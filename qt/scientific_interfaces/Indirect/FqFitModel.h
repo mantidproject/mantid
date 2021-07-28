@@ -16,15 +16,9 @@ class MANTIDQT_INDIRECT_DLL FqFitModel : public IndirectFittingModel {
 public:
   FqFitModel();
 
-  bool isMultiFit() const override;
-
-  std::string getFitParameterName(WorkspaceID dataIndex, WorkspaceIndex spectrum) const;
-
 private:
-  bool allWorkspacesEqual(const Mantid::API::MatrixWorkspace_sptr &workspace) const;
   std::string getResultXAxisUnit() const override;
   std::string getResultLogName() const override;
-  Mantid::API::AnalysisDataServiceImpl &m_adsInstance;
 };
 
 } // namespace IDA

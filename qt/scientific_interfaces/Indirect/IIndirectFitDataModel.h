@@ -31,7 +31,6 @@ public:
   virtual bool hasWorkspace(std::string const &workspaceName) const = 0;
   virtual Mantid::API::MatrixWorkspace_sptr getWorkspace(WorkspaceID workspaceID) const = 0;
   virtual FunctionModelSpectra getSpectra(WorkspaceID workspaceID) const = 0;
-  virtual bool isMultiFit() const = 0;
   virtual WorkspaceID getNumberOfWorkspaces() const = 0;
   virtual size_t getNumberOfSpectra(WorkspaceID workspaceID) const = 0;
   virtual size_t getNumberOfDomains() const = 0;
@@ -59,6 +58,7 @@ public:
   virtual void setEndX(double endX, WorkspaceID workspaceID, WorkspaceIndex spectrum) = 0;
   virtual void setEndX(double endX, WorkspaceID workspaceID) = 0;
   virtual void setExcludeRegion(const std::string &exclude, WorkspaceID workspaceID, WorkspaceIndex spectrum) = 0;
+  virtual void setResolution(const std::string &name) = 0;
   virtual void setResolution(const std::string &name, WorkspaceID workspaceID) = 0;
 
   virtual Mantid::API::MatrixWorkspace_sptr getWorkspace(FitDomainIndex index) const = 0;

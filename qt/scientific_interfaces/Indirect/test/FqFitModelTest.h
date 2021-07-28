@@ -57,13 +57,6 @@ public:
     TS_ASSERT_EQUALS(m_model->getNumberOfWorkspaces(), WorkspaceID{1});
   }
 
-  void test_that_removeWorkspace_will_remove_the_specified_workspace_from_the_model() {
-    addWorkspacesToModel(m_workspace);
-    m_model->removeWorkspace(WorkspaceID{0});
-
-    TS_ASSERT_EQUALS(m_model->getNumberOfWorkspaces(), WorkspaceID{0});
-  }
-
   void test_that_isMultiFit_returns_false_if_the_model_contains_one_workspace() {
     addWorkspacesToModel(m_workspace);
     TS_ASSERT(!m_model->isMultiFit());

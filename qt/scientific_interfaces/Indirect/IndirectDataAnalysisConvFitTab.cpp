@@ -117,11 +117,8 @@ EstimationDataSelector IndirectDataAnalysisConvFitTab::getEstimationDataSelector
 void IndirectDataAnalysisConvFitTab::addDataToModel(IAddWorkspaceDialog const *dialog) {
   if (const auto convDialog = dynamic_cast<ConvFitAddWorkspaceDialog const *>(dialog)) {
     m_dataPresenter->addWorkspace(convDialog->workspaceName(), convDialog->workspaceIndices());
+    m_dataPresenter->setResolution(convDialog->resolutionName());
     m_convFittingModel->addDefaultParameters();
-    auto const name = convDialog->resolutionName();
-    auto const index = m_convFittingModel->getNumberOfWorkspaces() - WorkspaceID{1};
-    m_convFittingModel->setResolution(name, index);
-    setModelResolution(name, index);
   }
 }
 
@@ -130,8 +127,7 @@ void IndirectDataAnalysisConvFitTab::setModelResolution(const std::string &resol
 }
 
 void IndirectDataAnalysisConvFitTab::setModelResolution(const std::string &resolutionName, WorkspaceID workspaceID) {
-  m_convFittingModel->setResolution(resolutionName, workspaceID);
-  auto fitResolutions = m_convFittingModel->getResolutionsForFit();
+  auto fitResolutions = m_dataPresenter->getResolutionsForFit();
   m_fitPropertyBrowser->setModelResolution(fitResolutions);
   updateParameterValues();
   setModelFitFunction();

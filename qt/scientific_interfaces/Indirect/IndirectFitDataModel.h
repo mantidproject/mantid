@@ -30,7 +30,6 @@ public:
   bool hasWorkspace(std::string const &workspaceName) const override;
   Mantid::API::MatrixWorkspace_sptr getWorkspace(WorkspaceID workspaceID) const override;
   FunctionModelSpectra getSpectra(WorkspaceID workspaceID) const override;
-  bool isMultiFit() const override;
   WorkspaceID getNumberOfWorkspaces() const override;
   size_t getNumberOfSpectra(WorkspaceID workspaceID) const override;
   size_t getNumberOfDomains() const override;
@@ -60,6 +59,7 @@ public:
   void setEndX(double endX, WorkspaceID workspaceID, WorkspaceIndex spectrum) override;
   void setEndX(double endX, WorkspaceID workspaceID) override;
   void setExcludeRegion(const std::string &exclude, WorkspaceID workspaceID, WorkspaceIndex spectrum) override;
+  void setResolution(const std::string &name) override;
   void setResolution(const std::string &name, WorkspaceID workspaceID) override;
 
   Mantid::API::MatrixWorkspace_sptr getWorkspace(FitDomainIndex index) const override;

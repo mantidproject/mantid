@@ -70,8 +70,6 @@ std::string IndirectFitDataModel::createDisplayName(WorkspaceID workspaceID) con
 
 WorkspaceID IndirectFitDataModel::getNumberOfWorkspaces() const { return WorkspaceID{m_fittingData->size()}; }
 
-bool IndirectFitDataModel::isMultiFit() const { return getNumberOfWorkspaces().value > 1; }
-
 size_t IndirectFitDataModel::getNumberOfSpectra(WorkspaceID workspaceID) const {
   if (workspaceID < m_fittingData->size())
     return m_fittingData->at(workspaceID.value).numberOfSpectra().value;
@@ -116,6 +114,10 @@ std::vector<std::pair<std::string, size_t>> IndirectFitDataModel::getResolutions
     }
   }
   return resolutionVector;
+}
+
+void IndirectFitDataModel::setResolution(const std::string &name) {
+  setResolution(name, getNumberOfWorkspaces() - WorkspaceID{1});
 }
 
 void IndirectFitDataModel::setResolution(const std::string &name, WorkspaceID workspaceID) {

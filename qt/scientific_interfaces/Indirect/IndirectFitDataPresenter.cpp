@@ -53,6 +53,8 @@ void IndirectFitDataPresenter::addWorkspace(const std::string &workspaceName, co
   m_model->addWorkspace(workspaceName, spectra);
 }
 
+void IndirectFitDataPresenter::setResolution(const std::string &name) { m_model->setResolution(name); }
+
 void IndirectFitDataPresenter::setSampleWSSuffices(const QStringList &suffixes) { m_wsSampleSuffixes = suffixes; }
 
 void IndirectFitDataPresenter::setSampleFBSuffices(const QStringList &suffixes) { m_fbSampleSuffixes = suffixes; }
@@ -63,6 +65,9 @@ void IndirectFitDataPresenter::setResolutionWSSuffices(const QStringList &suffix
 
 void IndirectFitDataPresenter::setResolutionFBSuffices(const QStringList &suffixes) {
   m_fbResolutionSuffixes = suffixes;
+}
+std::vector<std::pair<std::string, size_t>> IndirectFitDataPresenter::getResolutionsForFit() const {
+  return m_model->getResolutionsForFit();
 }
 
 QStringList IndirectFitDataPresenter::getSampleWSSuffices() const { return m_wsSampleSuffixes; }

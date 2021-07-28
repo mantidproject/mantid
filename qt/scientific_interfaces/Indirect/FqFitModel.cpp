@@ -24,31 +24,11 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-FqFitModel::FqFitModel() : m_adsInstance(Mantid::API::AnalysisDataService::Instance()) { m_fitType = FQFIT_STRING; }
-
-std::string FqFitModel::getFitParameterName(WorkspaceID workspaceID, WorkspaceIndex spectrum) const {
-  const auto ws = getWorkspace(workspaceID);
-  const auto axis = dynamic_cast<TextAxis *>(ws->getAxis(1));
-  return axis->label(spectrum.value);
-}
-
-bool FqFitModel::isMultiFit() const {
-  if (getNumberOfWorkspaces() == WorkspaceID{0})
-    return false;
-  return !allWorkspacesEqual(getWorkspace(WorkspaceID{0}));
-}
+FqFitModel::FqFitModel() { m_fitType = FQFIT_STRING; }
 
 std::string FqFitModel::getResultXAxisUnit() const { return ""; }
 
 std::string FqFitModel::getResultLogName() const { return "SourceName"; }
-
-bool FqFitModel::allWorkspacesEqual(const Mantid::API::MatrixWorkspace_sptr &workspace) const {
-  for (auto i = WorkspaceID{1}; i < getNumberOfWorkspaces(); ++i) {
-    if (getWorkspace(i) != workspace)
-      return false;
-  }
-  return true;
-}
 
 } // namespace IDA
 } // namespace CustomInterfaces

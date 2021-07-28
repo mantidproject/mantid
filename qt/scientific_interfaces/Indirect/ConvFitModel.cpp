@@ -221,18 +221,10 @@ IAlgorithm_sptr ConvFitModel::simultaneousFitAlgorithm() const {
   return AlgorithmManager::Instance().create("ConvolutionFitSimultaneous");
 }
 
-Mantid::API::MultiDomainFunction_sptr ConvFitModel::getFitFunction() const {
-  return IndirectFittingModel::getFitFunction();
-}
-
 boost::optional<double> ConvFitModel::getInstrumentResolution(WorkspaceID workspaceID) const {
   if (workspaceID < getNumberOfWorkspaces())
     return instrumentResolution(getWorkspace(workspaceID));
   return boost::none;
-}
-
-std::size_t ConvFitModel::getNumberHistograms(WorkspaceID workspaceID) const {
-  return getWorkspace(workspaceID)->getNumberHistograms();
 }
 
 MultiDomainFunction_sptr ConvFitModel::getMultiDomainFunction() const {
@@ -244,13 +236,7 @@ MultiDomainFunction_sptr ConvFitModel::getMultiDomainFunction() const {
   return function;
 }
 
-void ConvFitModel::setFitFunction(MultiDomainFunction_sptr function) { IndirectFittingModel::setFitFunction(function); }
-
 void ConvFitModel::setTemperature(const boost::optional<double> &temperature) { m_temperature = temperature; }
-
-void ConvFitModel::setResolution(const std::string &name, WorkspaceID workspaceID) {
-  m_fitDataModel->setResolution(name, workspaceID);
-}
 
 std::unordered_map<std::string, ParameterValue> ConvFitModel::createDefaultParameters(WorkspaceID workspaceID) const {
   std::unordered_map<std::string, ParameterValue> defaultValues;

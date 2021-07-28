@@ -31,10 +31,12 @@ public:
   ~IndirectFitDataPresenter();
   virtual void addWorkspace(const std::string &workspaceName, const std::string &spectra);
   virtual void addWorkspace(const std::string &workspaceName, std::string paramType, const int &spectrum_index){};
+  void setResolution(const std::string &name);
   void setSampleWSSuffices(const QStringList &suffices);
   void setSampleFBSuffices(const QStringList &suffices);
   void setResolutionWSSuffices(const QStringList &suffices);
   void setResolutionFBSuffices(const QStringList &suffices);
+  std::vector<std::pair<std::string, size_t>> getResolutionsForFit() const;
   QStringList getSampleWSSuffices() const;
   QStringList getSampleFBSuffices() const;
   QStringList getResolutionWSSuffices() const;
