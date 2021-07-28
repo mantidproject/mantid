@@ -333,13 +333,17 @@ public:
     TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("InputWorkspace", inputWsName))
     TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("OutputWorkspace", "out"))
     TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("OutputBinning", "0,0.002,0.1"))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("NumberOfWedges", "2"))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("WedgeAngle", "90"))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("WedgeWorkspace", "out_wedges"))
     TS_ASSERT_THROWS_NOTHING(radial_average.setProperty("AccountForGravity", false))
     TS_ASSERT_THROWS_NOTHING(radial_average.setProperty("ErrorWeighting", false))
+    TS_ASSERT_THROWS_NOTHING(radial_average.setProperty("AsymmetricWedges", false))
     TS_ASSERT_THROWS_NOTHING(radial_average.setPropertyValue("NPixelDivision", "1"))
 
     TS_ASSERT_THROWS_NOTHING(radial_average.execute())
     TS_ASSERT(radial_average.isExecuted())
-    MatrixWorkspace_sptr result;
+    MatrixWorkspace_sptr result, wedge1, wedge2;
     TS_ASSERT_THROWS_NOTHING(
         result = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("out")))
 
@@ -349,6 +353,21 @@ public:
     TS_ASSERT_DELTA(result->y(2)[2], 0.1875, 0.0001)
     TS_ASSERT(result->isCommonBins())
     TS_ASSERT_EQUALS(result->getMaxNumberBins(), 50)
+
+    TS_ASSERT_THROWS_NOTHING(
+        wedge1 = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("out_wedges_1")))
+    TS_ASSERT_THROWS_NOTHING(
+        wedge2 = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("out_wedges_2")))
+    TS_ASSERT_EQUALS(wedge1->getMaxNumberBins(), wedge2->getMaxNumberBins())
+    TS_ASSERT_EQUALS(wedge1->getNumberHistograms(), wedge2->getNumberHistograms());
+
+    // Check some random values in the wedges to assert there is some data
+    TS_ASSERT_DELTA(wedge1->y(0)[5], 0.15, 1e-5)
+    TS_ASSERT_DELTA(wedge2->y(0)[8], 0.125, 1e-5)
+    TS_ASSERT_DELTA(wedge1->y(1)[12], 0.0625, 1e-5)
+    TS_ASSERT_DELTA(wedge2->y(1)[4], 0.125, 1e-5)
+    TS_ASSERT_DELTA(wedge1->y(2)[7], 0.1, 1e-5)
+    TS_ASSERT_DELTA(wedge2->y(2)[15], 0.25, 1e-5)
   }
 
 private:

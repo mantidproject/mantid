@@ -532,7 +532,7 @@ void Q1DWeighted::finalize(const MatrixWorkspace_const_sptr &inputWS) {
 
 /**
  * @brief Q1DWeighted::fillMonochromaticOutput
- * Fill the output worksapce for monochromatic, kinetic input. In this case, we don't average over bins, because they
+ * Fill the output workspace for monochromatic, kinetic input. In this case, we don't average over bins, because they
  * belong to different samples, and thus are written in different spectra.
  * @param outputWS : The workspace to fill
  * @param iout Its : index
