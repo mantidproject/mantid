@@ -12,15 +12,23 @@ import mantid.simpleapi as mantid
 
 from Muon.GUI.Common import thread_model
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
-from Muon.GUI.Common.ADSHandler.workspace_naming import get_maxent_workspace_group_name, get_maxent_workspace_name
+from Muon.GUI.Common.ADSHandler.workspace_naming import (get_maxent_workspace_group_name,
+                                                         get_maxent_workspace_name,
+                                                         get_raw_data_workspace_name)
 from mantidqt.utils.observer_pattern import GenericObserver, GenericObservable
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
+from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string, run_string_to_list
 from Muon.GUI.Common.utilities.algorithm_utils import run_MuonMaxent
 
 raw_data = "_raw_data"
 
-optional_output_suffixes = {'OutputPhaseTable': '_phase_table', 'OutputDeadTimeTable': '_dead_times',
-                            'ReconstructedSpectra': '_reconstructed_spectra', 'PhaseConvergenceTable': '_phase_convergence'}
+PHASETABLE = 'OutputPhaseTable'
+DEADTIMES = 'OutputDeadTimeTable'
+SPECTRA ='ReconstructedSpectra'
+PHASECONVERGENCE = 'PhaseConvergenceTable'
+
+optional_output_suffixes = {PHASETABLE: '_phase_table', DEADTIMES: '_dead_times',
+                            SPECTRA: '_reconstructed_spectra', PHASECONVERGENCE: '_phase_convergence'}
 
 
 class MaxEntPresenter(object):
@@ -29,39 +37,52 @@ class MaxEntPresenter(object):
     This class links the MaxEnt model to the GUI
     """
 
-    def __init__(self, view, load):
+    def __init__(self, view, context):
         self.view = view
-        self.load = load
+        self.context = context
         self.thread = None
+        self._optional_output_names = {}
         # set data
         self.getWorkspaceNames()
         # connect
         self.view.maxEntButtonSignal.connect(self.handleMaxEntButton)
         self.view.cancelSignal.connect(self.cancel)
+        self.view.run_changed_slot(self._load_periods)
 
         self.phase_table_observer = GenericObserver(self.update_phase_table_options)
         self.calculation_finished_notifier = GenericObservable()
         self.calculation_started_notifier = GenericObservable()
+        self.new_phase_table = GenericObservable()
         self.update_phase_table_options()
 
     @property
     def widget(self):
         return self.view
 
+    def _load_periods(self):
+        run = run_string_to_list(self.view.get_run)
+        periods = []
+        if run != []:
+            periods = [str(period+1) for period in range(self.context.data_context.num_periods(run))]
+        self.view.add_periods(periods)
+
     def runChanged(self):
         self.getWorkspaceNames()
 
     def clear(self):
-        self.view.addItems([])
+        self.view.addRuns([])
         self.view.update_phase_table_combo(['Construct'])
 
     # functions
     def getWorkspaceNames(self):
-        final_options = self.load.getGroupedWorkspaceNames()
-
-        self.view.addItems(final_options)
+        # get runs
+        run_list = [run_list_to_string(run) for run in self.context.data_context.current_runs]
+        self.view.addRuns(run_list)
+        # get periods
+        self._load_periods()
+        # get min number of points as a power of 2
         start = int(
-            math.ceil(math.log(self.load.data_context.num_points) / math.log(2.0)))
+            math.ceil(math.log(self.context.data_context.num_points) / math.log(2.0)))
         values = [str(2**k) for k in range(start, 21)]
         self.view.addNPoints(values)
 
@@ -99,6 +120,14 @@ class MaxEntPresenter(object):
     def handleFinished(self):
         self.activate()
         self.calculation_finished_notifier.notify_subscribers(self._maxent_output_workspace_name)
+        # if phase table is outputed
+        if self.view.output_phase_table:
+            name = self._optional_output_names[PHASETABLE]
+            self.context.phase_context.add_phase_table(MuonWorkspaceWrapper(name))
+            self.new_phase_table.notify_subscribers()
+            self.update_phase_table_options()
+        # clear optional outputs
+        self._optional_output_names = {}
 
     def handle_error(self, error):
         self.activate()
@@ -114,21 +143,26 @@ class MaxEntPresenter(object):
 
     def get_parameters_for_maxent_calculation(self):
         inputs = {}
-
-        inputs['InputWorkspace'] = self.view.input_workspace
-        run = float(re.search('[0-9]+', inputs['InputWorkspace']).group())
+        run = self.view.get_run
+        #method = self.view.get_method
+        period = self.view.get_period
+        multiperiod = True if self.view.num_periods >1 else False
+        name = get_raw_data_workspace_name(self.context.data_context.instrument, run, multiperiod,
+                                                       period=period, workspace_suffix=self.context.workspace_suffix)
+        inputs['InputWorkspace'] = name
+        run = float(run)
 
         if self.view.phase_table != 'Construct':
             inputs['InputPhaseTable'] = self.view.phase_table
 
-        dead_time_table_name = self.load.corrections_context.current_dead_time_table_name_for_run(
-            self.load.data_context.instrument, [run])
+        dead_time_table_name = self.context.corrections_context.current_dead_time_table_name_for_run(
+            self.context.data_context.instrument, [run])
         if dead_time_table_name is not None:
             inputs['InputDeadTimeTable'] = dead_time_table_name
 
-        inputs['FirstGoodTime'] = self.load.first_good_data([run])
+        inputs['FirstGoodTime'] = self.context.first_good_data([run])
 
-        inputs['LastGoodTime'] = self.load.last_good_data([run])
+        inputs['LastGoodTime'] = self.context.last_good_data([run])
 
         inputs['Npts'] = self.view.num_points
 
@@ -149,7 +183,7 @@ class MaxEntPresenter(object):
         return inputs
 
     def update_phase_table_options(self):
-        phase_table_list = self.load.phase_context.get_phase_table_list(self.load.data_context.instrument)
+        phase_table_list = self.context.phase_context.get_phase_table_list(self.context.data_context.instrument)
         phase_table_list.insert(0, 'Construct')
 
         self.view.update_phase_table_combo(phase_table_list)
@@ -157,13 +191,13 @@ class MaxEntPresenter(object):
     def add_maxent_workspace_to_ADS(self, input_workspace, maxent_workspace, alg):
         run = re.search('[0-9]+', input_workspace).group()
         base_name = get_maxent_workspace_name(input_workspace)
-        directory = get_maxent_workspace_group_name(base_name, self.load.data_context.instrument, self.load.workspace_suffix)
+        directory = get_maxent_workspace_group_name(base_name, self.context.data_context.instrument, self.context.workspace_suffix)
 
         muon_workspace_wrapper = MuonWorkspaceWrapper(directory + base_name)
         muon_workspace_wrapper.show()
 
         maxent_output_options = self.get_maxent_output_options()
-        self.load._frequency_context.add_maxEnt(run, maxent_workspace)
+        self.context._frequency_context.add_maxEnt(run, maxent_workspace)
         self.add_optional_outputs_to_ADS(alg, maxent_output_options, base_name, directory)
 
         # Storing this on the class so it can be sent as part of the calculation
@@ -173,10 +207,10 @@ class MaxEntPresenter(object):
     def get_maxent_output_options(self):
         output_options = {}
 
-        output_options['OutputPhaseTable'] = self.view.output_phase_table
-        output_options['OutputDeadTimeTable'] = self.view.output_dead_times
-        output_options['ReconstructedSpectra'] = self.view.output_reconstructed_spectra
-        output_options['PhaseConvergenceTable'] = self.view.output_phase_convergence
+        output_options[PHASETABLE] = self.view.output_phase_table
+        output_options[DEADTIMES] = self.view.output_dead_times
+        output_options[SPECTRA] = self.view.output_reconstructed_spectra
+        output_options[PHASECONVERGENCE] = self.view.output_phase_convergence
 
         return output_options
 
@@ -184,10 +218,12 @@ class MaxEntPresenter(object):
         for key in output_options:
             if output_options[key]:
                 output = alg.getProperty(key).valueAsStr
-                self.load.ads_observer.observeRename(False)
+                self.context.ads_observer.observeRename(False)
                 wrapped_workspace = MuonWorkspaceWrapper(output)
-                wrapped_workspace.show(directory + base_name + optional_output_suffixes[key])
-                self.load.ads_observer.observeRename(True)
+                name = directory + base_name + optional_output_suffixes[key]
+                self._optional_output_names[key] = name
+                wrapped_workspace.show(name)
+                self.context.ads_observer.observeRename(True)
 
     def update_view_from_model(self):
         self.getWorkspaceNames()

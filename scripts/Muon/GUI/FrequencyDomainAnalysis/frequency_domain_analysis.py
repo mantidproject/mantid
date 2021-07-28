@@ -402,6 +402,7 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
     def setup_phase_table_changed_notifier(self):
         self.phase_tab.phase_table_presenter.phase_table_calculation_complete_notifier.add_subscriber(
             self.transform._maxent._presenter.phase_table_observer)
+        self.transform._maxent._presenter.new_phase_table.add_subscriber(self.phase_tab.phase_table_presenter.phase_table_observer)
 
     def setup_fitting_notifier(self):
         """Connect fitting and results tabs to inform of new fits"""

@@ -14,13 +14,13 @@ from qtpy import QtWidgets
 
 class TransformWidget(QtWidgets.QWidget):
 
-    def __init__(self, load, fft_widget, maxent_widget, parent=None):
+    def __init__(self, context, fft_widget, maxent_widget, parent=None):
         super(TransformWidget, self).__init__(parent)
-        self._fft = fft_widget(load=load, parent=self)
-        self._maxent = maxent_widget(load=load, parent=self)
+        self._fft = fft_widget(load=context, parent=self)
+        self._maxent = maxent_widget(context=context, parent=self)
         self._selector = TransformSelectionWidget(parent=self)
         self.LoadObserver = LoadObserver(self)
-        self.load = load
+        self.context = context
         self.instrumentObserver = instrumentObserver(self)
         self.GroupPairObserver = GroupPairObserver(self)
         self.enable_observer = EnableObserver(self)
@@ -38,7 +38,7 @@ class TransformWidget(QtWidgets.QWidget):
         self.disable_view()
         # to make it compatable with the old GUI
         try:
-            self.load.update_view_from_model_notifier.add_subscriber(
+            self.context.update_view_from_model_notifier.add_subscriber(
                 self.update_view_from_model_observer)
         except:
             pass
