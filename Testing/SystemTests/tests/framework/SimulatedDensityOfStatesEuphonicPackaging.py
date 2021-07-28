@@ -40,8 +40,13 @@ class SimulatedDensityOfStatesEuphonicInstallationTest(MantidSystemTest):
                                      stderr=subprocess.STDOUT)
 
             prefix_path = pathlib.Path(scipy_prefix)
-            scipy_site_packages = next((prefix_path / 'lib').iterdir()
-                                       ) / 'site-packages'
+            try:
+                scipy_site_packages = next((prefix_path / 'lib').iterdir()
+                                           ) / 'site-packages'
+            except FileNotFoundError:
+                raise FileNotFoundError("Could not find site-packages for temporary dir. "
+                                        "Here are the directory contents: "
+                                        "\n".join(list(prefix_path.iterdir())))
 
             sys.path = [str(scipy_site_packages)] + sys.path
             os.environ['PYTHONPATH'] = str(scipy_site_packages) + ':' + os.environ['PYTHONPATH']
@@ -74,7 +79,7 @@ class SimulatedDensityOfStatesEuphonicInstallationTest(MantidSystemTest):
 
             process = subprocess.run([sys.executable, "-m", "pip", "install",
                                       "--system",
-                                      "--prefix", tmpdirname,
+                                      "--prefix", euphonic_prefix,
                                       "euphonic"],
                                      stdout=subprocess.PIPE,
                                      stderr=subprocess.STDOUT)
