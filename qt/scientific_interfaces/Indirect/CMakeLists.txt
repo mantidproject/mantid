@@ -268,7 +268,7 @@ mtd_add_qt_library(
         INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
         LINK_LIBS
         ${CORE_MANTIDLIBS}
-        PythonInterfaceCore
+        Mantid::PythonInterfaceCore
         ${POCO_LIBRARIES}
         ${Boost_LIBRARIES}
         Python::Python

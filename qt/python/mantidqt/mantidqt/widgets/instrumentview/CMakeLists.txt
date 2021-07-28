@@ -11,7 +11,7 @@ if(ENABLE_WORKBENCH)
     TARGET_NAME mantidqt_instrumentviewqt5
     SIP_SRC _instrumentview.sip
     PYQT_VERSION 5
-    LINK_LIBS DataObjects
+    LINK_LIBS Mantid::DataObjects
               ${common_link_libs}
               MantidQtWidgetsInstrumentViewQt5
               MantidQtWidgetsCommonQt5

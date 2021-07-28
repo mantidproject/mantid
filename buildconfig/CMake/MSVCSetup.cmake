@@ -196,7 +196,10 @@ configure_file(
 # ##############################################################################
 
 add_custom_target(SystemTests)
-add_dependencies(SystemTests Framework StandardTestData SystemTestData)
+if (NOT STANDALONE_FRAMEWORK)
+add_dependencies(SystemTests Framework)
+endif()
+add_dependencies(SystemTests StandardTestData SystemTestData)
 set_target_properties(
   SystemTests
   PROPERTIES

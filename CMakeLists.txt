@@ -132,20 +132,15 @@ set(DOCS_BUILDDIR ${CMAKE_BINARY_DIR}/docs)
 option(CXXTEST_ADD_PERFORMANCE
        "Switch to add performance tests to the list of tests run by ctest?")
 
+include(TargetFunctions)
+if(STANDALONE_FRAMEWORK)
+find_package(MantidFramework REQUIRED)
+else()
 add_subdirectory(Framework)
+endif()
 
-include_directories(Framework/Kernel/inc)
-include_directories(Framework/Json/inc)
-include_directories(Framework/HistogramData/inc)
-include_directories(Framework/Indexing/inc)
-include_directories(Framework/Parallel/inc)
-include_directories(Framework/Beamline/inc)
-include_directories(Framework/Geometry/inc)
-include_directories(Framework/API/inc)
-include_directories(Framework/Types/inc)
-include_directories(Framework/NexusGeometry/inc)
 
-set(CORE_MANTIDLIBS Kernel HistogramData Indexing Beamline Geometry API Types)
+set(CORE_MANTIDLIBS Mantid::Kernel Mantid::HistogramData Mantid::Indexing Mantid::Beamline Mantid::Geometry Mantid::API Mantid::Types)
 
 if(UNIX)
   # Experimental feature. Unix only at this point.
@@ -158,7 +153,10 @@ if(MSVC)
 endif()
 
 add_custom_target(AllTests)
+
+if(NOT STANDALONE_FRAMEWORK)
 add_dependencies(AllTests FrameworkTests)
+endif()
 
 if(ENABLE_WORKBENCH)
   add_custom_target(GUITests)
@@ -169,6 +167,7 @@ if(ENABLE_WORKBENCH)
 endif()
 
 add_subdirectory(scripts)
+
 
 # Docs requirements
 option(ENABLE_DOCS "Enable Building user and developer documentation" ON)
