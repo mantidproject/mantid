@@ -142,16 +142,6 @@ void LoadMD::execLoader() {
   const std::shared_ptr<Mantid::Kernel::NexusHDF5Descriptor> fileInfo = getFileInfo();
   auto allEntries = fileInfo->getAllEntries();
 
-  // DEBUG contents
-  //  for (const auto &pair : allEntries) {
-  //    const std::string &nxClass = pair.first;
-  //    std::cout << nxClass << " :\n";
-  //    for (const auto &entry : pair.second) {
-  //      std::cout << "\t" << entry << "\n";
-  //    }
-  //  }
-  //  std::cout << std::endl;
-
   std::string entryName;
   if (fileInfo->isEntry("/MDEventWorkspace", "NXentry")) {
     entryName = "MDEventWorkspace";
@@ -164,7 +154,6 @@ void LoadMD::execLoader() {
 
   // Open the entry
   m_file->openGroup(entryName, "NXentry");
-  const std::map<std::string, std::string> levelEntries = m_file->getEntries();
 
   // Check is SaveMD version 2 was used
   m_saveMDVersion = 0;
@@ -194,7 +183,7 @@ void LoadMD::execLoader() {
   this->loadQConvention();
 
   // Display normalization settting
-  if (levelEntries.find(VISUAL_NORMALIZATION_KEY) != levelEntries.end()) {
+  if (fileInfo->isEntry("/" + entryName + "/" + VISUAL_NORMALIZATION_KEY)) {
     this->loadVisualNormalization(VISUAL_NORMALIZATION_KEY, m_visualNormalization);
   }
 
@@ -203,7 +192,7 @@ void LoadMD::execLoader() {
     std::string eventType;
     m_file->getAttr("event_type", eventType);
 
-    if (levelEntries.find(VISUAL_NORMALIZATION_KEY_HISTO) != levelEntries.end()) {
+    if (fileInfo->isEntry("/" + entryName + "/" + VISUAL_NORMALIZATION_KEY_HISTO)) {
       this->loadVisualNormalization(VISUAL_NORMALIZATION_KEY_HISTO, m_visualNormalizationHisto);
     }
 
