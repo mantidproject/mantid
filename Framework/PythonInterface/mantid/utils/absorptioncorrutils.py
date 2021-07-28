@@ -418,7 +418,7 @@ def calc_absorption_corr_using_wksp(
 
 def create_absorption_input(
     filename,
-    props,
+    props=None,
     num_wl_bins=1000,
     material=None,
     geometry=None,
@@ -441,11 +441,15 @@ def create_absorption_input(
     :param metaws: Optional workspace name with metadata to use for donor workspace instead of reading from filename
     :return: Name of the donor workspace created
     """
-    if props is None:
-        raise RuntimeError("props is required to create donor workspace, props is None")
+    def confirmProps(props):
+        '''This function will throw an exception if the PropertyManager
+        is not defined correctly. It should only be called if the value
+        is needed.'''
+        if props is None:
+            raise ValueError("props is required to create donor workspace, props is None")
 
-    if not isinstance(props, PropertyManager):
-        raise RuntimeError("props must be a PropertyManager object")
+        if not isinstance(props, PropertyManager):
+            raise ValueError("props must be a PropertyManager object")
 
     log = Logger('CreateAbsorptionInput')
 
@@ -459,16 +463,23 @@ def create_absorption_input(
         ])
         Load(Filename=filename, OutputWorkspace=absName, MetaDataOnly=True, AllowList=allowed_log)
 
-    # first attempt to get the wavelength range from the properties file
-    wl_min, wl_max = props['wavelength_min'].value, props['wavelength_max'].value
-    # override that with what was given as parameters to the algorithm
+    # attempt to get the wavelength from the function parameters
     if opt_wl_min > 0.:
         wl_min = opt_wl_min
+    else:
+        # or get it from the PropertyManager
+        confirmProps(props)
+        wl_min = props['wavelength_min'].value
     if opt_wl_max != Property.EMPTY_DBL:
         wl_max = opt_wl_max
+    else:
+        # or get it from the PropertyManager
+        confirmProps(props)
+        wl_max = props['wavelength_max'].value  # unset value is 0.
 
     # if it isn't found by this point, guess it from the time-of-flight range
-    if (wl_min == wl_max == 0.):
+    if wl_min == 0. or wl_max == 0.:
+        confirmProps(props)
         tof_min = props['tof_min'].value
         tof_max = props['tof_max'].value
         if tof_min >= 0. and tof_max > tof_min:
@@ -492,8 +503,10 @@ def create_absorption_input(
             usec_to_sec = 1.e-6
             meter_to_angstrom = 1.e10
             h_m_n = meter_to_angstrom * usec_to_sec * 6.62606896e-34 / 1.674927211e-27
-            wl_min = h_m_n * tof_min / Lmax
-            wl_max = h_m_n * tof_max / Lmin
+            if wl_min == 0.:
+                wl_min = h_m_n * tof_min / Lmax
+            if wl_max == 0.:
+                wl_max = h_m_n * tof_max / Lmin
 
     # there isn't a good way to guess it so error out
     if wl_max <= wl_min:
