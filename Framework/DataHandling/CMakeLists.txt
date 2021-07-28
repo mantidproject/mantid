@@ -712,7 +712,7 @@ add_subdirectory(test)
 # Installation settings
 if (CONDA_BUILD)
 set(TARGET_EXPORT_NAME "MantidDataHandlingTargets")
-mtd_install_framework_lib(TARGETS DataHandling EXPORT_NAME ${TARGET_EXPORT_NAME})
+mtd_install_framework_lib(TARGETS DataHandling EXPORT_NAME ${TARGET_EXPORT_NAME} LIB_DIR lib BIN_DIR ${PLUGINS_DIR})
 else()
 mtd_install_targets(TARGETS
                     DataHandling

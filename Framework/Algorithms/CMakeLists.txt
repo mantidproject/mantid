@@ -1072,6 +1072,8 @@ set(TARGET_EXPORT_NAME "MantidAlgorithmsTargets")
 mtd_install_framework_lib(TARGETS
                   Algorithms
                   INSTALL_EXPORT_FILE
+                  BIN_DIR ${PLUGINS_DIR}
+                  LIB_DIR lib
                   EXPORT_NAME ${TARGET_EXPORT_NAME})
 else()
 mtd_install_targets(TARGETS

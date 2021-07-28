@@ -278,7 +278,11 @@ generate_mantid_export_header(Crystal FALSE)
 # Installation settings
 if (CONDA_BUILD)
 set(TARGET_EXPORT_NAME "MantidCrystalTargets")
-mtd_install_framework_lib(TARGETS Crystal INSTALL_EXPORT_FILE EXPORT_NAME ${TARGET_EXPORT_NAME})
+mtd_install_framework_lib(TARGETS Crystal
+INSTALL_EXPORT_FILE EXPORT_NAME ${TARGET_EXPORT_NAME}
+BIN_DIR ${PLUGINS_DIR}
+LIB_DIR lib
+)
 else()
 mtd_install_targets(TARGETS
                     Crystal

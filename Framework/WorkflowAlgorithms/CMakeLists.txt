@@ -145,7 +145,11 @@ add_subdirectory(test)
 # Installation settings
 if (CONDA_BUILD)
 set(TARGET_EXPORT_NAME "MantidWorkflowAlgorithmsTargets")
-mtd_install_framework_lib(TARGETS WorkflowAlgorithms EXPORT_NAME ${TARGET_EXPORT_NAME})
+mtd_install_framework_lib(TARGETS WorkflowAlgorithms
+EXPORT_NAME ${TARGET_EXPORT_NAME}
+BIN_DIR ${PLUGINS_DIR}
+LIB_DIR lib
+)
 else()
 mtd_install_targets(TARGETS
                     WorkflowAlgorithms

@@ -25,7 +25,7 @@ endfunction()
 # Install a framework library (used primarily for a conda install)
 function (mtd_install_framework_lib)
 set (options INSTALL_EXPORT_FILE)
-set (oneValueArgs TARGETS EXPORT_NAME)
+set (oneValueArgs TARGETS EXPORT_NAME BIN_DIR LIB_DIR)
 set (multiValueArgs INSTALL_DIRS)
 cmake_parse_arguments (PARSED "${options}" "${oneValueArgs}"
 "${multiValueArgs}" ${ARGN})
@@ -40,11 +40,15 @@ if(PARSED_INSTALL_EXPORT_FILE)
         DESTINATION include/Mantid/Mantid${PARSED_TARGETS}
         COMPONENT Devel)
 endif()
+if (NOT PARSED_LIB_DIR)
+set(LIB_DIR lib)
+set(BIN_DIR bin)
+endif()
 install ( TARGETS ${PARSED_TARGETS}
 EXPORT ${PARSED_EXPORT_NAME}
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-    RUNTIME DESTINATION bin)
+    LIBRARY DESTINATION ${PARSED_LIB_DIR}
+    ARCHIVE DESTINATION ${PARSED_LIB_DIR}
+    RUNTIME DESTINATION ${PARSED_BIN_DIR})
 
 install(EXPORT ${PARSED_EXPORT_NAME}
     FILE ${PARSED_EXPORT_NAME}.cmake
