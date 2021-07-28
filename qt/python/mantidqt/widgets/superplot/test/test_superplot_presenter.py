@@ -146,6 +146,9 @@ class SuperplotPresenterTest(unittest.TestCase):
         self.presenter._update_plot.assert_called_once()
         self.presenter._update_spectrum_slider.assert_not_called()
         self.presenter.on_del_button_clicked("ws2")
+        self.presenter._update_spectrum_slider.assert_not_called()
+        self.m_view.get_selection.return_value = {"ws1": 1}
+        self.presenter.on_del_button_clicked("ws1")
         self.presenter._update_spectrum_slider.assert_called_once()
 
     def test_update_spectrum_slider(self):
