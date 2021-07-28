@@ -213,11 +213,6 @@ namespace IDA {
 
 ConvFitModel::ConvFitModel() { m_fitType = CONVFIT_STRING; }
 
-ConvFitModel::~ConvFitModel() {
-  for (const auto &resolution : m_extendedResolution)
-    AnalysisDataService::Instance().remove(resolution);
-}
-
 IAlgorithm_sptr ConvFitModel::sequentialFitAlgorithm() const {
   return AlgorithmManager::Instance().create("ConvolutionFitSequential");
 }
@@ -252,19 +247,6 @@ MultiDomainFunction_sptr ConvFitModel::getMultiDomainFunction() const {
 void ConvFitModel::setFitFunction(MultiDomainFunction_sptr function) { IndirectFittingModel::setFitFunction(function); }
 
 void ConvFitModel::setTemperature(const boost::optional<double> &temperature) { m_temperature = temperature; }
-
-void ConvFitModel::removeWorkspace(WorkspaceID workspaceID) {
-  IndirectFittingModel::removeWorkspace(workspaceID);
-
-  const auto newSize = getNumberOfWorkspaces();
-  while (m_resolution.size() > newSize)
-    m_resolution.remove(workspaceID);
-
-  while (m_extendedResolution.size() > newSize) {
-    AnalysisDataService::Instance().remove(m_extendedResolution[workspaceID]);
-    m_extendedResolution.remove(workspaceID);
-  }
-}
 
 void ConvFitModel::setResolution(const std::string &name, WorkspaceID workspaceID) {
   m_fitDataModel->setResolution(name, workspaceID);

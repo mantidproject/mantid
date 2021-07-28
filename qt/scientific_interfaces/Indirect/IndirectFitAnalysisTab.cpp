@@ -637,6 +637,7 @@ void IndirectFitAnalysisTab::respondToDataAdded(IAddWorkspaceDialog const *dialo
 }
 
 void IndirectFitAnalysisTab::respondToDataRemoved() {
+  m_fittingModel->removeDefaultParameters();
   updateDataReferences();
   m_plotPresenter->updateDataSelection();
   updateParameterEstimationData();

@@ -8,7 +8,7 @@
 
 #include "FQFitConstants.h"
 #include "FqFitAddWorkspaceDialog.h"
-//#include "FqFitDataModel.h"
+#include "FqFitDataView.h"
 #include "IFQFitObserver.h"
 #include "IndirectFitDataPresenter.h"
 #include "IndirectFunctionBrowser/SingleFunctionTemplateBrowser.h"

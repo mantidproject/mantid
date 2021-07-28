@@ -26,8 +26,6 @@ namespace IDA {
 
 FqFitModel::FqFitModel() : m_adsInstance(Mantid::API::AnalysisDataService::Instance()) { m_fitType = FQFIT_STRING; }
 
-void FqFitModel::removeWorkspace(WorkspaceID workspaceID) { IndirectFittingModel::removeWorkspace(workspaceID); }
-
 std::string FqFitModel::getFitParameterName(WorkspaceID workspaceID, WorkspaceIndex spectrum) const {
   const auto ws = getWorkspace(workspaceID);
   const auto axis = dynamic_cast<TextAxis *>(ws->getAxis(1));

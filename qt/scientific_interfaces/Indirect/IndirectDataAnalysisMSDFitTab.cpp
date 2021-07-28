@@ -52,6 +52,8 @@ IndirectDataAnalysisMSDFitTab::IndirectDataAnalysisMSDFitTab(QWidget *parent)
   m_uiForm->setupUi(parent);
 
   m_msdFittingModel = dynamic_cast<MSDFitModel *>(getFittingModel());
+
+  m_uiForm->dockArea->setFitDataView(new IndirectFitDataView(m_uiForm->dockArea));
   setFitDataPresenter(std::make_unique<IndirectFitDataPresenter>(m_msdFittingModel->getFitDataModel(),
                                                                  m_uiForm->dockArea->m_fitDataView));
   setPlotView(m_uiForm->dockArea->m_fitPlotView);

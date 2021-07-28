@@ -73,14 +73,12 @@ IndirectFitDataView::IndirectFitDataView(const QStringList &headers, QWidget *pa
   m_uiForm->setupUi(this);
 
   setHorizontalHeaders(headers);
-  m_uiForm->tbFitData->setItemDelegateForColumn(headers.size() - 1,
-                                                std::make_unique<ExcludeRegionDelegate>().release());
-  m_uiForm->tbFitData->verticalHeader()->setVisible(false);
 
   connect(m_uiForm->tbFitData, SIGNAL(cellChanged(int, int)), this, SIGNAL(cellChanged(int, int)));
   connect(m_uiForm->pbAdd, SIGNAL(clicked()), this, SIGNAL(addClicked()));
   connect(m_uiForm->pbRemove, SIGNAL(clicked()), this, SIGNAL(removeClicked()));
 }
+
 QTableWidget *IndirectFitDataView::getDataTable() const { return m_uiForm->tbFitData; }
 
 void IndirectFitDataView::setHorizontalHeaders(const QStringList &headers) {
@@ -89,6 +87,9 @@ void IndirectFitDataView::setHorizontalHeaders(const QStringList &headers) {
 
   auto header = m_uiForm->tbFitData->horizontalHeader();
   header->setSectionResizeMode(0, QHeaderView::Stretch);
+  m_uiForm->tbFitData->setItemDelegateForColumn(headers.size() - 1,
+                                                std::make_unique<ExcludeRegionDelegate>().release());
+  m_uiForm->tbFitData->verticalHeader()->setVisible(false);
 }
 
 UserInputValidator &IndirectFitDataView::validate(UserInputValidator &validator) {

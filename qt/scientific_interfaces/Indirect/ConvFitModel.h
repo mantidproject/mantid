@@ -18,7 +18,7 @@ using ExtendedResolutionType = IndexCollectionType<WorkspaceID, std::string>;
 class MANTIDQT_INDIRECT_DLL ConvFitModel : public IndirectFittingModel {
 public:
   ConvFitModel();
-  ~ConvFitModel() override;
+  ~ConvFitModel() = default;
 
   Mantid::API::MultiDomainFunction_sptr getFitFunction() const override;
   boost::optional<double> getInstrumentResolution(WorkspaceID workspaceID) const;
@@ -26,7 +26,6 @@ public:
 
   void setFitFunction(Mantid::API::MultiDomainFunction_sptr function) override;
   void setTemperature(const boost::optional<double> &temperature);
-  void removeWorkspace(WorkspaceID workspaceID) override;
   void setResolution(const std::string &name, WorkspaceID workspaceID);
 
   void addOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm) override;

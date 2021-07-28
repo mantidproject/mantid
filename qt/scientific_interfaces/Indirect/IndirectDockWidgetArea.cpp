@@ -14,12 +14,6 @@ IndirectDockWidgetArea::IndirectDockWidgetArea(QWidget *parent) : QMainWindow(pa
   QMainWindow::setWindowFlags(Qt::Widget);
   setDockOptions(QMainWindow::AnimatedDocks);
 
-  QDockWidget *dataViewArea = new QDockWidget();
-  dataViewArea->setWindowTitle("Data Input");
-  m_fitDataView = new IndirectFitDataView(this);
-  dataViewArea->setWidget(m_fitDataView);
-  dataViewArea->setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
-
   m_fitPropertyBrowser = new IndirectFitPropertyBrowser();
   m_fitPropertyBrowser->setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
 
@@ -29,11 +23,20 @@ IndirectDockWidgetArea::IndirectDockWidgetArea(QWidget *parent) : QMainWindow(pa
   plotViewArea->setWidget(m_fitPlotView);
   plotViewArea->setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
 
-  addDockWidget(Qt::TopDockWidgetArea, dataViewArea);
   addDockWidget(Qt::BottomDockWidgetArea, m_fitPropertyBrowser);
   addDockWidget(Qt::BottomDockWidgetArea, plotViewArea);
   resizeDocks({m_fitPropertyBrowser, plotViewArea}, {20, 20}, Qt::Horizontal);
 }
+
+void IndirectDockWidgetArea::setFitDataView(IIndirectFitDataView *fitDataView) {
+  QDockWidget *dataViewArea = new QDockWidget();
+  dataViewArea->setWindowTitle("Data Input");
+  m_fitDataView = fitDataView;
+  dataViewArea->setWidget(m_fitDataView);
+  dataViewArea->setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
+  addDockWidget(Qt::TopDockWidgetArea, dataViewArea);
+}
+
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt

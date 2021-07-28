@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-//#include "FqFitDataModel.h"
 #include "IndirectFittingModel.h"
 
 namespace MantidQt {
@@ -16,7 +15,6 @@ namespace IDA {
 class MANTIDQT_INDIRECT_DLL FqFitModel : public IndirectFittingModel {
 public:
   FqFitModel();
-  void removeWorkspace(WorkspaceID workspaceID) override;
 
   bool isMultiFit() const override;
 

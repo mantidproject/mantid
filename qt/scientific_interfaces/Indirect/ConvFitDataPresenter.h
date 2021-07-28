@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "ConvFitDataView.h"
 #include "ConvFitModel.h"
 #include "IndirectFitDataPresenter.h"
 
