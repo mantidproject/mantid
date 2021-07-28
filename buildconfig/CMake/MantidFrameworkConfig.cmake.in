@@ -4,8 +4,9 @@
 
 include(CMakeFindDependencyMacro)
 
-
-find_dependency(Boost COMPONENTS date_time regex serialization filesystem system)
+find_dependency(Python @Python_VERSION_MAJOR@.@Python_VERSION_MINOR@ REQUIRED
+             COMPONENTS Interpreter Development NumPy)
+find_dependency(Boost COMPONENTS date_time regex serialization filesystem system python${Python_VERSION_MAJOR}${Python_VERSION_MINOR})
 find_dependency(Poco COMPONENTS Foundation Util XML Net Crypto NetSSL)
 find_dependency(GSL)
 find_dependency(ZLIB)
@@ -55,6 +56,7 @@ set(MODULES
     ScriptRepository
     Muon
     Reflectometry
+    PythonInterfaceCore
 )
 
 foreach(module ${MODULES})
