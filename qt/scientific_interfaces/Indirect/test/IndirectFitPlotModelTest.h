@@ -100,7 +100,7 @@ IndirectFittingModel *getEmptyDummyModel() { return new DummyModel(); }
 
 void addWorkspaceToModel(IndirectFittingModel *model, int const &numberOfSpectra, std::string workspaceName) {
   ads_instance.addOrReplace(workspaceName, createWorkspace(numberOfSpectra));
-  model->addWorkspace(workspaceName);
+  model->getFitDataModel()->addWorkspace(workspaceName, "0-" + std::to_string(numberOfSpectra - 1));
 }
 template <class FitModel>
 IndirectFittingModel *createModelWithMultipleWorkspaces(int const &numberOfSpectra, bool setFitFunction,
@@ -118,7 +118,7 @@ IndirectFittingModel *createModelWithSingleInstrumentWorkspace(std::string const
                                                                int const &yLength) {
   auto model = getEmptyDummyModel();
   SetUpADSWithWorkspace ads(workspaceName, createWorkspaceWithInstrument(xLength, yLength));
-  model->addWorkspace(workspaceName);
+  model->getFitDataModel()->addWorkspace(workspaceName, "0-" + std::to_string(xLength - 1));
   return model;
 }
 

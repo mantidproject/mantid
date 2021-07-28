@@ -226,9 +226,11 @@ void FqFitDataPresenter::addWorkspace(const std::string &workspaceName, std::str
   if (paramType == "Width") {
     const auto single_spectra = FunctionModelSpectra(std::to_string(parameters.widthSpectra[spectrum_index]));
     m_model->addWorkspace(hwhmWorkspace->getName(), single_spectra);
-  } else {
+  } else if (paramType == "EISF") {
     const auto single_spectra = FunctionModelSpectra(std::to_string(parameters.eisfSpectra[spectrum_index]));
     m_model->addWorkspace(hwhmWorkspace->getName(), single_spectra);
+  } else {
+    throw std::invalid_argument("Invalid Parameter Type");
   }
 }
 

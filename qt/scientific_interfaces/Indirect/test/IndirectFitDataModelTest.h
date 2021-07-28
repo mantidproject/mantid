@@ -38,8 +38,8 @@ public:
     ads_instance.addOrReplace("resolution workspace", std::move(resolutionWorkspace));
     ads_instance.addOrReplace("data workspace 1", std::move(dataWorkspace1));
     ads_instance.addOrReplace("data workspace 2", std::move(dataWorkspace2));
-    m_fitData->addWorkspace("data workspace 1");
-    m_fitData->addWorkspace("data workspace 2");
+    m_fitData->addWorkspace("data workspace 1", "0-3");
+    m_fitData->addWorkspace("data workspace 2", "0-3");
     m_fitData->setResolution("resolution workspace", WorkspaceID{0});
   }
 
@@ -65,24 +65,11 @@ public:
     TS_ASSERT_EQUALS(m_fitData->getSpectra(WorkspaceID{0}).getString(), "0-3");
   }
 
-  void test_isMultiFit_returns_false_for_more_single_ws() {
-    auto singleFitData = std::make_unique<IndirectFitDataModel>();
-    auto resolutionWorkspace = Mantid::IndirectFitDataCreationHelper::createWorkspace(4, 5);
-    auto dataWorkspace = Mantid::IndirectFitDataCreationHelper::createWorkspace(4, 5);
-    ads_instance.addOrReplace("resolution workspace", std::move(resolutionWorkspace));
-    ads_instance.addOrReplace("data workspace", std::move(dataWorkspace));
-    singleFitData->addWorkspace("data workspace");
-    singleFitData->setResolution("resolution workspace", WorkspaceID{0});
-    TS_ASSERT(!singleFitData->isMultiFit());
-  }
-
-  void test_isMultiFit_returns_true_for_more_than_one_ws() { TS_ASSERT(m_fitData->isMultiFit()); }
-
   void test_getNumberOfWorkspaces_returns_correct_number_of_workspaces() {
     TS_ASSERT_EQUALS(m_fitData->getNumberOfWorkspaces(), 2);
     auto dataWorkspace = Mantid::IndirectFitDataCreationHelper::createWorkspace(4, 5);
     ads_instance.addOrReplace("data workspace 3", std::move(dataWorkspace));
-    m_fitData->addWorkspace("data workspace 3");
+    m_fitData->addWorkspace("data workspace 3", "0");
     TS_ASSERT_EQUALS(m_fitData->getNumberOfWorkspaces(), 3);
   }
 
@@ -90,7 +77,7 @@ public:
     TS_ASSERT_EQUALS(m_fitData->getNumberOfSpectra(WorkspaceID{0}), 4);
     auto dataWorkspace = Mantid::IndirectFitDataCreationHelper::createWorkspace(5, 5);
     ads_instance.addOrReplace("data workspace 3", std::move(dataWorkspace));
-    m_fitData->addWorkspace("data workspace 3");
+    m_fitData->addWorkspace("data workspace 3", "0-4");
     TS_ASSERT_EQUALS(m_fitData->getNumberOfSpectra(WorkspaceID{2}), 5);
   }
 
@@ -114,7 +101,7 @@ public:
   void test_getQValuesForData_returns_correct_value() {
     auto dataWorkspace = Mantid::IndirectFitDataCreationHelper::createWorkspaceWithInelasticInstrument(4);
     ads_instance.addOrReplace("data workspace Inelastic", dataWorkspace);
-    m_fitData->addWorkspace("data workspace Inelastic");
+    m_fitData->addWorkspace("data workspace Inelastic", "0");
     auto spectrumInfo = dataWorkspace->spectrumInfo();
     auto detID = spectrumInfo.detector(0).getID();
     double efixed = dataWorkspace->getEFixed(detID);
