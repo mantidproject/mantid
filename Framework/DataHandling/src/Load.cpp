@@ -371,8 +371,6 @@ void Load::loadSingleFile() {
   m_loader->execute();
   // Set output properties
   setOutputProperties(m_loader);
-  // Set the workspace. Deals with possible multiple periods
-  // setOutputWorkspace(m_loader);
 }
 
 void Load::loadMultipleFiles() {
@@ -456,6 +454,8 @@ void Load::loadMultipleFiles() {
     }
   }
 
+  setOutputProperties(m_loader);
+
   // Clean up.
   if (tempWs) {
     Algorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("DeleteWorkspace");
@@ -517,54 +517,17 @@ void Load::setUpLoader(const API::IAlgorithm_sptr &loader, const double startPro
   }
 }
 
+/**
+ * Set all the output properties from the load alg used to Load itself
+ * @param loader :: Shared pointer to the load algorithm
+ */
 void Load::setOutputProperties(const API::IAlgorithm_sptr &loader) {
-  // Go through each property and check if we can set an output value
+  // Loop all properties and set outputs only
   const auto &loaderProps = loader->getProperties();
   for (auto propertyPtr : loaderProps) {
     if (propertyPtr->direction() == Direction::Output)
       getPointerToProperty(propertyPtr->name())->setValueFromProperty(*propertyPtr);
   }
-
-  /*const std::vector<Property *> &loaderProps = loader->getProperties();
-  const size_t count = loader->propertyCount();
-  for (size_t i = 0; i < count; ++i) {
-    Property *prop = loaderProps[i];
-    if (prop->direction() == Direction::Output) {
-      const std::string &name = prop->name();
-      if (!this->existsProperty(name)) {
-        // Need to declare property, so get type and create property accordingly
-        const std::string type = prop->type();
-        if (type == "number") {
-          continue;
-        } else if (type == "workspace") {
-          declareProperty(
-              std::make_unique<WorkspaceProperty<Workspace>>(name, loader->getPropertyValue(name), Direction::Output));
-        }
-      } else {
-        // A Workspace property?
-        try {
-          Workspace_sptr wkspace = getOutputWorkspace(name, loader);
-          setProperty(name, wkspace);
-          continue;
-        } catch (std::logic_error &) {
-        }
-        // A String property?
-        try {
-          std::string stringProp = loader->getProperty(name);
-          setProperty(name, stringProp);
-          continue;
-        } catch (std::runtime_error &) {
-        }
-        // A Number property?
-        try {
-          double numberProp = loader->getProperty(name);
-          setProperty(name, numberProp);
-          continue;
-        } catch (std::runtime_error &) {
-        }
-      }
-    }
-  }*/
 }
 
 /**
@@ -704,7 +667,6 @@ API::Workspace_sptr Load::loadFileToWs(const std::string &fileName, const std::s
   Workspace_sptr ws = loadAlg->getProperty("OutputWorkspace");
   // ws->setName(wsName);
   AnalysisDataService::Instance().addOrReplace(wsName, ws);
-  setOutputProperties(loadAlg);
   return ws;
 }
 
