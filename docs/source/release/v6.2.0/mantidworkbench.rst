@@ -36,5 +36,6 @@ Bugfixes
 - Fixed a bug retrieving algorithm history from a workspace when the retrieval methods were chained together.
 - Added missing icon for the uninstaller in Windows "Apps & features" list.
 - Fixed a bug where output workspaces of different types would interfere with successive calls to binary operations, such as multiply.
+- Fixed JSON serialization issue of MantidAxType by explicitly extracting its value
 
 :ref:`Release 6.2.0 <v6.2.0>`
