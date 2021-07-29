@@ -5,7 +5,7 @@ PyCharm
 
 PyCharm can be installed from `here <https://jetbrains.com/pycharm/download/>`_.
 
-This tutorial assumes you are familiar with the process of building Mantid (with separate source and build directories inside a root directory), and that you have built a working version. If you are unclear about this see :ref:`here <GettingStarted>`.
+This tutorial assumes you are familiar with the process of building Mantid (with separate source and build directories inside a root directory), and that you have built a working version. If you are unclear about this see :ref:`here <GettingStarted/GettingStarted>`.
 
 .. contents::
   :local:
@@ -19,7 +19,7 @@ Setting up PyCharm on Windows
 
    Go to ``File->Settings``, then under ``Project`` you will set two sub-menus ``Project Interpreter`` and ``Project Structure``. The interpreter defines the python executable that will be used to run your code, and the structure menu allows you to decide which folders within the project to include and index.
 
-2. In the ``Project Interpreter`` sub menu, at the top select the options button and click ``Add...``, a new window should appear titled "Add Python Interpreter". In the menu on the left, select "System Interpreter" (a version of Python with all the correct variables set already exists within Mantid). Click on the ``...`` to open a file browser, and navigate to;
+2. In the ``Project Interpreter`` sub menu, at the top select the options button and click ``Add...``, a new window should appear titled "Add Python Interpreter". In the menu on the left, if you are using Conda select "Conda Environment", if you haven't set up Conda follow the Getting Started guidance for it, select existing environment and if not present already put in the path to your python interpreter, and your conda executable. Alternatively select "System Interpreter" (a version of Python with all the correct variables set already exists within Mantid, if you are not using Conda). Click on the ``...`` to open a file browser, and navigate to;
 
    .. code-block:: sh
 
