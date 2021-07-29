@@ -358,8 +358,13 @@ public:
         wedge1 = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("out_wedges_1")))
     TS_ASSERT_THROWS_NOTHING(
         wedge2 = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("out_wedges_2")))
-    TS_ASSERT_EQUALS(wedge1->getMaxNumberBins(), wedge2->getMaxNumberBins())
-    TS_ASSERT_EQUALS(wedge1->getNumberHistograms(), wedge2->getNumberHistograms());
+
+    TS_ASSERT(wedge1->isCommonBins())
+    TS_ASSERT(wedge2->isCommonBins())
+    TS_ASSERT_EQUALS(wedge1->getNumberHistograms(), 3)
+    TS_ASSERT_EQUALS(wedge2->getNumberHistograms(), 3)
+    TS_ASSERT_EQUALS(wedge1->getMaxNumberBins(), 50)
+    TS_ASSERT_EQUALS(wedge2->getMaxNumberBins(), 50)
 
     // Check some random values in the wedges to assert there is some data
     TS_ASSERT_DELTA(wedge1->y(0)[5], 0.15, 1e-5)
