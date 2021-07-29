@@ -57,34 +57,60 @@ QSplitter::handle
         <enum>QLayout::SetMinimumSize</enum>
        </property>
        <item>
-        <widget class="QTableWidget" name="tableWidget">
+        <widget class="QLabel" name="run_label">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>Run</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="workspace_line_edit"/>
+       </item>
+       <item>
+        <widget class="QLabel" name="angle_label">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+          <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
-         <property name="minimumSize">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>Angle</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QDoubleSpinBox" name="angle_spin_box"/>
+       </item>
+       <item>
+        <widget class="QPushButton" name="load_button">
+         <property name="text">
+          <string>Load</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="load_button_spacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
           <size>
-           <width>0</width>
-           <height>0</height>
+           <width>40</width>
+           <height>20</height>
           </size>
          </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="pushButton">
-         <property name="text">
-          <string>PushButton</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="pushButton_2">
-         <property name="text">
-          <string>PushButton</string>
-         </property>
-        </widget>
+        </spacer>
        </item>
       </layout>
      </widget>
@@ -167,6 +193,34 @@ QSplitter::handle
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>workspace_line_edit</tabstop>
+  <tabstop>inst_view_toolbar_placeholder</tabstop>
+  <tabstop>tableView</tabstop>
+  <tabstop>plot_2d_tool_placeholders</tabstop>
+  <tabstop>treeView_2</tabstop>
+  <tabstop>plot_1d_toolbar_placeholder</tabstop>
+  <tabstop>treeView</tabstop>
+  <tabstop>tableWidget_2</tabstop>
+  <tabstop>pushButton_3</tabstop>
+ </tabstops>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>workspace_line_edit</sender>
+   <signal>returnPressed()</signal>
+   <receiver>load_button</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>266</x>
+     <y>113</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>924</x>
+     <y>106</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>
