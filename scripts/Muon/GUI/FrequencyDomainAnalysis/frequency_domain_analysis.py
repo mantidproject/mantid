@@ -424,7 +424,8 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
 
     def setup_asymmetry_pair_and_diff_calculations_finished_notifier(self):
         for observer in self.plot_widget.data_changed_observers:
-            self.corrections_tab.corrections_tab_presenter.counts_calculation_finished_notifier.add_subscriber(observer)
+            self.corrections_tab.corrections_tab_presenter.asymmetry_pair_and_diff_calculations_finished_notifier.\
+                add_subscriber(observer)
             self.phase_tab.phase_table_presenter.calculation_finished_notifier.add_subscriber(observer)
 
         self.corrections_tab.corrections_tab_presenter.asymmetry_pair_and_diff_calculations_finished_notifier.add_subscriber(
