@@ -4,18 +4,8 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
-#include "PreviewPresenter.h"
-#include "IPreviewModel.h"
-
-#include <memory>
+#pragma once
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
-PreviewPresenter::PreviewPresenter(IPreviewView *view, std::unique_ptr<IPreviewModel> model)
-    : m_view(view), m_model(std::move(model)) {}
-
-void PreviewPresenter::notifyLoadWorkspaceRequested() {
-  auto const name = m_view->getWorkspaceName();
-  m_model->loadWorkspace(name);
-}
+class IPreviewPresenter {};
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

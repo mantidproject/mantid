@@ -7,11 +7,15 @@ set(PREVIEW_SRC_FILES
 # IMPORTANT: Include files are required in the MOC_FILES set. Scroll down to
 # find it.
 set(PREVIEW_INC_FILES
-        IPreviewView.h
-        PreviewPresenter.h
-        QtPreviewView.h
         IPreviewModel.h
         PreviewModel.h
+
+        IPreviewPresenter.h
+        PreviewPresenterFactory.h
+        PreviewPresenter.h
+
+        IPreviewView.h
+        QtPreviewView.h
     )
 
 set(PREVIEW_MOC_FILES QtPreviewView.h)

@@ -20,4 +20,6 @@ void QtPreviewView::connectSignals() const {
 }
 
 void QtPreviewView::onLoadWorkspaceRequested() const { std::cout << "Called onLoadWorkspaceRequested()" << std::endl; }
+
+std::string QtPreviewView::getWorkspaceName() const { return m_ui.workspace_line_edit->text().toStdString(); }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

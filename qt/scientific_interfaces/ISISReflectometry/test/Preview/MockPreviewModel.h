@@ -6,22 +6,20 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Common/DllConfig.h"
 #include "IPreviewModel.h"
-#include "IPreviewPresenter.h"
-#include "IPreviewView.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 
-#include <memory>
+#include <gmock/gmock.h>
+
+#include <string>
+
+using Mantid::API::MatrixWorkspace_sptr;
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
-class MANTIDQT_ISISREFLECTOMETRY_DLL PreviewPresenter : public PreviewViewSubscriber, public IPreviewPresenter {
-public:
-  PreviewPresenter(IPreviewView *view, std::unique_ptr<IPreviewModel> model);
-  virtual ~PreviewPresenter() = default;
-  void notifyLoadWorkspaceRequested() override;
 
-private:
-  IPreviewView *m_view{nullptr};
-  std::unique_ptr<IPreviewModel> m_model;
+class MockPreviewModel : public IPreviewModel {
+public:
+  MOCK_METHOD(void, loadWorkspace, (std::string const &), (override));
+  MOCK_METHOD(MatrixWorkspace_sptr, getInstViewWorkspace, (), (const, override));
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

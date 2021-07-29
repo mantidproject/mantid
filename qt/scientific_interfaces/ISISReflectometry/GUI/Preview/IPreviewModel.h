@@ -12,6 +12,8 @@
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 class IPreviewModel {
 public:
+  IPreviewModel() = default;
+  virtual ~IPreviewModel() = default;
   virtual void loadWorkspace(std::string const &workspaceName) = 0;
   virtual Mantid::API::MatrixWorkspace_sptr getInstViewWorkspace() const = 0;
 };

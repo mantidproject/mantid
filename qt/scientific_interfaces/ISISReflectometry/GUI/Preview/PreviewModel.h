@@ -10,11 +10,13 @@
 #include "IPreviewModel.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
+#include <memory>
 #include <string>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 class MANTIDQT_ISISREFLECTOMETRY_DLL PreviewModel : public IPreviewModel {
 public:
+  virtual ~PreviewModel() = default;
   void loadWorkspace(std::string const &workspaceName) override;
   Mantid::API::MatrixWorkspace_sptr getInstViewWorkspace() const override;
 

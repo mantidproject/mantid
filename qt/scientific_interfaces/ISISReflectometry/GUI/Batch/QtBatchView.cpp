@@ -59,6 +59,8 @@ IExperimentView *QtBatchView::experiment() const { return m_experiment.get(); }
 
 IInstrumentView *QtBatchView::instrument() const { return m_instrument.get(); }
 
+IPreviewView *QtBatchView::preview() const { return m_preview.get(); }
+
 IRunsView *QtBatchView::runs() const { return m_runs.get(); }
 
 IEventView *QtBatchView::eventHandling() const { return m_eventHandling.get(); }

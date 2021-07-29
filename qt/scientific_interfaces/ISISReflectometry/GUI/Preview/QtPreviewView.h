@@ -7,18 +7,23 @@
 #pragma once
 
 #include "Common/DllConfig.h"
+#include "IPreviewView.h"
 #include "ui_PreviewWidget.h"
+
 #include <memory>
+#include <string>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 /** QtInstrumentView : Provides an interface for the "Preview" tab in the
 ISIS Reflectometry interface.
 */
-class MANTIDQT_ISISREFLECTOMETRY_DLL QtPreviewView : public QWidget {
+class MANTIDQT_ISISREFLECTOMETRY_DLL QtPreviewView : public QWidget, public IPreviewView {
   Q_OBJECT
 public:
   QtPreviewView(QWidget *parent = nullptr);
+
+  std::string getWorkspaceName() const override;
 
 private:
   Ui::PreviewWidget m_ui;

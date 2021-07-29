@@ -35,6 +35,7 @@ public:
   ISaveView *save() const override;
   IExperimentView *experiment() const override;
   IInstrumentView *instrument() const override;
+  IPreviewView *preview() const override;
   void clearAlgorithmQueue() override;
   void setAlgorithmQueue(std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> algorithms) override;
   void executeAlgorithmQueue() override;
