@@ -51,7 +51,6 @@ Configure CMake and generate build files
 
 * Still using the terminal or powershell prompt from the last step and in your mantid source directory.
 * Run ``conda activate mantid-developer`` to activate your conda environment.
-* Navigate back to your mantid source directory using ``cd mantid`` if you used the default name during cloning from git.
 * Inside of your mantid source directory run ``cmake --preset=win``
 
     * Alternatively if you don't want to have your build folder in your mantid source then pass the ``-B`` argument, overriding the preset, to cmake: ``cmake {PATH_TO_SOURCE} --preset=win -B {BUILD_DIR}``
