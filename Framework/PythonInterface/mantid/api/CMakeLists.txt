@@ -65,6 +65,9 @@ set(EXPORT_FILES
     src/Exports/SpectrumInfo.cpp
     src/Exports/Run.cpp
     src/Exports/WorkspaceFactory.cpp
+    src/Exports/FunctionDomain.cpp
+    src/Exports/FunctionDomain1D.cpp
+    src/Exports/FunctionDomain1DVector.cpp
     src/Exports/IFunction.cpp
     src/Exports/IFunction1D.cpp
     src/Exports/IPeakFunction.cpp
