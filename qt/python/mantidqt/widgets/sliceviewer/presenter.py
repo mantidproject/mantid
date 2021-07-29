@@ -418,10 +418,13 @@ class SliceViewer(ObservingPresenter):
         # the meantime, so check it still exists. See github issue #30406 for detail.
         if sip.isdeleted(self.view):
             return
+        ws = self.model._get_ws()
         # we don't want to use model.get_ws for the image info widget as this needs
         # extra arguments depending on workspace type.
-        self.view.data_view.image_info_widget.setWorkspace(self.model._get_ws())
+        ws.readLock()
+        self.view.data_view.image_info_widget.setWorkspace(ws)
         self.new_plot()
+        ws.unlock()
 
     def rename_workspace(self, old_name, new_name):
         if str(self.model._get_ws()) == old_name:
