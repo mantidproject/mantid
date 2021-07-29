@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 from Muon.GUI.Common.ADSHandler.ADS_calls import remove_ws_if_present, retrieve_ws
+from mantidqt.utils.observer_pattern import GenericObservable
 
 
 class EAGroup(object):
@@ -30,10 +31,12 @@ class EAGroup(object):
         self._peak_table = None
         self._matches_table = None
         self.update_counts_workspace(str(group_name))
+        self.error_notifier = None
 
     def __del__(self):
         try:
             remove_ws_if_present(self.get_counts_workspace_for_run())
+            print("here")
 
             if self.is_rebinned_workspace_present():
                 remove_ws_if_present(self.get_counts_workspace_for_run(rebin=True))
@@ -47,13 +50,18 @@ class EAGroup(object):
                     remove_ws_if_present(table)
                 remove_ws_if_present(self.get_matches_table())
 
-        except Exception as e:
+        except Exception as error:
             """
                 If ADS is deleted before group is deleted, boost.python.ArgumentError is raised and
                 boost.python.ArgumentError are not catchable
             """
-            if "Python argument types in" not in str(e):
-                raise e
+            if "Python argument types in" not in str(error):
+                if self.error_notifier:
+                    error_message = f"Unexpected error occurred when deleting group {self.name}: " + str(error)
+                    self.error_notifier.notify_subscribers(error_message)
+
+    def set_error_notifier(self, notifier:  GenericObservable):
+        self.error_notifier = notifier
 
     @property
     def workspace(self):

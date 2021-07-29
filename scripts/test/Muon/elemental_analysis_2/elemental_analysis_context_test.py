@@ -302,6 +302,24 @@ class EAGroupContextTest(unittest.TestCase):
         mock_remove_peak.aassert_not_called()
         mock_remove_matches.assert_not_called()
 
+    @mock.patch("Muon.GUI.ElementalAnalysis2.ea_group.remove_ws_if_present")
+    def test_error_raised_when_deleting_EAGroup(self, mock_remove_ws):
+        self.loadedData.clear()
+        self.create_group_workspace_and_load()
+        self.context.reset_group_to_default(self.loadedData)
+        self.assertEqual(len(self.context.groups), 2)
+        group_name1 = '9999; Detector 1'
+        self.assertTrue(group_name1 in self.context.group_names)
+        mock_remove_ws.side_effect = ValueError("mock error")
+        error_notifier_mock = mock.Mock()
+        self.context[group_name1].error_notifier = error_notifier_mock
+
+        self.context.remove_group(group_name1)
+        self.assertFalse(group_name1 in self.context.group_names)
+        mock_remove_ws.assert_called_once_with(group_name1)
+        error_notifier_mock.notify_subscribers.assert_called_once_with(f"Unexpected error occurred when"
+                                                                       f" deleting group {group_name1}: mock error")
+
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)

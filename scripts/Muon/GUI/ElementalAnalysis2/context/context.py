@@ -8,7 +8,6 @@ from mantidqt.utils.observer_pattern import GenericObservable
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
 from Muon.GUI.Common import thread_model
 from mantid.simpleapi import CloneWorkspace
-from Muon.GUI.Common import message_box
 from Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws, remove_ws_if_present
 from Muon.GUI.Common.utilities.algorithm_utils import rebin_ws
 from Muon.GUI.Common.contexts.muon_context_ADS_observer import MuonContextADSObserver
@@ -20,7 +19,7 @@ REBINNED_VARIABLE_WS_SUFFIX = "_EA_Rebinned_Variable"
 class ElementalAnalysisContext(object):
 
     def __init__(self, data_context, ea_group_context=None, muon_gui_context=None, plot_panes_context=None,
-                 workspace_suffix=' EA'):
+                 error_notifier=None, workspace_suffix=' EA'):
         self._window_title = "Elemental Analysis 2"
         self.data_context = data_context
         self._gui_context = muon_gui_context
@@ -37,6 +36,7 @@ class ElementalAnalysisContext(object):
         self.deleted_plots_notifier = GenericObservable()
         self.calculation_started_notifier = GenericObservable()
         self.calculation_finished_notifier = GenericObservable()
+        self.error_notifier = error_notifier
 
     @property
     def name(self):
@@ -96,7 +96,11 @@ class ElementalAnalysisContext(object):
 
     def handle_calculation_error(self, error):
         self.calculation_finished_notifier.notify_subscribers()
-        message_box.warning(str(error), None)
+        print("in errors", error)
+        if self.error_notifier:
+            print("here")
+            error_message = f"Unexpected error occurred during Rebin: " + str(error)
+            self.error_notifier.notify_subscribers(error_message)
 
     def _run_rebin(self, name, rebin_type, params):
         rebined_run_name = None
@@ -114,6 +118,7 @@ class ElementalAnalysisContext(object):
 
         CloneWorkspace(InputWorkspace=raw_workspace, OutputWorkspace=rebined_run_name)
         rebin_ws(rebined_run_name, params)
+        print("after rebin")
 
         workspace = retrieve_ws(rebined_run_name)
         group_workspace = retrieve_ws(self.group_context[name].run_number)
@@ -126,9 +131,9 @@ class ElementalAnalysisContext(object):
     def handle_rebin(self, name, rebin_type, rebin_param):
         self.rebin_model = ThreadModelWrapper(lambda: self._run_rebin(name, rebin_type, rebin_param))
         self.rebin_thread = thread_model.ThreadModel(self.rebin_model)
-        self.rebin_thread.threadWrapperSetUp(self.handle_calculation_started,
-                                             self.calculation_success,
-                                             self.handle_calculation_error)
+        self.rebin_thread.threadWrapperSetUp(on_thread_start_callback=self.handle_calculation_started,
+                                             on_thread_end_callback=self.calculation_success,
+                                             on_thread_exception_callback=self.handle_calculation_error)
         self.rebin_thread.start()
 
     def show_all_groups(self):

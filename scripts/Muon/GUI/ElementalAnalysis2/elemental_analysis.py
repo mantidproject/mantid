@@ -19,7 +19,7 @@ from Muon.GUI.ElementalAnalysis2.context.context import ElementalAnalysisContext
 from Muon.GUI.ElementalAnalysis2.load_widget.load_widget import LoadWidget
 from Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_widget import EAGroupingTabWidget
 from Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_widget import EAAutoTabWidget
-from mantidqt.utils.observer_pattern import GenericObserver, GenericObservable
+from mantidqt.utils.observer_pattern import GenericObserver, GenericObservable, GenericObserverWithArgPassing
 from Muon.GUI.Common.plotting_dock_widget.plotting_dock_widget import PlottingDockWidget
 from Muon.GUI.ElementalAnalysis2.plotting_widget.EA_plot_widget import EAPlotWidget
 
@@ -29,22 +29,27 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
     The Elemental Analysis 2.0 interface.
     """
 
-    @staticmethod
-    def warning_popup(message):
-        message_box.warning(str(message))
+    def warning_popup(self, message):
+        message_box.warning(str(message), parent=self)
 
     def __init__(self, parent=None):
         super(ElementalAnalysisGui, self).__init__(parent)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
         self.setObjectName("ElementalAnalysis2")
+
+        # setup error notifier and observer for context and group context
+        self.error_notifier = GenericObservable()
+        self.error_observer = GenericObserverWithArgPassing(self.warning_popup)
+        self.error_notifier.add_subscriber(self.error_observer)
+
         self.loaded_data = MuonLoadData()
         self.data_context = DataContext(self.loaded_data)
-        self.group_context = EAGroupContext(self.data_context.check_group_contains_valid_detectors)
+        self.group_context = EAGroupContext(self.data_context.check_group_contains_valid_detectors, self.error_notifier)
         self.gui_context = MuonGuiContext()
         self.plot_panes_context = PlotPanesContext()
         self.context = ElementalAnalysisContext(self.data_context, self.group_context, self.gui_context,
-                                                self.plot_panes_context)
+                                                self.plot_panes_context, self.error_notifier)
         self.current_tab = ''
 
         self.plot_widget = EAPlotWidget(self.context, parent=self)

@@ -16,7 +16,7 @@ INVALID_STRINGS_FOR_GROUP_NAMES = [REBINNED_VARIABLE_WS_SUFFIX, REBINNED_FIXED_W
                                    REFITTED_PEAKS_WS_SUFFIX, ERRORS_WS_SUFFIX, MATCH_GROUP_WS_SUFFIX]
 
 
-def get_default_grouping(loadedData):
+def get_default_grouping(loadedData, error_notifier=None):
     """this creates the first set of groups listed in the grouping table of the Elemental Analysis GUI
         For single workspace names the detector is found by taking everything after ; in the name
         For example : 2695; Detector 1 --> Detector 1
@@ -32,7 +32,10 @@ def get_default_grouping(loadedData):
                 continue
             detector_name = (group_name.split(';', 1)[-1].lstrip()).split('_', 1)[0]
             run_number = str(run_item).replace('[', '').replace(']', '')
-            groups += [EAGroup(group_name=group_name, detector=detector_name, run_number=run_number)]
+            group = EAGroup(group_name=group_name, detector=detector_name, run_number=run_number)
+            if error_notifier is not None:
+                group.set_error_notifier(error_notifier)
+            groups += [group]
     return groups
 
 
@@ -48,7 +51,7 @@ def is_group_valid(group_name):
 
 
 class EAGroupContext(object):
-    def __init__(self, check_group_contains_valid_detectors=lambda x: True):
+    def __init__(self, check_group_contains_valid_detectors=lambda x: True, error_notifier=None):
         self._groups = []
         self._runs_in_groups = []
         self._selected = ''
@@ -56,7 +59,7 @@ class EAGroupContext(object):
         self._selected_groups = []
 
         self.message_notifier = GenericObservable()
-
+        self.error_notifier = error_notifier
         self._check_group_contains_valid_detectors = check_group_contains_valid_detectors
 
     def __getitem__(self, name):
@@ -69,6 +72,9 @@ class EAGroupContext(object):
     def groups(self):
         return self._groups
 
+    def set_error_notifier(self, notifier: GenericObservable):
+        self.error_notifier = notifier
+
     @property
     def selected_groups(self):
         return self._selected_groups
@@ -78,6 +84,12 @@ class EAGroupContext(object):
 
     def clear_selected_groups(self):
         self._selected_groups = []
+
+    def create_EAGroup(self, group_name, detector, run_number):
+        # This method should be used to create EAGroups as it sets error notifier
+        group = EAGroup(group_name=group_name, detector=detector, run_number=run_number)
+        group.set_error_notifier(self.error_notifier)
+        return group
 
     @property
     def group_names(self):
@@ -96,7 +108,7 @@ class EAGroupContext(object):
                         continue
                     detector_name = (group_name.split(';', 1)[-1].lstrip()).split('_', 1)[0]
                     run_number = str(run_item).replace('[', '').replace(']', '')
-                    group += [EAGroup(group_name=group_name, detector=detector_name, run_number=run_number)]
+                    group += [self.create_EAGroup(group_name=group_name, detector=detector_name, run_number=run_number)]
         return group
 
     def add_group(self, group):
@@ -107,7 +119,7 @@ class EAGroupContext(object):
 
     def reset_group_to_default(self, loadedData):
         if loadedData:
-            self._groups = get_default_grouping(loadedData)
+            self._groups = get_default_grouping(loadedData, self.error_notifier)
 
     def add_group_to_selected_groups(self, group):
         if group in self.group_names and group not in self.selected_groups:

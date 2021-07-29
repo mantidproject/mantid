@@ -144,7 +144,7 @@ class EAGroupingTablePresenter(object):
         table = self._view.get_table_contents()
         self._model.clear_groups()
         for entry in table:
-            group = EAGroup(group_name=str(entry[0]), detector=str(entry[2]), run_number=str(entry[1]))
+            group = self._model.group_context.create_EAGroup(group_name=str(entry[0]), detector=str(entry[2]), run_number=str(entry[1]))
             if entry[4]:
                 group.rebin_index = str(entry[4])
             else:
