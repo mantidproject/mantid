@@ -42,7 +42,8 @@ struct GoniometerAxis {
   int sense;                /// Rotation sense (1 for CCW, -1 for CW)
   int angleunit;            /// angle units are angDegrees or angRadians (see AngleUnits.h)
   /// Constructor
-  GoniometerAxis(std::string initname, Kernel::V3D initrotationaxis, double initangle, int initsense, int initangleunit)
+  GoniometerAxis(std::string initname, const Kernel::V3D &initrotationaxis, double initangle, int initsense,
+                 int initangleunit)
       : name(std::move(initname)), rotationaxis(initrotationaxis), angle(initangle), sense(initsense),
         angleunit(initangleunit) {}
   GoniometerAxis() : name(""), rotationaxis(), angle(0.), sense(0), angleunit(0) {}
