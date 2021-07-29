@@ -26,6 +26,12 @@
 #   --extra-cmake-flags: Extra flags to pass directly to cmake, enclose in ""
 #   --build-threads: pass the number of threads that can be used to build with, default is 1 thread per logical core
 
+# Check arguements passed are 2 or higher, and aren't optional flags.
+if [[ $# < 2 || $1 == "--"* || $2 == "--"* ]]; then
+    echo "Pass 2 arguements followed by optional flags usage: buildscript <path-to-workspace> <cmake-preset-name> [options]"
+    exit 1
+fi
+
 # SCRIPT_DIR discovery from https://stackoverflow.com/a/9107028 by https://stackoverflow.com/users/1184238/andrew-norrie
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WORKSPACE=$1
@@ -50,13 +56,6 @@ CLEAN_BUILD=false
 CLEAN_EXTERNAL_PROJECTS=false
 USE_CORE_DUMPS=false
 EXTRA_CMAKE_FLAGS=""
-
-# Check arguements passed are 2 or higher, and aren't optional flags.
-if [[ $# < 2 || $1 == "--"* || $2 == "--"* ]]; then
-    echo "Pass atleast 2 arguements followed by optional flags usage:"
-    echo "\tbuildscript <path-to-workspace> <cmake-preset-name> [options]"
-    exit 1
-fi
 
 # Handle flag inputs
 while [ ! $# -eq 0 ]
@@ -107,7 +106,7 @@ fi
 mkdir -p $BUILD_DIR
 
 rm -rf ${BUILD_DIR}/bin ${BUILD_DIR}/ExternalData ${BUILD_DIR}/Testing
-find ${BUILD_DIR} \( -name 'TEST-*.xml' -o -name 'Test.xml' \) -delete
+find $WORKSPACE \( -name 'TEST-*.xml' -o -name 'Test.xml' \) -delete
 
 if [[ ${CLEAN_EXTERNAL_PROJECTS} == true ]]; then
     rm -rf $BUILD_DIR/eigen-*
