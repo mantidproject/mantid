@@ -135,22 +135,19 @@ private:
     // Create a fake workspace with TOF data
     auto sampleAlg = Mantid::API::AlgorithmManager::Instance().create("CreateSampleWorkspace");
     sampleAlg->initialize();
-    sampleAlg->setChild(true);
     sampleAlg->setProperty("Function", "Powder Diffraction");
     sampleAlg->setProperty("NumBanks", 4);
+    sampleAlg->setProperty("BankPixelWidth", 1);
     sampleAlg->setProperty("XUnit", "TOF");
     sampleAlg->setProperty("XMin", 1000.0);
     sampleAlg->setProperty("XMax", 10000.0);
     sampleAlg->setPropertyValue("OutputWorkspace", "sample_ws");
-
     sampleAlg->execute();
-    Mantid::API::MatrixWorkspace_sptr ws = sampleAlg->getProperty("OutputWorkspace");
 
     // edit the instrument geometry
     auto editAlg = Mantid::API::AlgorithmManager::Instance().create("EditInstrumentGeometry");
     editAlg->initialize();
-    editAlg->setChild(true);
-    editAlg->setProperty("Workspace", ws);
+    editAlg->setPropertyValue("Workspace", "sample_ws");
     editAlg->setProperty("PrimaryFlightPath", 5.0);
     editAlg->setProperty("SpectrumIDs", "1,2,3,4");
     editAlg->setProperty("L2", "2.0,2.0,2.0,2.0");
@@ -158,8 +155,9 @@ private:
     editAlg->setProperty("Azimuthal", "0.0,0.0,0.0,45.0");
     editAlg->setProperty("DetectorIDs", "1,2,3,4");
     editAlg->setProperty("InstrumentName", "Instrument");
-
     editAlg->execute();
+
+    Mantid::API::MatrixWorkspace_sptr ws = editAlg->getProperty("Workspace");
 
     return ws;
   }

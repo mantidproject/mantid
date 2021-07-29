@@ -135,7 +135,6 @@ void MultipleScatteringCorrection::exec() {
     }
   }
 
-  // perform integration
   const auto &spectrumInfo = m_inputWS->spectrumInfo();
   const auto numHists = static_cast<int64_t>(m_inputWS->getNumberHistograms());
   const auto specSize = static_cast<int64_t>(m_inputWS->blocksize());
@@ -170,6 +169,7 @@ void MultipleScatteringCorrection::exec() {
     for (int64_t j = 0; j < specSize; j += m_xStep) {
       double A1 = 0.0;
       double A2 = 0.0;
+
       pairWiseSum(A1, A2, -sampleLinearCoefAbs[j], distGraber, sample_L2Ds, sample_L12s, 0, numVolumeElements);
       // compute the correction factor
       const double rho = m_material.numberDensityEffective();
@@ -196,8 +196,24 @@ void MultipleScatteringCorrection::exec() {
   }
   PARALLEL_CHECK_INTERUPT_REGION
 
-  // set the output workspace
-  setProperty("OutputWorkspace", m_outputWS);
+  g_log.notice() << "finished integration.\n";
+
+  // set the output workspace group
+  // TODO: additional workspace will be added in as we are gradually implementing
+  //       support for container-sample scattering correction
+  const std::string outWSName = getProperty("OutputWorkspace");
+  std::vector<std::string> names;
+  names.emplace_back(outWSName + "_sampleOnly");
+  API::AnalysisDataService::Instance().addOrReplace(names.back(), m_outputWS);
+  // group
+  auto group = createChildAlgorithm("GroupWorkspaces");
+  group->initialize();
+  group->setProperty("InputWorkspaces", names);
+  group->setProperty("OutputWorkspace", outWSName);
+  group->execute();
+  API::WorkspaceGroup_sptr outWS = group->getProperty("OutputWorkspace");
+
+  setProperty("OutputWorkspace", outWS);
 }
 
 /**
@@ -220,7 +236,7 @@ void MultipleScatteringCorrection::parseInputs() {
   // -- notify the user of the bin step
   std::ostringstream msg;
   msg << "Numerical integration performed every " << m_xStep << " wavelength points";
-  g_log.information(msg.str());
+  g_log.information() << msg.str();
 
   // Get the element size
   m_elementSize = getProperty("ElementSize"); // in mm
