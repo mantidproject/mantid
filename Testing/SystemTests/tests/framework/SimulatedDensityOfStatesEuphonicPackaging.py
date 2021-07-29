@@ -26,16 +26,22 @@ class SimulatedDensityOfStatesEuphonicPackagingTest(MantidSystemTest):
 
 class SimulatedDensityOfStatesEuphonicInstallationTest(MantidSystemTest):
     def runTest(self):
+        # First check if we are using debian-style Pip, where --system
+        # is needed to prevent default --user option from breaking --prefix.
+
+        if '--system' in subprocess.check_output(
+                [sys.executable, "-m", "pip", "install", "-h"]).decode():
+            compatibility_args = ['--system']
+        else:
+            compatibility_args = []
+
         with tempfile.TemporaryDirectory() as scipy_prefix, \
              tempfile.TemporaryDirectory() as euphonic_prefix:
-            # Pip is called with --system as well as --prefix, because
-            # Ubuntu ships a Pip which defaults to --user which is not
-            # compatible with --prefix.
 
             process = subprocess.run([sys.executable, "-m", "pip", "install",
-                                      "--prefix", scipy_prefix,
-                                      "--system", "pip",
-                                      "packaging"],
+                                      "--prefix", scipy_prefix]
+                                     + compatibility_args
+                                     + ["pip", "packaging"],
                                      stdout=subprocess.PIPE,
                                      stderr=subprocess.STDOUT)
 
@@ -61,10 +67,10 @@ class SimulatedDensityOfStatesEuphonicInstallationTest(MantidSystemTest):
             from packaging import version
             if version.parse(scipy.version.version) < version.parse('1.0.1'):
                 process = subprocess.run([sys.executable, "-m", "pip", "install",
-                                          #"--system",
                                           "--ignore-installed", "--no-deps",
-                                          "--prefix", scipy_prefix,
-                                          "scipy==1.0", "pytest"],
+                                          "--prefix", scipy_prefix]
+                                         #+ compatibility_args
+                                         + ["scipy==1.0", "pytest"],
                                          stdout=subprocess.PIPE,
                                          stderr=subprocess.STDOUT)
                 print(process.stdout.decode('utf-8'))
@@ -72,18 +78,18 @@ class SimulatedDensityOfStatesEuphonicInstallationTest(MantidSystemTest):
                 importlib.reload(site)
                 importlib.reload(scipy)
 
+            process = subprocess.run([sys.executable, "-m", "pip", "install",
+                                      "--prefix", euphonic_prefix]
+                                     #+ compatibility_args
+                                     + ["euphonic"],
+                                     stdout=subprocess.PIPE,
+                                     stderr=subprocess.STDOUT)
+            print(process.stdout.decode('utf-8'))
+
             prefix_path = pathlib.Path(euphonic_prefix)
             euphonic_site_packages = next((prefix_path / 'lib').iterdir()
                                           ) / 'site-packages'
             sys.path.append(str(euphonic_site_packages))
-
-            process = subprocess.run([sys.executable, "-m", "pip", "install",
-                                      "--system",
-                                      "--prefix", euphonic_prefix,
-                                      "euphonic"],
-                                     stdout=subprocess.PIPE,
-                                     stderr=subprocess.STDOUT)
-            print(process.stdout.decode('utf-8'))
 
             importlib.reload(site)
             globals()['euphonic'] = importlib.import_module('euphonic')
