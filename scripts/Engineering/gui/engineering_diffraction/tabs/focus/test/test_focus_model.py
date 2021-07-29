@@ -13,6 +13,7 @@ from unittest.mock import patch, MagicMock, call
 from mantid.simpleapi import CreateSampleWorkspace
 from Engineering.common import path_handling
 from Engineering.gui.engineering_diffraction.tabs.focus import model
+from Engineering.gui.engineering_diffraction.tabs.common import output_settings
 from Engineering.gui.engineering_diffraction.tabs.common.calibration_info import CalibrationInfo
 
 file_path = "Engineering.gui.engineering_diffraction.tabs.focus.model"
@@ -191,7 +192,7 @@ class FocusModelTest(unittest.TestCase):
     @patch(file_path + ".SaveNexus")
     def test_last_path_updates_with_no_RB_number(self, nexus, gss, xye):
         mocked_workspace = "mocked-workspace"
-        output_file = path.join(path_handling.get_output_path(), "Focus",
+        output_file = path.join(output_settings.get_output_path(), "Focus",
                                 "ENGINX_123_North_TOF.nxs")
 
         self.model._last_path_ws = 'ENGINX_123_North_TOF.nxs'
@@ -207,7 +208,7 @@ class FocusModelTest(unittest.TestCase):
     def test_last_path_updates_with_RB_number(self, nexus, gss, xye):
         mocked_workspace = "mocked-workspace"
         rb_num = '2'
-        output_file = path.join(path_handling.get_output_path(), "User", rb_num, "Focus",
+        output_file = path.join(output_settings.get_output_path(), "User", rb_num, "Focus",
                                 "ENGINX_123_North_TOF.nxs")
 
         self.model._last_path_ws = 'ENGINX_123_North_TOF.nxs'

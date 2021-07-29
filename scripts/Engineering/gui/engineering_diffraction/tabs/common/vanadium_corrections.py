@@ -11,6 +11,7 @@ from mantid.simpleapi import logger, Load, SaveNexus, NormaliseByCurrent, Integr
 from mantid.simpleapi import AnalysisDataService as Ads
 
 from Engineering.common import path_handling
+from Engineering.gui.engineering_diffraction.tabs.common import output_settings
 from Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 
 VANADIUM_INPUT_WORKSPACE_NAME = "engggui_vanadium_ws"
@@ -38,8 +39,8 @@ def fetch_correction_workspaces(vanadium_path: str, instrument: str, rb_num: str
     if is_load:
         force_recalc = False
     else:
-        force_recalc = get_setting(path_handling.INTERFACES_SETTINGS_GROUP,
-                                   path_handling.ENGINEERING_PREFIX, "recalc_vanadium", return_type=bool)
+        force_recalc = get_setting(output_settings.INTERFACES_SETTINGS_GROUP,
+                                   output_settings.ENGINEERING_PREFIX, "recalc_vanadium", return_type=bool)
     if path.exists(processed_path) and path.exists(integ_path) and not force_recalc:  # Check if the cached files exist.
         try:
             integ_workspace = Load(Filename=integ_path, OutputWorkspace=INTEGRATED_WORKSPACE_NAME)
@@ -86,8 +87,8 @@ def create_vanadium_corrections(vanadium_path: str):  # -> Workspace, Workspace
                      + str(vanadium_path) + ". Error description: " + str(e))
         raise RuntimeError
     # get full instrument calibration for instrument processing calculation
-    full_calib_path = get_setting(path_handling.INTERFACES_SETTINGS_GROUP,
-                                  path_handling.ENGINEERING_PREFIX, "full_calibration")
+    full_calib_path = get_setting(output_settings.INTERFACES_SETTINGS_GROUP,
+                                  output_settings.ENGINEERING_PREFIX, "full_calibration")
     try:
         full_calib_ws = Load(full_calib_path, OutputWorkspace="full_inst_calib")
     except ValueError:
@@ -149,10 +150,10 @@ def _generate_vanadium_saves_file_path(rb_num: str = "") -> str:
     :return: The full path to the file.
     """
     if rb_num:
-        vanadium_dir = path.join(path_handling.get_output_path(), "User", rb_num,
+        vanadium_dir = path.join(output_settings.get_output_path(), "User", rb_num,
                                  VANADIUM_DIRECTORY_NAME)
     else:
-        vanadium_dir = path.join(path_handling.get_output_path(), VANADIUM_DIRECTORY_NAME)
+        vanadium_dir = path.join(output_settings.get_output_path(), VANADIUM_DIRECTORY_NAME)
     if not path.exists(vanadium_dir):
         makedirs(vanadium_dir)
     return vanadium_dir
