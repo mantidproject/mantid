@@ -61,7 +61,7 @@ class FrequencyContext(object):
 
     def get_group_phase_tables(self, num_groups, instrument):
         if num_groups not in self._group_phase_tables.keys():
-            return [""]
+            return []
         return [phase_table.workspace_name for phase_table in self._group_phase_tables[num_groups]
                 if instrument in phase_table.workspace_name]
 

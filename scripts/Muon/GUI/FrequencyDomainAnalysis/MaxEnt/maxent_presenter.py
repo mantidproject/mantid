@@ -28,7 +28,7 @@ SPECTRA ='ReconstructedSpectra'
 PHASECONVERGENCE = 'PhaseConvergenceTable'
 GROUPINGTABLE = "GroupingTable"
 
-USEGROUPS = "groups"
+USEGROUPS = "Groups"
 USEDETECTORS = "All detectors"
 
 optional_output_suffixes = {PHASETABLE: '_phase_table', DEADTIMES: '_dead_times',
@@ -46,12 +46,12 @@ class MaxEntPresenter(object):
         self.context = context
         self.thread = None
         self._optional_output_names = {}
-        self._method = ""
         # set data
         self.getWorkspaceNames()
         self.view.set_methods([USEGROUPS, USEDETECTORS])
         # connect
         self.view.maxEntButtonSignal.connect(self.handleMaxEntButton)
+        self.view.method_changed_slot(self.update_phase_table_options)
         self.view.cancelSignal.connect(self.cancel)
         self.view.run_changed_slot(self._load_periods)
 
@@ -63,7 +63,7 @@ class MaxEntPresenter(object):
 
     @property
     def use_groups(self):
-        return self._method == USEGROUPS
+        return self.view.get_method == USEGROUPS
 
     @property
     def widget(self):
@@ -75,6 +75,15 @@ class MaxEntPresenter(object):
         if run != []:
             periods = [str(period+1) for period in range(self.context.data_context.num_periods(run))]
         self.view.add_periods(periods)
+
+    @property
+    def get_selected_groups(self):
+        selected_names = self.context.group_pair_context.selected_groups
+        return [ group for group in self.context.group_pair_context.groups if group.name in selected_names]
+
+    @property
+    def get_num_groups(self):
+        return len(self.context.group_pair_context.selected_groups)
 
     def runChanged(self):
         self.getWorkspaceNames()
@@ -111,7 +120,7 @@ class MaxEntPresenter(object):
     def createThread(self):
         self.maxent_alg = mantid.AlgorithmManager.create("MuonMaxent")
         self._maxent_output_workspace_name = get_maxent_workspace_name(
-            self.get_parameters_for_maxent_calculation()['InputWorkspace'], self._method)
+            self.get_parameters_for_maxent_calculation()['InputWorkspace'],  self.view.get_method)
         calculation_function = functools.partial(self.calculate_maxent, self.maxent_alg)
         self._maxent_calculation_model = ThreadModelWrapper(calculation_function)
         return thread_model.ThreadModel(self._maxent_calculation_model)
@@ -134,7 +143,7 @@ class MaxEntPresenter(object):
         if self.view.output_phase_table:
             name = self._optional_output_names[PHASETABLE]
             if self.use_groups:
-                num_groups = len(self.context.group_pair_context.groups)
+                num_groups = self.get_num_groups
                 self.context.frequency_context.add_group_phase_table(MuonWorkspaceWrapper(name), num_groups)
             else:
                 self.context.phase_context.add_phase_table(MuonWorkspaceWrapper(name))
@@ -149,7 +158,7 @@ class MaxEntPresenter(object):
 
     def calculate_maxent(self, alg):
         maxent_parameters = self.get_parameters_for_maxent_calculation()
-        base_name = get_maxent_workspace_name(maxent_parameters['InputWorkspace'], self._method)
+        base_name = get_maxent_workspace_name(maxent_parameters['InputWorkspace'],  self.view.get_method)
 
         maxent_workspace = run_MuonMaxent(maxent_parameters, alg, base_name)
 
@@ -158,7 +167,7 @@ class MaxEntPresenter(object):
     def _create_group_table(self):
         tab = create_empty_table(GROUPINGTABLE)
         tab.addColumn('str', 'Detectors')
-        groups = self.context.group_pair_context.groups
+        groups = self.get_selected_groups
         for group in groups:
             detectors = ""
             for det in group.detectors:
@@ -169,7 +178,6 @@ class MaxEntPresenter(object):
     def get_parameters_for_maxent_calculation(self):
         inputs = {}
         run = self.view.get_run
-        self._method = self.view.get_method
         period = self.view.get_period
         multiperiod = True if self.view.num_periods >1 else False
         name = get_raw_data_workspace_name(self.context.data_context.instrument, run, multiperiod,
@@ -211,17 +219,13 @@ class MaxEntPresenter(object):
 
         return inputs
 
-    """
-    Need to add connects to update_phase_table_options for:
-    1. Change method
-    2. Change group or diff table
-    """
-
     def update_phase_table_options(self):
         phase_table_list = []
         if self.use_groups:
-            num_groups = len(self.context.group_pair_context.groups)
+            num_groups = self.get_num_groups
             phase_table_list = self.context.frequency_context.get_group_phase_tables(num_groups, self.context.data_context.instrument)
+            print("moo",num_groups,phase_table_list )
+
             phase_table_list.insert(0, 'None')
         else:
             phase_table_list = self.context.phase_context.get_phase_table_list(self.context.data_context.instrument)
@@ -231,7 +235,7 @@ class MaxEntPresenter(object):
 
     def add_maxent_workspace_to_ADS(self, input_workspace, maxent_workspace, alg):
         run = re.search('[0-9]+', input_workspace).group()
-        base_name = get_maxent_workspace_name(input_workspace, self._method)
+        base_name = get_maxent_workspace_name(input_workspace, self.view.get_method)
         directory = get_maxent_workspace_group_name(base_name, self.context.data_context.instrument, self.context.workspace_suffix)
 
         muon_workspace_wrapper = MuonWorkspaceWrapper(directory + base_name)
@@ -262,16 +266,15 @@ class MaxEntPresenter(object):
                 output = GROUPINGTABLE
                 self.context.ads_observer.observeRename(False)
                 wrapped_workspace = MuonWorkspaceWrapper(output)
-                name = directory + base_name + "_" + GROUPINGTABLE
+                name = directory + base_name + " " + GROUPINGTABLE
                 self._optional_output_names[key] = name
                 wrapped_workspace.show(name)
                 self.context.ads_observer.observeRename(True)
             elif output_options[key]:
                 output = alg.getProperty(key).valueAsStr
-                print("output", output)
                 self.context.ads_observer.observeRename(False)
                 wrapped_workspace = MuonWorkspaceWrapper(output)
-                name = directory + base_name + optional_output_suffixes[key]
+                name = directory + base_name + "(" + str(self.get_num_groups)+" groups) "+ optional_output_suffixes[key]
                 self._optional_output_names[key] = name
                 wrapped_workspace.show(name)
                 self.context.ads_observer.observeRename(True)
