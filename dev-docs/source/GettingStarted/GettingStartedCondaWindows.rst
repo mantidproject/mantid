@@ -34,7 +34,6 @@ Install `Mambaforge <https://github.com/conda-forge/miniforge/releases>`_
 
 * Choose the latest version of ``Mambaforge-Windows-x86_64.exe``
 * Run your downloaded ``Mambaforge-Windows-x86_64.exe`` and work through the installer until it finishes. In order to make it easier later on, check the box that adds Conda to your path.
-* Temporary fix for Mambaforge on Windows. Run ``conda config --add channels main`` this will add the main channel and allow Windows developers to install ``cyrus-sasl`` (A dependency of librdkafka) which is not available on Windows yet via conda-forge.
 
 Setup the mantid conda environment
 ----------------------------------
@@ -44,6 +43,7 @@ Setup the mantid conda environment
     * Open an Anaconda prompt (Mambaforge).
     * Add the path of your Mambaforge installation to your system path, if you didn't do it during installation (Follow the answers in the `FAQ <https://docs.anaconda.com/anaconda/user-guide/faq/#installing-anaconda>`_). Then you can use conda from the Command Prompt and Powershell.
 
+* Temporary fix for Mambaforge on Windows. Run ``conda config --add channels main`` this will add the main channel and allow Windows developers to install ``cyrus-sasl`` (A dependency of librdkafka) which is not available on Windows yet via conda-forge.
 * Create the mantid conda environment by navigating to your mantid source code directory in your terminal and running ``conda env create -f mantid-developer-win.yml``
 
 Configure CMake and generate build files
