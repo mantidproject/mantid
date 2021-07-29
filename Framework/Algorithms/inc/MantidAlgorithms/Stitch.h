@@ -30,8 +30,10 @@ private:
   void scale(MatrixWorkspace_sptr wsToMatch, MatrixWorkspace_sptr wsToScale, MatrixWorkspace_sptr scaleFactorsWorkspace,
              const std::vector<std::string> &inputs);
   MatrixWorkspace_sptr merge(const std::vector<std::string> &workspaces);
-  void scaleManual(const std::vector<std::string> &, const std::vector<double> &scaleFactors,
+  void scaleManual(const std::vector<std::string> &inputs, const std::vector<double> &scaleFactors,
                    MatrixWorkspace_sptr scaleFactorsWorkspace);
+  void scaleWithMedianRatios(const std::vector<std::string> &clones, const std::string &referenceName,
+                             MatrixWorkspace_sptr &scaleFactorsWorkspace);
   void recordScaleFactor(MatrixWorkspace_sptr scaleFactorWorkspace, MatrixWorkspace_sptr medianWorkspace,
                          MatrixWorkspace_sptr scaledWorkspace, const std::vector<std::string> &inputs);
   void cloneWorkspaces(const std::vector<std::string> &inputs);
