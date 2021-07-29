@@ -731,8 +731,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(WS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws_name));
     // Valid WS and it is an EventWorkspace
     TS_ASSERT(WS);
-    if (!WS)
-      return;
+
     // Pixels have to be padded
     TS_ASSERT_EQUALS(WS->getNumberHistograms(), SingleBankPixelsOnly ? 1024 : 51200);
     // Events - there are fewer now.
@@ -838,8 +837,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(WS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws_name));
     // Valid WS and it is an EventWorkspace
     TS_ASSERT(WS);
-    if (!WS)
-      return;
+
     TS_ASSERT_EQUALS(WS->getNumberHistograms(), 117760);
     TS_ASSERT_EQUALS(WS->getNumberEvents(), 10730347);
     for (size_t wi = 0; wi < WS->getNumberHistograms(); wi++) {
@@ -881,8 +879,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(WS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsname));
     // Valid WS and it is an EventWorkspace
     TS_ASSERT(WS);
-    if (!WS)
-      return;
+
     const auto numHist = WS->getNumberHistograms();
     TS_ASSERT_EQUALS(numHist, 117760);
     TS_ASSERT_EQUALS(WS->getNumberEvents(), 2);
@@ -1010,8 +1007,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(eventWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("dummy"));
     // Valid WS and it is an EventWorkspace
     TS_ASSERT(eventWS);
-    if (!eventWS)
-      return;
+
     TS_ASSERT_EQUALS(eventWS->getNumberEvents(), 1000);
     TS_ASSERT_EQUALS(eventWS->run().startTime(), DateAndTime("2021-01-28T18:07:12"));
     TS_ASSERT_EQUALS(eventWS->getPulseTimeMin(), eventWS->getPulseTimeMax());
@@ -1039,8 +1035,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(eventWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("dummy"));
     // Valid WS and it is an EventWorkspace
     TS_ASSERT(eventWS);
-    if (!eventWS)
-      return;
 
     TS_ASSERT_EQUALS(eventWS->getNumberEvents(), 1000);
     TS_ASSERT_EQUALS(eventWS->run().startTime(), DateAndTime("2021-03-24T20:52:50"));
