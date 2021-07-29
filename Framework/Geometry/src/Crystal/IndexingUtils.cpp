@@ -2642,7 +2642,7 @@ std::vector<V3D> IndexingUtils::MakeHemisphereDirections(int n_steps) {
   @throws std::invalid_argument exception if the number of steps is <= 0, or
                                 if the axix length is 0.
  */
-std::vector<V3D> IndexingUtils::MakeCircleDirections(int n_steps, const V3D axis, double angle_degrees) {
+std::vector<V3D> IndexingUtils::MakeCircleDirections(int n_steps, const Kernel::V3D &axis, double angle_degrees) {
   if (n_steps <= 0) {
     throw std::invalid_argument("MakeCircleDirections(): n_steps must be greater than 0");
   }

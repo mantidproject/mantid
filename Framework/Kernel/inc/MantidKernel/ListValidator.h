@@ -42,12 +42,12 @@ public:
                          const bool allowMultiSelection = false)
       : TypedValidator<TYPE>(), m_allowedValues(values.begin(), values.end()),
         m_aliases(aliases.begin(), aliases.end()), m_allowMultiSelection(allowMultiSelection) {
+    if (m_allowMultiSelection) {
+      throw Kernel::Exception::NotImplementedError("The List Validator does not support multi selection yet");
+    }
     for (auto aliasIt = m_aliases.begin(); aliasIt != m_aliases.end(); ++aliasIt) {
       if (values.end() == std::find(values.begin(), values.end(), boost::lexical_cast<TYPE>(aliasIt->second))) {
         throw std::invalid_argument("Alias " + aliasIt->first + " refers to invalid value " + aliasIt->second);
-        if (m_allowMultiSelection) {
-          throw Kernel::Exception::NotImplementedError("The List Validator does not support multi selection yet");
-        }
       }
     }
   }

@@ -28,7 +28,7 @@ public:
   Container();
   Container(IObject_sptr shape);
   Container(const Container &container);
-  Container(std::string xml);
+  Container(const std::string &xml);
 
   bool hasCustomizableSampleShape() const;
   bool hasFixedSampleShape() const;

@@ -203,7 +203,7 @@ public:
 
 protected:
   /// Constructor
-  Property(std::string name, const std::type_info &type, unsigned int direction = Direction::Input);
+  Property(std::string name, const std::type_info &type, const unsigned int &direction = Direction::Input);
   /// Copy constructor
   Property(const Property &right);
   /// The name of the property
