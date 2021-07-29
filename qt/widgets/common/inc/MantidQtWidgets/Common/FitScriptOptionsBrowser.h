@@ -48,9 +48,11 @@ public:
   bool getBoolProperty(std::string const &name) const;
 
 signals:
+  void outputBaseNameChanged(std::string const &outputBaseName);
   void fittingModeChanged(FittingMode fittingMode);
 
 private slots:
+  void stringChanged(QtProperty *prop);
   void enumChanged(QtProperty *prop);
 
 private:

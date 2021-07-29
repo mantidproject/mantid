@@ -80,6 +80,7 @@ void FitScriptOptionsBrowser::createBrowser() {
   m_browser->setFactoryForManager(m_boolManager, checkBoxFactory);
   m_browser->setMinimumHeight(110);
 
+  connect(m_stringManager, SIGNAL(propertyChanged(QtProperty *)), this, SLOT(stringChanged(QtProperty *)));
   connect(m_enumManager, SIGNAL(propertyChanged(QtProperty *)), this, SLOT(enumChanged(QtProperty *)));
 
   auto *layout = new QVBoxLayout(this);
@@ -195,6 +196,12 @@ QtProperty *FitScriptOptionsBrowser::getQtPropertyFor(std::string const &name) c
     throw std::runtime_error("Property " + name + " isn't supported by the browser.");
   }
   return m_propertyNameMap[name];
+}
+
+void FitScriptOptionsBrowser::stringChanged(QtProperty *prop) {
+  if (prop == m_outputBaseName) {
+    emit outputBaseNameChanged(prop->valueText().toStdString());
+  }
 }
 
 void FitScriptOptionsBrowser::enumChanged(QtProperty *prop) {

@@ -93,6 +93,9 @@ void FitScriptGeneratorPresenter::notifyPresenter(ViewEvent const &event, [[mayb
   case ViewEvent::EditLocalParameterFinished:
     handleEditLocalParameterFinished();
     return;
+  case ViewEvent::OutputBaseNameChanged:
+    handleOutputBaseNameChanged(arg1);
+    return;
   case ViewEvent::GenerateScriptToFileClicked:
     handleGenerateScriptToFileClicked();
     return;
@@ -242,6 +245,10 @@ void FitScriptGeneratorPresenter::handleEditLocalParameterFinished() {
   }
 
   handleSelectionChanged();
+}
+
+void FitScriptGeneratorPresenter::handleOutputBaseNameChanged(std::string const &outputBaseName) {
+  m_model->setOutputBaseName(outputBaseName);
 }
 
 void FitScriptGeneratorPresenter::handleFittingModeChanged(FittingMode fittingMode) {
@@ -513,7 +520,7 @@ void FitScriptGeneratorPresenter::checkForWarningMessages() {
 }
 
 template <typename Generator> void FitScriptGeneratorPresenter::generateFitScript(Generator &&func) const {
-  auto const [valid, message] = m_model->isValid(m_view->outputBaseName());
+  auto const [valid, message] = m_model->isValid();
 
   if (!message.empty())
     m_view->displayWarning(message);

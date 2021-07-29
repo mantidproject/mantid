@@ -177,6 +177,8 @@ public:
 
   MOCK_METHOD1(setGlobalParameters, void(std::vector<std::string> const &parameters));
 
+  MOCK_METHOD1(setOutputBaseName, void(std::string const &outputBaseName));
+
   MOCK_METHOD1(setFittingMode, void(FittingMode fittingMode));
   MOCK_CONST_METHOD0(getFittingMode, FittingMode());
   MOCK_CONST_METHOD0(isSimultaneousMode, bool());
@@ -208,7 +210,7 @@ public:
   MOCK_CONST_METHOD0(getGlobalTies, std::vector<GlobalTie>());
   MOCK_CONST_METHOD0(getGlobalParameters, std::vector<GlobalParameter>());
 
-  MOCK_CONST_METHOD1(isValid, std::tuple<bool, std::string>(std::string const &outputBaseName));
+  MOCK_CONST_METHOD0(isValid, std::tuple<bool, std::string>());
 
   std::string generatePythonFitScript([[maybe_unused]] std::tuple<std::string, std::string, std::string, std::string,
                                                                   std::string, bool> const &fitOptions,

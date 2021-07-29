@@ -87,7 +87,6 @@ public:
 
   [[nodiscard]] std::tuple<std::string, std::string, std::string, std::string, std::string, bool>
   fitOptions() const override;
-  [[nodiscard]] std::string outputBaseName() const override;
   [[nodiscard]] std::string filepath() const override;
 
   void resetSelection() override;
@@ -142,6 +141,7 @@ private slots:
   void onGlobalParametersChanged(QStringList const &globalParameters);
   void onCopyFunctionToClipboard();
   void onFunctionHelpRequested();
+  void onOutputBaseNameChanged(std::string const &outputBaseName);
   void onFittingModeChanged(FittingMode fittingMode);
   void onEditLocalParameterClicked(QString const &parameter);
   void onEditLocalParameterFinished(int result);

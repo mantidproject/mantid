@@ -79,6 +79,8 @@ public:
 
   virtual void setGlobalParameters(std::vector<std::string> const &parameters) = 0;
 
+  virtual void setOutputBaseName(std::string const &outputBaseName) = 0;
+
   virtual void setFittingMode(FittingMode fittingMode) = 0;
   [[nodiscard]] virtual FittingMode getFittingMode() const = 0;
 
@@ -107,7 +109,7 @@ public:
 
   [[nodiscard]] virtual std::size_t numberOfDomains() const = 0;
 
-  [[nodiscard]] virtual std::tuple<bool, std::string> isValid(std::string const &outputBaseName) const = 0;
+  [[nodiscard]] virtual std::tuple<bool, std::string> isValid() const = 0;
 
   virtual std::string generatePythonFitScript(
       std::tuple<std::string, std::string, std::string, std::string, std::string, bool> const &fitOptions,

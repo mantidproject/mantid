@@ -94,6 +94,8 @@ public:
     return m_globalParameters;
   }
 
+  void setOutputBaseName(std::string const &outputBaseName) override;
+
   void setFittingMode(FittingMode fittingMode) override;
   [[nodiscard]] inline FittingMode getFittingMode() const noexcept override { return m_fittingMode; }
 
@@ -117,7 +119,7 @@ public:
 
   [[nodiscard]] inline std::size_t numberOfDomains() const noexcept override { return m_fitDomains.size(); }
 
-  std::tuple<bool, std::string> isValid(std::string const &outputBaseName) const override;
+  std::tuple<bool, std::string> isValid() const override;
 
   std::string generatePythonFitScript(
       std::tuple<std::string, std::string, std::string, std::string, std::string, bool> const &fitOptions,
@@ -186,6 +188,7 @@ private:
   void addGlobalTies(Mantid::API::MultiDomainFunction_sptr &function) const;
 
   IFitScriptGeneratorPresenter *m_presenter;
+  std::string m_outputBaseName;
   std::vector<std::unique_ptr<FitDomain>> m_fitDomains;
   // A vector of global parameters. E.g. f0.A0
   std::vector<GlobalParameter> m_globalParameters;

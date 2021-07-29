@@ -56,6 +56,7 @@ public:
     GlobalParametersChanged,
     EditLocalParameterClicked,
     EditLocalParameterFinished,
+    OutputBaseNameChanged,
     FittingModeChanged,
     GenerateScriptToFileClicked,
     GenerateScriptToClipboardClicked
@@ -102,7 +103,6 @@ public:
 
   [[nodiscard]] virtual std::tuple<std::string, std::string, std::string, std::string, std::string, bool>
   fitOptions() const = 0;
-  [[nodiscard]] virtual std::string outputBaseName() const = 0;
   [[nodiscard]] virtual std::string filepath() const = 0;
 
   virtual void resetSelection() = 0;

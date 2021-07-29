@@ -155,6 +155,8 @@ void FitScriptGeneratorView::connectUiSignals() {
   connect(m_functionTreeView.get(), SIGNAL(localParameterButtonClicked(QString const &)), this,
           SLOT(onEditLocalParameterClicked(QString const &)));
 
+  connect(m_fitOptionsBrowser.get(), SIGNAL(outputBaseNameChanged(std::string const &)), this,
+          SLOT(onOutputBaseNameChanged(std::string const &)));
   connect(m_fitOptionsBrowser.get(), SIGNAL(fittingModeChanged(FittingMode)), this,
           SLOT(onFittingModeChanged(FittingMode)));
 
@@ -283,6 +285,10 @@ void FitScriptGeneratorView::onCopyFunctionToClipboard() {
 void FitScriptGeneratorView::onFunctionHelpRequested() {
   if (auto const function = m_functionTreeView->getSelectedFunction())
     m_functionTreeView->showFunctionHelp(QString::fromStdString(function->name()));
+}
+
+void FitScriptGeneratorView::onOutputBaseNameChanged(std::string const &outputBaseName) {
+  m_presenter->notifyPresenter(ViewEvent::OutputBaseNameChanged, outputBaseName);
 }
 
 void FitScriptGeneratorView::onFittingModeChanged(FittingMode fittingMode) {
@@ -417,10 +423,6 @@ FitScriptGeneratorView::fitOptions() const {
   return {m_fitOptionsBrowser->getProperty("Max Iterations"),   m_fitOptionsBrowser->getProperty("Minimizer"),
           m_fitOptionsBrowser->getProperty("Cost Function"),    m_fitOptionsBrowser->getProperty("Evaluation Type"),
           m_fitOptionsBrowser->getProperty("Output Base Name"), m_fitOptionsBrowser->getBoolProperty("Plot Output")};
-}
-
-std::string FitScriptGeneratorView::outputBaseName() const {
-  return m_fitOptionsBrowser->getProperty("Output Base Name");
 }
 
 std::string FitScriptGeneratorView::filepath() const {

@@ -90,7 +90,8 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 FitScriptGeneratorModel::FitScriptGeneratorModel()
-    : m_presenter(), m_fitDomains(), m_globalParameters(), m_globalTies(), m_fittingMode(FittingMode::SEQUENTIAL) {}
+    : m_presenter(), m_outputBaseName("Output_Fit"), m_fitDomains(), m_globalParameters(), m_globalTies(),
+      m_fittingMode(FittingMode::SEQUENTIAL) {}
 
 FitScriptGeneratorModel::~FitScriptGeneratorModel() {
   m_fitDomains.clear();
@@ -479,6 +480,10 @@ void FitScriptGeneratorModel::setGlobalParameters(std::vector<std::string> const
   }
 }
 
+void FitScriptGeneratorModel::setOutputBaseName(std::string const &outputBaseName) {
+  m_outputBaseName = outputBaseName;
+}
+
 void FitScriptGeneratorModel::setFittingMode(FittingMode fittingMode) {
   if (fittingMode == FittingMode::SEQUENTIAL_AND_SIMULTANEOUS)
     throw std::invalid_argument("Fitting mode must be SEQUENTIAL or SIMULTANEOUS.");
@@ -615,14 +620,14 @@ bool FitScriptGeneratorModel::checkFunctionIsSameForAllDomains() const {
   return std::all_of(m_fitDomains.cbegin(), m_fitDomains.cend(), hasSameFunction);
 }
 
-std::tuple<bool, std::string> FitScriptGeneratorModel::isValid(std::string const &outputBaseName) const {
+std::tuple<bool, std::string> FitScriptGeneratorModel::isValid() const {
   std::string message;
   if (numberOfDomains() == 0u)
     message = "Domain data must be loaded before generating a python script.";
   else if (!checkFunctionExistsInAllDomains())
     message = "A function must exist in ALL domains to generate a python script.";
 
-  if (outputBaseName.empty())
+  if (m_outputBaseName.empty())
     message = "The Output Base Name must not be empty, please provide an Output Base Name.";
 
   bool valid(message.empty());
