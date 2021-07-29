@@ -117,6 +117,10 @@ Directory Properties
 |                                      | files.                                            |                                     |
 |                                      | **WARNING:** Do not alter the default value.      |                                     |
 +--------------------------------------+---------------------------------------------------+-------------------------------------+
+| ``python.templates.directory``       | The directory of python .in files used as         | N/A                                 |
+|                                      | templates when generating python scripts from     |                                     |
+|                                      | within an algorithm.                              |                                     |
++--------------------------------------+---------------------------------------------------+-------------------------------------+
 
 
 Logging Properties

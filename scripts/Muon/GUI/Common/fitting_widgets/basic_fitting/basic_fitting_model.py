@@ -16,7 +16,7 @@ from Muon.GUI.Common.contexts.fitting_contexts.basic_fitting_context import Basi
 from Muon.GUI.Common.contexts.fitting_contexts.fitting_context import FitInformation
 from Muon.GUI.Common.contexts.muon_context import MuonContext
 from Muon.GUI.Common.utilities.algorithm_utils import run_Fit
-from Muon.GUI.Common.utilities.workspace_data_utils import x_limits_of_workspace
+from Muon.GUI.Common.utilities.workspace_data_utils import check_exclude_start_and_end_x_is_valid, x_limits_of_workspace
 from Muon.GUI.Common.utilities.workspace_utils import StaticWorkspaceWrapper
 
 import math
@@ -83,6 +83,10 @@ class BasicFittingModel:
         self.fitting_context.start_xs = start_xs
         self.fitting_context.end_xs = end_xs
 
+        exclude_start_xs, exclude_end_xs = self._get_new_exclude_start_xs_and_end_xs_using_existing_data()
+        self.fitting_context.exclude_start_xs = exclude_start_xs
+        self.fitting_context.exclude_end_xs = exclude_end_xs
+
         self.reset_fit_functions(functions)
         self.reset_current_dataset_index()
         self.reset_fit_statuses_and_chi_squared()
@@ -101,6 +105,15 @@ class BasicFittingModel:
     def current_dataset_name(self, name: str) -> None:
         """Sets the currently selected dataset name to have a different name."""
         self.fitting_context.dataset_names[self.fitting_context.current_dataset_index] = name
+
+    def current_normalised_covariance_matrix(self) -> StaticWorkspaceWrapper:
+        """Returns the Normalised Covariance matrix for the currently selected data."""
+        return self._get_normalised_covariance_matrix_for(self.get_active_workspace_names(),
+                                                          self.fitting_context.function_name)
+
+    def has_normalised_covariance_matrix(self) -> bool:
+        """Returns true if a Normalised Covariance matrix exists for the currently selected dataset."""
+        return self.current_normalised_covariance_matrix() is not None
 
     @property
     def number_of_datasets(self) -> int:
@@ -156,6 +169,46 @@ class BasicFittingModel:
         """Sets the value of the currently selected end X."""
         if value > self.current_start_x:
             self.fitting_context.end_xs[self.fitting_context.current_dataset_index] = value
+
+    @property
+    def exclude_range(self) -> bool:
+        """Returns true if the Exclude Range option is on in the context."""
+        return self.fitting_context.exclude_range
+
+    @exclude_range.setter
+    def exclude_range(self, exclude_range_state: bool) -> None:
+        """Sets whether the Exclude Range option is on in the context."""
+        self.fitting_context.exclude_range = exclude_range_state
+
+    @property
+    def current_exclude_start_x(self) -> float:
+        """Returns the currently selected exclude start X, or the default exclude start X if nothing is selected."""
+        current_dataset_index = self.fitting_context.current_dataset_index
+        if current_dataset_index is not None:
+            return self.fitting_context.exclude_start_xs[current_dataset_index]
+        else:
+            return self.current_end_x
+
+    @current_exclude_start_x.setter
+    def current_exclude_start_x(self, value: float) -> None:
+        """Sets the value of the currently selected exclude start X."""
+        if value < self.current_exclude_end_x:
+            self.fitting_context.exclude_start_xs[self.fitting_context.current_dataset_index] = value
+
+    @property
+    def current_exclude_end_x(self) -> float:
+        """Returns the currently selected exclude start X, or the default exclude start X if nothing is selected."""
+        current_dataset_index = self.fitting_context.current_dataset_index
+        if current_dataset_index is not None:
+            return self.fitting_context.exclude_end_xs[current_dataset_index]
+        else:
+            return self.current_end_x
+
+    @current_exclude_end_x.setter
+    def current_exclude_end_x(self, value: float) -> None:
+        """Sets the value of the currently selected exclude end X."""
+        if value > self.current_exclude_start_x:
+            self.fitting_context.exclude_end_xs[self.fitting_context.current_dataset_index] = value
 
     def clear_single_fit_functions(self) -> None:
         """Clears the single fit functions corresponding to each dataset."""
@@ -398,6 +451,7 @@ class BasicFittingModel:
         """Resets the start and end Xs stored by the context."""
         self._reset_start_xs()
         self._reset_end_xs()
+        self._reset_exclude_start_and_end_xs()
 
     def reset_fit_statuses_and_chi_squared(self) -> None:
         """Reset the fit statuses and chi squared stored by the context."""
@@ -433,6 +487,11 @@ class BasicFittingModel:
         """Resets the end Xs stored by the context."""
         self.fitting_context.end_xs = [self.current_end_x] * self.fitting_context.number_of_datasets
 
+    def _reset_exclude_start_and_end_xs(self) -> None:
+        """Resets the exclude start and end Xs. Default exclude range is to have exclude_start_x == exclude_end_x."""
+        self.fitting_context.exclude_start_xs = [self.current_end_x] * self.fitting_context.number_of_datasets
+        self.fitting_context.exclude_end_xs = [self.current_end_x] * self.fitting_context.number_of_datasets
+
     def _get_new_start_xs_and_end_xs_using_existing_datasets(self, new_dataset_names: list) -> tuple:
         """Returns the start and end Xs to use for the new datasets. It tries to use existing ranges if possible."""
         if len(self.fitting_context.dataset_names) == len(new_dataset_names):
@@ -460,6 +519,25 @@ class BasicFittingModel:
         else:
             x_lower, x_upper = self.x_limits_of_workspace(new_dataset_name)
             return self.current_end_x if x_lower < self.current_end_x < x_upper else x_upper
+
+    def _get_new_exclude_start_xs_and_end_xs_using_existing_data(self) -> tuple:
+        """Returns the exclude start and end Xs to use for the new data. It tries to use existing ranges if possible."""
+        exclude_start_xs, exclude_end_xs = [], []
+        for dataset_index in range(self.fitting_context.number_of_datasets):
+            exclude_start_x, exclude_end_x = self._get_new_exclude_start_and_end_x_for(dataset_index)
+            exclude_start_xs.append(exclude_start_x)
+            exclude_end_xs.append(exclude_end_x)
+        return exclude_start_xs, exclude_end_xs
+
+    def _get_new_exclude_start_and_end_x_for(self, dataset_index: int) -> tuple:
+        """Gets the new exclude start and end X to use for a specific dataset. It tries to use the current data."""
+        start_x, end_x = self.fitting_context.start_xs[dataset_index], self.fitting_context.end_xs[dataset_index]
+        exclude_start_xs, exclude_end_xs = self.fitting_context.exclude_start_xs, self.fitting_context.exclude_end_xs
+
+        new_exclude_start_x = exclude_start_xs[dataset_index] if dataset_index < len(exclude_start_xs) else end_x
+        new_exclude_end_x = exclude_end_xs[dataset_index] if dataset_index < len(exclude_end_xs) else end_x
+
+        return check_exclude_start_and_end_x_is_valid(start_x, end_x, new_exclude_start_x, new_exclude_end_x)
 
     def _get_new_functions_using_existing_datasets(self, new_dataset_names: list) -> list:
         """Returns the functions to use for the new datasets. It tries to use the existing functions if possible."""
@@ -563,6 +641,8 @@ class BasicFittingModel:
         params["InputWorkspace"] = dataset_name
         params["StartX"] = self.current_start_x
         params["EndX"] = self.current_end_x
+        if self.fitting_context.exclude_range:
+            params["Exclude"] = [self.current_exclude_start_x, self.current_exclude_end_x]
         return params
 
     def _get_common_parameters(self) -> dict:
@@ -630,6 +710,11 @@ class BasicFittingModel:
         """Creates the FitPlotInformation storing fit data to be plotted in the plot widget."""
         return [FitPlotInformation(input_workspaces=workspace_names,
                                    fit=self._get_fit_results_from_context(workspace_names, function_name))]
+
+    def _get_normalised_covariance_matrix_for(self, workspace_names: list, function_name: str) -> StaticWorkspaceWrapper:
+        """Returns the Normalised Covariance Matrix associated with some input workspaces and a function name."""
+        fit = self._get_fit_results_from_context(workspace_names, function_name)
+        return fit.covariance_workspace if fit is not None else None
 
     def _get_fit_results_from_context(self, workspace_names: list, function_name: str) -> FitInformation:
         """Gets the fit results from the context using the workspace names and function name."""

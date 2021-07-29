@@ -38,7 +38,7 @@ function (find_qscintilla qt_version)
       libqt5scintilla2
       libqscintilla2-qt5
       qt5scintilla2
-      libqscintilla2_qt5.dylib
+      libqscintilla2_qt5
       qscintilla2
       libqscintilla2
     )
@@ -66,20 +66,24 @@ function (find_qscintilla qt_version)
       PATHS ${_qsci_include_paths}
       NO_DEFAULT_PATH
   )
+
   set ( _library_var QSCINTILLA_QT${qt_version}_LIBRARY )
   if ( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" )
-    set ( _default_path_opt NO_DEFAULT_PATH )
+    set (_opt_outs NO_DEFAULT_PATH )
+  elseif (${CONDA_BUILD})
+    set (_opt_outs NO_CMAKE_SYSTEM_PATH)
   endif()
+
   find_library ( ${_library_var}
     NAMES ${_qsci_lib_names}
     PATHS ${_qsci_lib_paths}
-    ${_default_path_opt}
+    ${_opt_outs}
   )
   set ( _library_var_debug QSCINTILLA_QT${qt_version}_LIBRARY_DEBUG )
   find_library ( ${_library_var_debug}
     NAMES ${_qsci_lib_names_debug}
     PATHS ${_qsci_lib_paths}
-    ${_default_path_opt}
+    ${_opt_outs}
   )
 
   if ( ${_include_var} AND ${_library_var} )

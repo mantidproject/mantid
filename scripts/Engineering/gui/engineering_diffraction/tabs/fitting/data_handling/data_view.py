@@ -68,12 +68,16 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
     # Component Setters
     # =================
 
-    def set_file_last(self, filepath):
-        if not filepath:
+    def set_default_files(self, filepaths):
+        if not filepaths:
             return
-        self.finder_data.setUserInput(filepath)
-        directory, discard = path.split(filepath)
-        self.finder_data.setLastDirectory(directory)
+        self.finder_data.setUserInput(",".join(filepaths))
+        directories = set()
+        for filepath in filepaths:
+            directory, discard = path.split(filepath)
+            directories.add(directory)
+        if len(directories) == 1:
+            self.finder_data.setLastDirectory(directory)
 
     def set_load_button_enabled(self, enabled):
         self.button_load.setEnabled(enabled)

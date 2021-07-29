@@ -99,32 +99,15 @@ class BackgroundCorrectionsPresenterTest(unittest.TestCase):
 
         self.presenter._update_displayed_corrections_data.assert_called_once_with()
 
-    @mock.patch("Muon.GUI.Common.utilities.workspace_data_utils.check_start_x_is_valid")
-    def test_that_handle_start_x_changed_will_validate_the_start_x_before_updating_the_xs_in_the_model(self,
-                                                                                                       mock_check_start_x):
-        mock_check_start_x.return_value = (self.start_x, self.end_x)
+    def test_that_handle_start_x_changed_will_validate_the_start_x_before_updating_the_xs_in_the_model(self):
         self.presenter.handle_start_x_changed()
+        self.presenter._handle_start_or_end_x_changed.assert_called_once_with(
+            self.presenter._get_new_x_range_when_start_x_changed)
 
-        self.view.selected_run_and_group.assert_called_once_with()
-
-        self.view.start_x.assert_called_once_with(self.selected_run, self.selected_group)
-        self.model.set_start_x.assert_called_once_with(self.selected_run, self.selected_group, self.start_x)
-
-        self.view.end_x.assert_called_once_with(self.selected_run, self.selected_group)
-        self.model.set_end_x.assert_called_once_with(self.selected_run, self.selected_group, self.end_x)
-
-    @mock.patch("Muon.GUI.Common.utilities.workspace_data_utils.check_end_x_is_valid")
-    def test_that_handle_end_x_changed_will_validate_the_end_x_before_updating_the_xs_in_the_model(self, mock_check_end_x):
-        mock_check_end_x.return_value = (self.start_x, self.end_x)
+    def test_that_handle_end_x_changed_will_validate_the_end_x_before_updating_the_xs_in_the_model(self):
         self.presenter.handle_end_x_changed()
-
-        self.view.selected_run_and_group.assert_called_once_with()
-
-        self.view.start_x.assert_called_once_with(self.selected_run, self.selected_group)
-        self.model.set_start_x.assert_called_once_with(self.selected_run, self.selected_group, self.start_x)
-
-        self.view.end_x.assert_called_once_with(self.selected_run, self.selected_group)
-        self.model.set_end_x.assert_called_once_with(self.selected_run, self.selected_group, self.end_x)
+        self.presenter._handle_start_or_end_x_changed.assert_called_once_with(
+            self.presenter._get_new_x_range_when_end_x_changed)
 
     def _setup_mock_view(self):
         self.view = mock.Mock(spec=BackgroundCorrectionsView)
@@ -181,6 +164,7 @@ class BackgroundCorrectionsPresenterTest(unittest.TestCase):
         self.presenter = BackgroundCorrectionsPresenter(self.view, self.model, self.corrections_presenter)
 
         self.presenter._update_displayed_corrections_data = mock.Mock()
+        self.presenter._handle_start_or_end_x_changed = mock.Mock()
 
 
 if __name__ == '__main__':

@@ -14,6 +14,7 @@ New and Improved
     :width: 500px
     :align: center
 
+- Workflow diagrams in help pages are now ``.svg`` rather than ``.png``
 - Peaks can now be added or removed from a PeaksWorkspace using the :ref:`peaks overlay <sliceviewer_peaks_overlay>` in :ref:`sliceviewer`.
 - The list of eligible workspaces in the `WorkspaceSelector` can now be sorted by name
 - New widget and workbench plugin: `WorkspaceCalculator`, allows to perform binary operations and scaling by a floating number on workspaces;
@@ -34,5 +35,7 @@ Bugfixes
 - Fixed a bug where parameters wouldn't update in the fit property browser when fitting a single function with ties.
 - Fixed a bug retrieving algorithm history from a workspace when the retrieval methods were chained together.
 - Added missing icon for the uninstaller in Windows "Apps & features" list.
+- Fixed a bug where output workspaces of different types would interfere with successive calls to binary operations, such as multiply.
+- Fixed JSON serialization issue of MantidAxType by explicitly extracting its value
 
 :ref:`Release 6.2.0 <v6.2.0>`

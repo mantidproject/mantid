@@ -125,7 +125,6 @@ BANNED_FILES = ['80_tubes_Top_and_Bottom_April_2015.xml',
                 'BioSANS_exp61_scan0004_0001_Iq.txt',
                 'test_data_Iq.txt',
                 'BioSANS_test_data_Iq.txt'
-                'PowderReduceP2D_reference.p2d'
                 ]
 
 EXPECTED_EXT = '.expected'
@@ -145,7 +144,8 @@ BANNED_REGEXP = [r'SANS2D\d+.log$',
                  r'.*\.phonon',
                  r'.*\.cif',
                  r'.*\.toml',
-                 r'.*\.h5']
+                 r'.*\.h5',
+                 r'.*\.p2d']
 
 BANNED_DIRS = ["DocTest", "UnitTest", "reference"]
 

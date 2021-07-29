@@ -12,6 +12,9 @@ New Features
 ############
 
 - The Model Fitting tab allows you to perform fits across the sample logs and fit parameters stored in your results table.
+- Users can now copy sequential fitting parameters to all other runs. To do this, click the checkbox to turn this feature
+  on and change a parmeter. The change should be copied to the other cells in the same column. Turn the feature off to make
+  changes to single rows.
 
 Improvements
 ############
@@ -25,6 +28,12 @@ BugFixes
 
 Muon Analysis and Frequency Domain Analysis
 -------------------------------------------
+
+New Features
+############
+
+- It is now possible to Exclude a range from a fit range when doing a fit on the Fitting tab.
+- Added a 'Covariance Matrix' button to the Fitting tab that can be used to open and inspect the normalised covariance parameters of a fit.
 
 Improvements
 ############
@@ -56,5 +65,6 @@ Algorithms
 ##########
 
 - Updated :ref:`LoadMuonLog <algm-LoadMuonLog>` to read units for most log values.
+- It is now possible to exclude a fit range when executing the :ref:`CalculateMuonAsymmetry <algm-CalculateMuonAsymmetry>` algorithm.
 
 :ref:`Release 6.2.0 <v6.2.0>`

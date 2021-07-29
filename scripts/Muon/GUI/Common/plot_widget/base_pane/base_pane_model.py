@@ -47,7 +47,7 @@ class BasePaneModel(object):
     def create_tiled_keys(self, tiled_by):
         return []
 
-    def _get_workspace_plot_axis(self, workspace_name: str, axes_workspace_map):
+    def _get_workspace_plot_axis(self, workspace_name: str, axes_workspace_map, indicies = None):
         return 0
 
     def _create_workspace_label(self, workspace_name, index):

@@ -1,0 +1,19 @@
+# Perform a sequential fit
+output_workspaces, parameter_tables, normalised_matrices = [], [], []
+for input_workspace, domain_data in input_data.items():
+    fit_output = Fit(Function=function, InputWorkspace=input_workspace, WorkspaceIndex=domain_data[0],
+                     StartX=domain_data[1], EndX=domain_data[2], MaxIterations=max_iterations,
+                     Minimizer=minimizer, CostFunction=cost_function, EvaluationType=evaluation_type,
+                     CreateOutput=True)
+
+    output_workspaces.append(fit_output.OutputWorkspace)
+    parameter_tables.append(fit_output.OutputParameters)
+    normalised_matrices.append(fit_output.OutputNormalisedCovarianceMatrix)
+
+    # Use the parameters in the previous function as the start parameters of the next fit
+    function = fit_output.Function
+
+# Group the output workspaces from the sequential fit
+GroupWorkspaces(InputWorkspaces=output_workspaces, OutputWorkspace="Sequential_Fit_Workspaces")
+GroupWorkspaces(InputWorkspaces=parameter_tables, OutputWorkspace="Sequential_Fit_Parameters")
+GroupWorkspaces(InputWorkspaces=normalised_matrices, OutputWorkspace="Sequential_Fit_NormalisedCovarianceMatrices")

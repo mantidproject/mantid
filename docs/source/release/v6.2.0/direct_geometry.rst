@@ -25,6 +25,8 @@ CrystalField
 Improvements
 ############
 - Added documentation and warning messages in the :ref:`Crystal Field Python Interface` related to IntensityScaling
+- :ref:`LoadILLTOF <algm-LoadILLTOF>` now adds input run number also to a metadata field `run_list`, indended to contain a full list of numors, handled by :ref:`MergeRuns <algm-MergeRuns>`
+- The order of detector efficiency correction and rebinning in :ref:`algm-DirectILLReduction` has been inversed
 
 BugFixes
 ########

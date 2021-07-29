@@ -10,7 +10,7 @@ from mantid.simpleapi import logger, Load, SaveNexus, NormaliseByCurrent, Integr
     ApplyDiffCal, ConvertUnits
 from mantid.simpleapi import AnalysisDataService as Ads
 
-from Engineering.gui.engineering_diffraction.tabs.common import path_handling
+from Engineering.common import path_handling
 from Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 
 VANADIUM_INPUT_WORKSPACE_NAME = "engggui_vanadium_ws"

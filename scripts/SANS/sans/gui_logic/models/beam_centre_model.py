@@ -6,15 +6,15 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.kernel import Logger
 from sans.common.enums import (FindDirectionEnum, DetectorType, SANSInstrument)
-from sans.state.AllStates import AllStates
 from sans.gui_logic.gui_common import (meter_2_millimeter, millimeter_2_meter, apply_selective_view_scaling,
                                        undo_selective_view_scaling)
+from sans.gui_logic.models.async_workers.beam_centre_async import BeamCentreFields
 
 
 class BeamCentreModel(object):
     logger = Logger("CentreFinder")
 
-    def __init__(self, SANSCentreFinder):
+    def __init__(self):
         super(BeamCentreModel, self).__init__()
         self._max_iterations = 10
         self._r_min = 0
@@ -37,8 +37,6 @@ class BeamCentreModel(object):
 
         self.reset_inst_defaults(instrument=SANSInstrument.NO_INSTRUMENT)
 
-        self.SANSCentreFinder = SANSCentreFinder
-
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
 
@@ -54,45 +52,6 @@ class BeamCentreModel(object):
             self._r_max = 0.280 # metres
 
         self.instrument = instrument
-
-    def find_beam_centre(self, state: AllStates):
-        """
-        This is called from the GUI and runs the find beam centre algorithm given a state model and a beam_centre_model object.
-
-        :param state: A SANS state object
-        :param beam_centre_model: An instance of the BeamCentreModel class.
-        :returns: The centre position found.
-        """
-        centre_finder = self.SANSCentreFinder()
-        find_direction = self.get_finder_direction()
-        if not find_direction:
-            self.logger.error("Have chosen no find direction exiting early")
-            return
-
-        pos_1 = self._lab_pos_1 if self.component is DetectorType.LAB else self._hab_pos_1
-        pos_2 = self._lab_pos_2 if self.component is DetectorType.LAB else self._hab_pos_2
-
-        if self.COM:
-            centre = centre_finder(state, r_min=self.r_min, r_max=self.r_max,
-                                   max_iter=self.max_iterations,
-                                   x_start=pos_1, y_start=pos_2,
-                                   tolerance=self.tolerance,
-                                   find_direction=find_direction, reduction_method=False, component=self.component)
-
-            centre = centre_finder(state, r_min=self.r_min, r_max=self.r_max,
-                                   max_iter=self.max_iterations,
-                                   x_start=centre['pos1'], y_start=centre['pos2'],
-                                   tolerance=self.tolerance,
-                                   find_direction=find_direction, reduction_method=True,
-                                   verbose=self.verbose, component=self.component)
-        else:
-            centre = centre_finder(state, r_min=self.r_min, r_max=self.r_max,
-                                   max_iter=self.max_iterations, x_start=pos_1,
-                                   y_start=pos_2, tolerance=self.tolerance,
-                                   find_direction=find_direction, reduction_method=True,
-                                   verbose=self.verbose, component=self.component)
-
-        self._update_centre_positions(results=centre)
 
     def _update_centre_positions(self, results):
         if self.component is DetectorType.LAB:
@@ -114,6 +73,18 @@ class BeamCentreModel(object):
             find_direction = FindDirectionEnum.LEFT_RIGHT
 
         return find_direction
+
+    def pack_beam_centre_settings(self) -> BeamCentreFields:
+        # We pack into a separate object so that:
+        # 1. we don't share memory across threads (so free thread-safety)
+        # 2. We only move the attrs that are relevant across threads
+        return BeamCentreFields(component=self.component, centre_of_mass=self.COM,
+                                find_direction=self.get_finder_direction(),
+                                lab_pos_1=self._lab_pos_1, lab_pos_2=self._lab_pos_2,
+                                hab_pos_1=self._hab_pos_1, hab_pos_2=self._hab_pos_2,
+                                max_iterations=self.max_iterations,
+                                r_min=self.r_min, r_max=self.r_max,
+                                tolerance=self.tolerance, verbose=self.verbose)
 
     @property
     def max_iterations(self):
@@ -198,7 +169,7 @@ class BeamCentreModel(object):
     @property
     @apply_selective_view_scaling
     def lab_pos_1(self):
-        return self._lab_pos_1 if self._lab_pos_1 else ''
+        return self._lab_pos_1 if self._lab_pos_1 is not None else ''
 
     @lab_pos_1.setter
     @undo_selective_view_scaling
@@ -208,7 +179,7 @@ class BeamCentreModel(object):
     @property
     @apply_selective_view_scaling
     def lab_pos_2(self):
-        return self._lab_pos_2 if self._lab_pos_2 else ''
+        return self._lab_pos_2 if self._lab_pos_2 is not None else ''
 
     @lab_pos_2.setter
     @undo_selective_view_scaling
@@ -218,7 +189,7 @@ class BeamCentreModel(object):
     @property
     @apply_selective_view_scaling
     def hab_pos_1(self):
-        return self._hab_pos_1 if self._hab_pos_1 else ''
+        return self._hab_pos_1 if self._hab_pos_1 is not None else ''
 
     @hab_pos_1.setter
     @undo_selective_view_scaling
@@ -228,7 +199,7 @@ class BeamCentreModel(object):
     @property
     @apply_selective_view_scaling
     def hab_pos_2(self):
-        return self._hab_pos_2 if self._hab_pos_2 else ''
+        return self._hab_pos_2 if self._hab_pos_2 is not None else ''
 
     @hab_pos_2.setter
     @undo_selective_view_scaling

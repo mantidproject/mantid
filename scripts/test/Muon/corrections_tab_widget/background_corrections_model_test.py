@@ -7,7 +7,7 @@
 import unittest
 from unittest import mock
 
-from mantid.api import AnalysisDataService, FrameworkManager
+from mantid.api import AnalysisDataService, FrameworkManager, FunctionFactory
 from mantid.simpleapi import CreateSampleWorkspace
 
 from Muon.GUI.Common.corrections_tab_widget.corrections_model import CorrectionsModel
@@ -34,6 +34,13 @@ class BackgroundCorrectionsModelTest(unittest.TestCase):
         self.end_xs = [30.0] * 4
         self.a0s = [0.0] * 4
         self.a0_errors = [0.0] * 4
+        self.statuses = ["No background correction"] * 4
+
+        self.fitted_a0 = 1.234
+        self.fitted_a0_error = 0.005
+        self.fitted_function = self._setup_fitted_function()
+        self.fit_status = "success"
+        self.chi_squared = 2.2
 
     def tearDown(self):
         self.model = None
@@ -116,7 +123,7 @@ class BackgroundCorrectionsModelTest(unittest.TestCase):
         self.model.set_show_all_runs(True)
 
         self._populate_background_corrections_data()
-        runs, groups, start_xs, end_xs, a0s, a0_errors = self.model.selected_correction_data()
+        runs, groups, start_xs, end_xs, a0s, a0_errors, statuses = self.model.selected_correction_data()
 
         self.assertEqual(runs, self.runs)
         self.assertEqual(groups, self.groups)
@@ -124,6 +131,7 @@ class BackgroundCorrectionsModelTest(unittest.TestCase):
         self.assertEqual(end_xs, self.end_xs)
         self.assertEqual(a0s, self.a0s)
         self.assertEqual(a0_errors, self.a0_errors)
+        self.assertEqual(statuses, self.statuses)
 
     def test_that_selected_correction_data_returns_all_correction_data_for_a_specific_run_and_group(self):
         run = "84447"
@@ -133,7 +141,7 @@ class BackgroundCorrectionsModelTest(unittest.TestCase):
         self.corrections_model.set_current_run_string(run)
 
         self._populate_background_corrections_data()
-        runs, groups, start_xs, end_xs, a0s, a0_errors = self.model.selected_correction_data()
+        runs, groups, start_xs, end_xs, a0s, a0_errors, statuses = self.model.selected_correction_data()
 
         self.assertEqual(runs, [run])
         self.assertEqual(groups, [group])
@@ -141,6 +149,19 @@ class BackgroundCorrectionsModelTest(unittest.TestCase):
         self.assertEqual(end_xs, [30.0])
         self.assertEqual(a0s, [0.0])
         self.assertEqual(a0_errors, [0.0])
+        self.assertEqual(statuses, ["No background correction"])
+
+    def test_that_all_runs_and_groups_returns_the_expected_run_and_group_lists(self):
+        self._populate_background_corrections_data()
+
+        runs, groups = self.model.all_runs_and_groups()
+        self.assertEqual(runs, self.runs)
+        self.assertEqual(groups, self.groups)
+
+    def test_that_all_runs_and_groups_returns_empty_lists_when_no_correction_data_exists(self):
+        runs, groups = self.model.all_runs_and_groups()
+        self.assertEqual(runs, [])
+        self.assertEqual(groups, [])
 
     def test_that_x_limits_of_workspace_will_return_the_x_limits_of_the_workspace(self):
         run, group = "84447", "top"
@@ -164,12 +185,79 @@ class BackgroundCorrectionsModelTest(unittest.TestCase):
         self.assertEqual(x_lower, DEFAULT_X_LOWER)
         self.assertEqual(x_upper, DEFAULT_X_UPPER)
 
-    def _populate_background_corrections_data(self):
+    def test_that_run_background_correction_for_all_will_run_without_error_when_the_start_and_end_x_is_good(self):
+        self._populate_background_corrections_data()
+
+        for run, group in zip(self.runs, self.groups):
+            self.model.set_start_x(run, group, 0.0)
+            self.model.set_end_x(run, group, 1.0)
+
+        self.model.run_background_correction_for_all()
+
+    def test_that_run_background_correction_for_all_will_cause_an_exception_when_the_start_and_end_x_are_out_of_range(self):
+        self._populate_background_corrections_data()
+
+        for run, group in zip(self.runs, self.groups):
+            self.model.set_start_x(run, group, 20.0)
+            self.model.set_end_x(run, group, 25.0)
+
+        self.assertRaises(ValueError, self.model.run_background_correction_for_all)
+
+    @mock.patch("Muon.GUI.Common.corrections_tab_widget.background_corrections_model.run_Fit")
+    def test_that_reset_background_function_data_will_reset_the_background_function_data_after_a_fit(self, mock_run_fit):
+        mock_run_fit.return_value = (self.fitted_function, self.fit_status, self.chi_squared)
+        self.model.x_limits_of_workspace = mock.Mock(return_value=(0.0, 30.0))
+        self.model.set_show_all_runs(True)
+
+        self._populate_background_corrections_data()
+
+        self.model.run_background_correction_for_all()
+
+        _, _, _, _, a0s, a0_errors, _ = self.model.selected_correction_data()
+
+        self.assertEqual(a0s, [self.fitted_a0] * 4)
+        self.assertEqual(a0_errors, [self.fitted_a0_error] * 4)
+
+        self.model.reset_background_function_data()
+
+        _, _, _, _, a0s, a0_errors, _ = self.model.selected_correction_data()
+
+        self.assertEqual(a0s, [0.0] * 4)
+        self.assertEqual(a0_errors, [0.0] * 4)
+
+    def test_that_run_background_correction_for_will_run_without_error_when_the_start_and_end_x_is_good(self):
+        run, group = "84447", "bwd"
+        self._populate_background_corrections_data()
+
+        self.model.set_start_x(run, group, 0.0)
+        self.model.set_end_x(run, group, 1.0)
+
+        self.model.run_background_correction_for(run, group)
+
+    def test_that_run_background_correction_for_will_cause_an_exception_when_the_start_and_end_x_are_out_of_range(self):
+        run, group = "84447", "bwd"
+        self._populate_background_corrections_data()
+
+        self.model.set_start_x(run, group, 20.0)
+        self.model.set_end_x(run, group, 25.0)
+
+        self.assertRaises(ValueError, self.model.run_background_correction_for, run, group)
+
+    @mock.patch("Muon.GUI.Common.corrections_tab_widget.background_corrections_model.retrieve_ws")
+    def _populate_background_corrections_data(self, mock_retrieve_ws):
+        workspace = CreateSampleWorkspace()
+        mock_retrieve_ws.return_value = workspace
         self.corrections_model.run_number_strings = mock.Mock(return_value=self.runs)
         self.mock_group_names = mock.PropertyMock(return_value=self.groups)
         type(self.model._context.group_pair_context).group_names = self.mock_group_names
 
         self.model.populate_background_corrections_data()
+
+    def _setup_fitted_function(self):
+        function = FunctionFactory.createFunction("FlatBackground")
+        function.setParameter("A0", self.fitted_a0)
+        function.setError("A0", self.fitted_a0_error)
+        return function
 
 
 if __name__ == '__main__':
