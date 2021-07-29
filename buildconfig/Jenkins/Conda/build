@@ -47,6 +47,11 @@ fi
 
 # Build docs
 if [[ $ENABLE_DOCS == true ]]; then
+    # Remove doctrees directory so it forces a full reparse. It seems that
+    # without this newly added doctests are not executed
+    if [ -d $BUILD_DIR/docs/doctrees ]; then
+        rm -fr $BUILD_DIR/docs/doctrees/*
+    fi
     cmake --build . --target docs-html
 fi
 

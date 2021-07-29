@@ -15,10 +15,11 @@
 #   2. CMAKE_PRESET: the CMake preset that should be ran to generate the cmake files for this CI job
 #
 # Possible flags:
-#   --enable-systemtests: Stops the system tests from being compiled or ran
-#   --enable-package: Stops a package being produced
-#   --enable-docs: Stops the docs from being built
-#   --enable-dev-docs: Stops the developer docs from being built
+#   --enable-systemtests: Runs the system tests from being compiled or ran
+#   --enable-package: Runs a package being produced
+#   --enable-docs: Runs the docs from being built
+#   --enable-dev-docs: Runs the developer docs from being built
+#   --enable-doctests: Runs the documentation tests
 #   --clean-build: Clears the build folder and builds from scratch
 #   --clean-external-projects: Clear the external projects from the build folder
 #   --use-core-dumps: Activate core dumps (Linux only)
@@ -42,6 +43,7 @@ ENABLE_UNIT_TESTS=true
 ENABLE_SYSTEM_TESTS=false
 ENABLE_PACKAGE=false
 ENABLE_DOCS=false
+ENABLE_DOC_TESTS=false
 ENABLE_DEV_DOCS=false
 CLEAN_BUILD=false
 CLEAN_EXTERNAL_PROJECTS=false
@@ -55,6 +57,7 @@ do
         --enable-systemtests) ENABLE_SYSTEM_TESTS=true ;;
         --enable-package) ENABLE_PACKAGE=true ;;
         --enable-docs) ENABLE_DOCS=true ;;
+        --enable-doctests) ENABLE_DOC_TESTS=true ;;
         --enable-dev-docs) ENABLE_DEV_DOCS=true ;;
         --clean-build) CLEAN_BUILD=true ;;
         --clean-external-projects) CLEAN_EXTERNAL_PROJECTS=true ;;
@@ -125,4 +128,4 @@ mkdir -p $userconfig_dir
 echo MultiThreaded.MaxCores=2 > $userconfig_dir/Mantid.user.properties
 
 # Run unit and system tests
-$SCRIPT_DIR/run-tests $WORKSPACE $ENABLE_SYSTEM_TESTS $ENABLE_UNIT_TESTS $CPU_COUNT $USE_CORE_DUMPS
+$SCRIPT_DIR/run-tests $WORKSPACE $ENABLE_SYSTEM_TESTS $ENABLE_UNIT_TESTS $ENABLE_DOCS $ENABLE_DOC_TESTS $CPU_COUNT $USE_CORE_DUMPS
