@@ -42,7 +42,7 @@
             "generator": "Ninja",
             "cacheVariables": {
                 "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
-		        "CONDA_BUILD": true,
+                "CONDA_BUILD": true,
                 "CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH": "FALSE",
                 "CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH": "FALSE",
                 "CMAKE_BUILD_TYPE": "Debug"
@@ -56,7 +56,7 @@
             "generator": "Ninja",
             "cacheVariables": {
                 "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
-		        "CONDA_BUILD": true,
+                "CONDA_BUILD": true,
                 "CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH": "FALSE",
                 "CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH": "FALSE",
                 "CMAKE_BUILD_TYPE": "Release",
@@ -76,7 +76,7 @@
             "generator": "Ninja",
             "cacheVariables": {
                 "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
-		        "CONDA_BUILD": true,
+                "CONDA_BUILD": true,
                 "CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH": "FALSE",
                 "CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH": "FALSE",
                 "CMAKE_BUILD_TYPE": "RelWithDebInfo",
@@ -97,7 +97,7 @@
             "generator": "Ninja",
             "cacheVariables": {
                 "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
-		        "CONDA_BUILD": true,
+                "CONDA_BUILD": true,
                 "CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH": "FALSE",
                 "CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH": "FALSE",
                 "CMAKE_BUILD_TYPE": "RelWithDebInfo",
@@ -118,7 +118,7 @@
             "generator": "Ninja",
             "cacheVariables": {
                 "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
-		        "CONDA_BUILD": true,
+                "CONDA_BUILD": true,
                 "CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH": "FALSE",
                 "CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH": "FALSE",
                 "CMAKE_BUILD_TYPE": "RelWithDebInfo",
@@ -139,7 +139,7 @@
             "generator": "Ninja",
             "cacheVariables": {
                 "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
-		        "CONDA_BUILD": true,
+                "CONDA_BUILD": true,
                 "CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH": "FALSE",
                 "CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH": "FALSE",
                 "CMAKE_BUILD_TYPE": "Debug",
