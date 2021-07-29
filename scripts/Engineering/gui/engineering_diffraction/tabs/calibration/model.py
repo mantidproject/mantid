@@ -80,8 +80,7 @@ class CalibrationModel(object):
             self.calibration.save_grouping_workspace(calib_dir)
 
         # get diff consts from table?
-        self.create_output_files(calib_dir, difa, difc, tzero, bk2bk_params, ceria_path, van_path, inst,
-                                 calibration)
+        self.create_output_files(calib_dir, difa, difc, tzero, bk2bk_params, calibration)
 
     @staticmethod
     def extract_b2b_params(workspace):
@@ -242,8 +241,7 @@ class CalibrationModel(object):
             cal_params.append(current_fit_params)
         return cal_params, ceria_raw, grp_ws
 
-    def create_output_files(self, calibration_dir, difa, difc, tzero, bk2bk_params, ceria_path, vanadium_path,
-                            instrument, calibration):
+    def create_output_files(self, calibration_dir, difa, difc, tzero, bk2bk_params, calibration):
         """
         Create output files from the algorithms in the specified directory
         :param calibration_dir: The directory to save the files into.
@@ -258,43 +256,35 @@ class CalibrationModel(object):
         :param spectrum_numbers: Optional parameter to crop using spectrum numbers.
         :param calfile: Optional parameter to crop with a custom calfile
         """
-        kwargs = {"ceria_run": path_handling.get_run_number_from_path(ceria_path, instrument),
-                  "vanadium_run": path_handling.get_run_number_from_path(vanadium_path, instrument)}
 
-        def south_kwargs():
-            kwargs["template_file"] = SOUTH_BANK_TEMPLATE_FILE
-            kwargs["bank_names"] = ["South"]
+        ceria_run = calibration.get_sample_runno()
+        van_run = calibration.get_vanadium_runno()
 
-        def north_kwargs():
-            kwargs["template_file"] = NORTH_BANK_TEMPLATE_FILE
-            kwargs["bank_names"] = ["North"]
-
-        def generate_prm_output_file(difa_list, difc_list, tzero_list, bank_name, kwargs_to_pass):
-            file_path = calibration_dir + EnggUtils.generate_output_file_name(vanadium_path, ceria_path, instrument,
-                                                                              bank=bank_name)
-            EnggUtils.write_ENGINX_GSAS_iparam_file(file_path, difa_list, difc_list, tzero_list, bk2bk_params, **kwargs_to_pass)
-
-        def save_pdcal_output_file(ws_name_suffix, bank_name):
-            file_path = calibration_dir + EnggUtils.generate_output_file_name(vanadium_path, ceria_path, instrument,
-                                                                              bank=bank_name, ext=".nxs")
-            ws_name = "engggui_calibration_" + ws_name_suffix
-            SaveNexus(InputWorkspace=ws_name, Filename=file_path)
-
+        # create calibration dir of not exiust
         if not path.exists(calibration_dir):
             makedirs(calibration_dir)
-        prm_filepath = calibration.generate_output_file_name()
-        if calibration.group.banks:
-            # also want to do a separate North and South when both banks selected
+
+        # save prm file(s)
+        prm_filepath = calibration_dir + calibration.generate_output_file_name()
+        EnggUtils.write_ENGINX_GSAS_iparam_file(prm_filepath, difa, difc, tzero, bk2bk_params,
+                                                bank_names=calibration.group.banks,
+                                                template_file=calibration.get_prm_template_file(),
+                                                ceria_run=ceria_run, vanadium_run=van_run)
+        if calibration.group == EnggUtils.GROUP.BOTH:
+            # output a separate prm for North and South when both banks included
             for ibank, bank in enumerate(self.group.banks):
-                generate_prm_output_file([difa[ibank]], [difc[ibank]], [tzero[ibank]], "north", kwargs)
+                bank_group = EnggUtils.GROUP(str(ibank))  # so can retrieve prm template for that bank
                 EnggUtils.write_ENGINX_GSAS_iparam_file(prm_filepath, [difa[ibank]], [difc[ibank]], [tzero[ibank]],
-                                                        bk2bk_params,      **kwargs_to_pass)
-                save_pdcal_output_file(f"bank_{bank}", "north")
-        else:
-            # CUSTOM or CROPPED
-            north_kwargs()
-            generate_prm_output_file([difa[0]], [difc[0]], [tzero[0]], "Custom", kwargs)
-            save_pdcal_output_file("Custom", "Custom")
+                                                        bk2bk_params, bank_names=bank,
+                                                        template_file=bank_group.get_prm_template_file(),
+                                                        ceria_run=ceria_run, vanadium_run=van_run)
+
+        # save pdcal output as nexus
+        filepath, ext = path.splitext(prm_filepath)
+        nxs_filepath = filepath + '.nxs'
+        ws_name = "engggui_calibration_" + calibration.get_group_suffix()  # would be good not to rely on wsname
+        SaveNexus(InputWorkspace=ws_name, Filename=nxs_filepath)
+
         logger.notice(f"\n\nCalibration files saved to: \"{calibration_dir}\"\n\n")
 
     @staticmethod

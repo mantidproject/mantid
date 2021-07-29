@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import Engineering.EnggUtils as EnggUtils
+from Engineering.gui.engineering_diffraction.tabs.common import path_handling
 
 
 class CalibrationInfo(EnggUtils.GroupingInfo):
@@ -16,9 +17,6 @@ class CalibrationInfo(EnggUtils.GroupingInfo):
         self.vanadium_path = vanadium_path
         self.sample_path = sample_path
         self.instrument = instrument
-        self._prm_templates = {EnggUtils.GROUP.NORTH: "template_ENGINX_241391_236516_North_bank.prm",
-                               EnggUtils.GROUP.SOUTH: "template_ENGINX_241391_236516_South_bank.prm",
-                               EnggUtils.GROUP.BOTH: "template_ENGINX_241391_236516_South_bank.prm"}
 
     def set_calibration_paths(self, vanadium_path, sample_path, instrument):
         """
@@ -32,21 +30,26 @@ class CalibrationInfo(EnggUtils.GroupingInfo):
         self.instrument = instrument
 
     def set_calibration_from_prm_fname(self, file_path):
-        inst, van, ceria = self.set_group_from_prm_fname(file_path)
+        inst, van, ceria = self.set_group_from_prm_fname(file_path)  # ceria and van are run numbers
         self.set_calibration_paths(van, ceria, inst)
 
-    def generate_output_file_name(self):
-        return super().generate_output_file_name(self.get_vanadium(),self.get_sample(),self.get_instrument())
+    def generate_output_file_name(self, ext='.prm'):
+        return super().generate_output_file_name(self.get_vanadium(), self.get_sample(),self.get_instrument(), ext)
 
     # getters
-    def get_prm_template_file(self):
-        return self._prm_templates[self.group]
-
-    def get_vanadium(self):
+    def get_vanadium_path(self):
         return self.vanadium_path
 
-    def get_sample(self):
+    def get_vanadium_runno(self):
+        if self.vanadium_path and self.instrument:
+            return path_handling.get_run_number_from_path(self.vanadium_path, self.instrument)
+
+    def get_sample_path(self):
         return self.sample_path
+
+    def get_sample_runno(self):
+        if self.sample_path and self.instrument:
+            return path_handling.get_run_number_from_path(self.sample_path, self.instrument)
 
     def get_instrument(self):
         return self.instrument

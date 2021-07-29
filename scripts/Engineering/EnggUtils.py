@@ -56,6 +56,9 @@ class GroupingInfo:
                                     GROUP.CUSTOM: "Custom_calfile_grouping", GROUP.TEXTURE: "Texture"}
         self._group_suffix = {GROUP.BOTH: "all_banks", GROUP.NORTH: "bank_1", GROUP.SOUTH: "bank_2",
                               GROUP.CROPPED: "Cropped", GROUP.CUSTOM: "Custom", GROUP.TEXTURE: "Texture"}
+        self._prm_templates = {GROUP.NORTH: "template_ENGINX_241391_236516_North_bank.prm",
+                               GROUP.SOUTH: "template_ENGINX_241391_236516_South_bank.prm",
+                               GROUP.BOTH: "template_ENGINX_241391_236516_North_and_South_bank.prm"}
 
     def clear(self):
         self.group = None
@@ -76,6 +79,9 @@ class GroupingInfo:
     def get_group_file(self):
         if self.group:
             return self._group_files[self.group]
+
+    def get_prm_template_file(self):
+        return self._prm_templates[self.group]
 
     # setters
     def set_spectra_list(self, spectra_list):
