@@ -126,17 +126,5 @@ fi
 # Run the script that handles the actual building
 $SCRIPT_DIR/build $WORKSPACE $CMAKE_PRESET $ENABLE_DOCS $ENABLE_DEV_DOCS $ENABLE_BUILD_CODE $ENABLE_UNIT_TESTS $ENABLE_SYSTEM_TESTS $EXTRA_CMAKE_FLAGS
 
-# Clean up prior to testing
-# Prevent race conditions when creating the user config directory
-userconfig_dir=$HOME/.mantid
-rm -fr $userconfig_dir
-
-# Remove GUI qsettings files
-rm -f ~/.config/mantidproject/mantidworkbench.ini
-
-mkdir -p $userconfig_dir
-# use a fixed number of openmp threads to avoid overloading the system
-echo MultiThreaded.MaxCores=2 > $userconfig_dir/Mantid.user.properties
-
 # Run unit and system tests
 $SCRIPT_DIR/run-tests $WORKSPACE $ENABLE_SYSTEM_TESTS $ENABLE_UNIT_TESTS $ENABLE_DOCS $ENABLE_DOC_TESTS $BUILD_THREADS $USE_CORE_DUMPS
