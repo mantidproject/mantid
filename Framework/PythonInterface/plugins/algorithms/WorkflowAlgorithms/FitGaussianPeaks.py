@@ -11,14 +11,18 @@ from mantid.kernel import (Direction, FloatBoundedValidator, IntBoundedValidator
 import numpy as np
 import scipy.optimize
 
+MINIMUM_NUMBER_OF_DATA_POINTS = 5
+MINIMUM_ALLOWED_WIN_SIZE = 2
+
 
 class FitGaussianPeaks(DataProcessorAlgorithm):
+    # Default arguments
     _centre_tolerance = 1.0
     _estimate_sigma = 3.0
     _min_sigma = 0.0
     _max_sigma = 30.0
     _estimate_fit_window = True
-    _fit_window = 5
+    _fit_window_size = 5
     _general_tolerance = 0.1
     _refit_tolerance = 0.001
 
@@ -102,7 +106,7 @@ class FitGaussianPeaks(DataProcessorAlgorithm):
         self._estimate_sigma = self.getProperty('EstimatedPeakSigma').value
         self._min_sigma = self.getProperty('MinPeakSigma').value
         self._max_sigma = self.getProperty('MaxPeakSigma').value
-        self._fit_window = self.getProperty('FitWindowSize').value
+        self._fit_window_size = self.getProperty('FitWindowSize').value
         self._general_tolerance = self.getProperty('GeneralFitTolerance').value
         self._refit_tolerance = self.getProperty('RefitTolerance').value
 
@@ -115,7 +119,7 @@ class FitGaussianPeaks(DataProcessorAlgorithm):
 
         if self._estimate_sigma > self._max_sigma:
             issues['EstimatePeakSigma'] = 'EstimatePeakSigma must be greater than MaxPeakSigma'
-        if self._fit_window % 2 != 1:
+        if self._fit_window_size % 2 != 1:
             issues['FitWindowSize'] = 'WindowSize must be an odd number'
         return issues
 
@@ -145,6 +149,16 @@ class FitGaussianPeaks(DataProcessorAlgorithm):
         self.setProperty('PeakProperties', peak_table)
         self.setProperty('RefitPeakProperties', refit_peak_table)
         self.setProperty('FitCost', fit_cost)
+
+    def _get_window_size(self, xvals):
+        # method returns win_size used to determine how many data points to use for fit.
+        if self._estimate_fit_window:
+            win_size = int(self._estimate_sigma * len(xvals) / (max(xvals) - min(xvals)))
+            if win_size < MINIMUM_ALLOWED_WIN_SIZE:
+                win_size = MINIMUM_ALLOWED_WIN_SIZE
+        else:
+            win_size = int((self._fit_window_size - 1) / 2)
+        return win_size
 
     def _load_data(self):
         xvals = self.getProperty('InputWorkspace').value.readX(0).copy()
@@ -295,12 +309,13 @@ class FitGaussianPeaks(DataProcessorAlgorithm):
     def estimate_single_parameters(self, xvals, yvals, centre, win_size):
         lside = max(0, centre - win_size)
         rside = min(len(yvals), centre + win_size)
-        if rside - lside < 5:
-            rside = 5 + lside
+        if rside - lside < MINIMUM_NUMBER_OF_DATA_POINTS:
+            rside = MINIMUM_NUMBER_OF_DATA_POINTS + lside
         x_range = xvals[lside:rside]
         y_range = yvals[lside:rside]
-        if len(x_range) < 5:
-            self.log().warning(f"Peak at {xvals[centre]} cannot be fitted")
+        if len(x_range) < MINIMUM_NUMBER_OF_DATA_POINTS:
+            self.log().warning(f"Peak at {xvals[centre]} cannot be fitted as there are not enough data points to fit"
+                               f" peak. This could be due to peak being at the end of the dataset")
             return None
         # The function least_squares should not be used as it is not present in scipy < 1.1.0
         # Using the mantid fitting function will not produce an equally good result here
@@ -320,12 +335,7 @@ class FitGaussianPeaks(DataProcessorAlgorithm):
         fit_func = ''
         fit_constr = ''
         for i, pid in enumerate(peakids):
-            if self._estimate_fit_window:
-                win_size = int(self._estimate_sigma * len(xvals) / (max(xvals) - min(xvals)))
-                if win_size < 2:
-                    win_size = 2
-            else:
-                win_size = int((self._fit_window - 1)/2)
+            win_size = self._get_window_size(xvals)
             params = self.estimate_single_parameters(xvals, yvals, pid, win_size)
             if params is None:
                 continue
