@@ -9,7 +9,7 @@
 #   3. ENABLE_UNIT_TESTS: whether or not unit tests are being ran/built
 #   4. ENABLE_DOCS: Whether or not the docs have been built
 #   5. ENABLE_DOC_TESTS: Whether or not the doc tests should be ran
-#   4. CPU_COUNT: The number of threads to use during testing
+#   4. BUILD_THREADS: The number of threads to use during testing
 #   5. USE_CORE_DUMPS: Activate core dumps (Linux only)
 
 WORKSPACE=$1
@@ -17,7 +17,7 @@ ENABLE_SYSTEM_TESTS=$2
 ENABLE_UNIT_TESTS=$3
 ENABLE_DOCS=$4
 ENABLE_DOC_TESTS=$5
-CPU_COUNT=$6
+BUILD_THREADS=$6
 USE_CORE_DUMPS=$7
 
 XVFB_SERVER_NUM=101
@@ -61,12 +61,12 @@ fi
 # Run unit tests
 cd $WORKSPACE/build
 if [[ $ENABLE_UNIT_TESTS == true ]]; then
-    run_with_xvfb ctest -j$CPU_COUNT --no-compress-output -T Test --schedule-random --output-on-failure
+    run_with_xvfb ctest -j$BUILD_THREADS --no-compress-output -T Test --schedule-random --output-on-failure
     terminate_xvfb_sessions
 fi
 
 if [[ $ENABLE_DOCS == true && $ENABLE_DOC_TESTS == true ]]; then
-    run_with_xvfb cmake --build . --target docs-doctest
+    run_with_xvfb cmake --build . --target docs-doctest -j$BUILD_THREADS
     terminate_xvfb_sessions
 fi
 
@@ -82,6 +82,6 @@ if [[ $ENABLE_SYSTEM_TESTS == true ]]; then
     echo "usagereports.enabled = 0" >> $userprops
     echo "CheckMantidVersion.OnStartup = 0" >> $userprops
 
-    run_with_xvfb $WORKSPACE/build/systemtest -j2
+    run_with_xvfb $WORKSPACE/build/systemtest -j$BUILD_THREADS
     terminate_xvfb_sessions
 fi
