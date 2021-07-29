@@ -140,7 +140,7 @@ class MaxEntPresenter(object):
         self.activate()
         self.calculation_finished_notifier.notify_subscribers(self._maxent_output_workspace_name)
         # if phase table is outputed
-        if self.view.output_phase_table:
+        if self.view.output_phase_table and PHASETABLE in self._optional_output_names.keys():
             name = self._optional_output_names[PHASETABLE]
             if self.use_groups:
                 num_groups = self.get_num_groups
@@ -159,10 +159,12 @@ class MaxEntPresenter(object):
     def calculate_maxent(self, alg):
         maxent_parameters = self.get_parameters_for_maxent_calculation()
         base_name = get_maxent_workspace_name(maxent_parameters['InputWorkspace'],  self.view.get_method)
-
-        maxent_workspace = run_MuonMaxent(maxent_parameters, alg, base_name)
-
-        self.add_maxent_workspace_to_ADS(maxent_parameters['InputWorkspace'], maxent_workspace, alg)
+        if self.use_groups and self.get_num_groups ==0:
+            # this is caught as part of the calculation thread
+            raise ValueError("Please select groups in the grouping tab")
+        else:
+            maxent_workspace = run_MuonMaxent(maxent_parameters, alg, base_name)
+            self.add_maxent_workspace_to_ADS(maxent_parameters['InputWorkspace'], maxent_workspace, alg)
 
     def _create_group_table(self):
         tab = create_empty_table(GROUPINGTABLE)
