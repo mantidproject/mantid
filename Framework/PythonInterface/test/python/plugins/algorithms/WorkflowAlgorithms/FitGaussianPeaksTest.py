@@ -104,59 +104,59 @@ class FitGaussianPeaksTest(unittest.TestCase):
         return table
 
     def test_algorithm_with_bad_input_workspace_throws(self):
-        with self.assertRaises(Exception):
+        with self.assertRaises(ValueError):
             FitGaussianPeaks(InputWorkspace='ws-that-does-not-exist')
 
     def test_algorithm_with_negative_centre_tolerance_throws(self):
-        with self.assertRaises(Exception):
+        with self.assertRaises(ValueError):
             FitGaussianPeaks(InputWorkspace=self.data_ws,
                              PeakGuessTable=self.peak_guess_table,
                              CentreTolerance=-1.0)
 
     def test_algorithm_with_negative_estimated_peak_sigma_throws(self):
-        with self.assertRaises(Exception):
+        with self.assertRaises(ValueError):
             FitGaussianPeaks(InputWorkspace=self.data_ws,
                              PeakGuessTable=self.peak_guess_table,
                              EstimatedPeakSigma=-1.0)
 
     def test_algorithm_with_negative_min_peak_sigma_throws(self):
-        with self.assertRaises(Exception):
+        with self.assertRaises(ValueError):
             FitGaussianPeaks(InputWorkspace=self.data_ws,
                              PeakGuessTable=self.peak_guess_table,
                              MinPeakSigma=-1.0)
 
     def test_algorithm_with_negative_max_peak_sigma_throws(self):
-        with self.assertRaises(Exception):
+        with self.assertRaises(ValueError):
             FitGaussianPeaks(InputWorkspace=self.data_ws,
                              PeakGuessTable=self.peak_guess_table,
                              MaxPeakSigma=-1.0)
 
     def test_algorithm_with_even_fit_window_throws(self):
-        with self.assertRaises(Exception):
+        with self.assertRaises(RuntimeError):
             FitGaussianPeaks(InputWorkspace=self.data_ws,
                              PeakGuessTable=self.peak_guess_table,
                              FitWindowSize=6)
 
     def test_algorithm_with_fit_window_lower_than_5_throws(self):
-        with self.assertRaises(Exception):
+        with self.assertRaises(ValueError):
             FitGaussianPeaks(InputWorkspace=self.data_ws,
                              PeakGuessTable=self.peak_guess_table,
                              FitWindowSize=3)
 
     def test_algorithm_with_float_fit_window_throws(self):
-        with self.assertRaises(Exception):
+        with self.assertRaises(TypeError):
             FitGaussianPeaks(InputWorkspace=self.data_ws,
                              PeakGuessTable=self.peak_guess_table,
                              FitWindowSize=5.5)
 
     def test_algorithm_with_negative_general_fit_tolerance_throws(self):
-        with self.assertRaises(Exception):
+        with self.assertRaises(ValueError):
             FitGaussianPeaks(InputWorkspace=self.data_ws,
                              PeakGuessTable=self.peak_guess_table,
                              GeneralFitTolerance=-1.0)
 
     def test_algorithm_with_negative_refit_tolerance_throws(self):
-        with self.assertRaises(Exception):
+        with self.assertRaises(ValueError):
             FitGaussianPeaks(InputWorkspace=self.data_ws,
                              PeakGuessTable=self.peak_guess_table,
                              RefitTolerance=-1.0)
