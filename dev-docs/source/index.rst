@@ -15,7 +15,7 @@ Guides
    :hidden:
 
    DeveloperAccounts
-   GettingStarted
+   GettingStarted/GettingStarted
    Architecture
    BuildingOnOSX
    BuildingWithCMake
@@ -26,7 +26,7 @@ Guides
 :doc:`DeveloperAccounts`
    Details of the accounts required for developers.
 
-:doc:`GettingStarted`
+:doc:`GettingStarted <GettingStarted/GettingStarted>`
    Describes the process of obtaining and building the mantid code base.
 
 :doc:`Architecture`
