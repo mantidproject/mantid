@@ -230,12 +230,11 @@ void LoadPSIMuonBin::exec() {
     }
   }
 
-  // Make empty detector table
-  if (!getPropertyValue("DetectorGroupingTable").empty())
-    makeDetectorGroupingTable(m_histograms.size());
+  // Set DetectorGroupingTable if needed
+  setEmptyDetectorGroupingTable(m_histograms.size());
 }
 
-void LoadPSIMuonBin::makeDetectorGroupingTable(const size_t &numSpec) {
+void LoadPSIMuonBin::setEmptyDetectorGroupingTable(const size_t &numSpec) {
   if (getPropertyValue("DetectorGroupingTable").empty())
     return;
   Mantid::DataObjects::TableWorkspace_sptr detectorTable =
