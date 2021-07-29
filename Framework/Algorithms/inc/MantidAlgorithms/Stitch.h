@@ -9,6 +9,8 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
 
+using Mantid::API::MatrixWorkspace_sptr;
+
 namespace Mantid {
 namespace Algorithms {
 
@@ -25,15 +27,15 @@ public:
 private:
   void init() override;
   void exec() override;
-  void scale(Mantid::API::MatrixWorkspace_sptr wsToMatch, Mantid::API::MatrixWorkspace_sptr wsToScale,
-             Mantid::API::MatrixWorkspace_sptr scaleFactorsWorkspace, const std::vector<std::string> &inputs);
-  Mantid::API::MatrixWorkspace_sptr merge(const std::vector<std::string> &workspaces);
+  void scale(MatrixWorkspace_sptr wsToMatch, MatrixWorkspace_sptr wsToScale, MatrixWorkspace_sptr scaleFactorsWorkspace,
+             const std::vector<std::string> &inputs);
+  MatrixWorkspace_sptr merge(const std::vector<std::string> &workspaces);
   void scaleManual(const std::vector<std::string> &, const std::vector<double> &scaleFactors,
-                   Mantid::API::MatrixWorkspace_sptr scaleFactorsWorkspace);
-  void recordScaleFactor(Mantid::API::MatrixWorkspace_sptr scaleFactorWorkspace,
-                         Mantid::API::MatrixWorkspace_sptr medianWorkspace,
-                         Mantid::API::MatrixWorkspace_sptr scaledWorkspace, const std::vector<std::string> &inputs);
+                   MatrixWorkspace_sptr scaleFactorsWorkspace);
+  void recordScaleFactor(MatrixWorkspace_sptr scaleFactorWorkspace, MatrixWorkspace_sptr medianWorkspace,
+                         MatrixWorkspace_sptr scaledWorkspace, const std::vector<std::string> &inputs);
   void cloneWorkspaces(const std::vector<std::string> &inputs);
+  size_t getReferenceIndex(const std::vector<MatrixWorkspace_sptr> &workspaces, const std::string &referenceName);
 };
 
 } // namespace Algorithms

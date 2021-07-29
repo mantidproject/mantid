@@ -100,32 +100,36 @@ double median(const std::vector<double> &vec) {
 /**
  * @brief Creates a single bin workspace containing spectrum-wise medians of the input workspace
  * @param ws : the input workspace
- * @param global : if true, a global median will be calculated for all the spectra
  * @return a new workspace representing the medians, single count if global is requested
  */
-MatrixWorkspace_sptr medianWorkspace(MatrixWorkspace_sptr ws, bool global) {
-  if (global) {
-    MatrixWorkspace_sptr out = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
-    std::vector<double> allY;
-    allY.reserve(ws->getNumberHistograms() * ws->blocksize());
-    for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
-      const auto spectrum = ws->mutableY(i).rawData();
-      std::copy(spectrum.cbegin(), spectrum.cend(), std::back_inserter(allY));
-    }
-    auto &y = out->mutableY(0);
-    y = std::vector<double>(1, median(std::move(allY)));
-    return out;
-  } else {
-    const size_t nSpectra = ws->getNumberHistograms();
-    MatrixWorkspace_sptr out = WorkspaceFactory::Instance().create("Workspace2D", nSpectra, 1, 1);
-    PARALLEL_FOR_IF(threadSafe(*ws, *out))
-    for (int i = 0; i < static_cast<int>(nSpectra); ++i) {
-      const size_t wsIndex = static_cast<size_t>(i);
-      auto &y = out->mutableY(wsIndex);
-      y = std::vector<double>(1, median(ws->readY(wsIndex)));
-    }
-    return out;
+MatrixWorkspace_sptr medianWorkspaceLocal(MatrixWorkspace_sptr ws) {
+  const size_t nSpectra = ws->getNumberHistograms();
+  MatrixWorkspace_sptr out = WorkspaceFactory::Instance().create("Workspace2D", nSpectra, 1, 1);
+  PARALLEL_FOR_IF(threadSafe(*ws, *out))
+  for (int i = 0; i < static_cast<int>(nSpectra); ++i) {
+    const size_t wsIndex = static_cast<size_t>(i);
+    auto &y = out->mutableY(wsIndex);
+    y = std::vector<double>(1, median(ws->readY(wsIndex)));
   }
+  return out;
+}
+
+/**
+ * @brief Creates a single bin and single spectrum workspace containing the global median of the input workspace
+ * @param ws : the input workspace
+ * @return a new workspace representing the medians, single count if global is requested
+ */
+MatrixWorkspace_sptr medianWorkspaceGlobal(MatrixWorkspace_sptr ws) {
+  MatrixWorkspace_sptr out = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
+  std::vector<double> allY;
+  allY.reserve(ws->getNumberHistograms() * ws->blocksize());
+  for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
+    const auto spectrum = ws->mutableY(i).rawData();
+    std::copy(spectrum.cbegin(), spectrum.cend(), std::back_inserter(allY));
+  }
+  auto &y = out->mutableY(0);
+  y = std::vector<double>(1, median(std::move(allY)));
+  return out;
 }
 
 /**
@@ -279,13 +283,7 @@ void Stitch::exec() {
     scaleFactorsWorkspace = initScaleFactorsWorkspace(nSpectrumInScaleFactors, workspaces.size());
     std::sort(workspaces.begin(), workspaces.end(), compareInterval);
     auto progress = std::make_unique<Progress>(this, 0.0, 1.0, workspaces.size());
-    size_t referenceIndex = 0;
-    if (!isDefault(REFERENCE_WORKSPACE_PROPERTY)) {
-      const auto ref = std::find_if(workspaces.cbegin(), workspaces.cend(), [&referenceName](const auto ws) {
-        return ws->getName() == "__cloned_" + referenceName;
-      });
-      referenceIndex = std::distance(workspaces.cbegin(), ref);
-    }
+    const size_t referenceIndex = getReferenceIndex(workspaces, referenceName);
     size_t leftIterator = referenceIndex, rightIterator = referenceIndex;
     while (leftIterator > 0) {
       scale(workspaces[leftIterator], workspaces[leftIterator - 1], scaleFactorsWorkspace, clones);
@@ -305,6 +303,24 @@ void Stitch::exec() {
   if (!isDefault(OUTPUT_SCALE_FACTORS_PROPERTY)) {
     setProperty(OUTPUT_SCALE_FACTORS_PROPERTY, scaleFactorsWorkspace);
   }
+}
+
+/**
+ * @brief Returns the index of the reference workspace in the sorted workspace list
+ * @param workspaces : input workspace pointers, sorted by x-interval ascending
+ * @param referenceName : the name of the reference workspace
+ * @return the index of the reference workspace in the sorted workspace list
+ */
+size_t Stitch::getReferenceIndex(const std::vector<MatrixWorkspace_sptr> &workspaces,
+                                 const std::string &referenceName) {
+  size_t referenceIndex = 0;
+  if (!isDefault(REFERENCE_WORKSPACE_PROPERTY)) {
+    const auto ref = std::find_if(workspaces.cbegin(), workspaces.cend(), [&referenceName](const auto ws) {
+      return ws->getName() == "__cloned_" + referenceName;
+    });
+    referenceIndex = std::distance(workspaces.cbegin(), ref);
+  }
+  return referenceIndex;
 }
 
 /**
@@ -332,14 +348,12 @@ MatrixWorkspace_sptr Stitch::merge(const std::vector<std::string> &inputs) {
   // interleave option is equivalent to concatenation followed by sort X axis
   auto joiner = createChildAlgorithm("ConjoinXRuns");
   joiner->setProperty("InputWorkspaces", inputs);
-  joiner->setPropertyValue("OutputWorkspace", "__joined");
   joiner->execute();
   Workspace_sptr output = joiner->getProperty("OutputWorkspace");
   MatrixWorkspace_sptr joined = std::dynamic_pointer_cast<MatrixWorkspace>(output);
 
   auto sorter = createChildAlgorithm("SortXAxis");
   sorter->setProperty("InputWorkspace", joined);
-  sorter->setPropertyValue("OutputWorkspace", "__sorted");
   sorter->execute();
   MatrixWorkspace_sptr sorted = sorter->getProperty("OutputWorkspace");
   return sorted;
@@ -362,11 +376,9 @@ void Stitch::scale(MatrixWorkspace_sptr wsToMatch, MatrixWorkspace_sptr wsToScal
   cropper->setProperty("XMax", std::vector<double>({overlap.second}));
 
   cropper->setProperty("InputWorkspace", wsToMatch);
-  cropper->setPropertyValue("OutputWorkspace", "__to_match");
   cropper->execute();
   MatrixWorkspace_sptr croppedToMatch = cropper->getProperty("OutputWorkspace");
   cropper->setProperty("InputWorkspace", wsToScale);
-  cropper->setPropertyValue("OutputWorkspace", "__to_scale");
   cropper->execute();
   MatrixWorkspace_sptr croppedToScale = cropper->getProperty("OutputWorkspace");
 
@@ -376,7 +388,6 @@ void Stitch::scale(MatrixWorkspace_sptr wsToMatch, MatrixWorkspace_sptr wsToScal
     interpolator->setProperty("WorkspaceToMatch", croppedToMatch);
     interpolator->setProperty("WorkspaceToInterpolate", croppedToScale);
     interpolator->setProperty("Linear2Points", true);
-    interpolator->setPropertyValue("OutputWorkspace", "__interpolated");
     interpolator->execute();
     rebinnedToScale = interpolator->getProperty("OutputWorkspace");
   } else {
@@ -391,10 +402,10 @@ void Stitch::scale(MatrixWorkspace_sptr wsToMatch, MatrixWorkspace_sptr wsToScal
   auto divider = createChildAlgorithm("Divide");
   divider->setProperty("LHSWorkspace", rebinnedToScale);
   divider->setProperty("RHSWorkspace", croppedToMatch);
-  divider->setPropertyValue("OutputWorkspace", "__ratio");
   divider->execute();
   MatrixWorkspace_sptr ratio = divider->getProperty("OutputWorkspace");
-  MatrixWorkspace_sptr median = medianWorkspace(ratio, getProperty("TieScaleFactors"));
+  MatrixWorkspace_sptr median =
+      getProperty("TieScaleFactors") ? medianWorkspaceGlobal(ratio) : medianWorkspaceLocal(ratio);
 
   auto scaler = createChildAlgorithm("Divide");
   scaler->setAlwaysStoreInADS(true);

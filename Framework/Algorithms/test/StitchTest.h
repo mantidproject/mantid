@@ -44,6 +44,22 @@ MatrixWorkspace_sptr pointDataWorkspaceOneSpectrum(size_t nPoints, double startX
   return ws;
 }
 
+MatrixWorkspace_sptr histoDataWorkspaceOneSpectrum(size_t nPoints, double startX, double endX,
+                                                   const std::string &name) {
+  MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D", 1, nPoints, nPoints);
+  AnalysisDataService::Instance().addOrReplace(name, ws);
+  std::vector<double> x(nPoints + 1), y(nPoints), e(nPoints);
+  const double step = (endX - startX) / double(nPoints);
+  for (size_t ibin = 0; ibin < nPoints; ++ibin) {
+    x[ibin] = startX + double(ibin) * step;
+    y[ibin] = 7 * double(ibin) + 3;
+    e[ibin] = std::sqrt(y[ibin]);
+  }
+  x[nPoints] = endX;
+  ws->setHistogram(0, Histogram(BinEdges(x), Counts(y), CountStandardDeviations(e)));
+  return ws;
+}
+
 MatrixWorkspace_sptr pointDataWorkspaceMultiSpectrum(size_t nSpectra, size_t nPoints, double startX, double endX,
                                                      const std::string &name) {
   MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D", nSpectra, nPoints, nPoints);
@@ -53,6 +69,23 @@ MatrixWorkspace_sptr pointDataWorkspaceMultiSpectrum(size_t nSpectra, size_t nPo
   for (size_t ispec = 0; ispec < nSpectra; ++ispec) {
     for (size_t ibin = 0; ibin < nPoints; ++ibin) {
       x[ibin] = startX + double(ibin) * step;
+      y[ibin] = 7 * double(ibin) + 3 + 10 * double(ispec);
+      e[ibin] = std::sqrt(y[ibin]);
+    }
+    ws->setHistogram(ispec, Histogram(Points(x), Counts(y), CountStandardDeviations(e)));
+  }
+  return ws;
+}
+
+MatrixWorkspace_sptr pointDataWorkspaceMultiSpectrumRagged(size_t nSpectra, size_t nPoints, double startX, double endX,
+                                                           const std::string &name) {
+  MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D", nSpectra, nPoints, nPoints);
+  AnalysisDataService::Instance().addOrReplace(name, ws);
+  std::vector<double> x(nPoints), y(nPoints), e(nPoints);
+  const double step = (endX - startX) / (double(nPoints) - 1);
+  for (size_t ispec = 0; ispec < nSpectra; ++ispec) {
+    for (size_t ibin = 0; ibin < nPoints; ++ibin) {
+      x[ibin] = startX + double(ibin) * step + 0.01 * double(ispec);
       y[ibin] = 7 * double(ibin) + 3 + 10 * double(ispec);
       e[ibin] = std::sqrt(y[ibin]);
     }
@@ -90,12 +123,36 @@ public:
                             "No overlap is found between the intervals: [0.3,0.7] and [0.8, 0.9]");
   }
 
+  void test_Ragged() {
+    auto ws1 = pointDataWorkspaceMultiSpectrumRagged(3, 17, 0.5, 0.9, "ws1");
+    auto ws2 = pointDataWorkspaceMultiSpectrumRagged(3, 13, 0.8, 1.1, "ws2");
+    Stitch alg;
+    alg.setRethrows(true);
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", std::vector<std::string>({"ws1", "ws2"})));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "out"))
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e, std::string(e.what()),
+                            "Some invalid Properties found: [ InputWorkspaces ]");
+  }
+
   void test_OneWorkspace() {
     auto ws1 = pointDataWorkspaceOneSpectrum(12, 0.3, 0.7, "ws1");
     Stitch alg;
     alg.setRethrows(true);
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", std::vector<std::string>({"ws1"})));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "out"))
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e, std::string(e.what()),
+                            "Some invalid Properties found: [ InputWorkspaces ]");
+  }
+
+  void test_HistogramData() {
+    auto ws1 = histoDataWorkspaceOneSpectrum(12, 0.3, 0.7, "ws1");
+    auto ws2 = histoDataWorkspaceOneSpectrum(17, 0.8, 0.9, "ws2");
+    Stitch alg;
+    alg.setRethrows(true);
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", std::vector<std::string>({"ws1", "ws2"})));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "out"))
     TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e, std::string(e.what()),
                             "Some invalid Properties found: [ InputWorkspaces ]");
