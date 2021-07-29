@@ -57,8 +57,7 @@ endif()
 # Add to the 'Framework' group in VS
 set_property(TARGET Catalog PROPERTY FOLDER "MantidFramework")
 
-target_link_libraries(Catalog PUBLIC Mantid::Kernel PRIVATE ${JSONCPP_LIBRARIES})
-target_include_directories(Catalog PRIVATE ${JSONCPP_INCLUDE_DIR})
+target_link_libraries(Catalog PUBLIC Mantid::Kernel)
 
 # Add the unit tests directory
 add_subdirectory(test)
