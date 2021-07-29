@@ -1,6 +1,7 @@
 set(PREVIEW_SRC_FILES
         PreviewPresenter.cpp
-        QtPreviewView.cpp)
+        QtPreviewView.cpp
+        PreviewModel.cpp)
 
 # Include files aren't required, but this makes them appear in Visual Studio
 # IMPORTANT: Include files are required in the MOC_FILES set. Scroll down to
@@ -9,6 +10,8 @@ set(PREVIEW_INC_FILES
         IPreviewView.h
         PreviewPresenter.h
         QtPreviewView.h
+        IPreviewModel.h
+        PreviewModel.h
     )
 
 set(PREVIEW_MOC_FILES QtPreviewView.h)
