@@ -6,13 +6,15 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidAPI/MatrixWorkspace_fwd.h"
-#include <string>
+#include "PreviewPresenter.h"
 
-namespace MantidQt::CustomInterfaces::ISISReflectometry {
-class IPreviewModel {
+#include <cxxtest/TestSuite.h>
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
+
+using namespace MantidQt::CustomInterfaces::ISISReflectometry;
+
+class PreviewPresenterTest : public CxxTest::TestSuite {
 public:
-  virtual void loadWorkspace(std::string const &workspaceName) = 0;
-  virtual Mantid::API::MatrixWorkspace_sptr getInstViewWorkspace() const = 0;
+  void test_notify_load_workspace_requested() { TS_ASSERT(true); }
 };
-} // namespace MantidQt::CustomInterfaces::ISISReflectometry
