@@ -62,9 +62,15 @@ Improvements
 - Updated :ref:`LoadElementalAnalysisData <algm-LoadElementalAnalysisData>` algorithm to include Poisson errors for the counts data.
 
 Algorithms
-##########
+----------
 
+Improvements
+############
 - Updated :ref:`LoadMuonLog <algm-LoadMuonLog>` to read units for most log values.
 - It is now possible to exclude a fit range when executing the :ref:`CalculateMuonAsymmetry <algm-CalculateMuonAsymmetry>` algorithm.
+
+BugFixes
+############
+- Fixed bug in :ref:`FitGaussianPeaks <algm-FitGaussianPeaks>` algorithm in which a peak at the end of range would cause an error due to not enough data point being available to fit parameters.
 
 :ref:`Release 6.2.0 <v6.2.0>`
