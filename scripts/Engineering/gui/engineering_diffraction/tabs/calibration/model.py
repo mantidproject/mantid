@@ -7,8 +7,8 @@
 from os import path, makedirs
 
 from mantid.api import AnalysisDataService as Ads
-from mantid.kernel import logger
-from mantid.simpleapi import PDCalibration, DeleteWorkspace, CloneWorkspace, DiffractionFocussing, \
+from mantid.kernel import logger, UnitParams
+from mantid.simpleapi import PDCalibration, DeleteWorkspace, DiffractionFocussing, \
     CreateEmptyTableWorkspace, NormaliseByCurrent, ConvertUnits, Load, SaveNexus, ApplyDiffCal
 import Engineering.EnggUtils as EnggUtils
 from Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
@@ -50,24 +50,25 @@ class CalibrationModel(object):
             return
 
         # run PDCalibraiton
-        cal_params, ceria_raw, grp_ws = self.run_calibration(ceria_workspace, group_ws, full_calib)
+        cal_table, mask = self.run_calibration(ceria_workspace, group_ws, full_calib)
 
-        # surely do this right at end?
         if plot_output:
             self.plot_output(cal_params, calibration.get_group_suffix())
 
-        # write diff constants to params table
-        difa = [row['difa'] for row in cal_params]
-        difc = [row['difc'] for row in cal_params]
-        tzero = [row['tzero'] for row in cal_params]
-        diff_consts = []
+        # extract diffractometer constants
+        diff_consts = self.extract_diff_consts_from_cal(cal_table, mask)
+        difa = [diffs[UnitParams.difa] for diffs in diff_consts]
+        difc = [diffs[UnitParams.difc] for diffs in diff_consts]
+        tzero = [diffs[UnitParams.tzero] for diffs in diff_consts]
+        # write to table
+        rows = []
         for i in range(len(difc)):
-            diff_consts.append([i, difc[i], difa[i], tzero[i]])
-        self.update_calibration_params_table(diff_consts)
+            rows.append([i, difc[i], difa[i], tzero[i]])
+        self.update_calibration_params_table(rows)
 
         # extract Back-to-Back Exponential params for .prm before deleting raw data
-        bk2bk_params = self.extract_b2b_params(ceria_raw)
-        DeleteWorkspace(ceria_raw)
+        bk2bk_params = self.extract_b2b_params(ceria_workspace)
+        DeleteWorkspace(ceria_workspace)
 
         # save output
         if rb_num:
@@ -151,10 +152,8 @@ class CalibrationModel(object):
 
     @staticmethod
     def run_calibration(ceria_ws,
-                        bank,
-                        calfile,
-                        spectrum_numbers,
-                        full_calib):
+                        calibration,
+                        full_instrument_cal_ws):
         """
         Creates Engineering calibration files with PDCalibration
         :param ceria_ws: The workspace with the ceria data.
@@ -164,82 +163,42 @@ class CalibrationModel(object):
         :return: dict containing calibrated diffractometer constants, and copy of the raw ceria workspace
         """
 
-        def run_pd_calibration(kwargs_to_pass) -> list:
-            """
-            Call PDCalibration using the keyword arguments supplied, and return it's default list of output workspaces
-            :param kwargs_to_pass: Keyword arguments to supply to the algorithm
-            :return: List of output workspaces from PDCalibration
-            """
-            return PDCalibration(**kwargs_to_pass)
-
-        def calibrate_region_of_interest(ceria_d_ws, roi: str, grouping_kwarg: dict, cal_output: dict) -> None:
-            """
-            Focus the processed ceria workspace (dSpacing) over the chosen region of interest, and run the calibration
-            using this result
-            :param ceria_d_ws: Workspace containing the processed ceria data converted to dSpacing
-            :param roi: String describing chosen region of interest
-            :param grouping_kwarg: Dict containing kwarg to pass to DiffractionFocussing to select the roi
-            :param cal_output: Dictionary to append with the output of PDCalibration for the chosen roi
-            """
-            # focus ceria
-            focused_ceria = DiffractionFocussing(InputWorkspace=ceria_d_ws, **grouping_kwarg)
-            ApplyDiffCal(InstrumentWorkspace=focused_ceria, ClearCalibration=True)
-            ConvertUnits(InputWorkspace=focused_ceria, OutputWorkspace=focused_ceria, Target='TOF')
-
-            # calibration of focused data over chosen region of interest
-            kwargs["InputWorkspace"] = focused_ceria
-            kwargs["OutputCalibrationTable"] = "engggui_calibration_" + roi
-            kwargs["DiagnosticWorkspaces"] = "diag_" + roi
-
-            cal_roi = run_pd_calibration(kwargs)[0]
-            cal_output[roi] = cal_roi
-
-        # need to clone the data as PDCalibration rebins
-        ceria_raw = CloneWorkspace(InputWorkspace=ceria_ws)
-
         # initial process of ceria ws
         NormaliseByCurrent(InputWorkspace=ceria_ws, OutputWorkspace=ceria_ws)
-        ApplyDiffCal(InstrumentWorkspace=ceria_ws, CalibrationWorkspace=full_calib)
+        ApplyDiffCal(InstrumentWorkspace=ceria_ws, CalibrationWorkspace=full_instrument_cal_ws)
         ConvertUnits(InputWorkspace=ceria_ws, OutputWorkspace=ceria_ws, Target='dSpacing')
 
-        kwargs = {
-            "PeakPositions": EnggUtils.default_ceria_expected_peaks(final=True),
-            "TofBinning": [15500, -0.0003, 52000],  # using a finer binning now have better stats
-            "PeakWindow": 0.04,
-            "MinimumPeakHeight": 0.5,
-            "PeakFunction": 'BackToBackExponential',
-            "CalibrationParameters": 'DIFC+TZERO+DIFA',
-            "UseChiSq": True
-        }
-        cal_output = dict()
-        grp_ws = None
-        if (spectrum_numbers or calfile) is None:
-            if bank == '1' or bank is None:
-                grp_ws = EnggUtils.get_bank_grouping_workspace(1, ceria_raw)
-                grouping_kwarg = {"GroupingWorkspace": grp_ws}
-                calibrate_region_of_interest(ceria_ws, "bank_1", grouping_kwarg, cal_output)
-            if bank == '2' or bank is None:
-                grp_ws = EnggUtils.get_bank_grouping_workspace(2, ceria_raw)
-                grouping_kwarg = {"GroupingWorkspace": grp_ws}
-                calibrate_region_of_interest(ceria_ws, "bank_2", grouping_kwarg, cal_output)
-        elif calfile is None:
-            grp_ws = EnggUtils.create_grouping_workspace_from_spectra_list(spectrum_numbers, ceria_raw)
-            grouping_kwarg = {"GroupingWorkspace": grp_ws}
-            calibrate_region_of_interest(ceria_ws, "Cropped", grouping_kwarg, cal_output)
-        else:
-            grp_ws = EnggUtils.create_grouping_workspace_from_calfile(calfile, ceria_raw)
-            grouping_kwarg = {"GroupingWorkspace": grp_ws}
-            calibrate_region_of_interest(ceria_ws, "Custom", grouping_kwarg, cal_output)
-        cal_params = list()
-        # in the output calfile, rows are present for all detids, only read one from the region of interest
-        for bank_cal in cal_output:
-            mask_ws_name = "engggui_calibration_" + bank_cal + "_mask"
-            mask_ws = Ads.retrieve(mask_ws_name)
-            row_no = EnggUtils.get_first_unmasked_specno_from_mask_ws(mask_ws)
-            row = cal_output[bank_cal].row(row_no)
-            current_fit_params = {'difc': row['difc'], 'difa': row['difa'], 'tzero': row['tzero']}
-            cal_params.append(current_fit_params)
-        return cal_params, ceria_raw, grp_ws
+        # get grouping workspace and focus
+        grp_ws = calibration.get_group_ws(ceria_ws)  # (creates if doesn't exist)
+        focused_ceria = DiffractionFocussing(InputWorkspace=ceria_ws, GroupingWorkspace=grp_ws)
+        ApplyDiffCal(InstrumentWorkspace=focused_ceria, ClearCalibration=True)
+        ConvertUnits(InputWorkspace=focused_ceria, OutputWorkspace=focused_ceria, Target='TOF')
+
+        # Run PDCalibration to fit peaks in TOF
+        cal_table_name = "engggui_calibration_" + calibration.get_group_suffix()
+        diag_ws = "diag_" + calibration.get_group_suffix()
+        cal_table, _, mask = PDCalibration(InputWorkspace=focused_ceria,
+                                           OutputCalibrationTable=cal_table_name, DiagnosticWorkspaces=diag_ws,
+                                           PeakPositions=EnggUtils.default_ceria_expected_peaks(final=True),
+                                           TofBinning=[15500, -0.0003, 52000],
+                                           PeakWindow=0.04,
+                                           MinimumPeakHeight=0.5,
+                                           PeakFunction='BackToBackExponential',
+                                           CalibrationParameters='DIFC+TZERO+DIFA',
+                                           UseChiSq=True)
+        return cal_table, mask
+
+    def extract_diff_consts_from_cal(self, ws_foc, cal_table, mask_ws):
+        ApplyDiffCal(InstrumentWorkspace=ws_foc, CalibrationWorkspace=cal_table)
+        si = ws_foc.spectrumInfo()
+        masked_detIDs = mask_ws.getMaskedDetectors()
+        diff_consts = []
+        for ispec in range(ws_foc.getNumberHistograms()):
+            if ws_foc.getSpectrum(ispec).getDetectorIDs()[0] in masked_detIDs:
+                # spectrum has detectors that were masked in output of PDCal
+                logger.warning(f'PDCalibration failed for spectrum index {ispec} - proceeding with uncalibrated DIFC.')
+            diff_consts.append(si.diffractometerConstants(ispec))
+        return diff_consts
 
     def create_output_files(self, calibration_dir, difa, difc, tzero, bk2bk_params, calibration):
         """
