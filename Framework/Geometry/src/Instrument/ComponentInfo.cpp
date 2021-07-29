@@ -146,7 +146,7 @@ Kernel::V3D ComponentInfo::position(const size_t componentIndex) const {
   return Kernel::toV3D(m_componentInfo->position(componentIndex));
 }
 
-Kernel::V3D ComponentInfo::position(const std::pair<size_t, size_t> index) const {
+Kernel::V3D ComponentInfo::position(const std::pair<size_t, size_t> &index) const {
   return Kernel::toV3D(m_componentInfo->position(index));
 }
 
@@ -154,7 +154,7 @@ Kernel::Quat ComponentInfo::rotation(const size_t componentIndex) const {
   return Kernel::toQuat(m_componentInfo->rotation(componentIndex));
 }
 
-Kernel::Quat ComponentInfo::rotation(const std::pair<size_t, size_t> index) const {
+Kernel::Quat ComponentInfo::rotation(const std::pair<size_t, size_t> &index) const {
   return Kernel::toQuat(m_componentInfo->rotation(index));
 }
 
@@ -166,11 +166,11 @@ Kernel::Quat ComponentInfo::relativeRotation(const size_t componentIndex) const 
   return Kernel::toQuat(m_componentInfo->relativeRotation(componentIndex));
 }
 
-void ComponentInfo::setPosition(const std::pair<size_t, size_t> index, const Kernel::V3D &newPosition) {
+void ComponentInfo::setPosition(const std::pair<size_t, size_t> &index, const Kernel::V3D &newPosition) {
   m_componentInfo->setPosition(index, Kernel::toVector3d(newPosition));
 }
 
-void ComponentInfo::setRotation(const std::pair<size_t, size_t> index, const Kernel::Quat &newRotation) {
+void ComponentInfo::setRotation(const std::pair<size_t, size_t> &index, const Kernel::Quat &newRotation) {
   m_componentInfo->setRotation(index, Kernel::toQuaterniond(newRotation));
 }
 

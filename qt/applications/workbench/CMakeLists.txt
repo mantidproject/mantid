@@ -137,17 +137,21 @@ if(APPLE)
   configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/../../../installers/MacInstaller/Info.plist.in
                    ${CMAKE_CURRENT_BINARY_DIR}/Info.plist
                    @ONLY )
-
-install (FILES ${CMAKE_CURRENT_BINARY_DIR}/Info.plist DESTINATION ${WORKBENCH_BUNDLE} )
-install (CODE "
-    execute_process(COMMAND ${CMAKE_SOURCE_DIR}/installers/MacInstaller/make_package.rb
-                            \${CMAKE_INSTALL_PREFIX}/${WORKBENCH_APP} ${Python_EXECUTABLE}
-                    RESULT_VARIABLE install_name_tool_result OUTPUT_VARIABLE _out ERROR_VARIABLE _out COMMAND_ECHO STDOUT)
-    if(NOT install_name_tool_result EQUAL 0)
-      message(\"\${_out}\")
-      message(FATAL_ERROR \"Package script failed!!!\n\")
-    endif()
-")
+  # Determine Qt install prefix
+  set(_qt_install_prefix ${Qt5Core_DIR})
+  foreach(_i RANGE 2)
+    get_filename_component(_qt_install_prefix ${_qt_install_prefix} DIRECTORY)
+  endforeach()
+  install (FILES ${CMAKE_CURRENT_BINARY_DIR}/Info.plist DESTINATION ${WORKBENCH_BUNDLE} )
+  install (CODE "
+      execute_process(COMMAND ${CMAKE_SOURCE_DIR}/installers/MacInstaller/make_package.rb
+                              \${CMAKE_INSTALL_PREFIX}/${WORKBENCH_APP} ${Python_EXECUTABLE} ${_qt_install_prefix}
+                      RESULT_VARIABLE install_name_tool_result OUTPUT_VARIABLE _out ERROR_VARIABLE _out COMMAND_ECHO STDOUT)
+      if(NOT install_name_tool_result EQUAL 0)
+        message(\"\${_out}\")
+        message(FATAL_ERROR \"Package script failed!!!\n\")
+      endif()
+  ")
 endif()
 
 # Testing

@@ -65,7 +65,7 @@ Container::Container(const Container &container)
  * Construct a container providing an XML definition shape
  * @param xml Definition of the shape in xml
  */
-Container::Container(std::string xml) : m_shape(std::make_shared<CSGObject>(xml)) {}
+Container::Container(const std::string &xml) : m_shape(std::make_shared<CSGObject>(xml)) {}
 
 /**
  * @return True if the can contains a definition of the sample shape

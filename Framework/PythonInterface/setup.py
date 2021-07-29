@@ -6,15 +6,14 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
+import os
 from setuptools import find_packages, setup
 
-@SETUPTOOLS_BUILD_COMMANDS_DEF@
 
-# The most basic setup possible to be able to use setup.py develop
+# The most basic setup possible to be able to use pip develop/install
 setup(
     name='mantid',
-    version='@VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_PATCH@@VERSION_TWEAK_PY@',
+    version=os.environ['MANTID_VERSION_STR'],
     packages=find_packages(exclude=['*.test', 'plugins*']),
     package_data={'': ['*.ui']},
-    @SETUPTOOLS_BUILD_COMMANDS_USE@
 )

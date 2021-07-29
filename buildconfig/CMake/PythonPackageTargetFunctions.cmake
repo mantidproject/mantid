@@ -1,7 +1,9 @@
 # Defines functions to help deal with python packages
 
 # ~~~
-# Function to create links to python packages in the source tree
+# Function to create links to python packages from the source tree
+# to the binary tree. It expects a setup.py to be found in
+# ${CMAKE_CURRENT_SOURCE_DIR}/setup.py
 # Optional keyword arguments:
 #   - EXECUTABLE: If this option provided then it is assumed the package contains a
 #                 startup script and this is installed in the package bin
@@ -12,62 +14,20 @@
 #   - INSTALL_BIN_DIR: Destination for an executable to be installed
 #   - EXCLUDE_ON_INSTALL: Specifies a regex of files to exclude from the install
 #   -                     command
+#   - GENERATE_SITECUSTOMIZE: If provided then generate a sitecustomize
+#                             file in the egg link directory
 # ~~~
-function(
-  add_python_package
-  pkg_name
-)
-  # Create a setup.py file if necessary
+function(add_python_package pkg_name)
   set(_setup_py ${CMAKE_CURRENT_SOURCE_DIR}/setup.py)
-  set(_setup_py_build_root ${CMAKE_CURRENT_BINARY_DIR})
-
-  if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/setup.py.in")
-    set(
-      SETUPTOOLS_BUILD_COMMANDS_DEF
-      "def patch_setuptools_command(cmd_cls_name):
-    import importlib
-    cmd_module = importlib.import_module('setuptools.command.' + cmd_cls_name)
-    setuptools_command_cls = getattr(cmd_module, cmd_cls_name)
-
-    class CustomCommand(setuptools_command_cls):
-        user_options = setuptools_command_cls.user_options[:]
-        boolean_options = setuptools_command_cls.boolean_options[:]
-
-        def finalize_options(self):
-            self.build_lib = '${_setup_py_build_root}/build'
-            setuptools_command_cls.finalize_options(self)
-
-    return CustomCommand
-
-
-CustomBuildPy = patch_setuptools_command('build_py')
-CustomInstall = patch_setuptools_command('install')
-CustomInstallLib = patch_setuptools_command('install_lib')
-"
-    )
-    set(
-      SETUPTOOLS_BUILD_COMMANDS_USE
-      "cmdclass={'build_py': CustomBuildPy, 'install': CustomInstall, 'install-lib': CustomInstallLib }"
-    )
-    configure_file(
-      ${CMAKE_CURRENT_SOURCE_DIR}/setup.py.in
-      ${_setup_py}
-      @ONLY
-    )
-  endif()
-
+  set(_setup_py_build_root ${CMAKE_CURRENT_SOURCE_DIR}/build)
   set(_egg_link_dir ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR})
 
-  # Create variables for additional arguments
   cmake_parse_arguments(
-    _parsed_arg
-    "EXECUTABLE"
-    "EGGLINKNAME;EXCLUDE_FROM_INSTALL;INSTALL_BIN_DIR"
-    "INSTALL_LIB_DIRS"
+    _parsed_arg "EXECUTABLE;GENERATE_SITECUSTOMIZE"
+    "EGGLINKNAME;EXCLUDE_FROM_INSTALL;INSTALL_BIN_DIR" "INSTALL_LIB_DIRS"
     ${ARGN}
   )
 
-  # If a custom egg-link name was specified use that for the link
   if(_parsed_arg_EGGLINKNAME)
     set(_egg_link ${_egg_link_dir}/${_parsed_arg_EGGLINKNAME}.egg-link)
   else()
@@ -92,34 +52,36 @@ CustomInstallLib = patch_setuptools_command('install_lib')
 
   # create the developer setup which just creates a pth file rather than copying
   # things over
-  set(
-    _outputs
-    ${_egg_link}
-    ${_startup_script}
-    ${_startup_exe}
+  set(_outputs ${_egg_link} ${_startup_script} ${_startup_exe})
+  set(_version_str
+      ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}${VERSION_TWEAK_PY}
   )
   add_custom_command(
     OUTPUT ${_outputs}
     COMMAND
-      ${CMAKE_COMMAND}
-      -E
-      env
-      PYTHONPATH=${_egg_link_dir}
-      ${Python_EXECUTABLE}
-      ${_setup_py}
-      develop
-      --install-dir
-      ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}
-      --script-dir
-      ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}
+      ${CMAKE_COMMAND} -E env PYTHONPATH=${_egg_link_dir}
+      MANTID_VERSION_STR=${_version_str} ${Python_EXECUTABLE} ${_setup_py}
+      develop --install-dir ${_egg_link_dir} --script-dir ${_egg_link_dir}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     DEPENDS ${_setup_py}
   )
-  add_custom_target(
-    ${pkg_name}
-    ALL
-    DEPENDS ${_outputs}
+
+  # Generate a sitecustomize.py file in the egg link directory as setuptools no
+  # longer generates site.py for v>=49.0.0
+  if(_parsed_arg_GENERATE_SITECUSTOMIZE AND Python_SETUPTOOLS_VERSION
+                                            VERSION_GREATER_EQUAL 49.0.0
   )
+    add_custom_command(
+      OUTPUT ${_egg_link_dir}/sitecustomize.py
+      COMMAND ${CMAKE_COMMAND} -DSITECUSTOMIZE_DIR=${_egg_link_dir} -P
+              ${CMAKE_MODULE_PATH}/WriteSiteCustomize.cmake
+      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+      DEPENDS ${_setup_py} ${CMAKE_MODULE_PATH}/WriteSiteCustomize.cmake
+    )
+    list(APPEND _outputs ${_egg_link_dir}/sitecustomize.py)
+  endif()
+
+  add_custom_target(${pkg_name} ALL DEPENDS ${_outputs})
 
   # setuptools by default wants to build into a directory called 'build'
   # relative the to the working directory. We have overridden commands in
@@ -128,47 +90,36 @@ CustomInstallLib = patch_setuptools_command('install_lib')
   # --install-lib=lib removes any of the platform/distribution specific install
   # directories so we can have a flat structure
   install(
-    CODE
-      "execute_process(COMMAND ${Python_EXECUTABLE} ${_setup_py} install -O1 --single-version-externally-managed --root=${_setup_py_build_root}/install --install-scripts=bin --install-lib=lib WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})"
+    CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E env MANTID_VERSION_STR=${_version_str} \
+    ${Python_EXECUTABLE} ${_setup_py} install -O1 --single-version-externally-managed \
+    --root=${_setup_py_build_root}/install --install-scripts=bin --install-lib=lib \
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})"
   )
 
   # Registers the "installed" components with CMake so it will carry them over
   if(_parsed_arg_EXCLUDE_FROM_INSTALL)
-    foreach(
-      _dest
-      ${_parsed_arg_INSTALL_LIB_DIRS}
-    )
+    foreach(_dest ${_parsed_arg_INSTALL_LIB_DIRS})
       install(
         DIRECTORY ${_setup_py_build_root}/install/lib/
         DESTINATION ${_dest}
-        PATTERN
-          "test"
-          EXCLUDE
-        REGEX
-          "${_parsed_arg_EXCLUDE_FROM_INSTALL}"
-          EXCLUDE
+        PATTERN "test" EXCLUDE
+        REGEX "${_parsed_arg_EXCLUDE_FROM_INSTALL}" EXCLUDE
       )
     endforeach()
   else()
-    foreach(
-      _dest
-      ${_parsed_arg_INSTALL_LIB_DIRS}
-    )
+    foreach(_dest ${_parsed_arg_INSTALL_LIB_DIRS})
       install(
         DIRECTORY ${_setup_py_build_root}/install/lib/
         DESTINATION ${_dest}
-        PATTERN
-          "test"
-          EXCLUDE
+        PATTERN "test" EXCLUDE
       )
     endforeach()
   endif()
 
   # install the generated executable
   if(_parsed_arg_EXECUTABLE AND _parsed_arg_INSTALL_BIN_DIR)
-      install(
-        PROGRAMS ${_setup_py_build_root}/install/bin/${pkg_name}
-        DESTINATION ${_parsed_arg_INSTALL_BIN_DIR}
-      )
+    install(PROGRAMS ${_setup_py_build_root}/install/bin/${pkg_name}
+            DESTINATION ${_parsed_arg_INSTALL_BIN_DIR}
+    )
   endif()
 endfunction()

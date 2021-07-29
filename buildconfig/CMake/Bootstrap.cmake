@@ -115,8 +115,8 @@ if(MSVC AND NOT CONDA_BUILD)
   # Add to the path so that cmake can configure correctly without the user
   # having to do it
   set(ENV{PATH} "${THIRD_PARTY_BIN};$ENV{PATH}")
-  # Set PATH for custom command or target build steps. Avoids the need to
-  # make external PATH updates
+  # Set PATH for custom command or target build steps. Avoids the need to make
+  # external PATH updates
   set(CMAKE_MSVCIDE_RUN_PATH ${THIRD_PARTY_BIN})
 
   # Set variables to help CMake find components
@@ -131,17 +131,15 @@ elseif(MSVC AND CONDA_BUILD)
   # Print out where we are looking for 3rd party stuff
   set(Python_FIND_REGISTRY NEVER)
   # used in later parts for MSVC to bundle Python
-  set(MSVC_PYTHON_EXECUTABLE_DIR
-      $ENV{CONDA_PREFIX}
-  )
+  set(MSVC_PYTHON_EXECUTABLE_DIR $ENV{CONDA_PREFIX})
   set(THIRD_PARTY_BIN
       "$ENV{CONDA_PREFIX}/Library/bin;$ENV{CONDA_PREFIX}/Library/lib;${MSVC_PYTHON_EXECUTABLE_DIR}"
   )
   # Add to the path so that cmake can configure correctly without the user
   # having to do it
   set(ENV{PATH} "${THIRD_PARTY_BIN};$ENV{PATH}")
-  # Set PATH for custom command or target build steps. Avoids the need to
-  # make external PATH updates
+  # Set PATH for custom command or target build steps. Avoids the need to make
+  # external PATH updates
   set(CMAKE_MSVCIDE_RUN_PATH ${THIRD_PARTY_BIN})
 else()
   if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -181,17 +179,25 @@ endfunction()
 
 # Find python interpreter
 set(MINIMUM_PYTHON_VERSION 3.6)
-find_package(Python ${MINIMUM_PYTHON_VERSION} REQUIRED
-             COMPONENTS Interpreter Development NumPy)
-# If anything external uses find_package(PythonInterp) then make sure it finds the correct version and executable
+find_package(
+  Python ${MINIMUM_PYTHON_VERSION} REQUIRED COMPONENTS Interpreter Development
+                                                       NumPy
+)
+# If anything external uses find_package(PythonInterp) then make sure it finds
+# the correct version and executable
 set(PYTHON_EXECUTABLE ${Python_EXECUTABLE})
 set(Python_ADDITIONAL_VERSIONS ${Python_VERSION_MAJOR}.${Python_VERSION_MINOR})
 
-# Search for the pythonw executable if it has not already been found
-# Will only look in the folder containing the current python.exe
-if (NOT Python_W_EXECUTABLE)
+# Search for the pythonw executable if it has not already been found Will only
+# look in the folder containing the current python.exe
+if(NOT Python_W_EXECUTABLE)
   get_filename_component(Python_Binary_Dir ${PYTHON_EXECUTABLE} DIRECTORY)
-  find_program(Python_W_EXECUTABLE PATHS ${Python_Binary_Dir} NAMES pythonw NO_DEFAULT_PATH)
+  find_program(
+    Python_W_EXECUTABLE
+    PATHS ${Python_Binary_Dir}
+    NAMES pythonw
+    NO_DEFAULT_PATH
+  )
 endif()
 
 # Handle switching between previously configured Python verions
@@ -202,5 +208,19 @@ if(Python_INCLUDE_DIR
   message(
     STATUS "Python version has changed. Clearing previous Python configuration."
   )
-  unset_cached_Python_variables()
+  unset_cached_python_variables()
+endif()
+
+# What version of setuptools are we using?
+execute_process(
+  COMMAND ${Python_EXECUTABLE} -c
+          "import setuptools;print(setuptools.__version__)"
+  RESULT_VARIABLE _setuptools_version_check_result
+  OUTPUT_VARIABLE Python_SETUPTOOLS_VERSION
+  ERROR_VARIABLE _setuptools_version_check_error
+)
+if(NOT _setuptools_version_check_result EQUAL 0)
+  message(FATAL_ERROR "Unable to determine setuptools version:\n"
+                      "    ${_setuptools_version_check_error}"
+  )
 endif()

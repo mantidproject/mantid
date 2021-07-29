@@ -102,14 +102,26 @@ def plot_md_ws_from_names(names, errors, overplot, fig=None):
                                 ax_properties=None, window_title=None)
 
 
-def superplot_from_names(names):
+def superplot_from_names(names, plot_kwargs):
     """
     Open the superplot with a list of workspaces but no workspace indexes
     selected.
 
     :param names: A list of workspace names
     """
-    return plot(names, wksp_indices=[], superplot=True)
+    return plot(names, plot_kwargs=plot_kwargs, wksp_indices=[],
+                superplot=True)
+
+
+def superplot_with_errors_from_names(names, plot_kwargs):
+    """
+    Open the superplot with a list of workspaces but no workspace indexes
+    selected.
+
+    :param names: A list of workspace names
+    """
+    return plot(names, errors=True, plot_kwargs=plot_kwargs, wksp_indices=[],
+                superplot=True)
 
 
 def plot_from_names(names, errors, overplot, fig=None, show_colorfill_btn=False, advanced=False,

@@ -19,11 +19,16 @@ fi
 [ -d $WORKSPACE/build ] || mkdir $WORKSPACE/build
 cd $WORKSPACE/build
 
+# remove old results if they exist
+find -name cppcheck.xml -delete
+
+# configure cmake
 if [ "$(command -v ninja)" ]; then
   CMAKE_GENERATOR="-G Ninja"
 elif [ "$(command -v ninja-build)" ]; then
   CMAKE_GENERATOR="-G Ninja"
 fi
-
 cmake ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=Debug -DCPPCHECK_GENERATE_XML=TRUE -DCPPCHECK_NUM_THREADS=$BUILD_THREADS ..
+
+# run cppcheck
 cmake --build . --target cppcheck
