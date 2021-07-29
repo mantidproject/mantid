@@ -170,7 +170,7 @@ if(WIN32)
   set(WINSOCK ws2_32)
 endif()
 
-target_link_libraries(SINQ PUBLIC Mantid::Kernel Mantid::Geometry Mantid::API Mantid::DataObjects ${WINSOCK} PRIVATE Mantid::Crystal )
+target_link_libraries(SINQ PUBLIC Mantid::Kernel Mantid::Geometry Mantid::API Mantid::DataObjects ${WINSOCK})
 
 # Add the unit tests directory
 add_subdirectory(test)
