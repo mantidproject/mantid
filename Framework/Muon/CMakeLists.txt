@@ -122,9 +122,7 @@ generate_mantid_export_header(Muon FALSE)
 # Installation settings
 if (CONDA_BUILD)
 set(TARGET_EXPORT_NAME "MantidMuonTargets")
-mtd_install_framework_lib(TARGETS Muon PLUGIN_LIB INSTALL_EXPORT_FILE
-EXPORT_NAME ${TARGET_EXPORT_NAME}
-)
+mtd_install_framework_lib(TARGETS Muon PLUGIN_LIB)
 else()
 mtd_install_targets(TARGETS
                     Muon
