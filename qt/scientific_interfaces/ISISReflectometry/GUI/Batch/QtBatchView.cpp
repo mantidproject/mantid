@@ -48,8 +48,11 @@ void QtBatchView::initLayout() {
   m_instrument = std::make_unique<QtInstrumentView>(createReductionAlg(), this);
   m_ui.batchTabs->addTab(m_instrument.get(), "Instrument Settings");
 
+#ifdef DEBUG
+  // Only enabled in Debug mode to prevent users "finding" it in the nightly
   m_preview = std::make_unique<QtPreviewView>(this);
   m_ui.batchTabs->addTab(m_preview.get(), "Reduction Preview");
+#endif // DEBUG
 
   m_save = createSaveTab();
   m_ui.batchTabs->addTab(m_save.get(), "Save ASCII");

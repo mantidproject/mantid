@@ -8,11 +8,16 @@
 #include "PreviewModel.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/Logger.h"
 
 #include <memory>
 #include <string>
 
 using namespace Mantid::API;
+
+namespace {
+Mantid::Kernel::Logger g_log("Reflectometry Preview Model");
+}
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
@@ -20,6 +25,7 @@ void PreviewModel::loadWorkspace(std::string const &workspaceName) {
   auto &adsInstance = AnalysisDataService::Instance();
   if (adsInstance.doesExist(workspaceName)) {
     m_instViewWorkspace = adsInstance.retrieveWS<MatrixWorkspace>(workspaceName);
+    g_log.information("Loaded " + workspaceName);
     return;
   }
   // TODO load
