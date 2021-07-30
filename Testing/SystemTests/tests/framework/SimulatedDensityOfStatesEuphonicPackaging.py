@@ -54,45 +54,38 @@ class SimulatedDensityOfStatesEuphonicInstallationTest(MantidSystemTest):
                                         "Here are the directory contents: "
                                         "\n".join(list(prefix_path.iterdir())))
 
-            sys.path = [str(scipy_site_packages)] + sys.path
-            os.environ['PYTHONPATH'] = str(scipy_site_packages) + ':' + os.environ['PYTHONPATH']
-
-            #raise Exception(list(enumerate(sys.path)))
-
-            #sys.path.append(str(tmp_site_packages))
-            importlib.reload(site)
-            globals()['packaging'] = importlib.import_module('packaging')
+            process_pythonpath = str(scipy_site_packages) + ':' + os.environ['PYTHONPATH']
+            site.addsitedir(scipy_site_packages)
 
             # Install minimum Scipy version for Euphonic if necessary
             from packaging import version
             if version.parse(scipy.version.version) < version.parse('1.0.1'):
                 process = subprocess.run([sys.executable, "-m", "pip", "install",
-                                          "--ignore-installed", "--no-deps",
-                                          "--prefix", scipy_prefix]
-                                         #+ compatibility_args
-                                         + ["scipy==1.0", "pytest"],
+                                          "--ignore-installed",
+                                          "--no-deps",
+                                          "--prefix", scipy_prefix,
+                                         "scipy==1.0", "pytest"],
                                          stdout=subprocess.PIPE,
-                                         stderr=subprocess.STDOUT)
+                                         stderr=subprocess.STDOUT,
+                                         env={'PYTHONPATH': process_pythonpath})
                 print(process.stdout.decode('utf-8'))
 
-                importlib.reload(site)
+                #importlib.reload(site)
                 importlib.reload(scipy)
 
             process = subprocess.run([sys.executable, "-m", "pip", "install",
-                                      "--prefix", euphonic_prefix]
-                                     #+ compatibility_args
-                                     + ["euphonic"],
+                                      "--prefix", euphonic_prefix,
+                                      "euphonic[phonopy_reader]"],
                                      stdout=subprocess.PIPE,
-                                     stderr=subprocess.STDOUT)
+                                     stderr=subprocess.STDOUT,
+                                     env={'PYTHONPATH': process_pythonpath})
             print(process.stdout.decode('utf-8'))
 
             prefix_path = pathlib.Path(euphonic_prefix)
             euphonic_site_packages = next((prefix_path / 'lib').iterdir()
                                           ) / 'site-packages'
-            sys.path.append(str(euphonic_site_packages))
+            site.addsitedir(euphonic_site_packages)
 
-            importlib.reload(site)
-            globals()['euphonic'] = importlib.import_module('euphonic')
             import euphonic  # noqa: F401
 
             SimulatedDensityOfStates(CASTEPFile=find_file('Na2SiF6_CASTEP.phonon'),
