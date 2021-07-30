@@ -202,7 +202,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
     def handle_tab_changed(self):
         index = self.tabs.currentIndex()
         # the plot mode indicies are from the order the plots are stored
-        if TAB_ORDER[index] in ["Home", "Grouping", "Phase Table"]:  # Plot all the selected data
+        if TAB_ORDER[index] in ["Home", "Grouping", "Corrections", "Phase Table"]:  # Plot all the selected data
             plot_mode = self.plot_widget.data_index
         # Plot the displayed workspace
         elif TAB_ORDER[index] in ["Fitting", "Sequential Fitting"]:

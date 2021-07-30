@@ -328,3 +328,11 @@ def run_crop_workspace(ws, start, end):
     alg.setProperty("XMax", end)
     alg.execute()
     return alg.getProperty("OutputWorkspace").valueAsStr
+
+
+def run_create_single_valued_workspace(parameter_dict):
+    alg = mantid.AlgorithmManager.create("CreateSingleValuedWorkspace")
+    alg.initialize()
+    alg.setProperties(parameter_dict)
+    alg.execute()
+    return alg.getProperty("OutputWorkspace").valueAsStr

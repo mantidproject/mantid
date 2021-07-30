@@ -206,7 +206,7 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
 
     def handle_tab_changed(self):
         index = self.tabs.currentIndex()
-        if TAB_ORDER[index] in ["Home", "Grouping", "Phase Table"]:  # Plot all the selected data
+        if TAB_ORDER[index] in ["Home", "Grouping", "Corrections", "Phase Table"]:  # Plot all the selected data
             plot_mode = self.plot_widget.data_index
         elif TAB_ORDER[index] in ["Fitting", "Sequential Fitting", "Transform"]:  # Plot the displayed workspace
             plot_mode = self.plot_widget.frequency_index

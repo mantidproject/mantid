@@ -120,7 +120,8 @@ class CorrectionsPresenter(QObject):
 
         corrected_runs_and_groups = self.thread_model_wrapper.result
         if corrected_runs_and_groups is not None:
-            self._perform_asymmetry_pairs_and_diffs_calculation(*corrected_runs_and_groups)
+            runs, groups = corrected_runs_and_groups
+            self._perform_asymmetry_pairs_and_diffs_calculation(runs, groups)
 
     def handle_asymmetry_pairs_and_diffs_calc_finished(self) -> None:
         """Handle when the calculation of Asymmetry, Pairs and Diffs has finished finished."""

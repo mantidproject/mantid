@@ -7,19 +7,19 @@
 from mantid.py36compat import dataclass
 
 from mantid.api import AlgorithmManager, FunctionFactory, IFunction, Workspace
-from mantid.simpleapi import CreateSingleValuedWorkspace
 from Muon.GUI.Common.ADSHandler.ADS_calls import add_ws_to_ads, retrieve_ws
 from Muon.GUI.Common.contexts.corrections_context import (BACKGROUND_MODE_NONE, FLAT_BACKGROUND,
                                                           FLAT_BACKGROUND_AND_EXP_DECAY, RUNS_ALL, GROUPS_ALL)
 from Muon.GUI.Common.contexts.muon_context import MuonContext
 from Muon.GUI.Common.corrections_tab_widget.corrections_model import CorrectionsModel
-from Muon.GUI.Common.utilities.algorithm_utils import run_Fit, run_minus
+from Muon.GUI.Common.utilities.algorithm_utils import run_Fit, run_create_single_valued_workspace, run_minus
 from Muon.GUI.Common.utilities.workspace_data_utils import x_limits_of_workspace
 from Muon.GUI.Common.utilities.workspace_utils import StaticWorkspaceWrapper
 
 BACKGROUND_PARAM = "A0"
 DEFAULT_A_VALUE = 1e6
 MAX_ACCEPTABLE_CHI_SQUARED = 10.0
+TEMPORARY_BACKGROUND_WORKSPACE_NAME = "__temp_background_workspace"
 
 
 @dataclass
@@ -45,11 +45,12 @@ class BackgroundCorrectionData:
         self.exp_decay.setParameter("A", DEFAULT_A_VALUE)
 
     def create_background_workspace(self) -> Workspace:
-        background = self.flat_background.getParameterValue(BACKGROUND_PARAM)
-        background_error = self.flat_background.getError(BACKGROUND_PARAM)
-        background_workspace = CreateSingleValuedWorkspace(DataValue=background, ErrorValue=background_error,
-                                                           StoreInADS=False)
-        return background_workspace
+        return run_create_single_valued_workspace(self._create_background_workspace_params())
+
+    def _create_background_workspace_params(self) -> dict:
+        return {"DataValue": self.flat_background.getParameterValue(BACKGROUND_PARAM),
+                "ErrorValue": self.flat_background.getError(BACKGROUND_PARAM),
+                "OutputWorkspace": TEMPORARY_BACKGROUND_WORKSPACE_NAME}
 
 
 class BackgroundCorrectionsModel:
