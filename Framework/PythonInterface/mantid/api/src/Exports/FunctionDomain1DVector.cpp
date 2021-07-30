@@ -15,6 +15,7 @@
 #include <boost/python/module.hpp>
 
 using Mantid::API::FunctionDomain1D;
+using Mantid::API::FunctionDomain1D_sptr;
 using Mantid::API::FunctionDomain1DVector;
 using namespace Mantid::PythonInterface;
 using namespace Mantid::PythonInterface::Converters;
@@ -32,7 +33,7 @@ FunctionDomain1DVector *createFunctionDomain1DVector(const boost::python::object
 
 void export_FunctionDomain1DVector() {
 
-  register_ptr_to_python<std::shared_ptr<FunctionDomain1DVector>>();
+  register_ptr_to_python<FunctionDomain1D_sptr>();
 
   class_<FunctionDomain1DVector, bases<FunctionDomain1D>, boost::noncopyable>("FunctionDomain1DVector", no_init)
       .def("__init__", make_constructor(&createFunctionDomain1DVector, default_call_policies(), (arg("xvalues"))));
