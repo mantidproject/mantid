@@ -114,6 +114,9 @@ class SuperplotModel(QObject):
         if not self._plotted_data:
             self._plot_mode = None
 
+        if name in self._ws_colors:
+            del self._ws_colors[name]
+
     def get_workspaces(self):
         """
         Get the list of workspace names.
