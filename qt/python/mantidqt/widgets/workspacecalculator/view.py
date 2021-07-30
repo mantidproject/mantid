@@ -10,6 +10,8 @@ from qtpy.QtCore import Qt
 from qtpy import QtGui
 from qtpy.QtWidgets import QWidget
 from mantidqt.utils.qt import load_ui
+import time
+import threading
 
 
 class WorkspaceCalculatorView(QWidget):
@@ -60,6 +62,12 @@ class WorkspaceCalculatorView(QWidget):
             self.label_validation_rhs.setVisible(not validationValue)
             self.label_validation_rhs.setToolTip(tooltip)
 
+    def timeout_disconnect(self):
+        """This method runs in a separate thread and will disconnect WorkspaceSelectors listening to changes in the ADS,
+        with a timeout of 15 seconds."""
+        time.sleep(15)
+        self.disconnectADS()
+
     def connectADS(self, selector_name):
         """Explicitly connects the workspace selector observers to the ADS."""
         if selector_name == "lhs" and not self.lhs_ws.isConnected():
@@ -68,6 +76,9 @@ class WorkspaceCalculatorView(QWidget):
             self.rhs_ws.connectObservers()
         elif selector_name == "output" and not self.output_ws.isConnected():
             self.output_ws.connectObservers()
+
+        _thread = threading.Thread(target=self.timeout_disconnect)
+        _thread.start()
 
     def disconnectADS(self):
         """Disconnects connected workspace selectors from signals coming from the ADS."""
