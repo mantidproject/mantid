@@ -726,6 +726,9 @@ void MatrixWorkspace::getIntegratedSpectra(std::vector<double> &out, const doubl
                                            const bool entireRange) const {
   out.resize(this->getNumberHistograms(), 0.0);
 
+  // offset for histogram data, because the x axis is not the same size for histogram and point data.
+  const size_t histogramOffset = this->isHistogramData() ? 1 : 0;
+
   // Run in parallel if the implementation is threadsafe
   PARALLEL_FOR_IF(this->threadSafe())
   for (int wksp_index = 0; wksp_index < static_cast<int>(this->getNumberHistograms()); wksp_index++) {
@@ -733,21 +736,21 @@ void MatrixWorkspace::getIntegratedSpectra(std::vector<double> &out, const doubl
     const Mantid::MantidVec &x = this->readX(wksp_index);
     const auto &y = this->y(wksp_index);
     // If it is a 1D workspace, no need to integrate
-    if ((x.size() <= 2) && (!y.empty())) {
+    if ((x.size() <= 1 + histogramOffset) && (!y.empty())) {
       out[wksp_index] = y[0];
     } else {
       // Iterators for limits - whole range by default
       Mantid::MantidVec::const_iterator lowit, highit;
       lowit = x.begin();
-      highit = x.end() - 1;
+      highit = x.end() - histogramOffset;
 
       // But maybe we don't want the entire range?
       if (!entireRange) {
         // If the first element is lower that the xmin then search for new lowit
         if ((*lowit) < minX)
           lowit = std::lower_bound(x.begin(), x.end(), minX);
-        // If the last element is higher that the xmax then search for new lowit
-        if ((*highit) > maxX)
+        // If the last element is higher that the xmax then search for new highit
+        if (*(highit - 1 + histogramOffset) > maxX)
           highit = std::upper_bound(lowit, x.end(), maxX);
       }
 
