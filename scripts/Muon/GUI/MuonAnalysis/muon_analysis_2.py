@@ -140,7 +140,6 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         vertical_layout.addWidget(self.tabs)
         vertical_layout.addWidget(self.help_widget.view)
         central_widget.setLayout(vertical_layout)
-        central_widget.setMinimumWidth(730)
 
         self.setCentralWidget(central_widget)
         self.setWindowTitle(self.context.window_title)
@@ -195,6 +194,8 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.tabs.addTabWithOrder(self.results_tab.results_tab_view, 'Results')
         self.tabs.addTabWithOrder(self.model_fitting_tab.model_fitting_tab_view, 'Model Fitting')
         self.tabs.set_slot_for_tab_changed(self.handle_tab_changed)
+        self.tabs.setElideMode(QtCore.Qt.ElideNone)
+        self.tabs.setUsesScrollButtons(False)
 
     def handle_tab_changed(self):
         index = self.tabs.currentIndex()
