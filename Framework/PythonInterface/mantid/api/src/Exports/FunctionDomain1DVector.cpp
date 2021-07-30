@@ -13,6 +13,7 @@
 #include <boost/python/class.hpp>
 #include <boost/python/make_constructor.hpp>
 #include <boost/python/module.hpp>
+#include <boost/python/register_ptr_to_python.hpp>
 
 using Mantid::API::FunctionDomain1D;
 using Mantid::API::FunctionDomain1D_sptr;
