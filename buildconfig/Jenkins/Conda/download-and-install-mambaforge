@@ -1,0 +1,36 @@
+#!/bin/bash -ex
+
+# This script will download and install mambaforge if it's not present where expected
+#
+# Expected args:
+#   1. EXPECTED_MAMBAFORGE_PATH: path to where mambaforge should be installed
+#   2. EXPECTED_CONDA_PATH: path to the conda executable
+#   3. CLEAN_BUILD: whether or not to force mambaforge to be removed before attempting to install it again
+
+EXPECTED_MAMBAFORGE_PATH=$1
+EXPECTED_CONDA_PATH=$2
+CLEAN_BUILD=$3
+
+MAMBAFORGE_SCRIPT_NAME=Mambaforge-$(uname)-$(uname -m).sh
+URL=https://github.com/conda-forge/miniforge/releases/latest/download/$MAMBAFORGE_SCRIPT_NAME
+
+if [[ $CLEAN_BUILD  == true ]]; then
+    rm -rf $EXPECTED_MAMBAFORGE_PATH
+fi
+
+# Ensure conda is installed
+if [[ ! -f $EXPECTED_CONDA_PATH ]]; then
+    if [[ ! -f $MAMBAFORGE_SCRIPT_NAME ]]; then
+        # Download mambaforge
+        if [ -x "$(which curl)" ]; then
+            curl -L -O $URL
+        elif [ -x "$(which wget)" ] ; then
+            wget $URL
+        else
+            echo "Could not download Conda as wget and curl are not installed."
+            exit 1
+        fi
+    fi
+    bash $MAMBAFORGE_SCRIPT_NAME -b -p $EXPECTED_MAMBAFORGE_PATH
+    rm $MAMBAFORGE_SCRIPT_NAME
+fi

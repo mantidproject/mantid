@@ -1,0 +1,98 @@
+#!/bin/bash -ex
+
+# This script expects a setup environment with all dependencies availiable in
+# the environment
+#
+# Expected args:
+#   1. WORKSPACE: path to the workspace/source code that this should run inside
+#   2. ENABLE_SYSTEM_TESTS: whether or not system tests are being ran/built
+#   3. ENABLE_UNIT_TESTS: whether or not unit tests are being ran/built
+#   4. ENABLE_DOCS: Whether or not the docs have been built
+#   5. ENABLE_DOC_TESTS: Whether or not the doc tests should be ran
+#   6. BUILD_THREADS: The number of threads to use during testing
+#   7. USE_CORE_DUMPS: Activate core dumps (Linux only)
+
+WORKSPACE=$1
+ENABLE_SYSTEM_TESTS=$2
+ENABLE_UNIT_TESTS=$3
+ENABLE_DOCS=$4
+ENABLE_DOC_TESTS=$5
+BUILD_THREADS=$6
+USE_CORE_DUMPS=$7
+
+XVFB_SERVER_NUM=101
+ULIMIT_CORE_ORIG=$(ulimit -c)
+
+function run_with_xvfb {
+    if [ $(command -v xvfb-run) ]; then
+        # Use -e because a bug on RHEL7 means --error-file produces an error: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=337703;msg=2
+        # Use -noreset because of an X Display bug caused by a race condition in xvfb: https://gitlab.freedesktop.org/xorg/xserver/-/issues/1102
+        xvfb-run -e /dev/stderr --server-args="-core -noreset -screen 0 640x480x24" \
+        --server-num=${XVFB_SERVER_NUM} $@
+    else
+        eval $@
+    fi
+}
+
+function terminate_xvfb_sessions {
+    if [ $(command -v xvfb-run) ]; then
+        echo "Terminating existing Xvfb sessions"
+
+        # Kill Xvfb processes
+        killall Xvfb || true
+
+        # Remove Xvfb X server lock files
+        rm -f /tmp/.X${XVFB_SERVER_NUM}-lock
+    fi
+}
+
+function onexit {
+    if [[ ${USE_CORE_DUMPS} == true ]]; then
+        ulimit -c $ULIMIT_CORE_ORIG
+    fi
+}
+
+# Clean up prior to testing
+# Prevent race conditions when creating the user config directory
+userconfig_dir=$HOME/.mantid
+rm -fr $userconfig_dir
+
+# Remove GUI qsettings files
+rm -f ~/.config/mantidproject/mantidworkbench.ini
+
+mkdir -p $userconfig_dir
+# use a fixed number of openmp threads to avoid overloading the system
+echo MultiThreaded.MaxCores=2 > $userconfig_dir/Mantid.user.properties
+
+# Setup core dumping
+trap onexit INT TERM EXIT
+if [[ ${USE_CORE_DUMPS} == true ]]; then
+    ulimit -c unlimited
+fi
+
+# Run unit tests
+cd $WORKSPACE/build
+if [[ $ENABLE_UNIT_TESTS == true ]]; then
+    run_with_xvfb ctest -j$BUILD_THREADS --no-compress-output -T Test --schedule-random --output-on-failure
+    terminate_xvfb_sessions
+fi
+
+if [[ $ENABLE_DOCS == true && $ENABLE_DOC_TESTS == true ]]; then
+    run_with_xvfb cmake --build . --target docs-doctest -j$BUILD_THREADS
+    terminate_xvfb_sessions
+fi
+
+if [[ $ENABLE_SYSTEM_TESTS == true ]]; then
+    rm -fr $userconfig_dir
+    rm -f ~/.config/mantidproject/mantidworkbench.ini
+
+    # Turn off any auto updating on startup
+    mkdir -p $userconfig_dir
+    userprops=$userconfig_dir/Mantid.user.properties
+    echo "UpdateInstrumentDefinitions.OnStartup = 0" > $userprops
+    echo "usagereports.enabled = 0" >> $userprops
+    echo "CheckMantidVersion.OnStartup = 0" >> $userprops
+
+    run_with_xvfb $WORKSPACE/build/systemtest -j$BUILD_THREADS
+    terminate_xvfb_sessions
+fi
