@@ -126,6 +126,8 @@ void MultipleScatteringCorrection::exec() {
   // L2D needs to be calculated w.r.t the detector
   // L12 is independent from the detector, therefore can be cached outside
   // - L12 is a upper off-diagonal matrix
+  // NOTE: if the sample size/volume is too large, we might need to use openMP
+  //       to parallelize the calculation
   size_t len_l12 = numVolumeElements * (numVolumeElements - 1) / 2;
   std::vector<double> sample_L12s(len_l12, 0.0);
   for (size_t i = 0; i < numVolumeElements; ++i) {

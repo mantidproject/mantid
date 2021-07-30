@@ -12,13 +12,21 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAlgorithms/CompareWorkspaces.h"
 #include "MantidAlgorithms/MultipleScatteringCorrection.h"
 #include "MantidDataHandling/SetSample.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/UnitFactory.h"
 
 using Mantid::Algorithms::MultipleScatteringCorrection;
+using Mantid::Kernel::Logger;
+
+namespace {
+/// static logger
+Logger g_log("MultipleScatteringCorrectionTest");
+} // namespace
 
 class MultipleScatteringCorrectionTest : public CxxTest::TestSuite {
 public:
@@ -30,108 +38,71 @@ public:
   }
   static void destroySuite(MultipleScatteringCorrectionTest *suite) { delete suite; }
 
-  void test_vanadium() {
+  void test_single() {
     // Create a workspace with vanadium data
-    Mantid::API::MatrixWorkspace_sptr ws = MakeSampleWorkspaceVanadium();
+    const std::string ws_name = "ws_vanadium";
+    MakeSampleWorkspaceVanadium(ws_name);
+    // note: use MakeSampleWorkspaceDiamond() is decided to use diamond, keep in mind that
+    //       CarpenterSampleCorrection does not work on diamond workspace.
 
     // correct using Mayer correction
     auto unitsAlg = Mantid::API::AlgorithmManager::Instance().create("ConvertUnits");
     unitsAlg->initialize();
-    unitsAlg->setChild(true);
-    unitsAlg->setProperty("InputWorkspace", ws);
+    unitsAlg->setPropertyValue("InputWorkspace", ws_name);
     unitsAlg->setProperty("Target", "TOF");
+    unitsAlg->setPropertyValue("OutputWorkspace", "ws_TOF");
     unitsAlg->execute();
-    Mantid::API::MatrixWorkspace_sptr ws_TOF = unitsAlg->getProperty("OutputWorkspace");
     //
     auto mayerAlg = Mantid::API::AlgorithmManager::Instance().create("MayersSampleCorrection");
-    mayerAlg->setChild(true);
     mayerAlg->initialize();
-    mayerAlg->setProperty("InputWorkspace", ws_TOF);
+    mayerAlg->setProperty("InputWorkspace", "ws_TOF");
     mayerAlg->setProperty("MultipleScattering", true);
+    mayerAlg->setPropertyValue("OutputWorkspace", "rst_mayer");
     mayerAlg->execute();
-    Mantid::API::MatrixWorkspace_sptr ws_mayer = mayerAlg->getProperty("OutputWorkspace");
 
     // correct using Carpenter correction
-    unitsAlg->setProperty("InputWorkspace", ws);
+    unitsAlg->setPropertyValue("InputWorkspace", ws_name);
     unitsAlg->setProperty("Target", "Wavelength");
+    unitsAlg->setPropertyValue("OutputWorkspace", "ws_wavelength");
     unitsAlg->execute();
-    Mantid::API::MatrixWorkspace_sptr ws_wavelength = unitsAlg->getProperty("OutputWorkspace");
     //
     auto carrAlg = Mantid::API::AlgorithmManager::Instance().create("CarpenterSampleCorrection");
-    carrAlg->setChild(true);
     carrAlg->initialize();
-    carrAlg->setProperty("InputWorkspace", ws_wavelength);
+    carrAlg->setPropertyValue("InputWorkspace", "ws_wavelength");
+    carrAlg->setPropertyValue("OutputWorkspace", "rst_carpenter");
     carrAlg->execute();
-    Mantid::API::MatrixWorkspace_sptr ws_carr = carrAlg->getProperty("OutputWorkspace");
 
     // correct using multiple scattering correction
     MultipleScatteringCorrection msAlg;
     msAlg.initialize();
-    // TOF target
-    msAlg.setProperty("InputWorkspace", ws);
-    msAlg.setProperty("Target", "TOF");
-    msAlg.execute();
-    Mantid::API::MatrixWorkspace_sptr ws_ms_TOF = msAlg.getProperty("OutputWorkspace");
     // Wavelength target
-    msAlg.setProperty("InputWorkspace", ws);
-    msAlg.setProperty("Target", "Wavelength");
+    msAlg.setPropertyValue("InputWorkspace", "ws_wavelength");
+    msAlg.setPropertyValue("OutputWorkspace", "rst_ms");
     msAlg.execute();
-    Mantid::API::MatrixWorkspace_sptr ws_ms_wavelength = msAlg.getProperty("OutputWorkspace");
+    TS_ASSERT(msAlg.isExecuted());
 
     // Compare the results
-    // TODO: Compare the results
-  }
+    // auto checker = Mantid::API::AlgorithmManager::Instance().create("CompareWorkspaces");
+    // checker->initialize();
+    // checker->setPropertyValue("Workspace1", "rst_mayer");
+    // checker->setPropertyValue("Workspace2", "rst_ms");
+    // checker->setPropertyValue("Tolerance", "1e-4");
+    // checker->setProperty("CheckInstrument", false);
+    // checker->setProperty("CheckMasking", false);
+    // checker->execute();
 
-  void test_diamond() {
-    // Create a workspace with diamond data
-    Mantid::API::MatrixWorkspace_sptr ws = MakeSampleWorkspaceDiamond();
+    // std::string msg = checker->getProperty("Messages");
 
-    // correct using Mayer correction
-    auto unitsAlg = Mantid::API::AlgorithmManager::Instance().create("ConvertUnits");
-    unitsAlg->initialize();
-    unitsAlg->setChild(true);
-    unitsAlg->setProperty("InputWorkspace", ws);
-    unitsAlg->setProperty("Target", "TOF");
-    unitsAlg->execute();
-    Mantid::API::MatrixWorkspace_sptr ws_TOF = unitsAlg->getProperty("OutputWorkspace");
-    //
-    auto mayerAlg = Mantid::API::AlgorithmManager::Instance().create("MayersSampleCorrection");
-    mayerAlg->setChild(true);
-    mayerAlg->initialize();
-    mayerAlg->setProperty("InputWorkspace", ws_TOF);
-    mayerAlg->setProperty("MultipleScattering", true);
-    mayerAlg->execute();
-    Mantid::API::MatrixWorkspace_sptr ws_mayer = mayerAlg->getProperty("OutputWorkspace");
-
-    // correct using multiple scattering correction
-    MultipleScatteringCorrection msAlg;
-    msAlg.initialize();
-    // TOF target
-    msAlg.setProperty("InputWorkspace", ws);
-    msAlg.setProperty("Target", "TOF");
-    msAlg.execute();
-    Mantid::API::MatrixWorkspace_sptr ws_ms_TOF = msAlg.getProperty("OutputWorkspace");
-
-    // cast both to wavelength
-    unitsAlg->setProperty("InputWorkspace", ws_mayer);
-    unitsAlg->setProperty("Target", "Wavelength");
-    unitsAlg->execute();
-    Mantid::API::MatrixWorkspace_sptr ws_mayer_wavelength = unitsAlg->getProperty("OutputWorkspace");
-    unitsAlg->setProperty("InputWorkspace", ws_ms_TOF);
-    unitsAlg->setProperty("Target", "Wavelength");
-    unitsAlg->execute();
-    Mantid::API::MatrixWorkspace_sptr ws_ms_wavelength = unitsAlg->getProperty("OutputWorkspace");
-
-    // Compare the results
+    // g_log.notice() << msg << '\n';
   }
 
 private:
   /**
-   * @brief create a sample workspace with a mocked geometry
+   * @brief generate a workspace and register in ADS with given name
    *
-   * @return Mantid::API::MatrixWorkspace
+   * @param name
    */
-  static Mantid::API::MatrixWorkspace_sptr MakeSampleWorkspace() {
+  void MakeSampleWorkspace(std::string const &name) {
     // Create a fake workspace with TOF data
     auto sampleAlg = Mantid::API::AlgorithmManager::Instance().create("CreateSampleWorkspace");
     sampleAlg->initialize();
@@ -141,13 +112,13 @@ private:
     sampleAlg->setProperty("XUnit", "TOF");
     sampleAlg->setProperty("XMin", 1000.0);
     sampleAlg->setProperty("XMax", 10000.0);
-    sampleAlg->setPropertyValue("OutputWorkspace", "sample_ws");
+    sampleAlg->setPropertyValue("OutputWorkspace", name);
     sampleAlg->execute();
 
     // edit the instrument geometry
     auto editAlg = Mantid::API::AlgorithmManager::Instance().create("EditInstrumentGeometry");
     editAlg->initialize();
-    editAlg->setPropertyValue("Workspace", "sample_ws");
+    editAlg->setPropertyValue("Workspace", name);
     editAlg->setProperty("PrimaryFlightPath", 5.0);
     editAlg->setProperty("SpectrumIDs", "1,2,3,4");
     editAlg->setProperty("L2", "2.0,2.0,2.0,2.0");
@@ -156,19 +127,16 @@ private:
     editAlg->setProperty("DetectorIDs", "1,2,3,4");
     editAlg->setProperty("InstrumentName", "Instrument");
     editAlg->execute();
-
-    Mantid::API::MatrixWorkspace_sptr ws = editAlg->getProperty("Workspace");
-
-    return ws;
   }
 
   /**
-   * @brief Vanadium sample workspace
+   * @brief make a sample workspace with V
    *
-   * @return Mantid::API::Workspace_sptr
+   * @param name
    */
-  static Mantid::API::MatrixWorkspace_sptr MakeSampleWorkspaceVanadium() {
-    Mantid::API::MatrixWorkspace_sptr ws = MakeSampleWorkspace();
+  void MakeSampleWorkspaceVanadium(std::string const &name) {
+    // make the workspace with given name
+    MakeSampleWorkspace(name);
 
     // vanadium
     const std::string chemical_formula = "V";
@@ -200,16 +168,14 @@ private:
     // set sample
     Mantid::DataHandling::SetSample setsample;
     setsample.initialize();
-    setsample.setProperty("InputWorkspace", ws);
+    setsample.setPropertyValue("InputWorkspace", name);
     setsample.setProperty("Material", material);
     setsample.setProperty("Geometry", geometry);
     setsample.execute();
-
-    return ws;
   }
 
-  static Mantid::API::MatrixWorkspace_sptr MakeSampleWorkspaceDiamond() {
-    Mantid::API::MatrixWorkspace_sptr ws = MakeSampleWorkspace();
+  void MakeSampleWorkspaceDiamond(std::string const &name) {
+    MakeSampleWorkspace(name);
 
     // diamond
     const std::string chemical_formula = "C";
@@ -241,11 +207,9 @@ private:
     // set sample
     Mantid::DataHandling::SetSample setsample;
     setsample.initialize();
-    setsample.setProperty("InputWorkspace", ws);
+    setsample.setPropertyValue("InputWorkspace", name);
     setsample.setProperty("Material", material);
     setsample.setProperty("Geometry", geometry);
     setsample.execute();
-
-    return ws;
   }
 };
