@@ -8,6 +8,7 @@
 
 #include "MantidPythonInterface/core/Converters/NDArrayToVector.h"
 #include "MantidPythonInterface/core/Converters/PySequenceToVector.h"
+#include "MantidPythonInterface/core/GetPointer.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/make_constructor.hpp>
@@ -19,6 +20,8 @@ using namespace Mantid::PythonInterface;
 using namespace Mantid::PythonInterface::Converters;
 using namespace boost::python;
 
+GET_POINTER_SPECIALIZATION(FunctionDomain1DVector)
+
 FunctionDomain1DVector *createFunctionDomain1DVector(const boost::python::object &xvalues) {
   if (NDArray::check(xvalues)) {
     return new FunctionDomain1DVector(NDArrayToVector<double>(NDArray(xvalues))());
@@ -28,6 +31,8 @@ FunctionDomain1DVector *createFunctionDomain1DVector(const boost::python::object
 }
 
 void export_FunctionDomain1DVector() {
+
+  register_ptr_to_python<std::shared_ptr<FunctionDomain1DVector>>();
 
   class_<FunctionDomain1DVector, bases<FunctionDomain1D>, boost::noncopyable>("FunctionDomain1DVector", no_init)
       .def("__init__", make_constructor(&createFunctionDomain1DVector, default_call_policies(), (arg("xvalues"))));

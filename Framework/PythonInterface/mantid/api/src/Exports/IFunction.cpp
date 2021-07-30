@@ -7,6 +7,7 @@
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionDomain.h"
 #include "MantidAPI/FunctionValues.h"
+#include "MantidAPI/Jacobian.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidCurveFitting/Jacobian.h"
 #include "MantidKernel/WarningSuppressions.h"
@@ -20,6 +21,7 @@
 #include <boost/python/manage_new_object.hpp>
 #include <boost/python/overloads.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
+#include <boost/python/to_python_value.hpp>
 
 using Mantid::API::IFunction;
 using Mantid::API::IFunction_sptr;
@@ -90,7 +92,7 @@ GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unused-local-typedef")
 ///@endcond
 
-Mantid::CurveFitting::Jacobian *getFunctionDeriv(IFunction &self, const Mantid::API::FunctionDomain &domain) {
+Mantid::API::Jacobian *getFunctionDeriv(IFunction &self, const Mantid::API::FunctionDomain &domain) {
   Mantid::API::FunctionValues values(domain);
   Mantid::CurveFitting::Jacobian out(values.size(), self.nParams());
   self.functionDeriv(domain, out);
