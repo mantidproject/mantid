@@ -19,6 +19,7 @@ New features
 Improvements
 ############
 - Documentation added for the group calibration routine for :ref:`PowderDiffractionCalibration <calibration_tofpd_group_calibration-ref>`, as as guidance for general users.
+- The group calibration routine for :ref:`PowderDiffractionCalibration <calibration_tofpd_group_calibration-ref>` is made more generic. Groups are now allowed with dedicated control parameters.
 - :ref:`ConvertDiffCal <algm-ConvertDiffCal-v1>` now optionally updates a previous calibration when converting offsets.
 - :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` major interface update along with enabling the calibration of T0 and sample position.
 - :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` minor interface update that allows fine control of bank rotation calibration.
@@ -28,6 +29,7 @@ Improvements
 
 Bugfixes
 ########
+- Fix issue with :ref:`PowderDiffractionCalibration <calibration_tofpd_group_calibration-ref>`.
 - Fix the issue with :ref:`SNSPowderReduction <algm-SNSPowderReduction>` - when invalid height unit is encountered while reading sample log, we should continue by ignoring geometry and rely purely on user input.
 - fix d-spacing calculation when parabolic model is selected.
 
