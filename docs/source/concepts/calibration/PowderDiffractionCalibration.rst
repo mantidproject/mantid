@@ -317,6 +317,180 @@ saved with :ref:`SaveDiffCal <algm-SaveDiffCal>`.
                Filename='calibration.h5')
 
 
+.. _calibration_tofpd_group_calibration_howto-ref:
+
+Group calibration how-to's
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**Generate grouping file**
+
+The first stage of the group calibration is to generate suitable grouping scheme
+for all spectra involved. The principle is to group similar spectra together.
+A natural choice for generating grouping file is to use :ref:`CreateGroupingWorkspace <algm-CreateGroupingWorkspace>`
+algorithm which embodies several choices of grouping detectors according to physical geometry. A generic approach
+has also been implemented into the framework of `mantidtotalscattering <https://github.com/neutrons/mantid_total_scattering>`_,
+which autoamtically groups input spectra according to the similarity among each other, based on a unsupervised clustering algorithm.
+`mantidtotalscattering` has been deployed on SNS analysis cluster and therefore the generic grouping routine can be accessed easily
+from analysis. Here follows is provided a simple Python script for calling the generic grouping routine on analysis,
+
+.. code-block:: python
+
+    #!/usr/bin/env python
+    import sys
+    sys.path.append("/opt/anaconda/envs/mantidtotalscattering/lib/python3.7/site-packages")
+    import json
+    from autogrouping import main
+
+    jsonfile = "/SNS/users/y8z/Temp/autogrouping_config.json"
+    with open(jsonfile, 'r') as jf:
+        config = json.load(jf)
+    # execute
+    main(config)
+
+An example json file is presented below to control the grouping behavior,
+
+.. code-block:: json
+
+    {
+        "DiamondFile": "/SNS/NOM/IPTS-24637/nexus/NOM_144974.nxs.h5",
+        "MaskFile": "/SNS/users/y8z/Temp/mask144974.out",
+
+        "GroupingMethod": "KMEANS_ED",
+        "NumberOutputGroups": "4",
+        "StandardScaling": false,
+
+        "FittingFunctionParameters": "Mixing,Intensity,PeakCentre,FWHM",
+        "FitPeaksArgs": { "PeakFunction": "PseudoVoigt",
+                        "PeakParameterNames": "Mixing",
+                        "PeakParameterValues": "0.6",
+                        "HighBackground": false,
+                        "MinimumPeakHeight": 3,
+                        "ConstrainPeakPositions": false
+                        },
+        "DiamondPeaks": "0.8920,1.0758,1.2615",
+        "ParameterThresholds": { "PeakCentre": "(0.01,10.0)",
+                                "Height": "(0.0,10000.0)"
+                            },
+
+        "FilterByChi2": { "Enable": true,
+                        "Value": 1e4
+                        },
+
+
+        "OutputGroupingFile": "./outputgrouping.xml",
+        "OutputMaskFile": "./outputmask.txt",
+
+        "OutputFitParamFile": "./outputfitparamtable.nxs",
+
+        "CacheDir": "./tmp/",
+
+        "Plots": { "Grouping": true,
+                "ED_Features": true,
+                "PCA": true,
+                "KMeans_Elbow": true,
+                "KMeans_Silhouette": true}
+    }
+
+
+and description for entries in the input json file is summarized in the following table,
+
+.. list-table::
+    :widths: 25 50
+    :header-rows: 1
+
+    * - Name
+      - Description
+    * - DiamondFile
+      - Full name of the input nexus file. For calibration purpose, usually a diamond measurement will be used.
+    * - MaskFile
+      - Full name of the input mask file. The file should contain a whole bunch of lines with a single integter in each line specifying the detector ID to be masked (index starting from 0).
+    * - GroupingMethod
+      - The method to be used for grouping. Valid input could be 'KMEANS_CC', 'KMEANS_DG', 'KMEANS_ED', 'DBSCAN_CC', 'DBSCAN_DG' and 'DBSCAN_ED'. 'KMEANS' and 'DBSCAN' refers to the two clustering methods. The second part of those values refers to the method for calculating similarity between spectra. 'CC' for cross-correlation, 'DG' for De Gelder similarity and 'ED' for Euclidean distance in parameter space.
+    * - NumberOutputGroups
+      - The number of groups to cluster all input spectra into. If using 'DBSCAN' method, there is no need to specify this parameter.
+    * - StandardScaling
+      - Whether or not to scale the input spectra by removing the mean and scaling to unit variance before clustering.
+    * - WorkspaceIndexRange
+      - Range of workspace indeces to include in automatic grouping process.
+    * - FittingFunctionParameters
+      - If 'ED' method is to be used for calculating similarity between spectra, this specifies the peak parameters to fit and to be used as the coordinate components in parameter space.
+    * - FitPeaksArgs
+      - Refer to the input parameters for :ref:`FitPeaks <algm-FitPeaks>` algorithm.
+    * - DiamondPeaks
+      - If 'ED' method is to be used for calculating similarity between spectra, this specifies the diamond peaks, as specified by the nominal peak positions, to be used for peak fitting and clustering.
+    * - ParameterThresholds
+      - If 'ED' method is to be used for calculating similarity between spectra, this specifies the threshold for relevant peak parameters. The threshold for each relevant peak parameter will be given as sub-entries.
+    * - FilterByChi2
+      - If 'ED' method is to be used for calculating similarity between spectra, this specifies whether or not to mask out pixels based on chi square of peak fitting. Two sub-entry 'Enable' is a boolean trigger and 'Value' is the threshold of chi square.
+    * - OutputGroupingFile
+      - Full name of the output grouping file.
+    * - OutputMaskFile
+      - Full name of the output masking file.
+    * - OutputFitParamFile
+      - If 'ED' method is to be used for calculating similarity between spectra, this specifies the full name of the output fit parameters file.
+    * - CacheDir
+      - Cache directory.
+    * - Plots
+      - A series of boolean variables control the plotting options. 'Grouping' for plotting the grouping of detectors. 'ED_Features' for plotting parameters correlation features. 'KMeans_Elbow' for plotting the elbow analysis result. 'KMeans_Silhouette' for plotting the Silhouette score.
+
+Here, it is worth noting that detectors may be masked out as belonging to none of the generated group. For example, when using the 'ED' method for defining the similarity between spectra, detectors will be masked out at the fitting stage if the corresponding spectra cannot be fitted successfully.
+
+Following is presented the clustering result for a NOMAD diamond measurement data,
+
+.. figure:: /images/NOMAD_Grouping.png
+  :width: 400px
+  :align: right
+
+**N.B.** For certain instruments (e.g., POWGEN), the automatic grouping routine may not work due to special d-space coverage for detectors. In this case, one may need to treat various ranges of detectors indidividually (using the input entry 'WorkspaceIndexRange' in the input json file) and also some of the groups may need to be manually specified.
+
+**Group calibration**
+
+Having the grouping file (and potentially the masking file) ready, one can then open Mantid workbench interface and trigger the group calibration routine, using a simple Python script, as presented below,
+
+.. code-block:: python
+
+    # import mantid algorithms, numpy and matplotlib
+    from mantid.simpleapi import *
+    import matplotlib.pyplot as plt
+    import numpy as np
+
+    infile = "/SNS/NOM/shared/User_story_test/NOM_US-231_240/group_calib.json"
+
+    group_calibration.process_json(infile)
+
+Here follows is presented a demo input json file,
+
+.. code-block:: json
+
+    {
+        "Calibrant": "161450",
+        "Groups": "/SNS/NOM/shared/User_story_test/NOM_US-231_240/outputgrouping.xml",
+        "Mask": "/SNS/NOM/shared/User_story_test/NOM_US-231_240/outputmask.xml",
+        "Instrument": "NOMAD",
+        "Date" : "2021_07_21",
+        "SampleEnvironment": "shifter",
+        "CalDirectory": "/SNS/NOM/shared/User_story_test/NOM_US-231_240/",
+        "CrossCorrelate": {"Step": 0.001,
+                        "DReference": 1.2615,
+                        "Xmin": 1.0,
+                        "Xmax": 3.0,
+                        "MaxDSpaceShift": 0.25,
+                        "OffsetThreshold": 1E-4,
+                        "SkipCrossCorrelation": [1,2,3]},
+        "PDCalibration": {"TofBinning": [300,0.01,16666],
+                        "PeakFunction": "Gaussian",
+                        "PeakWindow": 0.1,
+                        "PeakWidthPercent": 0.001}
+    }
+
+Parameters in the input json file should be self-explaining. Here only the 'Calibrant' and 'Groups' entries are mandatory. For 'CrossCorrelate' entries, one can refer to the parameters for
+:ref:`CrossCorrelate <algm-CrossCorrelate>` and :ref:`GetDetectorOffsets <algm-GetDetectorOffsets>`. For 'PDCalibration' entries, one can refer to the parameters for :ref:`PDCalibration <algm-PDCalibration>`. In the group calibration workflow, one of the crucial steps is to cross correlate spectra in a
+single group. A cycling cross correlation scheme is introduced at this point to continue cross correlate spectra until the median value of the offset of all
+spectra in a single group is below the preset threshold (specified by the 'OffsetThreshol' parameter). If the 'OffsetThreshold' is set to 1.0 or larger, that means no cycling of cross correlation will be conducted. The 'SkipCrossCorrelation' parameter is to control the skipping of cross correlation for specified groups of spectra. For 'Xmin', 'Xmax', 'MaxDSpaceShift' and 'OffsetThreshold' parameters, they can be either provided with a single number or a list. When a single number is given, the value will apply to all groups, whereas if a list is given, each entry in the list will apply to each single group respectively.
+
+After the group calibration is complete, one can then inspect the quality of calibration by generating various diagnostics plots as documented in :ref:`Calibration Diagnostics`.
+
+
 Saving and Loading Calibration
 ##############################
 
