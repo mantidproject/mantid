@@ -253,12 +253,10 @@ class BackgroundCorrectionsModelTest(unittest.TestCase):
 
         self.assertRaises(ValueError, self.model.run_background_correction_for, run, group)
 
-    @mock.patch("Muon.GUI.Common.corrections_tab_widget.background_corrections_model.retrieve_ws")
-    def _populate_background_corrections_data(self, mock_retrieve_ws):
-        workspace = CreateSampleWorkspace()
-        mock_retrieve_ws.return_value = workspace
+    def _populate_background_corrections_data(self):
+        workspace_name = "HIFI84447; Group; fwd; Counts; MA"
+        CreateSampleWorkspace(OutputWorkspace=workspace_name)
 
-        workspace_name = f"HIFI84447; Group; fwd; Counts; MA"
         self.model.get_counts_workspace_name = mock.Mock(return_value=workspace_name)
 
         self.corrections_model.run_number_strings = mock.Mock(return_value=self.runs)

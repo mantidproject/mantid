@@ -336,3 +336,11 @@ def run_create_single_valued_workspace(parameter_dict):
     alg.setProperties(parameter_dict)
     alg.execute()
     return alg.getProperty("OutputWorkspace").valueAsStr
+
+
+def run_clone_workspace(parameter_dict):
+    alg = mantid.AlgorithmManager.create("CloneWorkspace")
+    alg.initialize()
+    alg.setProperties(parameter_dict)
+    alg.execute()
+    return alg.getProperty("OutputWorkspace").valueAsStr

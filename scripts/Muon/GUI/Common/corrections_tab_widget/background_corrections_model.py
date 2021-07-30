@@ -6,15 +6,14 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.py36compat import dataclass
 
-from mantid.api import AlgorithmManager, FunctionFactory, IFunction, Workspace
-from Muon.GUI.Common.ADSHandler.ADS_calls import add_ws_to_ads, retrieve_ws
+from mantid.api import AlgorithmManager, CompositeFunction, FunctionFactory, IFunction, Workspace
 from Muon.GUI.Common.contexts.corrections_context import (BACKGROUND_MODE_NONE, FLAT_BACKGROUND,
                                                           FLAT_BACKGROUND_AND_EXP_DECAY, RUNS_ALL, GROUPS_ALL)
 from Muon.GUI.Common.contexts.muon_context import MuonContext
 from Muon.GUI.Common.corrections_tab_widget.corrections_model import CorrectionsModel
-from Muon.GUI.Common.utilities.algorithm_utils import run_Fit, run_create_single_valued_workspace, run_minus
+from Muon.GUI.Common.utilities.algorithm_utils import (run_Fit, run_clone_workspace, run_create_single_valued_workspace,
+                                                       run_minus)
 from Muon.GUI.Common.utilities.workspace_data_utils import x_limits_of_workspace
-from Muon.GUI.Common.utilities.workspace_utils import StaticWorkspaceWrapper
 
 BACKGROUND_PARAM = "A0"
 DEFAULT_A_VALUE = 1e6
@@ -27,7 +26,8 @@ class BackgroundCorrectionData:
     """
     The background correction data associated with a specific group of a run.
     """
-    uncorrected_counts_workspace: StaticWorkspaceWrapper
+    uncorrected_workspace_name: str
+    workspace_name: str
     start_x: float
     end_x: float
     flat_background: IFunction
@@ -39,15 +39,66 @@ class BackgroundCorrectionData:
         self.end_x = end_x
         self.setup_functions()
 
-    def setup_functions(self):
+    def setup_functions(self) -> None:
+        """Sets up the functions to use by default when doing Auto corrections."""
         self.flat_background = FunctionFactory.createFunction("FlatBackground")
         self.exp_decay = FunctionFactory.createFunction("ExpDecayMuon")
         self.exp_decay.setParameter("A", DEFAULT_A_VALUE)
 
-    def create_background_workspace(self) -> Workspace:
-        return run_create_single_valued_workspace(self._create_background_workspace_params())
+    def setup_uncorrected_workspace(self, workspace_name: str) -> None:
+        """Clones the Counts workspace into a hidden workspace in the ADS."""
+        self.workspace_name = workspace_name
+        self.uncorrected_workspace_name = f"__{workspace_name}_uncorrected"
 
-    def _create_background_workspace_params(self) -> dict:
+        run_clone_workspace({"InputWorkspace": self.workspace_name, "OutputWorkspace": self.uncorrected_workspace_name})
+
+    def reset(self) -> None:
+        """Resets the background correction data by replacing the corrected data with the original uncorrected data."""
+        self.setup_functions()
+        run_clone_workspace({"InputWorkspace": self.uncorrected_workspace_name, "OutputWorkspace": self.workspace_name})
+
+    def calculate_background(self, fit_function: IFunction) -> None:
+        """Calculates the background in the counts workspace."""
+        params = self._get_parameters_for_background_fit(fit_function)
+        function, fit_status, chi_squared = run_Fit(params, AlgorithmManager.create("Fit"))
+
+        self._handle_background_fit_output(function, fit_status, chi_squared)
+
+    def _get_parameters_for_background_fit(self, fit_function: IFunction) -> dict:
+        """Gets the parameters to use for the background Fit."""
+        return {"Function": fit_function,
+                "InputWorkspace": self.uncorrected_workspace_name,
+                "StartX": self.start_x,
+                "EndX": self.end_x,
+                "CreateOutput": False,
+                "CalcErrors": True}
+
+    def _handle_background_fit_output(self, function: IFunction, fit_status: str, chi_squared: float) -> None:
+        """Handles the output of the background fit."""
+        if chi_squared > MAX_ACCEPTABLE_CHI_SQUARED:
+            self.setup_functions()
+            self.status = f"Correction skipped - chi squared is poor ({chi_squared:.3f})."
+        elif "Failed to converge" in fit_status:
+            self.setup_functions()
+            self.status = f"Correction skipped - {fit_status}"
+        else:
+            if isinstance(function, CompositeFunction):
+                self.flat_background = function.getFunction(0).clone()
+                self.exp_decay = function.getFunction(1).clone()
+            else:
+                self.flat_background = function.clone()
+
+            self.status = "Correction success"
+
+    def perform_background_subtraction(self) -> None:
+        """Performs the background subtraction on the counts workspace, and then generates the asymmetry workspace."""
+        run_minus(self.uncorrected_workspace_name, self._create_background_workspace(), self.workspace_name)
+
+    def _create_background_workspace(self) -> Workspace:
+        """Creates the background workspace to use for the background subtraction."""
+        return run_create_single_valued_workspace(self._get_parameters_for_creating_background_workspace())
+
+    def _get_parameters_for_creating_background_workspace(self) -> dict:
         return {"DataValue": self.flat_background.getParameterValue(BACKGROUND_PARAM),
                 "ErrorValue": self.flat_background.getError(BACKGROUND_PARAM),
                 "OutputWorkspace": TEMPORARY_BACKGROUND_WORKSPACE_NAME}
@@ -138,21 +189,18 @@ class BackgroundCorrectionsModel:
         for run in self._corrections_model.run_number_strings():
             for group in groups:
                 run_group = tuple([run, group])
-                workspace_name = self.get_counts_workspace_name(run, group)
                 if run_group not in self._corrections_context.background_correction_data:
                     start_x, end_x = self.default_x_range(run, group)
                     self._corrections_context.background_correction_data[run_group] = BackgroundCorrectionData(start_x,
                                                                                                                end_x)
-                self._corrections_context.background_correction_data[run_group].uncorrected_counts_workspace = \
-                    StaticWorkspaceWrapper(workspace_name, retrieve_ws(workspace_name))
+
+                workspace_name = self.get_counts_workspace_name(run, group)
+                self._corrections_context.background_correction_data[run_group].setup_uncorrected_workspace(workspace_name)
 
     def reset_background_subtraction_data(self) -> None:
         """Resets the calculated background functions and corrected counts data in the ADS."""
         for run_group in self._corrections_context.background_correction_data.keys():
-            correction_data = self._corrections_context.background_correction_data[run_group]
-            correction_data.setup_functions()
-            add_ws_to_ads(correction_data.uncorrected_counts_workspace.workspace_name,
-                          correction_data.uncorrected_counts_workspace.workspace_copy())
+            self._corrections_context.background_correction_data[run_group].reset()
         return self.all_runs_and_groups()
 
     def run_background_correction_for_all(self) -> None:
@@ -170,45 +218,10 @@ class BackgroundCorrectionsModel:
 
     def _run_background_correction(self, correction_data: BackgroundCorrectionData) -> None:
         """Calculates the background for some data using a Fit."""
-        params = self._get_parameters_for_background_fit(correction_data)
-        function, fit_status, chi_squared = run_Fit(params, AlgorithmManager.create("Fit"))
+        fit_function = self._get_fit_function_for_background_fit(correction_data)
 
-        self._handle_background_fit_output(correction_data, function, fit_status, chi_squared)
-        self._perform_background_subtraction_on_counts(correction_data)
-
-    @staticmethod
-    def _perform_background_subtraction_on_counts(correction_data: BackgroundCorrectionData) -> None:
-        """Performs the background subtraction on the counts workspace, and then generates the asymmetry workspace."""
-        run_minus(correction_data.uncorrected_counts_workspace.workspace_copy(),
-                  correction_data.create_background_workspace(),
-                  correction_data.uncorrected_counts_workspace.workspace_name)
-
-    def _handle_background_fit_output(self, correction_data: BackgroundCorrectionData, function: IFunction,
-                                      fit_status: str, chi_squared: float) -> None:
-        """Handles the output of the background fit."""
-        if chi_squared > MAX_ACCEPTABLE_CHI_SQUARED:
-            correction_data.setup_functions()
-            correction_data.status = f"Correction skipped - chi squared is poor ({chi_squared:.3f})."
-        elif "Failed to converge" in fit_status:
-            correction_data.setup_functions()
-            correction_data.status = f"Correction skipped - {fit_status}"
-        else:
-            if self._corrections_context.selected_function == FLAT_BACKGROUND:
-                correction_data.flat_background = function.clone()
-            elif self._corrections_context.selected_function == FLAT_BACKGROUND_AND_EXP_DECAY:
-                correction_data.flat_background = function.getFunction(0).clone()
-                correction_data.exp_decay = function.getFunction(1).clone()
-
-            correction_data.status = "Correction success"
-
-    def _get_parameters_for_background_fit(self, correction_data: BackgroundCorrectionData) -> dict:
-        """Gets the parameters to use for the background Fit."""
-        return {"Function": self._get_fit_function_for_background_fit(correction_data),
-                "InputWorkspace": correction_data.uncorrected_counts_workspace.workspace_copy(),
-                "StartX": correction_data.start_x,
-                "EndX": correction_data.end_x,
-                "CreateOutput": False,
-                "CalcErrors": True}
+        correction_data.calculate_background(fit_function)
+        correction_data.perform_background_subtraction()
 
     def _get_fit_function_for_background_fit(self, correction_data: BackgroundCorrectionData) -> IFunction:
         """Returns the fit function to use for a background fit."""
