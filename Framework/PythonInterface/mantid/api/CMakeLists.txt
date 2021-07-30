@@ -67,6 +67,7 @@ set(EXPORT_FILES
     src/Exports/WorkspaceFactory.cpp
     src/Exports/FunctionDomain.cpp
     src/Exports/FunctionDomain1D.cpp
+    src/Exports/FunctionDomain1DHistogram.cpp
     src/Exports/FunctionDomain1DVector.cpp
     src/Exports/IFunction.cpp
     src/Exports/IFunction1D.cpp
