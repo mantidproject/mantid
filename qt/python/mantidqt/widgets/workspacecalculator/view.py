@@ -43,6 +43,8 @@ class WorkspaceCalculatorView(QWidget):
 
         # cases for disconnecting ADS observers
         self.pushButton.clicked.connect(self.disconnectADS)
+        self.lhs_scaling.returnPressed.connect(self.disconnectADS)
+        self.rhs_scaling.returnPressed.connect(self.disconnectADS)
 
         # by default the observers to the ADS should be disconnected, and connected only when user focuses on the widget
         self.lhs_ws.disconnectObservers()
