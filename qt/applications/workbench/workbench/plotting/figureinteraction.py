@@ -374,6 +374,7 @@ class FigureInteraction(object):
             self.add_error_bars_menu(menu, event.inaxes)
             self._add_marker_option_menu(menu, event)
             self._add_plot_type_option_menu(menu, event.inaxes)
+            self._add_legend_menu(menu, event)
 
         menu.exec_(QCursor.pos())
 
@@ -508,6 +509,11 @@ class FigureInteraction(object):
             marker_action_group.addAction(action)
 
         menu.addMenu(marker_menu)
+
+    def _add_legend_menu(self, menu, event):
+        legend_menu = QMenu("Legend", menu)
+        legend_menu.addAction("Show/Hide legend", lambda: self._toggle_legend_and_redraw(event.inaxes.axes))
+        menu.addMenu(legend_menu)
 
     def _add_plot_type_option_menu(self, menu, ax):
         with errorbar_caps_removed(ax):
@@ -886,3 +892,11 @@ class FigureInteraction(object):
                                                         image.norm.vmax)
 
         self.canvas.draw_idle()
+
+    def _toggle_legend_and_redraw(self, ax):
+        legend = ax.get_legend()
+        if not legend:
+            ax.legend()
+        else:
+            legend.set_visible(not legend.get_visible())
+        self.canvas.draw()
