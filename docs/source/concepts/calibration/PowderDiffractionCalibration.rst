@@ -453,6 +453,7 @@ Having the grouping file (and potentially the masking file) ready, one can then 
     from mantid.simpleapi import *
     import matplotlib.pyplot as plt
     import numpy as np
+    from Calibration.tofpd import group_calibration
 
     infile = "/SNS/NOM/shared/User_story_test/NOM_US-231_240/group_calib.json"
 
