@@ -194,7 +194,7 @@ class SequentialTableModelTest(unittest.TestCase):
 
     def test_set_fit_parameter_values_for_column(self):
         parameter_value = 1.5
-        column = 5
+        column = 6
 
         self.model.set_fit_parameter_values_for_column(column, parameter_value)
 
