@@ -70,6 +70,7 @@ public:
   void setTotalRange(double minimum, double maximum);
   void setUnits(const QString &units);
   void setRange(double minimum, double maximum);
+  void setDiscrete(bool isDiscrete);
   double getMinimum() const;
   double getMaximum() const;
   double getWidth() const;
@@ -90,6 +91,8 @@ private:
   XIntegrationScrollBar *m_scrollBar;
   QLineEdit *m_minText;
   QLineEdit *m_maxText;
+  QSpinBox *m_minSpin;
+  QSpinBox *m_maxSpin;
   QLabel *m_units;
   QPushButton *m_setWholeRange;
   double m_totalMinimum;

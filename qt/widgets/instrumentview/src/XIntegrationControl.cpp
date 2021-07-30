@@ -426,16 +426,26 @@ XIntegrationControl::XIntegrationControl(InstrumentWidget *instrWindow, bool isD
   m_maxText->setMaximumWidth(100);
   m_maxText->setToolTip("Maximum x value");
 
+  m_minSpin = new QSpinBox(this);
+  m_minSpin->setMaximumWidth(100);
+  m_minSpin->setToolTip("Minimum channel index");
+  m_maxSpin = new QSpinBox(this);
+  m_maxSpin->setMaximumWidth(100);
+  m_maxSpin->setToolTip("Maximum channel index");
+
   m_units = new QLabel("TOF", this);
   m_setWholeRange = new QPushButton("Reset");
   m_setWholeRange->setToolTip("Reset integration range to maximum");
   m_scrollBar = new XIntegrationScrollBar(this, isDiscrete, stepsTotal);
 
   layout->addWidget(m_units, 0);
-
+  layout->addWidget(m_minSpin, 0);
   layout->addWidget(m_minText, 0);
   layout->addWidget(m_scrollBar, 1);
+  layout->addWidget(m_maxSpin, 0);
   layout->addWidget(m_maxText, 0);
+
+  setDiscrete(m_isDiscrete);
 
   layout->addWidget(m_setWholeRange, 0);
   setLayout(layout);
@@ -444,6 +454,8 @@ XIntegrationControl::XIntegrationControl(InstrumentWidget *instrWindow, bool isD
   connect(m_scrollBar, SIGNAL(running(double, double)), this, SLOT(sliderRunning(double, double)));
   connect(m_minText, SIGNAL(editingFinished()), this, SLOT(setMinimum()));
   connect(m_maxText, SIGNAL(editingFinished()), this, SLOT(setMaximum()));
+  connect(m_minSpin, SIGNAL(editingFinished()), this, SLOT(setMinimum()));
+  connect(m_maxSpin, SIGNAL(editingFinished()), this, SLOT(setMaximum()));
   connect(m_setWholeRange, SIGNAL(clicked()), this, SLOT(setWholeRange()));
   updateTextBoxes();
 }
@@ -506,6 +518,21 @@ void XIntegrationControl::setRange(double minimum, double maximum) {
   emit changed(m_minimum, m_maximum);
 }
 
+void XIntegrationControl::setDiscrete(bool isDiscrete) {
+  m_isDiscrete = isDiscrete;
+  if (m_isDiscrete) {
+    m_minText->hide();
+    m_maxText->hide();
+    m_minSpin->show();
+    m_maxSpin->show();
+  } else {
+    m_minSpin->hide();
+    m_maxSpin->hide();
+    m_minText->show();
+    m_maxText->show();
+  }
+}
+
 void XIntegrationControl::setWholeRange() { setRange(m_totalMinimum, m_totalMaximum); }
 
 double XIntegrationControl::getMinimum() const { return m_minimum; }
@@ -517,16 +544,20 @@ double XIntegrationControl::getWidth() const { return m_maximum - m_minimum; }
 void XIntegrationControl::updateTextBoxes() {
   if (m_isDiscrete) {
     discretize();
+    m_minSpin->setRange(static_cast<int>(m_totalMinimum), static_cast<int>(m_maximum));
+    m_maxSpin->setRange(static_cast<int>(m_minimum), static_cast<int>(m_totalMaximum));
+    m_minSpin->setValue(static_cast<int>(m_minimum));
+    m_maxSpin->setValue(static_cast<int>(m_maximum));
+  } else {
+    m_minText->setText(QString::number(m_minimum));
+    m_maxText->setText(QString::number(m_maximum));
   }
-  m_minText->setText(QString::number(m_minimum));
-  m_maxText->setText(QString::number(m_maximum));
-
   m_setWholeRange->setEnabled(m_minimum != m_totalMinimum || m_maximum != m_totalMaximum);
 }
 
 void XIntegrationControl::setMinimum() {
   bool ok;
-  QString text = m_minText->text();
+  QString text = m_isDiscrete ? m_minSpin->text() : m_minText->text();
   double minValue = text.toDouble(&ok);
   if (!ok)
     return;
@@ -536,7 +567,7 @@ void XIntegrationControl::setMinimum() {
 
 void XIntegrationControl::setMaximum() {
   bool ok;
-  QString text = m_maxText->text();
+  QString text = m_isDiscrete ? m_maxSpin->text() : m_maxText->text();
 
   double maxValue = text.toDouble(&ok);
   if (!ok)

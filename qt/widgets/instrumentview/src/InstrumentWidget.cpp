@@ -149,6 +149,7 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent, bool 
 
   bool isDiscrete = m_instrumentActor->getWorkspace()->isCommonBins() &&
                     m_instrumentActor->getWorkspace()->getAxis(0)->unit()->unitID() == "Empty";
+
   int stepsTotal = static_cast<int>(m_instrumentActor->getWorkspace()->getNumberBins(0));
   m_xIntegration = new XIntegrationControl(this, isDiscrete, stepsTotal);
   m_mainLayout->addWidget(m_xIntegration);
@@ -622,6 +623,8 @@ void InstrumentWidget::replaceWorkspace(const std::string &newWs, const std::str
  * initialized
  */
 void InstrumentWidget::updateIntegrationWidget(bool init) {
+  m_xIntegration->setDiscrete(m_instrumentActor->getWorkspace()->isCommonBins() &&
+                              m_instrumentActor->getWorkspace()->getAxis(0)->unit()->unitID() == "Empty");
   m_xIntegration->setTotalRange(m_instrumentActor->minBinValue(), m_instrumentActor->maxBinValue());
 
   if (!init) {
