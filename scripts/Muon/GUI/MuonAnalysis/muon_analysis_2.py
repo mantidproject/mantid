@@ -194,6 +194,8 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.tabs.addTabWithOrder(self.results_tab.results_tab_view, 'Results')
         self.tabs.addTabWithOrder(self.model_fitting_tab.model_fitting_tab_view, 'Model Fitting')
         self.tabs.set_slot_for_tab_changed(self.handle_tab_changed)
+        self.tabs.setElideMode(QtCore.Qt.ElideNone)
+        self.tabs.setUsesScrollButtons(False)
 
     def handle_tab_changed(self):
         index = self.tabs.currentIndex()

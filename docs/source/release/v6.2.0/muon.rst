@@ -44,6 +44,7 @@ Improvements
 - The plotting now has autoscale active by default.
 - Added a table to store phasequads in the phase tab, phasequads also no longer automatically delete themselves
   when new data is loaded
+- The labels on the tabs in the GUIs will now show in full
 
 ALC
 ---
