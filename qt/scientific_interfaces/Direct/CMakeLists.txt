@@ -14,8 +14,6 @@ set(INC_FILES
     ALFCustomInstrumentModel.h
     ALFCustomInstrumentMocks.h)
 
-# Target
-mtd_add_qt_library(TARGET_NAME MantidScientificInterfacesDirect
                    QT_VERSION 5
                    SRC
                      ${SRC_FILES}
