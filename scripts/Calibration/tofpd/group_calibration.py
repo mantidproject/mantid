@@ -12,8 +12,7 @@ from mantid.simpleapi import (ConvertUnits, ExtractSpectra, Rebin,
                               LoadDiffCal, LoadDetectorsGroupingFile,
                               SaveDiffCal, DeleteWorkspace, logger,
                               RenameWorkspace, Integration, CloneWorkspace,
-                              CreateGroupingWorkspace, CreateDetectorTable,
-                              CreateEmptyTableWorkspace)
+                              CreateGroupingWorkspace)
 
 # Diamond peak positions in d-space
 DIAMOND = (0.3117,0.3257,0.3499,0.4205,0.4645,
@@ -71,8 +70,8 @@ def cc_calibrate_groups(data_ws,
     to_skip = []
     for group in group_list:
         # Figure out input parameters for CrossCorrelate and GetDetectorOffset, specifically
-        # for those parameters for which both a single value and a list is accepted. If a 
-        # list is given, that means different parameter setup will be used for different groups. 
+        # for those parameters for which both a single value and a list is accepted. If a
+        # list is given, that means different parameter setup will be used for different groups.
         Xmin_group = Xmin[int(group) - 1] if type(Xmin) == list else Xmin
         Xmax_group = Xmax[int(group) - 1] if type(Xmax) == list else Xmax
         MDS_group = MaxDSpaceShift[int(group) - 1] if type(MaxDSpaceShift) == list else MaxDSpaceShift
@@ -88,7 +87,8 @@ def cc_calibrate_groups(data_ws,
             # data does not contain spectrum in group
             continue
 
-        if group in SkipCrossCorrelation : to_skip.extend(ws_indexes)
+        if group in SkipCrossCorrelation:
+            to_skip.extend(ws_indexes)
 
         ExtractSpectra(data_d, WorkspaceIndexList=ws_indexes, OutputWorkspace='_tmp_group_cc')
         ExtractUnmaskedSpectra('_tmp_group_cc', OutputWorkspace='_tmp_group_cc')
@@ -109,8 +109,8 @@ def cc_calibrate_groups(data_ws,
 
         # Cycling cross correlation. At each step, we will use the obtained offsets and DIFC's from
         # previous step to obtain new DIFC's. In this way, spectra in group will come closer and closer
-        # to each other as the cycle goes. This will continue until converging criterion is reached. The 
-        # converging criterion is set in such a way that the median value of all the non-zero offsets 
+        # to each other as the cycle goes. This will continue until converging criterion is reached. The
+        # converging criterion is set in such a way that the median value of all the non-zero offsets
         # should be smaller than the threshold (user tuned parameter, default to 1E-4, meaning 0.04%
         # relative offset).
         num_cycle = 1
@@ -145,7 +145,7 @@ def cc_calibrate_groups(data_ws,
                     mtd['_tmp_group_cc'].dataY(item)[0] = 0.0
                 print(f'Cross correlation skipped for group-{group}.')
                 converged = True
- 
+
             if not cycling or converged:
                 if cycling and converged:
                     if group not in SkipCrossCorrelation:
@@ -174,7 +174,8 @@ def cc_calibrate_groups(data_ws,
     DeleteWorkspace('_accum_cc')
     DeleteWorkspace('_tmp_group_cc')
     DeleteWorkspace('_tmp_group_cc_raw')
-    if cycling : DeleteWorkspace('_tmp_group_cc_diffcal')
+    if cycling:
+        DeleteWorkspace('_tmp_group_cc_diffcal')
 
     return mtd[f'{output_basename}_cc_diffcal']
 
@@ -348,7 +349,8 @@ def process_json(json_filename):
         args = json.load(json_file)
 
     calibrant_file = args.get('CalibrantFile', None)
-    if calibrant_file is None : calibrant = args['Calibrant']
+    if calibrant_file is None:
+        calibrant = args['Calibrant']
     groups = args['Groups']
     out_groups_by = args.get('OutputGroupsBy', 'Group')
     sample_env = args.get('SampleEnvironment', 'UnknownSampleEnvironment')
