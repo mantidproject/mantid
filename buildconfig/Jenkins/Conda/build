@@ -25,11 +25,11 @@ EXTRA_CMAKE_FLAGS=$8
 BUILD_THREADS=$9
 
 # Only pass MANTID_DATA_STORE to CMake if present in the environment otherwise rely on CMake default
-if [![ -n "${MANTID_DATA_STORE}" ]]; then
+if [[ -n "${MANTID_DATA_STORE}" ]]; then
     MANTID_DATA_STORE_CMAKE="-DMANTID_DATA_STORE=${MANTID_DATA_STORE}"
 fi
 
-# Run CMake using preset and variables ${DIST_FLAGS} is from the environment
+# Run CMake using preset and variables
 cmake --preset=${CMAKE_PRESET} ${MANTID_DATA_STORE_CMAKE} ${EXTRA_CMAKE_FLAGS} $WORKSPACE
 
 # Run the actual builds for the code, unit tests, and system tests.

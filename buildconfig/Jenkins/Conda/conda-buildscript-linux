@@ -8,7 +8,7 @@
 # buildscript <path-to-workspace> <cmake-preset-name> [options]
 #
 # Example command to run a PR build on ubuntu:
-# buildscript /jenkins/workspace_dir/ linux-ci --enable-unittests --enable-coverage --enable-docs
+# buildscript /jenkins/workspace_dir/ linux-ci --enable-systemtests --enable-coverage --enable-docs
 #
 # Expected args:
 #   1. WORKSPACE: path to the workspace/source code that this should run inside
@@ -23,7 +23,9 @@
 #   --clean-build: Clears the build folder and builds from scratch
 #   --clean-external-projects: Clear the external projects from the build folder
 #   --use-core-dumps: Activate core dumps (Linux only)
-#   --extra-cmake-flags: Extra flags to pass directly to cmake, enclose in ""
+#
+# Possible parameters:
+#   --extra-cmake-flags: Extra flags to pass directly to cmake, enclose in "", defaults to nothing
 #   --build-threads: pass the number of threads that can be used to build with, default is 1 thread per logical core
 
 # Check arguements passed are 2 or higher, and aren't optional flags.
@@ -106,7 +108,7 @@ fi
 mkdir -p $BUILD_DIR
 
 rm -rf ${BUILD_DIR}/bin ${BUILD_DIR}/ExternalData ${BUILD_DIR}/Testing
-find $WORKSPACE \( -name 'TEST-*.xml' -o -name 'Test.xml' \) -delete
+find $WORKSPACE \( -iname 'TEST-*.xml' -o -name 'Test.xml' \) -delete
 
 if [[ ${CLEAN_EXTERNAL_PROJECTS} == true ]]; then
     rm -rf $BUILD_DIR/eigen-*

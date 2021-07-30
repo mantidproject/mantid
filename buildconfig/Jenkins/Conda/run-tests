@@ -9,8 +9,8 @@
 #   3. ENABLE_UNIT_TESTS: whether or not unit tests are being ran/built
 #   4. ENABLE_DOCS: Whether or not the docs have been built
 #   5. ENABLE_DOC_TESTS: Whether or not the doc tests should be ran
-#   4. BUILD_THREADS: The number of threads to use during testing
-#   5. USE_CORE_DUMPS: Activate core dumps (Linux only)
+#   6. BUILD_THREADS: The number of threads to use during testing
+#   7. USE_CORE_DUMPS: Activate core dumps (Linux only)
 
 WORKSPACE=$1
 ENABLE_SYSTEM_TESTS=$2
