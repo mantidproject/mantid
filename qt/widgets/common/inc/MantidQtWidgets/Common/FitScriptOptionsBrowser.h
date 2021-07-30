@@ -14,8 +14,10 @@
 
 class QtProperty;
 class QtTreePropertyBrowser;
+class QtStringPropertyManager;
 class QtIntPropertyManager;
 class QtEnumPropertyManager;
+class QtBoolPropertyManager;
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -28,26 +30,29 @@ namespace MantidWidgets {
  * displayed in order to avoid the browser becoming cluttered with rarely used
  * options.
  */
-class EXPORT_OPT_MANTIDQT_COMMON BasicFitOptionsBrowser : public QWidget {
+class EXPORT_OPT_MANTIDQT_COMMON FitScriptOptionsBrowser : public QWidget {
   Q_OBJECT
 
-  using PropertySetter = void (BasicFitOptionsBrowser::*)(QtProperty *, std::string const &);
-  using PropertyGetter = std::string (BasicFitOptionsBrowser::*)(QtProperty *) const;
+  using PropertySetter = void (FitScriptOptionsBrowser::*)(QtProperty *, std::string const &);
+  using PropertyGetter = std::string (FitScriptOptionsBrowser::*)(QtProperty *) const;
 
 public:
-  BasicFitOptionsBrowser(QWidget *parent = nullptr);
-  ~BasicFitOptionsBrowser();
+  FitScriptOptionsBrowser(QWidget *parent = nullptr);
+  ~FitScriptOptionsBrowser();
 
   void setFittingMode(FittingMode fittingMode);
   FittingMode getFittingMode() const;
 
   void setProperty(std::string const &name, std::string const &value);
   std::string getProperty(std::string const &name) const;
+  bool getBoolProperty(std::string const &name) const;
 
 signals:
+  void outputBaseNameChanged(std::string const &outputBaseName);
   void fittingModeChanged(FittingMode fittingMode);
 
 private slots:
+  void stringChanged(QtProperty *prop);
   void enumChanged(QtProperty *prop);
 
 private:
@@ -58,8 +63,13 @@ private:
   void createMinimizerProperty();
   void createCostFunctionProperty();
   void createEvaluationTypeProperty();
+  void createOutputBaseNameProperty();
+  void createPlotOutputProperty();
 
   void addProperty(std::string const &name, QtProperty *prop, PropertyGetter getter, PropertySetter setter);
+
+  void setStringProperty(QtProperty *prop, std::string const &value);
+  std::string getStringProperty(QtProperty *prop) const;
 
   void setIntProperty(QtProperty *prop, std::string const &value);
   std::string getIntProperty(QtProperty *prop) const;
@@ -70,8 +80,10 @@ private:
   QtProperty *getQtPropertyFor(std::string const &name) const;
 
   /// Property managers
+  QtStringPropertyManager *m_stringManager;
   QtIntPropertyManager *m_intManager;
   QtEnumPropertyManager *m_enumManager;
+  QtBoolPropertyManager *m_boolManager;
 
   /// Properties
   QtProperty *m_fittingMode;
@@ -79,6 +91,8 @@ private:
   QtProperty *m_minimizer;
   QtProperty *m_costFunction;
   QtProperty *m_evaluationType;
+  QtProperty *m_outputBaseName;
+  QtProperty *m_plotOutput;
 
   /// Qt property browser which displays properties
   QtTreePropertyBrowser *m_browser;

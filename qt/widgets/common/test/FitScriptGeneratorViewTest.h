@@ -367,12 +367,15 @@ public:
   void test_that_fitOptions_returns_the_default_fitting_options() {
     openFitScriptGeneratorWidget();
 
-    auto const [maxIterations, minimizer, costFunction, evaluationType] = m_view->fitOptions();
+    auto const [maxIterations, minimizer, costFunction, evaluationType, outputBaseName, plotOptions] =
+        m_view->fitOptions();
 
     TS_ASSERT_EQUALS(maxIterations, "500");
     TS_ASSERT_EQUALS(minimizer, "Levenberg-Marquardt");
     TS_ASSERT_EQUALS(costFunction, "Least squares");
     TS_ASSERT_EQUALS(evaluationType, "CentrePoint");
+    TS_ASSERT_EQUALS(outputBaseName, "Output_Fit");
+    TS_ASSERT_EQUALS(plotOptions, true);
   }
 
 private:
