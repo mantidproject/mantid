@@ -274,6 +274,9 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.load_widget.load_widget.loadNotifier.add_subscriber(
             self.fitting_tab.fitting_tab_view.disable_tab_observer)
 
+        self.load_widget.load_widget.loadNotifier.add_subscriber(
+            self.plot_widget.raw_mode.new_data_observer)
+
     def setup_gui_variable_observers(self):
         self.context.gui_context.gui_variables_notifier.add_subscriber(
             self.grouping_tab_widget.group_tab_presenter.gui_variables_observer)
