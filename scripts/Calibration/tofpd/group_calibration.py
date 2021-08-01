@@ -12,7 +12,8 @@ from mantid.simpleapi import (ConvertUnits, ExtractSpectra, Rebin,
                               LoadDiffCal, LoadDetectorsGroupingFile,
                               SaveDiffCal, DeleteWorkspace, logger,
                               RenameWorkspace, Integration, CloneWorkspace,
-                              CreateGroupingWorkspace)
+                              CreateGroupingWorkspace, CreateDetectorTable,
+                              CreateEmptyTableWorkspace)
 
 # Diamond peak positions in d-space
 DIAMOND = (0.3117,0.3257,0.3499,0.4205,0.4645,
@@ -190,7 +191,8 @@ def pdcalibration_groups(data_ws,
                          TofBinning=(300,-.001,16666.7),
                          PeakFunction='IkedaCarpenterPV',
                          PeakWindow=0.1,
-                         PeakWidthPercent=None):
+                         PeakWidthPercent=None,
+                         BadCalibThreshold=100):
     """This will perform PDCalibration of the group data and combine the
     results with the results of `cc_calibrate_groups`.
 
@@ -217,6 +219,8 @@ def pdcalibration_groups(data_ws,
     :param PeakWidthPercent: PeakWidthPercent parameter of PDCalibration, default None
     :return: tuple of DiffCal and Mask from CrossCorrelate combined with DiffCal from PDCalibration of grouped workspace
     """
+
+    CreateDetectorTable(data_ws, DetectorTableWorkspace="calib_table_bak")
 
     ApplyDiffCal(data_ws, CalibrationWorkspace=cc_diffcal)
     ConvertUnits(data_ws, Target='dSpacing', OutputWorkspace='_tmp_data_aligned')
@@ -272,9 +276,29 @@ def pdcalibration_groups(data_ws,
                    GroupedCalibration=f'{output_basename}_pd_diffcal',
                    CalibrationWorkspace='_tmp_data_aligned',
                    MaskWorkspace=f'{output_basename}_pd_diffcal_mask',
-                   OutputWorkspace=f'{output_basename}_cc_pd_diffcal')
+                   OutputWorkspace=f'{output_basename}_cc_pd_diffcal_tmp')
 
     DeleteWorkspace('_tmp_data_aligned')
+
+    out_table = CreateEmptyTableWorkspace(OutputWorkspace=f'{output_basename}_cc_pd_diffcal')
+    out_table.addColumn("int", "detid")
+    out_table.addColumn("double", "difc")
+    out_table.addColumn("double", "difa")
+    out_table.addColumn("double", "tzero")
+    num_hist = data_ws.getNumberHistograms()
+    for i in range(num_hist):
+        difc_bak = mtd['calib_table_bak'].row(i)['DIFC']
+        difc_calib = mtd[f'{output_basename}_cc_pd_diffcal_tmp'].row(i)['difc']
+        diff_difc = abs(difc_bak - difc_calib) / difc_calib * 100.0
+        if diff_difc >= BadCalibThreshold:
+            difc_calib = difc_bak
+        new_row = { 'detid': mtd[f'{output_basename}_cc_pd_diffcal_tmp'].row(i)['detid'],
+                    'difc': difc_calib,
+                    'difa': mtd[f'{output_basename}_cc_pd_diffcal_tmp'].row(i)['difa'],
+                    'tzero': mtd[f'{output_basename}_cc_pd_diffcal_tmp'].row(i)['tzero'] }
+        out_table.addRow(new_row)
+
+    DeleteWorkspace(f'{output_basename}_cc_pd_diffcal_tmp')
 
     return mtd[f'{output_basename}_cc_pd_diffcal'], mtd[f'{output_basename}_pd_diffcal_mask']
 
