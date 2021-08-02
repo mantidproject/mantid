@@ -5,9 +5,10 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
+from unittest import mock
 
 from mantid.api import IEventWorkspace, MatrixWorkspace
-from mantid.simpleapi import ReflectometryISISPreprocess
+from mantid.simpleapi import CreateSampleWorkspace, ReflectometryISISPreprocess
 
 
 class ReflectometryISISPreprocessTest(unittest.TestCase):
@@ -33,8 +34,16 @@ class ReflectometryISISPreprocessTest(unittest.TestCase):
         output_ws = ReflectometryISISPreprocess(**args)
         self.assertIsInstance(output_ws, IEventWorkspace)
 
-    def test_validation_of_event_workspaces(self):
-        pass
+    @mock.patch("ReflectometryISISPreprocess.LoadEventNexus")
+    def test_validation_of_event_workspaces_without_proton_charge_throws(self, mocked_loader):
+        args = {'InputRunList': '13460',
+                "EventMode": True,
+                "OutputWorkspace": "ws"}
+
+        ws = CreateSampleWorkspace()
+        mocked_loader.return_value.OutputWorkspace = ws
+        with self.assertRaisesRegex(RuntimeError, "proton_charge"):
+            ReflectometryISISPreprocess(**args)
 
 
 if __name__ == '__main__':
