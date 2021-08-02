@@ -45,6 +45,7 @@ class CalibrationPresenter(object):
         self.view.set_on_radio_new_toggled(self.set_create_new_enabled)
         self.view.set_on_radio_existing_toggled(self.set_load_existing_enabled)
         self.view.set_on_check_cropping_state_changed(self.show_cropping)
+        self.view.set_on_check_update_vanadium_state_changed(self.disable_sample_and_crop)
 
     def on_calibrate_clicked(self):
         plot_output = self.view.get_plot_output()
@@ -186,6 +187,7 @@ class CalibrationPresenter(object):
             self.set_calibrate_button_text("Calibrate")
             self.view.set_check_plot_output_enabled(True)
             self.view.set_check_cropping_enabled(True)
+            self.view.set_check_update_vanadium_enabled(True)
             self.find_files()
 
     def set_load_existing_enabled(self, enabled):
@@ -195,6 +197,7 @@ class CalibrationPresenter(object):
             self.view.set_check_plot_output_enabled(False)
             self.view.set_check_cropping_enabled(False)
             self.view.set_check_cropping_checked(False)
+            self.view.set_check_update_vanadium_enabled(False)
 
     def set_calibrate_button_text(self, text):
         self.view.set_calibrate_button_text(text)
@@ -205,6 +208,13 @@ class CalibrationPresenter(object):
 
     def show_cropping(self, show):
         self.view.set_cropping_widget_visibility(show)
+
+    def disable_sample_and_crop(self, disable):
+        show = not disable
+        self.view.set_sample_enabled(show)
+        self.view.set_check_cropping_enabled(show)
+        if disable:
+            self.view.set_check_cropping_checked(show)
 
     # -----------------------
     # Observers / Observables

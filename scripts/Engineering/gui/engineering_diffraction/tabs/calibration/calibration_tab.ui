@@ -73,14 +73,14 @@ QGroupBox:title {
        </property>
        <layout class="QGridLayout" name="gridLayout_2">
         <item row="1" column="0">
-         <layout class="QGridLayout" name="gridLayout" rowstretch="0,0,0,0,0,0,0,0,0,0,0" columnstretch="0,0,0">
+         <layout class="QGridLayout" name="gridLayout" rowstretch="0,0,0,0,0,0,0,0,0,0,0,0" columnstretch="0,0,0">
           <property name="sizeConstraint">
            <enum>QLayout::SetDefaultConstraint</enum>
           </property>
           <property name="verticalSpacing">
            <number>6</number>
           </property>
-          <item row="6" column="0" colspan="3">
+          <item row="7" column="0" colspan="3">
            <widget class="Line" name="line_crop">
             <property name="minimumSize">
              <size>
@@ -93,7 +93,7 @@ QGroupBox:title {
             </property>
            </widget>
           </item>
-          <item row="5" column="0" colspan="3">
+          <item row="6" column="0" colspan="3">
            <widget class="FileFinderWidget" name="finder_path" native="true">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -112,7 +112,7 @@ QGroupBox:title {
             </property>
            </widget>
           </item>
-          <item row="3" column="0" colspan="3">
+          <item row="4" column="0" colspan="3">
            <spacer name="spacer_new_exist">
             <property name="orientation">
              <enum>Qt::Vertical</enum>
@@ -170,27 +170,27 @@ QGroupBox:title {
             </property>
            </widget>
           </item>
-          <item row="10" column="0" colspan="2">
+          <item row="11" column="0" colspan="2">
            <widget class="QCheckBox" name="check_plotOutput">
             <property name="enabled">
-             <bool>true</bool>
-            </property>
-		    <property name="checked">
              <bool>true</bool>
             </property>
             <property name="text">
              <string>Plot Calibrated Workspace</string>
             </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
            </widget>
           </item>
-          <item row="7" column="0" colspan="3">
+          <item row="8" column="0" colspan="3">
            <widget class="QCheckBox" name="check_cropCalib">
             <property name="text">
              <string>Crop Calibration</string>
             </property>
            </widget>
           </item>
-          <item row="10" column="2">
+          <item row="11" column="2">
            <widget class="QPushButton" name="button_calibrate">
             <property name="enabled">
              <bool>true</bool>
@@ -200,7 +200,7 @@ QGroupBox:title {
             </property>
            </widget>
           </item>
-          <item row="4" column="0" colspan="3">
+          <item row="5" column="0" colspan="3">
            <widget class="QRadioButton" name="radio_loadCalib">
             <property name="text">
              <string>Load Existing Calibration</string>
@@ -210,20 +210,36 @@ QGroupBox:title {
             </property>
            </widget>
           </item>
-          <item row="9" column="0" colspan="3">
+          <item row="10" column="0" colspan="3">
            <widget class="Line" name="line_go">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
            </widget>
           </item>
-          <item row="8" column="0" colspan="3">
+          <item row="9" column="0" colspan="3">
            <widget class="CroppingView" name="widget_cropping" native="true">
             <property name="minimumSize">
              <size>
               <width>0</width>
               <height>0</height>
              </size>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="2">
+           <widget class="QCheckBox" name="check_updateVan">
+            <property name="text">
+             <string>Only Update Vanadium</string>
+            </property>
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="checked">
+             <bool>false</bool>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::NoFocus</enum>
             </property>
            </widget>
           </item>
