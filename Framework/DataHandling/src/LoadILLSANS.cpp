@@ -241,7 +241,7 @@ LoadILLSANS::DetectorPosition LoadILLSANS::getDetectorPositionD33(const NeXus::N
 /**
  * Loads data for D11, D16 and D22
  * @param firstEntry : already opened first entry in nexus
- * @param instrumentNamePath : the path inside nexus where the instrument name is written
+ * @param instrumentPath : the path inside nexus where the instrument name is written
  */
 void LoadILLSANS::initWorkSpace(NeXus::NXEntry &firstEntry, const std::string &instrumentPath) {
   g_log.debug("Fetching data...");
@@ -277,7 +277,7 @@ void LoadILLSANS::initWorkSpace(NeXus::NXEntry &firstEntry, const std::string &i
 /**
  * @brief LoadILLSANS::initWorkSpaceD11B Load D11B data
  * @param firstEntry : already opened first entry in nexus
- * @param instrumentNamePath : the path inside nexus where the instrument name is written
+ * @param instrumentPath : the path inside nexus where the instrument name is written
  */
 void LoadILLSANS::initWorkSpaceD11B(NeXus::NXEntry &firstEntry, const std::string &instrumentPath) {
   g_log.debug("Fetching data...");
@@ -339,7 +339,7 @@ void LoadILLSANS::initWorkSpaceD11B(NeXus::NXEntry &firstEntry, const std::strin
 /**
  * @brief LoadILLSANS::initWorkSpaceD22B Load D22B data
  * @param firstEntry : already opened first entry in nexus
- * @param instrumentNamePath : the path inside nexus where the instrument name is written
+ * @param instrumentPath : the path inside nexus where the instrument name is written
  */
 void LoadILLSANS::initWorkSpaceD22B(NeXus::NXEntry &firstEntry, const std::string &instrumentPath) {
   g_log.debug("Fetching data...");
@@ -373,7 +373,7 @@ void LoadILLSANS::initWorkSpaceD22B(NeXus::NXEntry &firstEntry, const std::strin
 /**
  * Loads data for D33
  * @param firstEntry : already opened first entry in nexus
- * @param instrumentNamePath : the path inside nexus where the instrument name is written
+ * @param instrumentPath : the path inside nexus where the instrument name is written
  */
 void LoadILLSANS::initWorkSpaceD33(NeXus::NXEntry &firstEntry, const std::string &instrumentPath) {
 
