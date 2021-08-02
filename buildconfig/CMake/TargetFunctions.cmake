@@ -32,7 +32,10 @@ cmake_parse_arguments (PARSED "${options}" "${oneValueArgs}"
 # if its a plugin we don't need to headers or .lib file
 # we also don't need to export the cmake targets
 if (PARSED_PLUGIN_LIB)
-install(TARGETS ${PARSED_TARGETS} RUNTIME DESTINATION plugins)
+install(TARGETS ${PARSED_TARGETS}
+RUNTIME DESTINATION plugins
+LIBRARY DESTINATION plugins
+)
 else()
 install(
     DIRECTORY inc/
