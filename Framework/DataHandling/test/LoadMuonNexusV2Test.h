@@ -59,6 +59,8 @@ public:
     TS_ASSERT_EQUALS(goodfrm, 14320);
     double firstGoodData = ld.getProperty("FirstGoodData");
     TS_ASSERT_EQUALS(firstGoodData, 0.384);
+    double lastGoodData = ld.getProperty("LastGoodData");
+    TS_ASSERT_EQUALS(lastGoodData, 32.768);
     double timeZero = ld.getProperty("TimeZero");
     TS_ASSERT_DELTA(timeZero, 0.1599999, 1e-5);
     std::vector<double> timeZeroVector = ld.getProperty("TimeZeroList");
@@ -340,6 +342,8 @@ public:
     TS_ASSERT_EQUALS(goodfrm, 25000);
     double firstGoodData = ld.getProperty("FirstGoodData");
     TS_ASSERT_EQUALS(firstGoodData, 0.384);
+    double lastGoodData = ld.getProperty("LastGoodData");
+    TS_ASSERT_EQUALS(lastGoodData, 32.768);
     double timeZero = ld.getProperty("TimeZero");
     TS_ASSERT_DELTA(timeZero, 0.1599999, 1e-5);
 
@@ -392,6 +396,8 @@ public:
       TS_ASSERT_EQUALS(goodfrm, goodFrames[i]);
       double firstGoodData = ld.getProperty("FirstGoodData");
       TS_ASSERT_EQUALS(firstGoodData, 0.384);
+      double lastGoodData = ld.getProperty("LastGoodData");
+      TS_ASSERT_EQUALS(lastGoodData, 32.768);
       double timeZero = ld.getProperty("TimeZero");
       TS_ASSERT_DELTA(timeZero, 0.1599999, 1e-5);
 
