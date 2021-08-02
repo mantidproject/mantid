@@ -79,7 +79,8 @@ std::set<std::string> logFilesFromAlternateDataStream(const Poco::Path &pathToRa
       const size_t asteriskPos = line.find('*');
       if (asteriskPos == std::string::npos)
         continue;
-      Poco::Path logFilePath(dirOfFile.append(line.substr(asteriskPos + 1)));
+      Poco::Path logFilePath(dirOfFile);
+      logFilePath.append(line.substr(asteriskPos + 1));
       if (Poco::File(logFilePath).exists()) {
         logfilesList.insert(logFilePath.toString());
       }
