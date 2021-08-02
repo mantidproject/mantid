@@ -25,6 +25,7 @@ class BackgroundCorrectionsPresenter:
         self.view.set_slot_for_select_function_combo_box_changed(self.handle_select_function_combo_box_changed)
         self.view.set_slot_for_group_combo_box_changed(self.handle_selected_group_changed)
         self.view.set_slot_for_show_all_runs(self.handle_show_all_runs_ticked)
+        self.view.set_slot_for_show_rebin_data(self.handle_show_rebin_data_ticked)
         self.view.set_slot_for_start_x_changed(self.handle_start_x_changed)
         self.view.set_slot_for_end_x_changed(self.handle_end_x_changed)
 
@@ -73,6 +74,11 @@ class BackgroundCorrectionsPresenter:
     def handle_show_all_runs_ticked(self) -> None:
         """Handles when the show all runs check box is ticked or unticked."""
         self.model.set_show_all_runs(self.view.show_all_runs)
+        self._update_displayed_corrections_data()
+
+    def handle_show_rebin_data_ticked(self):
+        """Handles when the show rebin data check box is ticked or unticked."""
+        self.model.set_show_rebin_data(self.view.show_rebin_data)
         self._update_displayed_corrections_data()
 
     def handle_start_x_changed(self) -> None:

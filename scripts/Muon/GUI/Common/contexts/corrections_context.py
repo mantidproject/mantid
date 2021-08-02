@@ -36,6 +36,7 @@ class CorrectionsContext:
     selected_function: str = FLAT_BACKGROUND_AND_EXP_DECAY
     selected_group: str = GROUPS_ALL
     show_all_runs: bool = False
+    show_rebin_data: bool = False
 
     # The background corrections data in each row of the table is mapped to its corresponding Run and Group
     # i.e. dict(tuple(run, group): BackgroundCorrectionData)

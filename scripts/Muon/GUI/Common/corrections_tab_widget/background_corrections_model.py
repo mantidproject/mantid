@@ -135,6 +135,10 @@ class BackgroundCorrectionsModel:
         """Sets whether all runs should be shown or not."""
         self._corrections_context.show_all_runs = show_all
 
+    def set_show_rebin_data(self, show_rebin_data: bool) -> None:
+        """Sets whether the rebin corrected data should be shown or not."""
+        self._corrections_context.show_rebin_data = show_rebin_data
+
     def all_runs(self) -> list:
         """Returns a list of all loaded runs."""
         return self._context.get_runs(RUNS_ALL)
@@ -263,9 +267,13 @@ class BackgroundCorrectionsModel:
                                                                                                          [], [], [], []
         for run_group, correction_data in self._corrections_context.background_correction_data.items():
             if run_group[0] in selected_runs and run_group[1] in selected_groups:
+                rebinned = run_group[2]
+                if rebinned and not self._corrections_context.show_rebin_data:
+                    continue
+
                 runs_list.append(run_group[0])
                 groups_list.append(run_group[1])
-                rebin_list.append(run_group[2])
+                rebin_list.append(rebinned)
                 start_xs.append(correction_data.start_x)
                 end_xs.append(correction_data.end_x)
                 backgrounds.append(correction_data.flat_background.getParameterValue(BACKGROUND_PARAM))

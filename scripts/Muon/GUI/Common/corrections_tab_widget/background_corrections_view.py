@@ -90,6 +90,10 @@ class BackgroundCorrectionsView(widget, ui_form):
         """Connect the slot for the Show All Runs check box."""
         self.show_all_runs_checkbox.stateChanged.connect(slot)
 
+    def set_slot_for_show_rebin_data(self, slot) -> None:
+        """Connect the slot for the Show All Runs check box."""
+        self.show_rebin_data_checkbox.stateChanged.connect(slot)
+
     def set_slot_for_start_x_changed(self, slot) -> None:
         """Sets the slot for when a start x table cell is changed."""
         self._handle_start_x_changed = slot
@@ -106,6 +110,7 @@ class BackgroundCorrectionsView(widget, ui_form):
         self.group_combo_box.setVisible(visible)
         self.show_all_runs_checkbox.setVisible(visible)
         self.apply_table_changes_to_all_checkbox.setVisible(visible)
+        self.show_rebin_data_checkbox.setVisible(visible)
         self.correction_options_table.setVisible(visible)
 
     @property
@@ -158,6 +163,11 @@ class BackgroundCorrectionsView(widget, ui_form):
     def show_all_runs(self) -> bool:
         """Returns true if all the runs should be shown."""
         return self.show_all_runs_checkbox.isChecked()
+
+    @property
+    def show_rebin_data(self) -> bool:
+        """Returns true if the rebinned data should be shown."""
+        return self.show_rebin_data_checkbox.isChecked()
 
     def selected_run_and_group(self) -> tuple:
         """Returns the Run and Group that is in the same row as the selected table cell."""
