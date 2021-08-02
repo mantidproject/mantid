@@ -2100,6 +2100,8 @@ std::unique_ptr<Kernel::Property> Algorithm::takeProperty(const size_t index) {
   return m_properties.takeProperty(index);
 }
 
+const Kernel::Property *Algorithm::peekProperty(const size_t index) const { return m_properties.peekProperty(index); }
+
 /**
  * Clears all properties under management
  */

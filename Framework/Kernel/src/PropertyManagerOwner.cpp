@@ -246,6 +246,10 @@ std::unique_ptr<Property> PropertyManagerOwner::takeProperty(const size_t index)
   return m_properties->takeProperty(index);
 }
 
+const Property *PropertyManagerOwner::peekProperty(const size_t index) const {
+  return m_properties->peekProperty(index);
+}
+
 /**
  * Clears all properties under management
  */

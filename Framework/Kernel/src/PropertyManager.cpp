@@ -713,6 +713,14 @@ std::unique_ptr<Property> PropertyManager::takeProperty(const size_t index) {
   return std::move(propertyPtr);
 }
 
+const Property *PropertyManager::peekProperty(const size_t index) const {
+  try {
+    return m_orderedProperties[index];
+  } catch (const std::out_of_range &) {
+    return NULL;
+  }
+}
+
 //-----------------------------------------------------------------------------------------------
 /**
  * Clears the whole property map

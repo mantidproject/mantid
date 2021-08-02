@@ -344,6 +344,8 @@ public:
   void removeProperty(const std::string &name, const bool delproperty = true) override;
   /// Removes the property from management and returns a pointer to it
   std::unique_ptr<Kernel::Property> takeProperty(const size_t index) override;
+  const Kernel::Property *peekProperty(const size_t index) const override;
+
   /// Clears all properties under management
   void clear() override;
   /// Override this method to perform a custom action right after a property was
