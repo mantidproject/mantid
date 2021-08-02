@@ -20,7 +20,7 @@ namespace CustomInterfaces {
 namespace IDA {
 using namespace MantidWidgets;
 
-class DLLExport IndirectDataAnalysisElwinTab : public IndirectDataAnalysisTab {
+class MANTIDQT_INDIRECT_DLL IndirectDataAnalysisElwinTab : public IndirectDataAnalysisTab {
   Q_OBJECT
 
 public:

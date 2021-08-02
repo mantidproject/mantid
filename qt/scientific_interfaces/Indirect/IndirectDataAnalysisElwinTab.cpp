@@ -124,8 +124,6 @@ QStringList defaultHeaders() {
   return headers;
 }
 
-// QString makeNumber(double d) { return QString::number(d, 'g', 16); }
-
 class ScopedFalse {
   bool &m_ref;
   bool m_oldValue;
@@ -151,6 +149,7 @@ IndirectDataAnalysisElwinTab::IndirectDataAnalysisElwinTab(QWidget *parent)
 
   // data selected changes
   connect(m_uiForm.page, SIGNAL(filesFoundChanged()), this, SLOT(handleFileInput()));
+
   connect(m_uiForm.page_2, SIGNAL(currentIndexChanged(int)), this, SLOT(handleWorkspaceInput()));
 
   connect(m_uiForm.wkspAdd, SIGNAL(clicked()), this, SLOT(showAddWorkspaceDialog()));
@@ -680,9 +679,15 @@ void IndirectDataAnalysisElwinTab::showAddWorkspaceDialog() {
   connect(m_addWorkspaceDialog.get(), SIGNAL(closeDialog()), this, SLOT(closeDialog()));
 }
 
-QStringList IndirectDataAnalysisElwinTab::getSampleWSSuffices() const { return m_wsSampleSuffixes; }
+QStringList IndirectDataAnalysisElwinTab::getSampleWSSuffices() const {
+  QStringList const m_wsSampleSuffixes{"red", "sqw"};
+  return m_wsSampleSuffixes;
+}
 
-QStringList IndirectDataAnalysisElwinTab::getSampleFBSuffices() const { return m_fbSampleSuffixes; }
+QStringList IndirectDataAnalysisElwinTab::getSampleFBSuffices() const {
+  QStringList const m_fbSampleSuffixes{"red.*", "sqw.*"};
+  return m_fbSampleSuffixes;
+}
 
 void IndirectDataAnalysisElwinTab::closeDialog() {
   disconnect(m_addWorkspaceDialog.get(), SIGNAL(addData()), this, SLOT(addData()));
