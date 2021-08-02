@@ -5,16 +5,17 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm)
-
-
-class _Prop:
-    RUNS = 'InputRunList'
-    GROUP_TOF = 'GroupTOFWorkspaces'
-    OUTPUT_WS = 'OutputWorkspace'
+from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspaceProperty, WorkspaceGroup)
+from mantid.kernel import (CompositeValidator, StringArrayLengthValidator, StringArrayMandatoryValidator,
+                           StringArrayProperty, Direction)
+from mantid.simpleapi import LoadEventNexus, LoadNexus
 
 
 class ReflectometryISISPreprocess(DataProcessorAlgorithm):
+    _RUNS = 'InputRunList'
+    _GROUP_TOF = 'GroupTOFWorkspaces'
+    _OUTPUT_WS = 'OutputWorkspace'
+    _EVENT_MODE = "EventMode"
 
     def __init__(self):
         """Initialize an instance of the algorithm."""
@@ -36,15 +37,52 @@ class ReflectometryISISPreprocess(DataProcessorAlgorithm):
         """Return a list of related algorithm names."""
         return ['ReflectometryISISLoadAndProcess', 'ReflectometryReductionOneAuto']
 
-    def version(self):
-        """Return the version of the algorithm."""
-        return 1
-
     def PyInit(self):
-        pass
+        self.declareProperty(
+            StringArrayProperty(self._RUNS, values=[], validator=self._get_input_runs_validator()),
+            doc='A list of run numbers or workspace names to load and preprocess')
+        self.declareProperty(self._EVENT_MODE, False, direction=Direction.Input,
+                             doc='If true, load the input workspaces as event data')
+        self.declareProperty(
+            MatrixWorkspaceProperty(self._OUTPUT_WS, '', direction=Direction.Output),
+            doc='The preprocessed output workspace. If multiple input runs are specified '
+                'they will be summed into a single output workspace.')
+
+    @staticmethod
+    def _get_input_runs_validator():
+        mandatoryInputRuns = CompositeValidator()
+        mandatoryInputRuns.add(StringArrayMandatoryValidator())
+        lenValidator = StringArrayLengthValidator()
+        lenValidator.setLengthMin(1)
+        mandatoryInputRuns.add(lenValidator)
+        return mandatoryInputRuns
 
     def PyExec(self):
-        pass
+        workspace = self._loadRun(self.getPropertyValue(self._RUNS))
+        self.setProperty(self._OUTPUT_WS, workspace)
+
+    def _loadRun(self, run):
+        """Load a run as an event workspace if slicing is requested, or a histogram
+        workspace otherwise. Transmission runs are always loaded as histogram workspaces."""
+        event_mode = self.getProperty(self._EVENT_MODE).value
+        if event_mode:
+            ws = LoadEventNexus(Filename=run, LoadMonitors=True, StoreInADS=False).OutputWorkspace
+            self._validate_event_ws(ws)
+            self.log().information('Loaded event workspace')
+        else:
+            ws = LoadNexus(Filename=run, StoreInADS=False)
+            self.log().information('Loaded workspace ')
+        return ws
+
+    @staticmethod
+    def _validate_event_ws(workspace):
+        if isinstance(workspace, WorkspaceGroup):
+            # Our reduction algorithm doesn't currently support this due to slicing
+            # (which would result in a group of groups)
+            raise RuntimeError('Loading Workspace Groups in event mode is not supported currently.')
+        if not workspace.run().hasProperty('proton_charge'):
+            # Reduction algorithm requires proton_charge
+            raise RuntimeError('Event workspaces must contain proton_charge')
 
 
 AlgorithmFactory.subscribe(ReflectometryISISPreprocess)
