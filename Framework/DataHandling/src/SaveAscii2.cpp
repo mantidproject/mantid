@@ -263,7 +263,6 @@ void SaveAscii2::exec() {
 
   bool OneSpectrumPerFile = getProperty("OneSpectrumPerFile");
   auto idxIt = idx.begin();
-  int i = 0;
 
   Progress progress(this, 0.0, 1.0, idx.size());
 
@@ -282,7 +281,7 @@ void SaveAscii2::exec() {
           break;
       }
       std::ostringstream ss;
-      double axisValue = m_ws->getAxis(1)->getValue(i);
+      double axisValue = m_ws->getAxis(1)->getValue(*idxIt);
       ss << std::string(filename, 0, extPosition) << "_" << axisValue << std::string(filename, extPosition);
       currentFilename = ss.str();
     }
@@ -316,7 +315,6 @@ void SaveAscii2::exec() {
       writeSpectrum((*idxIt), file);
       progress.report();
       idxIt++;
-      i++;
     } else {
       while (idxIt != idx.end()) {
         writeSpectrum((*idxIt), file);
