@@ -56,7 +56,6 @@ class FrequencyContext(object):
         if num_groups not in self._group_phase_tables.keys():
             self._group_phase_tables[num_groups] = [table]
         elif table.workspace_name not in [table.workspace_name for table in self._group_phase_tables[num_groups]]:
-            print("add table", table.workspace_name)
             self._group_phase_tables[num_groups] += [table]
 
     def get_group_phase_tables(self, num_groups, instrument):

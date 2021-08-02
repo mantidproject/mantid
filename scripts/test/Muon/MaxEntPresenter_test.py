@@ -11,7 +11,6 @@ from Muon.GUI.Common import thread_model
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
 from Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_presenter
 from Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_view
-from Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_model
 
 
 class MaxEntPresenterTest(unittest.TestCase):
@@ -19,9 +18,6 @@ class MaxEntPresenterTest(unittest.TestCase):
         self.context = setup_context(True)
         self.context.data_context.instrument = 'MUSR'
         self.context.gui_context.update({'RebinType': 'None'})
-
-        # Model
-        self.model = mock.create_autospec(maxent_model.MaxEntWrapper, spec_set=True)
 
         # View
         self.view = mock.create_autospec(maxent_view.MaxEntView, spec_set=True)
@@ -69,13 +65,6 @@ class MaxEntPresenterTest(unittest.TestCase):
         self.assertEqual(2,self.view.addItems.call_count)
         self.assertEqual(2,self.view.update_phase_table_combo.call_count)
         self.assertRaises(KeyError,lambda: self.presenter.get_parameters_for_maxent_calculation()['InputPhaseTable'])
-
-    def test_cancel(self):
-        self.presenter.maxent_alg = self.model
-
-        self.presenter.cancel()
-
-        self.assertEqual(1,self.model.cancel.call_count)
 
     def test_maxent_button(self):
         self.presenter.createThread = lambda *args:self.thread

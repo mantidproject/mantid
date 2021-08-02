@@ -42,6 +42,13 @@ Improvements
 - The plotting now has autoscale active by default.
 - Added a table to store phasequads in the phase tab, phasequads also no longer automatically delete themselves
   when new data is loaded
+- Frequency domain analysis can now use groups in :ref:`MuonMaxent <algm-MuonMaxent>` calculations.
+
+BugFixes
+########
+
+- In frequency domain analysis the phasetables calculated from :ref:`MuonMaxent <algm-MuonMaxent>` can be used for
+  :ref:`PhaseQuad <algm-PhaseQuad>` calculations on the phase tab.
 
 ALC
 ---

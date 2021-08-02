@@ -170,6 +170,7 @@ class MaxEntPresenter(object):
         tab = create_empty_table(GROUPINGTABLE)
         tab.addColumn('str', 'Detectors')
         groups = self.get_selected_groups
+        print("moo", groups)
         for group in groups:
             detectors = ""
             for det in group.detectors:
@@ -226,8 +227,6 @@ class MaxEntPresenter(object):
         if self.use_groups:
             num_groups = self.get_num_groups
             phase_table_list = self.context.frequency_context.get_group_phase_tables(num_groups, self.context.data_context.instrument)
-            print("moo",num_groups,phase_table_list )
-
             phase_table_list.insert(0, 'None')
         else:
             phase_table_list = self.context.phase_context.get_phase_table_list(self.context.data_context.instrument)
