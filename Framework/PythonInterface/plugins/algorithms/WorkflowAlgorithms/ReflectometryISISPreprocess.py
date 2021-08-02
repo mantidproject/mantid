@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspaceProperty, WorkspaceGroup)
+from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspaceProperty, MatrixWorkspace, WorkspaceGroup)
 from mantid.kernel import (CompositeValidator, StringArrayLengthValidator, StringArrayMandatoryValidator,
                            StringArrayProperty, Direction)
 from mantid.simpleapi import LoadEventNexus, LoadNexus
@@ -61,12 +61,15 @@ class ReflectometryISISPreprocess(DataProcessorAlgorithm):
         workspace = self._loadRun(self.getPropertyValue(self._RUNS))
         self.setProperty(self._OUTPUT_WS, workspace)
 
-    def _loadRun(self, run):
+    def _loadRun(self, run: str) -> MatrixWorkspace:
         """Load a run as an event workspace if slicing is requested, or a histogram
         workspace otherwise. Transmission runs are always loaded as histogram workspaces."""
         event_mode = self.getProperty(self._EVENT_MODE).value
         if event_mode:
-            ws = LoadEventNexus(Filename=run, LoadMonitors=True, StoreInADS=False).OutputWorkspace
+            alg = LoadEventNexus(Filename=run, LoadMonitors=True, StoreInADS=False)
+            ws = alg.OutputWorkspace
+            # TODO
+            # monitors = alg.MonitorWorkspace
             self._validate_event_ws(ws)
             self.log().information('Loaded event workspace')
         else:
