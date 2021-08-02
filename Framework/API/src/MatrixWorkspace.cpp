@@ -1094,6 +1094,23 @@ bool MatrixWorkspace::isCommonBins() const {
   return m_isCommonBinsFlag;
 }
 
+/**
+ * Whether the workspace's bins are integers - and common.
+ * @return Whether the workspace's bins are integers - and common.
+ **/
+bool MatrixWorkspace::isIntegerBins() const {
+  if (!this->isCommonBins())
+    return false;
+
+  const HistogramData::HistogramX bins = x(0);
+
+  for (size_t i = 0; i < bins.size(); ++i) {
+    if (std::trunc(bins[i]) != bins[i])
+      return false;
+  }
+  return true;
+}
+
 /** Called by the algorithm MaskBins to mask a single bin for the first time,
  * algorithms that later propagate the
  *  the mask from an input to the output should call flagMasked() instead. Here
