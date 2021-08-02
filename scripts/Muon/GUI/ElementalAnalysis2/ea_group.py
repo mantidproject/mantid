@@ -36,7 +36,6 @@ class EAGroup(object):
     def __del__(self):
         try:
             remove_ws_if_present(self.get_counts_workspace_for_run())
-            print("here")
 
             if self.is_rebinned_workspace_present():
                 remove_ws_if_present(self.get_counts_workspace_for_run(rebin=True))

@@ -96,9 +96,7 @@ class ElementalAnalysisContext(object):
 
     def handle_calculation_error(self, error):
         self.calculation_finished_notifier.notify_subscribers()
-        print("in errors", error)
         if self.error_notifier:
-            print("here")
             error_message = f"Unexpected error occurred during Rebin: " + str(error)
             self.error_notifier.notify_subscribers(error_message)
 
@@ -118,7 +116,6 @@ class ElementalAnalysisContext(object):
 
         CloneWorkspace(InputWorkspace=raw_workspace, OutputWorkspace=rebined_run_name)
         rebin_ws(rebined_run_name, params)
-        print("after rebin")
 
         workspace = retrieve_ws(rebined_run_name)
         group_workspace = retrieve_ws(self.group_context[name].run_number)
