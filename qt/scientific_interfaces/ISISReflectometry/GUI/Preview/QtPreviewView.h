@@ -10,6 +10,9 @@
 #include "IPreviewView.h"
 #include "ui_PreviewWidget.h"
 
+#include <QObject>
+#include <QWidget>
+
 #include <memory>
 #include <string>
 
@@ -23,10 +26,14 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL QtPreviewView : public QWidget, public IPre
 public:
   QtPreviewView(QWidget *parent = nullptr);
 
+  void subscribe(PreviewViewSubscriber *notifyee) noexcept override;
+
   std::string getWorkspaceName() const override;
 
 private:
   Ui::PreviewWidget m_ui;
+  PreviewViewSubscriber *m_notifyee{nullptr};
+
   void connectSignals() const;
 
 private slots:

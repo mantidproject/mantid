@@ -49,7 +49,7 @@ public:
 
     return std::make_unique<BatchPresenter>(view, std::move(model), std::move(runsPresenter), std::move(eventPresenter),
                                             std::move(experimentPresenter), std::move(instrumentPresenter),
-                                            std::move(savePresenter));
+                                            std::move(savePresenter), std::move(previewPresenter));
   }
 
 private:

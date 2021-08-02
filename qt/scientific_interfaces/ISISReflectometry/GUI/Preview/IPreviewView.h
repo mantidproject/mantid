@@ -11,7 +11,7 @@
 #include <string>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
-class MANTIDQT_ISISREFLECTOMETRY_DLL PreviewViewSubscriber {
+class PreviewViewSubscriber {
 public:
   virtual ~PreviewViewSubscriber() = default;
   virtual void notifyLoadWorkspaceRequested() = 0;
@@ -19,6 +19,7 @@ public:
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL IPreviewView {
 public:
+  virtual void subscribe(PreviewViewSubscriber *notifyee) noexcept = 0;
   virtual std::string getWorkspaceName() const = 0;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

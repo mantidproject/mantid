@@ -12,7 +12,9 @@
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 PreviewPresenter::PreviewPresenter(IPreviewView *view, std::unique_ptr<IPreviewModel> model)
-    : m_view(view), m_model(std::move(model)) {}
+    : m_view(view), m_model(std::move(model)) {
+  m_view->subscribe(this);
+}
 
 void PreviewPresenter::notifyLoadWorkspaceRequested() {
   auto const name = m_view->getWorkspaceName();

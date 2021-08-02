@@ -14,6 +14,7 @@
 #include <memory>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
+
 class MANTIDQT_ISISREFLECTOMETRY_DLL PreviewPresenter : public PreviewViewSubscriber, public IPreviewPresenter {
 public:
   PreviewPresenter(IPreviewView *view, std::unique_ptr<IPreviewModel> model);

@@ -16,6 +16,7 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 class MockPreviewView : public IPreviewView {
 public:
+  MOCK_METHOD(void, subscribe, (PreviewViewSubscriber *), (noexcept, override));
   MOCK_METHOD(std::string, getWorkspaceName, (), (const, override));
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
