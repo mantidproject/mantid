@@ -34,16 +34,23 @@ class BackgroundCorrectionData:
     exp_decay: IFunction
     status: str = "No background correction"
 
-    def __init__(self, start_x: float, end_x: float):
+    def __init__(self, start_x: float, end_x: float, flat_background: IFunction = None, exp_decay: IFunction = None):
         self.start_x = start_x
         self.end_x = end_x
-        self.setup_functions()
+        self.setup_functions(flat_background, exp_decay)
 
-    def setup_functions(self) -> None:
+    def setup_functions(self, flat_background: IFunction = None, exp_decay: IFunction = None) -> None:
         """Sets up the functions to use by default when doing Auto corrections."""
-        self.flat_background = FunctionFactory.createFunction("FlatBackground")
-        self.exp_decay = FunctionFactory.createFunction("ExpDecayMuon")
-        self.exp_decay.setParameter("A", DEFAULT_A_VALUE)
+        if flat_background is not None:
+            self.flat_background = flat_background.clone()
+        else:
+            self.flat_background = FunctionFactory.createFunction("FlatBackground")
+
+        if exp_decay is not None:
+            self.exp_decay = exp_decay.clone()
+        else:
+            self.exp_decay = FunctionFactory.createFunction("ExpDecayMuon")
+            self.exp_decay.setParameter("A", DEFAULT_A_VALUE)
 
     def setup_uncorrected_workspace(self, workspace_name: str) -> None:
         """Clones the Counts workspace into a hidden workspace in the ADS."""
@@ -207,15 +214,25 @@ class BackgroundCorrectionsModel:
     def _add_background_correction_data_for(self, previous_data: dict, run: str, group: str, rebin: bool) -> None:
         """Add background correction data for the provided Run, Group and Rebin status."""
         run_group = tuple([run, group, rebin])
-        if run_group in previous_data:
-            background_data = previous_data[run_group]
-        else:
-            start_x, end_x = self.default_x_range(run, group)
-            background_data = BackgroundCorrectionData(start_x, end_x)
+        background_data = self._create_background_correction_data(previous_data, run_group)
 
         workspace_name = self.get_counts_workspace_name(run, group, rebin)
         self._corrections_context.background_correction_data[run_group] = background_data
         self._corrections_context.background_correction_data[run_group].setup_uncorrected_workspace(workspace_name)
+
+    def _create_background_correction_data(self, previous_data: dict, run_group: tuple) -> BackgroundCorrectionData:
+        """Creates the BackgroundCorrectionData for a newly loaded data. It tries to reuse previous data."""
+        run, group, _ = run_group
+        if run_group in previous_data:
+            data = previous_data[run_group]
+            return BackgroundCorrectionData(data.start_x, data.end_x, data.flat_background, data.exp_decay)
+        else:
+            for key, value in previous_data.items():
+                if key[1] == group:
+                    return BackgroundCorrectionData(value.start_x, value.end_x, value.flat_background, value.exp_decay)
+
+        start_x, end_x = self.default_x_range(run, group)
+        return BackgroundCorrectionData(start_x, end_x)
 
     def reset_background_subtraction_data(self) -> None:
         """Resets the calculated background functions and corrected counts data in the ADS."""

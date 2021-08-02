@@ -174,7 +174,7 @@ class BackgroundCorrectionsView(widget, ui_form):
         if self._selected_row is not None:
             run = self.correction_options_table.item(self._selected_row, RUN_COLUMN_INDEX).text()
             group = self.correction_options_table.item(self._selected_row, GROUP_COLUMN_INDEX).text()
-            rebin = bool(self.correction_options_table.item(self._selected_row, REBIN_COLUMN_INDEX).text())
+            rebin = self.correction_options_table.item(self._selected_row, REBIN_COLUMN_INDEX).text() == "True"
             return [run], [group], [rebin]
         else:
             raise RuntimeError("There is no selected run/group table row.")
