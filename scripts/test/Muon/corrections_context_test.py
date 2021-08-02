@@ -25,7 +25,7 @@ class CorrectionsContextTest(unittest.TestCase):
         self.assertEqual(self.corrections_context.dead_time_table_name_from_ads, None)
 
         self.assertEqual(self.corrections_context.background_corrections_mode, "None")
-        self.assertEqual(self.corrections_context.selected_function, "Flat Background")
+        self.assertEqual(self.corrections_context.selected_function, "Flat Background + Exp Decay")
         self.assertEqual(self.corrections_context.selected_group, "All")
         self.assertEqual(self.corrections_context.show_all_runs, False)
 

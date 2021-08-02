@@ -78,8 +78,9 @@ class GroupingTablePresenter(object):
 
     def validate_detector_ids(self, text):
         try:
-            if re.match(run_utils.run_string_regex, text):
-                return self._validate_detector_ids_list(run_utils.run_string_to_list(text, False))
+            if re.match(run_utils.run_string_regex, text) and \
+                    self._validate_detector_ids_list(run_utils.run_string_to_list(text, False)):
+                return True
         except OverflowError:
             pass
 

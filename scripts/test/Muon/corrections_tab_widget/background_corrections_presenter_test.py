@@ -44,9 +44,9 @@ class BackgroundCorrectionsPresenterTest(unittest.TestCase):
         self.presenter.handle_instrument_changed()
 
         self.model.set_background_correction_mode.assert_called_once_with("None")
-        self.model.set_selected_function.assert_called_once_with("Flat Background")
+        self.model.set_selected_function.assert_called_once_with("Flat Background + Exp Decay")
         self.mock_view_background_correction_mode.assert_called_once_with("None")
-        self.mock_view_selected_function.assert_called_once_with("Flat Background")
+        self.mock_view_selected_function.assert_called_once_with("Flat Background + Exp Decay")
 
     def test_that_handle_pre_process_and_counts_calculated_will_populate_the_background_corrections_data(self):
         self.presenter.handle_pre_process_and_counts_calculated()

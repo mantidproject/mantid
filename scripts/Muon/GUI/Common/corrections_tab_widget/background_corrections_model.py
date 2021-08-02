@@ -222,7 +222,7 @@ class BackgroundCorrectionsModel:
 
     def _create_background_correction_data(self, previous_data: dict, run_group: tuple) -> BackgroundCorrectionData:
         """Creates the BackgroundCorrectionData for a newly loaded data. It tries to reuse previous data."""
-        run, group, _ = run_group
+        run, group, rebin = run_group
         if run_group in previous_data:
             data = previous_data[run_group]
             return BackgroundCorrectionData(data.start_x, data.end_x, data.flat_background, data.exp_decay)
@@ -231,7 +231,7 @@ class BackgroundCorrectionsModel:
                 if key[1] == group:
                     return BackgroundCorrectionData(value.start_x, value.end_x, value.flat_background, value.exp_decay)
 
-        start_x, end_x = self.default_x_range(run, group)
+        start_x, end_x = self.default_x_range(run, group, rebin)
         return BackgroundCorrectionData(start_x, end_x)
 
     def reset_background_subtraction_data(self) -> None:
@@ -318,12 +318,12 @@ class BackgroundCorrectionsModel:
             workspace_list = self._context.group_pair_context.get_group_counts_workspace_names(run_list[0], [group], rebin)
         return workspace_list[0] if len(workspace_list) > 0 else None
 
-    def default_x_range(self, run: str, group: str) -> tuple:
+    def default_x_range(self, run: str, group: str, rebin: bool) -> tuple:
         """Returns the x range to use by default for the background corrections. It is the second half of the data."""
-        x_lower, x_upper = self.x_limits_of_workspace(run, group)
+        x_lower, x_upper = self.x_limits_of_workspace(run, group, rebin)
         x_mid = round((x_upper - x_lower)/2.0)
         return x_mid, x_upper
 
-    def x_limits_of_workspace(self, run: str, group: str) -> tuple:
+    def x_limits_of_workspace(self, run: str, group: str, rebin: bool) -> tuple:
         """Returns the x data limits of the workspace associated with the provided Run and Group."""
-        return x_limits_of_workspace(self.get_counts_workspace_name(run, group, False))
+        return x_limits_of_workspace(self.get_counts_workspace_name(run, group, rebin))

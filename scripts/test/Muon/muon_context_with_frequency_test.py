@@ -48,6 +48,7 @@ class MuonContextWithFrequencyTest(unittest.TestCase):
 
         self.run_list = [19489]
         self.groups = [MuonGroup("bwd"), MuonGroup("fwd")]
+        self.rebins = [False, False]
         self.pairs = [MuonPair("long", "bwd", "fwd")]
 
     def tearDown(self):
@@ -55,9 +56,9 @@ class MuonContextWithFrequencyTest(unittest.TestCase):
 
     def _calculate_all_data(self):
         self.context.calculate_all_counts()
-        for group in self.groups:
-            self.context.calculate_asymmetry_for(self.run_list, group)
-            self.context.show_group(self.run_list, group)
+        for group, rebin in zip(self.groups, self.rebins):
+            self.context.calculate_asymmetry_for(self.run_list, group, rebin)
+            self.context.show_group(self.run_list, group, rebin)
         for pair in self.pairs:
             self.context.calculate_pair_for(self.run_list, pair)
             self.context.show_pair(self.run_list, pair)

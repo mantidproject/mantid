@@ -24,12 +24,15 @@ class BackgroundCorrectionsModelTest(unittest.TestCase):
 
     def setUp(self):
         context = setup_context()
+        context._do_rebin = mock.Mock(return_value=False)
+
         self.corrections_model = CorrectionsModel(context)
         self.model = BackgroundCorrectionsModel(self.corrections_model, context)
         self.model.clear_background_corrections_data()
 
         self.runs = ["84447", "84447", "84447", "84447"]
         self.groups = ["fwd", "bwd", "top", "bottom"]
+        self.rebins = [False, False, False, False]
         self.start_xs = [15.0] * 4
         self.end_xs = [30.0] * 4
         self.a0s = [0.0] * 4
@@ -48,9 +51,10 @@ class BackgroundCorrectionsModelTest(unittest.TestCase):
 
     def test_that_the_model_and_context_has_been_initialized_with_the_expected_data(self):
         self.assertTrue(self.model.is_background_mode_none())
-        self.assertEqual(self.model._corrections_context.selected_function, "Flat Background")
+        self.assertEqual(self.model._corrections_context.selected_function, "Flat Background + Exp Decay")
         self.assertEqual(self.model._corrections_context.selected_group, "All")
         self.assertEqual(self.model._corrections_context.show_all_runs, False)
+        self.assertEqual(self.model._corrections_context.show_rebin_data, False)
 
     def test_that_set_background_correction_mode_will_set_the_background_mode_as_expected(self):
         self.model.set_background_correction_mode("Auto")
@@ -81,8 +85,8 @@ class BackgroundCorrectionsModelTest(unittest.TestCase):
         self.model.x_limits_of_workspace = mock.Mock(return_value=(0.0, 30.0))
         self._populate_background_corrections_data()
 
-        for run, group in zip(self.runs, self.groups):
-            correction_data = self.model._corrections_context.background_correction_data[tuple([run, group])]
+        for run, group, rebin in zip(self.runs, self.groups, self.rebins):
+            correction_data = self.model._corrections_context.background_correction_data[tuple([run, group, rebin])]
             self.assertEqual(correction_data.start_x, 15.0)
             self.assertEqual(correction_data.end_x, 30.0)
             self.assertEqual(correction_data.flat_background.getParameterValue("A0"), 0.0)
@@ -93,40 +97,41 @@ class BackgroundCorrectionsModelTest(unittest.TestCase):
 
         self._populate_background_corrections_data()
 
-        self.model.set_start_x(run, "fwd", 5.0)
-        self.model.set_start_x(run, "bwd", 6.0)
-        self.model.set_start_x(run, "top", 7.0)
-        self.model.set_start_x(run, "bottom", 8.0)
+        self.model.set_start_x(run, "fwd", False, 5.0)
+        self.model.set_start_x(run, "bwd", False, 6.0)
+        self.model.set_start_x(run, "top", False, 7.0)
+        self.model.set_start_x(run, "bottom", False, 8.0)
 
-        self.assertEqual(self.model.start_x(run, "fwd"), 5.0)
-        self.assertEqual(self.model.start_x(run, "bwd"), 6.0)
-        self.assertEqual(self.model.start_x(run, "top"), 7.0)
-        self.assertEqual(self.model.start_x(run, "bottom"), 8.0)
+        self.assertEqual(self.model.start_x(run, "fwd", False), 5.0)
+        self.assertEqual(self.model.start_x(run, "bwd", False), 6.0)
+        self.assertEqual(self.model.start_x(run, "top", False), 7.0)
+        self.assertEqual(self.model.start_x(run, "bottom", False), 8.0)
 
     def test_that_set_end_x_will_set_the_end_x_in_the_background_correction_data_for_a_specific_domain(self):
         run = "84447"
 
         self._populate_background_corrections_data()
 
-        self.model.set_end_x(run, "fwd", 5.0)
-        self.model.set_end_x(run, "bwd", 6.0)
-        self.model.set_end_x(run, "top", 7.0)
-        self.model.set_end_x(run, "bottom", 8.0)
+        self.model.set_end_x(run, "fwd", False, 5.0)
+        self.model.set_end_x(run, "bwd", False, 6.0)
+        self.model.set_end_x(run, "top", False, 7.0)
+        self.model.set_end_x(run, "bottom", False, 8.0)
 
-        self.assertEqual(self.model.end_x(run, "fwd"), 5.0)
-        self.assertEqual(self.model.end_x(run, "bwd"), 6.0)
-        self.assertEqual(self.model.end_x(run, "top"), 7.0)
-        self.assertEqual(self.model.end_x(run, "bottom"), 8.0)
+        self.assertEqual(self.model.end_x(run, "fwd", False), 5.0)
+        self.assertEqual(self.model.end_x(run, "bwd", False), 6.0)
+        self.assertEqual(self.model.end_x(run, "top", False), 7.0)
+        self.assertEqual(self.model.end_x(run, "bottom", False), 8.0)
 
     def test_that_selected_correction_data_returns_all_correction_data_if_all_runs_and_groups_are_selected(self):
         self.model.x_limits_of_workspace = mock.Mock(return_value=(0.0, 30.0))
         self.model.set_show_all_runs(True)
 
         self._populate_background_corrections_data()
-        runs, groups, start_xs, end_xs, a0s, a0_errors, statuses = self.model.selected_correction_data()
+        runs, groups, rebins, start_xs, end_xs, a0s, a0_errors, statuses = self.model.selected_correction_data()
 
         self.assertEqual(runs, self.runs)
         self.assertEqual(groups, self.groups)
+        self.assertEqual(rebins, self.rebins)
         self.assertEqual(start_xs, self.start_xs)
         self.assertEqual(end_xs, self.end_xs)
         self.assertEqual(a0s, self.a0s)
@@ -136,15 +141,17 @@ class BackgroundCorrectionsModelTest(unittest.TestCase):
     def test_that_selected_correction_data_returns_all_correction_data_for_a_specific_run_and_group(self):
         run = "84447"
         group = "bwd"
+        rebin = False
         self.model.x_limits_of_workspace = mock.Mock(return_value=(0.0, 30.0))
         self.model.set_selected_group(group)
         self.corrections_model.set_current_run_string(run)
 
         self._populate_background_corrections_data()
-        runs, groups, start_xs, end_xs, a0s, a0_errors, statuses = self.model.selected_correction_data()
+        runs, groups, rebins, start_xs, end_xs, a0s, a0_errors, statuses = self.model.selected_correction_data()
 
         self.assertEqual(runs, [run])
         self.assertEqual(groups, [group])
+        self.assertEqual(rebins, [rebin])
         self.assertEqual(start_xs, [15.0])
         self.assertEqual(end_xs, [30.0])
         self.assertEqual(a0s, [0.0])
@@ -154,55 +161,59 @@ class BackgroundCorrectionsModelTest(unittest.TestCase):
     def test_that_all_runs_and_groups_returns_the_expected_run_and_group_lists(self):
         self._populate_background_corrections_data()
 
-        runs, groups = self.model.all_runs_and_groups()
+        runs, groups, rebins = self.model.all_runs_and_groups()
         self.assertEqual(runs, self.runs)
         self.assertEqual(groups, self.groups)
+        self.assertEqual(rebins, self.rebins)
 
     def test_that_all_runs_and_groups_returns_empty_lists_when_no_correction_data_exists(self):
-        runs, groups = self.model.all_runs_and_groups()
+        runs, groups, rebins = self.model.all_runs_and_groups()
         self.assertEqual(runs, [])
         self.assertEqual(groups, [])
+        self.assertEqual(rebins, [])
 
     def test_that_x_limits_of_workspace_will_return_the_x_limits_of_the_workspace(self):
-        run, group = "84447", "top"
+        run, group, rebin = "84447", "top", False
         workspace_name = f"HIFI{run}; Group; {group}; Counts; MA"
         self.model.get_counts_workspace_name = mock.Mock(return_value=workspace_name)
 
         CreateSampleWorkspace(OutputWorkspace=workspace_name)
 
-        x_lower, x_upper = self.model.x_limits_of_workspace(run, group)
+        x_lower, x_upper = self.model.x_limits_of_workspace(run, group, rebin)
 
         self.assertEqual(x_lower, 0.0)
         self.assertEqual(x_upper, 20000.0)
 
     def test_that_x_limits_of_workspace_will_return_the_default_x_values_if_there_are_no_workspaces_loaded(self):
-        run, group = "84447", "top"
+        run, group, rebin = "84447", "top", False
         workspace_name = f"HIFI{run}; Group; {group}; Counts; MA"
         self.model.get_counts_workspace_name = mock.Mock(return_value=workspace_name)
 
-        x_lower, x_upper = self.model.x_limits_of_workspace(run, group)
+        x_lower, x_upper = self.model.x_limits_of_workspace(run, group, rebin)
 
         self.assertEqual(x_lower, DEFAULT_X_LOWER)
         self.assertEqual(x_upper, DEFAULT_X_UPPER)
 
     def test_that_run_background_correction_for_all_will_run_without_error_when_the_start_and_end_x_is_good(self):
+        self.model.set_selected_function("Flat Background")
         self._populate_background_corrections_data()
 
-        for run, group in zip(self.runs, self.groups):
-            self.model.set_start_x(run, group, 0.0)
-            self.model.set_end_x(run, group, 1.0)
+        for run, group, rebin in zip(self.runs, self.groups, self.rebins):
+            self.model.set_start_x(run, group, rebin, 0.0)
+            self.model.set_end_x(run, group, rebin, 1.0)
 
-        runs, groups = self.model.run_background_correction_for_all()
+        runs, groups, rebins = self.model.run_background_correction_for_all()
 
         self.assertEqual(runs, self.runs)
         self.assertEqual(groups, self.groups)
+        self.assertEqual(rebins, self.rebins)
 
     def test_that_run_background_correction_for_all_will_cause_an_exception_when_the_start_and_end_x_are_out_of_range(self):
         self._populate_background_corrections_data()
 
-        for run, group in zip(self.runs, self.groups):
-            self.model.set_start_x(run, group, 20.0)
-            self.model.set_end_x(run, group, 25.0)
+        for run, group, rebin in zip(self.runs, self.groups, self.rebins):
+            self.model.set_start_x(run, group, rebin, 20.0)
+            self.model.set_end_x(run, group, rebin, 25.0)
 
         self.assertRaises(ValueError, self.model.run_background_correction_for_all)
 
@@ -214,44 +225,48 @@ class BackgroundCorrectionsModelTest(unittest.TestCase):
 
         self._populate_background_corrections_data()
 
-        runs, groups = self.model.run_background_correction_for_all()
+        runs, groups, rebins = self.model.run_background_correction_for_all()
 
-        _, _, _, _, a0s, a0_errors, _ = self.model.selected_correction_data()
+        _, _, _, _, _, a0s, a0_errors, _ = self.model.selected_correction_data()
 
         self.assertEqual(a0s, [self.fitted_a0] * 4)
         self.assertEqual(a0_errors, [self.fitted_a0_error] * 4)
         self.assertEqual(runs, self.runs)
         self.assertEqual(groups, self.groups)
+        self.assertEqual(rebins, self.rebins)
 
-        runs, groups = self.model.reset_background_subtraction_data()
+        runs, groups, rebins = self.model.reset_background_subtraction_data()
 
-        _, _, _, _, a0s, a0_errors, _ = self.model.selected_correction_data()
+        _, _, _, _, _, a0s, a0_errors, _ = self.model.selected_correction_data()
 
         self.assertEqual(a0s, [0.0] * 4)
         self.assertEqual(a0_errors, [0.0] * 4)
         self.assertEqual(runs, self.runs)
         self.assertEqual(groups, self.groups)
+        self.assertEqual(rebins, self.rebins)
 
     def test_that_run_background_correction_for_will_run_without_error_when_the_start_and_end_x_is_good(self):
-        run, group = "84447", "bwd"
+        run, group, rebin = "84447", "bwd", False
+        self.model.set_selected_function("Flat Background")
         self._populate_background_corrections_data()
 
-        self.model.set_start_x(run, group, 0.0)
-        self.model.set_end_x(run, group, 1.0)
+        self.model.set_start_x(run, group, rebin, 0.0)
+        self.model.set_end_x(run, group, rebin, 1.0)
 
-        runs, groups = self.model.run_background_correction_for(run, group)
+        runs, groups, rebins = self.model.run_background_correction_for(run, group, rebin)
 
         self.assertEqual(runs, [run])
         self.assertEqual(groups, [group])
+        self.assertEqual(rebins, [rebin])
 
     def test_that_run_background_correction_for_will_cause_an_exception_when_the_start_and_end_x_are_out_of_range(self):
-        run, group = "84447", "bwd"
+        run, group, rebin = "84447", "bwd", False
         self._populate_background_corrections_data()
 
-        self.model.set_start_x(run, group, 20.0)
-        self.model.set_end_x(run, group, 25.0)
+        self.model.set_start_x(run, group, rebin, 20.0)
+        self.model.set_end_x(run, group, rebin, 25.0)
 
-        self.assertRaises(ValueError, self.model.run_background_correction_for, run, group)
+        self.assertRaises(ValueError, self.model.run_background_correction_for, run, group, rebin)
 
     def _populate_background_corrections_data(self):
         workspace_name = "HIFI84447; Group; fwd; Counts; MA"

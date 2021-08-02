@@ -87,13 +87,15 @@ class CorrectionsModelTest(unittest.TestCase):
     def test_that_calculate_asymmetry_workspaces_for_will_calculate_the_expected_asymmetry_workspace(self):
         self.context.calculate_all_counts()
 
-        self.model.calculate_asymmetry_workspaces_for([f"{self.run_number}", f"{self.run_number}"], ["fwd", "bwd"])
+        self.model.calculate_asymmetry_workspaces_for([f"{self.run_number}", f"{self.run_number}"], ["fwd", "bwd"],
+                                                      [False, False])
 
         self._assert_workspaces_exist(["EMU19489; Group; fwd; Asymmetry; MA", "EMU19489; Group; bwd; Asymmetry; MA"])
 
     def test_that_calculate_pairs_for_will_calculate_the_expected_pair_asymmetry_workspaces(self):
         self.context.calculate_all_counts()
-        self.model.calculate_asymmetry_workspaces_for([f"{self.run_number}", f"{self.run_number}"], ["fwd", "bwd"])
+        self.model.calculate_asymmetry_workspaces_for([f"{self.run_number}", f"{self.run_number}"], ["fwd", "bwd"],
+                                                      [False, False])
 
         pair_names = self.model.calculate_pairs_for([f"{self.run_number}"], ["bwd"])
 
@@ -105,7 +107,8 @@ class CorrectionsModelTest(unittest.TestCase):
         self.context.group_pair_context.add_diff(diff)
 
         self.context.calculate_all_counts()
-        self.model.calculate_asymmetry_workspaces_for([f"{self.run_number}", f"{self.run_number}"], ["fwd", "bwd"])
+        self.model.calculate_asymmetry_workspaces_for([f"{self.run_number}", f"{self.run_number}"], ["fwd", "bwd"],
+                                                      [False, False])
 
         self.model.calculate_diffs_for([f"{self.run_number}"], ["bwd"])
 

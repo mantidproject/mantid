@@ -54,6 +54,7 @@ class FFTPresenterTest(unittest.TestCase):
 
         self.run_list = [22725]
         self.groups = [MuonGroup(group) for group in GROUP_LIST]
+        self.rebins = [False] * len(self.groups)
         self.pairs = [MuonPair(EXAMPLE_PAIR, 'top', 'bottom', alpha=0.75)]
 
         self.presenter = fft_presenter.FFTPresenter(
@@ -78,9 +79,9 @@ class FFTPresenterTest(unittest.TestCase):
 
     def _calculate_all_data(self):
         self.context.calculate_all_counts()
-        for group in self.groups:
-            self.context.calculate_asymmetry_for(self.run_list, group)
-            self.context.show_group(self.run_list, group)
+        for group, rebin in zip(self.groups, self.rebins):
+            self.context.calculate_asymmetry_for(self.run_list, group, rebin)
+            self.context.show_group(self.run_list, group, rebin)
         for pair in self.pairs:
             self.context.calculate_pair_for(self.run_list, pair)
             self.context.show_pair(self.run_list, pair)
@@ -142,6 +143,8 @@ class FFTPresenterTest(unittest.TestCase):
 
     def test_handle_use_raw_data_changed_when_rebin_set(self):
         self.context.gui_context.update({'RebinType': 'Fixed', 'RebinFixed': 2})
+        self.groups = [MuonGroup(group) for group in GROUP_LIST] * 2
+        self.rebins = [False] * len(GROUP_LIST) + [True] * len(GROUP_LIST)
         self._calculate_all_data()
         self.view.set_raw_checkbox_state(False)
 
