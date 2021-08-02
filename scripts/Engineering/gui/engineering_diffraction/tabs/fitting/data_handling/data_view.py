@@ -9,6 +9,8 @@ from os import path
 
 from mantidqt.utils.qt import load_ui
 from Engineering.gui.engineering_diffraction.tabs.common import path_handling
+from fnmatch import fnmatch
+from os.path import splitext
 
 Ui_data, _ = load_ui(__file__, "data_widget.ui")
 
@@ -23,10 +25,12 @@ class FileFilterProxyModel (QtCore.QSortFilterProxyModel):
         model = self.sourceModel()
         index0 = model.index(source_row, 0, source_parent)
         fname = model.fileName(index0)
+        fname = splitext(fname)[0]
+
         if self.text_filter is None:
             return True
         else:
-            return model.isDir(index0) or (fname.find(self.text_filter) >= 0)
+            return model.isDir(index0) or fnmatch(fname,self.text_filter)
 
 
 class FittingDataView(QtWidgets.QWidget, Ui_data):
@@ -42,12 +46,10 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
         self.finder_data.setUseNativeWidget(False)
         self.proxy_model = FileFilterProxyModel()
         self.finder_data.setProxyModel(self.proxy_model)
-        self.finder_data.setLabelText("Focused Run Files")
+        self.finder_data.setLabelText("")
         self.finder_data.isForRunFiles(False)
         self.finder_data.allowMultipleFiles(True)
         self.finder_data.setFileExtensions([".nxs"])
-        # xunit combo box
-        self.setup_xunit_combobox()
         self.update_file_filter(self.combo_bank.currentText(), self.combo_xunit.currentText())
 
     def saveSettings(self):
@@ -188,13 +190,12 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
             self.get_table_item(row, col).setCheckState(QtCore.Qt.Unchecked)
 
     def update_file_filter(self, bank, xunit):
+        self.proxy_model.text_filter = "*"
         if bank == "1 (North)":
-            self.proxy_model.text_filter = "bank_1"
+            self.proxy_model.text_filter += "bank_1"
         elif bank == "2 (South)":
-            self.proxy_model.text_filter = "bank_2"
-        else:
-            self.proxy_model.text_filter = ""
-        if xunit != "":
+            self.proxy_model.text_filter += "bank_2"
+        if xunit != "All":
             self.proxy_model.text_filter += "_" + xunit
 
     # =================
@@ -232,13 +233,3 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
 
     def is_searching(self):
         return self.finder_data.isSearching()
-
-    # =================
-    # Internal Setup
-    # =================
-
-    def setup_xunit_combobox(self):
-        self.combo_xunit.setEditable(False)
-        # make TOF default
-        index = self.combo_xunit.findText("TOF")
-        self.combo_xunit.setCurrentIndex(index)
