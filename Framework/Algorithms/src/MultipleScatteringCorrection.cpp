@@ -202,13 +202,17 @@ void MultipleScatteringCorrection::exec() {
       // compute the correction factor
       const double rho = m_material.numberDensityEffective();
       const double sigma_s = m_material.totalScatterXSection();
-      const double V = distGraber.m_totalVolume;
-      output[j] = rho * V * sigma_s * A2 / (4 * M_PI * A1);
+      // NOTE: Unit is important
+      // rho in 1/A^3, and sigma_s in 1/barns (1e-8 A^(-2))
+      // so rho * sigma_s = 1e-8 A^(-1) = 100 meters
+      // A2/A1 gives length in meters
+      const double unit_scaling = 1e2;
+      output[j] = unit_scaling * rho * sigma_s * A2 / (4 * M_PI * A1);
 
       // debug output
       std::ostringstream msg_debug;
       msg_debug << "Det_" << i << "@spectrum_" << j << ":\n"
-                << "\trho = " << rho << ", sigma_s = " << sigma_s << ", V = " << V << "\n"
+                << "\trho = " << rho << ", sigma_s = " << sigma_s << "\n"
                 << "\tA1 = " << A1 << "\n"
                 << "\tA2 = " << A2 << "\n"
                 << "\tms_factor = " << output[j] << "\n";

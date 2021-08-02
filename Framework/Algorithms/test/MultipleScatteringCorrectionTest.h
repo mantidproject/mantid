@@ -80,20 +80,37 @@ public:
     TS_ASSERT(msAlg.isExecuted());
 
     // Compare the results
-    // NOTE:
-    // CompareWorkspace does not work in the C++ unit test environment.
-    // We are switching to test the Y value directly
-    g_log.notice() << "Comparing the results\n";
-    Mantid::API::MatrixWorkspace_sptr rst_mayer;
-    rst_mayer = AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>("rst_mayer");
-    Mantid::API::MatrixWorkspace_sptr rst_carpenter;
-    rst_carpenter = AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>("rst_carpenter_ms");
-    Mantid::API::MatrixWorkspace_sptr rst_ms;
-    rst_ms = AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>("rst_ms_sampleOnly");
 
-    for (int i = 0; i < 2; ++i) {
-      g_log.notice() << rst_mayer->readY(1)[i] << ", " << rst_carpenter->readY(1)[i] << ", " << rst_ms->readY(1)[i]
-                     << "\n";
+    // Mayer correction results rst_out should be adjusted following to get the actual correction factor
+    //    correction_factor_mayer = rst_out / rst_in
+    auto divAlg = Mantid::API::AlgorithmManager::Instance().create("Divide");
+    divAlg->initialize();
+    divAlg->setProperty("LHSWorkspace", "rst_mayer");
+    divAlg->setProperty("RHSWorkspace", "ws_TOF");
+    divAlg->setProperty("OutputWorkspace", "rst_mayer_factor");
+    divAlg->execute();
+    Mantid::API::MatrixWorkspace_sptr rst_mayer_factor = divAlg->getProperty("OutputWorkspace");
+
+    // Carpenter correction results can be directly extracted via its implicit name
+    Mantid::API::MatrixWorkspace_sptr rst_carpenter_factor =
+        AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>("rst_carpenter_ms");
+
+    // Use the absorption correction (PaalmanPing, Sample Only) to perform a sanity check on the results of A1
+
+    // Get the results from multiple scattering correction
+    Mantid::API::MatrixWorkspace_sptr rst_ms =
+        AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>("rst_ms_sampleOnly");
+
+    // actual checking with TS_ASSERT
+    // NOTE: we have two detector, each with two spectrum
+    for (size_t det_id = 0; det_id < 2; det_id++) {
+      for (size_t spec_id = 0; spec_id < 2; spec_id++) {
+        g_log.notice() << "Detector ID: " << det_id << "  Spectrum ID: " << spec_id
+                       << "\n"
+                       //  << "Mayer: " << rst_mayer_factor->readY(det_id)[spec_id] << "\n"
+                       << "Carpenter: " << rst_carpenter_factor->readY(det_id)[spec_id] << "\n"
+                       << "Mine: " << rst_ms->readY(det_id)[spec_id] << "\n";
+      }
     }
   }
 
@@ -142,12 +159,11 @@ private:
     // vanadium
     const std::string chemical_formula = "V";
     const double number_density = 0.07261;
-    const double mass_density = 6.11;
     const double center_bottom_base_x = 0.0;
     const double center_bottom_base_y = -0.0284;
     const double center_bottom_base_z = 0.0;
-    const double height = 0.00295;
-    const double radius = 0.0568;
+    const double height = 2.95;  // cm
+    const double radius = 0.568; // cm
 
     using StringProperty = Mantid::Kernel::PropertyWithValue<std::string>;
     using FloatProperty = Mantid::Kernel::PropertyWithValue<double>;
@@ -156,7 +172,6 @@ private:
     auto material = std::make_shared<Mantid::Kernel::PropertyManager>();
     material->declareProperty(std::make_unique<StringProperty>("ChemicalFormula", chemical_formula), "");
     material->declareProperty(std::make_unique<FloatProperty>("SampleNumberDensity", number_density), "");
-    material->declareProperty(std::make_unique<FloatProperty>("SampleMassDensity", mass_density), "");
     // geometry
     auto geometry = std::make_shared<Mantid::Kernel::PropertyManager>();
     geometry->declareProperty(std::make_unique<StringProperty>("Shape", "Cylinder"), "");
