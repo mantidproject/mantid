@@ -7,7 +7,7 @@
 import unittest
 
 from Muon.GUI.FrequencyDomainAnalysis.frequency_context import FrequencyContext
-import mock
+from unittest import mock
 from mantid.simpleapi import CreateWorkspace
 
 FFT_NAME_RE_2 = "FFT; Re MUSR62260; Group; fwd; Asymmmetry; FD_Re"
