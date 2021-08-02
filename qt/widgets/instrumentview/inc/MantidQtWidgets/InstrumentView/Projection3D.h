@@ -25,14 +25,7 @@ This is an implementation of ProjectionSurface for viewing the instrument in 3D.
 */
 class Projection3D : public ProjectionSurface {
   Q_OBJECT
-  enum AxisDirection {
-    XPOSITIVE,
-    YPOSITIVE,
-    ZPOSITIVE,
-    XNEGATIVE,
-    YNEGATIVE,
-    ZNEGATIVE
-  };
+  enum AxisDirection { XPOSITIVE, YPOSITIVE, ZPOSITIVE, XNEGATIVE, YNEGATIVE, ZNEGATIVE };
 
 public:
   Projection3D(const InstrumentActor *rootActor, QSize viewportSize);
@@ -68,7 +61,7 @@ protected slots:
 
 protected:
   void init() override {}
-  void drawSurface(MantidGLWidget *widget, bool picking = false) const override;
+  void drawSurface(GLDisplay *widget, bool picking = false) const override;
   void changeColorMap() override;
 
   void drawAxes(double axis_length = 100.0) const;

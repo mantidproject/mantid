@@ -50,11 +50,11 @@ public:
   bool getDebugOption() const override;
   void setDebugOption(bool enable) override;
 
-  std::vector<PerThetaDefaults::ValueArray> getPerAngleOptions() const override;
-  void setPerAngleOptions(std::vector<PerThetaDefaults::ValueArray> rows) override;
-  void showPerAngleOptionsAsInvalid(int row, int column) override;
-  void showPerAngleOptionsAsValid(int row) override;
-  void showPerAngleThetasNonUnique(double thetaTolerance) override;
+  std::vector<LookupRow::ValueArray> getLookupTable() const override;
+  void setLookupTable(std::vector<LookupRow::ValueArray> rows) override;
+  void showLookupRowAsInvalid(int row, int column) override;
+  void showLookupRowAsValid(int row) override;
+  void showLookupRowsNotUnique(double thetaTolerance) override;
   void showStitchParametersValid() override;
   void showStitchParametersInvalid() override;
 
@@ -85,7 +85,7 @@ public:
   void showOptionLoadErrors(std::vector<InstrumentParameterTypeMissmatch> const &typeErrors,
                             std::vector<MissingInstrumentParameterValue> const &missingValues) override;
 
-  void showAllPerAngleOptionsAsValid() override;
+  void showAllLookupRowsAsValid() override;
 
   void disableAll() override;
   void enableAll() override;
@@ -114,23 +114,23 @@ public:
   void enableFloodCorrectionInputs() override;
   void disableFloodCorrectionInputs() override;
 
-  void addPerThetaDefaultsRow() override;
-  void removePerThetaDefaultsRow(int rowIndex) override;
+  void addLookupRow() override;
+  void removeLookupRow(int rowIndex) override;
 
 public slots:
   /// Adds another row to the per-angle options table
   void onRestoreDefaultsRequested();
   void onSummationTypeChanged(int reductionTypeIndex);
-  void onNewPerThetaDefaultsRowRequested();
-  void onRemovePerThetaDefaultsRequested();
+  void onNewLookupRowRequested();
+  void onRemoveLookupRowRequested();
   void onSettingsChanged();
-  void onPerAngleDefaultsChanged(int row, int column);
+  void onLookupRowChanged(int row, int column);
 
 private:
   void initializeTableColumns(QTableWidget &table, const Mantid::API::IAlgorithm_sptr &algorithmForTooltips);
   void initializeTableItems(QTableWidget &table);
   void initializeTableRow(QTableWidget &table, int row);
-  void initializeTableRow(QTableWidget &table, int row, PerThetaDefaults::ValueArray rowValues);
+  void initializeTableRow(QTableWidget &table, int row, LookupRow::ValueArray rowValues);
   QString messageFor(std::vector<MissingInstrumentParameterValue> const &missingValues) const;
   QString messageFor(const InstrumentParameterTypeMissmatch &typeError) const;
 
@@ -187,7 +187,7 @@ private:
   std::unique_ptr<QShortcut> m_deleteShortcut;
   Ui::ExperimentWidget m_ui;
   ExperimentViewSubscriber *m_notifyee;
-  std::array<QString, PerThetaDefaults::OPTIONS_TABLE_COLUMN_COUNT> m_columnToolTips;
+  std::array<QString, LookupRow::OPTIONS_TABLE_COLUMN_COUNT> m_columnToolTips;
 
   friend class Encoder;
   friend class Decoder;

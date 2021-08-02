@@ -7,8 +7,8 @@
 #pragma once
 
 #include "MantidGeometry/Instrument.h"
+#include "MantidQtWidgets/InstrumentView/GLDisplay.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetTab.h"
-#include "MantidQtWidgets/InstrumentView/MantidGLWidget.h"
 
 #include <QFrame>
 #include <QMap>
@@ -54,8 +54,7 @@ class Shape2D;
  *underlying workspace.
  *
  */
-class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentWidgetMaskTab
-    : public InstrumentWidgetTab {
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentWidgetMaskTab : public InstrumentWidgetTab {
   Q_OBJECT
 public:
   enum Mode { Mask, Group, ROI };
@@ -98,9 +97,7 @@ protected slots:
   void clearShapes();
   void applyMask();
   void applyMaskToView();
-  void
-  storeDetectorMask(bool isROI = false,
-                    const std::vector<size_t> &dets = std::vector<size_t>());
+  void storeDetectorMask(bool isROI = false, const std::vector<size_t> &dets = std::vector<size_t>());
   void storeBinMask();
   void storeMask();
   void clearMask();
@@ -127,8 +124,7 @@ protected:
 
   void clearProperties();
   void setProperties();
-  std::shared_ptr<Mantid::API::MatrixWorkspace>
-  createMaskWorkspace(bool invertMask, bool temp = false) const;
+  std::shared_ptr<Mantid::API::MatrixWorkspace> createMaskWorkspace(bool invertMask, bool temp = false) const;
   void saveMaskingToWorkspace(bool invertMask = false);
   void saveMaskingToFile(bool invertMask = false);
   void saveMaskingToCalFile(bool invertMask = false);
@@ -145,13 +141,11 @@ protected:
 
 private:
   /// Save masks applied to the view but not to the workspace
-  bool saveMaskViewToProject(const std::string &name,
-                             const std::string &projectPath = "") const;
+  bool saveMaskViewToProject(const std::string &name, const std::string &projectPath = "") const;
   /// Load masks applied to the view but not to the workspace
   void loadMaskViewFromProject(const std::string &name);
   /// Run the LoadMask algorithm to get a MaskWorkspace
-  std::shared_ptr<Mantid::API::MatrixWorkspace>
-  loadMask(const std::string &fileName);
+  std::shared_ptr<Mantid::API::MatrixWorkspace> loadMask(const std::string &fileName);
 
 protected:
   /// Is it used?

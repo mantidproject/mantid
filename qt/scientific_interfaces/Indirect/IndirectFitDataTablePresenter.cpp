@@ -165,7 +165,6 @@ void IndirectFitDataTablePresenter::setModelEndXAndEmit(double endX, FitDomainIn
 void IndirectFitDataTablePresenter::setModelExcludeAndEmit(const std::string &exclude, FitDomainIndex row) {
   auto subIndices = m_model->getSubIndices(row);
   m_model->setExcludeRegion(exclude, subIndices.first, subIndices.second);
-  emit excludeRegionChanged(exclude, subIndices.first, subIndices.second);
 }
 
 void IndirectFitDataTablePresenter::clearTable() { m_dataTable->setRowCount(0); }

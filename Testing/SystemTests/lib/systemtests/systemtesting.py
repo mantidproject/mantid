@@ -104,6 +104,9 @@ class MantidSystemTest(unittest.TestCase):
         self.stripWhitespace = True
         # Tolerance
         self.tolerance = 0.00000001
+        # Whether or not to check the instrument/parameter map in CompareWorkspaces
+        self.checkInstrument = True
+
         # Store the resident memory of the system (in MB) before starting the test
         FrameworkManager.clear()
         self.memory = MemoryStats().residentMem() / 1024
@@ -348,6 +351,7 @@ class MantidSystemTest(unittest.TestCase):
         checker.setPropertyValue("Workspace1", valNames[0])
         checker.setPropertyValue("Workspace2", valNames[1])
         checker.setProperty("Tolerance", float(self.tolerance))
+        checker.setProperty("CheckInstrument", self.checkInstrument)
         if hasattr(self, 'tolerance_is_rel_err') and self.tolerance_is_rel_err:
             checker.setProperty("ToleranceRelErr", True)
         for d in self.disableChecking:
@@ -545,7 +549,14 @@ class ResultReporter(object):
         '''Initialize a class instance, e.g. connect to a database'''
         self._total_number_of_tests = total_number_of_tests
         self._maximum_name_length = maximum_name_length
-        pass
+
+    @property
+    def total_number_of_tests(self):
+        return self._total_number_of_tests
+
+    @total_number_of_tests.setter
+    def total_number_of_tests(self, ntests):
+        self._total_number_of_tests = ntests
 
     def dispatchResults(self, result, number_of_completed_tests):
         raise NotImplementedError(
@@ -609,7 +620,6 @@ class TextResultReporter(ResultReporter):
         The default text reporter prints to standard out
         '''
         self.printResultsToConsole(result, number_of_completed_tests)
-        return
 
 
 # A class to report results as junit xml
@@ -850,7 +860,7 @@ class TestManager(object):
     def __init__(self,
                  mantid_config,
                  runner=None,
-                 output=[TextResultReporter()],
+                 output=None,
                  quiet=False,
                  testsInclude=None,
                  testsExclude=None,
@@ -864,7 +874,7 @@ class TestManager(object):
 
         # Runners and reporters
         self._runner = runner
-        self._reporters = output
+        self._reporters = output if output is not None else [TextResultReporter()]
         for r in self._reporters:
             r._quiet = quiet
             r._output_on_failure = output_on_failure
@@ -917,6 +927,9 @@ class TestManager(object):
             print('No tests were found in the test directory {0}. Please ensure all test classes sub class '
                   'systemtesting.MantidSystemTest.'.format(self._config.testDir))
             exit(2)
+
+        for reporter in self._reporters:
+            reporter.total_number_of_tests = test_stats[0]
 
         return mod_counts, mod_tests, mod_sub_directories, test_stats, mod_required_files, data_file_lock_status
 

@@ -351,6 +351,8 @@ class GeneralFittingModel(BasicFittingModel):
         params["InputWorkspace"] = dataset_names
         params["StartX"] = self.fitting_context.start_xs
         params["EndX"] = self.fitting_context.end_xs
+        if self.fitting_context.exclude_range:
+            params["Exclude"] = list(zip(self.fitting_context.exclude_start_xs, self.fitting_context.exclude_end_xs))
         return params
 
     def _add_simultaneous_fit_results_to_ADS_and_context(self, input_workspace_names: list, parameter_table,

@@ -1,0 +1,1 @@
+        InputWorkspace_{{i}}=input_workspaces[{{i}}], WorkspaceIndex_{{i}}=domain_data[{{i}}][0], StartX_{{i}}=domain_data[{{i}}][1], EndX_{{i}}=domain_data[{{i}}][2],

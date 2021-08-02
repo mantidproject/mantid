@@ -8,10 +8,11 @@ import unittest
 from unittest import mock
 
 from mantid.api import AnalysisDataService, FrameworkManager, FunctionFactory
-from mantid.simpleapi import CreateSampleWorkspace
+from mantid.simpleapi import CreateEmptyTableWorkspace, CreateSampleWorkspace
 
 from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model import BasicFittingModel, DEFAULT_START_X
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
+from Muon.GUI.Common.utilities.workspace_utils import StaticWorkspaceWrapper
 
 
 class BasicFittingModelTest(unittest.TestCase):
@@ -84,6 +85,42 @@ class BasicFittingModelTest(unittest.TestCase):
 
         self.assertEqual(self.model.start_xs, [3.0])
         self.assertEqual(self.model.end_xs, [5.0])
+
+    def test_that_newly_loaded_datasets_will_reset_the_existing_exclude_xs_when_there_are_fewer_new_datasets(self):
+        self.model.dataset_names = self.dataset_names
+        self.model.start_xs = [2.0, 3.0]
+        self.model.end_xs = [4.0, 5.0]
+        self.model.fitting_context.exclude_start_xs = [2.2, 4.2]
+        self.model.fitting_context.exclude_end_xs = [2.5, 4.5]
+
+        self.model.dataset_names = ["Name2"]
+
+        self.assertEqual(self.model.fitting_context.exclude_start_xs, [5.0])
+        self.assertEqual(self.model.fitting_context.exclude_end_xs, [5.0])
+
+    def test_that_newly_loaded_datasets_will_reuse_the_existing_exclude_xs_when_there_are_more_new_datasets(self):
+        self.model.dataset_names = self.dataset_names
+        self.model.start_xs = [2.0, 2.0]
+        self.model.end_xs = [4.0, 4.0]
+        self.model.fitting_context.exclude_start_xs = [2.2, 2.2]
+        self.model.fitting_context.exclude_end_xs = [2.5, 2.5]
+
+        self.model.dataset_names = ["Name2", "Name3", "Name4"]
+
+        self.assertEqual(self.model.fitting_context.exclude_start_xs, [2.2, 2.2, 4.0])
+        self.assertEqual(self.model.fitting_context.exclude_end_xs, [2.5, 2.5, 4.0])
+
+    def test_that_newly_loaded_datasets_will_reuse_the_existing_exclude_xs_when_there_are_equal_num_datasets(self):
+        self.model.dataset_names = self.dataset_names
+        self.model.start_xs = [2.0, 2.0]
+        self.model.end_xs = [4.0, 4.0]
+        self.model.fitting_context.exclude_start_xs = [2.2, 2.2]
+        self.model.fitting_context.exclude_end_xs = [2.5, 2.5]
+
+        self.model.dataset_names = ["Name2", "Name3"]
+
+        self.assertEqual(self.model.fitting_context.exclude_start_xs, [2.2, 2.2])
+        self.assertEqual(self.model.fitting_context.exclude_end_xs, [2.5, 2.5])
 
     def test_that_current_dataset_index_will_raise_if_the_index_is_greater_than_or_equal_to_the_number_of_datasets(self):
         self.model.dataset_names = self.dataset_names
@@ -172,6 +209,17 @@ class BasicFittingModelTest(unittest.TestCase):
         self.model.current_end_x = 4.0
 
         self.assertEqual(self.model.end_xs, [10.0, 11.0])
+
+    def test_that_the_current_exclude_start_x_and_end_x_will_return_the_selected_exclude_end_x(self):
+        self.model.dataset_names = self.dataset_names
+        self.model.start_xs = [0.0, 1.0]
+        self.model.end_xs = [5.0, 6.0]
+        self.model.fitting_context.exclude_start_xs = [0.1, 1.1]
+        self.model.fitting_context.exclude_end_xs = [4.5, 5.5]
+        self.model.current_dataset_index = 1
+
+        self.assertEqual(self.model.current_exclude_start_x, 1.1)
+        self.assertEqual(self.model.current_exclude_end_x, 5.5)
 
     def test_that_setting_the_dataset_names_will_reset_the_start_and_end_xs(self):
         self.model.dataset_names = self.dataset_names
@@ -416,6 +464,27 @@ class BasicFittingModelTest(unittest.TestCase):
 
     def test_that_get_active_fit_results_returns_an_empty_list_if_there_are_no_datasets(self):
         self.assertEqual(self.model.get_active_fit_results(), [])
+
+    def test_that_current_normalised_covariance_matrix_returns_none_when_there_are_no_fits(self):
+        self.assertEqual(self.model.current_normalised_covariance_matrix(), None)
+
+    def test_that_current_normalised_covariance_matrix_will_return_a_statix_workspace_wrapper_when_a_fit_exists(self):
+        ws = CreateEmptyTableWorkspace()
+        wrapper = StaticWorkspaceWrapper("CovarianceMatrix", ws)
+        self.model._get_normalised_covariance_matrix_for = mock.Mock(return_value=wrapper)
+
+        covariance_wrapper = self.model.current_normalised_covariance_matrix()
+        self.assertEqual(covariance_wrapper, wrapper)
+
+    def test_that_has_normalised_covariance_matrix_returns_false_when_there_is_not_a_covariance_matrix(self):
+        self.assertTrue(not self.model.has_normalised_covariance_matrix())
+
+    def test_that_has_normalised_covariance_matrix_returns_true_when_there_is_not_a_covariance_matrix(self):
+        ws = CreateEmptyTableWorkspace()
+        wrapper = StaticWorkspaceWrapper("CovarianceMatrix", ws)
+        self.model._get_normalised_covariance_matrix_for = mock.Mock(return_value=wrapper)
+
+        self.assertTrue(self.model.has_normalised_covariance_matrix())
 
     def test_update_plot_guess_will_evaluate_the_function(self):
         guess_workspace_name = "__frequency_domain_analysis_fitting_guessName1"

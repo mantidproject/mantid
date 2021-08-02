@@ -5,9 +5,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-
 from unittest import mock
-from sans.common.enums import FindDirectionEnum, SANSInstrument, DetectorType
+
+from sans.common.enums import SANSInstrument, DetectorType
 from sans.gui_logic.models.beam_centre_model import BeamCentreModel
 
 
@@ -16,7 +16,7 @@ class BeamCentreModelTest(unittest.TestCase):
         self.result = {'pos1': 300, 'pos2': -300}
         self.centre_finder_instance = mock.MagicMock(return_value=self.result)
         self.SANSCentreFinder = mock.MagicMock(return_value=self.centre_finder_instance)
-        self.beam_centre_model = BeamCentreModel(self.SANSCentreFinder)
+        self.beam_centre_model = BeamCentreModel()
 
     def test_that_model_initialises_with_correct_values(self):
         self.assertEqual(self.beam_centre_model.max_iterations, 10)
@@ -51,54 +51,6 @@ class BeamCentreModelTest(unittest.TestCase):
     def test_that_can_update_model_values(self):
         self.beam_centre_model.r_max = 1.0
         self.assertEqual(self.beam_centre_model.r_max, 1.0)
-
-    def test_that_find_beam_centre_calls_centre_finder_once_when_COM_is_False(self):
-        state = mock.MagicMock()
-
-        starting_lab_positions = {"pos1": self.beam_centre_model.lab_pos_1,
-                                  "pos2": self.beam_centre_model.lab_pos_2}
-
-        self.beam_centre_model.find_beam_centre(state)
-
-        self.SANSCentreFinder.return_value.assert_called_once_with(state, r_min=self.beam_centre_model.r_min,
-                                                                   r_max=self.beam_centre_model.r_max,
-                                                                   max_iter=self.beam_centre_model.max_iterations,
-                                                                   x_start=starting_lab_positions["pos1"],
-                                                                   y_start=starting_lab_positions["pos2"],
-                                                                   tolerance=self.beam_centre_model.tolerance,
-                                                                   find_direction=FindDirectionEnum.ALL,
-                                                                   reduction_method=True,
-                                                                   verbose=False, component=DetectorType.LAB)
-
-    def test_that_find_beam_centre_calls_centre_finder_twice_when_COM_is_TRUE(self):
-        state = mock.MagicMock()
-        self.beam_centre_model.COM = True
-
-        starting_lab_positions = {"pos1": self.beam_centre_model.lab_pos_1,
-                                  "pos2": self.beam_centre_model.lab_pos_2}
-
-        self.beam_centre_model.find_beam_centre(state)
-
-        self.assertEqual(self.SANSCentreFinder.return_value.call_count, 2)
-
-        self.SANSCentreFinder.return_value.assert_called_with(state, r_min=self.beam_centre_model.r_min,
-                                                              r_max=self.beam_centre_model.r_max,
-                                                              max_iter=self.beam_centre_model.max_iterations,
-                                                              x_start=self.result['pos1'],
-                                                              y_start=self.result['pos2'],
-                                                              tolerance=self.beam_centre_model.tolerance,
-                                                              find_direction=FindDirectionEnum.ALL,
-                                                              reduction_method=True,
-                                                              verbose=False, component=DetectorType.LAB)
-
-        self.SANSCentreFinder.return_value.assert_any_call(state, r_min=self.beam_centre_model.r_min,
-                                                           r_max=self.beam_centre_model.r_max,
-                                                           max_iter=self.beam_centre_model.max_iterations,
-                                                           x_start=starting_lab_positions["pos1"],
-                                                           y_start=starting_lab_positions["pos2"],
-                                                           tolerance=self.beam_centre_model.tolerance,
-                                                           find_direction=FindDirectionEnum.ALL,
-                                                           reduction_method=False, component=DetectorType.LAB)
 
     def test_beam_centre_scales_to_mills(self):
         self.assertIsNot(SANSInstrument.LARMOR, self.beam_centre_model.instrument)
@@ -145,6 +97,17 @@ class BeamCentreModelTest(unittest.TestCase):
         # When in doubt it should just forward the value as is
         self.beam_centre_model.lab_pos_1 = 'a'
         self.assertEqual(self.beam_centre_model.lab_pos_1, 'a')
+
+    def test_scaling_ignores_zero_vals(self):
+        self.beam_centre_model.lab_pos_1 = 0.0
+        self.beam_centre_model.lab_pos_2 = 0.0
+        self.beam_centre_model.hab_pos_1 = 0.0
+        self.beam_centre_model.hab_pos_2 = 0.0
+
+        self.assertEqual(0.0, self.beam_centre_model.lab_pos_1)
+        self.assertEqual(0.0, self.beam_centre_model.lab_pos_2)
+        self.assertEqual(0.0, self.beam_centre_model.hab_pos_1)
+        self.assertEqual(0.0, self.beam_centre_model.hab_pos_2)
 
 
 if __name__ == '__main__':

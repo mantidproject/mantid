@@ -34,7 +34,6 @@ private:
   int startXColumn() const override;
   int endXColumn() const override;
   int excludeColumn() const override;
-  std::string getResolutionName(FitDomainIndex row) const;
 };
 
 } // namespace IDA

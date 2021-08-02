@@ -27,15 +27,15 @@ class PlotGroupPairModel(BasePaneModel):
         run = str(get_run_numbers_as_string_from_workspace_name(workspace_name, self.context.data_context.instrument))
         instrument = self.context.data_context.instrument
         rebin_label = self._get_rebin_label(workspace_name)
-        if not self.context.plot_panes_context[self.name]._is_tiled:
+        if not self.context.plot_panes_context[self.name].settings._is_tiled:
             return f"{instrument}{run};{group}{rebin_label}"
-        if self.context.plot_panes_context[self.name].is_tiled_by == "Group/Pair":
+        if self.context.plot_panes_context[self.name].settings.is_tiled_by == "Group/Pair":
             return f"{run}{rebin_label}"
         else:
             return f"{group}{rebin_label}"
 
-    def _get_workspace_plot_axis(self, workspace_name: str, axes_workspace_map):
-        if not self.context.plot_panes_context[self.name]._is_tiled:
+    def _get_workspace_plot_axis(self, workspace_name: str, axes_workspace_map, index = 0):
+        if not self.context.plot_panes_context[self.name].settings._is_tiled:
             return 0
 
         group_pair_name, run_as_string = self.context.group_pair_context.get_group_pair_name_and_run_from_workspace_name(workspace_name)

@@ -169,48 +169,6 @@ class GeneralFittingPresenterTest(unittest.TestCase):
         self.presenter.clear_undo_data.assert_called_once_with()
         self.presenter.simultaneous_fit_by_specifier_changed.notify_subscribers.assert_called_once_with()
 
-    def test_that_handle_dataset_name_changed_will_update_the_model_and_view(self):
-        self.presenter.update_fit_statuses_and_chi_squared_in_view_from_model = mock.Mock()
-        self.presenter.update_fit_function_in_view_from_model = mock.Mock()
-        self.presenter.update_start_and_end_x_in_view_from_model = mock.Mock()
-
-        self.presenter.handle_dataset_name_changed()
-
-        self.mock_view_current_dataset_index.assert_called_once_with()
-        self.mock_model_current_dataset_index.assert_called_once_with(self.current_dataset_index)
-
-        self.presenter.update_fit_statuses_and_chi_squared_in_view_from_model.assert_called_once_with()
-        self.presenter.update_fit_function_in_view_from_model.assert_called_once_with()
-        self.presenter.update_start_and_end_x_in_view_from_model.assert_called_once_with()
-
-        self.model.update_plot_guess.assert_called_once_with()
-
-        self.presenter.selected_fit_results_changed.notify_subscribers.assert_called_once_with([])
-
-    def test_that_handle_dataset_name_changed_will_not_notify_to_update_plots_when_it_is_set_to_false(self):
-        self.presenter._update_plot = False
-
-        self.presenter.update_fit_statuses_and_chi_squared_in_view_from_model = mock.Mock()
-        self.presenter.update_fit_function_in_view_from_model = mock.Mock()
-
-        self.presenter.handle_dataset_name_changed()
-
-        self.mock_view_current_dataset_index.assert_called_once_with()
-        self.mock_model_current_dataset_index.assert_called_once_with(self.current_dataset_index)
-
-        self.mock_model_current_start_x.assert_called_once_with()
-        self.mock_model_current_end_x.assert_called_once_with()
-        self.mock_view_start_x.assert_called_once_with(self.start_x)
-        self.mock_view_end_x.assert_called_once_with(self.end_x)
-
-        self.presenter.update_fit_statuses_and_chi_squared_in_view_from_model.assert_called_once_with()
-        self.presenter.update_fit_function_in_view_from_model.assert_called_once_with()
-
-        self.assertTrue(not self.mock_view_plot_guess.called)
-        self.assertTrue(not self.model.update_plot_guess.called)
-
-        self.assertTrue(not self.presenter.selected_fit_results_changed.notify_subscribers.called)
-
     def test_that_set_selected_dataset_will_set_the_dataset_name_in_the_view(self):
         dataset_name = "Name2"
 

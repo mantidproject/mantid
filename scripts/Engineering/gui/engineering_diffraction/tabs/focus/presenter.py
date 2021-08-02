@@ -9,9 +9,9 @@ from Engineering.gui.engineering_diffraction.tabs.common import INSTRUMENT_DICT,
     CalibrationObserver
 from Engineering.gui.engineering_diffraction.tabs.common.calibration_info import CalibrationInfo
 from Engineering.gui.engineering_diffraction.tabs.common.vanadium_corrections import check_workspaces_exist
-from Engineering.gui.engineering_diffraction.tabs.common.cropping.cropping_widget import CroppingWidget
 from mantidqt.utils.asynchronous import AsyncTask
 from mantidqt.utils.observer_pattern import GenericObservable
+from mantid.kernel import logger
 
 from qtpy.QtWidgets import QMessageBox
 
@@ -29,16 +29,11 @@ class FocusPresenter(object):
         # Connect view signals to local methods.
         self.view.set_on_focus_clicked(self.on_focus_clicked)
         self.view.set_enable_controls_connection(self.set_focus_controls_enabled)
-        self.view.set_on_check_cropping_state_changed(self.show_cropping)
 
         # Variables from other GUI tabs.
         self.current_calibration = CalibrationInfo()
         self.instrument = "ENGINX"
         self.rb_num = None
-
-        # Cropping Options
-        self.cropping_widget = CroppingWidget(self.view, view=self.view.get_cropping_widget())
-        self.show_cropping(False)
 
     def add_focus_subscriber(self, obs):
         self.focus_run_notifier.add_subscriber(obs)
@@ -46,24 +41,22 @@ class FocusPresenter(object):
     def on_focus_clicked(self):
         if not self._validate():
             return
-        banks, spectrum_numbers = self._get_banks()
+        regions_dict = self.current_calibration.create_focus_roi_dictionary()
         focus_paths = self.view.get_focus_filenames()
         if self._number_of_files_warning(focus_paths):
-            self.start_focus_worker(focus_paths, banks, self.view.get_plot_output(), self.rb_num, spectrum_numbers)
+            self.start_focus_worker(focus_paths, self.view.get_plot_output(), self.rb_num, regions_dict)
 
-    def start_focus_worker(self, focus_paths, banks, plot_output, rb_num, spectrum_numbers=None, custom_cal=None):
+    def start_focus_worker(self, focus_paths: list, plot_output: bool, rb_num: str, regions_dict: dict) -> None:
         """
         Focus data in a separate thread to stop the main GUI from hanging.
         :param focus_paths: List of paths to the files containing the data to focus.
-        :param banks: A list of banks that are to be focused.
         :param plot_output: True if the output should be plotted.
         :param rb_num: The RB Number from the main window (often an experiment id)
-        :param spectrum_numbers: Optional parameter to crop to a specific list of spectrum numbers.
-        :param custom_cal: TODO
+        :param regions_dict: Dictionary containing the regions to focus over, mapping region_name -> grouping_ws_name
         """
+        van_path = self.current_calibration.get_vanadium()
         self.worker = AsyncTask(self.model.focus_run,
-                                (focus_paths, banks, plot_output, self.instrument, rb_num, spectrum_numbers,
-                                 custom_cal),
+                                (focus_paths, van_path, plot_output, self.instrument, rb_num, regions_dict),
                                 error_cb=self._on_worker_error,
                                 finished_cb=self._on_worker_success)
         self.set_focus_controls_enabled(False)
@@ -71,7 +64,7 @@ class FocusPresenter(object):
 
     def _on_worker_success(self):
         self.emit_enable_button_signal()
-        self.focus_run_notifier.notify_subscribers(self.model.get_last_path())
+        self.focus_run_notifier.notify_subscribers(self.model.get_last_focused_files())
 
     def set_instrument_override(self, instrument):
         instrument = INSTRUMENT_DICT[instrument]
@@ -102,9 +95,6 @@ class FocusPresenter(object):
                 "Please make sure the selected instrument matches instrument for the current calibration.\n"
                 "The instrument for the current calibration is: " + self.current_calibration.get_instrument())
             return False
-        if self.view.get_crop_checked() and not self.cropping_widget.is_valid():
-            create_error_message(self.view, "Check cropping values are valid.")
-            return False
         return True
 
     def _number_of_files_warning(self, paths):
@@ -117,21 +107,13 @@ class FocusPresenter(object):
         else:
             return True
 
-    def _on_worker_error(self, _):
+    def _on_worker_error(self, error_info):
+        logger.error(str(error_info))
         self.emit_enable_button_signal()
 
     def set_focus_controls_enabled(self, enabled):
         self.view.set_focus_button_enabled(enabled)
         self.view.set_plot_output_enabled(enabled)
-
-    def _get_banks(self):
-        if self.view.get_crop_checked():
-            if self.cropping_widget.is_custom():
-                return None, self.cropping_widget.get_custom_spectra()
-            else:
-                return [self.cropping_widget.get_bank()], None
-        else:
-            return ["1", "2"], None
 
     def emit_enable_button_signal(self):
         self.view.sig_enable_controls.emit(True)
@@ -142,6 +124,5 @@ class FocusPresenter(object):
         :param calibration: The new current calibration.
         """
         self.current_calibration = calibration
-
-    def show_cropping(self, visible):
-        self.view.set_cropping_widget_visibility(visible)
+        region_text = calibration.get_roi_text()
+        self.view.set_region_display_text(region_text)

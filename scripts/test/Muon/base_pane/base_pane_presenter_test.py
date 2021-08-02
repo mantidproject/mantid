@@ -103,6 +103,13 @@ class BasePanePresenterTest(unittest.TestCase):
 
         self.figure_presenter.remove_workspace_from_plot.assert_not_called()
 
+    def test_handle_workspace_deleted_from_ads_with_wrong_type(self):
+        self.figure_presenter.get_plotted_workspaces_and_indices.return_value = [["fwd", "bwd"], []]
+        ws = self.create_workspace('fwd')
+
+        self.presenter.handle_workspace_deleted_from_ads(ws.name)
+        self.figure_presenter.remove_workspace_from_plot.assert_not_called()
+
     def test_added_or_removed_plot_add(self):
         plot_info ={"is_added": True, "name": "fwd"}
         self.presenter.add_list_to_plot = mock.Mock()

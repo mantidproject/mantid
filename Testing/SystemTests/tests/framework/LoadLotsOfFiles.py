@@ -144,7 +144,8 @@ BANNED_REGEXP = [r'SANS2D\d+.log$',
                  r'.*\.phonon',
                  r'.*\.cif',
                  r'.*\.toml',
-                 r'.*\.h5']
+                 r'.*\.h5',
+                 r'.*\.p2d']
 
 BANNED_DIRS = ["DocTest", "UnitTest", "reference"]
 

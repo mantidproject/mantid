@@ -86,7 +86,7 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.plot_panes_context = PlotPanesContext()
         self.group_pair_context = MuonGroupPairContext(
             self.data_context.check_group_contains_valid_detectors)
-        self.corrections_context = CorrectionsContext()
+        self.corrections_context = CorrectionsContext(self.loaded_data)
         self.phase_context = PhaseTableContext()
         self.fitting_context = BasicFittingContext(allow_double_pulse_fitting=True)
         self.results_context = ResultsContext()
@@ -201,6 +201,8 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.tabs.addTabWithOrder(self.results_tab.results_tab_view, 'Results')
         self.transform_finished_observer = GenericObserverWithArgPassing(self.handle_transform_performed)
         self.tabs.set_slot_for_tab_changed(self.handle_tab_changed)
+        self.tabs.setElideMode(QtCore.Qt.ElideNone)
+        self.tabs.setUsesScrollButtons(False)
 
     def handle_tab_changed(self):
         index = self.tabs.currentIndex()
@@ -271,6 +273,9 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
 
         self.load_widget.load_widget.loadNotifier.add_subscriber(
             self.fitting_tab.fitting_tab_view.disable_tab_observer)
+
+        self.load_widget.load_widget.loadNotifier.add_subscriber(
+            self.plot_widget.raw_mode.new_data_observer)
 
     def setup_gui_variable_observers(self):
         self.context.gui_context.gui_variables_notifier.add_subscriber(
@@ -390,12 +395,13 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
     def setup_on_recalculation_finished_notifier(self):
         for observer in self.plot_widget.data_changed_observers:
             self.grouping_tab_widget.group_tab_presenter.calculation_finished_notifier.add_subscriber(observer)
+            self.phase_tab.phase_table_presenter.calculation_finished_notifier.add_subscriber(observer)
 
         self.grouping_tab_widget.group_tab_presenter.calculation_finished_notifier.add_subscriber(
-            self.corrections_tab.corrections_tab_presenter.corrections_complete_observer)
+            self.corrections_tab.corrections_tab_presenter.pre_process_and_grouping_complete_observer)
 
     def setup_phase_quad_changed_notifier(self):
-        self.phase_tab.phase_table_presenter.phase_quad_calculation_complete_notifier.add_subscriber(
+        self.phase_tab.phase_table_presenter.phasequad_calculation_complete_notifier.add_subscriber(
             self.transform.phase_quad_observer)
 
     def setup_phase_table_changed_notifier(self):

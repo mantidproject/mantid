@@ -19,7 +19,7 @@
      <item row="0" column="0">
       <widget class="QLabel" name="label_bank">
        <property name="text">
-        <string>Select Bank/Spectra:</string>
+        <string>Select Region of Interest:</string>
        </property>
       </widget>
      </item>
@@ -28,6 +28,11 @@
        <property name="focusPolicy">
         <enum>Qt::StrongFocus</enum>
        </property>
+       <item>
+        <property name="text">
+         <string>Custom CalFile</string>
+        </property>
+       </item>
        <item>
         <property name="text">
          <string>1 (North)</string>
@@ -40,13 +45,13 @@
        </item>
        <item>
         <property name="text">
-         <string>Custom Spectra</string>
+         <string>Crop to Spectra</string>
         </property>
        </item>
       </widget>
      </item>
-     <item row="1" column="0" colspan="3">
-      <widget class="QWidget" name="widget_custom" native="true">
+     <item row="2" column="0" colspan="3">
+      <widget class="QWidget" name="widget_crop" native="true">
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <property name="leftMargin">
          <number>0</number>
@@ -61,21 +66,21 @@
          <number>0</number>
         </property>
         <item>
-         <widget class="QLabel" name="label_custom">
+         <widget class="QLabel" name="label_crop">
           <property name="text">
            <string>Custom Spectra:</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="edit_custom">
+         <widget class="QLineEdit" name="edit_crop">
           <property name="placeholderText">
            <string/>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="label_customValid">
+         <widget class="QLabel" name="label_cropValid">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
             <horstretch>10</horstretch>
@@ -133,13 +138,43 @@
        </layout>
       </widget>
      </item>
+     <item row="1" column="0" colspan="3">
+      <widget class="QWidget" name="widget_custom" native="true">
+       <layout class="QHBoxLayout" name="horizontalLayout_5">
+        <item>
+         <widget class="FileFinderWidget" name="finder_custom" native="true">
+          <property name="minimumSize">
+           <size>
+            <width>496</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>16777215</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
     </layout>
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>FileFinderWidget</class>
+   <extends>QWidget</extends>
+   <header>mantidqt.widgets.filefinderwidget</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <tabstops>
   <tabstop>combo_bank</tabstop>
-  <tabstop>edit_custom</tabstop>
+  <tabstop>edit_crop</tabstop>
  </tabstops>
  <resources/>
  <connections/>

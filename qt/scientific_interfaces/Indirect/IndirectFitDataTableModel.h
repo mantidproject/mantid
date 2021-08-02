@@ -28,39 +28,39 @@ public:
   IndirectFitDataTableModel();
   virtual ~IndirectFitDataTableModel() = default;
   bool hasWorkspace(std::string const &workspaceName) const override;
-  Mantid::API::MatrixWorkspace_sptr getWorkspace(TableDatasetIndex index) const override;
-  FunctionModelSpectra getSpectra(TableDatasetIndex index) const override;
+  Mantid::API::MatrixWorkspace_sptr getWorkspace(WorkspaceID workspaceID) const override;
+  FunctionModelSpectra getSpectra(WorkspaceID workspaceID) const override;
   bool isMultiFit() const override;
-  TableDatasetIndex getNumberOfWorkspaces() const override;
-  size_t getNumberOfSpectra(TableDatasetIndex index) const override;
+  WorkspaceID getNumberOfWorkspaces() const override;
+  size_t getNumberOfSpectra(WorkspaceID workspaceID) const override;
   size_t getNumberOfDomains() const override;
-  FitDomainIndex getDomainIndex(TableDatasetIndex dataIndex, WorkspaceIndex spectrum) const override;
+  FitDomainIndex getDomainIndex(WorkspaceID workspaceID, WorkspaceIndex spectrum) const override;
   std::vector<double> getQValuesForData() const override;
   std::vector<std::pair<std::string, size_t>> getResolutionsForFit() const override;
   std::vector<std::string> getWorkspaceNames() const override;
 
-  void setSpectra(const std::string &spectra, TableDatasetIndex dataIndex) override;
-  void setSpectra(FunctionModelSpectra &&spectra, TableDatasetIndex dataIndex) override;
-  void setSpectra(const FunctionModelSpectra &spectra, TableDatasetIndex dataIndex) override;
+  void setSpectra(const std::string &spectra, WorkspaceID workspaceID) override;
+  void setSpectra(FunctionModelSpectra &&spectra, WorkspaceID workspaceID) override;
+  void setSpectra(const FunctionModelSpectra &spectra, WorkspaceID workspaceID) override;
   void addWorkspace(const std::string &workspaceName) override;
   void addWorkspace(const std::string &workspaceName, const std::string &spectra) override;
   void addWorkspace(const std::string &workspaceName, const FunctionModelSpectra &spectra) override;
   void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace, const FunctionModelSpectra &spectra) override;
-  void removeWorkspace(TableDatasetIndex index) override;
+  void removeWorkspace(WorkspaceID workspaceID) override;
   void removeDataByIndex(FitDomainIndex fitDomainIndex) override;
 
   void clear() override;
 
-  std::pair<double, double> getFittingRange(TableDatasetIndex dataIndex, WorkspaceIndex spectrum) const override;
-  std::string getExcludeRegion(TableDatasetIndex dataIndex, WorkspaceIndex index) const override;
-  std::vector<double> getExcludeRegionVector(TableDatasetIndex dataIndex, WorkspaceIndex index) const override;
+  std::pair<double, double> getFittingRange(WorkspaceID workspaceID, WorkspaceIndex spectrum) const override;
+  std::string getExcludeRegion(WorkspaceID workspaceID, WorkspaceIndex spectrum) const override;
+  std::vector<double> getExcludeRegionVector(WorkspaceID workspaceID, WorkspaceIndex spectrum) const override;
 
-  void setStartX(double startX, TableDatasetIndex dataIndex, WorkspaceIndex spectrum) override;
-  void setStartX(double startX, TableDatasetIndex dataIndex) override;
-  void setEndX(double endX, TableDatasetIndex dataIndex, WorkspaceIndex spectrum) override;
-  void setEndX(double endX, TableDatasetIndex dataIndex) override;
-  void setExcludeRegion(const std::string &exclude, TableDatasetIndex dataIndex, WorkspaceIndex spectrum) override;
-  void setResolution(const std::string &name, TableDatasetIndex index) override;
+  void setStartX(double startX, WorkspaceID workspaceID, WorkspaceIndex spectrum) override;
+  void setStartX(double startX, WorkspaceID workspaceID) override;
+  void setEndX(double endX, WorkspaceID workspaceID, WorkspaceIndex spectrum) override;
+  void setEndX(double endX, WorkspaceID workspaceID) override;
+  void setExcludeRegion(const std::string &exclude, WorkspaceID workspaceID, WorkspaceIndex spectrum) override;
+  void setResolution(const std::string &name, WorkspaceID workspaceID) override;
 
   Mantid::API::MatrixWorkspace_sptr getWorkspace(FitDomainIndex index) const override;
   std::pair<double, double> getFittingRange(FitDomainIndex index) const override;
@@ -68,10 +68,7 @@ public:
   std::vector<double> getExcludeRegionVector(FitDomainIndex index) const override;
   std::string getExcludeRegion(FitDomainIndex index) const override;
   void setExcludeRegion(const std::string &exclude, FitDomainIndex index) override;
-  std::pair<TableDatasetIndex, WorkspaceIndex> getSubIndices(FitDomainIndex) const override;
-
-  void switchToSingleInputMode() override;
-  void switchToMultipleInputMode() override;
+  std::pair<WorkspaceID, WorkspaceIndex> getSubIndices(FitDomainIndex) const override;
 
 private:
   void addNewWorkspace(const Mantid::API::MatrixWorkspace_sptr &workspace, const FunctionModelSpectra &spectra);
@@ -79,11 +76,9 @@ private:
   std::vector<IndirectFitData> *m_fittingData;
   std::vector<std::weak_ptr<Mantid::API::MatrixWorkspace>> *m_resolutions;
 
-  std::unique_ptr<std::vector<IndirectFitData>> m_fittingDataSingle;
-  std::unique_ptr<std::vector<std::weak_ptr<Mantid::API::MatrixWorkspace>>> m_resolutionsSingle;
-
   std::unique_ptr<std::vector<IndirectFitData>> m_fittingDataMultiple;
   std::unique_ptr<std::vector<std::weak_ptr<Mantid::API::MatrixWorkspace>>> m_resolutionsMultiple;
+  Mantid::API::AnalysisDataServiceImpl &m_adsInstance;
 };
 
 } // namespace IDA

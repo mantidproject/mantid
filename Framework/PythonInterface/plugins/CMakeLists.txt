@@ -149,6 +149,7 @@ set(PYTHON_PLUGINS
     algorithms/PoldiCreatePeaksFromFile.py
     algorithms/PoldiLoadRuns.py
     algorithms/PoldiMerge.py
+    algorithms/PowderReduceP2D.py
     algorithms/RebinRagged.py
     algorithms/RefinePowderDiffProfileSeq.py
     algorithms/ReflectometryReductionOneLiveData.py
