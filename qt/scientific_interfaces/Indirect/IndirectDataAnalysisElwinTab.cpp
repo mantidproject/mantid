@@ -704,6 +704,8 @@ void IndirectDataAnalysisElwinTab::addData(IAddWorkspaceDialog const *dialog) {
     updateTableFromModel();
     emit dataAdded();
     emit dataChanged();
+    newInputFilesFromDialog(dialog);
+    plotInput();
   } catch (const std::runtime_error &ex) {
     displayWarning(ex.what());
   }
@@ -768,6 +770,38 @@ void IndirectDataAnalysisElwinTab::removeSelectedData() {
     m_dataModel->removeDataByIndex(FitDomainIndex(item->row()));
   }
   updateTableFromModel();
+}
+
+/**
+ * Handles a new set of input files being entered.
+ *
+ * Updates preview selection combo box.
+ */
+void IndirectDataAnalysisElwinTab::newInputFilesFromDialog(IAddWorkspaceDialog const *dialog) {
+  // Clear the existing list of files
+  m_uiForm.cbPreviewFile->clear();
+
+  // Populate the combo box with the filenames
+  QString workspaceNames;
+  QString workspaceIndices;
+  if (const auto indirectDialog = dynamic_cast<IndirectAddWorkspaceDialog const *>(dialog)) {
+    workspaceNames = QString::fromStdString(indirectDialog->workspaceName());
+    workspaceIndices = QString::fromStdString(indirectDialog->workspaceIndices());
+  }
+  m_uiForm.cbPreviewFile->addItem(workspaceNames, workspaceNames);
+
+  // Default to the first file
+  m_uiForm.cbPreviewFile->setCurrentIndex(0);
+  QString const wsname = m_uiForm.cbPreviewFile->currentText();
+  auto const inputWs = getADSMatrixWorkspace(wsname.toStdString());
+  setInputWorkspace(inputWs);
+
+  const auto range = getXRangeFromWorkspace(inputWs);
+
+  setRangeSelector(m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange"), m_properties["IntegrationStart"],
+                   m_properties["IntegrationEnd"], range);
+  setRangeSelector(m_uiForm.ppPlot->getRangeSelector("ElwinBackgroundRange"), m_properties["BackgroundStart"],
+                   m_properties["BackgroundEnd"], range);
 }
 
 } // namespace IDA

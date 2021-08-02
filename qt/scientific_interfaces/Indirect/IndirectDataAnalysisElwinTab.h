@@ -38,6 +38,7 @@ protected:
   QStringList m_wsSampleSuffixes;
   QStringList m_fbSampleSuffixes;
   void addData(IAddWorkspaceDialog const *dialog);
+  void newInputFilesFromDialog(IAddWorkspaceDialog const *dialog);
   virtual void addDataToModel(IAddWorkspaceDialog const *dialog);
   virtual void addTableEntry(FitDomainIndex row);
   void setCell(std::unique_ptr<QTableWidgetItem> cell, FitDomainIndex row, int column);
