@@ -9,8 +9,6 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
 
-using Mantid::API::MatrixWorkspace_sptr;
-
 namespace Mantid {
 namespace Algorithms {
 
@@ -27,17 +25,17 @@ public:
 private:
   void init() override;
   void exec() override;
-  void scale(MatrixWorkspace_sptr wsToMatch, MatrixWorkspace_sptr wsToScale, MatrixWorkspace_sptr scaleFactorsWorkspace,
-             const std::vector<std::string> &inputs);
-  MatrixWorkspace_sptr merge(const std::vector<std::string> &workspaces);
+  void scale(API::MatrixWorkspace_sptr wsToMatch, API::MatrixWorkspace_sptr wsToScale,
+             API::MatrixWorkspace_sptr scaleFactorsWorkspace, const std::vector<std::string> &inputs);
+  API::MatrixWorkspace_sptr merge(const std::vector<std::string> &workspaces);
   void scaleManual(const std::vector<std::string> &inputs, const std::vector<double> &scaleFactors,
-                   MatrixWorkspace_sptr scaleFactorsWorkspace);
+                   API::MatrixWorkspace_sptr scaleFactorsWorkspace);
   void scaleWithMedianRatios(const std::vector<std::string> &clones, const std::string &referenceName,
-                             MatrixWorkspace_sptr &scaleFactorsWorkspace);
-  void recordScaleFactor(MatrixWorkspace_sptr scaleFactorWorkspace, MatrixWorkspace_sptr medianWorkspace,
-                         MatrixWorkspace_sptr scaledWorkspace, const std::vector<std::string> &inputs);
+                             API::MatrixWorkspace_sptr &scaleFactorsWorkspace);
+  void recordScaleFactor(API::MatrixWorkspace_sptr scaleFactorWorkspace, API::MatrixWorkspace_sptr medianWorkspace,
+                         API::MatrixWorkspace_sptr scaledWorkspace, const std::vector<std::string> &inputs);
   void cloneWorkspaces(const std::vector<std::string> &inputs);
-  size_t getReferenceIndex(const std::vector<MatrixWorkspace_sptr> &workspaces, const std::string &referenceName);
+  size_t getReferenceIndex(const std::vector<API::MatrixWorkspace_sptr> &workspaces, const std::string &referenceName);
 };
 
 } // namespace Algorithms
