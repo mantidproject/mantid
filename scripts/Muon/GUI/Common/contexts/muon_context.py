@@ -95,7 +95,7 @@ class MuonContext(object):
     def _calculate_counts(self, run, group, periods, run_as_string, periods_as_string, rebin):
         """Calculates the counts workspace for the given run and group."""
         output_name = get_group_data_workspace_name(self, group.name, run_as_string, periods_as_string, rebin=rebin)
-        return calculate_group_data(self, group, run, rebin, output_name, periods)
+        return calculate_group_data(self, group, run, output_name, periods)
 
     def calculate_asymmetry(self, run, group, rebin=False):
         """Calculates the asymmetry workspaces for the given run and group."""
@@ -106,7 +106,7 @@ class MuonContext(object):
         output_name = get_group_asymmetry_name(self, group.name, run_as_string, periods_as_string, rebin=rebin)
         output_name_unnormalised = get_group_asymmetry_unnorm_name(self, group.name, run_as_string, periods_as_string,
                                                                    rebin=rebin)
-        group_asymmetry, group_asymmetry_unnormalised = estimate_group_asymmetry_data(self, group, run, rebin, output_name,
+        group_asymmetry, group_asymmetry_unnormalised = estimate_group_asymmetry_data(self, group, run, output_name,
                                                                                       output_name_unnormalised, periods)
         return group_asymmetry, group_asymmetry_unnormalised
 
@@ -147,27 +147,21 @@ class MuonContext(object):
         output_workspace_name = get_pair_asymmetry_name(self, pair.name, run_as_string, rebin=rebin)
         return calculate_pair_data(pair, forward_group_workspace_name, backward_group_workspace_name, output_workspace_name)
 
-    def show_group(self, run, group):
+    def show_group(self, run, group, rebin):
         run_as_string = run_list_to_string(run)
         group_name = group.name
         periods = run_list_to_string(group.periods)
 
         directory = get_base_data_directory(self, run_as_string)
 
-        name = get_group_data_workspace_name(self, group_name, run_as_string, periods, rebin=False)
-        asym_name = get_group_asymmetry_name(self, group_name, run_as_string, periods, rebin=False)
-        asym_name_unnorm = get_group_asymmetry_unnorm_name(self, group_name, run_as_string, periods, rebin=False)
+        name = get_group_data_workspace_name(self, group_name, run_as_string, periods, rebin=rebin)
+        asym_name = get_group_asymmetry_name(self, group_name, run_as_string, periods, rebin=rebin)
+        asym_name_unnorm = get_group_asymmetry_unnorm_name(self, group_name, run_as_string, periods, rebin=rebin)
 
-        self.group_pair_context[group_name].show_raw(run, directory + name, directory + asym_name,
-                                                     asym_name_unnorm)
-
-        if self._do_rebin():
-            name = get_group_data_workspace_name(self, group_name, run_as_string, periods, rebin=True)
-            asym_name = get_group_asymmetry_name(self, group_name, run_as_string, periods, rebin=True)
-            asym_name_unnorm = get_group_asymmetry_unnorm_name(self, group_name, run_as_string, periods, rebin=True)
-
-            self.group_pair_context[group_name].show_rebin(run, directory + name, directory + asym_name,
-                                                           asym_name_unnorm)
+        if not rebin:
+            self.group_pair_context[group_name].show_raw(run, directory + name, directory + asym_name, asym_name_unnorm)
+        else:
+            self.group_pair_context[group_name].show_rebin(run, directory + name, directory + asym_name, asym_name_unnorm)
 
     def show_pair(self, run: list, pair: MuonPair):
         pair_name = pair.name
@@ -214,12 +208,7 @@ class MuonContext(object):
 
                 self.group_pair_context[group.name].update_counts_workspace(MuonRun(run), counts_workspace, rebin)
 
-    def calculate_asymmetry_for(self, run, group):
-        self._calculate_asymmetry_for(run, group, rebin=False)
-        if self._do_rebin():
-            self._calculate_asymmetry_for(run, group, rebin=True)
-
-    def _calculate_asymmetry_for(self, run, group, rebin):
+    def calculate_asymmetry_for(self, run, group, rebin):
         asymmetry_workspaces = self.calculate_asymmetry(run, group, rebin)
 
         if asymmetry_workspaces is not None:
@@ -265,12 +254,12 @@ class MuonContext(object):
 
     def update_phasequads(self):
         for phasequad in self.group_pair_context.phasequads:
-            self.calculate_phasequads(phasequad.name, phasequad)
+            self.calculate_phasequads(phasequad)
 
-    def calculate_phasequads(self, name, phasequad_obj):
-        self._calculate_phasequads(name, phasequad_obj, rebin=False)
+    def calculate_phasequads(self, phasequad_obj):
+        self._calculate_phasequads(phasequad_obj, rebin=False)
         if self._do_rebin():
-            self._calculate_phasequads(name, phasequad_obj, rebin=True)
+            self._calculate_phasequads(phasequad_obj, rebin=True)
 
     def calculate_phasequad(self, phasequad, run, rebin):
         parameters = {}
@@ -293,7 +282,7 @@ class MuonContext(object):
         workspaces = split_phasequad(phase_quad)
         return workspaces
 
-    def _calculate_phasequads(self, name, phasequad_obj, rebin):
+    def _calculate_phasequads(self, phasequad_obj, rebin):
         for run in self._data_context.current_runs:
             if self._data_context.num_periods(run) > 1:
                 raise ValueError("Cannot support multiple periods")

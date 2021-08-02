@@ -78,15 +78,16 @@ class GroupingTablePresenter(object):
 
     def validate_detector_ids(self, text):
         try:
-            if re.match(run_utils.run_string_regex, text) and run_utils.run_string_to_list(text, False) and \
-                    max(run_utils.run_string_to_list(text, False)) <= self._model._data.num_detectors \
-                    and min(run_utils.run_string_to_list(text, False)) > 0:
-                return True
+            if re.match(run_utils.run_string_regex, text):
+                return self._validate_detector_ids_list(run_utils.run_string_to_list(text, False))
         except OverflowError:
             pass
 
         self._view.warning_popup("Invalid detector list.")
         return False
+
+    def _validate_detector_ids_list(self, detector_ids: list) -> bool:
+        return detector_ids and max(detector_ids) <= self._model._data.num_detectors and min(detector_ids) > 0
 
     def validate_periods(self, period_text):
         try:
@@ -215,6 +216,9 @@ class GroupingTablePresenter(object):
     def update_view_from_model(self):
         self._view.disable_updates()
         self._view.clear()
+
+        self._remove_groups_with_invalid_detectors()
+
         for group in self._model.groups:
             to_analyse = True if group.name in self._model.selected_groups else False
             display_period_warning = self._model.validate_periods_list(group.periods)
@@ -229,6 +233,10 @@ class GroupingTablePresenter(object):
             self._view.group_range_min.setText(str(self._model.get_first_good_data_from_file()))
 
         self._view.enable_updates()
+
+    def _remove_groups_with_invalid_detectors(self):
+        invalid_groups = [group.name for group in self._model.groups if not self._validate_detector_ids_list(group.detectors)]
+        self._model.remove_groups_by_name(invalid_groups)
 
     def to_analyse_data_checkbox_changed(self, state, row, group_name):
         group_added = True if state == 2 else False

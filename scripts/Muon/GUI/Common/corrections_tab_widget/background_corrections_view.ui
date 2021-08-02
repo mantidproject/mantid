@@ -180,6 +180,11 @@ background-color: #c7e0ff;
         </column>
         <column>
          <property name="text">
+          <string>Rebin</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
           <string>Start X</string>
          </property>
         </column>

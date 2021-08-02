@@ -50,18 +50,18 @@ class CorrectionsModel:
     count-corrected.
     """
 
-    def calculate_asymmetry_workspaces_for(self, runs: list, groups: list) -> None:
+    def calculate_asymmetry_workspaces_for(self, runs: list, groups: list, rebins: list) -> None:
         """Creates the asymmetry workspaces for the runs and groups provided using the Counts workspaces in the ADS."""
-        for run, group in zip(runs, groups):
-            self._create_asymmetry_workspace_for(run, group)
+        for run, group, rebin in zip(runs, groups, rebins):
+            self._create_asymmetry_workspace_for(run, group, rebin)
 
-    def _create_asymmetry_workspace_for(self, run: str, group: str) -> None:
+    def _create_asymmetry_workspace_for(self, run: str, group: str, rebin: bool) -> None:
         """Creates the asymmetry workspace for a run and group using its corresponding Counts workspace in the ADS."""
         run_list = run_string_to_list(run)
         group_object = self._context.group_pair_context[group]
         if run_list is not None and group_object is not None:
-            self._context.calculate_asymmetry_for(run_list, group_object)
-            self._context.show_group(run_list, group_object)
+            self._context.calculate_asymmetry_for(run_list, group_object, rebin)
+            self._context.show_group(run_list, group_object, rebin)
 
     def calculate_pairs_for(self, runs: list, groups: list) -> list:
         """Calculates the Pair Asymmetry workspaces which are concerned with the provided Runs and Groups."""
