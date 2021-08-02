@@ -247,19 +247,6 @@ class SANSILLReduction2(PythonAlgorithm):
 
     #==============================METHODS TO APPLY CORRECTIONS==============================#
 
-    def normalise_by_time(self, ws):
-        '''Normalises the given workspace to time and applies the dead time correction'''
-        run = ws.getRun()
-        if run.hasProperty('timer'):
-            duration = run['timer'].value
-            if duration != 0.:
-                Scale(InputWorkspace=ws, Factor=1./duration, OutputWorkspace=ws)
-                self.apply_dead_time(ws)
-            else:
-                raise RuntimeError('Unable to normalise to time; duration found is 0.')
-        else:
-            raise RuntimeError('Normalise to time requested, but duration is not available in the workspace.')
-
     def apply_normalisation(self, ws):
         '''Normalizes the workspace by monitor (default) or acquisition time'''
         normalise_by = self.getPropertyValue('NormaliseBy')
@@ -273,16 +260,12 @@ class SANSILLReduction2(PythonAlgorithm):
                 Divide(LHSWorkspace=ws, RHSWorkspace=mon, OutputWorkspace=ws)
                 DeleteWorkspace(mon)
         elif normalise_by == 'Time':
-            if self.mode == AcqMode.KINETIC:
-                # for kinetic, the durations are stored in the second monitor
-                mon = ws + '_duration'
-                ExtractSpectra(InputWorkspace=ws, DetectorList=monitor_ids[1], OutputWorkspace=mon)
-                Divide(LHSWorkspace=ws, RHSWorkspace=mon, OutputWorkspace=ws)
-                # TODO: check if dead time correction as is is applicable to kinetic
-                self.apply_dead_time(ws)
-                DeleteWorkspace(mon)
-            else:
-                normalise_by_time(mtd[ws])
+            # the durations are stored in the second monitor
+            mon = ws + '_duration'
+            ExtractSpectra(InputWorkspace=ws, DetectorList=monitor_ids[1], OutputWorkspace=mon)
+            Divide(LHSWorkspace=ws, RHSWorkspace=mon, OutputWorkspace=ws)
+            self.apply_dead_time(ws)
+            DeleteWorkspace(mon)
         # regardless on normalisation mask out the monitors not to skew the scale in the instrument viewer
         # but do not extract them, since extracting by ID is slow, so just leave them masked
         MaskDetectors(Workspace=ws, DetectorList=monitor_ids)
@@ -617,8 +600,10 @@ class SANSILLReduction2(PythonAlgorithm):
         Hence, we cannot specify a name of a specifc loader
         Besides, if it is processed nexus, it will be histogram data, which needs to be converted to point data
         The final output of this must be a workspace and not a workspace group
+        Note that the LoadAndMerge could do the concatenation as well directly
+        However, we might need to inject blank frames that's why we have to do it afterwards
+        Besides, it's only after loading when we can figure out whether it's TOF or Mono, which dictates to concatenate or not
         '''
-        #TODO: note that this operation is quite generic, so perhaps concatenation can become an option directly in LoadAndMerge
         #TODO: Currently, the loader too will load to a histogram data for monochromatic non-kinetic,
         # so we need to run a conversion to point data, which is redundant, since the loader could load directly to point-data
         #The latter is a breaking change for the loader, so will require a new version
