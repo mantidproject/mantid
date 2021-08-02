@@ -55,6 +55,8 @@ class SimulatedDensityOfStatesEuphonicInstallationTest(MantidSystemTest):
                                         "\n".join(list(prefix_path.iterdir())))
 
             process_pythonpath = str(scipy_site_packages) + ':' + os.environ['PYTHONPATH']
+            env = os.environ.copy()
+            env['PYTHONPATH'] = process_pythonpath
             site.addsitedir(scipy_site_packages)
 
             # Install minimum Scipy version for Euphonic if necessary
@@ -67,7 +69,7 @@ class SimulatedDensityOfStatesEuphonicInstallationTest(MantidSystemTest):
                                          "scipy==1.0", "pytest"],
                                          stdout=subprocess.PIPE,
                                          stderr=subprocess.STDOUT,
-                                         env={'PYTHONPATH': process_pythonpath})
+                                         env=env)
                 print(process.stdout.decode('utf-8'))
 
                 #importlib.reload(site)
@@ -78,7 +80,7 @@ class SimulatedDensityOfStatesEuphonicInstallationTest(MantidSystemTest):
                                       "euphonic[phonopy_reader]"],
                                      stdout=subprocess.PIPE,
                                      stderr=subprocess.STDOUT,
-                                     env={'PYTHONPATH': process_pythonpath})
+                                     env=env)
             print(process.stdout.decode('utf-8'))
 
             prefix_path = pathlib.Path(euphonic_prefix)
