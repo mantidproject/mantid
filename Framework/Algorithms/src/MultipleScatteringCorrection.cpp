@@ -44,6 +44,12 @@ inline size_t findMiddle(const size_t start, const size_t stop) {
   auto half = static_cast<size_t>(floor(.5 * (static_cast<double>(stop - start))));
   return start + half;
 }
+
+inline size_t calcLinearIdxFromUpperTriangular(const size_t N, const size_t row_idx, const size_t col_idx) {
+  // calculate the linear index from the upper triangular matrix from a (N x N) matrix
+  // row_idx < col_idx due to upper triangular matrix
+  return N * (N - 1) / 2 - (N - row_idx) * (N - row_idx - 1) / 2 + col_idx - row_idx - 1;
+}
 } // namespace
 
 /**
@@ -133,9 +139,29 @@ void MultipleScatteringCorrection::exec() {
   for (size_t i = 0; i < numVolumeElements; ++i) {
     for (size_t j = i + 1; j < numVolumeElements; ++j) {
       const V3D dist = distGraber.m_elementPositions[i] - distGraber.m_elementPositions[j];
-      sample_L12s[i * numVolumeElements + j] = dist.norm();
+      size_t idx = calcLinearIdxFromUpperTriangular(numVolumeElements, i, j);
+      sample_L12s[idx] = dist.norm();
     }
   }
+
+  // debug L12 matrix
+  // NOTE: this will come in handy when we start considering container and sample interaction,
+  //       do not remove it.
+  // std::ostringstream msg;
+  // msg << "\n";
+  // for (size_t i = 0; i < numVolumeElements; ++i) {
+  //   for (size_t j = 0; j < numVolumeElements; ++j) {
+  //     if (i < j) {
+  //       size_t idx = numVolumeElements * (numVolumeElements - 1) / 2 -
+  //                    (numVolumeElements - i) * (numVolumeElements - i - 1) / 2 + j - i - 1;
+  //       msg << sample_L12s[idx] << " ";
+  //     } else {
+  //       msg << "x ";
+  //     }
+  //   }
+  //   msg << '\n';
+  // }
+  // g_log.notice(msg.str());
 
   const auto &spectrumInfo = m_inputWS->spectrumInfo();
   const auto numHists = static_cast<int64_t>(m_inputWS->getNumberHistograms());
@@ -178,6 +204,16 @@ void MultipleScatteringCorrection::exec() {
       const double sigma_s = m_material.totalScatterXSection();
       const double V = distGraber.m_totalVolume;
       output[j] = rho * V * sigma_s * A2 / (4 * M_PI * A1);
+
+      // debug output
+      std::ostringstream msg_debug;
+      msg_debug << "Det_" << i << "@spectrum_" << j << ":\n"
+                << "\trho = " << rho << ", sigma_s = " << sigma_s << ", V = " << V << "\n"
+                << "\tA1 = " << A1 << "\n"
+                << "\tA2 = " << A2 << "\n"
+                << "\tms_factor = " << output[j] << "\n";
+      g_log.notice(msg_debug.str());
+
       // Make certain that last point is calculated
       if (m_xStep > 1 && j + m_xStep >= specSize && j + 1 != specSize) {
         j = specSize - m_xStep - 1;
@@ -346,11 +382,10 @@ void MultipleScatteringCorrection::pairWiseSum(double &A1, double &A2, const dou
           // skip self (second order scattering must happen in a different element)
           continue;
         }
-        // L12 is a pre-computed vector, therefore
-        // - case1: source -> 2 -> 1 -> det
-        //   we don't have 2->1 cached in L12, but we do have L12 cached, which is the same.
-        //   therefore, we will use L12[1*nElements + 2] to query the L12 for this case
-        size_t idx_l12 = i < j ? i * nElements + j : j * nElements + i;
+        // L12 is a pre-computed vector, therefore we can use the index directly
+        size_t idx_l12 = i < j ? calcLinearIdxFromUpperTriangular(nElements, i, j)
+                               : calcLinearIdxFromUpperTriangular(nElements, j, i);
+        // compute a2 component
         exponent = (Ls1s[j] + L12s[idx_l12] + L2Ds[i]) * linearCoefAbs;
         a2 += exp(exponent) * elementVolumes[j] / (L12s[idx_l12] * L12s[idx_l12]);
       }

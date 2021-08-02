@@ -91,7 +91,7 @@ public:
     Mantid::API::MatrixWorkspace_sptr rst_ms;
     rst_ms = AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>("rst_ms_sampleOnly");
 
-    for (int i = 0; i < 10; ++i) {
+    for (int i = 0; i < 2; ++i) {
       g_log.notice() << rst_mayer->readY(1)[i] << ", " << rst_carpenter->readY(1)[i] << ", " << rst_ms->readY(1)[i]
                      << "\n";
     }
@@ -108,11 +108,11 @@ private:
     auto sampleAlg = Mantid::API::AlgorithmManager::Instance().create("CreateSampleWorkspace");
     sampleAlg->initialize();
     sampleAlg->setProperty("Function", "Powder Diffraction");
-    sampleAlg->setProperty("NumBanks", 4);
+    sampleAlg->setProperty("NumBanks", 2);
     sampleAlg->setProperty("BankPixelWidth", 1);
     sampleAlg->setProperty("XUnit", "TOF");
     sampleAlg->setProperty("XMin", 1000.0);
-    sampleAlg->setProperty("XMax", 10000.0);
+    sampleAlg->setProperty("XMax", 1500.0);
     sampleAlg->setPropertyValue("OutputWorkspace", name);
     sampleAlg->execute();
 
@@ -121,11 +121,11 @@ private:
     editAlg->initialize();
     editAlg->setPropertyValue("Workspace", name);
     editAlg->setProperty("PrimaryFlightPath", 5.0);
-    editAlg->setProperty("SpectrumIDs", "1,2,3,4");
-    editAlg->setProperty("L2", "2.0,2.0,2.0,2.0");
-    editAlg->setProperty("Polar", "10.0,90.0,180.0,90.0");
-    editAlg->setProperty("Azimuthal", "0.0,0.0,0.0,45.0");
-    editAlg->setProperty("DetectorIDs", "1,2,3,4");
+    editAlg->setProperty("SpectrumIDs", "1,2");
+    editAlg->setProperty("L2", "2.0,2.0");
+    editAlg->setProperty("Polar", "10.0,90.0");
+    editAlg->setProperty("Azimuthal", "0.0,45.0");
+    editAlg->setProperty("DetectorIDs", "1,2");
     editAlg->setProperty("InstrumentName", "Instrument");
     editAlg->execute();
   }
