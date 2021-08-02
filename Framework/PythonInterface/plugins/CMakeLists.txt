@@ -169,6 +169,7 @@ set(PYTHON_PLUGINS
     algorithms/SaveYDA.py
     algorithms/SelectNexusFilesByMetadata.py
     algorithms/SetDetScale.py
+    algorithms/SetSampleFromLogs.py
     algorithms/SortByQVectors.py
     algorithms/SortDetectors.py
     algorithms/StatisticsOfTableWorkspace.py
