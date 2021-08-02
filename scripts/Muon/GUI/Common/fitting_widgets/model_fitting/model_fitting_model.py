@@ -14,6 +14,7 @@ from Muon.GUI.Common.ADSHandler.workspace_naming import (create_model_fitting_pa
 from Muon.GUI.Common.contexts.fitting_contexts.model_fitting_context import ModelFittingContext
 from Muon.GUI.Common.contexts.muon_context import MuonContext
 from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model import BasicFittingModel
+from Muon.GUI.Common.utilities.workspace_data_utils import is_equal_to_n_decimals
 
 
 class ModelFittingModel(BasicFittingModel):
@@ -195,11 +196,12 @@ class ModelFittingModel(BasicFittingModel):
                    and self._lists_are_equal(workspace.dataE(0), y_errors)
         return False
 
-    def _lists_are_equal(self, list1: list, list2: list) -> bool:
+    @staticmethod
+    def _lists_are_equal(list1: list, list2: list) -> bool:
         """Returns true if the two lists containing x, y or error data are equal to five decimal places."""
         if len(list1) != len(list2):
             return False
-        return all([self.is_equal_to_n_decimals(i, j, 5) for i, j in zip(list1, list2)])
+        return all([is_equal_to_n_decimals(i, j, 5) for i, j in zip(list1, list2)])
 
     @staticmethod
     def _convert_str_column_values_to_int(parameter_name: str, parameter_values: list) -> list:

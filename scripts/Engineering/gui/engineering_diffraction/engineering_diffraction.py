@@ -60,6 +60,9 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         self.set_on_instrument_changed(self.presenter.focus_presenter.set_instrument_override)
         self.set_on_rb_num_changed(self.presenter.focus_presenter.set_rb_num)
 
+        # load most recent calibration, if one saved
+        self.presenter.calibration_presenter.load_last_calibration()
+
         # load previous rb number if saved, create mechanism to save
         self.set_rb_no(self.presenter.get_saved_rb_number())
         self.set_on_rb_num_changed(self.presenter.set_saved_rb_number)

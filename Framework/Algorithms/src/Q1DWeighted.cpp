@@ -44,10 +44,21 @@ using namespace Geometry;
 using namespace DataObjects;
 
 void Q1DWeighted::init() {
-  auto wsValidator = std::make_shared<CompositeValidator>();
-  wsValidator->add<WorkspaceUnitValidator>("Wavelength");
-  wsValidator->add<HistogramValidator>();
-  wsValidator->add<InstrumentValidator>();
+  auto wsValidator = std::make_shared<CompositeValidator>(CompositeRelation::OR);
+  auto monoValidator = std::make_shared<CompositeValidator>(CompositeRelation::AND);
+  auto tofValidator = std::make_shared<CompositeValidator>(CompositeRelation::AND);
+
+  monoValidator->add<WorkspaceUnitValidator>("Empty");
+  monoValidator->add<HistogramValidator>(false);
+  monoValidator->add<InstrumentValidator>();
+
+  tofValidator->add<WorkspaceUnitValidator>("Wavelength");
+  tofValidator->add<HistogramValidator>(true);
+  tofValidator->add<InstrumentValidator>();
+
+  wsValidator->add(monoValidator);
+  wsValidator->add(tofValidator);
+
   declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, wsValidator),
                   "Input workspace containing the SANS 2D data");
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
@@ -120,12 +131,13 @@ void Q1DWeighted::bootstrap(const MatrixWorkspace_const_sptr &inputWS) {
 
   m_nQ = static_cast<size_t>(VectorHelper::createAxisFromRebinParams(binParams, m_qBinEdges)) - 1;
 
+  m_isMonochromatic = inputWS->getAxis(0)->unit()->unitID() != "Wavelength";
+
   // number of spectra in the input
   m_nSpec = inputWS->getNumberHistograms();
 
-  // get the number of wavelength bins in the input, note that the input is a
-  // histogram
-  m_nLambda = inputWS->readY(0).size();
+  // get the number of wavelength bins / samples in the input, note that the input is a histogram
+  m_nBins = inputWS->readY(0).size();
 
   m_wedgesParameters = std::vector<Q1DWeighted::Wedge>();
 
@@ -164,14 +176,13 @@ void Q1DWeighted::bootstrap(const MatrixWorkspace_const_sptr &inputWS) {
   }
 
   // we store everything in 3D arrays
-  // index 1 : is for the wedges + the one for the full integration,
-  //           if there are no wedges, the 1st dimension will be 1
-  // index 2 : will iterate over lambda bins
+  // index 1 : is for the wedges + the one for the full integration, if there are no wedges, the 1st dimension will be 1
+  // index 2 : will iterate over lambda bins / over samples if monochromatic
   // index 3 : will iterate over Q bins
-  // we want to do this, since we want to average the I(Q) in each lambda bin
-  // then average all the I(Q)s together
+  // we want to do this, since we want to average the I(Q) in each lambda bin then average all the I(Q)s together (in
+  // the case of TOF)
   m_intensities = std::vector<std::vector<std::vector<double>>>(
-      m_nWedges + 1, std::vector<std::vector<double>>(m_nLambda, std::vector<double>(m_nQ, 0.0)));
+      m_nWedges + 1, std::vector<std::vector<double>>(m_nBins, std::vector<double>(m_nQ, 0.0)));
   m_errors = m_intensities;
   m_normalisation = m_intensities;
 }
@@ -200,8 +211,7 @@ void Q1DWeighted::getTableShapes() {
         continue;
       boost::algorithm::split(params, val, boost::algorithm::is_any_of("\t"));
 
-      // NB : the first value of the vector also is the key, and is not a
-      // meaningful value
+      // NB : the first value of the vector also is the key, and is not a meaningful value
       paramMap[params[0]] = params;
     }
     if (paramMap["Type"][1] == "sector")
@@ -233,8 +243,8 @@ void Q1DWeighted::getViewportParams(const std::string &viewport,
   boost::algorithm::split(params, viewport, boost::algorithm::is_any_of("\t, \n"));
 
   if (params[0] != "Translation") {
-    g_log.error("No viewport found in the shape table. Please provide a table "
-                "using shapes drawn in the Full3D projection.");
+    g_log.error(
+        "No viewport found in the shape table. Please provide a table using shapes drawn in the Full3D projection.");
   }
 
   // Translation
@@ -257,10 +267,8 @@ void Q1DWeighted::getViewportParams(const std::string &viewport,
 
   if (std::fabs(viewportParams["Rotation"][0]) > epsilon || std::fabs(viewportParams["Rotation"][1]) > epsilon ||
       std::fabs(viewportParams["Rotation"][3]) > epsilon || std::fabs(viewportParams["Rotation"][2] - 1) > epsilon) {
-    g_log.warning("The shapes were created using a rotated viewport not using "
-                  "Z- projection, which is not supported. Results are likely "
-                  "to be erroneous. Consider freezing the rotation in the "
-                  "instrument viewer.");
+    g_log.warning("The shapes were created using a rotated viewport not using Z- projection, which is not supported. "
+                  "Results are likely to be erroneous. Consider freezing the rotation in the instrument viewer.");
   }
 }
 
@@ -286,8 +294,7 @@ void Q1DWeighted::getWedgeParams(std::vector<std::string> &params,
   double angleRange = std::fmod(endAngle - startAngle, 2 * M_PI);
   angleRange = angleRange >= 0 ? angleRange : angleRange + 2 * M_PI;
 
-  // since the viewport was in Z-, the axis are inverted so we have to take the
-  // symmetry of the angle
+  // since the viewport was in Z-, the axis are inverted so we have to take the symmetry of the angle
   centerAngle = std::fmod(3 * M_PI - centerAngle, 2 * M_PI);
 
   double xOffset = viewport["Translation"][0];
@@ -342,7 +349,7 @@ void Q1DWeighted::checkIfSuperposedWedges() {
  */
 void Q1DWeighted::calculate(const MatrixWorkspace_const_sptr &inputWS) {
   // Set up the progress
-  Progress progress(this, 0.0, 1.0, m_nSpec * m_nLambda);
+  Progress progress(this, 0.0, 1.0, m_nSpec * m_nBins);
 
   const auto &spectrumInfo = inputWS->spectrumInfo();
   const V3D sourcePos = spectrumInfo.sourcePosition();
@@ -351,6 +358,13 @@ void Q1DWeighted::calculate(const MatrixWorkspace_const_sptr &inputWS) {
   const V3D beamLine = samplePos - sourcePos;
 
   const auto up = inputWS->getInstrument()->getReferenceFrame()->vecPointingUp();
+  double monoWavelength = 0;
+  if (m_isMonochromatic) {
+    if (inputWS->run().hasProperty("wavelength")) {
+      monoWavelength = inputWS->run().getPropertyAsSingleValue("wavelength");
+    } else
+      throw std::runtime_error("Could not find wavelength in the sample logs.");
+  }
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS))
   // first we loop over spectra
@@ -381,15 +395,15 @@ void Q1DWeighted::calculate(const MatrixWorkspace_const_sptr &inputWS) {
     // on-the-fly, see the caching in the helper
     GravitySANSHelper gravityHelper(spectrumInfo, i, 0.0);
 
-    // loop over lambda bins
-    for (size_t j = 0; j < m_nLambda; ++j) {
+    // loop over bins
+    for (size_t j = 0; j < m_nBins; ++j) {
 
       // skip if the bin is masked
       if (std::binary_search(maskedBins.cbegin(), maskedBins.cend(), j)) {
         continue;
       }
 
-      const double wavelength = (XIn[j] + XIn[j + 1]) / 2.;
+      const double wavelength = m_isMonochromatic ? monoWavelength : (XIn[j] + XIn[j + 1]) / 2.;
 
       V3D correction;
       if (m_correctGravity) {
@@ -481,7 +495,8 @@ void Q1DWeighted::calculate(const MatrixWorkspace_const_sptr &inputWS) {
  * @param inputWS : the input workspace
  */
 void Q1DWeighted::finalize(const MatrixWorkspace_const_sptr &inputWS) {
-  MatrixWorkspace_sptr outputWS = createOutputWorkspace(inputWS, m_nQ, m_qBinEdges);
+  const size_t nSpectra = m_isMonochromatic ? m_nBins : 1;
+  MatrixWorkspace_sptr outputWS = createOutputWorkspace(inputWS, m_nQ, m_qBinEdges, nSpectra);
   setProperty("OutputWorkspace", outputWS);
 
   // Create workspace group that holds output workspaces for wedges
@@ -489,7 +504,7 @@ void Q1DWeighted::finalize(const MatrixWorkspace_const_sptr &inputWS) {
   if (m_nWedges != 0) {
     // Create wedge workspaces
     for (size_t iw = 0; iw < m_nWedges; ++iw) {
-      MatrixWorkspace_sptr wedgeWs = createOutputWorkspace(inputWS, m_nQ, m_qBinEdges);
+      MatrixWorkspace_sptr wedgeWs = createOutputWorkspace(inputWS, m_nQ, m_qBinEdges, nSpectra);
       wedgeWs->mutableRun().addProperty("wedge_angle", m_wedgesParameters[iw].angleMiddle / deg2rad, "degrees", true);
       wsgroup->addWorkspace(wedgeWs);
     }
@@ -506,30 +521,72 @@ void Q1DWeighted::finalize(const MatrixWorkspace_const_sptr &inputWS) {
   for (size_t iout = 0; iout < m_nWedges + 1; ++iout) {
 
     auto ws = (iout == 0) ? outputWS : std::dynamic_pointer_cast<MatrixWorkspace>(wsgroup->getItem(iout - 1));
-    auto &YOut = ws->mutableY(0);
-    auto &EOut = ws->mutableE(0);
 
-    std::vector<double> normLambda(m_nQ, 0.0);
+    if (m_isMonochromatic) {
+      fillMonochromaticOutput(ws, iout);
+    } else {
+      fillTOFOutput(ws, iout);
+    }
+  }
+}
 
-    for (size_t il = 0; il < m_nLambda; ++il) {
-      PARALLEL_FOR_IF(Kernel::threadSafe(*ws))
-      for (int iq = 0; iq < static_cast<int>(m_nQ); ++iq) {
-        PARALLEL_START_INTERUPT_REGION
-        const double norm = m_normalisation[iout][il][iq];
-        if (norm != 0.) {
-          YOut[iq] += m_intensities[iout][il][iq] / norm;
-          EOut[iq] += m_errors[iout][il][iq] / (norm * norm);
-          normLambda[iq] += 1.;
-        }
-        PARALLEL_END_INTERUPT_REGION
+/**
+ * @brief Q1DWeighted::fillMonochromaticOutput
+ * Fill the output workspace for monochromatic, kinetic input. In this case, we don't average over bins, because they
+ * belong to different samples, and thus are written in different spectra.
+ * @param outputWS : The workspace to fill
+ * @param iout Its : index
+ */
+void Q1DWeighted::fillMonochromaticOutput(MatrixWorkspace_sptr &outputWS, const size_t iout) {
+
+  for (size_t iSample = 0; iSample < m_nBins; ++iSample) {
+    auto &YOut = outputWS->mutableY(iSample);
+    auto &EOut = outputWS->mutableE(iSample);
+
+    PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
+    for (int iq = 0; iq < static_cast<int>(m_nQ); ++iq) {
+      PARALLEL_START_INTERUPT_REGION
+      const double norm = m_normalisation[iout][iSample][iq];
+      if (norm != 0.) {
+        YOut[iq] = m_intensities[iout][iSample][iq] / norm;
+        EOut[iq] = m_errors[iout][iSample][iq] / (norm * norm);
       }
-      PARALLEL_CHECK_INTERUPT_REGION
+      PARALLEL_END_INTERUPT_REGION
     }
+    PARALLEL_CHECK_INTERUPT_REGION
+  }
+}
 
-    for (size_t i = 0; i < m_nQ; ++i) {
-      YOut[i] /= normLambda[i];
-      EOut[i] = sqrt(EOut[i]) / normLambda[i];
+/**
+ * @brief Q1DWeighted::fillTOFOutput
+ * Fill in the output workspace for TOF input, averaging over lambda bins.
+ * @param outputWS : the output workspace to fill
+ * @param iout : its index
+ */
+void Q1DWeighted::fillTOFOutput(MatrixWorkspace_sptr &outputWS, const size_t iout) {
+  auto &YOut = outputWS->mutableY(0);
+  auto &EOut = outputWS->mutableE(0);
+
+  std::vector<double> normLambda(m_nQ, 0.0);
+
+  for (size_t il = 0; il < m_nBins; ++il) {
+    PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
+    for (int iq = 0; iq < static_cast<int>(m_nQ); ++iq) {
+      PARALLEL_START_INTERUPT_REGION
+      const double norm = m_normalisation[iout][il][iq];
+      if (norm != 0.) {
+        YOut[iq] += m_intensities[iout][il][iq] / norm;
+        EOut[iq] += m_errors[iout][il][iq] / (norm * norm);
+        normLambda[iq] += 1.;
+      }
+      PARALLEL_END_INTERUPT_REGION
     }
+    PARALLEL_CHECK_INTERUPT_REGION
+  }
+
+  for (size_t i = 0; i < m_nQ; ++i) {
+    YOut[i] /= normLambda[i];
+    EOut[i] = sqrt(EOut[i]) / normLambda[i];
   }
 }
 
@@ -538,14 +595,17 @@ void Q1DWeighted::finalize(const MatrixWorkspace_const_sptr &inputWS) {
  * @param parent : the parent workspace
  * @param nBins : number of bins in the histograms
  * @param binEdges : bin edges
+ * @param nSpectra : number of histograms the workspace should have
  * @return output I(Q) workspace
  */
 MatrixWorkspace_sptr Q1DWeighted::createOutputWorkspace(const MatrixWorkspace_const_sptr &parent, const size_t nBins,
-                                                        const std::vector<double> &binEdges) {
+                                                        const std::vector<double> &binEdges, const size_t nSpectra) {
 
-  MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(parent, 1, nBins + 1, nBins);
+  MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(parent, nSpectra, nBins + 1, nBins);
   outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("MomentumTransfer");
-  outputWS->setBinEdges(0, binEdges);
+  for (size_t iSpectra = 0; iSpectra < nSpectra; ++iSpectra) {
+    outputWS->setBinEdges(iSpectra, binEdges);
+  }
   outputWS->setYUnitLabel("1/cm");
   outputWS->setDistribution(true);
   return outputWS;

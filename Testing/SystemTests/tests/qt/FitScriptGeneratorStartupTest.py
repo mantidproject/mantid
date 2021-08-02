@@ -35,6 +35,13 @@ class FitScriptGeneratorStartupTest(systemtesting.MantidSystemTest, QtWidgetFind
         self.fsg_view = FitScriptGeneratorView(None, FittingMode.SIMULTANEOUS, {"Minimizer": "Levenberg-Marquardt"})
         self.fsg_presenter = FitScriptGeneratorPresenter(self.fsg_view, self.fsg_model, [self.ws_name], 1.0, 3.0)
 
+    def cleanup(self):
+        self.fsg_presenter = None
+        self.fsg_view = None
+        self.fsg_model = None
+        self._app = None
+        AnalysisDataService.clear()
+
     def runTest(self):
         try:
             self.fsg_presenter.openFitScriptGenerator()

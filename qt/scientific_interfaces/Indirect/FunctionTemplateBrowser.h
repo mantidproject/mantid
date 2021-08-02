@@ -67,7 +67,6 @@ public:
   virtual void updateParameterEstimationData(DataForParameterEstimationCollection &&data) = 0;
   virtual void estimateFunctionParameters() = 0;
   virtual void setBackgroundA0(double value) = 0;
-  virtual void setResolution(std::string const &name, TableDatasetIndex const &index) = 0;
   virtual void setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) = 0;
   virtual void setQValues(const std::vector<double> &qValues) = 0;
 

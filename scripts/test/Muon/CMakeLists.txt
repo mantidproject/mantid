@@ -6,6 +6,9 @@ set ( TEST_PY_FILES
    base_pane/base_pane_presenter_test.py
    basic_fitting_context_test.py
    corrections_context_test.py
+   corrections_tab_widget/background_corrections_model_test.py
+   corrections_tab_widget/background_corrections_presenter_test.py
+   corrections_tab_widget/background_corrections_view_test.py
    corrections_tab_widget/corrections_model_test.py
    corrections_tab_widget/corrections_presenter_test.py
    corrections_tab_widget/corrections_view_test.py
@@ -117,6 +120,9 @@ set ( TEST_PY_FILES
    plotting_canvas/plot_color_queue_test.py
    plotting_canvas/plotting_canvas_model_test.py
    plotting_canvas/plotting_canvas_presenter_test.py
+   plotting_canvas/plotting_canvas_utils_test.py
+   plotting_canvas/plotting_canvas_view_test.py
+   raw_pane/raw_pane_model_test.py
    results_context_test.py
    results_tab_widget/results_tab_model_test.py
    results_tab_widget/results_tab_presenter_test.py

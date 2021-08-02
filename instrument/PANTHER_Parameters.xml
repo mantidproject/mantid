@@ -18,10 +18,10 @@
 		<!-- formula for Detector efficiency calculation. Algorithm: DetectorEfficiencyCorUser
 			See http://muparser.sourceforge.net/mup_features.html#idDef2 for available
 			operators -->
-		<parameter name="formula_eff" type="string">
+		<parameter name="formula_eff" type="string" visible="false">
 			<value val="0.9653 * exp(-0.05202/sqrt(e)) * (1 - exp(-10.983/sqrt(e)))" />
 		</parameter>
-		<parameter name="components-for-backgrounds" type="string">
+		<parameter name="components-for-backgrounds" type="string" visible="false">
 			<value val="tube_1, tube_2, tube_3, tube_4, tube_5, tube_6, tube_7, tube_8, tube_9, tube_10, tube_11, tube_12, tube_13, tube_14, tube_15, tube_16, tube_17, tube_18, tube_19, tube_20, tube_21, tube_22, tube_23, tube_24, tube_25, tube_26, tube_27, tube_28, tube_29, tube_30, tube_31, tube_32, tube_33, tube_34, tube_35, tube_36, tube_37, tube_38, tube_39, tube_40, tube_41, tube_42, tube_43, tube_44, tube_45, tube_46, tube_47, tube_48, tube_49, tube_50, tube_51, tube_52, tube_53, tube_54, tube_55, tube_56, tube_57, tube_58, tube_59, tube_60, tube_61, tube_62, tube_63, tube_64, tube_65, tube_66, tube_67, tube_68, tube_69, tube_70, tube_71, tube_72, tube_73, tube_74, tube_75, tube_76, tube_77, tube_78, tube_79, tube_80, tube_81, tube_82, tube_83, tube_84, tube_85, tube_86, tube_87, tube_88, tube_89, tube_90, tube_91, tube_92, tube_93, tube_94, tube_95, tube_96, tube_97, tube_98, tube_99, tube_100, tube_101, tube_102, tube_103, tube_104, tube_105, tube_106, tube_107, tube_108, tube_109, tube_110, tube_111, tube_112, tube_113, tube_114, tube_115, tube_116, tube_117, tube_118, tube_119, tube_120, tube_121, tube_122, tube_123, tube_124, tube_125, tube_126, tube_127, tube_128, tube_129, tube_130, tube_131, tube_132, tube_133, tube_134, tube_135, tube_136, tube_137, tube_138, tube_139, tube_140, tube_141, tube_142, tube_143, tube_144, tube_145, tube_146, tube_147, tube_148, tube_149, tube_150, tube_151, tube_152, tube_153, tube_154, tube_155, tube_156, tube_157, tube_158, tube_159, tube_160, tube_161, tube_162, tube_163, tube_164, tube_165, tube_166, tube_167, tube_168, tube_169, tube_170, tube_171, tube_172, tube_173, tube_174, tube_175, tube_176, tube_177, tube_178, tube_179, tube_180, tube_181, tube_182, tube_183, tube_184, tube_185, tube_186, tube_187, tube_188, tube_189, tube_190, tube_191, tube_192, tube_193, tube_194, tube_195, tube_196, tube_197, tube_198, tube_199, tube_200, tube_201, tube_202, tube_203, tube_204, tube_205, tube_206, tube_207, tube_208, tube_209, tube_210, tube_211, tube_212, tube_213, tube_214, tube_215, tube_216, tube_217, tube_218, tube_219, tube_220, tube_221, tube_222, tube_223, tube_224, tube_225, tube_226, tube_227, tube_228, tube_229, tube_230, tube_231, tube_232, tube_233, tube_234, tube_235, tube_236, tube_237, tube_238, tube_239, tube_240, tube_241, tube_242, tube_243, tube_244, tube_245, tube_246, tube_247, tube_248, tube_249, tube_250, tube_251, tube_252, tube_253, tube_254, tube_255, tube_256, tube_257, tube_258, tube_259, tube_260, tube_261, tube_262, tube_263, tube_264, tube_265, tube_266, tube_267, tube_268, tube_269, tube_270, tube_271, tube_272, tube_273, tube_274, tube_275, tube_276, tube_277, tube_278, tube_279, tube_280, tube_281, tube_282, tube_283, tube_284, tube_285, tube_286, tube_287, tube_288" />
 		</parameter>
 		<!-- Default monitor spectrum number for monitor normalisation. -->
@@ -32,63 +32,67 @@
 		<parameter name="scaling_after_monitor_normalisation">
 			<value val="100000" />
 		</parameter>
-		<parameter name="enable_flat_background_subtraction" type="bool">
+		<parameter name="enable_flat_background_subtraction" type="bool" visible="false">
 			<value val="false" />
 		</parameter>
-		<parameter name="enable_background_diagnostics" type="bool">
+		<parameter name="enable_background_diagnostics" type="bool" visible="false">
 			<value val="false" />
 		</parameter>
-		<parameter name="enable_elastic_peak_diagnostics" type="bool">
+		<parameter name="enable_elastic_peak_diagnostics" type="bool" visible="false">
 			<value val="false" />
 		</parameter>
-		<parameter name="beam_stop_diagnostics_spectra" type="string">
+		<parameter name="beam_stop_diagnostics_spectra" type="string" visible="false">
 			<value val=""/>
 		</parameter>
-		<parameter name="enable_incident_energy_calibration" type="bool">
+		<parameter name="enable_incident_energy_calibration" type="bool" visible="false">
 			<value val="false" />
 		</parameter>
-		<parameter name="enable_elastic_peak_fitting" type="bool">
+		<parameter name="enable_elastic_peak_fitting" type="bool" visible="false">
 			<value val="false" />
 		</parameter>
-		<parameter name="enable_elastic_channel_fitting" type="bool">
+		<parameter name="enable_elastic_channel_fitting" type="bool" visible="false">
 			<value val="true" />
 		</parameter>
-		<parameter name="Workflow.MaskFile" type="string">
+		<parameter name="Workflow.MaskFile" type="string" visible="false">
 			<value val="PANTHER_Mask.xml" />
 		</parameter>
-		<parameter name="Ei_calibration_detectors" type="string">
+		<parameter name="Ei_calibration_detectors" type="string" visible="false">
 			<value val="75-85,331-341,587-597,843-853,1099-1109,1355-1365,1611-1621,1867-1877,2123-2133,2379-2389,2635-2645,2891-2901,3147-3157,3403-3413,3659-3669,3915-3925,4171-4181,4427-4437,4683-4693,4939-4949,5195-5205,5451-5461,5707-5717,5963-5973,6219-6229,6475-6485,6731-6741,6987-6997,7243-7253,7499-7509,7755-7765,8011-8021,8267-8277,8523-8533,8779-8789,9035-9045,9291-9301,9547-9557,9803-9813,10059-10069,10315-10325,10571-10581,10827-10837,11083-11093,11339-11349,11595-11605,11851-11861,12107-12117,12363-12373,12619-12629,12875-12885,13131-13141,13387-13397,13643-13653,13899-13909,14155-14165,14411-14421,14667-14677,14923-14933,15179-15189,15435-15445,15691-15701,15947-15957,16203-16213,16459-16469,16715-16725,16971-16981,17227-17237,17483-17493,17739-17749,17995-18005,18251-18261,18507-18517,18763-18773,19019-19029,19275-19285,19531-19541,19787-19797,20043-20053,20299-20309,20555-20565,20811-20821,21067-21077,21323-21333,21579-21589,21835-21845,22091-22101,22347-22357,22603-22613,22859-22869,23115-23125,23371-23381,23627-23637,23883-23893,24139-24149,24395-24405,24651-24661,24907-24917,25163-25173,25419-25429,25675-25685,25931-25941,26187-26197,26443-26453,26699-26709,26955-26965,27211-27221,27467-27477,27723-27733,27979-27989,28235-28245,28491-28501,28747-28757,29003-29013,29259-29269,29515-29525,29771-29781,30027-30037,30283-30293,30539-30549,30795-30805,31051-31061,31307-31317,31563-31573,31819-31829,32075-32085,32331-32341,32587-32597,32843-32853,33099-33109,33355-33365,33611-33621,33867-33877,34123-34133,34379-34389,34635-34645,34891-34901,35147-35157,35403-35413,35659-35669,35915-35925,36171-36181,36427-36437,36683-36693,36939-36949,37195-37205,37451-37461,37707-37717,37963-37973,38219-38229,38475-38485,38731-38741,38987-38997,39243-39253,39499-39509,39755-39765,40011-40021,40267-40277,40523-40533,40779-40789,41035-41045,41291-41301,41547-41557,41803-41813,42059-42069,42315-42325,42571-42581,42827-42837,43083-43093,43339-43349,43595-43605,43851-43861,44107-44117,44363-44373,44619-44629,44875-44885,45131-45141,45387-45397,45643-45653,45899-45909,46155-46165,46411-46421,46667-46677,46923-46933,47179-47189,47435-47445,47691-47701,47947-47957,48203-48213,48459-48469,48715-48725,48971-48981,49227-49237,49483-49493,49739-49749,49995-50005,50251-50261,50507-50517,50763-50773,51019-51029,51275-51285,51531-51541,51787-51797,52043-52053,52299-52309,52555-52565,52811-52821,53067-53077,53323-53333,53579-53589,53835-53845,54091-54101,54347-54357,54603-54613,54859-54869,55115-55125,55371-55381,55627-55637,55883-55893,56139-56149,56395-56405,56651-56661,56907-56917,57163-57173,57419-57429,57675-57685,57931-57941,58187-58197,58443-58453,58699-58709,58955-58965,59211-59221,59467-59477,59723-59733,59979-59989,60235-60245,60491-60501,60747-60757,61003-61013,61259-61269,61515-61525,61771-61781,62027-62037,62283-62293,62539-62549,62795-62805,63051-63061,63307-63317,63563-63573,63819-63829,64075-64085,64331-64341,64587-64597,64843-64853,65099-65109,65355-65365,65611-65621,65867-65877,66123-66133,66379-66389,66635-66645,66891-66901,67147-67157,67403-67413,67659-67669,67915-67925,68171-68181,68427-68437,68683-68693,68939-68949,69195-69205,69451-69461,69707-69717,69963-69973,70219-70229,70475-70485,70731-70741,70987-70997,71243-71253,71499-71509,71755-71765,72011-72021,72267-72277,72523-72533,72779-72789,73035-73045,73291-73301,73547-73557" />
 		</parameter>
 		<!-- MergeRuns behavior when merging sample logs. -->
-		<parameter name="sample_logs_sum" type="string">
+		<parameter name="sample_logs_sum" type="string" visible="false">
 			<value val="Detector.detsum, duration, monitor.monsum" />
 		</parameter>
-		<parameter name="sample_logs_time_series" type="string">
+		<parameter name="sample_logs_time_series" type="string" visible="false">
 			<value val="sample.temperature" />
 		</parameter>
-		<parameter name="sample_logs_warn" type="string">
+		<parameter name="sample_logs_warn" type="string" visible="false">
 			<value val="sample.temperature" />
 		</parameter>
-		<parameter name="sample_logs_warn_tolerances" type="string">
+		<parameter name="sample_logs_warn_tolerances" type="string" visible="false">
 			<value val="1.0" />
 		</parameter>
-		<parameter name="sample_logs_fail" type="string">
+		<parameter name="sample_logs_fail" type="string" visible="false">
 			<value val="monitor.time_of_flight_0, monitor.time_of_flight_1, monitor.time_of_flight_2" />
 		</parameter>
-		<parameter name="sample_logs_fail_tolerances" type="string">
+		<parameter name="sample_logs_fail_tolerances" type="string" visible="false">
 			<value val="0, 0, 0" />
 		</parameter>
-		<parameter name="temperature_sample_log" type="string">
+		<parameter name="temperature_sample_log" type="string" visible="false">
 			<value val="sample.temperature" />
 		</parameter>
+		<parameter name="sample_logs_list" type="string">
+		        <value val="run_list" />
+		</parameter>
+
 
 		<!-- The detector name for the height axis used in SumOverlappingTubes -->
-		<parameter name="detector_for_height_axis" type="string">
+		<parameter name="detector_for_height_axis" type="string" visible="false">
 			<value val="tube_1" />
 		</parameter>
 
 		<!-- These parameters are used to define headers and entries for GenerateLogbook algorithm -->
-		<parameter name="logbook_default_parameters" type="string">
+		<parameter name="logbook_default_parameters" type="string" visible="false">
 		  <value val="acq_mode:/entry0/acquisition_mode:d,
 			      start_time:/entry0/start_time:s,
 			      end_time:/entry0/end_time:s,
@@ -117,7 +121,7 @@
 			      Tsamp:/entry0/sample/temperature:f,
 			      subtitle:/entry0/experiment_identifier:f" />
 		</parameter>
-		<parameter name="logbook_optional_parameters" type="string">
+		<parameter name="logbook_optional_parameters" type="string" visible="false">
 		  <value val="lambda:/entry0/wavelength:f,
 			      duration:/entry0/duration:d,
 			      FilterVal:/entry0/instrument/SapphirFilter/value:f,

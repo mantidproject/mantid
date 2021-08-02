@@ -844,6 +844,7 @@ class SANSILLReduction(PythonAlgorithm):
         self._finalize(ws, process)
 
     def _split_kinetic_frames(self, ws):
+        '''Explodes the frames of a kinetic workspace into separate workspaces'''
         n_frames = mtd[ws].blocksize()
         n_hist = mtd[ws].getNumberHistograms()
         wavelength = round(mtd[ws].getRun().getLogData('wavelength').value * 100) / 100
@@ -861,6 +862,9 @@ class SANSILLReduction(PythonAlgorithm):
         return frames
 
     def _process_kinetic_sample(self, ws):
+        '''
+        Processes a kinetic monochromatic workspace by exploding the frames into separate workspaces and reducing them individually
+        Note that this is extremely slow and needs to be deprecated in favour of the v2 of this algorithm.        '''
 
         if self.getPropertyValue('NormaliseBy') == 'Timer':
             # trick the normalise to use the second monitor which contains the durations per frame

@@ -10,15 +10,10 @@ from qtpy.QtGui import QCursor
 from qtpy.QtWidgets import QDockWidget, QMainWindow, QMenu
 from mantidqt.utils.qt import load_ui
 from matplotlib.figure import Figure
-from matplotlib.backends.qt_compat import is_pyqt5
+from mantidqt.MPLwidgets import FigureCanvas
 from .EngDiff_fitpropertybrowser import EngDiffFitPropertyBrowser
 from workbench.plotting.toolbar import ToolbarStateManager
 from Engineering.gui.engineering_diffraction.tabs.fitting.plotting.plot_toolbar import FittingPlotToolbar
-
-if is_pyqt5():
-    from matplotlib.backends.backend_qt5agg import FigureCanvas
-else:
-    from matplotlib.backends.backend_qt4agg import FigureCanvas
 
 Ui_plot, _ = load_ui(__file__, "plot_widget.ui")
 

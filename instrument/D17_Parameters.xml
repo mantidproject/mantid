@@ -10,51 +10,51 @@
 		<!-- Mapping of nexus fields:
 		- Change the name from val to name in the properties
 		 -->
-		<parameter name="channel_width" type="string">
+		<parameter name="channel_width" type="string" visible="false">
 			<value val="monitor1.time_of_flight_0" />
 		</parameter>
 		<!--  Get value from properties -->
-		<parameter name="detector_distance" type="string">
+		<parameter name="detector_distance" type="string" visible="false">
 			<value val="det.value" />
 		</parameter>
-		<parameter name="detector_centre" type="string">
+		<parameter name="detector_centre" type="string" visible="false">
 			<value val="PSD.ny" />
 		</parameter>
 		<!-- Default monitor spectrum number for monitor normalisation. -->
-		<parameter name="default-incident-monitor-spectrum" type="int">
+		<parameter name="default-incident-monitor-spectrum" type="int" visible="false">
 			<value val="257" />
 		</parameter>
 		<!-- MergeRuns behavior when merging sample logs. -->
-		<parameter name="sample_logs_sum" type="string">
+		<parameter name="sample_logs_sum" type="string" visible="false">
 			<value val="duration, monitor1.monsum, monitor2.monsum, PSD.detsum, time" />
 		</parameter>
-		<parameter name="sample_logs_time_series" type="string">
+		<parameter name="sample_logs_time_series" type="string" visible="false">
 			<value val="sample.temperature" />
 		</parameter>
-		<parameter name="sample_logs_warn" type="string">
+		<parameter name="sample_logs_warn" type="string" visible="false">
 			<value val="sample.temperature" />
 		</parameter>
-		<parameter name="sample_logs_warn_tolerances" type="string">
+		<parameter name="sample_logs_warn_tolerances" type="string" visible="false">
 			<value val="1.0" />
 		</parameter>
-		<parameter name="sample_logs_fail" type="string">
+		<parameter name="sample_logs_fail" type="string" visible="false">
 			<value val="monitor1.time_of_flight_0, monitor1.time_of_flight_1, monitor1.time_of_flight_2" />
 		</parameter>
-		<parameter name="sample_logs_fail_tolerances" type="string">
+		<parameter name="sample_logs_fail_tolerances" type="string" visible="false">
 			<value val="0, 0, 0" />
 		</parameter>
-		<parameter name="chopper_window_opening">
+		<parameter name="chopper_window_opening" visible="false">
 		<!-- Chopper opening window [degrees]-->
 			<value val="45.0" valid-to="2020-07-31T23:59:59"/>
 			<value val="20.0" valid-from="2020-08-01T00:00:00"/>
 		</parameter>
-		<parameter name="chopper_gap_unit" type="string">
+		<parameter name="chopper_gap_unit" type="string" visible="false">
 		<!-- The unit of the chopper gap -->
 			<value val="cm" valid-to="2019-08-19T23:59:59"/>
 			<value val="m" valid-from="2019-08-20T00:00:00" valid-to="2020-07-31T23:59:59"/>
 			<value val="mm" valid-from="2020-08-01T00:00:00"/>
 		</parameter>
-		<parameter name="log_list_to_save" type="string">
+		<parameter name="log_list_to_save" type="string" visible="false">
 		  <value val="facility,instrument.name,experiment_identifier,
 			      title,start_time,end_time,numor_list,
 			      processedAs,wavelength,sample_transmission_numors,L2"/>

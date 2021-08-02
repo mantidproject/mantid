@@ -26,10 +26,6 @@
 #include "MantidKernel/VectorHelper.h"
 
 #include <Poco/Path.h>
-#include <cmath>
-#include <iostream>
-#include <limits>
-#include <numeric>
 
 namespace Mantid {
 namespace DataHandling {
@@ -199,6 +195,8 @@ void LoadILLSANS::exec() {
 
 /**
  * Set member variable with the instrument name
+ * @param firstEntry: already opened first entry in nexus
+ * @param instrumentNamePath : the path inside nexus where the instrument name is written
  */
 void LoadILLSANS::setInstrumentName(const NeXus::NXEntry &firstEntry, const std::string &instrumentNamePath) {
   if (instrumentNamePath.empty()) {
@@ -220,6 +218,8 @@ void LoadILLSANS::setInstrumentName(const NeXus::NXEntry &firstEntry, const std:
 
 /**
  * Get detector panel distances from the nexus file
+ * @param firstEntry : already opened first entry in nexus
+ * @param instrumentNamePath : the path inside nexus where the instrument name is written
  * @return a structure with the positions
  */
 LoadILLSANS::DetectorPosition LoadILLSANS::getDetectorPositionD33(const NeXus::NXEntry &firstEntry,
@@ -240,6 +240,8 @@ LoadILLSANS::DetectorPosition LoadILLSANS::getDetectorPositionD33(const NeXus::N
 
 /**
  * Loads data for D11, D16 and D22
+ * @param firstEntry : already opened first entry in nexus
+ * @param instrumentNamePath : the path inside nexus where the instrument name is written
  */
 void LoadILLSANS::initWorkSpace(NeXus::NXEntry &firstEntry, const std::string &instrumentPath) {
   g_log.debug("Fetching data...");
@@ -274,8 +276,8 @@ void LoadILLSANS::initWorkSpace(NeXus::NXEntry &firstEntry, const std::string &i
 
 /**
  * @brief LoadILLSANS::initWorkSpaceD11B Load D11B data
- * @param firstEntry
- * @param instrumentPath
+ * @param firstEntry : already opened first entry in nexus
+ * @param instrumentNamePath : the path inside nexus where the instrument name is written
  */
 void LoadILLSANS::initWorkSpaceD11B(NeXus::NXEntry &firstEntry, const std::string &instrumentPath) {
   g_log.debug("Fetching data...");
@@ -336,8 +338,8 @@ void LoadILLSANS::initWorkSpaceD11B(NeXus::NXEntry &firstEntry, const std::strin
 
 /**
  * @brief LoadILLSANS::initWorkSpaceD22B Load D22B data
- * @param firstEntry
- * @param instrumentPath
+ * @param firstEntry : already opened first entry in nexus
+ * @param instrumentNamePath : the path inside nexus where the instrument name is written
  */
 void LoadILLSANS::initWorkSpaceD22B(NeXus::NXEntry &firstEntry, const std::string &instrumentPath) {
   g_log.debug("Fetching data...");
@@ -370,6 +372,8 @@ void LoadILLSANS::initWorkSpaceD22B(NeXus::NXEntry &firstEntry, const std::strin
 
 /**
  * Loads data for D33
+ * @param firstEntry : already opened first entry in nexus
+ * @param instrumentNamePath : the path inside nexus where the instrument name is written
  */
 void LoadILLSANS::initWorkSpaceD33(NeXus::NXEntry &firstEntry, const std::string &instrumentPath) {
 
@@ -473,6 +477,13 @@ void LoadILLSANS::initWorkSpaceD33(NeXus::NXEntry &firstEntry, const std::string
   nextIndex = loadDataFromMonitors(firstEntry, nextIndex);
 }
 
+/**
+ * @brief Loads data from all the monitors
+ * @param firstEntry : already opened first entry in nexus
+ * @param firstIndex : the workspace index to load the first monitor to
+ * @param type : used to discrimante between TOF and Kinetic
+ * @return the next ws index after all the monitors
+ */
 size_t LoadILLSANS::loadDataFromMonitors(NeXus::NXEntry &firstEntry, size_t firstIndex, const MultichannelType type) {
 
   // let's find the monitors; should be monitor1 and monitor2
@@ -520,11 +531,19 @@ size_t LoadILLSANS::loadDataFromMonitors(NeXus::NXEntry &firstEntry, size_t firs
   return firstIndex;
 }
 
+/**
+ * @brief Loads data from tubes
+ * @param data : a reference to already loaded nexus data block
+ * @param timeBinning : the x-axis binning
+ * @param firstIndex : the workspace index to start loading to
+ * @param type : used to discrimante between TOF and Kinetic
+ * @return the next ws index after all the tubes in the given detector bank
+ */
 size_t LoadILLSANS::loadDataFromTubes(NeXus::NXInt &data, const std::vector<double> &timeBinning, size_t firstIndex = 0,
                                       const MultichannelType type) {
   int numberOfTubes;
   int numberOfChannels;
-  int numberOfPixelsPerTube = data.dim1();
+  const int numberOfPixelsPerTube = data.dim1();
 
   if (m_isD16Omega) {
     // D16 with omega scan case
@@ -576,9 +595,9 @@ size_t LoadILLSANS::loadDataFromTubes(NeXus::NXInt &data, const std::vector<doub
  */
 void LoadILLSANS::createEmptyWorkspace(const size_t numberOfHistograms, const size_t numberOfChannels,
                                        const MultichannelType type) {
-  m_localWorkspace = WorkspaceFactory::Instance().create(
-      "Workspace2D", numberOfHistograms, numberOfChannels + ((type == MultichannelType::TOF && !m_isD16Omega) ? 1 : 0),
-      numberOfChannels);
+  const size_t numberOfElementsInX = numberOfChannels + ((type == MultichannelType::TOF && !m_isD16Omega) ? 1 : 0);
+  m_localWorkspace =
+      WorkspaceFactory::Instance().create("Workspace2D", numberOfHistograms, numberOfElementsInX, numberOfChannels);
   if (type == MultichannelType::TOF) {
     m_localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
   }

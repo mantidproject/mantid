@@ -8,6 +8,7 @@
 
 #include "DllOption.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/IFunction_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/FitDomain.h"
 #include "MantidQtWidgets/Common/FittingGlobals.h"
@@ -39,10 +40,12 @@ public:
 
   void subscribePresenter(IFitScriptGeneratorPresenter *presenter) override;
 
-  void removeWorkspaceDomain(std::string const &workspaceName, WorkspaceIndex workspaceIndex) override;
+  void removeDomain(FitDomainIndex domainIndex) override;
   void addWorkspaceDomain(std::string const &workspaceName, WorkspaceIndex workspaceIndex, double startX,
                           double endX) override;
   [[nodiscard]] bool hasWorkspaceDomain(std::string const &workspaceName, WorkspaceIndex workspaceIndex) const override;
+
+  void renameWorkspace(std::string const &workspaceName, std::string const &newName) override;
 
   [[nodiscard]] bool updateStartX(std::string const &workspaceName, WorkspaceIndex workspaceIndex,
                                   double startX) override;
@@ -91,6 +94,8 @@ public:
     return m_globalParameters;
   }
 
+  void setOutputBaseName(std::string const &outputBaseName) override;
+
   void setFittingMode(FittingMode fittingMode) override;
   [[nodiscard]] inline FittingMode getFittingMode() const noexcept override { return m_fittingMode; }
 
@@ -116,8 +121,9 @@ public:
 
   std::tuple<bool, std::string> isValid() const override;
 
-  std::string generatePythonFitScript(std::tuple<std::string, std::string, std::string, std::string> const &fitOptions,
-                                      std::string const &filepath = "") override;
+  std::string generatePythonFitScript(
+      std::tuple<std::string, std::string, std::string, std::string, std::string, bool> const &fitOptions,
+      std::string const &filepath = "") override;
 
 private:
   [[nodiscard]] FitDomainIndex findDomainIndex(std::string const &workspaceName, WorkspaceIndex workspaceIndex) const;
@@ -172,9 +178,17 @@ private:
 
   template <typename T, typename Function> std::vector<T> transformDomains(Function const &func) const;
 
+  [[nodiscard]] std::string getFittingType() const;
   [[nodiscard]] Mantid::API::IFunction_sptr getFunction() const;
+  [[nodiscard]] Mantid::API::IFunction_sptr getMultiDomainFunction() const;
+
+  void addGlobalParameterTies(Mantid::API::MultiDomainFunction_sptr &function) const;
+  std::string constructGlobalParameterTie(GlobalParameter const &globalParameter) const;
+
+  void addGlobalTies(Mantid::API::MultiDomainFunction_sptr &function) const;
 
   IFitScriptGeneratorPresenter *m_presenter;
+  std::string m_outputBaseName;
   std::vector<std::unique_ptr<FitDomain>> m_fitDomains;
   // A vector of global parameters. E.g. f0.A0
   std::vector<GlobalParameter> m_globalParameters;

@@ -335,9 +335,13 @@ void SaveAscii2::writeSpectrum(const int &wsIndex, std::ofstream &file) {
 
     file << m_sep;
     file << m_ws->e(wsIndex)[bin];
-    if (m_writeDX && hasDx) {
-      file << m_sep;
-      file << pointDeltas[bin];
+    if (m_writeDX) {
+      if (hasDx) {
+        file << m_sep;
+        file << pointDeltas[bin];
+      } else {
+        g_log.information("SaveAscii2: WriteXError is requested but there are no Dx data in the workspace");
+      }
     }
     file << '\n';
   }

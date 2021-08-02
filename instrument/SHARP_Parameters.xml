@@ -18,10 +18,10 @@
 		<!-- formula for Detector efficiency calculation. Algorithm: DetectorEfficiencyCorUser
 			See http://muparser.sourceforge.net/mup_features.html#idDef2 for available
 			operators -->
-		<parameter name="formula_eff" type="string">
+		<parameter name="formula_eff" type="string" visible="false">
 			<value val="0.9653 * exp(-0.05202/sqrt(e)) * (1 - exp(-10.983/sqrt(e)))" />
 		</parameter>
-		<parameter name="components-for-backgrounds" type="string">
+		<parameter name="components-for-backgrounds" type="string" visible="false">
 			<value val="tube_1, tube_2, tube_3, tube_4, tube_5, tube_6, tube_7, tube_8, tube_9, tube_10, tube_11, tube_12, tube_13, tube_14, tube_15, tube_16, tube_17, tube_18, tube_19, tube_20, tube_21, tube_22, tube_23, tube_24, tube_25, tube_26, tube_27, tube_28, tube_29, tube_30, tube_31, tube_32, tube_33, tube_34, tube_35, tube_36, tube_37, tube_38, tube_39, tube_40, tube_41, tube_42, tube_43, tube_44, tube_45, tube_46, tube_47, tube_48, tube_49, tube_50, tube_51, tube_52, tube_53, tube_54, tube_55, tube_56, tube_57, tube_58, tube_59, tube_60, tube_61, tube_62, tube_63, tube_64, tube_65, tube_66, tube_67, tube_68, tube_69, tube_70, tube_71, tube_72, tube_73, tube_74, tube_75, tube_76, tube_77, tube_78, tube_79, tube_80, tube_81, tube_82, tube_83, tube_84, tube_85, tube_86, tube_87, tube_88, tube_89, tube_90, tube_91, tube_92, tube_93, tube_94, tube_95, tube_96, tube_97, tube_98, tube_99, tube_100, tube_101, tube_102, tube_103, tube_104, tube_105, tube_106, tube_107, tube_108, tube_109, tube_110, tube_111, tube_112, tube_113, tube_114, tube_115, tube_116, tube_117, tube_118, tube_119, tube_120, tube_121, tube_122, tube_123, tube_124, tube_125, tube_126, tube_127, tube_128, tube_129, tube_130, tube_131, tube_132, tube_133, tube_134, tube_135, tube_136, tube_137, tube_138, tube_139, tube_140, tube_141, tube_142, tube_143, tube_144, tube_145, tube_146, tube_147, tube_148, tube_149, tube_150, tube_151, tube_152, tube_153, tube_154, tube_155, tube_156, tube_157, tube_158, tube_159, tube_160, tube_161, tube_162, tube_163, tube_164, tube_165, tube_166, tube_167, tube_168, tube_169, tube_170, tube_171, tube_172, tube_173, tube_174, tube_175, tube_176, tube_177, tube_178, tube_179, tube_180, tube_181, tube_182, tube_183, tube_184, tube_185, tube_186, tube_187, tube_188, tube_189, tube_190, tube_191, tube_192, tube_193, tube_194, tube_195, tube_196, tube_197, tube_198, tube_199, tube_200, tube_201, tube_202, tube_203, tube_204, tube_205, tube_206, tube_207, tube_208, tube_209, tube_210, tube_211, tube_212, tube_213, tube_214, tube_215, tube_216, tube_217, tube_218, tube_219, tube_220, tube_221, tube_222, tube_223, tube_224, tube_225, tube_226, tube_227, tube_228, tube_229, tube_230, tube_231, tube_232, tube_233, tube_234, tube_235, tube_236, tube_237, tube_238, tube_239, tube_240" />
 		</parameter>
 		<!-- Default monitor spectrum number for monitor normalisation. -->
@@ -32,55 +32,58 @@
 		<parameter name="scaling_after_monitor_normalisation">
 			<value val="100000" />
 		</parameter>
-		<parameter name="enable_flat_background_subtraction" type="bool">
+		<parameter name="enable_flat_background_subtraction" type="bool" visible="false">
 			<value val="false" />
 		</parameter>
-		<parameter name="enable_background_diagnostics" type="bool">
+		<parameter name="enable_background_diagnostics" type="bool" visible="false">
 			<value val="false" />
 		</parameter>
-		<parameter name="enable_elastic_peak_diagnostics" type="bool">
+		<parameter name="enable_elastic_peak_diagnostics" type="bool" visible="false">
 			<value val="false" />
 		</parameter>
-		<parameter name="beam_stop_diagnostics_spectra" type="string">
+		<parameter name="beam_stop_diagnostics_spectra" type="string" visible="false">
 			<value val=""/>
 		</parameter>
-		<parameter name="enable_incident_energy_calibration" type="bool">
+		<parameter name="enable_incident_energy_calibration" type="bool" visible="false">
 			<value val="false" />
 		</parameter>
-		<parameter name="enable_elastic_peak_fitting" type="bool">
+		<parameter name="enable_elastic_peak_fitting" type="bool" visible="false">
 			<value val="false" />
 		</parameter>
-		<parameter name="enable_elastic_channel_fitting" type="bool">
+		<parameter name="enable_elastic_channel_fitting" type="bool" visible="false">
 			<value val="true" />
 		</parameter>
-		<parameter name="Ei_calibration_detectors" type="string">
+		<parameter name="Ei_calibration_detectors" type="string" visible="false">
 			<value val="121-136,377-392,633-648,889-904,1145-1160,1401-1416,1657-1672,1913-1928,2169-2184,2425-2440,2681-2696,2937-2952,3193-3208,3449-3464,3705-3720,3961-3976,4217-4232,4473-4488,4729-4744,4985-5000,5241-5256,5497-5512,5753-5768,6009-6024,6265-6280,6521-6536,6777-6792,7033-7048,7289-7304,7545-7560,7801-7816,8057-8072,8313-8328,8569-8584,8825-8840,9081-9096,9337-9352,9593-9608,9849-9864,10105-10120,10361-10376,10617-10632,10873-10888,11129-11144,11385-11400,11641-11656,11897-11912,12153-12168,12409-12424,12665-12680,12921-12936,13177-13192,13433-13448,13689-13704,13945-13960,14201-14216,14457-14472,14713-14728,14969-14984,15225-15240,15481-15496,15737-15752,15993-16008,16249-16264,16505-16520,16761-16776,17017-17032,17273-17288,17529-17544,17785-17800,18041-18056,18297-18312,18553-18568,18809-18824,19065-19080,19321-19336,19577-19592,19833-19848,20089-20104,20345-20360,20601-20616,20857-20872,21113-21128,21369-21384,21625-21640,21881-21896,22137-22152,22393-22408,22649-22664,22905-22920,23161-23176,23417-23432,23673-23688,23929-23944,24185-24200,24441-24456,24697-24712,24953-24968,25209-25224,25465-25480,25721-25736,25977-25992,26233-26248,26489-26504,26745-26760,27001-27016,27257-27272,27513-27528,27769-27784,28025-28040,28281-28296,28537-28552,28793-28808,29049-29064,29305-29320,29561-29576,29817-29832,30073-30088,30329-30344,30585-30600,30841-30856,31097-31112,31353-31368,31609-31624,31865-31880,32121-32136,32377-32392,32633-32648,32889-32904,33145-33160,33401-33416,33657-33672,33913-33928,34169-34184,34425-34440,34681-34696,34937-34952,35193-35208,35449-35464,35705-35720,35961-35976,36217-36232,36473-36488,36729-36744,36985-37000,37241-37256,37497-37512,37753-37768,38009-38024,38265-38280,38521-38536,38777-38792,39033-39048,39289-39304,39545-39560,39801-39816,40057-40072,40313-40328,40569-40584,40825-40840,41081-41096,41337-41352,41593-41608,41849-41864,42105-42120,42361-42376,42617-42632,42873-42888,43129-43144,43385-43400,43641-43656,43897-43912,44153-44168,44409-44424,44665-44680,44921-44936,45177-45192,45433-45448,45689-45704,45945-45960,46201-46216,46457-46472,46713-46728,46969-46984,47225-47240,47481-47496,47737-47752,47993-48008,48249-48264,48505-48520,48761-48776,49017-49032,49273-49288,49529-49544,49785-49800,50041-50056,50297-50312,50553-50568,50809-50824,51065-51080,51321-51336,51577-51592,51833-51848,52089-52104,52345-52360,52601-52616,52857-52872,53113-53128,53369-53384,53625-53640,53881-53896,54137-54152,54393-54408,54649-54664,54905-54920,55161-55176,55417-55432,55673-55688,55929-55944,56185-56200,56441-56456,56697-56712,56953-56968,57209-57224,57465-57480,57721-57736,57977-57992,58233-58248,58489-58504,58745-58760,59001-59016,59257-59272,59513-59528,59769-59784,60025-60040,60281-60296,60537-60552,60793-60808,61049-61064,61305-61320" />
 		</parameter>
 		<!-- MergeRuns behavior when merging sample logs. -->
-		<parameter name="sample_logs_sum" type="string">
+		<parameter name="sample_logs_sum" type="string" visible="false">
 			<value val="Detector.detsum, duration, monitor.monsum" />
 		</parameter>
-		<parameter name="sample_logs_time_series" type="string">
+		<parameter name="sample_logs_time_series" type="string" visible="false">
 			<value val="sample.temperature" />
 		</parameter>
-		<parameter name="sample_logs_warn" type="string">
+		<parameter name="sample_logs_warn" type="string" visible="false">
 			<value val="sample.temperature" />
 		</parameter>
-		<parameter name="sample_logs_warn_tolerances" type="string">
+		<parameter name="sample_logs_warn_tolerances" type="string" visible="false">
 			<value val="1.0" />
 		</parameter>
-		<parameter name="sample_logs_fail" type="string">
+		<parameter name="sample_logs_fail" type="string" visible="false">
 			<value val="monitor.time_of_flight_0, monitor.time_of_flight_1, monitor.time_of_flight_2" />
 		</parameter>
-		<parameter name="sample_logs_fail_tolerances" type="string">
+		<parameter name="sample_logs_fail_tolerances" type="string" visible="false">
 			<value val="0, 0, 0" />
 		</parameter>
-		<parameter name="temperature_sample_log" type="string">
+		<parameter name="temperature_sample_log" type="string" visible="false">
 			<value val="sample.temperature" />
+		</parameter>
+		<parameter name="sample_logs_list" type="string">
+		        <value val="run_list" />
 		</parameter>
 
 		<!-- The detector name for the height axis used in SumOverlappingTubes -->
-		<parameter name="detector_for_height_axis" type="string">
+		<parameter name="detector_for_height_axis" type="string" visible="false">
 			<value val="tube_1" />
 		</parameter>
 	</component-link>
