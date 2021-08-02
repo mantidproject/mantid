@@ -33,7 +33,7 @@ class CorrectionsContext:
 
     # The background corrections mode can be 'None', 'Auto' or 'Manual'
     background_corrections_mode: str = BACKGROUND_MODE_NONE
-    selected_function: str = FLAT_BACKGROUND
+    selected_function: str = FLAT_BACKGROUND_AND_EXP_DECAY
     selected_group: str = GROUPS_ALL
     show_all_runs: bool = False
 

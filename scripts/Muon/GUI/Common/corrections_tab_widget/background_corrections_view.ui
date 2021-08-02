@@ -83,12 +83,12 @@ color: grey; }
         </property>
         <item>
          <property name="text">
-          <string>Flat Background</string>
+          <string>Flat Background + Exp Decay</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>Flat Background + Exp Decay</string>
+          <string>Flat Background</string>
          </property>
         </item>
        </widget>

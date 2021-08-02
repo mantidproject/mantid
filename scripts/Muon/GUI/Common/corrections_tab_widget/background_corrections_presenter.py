@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from Muon.GUI.Common.contexts.corrections_context import BACKGROUND_MODE_NONE, FLAT_BACKGROUND
+from Muon.GUI.Common.contexts.corrections_context import BACKGROUND_MODE_NONE, FLAT_BACKGROUND_AND_EXP_DECAY
 from Muon.GUI.Common.corrections_tab_widget.background_corrections_model import BackgroundCorrectionsModel
 from Muon.GUI.Common.corrections_tab_widget.background_corrections_view import BackgroundCorrectionsView
 from Muon.GUI.Common.utilities.workspace_data_utils import check_start_x_is_valid, check_end_x_is_valid
@@ -36,9 +36,9 @@ class BackgroundCorrectionsPresenter:
     def handle_instrument_changed(self) -> None:
         """User changes the selected instrument."""
         self.model.set_background_correction_mode(BACKGROUND_MODE_NONE)
-        self.model.set_selected_function(FLAT_BACKGROUND)
+        self.model.set_selected_function(FLAT_BACKGROUND_AND_EXP_DECAY)
         self.view.background_correction_mode = BACKGROUND_MODE_NONE
-        self.view.selected_function = FLAT_BACKGROUND
+        self.view.selected_function = FLAT_BACKGROUND_AND_EXP_DECAY
         self.model.clear_background_corrections_data()
 
     def handle_pre_process_and_counts_calculated(self) -> None:
