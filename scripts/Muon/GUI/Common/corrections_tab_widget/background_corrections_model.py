@@ -7,16 +7,19 @@
 from mantid.py36compat import dataclass
 
 from mantid.api import AlgorithmManager, CompositeFunction, FunctionFactory, IFunction, Workspace
+from mantid.kernel import PhysicalConstants
 from Muon.GUI.Common.contexts.corrections_context import (BACKGROUND_MODE_NONE, FLAT_BACKGROUND,
                                                           FLAT_BACKGROUND_AND_EXP_DECAY, RUNS_ALL, GROUPS_ALL)
 from Muon.GUI.Common.contexts.muon_context import MuonContext
 from Muon.GUI.Common.corrections_tab_widget.corrections_model import CorrectionsModel
 from Muon.GUI.Common.utilities.algorithm_utils import (run_Fit, run_clone_workspace, run_create_single_valued_workspace,
                                                        run_minus)
+from Muon.GUI.Common.utilities.run_string_utils import run_string_to_list
 from Muon.GUI.Common.utilities.workspace_data_utils import x_limits_of_workspace
 
 BACKGROUND_PARAM = "A0"
 DEFAULT_A_VALUE = 1e6
+DEFAULT_LAMBDA_VALUE = 1.0e-6 / PhysicalConstants.MuonLifetime
 MAX_ACCEPTABLE_CHI_SQUARED = 10.0
 TEMPORARY_BACKGROUND_WORKSPACE_NAME = "__temp_background_workspace"
 
@@ -51,6 +54,8 @@ class BackgroundCorrectionData:
         else:
             self.exp_decay = FunctionFactory.createFunction("ExpDecayMuon")
             self.exp_decay.setParameter("A", DEFAULT_A_VALUE)
+            self.exp_decay.setParameter("Lambda", DEFAULT_LAMBDA_VALUE)
+            self.exp_decay.fixParameter("Lambda")
 
     def setup_uncorrected_workspace(self, workspace_name: str) -> None:
         """Clones the Counts workspace into a hidden workspace in the ADS."""
@@ -320,8 +325,23 @@ class BackgroundCorrectionsModel:
 
     def default_x_range(self, run: str, group: str, rebin: bool) -> tuple:
         """Returns the x range to use by default for the background corrections. It is the second half of the data."""
+        run_list = run_string_to_list(run)
+        last_good_data = self._context.last_good_data(run_list)
+
+        if last_good_data != 0.0:
+            return self._get_x_range_from(self._context.first_good_data(run_list), last_good_data)
+        else:
+            return self._get_x_range_from_counts_workspace(run, group, rebin)
+
+    @staticmethod
+    def _get_x_range_from(first_good_data: float, last_good_data: float) -> tuple:
+        """Get the default start and end X from the first and last good data, and the time zero."""
+        return (last_good_data - first_good_data) / 2.0 + first_good_data, last_good_data
+
+    def _get_x_range_from_counts_workspace(self, run: str, group: str, rebin: bool) -> tuple:
+        """Get the default start and end X from the counts workspace corresponding to the provided run and group."""
         x_lower, x_upper = self.x_limits_of_workspace(run, group, rebin)
-        x_mid = round((x_upper - x_lower)/2.0)
+        x_mid = (x_upper - x_lower) / 2.0 + x_lower
         return x_mid, x_upper
 
     def x_limits_of_workspace(self, run: str, group: str, rebin: bool) -> tuple:
