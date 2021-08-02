@@ -13,7 +13,9 @@ New
 ---
 
 - :ref:`SANSILLIntegration <algm-SANSILLIntegration>` has new resolution calculation option alternative to Mildner-Carpenter based on fitting horizontal size of direct beam. The fitting is handled in :ref:`SANSILLReduction <algm-SANSILLReduction>` while processing beam.
-
+- :ref:`LoadILLSANS <algm-LoadILLSANS>` is extended to support loading monochromatic kinetic files from the new D11.
+- :ref:`SANSILLReduction <algm-SANSILLReduction>` is extended to support processing of monochromatic kinetic runs.
+- A series of improvements have been introduced to :ref:`SANSILLAutoProcess <algm-SANSILLAutoProcess>` such as the use of the new :ref:`Stitch <algm-Stitch>`, allowing for semi-automatic q binning, supporting attenuator 2 on D22, as well as improved naming and grouping for the output workspaces.
 
 Bugfixes
 --------
