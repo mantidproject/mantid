@@ -7,5 +7,8 @@
 #pragma once
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
-class IPreviewPresenter {};
+class IPreviewPresenter {
+public:
+  virtual ~IPreviewPresenter() = default;
+};
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

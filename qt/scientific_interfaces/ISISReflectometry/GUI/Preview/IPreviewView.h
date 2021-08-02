@@ -6,8 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Common/DllConfig.h"
-
 #include <string>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
@@ -17,8 +15,9 @@ public:
   virtual void notifyLoadWorkspaceRequested() = 0;
 };
 
-class MANTIDQT_ISISREFLECTOMETRY_DLL IPreviewView {
+class IPreviewView {
 public:
+  virtual ~IPreviewView() = default;
   virtual void subscribe(PreviewViewSubscriber *notifyee) noexcept = 0;
   virtual std::string getWorkspaceName() const = 0;
 };
