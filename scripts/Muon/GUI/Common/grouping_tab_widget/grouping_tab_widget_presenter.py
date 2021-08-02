@@ -252,6 +252,7 @@ class GroupingTabPresenter(object):
         self.diff_table.update_view_from_model()
         self.pairing_table_widget.update_view_from_model()
         self.update_description_text_to_empty()
+        self.groupingNotifier.notify_subscribers()
 
     def handle_new_data_loaded(self):
         self.period_info_widget.clear()
