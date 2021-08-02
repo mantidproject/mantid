@@ -9,10 +9,10 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAlgorithms/CompareWorkspaces.h"
 #include "MantidAlgorithms/MultipleScatteringCorrection.h"
 #include "MantidDataHandling/SetSample.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -21,6 +21,7 @@
 #include "MantidKernel/UnitFactory.h"
 
 using Mantid::Algorithms::MultipleScatteringCorrection;
+using Mantid::API::AnalysisDataService;
 using Mantid::Kernel::Logger;
 
 namespace {
@@ -32,10 +33,7 @@ class MultipleScatteringCorrectionTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MultipleScatteringCorrectionTest *createSuite() {
-    Mantid::API::FrameworkManager::Instance();
-    return new MultipleScatteringCorrectionTest();
-  }
+  static MultipleScatteringCorrectionTest *createSuite() { return new MultipleScatteringCorrectionTest(); }
   static void destroySuite(MultipleScatteringCorrectionTest *suite) { delete suite; }
 
   void test_single() {
@@ -66,10 +64,10 @@ public:
     unitsAlg->setPropertyValue("OutputWorkspace", "ws_wavelength");
     unitsAlg->execute();
     //
-    auto carrAlg = Mantid::API::AlgorithmManager::Instance().create("CarpenterSampleCorrection");
+    auto carrAlg = Mantid::API::AlgorithmManager::Instance().create("CalculateCarpenterSampleCorrection");
     carrAlg->initialize();
     carrAlg->setPropertyValue("InputWorkspace", "ws_wavelength");
-    carrAlg->setPropertyValue("OutputWorkspace", "rst_carpenter");
+    carrAlg->setPropertyValue("OutputWorkspaceBaseName", "rst_carpenter");
     carrAlg->execute();
 
     // correct using multiple scattering correction
@@ -82,18 +80,21 @@ public:
     TS_ASSERT(msAlg.isExecuted());
 
     // Compare the results
-    // auto checker = Mantid::API::AlgorithmManager::Instance().create("CompareWorkspaces");
-    // checker->initialize();
-    // checker->setPropertyValue("Workspace1", "rst_mayer");
-    // checker->setPropertyValue("Workspace2", "rst_ms");
-    // checker->setPropertyValue("Tolerance", "1e-4");
-    // checker->setProperty("CheckInstrument", false);
-    // checker->setProperty("CheckMasking", false);
-    // checker->execute();
+    // NOTE:
+    // CompareWorkspace does not work in the C++ unit test environment.
+    // We are switching to test the Y value directly
+    g_log.notice() << "Comparing the results\n";
+    Mantid::API::MatrixWorkspace_sptr rst_mayer;
+    rst_mayer = AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>("rst_mayer");
+    Mantid::API::MatrixWorkspace_sptr rst_carpenter;
+    rst_carpenter = AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>("rst_carpenter_ms");
+    Mantid::API::MatrixWorkspace_sptr rst_ms;
+    rst_ms = AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>("rst_ms_sampleOnly");
 
-    // std::string msg = checker->getProperty("Messages");
-
-    // g_log.notice() << msg << '\n';
+    for (int i = 0; i < 10; ++i) {
+      g_log.notice() << rst_mayer->readY(1)[i] << ", " << rst_carpenter->readY(1)[i] << ", " << rst_ms->readY(1)[i]
+                     << "\n";
+    }
   }
 
 private:

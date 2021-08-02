@@ -64,6 +64,8 @@ private:
   double m_sampleLinearCoefTotScatt; ///< The total scattering cross-section in
                                      ///< 1/m for the sample
   int64_t m_xStep;                   ///< The step in bin number between adjacent points for linear interpolation
+
+  static constexpr double RAD2DEG = 180.0 / M_PI; // save some flops??
 };
 
 } // namespace Algorithms

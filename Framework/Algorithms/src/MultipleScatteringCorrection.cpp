@@ -285,8 +285,8 @@ void MultipleScatteringCorrection::calculateL2Ds(const MultipleScatteringCorrect
   if (detector.nDets() > 1) {
     // We need to make sure this is right for grouped detectors - should use
     // average theta & phi
-    detectorPos.spherical(detectorPos.norm(), detector.getTwoTheta(V3D(), V3D(0, 0, 1)) * 180.0 / M_PI,
-                          detector.getPhi() * 180.0 / M_PI);
+    detectorPos.spherical(detectorPos.norm(), detector.getTwoTheta(V3D(), V3D(0, 0, 1)) * RAD2DEG,
+                          detector.getPhi() * RAD2DEG);
   }
 
   // calculate the distance between the detector and the sample
