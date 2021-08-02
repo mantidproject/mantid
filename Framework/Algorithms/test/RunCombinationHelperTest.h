@@ -106,7 +106,7 @@ public:
   void testIncompatibleDataType() {
     MatrixWorkspace_sptr ws = create2DWorkspaceWithFullInstrument(2, 3, true, false, false, "test");
     setUnits(ws);
-    TS_ASSERT_EQUALS(m_testee.checkCompatibility(ws), "different distribution or histogram type; ");
+    TS_ASSERT_EQUALS(m_testee.checkCompatibility(ws), "different data type (Histogram Data vs Point Data); ");
   }
 
   void testIncompatibleXUnits() {

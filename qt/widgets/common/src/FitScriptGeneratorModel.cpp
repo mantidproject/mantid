@@ -90,7 +90,8 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 FitScriptGeneratorModel::FitScriptGeneratorModel()
-    : m_presenter(), m_fitDomains(), m_globalParameters(), m_globalTies(), m_fittingMode(FittingMode::SEQUENTIAL) {}
+    : m_presenter(), m_outputBaseName("Output_Fit"), m_fitDomains(), m_globalParameters(), m_globalTies(),
+      m_fittingMode(FittingMode::SEQUENTIAL) {}
 
 FitScriptGeneratorModel::~FitScriptGeneratorModel() {
   m_fitDomains.clear();
@@ -479,6 +480,10 @@ void FitScriptGeneratorModel::setGlobalParameters(std::vector<std::string> const
   }
 }
 
+void FitScriptGeneratorModel::setOutputBaseName(std::string const &outputBaseName) {
+  m_outputBaseName = outputBaseName;
+}
+
 void FitScriptGeneratorModel::setFittingMode(FittingMode fittingMode) {
   if (fittingMode == FittingMode::SEQUENTIAL_AND_SIMULTANEOUS)
     throw std::invalid_argument("Fitting mode must be SEQUENTIAL or SIMULTANEOUS.");
@@ -622,6 +627,9 @@ std::tuple<bool, std::string> FitScriptGeneratorModel::isValid() const {
   else if (!checkFunctionExistsInAllDomains())
     message = "A function must exist in ALL domains to generate a python script.";
 
+  if (m_outputBaseName.empty())
+    message = "The Output Base Name must not be empty, please provide an Output Base Name.";
+
   bool valid(message.empty());
   if (valid)
     message = generatePermissibleWarnings();
@@ -639,7 +647,8 @@ std::string FitScriptGeneratorModel::generatePermissibleWarnings() const {
 }
 
 std::string FitScriptGeneratorModel::generatePythonFitScript(
-    std::tuple<std::string, std::string, std::string, std::string> const &fitOptions, std::string const &filepath) {
+    std::tuple<std::string, std::string, std::string, std::string, std::string, bool> const &fitOptions,
+    std::string const &filepath) {
   auto generateScript = AlgorithmManager::Instance().create("GeneratePythonFitScript");
   generateScript->initialize();
   generateScript->setProperty("InputWorkspaces", getInputWorkspaces());
@@ -650,11 +659,13 @@ std::string FitScriptGeneratorModel::generatePythonFitScript(
   generateScript->setProperty("FittingType", getFittingType());
   generateScript->setProperty("Function", getFunction());
 
-  auto const [maxIterations, minimizer, costFunction, evaluationType] = fitOptions;
+  auto const [maxIterations, minimizer, costFunction, evaluationType, outputBaseName, plotOutput] = fitOptions;
   generateScript->setProperty("MaxIterations", maxIterations);
   generateScript->setProperty("Minimizer", minimizer);
   generateScript->setProperty("CostFunction", costFunction);
   generateScript->setProperty("EvaluationType", evaluationType);
+  generateScript->setProperty("OutputBaseName", outputBaseName);
+  generateScript->setProperty("PlotOutput", plotOutput);
 
   generateScript->setProperty("Filepath", filepath);
   generateScript->execute();

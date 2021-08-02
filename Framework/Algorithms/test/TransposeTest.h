@@ -15,6 +15,8 @@
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidDataObjects/RebinnedOutput.h"
 
+#include <boost/math/special_functions/fpclassify.hpp>
+
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;

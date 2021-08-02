@@ -15,6 +15,7 @@ New
 - :ref:`SANSILLIntegration <algm-SANSILLIntegration>` has new resolution calculation option alternative to Mildner-Carpenter based on fitting horizontal size of direct beam. The fitting is handled in :ref:`SANSILLReduction <algm-SANSILLReduction>` while processing beam.
 - ISIS SANS GUI will automatically toggle between Can SAS and NXS Can SAS when switching between 1D and 2D reductions.
   If you have toggled any save options it will not update the selected methods until the interface is restarted to avoid interfering with the user's save selection.
+- :ref:`Q1DWeighted <algm-Q1DWeighted>` now supports kinetic data from SANS, with multiple samples instead of time bins.
 
 Bugfixes
 --------
@@ -29,6 +30,6 @@ Improvements
 - :ref:The ANSTO Bilby loader `LoadBBY <algm-LoadBBY>` logs the occurence of invalid events detected in the file as a warning.
 - The ISIS SANS threading has been switched to use Python native threading. This provides users with much clearer error messages
   if something goes wrong, and improves tool compatibility for future development.
-
+- :ref:`DeadTimeCorrection <algm-DeadTimeCorrection>` now does not integrate TOF axis if the unit is `Empty`, allowing to correct multi-frame monochromatic SANS data.
 
 :ref:`Release 6.2.0 <v6.2.0>`

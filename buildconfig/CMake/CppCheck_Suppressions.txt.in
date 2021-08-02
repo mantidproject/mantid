@@ -33,7 +33,7 @@ syntaxError:${CMAKE_SOURCE_DIR}/Framework/API/src/MatrixWorkspace.cpp
 //passedByValue
 
 // Cppcheck struggles with some inheritance chains, some of these might be true though
-//unusedPrivateFunction
+unusedPrivateFunction
 
 // Nice to have, not need to have at the moment
 //useInitializationList
@@ -51,6 +51,13 @@ redundantAssignment:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/isisr
 
 // Ref binding means Cppcheck can't see these are used
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/MaskBinsIf.cpp
+
+// the mru-list is intentionally not altered
+operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:309
+// false positives from checking a second time using a mutex for multi-threading
+identicalConditionAfterEarlyExit:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:950
+identicalConditionAfterEarlyExit:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:1016
+identicalConditionAfterEarlyExit:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:1046
 
 // --------- Missing copy assignment / constructors -------------------
 // We don't want more creeping in so just mark these one by one

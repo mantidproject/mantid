@@ -26,7 +26,7 @@ namespace Kernel {
  * Direction::InOut (Input & Output) property
  * @throws std::invalid_argument if the name is empty
  */
-Property::Property(std::string name, const std::type_info &type, const unsigned int direction)
+Property::Property(std::string name, const std::type_info &type, const unsigned int &direction)
     : m_name(std::move(name)), m_documentation(""), m_typeinfo(&type), m_direction(direction), m_units(""), m_group(""),
       m_remember(true), m_autotrim(true) {
   if (m_name.empty()) {

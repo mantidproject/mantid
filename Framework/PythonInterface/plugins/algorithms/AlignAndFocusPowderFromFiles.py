@@ -25,7 +25,9 @@ PROPS_FOR_ALIGN = [CAL_FILE, GROUP_FILE,
                    MASK_WKSP, "MaskBinTable",
                    "Params", "ResampleX", "Dspacing",
                    "PreserveEvents",
-                   "RemovePromptPulseWidth", "CompressTolerance", "CompressWallClockTolerance",
+                   "RemovePromptPulseWidth",
+                   "ResonanceFilterUnits", "ResonanceFilterLowerLimits", "ResonanceFilterUpperLimits",
+                   "CompressTolerance", "CompressWallClockTolerance",
                    "CompressStartTime", "LorentzCorrection", "UnwrapRef", "LowResRef",
                    "LowResSpectrumOffset", "ReductionProperties"]
 PROPS_FOR_ALIGN.extend(PROPS_IN_PD_CHARACTER)

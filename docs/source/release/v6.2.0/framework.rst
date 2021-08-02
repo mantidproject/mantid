@@ -14,7 +14,9 @@ Concepts
 
 Algorithms
 ----------
+- A new algorithm :ref:`Stitch <algm-Stitch>` will perform stitching of multiple 2D workspaces by calculating the scale factors as medians of point-wise ratios in the overlap regions.
 - All remote algorithms have been deprecated as they have not been used since v3.8.
+
 
 Improvements
 ############
@@ -28,6 +30,8 @@ Bugfixes
 
 - Fix rare divide-by zero error when running :ref:`GetEi <algm-GetEi>` on noisy data.
 - Fix crash when running :ref:`IntegrateEPP <algm-IntegrateEPP>` on a workspace group via the algorithm dialog.
+- Fixed bug in :ref:`FitGaussianPeaks <algm-FitGaussianPeaks>` algorithm in which a peak at the end of range would cause an error due to not enough data point being available to fit parameters
+
 
 Fit Functions
 -------------

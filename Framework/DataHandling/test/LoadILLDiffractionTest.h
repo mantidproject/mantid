@@ -548,20 +548,22 @@ public:
     TS_ASSERT(run.hasProperty("ScanVar"))
     TS_ASSERT(run.hasProperty("ResolutionMode"))
     TS_ASSERT(run.hasProperty("Ei"))
+    TS_ASSERT(run.hasProperty("run_list"))
 
     const auto spy = run.getLogData("AcquisitionSpy.Time");
     const auto sample = run.getLogData("SampleSettings.SampleTemp");
     const auto scanType = run.getLogData("ScanType");
     const auto scanVar = run.getLogData("ScanVar");
     const auto ei = run.getLogAsSingleValue("wavelength");
+    const auto runList = run.getLogData("run_list");
 
     TS_ASSERT_EQUALS(scanType->value(), "OtherScan")
     TS_ASSERT_EQUALS(scanVar->value(), "samplerotation.position")
     TS_ASSERT_EQUALS(spy->size(), 17)
     TS_ASSERT_EQUALS(sample->size(), 17)
-
     TS_ASSERT_DELTA(ei, 4.80, 0.01)
     TS_ASSERT_EQUALS(outputWS->run().getProperty("Detector.calibration_file")->value(), "none")
+    TS_ASSERT_EQUALS(runList->value(), "199857")
     checkTimeFormat(outputWS);
   }
 
@@ -610,12 +612,14 @@ public:
     TS_ASSERT(run.hasProperty("ScanVar"))
     TS_ASSERT(run.hasProperty("ResolutionMode"))
     TS_ASSERT(run.hasProperty("Ei"))
+    TS_ASSERT(run.hasProperty("run_list"))
 
     const auto spy = run.getLogData("AcquisitionSpy.Time");
     const auto sample = run.getLogData("SampleSettings.SampleTemp");
     const auto scanType = run.getLogData("ScanType");
     const auto scanVar = run.getLogData("ScanVar");
     const auto ei = run.getLogAsSingleValue("wavelength");
+    const auto runList = run.getLogData("run_list");
 
     TS_ASSERT_EQUALS(scanType->value(), "OtherScan")
     TS_ASSERT_EQUALS(scanVar->value(), "d1t.position")
@@ -624,6 +628,7 @@ public:
 
     TS_ASSERT_DELTA(ei, 1.5288, 0.0001)
     TS_ASSERT_EQUALS(outputWS->run().getProperty("Detector.calibration_file")->value(), "none")
+    TS_ASSERT_EQUALS(runList->value(), "10578")
     checkTimeFormat(outputWS);
   }
 
@@ -635,7 +640,7 @@ public:
     alg.setChild(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "000104.nxs"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "000104"))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DataType", "Raw"))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
@@ -672,12 +677,14 @@ public:
     TS_ASSERT(run.hasProperty("ScanVar"))
     TS_ASSERT(run.hasProperty("ResolutionMode"))
     TS_ASSERT(run.hasProperty("Ei"))
+    TS_ASSERT(run.hasProperty("run_list"))
 
     const auto spy = run.getLogData("AcquisitionSpy.Time");
     const auto sample = run.getLogData("SampleSettings.SampleTemp");
     const auto scanType = run.getLogData("ScanType");
     const auto scanVar = run.getLogData("ScanVar");
     const auto ei = run.getLogAsSingleValue("wavelength");
+    const auto runList = run.getLogData("run_list");
 
     TS_ASSERT_EQUALS(scanType->value(), "OtherScan")
     TS_ASSERT_EQUALS(scanVar->value(), "updown.position")
@@ -686,6 +693,7 @@ public:
 
     TS_ASSERT_DELTA(ei, 5.12, 0.01)
     TS_ASSERT_EQUALS(outputWS->run().getProperty("Detector.calibration_file")->value(), "none")
+    TS_ASSERT_EQUALS(runList->value(), "104")
     checkTimeFormat(outputWS);
   }
 
