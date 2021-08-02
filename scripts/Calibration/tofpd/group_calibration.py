@@ -217,6 +217,7 @@ def pdcalibration_groups(data_ws,
     :param PeakFunction: PeakFunction parameter of PDCalibration, default 'IkedaCarpenterPV'
     :param PeakWindow: PeakWindow parameter of PDCalibration, default 0.1
     :param PeakWidthPercent: PeakWidthPercent parameter of PDCalibration, default None
+    :param BadCalibThreshold: Threshold for relative difference between calibrated DIFC and engineering value.
     :return: tuple of DiffCal and Mask from CrossCorrelate combined with DiffCal from PDCalibration of grouped workspace
     """
 
