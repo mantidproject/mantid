@@ -112,3 +112,49 @@ class LRReflectivityOutputTest(systemtesting.MantidSystemTest):
 
     def validate(self):
         return self._success
+
+
+class LiquidsReflectometryReductionSimpleErrorTest(systemtesting.MantidSystemTest):
+    """
+        Test algorithm LiquidsReflectometryReduction with simple binning
+    """
+    def runTest(self):
+        # '/SNS/users/wzz/Mantid_Project/builds/testing/sf_185602_Si2InDisk_auto.cfg'
+        scaling_factor_file = FileFinder.getFullPath("sf_185602_Si2InDisk_auto.cfg")
+
+        error_weighting = False
+        r = LiquidsReflectometryReduction(RunNumbers=[185746],
+                                          NormalizationRunNumber=185610,
+                                          SignalPeakPixelRange=[133, 145],
+                                          SubtractSignalBackground=True,
+                                          SignalBackgroundPixelRange=[129, 149],
+                                          NormFlag=True,
+                                          NormPeakPixelRange=[135, 143],
+                                          NormBackgroundPixelRange=[132, 146],
+                                          SubtractNormBackground=True,
+                                          ErrorWeighting=error_weighting,
+                                          LowResDataAxisPixelRangeFlag=True,
+                                          LowResDataAxisPixelRange=[75, 165],
+                                          LowResNormAxisPixelRangeFlag=True,
+                                          LowResNormAxisPixelRange=[115, 142],
+                                          TOFRange=[9965.86996219, 23253.6965784],
+                                          TOFSteps=40,
+                                          IncidentMediumSelected='Si2InDisk',
+                                          GeometryCorrectionFlag=False,
+                                          QMin=0.005,
+                                          QStep=0.02,
+                                          AngleOffset=-0.008,
+                                          AngleOffsetError=0.001,
+                                          ScalingFactorFile=scaling_factor_file,
+                                          SlitsWidthFlag=True,
+                                          ApplyPrimaryFraction=True,
+                                          SlitTolerance=0.02,
+                                          PrimaryFractionRange=[5, 295],
+                                          OutputWorkspace='_reflectivity_error')
+
+        self._success = True
+        if not r:
+            self._success = False
+
+    def validate(self):
+        return self._success
