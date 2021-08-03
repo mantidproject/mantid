@@ -275,15 +275,16 @@ class BackgroundCorrectionsModel:
 
     def _add_background_correction_data_for(self, previous_data: dict, run: str, group: str) -> None:
         """Add background correction data for the provided Run and Group."""
-        run_group = tuple([run, group])
-        background_data = self._create_background_correction_data(previous_data, run_group)
-
         workspace_name = self.get_counts_workspace_name(run, group, False)
         rebin_workspace_name = self.get_counts_workspace_name(run, group, True) if self.do_rebin() else None
 
-        self._corrections_context.background_correction_data[run_group] = background_data
-        self._corrections_context.background_correction_data[run_group].setup_uncorrected_workspace(workspace_name,
-                                                                                                    rebin_workspace_name)
+        if workspace_name is not None:
+            run_group = tuple([run, group])
+            background_data = self._create_background_correction_data(previous_data, run_group)
+
+            self._corrections_context.background_correction_data[run_group] = background_data
+            self._corrections_context.background_correction_data[run_group].setup_uncorrected_workspace(
+                workspace_name, rebin_workspace_name)
 
     def _create_background_correction_data(self, previous_data: dict, run_group: tuple) -> BackgroundCorrectionData:
         """Creates the BackgroundCorrectionData for a newly loaded data. It tries to reuse previous data."""
