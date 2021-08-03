@@ -120,8 +120,8 @@ class CorrectionsPresenter(QObject):
 
         corrected_runs_and_groups = self.thread_model_wrapper.result
         if corrected_runs_and_groups is not None:
-            runs, groups, rebins = corrected_runs_and_groups
-            self._perform_asymmetry_pairs_and_diffs_calculation(runs, groups, rebins)
+            runs, groups = corrected_runs_and_groups
+            self._perform_asymmetry_pairs_and_diffs_calculation(runs, groups)
 
     def handle_asymmetry_pairs_and_diffs_calc_finished(self) -> None:
         """Handle when the calculation of Asymmetry, Pairs and Diffs has finished finished."""
@@ -149,10 +149,10 @@ class CorrectionsPresenter(QObject):
         except ValueError as error:
             self.view.warning_popup(error)
 
-    def _calculate_asymmetry_pairs_and_diffs(self, runs: list, groups: list, rebins: list) -> None:
+    def _calculate_asymmetry_pairs_and_diffs(self, runs: list, groups: list) -> None:
         """Calculates the Asymmetry workspaces, Pairs and Diffs only for the provided runs and groups."""
         # Calculates the Asymmetry workspaces for the corresponding runs and groups that have just been corrected
-        self.model.calculate_asymmetry_workspaces_for(runs, groups, rebins)
+        self.model.calculate_asymmetry_workspaces_for(runs, groups)
         # Calculates the Pair Asymmetry workspaces for pairs formed from one or more groups which have been corrected
         pairs = self.model.calculate_pairs_for(runs, groups)
         # Calculates the Diff Asymmetry workspaces formed from one or more groups/pairs which have been corrected

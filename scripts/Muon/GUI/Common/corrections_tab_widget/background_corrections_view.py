@@ -14,7 +14,7 @@ ui_form, widget = load_ui(__file__, "background_corrections_view.ui")
 
 RUN_COLUMN_INDEX = 0
 GROUP_COLUMN_INDEX = 1
-REBIN_COLUMN_INDEX = 2
+USE_RAW_COLUMN_INDEX = 2
 START_X_COLUMN_INDEX = 3
 END_X_COLUMN_INDEX = 4
 A0_COLUMN_INDEX = 5
@@ -71,6 +71,7 @@ class BackgroundCorrectionsView(widget, ui_form):
 
         self.set_background_correction_options_visible(False)
 
+        self._handle_use_raw_changed = None
         self._handle_start_x_changed = None
         self._handle_end_x_changed = None
 
@@ -90,9 +91,9 @@ class BackgroundCorrectionsView(widget, ui_form):
         """Connect the slot for the Show All Runs check box."""
         self.show_all_runs_checkbox.stateChanged.connect(slot)
 
-    def set_slot_for_show_rebin_data(self, slot) -> None:
-        """Connect the slot for the Show All Runs check box."""
-        self.show_rebin_data_checkbox.stateChanged.connect(slot)
+    def set_slot_for_use_raw_changed(self, slot) -> None:
+        """Sets the slot for when a use raw table cell is changed."""
+        self._handle_use_raw_changed = slot
 
     def set_slot_for_start_x_changed(self, slot) -> None:
         """Sets the slot for when a start x table cell is changed."""
@@ -110,7 +111,6 @@ class BackgroundCorrectionsView(widget, ui_form):
         self.group_combo_box.setVisible(visible)
         self.show_all_runs_checkbox.setVisible(visible)
         self.apply_table_changes_to_all_checkbox.setVisible(visible)
-        self.show_rebin_data_checkbox.setVisible(visible)
         self.correction_options_table.setVisible(visible)
 
     @property
@@ -164,18 +164,19 @@ class BackgroundCorrectionsView(widget, ui_form):
         """Returns true if all the runs should be shown."""
         return self.show_all_runs_checkbox.isChecked()
 
-    @property
-    def show_rebin_data(self) -> bool:
-        """Returns true if the rebinned data should be shown."""
-        return self.show_rebin_data_checkbox.isChecked()
-
     def selected_run_and_group(self) -> tuple:
         """Returns the Run and Group that is in the same row as the selected table cell."""
         if self._selected_row is not None:
             run = self.correction_options_table.item(self._selected_row, RUN_COLUMN_INDEX).text()
             group = self.correction_options_table.item(self._selected_row, GROUP_COLUMN_INDEX).text()
-            rebin = self.correction_options_table.item(self._selected_row, REBIN_COLUMN_INDEX).text() == "True"
-            return [run], [group], [rebin]
+            return [run], [group]
+        else:
+            raise RuntimeError("There is no selected run/group table row.")
+
+    def selected_use_raw(self) -> bool:
+        """Returns the boolean state of the Use Raw in the row that is currently selected."""
+        if self._selected_row is not None:
+            return self.correction_options_table.item(self._selected_row, USE_RAW_COLUMN_INDEX).checkState() == Qt.Checked
         else:
             raise RuntimeError("There is no selected run/group table row.")
 
@@ -183,25 +184,33 @@ class BackgroundCorrectionsView(widget, ui_form):
         """Returns true if the changes made in the table should be made for all domains at once."""
         return self.apply_table_changes_to_all_checkbox.isChecked()
 
-    def is_run_group_displayed(self, run: str, group: str, rebin: bool) -> bool:
+    def is_run_group_displayed(self, run: str, group: str) -> bool:
         """Returns true if a Run-Group is currently displayed in the data table."""
-        return self._table_row_index_of(run, group, rebin) is not None
+        return self._table_row_index_of(run, group) is not None
 
-    def set_start_x(self, run: str, group: str, rebin: bool, start_x: float) -> None:
+    def set_use_raw(self, run: str, group: str, use_raw: bool) -> None:
+        """Sets the Use Raw associated with the provided Run and Group."""
+        row_index = self._table_row_index_of(run, group)
+
+        self.correction_options_table.blockSignals(True)
+        self.correction_options_table.item(row_index, USE_RAW_COLUMN_INDEX).setCheckState(Qt.Checked if use_raw else Qt.Unchecked)
+        self.correction_options_table.blockSignals(False)
+
+    def set_start_x(self, run: str, group: str, start_x: float) -> None:
         """Sets the Start X associated with the provided Run and Group."""
-        self._set_table_item_value_for(run, group, rebin, START_X_COLUMN_INDEX, start_x)
+        self._set_table_item_value_for(run, group, START_X_COLUMN_INDEX, start_x)
 
-    def start_x(self, run: str, group: str, rebin: bool) -> float:
+    def start_x(self, run: str, group: str) -> float:
         """Returns the Start X associated with the provided Run and Group."""
-        return float(self._table_item_value_for(run, group, rebin, START_X_COLUMN_INDEX))
+        return float(self._table_item_value_for(run, group, START_X_COLUMN_INDEX))
 
-    def set_end_x(self, run: str, group: str, rebin: bool, end_x: float) -> None:
+    def set_end_x(self, run: str, group: str, end_x: float) -> None:
         """Sets the End X associated with the provided Run and Group."""
-        self._set_table_item_value_for(run, group, rebin, END_X_COLUMN_INDEX, end_x)
+        self._set_table_item_value_for(run, group, END_X_COLUMN_INDEX, end_x)
 
-    def end_x(self, run: str, group: str, rebin: bool) -> float:
+    def end_x(self, run: str, group: str) -> float:
         """Returns the Start X associated with the provided Run and Group."""
-        return float(self._table_item_value_for(run, group, rebin, END_X_COLUMN_INDEX))
+        return float(self._table_item_value_for(run, group, END_X_COLUMN_INDEX))
 
     def selected_start_x(self) -> float:
         """Returns the Start X in the row that is selected."""
@@ -217,20 +226,20 @@ class BackgroundCorrectionsView(widget, ui_form):
         else:
             raise RuntimeError("There is no selected run/group table row.")
 
-    def populate_corrections_table(self, runs: list, groups: list, rebins: list, start_xs: list, end_xs: list,
+    def populate_corrections_table(self, runs: list, groups: list, use_raws: list, start_xs: list, end_xs: list,
                                    backgrounds: list, background_errors: list, statuses: list) -> None:
         """Populates the background corrections table with the provided data."""
         self.correction_options_table.blockSignals(True)
         self.correction_options_table.setRowCount(0)
-        for run, group, rebin, start_x, end_x, background, background_error, status in zip(runs, groups, rebins,
-                                                                                           start_xs, end_xs,
-                                                                                           backgrounds, background_errors,
-                                                                                           statuses):
+        for run, group, use_raw, start_x, end_x, background, background_error, status in zip(runs, groups, use_raws,
+                                                                                             start_xs, end_xs,
+                                                                                             backgrounds, background_errors,
+                                                                                             statuses):
             row = self.correction_options_table.rowCount()
             self.correction_options_table.insertRow(row)
             self.correction_options_table.setItem(row, RUN_COLUMN_INDEX, self._create_table_item(run, False))
             self.correction_options_table.setItem(row, GROUP_COLUMN_INDEX, self._create_table_item(group, False))
-            self.correction_options_table.setItem(row, REBIN_COLUMN_INDEX, self._create_table_item(str(rebin), False))
+            self.correction_options_table.setItem(row, USE_RAW_COLUMN_INDEX, self._create_bool_table_item(use_raw))
             self.correction_options_table.setItem(row, START_X_COLUMN_INDEX, self._create_double_table_item(start_x))
             self.correction_options_table.setItem(row, END_X_COLUMN_INDEX, self._create_double_table_item(end_x))
             self.correction_options_table.setItem(row, A0_COLUMN_INDEX,
@@ -266,14 +275,29 @@ class BackgroundCorrectionsView(widget, ui_form):
         self._selected_column = item.column()
         self._selected_value = item.text()
 
-    def _on_corrections_table_cell_changed(self, _: int, column: int) -> None:
+    def _on_corrections_table_cell_changed(self, row: int, column: int) -> None:
         """Handles when a cells value is changed in the corrections table."""
+        self._selected_row = row
+        self._selected_column = column
+
         self._format_selection()
 
-        if column == START_X_COLUMN_INDEX:
+        if column == USE_RAW_COLUMN_INDEX:
+            self._handle_use_raw_changed()
+        elif column == START_X_COLUMN_INDEX:
             self._handle_start_x_changed()
         elif column == END_X_COLUMN_INDEX:
             self._handle_end_x_changed()
+
+    def _create_bool_table_item(self, state: bool) -> QTableWidgetItem:
+        """Creates a check box table widget item with an initial boolean state."""
+        item = self._create_table_item("")
+        item.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
+        if state:
+            item.setCheckState(Qt.Checked)
+        else:
+            item.setCheckState(Qt.Unchecked)
+        return item
 
     def _create_double_table_item(self, value: float, editable: bool = True, enabled: bool = True) -> QTableWidgetItem:
         """Creates a table item for the corrections options table from a float."""
@@ -291,32 +315,31 @@ class BackgroundCorrectionsView(widget, ui_form):
             item.setFlags(item.flags() ^ Qt.ItemIsEnabled)
         return item
 
-    def _set_table_item_value_for(self, run: str, group: str, rebin: bool, column_index: int, value: float) -> None:
+    def _set_table_item_value_for(self, run: str, group: str, column_index: int, value: float) -> None:
         """Sets the End X associated with the provided Run and Group."""
-        row_index = self._table_row_index_of(run, group, rebin)
+        row_index = self._table_row_index_of(run, group)
 
         self.correction_options_table.blockSignals(True)
         self.correction_options_table.setItem(row_index, column_index, self._create_double_table_item(value))
         self.correction_options_table.blockSignals(False)
 
-    def _table_item_value_for(self, run: str, group: str, rebin: bool, column_index: int) -> str:
+    def _table_item_value_for(self, run: str, group: str, column_index: int) -> str:
         """Returns the value in a table cell for the provided Run, Group and column index."""
-        row_index = self._table_row_index_of(run, group, rebin)
+        row_index = self._table_row_index_of(run, group)
         return self.correction_options_table.item(row_index, column_index).text() if row_index is not None else None
 
-    def _table_row_index_of(self, run: str, group: str, rebin: bool) -> int:
+    def _table_row_index_of(self, run: str, group: str) -> int:
         """Returns the row index of the provided Run and Group."""
         for row_index in range(self.correction_options_table.rowCount()):
             row_run = self.correction_options_table.item(row_index, RUN_COLUMN_INDEX).text()
             row_group = self.correction_options_table.item(row_index, GROUP_COLUMN_INDEX).text()
-            row_rebin = self.correction_options_table.item(row_index, REBIN_COLUMN_INDEX).text()
-            if row_run == run and row_group == group and row_rebin == str(rebin):
+            if row_run == run and row_group == group:
                 return row_index
         return None
 
     def _format_selection(self) -> None:
         """Formats the selected cell to have the expected number of decimal places."""
-        if self._selected_row is not None and self._selected_column is not None:
+        if self._selected_row is not None and self._selected_column is not None and self._selected_column != USE_RAW_COLUMN_INDEX:
             value = float(self.correction_options_table.item(self._selected_row, self._selected_column).text())
             self._set_selected_value(value)
 

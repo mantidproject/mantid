@@ -41,18 +41,6 @@ color: grey; }
       <property name="topMargin">
        <number>20</number>
       </property>
-      <item row="3" column="3">
-       <widget class="QComboBox" name="group_combo_box">
-        <property name="toolTip">
-         <string>Select the Group to show data for</string>
-        </property>
-        <item>
-         <property name="text">
-          <string>All</string>
-         </property>
-        </item>
-       </widget>
-      </item>
       <item row="1" column="1">
        <widget class="QLabel" name="mode_label">
         <property name="minimumSize">
@@ -89,23 +77,6 @@ color: grey; }
         </property>
         <property name="text">
          <string>Show data for:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="2">
-       <widget class="QCheckBox" name="show_all_runs_checkbox">
-        <property name="toolTip">
-         <string>Tick to show data for all the runs</string>
-        </property>
-        <property name="text">
-         <string>All Runs</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="4">
-       <widget class="QCheckBox" name="show_rebin_data_checkbox">
-        <property name="text">
-         <string>Rebin data</string>
         </property>
        </widget>
       </item>
@@ -153,7 +124,7 @@ background-color: #c7e0ff;
         </column>
         <column>
          <property name="text">
-          <string>Rebin</string>
+          <string>Use Raw</string>
          </property>
         </column>
         <column>
@@ -213,6 +184,28 @@ background-color: #c7e0ff;
         <item>
          <property name="text">
           <string>Auto</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="3" column="2">
+       <widget class="QCheckBox" name="show_all_runs_checkbox">
+        <property name="toolTip">
+         <string>Tick to show data for all the runs</string>
+        </property>
+        <property name="text">
+         <string>All Runs</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="3" colspan="2">
+       <widget class="QComboBox" name="group_combo_box">
+        <property name="toolTip">
+         <string>Select the Group to show data for</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>All</string>
          </property>
         </item>
        </widget>
