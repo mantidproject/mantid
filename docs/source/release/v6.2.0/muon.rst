@@ -19,7 +19,7 @@ Improvements
 - When running the Dynamic Kubo Toyabe fit function you should now be able to see the BinWidth to 3 decimal places.
 
 Bug Fixes
-############
+#########
 - A bug has been fixed in the BinWidth for the Dynamic Kobu Toyabe Fitting Function which caused a crash and did not provide
   any information about why the value was invalid. Will now revert to last viable BinWidth used and explain why.
 
@@ -41,7 +41,7 @@ Improvements
   when new data is loaded
 
 Bug Fixes
-############
+#########
 - The GUIs will no longer crash if there are any whitespaces in the run range (e.g. 6010- 3).
 - The GUIs can also now cope with a range of runs that span between two different decades where the second number
   in the range is smaller than the final digit of the first number in the range (e.g. 6018-3 will give 6018-6023 now).
