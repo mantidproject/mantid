@@ -88,6 +88,7 @@ class SimulatedDensityOfStatesEuphonicInstallationTest(MantidSystemTest):
                                           ) / 'site-packages'
             site.addsitedir(euphonic_site_packages)
 
+            print(list(euphonic_site_packages.iterdir()))
             import euphonic  # noqa: F401
 
             SimulatedDensityOfStates(CASTEPFile=find_file('Na2SiF6_CASTEP.phonon'),
