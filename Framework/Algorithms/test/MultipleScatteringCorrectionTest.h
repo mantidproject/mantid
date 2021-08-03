@@ -100,6 +100,14 @@ public:
         AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>("rst_carpenter_ms");
 
     // Use the absorption correction to perform a sanity check on the results of A1
+    auto absAlg = Mantid::API::AlgorithmManager::Instance().create("AbsorptionCorrection");
+    absAlg->initialize();
+    absAlg->setPropertyValue("InputWorkspace", "ws_wavelength");
+    absAlg->setPropertyValue("ScatterFrom", "Sample");
+    absAlg->setPropertyValue("OutputWorkspace", "ws_abs");
+    absAlg->execute();
+    Mantid::API::MatrixWorkspace_sptr ws_abs =
+        AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>("ws_abs");
 
     // Get the results from multiple scattering correction
     Mantid::API::MatrixWorkspace_sptr rst_ms =
@@ -107,9 +115,11 @@ public:
 
     // actual checking with TS_ASSERT
     // NOTE: we have two detector, each with two spectrum
+    const double vol = (2.95e-2) * (2.95e-2) * M_PI * 0.568e-2;
     for (size_t det_id = 0; det_id < 2; det_id++) {
       for (size_t spec_id = 0; spec_id < 2; spec_id++) {
         g_log.notice() << "Detector ID: " << det_id << "  Spectrum ID: " << spec_id << "\n"
+                       << "Abs: " << ws_abs->readY(det_id)[spec_id] * vol << "\n"
                        << "Mayer: " << rst_mayer_factor->readY(det_id)[spec_id] << "\n"
                        << "Carpenter: " << rst_carpenter_factor->readY(det_id)[spec_id] << "\n"
                        << "MSC: " << rst_ms->readY(det_id)[spec_id] << "\n";
