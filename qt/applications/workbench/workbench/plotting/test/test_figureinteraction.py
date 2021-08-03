@@ -172,7 +172,8 @@ class FigureInteractionTest(unittest.TestCase):
         qmenu_call2 = MagicMock()
         qmenu_call3 = MagicMock()
         qmenu_call4 = MagicMock()
-        mocked_qmenu_cls.side_effect = [qmenu_call1, qmenu_call2, qmenu_call3, qmenu_call4]
+        qmenu_call5 = MagicMock()
+        mocked_qmenu_cls.side_effect = [qmenu_call1, qmenu_call2, qmenu_call3, qmenu_call4, qmenu_call5]
 
         with patch('workbench.plotting.figureinteraction.QActionGroup',
                    autospec=True):
@@ -185,7 +186,8 @@ class FigureInteractionTest(unittest.TestCase):
                     expected_qmenu_calls = [call(),
                                             call("Axes", qmenu_call1),
                                             call("Normalization", qmenu_call1),
-                                            call("Markers", qmenu_call1)]
+                                            call("Markers", qmenu_call1),
+                                            call("Legend", qmenu_call1)]
                     self.assertEqual(expected_qmenu_calls, mocked_qmenu_cls.call_args_list)
                     # 4 actions in Axes submenu
                     self.assertEqual(4, qmenu_call2.addAction.call_count)
@@ -193,6 +195,8 @@ class FigureInteractionTest(unittest.TestCase):
                     self.assertEqual(2, qmenu_call3.addAction.call_count)
                     # 3 actions in Markers submenu
                     self.assertEqual(3, qmenu_call4.addAction.call_count)
+                    # 1 actions in Legend submenu
+                    self.assertEqual(1, qmenu_call5.addAction.call_count)
 
     def test_toggle_normalization_no_errorbars(self):
         self._test_toggle_normalization(errorbars_on=False, plot_kwargs={'distribution': True})
