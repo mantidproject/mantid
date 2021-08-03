@@ -194,9 +194,9 @@ The workflow follows these step:
         1 2208.3
         2 2318.6
         3 2098.0
-        4 2208.3
-        5 2161.2
-        6 2115.7
+        4 2255.4
+        5 2208.3
+        6 2163.0
 
 .. testcode:: group_cal
 
@@ -219,9 +219,9 @@ The workflow follows these step:
         1 2208.7
         2 2319.0
         3 2098.4
-        4 2368.8
-        5 2318.3
-        6 2269.5
+        4 2367.7
+        5 2318.2
+        6 2270.7
 
 The evolution in the calibration can be seen with
 
@@ -305,9 +305,9 @@ The same complete calibration can just be run with just
         1 2208.7
         2 2319.0
         3 2098.4
-        4 2368.8
-        5 2318.3
-        6 2269.5
+        4 2367.7
+        5 2318.2
+        6 2270.7
 
 The resulting :ref:`diffcal <DiffractionCalibrationWorkspace>` can be
 saved with :ref:`SaveDiffCal <algm-SaveDiffCal>`.
