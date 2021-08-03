@@ -21,6 +21,8 @@ A0_COLUMN_INDEX = 5
 A0_ERROR_COLUMN_INDEX = 6
 STATUS_COLUMN_INDEX = 7
 
+USE_RAW_TOOLTIP = "Calculate the background using the raw data or the rebinned data."
+
 
 class DoubleItemDelegate(QStyledItemDelegate):
     """
@@ -239,8 +241,8 @@ class BackgroundCorrectionsView(widget, ui_form):
             self.correction_options_table.insertRow(row)
             self.correction_options_table.setItem(row, RUN_COLUMN_INDEX, self._create_table_item(run, False))
             self.correction_options_table.setItem(row, GROUP_COLUMN_INDEX, self._create_table_item(group, False))
-            self.correction_options_table.setItem(row, USE_RAW_COLUMN_INDEX, self._create_bool_table_item(use_raw,
-                                                                                                          enabled=use_raw_enabled))
+            self.correction_options_table.setItem(row, USE_RAW_COLUMN_INDEX,
+                                                  self._create_bool_table_item(use_raw, use_raw_enabled, USE_RAW_TOOLTIP))
             self.correction_options_table.setItem(row, START_X_COLUMN_INDEX, self._create_double_table_item(start_x))
             self.correction_options_table.setItem(row, END_X_COLUMN_INDEX, self._create_double_table_item(end_x))
             self.correction_options_table.setItem(row, A0_COLUMN_INDEX,
@@ -290,9 +292,10 @@ class BackgroundCorrectionsView(widget, ui_form):
         elif column == END_X_COLUMN_INDEX:
             self._handle_end_x_changed()
 
-    def _create_bool_table_item(self, state: bool, enabled: bool = True) -> QTableWidgetItem:
+    def _create_bool_table_item(self, state: bool, enabled: bool = True, tooltip: str = "") -> QTableWidgetItem:
         """Creates a check box table widget item with an initial boolean state."""
         item = self._create_table_item("")
+        item.setToolTip(tooltip)
         if enabled:
             item.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
         else:
