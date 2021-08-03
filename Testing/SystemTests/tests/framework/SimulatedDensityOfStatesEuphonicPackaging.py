@@ -77,6 +77,7 @@ class SimulatedDensityOfStatesEuphonicInstallationTest(MantidSystemTest):
 
             process = subprocess.run([sys.executable, "-m", "pip", "install",
                                       "--prefix", euphonic_prefix,
+                                      "-vvv",
                                       "euphonic[phonopy_reader]"],
                                      stdout=subprocess.PIPE,
                                      stderr=subprocess.STDOUT,
@@ -91,10 +92,10 @@ class SimulatedDensityOfStatesEuphonicInstallationTest(MantidSystemTest):
             print(list(euphonic_site_packages.iterdir()))
             import euphonic  # noqa: F401
 
-            SimulatedDensityOfStates(CASTEPFile=find_file('Na2SiF6_CASTEP.phonon'),
+            SimulatedDensityOfStates(ForceConstantsFile=find_file('phonopy-Al.yaml'),
                                      Function='Gaussian',
                                      SpectrumType='DOS',
-                                     OutputWorkspace='Na2SiF6_DOS')
+                                     OutputWorkspace='phonopy-Al_DOS')
 
     def validate(self):
-        return ('Na2SiF6_DOS', 'Na2SiF6_DOS.nxs')
+        return ('phonopy-Al_DOS', 'phonopy-Al_DOS.nxs')
