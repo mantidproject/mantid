@@ -181,7 +181,8 @@ The workflow follows these step:
                                      groups,
                                      DReference=2.0,
                                      Xmin=1.75,
-                                     Xmax=2.25)
+                                     Xmax=2.25,
+                                     OffsetThreshold=1.0)
 
     print("DetID DIFC")
     for detid, difc in zip(cc_diffcal.column('detid'), cc_diffcal.column('difc')):
@@ -287,7 +288,8 @@ The same complete calibration can just be run with just
                                         cc_kwargs={
                                             "DReference": 2.0,
                                             "Xmin": 1.75,
-                                            "Xmax": 2.25},
+                                            "Xmax": 2.25,
+                                            "OffsetThreshold": 1.0},
                                         pdcal_kwargs={
                                             "PeakPositions": [1.0, 2.0, 3.0],
                                             "PeakFunction": 'Gaussian',
