@@ -52,6 +52,7 @@ mtd_add_qt_tests(
     ../../../../Framework/DataObjects/inc
     ../../../../Framework/TestHelpers/inc
     ../GUI/Preview
+    Preview
   TEST_HELPER_SRCS
     ../../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
     ../../../../Framework/TestHelpers/src/IndirectFitDataCreationHelper.cpp
