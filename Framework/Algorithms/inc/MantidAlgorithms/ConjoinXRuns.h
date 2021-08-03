@@ -43,7 +43,7 @@ private:
   void exec() override;
 
   std::string checkLogEntry(const API::MatrixWorkspace_sptr &) const;
-  std::vector<double> getXAxis(const API::MatrixWorkspace_sptr &) const;
+  std::vector<double> getXAxis(const API::MatrixWorkspace_sptr &, double &) const;
   void joinSpectrum(int64_t);
 
   /// Sample log entry name

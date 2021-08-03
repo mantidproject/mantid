@@ -12,12 +12,13 @@ from mantid.kernel import Direction, EnabledWhenProperty, FloatBoundedValidator,
 from mantid.simpleapi import *
 import numpy as np
 
+EMPTY_TOKEN = '000000' # empty run rumber to act as a placeholder where a sample measurement is missing
 
-class SANSILLReduction2(PythonAlgorithm):
+
+class SANSILLReduction(PythonAlgorithm):
     """
         Performs unit data reduction of the given process type
-        Note that there should be no loop throughout this file
-        Except for the small loops, e.g. over detector panels (up to 5)
+        Supports stadard, kinetic and TOF measurements
     """
 
     mode = None # the acquisition mode of the reduction
@@ -576,21 +577,35 @@ class SANSILLReduction2(PythonAlgorithm):
             CalculateEfficiency(InputWorkspace=ws, OutputWorkspace=sens)
             self.setProperty('OutputSensitivityWorkspace', mtd[sens])
 
-    #===============================ENTRY POINT AND CORE LOGIC===============================#
-
-    def PyExec(self):
-        self.reset()
-        ws = self.getPropertyValue('OutputWorkspace')
-        self.load(ws)
-        self.set_process_as(ws)
-        self.reduce(ws)
-        self.setProperty('OutputWorkspace', ws)
+    def inject_blank_samples(self, ws):
+        '''Creates blank workspaces with the right dimension to include in the input list of workspaces'''
+        reference = mtd[ws][0]
+        nbins = self.n_frames
+        nspec = reference.getNumberHistograms()
+        xaxis = reference.getAxis(0).extractValues()
+        runs = self.getPropertyValue('Runs').split(',')
+        result = [w.getName() for w in mtd[ws]]
+        blank_indices = [i for i,r in enumerate(runs) if r == EMPTY_TOKEN]
+        for index in blank_indices:
+            blank = f'__blank_{index}'
+            CreateWorkspace(ParentWorkspace=reference, NSpec=nspec, DataX=np.tile(xaxis, nspec),
+                            DataY=np.zeros(nspec * nbins), DataE=np.zeros(nspec * nbins),
+                            OutputWorkspace=blank, UnitX='Empty')
+            result.insert(index,blank)
+        return result
 
     def set_process_as(self, ws):
         '''Sets the process as flag as sample log for future sanity checks'''
         AddSampleLog(Workspace=ws, LogName='ProcessedAs', LogText=self.process)
 
-    def load(self, ws):
+    #===============================ENTRY POINT AND CORE LOGIC===============================#
+
+    def PyExec(self):
+        self.reset()
+        self.load()
+        self.reduce()
+
+    def load(self):
         '''
         Loads, merges and concatenates the input runs, if needed
         This is a performance critical section, as it dominates the total runtime
@@ -598,42 +613,44 @@ class SANSILLReduction2(PythonAlgorithm):
         For all the rest, only summing is permitted
         The input might be either a numor or a processed nexus as a result of rebinning of event data in mantid
         Hence, we cannot specify a name of a specifc loader
-        Besides, if it is processed nexus, it will be histogram data, which needs to be converted to point data
+        Besides, if it is a rebinned event data, it will be histogram data, which needs to be converted to point data
         The final output of this must be a workspace and not a workspace group
-        Note that the LoadAndMerge could do the concatenation as well directly
-        However, we might need to inject blank frames that's why we have to do it afterwards
+        We might need to inject blank frames that's why we have to do concatenation manually
         Besides, it's only after loading when we can figure out whether it's TOF or Mono, which dictates to concatenate or not
         '''
-        #TODO: Currently, the loader too will load to a histogram data for monochromatic non-kinetic,
-        # so we need to run a conversion to point data, which is redundant, since the loader could load directly to point-data
-        #The latter is a breaking change for the loader, so will require a new version
-        LoadAndMerge(Filename=self.getPropertyValue('Runs'), OutputWorkspace=ws)
+        ws = self.getPropertyValue('OutputWorkspace')
+        runs = self.getPropertyValue('Runs').split(',')
+        runs = list(filter(lambda x: x != EMPTY_TOKEN, runs))
+        LoadAndMerge(Filename=','.join(runs), OutputWorkspace=ws)
         if isinstance(mtd[ws], WorkspaceGroup):
             self.setup(mtd[ws][0])
             if self.mode != AcqMode.TOF:
                 if self.process == 'Sample' or self.process == 'Transmission':
                     if not self.is_point:
                         ConvertToPointData(InputWorkspace=ws, OutputWorkspace=ws)
-                    # TODO: inject blank frames for the empty token placeholder of the right shape here at the right index
-                    ConjoinXRuns(InputWorkspaces=ws, OutputWorkspace=ws + '_joined', LinearizeAxis=True)
-                    DeleteWorkspace(Workspace=ws)
-                    RenameWorkspace(InputWorkspace=ws + '_joined', OutputWorkspace=ws)
+                    ws_list = self.inject_blank_samples(ws)
+                    ConjoinXRuns(InputWorkspaces=ws_list, OutputWorkspace=ws, LinearizeAxis=True)
+                    DeleteWorkspaces(WorkspaceList=ws_list)
                 else:
                     raise RuntimeError('Listing of runs in MONO mode is allowed only for sample and transmission measurements.')
             else:
                 raise RuntimeError('Listing of runs is not allowed for TOF mode as concatenation of multiple runs is not possible.')
         else:
             self.setup(mtd[ws])
+            if not self.is_point:
+                ConvertToPointData(InputWorkspace=ws, OutputWorkspace=ws)
+        self.set_process_as(ws)
         assert isinstance(mtd[ws], MatrixWorkspace)
         return ws
 
-    def reduce(self, ws):
+    def reduce(self):
         '''
         Performs the corresponding reduction based on the process type
         This is the core logic of the reduction realised as a hard-wired dependency graph, for example:
         If we are processing the empty beam we apply the dark current correction and process as empty beam
         If we are processing transmission, we apply both dark current and empty beam corrections and process as transmission
         '''
+        ws = self.getPropertyValue('OutputWorkspace')
         self.apply_normalisation(ws)
         if self.process != 'DarkCurrent':
             self.apply_dark_current(ws)
@@ -646,13 +663,12 @@ class SANSILLReduction2(PythonAlgorithm):
                 else:
                     self.apply_transmission(ws)
                     if self.process == 'EmptyContainer':
-                        pass # nothing to do here
+                        self.apply_solid_angle(ws)
                     else:
                         self.apply_container(ws)
-                        self.apply_solid_angle(ws)
                         self.apply_masks(ws)
-                        self.apply_thickness(ws)
                         self.apply_parallax(ws)
+                        self.apply_thickness(ws)
                         if self.process == 'Water':
                             self.generate_sensitivity(ws)
                         else:
@@ -661,7 +677,8 @@ class SANSILLReduction2(PythonAlgorithm):
                                 pass # nothing to do here
                             else:
                                 self.apply_solvent(ws)
+        self.setProperty('OutputWorkspace', ws)
 
 
 # Register algorithm with Mantid
-AlgorithmFactory.subscribe(SANSILLReduction2)
+AlgorithmFactory.subscribe(SANSILLReduction)

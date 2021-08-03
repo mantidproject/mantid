@@ -13,7 +13,6 @@ from os import path
 
 N_DISTANCES = 5 # maximum number of distinct distance configurations
 N_LAMBDAS = 2 # maximum number of distinct wavelengths used in the experiment
-EMPTY_TOKEN = '000000' # empty run rumber to act as a placeholder where a sample measurement is missing
 
 
 def get_run_number(value):
