@@ -19,8 +19,7 @@ from mantidqt.MPLwidgets import *
 from matplotlib.figure import Figure
 from mpl_toolkits.axisartist.grid_helper_curvelinear import GridHelperCurveLinear
 from mpl_toolkits.axisartist import Subplot
-from scipy.constants import m_n
-from scipy.constants import h
+from mantid.kernel import UnitConversion, Elastic
 import numpy
 import copy
 import os
@@ -149,19 +148,12 @@ class DGSPlannerGUI(QtWidgets.QWidget):
         self.updatedOL = True
         self.trajfig.clear()
 
-    # (h*h)/(2*m{n}*lambda*lambda)
-    # h = Planck constant
-    # m{n} = mass of the neutron m_n
-    # lambda = input wavelength
-    def convertWavelengthToEnergy(self, wavelength):
-        return (h*h)/(2*m_n*wavelength*wavelength)
-
     def eiWavelengthUpdateEvent(self):
         if self.masterDict['instrument'] == 'WAND\u00B2':
-            ei = self.convertWavelengthToEnergy(self.masterDict['Ei'])
+            ei = UnitConversion.run('Wavelength', 'Energy', self.masterDict['Ei'], 0, 0, 0, Elastic, 0)
             offset = ei * 0.01
-            lowerBound = ei - offset
-            upperBound = ei + offset
+            lowerBound = - offset
+            upperBound = offset
             self.dimensionWidget.set_editMin4(str(lowerBound))
             self.dimensionWidget.set_editMax4(str(upperBound))
 
@@ -170,12 +162,14 @@ class DGSPlannerGUI(QtWidgets.QWidget):
             # change the ui accordingly
             self.dimensionWidget.toggleDeltaE(False)
             self.instrumentWidget.setLabelEi('Input Wavelength')
-            self.instrumentWidget.setEiVal(str(1.0))
+            self.instrumentWidget.setEiVal(str(1.488))
 
-            self.instrumentWidget.setGoniometerNames(['s1', 'sgl','sgu'])
-            self.instrumentWidget.setGoniometerDirections(['0,1,0', '1,0,0','0,0,1'])
-            self.instrumentWidget.setGoniometerRotationSense([1,-1,-1])
+            self.instrumentWidget.setGoniometerNames(['s1', 'sgl', 'sgu'])
+            self.instrumentWidget.setGoniometerDirections(['0,1,0', '1,0,0', '0,0,1'])
+            self.instrumentWidget.setGoniometerRotationSense([1, -1, -1])
             self.instrumentWidget.updateAll()
+
+            self.eiWavelengthUpdateEvent()
         else:
             self.dimensionWidget.toggleDeltaE(True)
             self.instrumentWidget.setLabelEi('Incident Energy')
@@ -230,7 +224,7 @@ class DGSPlannerGUI(QtWidgets.QWidget):
         return groupingStrings
 
     # pylint: disable=too-many-locals
-    def updateFigure(self):
+    def updateFigure(self):  # noqa: C901
         # pylint: disable=too-many-branches
         if self.updatedInstrument or self.progress_canceled:
             self.progress_canceled = False
@@ -262,7 +256,6 @@ class DGSPlannerGUI(QtWidgets.QWidget):
                 instrumentName = 'WAND'
 
             mantid.simpleapi.LoadEmptyInstrument(
-                instrumentName
                 mantid.api.ExperimentInfo.getInstrumentFilename(instrumentName),
                 OutputWorkspace="__temp_instrument"
                 )
@@ -280,15 +273,12 @@ class DGSPlannerGUI(QtWidgets.QWidget):
                                                            Angle=str(self.masterDict['S2']),
                                                            RelativeRotation=False)
             elif instrumentName == 'WAND':
-                for bankNum in range(1,9):
-                    mantid.simpleapi.MoveInstrumentComponent(
-                        "__temp_instrument",
-                        'bank' + str(bankNum),
-                        X=0,
-                        Y=self.masterDict['DetZ'],
-                        Z=0,
-                        RelativePosition=True
-                        )
+                mantid.simpleapi.AddSampleLog(Workspace="__temp_instrument", LogName='HB2C:Mot:s2.RBV',
+                                              LogText=str(self.masterDict['S2']), LogType='Number Series')
+                mantid.simpleapi.AddSampleLog(Workspace="__temp_instrument", LogName='HB2C:Mot:detz.RBV',
+                                              LogText=str(self.masterDict['DetZ']), LogType='Number Series')
+                mantid.simpleapi.LoadInstrument(Workspace="__temp_instrument", RewriteSpectraMap=True,
+                                                InstrumentName="WAND")
             # masking
             if 'maskFilename' in self.masterDict and len(self.masterDict['maskFilename'].strip()) > 0:
                 try:
@@ -333,6 +323,12 @@ class DGSPlannerGUI(QtWidgets.QWidget):
         progressDialog.setCancelButtonText("&Cancel")
         progressDialog.setRange(0, self.iterations)
         progressDialog.setWindowTitle("DGSPlanner progress")
+
+        if self.masterDict['instrument'] == 'WAND\u00B2':
+            ei = UnitConversion.run('Wavelength', 'Energy', self.masterDict['Ei'], 0, 0, 0, Elastic, 0)
+        else:
+            ei = self.masterDict['Ei']
+
         for i in range(self.iterations):
             progressDialog.setValue(i)
             progressDialog.setLabelText("Calculating orientation %d of %d..." % (i, self.iterations))
@@ -346,7 +342,7 @@ class DGSPlannerGUI(QtWidgets.QWidget):
                                                            Q1Basis=self.masterDict['dimBasis'][0],
                                                            Q2Basis=self.masterDict['dimBasis'][1],
                                                            Q3Basis=self.masterDict['dimBasis'][2],
-                                                           IncidentEnergy=self.masterDict['Ei'],
+                                                           IncidentEnergy=ei,
                                                            Dimension1=dimensions[self.masterDict['dimIndex'][0]],
                                                            Dimension1Min=float2Input(self.masterDict['dimMin'][0]),
                                                            Dimension1Max=float2Input(self.masterDict['dimMax'][0]),

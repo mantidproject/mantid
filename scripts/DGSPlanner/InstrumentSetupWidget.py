@@ -243,6 +243,7 @@ class InstrumentSetupWidget(QtWidgets.QWidget):
         self.layout().addWidget(self.canvas)
         #connections
         self.editS2.textEdited.connect(self.checkValidInputs)
+        self.editDetZ.textEdited.connect(self.checkValidInputs)
         self.editMask.textEdited.connect(self.setMaskFile)
         self.combo.activated[str].connect(self.instrumentSelected)
         self.fast.stateChanged.connect(self.updateFast)
@@ -324,7 +325,7 @@ class InstrumentSetupWidget(QtWidgets.QWidget):
             self.editS2.show()
         else:
             self.labelS2.hide()
-            self.editS2.hide()\
+            self.editS2.hide()
 
         if self.instrument in ["WAND\u00B2"]:
             self.labelDetZ.show()
@@ -359,7 +360,9 @@ class InstrumentSetupWidget(QtWidgets.QWidget):
         self.labelEi.setText(newLabel)
 
     def setEiVal(self, val):
+        self.Ei = float(val)
         self.editEi.setText(val)
+        self.updateAll(Ei=float(val))
 
     def getInstrumentComboBox(self):
         return self.combo

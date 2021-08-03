@@ -315,35 +315,18 @@ class DimensionSelectorWidget(QtWidgets.QWidget):
         self.updateChanges()
 
     def toggleDeltaE(self, on):
-        # test disable code
-        if on:
-            self._editMin4.setReadOnly(False)
-            self._editMax4.setReadOnly(False)
-            self._comboDim4.setDisabled(False)
+        self._editMin4.setEnabled(on)
+        self._editMax4.setEnabled(on)
+        self._comboDim4.setEnabled(on)
 
-            self._editMin4.setStyleSheet("QLineEdit[readOnly=\"true\"] {}")
-            self._editMax4.setStyleSheet("QLineEdit[readOnly=\"true\"] {}")
-
-            if 'DeltaE' not in self.dimNames:
-                self.dimNames.append('DeltaE')
-                self.updateCombo()
-
+        if not on:
+            self.dimNames=['[H,0,0]', '[0,K,0]', '[0,0,L]', 'DeltaE']
+            self.updateCombo()
+            self._comboDim1.model().item(3).setFlags(QtCore.Qt.NoItemFlags)
+            self._comboDim2.model().item(3).setFlags(QtCore.Qt.NoItemFlags)
+            self._comboDim3.model().item(3).setFlags(QtCore.Qt.NoItemFlags)
         else:
-            self._editMin4.setReadOnly(True)
-            self._editMax4.setReadOnly(True)
-            self._comboDim4.setDisabled(True)
-
-            self._editMin4.setStyleSheet("QLineEdit[readOnly=\"true\"] {color: #808080; background-color: #F0F0F0;}")
-            self._editMax4.setStyleSheet("QLineEdit[readOnly=\"true\"] {color: #808080; background-color: #F0F0F0;}")
-
-            if 'DeltaE' in self.dimNames:
-                self.dimNames.remove('DeltaE')
-                self.updateCombo()
-                # add back deltaE to last combo box so only that can be deltaE
-                self.inhibitSignal=True
-                self._comboDim4.addItem('DeltaE')
-                self._comboDim4.setCurrentIndex(3)
-                self.inhibitSignal=False
+            self.updateCombo()
 
     def updateGui(self):
         self._editMin1.setText(FloatToQString(self.dimMin[0]))
@@ -363,11 +346,10 @@ class DimensionSelectorWidget(QtWidgets.QWidget):
         self._comboDim2.clear()
         self._comboDim3.clear()
         self._comboDim4.clear()
-        for name in self.dimNames:
-            self._comboDim1.addItem(name)
-            self._comboDim2.addItem(name)
-            self._comboDim3.addItem(name)
-            self._comboDim4.addItem(name)
+        self._comboDim1.addItems(self.dimNames)
+        self._comboDim2.addItems(self.dimNames)
+        self._comboDim3.addItems(self.dimNames)
+        self._comboDim4.addItems(self.dimNames)
         self._comboDim1.setCurrentIndex(0)
         self._comboDim2.setCurrentIndex(1)
         self._comboDim3.setCurrentIndex(2)
@@ -386,9 +368,13 @@ class DimensionSelectorWidget(QtWidgets.QWidget):
 
     def set_editMin4(self, val):
         self._editMin4.setText(val)
+        self.dimMin[3] = float(val)
+        self.updateChanges()
 
     def set_editMax4(self, val):
         self._editMax4.setText(val)
+        self.dimMax[3] = float(val)
+        self.updateChanges()
 
 
 if __name__=='__main__':
