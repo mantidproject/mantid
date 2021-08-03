@@ -8,7 +8,7 @@ from qtpy import QtWidgets, QtCore
 from os import path
 
 from mantidqt.utils.qt import load_ui
-from Engineering.gui.engineering_diffraction.tabs.common import path_handling
+from Engineering.common import path_handling
 from fnmatch import fnmatch
 from os.path import splitext
 
