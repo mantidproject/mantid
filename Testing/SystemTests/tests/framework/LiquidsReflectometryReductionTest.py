@@ -31,6 +31,7 @@ class LiquidsReflectometryReductionTest(systemtesting.MantidSystemTest):
                                       SignalPeakPixelRange=[154, 166],
                                       SubtractSignalBackground=True,
                                       SignalBackgroundPixelRange=[151, 169],
+                                      ErrorWeighting=True,
                                       NormFlag=True,
                                       NormPeakPixelRange=[154, 160],
                                       NormBackgroundPixelRange=[151, 163],
