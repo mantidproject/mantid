@@ -138,19 +138,20 @@ def cc_calibrate_groups(data_ws,
                     if abs(mtd['_tmp_group_cc'].readY(item)) != 0:
                         offsets_tmp.append(abs(mtd['_tmp_group_cc'].readY(item)))
                 offsets_tmp = np.array(offsets_tmp)
-                print(f'Running group-{group}, cycle-{num_cycle}.')
-                print(f'Median offset (no sign) = {np.median(offsets_tmp)}')
+                logger.information(f'Running group-{group}, cycle-{num_cycle}.')
+                logger.information(f'Median offset (no sign) = {np.median(offsets_tmp)}')
                 converged = np.median(offsets_tmp) < OT_group
             else:
                 for item in ws_indexes:
                     mtd['_tmp_group_cc'].dataY(item)[0] = 0.0
-                print(f'Cross correlation skipped for group-{group}.')
+                logger.information(f'Cross correlation skipped for group-{group}.')
                 converged = True
 
             if not cycling or converged:
                 if cycling and converged:
                     if group not in SkipCrossCorrelation:
-                        print(f'Cross correlation for group-{group} converged, with offset threshold {OT_group}.')
+                        logger.information(f'Cross correlation for group-{group} converged, ')
+                        logger.information(f'with offset threshold {OT_group}.')
                 break
             else:
                 previous_calibration = ConvertDiffCal('_tmp_group_cc',
