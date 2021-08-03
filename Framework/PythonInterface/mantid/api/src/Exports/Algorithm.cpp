@@ -97,6 +97,15 @@ template <typename T> void extractKwargs(const dict &kwargs, const std::string &
   }
 }
 
+template <typename T> boost::optional<T> extractObject(const object &obj) {
+  boost::python::extract<T> extractor(obj);
+
+  if (extractor.check())
+    return boost::optional<T>(extractor);
+  else
+    return boost::none;
+}
+
 // Signature createChildWithProps(self, name, startProgress, endProgress, enableLogging, version, **kwargs)
 object createChildWithProps(tuple args, dict kwargs) {
   std::shared_ptr<Algorithm> parentAlg = extract<std::shared_ptr<Algorithm>>(args[0]);
@@ -129,14 +138,19 @@ object createChildWithProps(tuple args, dict kwargs) {
       continue;
 
     object curArg = kwargs[keys[i]];
-    if (curArg) {
+    if (!curArg)
+      continue;
 
-      // Rather than trying to figure out which type were getting from Python
-      // we will "ab"use setPropertyValue to simply use strings. This currently
-      // doesn't handle lists, but this could be retrofitted in future work
-      std::string propValue = extract<std::string>(curArg);
-      childAlg->setPropertyValue(propName, propValue);
-    }
+    if (auto val = extractObject<bool>(curArg))
+      childAlg->setProperty(propName, val);
+    if (auto val = extractObject<float>(curArg))
+      childAlg->setProperty(propName, val);
+    if (auto val = extractObject<int>(curArg))
+      childAlg->setProperty(propName, val);
+
+    // This currently  doesn't handle lists, but this could be retrofitted in future work
+    std::string propValue = extract<std::string>(curArg);
+    childAlg->setPropertyValue(propName, propValue);
   }
   return object(childAlg);
 }
