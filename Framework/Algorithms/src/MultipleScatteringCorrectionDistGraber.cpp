@@ -30,7 +30,7 @@ using namespace Kernel;
 /**
  * @brief Construct a new Multiple Scattering Correction Dist Graber:: Multiple Scattering Correction Dist Graber object
  *
- * @param sampleOBbject : the sample object
+ * @param sampleShape : the sample object
  * @param elementSize : in meters
  */
 MultipleScatteringCorrectionDistGraber::MultipleScatteringCorrectionDistGraber(const Geometry::IObject &sampleShape,

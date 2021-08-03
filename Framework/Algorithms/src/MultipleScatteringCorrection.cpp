@@ -314,8 +314,9 @@ void MultipleScatteringCorrection::parseInputs() {
 }
 
 /**
- * @brief calculate L2D for all detectors
+ * @brief Calculate distance between exiting element to the detector
  *
+ * @param distGraber
  * @param detector
  * @param sample_L2Ds
  */
