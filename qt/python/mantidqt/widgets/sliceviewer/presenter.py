@@ -291,7 +291,8 @@ class SliceViewer(ObservingPresenter):
                 self.model.export_roi_to_workspace(self.get_slicepoint(),
                                                    bin_params=data_view.dimensions.get_bin_params(),
                                                    limits=limits,
-                                                   transpose=data_view.dimensions.transpose))
+                                                   transpose=data_view.dimensions.transpose,
+                                                   dimension_indices=data_view.dimensions.get_states()))
         except Exception as exc:
             self._logger.error(str(exc))
             self._show_status_message("Error exporting ROI")
@@ -311,6 +312,7 @@ class SliceViewer(ObservingPresenter):
                     bin_params=data_view.dimensions.get_bin_params(),
                     limits=limits,
                     transpose=data_view.dimensions.transpose,
+                    dimension_indices=data_view.dimensions.get_states(),
                     cut=cut_type))
         except Exception as exc:
             self._logger.error(str(exc))
