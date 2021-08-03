@@ -790,8 +790,8 @@ QString FileFinderWidget::openFileDialog() {
         m_dialog.setFileMode(QFileDialog::ExistingFile);
     }
     m_dialog.setDirectory(dir);
-    m_dialog.exec();
-    filenames = m_dialog.selectedFiles();
+    if (m_dialog.exec())
+      filenames = m_dialog.selectedFiles();
   } else {
     if (m_isForDirectory) {
       QString file = QFileDialog::getExistingDirectory(this, "Select directory", dir);
