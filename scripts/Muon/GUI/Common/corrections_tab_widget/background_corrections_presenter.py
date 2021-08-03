@@ -80,11 +80,16 @@ class BackgroundCorrectionsPresenter:
         """Handles when the Use Raw check box is ticked or unticked in the table."""
         runs, groups = self._selected_runs_and_groups()
         use_raw = self.view.selected_use_raw()
-        for run, group in zip(runs, groups):
-            self.view.set_use_raw(run, group, use_raw)
-            self.model.set_use_raw(run, group, use_raw)
+        if not use_raw and self.model.do_rebin():
+            for run, group in zip(runs, groups):
+                self.view.set_use_raw(run, group, use_raw)
+                self.model.set_use_raw(run, group, use_raw)
 
-        self._perform_background_corrections_for(runs, groups)
+            self._perform_background_corrections_for(runs, groups)
+        else:
+            runs, groups = self.view.selected_run_and_group()
+            self.view.set_use_raw(runs[0], groups[0], True)
+            self._corrections_presenter.warning_popup("There is no rebinned data to use for background corrections.")
 
     def handle_start_x_changed(self) -> None:
         """Handles when a Start X table cell is changed."""

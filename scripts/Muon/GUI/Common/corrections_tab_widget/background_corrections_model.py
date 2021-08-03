@@ -173,6 +173,18 @@ class BackgroundCorrectionsModel:
         self._context = context
         self._corrections_context = context.corrections_context
 
+    def do_rebin(self) -> bool:
+        """Returns true if rebinned data exists in the ADS."""
+        return self._context._do_rebin()
+
+    def rebin_fixed_steps(self) -> int:
+        """Returns the Rebin steps to use for Fixed Rebin mode."""
+        return int(self._context.gui_context["RebinFixed"]) if "RebinFixed" in self._context.gui_context else 0
+
+    def is_rebin_fixed_selected(self) -> bool:
+        """Returns true if the Rebin Fixed mode is currently selected."""
+        return self._context.gui_context["RebinType"] == "Fixed" if "RebinType" in self._context.gui_context else False
+
     def set_background_correction_mode(self, mode: str) -> None:
         """Sets the current background correction mode in the context."""
         self._corrections_context.background_corrections_mode = mode
@@ -267,7 +279,7 @@ class BackgroundCorrectionsModel:
         background_data = self._create_background_correction_data(previous_data, run_group)
 
         workspace_name = self.get_counts_workspace_name(run, group, False)
-        rebin_workspace_name = self.get_counts_workspace_name(run, group, True) if self._context._do_rebin() else None
+        rebin_workspace_name = self.get_counts_workspace_name(run, group, True) if self.do_rebin() else None
 
         self._corrections_context.background_correction_data[run_group] = background_data
         self._corrections_context.background_correction_data[run_group].setup_uncorrected_workspace(workspace_name,
@@ -275,18 +287,18 @@ class BackgroundCorrectionsModel:
 
     def _create_background_correction_data(self, previous_data: dict, run_group: tuple) -> BackgroundCorrectionData:
         """Creates the BackgroundCorrectionData for a newly loaded data. It tries to reuse previous data."""
-        rebin_fixed = int(self._context.gui_context["RebinFixed"]) if "RebinFixed" in self._context.gui_context else 0
+        rebin_fixed, is_rebin_fixed = self.rebin_fixed_steps(), self.is_rebin_fixed_selected()
 
         run, group = run_group
         if run_group in previous_data:
             data = previous_data[run_group]
-            return BackgroundCorrectionData(data.use_raw, rebin_fixed, data.start_x, data.end_x, data.flat_background,
-                                            data.exp_decay)
+            return BackgroundCorrectionData(data.use_raw if is_rebin_fixed else True, rebin_fixed, data.start_x,
+                                            data.end_x, data.flat_background, data.exp_decay)
         else:
             for key, value in previous_data.items():
                 if key[1] == group:
-                    return BackgroundCorrectionData(value.use_raw, rebin_fixed, value.start_x, value.end_x,
-                                                    value.flat_background, value.exp_decay)
+                    return BackgroundCorrectionData(value.use_raw if is_rebin_fixed else True, rebin_fixed,
+                                                    value.start_x, value.end_x, value.flat_background, value.exp_decay)
 
         start_x, end_x = self.default_x_range(run, group)
         return BackgroundCorrectionData(True, rebin_fixed, start_x, end_x)
