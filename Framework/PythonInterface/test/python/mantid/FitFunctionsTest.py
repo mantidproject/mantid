@@ -14,7 +14,7 @@ from mantid.simpleapi import CreateWorkspace, EvaluateFunction, Fit
 from mantid.simpleapi import FunctionWrapper, CompositeFunctionWrapper, ProductFunctionWrapper, ConvolutionWrapper, MultiDomainFunctionWrapper
 from mantid.simpleapi import Gaussian, LinearBackground, Polynomial, MultiDomainFunction, Convolution, ProductFunction,\
     CompositeFunction, IFunction1D, FunctionFactory, Fit
-from mantid.api import mtd, MatrixWorkspace, ITableWorkspace
+from mantid.api import mtd, MatrixWorkspace, ITableWorkspace, FunctionDomain1DVector, FunctionDomain1DHistogram
 import numpy as np
 from testhelpers import run_algorithm
 
@@ -762,7 +762,7 @@ class FitFunctionsTest(unittest.TestCase):
         ws = CreateWorkspace(DataX=[0,1,2,3,4], DataY=[5,5,5,5])
 
         dom = FunctionDomain1DVector(ws.readX(0))
-        out = func.functionDeriv(dom)
+        out = g.functionDeriv(dom)
 
         self.assertAlmostEqual(out.get(0,0), 0.0000000000000008323969676981107)
         self.assertAlmostEqual(out.get(0,1), -0.000000000000043354008734276606)
@@ -781,7 +781,7 @@ class FitFunctionsTest(unittest.TestCase):
         ws = CreateWorkspace(DataX=[0,1,2,3,4], DataY=[5,5,5,5])
 
         dom = FunctionDomain1DHistogram(ws.readX(0))
-        out = func.functionDeriv(dom)
+        out = g.functionDeriv(dom)
 
         self.assertAlmostEqual(out.get(0,0), 0.00000000000009592326932761353)
         self.assertAlmostEqual(out.get(0,1), -0.000000000004570209530946241)

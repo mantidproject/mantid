@@ -92,10 +92,9 @@ GNU_DIAG_ON("unused-local-typedef")
 ///@endcond
 
 Mantid::API::Jacobian *getFunctionDeriv(IFunction &self, const Mantid::API::FunctionDomain &domain) {
-  Mantid::CurveFitting::Jacobian out(domain.size(), self.nParams());
-  self.functionDeriv(domain, out);
-
-  return new Mantid::CurveFitting::Jacobian(out);
+  auto *out = new Mantid::CurveFitting::Jacobian(domain.size(), self.nParams());
+  self.functionDeriv(domain, *out);
+  return out;
 }
 
 void setMatrixWorkspace(IFunction &self, const boost::python::object &workspace, int wi, float startX, float endX) {
