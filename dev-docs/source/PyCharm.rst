@@ -1,16 +1,67 @@
 .. _PyCharm:
 
+=======
 PyCharm
 =======
-
-PyCharm can be installed from `here <https://jetbrains.com/pycharm/download/>`_.
-
-This tutorial assumes you are familiar with the process of building Mantid (with separate source and build directories inside a root directory), and that you have built a working version. If you are unclear about this see :ref:`here <GettingStarted/GettingStarted>`.
 
 .. contents::
   :local:
 
-.. _setting-up-pycharm-on-windows:
+Selecting PyCharm versions
+##########################
+
+There are two versions of PyCharm that are in use in the team, Community and Professional. The main difference for our workflow is that professional offers support for remote debugging which can help with debugging python code that is called from C++, such as algorithms called from python interfaces.
+
+If you haven't installed PyCharm yet do that now, PyCharm can be installed from `here <https://jetbrains.com/pycharm/download/>`_.
+
+Setup python development environment with Conda
+###############################################
+
+The assumption has been made that you have setup and built Mantid already, if you have not, please do so before hand by following,
+
+At any point in these instructions where ``RelWithDebInfo`` is used (including in file paths), you can replace it with any other build type such as ``Debug`` or ``Release``. We use ``RelWithDebInfo`` for Conda specific builds to allow debugging due to ``Debug`` not being functional with the ``Release ABIs``.
+
+- Open PyCharm
+- If no project has been selected already, open the Mantid source code as a project.
+- Open the ``File->Settings menu``.
+- In the right hand side select the option that is ``Project: {SOURCE_CODE_FOLDER_NAME}`` for example ``Project: mantid``.
+- Select the ``Python Interpreter`` option.
+- Select the button top right of the window, that looks like a settings cog, then select ``Add...`` from the submenu.
+- From the right side of the window select ``Conda Environment``.
+- Select the ``Existing environment``.
+- Click on the ``...`` to open a file browser, and navigate to your Conda environment's python executable. This can be found in the directory you installed Conda (i.e. Mambaforge, Miniconda3 etc), on Windows navigate to your ``{CONDA_DIRECTORY}/envs/mantid-developer/python.exe`` on other OSs navigate to ``{CONDA_DIRECTORY}/envs/mantid-developer/bin/python.exe``.
+- (Windows Only) Ensure that the line for ``Conda executable`` correctly points at your ``conda.exe``, an example of this would be ``{CONDA_DIRECTORY}/Scripts/conda.exe``.
+- When done, click ok to close the window.
+- Ensure that next to ``Python Interpreter: `` it says your Python version and ``(mantid-developer)`` e.g. ``Python 3.8 (mantid-developer)``.
+- Then click Apply.
+- Back on the right side, under ``Python Interpreter`` there should be an option for ``Project Structure`` select that.
+- If you do not build Mantid in the same directory as your source but somewhere else add this is another Content Root, by selecting ``+ Add Content Root`` on the right hand side now.
+- In the file tree, select each of the following and mark them as Sources by clicking the ``Sources`` button whilst it's selected:
+    - ``{SOURCE}/scripts``
+    - ``{SOURCE}/Framework/PythonInterface``
+    - ``{SOURCE}/qt/applications/workbench``
+    - ``{SOURCE}/qt/widgets``
+    - ``{SOURCE}/qt/python``
+- In the file tree select your build directory and mark as Excluded by clicking the ``Excluded`` button whilst it's selected.
+- On Windows, select the ``{BUILD}/bin/RelWithDeb`` file and mark as Source by clicking the ``Sources`` button whilst it's selected.
+- On Linux or MacOS, select your ``{BUILD}/bin`` directory and mark as Source by clicking the ``Sources`` button whilst it's selected.
+- Click Apply, and then Ok to close the window.
+
+Debug python in Workbench
+#########################
+
+Now that your python development environment has been setup we can setup the debugging using Workbench.
+
+- With an open project in Pycharm, open the Play configuration menu by Opening ``Run->Edit Configurations...``.
+- Click the ``+`` icon top left
+- Select Python
+- Name it something to do with ``Workbench``
+- In the ``Script Path:`` box, on Linux/MacOS enter the ``{BUILD}/bin/workbench`` python script, on Windows enter ``{BUILD}/bin/RelWithDebInfo/workbench-script.pyw``
+- In the ``Working directory:`` box,
+
+==================================================================================
+Legacy and not maintained past this point (Only use if explicitly not using Conda)
+==================================================================================
 
 Setting up PyCharm on Windows
 #############################
@@ -55,10 +106,11 @@ Setting up PyCharm on Windows
 
 NOTE : In some cases, imports in the code will still be highlighted red when they come from folders within the ``script/`` folder, or from other folders entirely. To fix this simply add the relevant folder that contains the module you are importing in the same fashion as step 3 above.
 
-.. _running-file-debug-with-envfile-extension:
 
 Running Files in the Debugger with EnvFile extension
 ####################################################
+
+Do not run files in the debugger with EnvFile extension with Conda, as Conda does this job for you.
 
 Running python code from within PyCharm which depends on the python API, or PyQt for example requires one extra step. Because the source root labelling from the previous section only affects PyCharm searching and not the run configuration, before running the file we must set up the run configuration correctly.
 
@@ -88,7 +140,6 @@ Disadvantages:
 
 Running Files in the Debugger without EnvFile extension
 #######################################################
-
 
 This can be done in two ways:
 
