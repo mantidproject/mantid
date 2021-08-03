@@ -38,6 +38,59 @@ public:
     inputFile = "HET15869.raw";
   }
 
+  void testAlternateDataStream() {
+#ifdef _WIN32
+    Poco::Path rawFilePath("./fakeRawFile.raw");
+    Poco::File rawFile(rawFilePath);
+
+    std::ofstream file(rawFile.path());
+    file << "data goes here";
+
+    std::string adsFileName = rawFile.path() + ":checksum";
+    std::ofstream adsFile(adsFileName);
+    adsFile << "ad0bc56c4c556fa368565000f01e77f7 *fakeRawFile.log" << std::endl;
+    adsFile << "d5ace6dc7ac6c4365d48ee1f2906c6f4 *fakeRawFile.nxs" << std::endl;
+    adsFile << "9c70ad392023515f775af3d3984882f3 *fakeRawFile.raw" << std::endl;
+    adsFile << "66f74b6c0cc3eb497b92d4956ed8d6b5 *fakeRawFile_ICPdebug.txt" << std::endl;
+    adsFile << "e200aa65186b61e487175d5263b315aa *fakeRawFile_ICPevent.txt" << std::endl;
+    adsFile << "91be40aa4f54d050a9eb4abea394720e *fakeRawFile_ICPstatus.txt" << std::endl;
+    adsFile << "50aa2872110a9b862b01c6c83f8ce9a8 *fakeRawFile_Status.txt" << std::endl;
+
+    file.close();
+    adsFile.close();
+
+    // Create the log files, otherwise the searchForLogFiles function won't include them in the
+    // list of log files.
+    Poco::File logFile("./fakeRawFile.log");
+    logFile.createFile();
+    Poco::File icpDebugFile("./fakeRawFile_ICPdebug.txt");
+    icpDebugFile.createFile();
+    Poco::File icpEventFile("./fakeRawFile_ICPevent.txt");
+    icpEventFile.createFile();
+    Poco::File icpStatusFile("./fakeRawFile_ICPstatus.txt");
+    icpStatusFile.createFile();
+    Poco::File statusFile("./fakeRawFile_Status.txt");
+    statusFile.createFile();
+
+    std::list<std::string> logFiles = LoadRawHelper::searchForLogFiles(rawFilePath);
+
+    // One .log and four .txt files are listed in the alternate data stream.
+    TS_ASSERT_EQUALS(5, logFiles.size());
+    TS_ASSERT(std::find(logFiles.begin(), logFiles.end(), "fakeRawFile.log") != logFiles.end());
+    TS_ASSERT(std::find(logFiles.begin(), logFiles.end(), "fakeRawFile_ICPdebug.txt") != logFiles.end());
+    TS_ASSERT(std::find(logFiles.begin(), logFiles.end(), "fakeRawFile_ICPevent.txt") != logFiles.end());
+    TS_ASSERT(std::find(logFiles.begin(), logFiles.end(), "fakeRawFile_ICPstatus.txt") != logFiles.end());
+    TS_ASSERT(std::find(logFiles.begin(), logFiles.end(), "fakeRawFile_Status.txt") != logFiles.end());
+
+    rawFile.remove();
+    logFile.remove();
+    icpDebugFile.remove();
+    icpEventFile.remove();
+    icpStatusFile.remove();
+    statusFile.remove();
+#endif
+  }
+
   void testConfidence() {
     using Mantid::Kernel::FileDescriptor;
     LoadRaw3 loader;
