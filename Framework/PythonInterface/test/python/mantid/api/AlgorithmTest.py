@@ -193,6 +193,26 @@ class AlgorithmTest(unittest.TestCase):
 
         self.assertEqual("Wavelength", ws.getAxis(0).getUnit().unitID())
 
+    def test_createChildAlgorithm_with_bool_arg(self):
+        parent_alg = AlgorithmManager.createUnmanaged('Load')
+        child_alg = parent_alg.createChildAlgorithm("CreateSampleWorkspace", 0.0, 1.0, version=1,
+                                                    enableLogging=False, Random=True)
+        self.assertTrue(child_alg.isChild())
+        child_alg.execute()
+        ws = child_alg.getProperty("OutputWorkspace").value
+
+        self.assertIsNotNone(ws)
+
+    def xtest_createChildAlgorithm_with_int_arg(self):
+        parent_alg = AlgorithmManager.createUnmanaged('Load')
+        child_alg = parent_alg.createChildAlgorithm("CreateSampleWorkspace", 0.0, 1.0, version=1,
+                                                    enableLogging=False, NumEvents=1000)
+        self.assertTrue(child_alg.isChild())
+        child_alg.execute()
+        ws = child_alg.getProperty("OutputWorkspace").value
+
+        self.assertIsNotNone(ws)
+
 
 if __name__ == '__main__':
     unittest.main()
