@@ -31,7 +31,6 @@
 #include <Poco/Path.h>
 #include <boost/algorithm/string/case_conv.hpp>
 #include <boost/algorithm/string/predicate.hpp>
-#include <string>
 
 namespace Mantid {
 namespace DataHandling {
@@ -716,7 +715,7 @@ void SetSample::setSampleShape(API::ExperimentInfo &experiment, const Kernel::Pr
     if (!xml.empty()) {
       Kernel::Matrix<double> rotationMatrix = experiment.run().getGoniometer().getR();
       if (rotationMatrix != Kernel::Matrix<double>(3, 3, 1) && !sampleEnv) {
-        // Only add goniometer tag if rotataionMatrix is not the Identity,
+        // Only add goniometer tag if rotationMatrix is not the Identity,
         // and this shape is not defined within a sample environment
         xml = Geometry::ShapeFactory().addGoniometerTag(rotationMatrix, xml);
       }

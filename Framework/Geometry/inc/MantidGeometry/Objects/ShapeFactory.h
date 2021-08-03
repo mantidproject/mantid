@@ -41,7 +41,7 @@ struct CuboidCorners {
   Kernel::V3D lbb;
   Kernel::V3D rfb;
 
-  void rotatePoints(std::vector<double> rotationMatrix) {
+  void rotatePoints(const std::vector<double> &rotationMatrix) {
     lfb.rotate(rotationMatrix);
     lft.rotate(rotationMatrix);
     lbb.rotate(rotationMatrix);
@@ -59,7 +59,7 @@ struct Hexahedron {
   Kernel::V3D rbb; // right back bottom
   Kernel::V3D rbt; // right back top
 
-  void rotatePoints(std::vector<double> rotationMatrix) {
+  void rotatePoints(const std::vector<double> &rotationMatrix) {
     lfb.rotate(rotationMatrix);
     lft.rotate(rotationMatrix);
     lbb.rotate(rotationMatrix);
@@ -94,7 +94,7 @@ public:
   static std::shared_ptr<CSGObject> createSphere(const Kernel::V3D &centre, double radius);
   static std::shared_ptr<CSGObject> createHexahedralShape(double xlb, double xlf, double xrf, double xrb, double ylb,
                                                           double ylf, double yrf, double yrb);
-  std::string addGoniometerTag(Kernel::Matrix<double> rotateMatrix, std::string xml);
+  std::string addGoniometerTag(const Kernel::Matrix<double> &rotateMatrix, std::string xml);
   static Kernel::Matrix<double> generateMatrix(double xRotation, double yRotation, double zRotation);
   static Kernel::Matrix<double> generateXRotation(double xRotation);
   static Kernel::Matrix<double> generateYRotation(double yRotation);
@@ -107,8 +107,6 @@ private:
   std::string parseInfiniteCylinder(Poco::XML::Element *pElem, std::map<int, std::shared_ptr<Surface>> &prim,
                                     int &l_id);
   std::string parseCylinder(Poco::XML::Element *pElem, std::map<int, std::shared_ptr<Surface>> &prim, int &l_id);
-  // std::string parseSegmentedCylinder(Poco::XML::Element *pElem, std::map<int, std::shared_ptr<Surface>> &prim,
-  //                                    int &l_id);
   std::string parseHollowCylinder(Poco::XML::Element *pElem, std::map<int, std::shared_ptr<Surface>> &prim, int &l_id);
 
   CuboidCorners parseCuboid(Poco::XML::Element *pElem);

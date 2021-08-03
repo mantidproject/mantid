@@ -54,7 +54,7 @@ Logger g_log("ShapeFactory");
 } // namespace
 
 namespace {
-std::vector<double> DegreesToRadians(std::vector<double> anglesDegrees) {
+std::vector<double> DegreesToRadians(const std::vector<double> &anglesDegrees) {
   std::vector<double> anglesRadians;
   for (auto angle : anglesDegrees) {
     anglesRadians.push_back(angle * M_PI / 180);
@@ -1636,7 +1636,7 @@ Kernel::Matrix<double> ShapeFactory::generateZRotation(double zrotate) {
   return Kernel::Matrix<double>(matrixList);
 }
 
-std::string ShapeFactory::addGoniometerTag(Kernel::Matrix<double> rotateMatrix, std::string xml) {
+std::string ShapeFactory::addGoniometerTag(const Kernel::Matrix<double> &rotateMatrix, std::string xml) {
 
   // Delete previous goniometer from xml
   std::size_t foundGonioTag = xml.find("<goniometer");

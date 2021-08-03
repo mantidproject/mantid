@@ -113,10 +113,11 @@ void CopySample::exec() {
     int outputSampleNumber = getProperty("MDOutputSampleNumber");
     if ((outputSampleNumber == EMPTY_INT()) || (outputSampleNumber < 0)) // copy to all samples
     {
-      for (uint16_t i = 0; i < outMDWS->getNumExperimentInfo(); i++)
-        copyParameters(sample, outMDWS->getExperimentInfo(i)->mutableSample(), copyName, copyMaterial, copyEnvironment,
-                       copyShape, copyLattice, copyOrientation,
-                       outMDWS->getExperimentInfo(i)->run().getGoniometer().getR());
+      for (uint16_t i = 0; i < outMDWS->getNumExperimentInfo(); i++) {
+        auto ei = outMDWS->getExperimentInfo(i);
+        copyParameters(sample, ei->mutableSample(), copyName, copyMaterial, copyEnvironment, copyShape, copyLattice,
+                       copyOrientation, ei->run().getGoniometer().getR());
+      }
     } else // copy to a single sample
     {
       if (static_cast<uint16_t>(outputSampleNumber) > (outMDWS->getNumExperimentInfo() - 1)) {
@@ -125,10 +126,9 @@ void CopySample::exec() {
                         << (outMDWS->getNumExperimentInfo() - 1) << "). Will use sample number 0 instead\n";
         outputSampleNumber = 0;
       }
-      copyParameters(
-          sample, outMDWS->getExperimentInfo(static_cast<uint16_t>(outputSampleNumber))->mutableSample(), copyName,
-          copyMaterial, copyEnvironment, copyShape, copyLattice, copyOrientation,
-          outMDWS->getExperimentInfo(static_cast<uint16_t>(outputSampleNumber))->run().getGoniometer().getR());
+      auto ei = outMDWS->getExperimentInfo(static_cast<uint16_t>(outputSampleNumber));
+      copyParameters(sample, ei->mutableSample(), copyName, copyMaterial, copyEnvironment, copyShape, copyLattice,
+                     copyOrientation, ei->run().getGoniometer().getR());
     }
   } else // peaks workspace or matrix workspace
   {
@@ -143,7 +143,7 @@ void CopySample::exec() {
 
 void CopySample::copyParameters(Sample &from, Sample &to, bool nameFlag, bool materialFlag, bool environmentFlag,
                                 bool shapeFlag, bool latticeFlag, bool orientationOnlyFlag,
-                                Kernel::Matrix<double> rotationMatrix) {
+                                const Kernel::Matrix<double> &rotationMatrix) {
   if (nameFlag)
     to.setName(from.getName());
   if (environmentFlag) {
