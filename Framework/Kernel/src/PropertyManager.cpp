@@ -702,17 +702,26 @@ void PropertyManager::removeProperty(const std::string &name, const bool delprop
 /**
  * Removes a property from the properties map by index and return a pointer to it
  * @param index :: index of the property to be removed
- * @returns :: pointer to the removed property
+ * @returns :: pointer to the removed property if found, NULL otherwise
  */
 std::unique_ptr<Property> PropertyManager::takeProperty(const size_t index) {
-  auto property = m_orderedProperties[index];
-  const std::string key = createKey(property->name());
-  auto propertyPtr = std::move(m_properties[key]);
-  m_properties.erase(key);
-  m_orderedProperties.erase(m_orderedProperties.cbegin() + index);
-  return std::move(propertyPtr);
+  try {
+    auto property = m_orderedProperties[index];
+    const std::string key = createKey(property->name());
+    auto propertyPtr = std::move(m_properties[key]);
+    m_properties.erase(key);
+    m_orderedProperties.erase(m_orderedProperties.cbegin() + index);
+    return propertyPtr;
+  } catch (const std::out_of_range &) {
+    return NULL;
+  }
 }
 
+/**
+ * Peeks at a property from the properties list by index and return a const pointer to it
+ * @param index :: index of the property to peek at
+ * @returns :: const pointer to the found property, NULL otherwise
+ */
 const Property *PropertyManager::peekProperty(const size_t index) const {
   try {
     return m_orderedProperties[index];

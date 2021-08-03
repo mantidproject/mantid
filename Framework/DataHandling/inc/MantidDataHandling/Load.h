@@ -72,6 +72,7 @@ private:
                    const double endProgress = -1.0, const bool logging = true) const;
   /// Set the output properties
   void setOutputProperties(const API::IAlgorithm_sptr &loader);
+  /// Retrieve a pointer to the output workspace from the Child Algorithm
   API::Workspace_sptr getOutputWorkspace(const std::string &propName, const API::IAlgorithm_sptr &loader) const;
 
   /// Load a file to a given workspace name.

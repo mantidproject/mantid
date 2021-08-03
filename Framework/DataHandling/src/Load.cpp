@@ -543,6 +543,14 @@ void Load::setOutputProperties(const API::IAlgorithm_sptr &loader) {
   }
 }
 
+/**
+ * Return an output workspace property dealing with the lack of connection
+ * between of
+ * WorkspaceProperty types
+ * @param propName :: The name of the property
+ * @param loader :: The loader algorithm
+ * @returns A pointer to the OutputWorkspace property of the Child Algorithm
+ */
 API::Workspace_sptr Load::getOutputWorkspace(const std::string &propName, const API::IAlgorithm_sptr &loader) const {
   // @todo Need to try and find a better way using the getValue methods
   try {

@@ -2094,12 +2094,17 @@ void Algorithm::removeProperty(const std::string &name, const bool delproperty) 
 /**
  * Removes a property from the properties map by index and return a pointer to it
  * @param index :: index of the property to be removed
- * @returns :: pointer to the removed property
+ * @returns :: pointer to the removed property if found, NULL otherwise
  */
 std::unique_ptr<Kernel::Property> Algorithm::takeProperty(const size_t index) {
   return m_properties.takeProperty(index);
 }
 
+/**
+ * Peeks at a property from the properties list by index and return a const pointer to it
+ * @param index :: index of the property to peek at
+ * @returns :: const pointer to the found property, NULL otherwise
+ */
 const Kernel::Property *Algorithm::peekProperty(const size_t index) const { return m_properties.peekProperty(index); }
 
 /**

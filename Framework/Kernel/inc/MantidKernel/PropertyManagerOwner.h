@@ -88,6 +88,7 @@ public:
   void removeProperty(const std::string &name, const bool delproperty = true) override;
   /// Removes the property from management returning a pointer to it
   std::unique_ptr<Property> takeProperty(const size_t index) override;
+  /// Peeks at a property in a given position by returning a const pointer to it
   const Property *peekProperty(const size_t index) const override;
   /// Clears all properties under management
   void clear() override;

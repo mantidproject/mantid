@@ -416,6 +416,16 @@ public:
     TS_ASSERT_EQUALS(mgr.getProperties().size(), 0);
   }
 
+  void testPeekProperty() {
+    PropertyManagerHelper mgr;
+    const std::string name("TestProperty");
+    TS_ASSERT_THROWS_NOTHING(mgr.declareProperty(name, 10.0));
+    const Property *ptr;
+    TS_ASSERT_THROWS_NOTHING(ptr = mgr.peekProperty(0));
+    TS_ASSERT_EQUALS(name, ptr->name());
+    TS_ASSERT_EQUALS(mgr.getProperties().size(), 1);
+  }
+
   void testClear() {
     PropertyManagerHelper mgr;
     const std::string name("TestProperty");
