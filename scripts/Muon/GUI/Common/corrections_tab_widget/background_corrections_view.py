@@ -227,7 +227,7 @@ class BackgroundCorrectionsView(widget, ui_form):
             raise RuntimeError("There is no selected run/group table row.")
 
     def populate_corrections_table(self, runs: list, groups: list, use_raws: list, start_xs: list, end_xs: list,
-                                   backgrounds: list, background_errors: list, statuses: list) -> None:
+                                   backgrounds: list, background_errors: list, statuses: list, use_raw_enabled: bool) -> None:
         """Populates the background corrections table with the provided data."""
         self.correction_options_table.blockSignals(True)
         self.correction_options_table.setRowCount(0)
@@ -239,7 +239,8 @@ class BackgroundCorrectionsView(widget, ui_form):
             self.correction_options_table.insertRow(row)
             self.correction_options_table.setItem(row, RUN_COLUMN_INDEX, self._create_table_item(run, False))
             self.correction_options_table.setItem(row, GROUP_COLUMN_INDEX, self._create_table_item(group, False))
-            self.correction_options_table.setItem(row, USE_RAW_COLUMN_INDEX, self._create_bool_table_item(use_raw))
+            self.correction_options_table.setItem(row, USE_RAW_COLUMN_INDEX, self._create_bool_table_item(use_raw,
+                                                                                                          enabled=use_raw_enabled))
             self.correction_options_table.setItem(row, START_X_COLUMN_INDEX, self._create_double_table_item(start_x))
             self.correction_options_table.setItem(row, END_X_COLUMN_INDEX, self._create_double_table_item(end_x))
             self.correction_options_table.setItem(row, A0_COLUMN_INDEX,
@@ -289,10 +290,13 @@ class BackgroundCorrectionsView(widget, ui_form):
         elif column == END_X_COLUMN_INDEX:
             self._handle_end_x_changed()
 
-    def _create_bool_table_item(self, state: bool) -> QTableWidgetItem:
+    def _create_bool_table_item(self, state: bool, enabled: bool = True) -> QTableWidgetItem:
         """Creates a check box table widget item with an initial boolean state."""
         item = self._create_table_item("")
-        item.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
+        if enabled:
+            item.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
+        else:
+            item.setFlags(item.flags() ^ Qt.ItemIsEnabled)
         if state:
             item.setCheckState(Qt.Checked)
         else:
@@ -303,12 +307,17 @@ class BackgroundCorrectionsView(widget, ui_form):
         """Creates a table item for the corrections options table from a float."""
         return self._create_table_item(self._float_to_str(value), editable, enabled)
 
-    @staticmethod
-    def _create_table_item(text: str, editable: bool = True, enabled: bool = True, alignment: int = Qt.AlignCenter) \
-            -> QTableWidgetItem:
+    def _create_table_item(self, text: str, editable: bool = True, enabled: bool = True,
+                           alignment: int = Qt.AlignCenter) -> QTableWidgetItem:
         """Creates a table item for the corrections options table from a string."""
         item = QTableWidgetItem(text)
         item.setTextAlignment(alignment)
+        item = self._set_table_item_flags(item, editable, enabled)
+        return item
+
+    @staticmethod
+    def _set_table_item_flags(item: QTableWidgetItem, editable: bool, enabled: bool) -> QTableWidgetItem:
+        """Sets the flags for a table widget item."""
         if not editable:
             item.setFlags(item.flags() ^ Qt.ItemIsEditable)
         if not enabled:

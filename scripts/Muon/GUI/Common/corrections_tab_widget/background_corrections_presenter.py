@@ -80,16 +80,11 @@ class BackgroundCorrectionsPresenter:
         """Handles when the Use Raw check box is ticked or unticked in the table."""
         runs, groups = self._selected_runs_and_groups()
         use_raw = self.view.selected_use_raw()
-        if not use_raw and self.model.do_rebin():
-            for run, group in zip(runs, groups):
-                self.view.set_use_raw(run, group, use_raw)
-                self.model.set_use_raw(run, group, use_raw)
+        for run, group in zip(runs, groups):
+            self.view.set_use_raw(run, group, use_raw)
+            self.model.set_use_raw(run, group, use_raw)
 
-            self._perform_background_corrections_for(runs, groups)
-        else:
-            runs, groups = self.view.selected_run_and_group()
-            self.view.set_use_raw(runs[0], groups[0], True)
-            self._corrections_presenter.warning_popup("There is no rebinned data to use for background corrections.")
+        self._perform_background_corrections_for(runs, groups)
 
     def handle_start_x_changed(self) -> None:
         """Handles when a Start X table cell is changed."""
@@ -136,7 +131,7 @@ class BackgroundCorrectionsPresenter:
         runs, groups, use_raws, start_xs, end_xs, backgrounds, background_errors, statuses = \
             self.model.selected_correction_data()
         self.view.populate_corrections_table(runs, groups, use_raws, start_xs, end_xs, backgrounds, background_errors,
-                                             statuses)
+                                             statuses, self.model.is_rebin_fixed_selected())
 
     def _update_start_and_end_x_in_view_and_model(self, run: str, group: str, start_x: float, end_x: float) -> None:
         """Updates the start and end x in the model using the provided values."""

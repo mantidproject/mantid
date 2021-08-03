@@ -20,7 +20,6 @@ class CorrectionsPresenterTest(unittest.TestCase):
         self.current_run_string = "84447"
         self.run_strings = ["84447", "84448", "84449"]
         self.groups = ["fwd", "bwd", "bottom", "top"]
-        self.rebins = [False, False, False, False]
 
         self._setup_mock_view()
         self._setup_mock_model()
@@ -119,7 +118,7 @@ class CorrectionsPresenterTest(unittest.TestCase):
         self.presenter.background_presenter.handle_background_corrections_for_all_finished.assert_called_once_with()
         self.mock_presenter_correction_results.assert_called_once_with()
         self.presenter._perform_asymmetry_pairs_and_diffs_calculation.assert_called_once_with(self.run_strings,
-                                                                                              self.groups, self.rebins)
+                                                                                              self.groups)
 
     def test_that_handle_asymmetry_pairs_and_diffs_calc_finished_calls_the_expected_notifiers(self):
         self.presenter.handle_asymmetry_pairs_and_diffs_calc_finished()
@@ -180,7 +179,7 @@ class CorrectionsPresenterTest(unittest.TestCase):
 
         # Mock the correction result property
         self.presenter.thread_model_wrapper = mock.Mock(spec=ThreadModel)
-        self.mock_presenter_correction_results = mock.PropertyMock(return_value=(self.run_strings, self.groups, self.rebins))
+        self.mock_presenter_correction_results = mock.PropertyMock(return_value=(self.run_strings, self.groups))
         type(self.presenter.thread_model_wrapper).result = self.mock_presenter_correction_results
 
 
