@@ -619,16 +619,17 @@ class SANSILLReduction(PythonAlgorithm):
         Besides, it's only after loading when we can figure out whether it's TOF or Mono, which dictates to concatenate or not
         '''
         ws = self.getPropertyValue('OutputWorkspace')
+        tmp = f'__{ws}'
         runs = self.getPropertyValue('Runs').split(',')
         runs = list(filter(lambda x: x != EMPTY_TOKEN, runs))
-        LoadAndMerge(Filename=','.join(runs), OutputWorkspace=ws)
-        if isinstance(mtd[ws], WorkspaceGroup):
-            self.setup(mtd[ws][0])
+        LoadAndMerge(Filename=','.join(runs), OutputWorkspace=tmp)
+        if isinstance(mtd[tmp], WorkspaceGroup):
+            self.setup(mtd[tmp][0])
             if self.mode != AcqMode.TOF:
                 if self.process == 'Sample' or self.process == 'Transmission':
                     if not self.is_point:
-                        ConvertToPointData(InputWorkspace=ws, OutputWorkspace=ws)
-                    ws_list = self.inject_blank_samples(ws)
+                        ConvertToPointData(InputWorkspace=tmp, OutputWorkspace=tmp)
+                    ws_list = self.inject_blank_samples(tmp)
                     ConjoinXRuns(InputWorkspaces=ws_list, OutputWorkspace=ws, LinearizeAxis=True)
                     DeleteWorkspaces(WorkspaceList=ws_list)
                 else:
@@ -636,9 +637,9 @@ class SANSILLReduction(PythonAlgorithm):
             else:
                 raise RuntimeError('Listing of runs is not allowed for TOF mode as concatenation of multiple runs is not possible.')
         else:
-            self.setup(mtd[ws])
+            self.setup(mtd[tmp])
             if not self.is_point:
-                ConvertToPointData(InputWorkspace=ws, OutputWorkspace=ws)
+                ConvertToPointData(InputWorkspace=tmp, OutputWorkspace=ws)
         self.set_process_as(ws)
         assert isinstance(mtd[ws], MatrixWorkspace)
         return ws
