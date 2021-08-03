@@ -203,15 +203,28 @@ class AlgorithmTest(unittest.TestCase):
 
         self.assertIsNotNone(ws)
 
-    def xtest_createChildAlgorithm_with_int_arg(self):
+    def test_createChildAlgorithm_with_int_arg(self):
         parent_alg = AlgorithmManager.createUnmanaged('Load')
+        num_banks = 4
         child_alg = parent_alg.createChildAlgorithm("CreateSampleWorkspace", 0.0, 1.0, version=1,
-                                                    enableLogging=False, NumEvents=1000)
+                                                    enableLogging=False, NumBanks=num_banks)
+
         self.assertTrue(child_alg.isChild())
         child_alg.execute()
         ws = child_alg.getProperty("OutputWorkspace").value
 
-        self.assertIsNotNone(ws)
+        default_num_histos = 100  # From createSampleWorkspace
+        self.assertEquals((default_num_histos * num_banks), ws.getNumberHistograms())
+
+    def test_createChildAlgorithm_with_float_arg(self):
+        parent_alg = AlgorithmManager.createUnmanaged('Load')
+        child_alg = parent_alg.createChildAlgorithm("CreateSampleWorkspace", 0.0, 1.0, version=1,
+                                                    enableLogging=False, XMin=2.0)
+        self.assertTrue(child_alg.isChild())
+        child_alg.execute()
+        ws = child_alg.getProperty("OutputWorkspace").value
+
+        self.assertEquals(2.0, ws.readX(0)[0])
 
 
 if __name__ == '__main__':
