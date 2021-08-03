@@ -76,8 +76,11 @@ public:
     // Wavelength target
     msAlg.setPropertyValue("InputWorkspace", "ws_wavelength");
     msAlg.setPropertyValue("OutputWorkspace", "rst_ms");
+    msAlg.setProperty("ElementSize", 1e-3); // 1um integration size
     msAlg.execute();
     TS_ASSERT(msAlg.isExecuted());
+
+    // run through Paalmanping to test
 
     // Compare the results
 
@@ -89,7 +92,8 @@ public:
     divAlg->setProperty("RHSWorkspace", "ws_TOF");
     divAlg->setProperty("OutputWorkspace", "rst_mayer_factor");
     divAlg->execute();
-    Mantid::API::MatrixWorkspace_sptr rst_mayer_factor = divAlg->getProperty("OutputWorkspace");
+    Mantid::API::MatrixWorkspace_sptr rst_mayer_factor =
+        AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>("rst_mayer_factor");
 
     // Carpenter correction results can be directly extracted via its implicit name
     Mantid::API::MatrixWorkspace_sptr rst_carpenter_factor =
@@ -105,11 +109,10 @@ public:
     // NOTE: we have two detector, each with two spectrum
     for (size_t det_id = 0; det_id < 2; det_id++) {
       for (size_t spec_id = 0; spec_id < 2; spec_id++) {
-        g_log.notice() << "Detector ID: " << det_id << "  Spectrum ID: " << spec_id
-                       << "\n"
-                       //  << "Mayer: " << rst_mayer_factor->readY(det_id)[spec_id] << "\n"
+        g_log.notice() << "Detector ID: " << det_id << "  Spectrum ID: " << spec_id << "\n"
+                       << "Mayer: " << rst_mayer_factor->readY(det_id)[spec_id] << "\n"
                        << "Carpenter: " << rst_carpenter_factor->readY(det_id)[spec_id] << "\n"
-                       << "Mine: " << rst_ms->readY(det_id)[spec_id] << "\n";
+                       << "MSC: " << rst_ms->readY(det_id)[spec_id] << "\n";
       }
     }
   }
