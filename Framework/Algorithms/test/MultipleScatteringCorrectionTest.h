@@ -71,19 +71,19 @@ public:
     carrAlg->execute();
 
     // correct using multiple scattering correction
+    // NOTE:
+    // using smaller element size will dramatically increase the computing time, and it might lead to a
+    // memory allocation error from std::vector
     MultipleScatteringCorrection msAlg;
     msAlg.initialize();
     // Wavelength target
     msAlg.setPropertyValue("InputWorkspace", "ws_wavelength");
     msAlg.setPropertyValue("OutputWorkspace", "rst_ms");
-    msAlg.setProperty("ElementSize", 1e-3); // 1um integration size
+    // msAlg.setProperty("ElementSize", 0.4); // mm
     msAlg.execute();
     TS_ASSERT(msAlg.isExecuted());
 
-    // run through Paalmanping to test
-
     // Compare the results
-
     // Mayer correction results rst_out should be adjusted following to get the actual correction factor
     //    correction_factor_mayer = rst_out / rst_in
     auto divAlg = Mantid::API::AlgorithmManager::Instance().create("Divide");
@@ -99,7 +99,7 @@ public:
     Mantid::API::MatrixWorkspace_sptr rst_carpenter_factor =
         AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>("rst_carpenter_ms");
 
-    // Use the absorption correction (PaalmanPing, Sample Only) to perform a sanity check on the results of A1
+    // Use the absorption correction to perform a sanity check on the results of A1
 
     // Get the results from multiple scattering correction
     Mantid::API::MatrixWorkspace_sptr rst_ms =
@@ -115,6 +115,15 @@ public:
                        << "MSC: " << rst_ms->readY(det_id)[spec_id] << "\n";
       }
     }
+
+    // Given the current condition, we can only verify with some static values calculate using the current version
+    // of multiple scattering correction.
+    // This is mostly to make sure other changes that impacting multiple scattering correction can be caught early,
+    // and the reference values here are by no means physically correct
+    TS_ASSERT_DELTA(rst_ms->readY(0)[0], 0.184945, 1e-3);
+    TS_ASSERT_DELTA(rst_ms->readY(0)[1], 0.182756, 1e-3);
+    TS_ASSERT_DELTA(rst_ms->readY(1)[0], 0.184469, 1e-3);
+    TS_ASSERT_DELTA(rst_ms->readY(1)[1], 0.182175, 1e-3);
   }
 
 private:
