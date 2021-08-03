@@ -140,6 +140,7 @@ class SliceViewerDataView(QWidget):
 
         # Status bar
         self.status_bar = QStatusBar(parent=self)
+        self.status_bar.setStyleSheet('QStatusBar::item {border: None;}')  # Hide spacers between button and label
         self.status_bar_label = QLabel()
         self.help_button = QToolButton()
         self.help_button.setText("?")
