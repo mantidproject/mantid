@@ -579,6 +579,8 @@ This approach attempts to correct the instrument component positions based on th
    * At ISIS enter the resulting workspace as the calibration workspace into the DAE software when recording new runs.  The calibrated workspace will be copied into the resulting NeXuS file of the run.
 
 
+.. _Calibration Diagnostics:
+
 Calibration Diagnostics
 -----------------------
 
