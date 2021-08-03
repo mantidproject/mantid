@@ -8,6 +8,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/FileFinder.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/LoadRaw3.h"
@@ -38,6 +39,9 @@ public:
     inputFile = "HET15869.raw";
   }
 
+  /// <summary>
+  /// Test that the log file paths are correctly found on Windows when using the alternate data stream.
+  /// </summary>
   void testAlternateDataStream() {
 #ifdef _WIN32
     Poco::Path rawFilePath("./fakeRawFile.raw");
@@ -89,6 +93,26 @@ public:
     icpStatusFile.remove();
     statusFile.remove();
 #endif
+  }
+
+  /// <summary>
+  /// Check that the .log file is added to the list of log files when loading a raw file.
+  /// </summary>
+  void testLogFileSearch() {
+    std::string rawFileName = FileFinder::Instance().getFullPath("NIMROD00001097.raw");
+    Poco::Path rawFilePath(rawFileName);
+
+    std::list<std::string> logFiles = LoadRawHelper::searchForLogFiles(rawFilePath);
+
+    // Count number of log files ending in ".log" - should be exactly one.
+    int logCount = 0;
+    for (const auto &logFile : logFiles) {
+      if (boost::algorithm::iends_with(logFile, ".log")) {
+        ++logCount;
+      }
+    }
+
+    TS_ASSERT_EQUALS(1, logCount);
   }
 
   void testConfidence() {

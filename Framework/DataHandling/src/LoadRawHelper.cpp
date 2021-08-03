@@ -1161,16 +1161,16 @@ std::list<std::string> LoadRawHelper::searchForLogFiles(const Poco::Path &pathTo
         Kernel::Glob::glob(pattern, potentialLogFiles);
       } catch (std::exception &) {
       }
+      // Check for .log
+      const Poco::File combinedLogPath(Poco::Path(pathToRawFile).setExtension("log"));
+      if (combinedLogPath.exists()) {
+        // Push three column filename to end of list.
+        potentialLogFilesList.insert(potentialLogFilesList.end(), combinedLogPath.path());
+      }
     }
 
     // push potential log files from set to list.
     potentialLogFilesList.insert(potentialLogFilesList.begin(), potentialLogFiles.begin(), potentialLogFiles.end());
-    // Check for .log
-    const Poco::File combinedLogPath(Poco::Path(pathToRawFile).setExtension("log"));
-    if (combinedLogPath.exists()) {
-      // Push three column filename to end of list.
-      potentialLogFilesList.insert(potentialLogFilesList.end(), combinedLogPath.path());
-    }
   }
   return potentialLogFilesList;
 }
