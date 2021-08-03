@@ -48,6 +48,10 @@ class ReflectometryISISPreprocess(DataProcessorAlgorithm):
             doc='The preprocessed output workspace. If multiple input runs are specified '
                 'they will be summed into a single output workspace.')
 
+    def PyExec(self):
+        workspace = self._loadRun(self.getPropertyValue(self._RUNS))
+        self.setProperty(self._OUTPUT_WS, workspace)
+
     @staticmethod
     def _get_input_runs_validator():
         mandatoryInputRuns = CompositeValidator()
@@ -56,10 +60,6 @@ class ReflectometryISISPreprocess(DataProcessorAlgorithm):
         lenValidator.setLengthMin(1)
         mandatoryInputRuns.add(lenValidator)
         return mandatoryInputRuns
-
-    def PyExec(self):
-        workspace = self._loadRun(self.getPropertyValue(self._RUNS))
-        self.setProperty(self._OUTPUT_WS, workspace)
 
     def _loadRun(self, run: str) -> MatrixWorkspace:
         """Load a run as an event workspace if slicing is requested, or a histogram
