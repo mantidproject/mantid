@@ -125,5 +125,74 @@ class AlgorithmTest(unittest.TestCase):
         self.assertRaises(Exception, parent_alg.createChildAlgorithm, name='Rebin',version=1,startProgress=0.5,
                           endProgress=0.9,enableLogging=True, unknownKW=1)
 
+    def test_createChildAlgorithm_with_kwargs(self):
+        parent_alg = AlgorithmManager.createUnmanaged('Load')
+        child_alg = parent_alg.createChildAlgorithm('CreateSampleWorkspace', **{"XUnit": "Wavelength"})
+
+        self.assertTrue(child_alg.isChild())
+        child_alg.execute()
+        ws = child_alg.getProperty("OutputWorkspace").value
+
+        self.assertEqual("Wavelength", ws.getAxis(0).getUnit().unitID())
+
+    def test_createChildAlgorithm_with_named_args(self):
+        parent_alg = AlgorithmManager.createUnmanaged('Load')
+        child_alg = parent_alg.createChildAlgorithm('CreateSampleWorkspace', XUnit="Wavelength")
+
+        self.assertTrue(child_alg.isChild())
+        child_alg.execute()
+        ws = child_alg.getProperty("OutputWorkspace").value
+
+        self.assertEqual("Wavelength", ws.getAxis(0).getUnit().unitID())
+
+    def test_createChildAlgorithm_with_version_and_kwargs(self):
+        parent_alg = AlgorithmManager.createUnmanaged('Load')
+        child_alg = parent_alg.createChildAlgorithm('CreateSampleWorkspace', version=1, **{"XUnit": "Wavelength"})
+
+        self.assertTrue(child_alg.isChild())
+        child_alg.execute()
+        ws = child_alg.getProperty("OutputWorkspace").value
+
+        self.assertEqual("Wavelength", ws.getAxis(0).getUnit().unitID())
+
+    def test_createChildAlgorithm_with_all_args(self):
+        parent_alg = AlgorithmManager.createUnmanaged('Load')
+        child_alg = parent_alg.createChildAlgorithm('CreateSampleWorkspace', startProgress=0.0, endProgress=1.0,
+                                                    enableLogging=False, version=1, **{"XUnit": "Wavelength"})
+
+        self.assertTrue(child_alg.isChild())
+        child_alg.execute()
+        ws = child_alg.getProperty("OutputWorkspace").value
+
+        self.assertEqual("Wavelength", ws.getAxis(0).getUnit().unitID())
+
+    def test_createChildAlgorithm_without_name(self):
+        parent_alg = AlgorithmManager.createUnmanaged('Load')
+        with self.assertRaisesRegex(ValueError, "algorithm name"):
+            parent_alg.createChildAlgorithm(startProgress=0.0, endProgress=1.0,
+                                            enableLogging=False, version=1, **{"XUnit": "Wavelength"})
+
+    def test_createChildAlgorithm_without_parameters(self):
+        parent_alg = AlgorithmManager.createUnmanaged('Load')
+        with self.assertRaisesRegex(ValueError, "algorithm name"):
+            parent_alg.createChildAlgorithm()
+
+    def test_createChildAlgorithm_with_incorrect_types(self):
+        parent_alg = AlgorithmManager.createUnmanaged('Load')
+        with self.assertRaises(TypeError):
+            parent_alg.createChildAlgorithm("CreateSampleWorkspace", startProgress="0.0", endProgress=1.0,
+                                            enableLogging=False, version=1, **{"XUnit": "Wavelength"})
+
+    def test_createChildAlgorithm_with_mixed_args_and_kwargs(self):
+        parent_alg = AlgorithmManager.createUnmanaged('Load')
+        child_alg = parent_alg.createChildAlgorithm("CreateSampleWorkspace", 0.0, 1.0, version=1,
+                                                    enableLogging=False, **{"XUnit": "Wavelength"})
+        self.assertTrue(child_alg.isChild())
+        child_alg.execute()
+        ws = child_alg.getProperty("OutputWorkspace").value
+
+        self.assertEqual("Wavelength", ws.getAxis(0).getUnit().unitID())
+
+
 if __name__ == '__main__':
     unittest.main()
