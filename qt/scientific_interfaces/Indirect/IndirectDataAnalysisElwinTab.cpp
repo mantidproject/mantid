@@ -135,6 +135,16 @@ public:
   ~ScopedFalse() { m_ref = m_oldValue; }
 };
 
+QStringList getSampleWSSuffices() {
+  QStringList const wsSampleSuffixes{"red", "sqw"};
+  return wsSampleSuffixes;
+}
+
+QStringList getSampleFBSuffices() {
+  QStringList const fbSampleSuffixes{"red.*", "sqw.*"};
+  return fbSampleSuffixes;
+}
+
 } // namespace
 
 namespace MantidQt {
@@ -677,16 +687,6 @@ void IndirectDataAnalysisElwinTab::showAddWorkspaceDialog() {
   m_addWorkspaceDialog->show();
   connect(m_addWorkspaceDialog.get(), SIGNAL(addData()), this, SLOT(addData()));
   connect(m_addWorkspaceDialog.get(), SIGNAL(closeDialog()), this, SLOT(closeDialog()));
-}
-
-QStringList IndirectDataAnalysisElwinTab::getSampleWSSuffices() const {
-  QStringList const m_wsSampleSuffixes{"red", "sqw"};
-  return m_wsSampleSuffixes;
-}
-
-QStringList IndirectDataAnalysisElwinTab::getSampleFBSuffices() const {
-  QStringList const m_fbSampleSuffixes{"red.*", "sqw.*"};
-  return m_fbSampleSuffixes;
 }
 
 void IndirectDataAnalysisElwinTab::closeDialog() {

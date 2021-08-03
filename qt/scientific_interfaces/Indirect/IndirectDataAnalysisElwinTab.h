@@ -26,8 +26,6 @@ class MANTIDQT_INDIRECT_DLL IndirectDataAnalysisElwinTab : public IndirectDataAn
 public:
   IndirectDataAnalysisElwinTab(QWidget *parent = nullptr);
   ~IndirectDataAnalysisElwinTab();
-  QStringList getSampleWSSuffices() const;
-  QStringList getSampleFBSuffices() const;
   void updateTableFromModel();
   QTableWidget *getDataTable() const;
 
@@ -35,8 +33,6 @@ public slots:
   void removeSelectedData();
 
 protected:
-  QStringList m_wsSampleSuffixes;
-  QStringList m_fbSampleSuffixes;
   void addData(IAddWorkspaceDialog const *dialog);
   void newInputFilesFromDialog(IAddWorkspaceDialog const *dialog);
   virtual void addDataToModel(IAddWorkspaceDialog const *dialog);
