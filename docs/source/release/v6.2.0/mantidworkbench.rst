@@ -14,4 +14,6 @@ New and Improved
 Bugfixes
 --------
 
+- Fixed a bug in the Sliceviewer when transposing MDE workspaces multiple times would cause the data to become all zeros.
+
 :ref:`Release 6.2.0 <v6.2.0>`
