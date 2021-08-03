@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionDomain.h"
-#include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/Jacobian.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidCurveFitting/Jacobian.h"
@@ -93,8 +92,7 @@ GNU_DIAG_ON("unused-local-typedef")
 ///@endcond
 
 Mantid::API::Jacobian *getFunctionDeriv(IFunction &self, const Mantid::API::FunctionDomain &domain) {
-  Mantid::API::FunctionValues values(domain);
-  Mantid::CurveFitting::Jacobian out(values.size(), self.nParams());
+  Mantid::CurveFitting::Jacobian out(domain.size(), self.nParams());
   self.functionDeriv(domain, out);
 
   return new Mantid::CurveFitting::Jacobian(out);

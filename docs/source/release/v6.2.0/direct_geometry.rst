@@ -25,6 +25,7 @@ CrystalField
 Improvements
 ############
 - Added documentation and warning messages in the :ref:`Crystal Field Python Interface` related to IntensityScaling
+- Exposed method ''functionDeriv'' to the python interface
 
 BugFixes
 ########
