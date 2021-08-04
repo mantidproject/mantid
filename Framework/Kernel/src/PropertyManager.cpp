@@ -717,19 +717,6 @@ std::unique_ptr<Property> PropertyManager::takeProperty(const size_t index) {
   }
 }
 
-/**
- * Peeks at a property from the properties list by index and return a const pointer to it
- * @param index :: index of the property to peek at
- * @returns :: const pointer to the found property, NULL otherwise
- */
-const Property *PropertyManager::peekProperty(const size_t index) const {
-  try {
-    return m_orderedProperties[index];
-  } catch (const std::out_of_range &) {
-    return NULL;
-  }
-}
-
 //-----------------------------------------------------------------------------------------------
 /**
  * Clears the whole property map

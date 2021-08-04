@@ -341,6 +341,9 @@ void Load::exec() {
     // Code that supports multiple file loading.
     loadMultipleFiles();
   }
+
+  // Set the remaining properties of the loader
+  setOutputProperties(m_loader);
 }
 
 void Load::loadSingleFile() {
@@ -370,8 +373,9 @@ void Load::loadSingleFile() {
   // Execute the concrete loader
   m_loader->execute();
 
-  // Set output properties
-  setOutputProperties(m_loader);
+  // Set the output Workspace
+  Workspace_sptr wks = getOutputWorkspace("OutputWorkspace", m_loader);
+  setProperty("OutputWorkspace", wks);
 }
 
 void Load::loadMultipleFiles() {
@@ -523,22 +527,11 @@ void Load::setUpLoader(const API::IAlgorithm_sptr &loader, const double startPro
 void Load::setOutputProperties(const API::IAlgorithm_sptr &loader) {
   // Set output properties by looping the loaders properties and taking them until we have none left
   while (loader->propertyCount() > 0) {
-    auto prop = loader->peekProperty(0); // We peek to determine how to process the next property
+    auto prop = loader->takeProperty(0);
     if (prop && prop->direction() == Direction::Output) {
-      if (prop->name() == "OutputWorkspace") {
-        /*
-          We have problems with OutputWorkspace where the property already exists. This tries to then replace the
-          property with the wrong type if the child loader has a different type for it's output workspace. To get around
-          this, we first get the output workspace based on it's type then cast it to a workspace
-        */
-        Workspace_sptr wks = getOutputWorkspace(prop->name(), loader);
-        setProperty("OutputWorkspace", wks);
-        loader->takeProperty(0);
-      } else {
-        declareOrReplaceProperty(loader->takeProperty(0));
-      }
-    } else {
-      loader->takeProperty(0);
+      // We skip OutputWorkspace as this is set already from loadSingleFile and loadMultipleFiles
+      if (prop->name() != "OutputWorkspace")
+        declareOrReplaceProperty(std::move(prop));
     }
   }
 }
@@ -656,7 +649,7 @@ API::Workspace_sptr Load::loadFileToWs(const std::string &fileName, const std::s
   Workspace_sptr ws = loadAlg->getProperty("OutputWorkspace");
   // ws->setName(wsName);
   AnalysisDataService::Instance().addOrReplace(wsName, ws);
-  setOutputProperties(loadAlg);
+  m_loader = loadAlg;
   return ws;
 }
 

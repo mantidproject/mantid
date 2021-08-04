@@ -79,6 +79,8 @@ Algorithms
 Improvements
 ############
 - Updated :ref:`LoadMuonLog <algm-LoadMuonLog>` to read units for most log values.
+- :ref:`LoadMuonNexus <algm-LoadMuonNexus>`, :ref:`LoadMuonNexusV2 <algm-LoadMuonNexusV2>` and :ref:`LoadPSIMuonBin <algm-LoadPSIMuonBin>`
+  have all been updated to return the same outputs. Check their documentation pages for more.
 - It is now possible to exclude a fit range when executing the :ref:`CalculateMuonAsymmetry <algm-CalculateMuonAsymmetry>` algorithm.
 
 BugFixes

@@ -186,7 +186,6 @@ def create_vanadium_integration(van_run, calibration_directory):
     simple.SaveNexus(ws_van_int, van_int_file)
     simple.DeleteWorkspace(van_name)
     simple.DeleteWorkspace(ws_van_int)
-    simple.DeleteWorkspace(van_ws)
 
 
 def handle_van_curves(van_curves, van_path):

@@ -180,8 +180,6 @@ public:
 
   /// Removes the property from management and returns a pointer to it
   virtual std::unique_ptr<Property> takeProperty(const size_t index) = 0;
-  /// Peeks at a property in a given position by returning a const pointer to it
-  virtual const Property *peekProperty(const size_t index) const = 0;
 
   virtual void resetProperties() = 0;
 

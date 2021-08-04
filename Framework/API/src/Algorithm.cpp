@@ -2101,13 +2101,6 @@ std::unique_ptr<Kernel::Property> Algorithm::takeProperty(const size_t index) {
 }
 
 /**
- * Peeks at a property from the properties list by index and return a const pointer to it
- * @param index :: index of the property to peek at
- * @returns :: const pointer to the found property, NULL otherwise
- */
-const Kernel::Property *Algorithm::peekProperty(const size_t index) const { return m_properties.peekProperty(index); }
-
-/**
  * Clears all properties under management
  */
 void Algorithm::clear() { m_properties.clear(); }
