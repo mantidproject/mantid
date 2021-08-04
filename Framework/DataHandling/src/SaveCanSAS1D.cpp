@@ -429,10 +429,6 @@ void SaveCanSAS1D::createSASDataElement(std::string &sasData) {
   if (dataUnit == "I(q) (cm-1)")
     dataUnit = "1/cm";
 
-  sasData = "\n\t\t<SASdata>";
-  std::string sasIData;
-  std::string sasIBlockData;
-  std::string sasIHistData;
   for (size_t i = 0; i < m_workspace->getNumberHistograms(); ++i) {
     const auto intensities = m_workspace->points(i);
     auto intensityDeltas = m_workspace->pointStandardDeviations(i);
@@ -440,49 +436,46 @@ void SaveCanSAS1D::createSASDataElement(std::string &sasData) {
       intensityDeltas = HistogramData::PointStandardDeviations(intensities.size(), 0.0);
     const auto &ydata = m_workspace->y(i);
     const auto &edata = m_workspace->e(i);
+    sasData += "\n\t\t<SASdata>";
     for (size_t j = 0; j < ydata.size(); ++j) {
       // x data is the QData in xml.If histogramdata take the mean
       std::stringstream x;
       x << intensities[j];
       std::stringstream dx_str;
       dx_str << intensityDeltas[j];
-      sasIData = "\n\t\t\t<Idata><Q unit=\"1/A\">";
-      sasIData += x.str();
-      sasIData += "</Q>";
-      sasIData += "<I unit=";
-      sasIData += "\"";
-      sasIData += dataUnit;
-      sasIData += "\">";
+      sasData += "\n\t\t\t<Idata><Q unit=\"1/A\">";
+      sasData += x.str();
+      sasData += "</Q>";
+      sasData += "<I unit=";
+      sasData += "\"";
+      sasData += dataUnit;
+      sasData += "\">";
       //// workspace Y data is the I data in the xml file
       std::stringstream y;
       y << (ydata[j]);
-      sasIData += y.str();
-      sasIData += "</I>";
+      sasData += y.str();
+      sasData += "</I>";
 
       // workspace error data is the Idev data in the xml file
       std::stringstream e;
       e << edata[j];
 
-      sasIData += "<Idev unit=";
-      sasIData += "\"";
-      sasIData += dataUnit;
-      sasIData += "\">";
+      sasData += "<Idev unit=";
+      sasData += "\"";
+      sasData += dataUnit;
+      sasData += "\">";
 
-      sasIData += e.str();
-      sasIData += "</Idev>";
+      sasData += e.str();
+      sasData += "</Idev>";
 
-      sasIData += "<Qdev unit=\"1/A\">";
-      sasIData += dx_str.str();
-      sasIData += "</Qdev>";
+      sasData += "<Qdev unit=\"1/A\">";
+      sasData += dx_str.str();
+      sasData += "</Qdev>";
 
-      sasIData += "</Idata>";
-      sasIBlockData += sasIData;
+      sasData += "</Idata>";
     }
-    sasIHistData += sasIBlockData;
+    sasData += "\n\t\t</SASdata>";
   }
-  sasData += sasIHistData;
-
-  sasData += "\n\t\t</SASdata>";
 }
 
 /** This method creates an XML element named "SASsample"
