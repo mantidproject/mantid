@@ -57,6 +57,7 @@ class BackgroundCorrectionData:
             self.flat_background = flat_background.clone()
         else:
             self.flat_background = FunctionFactory.createFunction("FlatBackground")
+            self.flat_background.addConstraints("A0>0")
 
         if exp_decay is not None:
             self.exp_decay = exp_decay.clone()
@@ -129,7 +130,6 @@ class BackgroundCorrectionData:
             background /= self.rebin_fixed_step
             background_error /= self.rebin_fixed_step
 
-        self.flat_background = FunctionFactory.createFunction("FlatBackground")
         self.flat_background.setParameter(BACKGROUND_PARAM, background)
         self.flat_background.setError(BACKGROUND_PARAM, background_error)
         self.status = "Correction success"
