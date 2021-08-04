@@ -4,11 +4,13 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from mantid.api import ITableWorkspace
 from mantidqt.utils.qt import load_ui
+from mantidqt.widgets.workspacedisplay.table.presenter import TableWorkspaceDisplay
 
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QDoubleValidator, QPalette
-from qtpy.QtWidgets import QLineEdit, QStyledItemDelegate, QStyleOptionViewItem, QTableWidgetItem, QWidget
+from qtpy.QtWidgets import QLineEdit, QPushButton, QStyledItemDelegate, QStyleOptionViewItem, QTableWidgetItem, QWidget
 
 ui_form, widget = load_ui(__file__, "background_corrections_view.ui")
 
@@ -20,6 +22,7 @@ END_X_COLUMN_INDEX = 4
 A0_COLUMN_INDEX = 5
 A0_ERROR_COLUMN_INDEX = 6
 STATUS_COLUMN_INDEX = 7
+SHOW_MATRIX_COLUMN_INDEX = 8
 
 USE_RAW_TOOLTIP = "Calculate the background using the raw data or the rebinned data."
 
@@ -77,6 +80,7 @@ class BackgroundCorrectionsView(widget, ui_form):
         self._handle_use_raw_changed = None
         self._handle_start_x_changed = None
         self._handle_end_x_changed = None
+        self.handle_show_fit_output_clicked = None
 
     def set_slot_for_mode_combo_box_changed(self, slot) -> None:
         """Connect the slot for the Background corrections mode combo box."""
@@ -105,6 +109,10 @@ class BackgroundCorrectionsView(widget, ui_form):
     def set_slot_for_end_x_changed(self, slot) -> None:
         """Sets the slot for when a end x table cell is changed."""
         self._handle_end_x_changed = slot
+
+    def set_slot_for_show_fit_output_clicked(self, slot) -> None:
+        """Sets the slot for when the 'Show Output' is clicked."""
+        self.handle_show_fit_output_clicked = slot
 
     def set_background_correction_options_visible(self, visible: bool) -> None:
         """Sets the Background corrections widgets as being visible or hidden."""
@@ -176,12 +184,17 @@ class BackgroundCorrectionsView(widget, ui_form):
 
     def selected_run_and_group(self) -> tuple:
         """Returns the Run and Group that is in the same row as the selected table cell."""
-        if self._selected_row is not None:
-            run = self.correction_options_table.item(self._selected_row, RUN_COLUMN_INDEX).text()
-            group = self.correction_options_table.item(self._selected_row, GROUP_COLUMN_INDEX).text()
-            return [run], [group]
+        run, group = self.get_run_and_group_for_row(self._selected_row)
+        return [run], [group]
+
+    def get_run_and_group_for_row(self, row_index: int) -> tuple:
+        """Gets the Run and Group in a specific row."""
+        if row_index is not None:
+            run = self.correction_options_table.item(row_index, RUN_COLUMN_INDEX).text()
+            group = self.correction_options_table.item(row_index, GROUP_COLUMN_INDEX).text()
+            return run, group
         else:
-            raise RuntimeError("There is no selected run/group table row.")
+            raise RuntimeError("The provided row index is empty.")
 
     def selected_use_raw(self) -> bool:
         """Returns the boolean state of the Use Raw in the row that is currently selected."""
@@ -259,8 +272,15 @@ class BackgroundCorrectionsView(widget, ui_form):
                                                   self._create_double_table_item(background_error, enabled=False))
             self.correction_options_table.setItem(row, STATUS_COLUMN_INDEX,
                                                   self._create_table_item(status, False, alignment=Qt.AlignVCenter))
+            self.correction_options_table.setCellWidget(row, SHOW_MATRIX_COLUMN_INDEX,
+                                                        self.create_show_fit_output_button_for_row(row))
         self.correction_options_table.blockSignals(False)
         self.correction_options_table.resizeColumnsToContents()
+
+    def show_table_workspace_display(self, workspace: ITableWorkspace, display_name: str) -> None:
+        """Shows a table workspace in a separate table display window."""
+        table_display = TableWorkspaceDisplay(workspace, parent=self, name=display_name)
+        table_display.show_view()
 
     def _setup_corrections_table(self) -> None:
         """Setup the correction options table to have a good layout."""
@@ -299,6 +319,13 @@ class BackgroundCorrectionsView(widget, ui_form):
             self._handle_start_x_changed()
         elif column == END_X_COLUMN_INDEX:
             self._handle_end_x_changed()
+
+    def create_show_fit_output_button_for_row(self, row_index: int) -> QPushButton:
+        """Creates the Show Matrix button and connects its slot for a specific row."""
+        button = QPushButton()
+        button.setText("Show Output")
+        button.clicked.connect(lambda _: self.handle_show_fit_output_clicked(row_index))
+        return button
 
     def _create_bool_table_item(self, state: bool, enabled: bool = True, tooltip: str = "") -> QTableWidgetItem:
         """Creates a check box table widget item with an initial boolean state."""

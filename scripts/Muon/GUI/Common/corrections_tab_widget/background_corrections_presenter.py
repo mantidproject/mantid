@@ -4,6 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws
 from Muon.GUI.Common.contexts.corrections_context import BACKGROUND_MODE_NONE, FLAT_BACKGROUND_AND_EXP_DECAY
 from Muon.GUI.Common.corrections_tab_widget.background_corrections_model import BackgroundCorrectionsModel
 from Muon.GUI.Common.corrections_tab_widget.background_corrections_view import BackgroundCorrectionsView
@@ -28,6 +29,7 @@ class BackgroundCorrectionsPresenter:
         self.view.set_slot_for_use_raw_changed(self.handle_use_raw_changed)
         self.view.set_slot_for_start_x_changed(self.handle_start_x_changed)
         self.view.set_slot_for_end_x_changed(self.handle_end_x_changed)
+        self.view.set_slot_for_show_fit_output_clicked(lambda row: self.handle_show_fit_output_clicked(row))
 
     def initialize_model_options(self) -> None:
         """Initialise the model with the default fitting options."""
@@ -93,6 +95,14 @@ class BackgroundCorrectionsPresenter:
     def handle_end_x_changed(self) -> None:
         """Handles when a End X table cell is changed."""
         self._handle_start_or_end_x_changed(self._get_new_x_range_when_end_x_changed)
+
+    def handle_show_fit_output_clicked(self, row_index: int) -> None:
+        """Handles when the Show Output button is clicked in one of the table rows."""
+        run, group = self.view.get_run_and_group_for_row(row_index)
+        parameter_table_name, covariance_matrix_name = self.model.create_background_output_workspaces_for(run, group)
+        if parameter_table_name is not None and covariance_matrix_name is not None:
+            self.view.show_table_workspace_display(retrieve_ws(parameter_table_name), "Parameter Table")
+            self.view.show_table_workspace_display(retrieve_ws(covariance_matrix_name), "Normalised Covariance Matrix")
 
     def handle_background_corrections_for_all_finished(self) -> None:
         """Handle when the background corrections has finished."""

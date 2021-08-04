@@ -89,22 +89,30 @@ class BackgroundCorrectionData:
             run_clone_workspace({"InputWorkspace": self.uncorrected_rebin_workspace_name,
                                  "OutputWorkspace": self.rebin_workspace_name})
 
+    def create_background_output_workspaces(self, fit_function: IFunction) -> tuple:
+        """Creates the output workspaces for the currently stored background data."""
+        params = self._get_parameters_for_background_fit(fit_function, create_output=True, max_iterations=0)
+        _, parameter_table_name, _, _, _, covariance_matrix_name = run_Fit(params, AlgorithmManager.create("Fit"))
+        return parameter_table_name, covariance_matrix_name
+
     def calculate_background(self, fit_function: IFunction) -> None:
         """Calculates the background in the counts workspace."""
-        params = self._get_parameters_for_background_fit(fit_function)
+        params = self._get_parameters_for_background_fit(fit_function, create_output=False)
         function, fit_status, chi_squared = run_Fit(params, AlgorithmManager.create("Fit"))
 
         self._handle_background_fit_output(function, fit_status, chi_squared)
 
-    def _get_parameters_for_background_fit(self, fit_function: IFunction) -> dict:
+    def _get_parameters_for_background_fit(self, fit_function: IFunction, create_output: bool,
+                                           max_iterations: int = 500) -> dict:
         """Gets the parameters to use for the background Fit."""
         input_name = self.uncorrected_workspace_name if self._use_raw_data() else self.uncorrected_rebin_workspace_name
         return {"Function": fit_function,
                 "InputWorkspace": input_name,
                 "StartX": self.start_x,
                 "EndX": self.end_x,
-                "CreateOutput": False,
-                "CalcErrors": True}
+                "CreateOutput": create_output,
+                "CalcErrors": True,
+                "MaxIterations": max_iterations}
 
     def _handle_background_fit_output(self, function: IFunction, fit_status: str, chi_squared: float) -> None:
         """Handles the output of the background fit."""
@@ -303,6 +311,16 @@ class BackgroundCorrectionsModel:
 
         start_x, end_x = self.default_x_range(run, group)
         return BackgroundCorrectionData(True, rebin_fixed, start_x, end_x)
+
+    def create_background_output_workspaces_for(self, run: str, group: str) -> tuple:
+        """Creates the parameter table and normalised covariance matrix for a Run/Group by performing a fit."""
+        run_group = tuple([run, group])
+        if run_group in self._corrections_context.background_correction_data:
+            correction_data = self._corrections_context.background_correction_data[run_group]
+            fit_function = self._get_fit_function_for_background_fit(correction_data)
+            return correction_data.create_background_output_workspaces(fit_function)
+        else:
+            return None, None
 
     def reset_background_subtraction_data(self) -> None:
         """Resets the calculated background functions and corrected counts data in the ADS."""
