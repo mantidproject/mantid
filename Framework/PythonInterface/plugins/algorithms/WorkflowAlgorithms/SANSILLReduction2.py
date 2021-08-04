@@ -49,8 +49,8 @@ class SANSILLReduction(PythonAlgorithm):
     def validateInputs(self):
         issues = dict()
         process = self.getPropertyValue('ProcessAs')
-        if process == 'Transmission' and not self.getPropertyValue('EmptyBeamWorkspace'):
-            issues['EmptyBeamWorkspace'] = 'Empty beam input workspace is mandatory for transmission calculation.'
+        if process == 'Transmission' and not self.getPropertyValue('FluxWorkspace'):
+            issues['FluxWorkspace'] = 'Empty beam flux input workspace is mandatory for transmission calculation.'
         samples_thickness = len(self.getProperty('SampleThickness').value)
         if samples_thickness != 1 and samples_thickness != self.getPropertyValue('Runs').count(',') + 1:
             issues['SampleThickness'] = 'Sample thickness must have either a single value or as many as there are samples.'
