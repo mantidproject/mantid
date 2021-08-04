@@ -8,7 +8,6 @@
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspaceProperty, MatrixWorkspace, WorkspaceGroup)
 from mantid.kernel import (CompositeValidator, StringArrayLengthValidator, StringArrayMandatoryValidator,
                            StringArrayProperty, Direction)
-from mantid.simpleapi import LoadEventNexus, LoadNexus
 
 
 class ReflectometryISISPreprocess(DataProcessorAlgorithm):
@@ -66,14 +65,17 @@ class ReflectometryISISPreprocess(DataProcessorAlgorithm):
         workspace otherwise. Transmission runs are always loaded as histogram workspaces."""
         event_mode = self.getProperty(self._EVENT_MODE).value
         if event_mode:
-            alg = LoadEventNexus(Filename=run, LoadMonitors=True, StoreInADS=False)
-            ws = alg.OutputWorkspace
+            alg = self.createChildAlgorithm('LoadEventNexus', Filename=run, LoadMonitors=True)
+            alg.execute()
+            ws = alg.getProperty('OutputWorkspace').value
             # TODO
             # monitors = alg.MonitorWorkspace
             self._validate_event_ws(ws)
             self.log().information('Loaded event workspace')
         else:
-            ws = LoadNexus(Filename=run, StoreInADS=False)
+            alg = self.createChildAlgorithm('LoadNexus', Filename=run)
+            alg.execute()
+            ws = alg.getProperty('OutputWorkspace').value
             self.log().information('Loaded workspace ')
         return ws
 
