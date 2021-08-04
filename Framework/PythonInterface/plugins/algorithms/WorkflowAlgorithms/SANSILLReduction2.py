@@ -351,6 +351,7 @@ class SANSILLReduction(PythonAlgorithm):
                 DeleteWorkspace(tmp)
             else:
                 Divide(LHSWorkspace=ws, RHSWorkspace=flux_ws, OutputWorkspace=ws)
+            AddSampleLog(Workspace=ws, LogText='True', LogType='String', LogName='NormalisedByFlux')
 
     def apply_transmission(self, ws):
         '''Applies transmission correction'''
@@ -438,7 +439,7 @@ class SANSILLReduction(PythonAlgorithm):
             If neither is normalised by flux, only then we have to rescale by the factor
         '''
         message = 'Sample and flat field runs are not consistent in terms of flux normalisation; ' \
-                  'unable to perform flat field normalisation.' \
+                  'unable to perform flat field normalisation. ' \
                   'Make sure either they are both normalised or both not normalised by direct beam flux.'
         run = mtd[ws].getRun()
         run_ref = mtd[flat_ws].getRun()
