@@ -64,6 +64,8 @@ New Features
 - Added an external plot button to the ALC interface which will plot in workbench the current tab's plot
 - Added a period info button to the ALC interface which displays a table of period information from the loaded runs
   (this is equivalent to the periods button in the Muon Analysis and Frequency Domain Analysis Interfaces)
+- If the sample log has a unit, it will be displayed on the axis of the plot
+- The plots are no longer normalised by bin width
 
 Elemental Analysis
 ------------------
@@ -79,6 +81,10 @@ Improvements
 ############
 - Updated :ref:`LoadMuonLog <algm-LoadMuonLog>` to read units for most log values.
 - It is now possible to exclude a fit range when executing the :ref:`CalculateMuonAsymmetry <algm-CalculateMuonAsymmetry>` algorithm.
+-The :ref:`PlotAsymmetryByLogValue <algm-PlotAsymmetryByLogValue>` algorithm will include the units for the log value (when they are available)
+
+
+
 
 BugFixes
 ############

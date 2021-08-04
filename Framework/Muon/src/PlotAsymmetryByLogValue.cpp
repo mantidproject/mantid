@@ -196,8 +196,15 @@ void PlotAsymmetryByLogValue::exec() {
   MatrixWorkspace_sptr outWS = create<Workspace2D>(nplots,         //  the number of plots
                                                    Points(npoints) //  the number of data points on a plot
   );
+  Workspace_sptr loadedWs = doLoad(m_fileNames[0]);
+  MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(loadedWs);
+
+  const Run &run = ws->run();
+  auto property = run.getLogData(m_logName);
+  std::string units = property->units();
   // Populate output workspace with data
-  populateOutputWorkspace(outWS, nplots);
+  populateOutputWorkspace(outWS, nplots, units);
+
   // Assign the result to the output workspace property
   setProperty("OutputWorkspace", outWS);
 
@@ -431,7 +438,8 @@ Workspace_sptr PlotAsymmetryByLogValue::loadCorrectionsFromFile(const std::strin
  *   @param outWS :: [input/output] Output workspace to populate
  *   @param nplots :: [input] Number of histograms
  */
-void PlotAsymmetryByLogValue::populateOutputWorkspace(MatrixWorkspace_sptr &outWS, int nplots) {
+void PlotAsymmetryByLogValue::populateOutputWorkspace(MatrixWorkspace_sptr &outWS, int nplots,
+                                                      const std::string units) {
 
   auto tAxis = std::make_unique<TextAxis>(nplots);
   if (nplots == 1) {
@@ -469,7 +477,7 @@ void PlotAsymmetryByLogValue::populateOutputWorkspace(MatrixWorkspace_sptr &outW
   outWS->replaceAxis(1, std::move(tAxis));
   outWS->getAxis(0)->title() = m_logName;
   outWS->getAxis(0)->setUnit("Label");
-  std::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(outWS->getAxis(0)->unit())->setLabel(m_logName, "");
+  std::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(outWS->getAxis(0)->unit())->setLabel(m_logName, units);
   outWS->setYUnitLabel("Asymmetry");
 }
 
