@@ -89,13 +89,21 @@ function(add_python_package pkg_name)
   # install directory is specified here and then --install-scripts=bin
   # --install-lib=lib removes any of the platform/distribution specific install
   # directories so we can have a flat structure
+  if (CONDA_BUILD)
+  install(
+    CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E env MANTID_VERSION_STR=${_version_str} \
+    ${Python_EXECUTABLE} -m pip install . --no-deps --ignore-installed --no-cache-dir -vvv)"
+  )
+  else()
   install(
     CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E env MANTID_VERSION_STR=${_version_str} \
     ${Python_EXECUTABLE} ${_setup_py} install -O1 --single-version-externally-managed \
     --root=${_setup_py_build_root}/install --install-scripts=bin --install-lib=lib \
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})"
   )
+  endif()
 
+  if (NOT CONDA_BUILD)
   # Registers the "installed" components with CMake so it will carry them over
   if(_parsed_arg_EXCLUDE_FROM_INSTALL)
     foreach(_dest ${_parsed_arg_INSTALL_LIB_DIRS})
@@ -115,7 +123,7 @@ function(add_python_package pkg_name)
       )
     endforeach()
   endif()
-
+  endif()
   # install the generated executable
   if(_parsed_arg_EXECUTABLE AND _parsed_arg_INSTALL_BIN_DIR)
     install(PROGRAMS ${_setup_py_build_root}/install/bin/${pkg_name}
