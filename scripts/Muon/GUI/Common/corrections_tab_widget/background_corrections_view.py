@@ -72,6 +72,7 @@ class BackgroundCorrectionsView(widget, ui_form):
         self._selected_value: str = None
 
         self.set_background_correction_options_visible(False)
+        self.set_function_combo_box_tooltips()
 
         self._handle_use_raw_changed = None
         self._handle_start_x_changed = None
@@ -114,6 +115,13 @@ class BackgroundCorrectionsView(widget, ui_form):
         self.show_all_runs_checkbox.setVisible(visible)
         self.apply_table_changes_to_all_checkbox.setVisible(visible)
         self.correction_options_table.setVisible(visible)
+
+    def set_function_combo_box_tooltips(self) -> None:
+        """Update the tooltips for the combobox."""
+        self.function_combo_box.setItemData(0, "A0 >= 0 (constraint)\n"
+                                               "A = 1e6 (initial value)\n"
+                                               "Lambda = 1.0/2.2 (fixed)", Qt.ToolTipRole)
+        self.function_combo_box.setItemData(1, "A0 >= 0 (constraint)", Qt.ToolTipRole)
 
     @property
     def background_correction_mode(self) -> str:
