@@ -23,14 +23,8 @@ enum class ScaleUnits { undefined, metres, centimetres, millimetres };
 
 class DLLExport MeshFileIO {
 public:
-  Kernel::Matrix<double> generateMatrix(double xRotation, double yRotation, double zRotation);
-
   std::shared_ptr<Geometry::MeshObject> rotate(std::shared_ptr<Geometry::MeshObject> environmentMesh, double xRotation,
                                                double yRotation, double zRotation);
-
-  Kernel::Matrix<double> generateXRotation(double xRotation);
-  Kernel::Matrix<double> generateYRotation(double yRotation);
-  Kernel::Matrix<double> generateZRotation(double zRotation);
 
   std::shared_ptr<Geometry::MeshObject> translate(std::shared_ptr<Geometry::MeshObject> environmentMesh,
                                                   const std::vector<double> &translationVector);
