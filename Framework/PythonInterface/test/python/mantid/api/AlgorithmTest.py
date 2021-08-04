@@ -7,16 +7,33 @@
 
 import unittest
 import json
-from mantid.api import AlgorithmID, AlgorithmManager, FrameworkManagerImpl
+from mantid.kernel import Direction, FloatArrayProperty, IntArrayProperty, StringArrayProperty, \
+    IntArrayMandatoryValidator, FloatArrayMandatoryValidator, StringArrayMandatoryValidator
+from mantid.api import AlgorithmID, AlgorithmManager, AlgorithmFactory, FrameworkManagerImpl, PythonAlgorithm
 from testhelpers import run_algorithm
 
 
-class AlgorithmTest(unittest.TestCase):
+class _ParamTester(PythonAlgorithm):
 
+    def category(self):
+        return "Examples"
+
+    def PyInit(self):
+        self.declareProperty(FloatArrayProperty("FloatInput", FloatArrayMandatoryValidator()))
+        self.declareProperty(IntArrayProperty("IntInput", IntArrayMandatoryValidator()))
+        self.declareProperty(StringArrayProperty("StringInput", StringArrayMandatoryValidator()))
+
+    def PyExec(self):
+        pass
+
+
+class AlgorithmTest(unittest.TestCase):
     _load = None
 
     def setUp(self):
         FrameworkManagerImpl.Instance()
+        self._alg_factory = AlgorithmFactory.Instance()
+        self._alg_factory.subscribe(_ParamTester)
         if self._load is None:
             self.__class__._load = AlgorithmManager.createUnmanaged('Load')
             self._load.initialize()
@@ -48,42 +65,41 @@ class AlgorithmTest(unittest.TestCase):
         self.assertRaises(RuntimeError, alg.execute)
 
     def test_execute_succeeds_with_valid_props(self):
-        data = [1.5,2.5,3.5]
-        alg = run_algorithm('CreateWorkspace',DataX=data,DataY=data,NSpec=1,UnitX='Wavelength',child=True)
+        data = [1.5, 2.5, 3.5]
+        alg = run_algorithm('CreateWorkspace', DataX=data, DataY=data, NSpec=1, UnitX='Wavelength', child=True)
         self.assertEqual(alg.isExecuted(), True)
         self.assertEqual(alg.isRunning(), False)
         self.assertEqual(alg.getProperty('NSpec').value, 1)
         self.assertEqual(type(alg.getProperty('NSpec').value), int)
         self.assertEqual(alg.getProperty('NSpec').name, 'NSpec')
         ws = alg.getProperty('OutputWorkspace').value
-        self.assertTrue(ws.getMemorySize() > 0.0 )
+        self.assertTrue(ws.getMemorySize() > 0.0)
 
         as_str = str(alg)
         self.assertEqual(as_str, '{"name":"CreateWorkspace","properties":{"DataX":[1.5,2.5,3.5],"DataY":[1.5,2.5,3.5],'
-                          '"OutputWorkspace":"UNUSED_NAME_FOR_CHILD","UnitX":"Wavelength"},"version":1}')
+                                 '"OutputWorkspace":"UNUSED_NAME_FOR_CHILD","UnitX":"Wavelength"},"version":1}')
 
     def test_execute_succeeds_with_unicode_props(self):
-        data = [1.5,2.5,3.5]
-        kwargs = {'child':True}
+        data = [1.5, 2.5, 3.5]
+        kwargs = {'child': True}
         unitx = 'Wavelength'
         kwargs['UnitX'] = unitx
 
-
-        alg = run_algorithm('CreateWorkspace',DataX=data,DataY=data,NSpec=1,**kwargs)
+        alg = run_algorithm('CreateWorkspace', DataX=data, DataY=data, NSpec=1, **kwargs)
         self.assertEqual(alg.isExecuted(), True)
         self.assertEqual(alg.isRunning(), False)
         self.assertEqual(alg.getProperty('NSpec').value, 1)
         self.assertEqual(type(alg.getProperty('NSpec').value), int)
         self.assertEqual(alg.getProperty('NSpec').name, 'NSpec')
         ws = alg.getProperty('OutputWorkspace').value
-        self.assertTrue(ws.getMemorySize() > 0.0 )
+        self.assertTrue(ws.getMemorySize() > 0.0)
 
         as_str = str(alg)
         self.assertEqual(as_str, '{"name":"CreateWorkspace","properties":{"DataX":[1.5,2.5,3.5],"DataY":[1.5,2.5,3.5],'
-                          '"OutputWorkspace":"UNUSED_NAME_FOR_CHILD","UnitX":"Wavelength"},"version":1}')
+                                 '"OutputWorkspace":"UNUSED_NAME_FOR_CHILD","UnitX":"Wavelength"},"version":1}')
 
     def test_execute_succeeds_with_unicode_kwargs(self):
-        props = json.loads('{"DryRun":true}') # this is always unicode
+        props = json.loads('{"DryRun":true}')  # this is always unicode
         alg = run_algorithm('Segfault', **props)
 
     def test_getAlgorithmID_returns_AlgorithmID_object(self):
@@ -93,14 +109,14 @@ class AlgorithmTest(unittest.TestCase):
     def test_AlgorithmID_compares_by_value(self):
         alg = AlgorithmManager.createUnmanaged('Load')
         id = alg.getAlgorithmID()
-        self.assertEqual(id, id) # equals itself
+        self.assertEqual(id, id)  # equals itself
         alg2 = AlgorithmManager.createUnmanaged('Load')
         id2 = alg2.getAlgorithmID()
         self.assertNotEqual(id2, id)
 
     def test_cancel_does_nothing_to_executed_algorithm(self):
         data = [1.0]
-        alg = run_algorithm('CreateWorkspace',DataX=data,DataY=data,NSpec=1,UnitX='Wavelength',child=True)
+        alg = run_algorithm('CreateWorkspace', DataX=data, DataY=data, NSpec=1, UnitX='Wavelength', child=True)
         self.assertEqual(alg.isExecuted(), True)
         self.assertEqual(alg.isRunning(), False)
         alg.cancel()
@@ -116,14 +132,14 @@ class AlgorithmTest(unittest.TestCase):
     def test_createChildAlgorithm_respects_keyword_arguments(self):
         parent_alg = AlgorithmManager.createUnmanaged('Load')
         try:
-            child_alg = parent_alg.createChildAlgorithm(name='Rebin',version=1,startProgress=0.5,
-                                                        endProgress=0.9,enableLogging=True)
+            parent_alg.createChildAlgorithm(name='Rebin', version=1, startProgress=0.5,
+                                                        endProgress=0.9, enableLogging=True)
         except Exception as exc:
             self.fail("Expected createChildAlgorithm not to throw but it did: %s" % (str(exc)))
 
         # Unknown keyword
-        self.assertRaises(Exception, parent_alg.createChildAlgorithm, name='Rebin',version=1,startProgress=0.5,
-                          endProgress=0.9,enableLogging=True, unknownKW=1)
+        self.assertRaises(Exception, parent_alg.createChildAlgorithm, name='Rebin', version=1, startProgress=0.5,
+                          endProgress=0.9, enableLogging=True, unknownKW=1)
 
     def test_createChildAlgorithm_with_kwargs(self):
         parent_alg = AlgorithmManager.createUnmanaged('Load')
@@ -225,6 +241,12 @@ class AlgorithmTest(unittest.TestCase):
         ws = child_alg.getProperty("OutputWorkspace").value
 
         self.assertEquals(2.0, ws.readX(0)[0])
+
+    def test_createChildAlgorithm_with_list(self):
+        parent_alg = AlgorithmManager.createUnmanaged('Load')
+        args = {'FloatInput': [2.3, 4.5], 'IntInput': [1, 2, 3], 'StringInput': ['test1', 'test2']}
+        child_alg = parent_alg.createChildAlgorithm("_ParamTester", **args)
+        self.assertIsNotNone(child_alg)
 
 
 if __name__ == '__main__':
