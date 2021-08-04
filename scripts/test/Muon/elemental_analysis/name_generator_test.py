@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from Muon.GUI.ElementalAnalysis.elemental_analysis import gen_name
+from Muon.GUI.ElementalAnalysis.periodic_table_widget_presenter import gen_name
 
 
 class NameGeneratorTest(unittest.TestCase):
