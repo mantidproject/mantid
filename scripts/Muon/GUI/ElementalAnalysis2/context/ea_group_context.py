@@ -79,6 +79,11 @@ class EAGroupContext(object):
     def selected_groups(self):
         return self._selected_groups
 
+    # To allow compatibility with fitting context
+    @property
+    def selected_groups_and_pairs(self):
+        return self._selected_groups
+
     def clear(self):
         self._groups = []
 
@@ -141,7 +146,7 @@ class EAGroupContext(object):
             if suffix in workspace_name:
                 workspace_name = workspace_name.replace(suffix, "")
 
-        run, detector = workspace_name.split(";")
+        run, detector, *_ = workspace_name.split(";")
 
         return run.strip(), detector.strip()
 
@@ -167,3 +172,13 @@ class EAGroupContext(object):
 
                 elif workspace_name.endswith(MATCH_GROUP_WS_SUFFIX):
                     group.remove_matches_group()
+
+    def check_if_any_group_rebinned(self):
+        """
+        checks if any group pin selected groups has been rebinned
+        :return:
+        """
+        for group_name in self._selected_groups:
+            if self[group_name].is_rebinned_workspace_present():
+                return True
+        return False
