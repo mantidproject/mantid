@@ -87,10 +87,6 @@ void SaveCanSAS1D2::exec() {
     throw std::invalid_argument("Invalid inputworkspace ,Error in  SaveCanSAS1D");
   }
 
-  if (m_workspace->getNumberHistograms() > 1) {
-    throw std::invalid_argument("Error in SaveCanSAS1D - more than one histogram.");
-  }
-
   if ((m_trans_ws && m_trans_ws->getNumberHistograms() > 1) ||
       (m_transcan_ws && m_transcan_ws->getNumberHistograms() > 1)) {
     throw std::invalid_argument("Error in SaveCanSAS1D - more than one "
