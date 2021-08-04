@@ -350,6 +350,8 @@ class BackgroundCorrectionsModel:
 
     def _get_fit_function_for_background_fit(self, correction_data: BackgroundCorrectionData) -> IFunction:
         """Returns the fit function to use for a background fit."""
+        correction_data = self._set_background_parameter_if_not_using_raw(correction_data)
+
         if self._corrections_context.selected_function == FLAT_BACKGROUND:
             return correction_data.flat_background
         elif self._corrections_context.selected_function == FLAT_BACKGROUND_AND_EXP_DECAY:
@@ -359,6 +361,17 @@ class BackgroundCorrectionsModel:
             return composite
 
         raise RuntimeError("The selected background function is not recognised.")
+
+    @staticmethod
+    def _set_background_parameter_if_not_using_raw(correction_data: BackgroundCorrectionData) -> BackgroundCorrectionData:
+        """Sets the background parameter to an appropriate value before doing a fit using rebinned data."""
+        rebin_fixed_step = correction_data.rebin_fixed_step
+        if not correction_data.use_raw and rebin_fixed_step != 0:
+            background = correction_data.flat_background.getParameterValue(BACKGROUND_PARAM) * rebin_fixed_step
+            background_error = correction_data.flat_background.getError(BACKGROUND_PARAM) * rebin_fixed_step
+            correction_data.flat_background.setParameter(BACKGROUND_PARAM, background)
+            correction_data.flat_background.setError(BACKGROUND_PARAM, background_error)
+        return correction_data
 
     def are_all_corrections_successful(self) -> bool:
         """Returns true if all the background corrections were applied successfully."""
