@@ -92,11 +92,6 @@ void LoadILLSANS2::init() {
                   "Name of the nexus file to load");
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "The name to use for the output workspace");
-  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
-  mustBePositive->setLower(0);
-  declareProperty("Wavelength", 0.0, mustBePositive,
-                  "The wavelength of the experiment, in angstroms. Used only for D16. Will "
-                  "override the nexus' value if there is one.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -785,15 +780,10 @@ void LoadILLSANS2::loadMetaData(const NeXus::NXEntry &entry, const std::string &
   }
 
   double wavelength;
-  if (getPointerToProperty("Wavelength")->isDefault()) {
-    if (m_instrumentName == "D16") {
-      wavelength = entry.getFloat(instrumentNamePath + "/Beam/wavelength");
-    } else {
-      wavelength = entry.getFloat(instrumentNamePath + "/selector/wavelength");
-    }
-    g_log.debug() << "Wavelength found in the nexus file: " << wavelength << '\n';
+  if (m_instrumentName == "D16") {
+    wavelength = entry.getFloat(instrumentNamePath + "/Beam/wavelength");
   } else {
-    wavelength = getProperty("Wavelength");
+    wavelength = entry.getFloat(instrumentNamePath + "/selector/wavelength");
   }
 
   // round the wavelength to avoid unnecessary rebinning during merge runs
