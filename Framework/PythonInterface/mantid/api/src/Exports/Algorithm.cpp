@@ -99,15 +99,26 @@ template <typename T> void extractKwargs(const dict &kwargs, const std::string &
   }
 }
 
-class SetPropertyVisitor {
+class SetPropertyVisitor : public boost::static_visitor<> {
 public:
   SetPropertyVisitor(Mantid::API::Algorithm_sptr &alg, std::string const &propName)
       : m_alg(alg), m_propName(propName) {}
 
-  void operator()(bool value) { m_alg->setProperty(m_propName, value); }
-  void operator()(int value) { m_alg->setProperty(m_propName, value); }
-  void operator()(double value) { m_alg->setProperty(m_propName, value); }
-  void operator()(std::string const &value) { m_alg->setPropertyValue(m_propName, value); }
+  void operator()(bool value) const { m_alg->setProperty(m_propName, value); }
+  void operator()(int value) const { m_alg->setProperty(m_propName, value); }
+  void operator()(double value) const { m_alg->setProperty(m_propName, value); }
+  void operator()(std::string const &value) const { m_alg->setPropertyValue(m_propName, value); }
+
+  void operator()(std::vector<bool> const &value) const { m_alg->setProperty(m_propName, value); }
+  void operator()(std::vector<int> const &value) const { m_alg->setProperty(m_propName, value); }
+  void operator()(std::vector<double> const &value) const { m_alg->setProperty(m_propName, value); }
+  void operator()(std::vector<std::string> const &value) const { m_alg->setProperty(m_propName, value); }
+
+  void operator()(std::vector<Mantid::PythonInterface::PyNativeTypeExtractor::PythonOutputT> const &values) const {
+    for (auto const &value : values) {
+      boost::apply_visitor(SetPropertyVisitor(m_alg, m_propName), value);
+    }
+  }
 
 private:
   Mantid::API::Algorithm_sptr &m_alg;
@@ -152,7 +163,7 @@ object createChildWithProps(tuple args, dict kwargs) {
     using Mantid::PythonInterface::PyNativeTypeExtractor;
     auto nativeObj = PyNativeTypeExtractor::convert(curArg);
 
-    std::visit(SetPropertyVisitor(childAlg, propName), nativeObj);
+    boost::apply_visitor(SetPropertyVisitor(childAlg, propName), nativeObj);
   }
   return object(childAlg);
 }
