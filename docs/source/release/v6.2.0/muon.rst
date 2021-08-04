@@ -81,10 +81,7 @@ Improvements
 ############
 - Updated :ref:`LoadMuonLog <algm-LoadMuonLog>` to read units for most log values.
 - It is now possible to exclude a fit range when executing the :ref:`CalculateMuonAsymmetry <algm-CalculateMuonAsymmetry>` algorithm.
--The :ref:`PlotAsymmetryByLogValue <algm-PlotAsymmetryByLogValue>` algorithm will include the units for the log value (when they are available)
-
-
-
+- The :ref:`PlotAsymmetryByLogValue <algm-PlotAsymmetryByLogValue>` algorithm will include the units for the log value (when they are available)
 
 BugFixes
 ############
