@@ -92,7 +92,7 @@ function(add_python_package pkg_name)
   if (CONDA_BUILD)
   install(
     CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E env MANTID_VERSION_STR=${_version_str} \
-    ${Python_EXECUTABLE} -m pip install . --no-deps --ignore-installed --no-cache-dir -vvv)"
+    ${Python_EXECUTABLE} -m pip install ${CMAKE_CURRENT_SOURCE_DIR} --no-deps --ignore-installed --no-cache-dir -vvv)"
   )
   else()
   install(
