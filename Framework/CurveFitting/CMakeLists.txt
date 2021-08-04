@@ -534,7 +534,6 @@ target_link_libraries(CurveFitting PUBLIC Mantid::API Mantid::Kernel Mantid::Dat
 # Add the unit tests directory
 add_subdirectory(test)
 
-
 # Auto-generate exports header
 target_include_directories(CurveFitting PUBLIC
   $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/CurveFitting>
