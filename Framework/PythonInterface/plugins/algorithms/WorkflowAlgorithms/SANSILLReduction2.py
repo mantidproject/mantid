@@ -707,7 +707,7 @@ class SANSILLReduction(PythonAlgorithm):
                         ConvertToPointData(InputWorkspace=tmp, OutputWorkspace=tmp)
                     ws_list = self.inject_blank_samples(tmp)
                     ConjoinXRuns(InputWorkspaces=ws_list, OutputWorkspace=ws, LinearizeAxis=True)
-                    DeleteWorkspace(WorkspaceList=ws_list)
+                    DeleteWorkspaces(WorkspaceList=ws_list)
                 else:
                     raise RuntimeError('Listing of runs in MONO mode is allowed only for sample and transmission measurements.')
             else:
