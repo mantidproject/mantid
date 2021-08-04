@@ -12,6 +12,7 @@ import mantid.simpleapi as mantid
 from mantid.simpleapi import AnalysisDataService as ADS
 from matplotlib import gridspec
 from Engineering.gui.engineering_diffraction.tabs.common import path_handling
+import numpy as np
 
 ENGINX_BANKS = ['', 'North', 'South', 'Both: North, South', '1', '2']
 ENGINX_MASK_BIN_MINS = [0, 19930, 39960, 59850, 79930]
@@ -348,6 +349,56 @@ def get_diffractometer_constants_from_workspace(ws):
     si = ws.spectrumInfo()
     diff_consts = si.diffractometerConstants(0)  # output is a UnitParametersMap
     return diff_consts
+
+
+def plot_tof_vs_d_from_calibration(diag_ws, ws_foc):
+    """
+    Plot fitted TOF vs expected d-spacing from diagnositc workspaces output from PDCalibration
+    :param diag_ws: workspace object of group of diagnostic workspaces
+    :param ws_foc: workspace object of focussed data (post ApplyDiffCal with calibrated diff_consts)
+    :return:
+    """
+    fitparam = mtd[diag_ws.name() + "_fitparam"].toDict()
+    fiterror = mtd[diag_ws.name() + "_fiterror"].toDict()
+    d_table = mtd[diag_ws.name() + "_dspacing"].toDict()
+    d = np.array([float(name.strip('@')) for name in d_table.keys() if '@' in name])  # expected d-spacing
+    x0 = np.array(fitparam['X0'])
+    x0_er = np.array(fiterror['X0'])
+    ws_index = np.array(fitparam['wsindex'])
+    xye = []
+    nspec = len(set(ws_index))
+    si = ws_foc.spectrumInfo()
+    for ispec in range(nspec):
+        # get index of valid peaks
+        detid = ws_foc.getSpectrum(ispec).getDetectorIDs()[0]
+        irow = d_table['detid'].index(detid)
+        valid = [np.isfinite(d_table[key][irow]) for key in d_table if '@' in key]
+        # get peak centres of valid fits
+        ipks = np.where(ws_index == ispec)
+        xye_dict = {'x': d[valid], 'y': x0[ipks][valid], 'e': x0_er[ipks][valid]}
+        # evaluate quadratic fit and clac residuals
+        diff_consts = si.diffractometerConstants(ispec)  # output is a UnitParametersMap
+        xye_dict['yfit'] = np.array([UnitConversion.run("dSpacing", "TOF", d, 0,
+                                                        DeltaEModeType.Elastic, diff_consts) for d in xye_dict['x']])
+        xye.append(xye_dict)
+
+    # plot
+    from matplotlib.pyplot import subplots
+    fig, ax = subplots(2, nspec.getNumberHistograms(), subplot_kw={'projection': 'mantid'})
+    for ispec in range(nspec):
+        # plot TOF vs d
+        ax[0, ispec].errorbar(xye[ispec]['x'], xye[ispec]['y'], yerr=xye[ispec]['e'],
+                              marker='o', markersize=3, capsize=2, ls='', color='b')
+        ax[0, ispec].plot(xye[ispec]['x'], xye[ispec]['yfit'], '-r')
+        ax[1, ispec].set_ylabel('Fitted TOF')
+        # plot residuals
+        ax[1, ispec].errorbar(xye[ispec]['x'], xye[ispec]['y'] - xye[ispec]['yfit'],
+                              yerr=xye[ispec]['e'], marker='o', markersize=3, capsize=2, ls='')
+        ax.axhline(color='r', ls='-')
+        ax[1, ispec].set_xlabel('d-spacing (Ang)')
+        ax[1, ispec].set_ylabel('Residual')
+    fig.tight_layout()
+    fig.show()
 
 
 def generate_tof_fit_dictionary(cal_name=None) -> dict:

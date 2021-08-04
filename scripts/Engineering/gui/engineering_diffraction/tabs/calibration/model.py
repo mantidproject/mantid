@@ -50,10 +50,7 @@ class CalibrationModel(object):
             return
 
         # run PDCalibraiton
-        cal_table, mask = self.run_calibration(ceria_workspace, group_ws, full_calib)
-
-        if plot_output:
-            self.plot_output(cal_params, calibration.get_group_suffix())
+        focused_ceria, cal_table, diag_ws, mask = self.run_calibration(ceria_workspace, group_ws, full_calib)
 
         # extract diffractometer constants
         diff_consts = self.extract_diff_consts_from_cal(cal_table, mask)
@@ -65,6 +62,9 @@ class CalibrationModel(object):
         for i in range(len(difc)):
             rows.append([i, difc[i], difa[i], tzero[i]])
         self.update_calibration_params_table(rows)
+
+        if plot_output:
+            EnggUtils.plot_tof_vs_d_from_calibration(diag_ws, focused_ceria)
 
         # extract Back-to-Back Exponential params for .prm before deleting raw data
         bk2bk_params = self.extract_b2b_params(ceria_workspace)
@@ -97,7 +97,7 @@ class CalibrationModel(object):
 
         return [params_north, params_south]
 
-    def plot_output(self, cal_params, group_name):
+    def plot_output(self, diag_ws, diff_consts):
         """
         Don't like the way EnggUtils.generate_tof_fit_dictionary relies on hard-coding of ws names
         If EnginX script deosn't use this func I'd be tempted to move into model
@@ -151,9 +151,7 @@ class CalibrationModel(object):
             workspace.addRow(row)
 
     @staticmethod
-    def run_calibration(ceria_ws,
-                        calibration,
-                        full_instrument_cal_ws):
+    def run_calibration(ceria_ws, calibration, full_instrument_cal_ws):
         """
         Creates Engineering calibration files with PDCalibration
         :param ceria_ws: The workspace with the ceria data.
@@ -171,25 +169,25 @@ class CalibrationModel(object):
         # get grouping workspace and focus
         grp_ws = calibration.get_group_ws(ceria_ws)  # (creates if doesn't exist)
         focused_ceria = DiffractionFocussing(InputWorkspace=ceria_ws, GroupingWorkspace=grp_ws)
-        ApplyDiffCal(InstrumentWorkspace=focused_ceria, ClearCalibration=True)
+        ApplyDiffCal(InstrumentWorkspace=focused_ceria, ClearCalibration=True)  # DIFC of detector in middle of bank
         ConvertUnits(InputWorkspace=focused_ceria, OutputWorkspace=focused_ceria, Target='TOF')
 
         # Run PDCalibration to fit peaks in TOF
         cal_table_name = "engggui_calibration_" + calibration.get_group_suffix()
-        diag_ws = "diag_" + calibration.get_group_suffix()
-        cal_table, _, mask = PDCalibration(InputWorkspace=focused_ceria,
-                                           OutputCalibrationTable=cal_table_name, DiagnosticWorkspaces=diag_ws,
-                                           PeakPositions=EnggUtils.default_ceria_expected_peaks(final=True),
-                                           TofBinning=[15500, -0.0003, 52000],
-                                           PeakWindow=0.04,
-                                           MinimumPeakHeight=0.5,
-                                           PeakFunction='BackToBackExponential',
-                                           CalibrationParameters='DIFC+TZERO+DIFA',
-                                           UseChiSq=True)
-        return cal_table, mask
+        diag_ws_name = "diag_" + calibration.get_group_suffix()
+        cal_table, diag_ws, mask = PDCalibration(InputWorkspace=focused_ceria, OutputCalibrationTable=cal_table_name,
+                                                 DiagnosticWorkspaces=diag_ws_name,
+                                                 PeakPositions=EnggUtils.default_ceria_expected_peaks(final=True),
+                                                 TofBinning=[15500, -0.0003, 52000],
+                                                 PeakWindow=0.04,
+                                                 MinimumPeakHeight=0.5,
+                                                 PeakFunction='BackToBackExponential',
+                                                 CalibrationParameters='DIFC+TZERO+DIFA',
+                                                 UseChiSq=True)
+        ApplyDiffCal(InstrumentWorkspace=focused_ceria, CalibrationWorkspace=cal_table)
+        return focused_ceria, cal_table, diag_ws, mask
 
-    def extract_diff_consts_from_cal(self, ws_foc, cal_table, mask_ws):
-        ApplyDiffCal(InstrumentWorkspace=ws_foc, CalibrationWorkspace=cal_table)
+    def extract_diff_consts_from_cal(self, ws_foc, mask_ws):
         si = ws_foc.spectrumInfo()
         masked_detIDs = mask_ws.getMaskedDetectors()
         diff_consts = []
