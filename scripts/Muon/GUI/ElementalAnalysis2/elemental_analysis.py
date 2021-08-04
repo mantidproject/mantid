@@ -103,7 +103,6 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         self.setup_group_calculation_disable_notifier()
         self.setup_grouping_changed_observers()
         self.setup_update_view_notifier()
-        #self.setup_fitting_notifier()
 
         self.setMinimumHeight(800)
 
@@ -131,9 +130,6 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         # the plot mode indices are from the order the plots are stored
         if TAB_ORDER[index] in ["Home", "Grouping", "Automatic"]:  # Plot all the selected data
             plot_mode = self.plot_widget.data_index
-        # Plot the displayed workspace
-        #elif TAB_ORDER[index] in ["Fitting"]:
-            #plot_mode = self.plot_widget.fit_index
         else:
             return
         self.plot_widget.set_plot_view(plot_mode)
@@ -177,9 +173,6 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
     def setup_gui_variable_observers(self):
         self.context.gui_context.gui_variables_notifier.add_subscriber(
             self.grouping_tab_widget.group_tab_presenter.gui_variables_observer)
-
-        #self.fitting_tab.fitting_tab_presenter.selected_fit_results_changed.add_subscriber(
-        #    self.plot_widget.fit_mode.plot_selected_fit_observer)
 
     def setup_grouping_changed_observers(self):
         self.grouping_tab_widget.grouping_table_widget.data_changed_notifier.add_subscriber(
@@ -241,12 +234,3 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
 
         self.context.update_view_from_model_notifier.add_subscriber(
             self.fitting_tab.fitting_tab_presenter.update_view_from_model_observer)
-
-    """def setup_fitting_notifier(self):
-        #Connect fitting tab to inform of new fits
-
-        self.fitting_tab.fitting_tab_presenter.remove_plot_guess_notifier.add_subscriber(
-            self.plot_widget.fit_mode.remove_plot_guess_observer)
-
-        self.fitting_tab.fitting_tab_presenter.update_plot_guess_notifier.add_subscriber(
-            self.plot_widget.fit_mode.update_plot_guess_observer)"""

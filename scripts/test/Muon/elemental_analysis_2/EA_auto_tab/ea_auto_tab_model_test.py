@@ -2,9 +2,8 @@ import unittest
 import unittest.mock as mock
 from mantid.simpleapi import CreateEmptyTableWorkspace, DeleteWorkspace
 from Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_model import EAAutoTabModel
-from Muon.GUI.ElementalAnalysis2.context.context import ElementalAnalysisContext
-from Muon.GUI.ElementalAnalysis2.context.ea_group_context import EAGroupContext
 from Muon.GUI.ElementalAnalysis2.ea_group import EAGroup
+from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_ea_tests
 from mantid.api import mtd
 
 
@@ -12,12 +11,10 @@ class EAAutoTabModelTest(unittest.TestCase):
 
     def setUp(self):
         workspaces = ["9999; Detector 1", "9999; Detector 2", "9999; Detector 3", "9999; Detector 4"]
-        self.group_context = EAGroupContext()
+        setup_context_for_ea_tests(self)
         for group_name in workspaces:
             self.group_context.add_group(EAGroup(group_name, group_name.split(";")[1].strip(),
                                                  group_name.split(";")[0].strip()))
-
-        self.context = ElementalAnalysisContext(None, self.group_context)
         self.model = EAAutoTabModel(self.context)
 
     @staticmethod

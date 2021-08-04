@@ -18,3 +18,14 @@ class EAFittingTabPresenter(GeneralFittingPresenter):
 
     def handle_spectrum_changed(self):
         self.model.current_spectrum = self.view.current_workspace_index
+
+    def handle_fit_clicked(self) -> None:
+        """Handle when the fit button is clicked."""
+        if self.model.number_of_datasets < 1:
+            self.view.warning_popup("No data selected for fitting.")
+            return
+        if not self.view.fit_object:
+            return
+        self.model.fitting_context.dataset_names = self.model._get_equivalent_binned_or_unbinned_workspaces()
+        self.model.save_current_fit_function_to_undo_data()
+        self._perform_fit()

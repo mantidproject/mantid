@@ -9,7 +9,8 @@ import numpy as np
 from unittest import mock
 from mantid.api import WorkspaceGroup
 from mantid.simpleapi import CreateSampleWorkspace, CreateWorkspace
-from Muon.GUI.ElementalAnalysis2.context.context import ElementalAnalysisContext, REBINNED_VARIABLE_WS_SUFFIX
+from Muon.GUI.ElementalAnalysis2.context.context import ElementalAnalysisContext, REBINNED_VARIABLE_WS_SUFFIX, \
+    REBINNED_FIXED_WS_SUFFIX
 from Muon.GUI.ElementalAnalysis2.context.data_context import DataContext
 from Muon.GUI.ElementalAnalysis2.context.ea_group_context import EAGroupContext
 from Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext
@@ -34,6 +35,14 @@ class ElementalAnalysisContextTest(unittest.TestCase):
         self.assertEqual(len(self.context.data_context.current_runs), 0)
         self.assertEqual(len(self.context.group_context.groups), 0)
         self.assertEqual(len(self.context.data_context._loaded_data.params), 0)
+
+    def add_groups_to_group_context(self):
+        self.context.group_context.add_group(EAGroup("9999; Detector 1", "Detector 1", "9999"))
+        self.context.group_context.add_group(EAGroup("9999; Detector 2", "Detector 2", "9999"))
+        self.context.group_context.add_group(EAGroup("9998; Detector 1", "Detector 1", "9998"))
+        self.context.group_context.add_group(EAGroup("9998; Detector 2", "Detector 2", "9998"))
+        self.context.group_context._selected_groups = ["9999; Detector 1", "9999; Detector 2", "9998; Detector 1",
+                                                       "9998; Detector 2"]
 
     # ------------------------------------------------------------------------------------------------------------------
     # TESTS
@@ -90,8 +99,8 @@ class ElementalAnalysisContextTest(unittest.TestCase):
         # check context is empty
         self.assert_context_empty()
 
-    @mock.patch("mantidqt.utils.observer_pattern.GenericObservable.notify_subscribers")
-    def test_remove_workspace_with_a_string(self, mock_notify_subscirbers):
+    @mock.patch("mantidqt.utils.observer_pattern.Observable.notify_subscribers")
+    def test_remove_workspace_with_a_string(self, mock_notify_subscribers):
         mock_group = EAGroup("mock_workspace", "detector 1", "9999")
         self.context.group_context.add_group(mock_group)
         self.context.group_context.remove_group = mock.Mock()
@@ -99,11 +108,11 @@ class ElementalAnalysisContextTest(unittest.TestCase):
         self.context.remove_workspace("mock_workspace")
 
         # assert statement
-        mock_notify_subscirbers.assert_has_calls([mock.call("mock_workspace"), mock.call("mock_workspace")])
+        mock_notify_subscribers.assert_has_calls([mock.call("mock_workspace"), mock.call("mock_workspace")])
         self.context.group_context.remove_group.assert_called_once_with("mock_workspace")
 
-    @mock.patch("mantidqt.utils.observer_pattern.GenericObservable.notify_subscribers")
-    def test_remove_workspace_with_a_workspace(self, mock_notify_subscirbers):
+    @mock.patch("mantidqt.utils.observer_pattern.Observable.notify_subscribers")
+    def test_remove_workspace_with_a_workspace(self, mock_notify_subscribers):
         # setup
         self.context.group_context.remove_group = mock.Mock()
         mock_group = EAGroup("mock_workspace", "detector 1", "9999")
@@ -114,27 +123,27 @@ class ElementalAnalysisContextTest(unittest.TestCase):
         self.context.remove_workspace(mock_ws)
 
         # assert statement
-        mock_notify_subscirbers.assert_has_calls([mock.call("mock_workspace"), mock.call(mock_ws)])
+        mock_notify_subscribers.assert_has_calls([mock.call("mock_workspace"), mock.call(mock_ws)])
         self.context.group_context.remove_group.assert_called_once_with("mock_workspace")
 
-    @mock.patch("mantidqt.utils.observer_pattern.GenericObservable.notify_subscribers")
-    def test_remove_workspace_with_a_rebinned_workspace(self, mock_notify_subscirbers):
+    @mock.patch("mantidqt.utils.observer_pattern.Observable.notify_subscribers")
+    def test_remove_workspace_with_a_rebinned_workspace(self, mock_notify_subscribers):
         self.context.group_context.remove_workspace_from_group = mock.Mock()
         # call remove_workspace function
         self.context.remove_workspace("rebinned_mock_workspace")
 
         # assert statement
-        mock_notify_subscirbers.assert_has_calls([mock.call("rebinned_mock_workspace")])
+        mock_notify_subscribers.assert_has_calls([mock.call("rebinned_mock_workspace")])
         self.context.group_context.remove_workspace_from_group.assert_called_once_with("rebinned_mock_workspace")
 
-    @mock.patch("mantidqt.utils.observer_pattern.GenericObservable.notify_subscribers")
-    def test_remove_workspace_with_a_string_and_not_present_in_group(self, mock_notify_subscirbers):
+    @mock.patch("mantidqt.utils.observer_pattern.Observable.notify_subscribers")
+    def test_remove_workspace_with_a_string_and_not_present_in_group(self, mock_notify_subscribers):
         self.context.group_context.remove_workspace_from_group = mock.Mock()
         # call remove_workspace function
         self.context.remove_workspace("mock_workspace")
 
         # assert statement
-        mock_notify_subscirbers.assert_has_calls([mock.call("mock_workspace"), mock.call("mock_workspace")])
+        mock_notify_subscribers.assert_has_calls([mock.call("mock_workspace"), mock.call("mock_workspace")])
         self.context.group_context.remove_workspace_from_group.assert_called_once_with("mock_workspace")
 
     def test_update_current_data_with_empty_data_context(self):
@@ -174,6 +183,89 @@ class ElementalAnalysisContextTest(unittest.TestCase):
         # assert statement
         self.context.group_context.add_new_group.assert_called_once_with(self.context.group_context.groups,
                                                                          self.context.data_context._loaded_data)
+
+    def test_get_workspace_names_for(self):
+        mock_run = ["mock_run"]
+        mock_group = ["mock_group"]
+        self.context.get_workspace_names_for_simultaneous_fit = mock.Mock()
+        self.context.get_workspace_names_for_single_fit = mock.Mock()
+
+        # when simultaneous fitting is false
+        self.context.get_workspace_names_for(mock_run, mock_group, False)
+
+        self.context.get_workspace_names_for_single_fit.assert_called_once_with(mock_group)
+        self.context.get_workspace_names_for_simultaneous_fit.assert_not_called()
+
+        self.context.get_workspace_names_for_simultaneous_fit = mock.Mock()
+        self.context.get_workspace_names_for_single_fit = mock.Mock()
+
+        # when simultaneous fitting is true
+        self.context.get_workspace_names_for(mock_run, mock_group, True)
+
+        self.context.get_workspace_names_for_single_fit.assert_not_called()
+        self.context.get_workspace_names_for_simultaneous_fit.assert_called_once_with(mock_run, mock_group)
+
+    @mock.patch("Muon.GUI.ElementalAnalysis2.ea_group.EAGroup.get_counts_workspace_for_run")
+    def test_get_workspace_names_for_single_fit(self, mock_get_counts):
+        workspace_name = "mock_workspace"
+        mock_get_counts.return_value = workspace_name
+        self.add_groups_to_group_context()
+        group_names = ["9999; Detector 1", "9998; Detector 1"]
+
+        workspaces_to_fit = self.context.get_workspace_names_for_single_fit(group_names)
+
+        self.assertEqual(workspaces_to_fit, [workspace_name] * len(group_names))
+        self.assertEqual(mock_get_counts.call_count, len(group_names))
+
+    def test_get_workspace_names_for_simultaneous_fit_when_all_run_selected(self):
+        correct_workspace_list = ["9999; Detector 1", "9998; Detector 1"]
+        self.add_groups_to_group_context()
+        workspaces_to_fit = self.context.get_workspace_names_for_simultaneous_fit("All", ["Detector 1"])
+
+        self.assertCountEqual(correct_workspace_list, workspaces_to_fit)
+
+    def test_get_workspace_names_for_simultaneous_fit_when_all_detectors_selected(self):
+        correct_workspace_list = ["9999; Detector 1", "9999; Detector 2"]
+        self.add_groups_to_group_context()
+        workspaces_to_fit = self.context.get_workspace_names_for_simultaneous_fit("9999", ["Detector 1", "Detector 2"])
+
+        self.assertCountEqual(correct_workspace_list, workspaces_to_fit)
+
+    def test_get_list_of_binned_or_unbinned_workspaces_from_equivalents_when_fit_to_raw_is_False(self):
+        group_names = ["9999; Detector 1", "9999; Detector 2", "9998; Detector 1",
+                       "9998; Detector 2"]
+        returned_data = ["9999; Detector 1" + REBINNED_FIXED_WS_SUFFIX, "9999; Detector 2", "9998; Detector 1",
+                         "9998; Detector 2" + REBINNED_VARIABLE_WS_SUFFIX]
+
+        # Adding suffix to end of first and second group to test if method can remove suffix to find right group name
+        input_list = [group_names[0] + REBINNED_FIXED_WS_SUFFIX, group_names[1] + REBINNED_FIXED_WS_SUFFIX] + \
+                     group_names[2:]
+
+        self.add_groups_to_group_context()
+        # updates rebinned data in group
+        self.context.group_context[group_names[0]].update_workspaces(returned_data[0], True)
+        self.context.group_context[group_names[3]].update_workspaces(returned_data[3], True)
+
+        workspaces = self.context.get_list_of_binned_or_unbinned_workspaces_from_equivalents(input_list, False)
+        self.assertCountEqual(workspaces, returned_data)
+
+    def test_get_list_of_binned_or_unbinned_workspaces_from_equivalents_when_fit_to_raw_is_True(self):
+        group_names = ["9999; Detector 1", "9999; Detector 2", "9998; Detector 1",
+                       "9998; Detector 2"]
+        returned_data = ["9999; Detector 1", "9999; Detector 2", "9998; Detector 1",
+                         "9998; Detector 2"]
+
+        # Adding suffix to end of first and second group to test if method can remove suffix to find right group name
+        input_list = [group_names[0] + REBINNED_FIXED_WS_SUFFIX, group_names[1] + REBINNED_FIXED_WS_SUFFIX] + \
+                     group_names[2:]
+
+        self.add_groups_to_group_context()
+        # updates rebinned data in group
+        self.context.group_context[group_names[0]].update_workspaces(input_list[0], True)
+        self.context.group_context[group_names[1]].update_workspaces(input_list[1], True)
+
+        workspaces = self.context.get_list_of_binned_or_unbinned_workspaces_from_equivalents(input_list, True)
+        self.assertCountEqual(workspaces, returned_data)
 
 
 class DataContextTest(unittest.TestCase):

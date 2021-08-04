@@ -28,6 +28,11 @@ class EAFittingTabModel(GeneralFittingModel):
             return detectors
         return []
 
+    def _get_equivalent_binned_or_unbinned_workspaces(self):
+        """Returns the equivalent binned or unbinned workspaces for the current datasets."""
+        return self.context.get_list_of_binned_or_unbinned_workspaces_from_equivalents(
+            self.fitting_context.dataset_names, self.fit_to_raw)
+
     def _get_selected_runs_and_detectors(self):
         selected_runs = []
         selected_detectors = []
@@ -45,8 +50,7 @@ class EAFittingTabModel(GeneralFittingModel):
     def get_workspace_names_to_display_from_context(self) -> list:
         """Returns the workspace names to display in the view based on the selected run and group/pair options."""
         runs, groups_and_pairs = self.get_selected_runs_groups_and_pairs()
-        workspace_names = self.context.get_workspace_names_for(runs, groups_and_pairs, self.fitting_context.fit_to_raw,
-                                                               self.simultaneous_fitting_mode)
+        workspace_names = self.context.get_workspace_names_for(runs, groups_and_pairs, self.simultaneous_fitting_mode)
 
         return self._check_data_exists(workspace_names)
 

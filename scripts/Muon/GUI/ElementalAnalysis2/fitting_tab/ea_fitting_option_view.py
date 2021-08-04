@@ -12,12 +12,8 @@ EA_FIT_BY_OPTIONS = ["Run", "Detector"]
 
 
 class EAFittingOptionsView(GeneralFittingOptionsView):
-    """
-    The GeneralFittingOptionsView includes the Simultaneous fitting options, and the cyclic dataset display combobox.
-    """
 
     def __init__(self, parent: QWidget = None):
-        """Initializes the GeneralFittingOptionsView. By default the simultaneous options are disabled."""
         super(EAFittingOptionsView, self).__init__(parent)
         self.simul_fit_by_combo.clear()
         self._setup_simultaneous_fit_by_combo_box(EA_FIT_BY_OPTIONS)

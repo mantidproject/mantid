@@ -2,9 +2,8 @@ import unittest
 import unittest.mock as mock
 from copy import deepcopy
 from Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_presenter import EAAutoTabPresenter
-from Muon.GUI.ElementalAnalysis2.context.context import ElementalAnalysisContext
-from Muon.GUI.ElementalAnalysis2.context.ea_group_context import EAGroupContext
 from Muon.GUI.ElementalAnalysis2.ea_group import EAGroup
+from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_ea_tests
 from Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_tab_model import PEAKS_WS_SUFFIX, MATCH_GROUP_WS_SUFFIX
 
 
@@ -12,7 +11,7 @@ class EAAutoTabPresenterTest(unittest.TestCase):
 
     def setUp(self):
         workspaces = ["9999; Detector 1", "9999; Detector 2", "9999; Detector 3", "9999; Detector 4"]
-        self.group_context = EAGroupContext()
+        setup_context_for_ea_tests(self)
         for group_name in workspaces:
             group = EAGroup(group_name, group_name.split(";")[1].strip(),
                             group_name.split(";")[0].strip())
@@ -20,7 +19,6 @@ class EAAutoTabPresenterTest(unittest.TestCase):
             group.update_matches_table(group_name + MATCH_GROUP_WS_SUFFIX)
             self.group_context.add_group(group)
 
-        self.context = ElementalAnalysisContext(None, self.group_context)
         self.presenter = EAAutoTabPresenter(self.context, mock.Mock(), mock.Mock(), mock.Mock())
 
     def test_run_find_peak_algorithms_if_parameters_is_None(self):

@@ -15,6 +15,7 @@ from Muon.GUI.Common.muon_load_data import MuonLoadData
 from Muon.GUI.Common.contexts.phase_table_context import PhaseTableContext
 from Muon.GUI.Common.contexts.plot_pane_context import PlotPanesContext
 from Muon.GUI.Common.contexts.fitting_contexts.basic_fitting_context import BasicFittingContext
+from Muon.GUI.Common.contexts.fitting_contexts.general_fitting_context import GeneralFittingContext
 from Muon.GUI.Common.contexts.fitting_contexts.model_fitting_context import ModelFittingContext
 from Muon.GUI.Common.contexts.fitting_contexts.tf_asymmetry_fitting_context import TFAsymmetryFittingContext
 from Muon.GUI.ElementalAnalysis2.context.context import ElementalAnalysisContext
@@ -84,6 +85,8 @@ def setup_context_for_ea_tests(parent_object):
     parent_object.data_context = DataContext(load_data=parent_object.loaded_data)
     parent_object.gui_context = MuonGuiContext()
     parent_object.plot_panes_context = PlotPanesContext()
+    parent_object.fitting_context = GeneralFittingContext()
     parent_object.group_context = EAGroupContext(parent_object.data_context.check_group_contains_valid_detectors)
     parent_object.context = ElementalAnalysisContext(parent_object.data_context, parent_object.group_context,
-                                                     parent_object.gui_context, parent_object.plot_panes_context)
+                                                     parent_object.gui_context, parent_object.plot_panes_context,
+                                                     parent_object.fitting_context,)

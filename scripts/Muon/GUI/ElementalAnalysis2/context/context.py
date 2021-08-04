@@ -20,7 +20,7 @@ REBINNED_VARIABLE_WS_SUFFIX = "_EA_Rebinned_Variable"
 class ElementalAnalysisContext(MuonContext):
 
     def __init__(self, data_context, ea_group_context=None, muon_gui_context=None, plot_panes_context=None,
-                 fitting_context=None,error_notifier=None, workspace_suffix=' EA'):
+                 fitting_context=None, error_notifier=None, workspace_suffix=' EA'):
 
         super(ElementalAnalysisContext, self).__init__(muon_data_context=data_context,
                                                        muon_gui_context=muon_gui_context,
@@ -145,9 +145,11 @@ class ElementalAnalysisContext(MuonContext):
     def show_all_groups(self):
         pass
 
-    def get_workspace_names_for(self, runs: str, groups: list, fit_to_raw: bool,
-                                simultaneous_fitting_mode: bool = False) -> list:
-        """Returns the workspace names of the loaded data for the provided runs and groups/pairs."""
+    def get_workspace_names_for(self, runs: str, groups: list, simultaneous_fitting_mode: bool = False) -> list:
+        """
+            Returns the name of the groups to be displayed in the fitting tab depending on whether single or
+            simultaneous fitting is enabled
+        """
         if simultaneous_fitting_mode:
             return self.get_workspace_names_for_simultaneous_fit(runs, groups)
         else:
@@ -181,18 +183,16 @@ class ElementalAnalysisContext(MuonContext):
 
         return workspace_to_fit
 
-    def get_list_of_binned_or_unbinned_workspaces_from_equivalents(self, input_list):
+    def get_list_of_binned_or_unbinned_workspaces_from_equivalents(self, input_list, fit_to_raw):
         equivalent_list = []
         for item in input_list:
-            if "Rebin" in item:
-                item = item.replace(REBINNED_FIXED_WS_SUFFIX, "")
-                item = item.replace(REBINNED_VARIABLE_WS_SUFFIX, "")
-                equivalent_workspace = self.group_context[item].get_counts_workspace_for_run()
-                equivalent_list.append(equivalent_workspace)
+            # gets group name in case input list is rebinned workspace
+            group_name = self.get_group_name(item)
+            if fit_to_raw:
+                equivalent_list.append(self.group_context[group_name].get_counts_workspace_for_run())
             else:
-                equivalent_workspace = self.group_context[
-                    item].get_rebined_or_unbinned_version_of_workspace_if_it_exists()
-                equivalent_list.append(equivalent_workspace)
+                equivalent_list.append(
+                    self.group_context[group_name].get_rebined_or_unbinned_version_of_workspace_if_it_exists())
         return equivalent_list
 
     @property
@@ -200,6 +200,10 @@ class ElementalAnalysisContext(MuonContext):
         return "__Elemental_analysis_fitting_guess__"
 
     def get_group_name(self, workspace_name):
+        """
+            gets group name from workspace name as workspace names are either group name or are group name with
+            a prefix
+        """
         run, detector = self.group_context.get_detector_and_run_from_workspace_name(workspace_name)
         group_name = "; ".join([run, detector])
         return group_name

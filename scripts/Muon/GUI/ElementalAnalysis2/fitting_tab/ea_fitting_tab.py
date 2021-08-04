@@ -11,7 +11,7 @@ from Muon.GUI.ElementalAnalysis2.fitting_tab.ea_fitting_tab_model import EAFitti
 
 class EAFittingTabWidget(object):
     """
-    The FittingTabWidget creates the tab used for fitting in Elemental analysis widget.
+    The EAFittingTabWidget creates the tab used for fitting in Elemental analysis widget.
     """
 
     def __init__(self, context, parent):
