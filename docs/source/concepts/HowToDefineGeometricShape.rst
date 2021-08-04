@@ -340,6 +340,54 @@ axis runs from the start aperture to the end aperture. "Height" is along
 the y-axis and "width" runs along the x-axis, before the application of
 the "axis" rotation.
 
+Rotating Shapes
+~~~~~~~~~~~~~~~
+
+Many Shapes can be rotated (either individually or as part of an ensemble).
+The shapes that can be rotated are: Sphere_, `Cylinder (finite height) <Cylinder_>`_,
+`Hollow Cylinder (finite height) <Hollow Cylinder_>`_, `Infinite Cylinder`_,
+`Slice of Cylinder Ring`_, `Infinite Plane`_, Cuboid_, Hexahedron_ and `Tapered Guide`_.
+
+Use the ``rotate`` tag to rotate a shape individually around its centre (or centre-of-bottom-base).
+The shape is rotated by an angle in degrees around the x,y and z axes in that order. To rotate a
+cylinder 90° clockwise around x and 45° anti-clockwise around y:
+
+.. code-block:: xml
+
+      <cylinder id="stick">
+        <centre-of-bottom-base x="-0.5" y="0.0" z="0.0" />
+        <axis x="1.0" y="0.0" z="0.0" />
+        <radius val="0.05" />
+        <height val="1.0" />
+        <rotate x="90" y="-45" z="0" />
+      </cylinder>
+
+      <algebra val="stick" />
+
+Use the ``rotate-all`` tag to rotate a combined shape. To rotate the unison of a
+sphere on the end of a cylinder (by 90° clockwise around x and 45° anti-clockwise around y):
+
+.. code-block:: xml
+
+      <cylinder id="stick">
+        <centre-of-bottom-base x="-1.0" y="0.0" z="0.0" />
+        <axis x="1.0" y="0.0" z="0.0" />
+        <radius val="0.2" />
+        <height val="2.0" />
+      </cylinder>
+
+      <sphere id="some-sphere">
+        <centre x="2.0"  y="0.0" z="0.0" />
+        <radius val="0.5" />
+      </sphere>
+
+      <algebra val="some-sphere (: stick)" />
+      <rotate-all x="90" y="-45" z="0" />
+
+All these rotatable shapes (expect for `Infinite Plane`_ and `Infinite Cylinder`_) can be plotted to check
+your shape definition is correct. For more details see :ref:`Mesh_Plots`.
+
+Shapes will be automatically rotated, if a rotation is set using :ref:<algm-SetGoniometer>.
 
 .. _Bounding-Box:
 
