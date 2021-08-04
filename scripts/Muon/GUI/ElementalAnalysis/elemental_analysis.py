@@ -175,7 +175,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
 
         # add current selection of lines
         for element in self.ptable.ptable.selection:
-            self.add_peak_data(element.symbol, detector)
+            self.ptable.add_peak_data(element.symbol, detector)
 
     def _unset_detectors(self):
         self.plot_window.windowClosedSignal.disconnect()
