@@ -196,12 +196,7 @@ void PlotAsymmetryByLogValue::exec() {
   MatrixWorkspace_sptr outWS = create<Workspace2D>(nplots,         //  the number of plots
                                                    Points(npoints) //  the number of data points on a plot
   );
-  Workspace_sptr loadedWs = doLoad(m_fileNames[0]);
-  MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(loadedWs);
-
-  const Run &run = ws->run();
-  auto property = run.getLogData(m_logName);
-  std::string units = property->units();
+  std::string units = getLogUnits(m_fileNames[0]);
   // Populate output workspace with data
   populateOutputWorkspace(outWS, nplots, units);
 
@@ -211,6 +206,22 @@ void PlotAsymmetryByLogValue::exec() {
   outWS = create<Workspace2D>(nplots + 1, Points(npoints));
   // Populate ws holding current results
   saveResultsToADS(outWS, nplots + 1);
+}
+
+std::string PlotAsymmetryByLogValue::getLogUnits(const std::string fileName) {
+  Workspace_sptr loadedWs = doLoad(fileName);
+  MatrixWorkspace_sptr ws;
+  // Check if workspace is a workspace group
+  WorkspaceGroup_sptr group = std::dynamic_pointer_cast<WorkspaceGroup>(loadedWs);
+  // If it is not, we only have 'red' data
+  if (!group) {
+    ws = std::dynamic_pointer_cast<MatrixWorkspace>(loadedWs);
+  } else {
+    ws = std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(m_red - 1));
+  }
+  const Run &run = ws->run();
+  auto property = run.getLogData(m_logName);
+  return property->units();
 }
 
 /**  Finds path to a file and removes file name to return it's directory
