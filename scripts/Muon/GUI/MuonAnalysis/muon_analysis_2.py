@@ -213,6 +213,10 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
             return
         self.plot_widget.set_plot_view(plot_mode)
 
+    def set_tab_warning(self, tab_name: str, message: str):
+        """Sets a warning message as the tooltip of the provided tab."""
+        self.tabs.set_tab_warning(TAB_ORDER.index(tab_name), message)
+
     def setup_disable_notifier(self):
 
         self.disable_notifier.add_subscriber(

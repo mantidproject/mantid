@@ -108,6 +108,9 @@ class BackgroundCorrectionsPresenter:
         """Handle when the background corrections has finished."""
         self._update_displayed_corrections_data()
 
+        message = "Background corrections skipped for some domains." if not self.model.are_all_corrections_successful() else ""
+        self._corrections_presenter.set_tab_warning(message)
+
     def _handle_start_or_end_x_changed(self, get_new_x_range) -> None:
         """Handles when a Start X or End X is changed using an appropriate getter to get the new x range."""
         runs, groups = self._selected_runs_and_groups()

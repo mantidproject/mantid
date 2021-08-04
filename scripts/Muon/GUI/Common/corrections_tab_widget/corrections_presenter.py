@@ -52,6 +52,7 @@ class CorrectionsPresenter(QObject):
 
         self.enable_editing_notifier = GenericObservable()
         self.disable_editing_notifier = GenericObservable()
+        self.set_tab_warning_notifier = GenericObservable()
         self.perform_corrections_notifier = GenericObservable()
         self.asymmetry_pair_and_diff_calculations_finished_notifier = GenericObservable()
 
@@ -166,3 +167,7 @@ class CorrectionsPresenter(QObject):
     def warning_popup(self, message: str) -> None:
         """Displays a warning message."""
         self.view.warning_popup(message)
+
+    def set_tab_warning(self, message: str) -> None:
+        """Sets a warning message as the tooltip of the corrections tab."""
+        self.view.set_tab_warning(message)

@@ -220,6 +220,10 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.fitting_tab.fitting_tab_presenter.set_selected_dataset(new_data_workspace_name)
         self.seq_fitting_tab.seq_fitting_tab_presenter.handle_selected_workspaces_changed()
 
+    def set_tab_warning(self, tab_name: str, message: str):
+        """Sets a warning message as the tooltip of the provided tab."""
+        self.tabs.set_tab_warning(TAB_ORDER.index(tab_name), message)
+
     def setup_disable_notifier(self):
 
         self.disable_notifier.add_subscriber(self.home_tab.home_tab_widget.disable_observer)

@@ -360,6 +360,14 @@ class BackgroundCorrectionsModel:
 
         raise RuntimeError("The selected background function is not recognised.")
 
+    def are_all_corrections_successful(self) -> bool:
+        """Returns true if all the background corrections were applied successfully."""
+        if not self.is_background_mode_none():
+            for correction_data in self._corrections_context.background_correction_data.values():
+                if "skipped" in correction_data.status:
+                    return False
+        return True
+
     def selected_correction_data(self) -> tuple:
         """Returns lists of the selected correction data to display in the view."""
         runs, groups, use_raws, start_xs, end_xs, backgrounds, background_errors, statuses = \

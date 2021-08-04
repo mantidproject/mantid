@@ -4,8 +4,13 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from mantidqt import icons
+
 from qtpy import QtWidgets, QtCore, QtGui, PYQT4
 from qtpy.QtCore import Slot
+from qtpy.QtGui import QIcon
+
+INVALID_TAB_ICON = icons.get_icon("mdi.asterisk", "red", 0.5)
 
 """
 Original code by user Blackwood, Jan 2018.
@@ -41,6 +46,11 @@ class DetachableTabWidget(QtWidgets.QTabWidget):
 
     def closeEvent(self, event):
         self.close_detached_tabs()
+
+    def set_tab_warning(self, index: int, message: str) -> None:
+        """Adds a tooltip to a tab with a warning message."""
+        self.setTabIcon(index, INVALID_TAB_ICON if message != "" else QIcon())
+        self.setTabToolTip(index, message)
 
     def setMovable(self, movable):
         """
