@@ -24,36 +24,21 @@ namespace IDA {
 class MANTIDQT_INDIRECT_DLL FqFitDataPresenter : public IndirectFitDataPresenter {
   Q_OBJECT
 public:
-  FqFitDataPresenter(FqFitModel *model, IIndirectFitDataView *view, QComboBox *cbParameterType, QComboBox *cbParameter,
-                     QLabel *lbParameterType, QLabel *lbParameter, IFQFitObserver *SingleFunctionTemplateBrowser);
+  FqFitDataPresenter(FqFitModel *model, IIndirectFitDataView *view, IFQFitObserver *SingleFunctionTemplateBrowser);
 
 private slots:
-  void hideParameterComboBoxes();
-  void showParameterComboBoxes();
-  void updateAvailableParameters();
-  void updateAvailableParameters(const QString &type);
-  void updateAvailableParameterTypes(FqFitParameters &parameters);
-  void updateParameterSelectionEnabled();
-  void setParameterLabel(const QString &parameter);
   void dialogParameterTypeUpdated(FqFitAddWorkspaceDialog *dialog, const std::string &type);
   void setDialogParameterNames(FqFitAddWorkspaceDialog *dialog, const std::string &workspace);
   void setActiveParameterType(const std::string &type);
-  void updateActiveDataIndex();
-  void updateActiveDataIndex(int index);
-  void setSingleModelSpectrum(int index);
-  void handleParameterTypeChanged(const QString &parameter);
-  void handleSpectrumSelectionChanged(int parameterIndex);
-  void handleMultipleInputSelected();
-  void handleSingleInputSelected();
+  void updateActiveWorkspaceID();
+  void updateActiveWorkspaceID(WorkspaceID index);
 
 signals:
   void spectrumChanged(WorkspaceIndex);
 
 protected slots:
-  void handleSampleLoaded(const QString &) override;
 
 private:
-  void setAvailableParameters(const std::vector<std::string> &parameters);
   void addDataToModel(IAddWorkspaceDialog const *dialog) override;
   void closeDialog() override;
   std::unique_ptr<IAddWorkspaceDialog> getAddWorkspaceDialog(QWidget *parent) const override;
@@ -62,20 +47,14 @@ private:
   std::vector<std::string> getParameterTypes(FqFitParameters &parameters) const;
   void addWorkspace(IndirectFittingModel *model, const std::string &name);
   void setModelSpectrum(int index);
-  void setDataIndexToCurrentWorkspace(IAddWorkspaceDialog const *dialog);
-
-  void setMultiInputResolutionFBSuffixes(IAddWorkspaceDialog *dialog) override;
-  void setMultiInputResolutionWSSuffixes(IAddWorkspaceDialog *dialog) override;
+  void setActiveWorkspaceIDToCurrentWorkspace(IAddWorkspaceDialog const *dialog);
 
   std::string m_activeParameterType;
-  TableDatasetIndex m_dataIndex;
+  WorkspaceID m_activeWorkspaceID;
 
-  QComboBox *m_cbParameterType;
-  QComboBox *m_cbParameter;
-  QLabel *m_lbParameterType;
-  QLabel *m_lbParameter;
   FqFitModel *m_fqFitModel;
   Notifier<IFQFitObserver> m_notifier;
+  Mantid::API::AnalysisDataServiceImpl &m_adsInstance;
 };
 
 } // namespace IDA

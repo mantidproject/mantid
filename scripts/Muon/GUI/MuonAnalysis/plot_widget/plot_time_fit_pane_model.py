@@ -43,9 +43,9 @@ class PlotTimeFitPaneModel(PlotGroupPairModel, PlotFitPaneModel):
         instrument = self.context.data_context.instrument
         fit_label = self._get_fit_label(workspace_name, index)
         rebin_label = self._get_rebin_label(workspace_name)
-        if not self.context.plot_panes_context[self.name]._is_tiled:
+        if not self.context.plot_panes_context[self.name].settings._is_tiled:
             return "".join([instrument, run, ';', group, fit_label, rebin_label])
-        if self.context.plot_panes_context[self.name].is_tiled_by == "Group/Pair":
+        if self.context.plot_panes_context[self.name].settings.is_tiled_by == "Group/Pair":
             return "".join([run, fit_label, rebin_label])
         else:
             return "".join([group, fit_label, rebin_label])

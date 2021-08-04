@@ -14,7 +14,7 @@ class RowValid(Enum):
     valid_for_all_runs = 2
 
 
-class EAGroupingTabModel():
+class EAGroupingTabModel:
     """
     The model for the grouping tab should be shared between all widgets of the tab.
     It keeps a record of the groups defined for the current instance of the interface.
@@ -31,6 +31,10 @@ class EAGroupingTabModel():
     @property
     def groups(self):
         return self._groups.groups
+
+    @property
+    def group_context(self):
+        return self._groups
 
     @property
     def group_names(self):

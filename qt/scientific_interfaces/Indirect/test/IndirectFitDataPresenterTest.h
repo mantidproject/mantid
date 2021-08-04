@@ -32,37 +32,8 @@ GNU_DIAG_OFF_SUGGEST_OVERRIDE
 /// Mock object to mock the view
 class MockIIndirectFitDataView : public IIndirectFitDataView {
 public:
-  /// Signals
-  void emitSampleLoaded(QString const &name) { emit sampleLoaded(name); }
-
   /// Public Methods
   MOCK_CONST_METHOD0(getDataTable, QTableWidget *());
-  MOCK_CONST_METHOD0(isMultipleDataTabSelected, bool());
-  MOCK_CONST_METHOD0(isResolutionHidden, bool());
-  MOCK_METHOD1(setResolutionHidden, void(bool hide));
-  MOCK_METHOD0(disableMultipleDataTab, void());
-
-  MOCK_CONST_METHOD0(getSelectedSample, std::string());
-  MOCK_CONST_METHOD0(getSelectedResolution, std::string());
-
-  MOCK_CONST_METHOD0(getSampleWSSuffices, QStringList());
-  MOCK_CONST_METHOD0(getSampleFBSuffices, QStringList());
-  MOCK_CONST_METHOD0(getResolutionWSSuffices, QStringList());
-  MOCK_CONST_METHOD0(getResolutionFBSuffices, QStringList());
-
-  MOCK_METHOD1(setSampleWSSuffices, void(QStringList const &suffices));
-  MOCK_METHOD1(setSampleFBSuffices, void(QStringList const &suffices));
-  MOCK_METHOD1(setResolutionWSSuffices, void(QStringList const &suffices));
-  MOCK_METHOD1(setResolutionFBSuffices, void(QStringList const &suffices));
-  MOCK_METHOD1(setXRange, void(std::pair<double, double> const &range));
-  MOCK_CONST_METHOD0(getXRange, std::pair<double, double>());
-  MOCK_METHOD1(setStartX, void(double startX));
-  MOCK_METHOD1(setEndX, void(double endX));
-
-  MOCK_CONST_METHOD0(isSampleWorkspaceSelectorVisible, bool());
-  MOCK_METHOD1(setSampleWorkspaceSelectorIndex, void(QString const &workspaceName));
-
-  MOCK_METHOD1(readSettings, void(QSettings const &settings));
   MOCK_METHOD1(validate, UserInputValidator &(UserInputValidator &validator));
 
   /// Public slots
@@ -75,55 +46,51 @@ public:
   MockIndirectFitDataTableModel() : m_fitDataModel(std::make_unique<MockIndirectDataTableModel>()) {}
 
   /// Public Methods
-  MOCK_CONST_METHOD2(isPreviouslyFit, bool(TableDatasetIndex dataIndex, IDA::WorkspaceIndex spectrum));
+  MOCK_CONST_METHOD2(isPreviouslyFit, bool(WorkspaceID workspaceID, WorkspaceIndex spectrum));
   MOCK_CONST_METHOD0(isInvalidFunction, boost::optional<std::string>());
   MOCK_CONST_METHOD0(getFitParameterNames, std::vector<std::string>());
   MOCK_CONST_METHOD0(getFitFunction, Mantid::API::MultiDomainFunction_sptr());
-  MOCK_CONST_METHOD2(getParameterValues,
-                     std::unordered_map<std::string, IDA::ParameterValue>(TableDatasetIndex dataIndex,
-                                                                          IDA::WorkspaceIndex spectrum));
+  MOCK_CONST_METHOD2(getParameterValues, std::unordered_map<std::string, IDA::ParameterValue>(WorkspaceID workspaceID,
+                                                                                              WorkspaceIndex spectrum));
   MOCK_METHOD1(setFitFunction, void(Mantid::API::MultiDomainFunction_sptr function));
-  MOCK_METHOD3(setDefaultParameterValue, void(const std::string &name, double value, IDA::TableDatasetIndex dataIndex));
+  MOCK_METHOD3(setDefaultParameterValue, void(const std::string &name, double value, IDA::WorkspaceID workspaceID));
 
-  MOCK_CONST_METHOD2(getFitParameters,
-                     std::unordered_map<std::string, IDA::ParameterValue>(TableDatasetIndex dataIndex,
-                                                                          IDA::WorkspaceIndex spectrum));
+  MOCK_CONST_METHOD2(getFitParameters, std::unordered_map<std::string, IDA::ParameterValue>(WorkspaceID workspaceID,
+                                                                                            WorkspaceIndex spectrum));
   MOCK_CONST_METHOD1(getDefaultParameters,
-                     std::unordered_map<std::string, IDA::ParameterValue>(TableDatasetIndex dataIndex));
+                     std::unordered_map<std::string, IDA::ParameterValue>(WorkspaceID workspaceID));
   MOCK_CONST_METHOD1(hasWorkspace, bool(std::string const &workspaceName));
-  MOCK_CONST_METHOD1(getWorkspace, MatrixWorkspace_sptr(TableDatasetIndex index));
-  MOCK_CONST_METHOD1(getSpectra, FunctionModelSpectra(TableDatasetIndex index));
+  MOCK_CONST_METHOD1(getWorkspace, MatrixWorkspace_sptr(WorkspaceID workspaceID));
+  MOCK_CONST_METHOD1(getSpectra, FunctionModelSpectra(WorkspaceID workspaceID));
   MOCK_CONST_METHOD0(isMultiFit, bool());
-  MOCK_CONST_METHOD0(getNumberOfWorkspaces, TableDatasetIndex());
-  MOCK_CONST_METHOD1(getNumberOfSpectra, size_t(TableDatasetIndex index));
+  MOCK_CONST_METHOD0(getNumberOfWorkspaces, WorkspaceID());
+  MOCK_CONST_METHOD1(getNumberOfSpectra, size_t(WorkspaceID workspaceID));
   MOCK_CONST_METHOD0(getNumberOfDomains, size_t());
-  MOCK_CONST_METHOD2(getDomainIndex, FitDomainIndex(TableDatasetIndex dataIndex, IDA::WorkspaceIndex spectrum));
+  MOCK_CONST_METHOD2(getDomainIndex, FitDomainIndex(WorkspaceID workspaceID, WorkspaceIndex spectrum));
   MOCK_CONST_METHOD0(getQValuesForData, std::vector<double>());
   MOCK_CONST_METHOD0(getResolutionsForFit, std::vector<std::pair<std::string, size_t>>());
   MOCK_METHOD0(clearWorkspaces, void());
   MOCK_METHOD0(clear, void());
-  MOCK_METHOD2(setSpectra, void(const std::string &spectra, TableDatasetIndex dataIndex));
-  MOCK_METHOD2(setSpectra, void(FunctionModelSpectra &&spectra, TableDatasetIndex dataIndex));
-  MOCK_METHOD2(setSpectra, void(const FunctionModelSpectra &spectra, TableDatasetIndex dataIndex));
+  MOCK_METHOD2(setSpectra, void(const std::string &spectra, WorkspaceID workspaceID));
+  MOCK_METHOD2(setSpectra, void(FunctionModelSpectra &&spectra, WorkspaceID workspaceID));
+  MOCK_METHOD2(setSpectra, void(const FunctionModelSpectra &spectra, WorkspaceID workspaceID));
 
   MOCK_METHOD1(addWorkspace, void(std::string const &workspaceName));
   MOCK_METHOD2(addWorkspace, void(std::string const &workspaceName, std::string const &spectra));
   MOCK_METHOD2(addWorkspace, void(std::string const &workspaceName, FunctionModelSpectra const &spectra));
   MOCK_METHOD2(addWorkspace, void(Mantid::API::MatrixWorkspace_sptr workspace, FunctionModelSpectra const &spectra));
-  MOCK_METHOD1(removeWorkspace, void(TableDatasetIndex index));
+  MOCK_METHOD1(removeWorkspace, void(WorkspaceID workspaceID));
 
-  MOCK_CONST_METHOD2(getFittingRange,
-                     std::pair<double, double>(TableDatasetIndex dataIndex, IDA::WorkspaceIndex spectrum));
-  MOCK_CONST_METHOD2(getExcludeRegion, std::string(TableDatasetIndex dataIndex, IDA::WorkspaceIndex index));
-  MOCK_METHOD3(setStartX, void(double startX, TableDatasetIndex dataIndex, IDA::WorkspaceIndex spectrum));
-  MOCK_METHOD2(setStartX, void(double startX, TableDatasetIndex dataIndex));
-  MOCK_METHOD3(setEndX, void(double endX, TableDatasetIndex dataIndex, IDA::WorkspaceIndex spectrum));
-  MOCK_METHOD2(setEndX, void(double endX, TableDatasetIndex dataIndex));
-  MOCK_METHOD3(setExcludeRegion,
-               void(const std::string &exclude, TableDatasetIndex dataIndex, IDA::WorkspaceIndex spectrum));
+  MOCK_CONST_METHOD2(getFittingRange, std::pair<double, double>(WorkspaceID workspaceID, WorkspaceIndex spectrum));
+  MOCK_CONST_METHOD2(getExcludeRegion, std::string(WorkspaceID workspaceID, WorkspaceIndex spectrum));
+  MOCK_METHOD3(setStartX, void(double startX, WorkspaceID workspaceID, WorkspaceIndex spectrum));
+  MOCK_METHOD2(setStartX, void(double startX, WorkspaceID workspaceID));
+  MOCK_METHOD3(setEndX, void(double endX, WorkspaceID workspaceID, WorkspaceIndex spectrum));
+  MOCK_METHOD2(setEndX, void(double endX, WorkspaceID workspaceID));
+  MOCK_METHOD3(setExcludeRegion, void(const std::string &exclude, WorkspaceID workspaceID, WorkspaceIndex spectrum));
 
-  MOCK_METHOD3(addSingleFitOutput, void(const Mantid::API::IAlgorithm_sptr &fitAlgorithm, TableDatasetIndex index,
-                                        IDA::WorkspaceIndex spectrum));
+  MOCK_METHOD3(addSingleFitOutput, void(const Mantid::API::IAlgorithm_sptr &fitAlgorithm, WorkspaceID workspaceID,
+                                        WorkspaceIndex spectrum));
   MOCK_METHOD1(addOutput, void(Mantid::API::IAlgorithm_sptr fitAlgorithm));
 
   MOCK_METHOD0(switchToSingleInputMode, void());
@@ -132,21 +99,19 @@ public:
   MOCK_CONST_METHOD0(getFittingMode, FittingMode());
   MOCK_METHOD1(setFitTypeString, void(const std::string &fitType));
   MOCK_CONST_METHOD2(getResultLocation,
-                     boost::optional<ResultLocationNew>(TableDatasetIndex dataIndex, IDA::WorkspaceIndex spectrum));
+                     boost::optional<ResultLocationNew>(WorkspaceID workspaceID, WorkspaceIndex spectrum));
 
   MOCK_CONST_METHOD0(getResultWorkspace, Mantid::API::WorkspaceGroup_sptr());
   MOCK_CONST_METHOD0(getResultGroup, Mantid::API::WorkspaceGroup_sptr());
   MOCK_CONST_METHOD0(getFittingAlgorithm, Mantid::API::IAlgorithm_sptr());
-  MOCK_CONST_METHOD2(getSingleFit,
-                     Mantid::API::IAlgorithm_sptr(TableDatasetIndex dataIndex, IDA::WorkspaceIndex spectrum));
-  MOCK_CONST_METHOD2(getSingleFunction,
-                     Mantid::API::IFunction_sptr(TableDatasetIndex dataIndex, IDA::WorkspaceIndex spectrum));
+  MOCK_CONST_METHOD2(getSingleFit, Mantid::API::IAlgorithm_sptr(WorkspaceID workspaceID, WorkspaceIndex spectrum));
+  MOCK_CONST_METHOD2(getSingleFunction, Mantid::API::IFunction_sptr(WorkspaceID workspaceID, WorkspaceIndex spectrum));
 
   MOCK_CONST_METHOD0(getOutputBasename, std::string());
-  MOCK_CONST_METHOD1(createDisplayName, std::string(TableDatasetIndex dataIndex));
+  MOCK_CONST_METHOD1(createDisplayName, std::string(WorkspaceID workspaceID));
   MOCK_METHOD1(cleanFailedRun, void(const Mantid::API::IAlgorithm_sptr &fittingAlgorithm));
   MOCK_METHOD2(cleanFailedSingleRun,
-               void(const Mantid::API::IAlgorithm_sptr &fittingAlgorithm, TableDatasetIndex index));
+               void(const Mantid::API::IAlgorithm_sptr &fittingAlgorithm, WorkspaceID workspaceID));
   MOCK_CONST_METHOD1(getDataForParameterEstimation,
                      DataForParameterEstimationCollection(const EstimationDataSelector &selector));
 
@@ -160,8 +125,8 @@ protected:
 private:
   std::string sequentialFitOutputName() const { return ""; };
   std::string simultaneousFitOutputName() const { return ""; };
-  std::string singleFitOutputName(TableDatasetIndex index, IDA::WorkspaceIndex spectrum) const {
-    UNUSED_ARG(index);
+  std::string singleFitOutputName(WorkspaceID workspaceID, WorkspaceIndex spectrum) const {
+    UNUSED_ARG(workspaceID);
     UNUSED_ARG(spectrum);
     return "";
   };
@@ -214,8 +179,7 @@ public:
     m_presenter = std::make_unique<IndirectFitDataPresenter>(std::move(m_model.get()), std::move(m_view.get()));
 
     TS_ASSERT(m_model->getFitDataModel());
-
-    SetUpADSWithWorkspace m_ads("WorkspaceName", createWorkspace(5));
+    m_ads = std::make_unique<SetUpADSWithWorkspace>("WorkspaceName", createWorkspace(5));
     m_model->addWorkspace("WorkspaceName");
   }
 
@@ -240,111 +204,32 @@ public:
     m_model->isMultiFit();
   }
 
-  void test_that_the_view_has_been_instantiated_correctly() {
-    std::string const sampleName("SampleName_red");
-    ON_CALL(*m_view, getSelectedSample()).WillByDefault(Return(sampleName));
-
-    EXPECT_CALL(*m_view, getSelectedSample()).Times(1).WillOnce(Return(sampleName));
-
-    m_view->getSelectedSample();
-  }
-
   ///----------------------------------------------------------------------
   /// Unit Tests that test the signals, methods and slots of the presenter
   ///----------------------------------------------------------------------
 
-  void test_that_the_sampleLoaded_signal_will_add_the_loaded_workspace_to_the_model() {
-    std::string const workspaceName("WorkspaceName2");
-    m_ads->addOrReplace(workspaceName, createWorkspace(5));
-
-    EXPECT_CALL(*m_model, addWorkspace(workspaceName)).Times(Exactly(1));
-    ON_CALL(*m_model, getSpectra(_)).WillByDefault(Return(FunctionModelSpectra("")));
-    m_view->emitSampleLoaded(QString::fromStdString(workspaceName));
-  }
-
   void test_that_setSampleWSSuffices_will_set_the_sample_workspace_suffices_in_the_view() {
     QStringList const suffices{"suffix1", "suffix2"};
-
-    EXPECT_CALL(*m_view, setSampleWSSuffices(suffices)).Times(Exactly(1));
-
     m_presenter->setSampleWSSuffices(suffices);
+    TS_ASSERT_EQUALS(m_presenter->getSampleWSSuffices(), suffices);
   }
 
   void test_that_setSampleFBSuffices_will_set_the_sample_file_browser_suffices_in_the_view() {
     QStringList const suffices{"suffix1", "suffix2"};
-
-    EXPECT_CALL(*m_view, setSampleFBSuffices(suffices)).Times(Exactly(1));
-
     m_presenter->setSampleFBSuffices(suffices);
+    TS_ASSERT_EQUALS(m_presenter->getSampleFBSuffices(), suffices);
   }
 
   void test_that_setResolutionWSSuffices_will_set_the_resolution_workspace_suffices_in_the_view() {
     QStringList const suffices{"suffix1", "suffix2"};
-
-    EXPECT_CALL(*m_view, setResolutionWSSuffices(suffices)).Times(Exactly(1));
-
     m_presenter->setResolutionWSSuffices(suffices);
+    TS_ASSERT_EQUALS(m_presenter->getResolutionWSSuffices(), suffices);
   }
 
   void test_that_setResolutionFBSuffices_will_set_the_resolution_file_browser_suffices_in_the_view() {
     QStringList const suffices{"suffix1", "suffix2"};
-
-    EXPECT_CALL(*m_view, setResolutionFBSuffices(suffices)).Times(Exactly(1));
-
     m_presenter->setResolutionFBSuffices(suffices);
-  }
-
-  void test_that_setStartX_with_TableDatasetIndex_alters_endX_column() {
-    double startX = 1.0;
-    EXPECT_CALL(*m_view, setStartX(startX)).Times(Exactly(1));
-    m_presenter->setStartX(startX, TableDatasetIndex{0});
-    assertValueIsGlobal(START_X_COLUMN, startX);
-  }
-
-  void test_that_setStartX_with_TableDatasetIndex_and_WorkspaceIndex_alters_endX_column() {
-    double startX = 1.0;
-    EXPECT_CALL(*m_view, setStartX(startX)).Times(Exactly(1));
-    m_presenter->setStartX(startX, TableDatasetIndex{0}, IDA::WorkspaceIndex{0});
-    assertValueIsGlobal(START_X_COLUMN, startX);
-  }
-
-  void test_that_setEndX_with_TableDatasetIndex_alters_endX_column() {
-    double endX = 1.0;
-    EXPECT_CALL(*m_view, setEndX(endX)).Times(Exactly(1));
-    m_presenter->setEndX(endX, TableDatasetIndex{0});
-    assertValueIsGlobal(END_X_COLUMN, endX);
-  }
-
-  void test_that_setEndX_with_TableDatasetIndex_and_WorkspaceIndex_alters_endX_column() {
-    double endX = 1.0;
-    EXPECT_CALL(*m_view, setEndX(endX)).Times(Exactly(1));
-    m_presenter->setEndX(endX, TableDatasetIndex{0}, IDA::WorkspaceIndex{0});
-    assertValueIsGlobal(END_X_COLUMN, endX);
-  }
-
-  void test_that_the_setExcludeRegion_slot_will_alter_the_relevant_excludeRegion_column_in_the_table() {
-    TableItem const excludeRegion("2-3");
-
-    m_presenter->setExclude(excludeRegion.asString(), TableDatasetIndex{0}, IDA::WorkspaceIndex{0});
-
-    assertValueIsGlobal(EXCLUDE_REGION_COLUMN, excludeRegion);
-  }
-
-  void test_that_loadSettings_will_read_the_settings_from_the_view() {
-    QSettings settings;
-    settings.beginGroup("/ISettings");
-
-    EXPECT_CALL(*m_view, readSettings(_)).Times(Exactly(1));
-
-    m_presenter->loadSettings(settings);
-  }
-
-  void test_that_replaceHandle_will_check_if_the_model_has_a_workspace() {
-    std::string const workspacename("DummyName");
-
-    EXPECT_CALL(*m_model, hasWorkspace(workspacename)).Times(Exactly(1));
-
-    m_presenter->replaceHandle(workspacename, createWorkspace(5));
+    TS_ASSERT_EQUALS(m_presenter->getResolutionFBSuffices(), suffices);
   }
 
   void test_getDataForParameterEstimation_uses_selector_to_get_from_model() {
@@ -353,15 +238,6 @@ public:
     EXPECT_CALL(*m_model, getDataForParameterEstimation(NoCheck(nullptr))).Times(Exactly(1));
 
     m_presenter->getDataForParameterEstimation(selector);
-  }
-
-  void test_that_getXRange_calls_the_correct_method_in_the_view() {
-    auto const xRange = std::make_pair(0.0, 1.0);
-
-    ON_CALL(*m_view, getXRange()).WillByDefault(Return(xRange));
-    EXPECT_CALL(*m_view, getXRange()).Times(1);
-
-    TS_ASSERT_EQUALS(m_presenter->getXRange(), xRange);
   }
 
 private:
@@ -386,5 +262,5 @@ private:
   std::unique_ptr<MockIndirectFitDataTableModel> m_model;
   std::unique_ptr<IndirectFitDataPresenter> m_presenter;
 
-  SetUpADSWithWorkspace *m_ads;
+  std::unique_ptr<SetUpADSWithWorkspace> m_ads;
 };

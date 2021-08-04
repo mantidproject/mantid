@@ -8,19 +8,13 @@ import unittest
 from unittest import mock
 
 from mantid.api import FrameworkManager, FunctionFactory
+from mantid.simpleapi import CreateEmptyTableWorkspace
 from mantidqt.widgets.fitscriptgenerator import FittingMode
-
-from Muon.GUI.Common.contexts.plotting_context import PlotMode
-from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model import BasicFittingModel
-from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_presenter import BasicFittingPresenter
-from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_view import BasicFittingView
-from Muon.GUI.Common.test_helpers.fitting_mock_setup import (add_mock_methods_to_basic_fitting_model,
-                                                             add_mock_methods_to_basic_fitting_presenter,
-                                                             add_mock_methods_to_basic_fitting_view)
-from Muon.GUI.Common.thread_model import ThreadModel
+from Muon.GUI.Common.test_helpers.fitting_mock_setup import MockBasicFitting
+from Muon.GUI.Common.utilities.workspace_utils import StaticWorkspaceWrapper
 
 
-class BasicFittingPresenterTest(unittest.TestCase):
+class BasicFittingPresenterTest(unittest.TestCase, MockBasicFitting):
 
     @classmethod
     def setUpClass(cls):
@@ -57,10 +51,14 @@ class BasicFittingPresenterTest(unittest.TestCase):
         self.assertEqual(self.view.set_slot_for_undo_fit_clicked.call_count, 1)
         self.assertEqual(self.view.set_slot_for_plot_guess_changed.call_count, 1)
         self.assertEqual(self.view.set_slot_for_fit_name_changed.call_count, 1)
+        self.assertEqual(self.view.set_slot_for_covariance_matrix_clicked.call_count, 1)
         self.assertEqual(self.view.set_slot_for_function_structure_changed.call_count, 1)
         self.assertEqual(self.view.set_slot_for_function_parameter_changed.call_count, 1)
         self.assertEqual(self.view.set_slot_for_start_x_updated.call_count, 1)
         self.assertEqual(self.view.set_slot_for_end_x_updated.call_count, 1)
+        self.assertEqual(self.view.set_slot_for_exclude_range_state_changed.call_count, 1)
+        self.assertEqual(self.view.set_slot_for_exclude_start_x_updated.call_count, 1)
+        self.assertEqual(self.view.set_slot_for_exclude_end_x_updated.call_count, 1)
         self.assertEqual(self.view.set_slot_for_minimizer_changed.call_count, 1)
         self.assertEqual(self.view.set_slot_for_evaluation_type_changed.call_count, 1)
         self.assertEqual(self.view.set_slot_for_use_raw_changed.call_count, 1)
@@ -84,10 +82,6 @@ class BasicFittingPresenterTest(unittest.TestCase):
 
         self.presenter.update_and_reset_all_data.assert_called_with()
         self.view.disable_view.assert_called_once_with()
-
-    def test_that_handle_plot_mode_changed_will_update_the_plot_guess_if_in_fitting_mode(self):
-        self.presenter.handle_plot_mode_changed(PlotMode.Fitting)
-        self.model.update_plot_guess.assert_called_once_with()
 
     def test_that_handle_gui_changes_made_will_reset_the_start_and_end_x_in_the_model_and_view(self):
         self.presenter.handle_gui_changes_made({"FirstGoodDataFromFile": True})
@@ -122,6 +116,26 @@ class BasicFittingPresenterTest(unittest.TestCase):
         self.presenter.clear_undo_data.assert_called_with()
         self.view.disable_view.assert_called_once_with()
 
+    def test_that_handle_dataset_name_changed_will_update_the_model_and_view(self):
+        self.presenter.update_fit_statuses_and_chi_squared_in_view_from_model = mock.Mock()
+        self.presenter.update_covariance_matrix_button = mock.Mock()
+        self.presenter.update_fit_function_in_view_from_model = mock.Mock()
+        self.presenter.update_start_and_end_x_in_view_from_model = mock.Mock()
+
+        self.presenter.handle_dataset_name_changed()
+
+        self.mock_view_current_dataset_index.assert_called_once_with()
+        self.mock_model_current_dataset_index.assert_called_once_with(self.current_dataset_index)
+
+        self.presenter.update_fit_statuses_and_chi_squared_in_view_from_model.assert_called_once_with()
+        self.presenter.update_covariance_matrix_button.assert_called_once_with()
+        self.presenter.update_fit_function_in_view_from_model.assert_called_once_with()
+        self.presenter.update_start_and_end_x_in_view_from_model.assert_called_once_with()
+
+        self.model.update_plot_guess.assert_called_once_with()
+
+        self.presenter.selected_fit_results_changed.notify_subscribers.assert_called_once_with([])
+
     def test_that_handle_plot_guess_changed_will_update_plot_guess_using_the_model(self):
         self.presenter.handle_plot_guess_changed()
         self.model.update_plot_guess.assert_called_once_with()
@@ -129,12 +143,14 @@ class BasicFittingPresenterTest(unittest.TestCase):
     def test_that_handle_undo_fit_clicked_will_attempt_to_reset_the_fit_data_and_notify_that_the_data_has_changed(self):
         self.presenter.update_fit_function_in_view_from_model = mock.Mock()
         self.presenter.update_fit_statuses_and_chi_squared_in_view_from_model = mock.Mock()
+        self.presenter.update_covariance_matrix_button = mock.Mock()
 
         self.presenter.handle_undo_fit_clicked()
 
         self.model.undo_previous_fit.assert_called_once_with()
         self.presenter.update_fit_function_in_view_from_model.assert_called_once_with()
         self.presenter.update_fit_statuses_and_chi_squared_in_view_from_model.assert_called_once_with()
+        self.presenter.update_covariance_matrix_button.assert_called_once_with()
         self.model.update_plot_guess.assert_called_once_with()
         self.presenter.selected_fit_results_changed.notify_subscribers.assert_called_once_with([])
 
@@ -218,6 +234,22 @@ class BasicFittingPresenterTest(unittest.TestCase):
                                                                                     FittingMode.SEQUENTIAL,
                                                                                     fit_options)
 
+    def test_that_handle_covariance_matrix_clicked_calls_the_expected_functions(self):
+        ws = CreateEmptyTableWorkspace()
+        wrapper = StaticWorkspaceWrapper("CovarianceMatrix", ws)
+        self.model.current_normalised_covariance_matrix = mock.Mock(return_value=wrapper)
+
+        self.presenter.handle_covariance_matrix_clicked()
+
+        self.model.current_normalised_covariance_matrix.assert_called_once_with()
+        self.view.show_normalised_covariance_matrix.assert_called_once_with(wrapper.workspace, wrapper.workspace_name)
+
+    def test_that_update_covariance_matrix_button_will_call_the_expected_functions(self):
+        self.presenter.update_covariance_matrix_button()
+
+        self.model.has_normalised_covariance_matrix.assert_called_once_with()
+        self.view.set_covariance_button_enabled.assert_called_once_with(True)
+
     def test_that_handle_function_name_changed_by_user_will_set_the_automatic_update_property_to_false(self):
         self.presenter.handle_function_name_changed_by_user()
 
@@ -271,7 +303,7 @@ class BasicFittingPresenterTest(unittest.TestCase):
 
     def test_that_handle_start_x_updated_will_attempt_to_update_the_start_x_in_the_model(self):
         self.presenter.handle_start_x_updated()
-        self.mock_model_current_start_x.assert_called_once_with(self.start_x)
+        self.mock_model_current_start_x.assert_called_with(self.start_x)
 
     def test_that_handle_start_x_updated_will_reset_the_start_x_if_it_equals_the_end_x(self):
         self.mock_view_start_x = mock.PropertyMock(return_value=self.end_x)
@@ -279,31 +311,31 @@ class BasicFittingPresenterTest(unittest.TestCase):
 
         self.presenter.handle_start_x_updated()
 
-        calls = [mock.call(), mock.call(), mock.call(), mock.call(), mock.call(0.0), mock.call()]
-        self.mock_view_start_x.assert_has_calls(calls)
+        self.mock_view_start_x.assert_called_with(0.0)
 
-    def test_that_handle_start_x_updated_will_use_the_min_start_x_when_the_set_start_x_is_too_small(self):
+    @mock.patch("Muon.GUI.Common.utilities.workspace_data_utils.x_limits_of_workspace")
+    def test_that_handle_start_x_updated_will_use_the_min_start_x_when_the_set_start_x_is_too_small(self, mock_x_limits):
         x_lower = 3.0
+        mock_x_limits.return_value = (x_lower, self.end_x)
         self.model.x_limits_of_workspace = mock.Mock(return_value=(x_lower, self.end_x))
 
         self.presenter.handle_start_x_updated()
 
-        calls = [mock.call(), mock.call(3.0), mock.call()]
-        self.mock_view_start_x.assert_has_calls(calls)
+        self.mock_view_start_x.assert_called_with(3.0)
 
-    def test_that_handle_start_x_updated_will_use_the_max_start_x_when_the_set_start_x_is_too_large(self):
+    @mock.patch("Muon.GUI.Common.utilities.workspace_data_utils.x_limits_of_workspace")
+    def test_that_handle_start_x_updated_will_use_the_max_start_x_when_the_set_start_x_is_too_large(self, mock_x_limits):
         x_upper = -0.1
-        self.model.x_limits_of_workspace = mock.Mock(return_value=(self.start_x, x_upper))
+        mock_x_limits.return_value = (self.start_x, x_upper)
         self.model.is_equal_to_n_decimals = mock.Mock(return_value=False)
 
         self.presenter.handle_start_x_updated()
 
-        calls = [mock.call(), mock.call(), mock.call(15.0), mock.call()]
-        self.mock_view_start_x.assert_has_calls(calls)
+        self.mock_view_start_x.assert_called_with(15.0)
 
     def test_that_handle_end_x_updated_will_attempt_to_update_the_end_x_in_the_model(self):
         self.presenter.handle_end_x_updated()
-        self.mock_model_current_end_x.assert_called_once_with(self.end_x)
+        self.mock_model_current_end_x.assert_called_with(self.end_x)
 
     def test_that_handle_end_x_updated_will_reset_the_end_x_if_it_equals_the_end_x(self):
         self.mock_view_end_x = mock.PropertyMock(return_value=self.start_x)
@@ -311,8 +343,36 @@ class BasicFittingPresenterTest(unittest.TestCase):
 
         self.presenter.handle_end_x_updated()
 
-        calls = [mock.call(), mock.call(), mock.call(), mock.call(), mock.call(15.0), mock.call()]
-        self.mock_view_end_x.assert_has_calls(calls)
+        self.mock_view_end_x.assert_called_with(15.0)
+
+    def test_that_handle_exclude_range_state_changed_will_update_the_model_and_view(self):
+        self.presenter.handle_exclude_range_state_changed()
+
+        self.mock_view_exclude_range.assert_called_once_with()
+        self.mock_model_exclude_range.assert_has_calls([mock.call(True), mock.call()])
+        self.view.set_exclude_start_and_end_x_visible.assert_called_once_with(True)
+
+    @mock.patch("Muon.GUI.Common.utilities.workspace_data_utils.check_exclude_start_x_is_valid")
+    def test_that_handle_exclude_start_x_updated_will_check_the_exclude_start_x_is_valid_before_updating_it(self, mock_check):
+        mock_check.return_value = (self.start_x, self.end_x)
+
+        self.presenter.handle_exclude_start_x_updated()
+
+        self.mock_view_exclude_start_x.assert_called_with()
+        self.mock_view_exclude_end_x.assert_called_with()
+        self.mock_model_current_exclude_start_x.assert_called_once_with()
+        self.presenter.update_exclude_start_and_end_x_in_view_and_model.assert_called_once_with(self.start_x, self.end_x)
+
+    @mock.patch("Muon.GUI.Common.utilities.workspace_data_utils.check_exclude_end_x_is_valid")
+    def test_that_handle_exclude_end_x_updated_will_check_the_exclude_end_x_is_valid_before_updating_it(self, mock_check):
+        mock_check.return_value = (self.start_x, self.end_x)
+
+        self.presenter.handle_exclude_end_x_updated()
+
+        self.mock_view_exclude_start_x.assert_called_with()
+        self.mock_view_exclude_end_x.assert_called_with()
+        self.mock_model_current_exclude_end_x.assert_called_once_with()
+        self.presenter.update_exclude_start_and_end_x_in_view_and_model.assert_called_once_with(self.start_x, self.end_x)
 
     def test_that_handle_use_rebin_changed_will_not_update_the_model_if_the_rebin_check_fails(self):
         self.presenter._check_rebin_options = mock.Mock(return_value=False)
@@ -418,104 +478,6 @@ class BasicFittingPresenterTest(unittest.TestCase):
         self.mock_view_start_x.assert_called_once_with(self.start_x)
         self.mock_model_current_end_x.assert_called_once_with()
         self.mock_view_end_x.assert_called_once_with(self.end_x)
-
-    def _setup_mock_view(self):
-        self.view = mock.Mock(spec=BasicFittingView)
-        self.view = add_mock_methods_to_basic_fitting_view(self.view)
-
-        # Mock the properties of the view
-        self.mock_view_minimizer = mock.PropertyMock(return_value=self.minimizer)
-        type(self.view).minimizer = self.mock_view_minimizer
-        self.mock_view_evaluation_type = mock.PropertyMock(return_value=self.evaluation_type)
-        type(self.view).evaluation_type = self.mock_view_evaluation_type
-        self.mock_view_fit_to_raw = mock.PropertyMock(return_value=self.fit_to_raw)
-        type(self.view).fit_to_raw = self.mock_view_fit_to_raw
-        self.mock_view_fit_object = mock.PropertyMock(return_value=self.fit_function)
-        type(self.view).fit_object = self.mock_view_fit_object
-        self.mock_view_start_x = mock.PropertyMock(return_value=self.start_x)
-        type(self.view).start_x = self.mock_view_start_x
-        self.mock_view_end_x = mock.PropertyMock(return_value=self.end_x)
-        type(self.view).end_x = self.mock_view_end_x
-        self.mock_view_plot_guess = mock.PropertyMock(return_value=self.plot_guess)
-        type(self.view).plot_guess = self.mock_view_plot_guess
-        self.mock_view_function_name = mock.PropertyMock(return_value=self.function_name)
-        type(self.view).function_name = self.mock_view_function_name
-
-    def _setup_mock_model(self):
-        self.model = mock.Mock(spec=BasicFittingModel)
-        self.model = add_mock_methods_to_basic_fitting_model(self.model, self.dataset_names, self.current_dataset_index,
-                                                             self.fit_function, self.start_x, self.end_x,
-                                                             self.fit_status, self.chi_squared)
-
-        # Mock the properties of the model
-        self.mock_model_current_dataset_index = mock.PropertyMock(return_value=self.current_dataset_index)
-        type(self.model).current_dataset_index = self.mock_model_current_dataset_index
-        self.mock_model_dataset_names = mock.PropertyMock(return_value=self.dataset_names)
-        type(self.model).dataset_names = self.mock_model_dataset_names
-        self.mock_model_current_dataset_name = mock.PropertyMock(return_value=
-                                                                 self.dataset_names[self.current_dataset_index])
-        type(self.model).current_dataset_name = self.mock_model_current_dataset_name
-        self.mock_model_number_of_datasets = mock.PropertyMock(return_value=len(self.dataset_names))
-        type(self.model).number_of_datasets = self.mock_model_number_of_datasets
-        self.mock_model_start_xs = mock.PropertyMock(return_value=[self.start_x] * len(self.dataset_names))
-        type(self.model).start_xs = self.mock_model_start_xs
-        self.mock_model_current_start_x = mock.PropertyMock(return_value=self.start_x)
-        type(self.model).current_start_x = self.mock_model_current_start_x
-        self.mock_model_end_xs = mock.PropertyMock(return_value=[self.end_x] * len(self.dataset_names))
-        type(self.model).end_xs = self.mock_model_end_xs
-        self.mock_model_current_end_x = mock.PropertyMock(return_value=self.end_x)
-        type(self.model).current_end_x = self.mock_model_current_end_x
-        self.mock_model_plot_guess = mock.PropertyMock(return_value=self.plot_guess)
-        type(self.model).plot_guess = self.mock_model_plot_guess
-        self.mock_model_minimizer = mock.PropertyMock(return_value=self.minimizer)
-        type(self.model).minimizer = self.mock_model_minimizer
-        self.mock_model_evaluation_type = mock.PropertyMock(return_value=self.evaluation_type)
-        type(self.model).evaluation_type = self.mock_model_evaluation_type
-        self.mock_model_fit_to_raw = mock.PropertyMock(return_value=self.fit_to_raw)
-        type(self.model).fit_to_raw = self.mock_model_fit_to_raw
-        self.mock_model_single_fit_functions = mock.PropertyMock(return_value=self.single_fit_functions)
-        type(self.model).single_fit_functions = self.mock_model_single_fit_functions
-        self.mock_model_current_single_fit_function = mock.PropertyMock(return_value=self.fit_function)
-        type(self.model).current_single_fit_function = self.mock_model_current_single_fit_function
-        self.mock_model_single_fit_functions_cache = mock.PropertyMock(return_value=self.fit_function)
-        type(self.model).single_fit_functions_cache = self.mock_model_single_fit_functions_cache
-        self.mock_model_fit_statuses = mock.PropertyMock(return_value=[self.fit_status] * len(self.dataset_names))
-        type(self.model).fit_statuses = self.mock_model_fit_statuses
-        self.mock_model_current_fit_status = mock.PropertyMock(return_value=self.fit_status)
-        type(self.model).current_fit_status = self.mock_model_current_fit_status
-        self.mock_model_chi_squared = mock.PropertyMock(return_value=[self.chi_squared] * len(self.dataset_names))
-        type(self.model).chi_squared = self.mock_model_chi_squared
-        self.mock_model_current_chi_squared = mock.PropertyMock(return_value=self.chi_squared)
-        type(self.model).current_chi_squared = self.mock_model_current_chi_squared
-        self.mock_model_function_name = mock.PropertyMock(return_value=self.function_name)
-        type(self.model).function_name = self.mock_model_function_name
-        self.mock_model_function_name_auto_update = mock.PropertyMock(return_value=True)
-        type(self.model).function_name_auto_update = self.mock_model_function_name_auto_update
-        self.mock_model_simultaneous_fitting_mode = mock.PropertyMock(return_value=False)
-        type(self.model).simultaneous_fitting_mode = self.mock_model_simultaneous_fitting_mode
-        self.mock_model_global_parameters = mock.PropertyMock(return_value=[])
-        type(self.model).global_parameters = self.mock_model_global_parameters
-        self.mock_model_do_rebin = mock.PropertyMock(return_value=False)
-        type(self.model).do_rebin = self.mock_model_do_rebin
-
-    def _setup_presenter(self):
-        self.presenter = BasicFittingPresenter(self.view, self.model)
-        self.presenter = add_mock_methods_to_basic_fitting_presenter(self.presenter)
-
-        # Mock the fit result property
-        self.presenter.fitting_calculation_model = mock.Mock(spec=ThreadModel)
-        self.mock_presenter_get_fit_results = mock.PropertyMock(return_value=(self.fit_function, self.fit_status,
-                                                                              self.chi_squared))
-        type(self.presenter.fitting_calculation_model).result = self.mock_presenter_get_fit_results
-
-        # Mock unimplemented methods and notifiers
-        self.presenter.handle_fitting_finished = mock.Mock()
-        self.presenter.update_and_reset_all_data = mock.Mock()
-        self.presenter.disable_editing_notifier.notify_subscribers = mock.Mock()
-        self.presenter.enable_editing_notifier.notify_subscribers = mock.Mock()
-        self.presenter.selected_fit_results_changed.notify_subscribers = mock.Mock()
-        self.presenter.fit_function_changed_notifier.notify_subscribers = mock.Mock()
-        self.presenter.fit_parameter_changed_notifier.notify_subscribers = mock.Mock()
 
 
 if __name__ == '__main__':

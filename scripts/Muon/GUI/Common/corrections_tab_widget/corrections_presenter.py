@@ -7,6 +7,8 @@
 from mantidqt.utils.observer_pattern import GenericObservable, GenericObserver, GenericObserverWithArgPassing
 
 from Muon.GUI.Common.contexts.muon_context import MuonContext
+from Muon.GUI.Common.corrections_tab_widget.background_corrections_model import BackgroundCorrectionsModel
+from Muon.GUI.Common.corrections_tab_widget.background_corrections_presenter import BackgroundCorrectionsPresenter
 from Muon.GUI.Common.corrections_tab_widget.corrections_model import CorrectionsModel
 from Muon.GUI.Common.corrections_tab_widget.corrections_view import CorrectionsView
 from Muon.GUI.Common.corrections_tab_widget.dead_time_corrections_model import DeadTimeCorrectionsModel
@@ -29,6 +31,10 @@ class CorrectionsPresenter(QObject):
         self.dead_time_model = DeadTimeCorrectionsModel(model, context.data_context, context.corrections_context)
         self.dead_time_presenter = DeadTimeCorrectionsPresenter(self.view.dead_time_view, self.dead_time_model, self)
 
+        self.background_model = BackgroundCorrectionsModel(model, context)
+        self.background_presenter = BackgroundCorrectionsPresenter(self.view.background_view, self.background_model,
+                                                                   self)
+
         self.initialize_model_options()
 
         self.view.set_slot_for_run_selector_changed(self.handle_run_selector_changed)
@@ -37,7 +43,8 @@ class CorrectionsPresenter(QObject):
             self.handle_ads_clear_or_remove_workspace_event)
         self.instrument_changed_observer = GenericObserver(self.handle_instrument_changed)
         self.load_observer = GenericObserver(self.handle_runs_loaded)
-        self.corrections_complete_observer = GenericObserver(self.handle_corrections_complete)
+        self.group_change_observer = GenericObserver(self.handle_groups_changed)
+        self.pre_process_and_grouping_complete_observer = GenericObserver(self.handle_pre_process_and_grouping_complete)
 
         self.enable_editing_notifier = GenericObservable()
         self.disable_editing_notifier = GenericObservable()
@@ -46,6 +53,7 @@ class CorrectionsPresenter(QObject):
     def initialize_model_options(self) -> None:
         """Initialise the model with the default fitting options."""
         self.dead_time_presenter.initialize_model_options()
+        self.background_presenter.initialize_model_options()
 
     def handle_ads_clear_or_remove_workspace_event(self, _: str = None) -> None:
         """Handle when there is a clear or remove workspace event in the ADS."""
@@ -60,6 +68,7 @@ class CorrectionsPresenter(QObject):
     def _handle_instrument_changed(self) -> None:
         """Handles when new run numbers are loaded from the GUI thread."""
         self.dead_time_presenter.handle_instrument_changed()
+        self.background_presenter.handle_instrument_changed()
 
     def handle_runs_loaded(self) -> None:
         """Handles when new run numbers are loaded. QMetaObject is required so its executed on the GUI thread."""
@@ -76,14 +85,20 @@ class CorrectionsPresenter(QObject):
         else:
             self.view.enable_view()
 
+    def handle_groups_changed(self) -> None:
+        """Handles when the selected groups have changed in the grouping tab."""
+        self.background_presenter.handle_groups_changed()
+
     def handle_run_selector_changed(self) -> None:
         """Handles when the run selector is changed."""
         self.model.set_current_run_string(self.view.current_run_string())
         self.dead_time_presenter.handle_run_selector_changed()
+        self.background_presenter.handle_run_selector_changed()
 
-    def handle_corrections_complete(self) -> None:
-        """When the corrections have been calculated, update the displayed correction data."""
-        self.dead_time_presenter.handle_corrections_complete()
+    def handle_pre_process_and_grouping_complete(self) -> None:
+        """Handles when MuonPreProcess and grouping has been completed."""
+        self.dead_time_presenter.handle_pre_process_and_grouping_complete()
+        self.background_presenter.handle_pre_process_and_grouping_complete()
 
     def current_run_string(self) -> str:
         """Returns the currently selected run string."""

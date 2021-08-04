@@ -7,8 +7,7 @@
 
 #pragma once
 
-#include "IGLDisplay.h"
-#include "MantidKernel/WarningSuppressions.h"
+#include "MantidQtWidgets/InstrumentView/IGLDisplay.h"
 
 #include <QGLWidget>
 #include <QString>
@@ -19,6 +18,7 @@ namespace MantidQt::MantidWidgets {
 
 class MockGLDisplay : public IGLDisplay {
 public:
+  virtual ~MockGLDisplay() = default;
   MOCK_METHOD(void, setSurface, (std::shared_ptr<ProjectionSurface>), (override));
   MOCK_METHOD(std::shared_ptr<ProjectionSurface>, getSurface, (), (override));
   MOCK_METHOD(void, updateView, (bool), (override));

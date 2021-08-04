@@ -62,10 +62,7 @@ private:
   TYPE mvalue;
 
 public:
-  TimeValueUnit(const Types::Core::DateAndTime &time, TYPE value) {
-    mtime = time;
-    mvalue = value;
-  }
+  TimeValueUnit(const Types::Core::DateAndTime &time, const TYPE &value) : mtime(time), mvalue(value) {}
 
   ~TimeValueUnit() = default;
 
@@ -184,11 +181,11 @@ public:
   std::vector<double> timesAsVectorSeconds() const;
 
   /// Add a value to the map using a DateAndTime object
-  void addValue(const Types::Core::DateAndTime &time, const TYPE value);
+  void addValue(const Types::Core::DateAndTime &time, const TYPE &value);
   /// Add a value to the map using a string time
-  void addValue(const std::string &time, const TYPE value);
+  void addValue(const std::string &time, const TYPE &value);
   /// Add a value to the map using a time_t
-  void addValue(const std::time_t &time, const TYPE value);
+  void addValue(const std::time_t &time, const TYPE &value);
   /// Adds vectors of values to the map. Should be much faster than repeated
   /// calls to addValue.
   void addValues(const std::vector<Types::Core::DateAndTime> &times, const std::vector<TYPE> &values);

@@ -174,7 +174,7 @@ public:
 
   /// Make list of the circle of direction vectors that form a fixed angle
   /// with the specified axis
-  static std::vector<Kernel::V3D> MakeCircleDirections(int n_steps, const Kernel::V3D axis, double angle_degrees);
+  static std::vector<Kernel::V3D> MakeCircleDirections(int n_steps, const Kernel::V3D &axis, double angle_degrees);
 
   /// Choose the direction in a list of directions, that is most nearly
   /// perpendicular to planes with the specified spacing in reciprocal space.

@@ -31,7 +31,10 @@ class AbsorptionCorrUtilsTest(unittest.TestCase):
         PropertyManagerDataService.remove('props')
 
     def test_correction_props(self):
-        self.assertRaises(RuntimeError, absorptioncorrutils.create_absorption_input, '', None)
+        # must supply the filename
+        self.assertRaises(ValueError, absorptioncorrutils.create_absorption_input, '', None)
+        # must supply some way of determining wavelength range
+        self.assertRaises(ValueError, absorptioncorrutils.create_absorption_input, 'PG3_46577.nxs.h5', None)
 
         props = PropertyManagerDataService.retrieve("props")
 

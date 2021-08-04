@@ -19,6 +19,16 @@ New Features
 
 Improvements
 ############
+- Single input has been removed from the Indirect Data Analysis Fit tabs. All data input is now done via the multiple input dialog.
+- The data input widgets in the Indirect Data Analysis fit tabs has been made dockable and can be resized once undocked.
+- Introduced multithreading for detectors/spectra to VesuvioCalculateMS in order to speed up the VesuvioAnalysis algorithm.
+- The Abins Algorithm can now import XML data from VASP calculations
+  using "selective dynamics" to restrict the set of atoms active in
+  vibrations. The data is imported and processed as though these are
+  the only atoms in the system, with appropriately-dimensioned
+  displacement data. This approximation is useful for the study of
+  light (e.g. organic) molecules adsorbed to surfaces of heavy
+  (e.g. noble-metal) catalysts.
 - Abins: Thresholding of low-intensity modes has been changed. This
   impacts the second-order spectrum, especially at elevated
   temperature; excitations were being discarded on the basis of a low
@@ -31,4 +41,3 @@ Bug Fixes
 
 
 :ref:`Release 6.2.0 <v6.2.0>`
-

@@ -134,6 +134,11 @@ class SuperplotViewSide(QDockWidget):
 
     UI = "side_dock_widget.ui"
 
+    """
+    Sent when the widget is resized.
+    """
+    resized = Signal()
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.here = os.path.dirname(os.path.realpath(__file__))
@@ -151,10 +156,22 @@ class SuperplotViewSide(QDockWidget):
                                                   "WorkspaceGroup",
                                                   "EventWorkspace"])
 
+    def resizeEvent(self, event):
+        """
+        Override QDockWidget::resizeEvent.
+        """
+        super().resizeEvent(event)
+        self.resized.emit()
+
 
 class SuperplotViewBottom(QDockWidget):
 
     UI = "bottom_dock_widget.ui"
+
+    """
+    Sent when the widget is resized.
+    """
+    resized = Signal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -177,6 +194,13 @@ class SuperplotViewBottom(QDockWidget):
         elif event.key() == Qt.Key_Space:
             self.holdButton.click()
 
+    def resizeEvent(self, event):
+        """
+        Override QDockWidget::resizeEvent.
+        """
+        super().resizeEvent(event)
+        self.resized.emit()
+
 
 class SuperplotView(QWidget):
 
@@ -195,6 +219,7 @@ class SuperplotView(QWidget):
         side.addButton.clicked.connect(self._presenter.on_add_button_clicked)
         side.workspacesList.itemSelectionChanged.connect(
                 self._presenter.on_workspace_selection_changed)
+        side.resized.connect(self._presenter.on_resize)
         bottom = self._bottom_view
         bottom.holdButton.clicked.connect(
                 self._presenter.on_hold_button_clicked)
@@ -204,6 +229,7 @@ class SuperplotView(QWidget):
                 self._presenter.on_spectrum_spin_box_changed)
         bottom.modeComboBox.currentTextChanged.connect(
                 self._presenter.on_mode_changed)
+        bottom.resized.connect(self._presenter.on_resize)
 
     def get_side_widget(self):
         return self._side_view
@@ -369,6 +395,27 @@ class SuperplotView(QWidget):
             str: text
         """
         return self._bottom_view.holdButton.text()
+
+    def set_hold_button_size(self, width, height):
+        """
+        Set the hold button fixed size.
+
+        Args:
+            width (int): button width
+            height (int): button height
+        """
+        self._bottom_view.holdButton.setFixedSize(width, height)
+
+    def get_hold_button_size(self):
+        """
+        Get the hold button size.
+
+        Returns:
+            (int, int): button width and height
+        """
+        self._bottom_view.holdButton.adjustSize()
+        size = self._bottom_view.holdButton.size()
+        return size.width(), size.height()
 
     def set_spectrum_selection_disabled(self, state):
         """

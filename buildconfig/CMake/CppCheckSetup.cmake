@@ -8,6 +8,7 @@ if ( CPPCHECK_EXECUTABLE )
   configure_file(${CMAKE_SOURCE_DIR}/buildconfig/CMake/CppCheck_Suppressions.txt.in ${CMAKE_BINARY_DIR}/CppCheck_Suppressions.txt)
 
   # setup the standard arguments
+  # --inline-suppr appears to be ignored if --suppresions-list is specified
   set ( CPPCHECK_ARGS --enable=all --inline-suppr --max-configs=120
   --suppressions-list=${CMAKE_BINARY_DIR}/CppCheck_Suppressions.txt
   --project=${CMAKE_BINARY_DIR}/compile_commands.json

@@ -282,6 +282,10 @@ class MuonGroupPairContext(object):
                     self._phasequad.remove(phasequad_obj)
                 return
 
+    def update_phase_tables(self, table):
+        for index, _ in enumerate(self._phasequad):
+            self._phasequad[index].phase_table = table
+
     def add_diff(self, diff):
         assert isinstance(diff, MuonDiff)
         if self._check_name_unique(diff.name):
@@ -335,6 +339,16 @@ class MuonGroupPairContext(object):
             if item.name == name:
                 return False
         return True
+
+    def get_group_counts_workspace_names(self, runs, groups, rebin=False):
+        workspace_names = []
+        for group_name in groups:
+            try:
+                name = self[group_name].get_counts_workspace_for_run(runs, rebin)
+                workspace_names.append(name)
+            except KeyError:
+                continue
+        return workspace_names
 
     def get_group_workspace_names(self, runs, groups, rebin):
         workspace_list = []

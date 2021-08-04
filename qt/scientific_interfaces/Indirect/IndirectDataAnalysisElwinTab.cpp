@@ -323,7 +323,7 @@ bool IndirectDataAnalysisElwinTab::validate() {
   return error.isEmpty();
 }
 
-void IndirectDataAnalysisElwinTab::loadSettings(const QSettings &settings) {
+void IndirectDataAnalysisElwinTab::loadTabSettings(const QSettings &settings) {
   m_uiForm.dsInputFiles->readSettings(settings.group());
 }
 

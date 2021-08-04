@@ -53,7 +53,7 @@ class FitScriptGeneratorModelTest : public CxxTest::TestSuite {
 
 public:
   FitScriptGeneratorModelTest()
-      : m_wsName("Name"), m_wsIndex(MantidQt::MantidWidgets::WorkspaceIndex(0)), m_workspace(create2DWorkspace(3, 3)),
+      : m_wsName("Name"), m_wsIndex(WorkspaceIndex(0)), m_workspace(create2DWorkspace(3, 3)),
         m_startX(m_workspace->x(m_wsIndex.value).front()), m_endX(m_workspace->x(m_wsIndex.value).back()) {
     Mantid::API::FrameworkManager::Instance();
   }
@@ -97,13 +97,13 @@ public:
   }
 
   void test_that_removeWorkspaceDomain_will_not_throw_if_it_does_not_have_the_specified_domain() {
-    TS_ASSERT_THROWS_NOTHING(m_model->removeWorkspaceDomain(m_wsName, m_wsIndex));
+    TS_ASSERT_THROWS_NOTHING(m_model->removeDomain(FitDomainIndex{0}));
   }
 
   void test_that_removeWorkspaceDomain_will_remove_the_specified_domain() {
     m_model->addWorkspaceDomain(m_wsName, m_wsIndex, m_startX, m_endX);
     m_model->addWorkspaceDomain("Name2", m_wsIndex, m_startX, m_endX);
-    m_model->removeWorkspaceDomain(m_wsName, m_wsIndex);
+    m_model->removeDomain(FitDomainIndex{0});
 
     TS_ASSERT(!m_model->hasWorkspaceDomain(m_wsName, m_wsIndex));
     TS_ASSERT(m_model->hasWorkspaceDomain("Name2", m_wsIndex));
@@ -113,7 +113,7 @@ public:
     setup_simultaneous_fit_with_global_tie();
 
     TS_ASSERT_EQUALS(m_model->getGlobalTies().size(), 1);
-    m_model->removeWorkspaceDomain(m_wsName, m_wsIndex);
+    m_model->removeDomain(FitDomainIndex{0});
     TS_ASSERT_EQUALS(m_model->getGlobalTies().size(), 0);
   }
 
@@ -124,6 +124,33 @@ public:
   void test_that_hasWorkspaceDomain_returns_true_if_a_workspace_domain_exists() {
     m_model->addWorkspaceDomain(m_wsName, m_wsIndex, m_startX, m_endX);
     TS_ASSERT(m_model->hasWorkspaceDomain(m_wsName, m_wsIndex));
+  }
+
+  void test_that_renameWorkspace_will_rename_all_domains_containing_that_workspace_name() {
+    std::string const newName("NewName");
+
+    m_model->addWorkspaceDomain(m_wsName, m_wsIndex, m_startX, m_endX);
+    m_model->addWorkspaceDomain("Name2", m_wsIndex, m_startX, m_endX);
+    m_model->addWorkspaceDomain(m_wsName, MantidQt::MantidWidgets::WorkspaceIndex{1}, m_startX, m_endX);
+    m_model->addWorkspaceDomain("Name3", m_wsIndex, m_startX, m_endX);
+    m_model->addWorkspaceDomain(m_wsName, MantidQt::MantidWidgets::WorkspaceIndex{2}, m_startX, m_endX);
+
+    m_model->renameWorkspace(m_wsName, newName);
+
+    TS_ASSERT(m_model->hasWorkspaceDomain(newName, m_wsIndex));
+    TS_ASSERT(m_model->hasWorkspaceDomain("Name2", m_wsIndex));
+    TS_ASSERT(m_model->hasWorkspaceDomain(newName, MantidQt::MantidWidgets::WorkspaceIndex{1}));
+    TS_ASSERT(m_model->hasWorkspaceDomain("Name3", m_wsIndex));
+    TS_ASSERT(m_model->hasWorkspaceDomain(newName, MantidQt::MantidWidgets::WorkspaceIndex{2}));
+  }
+
+  void test_that_renameWorkspace_will_not_cause_an_exception_if_a_workspace_name_does_not_exist() {
+    m_model->addWorkspaceDomain(m_wsName, m_wsIndex, m_startX, m_endX);
+
+    m_model->renameWorkspace("NonExistingName", "NewName");
+
+    TS_ASSERT(m_model->hasWorkspaceDomain(m_wsName, m_wsIndex));
+    TS_ASSERT(!m_model->hasWorkspaceDomain("NonExistingName", m_wsIndex));
   }
 
   void test_that_updateStartX_will_throw_if_the_domain_specified_does_not_exist() {
@@ -862,6 +889,7 @@ public:
   void test_that_isValid_returns_true_if_the_data_stored_in_the_model_is_sufficient_for_generating_a_file() {
     setup_sequential_fit_with_no_ties();
 
+    m_model->setOutputBaseName("Output_Fit");
     auto const [valid, message] = m_model->isValid();
 
     TS_ASSERT(valid);
@@ -869,6 +897,7 @@ public:
   }
 
   void test_that_isValid_returns_false_if_there_is_not_data_loaded() {
+    m_model->setOutputBaseName("Output_Fit");
     auto const [valid, message] = m_model->isValid();
 
     TS_ASSERT(!valid);
@@ -876,6 +905,7 @@ public:
   }
 
   void test_that_isValid_returns_false_if_there_is_a_function_missing_in_one_of_the_domains() {
+    m_model->setOutputBaseName("Output_Fit");
     m_model->addWorkspaceDomain(m_wsName, m_wsIndex, m_startX, m_endX);
     m_model->addWorkspaceDomain("Name2", m_wsIndex, m_startX, m_endX);
 
@@ -889,6 +919,7 @@ public:
 
   void
   test_that_isValid_returns_true_and_a_warning_message_if_there_are_different_functions_in_different_domains_when_in_sequential_mode() {
+    m_model->setOutputBaseName("Output_Fit");
     m_model->addWorkspaceDomain(m_wsName, m_wsIndex, m_startX, m_endX);
     m_model->addWorkspaceDomain("Name2", m_wsIndex, m_startX, m_endX);
 
@@ -902,6 +933,16 @@ public:
                      "Note that each domain should have the same fit function, including ties and constraints, for a "
                      "sequential fit. This is not the case for the fit functions you have provided. \n\nThe sequential "
                      "fit script will be generated using the fit function in the first domain.");
+  }
+
+  void test_that_isValid_returns_false_and_a_warning_message_if_the_output_base_name_is_empty() {
+    setup_sequential_fit_with_no_ties();
+
+    m_model->setOutputBaseName("");
+    auto const [valid, message] = m_model->isValid();
+
+    TS_ASSERT(!valid);
+    TS_ASSERT_EQUALS(message, "The Output Base Name must not be empty, please provide an Output Base Name.");
   }
 
 private:
@@ -934,7 +975,7 @@ private:
   }
 
   std::string m_wsName;
-  MantidQt::MantidWidgets::WorkspaceIndex m_wsIndex;
+  WorkspaceIndex m_wsIndex;
   Mantid::API::MatrixWorkspace_sptr m_workspace;
   double m_startX;
   double m_endX;

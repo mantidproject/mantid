@@ -123,7 +123,7 @@ public:
 
     addWorkspacesToModel(spectra, m_workspace, workspace2, workspace3, workspace4, workspace5);
 
-    TS_ASSERT_EQUALS(m_model->getNumberOfWorkspaces(), TableDatasetIndex{5});
+    TS_ASSERT_EQUALS(m_model->getNumberOfWorkspaces(), WorkspaceID{5});
   }
 
   void test_that_getFitFunction_will_return_the_fitting_function_which_has_been_set() {
@@ -145,7 +145,7 @@ public:
 
     addWorkspacesToModel(spectra, m_workspace, workspace2);
 
-    TS_ASSERT(!m_model->getInstrumentResolution(TableDatasetIndex{3}));
+    TS_ASSERT(!m_model->getInstrumentResolution(WorkspaceID{3}));
   }
 
   void test_that_getInstrumentResolution_will_return_the_none_if_the_workspace_has_no_analyser() {
@@ -158,7 +158,7 @@ public:
 
     addWorkspacesToModel(spectra, m_workspace, workspace2);
 
-    TS_ASSERT(!m_model->getInstrumentResolution(TableDatasetIndex{0}));
+    TS_ASSERT(!m_model->getInstrumentResolution(WorkspaceID{0}));
   }
 
   void test_that_getNumberHistograms_will_get_the_number_of_spectra_for_the_workspace_specified() {
@@ -168,24 +168,24 @@ public:
 
     addWorkspacesToModel(spectra, m_workspace, workspace2);
 
-    TS_ASSERT_EQUALS(m_model->getNumberHistograms(TableDatasetIndex{1}), 5);
+    TS_ASSERT_EQUALS(m_model->getNumberHistograms(WorkspaceID{1}), 5);
   }
 
   void test_that_removeWorkspace_will_remove_the_workspace_specified_from_the_model() {
     FunctionModelSpectra const spectra = FunctionModelSpectra("0-1");
 
     addWorkspacesToModel(spectra, m_workspace);
-    m_model->removeWorkspace(TableDatasetIndex{0});
+    m_model->removeWorkspace(WorkspaceID{0});
 
-    TS_ASSERT_EQUALS(m_model->getNumberOfWorkspaces(), TableDatasetIndex{0});
+    TS_ASSERT_EQUALS(m_model->getNumberOfWorkspaces(), WorkspaceID{0});
   }
 
   void test_that_setResolution_will_throw_when_provided_the_name_of_a_workspace_which_does_not_exist() {
-    TS_ASSERT_THROWS(m_model->setResolution("InvalidName", TableDatasetIndex{0}), const std::runtime_error &);
+    TS_ASSERT_THROWS(m_model->setResolution("InvalidName", WorkspaceID{0}), const std::runtime_error &);
   }
 
   void test_that_setResolution_will_throw_when_provided_an_index_that_is_out_of_range() {
-    TS_ASSERT_THROWS(m_model->setResolution(m_workspace->getName(), TableDatasetIndex{5}), const std::out_of_range &);
+    TS_ASSERT_THROWS(m_model->setResolution(m_workspace->getName(), WorkspaceID{5}), const std::out_of_range &);
   }
 
   void test_that_get_resolution_for_fit_returns_correctly_for_multiple_workspaces() {
@@ -195,8 +195,8 @@ public:
     m_ads->addOrReplace("Workspace2", workspace2);
     FunctionModelSpectra const spectra2 = FunctionModelSpectra("1-2");
     addWorkspacesToModel(spectra2, workspace2);
-    m_model->setResolution(m_workspace->getName(), TableDatasetIndex{0});
-    m_model->setResolution(workspace2->getName(), TableDatasetIndex{1});
+    m_model->setResolution(m_workspace->getName(), WorkspaceID{0});
+    m_model->setResolution(workspace2->getName(), WorkspaceID{1});
 
     auto fitResolutions = m_model->getResolutionsForFit();
 

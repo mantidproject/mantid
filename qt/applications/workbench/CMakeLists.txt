@@ -32,6 +32,7 @@ set(WORKBENCH_PYTHON_EXECUTABLE ${Python_W_EXECUTABLE})
 else()
 set(WORKBENCH_PYTHON_EXECUTABLE ${Python_EXECUTABLE})
 endif()
+file(TO_CMAKE_PATH ${WORKBENCH_PYTHON_EXECUTABLE} WORKBENCH_PYTHON_EXECUTABLE)
 
 # Wrapper launchers: See mantidworkbench.cpp:main for their function
 if(APPLE OR WIN32)
@@ -80,10 +81,14 @@ if (WIN32)
     set(_paths_qrc_file ${CMAKE_CURRENT_BINARY_DIR}/resources.qrc.${BUILD_TYPE})
     set(_qt_conf_file ${CMAKE_CURRENT_BINARY_DIR}/qt.conf.${BUILD_TYPE})
     set(_qrc_file_contents "<!DOCTYPE RCC><RCC version=\"1.0\">\n<qresource prefix=\"/qt/etc\">\n<file alias=\"qt.conf\">qt.conf.${BUILD_TYPE}</file>\n</qresource>\n</RCC>\n")
-
+    if (CONDA_BUILD)
+      file(TO_CMAKE_PATH $ENV{CONDA_PREFIX}/Library _qt5_dir)
+    else()
+      set(_qt5_dir ${THIRD_PARTY_DIR}/lib/qt5)
+    endif()
     # Write qt.conf.BUILD_TYPE file and get resources file name
     if (${BUILD_TYPE} STREQUAL "build")
-      file (WRITE ${_qt_conf_file} "[Paths]\nPrefix = ${THIRD_PARTY_DIR}/lib/qt5\n\n[Platforms]\nWindowsArguments = dpiawareness=1\n")
+      file (WRITE ${_qt_conf_file} "[Paths]\nPrefix = ${_qt5_dir}\n\n[Platforms]\nWindowsArguments = dpiawareness=1\n")
       set(_output_res_py ${CMAKE_CURRENT_LIST_DIR}/workbench/app/resources.py)
     elseif(${BUILD_TYPE} STREQUAL "install")
       file (WRITE ${_qt_conf_file} "[Paths]\nPrefix = ../lib/qt5\n\n[Platforms]\nWindowsArguments = dpiawareness=1\n")
@@ -132,17 +137,21 @@ if(APPLE)
   configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/../../../installers/MacInstaller/Info.plist.in
                    ${CMAKE_CURRENT_BINARY_DIR}/Info.plist
                    @ONLY )
-
-install (FILES ${CMAKE_CURRENT_BINARY_DIR}/Info.plist DESTINATION ${WORKBENCH_BUNDLE} )
-install (CODE "
-    execute_process(COMMAND ${CMAKE_SOURCE_DIR}/installers/MacInstaller/make_package.rb
-                            \${CMAKE_INSTALL_PREFIX}/${WORKBENCH_APP} ${Python_EXECUTABLE}
-                    RESULT_VARIABLE install_name_tool_result OUTPUT_VARIABLE _out ERROR_VARIABLE _out COMMAND_ECHO STDOUT)
-    if(NOT install_name_tool_result EQUAL 0)
-      message(\"\${_out}\")
-      message(FATAL_ERROR \"Package script failed!!!\n\")
-    endif()
-")
+  # Determine Qt install prefix
+  set(_qt_install_prefix ${Qt5Core_DIR})
+  foreach(_i RANGE 2)
+    get_filename_component(_qt_install_prefix ${_qt_install_prefix} DIRECTORY)
+  endforeach()
+  install (FILES ${CMAKE_CURRENT_BINARY_DIR}/Info.plist DESTINATION ${WORKBENCH_BUNDLE} )
+  install (CODE "
+      execute_process(COMMAND ${CMAKE_SOURCE_DIR}/installers/MacInstaller/make_package.rb
+                              \${CMAKE_INSTALL_PREFIX}/${WORKBENCH_APP} ${Python_EXECUTABLE} ${_qt_install_prefix}
+                      RESULT_VARIABLE install_name_tool_result OUTPUT_VARIABLE _out ERROR_VARIABLE _out COMMAND_ECHO STDOUT)
+      if(NOT install_name_tool_result EQUAL 0)
+        message(\"\${_out}\")
+        message(FATAL_ERROR \"Package script failed!!!\n\")
+      endif()
+  ")
 endif()
 
 # Testing

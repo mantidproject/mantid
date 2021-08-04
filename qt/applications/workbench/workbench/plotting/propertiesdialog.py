@@ -176,7 +176,7 @@ class AxisEditor(PropertiesEditorBase):
         self._memento = memento
         memento.min, memento.max = getattr(self.axes, 'get_{}lim'.format(self.axis_id))()
         memento.log = getattr(self.axes, 'get_{}scale'.format(self.axis_id))() != 'linear'
-        memento.grid = self.axis._major_tick_kw['gridOn']
+        memento.grid = self.axis.grid_on() if hasattr(self.axis, 'grid_on') else self.axis._major_tick_kw.get('gridOn', False)
         if type(self.axis.get_major_formatter()) is ScalarFormatter:
             memento.formatter = 'Decimal Format'
         elif type(self.axis.get_major_formatter()) is LogFormatterSciNotation:

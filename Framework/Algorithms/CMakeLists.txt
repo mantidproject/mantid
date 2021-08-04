@@ -46,6 +46,7 @@ set(SRC_FILES
     src/ClearInstrumentParameters.cpp
     src/ClearMaskFlag.cpp
     src/CloneWorkspace.cpp
+    src/CombineDiffCal.cpp
     src/Comment.cpp
     src/CommutativeBinaryOperation.cpp
     src/CompareWorkspaces.cpp
@@ -301,6 +302,7 @@ set(SRC_FILES
     src/SpatialGrouping.cpp
     src/SpectrumAlgorithm.cpp
     src/SphericalAbsorption.cpp
+    src/Stitch.cpp
     src/Stitch1D.cpp
     src/Stitch1DMany.cpp
     src/StripPeaks.cpp
@@ -382,6 +384,7 @@ set(INC_FILES
     inc/MantidAlgorithms/ClearInstrumentParameters.h
     inc/MantidAlgorithms/ClearMaskFlag.h
     inc/MantidAlgorithms/CloneWorkspace.h
+    inc/MantidAlgorithms/CombineDiffCal.h
     inc/MantidAlgorithms/Comment.h
     inc/MantidAlgorithms/CommutativeBinaryOperation.h
     inc/MantidAlgorithms/CompareWorkspaces.h
@@ -644,6 +647,7 @@ set(INC_FILES
     inc/MantidAlgorithms/SpatialGrouping.h
     inc/MantidAlgorithms/SpectrumAlgorithm.h
     inc/MantidAlgorithms/SphericalAbsorption.h
+    inc/MantidAlgorithms/Stitch.h
     inc/MantidAlgorithms/Stitch1D.h
     inc/MantidAlgorithms/Stitch1DMany.h
     inc/MantidAlgorithms/StripPeaks.h
@@ -738,6 +742,7 @@ set(TEST_FILES
     ClearInstrumentParametersTest.h
     ClearMaskFlagTest.h
     CloneWorkspaceTest.h
+    CombineDiffCalTest.h
     CommentTest.h
     CommutativeBinaryOperationTest.h
     CompareWorkspacesTest.h
@@ -980,6 +985,7 @@ set(TEST_FILES
     SphericalAbsorptionTest.h
     Stitch1DManyTest.h
     Stitch1DTest.h
+    StitchTest.h
     StripPeaksTest.h
     StripVanadiumPeaks2Test.h
     StripVanadiumPeaksTest.h

@@ -50,7 +50,7 @@ public:
 
     m_model->addWorkspace(m_workspace->getName(), spectra);
 
-    TS_ASSERT_EQUALS(m_model->getNumberOfWorkspaces(), TableDatasetIndex{1});
+    TS_ASSERT_EQUALS(m_model->getNumberOfWorkspaces(), WorkspaceID{1});
   }
 
 private:

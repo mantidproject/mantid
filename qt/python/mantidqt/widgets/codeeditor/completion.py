@@ -142,16 +142,25 @@ def get_function_spec(func):
             defs = None
     else:
         return ''
+    return generate_call_tip(defs, args)
 
+
+def generate_call_tip(defs, args):
     if defs is None:
         call_tip = "({})".format(', '.join(args))
     else:
         # The defaults list contains the default values for the last n arguments
-        diff = len(args) - len(defs)
         call_tip = ''
+        offset = 0
+        defaults_diff = len(args) - len(defs)
         for index in range(len(args) - 1, -1, -1):
-            def_index = index - diff
-            if def_index >= 0:
+            # If * is present we want to add an offset so we ignore the *, because it's likely required like in
+            # np.asarray()
+            is_wildcard = args[index] == '*'
+            if is_wildcard:
+                offset += 1
+            def_index = index - defaults_diff + offset
+            if def_index >= 0 and not is_wildcard:
                 call_tip = '[' + args[index] + '], ' + call_tip
             else:
                 call_tip = args[index] + ", " + call_tip

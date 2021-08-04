@@ -3,7 +3,7 @@
 # LIB3MF_LIBRARIES libraries to link against
 # LIB3MF_FOUND If false, do not try to use LIB3MF
 
-find_path ( LIB3MF_INCLUDE_DIR lib3mf/Bindings/Cpp/lib3mf_abi.hpp )
+find_path ( LIB3MF_INCLUDE_DIR Bindings/Cpp/lib3mf_abi.hpp PATHS_SUFFIXES lib3mf HINTS $ENV{CONDA_PREFIX}/Library/include)
 
 find_library ( LIB3MF_LIB lib3mf )
 find_library ( LIB3MF_LIB_DEBUG lib3mf_d )

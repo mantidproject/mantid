@@ -4,12 +4,21 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+import platform
 import systemtesting
 import numpy as np
 from mantid.simpleapi import *
 
 
+def _skip_test():
+    """Helper function to determine if we run the test"""
+    return "Linux" not in platform.platform()
+
+
 class ConvertHFIRSCDtoMDETest(systemtesting.MantidSystemTest):
+    def skipTests(self):
+        return _skip_test()
+
     def requiredMemoryMB(self):
         return 4000
 
@@ -21,8 +30,10 @@ class ConvertHFIRSCDtoMDETest(systemtesting.MantidSystemTest):
 
         self.assertEqual(ConvertHFIRSCDtoMDETest_Q.getNEvents(), 18022177)
 
-        ConvertHFIRSCDtoMDETest_peaks = FindPeaksMD(InputWorkspace=ConvertHFIRSCDtoMDETest_Q, PeakDistanceThreshold=2.2,
-                                                    CalculateGoniometerForCW=True, Wavelength=1.488)
+        ConvertHFIRSCDtoMDETest_peaks = FindPeaksMD(InputWorkspace=ConvertHFIRSCDtoMDETest_Q,
+                                                    PeakDistanceThreshold=2.2,
+                                                    CalculateGoniometerForCW=True,
+                                                    Wavelength=1.488)
 
         self.assertEqual(ConvertHFIRSCDtoMDETest_peaks.getNumberPeaks(), 14)
 
@@ -46,7 +57,8 @@ class ConvertHFIRSCDtoMDETest(systemtesting.MantidSystemTest):
                                        err_msg=f"mismatch for peak {p}")
 
         # now try using LeanElasticPeak
-        ConvertHFIRSCDtoMDETest_peaks3 = FindPeaksMD(InputWorkspace=ConvertHFIRSCDtoMDETest_Q, PeakDistanceThreshold=2.2,
+        ConvertHFIRSCDtoMDETest_peaks3 = FindPeaksMD(InputWorkspace=ConvertHFIRSCDtoMDETest_Q,
+                                                     PeakDistanceThreshold=2.2,
                                                      OutputType='LeanElasticPeak')
 
         self.assertEqual(ConvertHFIRSCDtoMDETest_peaks3.getNumberPeaks(), 14)
@@ -60,11 +72,14 @@ class ConvertHFIRSCDtoMDETest(systemtesting.MantidSystemTest):
         HFIRCalculateGoniometer(ConvertHFIRSCDtoMDETest_peaks3)
         peak0 = ConvertHFIRSCDtoMDETest_peaks3.getPeak(0)
         self.assertDelta(peak0.getWavelength(), 1.488, 1e-8)
-        g=peak0.getGoniometerMatrix()
+        g = peak0.getGoniometerMatrix()
         self.assertDelta(np.rad2deg(np.arccos(g[0][0])), 77.5, 1e-2)
 
 
 class ConvertHFIRSCDtoMDE_HB3A_Test(systemtesting.MantidSystemTest):
+    def skipTests(self):
+        return _skip_test()
+
     def requiredMemoryMB(self):
         return 1000
 
@@ -77,8 +92,7 @@ class ConvertHFIRSCDtoMDE_HB3A_Test(systemtesting.MantidSystemTest):
                       Axis2='phi,0,1,0,-1',
                       Average=False)
 
-        ConvertHFIRSCDtoMDETest_Q = ConvertHFIRSCDtoMDE(InputWorkspace='ConvertHFIRSCDtoMDE_HB3ATest_data',
-                                                        Wavelength=1.008)
+        ConvertHFIRSCDtoMDETest_Q = ConvertHFIRSCDtoMDE(InputWorkspace='ConvertHFIRSCDtoMDE_HB3ATest_data', Wavelength=1.008)
 
         self.assertEqual(ConvertHFIRSCDtoMDETest_Q.getNEvents(), 9038)
 
@@ -105,8 +119,7 @@ class ConvertHFIRSCDtoMDE_HB3A_Test(systemtesting.MantidSystemTest):
                                                      DensityThresholdFactor=20000)
 
         self.assertEqual(ConvertHFIRSCDtoMDETest_peaks2.getNumberPeaks(), 1)
-        np.testing.assert_allclose(ConvertHFIRSCDtoMDETest_peaks2.getPeak(0).getQSampleFrame(),
-                                   [-0.417683, 1.792265, 2.238072], rtol=1e-3)
+        np.testing.assert_allclose(ConvertHFIRSCDtoMDETest_peaks2.getPeak(0).getQSampleFrame(), [-0.417683, 1.792265, 2.238072], rtol=1e-3)
 
     def validate(self):
         results = 'ConvertHFIRSCDtoMDETest_Q'

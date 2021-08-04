@@ -63,7 +63,7 @@ public:
     assertNoTopLevelWidgets();
 
     m_wsName = "Name";
-    m_wsIndex = MantidQt::MantidWidgets::WorkspaceIndex(0);
+    m_wsIndex = WorkspaceIndex(0);
     m_workspace = create2DWorkspace(3, 3);
     m_workspaceGroup = createWorkspaceGroup(3, 3, 3, "GroupName");
 
@@ -78,13 +78,13 @@ public:
   }
 
   void tearDown() override {
-    AnalysisDataService::Instance().clear();
-
     TS_ASSERT(m_view->close());
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_presenter.get()));
     m_presenter.reset();
     m_view.reset();
+
+    AnalysisDataService::Instance().clear();
   }
 
   void test_opening_the_view_will_create_a_top_level_widget() {
@@ -134,9 +134,39 @@ public:
     m_view->addWorkspaceDomain(m_wsName, m_wsIndex, 0.0, 2.0);
 
     TS_ASSERT_EQUALS(m_view->tableWidget()->rowCount(), 1);
-    m_view->removeWorkspaceDomain(m_wsName, m_wsIndex);
+    m_view->removeDomain(FitDomainIndex{0});
 
     TS_ASSERT_EQUALS(m_view->tableWidget()->rowCount(), 0);
+  }
+
+  void test_that_renameWorkspace_will_rename_the_all_rows_containing_that_workspace() {
+    openFitScriptGeneratorWidget();
+
+    std::string const newName("NewName");
+
+    m_view->addWorkspaceDomain(m_wsName, m_wsIndex, 0.0, 2.0);
+    m_view->addWorkspaceDomain("Name2", m_wsIndex, 0.0, 2.0);
+    m_view->addWorkspaceDomain(m_wsName, MantidQt::MantidWidgets::WorkspaceIndex{1}, 0.0, 2.0);
+    m_view->addWorkspaceDomain("Name3", m_wsIndex, 0.0, 2.0);
+    m_view->addWorkspaceDomain(m_wsName, MantidQt::MantidWidgets::WorkspaceIndex{2}, 0.0, 2.0);
+
+    m_view->renameWorkspace(m_wsName, newName);
+
+    TS_ASSERT_EQUALS(m_view->workspaceName(0), newName);
+    TS_ASSERT_EQUALS(m_view->workspaceName(1), "Name2");
+    TS_ASSERT_EQUALS(m_view->workspaceName(2), newName);
+    TS_ASSERT_EQUALS(m_view->workspaceName(3), "Name3");
+    TS_ASSERT_EQUALS(m_view->workspaceName(4), newName);
+  }
+
+  void test_that_renameWorkspace_will_not_cause_an_exception_if_a_workspace_name_does_not_exist() {
+    openFitScriptGeneratorWidget();
+
+    m_view->addWorkspaceDomain(m_wsName, m_wsIndex, 0.0, 2.0);
+
+    m_view->renameWorkspace("NonExistingName", "NewName");
+
+    TS_ASSERT_EQUALS(m_view->workspaceName(0), m_wsName);
   }
 
   void test_that_modifying_the_startX_in_the_table_will_notify_the_presenter() {
@@ -216,14 +246,14 @@ public:
   void test_that_getDialogWorkspaces_returns_the_expected_workspace_selected_in_the_AddWorkspaceDialog() {
     openFitScriptGeneratorWidget();
 
+    m_view->openAddWorkspaceDialog();
     auto dialog = m_view->addWorkspaceDialog();
     auto combobox = dialog->workspaceNameComboBox();
     auto lineedit = dialog->workspaceIndiceLineEdit();
-    dialog->show();
 
     combobox->setCurrentIndex(4);
     lineedit->setText("0-2");
-    dialog->accept();
+    dialog->handleOKClicked();
 
     auto const workspaces = m_view->getDialogWorkspaces();
     TS_ASSERT_EQUALS(workspaces.size(), 1);
@@ -235,14 +265,14 @@ public:
   test_that_getDialogWorkspaces_returns_the_expected_workspaces_when_a_workspace_group_is_selected_in_the_AddWorkspaceDialog() {
     openFitScriptGeneratorWidget();
 
+    m_view->openAddWorkspaceDialog();
     auto dialog = m_view->addWorkspaceDialog();
     auto combobox = dialog->workspaceNameComboBox();
     auto lineedit = dialog->workspaceIndiceLineEdit();
-    dialog->show();
 
     combobox->setCurrentIndex(0);
     lineedit->setText("0-2");
-    dialog->accept();
+    dialog->handleOKClicked();
 
     auto const workspaces = m_view->getDialogWorkspaces();
     TS_ASSERT_EQUALS(workspaces.size(), 3);
@@ -255,37 +285,37 @@ public:
   void test_that_getDialogWorkspaceIndices_returns_the_expected_workspace_index_selected_in_the_AddWorkspaceDialog() {
     openFitScriptGeneratorWidget();
 
+    m_view->openAddWorkspaceDialog();
     auto dialog = m_view->addWorkspaceDialog();
     auto combobox = dialog->workspaceNameComboBox();
     auto lineedit = dialog->workspaceIndiceLineEdit();
-    dialog->show();
 
     combobox->setCurrentIndex(0);
     lineedit->setText("1");
-    dialog->accept();
+    dialog->handleOKClicked();
 
     auto const workspaceIndices = m_view->getDialogWorkspaceIndices();
     TS_ASSERT_EQUALS(workspaceIndices.size(), 1);
-    TS_ASSERT_EQUALS(workspaceIndices[0], MantidQt::MantidWidgets::WorkspaceIndex(1));
+    TS_ASSERT_EQUALS(workspaceIndices[0], WorkspaceIndex(1));
   }
 
   void
   test_that_getDialogWorkspaceIndices_returns_the_expected_range_of_workspace_indices_selected_in_the_AddWorkspaceDialog() {
     openFitScriptGeneratorWidget();
 
+    m_view->openAddWorkspaceDialog();
     auto dialog = m_view->addWorkspaceDialog();
     auto combobox = dialog->workspaceNameComboBox();
     auto lineedit = dialog->workspaceIndiceLineEdit();
-    dialog->show();
 
     combobox->setCurrentIndex(0);
     lineedit->setText("0-2");
-    dialog->accept();
+    dialog->handleOKClicked();
 
     auto const workspaceIndices = m_view->getDialogWorkspaceIndices();
     TS_ASSERT_EQUALS(workspaceIndices.size(), 3);
     for (auto i = 0u; i < workspaceIndices.size(); ++i)
-      TS_ASSERT_EQUALS(workspaceIndices[i], MantidQt::MantidWidgets::WorkspaceIndex(i));
+      TS_ASSERT_EQUALS(workspaceIndices[i], WorkspaceIndex(i));
   }
 
   void test_that_resetSelection_will_reset_the_selected_rows_value_to_its_previous_value() {
@@ -337,12 +367,15 @@ public:
   void test_that_fitOptions_returns_the_default_fitting_options() {
     openFitScriptGeneratorWidget();
 
-    auto const [maxIterations, minimizer, costFunction, evaluationType] = m_view->fitOptions();
+    auto const [maxIterations, minimizer, costFunction, evaluationType, outputBaseName, plotOptions] =
+        m_view->fitOptions();
 
     TS_ASSERT_EQUALS(maxIterations, "500");
     TS_ASSERT_EQUALS(minimizer, "Levenberg-Marquardt");
     TS_ASSERT_EQUALS(costFunction, "Least squares");
     TS_ASSERT_EQUALS(evaluationType, "CentrePoint");
+    TS_ASSERT_EQUALS(outputBaseName, "Output_Fit");
+    TS_ASSERT_EQUALS(plotOptions, true);
   }
 
 private:
@@ -381,7 +414,7 @@ private:
   }
 
   std::string m_wsName;
-  MantidQt::MantidWidgets::WorkspaceIndex m_wsIndex;
+  WorkspaceIndex m_wsIndex;
   Mantid::API::MatrixWorkspace_sptr m_workspace;
   Mantid::API::WorkspaceGroup_sptr m_workspaceGroup;
   Mantid::API::CompositeFunction_sptr m_function;
