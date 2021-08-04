@@ -14,6 +14,7 @@ class EAFittingTabPresenter(GeneralFittingPresenter):
     def __init__(self, view: EAFittingTabView, model: EAFittingTabModel):
         super(EAFittingTabPresenter, self).__init__(view, model)
         self.view.set_slot_for_spectrum_changed(self.handle_spectrum_changed)
+        self.handle_spectrum_changed()
 
     def handle_spectrum_changed(self):
         self.model.current_spectrum = self.view.current_workspace_index

@@ -9,7 +9,7 @@ class EAFittingTabModel(GeneralFittingModel):
 
     def __init__(self, context: ElementalAnalysisContext, fitting_context: GeneralFittingContext):
         super(EAFittingTabModel, self).__init__(context, fitting_context)
-        self._current_spectrum = 0
+        self._current_spectrum = 2
 
     @property
     def current_spectrum(self):

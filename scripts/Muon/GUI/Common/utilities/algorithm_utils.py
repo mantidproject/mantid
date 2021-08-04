@@ -11,7 +11,6 @@ from Muon.GUI.Common.ADSHandler.ADS_calls import remove_ws
 from copy import copy
 from mantid.kernel import PhysicalConstants as const
 
-
 muon_logger = Logger('Muon-Algs')
 
 
@@ -142,14 +141,18 @@ def run_Fit(parameters_dict, alg):
     alg.setRethrows(True)
     alg.setProperty('CreateOutput', create_output)
     pruned_parameter_dict = {key: value for key, value in parameters_dict.items() if
-                             key not in ['InputWorkspace', 'StartX', 'EndX', 'Exclude']}
+                             key not in ['InputWorkspace', 'StartX', 'EndX', 'Exclude', 'WorkspaceIndex']}
+
     alg.setProperties(pruned_parameter_dict)
     alg.setProperty('InputWorkspace', parameters_dict['InputWorkspace'])
+    if 'WorkspaceIndex' in parameters_dict:
+        alg.setProperty('WorkspaceIndex', parameters_dict['WorkspaceIndex'])
     alg.setProperty('StartX', parameters_dict['StartX'])
     alg.setProperty('EndX', parameters_dict['EndX'])
     if 'Exclude' in parameters_dict:
         alg.setProperty('Exclude', parameters_dict['Exclude'])
     alg.execute()
+
     if create_output:
         return alg.getProperty("OutputWorkspace").valueAsStr, alg.getProperty("OutputParameters").valueAsStr, \
                alg.getProperty("Function").value, alg.getProperty('OutputStatus').value, \
@@ -164,13 +167,17 @@ def run_simultaneous_Fit(parameters_dict, alg):
     alg.setAlwaysStoreInADS(True)
     alg.setRethrows(True)
     alg.setProperty('CreateOutput', True)
-    pruned_parameter_dict = {key: value for key,value in parameters_dict.items() if
-                             key not in ['InputWorkspace', 'StartX', 'EndX', 'Exclude']}
+
+    pruned_parameter_dict = {key: value for key, value in parameters_dict.items() if
+                             key not in ['InputWorkspace', 'StartX', 'EndX', 'Exclude', 'WorkspaceIndex']}
+
     alg.setProperties(pruned_parameter_dict)
 
     for index, input_workspace in enumerate(parameters_dict['InputWorkspace']):
         index_str = '_' + str(index) if index else ''
         alg.setProperty('InputWorkspace' + index_str, input_workspace)
+        if 'WorkspaceIndex' in parameters_dict:
+            alg.setProperty('WorkspaceIndex' + index_str, parameters_dict['WorkspaceIndex'])
         alg.setProperty('StartX' + index_str, parameters_dict['StartX'][index])
         alg.setProperty('EndX' + index_str, parameters_dict['EndX'][index])
         if 'Exclude' in parameters_dict:
@@ -179,9 +186,9 @@ def run_simultaneous_Fit(parameters_dict, alg):
     alg.execute()
 
     return alg.getProperty('OutputWorkspace').valueAsStr, alg.getProperty('OutputParameters').valueAsStr, \
-        alg.getProperty('Function').value, alg.getProperty('OutputStatus').value, alg.getProperty(
+           alg.getProperty('Function').value, alg.getProperty('OutputStatus').value, alg.getProperty(
         'OutputChi2overDoF').value, \
-        alg.getProperty("OutputNormalisedCovarianceMatrix").valueAsStr
+           alg.getProperty("OutputNormalisedCovarianceMatrix").valueAsStr
 
 
 def run_CalculateMuonAsymmetry(parameters_dict, alg):
@@ -191,8 +198,8 @@ def run_CalculateMuonAsymmetry(parameters_dict, alg):
     alg.setProperties(parameters_dict)
     alg.execute()
     return alg.getProperty('OutputWorkspace').valueAsStr, alg.getProperty('OutputParameters').valueAsStr, \
-        alg.getProperty("OutputFunction").value, alg.getProperty('OutputStatus').value, \
-        alg.getProperty('ChiSquared').value, alg.getProperty("OutputNormalisedCovarianceMatrix").valueAsStr
+           alg.getProperty("OutputFunction").value, alg.getProperty('OutputStatus').value, \
+           alg.getProperty('ChiSquared').value, alg.getProperty("OutputNormalisedCovarianceMatrix").valueAsStr
 
 
 def run_AppendSpectra(ws1, ws2):
@@ -248,7 +255,7 @@ def convert_to_field(workspace_name):
     alg.setAlwaysStoreInADS(True)
     alg.setProperty("InputWorkspace", workspace_name)
     alg.setProperty("OutputWorkspace", workspace_name)
-    alg.setProperty("Formula", 'x * 1. / '+str(const.MuonGyromagneticRatio))
+    alg.setProperty("Formula", 'x * 1. / ' + str(const.MuonGyromagneticRatio))
     alg.setProperty("AxisTitle", 'Field')
     alg.setProperty('AxisUnits', 'Gauss')
     alg.execute()
