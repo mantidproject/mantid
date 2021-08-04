@@ -141,7 +141,7 @@ class SANSILLReduction(PythonAlgorithm):
 
         self.declareProperty(MatrixWorkspaceProperty(name='FluxWorkspace',
                                                      defaultValue='',
-                                                     direction=Direction.Output,
+                                                     direction=Direction.Input,
                                                      optional=PropertyMode.Optional),
                              doc='The name of the input direct beam flux workspace.')
 
@@ -211,6 +211,13 @@ class SANSILLReduction(PythonAlgorithm):
                              doc='The name of the output sensitivity workspace.')
 
         self.setPropertySettings('OutputSensitivityWorkspace', water)
+
+        self.declareProperty(MatrixWorkspaceProperty('OutputFluxWorkspace', '',
+                                                     direction=Direction.Output,
+                                                     optional=PropertyMode.Optional),
+                             doc='The name of the output flux workspace.')
+
+        self.setPropertySettings('OutputFluxWorkspace', beam)
 
     def reset(self):
         '''Resets the class member variables'''
@@ -522,8 +529,8 @@ class SANSILLReduction(PythonAlgorithm):
         FindCenterOfMassPosition(InputWorkspace=ws, DirectBeam=True, BeamRadius=radius, Output=centers)
         beam_x = mtd[centers].cell(0,1)
         beam_y = mtd[centers].cell(1,1)
-        AddSampleLog(Workspace=ws, LogName='BeamCenterX', LogText=str(beam_x), LogType='Number')
-        AddSampleLog(Workspace=ws, LogName='BeamCenterY', LogText=str(beam_y), LogType='Number')
+        AddSampleLog(Workspace=ws, LogName='BeamCenterX', LogText=str(beam_x), LogType='Number', LogUnit='meters')
+        AddSampleLog(Workspace=ws, LogName='BeamCenterY', LogText=str(beam_y), LogType='Number', LogUnit='meters')
         DeleteWorkspace(centers)
         if self.mode != AcqMode.TOF:
             # correct for beam center before calculating the beam width for resolution
@@ -533,6 +540,9 @@ class SANSILLReduction(PythonAlgorithm):
 
     def calculate_flux(self, ws):
         '''Calculates the incident flux'''
+        flux = self.getPropertyValue('OutputFluxWorkspace')
+        if not flux:
+            return
         run = mtd[ws].getRun()
         att_coeff = 1.
         if run.hasProperty('attenuator.attenuation_coefficient'):
@@ -560,22 +570,22 @@ class SANSILLReduction(PythonAlgorithm):
             self.log().information('Attenuator 2 coefficient/value: {0}'.format(att2_value))
             att_coeff *= float(att2_value)
         self.log().information('Attenuation coefficient used is: {0}'.format(att_coeff))
-        flux = ws + '_flux'
         radius = self.getProperty('BeamRadius').value
         CalculateFlux(InputWorkspace=ws, OutputWorkspace=flux, BeamRadius=radius)
         Scale(InputWorkspace=flux, Factor=att_coeff, OutputWorkspace=flux)
-        # for TOF, the flux is wavelength dependent, and the sample workspace is ragged
-        # hence the flux must be rebinned to the sample before it can be divided by flux
-        # that's why we broadcast the empty beam workspace to the same size as the sample
-        # this allows rebinning spectrum-wise when processing the sample w/o tiling the empty beam data for each sample
-        # for mono however, this must be a single count workspace
-        nspec = mtd[ws].getNumberHistograms() if self.mode == AcqMode.TOF else 1
-        x = mtd[flux].readX(0)
-        y = mtd[flux].readY(0)
-        e = mtd[flux].readE(0)
-        CreateWorkspace(DataX=x, DataY=np.tile(y, nspec), DataE=np.tile(e, nspec), NSpec=nspec,
-                        ParentWorkspace=ws, OutputWorkspace=flux)
-        RenameWorkspace(InputWorkspace=flux, OutputWorkspace=ws)
+        if self.mode == AcqMode.TOF:
+            # for TOF, the flux is wavelength dependent, and the sample workspace is ragged
+            # hence the flux must be rebinned to the sample before it can be divided by flux
+            # that's why we broadcast the empty beam workspace to the same size as the sample
+            # this allows rebinning spectrum-wise when processing the sample w/o tiling the empty beam data for each sample
+            # for mono however, this must be a single count workspace
+            nspec = mtd[ws].getNumberHistograms() if self.mode == AcqMode.TOF else 1
+            x = mtd[flux].readX(0)
+            y = mtd[flux].readY(0)
+            e = mtd[flux].readE(0)
+            CreateWorkspace(DataX=x, DataY=np.tile(y, nspec), DataE=np.tile(e, nspec), NSpec=nspec,
+                            ParentWorkspace=ws, OutputWorkspace=flux)
+        self.setProperty('OutputFluxWorkspace', flux)
 
     def fit_beam_width(self, ws):
         ''''Groups detectors vertically and fits the horizontal beam width with a Gaussian profile'''
@@ -677,7 +687,7 @@ class SANSILLReduction(PythonAlgorithm):
                         ConvertToPointData(InputWorkspace=tmp, OutputWorkspace=tmp)
                     ws_list = self.inject_blank_samples(tmp)
                     ConjoinXRuns(InputWorkspaces=ws_list, OutputWorkspace=ws, LinearizeAxis=True)
-                    DeleteWorkspaces(WorkspaceList=ws_list)
+                    DeleteWorkspace(WorkspaceList=ws_list)
                 else:
                     raise RuntimeError('Listing of runs in MONO mode is allowed only for sample and transmission measurements.')
             else:
@@ -686,6 +696,7 @@ class SANSILLReduction(PythonAlgorithm):
             self.setup(mtd[tmp])
             if not self.is_point:
                 ConvertToPointData(InputWorkspace=tmp, OutputWorkspace=ws)
+                DeleteWorkspace(tmp)
         self.set_process_as(ws)
         assert isinstance(mtd[ws], MatrixWorkspace)
         return ws

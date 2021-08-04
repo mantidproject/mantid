@@ -46,7 +46,7 @@ class CalculateFlux(PythonAlgorithm):
             params = [min_wavelength, width, max_wavelength]
             rebinned = Rebin(InputWorkspace=input_ws, StoreInADS=False, Params=params)
         else:
-            rebinned = CloneWorkspace(input_ws)
+            rebinned = CloneWorkspace(input_ws, StoreInADS=False)
         radius = self.getProperty('BeamRadius').value
         shapeXML = '<infinite-cylinder id="flux"><centre x="0.0" y="0.0" z="0.0"/><axis x="0.0" y="0.0" z="1.0"/>' \
                    '<radius val="{0}"/></infinite-cylinder>'.format(radius)

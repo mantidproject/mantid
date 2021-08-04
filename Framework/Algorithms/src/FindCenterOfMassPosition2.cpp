@@ -5,7 +5,6 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/FindCenterOfMassPosition2.h"
-#include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/TableRow.h"
@@ -32,9 +31,7 @@ using namespace Geometry;
 using namespace DataObjects;
 
 void FindCenterOfMassPosition2::init() {
-  auto wsValidator = std::make_shared<CompositeValidator>();
-  wsValidator->add<HistogramValidator>();
-  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, wsValidator));
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input));
   declareProperty("Output", "",
                   "If not empty, a table workspace of that "
                   "name will contain the center of mass position.");
