@@ -17,6 +17,7 @@
 #ifdef _MSC_VER
 #pragma warning(default : 4250)
 #endif
+#include "MantidPythonInterface/core/Converters/PyNativeTypeExtractor.h"
 #include "MantidPythonInterface/core/GetPointer.h"
 
 #include <boost/optional.hpp>
@@ -30,6 +31,7 @@
 #include <boost/python/scope.hpp>
 
 #include <cstddef>
+#include <variant>
 
 using Mantid::API::Algorithm;
 using Mantid::API::DistributedAlgorithm;
@@ -97,9 +99,24 @@ template <typename T> void extractKwargs(const dict &kwargs, const std::string &
   }
 }
 
+class SetPropertyVisitor {
+public:
+  SetPropertyVisitor(Mantid::API::Algorithm_sptr &alg, std::string const &propName)
+      : m_alg(alg), m_propName(propName) {}
+
+  void operator()(bool value) { m_alg->setProperty(m_propName, value); }
+  void operator()(int value) { m_alg->setProperty(m_propName, value); }
+  void operator()(double value) { m_alg->setProperty(m_propName, value); }
+  void operator()(std::string const &value) { m_alg->setPropertyValue(m_propName, value); }
+
+private:
+  Mantid::API::Algorithm_sptr &m_alg;
+  std::string const &m_propName;
+};
+
 // Signature createChildWithProps(self, name, startProgress, endProgress, enableLogging, version, **kwargs)
 object createChildWithProps(tuple args, dict kwargs) {
-  std::shared_ptr<Algorithm> parentAlg = extract<std::shared_ptr<Algorithm>>(args[0]);
+  Mantid::API::Algorithm_sptr parentAlg = extract<Mantid::API::Algorithm_sptr>(args[0]);
   auto name = extractArg<std::string>(1, args);
   auto startProgress = extractArg<double>(2, args);
   auto endProgress = extractArg<double>(3, args);
@@ -132,21 +149,10 @@ object createChildWithProps(tuple args, dict kwargs) {
     if (!curArg)
       continue;
 
-    const PyObject *rawptr = curArg.ptr();
+    using Mantid::PythonInterface::PyNativeTypeExtractor;
+    auto nativeObj = PyNativeTypeExtractor::convert(curArg);
 
-    // This currently  doesn't handle lists, but this could be retrofitted in future work
-    if (PyBool_Check(rawptr) == 1) {
-      bool val = extract<bool>(curArg);
-      childAlg->setProperty(propName, val);
-    } else if (PyFloat_Check(rawptr) == 1) {
-      double val = extract<double>(curArg);
-      childAlg->setProperty(propName, val);
-    } else if (PyLong_Check(rawptr) == 1) {
-      int val = extract<int>(curArg);
-      childAlg->setProperty(propName, val);
-    } else {
-      childAlg->setPropertyValue(propName, extract<std::string>(curArg));
-    }
+    std::visit(SetPropertyVisitor(childAlg, propName), nativeObj);
   }
   return object(childAlg);
 }
