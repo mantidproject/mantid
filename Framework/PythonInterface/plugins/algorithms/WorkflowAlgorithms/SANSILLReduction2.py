@@ -340,6 +340,18 @@ class SANSILLReduction(PythonAlgorithm):
         else:
             MoveInstrumentComponent(Workspace=ws, X=-beam_x, Y=-beam_y, ComponentName='detector')
 
+    def apply_flux(self, ws):
+        '''Applies empty beam flux absolute scale normalisation'''
+        flux_ws = self.getPropertyValue('FluxWorkspace')
+        if flux_ws:
+            if self.mode == AcqMode.TOF:
+                tmp = flux_ws + '_rebinned'
+                RebinToWorkspace(WorkspaceToRebin=flux_ws, WorkspaceToMatch=ws, OutputWorkspace=tmp)
+                Divide(LHSWorkspace=ws, RHSWorkspace=tmp, OutputWorkspace=ws, WarnOnZeroDivide=False)
+                DeleteWorkspace(tmp)
+            else:
+                Divide(LHSWorkspace=ws, RHSWorkspace=flux_ws, OutputWorkspace=ws)
+
     def apply_transmission(self, ws):
         '''Applies transmission correction'''
         tr_ws = self.getPropertyValue('TransmissionWorkspace')
@@ -734,6 +746,7 @@ class SANSILLReduction(PythonAlgorithm):
                         self.apply_masks(ws)
                         self.apply_parallax(ws)
                         self.apply_thickness(ws)
+                        self.apply_flux(ws)
                         if self.process == 'Water':
                             self.generate_sensitivity(ws)
                         else:
