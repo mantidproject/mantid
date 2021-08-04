@@ -50,6 +50,8 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
         self.finder_data.isForRunFiles(False)
         self.finder_data.allowMultipleFiles(True)
         self.finder_data.setFileExtensions([".nxs"])
+        # xunit combo box
+        self.setup_xunit_combobox()
         self.update_file_filter(self.combo_bank.currentText(), self.combo_xunit.currentText())
 
     def saveSettings(self):
@@ -233,3 +235,13 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
 
     def is_searching(self):
         return self.finder_data.isSearching()
+
+    # =================
+    # Internal Setup
+    # =================
+
+    def setup_xunit_combobox(self):
+        self.combo_xunit.setEditable(False)
+        # make TOF default
+        index = self.combo_xunit.findText("TOF")
+        self.combo_xunit.setCurrentIndex(index)
