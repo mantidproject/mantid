@@ -17,7 +17,7 @@ If you haven't installed PyCharm yet do that now, PyCharm can be installed from 
 Setup Python development environment with Conda
 ###############################################
 
-The assumption has been made that you have setup and built Mantid already, if you have not, please do so before hand by following,
+The assumption has been made that you have setup and built Mantid already, if you have not, please do so before hand by following, `this guide <GettingStarted/GettingStarted>`_.
 
 At any point in these instructions where ``RelWithDebInfo`` is used (including in file paths), you can replace it with any other build type such as ``Debug`` or ``Release``. We use ``RelWithDebInfo`` for Conda specific builds to allow debugging due to ``Debug`` not being functional with the ``Release ABIs``.
 
@@ -32,7 +32,7 @@ At any point in these instructions where ``RelWithDebInfo`` is used (including i
 - Click on the ``...`` to open a file browser, and navigate to your Conda environment's Python executable. This can be found in the directory you installed Conda (i.e. Mambaforge, Miniconda3 etc), on Windows navigate to your ``{CONDA_DIRECTORY}/envs/mantid-developer/Python.exe`` on other OSs navigate to ``{CONDA_DIRECTORY}/envs/mantid-developer/bin/Python.exe``.
 - (Windows Only) Ensure that the line for ``Conda executable`` correctly points at your ``conda.exe``, an example of this would be ``{CONDA_DIRECTORY}/Scripts/conda.exe``.
 - When done, click ok to close the window.
-- Ensure that next to ``Python Interpreter: `` it says your Python version and ``(mantid-developer)`` e.g. ``Python 3.8 (mantid-developer)``.
+- Ensure that next to ``Python Interpreter:`` it says your Python version and ``(mantid-developer)`` e.g. ``Python 3.8 (mantid-developer)``.
 - Then click Apply.
 - Back on the right side, under ``Python Interpreter`` there should be an option for ``Project Structure`` select that.
 - If you do not build Mantid in the same directory as your source but somewhere else add this is another Content Root, by selecting ``+ Add Content Root`` on the right hand side now.
