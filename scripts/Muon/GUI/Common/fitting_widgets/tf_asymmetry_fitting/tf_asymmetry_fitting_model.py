@@ -230,10 +230,19 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
     def check_datasets_are_tf_asymmetry_compliant(self, workspace_names: list = None) -> bool:
         """Returns true if the datasets stored in the model are compatible with TF Asymmetry mode."""
         workspace_names = self.fitting_context.dataset_names if workspace_names is None else workspace_names
-        pair_names = [get_group_or_pair_from_name(name) for name in workspace_names if "Group" not in name]
         # Remove duplicates from the list
-        pair_names = list(dict.fromkeys(pair_names))
+        pair_names = list(dict.fromkeys(self._get_pair_and_pair_diff_names(workspace_names)))
         return len(pair_names) == 0, "'" + "', '".join(pair_names) + "'"
+
+    def _get_pair_and_pair_diff_names(self, workspace_names: list) -> list:
+        """Returns the names of pairs and pair diffs which are in the provided workspace name list."""
+        group_diff_names = [diff.name for diff in self.context.group_pair_context.get_diffs("group")]
+        pair_or_diff_names = []
+        for workspace_name in workspace_names:
+            name = get_group_or_pair_from_name(workspace_name)
+            if "Group" not in workspace_name and name not in group_diff_names:
+                pair_or_diff_names.append(name)
+        return pair_or_diff_names
 
     def undo_previous_fit(self) -> None:
         """Undoes the previous fit using the saved undo data."""
