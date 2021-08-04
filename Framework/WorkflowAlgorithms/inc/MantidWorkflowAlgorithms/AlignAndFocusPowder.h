@@ -24,22 +24,6 @@ This is a parent algorithm that uses several different child algorithms to
 perform it's task.
 Takes a workspace as input and the filename of a grouping file of a suitable
 format.
-
-The input workspace is
-1) Converted to d-spacing units
-2) Rebinned to a common set of bins
-3) The spectra are grouped according to the grouping file.
-
-    Required Properties:
-<UL>
-<LI> InputWorkspace - The name of the 2D Workspace to take as input </LI>
-<LI> OutputWorkspace - The name of the 2D workspace in which to store the result
-</LI>
-</UL>
-
-
-@author Vickie Lynch, SNS
-@date 07/16/2012
 */
 class DLLExport AlignAndFocusPowder : public API::DistributedDataProcessorAlgorithm {
 public:
@@ -79,6 +63,9 @@ private:
   /// Convert units
   API::MatrixWorkspace_sptr convertUnits(API::MatrixWorkspace_sptr matrixws, const std::string &target);
 
+  /// Filter out absorption resonances
+  API::MatrixWorkspace_sptr filterResonances(API::MatrixWorkspace_sptr matrixws);
+
   /// Call edit instrument geometry
   API::MatrixWorkspace_sptr editInstrument(API::MatrixWorkspace_sptr ws, const std::vector<double> &polars,
                                            const std::vector<specnum_t> &specids, const std::vector<double> &l2s,
@@ -104,6 +91,8 @@ private:
   std::vector<double> m_dmins;
   std::vector<double> m_dmaxs;
   std::vector<double> m_delta_ragged;
+  std::vector<double> m_resonanceLower;
+  std::vector<double> m_resonanceUpper;
   bool dspace{false};
   double xmin{0.0};
   double xmax{0.0};

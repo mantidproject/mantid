@@ -148,7 +148,7 @@ class EAAutoTabModelTest(unittest.TestCase):
 
         # Assert statements
         mock_find_peaks.assert_called_once_with(workspace, 3, 10, 1000, 1, 0.5, 1, 2.5)
-        mock_group.add.assert_called_once_with(workspace + "_peaks")
+        mock_group.add.assert_called_once_with(workspace + "_EA_peaks")
         self.assertEqual(mock_table.rowCount.call_count, 1)
         self.assertEqual(self.model.current_peak_table_info["workspace"], workspace)
         self.assertEqual(self.model.current_peak_table_info["number_of_peaks"], number_of_peaks)
@@ -176,7 +176,7 @@ class EAAutoTabModelTest(unittest.TestCase):
 
         # Assert statements
         mock_find_peaks.assert_called_once_with(workspace, 3, 1, 200, 4, 0.3, 1.5, 2)
-        mock_group.add.assert_called_once_with(workspace + "_peaks")
+        mock_group.add.assert_called_once_with(workspace + "_EA_peaks")
         self.assertEqual(mock_table.rowCount.call_count, 1)
         self.assertEqual(self.model.current_peak_table_info["workspace"], workspace)
         self.assertEqual(self.model.current_peak_table_info["number_of_peaks"], number_of_peaks)
@@ -245,17 +245,17 @@ class EAAutoTabModelTest(unittest.TestCase):
         mock_group = mock.Mock()
         mock_group.name.return_value = "9999"
         workspace = "9999; Detector 4"
-        match_table_names = [workspace + "_all_matches", workspace + "_primary_matches",
-                             workspace + "_secondary_matches",
-                             workspace + "_all_matches_sorted_by_energy", workspace + "_likelihood"]
+        match_table_names = [workspace + "_EA_all_matches", workspace + "_EA_primary_matches",
+                             workspace + "_EA_secondary_matches",
+                             workspace + "_EA_all_matches_sorted_by_energy", workspace + "_EA_likelihood"]
 
         self.model._run_peak_matching_algorithm(workspace, mock_group)
 
         mock_peak_matching.assert_called_once_with(workspace, match_table_names)
         mock_group_workspaces.assert_called_once_with(InputWorkspaces=match_table_names,
-                                                      OutputWorkspace=workspace + "_matches")
-        mock_group.add.assert_called_once_with(workspace + "_matches")
-        mock_update_match_table.assert_called_once_with(workspace + "_likelihood", workspace)
+                                                      OutputWorkspace=workspace + "_EA_matches")
+        mock_group.add.assert_called_once_with(workspace + "_EA_matches")
+        mock_update_match_table.assert_called_once_with(workspace + "_EA_likelihood", workspace)
 
 
 if __name__ == '__main__':

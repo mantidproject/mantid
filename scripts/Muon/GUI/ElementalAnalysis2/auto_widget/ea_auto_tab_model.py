@@ -24,12 +24,12 @@ PEAK_WIDTH = {"Detector 1": [0.5, 1, 2.5],
 NUMBER_OF_ELEMENTS_DISPLAYED = 3
 
 # Workspace suffixes
-REFITTED_PEAKS_WS_SUFFIX = "_refitted_peaks"
-PEAKS_WS_SUFFIX = "_peaks"
+REFITTED_PEAKS_WS_SUFFIX = "_EA_refitted_peaks"
+PEAKS_WS_SUFFIX = "_EA_peaks"
 ERRORS_WS_SUFFIX = "_with_errors"
-MATCH_TABLE_WS_SUFFIXES = ["_all_matches", "_primary_matches", "_secondary_matches", "_all_matches_sorted_by_energy",
-                           "_likelihood"]
-MATCH_GROUP_WS_SUFFIX = "_matches"
+MATCH_TABLE_WS_SUFFIXES = ["_EA_all_matches", "_EA_primary_matches", "_EA_secondary_matches",
+                           "_EA_all_matches_sorted_by_energy", "_EA_likelihood"]
+MATCH_GROUP_WS_SUFFIX = "_EA_matches"
 
 
 def find_peak_algorithm(workspace, spectrum_number, min_energy, max_energy, threshold, min_width,
@@ -102,7 +102,7 @@ class EAAutoTabModel(object):
             group_workspace = retrieve_ws(workspace)
             for group in self.context.group_context.groups:
                 if group.run_number == workspace:
-                    workspace_name = group.get_counts_workspace_for_run(workspace, rebin=False)
+                    workspace_name = group.get_counts_workspace_for_run(rebin=False)
                     tmp_parameters = copy.deepcopy(parameters)
                     tmp_parameters["workspace"] = workspace_name
                     if not self._run_find_peak_algorithm(tmp_parameters, group_workspace, True):
@@ -148,8 +148,7 @@ class EAAutoTabModel(object):
         GroupWorkspaces(InputWorkspaces=match_table_names, OutputWorkspace=workspace + MATCH_GROUP_WS_SUFFIX)
 
         group_workspace.add(workspace + MATCH_GROUP_WS_SUFFIX)
-        self.context.group_context[workspace].update_matches_table(group_workspace.name(),
-                                                                   workspace + MATCH_GROUP_WS_SUFFIX)
+        self.context.group_context[workspace].update_matches_table(workspace + MATCH_GROUP_WS_SUFFIX)
 
         self.update_match_table(workspace + MATCH_TABLE_WS_SUFFIXES[-1], workspace)
 
@@ -177,7 +176,7 @@ class EAAutoTabModel(object):
         self.current_peak_table_info["number_of_peaks"] = number_of_peaks
         if number_of_peaks != 0:
             group_workspace.add(workspace + PEAKS_WS_SUFFIX)
-            self.context.group_context[workspace].update_peak_table(group_workspace.name(), workspace + PEAKS_WS_SUFFIX)
+            self.context.group_context[workspace].update_peak_table(workspace + PEAKS_WS_SUFFIX)
         else:
             peak_table.delete()
             if delay_errors:

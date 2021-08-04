@@ -4,7 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from qtpy import QtWidgets, QtCore
+from qtpy import QtWidgets, QtCore, QT_VERSION
+from distutils.version import LooseVersion
 
 from Muon.GUI.ElementalAnalysis2.context.ea_group_context import EAGroupContext
 from Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext
@@ -13,11 +14,14 @@ from Muon.GUI.ElementalAnalysis2.context.data_context import DataContext
 from Muon.GUI.Common.help_widget.help_widget_presenter import HelpWidget
 from Muon.GUI.Common.dock.dockable_tabs import DetachableTabWidget
 from Muon.GUI.Common.muon_load_data import MuonLoadData
+from Muon.GUI.Common.contexts.plot_pane_context import PlotPanesContext
 from Muon.GUI.ElementalAnalysis2.context.context import ElementalAnalysisContext
 from Muon.GUI.ElementalAnalysis2.load_widget.load_widget import LoadWidget
 from Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_widget import EAGroupingTabWidget
 from Muon.GUI.ElementalAnalysis2.auto_widget.ea_auto_widget import EAAutoTabWidget
-from mantidqt.utils.observer_pattern import GenericObserver, GenericObservable
+from mantidqt.utils.observer_pattern import GenericObserver, GenericObservable, GenericObserverWithArgPassing
+from Muon.GUI.Common.plotting_dock_widget.plotting_dock_widget import PlottingDockWidget
+from Muon.GUI.ElementalAnalysis2.plotting_widget.EA_plot_widget import EAPlotWidget
 
 
 class ElementalAnalysisGui(QtWidgets.QMainWindow):
@@ -25,22 +29,41 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
     The Elemental Analysis 2.0 interface.
     """
 
-    @staticmethod
-    def warning_popup(message):
-        message_box.warning(str(message))
+    def warning_popup(self, message):
+        message_box.warning(str(message), parent=self)
 
     def __init__(self, parent=None):
         super(ElementalAnalysisGui, self).__init__(parent)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
         self.setObjectName("ElementalAnalysis2")
+
+        # setup error notifier and observer for context and group context
+        self.error_notifier = GenericObservable()
+        self.error_observer = GenericObserverWithArgPassing(self.warning_popup)
+        self.error_notifier.add_subscriber(self.error_observer)
+
         self.loaded_data = MuonLoadData()
         self.data_context = DataContext(self.loaded_data)
-        self.group_context = EAGroupContext(self.data_context.check_group_contains_valid_detectors)
+        self.group_context = EAGroupContext(self.data_context.check_group_contains_valid_detectors, self.error_notifier)
         self.gui_context = MuonGuiContext()
-        self.context = ElementalAnalysisContext(self.data_context, self.group_context, self.gui_context)
+        self.plot_panes_context = PlotPanesContext()
+        self.context = ElementalAnalysisContext(self.data_context, self.group_context, self.gui_context,
+                                                self.plot_panes_context, self.error_notifier)
         self.current_tab = ''
 
+        self.plot_widget = EAPlotWidget(self.context, parent=self)
+        self.dockable_plot_widget_window = PlottingDockWidget(parent=self,
+                                                              plotting_widget=self.plot_widget.view)
+        self.dockable_plot_widget_window.setMinimumWidth(800)
+
+        # Add dock widget to main Elemental analysis window
+        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.dockable_plot_widget_window)
+        # Need this line to stop the bug where the dock window snaps back to its original size after resizing.
+        # 0 argument is arbitrary and has no effect on fit widget size
+        # This is a qt bug reported at (https://bugreports.qt.io/browse/QTBUG-65592)
+        if QT_VERSION >= LooseVersion("5.6"):
+            self.resizeDocks({self.dockable_plot_widget_window}, {1}, QtCore.Qt.Horizontal)
         # disable and enable notifiers
         self.disable_notifier = GenericObservable()
         self.enable_notifier = GenericObservable()
@@ -72,6 +95,8 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         self.setup_group_calculation_enable_notifier()
         self.setup_group_calculation_disable_notifier()
         self.setup_grouping_changed_observers()
+        self.setup_update_view_notifier()
+        self.setMinimumHeight(800)
 
     def setup_dummy(self):
         self.load_widget = LoadWidget(self.loaded_data, self.context, parent=self)
@@ -92,6 +117,9 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         self.tabs.addTabWithOrder(self.fitting_tab, 'Fitting')
 
     def closeEvent(self, event):
+        self.removeDockWidget(self.dockable_plot_widget_window)
+        self.context.ads_observer.unsubscribe()
+        self.context.ads_observer = None
         self.tabs.closeEvent(event)
         super(ElementalAnalysisGui, self).closeEvent(event)
 
@@ -127,6 +155,12 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         self.grouping_tab_widget.grouping_table_widget.data_changed_notifier.add_subscriber(
             self.auto_tab.auto_tab_presenter.group_change_observer)
 
+        for observer in self.plot_widget.data_changed_observers:
+            self.grouping_tab_widget.grouping_table_widget.selected_group_changed_notifier.add_subscriber(observer)
+
+        for observer in self.plot_widget.workspace_deleted_from_ads_observers:
+            self.context.deleted_plots_notifier.add_subscriber(observer)
+
     def setup_on_load_enabler(self):
         self.load_widget.load_widget.load_run_widget.enable_notifier.add_subscriber(
             self.grouping_tab_widget.group_tab_presenter.enable_observer)
@@ -136,6 +170,8 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
             self.grouping_tab_widget.group_tab_presenter.disable_observer)
 
     def setup_group_calculation_enable_notifier(self):
+        self.load_widget.run_widget.enable_notifier.add_subscriber(self.enable_observer)
+
         self.grouping_tab_widget.group_tab_presenter.enable_editing_notifier.add_subscriber(
             self.enable_observer)
 
@@ -144,9 +180,19 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         self.auto_tab.auto_tab_presenter.model.calculation_finished_notifier.add_subscriber(self.enable_observer)
 
     def setup_group_calculation_disable_notifier(self):
+        self.load_widget.run_widget.disable_notifier.add_subscriber(self.disable_observer)
+
         self.grouping_tab_widget.group_tab_presenter.disable_editing_notifier.add_subscriber(
             self.disable_observer)
 
         self.context.calculation_started_notifier.add_subscriber(self.disable_observer)
 
         self.auto_tab.auto_tab_presenter.model.calculation_started_notifier.add_subscriber(self.disable_observer)
+
+    def setup_update_view_notifier(self):
+        self.context.update_view_from_model_notifier.add_subscriber(
+            self.grouping_tab_widget.group_tab_presenter.update_view_from_model_observer)
+        self.context.update_view_from_model_notifier.add_subscriber(
+            self.auto_tab.auto_tab_presenter.update_view_observer)
+        self.context.update_view_from_model_notifier.add_subscriber(
+            self.load_widget.load_widget.update_view_from_model_observer)

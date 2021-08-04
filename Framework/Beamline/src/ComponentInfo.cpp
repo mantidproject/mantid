@@ -327,7 +327,7 @@ void ComponentInfo::setPosition(const size_t componentIndex, const Eigen::Vector
  * @param index : Component, time index pair
  * @param newPosition : Absolute position to set
  */
-void ComponentInfo::setPosition(const std::pair<size_t, size_t> index, const Eigen::Vector3d &newPosition) {
+void ComponentInfo::setPosition(const std::pair<size_t, size_t> &index, const Eigen::Vector3d &newPosition) {
 
   const auto componentIndex = index.first;
   checkSpecialIndices(componentIndex);
@@ -371,7 +371,7 @@ void ComponentInfo::setRotation(const size_t componentIndex, const Eigen::Quater
  * @param index : Component and time index pair
  * @param newRotation : Absolute rotation to set
  */
-void ComponentInfo::setRotation(const std::pair<size_t, size_t> index, const Eigen::Quaterniond &newRotation) {
+void ComponentInfo::setRotation(const std::pair<size_t, size_t> &index, const Eigen::Quaterniond &newRotation) {
   const auto componentIndex = index.first;
   checkSpecialIndices(componentIndex);
   if (isDetector(componentIndex))
@@ -659,8 +659,8 @@ void ComponentInfo::checkSizes(const ComponentInfo &other) const {
     failMerge("size mismatch");
 }
 
-void ComponentInfo::checkIdenticalIntervals(const ComponentInfo &other, const std::pair<size_t, size_t> indexOther,
-                                            const std::pair<size_t, size_t> indexThis) const {
+void ComponentInfo::checkIdenticalIntervals(const ComponentInfo &other, const std::pair<size_t, size_t> &indexOther,
+                                            const std::pair<size_t, size_t> &indexThis) const {
   if (this->position(indexThis) != other.position(indexOther))
     failMerge("matching scan interval but positions differ");
   if (this->rotation(indexThis).coeffs() != other.rotation(indexOther).coeffs())

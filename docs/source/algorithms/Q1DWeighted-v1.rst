@@ -13,7 +13,7 @@ Performs azimuthal averaging for a 2D SANS data set by going through
 each wavelength bin of each detector pixel, determining its Q-value, and adding its amplitude
 :math:`I` to the appropriate Q bin. The algorithm works both for monochromatic and TOF SANS data.
 
-Note that the algorithm performs averaging in 2 steps.
+Note that in TOF case, the algorithm performs averaging in 2 steps.
 First, for each wavelength slice of the input it performs azimuthal averaging in radial rings.
 This results in a stack of I(Q)s, one for each input wavelength.
 As a second step, all the I(Q)s corresponding to different wavelengths are averaged again.
@@ -21,6 +21,7 @@ Note that for the TOF data, this is mathematically not equivalent to performing 
 The latter is done in :ref:`Q1D <algm-Q1D>` algorithm.
 See the :ref:`Rebin <algm-Rebin>` documentation for details about choosing the ``OutputBinning`` parameter.
 
+For monochromatic data, the algorithm considers each bin as belonging to a different sample and/or kinetic frame.
 Usage
 -----
 
@@ -30,7 +31,8 @@ However, it can also be used directly, provided that the input data is already c
 I/O
 ---
 
-The input to this algorithm must be a histogram with common wavelength bins for each pixel.
+The input to this algorithm must be a histogram with common wavelength bins for each pixel, or a monochromatic workspace with a different sample or kinetic frame in each bin.
+In this case the workspace must not be in units of wavelength, but the wavelength must be present in the sample logs.
 The output will be a distribution though.
 
 Additional options

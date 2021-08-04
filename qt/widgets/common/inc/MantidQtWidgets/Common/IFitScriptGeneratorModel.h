@@ -27,11 +27,13 @@ public:
 
   virtual void subscribePresenter(IFitScriptGeneratorPresenter *presenter) = 0;
 
-  virtual void removeWorkspaceDomain(std::string const &workspaceName, WorkspaceIndex workspaceIndex) = 0;
+  virtual void removeDomain(FitDomainIndex domainIndex) = 0;
   virtual void addWorkspaceDomain(std::string const &workspaceName, WorkspaceIndex workspaceIndex, double startX,
                                   double endX) = 0;
   [[nodiscard]] virtual bool hasWorkspaceDomain(std::string const &workspaceName,
                                                 WorkspaceIndex workspaceIndex) const = 0;
+
+  virtual void renameWorkspace(std::string const &workspaceName, std::string const &newName) = 0;
 
   [[nodiscard]] virtual bool updateStartX(std::string const &workspaceName, WorkspaceIndex workspaceIndex,
                                           double startX) = 0;
@@ -77,6 +79,8 @@ public:
 
   virtual void setGlobalParameters(std::vector<std::string> const &parameters) = 0;
 
+  virtual void setOutputBaseName(std::string const &outputBaseName) = 0;
+
   virtual void setFittingMode(FittingMode fittingMode) = 0;
   [[nodiscard]] virtual FittingMode getFittingMode() const = 0;
 
@@ -107,9 +111,9 @@ public:
 
   [[nodiscard]] virtual std::tuple<bool, std::string> isValid() const = 0;
 
-  virtual std::string
-  generatePythonFitScript(std::tuple<std::string, std::string, std::string, std::string> const &fitOptions,
-                          std::string const &filepath = "") = 0;
+  virtual std::string generatePythonFitScript(
+      std::tuple<std::string, std::string, std::string, std::string, std::string, bool> const &fitOptions,
+      std::string const &filepath = "") = 0;
 };
 
 } // namespace MantidWidgets

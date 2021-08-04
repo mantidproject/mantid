@@ -30,13 +30,12 @@ from sans.gui_logic.gui_common import (get_reduction_mode_from_gui_selection,
                                        get_instrument_from_gui_selection)
 from sans.gui_logic.models.POD.save_options import SaveOptions
 from sans.gui_logic.models.RowEntries import RowEntries
-from sans.gui_logic.models.SumRunsModel import SumRunsModel
+from sans.gui_logic.models.sum_runs_model import SumRunsModel
 from sans.gui_logic.presenter.add_runs_presenter import AddRunsPagePresenter
 from ui.sans_isis.SANSSaveOtherWindow import SANSSaveOtherDialog
-from ui.sans_isis.work_handler import WorkHandler
 from ui.sans_isis.modified_qt_field_factory import ModifiedQtFieldFactory
 
-from ui.sans_isis.SansGuiObservable import SansGuiObservable
+from ui.sans_isis.sans_gui_observable import SansGuiObservable
 
 Ui_SansDataProcessorWindow, _ = load_ui(__file__, "sans_data_processor_window.ui")
 
@@ -97,10 +96,6 @@ class SANSDataProcessorGui(QMainWindow,
 
         @abstractmethod
         def on_sample_geometry_selection(self, show_geometry):
-            pass
-
-        @abstractmethod
-        def on_reduction_dimensionality_changed(self, is_1d):
             pass
 
         @abstractmethod
@@ -221,7 +216,6 @@ class SANSDataProcessorGui(QMainWindow,
         self.export_table_button.clicked.connect(self._export_table_clicked)
         self.save_other_pushButton.clicked.connect(self._on_save_other_button_pressed)
         self.save_can_checkBox.clicked.connect(self._on_save_can_clicked)
-        self.reduction_dimensionality_1D.toggled.connect(self._on_reduction_dimensionality_changed)
 
         modified_field_factory = ModifiedQtFieldFactory(self._on_field_edit)
         modified_field_factory.attach_to_children(self.settings_page)
@@ -230,6 +224,9 @@ class SANSDataProcessorGui(QMainWindow,
         self._observable_items = SansGuiObservable()
         for save_checkbox in [self.can_sas_checkbox, self.nx_can_sas_checkbox, self.rkh_checkbox]:
             save_checkbox.clicked.connect(self._observable_items.save_options.notify_subscribers)
+
+        for reduction_checkboxes in [self.reduction_dimensionality_1D, self.reduction_dimensionality_2D]:
+            reduction_checkboxes.clicked.connect(self._observable_items.reduction_dim.notify_subscribers)
 
     def get_observable(self) -> SansGuiObservable:
         return self._observable_items
@@ -256,7 +253,7 @@ class SANSDataProcessorGui(QMainWindow,
         self.main_stacked_widget.setCurrentIndex(index)
 
     def _setup_add_runs_page(self):
-        self.add_runs_presenter = AddRunsPagePresenter(SumRunsModel(WorkHandler(), self.add_runs_page),
+        self.add_runs_presenter = AddRunsPagePresenter(SumRunsModel(self.add_runs_page),
                                                        self.add_runs_page, self)
 
     def setup_layout(self):
@@ -572,9 +569,6 @@ class SANSDataProcessorGui(QMainWindow,
         self.save_can_checkBox.setChecked(value)
         UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS", "Save Can Toggled"], False)
         set_setting(self.__generic_settings, self.__save_can_key, value)
-
-    def _on_reduction_dimensionality_changed(self, is_1d):
-        self._call_settings_listeners(lambda listener: listener.on_reduction_dimensionality_changed(is_1d))
 
     def _on_user_file_load(self):
         """
@@ -1148,12 +1142,12 @@ class SANSDataProcessorGui(QMainWindow,
     # General group
     # ------------------------------------------------------------------------------------------------------------------
     @property
-    def reduction_dimensionality(self):
+    def reduction_dimensionality(self) -> ReductionDimensionality:
         return ReductionDimensionality.ONE_DIM if self.reduction_dimensionality_1D.isChecked() \
             else ReductionDimensionality.TWO_DIM
 
     @reduction_dimensionality.setter
-    def reduction_dimensionality(self, value):
+    def reduction_dimensionality(self, value: ReductionDimensionality):
         is_1d = value is ReductionDimensionality.ONE_DIM
         self.reduction_dimensionality_1D.setChecked(is_1d)
         self.reduction_dimensionality_2D.setChecked(not is_1d)

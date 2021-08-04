@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from .tabs.common import path_handling
+from Engineering.common import path_handling
 from .tabs.common import CalibrationObserver
 from .tabs.calibration.model import CalibrationModel
 from .tabs.calibration.view import CalibrationView

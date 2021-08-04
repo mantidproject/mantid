@@ -7,11 +7,13 @@
 import unittest
 
 from mantid.api import FrameworkManager, FunctionFactory
+from mantid.simpleapi import CreateEmptyTableWorkspace
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 
 from Muon.GUI.Common.fitting_widgets.basic_fitting.fit_function_options_view import (FitFunctionOptionsView,
                                                                                      RAW_DATA_TABLE_ROW)
+from Muon.GUI.Common.utilities.workspace_utils import StaticWorkspaceWrapper
 
 from qtpy.QtWidgets import QApplication
 
@@ -160,6 +162,22 @@ class FitFunctionOptionsViewTest(unittest.TestCase, QtWidgetFinder):
         self.view.function_name = new_function_name
 
         self.assertEqual(self.view.function_name, new_function_name)
+
+    def test_that_set_covariance_button_enabled_can_disable_the_covariance_button(self):
+        self.assertTrue(self.view.covariance_matrix_button.isEnabled())
+        self.view.set_covariance_button_enabled(False)
+        self.assertTrue(not self.view.covariance_matrix_button.isEnabled())
+
+    def test_that_set_covariance_button_enabled_can_enable_the_covariance_button(self):
+        self.view.set_covariance_button_enabled(False)
+        self.view.set_covariance_button_enabled(True)
+        self.assertTrue(self.view.covariance_matrix_button.isEnabled())
+
+    def test_that_show_normalised_covariance_matrix_will_not_raise_an_error(self):
+        ws = CreateEmptyTableWorkspace()
+        wrapper = StaticWorkspaceWrapper("CovarianceMatrix", ws)
+
+        self.view.show_normalised_covariance_matrix(wrapper.workspace, wrapper.workspace_name)
 
 
 if __name__ == '__main__':

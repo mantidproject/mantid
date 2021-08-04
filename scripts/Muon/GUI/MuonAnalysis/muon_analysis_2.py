@@ -194,6 +194,8 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.tabs.addTabWithOrder(self.results_tab.results_tab_view, 'Results')
         self.tabs.addTabWithOrder(self.model_fitting_tab.model_fitting_tab_view, 'Model Fitting')
         self.tabs.set_slot_for_tab_changed(self.handle_tab_changed)
+        self.tabs.setElideMode(QtCore.Qt.ElideNone)
+        self.tabs.setUsesScrollButtons(False)
 
     def handle_tab_changed(self):
         index = self.tabs.currentIndex()
@@ -268,6 +270,9 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
 
         self.load_widget.load_widget.loadNotifier.add_subscriber(
             self.seq_fitting_tab.seq_fitting_tab_presenter.disable_tab_observer)
+
+        self.load_widget.load_widget.loadNotifier.add_subscriber(
+            self.plot_widget.raw_mode.new_data_observer)
 
     def setup_gui_variable_observers(self):
         self.context.gui_context.gui_variables_notifier.add_subscriber(
@@ -482,6 +487,5 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.removeDockWidget(self.dockable_plot_widget_window)
         self.tabs.closeEvent(event)
         self.context.ads_observer.unsubscribe()
-        self.context.ads_observer = None
         self.grouping_tab_widget.group_tab_presenter.closePeriodInfoWidget()
         super(MuonAnalysisGui, self).closeEvent(event)

@@ -86,10 +86,12 @@ template <> std::string dtype(TimeSeriesProperty<std::string> &self) {
       .add_property("filtered_times", make_function(&Mantid::Kernel::TimeSeriesProperty<TYPE>::filteredTimesAsVector,  \
                                                     return_value_policy<VectorToNumpy>()))                             \
       .def("addValue",                                                                                                 \
-           (void (TimeSeriesProperty<TYPE>::*)(const DateAndTime &, const TYPE)) & TimeSeriesProperty<TYPE>::addValue, \
+           (void (TimeSeriesProperty<TYPE>::*)(const DateAndTime &, const TYPE &)) &                                   \
+               TimeSeriesProperty<TYPE>::addValue,                                                                     \
            (arg("self"), arg("time"), arg("value")))                                                                   \
       .def("addValue",                                                                                                 \
-           (void (TimeSeriesProperty<TYPE>::*)(const std::string &, const TYPE)) & TimeSeriesProperty<TYPE>::addValue, \
+           (void (TimeSeriesProperty<TYPE>::*)(const std::string &, const TYPE &)) &                                   \
+               TimeSeriesProperty<TYPE>::addValue,                                                                     \
            (arg("self"), arg("time"), arg("value")))                                                                   \
       .def("addValue", &addPyTimeValue<TYPE>, (arg("self"), arg("time"), arg("value")))                                \
       .def("clear", &TimeSeriesProperty<TYPE>::clear, arg("self"))                                                     \
