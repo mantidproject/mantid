@@ -143,7 +143,7 @@ class SANSILLReduction(PythonAlgorithm):
                                                      defaultValue='',
                                                      direction=Direction.Input,
                                                      optional=PropertyMode.Optional),
-                             doc='The name of the input direct beam flux workspace.')
+                             doc='The name of the input empty beam flux workspace.')
 
         self.setPropertySettings('FluxWorkspace', water_solvent_sample)
 
@@ -215,7 +215,7 @@ class SANSILLReduction(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty('OutputFluxWorkspace', '',
                                                      direction=Direction.Output,
                                                      optional=PropertyMode.Optional),
-                             doc='The name of the output flux workspace.')
+                             doc='The name of the output empty beam flux workspace.')
 
         self.setPropertySettings('OutputFluxWorkspace', beam)
 
@@ -540,9 +540,12 @@ class SANSILLReduction(PythonAlgorithm):
 
     def calculate_flux(self, ws):
         '''Calculates the incident flux'''
-        flux = self.getPropertyValue('OutputFluxWorkspace')
-        if not flux:
-            return
+        if self.process == 'EmptyBeam':
+            flux = self.getPropertyValue('OutputFluxWorkspace')
+            if not flux:
+                return
+        elif self.process == 'Transmission':
+            flux = ws
         run = mtd[ws].getRun()
         att_coeff = 1.
         if run.hasProperty('attenuator.attenuation_coefficient'):
@@ -557,7 +560,7 @@ class SANSILLReduction(PythonAlgorithm):
                 if instrument.hasParameter(param):
                     att_coeff = instrument.getNumberParameter(param)[0]
                 else:
-                    raise RuntimeError('Unable to find the attenuation coefficient for D33 attenuator #'+str(int(att_value)))
+                    raise RuntimeError(f'Unable to find the attenuation coefficient for D33 attenuator #{att_value}')
             else:
                 att_coeff = float(att_value)
         self.log().information('Attenuator 1 coefficient/value: {0}'.format(att_coeff))
@@ -567,25 +570,30 @@ class SANSILLReduction(PythonAlgorithm):
             # In practice, only one (standard or chopper) is in at a time
             # If one is out, its attenuation_value is set to 1, so it's safe to take the product
             att2_value = run['attenuator2.attenuation_value'].value
-            self.log().information('Attenuator 2 coefficient/value: {0}'.format(att2_value))
+            self.log().information(f'Attenuator 2 coefficient/value: {att2_value}')
             att_coeff *= float(att2_value)
-        self.log().information('Attenuation coefficient used is: {0}'.format(att_coeff))
+        self.log().information(f'Attenuation coefficient used is: {att_coeff}')
         radius = self.getProperty('BeamRadius').value
         CalculateFlux(InputWorkspace=ws, OutputWorkspace=flux, BeamRadius=radius)
         Scale(InputWorkspace=flux, Factor=att_coeff, OutputWorkspace=flux)
-        if self.mode == AcqMode.TOF:
-            # for TOF, the flux is wavelength dependent, and the sample workspace is ragged
-            # hence the flux must be rebinned to the sample before it can be divided by flux
-            # that's why we broadcast the empty beam workspace to the same size as the sample
-            # this allows rebinning spectrum-wise when processing the sample w/o tiling the empty beam data for each sample
-            # for mono however, this must be a single count workspace
-            nspec = mtd[ws].getNumberHistograms() if self.mode == AcqMode.TOF else 1
-            x = mtd[flux].readX(0)
-            y = mtd[flux].readY(0)
-            e = mtd[flux].readE(0)
-            CreateWorkspace(DataX=x, DataY=np.tile(y, nspec), DataE=np.tile(e, nspec), NSpec=nspec,
-                            ParentWorkspace=ws, OutputWorkspace=flux)
-        self.setProperty('OutputFluxWorkspace', flux)
+        if self.process == 'EmptyBeam':
+            if self.mode == AcqMode.TOF:
+                self.prepare_tof_flux(ws)
+            self.setProperty('OutputFluxWorkspace', flux)
+
+    def prepare_tof_flux(self, ws):
+        '''Broadcasts the direct beam flux that can be easily rebinning at application time'''
+        # for TOF, the flux is wavelength dependent, and the sample workspace is ragged
+        # hence the flux must be rebinned to the sample before it can be divided by flux
+        # that's why we broadcast the empty beam workspace to the same size as the sample
+        # this allows rebinning spectrum-wise when processing the sample w/o tiling the empty beam data for each sample
+        # for mono however, this must be a single count workspace
+        nspec = mtd[ws].getNumberHistograms()
+        x = mtd[flux].readX(0)
+        y = mtd[flux].readY(0)
+        e = mtd[flux].readE(0)
+        CreateWorkspace(DataX=x, DataY=np.tile(y, nspec), DataE=np.tile(e, nspec), NSpec=nspec,
+                        ParentWorkspace=ws, OutputWorkspace=flux)
 
     def fit_beam_width(self, ws):
         ''''Groups detectors vertically and fits the horizontal beam width with a Gaussian profile'''
@@ -617,14 +625,14 @@ class SANSILLReduction(PythonAlgorithm):
 
     def calculate_transmission(self, ws):
         '''Calculates the transmission'''
-        beam_ws = self.getPropertyValue('EmptyBeamWorkspace')
-        check_distances_match(mtd[ws], mtd[beam_ws])
+        flux_ws = self.getPropertyValue('FluxWorkspace')
+        check_distances_match(mtd[ws], mtd[flux_ws])
         self.calculate_flux(ws)
         if self.mode != AcqMode.TOF:
-            check_wavelengths_match(mtd[ws], mtd[beam_ws])
+            check_wavelengths_match(mtd[ws], mtd[flux_ws])
         else:
-            RebinToWorkspace(WorkspaceToRebin=ws, WorkspaceToMatch=beam_ws, OutputWorkspace=ws)
-        Divide(LHSWorkspace=ws, RHSWorkspace=beam_ws, OutputWorkspace=ws)
+            RebinToWorkspace(WorkspaceToRebin=ws, WorkspaceToMatch=flux_ws, OutputWorkspace=ws)
+        Divide(LHSWorkspace=ws, RHSWorkspace=flux_ws, OutputWorkspace=ws)
 
     def generate_sensitivity(self, ws):
         '''Creates relative inter-pixel efficiency map'''
@@ -720,9 +728,8 @@ class SANSILLReduction(PythonAlgorithm):
                     self.calculate_transmission(ws)
                 else:
                     self.apply_transmission(ws)
-                    if self.process == 'EmptyContainer':
-                        self.apply_solid_angle(ws)
-                    else:
+                    self.apply_solid_angle(ws)
+                    if self.process != 'EmptyContainer':
                         self.apply_container(ws)
                         self.apply_masks(ws)
                         self.apply_parallax(ws)
@@ -731,9 +738,7 @@ class SANSILLReduction(PythonAlgorithm):
                             self.generate_sensitivity(ws)
                         else:
                             self.apply_water(ws)
-                            if self.process == 'Solvent':
-                                pass # nothing to do here
-                            else:
+                            if self.process != 'Solvent':
                                 self.apply_solvent(ws)
         self.setProperty('OutputWorkspace', ws)
 

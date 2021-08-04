@@ -143,13 +143,16 @@ API::MatrixWorkspace_sptr CalculateEfficiency2::calculateEfficiency(MatrixWorksp
                                                                     double startProgress, double stepProgress) {
 
   // create the output workspace from the input, while NOT preserving events
-  auto childAlg = createChildAlgorithm("RebinToWorkspace", 0.0, 0.1);
-  childAlg->setProperty("WorkspaceToRebin", inputWorkspace);
-  childAlg->setProperty("WorkspaceToMatch", inputWorkspace);
-  childAlg->setPropertyValue("OutputWorkspace", getPropertyValue(PropertyNames::OUTPUT_WORKSPACE));
-  childAlg->setProperty("PreserveEvents", false);
-  childAlg->executeAsChildAlg();
-  MatrixWorkspace_sptr outputWS = childAlg->getProperty("OutputWorkspace");
+  MatrixWorkspace_sptr outputWS = inputWorkspace->clone();
+  if (std::dynamic_pointer_cast<EventWorkspace>(inputWorkspace)) {
+    auto childAlg = createChildAlgorithm("RebinToWorkspace", 0.0, 0.1);
+    childAlg->setProperty("WorkspaceToRebin", inputWorkspace);
+    childAlg->setProperty("WorkspaceToMatch", inputWorkspace);
+    childAlg->setPropertyValue("OutputWorkspace", getPropertyValue(PropertyNames::OUTPUT_WORKSPACE));
+    childAlg->setProperty("PreserveEvents", false);
+    childAlg->executeAsChildAlg();
+    outputWS = childAlg->getProperty("OutputWorkspace");
+  }
 
   // Loop over spectra and sum all the counts to get normalization
   // Skip monitors and masked detectors
