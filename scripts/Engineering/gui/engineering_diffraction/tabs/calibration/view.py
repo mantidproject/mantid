@@ -154,11 +154,8 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
     def get_cropping_widget(self):
         return self.widget_cropping
 
-    def get_update_vanadium_widget(self):
+    def get_update_vanadium_checked(self):
         return self.check_updateVan.isChecked()
-
-    def get_update_vanadium(self):
-        return self.update_vanadium
 
     # =================
     # State Getters

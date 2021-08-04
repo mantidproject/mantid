@@ -30,7 +30,8 @@ class CalibrationModel(object):
                                rb_num=None,
                                bank=None,
                                calfile=None,
-                               spectrum_numbers=None):
+                               spectrum_numbers=None,
+                               only_update_vanadium=False):
         """
         Create a new calibration from a vanadium run and ceria run
         :param vanadium_path: Path to vanadium data file.
@@ -38,6 +39,7 @@ class CalibrationModel(object):
         :param plot_output: Whether the output should be plotted.
         :param instrument: The instrument the data relates to.
         :param rb_num: The RB number for file creation.
+        :param only_update_vanadium: If True, do not rerun ceria calibration
         :param bank: Optional parameter to crop by bank
         :param calfile: Optional parameter to crop using a custom calfile
         :param spectrum_numbers: Optional parameter to crop using spectrum numbers.
@@ -52,52 +54,56 @@ class CalibrationModel(object):
         except ValueError:
             logger.error("Error loading Full instrument calibration - this is set in the interface settings.")
             return
-        cal_params, ceria_raw, grp_ws = self.run_calibration(ceria_workspace,
-                                                             bank,
-                                                             calfile,
-                                                             spectrum_numbers,
-                                                             full_calib)
-        if plot_output:
-            plot_dicts = list()
-            if len(cal_params) == 1:
-                if calfile:
-                    bank_name = "Custom"
-                elif spectrum_numbers:
-                    bank_name = "Cropped"
+
+        if not only_update_vanadium:  # otherwise skip ceria calibration
+            # ceria_workspace = path_handling.load_workspace(ceria_path)
+            cal_params, ceria_raw, grp_ws = self.run_calibration(ceria_workspace,
+                                                                 bank,
+                                                                 calfile,
+                                                                 spectrum_numbers,
+                                                                 full_calib)
+            if plot_output:
+                plot_dicts = list()
+                if len(cal_params) == 1:
+                    if calfile:
+                        bank_name = "Custom"
+                    elif spectrum_numbers:
+                        bank_name = "Cropped"
+                    else:
+                        bank_name = bank
+                    plot_dicts.append(EnggUtils.generate_tof_fit_dictionary(bank_name))
+                    EnggUtils.plot_tof_fit(plot_dicts, [bank_name])
                 else:
-                    bank_name = bank
-                plot_dicts.append(EnggUtils.generate_tof_fit_dictionary(bank_name))
-                EnggUtils.plot_tof_fit(plot_dicts, [bank_name])
-            else:
-                plot_dicts.append(EnggUtils.generate_tof_fit_dictionary("bank_1"))
-                plot_dicts.append(EnggUtils.generate_tof_fit_dictionary("bank_2"))
-                EnggUtils.plot_tof_fit(plot_dicts, ["bank_1", "bank_2"])
-        difa = [row['difa'] for row in cal_params]
-        difc = [row['difc'] for row in cal_params]
-        tzero = [row['tzero'] for row in cal_params]
+                    plot_dicts.append(EnggUtils.generate_tof_fit_dictionary("bank_1"))
+                    plot_dicts.append(EnggUtils.generate_tof_fit_dictionary("bank_2"))
+                    EnggUtils.plot_tof_fit(plot_dicts, ["bank_1", "bank_2"])
+            difa = [row['difa'] for row in cal_params]
+            difc = [row['difc'] for row in cal_params]
+            tzero = [row['tzero'] for row in cal_params]
 
-        bk2bk_params = self.extract_b2b_params(ceria_raw)
-        DeleteWorkspace(ceria_raw)
+            bk2bk_params = self.extract_b2b_params(ceria_raw)
+            DeleteWorkspace(ceria_raw)
 
-        params_table = []
+            params_table = []
 
-        for i in range(len(difc)):
-            params_table.append([i, difc[i], difa[i], tzero[i]])
-        self.update_calibration_params_table(params_table)
+            for i in range(len(difc)):
+                params_table.append([i, difc[i], difa[i], tzero[i]])
+            self.update_calibration_params_table(params_table)
 
-        calib_dir = path.join(path_handling.get_output_path(), "Calibration", "")
-        if calfile:
-            EnggUtils.save_grouping_workspace(grp_ws, calib_dir, ceria_path, vanadium_path, instrument, calfile=calfile)
-        elif spectrum_numbers:
-            EnggUtils.save_grouping_workspace(grp_ws, calib_dir, ceria_path, vanadium_path, instrument,
-                                              spec_nos=spectrum_numbers)
-        self.create_output_files(calib_dir, difa, difc, tzero, bk2bk_params, ceria_path, vanadium_path, instrument,
-                                 bank, spectrum_numbers, calfile)
-        if rb_num:
-            user_calib_dir = path.join(path_handling.get_output_path(), "User", rb_num,
-                                       "Calibration", "")
-            self.create_output_files(user_calib_dir, difa, difc, tzero, bk2bk_params, ceria_path, vanadium_path,
-                                     instrument, bank, spectrum_numbers, calfile)
+            calib_dir = path.join(path_handling.get_output_path(), "Calibration", "")
+            if calfile:
+                EnggUtils.save_grouping_workspace(grp_ws, calib_dir, ceria_path,
+                                                  vanadium_path, instrument, calfile=calfile)
+            elif spectrum_numbers:
+                EnggUtils.save_grouping_workspace(grp_ws, calib_dir, ceria_path, vanadium_path, instrument,
+                                                  spec_nos=spectrum_numbers)
+            self.create_output_files(calib_dir, difa, difc, tzero, bk2bk_params, ceria_path, vanadium_path, instrument,
+                                     bank, spectrum_numbers, calfile)
+            if rb_num:
+                user_calib_dir = path.join(path_handling.get_output_path(), "User", rb_num,
+                                           "Calibration", "")
+                self.create_output_files(user_calib_dir, difa, difc, tzero, bk2bk_params, ceria_path, vanadium_path,
+                                         instrument, bank, spectrum_numbers, calfile)
 
     @staticmethod
     def extract_b2b_params(workspace):
@@ -171,17 +177,14 @@ class CalibrationModel(object):
             """
             return PDCalibration(**kwargs_to_pass)
 
-        def calibrate_region_of_interest(ceria_d_ws, roi: str, grouping_kwarg: dict, cal_output: dict) -> None:
+        def calibrate_region_of_interest(focused_ceria, roi: str, cal_output: dict) -> None:
             """
-            Focus the processed ceria workspace (dSpacing) over the chosen region of interest, and run the calibration
-            using this result
-            :param ceria_d_ws: Workspace containing the processed ceria data converted to dSpacing
+            Convert to TOF, select the region of interest, and run the calibration
+            :param focused_ceria: Workspace containing the focused ceria data in dSpacing
             :param roi: String describing chosen region of interest
-            :param grouping_kwarg: Dict containing kwarg to pass to DiffractionFocussing to select the roi
             :param cal_output: Dictionary to append with the output of PDCalibration for the chosen roi
             """
-            # focus ceria
-            focused_ceria = DiffractionFocussing(InputWorkspace=ceria_d_ws, **grouping_kwarg)
+
             ApplyDiffCal(InstrumentWorkspace=focused_ceria, ClearCalibration=True)
             ConvertUnits(InputWorkspace=focused_ceria, OutputWorkspace=focused_ceria, Target='TOF')
 
@@ -215,20 +218,24 @@ class CalibrationModel(object):
         if (spectrum_numbers or calfile) is None:
             if bank == '1' or bank is None:
                 grp_ws = EnggUtils.get_bank_grouping_workspace(1, ceria_raw)
-                grouping_kwarg = {"GroupingWorkspace": grp_ws}
-                calibrate_region_of_interest(ceria_ws, "bank_1", grouping_kwarg, cal_output)
+                focused_ceria = DiffractionFocussing(InputWorkspace=ceria_ws, GroupingWorkspace=grp_ws)
+                calibrate_region_of_interest(focused_ceria, "bank_1", cal_output)
             if bank == '2' or bank is None:
                 grp_ws = EnggUtils.get_bank_grouping_workspace(2, ceria_raw)
-                grouping_kwarg = {"GroupingWorkspace": grp_ws}
-                calibrate_region_of_interest(ceria_ws, "bank_2", grouping_kwarg, cal_output)
+                focused_ceria = DiffractionFocussing(InputWorkspace=ceria_ws, GroupingWorkspace=grp_ws)
+                calibrate_region_of_interest(focused_ceria, "bank_2", cal_output)
         elif calfile is None:
-            grp_ws = EnggUtils.create_grouping_workspace_from_spectra_list(spectrum_numbers, ceria_raw)
-            grouping_kwarg = {"GroupingWorkspace": grp_ws}
-            calibrate_region_of_interest(ceria_ws, "Cropped", grouping_kwarg, cal_output)
+            crop_grp_ws = EnggUtils.create_grouping_workspace_from_spectra_list(spectrum_numbers, ceria_raw)
+            bank_num = EnggUtils.on_which_bank(crop_grp_ws)
+            grp_ws = EnggUtils.get_bank_grouping_workspace(bank_num)
+            focused_ceria = DiffractionFocussing(InputWorkspace=ceria_ws, GroupingWorkspace=grp_ws)
+            calibrate_region_of_interest(focused_ceria, f"bank_{bank_num}", cal_output)
         else:
-            grp_ws = EnggUtils.create_grouping_workspace_from_calfile(calfile, ceria_raw)
-            grouping_kwarg = {"GroupingWorkspace": grp_ws}
-            calibrate_region_of_interest(ceria_ws, "Custom", grouping_kwarg, cal_output)
+            custom_grp_ws = EnggUtils.create_grouping_workspace_from_calfile(calfile, ceria_raw)
+            bank_num = EnggUtils.on_which_bank(custom_grp_ws)
+            grp_ws = EnggUtils.get_bank_grouping_workspace(bank_num)
+            focused_ceria = DiffractionFocussing(InputWorkspace=ceria_ws, GroupingWorkspace=grp_ws)
+            calibrate_region_of_interest(focused_ceria, f"bank_{bank_num}", cal_output)
         cal_params = list()
         # in the output calfile, rows are present for all detids, only read one from the region of interest
         for bank_cal in cal_output:

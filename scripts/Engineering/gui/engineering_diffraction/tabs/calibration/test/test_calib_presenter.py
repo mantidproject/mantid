@@ -30,9 +30,10 @@ class CalibrationPresenterTest(unittest.TestCase):
         self.view.get_sample_filename.return_value = "305738"
         self.view.get_plot_output.return_value = True
         self.view.is_searching.return_value = False
+        self.view.get_update_vanadium_checked.return_value = False
 
         self.presenter.on_calibrate_clicked()
-        worker_method.assert_called_with("307521", "305738", True, None)
+        worker_method.assert_called_with("307521", "305738", True, None, False)
 
     @patch(tab_path + ".presenter.set_setting")
     @patch(tab_path + ".presenter.CalibrationPresenter.start_calibration_worker")
@@ -46,9 +47,10 @@ class CalibrationPresenterTest(unittest.TestCase):
         self.presenter.cropping_widget.get_custom_spectra_enabled.return_value = False
         self.presenter.cropping_widget.get_bank.return_value = "bank"
         self.presenter.cropping_widget.get_custom_calfile.return_value = None
+        self.view.get_update_vanadium_checked.return_value = False
 
         self.presenter.on_calibrate_clicked()
-        worker_method.assert_called_with("307521", "305738", True, None, bank="bank")
+        worker_method.assert_called_with("307521", "305738", True, None, False, bank="bank")
 
     @patch(tab_path + ".presenter.set_setting")
     @patch(tab_path + ".presenter.CalibrationPresenter.start_calibration_worker")
@@ -61,9 +63,10 @@ class CalibrationPresenterTest(unittest.TestCase):
         self.presenter.cropping_widget.get_custom_calfile_enabled.return_value = False
         self.presenter.cropping_widget.get_custom_spectra_enabled.return_value = True
         self.presenter.cropping_widget.get_custom_spectra.return_value = "1-56,401-809"
+        self.view.get_update_vanadium_checked.return_value = False
 
         self.presenter.on_calibrate_clicked()
-        worker_method.assert_called_with("307521", "305738", True, None, spectrum_numbers="1-56,401-809")
+        worker_method.assert_called_with("307521", "305738", True, None, False, spectrum_numbers="1-56,401-809")
 
     @patch(tab_path + ".presenter.set_setting")
     @patch(tab_path + ".presenter.create_error_message")

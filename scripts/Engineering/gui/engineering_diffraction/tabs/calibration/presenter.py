@@ -52,10 +52,14 @@ class CalibrationPresenter(object):
         if self.view.get_new_checked() and self._validate():
             vanadium_file = self.view.get_vanadium_filename()
             sample_file = self.view.get_sample_filename()
+            only_update_vanadium = self.view.get_update_vanadium_checked()
             if self.view.get_crop_checked():
-                self.start_cropped_calibration_worker(vanadium_file, sample_file, plot_output, self.rb_num)
+                self.start_cropped_calibration_worker(vanadium_file, sample_file,
+                                                      plot_output, self.rb_num,
+                                                      only_update_vanadium=only_update_vanadium)
             else:
-                self.start_calibration_worker(vanadium_file, sample_file, plot_output, self.rb_num)
+                self.start_calibration_worker(vanadium_file, sample_file,
+                                              plot_output, self.rb_num, only_update_vanadium=only_update_vanadium)
         elif self.view.get_load_checked():
             if not self.validate_path():
                 logger.notice("Invalid path")
@@ -70,7 +74,7 @@ class CalibrationPresenter(object):
                         "last_calibration_path", filename)
 
     def start_calibration_worker(self, vanadium_path, sample_path, plot_output, rb_num, bank=None, calfile=None,
-                                 spectrum_numbers=None):
+                                 spectrum_numbers=None, only_update_vanadium=False):
         """
         Calibrate the data in a separate thread so as to not freeze the GUI.
         :param vanadium_path: Path to vanadium data file.
@@ -80,12 +84,14 @@ class CalibrationPresenter(object):
         :param bank: Optional parameter to crop by bank.
         :param calfile: Custom calibration file the user can supply for the calibration region of interest.
         :param spectrum_numbers: Optional parameter to crop by spectrum number.
+        :param only_update_vanadium: If True, do not rerun ceria calibration
         """
         self.worker = AsyncTask(self.model.create_new_calibration, (vanadium_path, sample_path),
                                 {
                                 "plot_output": plot_output,
                                 "instrument": self.instrument,
                                 "rb_num": rb_num,
+                                "only_update_vanadium": only_update_vanadium,
                                 "bank": bank,
                                 "calfile": calfile,
                                 "spectrum_numbers": spectrum_numbers
@@ -97,16 +103,19 @@ class CalibrationPresenter(object):
         self.set_calibrate_controls_enabled(False)
         self.worker.start()
 
-    def start_cropped_calibration_worker(self, vanadium_path, sample_path, plot_output, rb_num):
+    def start_cropped_calibration_worker(self, vanadium_path, sample_path, plot_output, rb_num, only_update_vanadium):
         if self.cropping_widget.get_custom_calfile_enabled():
             calfile = self.cropping_widget.get_custom_calfile()
-            self.start_calibration_worker(vanadium_path, sample_path, plot_output, rb_num, calfile=calfile)
+            self.start_calibration_worker(vanadium_path, sample_path, plot_output,
+                                          rb_num, only_update_vanadium=only_update_vanadium, calfile=calfile)
         elif self.cropping_widget.get_custom_spectra_enabled():
             spec_nums = self.cropping_widget.get_custom_spectra()
-            self.start_calibration_worker(vanadium_path, sample_path, plot_output, rb_num, spectrum_numbers=spec_nums)
+            self.start_calibration_worker(vanadium_path, sample_path, plot_output,
+                                          rb_num, only_update_vanadium=only_update_vanadium, spectrum_numbers=spec_nums)
         else:
             bank = str(self.cropping_widget.get_bank())
-            self.start_calibration_worker(vanadium_path, sample_path, plot_output, rb_num, bank=bank)
+            self.start_calibration_worker(vanadium_path, sample_path, plot_output,
+                                          rb_num, only_update_vanadium=only_update_vanadium, bank=bank)
 
     def set_current_calibration(self, success_info=None):
         if success_info:
@@ -144,8 +153,10 @@ class CalibrationPresenter(object):
         if self.view.is_searching():
             create_error_message(self.view, "Mantid is searching for data files. Please wait.")
             return False
-        if not self.validate_run_numbers():
+        if not self.view.get_update_vanadium_checked() and not self.validate_run_numbers():
             create_error_message(self.view, "Check run numbers/path is valid.")
+            return False
+        if self.view.get_update_vanadium_checked() and not self.view.get_vanadium_valid():
             return False
         if self.view.get_crop_checked():
             if self.cropping_widget.get_custom_calfile_enabled() and not self.cropping_widget.is_calfile_valid():
