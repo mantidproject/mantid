@@ -120,6 +120,7 @@ set(PYTHON_PLUGINS
     algorithms/LoadVisionElasticEQ.py
     algorithms/LoadVisionInelastic.py
     algorithms/LoadWANDSCD.py
+    algorithms/MaskShadowedPixels.py
     algorithms/MRFilterCrossSections.py
     algorithms/MRGetTheta.py
     algorithms/MRInspectData.py
