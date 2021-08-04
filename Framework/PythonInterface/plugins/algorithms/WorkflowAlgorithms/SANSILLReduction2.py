@@ -582,7 +582,7 @@ class SANSILLReduction(PythonAlgorithm):
             self.setProperty('OutputFluxWorkspace', flux)
 
     def prepare_tof_flux(self, ws):
-        '''Broadcasts the direct beam flux that can be easily rebinning at application time'''
+        '''Broadcasts the direct beam flux that can be easily rebinned at application time'''
         # for TOF, the flux is wavelength dependent, and the sample workspace is ragged
         # hence the flux must be rebinned to the sample before it can be divided by flux
         # that's why we broadcast the empty beam workspace to the same size as the sample
