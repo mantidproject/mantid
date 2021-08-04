@@ -45,6 +45,7 @@ set(EXPORT_FILES
     src/Exports/ComponentInfoPythonIterator.cpp
     src/Exports/MeshObject.cpp
     src/Exports/SampleEnvironment.cpp
+    src/Exports/Container.cpp
 )
 
 # Generate a source file from the export definitions and provided template

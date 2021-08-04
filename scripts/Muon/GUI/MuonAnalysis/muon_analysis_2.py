@@ -487,6 +487,5 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.removeDockWidget(self.dockable_plot_widget_window)
         self.tabs.closeEvent(event)
         self.context.ads_observer.unsubscribe()
-        self.context.ads_observer = None
         self.grouping_tab_widget.group_tab_presenter.closePeriodInfoWidget()
         super(MuonAnalysisGui, self).closeEvent(event)
