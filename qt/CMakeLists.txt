@@ -2,7 +2,7 @@
 include(QtTargetFunctions)
 
 # Resource compiler for PyQt5
-if(ENABLE_WORKBENCH AND NOT PYRCC5_CMD)
+if((ENABLE_WORKBENCH OR ENABLE_MANTIDQT) AND NOT PYRCC5_CMD)
   # Newer versions of PyQt5 have a pyrcc_main python module, whereas older
   # versions have a pyrcc5 executable. We prefer calling the python module.
   execute_process(COMMAND ${Python_EXECUTABLE} -c "import PyQt5.pyrcc_main"
