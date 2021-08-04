@@ -430,7 +430,6 @@ void SaveCanSAS1D::createSASDataElement(std::string &sasData) {
     dataUnit = "1/cm";
 
   sasData = "\n\t\t<SASdata>";
-  // outFile<<sasData;
   std::string sasIData;
   std::string sasIBlockData;
   std::string sasIHistData;
@@ -477,7 +476,6 @@ void SaveCanSAS1D::createSASDataElement(std::string &sasData) {
       sasIData += "</Qdev>";
 
       sasIData += "</Idata>";
-      // outFile<<sasIData;
       sasIBlockData += sasIData;
     }
     sasIHistData += sasIBlockData;
