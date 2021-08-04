@@ -29,7 +29,8 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/buildconfig/CMake")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 
-option(ENABLE_WORKBENCH "Enable Qt5-based gui & components" ON)
+option(ENABLE_MANTIDQT "Enable Qt5-based components" ON)
+option(ENABLE_WORKBENCH "Enable Qt5-based gui" ON)
 
 set(CPACK_INSTALL_CMAKE_PROJECTS "${CMAKE_BINARY_DIR}" "Mantid" "ALL" "/")
 
@@ -103,7 +104,7 @@ if(COVERAGE)
   coverage_turn_on()
 endif()
 
-if(ENABLE_WORKBENCH)
+if(ENABLE_WORKBENCH OR ENABLE_MANTIDQT)
   find_package(Qt5
                COMPONENTS Core
                           Gui
@@ -135,6 +136,24 @@ option(CXXTEST_ADD_PERFORMANCE
 include(TargetFunctions)
 if(STANDALONE_FRAMEWORK)
 find_package(MantidFramework REQUIRED)
+set(FRAMEWORK_PLUGINS_DIR $ENV{CONDA_PREFIX}/Library/plugins)
+set(CONSOLECHANNELCLASS "ConsoleChannel")
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Framework/Properties/Mantid.properties.template
+               ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.config)
+# Then, copy into appropriate place
+if(MSVC)
+  file(GENERATE
+       OUTPUT
+       ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/$<CONFIG>/Mantid.properties
+       INPUT
+       ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.config)
+else()
+  file(GENERATE
+       OUTPUT
+       ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/Mantid.properties
+       INPUT
+       ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.config)
+endif()
 else()
 add_subdirectory(Framework)
 endif()
@@ -158,7 +177,7 @@ if(NOT STANDALONE_FRAMEWORK)
 add_dependencies(AllTests FrameworkTests)
 endif()
 
-if(ENABLE_WORKBENCH)
+if(ENABLE_WORKBENCH OR ENABLE_MANTIDQT)
   add_custom_target(GUITests)
   add_dependencies(check GUITests)
   # Collect all tests together

@@ -1,4 +1,4 @@
-if(ENABLE_WORKBENCH)
+if(ENABLE_WORKBENCH OR ENABLE_MANTIDQT)
   # Defines a Python wrapper module for instrument view access This wraps the
   # low- level classes.
 

@@ -76,7 +76,7 @@ mtd_add_qt_library(
   LINUX_INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}"
 )
 # We require just the headers for system.h
-target_include_directories(MantidQtWidgetsMplCppQt5 PRIVATE $<TARGET_PROPERTY:Mantid::Kernel,INTERFACE_INCLUDE_DIRECTORIES>)
+#target_include_directories(MantidQtWidgetsMplCppQt5 PRIVATE $<TARGET_PROPERTY:Mantid::Kernel,INTERFACE_INCLUDE_DIRECTORIES>)
 
 # Testing
 add_subdirectory(test)

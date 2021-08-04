@@ -124,7 +124,7 @@ function (_sanitize_install_dirs output_variable)
     # Linux/windows packages share install layouts for many things
     # This ensures only a single unique install directory is present
     list(REMOVE_DUPLICATES potential_dirs)
-    if(NOT ENABLE_WORKBENCH)
+    if(NOT (ENABLE_WORKBENCH OR ENABLE_MANTIDQT))
       set(${output_variable} ${potential_dirs} PARENT_SCOPE)
       return()
     endif()
