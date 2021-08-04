@@ -57,7 +57,6 @@ class BackgroundCorrectionData:
             self.flat_background = flat_background.clone()
         else:
             self.flat_background = FunctionFactory.createFunction("FlatBackground")
-            self.flat_background.addConstraints("A0>0")
 
         if exp_decay is not None:
             self.exp_decay = exp_decay.clone()
@@ -373,13 +372,21 @@ class BackgroundCorrectionsModel:
             correction_data.flat_background.setError(BACKGROUND_PARAM, background_error)
         return correction_data
 
-    def are_all_corrections_successful(self) -> bool:
-        """Returns true if all the background corrections were applied successfully."""
+    def get_warning_for_correction_tab(self) -> bool:
+        """Returns a message if not all the background corrections were applied successfully."""
         if not self.is_background_mode_none():
             for correction_data in self._corrections_context.background_correction_data.values():
                 if "skipped" in correction_data.status:
-                    return False
-        return True
+                    return "Background corrections skipped for some domains."
+        return ""
+
+    def any_negative_backgrounds(self) -> bool:
+        """Returns true if a negative background exists in one of the background corrected domains."""
+        if not self.is_background_mode_none():
+            for correction_data in self._corrections_context.background_correction_data.values():
+                if correction_data.flat_background.getParameterValue(BACKGROUND_PARAM) < 0.0:
+                    return True
+        return False
 
     def selected_correction_data(self) -> tuple:
         """Returns lists of the selected correction data to display in the view."""

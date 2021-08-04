@@ -126,10 +126,10 @@ class BackgroundCorrectionsView(widget, ui_form):
 
     def set_function_combo_box_tooltips(self) -> None:
         """Update the tooltips for the combobox."""
-        self.function_combo_box.setItemData(0, "A0 >= 0 (constraint)\n"
+        self.function_combo_box.setItemData(0, "Flat Background + Exp Decay\n"
                                                "A = 1e6 (initial value)\n"
                                                "Lambda = 1.0/2.2 (fixed)", Qt.ToolTipRole)
-        self.function_combo_box.setItemData(1, "A0 >= 0 (constraint)", Qt.ToolTipRole)
+        self.function_combo_box.setItemData(1, "Flat Background", Qt.ToolTipRole)
 
     @property
     def background_correction_mode(self) -> str:
