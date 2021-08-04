@@ -83,8 +83,7 @@ class BackgroundCorrectionsPresenter:
         runs, groups = self._selected_runs_and_groups()
         use_raw = self.view.selected_use_raw()
         for run, group in zip(runs, groups):
-            self.view.set_use_raw(run, group, use_raw)
-            self.model.set_use_raw(run, group, use_raw)
+            self._update_use_raw_in_view_and_model(run, group, use_raw)
 
         self._perform_background_corrections_for(runs, groups)
 
@@ -146,8 +145,14 @@ class BackgroundCorrectionsPresenter:
         self.view.populate_corrections_table(runs, groups, use_raws, start_xs, end_xs, backgrounds, background_errors,
                                              statuses, self.model.is_rebin_fixed_selected())
 
+    def _update_use_raw_in_view_and_model(self, run: str, group: str, use_raw: bool) -> None:
+        """Updates the Use Raw option in the view and model using the provided value."""
+        if self.view.is_run_group_displayed(run, group):
+            self.view.set_use_raw(run, group, use_raw)
+        self.model.set_use_raw(run, group, use_raw)
+
     def _update_start_and_end_x_in_view_and_model(self, run: str, group: str, start_x: float, end_x: float) -> None:
-        """Updates the start and end x in the model using the provided values."""
+        """Updates the start and end x in the view and model using the provided values."""
         if self.view.is_run_group_displayed(run, group):
             self.view.set_start_x(run, group, start_x)
             self.view.set_end_x(run, group, end_x)
