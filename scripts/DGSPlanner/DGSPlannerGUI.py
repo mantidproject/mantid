@@ -175,7 +175,9 @@ class DGSPlannerGUI(QtWidgets.QWidget):
             self.instrumentWidget.setLabelEi('Incident Energy')
             self.instrumentWidget.setEiVal(str(10.0))
 
-            self.instrumentWidget.setGoniometerNames(['psi','gl','gs'])
+            self.instrumentWidget.setGoniometerNames(['psi', 'gl', 'gs'])
+            self.instrumentWidget.setGoniometerDirections(['0,1,0', '0,0,1', '1,0,0'])
+            self.instrumentWidget.setGoniometerRotationSense([1, 1, 1])
             self.instrumentWidget.updateAll()
 
     @QtCore.Slot(dict)

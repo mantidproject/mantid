@@ -1,3 +1,5 @@
+.. _dgsplanner-ref:
+
 DGS Planner
 ===========
 
