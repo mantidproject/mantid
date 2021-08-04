@@ -28,6 +28,7 @@ Improvements
 ############
 
 - When running the Dynamic Kubo Toyabe fit function you should now be able to see the BinWidth to 3 decimal places.
+- TF Asymmetry fitting is now allowed for diffs between groups.
 
 BugFixes
 ############
