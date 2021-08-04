@@ -18,7 +18,8 @@ EMPTY_TOKEN = '000000' # empty run rumber to act as a placeholder where a sample
 class SANSILLReduction(PythonAlgorithm):
     """
         Performs unit data reduction of the given process type
-        Supports stadard, kinetic and TOF measurements
+        Supports stadard monochromatic, kinetic and TOF measurements
+        Supports D11, D16, D22, and D33 instruments at the ILL
     """
 
     mode = None # the acquisition mode of the reduction
@@ -294,7 +295,14 @@ class SANSILLReduction(PythonAlgorithm):
         cadmium_ws = self.getPropertyValue('DarkCurrentWorkspace')
         if cadmium_ws:
             check_processed_flag(mtd[cadmium_ws], 'DarkCurrent')
-            Minus(LHSWorkspace=ws, RHSWorkspace=cadmium_ws, OutputWorkspace=ws)
+            if self.mode == AcqMode.TOF:
+                cadmium_ws_rebin = cadmium_ws + '_rebinned'
+                RebinToWorkspace(WorkspaceToRebin=cadmium_ws, WorkspaceToMatch=ws,
+                                 OutputWorkspace=cadmium_ws_rebin)
+                Minus(LHSWorkspace=ws, RHSWorkspace=cadmium_ws_rebin, OutputWorkspace=ws)
+                DeleteWorkspace(cadmium_ws_rebin)
+            else:
+                Minus(LHSWorkspace=ws, RHSWorkspace=cadmium_ws, OutputWorkspace=ws)
 
     def apply_direct_beam(self, ws):
         '''Applies the beam center correction'''
@@ -341,14 +349,34 @@ class SANSILLReduction(PythonAlgorithm):
                 DeleteWorkspace(tr_ws_rebin)
             else:
                 check_wavelengths_match(mtd[tr_ws], mtd[ws])
+                tr_to_apply = tr_ws
+                if self.mode == AcqMode.KINETIC:
+                    tr_to_apply = self.broadcast_kinetic(tr_ws)
                 ApplyTransmissionCorrection(InputWorkspace=ws,
-                                            TransmissionWorkspace=tr_ws,
+                                            TransmissionWorkspace=tr_to_apply,
                                             ThetaDependent=theta_dependent,
                                             OutputWorkspace=ws)
+                if self.mode == AcqMode.KINETIC:
+                    DeleteWorkspace(tr_to_apply)
                 if theta_dependent and self.instrument == 'D16' and 75 < mtd[ws].getRun()['Gamma.value'].value < 105:
                     # D16 can do wide angles, which means it can cross 90 degrees, where theta dependent transmission is divergent
                     # gamma is the detector center's theta, if it is in a certain range, then some pixels are around 90 degrees
                     MaskAngle(Workspace=ws, MinAngle=89, MaxAngle=91, Angle='TwoTheta')
+
+    def broadcast_kinetic(self, ws):
+        '''
+        Broadcasts the given workspace to the dimensions of the sample workspace
+        Repeats the values by the number of frames in order to allow vectorized application of the correction
+        '''
+        x = mtd[ws].readX(0)
+        y = mtd[ws].readY(0)
+        e = mtd[ws].readE(0)
+        out = ws + '_broadcast'
+        CreateWorkspace(ParentWorkspace=ws, OutputWorkspace=out, NSpec=1,
+                        DataX=np.repeat(x, self.n_frames),
+                        DataY=np.repeat(y, self.n_frames),
+                        DataE=np.repeat(e, self.n_frames))
+        return out
 
     def apply_container(self, ws):
         '''Applies empty container subtraction'''
@@ -380,7 +408,7 @@ class SANSILLReduction(PythonAlgorithm):
             Scale(InputWorkspace=ws, Factor=self.getProperty('WaterCrossSection').value, OutputWorkspace=ws)
             # copy the mask of water to the ws as it might be larger than the beam stop used for ws
             MaskDetectors(Workspace=ws, MaskedWorkspace=flat_ws)
-            # rescale the absolute scale if they ws and flat field are at different distances
+            # rescale the absolute scale if the ws and flat field are at different distances
             self.rescale_flux(ws, flat_ws)
 
     def rescale_flux(self, ws, flat_ws):
@@ -410,7 +438,10 @@ class SANSILLReduction(PythonAlgorithm):
             raise RuntimeError(message)
 
     def do_rescale_flux(self, ws, flat_ws):
-        '''Scales ws by the flux factor wrt the flat field'''
+        '''
+        Scales ws by the flux factor wrt the flat field
+        Formula 14, Grillo I. (2008) Small-Angle Neutron Scattering and Applications in Soft Condensed Matter
+        '''
         if self.mode != AcqMode.TOF:
             check_wavelengths_match(mtd[ws], mtd[flat_ws])
         sample_l2 = mtd[ws].getRun()['L2'].value
@@ -439,7 +470,8 @@ class SANSILLReduction(PythonAlgorithm):
     def apply_solid_angle(self, ws):
         '''Calculates solid angle and divides by it'''
         sa_ws = ws + '_solidangle'
-        SolidAngle(InputWorkspace=ws, OutputWorkspace=sa_ws, Method="Rectangle")
+        method = 'GenericShape' if self.instrument == 'D22B' else 'Rectangle'
+        SolidAngle(InputWorkspace=ws, OutputWorkspace=sa_ws, Method=method)
         Divide(LHSWorkspace=ws, RHSWorkspace=sa_ws, OutputWorkspace=ws, WarnOnZeroDivide=False)
         DeleteWorkspace(Workspace=sa_ws)
 
@@ -455,17 +487,31 @@ class SANSILLReduction(PythonAlgorithm):
     def apply_thickness(self, ws):
         '''Normalises by sample thickness'''
         thicknesses = self.getProperty('SampleThickness').value
-        if len(thicknesses) == 1:
+        length = len(thicknesses)
+        if length == 1:
             Scale(InputWorkspace=ws, Factor=1/thicknesses[0], OutputWorkspace=ws)
-        else:
-            pass #TODO create a thickness workspace of the right shape
+        elif length > 1:
+            thick_ws = ws + '_thickness'
+            CreateWorkspace(NSpec=1, OutputWorkspace=thick_ws,
+                            DataY=np.array(length), DataE=np.zeros(length),
+                            DataX=np.arange(length))
+            thick_to_apply = thick_ws
+            if self.mode == AcqMode.KINETIC:
+                thick_to_apply = self.broadcast_kinetic(thick_ws)
+            Divide(LHSWorkspace=ws, RHSWorkspace=thick_to_apply, OutputWorkspace=ws)
+            DeleteWorkspace(thick_to_apply)
+            if mtd[thick_ws]:
+                DeleteWorkspace(thick_ws)
 
     def apply_parallax(self, ws):
         '''Applies the parallax correction'''
         components = ['detector']
+        offsets = [0.]
+        if self.instrument == 'D22B':
+            offsets.append(mtd[ws].getRun()['Detector 2.dan1_actual'].value)
         if mtd[ws].getInstrument().hasParameter('detector_panels'):
             components = mtd[ws].getInstrument().getStringParameter('detector_panels')[0].split(',')
-            ParallaxCorrection(InputWorkspace=ws, OutputWorkspace=ws, ComponentNames=components)
+            ParallaxCorrection(InputWorkspace=ws, OutputWorkspace=ws, ComponentNames=components, AngleOffsets=offsets)
 
     #===============================METHODS TO PROCESS BY TYPE===============================#
 
