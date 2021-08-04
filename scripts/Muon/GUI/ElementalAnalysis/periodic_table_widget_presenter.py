@@ -8,7 +8,6 @@ from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_model import Period
 from Muon.GUI.ElementalAnalysis.PeriodicTable.PeakSelector.peak_selector_presenter import PeakSelectorPresenter
 from Muon.GUI.ElementalAnalysis.PeriodicTable.PeakSelector.peak_selector_view import PeakSelectorView
 from Muon.GUI.ElementalAnalysis.Peaks.peaks_presenter import PeaksPresenter
-from Muon.GUI.Common import message_box
 
 offset = 0.9
 
@@ -236,9 +235,9 @@ class PeriodicTableWidgetPresenter(object):
         try:
             self._generate_element_widgets()
         except ValueError:
-            message_box.warning(
+            self.view.warning_popup(
                 'The file does not contain correctly formatted data, resetting to default data file.'
-                'See "https://docs.mantidproject.org/nightly/interfaces/'
+                'See "https://docs.mantidproject.org/nightly/interfaces/muon/'
                 'Muon%20Elemental%20Analysis.html" for more information.')
             self.ptable.set_peak_datafile(None)
             self._generate_element_widgets()
@@ -249,3 +248,14 @@ class PeriodicTableWidgetPresenter(object):
             else:
                 self._remove_element_lines(element)
         self._update_checked_data()
+
+    def add_peak_data(self, element, subplot, data=None):
+        # if already selected add to just new plot
+        if data is None:
+            data = self.element_widgets[element].get_checked()
+        color = self.get_color(element)
+        for name, x_value in data.items():
+            if isinstance(x_value, float):
+                full_name = gen_name(element, name)
+                label = self._gen_label(full_name, x_value, element)
+                self._plot_line_once(subplot, x_value, label, color)

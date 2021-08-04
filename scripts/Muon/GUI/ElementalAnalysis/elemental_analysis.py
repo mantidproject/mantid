@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from copy import deepcopy
 
-import matplotlib as mpl
 from qtpy import QtWidgets
 
 import mantid.simpleapi as mantid
@@ -22,37 +21,17 @@ from Muon.GUI.ElementalAnalysis.LoadWidget.load_utils import spectrum_index
 from Muon.GUI.ElementalAnalysis.Peaks.peaks_view import PeaksView
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_view import PeriodicTableView
 from Muon.GUI.ElementalAnalysis.periodic_table_widget_presenter import PeriodicTableWidgetPresenter
-
-offset = 0.9
-
-
-def is_string(value):
-    if isinstance(value, str):
-        return True
-
-    return False
-
-
-def gen_name(element, name):
-    msg = None
-    if not is_string(element):
-        msg = "'{}' expected element to be 'str', found '{}' instead".format(
-            str(element), type(element))
-    if not is_string(name):
-        msg = "'{}' expected name to be 'str', found '{}' instead".format(str(name), type(name))
-
-    if msg is not None:
-        raise TypeError(msg)
-
-    if element in name:
-        return name
-    return element + " " + name
+from Muon.GUI.Common import message_box
 
 
 class ElementalAnalysisGui(QtWidgets.QMainWindow):
     BLUE = 'C0'
     ORANGE = 'C1'
     GREEN = 'C2'
+
+    @staticmethod
+    def warning_popup(message):
+        message_box.warning(message)
 
     def __init__(self, parent=None, window_flags=None):
         super(ElementalAnalysisGui, self).__init__(parent)
@@ -72,8 +51,6 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         # plotting
         self._plot_window = None
         self._plotting = None
-        self.num_colors = len(mpl.rcParams['axes.prop_cycle'])
-        self.used_colors = {}
 
         # setup periodic table and peaks
         self.ptable_view = PeriodicTableView()
@@ -131,33 +108,6 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
     def plotting(self, plotting):
         self._plotting = plotting
         self.ptable.plotting = plotting
-
-    def get_color(self, element):
-        """
-        When requesting the colour for a new element, return the first unused colour of the matplotlib
-        default colour cycle (i.e. mpl.rcParams['axes.prop_cycle']).
-        If all colours are used, return the first among the least used ones.
-        That is if C0-4 are all used twice and C5-9 are used once, C5 will be returned.
-
-        When requesting the colour for an element that is already plotted return the colour of that element.
-        This prevents the same element from being displayed in different colours in separate plots
-
-        :param element: Chemical symbol of the element that one wants the colour of
-        :return: Matplotlib colour string: C0, C1, ..., C9 to be used as plt.plot(..., color='C3')
-        """
-        if element in self.used_colors:
-            return self.used_colors[element]
-
-        occurrences = [
-            list(self.used_colors.values()).count('C{}'.format(i)) for i in range(self.num_colors)
-        ]
-
-        color_index = occurrences.index(min(occurrences))
-
-        color = "C{}".format(color_index)
-        self.used_colors[element] = color
-
-        return color
 
     def closeEvent(self, event):
         if self.plot_window is not None:

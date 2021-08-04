@@ -63,6 +63,7 @@ Elemental Analysis
 Improvements
 ############
 - Updated :ref:`LoadElementalAnalysisData <algm-LoadElementalAnalysisData>` algorithm to include Poisson errors for the counts data.
+- The periodic table has been updated for better stability.
 
 Algorithms
 ----------
