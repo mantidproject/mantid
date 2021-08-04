@@ -17,25 +17,25 @@ If you haven't installed PyCharm yet do that now, PyCharm can be installed from 
 Setup Python development environment with Conda
 ###############################################
 
-The assumption has been made that you have setup and built Mantid already, if you have not, please do so before hand by following, `this guide <GettingStarted/GettingStarted>`_.
+The assumption has been made that you have setup and built Mantid already, if you have not, please do so before hand by following, `this guide <GettingStarted/GettingStarted.html>`_.
 
 At any point in these instructions where ``RelWithDebInfo`` is used (including in file paths), you can replace it with any other build type such as ``Debug`` or ``Release``. We use ``RelWithDebInfo`` for Conda specific builds to allow debugging due to ``Debug`` not being functional with the ``Release ABIs``.
 
 - Open PyCharm
 - If no project has been selected already, open the Mantid source code as a project.
 - Open the ``File->Settings menu``.
-- In the right hand side select the option that is ``Project: {SOURCE_CODE_FOLDER_NAME}`` for example ``Project: mantid``.
+- In the left hand side select the option that is ``Project: {SOURCE_CODE_FOLDER_NAME}`` for example ``Project: mantid``.
 - Select the ``Python Interpreter`` option.
-- Select the button top right of the window, that looks like a settings cog, then select ``Add...`` from the submenu.
-- From the right side of the window select ``Conda Environment``.
+- Select the button top right in the of the window, that looks like a settings cog, then select ``Add...`` from the submenu.
+- From the left side of the window select ``Conda Environment``.
 - Select the ``Existing environment``.
-- Click on the ``...`` to open a file browser, and navigate to your Conda environment's Python executable. This can be found in the directory you installed Conda (i.e. Mambaforge, Miniconda3 etc), on Windows navigate to your ``{CONDA_DIRECTORY}/envs/mantid-developer/Python.exe`` on other OSs navigate to ``{CONDA_DIRECTORY}/envs/mantid-developer/bin/Python.exe``.
+- Click on the ``...`` to open a file browser, and navigate to your Conda environment's Python executable. This can be found in the directory you installed Conda (i.e. Mambaforge, Miniconda3 etc), on Windows navigate to your ``{CONDA_DIRECTORY}/envs/mantid-developer/Python.exe``, your ``{CONDA_DIRECTORY}`` on windows may be in a similar location to this: ``C:/Users/user/AppData/Local/mambaforge`` on other OSs navigate to ``{CONDA_DIRECTORY}/envs/mantid-developer/bin/python``.
 - (Windows Only) Ensure that the line for ``Conda executable`` correctly points at your ``conda.exe``, an example of this would be ``{CONDA_DIRECTORY}/Scripts/conda.exe``.
 - When done, click ok to close the window.
 - Ensure that next to ``Python Interpreter:`` it says your Python version and ``(mantid-developer)`` e.g. ``Python 3.8 (mantid-developer)``.
 - Then click Apply.
-- Back on the right side, under ``Python Interpreter`` there should be an option for ``Project Structure`` select that.
-- If you do not build Mantid in the same directory as your source but somewhere else add this is another Content Root, by selecting ``+ Add Content Root`` on the right hand side now.
+- Back on the left side, under ``Python Interpreter`` there should be an option for ``Project Structure`` select that.
+- If you do not build Mantid in the same directory as your source but somewhere else add this as another Content Root, by selecting ``+ Add Content Root`` on the right hand side now.
 - In the file tree, select each of the following and mark them as Sources by clicking the ``Sources`` button whilst it's selected:
 
     - ``{SOURCE}/scripts``
@@ -58,9 +58,9 @@ Now that your Python development environment has been setup we can setup the deb
 - Click the ``+`` icon top left
 - Select Python
 - Name it something to do with ``Workbench``
-- In the ``Script Path:`` box, on Linux/MacOS enter the ``{BUILD}/bin/workbench`` Python script, on Windows enter ``{BUILD}/bin/RelWithDebInfo/workbench-script.pyw``
+- In the ``Script Path:`` box, on Linux/MacOS enter the ``{BUILD}/bin/workbench`` Python script, on Windows enter ``{BUILD}/bin/RelWithDebInfo/workbench-script.pyw``, ``.pyw`` files will not appear in the search window as it only shows ``.py`` files, so you cannot search for it with the GUI.
 - In the ``Working directory:`` box, on Linux/MacOS enter the ``{BUILD}/bin`` directory, on Windows enter ``{BUILD}/bin/RelWithDebInfo`` directory.
-- Ensure the ``Python Interpreter:`` box is your Python version following by ``(mantid-developer)``, this ensure it runs using Conda.
+- Ensure the ``Python Interpreter:`` box is your Python version following by ``(mantid-developer)``, this ensures it runs using your Conda environment.
 - Click Ok and exit out the window.
 - You can now click the green play button in the top right of the window to create a Workbench instance from pycharm.
 - Alternatively you can click the green bug next to the green play button to start a debug session.
