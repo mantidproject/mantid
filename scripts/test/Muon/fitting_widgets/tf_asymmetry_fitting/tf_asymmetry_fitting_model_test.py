@@ -11,6 +11,7 @@ from mantid.api import FrameworkManager, FunctionFactory
 from mantid.simpleapi import CreateSampleWorkspace
 
 from Muon.GUI.Common.fitting_widgets.tf_asymmetry_fitting.tf_asymmetry_fitting_model import TFAsymmetryFittingModel
+from Muon.GUI.Common.muon_diff import MuonDiff
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
 
 
@@ -348,6 +349,26 @@ class TFAsymmetryFittingModelTest(unittest.TestCase):
 
         self.assertTrue(tf_compliant)
         self.assertEqual(non_compliant_names, "''")
+
+    def test_that_check_datasets_are_tf_asymmetry_compliant_returns_true_for_a_group_diff(self):
+        self.model.dataset_names = ["MUSR62260; Diff; diff_group; Asymmetry; MA"]
+
+        self.model.context.group_pair_context.add_diff(MuonDiff("diff_group", "fwd", "bwd", "group"))
+
+        tf_compliant, non_compliant_names = self.model.check_datasets_are_tf_asymmetry_compliant()
+
+        self.assertTrue(tf_compliant)
+        self.assertEqual(non_compliant_names, "''")
+
+    def test_that_check_datasets_are_tf_asymmetry_compliant_returns_true_for_a_pair_diff(self):
+        self.model.dataset_names = ["MUSR62260; Diff; diff_pair; Asymmetry; MA"]
+
+        self.model.context.group_pair_context.add_diff(MuonDiff("diff_pair", "long1", "long2", "pair"))
+
+        tf_compliant, non_compliant_names = self.model.check_datasets_are_tf_asymmetry_compliant()
+
+        self.assertTrue(not tf_compliant)
+        self.assertEqual(non_compliant_names, "'diff_pair'")
 
     def test_that_get_fit_function_parameter_values_returns_the_expected_parameter_values(self):
         self.model.dataset_names = self.dataset_names
