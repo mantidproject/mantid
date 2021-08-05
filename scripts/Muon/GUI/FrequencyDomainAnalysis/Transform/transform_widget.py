@@ -22,7 +22,7 @@ class TransformWidget(QtWidgets.QWidget):
         self.LoadObserver = LoadObserver(self)
         self.context = context
         self.instrumentObserver = instrumentObserver(self)
-        self.GroupPairObserver = GroupPairObserver(self)
+        self.GroupPairObserver = GenericObserver(self.handle_new_group_pair)
         self.enable_observer = EnableObserver(self)
         self.disable_observer = DisableObserver(self)
         self.phase_quad_observer = PhaseQuadObserver(self)
@@ -83,6 +83,7 @@ class TransformWidget(QtWidgets.QWidget):
     def handle_new_group_pair(self):
         # may have new groups/pairs for multiple runs
         self._fft.runChanged()
+        self._maxent.presenter.update_phase_table_options()
 
     def disable_view(self):
         self._view.setEnabled(False)
@@ -123,16 +124,6 @@ class instrumentObserver(Observer):
 
     def update(self, observable, arg):
         self.outer.handle_new_instrument()
-
-
-class GroupPairObserver(Observer):
-
-    def __init__(self, outer):
-        Observer.__init__(self)
-        self.outer = outer
-
-    def update(self, observable, arg):
-        self.outer.handle_new_group_pair()
 
 
 class EnableObserver(Observer):
