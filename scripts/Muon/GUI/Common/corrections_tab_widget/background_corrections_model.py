@@ -436,20 +436,19 @@ class BackgroundCorrectionsModel:
         last_good_data = self._context.last_good_data(run_list)
 
         if last_good_data != 0.0:
-            return self._get_x_range_from(self._context.first_good_data(run_list), last_good_data)
+            return self._get_range_for_second_half_of_data(self._context.first_good_data(run_list), last_good_data)
         else:
             return self._get_x_range_from_counts_workspace(run, group)
-
-    @staticmethod
-    def _get_x_range_from(first_good_data: float, last_good_data: float) -> tuple:
-        """Get the default start and end X from the first and last good data, and the time zero."""
-        return (last_good_data - first_good_data) / 2.0 + first_good_data, last_good_data
 
     def _get_x_range_from_counts_workspace(self, run: str, group: str) -> tuple:
         """Get the default start and end X from the counts workspace corresponding to the provided run and group."""
         x_lower, x_upper = self.x_limits_of_workspace(run, group)
-        x_mid = (x_upper - x_lower) / 2.0 + x_lower
-        return x_mid, x_upper
+        return self._get_range_for_second_half_of_data(x_lower, x_upper)
+
+    @staticmethod
+    def _get_range_for_second_half_of_data(x_lower: float, x_upper: float) -> tuple:
+        """Returns an x range representing the second half of the data range provided."""
+        return (x_upper - x_lower) / 2.0 + x_lower, x_upper
 
     def x_limits_of_workspace(self, run: str, group: str) -> tuple:
         """Returns the x data limits of the workspace associated with the provided Run and Group."""

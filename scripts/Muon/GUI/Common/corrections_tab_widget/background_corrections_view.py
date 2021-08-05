@@ -7,6 +7,8 @@
 from mantid.api import ITableWorkspace
 from mantidqt.utils.qt import load_ui
 from mantidqt.widgets.workspacedisplay.table.presenter import TableWorkspaceDisplay
+from Muon.GUI.Common.utilities.table_utils import (create_checkbox_table_item, create_double_table_item,
+                                                   create_string_table_item)
 
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QDoubleValidator, QPalette
@@ -260,18 +262,18 @@ class BackgroundCorrectionsView(widget, ui_form):
                                                                                              statuses):
             row = self.correction_options_table.rowCount()
             self.correction_options_table.insertRow(row)
-            self.correction_options_table.setItem(row, RUN_COLUMN_INDEX, self._create_table_item(run, False))
-            self.correction_options_table.setItem(row, GROUP_COLUMN_INDEX, self._create_table_item(group, False))
+            self.correction_options_table.setItem(row, RUN_COLUMN_INDEX, create_string_table_item(run, False))
+            self.correction_options_table.setItem(row, GROUP_COLUMN_INDEX, create_string_table_item(group, False))
             self.correction_options_table.setItem(row, USE_RAW_COLUMN_INDEX,
-                                                  self._create_bool_table_item(use_raw, use_raw_enabled, USE_RAW_TOOLTIP))
-            self.correction_options_table.setItem(row, START_X_COLUMN_INDEX, self._create_double_table_item(start_x))
-            self.correction_options_table.setItem(row, END_X_COLUMN_INDEX, self._create_double_table_item(end_x))
+                                                  create_checkbox_table_item(use_raw, use_raw_enabled, USE_RAW_TOOLTIP))
+            self.correction_options_table.setItem(row, START_X_COLUMN_INDEX, create_double_table_item(start_x))
+            self.correction_options_table.setItem(row, END_X_COLUMN_INDEX, create_double_table_item(end_x))
             self.correction_options_table.setItem(row, A0_COLUMN_INDEX,
-                                                  self._create_double_table_item(background, enabled=False))
+                                                  create_double_table_item(background, enabled=False))
             self.correction_options_table.setItem(row, A0_ERROR_COLUMN_INDEX,
-                                                  self._create_double_table_item(background_error, enabled=False))
+                                                  create_double_table_item(background_error, enabled=False))
             self.correction_options_table.setItem(row, STATUS_COLUMN_INDEX,
-                                                  self._create_table_item(status, False, alignment=Qt.AlignVCenter))
+                                                  create_string_table_item(status, False, alignment=Qt.AlignVCenter))
             self.correction_options_table.setCellWidget(row, SHOW_MATRIX_COLUMN_INDEX,
                                                         self.create_show_fit_output_button_for_row(row))
         self.correction_options_table.blockSignals(False)
@@ -327,47 +329,12 @@ class BackgroundCorrectionsView(widget, ui_form):
         button.clicked.connect(lambda _: self.handle_show_fit_output_clicked(row_index))
         return button
 
-    def _create_bool_table_item(self, state: bool, enabled: bool = True, tooltip: str = "") -> QTableWidgetItem:
-        """Creates a check box table widget item with an initial boolean state."""
-        item = self._create_table_item("")
-        item.setToolTip(tooltip)
-        if enabled:
-            item.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
-        else:
-            item.setFlags(item.flags() ^ Qt.ItemIsEnabled)
-        if state:
-            item.setCheckState(Qt.Checked)
-        else:
-            item.setCheckState(Qt.Unchecked)
-        return item
-
-    def _create_double_table_item(self, value: float, editable: bool = True, enabled: bool = True) -> QTableWidgetItem:
-        """Creates a table item for the corrections options table from a float."""
-        return self._create_table_item(self._float_to_str(value), editable, enabled)
-
-    def _create_table_item(self, text: str, editable: bool = True, enabled: bool = True,
-                           alignment: int = Qt.AlignCenter) -> QTableWidgetItem:
-        """Creates a table item for the corrections options table from a string."""
-        item = QTableWidgetItem(text)
-        item.setTextAlignment(alignment)
-        item = self._set_table_item_flags(item, editable, enabled)
-        return item
-
-    @staticmethod
-    def _set_table_item_flags(item: QTableWidgetItem, editable: bool, enabled: bool) -> QTableWidgetItem:
-        """Sets the flags for a table widget item."""
-        if not editable:
-            item.setFlags(item.flags() ^ Qt.ItemIsEditable)
-        if not enabled:
-            item.setFlags(item.flags() ^ Qt.ItemIsEnabled)
-        return item
-
     def _set_table_item_value_for(self, run: str, group: str, column_index: int, value: float) -> None:
         """Sets the End X associated with the provided Run and Group."""
         row_index = self._table_row_index_of(run, group)
 
         self.correction_options_table.blockSignals(True)
-        self.correction_options_table.setItem(row_index, column_index, self._create_double_table_item(value))
+        self.correction_options_table.setItem(row_index, column_index, create_double_table_item(value))
         self.correction_options_table.blockSignals(False)
 
     def _table_item_value_for(self, run: str, group: str, column_index: int) -> str:
@@ -395,10 +362,5 @@ class BackgroundCorrectionsView(widget, ui_form):
         if self._selected_row is not None and self._selected_column is not None:
             self.correction_options_table.blockSignals(True)
             self.correction_options_table.setItem(self._selected_row, self._selected_column,
-                                                  self._create_double_table_item(value))
+                                                  create_double_table_item(value))
             self.correction_options_table.blockSignals(False)
-
-    @staticmethod
-    def _float_to_str(value: float) -> str:
-        """Converts a float to a string with three decimal places."""
-        return f"{value:.3f}"
