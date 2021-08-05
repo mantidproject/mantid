@@ -9,7 +9,7 @@ set ( PLUGINS_DIR plugins )
 
 set ( WORKBENCH_BIN_DIR ${BIN_DIR} )
 set ( WORKBENCH_LIB_DIR ${LIB_DIR} )
-set ( WORKBENCH_SITE_PACKAGES ${LIB_DIR} )
+set ( WORKBENCH_SITE_PACKAGES ${LIB_DIR} CACHE PATH "Location of site packages")
 set ( WORKBENCH_PLUGINS_DIR ${PLUGINS_DIR} )
 
 # Determine the version of macOS that we are running
