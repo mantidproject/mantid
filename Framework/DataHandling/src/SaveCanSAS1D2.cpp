@@ -97,10 +97,22 @@ void SaveCanSAS1D2::exec() {
   // write xml manually as the user requires a specific format were the
   // placement of new line characters is controled
   // and this can't be done in using the stylesheet part in Poco or libXML
-  prepareFileToWriteEntry(getPropertyValue("FileName"));
 
   size_t i = 0;
   while (i < m_workspace->getNumberHistograms()) {
+    std::string fileName;
+    if (getProperty("OneSpectrumPerFile")) {
+      fileName = getPropertyValue("FileName");
+      size_t extPosition = fileName.find(".xml");
+      std::ostringstream ss;
+      ss << std::string(fileName, 0, extPosition) << i
+         << std::string(fileName, extPosition);
+      fileName = ss.str();
+    } else {
+      fileName = getPropertyValue("FileName");
+    }
+
+    prepareFileToWriteEntry(fileName);
     m_outFile << "\n\t<SASentry name=\"" << m_workspace->getName() << "\">";
 
     std::string sasTitle;
