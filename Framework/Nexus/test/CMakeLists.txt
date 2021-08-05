@@ -3,14 +3,10 @@ if(CXXTEST_FOUND)
 
   cxxtest_add_test(NexusTest ${TEST_FILES})
 
-  target_include_directories(NexusTest SYSTEM PRIVATE ${HDF5_INCLUDE_DIRS})
   target_link_libraries(NexusTest
-                        LINK_PRIVATE
-                        ${MANTIDLIBS}
-                        Nexus
-                        ${NEXUS_LIBRARIES}
-                        ${HDF5_LIBRARIES}
-                        ${HDF5_HL_LIBRARIES}
+                        PRIVATE
+                        Mantid::API
+                        Mantid::Nexus
                         gmock)
   add_dependencies(FrameworkTests NexusTest)
   add_dependencies(NexusTest StandardTestData)

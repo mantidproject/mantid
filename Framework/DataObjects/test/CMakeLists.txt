@@ -21,13 +21,11 @@ if(CXXTEST_FOUND)
 
   cxxtest_add_test(DataObjectsTest ${TEST_FILES})
   target_link_libraries(DataObjectsTest
-                        LINK_PRIVATE
-                        ${MANTIDLIBS}
-                        DataObjects
-                        ${NEXUS_LIBRARIES}
-                        ${JSONCPP_LIBRARIES}
-                        gmock
-)
+                        PRIVATE
+                        Mantid::DataObjects
+                        Mantid::Kernel
+                        Nexus::nexuscpp
+                        gmock)
   # Specify implicit dependency, but don't link to it
   add_dependencies(FrameworkTests DataObjectsTest)
   # Add to the 'FrameworkTests' group in VS
