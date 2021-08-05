@@ -490,6 +490,7 @@ class SANSILLReduction(PythonAlgorithm):
     def apply_solid_angle(self, ws):
         '''Calculates solid angle and divides by it'''
         sa_ws = ws + '_solidangle'
+        # D22B has the front panel tilted, hence the Rectangle approximation is wrong
         method = 'GenericShape' if self.instrument == 'D22B' else 'Rectangle'
         SolidAngle(InputWorkspace=ws, OutputWorkspace=sa_ws, Method=method)
         Divide(LHSWorkspace=ws, RHSWorkspace=sa_ws, OutputWorkspace=ws, WarnOnZeroDivide=False)
@@ -528,7 +529,9 @@ class SANSILLReduction(PythonAlgorithm):
         components = ['detector']
         offsets = [0.]
         if self.instrument == 'D22B':
-            offsets.append(mtd[ws].getRun()['Detector 2.dan1_actual'].value)
+            # The front detector of D22B is often tilted around its own axis
+            # The tilt angle must be subtracted from 2thetas before putting them into the parallax correction formula
+            offsets.append(mtd[ws].getRun()['Detector 2.dan2_actual'].value)
         if mtd[ws].getInstrument().hasParameter('detector_panels'):
             components = mtd[ws].getInstrument().getStringParameter('detector_panels')[0].split(',')
             ParallaxCorrection(InputWorkspace=ws, OutputWorkspace=ws, ComponentNames=components, AngleOffsets=offsets)
