@@ -7,10 +7,10 @@
 #pylint: disable=no-init,invalid-name
 import mantid
 import numpy as np
+import yaml
 
 
 class MaskShadowedPixels(mantid.api.PythonAlgorithm):
-
     def category(self):
         return "DataHandling\\Nexus"
 
@@ -21,17 +21,11 @@ class MaskShadowedPixels(mantid.api.PythonAlgorithm):
         return "MaskShadowedPixels"
 
     def summary(self):
-        return "Save constant wavelength powder diffraction data to a GSAS file in FXYE format"
+        return "Generate maks file for NOMAD to exclude shadowed pixels."
 
     def PyInit(self):
-        self.declareProperty(mantid.api.WorkspaceProperty('InputWorkspace',
-                                                          '',
-                                                          mantid.kernel.Direction.Input),
-                             "Workspace to save")
-        self.declareProperty(mantid.api.FileProperty('OutputFilename',
-                                                     '',
-                                                     action=mantid.api.FileAction.Save,
-                                                     extensions=['.gss']),
+        self.declareProperty(mantid.api.WorkspaceProperty('InputWorkspace', '', mantid.kernel.Direction.Input), "Workspace to save")
+        self.declareProperty(mantid.api.FileProperty('OutputFilename', '', action=mantid.api.FileAction.Save, extensions=['.gss']),
                              doc='Name of the GSAS file to save to')
 
         # TODO - Add missing input properties
@@ -125,15 +119,16 @@ class MaskShadowedPixels(mantid.api.PythonAlgorithm):
 
         Parameters
         ----------
-        file_name
+        file_name: str
+            name of the YAML file that contains the configuration for NOMAD
 
         Returns
         -------
         dictionary
-
         """
-
-        return dict()
+        with open(file_name, 'r') as stream:
+            config = yaml.safe_load(stream)
+        return config
 
     def calculate_solid_angle(self, workspace):
         """Calculate solid angle for each detector
