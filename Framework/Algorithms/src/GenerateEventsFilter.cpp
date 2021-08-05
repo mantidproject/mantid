@@ -340,8 +340,8 @@ void GenerateEventsFilter::setFilterByTimeOnly() {
   // Progress
   int64_t totaltime = m_stopTime.totalNanoseconds() - m_startTime.totalNanoseconds();
 
-  g_log.warning() << "Filter by time: start @ " << m_startTime.totalNanoseconds() << "; "
-                  << "stop @ " << m_stopTime.totalNanoseconds() << "\n";
+  g_log.information() << "Filter by time: start @ " << m_startTime.totalNanoseconds() << "; "
+                      << "stop @ " << m_stopTime.totalNanoseconds() << "\n";
 
   if (singleslot) {
     int wsindex = 0;
