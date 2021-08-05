@@ -339,8 +339,11 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         alg.execute()
 
         ws = alg.getProperty('OutputWorkspace').value
+        monitor_ws = alg.getProperty('MonitorWorkspace').value
         workspace_name = self._prefixedName(_getRunNumberAsString(ws), isTrans)
         AnalysisDataService.addOrReplace(workspace_name, ws)
+        if monitor_ws:
+            AnalysisDataService.addOrReplace(_monitorWorkspace(workspace_name), monitor_ws)
 
         if event_mode:
             _throwIfNotValidReflectometryEventWorkspace(workspace_name)

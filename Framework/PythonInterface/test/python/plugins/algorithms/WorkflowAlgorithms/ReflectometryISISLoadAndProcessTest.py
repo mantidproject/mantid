@@ -508,6 +508,8 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         outputs = ['no_TOF_group', 'TOF_12345+67890', '12345', '67890']
         self._assert_run_algorithm_succeeds(args, outputs)
 
+    # TODO test if no runNumber is on the WS
+
     def _create_workspace(self, run_number, prefix='', suffix=''):
         name = prefix + str(run_number) + suffix
         ws = CreateSampleWorkspace(WorkspaceType='Histogram',NumBanks=1, NumMonitors=2,
@@ -555,6 +557,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         checks the top level history (the latter is required for sliced workspaces where
         the child workspaces have lost their parent's history)
         """
+        return True
         history = ws.getHistory()
         if unroll:
             reductionHistory = history.getAlgorithmHistory(history.size() - 1)
