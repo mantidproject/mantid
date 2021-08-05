@@ -44,8 +44,8 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLSANS2)
 /** Constructor
  */
 LoadILLSANS2::LoadILLSANS2()
-    : m_supportedInstruments{"D11", "D22", "D33", "D16"}, m_defaultBinning{0, 0}, m_resMode("nominal"), m_isTOF(false),
-      m_sourcePos(0.) {}
+    : m_supportedInstruments{"D11", "D22", "D33", "D16"}, m_defaultBinning{0}, m_resMode("nominal"),
+      m_sourcePos(0.), m_isD16Omega{false} {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -99,11 +99,11 @@ void LoadILLSANS2::init() {
  */
 void LoadILLSANS2::exec() {
   const std::string filename = getPropertyValue("Filename");
-  m_isD16Omega = false;
   NXRoot root(filename);
   NXEntry firstEntry = root.openFirstEntry();
   const std::string instrumentPath = m_loadHelper.findInstrumentNexusPath(firstEntry);
   setInstrumentName(firstEntry, instrumentPath);
+  figureOutMeasurementType(firstEntry);
   Progress progress(this, 0.0, 1.0, 4);
   progress.report("Initializing the workspace for " + m_instrumentName);
   if (m_instrumentName == "D33") {
@@ -113,7 +113,7 @@ void LoadILLSANS2::exec() {
     const DetectorPosition detPos = getDetectorPositionD33(firstEntry, instrumentPath);
     progress.report("Moving detectors");
     moveDetectorsD33(std::move(detPos));
-    if (m_isTOF) {
+    if (m_measurementType == MeasurementType::TOF) {
       adjustTOF();
       moveSource();
     }
@@ -251,8 +251,6 @@ void LoadILLSANS2::initWorkSpace(NeXus::NXEntry &firstEntry, const std::string &
   data.load();
   size_t numberOfHistograms;
 
-  m_isD16Omega = (data.dim0() == 1 && data.dim2() > 1 && m_instrumentName == "D16");
-
   if (m_isD16Omega) {
     numberOfHistograms = static_cast<size_t>(data.dim1() * data.dim2()) + N_MONITORS;
   } else {
@@ -292,33 +290,17 @@ void LoadILLSANS2::initWorkSpaceD11B(NeXus::NXEntry &firstEntry, const std::stri
                           dataLeft.dim0() * dataLeft.dim1()) +
       N_MONITORS;
 
-  if (dataCenter.dim2() != 1) {
-    createEmptyWorkspace(numberOfHistograms, dataCenter.dim2(), MultichannelType::KINETIC);
-  } else {
-    createEmptyWorkspace(numberOfHistograms, 1);
-  }
+  createEmptyWorkspace(numberOfHistograms, dataCenter.dim2());
   loadMetaData(firstEntry, instrumentPath);
-
-  // we need to adjust the default binning after loadmetadata
-  if (dataCenter.dim2() != 1) {
-    std::vector<double> frames(dataCenter.dim2(), 0);
-    for (int i = 0; i < dataCenter.dim2(); ++i) {
-      frames[i] = i;
-    }
-    m_defaultBinning.resize(dataCenter.dim2());
-    std::copy(frames.cbegin(), frames.cend(), m_defaultBinning.begin());
-  }
-
-  MultichannelType type = (dataCenter.dim2() != 1) ? MultichannelType::KINETIC : MultichannelType::TOF;
   size_t nextIndex;
-  nextIndex = loadDataFromTubes(dataCenter, m_defaultBinning, 0, type);
-  nextIndex = loadDataFromTubes(dataLeft, m_defaultBinning, nextIndex, type);
-  nextIndex = loadDataFromTubes(dataRight, m_defaultBinning, nextIndex, type);
-  nextIndex = loadDataFromMonitors(firstEntry, nextIndex, type);
+  nextIndex = loadDataFromTubes(dataCenter, m_defaultBinning, 0);
+  nextIndex = loadDataFromTubes(dataLeft, m_defaultBinning, nextIndex);
+  nextIndex = loadDataFromTubes(dataRight, m_defaultBinning, nextIndex);
+  nextIndex = loadDataFromMonitors(firstEntry, nextIndex);
   if (dataCenter.dim2() != 1 && nextIndex < numberOfHistograms) {
     // there are a few runs with no 2nd monitor in kinetic, so we load the first monitor once again to preserve the
     // dimensions and x-axis
-    nextIndex = loadDataFromMonitors(firstEntry, nextIndex, type);
+    nextIndex = loadDataFromMonitors(firstEntry, nextIndex);
   }
   // hijack the second monitor spectrum to store per-frame durations to enable time normalisation
   if (dataCenter.dim2() != 1) {
@@ -407,8 +389,7 @@ void LoadILLSANS2::initWorkSpaceD33(NeXus::NXEntry &firstEntry, const std::strin
 
   std::vector<double> binningRear, binningRight, binningLeft, binningDown, binningUp;
 
-  if (firstEntry.getFloat("mode") == 0.0) { // Not TOF
-    g_log.debug("Getting default wavelength bins...");
+  if (m_measurementType == MeasurementType::MONO) { // Not TOF
     binningRear = m_defaultBinning;
     binningRight = m_defaultBinning;
     binningLeft = m_defaultBinning;
@@ -416,7 +397,6 @@ void LoadILLSANS2::initWorkSpaceD33(NeXus::NXEntry &firstEntry, const std::strin
     binningUp = m_defaultBinning;
 
   } else { // TOF
-    m_isTOF = true;
     NXInt masterPair = firstEntry.openNXInt(m_instrumentName + "/tof/master_pair");
     masterPair.load();
 
@@ -476,10 +456,9 @@ void LoadILLSANS2::initWorkSpaceD33(NeXus::NXEntry &firstEntry, const std::strin
  * @brief Loads data from all the monitors
  * @param firstEntry : already opened first entry in nexus
  * @param firstIndex : the workspace index to load the first monitor to
- * @param type : used to discrimante between TOF and Kinetic
  * @return the next ws index after all the monitors
  */
-size_t LoadILLSANS2::loadDataFromMonitors(NeXus::NXEntry &firstEntry, size_t firstIndex, const MultichannelType type) {
+size_t LoadILLSANS2::loadDataFromMonitors(NeXus::NXEntry &firstEntry, size_t firstIndex) {
 
   // let's find the monitors; should be monitor1 and monitor2
   for (std::vector<NXClassInfo>::const_iterator it = firstEntry.groups().begin(); it != firstEntry.groups().end();
@@ -495,24 +474,14 @@ size_t LoadILLSANS2::loadDataFromMonitors(NeXus::NXEntry &firstEntry, size_t fir
       const HistogramData::CountVariances histoVariances(data(), data() + data.dim2());
       m_localWorkspace->setCountVariances(firstIndex, std::move(histoVariances));
 
-      if (m_isTOF) {
+      if (m_measurementType == MeasurementType::TOF) {
         HistogramData::BinEdges histoBinEdges(data.dim2() + 1, HistogramData::LinearGenerator(0.0, 1));
         m_localWorkspace->setBinEdges(firstIndex, std::move(histoBinEdges));
       } else {
-        if (m_isD16Omega) {
-          HistogramData::Points histoPoints =
-              HistogramData::Points(std::vector<double>(1, 0.5 * (m_defaultBinning[0] + m_defaultBinning[1])));
-          m_localWorkspace->setPoints(firstIndex, std::move(histoPoints));
-        } else {
-          if (type != MultichannelType::KINETIC) {
-            HistogramData::BinEdges histoBinEdges = HistogramData::BinEdges(m_defaultBinning);
-            m_localWorkspace->setBinEdges(firstIndex, std::move(histoBinEdges));
-          } else {
-            HistogramData::Points histoPoints = HistogramData::Points(m_defaultBinning);
-            m_localWorkspace->setPoints(firstIndex, std::move(histoPoints));
-          }
-        }
+        HistogramData::Points histoPoints = HistogramData::Points(m_defaultBinning);
+        m_localWorkspace->setPoints(firstIndex, std::move(histoPoints));
       }
+
       // Add average monitor counts to a property:
       double averageMonitorCounts = std::accumulate(data(), data() + data.dim2(), 0) / static_cast<double>(data.dim2());
       // make sure the monitor has values!
@@ -529,13 +498,11 @@ size_t LoadILLSANS2::loadDataFromMonitors(NeXus::NXEntry &firstEntry, size_t fir
 /**
  * @brief Loads data from tubes
  * @param data : a reference to already loaded nexus data block
- * @param timeBinning : the x-axis binning
+ * @param binning : the x-axis binning
  * @param firstIndex : the workspace index to start loading to
- * @param type : used to discrimante between TOF and Kinetic
  * @return the next ws index after all the tubes in the given detector bank
  */
-size_t LoadILLSANS2::loadDataFromTubes(NeXus::NXInt &data, const std::vector<double> &timeBinning,
-                                       size_t firstIndex = 0, const MultichannelType type) {
+size_t LoadILLSANS2::loadDataFromTubes(NeXus::NXInt &data, const std::vector<double> &binning, size_t firstIndex = 0) {
   int numberOfTubes;
   int numberOfChannels;
   const int numberOfPixelsPerTube = data.dim1();
@@ -563,18 +530,12 @@ size_t LoadILLSANS2::loadDataFromTubes(NeXus::NXInt &data, const std::vector<dou
       const HistogramData::CountVariances histoVariances(data_p, data_p + numberOfChannels);
       m_localWorkspace->setCounts(index, std::move(histoCounts));
       m_localWorkspace->setCountVariances(index, std::move(histoVariances));
-
-      if (m_isD16Omega) {
-        const HistogramData::Points histoPoints(std::vector<double>(1, 0.5 * (timeBinning[0] + timeBinning[1])));
-        m_localWorkspace->setPoints(index, std::move(histoPoints));
+      if (m_measurementType == MeasurementType::TOF) {
+        const HistogramData::BinEdges binEdges(binning);
+        m_localWorkspace->setBinEdges(index, std::move(binEdges));
       } else {
-        if (type == MultichannelType::KINETIC) {
-          const HistogramData::Points histoPoints(timeBinning);
-          m_localWorkspace->setPoints(index, std::move(histoPoints));
-        } else {
-          const HistogramData::BinEdges binEdges(timeBinning);
-          m_localWorkspace->setBinEdges(index, std::move(binEdges));
-        }
+        const HistogramData::Points histoPoints(binning);
+        m_localWorkspace->setPoints(index, std::move(histoPoints));
       }
     }
   }
@@ -585,18 +546,16 @@ size_t LoadILLSANS2::loadDataFromTubes(NeXus::NXInt &data, const std::vector<dou
 /**
  * Create a workspace without any data in it
  * @param numberOfHistograms : number of spectra
- * @param numberOfChannels : number of TOF channels
- * @param type : type of the multichannel workspace (TOF (default) or Kinetic)
+ * @param numberOfBins: number of X-axis bins
  */
-void LoadILLSANS2::createEmptyWorkspace(const size_t numberOfHistograms, const size_t numberOfChannels,
-                                        const MultichannelType type) {
-  const size_t numberOfElementsInX = numberOfChannels + ((type == MultichannelType::TOF && !m_isD16Omega) ? 1 : 0);
+void LoadILLSANS2::createEmptyWorkspace(const size_t numberOfHistograms, const size_t numberOfBins) {
+  const size_t numberOfElementsInX = numberOfBins + (m_measurementType == MeasurementType::TOF ? 1 : 0);
   m_localWorkspace =
-      WorkspaceFactory::Instance().create("Workspace2D", numberOfHistograms, numberOfElementsInX, numberOfChannels);
-  if (type == MultichannelType::TOF) {
+      WorkspaceFactory::Instance().create("Workspace2D", numberOfHistograms, numberOfElementsInX, numberOfBins);
+  m_localWorkspace->setYUnitLabel("Counts");
+  if (m_measurementType == MeasurementType::TOF) {
     m_localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
   }
-  m_localWorkspace->setYUnitLabel("Counts");
 }
 
 /**
@@ -798,28 +757,10 @@ void LoadILLSANS2::loadMetaData(const NeXus::NXEntry &entry, const std::string &
                                "scientist!");
     }
   } else {
-    double wavelengthRes = 10.;
-    const std::string entryResolution = instrumentNamePath + "/selector/";
-    try {
-      wavelengthRes = entry.getFloat(entryResolution + "wavelength_res");
-    } catch (const std::runtime_error &) {
-      try {
-        wavelengthRes = entry.getFloat(entryResolution + "wave_length_res");
-      } catch (const std::runtime_error &) {
-        if (m_instrumentName == "D16")
-          wavelengthRes = 1;
-        g_log.information() << "Could not find wavelength resolution, assuming " << wavelengthRes << "%.\n";
-      }
-    }
-    // round also the wavelength res to avoid unnecessary rebinning during
-    // merge runs
-    wavelengthRes = std::round(wavelengthRes * 100) / 100.;
     runDetails.addProperty<double>("wavelength", wavelength);
     double ei = m_loadHelper.calculateEnergy(wavelength);
     runDetails.addProperty<double>("Ei", ei, true);
     // wavelength
-    m_defaultBinning[0] = wavelength - wavelengthRes * wavelength * 0.01 / 2;
-    m_defaultBinning[1] = wavelength + wavelengthRes * wavelength * 0.01 / 2;
   }
   // Add a log called timer with the value of duration
   const double duration = entry.getFloat("duration");
@@ -931,6 +872,65 @@ std::vector<double> LoadILLSANS2::getVariableTimeBinning(const NXEntry &entry, c
     binEdges[0] = 0.;
   }
   return binEdges;
+}
+
+/**
+ * Figures out the measurement type and sets the default binning relevant to the measurement type.
+ * @param firstEntry : opened root nexus entry, used to obtain data dimensions
+ * @return binning : wavelength bin boundaries
+ */
+std::tuple<int, int, int> LoadILLSANS2::getDataDimensions(NeXus::NXEntry &firstEntry) {
+  std::tuple<int, int, int> dataDimensions;
+  std::vector<std::string> defaultInstruments{"D11", "D16", "D22"};
+  if (std::find(defaultInstruments.begin(), defaultInstruments.end(), m_instrumentName) != defaultInstruments.end()) {
+    std::string path = "data";
+    if (!firstEntry.containsGroup("data")) {
+      path = "data_scan/detector_data/data";
+    }
+    NXData dataGroup = firstEntry.openNXData(path);
+    NXInt data = dataGroup.openIntData();
+    dataDimensions = std::make_tuple(data.dim0(), data.dim1(), data.dim2());
+  } else if (m_instrumentName == "D11B") {
+    NXData dataDet1 = firstEntry.openNXData("D11/Detector 1/data");
+    NXInt data = dataDet1.openIntData();
+    dataDimensions = std::make_tuple(data.dim0(), data.dim1(), data.dim2());
+  } else if (m_instrumentName == "D22B") {
+    NXData dataDet1 = firstEntry.openNXData("data1");
+    NXInt data = dataDet1.openIntData();
+    dataDimensions = std::make_tuple(data.dim0(), data.dim1(), data.dim2());
+  }
+
+  return dataDimensions;
+}
+
+/**
+ * Figures out the measurement type, sets omega scan flag for D16 data, and prepares a default binning relevant to the
+ * measurement type.
+ * @param entry : opened root nexus entry, used to obtain data dimensions
+ * @return binning : wavelength bin boundaries
+ */
+void LoadILLSANS2::figureOutMeasurementType(NeXus::NXEntry &entry) {
+  m_measurementType = MeasurementType::MONO;
+  auto dataDimensions = getDataDimensions(entry);
+  if (m_instrumentName == "D33" && entry.getFloat("mode") == 1.0) { // TOF
+    m_measurementType = MeasurementType::TOF;
+  } else {
+    m_isD16Omega = (m_instrumentName == "D16" && std::get<0>(dataDimensions) == 1 && std::get<2>(dataDimensions) > 1);
+    if (std::get<2>(dataDimensions) > 1 && !m_isD16Omega)
+      m_measurementType = MeasurementType::KINETIC;
+  }
+
+  // in non-monochromatic case, the binning will contain proper indices according to the size of data
+  if (m_measurementType != MeasurementType::MONO) {
+    // TOF mode is a histogram data, thus it needs one extra bin edge
+    auto isTOF = m_measurementType == MeasurementType::TOF ? 1 : 0;
+    std::vector<double> frames(std::get<2>(dataDimensions) + isTOF, 0);
+    for (int i = 0; i < std::get<2>(dataDimensions) + isTOF; ++i) {
+      frames[i] = i;
+    }
+    m_defaultBinning.resize(std::get<2>(dataDimensions) + isTOF);
+    std::copy(frames.cbegin(), frames.cend(), m_defaultBinning.begin());
+  }
 }
 
 } // namespace DataHandling
