@@ -13,7 +13,8 @@ from mantid.simpleapi import SimulatedDensityOfStates
 from systemtesting import MantidSystemTest
 
 
-class SimulatedDensityOfStatesEuphonicPackagingTest(MantidSystemTest):
+class SimulatedDensityOfStatesTest(MantidSystemTest):
+    """Make sure normal case will run without Euphonic installed"""
     def runTest(self):
         SimulatedDensityOfStates(CASTEPFile=find_file('Na2SiF6_CASTEP.phonon'),
                                  Function='Gaussian',
@@ -24,7 +25,8 @@ class SimulatedDensityOfStatesEuphonicPackagingTest(MantidSystemTest):
         return ('Na2SiF6_DOS', 'Na2SiF6_DOS.nxs')
 
 
-class SimulatedDensityOfStatesEuphonicInstallationTest(MantidSystemTest):
+class SimulatedDensityOfStatesEuphonicTest(MantidSystemTest):
+    """"Install Euphonic library to temporary prefix and check results"""
     def runTest(self):
         # First check if we are using debian-style Pip, where --system
         # is needed to prevent default --user option from breaking --prefix.
@@ -50,9 +52,10 @@ class SimulatedDensityOfStatesEuphonicInstallationTest(MantidSystemTest):
                 scipy_site_packages = next((prefix_path / 'lib').iterdir()
                                            ) / 'site-packages'
             except FileNotFoundError:
-                raise FileNotFoundError("Could not find site-packages for temporary dir. "
-                                        "Here are the directory contents: "
-                                        "\n".join(list(prefix_path.iterdir())))
+                raise FileNotFoundError(
+                    "Could not find site-packages for temporary dir. "
+                    "Here are the directory contents: "
+                    "\n".join(list(prefix_path.iterdir())))
 
             process_pythonpath = str(scipy_site_packages) + ':' + os.environ['PYTHONPATH']
             env = os.environ.copy()
@@ -76,21 +79,7 @@ class SimulatedDensityOfStatesEuphonicInstallationTest(MantidSystemTest):
                 importlib.reload(scipy)
 
             process = subprocess.run([sys.executable, "-m", "pip", "install",
-                                      "--prefix", scipy_prefix,
-                                      "-vvv",
-                                      "pint==0.17"],
-                                     stdout=subprocess.PIPE,
-                                     stderr=subprocess.STDOUT,
-                                     env=env)
-            print(process.stdout.decode('utf-8'))
-
-            print(list(prefix_path.iterdir()))
-            print(list(scipy_site_packages.iterdir()))
-            import pint  # noqa: F401
-
-            process = subprocess.run([sys.executable, "-m", "pip", "install",
                                       "--prefix", euphonic_prefix,
-                                      "-vvv",
                                       "euphonic[phonopy_reader]"],
                                      stdout=subprocess.PIPE,
                                      stderr=subprocess.STDOUT,
@@ -98,10 +87,14 @@ class SimulatedDensityOfStatesEuphonicInstallationTest(MantidSystemTest):
             print(process.stdout.decode('utf-8'))
 
             prefix_path = pathlib.Path(euphonic_prefix)
-            euphonic_site_packages = next((prefix_path / 'lib').iterdir()
-                                          ) / 'site-packages'
-            site.addsitedir(euphonic_site_packages)
-            print(list(euphonic_site_packages.iterdir()))
+            for lib_dir in ('lib', 'lib64'):
+                if (prefix_path / lib_dir).is_dir():
+                    site_packages = next((prefix_path / lib_dir).iterdir()
+                                         ) / 'site-packages'
+                    if site_packages.is_dir():
+                        site.addsitedir(site_packages)
+
+            import pint  # noqa: F401
             import euphonic  # noqa: F401
 
             SimulatedDensityOfStates(ForceConstantsFile=find_file('phonopy-Al.yaml'),
