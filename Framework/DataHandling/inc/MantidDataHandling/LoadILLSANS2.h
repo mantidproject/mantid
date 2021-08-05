@@ -88,6 +88,7 @@ private:
   std::string m_resMode;                           ///< Resolution mode for D11 and D22
   double m_sourcePos;                              ///< Source Z (for D33 TOF)
   bool m_isD16Omega;                               ///< Data come from a D16 omega scan flag
+  bool m_loadInstrument;                           ///< Flag for loading the instrument geometry
   MeasurementType m_measurementType;               ///< Holds the measurement type of the data
 
   void setFinalProperties(const std::string &filename);

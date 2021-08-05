@@ -45,7 +45,7 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLSANS2)
  */
 LoadILLSANS2::LoadILLSANS2()
     : m_supportedInstruments{"D11", "D22", "D33", "D16"}, m_defaultBinning{0}, m_resMode("nominal"),
-      m_sourcePos(0.), m_isD16Omega{false} {}
+      m_sourcePos(0.), m_isD16Omega{false}, m_loadInstrument{true} {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -99,6 +99,7 @@ void LoadILLSANS2::init() {
 /** Execute the algorithm.
  */
 void LoadILLSANS2::exec() {
+  m_loadInstrument = getProperty("LoadInstrument");
   const std::string filename = getPropertyValue("Filename");
   NXRoot root(filename);
   NXEntry firstEntry = root.openFirstEntry();
@@ -879,6 +880,13 @@ void LoadILLSANS2::figureOutMeasurementType(NeXus::NXEntry &entry) {
     }
     m_defaultBinning.resize(std::get<2>(dataDimensions) + isTOF);
     std::copy(frames.cbegin(), frames.cend(), m_defaultBinning.begin());
+  }
+
+  if (m_instrumentName == "D22B" && !m_loadInstrument) {
+    m_loadInstrument = true;
+    g_log.information("LoadInstrument property not chosen but due to detector index swap in cycle 211, this option is "
+                      "not available for D22B."
+                      " The instrument will be loaded.");
   }
 }
 
