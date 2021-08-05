@@ -265,12 +265,12 @@ The workflow follows these step:
 .. testoutput:: group_cal
 
     DetID DIFC
-        1 2208.7
-        2 2319.0
-        3 2098.4
-        4 2367.7
+        1 2319.1
+        2 2319.1
+        3 2319.1
+        4 2365.5
         5 2318.2
-        6 2270.7
+        6 2272.7
 
 The evolution in the calibration can be seen with
 
