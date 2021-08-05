@@ -36,6 +36,7 @@ Bugfixes
 Fit Functions
 -------------
 - new method `IPeakFunction::intensityError` calculates the error in the integrated intensity of the peak due to uncertainties in the values of the fit parameters.
+- Exposed method ''functionDeriv'' to the python interface
 
 
 Data Objects

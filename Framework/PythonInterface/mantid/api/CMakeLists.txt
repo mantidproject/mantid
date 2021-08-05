@@ -65,6 +65,10 @@ set(EXPORT_FILES
     src/Exports/SpectrumInfo.cpp
     src/Exports/Run.cpp
     src/Exports/WorkspaceFactory.cpp
+    src/Exports/FunctionDomain.cpp
+    src/Exports/FunctionDomain1D.cpp
+    src/Exports/FunctionDomain1DHistogram.cpp
+    src/Exports/FunctionDomain1DVector.cpp
     src/Exports/IFunction.cpp
     src/Exports/IFunction1D.cpp
     src/Exports/IPeakFunction.cpp
@@ -125,6 +129,8 @@ list (APPEND ALL_FILES ${EXPORT_FILES} ${SRC_FILES})
 enable_precompiled_headers(inc/MantidPythonInterface/api/PrecompiledHeader.h ALL_FILES)
 
 # Create the target for this directory
+set(FRAMEWORK_DIR ../../..)
+include_directories(${FRAMEWORK_DIR}/CurveFitting/inc)
 
 add_library(
   PythonAPIModule ${ALL_FILES} ${MODULE_DEFINITION}
