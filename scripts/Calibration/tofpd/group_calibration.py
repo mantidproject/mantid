@@ -58,6 +58,7 @@ def cc_calibrate_groups(data_ws,
     :param Xmax: Xmax parameter for CrossCorrelate, default 1.30
     :param MaxDSpaceShift: MaxDSpaceShift paramter for CrossCorrelate, default None
     :param OffsetThreshold: Convergence threshold for cycling cross correlation, default 1E-4
+    :param SkipCrossCorrelation: Skip cross correlation for specified groups.
     :return: Combined DiffCal workspace from all the different groups
     """
     if previous_calibration:
@@ -219,7 +220,7 @@ def pdcalibration_groups(data_ws,
     :param PeakWindow: PeakWindow parameter of PDCalibration, default 0.1
     :param PeakWidthPercent: PeakWidthPercent parameter of PDCalibration, default None
     :param BadCalibThreshold: Threshold for relative difference between calibrated DIFC and engineering value.
-    :return: tuple of DiffCal and Mask from CrossCorrelate combined with DiffCal from PDCalibration of grouped workspace
+    :return: tuple of DiffCal and Mask (both as TableWorkspace objects) holding the combined DiffCal.
     """
 
     CreateDetectorTable(data_ws, DetectorTableWorkspace="calib_table_bak")

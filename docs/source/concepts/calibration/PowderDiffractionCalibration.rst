@@ -200,6 +200,55 @@ The workflow follows these step:
 
 .. testcode:: group_cal
 
+    # In this case, cycling through cross correlation until offset converges.
+    cc_diffcal = cc_calibrate_groups(ws,
+                                     groups,
+                                     DReference=2.0,
+                                     Xmin=1.75,
+                                     Xmax=2.25,
+                                     OffsetThreshold=1E-4)
+
+    print("DetID DIFC")
+    for detid, difc in zip(cc_diffcal.column('detid'), cc_diffcal.column('difc')):
+        print(f'{detid:>5} {difc:.1f}')
+
+.. testoutput:: group_cal
+
+    DetID DIFC
+        1 2208.3
+        2 2318.7
+        3 2097.9
+        4 2253.3
+        5 2208.3
+        6 2165.0
+
+.. testcode:: group_cal
+
+    # Turn on cross correlation cycling but skip cross correlation for group-1.
+    cc_diffcal = cc_calibrate_groups(ws,
+                                     groups,
+                                     DReference=2.0,
+                                     Xmin=1.75,
+                                     Xmax=2.25,
+                                     OffsetThreshold=1E-4,
+                                     SkipCrossCorrelation=[1])
+
+    print("DetID DIFC")
+    for detid, difc in zip(cc_diffcal.column('detid'), cc_diffcal.column('difc')):
+        print(f'{detid:>5} {difc:.1f}')
+
+.. testoutput:: group_cal
+
+    DetID DIFC
+        1 2208.3
+        2 2208.3
+        3 2208.3
+        4 2253.3
+        5 2208.3
+        6 2165.0
+
+.. testcode:: group_cal
+
     from Calibration.tofpd.group_calibration import pdcalibration_groups
 
     diffcal, mask = pdcalibration_groups(ws,
