@@ -59,7 +59,7 @@ class GroupingInfo:
                               GROUP.CROPPED: "Cropped", GROUP.CUSTOM: "Custom", GROUP.TEXTURE: "Texture"}
         self._prm_templates = {GROUP.NORTH: "template_ENGINX_241391_236516_North_bank.prm",
                                GROUP.SOUTH: "template_ENGINX_241391_236516_South_bank.prm",
-                               GROUP.BOTH: "template_ENGINX_241391_236516_North_and_South_bank.prm"}
+                               GROUP.BOTH: "template_ENGINX_241391_236516_North_and_South_banks.prm"}
 
     def clear(self):
         self.group = None
@@ -165,7 +165,7 @@ class GroupingInfo:
         return filename + ext
 
     def get_group_ws(self, sample_ws):
-        if not self.group_ws or not ADS.doesExist(self.group_ws):
+        if not self.group_ws or not ADS.doesExist(self.group_ws.name()):
             if self.group.banks:
                 self.create_bank_grouping_workspace(sample_ws)
             elif self.group == GROUP.CROPPED:
@@ -382,21 +382,22 @@ def plot_tof_vs_d_from_calibration(diag_ws, ws_foc):
                                                         DeltaEModeType.Elastic, diff_consts) for d in xye_dict['x']])
         xye.append(xye_dict)
 
-    # plot
+    # plot - To-DO add titles?
     from matplotlib.pyplot import subplots
-    fig, ax = subplots(2, nspec.getNumberHistograms(), subplot_kw={'projection': 'mantid'})
+    fig, ax = subplots(2, nspec, subplot_kw={'projection': 'mantid'})
     for ispec in range(nspec):
         # plot TOF vs d
         ax[0, ispec].errorbar(xye[ispec]['x'], xye[ispec]['y'], yerr=xye[ispec]['e'],
-                              marker='o', markersize=3, capsize=2, ls='', color='b')
-        ax[0, ispec].plot(xye[ispec]['x'], xye[ispec]['yfit'], '-r')
-        ax[1, ispec].set_ylabel('Fitted TOF')
+                              marker='o', markersize=3, capsize=2, ls='', color='b', label='Peak centres')
+        ax[0, ispec].plot(xye[ispec]['x'], xye[ispec]['yfit'], '-r', label='quadratic fit')
+        ax[0, ispec].set_ylabel('Fitted TOF (\u03BCs)')
         # plot residuals
         ax[1, ispec].errorbar(xye[ispec]['x'], xye[ispec]['y'] - xye[ispec]['yfit'],
-                              yerr=xye[ispec]['e'], marker='o', markersize=3, capsize=2, ls='')
-        ax.axhline(color='r', ls='-')
+                              yerr=xye[ispec]['e'], marker='o', markersize=3, capsize=2, ls='',
+                              color='b', label='residuals')
+        ax[1, ispec].axhline(color='r', ls='-')
         ax[1, ispec].set_xlabel('d-spacing (Ang)')
-        ax[1, ispec].set_ylabel('Residual')
+        ax[1, ispec].set_ylabel('Residuals (\u03BCs)')
     fig.tight_layout()
     fig.show()
 

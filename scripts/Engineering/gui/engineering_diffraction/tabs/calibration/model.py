@@ -29,12 +29,10 @@ class CalibrationModel(object):
         :param ceria_path: Path to ceria (CeO2) data file
         :param rb_num: The RB number for file creation.
         """
-        ceria_path = calibration.get_sample()
-        van_path = calibration.get_vanadium()
+        ceria_path = calibration.get_sample_path()
+        van_path = calibration.get_vanadium_path()
         inst = calibration.get_instrument()
 
-        # load grouping workspace (creates if doesn't exist - tries to read from xml for banks)
-        group_ws = calibration.get_group_ws()
         # load ceria data
         ceria_workspace = path_handling.load_workspace(ceria_path)
 
@@ -50,10 +48,10 @@ class CalibrationModel(object):
             return
 
         # run PDCalibraiton
-        focused_ceria, cal_table, diag_ws, mask = self.run_calibration(ceria_workspace, group_ws, full_calib)
+        focused_ceria, cal_table, diag_ws, mask = self.run_calibration(ceria_workspace, calibration, full_calib)
 
         # extract diffractometer constants
-        diff_consts = self.extract_diff_consts_from_cal(cal_table, mask)
+        diff_consts = self.extract_diff_consts_from_ws(focused_ceria, mask)
         difa = [diffs[UnitParams.difa] for diffs in diff_consts]
         difc = [diffs[UnitParams.difc] for diffs in diff_consts]
         tzero = [diffs[UnitParams.tzero] for diffs in diff_consts]
@@ -157,12 +155,13 @@ class CalibrationModel(object):
         grp_ws = calibration.get_group_ws(ceria_ws)  # (creates if doesn't exist)
         focused_ceria = DiffractionFocussing(InputWorkspace=ceria_ws, GroupingWorkspace=grp_ws)
         ApplyDiffCal(InstrumentWorkspace=focused_ceria, ClearCalibration=True)  # DIFC of detector in middle of bank
-        ConvertUnits(InputWorkspace=focused_ceria, OutputWorkspace=focused_ceria, Target='TOF')
+        focused_ceria = ConvertUnits(InputWorkspace=focused_ceria, Target='TOF')
 
         # Run PDCalibration to fit peaks in TOF
+        foc_name = focused_ceria.name()  # PDCal invalidates ptr during rebin so keep track of ws name
         cal_table_name = "engggui_calibration_" + calibration.get_group_suffix()
         diag_ws_name = "diag_" + calibration.get_group_suffix()
-        cal_table, diag_ws, mask = PDCalibration(InputWorkspace=focused_ceria, OutputCalibrationTable=cal_table_name,
+        cal_table, diag_ws, mask = PDCalibration(InputWorkspace=foc_name, OutputCalibrationTable=cal_table_name,
                                                  DiagnosticWorkspaces=diag_ws_name,
                                                  PeakPositions=EnggUtils.default_ceria_expected_peaks(final=True),
                                                  TofBinning=[15500, -0.0003, 52000],
@@ -171,10 +170,11 @@ class CalibrationModel(object):
                                                  PeakFunction='BackToBackExponential',
                                                  CalibrationParameters='DIFC+TZERO+DIFA',
                                                  UseChiSq=True)
-        ApplyDiffCal(InstrumentWorkspace=focused_ceria, CalibrationWorkspace=cal_table)
-        return focused_ceria, cal_table, diag_ws, mask
+        ApplyDiffCal(InstrumentWorkspace=foc_name, CalibrationWorkspace=cal_table)
 
-    def extract_diff_consts_from_cal(self, ws_foc, mask_ws):
+        return Ads.retrieve(foc_name), cal_table, diag_ws, mask
+
+    def extract_diff_consts_from_ws(self, ws_foc, mask_ws):
         si = ws_foc.spectrumInfo()
         masked_detIDs = mask_ws.getMaskedDetectors()
         diff_consts = []
@@ -216,10 +216,10 @@ class CalibrationModel(object):
                                                 ceria_run=ceria_run, vanadium_run=van_run)
         if calibration.group == EnggUtils.GROUP.BOTH:
             # output a separate prm for North and South when both banks included
-            for ibank, bank in enumerate(self.group.banks):
-                bank_group = EnggUtils.GROUP(str(ibank))  # so can retrieve prm template for that bank
+            for ibank, bank in enumerate(calibration.group.banks):
+                bank_group = EnggUtils.GroupingInfo(EnggUtils.GROUP(str(ibank+1)))  # so can retrieve prm template for that bank
                 EnggUtils.write_ENGINX_GSAS_iparam_file(prm_filepath, [difa[ibank]], [difc[ibank]], [tzero[ibank]],
-                                                        bk2bk_params, bank_names=bank,
+                                                        bk2bk_params, bank_names=bank_group.group.banks,
                                                         template_file=bank_group.get_prm_template_file(),
                                                         ceria_run=ceria_run, vanadium_run=van_run)
 

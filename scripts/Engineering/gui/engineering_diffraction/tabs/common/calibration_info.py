@@ -34,7 +34,8 @@ class CalibrationInfo(EnggUtils.GroupingInfo):
         self.set_calibration_paths(van, ceria, inst)
 
     def generate_output_file_name(self, ext='.prm'):
-        return super().generate_output_file_name(self.get_vanadium(), self.get_sample(),self.get_instrument(), ext)
+        return super().generate_output_file_name(self.get_vanadium_path(), self.get_sample_path(),
+                                                 self.get_instrument(), ext)
 
     # getters
     def get_vanadium_path(self):

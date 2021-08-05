@@ -54,7 +54,7 @@ class CalibrationPresenter(object):
             # make a new calibration
             vanadium_file = self.view.get_vanadium_filename()
             sample_file = self.view.get_sample_filename()
-            self.pending_calibration.set_calibration_paths(self, vanadium_file, sample_file, self.instrument)
+            self.pending_calibration.set_calibration_paths(vanadium_file, sample_file, self.instrument)
             # set group and any additional parameters needed
             if self.view.get_crop_checked():
                 self.pending_calibration.set_group(self.cropping_widget.get_group())
@@ -69,7 +69,7 @@ class CalibrationPresenter(object):
     def on_calibrate_clicked(self):
         self.update_pending_calibration_from_view()
         if self.view.get_new_checked() and self._validate():
-            self.start_cropped_calibration_worker(self.view.get_plot_output())
+            self.start_calibration_worker(self.view.get_plot_output())
         elif self.view.get_load_checked() and self.validate_path():
             self.model.load_existing_calibration_files(self.pending_calibration)
             self.set_current_calibration()
@@ -81,9 +81,7 @@ class CalibrationPresenter(object):
         Calibrate the data in a separate thread so as to not freeze the GUI.
         """
         self.worker = AsyncTask(self.model.create_new_calibration,
-                                {'calibration': self.pending_calibration,
-                                 'rb_num': self.rb_num,
-                                 'plot_output': plot_output},
+                                (self.pending_calibration, self.rb_num, plot_output),
                                 error_cb=self._on_error,
                                 success_cb=self._on_success)
         self.set_calibrate_controls_enabled(False)
