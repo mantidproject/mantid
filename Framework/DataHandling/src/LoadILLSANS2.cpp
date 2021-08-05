@@ -92,6 +92,7 @@ void LoadILLSANS2::init() {
                   "Name of the nexus file to load");
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "The name to use for the output workspace");
+  declareProperty("LoadInstrument", true, "Whether to load the instrument geometry with the data.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -106,81 +107,12 @@ void LoadILLSANS2::exec() {
   figureOutMeasurementType(firstEntry);
   Progress progress(this, 0.0, 1.0, 4);
   progress.report("Initializing the workspace for " + m_instrumentName);
-  if (m_instrumentName == "D33") {
-    initWorkSpaceD33(firstEntry, instrumentPath);
+  initWorkspace(firstEntry, instrumentPath);
+  if (getProperty("LoadInstrument")) {
     progress.report("Loading the instrument " + m_instrumentName);
     runLoadInstrument();
-    const DetectorPosition detPos = getDetectorPositionD33(firstEntry, instrumentPath);
-    progress.report("Moving detectors");
-    moveDetectorsD33(std::move(detPos));
-    if (m_measurementType == MeasurementType::TOF) {
-      adjustTOF();
-      moveSource();
-    }
-
-  } else if (m_instrumentName == "D16") {
-    initWorkSpace(firstEntry, instrumentPath);
-    progress.report("Loading the instrument " + m_instrumentName);
-    runLoadInstrument();
-
-    double distance = firstEntry.getFloat(instrumentPath + "/Det/value") / 1000; // mm to metre
-    const double angle = firstEntry.getFloat(instrumentPath + "/Gamma/value");
-    placeD16(-angle, distance, "detector");
-
-  } else if (m_instrumentName == "D11B") {
-    initWorkSpaceD11B(firstEntry, instrumentPath);
-    progress.report("Loading the instrument " + m_instrumentName);
-    runLoadInstrument();
-
-    // we move the parent "detector" component, but since it is at (0,0,0), we
-    // need to find the distance it has to move and move it to this position
-    double finalDistance = firstEntry.getFloat(instrumentPath + "/Detector 1/det_calc");
-    V3D pos = getComponentPosition("detector_center");
-    double currentDistance = pos.Z();
-
-    moveDetectorDistance(finalDistance - currentDistance, "detector");
-    API::Run &runDetails = m_localWorkspace->mutableRun();
-    runDetails.addProperty<double>("L2", finalDistance, true);
-
-  } else if (m_instrumentName == "D22B") {
-    initWorkSpaceD22B(firstEntry, instrumentPath);
-
-    const std::string backIndex = m_localWorkspace->getInstrument()->getStringParameter("back_detector_index")[0];
-    const std::string frontIndex = m_localWorkspace->getInstrument()->getStringParameter("front_detector_index")[0];
-
-    // first we move the central (back) detector
-    double distance = firstEntry.getFloat(instrumentPath + "/Detector " + backIndex + "/det" + backIndex + "_calc");
-    moveDetectorDistance(distance, "detector_back");
-    API::Run &runDetails = m_localWorkspace->mutableRun();
-    runDetails.addProperty<double>("L2", distance, true);
-
-    double offset = firstEntry.getFloat(instrumentPath + "/Detector " + backIndex + "/dtr" + backIndex + "_actual");
-    moveDetectorHorizontal(-offset / 1000, "detector_back"); // mm to meter
-
-    // then the front (right) one
-    distance = firstEntry.getFloat(instrumentPath + "/Detector " + frontIndex + "/det" + frontIndex + "_calc");
-    moveDetectorDistance(distance, "detector_front");
-
-    // mm to meter
-    offset = firstEntry.getFloat(instrumentPath + "/Detector " + frontIndex + "/dtr" + frontIndex + "_actual");
-    moveDetectorHorizontal(-offset / 1000, "detector_front"); // mm to meter
-    double angle = firstEntry.getFloat(instrumentPath + "/Detector " + frontIndex + "/dan" + frontIndex + "_actual");
-    rotateInstrument(-angle, "detector_front");
-
-  } else {
-    // D11 and D22
-    initWorkSpace(firstEntry, instrumentPath);
-    progress.report("Loading the instrument " + m_instrumentName);
-    runLoadInstrument();
-    double distance = m_loadHelper.getDoubleFromNexusPath(firstEntry, instrumentPath + "/detector/det_calc");
-    progress.report("Moving detectors");
-    moveDetectorDistance(distance, "detector");
-    API::Run &runDetails = m_localWorkspace->mutableRun();
-    runDetails.addProperty<double>("L2", distance, true);
-    if (m_instrumentName == "D22") {
-      double offset = m_loadHelper.getDoubleFromNexusPath(firstEntry, instrumentPath + "/detector/dtr_actual");
-      moveDetectorHorizontal(-offset / 1000, "detector"); // mm to meter
-    }
+    progress.report("Placing the instrument " + m_instrumentName);
+    placeInstrument(firstEntry, instrumentPath);
   }
 
   progress.report("Setting sample logs");
@@ -233,44 +165,52 @@ LoadILLSANS2::DetectorPosition LoadILLSANS2::getDetectorPositionD33(const NeXus:
 }
 
 /**
- * Loads data for D11, D16 and D22
+ * Loads data for all supported instruments
  * @param firstEntry : already opened first entry in nexus
  * @param instrumentPath : the path inside nexus where the instrument name is written
  */
-void LoadILLSANS2::initWorkSpace(NeXus::NXEntry &firstEntry, const std::string &instrumentPath) {
-  std::string path;
-  if (firstEntry.containsGroup("data")) {
-    path = "data";
-  } else {
-    path = "data_scan/detector_data/data";
-  }
-  NXData dataGroup = firstEntry.openNXData(path);
-  NXInt data = dataGroup.openIntData();
-  data.load();
-  size_t numberOfHistograms;
+void LoadILLSANS2::initWorkspace(NeXus::NXEntry &firstEntry, const std::string &instrumentPath) {
+  size_t firstMonitorIndex = 0;
+  std::vector<std::string> defaultInstruments{"D11", "D16", "D22"};
+  if (std::find(defaultInstruments.begin(), defaultInstruments.end(), m_instrumentName) != defaultInstruments.end()) {
+    std::string path;
+    if (firstEntry.containsGroup("data")) {
+      path = "data";
+    } else {
+      path = "data_scan/detector_data/data";
+    }
+    NXData dataGroup = firstEntry.openNXData(path);
+    NXInt data = dataGroup.openIntData();
+    data.load();
+    size_t numberOfHistograms;
 
-  if (m_isD16Omega) {
-    numberOfHistograms = static_cast<size_t>(data.dim1() * data.dim2()) + N_MONITORS;
-  } else {
-    numberOfHistograms = static_cast<size_t>(data.dim0() * data.dim1()) + N_MONITORS;
+    if (m_isD16Omega) {
+      numberOfHistograms = static_cast<size_t>(data.dim1() * data.dim2()) + N_MONITORS;
+    } else {
+      numberOfHistograms = static_cast<size_t>(data.dim0() * data.dim1()) + N_MONITORS;
+    }
+    createEmptyWorkspace(numberOfHistograms, 1);
+
+    firstMonitorIndex = loadDataFromTubes(data, m_defaultBinning, 0);
+    if (data.dim1() == 128) {
+      m_resMode = "low";
+    }
+  } else if (m_instrumentName == "D11B") {
+    firstMonitorIndex = initWorkspaceD11B(firstEntry);
+  } else if (m_instrumentName == "D22B") {
+    firstMonitorIndex = initWorkspaceD22B(firstEntry);
+  } else if (m_instrumentName == "D33") {
+    firstMonitorIndex = initWorkspaceD33(firstEntry, instrumentPath);
   }
-  createEmptyWorkspace(numberOfHistograms, 1);
   loadMetaData(firstEntry, instrumentPath);
-
-  size_t nextIndex;
-  nextIndex = loadDataFromTubes(data, m_defaultBinning, 0);
-  nextIndex = loadDataFromMonitors(firstEntry, nextIndex);
-  if (data.dim1() == 128) {
-    m_resMode = "low";
-  }
+  loadDataFromMonitors(firstEntry, firstMonitorIndex);
 }
 
 /**
- * @brief LoadILLSANS2::initWorkSpaceD11B Load D11B data
+ * Loads D11B data
  * @param firstEntry : already opened first entry in nexus
- * @param instrumentPath : the path inside nexus where the instrument name is written
  */
-void LoadILLSANS2::initWorkSpaceD11B(NeXus::NXEntry &firstEntry, const std::string &instrumentPath) {
+size_t LoadILLSANS2::initWorkspaceD11B(NeXus::NXEntry &firstEntry) {
   g_log.debug("Fetching data...");
 
   NXData data1 = firstEntry.openNXData("D11/Detector 1/data");
@@ -289,34 +229,19 @@ void LoadILLSANS2::initWorkSpaceD11B(NeXus::NXEntry &firstEntry, const std::stri
       N_MONITORS;
 
   createEmptyWorkspace(numberOfHistograms, dataCenter.dim2());
-  loadMetaData(firstEntry, instrumentPath);
   size_t nextIndex;
   nextIndex = loadDataFromTubes(dataCenter, m_defaultBinning, 0);
   nextIndex = loadDataFromTubes(dataLeft, m_defaultBinning, nextIndex);
   nextIndex = loadDataFromTubes(dataRight, m_defaultBinning, nextIndex);
-  nextIndex = loadDataFromMonitors(firstEntry, nextIndex);
-  if (dataCenter.dim2() != 1 && nextIndex < numberOfHistograms) {
-    // there are a few runs with no 2nd monitor in kinetic, so we load the first monitor once again to preserve the
-    // dimensions and x-axis
-    nextIndex = loadDataFromMonitors(firstEntry, nextIndex);
-  }
-  // hijack the second monitor spectrum to store per-frame durations to enable time normalisation
-  if (dataCenter.dim2() != 1) {
-    NXFloat durations = firstEntry.openNXFloat("slices");
-    durations.load();
-    const HistogramData::Counts histoCounts(durations(), durations() + dataCenter.dim2());
-    m_localWorkspace->setCounts(nextIndex - 1, std::move(histoCounts));
-    m_localWorkspace->setCountVariances(nextIndex - 1,
-                                        HistogramData::CountVariances(std::vector<double>(dataCenter.dim2(), 0)));
-  }
+  return nextIndex;
 }
 
 /**
- * @brief LoadILLSANS2::initWorkSpaceD22B Load D22B data
+ * Initializes empty instrument and loads D22B data
  * @param firstEntry : already opened first entry in nexus
- * @param instrumentPath : the path inside nexus where the instrument name is written
  */
-void LoadILLSANS2::initWorkSpaceD22B(NeXus::NXEntry &firstEntry, const std::string &instrumentPath) {
+size_t LoadILLSANS2::initWorkspaceD22B(NeXus::NXEntry &firstEntry) {
+
   NXData data2 = firstEntry.openNXData("data2");
   NXInt data2_data = data2.openIntData();
   data2_data.load();
@@ -328,8 +253,7 @@ void LoadILLSANS2::initWorkSpaceD22B(NeXus::NXEntry &firstEntry, const std::stri
       static_cast<size_t>(data2_data.dim0() * data2_data.dim1() + data1_data.dim0() * data1_data.dim1()) + N_MONITORS;
 
   createEmptyWorkspace(numberOfHistograms, 1);
-  loadMetaData(firstEntry, instrumentPath);
-  runLoadInstrument();
+  runLoadInstrument(); // necessary for D22B to extract back_detector_index
 
   const std::string backIndex = m_localWorkspace->getInstrument()->getStringParameter("back_detector_index")[0];
   size_t nextIndex;
@@ -340,7 +264,7 @@ void LoadILLSANS2::initWorkSpaceD22B(NeXus::NXEntry &firstEntry, const std::stri
     nextIndex = loadDataFromTubes(data1_data, m_defaultBinning, 0);
     nextIndex = loadDataFromTubes(data2_data, m_defaultBinning, nextIndex);
   }
-  nextIndex = loadDataFromMonitors(firstEntry, nextIndex);
+  return nextIndex;
 }
 
 /**
@@ -348,7 +272,7 @@ void LoadILLSANS2::initWorkSpaceD22B(NeXus::NXEntry &firstEntry, const std::stri
  * @param firstEntry : already opened first entry in nexus
  * @param instrumentPath : the path inside nexus where the instrument name is written
  */
-void LoadILLSANS2::initWorkSpaceD33(NeXus::NXEntry &firstEntry, const std::string &instrumentPath) {
+size_t LoadILLSANS2::initWorkspaceD33(NeXus::NXEntry &firstEntry, const std::string &instrumentPath) {
 
   NXData dataGroup1 = firstEntry.openNXData("data1");
   NXInt dataRear = dataGroup1.openIntData();
@@ -377,8 +301,6 @@ void LoadILLSANS2::initWorkSpaceD33(NeXus::NXEntry &firstEntry, const std::strin
 
   createEmptyWorkspace(numberOfHistograms + N_MONITORS, static_cast<size_t>(dataRear.dim2()));
 
-  loadMetaData(firstEntry, instrumentPath);
-
   std::vector<double> binningRear, binningRight, binningLeft, binningDown, binningUp;
 
   if (m_measurementType == MeasurementType::MONO) { // Not TOF
@@ -394,7 +316,6 @@ void LoadILLSANS2::initWorkSpaceD33(NeXus::NXEntry &firstEntry, const std::strin
 
     const std::string first = std::to_string(masterPair[0]);
     const std::string second = std::to_string(masterPair[1]);
-
     NXFloat firstChopper = firstEntry.openNXFloat(m_instrumentName + "/chopper" + first + "/sample_distance");
     firstChopper.load();
     NXFloat secondChopper = firstEntry.openNXFloat(m_instrumentName + "/chopper" + second + "/sample_distance");
@@ -436,7 +357,7 @@ void LoadILLSANS2::initWorkSpaceD33(NeXus::NXEntry &firstEntry, const std::strin
   nextIndex = loadDataFromTubes(dataLeft, binningLeft, nextIndex);
   nextIndex = loadDataFromTubes(dataDown, binningDown, nextIndex);
   nextIndex = loadDataFromTubes(dataUp, binningUp, nextIndex);
-  nextIndex = loadDataFromMonitors(firstEntry, nextIndex);
+  return nextIndex;
 }
 
 /**
@@ -590,42 +511,97 @@ void LoadILLSANS2::runLoadInstrument() {
 }
 
 /**
- * Move the detector banks for D33
- * @param detPos : structure holding the positions
+ * @brief LoadILLSANS2::placeInstrument : places the instrument in the correct 3D position.
+ * @param firstEntry : already opened first entry in nexus
+ * @param instrumentPath : the path inside nexus where the instrument name is written
  */
-void LoadILLSANS2::moveDetectorsD33(const DetectorPosition &detPos) {
-  // Move in Z
-  moveDetectorDistance(detPos.distanceSampleRear, "back_detector");
-  moveDetectorDistance(detPos.distanceSampleBottomTop, "front_detector_top");
-  moveDetectorDistance(detPos.distanceSampleBottomTop, "front_detector_bottom");
-  moveDetectorDistance(detPos.distanceSampleRightLeft, "front_detector_right");
-  moveDetectorDistance(detPos.distanceSampleRightLeft, "front_detector_left");
-  // Move in X
-  moveDetectorHorizontal(detPos.shiftLeft, "front_detector_left");
-  moveDetectorHorizontal(-detPos.shiftRight, "front_detector_right");
-  // Move in Y
-  moveDetectorVertical(detPos.shiftUp, "front_detector_top");
-  moveDetectorVertical(-detPos.shiftDown, "front_detector_bottom");
-  // Set the sample log
+void LoadILLSANS2::placeInstrument(const NXEntry &firstEntry, const std::string &instrumentPath) {
+  double distance = 0;
+  if (m_instrumentName == "D33") {
+    const DetectorPosition detPos = getDetectorPositionD33(firstEntry, instrumentPath);
+    // Move in Z
+    moveDetectorDistance(detPos.distanceSampleRear, "back_detector");
+    moveDetectorDistance(detPos.distanceSampleBottomTop, "front_detector_top");
+    moveDetectorDistance(detPos.distanceSampleBottomTop, "front_detector_bottom");
+    moveDetectorDistance(detPos.distanceSampleRightLeft, "front_detector_right");
+    moveDetectorDistance(detPos.distanceSampleRightLeft, "front_detector_left");
+    // Move in X
+    moveDetectorHorizontal(detPos.shiftLeft, "front_detector_left");
+    moveDetectorHorizontal(-detPos.shiftRight, "front_detector_right");
+    // Move in Y
+    moveDetectorVertical(detPos.shiftUp, "front_detector_top");
+    moveDetectorVertical(-detPos.shiftDown, "front_detector_bottom");
+    if (m_measurementType == MeasurementType::TOF) {
+      adjustTOF();
+      moveSource();
+    }
+  } else if (m_instrumentName == "D16") {
+    distance = firstEntry.getFloat(instrumentPath + "/Det/value") / 1000; // mm to metre
+    const double angle = -1.0 * firstEntry.getFloat(instrumentPath + "/Gamma/value");
+    moveDetectorDistance(distance, "detector", angle);
+    // rotate the detector so it faces the sample.
+    rotateInstrument(angle, "detector");
+  } else if (m_instrumentName == "D11B") {
+    // we move the parent "detector" component, but since it is at (0,0,0), we
+    // need to find the distance it has to move and move it to this position
+    distance = firstEntry.getFloat(instrumentPath + "/Detector 1/det_calc");
+    V3D pos = getComponentPosition("detector_center");
+    double currentDistance = pos.Z();
+    moveDetectorDistance(distance - currentDistance, "detector");
+  } else if (m_instrumentName == "D22B") {
+    const std::string backIndex = m_localWorkspace->getInstrument()->getStringParameter("back_detector_index")[0];
+    const std::string frontIndex = m_localWorkspace->getInstrument()->getStringParameter("front_detector_index")[0];
+
+    // first, let's move the front (right) detector
+    distance = firstEntry.getFloat(instrumentPath + "/Detector " + frontIndex + "/det" + frontIndex + "_calc");
+    moveDetectorDistance(distance, "detector_front");
+
+    // mm to meter
+    double offset = firstEntry.getFloat(instrumentPath + "/Detector " + frontIndex + "/dtr" + frontIndex + "_actual");
+    moveDetectorHorizontal(-offset / 1000, "detector_front"); // mm to meter
+    double angle = firstEntry.getFloat(instrumentPath + "/Detector " + frontIndex + "/dan" + frontIndex + "_actual");
+    rotateInstrument(-angle, "detector_front");
+
+    // then, we move the central (back) detector
+    distance = firstEntry.getFloat(instrumentPath + "/Detector " + backIndex + "/det" + backIndex + "_calc");
+    moveDetectorDistance(distance, "detector_back");
+
+    offset = firstEntry.getFloat(instrumentPath + "/Detector " + backIndex + "/dtr" + backIndex + "_actual");
+    moveDetectorHorizontal(-offset / 1000, "detector_back"); // mm to meter
+
+  } else { // D11 and D22
+    distance = m_loadHelper.getDoubleFromNexusPath(firstEntry, instrumentPath + "/detector/det_calc");
+    moveDetectorDistance(distance, "detector");
+    if (m_instrumentName == "D22") {
+      double offset = m_loadHelper.getDoubleFromNexusPath(firstEntry, instrumentPath + "/detector/dtr_actual");
+      moveDetectorHorizontal(-offset / 1000, "detector"); // mm to meter
+    }
+  }
   API::Run &runDetails = m_localWorkspace->mutableRun();
-  runDetails.addProperty<double>("L2", detPos.distanceSampleRear, true);
+  runDetails.addProperty<double>("L2", distance, true);
 }
 
 /**
- * Move detectors in Z axis (X,Y are kept constant)
- * @param distance : the distance to move along Z axis [meters]
+ * Move detectors in Z axis while keeping other axes untouched or move it at with a specified angle
+ * @param distance : the distance instrument center and the sample [meters]
  * @param componentName : name of the component to move
+ * @param angle : the angle between instrument center and the transmitted beam
  */
-void LoadILLSANS2::moveDetectorDistance(double distance, const std::string &componentName) {
+void LoadILLSANS2::moveDetectorDistance(const double distance, const std::string &componentName, const double angle) {
 
   auto mover = createChildAlgorithm("MoveInstrumentComponent");
-  V3D pos = getComponentPosition(componentName);
   mover->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
   mover->setProperty("ComponentName", componentName);
-
-  mover->setProperty("X", pos.X());
-  mover->setProperty("Y", pos.Y());
-  mover->setProperty("Z", distance);
+  if (angle == 0) {
+    V3D pos = getComponentPosition(componentName);
+    mover->setProperty("X", pos.X());
+    mover->setProperty("Y", pos.Y());
+    mover->setProperty("Z", distance);
+  } else { // used for D16
+    mover->setProperty("X", sin(angle * M_PI / 180) * distance);
+    mover->setProperty("Y", 0.);
+    mover->setProperty("Z", cos(angle * M_PI / 180) * distance);
+  }
   mover->setProperty("RelativePosition", false);
   mover->executeAsChildAlg();
 
@@ -647,32 +623,6 @@ void LoadILLSANS2::rotateInstrument(double angle, const std::string &componentNa
   rotater->setProperty("Angle", angle);
   rotater->setProperty("RelativeRotation", false);
   rotater->executeAsChildAlg();
-  g_log.debug() << "Rotating component '" << componentName << "' to angle = " << angle << " degrees.\n";
-}
-
-/**
- * @brief LoadILLSANS2::placeD16 : place the D16 detector.
- * @param angle : the angle between its center and the transmitted beam
- * @param distance : the distance between its center and the sample
- * @param componentName : "detector"
- */
-void LoadILLSANS2::placeD16(double angle, double distance, const std::string &componentName) {
-  auto mover = createChildAlgorithm("MoveInstrumentComponent");
-  mover->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
-  mover->setProperty("ComponentName", componentName);
-  mover->setProperty("X", sin(angle * M_PI / 180) * distance);
-  mover->setProperty("Y", 0.);
-  mover->setProperty("Z", cos(angle * M_PI / 180) * distance);
-  mover->setProperty("RelativePosition", false);
-  mover->executeAsChildAlg();
-
-  // rotate the detector so it faces the sample.
-  rotateInstrument(angle, componentName);
-  API::Run &runDetails = m_localWorkspace->mutableRun();
-  runDetails.addProperty<double>("L2", distance, true);
-
-  g_log.debug() << "Moving component '" << componentName << "' to angle = " << angle
-                << " degrees and distance = " << distance << "metres.\n";
 }
 
 /**

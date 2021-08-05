@@ -57,25 +57,24 @@ private:
   void setInstrumentName(const NeXus::NXEntry &, const std::string &);
   DetectorPosition getDetectorPositionD33(const NeXus::NXEntry &, const std::string &);
 
-  void initWorkSpace(NeXus::NXEntry &, const std::string &);
-  void initWorkSpaceD11B(NeXus::NXEntry &, const std::string &);
-  void initWorkSpaceD22B(NeXus::NXEntry &, const std::string &);
-  void initWorkSpaceD33(NeXus::NXEntry &, const std::string &);
-  void initWorkSpaceD16(NeXus::NXEntry &, const std::string &);
+  void initWorkspace(NeXus::NXEntry &, const std::string &);
+  size_t initWorkspaceD11B(NeXus::NXEntry &);
+  size_t initWorkspaceD22B(NeXus::NXEntry &);
+  size_t initWorkspaceD33(NeXus::NXEntry &, const std::string &);
+  size_t initWorkspaceD16(NeXus::NXEntry &, const std::string &);
   void createEmptyWorkspace(const size_t, const size_t);
 
   size_t loadDataFromMonitors(NeXus::NXEntry &firstEntry, size_t firstIndex = 0);
   size_t loadDataFromTubes(NeXus::NXInt &, const std::vector<double> &, size_t);
   void runLoadInstrument();
-  void moveDetectorsD33(const DetectorPosition &);
-  void moveDetectorDistance(double distance, const std::string &componentName);
+  void placeInstrument(const NeXus::NXEntry &, const std::string &);
+  void moveDetectorDistance(const double, const std::string &, const double angle = 0.0);
   void moveDetectorHorizontal(double, const std::string &);
   void moveDetectorVertical(double, const std::string &);
-  Kernel::V3D getComponentPosition(const std::string &componentName);
+  Kernel::V3D getComponentPosition(const std::string &);
   void loadMetaData(const NeXus::NXEntry &, const std::string &);
   std::string getInstrumentFilePath(const std::string &) const;
   void rotateInstrument(double, const std::string &);
-  void placeD16(double, double, const std::string &);
   void adjustTOF();
   void moveSource();
   std::tuple<int, int, int> getDataDimensions(NeXus::NXEntry &);
