@@ -20,7 +20,7 @@ namespace Mantid::PythonInterface {
 
 struct PyNativeTypeExtractor {
   using PythonOutputT =
-      boost::make_recursive_variant<bool, int, double, std::string, std::vector<boost::recursive_variant_>>::type;
+      boost::make_recursive_variant<bool, long, double, std::string, std::vector<boost::recursive_variant_>>::type;
 
   static PythonOutputT convert(const boost::python::object &obj) {
     using namespace boost::python;
@@ -37,7 +37,7 @@ struct PyNativeTypeExtractor {
       double val = extract<double>(obj);
       out = val;
     } else if (PyLong_Check(rawptr)) {
-      int val = extract<int>(obj);
+      long val = extract<long>(obj);
       out = val;
     } else if (PyUnicode_Check(rawptr)) {
       std::string val = extract<std::string>(obj);
