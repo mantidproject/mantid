@@ -217,3 +217,105 @@ class ILL_SANS_D22_MONO_TEST(systemtesting.MantidSystemTest):
                          MaskWorkspace='mask',
                          FluxWorkspace='fl',
                          OutputWorkspace='out')
+
+
+class ILL_SANS_D22_MULTISENS(systemtesting.MantidSystemTest):
+    '''
+    Tests a standard monochromatic reduction with the v2 of the algorithm and data from the old D22
+    Tests creation of a sensitivity map without a shadow using 2 water measurements: with and w/o offset
+    '''
+
+    def __init__(self):
+        super(ILL_SANS_D22_MULTISENS, self).__init__()
+        self.setUp()
+        self.facility = config['default.facility']
+        self.instrument = config['default.instrument']
+        self.directories = config['datasearch.directories']
+
+    def setUp(self):
+        config['default.facility'] = 'ILL'
+        config['default.instrument'] = 'D22'
+        config.appendDataSearchSubDir('ILL/D22/')
+
+    def cleanup(self):
+        mtd.clear()
+        config['default.facility'] = self.facility
+        config['default.instrument'] = self.instrument
+        config['datasearch.directories'] = self.directories
+
+    def validate(self):
+        self.tolerance = 1e-3
+        self.tolerance_is_rel_err = True
+        self.disableChecking = ['Instrument']
+        return ['out', 'ILL_SANS_D22_MULTISENS.nxs']
+
+    def runTest(self):
+        # create necessary masks:
+        MaskBTP(Instrument='D22', Pixel='0-12,245-255')
+        RenameWorkspace(InputWorkspace='D22MaskBTP', OutputWorkspace='top_bottom')
+        MaskBTP(Instrument='D22', Tube='10-31', Pixel='105-150')
+        Plus(LHSWorkspace='top_bottom', RHSWorkspace='D22MaskBTP', OutputWorkspace='mask_offset')
+        MaskBTP(Instrument='D22', Tube='54-75', Pixel='108-150')
+        Plus(LHSWorkspace='top_bottom', RHSWorkspace='D22MaskBTP', OutputWorkspace='mask_central')
+
+        # Load the mask
+        LoadNexusProcessed(Filename='D22_mask.nxs',
+                           OutputWorkspace='mask')
+
+        # Absorber
+        SANSILLReduction(Runs='241238',
+                         ProcessAs='DarkCurrent',
+                         OutputWorkspace='cad')
+
+        # Beam
+        SANSILLReduction(Runs='241226',
+                         ProcessAs='EmptyBeam',
+                         DarkCurrentWorkspace='cad',
+                         OutputWorkspace='mt',
+                         OutputFluxWorkspace='fl')
+
+        # Container transmission known
+        CreateSingleValuedWorkspace(DataValue=0.94638, ErrorValue=0.0010425, OutputWorkspace='ctr')
+        AddSampleLog(Workspace='ctr', LogName='ProcessedAs', LogText='Transmission')
+        AddSampleLog(Workspace='ctr', LogName='wavelength', LogText='6.0', LogType='Number', LogUnit='Ansgrom')
+
+        # Container
+        SANSILLReduction(Runs='241239',
+                         ProcessAs='EmptyContainer',
+                         DarkCurrentWorkspace='cad',
+                         EmptyBeamWorkspace='mt',
+                         TransmissionWorkspace='ctr',
+                         OutputWorkspace='can')
+
+        # Water Reference
+        SANSILLReduction(Runs='344411',
+                         ProcessAs='Water',
+                         MaskWorkspace='mask_central',
+                         OutputWorkspace='ref1',
+                         OutputSensitivityWorkspace='sens1')
+
+        SANSILLReduction(Runs='344407',
+                         ProcessAs='Water',
+                         MaskWorkspace='mask_offset',
+                         OutputWorkspace='ref2',
+                         OutputSensitivityWorkspace='sens2')
+
+        GroupWorkspaces(InputWorkspaces=['ref1', 'ref2'], OutputWorkspace='sensitivity_input')
+        CalculateEfficiency(InputWorkspace='sensitivity_input', MergeGroup=True, OutputWorkspace='sens')
+
+        # Sample transmission known
+        CreateSingleValuedWorkspace(DataValue=0.52163, ErrorValue=0.00090538, OutputWorkspace='str')
+        AddSampleLog(Workspace='str', LogName='ProcessedAs', LogText='Transmission')
+        AddSampleLog(Workspace='str', LogName='wavelength', LogText='6.0', LogType='Number', LogUnit='Ansgrom')
+
+        # Sample
+        SANSILLReduction(Runs='241240',
+                         ProcessAs='Sample',
+                         DarkCurrentWorkspace='cad',
+                         EmptyBeamWorkspace='mt',
+                         TransmissionWorkspace='str',
+                         EmptyContainerWorkspace='can',
+                         MaskWorkspace='mask',
+                         SensitivityWorkspace='sens',
+                         OutputWorkspace='out',
+                         FluxWorkspace='fl')
