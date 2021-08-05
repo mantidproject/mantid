@@ -142,9 +142,9 @@ void CalculateEfficiency2::exec() {
 API::MatrixWorkspace_sptr CalculateEfficiency2::calculateEfficiency(MatrixWorkspace_sptr inputWorkspace,
                                                                     double startProgress, double stepProgress) {
 
-  // create the output workspace from the input, while NOT preserving events
-  MatrixWorkspace_sptr outputWS = inputWorkspace->clone();
+  MatrixWorkspace_sptr outputWS;
   if (std::dynamic_pointer_cast<EventWorkspace>(inputWorkspace)) {
+    // if event workspace, create the output workspace from the input, while NOT preserving events
     auto childAlg = createChildAlgorithm("RebinToWorkspace", 0.0, 0.1);
     childAlg->setProperty("WorkspaceToRebin", inputWorkspace);
     childAlg->setProperty("WorkspaceToMatch", inputWorkspace);
@@ -152,6 +152,9 @@ API::MatrixWorkspace_sptr CalculateEfficiency2::calculateEfficiency(MatrixWorksp
     childAlg->setProperty("PreserveEvents", false);
     childAlg->executeAsChildAlg();
     outputWS = childAlg->getProperty("OutputWorkspace");
+  } else {
+    // otherwise just clone the input
+    outputWS = inputWorkspace->clone();
   }
 
   // Loop over spectra and sum all the counts to get normalization
