@@ -8,6 +8,7 @@
 import mantid
 import numpy as np
 import yaml
+from collections import namedtuple
 
 
 class MaskShadowedPixels(mantid.api.PythonAlgorithm):
@@ -42,37 +43,21 @@ class MaskShadowedPixels(mantid.api.PythonAlgorithm):
         """
         Main method to execute the algorithm
         """
-        # Get input
+        # Prepare input workspace: normalize by solid angle
         raw_workspace = self.getProperty('InputWorkspace').value
         assert raw_workspace, 'Input workspace cannot be None'
+        intensity_array = self.prepare_input(raw_workspace)  # return (101378,) array
 
-        # Prepare inputs
+        # Parse YMAL configuration
         config = self.parse_yaml(self.getProperty('ConfigurationFile').value)
         assert isinstance(config, dict)
 
         # Get instrument information
-        pixel_tube_map, tube_8pack_map, eight_pack_bank_map, collimation_status_8pack_dict =\
-            self.get_instrument_info(raw_workspace)
-        num_tubes = len(tube_8pack_map)
-        # num_banks = 6
-
-        # Calculate solid angle
-        solid_angle_array = self.calculate_solid_angle(raw_workspace)
-
-        # Divide summed intensity for each pixel by solid angle
-        # TODO - process inp;ut workspaces if raw_workspace has multiple bins
-        # FIXME - watch out array dimension
-        vec_intensity = raw_workspace.extractY()
-        vec_intensity /= solid_angle_array
-
-        # Determine thresholds for a given tube
-        # calculate summed intensity for each tube
-        vec_tube_intensity = self.sum_to_tubes(vec_intensity, pixel_tube_map, num_tubes)
-        assert isinstance(vec_tube_intensity, np.ndarray)
+        instrument_info = self.set_nomad_constants()
 
         # Determine thresholds for a given tube (part 1)
         # TASK 335
-        self.determine_tube_threshold()
+        self.determine_tube_threshold(intensity_array, instrument_info, config)
         # END OF Part1 ---
 
         # Calculate the median for a particular Group of banks (part 2)
@@ -88,6 +73,55 @@ class MaskShadowedPixels(mantid.api.PythonAlgorithm):
         # Process for output
 
         return
+
+    def prepare_input(self, workspace):
+        """Calculate count on each detector pixels and normalized by solid angle correction
+
+        Parameters
+        ----------
+        workspace
+
+        Returns
+        -------
+        numpy.ndarray
+            shape = (101378,)
+
+        """
+        # Calculate the count on each detector pixel
+        # Get counts array: shape = (101378, Bins)
+        vec_intensity = workspace.extractY()
+        # Sum along Y axis (axis = 1): shape = (101378, )
+        vec_intensity = vec_intensity.sum(axis=1)
+
+        # Calculate solid angle
+        solid_angle_array = self.calculate_solid_angle(workspace).extractY().flatten()
+
+        vec_intensity /= solid_angle_array
+
+        return vec_intensity
+
+    @staticmethod
+    def set_nomad_constants():
+        """Set NOMAD geometry constants for numpy operation
+
+        Returns
+        -------
+        namedtutple
+            named tuple for NOMAD pixel, tube, 8 pack and bank constants
+
+        """
+        info_dict = dict()
+
+        info_dict['num_banks'] = 6
+        info_dict['num_8packs'] = 49
+        info_dict['num_tubes'] = 49 * 8
+        info_dict['num_pixels_per_tube'] = 128
+        info_dict['num_tubes_per_8pack'] = 8
+        info_dict['num_8packs_per_bank'] = [0, 6, 15, 23, 30, 45, 49]  # [i, i+1) is the range of 8 packs for bank i
+
+        instrument = namedtuple("nomad", info_dict)
+
+        return instrument(**info_dict)
 
     # TODO - return can be either dictionary or namedtuple
     def parse_yaml(self, file_name: str) -> dict:
@@ -106,12 +140,13 @@ class MaskShadowedPixels(mantid.api.PythonAlgorithm):
             config = yaml.safe_load(stream)
         return config
 
-    def calculate_solid_angle(self, workspace):
+    @staticmethod
+    def calculate_solid_angle(workspace):
         """Calculate solid angle for each detector
 
         Parameters
         ----------
-        workspace
+
 
         Returns
         -------
@@ -119,9 +154,26 @@ class MaskShadowedPixels(mantid.api.PythonAlgorithm):
             shape = (N, ) or (N, 1), where N is the number of detectors
 
         """
+        assert workspace
+        # TODO - To be implemented
         return np.ndarray()
 
-    def determine_tube_threshold(self):
+    def determine_tube_threshold(self, vec_intensity, nomad_info):
+        """
+
+        Parameters
+        ----------
+        vec_intensity: numpy.ndarray
+            solid angle corrected counts. shape = (101378, )
+
+        Returns
+        -------
+
+        """
+        # Determine thresholds for a given tube
+        # calculate summed intensity for each tube: output = (392, )
+        vec_tube_intensity = self.sum_to_tubes(vec_intensity, nomad_info)
+        assert isinstance(vec_tube_intensity, np.ndarray)
 
         for tube_index in range(num_tubes):
             collimation_status = collimation_status_8pack_dict[tube_index]
@@ -162,28 +214,29 @@ class MaskShadowedPixels(mantid.api.PythonAlgorithm):
             for eight_pack_index in bank_8packs:
                 do_something
 
-    def sum_to_tubes(self, pixel_count_array, pixel_tube_map_array, num_tubes: int):
+    @staticmethod
+    def sum_to_tubes(pixel_count_array, instrument_info):
         """ Calculate summed intensity for each tube
 
         Parameters
         ----------
         pixel_count_array
-        pixel_tube_map_array: numpy.ndarray
-            integer array with size of detectors number and each element as the tube index for each pixel
-        num_tubes
+        instrument_info: namedtuple
+            NOMAD inst instrument information
 
         Returns
         -------
         numpy.ndarray
-
+            shape = (392, )
         """
-        tube_intensity_array = np.ndarray(shape=(num_tubes, ), dtype='float')
+        # Reshape to tubes
+        tube_count_array = pixel_count_array.reshape(shape=(instrument_info.num_tubes,
+                                                            instrument_info.num_pixels_per_tube))
 
-        for tube_index in range(num_tubes):
-            counts_sum = np.sum(pixel_count_array[np.where(pixel_tube_map_array == tube_index)])
-            tube_intensity_array[tube_index] = counts_sum
+        # Sum
+        tube_count_array = tube_count_array.sum(axis=1)
 
-        return tube_intensity_array
+        return tube_count_array
 
 
 # Register the algorithm
