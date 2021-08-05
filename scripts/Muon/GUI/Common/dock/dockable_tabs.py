@@ -10,8 +10,6 @@ from qtpy import QtWidgets, QtCore, QtGui, PYQT4
 from qtpy.QtCore import Slot
 from qtpy.QtGui import QIcon
 
-INVALID_TAB_ICON = icons.get_icon("mdi.asterisk", "red", 0.5)
-
 """
 Original code by user Blackwood, Jan 2018.
 https://stackoverflow.com/questions/47267195/in-pyqt4-is-it-possible-to-detach-tabs-from-a-qtabwidget
@@ -41,6 +39,9 @@ class DetachableTabWidget(QtWidgets.QTabWidget):
         self.tab_order = []
         self.attached_tab_names = []
 
+        self.valid_tab_icon = QIcon()
+        self.invalid_tab_icon = icons.get_icon("mdi.asterisk", "red", 0.5)
+
         # Close all detached tabs if the application is closed explicitly
         # QtGui.qApp.aboutToQuit.connect(self.close_detached_tabs)  # @UndefinedVariable
 
@@ -49,7 +50,7 @@ class DetachableTabWidget(QtWidgets.QTabWidget):
 
     def set_tab_warning(self, index: int, message: str) -> None:
         """Adds a tooltip to a tab with a warning message."""
-        self.setTabIcon(index, INVALID_TAB_ICON if message != "" else QIcon())
+        self.setTabIcon(index, self.invalid_tab_icon if message != "" else self.valid_tab_icon)
         self.setTabToolTip(index, message)
 
     def setMovable(self, movable):
