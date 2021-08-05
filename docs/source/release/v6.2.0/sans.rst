@@ -19,6 +19,7 @@ New
 - ISIS SANS GUI will automatically toggle between Can SAS and NXS Can SAS when switching between 1D and 2D reductions.
   If you have toggled any save options it will not update the selected methods until the interface is restarted to avoid interfering with the user's save selection.
 - :ref:`Q1DWeighted <algm-Q1DWeighted>` now supports kinetic data from SANS, with multiple samples instead of time bins.
+- :ref:`LoadILLSANS <algm-LoadILLSANS>` now has a new version, where the wavelength is not set by the user anymore, and instrument can be chosen to be loaded (or not), as well as the data for non-TOF measurements is now not a histogram but point data.
 
 Bugfixes
 --------
