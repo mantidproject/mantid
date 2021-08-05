@@ -76,6 +76,7 @@ void SaveCanSAS1D2::init() {
   declareProperty("SampleDirectRunNumber", "", "The run number for the sample direct workspace. Optional.");
   declareProperty("CanScatterRunNumber", "", "The run number for the can scatter workspace. Optional.");
   declareProperty("CanDirectRunNumber", "", "The run number for the can direct workspace. Optional.");
+  declareProperty("OneSpectrumPerFile", false, "If true, each spectrum will be saved in an invididual file");
 }
 
 /// Overwrites Algorithm method
@@ -98,62 +99,73 @@ void SaveCanSAS1D2::exec() {
   // and this can't be done in using the stylesheet part in Poco or libXML
   prepareFileToWriteEntry();
 
-  m_outFile << "\n\t<SASentry name=\"" << m_workspace->getName() << "\">";
+  size_t i = 0;
+  while (i < m_workspace->getNumberHistograms()) {
+    m_outFile << "\n\t<SASentry name=\"" << m_workspace->getName() << "\">";
 
-  std::string sasTitle;
-  createSASTitleElement(sasTitle);
-  m_outFile << sasTitle;
+    std::string sasTitle;
+    createSASTitleElement(sasTitle);
+    m_outFile << sasTitle;
 
-  std::string sasRun;
-  createSASRunElement(sasRun);
-  m_outFile << sasRun;
+    std::string sasRun;
+    createSASRunElement(sasRun);
+    m_outFile << sasRun;
 
-  std::string dataUnit = m_workspace->YUnitLabel();
-  // look for xml special characters and replace with entity refrence
-  searchandreplaceSpecialChars(dataUnit);
+    std::string dataUnit = m_workspace->YUnitLabel();
+    // look for xml special characters and replace with entity refrence
+    searchandreplaceSpecialChars(dataUnit);
 
-  std::string sasData;
-  createSASDataElement(sasData, 0);
-  m_outFile << sasData;
+    std::string sasData;
+    if (getProperty("OneSpectrumPerFile")) {
+      createSASDataElement(sasData, i);
+      i++;
+    } else {
+      while (i < m_workspace->getNumberHistograms()) {
+        createSASDataElement(sasData, i);
+        i++;
+      }
+    }
+    m_outFile << sasData;
 
-  if (m_trans_ws) {
-    std::string transData;
-    createSASTransElement(transData, "sample");
-    m_outFile << transData;
+    if (m_trans_ws) {
+      std::string transData;
+      createSASTransElement(transData, "sample");
+      m_outFile << transData;
+    }
+    if (m_transcan_ws) {
+      std::string transData;
+      createSASTransElement(transData, "can");
+      m_outFile << transData;
+    }
+
+    std::string sasSample;
+    createSASSampleElement(sasSample);
+    m_outFile << sasSample;
+
+    // Recording the SAS instrument can throw, if there
+    // are no detecors present
+    std::string sasInstrument;
+    try {
+      createSASInstrument(sasInstrument);
+    } catch (Kernel::Exception::NotFoundError &) {
+      throw;
+    } catch (std::runtime_error &) {
+      throw;
+    }
+    m_outFile << sasInstrument;
+
+    std::string sasProcess;
+    createSASProcessElement(sasProcess);
+    m_outFile << sasProcess;
+
+    std::string sasNote = "\n\t\t<SASnote>";
+    sasNote += "\n\t\t</SASnote>";
+    m_outFile << sasNote;
+
+    m_outFile << "\n\t</SASentry>";
+    m_outFile << "\n</SASroot>";
+    m_outFile.close();
   }
-  if (m_transcan_ws) {
-    std::string transData;
-    createSASTransElement(transData, "can");
-    m_outFile << transData;
-  }
-
-  std::string sasSample;
-  createSASSampleElement(sasSample);
-  m_outFile << sasSample;
-
-  // Recording the SAS instrument can throw, if there
-  // are no detecors present
-  std::string sasInstrument;
-  try {
-    createSASInstrument(sasInstrument);
-  } catch (Kernel::Exception::NotFoundError &) {
-    throw;
-  } catch (std::runtime_error &) {
-    throw;
-  }
-  m_outFile << sasInstrument;
-
-  std::string sasProcess;
-  createSASProcessElement(sasProcess);
-  m_outFile << sasProcess;
-
-  std::string sasNote = "\n\t\t<SASnote>";
-  sasNote += "\n\t\t</SASnote>";
-  m_outFile << sasNote;
-
-  m_outFile << "\n\t</SASentry>";
-  m_outFile << "\n</SASroot>";
-  m_outFile.close();
 }
 
 /** This method creates an XML element named "SASroot"
