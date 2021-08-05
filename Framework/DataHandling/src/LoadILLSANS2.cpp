@@ -229,7 +229,6 @@ LoadILLSANS2::DetectorPosition LoadILLSANS2::getDetectorPositionD33(const NeXus:
   pos.shiftRight = m_loadHelper.getDoubleFromNexusPath(firstEntry, detectorPath + "/OxR_actual") * 1e-3;
   pos.shiftUp = m_loadHelper.getDoubleFromNexusPath(firstEntry, detectorPath + "/OyT_actual") * 1e-3;
   pos.shiftDown = m_loadHelper.getDoubleFromNexusPath(firstEntry, detectorPath + "/OyB_actual") * 1e-3;
-  pos >> g_log.debug();
   return pos;
 }
 
@@ -239,7 +238,6 @@ LoadILLSANS2::DetectorPosition LoadILLSANS2::getDetectorPositionD33(const NeXus:
  * @param instrumentPath : the path inside nexus where the instrument name is written
  */
 void LoadILLSANS2::initWorkSpace(NeXus::NXEntry &firstEntry, const std::string &instrumentPath) {
-  g_log.debug("Fetching data...");
   std::string path;
   if (firstEntry.containsGroup("data")) {
     path = "data";
@@ -319,8 +317,6 @@ void LoadILLSANS2::initWorkSpaceD11B(NeXus::NXEntry &firstEntry, const std::stri
  * @param instrumentPath : the path inside nexus where the instrument name is written
  */
 void LoadILLSANS2::initWorkSpaceD22B(NeXus::NXEntry &firstEntry, const std::string &instrumentPath) {
-  g_log.debug("Fetching data...");
-
   NXData data2 = firstEntry.openNXData("data2");
   NXInt data2_data = data2.openIntData();
   data2_data.load();
@@ -354,8 +350,6 @@ void LoadILLSANS2::initWorkSpaceD22B(NeXus::NXEntry &firstEntry, const std::stri
  */
 void LoadILLSANS2::initWorkSpaceD33(NeXus::NXEntry &firstEntry, const std::string &instrumentPath) {
 
-  g_log.debug("Fetching data...");
-
   NXData dataGroup1 = firstEntry.openNXData("data1");
   NXInt dataRear = dataGroup1.openIntData();
   dataRear.load();
@@ -371,7 +365,6 @@ void LoadILLSANS2::initWorkSpaceD33(NeXus::NXEntry &firstEntry, const std::strin
   NXData dataGroup5 = firstEntry.openNXData("data5");
   NXInt dataUp = dataGroup5.openIntData();
   dataUp.load();
-  g_log.debug("Checking channel numbers...");
 
   // check number of channels
   if (dataRear.dim2() != dataRight.dim2() && dataRight.dim2() != dataLeft.dim2() &&
@@ -382,7 +375,6 @@ void LoadILLSANS2::initWorkSpaceD33(NeXus::NXEntry &firstEntry, const std::strin
       dataRear.dim0() * dataRear.dim1() + dataRight.dim0() * dataRight.dim1() + dataLeft.dim0() * dataLeft.dim1() +
       dataDown.dim0() * dataDown.dim1() + dataUp.dim0() * dataUp.dim1());
 
-  g_log.debug("Creating empty workspace...");
   createEmptyWorkspace(numberOfHistograms + N_MONITORS, static_cast<size_t>(dataRear.dim2()));
 
   loadMetaData(firstEntry, instrumentPath);
@@ -402,15 +394,12 @@ void LoadILLSANS2::initWorkSpaceD33(NeXus::NXEntry &firstEntry, const std::strin
 
     const std::string first = std::to_string(masterPair[0]);
     const std::string second = std::to_string(masterPair[1]);
-    g_log.debug("Master choppers are " + first + " and " + second);
 
     NXFloat firstChopper = firstEntry.openNXFloat(m_instrumentName + "/chopper" + first + "/sample_distance");
     firstChopper.load();
     NXFloat secondChopper = firstEntry.openNXFloat(m_instrumentName + "/chopper" + second + "/sample_distance");
     secondChopper.load();
     m_sourcePos = (firstChopper[0] + secondChopper[0]) / 2.;
-    g_log.debug("Source distance computed, moving moderator to Z=-" + std::to_string(m_sourcePos));
-    g_log.debug("Getting wavelength bins from the nexus file...");
     bool vtof = true;
     // try VTOF mode
     try {
@@ -441,8 +430,6 @@ void LoadILLSANS2::initWorkSpaceD33(NeXus::NXEntry &firstEntry, const std::strin
       }
     }
   }
-
-  g_log.debug("Loading the data into the workspace...");
 
   size_t nextIndex = loadDataFromTubes(dataRear, binningRear, 0);
   nextIndex = loadDataFromTubes(dataRight, binningRight, nextIndex);
@@ -729,7 +716,6 @@ V3D LoadILLSANS2::getComponentPosition(const std::string &componentName) {
  */
 void LoadILLSANS2::loadMetaData(const NeXus::NXEntry &entry, const std::string &instrumentNamePath) {
 
-  g_log.debug("Loading metadata...");
   API::Run &runDetails = m_localWorkspace->mutableRun();
 
   if ((entry.getFloat("mode") == 0.0) || (m_instrumentName == "D16")) { // Not TOF
