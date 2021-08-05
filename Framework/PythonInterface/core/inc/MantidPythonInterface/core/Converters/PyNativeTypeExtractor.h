@@ -27,21 +27,16 @@ struct PyNativeTypeExtractor {
     PyObject *rawptr = obj.ptr();
     PythonOutputT out;
 
-    // This currently  doesn't handle lists, but this could be retrofitted in future work
     if (PyList_Check(rawptr)) {
       out = handleList(obj);
     } else if (PyBool_Check(rawptr)) {
-      bool val = extract<bool>(obj);
-      out = val;
+      out = extract<bool>(obj);
     } else if (PyFloat_Check(rawptr)) {
-      double val = extract<double>(obj);
-      out = val;
+      out = extract<double>(obj);
     } else if (PyLong_Check(rawptr)) {
-      long val = extract<long>(obj);
-      out = val;
+      out = extract<long>(obj);
     } else if (PyUnicode_Check(rawptr)) {
-      std::string val = extract<std::string>(obj);
-      out = val;
+      out = extract<std::string>(obj);
     } else {
       throw std::invalid_argument("Unrecognised Python type");
     }
