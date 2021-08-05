@@ -57,7 +57,6 @@ mtd_add_qt_tests(
     ../../../../Framework/TestHelpers/src/TearDownWorld.cpp
   LINK_LIBS
     ${CORE_MANTIDLIBS}
-    CurveFitting
     DataObjects
     gmock
     ${POCO_LIBRARIES}

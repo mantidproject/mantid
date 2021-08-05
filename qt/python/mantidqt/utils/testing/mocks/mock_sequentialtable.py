@@ -23,6 +23,7 @@ class MockSequentialTableModel(object):
     def __init__(self):
         self.set_fit_parameters_and_values = mock.MagicMock()
         self.set_fit_quality = mock.MagicMock()
+        self.get_workspace_name_information = mock.MagicMock()
         self.get_run_information = mock.MagicMock()
         self.get_group_information = mock.MagicMock()
         self.rowCount = mock.MagicMock()

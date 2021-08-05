@@ -2,8 +2,7 @@ if(CXXTEST_FOUND)
   include_directories(SYSTEM ${CXXTEST_INCLUDE_DIR})
 
   # Make the rest of the tests
-  include_directories(../../Algorithms/inc ../../DataHandling/inc
-                      ../../TestHelpers/inc)
+  include_directories(../../TestHelpers/inc)
   # This variable is used within the cxxtest_add_test macro to build these
   # helper classes into the test executable. It will go out of scope at the end
   # of this file so doesn't need un-setting
@@ -14,12 +13,11 @@ if(CXXTEST_FOUND)
       ../../TestHelpers/src/WorkspaceCreationHelper.cpp)
   cxxtest_add_test(WorkflowAlgorithmsTest ${TEST_FILES})
   target_link_libraries(WorkflowAlgorithmsTest
-                        LINK_PRIVATE
-                        ${MANTIDLIBS}
-                        WorkflowAlgorithms
-                        Algorithms
-                        DataHandling
-                        Nexus
+                        PRIVATE
+                        Mantid::WorkflowAlgorithms
+                        Mantid::Algorithms
+                        Mantid::DataHandling
+                        Boost::filesystem
                         gmock)
   add_dependencies(WorkflowAlgorithmsTest CurveFitting)
   add_dependencies(FrameworkTests WorkflowAlgorithmsTest)

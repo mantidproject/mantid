@@ -104,15 +104,27 @@ if(CMAKE_HOST_WIN32 AND NOT CONDA_BUILD)
   set(HDF5_DIR "${THIRD_PARTY_DIR}/cmake/hdf5")
   find_package(
     HDF5
-    COMPONENTS CXX HL
+    COMPONENTS C CXX HL
     REQUIRED CONFIGS hdf5-config.cmake
   )
   set(HDF5_LIBRARIES hdf5::hdf5_cpp-shared hdf5::hdf5_hl-shared)
-else()
+elseif(CONDA_BUILD)
+  # We'll use the cmake finder
   find_package(ZLIB REQUIRED)
   find_package(
     HDF5
-    COMPONENTS CXX HL
+    MODULE
+    COMPONENTS C CXX HL
+    REQUIRED
+  )
+  set(HDF5_LIBRARIES hdf5::hdf5_cpp hdf5::hdf5)
+  set(HDF5_HL_LIBRARIES hdf5::hdf5_hl)
+  else()
+  find_package(ZLIB REQUIRED)
+  find_package(
+    HDF5
+    MODULE
+    COMPONENTS C CXX HL
     REQUIRED
   )
 endif()
@@ -425,7 +437,7 @@ if (ENABLE_PRECOMMIT)
     message ( FATAL_ERROR "Failed to find pre-commit see https://developer.mantidproject.org/GettingStarted.html" )
   endif ()
 
-  if (MSVC)
+  if (WIN32)
     if(CONDA_BUILD)
     execute_process(COMMAND "${PRE_COMMIT_EXE}" install --overwrite WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} RESULT_VARIABLE PRE_COMMIT_RESULT)
     else()

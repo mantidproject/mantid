@@ -74,6 +74,7 @@ New features
 - New algorithm :ref:`ApplyInstrumentToPeaks <algm-ApplyInstrumentToPeaks>` to update the instrument of peaks within a PeaksWorkspace.
 - New plotting script that provides diagnostic plots of SCDCalibratePanels output.
 - New plotting script that provides diagnositc plots of SCDCalibratePanels2 on a per panel/bank basis.
+- Exposed :meth:`mantid.api.IPeak.getCol` and :meth:`mantid.api.IPeak.getRow` to python
 - Added two integration methods to :ref:`HB3AIntegrateDetectorPeaks <algm-HB3AIntegrateDetectorPeaks>` for simple cuboid integration with and without fitted background.
 - New algorithm :ref:`ConvertPeaksWorkspace <algm-ConvertPeaksWorkspace>` for quick conversion between PeaksWorkspace and LeanElasticPeaksWorkspace.
 - New definition file for D19 ILL instrument added.

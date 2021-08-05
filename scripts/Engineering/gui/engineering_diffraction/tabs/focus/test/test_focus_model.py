@@ -11,8 +11,8 @@ from os import path
 
 from unittest.mock import patch, MagicMock, call
 from mantid.simpleapi import CreateSampleWorkspace
-from Engineering.common import path_handling
 from Engineering.gui.engineering_diffraction.tabs.focus import model
+from Engineering.gui.engineering_diffraction.tabs.common import output_settings
 from Engineering.gui.engineering_diffraction.tabs.common.calibration_info import CalibrationInfo
 
 file_path = "Engineering.gui.engineering_diffraction.tabs.focus.model"
@@ -135,7 +135,7 @@ class FocusModelTest(unittest.TestCase):
     @patch(file_path + ".SaveNexus")
     def test_save_output_files_with_no_RB_number(self, nexus, gss, xye):
         mocked_workspace = "mocked-workspace"
-        output_file = path.join(path_handling.get_output_path(), "Focus",
+        output_file = path.join(output_settings.get_output_path(), "Focus",
                                 "ENGINX_123_North_TOF.nxs")
 
         self.model._save_output("ENGINX", "Path/To/ENGINX000123.whatever", "North",
@@ -157,7 +157,7 @@ class FocusModelTest(unittest.TestCase):
         self.assertEqual(xye.call_count, 2)
 
     @patch(file_path + ".logger")
-    @patch(file_path + ".path_handling.get_output_path")
+    @patch(file_path + ".output_settings.get_output_path")
     @patch(file_path + ".csv")
     def test_output_sample_logs_with_rb_number(self, mock_csv, mock_path, mock_logger):
         mock_writer = MagicMock()
@@ -172,7 +172,7 @@ class FocusModelTest(unittest.TestCase):
         self.assertEqual(8, mock_writer.writerow.call_count)
 
     @patch(file_path + ".logger")
-    @patch(file_path + ".path_handling.get_output_path")
+    @patch(file_path + ".output_settings.get_output_path")
     @patch(file_path + ".csv")
     def test_output_sample_logs_without_rb_number(self, mock_csv, mock_path, mock_logger):
         mock_writer = MagicMock()
@@ -191,7 +191,7 @@ class FocusModelTest(unittest.TestCase):
     @patch(file_path + ".SaveNexus")
     def test_last_path_updates_with_no_RB_number(self, nexus, gss, xye):
         mocked_workspace = "mocked-workspace"
-        output_file = path.join(path_handling.get_output_path(), "Focus",
+        output_file = path.join(output_settings.get_output_path(), "Focus",
                                 "ENGINX_123_North_TOF.nxs")
 
         self.model._last_path_ws = 'ENGINX_123_North_TOF.nxs'
@@ -207,7 +207,7 @@ class FocusModelTest(unittest.TestCase):
     def test_last_path_updates_with_RB_number(self, nexus, gss, xye):
         mocked_workspace = "mocked-workspace"
         rb_num = '2'
-        output_file = path.join(path_handling.get_output_path(), "User", rb_num, "Focus",
+        output_file = path.join(output_settings.get_output_path(), "User", rb_num, "Focus",
                                 "ENGINX_123_North_TOF.nxs")
 
         self.model._last_path_ws = 'ENGINX_123_North_TOF.nxs'
