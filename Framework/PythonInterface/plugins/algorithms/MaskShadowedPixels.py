@@ -54,7 +54,7 @@ class MaskShadowedPixels(mantid.api.PythonAlgorithm):
         pixel_tube_map, tube_8pack_map, eight_pack_bank_map, collimation_status_8pack_dict =\
             self.get_instrument_info(raw_workspace)
         num_tubes = len(tube_8pack_map)
-        num_banks = 6
+        # num_banks = 6
 
         # Calculate solid angle
         solid_angle_array = self.calculate_solid_angle(raw_workspace)
@@ -65,49 +65,25 @@ class MaskShadowedPixels(mantid.api.PythonAlgorithm):
         vec_intensity = raw_workspace.extractY()
         vec_intensity /= solid_angle_array
 
+        # Determine thresholds for a given tube
         # calculate summed intensity for each tube
         vec_tube_intensity = self.sum_to_tubes(vec_intensity, pixel_tube_map, num_tubes)
         assert isinstance(vec_tube_intensity, np.ndarray)
 
-        for tube_index in range(num_tubes):
-            collimation_status = collimation_status_8pack_dict[tube_index]
-            if collimation_status == 'Collimated':
-                do_something_1
-            elif collimation_status == 'Half Collimated':
-                do_something_2
-            else:
-                # not collimated
-                do_something_0
-
+        # Determine thresholds for a given tube (part 1)
+        # TASK 335
+        self.determine_tube_threshold()
         # END OF Part1 ---
 
-        for bank_index in range(num_banks):
-            if bank_index == 0:
-                # first bank
-                # calculate median value over all tubes contained in the bank
-                do_something
-            else:
-                # calculate median value over all tubes contained in non-collimated eight-packs in bank
-                for eight_pack_index in bank_8packs:
-                    for tube_index in eight_pack_tubes:
-                        if collimation_status_8pack_dict[tube_index] == 'Not Collimated':
-                            do_someting
-
+        # Calculate the median for a particular Group of banks (part 2)
+        # TASK 331
+        self.calculate_banks_medians(config)
         # END OF Part2 ----
-        for bank_index in non_flat_panel_banks:
-            for eight_pack_index in bank_8packs:
-                # FIXME - question: where is the definition of collimated 8packs?  we only have collimated banks
-                if collimated_8pack:
-                    #
-                    do_something
-                else:
-                    do_something
 
-        for bank_index in flat_panel_banks:
-            for eight_pack_index in bank_8packs:
-                do_something
-
-        # END OF Part3
+        # Determine thresholds for a given bank (part 3)
+        # TASK 333
+        self.determine_banks_thredsholds(config)
+        # END OF Part3 ---
 
         # Process for output
 
@@ -144,6 +120,47 @@ class MaskShadowedPixels(mantid.api.PythonAlgorithm):
 
         """
         return np.ndarray()
+
+    def determine_tube_threshold(self):
+
+        for tube_index in range(num_tubes):
+            collimation_status = collimation_status_8pack_dict[tube_index]
+            if collimation_status == 'Collimated':
+                do_something_1
+            elif collimation_status == 'Half Collimated':
+                do_something_2
+            else:
+                # not collimated
+                do_something_0
+
+    def calculate_banks_medians(self, config):
+        # TASK 331
+        for bank_index in range(num_banks):
+            if bank_index == 0:
+                # first bank
+                # calculate median value over all tubes contained in the bank
+                do_something
+            else:
+                # calculate median value over all tubes contained in non-collimated eight-packs in bank
+                for eight_pack_index in bank_8packs:
+                    for tube_index in eight_pack_tubes:
+                        if collimation_status_8pack_dict[tube_index] == 'Not Collimated':
+                            do_someting
+
+    def determine_banks_thresholds(self, config):
+        # TASK 333
+        for bank_index in non_flat_panel_banks:
+            for eight_pack_index in bank_8packs:
+                # FIXME - question: where is the definition of collimated 8packs?  we only have collimated banks
+                if collimated_8pack:
+                    #
+                    do_something
+                else:
+                    do_something
+
+        for bank_index in flat_panel_banks:
+            for eight_pack_index in bank_8packs:
+                do_something
 
     def sum_to_tubes(self, pixel_count_array, pixel_tube_map_array, num_tubes: int):
         """ Calculate summed intensity for each tube
