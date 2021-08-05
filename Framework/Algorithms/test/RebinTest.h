@@ -507,14 +507,13 @@ public:
     MatrixWorkspace_sptr out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_Rebin_revLog");
     auto &outX = out->x(0);
 
-    TS_ASSERT_EQUALS(outX.size(), 7);
-    TS_ASSERT_EQUALS(outX[0], 1);
-    TS_ASSERT_EQUALS(outX[1], 6);
-    TS_ASSERT_EQUALS(outX[2], 22);
-    TS_ASSERT_EQUALS(outX[3], 30);
-    TS_ASSERT_EQUALS(outX[4], 34);
-    TS_ASSERT_EQUALS(outX[5], 36);
-    TS_ASSERT_EQUALS(outX[6], 37);
+    TS_ASSERT_EQUALS(outX.size(), 6);
+    TS_ASSERT_DELTA(outX[0], 1, 1e-5);
+    TS_ASSERT_DELTA(outX[1], 22, 1e-5);
+    TS_ASSERT_DELTA(outX[2], 30, 1e-5);
+    TS_ASSERT_DELTA(outX[3], 34, 1e-5);
+    TS_ASSERT_DELTA(outX[4], 36, 1e-5);
+    TS_ASSERT_DELTA(outX[5], 37, 1e-5);
     AnalysisDataService::Instance().remove("test_Rebin_revLog");
   }
 
@@ -528,24 +527,24 @@ public:
     rebin.initialize();
     rebin.setPropertyValue("InputWorkspace", "test_Rebin_revLog");
     rebin.setPropertyValue("OutputWorkspace", "test_Rebin_revLog");
-    rebin.setPropertyValue("Params", "1, -0.5, 37");
+    rebin.setPropertyValue("Params", "1, -2, 42");
     rebin.setProperty("UseReverseLogarithmic", true);
     TS_ASSERT_THROWS_NOTHING(rebin.execute());
 
     MatrixWorkspace_sptr out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_Rebin_revLog");
     auto &outX = out->x(0);
 
-    TS_ASSERT_EQUALS(outX.size(), 10);
-    TS_ASSERT_EQUALS(outX[0], 1);
-    TS_ASSERT_EQUALS(outX[7], 35.75);
-    TS_ASSERT_EQUALS(outX[8], 36.5);
-    TS_ASSERT_EQUALS(outX[9], 37);
+    TS_ASSERT_EQUALS(outX.size(), 4);
+    TS_ASSERT_DELTA(outX[0], 1, 1e-5);
+    TS_ASSERT_DELTA(outX[1], 34, 1e-5);
+    TS_ASSERT_DELTA(outX[2], 40, 1e-5);
+    TS_ASSERT_DELTA(outX[3], 42, 1e-5);
     AnalysisDataService::Instance().remove("test_Rebin_revLog");
   }
 
   void test_reverseLogEdgeCase() {
-    // Check that if the parameters given are so that the edges of the bins fall perfectly, there is no offset by one in
-    // the split
+    // Check the case where the parameters given are so that the edges of the bins fall perfectly, and so no padding is
+    // needed
     Workspace2D_sptr test_1D = Create1DWorkspace(51);
     test_1D->setDistribution(false);
     AnalysisDataService::Instance().add("test_Rebin_revLog", test_1D);
@@ -554,18 +553,19 @@ public:
     rebin.initialize();
     rebin.setPropertyValue("InputWorkspace", "test_Rebin_revLog");
     rebin.setPropertyValue("OutputWorkspace", "test_Rebin_revLog");
-    rebin.setPropertyValue("Params", "30, -1, 37");
+    rebin.setPropertyValue("Params", "1, -1, 16");
     rebin.setProperty("UseReverseLogarithmic", true);
     TS_ASSERT_THROWS_NOTHING(rebin.execute());
 
     MatrixWorkspace_sptr out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_Rebin_revLog");
     auto &outX = out->x(0);
 
-    TS_ASSERT_EQUALS(outX.size(), 4);
-    TS_ASSERT_EQUALS(outX[0], 30);
-    TS_ASSERT_EQUALS(outX[1], 34);
-    TS_ASSERT_EQUALS(outX[2], 36);
-    TS_ASSERT_EQUALS(outX[3], 37);
+    TS_ASSERT_EQUALS(outX.size(), 5);
+    TS_ASSERT_DELTA(outX[0], 1, 1e-5)
+    TS_ASSERT_DELTA(outX[1], 9, 1e-5);
+    TS_ASSERT_DELTA(outX[2], 13, 1e-5);
+    TS_ASSERT_DELTA(outX[3], 15, 1e-5);
+    TS_ASSERT_DELTA(outX[4], 16, 1e-5);
     AnalysisDataService::Instance().remove("test_Rebin_revLog");
   }
 
@@ -579,22 +579,21 @@ public:
     rebin.initialize();
     rebin.setPropertyValue("InputWorkspace", "test_Rebin_revLog");
     rebin.setPropertyValue("OutputWorkspace", "test_Rebin_revLog");
-    rebin.setPropertyValue("Params", "1, 2, 15, -1, 37");
+    rebin.setPropertyValue("Params", "1, 2, 5, -1, 100");
     rebin.setProperty("UseReverseLogarithmic", true);
     TS_ASSERT_THROWS_NOTHING(rebin.execute());
 
     MatrixWorkspace_sptr out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_Rebin_revLog");
     auto &outX = out->x(0);
 
-    TS_ASSERT_EQUALS(outX.size(), 13);
-    TS_ASSERT_EQUALS(outX[0], 1);
-    TS_ASSERT_EQUALS(outX[6], 13);
-    TS_ASSERT_EQUALS(outX[7], 15);
-    TS_ASSERT_EQUALS(outX[8], 22);
-    TS_ASSERT_EQUALS(outX[9], 30);
-    TS_ASSERT_EQUALS(outX[10], 34);
-    TS_ASSERT_EQUALS(outX[11], 36);
-    TS_ASSERT_EQUALS(outX[12], 37);
+    TS_ASSERT_EQUALS(outX.size(), 7); // 2 lin + 4 log
+    TS_ASSERT_DELTA(outX[0], 1, 1e-5);
+    TS_ASSERT_DELTA(outX[1], 3, 1e-5);
+    TS_ASSERT_DELTA(outX[2], 5, 1e-5);
+    TS_ASSERT_DELTA(outX[3], 65, 1e-5);
+    TS_ASSERT_DELTA(outX[4], 85, 1e-5);
+    TS_ASSERT_DELTA(outX[5], 95, 1e-5);
+    TS_ASSERT_DELTA(outX[6], 100, 1e-5);
     AnalysisDataService::Instance().remove("test_Rebin_revLog");
   }
 
@@ -609,27 +608,30 @@ public:
     rebin.initialize();
     rebin.setPropertyValue("InputWorkspace", "test_Rebin_revLog");
     rebin.setPropertyValue("OutputWorkspace", "test_Rebin_revLog");
-    rebin.setPropertyValue("Params", "1, 2, 15, -1, 36, 0.5, 38");
+    rebin.setPropertyValue("Params", "1, 2, 5, -1, 100, 2, 110");
     rebin.setProperty("UseReverseLogarithmic", true);
     TS_ASSERT_THROWS_NOTHING(rebin.execute());
 
     MatrixWorkspace_sptr out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_Rebin_revLog");
     auto &outX = out->x(0);
 
-    TS_ASSERT_EQUALS(outX.size(), 16);
-    TS_ASSERT_EQUALS(outX[0], 1);
-    TS_ASSERT_EQUALS(outX[6], 13);
-    TS_ASSERT_EQUALS(outX[7], 15);
-    TS_ASSERT_EQUALS(outX[8], 22);
-    TS_ASSERT_EQUALS(outX[9], 30);
-    TS_ASSERT_EQUALS(outX[10], 34);
-    TS_ASSERT_EQUALS(outX[11], 36);
-    TS_ASSERT_EQUALS(outX[12], 36.5);
+    TS_ASSERT_EQUALS(outX.size(), 12);
+    TS_ASSERT_DELTA(outX[0], 1, 1e-5);
+    TS_ASSERT_DELTA(outX[1], 3, 1e-5);
+    TS_ASSERT_DELTA(outX[2], 5, 1e-5);
+    TS_ASSERT_DELTA(outX[3], 65, 1e-5);
+    TS_ASSERT_DELTA(outX[4], 85, 1e-5);
+    TS_ASSERT_DELTA(outX[5], 95, 1e-5);
+    TS_ASSERT_DELTA(outX[6], 100, 1e-5);
+    TS_ASSERT_DELTA(outX[7], 102, 1e-5);
+    TS_ASSERT_DELTA(outX[11], 110, 1e-5);
+
     AnalysisDataService::Instance().remove("test_Rebin_revLog");
   }
 
   void test_reverseLogFullBinsOnly() {
-    // Test UseReverseLogarithmic with the FullBinsOnly option checked. It should change absolutely nothing
+    // Test UseReverseLogarithmic with the FullBinsOnly option checked. It should not change anything from the non
+    // checked version.
     Workspace2D_sptr test_1D = Create1DWorkspace(51);
     test_1D->setDistribution(false);
     AnalysisDataService::Instance().add("test_Rebin_revLog", test_1D);
@@ -646,14 +648,44 @@ public:
     MatrixWorkspace_sptr out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_Rebin_revLog");
     auto &outX = out->x(0);
 
+    TS_ASSERT_EQUALS(outX.size(), 6);
+    TS_ASSERT_DELTA(outX[0], 1, 1e-5);
+    TS_ASSERT_DELTA(outX[1], 22, 1e-5);
+    TS_ASSERT_DELTA(outX[2], 30, 1e-5);
+    TS_ASSERT_DELTA(outX[3], 34, 1e-5);
+    TS_ASSERT_DELTA(outX[4], 36, 1e-5);
+    TS_ASSERT_DELTA(outX[5], 37, 1e-5);
+
+    AnalysisDataService::Instance().remove("test_Rebin_revLog");
+  }
+
+  void test_reverseLogIncompleteFirstBin() {
+    // Test UseReverseLogarithmic with a first bin that is incomplete, but still bigger than the next one so not merged.
+    Workspace2D_sptr test_1D = Create1DWorkspace(51);
+    test_1D->setDistribution(false);
+    AnalysisDataService::Instance().add("test_Rebin_revLog", test_1D);
+
+    Rebin rebin;
+    rebin.initialize();
+    rebin.setPropertyValue("InputWorkspace", "test_Rebin_revLog");
+    rebin.setPropertyValue("OutputWorkspace", "test_Rebin_revLog");
+    rebin.setPropertyValue("Params", "1, -1, 60");
+    rebin.setProperty("UseReverseLogarithmic", true);
+    rebin.setProperty("FullBinsOnly", true);
+    TS_ASSERT_THROWS_NOTHING(rebin.execute());
+
+    MatrixWorkspace_sptr out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_Rebin_revLog");
+    auto &outX = out->x(0);
+
     TS_ASSERT_EQUALS(outX.size(), 7);
-    TS_ASSERT_EQUALS(outX[0], 1);
-    TS_ASSERT_EQUALS(outX[1], 6);
-    TS_ASSERT_EQUALS(outX[2], 22);
-    TS_ASSERT_EQUALS(outX[3], 30);
-    TS_ASSERT_EQUALS(outX[4], 34);
-    TS_ASSERT_EQUALS(outX[5], 36);
-    TS_ASSERT_EQUALS(outX[6], 37);
+    TS_ASSERT_DELTA(outX[0], 1, 1e-5);
+    TS_ASSERT_DELTA(outX[1], 29, 1e-5);
+    TS_ASSERT_DELTA(outX[2], 45, 1e-5);
+    TS_ASSERT_DELTA(outX[3], 53, 1e-5);
+    TS_ASSERT_DELTA(outX[4], 57, 1e-5);
+    TS_ASSERT_DELTA(outX[5], 59, 1e-5);
+    TS_ASSERT_DELTA(outX[6], 60, 1e-5);
+
     AnalysisDataService::Instance().remove("test_Rebin_revLog");
   }
 

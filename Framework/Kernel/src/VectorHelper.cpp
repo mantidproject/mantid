@@ -70,30 +70,27 @@ int DLLExport createAxisFromRebinParams(const std::vector<double> &params, std::
   if (resize_xnew)
     xnew.emplace_back(xcurr);
 
-  int n0 = -1;
-
   while ((ibound <= ibounds) && (istep <= isteps)) {
     // if step is negative then it is logarithmic step
     bool isLogBin = (fullParams[istep] < 0.0);
     bool isReverseLogBin = isLogBin && useReverseLogarithmic;
+    double alpha = std::fabs(fullParams[istep]);
+
+    if (isReverseLogBin && xcurr == fullParams[ibound - 2]) {
+      // we are starting a new bin, but since it is a rev log, xcurr needs to be at its end
+      xcurr = fullParams[ibound];
+    }
 
     if (!isLogBin)
       xs = fullParams[istep];
     else {
       if (useReverseLogarithmic) {
-        double alpha = std::fabs(fullParams[istep]);
-        double x0 = fullParams[ibound];
+        // we go through a reverse log bin by starting from its end, and working our way back to the beginning
+        // this way we can define the bins in a reccuring way, and with a more obvious closeness with the usual log.
+        double x0 = fullParams[ibound - 2];
+        double step = x0 + fullParams[ibound] - xcurr;
 
-        if (n0 < 0) {
-          // if n0 is negative, that means we are starting a new reverse log interval split. In this case, we compute
-          // n0, which is the number of bins this interval still has to be split in.
-
-          // this is the formula for n0
-          n0 = static_cast<int>(std::ceil(std::log((xcurr - xMaxHint) / (x0 - xMaxHint)) / std::log1p(alpha) - 1));
-        }
-
-        xs = std::pow(1 + alpha, n0) * (x0 - xMaxHint) + xMaxHint - xcurr;
-        n0 -= 1;
+        xs = -step * alpha;
 
       } else
         xs = xcurr * fabs(fullParams[istep]);
@@ -106,10 +103,9 @@ int DLLExport createAxisFromRebinParams(const std::vector<double> &params, std::
       throw std::runtime_error("An infinite or NaN value was found in the binning parameters.");
     }
 
-    if ((xcurr + xs * (1.0 + lastBinCoef) <= fullParams[ibound]) ||
-        (isReverseLogBin && (xcurr + xs < fullParams[ibound]))) {
+    if ((!isReverseLogBin && xcurr + xs * (1.0 + lastBinCoef) <= fullParams[ibound]) ||
+        (isReverseLogBin && xcurr + 2 * xs >= fullParams[ibound - 2])) {
       // If we can still fit current bin _plus_ specified portion of a last bin, continue
-      // For reverse log, as long as the next xcurr is within the bound, continue.
       xcurr += xs;
 
     } else {
@@ -123,9 +119,10 @@ int DLLExport createAxisFromRebinParams(const std::vector<double> &params, std::
           // For non full_bins_only, finish by adding as much as is left from the range
           xcurr = fullParams[ibound];
       } else {
+        // we have finished this range, because its starting time has already been added, so we jump back to the last
+        // value of the bin and resume normal behaviour
         xcurr = fullParams[ibound];
       }
-
       istep += 2;
       ibound += 2;
     }
@@ -133,6 +130,7 @@ int DLLExport createAxisFromRebinParams(const std::vector<double> &params, std::
       xnew.emplace_back(xcurr);
     inew++;
   }
+  std::sort(xnew.begin(), xnew.end());
   return inew;
 }
 
