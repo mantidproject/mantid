@@ -73,6 +73,8 @@ class CalibrationPresenter(object):
         elif self.view.get_load_checked() and self.validate_path():
             self.model.load_existing_calibration_files(self.pending_calibration)
             self.set_current_calibration()
+            # set_setting(path_handling.INTERFACES_SETTINGS_GROUP, path_handling.ENGINEERING_PREFIX,
+            #             "last_calibration_path", filename)
 
     def start_calibration_worker(self, plot_output):
         """
@@ -104,8 +106,8 @@ class CalibrationPresenter(object):
         self.pending_calibration.clear()
 
     def set_field_values(self):
-        self.view.set_sample_text(self.current_calibration.get_sample())
-        self.view.set_vanadium_text(self.current_calibration.get_vanadium())
+        self.view.set_sample_text(self.current_calibration.get_sample_runno())
+        self.view.set_vanadium_text(self.current_calibration.get_vanadium_runno())
 
     def set_instrument_override(self, instrument):
         instrument = INSTRUMENT_DICT[instrument]

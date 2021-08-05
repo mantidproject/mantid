@@ -104,7 +104,7 @@ class GroupingInfo:
         # fname has form INSTRUMENT_VanadiumRunNo_ceriaRunNo_BANKS
         # BANKS can be "all_banks, "bank_1", "bank_2", "Cropped", "Custom"
         fname_words = fname.split('_')
-        suffix = fname_words[-1]
+        suffix = fname_words[-1].split('.')[0] # take last element and remove extension
         if any(grp.value == suffix for grp in GROUP):
             self.group = GROUP(suffix)
             self.prm_filepath = file_path

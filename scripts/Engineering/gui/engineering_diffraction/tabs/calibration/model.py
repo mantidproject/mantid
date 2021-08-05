@@ -97,21 +97,6 @@ class CalibrationModel(object):
 
         return [params_north, params_south]
 
-    def plot_output(self, diag_ws, diff_consts):
-        """
-        Don't like the way EnggUtils.generate_tof_fit_dictionary relies on hard-coding of ws names
-        If EnginX script deosn't use this func I'd be tempted to move into model
-        """
-        plot_dicts = list()
-        if len(cal_params) == 1:
-            plot_dicts.append(EnggUtils.generate_tof_fit_dictionary(group_name))
-            EnggUtils.plot_tof_fit(plot_dicts, [group_name])
-        else:
-            # want to get rid of special code like this for both banks
-            plot_dicts.append(EnggUtils.generate_tof_fit_dictionary("bank_1"))
-            plot_dicts.append(EnggUtils.generate_tof_fit_dictionary("bank_2"))
-            EnggUtils.plot_tof_fit(plot_dicts, ["bank_1", "bank_2"])
-
     def load_existing_calibration_files(self, calibration):
         # load prm
         prm_filepath = calibration.prm_filepath
@@ -126,9 +111,11 @@ class CalibrationModel(object):
         except RuntimeError:
             logger.error(f"Invalid file selected: {prm_filepath}")
             return
+        # how about grouping ws if made?
+        calibration.load_relevant_calibration_files()
         # load vanadium workspaces
         inst = calibration.get_instrument()
-        van_fname = inst + calibration.get_vanadium()
+        van_fname = inst + calibration.get_vanadium_path()
         vanadium_corrections.fetch_correction_workspaces(van_fname, inst, is_load=True)
 
     @staticmethod
