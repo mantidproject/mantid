@@ -14,8 +14,11 @@ class ILL_SANS_D11_MONO_TEST(systemtesting.MantidSystemTest):
     '''
 
     def __init__(self):
-        super(D11_Mono_Test, self).__init__()
+        super(ILL_SANS_D11_MONO_TEST, self).__init__()
         self.setUp()
+        self.facility = config['default.facility']
+        self.instrument = config['default.instrument']
+        self.directories = config['datasearch.directories']
 
     def setUp(self):
         config['default.facility'] = 'ILL'
@@ -24,6 +27,9 @@ class ILL_SANS_D11_MONO_TEST(systemtesting.MantidSystemTest):
 
     def cleanup(self):
         mtd.clear()
+        config['default.facility'] = self.facility
+        config['default.instrument'] = self.instrument
+        config['datasearch.directories'] = self.directories
 
     def validate(self):
         self.tolerance = 1e-3
@@ -135,3 +141,79 @@ class ILL_SANS_D11_MONO_TEST(systemtesting.MantidSystemTest):
                          FluxWorkspace='sflux')
         GroupWorkspaces(InputWorkspaces=['water', 'sens', 'sample_sens', 'sample_water'],
                         OutputWorkspace='out')
+
+
+class ILL_SANS_D22_MONO_TEST(systemtesting.MantidSystemTest):
+    '''
+    Tests a standard monochromatic reduction with the v2 of the algorithm and data from the old D22
+    '''
+
+    def __init__(self):
+        super(ILL_SANS_D22_MONO_TEST, self).__init__()
+        self.setUp()
+        self.facility = config['default.facility']
+        self.instrument = config['default.instrument']
+        self.directories = config['datasearch.directories']
+
+    def setUp(self):
+        config['default.facility'] = 'ILL'
+        config['default.instrument'] = 'D22'
+        config.appendDataSearchSubDir('ILL/D22/')
+
+    def cleanup(self):
+        mtd.clear()
+        config['default.facility'] = self.facility
+        config['default.instrument'] = self.instrument
+        config['datasearch.directories'] = self.directories
+
+    def validate(self):
+        self.tolerance = 1e-3
+        self.tolerance_is_rel_err = True
+        self.disableChecking = ['Instrument']
+        return ['out', 'ILL_SANS_D22_MONO.nxs']
+
+    def runTest(self):
+        # Load the mask
+        LoadNexusProcessed(Filename='D22_mask.nxs',
+                           OutputWorkspace='mask')
+
+        # Absorber
+        SANSILLReduction(Runs='241238',
+                         ProcessAs='DarkCurrent',
+                         OutputWorkspace='cad')
+
+        # Beam
+        SANSILLReduction(Runs='241226',
+                         ProcessAs='EmptyBeam',
+                         DarkCurrentWorkspace='cad',
+                         OutputWorkspace='mt',
+                         OutputFluxWorkspace='fl')
+
+        # Container transmission known
+        CreateSingleValuedWorkspace(DataValue=0.94638, ErrorValue=0.0010425, OutputWorkspace='ctr')
+        AddSampleLog(Workspace='ctr', LogName='ProcessedAs', LogText='Transmission')
+        AddSampleLog(Workspace='ctr', LogName='wavelength', LogText='6.0', LogType='Number', LogUnit='Angstrom')
+
+        # Container
+        SANSILLReduction(Runs='241239',
+                         ProcessAs='EmptyContainer',
+                         DarkCurrentWorkspace='cad',
+                         EmptyBeamWorkspace='mt',
+                         TransmissionWorkspace='ctr',
+                         OutputWorkspace='can')
+
+        # Sample transmission known
+        CreateSingleValuedWorkspace(DataValue=0.52163, ErrorValue=0.00090538, OutputWorkspace='str')
+        AddSampleLog(Workspace='str', LogName='ProcessedAs', LogText='Transmission')
+        AddSampleLog(Workspace='str', LogName='wavelength', LogText='6.0', LogType='Number', LogUnit='Angstrom')
+
+        # Sample
+        SANSILLReduction(Runs='241240',
+                         ProcessAs='Sample',
+                         DarkCurrentWorkspace='cad',
+                         EmptyBeamWorkspace='mt',
+                         TransmissionWorkspace='str',
+                         EmptyContainerWorkspace='can',
+                         MaskWorkspace='mask',
+                         FluxWorkspace='fl',
+                         OutputWorkspace='out')

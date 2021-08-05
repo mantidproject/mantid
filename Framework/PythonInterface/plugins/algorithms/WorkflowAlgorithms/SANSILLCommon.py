@@ -30,6 +30,16 @@ def check_distances_match(ws1, ws2):
         logger.warning(f'Distance difference out of tolerance {r1}: {l2_1}, {r2}: {l2_2}')
 
 
+def get_wavelength(ws):
+    run = ws.getRun()
+    if 'wavelength' in run:
+        return run['wavelength'].value
+    elif 'selector.wavelength' in run:
+        return run['selector.wavelength']
+    else:
+        raise RuntimeError('Unable to find the wavelength in workspace ' + ws.name())
+
+
 def check_wavelengths_match(ws1, ws2):
     """
         Checks if the wavelength difference between the data is close enough
@@ -37,8 +47,8 @@ def check_wavelengths_match(ws1, ws2):
         @param ws2 : workspace 2
     """
     tolerance = 0.01 # AA
-    wavelength_1 = ws1.getRun().getLogData('wavelength').value
-    wavelength_2 = ws2.getRun().getLogData('wavelength').value
+    wavelength_1 = get_wavelength(ws1)
+    wavelength_2 = get_wavelength(ws2)
     r1 = ws1.getRunNumber()
     r2 = ws2.getRunNumber()
     if fabs(wavelength_1 - wavelength_2) > tolerance:
