@@ -22,7 +22,7 @@ from matplotlib.container import ErrorbarContainer
 from matplotlib.contour import QuadContourSet
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QCursor
-from qtpy.QtWidgets import QActionGroup, QMenu, QApplication
+from qtpy.QtWidgets import QActionGroup, QMenu, QApplication, QAction
 from matplotlib.colors import LogNorm, Normalize
 from matplotlib.collections import Collection
 from mpl_toolkits.mplot3d.axes3d import Axes3D
@@ -374,7 +374,7 @@ class FigureInteraction(object):
             self.add_error_bars_menu(menu, event.inaxes)
             self._add_marker_option_menu(menu, event)
             self._add_plot_type_option_menu(menu, event.inaxes)
-            self._add_legend_menu(menu, event)
+            self._add_legend_toggle_action(menu, event)
 
         menu.exec_(QCursor.pos())
 
@@ -510,10 +510,12 @@ class FigureInteraction(object):
 
         menu.addMenu(marker_menu)
 
-    def _add_legend_menu(self, menu, event):
-        legend_menu = QMenu("Legend", menu)
-        legend_menu.addAction("Show/Hide legend", lambda: self._toggle_legend_and_redraw(event.inaxes.axes))
-        menu.addMenu(legend_menu)
+    def _add_legend_toggle_action(self, menu, event):
+        legend = event.inaxes.axes.get_legend()
+        legend_action = QAction("Show legend", menu, checkable=True)
+        legend_action.setChecked(legend is not None and legend.get_visible())
+        legend_action.toggled.connect(lambda: self._toggle_legend_and_redraw(event.inaxes.axes))
+        menu.addAction(legend_action)
 
     def _add_plot_type_option_menu(self, menu, ax):
         with errorbar_caps_removed(ax):
