@@ -122,7 +122,7 @@ protected:
   void createSASRunElement(std::string &sasRun);
 
   /// this method creates a sasData element
-  void createSASDataElement(std::string &sasData);
+  void createSASDataElement(std::string &sasData, size_t workspaceIndex);
 
   /// this method creates a sasSource element
   void createSASSourceElement(std::string &sasSource);

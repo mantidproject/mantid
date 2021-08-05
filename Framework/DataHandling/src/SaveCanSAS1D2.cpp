@@ -113,7 +113,7 @@ void SaveCanSAS1D2::exec() {
   searchandreplaceSpecialChars(dataUnit);
 
   std::string sasData;
-  createSASDataElement(sasData);
+  createSASDataElement(sasData, 0);
   m_outFile << sasData;
 
   if (m_trans_ws) {

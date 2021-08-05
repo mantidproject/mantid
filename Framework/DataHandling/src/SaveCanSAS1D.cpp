@@ -168,7 +168,7 @@ void SaveCanSAS1D::exec() {
   searchandreplaceSpecialChars(dataUnit);
 
   std::string sasData;
-  createSASDataElement(sasData);
+  createSASDataElement(sasData, 0);
   m_outFile << sasData;
 
   std::string sasSample;
@@ -413,8 +413,9 @@ void SaveCanSAS1D::createSASRunElement(std::string &sasRun) {
 
 /** This method creates an XML element named "SASdata"
  *  @param sasData :: string for sasdata element in the xml
+ *  @param workspaceIndex :: workspace index to be exported in SASdata entry
  */
-void SaveCanSAS1D::createSASDataElement(std::string &sasData) {
+void SaveCanSAS1D::createSASDataElement(std::string &sasData, size_t workspaceIndex) {
   std::string dataUnit = m_workspace->YUnitLabel();
   // look for xml special characters and replace with entity refrence
   searchandreplaceSpecialChars(dataUnit);
@@ -429,53 +430,51 @@ void SaveCanSAS1D::createSASDataElement(std::string &sasData) {
   if (dataUnit == "I(q) (cm-1)")
     dataUnit = "1/cm";
 
-  for (size_t i = 0; i < m_workspace->getNumberHistograms(); ++i) {
-    const auto intensities = m_workspace->points(i);
-    auto intensityDeltas = m_workspace->pointStandardDeviations(i);
-    if (!intensityDeltas)
-      intensityDeltas = HistogramData::PointStandardDeviations(intensities.size(), 0.0);
-    const auto &ydata = m_workspace->y(i);
-    const auto &edata = m_workspace->e(i);
-    sasData += "\n\t\t<SASdata>";
-    for (size_t j = 0; j < ydata.size(); ++j) {
-      // x data is the QData in xml.If histogramdata take the mean
-      std::stringstream x;
-      x << intensities[j];
-      std::stringstream dx_str;
-      dx_str << intensityDeltas[j];
-      sasData += "\n\t\t\t<Idata><Q unit=\"1/A\">";
-      sasData += x.str();
-      sasData += "</Q>";
-      sasData += "<I unit=";
-      sasData += "\"";
-      sasData += dataUnit;
-      sasData += "\">";
-      //// workspace Y data is the I data in the xml file
-      std::stringstream y;
-      y << (ydata[j]);
-      sasData += y.str();
-      sasData += "</I>";
+  const auto intensities = m_workspace->points(workspaceIndex);
+  auto intensityDeltas = m_workspace->pointStandardDeviations(workspaceIndex);
+  if (!intensityDeltas)
+    intensityDeltas = HistogramData::PointStandardDeviations(intensities.size(), 0.0);
+  const auto &ydata = m_workspace->y(workspaceIndex);
+  const auto &edata = m_workspace->e(workspaceIndex);
+  sasData += "\n\t\t<SASdata>";
+  for (size_t j = 0; j < ydata.size(); ++j) {
+    // x data is the QData in xml.If histogramdata take the mean
+    std::stringstream x;
+    x << intensities[j];
+    std::stringstream dx_str;
+    dx_str << intensityDeltas[j];
+    sasData += "\n\t\t\t<Idata><Q unit=\"1/A\">";
+    sasData += x.str();
+    sasData += "</Q>";
+    sasData += "<I unit=";
+    sasData += "\"";
+    sasData += dataUnit;
+    sasData += "\">";
+    //// workspace Y data is the I data in the xml file
+    std::stringstream y;
+    y << (ydata[j]);
+    sasData += y.str();
+    sasData += "</I>";
 
-      // workspace error data is the Idev data in the xml file
-      std::stringstream e;
-      e << edata[j];
+    // workspace error data is the Idev data in the xml file
+    std::stringstream e;
+    e << edata[j];
 
-      sasData += "<Idev unit=";
-      sasData += "\"";
-      sasData += dataUnit;
-      sasData += "\">";
+    sasData += "<Idev unit=";
+    sasData += "\"";
+    sasData += dataUnit;
+    sasData += "\">";
 
-      sasData += e.str();
-      sasData += "</Idev>";
+    sasData += e.str();
+    sasData += "</Idev>";
 
-      sasData += "<Qdev unit=\"1/A\">";
-      sasData += dx_str.str();
-      sasData += "</Qdev>";
+    sasData += "<Qdev unit=\"1/A\">";
+    sasData += dx_str.str();
+    sasData += "</Qdev>";
 
-      sasData += "</Idata>";
-    }
-    sasData += "\n\t\t</SASdata>";
+    sasData += "</Idata>";
   }
+  sasData += "\n\t\t</SASdata>";
 }
 
 /** This method creates an XML element named "SASsample"
