@@ -448,17 +448,29 @@ void LoadILLSANS2::initWorkSpaceD33(NeXus::NXEntry &firstEntry, const std::strin
 size_t LoadILLSANS2::loadDataFromMonitors(NeXus::NXEntry &firstEntry, size_t firstIndex) {
 
   // let's find the monitors; should be monitor1 and monitor2
-  for (std::vector<NXClassInfo>::const_iterator it = firstEntry.groups().begin(); it != firstEntry.groups().end();
-       ++it) {
+  bool monitor1 = true;
+  for (auto it = firstEntry.groups().begin(); it != firstEntry.groups().end(); ++it) {
     if (it->nxclass == "NXmonitor") {
       NXData dataGroup = firstEntry.openNXData(it->nxname);
       NXInt data = dataGroup.openIntData();
       data.load();
-      g_log.debug() << "Monitor: " << it->nxname << " dims = " << data.dim0() << "x" << data.dim1() << "x"
-                    << data.dim2() << '\n';
-      const HistogramData::Counts histoCounts(data(), data() + data.dim2());
+      HistogramData::Counts histoCounts;
+      HistogramData::CountVariances histoVariances;
+      if ((monitor1 && m_instrumentName == "D16") ||
+          (!monitor1 && m_instrumentName != "D16")) { // This hijacks the empty monitor and fills it with duration,
+                                                      // M1 for D16, M2 for D11(B), D22(B), and D33
+        NXFloat durations = firstEntry.openNXFloat("duration");
+        if (m_measurementType == MeasurementType::KINETIC) {
+          durations = firstEntry.openNXFloat("slices");
+        }
+        durations.load();
+        histoCounts = HistogramData::Counts(durations(), durations() + data.dim2());
+        histoVariances = HistogramData::CountVariances(std::vector<double>(data.dim2(), 0));
+      } else {
+        histoCounts = HistogramData::Counts(data(), data() + data.dim2());
+        histoVariances = HistogramData::CountVariances(data(), data() + data.dim2());
+      }
       m_localWorkspace->setCounts(firstIndex, std::move(histoCounts));
-      const HistogramData::CountVariances histoVariances(data(), data() + data.dim2());
       m_localWorkspace->setCountVariances(firstIndex, std::move(histoVariances));
 
       if (m_measurementType == MeasurementType::TOF) {
@@ -477,6 +489,7 @@ size_t LoadILLSANS2::loadDataFromMonitors(NeXus::NXEntry &firstEntry, size_t fir
         runDetails.addProperty("monitor", averageMonitorCounts, true);
       }
       firstIndex++;
+      monitor1 = false;
     }
   }
   return firstIndex;
