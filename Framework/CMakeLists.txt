@@ -5,13 +5,6 @@ if(stdint)
   add_definitions(-DHAVE_STDINT_H)
 endif()
 
-# Globally-linked libraries variable
-
-# Might just as well link everything to Boost & Poco (found in CommonSetup)
-# Boost_LIBRARIES variable is redefined by MPISetup so capture the value here
-# and just add MPI stuff if required
-set(MANTIDLIBS ${Boost_LIBRARIES} ${POCO_LIBRARIES})
-
 # MPI-enable build setup
 
 # Only available on Linux (specifically RedHat), and for a framework-only build
@@ -19,7 +12,6 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
   option(MPI_BUILD "Enable MPI options")
   if(MPI_BUILD)
     include(MPISetup)
-    set(MANTIDLIBS ${MANTIDLIBS} ${Boost_LIBRARIES} ${MPI_CXX_LIBRARIES})
   endif(MPI_BUILD)
 endif()
 
@@ -35,60 +27,21 @@ add_custom_target(FrameworkTests) # target for all framework tests
 add_dependencies(check FrameworkTests)
 add_dependencies(FrameworkTests Framework)
 
-include_directories(Types/inc)
+
 add_subdirectory(Types)
-set(MANTIDLIBS ${MANTIDLIBS} Types)
-
-include_directories(Json/inc)
 add_subdirectory(Json)
-set(MANTIDLIBS ${MANTIDLIBS} Json)
-
-include_directories(Kernel/inc)
 add_subdirectory(Kernel)
-
-include_directories(Parallel/inc)
 add_subdirectory(Parallel)
-
-include_directories(HistogramData/inc)
-add_subdirectory(HistogramData)
-
-include_directories(Indexing/inc)
-add_subdirectory(Indexing)
-
-include_directories(Beamline/inc)
-add_subdirectory(Beamline)
-
-set(MANTIDLIBS ${MANTIDLIBS} Parallel)
 # HistogramData has header-only dependency on Kernel, so Kernel comes after.
-set(MANTIDLIBS ${MANTIDLIBS} HistogramData)
-set(MANTIDLIBS ${MANTIDLIBS} Indexing)
-set(MANTIDLIBS ${MANTIDLIBS} Kernel)
-set(MANTIDLIBS ${MANTIDLIBS} Beamline)
-
-# muParser needed by Geometry and subsequent packages
-include_directories(${MUPARSER_INCLUDE_DIR})
-set(MANTIDLIBS ${MANTIDLIBS} ${MUPARSER_LIBRARIES})
-
-include_directories(Geometry/inc)
+add_subdirectory(HistogramData)
+add_subdirectory(Indexing)
+add_subdirectory(Beamline)
 add_subdirectory(Geometry)
-set(MANTIDLIBS ${MANTIDLIBS} Geometry)
-
-include_directories(API/inc)
 add_subdirectory(API)
-set(MANTIDLIBS ${MANTIDLIBS} API)
-
-include_directories(NexusGeometry/inc)
 add_subdirectory(NexusGeometry)
-set(MANTIDLIBS ${MANTIDLIBS} NexusGeometry)
-
 add_subdirectory(PythonInterface)
-
-include_directories(DataObjects/inc)
 add_subdirectory(DataObjects)
-set(MANTIDLIBS ${MANTIDLIBS} DataObjects)
-
 add_subdirectory(Catalog)
-
 add_subdirectory(Nexus)
 add_subdirectory(DataHandling)
 add_subdirectory(Algorithms)
@@ -225,4 +178,29 @@ endforeach()
 # for a Framework only
 if(NOT FULL_PACKAGE_BUILD)
   add_subdirectory(PostInstall)
+endif()
+
+if (CONDA_BUILD)
+configure_package_config_file(${CMAKE_SOURCE_DIR}/buildconfig/CMake/MantidFrameworkConfig.cmake.in
+  ${CMAKE_CURRENT_BINARY_DIR}/MantidFrameworkConfig.cmake
+  INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MantidFramework)
+
+write_basic_package_version_file(
+  ${CMAKE_CURRENT_BINARY_DIR}/MantidFrameworkConfigVersion.cmake
+  VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}
+  COMPATIBILITY SameMajorVersion )
+
+install(FILES
+          "${CMAKE_CURRENT_BINARY_DIR}/MantidFrameworkConfig.cmake"
+          "${CMAKE_CURRENT_BINARY_DIR}/MantidFrameworkConfigVersion.cmake"
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MantidFramework
+)
+
+install(FILES
+${CMAKE_SOURCE_DIR}/buildconfig/CMake/FindNexus.cmake
+${CMAKE_SOURCE_DIR}/buildconfig/CMake/FindJsonCPP.cmake
+${CMAKE_SOURCE_DIR}/buildconfig/CMake/FindTBB.cmake
+${CMAKE_SOURCE_DIR}/buildconfig/CMake/FindMuParser.cmake
+DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MantidFramework/find_modules
+)
 endif()

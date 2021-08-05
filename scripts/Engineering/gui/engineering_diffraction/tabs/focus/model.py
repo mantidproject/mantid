@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 
 from Engineering.common import path_handling
 from Engineering.gui.engineering_diffraction.tabs.common import vanadium_corrections
+from Engineering.gui.engineering_diffraction.tabs.common import output_settings
 from Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 from Engineering import EnggUtils
 from mantid.simpleapi import logger, AnalysisDataService as Ads, SaveNexus, SaveGSS, SaveFocusedXYE, \
@@ -46,8 +47,8 @@ class FocusModel(object):
         :param rb_num: Number to signify the user who is running this focus
         :param regions_dict: dict region name -> grp_ws_name, defining region(s) of interest to focus over
         """
-        full_calib_path = get_setting(path_handling.INTERFACES_SETTINGS_GROUP,
-                                      path_handling.ENGINEERING_PREFIX, "full_calibration")
+        full_calib_path = get_setting(output_settings.INTERFACES_SETTINGS_GROUP,
+                                      output_settings.ENGINEERING_PREFIX, "full_calibration")
         if not Ads.doesExist("full_inst_calib"):
             try:
                 full_calib_workspace = Load(full_calib_path, OutputWorkspace="full_inst_calib")
@@ -263,49 +264,44 @@ class FocusModel(object):
                                                rb_num, unit)
         self._save_focused_output_files_as_topas_xye(instrument, sample_path, bank, sample_workspace,
                                                      rb_num, unit)
-        output_path = path.join(path_handling.get_output_path(), 'Focus')
+        output_path = path.join(output_settings.get_output_path(), 'Focus')
         logger.notice(f"\n\nFocus files saved to: \"{output_path}\"\n\n")
         if rb_num:
-            output_path = path.join(path_handling.get_output_path(), 'User', rb_num, 'Focus')
+            output_path = path.join(output_settings.get_output_path(), 'User', rb_num, 'Focus')
             logger.notice(f"\n\nFocus files also saved to: \"{output_path}\"\n\n")
 
     def _save_focused_output_files_as_gss(self, instrument, sample_path, bank, sample_workspace,
                                           rb_num, unit):
-        gss_output_path = path.join(
-            path_handling.get_output_path(), "Focus",
-            self._generate_output_file_name(instrument, sample_path, bank, unit, ".gss"))
+        gss_output_path = path.join(output_settings.get_output_path(), "Focus",
+                                    self._generate_output_file_name(instrument, sample_path, bank, unit, ".gss"))
         SaveGSS(InputWorkspace=sample_workspace, Filename=gss_output_path)
         if rb_num:
-            gss_output_path = path.join(
-                path_handling.get_output_path(), "User", rb_num, "Focus",
-                self._generate_output_file_name(instrument, sample_path, bank, unit, ".gss"))
+            gss_output_path = path.join(output_settings.get_output_path(), "User", rb_num, "Focus",
+                                        self._generate_output_file_name(instrument, sample_path, bank, unit, ".gss"))
             SaveGSS(InputWorkspace=sample_workspace, Filename=gss_output_path)
 
     def _save_focused_output_files_as_nexus(self, instrument, sample_path, bank, sample_workspace,
                                             rb_num, unit):
         file_name = self._generate_output_file_name(instrument, sample_path, bank, unit, ".nxs")
-        nexus_output_path = path.join(path_handling.get_output_path(), "Focus", file_name)
+        nexus_output_path = path.join(output_settings.get_output_path(), "Focus", file_name)
         SaveNexus(InputWorkspace=sample_workspace, Filename=nexus_output_path)
         if rb_num:
-            nexus_output_path = path.join(
-                path_handling.get_output_path(), "User", rb_num, "Focus", file_name)
+            nexus_output_path = path.join(output_settings.get_output_path(), "User", rb_num, "Focus", file_name)
             SaveNexus(InputWorkspace=sample_workspace, Filename=nexus_output_path)
         if unit == "TOF":
             self._last_focused_files.append(nexus_output_path)
 
     def _save_focused_output_files_as_topas_xye(self, instrument, sample_path, bank,
                                                 sample_workspace, rb_num, unit):
-        xye_output_path = path.join(
-            path_handling.get_output_path(), "Focus",
-            self._generate_output_file_name(instrument, sample_path, bank, unit, ".abc"))
+        xye_output_path = path.join(output_settings.get_output_path(), "Focus",
+                                    self._generate_output_file_name(instrument, sample_path, bank, unit, ".abc"))
         SaveFocusedXYE(InputWorkspace=sample_workspace,
                        Filename=xye_output_path,
                        SplitFiles=False,
                        Format="TOPAS")
         if rb_num:
-            xye_output_path = path.join(
-                path_handling.get_output_path(), "User", rb_num, "Focus",
-                self._generate_output_file_name(instrument, sample_path, bank, unit, ".abc"))
+            xye_output_path = path.join(output_settings.get_output_path(), "User", rb_num, "Focus",
+                                        self._generate_output_file_name(instrument, sample_path, bank, unit, ".abc"))
             SaveFocusedXYE(InputWorkspace=sample_workspace,
                            Filename=xye_output_path,
                            SplitFiles=False,
@@ -329,13 +325,13 @@ class FocusModel(object):
             except ValueError:
                 logger.information(f"Could not convert {name} to a numerical value. It will not be included in the "
                                    f"sample logs output file.")
-        focus_dir = path.join(path_handling.get_output_path(), "Focus")
+        focus_dir = path.join(output_settings.get_output_path(), "Focus")
         if not path.exists(focus_dir):
             makedirs(focus_dir)
         output_path = path.join(focus_dir, (instrument + "_" + run_number + "_sample_logs.csv"))
         write_to_file()
         if rb_num:
-            focus_user_dir = path.join(path_handling.get_output_path(), "User", rb_num, "Focus")
+            focus_user_dir = path.join(output_settings.get_output_path(), "User", rb_num, "Focus")
             if not path.exists(focus_user_dir):
                 makedirs(focus_user_dir)
             output_path = path.join(focus_user_dir, (instrument + "_" + run_number + "_sample_logs.csv"))

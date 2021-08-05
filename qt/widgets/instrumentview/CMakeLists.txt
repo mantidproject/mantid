@@ -155,50 +155,6 @@ set(UI_FILES inc/MantidQtWidgets/InstrumentView/UCorrectionDialog.ui)
 
 # Target
 mtd_add_qt_library(TARGET_NAME MantidQtWidgetsInstrumentView
-                   QT_VERSION 4
-                   SRC
-                     ${SRC_FILES}
-                     ${QT4_SRC_FILES}
-                   MOC
-                     ${MOC_FILES}
-                     ${QT4_MOC_FILES}
-                   NOMOC
-                     ${INC_FILES}
-                     ${QT4_INC_FILES}
-                   UI
-                     ${UI_FILES}
-                   RES
-                     ../../../images/instrumentview.qrc
-                   DEFS
-                     IN_MANTIDQT_INSTRUMENTVIEW
-                   INCLUDE_DIRS
-                     inc
-                     ../../../Framework/DataObjects/inc
-                   SYSTEM_INCLUDE_DIRS
-                     ${Boost_INCLUDE_DIRS}
-                   LINK_LIBS
-                     ${CORE_MANTIDLIBS}
-                     DataObjects
-                     ${POCO_LIBRARIES}
-                     ${Boost_LIBRARIES}
-                     ${PYTHON_LIBRARIES}
-                     ${OPENGL_gl_LIBRARY}
-                     ${OPENGL_glu_LIBRARY}
-                   QT4_LINK_LIBS
-                     Qt4::QtOpenGL
-                     Qwt5
-                   MTD_QT_LINK_LIBS
-                     MantidQtWidgetsCommon
-                     MantidQtWidgetsPlotting
-                   INSTALL_DIR
-                     ${LIB_DIR}
-                   OSX_INSTALL_RPATH
-                     @loader_path/../MacOS
-                     @loader_path/../Frameworks
-                   LINUX_INSTALL_RPATH
-                     "\$ORIGIN/../${LIB_DIR}")
-
-mtd_add_qt_library(TARGET_NAME MantidQtWidgetsInstrumentView
                    QT_VERSION 5
                    SRC
                      ${SRC_FILES}

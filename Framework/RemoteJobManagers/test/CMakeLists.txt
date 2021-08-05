@@ -5,13 +5,9 @@ if(CXXTEST_FOUND)
 
   cxxtest_add_test(RemoteJobManagersTest ${TEST_FILES})
   target_link_libraries(RemoteJobManagersTest
-                        LINK_PRIVATE
-                        API
-                        Types
-                        Kernel
-                        RemoteJobManagers
-                        ${Boost_LIBRARIES}
-                        ${POCO_LIBRARIES}
+                        PRIVATE
+                        Mantid::Types
+                        Mantid::RemoteJobManagers
                         gmock
 )
   add_dependencies(FrameworkTests RemoteJobManagersTest)

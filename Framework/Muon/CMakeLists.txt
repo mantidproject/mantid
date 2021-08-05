@@ -84,6 +84,12 @@ endif()
 # enable_precompiled_headers (inc/MantidAlgorithms/PrecompiledHeader.h SRC_FILES )
 # Add the target for this directory
 add_library(Muon ${SRC_FILES} ${C_SRC_FILES} ${INC_FILES})
+add_library(Mantid::Muon ALIAS Muon)
+
+target_include_directories(Muon PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+		$<INSTALL_INTERFACE:include/Mantid>
+)
 # Set the name of the generated library
 set_target_properties(Muon
                       PROPERTIES OUTPUT_NAME
@@ -102,23 +108,25 @@ endif()
 # Add to the 'Framework' group in VS
 set_property(TARGET Muon PROPERTY FOLDER "MantidFramework")
 
-include_directories(inc)
-
-target_link_libraries(Muon
-                      LINK_PRIVATE
-                      ${MANTIDLIBS}
-                      ${GSL_LIBRARIES})
-
+target_link_libraries(Muon PUBLIC Mantid::API Mantid::Kernel Mantid::Muon Mantid::Geometry PRIVATE Mantid::DataObjects Mantid::Indexing)
 # Add the unit tests directory
 add_subdirectory(test)
 
 # Auto-generate exports header
-target_include_directories(Muon PUBLIC ${CMAKE_BINARY_DIR}/Framework/Muon)
+target_include_directories(Muon PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/Muon>
+  $<INSTALL_INTERFACE:include/Mantid>
+)
 generate_mantid_export_header(Muon FALSE)
 
 # Installation settings
+if (CONDA_BUILD)
+set(TARGET_EXPORT_NAME "MantidMuonTargets")
+mtd_install_framework_lib(TARGETS Muon PLUGIN_LIB)
+else()
 mtd_install_targets(TARGETS
                     Muon
                     INSTALL_DIRS
                     ${PLUGINS_DIR}
                     ${WORKBENCH_PLUGINS_DIR})
+endif()

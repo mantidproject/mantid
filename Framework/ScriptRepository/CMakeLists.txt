@@ -19,6 +19,12 @@ endif()
 
 # Add the target for this directory
 add_library(ScriptRepository ${SRC_FILES} ${INC_FILES})
+add_library(Mantid::ScriptRepository ALIAS ScriptRepository)
+target_include_directories(ScriptRepository PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+		$<INSTALL_INTERFACE:include/Mantid>
+)
+
 # Add the unit tests directory
 add_subdirectory(test)
 # Set the name of the generated library
@@ -38,17 +44,15 @@ endif()
 
 set_property(TARGET ScriptRepository PROPERTY FOLDER "MantidFramework")
 
-set(LIBS ${MANTIDLIBS})
 
-include_directories(inc)
+target_link_libraries(ScriptRepository PUBLIC Mantid::Kernel Mantid::API PRIVATE Mantid::Json)
 
-target_link_libraries(ScriptRepository
-                      LINK_PRIVATE
-                      ${LIBS}
-                      ${JSONCPP_LIBRARIES})
-
+if (CONDA_BUILD)
+mtd_install_framework_lib(TARGETS ScriptRepository PLUGIN_LIB)
+else()
 mtd_install_targets(TARGETS
                     ScriptRepository
                     INSTALL_DIRS
                     ${PLUGINS_DIR}
                     ${WORKBENCH_PLUGINS_DIR})
+endif()

@@ -36,11 +36,15 @@ Bugfixes
 Fit Functions
 -------------
 - new method `IPeakFunction::intensityError` calculates the error in the integrated intensity of the peak due to uncertainties in the values of the fit parameters.
+- Exposed method ''functionDeriv'' to the python interface
 
 
 Data Objects
 ------------
 - **Sample shapes which are CSGObjects can now be plotted. Shapes can also be merged, such as a sphere with a cylindrical hole. For more details see** :ref:`Mesh_Plots`.
+- CSGObject Sample Shapes defined with :ref:`SetSample <algm-SetSample>` can be manually rotated using the ``rotate`` and ``rotate-all`` tags.
+  Also, Sample shapes (both MeshObjects and CSGObjects) are automatically rotated by any rotations from :ref:`SetGoniometer <algm-SetGoniometer>`.
+  This works with :ref:`CopySample <algm-CopySample>`, so the copied shape can be plotted, but the goniometer angle set on the new workspace is applied.
 
 Python
 ------

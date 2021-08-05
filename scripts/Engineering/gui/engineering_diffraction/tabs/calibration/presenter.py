@@ -7,8 +7,7 @@
 # pylint: disable=invalid-name
 from copy import deepcopy
 
-from Engineering.common import path_handling
-from Engineering.gui.engineering_diffraction.tabs.common import INSTRUMENT_DICT, create_error_message
+from Engineering.gui.engineering_diffraction.tabs.common import INSTRUMENT_DICT, create_error_message, output_settings
 from Engineering.gui.engineering_diffraction.tabs.common.calibration_info import CalibrationInfo
 from Engineering.gui.engineering_diffraction.tabs.common.cropping.cropping_presenter import CroppingPresenter
 from Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting, set_setting
@@ -65,7 +64,7 @@ class CalibrationPresenter(object):
             self.pending_calibration.set_calibration(vanadium_file, sample_file, instrument)
             self.pending_calibration.set_roi_info_load(banks, grp_ws_name, roi_text)
             self.set_current_calibration()
-            set_setting(path_handling.INTERFACES_SETTINGS_GROUP, path_handling.ENGINEERING_PREFIX,
+            set_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX,
                         "last_calibration_path", filename)
 
     def start_calibration_worker(self, vanadium_path, sample_path, plot_output, rb_num, bank=None, calfile=None,
@@ -120,7 +119,7 @@ class CalibrationPresenter(object):
         Loads the most recently created or loaded calibration into the interface instance. To be used on interface
         startup.
         """
-        last_cal_path = get_setting(path_handling.INTERFACES_SETTINGS_GROUP, path_handling.ENGINEERING_PREFIX,
+        last_cal_path = get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX,
                                     "last_calibration_path")
         if last_cal_path:
             self.view.set_load_checked(True)

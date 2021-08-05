@@ -109,6 +109,12 @@ endif(UNITY_BUILD)
 enable_precompiled_headers(inc/MantidLiveData/PrecompiledHeader.h SRC_FILES)
 # Add the target for this directory
 add_library(LiveData ${SRC_FILES} ${INC_FILES})
+add_library(Mantid::LiveData ALIAS LiveData)
+
+target_include_directories(LiveData PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+		$<INSTALL_INTERFACE:include/Mantid>
+)
 # Set the name of the generated library
 set_target_properties(LiveData PROPERTIES OUTPUT_NAME MantidLiveData)
 
@@ -124,31 +130,36 @@ endif()
 # Add to the 'Framework' group in VS
 set_property(TARGET LiveData PROPERTY FOLDER "MantidFramework")
 
-include_directories(inc)
-
 # Have to link to winsock library on Windows
 if(WIN32)
   set(WINSOCK ws2_32)
 endif()
 
-set(PRIVATE_LINK_LIBRARIES
-    ${MANTIDLIBS}
-    ${WINSOCK})
+set(PRIVATE_LINK_LIBRARIES ${WINSOCK})
 if(LIBRDKAFKA_FOUND)
   set(PRIVATE_LINK_LIBRARIES ${PRIVATE_LINK_LIBRARIES} ${LibRDKafka_LIBRARIES})
+  target_include_directories(LiveData PRIVATE ${LibRDKafka_INCLUDE_DIR})
 endif()
-target_link_libraries(LiveData LINK_PRIVATE ${PRIVATE_LINK_LIBRARIES})
+target_link_libraries(LiveData PUBLIC Mantid::Kernel Mantid::API Mantid::DataObjects Mantid::Geometry Mantid::NexusGeometry PRIVATE ${PRIVATE_LINK_LIBRARIES} Mantid::Indexing)
 
 # Add the unit tests directory
 add_subdirectory(test)
 
 # Auto-generate exports header
-target_include_directories(LiveData PUBLIC ${CMAKE_BINARY_DIR}/Framework/LiveData)
+target_include_directories(LiveData PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/LiveData>
+  $<INSTALL_INTERFACE:include/Mantid>
+)
 generate_mantid_export_header(LiveData FALSE)
 
 # Installation settings
+if (CONDA_BUILD)
+mtd_install_framework_lib(TARGETS LiveData PLUGIN_LIB)
+else()
 mtd_install_targets(TARGETS
                     LiveData
                     INSTALL_DIRS
                     ${PLUGINS_DIR}
                     ${WORKBENCH_PLUGINS_DIR})
+endif()
+

@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from Engineering.common import path_handling
+from Engineering.gui.engineering_diffraction.tabs.common import output_settings
 from .tabs.common import CalibrationObserver
 from .tabs.calibration.model import CalibrationModel
 from .tabs.calibration.view import CalibrationView
@@ -97,9 +98,11 @@ class EngineeringDiffractionPresenter(object):
 
     @staticmethod
     def get_saved_rb_number() -> str:
-        rb_number = get_setting(path_handling.INTERFACES_SETTINGS_GROUP, path_handling.ENGINEERING_PREFIX, "rb_number")
+        rb_number = get_setting(output_settings.INTERFACES_SETTINGS_GROUP,
+                                output_settings.ENGINEERING_PREFIX, "rb_number")
         return rb_number
 
     @staticmethod
     def set_saved_rb_number(rb_number) -> None:
-        set_setting(path_handling.INTERFACES_SETTINGS_GROUP, path_handling.ENGINEERING_PREFIX, "rb_number", rb_number)
+        set_setting(output_settings.INTERFACES_SETTINGS_GROUP,
+                    output_settings.ENGINEERING_PREFIX, "rb_number", rb_number)
