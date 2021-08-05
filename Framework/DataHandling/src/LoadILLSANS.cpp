@@ -78,7 +78,7 @@ int LoadILLSANS::confidence(Kernel::NexusDescriptor &descriptor) const {
         !descriptor.pathExists("/entry0/instrument/Detector")))) // serves to remove the TOF
                                                                  // instruments
   {
-    return 80;
+    return 79;
   } else {
     return 0;
   }
