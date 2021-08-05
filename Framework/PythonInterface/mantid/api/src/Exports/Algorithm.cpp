@@ -109,7 +109,7 @@ public:
       : m_alg(alg), m_propName(propName) {}
 
   void operator()(bool value) const { m_alg->setProperty(m_propName, value); }
-  void operator()(int value) const { m_alg->setProperty(m_propName, value); }
+  void operator()(long value) const { m_alg->setProperty(m_propName, static_cast<int>(value)); }
   void operator()(double value) const { m_alg->setProperty(m_propName, value); }
   void operator()(std::string const &value) const { m_alg->setPropertyValue(m_propName, value); }
 
@@ -124,8 +124,8 @@ public:
       applyVectorProp<bool>(values);
     } else if (elemType == typeid(double)) {
       applyVectorProp<double>(values);
-    } else if (elemType == typeid(int)) {
-      applyVectorProp<int>(values);
+    } else if (elemType == typeid(long)) {
+      applyVectorProp<long>(values);
     } else if (elemType == typeid(std::string)) {
       applyVectorProp<std::string>(values);
     } else {
