@@ -29,9 +29,13 @@
 #include <boost/python/raw_function.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/scope.hpp>
+#include <boost/variant.hpp>
+#include <boost/variant/static_visitor.hpp>
 
 #include <cstddef>
+#include <string>
 #include <variant>
+#include <vector>
 
 using Mantid::API::Algorithm;
 using Mantid::API::DistributedAlgorithm;
@@ -109,18 +113,43 @@ public:
   void operator()(double value) const { m_alg->setProperty(m_propName, value); }
   void operator()(std::string const &value) const { m_alg->setPropertyValue(m_propName, value); }
 
-  void operator()(std::vector<bool> const &value) const { m_alg->setProperty(m_propName, value); }
-  void operator()(std::vector<int> const &value) const { m_alg->setProperty(m_propName, value); }
-  void operator()(std::vector<double> const &value) const { m_alg->setProperty(m_propName, value); }
-  void operator()(std::vector<std::string> const &value) const { m_alg->setProperty(m_propName, value); }
-
   void operator()(std::vector<Mantid::PythonInterface::PyNativeTypeExtractor::PythonOutputT> const &values) const {
-    for (auto const &value : values) {
-      boost::apply_visitor(SetPropertyVisitor(m_alg, m_propName), value);
+    if (values.size() == 0)
+      return;
+    const auto &elemType = values[0].type();
+
+    // We must manually dispatch for container types, as boost will try
+    // to recurse down to scalar values.
+    if (elemType == typeid(bool)) {
+      applyVectorProp<bool>(values);
+    } else if (elemType == typeid(double)) {
+      applyVectorProp<double>(values);
+    } else if (elemType == typeid(int)) {
+      applyVectorProp<int>(values);
+    } else if (elemType == typeid(std::string)) {
+      applyVectorProp<std::string>(values);
+    } else {
+      // Recurse down
+      for (const auto &val : values) {
+        boost::apply_visitor(*this, val);
+      }
     }
   }
 
 private:
+  template <typename ScalarT>
+  void applyVectorProp(const std::vector<Mantid::PythonInterface::PyNativeTypeExtractor::PythonOutputT> &values) const {
+    std::vector<ScalarT> propVals;
+    propVals.reserve(values.size());
+
+    // Explicitly copy so we don't have to think about Python lifetimes with refs
+    std::transform(values.cbegin(), values.cend(), std::back_inserter(propVals),
+                   [](const Mantid::PythonInterface::PyNativeTypeExtractor::PythonOutputT &varadicVal) {
+                     return boost::get<ScalarT>(varadicVal);
+                   });
+    m_alg->setProperty(m_propName, std::move(propVals));
+  }
+
   Mantid::API::Algorithm_sptr &m_alg;
   std::string const &m_propName;
 };
