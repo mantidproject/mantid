@@ -5,7 +5,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from Muon.GUI.Common.seq_fitting_tab_widget.QSequentialTableModel import QSequentialTableModel, default_table_columns
+from Muon.GUI.Common.seq_fitting_tab_widget.QSequentialTableModel import (QSequentialTableModel, default_table_columns,
+                                                                          FIT_STATUS_COLUMN, FIT_QUALITY_COLUMN,
+                                                                          GROUP_COLUMN, RUN_COLUMN, WORKSPACE_COLUMN)
 from mantidqt.utils.testing.mocks.mock_sequentialtable import MockSequentialTableModel, MockSequentialTableView
 from Muon.GUI.Common.seq_fitting_tab_widget.SequentialTableWidget import SequentialTableWidget
 from mantidqt.utils.testing.mocks.mock_qt import MockQModelIndex
@@ -78,12 +80,20 @@ class SequentialTableWidgetTest(unittest.TestCase):
         self.model.get_run_information.assert_not_called()
         self.model.get_group_information.assert_not_called()
 
+    def test_get_workspace_names_from_row_correctly_queries_model(self):
+        row = 1
+
+        self.table_widget.get_workspace_names_from_row(row)
+
+        self.model.get_workspace_name_information.assert_called_once_with(row)
+
 
 class SequentialTableModelTest(unittest.TestCase):
     def setUp(self):
         self.model = QSequentialTableModel()
 
-        self.workspace_data = [["2223", "bwd", "No Fit", 0], ["2223", "fwd", "No Fit", 0]]
+        self.workspace_data = [["EMU2223; Group; bwd; MA", "2223", "bwd", "No Fit", 0],
+                               ["EMU2223; Group; fwd; MA", "2223", "fwd", "No Fit", 0]]
         self.parameter_data = [[0, 1, 2], [3, 4, 5]]
         self.parameters = ["param1", "param2", "param3"]
         self.setup_test_data()
@@ -159,11 +169,11 @@ class SequentialTableModelTest(unittest.TestCase):
 
     def test_reset_fit_data_correctly_resets_to_default(self):
         for row in range(self.model.rowCount()):
-            self.model._defaultData[row][2] = 'test'
+            self.model._defaultData[row][FIT_STATUS_COLUMN] = 'test'
 
         self.model.reset_fit_quality()
 
-        self.assertEqual(self.get_column_data(2), ['No fit', 'No fit'])
+        self.assertEqual(self.get_column_data(FIT_STATUS_COLUMN), ['No fit', 'No fit'])
 
     def test_set_fit_parameters(self):
         parameters = ["new_param1", "new_param2", "new_param3"]
@@ -184,7 +194,7 @@ class SequentialTableModelTest(unittest.TestCase):
 
     def test_set_fit_parameter_values_for_column(self):
         parameter_value = 1.5
-        column = 5
+        column = 6
 
         self.model.set_fit_parameter_values_for_column(column, parameter_value)
 
@@ -192,15 +202,28 @@ class SequentialTableModelTest(unittest.TestCase):
         self.assertEqual(self.model._parameterData[1][1], parameter_value)
 
     def test_set_fit_workspaces(self):
+        new_workspaces = ["EMU2224; Group; top; MA", "EMU2224; bottom; bwd; MA"]
         new_runs = ['2224', '2224']
         new_groups = ['top', 'bottom']
 
-        self.model.set_fit_workspaces(new_runs, new_groups)
+        self.model.set_fit_workspaces(new_workspaces, new_runs, new_groups)
 
         for row in range(len(new_runs)):
-            self.assertEqual(self.model.data(self.model.createIndex(row, 0), Qt.DisplayRole), new_runs[row])
-            self.assertEqual(self.model.data(self.model.createIndex(row, 1), Qt.DisplayRole), new_groups[row])
-            self.assertEqual(self.model.data(self.model.createIndex(row, 2), Qt.DisplayRole), 'No fit')
+            self.assertEqual(self.model.data(self.model.createIndex(row, WORKSPACE_COLUMN), Qt.DisplayRole),
+                             new_workspaces[row])
+            self.assertEqual(self.model.data(self.model.createIndex(row, RUN_COLUMN), Qt.DisplayRole), new_runs[row])
+            self.assertEqual(self.model.data(self.model.createIndex(row, GROUP_COLUMN), Qt.DisplayRole), new_groups[row])
+            self.assertEqual(self.model.data(self.model.createIndex(row, FIT_STATUS_COLUMN), Qt.DisplayRole), 'No fit')
+
+    def test_get_workspace_name_information_returns_the_expected_data(self):
+        new_workspaces = ["EMU2224; Group; top; MA", "EMU2224; bottom; bwd; MA"]
+        new_runs = ['2224', '2224']
+        new_groups = ['top', 'bottom']
+
+        self.model.set_fit_workspaces(new_workspaces, new_runs, new_groups)
+
+        for i in range(len(new_workspaces)):
+            self.assertEqual(self.model.get_workspace_name_information(i), new_workspaces[i])
 
     def test_set_run_information(self):
         new_run = '2225'
@@ -208,7 +231,7 @@ class SequentialTableModelTest(unittest.TestCase):
 
         self.model.set_run_information(row, new_run)
 
-        self.assertEqual(self.model.data(self.model.createIndex(row, 0), Qt.DisplayRole), new_run)
+        self.assertEqual(self.model.data(self.model.createIndex(row, RUN_COLUMN), Qt.DisplayRole), new_run)
 
     def test_set_group_information(self):
         new_group = 'long'
@@ -216,7 +239,7 @@ class SequentialTableModelTest(unittest.TestCase):
 
         self.model.set_group_information(row, new_group)
 
-        self.assertEqual(self.model.data(self.model.createIndex(row, 1), Qt.DisplayRole), new_group)
+        self.assertEqual(self.model.data(self.model.createIndex(row, GROUP_COLUMN), Qt.DisplayRole), new_group)
 
     def test_set_fit_quality(self):
         fit_quality = 'success'
@@ -225,8 +248,8 @@ class SequentialTableModelTest(unittest.TestCase):
 
         self.model.set_fit_quality(row, fit_quality, chi_squared)
 
-        self.assertEqual(self.model.data(self.model.createIndex(row, 2), Qt.DisplayRole), fit_quality)
-        self.assertEqual(self.model.data(self.model.createIndex(row, 3), Qt.DisplayRole), chi_squared)
+        self.assertEqual(self.model.data(self.model.createIndex(row, FIT_STATUS_COLUMN), Qt.DisplayRole), fit_quality)
+        self.assertEqual(self.model.data(self.model.createIndex(row, FIT_QUALITY_COLUMN), Qt.DisplayRole), chi_squared)
 
 
 if __name__ == '__main__':

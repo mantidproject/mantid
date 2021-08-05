@@ -67,8 +67,8 @@ class SeqFittingTabPresenter(object):
             self.view.fit_table.set_parameter_values_for_row(row, parameter_values)
 
     def handle_selected_workspaces_changed(self):
-        runs, groups_and_pairs = self.model.get_runs_groups_and_pairs_for_fits()
-        self.view.fit_table.set_fit_workspaces(runs, groups_and_pairs)
+        workspace_names, runs, groups_and_pairs = self.model.get_runs_groups_and_pairs_for_fits()
+        self.view.fit_table.set_fit_workspaces(workspace_names, runs, groups_and_pairs)
         self.handle_fit_function_updated()
 
     def handle_fit_selected_pressed(self):
@@ -145,19 +145,10 @@ class SeqFittingTabPresenter(object):
             self._update_parameter_values_in_fitting_model_for_row(row)
 
     def validate_sequential_fit(self, workspace_names):
-        if self.model.get_active_fit_function() is None or len(workspace_names) == 0:
-            self.view.warning_popup("No data or fit function selected for fitting.")
-            return False
-        else:
-            return self._check_tf_asymmetry_compliance(self._flatten_workspace_names(workspace_names))
-
-    def _check_tf_asymmetry_compliance(self, workspace_names):
-        tf_compliant, non_compliant_names = self.model.check_datasets_are_tf_asymmetry_compliant(workspace_names)
-        if self.model.tf_asymmetry_mode and not tf_compliant:
-            self.view.warning_popup(f"Only Groups can be fitted in TF Asymmetry mode. Please unselect the following "
-                                    f"Pairs/Diffs in the grouping tab: {non_compliant_names}")
-            return False
-        return True
+        message = self.model.validate_sequential_fit(workspace_names)
+        if message != "":
+            self.view.warning_popup(message)
+        return message == ""
 
     @staticmethod
     def _flatten_workspace_names(workspaces: list) -> list:
@@ -180,9 +171,4 @@ class SeqFittingTabPresenter(object):
         self.selected_sequential_fit_notifier.notify_subscribers(fit_information)
 
     def get_workspaces_for_row_in_fit_table(self, row):
-        runs, group_and_pairs = self.view.fit_table.get_workspace_info_from_row(row)
-        separated_runs = runs.split(';')
-        separated_group_and_pairs = group_and_pairs.split(';')
-        workspace_names = self.model.get_fit_workspace_names_from_groups_and_runs(separated_runs,
-                                                                                  separated_group_and_pairs)
-        return workspace_names
+        return self.view.fit_table.get_workspace_names_from_row(row).split("/")
