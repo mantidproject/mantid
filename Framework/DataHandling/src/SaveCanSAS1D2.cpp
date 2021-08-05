@@ -97,7 +97,7 @@ void SaveCanSAS1D2::exec() {
   // write xml manually as the user requires a specific format were the
   // placement of new line characters is controled
   // and this can't be done in using the stylesheet part in Poco or libXML
-  prepareFileToWriteEntry();
+  prepareFileToWriteEntry(getPropertyValue("FileName"));
 
   size_t i = 0;
   while (i < m_workspace->getNumberHistograms()) {

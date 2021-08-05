@@ -151,7 +151,7 @@ void SaveCanSAS1D::exec() {
   // write xml manually as the user requires a specific format were the
   // placement of new line characters is controled
   // and this can't be done in using the stylesheet part in Poco or libXML
-  prepareFileToWriteEntry();
+  prepareFileToWriteEntry(getPropertyValue("FileName"));
 
   m_outFile << "\n\t<SASentry name=\"" << m_workspace->getName() << "\">";
 
@@ -201,15 +201,15 @@ void SaveCanSAS1D::exec() {
 }
 /** Opens the output file and either moves the file pointer to beyond the last
  *  entry or blanks the file and writes a header
+ *  @param fileName :: name of the output file
  *  @throw logic_error if append was selected but end of an entry tag couldn't
  * be found
  *  @throw FileError if there was a problem writing to the file
  */
-void SaveCanSAS1D::prepareFileToWriteEntry() {
+void SaveCanSAS1D::prepareFileToWriteEntry(const std::string &fileName) {
   // reduce error handling code by making file access errors throw
   m_outFile.exceptions(std::ios::eofbit | std::ios::failbit | std::ios::badbit);
 
-  const std::string fileName = getPropertyValue("FileName");
   bool append(getProperty("Append"));
 
   // write xml manually as the user requires a specific format were the
