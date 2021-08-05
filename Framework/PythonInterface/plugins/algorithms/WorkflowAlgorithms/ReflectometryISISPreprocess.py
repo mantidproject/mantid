@@ -5,7 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspaceProperty, MatrixWorkspace, WorkspaceGroup)
+from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspaceProperty, MatrixWorkspace,
+                        PropertyMode, WorkspaceGroup)
 from mantid.kernel import (CompositeValidator, StringArrayLengthValidator, StringArrayMandatoryValidator,
                            StringArrayProperty, Direction)
 
@@ -14,6 +15,7 @@ class ReflectometryISISPreprocess(DataProcessorAlgorithm):
     _RUNS = 'InputRunList'
     _GROUP_TOF = 'GroupTOFWorkspaces'
     _OUTPUT_WS = 'OutputWorkspace'
+    _MONITOR_WS = 'MonitorWorkspace'
     _EVENT_MODE = "EventMode"
 
     def __init__(self):
@@ -46,10 +48,15 @@ class ReflectometryISISPreprocess(DataProcessorAlgorithm):
             MatrixWorkspaceProperty(self._OUTPUT_WS, '', direction=Direction.Output),
             doc='The preprocessed output workspace. If multiple input runs are specified '
                 'they will be summed into a single output workspace.')
+        self.declareProperty(
+            MatrixWorkspaceProperty(self._MONITOR_WS, '', direction=Direction.Output, optional=PropertyMode.Optional),
+            doc='The loaded monitors workspace. This is only output in event mode.')
 
     def PyExec(self):
-        workspace = self._loadRun(self.getPropertyValue(self._RUNS))
+        workspace, monitor_ws = self._loadRun(self.getPropertyValue(self._RUNS))
         self.setProperty(self._OUTPUT_WS, workspace)
+        if monitor_ws:
+            self.setProperty(self._MONITOR_WS, monitor_ws)
 
     @staticmethod
     def _get_input_runs_validator():
@@ -64,12 +71,12 @@ class ReflectometryISISPreprocess(DataProcessorAlgorithm):
         """Load a run as an event workspace if slicing is requested, or a histogram
         workspace otherwise. Transmission runs are always loaded as histogram workspaces."""
         event_mode = self.getProperty(self._EVENT_MODE).value
+        monitor_ws = None
         if event_mode:
             alg = self.createChildAlgorithm('LoadEventNexus', Filename=run, LoadMonitors=True)
             alg.execute()
             ws = alg.getProperty('OutputWorkspace').value
-            # TODO
-            # monitors = alg.MonitorWorkspace
+            monitor_ws = alg.getProperty('MonitorWorkspace').value
             self._validate_event_ws(ws)
             self.log().information('Loaded event workspace')
         else:
@@ -77,7 +84,7 @@ class ReflectometryISISPreprocess(DataProcessorAlgorithm):
             alg.execute()
             ws = alg.getProperty('OutputWorkspace').value
             self.log().information('Loaded workspace ')
-        return ws
+        return ws, monitor_ws
 
     @staticmethod
     def _validate_event_ws(workspace):

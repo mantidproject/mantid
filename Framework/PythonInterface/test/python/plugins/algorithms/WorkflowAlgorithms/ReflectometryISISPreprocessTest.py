@@ -47,12 +47,33 @@ class ReflectometryISISPreprocessTest(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "Workspace Groups"):
             ReflectometryISISPreprocess._validate_event_ws(ws)
 
-    def _run_test(self, args):
+    def test_monitors_are_not_loaded_in_histo_mode(self):
+        args = {'InputRunList': '13460',
+                "EventMode": False,
+                "OutputWorkspace": "ws"}
+        output_ws, monitor_ws = self._run_test_with_monitors(args)
+        self.assertIsInstance(output_ws, MatrixWorkspace)
+        self.assertIsNone(monitor_ws)
+
+    def test_monitors_are_loaded_in_event_mode(self):
+        args = {'InputRunList': '13460',
+                "EventMode": True,
+                "OutputWorkspace": "ws"}
+        output_ws, monitor_ws = self._run_test_with_monitors(args)
+        self.assertIsInstance(output_ws, IEventWorkspace)
+        self.assertIsInstance(monitor_ws, MatrixWorkspace)
+
+    def _run_test_with_monitors(self, args):
         alg = create_algorithm('ReflectometryISISPreprocess', **args)
         alg.setChild(True)
         alg.setRethrows(True)
         alg.execute()
         output_ws = alg.getProperty('OutputWorkspace').value
+        monitor_ws = alg.getProperty('MonitorWorkspace').value
+        return output_ws, monitor_ws
+
+    def _run_test(self, args):
+        output_ws, _ = self._run_test_with_monitors(args)
         return output_ws
 
 
