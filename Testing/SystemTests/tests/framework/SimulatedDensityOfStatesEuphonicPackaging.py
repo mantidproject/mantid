@@ -76,7 +76,7 @@ class SimulatedDensityOfStatesEuphonicInstallationTest(MantidSystemTest):
                 importlib.reload(scipy)
 
             process = subprocess.run([sys.executable, "-m", "pip", "install",
-                                      "--prefix", euphonic_prefix,
+                                      "--prefix", scipy_prefix,
                                       "-vvv",
                                       "pint==0.17"],
                                      stdout=subprocess.PIPE,
@@ -84,10 +84,8 @@ class SimulatedDensityOfStatesEuphonicInstallationTest(MantidSystemTest):
                                      env=env)
             print(process.stdout.decode('utf-8'))
 
-            prefix_path = pathlib.Path(euphonic_prefix)
-            euphonic_site_packages = next((prefix_path / 'lib').iterdir()
-                                          ) / 'site-packages'
-            site.addsitedir(euphonic_site_packages)
+            print(list(prefix_path.iterdir()))
+            print(list(scipy_site_packages.iterdir()))
             import pint  # noqa: F401
 
             process = subprocess.run([sys.executable, "-m", "pip", "install",
@@ -99,6 +97,10 @@ class SimulatedDensityOfStatesEuphonicInstallationTest(MantidSystemTest):
                                      env=env)
             print(process.stdout.decode('utf-8'))
 
+            prefix_path = pathlib.Path(euphonic_prefix)
+            euphonic_site_packages = next((prefix_path / 'lib').iterdir()
+                                          ) / 'site-packages'
+            site.addsitedir(euphonic_site_packages)
             print(list(euphonic_site_packages.iterdir()))
             import euphonic  # noqa: F401
 
