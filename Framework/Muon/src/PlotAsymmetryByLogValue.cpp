@@ -196,7 +196,7 @@ void PlotAsymmetryByLogValue::exec() {
   MatrixWorkspace_sptr outWS = create<Workspace2D>(nplots,         //  the number of plots
                                                    Points(npoints) //  the number of data points on a plot
   );
-  std::string units = getLogUnits(m_fileNames[0]);
+  const auto units = getLogUnits(m_fileNames[0]);
   // Populate output workspace with data
   populateOutputWorkspace(outWS, nplots, units);
 
@@ -208,7 +208,7 @@ void PlotAsymmetryByLogValue::exec() {
   saveResultsToADS(outWS, nplots + 1);
 }
 
-std::string PlotAsymmetryByLogValue::getLogUnits(const std::string fileName) {
+const std::string PlotAsymmetryByLogValue::getLogUnits(const std::string &fileName) {
   Workspace_sptr loadedWs = doLoad(fileName);
   MatrixWorkspace_sptr ws;
   // Check if workspace is a workspace group
@@ -450,7 +450,7 @@ Workspace_sptr PlotAsymmetryByLogValue::loadCorrectionsFromFile(const std::strin
  *   @param nplots :: [input] Number of histograms
  */
 void PlotAsymmetryByLogValue::populateOutputWorkspace(MatrixWorkspace_sptr &outWS, int nplots,
-                                                      const std::string units) {
+                                                      const std::string &units) {
 
   auto tAxis = std::make_unique<TextAxis>(nplots);
   if (nplots == 1) {

@@ -88,9 +88,9 @@ private:
   /// Get log value
   double getLogValue(API::MatrixWorkspace &ws);
   /// Populate output workspace with results
-  void populateOutputWorkspace(API::MatrixWorkspace_sptr &outWS, int nplots, const std::string units);
+  void populateOutputWorkspace(API::MatrixWorkspace_sptr &outWS, int nplots, const std::string &units);
   /// get log units
-  std::string getLogUnits(const std::string fileName);
+  const std::string getLogUnits(const std::string &fileName);
   /// Populate the hidden ws storing current results
   void saveResultsToADS(API::MatrixWorkspace_sptr &outWS, int nplots);
   /// Check input properties
