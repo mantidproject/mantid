@@ -33,10 +33,13 @@ Mesh Plots
 **Mesh Plots can only be accessed with a script, not through the Workbench interface**
 Here the mesh is plotted as a Poly3DCollection `Polygon <https://matplotlib.org/stable/tutorials/toolkits/mplot3d.html#polygon-plots>`_.
 
-These sample shapes can be created with :ref:<algm-SetSample> and copied using :ref:<algm-CopySample>.
+These sample shapes can be created with :ref:`algm-SetSample` and copied using :ref:`algm-CopySample`.
 
 Scripting
 ---------
+
+MeshObject
+##########
 
 Plot a MeshObject from an .stl (or .3mf) file:
 
@@ -77,6 +80,11 @@ Plot a MeshObject from an .stl (or .3mf) file:
 
     plt.show()
 
+
+CSGObject
+#########
+
+For help defining CSG Shapes and Rotations, see :ref:`HowToDefineGeometricShape`.
 Plot a CSGObject defined in an XML string:
 
 .. plot::
@@ -131,7 +139,11 @@ Plot a CSGObject defined in an XML string:
 
    plt.show()
 
-Plot Containers and Components:
+Containers and Components
+#########################
+
+For help defining Containers and Components, see :ref:`SampleEnvironment`.
+Note Component index 0 is usually the Container.
 
 .. code-block:: python
 
@@ -149,7 +161,7 @@ Plot Containers and Components:
    container_mesh = environment.getContainer().getShape().getMesh()
 
    '''getMesh() to plot any Component Shape'''
-   # note Component index 0 is the Container:
+   # Component index 0 is the Container:
    # container_mesh = environment.getComponent(0).getShape().getMesh()
    component_mesh = environment.getComponent(2).getMesh()
 
@@ -196,19 +208,165 @@ Plot Containers and Components:
    axes.set_zlabel('Z / m')
    axes.view_init(elev=5, azim=40)
 
-   # Add arrow along beam direction (scaled down by 400)
-   source = (ws.getInstrument().getSource().getPos())
+   def arrow(ax, vector, origin = None, factor = None, color = 'black',linestyle = '-'):
+      if origin == None:
+         origin = (ax.get_xlim3d()[1],ax.get_ylim3d()[1],ax.get_zlim3d()[1])
+      if factor == None:
+         lims = ax.get_xlim3d()
+         factor = (lims[1]-lims[0]) / 3.0
+      vector_norm = vector / np.linalg.norm(vector)
+      ax.quiver(
+            origin[0], origin[1], origin[2],
+            vector_norm[0]*factor, vector_norm[1]*factor, vector_norm[2]*factor,
+            color = color,
+            linestyle = linestyle
+      )
+   # Add arrow along beam direction
+   source = ws.getInstrument().getSource().getPos()
    sample = ws.getInstrument().getSample().getPos() - source
-   factor = 400
-   axes.quiver(
-         source[0]/factor, source[1]/factor, source[2]/factor,
-         sample[0]/factor, sample[1]/factor, sample[2]/factor,
-         color = 'black'
-   )
+   arrow(axes, sample, origin=(0,0,-0.04))
 
    plt.show()
 
-For more info on defining Containers and Components, see :ref:`SampleEnvironment`.
+
+Add Arrows for Beam or Crystal Axes
+###################################
+
+In the above Containers example, a black arrow for the beam direction was added. Below, the real and reciprocal lattice
+vectors have been plotted (in solid and dashed linestyles respectively). Both of them make use of the ``arrow()`` function here:
+
+.. code-block:: python
+
+   def arrow(ax, vector, origin = None, factor = None, color = 'black',linestyle = '-'):
+    if origin == None:
+        origin = (ax.get_xlim3d()[1],ax.get_ylim3d()[1],ax.get_zlim3d()[1])
+    if factor == None:
+        lims = ax.get_xlim3d()
+        factor = (lims[1]-lims[0]) / 3.0
+    vector_norm = vector / np.linalg.norm(vector)
+    ax.quiver(
+         origin[0], origin[1], origin[2],
+         vector_norm[0]*factor, vector_norm[1]*factor, vector_norm[2]*factor,
+         color = color,
+         linestyle = linestyle
+    )
+
+   '''Add arrow along beam direction'''
+   source = ws.getInstrument().getSource().getPos()
+   sample = ws.getInstrument().getSample().getPos() - source
+   arrow(axes, sample, origin=(0,0,-0.04))
+
+   '''Calculate Lattice Vectors'''
+   SetUB(ws, a=1, b=1, c=2, alpha=90, beta=90, gamma=60)
+   if not sample.hasOrientedLattice():
+      raise Exception("There is no valid lattice")
+   UB = np.array(ws.sample().getOrientedLattice().getUB())
+   hkl = np.array([[1.0,0.0,0.0],[0.0,1.0,0.0],[0.0,0.0,1.0]])
+   QSample = np.matmul(UB,hkl)
+   Goniometer = ws.getRun().getGoniometer().getR()
+   reciprocal_lattice = np.matmul(Goniometer,QSample)#QLab
+   real_lattice = (2.0*np.pi)*np.linalg.inv(np.transpose(reciprocal_lattice))
+
+   '''Add arrows for real and reciprocal lattice vectors'''
+   colors = ['r','g','b']
+   for i in range(3): # plot real_lattice with '-' solid linestyle
+      arrow(axes, real_lattice[:,i], color = colors[i])
+   for i in range(3): # plot reciprocal_lattice with '--' dashed linestyle
+      arrow(axes, reciprocal_lattice[:,i], color = colors[i], linestyle = '--')
+
+
+.. plot::
+
+   # import mantid algorithms, numpy and matplotlib
+   from mantid.simpleapi import *
+   import matplotlib.pyplot as plt
+   import numpy as np
+   from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+
+   def set_axes_equal(ax):
+      x_limits = ax.get_xlim3d()
+      y_limits = ax.get_ylim3d()
+      z_limits = ax.get_zlim3d()
+
+      x_range = abs(x_limits[1] - x_limits[0])
+      x_middle = np.mean(x_limits)
+      y_range = abs(y_limits[1] - y_limits[0])
+      y_middle = np.mean(y_limits)
+      z_range = abs(z_limits[1] - z_limits[0])
+      z_middle = np.mean(z_limits)
+
+      plot_radius = 0.5*max([x_range, y_range, z_range])
+
+      ax.set_xlim3d([x_middle - plot_radius, x_middle + plot_radius])
+      ax.set_ylim3d([y_middle - plot_radius, y_middle + plot_radius])
+      ax.set_zlim3d([z_middle - plot_radius, z_middle + plot_radius])
+
+   cuboid = " \
+   <cuboid id='some-cuboid'> \
+   <height val='2.0'  /> \
+   <width val='2.0' />  \
+   <depth  val='0.2' />  \
+   <centre x='10.0' y='10.0' z='10.0'  />  \
+   </cuboid>  \
+   <algebra val='some-cuboid' /> \
+   "
+
+   ws = CreateSampleWorkspace()
+   SetGoniometer(ws, Axis0="120,0,0,1,1")
+   SetSample(ws, Geometry={'Shape': 'CSG', 'Value': cuboid})
+   sample = ws.sample()
+
+   SetUB(ws, a=1, b=1, c=2, alpha=90, beta=90, gamma=60)
+   if not sample.hasOrientedLattice():
+      raise Exception("There is no valid lattice")
+
+   UB = np.array(ws.sample().getOrientedLattice().getUB())
+   hkl = np.array([[1.0,0.0,0.0],[0.0,1.0,0.0],[0.0,0.0,1.0]])
+   QSample = np.matmul(UB,hkl)
+   Goniometer = ws.getRun().getGoniometer().getR()
+   reciprocal_lattice = np.matmul(Goniometer,QSample)#QLab
+   real_lattice = (2.0*np.pi)*np.linalg.inv(np.transpose(reciprocal_lattice))
+
+   shape = sample.getShape()
+   mesh = shape.getMesh()
+
+   facecolors = ['purple','mediumorchid','royalblue','b','red','firebrick','green', 'darkgreen','grey','black', 'gold', 'orange']
+   mesh_polygon = Poly3DCollection(mesh, facecolors = facecolors, linewidths=0.1)
+
+   fig, axes = plt.subplots(subplot_kw={'projection':'mantid3d'})
+   axes.add_collection3d(mesh_polygon)
+
+   axes.set_title('Sample Shape: Cuboid {} \n with Real and Reciprocal lattice vectors'.format(ws))
+   axes.set_xlabel('X / m')
+   axes.set_ylabel('Y / m')
+   axes.set_zlabel('Z / m')
+
+   axes_lims = mesh.flatten()
+   axes.auto_scale_xyz(axes_lims[0::3], axes_lims[1::3], axes_lims[2::3])
+   set_axes_equal(axes)
+   axes.view_init(elev=12, azim=44)
+
+   def arrow(ax, vector, origin = None, factor = None, color = 'black',linestyle = '-'):
+      if origin == None:
+         origin = (ax.get_xlim3d()[1],ax.get_ylim3d()[1],ax.get_zlim3d()[1])
+      if factor == None:
+         lims = ax.get_xlim3d()
+         factor = (lims[1]-lims[0]) / 3.0
+      vector_norm = vector / np.linalg.norm(vector)
+      ax.quiver(
+            origin[0], origin[1], origin[2],
+            vector_norm[0]*factor, vector_norm[1]*factor, vector_norm[2]*factor,
+            color = color,
+            linestyle = linestyle
+      )
+
+   colors = ['r','g','b']
+   for i in range(3): # plot real_lattice with '-' solid linestyle
+      arrow(axes, real_lattice[:,i], color = colors[i])
+   for i in range(3): # plot reciprocal_lattice with '--' dashed linestyle
+      arrow(axes, reciprocal_lattice[:,i], color = colors[i], linestyle = '--')
+
+   plt.show()
 
 For more plotting advice: :ref:`02_scripting_plots`
 
