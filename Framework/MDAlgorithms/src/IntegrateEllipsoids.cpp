@@ -23,6 +23,7 @@
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/Statistics.h"
 #include "MantidMDAlgorithms/IntegrateQLabEvents.h"
 #include "MantidMDAlgorithms/MDTransfFactory.h"
@@ -236,12 +237,17 @@ void IntegrateEllipsoids::init() {
                   "Only events at most this distance from a satellite peak will be considered when integration");
   declareProperty("SatellitePeakSize", EMPTY_DBL(), mustBePositive,
                   "Half-length of major axis for satellite peak ellipsoid");
+  declareProperty("ShareBackground", false, "Whether to use the same peak background region for satellite peaks.");
   declareProperty(
       "SatelliteBackgroundInnerSize", EMPTY_DBL(), mustBePositive,
       "Half-length of major axis for the inner ellipsoidal surface of background region of the satellite peak");
   declareProperty(
       "SatelliteBackgroundOuterSize", EMPTY_DBL(), mustBePositive,
       "Half-length of major axis for the outer ellipsoidal surface of background region of the satellite peak");
+  setPropertySettings("SatelliteBackgroundInnerSize",
+                      std::make_unique<EnabledWhenProperty>("ShareBackground", IS_EQUAL_TO, "0"));
+  setPropertySettings("SatelliteBackgroundOuterSize",
+                      std::make_unique<EnabledWhenProperty>("ShareBackground", IS_EQUAL_TO, "0"));
 }
 
 /**
@@ -347,6 +353,12 @@ void IntegrateEllipsoids::exec() {
   double satellite_back_outer_radius = (getPointerToProperty("SatelliteBackgroundOuterSize")->isDefault())
                                            ? getProperty("BackgroundOuterSize")
                                            : getProperty("SatelliteBackgroundOuterSize");
+  bool shareBackground = getProperty("ShareBackground");
+  if (shareBackground) {
+    // force same background shell as main peaks if sharing background region
+    satellite_back_inner_radius = back_inner_radius;
+    satellite_back_outer_radius = back_outer_radius;
+  }
 
   if (adaptiveQBackground)
     adaptiveQBackgroundMultiplier = adaptiveQMultiplier;
