@@ -169,6 +169,9 @@ class MuonGroupPairContext(object):
         """Returns the selected diff names. Ensures the order of the returned diff names is correct."""
         return [diff.name for diff in self.diffs if diff.name in self._selected_diffs]
 
+    def get_selected_diffs(self, group_or_pair) -> list:
+        return [diff for diff in self.diffs if diff.name in self._selected_diffs and diff.group_or_pair == group_or_pair]
+
     @property
     def selected_groups_and_pairs(self):
         return self.selected_groups + self.selected_pairs + self.selected_diffs

@@ -12,6 +12,7 @@ from mantid.simpleapi import CreateSampleWorkspace
 
 from Muon.GUI.Common.fitting_widgets.tf_asymmetry_fitting.tf_asymmetry_fitting_model import TFAsymmetryFittingModel
 from Muon.GUI.Common.muon_diff import MuonDiff
+from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
 
 
@@ -334,13 +335,16 @@ class TFAsymmetryFittingModelTest(unittest.TestCase):
 
         self.assertEqual(self.model.function_name, " FlatBackground,TFAsymmetry")
 
-    def test_that_check_datasets_are_tf_asymmetry_compliant_returns_false_if_none_of_the_dataset_names_contains_Group(self):
-        self.model.dataset_names = self.tf_non_compliant_dataset_names
+    def test_that_check_datasets_are_tf_asymmetry_compliant_returns_false_if_there_is_a_selected_pair(self):
+        pair_name = "long1"
+        pair = MuonPair(pair_name, "fwd", "bwd")
+        self.model.context.group_pair_context.add_pair(pair)
+        self.model.context.group_pair_context.add_pair_to_selected_pairs(pair_name)
 
         tf_compliant, non_compliant_names = self.model.check_datasets_are_tf_asymmetry_compliant()
 
         self.assertTrue(not tf_compliant)
-        self.assertEqual(non_compliant_names, "'long'")
+        self.assertEqual(non_compliant_names, f"'{pair_name}'")
 
     def test_that_check_datasets_are_tf_asymmetry_compliant_returns_true_if_all_of_the_dataset_names_contains_Group(self):
         self.model.dataset_names = self.dataset_names
@@ -351,24 +355,24 @@ class TFAsymmetryFittingModelTest(unittest.TestCase):
         self.assertEqual(non_compliant_names, "''")
 
     def test_that_check_datasets_are_tf_asymmetry_compliant_returns_true_for_a_group_diff(self):
-        self.model.dataset_names = ["MUSR62260; Diff; diff_group; Asymmetry; MA"]
-
-        self.model.context.group_pair_context.add_diff(MuonDiff("diff_group", "fwd", "bwd", "group"))
+        diff_name = "diff_group"
+        self.model.context.group_pair_context.add_diff(MuonDiff(diff_name, "fwd", "bwd", "group"))
+        self.model.context.group_pair_context.add_diff_to_selected_diffs(diff_name)
 
         tf_compliant, non_compliant_names = self.model.check_datasets_are_tf_asymmetry_compliant()
 
         self.assertTrue(tf_compliant)
         self.assertEqual(non_compliant_names, "''")
 
-    def test_that_check_datasets_are_tf_asymmetry_compliant_returns_true_for_a_pair_diff(self):
-        self.model.dataset_names = ["MUSR62260; Diff; diff_pair; Asymmetry; MA"]
-
-        self.model.context.group_pair_context.add_diff(MuonDiff("diff_pair", "long1", "long2", "pair"))
+    def test_that_check_datasets_are_tf_asymmetry_compliant_returns_false_for_a_pair_diff(self):
+        diff_name = "diff_pair"
+        self.model.context.group_pair_context.add_diff(MuonDiff(diff_name, "long1", "long2", "pair"))
+        self.model.context.group_pair_context.add_diff_to_selected_diffs(diff_name)
 
         tf_compliant, non_compliant_names = self.model.check_datasets_are_tf_asymmetry_compliant()
 
         self.assertTrue(not tf_compliant)
-        self.assertEqual(non_compliant_names, "'diff_pair'")
+        self.assertEqual(non_compliant_names, f"'{diff_name}'")
 
     def test_that_get_fit_function_parameter_values_returns_the_expected_parameter_values(self):
         self.model.dataset_names = self.dataset_names
@@ -668,6 +672,11 @@ class TFAsymmetryFittingModelTest(unittest.TestCase):
         self.assertEqual(message, "")
 
     def test_that_validate_sequential_fit_returns_an_error_message_for_pair_data_in_tf_asymmetry_fitting_mode(self):
+        pair_name = "long1"
+        pair = MuonPair(pair_name, "fwd", "bwd")
+        self.model.context.group_pair_context.add_pair(pair)
+        self.model.context.group_pair_context.add_pair_to_selected_pairs(pair_name)
+
         self.model.dataset_names = ["EMU20884; Pair Asym; bottom; Asymmetry", "EMU20884; Pair Asym; top; Asymmetry"]
         self.model.single_fit_functions = self.single_fit_functions
         self.model.tf_asymmetry_mode = True
@@ -675,7 +684,7 @@ class TFAsymmetryFittingModelTest(unittest.TestCase):
         message = self.model.validate_sequential_fit([self.model.dataset_names])
 
         self.assertEqual(message, "Only Groups can be fitted in TF Asymmetry mode. "
-                                  "Please unselect the following Pairs/Diffs in the grouping tab: 'bottom', 'top'")
+                                  "Please unselect the following Pairs/Diffs in the grouping tab: 'long1'")
 
 
 if __name__ == '__main__':
