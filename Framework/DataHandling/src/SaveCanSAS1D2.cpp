@@ -104,9 +104,13 @@ void SaveCanSAS1D2::exec() {
     if (getProperty("OneSpectrumPerFile")) {
       fileName = getPropertyValue("FileName");
       size_t extPosition = fileName.find(".xml");
+      double axisValue = m_workspace->getAxis(1)->getValue(i);
+      std::string axisLabel = m_workspace->getAxis(1)->unit()->label();
       std::ostringstream ss;
-      ss << std::string(fileName, 0, extPosition) << i
-         << std::string(fileName, extPosition);
+      ss << std::string(fileName, 0, extPosition) << "_" << i;
+      if (!(m_workspace->getAxis(1)->isSpectra()))
+        ss << "_" << axisValue << axisLabel;
+      ss << std::string(fileName, extPosition);
       fileName = ss.str();
     } else {
       fileName = getPropertyValue("FileName");
