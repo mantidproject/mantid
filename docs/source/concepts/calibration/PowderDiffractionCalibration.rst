@@ -382,15 +382,23 @@ algorithm which embodies several choices of grouping detectors according to phys
 has also been implemented into the framework of `mantidtotalscattering <https://github.com/neutrons/mantid_total_scattering>`_,
 which automatically groups input spectra according to the similarity among each other, based on a unsupervised clustering algorithm.
 ``mantidtotalscattering`` has been deployed on SNS analysis cluster and therefore the generic grouping routine can be accessed easily
-from analysis. Here follows is provided a simple Python script for calling the generic grouping routine on analysis,
+from analysis. To activate the `mantidtotalscattering` conda environment, one needs to first log into analysis cluster and the
+following commands could be executed from terminal,
+
+.. code-block:: bash
+
+    . /opt/anaconda/etc/profile.d/conda.sh
+    conda activate mantidtotalscattering
+
+With the `mantidtotalscattering` conda environment active, here follows is provided a simple Python script for calling the generic
+grouping routine on analysis,
 
 .. code-block:: python
 
     #!/usr/bin/env python
     import sys
-    sys.path.append("/opt/anaconda/envs/mantidtotalscattering/lib/python3.7/site-packages")
     import json
-    from autogrouping import main
+    from total_scattering.autogrouping.autogrouping import main
 
     jsonfile = "/SNS/users/y8z/Temp/autogrouping_config.json"
     with open(jsonfile, 'r') as jf:
@@ -456,36 +464,36 @@ and description for entries in the input json file is summarized in the followin
     * - MaskFile
       - Full name of the input mask file. The file should contain a whole bunch of lines with a single integter in each line specifying the detector ID to be masked (index starting from 0).
     * - GroupingMethod
-      - The method to be used for grouping. Valid input could be 'KMEANS_CC', 'KMEANS_DG', 'KMEANS_ED', 'DBSCAN_CC', 'DBSCAN_DG' and 'DBSCAN_ED'. 'KMEANS' and 'DBSCAN' refers to the two clustering methods. The second part of those values refers to the method for calculating similarity between spectra. 'CC' for cross-correlation, 'DG' for De Gelder similarity and 'ED' for Euclidean distance in parameter space.
+      - The method to be used for grouping. Valid input could be ``KMEANS_CC``, ``KMEANS_DG``, ``KMEANS_ED``, ``DBSCAN_CC``, ``DBSCAN_DG`` and ``DBSCAN_ED``. ``KMEANS`` and ``DBSCAN`` refers to the two clustering methods. The second part of those values refers to the method for calculating similarity between spectra. ``CC`` for cross-correlation, ``DG`` for De Gelder similarity and ``ED`` for Euclidean distance in parameter space.
     * - NumberOutputGroups
-      - The number of groups to cluster all input spectra into. If using 'DBSCAN' method, there is no need to specify this parameter.
+      - The number of groups to cluster all input spectra into. If using ``DBSCAN`` method, there is no need to specify this parameter.
     * - StandardScaling
       - Whether or not to scale the input spectra by removing the mean and scaling to unit variance before clustering.
     * - WorkspaceIndexRange
       - Range of workspace indeces to include in automatic grouping process.
     * - FittingFunctionParameters
-      - If 'ED' method is to be used for calculating similarity between spectra, this specifies the peak parameters to fit and to be used as the coordinate components in parameter space.
+      - If ``ED`` method is to be used for calculating similarity between spectra, this specifies the peak parameters to fit and to be used as the coordinate components in parameter space.
     * - FitPeaksArgs
       - Refer to the input parameters for :ref:`FitPeaks <algm-FitPeaks>` algorithm.
     * - DiamondPeaks
-      - If 'ED' method is to be used for calculating similarity between spectra, this specifies the diamond peaks, as specified by the nominal peak positions, to be used for peak fitting and clustering.
+      - If ``ED`` method is to be used for calculating similarity between spectra, this specifies the diamond peaks, as specified by the nominal peak positions, to be used for peak fitting and clustering.
     * - ParameterThresholds
-      - If 'ED' method is to be used for calculating similarity between spectra, this specifies the threshold for relevant peak parameters. The threshold for each relevant peak parameter will be given as sub-entries.
+      - If ``ED`` method is to be used for calculating similarity between spectra, this specifies the threshold for relevant peak parameters. The threshold for each relevant peak parameter will be given as sub-entries.
     * - FilterByChi2
-      - If 'ED' method is to be used for calculating similarity between spectra, this specifies whether or not to mask out pixels based on chi square of peak fitting. Two sub-entry 'Enable' is a boolean trigger and 'Value' is the threshold of chi square.
+      - If ``ED`` method is to be used for calculating similarity between spectra, this specifies whether or not to mask out pixels based on chi square of peak fitting. Among the two sub-entries, ``Enable`` is a boolean trigger and ``Value`` is the threshold of chi square.
     * - OutputGroupingFile
       - Full name of the output grouping file.
     * - OutputMaskFile
       - Full name of the output masking file.
     * - OutputFitParamFile
-      - If 'ED' method is to be used for calculating similarity between spectra, this specifies the full name of the output fit parameters file.
+      - If ``ED`` method is to be used for calculating similarity between spectra, this specifies the full name of the output fit parameters file.
     * - CacheDir
       - Cache directory.
     * - Plots
-      - A series of boolean variables control the plotting options. 'Grouping' for plotting the grouping of detectors. 'ED_Features' for plotting parameters correlation features. 'KMeans_Elbow' for plotting the elbow analysis result. 'KMeans_Silhouette' for plotting the Silhouette score.
+      - A series of boolean variables control the plotting options. ``Grouping`` for plotting the grouping of detectors. ``ED_Features`` for plotting parameters correlation features. ``KMeans_Elbow`` for plotting the elbow analysis result. ``KMeans_Silhouette`` for plotting the Silhouette score.
 
 Here, it is worth noting that detectors may be masked out as belonging to none of the generated groups.
-For example, when using the 'ED' method for defining the similarity between spectra, detectors will be masked out at the fitting stage if the corresponding spectra cannot be fitted successfully.
+For example, when using the ``ED`` method for defining the similarity between spectra, detectors will be masked out at the fitting stage if the corresponding spectra cannot be fitted successfully.
 
 Following is presented the clustering result for a NOMAD diamond measurement data,
 
@@ -538,10 +546,10 @@ Here follows is presented a demo input json file,
                         "PeakWidthPercent": 0.001}
     }
 
-Parameters in the input json file should be self-explaining. Here only the 'Calibrant' and 'Groups' entries are mandatory. For 'CrossCorrelate' entries, one can refer to the parameters for
-:ref:`CrossCorrelate <algm-CrossCorrelate>` and :ref:`GetDetectorOffsets <algm-GetDetectorOffsets>`. For 'PDCalibration' entries, one can refer to the parameters for :ref:`PDCalibration <algm-PDCalibration>`. In the group calibration workflow, one of the crucial steps is to cross correlate spectra in a
+Parameters in the input json file should be self-explaining. Here only the ``Calibrant`` and ``Groups`` entries are mandatory. For ``CrossCorrelate`` entries, one can refer to the parameters for
+:ref:`CrossCorrelate <algm-CrossCorrelate>` and :ref:`GetDetectorOffsets <algm-GetDetectorOffsets>`. For ``PDCalibration`` entries, one can refer to the parameters for :ref:`PDCalibration <algm-PDCalibration>`. In the group calibration workflow, one of the crucial steps is to cross correlate spectra in a
 single group. A cycling cross correlation scheme is introduced at this point to continue cross correlate spectra until the median value of the offset of all
-spectra in a single group is below the preset threshold (specified by the 'OffsetThreshol' parameter). If the 'OffsetThreshold' is set to 1.0 or larger, that means no cycling of cross correlation will be conducted. The 'SkipCrossCorrelation' parameter is to control the skipping of cross correlation for specified groups of spectra. For 'Xmin', 'Xmax', 'MaxDSpaceShift' and 'OffsetThreshold' parameters, they can be either provided with a single number or a list. When a single number is given, the value will apply to all groups, whereas if a list is given, each entry in the list will apply to each single group respectively.
+spectra in a single group is below the preset threshold (specified by the ``OffsetThreshol`` parameter). If the ``OffsetThreshold`` is set to 1.0 or larger, that means no cycling of cross correlation will be conducted. The ``SkipCrossCorrelation`` parameter is to control the skipping of cross correlation for specified groups of spectra. For ``Xmin``, ``Xmax``, ``MaxDSpaceShift`` and ``OffsetThreshold`` parameters, they can be either provided with a single number or a list. When a single number is given, the value will apply to all groups, whereas if a list is given, each entry in the list will apply to each single group respectively.
 
 After the group calibration is complete, one can then inspect the quality of calibration by generating various diagnostics plots as documented in :ref:`Calibration Diagnostics`.
 
