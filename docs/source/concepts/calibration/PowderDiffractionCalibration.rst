@@ -381,7 +381,7 @@ A natural choice for generating grouping file is to use :ref:`CreateGroupingWork
 algorithm which embodies several choices of grouping detectors according to physical geometry. A generic approach
 has also been implemented into the framework of `mantidtotalscattering <https://github.com/neutrons/mantid_total_scattering>`_,
 which automatically groups input spectra according to the similarity among each other, based on a unsupervised clustering algorithm.
-`mantidtotalscattering` has been deployed on SNS analysis cluster and therefore the generic grouping routine can be accessed easily
+``mantidtotalscattering`` has been deployed on SNS analysis cluster and therefore the generic grouping routine can be accessed easily
 from analysis. Here follows is provided a simple Python script for calling the generic grouping routine on analysis,
 
 .. code-block:: python
