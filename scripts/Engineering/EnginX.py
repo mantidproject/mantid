@@ -434,7 +434,7 @@ def extract_b2b_params(workspace):
     SouthBank = ws_inst.getComponentByName("SouthBank")
     params_north = []
     params_south = []
-    for param_name in ["alpha", "beta_0", "beta_1", "sigma_0_sq", "sigma_1_sq", "sigma_2_sq"]:
+    for param_name in ["alpha_0", "beta_0", "beta_1", "sigma_0_sq", "sigma_1_sq", "sigma_2_sq"]:
         params_north += [NorthBank.getNumberParameter(param_name)[0]]
         params_south += [SouthBank.getNumberParameter(param_name)[0]]
 
