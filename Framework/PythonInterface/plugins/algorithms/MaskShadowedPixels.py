@@ -55,6 +55,10 @@ class MaskShadowedPixels(mantid.api.PythonAlgorithm):
         # Get instrument information
         instrument_info = self.set_nomad_constants()
 
+        # Initialize the empty mask list
+        mask_array = np.zeros(shape=(instrument_info.num_pixels,), dtype='float')
+        assert mask_array
+
         # Determine thresholds for a given tube (part 1)
         # TASK 335
         self.determine_tube_threshold(intensity_array, instrument_info, config)
@@ -113,12 +117,14 @@ class MaskShadowedPixels(mantid.api.PythonAlgorithm):
         info_dict = dict()
 
         info_dict['num_banks'] = 6
-        info_dict['num_8packs'] = 49
-        info_dict['num_tubes'] = 49 * 8
-        info_dict['num_pixels_per_tube'] = 128
-        info_dict['num_tubes_per_8pack'] = 8
         info_dict['num_8packs_per_bank'] = [0, 6, 15, 23, 30, 45, 49]  # [i, i+1) is the range of 8 packs for bank i
+        info_dict['num_8packs'] = 49
+        info_dict['num_pixels_per_tube'] = 256
+        info_dict['num_tubes_per_8pack'] = 8
+        info_dict['num_tubes'] = info_dict['num_8packs'] * info_dict['num_tubes_per_8pack']
+        info_dict['num_pixels'] = info_dict['num_tubes'] * info_dict['num_pixels_per_tube']
 
+        # convert to namedtuple and return
         instrument = namedtuple("nomad", info_dict)
 
         return instrument(**info_dict)
@@ -158,8 +164,15 @@ class MaskShadowedPixels(mantid.api.PythonAlgorithm):
         # TODO - To be implemented
         return np.ndarray()
 
-    def determine_tube_threshold(self, vec_intensity, nomad_info):
+    # In-progress Task 335
+    def determine_tube_threshold(self, vec_intensity, nomad_info, config):
         """
+
+        Refer to diagram
+        https://code.ornl.gov/sns-hfir-scse/diffraction/powder/powder-diffraction/
+        uploads/99f4b65655e05edd476999942ff6fb98/Step-1.png
+        from box 'Select a tube' to 'All tubes finished'
+
 
         Parameters
         ----------
@@ -170,20 +183,52 @@ class MaskShadowedPixels(mantid.api.PythonAlgorithm):
         -------
 
         """
-        # Determine thresholds for a given tube
-        # calculate summed intensity for each tube: output = (392, )
-        vec_tube_intensity = self.sum_to_tubes(vec_intensity, nomad_info)
-        assert isinstance(vec_tube_intensity, np.ndarray)
+        # Workflow: process full-collimated, half-collimated and not-collimated separately
 
-        for tube_index in range(num_tubes):
-            collimation_status = collimation_status_8pack_dict[tube_index]
-            if collimation_status == 'Collimated':
-                do_something_1
-            elif collimation_status == 'Half Collimated':
-                do_something_2
-            else:
-                # not collimated
-                do_something_0
+        # reshape the input intensities to 2D matrix: each row is a tube, i.e., (num_tubes, num_pixel_per_tube)
+        # or say (392, 256)
+        tube_pixel_intensity_array = vec_intensity.flatten().reshpae((nomad_info.num_tubes,
+                                                                      nomad_info.num_pixels_per_tube))
+
+        self._determine_full_collimated_tubes_thresholds(tube_pixel_intensity_array, nomad_info, config)
+
+        self._determine_half_collimated_tubes_thresholds(tube_pixel_intensity_array, nomad_info, config)
+
+        self._determine_none_collimated_tubes_thresholds(tube_pixel_intensity_array, nomad_info, config)
+
+    def _determine_full_collimated_tubes_thresholds(self, vec_intensity, nomad_info, config):
+        """Determine the full-collimated tubes' thresholds
+
+        Parameters
+        ----------
+        vec_intensity
+        nomad_info
+        config
+
+        Returns
+        -------
+
+        """
+        # Get the boolean array for full-collimated tubes: shape = (392, )
+        full_collimated_tubes = self.get_tubes_by_collimation_status(config)
+        full_collimated_pixels = np.repeat(full_collimated_tubes, nomad_info.num_tubes)
+
+        # Calculate median value the tubes
+        tube_median_array = np.median(vec_intensity, axis=1)
+        tube_median_array = np.repeat(tube_median_array, nomad_info.num_tubes)
+
+        # Condition 3:
+        # summed pixel intensity < (1+(low_pixel-1)*3) * m or
+        # summed pixel intensity > (1+(high_pixel-1)*3) * m
+        # where low_pixel and high_pixel are parameters defined in the provided YAML configuration file above.
+        lower_boundaries = (1. + (config.low_pixel - 1) * 3.) * tube_median_array
+        upper_boundaries = (1. + (config.high_pixel - 1) * 3.) * tube_median_array
+
+        # Check pixels meets conditions 3 for pixels in full_collimated_tubes
+        masked_pixels = np.where((tube_median_array < lower_boundaries or tube_median_array > upper_boundaries)
+                                 and full_collimated_pixels)
+
+        return masked_pixels
 
     def calculate_banks_medians(self, config):
         # TASK 331
