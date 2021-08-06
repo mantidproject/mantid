@@ -35,5 +35,6 @@ BugFixes
 - Peaks are (re)set upon rebuilding the single spectrum function as a multi-spectrum function
   due to the physical properties. This re-setting peaks is needed to maintain the intended ties.
 - A bug has been fixed in :ref:`ConvertToMD <algm-ConvertToMD>` that sometimes crashes Mantid when files are summed together.
+- A bug has been fixed in PyChop that caused crashes when no Ei was specified.
 
 :ref:`Release 6.2.0 <v6.2.0>`
