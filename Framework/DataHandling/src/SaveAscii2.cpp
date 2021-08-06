@@ -262,7 +262,6 @@ void SaveAscii2::exec() {
   }
 
   bool OneSpectrumPerFile = getProperty("OneSpectrumPerFile");
-  auto idxIt = idx.begin();
 
   Progress progress(this, 0.0, 1.0, idx.size());
 
@@ -271,7 +270,8 @@ void SaveAscii2::exec() {
     populateAllMetaData();
   }
 
-  do {
+  auto idxIt = idx.begin();
+  while (idxIt != idx.end()) {
     std::string currentFilename = filename;
     size_t extPosition;
     if (OneSpectrumPerFile) {
@@ -327,7 +327,7 @@ void SaveAscii2::exec() {
 
     file.unsetf(std::ios_base::floatfield);
     file.close();
-  } while (idxIt != idx.end());
+  }
 }
 
 /** Writes a spectrum to the file using a workspace index
