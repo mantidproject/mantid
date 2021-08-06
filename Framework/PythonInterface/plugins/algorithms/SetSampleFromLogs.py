@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import (AlgorithmFactory, DistributedDataProcessorAlgorithm)
 from mantid.kernel import (ConfigService)
+from mantid import _kernel as mtd_kernel
 from mantid.simpleapi import (SetSample)
 
 
@@ -17,6 +18,8 @@ def _toDict(propertyManager):
     if propertyManager:
         for key in propertyManager.keys():
             result[key] = propertyManager[key].value
+            if isinstance(result[key], mtd_kernel.std_vector_dbl):
+                result[key] = list(result[key])
     return result
 
 
@@ -142,6 +145,13 @@ class SetSampleFromLogs(DistributedDataProcessorAlgorithm):
             if (not _hasValue(environment, "Container")) and _hasValue(runObject, "SampleContainer"):
                 self.log().information('Looking for "SampleContainer" in logs')
                 environment['Container'] = runObject['SampleContainer'].lastValue().replace(" ", "")
+
+            if _hasValue(environment, "Container") and (not _hasValue(environment, "Name")):
+                # set a default environment
+                instrEnum = ConfigService.getInstrument(wksp.getInstrument().getFullName())
+                if instrEnum.facility().name() == 'SNS':
+                    environment['Name'] = 'InAir'
+
         self.log().information('ENVIRONMENT: ' + str(environment))
 
         # let SetSample generate errors if anything is wrong
