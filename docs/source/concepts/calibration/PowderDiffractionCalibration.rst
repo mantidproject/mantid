@@ -493,7 +493,9 @@ Following is presented the clustering result for a NOMAD diamond measurement dat
   :width: 400px
   :align: right
 
-**N.B.** For certain instruments (e.g., POWGEN), the automatic grouping routine may not work due to special d-space coverage for detectors. In this case, one may need to treat various ranges of detectors indidividually (using the input entry 'WorkspaceIndexRange' in the input json file) and also some of the groups may need to be manually specified.
+.. note::
+   For certain instruments (e.g., POWGEN), the automatic grouping routine may not work due to special d-space coverage for detectors.
+   In this case, one may need to treat various ranges of detectors individually (using the input entry ``WorkspaceIndexRange`` in the input json file) and also some of the groups may need to be manually specified.
 
 **Group calibration**
 
