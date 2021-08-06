@@ -31,8 +31,8 @@ class GROUP(Enum):
     BOTH = "banks", [1, 2]
     NORTH = "1", [1]
     SOUTH = "2", [2]
-    CROPPED = "Custom", []  # pdcal results will be saved with file with same suffix
-    CUSTOM = "Cropped", []  # pdcal results will be saved with file with same suffix
+    CROPPED = "Cropped", []  # pdcal results will be saved with file with same suffix
+    CUSTOM = "Custom", []  # pdcal results will be saved with file with same suffix
     TEXTURE = "Texture", [1, 2]
 
 
@@ -59,7 +59,9 @@ class GroupingInfo:
                               GROUP.CROPPED: "Cropped", GROUP.CUSTOM: "Custom", GROUP.TEXTURE: "Texture"}
         self._prm_templates = {GROUP.NORTH: "template_ENGINX_241391_236516_North_bank.prm",
                                GROUP.SOUTH: "template_ENGINX_241391_236516_South_bank.prm",
-                               GROUP.BOTH: "template_ENGINX_241391_236516_North_and_South_banks.prm"}
+                               GROUP.BOTH: "template_ENGINX_241391_236516_North_and_South_banks.prm",
+                               GROUP.CROPPED: "template_ENGINX_241391_236516_North_bank.prm",
+                               GROUP.CUSTOM:"template_ENGINX_241391_236516_North_bank.prm"}
 
     def clear(self):
         self.group = None
@@ -85,11 +87,11 @@ class GroupingInfo:
         return self._prm_templates[self.group]
 
     # setters
-    def set_spectra_list(self, spectra_list):
-        self.spectra_list = spectra_list
+    def set_spectra_list(self, spectra_list_str):
+        self.spectra_list = create_spectrum_list_from_string(spectra_list_str)
 
-    def set_cal_file(self, spectra_list):
-        self.spectra_list = spectra_list
+    def set_cal_file(self, cal_filepath):
+        self.cal_filepath = cal_filepath
 
     def set_group(self, group):
         self.group = group
@@ -140,7 +142,7 @@ class GroupingInfo:
             mantid.LoadDetectorsGroupingFile(InputFile=filepath_no_ext + ".xml", OutputWorkspace=ws_name)
             self.group_ws = ws_name
 
-    def save_grouping_workspace(self, directory: str, ceria_path: str, vanadium_path: str, instrument: str) -> None:
+    def save_grouping_workspace(self, directory: str, vanadium_path: str, ceria_path: str, instrument: str) -> None:
         if self.group and not self.group.banks:
             name = generate_output_file_name(vanadium_path, ceria_path, instrument, self.group.value, '.xml')
             save_path = path.join(directory, name)
@@ -207,7 +209,7 @@ class GroupingInfo:
         grp_ws, _, _ = mantid.CreateGroupingWorkspace(InputWorkspace=sample_raw,
                                                       OutputWorkspace="Custom_spectra_grouping")
         for spec in self.spectra_list:
-            det_ids = grp_ws.getDetectorIDs(int(spec - 1))
+            det_ids = grp_ws.getDetectorIDs(spec - 1)
             grp_ws.setValue(det_ids[0], 1)
         self.group_ws = grp_ws
 
@@ -944,7 +946,7 @@ def write_ENGINX_GSAS_iparam_file(output_file, difa, difc, tzero, bk2bk_params=N
     template_file = os.path.join(os.path.dirname(__file__), template_file)
 
     if not bank_names:
-        bank_names = ["North", "South"]
+        bank_names = ["Custom/Cropped"]
 
     with open(template_file) as tf:
         output_lines = tf.readlines()

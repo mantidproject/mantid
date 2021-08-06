@@ -76,7 +76,7 @@ class CalibrationModel(object):
 
         # save grouping ws if custom or cropped
         if not calibration.group.banks:
-            self.calibration.save_grouping_workspace(calib_dir)
+            calibration.save_grouping_workspace(calib_dir)
 
         # get diff consts from table?
         self.create_output_files(calib_dir, difa, difc, tzero, bk2bk_params, calibration)

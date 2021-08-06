@@ -41,6 +41,10 @@ class CalibrationInfo(EnggUtils.GroupingInfo):
         return super().generate_output_file_name(self.get_vanadium_path(), self.get_sample_path(),
                                                  self.get_instrument(), ext)
 
+    def save_grouping_workspace(self, directory):
+        return super().save_grouping_workspace(directory, self.get_vanadium_path(), self.get_sample_path(),
+                                               self.get_instrument())
+
     # getters
     def get_calibration_table(self):
         return self.calibration_table

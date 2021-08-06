@@ -71,8 +71,6 @@ class CalibrationPresenter(object):
         elif self.view.get_load_checked() and self.validate_path():
             self.model.load_existing_calibration_files(self.current_calibration)
             self.set_current_calibration()
-            # set_setting(path_handling.INTERFACES_SETTINGS_GROUP, path_handling.ENGINEERING_PREFIX,
-            #             "last_calibration_path", filename)
 
     def start_calibration_worker(self, plot_output):
         """
