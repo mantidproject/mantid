@@ -275,9 +275,6 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
             self.corrections_tab.corrections_tab_presenter.load_observer)
 
         self.load_widget.load_widget.loadNotifier.add_subscriber(
-            self.transform.LoadObserver)
-
-        self.load_widget.load_widget.loadNotifier.add_subscriber(
             self.phase_tab.phase_table_presenter.run_change_observer)
 
         self.load_widget.load_widget.loadNotifier.add_subscriber(
@@ -431,6 +428,9 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
             self.corrections_tab.corrections_tab_presenter.asymmetry_pair_and_diff_calculations_finished_notifier.\
                 add_subscriber(observer)
             self.phase_tab.phase_table_presenter.calculation_finished_notifier.add_subscriber(observer)
+
+        self.corrections_tab.corrections_tab_presenter.asymmetry_pair_and_diff_calculations_finished_notifier.add_subscriber(
+            self.transform.load_observer)
 
         self.corrections_tab.corrections_tab_presenter.asymmetry_pair_and_diff_calculations_finished_notifier.add_subscriber(
             self.seq_fitting_tab.seq_fitting_tab_presenter.selected_workspaces_observer)
