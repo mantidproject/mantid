@@ -385,6 +385,7 @@ def plot_tof_vs_d_from_calibration(diag_ws, ws_foc):
     # plot - To-DO add titles?
     from matplotlib.pyplot import subplots
     fig, ax = subplots(2, nspec, subplot_kw={'projection': 'mantid'})
+    ax = np.reshape(ax, (-1, 1)) if ax.ndim == 1 else ax  # to ensure is 2D matrix even if nspec==1
     for ispec in range(nspec):
         # plot TOF vs d
         ax[0, ispec].errorbar(xye[ispec]['x'], xye[ispec]['y'], yerr=xye[ispec]['e'],
