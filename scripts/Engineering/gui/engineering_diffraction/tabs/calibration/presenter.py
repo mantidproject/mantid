@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
-from copy import deepcopy
 
 from Engineering.gui.engineering_diffraction.tabs.common import INSTRUMENT_DICT, create_error_message
 from Engineering.gui.engineering_diffraction.tabs.common.calibration_info import CalibrationInfo
@@ -25,7 +24,6 @@ class CalibrationPresenter(object):
         self.calibration_notifier = self.CalibrationNotifier(self)
 
         self.current_calibration = CalibrationInfo()
-        self.pending_calibration = CalibrationInfo()
 
         self.connect_view_signals()
 
@@ -45,33 +43,33 @@ class CalibrationPresenter(object):
         self.view.set_on_radio_existing_toggled(self.set_load_existing_enabled)
         self.view.set_on_check_cropping_state_changed(self.show_cropping)
 
-    def update_pending_calibration_from_view(self):
-        self.pending_calibration.clear()
+    def update_calibration_from_view(self):
+        self.current_calibration.clear()
         if self.view.get_load_checked():
             # loading calibration from path to .prm
-            self.pending_calibration.set_calibration_from_prm_fname(self.view.get_path_filename())
+            self.current_calibration.set_calibration_from_prm_fname(self.view.get_path_filename())
         else:
             # make a new calibration
             vanadium_file = self.view.get_vanadium_filename()
             sample_file = self.view.get_sample_filename()
-            self.pending_calibration.set_calibration_paths(vanadium_file, sample_file, self.instrument)
+            self.current_calibration.set_calibration_paths(vanadium_file, sample_file, self.instrument)
             # set group and any additional parameters needed
             if self.view.get_crop_checked():
-                self.pending_calibration.set_group(self.cropping_widget.get_group())
-                if self.pending_calibration.group == GROUP.CUSTOM:
-                    self.pending_calibration.set_cal_file(self.cropping_widget.get_custom_calfile())
-                elif self.pending_calibration.group == GROUP.CROPPED:
-                    self.pending_calibration.set_spectra_list(self.cropping_widget.get_custom_spectra())
+                self.current_calibration.set_group(self.cropping_widget.get_group())
+                if self.current_calibration.group == GROUP.CUSTOM:
+                    self.current_calibration.set_cal_file(self.cropping_widget.get_custom_calfile())
+                elif self.current_calibration.group == GROUP.CROPPED:
+                    self.current_calibration.set_spectra_list(self.cropping_widget.get_custom_spectra())
             else:
                 # default if no cropping
-                self.pending_calibration.set_group(GROUP.BOTH)
+                self.current_calibration.set_group(GROUP.BOTH)
 
     def on_calibrate_clicked(self):
-        self.update_pending_calibration_from_view()
+        self.update_calibration_from_view()
         if self.view.get_new_checked() and self._validate():
             self.start_calibration_worker(self.view.get_plot_output())
         elif self.view.get_load_checked() and self.validate_path():
-            self.model.load_existing_calibration_files(self.pending_calibration)
+            self.model.load_existing_calibration_files(self.current_calibration)
             self.set_current_calibration()
             # set_setting(path_handling.INTERFACES_SETTINGS_GROUP, path_handling.ENGINEERING_PREFIX,
             #             "last_calibration_path", filename)
@@ -81,7 +79,7 @@ class CalibrationPresenter(object):
         Calibrate the data in a separate thread so as to not freeze the GUI.
         """
         self.worker = AsyncTask(self.model.create_new_calibration,
-                                (self.pending_calibration, self.rb_num, plot_output),
+                                (self.current_calibration, self.rb_num, plot_output),
                                 error_cb=self._on_error,
                                 success_cb=self._on_success)
         self.set_calibrate_controls_enabled(False)
@@ -98,10 +96,8 @@ class CalibrationPresenter(object):
     def set_current_calibration(self, success_info=None):
         if success_info:
             logger.information("Thread executed in " + str(success_info.elapsed_time) + " seconds.")
-        self.current_calibration = deepcopy(self.pending_calibration)
         self.calibration_notifier.notify_subscribers(self.current_calibration)
         self.emit_update_fields_signal()
-        self.pending_calibration.clear()
 
     def set_field_values(self):
         self.view.set_sample_text(self.current_calibration.get_sample_runno())
