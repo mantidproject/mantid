@@ -29,6 +29,8 @@ class SeqFittingTabPresenter(object):
         self.fit_parameter_changed_notifier = GenericObservable()
         self.sequential_fit_finished_notifier = GenericObservable()
 
+        self.view.set_slot_for_display_data_type_changed(self.handle_selected_workspaces_changed)
+
         # Observers
         self.selected_workspaces_observer = GenericObserver(self.handle_selected_workspaces_changed)
         self.fit_type_changed_observer = GenericObserver(self.handle_selected_workspaces_changed)
@@ -56,8 +58,10 @@ class SeqFittingTabPresenter(object):
             self.view.fit_table.set_parameters_and_values(parameters, parameter_values)
 
     def _get_fit_function_parameter_values_from_fitting_model(self):
+        display_type = self.view.selected_data_type()
+
         parameter_values = [self.model.get_all_fit_function_parameter_values_for(fit_function)
-                            for row, fit_function in enumerate(self.model.get_all_fit_functions())]
+                            for row, fit_function in enumerate(self.model.get_all_fit_functions_for(display_type))]
         if len(parameter_values) != self.view.fit_table.get_number_of_fits():
             parameter_values *= self.view.fit_table.get_number_of_fits()
         return parameter_values
@@ -69,8 +73,11 @@ class SeqFittingTabPresenter(object):
             self.view.fit_table.set_parameter_values_for_row(row, parameter_values)
 
     def handle_selected_workspaces_changed(self):
-        workspace_names, runs, groups_and_pairs = self.model.get_runs_groups_and_pairs_for_fits()
+        display_type = self.view.selected_data_type()
+
+        workspace_names, runs, groups_and_pairs = self.model.get_runs_groups_and_pairs_for_fits(display_type)
         self.view.fit_table.set_fit_workspaces(workspace_names, runs, groups_and_pairs)
+
         self.handle_fit_function_updated()
 
     def handle_fit_selected_pressed(self):

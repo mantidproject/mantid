@@ -75,4 +75,4 @@ class FrequencyDomainAnalysisContext(MuonContext):
 
     @staticmethod
     def data_type_options_for_sequential():
-        return ["All", "FFT Real", "FFT Imaginary", "FFT Modulus", "MaxEnt"]
+        return ["All", "FD_Re", "FD_Im", "FD_mod", "MaxEnt"]

@@ -716,6 +716,16 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
         else:
             return super().get_all_fit_functions()
 
+    def get_all_fit_functions_for(self, display_type: str) -> list:
+        """Returns all the fit functions for datasets with a name containing a string."""
+        if self.fitting_context.tf_asymmetry_mode:
+            if self.fitting_context.simultaneous_fitting_mode:
+                return [self.fitting_context.tf_asymmetry_simultaneous_function]
+            else:
+                return self._filter_functions_by_dataset_string(display_type, self.tf_asymmetry_single_functions)
+        else:
+            return super().get_all_fit_functions_for(display_type)
+
     def _parse_parameter_values(self, all_parameter_values: list):
         """Separate the parameter values into the normalisations and ordinary parameter values."""
         if not self.fitting_context.tf_asymmetry_mode:
