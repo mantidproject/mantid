@@ -8,7 +8,7 @@ from qtpy import QtWidgets, QtCore
 from os import path
 
 from mantidqt.utils.qt import load_ui
-from Engineering.common import path_handling
+from Engineering.gui.engineering_diffraction.tabs.common import output_settings
 from fnmatch import fnmatch
 from os.path import splitext
 
@@ -42,7 +42,7 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
         super(FittingDataView, self).__init__(parent)
         self.setupUi(self)
         # file finder
-        self.finder_data.readSettings(path_handling.INTERFACES_SETTINGS_GROUP + '/' + path_handling.ENGINEERING_PREFIX)
+        self.finder_data.readSettings(output_settings.INTERFACES_SETTINGS_GROUP + '/' + output_settings.ENGINEERING_PREFIX)
         self.finder_data.setUseNativeWidget(False)
         self.proxy_model = FileFilterProxyModel()
         self.finder_data.setProxyModel(self.proxy_model)
@@ -55,7 +55,7 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
         self.update_file_filter(self.combo_bank.currentText(), self.combo_xunit.currentText())
 
     def saveSettings(self):
-        self.finder_data.saveSettings(path_handling.INTERFACES_SETTINGS_GROUP + '/' + path_handling.ENGINEERING_PREFIX)
+        self.finder_data.saveSettings(output_settings.INTERFACES_SETTINGS_GROUP + '/' + output_settings.ENGINEERING_PREFIX)
 
     # =================
     # Slot Connectors
