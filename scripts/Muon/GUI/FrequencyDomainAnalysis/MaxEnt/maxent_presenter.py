@@ -185,7 +185,6 @@ class MaxEntPresenter(object):
         name = get_raw_data_workspace_name(self.context.data_context.instrument, run, multiperiod,
                                                        period=period, workspace_suffix=self.context.workspace_suffix)
         inputs['InputWorkspace'] = name
-        run = float(run)
 
         if self.view.phase_table != 'Construct' and self.view.phase_table != 'None':
             inputs['InputPhaseTable'] = self.view.phase_table
@@ -199,9 +198,10 @@ class MaxEntPresenter(object):
         if dead_time_table_name is not None:
             inputs['InputDeadTimeTable'] = dead_time_table_name
 
-        inputs['FirstGoodTime'] = self.context.first_good_data([run])
+        run_float = [float(re.search("[0-9]+", name).group())]
+        inputs['FirstGoodTime'] = self.context.first_good_data(run_float)
 
-        inputs['LastGoodTime'] = self.context.last_good_data([run])
+        inputs['LastGoodTime'] = self.context.last_good_data(run_float)
 
         inputs['Npts'] = self.view.num_points
 
