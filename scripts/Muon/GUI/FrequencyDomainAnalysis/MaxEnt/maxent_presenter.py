@@ -170,7 +170,6 @@ class MaxEntPresenter(object):
         tab = create_empty_table(GROUPINGTABLE)
         tab.addColumn('str', 'Detectors')
         groups = self.get_selected_groups
-        print("moo", groups)
         for group in groups:
             detectors = ""
             for det in group.detectors:
