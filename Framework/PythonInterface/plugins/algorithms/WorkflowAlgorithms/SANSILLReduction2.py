@@ -370,16 +370,17 @@ class SANSILLReduction(PythonAlgorithm):
             else:
                 check_wavelengths_match(mtd[tr_ws], mtd[ws])
                 tr_to_apply = tr_ws
-                if self.mode == AcqMode.KINETIC and mtd[tr_ws].blocksize() < mtd[ws].blocksize():
+                needs_broadcasting = self.mode == AcqMode.KINETIC and mtd[tr_ws].blocksize() < mtd[ws].blocksize()
+                if needs_broadcasting:
                     # if the sample is kinetic, but the transmission is monochromatic, need to broadcast
-                    # sometimes, the tranmission itself can be kinetic, in which case there is nothing to do
+                    # sometimes, the transmission itself can be kinetic, in which case there is nothing to do
                     # furthermore, in some configurations the same scattering run can be used for transmission calculation
                     tr_to_apply = self.broadcast_kinetic(tr_ws)
                 ApplyTransmissionCorrection(InputWorkspace=ws,
                                             TransmissionWorkspace=tr_to_apply,
                                             ThetaDependent=theta_dependent,
                                             OutputWorkspace=ws)
-                if self.mode == AcqMode.KINETIC:
+                if needs_broadcasting:
                     DeleteWorkspace(tr_to_apply)
                 if theta_dependent and self.instrument == 'D16' and 75 < mtd[ws].getRun()['Gamma.value'].value < 105:
                     # D16 can do wide angles, which means it can cross 90 degrees, where theta dependent transmission is divergent
