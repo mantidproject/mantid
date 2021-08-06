@@ -370,7 +370,10 @@ class SANSILLReduction(PythonAlgorithm):
             else:
                 check_wavelengths_match(mtd[tr_ws], mtd[ws])
                 tr_to_apply = tr_ws
-                if self.mode == AcqMode.KINETIC:
+                if self.mode == AcqMode.KINETIC and mtd[tr_ws].blocksize() < mtd[ws].blocksize():
+                    # if the sample is kinetic, but the transmission is monochromatic, need to broadcast
+                    # sometimes, the tranmission itself can be kinetic, in which case there is nothing to do
+                    # furthermore, in some configurations the same scattering run can be used for transmission calculation
                     tr_to_apply = self.broadcast_kinetic(tr_ws)
                 ApplyTransmissionCorrection(InputWorkspace=ws,
                                             TransmissionWorkspace=tr_to_apply,
@@ -531,6 +534,7 @@ class SANSILLReduction(PythonAlgorithm):
         if self.instrument == 'D22B':
             # The front detector of D22B is often tilted around its own axis
             # The tilt angle must be subtracted from 2thetas before putting them into the parallax correction formula
+            # TODO: note that in cycle 211, the front detector was Detector 1, so get it from IPF
             offsets.append(mtd[ws].getRun()['Detector 2.dan2_actual'].value)
         if mtd[ws].getInstrument().hasParameter('detector_panels'):
             components = mtd[ws].getInstrument().getStringParameter('detector_panels')[0].split(',')
@@ -707,8 +711,11 @@ class SANSILLReduction(PythonAlgorithm):
             self.setup(mtd[tmp][0])
             if self.mode != AcqMode.TOF:
                 if self.process == 'Sample' or self.process == 'Transmission':
+                    # TODO: remove the next 4 lines once v2 of the loader is plugged in
                     if not self.is_point:
                         ConvertToPointData(InputWorkspace=tmp, OutputWorkspace=tmp)
+                    for w in mtd[tmp]:
+                        w.getAxis(0).setUnit('Empty')
                     ws_list = self.inject_blank_samples(tmp)
                     ConjoinXRuns(InputWorkspaces=ws_list, OutputWorkspace=ws, LinearizeAxis=True)
                     DeleteWorkspaces(WorkspaceList=ws_list)
@@ -720,6 +727,7 @@ class SANSILLReduction(PythonAlgorithm):
             self.setup(mtd[tmp])
             if not self.is_point:
                 ConvertToPointData(InputWorkspace=tmp, OutputWorkspace=ws)
+                mtd[ws].getAxis(0).setUnit('Empty')
                 DeleteWorkspace(tmp)
         self.set_process_as(ws)
         assert isinstance(mtd[ws], MatrixWorkspace)
