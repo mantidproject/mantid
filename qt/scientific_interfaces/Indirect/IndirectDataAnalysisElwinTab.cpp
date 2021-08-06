@@ -256,6 +256,14 @@ void IndirectDataAnalysisElwinTab::setup() {
 }
 
 void IndirectDataAnalysisElwinTab::run() {
+  if (!m_uiForm.dsInputFiles->isEmpty()) {
+    runFileInput();
+  } else {
+    runWorkspaceInput();
+  }
+}
+
+void IndirectDataAnalysisElwinTab::runFileInput() {
   setRunIsRunning(true);
 
   QStringList inputFilenames = m_uiForm.dsInputFiles->getFilenames();
@@ -305,6 +313,68 @@ void IndirectDataAnalysisElwinTab::run() {
     m_batchAlgoRunner->addAlgorithm(loadAlgorithm(inputFilename.toStdString(), workspaceName));
     inputWorkspacesString += workspaceName + ",";
   }
+
+  // Group input workspaces
+  auto groupWsAlg = AlgorithmManager::Instance().create("GroupWorkspaces");
+  groupWsAlg->initialize();
+  API::BatchAlgorithmRunner::AlgorithmRuntimeProps runTimeProps;
+  runTimeProps["InputWorkspaces"] = inputWorkspacesString;
+  groupWsAlg->setProperty("OutputWorkspace", inputGroupWsName);
+
+  m_batchAlgoRunner->addAlgorithm(groupWsAlg, runTimeProps);
+
+  // Configure ElasticWindowMultiple algorithm
+  auto elwinMultAlg = AlgorithmManager::Instance().create("ElasticWindowMultiple");
+  elwinMultAlg->initialize();
+
+  elwinMultAlg->setProperty("OutputInQ", qWorkspace);
+  elwinMultAlg->setProperty("OutputInQSquared", qSquaredWorkspace);
+  elwinMultAlg->setProperty("OutputELF", elfWorkspace);
+
+  elwinMultAlg->setProperty("SampleEnvironmentLogName", m_uiForm.leLogName->text().toStdString());
+  elwinMultAlg->setProperty("SampleEnvironmentLogValue", m_uiForm.leLogValue->currentText().toStdString());
+
+  elwinMultAlg->setProperty("IntegrationRangeStart", m_dblManager->value(m_properties["IntegrationStart"]));
+  elwinMultAlg->setProperty("IntegrationRangeEnd", m_dblManager->value(m_properties["IntegrationEnd"]));
+
+  if (m_blnManager->value(m_properties["BackgroundSubtraction"])) {
+    elwinMultAlg->setProperty("BackgroundRangeStart", m_dblManager->value(m_properties["BackgroundStart"]));
+    elwinMultAlg->setProperty("BackgroundRangeEnd", m_dblManager->value(m_properties["BackgroundEnd"]));
+  }
+
+  if (m_blnManager->value(m_properties["Normalise"])) {
+    elwinMultAlg->setProperty("OutputELT", eltWorkspace);
+  }
+
+  BatchAlgorithmRunner::AlgorithmRuntimeProps elwinInputProps;
+  elwinInputProps["InputWorkspaces"] = inputGroupWsName;
+
+  m_batchAlgoRunner->addAlgorithm(elwinMultAlg, elwinInputProps);
+
+  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(unGroupInput(bool)));
+  m_batchAlgoRunner->executeBatchAsync();
+
+  // Set the result workspace for Python script export
+  m_pythonExportWsName = qSquaredWorkspace;
+}
+
+void IndirectDataAnalysisElwinTab::runWorkspaceInput() {
+  setRunIsRunning(true);
+
+  // Get workspace names
+  std::string inputGroupWsName = "IDA_Elwin_Input";
+
+  auto workspaceBaseName = m_uiForm.cbPreviewFile->currentText();
+
+  workspaceBaseName += "_elwin_";
+
+  const auto qWorkspace = (workspaceBaseName + "eq").toStdString();
+  const auto qSquaredWorkspace = (workspaceBaseName + "eq2").toStdString();
+  const auto elfWorkspace = (workspaceBaseName + "elf").toStdString();
+  const auto eltWorkspace = (workspaceBaseName + "elt").toStdString();
+
+  // Load input files
+  std::string inputWorkspacesString = m_uiForm.cbPreviewFile->currentText().toStdString();
 
   // Group input workspaces
   auto groupWsAlg = AlgorithmManager::Instance().create("GroupWorkspaces");
@@ -404,7 +474,12 @@ void IndirectDataAnalysisElwinTab::checkForELTWorkspace() {
 bool IndirectDataAnalysisElwinTab::validate() {
   UserInputValidator uiv;
 
-  uiv.checkFileFinderWidgetIsValid("Input", m_uiForm.dsInputFiles);
+  if (!m_uiForm.dsInputFiles->isEmpty()) {
+    uiv.checkFileFinderWidgetIsValid("Input", m_uiForm.dsInputFiles);
+    auto const suffixes = getFilteredSuffixes(m_uiForm.dsInputFiles->getFilenames());
+    if (std::adjacent_find(suffixes.begin(), suffixes.end(), std::not_equal_to<>()) != suffixes.end())
+      uiv.addErrorMessage("The input files must be all _red or all _sqw.");
+  }
 
   auto rangeOne = std::make_pair(m_dblManager->value(m_properties["IntegrationStart"]),
                                  m_dblManager->value(m_properties["IntegrationEnd"]));
@@ -417,10 +492,6 @@ bool IndirectDataAnalysisElwinTab::validate() {
     uiv.checkValidRange("Range Two", rangeTwo);
     uiv.checkRangesDontOverlap(rangeOne, rangeTwo);
   }
-
-  auto const suffixes = getFilteredSuffixes(m_uiForm.dsInputFiles->getFilenames());
-  if (std::adjacent_find(suffixes.begin(), suffixes.end(), std::not_equal_to<>()) != suffixes.end())
-    uiv.addErrorMessage("The input files must be all _red or all _sqw.");
 
   QString error = uiv.generateErrorMessage();
   showMessageBox(error);

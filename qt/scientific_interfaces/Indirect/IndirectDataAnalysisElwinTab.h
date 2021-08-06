@@ -55,6 +55,8 @@ signals:
 
 private:
   void run() override;
+  void runFileInput();
+  void runWorkspaceInput();
   void setup() override;
   bool validate() override;
   void loadTabSettings(const QSettings &settings);
