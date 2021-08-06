@@ -484,7 +484,8 @@ and description for entries in the input json file is summarized in the followin
     * - Plots
       - A series of boolean variables control the plotting options. 'Grouping' for plotting the grouping of detectors. 'ED_Features' for plotting parameters correlation features. 'KMeans_Elbow' for plotting the elbow analysis result. 'KMeans_Silhouette' for plotting the Silhouette score.
 
-Here, it is worth noting that detectors may be masked out as belonging to none of the generated group. For example, when using the 'ED' method for defining the similarity between spectra, detectors will be masked out at the fitting stage if the corresponding spectra cannot be fitted successfully.
+Here, it is worth noting that detectors may be masked out as belonging to none of the generated groups.
+For example, when using the 'ED' method for defining the similarity between spectra, detectors will be masked out at the fitting stage if the corresponding spectra cannot be fitted successfully.
 
 Following is presented the clustering result for a NOMAD diamond measurement data,
 
