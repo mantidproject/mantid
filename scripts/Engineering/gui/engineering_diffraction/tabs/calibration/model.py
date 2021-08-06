@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from os import path, makedirs
-
+from shutil import copy2
 from mantid.api import AnalysisDataService as Ads
 from mantid.kernel import logger, UnitParams
 from mantid.simpleapi import PDCalibration, DeleteWorkspace, DiffractionFocussing, \
@@ -215,20 +215,25 @@ class CalibrationModel(object):
                                                 bank_names=calibration.group.banks,
                                                 template_file=calibration.get_prm_template_file(),
                                                 ceria_run=ceria_run, vanadium_run=van_run)
-        if calibration.group == EnggUtils.GROUP.BOTH:
-            # output a separate prm for North and South when both banks included
-            for ibank, bank in enumerate(calibration.group.banks):
-                bank_group = EnggUtils.GroupingInfo(EnggUtils.GROUP(str(ibank+1)))  # to get prm template for the bank
-                EnggUtils.write_ENGINX_GSAS_iparam_file(prm_filepath, [difa[ibank]], [difc[ibank]], [tzero[ibank]],
-                                                        bk2bk_params, bank_names=bank_group.group.banks,
-                                                        template_file=bank_group.get_prm_template_file(),
-                                                        ceria_run=ceria_run, vanadium_run=van_run)
-
         # save pdcal output as nexus
         filepath, ext = path.splitext(prm_filepath)
         nxs_filepath = filepath + '.nxs'
         SaveNexus(InputWorkspace=calibration.get_calibration_table(), Filename=nxs_filepath)
-
+        if calibration.group == EnggUtils.GROUP.BOTH:
+            # output a separate prm for North and South when both banks included
+            for ibank, bank in enumerate(calibration.group.banks):
+                bank_group = EnggUtils.GroupingInfo(EnggUtils.GROUP(str(ibank+1)))  # to get prm template for the bank
+                prm_filepath_bank = calibration_dir + bank_group.generate_output_file_name(
+                    calibration.get_vanadium_path(), calibration.get_sample_path(), calibration.get_instrument())
+                EnggUtils.write_ENGINX_GSAS_iparam_file(prm_filepath_bank,
+                                                        [difa[ibank]], [difc[ibank]], [tzero[ibank]],
+                                                        bk2bk_params, bank_names=bank_group.group.banks,
+                                                        template_file=bank_group.get_prm_template_file(),
+                                                        ceria_run=ceria_run, vanadium_run=van_run)
+                # copy pdcal output nxs for both banks
+                filepath, ext = path.splitext(prm_filepath_bank)
+                nxs_filepath_bank = filepath + '.nxs'
+                copy2(nxs_filepath, nxs_filepath_bank)
         logger.notice(f"\n\nCalibration files saved to: \"{calibration_dir}\"\n\n")
 
     @staticmethod
