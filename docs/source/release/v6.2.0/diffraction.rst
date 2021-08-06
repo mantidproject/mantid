@@ -29,7 +29,6 @@ Improvements
 
 Bugfixes
 ########
-- Fix issue with :ref:`PowderDiffractionCalibration <calibration_tofpd_group_calibration-ref>`.
 - Fix the issue with :ref:`SNSPowderReduction <algm-SNSPowderReduction>` - when invalid height unit is encountered while reading sample log, we should continue by ignoring geometry and rely purely on user input.
 - fix d-spacing calculation when parabolic model is selected.
 
