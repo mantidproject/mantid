@@ -171,7 +171,8 @@ class CalibrationModel(object):
                                                  CalibrationParameters='DIFC+TZERO+DIFA',
                                                  UseChiSq=True)
         ApplyDiffCal(InstrumentWorkspace=foc_name, CalibrationWorkspace=cal_table)
-
+        # store cal_table in calibration
+        calibration.set_calibration_table(cal_table)
         return Ads.retrieve(foc_name), cal_table, diag_ws, mask
 
     def extract_diff_consts_from_ws(self, ws_foc, mask_ws):
@@ -217,7 +218,7 @@ class CalibrationModel(object):
         if calibration.group == EnggUtils.GROUP.BOTH:
             # output a separate prm for North and South when both banks included
             for ibank, bank in enumerate(calibration.group.banks):
-                bank_group = EnggUtils.GroupingInfo(EnggUtils.GROUP(str(ibank+1)))  # so can retrieve prm template for that bank
+                bank_group = EnggUtils.GroupingInfo(EnggUtils.GROUP(str(ibank+1)))  # to get prm template for the bank
                 EnggUtils.write_ENGINX_GSAS_iparam_file(prm_filepath, [difa[ibank]], [difc[ibank]], [tzero[ibank]],
                                                         bk2bk_params, bank_names=bank_group.group.banks,
                                                         template_file=bank_group.get_prm_template_file(),
@@ -226,8 +227,7 @@ class CalibrationModel(object):
         # save pdcal output as nexus
         filepath, ext = path.splitext(prm_filepath)
         nxs_filepath = filepath + '.nxs'
-        ws_name = "engggui_calibration_" + calibration.get_group_suffix()  # would be good not to rely on wsname
-        SaveNexus(InputWorkspace=ws_name, Filename=nxs_filepath)
+        SaveNexus(InputWorkspace=calibration.get_calibration_table(), Filename=nxs_filepath)
 
         logger.notice(f"\n\nCalibration files saved to: \"{calibration_dir}\"\n\n")
 

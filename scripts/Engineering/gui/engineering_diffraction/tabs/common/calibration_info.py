@@ -12,11 +12,15 @@ class CalibrationInfo(EnggUtils.GroupingInfo):
     """
     Keeps track of the parameters that went into a calibration created by the engineering diffraction GUI.
     """
-    def __init__(self, vanadium_path=None, sample_path=None, instrument=None):
-        super().__init__()
-        self.vanadium_path = vanadium_path
-        self.sample_path = sample_path
-        self.instrument = instrument
+    def __init__(self, group=None):
+        super().__init__(group)
+        self.vanadium_path = None
+        self.sample_path = None
+        self.instrument = None
+        self.calibration_table = None
+
+    def set_calibration_table(self, cal_table):
+        self.calibration_table = cal_table
 
     def set_calibration_paths(self, vanadium_path, sample_path, instrument):
         """
@@ -38,6 +42,9 @@ class CalibrationInfo(EnggUtils.GroupingInfo):
                                                  self.get_instrument(), ext)
 
     # getters
+    def get_calibration_table(self):
+        return self.calibration_table
+
     def get_vanadium_path(self):
         return self.vanadium_path
 
