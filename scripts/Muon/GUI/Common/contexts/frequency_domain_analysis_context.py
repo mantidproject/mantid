@@ -49,12 +49,14 @@ class FrequencyDomainAnalysisContext(MuonContext):
     def get_names_of_frequency_domain_workspaces_to_fit(
             self, runs='', group_and_pair='', frequency_type="None"):
         run_list = self.get_runs(runs)
-        names=[]
+        names = []
         for group_pair in group_and_pair:
             group, pair = self.get_group_and_pair(group_pair)
             names += self._frequency_context.get_frequency_workspace_names(
                 run_list, group, pair, frequency_type)
-        return names
+
+        # Remove duplicates from the list
+        return list(dict.fromkeys(names))
 
     def get_names_of_time_domain_workspaces_to_fit(
             self, runs='', group_and_pair='', rebin=False):
