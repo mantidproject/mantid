@@ -75,8 +75,14 @@ int LoadILLSANS2::confidence(Kernel::NexusDescriptor &descriptor) const {
   if (descriptor.pathExists("/entry0/mode") &&
       ((descriptor.pathExists("/entry0/reactor_power") && descriptor.pathExists("/entry0/instrument_name")) ||
        (descriptor.pathExists("/entry0/instrument/name") && descriptor.pathExists("/entry0/acquisition_mode") &&
-        !descriptor.pathExists("/entry0/instrument/Detector")))) // serves to remove the TOF
-                                                                 // instruments
+        !descriptor.pathExists("/entry0/instrument/Detector")))                 // serves to remove the TOF instruments
+      && !((descriptor.pathExists("/entry0/instrument/Doppler/mirror_sense") && // serves to remove indirect instruments
+            descriptor.pathExists("/entry0/dataSD/SingleD_data"))               // IN16B new
+           || (descriptor.pathExists("/entry0/instrument/Doppler/doppler_frequency") &&
+               descriptor.pathExists("/entry0/dataSD/dataSD"))) // IN16B old
+      && !(descriptor.pathExists("/entry0/wavelength") ||       // ILL D17
+           descriptor.pathExists("/entry0/theta")))             // ILL FIGARO
+
   {
     return 80;
   } else {
