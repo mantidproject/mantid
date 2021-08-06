@@ -24,6 +24,8 @@ class SeqFittingTabPresenter(object):
         self.calculation_thread = None
         self.fitting_calculation_model = None
 
+        self.view.set_data_type_options(self.context.data_type_options_for_sequential())
+
         self.fit_parameter_changed_notifier = GenericObservable()
         self.sequential_fit_finished_notifier = GenericObservable()
 

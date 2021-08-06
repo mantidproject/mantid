@@ -27,6 +27,13 @@ class SeqFittingTabView(QtWidgets.QWidget, ui_seq_fitting_tab):
     def warning_popup(self, message):
         warning(message, parent=self)
 
+    def set_data_type_options(self, data_type_options: list) -> None:
+        self.data_type_combo_box.clear()
+        self.data_type_combo_box.addItems(data_type_options)
+
+    def hide_data_type_combo_box(self):
+        self.data_type_combo_box.hide()
+
     def use_initial_values_for_fits(self):
         return self.initial_fit_values_radio.isChecked()
 

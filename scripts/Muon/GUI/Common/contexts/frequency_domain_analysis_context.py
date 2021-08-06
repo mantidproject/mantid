@@ -72,3 +72,7 @@ class FrequencyDomainAnalysisContext(MuonContext):
     @property
     def window_title(self):
         return "Frequency Domain Analysis"
+
+    @staticmethod
+    def data_type_options_for_sequential():
+        return ["All", "FFT Real", "FFT Imaginary", "FFT Modulus", "MaxEnt"]
