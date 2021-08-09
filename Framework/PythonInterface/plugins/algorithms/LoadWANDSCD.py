@@ -4,7 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import PythonAlgorithm, AlgorithmFactory, PropertyMode, WorkspaceProperty, Progress, MultipleFileProperty, FileAction, mtd
+from mantid.api import (PythonAlgorithm, AlgorithmFactory, PropertyMode, ReplicateMD, FileProperty, DivideMD, WorkspaceProperty, Progress,
+                        MultipleFileProperty, FileAction, mtd)
 from mantid.kernel import Direction, Property, IntArrayProperty, StringListValidator, FloatTimeSeriesProperty
 from mantid.simpleapi import LoadEventNexus, RemoveLogs, DeleteWorkspace, ConvertToMD, Rebin, CreateGroupingWorkspace, GroupDetectors, SetUB
 import numpy as np
@@ -13,12 +14,11 @@ import re
 
 
 class LoadWANDSCD(PythonAlgorithm):
-
     def category(self):
         return 'DataHandling\\Nexus'
 
     def seeAlso(self):
-        return [ "ConvertWANDSCDtoQ" ]
+        return ["ConvertWANDSCDtoQ"]
 
     def name(self):
         return 'LoadWANDSCD'
@@ -27,15 +27,17 @@ class LoadWANDSCD(PythonAlgorithm):
         return 'Load WAND single crystal data into a detector space vs rotation MDHisto'
 
     def PyInit(self):
-        self.declareProperty(MultipleFileProperty(name="Filename", action=FileAction.OptionalLoad,
-                                                  extensions=[".nxs.h5"]),
-                             "Files to load")
+        # Input workspace/data info (filename or IPTS+RunNumber)
+        self.declareProperty(MultipleFileProperty(name="Filename", action=FileAction.OptionalLoad, extensions=[".nxs.h5"]), "Files to load")
         self.declareProperty('IPTS', Property.EMPTY_INT, "IPTS number to load from")
         self.declareProperty(IntArrayProperty("RunNumbers", []), 'Run numbers to load')
+        # Normalization info (optional, skip normalization if not specified)
+        self.declareProperty(FileProperty(name="NormWorkspace", action=FileAction.OptionalLoad, extensions=[".nxs.h5"]),
+                             "Normalization workspace")
+        self.declareProperty("NormalizedBy", '', StringListValidator(['', 'counts', 'Monitor', 'Time']), "Normalisation")
+        # Output workspace/data info
         self.declareProperty("Grouping", 'None', StringListValidator(['None', '2x2', '4x4']), "Group pixels")
-        self.declareProperty(WorkspaceProperty("OutputWorkspace", "",
-                                               optional=PropertyMode.Mandatory,
-                                               direction=Direction.Output),
+        self.declareProperty(WorkspaceProperty("OutputWorkspace", "", optional=PropertyMode.Mandatory, direction=Direction.Output),
                              "Output Workspace")
 
     def validateInputs(self):
@@ -178,6 +180,34 @@ class LoadWANDSCD(PythonAlgorithm):
         setGoniometer_alg.setProperty("Axis0", 's1,0,1,0,1')
         setGoniometer_alg.setProperty("Average", False)
         setGoniometer_alg.execute()
+
+        # Perform the normalization
+        # TODO: Confirm the format of the normalization input (file or workspace or both?)
+        # assuming we are getting a workspace
+        ws_norm = self.getProperty("NormWorkspace")
+        norm_method = self.getProperty("NormalizedBy").value
+
+        if ws_norm and (norm_method != ''):
+            print("Perform normalization")
+            norm_replicated = ReplicateMD(ShapeWorkspace=outWS, DataWorkspace=ws_norm)
+            outWS = DivideMD(LHSWorkspace=outWS, RHSWorkspace=norm_replicated)
+            if norm_method.lower() == 'counts':
+                scale = ws_norm.getSignalArray().mean()
+                print('scale counts = {}'.format(int(scale)))
+            elif norm_method.lower() == 'monitor':
+                scale = np.array(outWS.getExperimentInfo(0).run().getProperty('monitor_count').value)
+                scale /= ws_norm.getExperimentInfo(0).run().getProperty('monitor_count').value[0]
+                print('scale monitor = {}'.format(scale))
+            elif norm_method.lower() == 'time':
+                scale = np.array(ws_norm.getExperimentInfo(0).run().getProperty('duration').value)
+                scale /= ws_norm.getExperimentInfo(0).run().getProperty('duration').value[0]
+            else:
+                raise RuntimeError('Unknown normalization method: {}'.format(norm_method))
+            # perform the normalization
+            outWS.setSignalArray(outWS.getSignalArray() / scale)
+            outWS.setErrorSquaredArray(outWS.getErrorSquaredArray() / scale**2)
+        else:
+            print("Skipping normalization")
 
         self.setProperty("OutputWorkspace", outWS)
 
