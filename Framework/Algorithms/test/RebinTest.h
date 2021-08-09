@@ -689,6 +689,93 @@ public:
     AnalysisDataService::Instance().remove("test_Rebin_revLog");
   }
 
+  void test_inversePowerSquareRoot() {
+    // Test InversePower in a simple case of square root sum
+    Workspace2D_sptr test_1D = Create1DWorkspace(51);
+    test_1D->setDistribution(false);
+    AnalysisDataService::Instance().add("test_Rebin_revLog", test_1D);
+
+    Rebin rebin;
+    rebin.initialize();
+    rebin.setPropertyValue("InputWorkspace", "test_Rebin_revLog");
+    rebin.setPropertyValue("OutputWorkspace", "test_Rebin_revLog");
+    rebin.setPropertyValue("Params", "1, 1, 10");
+    rebin.setPropertyValue("Power", "0.5");
+    TS_ASSERT_THROWS_NOTHING(rebin.execute());
+
+    MatrixWorkspace_sptr out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_Rebin_revLog");
+    auto &outX = out->x(0);
+
+    TS_ASSERT_EQUALS(outX.size(), 28);
+    TS_ASSERT_DELTA(outX[0], 1, 1e-5);
+    TS_ASSERT_DELTA(outX[1], 2, 1e-5);
+    TS_ASSERT_DELTA(outX[2], 2.707106781, 1e-5);
+    TS_ASSERT_DELTA(outX[3], 3.28445705, 1e-5);
+    TS_ASSERT_DELTA(outX[27], 10, 1e-5);
+
+    AnalysisDataService::Instance().remove("test_Rebin_revLog");
+  }
+
+  void test_inversePowerHarmonic() {
+    // Test InversePower in a simple case of harmonic serie
+    Workspace2D_sptr test_1D = Create1DWorkspace(51);
+    test_1D->setDistribution(false);
+    AnalysisDataService::Instance().add("test_Rebin_revLog", test_1D);
+
+    Rebin rebin;
+    rebin.initialize();
+    rebin.setPropertyValue("InputWorkspace", "test_Rebin_revLog");
+    rebin.setPropertyValue("OutputWorkspace", "test_Rebin_revLog");
+    rebin.setPropertyValue("Params", "1, 1, 5");
+    rebin.setPropertyValue("Power", "1");
+    TS_ASSERT_THROWS_NOTHING(rebin.execute());
+
+    MatrixWorkspace_sptr out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_Rebin_revLog");
+    auto &outX = out->x(0);
+
+    TS_ASSERT_EQUALS(outX.size(), 31);
+    TS_ASSERT_DELTA(outX[0], 1, 1e-5);
+    TS_ASSERT_DELTA(outX[1], 2, 1e-5);
+    TS_ASSERT_DELTA(outX[2], 2.5, 1e-5);
+    TS_ASSERT_DELTA(outX[3], 2.8333333, 1e-5);
+    TS_ASSERT_DELTA(outX[30], 5, 1e-5);
+
+    AnalysisDataService::Instance().remove("test_Rebin_revLog");
+  }
+
+  void test_inversePowerValidateHarmonic() {
+    // Test that the validator which forbid breating more than 10000 bins works in a harmonic series case
+    Workspace2D_sptr test_1D = Create1DWorkspace(51);
+    test_1D->setDistribution(false);
+    AnalysisDataService::Instance().add("test_Rebin_revLog", test_1D);
+
+    Rebin rebin;
+    rebin.initialize();
+    rebin.setPropertyValue("InputWorkspace", "test_Rebin_revLog");
+    rebin.setPropertyValue("OutputWorkspace", "test_Rebin_revLog");
+    rebin.setPropertyValue("Params", "1, 1, 100");
+    rebin.setPropertyValue("Power", "1");
+    TS_ASSERT_THROWS(rebin.execute(), const std::runtime_error &);
+    AnalysisDataService::Instance().remove("test_Rebin_revLog");
+  }
+
+  void test_inversePowerValidateInverseSquareRoot() {
+    // Test that the validator which forbid breating more than 10000 bins works in an inverse square root case
+    // We test both because they rely on different formula to compute the expected number of bins.
+    Workspace2D_sptr test_1D = Create1DWorkspace(51);
+    test_1D->setDistribution(false);
+    AnalysisDataService::Instance().add("test_Rebin_revLog", test_1D);
+
+    Rebin rebin;
+    rebin.initialize();
+    rebin.setPropertyValue("InputWorkspace", "test_Rebin_revLog");
+    rebin.setPropertyValue("OutputWorkspace", "test_Rebin_revLog");
+    rebin.setPropertyValue("Params", "1, 1, 1000");
+    rebin.setPropertyValue("Power", "0.5");
+    TS_ASSERT_THROWS(rebin.execute(), const std::runtime_error &);
+    AnalysisDataService::Instance().remove("test_Rebin_revLog");
+  }
+
   void test_parallel_cloned() { ParallelTestHelpers::runParallel(run_rebin, "Parallel::StorageMode::Cloned"); }
 
   void test_parallel_distributed() {

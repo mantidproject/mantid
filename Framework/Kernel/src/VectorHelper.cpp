@@ -10,6 +10,7 @@
 #include "MantidKernel/VectorHelper.h"
 #include <algorithm>
 #include <boost/algorithm/string.hpp>
+#include <iostream>
 #include <numeric>
 #include <sstream>
 
@@ -34,7 +35,7 @@ namespace VectorHelper {
  **/
 int DLLExport createAxisFromRebinParams(const std::vector<double> &params, std::vector<double> &xnew,
                                         const bool resize_xnew, const bool full_bins_only, const double xMinHint,
-                                        const double xMaxHint, const bool useReverseLogarithmic) {
+                                        const double xMaxHint, const bool useReverseLogarithmic, const double power) {
   std::vector<double> tmp;
   const std::vector<double> &fullParams = [&params, &tmp, xMinHint, xMaxHint]() {
     if (params.size() == 1) {
@@ -70,6 +71,10 @@ int DLLExport createAxisFromRebinParams(const std::vector<double> &params, std::
   if (resize_xnew)
     xnew.emplace_back(xcurr);
 
+  int currDiv = 1;
+
+  bool isPower = power > 0 && power <= 1;
+
   while ((ibound <= ibounds) && (istep <= isteps)) {
     // if step is negative then it is logarithmic step
     bool isLogBin = (fullParams[istep] < 0.0);
@@ -80,20 +85,24 @@ int DLLExport createAxisFromRebinParams(const std::vector<double> &params, std::
       // we are starting a new bin, but since it is a rev log, xcurr needs to be at its end
       xcurr = fullParams[ibound];
     }
+    if (!isPower) {
+      if (!isLogBin)
+        xs = fullParams[istep];
+      else {
+        if (useReverseLogarithmic) {
+          // we go through a reverse log bin by starting from its end, and working our way back to the beginning
+          // this way we can define the bins in a reccuring way, and with a more obvious closeness with the usual log.
+          double x0 = fullParams[ibound - 2];
+          double step = x0 + fullParams[ibound] - xcurr;
 
-    if (!isLogBin)
-      xs = fullParams[istep];
-    else {
-      if (useReverseLogarithmic) {
-        // we go through a reverse log bin by starting from its end, and working our way back to the beginning
-        // this way we can define the bins in a reccuring way, and with a more obvious closeness with the usual log.
-        double x0 = fullParams[ibound - 2];
-        double step = x0 + fullParams[ibound] - xcurr;
+          xs = -step * alpha;
 
-        xs = -step * alpha;
-
-      } else
-        xs = xcurr * fabs(fullParams[istep]);
+        } else
+          xs = xcurr * fabs(fullParams[istep]);
+      }
+    } else {
+      xs = fullParams[istep] * std::pow(currDiv, -power);
+      ++currDiv;
     }
 
     if (fabs(xs) == 0.0) {

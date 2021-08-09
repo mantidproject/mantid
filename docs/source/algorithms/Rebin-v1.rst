@@ -94,6 +94,19 @@ Hence the actual *Param* string used is "0, 2, 4, 3, 10".
 
 This flag is ignored if UseReverseLogarithm is checked.
 
+Power option
+############
+
+If a value between 0 (excluded) and 1 (included) is provided in the Power field, the binning will follow an inverse power
+pattern, each bin having a width of
+
+.. math:: w_i = \frac{F}{i^{\mathrm{power}}
+
+where F is the factor provided between the boundaries.
+Since, even though these series diverge and will reach whatever bounds are given, they might take an exponentially slow time
+to reach them, and thus an exponential number of bins, a check ensure that the total number of bins is not greater
+than 10000.
+
 .. _rebin-usage:
 
 Usage
@@ -160,6 +173,26 @@ Output:
 .. testoutput:: ExHistRevLog
 
    The rebinned X values are: [ 1.  6.  8.  9.]
+
+**Example - Inverse power rebinning:**
+
+.. testcode:: ExInversePower
+
+   # create histogram workspace
+   dataX = [1,2,3,4,5,6,7,8,9,10] # or use dataX=range(1,11)
+   dataY = [1,2,3,4,5,6,7,8,9] # or use dataY=range(1,10)
+   ws = CreateWorkspace(dataX, dataY)
+
+   # rebin from min to max - 1 with square root
+   ws = Rebin(ws, "1, 3, 10", Power=0.5)
+
+   print("The rebinned X values are: {}".format(ws.readX(0)))
+
+Output:
+
+.. testoutput:: ExHistRevLog
+
+   The rebinned X values are: [ 1.  4.  6.121320344  7.853371151  9.353371151  10.]
 
 **Example - custom two regions rebinning:**
 
