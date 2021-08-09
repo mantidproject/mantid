@@ -13,7 +13,7 @@
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
-#include <fstream>
+//#include "MantidKernel/MultiThreaded.h"
 
 #include <stdexcept>
 #include <vector>
@@ -21,7 +21,7 @@
 #include <chrono>
 #include <iostream>
 
-#define USE_PARALLELISM false
+#define USE_PARALLELISM true
 
 namespace {
 
@@ -67,8 +67,7 @@ DECLARE_ALGORITHM(LoadDNSEvent)
 const std::string LoadDNSEvent::INSTRUMENT_NAME = "DNS-PSD";
 const unsigned MAX_BUFFER_BYTES_SIZE = 1500; // maximum buffer size in data file
 const unsigned DETECTOR_PIXEL_COUNT = 1024 * 128; // number of pixels in detector
-// changed to 1024 pixels, which is natural pixel count of PSD, 
-// last 64 are not vissible (covered) so 960 are usefull 
+
 void LoadDNSEvent::init() {
   /// Initialise the properties
 
@@ -108,6 +107,8 @@ void LoadDNSEvent::exec() {
   const std::string fileName = getPropertyValue("InputFile");
   chopperChannel = static_cast<uint32_t>(getProperty("ChopperChannel"));
   monitorChannel = static_cast<uint32_t>(getProperty("MonitorChannel"));
+  //const auto instrParamMonitorChannels =
+  //    outputWS->instrumentParameters().getType<int>("monitor", "channel");
 
   if (chopperChannel == 0) {
     const auto instrumentParametersChopperChannels =
@@ -173,8 +174,6 @@ void LoadDNSEvent::populate_EventWorkspace(
     uint64_t oversizedChanelIndexCounter = 0;
     uint64_t oversizedPosCounter = 0;
     uint64_t i = 0;
-
-
     const auto wsIndex = j;
     auto &eventList = finalEventAccumulator.neutronEvents[j];
     if (eventList.size() != 0) {
@@ -196,17 +195,19 @@ void LoadDNSEvent::populate_EventWorkspace(
         }
       }
 
-      chopperIt =
-          std::lower_bound(finalEventAccumulator.triggerEvents.cbegin(), finalEventAccumulator.triggerEvents.cend(),
-                           event.timestamp, [](auto l, auto r) { return l.timestamp > r; });
-      const uint64_t chopperTimestamp = chopperIt->timestamp;
-      if (chopperTimestamp != 0) {
-      spectrum.addEventQuickly(Types::Event::TofEvent(double(event.timestamp - chopperTimestamp) / 10.0));
-      g_log.information() << "evts " << event.timestamp 
-                  << " chopperts " << chopperTimestamp
-                  << std::endl;
-      }
+      chopperIt = std::lower_bound(
+          finalEventAccumulator.triggerEvents.cbegin(), finalEventAccumulator.triggerEvents.cend(),
+          event.timestamp, [](auto l, auto r) { return l.timestamp > r; });
+      const uint64_t chopperTimestamp =
+          chopperIt != finalEventAccumulator.triggerEvents.cend()
+              ? chopperIt->timestamp
+              : 0; //before first chopper trigger
+      if (chopperTimestamp != 0) { 
+      // throw away events before first chopper trigger
+      spectrum.addEventQuickly(Types::Event::TofEvent(
+      double(event.timestamp - chopperTimestamp) / 10.0));}
     }
+
     // PARALLEL_END_INTERUPT_REGION
     oversizedChanelIndexCounterA += oversizedChanelIndexCounter;
     oversizedPosCounterA += oversizedPosCounter;
@@ -221,7 +222,6 @@ void LoadDNSEvent::populate_EventWorkspace(
     g_log.warning() << "Bad position values: " << oversizedPosCounterA
                     << std::endl;
   }
-  //outfile.close();
 }
 
 void LoadDNSEvent::runLoadInstrument(std::string instrumentName,
@@ -493,38 +493,35 @@ void LoadDNSEvent::parse_DataBuffer(VectorByteStream &file,
 
 LoadDNSEvent::BufferHeader
 LoadDNSEvent::parse_DataBufferHeader(VectorByteStream &file) {
-  uint64_t ts1;
-  uint64_t ts2;
-  uint64_t ts3;  
+  uint16_t ts1;
+  uint16_t ts2;
+  uint16_t ts3;  
   BufferHeader header = {};
   file.read<2>(header.bufferLength);
-  file.extractDataChunk<2>() // datachunck with a size of 2 bytes
-      .readBits<1>(
-          header.bufferType) // reads first bit of the extracted data chnk
-      .readBits<15>(header.bufferVersion);
+  file.read<2>(header.bufferVersion);
   file.read<2>(header.headerLength);
   file.read<2>(header.bufferNumber);
   file.read<2>(header.runId);
+  //file.skip<10>()
   file.read<1>(header.mcpdId);
   file.read<1>(header.deviceStatus);
+  //file.skip<1>()
   file.read<2>(ts1);
   file.read<2>(ts2);
   file.read<2>(ts3);
-  header.timestamp = ts3 << 32 | ts2 << 16 | ts1;
-  g_log.debug() << int(header.bufferType) << " "
-                << int(header.bufferVersion)  << " "
-                << int(header.headerLength)  << " "
-                << int(header.bufferNumber)  << " "
-                << int(header.runId)  << " "
-                << int(header.mcpdId)  << " "      
-                << int(header.deviceStatus)  << " "   
-                << int(header.deviceStatus)  << " "     
-                << ts1  << " "       
-                << ts2  << " "       
-                << ts3  << " "   
-                << header.timestamp  << " "                       
-                << std::endl;
-
+  // 48 bit timestamp is 3 2-byte MSB words ordered LSB
+  header.timestamp = (uint64_t) ts3 << 32 | (uint64_t) ts2 << 16 | ts1;
+  //g_log.debug() << int(header.bufferLength)  << " "
+  //              << int(header.headerLength)  << " "
+  //              << int(header.bufferNumber)  << " "
+   //             << int(header.runId)  << " "
+   //             << int(header.mcpdId)  << " "      
+   //             << int(header.deviceStatus)  << " "     
+   //             << ts1  << " "       
+   //             << ts2  << " "       
+   //             << ts3  << " "   
+   //             << header.timestamp  << " "                       
+   //             << std::endl;
   file.skip<24>();
   return header;
 }
@@ -533,15 +530,16 @@ void LoadDNSEvent::parse_andAddEvent(
     VectorByteStream &file, const LoadDNSEvent::BufferHeader &bufferHeader,
     LoadDNSEvent::EventAccumulator &eventAccumulator) {
   CompactEvent event = {};
-  uint64_t data1;
-  uint64_t data2;
-  uint64_t data3;  
+  uint16_t data1;
+  uint16_t data2;
+  uint16_t data3;  
   uint64_t data;
   event_id_e eventId;
   file.read<2>(data1);
   file.read<2>(data2);
   file.read<2>(data3);
-  data = data3 << 32 | data2 << 16 | data1;
+  // 48 bit event is 3 2-byte MSB words ordered LSB
+  data = (uint64_t) data3 << 32 | (uint64_t) data2 << 16 | data1;
   eventId = static_cast<event_id_e>((data >> 47) & 0b1) ;
   switch (eventId) {
   case event_id_e::TRIGGER: {
@@ -550,12 +548,13 @@ void LoadDNSEvent::parse_andAddEvent(
     trigId = (data >> 44) & 0b111; // 3 bit
     dataId = (data >> 40) & 0b1111; // 4 bit
     event.timestamp = data & 0x7ffff; // 19bit
-    Sleep(1);
     event.timestamp += bufferHeader.timestamp;
-    if ((dataId != chopperChannel - 1) || (trigId != 7)) { 
-        // dataId identifies chopper channel
-        // goes from 0-3 for Monitor/Chopper channel 1-4 in mesydaq gui,
-        // trigger ID should be 7 for register change
+    //g_log.debug() << "trigger " << trigId
+    //              << " data_id " << dataId
+    //             << " timestamp " << event.timestamp << std::endl;
+    // trigId = 7 is register change and 
+    // dataId 0-3 corresponds to chopperchannel 1-4 in the gui
+    if ((dataId != chopperChannel - 1) || (trigId != 7)) {  
       return;
     }
     eventAccumulator.triggerEvents.push_back(event);
@@ -566,9 +565,12 @@ void LoadDNSEvent::parse_andAddEvent(
     channel = (data >> 39) & 0b11111111; // 5bit
     position = (data >> 19) & 0x3ff;  // 10bit
     event.timestamp = (data & 0x7ffff);  // 19bit
-    channel |= static_cast<uint8_t>(bufferHeader.mcpdId << 6u);
     event.timestamp += bufferHeader.timestamp;
-
+    channel |= static_cast<uint8_t>(bufferHeader.mcpdId << 6u);
+    //g_log.debug() << "channel " << int(channel) 
+    //              << " position " << position
+    //              << " timestamp " << event.timestamp
+    //              << std::endl;
     const size_t wsIndex = getWsIndex(channel, position);
     eventAccumulator.neutronEvents[wsIndex].push_back(event);
   } break;

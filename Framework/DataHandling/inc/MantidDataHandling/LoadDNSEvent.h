@@ -56,7 +56,7 @@ public:
   const std::string name() const override { return "LoadDNSEvent"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
-    return "Loads data from the new PSD detector to a Mantid EventWorkspace.";
+    return "Loads data from the PSD detector to a Mantid EventWorkspace.";
   }
 
   /// Algorithm's version for identification
@@ -72,24 +72,14 @@ private:
   /// Run the algorithm
   void exec() override;
 
-  enum class BufferType { DATA = 0, COMMAND = 1 };
-
-  enum class DeviceStatus {
-    DAQ_STOPPED_SYNC_ERROR = 0,
-    DAQ_RUNNING_SYNC_ERROR = 1,
-    DAQ_STOPPED_SYNC_OK = 2,
-    DAQ_RUNNING_SYNC_OK = 3
-  };
-
   struct BufferHeader {
     uint16_t bufferLength;
     uint16_t bufferVersion;
-    BufferType bufferType;
     uint16_t headerLength; // static const uint16_t headerLength = 21;
     uint16_t bufferNumber;
     uint16_t runId;
     uint8_t mcpdId;
-    DeviceStatus deviceStatus;
+    uint8_t deviceStatus;
     uint64_t timestamp;
     // std::array<uint16_t, 3> parameter0;
     // std::array<uint16_t, 3> parameter1;
@@ -97,36 +87,9 @@ private:
     // std::array<uint16_t, 3> parameter3;
   };
 
-  struct NeutronEventData {
-    uint8_t modId;
-    //! number of the slot inside the MPSD
-    uint8_t slotId;
-    //! amplitude value of the neutron event
-    uint16_t amplitude;
-    //! y position of the neutron event in one tube
-    uint16_t position;
-  };
-
-  struct TriggerEventData {
-    uint8_t trigId;
-    uint8_t dataId;
-    uint32_t data;
-  };
 
 public:
   enum event_id_e { NEUTRON = 0, TRIGGER = 1 };
-
-  struct Event {
-    event_id_e eventId;
-
-    union {
-      NeutronEventData neutron;
-      TriggerEventData trigger;
-    } data;
-
-    uint8_t mcpdId;
-    uint64_t timestamp;
-  };
 
   struct CompactEvent {
     uint64_t timestamp;
@@ -162,12 +125,9 @@ private:
                         EventAccumulator &eventAccumulator);
   BufferHeader parse_DataBufferHeader(VectorByteStream &file);
 
-  inline size_t getWsIndex(const uint8_t &channel,
-                           const uint16_t &position) {
+  inline size_t getWsIndex(const uint8_t &channel, const uint16_t &position) {
   const uint32_t channelIndex =  ((channel & 0b11100000u) >> 2u) |
                                   (channel & 0b00000111u);
-    // channelIndex is the number of the tube going from 0 to 127
-    // wsIndex is tubenumber*pixelnumber + y-pixel-position
     return channelIndex * 1024 + position;
   }
 

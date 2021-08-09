@@ -75,44 +75,6 @@ static endian getMachineEndianess() {
 
 static const endian MACHINE_ENDIANESS = getMachineEndianess();
 
-template <size_t bytecount, size_t bitsLeft = bytecount * 8> struct DataChunk {
-  static_assert(bytecount * 8 >= bitsLeft,
-                "bitsLeft must be smaller or equal to bytecount * 8 ");
-  static_assert(bitsLeft >= 0, "bitcount must be greater than zero");
-  // private:
-  using Buffer = uint64_t;
-  Buffer buffer;
-
-public:
-  template <std::size_t bitcount, typename T>
-  inline DataChunk<bytecount, bitsLeft - bitcount> readBits(T &result) const {
-    const size_t shiftAmount = sizeof(buffer) * 8 - bitcount;
-    const Buffer bufferMask = ~((Buffer(0x1) << shiftAmount) - Buffer(1));
-    const Buffer maskedBuffer = buffer & bufferMask;
-
-    union {
-      Buffer buf;
-      T asT;
-    } shiftedBuffer;
-    shiftedBuffer.buf = maskedBuffer >> shiftAmount;
-
-    result = shiftedBuffer.asT;
-    return {buffer << bitcount};
-  }
-
-  template <std::size_t bitcount>
-  inline DataChunk<bytecount, bitsLeft - bitcount> skipBits() const {
-    return {buffer << bitcount};
-  }
-};
-
-template <size_t bytecount> struct DataChunk<bytecount, 0> {
-  // empty struct to ensure no further bits are read from this DataChunk.
-  // private:
-  using Buffer = uint64_t;
-  Buffer buffer;
-};
-
 class FileByteStream {
 public:
   explicit FileByteStream(const std::string &filename, const endian endianess)
@@ -166,31 +128,23 @@ public:
     return result;
   }
 
-  template <std::size_t bytecount, typename T>
-  inline FileByteStream &read(T &result) {
-    readRaw<bytecount>(result);
-    result = result;
-    if (endianess() != MACHINE_ENDIANESS /*&& endianess != endian::native*/) {
-    result = convert_endianness(result);
-    }
-    return *this;
-  }
+  // template <std::size_t bytecount, typename T>
+  // inline FileByteStream &read(T &result) {
+    // readRaw<bytecount>(result);
+    // if (endianess() != MACHINE_ENDIANESS /*&& endianess != endian::native*/) {
+      // result = convert_endianness(result);
+    // }
+    // return *this;
+  // }
 
-  template <typename T> inline FileByteStream &read(T &result) {
-    return read<sizeof(result)>(result);
-  }
+  // template <typename T> inline FileByteStream &read(T &result) {
+    // return read<sizeof(result)>(result);
+  // }
 
-  template <typename T> inline T read(T &&result) {
-    read<sizeof(result)>(result);
-    return result;
-  }
-
-  template <size_t bytecount> const DataChunk<bytecount> extractDataChunk() {
-    DataChunk<bytecount> dc = {};
-    read<bytecount>(dc.buffer);
-    dc.buffer <<= (sizeof(dc.buffer) - bytecount) * 8;
-    return dc;
-  }
+  // template <typename T> inline T read(T &&result) {
+    // read<sizeof(result)>(result);
+    // return result;
+  // }
 
   inline uint8_t peek() { return static_cast<uint8_t>(stream_.peek()); }
 
@@ -267,7 +221,6 @@ public:
   template <std::size_t bytecount, typename T>
   inline VectorByteStream &read(T &result) {
     readRaw<bytecount>(result);
-    result = result;
     if (endianess != MACHINE_ENDIANESS /*&& endianess != endian::native*/) {
       result = convert_endianness(result);
     }
@@ -283,12 +236,6 @@ public:
     return result;
   }
 
-  template <size_t bytecount> const DataChunk<bytecount> extractDataChunk() {
-    DataChunk<bytecount> dc = {};
-    read<bytecount>(dc.buffer);
-    dc.buffer <<= (sizeof(dc.buffer) - bytecount) * 8;
-    return dc;
-  }
 
   inline uint8_t peek() { return static_cast<uint8_t>(streampeek()); }
 
