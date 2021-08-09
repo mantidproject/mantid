@@ -677,7 +677,7 @@ class BasicFittingModelTest(unittest.TestCase):
 
         self.model.dataset_names = self.dataset_names
 
-        workspace_names, runs, groups_and_pairs = self.model.get_runs_groups_and_pairs_for_fits()
+        workspace_names, runs, groups_and_pairs = self.model.get_runs_groups_and_pairs_for_fits("All")
         self.assertEqual(workspace_names, self.dataset_names)
         self.assertEqual(runs, ["20884", "20884"])
         self.assertEqual(groups_and_pairs, ["fwd", "top"])

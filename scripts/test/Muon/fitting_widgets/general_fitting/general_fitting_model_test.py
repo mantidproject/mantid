@@ -497,11 +497,11 @@ class GeneralFittingModelTest(unittest.TestCase):
         self.model.simultaneous_fitting_mode = True
         self.model.simultaneous_fit_by = "Run"
 
-        runs, groups_and_pairs = self.model.get_runs_groups_and_pairs_for_fits()
+        runs, groups_and_pairs = self.model.get_runs_groups_and_pairs_for_fits("All")
         self.assertEqual(runs, ["62260"])
         self.assertEqual(groups_and_pairs, ["fwd;bwd;long"])
 
-        self.model._get_runs_groups_and_pairs_for_simultaneous_fit_by_runs.assert_called_once_with()
+        self.model._get_runs_groups_and_pairs_for_simultaneous_fit_by_runs.assert_called_once_with("All")
 
     def test_that_get_runs_groups_and_pairs_for_fits_will_attempt_to_get_it_by_groups_when_in_simultaneous_fitting_mode(self):
         self.model._get_runs_groups_and_pairs_for_simultaneous_fit_by_groups_and_pairs = \
@@ -509,11 +509,11 @@ class GeneralFittingModelTest(unittest.TestCase):
         self.model.simultaneous_fitting_mode = True
         self.model.simultaneous_fit_by = "Group/Pair"
 
-        runs, groups_and_pairs = self.model.get_runs_groups_and_pairs_for_fits()
+        runs, groups_and_pairs = self.model.get_runs_groups_and_pairs_for_fits("All")
         self.assertEqual(runs, ["62260;62261;62262"])
         self.assertEqual(groups_and_pairs, ["fwd", "bwd"])
 
-        self.model._get_runs_groups_and_pairs_for_simultaneous_fit_by_groups_and_pairs.assert_called_once_with()
+        self.model._get_runs_groups_and_pairs_for_simultaneous_fit_by_groups_and_pairs.assert_called_once_with("All")
 
     def test_that_get_fit_function_parameter_values_will_return_the_parameter_values_in_the_specified_function(self):
         self.assertEqual(self.model.get_fit_function_parameter_values(self.simultaneous_fit_function)[0], [0.0, 0.0])
