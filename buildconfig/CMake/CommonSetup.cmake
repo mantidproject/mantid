@@ -86,7 +86,7 @@ add_definitions(-DPOCO_ENABLE_CPP11)
 find_package(OpenSSL REQUIRED)
 
 # if we are building the framework we will need these libraries.
-if (NOT STANDALONE_FRAMEWORK)
+if (NOT USE_SYSTEM_FRAMEWORK)
   find_package(GSL REQUIRED)
   find_package(Nexus 4.3.1 REQUIRED)
   find_package(MuParser REQUIRED)

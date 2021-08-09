@@ -248,7 +248,7 @@ set(
 )
 
 set(RES_FILES IndirectInterfaceResources.qrc)
-if (ENABLE_WORKBENCH OR ENABLE_MANTIDQT)
+if (ENABLE_MANTIDQT)
     # XML is required to parse the settings file
     find_package(Qt5 COMPONENTS Concurrent Xml REQUIRED)
 endif ()

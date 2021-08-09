@@ -12,7 +12,7 @@ set(
   inc/MantidQtIcons/Icon.h
 )
 
-if(ENABLE_WORKBENCH OR ENABLE_MANTIDQT)
+if(ENABLE_MANTIDQT)
   mtd_add_qt_library (TARGET_NAME MantidQtIcons
                       QT_VERSION 5
                       SRC ${SRC_FILES}
