@@ -220,14 +220,19 @@ endif()
 enable_precompiled_headers(inc/MantidDataObjects/PrecompiledHeader.h SRC_FILES)
 # Add the target for this directory
 add_library(DataObjects ${SRC_FILES} ${INC_FILES})
+add_library(Mantid::DataObjects ALIAS DataObjects)
+
+target_include_directories(DataObjects PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+		$<INSTALL_INTERFACE:include/Mantid>
+)
+
 # Set the name of the generated library
 set_target_properties(DataObjects PROPERTIES
                       OUTPUT_NAME
                         MantidDataObjects
                       COMPILE_DEFINITIONS
-                        IN_MANTID_DATAOBJECTS
-                      INTERFACE_INCLUDE_DIRECTORIES
-                        ${CMAKE_CURRENT_LIST_DIR}/inc)
+                        IN_MANTID_DATAOBJECTS)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(DataObjects
@@ -246,23 +251,19 @@ endif()
 # Add to the 'Framework' group in VS
 set_property(TARGET DataObjects PROPERTY FOLDER "MantidFramework")
 
-target_include_directories(DataObjects SYSTEM PRIVATE ${HDF5_INCLUDE_DIRS})
-
-target_link_libraries(DataObjects
-                      LINK_PRIVATE
-                      ${MANTIDLIBS}
-                      ${JSONCPP_LIBRARIES}
-                      ${NEXUS_LIBRARIES}
-                      ${HDF5_LIBRARIES}
-                      ${HDF5_HL_LIBRARIES})
+target_link_libraries(DataObjects PUBLIC Mantid::API Mantid::Geometry Mantid::HistogramData Mantid::Kernel PRIVATE Mantid::Json Mantid::Indexing)
 
 # Add the unit tests directory
 add_subdirectory(test)
 
 # Installation settings
-
+if (CONDA_BUILD)
+set(TARGET_EXPORT_NAME "MantidDataObjectsTargets")
+mtd_install_framework_lib(TARGETS DataObjects EXPORT_NAME ${TARGET_EXPORT_NAME})
+else()
 mtd_install_targets(TARGETS
                     DataObjects
                     INSTALL_DIRS
                     ${LIB_DIR}
                     ${WORKBENCH_LIB_DIR})
+endif()

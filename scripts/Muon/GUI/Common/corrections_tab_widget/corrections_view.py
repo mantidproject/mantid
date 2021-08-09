@@ -26,17 +26,18 @@ class CorrectionsView(widget, ui_form):
         """Initializes the CorrectionsView."""
         super(CorrectionsView, self).__init__(parent)
         self.setupUi(self)
+        self.parent = parent
 
         self.run_selector = CyclicDataSelectorView(self)
         self.run_selector.set_data_combo_box_label("Runs :")
         self.run_selector.set_data_combo_box_label_width(50)
-        self.run_selector_layout.addWidget(self.run_selector)
+        self.corrections_layout.addWidget(self.run_selector, 1)
 
         self.dead_time_corrections_view = DeadTimeCorrectionsView(self)
-        self.dead_time_layout.addWidget(self.dead_time_corrections_view)
+        self.corrections_layout.addWidget(self.dead_time_corrections_view, 1)
 
         self.background_corrections_view = BackgroundCorrectionsView(self)
-        self.background_layout.addWidget(self.background_corrections_view)
+        self.corrections_layout.addWidget(self.background_corrections_view, 10)
 
         self.disable_tab_observer = GenericObserver(self.disable_view)
         self.enable_tab_observer = GenericObserver(self.enable_view)
@@ -52,6 +53,11 @@ class CorrectionsView(widget, ui_form):
     def background_view(self) -> BackgroundCorrectionsView:
         """Returns the background corrections view."""
         return self.background_corrections_view
+
+    def set_tab_warning(self, message: str) -> None:
+        """Sets a warning message as the tooltip of the corrections tab."""
+        if self.parent is not None:
+            self.parent.set_tab_warning("Corrections", message)
 
     def set_slot_for_run_selector_changed(self, slot) -> None:
         """Connect the slot for the Run Selector combobox"""

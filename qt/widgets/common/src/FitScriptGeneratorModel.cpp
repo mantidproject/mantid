@@ -12,6 +12,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MultiDomainFunction.h"
 #include "MantidKernel/Logger.h"
 
 #include <algorithm>
@@ -89,7 +90,8 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 FitScriptGeneratorModel::FitScriptGeneratorModel()
-    : m_presenter(), m_fitDomains(), m_globalParameters(), m_globalTies(), m_fittingMode(FittingMode::SEQUENTIAL) {}
+    : m_presenter(), m_outputBaseName("Output_Fit"), m_fitDomains(), m_globalParameters(), m_globalTies(),
+      m_fittingMode(FittingMode::SEQUENTIAL) {}
 
 FitScriptGeneratorModel::~FitScriptGeneratorModel() {
   m_fitDomains.clear();
@@ -99,8 +101,11 @@ FitScriptGeneratorModel::~FitScriptGeneratorModel() {
 
 void FitScriptGeneratorModel::subscribePresenter(IFitScriptGeneratorPresenter *presenter) { m_presenter = presenter; }
 
-void FitScriptGeneratorModel::removeWorkspaceDomain(std::string const &workspaceName, WorkspaceIndex workspaceIndex) {
-  auto const removeIter = findWorkspaceDomain(workspaceName, workspaceIndex);
+void FitScriptGeneratorModel::removeDomain(FitDomainIndex domainIndex) {
+  if (domainIndex.value > m_fitDomains.size())
+    return;
+
+  auto const removeIter = m_fitDomains.begin() + domainIndex.value;
   if (removeIter != m_fitDomains.cend()) {
     m_fitDomains.erase(removeIter);
     checkGlobalTies();
@@ -119,6 +124,13 @@ void FitScriptGeneratorModel::addWorkspaceDomain(std::string const &workspaceNam
 bool FitScriptGeneratorModel::hasWorkspaceDomain(std::string const &workspaceName,
                                                  WorkspaceIndex workspaceIndex) const {
   return findWorkspaceDomain(workspaceName, workspaceIndex) != m_fitDomains.cend();
+}
+
+void FitScriptGeneratorModel::renameWorkspace(std::string const &workspaceName, std::string const &newName) {
+  for (auto const &fitDomain : m_fitDomains) {
+    if (fitDomain->workspaceName() == workspaceName)
+      fitDomain->setWorkspaceName(newName);
+  }
 }
 
 FitDomainIndex FitScriptGeneratorModel::findDomainIndex(std::string const &workspaceName,
@@ -326,8 +338,10 @@ void FitScriptGeneratorModel::updateGlobalParameterTie(FitDomainIndex domainInde
       clearGlobalTie(fullParameter);
 
       auto const parameter = getAdjustedFunctionIndex(fullParameter);
+      auto const tieValue = getParameterValue(getDomainIndexOf(fullTie), fullTie);
+
       m_fitDomains[domainIndex.value]->clearParameterTie(parameter);
-      m_fitDomains[domainIndex.value]->setParameterValue(parameter, getParameterValue(domainIndex, fullTie));
+      m_fitDomains[domainIndex.value]->setParameterValue(parameter, tieValue);
 
       m_globalTies.emplace_back(GlobalTie(fullParameter, fullTie));
     } else {
@@ -464,6 +478,10 @@ void FitScriptGeneratorModel::setGlobalParameters(std::vector<std::string> const
 
     m_globalParameters.emplace_back(GlobalParameter(globalParameter));
   }
+}
+
+void FitScriptGeneratorModel::setOutputBaseName(std::string const &outputBaseName) {
+  m_outputBaseName = outputBaseName;
 }
 
 void FitScriptGeneratorModel::setFittingMode(FittingMode fittingMode) {
@@ -604,10 +622,13 @@ bool FitScriptGeneratorModel::checkFunctionIsSameForAllDomains() const {
 
 std::tuple<bool, std::string> FitScriptGeneratorModel::isValid() const {
   std::string message;
-  if (numberOfDomains() == 0)
+  if (numberOfDomains() == 0u)
     message = "Domain data must be loaded before generating a python script.";
   else if (!checkFunctionExistsInAllDomains())
     message = "A function must exist in ALL domains to generate a python script.";
+
+  if (m_outputBaseName.empty())
+    message = "The Output Base Name must not be empty, please provide an Output Base Name.";
 
   bool valid(message.empty());
   if (valid)
@@ -626,7 +647,8 @@ std::string FitScriptGeneratorModel::generatePermissibleWarnings() const {
 }
 
 std::string FitScriptGeneratorModel::generatePythonFitScript(
-    std::tuple<std::string, std::string, std::string, std::string> const &fitOptions, std::string const &filepath) {
+    std::tuple<std::string, std::string, std::string, std::string, std::string, bool> const &fitOptions,
+    std::string const &filepath) {
   auto generateScript = AlgorithmManager::Instance().create("GeneratePythonFitScript");
   generateScript->initialize();
   generateScript->setProperty("InputWorkspaces", getInputWorkspaces());
@@ -634,13 +656,16 @@ std::string FitScriptGeneratorModel::generatePythonFitScript(
   generateScript->setProperty("StartXs", getStartXs());
   generateScript->setProperty("EndXs", getEndXs());
 
+  generateScript->setProperty("FittingType", getFittingType());
   generateScript->setProperty("Function", getFunction());
 
-  auto const [maxIterations, minimizer, costFunction, evaluationType] = fitOptions;
+  auto const [maxIterations, minimizer, costFunction, evaluationType, outputBaseName, plotOutput] = fitOptions;
   generateScript->setProperty("MaxIterations", maxIterations);
   generateScript->setProperty("Minimizer", minimizer);
   generateScript->setProperty("CostFunction", costFunction);
   generateScript->setProperty("EvaluationType", evaluationType);
+  generateScript->setProperty("OutputBaseName", outputBaseName);
+  generateScript->setProperty("PlotOutput", plotOutput);
 
   generateScript->setProperty("Filepath", filepath);
   generateScript->execute();
@@ -676,13 +701,56 @@ std::vector<T> FitScriptGeneratorModel::transformDomains(Function const &func) c
   return domainData;
 }
 
+std::string FitScriptGeneratorModel::getFittingType() const {
+  switch (m_fittingMode) {
+  case FittingMode::SEQUENTIAL:
+    return "Sequential";
+  case FittingMode::SIMULTANEOUS:
+    return "Simultaneous";
+  default:
+    throw std::invalid_argument("Fitting mode must be SEQUENTIAL or SIMULTANEOUS.");
+  }
+}
+
 IFunction_sptr FitScriptGeneratorModel::getFunction() const {
   switch (m_fittingMode) {
   case FittingMode::SEQUENTIAL:
     return m_fitDomains[0u]->getFunctionCopy();
+  case FittingMode::SIMULTANEOUS:
+    return getMultiDomainFunction();
   default:
-    throw std::runtime_error("getFunction is not implemented for the simultaneous FittingMode.");
+    throw std::invalid_argument("Fitting mode must be SEQUENTIAL or SIMULTANEOUS.");
   }
+}
+
+IFunction_sptr FitScriptGeneratorModel::getMultiDomainFunction() const {
+  auto multiDomainFunction = std::make_shared<MultiDomainFunction>();
+
+  for (auto i = 0u; i < numberOfDomains(); ++i) {
+    multiDomainFunction->addFunction(m_fitDomains[i]->getFunctionCopy());
+    multiDomainFunction->setDomainIndex(i, i);
+  }
+
+  addGlobalParameterTies(multiDomainFunction);
+  addGlobalTies(multiDomainFunction);
+  return multiDomainFunction;
+}
+
+void FitScriptGeneratorModel::addGlobalParameterTies(MultiDomainFunction_sptr &function) const {
+  for (auto const &globalParameter : m_globalParameters)
+    function->addTies(constructGlobalParameterTie(globalParameter));
+}
+
+std::string FitScriptGeneratorModel::constructGlobalParameterTie(GlobalParameter const &globalParameter) const {
+  std::string tie = "f0." + globalParameter.m_parameter;
+  for (auto i = 1u; i < numberOfDomains(); ++i)
+    tie += "=f" + std::to_string(i) + "." + globalParameter.m_parameter;
+  return tie;
+}
+
+void FitScriptGeneratorModel::addGlobalTies(MultiDomainFunction_sptr &function) const {
+  for (auto const &globalTie : m_globalTies)
+    function->addTies(globalTie.asString());
 }
 
 } // namespace MantidWidgets

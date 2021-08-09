@@ -3,8 +3,7 @@ if(CXXTEST_FOUND)
                       ${CXXTEST_INCLUDE_DIR}
 )
 
-  include_directories(../../TestHelpers/inc ../../Nexus/inc
-                      ${HDF5_INCLUDE_DIRS})
+  include_directories(../../TestHelpers/inc)
   # This variable is used within the cxxtest_add_test macro to build these
   # helper classes into the test executable. It will go out of scope at the end
   # of this file so doesn't need un-setting
@@ -21,17 +20,13 @@ if(CXXTEST_FOUND)
     set(BCRYPT bcrypt)
   endif()
   target_link_libraries(APITest
-                        LINK_PRIVATE
-                        ${MANTIDLIBS}
-                        ${BCRYPT}
-                        Types
-                        API
-                        Nexus
-                        ${JSONCPP_LIBRARIES}
-                        ${NEXUS_LIBRARIES}
-                        ${MUPARSER_LIBRARIES}
+                        PRIVATE
+                        Mantid::Types
+                        Mantid::API
+                        Mantid::Nexus
                         Python::Python
                         gmock
+                        ${BCRYPT}
 )
 
   add_dependencies(FrameworkTests APITest)

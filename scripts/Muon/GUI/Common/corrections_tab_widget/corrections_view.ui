@@ -15,13 +15,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <layout class="QGridLayout" name="run_selector_layout"/>
-   </item>
-   <item>
-    <layout class="QGridLayout" name="dead_time_layout"/>
-   </item>
-   <item>
-    <layout class="QGridLayout" name="background_layout"/>
+    <layout class="QVBoxLayout" name="corrections_layout"/>
    </item>
   </layout>
  </widget>

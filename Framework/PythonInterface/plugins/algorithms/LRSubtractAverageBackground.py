@@ -36,6 +36,9 @@ class LRSubtractAverageBackground(PythonAlgorithm):
                                               IntArrayLengthValidator(2), direction=Direction.Input),
                              "Pixel range defining the low-resolution axis to integrate over")
         self.declareProperty("SumPeak", False, doc="If True, the resulting peak will be summed")
+        self.declareProperty("ErrorWeighting", False,
+                             "If True, a weighted average is used to to estimate the background. "
+                             "Otherwise, a simple average is used.")
         detector_list = ["2D-Detector", "LinearDetector"]
         self.declareProperty("TypeOfDetector", "2D-Detector", StringListValidator(detector_list), doc="The type of detector used")
         self.declareProperty(WorkspaceProperty("OutputWorkspace", "", Direction.Output), "The workspace to check.")
@@ -77,6 +80,7 @@ class LRSubtractAverageBackground(PythonAlgorithm):
                 raise RuntimeError("Instrument does not have parameter number-of-y-pixels")
 
         left_bck = None
+        use_weighted_error = self.getProperty('ErrorWeighting').value
         if peak_min > bck_min:
             left_bck = RefRoi(InputWorkspace=workspace, IntegrateY=False,
                               NXPixel=number_of_pixels_x,
@@ -86,7 +90,7 @@ class LRSubtractAverageBackground(PythonAlgorithm):
                               XPixelMax=x_max,
                               YPixelMin=bck_min,
                               YPixelMax=peak_min - 1,
-                              ErrorWeighting = True,
+                              ErrorWeighting=use_weighted_error,
                               SumPixels=True, NormalizeSum=True)
 
         right_bck = None
@@ -99,7 +103,7 @@ class LRSubtractAverageBackground(PythonAlgorithm):
                                XPixelMax=x_max,
                                YPixelMin=peak_max + 1,
                                YPixelMax=bck_max,
-                               ErrorWeighting = True,
+                               ErrorWeighting=use_weighted_error,
                                SumPixels=True, NormalizeSum=True)
 
         if right_bck is not None and left_bck is not None:
@@ -117,7 +121,7 @@ class LRSubtractAverageBackground(PythonAlgorithm):
                              XPixelMax=x_max,
                              YPixelMin=bck_min,
                              YPixelMax=bck_max,
-                             ErrorWeighting = True,
+                             ErrorWeighting=use_weighted_error,
                              SumPixels=True, NormalizeSum=True)
 
         output_name = self.getPropertyValue("OutputWorkspace")

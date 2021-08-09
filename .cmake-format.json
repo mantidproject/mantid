@@ -100,6 +100,18 @@
         "OSX_INSTALL_RPATH": "+",
         "LINUX_INSTALL_RPATH": "+"
       }
+    },
+    "add_python_package": {
+      "kwargs": {
+        "EGGLINKNAME": 1,
+        "INSTALL_LIB_DIRS": "+",
+        "INSTALL_BIN_DIR": 1,
+        "EXCLUDE_ON_INSTALL": "+"
+      },
+      "flags": [
+        "EXECUTABLE",
+        "GENERATE_SITECUSTOMIZE"
+      ]
     }
   },
   "always_wrap": [],

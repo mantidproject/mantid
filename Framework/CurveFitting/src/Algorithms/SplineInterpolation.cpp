@@ -139,9 +139,9 @@ void SplineInterpolation::exec() {
   std::vector<MatrixWorkspace_sptr> derivs(histNo);
 
   // warn user that we only use first spectra in matching workspace
-  if (histNoToMatch > 1) {
-    g_log.warning() << "Algorithm can only interpolate against a single data set. "
-                       "Only the x-axis of the first spectrum will be used.\n";
+  if (histNoToMatch > 1 && !iws->isCommonBins()) {
+    g_log.warning() << "The workspace to interpolate doesn't have common bins, SplineInterpolation algorithm will use "
+                       "the x-axis of the first spectrum.\n";
   }
 
   MatrixWorkspace_sptr outputWorkspace = setupOutputWorkspace(mws, iws);

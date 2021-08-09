@@ -12,7 +12,7 @@ Description
 
 This algorithm corrects for detector dead time. The multiplicative correction is defined as:
 
-.. math:: C = \frac{1}{1-\tau * R}
+.. math:: C = \frac{1}{1-\tau \cdot R}
 
 where :math:`\tau` is the dead time coefficient in :math:`[sec]` and :math:`R` is the total count rate in :math:`[sec^{-1}]`.
 
@@ -20,7 +20,8 @@ The correction can be calculated for groups of pixels specified. Check the **Gro
 
 If no grouping is specified, correction will be calculated on pixel by pixel bases.
 
-First the counts are integrated over all the time-of-flight channels, if there are more than one.
+First the counts are integrated over all the time-of-flight channels, if there are more than one and the X-axis unit id is not `Empty`.
+Otherwise, the correction is calculated and applied for each frame individually.
 
 Then for each group the counts of the pixels are summed.
 

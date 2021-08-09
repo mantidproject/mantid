@@ -37,6 +37,9 @@ class BasicFittingContextTest(unittest.TestCase):
         self.assertEqual(self.fitting_context.current_dataset_index, None)
         self.assertEqual(self.fitting_context.start_xs, [])
         self.assertEqual(self.fitting_context.end_xs, [])
+        self.assertEqual(self.fitting_context.exclude_range, False)
+        self.assertEqual(self.fitting_context.exclude_start_xs, [])
+        self.assertEqual(self.fitting_context.exclude_end_xs, [])
         self.assertEqual(self.fitting_context.single_fit_functions, [])
         self.assertEqual(self.fitting_context.dataset_indices_for_undo, [])
         self.assertEqual(self.fitting_context.single_fit_functions_for_undo, [])
@@ -73,6 +76,16 @@ class BasicFittingContextTest(unittest.TestCase):
         self.fitting_context.dataset_names = self.dataset_names
         with self.assertRaises(RuntimeError):
             self.fitting_context.end_xs = [1.0, 2.0, 3.0]
+
+    def test_that_exclude_start_xs_will_raise_if_the_number_of_xs_is_greater_than_or_equal_to_the_number_of_datasets(self):
+        self.fitting_context.dataset_names = self.dataset_names
+        with self.assertRaises(RuntimeError):
+            self.fitting_context.exclude_start_xs = [1.0, 2.0, 3.0]
+
+    def test_that_exclude_end_xs_will_raise_if_the_number_of_xs_is_greater_than_or_equal_to_the_number_of_datasets(self):
+        self.fitting_context.dataset_names = self.dataset_names
+        with self.assertRaises(RuntimeError):
+            self.fitting_context.exclude_end_xs = [1.0, 2.0, 3.0]
 
     def test_that_single_fit_functions_will_raise_if_the_num_of_funcs_is_greater_than_or_equal_to_the_num_of_datasets(self):
         self.fitting_context.dataset_names = ["Name1"]

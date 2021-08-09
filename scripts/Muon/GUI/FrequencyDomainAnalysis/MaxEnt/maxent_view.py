@@ -8,6 +8,7 @@ from qtpy import QtWidgets, QtCore
 
 from Muon.GUI.Common.utilities import table_utils
 from Muon.GUI.Common.message_box import warning
+from Muon.GUI.Common.data_selectors.cyclic_data_selector_view import CyclicDataSelectorView
 
 
 class MaxEntView(QtWidgets.QWidget):
@@ -23,6 +24,14 @@ class MaxEntView(QtWidgets.QWidget):
     def __init__(self, parent=None):
         super(MaxEntView, self).__init__(parent)
         self.grid = QtWidgets.QVBoxLayout(self)
+
+        self._runs_selector = CyclicDataSelectorView(self)
+        self._runs_selector.set_data_combo_box_label("Runs:")
+        self._runs_selector.set_data_combo_box_label_width(50)
+
+        self._period_selector = CyclicDataSelectorView(self)
+        self._period_selector.set_data_combo_box_label("Period:")
+        self._period_selector.set_data_combo_box_label_width(50)
 
         # add splitter for resizing
         splitter = QtWidgets.QSplitter(QtCore.Qt.Vertical)
@@ -45,8 +54,8 @@ class MaxEntView(QtWidgets.QWidget):
         # populate table
         options = []
 
-        table_utils.setRowName(self.table, 0, "Workspace")
-        self.ws = table_utils.addComboToTable(self.table, 0, options)
+        table_utils.setRowName(self.table, 0, "Calculate by")
+        self.method = table_utils.addComboToTable(self.table, 0, options)
 
         table_utils.setRowName(self.table, 1, "Phase Table")
         self.phase_table_combo = table_utils.addComboToTable(self.table, 1, options)
@@ -131,6 +140,8 @@ class MaxEntView(QtWidgets.QWidget):
         self.buttonLayout.addWidget(self.button)
         self.buttonLayout.addWidget(self.cancel)
         # add to layout
+        self.grid.addWidget(self._runs_selector)
+        self.grid.addWidget(self._period_selector)
         splitter.addWidget(self.table)
         splitter.addWidget(self.advancedLabel)
         splitter.addWidget(self.tableA)
@@ -141,9 +152,15 @@ class MaxEntView(QtWidgets.QWidget):
         return self.grid
 
     # add data to view
-    def addItems(self, options):
-        self.ws.clear()
-        self.ws.addItems(options)
+    def addRuns(self, runs):
+        self._runs_selector.update_dataset_name_combo_box(runs)
+
+    def add_periods(self, periods):
+        self._period_selector.update_dataset_name_combo_box(periods)
+
+    def set_methods(self, options):
+        self.method.clear()
+        self.method.addItems(options)
 
     def addNPoints(self, options):
         self.N_points.clear()
@@ -161,10 +178,14 @@ class MaxEntView(QtWidgets.QWidget):
 
     def activateCalculateButton(self):
         self.button.setEnabled(True)
+        self._period_selector.setEnabled(True)
+        self._runs_selector.setEnabled(True)
         self.cancel.setEnabled(False)
 
     def deactivateCalculateButton(self):
         self.button.setEnabled(False)
+        self._period_selector.setEnabled(False)
+        self._runs_selector.setEnabled(False)
         self.cancel.setEnabled(True)
 
     def update_phase_table_combo(self, phase_table_list):
@@ -180,9 +201,28 @@ class MaxEntView(QtWidgets.QWidget):
         else:
             self.phase_table_combo.setCurrentIndex(0)
 
+    # slots
+    def run_changed_slot(self, slot):
+        self._runs_selector.set_slot_for_dataset_changed(slot)
+
+    def method_changed_slot(self, slot):
+        self.method.currentIndexChanged.connect(slot)
+
     @property
-    def input_workspace(self):
-        return str(self.ws.currentText())
+    def get_run(self):
+        return str(self._runs_selector.current_dataset_name)
+
+    @property
+    def num_periods(self):
+        return len(self._period_selector.dataset_names)
+
+    @property
+    def get_period(self):
+        return str(self._period_selector.current_dataset_name)
+
+    @property
+    def get_method(self):
+        return str(self.method.currentText())
 
     @property
     def num_points(self):

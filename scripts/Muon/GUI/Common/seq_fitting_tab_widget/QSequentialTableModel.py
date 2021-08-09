@@ -6,11 +6,12 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from qtpy.QtCore import QAbstractTableModel, Qt, Signal, QModelIndex
 
-default_table_columns = ["Run", "Group/Pairs", "Fit status", "Chi squared"]
-RUN_COLUMN = 0
-GROUP_COLUMN = 1
-FIT_STATUS_COLUMN = 2
-FIT_QUALITY_COLUMN = 3
+default_table_columns = ["Workspace", "Run", "Group/Pairs", "Fit status", "Chi squared"]
+WORKSPACE_COLUMN = 0
+RUN_COLUMN = 1
+GROUP_COLUMN = 2
+FIT_STATUS_COLUMN = 3
+FIT_QUALITY_COLUMN = 4
 NUM_DEFAULT_COLUMNS = len(default_table_columns)
 default_fit_status = "No fit"
 default_chi_squared = 0.0
@@ -133,13 +134,19 @@ class QSequentialTableModel(QAbstractTableModel):
         self._parameterData[row] = parameter_values
         self.dataChanged.emit(leftIndex, rightIndex)
 
-    def set_fit_workspaces(self, runs, group_and_pairs):
+    def set_fit_parameter_values_for_column(self, column, parameter_value):
+        parameter_index = column - NUM_DEFAULT_COLUMNS
+        for row in range(self.rowCount()):
+            self._parameterData[row][parameter_index] = parameter_value
+
+    def set_fit_workspaces(self, workspace_names, runs, group_and_pairs):
         self.clear_fit_workspaces()
-        if not runs or not group_and_pairs:
+        if not workspace_names or not runs or not group_and_pairs:
             return
         self.beginInsertRows(QModelIndex(), 0, len(runs) - 1)
         for i in range(len(runs)):
-            self._defaultData.insert(i, [runs[i], group_and_pairs[i], default_fit_status, default_chi_squared])
+            self._defaultData.insert(i, [workspace_names[i], runs[i], group_and_pairs[i], default_fit_status,
+                                         default_chi_squared])
         self.endInsertRows()
 
     def set_run_information(self, row, run):
@@ -155,6 +162,10 @@ class QSequentialTableModel(QAbstractTableModel):
         self.setData(index, quality, Qt.EditRole)
         index = self.index(row, FIT_QUALITY_COLUMN)
         self.setData(index, chi_squared, Qt.EditRole)
+
+    def get_workspace_name_information(self, row):
+        index = self.index(row, WORKSPACE_COLUMN)
+        return self.data(index, Qt.DisplayRole)
 
     def get_run_information(self, row):
         index = self.index(row, RUN_COLUMN)

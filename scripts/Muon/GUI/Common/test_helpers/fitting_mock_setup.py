@@ -6,6 +6,11 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from unittest import mock
 
+from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model import BasicFittingModel
+from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_presenter import BasicFittingPresenter
+from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_view import BasicFittingView
+from Muon.GUI.Common.thread_model import ThreadModel
+
 
 def add_mock_methods_to_basic_fitting_view(view):
     # Mock the methods of the view
@@ -14,10 +19,14 @@ def add_mock_methods_to_basic_fitting_view(view):
     view.set_slot_for_undo_fit_clicked = mock.Mock()
     view.set_slot_for_plot_guess_changed = mock.Mock()
     view.set_slot_for_fit_name_changed = mock.Mock()
+    view.set_slot_for_covariance_matrix_clicked = mock.Mock()
     view.set_slot_for_function_structure_changed = mock.Mock()
     view.set_slot_for_function_parameter_changed = mock.Mock()
     view.set_slot_for_start_x_updated = mock.Mock()
     view.set_slot_for_end_x_updated = mock.Mock()
+    view.set_slot_for_exclude_range_state_changed = mock.Mock()
+    view.set_slot_for_exclude_start_x_updated = mock.Mock()
+    view.set_slot_for_exclude_end_x_updated = mock.Mock()
     view.set_slot_for_minimizer_changed = mock.Mock()
     view.set_slot_for_evaluation_type_changed = mock.Mock()
     view.set_slot_for_use_raw_changed = mock.Mock()
@@ -34,6 +43,9 @@ def add_mock_methods_to_basic_fitting_view(view):
     view.switch_to_simultaneous = mock.Mock()
     view.switch_to_single = mock.Mock()
     view.disable_view = mock.Mock()
+    view.set_exclude_start_and_end_x_visible = mock.Mock()
+    view.set_covariance_button_enabled = mock.Mock()
+    view.show_normalised_covariance_matrix = mock.Mock()
     return view
 
 
@@ -60,6 +72,7 @@ def add_mock_methods_to_basic_fitting_model(model, dataset_names, current_datase
     model.get_workspace_names_to_display_from_context = mock.Mock(return_value=dataset_names)
     model.perform_fit = mock.Mock(return_value=(fit_function, fit_status, chi_squared))
     model.number_of_undos = mock.Mock(return_value=1)
+    model.has_normalised_covariance_matrix = mock.Mock(return_value=True)
     return model
 
 
@@ -72,6 +85,7 @@ def add_mock_methods_to_basic_fitting_presenter(presenter):
     presenter.selected_fit_results_changed.notify_subscribers = mock.Mock()
     presenter.fit_function_changed_notifier.notify_subscribers = mock.Mock()
     presenter.fit_parameter_changed_notifier.notify_subscribers = mock.Mock()
+    presenter.update_exclude_start_and_end_x_in_view_and_model = mock.Mock()
     return presenter
 
 
@@ -126,3 +140,109 @@ def add_mock_methods_to_model_fitting_model(model, dataset_names, current_datase
 def add_mock_methods_to_model_fitting_presenter(presenter):
     presenter = add_mock_methods_to_basic_fitting_presenter(presenter)
     return presenter
+
+
+class MockBasicFitting:
+
+    def _setup_mock_view(self):
+        self.view = mock.Mock(spec=BasicFittingView)
+        self.view = add_mock_methods_to_basic_fitting_view(self.view)
+
+        # Mock the properties of the view
+        self.mock_view_current_dataset_index = mock.PropertyMock(return_value=self.current_dataset_index)
+        type(self.view).current_dataset_index = self.mock_view_current_dataset_index
+        self.mock_view_minimizer = mock.PropertyMock(return_value=self.minimizer)
+        type(self.view).minimizer = self.mock_view_minimizer
+        self.mock_view_evaluation_type = mock.PropertyMock(return_value=self.evaluation_type)
+        type(self.view).evaluation_type = self.mock_view_evaluation_type
+        self.mock_view_fit_to_raw = mock.PropertyMock(return_value=self.fit_to_raw)
+        type(self.view).fit_to_raw = self.mock_view_fit_to_raw
+        self.mock_view_fit_object = mock.PropertyMock(return_value=self.fit_function)
+        type(self.view).fit_object = self.mock_view_fit_object
+        self.mock_view_start_x = mock.PropertyMock(return_value=self.start_x)
+        type(self.view).start_x = self.mock_view_start_x
+        self.mock_view_end_x = mock.PropertyMock(return_value=self.end_x)
+        type(self.view).end_x = self.mock_view_end_x
+        self.mock_view_exclude_range = mock.PropertyMock(return_value=True)
+        type(self.view).exclude_range = self.mock_view_exclude_range
+        self.mock_view_exclude_start_x = mock.PropertyMock(return_value=self.start_x)
+        type(self.view).exclude_start_x = self.mock_view_exclude_start_x
+        self.mock_view_exclude_end_x = mock.PropertyMock(return_value=self.end_x)
+        type(self.view).exclude_end_x = self.mock_view_exclude_end_x
+        self.mock_view_plot_guess = mock.PropertyMock(return_value=self.plot_guess)
+        type(self.view).plot_guess = self.mock_view_plot_guess
+        self.mock_view_function_name = mock.PropertyMock(return_value=self.function_name)
+        type(self.view).function_name = self.mock_view_function_name
+
+    def _setup_mock_model(self):
+        self.model = mock.Mock(spec=BasicFittingModel)
+        self.model = add_mock_methods_to_basic_fitting_model(self.model, self.dataset_names, self.current_dataset_index,
+                                                             self.fit_function, self.start_x, self.end_x,
+                                                             self.fit_status, self.chi_squared)
+
+        # Mock the properties of the model
+        self.mock_model_current_dataset_index = mock.PropertyMock(return_value=self.current_dataset_index)
+        type(self.model).current_dataset_index = self.mock_model_current_dataset_index
+        self.mock_model_dataset_names = mock.PropertyMock(return_value=self.dataset_names)
+        type(self.model).dataset_names = self.mock_model_dataset_names
+        self.mock_model_current_dataset_name = mock.PropertyMock(return_value=
+                                                                 self.dataset_names[self.current_dataset_index])
+        type(self.model).current_dataset_name = self.mock_model_current_dataset_name
+        self.mock_model_number_of_datasets = mock.PropertyMock(return_value=len(self.dataset_names))
+        type(self.model).number_of_datasets = self.mock_model_number_of_datasets
+        self.mock_model_start_xs = mock.PropertyMock(return_value=[self.start_x] * len(self.dataset_names))
+        type(self.model).start_xs = self.mock_model_start_xs
+        self.mock_model_current_start_x = mock.PropertyMock(return_value=self.start_x)
+        type(self.model).current_start_x = self.mock_model_current_start_x
+        self.mock_model_end_xs = mock.PropertyMock(return_value=[self.end_x] * len(self.dataset_names))
+        type(self.model).end_xs = self.mock_model_end_xs
+        self.mock_model_current_end_x = mock.PropertyMock(return_value=self.end_x)
+        type(self.model).current_end_x = self.mock_model_current_end_x
+        self.mock_model_exclude_range = mock.PropertyMock(return_value=True)
+        type(self.model).exclude_range = self.mock_model_exclude_range
+        self.mock_model_current_exclude_start_x = mock.PropertyMock(return_value=self.start_x)
+        type(self.model).current_exclude_start_x = self.mock_model_current_exclude_start_x
+        self.mock_model_current_exclude_end_x = mock.PropertyMock(return_value=self.end_x)
+        type(self.model).current_exclude_end_x = self.mock_model_current_exclude_end_x
+        self.mock_model_plot_guess = mock.PropertyMock(return_value=self.plot_guess)
+        type(self.model).plot_guess = self.mock_model_plot_guess
+        self.mock_model_minimizer = mock.PropertyMock(return_value=self.minimizer)
+        type(self.model).minimizer = self.mock_model_minimizer
+        self.mock_model_evaluation_type = mock.PropertyMock(return_value=self.evaluation_type)
+        type(self.model).evaluation_type = self.mock_model_evaluation_type
+        self.mock_model_fit_to_raw = mock.PropertyMock(return_value=self.fit_to_raw)
+        type(self.model).fit_to_raw = self.mock_model_fit_to_raw
+        self.mock_model_single_fit_functions = mock.PropertyMock(return_value=self.single_fit_functions)
+        type(self.model).single_fit_functions = self.mock_model_single_fit_functions
+        self.mock_model_current_single_fit_function = mock.PropertyMock(return_value=self.fit_function)
+        type(self.model).current_single_fit_function = self.mock_model_current_single_fit_function
+        self.mock_model_single_fit_functions_cache = mock.PropertyMock(return_value=self.fit_function)
+        type(self.model).single_fit_functions_cache = self.mock_model_single_fit_functions_cache
+        self.mock_model_fit_statuses = mock.PropertyMock(return_value=[self.fit_status] * len(self.dataset_names))
+        type(self.model).fit_statuses = self.mock_model_fit_statuses
+        self.mock_model_current_fit_status = mock.PropertyMock(return_value=self.fit_status)
+        type(self.model).current_fit_status = self.mock_model_current_fit_status
+        self.mock_model_chi_squared = mock.PropertyMock(return_value=[self.chi_squared] * len(self.dataset_names))
+        type(self.model).chi_squared = self.mock_model_chi_squared
+        self.mock_model_current_chi_squared = mock.PropertyMock(return_value=self.chi_squared)
+        type(self.model).current_chi_squared = self.mock_model_current_chi_squared
+        self.mock_model_function_name = mock.PropertyMock(return_value=self.function_name)
+        type(self.model).function_name = self.mock_model_function_name
+        self.mock_model_function_name_auto_update = mock.PropertyMock(return_value=True)
+        type(self.model).function_name_auto_update = self.mock_model_function_name_auto_update
+        self.mock_model_simultaneous_fitting_mode = mock.PropertyMock(return_value=False)
+        type(self.model).simultaneous_fitting_mode = self.mock_model_simultaneous_fitting_mode
+        self.mock_model_global_parameters = mock.PropertyMock(return_value=[])
+        type(self.model).global_parameters = self.mock_model_global_parameters
+        self.mock_model_do_rebin = mock.PropertyMock(return_value=False)
+        type(self.model).do_rebin = self.mock_model_do_rebin
+
+    def _setup_presenter(self):
+        self.presenter = BasicFittingPresenter(self.view, self.model)
+        self.presenter = add_mock_methods_to_basic_fitting_presenter(self.presenter)
+
+        # Mock the fit result property
+        self.presenter.fitting_calculation_model = mock.Mock(spec=ThreadModel)
+        self.mock_presenter_get_fit_results = mock.PropertyMock(return_value=(self.fit_function, self.fit_status,
+                                                                              self.chi_squared))
+        type(self.presenter.fitting_calculation_model).result = self.mock_presenter_get_fit_results

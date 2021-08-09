@@ -74,7 +74,7 @@ class VanadiumCorrectionsTest(unittest.TestCase):
         vanadium_corrections.save_van_workspace("ws", "out/path")
         self.assertEqual(1, save.call_count)
 
-    @patch(dir_path + ".vanadium_corrections.path_handling.get_output_path")
+    @patch(dir_path + ".vanadium_corrections.output_settings.get_output_path")
     @patch(dir_path + ".vanadium_corrections.makedirs")
     def test_generate_van_ws_file_paths_no_rb(self, makedirs, out_path):
         usr_path = path.expanduser("~")
@@ -91,7 +91,7 @@ class VanadiumCorrectionsTest(unittest.TestCase):
         self.assertEqual((expected_integral, expected_processed), output)
         self.assertEqual(1, makedirs.call_count)
 
-    @patch(dir_path + ".vanadium_corrections.path_handling.get_output_path")
+    @patch(dir_path + ".vanadium_corrections.output_settings.get_output_path")
     @patch(dir_path + ".vanadium_corrections.makedirs")
     def test_generate_van_ws_file_paths_with_rb(self, makedirs, out_path):
         usr_path = path.expanduser("~")

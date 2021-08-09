@@ -98,7 +98,6 @@ set ( TEST_PY_FILES
    loading_tab/loadwidget_presenter_multiple_file_test.py
    loading_tab/loadwidget_presenter_test.py
    max_ent_presenter_load_interaction_test.py
-   MaxEntModel_test.py
    MaxEntPresenter_test.py
    model_fitting_context_test.py
    muon_context_test.py
@@ -120,6 +119,9 @@ set ( TEST_PY_FILES
    plotting_canvas/plot_color_queue_test.py
    plotting_canvas/plotting_canvas_model_test.py
    plotting_canvas/plotting_canvas_presenter_test.py
+   plotting_canvas/plotting_canvas_utils_test.py
+   plotting_canvas/plotting_canvas_view_test.py
+   raw_pane/raw_pane_model_test.py
    results_context_test.py
    results_tab_widget/results_tab_model_test.py
    results_tab_widget/results_tab_presenter_test.py

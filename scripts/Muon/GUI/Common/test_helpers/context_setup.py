@@ -83,6 +83,7 @@ def setup_context_for_ea_tests(parent_object):
     parent_object.loaded_data = MuonLoadData()
     parent_object.data_context = DataContext(load_data=parent_object.loaded_data)
     parent_object.gui_context = MuonGuiContext()
+    parent_object.plot_panes_context = PlotPanesContext()
     parent_object.group_context = EAGroupContext(parent_object.data_context.check_group_contains_valid_detectors)
-    parent_object.context = ElementalAnalysisContext(parent_object.data_context,parent_object.group_context,
-                                                     parent_object.gui_context)
+    parent_object.context = ElementalAnalysisContext(parent_object.data_context, parent_object.group_context,
+                                                     parent_object.gui_context, parent_object.plot_panes_context)
