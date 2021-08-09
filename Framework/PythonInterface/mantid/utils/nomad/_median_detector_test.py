@@ -1,7 +1,4 @@
-__all__ = ['hello_world', 'determine_tubes_threshold']
-
-def hello_world():
-    print('Hello World')
+__all__ = ['determine_tubes_threshold']
 
 
 def determine_tubes_threshold():
