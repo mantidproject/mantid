@@ -189,10 +189,10 @@ class DeadTimeCorrectionsPresenterTest(unittest.TestCase):
         self.assertEqual(self.view.populate_dead_time_workspace_selector.call_count, 1)
         self.view.switch_to_using_a_dead_time_table_workspace.assert_called_once_with(filename)
 
-    def test_that_handle_pre_process_and_grouping_complete_will_update_the_dead_time_label_in_the_view(self):
+    def test_that_handle_pre_process_and_counts_calculated_will_update_the_dead_time_label_in_the_view(self):
         self.presenter.update_dead_time_info_text_in_view = mock.Mock()
 
-        self.presenter.handle_pre_process_and_grouping_complete()
+        self.presenter.handle_pre_process_and_counts_calculated()
 
         self.presenter.update_dead_time_info_text_in_view.assert_called_once_with()
 

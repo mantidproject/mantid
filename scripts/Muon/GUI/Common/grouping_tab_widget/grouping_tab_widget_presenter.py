@@ -57,7 +57,7 @@ class GroupingTabPresenter(object):
         self.pairing_table_widget.on_data_changed(self.pair_table_changed)
         self.enable_editing_notifier = GroupingTabPresenter.EnableEditingNotifier(self)
         self.disable_editing_notifier = GroupingTabPresenter.DisableEditingNotifier(self)
-        self.calculation_finished_notifier = GenericObservable()
+        self.counts_calculation_finished_notifier = GenericObservable()
 
         self.guessAlphaObserver = GroupingTabPresenter.GuessAlphaObserver(self)
         self.pairing_table_widget.guessAlphaNotifier.add_subscriber(self.guessAlphaObserver)
@@ -214,7 +214,7 @@ class GroupingTabPresenter(object):
         self.pairing_table_widget.enable_editing()
 
     def calculate_all_data(self):
-        self._model.show_all_groups_and_pairs()
+        self._model.calculate_all_data()
 
     def handle_update_all_clicked(self):
         self.update_thread = self.create_update_thread()
@@ -230,7 +230,7 @@ class GroupingTabPresenter(object):
     def handle_update_finished(self):
         self.enable_editing()
         self.groupingNotifier.notify_subscribers()
-        self.calculation_finished_notifier.notify_subscribers()
+        self.counts_calculation_finished_notifier.notify_subscribers()
 
     def handle_default_grouping_button_clicked(self):
         status = self._model.reset_groups_and_pairs_to_default()
@@ -252,6 +252,7 @@ class GroupingTabPresenter(object):
         self.diff_table.update_view_from_model()
         self.pairing_table_widget.update_view_from_model()
         self.update_description_text_to_empty()
+        self.groupingNotifier.notify_subscribers()
 
     def handle_new_data_loaded(self):
         self.period_info_widget.clear()

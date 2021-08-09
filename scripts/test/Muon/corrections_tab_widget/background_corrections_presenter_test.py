@@ -44,15 +44,15 @@ class BackgroundCorrectionsPresenterTest(unittest.TestCase):
         self.presenter.handle_instrument_changed()
 
         self.model.set_background_correction_mode.assert_called_once_with("None")
-        self.model.set_selected_function.assert_called_once_with("Flat Background")
+        self.model.set_selected_function.assert_called_once_with("Flat Background + Exp Decay")
         self.mock_view_background_correction_mode.assert_called_once_with("None")
-        self.mock_view_selected_function.assert_called_once_with("Flat Background")
+        self.mock_view_selected_function.assert_called_once_with("Flat Background + Exp Decay")
 
-    def test_that_handle_pre_process_and_grouping_complete_will_populate_the_background_corrections_data(self):
-        self.presenter.handle_pre_process_and_grouping_complete()
+    def test_that_handle_pre_process_and_counts_calculated_will_populate_the_background_corrections_data(self):
+        self.presenter.handle_pre_process_and_counts_calculated()
 
         self.model.populate_background_corrections_data.assert_called_once_with()
-        self.presenter._update_displayed_corrections_data.assert_called_once_with()
+        self.presenter._run_background_corrections_for_all.assert_called_once_with()
 
     def test_that_handle_groups_changed_will_populate_the_group_selector(self):
         self.presenter.handle_groups_changed()
@@ -165,6 +165,7 @@ class BackgroundCorrectionsPresenterTest(unittest.TestCase):
 
         self.presenter._update_displayed_corrections_data = mock.Mock()
         self.presenter._handle_start_or_end_x_changed = mock.Mock()
+        self.presenter._run_background_corrections_for_all = mock.Mock()
 
 
 if __name__ == '__main__':

@@ -85,6 +85,41 @@ def setRowName(table, row, name, col=0):
     table.setItem(row, col, text)
 
 
+def set_table_item_flags(item: QtWidgets.QTableWidgetItem, editable: bool, enabled: bool) -> QtWidgets.QTableWidgetItem:
+    if not editable:
+        item.setFlags(item.flags() ^ QtCore.Qt.ItemIsEditable)
+    if not enabled:
+        item.setFlags(item.flags() ^ QtCore.Qt.ItemIsEnabled)
+    return item
+
+
+def create_string_table_item(text: str, editable: bool = True, enabled: bool = True, alignment: int = QtCore.Qt.AlignCenter) \
+        -> QtWidgets.QTableWidgetItem:
+    item = QtWidgets.QTableWidgetItem(text)
+    item.setTextAlignment(alignment)
+    item = set_table_item_flags(item, editable, enabled)
+    return item
+
+
+def create_double_table_item(value: float, editable: bool = True, enabled: bool = True, decimals: int = 3) \
+        -> QtWidgets.QTableWidgetItem:
+    return create_string_table_item(f"{value:.{decimals}f}", editable, enabled)
+
+
+def create_checkbox_table_item(state: bool, enabled: bool = True, tooltip: str = "") -> QtWidgets.QTableWidgetItem:
+    item = QtWidgets.QTableWidgetItem()
+    item.setToolTip(tooltip)
+    if enabled:
+        item.setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
+    else:
+        item.setFlags(item.flags() ^ QtCore.Qt.ItemIsEnabled)
+    if state:
+        item.setCheckState(QtCore.Qt.Checked)
+    else:
+        item.setCheckState(QtCore.Qt.Unchecked)
+    return item
+
+
 def addComboToTable(table,row,options,col=1):
     combo=QtWidgets.QComboBox()
     combo.addItems(options)
@@ -104,15 +139,9 @@ def addDoubleToTable(table, value, row, col=1, minimum=0.0):
 
 
 def addCheckBoxToTable(table,state,row,col=1):
-    box = QtWidgets.QTableWidgetItem()
-    box.setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
-    if state:
-        box.setCheckState(QtCore.Qt.Checked)
-    else:
-        box.setCheckState(QtCore.Qt.Unchecked)
-
-    table.setItem(row,col, box)
-    return box
+    item = create_checkbox_table_item(state)
+    table.setItem(row, col, item)
+    return item
 
 
 def addCheckBoxWidgetToTable(table,state,row,col=1):

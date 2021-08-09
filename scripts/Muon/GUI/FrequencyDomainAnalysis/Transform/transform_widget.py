@@ -19,7 +19,7 @@ class TransformWidget(QtWidgets.QWidget):
         self._fft = fft_widget(load=context, parent=self)
         self._maxent = maxent_widget(context=context, parent=self)
         self._selector = TransformSelectionWidget(parent=self)
-        self.LoadObserver = LoadObserver(self)
+        self.load_observer = LoadObserver(self)
         self.context = context
         self.instrumentObserver = instrumentObserver(self)
         self.GroupPairObserver = GenericObserver(self.handle_new_group_pair)
