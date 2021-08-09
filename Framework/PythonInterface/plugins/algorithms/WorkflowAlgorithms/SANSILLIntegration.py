@@ -222,6 +222,9 @@ class SANSILLIntegration(PythonAlgorithm):
             DeleteWorkspace(self._input_ws)
 
     def _integrate(self, in_ws, out_ws, panel=None):
+        """
+        Performs the integration based on the requested type
+        """
         if self._output_type == 'I(Q)' or self._output_type == 'I(Phi,Q)':
             self._integrate_iq(in_ws, out_ws, panel)
         elif self._output_type == 'I(Qx,Qy)':
@@ -384,7 +387,10 @@ class SANSILLIntegration(PythonAlgorithm):
             else:
                 self._deltaQ = MonochromaticScalarQCylindric(wavelength, delta_wavelength, r1, r2, x3, y3, l1, l2)
 
-    def _resolution_direct_beam(self):
+    def _setup_directbeam_resolution(self):
+        """
+        Calculates resolution based on the direct beam width (LAMP method)
+        """
         if self._is_tof:
             raise RuntimeError('TOF resolution is not supported yet')
         run = mtd[self._input_ws].getRun()
@@ -403,7 +409,7 @@ class SANSILLIntegration(PythonAlgorithm):
 
     def _integrate_iqxy(self, ws_in, ws_out):
         """
-        Calls Qxy
+        Calls Qxy to transform to reciprocal space in 2D
         """
         max_qxy = self.getProperty('MaxQxy').value
         delta_q = self.getProperty('DeltaQ').value
@@ -430,7 +436,7 @@ class SANSILLIntegration(PythonAlgorithm):
         if self._resolution == 'MildnerCarpenter':
             self._setup_mildner_carpenter()
         elif self._resolution == 'DirectBeam':
-            self._resolution_direct_beam()
+            self._setup_directbeam_resolution()
         run = mtd[ws_in].getRun()
         q_min_name = 'qmin'
         q_max_name = 'qmax'
