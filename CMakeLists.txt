@@ -32,10 +32,14 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 option(ENABLE_MANTIDQT "Enable Qt5-based components" ON)
 option(ENABLE_WORKBENCH "Enable Qt5-based gui" ON)
 
+option(USE_SYSTEM_FRAMEWORK "Use a system version of the mantid framework, e.g from conda" OFF)
+option(USE_SYSTEM_MANTIDQT "Use a system version of mantidqt, e.g from conda" OFF)
+
+
 set(CPACK_INSTALL_CMAKE_PROJECTS "${CMAKE_BINARY_DIR}" "Mantid" "ALL" "/")
 
 # Conda build variable
-set(CONDA_BUILD FALSE CACHE BOOL "If True, proceed with a Conda build. Only relevant on Windows")
+set(CONDA_BUILD FALSE CACHE BOOL "If True, proceed with a Conda build. This setting adds some conda specific configuration to the mantid build")
 
 # Ensure that if we are running any sanitizers the compiler options are
 # known in sub targets
@@ -104,7 +108,7 @@ if(COVERAGE)
   coverage_turn_on()
 endif()
 
-if(ENABLE_WORKBENCH OR ENABLE_MANTIDQT)
+if(ENABLE_MANTIDQT AND NOT USE_SYSTEM_MANTIDQT)
   find_package(Qt5
                COMPONENTS Core
                           Gui
@@ -134,26 +138,8 @@ option(CXXTEST_ADD_PERFORMANCE
        "Switch to add performance tests to the list of tests run by ctest?")
 
 include(TargetFunctions)
-if(STANDALONE_FRAMEWORK)
+if(USE_SYSTEM_FRAMEWORK)
 find_package(MantidFramework REQUIRED)
-set(FRAMEWORK_PLUGINS_DIR $ENV{CONDA_PREFIX}/Library/plugins)
-set(CONSOLECHANNELCLASS "ConsoleChannel")
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Framework/Properties/Mantid.properties.template
-               ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.config)
-# Then, copy into appropriate place
-if(MSVC)
-  file(GENERATE
-       OUTPUT
-       ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/$<CONFIG>/Mantid.properties
-       INPUT
-       ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.config)
-else()
-  file(GENERATE
-       OUTPUT
-       ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/Mantid.properties
-       INPUT
-       ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.config)
-endif()
 else()
 add_subdirectory(Framework)
 endif()
@@ -173,7 +159,7 @@ endif()
 
 add_custom_target(AllTests)
 
-if(NOT STANDALONE_FRAMEWORK)
+if(NOT USE_SYSTEM_FRAMEWORK)
 add_dependencies(AllTests FrameworkTests)
 endif()
 

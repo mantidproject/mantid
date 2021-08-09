@@ -26,7 +26,7 @@ set(TEST_PY_FILES
     VesuvioProfileTest.py
 )
 
-if (ENABLE_WORKBENCH OR ENABLE_MANTIDQT)
+if (ENABLE_MANTIDQT)
   set(PYUNITTEST_QT_API pyqt5) # force to use qt5
   pyunittest_add_test(
     ${CMAKE_CURRENT_SOURCE_DIR} python.scripts ${TEST_PY_FILES}

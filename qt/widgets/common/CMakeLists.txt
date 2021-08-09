@@ -885,7 +885,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 endif()
 
 # Target
-if(ENABLE_WORKBENCH OR ENABLE_MANTIDQT)
+if(ENABLE_MANTIDQT)
   # Additional components for this module
   find_package(
     Qt5
