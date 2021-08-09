@@ -111,7 +111,8 @@ class BackgroundCorrectionData:
                 "EndX": self.end_x,
                 "CreateOutput": create_output,
                 "CalcErrors": True,
-                "MaxIterations": max_iterations}
+                "MaxIterations": max_iterations,
+                "IgnoreInvalidData": True}
 
     def _handle_background_fit_output(self, function: IFunction, fit_status: str, chi_squared: float) -> None:
         """Handles the output of the background fit."""
@@ -166,7 +167,7 @@ class BackgroundCorrectionData:
 
     def _use_raw_data(self) -> bool:
         """Returns true if the raw data should be used to calculate the background."""
-        return self.use_raw or self.rebin_fixed_step == 0
+        return self.use_raw or self.rebin_fixed_step == 0 or self.rebin_workspace_name is None
 
 
 class BackgroundCorrectionsModel:
@@ -300,16 +301,16 @@ class BackgroundCorrectionsModel:
         run, group = run_group
         if run_group in previous_data:
             data = previous_data[run_group]
-            return BackgroundCorrectionData(data.use_raw if is_rebin_fixed else True, rebin_fixed, data.start_x,
+            return BackgroundCorrectionData(data.use_raw if is_rebin_fixed else False, rebin_fixed, data.start_x,
                                             data.end_x, data.flat_background, data.exp_decay)
         else:
             for key, value in previous_data.items():
                 if key[1] == group:
-                    return BackgroundCorrectionData(value.use_raw if is_rebin_fixed else True, rebin_fixed,
+                    return BackgroundCorrectionData(value.use_raw if is_rebin_fixed else False, rebin_fixed,
                                                     value.start_x, value.end_x, value.flat_background, value.exp_decay)
 
         start_x, end_x = self.default_x_range(run, group)
-        return BackgroundCorrectionData(True, rebin_fixed, start_x, end_x)
+        return BackgroundCorrectionData(False, rebin_fixed, start_x, end_x)
 
     def create_background_output_workspaces_for(self, run: str, group: str) -> tuple:
         """Creates the parameter table and normalised covariance matrix for a Run/Group by performing a fit."""
