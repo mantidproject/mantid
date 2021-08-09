@@ -244,6 +244,8 @@ class SANSILLReduction(PythonAlgorithm):
         if self.n_frames > 1:
             if unit == 'Wavelength':
                 self.mode = AcqMode.TOF
+            elif unit == 'TOF':
+                self.mode = AcqMode.REVENT
             else:
                 self.mode = AcqMode.KINETIC
         else:
@@ -690,7 +692,7 @@ class SANSILLReduction(PythonAlgorithm):
     def load(self):
         '''
         Loads, merges and concatenates the input runs, if needed
-        TODO: move out to a separate algorithm as with blank injection it is too complex
+        TODO: once v2 of the loader is in, move this out to a separate algorithm
         '''
         ws = self.getPropertyValue('OutputWorkspace')
         tmp = f'__{ws}'
@@ -751,8 +753,13 @@ class SANSILLReduction(PythonAlgorithm):
                 time = run['time'].value
             elif 'timer' in run:
                 time = run['timer'].value
-            mtd[ws].setY(blank_mon, [time])
-            mtd[ws].setE(blank_mon, np.array([0.]))
+            if self.mode == AcqMode.MONO:
+                mtd[ws].setY(blank_mon, np.array([time]))
+                mtd[ws].setE(blank_mon, np.array([0.]))
+            else:
+                bsize = mtd[ws].blocksize()
+                mtd[ws].setY(blank_mon, np.full(bsize, time))
+                mtd[ws].setE(blank_mon, np.full(bsize, 0.))
 
     def reduce(self):
         '''
