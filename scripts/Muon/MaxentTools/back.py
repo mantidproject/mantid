@@ -21,6 +21,7 @@ def BACK(hists, datum, sigma, DETECT_e, filePHASE, mylog):
     (npts, ngroups) = datum.shape
     DETECT_d = np.zeros([ngroups])
     for j in range(ngroups):
+        scale = 0
         if(hists[j] > 0):
             Ax = np.sum(DETECT_e * datum[:, j] / sigma[:, j]**2)
             Bx = np.sum(DETECT_e**2 / sigma[:, j]**2)
