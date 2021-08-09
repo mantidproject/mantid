@@ -83,53 +83,58 @@ add_definitions(-D_SILENCE_CXX17_OLD_ALLOCATOR_MEMBERS_DEPRECATION_WARNING)
 find_package(Poco 1.4.6 REQUIRED)
 add_definitions(-DPOCO_ENABLE_CPP11)
 
-find_package(GSL REQUIRED)
-find_package(Nexus 4.3.1 REQUIRED)
-find_package(MuParser REQUIRED)
-find_package(JsonCPP 0.7.0 REQUIRED)
+find_package(OpenSSL REQUIRED)
+
+# if we are building the framework we will need these libraries.
+if (NOT STANDALONE_FRAMEWORK)
+  find_package(GSL REQUIRED)
+  find_package(Nexus 4.3.1 REQUIRED)
+  find_package(MuParser REQUIRED)
+  find_package(JsonCPP 0.7.0 REQUIRED)
+
+  if(ENABLE_OPENCASCADE)
+    find_package(OpenCascade REQUIRED)
+    add_definitions(-DENABLE_OPENCASCADE)
+  endif()
+
+  if(CMAKE_HOST_WIN32 AND NOT CONDA_BUILD)
+    find_package(ZLIB REQUIRED CONFIGS zlib-config.cmake)
+    set(HDF5_DIR "${THIRD_PARTY_DIR}/cmake/hdf5")
+    find_package(
+      HDF5
+      COMPONENTS C CXX HL
+      REQUIRED CONFIGS hdf5-config.cmake
+    )
+    set(HDF5_LIBRARIES hdf5::hdf5_cpp-shared hdf5::hdf5_hl-shared)
+  elseif(CONDA_BUILD)
+    # We'll use the cmake finder
+    find_package(ZLIB REQUIRED)
+    find_package(
+      HDF5
+      MODULE
+      COMPONENTS C CXX HL
+      REQUIRED
+    )
+    set(HDF5_LIBRARIES hdf5::hdf5_cpp hdf5::hdf5)
+    set(HDF5_HL_LIBRARIES hdf5::hdf5_hl)
+    else()
+    find_package(ZLIB REQUIRED)
+    find_package(
+      HDF5
+      MODULE
+      COMPONENTS C CXX HL
+      REQUIRED
+    )
+  endif()
+endif()
 
 option(ENABLE_OPENGL "Enable OpenGLbased rendering" ON)
 option(ENABLE_OPENCASCADE "Enable OpenCascade-based 3D visualisation" ON)
 option(USE_PYTHON_DYNAMIC_LIB "Dynamic link python libs" ON)
 
-if(ENABLE_OPENCASCADE)
-  find_package(OpenCascade REQUIRED)
-  add_definitions(-DENABLE_OPENCASCADE)
-endif()
 
 find_package(Doxygen) # optional
 
-if(CMAKE_HOST_WIN32 AND NOT CONDA_BUILD)
-  find_package(ZLIB REQUIRED CONFIGS zlib-config.cmake)
-  set(HDF5_DIR "${THIRD_PARTY_DIR}/cmake/hdf5")
-  find_package(
-    HDF5
-    COMPONENTS C CXX HL
-    REQUIRED CONFIGS hdf5-config.cmake
-  )
-  set(HDF5_LIBRARIES hdf5::hdf5_cpp-shared hdf5::hdf5_hl-shared)
-elseif(CONDA_BUILD)
-  # We'll use the cmake finder
-  find_package(ZLIB REQUIRED)
-  find_package(
-    HDF5
-    MODULE
-    COMPONENTS C CXX HL
-    REQUIRED
-  )
-  set(HDF5_LIBRARIES hdf5::hdf5_cpp hdf5::hdf5)
-  set(HDF5_HL_LIBRARIES hdf5::hdf5_hl)
-  else()
-  find_package(ZLIB REQUIRED)
-  find_package(
-    HDF5
-    MODULE
-    COMPONENTS C CXX HL
-    REQUIRED
-  )
-endif()
-
-find_package(OpenSSL REQUIRED)
 
 # ##############################################################################
 # Look for Git. Used for version headers - faked if not found. Also makes sure
