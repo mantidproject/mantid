@@ -7,6 +7,7 @@
 from SANSILLCommon import *
 from mantid.api import PythonAlgorithm, MatrixWorkspace, MatrixWorkspaceProperty, WorkspaceProperty, \
     MultipleFileProperty, PropertyMode, Progress, WorkspaceGroup, FileAction
+from mantid.dataobjects import SpecialWorkspace2D
 from mantid.kernel import Direction, EnabledWhenProperty, FloatBoundedValidator, LogicOperator, PropertyCriterion, \
     StringListValidator
 from mantid.simpleapi import *
@@ -494,18 +495,28 @@ class SANSILLReduction(PythonAlgorithm):
         '''Calculates solid angle and divides by it'''
         sa_ws = ws + '_solidangle'
         # D22B has the front panel tilted, hence the Rectangle approximation is wrong
-        method = 'GenericShape' if self.instrument == 'D22B' else 'Rectangle'
+        # D16 can be rotated around the sample, where again rectangle is wrong unless we rotate back
+        method = 'GenericShape' if self.instrument == 'D22B' or seld.instrument == 'D16' else 'Rectangle'
         SolidAngle(InputWorkspace=ws, OutputWorkspace=sa_ws, Method=method)
         Divide(LHSWorkspace=ws, RHSWorkspace=sa_ws, OutputWorkspace=ws, WarnOnZeroDivide=False)
         DeleteWorkspace(Workspace=sa_ws)
 
     def apply_masks(self, ws):
-        '''Applies default (edges) and beam stop masks'''
+        '''
+        Applies default (edges and permanently bad pixels) and beam stop masks
+        Masks can be created in many ways: manually, via MaskBTP, etc.
+        When creating a mask with instrument viewer, there are 2 possibilities:
+        o) hitting the button Apply and Save as > Detector Mask to Workspace
+            This is the legacy way of propagating the masks.
+            In this case the workspace is a SpecialWorkspace2D which just contains 1s as intensity for the detector that is masked
+        o) hitting the button Apply to Data
+            In this case the workspace has a proper mask.
+        '''
         edge_mask = self.getProperty('DefaultMaskWorkspace').value
-        if edge_mask:
+        if edge_mask and (isinstance(edge_mask, SpecialWorkspace2D) or edge_mask.detectorInfo().hasMaskedDetectors()):
             MaskDetectors(Workspace=ws, MaskedWorkspace=edge_mask)
         beam_stop_mask = self.getProperty('MaskWorkspace').value
-        if beam_stop_mask:
+        if beam_stop_mask and (isinstance(beam_stop_mask, SpecialWorkspace2D) or beam_stop_mask.detectorInfo().hasMaskedDetectors()):
             MaskDetectors(Workspace=ws, MaskedWorkspace=beam_stop_mask)
 
     def apply_thickness(self, ws):

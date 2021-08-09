@@ -18,8 +18,8 @@ class AcqMode(Enum):
     '''
     MONO = 1 # standard monochromatic SANS
     KINETIC = 2 # kinetic monochromatic SANS
-    TOF = 3 # TOF SANS (D33 only)
-    REVENT = 4 # rebinned event data
+    TOF = 3 # TOF SANS [D33 only] (equidistant (LTOF) or non-equidistant (VTOF))
+    REVENT = 4 # rebinned monochromatic event data
 
 
 def check_distances_match(ws1, ws2):
@@ -136,6 +136,6 @@ def get_vertical_grouping_pattern(ws):
         max_id = 32768
         step = 128
     else:
-        self.log().warning('Instruments other than D11, D22, and D33 are not yet supported.')
+        logger.warning('Instruments other than D11, D22, and D33 are not yet supported for direct beam width fitting.')
         return
     return ','.join(["{}-{}".format(start, start + step - 1) for start in range(min_id, max_id, step)])
