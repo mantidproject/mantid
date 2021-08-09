@@ -4,8 +4,12 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.simpleapi import LoadWANDSCD
+from mantid.simpleapi import (
+    AddSampleLog,
+    LoadWANDSCD,
+)
 import unittest
+import numpy as np
 
 
 class LoadWANDTest(unittest.TestCase):
@@ -60,6 +64,19 @@ class LoadWANDTest(unittest.TestCase):
         self.assertEqual(run.getNumGoniometers(), 2)
         self.assertAlmostEqual(run.getGoniometer(0).getEulerAngles('YZY')[0], -142.6) # s1 from HB2C_7000
         self.assertAlmostEqual(run.getGoniometer(1).getEulerAngles('YZY')[0], -142.5) # s1 from HB2C_7001
+
+        LoadWANDTest_ws.delete()
+
+    def test_withNorm(self):
+        # create van data
+        van = LoadWANDSCD('HB2C_7000.nxs.h5')
+        van.setSignalArray(np.full_like(van.getSignalArray(), 25))
+        van.setErrorSquaredArray(np.full_like(van.getSignalArray(), 25))
+        AddSampleLog(van, LogName='time', LogText='42', LogType='Number Series', NumberType='Double')
+        AddSampleLog(van, LogName='monitor', LogText='420', LogType='Number Series', NumberType='Double')
+
+        LoadWANDTest_ws = LoadWANDSCD(Filename='HB2C_7000.nxs.h5,HB2C_7001.nxs.h5', VanadiumWorkspace=van, NormalizedBy='Monitor')
+        self.assertEqual(LoadWANDTest_ws.getSignalArray().max(), 7 / 25)
 
         LoadWANDTest_ws.delete()
 
