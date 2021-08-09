@@ -98,8 +98,6 @@ if(ENABLE_OPENGL)
   endif()
 endif()
 
-find_package(TBB REQUIRED)
-
 # We probably don't want this to run on every build.
 option(COVERAGE "Generate coverage data" OFF)
 
@@ -108,7 +106,7 @@ if(COVERAGE)
   coverage_turn_on()
 endif()
 
-if(ENABLE_MANTIDQT AND NOT USE_SYSTEM_MANTIDQT)
+if(ENABLE_WORKBENCH OR ENABLE_MANTIDQT)
   find_package(Qt5
                COMPONENTS Core
                           Gui
@@ -119,10 +117,12 @@ if(ENABLE_MANTIDQT AND NOT USE_SYSTEM_MANTIDQT)
   if(Qt5_FOUND)
     message(STATUS "Found Qt ${Qt5_VERSION}: ${Qt5_DIR}")
   endif()
+  if (ENABLE_MANTIDQT AND NOT USE_SYSTEM_MANTIDQT)
   find_package(QScintillaQt5 REQUIRED)
   find_package(PyQt5 REQUIRED)
   find_package(SIP REQUIRED)
   separate_arguments(PYQT5_SIP_FLAGS)
+  endif()
 endif()
 
 # Now add in all the components
