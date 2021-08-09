@@ -263,18 +263,30 @@ class SANSILLReduction(PythonAlgorithm):
         '''Normalizes the workspace by monitor (default) or acquisition time'''
         normalise_by = self.getPropertyValue('NormaliseBy')
         monitor_ids = monitor_id(self.instrument)
-        if normalise_by == 'Monitor':
-            mon = ws + '_mon'
-            ExtractSpectra(InputWorkspace=ws, DetectorList=monitor_ids[0], OutputWorkspace=mon)
-            Divide(LHSWorkspace=ws, RHSWorkspace=mon, OutputWorkspace=ws, WarnOnZeroDivide=False)
-            DeleteWorkspace(mon)
-        elif normalise_by == 'Time':
-            # the durations are stored in the second monitor
-            mon = ws + '_duration'
-            ExtractSpectra(InputWorkspace=ws, DetectorList=monitor_ids[1], OutputWorkspace=mon)
-            Divide(LHSWorkspace=ws, RHSWorkspace=mon, OutputWorkspace=ws, WarnOnZeroDivide=False)
-            self.apply_dead_time(ws)
-            DeleteWorkspace(mon)
+        if self.mode != AcqMode.TOF:
+            if normalise_by == 'Monitor':
+                mon = ws + '_mon'
+                ExtractSpectra(InputWorkspace=ws, DetectorList=monitor_ids[0], OutputWorkspace=mon)
+                Divide(LHSWorkspace=ws, RHSWorkspace=mon, OutputWorkspace=ws, WarnOnZeroDivide=False)
+                DeleteWorkspace(mon)
+            elif normalise_by == 'Time':
+                # the durations are stored in the second monitor
+                mon = ws + '_duration'
+                ExtractSpectra(InputWorkspace=ws, DetectorList=monitor_ids[1], OutputWorkspace=mon)
+                Divide(LHSWorkspace=ws, RHSWorkspace=mon, OutputWorkspace=ws, WarnOnZeroDivide=False)
+                self.apply_dead_time(ws)
+                DeleteWorkspace(mon)
+        else:
+            if normalise_by == 'Monitor':
+                mon = ws + '_mon'
+                ExtractSpectra(InputWorkspace=ws, DetectorList=monitor_ids[0], OutputWorkspace=mon)
+                self.broadcast_tof(ws, mon)
+                RebinToWorkspace(WorkspaceToMatch=ws, WorkspaceToRebin=mon, OutputWorkspace=mon)
+                Divide(LHSWorkspace=ws, RHSWorkspace=mon, OutputWorkspace=ws, WarnOnZeroDivide=False)
+                DeleteWorkspace(mon)
+            elif normalise_by == 'Time':
+                Scale(InputWorkspace=ws, Factor=1./mtd[ws].getRun()['duration'].value, OutputWorkspace=ws)
+                self.apply_dead_time(ws)
         # regardless on normalisation mask out the monitors not to skew the scale in the instrument viewer
         # but do not extract them, since extracting by ID is slow, so just leave them masked
         MaskDetectors(Workspace=ws, DetectorList=monitor_ids)
@@ -346,7 +358,9 @@ class SANSILLReduction(PythonAlgorithm):
         if flux_ws:
             if self.mode == AcqMode.TOF:
                 tmp = flux_ws + '_rebinned'
-                RebinToWorkspace(WorkspaceToRebin=flux_ws, WorkspaceToMatch=ws, OutputWorkspace=tmp)
+                CloneWorkspace(InputWorkspace=flux_ws, OutputWorkspace=tmp)
+                self.broadcast_tof(ws, tmp)
+                RebinToWorkspace(WorkspaceToRebin=tmp, WorkspaceToMatch=ws, OutputWorkspace=tmp)
                 Divide(LHSWorkspace=ws, RHSWorkspace=tmp, OutputWorkspace=ws, WarnOnZeroDivide=False)
                 DeleteWorkspace(tmp)
             else:
@@ -608,23 +622,20 @@ class SANSILLReduction(PythonAlgorithm):
         CalculateFlux(InputWorkspace=ws, OutputWorkspace=flux, BeamRadius=radius)
         Scale(InputWorkspace=flux, Factor=att_coeff, OutputWorkspace=flux)
         if self.process == 'EmptyBeam':
-            if self.mode == AcqMode.TOF:
-                self.prepare_tof_flux(ws)
             self.setProperty('OutputFluxWorkspace', flux)
 
-    def prepare_tof_flux(self, ws):
+    def broadcast_tof(self, ws, flux):
         '''Broadcasts the direct beam flux that can be easily rebinned at application time'''
         # for TOF, the flux is wavelength dependent, and the sample workspace is ragged
         # hence the flux must be rebinned to the sample before it can be divided by flux
         # that's why we broadcast the empty beam workspace to the same size as the sample
         # this allows rebinning spectrum-wise when processing the sample w/o tiling the empty beam data for each sample
-        # for mono however, this must be a single count workspace
         nspec = mtd[ws].getNumberHistograms()
         x = mtd[flux].readX(0)
         y = mtd[flux].readY(0)
         e = mtd[flux].readE(0)
         CreateWorkspace(DataX=x, DataY=np.tile(y, nspec), DataE=np.tile(e, nspec), NSpec=nspec,
-                        ParentWorkspace=ws, OutputWorkspace=flux)
+                        ParentWorkspace=ws, OutputWorkspace=flux, UnitX=mtd[ws].getAxis(0).getUnit().unitID())
 
     def fit_beam_width(self, ws):
         ''''Groups detectors vertically and fits the horizontal beam width with a Gaussian profile'''

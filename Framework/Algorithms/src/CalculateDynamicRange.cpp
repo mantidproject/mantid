@@ -82,7 +82,9 @@ void CalculateDynamicRange::calculateQMinMax(const MatrixWorkspace_sptr &workspa
                                              const std::string &compName = "") {
   const auto &spectrumInfo = workspace->spectrumInfo();
   const auto unit = workspace->getAxis(0)->unit()->unitID();
-  const double lambda = workspace->run().getLogAsSingleValue("wavelength");
+  double constantLambda;
+  if (workspace->run().hasProperty("wavelength"))
+    constantLambda = workspace->run().getLogAsSingleValue("wavelength");
   double min = std::numeric_limits<double>::max(), max = std::numeric_limits<double>::lowest();
   // PARALLEL_FOR_NO_WSP_CHECK does not work with range-based for so NOLINT this
   // block
@@ -94,7 +96,7 @@ void CalculateDynamicRange::calculateQMinMax(const MatrixWorkspace_sptr &workspa
       double r, theta, phi;
       detPos.getSpherical(r, theta, phi);
       if (unit != "Wavelength") {
-        const double q = calculateQ(lambda, theta);
+        const double q = calculateQ(constantLambda, theta);
         PARALLEL_CRITICAL(CalculateDynamicRange) {
           min = std::min(min, q);
           max = std::max(max, q);
