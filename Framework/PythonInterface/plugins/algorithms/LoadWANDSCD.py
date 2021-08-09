@@ -159,9 +159,9 @@ class LoadWANDSCD(PythonAlgorithm):
         """
         get the va filename
         """
-        ipts_va = self.getProperty("VanadiumIPTS")
-        run_va = self.getProperty("VanadiumRunNumber")
-        va_filename = self.getProperty("VanadiumFile")
+        ipts_va = self.getProperty("VanadiumIPTS").value
+        run_va = self.getProperty("VanadiumRunNumber").value
+        va_filename = self.getProperty("VanadiumFile").value
         # check order
         # IPTS + run number > file name > memory
         if (ipts_va is not None) and (run_va is not None):
