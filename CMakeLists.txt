@@ -77,7 +77,9 @@ set(CPACK_PACKAGE_NAME "mantid${CPACK_PACKAGE_SUFFIX}")
 include(Bootstrap)
 
 # Configure Eigen early
+if (NOT (USE_SYSTEM_FRAMEWORK AND USE_SYSTEM_MANTIDQT))
 include(Eigen)
+endif()
 include(Span)
 
 if( MSVC )
