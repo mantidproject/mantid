@@ -131,14 +131,18 @@ class LoadWANDSCD(PythonAlgorithm):
             van_filename = self.get_va_filename()
             if van_filename is None:
                 # try to load from memory
-                norm = mtd[self.getProperty("VanadiumWorkspace")]
+                norm = self.getProperty("VanadiumWorkspace").value
             else:
                 norm = self.load_and_group([van_filename])
             # normalize the results
             data = self.normalize(data, norm, self.getProperty("NormalizedBy").value.lower())
+            # cleanup
+            DeleteWorkspace(norm)
 
         # setup output
         self.setProperty("OutputWorkspace", data)
+        # cleanup
+        DeleteWorkspace(data)
 
     def get_intput_filenames(self) -> List:
         """
@@ -329,6 +333,8 @@ class LoadWANDSCD(PythonAlgorithm):
         # exec
         data.setSignalArray(data.getSignalArray() / scale)
         data.setErrorSquaredArray(data.getErrorSquaredArray() / scale**2)
+        # cleanup
+        DeleteWorkspace(norm_replicated)
         # return
         return data
 
