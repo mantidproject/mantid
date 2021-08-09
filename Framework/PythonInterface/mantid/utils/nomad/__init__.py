@@ -4,6 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-__all__ = ['hello_world', 'determine_tubes_threshold']
+__all__ = ['determine_tubes_threshold']
 
-from ._median_detector_test import hello_world, determine_tubes_threshold
+from ._median_detector_test import determine_tubes_threshold
