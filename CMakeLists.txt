@@ -140,8 +140,10 @@ option(CXXTEST_ADD_PERFORMANCE
        "Switch to add performance tests to the list of tests run by ctest?")
 
 include(TargetFunctions)
-if(USE_SYSTEM_FRAMEWORK AND NOT USE_SYSTEM_MANTIDQT)
+if(USE_SYSTEM_FRAMEWORK)
+if (NOT USE_SYSTEM_MANTIDQT)
 find_package(MantidFramework REQUIRED)
+endif()
 else()
 add_subdirectory(Framework)
 endif()
