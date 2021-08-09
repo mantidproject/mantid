@@ -451,8 +451,8 @@ class GeneralFittingModel(BasicFittingModel):
         groups_and_pairs = [get_group_or_pair_from_name(name) for name in self.fitting_context.dataset_names]
         workspace_names = ["/".join(self.get_fit_workspace_names_from_groups_and_runs([run], groups_and_pairs))
                            for run in runs]
-        return self._get_datasets_containing_string(workspace_names, runs, [";".join(groups_and_pairs)] * len(runs),
-                                                    display_type)
+        return self._get_datasets_containing_string(display_type, workspace_names, runs,
+                                                    [";".join(groups_and_pairs)] * len(runs))
 
     def _get_runs_groups_and_pairs_for_simultaneous_fit_by_groups_and_pairs(self, display_type: str):
         """Returns the runs and group/pairs for the selected data in simultaneous fit by group/pairs mode."""
@@ -461,8 +461,8 @@ class GeneralFittingModel(BasicFittingModel):
         groups_and_pairs = self._get_selected_groups_and_pairs()
         workspace_names = ["/".join(self.get_fit_workspace_names_from_groups_and_runs(runs, [group_and_pair]))
                            for group_and_pair in groups_and_pairs]
-        return self._get_datasets_containing_string(workspace_names, [";".join(runs)] * len(groups_and_pairs),
-                                                    groups_and_pairs, display_type)
+        return self._get_datasets_containing_string(display_type, workspace_names,
+                                                    [";".join(runs)] * len(groups_and_pairs), groups_and_pairs)
 
     def get_all_fit_functions(self) -> list:
         """Returns all the fit functions for the current fitting mode."""
