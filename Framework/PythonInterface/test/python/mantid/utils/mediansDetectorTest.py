@@ -7,11 +7,42 @@
 import unittest
 import numpy as np
 from mantid.utils.nomad import determine_tubes_threshold
+import os
+import tempfile
+from mantid.utils.nomad._median_detector_test import _NOMADMedianDetectorTest
 
 
 class DetectorMediansTest(unittest.TestCase):
 
-    def test_determine_tubes_thresholds(self):
+    def test_ymal_input(self):
+        """
+
+        Returns
+        -------
+
+        """
+        # Generate test file
+        temp_dir = tempfile.mkdtemp()
+        temp_ymal = os.path.join(temp_dir, 'nomad_mask.yml')
+        self._generate_test_ymal(temp_ymal)
+        assert os.path.exists(temp_ymal)
+
+        mask_config = _NOMADMedianDetectorTest.parse_yaml(temp_ymal)
+        assert isinstance(mask_config, dict)
+
+        # AssertionError: ['detector_ranges', 'threshold', 'collimation', 'eight_packs', 'bank']
+        print(f'{mask_config["collimation"]}')
+
+        full_col_8packs = mask_config['collimation']['full_col']
+        assert isinstance(full_col_8packs[0], int), f'{type(full_col_8packs[0])}'
+        # {'full_col': [1, 8, 16, 25, 27, 28, 29], 'half_col': [30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 45, 46]}
+        assert 8 in full_col_8packs
+        half_col_8packs = mask_config['collimation']['half_col']
+        assert 36 in half_col_8packs
+
+        # assert list(mask_config.keys()) == [], f'{list(mask_config)}'
+
+    def next_test_determine_tubes_thresholds(self):
         """
 
         Returns
@@ -23,7 +54,7 @@ class DetectorMediansTest(unittest.TestCase):
 
         test_data = self._generate_test_data()
 
-        some_returns = determine_tubes_threshold()
+        some_returns = determine_tubes_threshold(test_data, nomad_info=None, config=None)
         assert some_returns
 
     @staticmethod
@@ -67,6 +98,77 @@ class DetectorMediansTest(unittest.TestCase):
         print(f'[DEBUG] Test 3 x 2 pack:\n{test_data}')
 
         return test_data.flatten()
+
+    def _generate_test_ymal(self, file_name):
+        """
+
+        Returns
+        -------
+
+        """
+        ymal_str = """
+
+        #
+# Configuration file for generating mask file for NOMAD.
+#
+# +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+# This file needs to be maintained by IS/CIS to update
+# for each cycle if necessary.
+# +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+#
+detector_ranges:
+  #
+  # This section contains information concerning the calculation
+  # of solid angle corresponding to each pixel.
+  #
+  # The firste two numbers following each entry specify the range
+  # of eight-packs corresponding each specific region. The third
+  # number specifies the pixel width and the forth number is for
+  # the exponential intended to be used for seach specific region.
+  #
+  # Non- back or forward scattering regions.
+  range_1: [0, 13, 0.02, 2.5]
+  range_2: [14, 36, 0.02, 3.0]
+  range_3: [27, 50, 0.02, 3.0]
+  range_4: [51, 62, 0.02, 3.0]
+  # Back and forward scattering regions.
+  range_back: [63, 80, 0.01, 2.0]
+  range_forward: [81, 98, 0.01, 2.0]
+
+threshold:
+  #
+  # This block specifies the threshold (relative to median integrated
+  # intensity of either pixel or tube) for masking out pixels.
+  #
+  low_pixel: 0.9
+  high_pixel: 1.2
+  low_tube: 0.7
+  high_tube: 1.3
+
+collimation:
+  #
+  # This block specifies the full and half collimated eight-packs.
+  #
+  full_col: [1, 8, 16, 25, 27, 28, 29]
+  half_col: [30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 45, 46]
+
+# Indeces of eight-packs in use.
+eight_packs: [3,7,8,9,10,11,19,20,26,28,30,34,38,39,40,41,44,45,46,47,48,49,50,54,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,89,90,93,94,95]
+
+bank:
+  #
+  # Definition of range for each bank.
+  #
+  bank_1: [0, 5]
+  bank_2: [6, 14]
+  bank_3: [15, 22]
+  bank_4: [23, 29]
+  bank_5: [30, 44]
+  bank_6: [45, 49]
+        """
+        yml_file = open(file_name, 'w')
+        yml_file.write(ymal_str)
+        yml_file.close()
 
 
 if __name__ == '__main__':
