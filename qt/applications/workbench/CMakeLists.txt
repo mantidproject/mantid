@@ -125,7 +125,11 @@ else()
 endif()
 
 # Dependency chain
-add_dependencies(workbench workbench_resources mantidqt)
+add_dependencies(workbench workbench_resources)
+# if not system mantidqt we can add a building dependency for workbench
+if (NOT USE_SYSTEM_MANTIDQT)
+add_dependencies(workbench mantidqt)
+endif()
 
 # macOS package fixes
 if(APPLE)

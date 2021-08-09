@@ -24,6 +24,9 @@ if((ENABLE_WORKBENCH OR ENABLE_MANTIDQT) AND NOT PYRCC5_CMD)
   endif()
 endif()
 
+# Include python helper functions
+include(PythonPackageTargetFunctions)
+
 # Qt-based targets
 if (ENABLE_MANTIDQT AND NOT USE_SYSTEM_MANTIDQT)
 add_subdirectory(icons)
