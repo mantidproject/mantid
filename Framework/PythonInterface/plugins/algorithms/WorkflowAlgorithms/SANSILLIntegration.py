@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import PythonAlgorithm, MatrixWorkspaceProperty, WorkspaceUnitValidator, WorkspaceGroupProperty, \
+from mantid.api import PythonAlgorithm, MatrixWorkspaceProperty, WorkspaceGroupProperty, \
     PropertyMode, MatrixWorkspace, NumericAxis, ITableWorkspaceProperty
 from mantid.kernel import EnabledWhenProperty, FloatArrayProperty, Direction, StringListValidator, \
     IntBoundedValidator, FloatBoundedValidator, PropertyCriterion, LogicOperator, FloatArrayOrderedPairsValidator, \
@@ -70,8 +70,7 @@ class SANSILLIntegration(PythonAlgorithm):
         return issues
 
     def PyInit(self):
-        self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '', direction=Direction.Input,
-                             validator=WorkspaceUnitValidator('Wavelength')),
+        self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '', direction=Direction.Input),
                              doc='The input workspace.')
 
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
@@ -342,7 +341,8 @@ class SANSILLIntegration(PythonAlgorithm):
         if 'selector.wavelength_res' in run:
             delta_wavelength = run.getLogData('selector.wavelength_res').value * 0.01
         elif 'selector.wave_lenght_res' in run:
-            delta_wavelength = run.getLogData('selector.wave_lenght_res').value * 0.01 # sic! log name for at least some D22 data
+            # note the typo in the log name that is in some nexus file
+            delta_wavelength = run.getLogData('selector.wave_lenght_res').value * 0.01
         else:
             raise RuntimeError("Wavelength resolution log not available.")
         if run.hasProperty('collimation.sourceAperture'):
