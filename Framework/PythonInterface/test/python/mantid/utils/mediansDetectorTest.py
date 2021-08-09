@@ -4,6 +4,14 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-__all__ = ['hello_world', 'determine_tubes_threshold']
+import unittest
+from mantid.utils.nomad import determine_tubes_threshold
 
-from ._median_detector_test import hello_world, determine_tubes_threshold
+class DetectorMediansTest(unittest.TestCase):
+
+    def test_determine_tubes_thresholds(self):
+        return
+
+
+if __name__ == '__main__':
+    unittest.main()
