@@ -27,7 +27,6 @@ class SANSILLReduction(PythonAlgorithm):
     n_samples = None # how many samples
     n_frames = None # how many frames per sample in case of kinetic
     process = None # the process type
-    is_point = None # whether or not the input is point data
     n_reports = None # how many progress report checkpoints
     progress = None # the global progress reporter
 
@@ -48,6 +47,10 @@ class SANSILLReduction(PythonAlgorithm):
 
     def validateInputs(self):
         issues = dict()
+        runs = self.getPropertyValue('Runs').split(',')
+        non_blank_runs = list(filter(lambda x: x != EMPTY_TOKEN, runs))
+        if not non_blank_runs:
+            issues['Runs'] = 'Only blanks runs have been provided, there must be at least one non-blank run.'
         process = self.getPropertyValue('ProcessAs')
         if process == 'Transmission' and not self.getPropertyValue('FluxWorkspace'):
             issues['FluxWorkspace'] = 'Empty beam flux input workspace is mandatory for transmission calculation.'
@@ -226,7 +229,6 @@ class SANSILLReduction(PythonAlgorithm):
         self.n_frames = None
         self.n_reports = None
         self.n_samples = None
-        self.is_point = None
         self.process = None
         self.progress = None
 
@@ -247,8 +249,6 @@ class SANSILLReduction(PythonAlgorithm):
         else:
             self.mode = AcqMode.MONO
         self.log().notice(f'Set the acquisition mode to {self.mode}')
-        self.is_point = not ws.isHistogramData()
-        self.log().notice(f'Set the point data flag to {self.is_point}')
         if self.mode == AcqMode.KINETIC:
             if self.process != 'Sample':
                 raise RuntimeError('Only the sample can be a kinetic measurement, the auxiliary calibration measurements cannot.')
@@ -263,16 +263,13 @@ class SANSILLReduction(PythonAlgorithm):
         if normalise_by == 'Monitor':
             mon = ws + '_mon'
             ExtractSpectra(InputWorkspace=ws, DetectorList=monitor_ids[0], OutputWorkspace=mon)
-            if mtd[mon].readY(0)[0] == 0:
-                raise RuntimeError('Normalise to monitor requested, but monitor has 0 counts.')
-            else:
-                Divide(LHSWorkspace=ws, RHSWorkspace=mon, OutputWorkspace=ws)
-                DeleteWorkspace(mon)
+            Divide(LHSWorkspace=ws, RHSWorkspace=mon, OutputWorkspace=ws, WarnOnZeroDivide=False)
+            DeleteWorkspace(mon)
         elif normalise_by == 'Time':
             # the durations are stored in the second monitor
             mon = ws + '_duration'
             ExtractSpectra(InputWorkspace=ws, DetectorList=monitor_ids[1], OutputWorkspace=mon)
-            Divide(LHSWorkspace=ws, RHSWorkspace=mon, OutputWorkspace=ws)
+            Divide(LHSWorkspace=ws, RHSWorkspace=mon, OutputWorkspace=ws, WarnOnZeroDivide=False)
             self.apply_dead_time(ws)
             DeleteWorkspace(mon)
         # regardless on normalisation mask out the monitors not to skew the scale in the instrument viewer
@@ -535,7 +532,7 @@ class SANSILLReduction(PythonAlgorithm):
         if self.instrument == 'D22B':
             # The front detector of D22B is often tilted around its own axis
             # The tilt angle must be subtracted from 2thetas before putting them into the parallax correction formula
-            # TODO: note that in cycle 211, the front detector was Detector 1, so get it from IPF
+            # TODO: note that in cycle 211, the front detector was Detector 1, so we should rather get it from IPF
             offsets.append(mtd[ws].getRun()['Detector 2.dan2_actual'].value)
         if mtd[ws].getInstrument().hasParameter('detector_panels'):
             components = mtd[ws].getInstrument().getStringParameter('detector_panels')[0].split(',')
@@ -693,30 +690,23 @@ class SANSILLReduction(PythonAlgorithm):
     def load(self):
         '''
         Loads, merges and concatenates the input runs, if needed
-        This is a performance critical section, as it dominates the total runtime
-        Concatenation is allowed only for sample and transmission runs, if the mode is not TOF
-        For all the rest, only summing is permitted
-        The input might be either a numor or a processed nexus as a result of rebinning of event data in mantid
-        Hence, we cannot specify a name of a specifc loader
-        Besides, if it is a rebinned event data, it will be histogram data, which needs to be converted to point data
-        The final output of this must be a workspace and not a workspace group
-        We might need to inject blank frames that's why we have to do concatenation manually
-        Besides, it's only after loading when we can figure out whether it's TOF or Mono, which dictates to concatenate or not
+        TODO: move out to a separate algorithm as with blank injection it is too complex
         '''
         ws = self.getPropertyValue('OutputWorkspace')
         tmp = f'__{ws}'
         runs = self.getPropertyValue('Runs').split(',')
-        runs = list(filter(lambda x: x != EMPTY_TOKEN, runs))
-        LoadAndMerge(Filename=','.join(runs), OutputWorkspace=tmp)
+        non_blank_runs = list(filter(lambda x: x != EMPTY_TOKEN, runs))
+        blank_runs = list(filter(lambda x: x == EMPTY_TOKEN, runs))
+        LoadAndMerge(Filename=','.join(non_blank_runs), OutputWorkspace=tmp)
+        if isinstance(mtd[tmp], MatrixWorkspace) and blank_runs:
+            # if we loaded a single workspace but there are blanks, need to make a group so that the blanks can be insterted
+            RenameWorkspace(InputWorkspace=tmp, OutputWorkspace=tmp+'_0')
+            GroupWorkspaces(InputWorkspaces=[tmp+'_0'], OutputWorkspace=tmp)
         if isinstance(mtd[tmp], WorkspaceGroup):
             self.setup(mtd[tmp][0])
+            self.preprocess_group(tmp)
             if self.mode != AcqMode.TOF:
                 if self.process == 'Sample' or self.process == 'Transmission':
-                    # TODO: remove the next 4 lines once v2 of the loader is plugged in
-                    if not self.is_point:
-                        ConvertToPointData(InputWorkspace=tmp, OutputWorkspace=tmp)
-                    for w in mtd[tmp]:
-                        w.getAxis(0).setUnit('Empty')
                     ws_list = self.inject_blank_samples(tmp)
                     ConjoinXRuns(InputWorkspaces=ws_list, OutputWorkspace=ws, LinearizeAxis=True)
                     DeleteWorkspaces(WorkspaceList=ws_list)
@@ -726,13 +716,43 @@ class SANSILLReduction(PythonAlgorithm):
                 raise RuntimeError('Listing of runs is not allowed for TOF mode as concatenation of multiple runs is not possible.')
         else:
             self.setup(mtd[tmp])
-            if not self.is_point:
-                ConvertToPointData(InputWorkspace=tmp, OutputWorkspace=ws)
-                mtd[ws].getAxis(0).setUnit('Empty')
-                DeleteWorkspace(tmp)
+            self.preprocess(tmp)
+            if self.mode == AcqMode.REVENT or self.mode == AcqMode.MONO:
+                self.linearize_axis(tmp)
+            RenameWorkspace(InputWorkspace=tmp, OutputWorkspace=ws)
         self.set_process_as(ws)
         assert isinstance(mtd[ws], MatrixWorkspace)
         return ws
+
+    def linearize_axis(self, ws):
+        '''Linearizes x-axis for a single rebinned event workspace to transform it to kinetic'''
+        x = np.arange(mtd[ws].blocksize())
+        for s in range(mtd[ws].getNumberHistograms()):
+            mtd[ws].setX(s, x)
+
+    def preprocess_group(self, wsg):
+        '''Preprocesses a loaded workspace group'''
+        for ws in mtd[wsg]:
+            self.preprocess(ws.name())
+
+    def preprocess(self, ws):
+        '''Prepares the loaded workspace based on the acq mode'''
+        # TODO: all these must be done in v2 of the loader directly
+        # this should be removed once v2 of the loader is plugged in
+        if self.mode != AcqMode.TOF:
+            mtd[ws].getAxis(0).setUnit('Empty')
+        if self.mode == AcqMode.MONO or self.mode == AcqMode.REVENT:
+            ConvertToPointData(InputWorkspace=ws, OutputWorkspace=ws)
+            blank_mon = mtd[ws].getNumberHistograms() + blank_monitor_ws_neg_index(self.instrument)
+            run = mtd[ws].getRun()
+            if 'duration' in run:
+                time = run['duration'].value
+            elif 'time' in run:
+                time = run['time'].value
+            elif 'timer' in run:
+                time = run['timer'].value
+            mtd[ws].setY(blank_mon, [time])
+            mtd[ws].setE(blank_mon, np.array([0.]))
 
     def reduce(self):
         '''

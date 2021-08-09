@@ -10,9 +10,16 @@ from math import fabs
 
 
 class AcqMode(Enum):
+    '''
+    |        |  MONO  |  KINETIC  |  TOF  |  REVENT  |
+    | X Unit |  Empty |   Empty   | Lambda|    TOF   |
+    | X Size |    1   |    >1     |  >1   |    >1    |
+    | IsHist?|    n   |     n     |   y   |     y    |
+    '''
     MONO = 1 # standard monochromatic SANS
     KINETIC = 2 # kinetic monochromatic SANS
     TOF = 3 # TOF SANS (D33 only)
+    REVENT = 4 # rebinned event data
 
 
 def check_distances_match(ws1, ws2):
@@ -86,6 +93,14 @@ def monitor_id(instrument):
         return [500001, 500000]
     else:
         return [100000, 100001]
+
+
+def blank_monitor_ws_neg_index(instrument):
+    '''Returns the negative index of the spectra corresponding to the empty monitor that will host acq times'''
+    if instrument != 'D16':
+        return -1
+    else:
+        return -2
 
 
 def get_vertical_grouping_pattern(ws):
