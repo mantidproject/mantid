@@ -496,7 +496,7 @@ class SANSILLReduction(PythonAlgorithm):
         sa_ws = ws + '_solidangle'
         # D22B has the front panel tilted, hence the Rectangle approximation is wrong
         # D16 can be rotated around the sample, where again rectangle is wrong unless we rotate back
-        method = 'GenericShape' if self.instrument == 'D22B' or seld.instrument == 'D16' else 'Rectangle'
+        method = 'GenericShape' if self.instrument == 'D22B' or self.instrument == 'D16' else 'Rectangle'
         SolidAngle(InputWorkspace=ws, OutputWorkspace=sa_ws, Method=method)
         Divide(LHSWorkspace=ws, RHSWorkspace=sa_ws, OutputWorkspace=ws, WarnOnZeroDivide=False)
         DeleteWorkspace(Workspace=sa_ws)
