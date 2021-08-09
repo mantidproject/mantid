@@ -11,7 +11,8 @@ from mantid.api import AnalysisDataService, FrameworkManager, FunctionFactory
 from mantid.simpleapi import CreateSampleWorkspace
 
 from Muon.GUI.Common.corrections_tab_widget.corrections_model import CorrectionsModel
-from Muon.GUI.Common.corrections_tab_widget.background_corrections_model import BackgroundCorrectionsModel
+from Muon.GUI.Common.corrections_tab_widget.background_corrections_model import (BackgroundCorrectionsModel,
+                                                                                 DEFAULT_USE_RAW)
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
 from Muon.GUI.Common.utilities.workspace_data_utils import DEFAULT_X_LOWER, DEFAULT_X_UPPER
 
@@ -32,7 +33,7 @@ class BackgroundCorrectionsModelTest(unittest.TestCase):
 
         self.runs = ["84447", "84447", "84447", "84447"]
         self.groups = ["fwd", "bwd", "top", "bottom"]
-        self.use_raws = [True, True, True, True]
+        self.use_raws = [DEFAULT_USE_RAW] * len(self.groups)
         self.start_xs = [15.0] * 4
         self.end_xs = [30.0] * 4
         self.a0s = [0.0] * 4
@@ -86,7 +87,7 @@ class BackgroundCorrectionsModelTest(unittest.TestCase):
 
         for run, group in zip(self.runs, self.groups):
             correction_data = self.model._corrections_context.background_correction_data[tuple([run, group])]
-            self.assertEqual(correction_data.use_raw, True)
+            self.assertEqual(correction_data.use_raw, DEFAULT_USE_RAW)
             self.assertEqual(correction_data.start_x, 15.0)
             self.assertEqual(correction_data.end_x, 30.0)
             self.assertEqual(correction_data.flat_background.getParameterValue("A0"), 0.0)
@@ -150,7 +151,7 @@ class BackgroundCorrectionsModelTest(unittest.TestCase):
 
         self.assertEqual(runs, [run])
         self.assertEqual(groups, [group])
-        self.assertEqual(use_raws, [True])
+        self.assertEqual(use_raws, [DEFAULT_USE_RAW])
         self.assertEqual(start_xs, [15.0])
         self.assertEqual(end_xs, [30.0])
         self.assertEqual(a0s, [0.0])

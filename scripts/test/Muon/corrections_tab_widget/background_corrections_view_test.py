@@ -16,8 +16,8 @@ from Muon.GUI.Common.corrections_tab_widget.background_corrections_view import (
                                                                                 RUN_COLUMN_INDEX,
                                                                                 GROUP_COLUMN_INDEX,
                                                                                 USE_RAW_COLUMN_INDEX,
-                                                                                A0_COLUMN_INDEX,
-                                                                                A0_ERROR_COLUMN_INDEX,
+                                                                                BG_COLUMN_INDEX,
+                                                                                BG_ERROR_COLUMN_INDEX,
                                                                                 STATUS_COLUMN_INDEX)
 
 from qtpy.QtWidgets import QApplication
@@ -130,9 +130,9 @@ class BackgroundCorrectionsViewTest(unittest.TestCase, QtWidgetFinder):
                              Qt.Checked)
             self.assertEqual(self.view.start_x(self.runs[row_i], self.groups[row_i]), self.start_xs[row_i])
             self.assertEqual(self.view.end_x(self.runs[row_i], self.groups[row_i]), self.end_xs[row_i])
-            self.assertEqual(self.view.correction_options_table.item(row_i, A0_COLUMN_INDEX).text(),
+            self.assertEqual(self.view.correction_options_table.item(row_i, BG_COLUMN_INDEX).text(),
                              f"{self.a0s[row_i]:.3f}")
-            self.assertEqual(self.view.correction_options_table.item(row_i, A0_ERROR_COLUMN_INDEX).text(),
+            self.assertEqual(self.view.correction_options_table.item(row_i, BG_ERROR_COLUMN_INDEX).text(),
                              f"{self.a0_errors[row_i]:.3f}")
             self.assertEqual(self.view.correction_options_table.item(row_i, STATUS_COLUMN_INDEX).text(),
                              self.statuses[row_i])
