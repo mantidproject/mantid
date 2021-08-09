@@ -515,6 +515,17 @@ class GeneralFittingModelTest(unittest.TestCase):
 
         self.model._get_runs_groups_and_pairs_for_simultaneous_fit_by_groups_and_pairs.assert_called_once_with("All")
 
+    def test_that_get_all_fit_functions_for_will_return_the_simultaneous_fit_function_when_in_simultaneous_mode(self):
+        self.model.dataset_names = self.dataset_names
+        self.model.simultaneous_fit_function = self.simultaneous_fit_function
+        self.model.simultaneous_fitting_mode = True
+
+        filtered_function_all = self.model.get_all_fit_functions_for("All")
+        self.assertEqual(self.model.get_fit_function_parameter_values(filtered_function_all[0]), ([0.0, 0.0], [0.0, 0.0]))
+
+        filtered_function_fwd = self.model.get_all_fit_functions_for("fwd")
+        self.assertEqual(self.model.get_fit_function_parameter_values(filtered_function_fwd[0]), ([0.0, 0.0], [0.0, 0.0]))
+
     def test_that_get_fit_function_parameter_values_will_return_the_parameter_values_in_the_specified_function(self):
         self.assertEqual(self.model.get_fit_function_parameter_values(self.simultaneous_fit_function)[0], [0.0, 0.0])
 

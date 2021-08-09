@@ -836,7 +836,7 @@ class BasicFittingModel:
     def _get_datasets_containing_string(display_type: str, dataset_names: list, *corresponding_dataset_args) -> tuple:
         """Returns the dataset names that contain a string and returns its associated runs/groups/pairs."""
         if display_type == "All":
-            return dataset_names, *corresponding_dataset_args
+            return (dataset_names, *corresponding_dataset_args)
 
         # Filter the data based on a name in the dataset_names containing a string
         return zip(*filter(lambda x: display_type in x[0], zip(dataset_names, *corresponding_dataset_args)))
