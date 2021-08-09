@@ -289,7 +289,8 @@ std::map<std::string, std::string> IntegrateEllipsoids::validateInputs() {
   double satellite_back_outer_radius = (getPointerToProperty("SatelliteBackgroundOuterSize")->isDefault())
                                            ? getProperty("BackgroundOuterSize")
                                            : getProperty("SatelliteBackgroundOuterSize");
-  if (specify_size) {
+  bool shareBackground = getProperty("ShareBackground");
+  if (specify_size && !shareBackground) {
     if (satellite_back_outer_radius > satellite_radius) {
       issues["SpecifySize"] = "SatelliteBackgroundOuterSize must be less than or equal to the SatelliteRegionRadius";
     }
@@ -490,9 +491,15 @@ void IntegrateEllipsoids::exec() {
     std::vector<double> axes_radii;
     Mantid::Geometry::PeakShape_const_sptr shape;
     if (isSatellitePeak) {
-      shape = integrator_satellite.ellipseIntegrateEvents(E1Vec, peak_q, specify_size, adaptiveRadius,
-                                                          adaptiveBack_inner_radius, adaptiveBack_outer_radius,
-                                                          axes_radii, inti, sigi);
+      if (shareBackground) {
+        shape = integrator_satellite.ellipseIntegrateEvents(E1Vec, peak_q, specify_size, adaptiveRadius,
+                                                            adaptiveBack_inner_radius, adaptiveBack_outer_radius,
+                                                            axes_radii, inti, sigi);
+      } else {
+        shape = integrator_satellite.ellipseIntegrateEvents(E1Vec, peak_q, specify_size, adaptiveRadius,
+                                                            adaptiveBack_inner_radius, adaptiveBack_outer_radius,
+                                                            axes_radii, inti, sigi);
+      }
     } else {
       shape = integrator.ellipseIntegrateEvents(E1Vec, peak_q, specify_size, adaptiveRadius, adaptiveBack_inner_radius,
                                                 adaptiveBack_outer_radius, axes_radii, inti, sigi);
