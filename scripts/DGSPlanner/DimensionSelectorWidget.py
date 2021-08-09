@@ -320,12 +320,14 @@ class DimensionSelectorWidget(QtWidgets.QWidget):
         self._comboDim4.setEnabled(on)
 
         if not on:
-            self.dimNames=['[H,0,0]', '[0,K,0]', '[0,0,L]', 'DeltaE']
+            self._comboDim4.setCurrentIndex(self.dimNames.index('DeltaE'))
             self.updateCombo()
             self._comboDim1.model().item(3).setFlags(QtCore.Qt.NoItemFlags)
             self._comboDim2.model().item(3).setFlags(QtCore.Qt.NoItemFlags)
             self._comboDim3.model().item(3).setFlags(QtCore.Qt.NoItemFlags)
         else:
+            self.set_editMin4(-numpy.inf)
+            self.set_editMax4(numpy.inf)
             self.updateCombo()
 
     def updateGui(self):
@@ -367,13 +369,13 @@ class DimensionSelectorWidget(QtWidgets.QWidget):
         self.changed.emit(d)
 
     def set_editMin4(self, val):
-        self._editMin4.setText(val)
-        self.dimMin[3] = float(val)
+        self._editMin4.setText(FloatToQString(val))
+        self.dimMin[3] = val
         self.updateChanges()
 
     def set_editMax4(self, val):
-        self._editMax4.setText(val)
-        self.dimMax[3] = float(val)
+        self._editMax4.setText(FloatToQString(val))
+        self.dimMax[3] = val
         self.updateChanges()
 
 
