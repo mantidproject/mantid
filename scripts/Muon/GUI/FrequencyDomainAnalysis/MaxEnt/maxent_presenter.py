@@ -14,8 +14,9 @@ from Muon.GUI.Common import thread_model
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 from Muon.GUI.Common.ADSHandler.workspace_naming import (get_maxent_workspace_group_name,
                                                          get_maxent_workspace_name,
-                                                         get_raw_data_workspace_name)
-from mantidqt.utils.observer_pattern import GenericObserver, GenericObservable
+                                                         get_raw_data_workspace_name,
+                                                         RECONSTRUCTED_SPECTRA)
+from mantidqt.utils.observer_pattern import GenericObserver, GenericObservable, Observable
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
 from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string, run_string_to_list
 from Muon.GUI.Common.utilities.algorithm_utils import run_MuonMaxent, create_empty_table
@@ -32,7 +33,7 @@ USEGROUPS = "Groups"
 USEDETECTORS = "All detectors"
 
 optional_output_suffixes = {PHASETABLE: '_phase_table', DEADTIMES: '_dead_times',
-                            SPECTRA: '_reconstructed_spectra', PHASECONVERGENCE: '_phase_convergence'}
+                            SPECTRA: RECONSTRUCTED_SPECTRA, PHASECONVERGENCE: '_phase_convergence'}
 
 
 class MaxEntPresenter(object):
@@ -60,6 +61,8 @@ class MaxEntPresenter(object):
         self.calculation_started_notifier = GenericObservable()
         self.new_phase_table = GenericObservable()
         self.update_phase_table_options()
+        self.method_changed = Observable()
+        self.new_reconstructed_data = Observable()
 
     @property
     def use_groups(self):
@@ -140,6 +143,14 @@ class MaxEntPresenter(object):
         self.activate()
         self.calculation_finished_notifier.notify_subscribers(self._maxent_output_workspace_name)
         # if phase table is outputed
+        if self.view.output_reconstructed_spectra and SPECTRA in self._optional_output_names.keys():
+            ws = MuonWorkspaceWrapper(self._optional_output_names[SPECTRA]).workspace
+            if self.use_groups:
+                table = MuonWorkspaceWrapper(self._optional_output_names[GROUPINGTABLE]).workspace
+                self.new_reconstructed_data.notify_subscribers({"ws": ws.name(), "table": table.name()})
+            else:
+                self.new_reconstructed_data.notify_subscribers({"ws": ws.name(), "table": None})
+
         if self.view.output_phase_table and PHASETABLE in self._optional_output_names.keys():
             name = self._optional_output_names[PHASETABLE]
             if self.use_groups:
@@ -168,13 +179,15 @@ class MaxEntPresenter(object):
 
     def _create_group_table(self):
         tab = create_empty_table(GROUPINGTABLE)
+        tab.addColumn('str', 'Group')
         tab.addColumn('str', 'Detectors')
         groups = self.get_selected_groups
         for group in groups:
             detectors = ""
+            name = group.name
             for det in group.detectors:
                 detectors += str(det) + ","
-            tab.addRow([detectors[:-1]])
+            tab.addRow([name, detectors[:-1]])
         return tab
 
     def get_parameters_for_maxent_calculation(self):
