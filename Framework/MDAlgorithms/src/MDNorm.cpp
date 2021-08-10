@@ -244,7 +244,7 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
         if (bkgdWS->getNumDims() <= 3) {
           errorMessage.emplace("BackgroundWorkspace", "The input background workspace must have at 4 dimensions when "
                                                       "input workspace has more than 4 dimensions (inelastic case).");
-        } else if (bkgdWS->getDimension(3)->getMDFrame().name() != inputWS->getDimension(3)->getMDFrame().name()) {
+        } else if (bkgdWS->getDimension(3)->getName() != inputWS->getDimension(3)->getName()) {
           errorMessage.emplace("BackgroundWorkspace", "The input background workspace 4th dimension must be DeltaE "
                                                       "for inelastic case.");
         }
