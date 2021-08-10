@@ -668,7 +668,7 @@ class TFAsymmetryFittingModelTest(unittest.TestCase):
         self.assertEqual(self.model.get_fit_function_parameter_values(filtered_functions[0])[0], [0.0, 0.0, 0.0, 0.2, 0.2])
         self.assertEqual(self.model.get_fit_function_parameter_values(filtered_functions[1])[0], [0.0, 0.0, 0.0, 0.2, 0.2])
 
-    def test_that_get_all_fit_functions_for_returns_the_fwd_tf_single_functions_for_the_display_type_fwd(self):
+    def test_that_get_all_fit_functions_for_does_not_do_filtering_even_for_a_fwd_display_type(self):
         self.model.dataset_names = self.dataset_names
         self.model.single_fit_functions = self.single_fit_functions
         self.model.tf_asymmetry_single_functions = [self.tf_single_function.clone(), self.tf_single_function.clone()]
@@ -676,8 +676,9 @@ class TFAsymmetryFittingModelTest(unittest.TestCase):
 
         filtered_functions = self.model.get_all_fit_functions_for("fwd")
 
-        self.assertEqual(len(filtered_functions), 1)
+        self.assertEqual(len(filtered_functions), 2)
         self.assertEqual(self.model.get_fit_function_parameter_values(filtered_functions[0])[0], [0.0, 0.0, 0.0, 0.2, 0.2])
+        self.assertEqual(self.model.get_fit_function_parameter_values(filtered_functions[1])[0], [0.0, 0.0, 0.0, 0.2, 0.2])
 
     def test_that_get_all_fit_functions_for_returns_the_tf_simultaneous_function_when_in_simultaneous_mode(self):
         self.model.dataset_names = self.dataset_names

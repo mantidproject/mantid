@@ -719,10 +719,7 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
     def get_all_fit_functions_for(self, display_type: str) -> list:
         """Returns all the fit functions for datasets with a name containing a string."""
         if self.fitting_context.tf_asymmetry_mode:
-            if self.fitting_context.simultaneous_fitting_mode:
-                return [self.fitting_context.tf_asymmetry_simultaneous_function]
-            else:
-                return self._filter_functions_by_dataset_string(display_type, self.tf_asymmetry_single_functions)
+            return self.get_all_fit_functions()
         else:
             return super().get_all_fit_functions_for(display_type)
 

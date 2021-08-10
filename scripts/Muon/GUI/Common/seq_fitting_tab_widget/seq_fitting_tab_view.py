@@ -35,6 +35,7 @@ class SeqFittingTabView(QtWidgets.QWidget, ui_seq_fitting_tab):
         self.data_type_combo_box.addItems(data_type_options)
 
     def hide_data_type_combo_box(self):
+        self.filter_by_label.hide()
         self.data_type_combo_box.hide()
 
     def selected_data_type(self) -> str:
