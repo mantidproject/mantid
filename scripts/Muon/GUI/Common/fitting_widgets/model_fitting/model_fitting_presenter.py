@@ -103,6 +103,7 @@ class ModelFittingPresenter(BasicFittingPresenter):
         self.automatically_update_function_name()
 
         self.update_fit_statuses_and_chi_squared_in_view_from_model()
+        self.update_covariance_matrix_button()
         self.update_fit_function_in_view_from_model()
         self.update_start_and_end_x_in_view_from_model()
 
