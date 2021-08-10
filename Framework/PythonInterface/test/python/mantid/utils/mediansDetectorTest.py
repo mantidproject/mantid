@@ -8,6 +8,7 @@ import unittest
 import numpy as np
 from mantid.utils.nomad import determine_tubes_threshold
 import os
+from collections import namedtuple
 import tempfile
 from mantid.utils.nomad._median_detector_test import _NOMADMedianDetectorTest, InstrumentComponentLevel
 
@@ -84,24 +85,26 @@ class DetectorMediansTest(unittest.TestCase):
         for pack_index in [2, 3, 4, 5, 6, 7, 9, 10, 11, 43, 44, 47, 48, 49]:
             pack_index -= 1
             np.testing.assert_allclose(pixel_collimation_states[pack_index * 8 * 256:(pack_index + 1) * 8 * 256],
-                                       np.zeros(8 * 256) ,
+                                       np.zeros(8 * 256),
                                        err_msg=f'Pack index {pack_index * 8 * 256}:... : '
                                                f'{pixel_collimation_states[pack_index]}')
 
-    def next_test_determine_tubes_thresholds(self):
+    def test_determine_tubes_thresholds(self):
         """
 
         Returns
         -------
 
         """
-        # lower_pixel = 0.9
-        # high_pixel = 1.2
+        # Set up test data
+        mock_nomad, test_config, test_data = self._generate_test_data()
 
-        test_data = self._generate_test_data()
+        # Determine threshold
+        some_returns = determine_tubes_threshold(test_data, test_config, mock_nomad)
 
-        some_returns = determine_tubes_threshold(test_data, nomad_info=None, config=None)
-        assert some_returns
+        print(f'{some_returns.reshape(6, 12)}')
+
+        assert 1 == 4
 
     @staticmethod
     def _generate_test_data():
@@ -109,6 +112,8 @@ class DetectorMediansTest(unittest.TestCase):
 
         Returns
         -------
+        ~tuple
+            namedtuple as instrument, dict as mask configuration, numpy.ndarray
 
         """
         # 16 pixels per tube
@@ -143,7 +148,28 @@ class DetectorMediansTest(unittest.TestCase):
 
         print(f'[DEBUG] Test 3 x 2 pack:\n{test_data}')
 
-        return test_data.flatten()
+        # Mock instrument
+        info_dict = dict()
+
+        info_dict['num_banks'] = 1
+        info_dict['num_8packs_per_bank'] = [6]  # [i, i+1) is the range of 8 packs for bank i
+        info_dict['num_8packs'] = 3
+        info_dict['num_pixels_per_tube'] = tube_size
+        info_dict['num_tubes_per_8pack'] = 2
+        info_dict['num_tubes'] = info_dict['num_8packs'] * info_dict['num_tubes_per_8pack']
+        info_dict['num_pixels'] = info_dict['num_tubes'] * info_dict['num_pixels_per_tube']
+
+        # convert to namedtuple and return
+        instrument_class = namedtuple("nomad", info_dict)
+        instrument = instrument_class(**info_dict)
+
+        # Mask configuration
+        mask_config = {'collimation': {'full_col': [2],
+                                       'half_col': [3]},
+                       'threshold': {'low_pixel': 0.9, 'high_pixel': 1.2,
+                                     'low_tube': 0.7, 'high_tube': 1.3}}
+
+        return instrument, mask_config, test_data.flatten()
 
     def _generate_test_ymal(self, file_name):
         """
