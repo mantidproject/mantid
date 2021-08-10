@@ -126,7 +126,7 @@ class LoadWANDSCD(PythonAlgorithm):
         # Process the vanadium normalization data
         if self.getProperty("NormalizedBy").value.lower() == 'none':
             # no normalization
-            print("Skip Va normalization as requested")
+            self.getLogger().information("Skip Va normalization as requested")
         else:
             van_filename = self.get_va_filename()
             if van_filename is None:
@@ -319,15 +319,15 @@ class LoadWANDSCD(PythonAlgorithm):
         # find the scale
         if normalize_by == 'counts':
             scale = norm.getSignalArray().mean()
-            print('scale counts = {}'.format(int(scale)))
+            self.getLogger().information('scale counts = {}'.format(int(scale)))
         elif normalize_by == 'monitor':
             scale = np.array(data.getExperimentInfo(0).run().getProperty('monitor_count').value)
             scale /= norm.getExperimentInfo(0).run().getProperty('monitor_count').value[0]
-            print('scale monitor = {}'.format(scale))
+            self.getLogger().information('scale monitor = {}'.format(scale))
         elif normalize_by == 'time':
             scale = np.array(norm.getExperimentInfo(0).run().getProperty('duration').value)
             scale /= norm.getExperimentInfo(0).run().getProperty('duration').value[0]
-            print('van time = {}'.format(scale))
+            self.getLogger().information('van time = {}'.format(scale))
         else:
             scale = 1
         # exec
