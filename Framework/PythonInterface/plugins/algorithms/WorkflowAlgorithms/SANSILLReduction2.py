@@ -13,13 +13,12 @@ from mantid.kernel import Direction, EnabledWhenProperty, FloatBoundedValidator,
 from mantid.simpleapi import *
 import numpy as np
 
-EMPTY_TOKEN = '000000' # empty run rumber to act as a placeholder where a sample measurement is missing
-
 
 class SANSILLReduction(PythonAlgorithm):
     """
         Performs unit data reduction of the given process type
-        Supports stadard monochromatic, kinetic and TOF measurements
+        Supports stadard monochromatic, kinetic, rebinned event (monochromatic)
+        and TOF measurements (equidistant and non-equidistant, D33 only)
         Supports D11, D16, D22, and D33 instruments at the ILL
     """
 
@@ -715,6 +714,7 @@ class SANSILLReduction(PythonAlgorithm):
         '''
         Loads, merges and concatenates the input runs, if needed
         TODO: once v2 of the loader is in, move this out to a separate algorithm
+        Then it should load the instrument only with the first run, which will make the logic even more complex
         '''
         ws = self.getPropertyValue('OutputWorkspace')
         tmp = f'__{ws}'

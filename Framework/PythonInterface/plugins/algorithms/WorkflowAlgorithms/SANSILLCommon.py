@@ -22,6 +22,20 @@ class AcqMode(Enum):
     REVENT = 4 # rebinned monochromatic event data
 
 
+# Empty run rumber to act as a placeholder where a sample measurement is missing.
+EMPTY_TOKEN = '000000'
+# Quite often some samples are not measured at the some distances.
+# Still, it is preferred to reduce them together in one table.
+# Below is an example of why the blanks are needed:
+#    | samples D1 | samples D2 | samples D3 | sample TR |
+#    |     R1     |     R2     |     R3     |    R4     |
+#    |     R10    |     0      |     R11    |    R12    |
+# Here the sample 2 is not measured at distance 2.
+# But in order to reduce it together in a vectorized way and apply the transmissions
+# we will need to inject a blank measurement in the place of 0, with the same number of frames
+# as the sample measurement (so 1 if mono, >1 if kinetic mono).
+
+
 def check_distances_match(ws1, ws2):
     """
         Checks if the detector distance between two workspaces are close enough
