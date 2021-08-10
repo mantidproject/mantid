@@ -1291,6 +1291,37 @@ TRANS/TRANSSPEC=n
       [transmission.monitor.M3]
         spectrum_number = 3
 
+TRANS/TRANSPEC=n/SHIFT=a
+------------------------
+
+**Replacement**
+
+..  code-block:: none
+
+    [transmission]
+      # Where Mn is arbitrary but must match the section label
+      selected_monitor = "Mn"
+
+      [transmission.monitor.Mn]
+        spectrum_number = n
+
+**Existing Example:**
+
+..  code-block:: none
+
+    TRANS/TRANSPEC=3/SHIFT=-58
+
+**Existing Replacement**
+
+..  code-block:: none
+
+    [transmission]
+      selected_monitor = "M3"
+
+      [transmission.monitor.M3]
+        spectrum_number = 3
+        shift = -0.058
+
 TUBECALIBFILE=str
 -----------------
 
