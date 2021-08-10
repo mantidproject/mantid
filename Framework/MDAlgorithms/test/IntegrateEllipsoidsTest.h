@@ -532,11 +532,46 @@ public:
       TS_ASSERT_EQUALS(peakNoSatellite.getDetectorPosition(), peakSatellite.getDetectorPosition());
     }
 
+    // integrate with sharing background region to satellite peaks
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", "TOPAZ_36079_event"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeaksWorkspace", "TOPAZ_36079_peaks"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "peaks_integrated_shared"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("RegionRadius", 0.055));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SpecifySize", true));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakSize", 0.0425));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundInnerSize", 0.043));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundOuterSize", 0.055));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("UseOnePercentBackgroundCorrection", false));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SatelliteRegionRadius", 0.1));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SatellitePeakSize", 0.08));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("ShareBackground", true));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT_THROWS_NOTHING(alg.isExecuted());
+
+    PeaksWorkspace_sptr peaksShared = alg.getProperty("OutputWorkspace");
+    TS_ASSERT_EQUALS(peaksShared->getNumberPeaks(), 3);
+
+    for (int peakind = 0; peakind < peaksShared->getNumberPeaks(); peakind++) {
+      const Peak &peakShared = peaksShared->getPeak(peakind);
+      const Peak &peakSatellite = peaksSatellite->getPeak(peakind);
+
+      if (peakind == 0) {
+        TS_ASSERT_DELTA(peakShared.getIntensity(), 22.0, 1e-6);
+        TS_ASSERT_DELTA(peakSatellite.getIntensity(), 13.0, 1e-6);
+      } else {
+        TS_ASSERT_DELTA(peakShared.getIntensity(), peakSatellite.getIntensity(), 1e-6);
+      }
+
+      TS_ASSERT_EQUALS(peakShared.getDetectorPosition(), peakSatellite.getDetectorPosition());
+    }
+
     AnalysisDataService::Instance().remove("TOPAZ_36079_event");
     AnalysisDataService::Instance().remove("TOPAZ_36079_md");
     AnalysisDataService::Instance().remove("TOPAZ_36079_peaks");
     AnalysisDataService::Instance().remove("peaks_integrated_satellite");
     AnalysisDataService::Instance().remove("peaks_integrated_nosatellite");
+    AnalysisDataService::Instance().remove("peaks_integrated_shared");
   }
 };
 
