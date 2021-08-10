@@ -12,6 +12,7 @@ New Features
 ############
 
 - The Frequency Domain Analysis interface now allows you to perform a sequential fit using the Sequential Fitting tab.
+- The Sequential Fitting tab allows you to choose the type of dataset you want to fit.
 
 Muon Analysis
 -------------
