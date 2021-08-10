@@ -122,38 +122,6 @@ def determine_tubes_threshold(vec_intensity, mask_config: dict, instrument_confi
     return pixel_mask_states
 
 
-def _determine_full_collimated_tubes_thresholds(vec_intensity, nomad_info, full_collimated_pixels,
-                                                low_pixel, high_pixel):
-    """Determine the full-collimated tubes' thresholds
-
-    Parameters
-    ----------
-    vec_intensity
-    nomad_info
-    config
-
-    Returns
-    -------
-
-    """
-    # Calculate median value the tubes
-    tube_median_array = np.median(vec_intensity, axis=1)
-    tube_median_array = np.repeat(tube_median_array, nomad_info.num_tubes)
-
-    # Condition 3:
-    # summed pixel intensity < (1+(low_pixel-1)*3) * m or
-    # summed pixel intensity > (1+(high_pixel-1)*3) * m
-    # where low_pixel and high_pixel are parameters defined in the provided YAML configuration file above.
-    lower_boundaries = (1. + (low_pixel - 1) * 3.) * tube_median_array
-    upper_boundaries = (1. + (high_pixel - 1) * 3.) * tube_median_array
-
-    # Check pixels meets conditions 3 for pixels in full_collimated_tubes
-    masked_pixels = np.where((tube_median_array < lower_boundaries or tube_median_array > upper_boundaries)
-                             and full_collimated_pixels)
-
-    return masked_pixels
-
-
 class CollimationLevel(enum.IntEnum):
     r"""Collimation state of an eight-pack"""
     Empty = 0
