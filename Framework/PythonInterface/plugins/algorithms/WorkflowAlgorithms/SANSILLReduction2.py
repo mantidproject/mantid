@@ -624,6 +624,29 @@ class SANSILLReduction(PythonAlgorithm):
             result.insert(index,blank)
         return result
 
+    def inject_repeat_transmissions(self, ws):
+        '''Repeats the transmission workspaces if they are reused for several samples'''
+        result = []
+        runs = self.getPropertyValue('Runs').split(',')
+        runs_unique = self.remove_repeated(runs)
+        if len(runs_unique) < len(runs):
+            for index, run in enumerate(runs):
+                to_clone_index = runs_unique.index(run)
+                replica = f'__replica_{index}'
+                CloneWorkspace(InputWorkspace=mtd[ws][to_clone_index], OutputWorkspace=replica)
+                result.append(replica)
+            DeleteWorkspace(ws)
+        else:
+            result = [w.getName() for w in mtd[ws]]
+        return result
+
+    def remove_repeated(self, list):
+        '''Removes the repetitions from the list'''
+        result = set()
+        for it in list:
+            result.add(it)
+        return [*result,]
+
     def set_process_as(self, ws):
         '''Sets the process as flag as sample log for future sanity checks'''
         AddSampleLog(Workspace=ws, LogName='ProcessedAs', LogText=self.process)
@@ -710,8 +733,10 @@ class SANSILLReduction(PythonAlgorithm):
     def load(self):
         '''
         Loads, merges and concatenates the input runs, as appropriate
-        TODO: once v2 of the loader is in, move this out to a separate algorithm
-        Then it should load the instrument only with the first run, which will make the logic even more complex
+        This could load the instrument only with the first run, once v2 of the loader is in
+        However, it will make things more complicated
+        Besides, the injections of blanks (for scattering) and repeats (for transmissions) makes this already cluttered
+        TODO: Move this out to a separate algorithm, once v2 of the loader is in
         '''
         ws = self.getPropertyValue('OutputWorkspace')
         tmp = f'__{ws}'
@@ -720,6 +745,9 @@ class SANSILLReduction(PythonAlgorithm):
         blank_runs = list(filter(lambda x: x == EMPTY_TOKEN, runs))
         nreports = len(non_blank_runs) + self.processes.index(self.getPropertyValue('ProcessAs')) + 2
         self.progress = Progress(self, start=0.0, end=1.0, nreports=nreports)
+        if self.getPropertyValue('ProcessAs') == 'Transmission':
+            # sometimes the same transmission can be applied to many samples
+            non_blank_runs = self.remove_repeated(non_blank_runs)
         LoadAndMerge(Filename=','.join(non_blank_runs), OutputWorkspace=tmp, startProgress=0., endProgress=len(non_blank_runs)/nreports)
         self.progress.report(len(non_blank_runs), 'Loaded')
         if isinstance(mtd[tmp], MatrixWorkspace) and blank_runs:
@@ -731,7 +759,10 @@ class SANSILLReduction(PythonAlgorithm):
             self.preprocess_group(tmp)
             if self.mode != AcqMode.TOF:
                 if self.process == 'Sample' or self.process == 'Transmission':
-                    ws_list = self.inject_blank_samples(tmp)
+                    if self.process == 'Sample':
+                        ws_list = self.inject_blank_samples(tmp)
+                    if self.process == 'Transmission':
+                        ws_list = self.inject_repeat_transmissions(tmp)
                     ConjoinXRuns(InputWorkspaces=ws_list, OutputWorkspace=ws, LinearizeAxis=True)
                     DeleteWorkspaces(WorkspaceList=ws_list)
                 else:
