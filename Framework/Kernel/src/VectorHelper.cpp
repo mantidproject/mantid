@@ -31,6 +31,7 @@ namespace VectorHelper {
  *  @param[in] xMinHint x_1 if params contains only delta_1.
  *  @param[in] xMaxHint x_2 if params contains only delta_1.
  *  @param[in] useReverseLogarithmic wheter or not to use reverse logarithmic for bins
+ *  @param[in] power the power in case of inverse power sum. Must be between 0 and 1 or is ignored.
  *  @return The number of bin boundaries in the new axis
  **/
 int DLLExport createAxisFromRebinParams(const std::vector<double> &params, std::vector<double> &xnew,

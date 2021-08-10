@@ -190,9 +190,9 @@ Output:
 
 Output:
 
-.. testoutput:: ExHistRevLog
+.. testoutput:: ExInversePower
 
-   The rebinned X values are: [ 1.  4.  6.121320344  7.853371151  9.353371151  10.]
+   The rebinned X values are: [  1.           4.           6.12132034   7.85337115   9.35337115  10.        ]
 
 **Example - custom two regions rebinning:**
 
