@@ -6,18 +6,19 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 # 3rd-party imports
+import numpy
 import numpy as np
 import yaml
-
 # standard imports
 import enum
+from collections import namedtuple
 
 
 __all__ = ['determine_tubes_threshold']
 
 
 # In-progress Task 335
-def determine_tubes_threshold(vec_intensity, nomad_info, config):
+def determine_tubes_threshold(vec_intensity, collimation_status, tube_collimation_states: numpy.ndarray):
     """
 
     Refer to diagram
@@ -91,6 +92,16 @@ class CollimationLevel(enum.Enum):
     Full = 2
 
 
+class InstrumentComponentLevel(enum.Enum):
+    """
+    Instrument component level
+    """
+    Bank = 0
+    EightPack = 1
+    Tube = 2
+    Pixel = 3
+
+
 class _NOMADMedianDetectorTest:
     r"""Mixin providing methods to algorithm NOMADMedianDetectorTest"""
 
@@ -131,3 +142,66 @@ class _NOMADMedianDetectorTest:
         with open(file_name, 'r') as stream:
             config = yaml.safe_load(stream)
         return config
+
+    @staticmethod
+    def get_collimation_states(collimation_config_dict: dict, instrument_config,
+                               level: InstrumentComponentLevel) -> numpy.ndarray:
+        """Convert 8pack collimation states (in dictionary)
+
+        Parameters
+        ----------
+        collimation_config_dict
+        instrument_config
+        level
+        num_8packs: int
+            number of 8 packs
+
+        Returns
+        -------
+        numpy.ndarray
+            component collimation states
+
+        """
+        # Compute the 8-pack level collimation
+        collimation_state_array = np.zeros(shape=(instrument_config.num_8packs, ), dtype=int)
+
+        # Read the configuration dict
+        full_collimation_8packs = np.array(collimation_config_dict['full_col']) - 1
+        half_collimation_8packs = np.array(collimation_config_dict['half_col']) - 1
+        collimation_state_array[full_collimation_8packs] = 2
+        collimation_state_array[half_collimation_8packs] = 1
+
+        if level == InstrumentComponentLevel.Bank:
+            raise RuntimeError(f'Level must be EightPack or up but not {level}')
+        elif level == InstrumentComponentLevel.Tube:
+            collimation_state_array = collimation_state_array.repeat(instrument_config.num_tubes_per_8pack)
+        elif level == InstrumentComponentLevel.Pixel:
+            collimation_state_array = collimation_state_array.repeat(instrument_config.num_tubes_per_8pack *
+                                                                     instrument_config.num_pixels_per_tube)
+
+        return collimation_state_array
+
+    @staticmethod
+    def set_nomad_constants():
+        """Set NOMAD geometry constants for numpy operation
+
+        Returns
+        -------
+        namedtutple
+            named tuple for NOMAD pixel, tube, 8 pack and bank constants
+
+        """
+        info_dict = dict()
+
+        info_dict['num_banks'] = 6
+        info_dict['num_8packs_per_bank'] = [0, 6, 15, 23, 30, 45, 49]  # [i, i+1) is the range of 8 packs for bank i
+        info_dict['num_8packs'] = 49
+        info_dict['num_pixels_per_tube'] = 256
+        info_dict['num_tubes_per_8pack'] = 8
+        info_dict['num_tubes'] = info_dict['num_8packs'] * info_dict['num_tubes_per_8pack']
+        info_dict['num_pixels'] = info_dict['num_tubes'] * info_dict['num_pixels_per_tube']
+
+        # convert to namedtuple and return
+        instrument = namedtuple("nomad", info_dict)
+
+        return instrument(**info_dict)

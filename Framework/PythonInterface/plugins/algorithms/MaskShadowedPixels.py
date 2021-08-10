@@ -7,7 +7,6 @@
 #pylint: disable=no-init,invalid-name
 import mantid
 import numpy as np
-from collections import namedtuple
 
 
 class MaskShadowedPixels(mantid.api.PythonAlgorithm):
@@ -102,31 +101,6 @@ class MaskShadowedPixels(mantid.api.PythonAlgorithm):
         vec_intensity /= solid_angle_array
 
         return vec_intensity
-
-    @staticmethod
-    def set_nomad_constants():
-        """Set NOMAD geometry constants for numpy operation
-
-        Returns
-        -------
-        namedtutple
-            named tuple for NOMAD pixel, tube, 8 pack and bank constants
-
-        """
-        info_dict = dict()
-
-        info_dict['num_banks'] = 6
-        info_dict['num_8packs_per_bank'] = [0, 6, 15, 23, 30, 45, 49]  # [i, i+1) is the range of 8 packs for bank i
-        info_dict['num_8packs'] = 49
-        info_dict['num_pixels_per_tube'] = 256
-        info_dict['num_tubes_per_8pack'] = 8
-        info_dict['num_tubes'] = info_dict['num_8packs'] * info_dict['num_tubes_per_8pack']
-        info_dict['num_pixels'] = info_dict['num_tubes'] * info_dict['num_pixels_per_tube']
-
-        # convert to namedtuple and return
-        instrument = namedtuple("nomad", info_dict)
-
-        return instrument(**info_dict)
 
     @staticmethod
     def calculate_solid_angle(workspace):

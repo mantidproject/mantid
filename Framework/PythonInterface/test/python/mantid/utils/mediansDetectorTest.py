@@ -9,7 +9,7 @@ import numpy as np
 from mantid.utils.nomad import determine_tubes_threshold
 import os
 import tempfile
-from mantid.utils.nomad._median_detector_test import _NOMADMedianDetectorTest
+from mantid.utils.nomad._median_detector_test import _NOMADMedianDetectorTest, InstrumentComponentLevel
 
 
 class DetectorMediansTest(unittest.TestCase):
@@ -40,7 +40,53 @@ class DetectorMediansTest(unittest.TestCase):
         half_col_8packs = mask_config['collimation']['half_col']
         assert 36 in half_col_8packs
 
-        # assert list(mask_config.keys()) == [], f'{list(mask_config)}'
+        # Get nomad instrument configuration
+        nomad = _NOMADMedianDetectorTest.set_nomad_constants()
+
+        # Test ymal and numpy conversion
+        eight_pack_collimation_states = \
+            _NOMADMedianDetectorTest.get_collimation_states(mask_config['collimation'],
+                                                            nomad, InstrumentComponentLevel.EightPack)
+        assert eight_pack_collimation_states.shape == (49,), f'{eight_pack_collimation_states.shape}'
+        # check full collimated
+        for pack_index in [1, 8, 16, 25, 27, 28, 29]:
+            assert eight_pack_collimation_states[pack_index - 1] == 2,\
+                f'Pack index {pack_index - 1}: {eight_pack_collimation_states[pack_index - 1]}'
+        # check half collimated
+        for pack_index in [30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 45, 46]:
+            assert eight_pack_collimation_states[pack_index - 1] == 1,\
+                f'Pack index {pack_index - 1}: {eight_pack_collimation_states[pack_index - 1]}'
+        # not collimated
+        for pack_index in [2, 3, 4, 5, 6, 7, 9, 10, 11, 43, 44, 47, 48, 49]:
+            assert eight_pack_collimation_states[pack_index - 1] == 0,\
+                f'Pack index {pack_index - 1}: {eight_pack_collimation_states[pack_index - 1]}'
+
+        # pixel collimation
+        pixel_collimation_states = \
+            _NOMADMedianDetectorTest.get_collimation_states(mask_config['collimation'],
+                                                            nomad, InstrumentComponentLevel.Pixel)
+        assert pixel_collimation_states.shape == (256 * 8 * 49, ), f'{pixel_collimation_states.shape}'
+        # check full collimated
+        for pack_index in [1, 8, 16, 25, 27, 28, 29]:
+            pack_index -= 1
+            np.testing.assert_allclose(pixel_collimation_states[pack_index * 8 * 256:(pack_index + 1) * 8 * 256],
+                                       np.zeros(8 * 256) + 2,
+                                       err_msg=f'Pack index {pack_index * 8 * 256}:... : '
+                                               f'{pixel_collimation_states[pack_index]}')
+        # check half collimated
+        for pack_index in [30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 45, 46]:
+            pack_index -= 1
+            np.testing.assert_allclose(pixel_collimation_states[pack_index * 8 * 256:(pack_index + 1) * 8 * 256],
+                                       np.zeros(8 * 256) + 1,
+                                       err_msg=f'Pack index {pack_index * 8 * 256}:... : '
+                                               f'{pixel_collimation_states[pack_index]}')
+        # not collimated
+        for pack_index in [2, 3, 4, 5, 6, 7, 9, 10, 11, 43, 44, 47, 48, 49]:
+            pack_index -= 1
+            np.testing.assert_allclose(pixel_collimation_states[pack_index * 8 * 256:(pack_index + 1) * 8 * 256],
+                                       np.zeros(8 * 256) ,
+                                       err_msg=f'Pack index {pack_index * 8 * 256}:... : '
+                                               f'{pixel_collimation_states[pack_index]}')
 
     def next_test_determine_tubes_thresholds(self):
         """
@@ -49,8 +95,8 @@ class DetectorMediansTest(unittest.TestCase):
         -------
 
         """
-        lower_pixel = 0.9
-        high_pixel = 1.2
+        # lower_pixel = 0.9
+        # high_pixel = 1.2
 
         test_data = self._generate_test_data()
 
