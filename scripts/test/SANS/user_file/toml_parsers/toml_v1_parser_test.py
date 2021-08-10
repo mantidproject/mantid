@@ -5,6 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
+from typing import List, Dict
 from unittest import mock
 
 from sans.common.enums import SANSInstrument, SANSFacility, DetectorType, ReductionMode, RangeStepType, \
@@ -13,6 +14,7 @@ from sans.common.enums import SANSInstrument, SANSFacility, DetectorType, Reduct
 from sans.state.StateObjects.StateData import get_data_builder
 from sans.state.StateObjects.StateMaskDetectors import StateMaskDetectors, StateMask
 from sans.test_helper.file_information_mock import SANSFileInformationMock
+from sans.user_file.parser_helpers.toml_parser_impl_base import MissingMandatoryParam
 from sans.user_file.toml_parsers.toml_v1_parser import TomlV1Parser
 
 
@@ -28,12 +30,21 @@ class TomlV1ParserTest(unittest.TestCase):
         return data_builder.build()
 
     def _setup_parser(self, dict_vals):
+        def _add_missing_mandatory_key(dict_to_check: Dict, key_path: List[str], replacement_val):
+            _dict = dict_to_check
+            for key in key_path[0:-1]:
+                if key not in _dict:
+                    _dict[key] = {}
+                _dict = _dict[key]
+
+            if key_path[-1] not in _dict:
+                _dict[key_path[-1]] = replacement_val  # Add in child value
+            return dict_to_check
+
         self._mocked_data_info = self._get_mock_data_info()
-        if "instrument" not in dict_vals:
-            # instrument key needs to generally be present
-            dict_vals["instrument"] = {}
-        if "name" not in dict_vals["instrument"]:
-            dict_vals["instrument"]["name"] = "LOQ"
+        # instrument key needs to generally be present
+        dict_vals = _add_missing_mandatory_key(dict_vals, ["instrument", "name"], "LOQ")
+        dict_vals = _add_missing_mandatory_key(dict_vals, ["detector", "configuration", "selected_detector"], "rear")
 
         return TomlV1Parser(dict_vals, file_information=None)
 
@@ -106,6 +117,23 @@ class TomlV1ParserTest(unittest.TestCase):
         self.assertTrue(parser.get_state_reduction_mode().reduction_mode is expected_reduction_mode)
         self.assertEqual((1, 2), get_beam_position(state_move, DetectorType.HAB))
         self.assertEqual((2, 3), get_beam_position(state_move, DetectorType.LAB))
+
+    def test_rear_front_maps_to_enum_correctly(self):
+        for user_input, enum_val in [("rear", ReductionMode.LAB), ("front", ReductionMode.HAB),
+                                     ("all", ReductionMode.ALL), ("merged", ReductionMode.MERGED)]:
+            input_dict = {"detector": {"configuration": {"selected_detector": user_input}}}
+            parser = self._setup_parser(dict_vals=input_dict)
+            self.assertEqual(enum_val, parser.get_state_reduction_mode().reduction_mode)
+
+    def test_legacy_reduction_mode_rejected(self):
+        for legacy_input in ["hab", "lab"]:
+            with self.assertRaisesRegex(ValueError, "rear"):
+                input_dict = {"detector": {"configuration": {"selected_detector": legacy_input}}}
+                self._setup_parser(dict_vals=input_dict)
+
+    def test_reduction_mode_mandatory(self):
+        with self.assertRaisesRegex(MissingMandatoryParam, "selected_detector"):
+            TomlV1Parser({"instrument": {"name": "LOQ"}}, None)
 
     def test_binning_commands_parsed(self):
         # Wavelength

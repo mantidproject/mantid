@@ -25,6 +25,8 @@ V0 to V1
   *mask.spatial.beamstop_shadow* and *mask.spatial.mask_pixels*
 - *normalisation.all_monitors* was added to support *BACK/MON/TIMES*
 - *[gravity]* and *gravity.enabled* were merged into *instrument.configuration.gravity_enabled*
+- *detector.configuration.selected_detector* is now mandatory
+- *detector.configuration.selected_detector* accepts *front* and *rear* instead of *HAB* and *LAB* respectively.
 
 
 Conversion From Legacy User Files
@@ -217,10 +219,13 @@ DET/CORR [FRONT][REAR] [X][Y][Z][ROT] a
 DET/[LAB][HAB][MERGED][ALL]
 ---------------------------
 
+Note: The group now refers to *LAB* and *HAB* as *rear* and *front* respectively.
+All reduction types are lower case.
+
 ..  code-block:: none
 
     [detector.configuration]
-      selected_detector = "LAB"
+      selected_detector = "rear"
 
 **Existing Example**
 
@@ -228,13 +233,13 @@ DET/[LAB][HAB][MERGED][ALL]
 
     DET/HAB
 
-
 **Existing Replacement**
 
 ..  code-block:: none
 
     [detector.configuration]
-      selected_detector = "HAB"  # Or "LAB", "All" (with lowercase l's), "Merged" ...etc.
+      # Accepts "front", "rear", "merged", or "all".
+      selected_detector = "front"
 
 DET/RESCALE[/FIT] x y
 ---------------------

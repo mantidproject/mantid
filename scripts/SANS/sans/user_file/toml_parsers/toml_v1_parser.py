@@ -163,10 +163,9 @@ class _TomlV1ParserImpl(TomlParserImplBase):
 
         self.scale.scale = self.get_val("rear_scale", det_config_dict)
 
-        reduction_mode_key = self.get_val(["detector", "configuration", "selected_detector"])
-        # Low angle bank was set by default in user parser as it's the main detectors
-        reduction_mode = ReductionMode(reduction_mode_key) if reduction_mode_key else ReductionMode.LAB
-        self.reduction_mode.reduction_mode = reduction_mode
+        reduction_mode_key = self.get_mandatory_val(["detector", "configuration", "selected_detector"])
+        # LAB/Rear was set by default in user parser, so we fall-back to this
+        self.reduction_mode.reduction_mode = ReductionMode.convert(reduction_mode_key, support_deprecated=False)
 
         def update_translations(det_type, values: dict):
             if values:
