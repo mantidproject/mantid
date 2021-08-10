@@ -60,6 +60,9 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
     def set_on_check_cropping_state_changed(self, slot):
         self.check_cropCalib.stateChanged.connect(slot)
 
+    def set_on_check_update_vanadium_state_changed(self, slot):
+        self.check_updateVan.stateChanged.connect(slot)
+
     # =================
     # Component Setters
     # =================
@@ -107,6 +110,11 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
     def set_check_cropping_checked(self, checked):
         self.check_cropCalib.setChecked(checked)
 
+    def set_check_update_vanadium_enabled(self, enabled):
+        self.check_updateVan.setEnabled(enabled)
+
+    def set_check_update_vanadium_checked(self, checked):
+        self.check_updateVan.setChecked(checked)
     # =================
     # Component Getters
     # =================
@@ -143,6 +151,9 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
 
     def get_cropping_widget(self):
         return self.widget_cropping
+
+    def get_update_vanadium_checked(self):
+        return self.check_updateVan.isChecked()
 
     # =================
     # State Getters

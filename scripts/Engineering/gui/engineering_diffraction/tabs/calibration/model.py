@@ -30,7 +30,8 @@ class CalibrationModel(object):
                                rb_num=None,
                                bank=None,
                                calfile=None,
-                               spectrum_numbers=None):
+                               spectrum_numbers=None,
+                               only_update_vanadium=False):
         """
         Create a new calibration from a vanadium run and ceria run
         :param vanadium_path: Path to vanadium data file.
@@ -44,7 +45,6 @@ class CalibrationModel(object):
         """
         # vanadium corrections workspaces not used at this stage, but ensure they exist and create if not
         vanadium_corrections.fetch_correction_workspaces(vanadium_path, instrument, rb_num=rb_num)
-        ceria_workspace = path_handling.load_workspace(ceria_path)
         full_calib_path = get_setting(output_settings.INTERFACES_SETTINGS_GROUP,
                                       output_settings.ENGINEERING_PREFIX, "full_calibration")
         try:
@@ -52,52 +52,72 @@ class CalibrationModel(object):
         except ValueError:
             logger.error("Error loading Full instrument calibration - this is set in the interface settings.")
             return
-        cal_params, ceria_raw, grp_ws = self.run_calibration(ceria_workspace,
-                                                             bank,
-                                                             calfile,
-                                                             spectrum_numbers,
-                                                             full_calib)
-        if plot_output:
-            plot_dicts = list()
-            if len(cal_params) == 1:
-                if calfile:
-                    bank_name = "Custom"
-                elif spectrum_numbers:
-                    bank_name = "Cropped"
+
+        if not only_update_vanadium:
+            ceria_workspace = path_handling.load_workspace(ceria_path)
+            cal_params, ceria_raw, grp_ws = self.run_calibration(ceria_workspace,
+                                                                 bank,
+                                                                 calfile,
+                                                                 spectrum_numbers,
+                                                                 full_calib)
+            if plot_output:
+                plot_dicts = list()
+                if len(cal_params) == 1:
+                    if calfile:
+                        bank_name = "Custom"
+                    elif spectrum_numbers:
+                        bank_name = "Cropped"
+                    else:
+                        bank_name = bank
+                    plot_dicts.append(EnggUtils.generate_tof_fit_dictionary(bank_name))
+                    EnggUtils.plot_tof_fit(plot_dicts, [bank_name])
                 else:
-                    bank_name = bank
-                plot_dicts.append(EnggUtils.generate_tof_fit_dictionary(bank_name))
-                EnggUtils.plot_tof_fit(plot_dicts, [bank_name])
-            else:
-                plot_dicts.append(EnggUtils.generate_tof_fit_dictionary("bank_1"))
-                plot_dicts.append(EnggUtils.generate_tof_fit_dictionary("bank_2"))
-                EnggUtils.plot_tof_fit(plot_dicts, ["bank_1", "bank_2"])
-        difa = [row['difa'] for row in cal_params]
-        difc = [row['difc'] for row in cal_params]
-        tzero = [row['tzero'] for row in cal_params]
+                    plot_dicts.append(EnggUtils.generate_tof_fit_dictionary("bank_1"))
+                    plot_dicts.append(EnggUtils.generate_tof_fit_dictionary("bank_2"))
+                    EnggUtils.plot_tof_fit(plot_dicts, ["bank_1", "bank_2"])
+            difa = [row['difa'] for row in cal_params]
+            difc = [row['difc'] for row in cal_params]
+            tzero = [row['tzero'] for row in cal_params]
 
-        bk2bk_params = self.extract_b2b_params(ceria_raw)
-        DeleteWorkspace(ceria_raw)
+            bk2bk_params = self.extract_b2b_params(ceria_raw)
+            DeleteWorkspace(ceria_raw)
 
-        params_table = []
+            params_table = []
 
-        for i in range(len(difc)):
-            params_table.append([i, difc[i], difa[i], tzero[i]])
-        self.update_calibration_params_table(params_table)
+            for i in range(len(difc)):
+                params_table.append([i, difc[i], difa[i], tzero[i]])
+            self.update_calibration_params_table(params_table)
 
-        calib_dir = path.join(output_settings.get_output_path(), "Calibration", "")
-        if calfile:
-            EnggUtils.save_grouping_workspace(grp_ws, calib_dir, ceria_path, vanadium_path, instrument, calfile=calfile)
-        elif spectrum_numbers:
-            EnggUtils.save_grouping_workspace(grp_ws, calib_dir, ceria_path, vanadium_path, instrument,
-                                              spec_nos=spectrum_numbers)
-        self.create_output_files(calib_dir, difa, difc, tzero, bk2bk_params, ceria_path, vanadium_path, instrument,
-                                 bank, spectrum_numbers, calfile)
-        if rb_num:
-            user_calib_dir = path.join(output_settings.get_output_path(), "User", rb_num,
-                                       "Calibration", "")
-            self.create_output_files(user_calib_dir, difa, difc, tzero, bk2bk_params, ceria_path, vanadium_path,
-                                     instrument, bank, spectrum_numbers, calfile)
+            calib_dir = path.join(output_settings.get_output_path(), "Calibration", "")
+            if calfile:
+                EnggUtils.save_grouping_workspace(grp_ws, calib_dir, ceria_path, vanadium_path, instrument, calfile=calfile)
+            elif spectrum_numbers:
+                EnggUtils.save_grouping_workspace(grp_ws, calib_dir, ceria_path, vanadium_path, instrument,
+                                                  spec_nos=spectrum_numbers)
+            self.create_output_files(calib_dir, difa, difc, tzero, bk2bk_params, ceria_path, vanadium_path, instrument,
+                                     bank, spectrum_numbers, calfile)
+            if rb_num:
+                user_calib_dir = path.join(output_settings.get_output_path(), "User", rb_num,
+                                           "Calibration", "")
+                self.create_output_files(user_calib_dir, difa, difc, tzero, bk2bk_params, ceria_path, vanadium_path,
+                                         instrument, bank, spectrum_numbers, calfile)
+
+        else:
+            if plot_output:
+                plot_dicts = list()
+                if bank is not None:
+                    if calfile:
+                        bank_name = "Custom"
+                    elif spectrum_numbers:
+                        bank_name = "Cropped"
+                    else:
+                        bank_name = bank
+                    plot_dicts.append(EnggUtils.generate_tof_fit_dictionary(bank_name))
+                    EnggUtils.plot_tof_fit(plot_dicts, [bank_name])
+                else:
+                    plot_dicts.append(EnggUtils.generate_tof_fit_dictionary("bank_1"))
+                    plot_dicts.append(EnggUtils.generate_tof_fit_dictionary("bank_2"))
+                    EnggUtils.plot_tof_fit(plot_dicts, ["bank_1", "bank_2"])
 
     @staticmethod
     def extract_b2b_params(workspace):

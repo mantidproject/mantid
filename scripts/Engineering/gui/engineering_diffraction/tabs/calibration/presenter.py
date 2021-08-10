@@ -32,6 +32,7 @@ class CalibrationPresenter(object):
         # Main Window State Variables
         self.instrument = "ENGINX"
         self.rb_num = None
+        self.last_calibration_successful = False
 
         # Cropping Options
         self.cropping_widget = CroppingPresenter(parent=self.view, view=self.view.get_cropping_widget())
@@ -44,16 +45,21 @@ class CalibrationPresenter(object):
         self.view.set_on_radio_new_toggled(self.set_create_new_enabled)
         self.view.set_on_radio_existing_toggled(self.set_load_existing_enabled)
         self.view.set_on_check_cropping_state_changed(self.show_cropping)
+        self.view.set_on_check_update_vanadium_state_changed(self.disable_sample_and_crop)
 
     def on_calibrate_clicked(self):
         plot_output = self.view.get_plot_output()
         if self.view.get_new_checked() and self._validate():
             vanadium_file = self.view.get_vanadium_filename()
             sample_file = self.view.get_sample_filename()
+            only_update_vanadium = self.view.get_update_vanadium_checked()
             if self.view.get_crop_checked():
-                self.start_cropped_calibration_worker(vanadium_file, sample_file, plot_output, self.rb_num)
+                self.start_cropped_calibration_worker(vanadium_file, sample_file,
+                                                      plot_output, self.rb_num,
+                                                      only_update_vanadium=only_update_vanadium)
             else:
-                self.start_calibration_worker(vanadium_file, sample_file, plot_output, self.rb_num)
+                self.start_calibration_worker(vanadium_file, sample_file,
+                                              plot_output, self.rb_num, only_update_vanadium=only_update_vanadium)
         elif self.view.get_load_checked():
             if not self.validate_path():
                 logger.notice("Invalid path")
@@ -68,7 +74,7 @@ class CalibrationPresenter(object):
                         "last_calibration_path", filename)
 
     def start_calibration_worker(self, vanadium_path, sample_path, plot_output, rb_num, bank=None, calfile=None,
-                                 spectrum_numbers=None):
+                                 spectrum_numbers=None, only_update_vanadium=False):
         """
         Calibrate the data in a separate thread so as to not freeze the GUI.
         :param vanadium_path: Path to vanadium data file.
@@ -86,7 +92,8 @@ class CalibrationPresenter(object):
                                 "rb_num": rb_num,
                                 "bank": bank,
                                 "calfile": calfile,
-                                "spectrum_numbers": spectrum_numbers
+                                "spectrum_numbers": spectrum_numbers,
+                                "only_update_vanadium": only_update_vanadium
                                 },
                                 error_cb=self._on_error,
                                 success_cb=self._on_success)
@@ -95,16 +102,19 @@ class CalibrationPresenter(object):
         self.set_calibrate_controls_enabled(False)
         self.worker.start()
 
-    def start_cropped_calibration_worker(self, vanadium_path, sample_path, plot_output, rb_num):
+    def start_cropped_calibration_worker(self, vanadium_path, sample_path, plot_output, rb_num, only_update_vanadium):
         if self.cropping_widget.get_custom_calfile_enabled():
             calfile = self.cropping_widget.get_custom_calfile()
-            self.start_calibration_worker(vanadium_path, sample_path, plot_output, rb_num, calfile=calfile)
+            self.start_calibration_worker(vanadium_path, sample_path, plot_output, rb_num,
+                                          calfile=calfile, only_update_vanadium=only_update_vanadium)
         elif self.cropping_widget.get_custom_spectra_enabled():
             spec_nums = self.cropping_widget.get_custom_spectra()
-            self.start_calibration_worker(vanadium_path, sample_path, plot_output, rb_num, spectrum_numbers=spec_nums)
+            self.start_calibration_worker(vanadium_path, sample_path, plot_output, rb_num,
+                                          spectrum_numbers=spec_nums, only_update_vanadium=only_update_vanadium)
         else:
             bank = str(self.cropping_widget.get_bank())
-            self.start_calibration_worker(vanadium_path, sample_path, plot_output, rb_num, bank=bank)
+            self.start_calibration_worker(vanadium_path, sample_path, plot_output, rb_num,
+                                          bank=bank, only_update_vanadium=only_update_vanadium)
 
     def set_current_calibration(self, success_info=None):
         if success_info:
@@ -142,8 +152,11 @@ class CalibrationPresenter(object):
         if self.view.is_searching():
             create_error_message(self.view, "Mantid is searching for data files. Please wait.")
             return False
-        if not self.validate_run_numbers():
+        if not self.validate_run_numbers() and not self.view.get_update_vanadium_checked():
             create_error_message(self.view, "Check run numbers/path is valid.")
+            return False
+        if self.view.get_update_vanadium_checked() and not self.view.get_vanadium_valid():
+            create_error_message(self.view, "Check vanadium run number/path is valid.")
             return False
         if self.view.get_crop_checked():
             if self.cropping_widget.get_custom_calfile_enabled() and not self.cropping_widget.is_calfile_valid():
@@ -173,10 +186,19 @@ class CalibrationPresenter(object):
     def _on_error(self, error_info):
         logger.error(str(error_info))
         self.emit_enable_button_signal()
+        self.try_enable_update_vanadium(False)
 
     def _on_success(self, success_info):
         self.set_current_calibration(success_info)
         self.emit_enable_button_signal()
+        self.try_enable_update_vanadium(True)
+
+    def try_enable_update_vanadium(self, cal_success):
+        self.last_calibration_successful = cal_success
+        if cal_success and self.view.get_new_checked():
+            self.view.set_check_update_vanadium_enabled(True)
+        else:
+            self.view.set_check_update_vanadium_enabled(False)
 
     def set_create_new_enabled(self, enabled):
         self.view.set_vanadium_enabled(enabled)
@@ -184,8 +206,16 @@ class CalibrationPresenter(object):
         if enabled:
             self.set_calibrate_button_text("Calibrate")
             self.view.set_check_plot_output_enabled(True)
-            self.view.set_check_cropping_enabled(True)
+            self.disable_sample_and_crop(self.view.get_update_vanadium_checked())
+            self.view.set_check_update_vanadium_enabled(self.last_calibration_successful)
             self.find_files()
+            # if self.view.get_update_vanadium_checked():
+            #     self.set_calibrate_button_text("Update Vanadium")
+            # else:
+            #     self.set_calibrate_button_text("Calibrate")
+
+        if enabled and self.view.get_update_vanadium_checked():
+            self.disable_sample_and_crop(True)
 
     def set_load_existing_enabled(self, enabled):
         self.view.set_path_enabled(enabled)
@@ -194,6 +224,7 @@ class CalibrationPresenter(object):
             self.view.set_check_plot_output_enabled(False)
             self.view.set_check_cropping_enabled(False)
             self.view.set_check_cropping_checked(False)
+            self.view.set_check_update_vanadium_enabled(False)
 
     def set_calibrate_button_text(self, text):
         self.view.set_calibrate_button_text(text)
@@ -204,6 +235,16 @@ class CalibrationPresenter(object):
 
     def show_cropping(self, show):
         self.view.set_cropping_widget_visibility(show)
+
+    def disable_sample_and_crop(self, disable):
+        show = not disable
+        self.view.set_sample_enabled(show)
+        self.view.set_check_cropping_enabled(show)
+        if disable:
+            self.view.set_check_cropping_checked(show)
+            self.set_calibrate_button_text("Update Vanadium")
+        else:
+            self.set_calibrate_button_text("Calibrate")
 
     # -----------------------
     # Observers / Observables
