@@ -31,6 +31,7 @@ public:
   const std::string category() const override { return "CorrectionFunctions"; };
 
   /// Algorithm's summary
+  /// TODO: the summary needs to be updated as we add more features
   const std::string summary() const override {
     return "Calculate Multiple Scattering Correction using numerical integration with the assumption of sample only, "
            "elastic scattering only, and isotropic scattering within the sample.";
@@ -38,7 +39,7 @@ public:
 
   /// Algorithm's see also
   const std::vector<std::string> seeAlso() const override {
-    return {"AbsorptionCorrection", "PaalmanPingsAbsorptionCorrection", "PaalmanPingsMonteCarloAbsorption"};
+    return {"CalculateCarpenterSampleCorrection", "CarpenterSampleCorrection", "MayersSampleCorrection"};
   };
 
 protected:
@@ -54,6 +55,7 @@ private:
   std::map<std::string, std::string> validateInputs() override;
 
   void parseInputs();
+  void setupOutput();
   void calculateL2Ds(const MultipleScatteringCorrectionDistGraber &distGraber, const IDetector &detector,
                      std::vector<double> &sample_L2Ds) const;
   void pairWiseSum(double &A1, double &A2, const double linearCoefAbs,
@@ -64,8 +66,6 @@ private:
   double m_sampleLinearCoefTotScatt; ///< The total scattering cross-section in
                                      ///< 1/m for the sample
   int64_t m_xStep;                   ///< The step in bin number between adjacent points for linear interpolation
-
-  static constexpr double RAD2DEG = 180.0 / M_PI; // save some flops??
 };
 
 } // namespace Algorithms

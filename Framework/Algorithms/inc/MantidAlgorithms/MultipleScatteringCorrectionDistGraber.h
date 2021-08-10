@@ -28,7 +28,7 @@ class MANTID_ALGORITHMS_DLL MultipleScatteringCorrectionDistGraber {
 public:
   MultipleScatteringCorrectionDistGraber(const Geometry::IObject &sampleShape, const double elementSize);
   ~MultipleScatteringCorrectionDistGraber() = default;
-  // Pre-calculate (cache) all the distances from source to each indivudual voxel
+  // Pre-calculate (cache) all the distances from source to each individual voxel
   // inside the sample.
   // This function is borrowed from AnyShapeAbsorption.initialiseCachedDistances()
   void cacheLS1(const Mantid::Kernel::V3D &beamDirection);
@@ -41,7 +41,7 @@ public:
   double m_totalVolume;                        ///< The total volume of the sample
 
 private:
-  const Geometry::IObject *m_sampleShape; ///< Local cache of sample object.
+  const Geometry::IObject *m_sampleShape; ///< The shape pointer is handeled by sample object, not distGraber
   const double m_elementSize;             ///< Size of the sample in m.
 };
 

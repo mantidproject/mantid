@@ -40,6 +40,8 @@ namespace {
 // the maximum number of elements to combine at once in the pairwise summation
 constexpr size_t MAX_INTEGRATION_LENGTH{1000};
 
+static constexpr double RAD2DEG = 180.0 / M_PI; // save some flops??
+
 inline size_t findMiddle(const size_t start, const size_t stop) {
   auto half = static_cast<size_t>(floor(.5 * (static_cast<double>(stop - start))));
   return start + half;
@@ -48,6 +50,7 @@ inline size_t findMiddle(const size_t start, const size_t stop) {
 inline size_t calcLinearIdxFromUpperTriangular(const size_t N, const size_t row_idx, const size_t col_idx) {
   // calculate the linear index from the upper triangular matrix from a (N x N) matrix
   // row_idx < col_idx due to upper triangular matrix
+  assert(row_idx < col_idx); // only relevant during Debug build
   return N * (N - 1) / 2 - (N - row_idx) * (N - row_idx - 1) / 2 + col_idx - row_idx - 1;
 }
 } // namespace
@@ -118,8 +121,11 @@ void MultipleScatteringCorrection::exec() {
   // parse input properties and assign corresponding values to the member
   // variables
   parseInputs();
+  setupOutput();
 
   // prepare the cached distances
+  // NOTE: cannot use IObject_sprt for sample shape as the getShape() method dereferenced
+  //       the shared pointer upon returning.
   MultipleScatteringCorrectionDistGraber distGraber(m_inputWS->sample().getShape(), m_elementSize);
   distGraber.cacheLS1(m_beamDirection);
   // NOTE: the following data is now cached in the distGraber object
@@ -127,41 +133,47 @@ void MultipleScatteringCorrection::exec() {
   // std::vector<double> distGraber.m_elementVolumes : Cached element volumes
   // std::vector<Kernel::V3D> distGraber.m_elementPositions : Cached element positions
   // size_t distGraber.m_numVolumeElements : The number of volume elements
-  size_t numVolumeElements = distGraber.m_numVolumeElements;
+  const size_t numVolumeElements = distGraber.m_numVolumeElements;
 
   // L2D needs to be calculated w.r.t the detector
   // L12 is independent from the detector, therefore can be cached outside
   // - L12 is a upper off-diagonal matrix
   // NOTE: if the sample size/volume is too large, we might need to use openMP
   //       to parallelize the calculation
-  size_t len_l12 = numVolumeElements * (numVolumeElements - 1) / 2;
+  const size_t len_l12 = numVolumeElements * (numVolumeElements - 1) / 2;
   std::vector<double> sample_L12s(len_l12, 0.0);
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *m_outputWS))
   for (size_t i = 0; i < numVolumeElements; ++i) {
+    PARALLEL_START_INTERUPT_REGION
     for (size_t j = i + 1; j < numVolumeElements; ++j) {
       const V3D dist = distGraber.m_elementPositions[i] - distGraber.m_elementPositions[j];
       size_t idx = calcLinearIdxFromUpperTriangular(numVolumeElements, i, j);
       sample_L12s[idx] = dist.norm();
     }
+    PARALLEL_END_INTERUPT_REGION
   }
+  PARALLEL_CHECK_INTERUPT_REGION
 
   // debug L12 matrix
   // NOTE: this will come in handy when we start considering container and sample interaction,
   //       do not remove it.
-  // std::ostringstream msg;
-  // msg << "\n";
-  // for (size_t i = 0; i < numVolumeElements; ++i) {
-  //   for (size_t j = 0; j < numVolumeElements; ++j) {
-  //     if (i < j) {
-  //       size_t idx = numVolumeElements * (numVolumeElements - 1) / 2 -
-  //                    (numVolumeElements - i) * (numVolumeElements - i - 1) / 2 + j - i - 1;
-  //       msg << sample_L12s[idx] << " ";
-  //     } else {
-  //       msg << "x ";
-  //     }
-  //   }
-  //   msg << '\n';
-  // }
-  // g_log.notice(msg.str());
+#ifndef NDEBUG
+  std::ostringstream msg;
+  msg << "\n";
+  for (size_t i = 0; i < numVolumeElements; ++i) {
+    for (size_t j = 0; j < numVolumeElements; ++j) {
+      if (i < j) {
+        size_t idx = numVolumeElements * (numVolumeElements - 1) / 2 -
+                     (numVolumeElements - i) * (numVolumeElements - i - 1) / 2 + j - i - 1;
+        msg << sample_L12s[idx] << " ";
+      } else {
+        msg << "x ";
+      }
+    }
+    msg << '\n';
+  }
+  g_log.notice(msg.str());
+#endif
 
   const auto &spectrumInfo = m_inputWS->spectrumInfo();
   const auto numHists = static_cast<int64_t>(m_inputWS->getNumberHistograms());
@@ -169,36 +181,37 @@ void MultipleScatteringCorrection::exec() {
   Progress prog(this, 0.0, 1.0, numHists);
   // -- loop over the spectra/detectors
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *m_outputWS))
-  for (int64_t i = 0; i < numHists; ++i) {
+  for (int64_t workspaceIndex = 0; workspaceIndex < numHists; ++workspaceIndex) {
     PARALLEL_START_INTERUPT_REGION
 
     // copy bins from input workspace to output workspace
-    m_outputWS->setSharedX(i, m_inputWS->sharedX(i));
+    // m_outputWS->setSharedX(workspaceIndex, m_inputWS->sharedX(workspaceIndex));
 
     // locate the spectrum and its detector
-    if (!spectrumInfo.hasDetectors(i)) {
-      g_log.information() << "Spectrum " << i << " does not have a detector defined for it\n";
+    if (!spectrumInfo.hasDetectors(workspaceIndex)) {
+      g_log.information() << "Spectrum " << workspaceIndex << " does not have a detector defined for it\n";
       continue;
     }
-    const auto &det = spectrumInfo.detector(i);
+    const auto &det = spectrumInfo.detector(workspaceIndex);
 
     // compute L2D
     std::vector<double> sample_L2Ds(numVolumeElements, 0.0);
     calculateL2Ds(distGraber, det, sample_L2Ds);
 
-    const auto wavelengths = m_inputWS->points(i);
+    const auto wavelengths = m_inputWS->points(workspaceIndex);
     // these need to have the minus sign applied still
     const auto sampleLinearCoefAbs = m_material.linearAbsorpCoef(wavelengths.cbegin(), wavelengths.cend());
     // TODO:
     // - implement the multiple scattering correction for heterogenous media (container)
 
-    auto &output = m_outputWS->mutableY(i);
+    auto &output = m_outputWS->mutableY(workspaceIndex);
     // -- loop over the wavelength points every m_xStep
-    for (int64_t j = 0; j < specSize; j += m_xStep) {
+    for (int64_t wvBinsIndex = 0; wvBinsIndex < specSize; wvBinsIndex += m_xStep) {
       double A1 = 0.0;
       double A2 = 0.0;
 
-      pairWiseSum(A1, A2, -sampleLinearCoefAbs[j], distGraber, sample_L2Ds, sample_L12s, 0, numVolumeElements);
+      pairWiseSum(A1, A2, -sampleLinearCoefAbs[wvBinsIndex], distGraber, sample_L2Ds, sample_L12s, 0,
+                  numVolumeElements);
       // compute the correction factor
       const double rho = m_material.numberDensityEffective();
       const double sigma_s = m_material.totalScatterXSection();
@@ -207,29 +220,29 @@ void MultipleScatteringCorrection::exec() {
       // so rho * sigma_s = 1e-8 A^(-1) = 100 meters
       // A2/A1 gives length in meters
       const double unit_scaling = 1e2;
-      output[j] = unit_scaling * rho * sigma_s * A2 / (4 * M_PI * A1);
+      output[wvBinsIndex] = unit_scaling * rho * sigma_s * A2 / (4 * M_PI * A1);
 
       // debug output
       std::ostringstream msg_debug;
-      msg_debug << "Det_" << i << "@spectrum_" << j << ":\n"
+      msg_debug << "Det_" << workspaceIndex << "@spectrum_" << wvBinsIndex << ":\n"
                 << "\trho = " << rho << ", sigma_s = " << sigma_s << "\n"
                 << "\tA1 = " << A1 << "\n"
                 << "\tA2 = " << A2 << "\n"
-                << "\tms_factor = " << output[j] << "\n";
+                << "\tms_factor = " << output[wvBinsIndex] << "\n";
       g_log.notice(msg_debug.str());
 
       // Make certain that last point is calculated
-      if (m_xStep > 1 && j + m_xStep >= specSize && j + 1 != specSize) {
-        j = specSize - m_xStep - 1;
+      if (m_xStep > 1 && wvBinsIndex + m_xStep >= specSize && wvBinsIndex + 1 != specSize) {
+        wvBinsIndex = specSize - m_xStep - 1;
       }
     }
 
     // Interpolate linearly between points separated by m_xStep,
     // last point required
     if (m_xStep > 1) {
-      auto histNew = m_outputWS->histogram(i);
+      auto histNew = m_outputWS->histogram(workspaceIndex);
       interpolateLinearInplace(histNew, m_xStep);
-      m_outputWS->setHistogram(i, histNew);
+      m_outputWS->setHistogram(workspaceIndex, histNew);
     }
 
     prog.report();
@@ -298,7 +311,13 @@ void MultipleScatteringCorrection::parseInputs() {
   m_sampleLinearCoefTotScatt = -m_material.totalScatterXSection() * m_material.numberDensityEffective() * 100;
   // -- container
   // TODO:
+}
 
+/**
+ * @brief use input workspace as a template to initalize output workspace
+ *
+ */
+void MultipleScatteringCorrection::setupOutput() {
   // Create output workspace
   // NOTE: this output workspace is just a Workspace2D of factor that can be applied to the
   // corresponding EventWorkspace.
