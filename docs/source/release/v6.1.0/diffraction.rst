@@ -28,6 +28,8 @@ New features
 - A new caching feature is added to :ref:`SNSPowderReduction <algm-SNSPowderReduction>` to speed up calculation using same sample and container.
 - New property `CleanCache` in algorithm :ref:`SNSPowderReduction <algm-SNSPowderReduction>`.
 - Including three options for "cache directory" and one for "clean cache" in the Advanced Setup tab of the SNS Powder Reduction interface.
+- Only Update Vanadium checkbox has been added, to allow the vanadium dataset to be updated, without rerunning a sample
+  calibration. This checkbox is only enabled after a successful calibration.
 
 Improvements
 ############

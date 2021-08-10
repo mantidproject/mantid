@@ -202,20 +202,14 @@ class CalibrationPresenter(object):
 
     def set_create_new_enabled(self, enabled):
         self.view.set_vanadium_enabled(enabled)
-        self.view.set_sample_enabled(enabled)
         if enabled:
             self.set_calibrate_button_text("Calibrate")
             self.view.set_check_plot_output_enabled(True)
             self.disable_sample_and_crop(self.view.get_update_vanadium_checked())
             self.view.set_check_update_vanadium_enabled(self.last_calibration_successful)
             self.find_files()
-            # if self.view.get_update_vanadium_checked():
-            #     self.set_calibrate_button_text("Update Vanadium")
-            # else:
-            #     self.set_calibrate_button_text("Calibrate")
-
-        if enabled and self.view.get_update_vanadium_checked():
-            self.disable_sample_and_crop(True)
+        else:
+            self.view.set_sample_enabled(enabled)
 
     def set_load_existing_enabled(self, enabled):
         self.view.set_path_enabled(enabled)
