@@ -176,8 +176,8 @@ class _NOMADMedianDetectorTest:
         elif level == InstrumentComponentLevel.Tube:
             collimation_state_array = collimation_state_array.repeat(instrument_config.num_tubes_per_8pack)
         elif level == InstrumentComponentLevel.Pixel:
-            collimation_state_array = collimation_state_array.repeat(instrument_config.num_tubes_per_8pack *
-                                                                     instrument_config.num_pixels_per_tube)
+            num_repeats = instrument_config.num_tubes_per_8pack * instrument_config.num_pixels_per_tube
+            collimation_state_array = collimation_state_array.repeat(num_repeats)
 
         return collimation_state_array
 
