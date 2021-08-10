@@ -54,6 +54,9 @@ New features
 - Automatically subtract background from runs on loading in EngDiff UI.
 - The most recently created or loaded Calibration is now selected by default in the load path when the interface is opened.
 - The last used RB number is now saved for the next session
+- The generation of the files required for Vanadium normalization is now done on the Focus tab of the user interface. This means the Vanadium data can be updated without
+having to rerun the Ceria calibration. As part of this change the setting "Force Vanadium Recalculation" has been removed and the Vanadium run number input has been
+moved from the Calibration tab to the Focus tab. The Vanadium run number is also no longer written to the prm generated on the Calibration tab
 
 
 Improvements
