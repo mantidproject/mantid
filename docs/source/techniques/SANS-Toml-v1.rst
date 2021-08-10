@@ -166,12 +166,29 @@ DET/CORR [FRONT][REAR] [X][Y][Z][ROT] a
 
     [detector]
       [detector.calibration.position]
+        # Note fields can be added or omitted as required
+        # This is the complete list of adjustments available
         front_x = a
         front_y = b
         front_z = c
-        front_rot = d
-        rear_x = e
-        rear_z = f
+
+        front_x_tilt = d
+        front_y_tilt = e
+        front_z_tilt = f
+
+        front_rot = g
+        front_side = h
+
+        rear_x = a
+        rear_y = b
+        rear_z = c
+
+        rear_x_tilt = d
+        rear_y_tilt = e
+        rear_z_tilt = f
+
+        rear_rot = g
+        rear_side = h
 
 **Existing Example**
 
