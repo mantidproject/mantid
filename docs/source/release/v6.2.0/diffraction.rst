@@ -59,6 +59,7 @@ Improvements
 - The cropping/region of interest selection for Calibration/Focusing is now chosen only on the Calibration tab, to avoid confusion and duplication of input.
 - The region of interest for Calibration/Focusing can now be selected with a user-supplied custom calibration file.
 - The Focused Run Files input box defaults to the last runs focused on the Focus tab, even if multiple runs were focussed
+- The full calibration setting now has a default value consisting of the path to the ENGINX_full_instrument_calibration_193749.nxs file
 
 Bugfixes
 ########
