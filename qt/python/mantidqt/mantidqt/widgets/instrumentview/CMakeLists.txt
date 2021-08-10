@@ -1,6 +1,5 @@
-if(ENABLE_MANTIDQT)
-  # Defines a Python wrapper module for instrument view access This wraps the
-  # low- level classes.
+# Defines a Python wrapper module for instrument view access This wraps the
+# low- level classes.
 
   set(INSTRUMENTVIEW_INC_DIR ../../widgets/instrumentview/inc)
   set(_header_depends ${INSTRUMENTVIEW_INC_DIR}/InstrumentWidget.h)
@@ -25,4 +24,3 @@ if(ENABLE_MANTIDQT)
     OSX_INSTALL_RPATH "@loader_path/../../.."
     FOLDER Qt5
   )
-endif()

@@ -885,8 +885,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 endif()
 
 # Target
-if(ENABLE_MANTIDQT)
-  # Additional components for this module
+# Additional components for this module
   find_package(
     Qt5
     COMPONENTS
@@ -914,7 +913,6 @@ if(ENABLE_MANTIDQT)
     endif()
   endif()
 
-endif()
 
 # If not sip header is defined we need to generate one with sip-module
 if (SIP_INCLUDE_DIR AND EXISTS ${SIP_INCLUDE_DIR}/sip.h)

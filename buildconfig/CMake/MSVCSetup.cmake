@@ -196,7 +196,7 @@ configure_file(
 # ##############################################################################
 
 add_custom_target(SystemTests)
-if (NOT USE_SYSTEM_FRAMEWORK)
+if (MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
 add_dependencies(SystemTests Framework)
 endif()
 add_dependencies(SystemTests StandardTestData SystemTestData)

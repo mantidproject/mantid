@@ -6,7 +6,7 @@ set(TEST_PY_FILES
 
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})
 
-if (ENABLE_MANTIDQT)
+if (MANTID_QT_LIB STREQUAL "BUILD")
     set(PYUNITTEST_QT_API pyqt5) # force to use qt5
     pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} PythonTOFTOFReductionQt5
                         ${TEST_PY_FILES})

@@ -32,8 +32,22 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 option(ENABLE_MANTIDQT "Enable Qt5-based components" ON)
 option(ENABLE_WORKBENCH "Enable Qt5-based gui" ON)
 
-option(USE_SYSTEM_FRAMEWORK "Use a system version of the mantid framework, e.g from conda" OFF)
-option(USE_SYSTEM_MANTIDQT "Use a system version of mantidqt, e.g from conda" OFF)
+
+set(MANTID_FRAMEWORK_LIB "BUILD" CACHE STRING "Mantid framework build options, valid options are (BUILD, SYSTEM).
+If system is specificed a valid mantid framework installation must be present on the system, e.g from conda")
+set_property(CACHE MANTID_FRAMEWORK_LIB PROPERTY STRINGS "BUILD" "SYSTEM")
+
+# set this for compatability, as previously if enable_workbench was off we didn't build the qt element
+# we can override this behavior on the command line.
+if (NOT ENABLE_WORKBENCH)
+set(_mantidqt_option "OFF")
+else()
+set(_mantidqt_option "BUILD")
+endif()
+
+set(MANTID_QT_LIB ${_mantidqt_option} CACHE STRING "Mantid qt build options, valid options are (OFF, BUILD, SYSTEM).
+If system is specificed a valid mantid qt installation must be present on the system, e.g. from conda")
+set_property(CACHE MANTID_QT_LIB PROPERTY STRINGS "OFF" "BUILD" "SYSTEM")
 
 
 set(CPACK_INSTALL_CMAKE_PROJECTS "${CMAKE_BINARY_DIR}" "Mantid" "ALL" "/")
@@ -77,7 +91,7 @@ set(CPACK_PACKAGE_NAME "mantid${CPACK_PACKAGE_SUFFIX}")
 include(Bootstrap)
 
 # Configure Eigen early
-if (NOT (USE_SYSTEM_FRAMEWORK AND USE_SYSTEM_MANTIDQT))
+if (MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
 include(Eigen)
 endif()
 include(Span)
@@ -108,7 +122,7 @@ if(COVERAGE)
   coverage_turn_on()
 endif()
 
-if(ENABLE_WORKBENCH OR ENABLE_MANTIDQT)
+if(ENABLE_WORKBENCH OR MANTID_QT_LIB STREQUAL "BUILD")
   find_package(Qt5
                COMPONENTS Core
                           Gui
@@ -119,12 +133,10 @@ if(ENABLE_WORKBENCH OR ENABLE_MANTIDQT)
   if(Qt5_FOUND)
     message(STATUS "Found Qt ${Qt5_VERSION}: ${Qt5_DIR}")
   endif()
-  if (ENABLE_MANTIDQT AND NOT USE_SYSTEM_MANTIDQT)
   find_package(QScintillaQt5 REQUIRED)
   find_package(PyQt5 REQUIRED)
   find_package(SIP REQUIRED)
   separate_arguments(PYQT5_SIP_FLAGS)
-  endif()
 endif()
 
 # Now add in all the components
@@ -140,8 +152,8 @@ option(CXXTEST_ADD_PERFORMANCE
        "Switch to add performance tests to the list of tests run by ctest?")
 
 include(TargetFunctions)
-if(USE_SYSTEM_FRAMEWORK)
-if (NOT USE_SYSTEM_MANTIDQT)
+if (MANTID_FRAMEWORK_LIB STREQUAL "SYSTEM")
+if (MANTID_QT_LIB STREQUAL "BUILD")
 find_package(MantidFramework REQUIRED)
 endif()
 else()
@@ -163,11 +175,11 @@ endif()
 
 add_custom_target(AllTests)
 
-if(NOT USE_SYSTEM_FRAMEWORK)
+if (MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
 add_dependencies(AllTests FrameworkTests)
 endif()
 
-if(ENABLE_WORKBENCH OR ENABLE_MANTIDQT)
+if(ENABLE_WORKBENCH OR MANTID_QT_LIB STREQUAL "BUILD")
   add_custom_target(GUITests)
   add_dependencies(check GUITests)
   # Collect all tests together

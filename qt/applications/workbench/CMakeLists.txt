@@ -126,8 +126,8 @@ endif()
 
 # Dependency chain
 add_dependencies(workbench workbench_resources)
-# if not system mantidqt we can add a building dependency for workbench
-if (NOT USE_SYSTEM_MANTIDQT)
+# if we are building mantidqt we can add a dependency for workbench
+if (MANTID_QT_LIB STREQUAL "BUILD")
 add_dependencies(workbench mantidqt)
 endif()
 

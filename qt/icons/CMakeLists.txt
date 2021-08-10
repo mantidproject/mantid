@@ -12,8 +12,7 @@ set(
   inc/MantidQtIcons/Icon.h
 )
 
-if(ENABLE_MANTIDQT)
-  mtd_add_qt_library (TARGET_NAME MantidQtIcons
+mtd_add_qt_library (TARGET_NAME MantidQtIcons
                       QT_VERSION 5
                       SRC ${SRC_FILES}
                       NOMOC ${INC_FILES}
@@ -35,7 +34,6 @@ if(ENABLE_MANTIDQT)
                         "\$ORIGIN/../${WORKBENCH_LIB_DIR}")
 # We require just the headers for system.h
 target_include_directories(MantidQtIconsQt5 PUBLIC $<TARGET_PROPERTY:Mantid::Kernel,INTERFACE_INCLUDE_DIRECTORIES>)
-endif()
 
 set(QT5_TEST_FILES test/IconTest.h)
 
