@@ -18,9 +18,8 @@ from Muon.GUI.ElementalAnalysis.LineSelector.LineSelectorPresenter import LineSe
 from Muon.GUI.ElementalAnalysis.LineSelector.LineSelectorView import LineSelectorView
 from Muon.GUI.ElementalAnalysis.LoadWidget.load_model import LoadModel, CoLoadModel
 from Muon.GUI.ElementalAnalysis.LoadWidget.load_utils import spectrum_index
-from Muon.GUI.ElementalAnalysis.Peaks.peaks_view import PeaksView
-from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_view import PeriodicTableView
 from Muon.GUI.ElementalAnalysis.periodic_table_widget_presenter import PeriodicTableWidgetPresenter
+from Muon.GUI.ElementalAnalysis.periodic_table_widget_view import PeriodicTableWidgetView
 from Muon.GUI.Common import message_box
 
 
@@ -53,9 +52,8 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         self._plotting = None
 
         # setup periodic table and peaks
-        self.ptable_view = PeriodicTableView()
-        self.peaks_view = PeaksView()
-        self.ptable = PeriodicTableWidgetPresenter(self)
+        self.ptable_view = PeriodicTableWidgetView(self)
+        self.ptable = PeriodicTableWidgetPresenter(self.ptable_view)
 
         # set menu
         self.menu = self.menuBar()
@@ -76,16 +74,13 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         self.lines.delayed.on_checkbox_unchecked(self.line_delayed_changed)
 
         # set up
-        self.widget_list = QtWidgets.QVBoxLayout()
-        self.widget_list.addWidget(self.peaks_view)
-        self.widget_list.addWidget(self.lines.view)
-        self.widget_list.addWidget(self.detectors.view)
-        self.widget_list.addWidget(self.load_widget.view)
+        self.ptable_view.add_widget_to_view(self.lines.view)
+        self.ptable_view.add_widget_to_view(self.detectors.view)
+        self.ptable_view.add_widget_to_view(self.load_widget.view)
 
         # layout
         self.box = QtWidgets.QHBoxLayout()
         self.box.addWidget(self.ptable_view)
-        self.box.addLayout(self.widget_list)
 
         self.setCentralWidget(QtWidgets.QWidget(self))
         self.centralWidget().setLayout(self.box)

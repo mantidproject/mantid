@@ -5,7 +5,8 @@ from mantidqt.utils.qt.testing import start_qapplication
 from Muon.GUI.ElementalAnalysis.periodic_table_widget_presenter import gen_name
 from MultiPlotting.multi_plotting_widget import MultiPlotWindow
 from MultiPlotting.multi_plotting_widget import MultiPlotWidget
-from Muon.GUI.ElementalAnalysis.elemental_analysis import ElementalAnalysisGui
+from Muon.GUI.ElementalAnalysis.periodic_table_widget_view import PeriodicTableWidgetView
+from Muon.GUI.ElementalAnalysis.periodic_table_widget_presenter import PeriodicTableWidgetPresenter
 from MultiPlotting.label import Label
 from testhelpers import assertRaisesNothing
 
@@ -20,8 +21,8 @@ class PeriodicTableWidgetPresenterTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.view = ElementalAnalysisGui()
-        cls.periodic_table = cls.view.ptable
+        cls.view = PeriodicTableWidgetView()
+        cls.periodic_table = PeriodicTableWidgetPresenter(cls.view)
 
     def setUp(self):
         self.periodic_table.plot_window = None
@@ -154,7 +155,7 @@ class PeriodicTableWidgetPresenterTest(unittest.TestCase):
 
     @mock.patch('Muon.GUI.Common.message_box.warning')
     @mock.patch('Muon.GUI.ElementalAnalysis.periodic_table_widget_presenter.QFileDialog.getOpenFileName')
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui.warning_popup')
+    @mock.patch('Muon.GUI.ElementalAnalysis.periodic_table_widget_view.PeriodicTableWidgetView.warning_popup')
     @mock.patch('Muon.GUI.ElementalAnalysis.periodic_table_widget_presenter.PeriodicTableWidgetPresenter.'
                 '_generate_element_widgets')
     def test_that_select_data_file_raises_warning_with_correct_text(self, mock_generate_element_widgets, mock_warning,
@@ -168,7 +169,7 @@ class PeriodicTableWidgetPresenterTest(unittest.TestCase):
         mock_warning.assert_called_with(warning_text)
         mock_message_box.assert_called_once()
 
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui.warning_popup')
+    @mock.patch('Muon.GUI.ElementalAnalysis.periodic_table_widget_view.PeriodicTableWidgetView.warning_popup')
     @mock.patch('Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_presenter.PeriodicTablePresenter.'
                 'set_peak_datafile')
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.QtWidgets.QFileDialog.getOpenFileName')
