@@ -28,10 +28,12 @@ class DuelPlotMaxentPanePresenter(BasePanePresenter):
         self.reconstructed_data_observer = GenericObserverWithArgPassing(
             self.handle_reconstructed_data_updated)
         self._time_data = "groups"
+        self._model.set_selected_groups("bkwd:bottom")
 
     def change_time_plot(self, if_groups):
         self._time_data ="groups" if if_groups else "all"
-        self.handle_time_data_updated()
+        selection_string = "bkwd:bottom"
+        self.handle_time_data_updated(selection_string)
 
     def handle_data_type_changed(self):
         """
