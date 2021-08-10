@@ -29,6 +29,7 @@ class SANSILLReduction(PythonAlgorithm):
     process = None # the process type
     n_reports = None # how many progress report checkpoints
     progress = None # the global progress reporter
+    processes = ['DarkCurrent', 'EmptyBeam', 'Transmission', 'EmptyContainer', 'Water', 'Solvent', 'Sample']
 
     def category(self):
         return 'ILL\\SANS'
@@ -63,8 +64,6 @@ class SANSILLReduction(PythonAlgorithm):
 
         #================================MAIN PARAMETERS================================#
 
-        options = ['DarkCurrent', 'EmptyBeam', 'Transmission', 'EmptyContainer', 'Water', 'Solvent', 'Sample']
-
         self.declareProperty(MultipleFileProperty(name='Runs',
                                                   action=FileAction.OptionalLoad,
                                                   extensions=['nxs'],
@@ -73,7 +72,7 @@ class SANSILLReduction(PythonAlgorithm):
 
         self.declareProperty(name='ProcessAs',
                              defaultValue='Sample',
-                             validator=StringListValidator(options),
+                             validator=StringListValidator(self.processes),
                              doc='Choose the process type.')
 
         self.declareProperty(WorkspaceProperty(name='OutputWorkspace',
@@ -234,13 +233,11 @@ class SANSILLReduction(PythonAlgorithm):
 
     def setup(self, ws):
         '''Performs a full setup, which can be done only after having loaded the sample data'''
-        processes = ['DarkCurrent', 'EmptyBeam', 'Transmission', 'EmptyContainer', 'Water', 'Solvent', 'Sample']
         self.process = self.getPropertyValue('ProcessAs')
         self.instrument = ws.getInstrument().getName()
         self.log().notice(f'Set the instrument name to {self.instrument}')
         unit = ws.getAxis(0).getUnit().unitID()
         self.n_frames = ws.blocksize()
-        self.log().notice(f'Set the number of frames to {self.n_frames}')
         if self.n_frames > 1:
             if unit == 'Wavelength':
                 self.mode = AcqMode.TOF
@@ -252,9 +249,8 @@ class SANSILLReduction(PythonAlgorithm):
             self.mode = AcqMode.MONO
         self.log().notice(f'Set the acquisition mode to {self.mode}')
         if self.mode == AcqMode.KINETIC:
-            if self.process != 'Sample':
-                raise RuntimeError('Only the sample can be a kinetic measurement, the auxiliary calibration measurements cannot.')
-        self.progress = Progress(self, start=0.0, end=1.0, nreports=processes.index(self.process) + 1)
+            if self.process != 'Sample' and self.process != 'Transmission':
+                raise RuntimeError('Only the sample and transmission can be kinetic measurements, the calibration measurements cannot.')
 
     #==============================METHODS TO APPLY CORRECTIONS==============================#
 
@@ -722,9 +718,12 @@ class SANSILLReduction(PythonAlgorithm):
         runs = self.getPropertyValue('Runs').split(',')
         non_blank_runs = list(filter(lambda x: x != EMPTY_TOKEN, runs))
         blank_runs = list(filter(lambda x: x == EMPTY_TOKEN, runs))
-        LoadAndMerge(Filename=','.join(non_blank_runs), OutputWorkspace=tmp)
+        nreports = len(non_blank_runs) + self.processes.index(self.getPropertyValue('ProcessAs')) + 2
+        self.progress = Progress(self, start=0.0, end=1.0, nreports=nreports)
+        LoadAndMerge(Filename=','.join(non_blank_runs), OutputWorkspace=tmp, startProgress=0., endProgress=len(non_blank_runs)/nreports)
+        self.progress.report(len(non_blank_runs), 'Loaded')
         if isinstance(mtd[tmp], MatrixWorkspace) and blank_runs:
-            # if we loaded a single workspace but there are blanks, need to make a group so that the blanks can be insterted
+            # if we loaded a single workspace but there are blanks, need to make a group so that the blanks can be inserted
             RenameWorkspace(InputWorkspace=tmp, OutputWorkspace=tmp+'_0')
             GroupWorkspaces(InputWorkspaces=[tmp+'_0'], OutputWorkspace=tmp)
         if isinstance(mtd[tmp], WorkspaceGroup):
@@ -747,6 +746,7 @@ class SANSILLReduction(PythonAlgorithm):
             RenameWorkspace(InputWorkspace=tmp, OutputWorkspace=ws)
         self.set_process_as(ws)
         assert isinstance(mtd[ws], MatrixWorkspace)
+        self.progress.report('Combined')
         return ws
 
     def linearize_axis(self, ws):
@@ -793,29 +793,36 @@ class SANSILLReduction(PythonAlgorithm):
         '''
         ws = self.getPropertyValue('OutputWorkspace')
         self.apply_normalisation(ws)
+        self.progress.report()
         if self.process != 'DarkCurrent':
             self.apply_dark_current(ws)
+            self.progress.report()
             if self.process == 'EmptyBeam':
                 self.treat_empty_beam(ws)
             else:
                 self.apply_direct_beam(ws)
+                self.progress.report()
                 if self.process == 'Transmission':
                     self.calculate_transmission(ws)
                 else:
                     self.apply_transmission(ws)
                     self.apply_solid_angle(ws)
+                    self.progress.report()
                     if self.process != 'EmptyContainer':
                         self.apply_container(ws)
                         self.apply_masks(ws)
                         self.apply_parallax(ws)
                         self.apply_thickness(ws)
                         self.apply_flux(ws)
+                        self.progress.report()
                         if self.process == 'Water':
                             self.generate_sensitivity(ws)
                         else:
                             self.apply_water(ws)
+                            self.progress.report()
                             if self.process != 'Solvent':
                                 self.apply_solvent(ws)
+                                self.progress.report()
         self.setProperty('OutputWorkspace', ws)
 
     def PyExec(self):
