@@ -30,9 +30,10 @@ class CalibrationPresenterTest(unittest.TestCase):
         self.view.get_sample_filename.return_value = "305738"
         self.view.get_plot_output.return_value = True
         self.view.is_searching.return_value = False
+        self.view.get_update_vanadium_checked.return_value = False
 
         self.presenter.on_calibrate_clicked()
-        worker_method.assert_called_with("307521", "305738", True, None)
+        worker_method.assert_called_with("307521", "305738", True, None, only_update_vanadium=False)
 
     @patch(tab_path + ".presenter.set_setting")
     @patch(tab_path + ".presenter.CalibrationPresenter.start_calibration_worker")
@@ -46,9 +47,10 @@ class CalibrationPresenterTest(unittest.TestCase):
         self.presenter.cropping_widget.get_custom_spectra_enabled.return_value = False
         self.presenter.cropping_widget.get_bank.return_value = "bank"
         self.presenter.cropping_widget.get_custom_calfile.return_value = None
+        self.view.get_update_vanadium_checked.return_value = False
 
         self.presenter.on_calibrate_clicked()
-        worker_method.assert_called_with("307521", "305738", True, None, bank="bank")
+        worker_method.assert_called_with("307521", "305738", True, None, bank="bank", only_update_vanadium=False)
 
     @patch(tab_path + ".presenter.set_setting")
     @patch(tab_path + ".presenter.CalibrationPresenter.start_calibration_worker")
@@ -61,9 +63,11 @@ class CalibrationPresenterTest(unittest.TestCase):
         self.presenter.cropping_widget.get_custom_calfile_enabled.return_value = False
         self.presenter.cropping_widget.get_custom_spectra_enabled.return_value = True
         self.presenter.cropping_widget.get_custom_spectra.return_value = "1-56,401-809"
+        self.view.get_update_vanadium_checked.return_value = False
 
         self.presenter.on_calibrate_clicked()
-        worker_method.assert_called_with("307521", "305738", True, None, spectrum_numbers="1-56,401-809")
+        worker_method.assert_called_with("307521", "305738", True, None,
+                                         spectrum_numbers="1-56,401-809", only_update_vanadium=False)
 
     @patch(tab_path + ".presenter.set_setting")
     @patch(tab_path + ".presenter.create_error_message")
@@ -89,11 +93,50 @@ class CalibrationPresenterTest(unittest.TestCase):
         self.view.get_plot_output.return_value = True
         self.view.is_searching.return_value = False
         self.view.get_load_checked.return_value = False
+        self.view.get_update_vanadium_checked.return_value = False
         validator.return_value = False
 
         self.presenter.on_calibrate_clicked()
         worker_method.assert_not_called()
         self.assertEqual(err_msg.call_count, 1)
+
+    @patch(tab_path + ".presenter.set_setting")
+    @patch(tab_path + ".presenter.create_error_message")
+    @patch(tab_path + ".presenter.CalibrationPresenter.validate_run_numbers")
+    @patch(tab_path + ".presenter.CalibrationPresenter.start_calibration_worker")
+    def test_worker_not_started_for_update_vanadium_when_vanadium_invalid(self, worker_method, validator, err_msg, setting):
+        self.view.get_vanadium_filename.return_value = "307521"
+        self.view.get_sample_filename.return_value = "305738"
+        self.view.get_plot_output.return_value = True
+        self.view.is_searching.return_value = False
+        self.view.get_load_checked.return_value = False
+        self.view.get_update_vanadium_checked.return_value = True
+        self.view.get_sample_valid.return_value = True
+        self.view.get_vanadium_valid.return_value = False
+        validator.return_value = False
+
+        self.presenter.on_calibrate_clicked()
+        worker_method.assert_not_called()
+        self.assertEqual(err_msg.call_count, 1)
+
+    @patch(tab_path + ".presenter.set_setting")
+    @patch(tab_path + ".presenter.create_error_message")
+    @patch(tab_path + ".presenter.CalibrationPresenter.validate_run_numbers")
+    @patch(tab_path + ".presenter.CalibrationPresenter.start_calibration_worker")
+    def test_worker_started_for_update_vanadium_when_sample_invalid(self, worker_method, validator, err_msg, setting):
+        self.view.get_vanadium_filename.return_value = "307521"
+        self.view.get_sample_filename.return_value = "305738"
+        self.view.get_plot_output.return_value = True
+        self.view.is_searching.return_value = False
+        self.view.get_load_checked.return_value = False
+        self.view.get_update_vanadium_checked.return_value = True
+        self.view.get_sample_valid.return_value = False
+        self.view.get_vanadium_valid.return_value = True
+        validator.return_value = False
+
+        self.presenter.on_calibrate_clicked()
+        self.assertEqual(worker_method.call_count, 1)
+        self.assertEqual(err_msg.call_count, 0)
 
     @patch(tab_path + ".presenter.set_setting")
     @patch(tab_path + ".presenter.create_error_message")
@@ -235,6 +278,7 @@ class CalibrationPresenterTest(unittest.TestCase):
         self.assertEqual(self.presenter.calibration_notifier.notify_subscribers.call_count, 0)
 
     def test_create_new_enabled_true(self):
+        self.view.get_update_vanadium_checked.return_value = False
         self.presenter.set_create_new_enabled(True)
 
         self.assertEqual(self.view.set_vanadium_enabled.call_count, 1)
