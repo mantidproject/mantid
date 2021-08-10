@@ -257,6 +257,23 @@ class SData(collections.abc.Sequence):
                               temperature=self.get_temperature(),
                               sample_form=self.get_sample_form())
 
+    @staticmethod
+    def _get_highest_existing_order(atom_data: dict) -> int:
+        """Check atom_data['s'] for highest existing data order
+
+        Assumes that there are no gaps, so will run order_1, order_2... until
+        a missing key is identified.
+
+        If there is no existing order_1, return 0.
+        """
+        from itertools import count
+
+        for order_index in count(start=1):
+            if f'order_{order_index}' not in atom_data['s']:
+                break
+
+        return order_index - 1
+
     def add_autoconvolution_spectra(self, max_order: Optional[int] = None) -> None:
         """
         Atom-by-atom, add higher order spectra by convolution with fundamentals
@@ -274,19 +291,10 @@ class SData(collections.abc.Sequence):
             max_order = abins.parameters.autoconvolution['max_order']
 
         for atom_key, atom_data in self._data.items():
-            for order_index in range(1, max_order + 1):
-                if f'order_{order_index}' in atom_data['s']:
-                    highest_existing_order = order_index
-                else:
-                    break
-            else:
-                # All orders are already full, do nothing
-                return None
-
             fundamental_spectrum = atom_data['s']['order_1']
             kernel = fundamental_spectrum * abins.parameters.autoconvolution['scale'] / np.sum(fundamental_spectrum)
 
-            for order_index in range(highest_existing_order, max_order):
+            for order_index in range(self._get_highest_existing_order(atom_data), max_order):
                 spectrum = convolve(atom_data['s'][f'order_{order_index}'], kernel, mode='full')[:fundamental_spectrum.size]
                 self._data[atom_key]['s'][f'order_{order_index + 1}'] = spectrum
 

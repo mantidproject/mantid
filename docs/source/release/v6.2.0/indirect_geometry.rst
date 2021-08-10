@@ -8,7 +8,7 @@ Indirect Geometry Changes
 New Features
 ############
 - Fit functions `ElasticIsoRotDiff` and `InelasticIsoRotDiff` have been made available in the ConvFit tab in the Indirect Data Analysis
-- A new option "autoconvolution" is added to the Abins Algorithm.
+- A new option "Autoconvolution" is added to the Abins Algorithm.
   This enables simulation of quantum orders up to order 10 by
   convolving the highest calculated spectrum (order 1 or 2) against
   the fundamentals spectrum repeatedly, before applying Debye-Waller

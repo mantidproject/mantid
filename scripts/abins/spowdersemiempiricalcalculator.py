@@ -154,7 +154,7 @@ class SPowderSemiEmpiricalCalculator:
 
         if self._quantum_order_num > data["attributes"]["order_of_quantum_events"]:
             raise ValueError("User requested a larger number of quantum events to be included in the simulation "
-                             "then in the previous calculations. S cannot be loaded from the hdf file.")
+                             "than in the previous calculations. S cannot be loaded from the hdf file.")
         if self._quantum_order_num < data["attributes"]["order_of_quantum_events"]:
 
             self._report_progress("""
@@ -167,11 +167,11 @@ class SPowderSemiEmpiricalCalculator:
             # load atoms_data
             n_atom = len([key for key in data["datasets"]["data"].keys() if "atom" in key])
             for i in range(n_atom):
-                atoms_s["atom_%s" % i] = {"s": dict()}
+                atoms_s[f"atom_{i}"] = {"s": dict()}
                 for j in range(1, self._quantum_order_num + 1):
 
-                    temp_val = data["datasets"]["data"]["atom_%s" % i]["s"]["order_%s" % j]
-                    atoms_s["atom_%s" % i]["s"].update({"order_%s" % j: temp_val})
+                    temp_val = data["datasets"]["data"][f"atom_{i}"]["s"][f"order_{j}"]
+                    atoms_s[f"atom_{i}"]["s"].update({f"order_{j}": temp_val})
 
             # reduce the data which is loaded to only this data which is required by the user
             data["datasets"]["data"] = atoms_s
@@ -395,10 +395,7 @@ class SPowderSemiEmpiricalCalculator:
         """
         Initialise an appropriate SData object for this calculation
         """
-        if use_fine_bins:
-            bin_centres = self._fine_bin_centres
-        else:
-            bin_centres = self._bin_centres
+        bin_centres = self._fine_bin_centres if use_fine_bins else self._bin_centres
 
         if max_order is None:
             max_order = self._quantum_order_num

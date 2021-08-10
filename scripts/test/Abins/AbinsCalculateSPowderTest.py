@@ -88,10 +88,6 @@ class SCalculatorFactoryPowderTest(unittest.TestCase):
 
         self._check_data(good_data=good_data["S"], data=calculated_data.extract())
 
-        # Uncomment to write a replacement data file
-        # self._write_data(data=calculated_data.extract(),
-        #                  filename=f'/home/abc/{name}_S.txt')
-
         # check if loading powder data is correct
         new_tester = abins.SCalculatorFactory.init(
             filename=abins.test_helpers.find_file(filename=name + ".phonon"), temperature=self._temperature,
