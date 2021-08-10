@@ -47,7 +47,7 @@ add_custom_command(
   COMMENT "Generating scripts .pth file"
 )
 add_custom_target(ScriptsDotPth ALL DEPENDS ${_scripts_pth_dest})
-if(NOT USE_SYSTEM_FRAMEWORK)
+if (MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
 add_dependencies(PythonInterface ScriptsDotPth)
 endif()
 

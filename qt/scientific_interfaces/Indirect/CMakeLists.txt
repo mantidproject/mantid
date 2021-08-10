@@ -248,10 +248,9 @@ set(
 )
 
 set(RES_FILES IndirectInterfaceResources.qrc)
-if (ENABLE_MANTIDQT)
-    # XML is required to parse the settings file
-    find_package(Qt5 COMPONENTS Concurrent Xml REQUIRED)
-endif ()
+
+# XML is required to parse the settings file
+find_package(Qt5 COMPONENTS Concurrent Xml REQUIRED)
 
 mtd_add_qt_library(
         TARGET_NAME MantidScientificInterfacesIndirect

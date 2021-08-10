@@ -179,8 +179,8 @@ endfunction()
 
 # Find python interpreter
 set(MINIMUM_PYTHON_VERSION 3.6)
-# If we are not building mantidqt or mantidframework we don't need the numpy developer env
-if (NOT (USE_SYSTEM_FRAMEWORK AND USE_SYSTEM_MANTIDQT))
+# If we are not building the mantid framework we don't need the numpy developer env
+if (MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
 find_package(
   Python ${MINIMUM_PYTHON_VERSION} REQUIRED COMPONENTS Interpreter Development
                                                        NumPy
