@@ -400,21 +400,6 @@ class SANSILLReduction(PythonAlgorithm):
                     # gamma is the detector center's theta, if it is in a certain range, then some pixels are around 90 degrees
                     MaskAngle(Workspace=ws, MinAngle=89, MaxAngle=91, Angle='TwoTheta')
 
-    def broadcast_kinetic(self, ws):
-        '''
-        Broadcasts the given workspace to the dimensions of the sample workspace
-        Repeats the values by the number of frames in order to allow vectorized application of the correction
-        '''
-        x = mtd[ws].readX(0)
-        y = mtd[ws].readY(0)
-        e = mtd[ws].readE(0)
-        out = ws + '_broadcast'
-        CreateWorkspace(ParentWorkspace=ws, OutputWorkspace=out, NSpec=1,
-                        DataX=np.repeat(x, self.n_frames),
-                        DataY=np.repeat(y, self.n_frames),
-                        DataE=np.repeat(e, self.n_frames))
-        return out
-
     def apply_container(self, ws):
         '''Applies empty container subtraction'''
         can_ws = self.getPropertyValue('EmptyContainerWorkspace')
@@ -447,45 +432,6 @@ class SANSILLReduction(PythonAlgorithm):
             MaskDetectors(Workspace=ws, MaskedWorkspace=flat_ws)
             # rescale the absolute scale if the ws and flat field are at different distances
             self.rescale_flux(ws, flat_ws)
-
-    def rescale_flux(self, ws, flat_ws):
-        '''
-            Rescales the absolute scale if ws and flat_ws are at different distances
-            If both sample and flat runs are normalised by flux, there is nothing to do, they are both in abs scale
-            If one is normalised, the other is not, we raise an error
-            If neither is normalised by flux, only then we have to rescale by the factor
-        '''
-        message = 'Sample and flat field runs are not consistent in terms of flux normalisation; ' \
-                  'unable to perform flat field normalisation. ' \
-                  'Make sure either they are both normalised or both not normalised by direct beam flux.'
-        run = mtd[ws].getRun()
-        run_ref = mtd[flat_ws].getRun()
-        has_log = run.hasProperty('NormalisedByFlux')
-        has_log_ref = run_ref.hasProperty('NormalisedByFlux')
-        if has_log != has_log_ref:
-            raise RuntimeError(message)
-        if has_log and has_log_ref:
-            log_val = run['NormalisedByFlux'].value
-            log_val_ref = run_ref['NormalisedByFlux'].value
-            if log_val != log_val_ref:
-                raise RuntimeError(message)
-            elif not log_val:
-                self.do_rescale_flux(ws, flat_ws)
-        else:
-            raise RuntimeError(message)
-
-    def do_rescale_flux(self, ws, flat_ws):
-        '''
-        Scales ws by the flux factor wrt the flat field
-        Formula 14, Grillo I. (2008) Small-Angle Neutron Scattering and Applications in Soft Condensed Matter
-        '''
-        if self.mode != AcqMode.TOF:
-            check_wavelengths_match(mtd[ws], mtd[flat_ws])
-        sample_l2 = mtd[ws].getRun()['L2'].value
-        ref_l2 = mtd[flat_ws].getRun()['L2'].value
-        flux_factor = (sample_l2 ** 2) / (ref_l2 ** 2)
-        self.log().notice(f'Flux factor is: {flux_factor}')
-        Scale(InputWorkspace=ws, Factor=flux_factor, OutputWorkspace=ws)
 
     def apply_solvent(self, ws):
         '''Applies pixel-by-pixel solvent/buffer subtraction'''
@@ -564,7 +510,129 @@ class SANSILLReduction(PythonAlgorithm):
             components = mtd[ws].getInstrument().getStringParameter('detector_panels')[0].split(',')
             ParallaxCorrection(InputWorkspace=ws, OutputWorkspace=ws, ComponentNames=components, AngleOffsets=offsets)
 
-    #===============================METHODS TO PROCESS BY TYPE===============================#
+    #===============================HELPER METHODS===============================#
+
+    def rescale_flux(self, ws, flat_ws):
+        '''
+            Rescales the absolute scale if ws and flat_ws are at different distances
+            If both sample and flat runs are normalised by flux, there is nothing to do, they are both in abs scale
+            If one is normalised, the other is not, we raise an error
+            If neither is normalised by flux, only then we have to rescale by the factor
+        '''
+        message = 'Sample and flat field runs are not consistent in terms of flux normalisation; ' \
+                  'unable to perform flat field normalisation. ' \
+                  'Make sure either they are both normalised or both not normalised by direct beam flux.'
+        run = mtd[ws].getRun()
+        run_ref = mtd[flat_ws].getRun()
+        has_log = run.hasProperty('NormalisedByFlux')
+        has_log_ref = run_ref.hasProperty('NormalisedByFlux')
+        if has_log != has_log_ref:
+            raise RuntimeError(message)
+        if has_log and has_log_ref:
+            log_val = run['NormalisedByFlux'].value
+            log_val_ref = run_ref['NormalisedByFlux'].value
+            if log_val != log_val_ref:
+                raise RuntimeError(message)
+            elif not log_val:
+                self.do_rescale_flux(ws, flat_ws)
+        else:
+            raise RuntimeError(message)
+
+    def do_rescale_flux(self, ws, flat_ws):
+        '''
+        Scales ws by the flux factor wrt the flat field
+        Formula 14, Grillo I. (2008) Small-Angle Neutron Scattering and Applications in Soft Condensed Matter
+        '''
+        if self.mode != AcqMode.TOF:
+            check_wavelengths_match(mtd[ws], mtd[flat_ws])
+        sample_l2 = mtd[ws].getRun()['L2'].value
+        ref_l2 = mtd[flat_ws].getRun()['L2'].value
+        flux_factor = (sample_l2 ** 2) / (ref_l2 ** 2)
+        self.log().notice(f'Flux factor is: {flux_factor}')
+        Scale(InputWorkspace=ws, Factor=flux_factor, OutputWorkspace=ws)
+
+    def broadcast_kinetic(self, ws):
+        '''
+        Broadcasts the given workspace to the dimensions of the sample workspace
+        Repeats the values by the number of frames in order to allow vectorized application of the correction
+        Here we are matching in terms of the x-axis size
+        '''
+        x = mtd[ws].readX(0)
+        y = mtd[ws].readY(0)
+        e = mtd[ws].readE(0)
+        out = ws + '_broadcast'
+        CreateWorkspace(ParentWorkspace=ws, OutputWorkspace=out, NSpec=1,
+                        DataX=np.repeat(x, self.n_frames),
+                        DataY=np.repeat(y, self.n_frames),
+                        DataE=np.repeat(e, self.n_frames))
+        return out
+
+    def broadcast_tof(self, ws, flux):
+        '''
+        Broadcasts the direct beam flux that can be easily rebinned at application time
+        For TOF, the flux is wavelength dependent, and the sample workspace is ragged
+        Hence the flux must be rebinned to the sample before it can be divided by flux
+        That's why we broadcast the empty beam workspace to the same size as the sample
+        This allows rebinning spectrum-wise when processing the sample w/o tiling the empty beam data for each sample
+        Here we are matching in terms of vertical axis size (i.e. number of spectra)
+        '''
+        nspec = mtd[ws].getNumberHistograms()
+        x = mtd[flux].readX(0)
+        y = mtd[flux].readY(0)
+        e = mtd[flux].readE(0)
+        CreateWorkspace(DataX=x, DataY=np.tile(y, nspec), DataE=np.tile(e, nspec), NSpec=nspec,
+                        ParentWorkspace=ws, OutputWorkspace=flux, UnitX=mtd[ws].getAxis(0).getUnit().unitID())
+
+    def fit_beam_width(self, ws):
+        ''''Groups detectors vertically and fits the horizontal beam width with a Gaussian profile'''
+        tmp_ws = ws + '_beam_width'
+        CloneWorkspace(InputWorkspace=ws, OutputWorkspace=tmp_ws)
+        grouping_pattern = get_vertical_grouping_pattern(tmp_ws)
+        if not grouping_pattern: # unsupported instrument
+            return
+        GroupDetectors(InputWorkspace=tmp_ws, OutputWorkspace=tmp_ws, GroupingPattern=grouping_pattern)
+        ConvertSpectrumAxis(InputWorkspace=tmp_ws, OutputWorkspace=tmp_ws, Target='SignedInPlaneTwoTheta')
+        Transpose(InputWorkspace=tmp_ws, OutputWorkspace=tmp_ws)
+        background = 'name=FlatBackground, A0=1e-4'
+        distribution_width = np.max(mtd[tmp_ws].getAxis(0).extractValues())
+        function = "name=Gaussian, PeakCentre={0}, Height={1}, Sigma={2}".format(
+            0, np.max(mtd[tmp_ws].getAxis(1).extractValues()), 0.1*distribution_width)
+        constraints = "{0} < f1.PeakCentre < {1}".format(-0.1*distribution_width, 0.1*distribution_width)
+        fit_function = [background, function]
+        fit_output = Fit(Function=';'.join(fit_function),
+                         InputWorkspace=tmp_ws,
+                         Constraints=constraints,
+                         CreateOutput=False,
+                         IgnoreInvalidData=True,
+                         Output=tmp_ws+"_fit_output")
+        param_table = fit_output.OutputParameters
+        beam_width = param_table.column(1)[3] * np.pi / 180.0
+        AddSampleLog(Workspace=ws, LogName='BeamWidthX', LogText=str(beam_width), LogType='Number', LogUnit='rad')
+        DeleteWorkspaces(WorkspaceList=[tmp_ws, tmp_ws+'_fit_output_Parameters', tmp_ws+'_fit_output_Workspace',
+                                        tmp_ws+'_fit_output_NormalisedCovarianceMatrix'])
+
+    def inject_blank_samples(self, ws):
+        '''Creates blank workspaces with the right dimension to include in the input list of workspaces'''
+        reference = mtd[ws][0]
+        nbins = self.n_frames
+        nspec = reference.getNumberHistograms()
+        xaxis = reference.getAxis(0).extractValues()
+        runs = self.getPropertyValue('Runs').split(',')
+        result = [w.getName() for w in mtd[ws]]
+        blank_indices = [i for i,r in enumerate(runs) if r == EMPTY_TOKEN]
+        for index in blank_indices:
+            blank = f'__blank_{index}'
+            CreateWorkspace(ParentWorkspace=reference, NSpec=nspec, DataX=np.tile(xaxis, nspec),
+                            DataY=np.zeros(nspec * nbins), DataE=np.zeros(nspec * nbins),
+                            OutputWorkspace=blank, UnitX='Empty')
+            result.insert(index,blank)
+        return result
+
+    def set_process_as(self, ws):
+        '''Sets the process as flag as sample log for future sanity checks'''
+        AddSampleLog(Workspace=ws, LogName='ProcessedAs', LogText=self.process)
+
+    #===============================METHODS TO TREAT PROCESS TYPES===============================#
 
     def treat_empty_beam(self, ws):
         '''Processes as empty beam, i.e. calculates beam center, beam width and incident flux'''
@@ -623,47 +691,6 @@ class SANSILLReduction(PythonAlgorithm):
         if self.process == 'EmptyBeam':
             self.setProperty('OutputFluxWorkspace', flux)
 
-    def broadcast_tof(self, ws, flux):
-        '''Broadcasts the direct beam flux that can be easily rebinned at application time'''
-        # for TOF, the flux is wavelength dependent, and the sample workspace is ragged
-        # hence the flux must be rebinned to the sample before it can be divided by flux
-        # that's why we broadcast the empty beam workspace to the same size as the sample
-        # this allows rebinning spectrum-wise when processing the sample w/o tiling the empty beam data for each sample
-        nspec = mtd[ws].getNumberHistograms()
-        x = mtd[flux].readX(0)
-        y = mtd[flux].readY(0)
-        e = mtd[flux].readE(0)
-        CreateWorkspace(DataX=x, DataY=np.tile(y, nspec), DataE=np.tile(e, nspec), NSpec=nspec,
-                        ParentWorkspace=ws, OutputWorkspace=flux, UnitX=mtd[ws].getAxis(0).getUnit().unitID())
-
-    def fit_beam_width(self, ws):
-        ''''Groups detectors vertically and fits the horizontal beam width with a Gaussian profile'''
-        tmp_ws = ws + '_beam_width'
-        CloneWorkspace(InputWorkspace=ws, OutputWorkspace=tmp_ws)
-        grouping_pattern = get_vertical_grouping_pattern(tmp_ws)
-        if not grouping_pattern: # unsupported instrument
-            return
-        GroupDetectors(InputWorkspace=tmp_ws, OutputWorkspace=tmp_ws, GroupingPattern=grouping_pattern)
-        ConvertSpectrumAxis(InputWorkspace=tmp_ws, OutputWorkspace=tmp_ws, Target='SignedInPlaneTwoTheta')
-        Transpose(InputWorkspace=tmp_ws, OutputWorkspace=tmp_ws)
-        background = 'name=FlatBackground, A0=1e-4'
-        distribution_width = np.max(mtd[tmp_ws].getAxis(0).extractValues())
-        function = "name=Gaussian, PeakCentre={0}, Height={1}, Sigma={2}".format(
-            0, np.max(mtd[tmp_ws].getAxis(1).extractValues()), 0.1*distribution_width)
-        constraints = "{0} < f1.PeakCentre < {1}".format(-0.1*distribution_width, 0.1*distribution_width)
-        fit_function = [background, function]
-        fit_output = Fit(Function=';'.join(fit_function),
-                         InputWorkspace=tmp_ws,
-                         Constraints=constraints,
-                         CreateOutput=False,
-                         IgnoreInvalidData=True,
-                         Output=tmp_ws+"_fit_output")
-        param_table = fit_output.OutputParameters
-        beam_width = param_table.column(1)[3] * np.pi / 180.0
-        AddSampleLog(Workspace=ws, LogName='BeamWidthX', LogText=str(beam_width), LogType='Number', LogUnit='rad')
-        DeleteWorkspaces(WorkspaceList=[tmp_ws, tmp_ws+'_fit_output_Parameters', tmp_ws+'_fit_output_Workspace',
-                                        tmp_ws+'_fit_output_NormalisedCovarianceMatrix'])
-
     def calculate_transmission(self, ws):
         '''Calculates the transmission'''
         flux_ws = self.getPropertyValue('FluxWorkspace')
@@ -682,37 +709,11 @@ class SANSILLReduction(PythonAlgorithm):
             CalculateEfficiency(InputWorkspace=ws, OutputWorkspace=sens)
             self.setProperty('OutputSensitivityWorkspace', mtd[sens])
 
-    def inject_blank_samples(self, ws):
-        '''Creates blank workspaces with the right dimension to include in the input list of workspaces'''
-        reference = mtd[ws][0]
-        nbins = self.n_frames
-        nspec = reference.getNumberHistograms()
-        xaxis = reference.getAxis(0).extractValues()
-        runs = self.getPropertyValue('Runs').split(',')
-        result = [w.getName() for w in mtd[ws]]
-        blank_indices = [i for i,r in enumerate(runs) if r == EMPTY_TOKEN]
-        for index in blank_indices:
-            blank = f'__blank_{index}'
-            CreateWorkspace(ParentWorkspace=reference, NSpec=nspec, DataX=np.tile(xaxis, nspec),
-                            DataY=np.zeros(nspec * nbins), DataE=np.zeros(nspec * nbins),
-                            OutputWorkspace=blank, UnitX='Empty')
-            result.insert(index,blank)
-        return result
-
-    def set_process_as(self, ws):
-        '''Sets the process as flag as sample log for future sanity checks'''
-        AddSampleLog(Workspace=ws, LogName='ProcessedAs', LogText=self.process)
-
-    #===============================ENTRY POINT AND CORE LOGIC===============================#
-
-    def PyExec(self):
-        self.reset()
-        self.load()
-        self.reduce()
+    #===============================CORE LOGIC OF LOAD AND REDUCE===============================#
 
     def load(self):
         '''
-        Loads, merges and concatenates the input runs, if needed
+        Loads, merges and concatenates the input runs, as appropriate
         TODO: once v2 of the loader is in, move this out to a separate algorithm
         Then it should load the instrument only with the first run, which will make the logic even more complex
         '''
@@ -816,6 +817,12 @@ class SANSILLReduction(PythonAlgorithm):
                             if self.process != 'Solvent':
                                 self.apply_solvent(ws)
         self.setProperty('OutputWorkspace', ws)
+
+    def PyExec(self):
+        '''Entry point of the execution'''
+        self.reset()
+        self.load()
+        self.reduce()
 
 
 # Register algorithm with Mantid
