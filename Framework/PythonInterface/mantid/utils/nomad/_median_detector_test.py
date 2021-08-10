@@ -11,7 +11,6 @@ import numpy as np
 import yaml
 # standard imports
 import enum
-from enum import IntEnum
 from collections import namedtuple
 
 
@@ -104,12 +103,13 @@ def determine_tubes_threshold(vec_intensity, mask_config: dict, instrument_confi
     half_collimated_masks = (pixel_collimation_states == int(CollimationLevel.Half)).astype(int)
 
     # Combine
-    upper_boundaries = (not_collimated_uppers * not_collimated_masks +
-                        full_collimated_uppers * full_collimated_masks +
-                        half_collimated_uppers * half_collimated_masks)
-    lower_boundaries = (not_collimated_lowers * not_collimated_masks +
-                        full_collimated_lowers * full_collimated_masks +
-                        half_collimated_lowers * half_collimated_masks)
+    upper_boundaries = not_collimated_uppers * not_collimated_masks
+    upper_boundaries += full_collimated_uppers * full_collimated_masks
+    upper_boundaries += half_collimated_uppers * half_collimated_masks
+
+    lower_boundaries = not_collimated_lowers * not_collimated_masks
+    lower_boundaries += full_collimated_lowers * full_collimated_masks
+    lower_boundaries += half_collimated_lowers * half_collimated_masks
     #
     # print(f'[DEBUG] Upper: \n{upper_boundaries}')
     # print(f'[DEBUG] Lower: \n{lower_boundaries}')
