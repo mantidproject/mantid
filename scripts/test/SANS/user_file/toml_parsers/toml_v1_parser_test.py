@@ -464,6 +464,16 @@ class TomlV1ParserTest(unittest.TestCase):
         self.assertEqual(180, mask_state.beam_stop_arm_angle)
         self.assertEqual(10, mask_state.beam_stop_arm_width)
 
+    def test_beamstop_masking_x_y_positions(self):
+        for beamstop_values in [{"width": 0.1, "angle": 0.2},
+                                {"width": 0.1, "angle": 0.2, "x_pos": 0.3, "y_pos": 0.4}]:
+            parser = self._setup_parser({"mask": {"spatial": {"beamstop_shadow": beamstop_values}}})
+            masks = parser.get_state_mask(None)
+            self.assertEqual(beamstop_values["width"], masks.beam_stop_arm_width)
+            self.assertEqual(beamstop_values["angle"], masks.beam_stop_arm_angle)
+            self.assertEqual(beamstop_values.get("x_pos", 0.0), masks.beam_stop_arm_pos1)
+            self.assertEqual(beamstop_values.get("y_pos", 0.0), masks.beam_stop_arm_pos2)
+
     def test_parse_mask(self):
         top_level_dict = {"mask": {
             "prompt_peak": {},

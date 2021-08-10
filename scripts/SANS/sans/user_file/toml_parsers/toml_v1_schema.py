@@ -102,7 +102,7 @@ class TomlSchemaV1Validator(object):
                                           "detector_column_ranges", "detector_row_ranges"},
                                  "front": {"detector_columns", "detector_rows",
                                            "detector_column_ranges", "detector_row_ranges"},
-                                 "beamstop_shadow": {"angle", "width"},
+                                 "beamstop_shadow": {"angle", "width", "x_pos", "y_pos"},
                                  "mask_pixels": None}
                      }
 

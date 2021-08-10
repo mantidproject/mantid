@@ -966,6 +966,31 @@ MASK/LINE x y
     [mask]
       beamstop_shadow = {width = 0.03, angle = 170.0}
 
+MASK/LINE a b c d
+-----------------
+
+Note: *c* and *d* representing x and y positions are already in meters in
+legacy files.
+
+**Replacement**
+
+..  code-block:: none
+
+    beamstop_shadow = {width = a, angle = b, x_pos = c, y_pos = d}
+
+**Existing Example:**
+
+..  code-block:: none
+
+    MASK/LINE 30 170 0.3 0.1
+
+**Existing Replacement**
+
+..  code-block:: none
+
+    [mask]
+      beamstop_shadow = {width = 0.03, angle = 170.0, x_pos=0.3, y_pos=0.1}
+
 MON/DIRECT="filename"
 ---------------------
 

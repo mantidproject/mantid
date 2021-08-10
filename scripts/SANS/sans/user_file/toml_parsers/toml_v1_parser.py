@@ -434,6 +434,8 @@ class _TomlV1ParserImpl(TomlParserImplBase):
 
         self.mask.beam_stop_arm_angle = self.get_val(["beamstop_shadow", "angle"], spatial_dict)
         self.mask.beam_stop_arm_width = self.get_val(["beamstop_shadow", "width"], spatial_dict)
+        self.mask.beam_stop_arm_pos1 = self.get_val(["beamstop_shadow", "x_pos"], spatial_dict, 0.0)
+        self.mask.beam_stop_arm_pos2 = self.get_val(["beamstop_shadow", "y_pos"], spatial_dict, 0.0)
 
         mask_pixels = self.get_val("mask_pixels", spatial_dict)
         if mask_pixels:
