@@ -19,6 +19,6 @@ class IConfiguredAlgorithm;
 
 using AlgorithmRuntimeProps = std::map<std::string, std::string>;
 
-MANTIDQT_ISISREFLECTOMETRY_DLL MantidQt::API::IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const &model,
-                                                                                                  PreviewRow &row);
+MANTIDQT_ISISREFLECTOMETRY_DLL MantidQt::API::IConfiguredAlgorithm_sptr
+createConfiguredAlgorithm(IBatch const &model, PreviewRow &row, Mantid::API::IAlgorithm_sptr alg = nullptr);
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

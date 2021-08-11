@@ -41,10 +41,12 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
  * @param model : the reduction configuration model
  * @param row : the row from the runs table
  */
-IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const & /*model*/, PreviewRow &row) {
+IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const & /*model*/, PreviewRow &row, IAlgorithm_sptr alg) {
   // Create the algorithm
-  auto alg = Mantid::API::AlgorithmManager::Instance().create("ReflectometryISISPreprocess");
-  alg->setRethrows(true);
+  if (!alg) {
+    alg = Mantid::API::AlgorithmManager::Instance().create("ReflectometryISISPreprocess");
+    alg->setRethrows(true);
+  }
 
   // Set the algorithm properties from the model
   auto properties = AlgorithmRuntimeProps();

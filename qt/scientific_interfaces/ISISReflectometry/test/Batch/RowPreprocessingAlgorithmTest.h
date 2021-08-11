@@ -10,11 +10,14 @@
 #include "../../../ISISReflectometry/Reduction/IBatch.h"
 #include "../../../ISISReflectometry/Reduction/PreviewRow.h"
 #include "../../../ISISReflectometry/TestHelpers/ModelCreationHelper.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MockBatch.h"
 
 #include <cxxtest/TestSuite.h>
+#include <gmock/gmock.h>
+
+using namespace ::testing;
 
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 using namespace MantidQt::CustomInterfaces::ISISReflectometry::ModelCreationHelper;
@@ -26,13 +29,15 @@ public:
   static RowPreprocessingAlgorithmTest *createSuite() { return new RowPreprocessingAlgorithmTest(); }
   static void destroySuite(RowPreprocessingAlgorithmTest *suite) { delete suite; }
 
-  void setUp() override { Mantid::API::FrameworkManager::Instance(); }
-
   void test_input_run_list_forwarded() {
     auto batch = MockBatch();
-    auto expected = std::vector<std::string>{"12345"};
-    auto row = PreviewRow(expected);
-    auto alg = createConfiguredAlgorithm(batch, row);
-    TS_ASSERT_EQUALS(expected, static_cast<decltype(expected)>(alg->algorithm()->getProperty("InputRunList")));
+    auto inputRuns = std::vector<std::string>{"12345"};
+    auto row = PreviewRow(inputRuns);
+    auto mockAlg = std::make_shared<WorkspaceCreationHelper::StubAlgorithm>();
+
+    auto configuredAlg = createConfiguredAlgorithm(batch, row, mockAlg);
+    TS_ASSERT_EQUALS(configuredAlg->algorithm(), mockAlg);
+    auto expectedProps = AlgorithmRuntimeProps{{"InputRunList", inputRuns[0]}};
+    TS_ASSERT_EQUALS(configuredAlg->properties(), expectedProps);
   }
 };
