@@ -56,9 +56,9 @@ public:
   }
 };
 /** mock algorithm for doing logging/progress reporting*/
-class MockAlgorithm : public Mantid::API::Algorithm {
+class StubAlgorithm : public Mantid::API::Algorithm {
 public:
-  MockAlgorithm(size_t nSteps = 100);
+  StubAlgorithm(size_t nSteps = 100);
   /// Algorithm's name for identification
   const std::string name() const override { return "MockAlgorithm"; }
   /// Algorithm's version for identification

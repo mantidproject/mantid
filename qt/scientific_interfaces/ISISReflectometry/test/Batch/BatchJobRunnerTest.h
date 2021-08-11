@@ -22,7 +22,6 @@ using Mantid::API::Workspace_sptr;
 using Mantid::DataObjects::Workspace2D_sptr;
 using MantidQt::API::IConfiguredAlgorithm;
 using MantidQt::API::IConfiguredAlgorithm_sptr;
-using WorkspaceCreationHelper::MockAlgorithm;
 
 using testing::_;
 using testing::AtLeast;

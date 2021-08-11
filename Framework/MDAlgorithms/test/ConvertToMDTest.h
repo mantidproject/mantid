@@ -515,13 +515,13 @@ class ConvertToMDTestPerformance : public CxxTest::TestSuite {
   Mantid::MDAlgorithms::ConvertToMD convertAlgDefault;
   Mantid::MDAlgorithms::ConvertToMD convertAlgIndexed;
 
-  WorkspaceCreationHelper::MockAlgorithm reporter;
+  WorkspaceCreationHelper::StubAlgorithm reporter;
 
   std::shared_ptr<ConvToMDBase> pConvMethods;
   DataObjects::TableWorkspace_sptr pDetLoc_events;
   DataObjects::TableWorkspace_sptr pDetLoc_histo;
   // pointer to mock algorithm to work with progress bar
-  std::unique_ptr<WorkspaceCreationHelper::MockAlgorithm> pMockAlgorithm;
+  std::unique_ptr<WorkspaceCreationHelper::StubAlgorithm> pMockAlgorithm;
 
   std::shared_ptr<MDEventWSWrapper> pTargWS;
 
@@ -741,7 +741,7 @@ public:
     Rot.toRotation();
 
     // this will be used to display progress
-    pMockAlgorithm = std::make_unique<WorkspaceCreationHelper::MockAlgorithm>();
+    pMockAlgorithm = std::make_unique<WorkspaceCreationHelper::StubAlgorithm>();
 
     auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("CreateSampleWorkspace");
     alg->initialize();
