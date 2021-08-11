@@ -132,7 +132,7 @@ add_dependencies(workbench mantidqt)
 endif()
 
 # macOS package fixes
-if(APPLE)
+if(APPLE AND NOT CONDA_BUILD)
   # create Info.plist
   set ( MAC_BUNDLE_EXECUTABLE ${PACKAGE_EXECUTABLE})
   set ( MAC_BUNDLE_IDENTIFIER "org.mantidproject.${PACKAGE_EXECUTABLE}" )
