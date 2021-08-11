@@ -66,17 +66,16 @@ mtd_add_qt_library(
     ${Boost_INCLUDE_DIRS}
   LINK_LIBS
     Mantid::PythonInterfaceCore
+    Mantid::API
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon
-  INSTALL_DIR
+  # INSTALL_DIR
     ${WORKBENCH_LIB_DIR}
   OSX_INSTALL_RPATH
     @loader_path/../MacOS
     @loader_path/../Frameworks
   LINUX_INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}"
 )
-# We require just the headers for system.h
-#target_include_directories(MantidQtWidgetsMplCppQt5 PRIVATE $<TARGET_PROPERTY:Mantid::Kernel,INTERFACE_INCLUDE_DIRECTORIES>)
 
 # Testing
 add_subdirectory(test)
