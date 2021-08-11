@@ -7,6 +7,7 @@
 #pragma once
 
 #include "Common/DllConfig.h"
+#include "GUI/Batch/IBatchView.h"
 #include "IPreviewModel.h"
 #include "IPreviewPresenter.h"
 #include "IPreviewView.h"
@@ -15,11 +16,21 @@
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
-class MANTIDQT_ISISREFLECTOMETRY_DLL PreviewPresenter : public PreviewViewSubscriber, public IPreviewPresenter {
+class MANTIDQT_ISISREFLECTOMETRY_DLL PreviewPresenter : public PreviewViewSubscriber,
+                                                        public BatchViewSubscriber,
+                                                        public IPreviewPresenter {
 public:
   PreviewPresenter(IPreviewView *view, std::unique_ptr<IPreviewModel> model);
   virtual ~PreviewPresenter() = default;
+  // PreviewViewSubscriber overrides
   void notifyLoadWorkspaceRequested() override;
+
+  // BatchViewSubscriber overrides
+  void notifyBatchComplete(bool error) override;
+  void notifyBatchCancelled() override;
+  void notifyAlgorithmStarted(API::IConfiguredAlgorithm_sptr algorithm) override;
+  void notifyAlgorithmComplete(API::IConfiguredAlgorithm_sptr algorithm) override;
+  void notifyAlgorithmError(API::IConfiguredAlgorithm_sptr algorithm, std::string const &message) override;
 
 private:
   IPreviewView *m_view{nullptr};

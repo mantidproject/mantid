@@ -97,6 +97,7 @@ public:
 
   // Feel free to add types for the second param as required. Since the base class is instantiated in a .cpp file
   // we want to have to name those types manually to avoid having to write MockAlgorithm<T> when using it.
+  MOCK_METHOD(TypedValue, getProperty, (const std::string &propName), (const, override));
   MOCK_METHOD(IPropertyManager *, setProperty, (const std::string &name, const std::vector<std::string> &), (const));
 
 private:
