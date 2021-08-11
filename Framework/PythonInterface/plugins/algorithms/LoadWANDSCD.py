@@ -137,7 +137,9 @@ class LoadWANDSCD(PythonAlgorithm):
             # normalize the results
             data = self.normalize(data, norm, self.getProperty("NormalizedBy").value.lower())
             # cleanup
-            DeleteWorkspace(norm)
+            # NOTE: keep the Va workspace in memory in case we need it later
+            if van_filename is not None:
+                DeleteWorkspace(norm)
 
         # setup output
         self.setProperty("OutputWorkspace", data)
@@ -316,6 +318,8 @@ class LoadWANDSCD(PythonAlgorithm):
         # prep
         norm_replicated = ReplicateMD(ShapeWorkspace=data, DataWorkspace=norm)
         data = DivideMD(LHSWorkspace=data, RHSWorkspace=norm_replicated)
+        # reduce memory footprint
+        DeleteWorkspace(norm_replicated)
         # find the scale
         if normalize_by == 'counts':
             scale = norm.getSignalArray().mean()
@@ -333,8 +337,6 @@ class LoadWANDSCD(PythonAlgorithm):
         # exec
         data.setSignalArray(data.getSignalArray() / scale)
         data.setErrorSquaredArray(data.getErrorSquaredArray() / scale**2)
-        # cleanup
-        DeleteWorkspace(norm_replicated)
         # return
         return data
 
