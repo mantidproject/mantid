@@ -53,6 +53,7 @@ class MaxEntPresenter(object):
         # connect
         self.view.maxEntButtonSignal.connect(self.handleMaxEntButton)
         self.view.method_changed_slot(self.update_phase_table_options)
+        self.view.method_changed_slot(self.notify_method_changed)
         self.view.cancelSignal.connect(self.cancel)
         self.view.run_changed_slot(self._load_periods)
 
@@ -63,6 +64,9 @@ class MaxEntPresenter(object):
         self.update_phase_table_options()
         self.method_changed = Observable()
         self.new_reconstructed_data = Observable()
+
+    def notify_method_changed(self):
+        self.method_changed.notify_subscribers(self.view.get_method)
 
     @property
     def use_groups(self):

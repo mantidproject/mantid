@@ -18,6 +18,7 @@ from Muon.GUI.Common.plot_widget.raw_pane.raw_pane_model import RawPaneModel
 from Muon.GUI.Common.plot_widget.raw_pane.raw_pane_view import RawPaneView
 from Muon.GUI.FrequencyDomainAnalysis.plot_widget.duel_plot_maxent_pane.duel_plot_maxent_pane_presenter import DuelPlotMaxentPanePresenter
 from Muon.GUI.FrequencyDomainAnalysis.plot_widget.duel_plot_maxent_pane.duel_plot_maxent_pane_model import DuelPlotMaxentPaneModel
+from Muon.GUI.FrequencyDomainAnalysis.plot_widget.duel_plot_maxent_pane.duel_plot_maxent_pane_view import DuelPlotMaxentPaneView
 
 
 class FrequencyAnalysisPlotWidget(object):
@@ -25,7 +26,7 @@ class FrequencyAnalysisPlotWidget(object):
         self.data_model = PlotDataPaneModel(context)
         self.fit_model = PlotFreqFitPaneModel(context)
         self.raw_model = RawPaneModel(context)
-        self.plot_maxent_model = DuelPlotMaxentPaneModel(context, self.data_model)
+        self.plot_maxent_model = DuelPlotMaxentPaneModel(context, self.data_model, RawPaneModel(context))
         models = [self.data_model, self.fit_model, self.raw_model, self.plot_maxent_model]
 
         self.view = MainPlotWidgetView(parent)
@@ -41,6 +42,8 @@ class FrequencyAnalysisPlotWidget(object):
                                                                                  plot_model=model)
             if model == self.raw_model:
                 self._views[model.name] = RawPaneView(parent)
+            elif model == self.plot_maxent_model:
+                self._views[model.name] = DuelPlotMaxentPaneView(parent)
             else:
                 self._views[model.name] = BasePaneView(parent)
             self._views[model.name].add_canvas_widget(self.plotting_canvas_widgets[model.name].widget)

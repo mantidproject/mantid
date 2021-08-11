@@ -21,44 +21,48 @@ class DuelPlotMaxentPanePresenter(BasePanePresenter):
         self._view.hide_plot_raw()
         self._view.disable_tile_plotting_options()
         self._view.set_is_tiled_plot(True)
-        #self._view.enable_plot_raw_option()
+
         self.method_changed =  GenericObserverWithArgPassing(self.change_time_plot)
         self.new_data_observer = GenericObserverWithArgPassing(
             self.handle_maxent_data_updated)
         self.reconstructed_data_observer = GenericObserverWithArgPassing(
             self.handle_reconstructed_data_updated)
-        self._time_data = "groups"
-        self._model.set_selected_groups("bkwd:bottom")
+        self._maxent_ws_name = None
+        self._model.set_selection(self.view.get_selection_for_plot)
+        self._view.set_slot_for_selection_changed(self.update_selection)
 
-    def change_time_plot(self, if_groups):
-        self._time_data ="groups" if if_groups else "all"
-        selection_string = "bkwd:bottom"
-        self.handle_time_data_updated(selection_string)
+    # need to add a clear when run changes
 
-    def handle_data_type_changed(self):
-        """
-        Handles the data type being changed in the view by plotting the workspaces corresponding to the new data type
-        """
-        self.handle_time_data_updated()
-        # the data change probably means its the wrong scale
-        self._figure_presenter.force_autoscale()
-
-    def handle_time_data_updated(self):
-        return self._model.get_workspace_list_and_indices_to_plot(self._time_data=="groups")
+    def change_time_plot(self, method):
+        self._model.clear_data()
+        self._model.set_if_groups(method=="Groups")
+        self._maxent_ws_name = None
+        self._view.update_selection([])
+        self.add_data_to_plots()
 
     def handle_maxent_data_updated(self, name):
         self._maxent_ws_name = name
+        self._model.set_run_from_name(name)
         self.add_data_to_plots()
+
+    def handle_time_data_updated(self):
+        return self._model.get_workspace_list_and_indices_to_plot()
 
     def add_data_to_plots(self):
         workspaces, indicies = self.handle_time_data_updated()
         workspaces, indicies = self._model.add_reconstructed_data(workspaces, indicies)
-        workspaces += [self._maxent_ws_name]
-        indicies += [0]
+        if self._maxent_ws_name:
+            workspaces += [self._maxent_ws_name]
+            indicies += [0]
         self.add_list_to_plot(workspaces, indicies, hold=False, autoscale=True)
 
     def handle_reconstructed_data_updated(self, data_dict):
-        self._model.clear_reconstructed_data()
-        if data_dict["table"] and data_dict["ws"]:
+        self._model.clear_data()
+        if "table" in data_dict.keys() and "ws" in data_dict.keys():
             self._model.set_reconstructed_data(data_dict["ws"], data_dict["table"])
+        self._view.update_selection(self._model.create_options())
+        self.update_selection()
+
+    def update_selection(self):
+        self._model.set_selection(self.view.get_selection_for_plot)
         self.add_data_to_plots()
