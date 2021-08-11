@@ -1369,9 +1369,12 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::clearOutdated() {
 template <typename TYPE>
 void TimeSeriesProperty<TYPE>::create(const Types::Core::DateAndTime &start_time, const std::vector<double> &time_sec,
                                       const std::vector<TYPE> &new_values) {
-  if (time_sec.size() != new_values.size())
-    throw std::invalid_argument("TimeSeriesProperty::create: mismatched size "
-                                "for the time and values vectors.");
+  if (time_sec.size() != new_values.size()) {
+    std::stringstream msg;
+    msg << "TimeSeriesProperty \"" << name() << "\" create: mismatched size "
+        << "for the time and values vectors.";
+    throw std::invalid_argument(msg.str());
+  }
 
   // Make the times(as seconds) into a vector of DateAndTime in one go.
   std::vector<DateAndTime> times;
