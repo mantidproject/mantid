@@ -334,7 +334,22 @@ void LoadILLSANS::initWorkSpaceD11B(NeXus::NXEntry &firstEntry, const std::strin
     m_localWorkspace->setCountVariances(nextIndex - 1,
                                         HistogramData::CountVariances(std::vector<double>(dataCenter.dim2(), 0)));
   }
+  if (type == MultichannelType::KINETIC) {
+    setTimeLog();
+  }
 }
+
+/**
+ * @brief LoadILLSANS::setTimeLog
+ * Sets sample logs time and timer in case of kinetic
+ * They are absent in nexus as the times per frame are stored in slices entry
+ * These logs are not going to be used, since we store the acq time in the 2nd monitor
+ * However, not having them causes an error when merging runs, i.e. in case of sum
+ * This is due to a rule that tells that time and timer must be summed when merging
+ * The rules are defined in IPF, so they are instrument-wide, no matter the acq mode
+ * Hence, we have to add empty logs, just to avoid error log in merge runs
+ */
+void LoadILLSANS::setTimeLog() { m_localWorkspace->mutableRun().addProperty("time", 0.); }
 
 /**
  * @brief LoadILLSANS::initWorkSpaceD22B Load D22B data
