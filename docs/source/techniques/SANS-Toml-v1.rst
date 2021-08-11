@@ -1114,25 +1114,48 @@ QRESOL/A1=x
 QRESOL/A2=x
 --------------
 
-  **Replacement**
+**Replacement**
 
-  ..  code-block:: none
+..  code-block:: none
 
-    [instrument.configuration]
-      sample_aperture_diameter = x
+  [instrument.configuration]
+    sample_aperture_diameter = x
 
-  **Existing Example:**
+**Existing Example:**
 
-  ..  code-block:: none
+..  code-block:: none
 
-      QRESOL/A2=20
+    QRESOL/A2=20
 
-  **Existing Replacement**
+**Existing Replacement**
 
-  ..  code-block:: none
+..  code-block:: none
 
-    [instrument.configuration]
-      sample_aperture_diameter = 0.02
+  [instrument.configuration]
+    sample_aperture_diameter = 0.02
+
+QRESOL/DELTAR=x
+---------------
+
+**Replacement**
+
+..  code-block:: none
+
+  [q_resolution]
+    delta_r = x
+
+**Existing Example:**
+
+..  code-block:: none
+
+  QRESOL/DELTAR=10
+
+**Existing Replacement**
+
+..  code-block:: none
+
+  [q_resolution]
+    delta_r = 10
 
 QRESOL/MODERATOR=filename.txt
 -----------------------------
