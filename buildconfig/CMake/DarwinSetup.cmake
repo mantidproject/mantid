@@ -132,7 +132,7 @@ if(NOT HDF5_ROOT)
     set(HDF5_ROOT /usr/local/opt/hdf5) # Only for homebrew!
 endif()
 
-if(ENABLE_WORKBENCH)
+if(ENABLE_WORKBENCH AND NOT CONDA_BUILD)
   set(CPACK_GENERATOR DragNDrop)
   set(CMAKE_INSTALL_PREFIX "")
   # Replace hdiutil command to retry on detach failure
