@@ -21,8 +21,8 @@ GROUP_COLUMN_INDEX = 1
 USE_RAW_COLUMN_INDEX = 2
 START_X_COLUMN_INDEX = 3
 END_X_COLUMN_INDEX = 4
-A0_COLUMN_INDEX = 5
-A0_ERROR_COLUMN_INDEX = 6
+BG_COLUMN_INDEX = 5
+BG_ERROR_COLUMN_INDEX = 6
 STATUS_COLUMN_INDEX = 7
 SHOW_MATRIX_COLUMN_INDEX = 8
 
@@ -252,7 +252,7 @@ class BackgroundCorrectionsView(widget, ui_form):
             raise RuntimeError("There is no selected run/group table row.")
 
     def populate_corrections_table(self, runs: list, groups: list, use_raws: list, start_xs: list, end_xs: list,
-                                   backgrounds: list, background_errors: list, statuses: list, use_raw_enabled: bool) -> None:
+                                   backgrounds: list, background_errors: list, statuses: list, use_raw_visible: bool) -> None:
         """Populates the background corrections table with the provided data."""
         self.correction_options_table.blockSignals(True)
         self.correction_options_table.setRowCount(0)
@@ -265,17 +265,18 @@ class BackgroundCorrectionsView(widget, ui_form):
             self.correction_options_table.setItem(row, RUN_COLUMN_INDEX, create_string_table_item(run, False))
             self.correction_options_table.setItem(row, GROUP_COLUMN_INDEX, create_string_table_item(group, False))
             self.correction_options_table.setItem(row, USE_RAW_COLUMN_INDEX,
-                                                  create_checkbox_table_item(use_raw, use_raw_enabled, USE_RAW_TOOLTIP))
+                                                  create_checkbox_table_item(use_raw, tooltip=USE_RAW_TOOLTIP))
             self.correction_options_table.setItem(row, START_X_COLUMN_INDEX, create_double_table_item(start_x))
             self.correction_options_table.setItem(row, END_X_COLUMN_INDEX, create_double_table_item(end_x))
-            self.correction_options_table.setItem(row, A0_COLUMN_INDEX,
+            self.correction_options_table.setItem(row, BG_COLUMN_INDEX,
                                                   create_double_table_item(background, enabled=False))
-            self.correction_options_table.setItem(row, A0_ERROR_COLUMN_INDEX,
+            self.correction_options_table.setItem(row, BG_ERROR_COLUMN_INDEX,
                                                   create_double_table_item(background_error, enabled=False))
             self.correction_options_table.setItem(row, STATUS_COLUMN_INDEX,
                                                   create_string_table_item(status, False, alignment=Qt.AlignVCenter))
             self.correction_options_table.setCellWidget(row, SHOW_MATRIX_COLUMN_INDEX,
                                                         self.create_show_fit_output_button_for_row(row))
+        self.correction_options_table.setColumnHidden(USE_RAW_COLUMN_INDEX, not use_raw_visible)
         self.correction_options_table.blockSignals(False)
         self.correction_options_table.resizeColumnsToContents()
 
@@ -288,8 +289,8 @@ class BackgroundCorrectionsView(widget, ui_form):
         """Setup the correction options table to have a good layout."""
         self._setup_double_item_delegate(START_X_COLUMN_INDEX)
         self._setup_double_item_delegate(END_X_COLUMN_INDEX)
-        self._setup_double_item_delegate(A0_COLUMN_INDEX)
-        self._setup_double_item_delegate(A0_ERROR_COLUMN_INDEX)
+        self._setup_double_item_delegate(BG_COLUMN_INDEX)
+        self._setup_double_item_delegate(BG_ERROR_COLUMN_INDEX)
         self.correction_options_table.setItemDelegateForColumn(STATUS_COLUMN_INDEX,
                                                                StatusItemDelegate(self.correction_options_table))
 
