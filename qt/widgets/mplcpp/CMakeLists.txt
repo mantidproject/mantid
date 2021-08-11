@@ -69,7 +69,7 @@ mtd_add_qt_library(
     Mantid::API
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon
-  # INSTALL_DIR
+  INSTALL_DIR
     ${WORKBENCH_LIB_DIR}
   OSX_INSTALL_RPATH
     @loader_path/../MacOS
