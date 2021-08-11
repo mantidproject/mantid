@@ -96,7 +96,7 @@
       <value val=",,10.0"/>
     </parameter>
 	
-	<!-- dummy parameter to support unit testing
+	<!-- dummy parameter to support unit testing,
 		the parameter is not present in the data file and does not
 		have a default value so is not added to the workspace log -->
     <parameter name="log_sample_xxx" type="string">
