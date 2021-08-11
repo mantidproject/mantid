@@ -571,13 +571,14 @@ public:
     PeaksWorkspace_sptr peaksShared = alg.getProperty("OutputWorkspace");
     TS_ASSERT_EQUALS(peaksShared->getNumberPeaks(), 3);
 
-    for (int peakind = 0; peakind < peaksShared->getNumberPeaks(); peakind++) {
-      const Peak &peakShared = peaksShared->getPeak(peakind);
+    // first peak is a satellite peak of second peak
+    // second peak is bragg peak with intensity 59 - 0.883704*7 = 52.814
+    // satellite peak should share background: 23 - 0.883704*7 = 16.814
+    const Peak satellitePeak = peaksShared->getPeak(0);
+    const Peak braggPeak = peaksShared->getPeak(1);
 
-      if (peakind == 0) {
-        TS_ASSERT_DELTA(peakShared.getIntensity(), 22.0, 1e-6);
-      }
-    }
+    TS_ASSERT_DELTA(braggPeak.getIntensity(), 52.814, 1e-2);
+    TS_ASSERT_DELTA(satellitePeak.getIntensity(), 16.814, 1e-2);
 
     AnalysisDataService::Instance().remove("peaks_integrated_shared");
   }
