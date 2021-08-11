@@ -4,7 +4,7 @@
 the create a distinct ENTITY for each bank-->
 
 <!DOCTYPE parameter-file [
-    <!ENTITY alpha "0.0968">
+    <!ENTITY alpha_0 "0.0968">
     <!ENTITY beta_0 "0.0216">
     <!ENTITY beta_1 "0.0123">
     <!ENTITY sigma_0_sq "0.0">
@@ -25,11 +25,30 @@ the create a distinct ENTITY for each bank-->
 
 <component-link name="NorthBank" >
 
+  <parameter name="alpha_0" type="number">
+    <value val="&alpha_0;" />
+  </parameter>
+  <parameter name="beta_0" type="number">
+    <value val="&beta_0;" />
+  </parameter>
+  <parameter name="beta_1" type="number">
+    <value val="&beta_1;" />
+  </parameter>
+  <parameter name="sigma_0_sq" type="number">
+    <value val="&sigma_0_sq;" />
+  </parameter>
+  <parameter name="sigma_1_sq" type="number">
+    <value val="&sigma_1_sq;" />
+  </parameter>
+  <parameter name="sigma_2_sq" type="number">
+    <value val="&sigma_2_sq;" />
+  </parameter>
+
   <parameter name="BackToBackExponential:S" type="fitting">
     <formula eq="sqrt((&sigma_2_sq;)*centre^4+(&sigma_1_sq;)*centre^2+(&sigma_0_sq;))" unit="dSpacing" result-unit="TOF" />
   </parameter>
   <parameter name="BackToBackExponential:A" type="fitting">
-    <formula eq="((&alpha;)/centre)" unit="dSpacing" result-unit="1/TOF" /> <fixed />
+    <formula eq="((&alpha_0;)/centre)" unit="dSpacing" result-unit="1/TOF" /> <fixed />
   </parameter>
   <parameter name="BackToBackExponential:B" type="fitting">
     <formula eq="((&beta_0;)+(&beta_1;)/(centre^4))" unit="dSpacing" result-unit="1/TOF" /> <fixed />
@@ -52,11 +71,30 @@ the create a distinct ENTITY for each bank-->
 
 <component-link name="SouthBank" >
 
+  <parameter name="alpha_0" type="number">
+    <value val="&alpha_0;" />
+  </parameter>
+  <parameter name="beta_0" type="number">
+    <value val="&beta_0;" />
+  </parameter>
+  <parameter name="beta_1" type="number">
+    <value val="&beta_1;" />
+  </parameter>
+  <parameter name="sigma_0_sq" type="number">
+    <value val="&sigma_0_sq;" />
+  </parameter>
+  <parameter name="sigma_1_sq" type="number">
+    <value val="&sigma_1_sq;" />
+  </parameter>
+  <parameter name="sigma_2_sq" type="number">
+    <value val="&sigma_2_sq;" />
+  </parameter>
+
   <parameter name="BackToBackExponential:S" type="fitting">
     <formula eq="sqrt((&sigma_2_sq;)*centre^4+(&sigma_1_sq;)*centre^2+(&sigma_0_sq;))" unit="dSpacing" result-unit="TOF" />
   </parameter>
   <parameter name="BackToBackExponential:A" type="fitting">
-    <formula eq="((&alpha;)/centre)" unit="dSpacing" result-unit="1/TOF" /> <fixed />
+    <formula eq="((&alpha_0;)/centre)" unit="dSpacing" result-unit="1/TOF" /> <fixed />
   </parameter>
   <parameter name="BackToBackExponential:B" type="fitting">
     <formula eq="((&beta_0;)+(&beta_1;)/(centre^4))" unit="dSpacing" result-unit="1/TOF" /> <fixed />
