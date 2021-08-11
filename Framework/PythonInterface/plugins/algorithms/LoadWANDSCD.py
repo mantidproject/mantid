@@ -325,7 +325,7 @@ class LoadWANDSCD(PythonAlgorithm):
             scale /= norm.getExperimentInfo(0).run().getProperty('monitor_count').value[0]
             self.getLogger().information('scale monitor = {}'.format(scale))
         elif normalize_by == 'time':
-            scale = np.array(norm.getExperimentInfo(0).run().getProperty('duration').value)
+            scale = np.array(data.getExperimentInfo(0).run().getProperty('duration').value)
             scale /= norm.getExperimentInfo(0).run().getProperty('duration').value[0]
             self.getLogger().information('van time = {}'.format(scale))
         else:
