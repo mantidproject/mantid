@@ -63,6 +63,7 @@ BugFixes
 
 - In frequency domain analysis the phasetables calculated from :ref:`MuonMaxent <algm-MuonMaxent>` can be used for
   :ref:`PhaseQuad <algm-PhaseQuad>` calculations on the phase tab.
+- In fitting tabs fit to raw checkbox can no longer be unchecked if no rebinned data is present.
 
 ALC
 ---

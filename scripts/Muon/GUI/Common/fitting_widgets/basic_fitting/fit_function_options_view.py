@@ -12,6 +12,7 @@ from mantidqt.widgets.workspacedisplay.table.presenter import TableWorkspaceDisp
 from Muon.GUI.Common.utilities import table_utils
 
 from qtpy.QtWidgets import QWidget
+from qtpy import QtCore
 
 ui_form, base_widget = load_ui(__file__, "fit_function_options.ui")
 
@@ -242,7 +243,7 @@ class FitFunctionOptionsView(ui_form, base_widget):
     @fit_to_raw.setter
     def fit_to_raw(self, check: bool) -> None:
         """Sets whether or not you are fitting to raw data."""
-        self.fit_to_raw_data_checkbox.setChecked(check)
+        self.fit_to_raw_data_checkbox.setCheckState(QtCore.Qt.Checked if check else QtCore.Qt.Unchecked)
 
     @property
     def function_name(self) -> str:
