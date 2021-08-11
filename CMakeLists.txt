@@ -49,6 +49,9 @@ set(MANTID_QT_LIB ${_mantidqt_option} CACHE STRING "Mantid qt build options, val
 If system is specificed a valid mantid qt installation must be present on the system, e.g. from conda")
 set_property(CACHE MANTID_QT_LIB PROPERTY STRINGS "OFF" "BUILD" "SYSTEM")
 
+if (NOT (ENABLE_WORKBENCH OR MANTID_QT_LIB STREQUAL "BUILD" OR MANTID_FRAMEWORK_LIB STREQUAL "BUILD"))
+message(FATAL_ERROR "Must select atleast one component to build")
+endif()
 
 set(CPACK_INSTALL_CMAKE_PROJECTS "${CMAKE_BINARY_DIR}" "Mantid" "ALL" "/")
 
