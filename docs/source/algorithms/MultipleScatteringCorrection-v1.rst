@@ -62,7 +62,7 @@ Example
 
 The following Python script generate a synthetic data set (instrument and sample) to show case the interface
 
-.. code-block:: python
+.. testcode:: TestSyntheticData
 
     def make_sample_workspace():
         # Create a fake workspace with TOF data
@@ -134,6 +134,8 @@ The following Python script generate a synthetic data set (instrument and sample
         0.0568,
     )
     ms_multi = correction_multiple_scattering(ws)
+
+.. testcleanup:: TestSyntheticData
 
 .. categories::
 
