@@ -314,7 +314,7 @@ class CalibrationModel(object):
     @staticmethod
     def get_info_from_file(file_path):
         # TODO: Find a way to reliably get the instrument from the file without using the filename.
-        instrument = file_path.split("/")[-1].split("_", 1)[0]
+        instrument = path.split(file_path)[-1].split("_", 1)[0]
         # Get run numbers from file.
         run_numbers = ""
         params_table = []
