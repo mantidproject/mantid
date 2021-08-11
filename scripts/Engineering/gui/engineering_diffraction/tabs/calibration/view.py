@@ -14,6 +14,7 @@ Ui_calib, _ = load_ui(__file__, "calibration_tab.ui")
 class CalibrationView(QtWidgets.QWidget, Ui_calib):
     sig_enable_controls = QtCore.Signal(bool)
     sig_update_fields = QtCore.Signal()
+    sig_enable_only_update_van = QtCore.Signal(bool)
 
     def __init__(self, parent=None, instrument="ENGINX"):
         super(CalibrationView, self).__init__(parent)
@@ -62,6 +63,9 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
 
     def set_on_check_update_vanadium_state_changed(self, slot):
         self.check_updateVan.stateChanged.connect(slot)
+
+    def set_enable_update_vanadium(self, slot):
+        self.sig_enable_only_update_van.connect(slot)
 
     # =================
     # Component Setters

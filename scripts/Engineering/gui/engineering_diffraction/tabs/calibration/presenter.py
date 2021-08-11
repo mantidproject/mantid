@@ -46,6 +46,7 @@ class CalibrationPresenter(object):
         self.view.set_on_radio_existing_toggled(self.set_load_existing_enabled)
         self.view.set_on_check_cropping_state_changed(self.show_cropping)
         self.view.set_on_check_update_vanadium_state_changed(self.disable_sample_and_crop)
+        self.view.set_enable_update_vanadium(self.try_enable_update_vanadium)
 
     def on_calibrate_clicked(self):
         plot_output = self.view.get_plot_output()
@@ -176,6 +177,9 @@ class CalibrationPresenter(object):
     def emit_enable_button_signal(self):
         self.view.sig_enable_controls.emit(True)
 
+    def emit_enable_update_van(self, cal_success):
+        self.view.sig_enable_only_update_van.emit(cal_success)
+
     def emit_update_fields_signal(self):
         self.view.sig_update_fields.emit()
 
@@ -186,19 +190,12 @@ class CalibrationPresenter(object):
     def _on_error(self, error_info):
         logger.error(str(error_info))
         self.emit_enable_button_signal()
-        self.try_enable_update_vanadium(False)
+        self.emit_enable_update_van(False)
 
     def _on_success(self, success_info):
         self.set_current_calibration(success_info)
         self.emit_enable_button_signal()
-        self.try_enable_update_vanadium(True)
-
-    def try_enable_update_vanadium(self, cal_success):
-        self.last_calibration_successful = cal_success
-        if cal_success and self.view.get_new_checked():
-            self.view.set_check_update_vanadium_enabled(True)
-        else:
-            self.view.set_check_update_vanadium_enabled(False)
+        self.emit_enable_update_van(True)
 
     def set_create_new_enabled(self, enabled):
         self.view.set_vanadium_enabled(enabled)
@@ -239,6 +236,13 @@ class CalibrationPresenter(object):
             self.set_calibrate_button_text("Update Vanadium")
         else:
             self.set_calibrate_button_text("Calibrate")
+
+    def try_enable_update_vanadium(self, cal_success):
+        self.last_calibration_successful = cal_success
+        if cal_success and self.view.get_new_checked():
+            self.view.set_check_update_vanadium_enabled(True)
+        else:
+            self.view.set_check_update_vanadium_enabled(False)
 
     # -----------------------
     # Observers / Observables
