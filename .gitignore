@@ -168,8 +168,9 @@ Thumbs.db
 # Folder config file
 Desktop.ini
 
-# PyCharm IDE
+# CLion and PyCharm IDE
 .idea/
+cmake-build-*/
 
 # VSCode
 .vscode/

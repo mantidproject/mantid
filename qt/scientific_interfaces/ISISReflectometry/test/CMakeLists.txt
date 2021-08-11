@@ -35,19 +35,24 @@ set(TEST_FILES
   Reduction/ValidateLookupRowTest.h
   Reduction/GroupTest.h
   Reduction/ValidateRowTest.h
+
+  Preview/PreviewModelTest.h
+  Preview/PreviewPresenterTest.h
 )
 
 set(CXXTEST_EXTRA_HEADER_INCLUDE
     ${CMAKE_CURRENT_LIST_DIR}/InterfacesReflectometryTestInitialization.h)
 
 mtd_add_qt_tests(
-  TARGET_NAME MantidQtInterfacesISISReflectometryTest
+  TARGET_NAME MantidScientificInterfacesISISReflectometryTest
   QT_VERSION 5
   SRC ${TEST_FILES}
   INCLUDE_DIRS
     ../../../../Framework/CurveFitting/inc
     ../../../../Framework/DataObjects/inc
     ../../../../Framework/TestHelpers/inc
+    ../GUI/Preview
+    Preview
   TEST_HELPER_SRCS
     ../../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
     ../../../../Framework/TestHelpers/src/IndirectFitDataCreationHelper.cpp
