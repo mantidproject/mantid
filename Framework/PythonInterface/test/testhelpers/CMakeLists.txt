@@ -38,6 +38,7 @@ target_link_libraries(
           Geometry
           ${Boost_LIBRARIES}
           ${POCO_LIBRARIES}
+          gmock
 )
 
 # Overall testhelpers target .pth file for discovery (only needed for
