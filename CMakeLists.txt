@@ -239,7 +239,7 @@ endif()
 # Installation settings
 
 # Install the files (.desktop and icon) to create a menu items
-if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux" AND NOT CONDA_BUILD)
   function(uppercase_first_letter output_var input)
   string(LENGTH ${input} _inputlen)
   string(TOUPPER ${input} _allupper)

@@ -123,11 +123,11 @@ function(add_python_package pkg_name)
       )
     endforeach()
   endif()
-  endif()
   # install the generated executable
   if(_parsed_arg_EXECUTABLE AND _parsed_arg_INSTALL_BIN_DIR)
     install(PROGRAMS ${_setup_py_build_root}/install/bin/${pkg_name}
             DESTINATION ${_parsed_arg_INSTALL_BIN_DIR}
     )
+  endif()
   endif()
 endfunction()
