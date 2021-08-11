@@ -59,8 +59,9 @@ class TomlSchemaV1Validator(object):
 
         detector_keys = {"configuration": {"selected_detector": None,
                                            "rear_scale": None,
-                                           "front_centre": {"x", "y", "z"},
-                                           "rear_centre": {"x", "y", "z"}},
+                                           "all_centre": {"x", "y"},
+                                           "front_centre": {"x", "y"},
+                                           "rear_centre": {"x", "y"}},
                          "correction": {"direct": {"front_file", "rear_file"},
                                          "flat": {"front_file", "rear_file"},
                                          "tube": {"file"},

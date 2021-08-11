@@ -27,7 +27,7 @@ V0 to V1
 - *[gravity]* and *gravity.enabled* were merged into *instrument.configuration.gravity_enabled*
 - *detector.configuration.selected_detector* is now mandatory
 - *detector.configuration.selected_detector* accepts *front* and *rear* instead of *HAB* and *LAB* respectively.
-
+- *detector.configuration.all_centre* has been added to set the front and rear centre at the same time.
 
 Conversion From Legacy User Files
 =================================
@@ -1261,8 +1261,33 @@ SAMPLE/OFFSET x
     sample_offset = -0.06
 
 
-set centre a b c d
-------------------
+set centre a b
+--------------
+
+..  code-block:: none
+
+    [detector]
+      [detector.configuration]
+        all_centre = {x=a, y=b}
+
+**Existing Example:**
+
+..  code-block:: none
+
+    set centre 84.2 -196.5
+
+**Existing Replacement**
+
+..  code-block:: none
+
+    [detector]
+      [detector.configuration]
+        # This will set both front and rear to the same centre values.
+        all_centre = {x=a, y=b}
+
+
+set centre a b c d [/MAIN] [/HAB]
+---------------------------------
 
 ..  code-block:: none
 
@@ -1275,7 +1300,8 @@ set centre a b c d
 
 ..  code-block:: none
 
-    set centre 84.2 -196.5 5.1 5.1
+    set centre 84.2 -196.5 5.1 5.1 /MAIN
+    set centre 84.2 -196.5 /HAB
 
 **Existing Replacement**
 

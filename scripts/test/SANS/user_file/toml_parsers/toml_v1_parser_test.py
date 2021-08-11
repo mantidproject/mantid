@@ -118,6 +118,26 @@ class TomlV1ParserTest(unittest.TestCase):
         self.assertEqual((1, 2), get_beam_position(state_move, DetectorType.HAB))
         self.assertEqual((2, 3), get_beam_position(state_move, DetectorType.LAB))
 
+    def test_all_centre_entry(self):
+        input_dict = {"detector": {"configuration": {"all_centre": {"x": 2, "y": 3.4}}}}
+        parser = self._setup_parser(input_dict)
+        for i in [ReductionMode.HAB, ReductionMode.LAB]:
+            move = parser.get_state_move(None)
+            self.assertEqual(2, move.detectors[i.value].sample_centre_pos1)
+            self.assertEqual(3.4, move.detectors[i.value].sample_centre_pos2)
+
+    def test_throws_when_all_and_rear_specified(self):
+        input_dict = {"detector": {"configuration": {"all_centre": {"x": 2, "y": 3.4},
+                                                     "rear_centre": {"x": 2}}}}
+        with self.assertRaisesRegex(ValueError, "front_centre"):
+            self._setup_parser(input_dict)
+
+    def test_throws_when_all_and_front_specified(self):
+        input_dict = {"detector": {"configuration": {"all_centre": {"x": 2, "y": 3.4},
+                                                     "front_centre": {"x": 2}}}}
+        with self.assertRaisesRegex(ValueError, "front_centre"):
+            self._setup_parser(input_dict)
+
     def test_rear_front_maps_to_enum_correctly(self):
         for user_input, enum_val in [("rear", ReductionMode.LAB), ("front", ReductionMode.HAB),
                                      ("all", ReductionMode.ALL), ("merged", ReductionMode.MERGED)]:

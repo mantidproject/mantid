@@ -166,15 +166,23 @@ class _TomlV1ParserImpl(TomlParserImplBase):
         reduction_mode_key = self.get_mandatory_val(["detector", "configuration", "selected_detector"])
         # LAB/Rear was set by default in user parser, so we fall-back to this
         self.reduction_mode.reduction_mode = ReductionMode.convert(reduction_mode_key, support_deprecated=False)
+        self._parse_centre_pos(det_config_dict)
 
+    def _parse_centre_pos(self, det_config_dict):
         def update_translations(det_type, values: dict):
             if values:
                 self.move.detectors[det_type.value].sample_centre_pos1 = values["x"]
                 self.move.detectors[det_type.value].sample_centre_pos2 = values["y"]
 
-        update_translations(DetectorType.LAB, self.get_val("rear_centre", det_config_dict))
+        rear = self.get_val("rear_centre", det_config_dict)
+        front = self.get_val("front_centre", det_config_dict)
+        all = self.get_val("all_centre", det_config_dict)
+        if (front or rear) and all:
+            raise ValueError("front_centre, rear_centre and all_centre were all specified together.")
+
+        update_translations(DetectorType.LAB, next((i for i in [rear, all] if i), None))
         if DetectorType.HAB.value in self.move.detectors:
-            update_translations(DetectorType.HAB, self.get_val("front_centre", det_config_dict))
+            update_translations(DetectorType.HAB, next((i for i in [front, all] if i), None))
 
     def _parse_detector(self):
         detector_dict = self.get_val("detector")
