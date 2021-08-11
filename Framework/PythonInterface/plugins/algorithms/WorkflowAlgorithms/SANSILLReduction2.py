@@ -651,6 +651,12 @@ class SANSILLReduction(PythonAlgorithm):
         '''Sets the process as flag as sample log for future sanity checks'''
         AddSampleLog(Workspace=ws, LogName='ProcessedAs', LogText=self.process)
 
+    def linearize_axis(self, ws):
+        '''Linearizes x-axis for a single rebinned event workspace to transform it to kinetic'''
+        x = np.arange(mtd[ws].blocksize())
+        for s in range(mtd[ws].getNumberHistograms()):
+            mtd[ws].setX(s, x)
+
     #===============================METHODS TO TREAT PROCESS TYPES===============================#
 
     def treat_empty_beam(self, ws):
@@ -779,12 +785,6 @@ class SANSILLReduction(PythonAlgorithm):
         assert isinstance(mtd[ws], MatrixWorkspace)
         self.progress.report('Combined')
         return ws
-
-    def linearize_axis(self, ws):
-        '''Linearizes x-axis for a single rebinned event workspace to transform it to kinetic'''
-        x = np.arange(mtd[ws].blocksize())
-        for s in range(mtd[ws].getNumberHistograms()):
-            mtd[ws].setX(s, x)
 
     def preprocess_group(self, wsg):
         '''Preprocesses a loaded workspace group'''
