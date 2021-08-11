@@ -223,6 +223,7 @@ void MultipleScatteringCorrection::exec() {
       output[wvBinsIndex] = unit_scaling * rho * sigma_s * A2 / (4 * M_PI * A1);
 
       // debug output
+#ifndef NDEBUG
       std::ostringstream msg_debug;
       msg_debug << "Det_" << workspaceIndex << "@spectrum_" << wvBinsIndex << ":\n"
                 << "\trho = " << rho << ", sigma_s = " << sigma_s << "\n"
@@ -230,6 +231,7 @@ void MultipleScatteringCorrection::exec() {
                 << "\tA2 = " << A2 << "\n"
                 << "\tms_factor = " << output[wvBinsIndex] << "\n";
       g_log.notice(msg_debug.str());
+#endif
 
       // Make certain that last point is calculated
       if (m_xStep > 1 && wvBinsIndex + m_xStep >= specSize && wvBinsIndex + 1 != specSize) {
