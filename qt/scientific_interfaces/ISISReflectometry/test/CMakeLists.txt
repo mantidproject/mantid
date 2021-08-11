@@ -8,6 +8,8 @@ set(TEST_FILES
   Batch/GroupProcessingAlgorithmTest.h
   Batch/BatchJobRunnerProcessingTest.h
   Batch/RowProcessingAlgorithmTest.h
+  Batch/RowPreprocessingAlgorithmTest.h
+
   Event/EventPresenterTest.h
   MainWindow/MainWindowPresenterTest.h
   RunsTable/RunsTablePresenterRowDeletionTest.h
@@ -53,6 +55,7 @@ mtd_add_qt_tests(
     ../../../../Framework/TestHelpers/inc
     ../GUI/Preview
     Preview
+    Reduction
   TEST_HELPER_SRCS
     ../../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
     ../../../../Framework/TestHelpers/src/IndirectFitDataCreationHelper.cpp
