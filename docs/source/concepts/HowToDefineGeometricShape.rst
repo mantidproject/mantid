@@ -348,7 +348,7 @@ The shapes that can be rotated are: Sphere_, `Cylinder (finite height) <Cylinder
 `Hollow Cylinder (finite height) <Hollow Cylinder_>`_, `Infinite Cylinder`_,
 `Slice of Cylinder Ring`_, `Infinite Plane`_, Cuboid_, Hexahedron_ and `Tapered Guide`_.
 
-Use the ``rotate`` tag to rotate a shape individually around its centre (or centre-of-bottom-base).
+Use the ``rotate`` tag to rotate a shape **individually around its centre** (or centre-of-bottom-base).
 The shape is rotated by an angle in degrees around the x,y and z axes in that order. To rotate a
 cylinder 90° clockwise around x and 45° anti-clockwise around y:
 
@@ -364,7 +364,7 @@ cylinder 90° clockwise around x and 45° anti-clockwise around y:
 
       <algebra val="stick" />
 
-Use the ``rotate-all`` tag to rotate a combined shape. To rotate the unison of a
+Use the ``rotate-all`` tag to rotate a combined shape **about the origin**. To rotate the unison of a
 sphere on the end of a cylinder (by 90° clockwise around x and 45° anti-clockwise around y):
 
 .. code-block:: xml
@@ -387,7 +387,8 @@ sphere on the end of a cylinder (by 90° clockwise around x and 45° anti-clockw
 All these rotatable shapes (expect for `Infinite Plane`_ and `Infinite Cylinder`_) can be plotted to check
 your shape definition is correct. For more details see :ref:`Mesh_Plots`.
 
-Shapes will be automatically rotated, if a rotation is set using :ref:<algm-SetGoniometer>.
+Shapes will be automatically rotated, if a rotation is set using :ref:`algm-SetGoniometer`. This can work alongside
+manual rotation tags. Note the rotations are applied in the order ``rotate``, ``rotate-all``, ``goniometer``.
 
 .. _Bounding-Box:
 

@@ -8,16 +8,9 @@
 
 `3D plotting in Matplotlib <https://matplotlib.org/mpl_toolkits/mplot3d/tutorial.html>`_
 
-**Other Plot Types**
+**Other Plot Docs**
 
 * :ref:`3D_Plots`
-* :ref:`Basic_1D_Plots`
-* :ref:`Waterfall_Plots`
-* :ref:`Colorfill_Plots`
-
-
-**General Plot Help**
-
 * :ref:`06_formatting_plots`
 * :ref:`02_scripting_plots`
 
@@ -27,16 +20,12 @@
 .. contents:: 3D Mesh Plots - Table of contents
     :local:
 
-Mesh Plots
-==========
-
 **Mesh Plots can only be accessed with a script, not through the Workbench interface**
 Here the mesh is plotted as a Poly3DCollection `Polygon <https://matplotlib.org/stable/tutorials/toolkits/mplot3d.html#polygon-plots>`_.
 
-These sample shapes can be created with :ref:`algm-SetSample` and copied using :ref:`algm-CopySample`.
+These sample shapes can be created with :ref:`algm-SetSample`, :ref:`algm-LoadSampleShape` or
+:ref:`algm-LoadSampleEnvironment` and copied using :ref:`algm-CopySample`.
 
-Scripting
----------
 
 MeshObject
 ##########
@@ -69,10 +58,7 @@ Plot a MeshObject from an .stl (or .3mf) file:
     fig, axes = plt.subplots(subplot_kw={'projection':'mantid3d'})
     axes.add_collection3d(mesh_polygon)
 
-    # Auto scale to the mesh size
-    axes_lims = mesh.flatten()
-    axes.auto_scale_xyz(axes_lims, axes_lims, axes_lims)
-
+    axes.set_mesh_axes_equal(mesh)
     axes.set_title('Sample Shape: Tube')
     axes.set_xlabel('X / m')
     axes.set_ylabel('Y / m')
@@ -127,9 +113,7 @@ Plot a CSGObject defined in an XML string:
    fig, axes = plt.subplots(subplot_kw={'projection':'mantid3d'})
    axes.add_collection3d(mesh_polygon)
 
-   # Auto scale to the mesh size
-   axes_lims = mesh.flatten()
-   axes.auto_scale_xyz(axes_lims, axes_lims, axes_lims)
+   axes.set_mesh_axes_equal(mesh)
    axes.view_init(elev=10, azim=-150)
 
    axes.set_title('Sample Shape: Microphone')
@@ -164,6 +148,8 @@ Note Component index 0 is usually the Container.
    # Component index 0 is the Container:
    # container_mesh = environment.getComponent(0).getShape().getMesh()
    component_mesh = environment.getComponent(2).getMesh()
+
+   # plot as meshes as previously described
 
 .. plot::
 
@@ -251,6 +237,8 @@ vectors have been plotted (in solid and dashed linestyles respectively). Both of
          linestyle = linestyle
     )
 
+    # Create ws and plot sample shape as previously described
+
    '''Add arrow along beam direction'''
    source = ws.getInstrument().getSource().getPos()
    sample = ws.getInstrument().getSample().getPos() - source
@@ -282,24 +270,6 @@ vectors have been plotted (in solid and dashed linestyles respectively). Both of
    import matplotlib.pyplot as plt
    import numpy as np
    from mpl_toolkits.mplot3d.art3d import Poly3DCollection
-
-   def set_axes_equal(ax):
-      x_limits = ax.get_xlim3d()
-      y_limits = ax.get_ylim3d()
-      z_limits = ax.get_zlim3d()
-
-      x_range = abs(x_limits[1] - x_limits[0])
-      x_middle = np.mean(x_limits)
-      y_range = abs(y_limits[1] - y_limits[0])
-      y_middle = np.mean(y_limits)
-      z_range = abs(z_limits[1] - z_limits[0])
-      z_middle = np.mean(z_limits)
-
-      plot_radius = 0.5*max([x_range, y_range, z_range])
-
-      ax.set_xlim3d([x_middle - plot_radius, x_middle + plot_radius])
-      ax.set_ylim3d([y_middle - plot_radius, y_middle + plot_radius])
-      ax.set_zlim3d([z_middle - plot_radius, z_middle + plot_radius])
 
    cuboid = " \
    <cuboid id='some-cuboid'> \
@@ -341,9 +311,7 @@ vectors have been plotted (in solid and dashed linestyles respectively). Both of
    axes.set_ylabel('Y / m')
    axes.set_zlabel('Z / m')
 
-   axes_lims = mesh.flatten()
-   axes.auto_scale_xyz(axes_lims[0::3], axes_lims[1::3], axes_lims[2::3])
-   set_axes_equal(axes)
+   axes.set_mesh_axes_equal(mesh)
    axes.view_init(elev=12, azim=44)
 
    def arrow(ax, vector, origin = None, factor = None, color = 'black',linestyle = '-'):
@@ -368,72 +336,22 @@ vectors have been plotted (in solid and dashed linestyles respectively). Both of
 
    plt.show()
 
-For more plotting advice: :ref:`02_scripting_plots`
+``set_mesh_axes_equal()``
+#########################
 
-|
-|
+To centre the axes on the mesh and to set the aspect ratio equal, simply provide
+the mesh of the largest object on your plot. If you want to add arrows to your plot,
+you probably want to call ``set_mesh_axes_equal()`` first.
 
-Plot Toolbar
-------------
+.. code-block:: python
 
-.. figure:: /images/PlotToolbar3DSurface.png
-   :alt: Plot Toolbar Mesh Plots
-   :align: center
+    mesh = shape.getMesh()
+    mesh_polygon = Poly3DCollection(mesh, facecolors = facecolors, linewidths=0.1)
+    fig, axes = plt.subplots(subplot_kw={'projection':'mantid3d'})
+    axes.add_collection3d(mesh_polygon)
 
-|
-|
-
-Click Menus
------------
-
-.. figure:: /images/PlotClickMenus3DMesh.png
-   :alt: Click Menus Surface Plots
-   :align: center
-   :width: 1500px
-
-|
-|
-
-|FigureOptionsGear.png| ptions Menu
------------------------------------
-
-.. figure:: /images/PlotOptions3DSurface.png
-   :alt: Plot Options 3D Surface
-   :align: center
-
-
-|
-|
-
-General
-=======
-
-**General Plot Help**
-
-* :ref:`06_formatting_plots`
-* :ref:`02_scripting_plots`
-
-|
-|
-
-Plots Toolbox
--------------
-
-.. figure:: /images/PlotsWindow.png
-   :alt: Plot Toolbox
-   :align: center
-   :width: 800px
-
-|
-|
-
-File > Settings
----------------
-
-.. figure:: /images/PlotSettings.png
-   :alt: Plot Settings
-   :align: center
-   :width: 850px
+    axes.set_mesh_axes_equal(mesh)
+    # then add arrows as desired
 
 |
 |
@@ -443,6 +361,3 @@ File > Settings
 * :ref:`plotting`
 * `Matplotlib Keyboard Shortcuts <https://matplotlib.org/3.1.1/users/navigation_toolbar.html#navigation-keyboard-shortcuts>`_
 * See :ref:`here <plotting>` for custom color cycles and colormaps
-
-.. |FigureOptionsGear.png| image:: /images/FigureOptionsGear.png
-   :width: 150px
