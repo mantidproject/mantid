@@ -133,21 +133,21 @@ void MultipleScatteringCorrection::exec() {
   // std::vector<double> distGraber.m_elementVolumes : Cached element volumes
   // std::vector<Kernel::V3D> distGraber.m_elementPositions : Cached element positions
   // size_t distGraber.m_numVolumeElements : The number of volume elements
-  const size_t numVolumeElements = distGraber.m_numVolumeElements;
+  const int64_t numVolumeElements = distGraber.m_numVolumeElements;
 
   // L2D needs to be calculated w.r.t the detector
   // L12 is independent from the detector, therefore can be cached outside
   // - L12 is a upper off-diagonal matrix
   // NOTE: if the sample size/volume is too large, we might need to use openMP
   //       to parallelize the calculation
-  const size_t len_l12 = numVolumeElements * (numVolumeElements - 1) / 2;
+  const int64_t len_l12 = numVolumeElements * (numVolumeElements - 1) / 2;
   std::vector<double> sample_L12s(len_l12, 0.0);
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *m_outputWS))
-  for (size_t i = 0; i < numVolumeElements; ++i) {
+  for (int64_t i = 0; i < numVolumeElements; ++i) {
     PARALLEL_START_INTERUPT_REGION
-    for (size_t j = i + 1; j < numVolumeElements; ++j) {
+    for (int64_t j = i + 1; j < numVolumeElements; ++j) {
       const V3D dist = distGraber.m_elementPositions[i] - distGraber.m_elementPositions[j];
-      size_t idx = calcLinearIdxFromUpperTriangular(numVolumeElements, i, j);
+      int64_t idx = calcLinearIdxFromUpperTriangular(numVolumeElements, i, j);
       sample_L12s[idx] = dist.norm();
     }
     PARALLEL_END_INTERUPT_REGION
@@ -160,11 +160,11 @@ void MultipleScatteringCorrection::exec() {
 #ifndef NDEBUG
   std::ostringstream msg;
   msg << "\n";
-  for (size_t i = 0; i < numVolumeElements; ++i) {
-    for (size_t j = 0; j < numVolumeElements; ++j) {
+  for (int64_t i = 0; i < numVolumeElements; ++i) {
+    for (int64_t j = 0; j < numVolumeElements; ++j) {
       if (i < j) {
-        size_t idx = numVolumeElements * (numVolumeElements - 1) / 2 -
-                     (numVolumeElements - i) * (numVolumeElements - i - 1) / 2 + j - i - 1;
+        int64_t idx = numVolumeElements * (numVolumeElements - 1) / 2 -
+                      (numVolumeElements - i) * (numVolumeElements - i - 1) / 2 + j - i - 1;
         msg << sample_L12s[idx] << " ";
       } else {
         msg << "x ";
