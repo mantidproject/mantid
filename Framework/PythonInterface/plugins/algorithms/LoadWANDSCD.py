@@ -136,7 +136,7 @@ class LoadWANDSCD(PythonAlgorithm):
             # normalize
             data = self.normalize(data, norm, self.getProperty("NormalizedBy").value.lower())
             # cleanup
-            # NOTE: keep the Va workspace in memory in case we need it later
+            # NOTE: if va is read from memory, we will keep it in case we need it later
             if van_filename is not None:
                 DeleteWorkspace(norm)
 
