@@ -880,6 +880,8 @@ void LoadNexusLogs::loadNXLog(::NeXus::File &file, const std::string &absolute_e
     }
   } catch (::NeXus::Exception &e) {
     g_log.warning() << "NXlog entry " << entry_name << " gave an error when loading:'" << e.what() << "'.\n";
+  } catch (std::invalid_argument &e) {
+    g_log.warning() << "NXlog entry " << entry_name << " gave an error when loading:'" << e.what() << "'.\n";
   }
 
   file.closeGroup();
