@@ -1,8 +1,7 @@
 # mantid.utils.nomad tests
 
 set(TEST_PY_FILES
-    diagnosticsTest.py
-    mediansDetectorTest.py)
+    diagnosticsTest.py)
 
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})
 

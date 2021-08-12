@@ -143,8 +143,10 @@ class InstrumentComponentLevel(enum.IntEnum):
 class _NOMADMedianDetectorTest:
     r"""
     Mixin providing methods to algorithm NOMADMedianDetectorTest
-    The following attributes should've been defined in NOMADMedianDetectorTest:
+
+    The following attributes should've been defined and initialized in NOMADMedianDetectorTest:
         intensities: numpy.ma.core.MaskedArray
+        config: dict
     """
 
     # Instrument geomtry
