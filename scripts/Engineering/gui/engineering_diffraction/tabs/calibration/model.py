@@ -107,7 +107,7 @@ class CalibrationModel(object):
         SouthBank = ws_inst.getComponentByName("SouthBank")
         params_north = []
         params_south = []
-        for param_name in ["alpha", "beta_0", "beta_1", "sigma_0_sq", "sigma_1_sq", "sigma_2_sq"]:
+        for param_name in ["alpha_0", "beta_0", "beta_1", "sigma_0_sq", "sigma_1_sq", "sigma_2_sq"]:
             params_north += [NorthBank.getNumberParameter(param_name)[0]]
             params_south += [SouthBank.getNumberParameter(param_name)[0]]
 
@@ -314,7 +314,7 @@ class CalibrationModel(object):
     @staticmethod
     def get_info_from_file(file_path):
         # TODO: Find a way to reliably get the instrument from the file without using the filename.
-        instrument = file_path.split("/")[-1].split("_", 1)[0]
+        instrument = path.split(file_path)[-1].split("_", 1)[0]
         # Get run numbers from file.
         run_numbers = ""
         params_table = []

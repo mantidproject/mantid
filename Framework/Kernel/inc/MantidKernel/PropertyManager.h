@@ -92,6 +92,8 @@ public:
 
   /// removes the property from properties map
   void removeProperty(const std::string &name, const bool delproperty = true) override;
+  /// removes the property from the properties map and returns a pointer to it
+  std::unique_ptr<Property> takeProperty(const size_t index) override;
   /// Clears the whole property map
   void clear() override;
 

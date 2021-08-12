@@ -234,6 +234,11 @@ void LoadMuonNexus2::doExec() {
       double dum = detector.getFloat("first_good_time");
       setProperty("FirstGoodData", dum);
     }
+
+    if (detector.containsDataSet("last_good_time")) {
+      double dum = detector.getFloat("last_good_time");
+      setProperty("LastGoodData", dum);
+    }
   }
 
   API::Progress progress(this, 0.0, 1.0, m_numberOfPeriods * total_specs);

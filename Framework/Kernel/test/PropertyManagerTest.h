@@ -406,6 +406,17 @@ public:
     TS_ASSERT_EQUALS(mgr.getProperties().size(), 0);
   }
 
+  void testTakeProperty() {
+    PropertyManagerHelper mgr;
+    const std::string name("TestProperty");
+    TS_ASSERT_THROWS_NOTHING(mgr.declareProperty(name, 10.0));
+    std::unique_ptr<Property> propertyPointer;
+    TS_ASSERT_THROWS_NOTHING(propertyPointer = mgr.takeProperty(0));
+    TS_ASSERT(propertyPointer);
+    TS_ASSERT_EQUALS(name, propertyPointer->name());
+    TS_ASSERT_EQUALS(mgr.getProperties().size(), 0);
+  }
+
   void testClear() {
     PropertyManagerHelper mgr;
     const std::string name("TestProperty");

@@ -9,7 +9,7 @@ from mantid.api import FileFinder
 from Muon.GUI.Common.message_box import warning
 from qtpy import PYQT4, QtWidgets
 allowed_instruments = ["EMU", "MUSR", "CHRONUS", "HIFI", "ARGUS", "PSI"]
-allowed_extensions = ["nxs", "bin"]
+allowed_extensions = ["nxs", "nxs_v2", "bin"]
 FILE_SEP = os.sep
 
 

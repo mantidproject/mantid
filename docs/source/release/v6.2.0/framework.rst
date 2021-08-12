@@ -23,6 +23,7 @@ Improvements
 
 - :ref:`CreateSampleWorkspace <algm-CreateSampleWorkspace>` has new property InstrumentName.
 - :ref:`CrossCorrelate <algm-CrossCorrelate>` has additional parameter to set the maximum d-space shift during cross correlation.
+- :ref:`Load <algm-Load>` will now set output properties of all types, not just workspaces.
 - :ref:`LoadRaw <algm-LoadRaw>` will now ignore empty ICPalarm log files.
 
 Bugfixes
@@ -31,7 +32,7 @@ Bugfixes
 - Fix rare divide-by zero error when running :ref:`GetEi <algm-GetEi>` on noisy data.
 - Fix crash when running :ref:`IntegrateEPP <algm-IntegrateEPP>` on a workspace group via the algorithm dialog.
 - Fixed bug in :ref:`FitGaussianPeaks <algm-FitGaussianPeaks>` algorithm in which a peak at the end of range would cause an error due to not enough data point being available to fit parameters
-
+- Fixed bug where :ref:`LoadRaw <algm-LoadRaw>` would not load all log files for raw files with an alternate data stream.
 
 Fit Functions
 -------------

@@ -823,13 +823,23 @@ class BasicFittingModel:
         else:
             return ""
 
-    def get_runs_groups_and_pairs_for_fits(self) -> tuple:
+    def get_runs_groups_and_pairs_for_fits(self, display_type: str) -> tuple:
         """Returns the runs and group/pairs corresponding to the selected dataset names."""
         runs, groups_and_pairs = [], []
         for name in self.fitting_context.dataset_names:
             runs.append(get_run_numbers_as_string_from_workspace_name(name, self.context.data_context.instrument))
             groups_and_pairs.append(get_group_or_pair_from_name(name))
-        return self.fitting_context.dataset_names, runs, groups_and_pairs
+        return self._get_datasets_containing_string(display_type, self.fitting_context.dataset_names, runs,
+                                                    groups_and_pairs)
+
+    @staticmethod
+    def _get_datasets_containing_string(display_type: str, dataset_names: list, *corresponding_dataset_args) -> tuple:
+        """Returns the dataset names that contain a string and returns its associated runs/groups/pairs."""
+        if display_type == "All":
+            return (dataset_names, *corresponding_dataset_args)
+
+        # Filter the data based on a name in the dataset_names containing a string
+        return zip(*filter(lambda x: display_type in x[0], zip(dataset_names, *corresponding_dataset_args)))
 
     def get_all_fit_function_parameter_values_for(self, fit_function: IFunction) -> list:
         """Returns the values of the fit function parameters."""
@@ -847,6 +857,18 @@ class BasicFittingModel:
     def get_all_fit_functions(self) -> list:
         """Returns all the fit functions for the current fitting mode."""
         return self.fitting_context.single_fit_functions
+
+    def get_all_fit_functions_for(self, display_type: str) -> list:
+        """Returns all the fit functions for datasets with a name containing a string."""
+        return self._filter_functions_by_dataset_string(display_type, self.single_fit_functions)
+
+    def _filter_functions_by_dataset_string(self, display_type: str, fit_functions: list) -> list:
+        """Filters out the fit functions corresponding to dataset names that do not contain a string."""
+        if display_type == "All":
+            return self.get_all_fit_functions()
+        else:
+            _, filtered_functions = self._get_datasets_containing_string(display_type, self.dataset_names, fit_functions)
+            return filtered_functions
 
     def get_fit_workspace_names_from_groups_and_runs(self, runs: list, groups_and_pairs: list) -> list:
         """Returns the workspace names to use for the given runs and groups/pairs."""

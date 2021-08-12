@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from os import path
 
-from mantid.simpleapi import Load, logger, EnggEstimateFocussedBackground, ConvertUnits, Minus, AverageLogData, \
+from mantid.simpleapi import Load, logger, EnggEstimateFocussedBackground, Minus, AverageLogData, \
     CreateEmptyTableWorkspace, GroupWorkspaces, DeleteWorkspace, DeleteTableRows, RenameWorkspace, CreateWorkspace
 from Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 from Engineering.gui.engineering_diffraction.tabs.common import output_settings
@@ -53,17 +53,15 @@ class FittingDataModel(object):
                     f"Failed to restore workspace: {ws_name}. Error: {e}. \n Continuing loading of other files.")
         self.update_log_workspace_group()
 
-    def load_files(self, filenames_string, xunit):
+    def load_files(self, filenames_string):
         self._last_added = []
         filenames = [name.strip() for name in filenames_string.split(",")]
         for filename in filenames:
-            ws_name = self._generate_workspace_name(filename, xunit)
+            ws_name = self._generate_workspace_name(filename)
             if ws_name not in self._loaded_workspaces:
                 try:
                     if not ADS.doesExist(ws_name):
                         ws = Load(filename, OutputWorkspace=ws_name)
-                        # temporary fix to ensure unit of ws matches unit box (which will soon be removed)
-                        ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws_name, Target=xunit)
                     else:
                         ws = ADS.retrieve(ws_name)
                     if ws.getNumberHistograms() == 1:
@@ -376,10 +374,6 @@ class FittingDataModel(object):
         [ws_table.setCell(irow, icol, row[icol]) for icol in range(0, len(row))]
 
     @staticmethod
-    def _generate_workspace_name(filepath, xunit):
+    def _generate_workspace_name(filepath):
         wsname = path.splitext(path.split(filepath)[1])[0]
-        # remove unit from fname if present as will convert unit to xunit in combo box temporarily until it is removed
-        # Once combo box removed we can get unit from workspace post-loading (and call RenameWorkspace)
-        if wsname.endswith('_TOF') or wsname.endswith('_dSpacing'):
-            wsname = '_'.join(wsname.split('_')[0:-1])
-        return wsname + '_' + xunit
+        return wsname

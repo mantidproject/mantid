@@ -36,6 +36,7 @@ class SeqFittingTabWidget(object):
             self.seq_fitting_tab_view.fit_table.hide_run_column()
             self.seq_fitting_tab_view.fit_table.hide_group_column()
         else:
+            self.seq_fitting_tab_view.hide_data_type_combo_box()
             self.seq_fitting_tab_view.fit_table.hide_workspace_column()
 
         context.deleted_plots_notifier.add_subscriber(self.seq_fitting_tab_presenter.selected_workspaces_observer)

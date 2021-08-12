@@ -70,7 +70,8 @@ class SeqFittingTabPresenterTest(unittest.TestCase):
         fit_values = [0.2, 0.2, 0.1, 0]
         self.model.get_fit_function_parameters = mock.Mock(return_value=parameters)
         self.model.get_all_fit_function_parameter_values_for = mock.Mock(return_value=fit_values)
-        self.model.get_all_fit_functions = mock.Mock(return_value=[None, None])
+        self.model.get_all_fit_functions_for = mock.Mock(return_value=[None, None])
+        self.view.selected_data_type = mock.Mock(return_value="All")
 
         self._setup_test_fit_function(fit_values)
         self.view.fit_table.get_number_of_fits.return_value = 2

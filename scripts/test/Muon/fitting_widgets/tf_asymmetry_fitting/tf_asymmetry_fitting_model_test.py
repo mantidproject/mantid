@@ -656,6 +656,43 @@ class TFAsymmetryFittingModelTest(unittest.TestCase):
         self.assertEqual(message, "Only Groups can be fitted in TF Asymmetry mode. "
                                   "Please unselect the following Pairs/Diffs in the grouping tab: 'bottom', 'top'")
 
+    def test_that_get_all_fit_functions_for_returns_all_the_tf_single_functions_for_the_display_type_all(self):
+        self.model.dataset_names = self.dataset_names
+        self.model.single_fit_functions = self.single_fit_functions
+        self.model.tf_asymmetry_single_functions = [self.tf_single_function.clone(), self.tf_single_function.clone()]
+        self.model.tf_asymmetry_mode = True
+
+        filtered_functions = self.model.get_all_fit_functions_for("All")
+
+        self.assertEqual(len(filtered_functions), len(self.model.single_fit_functions))
+        self.assertEqual(self.model.get_fit_function_parameter_values(filtered_functions[0])[0], [0.0, 0.0, 0.0, 0.2, 0.2])
+        self.assertEqual(self.model.get_fit_function_parameter_values(filtered_functions[1])[0], [0.0, 0.0, 0.0, 0.2, 0.2])
+
+    def test_that_get_all_fit_functions_for_does_not_do_filtering_even_for_a_fwd_display_type(self):
+        self.model.dataset_names = self.dataset_names
+        self.model.single_fit_functions = self.single_fit_functions
+        self.model.tf_asymmetry_single_functions = [self.tf_single_function.clone(), self.tf_single_function.clone()]
+        self.model.tf_asymmetry_mode = True
+
+        filtered_functions = self.model.get_all_fit_functions_for("fwd")
+
+        self.assertEqual(len(filtered_functions), 2)
+        self.assertEqual(self.model.get_fit_function_parameter_values(filtered_functions[0])[0], [0.0, 0.0, 0.0, 0.2, 0.2])
+        self.assertEqual(self.model.get_fit_function_parameter_values(filtered_functions[1])[0], [0.0, 0.0, 0.0, 0.2, 0.2])
+
+    def test_that_get_all_fit_functions_for_returns_the_tf_simultaneous_function_when_in_simultaneous_mode(self):
+        self.model.dataset_names = self.dataset_names
+        self.model.simultaneous_fitting_mode = True
+        self.model.tf_asymmetry_mode = True
+        self.model.simultaneous_fit_function = self.simultaneous_fit_function
+        self.model.tf_asymmetry_simultaneous_function = self.tf_simultaneous_fit_function
+
+        filtered_functions_all = self.model.get_all_fit_functions_for("All")
+        self.assertEqual(str(filtered_functions_all[0]), str(self.tf_simultaneous_fit_function))
+
+        filtered_functions_fwd = self.model.get_all_fit_functions_for("fwd")
+        self.assertEqual(str(filtered_functions_fwd[0]), str(self.tf_simultaneous_fit_function))
+
 
 if __name__ == '__main__':
     unittest.main()

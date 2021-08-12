@@ -60,6 +60,7 @@ Improvements
 - The region of interest for Calibration/Focusing can now be selected with a user-supplied custom calibration file.
 - The Focused Run Files input box defaults to the last runs focused on the Focus tab, even if multiple runs were focussed
 - The full calibration setting now has a default value consisting of the path to the ENGINX_full_instrument_calibration_193749.nxs file
+- The usability of the file finder on the Fitting tab has been improved by the addition of file filters based on unit and/or bank
 
 Bugfixes
 ########
@@ -87,6 +88,7 @@ Improvements
 ############
 - Find detector in peaks will check which det is closer when dealing with peak-in-gap situation for tube-type detectors.
 - Existing :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` now provides better calibration of panel orientation for flat panel detectors.
+- Existing :ref:`DGSPlanner <dgsplanner-ref>` expanded to support WAND²
 - Existing :ref:`MaskPeaksWorkspace <algm-MaskPeaksWorkspace-v1>` now also supports tube-type detectors used at the CORELLI instrument.
 - Existing :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` now retains the value of small optimization results instead of zeroing them.
 - Existing :ref:`IntegrateEllipsoids <algm-IntegrateEllipsoids-v1>` now can use a different integrator for satellite peaks.

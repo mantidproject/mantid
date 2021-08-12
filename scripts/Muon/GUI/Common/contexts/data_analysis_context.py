@@ -55,3 +55,7 @@ class DataAnalysisContext(MuonContext):
     @property
     def window_title(self):
         return "Muon Analysis"
+
+    @staticmethod
+    def data_type_options_for_sequential():
+        return ["All"]
