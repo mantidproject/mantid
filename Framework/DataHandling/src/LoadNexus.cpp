@@ -121,6 +121,7 @@ void LoadNexus::runLoadMuonNexus() {
   loadMuonNexus->setPropertyValue(outputWorkspace, m_workspace);
   loadMuonNexus->setPropertyValue("DeadTimeTable", m_workspace + "_DeadTimeTable");
   loadMuonNexus->setPropertyValue("DetectorGroupingTable", m_workspace + "DetectorGroupingTable");
+  loadMuonNexus->setPropertyValue("TimeZeroTable", m_workspace + "TimeZeroTable");
 
   // Get the array passed in the spectrum_list, if an empty array was passed use
   // the default

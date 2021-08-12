@@ -23,6 +23,7 @@ Improvements
 
 - :ref:`CreateSampleWorkspace <algm-CreateSampleWorkspace>` has new property InstrumentName.
 - :ref:`CrossCorrelate <algm-CrossCorrelate>` has additional parameter to set the maximum d-space shift during cross correlation.
+- :ref:`Load <algm-Load>` will now set output properties of all types, not just workspaces.
 - :ref:`LoadRaw <algm-LoadRaw>` will now ignore empty ICPalarm log files.
 
 Bugfixes
