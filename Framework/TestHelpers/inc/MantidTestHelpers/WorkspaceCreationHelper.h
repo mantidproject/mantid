@@ -87,23 +87,6 @@ private:
   static Mantid::Kernel::Logger &g_log;
 };
 
-/** gmock algorithm for mocking*/
-class MockAlgorithm : public Mantid::API::Algorithm {
-public:
-  MOCK_METHOD(const std::string, name, (), (const, override));
-  MOCK_METHOD(int, version, (), (const, override));
-  MOCK_METHOD(const std::string, category, (), (const, override));
-  MOCK_METHOD(const std::string, summary, (), (const, override));
-
-  // Feel free to add types for the second param as required. Since the base class is instantiated in a .cpp file
-  // we want to have to name those types manually to avoid having to write MockAlgorithm<T> when using it.
-  MOCK_METHOD(TypedValue, getProperty, (const std::string &propName), (const, override));
-  MOCK_METHOD(IPropertyManager *, setProperty, (const std::string &name, const std::vector<std::string> &), (const));
-
-private:
-  void init() override {}
-  void exec() override {}
-};
 /// A struct containing the cells of an EPP table row.
 struct EPPTableRow {
   /// FindEPP algorithm fitting success status.
