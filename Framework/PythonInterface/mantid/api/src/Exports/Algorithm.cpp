@@ -184,7 +184,7 @@ void export_leaf_classes() {
       "Algorithm", "Base class for all algorithms")
       .def("fromString", &Algorithm::fromString, "Initialize the algorithm from a string representation")
       .staticmethod("fromString")
-      .def("createChildAlgorithm", raw_function(&createChildWithProps, 1),
+      .def("createChildAlgorithm", raw_function(&createChildWithProps, std::size_t(1)),
            "Creates and intializes a named child algorithm. Output workspaces "
            "are given a dummy name.")
       .def("declareProperty", (declarePropertyType1)&PythonAlgorithm::declarePyAlgProperty,
