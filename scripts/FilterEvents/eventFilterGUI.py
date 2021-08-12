@@ -882,9 +882,14 @@ class MainWindow(QMainWindow):
         vecx = sumws.readX(0)
         vecy = sumws.readY(0)
 
-        # get the x limits using the original workspace, as they are far more precise
-        xmin = min(wksp.readX(0)) / 1000000
-        xmax = max(wksp.readX(0)) / 1000000
+        # if there is only one xbin in the summed workspace, that means we have an evetn file without pulse,
+        # and in this case we use the original workspace time limits
+        if len(vecx) == 1:
+            xmin = min(wksp.readX(0)) / 1000000
+            xmax = max(wksp.readX(0)) / 1000000
+        else:
+            xmin = min(vecx)
+            xmax = max(vecx)
 
         ymin = min(vecy)
         ymax = max(vecy)
@@ -919,9 +924,13 @@ class MainWindow(QMainWindow):
             return
 
         kwargs = {}
-        kwargs["StartTime"] = self.ui.lineEdit_3.text()
-        kwargs["StopTime"] = self.ui.lineEdit_4.text()
-        kwargs["TimeInterval"] = self.ui.lineEdit_timeInterval.text()
+
+        xlim = self.ui.mainplot.get_xlim()
+        kwargs["StartTime"] = self.ui.lineEdit_3.text()if self.ui.lineEdit_3.text() != "" else str(xlim[0])
+        kwargs["StopTime"] = self.ui.lineEdit_4.text() if self.ui.lineEdit_4.text() != "" else str(xlim[1])
+
+        if self.ui.lineEdit_timeInterval.text() != "":
+            kwargs["TimeInterval"] = self.ui.lineEdit_timeInterval.text()
         kwargs["useReverseLogarithmic"] = self.ui.useReverseLogarithmic.isChecked()
 
         splitwsname = str(self._dataWS) + "_splitters"
