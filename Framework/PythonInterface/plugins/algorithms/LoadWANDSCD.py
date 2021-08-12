@@ -108,6 +108,14 @@ class LoadWANDSCD(PythonAlgorithm):
             if (self.getProperty("IPTS").value == Property.EMPTY_INT) or len(self.getProperty("RunNumbers").value) == 0:
                 issues["Filename"] = 'Must specify either Filename or IPTS AND RunNumbers'
 
+        # case 2: vanadium IPTS and run number must be specified at the same time
+        va_noIPTS = self.getProperty("VanadiumIPTS").isDefault
+        va_useIPTS = not self.getProperty("VanadiumIPTS").isDefault
+        va_noRunNumber = self.getProperty("VanadiumRunNumber").isDefault
+        va_useRunNumber = not self.getProperty("VanadiumRunNumber").isDefault
+        if (va_useIPTS and va_noRunNumber) or (va_noIPTS and va_useRunNumber):
+            issues["VanadiumIPTS"] = 'VanadiumIPTS and VanadiumRunNumber must be specified together'
+
         return issues
 
     def PyExec(self):
