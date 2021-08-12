@@ -669,9 +669,9 @@ class SANSILLReduction(PythonAlgorithm):
         AddSampleLog(Workspace=ws, LogName='BeamCenterX', LogText=str(beam_x), LogType='Number', LogUnit='meters')
         AddSampleLog(Workspace=ws, LogName='BeamCenterY', LogText=str(beam_y), LogType='Number', LogUnit='meters')
         DeleteWorkspace(centers)
+        # correct for beam center before calculating the beam width and flux
+        self.apply_multipanel_beam_center_corr(ws, beam_x, beam_y)
         if self.mode != AcqMode.TOF:
-            # correct for beam center before calculating the beam width for resolution
-            MoveInstrumentComponent(Workspace=ws, X=-beam_x, Y=-beam_y, ComponentName='detector')
             self.fit_beam_width(ws)
         self.calculate_flux(ws)
 
@@ -720,6 +720,7 @@ class SANSILLReduction(PythonAlgorithm):
         '''Calculates the transmission'''
         flux_ws = self.getPropertyValue('FluxWorkspace')
         check_distances_match(mtd[ws], mtd[flux_ws])
+        self.apply_multipanel_beam_center_corr(ws, beam_x, beam_y)
         self.calculate_flux(ws)
         if self.mode != AcqMode.TOF:
             check_wavelengths_match(mtd[ws], mtd[flux_ws])
