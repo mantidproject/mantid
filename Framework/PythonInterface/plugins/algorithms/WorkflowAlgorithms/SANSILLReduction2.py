@@ -100,11 +100,18 @@ class SANSILLReduction(PythonAlgorithm):
                              doc='Choose the normalisation type.')
 
         self.declareProperty(name='BeamRadius',
-                             defaultValue=0.2,
+                             defaultValue=0.25,
                              validator=FloatBoundedValidator(lower=0.),
-                             doc='Beam radius [m]; used for beam center finding, transmission and flux calculations.')
+                             doc='Beam radius [m]; used for beam center finding.')
 
-        self.setPropertySettings('BeamRadius', beam_or_transmission)
+        self.setPropertySettings('BeamRadius', beam)
+
+        self.declareProperty(name='TransmissionBeamRadius',
+                             defaultValue=0.1,
+                             validator=FloatBoundedValidator(lower=0.),
+                             doc='Beam radius [m]; used for flux and transmission calculations.')
+
+        self.setPropertySettings('TransmissionBeamRadius', beam_or_transmission)
 
         self.declareProperty(name='SampleThickness',
                              defaultValue=[0.1],
@@ -710,7 +717,7 @@ class SANSILLReduction(PythonAlgorithm):
             self.log().information(f'Attenuator 2 coefficient/value: {att2_value}')
             att_coeff *= float(att2_value)
         self.log().information(f'Attenuation coefficient used is: {att_coeff}')
-        radius = self.getProperty('BeamRadius').value
+        radius = self.getProperty('TransmissionBeamRadius').value
         CalculateFlux(InputWorkspace=ws, OutputWorkspace=flux, BeamRadius=radius)
         Scale(InputWorkspace=flux, Factor=att_coeff, OutputWorkspace=flux)
         if self.process == 'EmptyBeam':
