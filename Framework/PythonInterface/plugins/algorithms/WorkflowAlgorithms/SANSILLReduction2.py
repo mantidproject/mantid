@@ -720,7 +720,7 @@ class SANSILLReduction(PythonAlgorithm):
         '''Calculates the transmission'''
         flux_ws = self.getPropertyValue('FluxWorkspace')
         check_distances_match(mtd[ws], mtd[flux_ws])
-        self.apply_multipanel_beam_center_corr(ws, beam_x, beam_y)
+        self.apply_direct_beam(ws)
         self.calculate_flux(ws)
         if self.mode != AcqMode.TOF:
             check_wavelengths_match(mtd[ws], mtd[flux_ws])
