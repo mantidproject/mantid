@@ -7,6 +7,7 @@
 #pragma once
 #include "Common/DllConfig.h"
 #include "Item.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 class MANTIDQT_ISISREFLECTOMETRY_DLL PreviewRow : public Item {
@@ -21,7 +22,11 @@ public:
   void renameOutputWorkspace(std::string const &, std::string const &) override {}
   void setOutputNames(std::vector<std::string> const &) override {}
 
+  Mantid::API::MatrixWorkspace_sptr getLoadedWs() const noexcept;
+  void setLoadedWs(Mantid::API::MatrixWorkspace_sptr ws) noexcept;
+
 private:
   std::vector<std::string> m_runNumbers;
+  Mantid::API::MatrixWorkspace_sptr m_loadedWs;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

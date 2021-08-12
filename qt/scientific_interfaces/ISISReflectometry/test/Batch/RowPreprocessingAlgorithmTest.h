@@ -65,6 +65,7 @@ public:
     auto row = PreviewRow(runNumbers);
 
     updateRowOnAlgorithmComplete(mockAlg, row);
-    // TODO ASSERT WS_Ptr
+
+    TS_ASSERT_EQUALS(row.getLoadedWs(), mockWs);
   }
 };

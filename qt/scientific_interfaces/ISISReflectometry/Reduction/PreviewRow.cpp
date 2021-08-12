@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "PreviewRow.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 #include <string>
 #include <vector>
@@ -23,4 +24,7 @@ int PreviewRow::totalItems() const { return 1; }
 
 int PreviewRow::completedItems() const { return 1; }
 
+Mantid::API::MatrixWorkspace_sptr PreviewRow::getLoadedWs() const noexcept { return m_loadedWs; }
+
+void PreviewRow::setLoadedWs(Mantid::API::MatrixWorkspace_sptr ws) noexcept { m_loadedWs = ws; }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

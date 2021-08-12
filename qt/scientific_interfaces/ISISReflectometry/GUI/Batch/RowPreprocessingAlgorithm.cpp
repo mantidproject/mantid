@@ -53,9 +53,9 @@ IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const & /*model*/, Pr
   return jobAlgorithm;
 }
 
-void updateRowOnAlgorithmComplete(const IAlgorithm_sptr &, Item &) {
-  // TODO decide what to do with the output workspace
-  // auto &row = dynamic_cast<Row &>(item);
-  // auto const outputWs = AlgorithmProperties::getOutputWorkspace(algorithm, "OutputWorkspace");
+void updateRowOnAlgorithmComplete(const IAlgorithm_sptr &algorithm, Item &item) {
+  auto &row = dynamic_cast<PreviewRow &>(item);
+  MatrixWorkspace_sptr outputWs = algorithm->getProperty("OutputWorkspace");
+  row.setLoadedWs(outputWs);
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry::PreprocessRow
