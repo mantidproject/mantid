@@ -153,6 +153,8 @@ set(
 
 set(UI_FILES inc/MantidQtWidgets/InstrumentView/UCorrectionDialog.ui)
 
+# Target
+mtd_add_qt_library(TARGET_NAME MantidQtWidgetsInstrumentView
                    QT_VERSION 5
                    SRC
                      ${SRC_FILES}
