@@ -5,6 +5,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
+# package imports
+from mantid.simpleapi import (LoadEmptyInstrument, mtd, MaskDetectors, ExtractMask, SaveMask, DeleteWorkspace)
+
 # 3rd-party imports
 import numpy
 import numpy as np
@@ -111,7 +114,7 @@ def determine_tubes_threshold(vec_intensity, mask_config: dict, instrument_confi
     not_collimated_uppers = high_pixel * tube_m_array
     not_collimated_lowers = np.repeat(not_collimated_lowers, instrument_config.num_pixels_per_tube)
     not_collimated_uppers = np.repeat(not_collimated_uppers, instrument_config.num_pixels_per_tube)
-    not_collimated_masks = (pixel_collimation_states == int(CollimationLevel.Empty)).astype(int)
+    not_collimated_masks = (pixel_collimation_states == CollimationLevel.Empty.value).astype(int)
     # sanity check
     assert not_collimated_lowers.shape == (instrument_config.num_pixels, )
     assert not_collimated_masks.shape == not_collimated_uppers.shape
@@ -122,7 +125,7 @@ def determine_tubes_threshold(vec_intensity, mask_config: dict, instrument_confi
     full_collimated_uppers = (1. + (high_pixel - 1) * 3.) * tube_m_array
     full_collimated_lowers = np.repeat(full_collimated_lowers, instrument_config.num_pixels_per_tube)
     full_collimated_uppers = np.repeat(full_collimated_uppers, instrument_config.num_pixels_per_tube)
-    full_collimated_masks = (pixel_collimation_states == int(CollimationLevel.Full)).astype(int)
+    full_collimated_masks = (pixel_collimation_states == CollimationLevel.Full.value).astype(int)
 
     # Calculate boundaries for half collimated pixels
     # condition 4: summed pixel intensity < (1+(low_pixel-1)*3) * m1 or
@@ -142,7 +145,7 @@ def determine_tubes_threshold(vec_intensity, mask_config: dict, instrument_confi
     half_collimated_uppers[1::2] = half2_collimated_uppers
     half_collimated_uppers = np.repeat(half_collimated_uppers, instrument_config.num_pixels_per_tube // 2)
     assert half_collimated_uppers.shape == (instrument_config.num_pixels, )
-    half_collimated_masks = (pixel_collimation_states == int(CollimationLevel.Half)).astype(int)
+    half_collimated_masks = (pixel_collimation_states == CollimationLevel.Half.value).astype(int)
 
     # Combine
     upper_boundaries = not_collimated_uppers * not_collimated_masks
@@ -153,8 +156,6 @@ def determine_tubes_threshold(vec_intensity, mask_config: dict, instrument_confi
     lower_boundaries += full_collimated_lowers * full_collimated_masks
     lower_boundaries += half_collimated_lowers * half_collimated_masks
     #
-    # print(f'[DEBUG] Upper: \n{upper_boundaries}')
-    # print(f'[DEBUG] Lower: \n{lower_boundaries}')
 
     # Return the to be masked pixels
     pixel_mask_states = vec_intensity < lower_boundaries
@@ -162,6 +163,46 @@ def determine_tubes_threshold(vec_intensity, mask_config: dict, instrument_confi
     pixel_mask_states += vec_intensity > upper_boundaries
 
     return pixel_mask_states
+
+
+def export_masks(pixel_mask_states: numpy.ndarray,
+                 mask_file_name: str,
+                 instrument_name: str = 'NOMAD'):
+    """Export masks to XML file format
+
+    Parameters
+    ----------
+    pixel_mask_states: numpy.ndarray
+        boolean array with the number of pixels of NOMAD.  True for masking
+    mask_file_name: str
+        name of the output mask XML file
+    instrument_name: str
+        name of the instrument
+
+    """
+    # Load empty instrument
+    empty_workspace_name = f'_{instrument_name}_empty'
+    mask_workspace_name = f'_{instrument_name}_mask_empty'
+    LoadEmptyInstrument(InstrumentName=instrument_name, OutputWorkspace=empty_workspace_name)
+
+    # Get the workspace indexes to mask
+    # first 2 spectra are monitors: add 2
+    # Check
+    if mtd[empty_workspace_name].getNumberHistograms() != pixel_mask_states.shape[0] + 2:
+        raise RuntimeError(f'Spectra number of {instrument_name} workspace does not match mask state array')
+    mask_ws_indexes = np.where(pixel_mask_states)[0] + 2
+    print(f'DEBUG mask workspace indexes: {mask_ws_indexes}')
+
+    # Mask detectors
+    MaskDetectors(Workspace=empty_workspace_name, WorkspaceIndexList=mask_ws_indexes)
+
+    # Extract and save
+    ExtractMask(InputWorkspace=empty_workspace_name, OutputWorkspace=mask_workspace_name)
+    SaveMask(InputWorkspace=mask_workspace_name, OutputFile=mask_file_name)
+
+    # Clean
+    for ws_name in [empty_workspace_name, mask_workspace_name]:
+        DeleteWorkspace(ws_name)
 
 
 class CollimationLevel(enum.Enum):

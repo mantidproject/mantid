@@ -5,12 +5,12 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-import unittest
 # package imports
-from mantid.utils.nomad.diagnostics import (determine_tubes_threshold, CollimationLevel, InstrumentComponentLevel,
-                                            _NOMADMedianDetectorTest, export_masks)
+from mantid.utils.nomad.diagnostics import (export_masks, determine_tubes_threshold, CollimationLevel,
+                                            InstrumentComponentLevel, _NOMADMedianDetectorTest)
 
 # third-party imports
+import numpy
 import numpy as np
 from numpy.testing import assert_allclose
 
@@ -18,122 +18,10 @@ from numpy.testing import assert_allclose
 from collections import namedtuple
 import os
 import tempfile
+import unittest
 
 
 class NOMADMedianDetectorTestTest(unittest.TestCase):
-
-    def test_export_mantid_mask(self):
-        """Test to export Mask to XML
-        """
-        # output file name
-        test_xml_name = '/tmp/test_mask.xml'
-
-        # mask states
-        test_mask_states = np.ndarray(shape=(128*8*99, ), dtype=bool)
-        test_mask_states[:] = False
-        test_mask_states[0:123] = True
-        test_mask_states[3000:4321] = True
-
-        # export masks
-        export_masks(test_mask_states, test_xml_name, 'NOMAD')
-
-        # check
-        assert os.path.exists(test_xml_name)
-        with open(test_xml_name, 'r') as mask_file:
-            lines = mask_file.readlines()
-            assert lines[3].strip() == '<detids>0-122,3000-4320</detids>'
-        os.remove(test_xml_name)
-
-    def test_ymal_input(self):
-        """Test processing YMAL
-        """
-        # Generate test file
-        temp_dir = tempfile.mkdtemp()
-        temp_ymal = os.path.join(temp_dir, 'nomad_mask.yml')
-        self._generate_test_ymal(temp_ymal)
-        assert os.path.exists(temp_ymal)
-
-        # Parse yaml
-        mask_config = _NOMADMedianDetectorTest.parse_yaml(temp_ymal)
-        assert isinstance(mask_config, dict)
-
-        # Check parsing
-        full_col_8packs = mask_config['collimation']['full_col']
-        # eight_packs: [3,7,8,9,10,11,19,20,26,28,30,34, ...]
-        # full_col: from [1, 8, 16, 25, 27, 28, 29] -> [7, 26, ...]
-        assert 7 in full_col_8packs and 26 in full_col_8packs,  f'Mapped full column 8 packs: {full_col_8packs}'
-        # half_col': [30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 45, 46] -> [...]
-        half_col_8packs = mask_config['collimation']['half_col']
-        assert 63 in half_col_8packs and 90 in half_col_8packs, f'Mapped half column 8 packs: {half_col_8packs}'
-
-        # Get nomad instrument configuration
-        nomad = _NOMADMedianDetectorTest.set_nomad_constants()
-
-        # Test ymal and numpy conversion
-        eight_pack_collimation_states = \
-            _NOMADMedianDetectorTest.get_collimation_states(mask_config['collimation'],
-                                                            nomad, InstrumentComponentLevel.EightPack)
-        assert eight_pack_collimation_states.shape == (99,), f'{eight_pack_collimation_states.shape}'
-        # check full collimated
-        for pack_index in [7, 26]:
-            assert eight_pack_collimation_states[pack_index] == 2,\
-                f'Pack index {pack_index}: {eight_pack_collimation_states[pack_index]}'
-        # check half collimated
-        for pack_index in [63, 90]:
-            assert eight_pack_collimation_states[pack_index] == 1,\
-                f'Pack index {pack_index}: {eight_pack_collimation_states[pack_index]}'
-        # not collimated
-        for pack_index in [2, 3, 4, 5, 6, 91, 92]:
-            assert eight_pack_collimation_states[pack_index] == 0,\
-                f'Pack index {pack_index}: {eight_pack_collimation_states[pack_index]}'
-
-        # pixel collimation
-        pixel_collimation_states = \
-            _NOMADMedianDetectorTest.get_collimation_states(mask_config['collimation'],
-                                                            nomad, InstrumentComponentLevel.Pixel)
-        assert pixel_collimation_states.shape == (256 * 8 * 49, ), f'{pixel_collimation_states.shape}'
-        # check full collimated
-        for pack_index in [1, 8, 16, 25, 27, 28, 29]:
-            pack_index -= 1
-            np.testing.assert_allclose(pixel_collimation_states[pack_index * 8 * 256:(pack_index + 1) * 8 * 256],
-                                       np.zeros(8 * 256) + 2,
-                                       err_msg=f'Pack index {pack_index * 8 * 256}:... : '
-                                               f'{pixel_collimation_states[pack_index]}')
-        # check half collimated
-        for pack_index in [30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 45, 46]:
-            pack_index -= 1
-            np.testing.assert_allclose(pixel_collimation_states[pack_index * 8 * 256:(pack_index + 1) * 8 * 256],
-                                       np.zeros(8 * 256) + 1,
-                                       err_msg=f'Pack index {pack_index * 8 * 256}:... : '
-                                               f'{pixel_collimation_states[pack_index]}')
-        # not collimated
-        for pack_index in [2, 3, 4, 5, 6, 7, 9, 10, 11, 43, 44, 47, 48, 49]:
-            pack_index -= 1
-            np.testing.assert_allclose(pixel_collimation_states[pack_index * 8 * 256:(pack_index + 1) * 8 * 256],
-                                       np.zeros(8 * 256),
-                                       err_msg=f'Pack index {pack_index * 8 * 256}:... : '
-                                               f'{pixel_collimation_states[pack_index]}')
-
-    def test_determine_tubes_thresholds(self):
-        """
-        Returns
-        -------
-        """
-        # Set up test data
-        mock_nomad, test_config, test_data = self._generate_test_data()
-
-        # Determine threshold
-        some_returns = determine_tubes_threshold(test_data, test_config, mock_nomad)
-
-        # Gold file
-        expected_mask_states = np.array([[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
-                                         [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                                         [1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0],
-                                         [0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 1],
-                                         [1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
-                                         [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1]])
-
-        np.testing.assert_allclose(some_returns.reshape(6, 12).astype(int), expected_mask_states)
 
     @staticmethod
     def _generate_test_data():
@@ -318,6 +206,212 @@ class NOMADMedianDetectorTestTest(unittest.TestCase):
         mask = np.repeat(mask, tester.TUBES_IN_EIGHTPACK * tester.PIXELS_IN_TUBE)
         tester.intensities = np.ma.masked_array(intensities, mask=mask)
         cls.tester2 = tester
+
+    def test_export_mantid_mask(self):
+        """Test to export Mask to XML
+        """
+        # output file name
+        test_xml_name = '/tmp/test_mask.xml'
+
+        # mask states
+        test_mask_states = np.ndarray(shape=(128*8*99, ), dtype=bool)
+        test_mask_states[:] = False
+        test_mask_states[0:123] = True
+        test_mask_states[3000:4321] = True
+
+        # export masks
+        export_masks(test_mask_states, test_xml_name, 'NOMAD')
+
+        # check
+        assert os.path.exists(test_xml_name)
+        with open(test_xml_name, 'r') as mask_file:
+            lines = mask_file.readlines()
+            assert lines[3].strip() == '<detids>0-122,3000-4320</detids>'
+        os.remove(test_xml_name)
+
+    def test_ymal_input(self):
+        """Test processing YMAL
+        """
+        # Generate test file
+        temp_dir = tempfile.mkdtemp()
+        temp_ymal = os.path.join(temp_dir, 'nomad_mask.yml')
+        self._generate_test_ymal(temp_ymal)
+        assert os.path.exists(temp_ymal)
+
+        # Parse yaml
+        mask_config = _NOMADMedianDetectorTest.parse_yaml(temp_ymal)
+        assert isinstance(mask_config, dict)
+
+        # Check parsing
+        full_col_8packs = mask_config['collimation']['full_col']
+        # eight_packs: [3,7,8,9,10,11,19,20,26,28,30,34, ...]
+        # full_col: from [1, 8, 16, 25, 27, 28, 29] -> [7, 26, ...]
+        assert 7 in full_col_8packs and 26 in full_col_8packs,  f'Mapped full column 8 packs: {full_col_8packs}'
+        # half_col': [30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 45, 46] -> [...]
+        half_col_8packs = mask_config['collimation']['half_col']
+        assert 63 in half_col_8packs and 90 in half_col_8packs, f'Mapped half column 8 packs: {half_col_8packs}'
+
+        # Get nomad instrument configuration
+        nomad = _NOMADMedianDetectorTest.set_nomad_constants()
+
+        # Test ymal and numpy conversion
+        eight_pack_collimation_states = \
+            _NOMADMedianDetectorTest.get_collimation_states(mask_config['collimation'],
+                                                            nomad, InstrumentComponentLevel.EightPack)
+        assert eight_pack_collimation_states.shape == (99,), f'{eight_pack_collimation_states.shape}'
+        # check full collimated
+        for pack_index in [7, 26]:
+            assert eight_pack_collimation_states[pack_index] == 2,\
+                f'Pack index {pack_index}: {eight_pack_collimation_states[pack_index]}'
+        # check half collimated
+        for pack_index in [63, 90]:
+            assert eight_pack_collimation_states[pack_index] == 1,\
+                f'Pack index {pack_index}: {eight_pack_collimation_states[pack_index]}'
+        # not collimated
+        for pack_index in [2, 3, 4, 5, 6, 91, 92]:
+            assert eight_pack_collimation_states[pack_index] == 0,\
+                f'Pack index {pack_index}: {eight_pack_collimation_states[pack_index]}'
+
+        # pixel collimation
+        pixel_collimation_states = \
+            _NOMADMedianDetectorTest.get_collimation_states(mask_config['collimation'],
+                                                            nomad, InstrumentComponentLevel.Pixel)
+        assert pixel_collimation_states.shape == (256 * 8 * 49, ), f'{pixel_collimation_states.shape}'
+        # check full collimated
+        for pack_index in [1, 8, 16, 25, 27, 28, 29]:
+            pack_index -= 1
+            np.testing.assert_allclose(pixel_collimation_states[pack_index * 8 * 256:(pack_index + 1) * 8 * 256],
+                                       np.zeros(8 * 256) + 2,
+                                       err_msg=f'Pack index {pack_index * 8 * 256}:... : '
+                                               f'{pixel_collimation_states[pack_index]}')
+        # check half collimated
+        for pack_index in [30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 45, 46]:
+            pack_index -= 1
+            np.testing.assert_allclose(pixel_collimation_states[pack_index * 8 * 256:(pack_index + 1) * 8 * 256],
+                                       np.zeros(8 * 256) + 1,
+                                       err_msg=f'Pack index {pack_index * 8 * 256}:... : '
+                                               f'{pixel_collimation_states[pack_index]}')
+        # not collimated
+        for pack_index in [2, 3, 4, 5, 6, 7, 9, 10, 11, 43, 44, 47, 48, 49]:
+            pack_index -= 1
+            np.testing.assert_allclose(pixel_collimation_states[pack_index * 8 * 256:(pack_index + 1) * 8 * 256],
+                                       np.zeros(8 * 256),
+                                       err_msg=f'Pack index {pack_index * 8 * 256}:... : '
+                                               f'{pixel_collimation_states[pack_index]}')
+
+    def test_ymal_input_2(self):
+        """
+
+        Returns
+        -------
+
+        """
+        # Generate test file
+        temp_dir = tempfile.mkdtemp()
+        temp_ymal = os.path.join(temp_dir, 'nomad_mask.yml')
+        self._generate_test_ymal(temp_ymal)
+        assert os.path.exists(temp_ymal)
+
+        mask_config = _NOMADMedianDetectorTest.parse_yaml(temp_ymal)
+        assert isinstance(mask_config, dict)
+
+        # AssertionError: ['detector_ranges', 'threshold', 'collimation', 'eight_packs', 'bank']
+        print(f'{mask_config["collimation"]}')
+
+        full_col_8packs = mask_config['collimation']['full_col']
+        assert isinstance(full_col_8packs[0], int), f'{type(full_col_8packs[0])}'
+        # {'full_col': [1, 8, 16, 25, 27, 28, 29], 'half_col': [30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 45, 46]}
+        assert 8 in full_col_8packs
+        half_col_8packs = mask_config['collimation']['half_col']
+        assert 36 in half_col_8packs
+
+        # Get nomad instrument configuration
+        nomad = _NOMADMedianDetectorTest.set_nomad_constants()
+
+        # Test ymal and numpy conversion
+        eight_pack_collimation_states = \
+            _NOMADMedianDetectorTest.get_collimation_states(mask_config['collimation'],
+                                                            nomad, InstrumentComponentLevel.EightPack)
+        assert eight_pack_collimation_states.shape == (49,), f'{eight_pack_collimation_states.shape}'
+        # check full collimated
+        for pack_index in [1, 8, 16, 25, 27, 28, 29]:
+            assert eight_pack_collimation_states[pack_index - 1] == 2,\
+                f'Pack index {pack_index - 1}: {eight_pack_collimation_states[pack_index - 1]}'
+        # check half collimated
+        for pack_index in [30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 45, 46]:
+            assert eight_pack_collimation_states[pack_index - 1] == 1,\
+                f'Pack index {pack_index - 1}: {eight_pack_collimation_states[pack_index - 1]}'
+        # not collimated
+        for pack_index in [2, 3, 4, 5, 6, 7, 9, 10, 11, 43, 44, 47, 48, 49]:
+            assert eight_pack_collimation_states[pack_index - 1] == 0,\
+                f'Pack index {pack_index - 1}: {eight_pack_collimation_states[pack_index - 1]}'
+
+        # pixel collimation
+        pixel_collimation_states = \
+            _NOMADMedianDetectorTest.get_collimation_states(mask_config['collimation'],
+                                                            nomad, InstrumentComponentLevel.Pixel)
+        assert pixel_collimation_states.shape == (256 * 8 * 49, ), f'{pixel_collimation_states.shape}'
+        # check full collimated
+        for pack_index in [1, 8, 16, 25, 27, 28, 29]:
+            pack_index -= 1
+            np.testing.assert_allclose(pixel_collimation_states[pack_index * 8 * 256:(pack_index + 1) * 8 * 256],
+                                       np.zeros(8 * 256) + 2,
+                                       err_msg=f'Pack index {pack_index * 8 * 256}:... : '
+                                               f'{pixel_collimation_states[pack_index]}')
+        # check half collimated
+        for pack_index in [30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 45, 46]:
+            pack_index -= 1
+            np.testing.assert_allclose(pixel_collimation_states[pack_index * 8 * 256:(pack_index + 1) * 8 * 256],
+                                       np.zeros(8 * 256) + 1,
+                                       err_msg=f'Pack index {pack_index * 8 * 256}:... : '
+                                               f'{pixel_collimation_states[pack_index]}')
+        # not collimated
+        for pack_index in [2, 3, 4, 5, 6, 7, 9, 10, 11, 43, 44, 47, 48, 49]:
+            pack_index -= 1
+            np.testing.assert_allclose(pixel_collimation_states[pack_index * 8 * 256:(pack_index + 1) * 8 * 256],
+                                       np.zeros(8 * 256),
+                                       err_msg=f'Pack index {pack_index * 8 * 256}:... : '
+                                               f'{pixel_collimation_states[pack_index]}')
+
+    def test_ymal_input_3(self):
+        """
+
+        Returns
+        -------
+
+        """
+        # Generate test file
+        temp_dir = tempfile.mkdtemp()
+        temp_ymal = os.path.join(temp_dir, 'nomad_mask.yml')
+        self._generate_test_ymal(temp_ymal)
+        assert os.path.exists(temp_ymal)
+
+        mask_config = _NOMADMedianDetectorTest.parse_yaml(temp_ymal)
+        assert isinstance(mask_config, dict)
+
+        # AssertionError: ['detector_ranges', 'threshold', 'collimation', 'eight_packs', 'bank']
+        print(f'{mask_config["collimation"]}')
+
+    def test_determine_tubes_thresholds(self):
+        """
+        Returns
+        -------
+        """
+        # Set up test data
+        mock_nomad, test_config, test_data = self._generate_test_data()
+
+        # Determine threshold
+        some_returns = determine_tubes_threshold(test_data, test_config, mock_nomad)
+
+        # Gold file
+        expected_mask_states = np.array([[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                                         [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                                         [1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0],
+                                         [0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 1],
+                                         [1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
+                                         [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1]])
+
+        np.testing.assert_allclose(some_returns.reshape(6, 12).astype(int), expected_mask_states)
 
     def test_tube_range(self):
         ranges = _NOMADMedianDetectorTest().tube_range
