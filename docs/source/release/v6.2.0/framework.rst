@@ -47,6 +47,17 @@ MantidWorkbench
 
 See :doc:`mantidworkbench`.
 
+Algorithms
+----------
+
+Improvements
+############
+- :ref:`LoadNexusMonitors <algm-LoadNexusMonitors-v2>` now utilizes the log filter provided by `LoadNexusLogs <algm-LoadNexusLogs>`
+
+Bugfixes
+########
+- :ref:`LoadNexusLogs <algm-LoadNexusLogs>` now logs that are poorly formed create a warning message and the other logs are loaded. Previously it stopped loading logs at that point.
+
 SliceViewer
 -----------
 
