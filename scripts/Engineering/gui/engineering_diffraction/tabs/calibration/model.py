@@ -102,23 +102,6 @@ class CalibrationModel(object):
                 self.create_output_files(user_calib_dir, difa, difc, tzero, bk2bk_params, ceria_path, vanadium_path,
                                          instrument, bank, spectrum_numbers, calfile)
 
-        else:
-            if plot_output:
-                plot_dicts = list()
-                if bank is not None:
-                    if calfile:
-                        bank_name = "Custom"
-                    elif spectrum_numbers:
-                        bank_name = "Cropped"
-                    else:
-                        bank_name = bank
-                    plot_dicts.append(EnggUtils.generate_tof_fit_dictionary(bank_name))
-                    EnggUtils.plot_tof_fit(plot_dicts, [bank_name])
-                else:
-                    plot_dicts.append(EnggUtils.generate_tof_fit_dictionary("bank_1"))
-                    plot_dicts.append(EnggUtils.generate_tof_fit_dictionary("bank_2"))
-                    EnggUtils.plot_tof_fit(plot_dicts, ["bank_1", "bank_2"])
-
     @staticmethod
     def extract_b2b_params(workspace):
 
