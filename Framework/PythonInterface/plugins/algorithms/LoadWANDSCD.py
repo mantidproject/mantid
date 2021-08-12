@@ -19,9 +19,7 @@ from mantid.api import (
 )
 from mantid.kernel import (
     Direction,
-    EnabledWhenProperty,
     Property,
-    PropertyCriterion,
     IntArrayProperty,
     StringListValidator,
     FloatTimeSeriesProperty,
@@ -93,11 +91,6 @@ class LoadWANDSCD(PythonAlgorithm):
         self.setPropertyGroup('VanadiumFile', 'Normalization')
         self.setPropertyGroup('VanadiumWorkspace', 'Normalization')
         self.setPropertyGroup('NormalizedBy', 'Normalization')
-        # setup condition
-        self.setPropertySettings('VanadiumIPTS', EnabledWhenProperty('NormalizedBy', PropertyCriterion.IsNotDefault))
-        self.setPropertySettings('VanadiumRunNumber', EnabledWhenProperty('NormalizedBy', PropertyCriterion.IsNotDefault))
-        self.setPropertySettings('VanadiumFile', EnabledWhenProperty('NormalizedBy', PropertyCriterion.IsNotDefault))
-        self.setPropertySettings('VanadiumWorkspace', EnabledWhenProperty('NormalizedBy', PropertyCriterion.IsNotDefault))
 
         # Grouping info
         self.declareProperty("Grouping", 'None', StringListValidator(['None', '2x2', '4x4']),
@@ -110,6 +103,7 @@ class LoadWANDSCD(PythonAlgorithm):
     def validateInputs(self):
         issues = dict()
 
+        # case 1: missing input
         if not self.getProperty("Filename").value:
             if (self.getProperty("IPTS").value == Property.EMPTY_INT) or len(self.getProperty("RunNumbers").value) == 0:
                 issues["Filename"] = 'Must specify either Filename or IPTS AND RunNumbers'
@@ -123,18 +117,23 @@ class LoadWANDSCD(PythonAlgorithm):
         # load and group
         data = self.load_and_group(runs)
 
-        # Process the vanadium normalization data
-        if self.getProperty("NormalizedBy").value.lower() == 'none':
-            # no normalization
-            self.getLogger().information("Skip Va normalization as requested")
+        # check if normalization need to be performed
+        # NOTE: the normalization will be skipped if no information regarding Vanadium is provided
+        skipNormalization = self.getProperty("VanadiumIPTS").isDefault and \
+                            self.getProperty("VanadiumRunNumber").isDefault and \
+                            self.getProperty("VanadiumFile").isDefault and \
+                            self.getProperty("VanadiumWorkspace").isDefault
+        if skipNormalization:
+            self.log().warning('No Vanadium data provided, skip normalization')
         else:
+            # attempt to get the vanadium via file
             van_filename = self.get_va_filename()
             if van_filename is None:
                 # try to load from memory
                 norm = self.getProperty("VanadiumWorkspace").value
             else:
                 norm = self.load_and_group([van_filename])
-            # normalize the results
+            # normalize
             data = self.normalize(data, norm, self.getProperty("NormalizedBy").value.lower())
             # cleanup
             # NOTE: keep the Va workspace in memory in case we need it later
@@ -332,8 +331,10 @@ class LoadWANDSCD(PythonAlgorithm):
             scale = np.array(data.getExperimentInfo(0).run().getProperty('duration').value)
             scale /= norm.getExperimentInfo(0).run().getProperty('duration').value[0]
             self.getLogger().information('van time = {}'.format(scale))
-        else:
+        elif normalize_by == 'none':
             scale = 1
+        else:
+            raise RuntimeError(f'Unknown normalization method: {normalize_by}!')
         # exec
         data.setSignalArray(data.getSignalArray() / scale)
         data.setErrorSquaredArray(data.getErrorSquaredArray() / scale**2)
