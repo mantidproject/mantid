@@ -5,9 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
-#include <string>
-#include <variant>
-#include <vector>
+#include "MantidKernel/Logger.h"
 
 #include <boost/python/extract.hpp>
 #include <boost/python/list.hpp>
@@ -15,6 +13,13 @@
 #include <boost/variant.hpp>
 
 #include <exception>
+#include <string>
+#include <variant>
+#include <vector>
+
+namespace {
+Mantid::Kernel::Logger g_log("Python Type Extractor");
+}
 
 namespace Mantid::PythonInterface {
 
@@ -110,10 +115,19 @@ private:
     propVals.reserve(values.size());
 
     // Explicitly copy so we don't have to think about Python lifetimes with refs
-    std::transform(values.cbegin(), values.cend(), std::back_inserter(propVals),
-                   [](const Mantid::PythonInterface::PyNativeTypeExtractor::PythonOutputT &varadicVal) {
-                     return boost::get<ScalarT>(varadicVal);
-                   });
+    try {
+
+      std::transform(values.cbegin(), values.cend(), std::back_inserter(propVals),
+                     [](const Mantid::PythonInterface::PyNativeTypeExtractor::PythonOutputT &varadicVal) {
+                       return boost::get<ScalarT>(varadicVal);
+                     });
+    } catch (boost::bad_get &e) {
+      std::string err{
+          "A list with mixed types is unsupported as precision loss can occur trying to determine a common type."
+          " \nOriginal exception: "};
+      // Boost will convert bad_get into runtime_error anyway....
+      throw std::runtime_error(err + e.what());
+    }
     this->operator()(std::move(propVals));
   }
 };

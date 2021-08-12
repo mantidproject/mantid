@@ -37,15 +37,24 @@ public:
   void operator()(std::string value) const override { m_attr.setValue(value); }
 
   void operator()(std::vector<bool>) const override { throw std::invalid_argument(m_errorMsg); }
-  void operator()(std::vector<long>) const override { throw std::invalid_argument(m_errorMsg); }
-  void operator()(std::vector<double> value) const override { m_attr.setValue(value); }
+  void operator()(std::vector<long> value) const override {
+    // Previous existing code blindly converted any list type into a list of doubles.
+    // We now have to preserve this behaviour to maintain API compatibility as
+    // setValue only takes std::vector<double>.
+    std::vector<double> doubleVals;
+    doubleVals.reserve(value.size());
+    std::transform(value.cbegin(), value.cend(), std::back_inserter(doubleVals),
+                   [](const long val) { return static_cast<double>(val); });
+    m_attr.setValue(std::move(doubleVals));
+  }
+  void operator()(std::vector<double> value) const override { m_attr.setValue(std::move(value)); }
   void operator()(std::vector<std::string>) const override { throw std::invalid_argument(m_errorMsg); }
 
   using Mantid::PythonInterface::IPyTypeVisitor::operator();
 
 private:
   IFunction::Attribute &m_attr;
-  const std::string m_errorMsg = "Invalid attribute. Allowed types=float,int,str,bool,list(float)";
+  const std::string m_errorMsg = "Invalid attribute. Allowed types=float,int,str,bool,list(float),list(int)";
 };
 
 /**
