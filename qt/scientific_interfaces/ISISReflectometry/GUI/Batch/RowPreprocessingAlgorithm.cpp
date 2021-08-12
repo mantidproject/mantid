@@ -57,5 +57,6 @@ void updateRowOnAlgorithmComplete(const IAlgorithm_sptr &algorithm, Item &item) 
   auto &row = dynamic_cast<PreviewRow &>(item);
   MatrixWorkspace_sptr outputWs = algorithm->getProperty("OutputWorkspace");
   row.setLoadedWs(outputWs);
+  // TODO reset
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry::PreprocessRow

@@ -11,8 +11,7 @@
 #include <vector>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
-
-PreviewRow::PreviewRow(std::vector<std::string> &runNumbers) : Item(), m_runNumbers(runNumbers) {
+PreviewRow::PreviewRow(const std::vector<std::string> &runNumbers) : Item(), m_runNumbers(runNumbers) {
   std::sort(m_runNumbers.begin(), m_runNumbers.end());
 }
 

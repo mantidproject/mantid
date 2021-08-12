@@ -9,6 +9,7 @@
 #include "Common/DllConfig.h"
 #include "IPreviewModel.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "Reduction/PreviewRow.h"
 
 #include <memory>
 #include <string>
@@ -18,9 +19,12 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL PreviewModel : public IPreviewModel {
 public:
   virtual ~PreviewModel() = default;
   void loadWorkspace(std::string const &workspaceName) override;
-  Mantid::API::MatrixWorkspace_sptr getInstViewWorkspace() const override;
+  Mantid::API::MatrixWorkspace_sptr getLoadedWs() const override;
 
 private:
-  Mantid::API::MatrixWorkspace_sptr m_instViewWorkspace;
+  boost::optional<PreviewRow> m_runDetails;
+
+  void createRunDetails(std::string const &workspaceName);
+  Mantid::API::MatrixWorkspace_sptr loadFromAds(std::string const &workspaceName) const;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

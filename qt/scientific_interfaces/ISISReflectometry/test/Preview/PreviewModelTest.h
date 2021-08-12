@@ -28,9 +28,9 @@ public:
     AnalysisDataService::Instance().addOrReplace(workspaceName, createWorkspace());
 
     model.loadWorkspace(workspaceName);
-    auto workspace = model.getInstViewWorkspace();
+    auto workspace = model.getLoadedWs();
     TS_ASSERT(workspace);
-    TS_ASSERT_EQUALS(model.getInstViewWorkspace()->getName(), workspaceName);
+    TS_ASSERT_EQUALS(workspace->getName(), workspaceName);
   }
 
 private:

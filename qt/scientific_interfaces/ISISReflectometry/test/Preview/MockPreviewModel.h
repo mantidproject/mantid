@@ -20,6 +20,6 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 class MockPreviewModel : public IPreviewModel {
 public:
   MOCK_METHOD(void, loadWorkspace, (std::string const &), (override));
-  MOCK_METHOD(MatrixWorkspace_sptr, getInstViewWorkspace, (), (const, override));
+  MOCK_METHOD(MatrixWorkspace_sptr, getLoadedWs, (), (const, override));
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

@@ -9,10 +9,13 @@
 #include "Item.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
+#include <string>
+#include <vector>
+
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 class MANTIDQT_ISISREFLECTOMETRY_DLL PreviewRow : public Item {
 public:
-  PreviewRow(std::vector<std::string> &runNumbers);
+  PreviewRow(const std::vector<std::string> &runNumbers);
   std::vector<std::string> const &runNumbers() const;
 
   bool isGroup() const override;
