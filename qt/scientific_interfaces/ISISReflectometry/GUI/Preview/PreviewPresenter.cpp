@@ -9,6 +9,7 @@
 #include "GUI/Batch/IBatchJobAlgorithm.h"
 #include "IPreviewModel.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
+#include "Reduction/Item.h"
 
 #include <memory>
 
@@ -27,19 +28,17 @@ void PreviewPresenter::notifyBatchComplete(bool) {}
 
 void PreviewPresenter::notifyBatchCancelled() {}
 
-void PreviewPresenter::notifyAlgorithmStarted(API::IConfiguredAlgorithm_sptr algorithm) {}
+void PreviewPresenter::notifyAlgorithmStarted(API::IConfiguredAlgorithm_sptr) {}
 
 void PreviewPresenter::notifyAlgorithmComplete(API::IConfiguredAlgorithm_sptr algorithm) {
   auto jobAlgorithm = std::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
   auto item = jobAlgorithm->item();
-  if (!item /*TODO || !item.isPreview()*/)
+  if (!item || !item->isPreview())
     return;
 
-  auto alg = algorithm->algorithm();
-  Mantid::API::MatrixWorkspace_sptr ws = alg->getProperty("OutputWorkspace");
-
+  auto loadedWs = m_model->getLoadedWs();
   // TODO plot the result
 }
 
-void PreviewPresenter::notifyAlgorithmError(API::IConfiguredAlgorithm_sptr algorithm, std::string const &message) {}
+void PreviewPresenter::notifyAlgorithmError(API::IConfiguredAlgorithm_sptr, std::string const &) {}
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

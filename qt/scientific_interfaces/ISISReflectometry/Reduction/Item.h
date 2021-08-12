@@ -27,6 +27,8 @@ public:
   virtual ~Item() = default;
 
   virtual bool isGroup() const = 0;
+  virtual bool isPreview() const = 0;
+
   State state() const;
   void setState(State state);
   std::string message() const;

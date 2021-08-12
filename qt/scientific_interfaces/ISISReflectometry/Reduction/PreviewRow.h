@@ -19,6 +19,7 @@ public:
   std::vector<std::string> const &runNumbers() const;
 
   bool isGroup() const override;
+  bool isPreview() const override;
   int totalItems() const override;
   int completedItems() const override;
 

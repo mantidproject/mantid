@@ -19,6 +19,8 @@ std::vector<std::string> const &PreviewRow::runNumbers() const { return m_runNum
 
 bool PreviewRow::isGroup() const { return false; }
 
+bool PreviewRow::isPreview() const { return true; }
+
 int PreviewRow::totalItems() const { return 1; }
 
 int PreviewRow::completedItems() const { return 1; }
