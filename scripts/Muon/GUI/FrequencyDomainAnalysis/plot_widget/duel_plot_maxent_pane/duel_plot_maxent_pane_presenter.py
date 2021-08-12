@@ -5,13 +5,14 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from Muon.GUI.Common.plot_widget.base_pane.base_pane_presenter import BasePanePresenter
-from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing
+from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing, GenericObserver
 
 
 class DuelPlotMaxentPanePresenter(BasePanePresenter):
 
     def __init__(self, view, model, context, figure_presenter):
         super().__init__(view, model, context, figure_presenter)
+        # view set up
         self._data_type = ["Maxent and Counts"]
         self._sort_by = ["Maxent + Groups/detectors"]
         self.update_view()
@@ -21,24 +22,22 @@ class DuelPlotMaxentPanePresenter(BasePanePresenter):
         self._view.hide_plot_raw()
         self._view.disable_tile_plotting_options()
         self._view.set_is_tiled_plot(True)
-
+        self._view.set_slot_for_selection_changed(self.update_selection)
+        # sync view and model
+        self._model.set_selection(self.view.get_selection_for_plot)
+        # private memeber
+        self._maxent_ws_name = None
+        # connections
         self.method_changed =  GenericObserverWithArgPassing(self.change_time_plot)
         self.new_data_observer = GenericObserverWithArgPassing(
             self.handle_maxent_data_updated)
         self.reconstructed_data_observer = GenericObserverWithArgPassing(
             self.handle_reconstructed_data_updated)
-        self._maxent_ws_name = None
-        self._model.set_selection(self.view.get_selection_for_plot)
-        self._view.set_slot_for_selection_changed(self.update_selection)
-
-    # need to add a clear when run changes
+        self.instrument_observer = GenericObserver(self.clear)
 
     def change_time_plot(self, method):
-        self._model.clear_data()
         self._model.set_if_groups(method=="Groups")
-        self._maxent_ws_name = None
-        self._view.update_selection([])
-        self.add_data_to_plots()
+        self.clear()
 
     def handle_maxent_data_updated(self, name):
         self._maxent_ws_name = name
@@ -55,6 +54,9 @@ class DuelPlotMaxentPanePresenter(BasePanePresenter):
             workspaces += [self._maxent_ws_name]
             indicies += [0]
         self.add_list_to_plot(workspaces, indicies, hold=False, autoscale=True)
+        # force the maxent plot to have sensible start values
+        self._figure_presenter._options_presenter.set_selection_by_index(1)
+        self._figure_presenter.set_plot_range([0,1000])
 
     def handle_reconstructed_data_updated(self, data_dict):
         self._model.clear_data()
@@ -66,3 +68,9 @@ class DuelPlotMaxentPanePresenter(BasePanePresenter):
     def update_selection(self):
         self._model.set_selection(self.view.get_selection_for_plot)
         self.add_data_to_plots()
+
+    def clear(self):
+        self._model.clear_data()
+        self._maxent_ws_name = None
+        self._view.update_selection([])
+        self.clear_subplots()

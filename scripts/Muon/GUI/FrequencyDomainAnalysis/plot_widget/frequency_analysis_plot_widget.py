@@ -19,6 +19,7 @@ from Muon.GUI.Common.plot_widget.raw_pane.raw_pane_view import RawPaneView
 from Muon.GUI.FrequencyDomainAnalysis.plot_widget.duel_plot_maxent_pane.duel_plot_maxent_pane_presenter import DuelPlotMaxentPanePresenter
 from Muon.GUI.FrequencyDomainAnalysis.plot_widget.duel_plot_maxent_pane.duel_plot_maxent_pane_model import DuelPlotMaxentPaneModel
 from Muon.GUI.FrequencyDomainAnalysis.plot_widget.duel_plot_maxent_pane.duel_plot_maxent_pane_view import DuelPlotMaxentPaneView
+from Muon.GUI.Common.plot_widget.quick_edit.quick_edit_widget import DuelQuickEditWidget
 
 
 class FrequencyAnalysisPlotWidget(object):
@@ -37,14 +38,24 @@ class FrequencyAnalysisPlotWidget(object):
         self._views = {}
 
         for model in models:
-            self.plotting_canvas_widgets[model.name] = PlottingCanvasWidget(parent, context=
+
+            if model == self.plot_maxent_model:
+                duel_quick_edit = DuelQuickEditWidget(context.plot_panes_context[model.name], parent)
+                self.plotting_canvas_widgets[model.name] = PlottingCanvasWidget(parent, context=
+                                                                                 context.plot_panes_context[model.name],
+                                                                                 plot_model=model, figure_options=duel_quick_edit)
+                self._views[model.name] = DuelPlotMaxentPaneView(parent)
+
+            elif model == self.raw_model:
+                self.plotting_canvas_widgets[model.name] = PlottingCanvasWidget(parent, context=
                                                                                  context.plot_panes_context[model.name],
                                                                                  plot_model=model)
-            if model == self.raw_model:
                 self._views[model.name] = RawPaneView(parent)
-            elif model == self.plot_maxent_model:
-                self._views[model.name] = DuelPlotMaxentPaneView(parent)
+
             else:
+                self.plotting_canvas_widgets[model.name] = PlottingCanvasWidget(parent, context=
+                                                                                 context.plot_panes_context[model.name],
+                                                                                 plot_model=model)
                 self._views[model.name] = BasePaneView(parent)
             self._views[model.name].add_canvas_widget(self.plotting_canvas_widgets[model.name].widget)
 

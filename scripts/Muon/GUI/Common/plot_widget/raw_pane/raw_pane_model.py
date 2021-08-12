@@ -88,8 +88,8 @@ class RawPaneModel(BasePaneModel):
 
         return workspace_list, indices
 
-    def create_tiled_keys(self, tiled_by):
-        return ["Detector: "+str(spec+1) for spec in range(self._max_spec)]
+    def create_tiled_keys(self, tiled_by, def_zero = 1):
+        return ["Detector: "+str(spec+def_zero) for spec in range(self._max_spec)]
 
     def convert_index_to_axis(self, index):
         return index - floor(index/self._max_spec)*self._max_spec

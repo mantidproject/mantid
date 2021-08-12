@@ -193,6 +193,8 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
             self.plot_widget.maxent_mode.reconstructed_data_observer)
         self.transform._maxent._presenter.method_changed.add_subscriber(
             self.plot_widget.maxent_mode.method_changed)
+        self.context.data_context.instrumentNotifier.add_subscriber(
+            self.plot_widget.maxent_mode.instrument_observer)
 
     def setup_tabs(self):
         """
