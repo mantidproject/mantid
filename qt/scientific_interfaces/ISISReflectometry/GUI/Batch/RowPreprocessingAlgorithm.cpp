@@ -18,22 +18,18 @@
 
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 using namespace Mantid::API;
+using MantidQt::API::IConfiguredAlgorithm;
 using MantidQt::API::IConfiguredAlgorithm_sptr;
 
 namespace {
-void updateInputWorkspacesProperties(AlgorithmRuntimeProps &properties,
+void updateInputWorkspacesProperties(IConfiguredAlgorithm::AlgorithmRuntimeProps &properties,
                                      std::vector<std::string> const &inputRunNumbers) {
   AlgorithmProperties::update("InputRunList", inputRunNumbers, properties);
 }
 
-void updateRowCallback(const IAlgorithm_sptr &, Item &) {
-  // TODO decide what to do with the output workspace
-  // auto &row = dynamic_cast<Row &>(item);
-  // auto const outputWs = AlgorithmProperties::getOutputWorkspace(algorithm, "OutputWorkspace");
-}
 } // namespace
 
-namespace MantidQt::CustomInterfaces::ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry::PreprocessRow {
 
 /** Create a configured algorithm for processing a row. The algorithm
  * properties are set from the reduction configuration model and the
@@ -49,11 +45,17 @@ IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const & /*model*/, Pr
   }
 
   // Set the algorithm properties from the model
-  auto properties = AlgorithmRuntimeProps();
+  auto properties = IConfiguredAlgorithm::AlgorithmRuntimeProps();
   updateInputWorkspacesProperties(properties, row.runNumbers());
 
   // Return the configured algorithm
-  auto jobAlgorithm = std::make_shared<BatchJobAlgorithm>(alg, properties, updateRowCallback, &row);
+  auto jobAlgorithm = std::make_shared<BatchJobAlgorithm>(alg, properties, updateRowOnAlgorithmComplete, &row);
   return jobAlgorithm;
 }
-} // namespace MantidQt::CustomInterfaces::ISISReflectometry
+
+void updateRowOnAlgorithmComplete(const IAlgorithm_sptr &, Item &) {
+  // TODO decide what to do with the output workspace
+  // auto &row = dynamic_cast<Row &>(item);
+  // auto const outputWs = AlgorithmProperties::getOutputWorkspace(algorithm, "OutputWorkspace");
+}
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry::PreprocessRow

@@ -7,6 +7,7 @@
 #pragma once
 
 #include "Common/DllConfig.h"
+#include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 
 #include <string>
@@ -15,10 +16,11 @@
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 class IBatch;
 class PreviewRow;
-class IConfiguredAlgorithm;
+class Item;
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry
 
-using AlgorithmRuntimeProps = std::map<std::string, std::string>;
-
+namespace MantidQt::CustomInterfaces::ISISReflectometry::PreprocessRow {
 MANTIDQT_ISISREFLECTOMETRY_DLL MantidQt::API::IConfiguredAlgorithm_sptr
 createConfiguredAlgorithm(IBatch const &model, PreviewRow &row, Mantid::API::IAlgorithm_sptr alg = nullptr);
-} // namespace MantidQt::CustomInterfaces::ISISReflectometry
+MANTIDQT_ISISREFLECTOMETRY_DLL void updateRowOnAlgorithmComplete(const Mantid::API::IAlgorithm_sptr &, Item &);
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry::PreprocessRow

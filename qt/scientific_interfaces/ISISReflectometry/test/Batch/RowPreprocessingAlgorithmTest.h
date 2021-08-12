@@ -20,9 +20,23 @@
 using namespace ::testing;
 
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
+using namespace MantidQt::CustomInterfaces::ISISReflectometry::PreprocessRow;
 using namespace MantidQt::CustomInterfaces::ISISReflectometry::ModelCreationHelper;
+using MantidQt::API::IConfiguredAlgorithm;
 
 class RowPreprocessingAlgorithmTest : public CxxTest::TestSuite {
+  class StubbedPreProcess : public WorkspaceCreationHelper::StubAlgorithm {
+  public:
+    StubbedPreProcess() { this->setChild(true); }
+    void addOutputWorkspace(Mantid::API::MatrixWorkspace_sptr &ws) {
+      const std::string propName = "OutputWorkspace";
+      auto prop = std::make_unique<Mantid::API::WorkspaceProperty<>>(propName, "", Mantid::Kernel::Direction::Output);
+      prop->createTemporaryValue();
+      declareProperty(std::move(prop));
+      setProperty(propName, ws);
+    }
+  };
+
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -37,7 +51,20 @@ public:
 
     auto configuredAlg = createConfiguredAlgorithm(batch, row, mockAlg);
     TS_ASSERT_EQUALS(configuredAlg->algorithm(), mockAlg);
-    auto expectedProps = AlgorithmRuntimeProps{{"InputRunList", inputRuns[0]}};
+    auto expectedProps = IConfiguredAlgorithm::AlgorithmRuntimeProps{{"InputRunList", inputRuns[0]}};
     TS_ASSERT_EQUALS(configuredAlg->properties(), expectedProps);
+  }
+
+  void test_row_is_updated_on_algorithm_complete() {
+    auto mockAlg = std::make_shared<StubbedPreProcess>();
+    const bool isHistogram = true;
+    Mantid::API::MatrixWorkspace_sptr mockWs = WorkspaceCreationHelper::create1DWorkspaceRand(1, isHistogram);
+    mockAlg->addOutputWorkspace(mockWs);
+
+    auto runNumbers = std::vector<std::string>{};
+    auto row = PreviewRow(runNumbers);
+
+    updateRowOnAlgorithmComplete(mockAlg, row);
+    // TODO ASSERT WS_Ptr
   }
 };
