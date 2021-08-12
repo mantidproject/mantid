@@ -5,15 +5,40 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
+
+import numpy
 import numpy as np
 from mantid.utils.nomad import determine_tubes_threshold
 import os
 from collections import namedtuple
 import tempfile
-from mantid.utils.nomad._median_detector_test import _NOMADMedianDetectorTest, InstrumentComponentLevel
+from mantid.utils.nomad._median_detector_test import (_NOMADMedianDetectorTest, InstrumentComponentLevel,
+                                                      export_masks)
 
 
 class DetectorMediansTest(unittest.TestCase):
+
+    def test_export_mantid_mask(self):
+        """Test to export Mask to XML
+        """
+        # output file name
+        test_xml_name = '/tmp/test_mask.xml'
+
+        # mask states
+        test_mask_states = numpy.ndarray(shape=(128*8*99, ), dtype=bool)
+        test_mask_states[:] = False
+        test_mask_states[0:123] = True
+        test_mask_states[3000:4321] = True
+
+        # export masks
+        export_masks(test_mask_states, test_xml_name, 'NOMAD')
+
+        # check
+        assert os.path.exists(test_xml_name)
+        with open(test_xml_name, 'r') as mask_file:
+            lines = mask_file.readlines()
+            assert lines[3].strip() == '<detids>0-122,3000-4320</detids>'
+        os.remove(test_xml_name)
 
     def test_ymal_input(self):
         """
