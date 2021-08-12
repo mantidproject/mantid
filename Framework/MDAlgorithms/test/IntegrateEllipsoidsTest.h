@@ -143,10 +143,7 @@ createDiffractionData(const int nPixels = 200, const int nEventsPerPeak = 24, co
   return boost::tuple<EventWorkspace_sptr, PeaksWorkspace_sptr>(eventWS, peaksWS);
 }
 
-boost::tuple<EventWorkspace_sptr, PeaksWorkspace_sptr> createSatelliteData() {
-  const std::vector<double> ub = {0.15468228,  0.10908475,  -0.14428671, -0.08922105, -0.08617147,
-                                  -0.22976459, -0.05616441, 0.12536522,  -0.03238277};
-
+EventWorkspace_sptr createSatelliteData() {
   auto loadalg = AlgorithmManager::Instance().createUnmanaged("LoadNexusProcessed");
   TS_ASSERT_THROWS_NOTHING(loadalg->initialize());
   TS_ASSERT_THROWS_NOTHING(loadalg->setPropertyValue("Filename", "TOPAZ_36079_crop.nxs"));
@@ -179,43 +176,9 @@ boost::tuple<EventWorkspace_sptr, PeaksWorkspace_sptr> createSatelliteData() {
   TS_ASSERT_THROWS_NOTHING(convertalg->setProperty("MaxValues", std::vector<double>{10.0, 5.0, 8.425}));
   TS_ASSERT_THROWS_NOTHING(convertalg->execute());
 
-  auto peaksalg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("CreatePeaksWorkspace");
-  TS_ASSERT_THROWS_NOTHING(peaksalg->initialize());
-  TS_ASSERT_THROWS_NOTHING(peaksalg->setProperty("InstrumentWorkspace", "TOPAZ_36079_event"));
-  TS_ASSERT_THROWS_NOTHING(peaksalg->setProperty("NumberOfPeaks", 0));
-  TS_ASSERT_THROWS_NOTHING(peaksalg->setProperty("OutputWorkspace", "TOPAZ_36079_peaks"));
-  TS_ASSERT_THROWS_NOTHING(peaksalg->execute());
-
-  auto setubalg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("SetUB");
-  TS_ASSERT_THROWS_NOTHING(setubalg->initialize());
-  TS_ASSERT_THROWS_NOTHING(setubalg->setProperty("Workspace", "TOPAZ_36079_peaks"));
-  TS_ASSERT_THROWS_NOTHING(setubalg->setProperty("UB", ub));
-  TS_ASSERT_THROWS_NOTHING(setubalg->execute());
-
-  // add some peaks for testing
-  PeaksWorkspace_sptr peakWS = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>("TOPAZ_36079_peaks");
-  peakWS->addPeak(*peakWS->createPeakHKL(V3D(0.15, 1.85, -1.0)));
-  peakWS->addPeak(*peakWS->createPeakHKL(V3D(1.0, 4.0, -3.0)));
-  peakWS->addPeak(*peakWS->createPeakHKL(V3D(1.0, 5.0, -3.0)));
-  TS_ASSERT_EQUALS(peakWS->getNumberPeaks(), 3);
-
-  auto indexalg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("IndexPeaks");
-  TS_ASSERT_THROWS_NOTHING(indexalg->initialize());
-  TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("PeaksWorkspace", "TOPAZ_36079_peaks"));
-  TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("Tolerance", 0.06));
-  TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("ToleranceForSatellite", 0.05));
-  TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("RoundHKLs", false));
-  TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("ModVector1", std::vector<double>{0.125, 0.0, 0.0}));
-  TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("ModVector2", std::vector<double>{0.0, 0.125, 0.0}));
-  TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("ModVector3", std::vector<double>{-0.125, 0.125, 0.0}));
-  TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("MaxOrder", 1));
-  TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("CrossTerms", false));
-  TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("SaveModulationInfo", true));
-  TS_ASSERT_THROWS_NOTHING(indexalg->execute());
-
   EventWorkspace_sptr eventWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("TOPAZ_36079_event");
 
-  return boost::tuple<EventWorkspace_sptr, PeaksWorkspace_sptr>(eventWS, peakWS);
+  return eventWS;
 }
 } // namespace
 
@@ -225,7 +188,6 @@ private:
   Mantid::DataObjects::EventWorkspace_sptr m_eventWS;
   Mantid::DataObjects::PeaksWorkspace_sptr m_peaksWS;
   Mantid::DataObjects::EventWorkspace_sptr m_satelliteEventWS;
-  Mantid::DataObjects::PeaksWorkspace_sptr m_satellitePeaksWS;
   Mantid::API::MatrixWorkspace_sptr m_histoWS;
 
   // Check that n-peaks from the workspace are integrated as we expect
@@ -272,6 +234,49 @@ private:
     }
   }
 
+  PeaksWorkspace_sptr createPeaksForSatelliteTests(const std::vector<V3D> peaksHKL) {
+
+    const std::vector<double> ub = {0.15468228,  0.10908475,  -0.14428671, -0.08922105, -0.08617147,
+                                    -0.22976459, -0.05616441, 0.12536522,  -0.03238277};
+
+    auto peaksalg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("CreatePeaksWorkspace");
+    TS_ASSERT_THROWS_NOTHING(peaksalg->initialize());
+    TS_ASSERT_THROWS_NOTHING(peaksalg->setProperty("InstrumentWorkspace", "TOPAZ_36079_event"));
+    TS_ASSERT_THROWS_NOTHING(peaksalg->setProperty("NumberOfPeaks", 0));
+    TS_ASSERT_THROWS_NOTHING(peaksalg->setProperty("OutputWorkspace", "TOPAZ_36079_peaks"));
+    TS_ASSERT_THROWS_NOTHING(peaksalg->execute());
+
+    auto setubalg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("SetUB");
+    TS_ASSERT_THROWS_NOTHING(setubalg->initialize());
+    TS_ASSERT_THROWS_NOTHING(setubalg->setProperty("Workspace", "TOPAZ_36079_peaks"));
+    TS_ASSERT_THROWS_NOTHING(setubalg->setProperty("UB", ub));
+    TS_ASSERT_THROWS_NOTHING(setubalg->execute());
+
+    // add some peaks for testing
+    PeaksWorkspace_sptr peakWS = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>("TOPAZ_36079_peaks");
+    for (const V3D &hkl : peaksHKL) {
+      peakWS->addPeak(*peakWS->createPeakHKL(hkl));
+    }
+    TS_ASSERT_EQUALS(peakWS->getNumberPeaks(), peaksHKL.size());
+
+    // index the peaks
+    auto indexalg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("IndexPeaks");
+    TS_ASSERT_THROWS_NOTHING(indexalg->initialize());
+    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("PeaksWorkspace", "TOPAZ_36079_peaks"));
+    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("Tolerance", 0.06));
+    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("ToleranceForSatellite", 0.05));
+    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("RoundHKLs", false));
+    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("ModVector1", std::vector<double>{0.125, 0.0, 0.0}));
+    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("ModVector2", std::vector<double>{0.0, 0.125, 0.0}));
+    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("ModVector3", std::vector<double>{-0.125, 0.125, 0.0}));
+    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("MaxOrder", 1));
+    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("CrossTerms", false));
+    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("SaveModulationInfo", true));
+    TS_ASSERT_THROWS_NOTHING(indexalg->execute());
+
+    return peakWS;
+  }
+
 public:
   static void destroySuite(IntegrateEllipsoidsTest *suite) { delete suite; }
 
@@ -289,10 +294,7 @@ public:
     m_eventWS = data.get<0>();
     m_peaksWS = data.get<1>();
 
-    auto satelliteData = createSatelliteData();
-
-    m_satelliteEventWS = satelliteData.get<0>();
-    m_satellitePeaksWS = satelliteData.get<1>();
+    m_satelliteEventWS = createSatelliteData();
 
     /*
      Simply rebin the event workspace to a histo workspace to create the input
@@ -485,13 +487,19 @@ public:
   }
 
   void test_execution_background_shell() {
+
+    const std::vector<V3D> peaksHKL = {V3D(0.15, 1.85, -1.0), V3D(1.0, 4.0, -3.0), V3D(1.0, 5.0, -3.0)};
+
+    // creates the peak workspace, sets UB, and indexes them
+    PeaksWorkspace_sptr peaksWS = createPeaksForSatelliteTests(peaksHKL);
+
     // integrate without satellite background for comparison
     IntegrateEllipsoids alg;
     TS_ASSERT_THROWS_NOTHING(alg.setChild(true));
     TS_ASSERT_THROWS_NOTHING(alg.setRethrows(true));
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", m_satelliteEventWS));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeaksWorkspace", m_satellitePeaksWS));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeaksWorkspace", peaksWS));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "peaks_integrated_nosatellite"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("RegionRadius", 0.055));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("SpecifySize", true));
@@ -509,7 +517,7 @@ public:
     // integrate the data now with satellite background options
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", m_satelliteEventWS));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeaksWorkspace", m_satellitePeaksWS));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeaksWorkspace", peaksWS));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "peaks_integrated_satellite"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("RegionRadius", 0.055));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("SpecifySize", true));
@@ -547,14 +555,21 @@ public:
     AnalysisDataService::Instance().remove("TOPAZ_36079_md");
     AnalysisDataService::Instance().remove("peaks_integrated_satellite");
     AnalysisDataService::Instance().remove("peaks_integrated_nosatellite");
+    AnalysisDataService::Instance().remove(peaksWS->getName());
   }
 
   void test_execution_shared_background() {
+
+    const std::vector<V3D> peaksHKL = {V3D(0.15, 1.85, -1.0), V3D(1.0, 4.0, -3.0), V3D(1.0, 5.0, -3.0)};
+
+    // creates the peak workspace, sets UB, and indexes them
+    PeaksWorkspace_sptr peaksWS = createPeaksForSatelliteTests(peaksHKL);
+
     // integrate with sharing background region to satellite peaks
     IntegrateEllipsoids alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", m_satelliteEventWS));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeaksWorkspace", m_satellitePeaksWS));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeaksWorkspace", peaksWS));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "peaks_integrated_shared"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("RegionRadius", 0.055));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("SpecifySize", true));
@@ -581,6 +596,7 @@ public:
     TS_ASSERT_DELTA(satellitePeak.getIntensity(), 16.814, 1e-2);
 
     AnalysisDataService::Instance().remove("peaks_integrated_shared");
+    AnalysisDataService::Instance().remove(peaksWS->getName());
   }
 };
 
