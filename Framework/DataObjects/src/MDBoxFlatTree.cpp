@@ -444,7 +444,7 @@ void MDBoxFlatTree::loadExperimentInfos(::NeXus::File *const file, const std::st
       std::string parameterStr;
       try {
         // Get the sample, logs, instrument
-        ei->loadExperimentInfoNexus(filename, file, parameterStr);
+        ei->loadExperimentInfoNexus(filename, file, parameterStr, fileInfo, file->getPath() + "/" + groupName);
         // Now do the parameter map
         if (parameterStr.empty()) {
           ei->populateInstrumentParameters();

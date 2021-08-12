@@ -495,6 +495,83 @@ void Run::saveNexus(::NeXus::File *file, const std::string &group, bool keepOpen
  * load any NXlog in the current open group.
  * @param keepOpen :: If true, then the file is left open after doing to load
  */
+void Run::loadNexus(::NeXus::File *file, const std::string &group,
+                    const std::shared_ptr<Mantid::Kernel::NexusHDF5Descriptor> &fileInfo, const std::string &prefix,
+                    bool keepOpen) {
+
+  if (!group.empty()) {
+    file->openGroup(group, "NXgroup");
+  }
+  // TODO
+  std::map<std::string, std::string> entries;
+  file->getEntries(entries);
+  LogManager::loadNexus(file, entries);
+  for (const auto &name_class : entries) {
+    if (name_class.first == GONIOMETER_LOG_NAME) {
+      // Goniometer class
+      m_goniometers[0]->loadNexus(file, name_class.first);
+    } else if (name_class.first == GONIOMETERS_LOG_NAME) {
+      file->openGroup(name_class.first, "NXcollection");
+      int num_goniometer;
+      file->readData("num_goniometer", num_goniometer);
+      m_goniometers.clear();
+      m_goniometers.reserve(num_goniometer);
+      for (int i = 0; i < num_goniometer; i++) {
+        m_goniometers.emplace_back(std::make_unique<Geometry::Goniometer>());
+        m_goniometers[i]->loadNexus(file, "goniometer" + std::to_string(i));
+      }
+      file->closeGroup();
+    } else if (name_class.first == HISTO_BINS_LOG_NAME) {
+      file->openGroup(name_class.first, "NXdata");
+      file->readData("value", m_histoBins);
+      file->closeGroup();
+    } else if (name_class.first == PEAK_RADIUS_GROUP) {
+      file->openGroup(name_class.first, "NXdata");
+      std::vector<double> values;
+      file->readData("value", values);
+      file->closeGroup();
+      this->addProperty("PeakRadius", values, true);
+    } else if (name_class.first == INNER_BKG_RADIUS_GROUP) {
+      file->openGroup(name_class.first, "NXdata");
+      std::vector<double> values;
+      file->readData("value", values);
+      file->closeGroup();
+      this->addProperty("BackgroundInnerRadius", values, true);
+    } else if (name_class.first == OUTER_BKG_RADIUS_GROUP) {
+      file->openGroup(name_class.first, "NXdata");
+      std::vector<double> values;
+      file->readData("value", values);
+      file->closeGroup();
+      this->addProperty("BackgroundOuterRadius", values, true);
+    } else if (name_class.first == "proton_charge" && !this->hasProperty("proton_charge")) {
+      // Old files may have a proton_charge field, single value (not even NXlog)
+      double charge;
+      file->readData("proton_charge", charge);
+      this->setProtonCharge(charge);
+    }
+  }
+  if (!(group.empty() || keepOpen))
+    file->closeGroup();
+
+  if (this->hasProperty("proton_charge")) {
+    // Old files may have a proton_charge field, single value.
+    // Modern files (e.g. SNS) have a proton_charge TimeSeriesProperty.
+    PropertyWithValue<double> *charge_log =
+        dynamic_cast<PropertyWithValue<double> *>(this->getProperty("proton_charge"));
+    if (charge_log) {
+      this->setProtonCharge(boost::lexical_cast<double>(charge_log->value()));
+    }
+  }
+}
+
+//--------------------------------------------------------------------------------------------
+/** Load the object from an open NeXus file.
+ * @param file :: open NeXus file
+ * @param group :: name of the group to open. Empty string to NOT open a group,
+ * but
+ * load any NXlog in the current open group.
+ * @param keepOpen :: If true, then the file is left open after doing to load
+ */
 void Run::loadNexus(::NeXus::File *file, const std::string &group, bool keepOpen) {
 
   if (!group.empty()) {

@@ -925,6 +925,26 @@ void ExperimentInfo::saveExperimentInfoNexus(::NeXus::File *file, bool saveInstr
 /** Load the sample and log info from an open NeXus file.
  * @param file :: open NeXus file
  */
+void ExperimentInfo::loadSampleAndLogInfoNexus(::NeXus::File *file,
+                                               const std::shared_ptr<Mantid::Kernel::NexusHDF5Descriptor> &fileInfo,
+                                               const std::string &prefix) {
+  // First, the sample and then the logs
+  int sampleVersion = mutableSample().loadNexus(file, "sample");
+  if (sampleVersion == 0) {
+    // Old-style (before Sep-9-2011) NXS processed
+    // sample field contains both the logs and the sample details
+    file->openGroup("sample", "NXsample");
+    this->mutableRun().loadNexus(file, "", fileInfo, prefix);
+    file->closeGroup();
+  } else {
+    // Newer style: separate "logs" field for the Run object
+    this->mutableRun().loadNexus(file, "logs", fileInfo, prefix);
+  }
+}
+
+/** Load the sample and log info from an open NeXus file.
+ * @param file :: open NeXus file
+ */
 void ExperimentInfo::loadSampleAndLogInfoNexus(::NeXus::File *file) {
   // First, the sample and then the logs
   int sampleVersion = mutableSample().loadNexus(file, "sample");
@@ -938,6 +958,17 @@ void ExperimentInfo::loadSampleAndLogInfoNexus(::NeXus::File *file) {
     // Newer style: separate "logs" field for the Run object
     this->mutableRun().loadNexus(file, "logs");
   }
+}
+
+void ExperimentInfo::loadExperimentInfoNexus(const std::string &nxFilename, ::NeXus::File *file,
+                                             std::string &parameterStr,
+                                             const std::shared_ptr<Mantid::Kernel::NexusHDF5Descriptor> &fileInfo,
+                                             const std::string &prefix) {
+  // TODO
+  // load sample and log info
+  loadSampleAndLogInfoNexus(file, fileInfo, prefix);
+
+  loadInstrumentInfoNexus(nxFilename, file, parameterStr);
 }
 
 /** Load the object from an open NeXus file.
