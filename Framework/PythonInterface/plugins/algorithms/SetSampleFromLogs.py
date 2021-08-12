@@ -62,22 +62,12 @@ class SetSampleFromLogs(DistributedDataProcessorAlgorithm):
         self.declareProperty("FindEnvironment", True,
                              "Whether to look for the sample container in the logs")
 
-    def PyExec(self):
-        wksp = self.getProperty("InputWorkspace").value
-        geometry = _toDict(self.getProperty("Geometry").value)
+    def _createMaterial(self, runObject):
+        '''Create the sample material by combining the supplied material information with things found in the logs'''
+        # grab the starting information from the algorithm property
         material = _toDict(self.getProperty("Material").value)
-        environment = _toDict(self.getProperty("Environment").value)
-        geometryContainer = _toDict(self.getProperty("ContainerGeometry").value)
-        materialContainer = _toDict(self.getProperty("ContainerMaterial").value)
-        findGeometry = self.getProperty("FindGeometry").value
-        findSample = self.getProperty("FindSample").value
-        findEnvironment = self.getProperty("FindEnvironment").value
-
-        # get a convenient handle to the logs
-        runObject = wksp.run()
-
-        # get information for the material from the logs
-        if findSample:
+        # only look in the logs if the user asks for it
+        if self.getProperty("FindSample").value:  # SetSample calls it the material
             if (not _hasValue(material, 'ChemicalFormula')) and _hasValue(runObject, "SampleFormula"):
                 self.log().information("Looking for 'SampleFormula' in logs")
                 material['ChemicalFormula'] = _getLogValue(runObject, 'SampleFormula').strip()
@@ -88,12 +78,17 @@ class SetSampleFromLogs(DistributedDataProcessorAlgorithm):
                     material['Mass'] = _getLogValue(runObject, 'SampleMass')
                 elif _hasValue(runObject, "SampleMass"):
                     material['SampleMassDensity'] = value
-        self.log().information('MATERIAL: ' + str(material))
 
+        # log the results and return
+        self.log().information('MATERIAL: ' + str(material))
+        return material
+
+    def _createGeometry(self, runObject, instrEnum):
         # get height of sample from the logs
         # this assumes the shape has a "Height" property
-        if findGeometry:
-            instrEnum = ConfigService.getInstrument(wksp.getInstrument().getFullName())
+        geometry = _toDict(self.getProperty("Geometry").value)
+
+        if self.getProperty("FindGeometry").value:
             if not _hasValue(geometry, "Height"):
                 heightInContainerNames = ['HeightInContainer']
                 heightInContainerUnitsNames = ['HeightInContainerUnits']
@@ -110,6 +105,7 @@ class SetSampleFromLogs(DistributedDataProcessorAlgorithm):
                         warningMsg = 'Do not know how to create lognames for "{}"'.format(instrEnum.name())
                         self.log().warn(warningMsg)
                     if beamline:
+                        # "internal" log names at SNS are templated from the beamline number
                         heightInContainerUnitsNames.append('{}:CS:ITEMS:HeightInContainerUnits'.format(beamline))
                         heightInContainerNames.append('{}:CS:ITEMS:HeightInContainer'.format(beamline))
                 self.log().information("Looking for sample height from {} and units from {}".format(heightInContainerNames,
@@ -138,10 +134,17 @@ class SetSampleFromLogs(DistributedDataProcessorAlgorithm):
                     geometry['Height'] = conversion * _getLogValue(runObject, heightKey)
                 else:
                     raise RuntimeError("Failed to determine the height from the logs")
-        self.log().information('GEOMETRY (in cm): ' + str(geometry))
 
+        # log the results and return
+        self.log().information('GEOMETRY (in cm): ' + str(geometry))
+        return geometry
+
+    def _createEnvironment(self, runObject, instrEnum):
+        '''Create the sample material by combining the supplied environment information with things found in the logs'''
+        # grab the starting information from the algorithm property
+        environment = _toDict(self.getProperty("Environment").value)
         # get the container from the logs
-        if findEnvironment:
+        if self.getProperty("FindEnvironment").value:
             if (not _hasValue(environment, "Container")) and _hasValue(runObject, "SampleContainer"):
                 self.log().information('Looking for "SampleContainer" in logs')
                 environment['Container'] = runObject['SampleContainer'].lastValue().replace(" ", "")
@@ -153,6 +156,24 @@ class SetSampleFromLogs(DistributedDataProcessorAlgorithm):
                     environment['Name'] = 'InAir'
 
         self.log().information('ENVIRONMENT: ' + str(environment))
+        return environment
+
+    def PyExec(self):
+        wksp = self.getProperty("InputWorkspace").value
+        # these items are not grabbed from the logs
+        geometryContainer = _toDict(self.getProperty("ContainerGeometry").value)
+        materialContainer = _toDict(self.getProperty("ContainerMaterial").value)
+
+        # get a convenient handle to the logs
+        runObject = wksp.run()
+
+        # this is used for determining some of the log names
+        instrEnum = ConfigService.getInstrument(wksp.getInstrument().getFullName())
+
+        # get information from the logs
+        material = self._createMaterial(runObject)
+        geometry = self._createGeometry(runObject, instrEnum)
+        environment = self._createEnvironment(runObject, instrEnum)
 
         # let SetSample generate errors if anything is wrong
         SetSample(InputWorkspace=wksp,
