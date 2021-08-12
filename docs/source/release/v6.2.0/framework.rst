@@ -82,3 +82,4 @@ Bugfixes
 - Fix bug in :ref:`CalculateMultipleScattering <algm-CalculateMultipleScattering>` where detector position was incorrectly determined on a workspace where the workspace index didn't match the detector
   index eg if the workspace was loaded with SpectrumMin specified to exclude some monitors
 
+:ref:`Release 6.2.0 <v6.2.0>`
