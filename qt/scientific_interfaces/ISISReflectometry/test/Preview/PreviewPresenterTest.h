@@ -7,6 +7,7 @@
 #pragma once
 
 #include "GUI/Batch/BatchJobAlgorithm.h"
+#include "MantidKernel/IPropertyManager.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MockPreviewModel.h"
@@ -29,6 +30,18 @@ using ::testing::Return;
 using ::testing::ReturnRef;
 
 class PreviewPresenterTest : public CxxTest::TestSuite {
+  class StubbedPreProcess : public WorkspaceCreationHelper::StubAlgorithm {
+  public:
+    StubbedPreProcess() { this->setChild(true); }
+    void addOutputWorkspace(Mantid::API::MatrixWorkspace_sptr &ws) {
+      const std::string propName = "OutputWorkspace";
+      auto prop = std::make_unique<Mantid::API::WorkspaceProperty<>>(propName, "", Mantid::Kernel::Direction::Output);
+      prop->createTemporaryValue();
+      declareProperty(std::move(prop));
+      setProperty(propName, ws);
+    }
+  };
+
 public:
   void test_notify_load_workspace_requested() {
     auto mockModel = std::make_unique<MockPreviewModel>();
@@ -47,17 +60,20 @@ public:
     auto mockModel = std::make_unique<MockPreviewModel>();
     auto mockView = std::make_unique<MockPreviewView>();
 
-    auto mockAlg = std::make_unique<WorkspaceCreationHelper::MockAlgorithm>();
+    auto mockAlg = std::make_shared<StubbedPreProcess>();
     const bool isHistogram = true;
     Mantid::API::MatrixWorkspace_sptr mockWs = WorkspaceCreationHelper::create1DWorkspaceRand(1, isHistogram);
+    mockAlg->addOutputWorkspace(mockWs);
 
-    EXPECT_CALL(*mockAlg, getProperty("OutputWorkspace")).Times(1).WillOnce(Return(mockWs.get()));
     auto properties = IConfiguredAlgorithm::AlgorithmRuntimeProps();
     auto runNumbers = std::vector<std::string>{};
     auto row = PreviewRow(runNumbers);
-    auto configuredAlg = std::make_shared<BatchJobAlgorithm>(mockAlg, properties, nullptr, row);
+    auto configuredAlg = std::make_shared<BatchJobAlgorithm>(std::static_pointer_cast<Mantid::API::IAlgorithm>(mockAlg),
+                                                             properties, nullptr, &row);
 
     auto presenter = PreviewPresenter(mockView.get(), std::move(mockModel));
     presenter.notifyAlgorithmComplete(configuredAlg);
+
+    // TODO ASSERT WS_Ptr
   }
 };
