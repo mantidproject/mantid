@@ -459,6 +459,28 @@ def get_ws_indices_for_bank(workspace, bank):
     return [i for i in range(workspace.getNumberHistograms()) if index_in_bank(i)]
 
 
+def on_which_bank(workspace):
+    """
+    Find the instrument bank on which this cropped or custom workspace exists. Note this is at this point specific to
+    the ENGINX instrument.
+    @param workspace :: cropped or custom workspace to be checked
+    @returns bank number: 1 for North Bank, 2 for South Bank
+    """
+
+    bank1_ids = get_detector_ids_for_bank(1)
+    bank2_ids = get_detector_ids_for_bank(2)
+
+    first_spectrum = workspace.getSpectrumNumbers()[0]
+    detid_on_bank = workspace.getSpectrum(first_spectrum).getDetectorIDs()[0]
+
+    if detid_on_bank in bank1_ids:
+        return 1
+    elif detid_on_bank in bank2_ids:
+        return 2
+    else:
+        return 0  # Select both banks if correct bank not found
+
+
 def get_detector_ids_for_bank(bank):
     """
     Find the detector IDs for an instrument bank. Note this is at this point specific to

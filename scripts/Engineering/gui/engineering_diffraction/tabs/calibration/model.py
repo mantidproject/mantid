@@ -174,17 +174,14 @@ class CalibrationModel(object):
             """
             return PDCalibration(**kwargs_to_pass)
 
-        def calibrate_region_of_interest(ceria_d_ws, roi: str, grouping_kwarg: dict, cal_output: dict) -> None:
+        def calibrate_region_of_interest(focused_ceria, roi: str, cal_output: dict) -> None:
             """
-            Focus the processed ceria workspace (dSpacing) over the chosen region of interest, and run the calibration
-            using this result
-            :param ceria_d_ws: Workspace containing the processed ceria data converted to dSpacing
+            Convert to TOF, select the region of interest, and run the calibration
+            :param focused_ceria: Workspace containing the focused ceria data in dSpacing
             :param roi: String describing chosen region of interest
-            :param grouping_kwarg: Dict containing kwarg to pass to DiffractionFocussing to select the roi
             :param cal_output: Dictionary to append with the output of PDCalibration for the chosen roi
             """
-            # focus ceria
-            focused_ceria = DiffractionFocussing(InputWorkspace=ceria_d_ws, **grouping_kwarg)
+
             ApplyDiffCal(InstrumentWorkspace=focused_ceria, ClearCalibration=True)
             ConvertUnits(InputWorkspace=focused_ceria, OutputWorkspace=focused_ceria, Target='TOF')
 
@@ -218,20 +215,24 @@ class CalibrationModel(object):
         if (spectrum_numbers or calfile) is None:
             if bank == '1' or bank is None:
                 grp_ws = EnggUtils.get_bank_grouping_workspace(1, ceria_raw)
-                grouping_kwarg = {"GroupingWorkspace": grp_ws}
-                calibrate_region_of_interest(ceria_ws, "bank_1", grouping_kwarg, cal_output)
+                focused_ceria = DiffractionFocussing(InputWorkspace=ceria_ws, GroupingWorkspace=grp_ws)
+                calibrate_region_of_interest(focused_ceria, "bank_1", cal_output)
             if bank == '2' or bank is None:
                 grp_ws = EnggUtils.get_bank_grouping_workspace(2, ceria_raw)
-                grouping_kwarg = {"GroupingWorkspace": grp_ws}
-                calibrate_region_of_interest(ceria_ws, "bank_2", grouping_kwarg, cal_output)
+                focused_ceria = DiffractionFocussing(InputWorkspace=ceria_ws, GroupingWorkspace=grp_ws)
+                calibrate_region_of_interest(focused_ceria, "bank_2", cal_output)
         elif calfile is None:
-            grp_ws = EnggUtils.create_grouping_workspace_from_spectra_list(spectrum_numbers, ceria_raw)
-            grouping_kwarg = {"GroupingWorkspace": grp_ws}
-            calibrate_region_of_interest(ceria_ws, "Cropped", grouping_kwarg, cal_output)
+            crop_grp_ws = EnggUtils.create_grouping_workspace_from_spectra_list(spectrum_numbers, ceria_raw)
+            bank_num = EnggUtils.on_which_bank(crop_grp_ws)
+            grp_ws = EnggUtils.get_bank_grouping_workspace(bank_num)
+            focused_ceria = DiffractionFocussing(InputWorkspace=ceria_ws, GroupingWorkspace=grp_ws)
+            calibrate_region_of_interest(focused_ceria, f"bank_{bank_num}", cal_output)
         else:
-            grp_ws = EnggUtils.create_grouping_workspace_from_calfile(calfile, ceria_raw)
-            grouping_kwarg = {"GroupingWorkspace": grp_ws}
-            calibrate_region_of_interest(ceria_ws, "Custom", grouping_kwarg, cal_output)
+            custom_grp_ws = EnggUtils.create_grouping_workspace_from_calfile(calfile, ceria_raw)
+            bank_num = EnggUtils.on_which_bank(custom_grp_ws)
+            grp_ws = EnggUtils.get_bank_grouping_workspace(bank_num)
+            focused_ceria = DiffractionFocussing(InputWorkspace=ceria_ws, GroupingWorkspace=grp_ws)
+            calibrate_region_of_interest(focused_ceria, f"bank_{bank_num}", cal_output)
         cal_params = list()
         # in the output calfile, rows are present for all detids, only read one from the region of interest
         for bank_cal in cal_output:
