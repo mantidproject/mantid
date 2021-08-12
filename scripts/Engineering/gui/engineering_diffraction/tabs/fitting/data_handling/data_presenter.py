@@ -183,10 +183,8 @@ class FittingDataPresenter(object):
         # make external figure
         row_numbers = self.view.get_selected_rows()
         for row in row_numbers:
-            if self.view.get_item_checked(row, 3):
-                # background has been subtracted from workspace
-                ws_name = self.row_numbers[row]
-                self.model.plot_background_figure(ws_name)
+            ws_name = self.row_numbers[row]
+            self.model.plot_background_figure(ws_name)
 
     def _handle_table_cell_changed(self, row, col):
         if row in self.row_numbers:
@@ -234,12 +232,7 @@ class FittingDataPresenter(object):
             self.plotted.add(ws_name)
 
     def _handle_selection_changed(self):
-        rows = self.view.get_selected_rows()
-        enabled = False
-        for row in rows:
-            if self.view.get_item_checked(row, 3):
-                enabled = True
-        self._enable_inspect_bg_button(enabled)
+        self._enable_inspect_bg_button(True)
 
     def _enable_load_button(self, enabled):
         self.view.set_load_button_enabled(enabled)
