@@ -50,6 +50,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         # (in the form f0.f1...)
         self.peak_ids = {}
         self._connect_signals()
+        self.canvas_draw_signal = None
 
     def _connect_signals(self):
         self.xRangeChanged.connect(self.move_x_range)
@@ -61,6 +62,29 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         self.getFitMenu().aboutToShow.connect(self._set_normalise_data)
         self.sequentialFitDone.connect(self._sequential_fit_done_slot)
         self.workspaceClicked.connect(self.display_workspace)
+
+    def _update_workspace_info_slot(self, event):
+        "Callback when the matplotlib canvas updates"
+        if not self._update_allowed_spectra():
+            self.hide()
+
+    def _update_allowed_spectra(self):
+        " Update the allowed spectra/tableworkspace in the fit browser"
+        allowed_spectra = self._get_allowed_spectra()
+        table = self._get_table_workspace()
+        if allowed_spectra:
+            previous_selected_index = self.workspaceIndex()
+            self._add_spectra(allowed_spectra)
+            workspace_index = self.workspaceIndex()
+            if workspace_index != previous_selected_index:
+                self.clear_fit_result_lines()
+        elif table:
+            self.addAllowedTableWorkspace(table)
+        else:
+            self.toolbar_manager.toggle_fit_button_checked()
+            logger.warning("Cannot use fitting tool: No valid workspaces to fit to.")
+            return False
+        return True
 
     def _add_spectra(self, spectra):
         """
@@ -81,6 +105,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
             try:
                 for ws_name, artists in ax.tracked_workspaces.items():
                     spectrum_list = [artist.spec_num for artist in artists]
+                    spectrum_list = sorted(list(set(spectrum_list)))
                     allowed_spectra[ws_name] = spectrum_list
             except AttributeError:  # scripted plots have no tracked_workspaces
                 pass
@@ -144,6 +169,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         """
         Override the base class method. Initialise the peak editing tool.
         """
+
         allowed_spectra = self._get_allowed_spectra()
         table = self._get_table_workspace()
 
@@ -153,9 +179,10 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
             self.addAllowedTableWorkspace(table)
         else:
             self.toolbar_manager.toggle_fit_button_checked()
-            logger.warning("Cannot open fitting tool: No valid workspaces to fit to.")
+            logger.warning("Cannot use fitting tool: No valid workspaces to fit to.")
             return
 
+        self.canvas_draw_signal = self.canvas.mpl_connect('draw_event', self._update_workspace_info_slot)
         super(FitPropertyBrowser, self).show()
         self.tool = FitInteractiveTool(self.canvas,
                                        self.toolbar_manager,
@@ -233,6 +260,11 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
             self.tool.disconnect()
             self.tool = None
             self.canvas.draw()
+
+        if self.canvas_draw_signal is not None:
+            self.canvas.mpl_disconnect(self.canvas_draw_signal)
+            self.canvas_draw_signal = None
+
         super(FitPropertyBrowser, self).hide()
         self.setPeakToolOn(False)
 

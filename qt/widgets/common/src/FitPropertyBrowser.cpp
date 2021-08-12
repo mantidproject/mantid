@@ -1296,6 +1296,7 @@ void FitPropertyBrowser::intChanged(QtProperty *prop) {
     return;
 
   if (prop == m_workspaceIndex) {
+    // Get current value displayed by the workspace index spinbox
     auto const currentIndex = workspaceIndex();
     auto const allowedIndex = getAllowedIndex(currentIndex);
     if (allowedIndex != currentIndex) {
@@ -2451,10 +2452,6 @@ int FitPropertyBrowser::getAllowedIndex(int currentIndex) const {
     return 0;
   }
 
-  if (currentIndex == m_oldWorkspaceIndex) {
-    return currentIndex < 0 ? 0 : currentIndex;
-  }
-
   auto const allowedIndices =
       m_allowedSpectra.empty() ? QList<int>() : m_allowedSpectra[QString::fromStdString(workspaceName())];
   auto const firstIndex = m_allowedSpectra.empty() ? 0 : allowedIndices.front();
@@ -3265,6 +3262,7 @@ void FitPropertyBrowser::addAllowedSpectra(const QString &wsName, const QList<in
   } else {
     throw std::runtime_error("Workspace " + name + " is not a MatrixWorkspace");
   }
+  intChanged(m_workspaceIndex);
 }
 
 void FitPropertyBrowser::removeWorkspaceAndSpectra(const std::string &wsName) {
