@@ -437,6 +437,46 @@ void IntegrateEllipsoids::exec() {
   double inti;
   double sigi;
   std::vector<double> principalaxis1, principalaxis2, principalaxis3;
+  std::map<size_t, std::vector<Peak *>> satellitePeakMap;
+  std::vector<size_t> braggPeaks;
+  std::vector<size_t> satellitePeaks;
+  if (shareBackground) {
+    for (size_t i = 0; i < n_peaks; i++) {
+      // check if peak is satellite peak
+      const bool isSatellitePeak = (peaks[i].getIntMNP().norm2() > 0);
+      // grab QLabFrame
+      const V3D peak_q = peaks[i].getQLabFrame();
+      // check if peak is origin (skip if true)
+      const bool isOrigin = isSatellitePeak ? IntegrateQLabEvents::isOrigin(peak_q, satellite_radius)
+                                            : IntegrateQLabEvents::isOrigin(peak_q, radius_m);
+      if (isOrigin) {
+        continue;
+      }
+
+      if (isSatellitePeak) {
+        satellitePeaks.emplace_back(i);
+      } else {
+        braggPeaks.emplace_back(i);
+      }
+    }
+
+    // Generate mapping of all satellite peaks for each bragg peak
+    for (auto it = braggPeaks.begin(); it != braggPeaks.end(); it++) {
+      const auto braggHKL = peaks[*it].getIntHKL();
+
+      // loop over all satellite peaks to determine if it belongs to this bragg
+      for (auto satIt = satellitePeaks.begin(); satIt != satellitePeaks.end(); satIt++) {
+        const auto satHKL = peaks[*satIt].getIntHKL();
+
+        if (satHKL == braggHKL) {
+          // this satellite peak shares the HKL vector, so it is a satellite peak of this bragg peak
+          satellitePeakMap[*it] = std::vector<Peak *>();
+          satellitePeakMap[*it].emplace_back(&peaks[*satIt]);
+        }
+      }
+    }
+  }
+
   for (size_t i = 0; i < n_peaks; i++) {
     // check if peak is satellite peak
     const bool isSatellitePeak = (peaks[i].getIntMNP().norm2() > 0);
