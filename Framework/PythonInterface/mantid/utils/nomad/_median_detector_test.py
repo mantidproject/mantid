@@ -203,7 +203,7 @@ class _NOMADMedianDetectorTest:
 
     @staticmethod
     def parse_yaml(file_name: str) -> dict:
-        """Parse configuration YAML file
+        """Parse configuration YAML file and convert the bank, 8pack and tube parameters
 
         Parameters
         ----------
@@ -214,8 +214,24 @@ class _NOMADMedianDetectorTest:
         -------
         dictionary
         """
+        # Import YMAL to dict
         with open(file_name, 'r') as stream:
-            config = yaml.safe_load(stream)
+            yaml_config = yaml.safe_load(stream)
+
+        # Parse: convert 8pack, tubes indexes from starting-1 to staring-0
+        config = dict()
+
+        # Used 8 packs
+        config['eight_packs'] = np.array(yaml_config['eight_packs']).astype(int)
+
+        # Collimator states
+        config['collimation'] = dict()
+        for col_name in ['full_col', 'half_col']:
+            config['collimation'][col_name] = config['eight_packs'][yaml_config['collimation'][col_name]]
+
+        # Threshold
+        config['threshold'] = yaml_config['threshold']
+
         return config
 
     @staticmethod
@@ -241,8 +257,8 @@ class _NOMADMedianDetectorTest:
         collimation_state_array = np.zeros(shape=(instrument_config.num_8packs, ), dtype=int)
 
         # Read the configuration dict
-        full_collimation_8packs = np.array(collimation_config_dict['full_col']) - 1
-        half_collimation_8packs = np.array(collimation_config_dict['half_col']) - 1
+        full_collimation_8packs = collimation_config_dict['full_col']
+        half_collimation_8packs = collimation_config_dict['half_col']
         collimation_state_array[full_collimation_8packs] = 2
         collimation_state_array[half_collimation_8packs] = 1
 
@@ -269,9 +285,9 @@ class _NOMADMedianDetectorTest:
         info_dict = dict()
 
         info_dict['num_banks'] = 6
-        info_dict['num_8packs_per_bank'] = [0, 6, 15, 23, 30, 45, 49]  # [i, i+1) is the range of 8 packs for bank i
-        info_dict['num_8packs'] = 49
-        info_dict['num_pixels_per_tube'] = 256
+        # info_dict['num_8packs_per_bank'] = [0, 6, 15, 23, 30, 45, 49]  # [i, i+1) is the range of 8 packs for bank i
+        info_dict['num_8packs'] = 99
+        info_dict['num_pixels_per_tube'] = 128
         info_dict['num_tubes_per_8pack'] = 8
         info_dict['num_tubes'] = info_dict['num_8packs'] * info_dict['num_tubes_per_8pack']
         info_dict['num_pixels'] = info_dict['num_tubes'] * info_dict['num_pixels_per_tube']

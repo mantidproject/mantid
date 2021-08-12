@@ -18,7 +18,7 @@ from mantid.utils.nomad._median_detector_test import (_NOMADMedianDetectorTest, 
 
 class DetectorMediansTest(unittest.TestCase):
 
-    def test_export_mantid_mask(self):
+    def passed_test_export_mantid_mask(self):
         """Test to export Mask to XML
         """
         # output file name
@@ -41,11 +41,7 @@ class DetectorMediansTest(unittest.TestCase):
         os.remove(test_xml_name)
 
     def test_ymal_input(self):
-        """
-
-        Returns
-        -------
-
+        """Test processing YMAL
         """
         # Generate test file
         temp_dir = tempfile.mkdtemp()
@@ -53,18 +49,18 @@ class DetectorMediansTest(unittest.TestCase):
         self._generate_test_ymal(temp_ymal)
         assert os.path.exists(temp_ymal)
 
+        # Parse yaml
         mask_config = _NOMADMedianDetectorTest.parse_yaml(temp_ymal)
         assert isinstance(mask_config, dict)
 
-        # AssertionError: ['detector_ranges', 'threshold', 'collimation', 'eight_packs', 'bank']
-        print(f'{mask_config["collimation"]}')
-
+        # Check parsing
         full_col_8packs = mask_config['collimation']['full_col']
-        assert isinstance(full_col_8packs[0], int), f'{type(full_col_8packs[0])}'
-        # {'full_col': [1, 8, 16, 25, 27, 28, 29], 'half_col': [30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 45, 46]}
-        assert 8 in full_col_8packs
+        # eight_packs: [3,7,8,9,10,11,19,20,26,28,30,34, ...]
+        # full_col: from [1, 8, 16, 25, 27, 28, 29] -> [7, 26, ...]
+        assert 7 in full_col_8packs and 26 in full_col_8packs,  f'Mapped full column 8 packs: {full_col_8packs}'
+        # half_col': [30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 45, 46] -> [...]
         half_col_8packs = mask_config['collimation']['half_col']
-        assert 36 in half_col_8packs
+        assert 63 in half_col_8packs and 90 in half_col_8packs, f'Mapped half column 8 packs: {half_col_8packs}'
 
         # Get nomad instrument configuration
         nomad = _NOMADMedianDetectorTest.set_nomad_constants()
@@ -73,19 +69,19 @@ class DetectorMediansTest(unittest.TestCase):
         eight_pack_collimation_states = \
             _NOMADMedianDetectorTest.get_collimation_states(mask_config['collimation'],
                                                             nomad, InstrumentComponentLevel.EightPack)
-        assert eight_pack_collimation_states.shape == (49,), f'{eight_pack_collimation_states.shape}'
+        assert eight_pack_collimation_states.shape == (99,), f'{eight_pack_collimation_states.shape}'
         # check full collimated
-        for pack_index in [1, 8, 16, 25, 27, 28, 29]:
-            assert eight_pack_collimation_states[pack_index - 1] == 2,\
-                f'Pack index {pack_index - 1}: {eight_pack_collimation_states[pack_index - 1]}'
+        for pack_index in [7, 26]:
+            assert eight_pack_collimation_states[pack_index] == 2,\
+                f'Pack index {pack_index}: {eight_pack_collimation_states[pack_index]}'
         # check half collimated
-        for pack_index in [30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 45, 46]:
-            assert eight_pack_collimation_states[pack_index - 1] == 1,\
-                f'Pack index {pack_index - 1}: {eight_pack_collimation_states[pack_index - 1]}'
+        for pack_index in [63, 90]:
+            assert eight_pack_collimation_states[pack_index] == 1,\
+                f'Pack index {pack_index}: {eight_pack_collimation_states[pack_index]}'
         # not collimated
-        for pack_index in [2, 3, 4, 5, 6, 7, 9, 10, 11, 43, 44, 47, 48, 49]:
-            assert eight_pack_collimation_states[pack_index - 1] == 0,\
-                f'Pack index {pack_index - 1}: {eight_pack_collimation_states[pack_index - 1]}'
+        for pack_index in [2, 3, 4, 5, 6, 91, 92]:
+            assert eight_pack_collimation_states[pack_index] == 0,\
+                f'Pack index {pack_index}: {eight_pack_collimation_states[pack_index]}'
 
         # pixel collimation
         pixel_collimation_states = \
@@ -114,7 +110,7 @@ class DetectorMediansTest(unittest.TestCase):
                                        err_msg=f'Pack index {pack_index * 8 * 256}:... : '
                                                f'{pixel_collimation_states[pack_index]}')
 
-    def test_determine_tubes_thresholds(self):
+    def how_test_determine_tubes_thresholds(self):
         """
 
         Returns
