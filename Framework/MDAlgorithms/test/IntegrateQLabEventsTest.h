@@ -85,7 +85,7 @@ public:
     std::vector<Kernel::V3D> E1Vec;
     double inti;
     double sigi;
-    double backi;
+    std::pair<double, double> backi;
     for (size_t i = 0; i < peak_q_list.size(); i++) {
       auto shape =
           integrator.ellipseIntegrateEvents(E1Vec, peak_q_list[i].second, specify_size, peak_radius, back_inner_radius,

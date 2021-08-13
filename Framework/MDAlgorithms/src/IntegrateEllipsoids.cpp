@@ -436,12 +436,12 @@ void IntegrateEllipsoids::exec() {
 
   double inti;
   double sigi;
-  double backi;
+  std::pair<double, double> backi;
   std::vector<double> principalaxis1, principalaxis2, principalaxis3;
   std::map<size_t, std::vector<Peak *>> satellitePeakMap;
   std::vector<size_t> braggPeaks;
   std::vector<size_t> satellitePeaks;
-  std::map<size_t, double> cachedBraggBackground;
+  std::map<size_t, std::pair<double, double>> cachedBraggBackground;
   if (shareBackground) {
     for (size_t i = 0; i < n_peaks; i++) {
       // check if peak is satellite peak
@@ -567,7 +567,11 @@ void IntegrateEllipsoids::exec() {
     for (auto it = satellitePeakMap.begin(); it != satellitePeakMap.end(); it++) {
       for (auto satPeak = it->second.begin(); satPeak != it->second.end(); satPeak++) {
         // subtract the cached background from the intensity
-        (*satPeak)->setIntensity((*satPeak)->getIntensity() - cachedBraggBackground[it->first]);
+        (*satPeak)->setIntensity((*satPeak)->getIntensity() - cachedBraggBackground[it->first].first);
+
+        // update the sigma intensity based on the new background
+        double sigInt = (*satPeak)->getSigmaIntensity();
+        (*satPeak)->setSigmaIntensity(sqrt(sigInt * sigInt + cachedBraggBackground[it->first].second));
       }
     }
   }

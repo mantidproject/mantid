@@ -595,6 +595,7 @@ public:
 
     TS_ASSERT_DELTA(braggPeak.getIntensity(), 279858.196, 1e-2);
     TS_ASSERT_DELTA(satellitePeak.getIntensity(), 2863.196488, 1e-2);
+    TS_ASSERT_DELTA(satellitePeak.getSigmaIntensity(), 78.5652, 1e-2);
 
     // check that the background radii are the same in the peak shape
     const PeakShapeEllipsoid braggShape = static_cast<const PeakShapeEllipsoid &>(braggPeak.getPeakShape());
