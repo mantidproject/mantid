@@ -20,6 +20,7 @@ import math
 class D7AbsoluteCrossSections(PythonAlgorithm):
 
     _sampleAndEnvironmentProperties = None
+    _mode = None
 
     @staticmethod
     def _max_value_per_detector(ws, one_per_detector=True):
@@ -181,7 +182,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
 
         self.declareProperty(name="MeasurementTechnique",
                              defaultValue="Powder",
-                             validator=StringListValidator(["Powder", "SingleCrystal"]),
+                             validator=StringListValidator(["Powder", "SingleCrystal", "TOF"]),
                              direction=Direction.Input,
                              doc="What type of measurement technique has been used to collect the data.")
 
@@ -263,7 +264,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         ws_to_transpose = mtd[ws][0].name()
         angle_ws = mtd[ws][0].name() + "_tmp_angle"
         conv_to_theta = 0.5  # conversion to half of the scattering angle
-        if self.getPropertyValue('MeasurementTechnique') != 'SingleCrystal':
+        if self._mode != 'SingleCrystal':
             # for single crystal, the spectrum axis is already converted
             ConvertSpectrumAxis(InputWorkspace=mtd[ws][0],
                                 OutputWorkspace=angle_ws,
@@ -558,6 +559,8 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                      OutputWorkspace=det_efficiency_ws)
         elif calibrationType in  ['Paramagnetic', 'Incoherent']:
             if calibrationType == 'Paramagnetic':
+                if self._mode == 'TOF':
+                    raise RuntimeError('Paramagnetic calibration is not valid in the TOF mode.')
                 spin = self._sampleAndEnvironmentProperties['SampleSpin'].value
                 for entry_no, entry in enumerate(mtd[cross_section_ws]):
                     ws_name = '{0}_{1}'.format(tmp_name, entry_no)
@@ -572,6 +575,8 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                            RHSWorkspace=normalisation_name,
                            OutputWorkspace=ws_name)
             else: # Incoherent
+                if self._mode == 'TOF':
+                    raise RuntimeError('Incoherent calibration is not valid in the TOF mode.')
                 for spectrum_no in range(mtd[cross_section_ws][2].getNumberHistograms()):
                     if normaliseToAbsoluteUnits:
                         normFactor = self._sampleAndEnvironmentProperties['IncoherentCrossSection'].value
@@ -604,7 +609,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
     def _normalise_sample_data(self, sample_ws, det_efficiency_ws, nMeasurements, nComponents):
         """Normalises the sample data using the detector efficiency calibration workspace."""
         normalisation_method = self.getPropertyValue('NormalisationMethod')
-        is_single_crystal = self.getPropertyValue('MeasurementTechnique') == 'SingleCrystal'
+        is_single_crystal = self._mode == 'SingleCrystal'
         if is_single_crystal and normalisation_method == 'Vanadium' \
                 and mtd[sample_ws][0].getNumberHistograms() == 2 * mtd[det_efficiency_ws][0].getNumberHistograms():
             # the length of the spectrum axis is twice the size of Vanadium, as data comes from two omega scans
@@ -823,6 +828,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         progress = Progress(self, start=0.0, end=1.0, nreports=self._get_number_reports())
         input_ws = self.getPropertyValue('InputWorkspace')
         output_ws = self.getPropertyValue('OutputWorkspace')
+        self._mode = self.getPropertyValue('MeasurementTechnique')
         progress.report('Loading experiment properties')
         self._read_experiment_properties(input_ws)
         nMeasurements, nComponents = self._data_structure_helper(input_ws)
