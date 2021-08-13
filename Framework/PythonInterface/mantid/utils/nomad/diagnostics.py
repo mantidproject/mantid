@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 # package imports
-from mantid.simpleapi import (LoadEmptyInstrument, mtd, MaskDetectors, ExtractMask, SaveMask, DeleteWorkspace)
+from mantid.simpleapi import (LoadEmptyInstrument, mtd, MaskDetectors, ExtractMask, SaveMask, DeleteWorkspaces)
 
 # 3rd-party imports
 import numpy
@@ -16,6 +16,8 @@ import yaml
 # standard imports
 from collections import namedtuple
 import enum
+import random
+import string
 from typing import List
 
 
@@ -57,9 +59,7 @@ def export_masks(pixel_mask_states: numpy.ndarray,
     ExtractMask(InputWorkspace=empty_workspace_name, OutputWorkspace=mask_workspace_name)
     SaveMask(InputWorkspace=mask_workspace_name, OutputFile=mask_file_name)
 
-    # Clean
-    for ws_name in [empty_workspace_name, mask_workspace_name]:
-        DeleteWorkspace(ws_name)
+    DeleteWorkspaces([empty_workspace_name, mask_workspace_name])
 
 
 def determine_tubes_threshold(vec_intensity, mask_config: dict, instrument_config):
@@ -199,6 +199,21 @@ class _NOMADMedianDetectorTest:
     PIXELS_IN_TUBE = 128
     PIXELS_IN_EIGHTPACK = TUBES_IN_EIGHTPACK * PIXELS_IN_TUBE
     PIXEL_COUNT = TUBE_COUNT * PIXELS_IN_TUBE
+
+    @staticmethod
+    def _random_string(prefix: str = '_', n: int = 9) -> str:
+        r"""
+        String of random characters
+
+        Parameters
+        ----------
+        prefix
+            string to prefix to the random string
+        n
+            length of the random string
+        """
+        letters = string.ascii_lowercase
+        return prefix + ''.join([random.choice(letters) for i in range(n)])
 
     @staticmethod
     def parse_yaml(file_name: str) -> dict:
@@ -427,6 +442,33 @@ class _NOMADMedianDetectorTest:
         # TODO move function "determine_tubes_threshold"() here
         pass
 
-    def export_mask(self):
-        # TODO move function "export_masks()" here
-        pass
+    @classmethod
+    def export_mask(cls, pixel_mask_states: numpy.ndarray, mask_file_name: str, instrument_name: str = 'NOMAD'):
+        """
+        Export masks to XML file format
+
+        Parameters
+        ----------
+        pixel_mask_states: numpy.ndarray
+            boolean array with the number of pixels of NOMAD.  True for masking
+        mask_file_name: str
+            name of the output mask XML file
+        instrument_name: str
+            name of the instrument
+        """
+        # Load empty instrument
+        empty_workspace_name = cls._random_string()
+        LoadEmptyInstrument(InstrumentName=instrument_name, OutputWorkspace=empty_workspace_name)
+
+        # Get the workspace indexes to mask first 2 spectra are monitors: add 2
+        if mtd[empty_workspace_name].getNumberHistograms() != pixel_mask_states.shape[0] + 2:
+            raise RuntimeError(f'Spectra number of {instrument_name} workspace does not match mask state array')
+        mask_ws_indexes = np.where(pixel_mask_states)[0] + 2
+
+        MaskDetectors(Workspace=empty_workspace_name, WorkspaceIndexList=mask_ws_indexes)
+
+        mask_workspace_name = cls._random_string()
+        ExtractMask(InputWorkspace=empty_workspace_name, OutputWorkspace=mask_workspace_name)
+        SaveMask(InputWorkspace=mask_workspace_name, OutputFile=mask_file_name)
+
+        DeleteWorkspaces([empty_workspace_name, mask_workspace_name])
