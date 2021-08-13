@@ -705,7 +705,7 @@ class PolDiffILLReduction(PythonAlgorithm):
             self._sampleAndEnvironmentProperties['InitialEnergy'] = \
                 joules_to_mev * math.pow(h / wavelength, 2) / (2 * neutron_mass)
 
-        if 'NMoles' not in self._sampleAndEnvironmentProperties:
+        if 'NMoles' not in self._sampleAndEnvironmentProperties and self.getProperty('AbsoluteNormalisation').value:
             sample_mass = self._sampleAndEnvironmentProperties['SampleMass'].value
             formula_unit_mass = self._sampleAndEnvironmentProperties['FormulaUnitMass'].value
             self._sampleAndEnvironmentProperties['NMoles'] = (sample_mass / formula_unit_mass)
