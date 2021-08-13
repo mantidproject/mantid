@@ -12,7 +12,6 @@ from mantid.simpleapi import (LoadEmptyInstrument, mtd, MaskDetectors, ExtractMa
 import numpy
 import numpy as np
 import yaml
-from mantid.simpleapi import (LoadEmptyInstrument, mtd, MaskDetectors, ExtractMask, SaveMask, DeleteWorkspace)
 
 # standard imports
 from collections import namedtuple
@@ -165,46 +164,6 @@ def determine_tubes_threshold(vec_intensity, mask_config: dict, instrument_confi
     return pixel_mask_states
 
 
-def export_masks(pixel_mask_states: numpy.ndarray,
-                 mask_file_name: str,
-                 instrument_name: str = 'NOMAD'):
-    """Export masks to XML file format
-
-    Parameters
-    ----------
-    pixel_mask_states: numpy.ndarray
-        boolean array with the number of pixels of NOMAD.  True for masking
-    mask_file_name: str
-        name of the output mask XML file
-    instrument_name: str
-        name of the instrument
-
-    """
-    # Load empty instrument
-    empty_workspace_name = f'_{instrument_name}_empty'
-    mask_workspace_name = f'_{instrument_name}_mask_empty'
-    LoadEmptyInstrument(InstrumentName=instrument_name, OutputWorkspace=empty_workspace_name)
-
-    # Get the workspace indexes to mask
-    # first 2 spectra are monitors: add 2
-    # Check
-    if mtd[empty_workspace_name].getNumberHistograms() != pixel_mask_states.shape[0] + 2:
-        raise RuntimeError(f'Spectra number of {instrument_name} workspace does not match mask state array')
-    mask_ws_indexes = np.where(pixel_mask_states)[0] + 2
-    print(f'DEBUG mask workspace indexes: {mask_ws_indexes}')
-
-    # Mask detectors
-    MaskDetectors(Workspace=empty_workspace_name, WorkspaceIndexList=mask_ws_indexes)
-
-    # Extract and save
-    ExtractMask(InputWorkspace=empty_workspace_name, OutputWorkspace=mask_workspace_name)
-    SaveMask(InputWorkspace=mask_workspace_name, OutputFile=mask_file_name)
-
-    # Clean
-    for ws_name in [empty_workspace_name, mask_workspace_name]:
-        DeleteWorkspace(ws_name)
-
-
 class CollimationLevel(enum.Enum):
     r"""Collimation state of an eight-pack"""
     Empty = 0
@@ -238,6 +197,7 @@ class _NOMADMedianDetectorTest:
     TUBES_IN_EIGHTPACK = 8
     TUBE_COUNT = EIGHTPACK_COUNT * TUBES_IN_EIGHTPACK
     PIXELS_IN_TUBE = 128
+    PIXELS_IN_EIGHTPACK = TUBES_IN_EIGHTPACK * PIXELS_IN_TUBE
     PIXEL_COUNT = TUBE_COUNT * PIXELS_IN_TUBE
 
     @staticmethod
@@ -336,6 +296,24 @@ class _NOMADMedianDetectorTest:
 
         return instrument(**info_dict)
 
+    def _get_intensities(self, input_workspace: 'mantid.api.MatrixWorkspace') -> np.ma.core.MaskedArray:  # noqa F821
+        r"""
+        Integrated intensity of each pixel for pixels in use. Pixels of unused eightpacks are masked
+
+        Returns
+        -------
+        1D array of size number-of-pixels
+        """
+        # Do not count initial spectra which may be related to monitors, not pixel-detectors
+        spectrum_info = input_workspace.spectrumInfo()
+        spectrum_index = 0
+        while spectrum_info.isMonitor(spectrum_index):
+            spectrum_index += 1
+        # sum counts for each detector histogram
+        intensities = np.sum(input_workspace.extractY()[spectrum_index:], axis=1)
+        assert len(intensities) == self.PIXEL_COUNT
+        return np.ma.masked_array(intensities, mask=~self.pixel_in_use)  # mask unused pixels
+
     @property
     def tube_range(self) -> List[List[int]]:
         r"""Begin and (1 + end) tube index for each panel.
@@ -345,6 +323,19 @@ class _NOMADMedianDetectorTest:
         eightpack_range = [[0, 14], [14, 37], [37, 51], [51, 63], [63, 81], [81, 99]]
         # extend eightpack indexes to tube indexes
         return (self.TUBES_IN_EIGHTPACK * np.array(eightpack_range)).tolist()
+
+    @property
+    def pixel_in_use(self) -> np.ndarray:
+        r"""
+        Boolean flag, True for pixels in use
+
+        Returns
+        -------
+        1D array of size PIXEL_COUNT
+        """
+        flag = np.full(self.EIGHTPACK_COUNT, False)  # initialize all eightpacks as not in use
+        flag[self.config['eight_packs']] = True
+        return np.repeat(flag, )
 
     @property
     def tube_intensity(self) -> np.ndarray:
@@ -430,3 +421,12 @@ class _NOMADMedianDetectorTest:
         tube_mask[self.tube_intensity.mask] = True
         tube_mask = tube_mask.data  # cast numpy.ma.core.MaskedArray to numpy.ndarray
         return np.repeat(tube_mask, self.PIXELS_IN_TUBE)  # extend the tube mask states to all pixels in the tubes
+
+    @property
+    def mask_by_pixel_intensity(self) -> np.ndarray:
+        # TODO move function "determine_tubes_threshold"() here
+        pass
+
+    def export_mask(self):
+        # TODO move function "export_masks()" here
+        pass
