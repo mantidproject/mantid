@@ -1037,21 +1037,23 @@ class PolDiffILLReduction(PythonAlgorithm):
                 self._calculate_polarising_efficiencies(ws)
 
             if process in ['Vanadium', 'Sample']:
+                self._read_experiment_properties(ws)
                 pol_eff_ws = self.getPropertyValue('QuartzWorkspace')
                 if pol_eff_ws:
                     progress.report('Applying polarisation corrections')
                     self._apply_polarisation_corrections(ws, pol_eff_ws)
                 empty_ws = self.getPropertyValue('EmptyContainerWorkspace')
-                if self.getPropertyValue('SelfAttenuationMethod') != 'Transmission' \
-                        or self.getProperty('AbsoluteNormalisation').value:
-                    self._read_experiment_properties(ws)
                 if self.getPropertyValue('SelfAttenuationMethod') != 'None' and empty_ws != '':
                     progress.report('Applying self-attenuation correction')
                     self._apply_self_attenuation_correction(ws, empty_ws)
+                if measurement_technique == 'TOF':
+                    progress.report('Correcting detector-analyser efficiency')
+                    self._detector_analyser_energy_efficiency(ws)
                 if process == 'Vanadium':
                     progress.report('Normalising vanadium output')
                     self._normalise_vanadium(ws)
-                self._set_units(ws, process)
+                else:
+                    self._set_units(ws, process)
 
         self._finalize(ws, process)
 
