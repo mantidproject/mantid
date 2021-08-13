@@ -386,9 +386,12 @@ class PolDiffILLReduction(PythonAlgorithm):
                 if 0 in mtd[mon].readY(0):
                     raise RuntimeError('Cannot normalise to monitor; monitor has 0 counts.')
                 else:
-                    CreateSingleValuedWorkspace(DataValue=mtd[mon].readY(0)[0] / lampCompatibilityFactor,
-                                                ErrorValue=np.sqrt(mtd[mon].readE(0)[0] / lampCompatibilityFactor),
-                                                OutputWorkspace=norm)
+                    CreateWorkspace(OutputWorkspace=norm,
+                                    DataX=mtd[mon].readX(0),
+                                    DataY=mtd[mon].readY(0) / lampCompatibilityFactor,
+                                    DataE=np.sqrt(mtd[mon].readE(0) / lampCompatibilityFactor),
+                                    ParentWorkspace=mtd[mon],
+                                    UnitX=mtd[mon].getAxis(0).getUnit().unitID())
             if normaliseBy == 'Time':
                 duration = float(entry.getRun().getLogData('duration').value) * lampCompatibilityFactor
                 CreateSingleValuedWorkspace(DataValue=duration,
