@@ -312,6 +312,10 @@ PeakShapeEllipsoid_const_sptr IntegrateQLabEvents::ellipseIntegrateEvents(
   std::pair<double, double> peak_w_back = numInEllipsoid(ev_list, directions, axes_radii);
 
   double ratio = pow(r1, 3) / (pow(r3, 3) - pow(r2, 3));
+  if (r3 == r2) {
+    // special case if background radius = peak radius, reset this to 1 instead of inf
+    ratio = 1.0;
+  }
 
   inti = peak_w_back.first - ratio * backgrd.first;
   sigi = sqrt(peak_w_back.second + ratio * ratio * backgrd.second);

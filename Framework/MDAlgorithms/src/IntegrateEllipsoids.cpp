@@ -436,10 +436,12 @@ void IntegrateEllipsoids::exec() {
 
   double inti;
   double sigi;
+  double backi;
   std::vector<double> principalaxis1, principalaxis2, principalaxis3;
   std::map<size_t, std::vector<Peak *>> satellitePeakMap;
   std::vector<size_t> braggPeaks;
   std::vector<size_t> satellitePeaks;
+  std::map<size_t, double> cachedBraggBackground;
   if (shareBackground) {
     for (size_t i = 0; i < n_peaks; i++) {
       // check if peak is satellite peak
@@ -470,7 +472,6 @@ void IntegrateEllipsoids::exec() {
 
         if (satHKL == braggHKL) {
           // this satellite peak shares the HKL vector, so it is a satellite peak of this bragg peak
-          satellitePeakMap[*it] = std::vector<Peak *>();
           satellitePeakMap[*it].emplace_back(&peaks[*satIt]);
         }
       }
@@ -531,18 +532,22 @@ void IntegrateEllipsoids::exec() {
     std::vector<double> axes_radii;
     Mantid::Geometry::PeakShape_const_sptr shape;
     if (isSatellitePeak) {
-      if (shareBackground) {
+      if (!shareBackground) {
         shape = integrator_satellite.ellipseIntegrateEvents(E1Vec, peak_q, specify_size, adaptiveRadius,
                                                             adaptiveBack_inner_radius, adaptiveBack_outer_radius,
-                                                            axes_radii, inti, sigi);
+                                                            axes_radii, inti, sigi, backi);
       } else {
-        shape = integrator_satellite.ellipseIntegrateEvents(E1Vec, peak_q, specify_size, adaptiveRadius,
-                                                            adaptiveBack_inner_radius, adaptiveBack_outer_radius,
-                                                            axes_radii, inti, sigi);
+        // if sharing background, integrate with the background radii = peak radius so that background is 0
+        shape = integrator_satellite.ellipseIntegrateEvents(E1Vec, peak_q, specify_size, adaptiveRadius, adaptiveRadius,
+                                                            adaptiveRadius, axes_radii, inti, sigi, backi);
       }
     } else {
       shape = integrator.ellipseIntegrateEvents(E1Vec, peak_q, specify_size, adaptiveRadius, adaptiveBack_inner_radius,
-                                                adaptiveBack_outer_radius, axes_radii, inti, sigi);
+                                                adaptiveBack_outer_radius, axes_radii, inti, sigi, backi);
+      if (shareBackground) {
+        // cache this bragg peak's background so we can apply it to all its satellite peaks later
+        cachedBraggBackground[i] = backi;
+      }
     }
 
     peaks[i].setIntensity(inti);
@@ -556,6 +561,17 @@ void IntegrateEllipsoids::exec() {
       }
     }
   }
+
+  if (shareBackground) {
+    // loop over all bragg peaks and apply the cached background to their satellite peaks
+    for (auto it = satellitePeakMap.begin(); it != satellitePeakMap.end(); it++) {
+      for (auto satPeak = it->second.begin(); satPeak != it->second.end(); satPeak++) {
+        // subtract the cached background from the intensity
+        (*satPeak)->setIntensity((*satPeak)->getIntensity() - cachedBraggBackground[it->first]);
+      }
+    }
+  }
+
   if (principalaxis1.size() > 1) {
     Statistics stats1 = getStatistics(principalaxis1);
     g_log.notice() << "principalaxis1: "
@@ -603,10 +619,10 @@ void IntegrateEllipsoids::exec() {
 
         if (isSatellitePeak) {
           integrator_satellite.ellipseIntegrateEvents(E1Vec, peak_q, specify_size, peak_radius, back_inner_radius,
-                                                      back_outer_radius, axes_radii, inti, sigi);
+                                                      back_outer_radius, axes_radii, inti, sigi, backi);
         } else {
           integrator.ellipseIntegrateEvents(E1Vec, peak_q, specify_size, peak_radius, back_inner_radius,
-                                            back_outer_radius, axes_radii, inti, sigi);
+                                            back_outer_radius, axes_radii, inti, sigi, backi);
         }
 
         peaks[i].setIntensity(inti);
