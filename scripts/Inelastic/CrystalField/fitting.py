@@ -1284,8 +1284,12 @@ class CrystalFieldFit(object):
 
     def fit_sp(self, Solver='Powell'):
         """
-        Run scipy.optimize.minimize algorithm. Update function parameters.
+        Run scipy.optimize.minimize algorithm for CEF parameters only. Update function parameters.
         """
+        #only allow solvers with bounds!
+        if Solver not in ['Nelder-Mead', 'L-BFGS-B', 'TNC', 'SLSQP', 'Powell', 'trust-constr']:
+            Solver = 'Powell'
+            logger.notice("Solver not suitable, replaced by 'Powell'")
         self.check_consistency()
         if isinstance(self._input_workspace, list):
             return self._fit_multi_sp(Solver)
@@ -1335,7 +1339,7 @@ class CrystalFieldFit(object):
             # Fit CEF parameters only
             self.model.FixAllPeaks = True
             self.overwrite_fit_properties(0)
-            self.fit_sp('SLSQP')
+            self.fit_sp()
             self._function = self.model.function
             # Fit peaks only
             for parameter in self._free_cef_parameters:
@@ -1499,6 +1503,7 @@ class CrystalFieldFit(object):
             else:
                 fun = self._function
         x0 = []
+        fun.setAttributeValue('FixAllPeaks', True)
         lb = np.zeros(fun.nParams())
         ub = np.zeros(fun.nParams())
         for par_id in range(fun.nParams()):
@@ -1515,7 +1520,6 @@ class CrystalFieldFit(object):
         if res.success:
             for par_id in [id for id in range(fun.nParams()) if not fun.isFixed(id)]:
                 fun.setParameter(par_id, res.x[par_id])
-                print(res.x[par_id])
             self.model.update(fun)
 
     def _evaluate_cf(self, x0, fun):
@@ -1528,7 +1532,7 @@ class CrystalFieldFit(object):
         EvaluateFunction(fun, self._input_workspace, OutputWorkspace='data')
         for par_id in range(fun.nParams()):
             res.append(fun.getParameterValue(par_id))
-        for index in range(len(x0)):
+        for index in range(min(len(x0),len(res))):
             chi2 += (res[index] - x0[index])**2
         #chi2 = CalculateChiSquared(fun, InputWorkspace=self._input_workspace, Inputworkspace_1=mtd['data'])[1]
         return chi2
