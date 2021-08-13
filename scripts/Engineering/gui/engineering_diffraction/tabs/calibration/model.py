@@ -45,16 +45,17 @@ class CalibrationModel(object):
         """
         # vanadium corrections workspaces not used at this stage, but ensure they exist and create if not
         vanadium_corrections.fetch_correction_workspaces(vanadium_path, instrument, rb_num=rb_num)
-        full_calib_path = get_setting(output_settings.INTERFACES_SETTINGS_GROUP,
-                                      output_settings.ENGINEERING_PREFIX, "full_calibration")
-        try:
-            full_calib = Load(full_calib_path, OutputWorkspace="full_inst_calib")
-        except ValueError:
-            logger.error("Error loading Full instrument calibration - this is set in the interface settings.")
-            return
 
         if not only_update_vanadium:
             ceria_workspace = path_handling.load_workspace(ceria_path)
+            full_calib_path = get_setting(output_settings.INTERFACES_SETTINGS_GROUP,
+                                          output_settings.ENGINEERING_PREFIX, "full_calibration")
+            try:
+                full_calib = Load(full_calib_path, OutputWorkspace="full_inst_calib")
+            except ValueError:
+                logger.error("Error loading Full instrument calibration - this is set in the interface settings.")
+                return
+
             cal_params, ceria_raw, grp_ws = self.run_calibration(ceria_workspace,
                                                                  bank,
                                                                  calfile,

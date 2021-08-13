@@ -45,7 +45,7 @@ class CalibrationPresenter(object):
         self.view.set_on_radio_new_toggled(self.set_create_new_enabled)
         self.view.set_on_radio_existing_toggled(self.set_load_existing_enabled)
         self.view.set_on_check_cropping_state_changed(self.show_cropping)
-        self.view.set_on_check_update_vanadium_state_changed(self.disable_sample_and_crop)
+        self.view.set_on_check_update_vanadium_state_changed(self.disable_sample_crop_and_plot)
         self.view.set_enable_update_vanadium(self.try_enable_update_vanadium)
 
     def on_calibrate_clicked(self):
@@ -185,7 +185,8 @@ class CalibrationPresenter(object):
 
     def set_calibrate_controls_enabled(self, enabled):
         self.view.set_calibrate_button_enabled(enabled)
-        self.view.set_check_plot_output_enabled(enabled)
+        if not self.view.get_update_vanadium_checked():
+            self.view.set_check_plot_output_enabled(enabled)
 
     def _on_error(self, error_info):
         logger.error(str(error_info))
@@ -202,7 +203,7 @@ class CalibrationPresenter(object):
         if enabled:
             self.set_calibrate_button_text("Calibrate")
             self.view.set_check_plot_output_enabled(True)
-            self.disable_sample_and_crop(self.view.get_update_vanadium_checked())
+            self.disable_sample_crop_and_plot(self.view.get_update_vanadium_checked())
             self.view.set_check_update_vanadium_enabled(self.last_calibration_successful)
             self.find_files()
         else:
@@ -227,10 +228,11 @@ class CalibrationPresenter(object):
     def show_cropping(self, show):
         self.view.set_cropping_widget_visibility(show)
 
-    def disable_sample_and_crop(self, disable):
+    def disable_sample_crop_and_plot(self, disable):
         show = not disable
         self.view.set_sample_enabled(show)
         self.view.set_check_cropping_enabled(show)
+        self.view.set_check_plot_output_enabled(show)
         if disable:
             self.view.set_check_cropping_checked(show)
             self.set_calibrate_button_text("Update Vanadium")
