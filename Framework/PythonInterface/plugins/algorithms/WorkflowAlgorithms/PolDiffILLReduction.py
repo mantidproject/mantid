@@ -638,9 +638,10 @@ class PolDiffILLReduction(PythonAlgorithm):
 
     def _detector_analyser_energy_efficiency(self, ws):
         """Corrects for the detector and analyser energy efficiency."""
-        for entry in mtd[ws]:
-            DetectorEfficiencyCorUser(InputWorkspace=entry, OutputWorkspace=entry,
-                                      IncidentEnergy=self._sampleAndEnvironmentProperties['InitialEnergy'].value)
+        ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws, Target='DeltaE', EMode='Direct',
+                     EFixed=self._sampleAndEnvironmentProperties['InitialEnergy'].value)
+        DetectorEfficiencyCorUser(InputWorkspace=ws, OutputWorkspace=ws,
+                                  IncidentEnergy=self._sampleAndEnvironmentProperties['InitialEnergy'].value)
         return ws
 
     def _apply_polarisation_corrections(self, ws, pol_eff_ws):
