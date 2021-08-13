@@ -456,7 +456,8 @@ Rotating Shapes
 ~~~~~~~~~~~~~~~
 
 *Note that some shapes (such as* `Cylinder (finite height) <Cylinder_>`_ *and* `Tapered Guide`_ *) can be oriented in a
-certain direction, using the* ``axis`` *tag, but this does not support all possible 3D rotations.*
+certain direction, using the* ``axis`` *tag, but this representation isn't general enough to support
+all possible 3D rotations for all shapes.*
 
 Most shapes can be rotated individually or as part of an ensemble, by using the
 ``rotate`` or ``rotate-all`` tags respectively.
@@ -466,17 +467,17 @@ The shapes that can be rotated are: Sphere_, `Cylinder (finite height) <Cylinder
 
 Use the ``rotate`` tag to rotate a shape **individually around its centre** (or centre-of-bottom-base).
 The shape is rotated by an angle in degrees around the x,y and z axes in that order. To rotate a
-cylinder 90° clockwise around x and 45° anti-clockwise around y:
+cuboid 90° clockwise around x and 45° anti-clockwise around y:
 
 .. code-block:: xml
 
-      <cylinder id="stick">
-        <centre-of-bottom-base x="-0.5" y="0.0" z="0.0" />
-        <axis x="1.0" y="0.0" z="0.0" />
-        <radius val="0.05" />
-        <height val="1.0" />
+      <cuboid id="stick">
+        <width val="3.0" />
+        <height val="0.5"  />
+        <depth  val="0.5" />
+        <centre x="0.0" y="0.0" z="0.0"  />
         <rotate x="90" y="-45" z="0" />
-      </cylinder>
+      </cuboid>
 
       <algebra val="stick" />
 
@@ -503,8 +504,9 @@ sphere on the end of a cylinder (by 90° clockwise around x and 45° anti-clockw
 All these rotatable shapes (expect for `Infinite Plane`_ and `Infinite Cylinder`_) can be plotted to check
 your shape definition is correct. For more details see :ref:`Mesh_Plots`.
 
-Shapes will be automatically rotated, if a rotation is set using :ref:`algm-SetGoniometer`. This can work alongside
-manual rotation tags. Note the rotations are applied in the order ``rotate``, ``rotate-all``, ``goniometer``.
+Shapes will be automatically rotated, if a rotation is set using :ref:`algm-SetGoniometer`.
+This goniometer rotation is about the origin and can work alongside manual rotation tags.
+Note the rotations are applied in the order ``rotate``, ``rotate-all``, ``goniometer``.
 
 .. _Bounding-Box:
 
