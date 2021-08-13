@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import numpy as np
 import re
+import scipy.optimize as sp
 import warnings
 # RegEx pattern matching a composite function parameter name, eg f2.Sigma.
 FN_PATTERN = re.compile('f(\\d+)\\.(.+)')
@@ -1281,6 +1282,16 @@ class CrystalFieldFit(object):
         else:
             return self._fit_single()
 
+    def fit_sp(self, Solver='Powell'):
+        """
+        Run scipy.optimize.minimize algorithm. Update function parameters.
+        """
+        self.check_consistency()
+        if isinstance(self._input_workspace, list):
+            return self._fit_multi_sp(Solver)
+        else:
+            return self._fit_single_sp(Solver)
+
     def monte_carlo(self, **kwargs):
         fix_all_peaks = self.model.FixAllPeaks
         self.model.FixAllPeaks = True
@@ -1324,7 +1335,7 @@ class CrystalFieldFit(object):
             # Fit CEF parameters only
             self.model.FixAllPeaks = True
             self.overwrite_fit_properties(0)
-            self.fit()
+            self.fit_sp('SLSQP')
             self._function = self.model.function
             # Fit peaks only
             for parameter in self._free_cef_parameters:
@@ -1475,6 +1486,53 @@ class CrystalFieldFit(object):
         self.model.update(function)
         self.model.chi2 = alg.getProperty('OutputChi2overDoF').value
 
+    def _fit_single_sp(self, solver):
+        """
+        Fit with scipy.optimize.minimize when the model has a single spectrum.
+        """
+        from CrystalField.CrystalFieldMultiSite import CrystalFieldMultiSite
+        if isinstance(self.model, CrystalFieldMultiSite):
+            fun = self.model.function
+        else:
+            if self._function is None:
+                fun = self.model.crystalFieldFunction
+            else:
+                fun = self._function
+        x0 = []
+        lb = np.zeros(fun.nParams())
+        ub = np.zeros(fun.nParams())
+        for par_id in range(fun.nParams()):
+            value = fun.getParameterValue(par_id)
+            x0.append(value)
+            if not fun.isFixed(par_id):
+                lb[par_id] = None
+                ub[par_id] = None
+            else:
+                lb[par_id] = value
+                ub[par_id] = value
+        bnds = np.vstack((lb, ub)).T
+        res = sp.minimize(self._evaluate_cf, x0, args=(fun), method=solver, bounds=bnds, options={'disp': False, 'maxiter': 10})
+        if res.success:
+            for par_id in [id for id in range(fun.nParams()) if not fun.isFixed(id)]:
+                fun.setParameter(par_id, res.x[par_id])
+                print(res.x[par_id])
+            self.model.update(fun)
+
+    def _evaluate_cf(self, x0, fun):
+        from mantid.simpleapi import EvaluateFunction#, CalculateChiSquared
+        #from mantid.api import mtd
+        for par_id in [id for id in range(fun.nParams()) if not fun.isFixed(id)]:
+            fun.setParameter(par_id, x0[par_id])
+        res = []
+        chi2 = 0.0
+        EvaluateFunction(fun, self._input_workspace, OutputWorkspace='data')
+        for par_id in range(fun.nParams()):
+            res.append(fun.getParameterValue(par_id))
+        for index in range(len(x0)):
+            chi2 += (res[index] - x0[index])**2
+        #chi2 = CalculateChiSquared(fun, InputWorkspace=self._input_workspace, Inputworkspace_1=mtd['data'])[1]
+        return chi2
+
     def _fit_multi(self):
         """
         Fit when the model has multiple spectra.
@@ -1499,6 +1557,12 @@ class CrystalFieldFit(object):
         function = alg.getProperty('Function').value
         self.model.update(function)
         self.model.chi2 = alg.getProperty('OutputChi2overDoF').value
+
+    def _fit_multi_sp(self, solver):
+        """
+        Fit with scipy.optimize.minimize when the model has multiple spectra.
+        """
+        print("Not yet implemented!!!")
 
     def _set_fit_properties(self, alg):
         for prop in self._fit_properties.items():
