@@ -72,12 +72,12 @@ void IntegrateQLabEvents::addEvents(SlimEvents const &event_qs) {
 }
 
 // Entry function that perform the integration
-Mantid::Geometry::PeakShape_const_sptr
-IntegrateQLabEvents::ellipseIntegrateEvents(const std::vector<V3D> &E1Vec, V3D const &peak_q, bool specify_size,
-                                            double peak_radius, double back_inner_radius, double back_outer_radius,
-                                            std::vector<double> &axes_radii, double &inti, double &sigi) {
+Mantid::Geometry::PeakShape_const_sptr IntegrateQLabEvents::ellipseIntegrateEvents(
+    const std::vector<V3D> &E1Vec, V3D const &peak_q, bool specify_size, double peak_radius, double back_inner_radius,
+    double back_outer_radius, std::vector<double> &axes_radii, double &inti, double &sigi, double &backi) {
   inti = 0.0; // default values, in case something
   sigi = 0.0; // is wrong with the peak.
+  backi = 0.0;
 
   int64_t hash = CellCoords(peak_q, m_cellSize).getHash();
   auto cell_it = m_cellsWithPeaks.find(hash);
@@ -107,7 +107,7 @@ IntegrateQLabEvents::ellipseIntegrateEvents(const std::vector<V3D> &E1Vec, V3D c
     return std::make_shared<NoShape>();
 
   return ellipseIntegrateEvents(std::move(E1Vec), peak_q, some_events, eigen_vectors, sigmas, specify_size, peak_radius,
-                                back_inner_radius, back_outer_radius, axes_radii, inti, sigi);
+                                back_inner_radius, back_outer_radius, axes_radii, inti, sigi, backi);
 }
 
 std::pair<double, double> IntegrateQLabEvents::numInEllipsoid(SlimEvents const &events,
@@ -239,7 +239,7 @@ void IntegrateQLabEvents::addEvent(const SlimEvent event) {
 PeakShapeEllipsoid_const_sptr IntegrateQLabEvents::ellipseIntegrateEvents(
     const std::vector<V3D> &E1Vec, V3D const &peak_q, SlimEvents const &ev_list, std::vector<V3D> const &directions,
     std::vector<double> const &sigmas, bool specify_size, double peak_radius, double back_inner_radius,
-    double back_outer_radius, std::vector<double> &axes_radii, double &inti, double &sigi) {
+    double back_outer_radius, std::vector<double> &axes_radii, double &inti, double &sigi, double &backi) {
   /* r1, r2 and r3 will give the sizes of the major axis of the peak
    * ellipsoid, and of the inner and outer surface of the background
    * ellipsoidal shell, respectively.
@@ -315,6 +315,7 @@ PeakShapeEllipsoid_const_sptr IntegrateQLabEvents::ellipseIntegrateEvents(
 
   inti = peak_w_back.first - ratio * backgrd.first;
   sigi = sqrt(peak_w_back.second + ratio * ratio * backgrd.second);
+  backi = ratio * backgrd.first;
 
   if (inti < 0) {
     std::ostringstream msg;

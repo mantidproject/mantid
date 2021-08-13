@@ -138,10 +138,11 @@ public:
    * of the three principal axes.
    * @param inti : (output) collects the net integrated intensity
    * @param sigi : (output) collects an estimate of the standard deviation
-   * of the net integrated intensity */
+   * of the net integrated intensity 
+   * @param backi : (output) collects background intensity subtracted from inti */
   PeakShape_const_sptr ellipseIntegrateEvents(const std::vector<V3D> &E1Vec, V3D const &peak_q, bool specify_size,
                                               double peak_radius, double back_inner_radius, double back_outer_radius,
-                                              std::vector<double> &axes_radii, double &inti, double &sigi);
+                                              std::vector<double> &axes_radii, double &inti, double &sigi, double &backi);
 
   /**
    * @brief Assign events to each of the cells occupied by events.
@@ -249,13 +250,14 @@ private:
    * @param axes_radii : The radii used for integration in the directions
    * of the three principal axes.
    * @param inti : (output) net integrated intensity
-   * @param sigi : (output) estimate of the standard deviation the intensity */
+   * @param sigi : (output) estimate of the standard deviation the intensity
+   * @param backi : (output) background intensity subtracted from inti */
   PeakShapeEllipsoid_const_sptr ellipseIntegrateEvents(const std::vector<V3D> &E1Vec, V3D const &peak_q,
                                                        SlimEvents const &ev_list, std::vector<V3D> const &directions,
                                                        std::vector<double> const &sigmas, bool specify_size,
                                                        double peak_radius, double back_inner_radius,
                                                        double back_outer_radius, std::vector<double> &axes_radii,
-                                                       double &inti, double &sigi);
+                                                       double &inti, double &sigi, double &backi);
 
   /**
    * @brief Calculate if this Q is on a detector
