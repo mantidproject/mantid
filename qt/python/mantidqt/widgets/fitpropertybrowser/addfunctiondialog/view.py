@@ -63,8 +63,7 @@ class AddFunctionDialogView(QDialog):
         super(AddFunctionDialogView, self).__init__(parent)
         self.setWindowIcon(QIcon(':/images/MantidIcon.ico'))
         self.setAttribute(Qt.WA_DeleteOnClose, True)
-        self._has_default_checkbox = default_checkbox
-        self._setup_ui(function_names, default_function_name)
+        self._setup_ui(function_names, default_function_name, default_checkbox)
 
     def is_text_in_function_list(self, function: str) -> bool:
         """Return True if the given str is in the function list"""
@@ -76,12 +75,12 @@ class AddFunctionDialogView(QDialog):
         self.ui.errorMessage.show()
 
     def is_set_global_default(self):
-        if self._has_default_checkbox:
+        if hasattr(self, '_default_checkbox'):
             return self._default_checkbox.checkState() == Qt.Checked
         return False
 
     # private api
-    def _setup_ui(self, function_names, default_function_name):
+    def _setup_ui(self, function_names, default_function_name, default_checkbox):
         self.ui = load_ui(__file__, 'add_function_dialog.ui', self)
         functionBox = self.ui.functionBox
         if function_names:
@@ -95,6 +94,6 @@ class AddFunctionDialogView(QDialog):
         functionBox.installEventFilter(self._key_filter)
         self.ui.errorMessage.hide()
         # Add a checkbox so user is able to explicitly update the global settings.
-        if self._has_default_checkbox:
+        if default_checkbox:
             self._default_checkbox = QCheckBox("Set as global default")
             self.ui.verticalLayout_2.addWidget(self._default_checkbox)

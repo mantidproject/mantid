@@ -51,6 +51,14 @@ class AddFunctionDialogPresenterTest(unittest.TestCase):
 
         self.assertEqual(self.TEST_FUNCTION_NAMES[0], view.ui.functionBox.currentText())
 
+    def test_checkbox_exists_if_requested(self):
+        view = AddFunctionDialogView(default_checkbox=True)
+        self.assertTrue(hasattr(view, '_default_checkbox'))
+
+    def test_checkbox_not_exists_if_not_requested(self):
+        view = AddFunctionDialogView()
+        self.assertFalse(hasattr(view, '_default_checkbox'))
+
 
 if __name__ == '__main__':
     unittest.main()
