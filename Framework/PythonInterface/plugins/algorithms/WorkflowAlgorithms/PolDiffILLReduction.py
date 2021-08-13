@@ -899,6 +899,11 @@ class PolDiffILLReduction(PythonAlgorithm):
 
         return nMeasurements
 
+    def _elastic_channel_calibration(self, ws):
+        """Finds the elastic peaks and puts them in a WorkspaceGroup with the set name."""
+        self._elastic_channels_ws = "{}_elastic".format(ws[2:])
+        FindEPP(InputWorkspace=ws, OutputWorkspace=self._elastic_channels_ws)
+
     def _normalise_vanadium(self, ws):
         """Performs normalisation of the vanadium data to the expected cross-section."""
         vanadium_expected_cross_section = 0.404  # barns
@@ -1015,6 +1020,12 @@ class PolDiffILLReduction(PythonAlgorithm):
             self._normalise(ws)
 
         if process in ['Quartz', 'Vanadium', 'Sample']:
+            if measurement_technique == 'TOF':
+                if process == 'Vanadium':
+                    progress.report('Calibrating the elastic peak energy')
+                    self._elastic_channel_calibration(ws)
+                else:
+                    self._elastic_channels_ws = self.getPropertyValue('ElasticChannelsWorkspace')
             # Subtracts background if the transmission and either empty container or cadmium are provided
             transmission_ws = self._get_transmission(ws)
             progress.report('Subtracting backgrounds')
