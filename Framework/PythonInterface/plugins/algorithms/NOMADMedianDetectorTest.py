@@ -10,9 +10,6 @@ from mantid.api import (AlgorithmFactory, FileAction, FileProperty, PropertyMode
 from mantid.kernel import Direction
 from mantid.utils.nomad.diagnostics import _NOMADMedianDetectorTest
 
-# third-party imports
-import numpy as np
-
 
 class NOMADMedianDetectorTest(PythonAlgorithm, _NOMADMedianDetectorTest):
 
@@ -52,14 +49,10 @@ class NOMADMedianDetectorTest(PythonAlgorithm, _NOMADMedianDetectorTest):
             doc='Output masked pixels in XML format')
 
     def PyExec(self):
-        ws = self.getProperty('InputWorkspace').value
-        ws.extractY()
-
-    def _load_intensities(self) -> np.ndarray:
-        r"""Pixel intensities
-        @details pixels in non-used eight-packs become masked
-        """
-        pass
+        self.config = self.parse_yaml(self.getProperty('Configuration').value)  # config data structure
+        self.intensities = self._get_intensities(self.getProperty('InputWorkspace').value)  # intensities data structure
+        mask_composite = self.mask_by_tube_intensity | self.mask_by_pixel_intensity
+        self.export_mask(mask_composite, self.getProperty('OutputMaskXML').value)
 
 
 AlgorithmFactory.subscribe(NOMADMedianDetectorTest)
