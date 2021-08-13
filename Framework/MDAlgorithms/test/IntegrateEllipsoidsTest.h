@@ -560,7 +560,8 @@ public:
 
   void test_execution_shared_background() {
 
-    const std::vector<V3D> peaksHKL = {V3D(0.15, 1.85, -1.0), V3D(1.0, 4.0, -3.0), V3D(1.0, 5.0, -3.0)};
+    const std::vector<V3D> peaksHKL = {V3D(0.0, 2.0, 1.0), V3D(0.15, 1.85, 1.0), V3D(-0.15, 2.15, 1.0),
+                                       V3D(1.0, 4.0, -3.0)};
 
     // creates the peak workspace, sets UB, and indexes them
     PeaksWorkspace_sptr peaksWS = createPeaksForSatelliteTests(peaksHKL);
@@ -571,14 +572,14 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", m_satelliteEventWS));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeaksWorkspace", peaksWS));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "peaks_integrated_shared"));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("RegionRadius", 0.055));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("RegionRadius", 0.11));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("SpecifySize", true));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakSize", 0.0425));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundInnerSize", 0.043));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundOuterSize", 0.055));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakSize", 0.085));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundInnerSize", 0.086));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundOuterSize", 0.11));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("UseOnePercentBackgroundCorrection", false));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SatelliteRegionRadius", 0.1));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SatellitePeakSize", 0.08));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SatelliteRegionRadius", 0.11));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SatellitePeakSize", 0.10));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("ShareBackground", true));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT_THROWS_NOTHING(alg.isExecuted());
@@ -586,14 +587,14 @@ public:
     PeaksWorkspace_sptr peaksShared = alg.getProperty("OutputWorkspace");
     TS_ASSERT_EQUALS(peaksShared->getNumberPeaks(), 3);
 
-    // first peak is a satellite peak of second peak
-    // second peak is bragg peak with intensity 59 - 0.883704*7 = 52.814
-    // satellite peak should share background: 23 - 0.883704*7 = 16.814
-    const Peak satellitePeak = peaksShared->getPeak(0);
-    const Peak braggPeak = peaksShared->getPeak(1);
+    // first peak is a bragg peak: intensity = 29715 - 0.883704*1988 = 279858.196
+    // second peak is a satellite with intensity = 4620 - 3.32588*721 = 2222.25
+    // However, sat peak should share background of bragg: 4620 - 0.883704*1988 = 2863.196448
+    const Peak braggPeak = peaksShared->getPeak(0);
+    const Peak satellitePeak = peaksShared->getPeak(1);
 
-    TS_ASSERT_DELTA(braggPeak.getIntensity(), 52.814, 1e-2);
-    TS_ASSERT_DELTA(satellitePeak.getIntensity(), 16.814, 1e-2);
+    TS_ASSERT_DELTA(braggPeak.getIntensity(), 279858.196, 1e-2);
+    TS_ASSERT_DELTA(satellitePeak.getIntensity(), 2863.196488, 1e-2);
 
     AnalysisDataService::Instance().remove("peaks_integrated_shared");
     AnalysisDataService::Instance().remove(peaksWS->getName());
