@@ -644,6 +644,9 @@ class PolDiffILLReduction(PythonAlgorithm):
                                   IncidentEnergy=self._sampleAndEnvironmentProperties['InitialEnergy'].value)
         return ws
 
+    def _frame_overlap_correction(self, ws):
+        pass
+
     def _apply_polarisation_corrections(self, ws, pol_eff_ws):
         """Applies the polarisation correction based on the output from quartz reduction."""
         nPolarisations = None
