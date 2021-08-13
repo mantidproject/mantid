@@ -83,6 +83,45 @@ void addFullInstrumentToWorkspace(MatrixWorkspace &workspace, bool includeMonito
   workspace.setInstrument(instrument);
 }
 
+void addInstrumentWithGeographicalDetectorsToWorkspace(Mantid::API::MatrixWorkspace &workspace, const int nlat,
+                                                       const int nlong, const double anginc) {
+  V3D samplePosition(0., 0., 0.);
+  V3D sourcePosition(0., 0., -14.);
+
+  Instrument_sptr instrument = std::make_shared<Instrument>();
+  instrument->setReferenceFrame(
+      std::make_shared<ReferenceFrame>(Mantid::Geometry::Y, Mantid::Geometry::Z, Right, "0,0,0"));
+
+  InstrumentCreationHelper::addSource(instrument, sourcePosition, "source");
+  InstrumentCreationHelper::addSample(instrument, samplePosition, "sample");
+
+  // set up detectors with even spacing in latitude and longitude (to match geographical angles
+  // approach used in the spatial interpolation\sparse instrument functionality)
+  int i = 0;
+  constexpr double deg2rad = M_PI / 180.0;
+  const double angincRad = anginc * deg2rad;
+  auto R = 1.0;
+  for (int lat = 0; lat < nlat; ++lat) {
+    for (int lng = 0; lng < nlong; ++lng) {
+      std::stringstream buffer;
+      buffer << "detector_" << i;
+      V3D detPos;
+      auto latrad = lat * angincRad;
+      auto longrad = lng * angincRad;
+      detPos[1] = R * sin(latrad);
+      const double ct = R * cos(latrad);
+      detPos[2] = ct * cos(longrad);
+      detPos[0] = ct * sin(longrad);
+
+      InstrumentCreationHelper::addDetector(instrument, detPos, i, buffer.str());
+      // Link it to the workspace
+      workspace.getSpectrum(i).addDetectorID(i);
+      i++;
+    }
+  }
+  workspace.setInstrument(instrument);
+}
+
 /** Adds a component to an instrument
  *
  * @param instrument :: instrument to which the component will be added

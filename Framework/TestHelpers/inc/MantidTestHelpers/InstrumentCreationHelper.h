@@ -18,6 +18,8 @@ namespace InstrumentCreationHelper {
 
 void addFullInstrumentToWorkspace(Mantid::API::MatrixWorkspace &workspace, bool includeMonitors, bool startYNegative,
                                   const std::string &instrumentName);
+void addInstrumentWithGeographicalDetectorsToWorkspace(Mantid::API::MatrixWorkspace &workspace, const int nlat,
+                                                       const int nlong, const double anginc);
 Mantid::Geometry::Component *addComponent(Mantid::Geometry::Instrument_sptr &instrument,
                                           const Mantid::Kernel::V3D &position, const std::string &name);
 void addSample(Mantid::Geometry::Instrument_sptr &instrument, const Mantid::Kernel::V3D &position,
