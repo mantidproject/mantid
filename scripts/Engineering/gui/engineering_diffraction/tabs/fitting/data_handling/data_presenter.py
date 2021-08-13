@@ -232,7 +232,10 @@ class FittingDataPresenter(object):
             self.plotted.add(ws_name)
 
     def _handle_selection_changed(self):
-        self._enable_inspect_bg_button(True)
+        enable = True
+        if self.view.get_selected_rows() == {}:
+            enable = False
+        self._enable_inspect_bg_button(enable)
 
     def _enable_load_button(self, enabled):
         self.view.set_load_button_enabled(enabled)
