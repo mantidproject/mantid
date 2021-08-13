@@ -366,6 +366,29 @@ class PolDiffILLReduction(PythonAlgorithm):
             new_name = "{0}_{1}_{2}".format(numor, direction, flipper_state)
             RenameWorkspace(InputWorkspace=entry, OutputWorkspace=new_name)
 
+    def _load_and_prepare_data(self, measurement_technique, progress):
+        """Loads the data, sets the instrument, and runs function to check the measurement method. In the case
+        of a single crystal measurement, it also merges the omega scan data into one workspace per polarisation
+        orientation."""
+
+        ws = '__' + self.getPropertyValue('OutputWorkspace')
+        calibration_setting = 'YIGFile'
+        if self.getProperty('InstrumentCalibration').isDefault:
+            calibration_setting = 'None'
+        progress.report(0, 'Loading data')
+        LoadAndMerge(Filename=self.getPropertyValue('Run'), LoaderName='LoadILLPolarizedDiffraction',
+                     LoaderOptions={'PositionCalibration': calibration_setting,
+                                    'YIGFileName': self.getPropertyValue('InstrumentCalibration')},
+                     OutputWorkspace=ws, startProgress=0.0, endProgress=0.6)
+        self._instrument = mtd[ws][0].getInstrument().getName()
+        self._figure_out_measurement_method(ws)
+        if measurement_technique == 'SingleCrystal':
+            progress.report(7, 'Merging omega scan')
+            input_ws = self._merge_omega_scan(ws, self._data_structure_helper(), ws+'_conjoined')
+            DeleteWorkspace(Workspace=ws)
+            RenameWorkspace(InputWorkspace=input_ws, OutputWorkspace=ws)
+        return ws
+
     def _normalise(self, ws):
         """Normalises the provided WorkspaceGroup to the monitor 1 or time and simultaneously removes monitors.
         In case the input group is used to calculate transmission, the output contains normalised monitors rather
@@ -935,31 +958,14 @@ class PolDiffILLReduction(PythonAlgorithm):
     def PyExec(self):
         process = self.getPropertyValue('ProcessAs')
         processes = ['Cadmium', 'EmptyBeam', 'BeamWithCadmium', 'Transmission', 'Empty', 'Quartz', 'Vanadium', 'Sample']
+
         nReports = np.array([3, 2, 2, 3, 3, 3, 10, 10])
         measurement_technique = self.getPropertyValue('MeasurementTechnique')
         if measurement_technique == 'SingleCrystal':
             nReports += 2
         progress = Progress(self, start=0.0, end=1.0, nreports=int(nReports[processes.index(process)]))
-        ws = '__' + self.getPropertyValue('OutputWorkspace')
 
-        calibration_setting = 'YIGFile'
-        if self.getProperty('InstrumentCalibration').isDefault:
-            calibration_setting = 'None'
-        progress.report(0, 'Loading data')
-        LoadAndMerge(Filename=self.getPropertyValue('Run'), LoaderName='LoadILLPolarizedDiffraction',
-                     LoaderOptions={'PositionCalibration':calibration_setting,
-                                    'YIGFileName':self.getPropertyValue('InstrumentCalibration')},
-                     OutputWorkspace=ws, startProgress=0.0, endProgress=0.6)
-        self._instrument = mtd[ws][0].getInstrument().getName()
-        run = mtd[ws][0].getRun()
-        if run['acquisition_mode'].value == 1:
-            raise RuntimeError("TOF data reduction is not supported at the moment.")
-        self._figure_out_measurement_method(ws)
-        if measurement_technique == 'SingleCrystal':
-            progress.report(7, 'Merging omega scan')
-            input_ws = self._merge_omega_scan(ws, self._data_structure_helper(), ws+'_conjoined')
-            DeleteWorkspace(Workspace=ws)
-            RenameWorkspace(InputWorkspace=input_ws, OutputWorkspace=ws)
+        ws = self._load_and_prepare_data(measurement_technique, progress)
         if process in ['EmptyBeam', 'BeamWithCadmium', 'Transmission']:
             if mtd[ws].getNumberOfEntries() > 1:
                 tmp_ws = ws + '_tmp'
