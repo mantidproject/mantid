@@ -23,8 +23,9 @@ class PolDiffILLReduction(PythonAlgorithm):
     _method_data_structure = None # measurement method determined from the data
     _instrument = None
     _sampleAndEnvironmentProperties = None
+    _elastic_channels_ws = None
 
-    _DEG_2_RAD =  np.pi / 180.0
+    _DEG_2_RAD = np.pi / 180.0
 
     def category(self):
         return 'ILL\\Diffraction'
@@ -111,6 +112,9 @@ class PolDiffILLReduction(PythonAlgorithm):
                 and (self.getPropertyValue('SelfAttenuationMethod') not in ['None', 'Transmission']
                      or self.getProperty('AbsoluteNormalisation').value)):
             issues.update(self._validate_self_attenuation_arguments())
+
+        if process == 'Sample' and self.getProperty('ElasticChannelsWorkspace').isDefault:
+            issues['ElasticChannelsWorkspace'] = 'Elastic peak information must be provided.'
 
         return issues
 
@@ -246,7 +250,7 @@ class PolDiffILLReduction(PythonAlgorithm):
 
         self.declareProperty(name="MeasurementTechnique",
                              defaultValue="Powder",
-                             validator=StringListValidator(["Powder", "SingleCrystal"]),
+                             validator=StringListValidator(["Powder", "SingleCrystal", "TOF"]),
                              direction=Direction.Input,
                              doc="What type of measurement technique has been used to collect the data.")
 
@@ -262,6 +266,24 @@ class PolDiffILLReduction(PythonAlgorithm):
                              validator=StringListValidator(["Monitor", "Time", "None"]),
                              direction=Direction.Input,
                              doc="What normalisation approach to use on data.")
+
+        self.declareProperty(name="TOFUnits",
+                             defaultValue="TimeChannels",
+                             validator=StringListValidator(["TimeChannels", "UncalibratedTime", "CalibratedTime",
+                                                            "Energy"]),
+                             direction=Direction.Input,
+                             doc="The choice to display the TOF data either as a function of the time channel,"
+                                 " (un)calibrated time, or energy.")
+
+        tofMeasurement = EnabledWhenProperty('MeasurementTechnique', PropertyCriterion.IsEqualTo, 'TOF')
+        self.setPropertySettings('TOFUnits', tofMeasurement)
+
+        self.declareProperty(WorkspaceGroupProperty('ElasticChannelsWorkspace', '',
+                                                    direction=Direction.Input,
+                                                    optional=PropertyMode.Optional),
+                             doc='The name of the group workspace containing tables with elastic peak channels.')
+
+        self.setPropertySettings('ElasticChannelsWorkspace', tofMeasurement)
 
     @staticmethod
     def _calculate_transmission(ws, beam_ws):
