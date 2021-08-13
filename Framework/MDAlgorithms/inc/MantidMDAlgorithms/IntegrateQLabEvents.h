@@ -138,11 +138,12 @@ public:
    * of the three principal axes.
    * @param inti : (output) collects the net integrated intensity
    * @param sigi : (output) collects an estimate of the standard deviation
-   * of the net integrated intensity 
+   * of the net integrated intensity
    * @param backi : (output) collects background intensity subtracted from inti */
   PeakShape_const_sptr ellipseIntegrateEvents(const std::vector<V3D> &E1Vec, V3D const &peak_q, bool specify_size,
                                               double peak_radius, double back_inner_radius, double back_outer_radius,
-                                              std::vector<double> &axes_radii, double &inti, double &sigi, double &backi);
+                                              std::vector<double> &axes_radii, double &inti, double &sigi,
+                                              double &backi);
 
   /**
    * @brief Assign events to each of the cells occupied by events.

@@ -585,7 +585,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.isExecuted());
 
     PeaksWorkspace_sptr peaksShared = alg.getProperty("OutputWorkspace");
-    TS_ASSERT_EQUALS(peaksShared->getNumberPeaks(), 3);
+    TS_ASSERT_EQUALS(peaksShared->getNumberPeaks(), peaksHKL.size());
 
     // first peak is a bragg peak: intensity = 29715 - 0.883704*1988 = 279858.196
     // second peak is a satellite with intensity = 4620 - 3.32588*721 = 2222.25
@@ -595,6 +595,12 @@ public:
 
     TS_ASSERT_DELTA(braggPeak.getIntensity(), 279858.196, 1e-2);
     TS_ASSERT_DELTA(satellitePeak.getIntensity(), 2863.196488, 1e-2);
+
+    // check that the background radii are the same in the peak shape
+    const PeakShapeEllipsoid braggShape = static_cast<const PeakShapeEllipsoid &>(braggPeak.getPeakShape());
+    const PeakShapeEllipsoid satelliteShape = static_cast<const PeakShapeEllipsoid &>(satellitePeak.getPeakShape());
+    TS_ASSERT_EQUALS(braggShape.abcRadiiBackgroundInner(), satelliteShape.abcRadiiBackgroundInner())
+    TS_ASSERT_EQUALS(braggShape.abcRadiiBackgroundOuter(), satelliteShape.abcRadiiBackgroundOuter())
 
     AnalysisDataService::Instance().remove("peaks_integrated_shared");
     AnalysisDataService::Instance().remove(peaksWS->getName());
