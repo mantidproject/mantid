@@ -22,7 +22,6 @@ class RawPaneModelTest(unittest.TestCase):
         self.model._max_spec = 4
         ws_list = [mock.Mock(), mock.Mock(),mock.Mock()]
         indices = [k for k in range(self.model._max_spec)]
-        indices += indices + indices
         self.assertEqual(indices, self.model._generate_run_indices(ws_list, "1:4"))
 
     def test_generate_run_indicies(self):

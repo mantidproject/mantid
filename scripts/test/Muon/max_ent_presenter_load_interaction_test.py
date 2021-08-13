@@ -163,13 +163,14 @@ class MaxEntPresenterTest(unittest.TestCase):
         self.assertEqual(mock_maxent.call_count,0)
 
     def test_create_group_table(self):
-        group1 = MuonGroup("a",[1,2,3])
+        group1 = MuonGroup("fwd",[1,2,3])
         type(self.presenter).get_selected_groups = mock.PropertyMock(return_value=[group1])
 
         tab = self.presenter._create_group_table()
-        self.assertEqual(tab.column(0)[0], "1,2,3")
+        self.assertEqual(tab.column(0)[0], "fwd")
+        self.assertEqual(tab.column(1)[0], "1,2,3")
         self.assertEqual(len(tab.column(0)), 1)
-        self.assertEqual(tab.getColumnNames(), ["Detectors"])
+        self.assertEqual(tab.getColumnNames(), ["Group", "Detectors"])
 
     def test_get_N_points_comboboxes_appropriately(self):
         self.presenter.getWorkspaceNames()
