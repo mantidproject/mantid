@@ -8,12 +8,11 @@ from mantid.api import AnalysisDataService, WorkspaceFactory
 from mantid.kernel import Logger, Property, PropertyManager
 from mantid.simpleapi import (AbsorptionCorrection, DeleteWorkspace, Divide, Load, Multiply,
                               PaalmanPingsAbsorptionCorrection, PreprocessDetectorsToMD,
-                              RenameWorkspace, SetSample, SaveNexusProcessed, UnGroupWorkspace, mtd)
+                              RenameWorkspace, SaveNexusProcessed, UnGroupWorkspace, mtd)
 import mantid.simpleapi
 import numpy as np
 import os
 from functools import wraps
-import warnings
 
 VAN_SAMPLE_DENSITY = 0.0721
 _EXTENSIONS_NXS = ["_event.nxs", ".nxs.h5"]
@@ -87,7 +86,7 @@ def __get_cache_name(meta_wksp_name, abs_method, cache_dirs=[], prefix_name=""):
 
         # use mantid build-in alg to generate the cache filename and sha1
         ascii_hash = ""
-        for cache_dir in cache_dirs :
+        for cache_dir in cache_dirs:
 
             ascii_name, ascii_hash = mantid.simpleapi.CreateCacheFilename(
               Prefix=prefix_name,
@@ -420,9 +419,9 @@ def create_absorption_input(   # noqa: C901
     filename,
     props=None,
     num_wl_bins=1000,
-    material=None,
-    geometry=None,
-    environment=None,
+    material={},
+    geometry={},
+    environment={},
     opt_wl_min=0,
     opt_wl_max=Property.EMPTY_DBL,
     metaws=None,
@@ -526,69 +525,16 @@ def create_absorption_input(   # noqa: C901
     # this effectively deletes the metadata only workspace
     AnalysisDataService.addOrReplace(absName, absorptionWS)
 
-    # Set ChemicalFormula, and either SampleMassDensity or Mass, if SampleMassDensity not set
-    if material is not None:
-        if (not material['ChemicalFormula']) and ("SampleFormula" in absorptionWS.run()):
-            material['ChemicalFormula'] = absorptionWS.run()['SampleFormula'].lastValue().strip()
-        if ("SampleMassDensity" not in material
-                or not material['SampleMassDensity']) and ("SampleDensity" in absorptionWS.run()):
-            if absorptionWS.run()['SampleDensity'].lastValue() != 1.0 \
-                    and absorptionWS.run()['SampleDensity'].lastValue() != 0.0:
-                material['SampleMassDensity'] = absorptionWS.run()['SampleDensity'].lastValue()
-            else:
-                material['Mass'] = absorptionWS.run()['SampleMass'].lastValue()
-
-    # Set height for computing density if height not set
-    if geometry is None:
+    # cleanup inputs before delegating work
+    if not material:
+        material = {}
+    if not geometry:
         geometry = {}
-
-    if geometry is not None:
-        if "Height" not in geometry or not geometry['Height']:
-            invalidUnit = False
-            # Check units - SetSample expects cm
-            if absorptionWS.run()['BL11A:CS:ITEMS:HeightInContainerUnits'].lastValue() == "mm":
-                conversion = 0.1
-            elif absorptionWS.run()['BL11A:CS:ITEMS:HeightInContainerUnits'].lastValue() == "cm":
-                conversion = 1.0
-            else:
-                unitVal = absorptionWS.run()['BL11A:CS:ITEMS:HeightInContainerUnits'].lastValue()
-                warningMsg1 = "HeightInContainerUnits expects cm or mm;"
-                warningMsg2 = " specified units not recognized: {:s};".format(unitVal)
-                warningMsg3 = " we will reply on user input for sample density information."
-                warnings.warn(warningMsg1 + warningMsg2 + warningMsg3)
-                invalidUnit = True
-
-            if not invalidUnit:
-                geometry['Height'] = absorptionWS.run()['BL11A:CS:ITEMS:HeightInContainer'].lastValue(
-                ) * conversion
-            else:
-                geometry = {}
-
-    # Set container if not set
-    if environment is not None:
-        if environment['Container'] == "":
-            environment['Container'] = absorptionWS.run()['SampleContainer'].lastValue().replace(
-                " ", "")
+    if not environment:
+        environment = {}
 
     # Make sure one is set before calling SetSample
-    if material or geometry or environment is not None:
-        setup_sample(absName, material, geometry, environment)
+    if material or geometry or environment:
+        mantid.simpleapi.SetSampleFromLogs(InputWorkspace=absName, Material=material, Geometry=geometry, Environment=environment)
 
     return absName
-
-
-def setup_sample(donor_ws, material, geometry, environment):
-    """
-    Calls SetSample with the associated sample and container material and geometry for use
-    in creating an input workspace for an Absorption Correction algorithm
-    :param donor_ws:
-    :param material:
-    :param geometry:
-    :param environment:
-    """
-
-    # Set the material, geometry, and container info
-    SetSample(InputWorkspace=donor_ws,
-              Material=material,
-              Geometry=geometry,
-              Environment=environment)

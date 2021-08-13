@@ -104,6 +104,7 @@ set(TEST_PY_FILES
     SaveReflectionsTest.py
     ExtractMonitorsTest.py
     SetDetScaleTest.py
+    SetSampleFromLogsTest.py
     SortByQVectorsTest.py
     SortDetectorsTest.py
     StatisticsOfTableWorkspaceTest.py
