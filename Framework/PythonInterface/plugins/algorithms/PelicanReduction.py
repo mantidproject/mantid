@@ -241,7 +241,7 @@ class PelicanReduction(PythonAlgorithm):
         return 'Performs an inelastic energy transfer reduction for ANSTO Pelican geometry data.'
 
     def seeAlso(self):
-        return ["NA"]
+        return []
 
     def name(self):
         return "PelicanReduction"

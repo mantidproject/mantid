@@ -35,7 +35,6 @@ mtd_add_qt_tests(
   QT_VERSION 5
   SRC ${TEST_FILES}
   INCLUDE_DIRS
-    ../../../../Framework/CurveFitting/inc
     ../../../../Framework/DataObjects/inc
     ../../../../Framework/TestHelpers/inc
     ../
@@ -48,7 +47,6 @@ mtd_add_qt_tests(
     ../IndirectDataValidationHelper.cpp
   LINK_LIBS
     ${CORE_MANTIDLIBS}
-    CurveFitting
     DataObjects
     gmock
     ${POCO_LIBRARIES}

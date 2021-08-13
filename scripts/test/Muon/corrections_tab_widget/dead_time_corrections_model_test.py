@@ -23,7 +23,7 @@ class DeadTimeCorrectionsModelTest(unittest.TestCase):
 
     def setUp(self):
         context = setup_context()
-        self.corrections_model = CorrectionsModel(context.data_context, context.corrections_context)
+        self.corrections_model = CorrectionsModel(context)
         self.model = DeadTimeCorrectionsModel(self.corrections_model, context.data_context, context.corrections_context)
         self.runs = [[84447], [84448], [84449]]
         self.coadd_runs = [[84447, 84448, 84449]]

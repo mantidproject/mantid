@@ -25,6 +25,7 @@ const std::string GROUPING{"grouping"};
 const std::string DEADTIME{"dead_time"};
 const std::string COUNTS{"counts"};
 const std::string FIRSTGOODBIN{"first_good_bin"};
+const std::string LASTGOODBIN{"last_good_bin"};
 const std::string TIMEZERO{"time_zero"};
 const std::string SAMPLE{"sample"};
 const std::string TEMPERATURE{"temperature"};
@@ -154,6 +155,31 @@ double LoadMuonNexusV2NexusHelper::loadFirstGoodDataFromNexus() {
     return bin * bin_size;
   } catch (std::runtime_error &) {
     throw std::runtime_error("Error loading FirstGoodData, check Nexus file");
+  }
+}
+
+double LoadMuonNexusV2NexusHelper::loadLastGoodDataFromNexus() {
+  try {
+    NXClass detectorEntry = m_entry.openNXGroup(NeXusEntry::DETECTOR);
+    NXInfo infoResolution = detectorEntry.getDataSetInfo(NeXusEntry::RESOLUTION);
+    NXInt counts = detectorEntry.openNXInt(NeXusEntry::COUNTS);
+    std::string lastGoodBin = counts.attributes(NeXusEntry::LASTGOODBIN);
+    double resolution;
+    switch (infoResolution.type) {
+    case NX_FLOAT32:
+      resolution = static_cast<double>(detectorEntry.getFloat(NeXusEntry::RESOLUTION));
+      break;
+    case NX_INT32:
+      resolution = static_cast<double>(detectorEntry.getInt(NeXusEntry::RESOLUTION));
+      break;
+    default:
+      throw std::runtime_error("Unsupported data type for resolution");
+    }
+    double bin = static_cast<double>(boost::lexical_cast<int>(lastGoodBin));
+    double bin_size = resolution / 1000000.0;
+    return bin * bin_size;
+  } catch (std::runtime_error &) {
+    throw std::runtime_error("Error loading LastGoodData, check Nexus file");
   }
 }
 

@@ -19,19 +19,13 @@ if(CXXTEST_FOUND)
   cxxtest_add_test(GeometryTest ${TEST_FILES} ${GMOCK_TEST_FILES})
   target_compile_definitions(GeometryTest PRIVATE -D_SILENCE_FPOS_SEEKPOS_DEPRECATION_WARNING)
   target_link_libraries(GeometryTest
-                        LINK_PRIVATE
-                        Geometry
-                        Beamline
-                        Types
-                        Kernel
+                        PRIVATE
+                        Mantid::Geometry
+                        Mantid::Beamline
+                        Mantid::Types
+                        Mantid::Kernel
                         ${OpenGL_LIBRARIES}
-                        ${TBB_LIBRARIES}
-                        ${NEXUS_LIBRARIES}
-                        ${GSL_LIBRARIES}
-                        ${Boost_LIBRARIES}
-                        ${POCO_LIBRARIES}
-                        gmock
-)
+                        gmock)
 
   add_dependencies(FrameworkTests GeometryTest)
   # Add to the 'FrameworkTests' group in VS

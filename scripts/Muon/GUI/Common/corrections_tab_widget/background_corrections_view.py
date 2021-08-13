@@ -4,21 +4,29 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from mantid.api import ITableWorkspace
 from mantidqt.utils.qt import load_ui
+from mantidqt.widgets.workspacedisplay.table.presenter import TableWorkspaceDisplay
+from Muon.GUI.Common.utilities.table_utils import (create_checkbox_table_item, create_double_table_item,
+                                                   create_string_table_item)
 
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QDoubleValidator, QPalette
-from qtpy.QtWidgets import QLineEdit, QStyledItemDelegate, QStyleOptionViewItem, QTableWidgetItem, QWidget
+from qtpy.QtWidgets import QLineEdit, QPushButton, QStyledItemDelegate, QStyleOptionViewItem, QTableWidgetItem, QWidget
 
 ui_form, widget = load_ui(__file__, "background_corrections_view.ui")
 
 RUN_COLUMN_INDEX = 0
 GROUP_COLUMN_INDEX = 1
-START_X_COLUMN_INDEX = 2
-END_X_COLUMN_INDEX = 3
-A0_COLUMN_INDEX = 4
-A0_ERROR_COLUMN_INDEX = 5
-STATUS_COLUMN_INDEX = 6
+USE_RAW_COLUMN_INDEX = 2
+START_X_COLUMN_INDEX = 3
+END_X_COLUMN_INDEX = 4
+BG_COLUMN_INDEX = 5
+BG_ERROR_COLUMN_INDEX = 6
+STATUS_COLUMN_INDEX = 7
+SHOW_MATRIX_COLUMN_INDEX = 8
+
+USE_RAW_TOOLTIP = "Calculate the background using the raw data or the rebinned data."
 
 
 class DoubleItemDelegate(QStyledItemDelegate):
@@ -69,12 +77,12 @@ class BackgroundCorrectionsView(widget, ui_form):
         self._selected_value: str = None
 
         self.set_background_correction_options_visible(False)
+        self.set_function_combo_box_tooltips()
 
+        self._handle_use_raw_changed = None
         self._handle_start_x_changed = None
         self._handle_end_x_changed = None
-
-        # Disable the background mode combo box while background corrections is still in development
-        self.mode_combo_box.setEnabled(False)
+        self.handle_show_fit_output_clicked = None
 
     def set_slot_for_mode_combo_box_changed(self, slot) -> None:
         """Connect the slot for the Background corrections mode combo box."""
@@ -92,6 +100,10 @@ class BackgroundCorrectionsView(widget, ui_form):
         """Connect the slot for the Show All Runs check box."""
         self.show_all_runs_checkbox.stateChanged.connect(slot)
 
+    def set_slot_for_use_raw_changed(self, slot) -> None:
+        """Sets the slot for when a use raw table cell is changed."""
+        self._handle_use_raw_changed = slot
+
     def set_slot_for_start_x_changed(self, slot) -> None:
         """Sets the slot for when a start x table cell is changed."""
         self._handle_start_x_changed = slot
@@ -99,6 +111,10 @@ class BackgroundCorrectionsView(widget, ui_form):
     def set_slot_for_end_x_changed(self, slot) -> None:
         """Sets the slot for when a end x table cell is changed."""
         self._handle_end_x_changed = slot
+
+    def set_slot_for_show_fit_output_clicked(self, slot) -> None:
+        """Sets the slot for when the 'Show Output' is clicked."""
+        self.handle_show_fit_output_clicked = slot
 
     def set_background_correction_options_visible(self, visible: bool) -> None:
         """Sets the Background corrections widgets as being visible or hidden."""
@@ -109,7 +125,13 @@ class BackgroundCorrectionsView(widget, ui_form):
         self.show_all_runs_checkbox.setVisible(visible)
         self.apply_table_changes_to_all_checkbox.setVisible(visible)
         self.correction_options_table.setVisible(visible)
-        self.background_info_label.setVisible(not visible)
+
+    def set_function_combo_box_tooltips(self) -> None:
+        """Update the tooltips for the combobox."""
+        self.function_combo_box.setItemData(0, "Flat Background + Exp Decay\n"
+                                               "A = 1e6 (initial value)\n"
+                                               "Lambda = 1.0/2.2 (fixed)", Qt.ToolTipRole)
+        self.function_combo_box.setItemData(1, "Flat Background", Qt.ToolTipRole)
 
     @property
     def background_correction_mode(self) -> str:
@@ -164,10 +186,22 @@ class BackgroundCorrectionsView(widget, ui_form):
 
     def selected_run_and_group(self) -> tuple:
         """Returns the Run and Group that is in the same row as the selected table cell."""
+        run, group = self.get_run_and_group_for_row(self._selected_row)
+        return [run], [group]
+
+    def get_run_and_group_for_row(self, row_index: int) -> tuple:
+        """Gets the Run and Group in a specific row."""
+        if row_index is not None:
+            run = self.correction_options_table.item(row_index, RUN_COLUMN_INDEX).text()
+            group = self.correction_options_table.item(row_index, GROUP_COLUMN_INDEX).text()
+            return run, group
+        else:
+            raise RuntimeError("The provided row index is empty.")
+
+    def selected_use_raw(self) -> bool:
+        """Returns the boolean state of the Use Raw in the row that is currently selected."""
         if self._selected_row is not None:
-            run = self.correction_options_table.item(self._selected_row, RUN_COLUMN_INDEX).text()
-            group = self.correction_options_table.item(self._selected_row, GROUP_COLUMN_INDEX).text()
-            return [run], [group]
+            return self.correction_options_table.item(self._selected_row, USE_RAW_COLUMN_INDEX).checkState() == Qt.Checked
         else:
             raise RuntimeError("There is no selected run/group table row.")
 
@@ -178,6 +212,14 @@ class BackgroundCorrectionsView(widget, ui_form):
     def is_run_group_displayed(self, run: str, group: str) -> bool:
         """Returns true if a Run-Group is currently displayed in the data table."""
         return self._table_row_index_of(run, group) is not None
+
+    def set_use_raw(self, run: str, group: str, use_raw: bool) -> None:
+        """Sets the Use Raw associated with the provided Run and Group."""
+        row_index = self._table_row_index_of(run, group)
+
+        self.correction_options_table.blockSignals(True)
+        self.correction_options_table.item(row_index, USE_RAW_COLUMN_INDEX).setCheckState(Qt.Checked if use_raw else Qt.Unchecked)
+        self.correction_options_table.blockSignals(False)
 
     def set_start_x(self, run: str, group: str, start_x: float) -> None:
         """Sets the Start X associated with the provided Run and Group."""
@@ -209,35 +251,46 @@ class BackgroundCorrectionsView(widget, ui_form):
         else:
             raise RuntimeError("There is no selected run/group table row.")
 
-    def populate_corrections_table(self, runs: list, groups: list, start_xs: list, end_xs: list, backgrounds: list,
-                                   background_errors: list, statuses: list) -> None:
+    def populate_corrections_table(self, runs: list, groups: list, use_raws: list, start_xs: list, end_xs: list,
+                                   backgrounds: list, background_errors: list, statuses: list, use_raw_visible: bool) -> None:
         """Populates the background corrections table with the provided data."""
         self.correction_options_table.blockSignals(True)
         self.correction_options_table.setRowCount(0)
-        for run, group, start_x, end_x, background, background_error, status in zip(runs, groups, start_xs, end_xs,
-                                                                                    backgrounds, background_errors,
-                                                                                    statuses):
+        for run, group, use_raw, start_x, end_x, background, background_error, status in zip(runs, groups, use_raws,
+                                                                                             start_xs, end_xs,
+                                                                                             backgrounds, background_errors,
+                                                                                             statuses):
             row = self.correction_options_table.rowCount()
             self.correction_options_table.insertRow(row)
-            self.correction_options_table.setItem(row, RUN_COLUMN_INDEX, self._create_table_item(run, False))
-            self.correction_options_table.setItem(row, GROUP_COLUMN_INDEX, self._create_table_item(group, False))
-            self.correction_options_table.setItem(row, START_X_COLUMN_INDEX, self._create_double_table_item(start_x))
-            self.correction_options_table.setItem(row, END_X_COLUMN_INDEX, self._create_double_table_item(end_x))
-            self.correction_options_table.setItem(row, A0_COLUMN_INDEX,
-                                                  self._create_double_table_item(background, enabled=False))
-            self.correction_options_table.setItem(row, A0_ERROR_COLUMN_INDEX,
-                                                  self._create_double_table_item(background_error, enabled=False))
+            self.correction_options_table.setItem(row, RUN_COLUMN_INDEX, create_string_table_item(run, False))
+            self.correction_options_table.setItem(row, GROUP_COLUMN_INDEX, create_string_table_item(group, False))
+            self.correction_options_table.setItem(row, USE_RAW_COLUMN_INDEX,
+                                                  create_checkbox_table_item(use_raw, tooltip=USE_RAW_TOOLTIP))
+            self.correction_options_table.setItem(row, START_X_COLUMN_INDEX, create_double_table_item(start_x))
+            self.correction_options_table.setItem(row, END_X_COLUMN_INDEX, create_double_table_item(end_x))
+            self.correction_options_table.setItem(row, BG_COLUMN_INDEX,
+                                                  create_double_table_item(background, enabled=False))
+            self.correction_options_table.setItem(row, BG_ERROR_COLUMN_INDEX,
+                                                  create_double_table_item(background_error, enabled=False))
             self.correction_options_table.setItem(row, STATUS_COLUMN_INDEX,
-                                                  self._create_table_item(status, False, alignment=Qt.AlignVCenter))
+                                                  create_string_table_item(status, False, alignment=Qt.AlignVCenter))
+            self.correction_options_table.setCellWidget(row, SHOW_MATRIX_COLUMN_INDEX,
+                                                        self.create_show_fit_output_button_for_row(row))
+        self.correction_options_table.setColumnHidden(USE_RAW_COLUMN_INDEX, not use_raw_visible)
         self.correction_options_table.blockSignals(False)
         self.correction_options_table.resizeColumnsToContents()
+
+    def show_table_workspace_display(self, workspace: ITableWorkspace, display_name: str) -> None:
+        """Shows a table workspace in a separate table display window."""
+        table_display = TableWorkspaceDisplay(workspace, parent=self, name=display_name)
+        table_display.show_view()
 
     def _setup_corrections_table(self) -> None:
         """Setup the correction options table to have a good layout."""
         self._setup_double_item_delegate(START_X_COLUMN_INDEX)
         self._setup_double_item_delegate(END_X_COLUMN_INDEX)
-        self._setup_double_item_delegate(A0_COLUMN_INDEX)
-        self._setup_double_item_delegate(A0_ERROR_COLUMN_INDEX)
+        self._setup_double_item_delegate(BG_COLUMN_INDEX)
+        self._setup_double_item_delegate(BG_ERROR_COLUMN_INDEX)
         self.correction_options_table.setItemDelegateForColumn(STATUS_COLUMN_INDEX,
                                                                StatusItemDelegate(self.correction_options_table))
 
@@ -256,37 +309,33 @@ class BackgroundCorrectionsView(widget, ui_form):
         self._selected_column = item.column()
         self._selected_value = item.text()
 
-    def _on_corrections_table_cell_changed(self, _: int, column: int) -> None:
+    def _on_corrections_table_cell_changed(self, row: int, column: int) -> None:
         """Handles when a cells value is changed in the corrections table."""
+        self._selected_row = row
+        self._selected_column = column
+
         self._format_selection()
 
-        if column == START_X_COLUMN_INDEX:
+        if column == USE_RAW_COLUMN_INDEX:
+            self._handle_use_raw_changed()
+        elif column == START_X_COLUMN_INDEX:
             self._handle_start_x_changed()
         elif column == END_X_COLUMN_INDEX:
             self._handle_end_x_changed()
 
-    def _create_double_table_item(self, value: float, editable: bool = True, enabled: bool = True) -> QTableWidgetItem:
-        """Creates a table item for the corrections options table from a float."""
-        return self._create_table_item(self._float_to_str(value), editable, enabled)
-
-    @staticmethod
-    def _create_table_item(text: str, editable: bool = True, enabled: bool = True, alignment: int = Qt.AlignCenter) \
-            -> QTableWidgetItem:
-        """Creates a table item for the corrections options table from a string."""
-        item = QTableWidgetItem(text)
-        item.setTextAlignment(alignment)
-        if not editable:
-            item.setFlags(item.flags() ^ Qt.ItemIsEditable)
-        if not enabled:
-            item.setFlags(item.flags() ^ Qt.ItemIsEnabled)
-        return item
+    def create_show_fit_output_button_for_row(self, row_index: int) -> QPushButton:
+        """Creates the Show Matrix button and connects its slot for a specific row."""
+        button = QPushButton()
+        button.setText("Show Output")
+        button.clicked.connect(lambda _: self.handle_show_fit_output_clicked(row_index))
+        return button
 
     def _set_table_item_value_for(self, run: str, group: str, column_index: int, value: float) -> None:
         """Sets the End X associated with the provided Run and Group."""
         row_index = self._table_row_index_of(run, group)
 
         self.correction_options_table.blockSignals(True)
-        self.correction_options_table.setItem(row_index, column_index, self._create_double_table_item(value))
+        self.correction_options_table.setItem(row_index, column_index, create_double_table_item(value))
         self.correction_options_table.blockSignals(False)
 
     def _table_item_value_for(self, run: str, group: str, column_index: int) -> str:
@@ -305,7 +354,7 @@ class BackgroundCorrectionsView(widget, ui_form):
 
     def _format_selection(self) -> None:
         """Formats the selected cell to have the expected number of decimal places."""
-        if self._selected_row is not None and self._selected_column is not None:
+        if self._selected_row is not None and self._selected_column is not None and self._selected_column != USE_RAW_COLUMN_INDEX:
             value = float(self.correction_options_table.item(self._selected_row, self._selected_column).text())
             self._set_selected_value(value)
 
@@ -314,10 +363,5 @@ class BackgroundCorrectionsView(widget, ui_form):
         if self._selected_row is not None and self._selected_column is not None:
             self.correction_options_table.blockSignals(True)
             self.correction_options_table.setItem(self._selected_row, self._selected_column,
-                                                  self._create_double_table_item(value))
+                                                  create_double_table_item(value))
             self.correction_options_table.blockSignals(False)
-
-    @staticmethod
-    def _float_to_str(value: float) -> str:
-        """Converts a float to a string with three decimal places."""
-        return f"{value:.3f}"

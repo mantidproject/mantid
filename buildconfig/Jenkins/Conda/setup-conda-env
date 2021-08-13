@@ -1,0 +1,19 @@
+#!/bin/bash -ex
+
+
+# This script will setup a working conda environment given the arguements
+#
+# Expected args:
+#   1. WORKSPACE: path to the workspace
+#   2. EXPECTED_CONDA_PATH: path to the conda executable
+#   3. CONDA_ENV_NAME: name of the conda environment
+
+WORKSPACE=$1
+EXPECTED_CONDA_PATH=$2
+CONDA_ENV_NAME=$3
+
+# Clean out an old env if present
+$EXPECTED_CONDA_PATH env remove -n $CONDA_ENV_NAME
+
+# Always create the new environment:
+$EXPECTED_CONDA_PATH env create -f $WORKSPACE/mantid-developer-linux.yml

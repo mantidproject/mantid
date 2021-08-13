@@ -4,21 +4,29 @@
 the create a distinct ENTITY for each bank-->
 
 <!DOCTYPE parameter-file [
-        <!ENTITY alpha "0.0968">
-        <!ENTITY beta_0 "0.0216">
-        <!ENTITY beta_1 "0.0123">
-        <!ENTITY sigma_0_sq "0.0">
-        <!ENTITY sigma_1_sq "82.1321">
-        <!ENTITY sigma_2_sq "42.5988">
+    <!ENTITY alpha_0 "0.0968">
+    <!ENTITY beta_0 "0.0216">
+    <!ENTITY beta_1 "0.0123">
+    <!ENTITY sigma_0_sq "0.0">
+    <!ENTITY sigma_1_sq "82.1321">
+    <!ENTITY sigma_2_sq "42.5988">
+    <!ENTITY PVgamma_0 "0.0">
+    <!ENTITY PVgamma_1 "5.147">
+    <!ENTITY PVgamma_2 "0.0">
+    <!ENTITY PValpha "0.2749">
+    <!ENTITY PVbeta_0 "0.01793">
+    <!ENTITY PVbeta_1 "0.03797">
+    <!ENTITY PVsigma_0_sq "388.24">
+    <!ENTITY PVsigma_1_sq "76.865">
+    <!ENTITY PVsigma_2_sq "43.299">
 ]>
 
 <parameter-file instrument="ENGIN-X" valid-from="2020-10-23">
 
-
 <component-link name="NorthBank" >
 
-  <parameter name="alpha" type="number">
-    <value val="&alpha;" />
+  <parameter name="alpha_0" type="number">
+    <value val="&alpha_0;" />
   </parameter>
   <parameter name="beta_0" type="number">
     <value val="&beta_0;" />
@@ -40,18 +48,31 @@ the create a distinct ENTITY for each bank-->
     <formula eq="sqrt((&sigma_2_sq;)*centre^4+(&sigma_1_sq;)*centre^2+(&sigma_0_sq;))" unit="dSpacing" result-unit="TOF" />
   </parameter>
   <parameter name="BackToBackExponential:A" type="fitting">
-    <formula eq="((&alpha;)/centre)" unit="dSpacing" result-unit="1/TOF" /> <fixed />
+    <formula eq="((&alpha_0;)/centre)" unit="dSpacing" result-unit="1/TOF" /> <fixed />
   </parameter>
   <parameter name="BackToBackExponential:B" type="fitting">
     <formula eq="((&beta_0;)+(&beta_1;)/(centre^4))" unit="dSpacing" result-unit="1/TOF" /> <fixed />
   </parameter>
-
+  
+  <parameter name="Bk2BkExpConvPV:Alpha" type="fitting">
+    <formula eq="((&PValpha;)/centre)" unit="dSpacing" result-unit="1/TOF" /> <fixed />
+  </parameter>
+  <parameter name="Bk2BkExpConvPV:Beta" type="fitting">
+    <formula eq="((&PVbeta_0;)+(&PVbeta_1;)/(centre^4))" unit="dSpacing" result-unit="1/TOF" /> <fixed />
+  </parameter>
+  <parameter name="Bk2BkExpConvPV:Sigma2" type="fitting">
+    <formula eq="(&PVsigma_2_sq;)*centre^4+(&PVsigma_1_sq;)*centre^2+(&PVsigma_0_sq;)" unit="dSpacing" result-unit="TOF" />
+  </parameter>
+  <parameter name="Bk2BkExpConvPV:Gamma" type="fitting">
+    <formula eq="(&PVgamma_2;)*centre^2+(&PVgamma_1;)*centre+(&PVgamma_0;)" unit="dSpacing" result-unit="TOF" />
+  </parameter>
+  
 </component-link>
 
 <component-link name="SouthBank" >
 
-  <parameter name="alpha" type="number">
-    <value val="&alpha;" />
+  <parameter name="alpha_0" type="number">
+    <value val="&alpha_0;" />
   </parameter>
   <parameter name="beta_0" type="number">
     <value val="&beta_0;" />
@@ -73,10 +94,23 @@ the create a distinct ENTITY for each bank-->
     <formula eq="sqrt((&sigma_2_sq;)*centre^4+(&sigma_1_sq;)*centre^2+(&sigma_0_sq;))" unit="dSpacing" result-unit="TOF" />
   </parameter>
   <parameter name="BackToBackExponential:A" type="fitting">
-    <formula eq="((&alpha;)/centre)" unit="dSpacing" result-unit="1/TOF" /> <fixed />
+    <formula eq="((&alpha_0;)/centre)" unit="dSpacing" result-unit="1/TOF" /> <fixed />
   </parameter>
   <parameter name="BackToBackExponential:B" type="fitting">
     <formula eq="((&beta_0;)+(&beta_1;)/(centre^4))" unit="dSpacing" result-unit="1/TOF" /> <fixed />
+  </parameter>
+  
+  <parameter name="Bk2BkExpConvPV:Alpha" type="fitting">
+    <formula eq="((&PValpha;)/centre)" unit="dSpacing" result-unit="1/TOF" /> <fixed />
+  </parameter>
+  <parameter name="Bk2BkExpConvPV:Beta" type="fitting">
+    <formula eq="((&PVbeta_0;)+(&PVbeta_1;)/(centre^4))" unit="dSpacing" result-unit="1/TOF" /> <fixed />
+  </parameter>
+  <parameter name="Bk2BkExpConvPV:Sigma2" type="fitting">
+    <formula eq="(&PVsigma_2_sq;)*centre^4+(&PVsigma_1_sq;)*centre^2+(&PVsigma_0_sq;)" unit="dSpacing" result-unit="TOF" />
+  </parameter>
+  <parameter name="Bk2BkExpConvPV:Gamma" type="fitting">
+    <formula eq="(&PVgamma_2;)*centre^2+(&PVgamma_1;)*centre+(&PVgamma_0;)" unit="dSpacing" result-unit="TOF" />
   </parameter>
 
 </component-link>

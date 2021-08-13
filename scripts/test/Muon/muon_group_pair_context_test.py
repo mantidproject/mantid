@@ -7,6 +7,7 @@
 import unittest
 
 from Muon.GUI.Common.contexts.muon_group_pair_context import MuonGroupPairContext
+from Muon.GUI.Common.muon_base import MuonRun
 from Muon.GUI.Common.muon_diff import MuonDiff
 from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.muon_pair import MuonPair
@@ -234,7 +235,8 @@ class MuonGroupPairContextTest(unittest.TestCase):
         self.context.add_group(group_1)
         self.context.add_group(group_2)
         self.context.add_group(group_3)
-        group_1.update_workspaces([62260], 'group_1_counts', 'group_1_asym', 'group_1_asym_unorm', False)
+        group_1.update_counts_workspace(MuonRun([62260]), 'group_1_counts', False)
+        group_1.update_asymmetry_workspace(MuonRun([62260]), 'group_1_asym', 'group_1_asym_unorm', False)
         workspace_name_list = self.context.get_group_workspace_names(runs = [[62260]], groups=['group_1'], rebin=False)
 
         group_name, run = self.context.get_group_pair_name_and_run_from_workspace_name(workspace_name_list[0])
@@ -249,7 +251,8 @@ class MuonGroupPairContextTest(unittest.TestCase):
         self.context.add_group(group_1)
         self.context.add_group(group_2)
         self.context.add_group(group_3)
-        group_1.update_workspaces([62260, 62261], 'group_1_counts', 'group_1_asym', 'group_1_asym_unorm', False)
+        group_1.update_counts_workspace(MuonRun([62260, 62261]), 'group_1_counts', False)
+        group_1.update_asymmetry_workspace(MuonRun([62260, 62261]), 'group_1_asym', 'group_1_asym_unorm', False)
         workspace_name_list = self.context.get_group_workspace_names(runs = [[62260, 62261]], groups=['group_1'], rebin=False)
 
         group_name, run = self.context.get_group_pair_name_and_run_from_workspace_name(workspace_name_list[0])
@@ -264,7 +267,8 @@ class MuonGroupPairContextTest(unittest.TestCase):
         self.context.add_group(group_1)
         self.context.add_group(group_2)
         self.context.add_group(group_3)
-        group_1.update_workspaces([62260, 62261], 'group_1_counts', 'group_1_asym', 'group_1_asym_unorm', False)
+        group_1.update_counts_workspace(MuonRun([62260, 62261]), 'group_1_counts', False)
+        group_1.update_asymmetry_workspace(MuonRun([62260, 62261]), 'group_1_asym', 'group_1_asym_unorm', False)
         workspace_name_list = self.context.get_group_workspace_names(runs = [[62260, 62261]], groups=['group_1'], rebin=False)
 
         group_name, run = self.context.get_group_pair_name_and_run_from_workspace_name(workspace_name_list[0] + '; Fit Seq Flatbackground')

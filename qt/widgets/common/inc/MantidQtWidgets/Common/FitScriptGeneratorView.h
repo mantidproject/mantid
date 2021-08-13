@@ -13,7 +13,7 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/AddWorkspaceDialog.h"
-#include "MantidQtWidgets/Common/BasicFitOptionsBrowser.h"
+#include "MantidQtWidgets/Common/FitScriptOptionsBrowser.h"
 #include "MantidQtWidgets/Common/FittingMode.h"
 #include "MantidQtWidgets/Common/FunctionTreeView.h"
 #include "MantidQtWidgets/Common/IFitScriptGeneratorView.h"
@@ -85,7 +85,8 @@ public:
   std::tuple<std::string, std::vector<double>, std::vector<bool>, std::vector<std::string>, std::vector<std::string>>
   getEditLocalParameterResults() const override;
 
-  [[nodiscard]] std::tuple<std::string, std::string, std::string, std::string> fitOptions() const override;
+  [[nodiscard]] std::tuple<std::string, std::string, std::string, std::string, std::string, bool>
+  fitOptions() const override;
   [[nodiscard]] std::string filepath() const override;
 
   void resetSelection() override;
@@ -140,6 +141,7 @@ private slots:
   void onGlobalParametersChanged(QStringList const &globalParameters);
   void onCopyFunctionToClipboard();
   void onFunctionHelpRequested();
+  void onOutputBaseNameChanged(std::string const &outputBaseName);
   void onFittingModeChanged(FittingMode fittingMode);
   void onEditLocalParameterClicked(QString const &parameter);
   void onEditLocalParameterFinished(int result);
@@ -157,7 +159,7 @@ private:
   std::unique_ptr<AddWorkspaceDialog> m_addWorkspaceDialog;
   std::unique_ptr<FitScriptGeneratorDataTable> m_dataTable;
   std::unique_ptr<FunctionTreeView> m_functionTreeView;
-  std::unique_ptr<BasicFitOptionsBrowser> m_fitOptionsBrowser;
+  std::unique_ptr<FitScriptOptionsBrowser> m_fitOptionsBrowser;
   EditLocalParameterDialog *m_editLocalParameterDialog;
   Ui::FitScriptGenerator m_ui;
 };

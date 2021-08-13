@@ -7,6 +7,7 @@
 import unittest
 from unittest import mock
 
+from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
 from Muon.GUI.Common.utilities import load_utils
@@ -51,6 +52,11 @@ class FFTPresenterTest(unittest.TestCase):
         self.model1 = fft_model.FFTModel()
         self.model = fft_model.FFTWrapper
 
+        self.run_list = [22725]
+        self.groups = [MuonGroup(group) for group in GROUP_LIST]
+        self.rebins = [False] * len(self.groups)
+        self.pairs = [MuonPair(EXAMPLE_PAIR, 'top', 'bottom', alpha=0.75)]
+
         self.presenter = fft_presenter.FFTPresenter(
             self.view, self.model, self.context)
 
@@ -61,10 +67,8 @@ class FFTPresenterTest(unittest.TestCase):
         self.context.data_context.current_runs = [[22725]]
 
         self.context.update_current_data()
-        test_pair = MuonPair(EXAMPLE_PAIR, 'top', 'bottom', alpha=0.75)
-        self.context.group_pair_context.add_pair(pair=test_pair)
-        self.context.show_all_groups()
-        self.context.show_all_pairs()
+        self.context.group_pair_context.add_pair(pair=self.pairs[0])
+        self._calculate_all_data()
         self.context.group_pair_context._selected_groups = GROUP_LIST
         self.context.group_pair_context._selected_pairs = [EXAMPLE_PAIR]
 
@@ -72,6 +76,15 @@ class FFTPresenterTest(unittest.TestCase):
 
     def tearDown(self):
         self.view = None
+
+    def _calculate_all_data(self):
+        self.context.calculate_all_counts()
+        for group, rebin in zip(self.groups, self.rebins):
+            self.context.calculate_asymmetry_for(self.run_list, group, rebin)
+            self.context.show_group(self.run_list, group, rebin)
+        for pair in self.pairs:
+            self.context.calculate_pair_for(self.run_list, pair)
+            self.context.show_pair(self.run_list, pair)
 
     def test_getWorkspaceNames_sets_workspace_and_imaginary_workspace_list_correctly(self):
         self.presenter.getWorkspaceNames()
@@ -130,8 +143,9 @@ class FFTPresenterTest(unittest.TestCase):
 
     def test_handle_use_raw_data_changed_when_rebin_set(self):
         self.context.gui_context.update({'RebinType': 'Fixed', 'RebinFixed': 2})
-        self.context.show_all_groups()
-        self.context.show_all_pairs()
+        self.groups = [MuonGroup(group) for group in GROUP_LIST] * 2
+        self.rebins = [False] * len(GROUP_LIST) + [True] * len(GROUP_LIST)
+        self._calculate_all_data()
         self.view.set_raw_checkbox_state(False)
 
         self.assertEqual(retrieve_combobox_info(self.view.ws),

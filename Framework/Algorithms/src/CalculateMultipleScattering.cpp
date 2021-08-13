@@ -686,7 +686,7 @@ void CalculateMultipleScattering::updateWeightAndPosition(Geometry::Track &track
  */
 Geometry::Track CalculateMultipleScattering::generateInitialTrack(const Geometry::IObject &shape,
                                                                   std::shared_ptr<const Geometry::ReferenceFrame> frame,
-                                                                  const V3D sourcePos,
+                                                                  const V3D &sourcePos,
                                                                   Kernel::PseudoRandomNumberGenerator &rng) {
   auto sampleBox = shape.getBoundingBox();
   // generate random point on front surface of sample bounding box

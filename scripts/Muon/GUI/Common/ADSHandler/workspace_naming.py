@@ -195,8 +195,8 @@ def get_fft_workspace_name(input_workspace, imaginary_input_workspace):
         return 'FFT; Re ' + input_workspace
 
 
-def get_maxent_workspace_name(input_workspace):
-    return input_workspace + "".join(['; ', MAXENT_STR])
+def get_maxent_workspace_name(input_workspace, method):
+    return input_workspace + "".join(['; by ',method, '; ', MAXENT_STR])
 
 
 def get_fft_component_from_workspace_name(input_workspace):

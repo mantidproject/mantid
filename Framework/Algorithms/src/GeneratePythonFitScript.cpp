@@ -19,6 +19,8 @@
 #include "MantidKernel/StartsWithValidator.h"
 
 #include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/detail/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
 
 #include <fstream>
 #include <streambuf>
@@ -151,6 +153,13 @@ void GeneratePythonFitScript::init() {
   declareProperty("EvaluationType", "CentrePoint", IValidator_sptr(new ListValidator<std::string>(evaluationTypes)),
                   "The EvaluationType to be passed to the Fit algorithm in the Python script.", Direction::Input);
 
+  declareProperty("OutputBaseName", "Output_Fit",
+                  "The OutputBaseName is the base output name to use for the resulting Fit workspaces.");
+
+  declareProperty(
+      "PlotOutput", true,
+      "If true, code used for plotting the results of a fit will be generated and added to the python script.");
+
   std::vector<std::string> extensions{".py"};
   declareProperty(std::make_unique<FileProperty>("Filepath", "", FileProperty::OptionalSave, extensions),
                   "The name of the Python fit script which will be generated and saved in the selected location.");
@@ -166,6 +175,7 @@ std::map<std::string, std::string> GeneratePythonFitScript::validateInputs() {
   auto const fittingType = getPropertyValue("FittingType");
   auto const filepath = getPropertyValue("Filepath");
   IFunction_sptr function = getProperty("Function");
+  std::string const outputBaseName = getProperty("OutputBaseName");
 
   std::map<std::string, std::string> errors;
   if (workspaceIndices.size() != inputWorkspaces.size())
@@ -183,6 +193,8 @@ std::map<std::string, std::string> GeneratePythonFitScript::validateInputs() {
       errors["Function"] = "The Function provided does not have the same number of domains as there are input "
                            "workspaces. This is a requirement for Simultaneous fitting.";
   }
+  if (outputBaseName.empty())
+    errors["OutputBaseName"] = "The OutputBaseName is empty, please provide a base name for the output fit.";
 
   return errors;
 }
@@ -214,8 +226,13 @@ std::string GeneratePythonFitScript::generateFitScript(std::string const &fittin
     generatedScript += getFileContents("GeneratePythonFitScript_SequentialFit.py.in");
   else if (fittingType == "Simultaneous")
     generatedScript += generateSimultaneousFitCode();
-  generatedScript += "\n";
-  generatedScript += getFileContents("GeneratePythonFitScript_PlottingOutput.py.in");
+
+  bool plotOutput = getProperty("PlotOutput");
+  if (plotOutput) {
+    generatedScript += "\n";
+    generatedScript += getFileContents("GeneratePythonFitScript_PlottingOutput.py.in");
+  }
+
   return generatedScript;
 }
 
@@ -231,6 +248,7 @@ std::string GeneratePythonFitScript::generateVariableSetupCode() const {
   std::string const minimizer = getProperty("Minimizer");
   std::string const costFunction = getProperty("CostFunction");
   std::string const evaluationType = getProperty("EvaluationType");
+  std::string const outputBaseName = getProperty("OutputBaseName");
 
   replaceAll(code, "{{input_dictionary}}", constructInputDictionary(inputWorkspaces, workspaceIndices, startXs, endXs));
   replaceAll(code, "{{function_string}}", generateFunctionString());
@@ -238,7 +256,7 @@ std::string GeneratePythonFitScript::generateVariableSetupCode() const {
   replaceAll(code, "{{minimizer}}", minimizer);
   replaceAll(code, "{{cost_function}}", costFunction);
   replaceAll(code, "{{evaluation_type}}", evaluationType);
-
+  replaceAll(code, "{{output_base_name}}", outputBaseName);
   return code;
 }
 

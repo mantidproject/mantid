@@ -556,9 +556,15 @@ def _workspace_indices_maxpooling(y_bins, workspace):
     workspace_indices = []
     for y_range in pairwise(y_bins):
         try:
-            workspace_range = range(workspace.getAxis(1).indexOfValue(np.math.floor(y_range[0])),
-                                    workspace.getAxis(1).indexOfValue(np.math.ceil(y_range[1])))
-            workspace_index = workspace_range[np.argmax(summed_spectra[workspace_range])]
+            workspace_range = [workspace.getAxis(1).indexOfValue(y_range[0]),
+                               workspace.getAxis(1).indexOfValue(y_range[1])]
+            # if the range doesn't span more than one spectra just grab the first element
+            # else we need to pick the spectra which has the highest intensity
+            if np.diff(workspace_range)[0] > 1:
+                workspace_range = range(workspace_range[0], workspace_range[1])
+                workspace_index = workspace_range[np.argmax(summed_spectra[workspace_range])]
+            else:
+                workspace_index = workspace_range[0]
             workspace_indices.append(workspace_index)
         except IndexError:
             workspace_indices.append(-1)

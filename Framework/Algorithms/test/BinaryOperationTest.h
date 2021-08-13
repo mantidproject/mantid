@@ -53,6 +53,9 @@ public:
     return BinaryOperation::checkSizeCompatibility(ws1, ws2);
   }
 
+  auto getLHSEventWorkspacePointerCast() { return m_elhs; }
+  auto getOutputEventWorkspacePointerCast() { return m_eout; }
+
 private:
   // Unhide base class method to avoid Intel compiler warning
   using BinaryOperation::checkSizeCompatibility;
@@ -61,6 +64,22 @@ private:
                               HistogramData::HistogramY &, HistogramData::HistogramE &) override {}
   void performBinaryOperation(const HistogramData::Histogram &, const double, const double, HistogramData::HistogramY &,
                               HistogramData::HistogramE &) override {}
+  void performEventBinaryOperation(DataObjects::EventList &, const DataObjects::EventList &) override {}
+  void performEventBinaryOperation(DataObjects::EventList &, const MantidVec &, const MantidVec &,
+                                   const MantidVec &) override {}
+  void performEventBinaryOperation(DataObjects::EventList &, const double &, const double &) override {}
+};
+
+// Enables a BinaryOperation to be performed where the output workspace will be type EventWorkspace
+class EventBinaryOpHelper : public BinaryOpHelper {
+public:
+  EventBinaryOpHelper() { m_keepEventWorkspace = true; }
+
+protected:
+  void checkRequirements() override {
+    BinaryOperation::checkRequirements();
+    m_keepEventWorkspace = true;
+  }
 };
 
 namespace {
@@ -332,6 +351,46 @@ public:
     for (int i = 0; i < 2000; i++) {
       TS_ASSERT_EQUALS((*table)[i], i / 100);
     }
+  }
+
+  void test_output_workspace_type_is_not_reused_between_calls() {
+    // BinaryOp should only try to cast the output to an event workspace if the LHS could be cast to an event workspace.
+    EventWorkspace_sptr event_workspace_in = WorkspaceCreationHelper::createEventWorkspace(10, 1);
+    MatrixWorkspace_sptr workspace_2d_in = WorkspaceCreationHelper::create2DWorkspace123(10, 10, true);
+    WorkspaceSingleValue_sptr single_value_workspace_in = WorkspaceCreationHelper::createWorkspaceSingleValue(2);
+
+    // First call to BinaryOp. f(EventWS, SVWS) = EventWS.
+    EventBinaryOpHelper eventHelper;
+    eventHelper.initialize();
+    eventHelper.setProperty("LHSWorkspace", event_workspace_in);
+    eventHelper.setProperty("RHSWorkspace", single_value_workspace_in);
+    const std::string outputSpace("test");
+    eventHelper.setPropertyValue("OutputWorkspace", outputSpace);
+    eventHelper.setRethrows(true);
+    eventHelper.execute();
+
+    TS_ASSERT(eventHelper.isExecuted());
+
+    // Given BinaryOp was able to cast the LHS to an event workspace, it should have also cast the output to
+    // an event workspace.
+    TS_ASSERT(eventHelper.getLHSEventWorkspacePointerCast());
+    TS_ASSERT(eventHelper.getOutputEventWorkspacePointerCast());
+
+    // Second call to BinaryOp. f(WS2D, SVWS) = WS2D using the same output workspace as before.
+    BinaryOpHelper helper;
+    helper.initialize();
+    helper.setProperty("LHSWorkspace", workspace_2d_in);
+    helper.setProperty("RHSWorkspace", single_value_workspace_in);
+    helper.setPropertyValue("OutputWorkspace", outputSpace);
+    helper.setRethrows(true);
+    helper.execute();
+
+    TS_ASSERT(helper.isExecuted());
+
+    // Given BinaryOp shouldn't have been able cast the LHS to an event workspace,
+    // it shouldn't have also cast the output an event workspace.
+    TS_ASSERT(!helper.getLHSEventWorkspacePointerCast())
+    TS_ASSERT(!helper.getOutputEventWorkspacePointerCast())
   }
 
   void test_parallel_Distributed() {
