@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from qtpy.QtCore import QObject, QEvent, Qt, Signal
 from qtpy.QtGui import QIcon, QKeyEvent
-from qtpy.QtWidgets import QCompleter, QDialog, QLineEdit
+from qtpy.QtWidgets import QCompleter, QDialog, QLineEdit, QCheckBox
 
 from mantidqt.utils.qt import load_ui
 
@@ -48,20 +48,22 @@ class ActivateCompleterOnReturn(QObject):
 
 class AddFunctionDialogView(QDialog):
     # public
-    function_added = Signal(str)
+    function_added = Signal(str, bool)
 
     # private
     _key_filter = None
 
-    def __init__(self, parent=None, function_names=None, default_function_name=None):
+    def __init__(self, parent=None, function_names=None, default_function_name=None, default_checkbox=False):
         """
         :param parent: An optional parent widget
         :param function_names: A list of function names to add to the box
         :param default_function_name: An optional default name to display as a placeholder
+        :param default_checkbox: Whether to add a checkbox for setting the function as the global application default
         """
         super(AddFunctionDialogView, self).__init__(parent)
         self.setWindowIcon(QIcon(':/images/MantidIcon.ico'))
         self.setAttribute(Qt.WA_DeleteOnClose, True)
+        self._has_default_checkbox = default_checkbox
         self._setup_ui(function_names, default_function_name)
 
     def is_text_in_function_list(self, function: str) -> bool:
@@ -72,6 +74,11 @@ class AddFunctionDialogView(QDialog):
         """Show the message as an error on the dialog"""
         self.ui.errorMessage.setText("<span style='color:red'> %s </span>" % text)
         self.ui.errorMessage.show()
+
+    def is_set_global_default(self):
+        if self._has_default_checkbox:
+            return self._default_checkbox.checkState() == Qt.Checked
+        return False
 
     # private api
     def _setup_ui(self, function_names, default_function_name):
@@ -87,3 +94,7 @@ class AddFunctionDialogView(QDialog):
         self._key_filter = ActivateCompleterOnReturn(functionBox)
         functionBox.installEventFilter(self._key_filter)
         self.ui.errorMessage.hide()
+        # Add a checkbox so user is able to explicitly update the global settings.
+        if self._has_default_checkbox:
+            self._default_checkbox = QCheckBox("Set as global default")
+            self.ui.verticalLayout_2.addWidget(self._default_checkbox)

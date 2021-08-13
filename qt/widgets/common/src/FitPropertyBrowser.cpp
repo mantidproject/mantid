@@ -1042,7 +1042,6 @@ std::string FitPropertyBrowser::defaultPeakType() {
 void FitPropertyBrowser::setDefaultPeakType(const std::string &fnType) {
   m_defaultPeak = fnType;
   setDefaultFunctionType(fnType);
-  Mantid::Kernel::ConfigService::Instance().setString("curvefitting.defaultPeak", fnType);
 }
 /// Get the default background type
 std::string FitPropertyBrowser::defaultBackgroundType() const { return m_defaultBackground; }
