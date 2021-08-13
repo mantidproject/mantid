@@ -24,44 +24,6 @@ from typing import List
 __all__ = ['determine_tubes_threshold']
 
 
-def export_masks(pixel_mask_states: numpy.ndarray,
-                 mask_file_name: str,
-                 instrument_name: str = 'NOMAD'):
-    """Export masks to XML file format
-
-    Parameters
-    ----------
-    pixel_mask_states: numpy.ndarray
-        boolean array with the number of pixels of NOMAD.  True for masking
-    mask_file_name: str
-        name of the output mask XML file
-    instrument_name: str
-        name of the instrument
-
-    """
-    # Load empty instrument
-    empty_workspace_name = f'_{instrument_name}_empty'
-    mask_workspace_name = f'_{instrument_name}_mask_empty'
-    LoadEmptyInstrument(InstrumentName=instrument_name, OutputWorkspace=empty_workspace_name)
-
-    # Get the workspace indexes to mask
-    # first 2 spectra are monitors: add 2
-    # Check
-    if mtd[empty_workspace_name].getNumberHistograms() != pixel_mask_states.shape[0] + 2:
-        raise RuntimeError(f'Spectra number of {instrument_name} workspace does not match mask state array')
-    mask_ws_indexes = np.where(pixel_mask_states)[0] + 2
-    print(f'DEBUG mask workspace indexes: {mask_ws_indexes}')
-
-    # Mask detectors
-    MaskDetectors(Workspace=empty_workspace_name, WorkspaceIndexList=mask_ws_indexes)
-
-    # Extract and save
-    ExtractMask(InputWorkspace=empty_workspace_name, OutputWorkspace=mask_workspace_name)
-    SaveMask(InputWorkspace=mask_workspace_name, OutputFile=mask_file_name)
-
-    DeleteWorkspaces([empty_workspace_name, mask_workspace_name])
-
-
 def determine_tubes_threshold(vec_intensity, mask_config: dict, instrument_config):
     """
 
@@ -253,8 +215,9 @@ class _NOMADMedianDetectorTest:
     @staticmethod
     def get_collimation_states(collimation_config_dict: dict, instrument_config,
                                level: InstrumentComponentLevel) -> numpy.ndarray:
-        """Convert 8pack collimation states (in dictionary)
-
+        """
+        Convert 8pack collimation states (in dictionary)
+        State values are 0 (no collimation), 1 (half collimation), and 2 (full collimation)
         Parameters
         ----------
         collimation_config_dict
@@ -264,7 +227,7 @@ class _NOMADMedianDetectorTest:
         Returns
         -------
         numpy.ndarray
-            component collimation states
+            component collimation states as integers
 
         """
         # Compute the 8-pack level collimation
@@ -286,8 +249,8 @@ class _NOMADMedianDetectorTest:
 
         return collimation_state_array
 
-    @staticmethod
-    def set_nomad_constants():
+    @classmethod
+    def set_nomad_constants(cls):
         """Set NOMAD geometry constants for numpy operation
 
         Returns
@@ -298,10 +261,11 @@ class _NOMADMedianDetectorTest:
         """
         info_dict = dict()
 
-        info_dict['num_banks'] = 6
-        info_dict['num_8packs'] = 99
-        info_dict['num_pixels_per_tube'] = 128
-        info_dict['num_tubes_per_8pack'] = 8
+        info_dict['num_banks'] = cls.PANEL_COUNT
+        info_dict['num_8packs'] = cls.PANEL_COUNT
+        info_dict['num_pixels_per_tube'] = cls.PIXELS_IN_TUBE
+        info_dict['num_tubes_per_8pack'] = cls.TUBES_IN_EIGHTPACK
+
         info_dict['num_tubes'] = info_dict['num_8packs'] * info_dict['num_tubes_per_8pack']
         info_dict['num_pixels'] = info_dict['num_tubes'] * info_dict['num_pixels_per_tube']
 
@@ -361,12 +325,22 @@ class _NOMADMedianDetectorTest:
     @property
     def tube_collevel(self) -> np.ndarray:
         r"""Collimation level of each tube
-        @return 1D array of size number of tubes. Each item is a CollimationLevel"""
+        @return 1D array of size number of tubes. Each item is a CollimationLevel enumeration"""
         # Find the collimation level of each eightpack
         levels = np.full(self.EIGHTPACK_COUNT, CollimationLevel.Empty, dtype=CollimationLevel)  # initialize as empty
         levels[self.config['collimation']['half_col']] = CollimationLevel.Half
         levels[self.config['collimation']['full_col']] = CollimationLevel.Full
         return np.repeat(levels, self.TUBES_IN_EIGHTPACK)  # extend the collimation levels to each tube
+
+    @property
+    def pixel_collevel(self) -> np.ndarray:
+        r"""
+        Collimation level of each pixel
+
+        Returns
+        -------
+        1D array of size PIXEL_COUNT. Each item is a CollimationLevel enumeration"""
+        return np.repeat(self.tube_collevel, self.PIXELS_IN_TUBE)
 
     @property
     def panel_median(self) -> np.ndarray:
@@ -395,6 +369,41 @@ class _NOMADMedianDetectorTest:
             medians.extend([median] * (end - begin))  # extend to all tubes in this panel
         # preserve the same mask as that of the tube intensities
         return np.ma.masked_array(np.array(medians), mask=self.tube_intensity.mask)
+
+    @property
+    def pixel_median(self) -> np.ma.MaskedArray:
+        r"""
+        Median assigned to a single pixel. Unused pixels are masked
+
+        The median correponds to the median of the pixels in the tube, except if the collimation level of the tube
+        is Half, in which case the median for the pixels in the first half of the tube corresponds to the median of
+        this set of pixels. Similarly for the other half of the tube
+
+        Returns
+        -------
+        1D array of size PIXEL_COUNT
+        """
+        intensities = self.intensities.reshape((self.TUBE_COUNT, self.PIXELS_IN_TUBE))
+
+        # tube medians, also medians for the first and second half of the tubes
+        half = int(self.PIXELS_IN_TUBE / 2)
+        whole_tube_median = np.median(intensities, axis=1)
+        first_half_tube_median = np.median(intensities[:, half], axis=1)
+        second_half_tube_median = np.median(intensities[half:], axis=1)
+
+        # tile the first and half medians
+        # Example: Let TUBE_COUNT=3, first_half_tube_median = (1, 2, 3), and  second_half_tube_median=(10, 20, 30).
+        # If PIXELS_IN_TUBE=4, then
+        # first_half_medians = (1, 1, 2, 2, 3, 3), second_half_medians = (10, 10, 20, 20, 30, 30), and
+        # half_medians = (1, 1, 10, 10, 2, 2, 20, 20, 3, 3, 30, 30)
+        half2 = self.PIXELS_IN_TUBE - half
+        first_half_medians = np.repeat(first_half_tube_median, half).reshape((self.TUBE_COUNT, half))
+        second_half_medians = np.repeat(second_half_tube_median, half2).reshape((self.TUBE_COUNT, half2))
+        half_medians = np.concatenate((first_half_medians, second_half_medians), axis=1).flatten()
+        whole_medians = np.repeat(whole_tube_median, self.PIXELS_IN_TUBE)
+
+        medians = np.where(self.pixel_collevel == CollimationLevel.Half, half_medians, whole_medians)
+        return medians
 
     @property
     def eightpack_median(self) -> np.ndarray:
@@ -437,9 +446,17 @@ class _NOMADMedianDetectorTest:
         return np.repeat(tube_mask, self.PIXELS_IN_TUBE)  # extend the tube mask states to all pixels in the tubes
 
     @property
-    def mask_by_pixel_intensity(self) -> np.ndarray:
-        # TODO move function "determine_tubes_threshold"() here
-        pass
+    def mask_by_pixel_intensity(self):
+        lower, upper = self.config['threshold']['low_pixel'], self.config['threshold']['high_pixel']
+        lowers = np.where(self.pixel_collevel == CollimationLevel.Empty, lower, (1 + (lower - 1) * 3))
+        uppers = np.where(self.pixel_collevel == CollimationLevel.Empty, upper, (1 + (upper - 1) * 3))
+        deficient = self.intensities < lower * self.pixel_median
+        excessive = self.intensities > lower * self.pixel_median
+        pixel_mask = deficient | excessive
+        # turn the numpy mask into True values. Masked indexes correspond to unused pixels, hence
+        # should be flagged as mask == True
+        pixel_mask[self.intensities.mask] = True
+        return pixel_mask.data # cast numpy.ma.core.MaskedArray to numpy.ndarray
 
     @classmethod
     def export_mask(cls, pixel_mask_states: numpy.ndarray, mask_file_name: str, instrument_name: str = 'NOMAD'):
