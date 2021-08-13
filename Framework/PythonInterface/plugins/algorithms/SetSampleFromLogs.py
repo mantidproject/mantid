@@ -151,7 +151,6 @@ class SetSampleFromLogs(DistributedDataProcessorAlgorithm):
 
             if _hasValue(environment, "Container") and (not _hasValue(environment, "Name")):
                 # set a default environment
-                instrEnum = ConfigService.getInstrument(wksp.getInstrument().getFullName())
                 if instrEnum.facility().name() == 'SNS':
                     environment['Name'] = 'InAir'
 
