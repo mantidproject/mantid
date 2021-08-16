@@ -29,6 +29,7 @@ set(SRC_FILES
     src/CalculateFlatBackground.cpp
     src/CalculateIqt.cpp
     src/CalculateMultipleScattering.cpp
+    src/CalculatePlaczek.cpp
     src/CalculatePlaczekSelfScattering.cpp
     src/CalculatePolynomialBackground.cpp
     src/CalculateTransmission.cpp
@@ -368,6 +369,7 @@ set(INC_FILES
     inc/MantidAlgorithms/CalculateFlatBackground.h
     inc/MantidAlgorithms/CalculateIqt.h
     inc/MantidAlgorithms/CalculateMultipleScattering.h
+    inc/MantidAlgorithms/CalculatePlaczek.h
     inc/MantidAlgorithms/CalculatePlaczekSelfScattering.h
     inc/MantidAlgorithms/CalculatePolynomialBackground.h
     inc/MantidAlgorithms/CalculateTransmission.h
@@ -726,6 +728,7 @@ set(TEST_FILES
     CalculateIqtTest.h
     CalculateMultipleScatteringTest.h
     CalculatePlaczekSelfScatteringTest.h
+    CalculatePlaczekTest.h
     CalculatePolynomialBackgroundTest.h
     CalculateTransmissionBeamSpreaderTest.h
     CalculateTransmissionTest.h
