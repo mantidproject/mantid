@@ -39,18 +39,18 @@ class NOMADMedianDetectorTest(PythonAlgorithm, _NOMADMedianDetectorTest):
             doc='Workspace containing reference pixel intensities')
 
         self.declareProperty(
-            FileProperty(name='Configuration', defaultValue='', direction=Direction.Input, extensions=['.yml'],
+            FileProperty(name='ConfigurationFile', defaultValue='', direction=Direction.Input, extensions=['.yml'],
                          action=FileAction.Load),
             doc='YML file specifying collimation states and unused eight-packs')
 
         self.declareProperty(
-            FileProperty(name='OutputMaskXML', defaultValue='', direction=Direction.Output, extensions=['.xml'],
+            FileProperty('OutputMaskXML', defaultValue='', extensions=['.xml'],
                          action=FileAction.Save),
             doc='Output masked pixels in XML format')
 
     def PyExec(self):
         # initialize data structures 'config' and 'intensities'
-        self.config = self.parse_yaml(self.getProperty('Configuration').value)
+        self.config = self.parse_yaml(self.getProperty('ConfigurationFile').value)
         self.intensities = self._get_intensities(self.getProperty('InputWorkspace').value)
         # calculate the mask, and export it to XML file
         mask_composite = self.mask_by_tube_intensity | self.mask_by_pixel_intensity
