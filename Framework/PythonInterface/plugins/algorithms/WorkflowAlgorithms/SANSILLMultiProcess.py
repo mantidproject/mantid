@@ -5,8 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from SANSILLCommon import *
-from mantid.api import DataProcessorAlgorithm, WorkspaceProperty, MultipleFileProperty, PropertyMode, \
-    FileAction, MatrixWorkspaceProperty
+from mantid.api import DataProcessorAlgorithm, WorkspaceGroupProperty, MultipleFileProperty, FileAction
 from mantid.kernel import Direction, FloatBoundedValidator, FloatArrayProperty, IntBoundedValidator, StringListValidator
 from mantid.simpleapi import *
 from os import path
@@ -209,15 +208,15 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         self.setPropertyGroup('NormaliseBy', 'Parameters')
 
         self.declareProperty(FloatArrayProperty(name='TrBeamRadius', values=[1.]),
-                             doc='Beam radius [m] used as ROI for transmission calculations.')
+                             doc='Beam radius [m] used for transmission and flux calculations.')
         self.setPropertyGroup('TrBeamRadius', 'Parameters')
 
         self.declareProperty(FloatArrayProperty(name='BeamRadius', values=[1.]),
-                             doc='Beam radius [m] used for beam center finding and flux calculations.')
+                             doc='Beam radius [m] used for beam center finding.')
         self.setPropertyGroup('BeamRadius', 'Parameters')
 
         self.declareProperty(FloatArrayProperty(name='SampleThickness', values=[0.1]),
-                             doc='Sample thickness [cm] used for final normalisation.')
+                             doc='Sample thickness [cm] used in final normalisation.')
         self.setPropertyGroup('SampleThickness', 'Parameters')
 
         self.declareProperty(name='WaterCrossSection', defaultValue=1.,
@@ -229,12 +228,8 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
                              doc='Whether the sensitivity data has been measured with different horizontal offsets (D22 only).')
         self.setPropertyGroup('SensitivityWithOffsets', 'Parameters')
 
-        self.declareProperty(name='ClearCorrectedRealSpaceWorkspace', defaultValue=False,
-                             doc='Whether to clear the fully corrected real-space workspace.')
-        self.setPropertyGroup('ClearCorrectedRealSpaceWorkspace', 'Parameters')
-
         self.declareProperty(name='OutputType', defaultValue='I(Q)',
-                             validator=StringListValidator(['I(Q)']),
+                             validator=StringListValidator(['None', 'I(Q)']),
                              doc='The type of the integration to perform.')
         self.setPropertyGroup('OutputType', 'Parameters')
 
@@ -269,41 +264,11 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
 
         #================================OUTPUT WORKSPACES================================#
 
-        # This one is the only mandatory output, the rest are optional
-        self.declareProperty(WorkspaceProperty(name='OutputWorkspace', defaultValue='',
-                                               direction=Direction.Output),
-                             doc='The output workspace containing the reduced data.')
+        # This will be a group containing all the main and diagnostic outputs
+        self.declareProperty(WorkspaceGroupProperty(name='OutputWorkspace', defaultValue='',
+                                                    direction=Direction.Output),
+                             doc='The output workspace group containing the reduced data.')
         self.setPropertyGroup('OutputWorkspace', 'Output Workspaces')
-
-        self.declareProperty(WorkspaceProperty(name='StitchScaleFactorsWorkspace', defaultValue='',
-                                               direction=Direction.Output,
-                                               optional=PropertyMode.Optional),
-                             doc='The output workspace containing the scale factors employed by stitch.')
-        self.setPropertyGroup('StitchScaleFactorsWorkspace', 'Output Workspaces')
-
-        self.declareProperty(WorkspaceProperty(name='CorrectedRealSpaceOutputWorkspace', defaultValue='',
-                                               direction=Direction.Output,
-                                               optional=PropertyMode.Optional),
-                             doc='The output workspace containing the fully corrected, but not integrated data in real space.')
-        self.setPropertyGroup('CorrectedRealSpaceOutputWorkspace', 'Output Workspaces')
-
-        self.declareProperty(WorkspaceProperty(name='WedgesOutputWorkspace', defaultValue='',
-                                               direction=Direction.Output,
-                                               optional=PropertyMode.Optional),
-                             doc='The output workspace containing the reduced data per azimuthal sector.')
-        self.setPropertyGroup('WedgesOutputWorkspace', 'Output Workspaces')
-
-        self.declareProperty(WorkspaceProperty(name='PanelsOutputWorkspace', defaultValue='',
-                                               direction=Direction.Output,
-                                               optional=PropertyMode.Optional),
-                             doc='The output workspace containing the reduced data per detector bank.')
-        self.setPropertyGroup('PanelsOutputWorkspace', 'Output Workspaces')
-
-        self.declareProperty(MatrixWorkspaceProperty(name='SensitivityOutputWorkspace', defaultValue='',
-                                                     direction=Direction.Output,
-                                                     optional=PropertyMode.Optional),
-                             doc='The output sensitivity map workspace.')
-        self.setPropertyGroup('SensitivityOutputWorkspace', 'Output Workspaces')
 
     def _reset(self):
         '''Resets the class member variables'''
@@ -359,13 +324,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         if unit == 'Wavelength':
             self.mode = AcqMode.TOF
         else:
-            if self.n_frames > 1:
-                if unit == 'Empty':
-                    self.mode = AcqMode.KINETIC
-                else:
-                    self.mode = AcqMode.SCAN
-            else:
-                self.mode = AcqMode.MONO
+            self.mode = AcqMode.MONO
         self.log().notice(f'Set the acquisition mode to {self.mode}')
 
     def _check_sample_runs_dimensions(self):
@@ -514,20 +473,6 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
 
     def finalize(self):
         pass
-
-    def load_and_concatenate_monochromatic(self, prop_name, out_name):
-        '''
-        Loads, merges and concatenates a list of files into one workspace
-        The input might be either numors, or nexus processed files as a result of event rebinning in mantid
-        '''
-        LoadAndMerge(Filename=self.getPropertyValue(prop_name),
-                     OutputWorkspace=out_name)
-        ConvertToPointData(InputWorkspace=out_name,
-                           OutputWorkspace=out_name)
-        ConjoinXRuns(InputWorkspaces=out_name,
-                     OutputWorkspace='__tmp'+out_name)
-        DeleteWorkspace(out_name)
-        RenameWorkspace('__tmp'+out_name, out_name)
 
 
 AlgorithmFactory.subscribe(SANSILLMultiProcess)
