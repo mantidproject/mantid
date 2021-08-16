@@ -12,18 +12,27 @@
 namespace Mantid {
 namespace Algorithms {
 
-/** CalculatePlaczek : TODO: DESCRIPTION
+/** CalculatePlaczek : Placzek 1st&2nd order correction for inelastic scattering
  */
 class MANTID_ALGORITHMS_DLL CalculatePlaczek : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
+  // Category for quick search and doc page
   const std::string category() const override;
-  const std::string summary() const override;
+  // Documentation
+  const std::string summary() const override {
+    return "Perform 1st or 2nd order Placzek correction for given spectrum.";
+  };
+  // seeAlso (documentation purpose)
+  const std::vector<std::string> seeAlso() const override;
 
 private:
   void init() override;
   void exec() override;
+
+  // validator for input parameters
+  std::map<std::string, std::string> validateInputs() override;
 };
 
 } // namespace Algorithms

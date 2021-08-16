@@ -24,10 +24,15 @@ const std::string CalculatePlaczek::name() const { return "CalculatePlaczek"; }
 int CalculatePlaczek::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string CalculatePlaczek::category() const { return "TODO: FILL IN A CATEGORY"; }
+const std::string CalculatePlaczek::category() const { return "CorrectionFunctions"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string CalculatePlaczek::summary() const { return "TODO: FILL IN A SUMMARY"; }
+const std::string CalculatePlaczek::summary() const {
+  return "Perform 1st or 2nd order Placzek correction for given spectrum.";
+}
+
+/// Algorithm's see also for use in the GUI and help. @see Algorithm::seeAlso
+const std::vector<std::string> CalculatePlaczek::seeAlso() const { return {"CalculatePlaczekSelfScattering"}; }
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
@@ -37,6 +42,18 @@ void CalculatePlaczek::init() {
                   "An input workspace.");
   declareProperty(std::make_unique<WorkspaceProperty<API::Workspace>>("OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
+}
+
+//----------------------------------------------------------------------------------------------
+/**
+ * @brief validate inputs
+ *
+ * @return std::map<std::string, std::string>
+ */
+std::map<std::string, std::string> validateInputs() {
+  std::map<std::string, std::string> issues;
+  // TODO: find edge cases that needs checking
+  return issues;
 }
 
 //----------------------------------------------------------------------------------------------
