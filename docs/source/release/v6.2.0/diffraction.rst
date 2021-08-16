@@ -20,6 +20,7 @@ New features
 
 Improvements
 ############
+- More input control parameters added to the group calibration routine, including peak function type for estimating offset after cross correlation and an option to turn on or off the smoothing of data for cross correlation purpose. The workflow of group calibration script is also polished to make it smoother. Accordingly, unit tests have been updated.
 - Documentation added for the group calibration routine for :ref:`PowderDiffractionCalibration <calibration_tofpd_group_calibration-ref>`, as as guidance for general users.
 - The group calibration routine for :ref:`PowderDiffractionCalibration <calibration_tofpd_group_calibration-ref>` is made more generic. Groups are now allowed with dedicated control parameters.
 - :ref:`ConvertDiffCal <algm-ConvertDiffCal-v1>` now optionally updates a previous calibration when converting offsets.
@@ -40,6 +41,7 @@ Improvements
 
 Bugfixes
 ########
+- Fix the issue with the calibration diagnostics script when dealing with instruments of which the detector ID does not start from 0.
 - Fix the issue with :ref:`SNSPowderReduction <algm-SNSPowderReduction>` - when invalid height unit is encountered while reading sample log, we should continue by ignoring geometry and rely purely on user input.
 - fix d-spacing calculation when parabolic model is selected.
 - Correct equation for pseudo-voigt FWHM and mixing parameter in peak profile function :ref:`Bk2BkExpConvPV <func-Bk2BkExpConvPV>`.
