@@ -38,6 +38,8 @@ class CalibrationPresenter(object):
         self.cropping_widget = CroppingPresenter(parent=self.view, view=self.view.get_cropping_widget())
         self.show_cropping(False)
 
+        self.set_create_new_enabled(True)
+
     def connect_view_signals(self):
         self.view.set_on_calibrate_clicked(self.on_calibrate_clicked)
         self.view.set_enable_controls_connection(self.set_calibrate_controls_enabled)
@@ -201,7 +203,6 @@ class CalibrationPresenter(object):
     def set_create_new_enabled(self, enabled):
         self.view.set_vanadium_enabled(enabled)
         if enabled:
-            self.set_calibrate_button_text("Calibrate")
             self.view.set_check_plot_output_enabled(True)
             self.disable_sample_crop_and_plot(self.view.get_update_vanadium_checked())
             self.view.set_check_update_vanadium_enabled(self.last_calibration_successful)
