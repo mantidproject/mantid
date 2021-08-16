@@ -436,6 +436,14 @@ class SANSILLReduction(PythonAlgorithm):
             # rescale the absolute scale if the ws and flat field are at different distances
             self.rescale_flux(ws, flat_ws)
 
+    def apply_sensitivity(self, ws):
+        '''Applies inter-pixel detector efficiency map'''
+        sens_ws = self.getPropertyValue('SensitivityWorkspace')
+        if sens_ws:
+            Divide(LHSWorkspace=ws, RHSWorkspace=sens_ws, OutputWorkspace=ws, WarnOnZeroDivide=False)
+            # copy the mask of sensitivity to the ws as it might be larger than the beam stop used for ws
+            MaskDetectors(Workspace=ws, MaskedWorkspace=sens_ws)
+
     def apply_solvent(self, ws):
         '''Applies pixel-by-pixel solvent/buffer subtraction'''
         solvent_ws = self.getPropertyValue('SolventWorkspace')
@@ -858,6 +866,7 @@ class SANSILLReduction(PythonAlgorithm):
                             self.generate_sensitivity(ws)
                         else:
                             self.apply_water(ws)
+                            self.apply_sensitivity(ws)
                             self.progress.report()
                             if self.process != 'Solvent':
                                 self.apply_solvent(ws)

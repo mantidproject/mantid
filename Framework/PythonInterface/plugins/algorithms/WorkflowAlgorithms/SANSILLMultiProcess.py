@@ -224,6 +224,10 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
                              doc='Provide the water cross-section; used only if the absolute scale is done by dividing to water.')
         self.setPropertyGroup('WaterCrossSection', 'Parameters')
 
+        self.declareProperty(name='ProduceSensitivity', defaultValue=False,
+                             doc='Whether or not to produce a sensitivity map; should be used for water reduction only.')
+        self.setPropertyGroup('ProduceSensitivity', 'Parameters')
+
         self.declareProperty(name='SensitivityWithOffsets', defaultValue=False,
                              doc='Whether the sensitivity data has been measured with different horizontal offsets (D22 only).')
         self.setPropertyGroup('SensitivityWithOffsets', 'Parameters')
@@ -440,20 +444,23 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
     def PyExec(self):
         '''Executes the algorithm'''
         self._setup_light()
-        self.process_transmissions()
-        samples = self.process_samples()
-        self.finalize(samples)
+        self.process_all_transmissions()
+        outputs = self.process_all_samples()
+        self.package(outputs)
 
-    def process_transmissions(self):
+    def process_all_transmissions(self):
         '''Calculates all the transmissions'''
         for l in range(self.lambda_rank):
             self.process_all_transmissions_at_lambda(l)
 
-    def process_samples(self):
+    def process_all_samples(self):
         '''Reduces all the samples'''
         samples = []
         for d in range(self.rank):
-            samples.append(self.process_all_samples_at_distance(d))
+            sample_ws = self.process_all_samples_at_distance(d)
+            integrated_ws = self.integrate(d, sample_ws)
+            samples.extend(sample_ws)
+            samples.extend(integrated_ws)
         return samples
 
     def process_all_transmissions_at_lambda(self, l):
@@ -544,8 +551,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         [empty_beam2_ws, empty_beam2_flux] = self.process_flux(d, dark_current_ws)
         empty_can_ws = self.process_container(d, dark_current_ws, empty_beam1_ws)
         actual_flux_ws = empty_beam2_flux if empty_beam2_flux else empty_beam1_flux
-        sample_ws = self.process_sample(d, dark_current_ws, empty_beam1_ws, empty_can_ws, actual_flux_ws)
-        return sample_ws
+        return self.process_sample(d, dark_current_ws, empty_beam1_ws, empty_can_ws, actual_flux_ws)
 
     def process_dark_current(self, d):
         runs = self.getPropertyValue('DarkCurrentRuns')
@@ -621,10 +627,16 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
             [edge_mask_ws, beam_stop_mask_ws] = self.load_masks(d)
             flat_field_ws = self.load_flat_field(d)
             solvent_ws = self.load_solvent(d)
+            sens_ws = self.load_sensitivity(d)
             sample_tr_ws = self.sample_transmissions[self.tr_index(d)] if self.sample_transmissions else ''
+            process = 'Sample'
             [_, sample_ws] = needs_processing(runs, 'Sample')
+            sens_out = ''
+            if self.getProperty('ProduceSensitivity').value:
+                process = 'Water'
+                sens_out = sample_ws + '_Sens'
             SANSILLReduction(Runs=runs,
-                             ProcessAs='Sample',
+                             ProcessAs=process,
                              DarkCurrentWorkspace=dark_current_ws,
                              EmptyBeamWorkspace=empty_beam_ws,
                              TransmissionWorkspace=sample_tr_ws,
@@ -632,14 +644,26 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
                              DefaultMaskWorkspace=edge_mask_ws,
                              MaskWorkspace=beam_stop_mask_ws,
                              FlatFieldWorkspace=flat_field_ws,
+                             SensitivityWorkspace=sens_ws,
                              SolventWorkspace=solvent_ws,
                              FluxWorkspace=flux_ws,
                              NormaliseBy=self.getProperty('NormaliseBy').value,
                              TransmissionThetaDependent=self.getProperty('TransmissionThetaDependent').value,
                              SampleThickness=self.getProperty('SampleThickness').value,
                              WaterCrossSection=self.getProperty('WaterCrossSection').value,
-                             OutputWorkspace=sample_ws)
-            return sample_ws
+                             OutputWorkspace=sample_ws,
+                             OutputSensitivityWorkspace=sens_out)
+            return [sample_ws, sens_out]
+        else:
+            return []
+
+    def load_sensitivity(self, d):
+        sens = self.getPropertyValue('SensitivityMap')
+        if sens:
+            [load_sens, sens_ws] = needs_loading(sens, 'Sensitivity')
+            if load_sens:
+                LoadNexusProcessed(Filename=sens, OutputWorkspace=sens_ws)
+            return sens_ws
         else:
             return ''
 
@@ -679,12 +703,16 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         else:
             return ''
 
+    def integrate(self, d, sample_ws):
+        return []
+
     def tr_index(self, d):
         return 1 if d+1 in self.getProperty('DistancesAtWavelength2').value else 0
 
-    def finalize(self, samples):
+    def package(self, output):
         out = self.getPropertyValue('OutputWorkspace')
-        GroupWorkspaces(InputWorkspaces=samples, OutputWorkspace=out)
+        output = list(filter(lambda x: x, output))
+        GroupWorkspaces(InputWorkspaces=output, OutputWorkspace=out)
         self.setProperty('OutputWorkspace', out)
 
 
