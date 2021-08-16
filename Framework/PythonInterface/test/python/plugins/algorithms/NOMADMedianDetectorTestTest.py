@@ -7,9 +7,11 @@
 
 # package imports
 from mantid.api import AlgorithmManager
-from mantid.simpleapi import NOMADMedianDetectorTest  # noqa F401
+from mantid.simpleapi import LoadNexusProcessed, NOMADMedianDetectorTest
 
 # standard imports
+import os
+import tempfile
 import unittest
 
 
@@ -19,6 +21,18 @@ class NOMADMedianDetectorTestTest(unittest.TestCase):
         alg = AlgorithmManager.create('NOMADMedianDetectorTest')
         alg.initialize()
         self.assertTrue(alg.isInitialized())
+
+    def test_exec(self):
+        _, file_mask = tempfile.mkstemp(suffix='.xml')
+        LoadNexusProcessed(Filename='NOM_144974_SingleBin.nxs', OutputWorkspace='NOM_144974')
+        NOMADMedianDetectorTest(InputWorkspace='NOM_144974',
+                                ConfigurationFile='NOMAD_mask_gen_config.yml',
+                                OutputMaskXML=file_mask)
+        with open(file_mask) as f:
+            contents = f.read()
+        for segment in ['0-3122', '48847-48900', '69884-71046', '96376-96772']:  # test a few
+            assert segment in contents
+        os.remove(file_mask)
 
 
 if __name__ == '__main__':
