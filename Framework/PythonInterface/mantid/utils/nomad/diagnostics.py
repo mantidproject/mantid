@@ -18,112 +18,7 @@ from collections import namedtuple
 import enum
 import random
 import string
-from typing import List
-
-
-__all__ = ['determine_tubes_threshold']
-
-
-def determine_tubes_threshold(vec_intensity, mask_config: dict, instrument_config):
-    """
-
-    Refer to diagram
-    https://code.ornl.gov/sns-hfir-scse/diffraction/powder/powder-diffraction/
-    uploads/99f4b65655e05edd476999942ff6fb98/Step-1.png
-    from box 'Select a tube' to 'All tubes finished'
-
-
-    Parameters
-    ----------
-    vec_intensity: numpy.ndarray
-        solid angle corrected counts. shape = (101378, )
-    mask_config: ~dict
-        configuration for masking
-    instrument_config: ~namedtuple
-        instrument configuration
-
-    Returns
-    -------
-
-    """
-    # Workflow: process full-collimated, half-collimated and not-collimated separately
-    pixel_collimation_states = \
-        _NOMADMedianDetectorTest.get_collimation_states(mask_config['collimation'],
-                                                        instrument_config, InstrumentComponentLevel.Pixel)
-
-    # reshape the input intensities to 2D matrix: each row is a tube, i.e., (num_tubes, num_pixel_per_tube)
-    # or say (392, 256)
-    tube_pixel_intensity_array = vec_intensity.flatten().reshape((instrument_config.num_tubes,
-                                                                  instrument_config.num_pixels_per_tube))
-
-    # Calculate tube medians: m, m1, m2
-    half_tube_pixels = instrument_config.num_pixels_per_tube // 2
-    # m
-    tube_m_array = np.median(tube_pixel_intensity_array, axis=1)
-    # m1
-    tube_m1_array = np.median(tube_pixel_intensity_array[:, 0:half_tube_pixels], axis=1)
-    # m2
-    tube_m2_array = np.median(tube_pixel_intensity_array[:, half_tube_pixels:], axis=1)
-
-    # Boundary constants
-    low_pixel = mask_config['threshold']['low_pixel']
-    high_pixel = mask_config['threshold']['high_pixel']
-
-    # Calculate boundary for not collimated pixels
-    # condition 2:  summed pixel intensity < low_pixel * m or summed pixel intensity > high_pixel * m,
-    not_collimated_lowers = low_pixel * tube_m_array
-    not_collimated_uppers = high_pixel * tube_m_array
-    not_collimated_lowers = np.repeat(not_collimated_lowers, instrument_config.num_pixels_per_tube)
-    not_collimated_uppers = np.repeat(not_collimated_uppers, instrument_config.num_pixels_per_tube)
-    not_collimated_masks = (pixel_collimation_states == CollimationLevel.Empty.value).astype(int)
-    # sanity check
-    assert not_collimated_lowers.shape == (instrument_config.num_pixels, )
-    assert not_collimated_masks.shape == not_collimated_uppers.shape
-
-    # Calculate boundary for full collimated pixels
-    # condition 3:
-    full_collimated_lowers = (1. + (low_pixel - 1) * 3.) * tube_m_array
-    full_collimated_uppers = (1. + (high_pixel - 1) * 3.) * tube_m_array
-    full_collimated_lowers = np.repeat(full_collimated_lowers, instrument_config.num_pixels_per_tube)
-    full_collimated_uppers = np.repeat(full_collimated_uppers, instrument_config.num_pixels_per_tube)
-    full_collimated_masks = (pixel_collimation_states == CollimationLevel.Full.value).astype(int)
-
-    # Calculate boundaries for half collimated pixels
-    # condition 4: summed pixel intensity < (1+(low_pixel-1)*3) * m1 or
-    # summed pixel intensity > (1+(high_pixel-1)*3) * m1,
-    # condition 5:  summed pixel intensity < (1+(low_pixel-1)*3) * m2 or
-    # summed pixel intensity > (1+(high_pixel-1)*3) * m2,
-    half1_collimated_lowers = (1. + (low_pixel - 1) * 3.) * tube_m1_array
-    half2_collimated_lowers = (1. + (low_pixel - 1) * 3.) * tube_m2_array
-    half_collimated_lowers = np.repeat(half1_collimated_lowers, 2)
-    half_collimated_lowers[1::2] = half2_collimated_lowers
-    half_collimated_lowers = np.repeat(half_collimated_lowers, instrument_config.num_pixels_per_tube // 2)
-    assert half_collimated_lowers.shape == (instrument_config.num_pixels, )
-
-    half_collimated_uppers = (1. + (high_pixel - 1) * 3.) * tube_m1_array
-    half2_collimated_uppers = (1. + (high_pixel - 1) * 3.) * tube_m2_array
-    half_collimated_uppers = np.repeat(half_collimated_uppers, 2)
-    half_collimated_uppers[1::2] = half2_collimated_uppers
-    half_collimated_uppers = np.repeat(half_collimated_uppers, instrument_config.num_pixels_per_tube // 2)
-    assert half_collimated_uppers.shape == (instrument_config.num_pixels, )
-    half_collimated_masks = (pixel_collimation_states == CollimationLevel.Half.value).astype(int)
-
-    # Combine
-    upper_boundaries = not_collimated_uppers * not_collimated_masks
-    upper_boundaries += full_collimated_uppers * full_collimated_masks
-    upper_boundaries += half_collimated_uppers * half_collimated_masks
-
-    lower_boundaries = not_collimated_lowers * not_collimated_masks
-    lower_boundaries += full_collimated_lowers * full_collimated_masks
-    lower_boundaries += half_collimated_lowers * half_collimated_masks
-    #
-
-    # Return the to be masked pixels
-    pixel_mask_states = vec_intensity < lower_boundaries
-    print(pixel_mask_states)
-    pixel_mask_states += vec_intensity > upper_boundaries
-
-    return pixel_mask_states
+from typing import List, NamedTuple
 
 
 class CollimationLevel(enum.Enum):
@@ -137,7 +32,7 @@ class InstrumentComponentLevel(enum.IntEnum):
     """
     Instrument component level
     """
-    Bank = 0
+    Panel = 0  # a.k.a "Panel"
     EightPack = 1
     Tube = 2
     Pixel = 3
@@ -179,7 +74,7 @@ class _NOMADMedianDetectorTest:
 
     @staticmethod
     def parse_yaml(file_name: str) -> dict:
-        """Parse configuration YAML file and convert the bank, 8pack and tube parameters
+        """Parse configuration YAML file and convert the Panel, 8pack and tube parameters
 
         Parameters
         ----------
@@ -213,11 +108,13 @@ class _NOMADMedianDetectorTest:
         return config
 
     @staticmethod
-    def get_collimation_states(collimation_config_dict: dict, instrument_config,
+    def get_collimation_states(collimation_config_dict: dict,
+                               instrument_config: NamedTuple,
                                level: InstrumentComponentLevel) -> numpy.ndarray:
         """
         Convert 8pack collimation states (in dictionary)
         State values are 0 (no collimation), 1 (half collimation), and 2 (full collimation)
+
         Parameters
         ----------
         collimation_config_dict
@@ -239,7 +136,7 @@ class _NOMADMedianDetectorTest:
         collimation_state_array[full_collimation_8packs] = 2
         collimation_state_array[half_collimation_8packs] = 1
 
-        if level == InstrumentComponentLevel.Bank:
+        if level == InstrumentComponentLevel.Panel:
             raise RuntimeError(f'Level must be EightPack or up but not {level}')
         elif level == InstrumentComponentLevel.Tube:
             collimation_state_array = collimation_state_array.repeat(instrument_config.num_tubes_per_8pack)
@@ -256,13 +153,13 @@ class _NOMADMedianDetectorTest:
         Returns
         -------
         namedtutple
-            named tuple for NOMAD pixel, tube, 8 pack and bank constants
+            named tuple for NOMAD pixel, tube, 8 pack and Panel constants
 
         """
         info_dict = dict()
 
-        info_dict['num_banks'] = cls.PANEL_COUNT
-        info_dict['num_8packs'] = cls.PANEL_COUNT
+        info_dict['num_Panels'] = cls.PANEL_COUNT
+        info_dict['num_8packs'] = cls.EIGHTPACK_COUNT
         info_dict['num_pixels_per_tube'] = cls.PIXELS_IN_TUBE
         info_dict['num_tubes_per_8pack'] = cls.TUBES_IN_EIGHTPACK
 
@@ -273,6 +170,120 @@ class _NOMADMedianDetectorTest:
         instrument = namedtuple("nomad", info_dict)
 
         return instrument(**info_dict)
+
+    @classmethod
+    def determine_tubes_threshold(cls, vec_intensity, mask_config: dict, instrument_config):
+        """
+
+        Refer to diagram
+        https://code.ornl.gov/sns-hfir-scse/diffraction/powder/powder-diffraction/
+        uploads/99f4b65655e05edd476999942ff6fb98/Step-1.png
+        from box 'Select a tube' to 'All tubes finished'
+
+
+        Parameters
+        ----------
+        vec_intensity: numpy.ndarray
+            solid angle corrected counts. shape = (101378, )
+        mask_config: ~dict
+            configuration for masking
+        instrument_config: ~namedtuple
+            instrument configuration
+
+        Returns
+        -------
+
+        """
+        # If vec_intensity is a masked array, we set the intensities of the masked indexes to zero. Later we'll set
+        # these indexes to have a mask of True.
+        intensities = vec_intensity.flatten()  # intensities is a copy of vec_intensities, even for 1D input arrays
+        try:
+            intensities[intensities.mask] = 0
+            intensities = intensities.data  # cast from numpy.ma.core.MaskedArray to numpy.ndarray
+        except AttributeError:  # vec_intensity is not a masked array
+            pass
+
+        # Workflow: process full-collimated, half-collimated and not-collimated separately
+        pixel_collimation_states = cls.get_collimation_states(mask_config['collimation'],
+                                                              instrument_config, InstrumentComponentLevel.Pixel)
+
+        # reshape the input intensities to 2D matrix: each row is a tube, i.e., (num_tubes, num_pixel_per_tube)
+        # or say (392, 256)
+        tube_pixel_intensity_array = intensities.reshape((instrument_config.num_tubes,
+                                                          instrument_config.num_pixels_per_tube))
+
+        # Calculate tube medians: m, m1, m2
+        half_tube_pixels = instrument_config.num_pixels_per_tube // 2
+        # m
+        tube_m_array = np.median(tube_pixel_intensity_array, axis=1)
+        # m1
+        tube_m1_array = np.median(tube_pixel_intensity_array[:, :half_tube_pixels], axis=1)
+        # m2
+        tube_m2_array = np.median(tube_pixel_intensity_array[:, half_tube_pixels:], axis=1)
+
+        # Boundary constants
+        low_pixel = mask_config['threshold']['low_pixel']
+        high_pixel = mask_config['threshold']['high_pixel']
+
+        # Calculate boundary for not collimated pixels
+        # condition 2:  summed pixel intensity < low_pixel * m or summed pixel intensity > high_pixel * m,
+        not_collimated_lowers = low_pixel * tube_m_array
+        not_collimated_uppers = high_pixel * tube_m_array
+        not_collimated_lowers = np.repeat(not_collimated_lowers, instrument_config.num_pixels_per_tube)
+        not_collimated_uppers = np.repeat(not_collimated_uppers, instrument_config.num_pixels_per_tube)
+        not_collimated_masks = (pixel_collimation_states == CollimationLevel.Empty.value).astype(int)
+        # sanity check
+        assert not_collimated_lowers.shape == (instrument_config.num_pixels,)
+        assert not_collimated_masks.shape == not_collimated_uppers.shape
+
+        # Calculate boundary for full collimated pixels
+        # condition 3:
+        full_collimated_lowers = (1. + (low_pixel - 1) * 3.) * tube_m_array
+        full_collimated_uppers = (1. + (high_pixel - 1) * 3.) * tube_m_array
+        full_collimated_lowers = np.repeat(full_collimated_lowers, instrument_config.num_pixels_per_tube)
+        full_collimated_uppers = np.repeat(full_collimated_uppers, instrument_config.num_pixels_per_tube)
+        full_collimated_masks = (pixel_collimation_states == CollimationLevel.Full.value).astype(int)
+
+        # Calculate boundaries for half collimated pixels
+        # condition 4: summed pixel intensity < (1+(low_pixel-1)*3) * m1 or
+        # summed pixel intensity > (1+(high_pixel-1)*3) * m1,
+        # condition 5:  summed pixel intensity < (1+(low_pixel-1)*3) * m2 or
+        # summed pixel intensity > (1+(high_pixel-1)*3) * m2,
+        half1_collimated_lowers = (1. + (low_pixel - 1) * 3.) * tube_m1_array
+        half2_collimated_lowers = (1. + (low_pixel - 1) * 3.) * tube_m2_array
+        half_collimated_lowers = np.repeat(half1_collimated_lowers, 2)
+        half_collimated_lowers[1::2] = half2_collimated_lowers
+        half_collimated_lowers = np.repeat(half_collimated_lowers, instrument_config.num_pixels_per_tube // 2)
+        assert half_collimated_lowers.shape == (instrument_config.num_pixels,)
+
+        half_collimated_uppers = (1. + (high_pixel - 1) * 3.) * tube_m1_array
+        half2_collimated_uppers = (1. + (high_pixel - 1) * 3.) * tube_m2_array
+        half_collimated_uppers = np.repeat(half_collimated_uppers, 2)
+        half_collimated_uppers[1::2] = half2_collimated_uppers
+        half_collimated_uppers = np.repeat(half_collimated_uppers, instrument_config.num_pixels_per_tube // 2)
+        assert half_collimated_uppers.shape == (instrument_config.num_pixels,)
+        half_collimated_masks = (pixel_collimation_states == CollimationLevel.Half.value).astype(int)
+
+        # Combine
+        upper_boundaries = not_collimated_uppers * not_collimated_masks
+        upper_boundaries += full_collimated_uppers * full_collimated_masks
+        upper_boundaries += half_collimated_uppers * half_collimated_masks
+
+        lower_boundaries = not_collimated_lowers * not_collimated_masks
+        lower_boundaries += full_collimated_lowers * full_collimated_masks
+        lower_boundaries += half_collimated_lowers * half_collimated_masks
+        #
+
+        # Return the to be masked pixels
+        pixel_mask_states = vec_intensity < lower_boundaries
+        pixel_mask_states += vec_intensity > upper_boundaries
+
+        # If vec_intensity is a masked array, set the masked indexes as True.
+        try:
+            pixel_mask_states[vec_intensity.mask] = True
+        except AttributeError:  # vec_intensity is not a masked array
+            pass
+        return pixel_mask_states
 
     def _get_intensities(self, input_workspace: 'mantid.api.MatrixWorkspace') -> np.ma.core.MaskedArray:  # noqa F821
         r"""
@@ -371,41 +382,6 @@ class _NOMADMedianDetectorTest:
         return np.ma.masked_array(np.array(medians), mask=self.tube_intensity.mask)
 
     @property
-    def pixel_median(self) -> np.ma.MaskedArray:
-        r"""
-        Median assigned to a single pixel. Unused pixels are masked
-
-        The median correponds to the median of the pixels in the tube, except if the collimation level of the tube
-        is Half, in which case the median for the pixels in the first half of the tube corresponds to the median of
-        this set of pixels. Similarly for the other half of the tube
-
-        Returns
-        -------
-        1D array of size PIXEL_COUNT
-        """
-        intensities = self.intensities.reshape((self.TUBE_COUNT, self.PIXELS_IN_TUBE))
-
-        # tube medians, also medians for the first and second half of the tubes
-        half = int(self.PIXELS_IN_TUBE / 2)
-        whole_tube_median = np.median(intensities, axis=1)
-        first_half_tube_median = np.median(intensities[:, half], axis=1)
-        second_half_tube_median = np.median(intensities[half:], axis=1)
-
-        # tile the first and half medians
-        # Example: Let TUBE_COUNT=3, first_half_tube_median = (1, 2, 3), and  second_half_tube_median=(10, 20, 30).
-        # If PIXELS_IN_TUBE=4, then
-        # first_half_medians = (1, 1, 2, 2, 3, 3), second_half_medians = (10, 10, 20, 20, 30, 30), and
-        # half_medians = (1, 1, 10, 10, 2, 2, 20, 20, 3, 3, 30, 30)
-        half2 = self.PIXELS_IN_TUBE - half
-        first_half_medians = np.repeat(first_half_tube_median, half).reshape((self.TUBE_COUNT, half))
-        second_half_medians = np.repeat(second_half_tube_median, half2).reshape((self.TUBE_COUNT, half2))
-        half_medians = np.concatenate((first_half_medians, second_half_medians), axis=1).flatten()
-        whole_medians = np.repeat(whole_tube_median, self.PIXELS_IN_TUBE)
-
-        medians = np.where(self.pixel_collevel == CollimationLevel.Half, half_medians, whole_medians)
-        return medians
-
-    @property
     def eightpack_median(self) -> np.ndarray:
         r"""Median of the set of summed tube intensities in a given eightpack, for all eightpacks, extended to the
         tube level
@@ -447,16 +423,7 @@ class _NOMADMedianDetectorTest:
 
     @property
     def mask_by_pixel_intensity(self):
-        lower, upper = self.config['threshold']['low_pixel'], self.config['threshold']['high_pixel']
-        lowers = np.where(self.pixel_collevel == CollimationLevel.Empty, lower, (1 + (lower - 1) * 3))
-        uppers = np.where(self.pixel_collevel == CollimationLevel.Empty, upper, (1 + (upper - 1) * 3))
-        deficient = self.intensities < lower * self.pixel_median
-        excessive = self.intensities > lower * self.pixel_median
-        pixel_mask = deficient | excessive
-        # turn the numpy mask into True values. Masked indexes correspond to unused pixels, hence
-        # should be flagged as mask == True
-        pixel_mask[self.intensities.mask] = True
-        return pixel_mask.data # cast numpy.ma.core.MaskedArray to numpy.ndarray
+        return self.determine_tubes_threshold(self.intensities, self.config, self.set_nomad_constants())
 
     @classmethod
     def export_mask(cls, pixel_mask_states: numpy.ndarray, mask_file_name: str, instrument_name: str = 'NOMAD'):

@@ -49,8 +49,10 @@ class NOMADMedianDetectorTest(PythonAlgorithm, _NOMADMedianDetectorTest):
             doc='Output masked pixels in XML format')
 
     def PyExec(self):
-        self.config = self.parse_yaml(self.getProperty('Configuration').value)  # config data structure
-        self.intensities = self._get_intensities(self.getProperty('InputWorkspace').value)  # intensities data structure
+        # initialize data structures 'config' and 'intensities'
+        self.config = self.parse_yaml(self.getProperty('Configuration').value)
+        self.intensities = self._get_intensities(self.getProperty('InputWorkspace').value)
+        # calculate the mask, and export it to XML file
         mask_composite = self.mask_by_tube_intensity | self.mask_by_pixel_intensity
         self.export_mask(mask_composite, self.getProperty('OutputMaskXML').value)
 
