@@ -146,6 +146,8 @@ class DuelPlotMaxentPaneModel(BasePaneModel):
             group_pair_name, run_as_string = self.context.group_pair_context.get_group_pair_name_and_run_from_workspace_name(workspace_name)
             if group_pair_name in axes_workspace_map:
                 return axes_workspace_map[group_pair_name]
+            else:
+                return 0
         else:
             return self._raw_model.convert_index_to_axis(index) + 1
 

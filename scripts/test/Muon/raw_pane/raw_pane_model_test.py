@@ -59,6 +59,11 @@ class RawPaneModelTest(unittest.TestCase):
         keys = ['Detector: 1', 'Detector: 2', 'Detector: 3', 'Detector: 4']
         self.assertEqual(keys, self.model.create_tiled_keys("unused"))
 
+    def test_create_tiled_keys_with_offset(self):
+        self.model._max_spec = 4
+        keys = ['Detector: 9', 'Detector: 10', 'Detector: 11', 'Detector: 12']
+        self.assertEqual(keys, self.model.create_tiled_keys("unused", 9))
+
     def test_get_workspace_plot_axis(self):
         index = 2
         axis_map = mock.Mock()

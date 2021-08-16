@@ -10,7 +10,6 @@ from mantid.api import FileFinder
 from unittest import mock
 from mantidqt.utils.qt.testing import start_qapplication
 from qtpy import QtCore
-
 from Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_view
 from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.muon_group import MuonGroup
@@ -27,6 +26,19 @@ def retrieve_combobox_info(combo_box):
         output_list.append(str(combo_box.itemText(i)))
 
     return output_list
+
+
+class mock_ws(object):
+    def __init__(self,name):
+        self._name = name
+
+    def name(self):
+        return self._name
+
+
+class mock_wrapper(object):
+    def __init__(self, name):
+        self.workspace = mock_ws(name)
 
 
 @start_qapplication
@@ -52,7 +64,7 @@ class MaxEntPresenterTest(unittest.TestCase):
         self.context.update_current_data()
         test_pair = MuonPair('test_pair', 'top', 'bottom', alpha=0.75)
         self.context.group_pair_context.add_pair(pair=test_pair)
-
+        self._count = 0
         self.view.warning_popup = mock.MagicMock()
 
     def test_load_single_period(self):
@@ -85,10 +97,45 @@ class MaxEntPresenterTest(unittest.TestCase):
         self.presenter._maxent_output_workspace_name = "output"
         self.presenter.activate = mock.Mock()
         self.presenter.calculation_finished_notifier.notify_subscribers = mock.Mock()
+        self.presenter.new_reconstructed_data.notify_subscribers = mock.Mock()
         self.context.frequency_context.add_group_phase_table = mock.Mock()
         self.context.phase_context.add_phase_table = mock.Mock()
         self.presenter.new_phase_table.notify_subscribers = mock.Mock()
         self.presenter.update_phase_table_options = mock.Mock()
+
+    def wrapper_side_effect(self, _):
+        self._count+=1
+        if self._count ==1:
+            return mock_wrapper("workspace")
+        if self._count ==2:
+            return mock_wrapper("table")
+        return "not expected"
+
+    @mock.patch('Muon.GUI.FrequencyDomainAnalysis.MaxEnt.maxent_presenter.MuonWorkspaceWrapper')
+    def test_handle_finished_reconstructed_with_groups(self, wrapper_mock):
+        wrapper_mock.side_effect=self.wrapper_side_effect
+        self.setup_handle_finished()
+        self.presenter._optional_output_names = {"ReconstructedSpectra":"calculated_data", "GroupingTable":"table"}
+        type(self.view).output_reconstructed_spectra = mock.PropertyMock(return_value=True)
+        type(self.presenter).use_groups = mock.PropertyMock(return_value = True)
+
+        self.presenter.handleFinished()
+        self.assertEqual(self.presenter.activate.call_count,1)
+        self.assertEqual(self.presenter.new_reconstructed_data.notify_subscribers.call_count,1)
+        self.presenter.new_reconstructed_data.notify_subscribers.assert_called_once_with({"ws": "workspace","table": "table"})
+
+    @mock.patch('Muon.GUI.FrequencyDomainAnalysis.MaxEnt.maxent_presenter.MuonWorkspaceWrapper')
+    def test_handle_finished_reconstructed_with_dets(self, wrapper_mock):
+        wrapper_mock.side_effect=self.wrapper_side_effect
+        self.setup_handle_finished()
+        self.presenter._optional_output_names = {"ReconstructedSpectra":"calculated_data", "GroupingTable":"table"}
+        type(self.view).output_reconstructed_spectra = mock.PropertyMock(return_value=True)
+        type(self.presenter).use_groups = mock.PropertyMock(return_value = False)
+
+        self.presenter.handleFinished()
+        self.assertEqual(self.presenter.activate.call_count,1)
+        self.assertEqual(self.presenter.new_reconstructed_data.notify_subscribers.call_count,1)
+        self.presenter.new_reconstructed_data.notify_subscribers.assert_called_once_with({"ws": "workspace","table": None})
 
     @mock.patch('Muon.GUI.FrequencyDomainAnalysis.MaxEnt.maxent_presenter.MuonWorkspaceWrapper')
     def test_handle_finished(self, wrapper_mock):
