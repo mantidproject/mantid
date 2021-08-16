@@ -99,5 +99,6 @@ Improvements
 Bugfixes
 ########
 - Expand the Q space search radius in DetectorSearcher to avoid missing peaks when using :ref:`PredictPeaks <algm-PredictPeaks>`.
+- :ref:`IndexPeaks <algm-IndexPeaks>` can now index peaks in a PeaksWorkspace with only a single run without optimising the UB (i.e. it is now possible to set CommonUBForAll=True in this instance).
 
 :ref:`Release 6.2.0 <v6.2.0>`
