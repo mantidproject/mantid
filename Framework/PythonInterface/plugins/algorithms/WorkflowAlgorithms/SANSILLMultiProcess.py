@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from SANSILLCommon import *
 from mantid.api import DataProcessorAlgorithm, WorkspaceGroupProperty, MultipleFileProperty, FileAction
-from mantid.kernel import Direction, FloatBoundedValidator, FloatArrayProperty, IntBoundedValidator, StringListValidator
+from mantid.kernel import Direction, FloatBoundedValidator, FloatArrayProperty, IntArrayProperty, IntBoundedValidator, StringListValidator
 from mantid.simpleapi import *
 from os import path
 
@@ -90,8 +90,8 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
     rank = None # the rank of the reduction, i.e. the number of (detector distance, wavelength) configurations
     lambda_rank = None # how many wavelengths are we dealing with, i.e. how many transmissions need to be calculated
     n_samples = None # how many samples are being reduced
-    sample_transmissions = dict() # map of sample transmissions keyed on wavelength values
-    container_transmissions = dict() # map of container transmissions keyed on wavelength values
+    sample_transmissions = [] # list of sample transmission workspaces
+    container_transmissions = [] # list of container transmission workspace
 
     def category(self):
         return 'ILL\\SANS;ILL\\Auto'
@@ -233,6 +233,10 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
                              doc='The type of the integration to perform.')
         self.setPropertyGroup('OutputType', 'Parameters')
 
+        self.declareProperty(IntArrayProperty(name='DistancesAtWavelength2', values=[]),
+                             doc='Defines which distance indices (starting from 0) match to the 2nd wavelength')
+        self.setPropertyGroup('DistancesAtWavelength2', 'Parameters')
+
         self.declareProperty(name='SubAlgorithmOffset', defaultValue=True,
                              doc='Whether to offset logging from child algorithms one level down.')
         self.setPropertyGroup('SubAlgorithmOffset', 'Parameters')
@@ -277,8 +281,8 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         self.lambda_rank = None
         self.n_samples = None
         self.properties = dict()
-        self.sample_transmissions = dict()
-        self.container_transmissions = dict()
+        self.sample_transmissions = []
+        self.container_transmissions = []
 
     def _set_rank(self):
         '''Sets the actual rank of the reduction'''
@@ -437,8 +441,8 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         '''Executes the algorithm'''
         self._setup_light()
         self.process_transmissions()
-        self.process_samples()
-        self.finalize()
+        samples = self.process_samples()
+        self.finalize(samples)
 
     def process_transmissions(self):
         '''Calculates all the transmissions'''
@@ -447,8 +451,10 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
 
     def process_samples(self):
         '''Reduces all the samples'''
+        samples = []
         for d in range(self.rank):
-            self.process_all_samples_at_distance(d)
+            samples.append(self.process_all_samples_at_distance(d))
+        return samples
 
     def process_all_transmissions_at_lambda(self, l):
         '''
@@ -459,11 +465,9 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         tr_empty_can_ws = self.process_empty_can_tr(l, tr_dark_current_ws, tr_empty_beam_ws, tr_empty_beam_flux)
         tr_sample_ws = self.process_sample_tr(l, tr_dark_current_ws, tr_empty_beam_ws, tr_empty_beam_flux)
         if tr_empty_can_ws:
-            w = mtd[tr_empty_can_ws].getRun()['wavelength'].value
-            self.container_transmissions[str(round(w, 2))] = tr_empty_can_ws
+            self.container_transmissions.append(tr_empty_can_ws)
         if tr_sample_ws:
-            w = mtd[tr_sample_ws].getRun()['wavelength'].value
-            self.sample_transmissions[str(round(w,2))] = tr_sample_ws
+            self.sample_transmissions.append(tr_sample_ws)
 
     def process_tr_dark_current(self, l):
         runs = self.getPropertyValue('TrDarkCurrentRuns')
@@ -534,12 +538,154 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
     def process_all_samples_at_distance(self, d):
         '''
         Reduces all the samples at a given distance
-        Note, there must be no loop beyond this point in stack
         '''
-        pass
+        dark_current_ws = self.process_dark_current(d)
+        [empty_beam1_ws, empty_beam1_flux] = self.process_empty_beam(d, dark_current_ws)
+        [empty_beam2_ws, empty_beam2_flux] = self.process_flux(d, dark_current_ws)
+        empty_can_ws = self.process_container(d, dark_current_ws, empty_beam1_ws)
+        actual_flux_ws = empty_beam2_flux if empty_beam2_flux else empty_beam1_flux
+        sample_ws = self.process_sample(d, dark_current_ws, empty_beam1_ws, empty_can_ws, actual_flux_ws)
+        return sample_ws
 
-    def finalize(self):
-        pass
+    def process_dark_current(self, d):
+        runs = self.getPropertyValue('DarkCurrentRuns')
+        if runs:
+            dark_current = runs.split(',')[l]
+            [process_dark_current, dark_current_ws] = needs_processing(dark_current, 'DarkCurrent')
+            if process_dark_current:
+                SANSILLReduction(Runs=dark_current,
+                                 ProcessAs='DarkCurrent',
+                                 NormaliseBy=self.getProperty('NormaliseBy').value,
+                                 OutputWorkspace=dark_current_ws)
+            return dark_current_ws
+        else:
+            return ''
+
+    def process_empty_beam(self, d, dark_current_ws):
+        runs = self.getPropertyValue('EmptyBeamRuns')
+        if runs:
+            empty_beam = runs.split(',')[l]
+            [process_empty_beam, empty_beam_ws] = needs_processing(empty_beam, 'EmptyBeam')
+            empty_beam_flux = empty_beam_ws + 'Flux'
+            if process_empty_beam:
+                SANSILLReduction(Runs=empty_beam,
+                                 ProcessAs='EmptyBeam',
+                                 DarkCurrentWorkspace=dark_current_ws,
+                                 NormaliseBy=self.getProperty('NormaliseBy').value,
+                                 BeamRadius=self.getProperty('BeamRadius').value[l],
+                                 OutputWorkspace=empty_beam_ws,
+                                 OutputFluxWorkspace=empty_beam_flux)
+            return [empty_beam_ws, empty_beam_flux]
+        else:
+            return ['','']
+
+    def process_flux(self, d, dark_current_ws):
+        runs = self.getPropertyValue('FluxRuns')
+        if runs:
+            empty_beam = runs.split(',')[l]
+            [process_empty_beam, empty_beam_ws] = needs_processing(empty_beam, 'EmptyBeam')
+            empty_beam_flux = empty_beam_ws + 'Flux'
+            if process_empty_beam:
+                SANSILLReduction(Runs=empty_beam,
+                                 ProcessAs='EmptyBeam',
+                                 DarkCurrentWorkspace=dark_current_ws,
+                                 NormaliseBy=self.getProperty('NormaliseBy').value,
+                                 TrBeamRadius=self.getProperty('BeamRadius').value[l],
+                                 OutputWorkspace=empty_beam_ws,
+                                 OutputFluxWorkspace=empty_beam_flux)
+            return [empty_beam_ws, empty_beam_flux]
+        else:
+            return ['','']
+
+    def process_container(self, d, dark_current_ws, empty_beam_ws):
+        runs = self.getPropertyValue('EmptyContainerRuns')
+        if runs:
+            empty_can = runs.split(',')[l]
+            [process_empty_can, empty_can_ws] = needs_processing(empty_can, 'EmptyContainer')
+            if process_empty_can:
+                SANSILLReduction(Runs=empty_can,
+                                 ProcessAs='EmptyContainer',
+                                 DarkCurrentWorkspace=dark_current_ws,
+                                 EmptyBeamWorkspace=empty_beam_ws,
+                                 TransmissionInputWorkspace=self.container_transmissions[self.tr_index(d)],
+                                 TransmissionThetaDependent=self.getProperty('TransmissionThetaDependent').value,
+                                 NormaliseBy=self.getProperty('NormaliseBy').value,
+                                 OutputWorkspace=empty_can_ws)
+            return empty_can_ws
+        else:
+            return ''
+
+    def process_sample(self, d, dark_current_ws, empty_beam_ws, empty_can_ws, flux_ws):
+        runs = self.getPropertyValue(f'SampleRunsD{d+1}')
+        if runs:
+            [edge_mask_ws, beam_stop_mask_ws] = self.load_masks(d)
+            flat_field_ws = self.load_flat_field(d)
+            solvent_ws = self.load_solvent(d)
+            sample_tr_ws = self.sample_transmissions[self.tr_index(d)] if self.sample_transmissions else ''
+            [_, sample_ws] = needs_processing(runs, 'Sample')
+            SANSILLReduction(Runs=runs,
+                             ProcessAs='Sample',
+                             DarkCurrentWorkspace=dark_current_ws,
+                             EmptyBeamWorkspace=empty_beam_ws,
+                             TransmissionWorkspace=sample_tr_ws,
+                             EmptyContainerWorkspace=empty_can_ws,
+                             DefaultMaskWorkspace=edge_mask_ws,
+                             MaskWorkspace=beam_stop_mask_ws,
+                             FlatFieldWorkspace=flat_field_ws,
+                             SolventWorkspace=solvent_ws,
+                             FluxWorkspace=flux_ws,
+                             NormaliseBy=self.getProperty('NormaliseBy').value,
+                             TransmissionThetaDependent=self.getProperty('TransmissionThetaDependent').value,
+                             SampleThickness=self.getProperty('SampleThickness').value,
+                             WaterCrossSection=self.getProperty('WaterCrossSection').value,
+                             OutputWorkspace=sample_ws)
+            return sample_ws
+        else:
+            return ''
+
+    def load_masks(self, d):
+        edge_mask = self.getPropertyValue('DefaultMask')
+        [load_edge_mask, edge_mask_ws] = needs_loading(edge_mask, 'DefaultMask')
+        if load_edge_mask:
+            LoadNexusProcessed(Filename=edge_mask, OutputWorkspace=edge_mask_ws)
+        beam_stop = self.getPropertyValue('BeamStopMasks')
+        beam_stop_mask_ws = ''
+        if beam_stop:
+            beam_stop_mask = beam_stop.split(',')[d]
+            [load_beam_stop_mask, beam_stop_mask_ws] = needs_loading(beam_stop_mask, 'Mask')
+            if load_beam_stop_mask:
+                LoadNexusProcessed(Filename=beam_stop_mask, OutputWorkspace=beam_stop_mask_ws)
+        return [edge_mask_ws, beam_stop_mask_ws]
+
+    def load_flat_field(self, d):
+        flat_fields = self.getPropertyValue('FlatFields')
+        if flat_fields:
+            flat_field = flat_fields.split(',')[d]
+            [load_flat_field, flat_field_ws] = needs_loading(flat_field, 'FlatField')
+            if load_flat_field:
+                LoadNexusProcessed(Filename=flat_field, OutputWorkspace=flat_field_ws)
+            return flat_field_ws
+        else:
+            return ''
+
+    def load_solvent(self, d):
+        solvents = self.getPropertyValue('Solvents')
+        if solvents:
+            solvent = solvents.split(',')[d]
+            [load_solvent, solvent_ws] = needs_loading(solvent, 'Solvent')
+            if load_solvent:
+                LoadNexusProcessed(Filename=solvent, OutputWorkspace=solvent_ws)
+            return solvent_ws
+        else:
+            return ''
+
+    def tr_index(self, d):
+        return 1 if d+1 in self.getProperty('DistancesAtWavelength2').value else 0
+
+    def finalize(self, samples):
+        out = self.getPropertyValue('OutputWorkspace')
+        GroupWorkspaces(InputWorkspaces=samples, OutputWorkspace=out)
+        self.setProperty('OutputWorkspace', out)
 
 
 AlgorithmFactory.subscribe(SANSILLMultiProcess)
