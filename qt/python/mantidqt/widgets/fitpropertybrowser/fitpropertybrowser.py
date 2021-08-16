@@ -16,6 +16,7 @@ from mantidqt.plotting.functions import plot
 from mantidqt.utils.qt import import_qt
 from .fitpropertybrowserplotinteraction import FitPropertyBrowserPlotInteraction
 from .interactive_tool import FitInteractiveTool
+import numpy as np
 
 BaseBrowser = import_qt('.._common', 'mantidqt.widgets', 'FitPropertyBrowser')
 
@@ -51,6 +52,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         self.peak_ids = {}
         self._connect_signals()
         self.canvas_draw_signal = None
+        self.allowed_spectra = {}
 
     def _connect_signals(self):
         self.xRangeChanged.connect(self.move_x_range)
@@ -65,19 +67,16 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
 
     def _update_workspace_info_slot(self, event):
         "Callback when the matplotlib canvas updates"
-        if not self._update_allowed_spectra():
+        if not self._update_workspace_info():
             self.hide()
 
-    def _update_allowed_spectra(self):
+    def _update_workspace_info(self):
         " Update the allowed spectra/tableworkspace in the fit browser"
+        allowed_spectra_old = self.allowed_spectra
         allowed_spectra = self._get_allowed_spectra()
         table = self._get_table_workspace()
         if allowed_spectra:
-            previous_selected_index = self.workspaceIndex()
-            self._add_spectra(allowed_spectra)
-            workspace_index = self.workspaceIndex()
-            if workspace_index != previous_selected_index:
-                self.clear_fit_result_lines()
+            self._update_spectra(allowed_spectra, allowed_spectra_old)
         elif table:
             self.addAllowedTableWorkspace(table)
         else:
@@ -85,6 +84,16 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
             logger.warning("Cannot use fitting tool: No valid workspaces to fit to.")
             return False
         return True
+
+    def _update_spectra(self, allowed_spectra, allowed_spectra_old):
+        previous_workspace_index = self.workspaceIndex()
+        previous_name = self.workspaceName()
+        # remove workspaces that are no longer plotted
+        for workspace in np.setdiff1d(list(allowed_spectra_old.keys()), list(allowed_spectra.keys())):
+            self.removeWorkspaceAndSpectra(workspace)
+        self._add_spectra(allowed_spectra)
+        if (self.workspaceName(), self.workspaceIndex()) != (previous_name, previous_workspace_index):
+            self.clear_fit_result_lines()
 
     def _add_spectra(self, spectra):
         """
@@ -104,11 +113,17 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         for ax in self.canvas.figure.get_axes():
             try:
                 for ws_name, artists in ax.tracked_workspaces.items():
+                    # we don't want to include the fit workspace in our selection
+                    # unfortunately, this might catch some workspaces which have _Workspace appended to their name
+                    # hopefully this is an unlikely scenario.
+                    if ws_name.endswith("_Workspace"):
+                        continue
                     spectrum_list = [artist.spec_num for artist in artists]
                     spectrum_list = sorted(list(set(spectrum_list)))
                     allowed_spectra[ws_name] = spectrum_list
             except AttributeError:  # scripted plots have no tracked_workspaces
                 pass
+        self.allowed_spectra = allowed_spectra
         return allowed_spectra
 
     def _get_table_workspace(self):
@@ -179,7 +194,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
             self.addAllowedTableWorkspace(table)
         else:
             self.toolbar_manager.toggle_fit_button_checked()
-            logger.warning("Cannot use fitting tool: No valid workspaces to fit to.")
+            logger.warning("Cannot open fitting tool: No valid workspaces to fit to.")
             return
 
         self.canvas_draw_signal = self.canvas.mpl_connect('draw_event', self._update_workspace_info_slot)
