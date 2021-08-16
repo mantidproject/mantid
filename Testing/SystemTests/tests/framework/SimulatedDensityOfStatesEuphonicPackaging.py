@@ -27,6 +27,30 @@ class SimulatedDensityOfStatesTest(MantidSystemTest):
 
 class SimulatedDensityOfStatesEuphonicTest(MantidSystemTest):
     """"Install Euphonic library to temporary prefix and check results"""
+    @staticmethod
+    def _add_libs_from_prefix(prefix_path):
+        package_dirs = []
+        for lib_dir in ('lib', 'lib64'):
+            if (prefix_path / lib_dir).is_dir():
+                site_packages = next(
+                    (prefix_path / lib_dir).iterdir()) / 'site-packages'
+                if site_packages.is_dir():
+                    site.addsitedir(site_packages)
+                    package_dirs.append(site_packages)
+
+        if package_dirs:
+            return package_dirs
+        else:
+            if not prefix_path.is_dir():
+                raise FileNotFoundError(
+                    f"Install prefix {prefix_path} does not exist.")
+            else:
+                directory_contents = list(prefix_path.iterdir())
+                raise FileNotFoundError(
+                    ("Could not find site-packages for temporary dir. "
+                     "Here are the directory contents: ")
+                    + "; ".join(directory_contents))
+
     def runTest(self):
         # First check if we are using debian-style Pip, where --system
         # is needed to prevent default --user option from breaking --prefix.
@@ -38,7 +62,7 @@ class SimulatedDensityOfStatesEuphonicTest(MantidSystemTest):
             compatibility_args = []
 
         with tempfile.TemporaryDirectory() as scipy_prefix, \
-             tempfile.TemporaryDirectory() as euphonic_prefix:
+                tempfile.TemporaryDirectory() as euphonic_prefix:
 
             process = subprocess.run([sys.executable, "-m", "pip", "install",
                                       "--prefix", scipy_prefix]
@@ -48,19 +72,14 @@ class SimulatedDensityOfStatesEuphonicTest(MantidSystemTest):
                                      stderr=subprocess.STDOUT)
 
             prefix_path = pathlib.Path(scipy_prefix)
-            try:
-                scipy_site_packages = next((prefix_path / 'lib').iterdir()
-                                           ) / 'site-packages'
-            except FileNotFoundError:
-                raise FileNotFoundError(
-                    "Could not find site-packages for temporary dir. "
-                    "Here are the directory contents: "
-                    "\n".join(list(prefix_path.iterdir())))
 
-            process_pythonpath = str(scipy_site_packages) + ':' + os.environ['PYTHONPATH']
+            # Add to path if anything was installed
             env = os.environ.copy()
-            env['PYTHONPATH'] = process_pythonpath
-            site.addsitedir(scipy_site_packages)
+            if list(prefix_path.iterdir()):
+                scipy_site_packages = self._add_libs_from_prefix(prefix_path)
+
+                process_pythonpath =  ':'.join([str(dir) for dir in scipy_site_packages] + [os.environ['PYTHONPATH']])
+                env['PYTHONPATH'] = process_pythonpath
 
             # Install minimum Scipy version for Euphonic if necessary
             from packaging import version
@@ -75,7 +94,9 @@ class SimulatedDensityOfStatesEuphonicTest(MantidSystemTest):
                                          env=env)
                 print(process.stdout.decode('utf-8'))
 
-                #importlib.reload(site)
+                # Add prefix again, in case nothing was installed before
+                scipy_site_packages = self._add_libs_from_prefix(prefix_path)
+
                 importlib.reload(scipy)
 
             process = subprocess.run([sys.executable, "-m", "pip", "install",
@@ -86,13 +107,7 @@ class SimulatedDensityOfStatesEuphonicTest(MantidSystemTest):
                                      env=env)
             print(process.stdout.decode('utf-8'))
 
-            prefix_path = pathlib.Path(euphonic_prefix)
-            for lib_dir in ('lib', 'lib64'):
-                if (prefix_path / lib_dir).is_dir():
-                    site_packages = next((prefix_path / lib_dir).iterdir()
-                                         ) / 'site-packages'
-                    if site_packages.is_dir():
-                        site.addsitedir(site_packages)
+            self._add_libs_from_prefix(pathlib.Path(euphonic_prefix))
 
             import pint  # noqa: F401
             import euphonic  # noqa: F401
