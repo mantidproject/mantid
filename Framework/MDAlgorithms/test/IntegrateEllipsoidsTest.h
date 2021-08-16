@@ -587,13 +587,13 @@ public:
     PeaksWorkspace_sptr peaksShared = alg.getProperty("OutputWorkspace");
     TS_ASSERT_EQUALS(peaksShared->getNumberPeaks(), peaksHKL.size());
 
-    // first peak is a bragg peak: intensity = 29715 - 0.883704*1988 = 279858.196
+    // first peak is a bragg peak: intensity = 29715 - 0.883704*1988 = 27958.196
     // second peak is a satellite with intensity = 4620 - 3.32588*721 = 2222.25
     // However, sat peak should share background of bragg: 4620 - 0.883704*1988 = 2863.196448
     const Peak braggPeak = peaksShared->getPeak(0);
     const Peak satellitePeak = peaksShared->getPeak(1);
 
-    TS_ASSERT_DELTA(braggPeak.getIntensity(), 279858.196, 1e-2);
+    TS_ASSERT_DELTA(braggPeak.getIntensity(), 27958.196, 1e-2);
     TS_ASSERT_DELTA(satellitePeak.getIntensity(), 2863.196488, 1e-2);
     TS_ASSERT_DELTA(satellitePeak.getSigmaIntensity(), 78.5652, 1e-2);
 

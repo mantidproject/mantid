@@ -438,9 +438,12 @@ void IntegrateEllipsoids::exec() {
   double sigi;
   std::pair<double, double> backi;
   std::vector<double> principalaxis1, principalaxis2, principalaxis3;
+  // map of satellite peaks for each bragg peak
   std::map<size_t, std::vector<Peak *>> satellitePeakMap;
+  // lists containing indices of bragg or satellite peaks
   std::vector<size_t> braggPeaks;
   std::vector<size_t> satellitePeaks;
+  // cached background and sigma background for each bragg peak (including ellipsoid ratio factor)
   std::map<size_t, std::pair<double, double>> cachedBraggBackground;
   if (shareBackground) {
     for (size_t i = 0; i < n_peaks; i++) {
@@ -469,7 +472,6 @@ void IntegrateEllipsoids::exec() {
       // loop over all satellite peaks to determine if it belongs to this bragg
       for (auto satIt = satellitePeaks.begin(); satIt != satellitePeaks.end(); satIt++) {
         const auto satHKL = peaks[*satIt].getIntHKL();
-
         if (satHKL == braggHKL) {
           // this satellite peak shares the HKL vector, so it is a satellite peak of this bragg peak
           satellitePeakMap[*it].emplace_back(&peaks[*satIt]);
