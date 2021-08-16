@@ -214,7 +214,7 @@ class FitInteractiveTool(QObject):
         self.mouse_state.transition_to('add_peak')
 
         if set_global_default:
-            ConfigService['curvefitting.defaultPeak'] = function_name
+            ConfigService.setString('curvefitting.defaultPeak', function_name)
 
     def add_background_dialog(self):
         """

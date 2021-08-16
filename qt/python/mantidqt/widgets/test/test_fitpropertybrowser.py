@@ -11,19 +11,28 @@ import unittest
 import matplotlib
 
 matplotlib.use('AGG')  # noqa
+import matplotlib.pyplot as plt
+
 from numpy import zeros
 
 from mantid.api import AnalysisDataService, WorkspaceFactory
 from unittest.mock import MagicMock, Mock, patch
+from mantid import ConfigService
 from mantid.simpleapi import CreateSampleWorkspace, CreateWorkspace
 from mantidqt.plotting.functions import plot
 from mantidqt.utils.qt.testing import start_qapplication
+from mantidqt.utils.testing.strict_mock import StrictMock
 from mantidqt.widgets.fitpropertybrowser.fitpropertybrowser import FitPropertyBrowser
 from testhelpers import assertRaisesNothing
-from workbench.plotting.figuremanager import FigureManagerADSObserver
+from workbench.plotting.figuremanager import FigureManagerADSObserver, MantidFigureCanvas
 
 from qtpy import PYQT5
 from qtpy.QtWidgets import QDockWidget
+
+
+class MockConfigService(object):
+    def __init__(self):
+        self.setString = StrictMock()
 
 
 @start_qapplication
@@ -221,10 +230,71 @@ class FitPropertyBrowserTest(unittest.TestCase):
         property_browser._set_peak_initial_fwhm('f1', fwhm)
         mock_setFwhm.assert_called_once_with('f1', fwhm)
 
+    def test_new_fit_browser_has_correct_peak_type_when_not_changing_global_default(self):
+        """
+        Change the default peak type in a fit browser without specifying that the global value should change and check
+        that a new fit browser still has the default value from the config.
+        """
+        default_peak_type = ConfigService['curvefitting.defaultPeak']
+
+        fit_browser = self._create_widget_with_interactive_tool()
+
+        # Find a peak type different to the default in the config.
+        new_peak_type = None
+        for peak_name in fit_browser.registeredPeaks():
+            if peak_name != default_peak_type:
+                new_peak_type = peak_name
+                break
+
+        self.assertIsNotNone(new_peak_type)
+
+        # Setting the peak type for a fit browser should update the default peak type for only that fit browser
+        fit_browser.tool.action_peak_added(new_peak_type)
+        self.assertEqual(fit_browser.defaultPeakType(), new_peak_type)
+
+        # Make sure the default peak type in the config didn't change.
+        self.assertEqual(ConfigService['curvefitting.defaultPeak'], default_peak_type)
+
+        # A new fit browser should have the default peak type from the config.
+        new_fit_browser = self._create_widget_with_interactive_tool()
+        self.assertNotEqual(new_fit_browser.defaultPeakType(), fit_browser.defaultPeakType())
+        self.assertEqual(new_fit_browser.defaultPeakType(), default_peak_type)
+
+    @patch('mantidqt.widgets.fitpropertybrowser.interactive_tool.ConfigService', new_callable=MockConfigService)
+    def test_new_fit_browser_has_correct_peak_type_when_changing_global_default(self, mock_config_service):
+        """
+        Check that the config service default peak is updated when explicitly requesting it from the fit browser
+        interactive tool.
+        """
+        fit_browser = self._create_widget_with_interactive_tool()
+        fit_browser.tool.action_peak_added('Lorentzian', set_global_default=True)
+
+        mock_config_service.setString.assert_called_once_with('curvefitting.defaultPeak', 'Lorentzian')
+
     # Private helper functions
+    @classmethod
     def _create_widget(self, canvas=MagicMock(), toolbar_manager=Mock()):
         return FitPropertyBrowser(canvas, toolbar_manager)
 
+    @classmethod
+    @patch('mantidqt.widgets.fitpropertybrowser.fitpropertybrowser.FitPropertyBrowserBase.show')
+    def _create_widget_with_interactive_tool(cls, _):
+        """
+        Need to mock some functions and call "show()" in order for the fit browser to create its FitInteractiveTool
+        object.
+        """
+        fig, axes = plt.subplots(subplot_kw={'projection': 'mantid'})
+        canvas = MantidFigureCanvas(fig)
+        fit_browser = FitPropertyBrowser(canvas=canvas, toolbar_manager=Mock())
+        fit_browser._get_allowed_spectra = Mock(return_value=True)
+        fit_browser._add_spectra = Mock()
+        fit_browser.set_output_window_names = Mock(return_value=None)
+        # Need to call show() to set up the FitInteractiveTool, but we've mocked the superclass show() function
+        # so it won't actually show the widget.
+        fit_browser.show()
+        return fit_browser
+
+    @classmethod
     def _create_and_plot_matrix_workspace(self, name="workspace", distribution=False):
         ws = CreateWorkspace(OutputWorkspace=name, DataX=zeros(10), DataY=zeros(10),
                              NSpec=2, Distribution=distribution)
