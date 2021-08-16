@@ -6,8 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 # package imports
-from mantid.utils.nomad.diagnostics import (export_masks, determine_tubes_threshold, CollimationLevel,
-                                            InstrumentComponentLevel, _NOMADMedianDetectorTest)
+from mantid.utils.nomad.diagnostics import (CollimationLevel, InstrumentComponentLevel, _NOMADMedianDetectorTest)
 
 # third-party imports
 import numpy
@@ -68,7 +67,7 @@ class NOMADMedianDetectorTestTest(unittest.TestCase):
         # Mock instrument
         info_dict = dict()
 
-        info_dict['num_banks'] = 1
+        info_dict['num_Panels'] = 1
         info_dict['num_8packs'] = 3
         info_dict['num_pixels_per_tube'] = tube_size
         info_dict['num_tubes_per_8pack'] = 2
@@ -86,6 +85,55 @@ class NOMADMedianDetectorTestTest(unittest.TestCase):
                                      'low_tube': 0.7, 'high_tube': 1.3}}
 
         return instrument, mask_config, test_data.flatten()
+
+    @classmethod
+    def setUpClass(cls):
+        r"""Instantiate an object of type _NOMADMedianDetectorTest"""
+        #
+        # tester 1
+        # each panel will have same intensity for all its pixels
+        #
+        # Some tubes in the last two panels have some collimation. Their medians cannot be calculated
+        config = {'collimation': {'half_col': list(range(77, 78)),  # last valid eightpack in next to last panel
+                                  'full_col': list(range(95, 96))},  # last valid eightpack in last panel
+                  'eight_packs': [3, 7, 8, 9, 10, 11, 19, 20, 26, 28, 30, 34, 38, 39, 40, 41, 44, 45, 46, 47, 48, 49,
+                                  50, 54, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75,
+                                  76, 77, 89, 90, 93, 94, 95],
+                  }
+        tester = _NOMADMedianDetectorTest()
+        tester.config = config
+        unique_intensities = np.arange(tester.PANEL_COUNT)
+
+        # each panel will have same intensity for all its pixels
+        intensities = list()
+        for intensity, (tube_begin, tube_end) in enumerate(tester.tube_range):
+            intensities.extend([intensity] * (tube_end - tube_begin) * tester.PIXELS_IN_TUBE)
+        # divide each pixel intensity by tester.PIXELS_IN_TUBE so that the summed tube intensity becomes the panel index
+        intensities = np.array(intensities, dtype=float) / tester.PIXELS_IN_TUBE
+        # mask unused eightpacks
+        mask = np.full(tester.EIGHTPACK_COUNT, True)
+        mask[config['eight_packs']] = False  # don't mask eightpacks in use
+        mask = np.repeat(mask, tester.TUBES_IN_EIGHTPACK * tester.PIXELS_IN_TUBE)
+        tester.intensities = np.ma.masked_array(intensities, mask=mask)
+        cls.tester1 = tester
+        #
+        # tester 2
+        # the intensity of each pixel corresponds to the index of the tube to which the pixel belongs
+        #
+        config = {'eight_packs': [3, 7, 8, 9, 10, 11, 19, 20, 26, 28, 30, 34, 38, 39, 40, 41, 44, 45, 46, 47, 48, 49,
+                                  50, 54, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75,
+                                  76, 77, 89, 90, 93, 94, 95]
+                  }
+        tester = _NOMADMedianDetectorTest()
+        tester.config = config
+        unique_intensities = np.arange(tester.TUBE_COUNT)
+        intensities = np.repeat(unique_intensities, tester.PIXELS_IN_TUBE)
+        # mask unused eightpacks
+        mask = np.full(tester.EIGHTPACK_COUNT, True)
+        mask[config['eight_packs']] = False  # don't mask eightpacks in use
+        mask = np.repeat(mask, tester.TUBES_IN_EIGHTPACK * tester.PIXELS_IN_TUBE)
+        tester.intensities = np.ma.masked_array(intensities, mask=mask)
+        cls.tester2 = tester
 
     def _generate_test_ymal(self, file_name):
         """
@@ -158,76 +206,6 @@ class NOMADMedianDetectorTestTest(unittest.TestCase):
         yml_file.write(ymal_str)
         yml_file.close()
 
-    @classmethod
-    def setUpClass(cls):
-        r"""Instantiate an object of type _NOMADMedianDetectorTest"""
-        #
-        # tester 1
-        #
-        # Some tubes in the last two panels have some collimation. Their medians cannot be calculated
-        config = {'collimation': {'half_col': list(range(77, 78)),  # last valid eightpack in next to last panel
-                                  'full_col': list(range(95, 96))},  # last valid eightpack in last panel
-                  'eight_packs': [3, 7, 8, 9, 10, 11, 19, 20, 26, 28, 30, 34, 38, 39, 40, 41, 44, 45, 46, 47, 48, 49,
-                                  50, 54, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75,
-                                  76, 77, 89, 90, 93, 94, 95],
-                  }
-        tester = _NOMADMedianDetectorTest()
-        tester.config = config
-        unique_intensities = np.arange(tester.PANEL_COUNT)
-
-        # each panel will have same intensity for all its pixels
-        intensities = list()
-        for intensity, (tube_begin, tube_end) in enumerate(tester.tube_range):
-            intensities.extend([intensity] * (tube_end - tube_begin) * tester.PIXELS_IN_TUBE)
-        # divide each pixel intensity by tester.PIXELS_IN_TUBE so that the summed tube intensity becomes the panel index
-        intensities = np.array(intensities, dtype=float) / tester.PIXELS_IN_TUBE
-        # mask unused eightpacks
-        mask = np.full(tester.EIGHTPACK_COUNT, True)
-        mask[config['eight_packs']] = False  # don't mask eightpacks in use
-        mask = np.repeat(mask, tester.TUBES_IN_EIGHTPACK * tester.PIXELS_IN_TUBE)
-        tester.intensities = np.ma.masked_array(intensities, mask=mask)
-        cls.tester1 = tester
-        #
-        # tester 2
-        # the intensity of each pixel corresponds to the index of the tube to which the pixel belongs
-        #
-        config = {'eight_packs': [3, 7, 8, 9, 10, 11, 19, 20, 26, 28, 30, 34, 38, 39, 40, 41, 44, 45, 46, 47, 48, 49,
-                                  50, 54, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75,
-                                  76, 77, 89, 90, 93, 94, 95]
-                  }
-        tester = _NOMADMedianDetectorTest()
-        tester.config = config
-        unique_intensities = np.arange(tester.TUBE_COUNT)
-        intensities = np.repeat(unique_intensities, tester.PIXELS_IN_TUBE)
-        # mask unused eightpacks
-        mask = np.full(tester.EIGHTPACK_COUNT, True)
-        mask[config['eight_packs']] = False  # don't mask eightpacks in use
-        mask = np.repeat(mask, tester.TUBES_IN_EIGHTPACK * tester.PIXELS_IN_TUBE)
-        tester.intensities = np.ma.masked_array(intensities, mask=mask)
-        cls.tester2 = tester
-
-    def test_export_mantid_mask(self):
-        """Test to export Mask to XML
-        """
-        # output file name
-        test_xml_name = '/tmp/test_mask.xml'
-
-        # mask states
-        test_mask_states = np.ndarray(shape=(128*8*99, ), dtype=bool)
-        test_mask_states[:] = False
-        test_mask_states[0:123] = True
-        test_mask_states[3000:4321] = True
-
-        # export masks
-        export_masks(test_mask_states, test_xml_name, 'NOMAD')
-
-        # check
-        assert os.path.exists(test_xml_name)
-        with open(test_xml_name, 'r') as mask_file:
-            lines = mask_file.readlines()
-            assert lines[3].strip() == '<detids>0-122,3000-4320</detids>'
-        os.remove(test_xml_name)
-
     def test_ymal_input(self):
         """Test processing YMAL
         """
@@ -297,15 +275,11 @@ class NOMADMedianDetectorTestTest(unittest.TestCase):
                                                f'{pixel_collimation_states[pack_index]}')
 
     def test_determine_tubes_thresholds(self):
-        """
-        Returns
-        -------
-        """
         # Set up test data
         mock_nomad, test_config, test_data = self._generate_test_data()
 
         # Determine threshold
-        some_returns = determine_tubes_threshold(test_data, test_config, mock_nomad)
+        some_returns = _NOMADMedianDetectorTest.determine_tubes_threshold(test_data, test_config, mock_nomad)
 
         # Gold file
         expected_mask_states = np.array([[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
@@ -379,6 +353,20 @@ class NOMADMedianDetectorTestTest(unittest.TestCase):
         # All pixels will be masked
         tester.config['threshold'] = {'low_tube': 1.5, 'high_tube': 0.5}
         mask = tester.mask_by_tube_intensity
+        assert np.all(mask)
+        # Only unused pixels will be masked
+        tester.config['threshold'] = {'low_tube': 0.5, 'high_tube': 1.5}
+        pixel_mask = tester.mask_by_tube_intensity
+        pixel_unused, pixel_used = tester.intensities.mask, ~tester.intensities.mask
+        assert ~np.all(pixel_mask[pixel_used])  # the mask of unused pixels is False
+        assert np.all(pixel_mask[pixel_unused])  # the mask of unused pixels is True
+
+    def test_mask_by_pixel_intensity(self):
+        tester = self.tester1
+        tester.intensities += 1e-06  # so that no intensity is zero
+        # All pixels will be masked
+        tester.config['threshold'] = {'low_pixel': 1.5, 'high_pixel': 0.5}
+        mask = tester.mask_by_pixel_intensity
         assert np.all(mask)
         # Only unused pixels will be masked
         tester.config['threshold'] = {'low_tube': 0.5, 'high_tube': 1.5}
