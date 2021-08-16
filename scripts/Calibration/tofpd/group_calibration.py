@@ -13,7 +13,7 @@ from mantid.simpleapi import (ConvertUnits, ExtractSpectra, Rebin,
                               SaveDiffCal, DeleteWorkspace, logger,
                               RenameWorkspace, Integration, CloneWorkspace,
                               CreateGroupingWorkspace, CreateDetectorTable,
-                              CreateEmptyTableWorkspace)
+                              CreateEmptyTableWorkspace, SmoothData)
 
 # Diamond peak positions in d-space
 DIAMOND = (0.3117,0.3257,0.3499,0.4205,0.4645,
@@ -32,7 +32,9 @@ def cc_calibrate_groups(data_ws,
                         Xmax=1.30,
                         MaxDSpaceShift=None,
                         OffsetThreshold=1E-4,
-                        SkipCrossCorrelation=[]):
+                        SkipCrossCorrelation=[],
+                        PeakFunction="Gaussian",
+                        SmoothNPoints=0):
     """This will perform the CrossCorrelate/GetDetectorOffsets on a group
     of detector pixel.
 
@@ -58,7 +60,9 @@ def cc_calibrate_groups(data_ws,
     :param Xmax: Xmax parameter for CrossCorrelate, default 1.30
     :param MaxDSpaceShift: MaxDSpaceShift paramter for CrossCorrelate, default None
     :param OffsetThreshold: Convergence threshold for cycling cross correlation, default 1E-4
-    :param SkipCrossCorrelation: Skip cross correlation for specified groups.
+    :param SkipCrossCorrelation: Skip cross correlation for specified groups
+    :param PeakFunction: Peak function to use for extracting the offset
+    :param SmoothNPoints: Number of points for smoothing spectra, for cross correlation ONLY
     :return: Combined DiffCal workspace from all the different groups
     """
     if previous_calibration:
@@ -69,6 +73,7 @@ def cc_calibrate_groups(data_ws,
     group_list = np.unique(group_ws.extractY())
 
     _accum_cc = None
+    cycled = False
     to_skip = []
     for group in group_list:
         # Figure out input parameters for CrossCorrelate and GetDetectorOffset, specifically
@@ -79,6 +84,8 @@ def cc_calibrate_groups(data_ws,
         MDS_group = MaxDSpaceShift[int(group) - 1] if type(MaxDSpaceShift) == list else MaxDSpaceShift
         DRef_group = DReference[int(group) - 1] if type(DReference) == list else DReference
         OT_group = OffsetThreshold[int(group) - 1] if type(OffsetThreshold) == list else OffsetThreshold
+        pf_group = PeakFunction[int(group) - 1] if type(PeakFunction) == list else PeakFunction
+        snpts_group = SmoothNPoints[int(group) - 1] if type(SmoothNPoints) == list else SmoothNPoints
         cycling = OT_group < 1.0
 
         indexes = np.where(group_ws.extractY().flatten() == group)[0]
@@ -100,6 +107,8 @@ def cc_calibrate_groups(data_ws,
         if num_spectra < 2:
             continue
         Rebin('_tmp_group_cc', Params=f'{Xmin_group},{Step},{Xmax_group}', OutputWorkspace='_tmp_group_cc')
+        if snpts_group >= 3:
+            SmoothData('_tmp_group_cc', NPoints=snpts_group, OutputWorkspace='_tmp_group_cc')
 
         # Figure out brightest spectra to be used as the reference for cross correlation.
         CloneWorkspace('_tmp_group_cc_raw', OutputWorkspace='_tmp_group_cc_raw_tmp')
@@ -131,6 +140,7 @@ def cc_calibrate_groups(data_ws,
                                Xmin=-bin_range, XMax=bin_range,
                                DReference=DRef_group,
                                MaxOffset=1,
+                               PeakFunction=pf_group,
                                OutputWorkspace='_tmp_group_cc')
 
             if group not in SkipCrossCorrelation:
@@ -139,22 +149,25 @@ def cc_calibrate_groups(data_ws,
                     if abs(mtd['_tmp_group_cc'].readY(item)) != 0:
                         offsets_tmp.append(abs(mtd['_tmp_group_cc'].readY(item)))
                 offsets_tmp = np.array(offsets_tmp)
-                logger.information(f'Running group-{group}, cycle-{num_cycle}.')
-                logger.information(f'Median offset (no sign) = {np.median(offsets_tmp)}')
+                logger.notice(f'Running group-{group}, cycle-{num_cycle}.')
+                logger.notice(f'Median offset (no sign) = {np.median(offsets_tmp)}')
+                logger.notice(f'Running group-{group}, cycle-{num_cycle}.')
+                logger.notice(f'Median offset (no sign) = {np.median(offsets_tmp)}')
                 converged = np.median(offsets_tmp) < OT_group
             else:
                 for item in ws_indexes:
                     mtd['_tmp_group_cc'].dataY(item)[0] = 0.0
-                logger.information(f'Cross correlation skipped for group-{group}.')
+                logger.notice(f'Cross correlation skipped for group-{group}.')
                 converged = True
 
             if not cycling or converged:
                 if cycling and converged:
                     if group not in SkipCrossCorrelation:
-                        logger.information(f'Cross correlation for group-{group} converged, ')
-                        logger.information(f'with offset threshold {OT_group}.')
+                        logger.notice(f'Cross correlation for group-{group} converged, ')
+                        logger.notice(f'with offset threshold {OT_group}.')
                 break
             else:
+                cycled = True
                 previous_calibration = ConvertDiffCal('_tmp_group_cc',
                                                       PreviousCalibration=previous_calibration,
                                                       OutputWorkspace='_tmp_group_cc_diffcal')
@@ -177,16 +190,16 @@ def cc_calibrate_groups(data_ws,
     DeleteWorkspace('_accum_cc')
     DeleteWorkspace('_tmp_group_cc')
     DeleteWorkspace('_tmp_group_cc_raw')
-    if cycling:
+    if cycling and cycled:
         DeleteWorkspace('_tmp_group_cc_diffcal')
 
-    return mtd[f'{output_basename}_cc_diffcal']
+    return mtd[f'{output_basename}_cc_diffcal'], to_skip
 
 
 def pdcalibration_groups(data_ws,
                          group_ws,
                          cc_diffcal,
-                         mask=None,
+                         to_skip,
                          output_basename="_tmp_group_pd_calibration",
                          previous_calibration=None,
                          PeakPositions=DIAMOND,
@@ -212,6 +225,7 @@ def pdcalibration_groups(data_ws,
     :param data_ws: Input calibration raw data (in TOF), assumed to already be correctly masked
     :param group_ws: grouping workspace, e.g. output from LoadDetectorsGroupingFile
     :param cc_diffcal: DiffCal workspace which is the output from cc_calibrate_groups
+    :param to_skip: Groups to skip the cross correlation stage
     :param output_basename: Optional name to use for temporay and output workspace
     :param previous_calibration: Optional previous diffcal workspace
     :param PeakPositions: PeakPositions parameter of PDCalibration, default Diamond peaks
@@ -243,37 +257,40 @@ def pdcalibration_groups(data_ws,
                       PeakWidthPercent=PeakWidthPercent,
                       OutputCalibrationTable=f'{output_basename}_pd_diffcal',
                       DiagnosticWorkspaces=f'{output_basename}_pd_diag')
+        if to_skip:
+            ExtractSpectra(data_ws, WorkspaceIndexList=to_skip, OutputWorkspace='_tmp_group_to_skip')
+            ExtractUnmaskedSpectra('_tmp_group_to_skip', OutputWorkspace='_tmp_group_to_skip')
+            PDCalibration(InputWorkspace='_tmp_group_to_skip',
+                          TofBinning=TofBinning,
+                          PreviousCalibrationTable=previous_calibration,
+                          PeakFunction=PeakFunction,
+                          PeakPositions=PeakPositions,
+                          PeakWindow=PeakWindow,
+                          PeakWidthPercent=PeakWidthPercent,
+                          OutputCalibrationTable=f'{output_basename}_pd_diffcal_skip',
+                          DiagnosticWorkspaces=f'{output_basename}_pd_diag_skip')
     else:
-        PDCalibration(InputWorkspace='_tmp_data_aligned',
-                      TofBinning=TofBinning,
-                      PreviousCalibrationTable=previous_calibration,
-                      PeakFunction=PeakFunction,
-                      PeakPositions=PeakPositions,
-                      PeakWindow=PeakWindow,
-                      PeakWidthPercent=PeakWidthPercent,
-                      OutputCalibrationTable='PDCalib',
-                      DiagnosticWorkspaces='diag')
-        PDCalibration(InputWorkspace='_tmp_data_aligned',
-                      TofBinning=[TofBinning[0], TofBinning[1]/2, TofBinning[2]],
-                      PreviousCalibrationTable='PDCalib',
-                      PeakFunction=PeakFunction,
-                      PeakPositions=PeakPositions,
-                      PeakWindow=PeakWindow,
-                      PeakWidthPercent=PeakWidthPercent/2.0,
-                      OutputCalibrationTable='PDCalib',
-                      DiagnosticWorkspaces='diag')
-        PDCalibration(InputWorkspace='_tmp_data_aligned',
-                      TofBinning=[TofBinning[0], TofBinning[1]/2, TofBinning[2]],
-                      PreviousCalibrationTable='PDCalib',
-                      PeakFunction=PeakFunction,
-                      PeakPositions=PeakPositions,
-                      PeakWindow=PeakWindow,
-                      PeakWidthPercent=PeakWidthPercent/2.0,
-                      OutputCalibrationTable=f'{output_basename}_pd_diffcal',
-                      DiagnosticWorkspaces=f'{output_basename}_pd_diag')
-        DeleteWorkspace('PDCalib')
-        DeleteWorkspace('PDCalib_mask')
-        DeleteWorkspace('diag')
+        pdcalib_for_powgen(mtd['_tmp_data_aligned'],
+                           TofBinning,
+                           previous_calibration,
+                           PeakFunction,
+                           PeakPositions,
+                           PeakWindow,
+                           PeakWidthPercent,
+                           f'{output_basename}_pd_diffcal',
+                           f'{output_basename}_pd_diag')
+        if to_skip:
+            ExtractSpectra(data_ws, WorkspaceIndexList=to_skip, OutputWorkspace='_tmp_group_to_skip')
+            ExtractUnmaskedSpectra('_tmp_group_to_skip', OutputWorkspace='_tmp_group_to_skip')
+            pdcalib_for_powgen(mtd['_tmp_group_to_skip'],
+                               [300,-0.0008,16667],
+                               previous_calibration,
+                               PeakFunction,
+                               PeakPositions,
+                               PeakWindow,
+                               PeakWidthPercent,
+                               f'{output_basename}_pd_diffcal_skip',
+                               f'{output_basename}_pd_diag_skip')
 
     CombineDiffCal(PixelCalibration=cc_diffcal,
                    GroupedCalibration=f'{output_basename}_pd_diffcal',
@@ -291,11 +308,14 @@ def pdcalibration_groups(data_ws,
     num_hist = data_ws.getNumberHistograms()
     for i in range(num_hist):
         difc_bak = mtd['calib_table_bak'].row(i)['DIFC']
-        difc_calib = mtd[f'{output_basename}_cc_pd_diffcal_tmp'].row(i)['difc']
+        if i in to_skip:
+            difc_calib = mtd[f'{output_basename}_pd_diffcal_skip'].row(i)['difc']
+        else:
+            difc_calib = mtd[f'{output_basename}_cc_pd_diffcal_tmp'].row(i)['difc']
         if mtd[f'{output_basename}_pd_diffcal_mask'].readY(i)[0] == 0.0:
             diff_difc = abs(difc_bak - difc_calib) / difc_calib * 100.0
         else:
-            diff_difc = 0.0
+            diff_difc = float("inf")
         if diff_difc >= BadCalibThreshold:
             difc_calib = difc_bak
         new_row = { 'detid': mtd[f'{output_basename}_cc_pd_diffcal_tmp'].row(i)['detid'],
@@ -306,13 +326,68 @@ def pdcalibration_groups(data_ws,
 
     DeleteWorkspace(f'{output_basename}_cc_pd_diffcal_tmp')
 
-    return mtd[f'{output_basename}_cc_pd_diffcal'], mtd[f'{output_basename}_pd_diffcal_mask']
+    return mtd[f'{output_basename}_cc_pd_diffcal']
+
+
+def pdcalib_for_powgen(wks_in,
+                       TofBinning,
+                       previous_calibration,
+                       PeakFunction,
+                       PeakPositions,
+                       PeakWindow,
+                       PeakWidthPercent,
+                       OutPDCalib,
+                       OutPDCalibDiag):
+    """This will perform PDCalibration for input workspace. This is a special function
+    defined for POWGEN for which it seems that we need to conduct the calibration
+    three times consecutively.
+
+    :param wks_in: Input workspace
+    :param TofBinning: TofBinning parameter of PDCalibration, default (300,-.001,16666.7)
+    :param previous_calibration: Optional previous diffcal workspace
+    :param PeakFunction: PeakFunction parameter of PDCalibration, default 'IkedaCarpenterPV'
+    :param PeakWindow: PeakWindow parameter of PDCalibration, default 0.1
+    :param PeakWidthPercent: PeakWidthPercent parameter of PDCalibration, default None
+    :param OutPDCalib: Output calibration table
+    :param OutPDCalibDiag: Output diagnostics workspace group
+    :return: Calibration table workspace and diagnostics workspace group
+    """
+
+    PDCalibration(InputWorkspace=wks_in,
+                  TofBinning=TofBinning,
+                  PreviousCalibrationTable=previous_calibration,
+                  PeakFunction=PeakFunction,
+                  PeakPositions=PeakPositions,
+                  PeakWindow=PeakWindow,
+                  PeakWidthPercent=PeakWidthPercent,
+                  OutputCalibrationTable='PDCalib',
+                  DiagnosticWorkspaces='diag')
+    PDCalibration(InputWorkspace=wks_in,
+                  TofBinning=[TofBinning[0], TofBinning[1]/2, TofBinning[2]],
+                  PreviousCalibrationTable='PDCalib',
+                  PeakFunction=PeakFunction,
+                  PeakPositions=PeakPositions,
+                  PeakWindow=PeakWindow,
+                  PeakWidthPercent=PeakWidthPercent/2.0,
+                  OutputCalibrationTable='PDCalib',
+                  DiagnosticWorkspaces='diag')
+    PDCalibration(InputWorkspace=wks_in,
+                  TofBinning=[TofBinning[0], TofBinning[1]/2, TofBinning[2]],
+                  PreviousCalibrationTable='PDCalib',
+                  PeakFunction=PeakFunction,
+                  PeakPositions=PeakPositions,
+                  PeakWindow=PeakWindow,
+                  PeakWidthPercent=PeakWidthPercent/2.0,
+                  OutputCalibrationTable=OutPDCalib,
+                  DiagnosticWorkspaces=OutPDCalibDiag)
+    DeleteWorkspace('PDCalib')
+    DeleteWorkspace('PDCalib_mask')
+    DeleteWorkspace('diag')
 
 
 def do_group_calibration(data_ws,
                          group_ws,
                          previous_calibration=None,
-                         mask=None,
                          output_basename="group_calibration",
                          cc_kwargs={},
                          pdcal_kwargs={}):
@@ -328,21 +403,21 @@ def do_group_calibration(data_ws,
     :return: The final diffcal after running cc_calibrate_groups and  pdcalibration_groups
     """
 
-    cc_diffcal = cc_calibrate_groups(data_ws,
-                                     group_ws,
-                                     output_basename,
-                                     previous_calibration,
-                                     **cc_kwargs)
+    cc_diffcal, to_skip = cc_calibrate_groups(data_ws,
+                                              group_ws,
+                                              output_basename,
+                                              previous_calibration,
+                                              **cc_kwargs)
 
-    diffcal, mask = pdcalibration_groups(data_ws,
-                                         group_ws,
-                                         cc_diffcal,
-                                         mask,
-                                         output_basename,
-                                         previous_calibration,
-                                         **pdcal_kwargs)
+    diffcal = pdcalibration_groups(data_ws,
+                                   group_ws,
+                                   cc_diffcal,
+                                   to_skip,
+                                   output_basename,
+                                   previous_calibration,
+                                   **pdcal_kwargs)
 
-    return diffcal, mask
+    return diffcal
 
 
 def process_json(json_filename):
@@ -401,7 +476,7 @@ def process_json(json_filename):
         ws = Load(filename)
 
     calfilename = f'{caldirectory}/{instrument}_{calibrant}_{date}_{sample_env}.h5'
-    logger.information(f'going to create calibration file: {calfilename}')
+    logger.notice(f'going to create calibration file: {calfilename}')
 
     groups = LoadDetectorsGroupingFile(groups, InputWorkspace=ws)
 
@@ -414,12 +489,12 @@ def process_json(json_filename):
                                            MakeGroupingWorkspace=False,
                                            MakeMaskWorkspace=False)
 
-    diffcal, mask = do_group_calibration(ws,
-                                         groups,
-                                         previous_calibration,
-                                         mask,
-                                         cc_kwargs=cc_kwargs,
-                                         pdcal_kwargs=pdcal_kwargs)
+    diffcal = do_group_calibration(ws,
+                                   groups,
+                                   previous_calibration,
+                                   cc_kwargs=cc_kwargs,
+                                   pdcal_kwargs=pdcal_kwargs)
+    mask = mtd['group_calibration_pd_diffcal_mask']
 
     CreateGroupingWorkspace(InputWorkspace=ws,
                             GroupDetectorsBy=out_groups_by,
