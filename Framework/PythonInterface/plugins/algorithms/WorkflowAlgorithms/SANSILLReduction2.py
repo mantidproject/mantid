@@ -746,11 +746,9 @@ class SANSILLReduction(PythonAlgorithm):
 
     def load(self):
         '''
-        Loads, merges and concatenates the input runs, as appropriate
-        This could load the instrument only with the first run, once v2 of the loader is in
-        However, it will make things more complicated
-        Besides, the injections of blanks (for scattering) and repeats (for transmissions) makes this already cluttered
-        TODO: Move this out to a separate algorithm, once v2 of the loader is in
+        Loads, merges and concatenates the input runs, as appropriate.
+        TODO: Consider moving this out to a separate algorithm, once v2 of the loader is in
+        There it could load the instrument only with the first run to save some time
         '''
         ws = self.getPropertyValue('OutputWorkspace')
         tmp = f'__{ws}'
@@ -800,9 +798,11 @@ class SANSILLReduction(PythonAlgorithm):
             self.preprocess(ws.name())
 
     def preprocess(self, ws):
-        '''Prepares the loaded workspace based on the acq mode'''
-        # TODO: all these must be done in v2 of the loader directly
-        # this should be removed once v2 of the loader is plugged in
+        '''
+        Prepares the loaded workspace based on the acq mode
+        TODO: all these must be done in v2 of the loader directly.
+        Hence, this should be removed once v2 of the loader is plugged in.
+        '''
         if self.mode != AcqMode.TOF:
             mtd[ws].getAxis(0).setUnit('Empty')
         if self.mode == AcqMode.MONO or self.mode == AcqMode.REVENT:
