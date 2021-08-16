@@ -23,7 +23,6 @@
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
-#include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/Statistics.h"
 #include "MantidMDAlgorithms/IntegrateQLabEvents.h"
 #include "MantidMDAlgorithms/MDTransfFactory.h"
@@ -244,10 +243,6 @@ void IntegrateEllipsoids::init() {
   declareProperty(
       "SatelliteBackgroundOuterSize", EMPTY_DBL(), mustBePositive,
       "Half-length of major axis for the outer ellipsoidal surface of background region of the satellite peak");
-  setPropertySettings("SatelliteBackgroundInnerSize",
-                      std::make_unique<EnabledWhenProperty>("ShareBackground", IS_EQUAL_TO, "0"));
-  setPropertySettings("SatelliteBackgroundOuterSize",
-                      std::make_unique<EnabledWhenProperty>("ShareBackground", IS_EQUAL_TO, "0"));
 }
 
 /**
@@ -470,13 +465,24 @@ void IntegrateEllipsoids::exec() {
       const auto braggHKL = peaks[*it].getIntHKL();
 
       // loop over all satellite peaks to determine if it belongs to this bragg
-      for (auto satIt = satellitePeaks.begin(); satIt != satellitePeaks.end(); satIt++) {
+      for (auto satIt = satellitePeaks.begin(); satIt != satellitePeaks.end();) {
         const auto satHKL = peaks[*satIt].getIntHKL();
         if (satHKL == braggHKL) {
           // this satellite peak shares the HKL vector, so it is a satellite peak of this bragg peak
           satellitePeakMap[*it].emplace_back(&peaks[*satIt]);
+
+          // remove this sat peak from the list, since it can be associated with only one bragg peak
+          satIt = satellitePeaks.erase(satIt);
+          continue;
         }
+        satIt++;
       }
+    }
+
+    // Any leftover satellite peaks in this list means these did not have a bragg peak
+    if (satellitePeaks.size() > 0) {
+      g_log.debug() << "Unable to find Bragg peaks for " << satellitePeaks.size()
+                    << " satellite peaks.. integrating these using the satellite background radii options.";
     }
   }
 
@@ -539,9 +545,22 @@ void IntegrateEllipsoids::exec() {
                                                             adaptiveBack_inner_radius, adaptiveBack_outer_radius,
                                                             axes_radii, inti, sigi, backi);
       } else {
-        // if sharing background, integrate with the background radii = peak radius so that background is 0
-        shape = integrator_satellite.ellipseIntegrateEvents(E1Vec, peak_q, specify_size, adaptiveRadius, adaptiveRadius,
-                                                            adaptiveRadius, axes_radii, inti, sigi, backi);
+        // check if this satellite peak did NOT have a bragg peak, then we want to integrate it normally
+        if (satellitePeaks.size() > 0 &&
+            std::find(satellitePeaks.begin(), satellitePeaks.end(), i) != satellitePeaks.end()) {
+          shape = integrator_satellite.ellipseIntegrateEvents(E1Vec, peak_q, specify_size, adaptiveRadius,
+                                                              adaptiveBack_inner_radius, adaptiveBack_outer_radius,
+                                                              axes_radii, inti, sigi, backi);
+        } else {
+          // force satellite background radii in containers to use bragg peak background values
+          SatelliteBackgroundInnerRadiusVector[i] = adaptiveQBackgroundMultiplier * lenQpeak + back_inner_radius;
+          SatelliteBackgroundOuterRadiusVector[i] = adaptiveQBackgroundMultiplier * lenQpeak + back_outer_radius;
+
+          // if sharing background, integrate with background radii = peak radius so that background is 0 for now
+          shape =
+              integrator_satellite.ellipseIntegrateEvents(E1Vec, peak_q, specify_size, adaptiveRadius, adaptiveRadius,
+                                                          adaptiveRadius, axes_radii, inti, sigi, backi);
+        }
       }
     } else {
       shape = integrator.ellipseIntegrateEvents(E1Vec, peak_q, specify_size, adaptiveRadius, adaptiveBack_inner_radius,
