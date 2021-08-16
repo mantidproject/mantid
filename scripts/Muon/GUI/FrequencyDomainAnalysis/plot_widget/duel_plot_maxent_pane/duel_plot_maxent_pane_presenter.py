@@ -48,12 +48,12 @@ class DuelPlotMaxentPanePresenter(BasePanePresenter):
         return self._model.get_workspace_list_and_indices_to_plot()
 
     def add_data_to_plots(self):
-        workspaces, indicies = self.handle_time_data_updated()
-        workspaces, indicies = self._model.add_reconstructed_data(workspaces, indicies)
+        workspaces, indices = self.handle_time_data_updated()
+        workspaces, indices = self._model.add_reconstructed_data(workspaces, indices)
         if self._maxent_ws_name:
             workspaces += [self._maxent_ws_name]
-            indicies += [0]
-        self.add_list_to_plot(workspaces, indicies, hold=False, autoscale=True)
+            indices += [0]
+        self.add_list_to_plot(workspaces, indices, hold=False, autoscale=True)
         # force the maxent plot to have sensible start values
         self._figure_presenter._options_presenter.set_selection_by_index(1)
         self._figure_presenter.set_plot_range([0,1000])

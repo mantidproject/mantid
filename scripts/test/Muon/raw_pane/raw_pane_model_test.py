@@ -18,19 +18,19 @@ class RawPaneModelTest(unittest.TestCase):
         self.model = RawPaneModel(self.context)
         self.name = self.model.name
 
-    def test_generate_run_indicies_3_runs(self):
+    def test_generate_run_indices_3_runs(self):
         self.model._max_spec = 4
         ws_list = [mock.Mock(), mock.Mock(),mock.Mock()]
         indices = [k for k in range(self.model._max_spec)]
         self.assertEqual(indices, self.model._generate_run_indices(ws_list, "1:4"))
 
-    def test_generate_run_indicies(self):
+    def test_generate_run_indices(self):
         self.model._max_spec = 12
         ws_list = [mock.Mock()]
         indices = [k for k in range(self.model._max_spec)]
         self.assertEqual(indices, self.model._generate_run_indices(ws_list, "1:12"))
 
-    def test_generate_run_indicies_from_other_detectors(self):
+    def test_generate_run_indices_from_other_detectors(self):
         self.model._max_spec = 4
         ws_list = [mock.Mock()]
         det = "5:8"

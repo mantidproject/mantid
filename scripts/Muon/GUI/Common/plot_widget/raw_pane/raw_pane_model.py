@@ -69,15 +69,15 @@ class RawPaneModel(BasePaneModel):
 
     def _generate_run_indices(self, workspace_list, detectors):
         lower, upper = self._get_first_and_last_detector_to_plot(detectors)
-        indicies = []
+        indices = []
         if upper == lower:
-            return indicies
+            return indices
         # workspace list repeats value multiple times
         # step size only fills in unique workspaces
         for k in range(0, len(workspace_list), upper-lower):
             for spec in range(lower, upper):
-                indicies += [spec]
-        return indicies
+                indices += [spec]
+        return indices
 
     def get_workspace_list_and_indices_to_plot(self, is_raw, plot_type, detectors:str, run):
         """
