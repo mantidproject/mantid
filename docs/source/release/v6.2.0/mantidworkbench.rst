@@ -39,5 +39,6 @@ Bugfixes
 - Fixed a bug where output workspaces of different types would interfere with successive calls to binary operations, such as multiply.
 - Fixed JSON serialization issue of MantidAxType by explicitly extracting its value
 - Fixed a bug in colorfill plots which lead to the loss of a spectrum from the resulting image.
+- Fixed a bug where removing the plot guess line in the fit browser could lead to an exception being thrown.
 
 :ref:`Release 6.2.0 <v6.2.0>`
