@@ -87,11 +87,11 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
     Reduces all the samples at all the distances together in the most optimal way.
     '''
     instrument = None # the name of the instrument [D11, D11B, D16, D22, D22B, D33]
-    mode = None # the acquisition mode Mono, Kinetic, TOF
     rank = None # the rank of the reduction, i.e. the number of (detector distance, wavelength) configurations
     lambda_rank = None # how many wavelengths are we dealing with, i.e. how many transmissions need to be calculated
-    n_samples = None # how many samples
-    n_frames = None # how many frames per sample in case of kinetic
+    n_samples = None # how many samples are being reduced
+    sample_transmissions = dict() # map of sample transmissions keyed on wavelength values
+    container_transmissions = dict() # map of container transmissions keyed on wavelength values
 
     def category(self):
         return 'ILL\\SANS;ILL\\Auto'
@@ -154,7 +154,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
                                  doc=f'Sample run(s) at the wavelength #{l+1}.')
             self.setPropertyGroup(p_name, 'Transmission Numors')
 
-        self.declareProperty(MultipleFileProperty(name='TrCadmiumRuns',
+        self.declareProperty(MultipleFileProperty(name='TrDarkCurrentRuns',
                                                   action=FileAction.OptionalLoad,
                                                   extensions=['nxs']),
                              doc='Absorber (Cd/B4C) run(s) for transmission calculation.')
@@ -170,7 +170,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
                                                   extensions=['nxs']),
                              doc='Empty beam run(s) for transmission calculation.')
 
-        self.setPropertyGroup('TrCadmiumRuns', 'Transmission Numors')
+        self.setPropertyGroup('TrDarkCurrentRuns', 'Transmission Numors')
         self.setPropertyGroup('ContainerTrRuns', 'Transmission Numors')
         self.setPropertyGroup('TrEmptyBeamRuns', 'Transmission Numors')
 
@@ -273,11 +273,12 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
     def _reset(self):
         '''Resets the class member variables'''
         self.instrument = None
-        self.mode = None
         self.rank = None
         self.lambda_rank = None
         self.n_samples = None
-        self.n_frames = None
+        self.properties = dict()
+        self.sample_transmissions = dict()
+        self.container_transmissions = dict()
 
     def _set_rank(self):
         '''Sets the actual rank of the reduction'''
@@ -317,15 +318,9 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         '''Performs a full setup, which can be done only after having loaded the sample data'''
         self._setup_light()
         self.instrument = ws.getInstrument().getName()
-        self.log().notice(f'Set the instrument name to {self.instrument}')
         unit = ws.getAxis(0).getUnit().unitID()
-        self.n_frames = ws.blocksize()
-        self.log().notice(f'Set the number of frames to {self.n_frames}')
         if unit == 'Wavelength':
-            self.mode = AcqMode.TOF
-        else:
-            self.mode = AcqMode.MONO
-        self.log().notice(f'Set the acquisition mode to {self.mode}')
+            raise RuntimeError('TOF is not yet supported in the new workflow, please use the old one.')
 
     def _check_sample_runs_dimensions(self):
         '''Makes sure all the sample inputs have matching extents'''
@@ -362,7 +357,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
     def _check_aux_tr_input_dimensions(self):
         '''Checks if the provided correction inputs have the right lambda rank'''
         issues = dict()
-        props_to_match_lambda_rank = ['TrCadmiumRuns', 'ContainerTrRuns', 'TrEmptyBeamRuns']
+        props_to_match_lambda_rank = ['TrDarkCurrentRuns', 'ContainerTrRuns', 'TrEmptyBeamRuns']
         for prop in props_to_match_lambda_rank:
             if self.getPropertyValue(prop):
                 prop_rank = self.getPropertyValue(prop).count(',') + 1
@@ -458,18 +453,90 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
     def process_all_transmissions_at_lambda(self, l):
         '''
         Calculates transmissions at the given lambda index
-        Note, there must be no loop beyond this point in stack
         '''
-        pass
+        tr_dark_current_ws = self.process_tr_dark_current(l)
+        [tr_empty_beam_ws, tr_empty_beam_flux] = self.process_tr_empty_beam(l, tr_dark_current_ws)
+        tr_empty_can_ws = self.process_empty_can_tr(l, tr_dark_current_ws, tr_empty_beam_ws, tr_empty_beam_flux)
+        tr_sample_ws = self.process_sample_tr(l, tr_dark_current_ws, tr_empty_beam_ws, tr_empty_beam_flux)
+        if tr_empty_can_ws:
+            w = mtd[tr_empty_can_ws].getRun()['wavelength'].value
+            self.container_transmissions[str(round(w, 2))] = tr_empty_can_ws
+        if tr_sample_ws:
+            w = mtd[tr_sample_ws].getRun()['wavelength'].value
+            self.sample_transmissions[str(round(w,2))] = tr_sample_ws
+
+    def process_tr_dark_current(self, l):
+        runs = self.getPropertyValue('TrDarkCurrentRuns')
+        if runs:
+            tr_dark_current = runs.split(',')[l]
+            [process_tr_dark_current, tr_dark_current_ws] = needs_processing(tr_dark_current, 'DarkCurrent')
+            if process_tr_dark_current:
+                SANSILLReduction(Runs=tr_dark_current,
+                                 ProcessAs='DarkCurrent',
+                                 NormaliseBy=self.getProperty('NormaliseBy').value,
+                                 OutputWorkspace=tr_dark_current_ws)
+            return tr_dark_current_ws
+        else:
+            return ''
+
+    def process_tr_empty_beam(self, l, tr_dark_current_ws):
+        runs = self.getPropertyValue('TrEmptyBeamRuns')
+        if runs:
+            tr_empty_beam = runs.split(',')[l]
+            [process_tr_empty_beam, tr_empty_beam_ws] = needs_processing(tr_empty_beam, 'EmptyBeam')
+            tr_empty_beam_flux = tr_empty_beam_ws + 'Flux'
+            if process_tr_empty_beam:
+                SANSILLReduction(Runs=tr_empty_beam,
+                                 ProcessAs='EmptyBeam',
+                                 DarkCurrentWorkspace=tr_dark_current_ws,
+                                 NormaliseBy=self.getProperty('NormaliseBy').value,
+                                 TrBeamRadius=self.getProperty('TrBeamRadius').value[l],
+                                 OutputWorkspace=tr_empty_beam_ws,
+                                 OutputFluxWorkspace=tr_empty_beam_flux)
+            return [tr_empty_beam_ws, tr_empty_beam_flux]
+        else:
+            return ['','']
+
+    def process_empty_can_tr(self, l, tr_dark_current_ws, tr_empty_beam_ws, tr_empty_beam_flux):
+        runs = self.getPropertyValue('ContainerTrRuns')
+        if runs:
+            tr_empty_can = runs.split(',')[l]
+            [process_tr_empty_can, tr_empty_can_ws] = needs_processing(tr_empty_can, 'Transmission')
+            if process_tr_empty_can:
+                SANSILLReduction(Runs=tr_empty_can,
+                                 ProcessAs='Transmission',
+                                 DarkCurrentWorkspace=tr_dark_current_ws,
+                                 EmptyBeamWorkspace=tr_empty_beam_ws,
+                                 FluxWorkspace=tr_empty_beam_flux,
+                                 NormaliseBy=self.getProperty('NormaliseBy').value,
+                                 TrBeamRadius=self.getProperty('TrBeamRadius').value[l],
+                                 OutputWorkspace=tr_empty_can_ws)
+            return tr_empty_can_ws
+        else:
+            return ''
+
+    def process_sample_tr(self, l, tr_dark_current_ws, tr_empty_beam_ws, tr_empty_beam_flux):
+        tr_sample = self.getPropertyValue(f'SampleTrRunsW{l+1}')
+        if tr_sample:
+            [_, tr_sample_ws] = needs_processing(tr_sample, 'Transmission')
+            SANSILLReduction(Runs=tr_sample,
+                             ProcessAs='Transmission',
+                             DarkCurrentWorkspace=tr_dark_current_ws,
+                             EmptyBeamWorkspace=tr_empty_beam_ws,
+                             FluxWorkspace=tr_empty_beam_flux,
+                             NormaliseBy=self.getProperty('NormaliseBy').value,
+                             TrBeamRadius=self.getProperty('TrBeamRadius').value[l],
+                             OutputWorkspace=tr_sample_ws)
+            return tr_sample_ws
+        else:
+            return ''
 
     def process_all_samples_at_distance(self, d):
         '''
         Reduces all the samples at a given distance
         Note, there must be no loop beyond this point in stack
         '''
-        out_name = self.getPropertyValue('OutputWorkspace')
-        self.load_and_concatenate_monochromatic(f'SampleRunsD{d+1}', out_name)
-        self.setProperty('OutputWorkspace', mtd[out_name])
+        pass
 
     def finalize(self):
         pass
