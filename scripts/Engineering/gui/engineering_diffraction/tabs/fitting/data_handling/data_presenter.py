@@ -303,6 +303,11 @@ class TwoWayRowDict(dict):
     Two way dictionary used to map rows to workspaces and vice versa.
     """
 
+    def pop(self, key):
+        value = self[key]
+        self.__delitem__(key)
+        return value
+
     def __setitem__(self, key, value):
         if key in self:
             del self[key]
@@ -315,10 +320,8 @@ class TwoWayRowDict(dict):
         dict.__delitem__(self, self[key])
         dict.__delitem__(self, key)
 
-    def pop(self, key):
-        value = self[key]
-        self.__delitem__(key)
-        return value
+    def __bool__(self):
+        return bool(self.keys())
 
     def __len__(self):
         return dict.__len__(self) / 2
