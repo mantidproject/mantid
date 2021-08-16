@@ -1282,15 +1282,15 @@ class CrystalFieldFit(object):
         else:
             return self._fit_single()
 
-    def fit_sp(self, Solver='Powell'):
+    def fit_sp(self, Solver='Powell', Options=None):
         """
         Run scipy.optimize.minimize algorithm for CEF parameters only. Update function parameters.
         """
         self.check_consistency()
         if isinstance(self._input_workspace, list):
-            return self._fit_multi_sp(Solver)
+            return self._fit_multi_sp(Solver, Options)
         else:
-            return self._fit_single_sp(Solver)
+            return self._fit_single_sp(Solver, Options)
 
     def monte_carlo(self, **kwargs):
         fix_all_peaks = self.model.FixAllPeaks
@@ -1301,7 +1301,7 @@ class CrystalFieldFit(object):
             self._monte_carlo_single(**kwargs)
         self.model.FixAllPeaks = fix_all_peaks
 
-    def two_step_fit(self, OverwriteMaxIterations=None, OverwriteMinimizers=None, Iterations=20):
+    def two_step_fit(self, OverwriteMaxIterations=None, OverwriteMinimizers=None, Options=None):
         fix_all_peaks = self.model.FixAllPeaks
         fit_properties = self._fit_properties
         self._overwrite_maxiterations = OverwriteMaxIterations
@@ -1310,7 +1310,10 @@ class CrystalFieldFit(object):
         self._overwrite_minimizer = OverwriteMinimizers
         if self._overwrite_minimizer is not None and len(self._overwrite_minimizer) != 2:
             raise RuntimeError('You must provide two values for overwriting Minimizers')
-        self._iterations = Iterations
+        if OverwriteMaxIterations is not None:
+            self._iterations = OverwriteMaxIterations[0]
+        else:
+            self._iterations = 50
         self.check_consistency()
         from CrystalField.CrystalFieldMultiSite import CrystalFieldMultiSite
         # Store free CEF parameters
@@ -1325,17 +1328,15 @@ class CrystalFieldFit(object):
             parName = fun.getParamName(par_id)
             if parName in CrystalField.field_parameter_names or parName == "IntensityScaling":
                 self._free_cef_parameters.append(par_id)
-        self._two_step_fit()
+        self._two_step_fit(Options)
         self.model.FixAllPeaks = fix_all_peaks
         self._fit_properties = fit_properties
 
-    def _two_step_fit(self):
+    def _two_step_fit(self, opt):
         iter = 0
         while iter < self._iterations:
             # Fit CEF parameters only
-            self.model.FixAllPeaks = True
-            self.overwrite_fit_properties(0)
-            self.fit_sp('SLSQP')
+            self.fit_sp(self._overwrite_minimizer[0], opt)
             self._function = self.model.function
             # Fit peaks only
             for parameter in self._free_cef_parameters:
@@ -1486,7 +1487,7 @@ class CrystalFieldFit(object):
         self.model.update(function)
         self.model.chi2 = alg.getProperty('OutputChi2overDoF').value
 
-    def _fit_single_sp(self, solver):
+    def _fit_single_sp(self, solver, opt):
         """
         Fit with scipy.optimize.minimize when the model has a single spectrum.
         """
@@ -1501,32 +1502,24 @@ class CrystalFieldFit(object):
         x0 = []
         cef_positions = []
         fun.setAttributeValue('FixAllPeaks', True)
-        for par_id in range(fun.nParams()):
+        for par_id in [id for id in range(fun.nParams()) if not fun.isFixed(id)]:
             parName = fun.getParamName(par_id)
             if parName in CrystalField.field_parameter_names or parName == "IntensityScaling":
-                if not fun.isFixed(par_id):
-                    x0.append(fun.getParameterValue(par_id))
-                    cef_positions.append(par_id)
-        res = sp.minimize(self._evaluate_cf, x0, args=(fun, cef_positions), method=solver, options={'disp': False, 'maxiter': 25})
+                x0.append(fun.getParameterValue(par_id))
+                cef_positions.append(par_id)
+        if opt is None:
+            opt = {'disp': False}
+        res = sp.minimize(self._evaluate_cf, x0, args=(fun, cef_positions), method=solver, options=opt)
         if res.success:
             for pos in range(len(cef_positions)):
                 fun.setParameter(cef_positions[pos], res.x[pos])
             self.model.update(fun)
 
     def _evaluate_cf(self, x0, fun, cef_pos):
-        from mantid.simpleapi import EvaluateFunction#, CalculateChiSquared
-        #from mantid.api import mtd
+        from mantid.simpleapi import CalculateChiSquared
         for pos in range(len(cef_pos)):
             fun.setParameter(cef_pos[pos], x0[pos])
-        res = []
-        chi2 = 0.0
-        EvaluateFunction(fun, self._input_workspace, OutputWorkspace='eval')
-        for pos in range(len(cef_pos)):
-            res.append(fun.getParameterValue(cef_pos[pos]))
-        for index in range(min(len(x0),len(res))):
-            chi2 += (res[index] - x0[index])**2
-        #chi2 = CalculateChiSquared(fun, InputWorkspace=self._input_workspace, Inputworkspace_1=mtd['eval'])[1]
-        return chi2
+        return CalculateChiSquared(str(fun), self._input_workspace)[1]
 
     def _fit_multi(self):
         """
@@ -1553,7 +1546,7 @@ class CrystalFieldFit(object):
         self.model.update(function)
         self.model.chi2 = alg.getProperty('OutputChi2overDoF').value
 
-    def _fit_multi_sp(self, solver):
+    def _fit_multi_sp(self, solver, opt):
         """
         Fit with scipy.optimize.minimize when the model has multiple spectra.
         """
