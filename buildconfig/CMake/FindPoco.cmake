@@ -19,7 +19,7 @@ find_library ( POCO_LIB_NET_DEBUG NAMES PocoNetd )
 find_library ( POCO_LIB_CRYPTO_DEBUG NAMES PocoCryptod )
 find_library ( POCO_LIB_NETSSL_DEBUG NAMES PocoNetSSLd )
 
-function( add_poco_lib POCO_LIB_MODULE POCO_DEBUG_LIB_MODULE )
+function( add_poco_lib POCO_COMPONENT POCO_LIB_MODULE POCO_DEBUG_LIB_MODULE )
   # Add poco library to list and also the corresponding debug library if it is available
 
   if ( EXISTS "${POCO_DEBUG_LIB_MODULE}" AND NOT ${CONDA_BUILD})
@@ -31,14 +31,28 @@ function( add_poco_lib POCO_LIB_MODULE POCO_DEBUG_LIB_MODULE )
     set ( POCO_LIBRARIES ${POCO_LIBRARIES} ${POCO_LIB_MODULE} PARENT_SCOPE)
   endif()
 
+  if(NOT TARGET Poco::${POCO_COMPONENT})
+  add_library(Poco::${POCO_COMPONENT} UNKNOWN IMPORTED)
+  set_target_properties(Poco::${POCO_COMPONENT} PROPERTIES
+  INTERFACE_INCLUDE_DIRECTORIES ${POCO_INCLUDE_DIR}
+  IMPORTED_LOCATION ${POCO_LIB_MODULE}
+  )
+  if ( EXISTS "${POCO_DEBUG_LIB_MODULE}" AND NOT ${CONDA_BUILD})
+  set_target_properties(Poco::${POCO_COMPONENT} PROPERTIES
+  IMPORTED_LOCATION_DEBUG ${POCO_DEBUG_LIB_MODULE}
+  )
+  endif()
+
+  endif()
+
 endfunction( add_poco_lib )
 
-add_poco_lib( ${POCO_LIB_FOUNDATION} ${POCO_LIB_FOUNDATION_DEBUG} )
-add_poco_lib( ${POCO_LIB_UTIL} ${POCO_LIB_UTIL_DEBUG} )
-add_poco_lib( ${POCO_LIB_XML} ${POCO_LIB_XML_DEBUG} )
-add_poco_lib( ${POCO_LIB_NET} ${POCO_LIB_NET_DEBUG} )
-add_poco_lib( ${POCO_LIB_CRYPTO} ${POCO_LIB_CRYPTO_DEBUG} )
-add_poco_lib( ${POCO_LIB_NETSSL} ${POCO_LIB_NETSSL_DEBUG} )
+add_poco_lib( Foundation ${POCO_LIB_FOUNDATION} ${POCO_LIB_FOUNDATION_DEBUG} )
+add_poco_lib( Util ${POCO_LIB_UTIL} ${POCO_LIB_UTIL_DEBUG} )
+add_poco_lib( XML ${POCO_LIB_XML} ${POCO_LIB_XML_DEBUG} )
+add_poco_lib( Net ${POCO_LIB_NET} ${POCO_LIB_NET_DEBUG} )
+add_poco_lib( Crypto ${POCO_LIB_CRYPTO} ${POCO_LIB_CRYPTO_DEBUG} )
+add_poco_lib( NetSSL ${POCO_LIB_NETSSL} ${POCO_LIB_NETSSL_DEBUG} )
 
 # Set a version string by examining either the Poco/Version.h header or
 # the Poco/Foundation.h header if Version.h does not exist

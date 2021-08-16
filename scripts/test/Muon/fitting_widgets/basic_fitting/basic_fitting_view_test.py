@@ -28,6 +28,7 @@ class BasicFittingViewTest(unittest.TestCase, QtWidgetFinder):
         FrameworkManager.Instance()
 
     def setUp(self):
+        self.dataset_names = ["MUSR62260; Group; fwd; Asymmetry; MA", "MUSR62260; Group; bwd; Asymmetry; MA"]
         self.view = BasicFittingView()
         self.view.show()
         self.assert_widget_created()
@@ -40,7 +41,17 @@ class BasicFittingViewTest(unittest.TestCase, QtWidgetFinder):
         self.view.plot_guess = True
         self.assertTrue(self.view.plot_guess)
 
+    def test_that_enable_view_does_not_enable_the_tab_if_there_are_no_datasets_loaded(self):
+        self.view.enable_view()
+        self.assertTrue(not self.view.isEnabled())
+
+    def test_that_enable_view_does_enable_the_tab_if_there_are_datasets_loaded(self):
+        self.view.update_dataset_name_combo_box(self.dataset_names)
+        self.view.enable_view()
+        self.assertTrue(self.view.isEnabled())
+
     def test_that_the_undo_fit_button_can_be_enabled_as_expected_when_the_number_of_undos_is_above_zero(self):
+        self.view.update_dataset_name_combo_box(self.dataset_names)
         self.view.enable_view()
         self.view.set_number_of_undos(2)
         self.assertTrue(self.view.fit_controls.undo_fit_button.isEnabled())

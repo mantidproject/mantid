@@ -13,7 +13,7 @@ from mantidqt.utils.qt import import_qt
 from mantidqt.utils.observer_pattern import GenericObservable
 from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowser
 from mantid.api import AnalysisDataService as ADS
-from Engineering.common import path_handling
+from Engineering.gui.engineering_diffraction.tabs.common import output_settings
 from Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 
 BaseBrowser = import_qt('.._common', 'mantidqt.widgets', 'FitPropertyBrowser')
@@ -28,7 +28,7 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
     def __init__(self, canvas, toolbar_manager, parent=None):
         super(EngDiffFitPropertyBrowser, self).__init__(canvas, toolbar_manager, parent)
         # overwrite default peak with that in settings (gets init when UI opened)
-        default_peak = get_setting(path_handling.INTERFACES_SETTINGS_GROUP, path_handling.ENGINEERING_PREFIX,
+        default_peak = get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX,
                                    "default_peak")
         self.setDefaultPeakType(default_peak)  # this will also update peak func in config settings
         self.fit_notifier = GenericObservable()

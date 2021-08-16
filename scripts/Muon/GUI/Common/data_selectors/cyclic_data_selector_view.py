@@ -30,6 +30,11 @@ class CyclicDataSelectorView(ui_form, base_widget):
         """Connect the slot for the combo box being changed."""
         self.dataset_name_combo_box.currentIndexChanged.connect(slot)
 
+    def setEnabled(self, state):
+        self.dataset_name_combo_box.setEnabled(state)
+        self.increment_parameter_display_button.setEnabled(state)
+        self.decrement_parameter_display_button.setEnabled(state)
+
     @property
     def dataset_names(self) -> list:
         """Returns a list of dataset names currently in the combobox."""

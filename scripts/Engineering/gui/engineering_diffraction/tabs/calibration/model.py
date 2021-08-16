@@ -12,7 +12,7 @@ from mantid.simpleapi import PDCalibration, DeleteWorkspace, CloneWorkspace, Dif
     CreateEmptyTableWorkspace, NormaliseByCurrent, ConvertUnits, Load, SaveNexus, ApplyDiffCal
 import Engineering.EnggUtils as EnggUtils
 from Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting, set_setting
-from Engineering.gui.engineering_diffraction.tabs.common import vanadium_corrections
+from Engineering.gui.engineering_diffraction.tabs.common import vanadium_corrections, output_settings
 from Engineering.common import path_handling
 
 CALIB_PARAMS_WORKSPACE_NAME = "engggui_calibration_banks_parameters"
@@ -45,8 +45,8 @@ class CalibrationModel(object):
         # vanadium corrections workspaces not used at this stage, but ensure they exist and create if not
         vanadium_corrections.fetch_correction_workspaces(vanadium_path, instrument, rb_num=rb_num)
         ceria_workspace = path_handling.load_workspace(ceria_path)
-        full_calib_path = get_setting(path_handling.INTERFACES_SETTINGS_GROUP,
-                                      path_handling.ENGINEERING_PREFIX, "full_calibration")
+        full_calib_path = get_setting(output_settings.INTERFACES_SETTINGS_GROUP,
+                                      output_settings.ENGINEERING_PREFIX, "full_calibration")
         try:
             full_calib = Load(full_calib_path, OutputWorkspace="full_inst_calib")
         except ValueError:
@@ -85,7 +85,7 @@ class CalibrationModel(object):
             params_table.append([i, difc[i], difa[i], tzero[i]])
         self.update_calibration_params_table(params_table)
 
-        calib_dir = path.join(path_handling.get_output_path(), "Calibration", "")
+        calib_dir = path.join(output_settings.get_output_path(), "Calibration", "")
         if calfile:
             EnggUtils.save_grouping_workspace(grp_ws, calib_dir, ceria_path, vanadium_path, instrument, calfile=calfile)
         elif spectrum_numbers:
@@ -94,7 +94,7 @@ class CalibrationModel(object):
         self.create_output_files(calib_dir, difa, difc, tzero, bk2bk_params, ceria_path, vanadium_path, instrument,
                                  bank, spectrum_numbers, calfile)
         if rb_num:
-            user_calib_dir = path.join(path_handling.get_output_path(), "User", rb_num,
+            user_calib_dir = path.join(output_settings.get_output_path(), "User", rb_num,
                                        "Calibration", "")
             self.create_output_files(user_calib_dir, difa, difc, tzero, bk2bk_params, ceria_path, vanadium_path,
                                      instrument, bank, spectrum_numbers, calfile)
@@ -107,7 +107,7 @@ class CalibrationModel(object):
         SouthBank = ws_inst.getComponentByName("SouthBank")
         params_north = []
         params_south = []
-        for param_name in ["alpha", "beta_0", "beta_1", "sigma_0_sq", "sigma_1_sq", "sigma_2_sq"]:
+        for param_name in ["alpha_0", "beta_0", "beta_1", "sigma_0_sq", "sigma_1_sq", "sigma_2_sq"]:
             params_north += [NorthBank.getNumberParameter(param_name)[0]]
             params_south += [SouthBank.getNumberParameter(param_name)[0]]
 
@@ -272,7 +272,7 @@ class CalibrationModel(object):
                                                                               bank=bank_name)
             EnggUtils.write_ENGINX_GSAS_iparam_file(file_path, difa_list, difc_list, tzero_list, bk2bk_params,
                                                     **kwargs_to_pass)
-            set_setting(path_handling.INTERFACES_SETTINGS_GROUP, path_handling.ENGINEERING_PREFIX,
+            set_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX,
                         "last_calibration_path", file_path)
 
         def save_pdcal_output_file(ws_name_suffix, bank_name):
@@ -314,7 +314,7 @@ class CalibrationModel(object):
     @staticmethod
     def get_info_from_file(file_path):
         # TODO: Find a way to reliably get the instrument from the file without using the filename.
-        instrument = file_path.split("/")[-1].split("_", 1)[0]
+        instrument = path.split(file_path)[-1].split("_", 1)[0]
         # Get run numbers from file.
         run_numbers = ""
         params_table = []

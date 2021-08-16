@@ -21,11 +21,13 @@ import matplotlib.pyplot as plt
 # local imports
 # register mantid projection
 from mantid.api import AnalysisDataService, WorkspaceFactory, WorkspaceGroup
-from mantid.simpleapi import CreateMDHistoWorkspace, CloneWorkspace, GroupWorkspaces
+from mantid.simpleapi import CreateMDHistoWorkspace, CloneWorkspace, GroupWorkspaces, \
+                             CreateSampleWorkspace
 from mantid.kernel import config
 from mantid.plots import MantidAxes
 from mantid.plots.plotfunctions import (figure_title, manage_workspace_names,
                                         plot, plot_md_histo_ws)
+from mantid.plots.utility import MantidAxType
 
 
 PLOT_OPTIONS = {"plots.ShowMinorTicks": "off", "plots.ShowMinorGridlines": "off",
@@ -266,6 +268,25 @@ class FunctionsTest(unittest.TestCase):
         ax = plt.gca()
         self.assertEqual(len(ax.lines), 2, msg=f'With overplot on an existing fig, there shall be 2 lines,'
                                                f'but not {len(ax.lines)} lines.')
+
+    def test_superplot_bin_plot(self):
+        fig = plt.gcf()
+        fig.canvas.manager = mock.Mock()
+        ws = CreateSampleWorkspace()
+        plot([ws], wksp_indices=[], superplot=True, fig=fig,
+             plot_kwargs={"axis": MantidAxType.BIN})
+        fig.canvas.manager.superplot.set_workspaces.assert_called_once()
+        fig.canvas.manager.superplot.set_bin_mode.assert_called_once_with(True)
+        fig.canvas.manager.reset_mock()
+        plot([ws], wksp_indices=[], superplot=True, fig=fig,
+             plot_kwargs={"axis": MantidAxType.SPECTRUM})
+        fig.canvas.manager.superplot.set_workspaces.assert_called_once()
+        fig.canvas.manager.superplot.set_bin_mode.assert_called_once_with(False)
+        fig.canvas.manager.reset_mock()
+        plot([ws], wksp_indices=[], superplot=True, fig=fig,
+             plot_kwargs={})
+        fig.canvas.manager.superplot.set_workspaces.assert_called_once()
+        fig.canvas.manager.superplot.set_bin_mode.assert_called_once_with(False)
 
     # ------------- Failure tests -------------
     def test_that_manage_workspace_names_raises_on_mix_of_workspaces_and_names(self):

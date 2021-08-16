@@ -20,9 +20,8 @@ if(CXXTEST_FOUND)
 
   cxxtest_add_test(LiveDataTest ${TEST_FILES})
   target_link_libraries(LiveDataTest
-                        LINK_PRIVATE
-                        ${MANTIDLIBS}
-                        LiveData
+                        PRIVATE
+                        Mantid::LiveData
                         gmock)
   target_include_directories(LiveDataTest PRIVATE ../src/)
   add_dependencies(LiveDataTest DataHandling Algorithms MDAlgorithms)

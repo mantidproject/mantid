@@ -77,7 +77,7 @@ private:
                               Kernel::V3D sourcePos, Kernel::PseudoRandomNumberGenerator &rng);
   Geometry::Track generateInitialTrack(const Geometry::IObject &shape,
                                        std::shared_ptr<const Geometry::ReferenceFrame> frame,
-                                       const Kernel::V3D sourcePos, Kernel::PseudoRandomNumberGenerator &rng);
+                                       const Kernel::V3D &sourcePos, Kernel::PseudoRandomNumberGenerator &rng);
   void inc_xyz(Geometry::Track &track, double vl);
   void updateWeightAndPosition(Geometry::Track &track, double &weight, const double vmfp, const double sigma_total,
                                Kernel::PseudoRandomNumberGenerator &rng);

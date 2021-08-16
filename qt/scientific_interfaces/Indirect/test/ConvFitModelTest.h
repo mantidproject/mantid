@@ -10,23 +10,19 @@
 
 #include "ConvFitModel.h"
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/MultiDomainFunction.h"
-#include "MantidCurveFitting/Algorithms/ConvolutionFit.h"
-#include "MantidCurveFitting/Algorithms/QENSFitSequential.h"
 #include "MantidTestHelpers/IndirectFitDataCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::IndirectFitDataCreationHelper;
 using namespace MantidQt::CustomInterfaces::IDA;
 using namespace MantidQt::MantidWidgets;
-
-using ConvolutionFitSequential =
-    Mantid::CurveFitting::Algorithms::ConvolutionFit<Mantid::CurveFitting::Algorithms::QENSFitSequential>;
 
 namespace {
 
@@ -52,7 +48,7 @@ void setFittingFunction(std::unique_ptr<ConvFitModel> &model, std::string const 
 }
 
 IAlgorithm_sptr setupFitAlgorithm(const MatrixWorkspace_sptr &workspace, std::string const &functionString) {
-  auto alg = std::make_shared<ConvolutionFitSequential>();
+  auto alg = AlgorithmManager::Instance().create("ConvolutionFitSequential");
   alg->initialize();
   alg->setProperty("InputWorkspace", workspace);
   alg->setProperty("Function", functionString);

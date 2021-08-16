@@ -139,6 +139,12 @@ endif()
 enable_precompiled_headers(inc/MantidSINQ/PrecompiledHeader.h SRC_FILES)
 # Add the target for this directory
 add_library(SINQ ${SRC_FILES} ${INC_FILES})
+add_library(Mantid::SINQ ALIAS SINQ)
+
+target_include_directories(SINQ PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+		$<INSTALL_INTERFACE:include/Mantid>
+)
 # Set the name of the generated library
 set_target_properties(SINQ
                       PROPERTIES OUTPUT_NAME
@@ -164,19 +170,19 @@ if(WIN32)
   set(WINSOCK ws2_32)
 endif()
 
-target_include_directories (SINQ SYSTEM PUBLIC ${Boost_INCLUDE_DIRS})
-target_link_libraries(SINQ
-                      LINK_PRIVATE
-                      ${MANTIDLIBS}
-                      ${NEXUS_LIBRARIES}
-                      ${WINSOCK})
+target_link_libraries(SINQ PUBLIC Mantid::Kernel Mantid::Geometry Mantid::API Mantid::DataObjects ${WINSOCK})
 
 # Add the unit tests directory
 add_subdirectory(test)
 
 # Installation settings
+if (CONDA_BUILD)
+mtd_install_framework_lib(TARGETS SINQ PLUGIN_LIB)
+else()
 mtd_install_targets(TARGETS
                     SINQ
                     INSTALL_DIRS
                     ${PLUGINS_DIR}
                     ${WORKBENCH_PLUGINS_DIR})
+endif()
+

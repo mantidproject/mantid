@@ -108,8 +108,6 @@ build/
 Framework/Kernel/inc/MantidKernel/GitHubApiHelper.h
 qt/python/mantidqt/resources.py
 qt/applications/workbench/workbench/app/resources.py
-qt/applications/workbench/setup.py
-qt/python/setup.py
 
 # Visual C++ cache files
 ipch/
@@ -170,8 +168,9 @@ Thumbs.db
 # Folder config file
 Desktop.ini
 
-# PyCharm IDE
+# CLion and PyCharm IDE
 .idea/
+cmake-build-*/
 
 # VSCode
 .vscode/
@@ -197,3 +196,7 @@ rel/
 
 # NFS files
 *.nfs*
+
+# in source installed conda
+mambaforge/
+miniconda3/

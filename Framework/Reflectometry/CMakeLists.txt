@@ -85,6 +85,13 @@ endif()
 enable_precompiled_headers (inc/MantidReflectometry/PrecompiledHeader.h SRC_FILES )
 # Add the target for this directory
 add_library(Reflectometry ${SRC_FILES} ${INC_FILES})
+add_library(Mantid::Reflectometry ALIAS Reflectometry)
+
+target_include_directories(Reflectometry PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+		$<INSTALL_INTERFACE:include/Mantid>
+)
+
 # Set the name of the generated library
 set_target_properties(Reflectometry
                       PROPERTIES OUTPUT_NAME
@@ -103,25 +110,26 @@ endif()
 # Add to the 'Framework' group in VS
 set_property(TARGET Reflectometry PROPERTY FOLDER "MantidFramework")
 
-# Auto-generate exports header
-generate_mantid_export_header(Reflectometry FALSE)
-
-target_include_directories(Reflectometry PUBLIC
-  ${CMAKE_BINARY_DIR}/Framework/Reflectometry)
-
-include_directories(inc)
-
-target_link_libraries(Reflectometry
-                      LINK_PRIVATE
-                      ${MANTIDLIBS}
-                      ${GSL_LIBRARIES})
+target_link_libraries(Reflectometry PUBLIC Mantid::Kernel Mantid::API Mantid::Geometry Mantid::DataObjects PRIVATE Mantid::Indexing Mantid::HistogramData)
 
 # Add the unit tests directory
 add_subdirectory(test)
 
+# Auto-generate exports header
+target_include_directories(Reflectometry PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/Reflectometry>
+  $<INSTALL_INTERFACE:include/Mantid>
+)
+generate_mantid_export_header(Reflectometry FALSE)
+
 # Installation settings
+if (CONDA_BUILD)
+mtd_install_framework_lib(TARGETS Reflectometry PLUGIN_LIB)
+else()
 mtd_install_targets(TARGETS
                     Reflectometry
                     INSTALL_DIRS
                     ${PLUGINS_DIR}
                     ${WORKBENCH_PLUGINS_DIR})
+endif()
+

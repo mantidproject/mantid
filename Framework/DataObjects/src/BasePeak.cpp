@@ -324,6 +324,7 @@ BasePeak &BasePeak::operator=(const BasePeak &other) {
     m_InverseGoniometerMatrix = other.m_InverseGoniometerMatrix;
     m_runNumber = other.m_runNumber;
     m_monitorCount = other.m_monitorCount;
+    m_peakNumber = other.m_peakNumber;
     m_intHKL = other.m_intHKL;
     m_intMNP = other.m_intMNP;
     m_peakShape.reset(other.m_peakShape->clone());

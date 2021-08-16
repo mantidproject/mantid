@@ -11,6 +11,7 @@ from Muon.GUI.Common.corrections_tab_widget.corrections_model import Corrections
 from Muon.GUI.Common.corrections_tab_widget.corrections_presenter import CorrectionsPresenter
 from Muon.GUI.Common.corrections_tab_widget.corrections_view import CorrectionsView
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
+from Muon.GUI.Common.thread_model import ThreadModel
 
 
 class CorrectionsPresenterTest(unittest.TestCase):
@@ -18,6 +19,7 @@ class CorrectionsPresenterTest(unittest.TestCase):
     def setUp(self):
         self.current_run_string = "84447"
         self.run_strings = ["84447", "84448", "84449"]
+        self.groups = ["fwd", "bwd", "bottom", "top"]
 
         self._setup_mock_view()
         self._setup_mock_model()
@@ -96,14 +98,40 @@ class CorrectionsPresenterTest(unittest.TestCase):
         self.presenter.dead_time_presenter.handle_run_selector_changed.assert_called_once_with()
         self.presenter.background_presenter.handle_run_selector_changed.assert_called_once_with()
 
-    def test_that_handle_pre_process_and_grouping_complete_will_update_the_dead_time_label_in_the_view(self):
-        self.presenter.handle_pre_process_and_grouping_complete()
-        self.presenter.dead_time_presenter.handle_pre_process_and_grouping_complete.assert_called_once_with()
-        self.presenter.background_presenter.handle_pre_process_and_grouping_complete.assert_called_once_with()
+    def test_that_handle_pre_process_and_counts_calculated_will_update_the_dead_time_label_in_the_view(self):
+        self.presenter.handle_pre_process_and_counts_calculated()
+        self.presenter.dead_time_presenter.handle_pre_process_and_counts_calculated.assert_called_once_with()
+        self.presenter.background_presenter.handle_pre_process_and_counts_calculated.assert_called_once_with()
 
     def test_that_handle_groups_changed_will_notify_the_background_corrections_presenter(self):
         self.presenter.handle_groups_changed()
         self.presenter.background_presenter.handle_groups_changed.assert_called_once_with()
+
+    def test_that_handle_thread_calculation_started_notifies_to_disable_editing(self):
+        self.presenter.handle_thread_calculation_started()
+        self.presenter.disable_editing_notifier.notify_subscribers.assert_called_once_with()
+
+    def test_that_handle_background_corrections_for_all_finished_calls_the_expected_methods(self):
+        self.presenter.handle_background_corrections_for_all_finished()
+
+        self.presenter.enable_editing_notifier.notify_subscribers.assert_called_once_with()
+        self.presenter.background_presenter.handle_background_corrections_for_all_finished.assert_called_once_with()
+        self.mock_presenter_correction_results.assert_called_once_with()
+        self.presenter._perform_asymmetry_pairs_and_diffs_calculation.assert_called_once_with(self.run_strings,
+                                                                                              self.groups)
+
+    def test_that_handle_asymmetry_pairs_and_diffs_calc_finished_calls_the_expected_notifiers(self):
+        self.presenter.handle_asymmetry_pairs_and_diffs_calc_finished()
+
+        self.presenter.enable_editing_notifier.notify_subscribers.assert_called_once_with()
+        self.presenter.asymmetry_pair_and_diff_calculations_finished_notifier.notify_subscribers.assert_called_once_with()
+
+    def test_that_handle_thread_error_will_attempt_to_show_a_warning_popup(self):
+        error = "This is an error message."
+        self.presenter.handle_thread_error(error)
+
+        self.presenter.disable_editing_notifier.notify_subscribers.assert_called_once_with()
+        self.view.warning_popup.assert_called_once_with(error)
 
     def _setup_mock_view(self):
         self.view = mock.Mock(spec=CorrectionsView)
@@ -127,23 +155,32 @@ class CorrectionsPresenterTest(unittest.TestCase):
     def _setup_presenter(self):
         self.context = setup_context()
         self.presenter = CorrectionsPresenter(self.view, self.model, self.context)
+        self.presenter.disable_editing_notifier = mock.Mock()
+        self.presenter.enable_editing_notifier = mock.Mock()
+        self.presenter.asymmetry_pair_and_diff_calculations_finished_notifier = mock.Mock()
 
         self.presenter.dead_time_presenter.initialize_model_options = mock.Mock()
         self.presenter.dead_time_presenter.handle_ads_clear_or_remove_workspace_event = mock.Mock()
         self.presenter.dead_time_presenter.handle_instrument_changed = mock.Mock()
         self.presenter.dead_time_presenter.handle_run_selector_changed = mock.Mock()
-        self.presenter.dead_time_presenter.handle_pre_process_and_grouping_complete = mock.Mock()
+        self.presenter.dead_time_presenter.handle_pre_process_and_counts_calculated = mock.Mock()
 
         self.presenter.background_presenter.initialize_model_options = mock.Mock()
         self.presenter.background_presenter.handle_instrument_changed = mock.Mock()
         self.presenter.background_presenter.handle_runs_loaded = mock.Mock()
         self.presenter.background_presenter.handle_run_selector_changed = mock.Mock()
         self.presenter.background_presenter.handle_groups_changed = mock.Mock()
-        self.presenter.background_presenter.handle_pre_process_and_grouping_complete = mock.Mock()
+        self.presenter.background_presenter.handle_pre_process_and_counts_calculated = mock.Mock()
+        self.presenter.background_presenter.handle_background_corrections_for_all_finished = mock.Mock()
 
         self.presenter._handle_selected_table_is_invalid = mock.Mock()
-
         self.presenter._notify_perform_dead_time_corrections = mock.Mock()
+        self.presenter._perform_asymmetry_pairs_and_diffs_calculation = mock.Mock()
+
+        # Mock the correction result property
+        self.presenter.thread_model_wrapper = mock.Mock(spec=ThreadModel)
+        self.mock_presenter_correction_results = mock.PropertyMock(return_value=(self.run_strings, self.groups))
+        type(self.presenter.thread_model_wrapper).result = self.mock_presenter_correction_results
 
 
 if __name__ == '__main__':

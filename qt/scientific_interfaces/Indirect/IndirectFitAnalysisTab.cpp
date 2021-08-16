@@ -22,13 +22,13 @@
 #include <algorithm>
 #include <utility>
 
-/// Logger
-Mantid::Kernel::Logger g_log("IndirectFitAnalysisTab");
-
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
 
 namespace {
+/// Logger
+Mantid::Kernel::Logger g_log("IndirectFitAnalysisTab");
+
 bool doesExistInADS(std::string const &workspaceName) {
   return AnalysisDataService::Instance().doesExist(workspaceName);
 }

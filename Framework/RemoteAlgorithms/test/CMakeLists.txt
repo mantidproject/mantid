@@ -6,13 +6,9 @@ if(CXXTEST_FOUND)
   cxxtest_add_test(RemoteAlgorithmsTest ${TEST_FILES})
   target_include_directories(RemoteAlgorithmsTest PUBLIC ${CMAKE_BINARY_DIR}/Framework/Types)
   target_link_libraries(RemoteAlgorithmsTest
-                        LINK_PRIVATE
-                        API
-                        Geometry
-                        Kernel
-                        RemoteAlgorithms
-                        ${Boost_LIBRARIES}
-                        ${POCO_LIBRARIES}
+                        PRIVATE
+                        Mantid::Geometry
+                        Mantid::RemoteAlgorithms
                         gmock
 )
   add_dependencies(FrameworkTests RemoteAlgorithmsTest)

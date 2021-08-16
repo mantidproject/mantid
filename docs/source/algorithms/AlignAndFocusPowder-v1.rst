@@ -9,34 +9,61 @@
 Description
 -----------
 
-This is a workflow algorithm that does the bulk of the work for time
-focusing diffraction data. This is done by executing several
-sub-algorithms as listed below.
+This is a workflow algorithm that does the bulk of the work for time focusing diffraction data.
+This is done by executing several sub-algorithms as listed below.
+The way that algorithms are connected together is better described in the workflow diagram
 
-#. :ref:`algm-CompressEvents` (event workspace only)
-#. :ref:`algm-CropWorkspace`
-#. :ref:`algm-RemovePromptPulse`
-#. :ref:`algm-MaskDetectors`
-#. :ref:`algm-Rebin` or :ref:`algm-ResampleX` if not d-space binning
-#. :ref:`algm-AlignDetectors`
-#. If ``LowResRef`` or ``CropWavelengthMin`` are specified:
+- :ref:`algm-ApplyDiffCal`
+- :ref:`algm-CompressEvents` (event workspace only)
+- :ref:`algm-ConvertDiffCal` to convert legacy offsets workspace to difcal table
+- :ref:`algm-ConvertUnits`
+- :ref:`algm-DiffractionFocussing`
+- :ref:`algm-EditInstrumentGeometry`
+- :ref:`algm-LoadDetectorsGroupingFile` when grouping file is specified without a calibration file
+- :ref:`algm-LoadDiffCal`
+- :ref:`algm-AppendSpectra` only used when ``LowResRef`` is specified
+- :ref:`algm-LorentzCorrection`
+- :ref:`algm-MaskBins` for filtering out absorption resonances
+- :ref:`algm-MaskBinsFromTable` for filtering out single crystal peaks from powder data
+- :ref:`algm-MaskDetectors`
+- :ref:`algm-Rebin`
+- :ref:`algm-ResampleX`
+- :ref:`algm-RebinRagged`
+- :ref:`algm-RemoveLowResTOF` ``CropWavelengthMin`` and ``CropWavelengthMax`` are prefered
+- :ref:`algm-RemovePromptPulse`
+- :ref:`algm-SortEvents` (event workspace only)
+- :ref:`algm-UnwrapSNS`
 
-   #. :ref:`algm-ConvertUnits` to time-of-flight
-   #. :ref:`algm-UnwrapSNS`
-   #. :ref:`algm-RemoveLowResTOF`
-   #. :ref:`algm-ConvertUnits` to d-spacing
 
-#. :ref:`algm-Rebin` if d-space binning (optionally :ref:`algm-RebinRagged` if ``DeltaRagged``)
-#. :ref:`algm-DiffractionFocussing`
-#. :ref:`algm-SortEvents` (event workspace only)
-#. :ref:`algm-EditInstrumentGeometry` (if appropriate)
-#. :ref:`algm-ConvertUnits` to time-of-flight
-#. :ref:`algm-RebinRagged` (if ``DeltaRagged`` is specified) to bin each spectrum differently
 
 Workflow
 ########
 
+The main workflow of the algorithm can be described in following diagram.
+In this diagram, the ``CalibrationWorkspace``, ``MaskWorkspace``, and ``GroupingWorkspace`` are abstractions of the many ways that this information can be provided (see below).
+
 .. diagram:: AlignAndFocusPowder-v1_wkflw.dot
+
+Calibration
+###########
+
+The way that calibration is supplied can be confusing.
+This section will attempt to clarify it.
+
+**Workspaces provided:**
+If the ``GroupingWorkspace``, ``CalibrationWorkspace``, or ``MaskWorkspace`` are supplied as parameters they are used.
+If the ``OffsetsWorkspace`` is supplied it is converted to a ``CalibrationWorkspace`` using :ref:`algm-ConvertDiffCal`.
+The values of ``CalFileName`` and ``GroupFilename`` will be ignored
+
+**Filenames provided, Workspaces not:**
+Assuming the instrument short-name is ``<INSTR>`` (replace with the actual instrument short-name), the algorithm will look for the workspaces ``<INSTR>_group``, ``<INSTR>_cal`` (falling back to ``<INSTR>_offsets``), and ``<INSTR>_mask`` and use them without consulting the files.
+This behavior is to reduce the amount of overhead in processing a collection of input data.
+When loading information from a file, all 3 workspaces can be read from either type of calibration file (``.h5`` or ``.cal``) and will get the default names.
+If the ``GroupFilename`` is provided, that will override the grouping information in the ``CalFilename``.
+
+.. note::
+   If the user wishes to force reading the supplied calibration file(s), they must delete the workspaces ``<INSTR>_group``, ``<INSTR>_cal``, ``<INSTR>_offsets``, and ``<INSTR>_mask``.
+
 
 Usage
 -----
@@ -55,7 +82,7 @@ You will have to rename :literal:`pg3_mantid_det.cal` manually, as its name in t
 
     PG3_9830_event = Load('PG3_9830_event.nxs')
     PG3_9830_event = AlignAndFocusPowder(PG3_9830_event,
-        CalFileName='pg3_mantid_det.cal', Params='100')
+                                         CalFileName='pg3_mantid_det.cal', Params='100')
 
 
 .. categories::

@@ -44,15 +44,37 @@ class SettingsPresenterTest(unittest.TestCase):
         self.assertEqual(1, self.view.find_save.call_count)
 
     def test_load_invalid_settings(self):
-        self.model.get_settings_dict.return_value = {
-            "foo": "dud",
-            "bar": "result"
-        }
+
+        def return_value(self):
+            return {"foo": "dud", "bar": "result"}
+
+        self.model.get_settings_dict.side_effect = return_value
         self.presenter.savedir_notifier = mock.MagicMock()
 
         self.presenter.load_settings_from_file_or_default()
 
         self.assertEqual(self.presenter.settings, settings_presenter.DEFAULT_SETTINGS)
+        self.model.set_settings_dict.assert_called_once()  # called to replace invalid settings
+
+    def test_load_invalid_settings_correct_keys(self):
+        def return_value(self):
+            return {"save_location": "save",
+                    "full_calibration": "", # invalid
+                    "recalc_vanadium": True, # not the default but valid
+                    "logs": "some,logs",
+                    "primary_log": "some",
+                    "sort_ascending": True,
+                    "default_peak": "BackToBackExponential"
+                    }
+
+        self.model.get_settings_dict.side_effect = return_value
+        self.presenter.savedir_notifier = mock.MagicMock()
+
+        self.presenter.load_settings_from_file_or_default()
+
+        expected_dict = return_value(self)
+        expected_dict["full_calibration"] = settings_presenter.DEFAULT_SETTINGS["full_calibration"]
+        self.assertEqual(self.presenter.settings, expected_dict)
         self.model.set_settings_dict.assert_called_once()  # called to replace invalid settings
 
     def test_save_new_settings(self):

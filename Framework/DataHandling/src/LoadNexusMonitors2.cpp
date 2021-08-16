@@ -38,6 +38,8 @@ using Mantid::DataObjects::EventWorkspace_sptr;
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::Histogram;
+using Mantid::Kernel::Direction;
+using Mantid::Kernel::PropertyWithValue;
 
 namespace Mantid {
 namespace DataHandling {
@@ -78,6 +80,11 @@ void loadSampleDataISIScompatibilityInfo(::NeXus::File &file, Mantid::API::Matri
 
 const std::string LOAD_EVENTS("Events");
 const std::string LOAD_HISTO("Histogram");
+
+namespace PropertyNames {
+const std::string LOGS_ALLOW("AllowList");
+const std::string LOGS_BLOCK("BlockList");
+} // namespace PropertyNames
 
 // collection of static methods to inspect monitors to determine type
 bool keyExists(std::string const &key, std::map<std::string, std::string> const &entries) {
@@ -133,6 +140,15 @@ void LoadNexusMonitors2::init() {
                   "If multiple repesentations exist, which one to load. "
                   "Default is to load the one that is present, and Histogram "
                   "if both are present.");
+
+  declareProperty(std::make_unique<PropertyWithValue<std::vector<std::string>>>(
+                      PropertyNames::LOGS_ALLOW, std::vector<std::string>(), Direction::Input),
+                  "If specified, only these logs will be loaded from the file (each "
+                  "separated by a comma).");
+  declareProperty(std::make_unique<PropertyWithValue<std::vector<std::string>>>(
+                      PropertyNames::LOGS_BLOCK, std::vector<std::string>(), Direction::Input),
+                  "If specified, these logs will NOT be loaded from the file (each "
+                  "separated by a comma).");
 }
 
 //------------------------------------------------------------------------------
@@ -382,6 +398,10 @@ void LoadNexusMonitors2::fixUDets(::NeXus::File &file) {
 }
 
 void LoadNexusMonitors2::runLoadLogs(const std::string &filename, const API::MatrixWorkspace_sptr &localWorkspace) {
+  // get the properties for which logs to use
+  const std::vector<std::string> allow_list = getProperty(PropertyNames::LOGS_ALLOW);
+  const std::vector<std::string> block_list = getProperty(PropertyNames::LOGS_BLOCK);
+
   // do the actual work
   auto loadLogs = createChildAlgorithm("LoadNexusLogs");
 
@@ -390,6 +410,9 @@ void LoadNexusMonitors2::runLoadLogs(const std::string &filename, const API::Mat
     g_log.information() << "Loading logs from NeXus file...\n";
     loadLogs->setPropertyValue("Filename", filename);
     loadLogs->setProperty<API::MatrixWorkspace_sptr>("Workspace", localWorkspace);
+    // copy properties for which logs to use/not use
+    loadLogs->setProperty<std::vector<std::string>>(PropertyNames::LOGS_ALLOW, allow_list);
+    loadLogs->setProperty<std::vector<std::string>>(PropertyNames::LOGS_BLOCK, block_list);
     loadLogs->execute();
   } catch (...) {
     g_log.error() << "Error while loading Logs from Nexus. Some sample logs "
