@@ -15,7 +15,7 @@ from mantidqt.utils.qt.testing import start_qapplication
 
 
 @start_qapplication
-class AddFunctionDialogPresenterTest(unittest.TestCase):
+class AddFunctionDialogViewTest(unittest.TestCase):
     TEST_FUNCTION_NAMES = ['func1', 'secondfunc']
 
     def test_construction_with_no_functions_gives_empty_list(self):
