@@ -110,13 +110,12 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         tracked workspaces.
         """
         allowed_spectra = {}
+        output_wsnames = [self.getWorkspaceList().item(ii).text() for ii in range(self.getWorkspaceList().count())]
         for ax in self.canvas.figure.get_axes():
             try:
                 for ws_name, artists in ax.tracked_workspaces.items():
                     # we don't want to include the fit workspace in our selection
-                    # unfortunately, this might catch some workspaces which have _Workspace appended to their name
-                    # hopefully this is an unlikely scenario.
-                    if ws_name.endswith("_Workspace"):
+                    if ws_name in output_wsnames:
                         continue
                     spectrum_list = [artist.spec_num for artist in artists]
                     spectrum_list = sorted(list(set(spectrum_list)))
