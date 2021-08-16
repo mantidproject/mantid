@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
 #ifndef Q_MOC_RUN
 #include <memory>
@@ -39,6 +40,13 @@ struct CuboidCorners {
   Kernel::V3D lft;
   Kernel::V3D lbb;
   Kernel::V3D rfb;
+
+  void rotatePoints(const std::vector<double> &rotationMatrix) {
+    lfb.rotate(rotationMatrix);
+    lft.rotate(rotationMatrix);
+    lbb.rotate(rotationMatrix);
+    rfb.rotate(rotationMatrix);
+  }
 };
 
 struct Hexahedron {
@@ -50,6 +58,17 @@ struct Hexahedron {
   Kernel::V3D rft; // right front top
   Kernel::V3D rbb; // right back bottom
   Kernel::V3D rbt; // right back top
+
+  void rotatePoints(const std::vector<double> &rotationMatrix) {
+    lfb.rotate(rotationMatrix);
+    lft.rotate(rotationMatrix);
+    lbb.rotate(rotationMatrix);
+    lbt.rotate(rotationMatrix);
+    rfb.rotate(rotationMatrix);
+    rft.rotate(rotationMatrix);
+    rbb.rotate(rotationMatrix);
+    rbt.rotate(rotationMatrix);
+  }
 };
 /**
 
@@ -75,6 +94,11 @@ public:
   static std::shared_ptr<CSGObject> createSphere(const Kernel::V3D &centre, double radius);
   static std::shared_ptr<CSGObject> createHexahedralShape(double xlb, double xlf, double xrf, double xrb, double ylb,
                                                           double ylf, double yrf, double yrb);
+  std::string addGoniometerTag(const Kernel::Matrix<double> &rotateMatrix, std::string xml);
+  static Kernel::Matrix<double> generateMatrix(double xRotation, double yRotation, double zRotation);
+  static Kernel::Matrix<double> generateXRotation(double xRotation);
+  static Kernel::Matrix<double> generateYRotation(double yRotation);
+  static Kernel::Matrix<double> generateZRotation(double zRotation);
 
 private:
   static std::string sphereAlgebra(const int surfaceID);
@@ -83,8 +107,6 @@ private:
   std::string parseInfiniteCylinder(Poco::XML::Element *pElem, std::map<int, std::shared_ptr<Surface>> &prim,
                                     int &l_id);
   std::string parseCylinder(Poco::XML::Element *pElem, std::map<int, std::shared_ptr<Surface>> &prim, int &l_id);
-  std::string parseSegmentedCylinder(Poco::XML::Element *pElem, std::map<int, std::shared_ptr<Surface>> &prim,
-                                     int &l_id);
   std::string parseHollowCylinder(Poco::XML::Element *pElem, std::map<int, std::shared_ptr<Surface>> &prim, int &l_id);
 
   CuboidCorners parseCuboid(Poco::XML::Element *pElem);
@@ -106,6 +128,9 @@ private:
   double getDoubleAttribute(Poco::XML::Element *pElem, const std::string &name);
   Kernel::V3D parsePosition(Poco::XML::Element *pElem);
   void createGeometryHandler(Poco::XML::Element *, std::shared_ptr<CSGObject>);
+
+  Kernel::Matrix<double> m_gonioRotateMatrix = Kernel::Matrix<double>(3, 3, 1);
+  Kernel::Matrix<double> m_rotateAllMatrix = Kernel::Matrix<double>(3, 3, 1);
 };
 
 } // namespace Geometry

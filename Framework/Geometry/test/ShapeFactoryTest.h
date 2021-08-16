@@ -634,6 +634,294 @@ public:
     return shape_sptr;
   }
 
+  void testGenerateXRotation() {
+    auto rotationMatrix = ShapeFactory::generateXRotation(90.0 * M_PI / 180);
+    std::vector<double> vectorToMatch = {1, 0, 0, 0, 0, -1, 0, 1, 0};
+    compareMatrix(vectorToMatch, rotationMatrix);
+  }
+
+  void testGenerateYRotation() {
+
+    auto rotationMatrix = ShapeFactory::generateYRotation(90.0 * M_PI / 180);
+    std::vector<double> vectorToMatch = {0, 0, 1, 0, 1, 0, -1, 0, 0};
+    compareMatrix(vectorToMatch, rotationMatrix);
+  }
+
+  void testGenerateZRotation() {
+    auto rotationMatrix = ShapeFactory::generateZRotation(90.0 * M_PI / 180);
+    std::vector<double> vectorToMatch = {0, -1, 0, 1, 0, 0, 0, 0, 1};
+    compareMatrix(vectorToMatch, rotationMatrix);
+  }
+
+  void testGenerateRotationMatrix() {
+    auto rotationMatrix = ShapeFactory::generateMatrix(90.0 * M_PI / 180, 60.0 * M_PI / 180, 30.0 * M_PI / 180);
+    std::vector<double> vectorToMatch = {0.4330127,  0.7500000,  0.5000000, 0.2500000, 0.4330127,
+                                         -0.8660254, -0.8660254, 0.5000000, 0.0000000};
+    compareMatrix(vectorToMatch, rotationMatrix);
+  }
+
+  void testRotateCuboid() {
+    std::string xmlCuboidStart = "<cuboid id=\"cuboid\"> ";
+    xmlCuboidStart += "<height val=\"2.0\" /> ";
+    xmlCuboidStart += "<width val=\"2.0\" /> ";
+    xmlCuboidStart += "<depth val=\"4.0\" /> ";
+    xmlCuboidStart += "<centre x=\"10.0\" y=\"10.0\" z=\"10.0\"/> ";
+    xmlCuboidStart += "<axis x=\"0\" y=\"0\" z=\"1\"/> ";
+    std::string xmlCuboidEnd = "</cuboid> ";
+    xmlCuboidEnd += "<algebra val=\"cuboid\"/> ";
+
+    V3D top = V3D(10.0, 10.0, 12.0);
+    V3D centre = V3D(10.0, 10.0, 10.0);
+    V3D topRotate = V3D(10.0, 8.0, 10.0);
+    V3D topRotateAll = V3D(10.0, -12.0, 10.0);
+    V3D centreRotateAll = V3D(10.0, -10.0, 10.0);
+
+    std::string xmlCuboid = xmlCuboidStart + xmlCuboidEnd;
+    auto cuboid_sptr = getObject(xmlCuboid);
+    TS_ASSERT(cuboid_sptr->isValid(top));
+    TS_ASSERT(cuboid_sptr->isValid(centre));
+    TS_ASSERT(!cuboid_sptr->isValid(topRotate));
+    TS_ASSERT(!cuboid_sptr->isValid(centreRotateAll));
+
+    std::string xmlCuboidRotate = xmlCuboidStart + "<rotate x=\"90\" y=\"0\" z=\"0\" /> " + xmlCuboidEnd;
+    auto cuboidRotate_sptr = getObject(xmlCuboidRotate);
+    TS_ASSERT(cuboidRotate_sptr->isValid(topRotate));
+    TS_ASSERT(cuboidRotate_sptr->isValid(centre));
+    TS_ASSERT(!cuboidRotate_sptr->isValid(top));
+    TS_ASSERT(!cuboidRotate_sptr->isValid(centreRotateAll));
+
+    std::string xmlCuboidRotateAll = xmlCuboid + "<rotate-all x=\"90\" y=\"0\" z=\"0\" /> ";
+    auto cuboidRotateAll_sptr = getObject(xmlCuboidRotateAll);
+    TS_ASSERT(cuboidRotateAll_sptr->isValid(topRotateAll));
+    TS_ASSERT(cuboidRotateAll_sptr->isValid(centreRotateAll));
+    TS_ASSERT(!cuboidRotateAll_sptr->isValid(topRotate));
+    TS_ASSERT(!cuboidRotateAll_sptr->isValid(centre));
+  }
+
+  void testRotateTaperedGuide() {
+    std::string xmlGuideStart = "<tapered-guide id=\"Guide\"> ";
+    xmlGuideStart += "<aperture-start height=\"2.0\" width=\"2.0\" /> ";
+    xmlGuideStart += "<length val=\"4.0\" /> ";
+    xmlGuideStart += "<aperture-end height=\"4.0\" width=\"4.0\" /> ";
+    xmlGuideStart += "<centre x=\"10.0\" y=\"10.0\" z=\"10.0\"/> ";
+    xmlGuideStart += "<axis x=\"0\" y=\"0\" z=\"1\"/> ";
+    std::string xmlGuideEnd = "</tapered-guide> ";
+    xmlGuideEnd += "<algebra val=\"Guide\"/> ";
+
+    V3D corner = V3D(8.0, 12.0, 14.0);
+    V3D centre = V3D(10.0, 10.0, 10.0); // Actually centre of the base (aperture-start)
+    V3D cornerRotate = V3D(8.0, 6.0, 12.0);
+    V3D cornerRotateAll = V3D(12, -14.0, 8.0);
+    V3D centreRotateAll = V3D(10.0, -10.0, 10.0);
+
+    std::string xmlGuide = xmlGuideStart + xmlGuideEnd;
+    auto guide_sptr = getObject(xmlGuide);
+    TS_ASSERT(guide_sptr->isValid(corner));
+    TS_ASSERT(guide_sptr->isValid(centre));
+    TS_ASSERT(!guide_sptr->isValid(cornerRotate));
+    TS_ASSERT(!guide_sptr->isValid(centreRotateAll));
+
+    std::string xmlGuideRotate = xmlGuideStart + "<rotate x=\"90\" y=\"0\" z=\"0\" /> " + xmlGuideEnd;
+    auto guideRotate_sptr = getObject(xmlGuideRotate);
+    TS_ASSERT(guideRotate_sptr->isValid(cornerRotate));
+    TS_ASSERT(guideRotate_sptr->isValid(centre));
+    TS_ASSERT(!guideRotate_sptr->isValid(corner));
+    TS_ASSERT(!guideRotate_sptr->isValid(centreRotateAll));
+
+    std::string xmlGuideRotateAll = xmlGuide + "<rotate-all x=\"90\" y=\"0\" z=\"0\" /> ";
+    auto guideRotateAll_sptr = getObject(xmlGuideRotateAll);
+    TS_ASSERT(guideRotateAll_sptr->isValid(cornerRotateAll));
+    TS_ASSERT(guideRotateAll_sptr->isValid(centreRotateAll));
+    TS_ASSERT(!guideRotateAll_sptr->isValid(cornerRotate));
+    TS_ASSERT(!guideRotateAll_sptr->isValid(centre));
+  }
+
+  void testRotateCylinder() {
+    std::string xmlCylinderStart = "<cylinder id=\"Cylinder\"> ";
+    xmlCylinderStart += "<height val=\"2.0\" /> ";
+    xmlCylinderStart += "<radius val=\"0.2\" /> ";
+    xmlCylinderStart += "<centre-of-bottom-base x=\"10.0\" y=\"10.0\" z=\"10.0\"/> ";
+    xmlCylinderStart += "<axis x=\"0\" y=\"0\" z=\"1\"/> ";
+    std::string xmlCylinderEnd = "</cylinder> ";
+    xmlCylinderEnd += "<algebra val=\"Cylinder\"/> ";
+
+    V3D top = V3D(10.0, 10.0, 12.0);
+    V3D centre = V3D(10.0, 10.0, 11.0);
+    V3D topRotate = V3D(10.0, 9.0, 11.0);
+    V3D topRotateAll = V3D(10.0, -12.0, 10.0);
+    V3D centreRotateAll = V3D(10.0, -11.0, 10.0);
+
+    std::string xmlCylinder = xmlCylinderStart + xmlCylinderEnd;
+    auto cylinder_sptr = getObject(xmlCylinder);
+    TS_ASSERT(cylinder_sptr->isValid(top));
+    TS_ASSERT(cylinder_sptr->isValid(centre));
+    TS_ASSERT(!cylinder_sptr->isValid(topRotate));
+    TS_ASSERT(!cylinder_sptr->isValid(centreRotateAll));
+
+    std::string xmlCylinderRotate = xmlCylinderStart + "<rotate x=\"90\" y=\"0\" z=\"0\" /> " + xmlCylinderEnd;
+    auto cylinderRotate_sptr = getObject(xmlCylinderRotate);
+    TS_ASSERT(cylinderRotate_sptr->isValid(topRotate));
+    TS_ASSERT(cylinderRotate_sptr->isValid(centre));
+    TS_ASSERT(!cylinderRotate_sptr->isValid(top));
+    TS_ASSERT(!cylinderRotate_sptr->isValid(centreRotateAll));
+
+    std::string xmlCylinderRotateAll = xmlCylinder + "<rotate-all x=\"90\" y=\"0\" z=\"0\" /> ";
+    auto cylinderRotateAll_sptr = getObject(xmlCylinderRotateAll);
+    TS_ASSERT(cylinderRotateAll_sptr->isValid(topRotateAll));
+    TS_ASSERT(cylinderRotateAll_sptr->isValid(centreRotateAll));
+    TS_ASSERT(!cylinderRotateAll_sptr->isValid(topRotate));
+    TS_ASSERT(!cylinderRotateAll_sptr->isValid(centre));
+  }
+
+  void testRotateHollowCylinder() {
+    std::string xmlHollowCylinderStart = "<hollow-cylinder id=\"HollowCylinder\"> ";
+    xmlHollowCylinderStart += "<height val=\"20.0\" /> ";
+    xmlHollowCylinderStart += "<inner-radius val=\"1.0\" /> ";
+    xmlHollowCylinderStart += "<outer-radius val=\"5.0\" /> ";
+    xmlHollowCylinderStart += "<centre-of-bottom-base x=\"100.0\" y=\"100.0\" z=\"100.0\"/> ";
+    xmlHollowCylinderStart += "<axis x=\"0\" y=\"0\" z=\"1\"/> ";
+    std::string xmlHollowCylinderEnd = "</hollow-cylinder> ";
+    xmlHollowCylinderEnd += "<algebra val=\"HollowCylinder\"/> ";
+
+    // Centre @ (100,100,110)
+    V3D point = V3D(103.0, 103.0, 120.0);
+    V3D pointRotate = V3D(103.0, 90.0, 113.0);
+    V3D pointRotateAll = V3D(103.0, -120.0, 103.0);
+
+    std::string xmlHollowCylinder = xmlHollowCylinderStart + xmlHollowCylinderEnd;
+    auto hollow_sptr = getObject(xmlHollowCylinder);
+    TS_ASSERT(hollow_sptr->isValid(point));
+    TS_ASSERT(!hollow_sptr->isValid(pointRotate));
+
+    std::string xmlHollowCylinderRotate =
+        xmlHollowCylinderStart + "<rotate x=\"90\" y=\"0\" z=\"0\" /> " + xmlHollowCylinderEnd;
+    auto hollowRotate_sptr = getObject(xmlHollowCylinderRotate);
+    TS_ASSERT(hollowRotate_sptr->isValid(pointRotate));
+    TS_ASSERT(!hollowRotate_sptr->isValid(point));
+
+    std::string xmlHollowCylinderRotateAll = xmlHollowCylinder + "<rotate-all x=\"90\" y=\"0\" z=\"0\" /> ";
+    auto hollowRotateAll_sptr = getObject(xmlHollowCylinderRotateAll);
+    TS_ASSERT(hollowRotateAll_sptr->isValid(pointRotateAll));
+    TS_ASSERT(!hollowRotateAll_sptr->isValid(pointRotate));
+  }
+
+  void testRotateSphere() {
+    std::string xmlSphereStart = "<sphere id=\"Sphere\"> ";
+    xmlSphereStart += "<radius val=\"1.0\" /> ";
+    xmlSphereStart += "<centre x=\"10.0\" y=\"10.0\" z=\"10.0\"/> ";
+    std::string xmlSphereEnd = "</sphere> ";
+    xmlSphereEnd += "<algebra val=\"Sphere\"/> ";
+
+    V3D centre = V3D(10.0, 10.0, 10.0);
+    V3D centreRotateAll = V3D(10.0, -10.0, 10.0);
+
+    std::string xmlSphere = xmlSphereStart + xmlSphereEnd;
+    auto sphere_sptr = getObject(xmlSphere);
+    TS_ASSERT(sphere_sptr->isValid(centre));
+    TS_ASSERT(!sphere_sptr->isValid(centreRotateAll));
+
+    std::string xmlSphereRotate = xmlSphereStart + "<rotate x=\"90\" y=\"0\" z=\"0\" /> " + xmlSphereEnd;
+    auto sphereRotate_sptr = getObject(xmlSphereRotate);
+    TS_ASSERT(sphereRotate_sptr->isValid(centre));
+    TS_ASSERT(!sphereRotate_sptr->isValid(centreRotateAll));
+
+    std::string xmlSphereRotateAll = xmlSphere + "<rotate-all x=\"90\" y=\"0\" z=\"0\" /> ";
+    auto sphereRotateAll_sptr = getObject(xmlSphereRotateAll);
+    TS_ASSERT(sphereRotateAll_sptr->isValid(centreRotateAll));
+    TS_ASSERT(!sphereRotateAll_sptr->isValid(centre));
+  }
+
+  void testRotateInfinitePlane() {
+    std::string xmlInfinitePlaneStart = "<infinite-plane id=\"InfinitePlane\"> ";
+    xmlInfinitePlaneStart += "<point-in-plane x=\"0.0\" y=\"0.0\" z=\"20.0\" /> ";
+    xmlInfinitePlaneStart += "<normal-to-plane x=\"0.0\" y=\"0.0\" z=\"1.0\" /> ";
+    std::string xmlInfinitePlaneEnd = "</infinite-plane> ";
+    xmlInfinitePlaneEnd += "<algebra val=\"InfinitePlane\"/> ";
+
+    V3D centre = V3D(0.0, 0.0, 20.0);
+    V3D centreRotateAll = V3D(0.0, -20.0, 0.0);
+
+    std::string xmlInfinitePlane = xmlInfinitePlaneStart + xmlInfinitePlaneEnd;
+    auto plane_sptr = getObject(xmlInfinitePlane);
+    TS_ASSERT(plane_sptr->isOnSide(centre));
+    TS_ASSERT(!plane_sptr->isOnSide(centreRotateAll));
+
+    std::string xmlInfinitePlaneRotate =
+        xmlInfinitePlaneStart + "<rotate x=\"90\" y=\"0\" z=\"0\" /> " + xmlInfinitePlaneEnd;
+    auto planeRotate_sptr = getObject(xmlInfinitePlaneRotate);
+    TS_ASSERT(planeRotate_sptr->isOnSide(centre));
+    TS_ASSERT(!planeRotate_sptr->isOnSide(centreRotateAll));
+
+    std::string xmlInfinitePlaneRotateAll = xmlInfinitePlane + "<rotate-all x=\"90\" y=\"0\" z=\"0\" /> ";
+    auto planeRotateAll_sptr = getObject(xmlInfinitePlaneRotateAll);
+    TS_ASSERT(planeRotateAll_sptr->isOnSide(centreRotateAll));
+    TS_ASSERT(!planeRotateAll_sptr->isOnSide(centre));
+  }
+
+  void testRotateInfiniteCylinder() {
+    std::string xmlInfiniteCylinderStart = "<infinite-cylinder id=\"InfiniteCylinder\"> ";
+    xmlInfiniteCylinderStart += "<centre x=\"10.0\" y=\"0.0\" z=\"20.0\" /> ";
+    xmlInfiniteCylinderStart += "<axis x=\"0.0\" y=\"0.0\" z=\"1.0\" /> ";
+    xmlInfiniteCylinderStart += "<radius val=\"1\" /> ";
+    std::string xmlInfiniteCylinderEnd = "</infinite-cylinder> ";
+    xmlInfiniteCylinderEnd += "<algebra val=\"InfiniteCylinder\"/> ";
+
+    V3D centre = V3D(10.0, 0.0, 20.0);
+    V3D centreRotateAll = V3D(10.0, -20.0, 0.0);
+
+    std::string xmlInfiniteCylinder = xmlInfiniteCylinderStart + xmlInfiniteCylinderEnd;
+    auto cylinder_sptr = getObject(xmlInfiniteCylinder);
+    TS_ASSERT(cylinder_sptr->isValid(centre));
+    TS_ASSERT(!cylinder_sptr->isValid(centreRotateAll));
+
+    std::string xmlInfiniteCylinderRotate =
+        xmlInfiniteCylinderStart + "<rotate x=\"90\" y=\"0\" z=\"0\" /> " + xmlInfiniteCylinderEnd;
+    auto cylinderRotate_sptr = getObject(xmlInfiniteCylinderRotate);
+    TS_ASSERT(cylinderRotate_sptr->isValid(centre));
+    TS_ASSERT(!cylinderRotate_sptr->isValid(centreRotateAll));
+
+    std::string xmlInfiniteCylinderRotateAll = xmlInfiniteCylinder + "<rotate-all x=\"90\" y=\"0\" z=\"0\" /> ";
+    auto cylinderRotateAll_sptr = getObject(xmlInfiniteCylinderRotateAll);
+    TS_ASSERT(cylinderRotateAll_sptr->isValid(centreRotateAll));
+    TS_ASSERT(!cylinderRotateAll_sptr->isValid(centre));
+  }
+
+  void testRotateSlice() {
+    std::string xmlSliceStart = "<slice-of-cylinder-ring id=\"Slice\"> ";
+    xmlSliceStart += "<depth val=\"1.0\" /> ";
+    xmlSliceStart += "<inner-radius val=\"2.0\" /> ";
+    xmlSliceStart += "<outer-radius val=\"10.0\" /> ";
+    xmlSliceStart += "<arc val = \"90.0\"/> ";
+    std::string xmlSliceEnd = "</slice-of-cylinder-ring> ";
+    xmlSliceEnd += "<algebra val=\"Slice\"/> ";
+
+    // centre @ (-6,0,0)
+    V3D point = V3D(0.0, 4.0, 0.0);
+    V3D pointRotate = V3D(-6.0, 4.0, -6.0);
+    V3D pointRotateAll = V3D(0.0, 4.0, 0.0);
+
+    std::string xmlSlice = xmlSliceStart + xmlSliceEnd;
+    auto slice_sptr = getObject(xmlSlice);
+    TS_ASSERT(slice_sptr->isValid(point));
+    TS_ASSERT(!slice_sptr->isValid(pointRotate));
+
+    std::string xmlSliceRotate = xmlSliceStart + "<rotate x=\"0\" y=\"90\" z=\"0\" /> " + xmlSliceEnd;
+    auto sliceRotate_sptr = getObject(xmlSliceRotate);
+    TS_ASSERT(sliceRotate_sptr->isValid(pointRotate));
+    TS_ASSERT(!sliceRotate_sptr->isValid(point));
+
+    std::string xmlSliceRotateAll = xmlSlice + "<rotate-all x=\"0\" y=\"90\" z=\"0\" /> ";
+    auto sliceRotateAll_sptr = getObject(xmlSliceRotateAll);
+    TS_ASSERT(sliceRotateAll_sptr->isValid(pointRotateAll));
+    TS_ASSERT(!sliceRotateAll_sptr->isValid(pointRotate));
+  }
+
 private:
+  void compareMatrix(const std::vector<double> &vectorToMatch, const Matrix<double> &rotationMatrix) {
+    auto checkVector = rotationMatrix.getVector();
+    for (size_t i = 0; i < 9; ++i) {
+      TS_ASSERT_DELTA(checkVector[i], vectorToMatch[i], 1e-7);
+    }
+  }
   std::string inputFile;
 };

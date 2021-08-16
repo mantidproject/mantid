@@ -16,7 +16,6 @@ BANNED_FILES = ['80_tubes_Top_and_Bottom_April_2015.xml',
                 '80tubeCalibration_18-04-2016_r9330-9335.nxs',
                 '80tube_DIRECT_3146_M1_30April15_r3146.dat',
                 '992 Descriptions.txt',
-                'directBeamDatabaseFall2014_IPTS_11601_2.cfg',
                 'BASIS_AutoReduction_Mask.xml',
                 'BioSANS_dark_current.xml',
                 'BioSANS_empty_cell.xml',
@@ -144,7 +143,9 @@ BANNED_REGEXP = [r'SANS2D\d+.log$',
                  r'.*\.phonon',
                  r'.*\.cif',
                  r'.*\.toml',
-                 r'.*\.h5']
+                 r'.*\.h5',
+                 r'.*\.p2d',
+                 r'.*\.cfg']
 
 BANNED_DIRS = ["DocTest", "UnitTest", "reference"]
 

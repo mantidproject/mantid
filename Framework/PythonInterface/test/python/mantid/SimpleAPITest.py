@@ -27,6 +27,25 @@ class SimpleAPITest(unittest.TestCase):
     def test_version_number_equals_2(self):
         self.assertEqual(simpleapi.apiVersion(), 2)
 
+    def test_simpleapi_does_not_import_qt(self):
+        import sys
+        modules = [mod for mod in sys.modules]
+        qt_import = 'qtpy'
+        matching_qtpy_imports = [mod for mod in modules if qt_import in mod]
+        self.assertFalse(len(matching_qtpy_imports) > 0, msg="The simpleapi shouldn't import qtpy, one or more of "
+                                                             "imports you've added includes a package which imports "
+                                                             "qtpy, please amend your imports.")
+
+    def test_simpleapi_does_not_import_mantidqt(self):
+        import sys
+        modules = [mod for mod in sys.modules]
+        mantidqt_import = 'mantidqt'
+        matching_mantidqt_imports = [mod for mod in modules if mantidqt_import in mod]
+        self.assertFalse(len(matching_mantidqt_imports) > 0,
+                         msg="The simpleapi shouldn't import mantidqt, one or more of "
+                             "imports you've added includes a package which imports "
+                             "mantidqt, please amend your imports.")
+
     def test_module_dict_seems_to_be_correct_size(self):
         # Check that the module has at least the same number
         # of attributes as unique algorithms

@@ -64,7 +64,7 @@ class FocusPresenter(object):
 
     def _on_worker_success(self):
         self.emit_enable_button_signal()
-        self.focus_run_notifier.notify_subscribers(self.model.get_last_path())
+        self.focus_run_notifier.notify_subscribers(self.model.get_last_focused_files())
 
     def set_instrument_override(self, instrument):
         instrument = INSTRUMENT_DICT[instrument]

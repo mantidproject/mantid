@@ -114,8 +114,6 @@ std::shared_ptr<Mantid::API::TableRow> binarySearchForRow(API::ITableWorkspace_s
     size_t currentPosition = start + ((end - start) / 2);
 
     Mantid::API::TableRow currentRow = ws->getRow(currentPosition);
-
-    currentRow = ws->getRow(currentPosition);
     if (currentRow.Int(0) > detid) {
       end = currentPosition - 1;
     } else if (currentRow.Int(0) < detid) {

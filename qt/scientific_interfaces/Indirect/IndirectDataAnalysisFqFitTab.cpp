@@ -55,6 +55,7 @@ IndirectDataAnalysisFqFitTab::IndirectDataAnalysisFqFitTab(QWidget *parent)
   setOutputOptionsView(m_uiForm->ovOutputOptionsView);
 
   m_uiForm->dockArea->m_fitPropertyBrowser->setFunctionTemplateBrowser(templateBrowser);
+  templateBrowser->updateAvailableFunctions(availableFits.at(DataType::ALL));
   setFitPropertyBrowser(m_uiForm->dockArea->m_fitPropertyBrowser);
   m_uiForm->dockArea->m_fitPropertyBrowser->setHiddenProperties(FQFIT_HIDDEN_PROPS);
 

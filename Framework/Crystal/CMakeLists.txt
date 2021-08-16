@@ -240,6 +240,13 @@ enable_precompiled_headers(inc/MantidCrystal/PrecompiledHeader.h SRC_FILES)
 
 # Add the target for this directory
 add_library(Crystal ${SRC_FILES} ${INC_FILES})
+add_library(Mantid::Crystal ALIAS Crystal)
+
+target_include_directories(Crystal PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+		$<INSTALL_INTERFACE:include/Mantid>
+)
+
 # Set the name of the generated library
 set_target_properties(Crystal PROPERTIES OUTPUT_NAME MantidCrystal)
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -256,25 +263,25 @@ set_property(TARGET Crystal PROPERTY FOLDER "MantidFramework")
 
 include_directories(inc)
 
-target_link_libraries(Crystal
-                      LINK_PRIVATE
-                      ${MANTIDLIBS}
-                      ${GSL_LIBRARIES})
+target_link_libraries(Crystal PUBLIC Mantid::API Mantid::Geometry Mantid::Kernel PRIVATE Mantid::DataObjects Mantid::Indexing Boost::filesystem)
 
 # Add the unit tests directory
 add_subdirectory(test)
 
 # Auto-generate exports header
-target_include_directories(Crystal PUBLIC ${CMAKE_BINARY_DIR}/Framework/Crystal)
-target_include_directories( Crystal PUBLIC
-                           ${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Crystal )
-
+target_include_directories(Crystal PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/Crystal>
+  $<INSTALL_INTERFACE:include/Mantid>
+)
 generate_mantid_export_header(Crystal FALSE)
 
 # Installation settings
-
+if (CONDA_BUILD)
+mtd_install_framework_lib(TARGETS Crystal PLUGIN_LIB)
+else()
 mtd_install_targets(TARGETS
                     Crystal
                     INSTALL_DIRS
                     ${PLUGINS_DIR}
                     ${WORKBENCH_PLUGINS_DIR})
+endif()

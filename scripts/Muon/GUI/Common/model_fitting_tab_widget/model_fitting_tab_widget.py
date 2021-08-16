@@ -16,7 +16,9 @@ class ModelFittingTabWidget(object):
 
     def __init__(self, context, parent):
         self.model_fitting_tab_view = ModelFittingView(parent)
+        self.model_fitting_tab_view.hide_exclude_range_checkbox()
         self.model_fitting_tab_view.hide_fit_raw_checkbox()
+        self.model_fitting_tab_view.hide_evaluate_function_as_checkbox()
         self.model_fitting_tab_model = ModelFittingModel(context, context.model_fitting_context)
         self.model_fitting_tab_presenter = ModelFittingPresenter(self.model_fitting_tab_view,
                                                                  self.model_fitting_tab_model)

@@ -63,9 +63,9 @@ public:
 
     // We should get a peak at ~400
     TS_ASSERT_THROWS_NOTHING(peak.function(x, y));
-    TS_ASSERT_DELTA(y[0], 0.002106, 1e-6);
-    TS_ASSERT_DELTA(y[50], 2.7609, 1e-4);
-    TS_ASSERT_DELTA(y[99], 0.002079, 1e-6);
+    TS_ASSERT_DELTA(y[0], 0.004167, 1e-6);
+    TS_ASSERT_DELTA(y[50], 2.7231, 1e-4);
+    TS_ASSERT_DELTA(y[99], 0.004113, 1e-6);
   }
 
   void test_function_evaluation_compare_to_b2bExp() {

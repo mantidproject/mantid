@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import PythonAlgorithm, MatrixWorkspaceProperty, MultipleFileProperty, PropertyMode, Progress, \
+from mantid.api import PythonAlgorithm, MatrixWorkspaceProperty, WorkspaceProperty, MultipleFileProperty, PropertyMode, Progress, \
     WorkspaceGroup, FileAction
 from mantid.kernel import Direction, EnabledWhenProperty, FloatBoundedValidator, LogicOperator, PropertyCriterion, \
     StringListValidator
@@ -127,8 +127,8 @@ class SANSILLReduction(PythonAlgorithm):
                              validator=StringListValidator(options),
                              doc='Choose the process type.')
 
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '',
-                                                     direction=Direction.Output),
+        self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
+                                               direction=Direction.Output),
                              doc='The output workspace based on the value of ProcessAs.')
 
         not_absorber = EnabledWhenProperty('ProcessAs', PropertyCriterion.IsNotEqualTo, 'Absorber')
@@ -268,18 +268,19 @@ class SANSILLReduction(PythonAlgorithm):
 
         self.setPropertySettings('SolventInputWorkspace', sample)
 
-    def _normalise(self, ws):
+    def _normalise(self, ws, monID=None):
         """
-            Normalizes the workspace by time (SampleLog Timer) or Monitor (ID=100000)
+            Normalizes the workspace by time (SampleLog Timer) or Monitor
             @param ws : the input workspace
         """
         normalise_by = self.getPropertyValue('NormaliseBy')
-        if self._instrument == "D33":
-            monID = 500000
-        elif self._instrument == "D16":
-            monID = 500001
-        else:
-            monID = 100000
+        if monID is None:
+            if self._instrument == "D33":
+                monID = 500000
+            elif self._instrument == "D16":
+                monID = 500001
+            else:
+                monID = 100000
         if normalise_by == 'Monitor':
             mon = ws + '_mon'
             ExtractSpectra(InputWorkspace=ws, DetectorList=monID, OutputWorkspace=mon)
@@ -388,6 +389,7 @@ class SANSILLReduction(PythonAlgorithm):
             MoveInstrumentComponent(Workspace=ws, X=-beam_x, Y=-beam_y, ComponentName='detector')
             self._fit_beam_width(input_ws=ws)
         run = mtd[ws].getRun()
+        att_coeff = 1.
         if run.hasProperty('attenuator.attenuation_coefficient'):
             att_coeff = run.getLogData('attenuator.attenuation_coefficient').value
             self.log().information('Found attenuator coefficient/value: {0}'.format(att_coeff))
@@ -401,11 +403,17 @@ class SANSILLReduction(PythonAlgorithm):
                 else:
                     raise RuntimeError('Unable to find the attenuation coefficient for D33 attenuator #'+str(int(att_value)))
             else:
-                att_coeff = att_value
+                att_coeff = float(att_value)
             self.log().information('Found attenuator coefficient/value: {0}'.format(att_coeff))
-        else:
-            att_coeff = 1
-            self.log().notice('Unable to process as beam: could not find attenuation coefficient nor value. Assuming 1.')
+        if run.hasProperty('attenuator2.attenuation_value'):
+            # D22 can have the second, chopper attenuator
+            # In principle, either of the 2 attenuators can be in or out
+            # In practice, only one (standard or chopper) is in at a time
+            # If one is out, its attenuation_value is set to 1, so it's safe to take the product
+            att2_value = run.getLogData('attenuator2.attenuation_value').value
+            self.log().information('Found attenuator 2 value: {0}'.format(att2_value))
+            att_coeff *= float(att2_value)
+        self.log().information('Attenuation coefficient used is: {0}'.format(att_coeff))
         flux_out = self.getPropertyValue('FluxOutputWorkspace')
         if flux_out:
             flux = ws + '_flux'
@@ -476,7 +484,6 @@ class SANSILLReduction(PythonAlgorithm):
             else:
                 Divide(LHSWorkspace=ws, RHSWorkspace=flux_in, OutputWorkspace=ws, WarnOnZeroDivide=False)
             AddSampleLog(Workspace=ws, LogText='True', LogType='String', LogName='NormalisedByFlux')
-            self._do_rescale_flux(ws, flux_in)
         reference_ws = self.getProperty('ReferenceInputWorkspace').value
         if reference_ws:
             if not self._check_processed_flag(reference_ws, 'Sample'):
@@ -488,8 +495,7 @@ class SANSILLReduction(PythonAlgorithm):
         solvent_ws = self.getProperty('SolventInputWorkspace').value
         if solvent_ws:
             self._apply_solvent(ws, solvent_ws)
-        ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws,
-                             NaNValue=0., NaNError=0., InfinityValue=0., InfinityError=0.)
+        MaskDetectorsIf(InputWorkspace=ws, OutputWorkspace=ws, Operator='NotFinite')
 
     def _rescale_flux(self, ws, ref_ws):
         """
@@ -742,6 +748,13 @@ class SANSILLReduction(PythonAlgorithm):
                 title = "Sample ID = " + title
                 mtd[ws].setTitle(title)
 
+    def _set_mode(self, ws):
+        if mtd[ws].blocksize() > 1:
+            if mtd[ws].getAxis(0).getUnit().unitID() == 'Wavelength':
+                self._mode = 'TOF'
+            elif mtd[ws].getInstrument().getName() != 'D16':
+                self._mode = 'Kinetic'
+
     def PyExec(self):
         process = self.getPropertyValue('ProcessAs')
         processes = ['Absorber', 'Beam', 'Transmission', 'Container', 'Sample']
@@ -759,13 +772,19 @@ class SANSILLReduction(PythonAlgorithm):
         else:
             in_ws = self.getPropertyValue('InputWorkspace')
             CloneWorkspace(InputWorkspace=in_ws, OutputWorkspace=ws)
+        progress.report()
+        self._set_mode(ws)
+
+        if self._mode == 'Kinetic':
+            if process == 'Sample':
+                self.log().notice('Doing kinetic mode (monochromatic)')
+                self._process_kinetic_sample(ws)
+                return
+            else:
+                raise RuntimeError('Only the sample can be in kinetic mode, the calibration measurements cannot be.')
+
         self._instrument = mtd[ws].getInstrument().getName()
         self._normalise(ws)
-        run = mtd[ws].getRun()
-        if run.hasProperty('tof_mode'):
-            if run.getLogData('tof_mode').value == 'TOF':
-                self._mode = 'TOF'
-        progress.report()
         if process in ['Beam', 'Transmission', 'Container', 'Sample']:
             absorber_ws = self.getProperty('AbsorberInputWorkspace').value
             if absorber_ws:
@@ -821,6 +840,87 @@ class SANSILLReduction(PythonAlgorithm):
                         self._set_sample_title(ws)
                         progress.report()
         self._finalize(ws, process)
+
+    def _split_kinetic_frames(self, ws):
+        '''Explodes the frames of a kinetic workspace into separate workspaces'''
+        n_frames = mtd[ws].blocksize()
+        n_hist = mtd[ws].getNumberHistograms()
+        wavelength = round(mtd[ws].getRun().getLogData('wavelength').value * 100) / 100
+        wave_bins = [wavelength * 0.9, wavelength * 1.1]
+        frames = []
+        for frame_index in range(n_frames):
+            frame_name = ws + '_t' + str(frame_index)
+            frames.append(frame_name)
+            CropWorkspace(InputWorkspace=ws, OutputWorkspace=frame_name, XMin=frame_index, XMax=frame_index)
+            ConvertToHistogram(InputWorkspace=frame_name, OutputWorkspace=frame_name)
+            mtd[frame_name].getAxis(0).setUnit('Wavelength')
+            for s in range(n_hist):
+                mtd[frame_name].setX(s, wave_bins)
+        RenameWorkspace(InputWorkspace=ws, OutputWorkspace=ws[2:])
+        return frames
+
+    def _process_kinetic_sample(self, ws):
+        '''
+        Processes a kinetic monochromatic workspace by exploding the frames into separate workspaces and reducing them individually
+        Note that this is extremely slow and needs to be deprecated in favour of the v2 of this algorithm.        '''
+
+        if self.getPropertyValue('NormaliseBy') == 'Timer':
+            # trick the normalise to use the second monitor which contains the durations per frame
+            self.setPropertyValue('NormaliseBy', 'Monitor')
+            self._normalise(ws, 100001)
+        else:
+            self._normalise(ws)
+        group_name = ws
+        frames = self._split_kinetic_frames(ws)
+        frames_to_group = []
+
+        for ws in frames:
+            frames_to_group.append(ws[2:])
+
+            absorber_ws = self.getProperty('AbsorberInputWorkspace').value
+            if absorber_ws:
+                self._apply_absorber(ws, absorber_ws)
+
+            beam_ws = self.getProperty('BeamInputWorkspace').value
+            if beam_ws:
+                self._apply_beam(ws, beam_ws)
+
+            transmission_ws = self.getProperty('TransmissionInputWorkspace').value
+            if transmission_ws:
+                self._apply_transmission(ws, transmission_ws)
+            solid_angle = self._make_solid_angle_name(ws)
+            cache = self.getProperty('CacheSolidAngle').value
+            if (cache and not mtd.doesExist(solid_angle)) or not cache:
+                SolidAngle(InputWorkspace=ws, OutputWorkspace=solid_angle, Method="Rectangle")
+            Divide(LHSWorkspace=ws, RHSWorkspace=solid_angle, OutputWorkspace=ws, WarnOnZeroDivide=False)
+            if not cache:
+                DeleteWorkspace(solid_angle)
+
+            container_ws = self.getProperty('ContainerInputWorkspace').value
+            if container_ws:
+                self._apply_container(ws, container_ws)
+
+            self._apply_masks(ws)
+            self._apply_thickness(ws)
+            # parallax (gondola) effect
+            if self._instrument in ['D22', 'D22lr', 'D33', 'D11B', 'D22B']:
+                self._apply_parallax(ws)
+
+            self._process_sample(ws)
+            self._set_sample_title(ws)
+
+            components = mtd[ws].getInstrument().getStringParameter('detector_panels')[0]
+            CalculateDynamicRange(Workspace=ws, ComponentNames=components.split(','))
+            MaskDetectorsIf(InputWorkspace=ws, OutputWorkspace=ws, Operator='NotFinite')
+
+            mtd[ws].getRun().addProperty('ProcessedAs', 'Sample', True)
+            mtd[ws].getRun().addProperty('numor_list', self._return_numors(self.getPropertyValue('Run')), True)
+            mtd[ws].getRun().addProperty('sample_transmission_numors',
+                                          self._return_numors(self.getPropertyValue('TransmissionInputWorkspace')), True)
+            RenameWorkspace(InputWorkspace=ws, OutputWorkspace=ws[2:])
+
+        GroupWorkspaces(InputWorkspaces=frames_to_group, OutputWorkspace=group_name[2:])
+        self.setProperty('OutputWorkspace', mtd[group_name[2:]])
 
 
 # Register algorithm with Mantid

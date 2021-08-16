@@ -11,7 +11,10 @@ set (TEST_FILES
 )
 
 add_library(Json ${SRC_FILES} ${INC_FILES})
-target_link_libraries(Json PUBLIC ${JSONCPP_LIBRARIES})
+add_library(Mantid::Json ALIAS Json)
+
+
+target_link_libraries(Json PUBLIC JsonCPP::jsoncpp)
 set_target_properties(Json PROPERTIES OUTPUT_NAME MantidJson)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -23,20 +26,22 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
                         PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
 endif()
 
+
+target_include_directories(Json PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+	$<INSTALL_INTERFACE:include/Mantid>
+)
+
 # Add to the 'Framework' group in VS
 set_property(TARGET Json PROPERTY FOLDER "MantidFramework")
 
 # Auto-generate exports header
-target_include_directories(Json PUBLIC ${CMAKE_BINARY_DIR}/Framework/Json)
-target_include_directories(Json SYSTEM PRIVATE ${JSONCPP_INCLUDE_DIR})
-generate_mantid_export_header(Json FALSE)
+target_include_directories(Json PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/Json>
+  $<INSTALL_INTERFACE:include/Mantid>
+)
 
-# Installation settings
-mtd_install_targets(TARGETS
-                    Json
-                    INSTALL_DIRS
-                    ${LIB_DIR}
-                    ${WORKBENCH_LIB_DIR})
+generate_mantid_export_header(Json FALSE)
 
 if(CXXTEST_FOUND)
 
@@ -49,4 +54,16 @@ add_dependencies(FrameworkTests JsonTest)
 # Add to the 'FrameworkTests' group in VS
 set_property(TARGET JsonTest PROPERTY FOLDER "UnitTests")
 
+endif()
+
+# Installation settings
+if (CONDA_BUILD)
+set(TARGET_EXPORT_NAME "MantidJsonTargets")
+mtd_install_framework_lib(TARGETS Json INSTALL_EXPORT_FILE EXPORT_NAME ${TARGET_EXPORT_NAME})
+else()
+mtd_install_targets(TARGETS
+                    Json
+                    INSTALL_DIRS
+                    ${LIB_DIR}
+                    ${WORKBENCH_LIB_DIR})
 endif()

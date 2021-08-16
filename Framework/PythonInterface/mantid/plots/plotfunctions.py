@@ -22,6 +22,7 @@ from mantid.api import AnalysisDataService, MatrixWorkspace, WorkspaceGroup
 from mantid.api import IMDHistoWorkspace
 from mantid.kernel import ConfigService
 from mantid.plots import datafunctions, MantidAxes
+from mantid.plots.utility import MantidAxType
 
 # -----------------------------------------------------------------------------
 # Constants
@@ -217,8 +218,10 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
     if superplot and not waterfall and not tiled:
         fig.canvas.manager.superplot_toggle()
         if not spectrum_nums and not wksp_indices:
-            workspace_names = [ws.getName() for ws in workspaces]
+            workspace_names = [ws.name() for ws in workspaces]
             fig.canvas.manager.superplot.set_workspaces(workspace_names)
+            fig.canvas.manager.superplot.set_bin_mode(plot_kwargs and "axis" in plot_kwargs and plot_kwargs["axis"] == MantidAxType.BIN)
+        fig.canvas.manager.superplot.enable_error_bars(errors)
 
     # update and show figure
     return _update_show_figure(fig)

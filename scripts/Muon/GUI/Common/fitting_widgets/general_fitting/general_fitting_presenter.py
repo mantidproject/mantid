@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import IFunction
-from mantidqt.utils.observer_pattern import GenericObserver, GenericObservable
+from mantidqt.utils.observer_pattern import GenericObservable
 
 from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_presenter import BasicFittingPresenter
 from Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_model import GeneralFittingModel
@@ -23,8 +23,6 @@ class GeneralFittingPresenter(BasicFittingPresenter):
 
         self.fitting_mode_changed_notifier = GenericObservable()
         self.simultaneous_fit_by_specifier_changed = GenericObservable()
-
-        self.fit_parameter_updated_observer = GenericObserver(self.update_fit_function_in_view_from_model)
 
         self.model.context.gui_context.add_non_calc_subscriber(self.double_pulse_observer)
 

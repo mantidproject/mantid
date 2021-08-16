@@ -7,10 +7,12 @@
 import unittest
 from unittest import mock
 
-from mantid.api import AnalysisDataService, FrameworkManager
+from mantid.api import AnalysisDataService, FileFinder, FrameworkManager
 
 from Muon.GUI.Common.corrections_tab_widget.corrections_model import CorrectionsModel
+from Muon.GUI.Common.muon_diff import MuonDiff
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
+from Muon.GUI.Common.utilities.load_utils import load_workspace_from_filename
 
 
 class CorrectionsModelTest(unittest.TestCase):
@@ -20,10 +22,22 @@ class CorrectionsModelTest(unittest.TestCase):
         FrameworkManager.Instance()
 
     def setUp(self):
-        context = setup_context()
-        self.model = CorrectionsModel(context.data_context, context.corrections_context)
+        self.filepath = FileFinder.findRuns('EMU00019489.nxs')[0]
+        self.load_result, self.run_number, self.filename, _ = load_workspace_from_filename(self.filepath)
+
+        self.context = setup_context()
+        self.context.gui_context.update({'RebinType': 'None'})
+        self.model = CorrectionsModel(self.context)
         self.runs = [[84447], [84448], [84449]]
         self.coadd_runs = [[84447, 84448, 84449]]
+
+        self.context.data_context.instrument = 'EMU'
+        self.context.data_context._loaded_data.add_data(workspace=self.load_result, run=[self.run_number],
+                                                        filename=self.filename, instrument='EMU')
+        self.context.data_context.current_runs = [[self.run_number]]
+        self.context.data_context.update_current_data()
+        self.context.group_pair_context.reset_group_and_pairs_to_default(
+            self.load_result['OutputWorkspace'][0].workspace, 'EMU', '', 1)
 
     def _setup_for_multiple_runs(self):
         self.mock_current_runs = mock.PropertyMock(return_value=self.runs)
@@ -69,6 +83,38 @@ class CorrectionsModelTest(unittest.TestCase):
         self.model.set_current_run_string("84447-84449")
 
         self.assertEqual(self.model.current_runs(), [84447, 84448, 84449])
+
+    def test_that_calculate_asymmetry_workspaces_for_will_calculate_the_expected_asymmetry_workspace(self):
+        self.context.calculate_all_counts()
+
+        self.model.calculate_asymmetry_workspaces_for([f"{self.run_number}", f"{self.run_number}"], ["fwd", "bwd"])
+
+        self._assert_workspaces_exist(["EMU19489; Group; fwd; Asymmetry; MA", "EMU19489; Group; bwd; Asymmetry; MA"])
+
+    def test_that_calculate_pairs_for_will_calculate_the_expected_pair_asymmetry_workspaces(self):
+        self.context.calculate_all_counts()
+        self.model.calculate_asymmetry_workspaces_for([f"{self.run_number}", f"{self.run_number}"], ["fwd", "bwd"])
+
+        pair_names = self.model.calculate_pairs_for([f"{self.run_number}"], ["bwd"])
+
+        self.assertEqual(pair_names, ["long"])
+        self._assert_workspaces_exist(["EMU19489; Pair Asym; long; MA"])
+
+    def test_that_calculate_diffs_for_will_calculate_the_expected_diff_asymmetry_workspaces(self):
+        diff = MuonDiff('group_diff', 'fwd', 'bwd')
+        self.context.group_pair_context.add_diff(diff)
+
+        self.context.calculate_all_counts()
+        self.model.calculate_asymmetry_workspaces_for([f"{self.run_number}", f"{self.run_number}"], ["fwd", "bwd"])
+
+        self.model.calculate_diffs_for([f"{self.run_number}"], ["bwd"])
+
+        self._assert_workspaces_exist(["EMU19489; Diff; group_diff; Asymmetry; MA"])
+
+    def _assert_workspaces_exist(self, workspace_names: list):
+        ads_list = AnalysisDataService.getObjectNames()
+        for workspace_name in workspace_names:
+            self.assertTrue(workspace_name in ads_list)
 
 
 if __name__ == '__main__':

@@ -8,34 +8,67 @@ from qtpy import QtWidgets, QtCore
 from os import path
 
 from mantidqt.utils.qt import load_ui
+from Engineering.gui.engineering_diffraction.tabs.common import output_settings
+from fnmatch import fnmatch
+from os.path import splitext
 
 Ui_data, _ = load_ui(__file__, "data_widget.ui")
+
+
+class FileFilterProxyModel (QtCore.QSortFilterProxyModel):
+    text_filter = None
+
+    def __init__(self, parent=None):
+        super(FileFilterProxyModel, self).__init__(parent)
+
+    def filterAcceptsRow(self, source_row, source_parent):
+        model = self.sourceModel()
+        index0 = model.index(source_row, 0, source_parent)
+        fname = model.fileName(index0)
+        fname = splitext(fname)[0]
+
+        if self.text_filter is None:
+            return True
+        else:
+            return model.isDir(index0) or fnmatch(fname,self.text_filter)
 
 
 class FittingDataView(QtWidgets.QWidget, Ui_data):
     sig_enable_load_button = QtCore.Signal(bool)
     sig_enable_inspect_bg_button = QtCore.Signal(bool)
+    proxy_model = None
 
     def __init__(self, parent=None):
         super(FittingDataView, self).__init__(parent)
         self.setupUi(self)
         # file finder
-        self.finder_data.setLabelText("Focused Run Files")
+        self.finder_data.readSettings(output_settings.INTERFACES_SETTINGS_GROUP + '/' + output_settings.ENGINEERING_PREFIX)
+        self.finder_data.setUseNativeWidget(False)
+        self.proxy_model = FileFilterProxyModel()
+        self.finder_data.setProxyModel(self.proxy_model)
+        self.finder_data.setLabelText("")
         self.finder_data.isForRunFiles(False)
         self.finder_data.allowMultipleFiles(True)
         self.finder_data.setFileExtensions([".nxs"])
         # xunit combo box
         self.setup_xunit_combobox()
+        self.update_file_filter(self.combo_bank.currentText(), self.combo_xunit.currentText())
+
+    def saveSettings(self):
+        self.finder_data.saveSettings(output_settings.INTERFACES_SETTINGS_GROUP + '/' + output_settings.ENGINEERING_PREFIX)
 
     # =================
     # Slot Connectors
     # =================
 
     def set_on_load_clicked(self, slot):
-        self.button_load.clicked.connect(lambda: slot(self.combo_xunit.currentText()))
+        self.button_load.clicked.connect(slot)
+
+    def set_on_bank_changed(self, slot):
+        self.combo_bank.currentIndexChanged.connect(lambda: slot(self.combo_bank.currentText(), self.combo_xunit.currentText()))
 
     def set_on_xunit_changed(self, slot):
-        self.combo_xunit.currentIndexChanged.connect(lambda: slot(self.combo_xunit.currentText()))
+        self.combo_xunit.currentIndexChanged.connect(lambda: slot(self.combo_bank.currentText(), self.combo_xunit.currentText()))
 
     def set_enable_load_button_connection(self, slot):
         self.sig_enable_load_button.connect(slot)
@@ -68,12 +101,16 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
     # Component Setters
     # =================
 
-    def set_file_last(self, filepath):
-        if not filepath:
+    def set_default_files(self, filepaths):
+        if not filepaths:
             return
-        self.finder_data.setUserInput(filepath)
-        directory, discard = path.split(filepath)
-        self.finder_data.setLastDirectory(directory)
+        self.finder_data.setUserInput(",".join(filepaths))
+        directories = set()
+        for filepath in filepaths:
+            directory, discard = path.split(filepath)
+            directories.add(directory)
+        if len(directories) == 1:
+            self.finder_data.setLastDirectory(directory)
 
     def set_load_button_enabled(self, enabled):
         self.button_load.setEnabled(enabled)
@@ -153,6 +190,15 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
             self.get_table_item(row, col).setCheckState(QtCore.Qt.Checked)
         else:
             self.get_table_item(row, col).setCheckState(QtCore.Qt.Unchecked)
+
+    def update_file_filter(self, bank, xunit):
+        self.proxy_model.text_filter = "*"
+        if bank == "1 (North)":
+            self.proxy_model.text_filter += "bank_1"
+        elif bank == "2 (South)":
+            self.proxy_model.text_filter += "bank_2"
+        if xunit != "All":
+            self.proxy_model.text_filter += "_" + xunit
 
     # =================
     # Component Getters

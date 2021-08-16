@@ -54,6 +54,9 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         self.declareProperty(IntArrayProperty("SignalBackgroundPixelRange", [123, 137],
                                               IntArrayLengthValidator(2), direction=Direction.Input),
                              "Pixel range defining the background. Default:(123,137)")
+        self.declareProperty("ErrorWeighting", False,
+                             doc='If True, a weighted average is used to to estimate the subtracted background.'
+                                 'Otherwise, a simple average is used.')
         self.declareProperty("NormFlag", True, doc="If true, the data will be normalized")
         self.declareProperty(IntArrayProperty("NormPeakPixelRange", [127, 133],
                                               IntArrayLengthValidator(2), direction=Direction.Input),
@@ -412,11 +415,13 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
 
         # Subtract background
         if subtract_background:
+            err_weight = self.getProperty('ErrorWeighting').value
             workspace = LRSubtractAverageBackground(InputWorkspace=workspace,
                                                     PeakRange=peak_range,
                                                     BackgroundRange=background_range,
                                                     LowResolutionRange=[x_min, x_max],
-                                                    OutputWorkspace=str(workspace))
+                                                    OutputWorkspace=str(workspace),
+                                                    ErrorWeighting=err_weight)
         else:
             # If we don't subtract the background, we still have to integrate
             # over the low resolution axis

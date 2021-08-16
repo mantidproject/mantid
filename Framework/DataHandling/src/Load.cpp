@@ -341,6 +341,9 @@ void Load::exec() {
     // Code that supports multiple file loading.
     loadMultipleFiles();
   }
+
+  // Set the remaining properties of the loader
+  setOutputProperties(m_loader);
 }
 
 void Load::loadSingleFile() {
@@ -369,8 +372,10 @@ void Load::loadSingleFile() {
 
   // Execute the concrete loader
   m_loader->execute();
-  // Set the workspace. Deals with possible multiple periods
-  setOutputWorkspace(m_loader);
+
+  // Set the output Workspace
+  Workspace_sptr wks = getOutputWorkspace("OutputWorkspace", m_loader);
+  setProperty("OutputWorkspace", wks);
 }
 
 void Load::loadMultipleFiles() {
@@ -516,25 +521,17 @@ void Load::setUpLoader(const API::IAlgorithm_sptr &loader, const double startPro
 }
 
 /**
- * Set the output workspace(s) if the load's return workspace has type
- * API::Workspace
- * @param loader :: Shared pointer to load algorithm
+ * Set all the output properties from the loader used to Load algorithm itself
+ * @param loader :: Shared pointer to the load algorithm
  */
-void Load::setOutputWorkspace(const API::IAlgorithm_sptr &loader) {
-  // Go through each OutputWorkspace property and check whether we need to make
-  // a counterpart here
-  const std::vector<Property *> &loaderProps = loader->getProperties();
-  const size_t count = loader->propertyCount();
-  for (size_t i = 0; i < count; ++i) {
-    Property *prop = loaderProps[i];
-    if (dynamic_cast<IWorkspaceProperty *>(prop) && prop->direction() == Direction::Output) {
-      const std::string &name = prop->name();
-      if (!this->existsProperty(name)) {
-        declareProperty(
-            std::make_unique<WorkspaceProperty<Workspace>>(name, loader->getPropertyValue(name), Direction::Output));
-      }
-      Workspace_sptr wkspace = getOutputWorkspace(name, loader);
-      setProperty(name, wkspace);
+void Load::setOutputProperties(const API::IAlgorithm_sptr &loader) {
+  // Set output properties by looping the loaders properties and taking them until we have none left
+  while (loader->propertyCount() > 0) {
+    auto prop = loader->takeProperty(0);
+    if (prop && prop->direction() == Direction::Output) {
+      // We skip OutputWorkspace as this is set already from loadSingleFile and loadMultipleFiles
+      if (prop->name() != "OutputWorkspace")
+        declareOrReplaceProperty(std::move(prop));
     }
   }
 }
@@ -652,6 +649,7 @@ API::Workspace_sptr Load::loadFileToWs(const std::string &fileName, const std::s
   Workspace_sptr ws = loadAlg->getProperty("OutputWorkspace");
   // ws->setName(wsName);
   AnalysisDataService::Instance().addOrReplace(wsName, ws);
+  m_loader = loadAlg;
   return ws;
 }
 

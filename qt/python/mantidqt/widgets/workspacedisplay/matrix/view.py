@@ -147,13 +147,13 @@ class MatrixWorkspaceDisplayView(QTabWidget):
         return True if reply == QMessageBox.Yes else False
 
     def setup_bin_context_menu(self, table):
-        context_menu = QMenu()
+        context_menu = QMenu(self)
         self.setup_copy_bin_actions(context_menu, table)
         self.setup_plot_bin_actions(context_menu, table)
         return context_menu
 
     def setup_spectra_context_menu(self, table):
-        context_menu = QMenu()
+        context_menu = QMenu(self)
         self.setup_copy_spectrum_actions(context_menu, table)
         self.setup_plot_spectrum_actions(context_menu, table)
         return context_menu

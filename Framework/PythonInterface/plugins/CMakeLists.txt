@@ -68,6 +68,7 @@ set(PYTHON_PLUGINS
     algorithms/ExtractMonitors.py
     algorithms/FilterLogByTime.py
     algorithms/FindGoniometerFromUB.py
+    algorithms/FindGlobalBMatrix.py
     algorithms/FindSatellitePeaks.py
     algorithms/FitGaussian.py
     algorithms/FitIncidentSpectrum.py
@@ -170,6 +171,7 @@ set(PYTHON_PLUGINS
     algorithms/SaveYDA.py
     algorithms/SelectNexusFilesByMetadata.py
     algorithms/SetDetScale.py
+    algorithms/SetSampleFromLogs.py
     algorithms/SortByQVectors.py
     algorithms/SortDetectors.py
     algorithms/StatisticsOfTableWorkspace.py

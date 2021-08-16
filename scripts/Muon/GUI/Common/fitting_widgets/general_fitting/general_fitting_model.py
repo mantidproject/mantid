@@ -11,7 +11,7 @@ from Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws
 from Muon.GUI.Common.ADSHandler.workspace_naming import (create_covariance_matrix_name,
                                                          create_fitted_workspace_name,
                                                          create_multi_domain_fitted_workspace_name,
-                                                         create_parameter_table_name,
+                                                         create_parameter_table_name, get_group_or_pair_from_name,
                                                          get_run_numbers_as_string_from_workspace_name)
 from Muon.GUI.Common.contexts.fitting_contexts.general_fitting_context import GeneralFittingContext
 from Muon.GUI.Common.contexts.muon_context import MuonContext
@@ -245,13 +245,6 @@ class GeneralFittingModel(BasicFittingModel):
         else:
             return super().get_fit_function_parameters()
 
-    def get_all_fit_functions(self) -> list:
-        """Returns all the fit functions for the current fitting mode."""
-        if self.fitting_context.simultaneous_fitting_mode:
-            return [self.fitting_context.simultaneous_fit_function]
-        else:
-            return super().get_all_fit_functions()
-
     def get_active_fit_function(self) -> IFunction:
         """Returns the fit function that is active and will be used for a fit."""
         if self.fitting_context.simultaneous_fitting_mode:
@@ -351,6 +344,8 @@ class GeneralFittingModel(BasicFittingModel):
         params["InputWorkspace"] = dataset_names
         params["StartX"] = self.fitting_context.start_xs
         params["EndX"] = self.fitting_context.end_xs
+        if self.fitting_context.exclude_range:
+            params["Exclude"] = list(zip(self.fitting_context.exclude_start_xs, self.fitting_context.exclude_end_xs))
         return params
 
     def _add_simultaneous_fit_results_to_ADS_and_context(self, input_workspace_names: list, parameter_table,
@@ -429,3 +424,139 @@ class GeneralFittingModel(BasicFittingModel):
         new_name += '; Simultaneous'
         RenameWorkspace(InputWorkspace=workspace_name, OutputWorkspace=new_name)
         return new_name
+
+    """
+    Methods used by the Sequential Fitting Tab
+    """
+
+    def get_runs_groups_and_pairs_for_fits(self, display_type: str) -> tuple:
+        """Returns the runs and group/pairs corresponding to the selected dataset names."""
+        if not self.fitting_context.simultaneous_fitting_mode:
+            return super().get_runs_groups_and_pairs_for_fits(display_type)
+        else:
+            return self._get_runs_groups_and_pairs_for_simultaneous_fit(display_type)
+
+    def _get_runs_groups_and_pairs_for_simultaneous_fit(self, display_type: str) -> tuple:
+        """Returns the runs and group/pairs corresponding to the selected dataset names in simultaneous fitting mode."""
+        if self.fitting_context.simultaneous_fit_by == "Run":
+            return self._get_runs_groups_and_pairs_for_simultaneous_fit_by_runs(display_type)
+        elif self.fitting_context.simultaneous_fit_by == "Group/Pair":
+            return self._get_runs_groups_and_pairs_for_simultaneous_fit_by_groups_and_pairs(display_type)
+        else:
+            return [], [], []
+
+    def _get_runs_groups_and_pairs_for_simultaneous_fit_by_runs(self, display_type: str):
+        """Returns the runs and group/pairs for the selected data in simultaneous fit by runs mode."""
+        runs = self._get_selected_runs()
+        groups_and_pairs = [get_group_or_pair_from_name(name) for name in self.fitting_context.dataset_names]
+        workspace_names = ["/".join(self.get_fit_workspace_names_from_groups_and_runs([run], groups_and_pairs))
+                           for run in runs]
+        return self._get_datasets_containing_string(display_type, workspace_names, runs,
+                                                    [";".join(groups_and_pairs)] * len(runs))
+
+    def _get_runs_groups_and_pairs_for_simultaneous_fit_by_groups_and_pairs(self, display_type: str):
+        """Returns the runs and group/pairs for the selected data in simultaneous fit by group/pairs mode."""
+        runs = [get_run_numbers_as_string_from_workspace_name(name, self.context.data_context.instrument)
+                for name in self.fitting_context.dataset_names]
+        groups_and_pairs = self._get_selected_groups_and_pairs()
+        workspace_names = ["/".join(self.get_fit_workspace_names_from_groups_and_runs(runs, [group_and_pair]))
+                           for group_and_pair in groups_and_pairs]
+        return self._get_datasets_containing_string(display_type, workspace_names,
+                                                    [";".join(runs)] * len(groups_and_pairs), groups_and_pairs)
+
+    def get_all_fit_functions(self) -> list:
+        """Returns all the fit functions for the current fitting mode."""
+        if self.fitting_context.simultaneous_fitting_mode:
+            return [self.fitting_context.simultaneous_fit_function]
+        else:
+            return super().get_all_fit_functions()
+
+    def get_all_fit_functions_for(self, display_type: str) -> list:
+        """Returns all the fit functions for datasets with a name containing a string."""
+        if self.fitting_context.simultaneous_fitting_mode:
+            return [self.fitting_context.simultaneous_fit_function]
+        else:
+            return super().get_all_fit_functions_for(display_type)
+
+    def update_ws_fit_function_parameters(self, dataset_names: list, parameter_values: list) -> None:
+        """Updates the function parameter values for the given dataset names."""
+        if self.fitting_context.simultaneous_fitting_mode:
+            self._update_fit_function_parameters_for_simultaneous_fit(dataset_names, parameter_values)
+        else:
+            super().update_ws_fit_function_parameters(dataset_names, parameter_values)
+
+    def _update_fit_function_parameters_for_simultaneous_fit(self, _: list, parameter_values: list) -> None:
+        """Updates the function parameters for the given dataset names if in simultaneous fit mode."""
+        self._set_fit_function_parameter_values(self.fitting_context.simultaneous_fit_function, parameter_values)
+
+    def perform_sequential_fit(self, workspaces: list, parameter_values: list, use_initial_values: bool = False):
+        """Performs a sequential fit of the workspace names provided for the current fitting mode.
+
+        :param workspaces: A list of lists of workspace names e.g. [[Row 1 workspaces], [Row 2 workspaces], etc...]
+        :param parameter_values: A list of lists of parameter values e.g. [[Row 1 params], [Row 2 params], etc...]
+        :param use_initial_values: If false the parameters at the end of each fit are passed on to the next fit.
+        """
+        fitting_func = self._get_sequential_fitting_func_for_normal_fitting_mode()
+        if not self.fitting_context.simultaneous_fitting_mode:
+            workspaces = self._flatten_workspace_names(workspaces)
+        return self._perform_sequential_fit_using_func(fitting_func, workspaces, parameter_values, use_initial_values)
+
+    def _do_sequential_simultaneous_fits(self, row_index: int, workspace_names: list, parameter_values: list,
+                                         functions: list, use_initial_values: bool = False):
+        """Performs a number of simultaneous fits, sequentially."""
+        simultaneous_function = functions[row_index - 1].clone() if not use_initial_values and row_index >= 1 else \
+            self._get_simultaneous_function_with_parameters(parameter_values)
+
+        params = self._get_parameters_for_simultaneous_fit(workspace_names, simultaneous_function)
+
+        return self._do_simultaneous_fit(params, self.fitting_context.global_parameters)
+
+    def _get_simultaneous_function_with_parameters(self, parameter_values: list) -> IFunction:
+        """Returns the current simultaneous function but with the parameter values provided."""
+        simultaneous_function = self.fitting_context.simultaneous_fit_function.clone()
+        self._set_fit_function_parameter_values(simultaneous_function, parameter_values)
+        return simultaneous_function
+
+    def _get_sequential_fitting_func_for_normal_fitting_mode(self):
+        """Returns the fitting func to use when performing a fit in normal fitting mode."""
+        if self.fitting_context.simultaneous_fitting_mode:
+            return self._do_sequential_simultaneous_fits
+        else:
+            return self._do_sequential_fit
+
+    def _update_fit_functions_after_sequential_fit(self, workspaces: list, functions: list) -> None:
+        """Updates the fit functions after a sequential fit has been run on the Sequential fitting tab."""
+        if self.fitting_context.simultaneous_fitting_mode:
+            self._update_simultaneous_fit_function_after_sequential(workspaces, functions)
+        else:
+            super()._update_fit_functions_after_sequential_fit(workspaces, functions)
+
+    def _update_simultaneous_fit_function_after_sequential(self, workspaces: list, functions: list) -> None:
+        """Updates the single fit functions after a sequential fit has been run on the Sequential fitting tab."""
+        for fit_index, workspace_names in enumerate(workspaces):
+            if self._are_same_workspaces_as_the_datasets(workspace_names):
+                self.fitting_context.simultaneous_fit_function = functions[fit_index]
+                break
+
+    def _are_same_workspaces_as_the_datasets(self, workspace_names: list) -> bool:
+        """Checks that the workspace names provided are all in the loaded dataset names."""
+        not_in_datasets = [name for name in workspace_names if name not in self.fitting_context.dataset_names]
+        return False if len(not_in_datasets) > 0 else True
+
+    def _update_fit_statuses_and_chi_squared_after_sequential_fit(self, workspaces, fit_statuses, chi_squared_list):
+        """Updates the fit statuses and chi squared after a sequential fit."""
+        if self.fitting_context.simultaneous_fitting_mode:
+            self._update_fit_statuses_and_chi_squared_for_simultaneous_mode(workspaces, fit_statuses, chi_squared_list)
+        else:
+            super()._update_fit_statuses_and_chi_squared_after_sequential_fit(workspaces, fit_statuses, chi_squared_list)
+
+    def _update_fit_statuses_and_chi_squared_for_simultaneous_mode(self, workspaces: list, fit_statuses: list,
+                                                                   chi_squared_list: list) -> None:
+        """Updates the fit statuses and chi squared after a sequential fit when in simultaneous fit mode."""
+        for fit_index, workspace_names in enumerate(workspaces):
+            if self._are_same_workspaces_as_the_datasets(workspace_names):
+                for workspace_name in workspace_names:
+                    dataset_index = self.fitting_context.dataset_names.index(workspace_name)
+                    self.fitting_context.fit_statuses[dataset_index] = fit_statuses[fit_index]
+                    self.fitting_context.chi_squared[dataset_index] = chi_squared_list[fit_index]
+                break
