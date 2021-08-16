@@ -324,7 +324,7 @@ class _NOMADMedianDetectorTest:
         """
         flag = np.full(self.EIGHTPACK_COUNT, False)  # initialize all eightpacks as not in use
         flag[self.config['eight_packs']] = True
-        return np.repeat(flag, )
+        return np.repeat(flag, self.PIXELS_IN_EIGHTPACK)  # assign the flag to all pixels in the eight-pack
 
     @property
     def tube_intensity(self) -> np.ndarray:
