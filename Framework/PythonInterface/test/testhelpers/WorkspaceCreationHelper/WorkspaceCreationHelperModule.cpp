@@ -69,7 +69,7 @@ BOOST_PYTHON_MODULE(_WorkspaceCreationHelper) {
   def("create2DWorkspaceWithGeographicalDetectors",
       (Workspace2D_sptr(*)(const int, const int, const double, const int,
                            const std::string &))create2DWorkspaceWithGeographicalDetectors,
-      create2DWorkspaceWithGeographicalDetectors_overloads());
+      create2DWorkspaceWithGeographicalDetectors_overloads()[return_value_policy<AsType<Workspace_sptr>>()]);
 
   //=================================== Event Workspaces
   //===================================
