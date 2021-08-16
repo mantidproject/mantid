@@ -256,7 +256,7 @@ void IndirectDataAnalysisElwinTab::setup() {
 }
 
 void IndirectDataAnalysisElwinTab::run() {
-  if (!m_uiForm.dsInputFiles->isEmpty()) {
+  if (m_uiForm.inputChoice->currentIndex() == 0) {
     runFileInput();
   } else {
     runWorkspaceInput();
@@ -474,7 +474,7 @@ void IndirectDataAnalysisElwinTab::checkForELTWorkspace() {
 bool IndirectDataAnalysisElwinTab::validate() {
   UserInputValidator uiv;
 
-  if (!m_uiForm.dsInputFiles->isEmpty()) {
+  if (m_uiForm.inputChoice->currentIndex() == 0) {
     uiv.checkFileFinderWidgetIsValid("Input", m_uiForm.dsInputFiles);
     auto const suffixes = getFilteredSuffixes(m_uiForm.dsInputFiles->getFilenames());
     if (std::adjacent_find(suffixes.begin(), suffixes.end(), std::not_equal_to<>()) != suffixes.end())
@@ -854,12 +854,12 @@ void IndirectDataAnalysisElwinTab::newInputFilesFromDialog(IAddWorkspaceDialog c
 
   // Populate the combo box with the filenames
   QString workspaceNames;
-  QString workspaceIndices;
+  QString filename;
   if (const auto indirectDialog = dynamic_cast<IndirectAddWorkspaceDialog const *>(dialog)) {
     workspaceNames = QString::fromStdString(indirectDialog->workspaceName());
-    workspaceIndices = QString::fromStdString(indirectDialog->workspaceIndices());
+    filename = QString::fromStdString(indirectDialog->getFileName());
   }
-  m_uiForm.cbPreviewFile->addItem(workspaceNames, workspaceNames);
+  m_uiForm.cbPreviewFile->addItem(workspaceNames, filename);
 
   // Default to the first file
   m_uiForm.cbPreviewFile->setCurrentIndex(0);
