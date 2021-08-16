@@ -1286,10 +1286,6 @@ class CrystalFieldFit(object):
         """
         Run scipy.optimize.minimize algorithm for CEF parameters only. Update function parameters.
         """
-        #only allow solvers with bounds!
-        if Solver not in ['Nelder-Mead', 'L-BFGS-B', 'TNC', 'SLSQP', 'Powell', 'trust-constr']:
-            Solver = 'Powell'
-            logger.notice("Solver not suitable, replaced by 'Powell'")
         self.check_consistency()
         if isinstance(self._input_workspace, list):
             return self._fit_multi_sp(Solver)
@@ -1339,7 +1335,7 @@ class CrystalFieldFit(object):
             # Fit CEF parameters only
             self.model.FixAllPeaks = True
             self.overwrite_fit_properties(0)
-            self.fit_sp()
+            self.fit_sp('SLSQP')
             self._function = self.model.function
             # Fit peaks only
             for parameter in self._free_cef_parameters:
@@ -1503,38 +1499,33 @@ class CrystalFieldFit(object):
             else:
                 fun = self._function
         x0 = []
+        cef_positions = []
         fun.setAttributeValue('FixAllPeaks', True)
-        lb = np.zeros(fun.nParams())
-        ub = np.zeros(fun.nParams())
         for par_id in range(fun.nParams()):
-            value = fun.getParameterValue(par_id)
-            x0.append(value)
-            if not fun.isFixed(par_id):
-                lb[par_id] = None
-                ub[par_id] = None
-            else:
-                lb[par_id] = value
-                ub[par_id] = value
-        bnds = np.vstack((lb, ub)).T
-        res = sp.minimize(self._evaluate_cf, x0, args=(fun), method=solver, bounds=bnds, options={'disp': False, 'maxiter': 10})
+            parName = fun.getParamName(par_id)
+            if parName in CrystalField.field_parameter_names or parName == "IntensityScaling":
+                if not fun.isFixed(par_id):
+                    x0.append(fun.getParameterValue(par_id))
+                    cef_positions.append(par_id)
+        res = sp.minimize(self._evaluate_cf, x0, args=(fun, cef_positions), method=solver, options={'disp': False, 'maxiter': 25})
         if res.success:
-            for par_id in [id for id in range(fun.nParams()) if not fun.isFixed(id)]:
-                fun.setParameter(par_id, res.x[par_id])
+            for pos in range(len(cef_positions)):
+                fun.setParameter(cef_positions[pos], res.x[pos])
             self.model.update(fun)
 
-    def _evaluate_cf(self, x0, fun):
+    def _evaluate_cf(self, x0, fun, cef_pos):
         from mantid.simpleapi import EvaluateFunction#, CalculateChiSquared
         #from mantid.api import mtd
-        for par_id in [id for id in range(fun.nParams()) if not fun.isFixed(id)]:
-            fun.setParameter(par_id, x0[par_id])
+        for pos in range(len(cef_pos)):
+            fun.setParameter(cef_pos[pos], x0[pos])
         res = []
         chi2 = 0.0
-        EvaluateFunction(fun, self._input_workspace, OutputWorkspace='data')
-        for par_id in range(fun.nParams()):
-            res.append(fun.getParameterValue(par_id))
+        EvaluateFunction(fun, self._input_workspace, OutputWorkspace='eval')
+        for pos in range(len(cef_pos)):
+            res.append(fun.getParameterValue(cef_pos[pos]))
         for index in range(min(len(x0),len(res))):
             chi2 += (res[index] - x0[index])**2
-        #chi2 = CalculateChiSquared(fun, InputWorkspace=self._input_workspace, Inputworkspace_1=mtd['data'])[1]
+        #chi2 = CalculateChiSquared(fun, InputWorkspace=self._input_workspace, Inputworkspace_1=mtd['eval'])[1]
         return chi2
 
     def _fit_multi(self):
