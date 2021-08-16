@@ -233,7 +233,7 @@ class FittingDataPresenter(object):
 
     def _handle_selection_changed(self):
         enable = True
-        if self.view.get_selected_rows() == {}:
+        if not self.view.get_selected_rows():
             enable = False
         self._enable_inspect_bg_button(enable)
 

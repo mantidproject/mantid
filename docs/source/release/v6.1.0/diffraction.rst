@@ -87,7 +87,7 @@ Bugfixes
 - Error on the fitted peak centre converted from TOF to d-spacing will now be correct for non-zero difa in the Engineering diffraction interface.
 - Added checks for the existence of non-zero proton charge before attempting to average log values weighted by proton charge in the fitting tab of the engineering diffraction interface.
 - :ref:`EnggFocus <algm-EnggFocus>` algorithm doesn't attempt to normalise by current if the run has no proton charge and will not throw an error (but will print a warning to the log).
-- On the fitting tab, the background can be inpsected whether the background subtraction has been applied or not.
+
 
 Single Crystal Diffraction
 --------------------------
