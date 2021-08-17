@@ -24,19 +24,19 @@ def euphonic_available():
     return True
 
 
-def get_data_with_euphonic(filename: str, cutoff: float = 20.):
+def euphonic_calculate_modes(filename: str, cutoff: float = 20.):
     """
     Read force constants file with Euphonic and sample frequencies/modes
 
     :param filename: Input data
     :param cutoff:
         Sampling density of Brillouin-zone. Specified as real-space length
-        cutoff.
+        cutoff in Angstrom.
 
-    :returns: 2-tuple (dict of structure and vibration data,
-                       dict of elements and isotopes)
+    :returns: euphonic.QpointPhononModes
 
     """
+
     from math import ceil
     from euphonic.cli.utils import force_constants_from_file
     from euphonic.util import mp_grid
@@ -49,7 +49,25 @@ def get_data_with_euphonic(filename: str, cutoff: float = 20.):
     qpts = mp_grid(mp_sampling)
     logger.notice('Calculating phonon modes on {} grid'.format(
         'x'.join(map(str, mp_sampling))))
-    modes = fc.calculate_qpoint_phonon_modes(qpts, use_c=True, n_threads=4)
+    modes = fc.calculate_qpoint_phonon_modes(qpts)
+
+    return modes
+
+
+def get_data_with_euphonic(file_name: str, cutoff: float = 20.):
+    """
+    Read force constants file with Euphonic and sample frequencies/modes
+
+    :param file_name: Input data
+    :param cutoff:
+        Sampling density of Brillouin-zone. Specified as real-space length
+        cutoff.
+
+    :returns: 2-tuple (dict of structure and vibration data,
+                       dict of elements and isotopes)
+
+    """
+    modes = euphonic_calculate_modes(file_name=file_name, cutoff=cutoff)
 
     file_data = {'num_ions': len(fc.crystal.atom_type),
                  'num_branches': modes.frequencies.magnitude.shape[1],
