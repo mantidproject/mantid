@@ -34,5 +34,7 @@ Improvements
 - The ISIS SANS threading has been switched to use Python native threading. This provides users with much clearer error messages
   if something goes wrong, and improves tool compatibility for future development.
 - :ref:`DeadTimeCorrection <algm-DeadTimeCorrection>` now does not integrate TOF axis if the unit is `Empty`, allowing to correct multi-frame monochromatic SANS data.
+- The ISIS SANS TOML V0 format was updated with several incompatible changes as-per testing feedback.
+  A full list of changes can be found on the :ref:`TOML documentation page <sans_toml_v1-ref>` along with more conversion entries.
 
 :ref:`Release 6.2.0 <v6.2.0>`
