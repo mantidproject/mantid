@@ -29,8 +29,7 @@ class MANTIDQT_INDIRECT_DLL IndirectFitDataPresenter : public QObject, public An
 public:
   IndirectFitDataPresenter(IIndirectFitDataModel *model, IIndirectFitDataView *view);
   ~IndirectFitDataPresenter();
-  virtual void addWorkspace(const std::string &workspaceName, const std::string &spectra);
-  virtual void addWorkspace(const std::string &workspaceName, std::string paramType, const int &spectrum_index){};
+  void addWorkspace(const std::string &workspaceName, const std::string &spectra);
   void setResolution(const std::string &name);
   void setSampleWSSuffices(const QStringList &suffices);
   void setSampleFBSuffices(const QStringList &suffices);
@@ -47,8 +46,22 @@ public:
 
   UserInputValidator &validate(UserInputValidator &validator);
 
-  virtual void setActiveWidth(std::size_t widthIndex, WorkspaceID dataIndex, bool single = true){};
-  virtual void setActiveEISF(std::size_t eisfIndex, WorkspaceID dataIndex, bool single = true){};
+  virtual void addWorkspace(const std::string &workspaceName, const std::string &paramType, const int &spectrum_index) {
+    UNUSED_ARG(workspaceName);
+    UNUSED_ARG(paramType);
+    UNUSED_ARG(spectrum_index);
+  };
+
+  virtual void setActiveWidth(std::size_t widthIndex, WorkspaceID dataIndex, bool single = true) {
+    UNUSED_ARG(widthIndex);
+    UNUSED_ARG(dataIndex);
+    UNUSED_ARG(single);
+  };
+  virtual void setActiveEISF(std::size_t eisfIndex, WorkspaceID dataIndex, bool single = true) {
+    UNUSED_ARG(eisfIndex);
+    UNUSED_ARG(dataIndex);
+    UNUSED_ARG(single);
+  };
 
 protected slots:
   void showAddWorkspaceDialog();

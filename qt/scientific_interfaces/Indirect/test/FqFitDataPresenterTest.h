@@ -33,10 +33,6 @@ std::vector<std::string> getTextAxisLabels() {
   return {"f0.Width", "f1.Width", "f2.Width", "f0.EISF", "f1.EISF", "f2.EISF"};
 }
 
-std::vector<std::string> getWidthAxisLabels() { return {"f0.Width", "f1.Width", "f2.Width"}; }
-
-std::vector<std::string> getEISFAxisLabels() { return {"f0.EISF", "f1.EISF", "f2.EISF"}; }
-
 std::vector<std::string> getNoAxisLabels() { return {"NoLabel", "NoLabel", "NoLabel"}; }
 
 std::unique_ptr<QTableWidget> createEmptyTableWidget(int columns, int rows) {

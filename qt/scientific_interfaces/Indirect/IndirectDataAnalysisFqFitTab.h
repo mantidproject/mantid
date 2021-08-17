@@ -36,7 +36,7 @@ private:
   IDAFunctionParameterEstimation createParameterEstimation() const;
   void addDataToModel(IAddWorkspaceDialog const *dialog) override;
   void setActiveWorkspaceIDToCurrentWorkspace(IAddWorkspaceDialog const *dialog);
-  void setModelSpectrum(int index, std::string paramType);
+  void setModelSpectrum(int index, const std::string &paramType);
 
   std::unique_ptr<Ui::IndirectFitTab> m_uiForm;
   FqFitModel *m_FqFittingModel;

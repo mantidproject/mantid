@@ -24,14 +24,10 @@ public:
 signals:
   void modelResolutionAdded(std::string const &name, WorkspaceID const &workspaceID);
 
-private slots:
-  void setModelResolution(const QString &name);
-
 protected:
   void addTableEntry(FitDomainIndex row) override;
 
 private:
-  void setModelResolution(std::string const &name, WorkspaceID const &workspaceID);
   std::unique_ptr<IAddWorkspaceDialog> getAddWorkspaceDialog(QWidget *parent) const override;
 };
 

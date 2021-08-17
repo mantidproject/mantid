@@ -14,25 +14,7 @@ namespace CustomInterfaces {
 namespace IDA {
 
 ConvFitDataPresenter::ConvFitDataPresenter(IIndirectFitDataModel *model, IIndirectFitDataView *view)
-    : IndirectFitDataPresenter(model, view) {
-  connect(view, SIGNAL(resolutionLoaded(const QString &)), this, SLOT(setModelResolution(const QString &)));
-  connect(view, SIGNAL(resolutionLoaded(const QString &)), this, SIGNAL(singleResolutionLoaded()));
-}
-
-void ConvFitDataPresenter::setModelResolution(const QString &name) {
-  auto const workspaceCount = m_model->getNumberOfWorkspaces();
-  auto const index = m_model->getWorkspace(WorkspaceID{0}) ? workspaceCount - WorkspaceID{1} : workspaceCount;
-  setModelResolution(name.toStdString(), index);
-}
-
-void ConvFitDataPresenter::setModelResolution(std::string const &name, WorkspaceID const &workspaceID) {
-  try {
-    m_model->setResolution(name, workspaceID);
-    emit modelResolutionAdded(name, workspaceID);
-  } catch (std::exception const &ex) {
-    displayWarning(ex.what());
-  }
-}
+    : IndirectFitDataPresenter(model, view) {}
 
 std::unique_ptr<IAddWorkspaceDialog> ConvFitDataPresenter::getAddWorkspaceDialog(QWidget *parent) const {
   auto dialog = std::make_unique<ConvFitAddWorkspaceDialog>(parent);

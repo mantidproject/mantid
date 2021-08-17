@@ -12,8 +12,6 @@
 
 namespace {
 
-QString makeNumber(double d) { return QString::number(d, 'g', 16); }
-
 class ScopedFalse {
   bool &m_ref;
   bool m_oldValue;

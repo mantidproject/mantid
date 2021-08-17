@@ -53,8 +53,6 @@ IndirectDataAnalysisConvFitTab::IndirectDataAnalysisConvFitTab(QWidget *parent)
   m_uiForm->dockArea->setFitDataView(new ConvFitDataView(m_uiForm->dockArea));
   auto dataPresenter =
       std::make_unique<ConvFitDataPresenter>(m_convFittingModel->getFitDataModel(), m_uiForm->dockArea->m_fitDataView);
-  connect(dataPresenter.get(), SIGNAL(modelResolutionAdded(std::string const &, WorkspaceID const &)), this,
-          SLOT(setModelResolution(std::string const &, WorkspaceID const &)));
   setFitDataPresenter(std::move(dataPresenter));
 
   setEditResultVisible(true);
@@ -120,17 +118,6 @@ void IndirectDataAnalysisConvFitTab::addDataToModel(IAddWorkspaceDialog const *d
     m_dataPresenter->setResolution(convDialog->resolutionName());
     m_convFittingModel->addDefaultParameters();
   }
-}
-
-void IndirectDataAnalysisConvFitTab::setModelResolution(const std::string &resolutionName) {
-  setModelResolution(resolutionName, WorkspaceID{0});
-}
-
-void IndirectDataAnalysisConvFitTab::setModelResolution(const std::string &resolutionName, WorkspaceID workspaceID) {
-  auto fitResolutions = m_dataPresenter->getResolutionsForFit();
-  m_fitPropertyBrowser->setModelResolution(fitResolutions);
-  updateParameterValues();
-  setModelFitFunction();
 }
 
 void IndirectDataAnalysisConvFitTab::fitFunctionChanged() { m_convFittingModel->setFitTypeString(getFitTypeString()); }

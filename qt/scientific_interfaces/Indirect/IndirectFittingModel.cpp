@@ -29,10 +29,6 @@ using namespace MantidQt::MantidWidgets;
 namespace {
 using namespace MantidQt::CustomInterfaces::IDA;
 
-std::string getFitDataName(const std::string &baseWorkspaceName, const FunctionModelSpectra &workspaceIndexes) {
-  return baseWorkspaceName + " (" + workspaceIndexes.getString() + ")";
-}
-
 std::string cutLastOf(std::string const &str, std::string const &delimiter) {
   auto const cutIndex = str.rfind(delimiter);
   if (cutIndex != std::string::npos)

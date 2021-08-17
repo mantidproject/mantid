@@ -35,7 +35,7 @@ class MANTIDQT_INDIRECT_DLL FqFitDataPresenter : public IndirectFitDataPresenter
 public:
   FqFitDataPresenter(IIndirectFitDataModel *model, IIndirectFitDataView *view,
                      IFQFitObserver *SingleFunctionTemplateBrowser);
-  void addWorkspace(const std::string &workspaceName, std::string paramType, const int &spectrum_index) override;
+  void addWorkspace(const std::string &workspaceName, const std::string &paramType, const int &spectrum_index) override;
   void setActiveWidth(std::size_t widthIndex, WorkspaceID dataIndex, bool single = true) override;
   void setActiveEISF(std::size_t eisfIndex, WorkspaceID dataIndex, bool single = true) override;
 

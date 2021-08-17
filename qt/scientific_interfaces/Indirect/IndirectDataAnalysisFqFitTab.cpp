@@ -146,7 +146,7 @@ void IndirectDataAnalysisFqFitTab::setActiveWorkspaceIDToCurrentWorkspace(IAddWo
   m_activeWorkspaceID = index;
 }
 
-void IndirectDataAnalysisFqFitTab::setModelSpectrum(int index, std::string paramType) {
+void IndirectDataAnalysisFqFitTab::setModelSpectrum(int index, const std::string &paramType) {
   if (index < 0)
     throw std::runtime_error("No valid parameter was selected.");
   else if (paramType == "Width")

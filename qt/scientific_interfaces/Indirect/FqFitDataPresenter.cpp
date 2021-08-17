@@ -210,7 +210,7 @@ FqFitDataPresenter::FqFitDataPresenter(IIndirectFitDataModel *model, IIndirectFi
   m_notifier.subscribe(SingleFunctionTemplateBrowser);
 }
 
-void FqFitDataPresenter::addWorkspace(const std::string &workspaceName, std::string paramType,
+void FqFitDataPresenter::addWorkspace(const std::string &workspaceName, const std::string &paramType,
                                       const int &spectrum_index) {
   auto workspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
   const auto name = getHWHMName(workspace->getName());
