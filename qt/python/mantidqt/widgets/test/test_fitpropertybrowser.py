@@ -21,7 +21,6 @@ from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.widgets.fitpropertybrowser.fitpropertybrowser import FitPropertyBrowser
 from workbench.plotting.figuremanager import FigureManagerADSObserver
 
-from qtpy import PYQT5
 from qtpy.QtWidgets import QDockWidget
 
 
@@ -29,12 +28,6 @@ from qtpy.QtWidgets import QDockWidget
 class FitPropertyBrowserTest(unittest.TestCase):
     def tearDown(self):
         AnalysisDataService.clear()
-
-    def test_initialization_does_not_raise(self):
-        try:
-            self._create_widget()
-        except:
-            self.assertTrue(False)
 
     @patch('mantidqt.widgets.fitpropertybrowser.fitpropertybrowser.FitPropertyBrowser.normaliseData')
     def test_normalise_data_set_on_fit_menu_shown(self, normaliseData_mock):
@@ -135,9 +128,6 @@ class FitPropertyBrowserTest(unittest.TestCase):
         self.assertEqual(name + "_Workspace", workspaceList.item(2).text())
 
     def test_fit_result_matrix_workspace_in_browser_is_viewed_when_clicked(self):
-        if not PYQT5:
-            self.skipTest("MatrixWorkspaceDisplay and TableWorkspaceDisplay cannot be "
-                          "imported in qt4 so the test fails with an error.")
         from mantidqt.widgets.workspacedisplay.table.presenter import TableWorkspaceDisplay
 
         name = "ws"
