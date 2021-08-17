@@ -72,10 +72,11 @@ class SliceViewer(ObservingPresenter):
         self.ads_observer = SliceViewerADSObserver(self.replace_workspace, self.rename_workspace,
                                                    self.ADS_cleared, self.delete_workspace)
 
-    def new_plot_MDH(self):
+    def new_plot_MDH(self, reset_limits=False):
         """
         Tell the view to display a new plot of an MDHistoWorkspace
         """
+        print(f'[DEBUG] New MDH')
         data_view = self.view.data_view
         limits = data_view.get_axes_limits()
 
@@ -85,12 +86,17 @@ class SliceViewer(ObservingPresenter):
         else:
             self.new_plot_MDE()
 
-    def new_plot_MDE(self):
+    def new_plot_MDE(self, reset_limits=False):
         """
         Tell the view to display a new plot of an MDEventWorkspace
         """
+        print(f'[DEBUG] New MDE')
         data_view = self.view.data_view
-        limits = data_view.get_axes_limits()
+        if reset_limits:
+            limits = None
+        else:
+            limits = data_view.get_axes_limits()
+        print(f'[DEBUG] Limits = {limits}; dimension trasposed: {data_view.dimensions.transpose}')
 
         if limits is not None:
             xlim, ylim = limits
@@ -102,19 +108,23 @@ class SliceViewer(ObservingPresenter):
                 xmin_p, ymax_p = inv_tr(xlim[0], ylim[1])
                 xmax_p, ymin_p = inv_tr(xlim[1], ylim[0])
                 xlim, ylim = (xmin_p, xmax_p), (ymin_p, ymax_p)
+
+            print(f'[DEBUG] Reset limit: {limits}')
             if data_view.dimensions.transpose:
                 limits = ylim, xlim
             else:
                 limits = xlim, ylim
 
-        data_view.plot_MDH(
-            self.model.get_ws_MDE(slicepoint=self.get_slicepoint(),
-                                  bin_params=data_view.dimensions.get_bin_params(),
-                                  limits=limits))
+        something = self.model.get_ws_MDE(slicepoint=self.get_slicepoint(),
+                                  bin_params=data_view.dimensions.get_bin_params())
+                                  # , limits=limits)
+        print(f'[DEBUG] something = {type(something)}')
+        data_view.plot_MDH(something)
         self._call_peaks_presenter_if_created("notify", PeaksViewerPresenter.Event.OverlayPeaks)
 
-    def new_plot_matrix(self):
+    def new_plot_matrix(self, reset_limits=False):
         """Tell the view to display a new plot of an MatrixWorkspace"""
+        print(f'[DEBUG] New Matrix')
         self.view.data_view.plot_matrix(self.model.get_ws(), distribution=not self.normalization)
 
     def update_plot_data_MDH(self):
@@ -165,9 +175,14 @@ class SliceViewer(ObservingPresenter):
 
     def dimensions_changed(self):
         """Indicates that the dimensions have changed"""
+
+
+        print(f'[DEBUG] Dimensions to plot is detected')
+
         data_view = self.view.data_view
         sliceinfo = self.get_sliceinfo()
         if data_view.nonorthogonal_mode:
+            print(f'[DEBUG] mode 1')
             if sliceinfo.can_support_nonorthogonal_axes():
                 # axes need to be recreated to have the correct transform associated
                 data_view.create_axes_nonorthogonal(
@@ -176,12 +191,14 @@ class SliceViewer(ObservingPresenter):
                 data_view.disable_tool_button(ToolItemText.NONORTHOGONAL_AXES)
                 data_view.create_axes_orthogonal()
         else:
+            print(f'[DEBUG] mode 2')
             if sliceinfo.can_support_nonorthogonal_axes():
                 data_view.enable_tool_button(ToolItemText.NONORTHOGONAL_AXES)
             else:
                 data_view.disable_tool_button(ToolItemText.NONORTHOGONAL_AXES)
 
-        self.new_plot()
+        # Call new_plot() which is setup dynamically in self.__init__()
+        self.new_plot(reset_limits=True)
 
     def slicepoint_changed(self):
         """Indicates the slicepoint has been updated"""
