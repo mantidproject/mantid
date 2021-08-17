@@ -51,14 +51,21 @@ class NOMADMedianDetectorTest(PythonAlgorithm, _NOMADMedianDetectorTest):
                          action=FileAction.Save),
             doc='Output masked pixels in XML format')
 
+        self.declareProperty(
+            FileProperty('OutputMaskASCII', defaultValue='', extensions=['.txt'],
+                         action=FileAction.Save),
+            doc='Output masked pixels in single-column ASCII file')
+
     def PyExec(self):
         # initialize data structures 'config' and 'intensities'
         self.config = self.parse_yaml(self.getProperty('ConfigurationFile').value)
         self.intensities = self._get_intensities(self.getProperty('InputWorkspace').value,
                                                  self.getProperty('SolidAngleNorm').value)
-        # calculate the mask, and export it to XML file
+        # calculate the mask, and export it to XML and/or single-column ASCII file
         mask_composite = self.mask_by_tube_intensity | self.mask_by_pixel_intensity
-        self.export_mask(mask_composite, self.getProperty('OutputMaskXML').value)
+        for exported in ['OutputMaskXML', 'OutputMaskASCII']:
+            if self.getProperty(exported).value:
+                self.export_mask(mask_composite, self.getProperty(exported).value)
 
 
 AlgorithmFactory.subscribe(NOMADMedianDetectorTest)

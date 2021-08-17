@@ -17,6 +17,7 @@ import yaml
 # standard imports
 from collections import namedtuple
 import enum
+import os
 import random
 import string
 from typing import List, NamedTuple
@@ -50,6 +51,7 @@ class _NOMADMedianDetectorTest:
 
     # Instrument geomtry
     # TODO these quantities should be derived from the instrument object
+    MONITOR_COUNT = 2  # number of upstream monitors
     PANEL_COUNT = 6
     EIGHTPACK_COUNT = 99
     TUBES_IN_EIGHTPACK = 8
@@ -442,7 +444,10 @@ class _NOMADMedianDetectorTest:
         return self.determine_tubes_threshold(self.intensities, self.config, self.set_nomad_constants())
 
     @classmethod
-    def export_mask(cls, pixel_mask_states: numpy.ndarray, mask_file_name: str, instrument_name: str = 'NOMAD'):
+    def export_mask(cls,
+                    pixel_mask_states: numpy.ndarray,
+                    mask_file_name: str,
+                    instrument_name: str = 'NOMAD') -> None:
         """
         Export masks to XML file format
 
@@ -451,23 +456,27 @@ class _NOMADMedianDetectorTest:
         pixel_mask_states: numpy.ndarray
             boolean array with the number of pixels of NOMAD.  True for masking
         mask_file_name: str
-            name of the output mask XML file
+            name of the output mask XML file or single-colun ASCII file
         instrument_name: str
             name of the instrument
         """
-        # Load empty instrument
-        empty_workspace_name = cls._random_string()
-        LoadEmptyInstrument(InstrumentName=instrument_name, OutputWorkspace=empty_workspace_name)
+        detector_ids_masked = np.where(pixel_mask_states)[0]  # detector ID's start at zero (monitors have negative ID)
+        if '.xml' in mask_file_name:
+            # Load empty instrument
+            empty_workspace_name = cls._random_string()
+            LoadEmptyInstrument(InstrumentName=instrument_name, OutputWorkspace=empty_workspace_name)
 
-        # Get the workspace indexes to mask first 2 spectra are monitors: add 2
-        if mtd[empty_workspace_name].getNumberHistograms() != pixel_mask_states.shape[0] + 2:
-            raise RuntimeError(f'Spectra number of {instrument_name} workspace does not match mask state array')
-        mask_ws_indexes = np.where(pixel_mask_states)[0] + 2
+            # Get the workspace indexes to mask. Shift by the number of monitors
+            if mtd[empty_workspace_name].getNumberHistograms() != pixel_mask_states.shape[0] + cls.MONITOR_COUNT:
+                raise RuntimeError(f'Spectra number of {instrument_name} workspace does not match mask state array')
+            mask_ws_indexes = detector_ids_masked + cls.MONITOR_COUNT
 
-        MaskDetectors(Workspace=empty_workspace_name, WorkspaceIndexList=mask_ws_indexes)
+            MaskDetectors(Workspace=empty_workspace_name, WorkspaceIndexList=mask_ws_indexes)
 
-        mask_workspace_name = cls._random_string()
-        ExtractMask(InputWorkspace=empty_workspace_name, OutputWorkspace=mask_workspace_name)
-        SaveMask(InputWorkspace=mask_workspace_name, OutputFile=mask_file_name)
+            mask_workspace_name = cls._random_string()
+            ExtractMask(InputWorkspace=empty_workspace_name, OutputWorkspace=mask_workspace_name)
+            SaveMask(InputWorkspace=mask_workspace_name, OutputFile=mask_file_name)
 
-        DeleteWorkspaces([empty_workspace_name, mask_workspace_name])
+            DeleteWorkspaces([empty_workspace_name, mask_workspace_name])
+        else:
+            np.savetxt(mask_file_name, detector_ids_masked, fmt='%6d', newline=os.linesep)
