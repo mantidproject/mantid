@@ -71,6 +71,9 @@ class ImageInfoTracker(CursorTracker):
         if cinfo is not None:
             arr, _, (i, j) = cinfo
             if (0 <= i < arr.shape[0]) and (0 <= j < arr.shape[1]) and not np.ma.is_masked(arr[i, j]):
+                if (not self._cursor_transform) and self._image.transpose:
+                    # The cursor transform would have dealt with this
+                    xdata, ydata = ydata, xdata
                 self._widget.cursorAt(xdata, ydata, arr[i, j])
 
     def _on_cursor_at_mesh(self, xdata: float, ydata: float):
