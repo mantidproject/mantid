@@ -1,4 +1,4 @@
-.. _PyCharm:
+.. _pycharm-ref:
 
 =======
 PyCharm
@@ -48,6 +48,8 @@ At any point in these instructions where ``RelWithDebInfo`` is used (including i
 - On Windows, select the ``{BUILD}/bin/RelWithDeb`` file and mark as Source by clicking the ``Sources`` button whilst it's selected.
 - On Linux or MacOS, select your ``{BUILD}/bin`` directory and mark as Source by clicking the ``Sources`` button whilst it's selected.
 - Click Apply, and then Ok to close the window.
+
+.. _debug-workbench-in-pycharm-ref:
 
 Debug Python in Workbench
 #########################
@@ -164,6 +166,7 @@ Setting up PyCharm on Windows
 
 NOTE : In some cases, imports in the code will still be highlighted red when they come from folders within the ``script/`` folder, or from other folders entirely. To fix this simply add the relevant folder that contains the module you are importing in the same fashion as step 3 above.
 
+.. _pycharm-debugging-env-file:
 
 Running Files in the Debugger with EnvFile extension
 ####################################################
@@ -260,7 +263,7 @@ This **does not** require a PyCharm Professional license for debugging, but requ
 1. Go to your Run/Debug Configurations.
 2. Open Templates > Python tests > Unittests configuration.
 3. Set the working directory to ``<Mantid Build Dir>/bin/Debug``, for a Debug build, or ``<Mantid Build Dir>/bin/Release`` for a Release build.
-4. Add the EnvFile to the Unittests configuration, instructions in :ref:`running-file-debug-with-envfile-extension`.
+4. Add the EnvFile to the Unittests configuration, instructions in :ref:`pycharm-debugging-env-file`.
 5. You should now be able to click the Run/Debug icons next to each unit test method or class to run/debug them.
 
 Setting up PyCharm on Linux
