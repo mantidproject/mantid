@@ -43,6 +43,9 @@ class NOMADMedianDetectorTest(PythonAlgorithm, _NOMADMedianDetectorTest):
                          action=FileAction.Load),
             doc='YML file specifying collimation states and unused eight-packs')
 
+        self.declareProperty(name='SolidAngleNorm', defaultValue=True, direction=Direction.Input,
+                             doc='Normalize each pixel by its solid angle?')
+
         self.declareProperty(
             FileProperty('OutputMaskXML', defaultValue='', extensions=['.xml'],
                          action=FileAction.Save),
@@ -51,7 +54,8 @@ class NOMADMedianDetectorTest(PythonAlgorithm, _NOMADMedianDetectorTest):
     def PyExec(self):
         # initialize data structures 'config' and 'intensities'
         self.config = self.parse_yaml(self.getProperty('ConfigurationFile').value)
-        self.intensities = self._get_intensities(self.getProperty('InputWorkspace').value)
+        self.intensities = self._get_intensities(self.getProperty('InputWorkspace').value,
+                                                 self.getProperty('SolidAngleNorm').value)
         # calculate the mask, and export it to XML file
         mask_composite = self.mask_by_tube_intensity | self.mask_by_pixel_intensity
         self.export_mask(mask_composite, self.getProperty('OutputMaskXML').value)

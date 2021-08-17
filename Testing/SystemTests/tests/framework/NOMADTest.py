@@ -23,6 +23,7 @@ class MedianDetectorTestTest(systemtesting.MantidSystemTest):
         LoadNexusProcessed(Filename='NOM_144974_SingleBin.nxs', OutputWorkspace='NOM_144974')
         NOMADMedianDetectorTest(InputWorkspace='NOM_144974',
                                 ConfigurationFile='NOMAD_mask_gen_config.yml',
+                                SolidAngleNorm=False,
                                 OutputMaskXML=file_mask)
         for file_name, workspace_name in [(file_mask, 'mask_test'), ('NOM_144974_mask.xml', 'mask_reference')]:
             LoadMask(Instrument='NOMAD',

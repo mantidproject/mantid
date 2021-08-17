@@ -6,7 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 # package imports
-from mantid.simpleapi import (LoadEmptyInstrument, mtd, MaskDetectors, ExtractMask, SaveMask, DeleteWorkspaces)
+from mantid.simpleapi import (DeleteWorkspaces, Divide, ExtractMask, LoadEmptyInstrument, MaskDetectors,
+                              mtd, SaveMask, SolidAngle)
 
 # 3rd-party imports
 import numpy
@@ -285,22 +286,37 @@ class _NOMADMedianDetectorTest:
             pass
         return pixel_mask_states
 
-    def _get_intensities(self, input_workspace: 'mantid.api.MatrixWorkspace') -> np.ma.core.MaskedArray:  # noqa F821
+    def _get_intensities(self,
+                         input_workspace: 'mantid.api.MatrixWorkspace',
+                         solid_angle_normalize: bool = True) -> np.ma.core.MaskedArray:  # noqa F821
         r"""
         Integrated intensity of each pixel for pixels in use. Pixels of unused eightpacks are masked
+
+        Parameters
+        ----------
+        input_workspace: workspace containing pixel intensities
+        solid_angle_normalize: carry out nomalization by pixel solid angle
 
         Returns
         -------
         1D array of size number-of-pixels
         """
+        intensities_workspace = input_workspace  # clean up temporary workspaces
+        if solid_angle_normalize:
+            solid_angles, normalized_workspace = self._random_string(), self._random_string()  # temporary
+            SolidAngle(InputWorkspace=input_workspace, OutputWorkspace=solid_angles)
+            Divide(LHSWorkspace=input_workspace, RHSWorkspace=solid_angles, OutputWorkspace=normalized_workspace)
+            intensities_workspace = mtd[normalized_workspace]
         # Do not count initial spectra which may be related to monitors, not pixel-detectors
-        spectrum_info = input_workspace.spectrumInfo()
+        spectrum_info = intensities_workspace.spectrumInfo()
         spectrum_index = 0
         while spectrum_info.isMonitor(spectrum_index):
             spectrum_index += 1
         # sum counts for each detector histogram
-        intensities = np.sum(input_workspace.extractY()[spectrum_index:], axis=1)
+        intensities = np.sum(intensities_workspace.extractY()[spectrum_index:], axis=1)
         assert len(intensities) == self.PIXEL_COUNT
+        if solid_angle_normalize:
+            DeleteWorkspaces([solid_angles, normalized_workspace])  # clean up temporary workspaces
         return np.ma.masked_array(intensities, mask=~self.pixel_in_use)  # mask unused pixels
 
     @property

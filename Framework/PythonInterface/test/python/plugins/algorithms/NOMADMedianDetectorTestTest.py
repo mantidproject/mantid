@@ -27,6 +27,7 @@ class NOMADMedianDetectorTestTest(unittest.TestCase):
         LoadNexusProcessed(Filename='NOM_144974_SingleBin.nxs', OutputWorkspace='NOM_144974')
         NOMADMedianDetectorTest(InputWorkspace='NOM_144974',
                                 ConfigurationFile='NOMAD_mask_gen_config.yml',
+                                SolidAngleNorm=False,
                                 OutputMaskXML=file_mask)
         with open(file_mask) as f:
             contents = f.read()
