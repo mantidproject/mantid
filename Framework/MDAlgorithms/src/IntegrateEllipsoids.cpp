@@ -284,8 +284,7 @@ std::map<std::string, std::string> IntegrateEllipsoids::validateInputs() {
   double satellite_back_outer_radius = (getPointerToProperty("SatelliteBackgroundOuterSize")->isDefault())
                                            ? getProperty("BackgroundOuterSize")
                                            : getProperty("SatelliteBackgroundOuterSize");
-  bool shareBackground = getProperty("ShareBackground");
-  if (specify_size && !shareBackground) {
+  if (specify_size) {
     if (satellite_back_outer_radius > satellite_radius) {
       issues["SpecifySize"] = "SatelliteBackgroundOuterSize must be less than or equal to the SatelliteRegionRadius";
     }

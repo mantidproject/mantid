@@ -581,21 +581,23 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("SatelliteRegionRadius", 0.11));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("SatellitePeakSize", 0.10));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("ShareBackground", true));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SatelliteBackgroundInnerSize", 0.101));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SatelliteBackgroundOuterSize", 0.11));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT_THROWS_NOTHING(alg.isExecuted());
 
     PeaksWorkspace_sptr peaksShared = alg.getProperty("OutputWorkspace");
     TS_ASSERT_EQUALS(peaksShared->getNumberPeaks(), peaksHKL.size());
 
-    // first peak is a bragg peak: intensity = 29510 - 0.883704*1832 = 27891.054
-    // second peak is a satellite with intensity = 4539 - 3.32588*722 = 2137.93
-    // However, sat peak should share background of bragg: 4539 - 0.883704*1832 = 2920.054
+    // first peak is a bragg peak: intensity = 46372 - 0.883704*3086 = 43644.889456
+    // second peak is a satellite with intensity = 4540 - 3.32558*722 = 2138.93124
+    // However, sat peak should share background of bragg: 4540 - 0.883704*3086 = 1812.889456
     const Peak braggPeak = peaksShared->getPeak(0);
     const Peak satellitePeak = peaksShared->getPeak(1);
 
-    TS_ASSERT_DELTA(braggPeak.getIntensity(), 27891.054272, 1e-2);
-    TS_ASSERT_DELTA(satellitePeak.getIntensity(), 2920.054272, 1e-2);
-    TS_ASSERT_DELTA(satellitePeak.getSigmaIntensity(), 77.2636, 1e-2);
+    TS_ASSERT_DELTA(braggPeak.getIntensity(), 43644.889456, 1e-2);
+    TS_ASSERT_DELTA(satellitePeak.getIntensity(), 1812.889456, 1e-2);
+    TS_ASSERT_DELTA(satellitePeak.getSigmaIntensity(), 83.3664, 1e-2);
 
     // check that the background radii are the same in the peak shape
     const PeakShapeEllipsoid braggShape = static_cast<const PeakShapeEllipsoid &>(braggPeak.getPeakShape());
