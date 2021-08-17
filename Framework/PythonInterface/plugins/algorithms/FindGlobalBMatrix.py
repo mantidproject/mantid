@@ -106,6 +106,8 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
         alatt0 = [a, b, c, alpha, beta, gamma]
         try:
             alatt, cov, info, msg, ier = leastsq(fobj, x0=alatt0, full_output=True)
+            # eval the fobj at optimal solution to set UB (leastsq iteration stops at a next sub-optimal solution)
+            fobj(alatt)
         except ValueError:
             logger.error("CalculateUMatrix failed - check initial lattice parameters and tolerance provided.")
             return
