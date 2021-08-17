@@ -26,6 +26,7 @@ Bugfixes
 - The ISIS SANS Interface will now display an error, instead of an unexpected error, if the user does not have permission to save a CSV file to the requested location.
 - The ISIS SANS interface will no longer throw an uncaught exception when a user tries to enter row information without loading a Mask/TOML file.
 - The ISIS SANS beam centre finder correctly accepts zero values (0.0) and won't try to replace them with empty strings.
+- The warning "Reduction Mode 'x' is not valid" will no longer incorrectly show when there are errors with the user's mask file.
 
 Improvements
 ############
