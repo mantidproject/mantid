@@ -9,6 +9,7 @@
 This is one of the two models which is used for the data reduction. It contains generally all the settings which
 are not available in the model associated with the data table.
 """
+from typing import Union
 
 from sans.common.enums import (ReductionDimensionality, ReductionMode, RangeStepType, SaveType,
                                DetectorType, FitModeForMerge)
@@ -207,12 +208,10 @@ class StateGuiModel(ModelCommon):
         return self._get_val_or_default(val, ReductionMode.LAB)
 
     @reduction_mode.setter
-    def reduction_mode(self, value):
-        if (value is ReductionMode.LAB or value is ReductionMode.HAB
-                or value is ReductionMode.MERGED or value is ReductionMode.ALL):  # noqa
-            self._all_states.reduction.reduction_mode = value
-        else:
-            raise ValueError("A reduction mode was expected, got instead {}".format(value))
+    def reduction_mode(self, value: Union[str, ReductionMode]):
+        if isinstance(value, str):
+            value = ReductionMode(value)
+        self._all_states.reduction.reduction_mode = value
 
     @property
     def merge_scale(self):
