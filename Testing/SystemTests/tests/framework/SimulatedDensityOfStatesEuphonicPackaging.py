@@ -53,7 +53,7 @@ class SimulatedDensityOfStatesEuphonicTest(MantidSystemTest):
                     + "; ".join(directory_contents))
 
     @classmethod
-    def _install_euphonic_to_tmp_prefix(cls, scipy_prefix, euphonic_prefix,
+    def _install_euphonic_to_tmp_prefix(cls, tmp_prefix,
                                         verbose=False):
         """Install Euphonic library to temporary prefix
 
@@ -71,21 +71,22 @@ class SimulatedDensityOfStatesEuphonicTest(MantidSystemTest):
             compatibility_args = []
 
         process = subprocess.run([sys.executable, "-m", "pip", "install",
-                                  "--prefix", scipy_prefix]
+                                  "--prefix", tmp_prefix]
                                  + compatibility_args
                                  + ["pip", "packaging"],
                                  stdout=subprocess.PIPE,
                                  stderr=subprocess.STDOUT)
 
-        prefix_path = pathlib.Path(scipy_prefix)
+        prefix_path = pathlib.Path(tmp_prefix)
 
-        # Add to path if anything was installed
+        # Add to path if anything was installed so that subsequent calls to
+        # Pip can see those dependencies
         env = os.environ.copy()
         if list(prefix_path.iterdir()):
-            scipy_site_packages = cls._add_libs_from_prefix(prefix_path)
+            tmp_site_packages = cls._add_libs_from_prefix(prefix_path)
 
             process_pythonpath =  (
-                ':'.join([str(dir) for dir in scipy_site_packages]
+                ':'.join([str(dir) for dir in tmp_site_packages]
                          + [os.environ['PYTHONPATH']]))
             env['PYTHONPATH'] = process_pythonpath
 
@@ -95,7 +96,7 @@ class SimulatedDensityOfStatesEuphonicTest(MantidSystemTest):
             process = subprocess.run([sys.executable, "-m", "pip", "install",
                                       "--ignore-installed",
                                       "--no-deps",
-                                      "--prefix", scipy_prefix,
+                                      "--prefix", tmp_prefix,
                                      "scipy==1.0", "pytest"],
                                      stdout=subprocess.PIPE,
                                      stderr=subprocess.STDOUT,
@@ -104,12 +105,11 @@ class SimulatedDensityOfStatesEuphonicTest(MantidSystemTest):
                 print(process.stdout.decode('utf-8'))
 
             # Add prefix again, in case nothing was installed before
-            scipy_site_packages = cls._add_libs_from_prefix(prefix_path)
-
+            tmp_site_packages = cls._add_libs_from_prefix(prefix_path)
             importlib.reload(scipy)
 
         process = subprocess.run([sys.executable, "-m", "pip", "install",
-                                  "--prefix", euphonic_prefix,
+                                  "--prefix", tmp_prefix,
                                   "euphonic[phonopy_reader]"],
                                  stdout=subprocess.PIPE,
                                  stderr=subprocess.STDOUT,
@@ -117,15 +117,14 @@ class SimulatedDensityOfStatesEuphonicTest(MantidSystemTest):
         if verbose:
             print(process.stdout.decode('utf-8'))
 
-        cls._add_libs_from_prefix(pathlib.Path(euphonic_prefix))
+        # Update path again, in case a new lib/lib64 diretory was created
+        cls._add_libs_from_prefix(pathlib.Path(tmp_prefix))
 
     def runTest(self):
-        with tempfile.TemporaryDirectory() as scipy_prefix, \
-                tempfile.TemporaryDirectory() as euphonic_prefix:
+        with tempfile.TemporaryDirectory() as tmp_prefix:
 
             if not euphonic_available():
-                self._install_euphonic_to_tmp_prefix(scipy_prefix,
-                                                     euphonic_prefix)
+                self._install_euphonic_to_tmp_prefix(tmp_prefix)
 
             import pint  # noqa: F401
             import euphonic  # noqa: F401
