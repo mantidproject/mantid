@@ -39,5 +39,6 @@ Bugfixes
 - Fixed a bug where output workspaces of different types would interfere with successive calls to binary operations, such as multiply.
 - Fixed JSON serialization issue of MantidAxType by explicitly extracting its value
 - Fixed a bug in colorfill plots which lead to the loss of a spectrum from the resulting image.
+- Fixed a bug where marker formatting options were disabled upon opening the figure options.
 
 :ref:`Release 6.2.0 <v6.2.0>`
