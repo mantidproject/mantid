@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from SANSILLCommon import *
-from mantid.api import DataProcessorAlgorithm, WorkspaceGroupProperty, MultipleFileProperty, FileAction
+from mantid.api import DataProcessorAlgorithm, WorkspaceGroupProperty, MultipleFileProperty, FileAction, WorkspaceGroup
 from mantid.kernel import Direction, FloatBoundedValidator, FloatArrayProperty, IntArrayProperty, IntBoundedValidator, StringListValidator
 from mantid.simpleapi import *
 from os import path
@@ -742,8 +742,8 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         if qbinning:
             kwargs['OutputBinning'] = qbinning.split(':')[d]
         if self.getProperty('OutputPanels').value:
-            kwargs['PanelOutputWorkspace'] = sample_ws[0] + '_iq_panels'
-            results.append(kwargs['PanelOutputWorkspace'])
+            kwargs['PanelOutputWorkspaces'] = sample_ws[0] + '_iq_panels'
+            results.append(kwargs['PanelOutputWorkspaces'])
         SANSILLIntegration(**kwargs)
         return results
 
