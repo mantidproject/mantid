@@ -248,7 +248,7 @@ std::string LoadMuonNexusV2NexusHelper::getPeriodLabels() const {
   return periodClass.getString("labels");
 }
 
-std::vector<int> LoadMuonNexusV2NexusHelper::getIntVector(const int numPeriods, const std::string name) const {
+std::vector<int> LoadMuonNexusV2NexusHelper::getIntVector(const int &numPeriods, const std::string &name) const {
   NXClass periodClass = m_entry.openNXGroup(NeXusEntry::PERIOD);
 
   NXInt dataClass = periodClass.openNXInt(name);
@@ -260,25 +260,25 @@ std::vector<int> LoadMuonNexusV2NexusHelper::getIntVector(const int numPeriods, 
   return dataVector;
 }
 
-std::string LoadMuonNexusV2NexusHelper::getPeriodSequenceString(const int numPeriods) const {
+std::string LoadMuonNexusV2NexusHelper::getPeriodSequenceString(const int &numPeriods) const {
   return convertVectorToString(getIntVector(numPeriods, NeXusEntry::SEQUENCES));
 }
 
-std::string LoadMuonNexusV2NexusHelper::getPeriodTypes(const int numPeriods) const {
+std::string LoadMuonNexusV2NexusHelper::getPeriodTypes(const int &numPeriods) const {
   return convertVectorToString(getIntVector(numPeriods, NeXusEntry::TYPE));
 }
 
-std::string LoadMuonNexusV2NexusHelper::getPeriodFramesRequested(const int numPeriods) const {
+std::string LoadMuonNexusV2NexusHelper::getPeriodFramesRequested(const int &numPeriods) const {
   return convertVectorToString(getIntVector(numPeriods, NeXusEntry::REQUESTED));
 }
-std::string LoadMuonNexusV2NexusHelper::getPeriodRawFrames(const int numPeriods) const {
+std::string LoadMuonNexusV2NexusHelper::getPeriodRawFrames(const int &numPeriods) const {
   return convertVectorToString(getIntVector(numPeriods, NeXusEntry::RAWFRAMES));
 }
-std::string LoadMuonNexusV2NexusHelper::getPeriodOutput(const int numPeriods) const {
+std::string LoadMuonNexusV2NexusHelper::getPeriodOutput(const int &numPeriods) const {
   return convertVectorToString(getIntVector(numPeriods, NeXusEntry::PERIODOUTPUT));
 }
 
-std::string LoadMuonNexusV2NexusHelper::getPeriodTotalCounts(const int numPeriods) const {
+std::string LoadMuonNexusV2NexusHelper::getPeriodTotalCounts(const int &numPeriods) const {
   NXClass periodClass = m_entry.openNXGroup(NeXusEntry::PERIOD);
 
   NXFloat countsData = periodClass.openNXFloat(NeXusEntry::PERIODCOUNTS);
