@@ -38,7 +38,7 @@ class TomlSchemaV1Validator(object):
         unrecognised = [s for s in unrecognised if not any(wild_matcher.match(s) for wild_matcher in wildcard_matchers)]
 
         if len(unrecognised) > 0:
-            err = "The following keys were not recognised\n:"
+            err = "The following keys were not recognised:\n"
             err += "".join("{0} \n".format(k) for k in unrecognised)
             raise TomlValidationError(err)
 
