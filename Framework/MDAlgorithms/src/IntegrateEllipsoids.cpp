@@ -350,11 +350,6 @@ void IntegrateEllipsoids::exec() {
                                            ? getProperty("BackgroundOuterSize")
                                            : getProperty("SatelliteBackgroundOuterSize");
   bool shareBackground = getProperty("ShareBackground");
-  if (shareBackground) {
-    // force same background shell as main peaks if sharing background region
-    satellite_back_inner_radius = back_inner_radius;
-    satellite_back_outer_radius = back_outer_radius;
-  }
 
   if (adaptiveQBackground)
     adaptiveQBackgroundMultiplier = adaptiveQMultiplier;
@@ -593,6 +588,17 @@ void IntegrateEllipsoids::exec() {
         // update the sigma intensity based on the new background
         double sigInt = (*satPeak)->getSigmaIntensity();
         (*satPeak)->setSigmaIntensity(sqrt(sigInt * sigInt + cachedBraggBackground[it->first].second));
+
+        const PeakShapeEllipsoid braggPeakShape =
+            static_cast<const PeakShapeEllipsoid &>(peaks[it->first].getPeakShape());
+        const PeakShapeEllipsoid satellitePeakShape =
+            static_cast<const PeakShapeEllipsoid &>((*satPeak)->getPeakShape());
+
+        // update the satellite's shape background radii
+        Mantid::Geometry::PeakShape_const_sptr newShape = std::make_shared<const PeakShapeEllipsoid>(
+            satellitePeakShape.directions(), satellitePeakShape.abcRadii(), braggPeakShape.abcRadiiBackgroundInner(),
+            braggPeakShape.abcRadiiBackgroundOuter(), Mantid::Kernel::QLab, "IntegrateEllipsoids");
+        (*satPeak)->setPeakShape(newShape);
       }
     }
   }
