@@ -53,6 +53,13 @@ void CalculatePlaczek::init() {
 std::map<std::string, std::string> validateInputs() {
   std::map<std::string, std::string> issues;
   // TODO: find edge cases that needs checking
+
+  // Case1: no sample temperature
+  // -- if second order correction is required, the user need to
+  //  | provide the sample temperature as input
+  //  | have sample temperature embedded in the sample log
+
+  // Case2:
   return issues;
 }
 

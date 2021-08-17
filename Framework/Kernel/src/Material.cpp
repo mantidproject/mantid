@@ -217,7 +217,7 @@ double Material::temperature() const { return m_temperature; }
 
 /**
  * Get the pressure
- * @returns The pressure of the material
+ * @returns The pressure of the material, in kPa (Default: 101.325 kPa)
  */
 double Material::pressure() const { return m_pressure; }
 

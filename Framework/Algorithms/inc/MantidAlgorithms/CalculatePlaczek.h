@@ -21,9 +21,7 @@ public:
   // Category for quick search and doc page
   const std::string category() const override;
   // Documentation
-  const std::string summary() const override {
-    return "Perform 1st or 2nd order Placzek correction for given spectrum.";
-  };
+  const std::string summary() const override;
   // seeAlso (documentation purpose)
   const std::vector<std::string> seeAlso() const override;
 
