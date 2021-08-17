@@ -23,17 +23,20 @@ class NOMADMedianDetectorTestTest(unittest.TestCase):
         self.assertTrue(alg.isInitialized())
 
     def test_exec(self):
-        _, file_mask = tempfile.mkstemp(suffix='.xml')
+        _, file_xml_mask = tempfile.mkstemp(suffix='.xml')
+        _, file_txt_mask = tempfile.mkstemp(suffix='.txt')
         LoadNexusProcessed(Filename='NOM_144974_SingleBin.nxs', OutputWorkspace='NOM_144974')
         NOMADMedianDetectorTest(InputWorkspace='NOM_144974',
                                 ConfigurationFile='NOMAD_mask_gen_config.yml',
                                 SolidAngleNorm=False,
-                                OutputMaskXML=file_mask)
-        with open(file_mask) as f:
+                                OutputMaskXML=file_xml_mask,
+                                OutputMaskASCII=file_txt_mask)
+        with open(file_xml_mask) as f:
             contents = f.read()
-        for segment in ['0-3122', '48847-48900', '69884-71046', '96376-96772']:  # test a few
+        for segment in ['0-3122', '48847-48900', '65020-65029', '98295-101375']:  # test a few
             assert segment in contents
-        os.remove(file_mask)
+        os.remove(file_xml_mask)
+        os.remove(file_txt_mask)
 
 
 if __name__ == '__main__':

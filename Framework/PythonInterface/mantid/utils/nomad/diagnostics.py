@@ -53,6 +53,7 @@ class _NOMADMedianDetectorTest:
     # TODO these quantities should be derived from the instrument object
     MONITOR_COUNT = 2  # number of upstream monitors
     PANEL_COUNT = 6
+    PANEL_FLAT = [False, False, False, False, True, True]  # last two panels are flat
     EIGHTPACK_COUNT = 99
     TUBES_IN_EIGHTPACK = 8
     TUBE_COUNT = EIGHTPACK_COUNT * TUBES_IN_EIGHTPACK
@@ -332,6 +333,20 @@ class _NOMADMedianDetectorTest:
         return (self.TUBES_IN_EIGHTPACK * np.array(eightpack_range)).tolist()
 
     @property
+    def tube_in_flat_panel(self) -> np.ndarray:
+        r"""Boolean list indicating whether each tube belong to flat panel"""
+        checks = list()  # will contains True or False for each tube index
+        # iterate over the range of tubes for each panel
+        for (begin, end), state in zip(self.tube_range, self.PANEL_FLAT):
+            checks.extend([state] * (end - begin))
+        return np.array(checks)
+
+    @property
+    def pixel_in_flat_panel(self) -> np.ndarray:
+        r"""Boolean list indicating whether each pixel belong to flat panel"""
+        return np.repeat(self.tube_in_flat_panel, self.PIXELS_IN_TUBE)
+
+    @property
     def pixel_in_use(self) -> np.ndarray:
         r"""
         Boolean flag, True for pixels in use
@@ -423,15 +438,19 @@ class _NOMADMedianDetectorTest:
 
         @return boolean 1D array of shape number of pixels. A value of `True` corresponds to a masked pixel
         """
-        lower, upper = self.config['threshold']['low_tube'], self.config['threshold']['high_tube']
-        tube_is_collimated = self.tube_collevel == CollimationLevel.Full
-        # if the tube is collimated, select the median from the eightpack calculation, otherwise select from the panel
-        medians = np.where(tube_is_collimated, self.eightpack_median, self.panel_median)
+        # find lower and upper multiplicative factors according to whether the tube belongs in a flat panel
+        lowers = np.where(self.tube_in_flat_panel, 0.1, self.config['threshold']['low_tube'])
+        uppers = np.where(self.tube_in_flat_panel, np.inf, self.config['threshold']['high_tube'])
+        # start all medians as those from the eightpack calculation
+        medians = np.copy(self.eightpack_median)
+        # if the tube is in a non-flat panel and is non-collimated, select the median from the panel calculation
+        not_collimated = self.tube_collevel != CollimationLevel.Full
+        medians = np.where(~self.tube_in_flat_panel & not_collimated, self.panel_median, medians)
         # np.where returns the index value for indexes where both eightpack_medians and panel_medians are masked
         # thus, we impose the mask of tube_intensity to the medians
         medians = np.ma.masked_array(medians, mask=self.tube_intensity.mask)
-        deficient = self.tube_intensity < lower * medians  # tube exhibits insufficient intensity
-        excessive = self.tube_intensity > upper * medians  # tube exhibits excessive intensity
+        deficient = self.tube_intensity < lowers * medians  # tube exhibits insufficient intensity
+        excessive = self.tube_intensity > uppers * medians  # tube exhibits excessive intensity
         tube_mask = deficient | excessive  # masked tubes denoted with a True value
         # turn the numpy mask into True values. Masked indexes correspond to unused tubes, hence
         # should be flagged as mask == True

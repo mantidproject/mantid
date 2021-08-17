@@ -296,6 +296,16 @@ class NOMADMedianDetectorTestTest(unittest.TestCase):
         self.assertEquals(ranges[0], [0, 14 * 8])
         self.assertEqual(ranges[-1], [81 * 8, 99 * 8])
 
+    def test_tube_in_flat_panel(self):
+        states = _NOMADMedianDetectorTest().tube_in_flat_panel
+        self.assertTrue(np.all(~states[0: 504]))
+        self.assertTrue(np.all(states[504:]))
+
+    def test_pixel_in_flat_panel(self):
+        states = _NOMADMedianDetectorTest().pixel_in_flat_panel
+        self.assertTrue(np.all(~states[0: 504 * 128]))
+        self.assertTrue(np.all(states[504 * 128:]))
+
     def test_tube_intensity(self):
         # No masked eightpacks, the intensity of each pixel is the index of the tube to which the pixel belongs
         tester = _NOMADMedianDetectorTest()
@@ -350,10 +360,11 @@ class NOMADMedianDetectorTestTest(unittest.TestCase):
     def test_mask_by_tube_intensity(self):
         tester = self.tester1
         tester.intensities += 1e-06  # so that no intensity is zero
-        # All pixels will be masked
         tester.config['threshold'] = {'low_tube': 1.5, 'high_tube': 0.5}
         mask = tester.mask_by_tube_intensity
-        assert np.all(mask)
+        # Only pixels in use and in flat panels will remain unmasked
+        self.assertTrue(~np.all(mask[tester.pixel_in_flat_panel & tester.pixel_in_use]))
+        self.assertTrue(np.all(~mask[tester.pixel_in_flat_panel & tester.pixel_in_use]))  # all other pixels are masked
         # Only unused pixels will be masked
         tester.config['threshold'] = {'low_tube': 0.5, 'high_tube': 1.5}
         pixel_mask = tester.mask_by_tube_intensity
@@ -380,9 +391,15 @@ class NOMADMedianDetectorTestTest(unittest.TestCase):
         test_mask_states[0: 123] = True
         test_mask_states[3000: 4321] = True
 
-        _, test_xml_name = tempfile.mkstemp()
-        _NOMADMedianDetectorTest.export_mask(test_mask_states, test_xml_name, 'NOMAD')
+        _, test_txt_name = tempfile.mkstemp(suffix='.txt')
+        _NOMADMedianDetectorTest.export_mask(test_mask_states, test_txt_name, 'NOMAD')
+        assert os.path.isfile(test_txt_name)
+        with open(test_txt_name, 'r') as mask_file:
+            assert '4319,  4320' in mask_file.read().replace('\n', ',')
+        os.remove(test_txt_name)
 
+        _, test_xml_name = tempfile.mkstemp(suffix='.xml')
+        _NOMADMedianDetectorTest.export_mask(test_mask_states, test_xml_name, 'NOMAD')
         assert os.path.isfile(test_xml_name)
         with open(test_xml_name, 'r') as mask_file:
             assert '<detids>0-122,3000-4320</detids>' in mask_file.read()
