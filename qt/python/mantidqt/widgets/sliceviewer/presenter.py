@@ -120,7 +120,7 @@ class SliceViewer(ObservingPresenter):
                 limits = xlim, ylim
 
         something = self.model.get_ws_MDE(slicepoint=self.get_slicepoint(),
-                                  bin_params=data_view.dimensions.get_bin_params())
+                                          bin_params=data_view.dimensions.get_bin_params())
         print(f'[DEBUG] something = {type(something)}')
         data_view.plot_MDH(something)
         self._call_peaks_presenter_if_created("notify", PeaksViewerPresenter.Event.OverlayPeaks)
