@@ -86,7 +86,6 @@ class SettingsPresenter(object):
         self._validate_settings()
         self.settings["save_location"] = self.view.get_save_location()
         self.settings["full_calibration"] = self.view.get_full_calibration()
-        self.settings["recalc_vanadium"] = self.view.get_van_recalc()
         self.settings["logs"] = self.view.get_checked_logs()
         self.settings["primary_log"] = self.view.get_primary_log()
         self.settings["sort_ascending"] = self.view.get_ascending_checked()
@@ -96,7 +95,6 @@ class SettingsPresenter(object):
         self._validate_settings()
         self.view.set_save_location(self.settings["save_location"])
         self.view.set_full_calibration(self.settings["full_calibration"])
-        self.view.set_van_recalc(self.settings["recalc_vanadium"])
         self.view.set_checked_logs(self.settings["logs"])
         self.view.set_primary_log_combobox(self.settings["primary_log"])
         self.view.set_ascending_checked(self.settings["sort_ascending"])
@@ -135,7 +133,6 @@ class SettingsPresenter(object):
         self.check_and_populate_with_default("logs")
         self.check_and_populate_with_default("full_calibration")
         self.check_and_populate_with_default("primary_log")
-        self.check_and_populate_with_default("recalc_vanadium")
         # boolean values already checked to be "" or True or False in settings_helper
         self.check_and_populate_with_default("sort_ascending")
 

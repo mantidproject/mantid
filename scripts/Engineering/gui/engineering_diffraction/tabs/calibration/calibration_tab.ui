@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>673</width>
-    <height>305</height>
+    <height>600</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -38,12 +38,12 @@ QGroupBox:title {
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
-    <layout class="QVBoxLayout" name="verticalLayout" stretch="1,0">
+    <layout class="QVBoxLayout" name="verticalLayout" stretch="1,0,0">
      <property name="sizeConstraint">
       <enum>QLayout::SetDefaultConstraint</enum>
      </property>
      <item>
-      <widget class="QGroupBox" name="loadingGroup">
+      <widget class="QGroupBox" name="CalibrationGroup">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -80,7 +80,7 @@ QGroupBox:title {
           <property name="verticalSpacing">
            <number>6</number>
           </property>
-          <item row="7" column="0" colspan="3">
+          <item row="6" column="0" colspan="3">
            <widget class="Line" name="line_crop">
             <property name="minimumSize">
              <size>
@@ -93,7 +93,7 @@ QGroupBox:title {
             </property>
            </widget>
           </item>
-          <item row="6" column="0" colspan="3">
+          <item row="5" column="0" colspan="3">
            <widget class="FileFinderWidget" name="finder_path" native="true">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -112,7 +112,7 @@ QGroupBox:title {
             </property>
            </widget>
           </item>
-          <item row="4" column="0" colspan="3">
+          <item row="3" column="0" colspan="3">
            <spacer name="spacer_new_exist">
             <property name="orientation">
              <enum>Qt::Vertical</enum>
@@ -128,19 +128,6 @@ QGroupBox:title {
             </property>
            </spacer>
           </item>
-          <item row="1" column="0" colspan="3">
-           <widget class="FileFinderWidget" name="finder_vanadium" native="true">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="focusPolicy">
-             <enum>Qt::NoFocus</enum>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="0" colspan="3">
            <widget class="QRadioButton" name="radio_newCalib">
             <property name="text">
@@ -151,7 +138,7 @@ QGroupBox:title {
             </property>
            </widget>
           </item>
-          <item row="2" column="0" colspan="3">
+          <item row="1" column="0" colspan="3">
            <widget class="FileFinderWidget" name="finder_sample" native="true">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -170,7 +157,7 @@ QGroupBox:title {
             </property>
            </widget>
           </item>
-          <item row="11" column="0" colspan="2">
+          <item row="10" column="0" colspan="2">
            <widget class="QCheckBox" name="check_plotOutput">
             <property name="enabled">
              <bool>true</bool>
@@ -183,14 +170,14 @@ QGroupBox:title {
             </property>
            </widget>
           </item>
-          <item row="8" column="0" colspan="3">
+          <item row="7" column="0" colspan="3">
            <widget class="QCheckBox" name="check_cropCalib">
             <property name="text">
              <string>Crop Calibration</string>
             </property>
            </widget>
           </item>
-          <item row="11" column="2">
+          <item row="10" column="2">
            <widget class="QPushButton" name="button_calibrate">
             <property name="enabled">
              <bool>true</bool>
@@ -200,7 +187,7 @@ QGroupBox:title {
             </property>
            </widget>
           </item>
-          <item row="5" column="0" colspan="3">
+          <item row="4" column="0" colspan="3">
            <widget class="QRadioButton" name="radio_loadCalib">
             <property name="text">
              <string>Load Existing Calibration</string>
@@ -210,14 +197,14 @@ QGroupBox:title {
             </property>
            </widget>
           </item>
-          <item row="10" column="0" colspan="3">
+          <item row="9" column="0" colspan="3">
            <widget class="Line" name="line_go">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
            </widget>
           </item>
-          <item row="9" column="0" colspan="3">
+          <item row="8" column="0" colspan="3">
            <widget class="CroppingView" name="widget_cropping" native="true">
             <property name="minimumSize">
              <size>
@@ -227,19 +214,84 @@ QGroupBox:title {
             </property>
            </widget>
           </item>
-          <item row="3" column="2">
-           <widget class="QCheckBox" name="check_updateVan">
+         </layout>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="VanadiumGroup">
+       <property name="title">
+        <string>Load Vanadium</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignBottom|Qt::AlignHCenter</set>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_4">
+        <item row="0" column="0">
+         <layout class="QGridLayout" name="gridLayout_3">
+          <item row="0" column="0">
+           <widget class="QRadioButton" name="radio_new_van">
             <property name="text">
-             <string>Only Update Vanadium</string>
+             <string>Create New Vanadium</string>
             </property>
-            <property name="enabled">
+            <property name="checked">
              <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0" colspan="3">
+           <widget class="FileFinderWidget" name="finder_vanadium" native="true">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::NoFocus</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QRadioButton" name="radio_load_van">
+            <property name="text">
+             <string>Load Existing Vanadium</string>
             </property>
             <property name="checked">
              <bool>false</bool>
             </property>
+           </widget>
+          </item>
+          <item row="3" column="0" colspan="3">
+           <widget class="FileFinderWidget" name="finder_path_van" native="true">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>0</height>
+             </size>
+            </property>
             <property name="focusPolicy">
              <enum>Qt::NoFocus</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="2">
+           <widget class="QPushButton" name="button_create_v">
+            <property name="text">
+             <string>Create Vanadium</string>
             </property>
            </widget>
           </item>
@@ -281,13 +333,17 @@ QGroupBox:title {
  </customwidgets>
  <tabstops>
   <tabstop>radio_newCalib</tabstop>
-  <tabstop>finder_vanadium</tabstop>
   <tabstop>finder_sample</tabstop>
   <tabstop>radio_loadCalib</tabstop>
   <tabstop>finder_path</tabstop>
   <tabstop>check_cropCalib</tabstop>
   <tabstop>check_plotOutput</tabstop>
   <tabstop>button_calibrate</tabstop>
+  <tabstop>radio_new_van</tabstop>
+  <tabstop>finder_vanadium</tabstop>
+  <tabstop>radio_load_van</tabstop>
+  <tabstop>finder_path_van</tabstop>
+  <tabstop>button_create_v</tabstop>
  </tabstops>
  <resources/>
  <connections/>

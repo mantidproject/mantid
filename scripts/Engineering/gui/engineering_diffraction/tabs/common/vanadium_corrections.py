@@ -24,44 +24,34 @@ SAVED_FILE_PROCESSED_SUFFIX = "_precalculated_vanadium_run_processed_instrument.
 SAVED_FILE_INTEG_SUFFIX = "_precalculated_vanadium_run_integration.nxs"
 
 
-def fetch_correction_workspaces(vanadium_path: str, instrument: str, rb_num: str = "", is_load: bool = False):
+def fetch_correction_workspaces(vanadium_path: str, instrument: str, rb_num: str = ""):
     # -> Workspace2D, Workspace2D
     """
     Fetch workspaces from the file system or create new ones.
     :param vanadium_path: The path to the requested vanadium run raw data.
     :param instrument: The instrument the data came from.
     :param rb_num: A user identifier, usually an experiment number.
-    :param is_load: True if this is being called as part of loading a previous calibration (force_recalc ignored)
     :return: The resultant integration and processed instrument workspaces.
     """
     vanadium_number = path_handling.get_run_number_from_path(vanadium_path, instrument)
     integ_path, processed_path = generate_van_ws_file_paths(vanadium_number, rb_num)
-    if is_load:
-        force_recalc = False
-    else:
-        force_recalc = get_setting(output_settings.INTERFACES_SETTINGS_GROUP,
-                                   output_settings.ENGINEERING_PREFIX, "recalc_vanadium", return_type=bool)
-    if path.exists(processed_path) and path.exists(integ_path) and not force_recalc:  # Check if the cached files exist.
-        try:
-            integ_workspace = Load(Filename=integ_path, OutputWorkspace=INTEGRATED_WORKSPACE_NAME)
-            processed_workspace = Load(Filename=processed_path, OutputWorkspace=PROCESSED_WORKSPACE_NAME)
-            if rb_num:
-                user_integ_path, user_processed_path = generate_van_ws_file_paths(vanadium_number, rb_num=rb_num)
-                if not path.exists(user_integ_path) and not path.exists(user_processed_path):
-                    save_van_workspace(integ_workspace, user_integ_path)
-                    save_van_workspace(processed_workspace, user_processed_path)
-            return integ_workspace, processed_workspace
-        except RuntimeError as e:
-            logger.error(
-                "Problem loading existing vanadium calculations. Creating new files. Description: "
-                + str(e))
     (integ_workspace, processed_workspace) = create_vanadium_corrections(vanadium_path)
-    save_van_workspace(integ_workspace, integ_path)
-    save_van_workspace(processed_workspace, processed_path)
+    #save_van_workspace(integ_workspace, integ_path)
+    #save_van_workspace(processed_workspace, processed_path)
     if rb_num:
         user_integ_path, user_processed_path = generate_van_ws_file_paths(vanadium_number, rb_num=rb_num)
-        save_van_workspace(integ_workspace, user_integ_path)
-        save_van_workspace(processed_workspace, user_processed_path)
+     #   save_van_workspace(integ_workspace, user_integ_path)
+     #   save_van_workspace(processed_workspace, user_processed_path)
+    return integ_workspace, processed_workspace
+
+
+def load_correction_workspaces(vanadium_path: str, instrument: str, rb_num: str = ""):
+    import pydevd_pycharm
+    pydevd_pycharm.settrace(stdoutToServer = True, stderrToServer = True)
+    vanadium_number = path_handling.get_run_number_from_path(vanadium_path, instrument)
+    integ_path, processed_path = generate_van_ws_file_paths(vanadium_number, rb_num)
+    integ_workspace = Load(Filename=integ_path, OutputWorkspace=INTEGRATED_WORKSPACE_NAME)
+    processed_workspace = Load(Filename=processed_path, OutputWorkspace=PROCESSED_WORKSPACE_NAME)
     return integ_workspace, processed_workspace
 
 
@@ -87,13 +77,16 @@ def create_vanadium_corrections(vanadium_path: str):  # -> Workspace, Workspace
                      + str(vanadium_path) + ". Error description: " + str(e))
         raise RuntimeError
     # get full instrument calibration for instrument processing calculation
-    full_calib_path = get_setting(output_settings.INTERFACES_SETTINGS_GROUP,
-                                  output_settings.ENGINEERING_PREFIX, "full_calibration")
-    try:
-        full_calib_ws = Load(full_calib_path, OutputWorkspace="full_inst_calib")
-    except ValueError:
-        logger.error("Error loading Full instrument calibration - this is set in the interface settings.")
-        return
+    if Ads.doesExist("full_inst_calib"):
+        full_calib_ws = Ads.retrieve("full_inst_calib")
+    else:
+        full_calib_path = get_setting(output_settings.INTERFACES_SETTINGS_GROUP,
+                                      output_settings.ENGINEERING_PREFIX, "full_calibration")
+        try:
+            full_calib_ws = Load(full_calib_path, OutputWorkspace="full_inst_calib")
+        except ValueError:
+            logger.error("Error loading Full instrument calibration - this is set in the interface settings.")
+            return
     integral_ws = _calculate_vanadium_integral(van_ws)
     processed_ws = _calculate_vanadium_processed_instrument(van_ws, full_calib_ws, integral_ws)
     return integral_ws, processed_ws

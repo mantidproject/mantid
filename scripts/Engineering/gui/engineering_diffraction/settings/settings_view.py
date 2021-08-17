@@ -64,9 +64,6 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
     def get_full_calibration(self):
         return self.finder_fullCalib.getFirstFilename()
 
-    def get_van_recalc(self):
-        return self.check_vanRecalc.isChecked()
-
     def get_checked_logs(self):
         return ','.join([self.log_list.item(ilog).text() for ilog in range(self.log_list.count()) if
                          self.log_list.item(ilog).checkState() == QtCore.Qt.Checked])

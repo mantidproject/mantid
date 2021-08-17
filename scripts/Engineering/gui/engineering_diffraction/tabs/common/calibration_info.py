@@ -10,7 +10,7 @@ class CalibrationInfo(object):
     """
     Keeps track of the parameters that went into a calibration created by the engineering diffraction GUI.
     """
-    def __init__(self, vanadium_path=None, sample_path=None, instrument=None, grouping_ws=None, roi_text: str = ""):
+    def __init__(self, vanadium_path=None, sample_path=None, instrument=None, grouping_ws=None, roi_text: str = "Not loaded"):
         self.vanadium_path = vanadium_path
         self.sample_path = sample_path
         self.instrument = instrument
@@ -18,15 +18,22 @@ class CalibrationInfo(object):
         self.roi_text = roi_text
         self.bank = None
 
-    def set_calibration(self, vanadium_path, sample_path, instrument):
+    def set_calibration(self, sample_path, instrument):
         """
-        Set the values of the calibration. requires a complete set of calibration info to be supplied.
-        :param vanadium_path: Path to the vanadium data file used in the calibration.
+        Set the values of the calibration
         :param sample_path: Path to the sample data file used.
         :param instrument: String defining the instrument the data came from.
         """
-        self.vanadium_path = vanadium_path
         self.sample_path = sample_path
+        self.instrument = instrument
+
+    def set_vanadium(self, vanadium_path, instrument):
+        """
+        Set the Vanadium data
+        :param vanadium_path: Path to the Vanadium data file used.
+        :param instrument: String defining the instrument the data came from.
+        """
+        self.vanadium_path = vanadium_path
         self.instrument = instrument
 
     def set_roi_info_load(self, banks: list, grp_ws: str, roi_text: str) -> None:

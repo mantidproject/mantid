@@ -31,7 +31,7 @@ class FocusPresenter(object):
         self.view.set_enable_controls_connection(self.set_focus_controls_enabled)
 
         # Variables from other GUI tabs.
-        self.current_calibration = CalibrationInfo()
+        self.update_calibration(CalibrationInfo())
         self.instrument = "ENGINX"
         self.rb_num = None
 

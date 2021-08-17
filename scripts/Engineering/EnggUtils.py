@@ -52,7 +52,7 @@ def load_relevant_calibration_files(file_path, output_prefix="engggui") -> list:
     """
     basepath, fname = path.split(file_path)
     fname_words = fname.split('_')
-    prefix = '_'.join(fname_words[0:3])
+    prefix = '_'.join(fname_words[0:2])
     roi = determine_roi_from_prm_fname(fname)
     bank = None
     if roi == "BOTH":
@@ -106,12 +106,12 @@ def load_custom_grouping_workspace(file_path: str) -> (str, str):
     return ws_name, roi_text
 
 
-def save_grouping_workspace(grp_ws, directory: str, ceria_path: str, vanadium_path: str, instrument: str,
+def save_grouping_workspace(grp_ws, directory: str, ceria_path: str, instrument: str,
                             calfile: str = None, spec_nos=None) -> None:
     if calfile:
-        name = generate_output_file_name(vanadium_path, ceria_path, instrument, "Custom", '.xml')
+        name = generate_output_file_name(ceria_path, instrument, "Custom", '.xml')
     elif spec_nos:
-        name = generate_output_file_name(vanadium_path, ceria_path, instrument, "Cropped", '.xml')
+        name = generate_output_file_name(ceria_path, instrument, "Cropped", '.xml')
     else:
         logger.warning("No Calfile or Spectra given, no grouping workspace saved")
         return
@@ -119,9 +119,9 @@ def save_grouping_workspace(grp_ws, directory: str, ceria_path: str, vanadium_pa
     mantid.SaveDetectorsGrouping(InputWorkspace=grp_ws, OutputFile=save_path)
 
 
-def generate_output_file_name(vanadium_path, ceria_path, instrument, bank, ext='.prm'):
+def generate_output_file_name(ceria_path, instrument, bank, ext='.prm'):
     """
-    Generate an output filename in the form INSTRUMENT_VanadiumRunNo_ceriaRunNo_BANKS
+    Generate an output filename in the form INSTRUMENT_ceriaRunNo_BANKS
     :param vanadium_path: Path to vanadium data file
     :param ceria_path: Path to ceria data file
     :param instrument: The instrument in use.
@@ -129,9 +129,8 @@ def generate_output_file_name(vanadium_path, ceria_path, instrument, bank, ext='
     :param ext: Extension to be used on the saved file
     :return: The filename, the vanadium run number, and ceria run number.
     """
-    vanadium_no = path_handling.get_run_number_from_path(vanadium_path, instrument)
     ceria_no = path_handling.get_run_number_from_path(ceria_path, instrument)
-    filename = instrument + "_" + vanadium_no + "_" + ceria_no + "_"
+    filename = instrument + "_" + ceria_no + "_"
     if bank == "all":
         filename = filename + "all_banks" + ext
     elif bank == "north":

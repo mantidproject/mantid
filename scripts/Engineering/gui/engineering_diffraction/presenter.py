@@ -93,8 +93,14 @@ class EngineeringDiffractionPresenter(object):
 
     def update_calibration(self, calibration):
         instrument = calibration.get_instrument()
-        van_no = path_handling.get_run_number_from_path(calibration.get_vanadium(), instrument)
-        sample_no = path_handling.get_run_number_from_path(calibration.get_sample(), instrument)
+        if calibration.get_vanadium():
+            van_no = path_handling.get_run_number_from_path(calibration.get_vanadium(), instrument)
+        else:
+            van_no = "Empty"
+        if calibration.get_sample():
+            sample_no = path_handling.get_run_number_from_path(calibration.get_sample(), instrument)
+        else:
+            sample_no = "Empty"
         self.statusbar_observable.notify_subscribers(f"V: {van_no}, CeO2: {sample_no}, Instrument: {instrument}")
 
     @staticmethod

@@ -23,18 +23,15 @@ SOUTH_BANK_TEMPLATE_FILE = "template_ENGINX_241391_236516_South_bank.prm"
 
 class CalibrationModel(object):
     def create_new_calibration(self,
-                               vanadium_path,
                                ceria_path,
                                plot_output,
                                instrument,
                                rb_num=None,
                                bank=None,
                                calfile=None,
-                               spectrum_numbers=None,
-                               only_update_vanadium=False):
+                               spectrum_numbers=None):
         """
-        Create a new calibration from a vanadium run and ceria run
-        :param vanadium_path: Path to vanadium data file.
+        Create a new calibration from a ceria run
         :param ceria_path: Path to ceria (CeO2) data file
         :param plot_output: Whether the output should be plotted.
         :param instrument: The instrument the data relates to.
@@ -43,11 +40,11 @@ class CalibrationModel(object):
         :param calfile: Optional parameter to crop using a custom calfile
         :param spectrum_numbers: Optional parameter to crop using spectrum numbers.
         """
-        # vanadium corrections workspaces not used at this stage, but ensure they exist and create if not
-        vanadium_corrections.fetch_correction_workspaces(vanadium_path, instrument, rb_num=rb_num)
 
-        if not only_update_vanadium:
-            ceria_workspace = path_handling.load_workspace(ceria_path)
+        ceria_workspace = path_handling.load_workspace(ceria_path)
+        if Ads.doesExist("full_inst_calib"):
+            full_calib = Ads.retrieve("full_inst_calib")
+        else:
             full_calib_path = get_setting(output_settings.INTERFACES_SETTINGS_GROUP,
                                           output_settings.ENGINEERING_PREFIX, "full_calibration")
             try:
@@ -56,52 +53,67 @@ class CalibrationModel(object):
                 logger.error("Error loading Full instrument calibration - this is set in the interface settings.")
                 return
 
-            cal_params, ceria_raw, grp_ws = self.run_calibration(ceria_workspace,
-                                                                 bank,
-                                                                 calfile,
-                                                                 spectrum_numbers,
-                                                                 full_calib)
-            if plot_output:
-                plot_dicts = list()
-                if len(cal_params) == 1:
-                    if calfile:
-                        bank_name = "Custom"
-                    elif spectrum_numbers:
-                        bank_name = "Cropped"
-                    else:
-                        bank_name = bank
-                    plot_dicts.append(EnggUtils.generate_tof_fit_dictionary(bank_name))
-                    EnggUtils.plot_tof_fit(plot_dicts, [bank_name])
+        cal_params, ceria_raw, grp_ws = self.run_calibration(ceria_workspace,
+                                                             bank,
+                                                             calfile,
+                                                             spectrum_numbers,
+                                                             full_calib)
+        #import pydevd_pycharm
+        #pydevd_pycharm.settrace(stdoutToServer=True, stderrToServer=True)
+        if plot_output:
+            plot_dicts = list()
+            if len(cal_params) == 1:
+                if calfile:
+                    bank_name = "Custom"
+                elif spectrum_numbers:
+                    bank_name = "Cropped"
                 else:
-                    plot_dicts.append(EnggUtils.generate_tof_fit_dictionary("bank_1"))
-                    plot_dicts.append(EnggUtils.generate_tof_fit_dictionary("bank_2"))
-                    EnggUtils.plot_tof_fit(plot_dicts, ["bank_1", "bank_2"])
-            difa = [row['difa'] for row in cal_params]
-            difc = [row['difc'] for row in cal_params]
-            tzero = [row['tzero'] for row in cal_params]
+                    bank_name = bank
+                plot_dicts.append(EnggUtils.generate_tof_fit_dictionary(bank_name))
+                EnggUtils.plot_tof_fit(plot_dicts, [bank_name])
+            else:
+                plot_dicts.append(EnggUtils.generate_tof_fit_dictionary("bank_1"))
+                plot_dicts.append(EnggUtils.generate_tof_fit_dictionary("bank_2"))
+                EnggUtils.plot_tof_fit(plot_dicts, ["bank_1", "bank_2"])
+        difa = [row['difa'] for row in cal_params]
+        difc = [row['difc'] for row in cal_params]
+        tzero = [row['tzero'] for row in cal_params]
 
-            bk2bk_params = self.extract_b2b_params(ceria_raw)
-            DeleteWorkspace(ceria_raw)
+        bk2bk_params = self.extract_b2b_params(ceria_raw)
+        DeleteWorkspace(ceria_raw)
 
-            params_table = []
+        params_table = []
 
-            for i in range(len(difc)):
-                params_table.append([i, difc[i], difa[i], tzero[i]])
-            self.update_calibration_params_table(params_table)
+        for i in range(len(difc)):
+            params_table.append([i, difc[i], difa[i], tzero[i]])
+        self.update_calibration_params_table(params_table)
 
-            calib_dir = path.join(output_settings.get_output_path(), "Calibration", "")
-            if calfile:
-                EnggUtils.save_grouping_workspace(grp_ws, calib_dir, ceria_path, vanadium_path, instrument, calfile=calfile)
-            elif spectrum_numbers:
-                EnggUtils.save_grouping_workspace(grp_ws, calib_dir, ceria_path, vanadium_path, instrument,
-                                                  spec_nos=spectrum_numbers)
-            self.create_output_files(calib_dir, difa, difc, tzero, bk2bk_params, ceria_path, vanadium_path, instrument,
-                                     bank, spectrum_numbers, calfile)
-            if rb_num:
-                user_calib_dir = path.join(output_settings.get_output_path(), "User", rb_num,
-                                           "Calibration", "")
-                self.create_output_files(user_calib_dir, difa, difc, tzero, bk2bk_params, ceria_path, vanadium_path,
-                                         instrument, bank, spectrum_numbers, calfile)
+        calib_dir = path.join(output_settings.get_output_path(), "Calibration", "")
+        if calfile:
+            EnggUtils.save_grouping_workspace(grp_ws, calib_dir, ceria_path, instrument, calfile=calfile)
+        elif spectrum_numbers:
+            EnggUtils.save_grouping_workspace(grp_ws, calib_dir, ceria_path, instrument,
+                                              spec_nos=spectrum_numbers)
+        self.create_output_files(calib_dir, difa, difc, tzero, bk2bk_params, ceria_path, instrument,
+                                 bank, spectrum_numbers, calfile)
+        if rb_num:
+            user_calib_dir = path.join(output_settings.get_output_path(), "User", rb_num,
+                                       "Calibration", "")
+            self.create_output_files(user_calib_dir, difa, difc, tzero, bk2bk_params, ceria_path,
+                                     instrument, bank, spectrum_numbers, calfile)
+
+    def create_new_vanadium(self,
+                            vanadium_path,
+                            instrument,
+                            rb_num=None):
+        """
+        Create new processed vanadium data
+        :param vanadium_path: Path to vanadium data file.
+        :param instrument: The instrument the data relates to.
+        :param rb_num: The RB number for file creation.
+        """
+        # vanadium corrections workspaces not used at this stage, but ensure they exist and create if not
+        vanadium_corrections.fetch_correction_workspaces(vanadium_path, instrument, rb_num=rb_num)
 
     @staticmethod
     def extract_b2b_params(workspace):
@@ -128,10 +140,22 @@ class CalibrationModel(object):
         except RuntimeError:
             logger.error("Invalid file selected: ", file_path)
             return
-        vanadium_corrections.fetch_correction_workspaces(instrument+van_no, instrument, is_load=True)
         bank = EnggUtils.load_relevant_calibration_files(file_path)
         grp_ws_name, roi_text = EnggUtils.load_custom_grouping_workspace(file_path)
-        return instrument, van_no, ceria_no, grp_ws_name, roi_text, bank
+        return instrument, ceria_no, grp_ws_name, roi_text, bank
+
+    def load_existing_vanadium_files(self, file_path):
+        try:
+            instrument, van_no, ceria_no, params_table = self.get_info_from_file(file_path)
+        except RuntimeError:
+            logger.error("Invalid file selected: ", file_path)
+            return
+        try:
+            vanadium_corrections.load_correction_workspaces(instrument+van_no, instrument)
+        except RuntimeError:
+            logger.error("Unable to load Vanadium corrections")
+            return
+        return van_no
 
     @staticmethod
     def update_calibration_params_table(params_table):
@@ -244,7 +268,7 @@ class CalibrationModel(object):
             cal_params.append(current_fit_params)
         return cal_params, ceria_raw, grp_ws
 
-    def create_output_files(self, calibration_dir, difa, difc, tzero, bk2bk_params, ceria_path, vanadium_path,
+    def create_output_files(self, calibration_dir, difa, difc, tzero, bk2bk_params, ceria_path,
                             instrument, bank, spectrum_numbers, calfile):
         """
         Create output files from the algorithms in the specified directory
@@ -254,14 +278,12 @@ class CalibrationModel(object):
         :param tzero: TZERO values from the calibration algorithm.
         :param bk2bk_params: BackToBackExponential parameters from Parameters.xml file.
         :param ceria_path: The path to the ceria data file.
-        :param vanadium_path: The path to the vanadium data file.
         :param instrument: The instrument (ENGINX or IMAT).
         :param bank: Optional parameter to crop by bank.
         :param spectrum_numbers: Optional parameter to crop using spectrum numbers.
         :param calfile: Optional parameter to crop with a custom calfile
         """
-        kwargs = {"ceria_run": path_handling.get_run_number_from_path(ceria_path, instrument),
-                  "vanadium_run": path_handling.get_run_number_from_path(vanadium_path, instrument)}
+        kwargs = {"ceria_run": path_handling.get_run_number_from_path(ceria_path, instrument)}
 
         def south_kwargs():
             kwargs["template_file"] = SOUTH_BANK_TEMPLATE_FILE
@@ -272,7 +294,7 @@ class CalibrationModel(object):
             kwargs["bank_names"] = ["North"]
 
         def generate_prm_output_file(difa_list, difc_list, tzero_list, bank_name, kwargs_to_pass):
-            file_path = calibration_dir + EnggUtils.generate_output_file_name(vanadium_path, ceria_path, instrument,
+            file_path = calibration_dir + EnggUtils.generate_output_file_name(ceria_path, instrument,
                                                                               bank=bank_name)
             EnggUtils.write_ENGINX_GSAS_iparam_file(file_path, difa_list, difc_list, tzero_list, bk2bk_params,
                                                     **kwargs_to_pass)
@@ -280,7 +302,7 @@ class CalibrationModel(object):
                         "last_calibration_path", file_path)
 
         def save_pdcal_output_file(ws_name_suffix, bank_name):
-            file_path = calibration_dir + EnggUtils.generate_output_file_name(vanadium_path, ceria_path, instrument,
+            file_path = calibration_dir + EnggUtils.generate_output_file_name(ceria_path, instrument,
                                                                               bank=bank_name, ext=".nxs")
             ws_name = "engggui_calibration_" + ws_name_suffix
             SaveNexus(InputWorkspace=ws_name, Filename=file_path)

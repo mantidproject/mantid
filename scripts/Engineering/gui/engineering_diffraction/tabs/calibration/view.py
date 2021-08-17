@@ -13,8 +13,8 @@ Ui_calib, _ = load_ui(__file__, "calibration_tab.ui")
 
 class CalibrationView(QtWidgets.QWidget, Ui_calib):
     sig_enable_controls = QtCore.Signal(bool)
-    sig_update_fields = QtCore.Signal()
-    sig_enable_only_update_van = QtCore.Signal(bool)
+    sig_update_sample_field = QtCore.Signal()
+    sig_update_van_field = QtCore.Signal()
 
     def __init__(self, parent=None, instrument="ENGINX"):
         super(CalibrationView, self).__init__(parent)
@@ -30,6 +30,11 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
         self.finder_path.isForRunFiles(False)
         self.finder_path.setEnabled(False)
         self.finder_path.setFileExtensions([".prm"])
+
+        self.finder_path_van.setLabelText("Path")
+        self.finder_path_van.isForRunFiles(False)
+        self.finder_path_van.setEnabled(False)
+        self.finder_path_van.setFileExtensions([".nxs"])
 
     # =================
     # Slot Connectors
@@ -55,17 +60,23 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
     def set_enable_controls_connection(self, slot):
         self.sig_enable_controls.connect(slot)
 
-    def set_update_fields_connection(self, slot):
-        self.sig_update_fields.connect(slot)
+    def set_update_sample_field_connection(self, slot):
+        self.sig_update_sample_field.connect(slot)
 
     def set_on_check_cropping_state_changed(self, slot):
         self.check_cropCalib.stateChanged.connect(slot)
 
-    def set_on_check_update_vanadium_state_changed(self, slot):
-        self.check_updateVan.stateChanged.connect(slot)
+    def set_on_create_van_clicked(self, slot):
+        self.button_create_v.clicked.connect(slot)
 
-    def set_enable_update_vanadium(self, slot):
-        self.sig_enable_only_update_van.connect(slot)
+    def set_update_van_field_connection(self, slot):
+        self.sig_update_van_field.connect(slot)
+
+    def set_on_radio_new_van_toggled(self, slot):
+        self.radio_new_van.toggled.connect(slot)
+
+    def set_on_radio_existing_van_toggled(self, slot):
+        self.radio_load_van.toggled.connect(slot)
 
     # =================
     # Component Setters
@@ -87,7 +98,7 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
     def set_sample_enabled(self, set_to):
         self.finder_sample.setEnabled(set_to)
 
-    def set_path_enabled(self, set_to):
+    def set_calib_path_enabled(self, set_to):
         self.finder_path.setEnabled(set_to)
 
     def set_vanadium_text(self, text):
@@ -99,10 +110,10 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
     def set_calibrate_button_text(self, text):
         self.button_calibrate.setText(text)
 
-    def set_load_checked(self, ticked: bool):
+    def set_load_calib_checked(self, ticked: bool):
         self.radio_loadCalib.setChecked(ticked)
 
-    def set_file_text_with_search(self, text: str):
+    def set_calib_file_text_with_search(self, text: str):
         self.finder_path.setFileTextWithSearch(text)
 
     def set_cropping_widget_visibility(self, visible):
@@ -114,11 +125,21 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
     def set_check_cropping_checked(self, checked):
         self.check_cropCalib.setChecked(checked)
 
-    def set_check_update_vanadium_enabled(self, enabled):
-        self.check_updateVan.setEnabled(enabled)
+    def set_create_van_button_enabled(self, enabled):
+        self.button_create_v.setEnabled(enabled)
 
-    def set_check_update_vanadium_checked(self, checked):
-        self.check_updateVan.setChecked(checked)
+    def set_create_van_button_text(self, text):
+        self.button_create_v.setText(text)
+
+    def set_van_path_enabled(self, set_to):
+        self.finder_path_van.setEnabled(set_to)
+
+    def set_load_van_checked(self, ticked: bool):
+        self.radio_load_van.setChecked(ticked)
+
+    def set_van_file_text_with_search(self, text: str):
+        self.finder_path_van.setFileTextWithSearch(text)
+
     # =================
     # Component Getters
     # =================
@@ -138,16 +159,16 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
     def get_path_filename(self):
         return self.finder_path.getFirstFilename()
 
-    def get_path_valid(self):
+    def get_calib_path_valid(self):
         return self.finder_path.isValid() and self.finder_path.getText()
 
     def get_plot_output(self):
         return self.check_plotOutput.isChecked()
 
-    def get_new_checked(self):
+    def get_new_calib_checked(self):
         return self.radio_newCalib.isChecked()
 
-    def get_load_checked(self):
+    def get_load_calib_checked(self):
         return self.radio_loadCalib.isChecked()
 
     def get_crop_checked(self):
@@ -156,8 +177,17 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
     def get_cropping_widget(self):
         return self.widget_cropping
 
-    def get_update_vanadium_checked(self):
-        return self.check_updateVan.isChecked()
+    def get_new_van_checked(self):
+        return self.radio_new_van.isChecked()
+
+    def get_load_van_checked(self):
+        return self.radio_load_van.isChecked()
+
+    def get_van_path_filename(self):
+        return self.finder_path_van.getFirstFilename()
+
+    def get_van_path_valid(self):
+        return self.finder_path_van.isValid() and self.finder_path_van.getText()
 
     # =================
     # State Getters
@@ -165,6 +195,9 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
 
     def is_searching(self):
         return self.finder_sample.isSearching() or self.finder_sample.isSearching()
+
+    def is_searching_van(self):
+        return self.finder_vanadium.isSearching() or self.finder_vanadium.isSearching()
 
     # =================
     # Force Actions
@@ -184,11 +217,15 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
         self.finder_vanadium.focusProxy().setFocusPolicy(QtCore.Qt.StrongFocus)
         self.finder_sample.focusProxy().setFocusPolicy(QtCore.Qt.StrongFocus)
         self.finder_path.focusProxy().setFocusPolicy(QtCore.Qt.StrongFocus)
+        self.finder_path_van.focusProxy().setFocusPolicy(QtCore.Qt.StrongFocus)
 
-        self.setTabOrder(self.radio_newCalib, self.finder_vanadium.focusProxy())
-        self.setTabOrder(self.finder_vanadium.focusProxy(), self.finder_sample.focusProxy())
-        self.setTabOrder(self.finder_sample.focusProxy(), self.finder_path.focusProxy())
+        self.setTabOrder(self.radio_newCalib, self.finder_sample.focusProxy())
+        self.setTabOrder(self.finder_sample.focusProxy(), self.radio_loadCalib)
+        self.setTabOrder(self.radio_loadCalib, self.finder_path.focusProxy())
         self.setTabOrder(self.finder_path.focusProxy(), self.check_cropCalib)
         self.setTabOrder(self.check_cropCalib, self.widget_cropping)
         self.setTabOrder(self.widget_cropping, self.check_plotOutput)
         self.setTabOrder(self.check_plotOutput, self.button_calibrate)
+        self.setTabOrder(self.button_calibrate, self.finder_vanadium.focusProxy())
+        self.setTabOrder(self.finder_vanadium.focusProxy(), self.finder_path_van.focusProxy())
+        self.setTabOrder(self.finder_path_van.focusProxy(), self.button_create_v)
