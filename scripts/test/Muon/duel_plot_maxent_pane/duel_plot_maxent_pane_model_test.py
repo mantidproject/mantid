@@ -50,6 +50,7 @@ class DuelPlotMaxentPaneModelTest(unittest.TestCase):
         self.context.group_pair_context._pairs = []
         self.context.group_pair_context._selected_groups = ["fwd"]
         self.context.group_pair_context._selected_pairs = []
+        self.context.data_context.instrument = "MUSR"
         self.count = 0
 
     def test_clear_data(self):
