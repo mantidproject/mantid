@@ -257,6 +257,10 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         for opt in iq_options:
             self.setPropertyGroup(opt, 'I(Q) Options')
 
+        self.declareProperty(name='OutputPanels', defaultValue=False,
+                             doc='Output I(Q) per detector bank.')
+        self.setPropertyGroup('OutputPanels', 'I(Q) Options')
+
         #==================================STITCH OPTIONS=================================#
 
         stitch_options = ['ManualScaleFactors', 'TieScaleFactors', 'ScaleFactorCalculation']
@@ -420,6 +424,13 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
             issues['OutputWorkspace'] = "Output workspace name must be alphanumeric, it should start with a letter."
         return issues
 
+    def _check_wedges_panels_mutex(self):
+        '''Makes sure panels and wedges are not requested at the same time'''
+        issues = dict()
+        if (self.getProperty('NumberOfWedges').value > 0 or self.getPropertyValue('ShapeTable')) and self.getProperty('OutputPanels').value:
+            issues['OutputPanels'] = "Panels cannot be calculated together with the wedges, please choose one or the other."
+        return issues
+
     def validateInputs(self):
         '''Validates all the inputs'''
         issues = dict()
@@ -439,6 +450,8 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
             issues = self._check_q_ranges()
         if not issues:
             issues = self._check_output_name()
+        if not issues:
+            issues = self._check_wedges_panels_mutex()
         return issues
 
     def PyExec(self):
@@ -458,9 +471,10 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         samples = []
         for d in range(self.rank):
             sample_ws = self.process_all_samples_at_distance(d)
-            integrated_ws = self.integrate(d, sample_ws)
             samples.extend(sample_ws)
-            samples.extend(integrated_ws)
+            if self.getPropertyValue('OutputType') != 'None':
+                integrated_ws = self.integrate(d, sample_ws)
+                samples.extend(integrated_ws)
         return samples
 
     def process_all_transmissions_at_lambda(self, l):
@@ -704,7 +718,34 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
             return ''
 
     def integrate(self, d, sample_ws):
-        return []
+        results = []
+        panel_names = ''
+        instrument = mtd[sample_ws[0]].getInstrument()
+        if instrument.hasParameter('detector_panels'):
+            panel_names = instrument.getStringParameter('detector_panels')[0].split(',')
+        CalculateDynamicRange(Workspace=sample_ws[0], ComponentNames=panel_names)
+        kwargs = dict()
+        kwargs['InputWorkspace'] = sample_ws[0]
+        kwargs['OutputWorkspace'] = sample_ws[0] + '_iq'
+        results.append(kwargs['OutputWorkspace'])
+        # for the moment only I(Q) is supported, since with the workspace containing all the samples,
+        # I(Phi,Q) and I(Qx, Qy) will need to be reworked to be MDHistoWorkspace
+        kwargs['OutputType'] = 'I(Q)'
+        props = ['CalculateResolution', 'DefaultQBinning', 'BinningFactor', 'NumberOfWedges', 'WedgeAngle',
+                 'WedgeOffset', 'AsymmetricWedges', 'WavelengthRange', 'ShapeTable']
+        for prop in props:
+            kwargs[prop] = self.getProperty(prop).value
+        if self.getProperty('NumberOfWedges').value > 0 or self.getPropertyValue('ShapeTable'):
+            kwargs['WedgeWorkspace'] = sample_ws[0] + '_iq_wedges'
+            results.append(kwargs['WedgeWorkspace'])
+        qbinning = self.getPropertyValue('OutputBinning')
+        if qbinning:
+            kwargs['OutputBinning'] = qbinning.split(':')[d]
+        if self.getProperty('OutputPanels').value:
+            kwargs['PanelOutputWorkspace'] = sample_ws[0] + '_iq_panels'
+            results.append(kwargs['PanelOutputWorkspace'])
+        SANSILLIntegration(**kwargs)
+        return results
 
     def tr_index(self, d):
         return 1 if d+1 in self.getProperty('DistancesAtWavelength2').value else 0

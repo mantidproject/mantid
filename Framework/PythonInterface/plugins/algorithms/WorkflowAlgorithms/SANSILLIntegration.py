@@ -50,8 +50,8 @@ class SANSILLIntegration(PythonAlgorithm):
             else:
                 if run.hasProperty('ProcessedAs'):
                     processed = run.getLogData('ProcessedAs').value
-                    if processed != 'Sample':
-                        issues['InputWorkspace'] = 'The input workspace is not processed as sample.'
+                    if processed != 'Sample' and processed != 'Water' and processed != 'Solvent':
+                        issues['InputWorkspace'] = 'The input workspace is not processed as sample, water or solvent.'
                 else:
                     issues['InputWorkspace'] = 'The input workspace is not processed by SANSILLReduction'
             instrument = self.getProperty('InputWorkspace').value.getInstrument()
