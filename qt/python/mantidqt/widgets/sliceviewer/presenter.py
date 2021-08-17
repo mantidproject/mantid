@@ -78,12 +78,16 @@ class SliceViewer(ObservingPresenter):
         """
         print(f'[DEBUG] New MDH')
         data_view = self.view.data_view
-        limits = data_view.get_axes_limits()
+        if reset_limits:
+            limits = None
+        else:
+            limits = data_view.get_axes_limits()
 
         if limits is None or not self.model.can_support_dynamic_rebinning():
             data_view.plot_MDH(self.model.get_ws(), slicepoint=self.get_slicepoint())
             self._call_peaks_presenter_if_created("notify", PeaksViewerPresenter.Event.OverlayPeaks)
         else:
+            # limits is not None and support dynamic rebinning
             self.new_plot_MDE()
 
     def new_plot_MDE(self, reset_limits=False):
@@ -117,7 +121,6 @@ class SliceViewer(ObservingPresenter):
 
         something = self.model.get_ws_MDE(slicepoint=self.get_slicepoint(),
                                   bin_params=data_view.dimensions.get_bin_params())
-                                  # , limits=limits)
         print(f'[DEBUG] something = {type(something)}')
         data_view.plot_MDH(something)
         self._call_peaks_presenter_if_created("notify", PeaksViewerPresenter.Event.OverlayPeaks)
@@ -175,7 +178,6 @@ class SliceViewer(ObservingPresenter):
 
     def dimensions_changed(self):
         """Indicates that the dimensions have changed"""
-
 
         print(f'[DEBUG] Dimensions to plot is detected')
 
