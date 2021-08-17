@@ -183,9 +183,10 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
         pres.view.data_view.dimensions.transpose = True
         pres.update_plot_data()
         extent = pres.view.data_view.image.get_extent()
-        self.assertTupleEqual(extent, (-9.0, 9.0, -10.0, 10.0))
-        self.assertTupleEqual(extent[0:2], pres.view.data_view.ax.get_xlim())
-        self.assertTupleEqual(extent[2:], pres.view.data_view.ax.get_ylim())
+        # Should be the same as before as transposition is handled in the model
+        self.assertListEqual(extent, [-10.0, 10.0, -9.0, 9.0])
+        self.assertListEqual(extent[0:2], list(pres.view.data_view.ax.get_xlim()))
+        self.assertListEqual(extent[2:], list(pres.view.data_view.ax.get_ylim()))
 
         pres.view.close()
 
