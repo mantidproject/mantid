@@ -386,25 +386,6 @@ class NOMADMedianDetectorTestTest(unittest.TestCase):
         assert ~np.all(pixel_mask[pixel_used])  # the mask of unused pixels is False
         assert np.all(pixel_mask[pixel_unused])  # the mask of unused pixels is True
 
-    def test_export_mask(self):
-        test_mask_states = np.full(_NOMADMedianDetectorTest.PIXEL_COUNT, False)
-        test_mask_states[0: 123] = True
-        test_mask_states[3000: 4321] = True
-
-        _, test_txt_name = tempfile.mkstemp(suffix='.txt')
-        _NOMADMedianDetectorTest.export_mask(test_mask_states, test_txt_name, 'NOMAD')
-        assert os.path.isfile(test_txt_name)
-        with open(test_txt_name, 'r') as mask_file:
-            assert '4319,  4320' in mask_file.read().replace('\n', ',')
-        os.remove(test_txt_name)
-
-        _, test_xml_name = tempfile.mkstemp(suffix='.xml')
-        _NOMADMedianDetectorTest.export_mask(test_mask_states, test_xml_name, 'NOMAD')
-        assert os.path.isfile(test_xml_name)
-        with open(test_xml_name, 'r') as mask_file:
-            assert '<detids>0-122,3000-4320</detids>' in mask_file.read()
-        os.remove(test_xml_name)
-
 
 if __name__ == "__main__":
     unittest.main()

@@ -31,11 +31,18 @@ class NOMADMedianDetectorTestTest(unittest.TestCase):
                                 SolidAngleNorm=False,
                                 OutputMaskXML=file_xml_mask,
                                 OutputMaskASCII=file_txt_mask)
+        # verify the XML mask
         with open(file_xml_mask) as f:
             contents = f.read()
         for segment in ['0-3122', '48847-48900', '65020-65029', '98295-101375']:  # test a few
             assert segment in contents
         os.remove(file_xml_mask)
+
+        # verify the single-column ASCII mask
+        with open(file_txt_mask) as f:
+            contents = f.read()
+        for detector_id in [0, 3122, 48847, 48900, 65020, 65029, 98295]:
+            assert f' {detector_id}\n' in contents
         os.remove(file_txt_mask)
 
 

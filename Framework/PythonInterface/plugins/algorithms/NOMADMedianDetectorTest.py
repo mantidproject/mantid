@@ -8,7 +8,14 @@
 # package imports
 from mantid.api import (AlgorithmFactory, FileAction, FileProperty, PropertyMode, PythonAlgorithm, WorkspaceProperty)
 from mantid.kernel import Direction
+from mantid.simpleapi import DeleteWorkspaces, ExtractMask, LoadEmptyInstrument, MaskDetectors, mtd, SaveMask
 from mantid.utils.nomad.diagnostics import _NOMADMedianDetectorTest
+
+# third-party imports
+import numpy as np
+
+# standard imports
+import os
 
 
 class NOMADMedianDetectorTest(PythonAlgorithm, _NOMADMedianDetectorTest):
@@ -66,6 +73,44 @@ class NOMADMedianDetectorTest(PythonAlgorithm, _NOMADMedianDetectorTest):
         for exported in ['OutputMaskXML', 'OutputMaskASCII']:
             if self.getProperty(exported).value:
                 self.export_mask(mask_composite, self.getProperty(exported).value)
+
+    @classmethod
+    def export_mask(cls,
+                    pixel_mask_states: np.ndarray,
+                    mask_file_name: str,
+                    instrument_name: str = 'NOMAD') -> None:
+        """
+        Export masks to XML file format
+
+        Parameters
+        ----------
+        pixel_mask_states: numpy.ndarray
+            boolean array with the number of pixels of NOMAD.  True for masking
+        mask_file_name: str
+            name of the output mask XML file or single-colun ASCII file
+        instrument_name: str
+            name of the instrument
+        """
+        detector_ids_masked = np.where(pixel_mask_states)[0]  # detector ID's start at zero (monitors have negative ID)
+        if '.xml' in mask_file_name:
+            # Load empty instrument
+            empty_workspace_name = cls._random_string()
+            LoadEmptyInstrument(InstrumentName=instrument_name, OutputWorkspace=empty_workspace_name)
+
+            # Get the workspace indexes to mask. Shift by the number of monitors
+            if mtd[empty_workspace_name].getNumberHistograms() != pixel_mask_states.shape[0] + cls.MONITOR_COUNT:
+                raise RuntimeError(f'Spectra number of {instrument_name} workspace does not match mask state array')
+            mask_ws_indexes = detector_ids_masked + cls.MONITOR_COUNT
+
+            MaskDetectors(Workspace=empty_workspace_name, WorkspaceIndexList=mask_ws_indexes)
+
+            mask_workspace_name = cls._random_string()
+            ExtractMask(InputWorkspace=empty_workspace_name, OutputWorkspace=mask_workspace_name)
+            SaveMask(InputWorkspace=mask_workspace_name, OutputFile=mask_file_name)
+
+            DeleteWorkspaces([empty_workspace_name, mask_workspace_name])
+        else:
+            np.savetxt(mask_file_name, detector_ids_masked, fmt='%6d', newline=os.linesep)
 
 
 AlgorithmFactory.subscribe(NOMADMedianDetectorTest)
