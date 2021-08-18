@@ -13,7 +13,6 @@ from Engineering.gui.engineering_diffraction.tabs.calibration.model import Calib
 from testhelpers import assert_any_call_partial
 
 CERIUM_NUMBER = "305738"
-TEST_PRM_FILE = "ENGINX_241391_236516_testall_banks.prm"
 class_path = "Engineering.gui.engineering_diffraction.tabs.calibration.model.CalibrationModel"
 file_path = "Engineering.gui.engineering_diffraction.tabs.calibration.model"
 
@@ -56,7 +55,7 @@ class CalibrationModelTest(unittest.TestCase):
         path.exists.return_value = True
         get_info.return_value = "TESTINST", "ceria_no", [["params"], ["table"]]
         utils.load_custom_grouping_workspace.return_value = "grp_ws", "Region"
-        inst, ceria_no, grp_ws, roi_text, bank = self.model.load_existing_calibration_files(TEST_PRM_FILE)
+        inst, ceria_no, grp_ws, roi_text, bank = self.model.load_existing_calibration_files("dummy.prm")
 
         table_test_params = [["params"], ["table"]]
         update_table.assert_called_with(table_test_params)
@@ -68,6 +67,20 @@ class CalibrationModelTest(unittest.TestCase):
         self.assertEqual("ceria_no", ceria_no)
         self.assertEqual("grp_ws", grp_ws)
         self.assertEqual("Region", roi_text)
+
+    def test_get_info_from_file(self):
+        file_content="""ID    ENGIN-X CALIBRATION WITH CeO2 and V-Nb
+INS    CALIB   241391   ceo2
+INS  1 ICONS  18306.98      2.99     14.44
+INS  2 ICONS  18497.75    -29.68    -26.50"""
+        mocked_handle = mock.mock_open(read_data=file_content)
+        dummy_file_path = "/foo/bar_123.prm"
+        patchable = "builtins.open"
+        with mock.patch(patchable, mocked_handle):
+            instrument, ceria_no, params_table = self.model.get_info_from_file(dummy_file_path)
+        self.assertEqual("bar", instrument)
+        self.assertEqual("241391", ceria_no)
+        self.assertEqual([[0, 18306.98, 2.99, 14.44], [1, 18497.75, -29.68, -26.5]], params_table)
 
     @patch(file_path + ".DeleteWorkspace")
     @patch(class_path + ".update_calibration_params_table")
