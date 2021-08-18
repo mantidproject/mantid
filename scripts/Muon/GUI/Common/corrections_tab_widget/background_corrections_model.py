@@ -19,6 +19,8 @@ from Muon.GUI.Common.utilities.run_string_utils import run_string_to_list
 from Muon.GUI.Common.utilities.workspace_data_utils import x_limits_of_workspace
 
 BACKGROUND_PARAM = "A0"
+CORRECTION_SUCCESS_STATUS = "Correction success"
+NO_CORRECTION_STATUS = "No background correction"
 DEFAULT_A_VALUE = 1e6
 DEFAULT_LAMBDA_VALUE = 1.0e-6 / PhysicalConstants.MuonLifetime
 DEFAULT_USE_RAW = False
@@ -43,7 +45,7 @@ class BackgroundCorrectionData:
     end_x: float
     flat_background: IFunction
     exp_decay: IFunction
-    status: str = "No background correction"
+    status: str = NO_CORRECTION_STATUS
 
     def __init__(self, use_raw: bool, rebin_fixed_step: int, start_x: float, end_x: float,
                  flat_background: IFunction = None, exp_decay: IFunction = None):
@@ -142,7 +144,7 @@ class BackgroundCorrectionData:
 
         self.flat_background.setParameter(BACKGROUND_PARAM, background)
         self.flat_background.setError(BACKGROUND_PARAM, background_error)
-        self.status = "Correction success"
+        self.status = CORRECTION_SUCCESS_STATUS
 
     def perform_background_subtraction(self) -> None:
         """Performs the background subtraction on the counts workspace, and then generates the asymmetry workspace."""
@@ -364,6 +366,9 @@ class BackgroundCorrectionsModel:
         if self.is_background_mode_auto():
             fit_function = self._get_fit_function_for_background_fit(correction_data)
             correction_data.calculate_background(fit_function)
+        elif self.is_background_mode_manual():
+            correction_data.status = CORRECTION_SUCCESS_STATUS \
+                if correction_data.flat_background.getParameterValue(BACKGROUND_PARAM) != 0.0 else NO_CORRECTION_STATUS
 
         correction_data.perform_background_subtraction()
 
