@@ -325,7 +325,7 @@ class CalibrationModel(object):
         run_numbers = ""
         params_table = []
         with open(file_path) as f:
-            for line in f:
+            for line in f.readlines():
                 if "INS    CALIB" in line:
                     run_numbers = line
                 if "ICONS" in line:
