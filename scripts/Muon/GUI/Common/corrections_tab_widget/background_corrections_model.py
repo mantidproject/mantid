@@ -353,9 +353,10 @@ class BackgroundCorrectionsModel:
 
     def _run_background_correction(self, correction_data: BackgroundCorrectionData) -> None:
         """Calculates the background for some data using a Fit."""
-        fit_function = self._get_fit_function_for_background_fit(correction_data)
+        if self.is_background_mode_auto():
+            fit_function = self._get_fit_function_for_background_fit(correction_data)
+            correction_data.calculate_background(fit_function)
 
-        correction_data.calculate_background(fit_function)
         correction_data.perform_background_subtraction()
 
     def _get_fit_function_for_background_fit(self, correction_data: BackgroundCorrectionData) -> IFunction:
