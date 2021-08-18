@@ -48,7 +48,7 @@ void CalculatePlaczekSelfScattering::init() {
   declareProperty(
       std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>("InputWorkspace", "", Kernel::Direction::Input),
       "Raw diffraction data workspace for associated correction to be "
-      "calculated for. Workspace must have instument and sample data.");
+      "calculated for. Workspace must have instrument and sample data.");
   declareProperty(
       std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>("IncidentSpecta", "", Kernel::Direction::Input),
       "Workspace of fitted incident spectrum with it's first derivative.");

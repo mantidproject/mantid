@@ -6,6 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAlgorithms/CalculatePlaczek.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
@@ -42,10 +44,11 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", InputWorkspace));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("IncidentSpecta", IncidentSpectaWSN));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Order", 1));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("SampleTemperature", 300)); // K
-    // TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DetectorEfficiency", efficientSpectrumWSN));  // Not implemented
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("IncidentSpectra", IncidentSpectaWSN));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Order", 1));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SampleTemperature", 300.0)); // K
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("CrystalDensity", 0.01));
+    // TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("EfficiencySpectra", efficientSpectrumWSN));  // Not implemented
     // yet
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "outws"));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
@@ -71,10 +74,11 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", InputWorkspace));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("IncidentSpecta", IncidentSpectaWSN));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Order", 2));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("SampleTemperature", 300)); // K
-    // TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DetectorEfficiency", efficientSpectrumWSN));  // Not implemented
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("IncidentSpectra", IncidentSpectaWSN));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Order", 2));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SampleTemperature", 300.0)); // K
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("CrystalDensity", 0.01));
+    // TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("EfficiencySpectra", efficientSpectrumWSN));  // Not implemented
     // yet
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "outws"));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
@@ -95,7 +99,8 @@ private:
   //  fig@https://www.wolframalpha.com/input/?i=-%28x-0.05%29%28x-2%29%28x-2.2%29%28x-3%29
   std::vector<double> generateIncidentSpectrum(const Mantid::HistogramData::HistogramX &lambda) {
     std::vector<double> amplitude;
-    // TODO: make the mocked spectrum
+    std::transform(lambda.begin(), lambda.end(), std::back_inserter(amplitude),
+                   [](double x) { return -(x - 0.05) * (x - 2) * (x - 2.2) * (x - 3); });
     return amplitude;
   }
 
@@ -106,7 +111,8 @@ private:
   //  fig@https://www.wolframalpha.com/input/?i=-4.%28-3.5125+%2B+8.68+x+-+5.4375+x%5E2+%2B+x%5E3%29
   std::vector<double> generateIncidentSpectrumPrime(const Mantid::HistogramData::HistogramX &lambda) {
     std::vector<double> amplitude;
-    // TODO: make the mocked first order derivitive
+    std::transform(lambda.begin(), lambda.end(), std::back_inserter(amplitude),
+                   [](double x) { return -4 * (-3.5125 + 8.68 * x - 5.4375 * x * x + x * x * x); });
     return amplitude;
   }
 
@@ -117,7 +123,8 @@ private:
   //  fig@https://www.wolframalpha.com/input/?i=-34.72+%2B+43.5+x+-+12+x%5E2
   std::vector<double> generateIncidentSpectrumPrimePrime(const Mantid::HistogramData::HistogramX &lambda) {
     std::vector<double> amplitude;
-    // TODO: make the mocked second order derivitive
+    std::transform(lambda.begin(), lambda.end(), std::back_inserter(amplitude),
+                   [](double x) { return -34.72 + 43.5 * x - 12 * x * x; });
     return amplitude;
   }
 
