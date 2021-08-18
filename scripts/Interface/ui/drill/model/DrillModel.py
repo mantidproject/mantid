@@ -61,6 +61,11 @@ class DrillModel(QObject):
     """
     _samples = None
 
+    """
+    List of sample groups.
+    """
+    _sampleGroups = None
+
     ###########################################################################
     # signals                                                                 #
     ###########################################################################
@@ -92,6 +97,7 @@ class DrillModel(QObject):
         self.experimentId = None
         self.algorithm = None
         self._samples = list()
+        self._sampleGroups = list()
         self.controller = None
         self.visualSettings = dict()
         self.rundexIO = None
@@ -111,6 +117,7 @@ class DrillModel(QObject):
         Clear the sample list and the settings.
         """
         self._samples = list()
+        self._sampleGroups = list()
         self.visualSettings = dict()
         self._initController()
         self._initProcessingParameters()
@@ -125,6 +132,7 @@ class DrillModel(QObject):
             instrument (str): instrument name
         """
         self._samples = list()
+        self._sampleGroups = list()
         self.visualSettings = dict()
         self.instrument = None
         self.acquisitionMode = None
@@ -168,6 +176,7 @@ class DrillModel(QObject):
                     self.instrument])):
             return
         self._samples = list()
+        self._sampleGroups = list()
         self.visualSettings = dict()
         if mode in RundexSettings.VISUAL_SETTINGS:
             self.visualSettings = RundexSettings.VISUAL_SETTINGS[mode]
