@@ -285,27 +285,20 @@ class _NOMADMedianDetectorTest:
         return pixel_mask_states
 
     def _get_intensities(self,
-                         input_workspace: 'mantid.api.MatrixWorkspace',
-                         solid_angle_normalize: bool = True) -> np.ma.core.MaskedArray:  # noqa F821
+                         intensities_workspace: 'mantid.api.MatrixWorkspace'  # noqa F821
+                         ) -> np.ma.core.MaskedArray:
         r"""
         Integrated intensity of each pixel for pixels in use. Pixels of unused eightpacks are masked
 
         Parameters
         ----------
         input_workspace: workspace containing pixel intensities
-        solid_angle_normalize: carry out nomalization by pixel solid angle
 
         Returns
         -------
         1D array of size number-of-pixels
         """
-        from mantid.simpleapi import DeleteWorkspaces, Divide, mtd, SolidAngle
-        intensities_workspace = input_workspace  # clean up temporary workspaces
-        if solid_angle_normalize:
-            solid_angles, normalized_workspace = self._random_string(), self._random_string()  # temporary
-            SolidAngle(InputWorkspace=input_workspace, OutputWorkspace=solid_angles)
-            Divide(LHSWorkspace=input_workspace, RHSWorkspace=solid_angles, OutputWorkspace=normalized_workspace)
-            intensities_workspace = mtd[normalized_workspace]
+        intensities_workspace
         # Do not count initial spectra which may be related to monitors, not pixel-detectors
         spectrum_info = intensities_workspace.spectrumInfo()
         spectrum_index = 0
@@ -314,8 +307,6 @@ class _NOMADMedianDetectorTest:
         # sum counts for each detector histogram
         intensities = np.sum(intensities_workspace.extractY()[spectrum_index:], axis=1)
         assert len(intensities) == self.PIXEL_COUNT
-        if solid_angle_normalize:
-            DeleteWorkspaces([solid_angles, normalized_workspace])  # clean up temporary workspaces
         return np.ma.masked_array(intensities, mask=~self.pixel_in_use)  # mask unused pixels
 
     @property

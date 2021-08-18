@@ -6,9 +6,12 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 # package imports
-from mantid.api import (AlgorithmFactory, FileAction, FileProperty, PropertyMode, PythonAlgorithm, WorkspaceProperty)
+from mantid.api import (AlgorithmFactory, FileAction, FileProperty, MatrixWorkspace, PropertyMode, PythonAlgorithm,
+                        WorkspaceProperty)
 from mantid.kernel import Direction
-from mantid.simpleapi import DeleteWorkspaces, ExtractMask, LoadEmptyInstrument, MaskDetectors, mtd, SaveMask
+from mantid.simpleapi import (DeleteWorkspaces, Divide, ExtractMask, LoadEmptyInstrument, MaskDetectors, mtd, SaveMask,
+                              SolidAngle)
+
 from mantid.utils.nomad.diagnostics import _NOMADMedianDetectorTest
 
 # third-party imports
@@ -66,13 +69,40 @@ class NOMADMedianDetectorTest(PythonAlgorithm, _NOMADMedianDetectorTest):
     def PyExec(self):
         # initialize data structures 'config' and 'intensities'
         self.config = self.parse_yaml(self.getProperty('ConfigurationFile').value)
-        self.intensities = self._get_intensities(self.getProperty('InputWorkspace').value,
-                                                 self.getProperty('SolidAngleNorm').value)
+        self.intensities = self.get_intensities(self.getProperty('InputWorkspace').value,
+                                                self.getProperty('SolidAngleNorm').value)
         # calculate the mask, and export it to XML and/or single-column ASCII file
         mask_composite = self.mask_by_tube_intensity | self.mask_by_pixel_intensity
         for exported in ['OutputMaskXML', 'OutputMaskASCII']:
             if self.getProperty(exported).value:
                 self.export_mask(mask_composite, self.getProperty(exported).value)
+
+    def get_intensities(self,
+                        input_workspace: MatrixWorkspace,
+                        solid_angle_normalize: bool = True
+                        ) -> np.ma.core.MaskedArray:
+        r"""
+        Integrated intensity of each pixel for pixels in use. Pixels of unused eightpacks are masked
+
+        Parameters
+        ----------
+        input_workspace: workspace containing pixel intensities
+        solid_angle_normalize: carry out normalization by pixel solid angle
+
+        Returns
+        -------
+        1D array of size number-of-pixels
+        """
+        intensities_workspace = mtd[str(input_workspace)]
+        if solid_angle_normalize:
+            solid_angles, normalized_workspace = self._random_string(), self._random_string()  # temporary workspaces
+            SolidAngle(InputWorkspace=input_workspace, OutputWorkspace=solid_angles)
+            Divide(LHSWorkspace=input_workspace, RHSWorkspace=solid_angles, OutputWorkspace=normalized_workspace)
+            intensities_workspace = mtd[normalized_workspace]
+        intensities = self._get_intensities(intensities_workspace)
+        if solid_angle_normalize:
+            DeleteWorkspaces([solid_angles, normalized_workspace])  # clean up temporary workspaces
+        return intensities
 
     @classmethod
     def export_mask(cls,
