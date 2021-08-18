@@ -11,7 +11,6 @@ import unittest
 import matplotlib
 
 matplotlib.use('AGG')  # noqa
-import matplotlib.pyplot as plt
 
 from numpy import zeros
 
@@ -23,8 +22,7 @@ from mantidqt.plotting.functions import plot
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.testing.strict_mock import StrictMock
 from mantidqt.widgets.fitpropertybrowser.fitpropertybrowser import FitPropertyBrowser
-from testhelpers import assertRaisesNothing
-from workbench.plotting.figuremanager import FigureManagerADSObserver, MantidFigureCanvas
+from workbench.plotting.figuremanager import FigureManagerADSObserver
 
 from qtpy.QtWidgets import QDockWidget
 
@@ -265,7 +263,7 @@ class FitPropertyBrowserTest(unittest.TestCase):
 
     # Private helper functions
     @classmethod
-    def _create_widget(self, canvas=MagicMock(), toolbar_manager=Mock()):
+    def _create_widget(cls, canvas=MagicMock(), toolbar_manager=Mock()):
         return FitPropertyBrowser(canvas, toolbar_manager)
 
     @classmethod
@@ -275,10 +273,12 @@ class FitPropertyBrowserTest(unittest.TestCase):
         Need to mock some functions and call "show()" in order for the fit browser to create its FitInteractiveTool
         object.
         """
-        fig, axes = plt.subplots(subplot_kw={'projection': 'mantid'})
-        canvas = MantidFigureCanvas(fig)
+        _, canvas, _ = cls._create_and_plot_matrix_workspace()
         fit_browser = FitPropertyBrowser(canvas=canvas, toolbar_manager=Mock())
+        # Mock these functions so that we can call show().
+        canvas.draw = Mock()
         fit_browser._get_allowed_spectra = Mock(return_value=True)
+        fit_browser._get_table_workspace = Mock(return_value=False)
         fit_browser._add_spectra = Mock()
         fit_browser.set_output_window_names = Mock(return_value=None)
         # Need to call show() to set up the FitInteractiveTool, but we've mocked the superclass show() function
@@ -287,7 +287,7 @@ class FitPropertyBrowserTest(unittest.TestCase):
         return fit_browser
 
     @classmethod
-    def _create_and_plot_matrix_workspace(self, name="workspace", distribution=False):
+    def _create_and_plot_matrix_workspace(cls, name="workspace", distribution=False):
         ws = CreateWorkspace(OutputWorkspace=name, DataX=zeros(10), DataY=zeros(10),
                              NSpec=5, Distribution=distribution)
         fig = plot([ws], spectrum_nums=[1])
