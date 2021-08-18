@@ -22,7 +22,7 @@ from sans.algorithm_detail.move_sans_instrument_component import move_component,
 from sans.algorithm_detail.scale_sans_workspace import scale_workspace
 from sans.algorithm_detail.slice_sans_event import slice_sans_event
 from sans.common.constants import EMPTY_NAME
-from sans.common.enums import (DetectorType, DataType)
+from sans.common.enums import (DetectorType, DataType, RebinType)
 from sans.common.general_functions import (create_child_algorithm, append_to_sans_file_tag)
 from sans.state.Serializer import Serializer
 from sans.state.StateObjects.wavelength_interval import WavRange
@@ -170,7 +170,8 @@ class SANSReductionCoreBase(DistributedDataProcessorAlgorithm):
                                   "WavelengthHigh": wav_range[1],
                                   "WavelengthStep": wavelength_state.wavelength_interval.wavelength_step,
                                   "WavelengthStepType": wavelength_state.wavelength_step_type_lin_log.value,
-                                  "RebinMode": wavelength_state.rebin_type.value}
+                                  # No option for interpolating data is available
+                                  "RebinMode": RebinType.REBIN.value}
 
             wavelength_alg = create_child_algorithm(self, wavelength_name, **wavelength_options)
             wavelength_alg.execute()
@@ -198,7 +199,7 @@ class SANSReductionCoreBase(DistributedDataProcessorAlgorithm):
             direct_workspace = self._move(state=state, workspace=direct_workspace, component=component_as_string,
                                           is_transmission=True)
 
-        alg = CreateSANSAdjustmentWorkspaces(state_adjustment=state.adjustment,
+        alg = CreateSANSAdjustmentWorkspaces(state=state,
                                              component=component_as_string, data_type=data_type)
 
         adjustments = {}

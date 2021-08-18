@@ -135,7 +135,7 @@ class SANSConvertToWavelengthAndRebin(DistributedDataProcessorAlgorithm):
 
         wavelength_step = self.getProperty("WavelengthStep").value
         step_type = RangeStepType(self.getProperty("WavelengthStepType").value)
-        pre_factor = -1 if step_type == RangeStepType.LOG else 1
+        pre_factor = -1 if step_type in [RangeStepType.LOG, RangeStepType.RANGE_LOG] else 1
         wavelength_step *= pre_factor
         return str(wavelength_low) + "," + str(wavelength_step) + "," + str(wavelength_high)
 

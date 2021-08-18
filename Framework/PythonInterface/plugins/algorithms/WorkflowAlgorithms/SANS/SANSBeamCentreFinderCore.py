@@ -20,7 +20,7 @@ from sans.algorithm_detail.scale_sans_workspace import scale_workspace
 from sans.algorithm_detail.slice_sans_event import slice_sans_event
 from sans.algorithm_detail.xml_shapes import quadrant_xml
 from sans.common.constants import EMPTY_NAME
-from sans.common.enums import (DetectorType, DataType, MaskingQuadrant)
+from sans.common.enums import (DetectorType, DataType, MaskingQuadrant, RebinType)
 from sans.common.general_functions import create_child_algorithm, append_to_sans_file_tag
 from sans.state.AllStates import AllStates
 from sans.state.Serializer import Serializer
@@ -321,7 +321,8 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
                               "WavelengthHigh": wavelength_state.wavelength_interval.wavelength_full_range[1],
                               "WavelengthStep": wavelength_state.wavelength_interval.wavelength_step,
                               "WavelengthStepType": wavelength_state.wavelength_step_type_lin_log.value,
-                              "RebinMode": wavelength_state.rebin_type.value}
+                              # Non monitor/transmission data does not support interpolating rebin
+                              "RebinMode": RebinType.REBIN.value}
 
         wavelength_alg = create_child_algorithm(self, wavelength_name, **wavelength_options)
         wavelength_alg.execute()
@@ -345,7 +346,7 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
             direct_workspace = self._move(state=state, workspace=direct_workspace,
                                           component=component_as_string, is_transmission=True)
 
-        alg = CreateSANSAdjustmentWorkspaces(state_adjustment=state.adjustment,
+        alg = CreateSANSAdjustmentWorkspaces(state=state,
                                              data_type=data_type, component=component_as_string)
         wav_range = state.wavelength.wavelength_interval.wavelength_full_range
         returned_dict = alg.create_sans_adjustment_workspaces(direct_ws=direct_workspace, monitor_ws=monitor_workspace,

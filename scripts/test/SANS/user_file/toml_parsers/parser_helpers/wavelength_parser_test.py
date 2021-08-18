@@ -41,7 +41,7 @@ class WavelengthParserTest(unittest.TestCase):
     @staticmethod
     def _get_wavelength_objs():
         return DuplicateWavelengthStates(
-            mock.NonCallableMock(), mock.NonCallableMock(),
+            mock.NonCallableMock(),
             mock.NonCallableMock(), mock.NonCallableMock())
 
     def _assert_wav_objs(self, state_objs: DuplicateWavelengthStates,
