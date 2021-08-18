@@ -8,7 +8,8 @@ from mantid.py36compat import dataclass
 
 from mantid.api import AlgorithmManager, CompositeFunction, FunctionFactory, IFunction, Workspace
 from mantid.kernel import PhysicalConstants
-from Muon.GUI.Common.contexts.corrections_context import (BACKGROUND_MODE_NONE, FLAT_BACKGROUND,
+from Muon.GUI.Common.contexts.corrections_context import (BACKGROUND_MODE_NONE, BACKGROUND_MODE_AUTO,
+                                                          BACKGROUND_MODE_MANUAL, FLAT_BACKGROUND,
                                                           FLAT_BACKGROUND_AND_EXP_DECAY, RUNS_ALL, GROUPS_ALL)
 from Muon.GUI.Common.contexts.muon_context import MuonContext
 from Muon.GUI.Common.corrections_tab_widget.corrections_model import CorrectionsModel
@@ -201,6 +202,14 @@ class BackgroundCorrectionsModel:
     def is_background_mode_none(self) -> bool:
         """Returns true if the current background correction mode is none."""
         return self._corrections_context.background_corrections_mode == BACKGROUND_MODE_NONE
+
+    def is_background_mode_auto(self) -> bool:
+        """Returns true if the current background correction mode is auto."""
+        return self._corrections_context.background_corrections_mode == BACKGROUND_MODE_AUTO
+
+    def is_background_mode_manual(self) -> bool:
+        """Returns true if the current background correction mode is manual."""
+        return self._corrections_context.background_corrections_mode == BACKGROUND_MODE_MANUAL
 
     def set_selected_function(self, selected_function: str) -> None:
         """Sets the currently selected function which is displayed in the function combo box."""

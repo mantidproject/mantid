@@ -60,7 +60,13 @@ class BackgroundCorrectionsPresenter:
     def handle_mode_combo_box_changed(self) -> None:
         """Handles when the background corrections mode is changed."""
         self.model.set_background_correction_mode(self.view.background_correction_mode)
-        self.view.set_background_correction_options_visible(not self.model.is_background_mode_none())
+        if self.model.is_background_mode_none():
+            self.view.set_none_background_correction_options_visible()
+        elif self.model.is_background_mode_auto():
+            self.view.set_auto_background_correction_options_visible()
+        elif self.model.is_background_mode_manual():
+            self.view.set_manual_background_correction_options_visible()
+
         self._run_background_corrections_for_all()
 
     def handle_select_function_combo_box_changed(self) -> None:

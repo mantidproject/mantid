@@ -116,6 +116,22 @@ class BackgroundCorrectionsView(widget, ui_form):
         """Sets the slot for when the 'Show Output' is clicked."""
         self.handle_show_fit_output_clicked = slot
 
+    def set_none_background_correction_options_visible(self) -> None:
+        """Sets the Background corrections widgets as being hidden."""
+        self.set_background_correction_options_visible(False)
+
+    def set_auto_background_correction_options_visible(self) -> None:
+        """Sets the Background corrections widgets as being hidden."""
+        self.set_background_correction_options_visible(True)
+        self.set_fitting_table_options_visible(True)
+
+    def set_manual_background_correction_options_visible(self) -> None:
+        """Sets the Background corrections widgets as being hidden."""
+        self.set_background_correction_options_visible(True)
+        self.set_fitting_table_options_visible(False)
+        self.select_function_label.setVisible(False)
+        self.function_combo_box.setVisible(False)
+
     def set_background_correction_options_visible(self, visible: bool) -> None:
         """Sets the Background corrections widgets as being visible or hidden."""
         self.select_function_label.setVisible(visible)
@@ -125,6 +141,14 @@ class BackgroundCorrectionsView(widget, ui_form):
         self.show_all_runs_checkbox.setVisible(visible)
         self.apply_table_changes_to_all_checkbox.setVisible(visible)
         self.correction_options_table.setVisible(visible)
+
+    def set_fitting_table_options_visible(self, visible: bool) -> None:
+        """Sets the fitting related options in the table as being visible or hidden."""
+        self.correction_options_table.setColumnHidden(USE_RAW_COLUMN_INDEX, not visible)
+        self.correction_options_table.setColumnHidden(START_X_COLUMN_INDEX, not visible)
+        self.correction_options_table.setColumnHidden(END_X_COLUMN_INDEX, not visible)
+        self.correction_options_table.setColumnHidden(BG_ERROR_COLUMN_INDEX, not visible)
+        self.correction_options_table.setColumnHidden(SHOW_MATRIX_COLUMN_INDEX, not visible)
 
     def set_function_combo_box_tooltips(self) -> None:
         """Update the tooltips for the combobox."""

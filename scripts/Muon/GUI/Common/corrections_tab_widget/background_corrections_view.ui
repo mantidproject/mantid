@@ -191,6 +191,11 @@ background-color: #c7e0ff;
           <string>Auto</string>
          </property>
         </item>
+        <item>
+         <property name="text">
+          <string>Manual</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item row="3" column="2">
