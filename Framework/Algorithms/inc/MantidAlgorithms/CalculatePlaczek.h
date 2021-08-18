@@ -31,6 +31,13 @@ private:
 
   // validator for input parameters
   std::map<std::string, std::string> validateInputs() override;
+
+  double getPackingFraction(const API::MatrixWorkspace_const_sptr &ws);
+
+  std::vector<double> getFluxCoefficient1();
+  std::vector<double> getFluxCoefficient2();
+  std::vector<double> getEfficiencyCoefficient1();
+  std::vector<double> getEfficiencyCoefficient2();
 };
 
 } // namespace Algorithms
