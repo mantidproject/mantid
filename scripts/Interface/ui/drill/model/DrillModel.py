@@ -305,11 +305,8 @@ class DrillModel(QObject):
         Returns:
             list(DrillSample): samples that belong to the group
         """
-        out = []
-        for sample in self.samples:
-            if sample.getGroupName() == groupName:
-                out.append(sample)
-        return out
+        return list(filter(lambda sample : sample.getGroupName() == groupName,
+                           self.samples))
 
     def groupSamples(self, sampleIndexes, groupName=None):
         """
