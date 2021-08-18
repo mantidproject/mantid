@@ -29,8 +29,13 @@ public:
   void updateTableFromModel();
   QTableWidget *getDataTable() const;
 
+  void setAvailableSpectra(WorkspaceIndex minimum, WorkspaceIndex maximum);
+  void setAvailableSpectra(const std::vector<WorkspaceIndex>::const_iterator &from,
+                           const std::vector<WorkspaceIndex>::const_iterator &to);
+
 public slots:
   void removeSelectedData();
+  void updateAvailableSpectra();
 
 protected:
   void addData(IAddWorkspaceDialog const *dialog);
@@ -90,9 +95,13 @@ private:
 
   void setHorizontalHeaders(const QStringList &headers);
 
+  void newPreviewFileSelected(const QString workspaceName, const QString filename);
+  void newPreviewWorkspaceSelected(const QString workspaceName);
+  int findWorkspaceID();
+
 private slots:
   void newInputFiles();
-  void newPreviewFileSelected(int index);
+  void checkNewPreviewSelected(int index);
   void plotInput();
   void handlePreviewSpectrumChanged();
   void twoRanges(QtProperty *prop, bool enabled);

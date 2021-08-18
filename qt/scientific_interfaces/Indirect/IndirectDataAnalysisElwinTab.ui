@@ -46,8 +46,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>777</width>
-         <height>275</height>
+         <width>798</width>
+         <height>294</height>
         </rect>
        </property>
        <property name="sizePolicy">
@@ -282,7 +282,7 @@
          <x>0</x>
          <y>0</y>
          <width>798</width>
-         <height>426</height>
+         <height>405</height>
         </rect>
        </property>
        <property name="minimumSize">
@@ -326,10 +326,61 @@
                </widget>
               </item>
               <item>
-               <widget class="QSpinBox" name="spPreviewSpec">
-                <property name="maximum">
-                 <number>0</number>
+               <widget class="QStackedWidget" name="elwinPreviewSpec">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
                 </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>50</height>
+                 </size>
+                </property>
+                <property name="lineWidth">
+                 <number>-1</number>
+                </property>
+                <widget class="QWidget" name="pgPlotSpinBox">
+                 <widget class="QSpinBox" name="spPlotSpectrum">
+                  <property name="geometry">
+                   <rect>
+                    <x>150</x>
+                    <y>10</y>
+                    <width>33</width>
+                    <height>22</height>
+                   </rect>
+                  </property>
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="maximum">
+                   <number>0</number>
+                  </property>
+                 </widget>
+                </widget>
+                <widget class="QWidget" name="pgPlotCombo">
+                 <widget class="QComboBox" name="cbPlotSpectrum">
+                  <property name="geometry">
+                   <rect>
+                    <x>170</x>
+                    <y>10</y>
+                    <width>73</width>
+                    <height>22</height>
+                   </rect>
+                  </property>
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                 </widget>
+                </widget>
                </widget>
               </item>
              </layout>

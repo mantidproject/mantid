@@ -238,9 +238,11 @@ void IndirectDataAnalysisElwinTab::setup() {
   connect(m_uiForm.dsInputFiles, SIGNAL(filesFound()), this, SLOT(newInputFiles()));
   connect(m_uiForm.dsInputFiles, SIGNAL(filesFound()), this, SLOT(plotInput()));
   connect(m_uiForm.dsInputFiles, SIGNAL(filesFound()), this, SLOT(updateIntegrationRange()));
-  connect(m_uiForm.cbPreviewFile, SIGNAL(currentIndexChanged(int)), this, SLOT(newPreviewFileSelected(int)));
-  connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this, SLOT(setSelectedSpectrum(int)));
-  connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this, SLOT(handlePreviewSpectrumChanged()));
+  connect(m_uiForm.cbPreviewFile, SIGNAL(currentIndexChanged(int)), this, SLOT(checkNewPreviewSelected(int)));
+  connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this, SLOT(setSelectedSpectrum(int)));
+  connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this, SLOT(handlePreviewSpectrumChanged()));
+  connect(m_uiForm.cbPlotSpectrum, SIGNAL(currentIndexChanged(int)), this, SLOT(setSelectedSpectrum(int)));
+  connect(m_uiForm.cbPlotSpectrum, SIGNAL(currentIndexChanged(int)), this, SLOT(handlePreviewSpectrumChanged()));
 
   // Handle plot and save
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
@@ -253,6 +255,8 @@ void IndirectDataAnalysisElwinTab::setup() {
 
   m_dblManager->setValue(m_properties["BackgroundStart"], -0.24);
   m_dblManager->setValue(m_properties["BackgroundEnd"], -0.22);
+
+  updateAvailableSpectra();
 }
 
 void IndirectDataAnalysisElwinTab::run() {
@@ -599,23 +603,43 @@ void IndirectDataAnalysisElwinTab::newInputFiles() {
  *
  * @param index Index of the new selected file
  */
-void IndirectDataAnalysisElwinTab::newPreviewFileSelected(int index) {
+
+void IndirectDataAnalysisElwinTab::checkNewPreviewSelected(int index) {
   auto const workspaceName = m_uiForm.cbPreviewFile->itemText(index);
   auto const filename = m_uiForm.cbPreviewFile->itemData(index).toString();
 
-  if (!filename.isEmpty()) {
-    auto const loadHistory = m_uiForm.ckLoadHistory->isChecked();
+  if (!workspaceName.isEmpty()) {
+    if (!filename.isEmpty())
+      newPreviewFileSelected(workspaceName, filename);
+    else
+      newPreviewWorkspaceSelected(workspaceName);
+  }
+}
 
-    if (loadFile(filename, workspaceName, -1, -1, loadHistory)) {
-      auto const workspace = getADSMatrixWorkspace(workspaceName.toStdString());
+void IndirectDataAnalysisElwinTab::newPreviewFileSelected(const QString workspaceName, const QString filename) {
+  auto const loadHistory = m_uiForm.ckLoadHistory->isChecked();
+  if (loadFile(filename, workspaceName, -1, -1, loadHistory)) {
+    auto const workspace = getADSMatrixWorkspace(workspaceName.toStdString());
+
+    setInputWorkspace(workspace);
+
+    if (m_uiForm.inputChoice->currentIndex() == 0) {
       int const numHist = static_cast<int>(workspace->getNumberHistograms()) - 1;
-
-      setInputWorkspace(workspace);
-      m_uiForm.spPreviewSpec->setMaximum(numHist);
-      m_uiForm.spPreviewSpec->setValue(0);
-      plotInput();
+      m_uiForm.spPlotSpectrum->setMaximum(numHist);
+      m_uiForm.spPlotSpectrum->setValue(0);
     } else
-      g_log.error("Failed to load input workspace.");
+      updateAvailableSpectra();
+
+    plotInput();
+  }
+}
+
+void IndirectDataAnalysisElwinTab::newPreviewWorkspaceSelected(const QString workspaceName) {
+  if (m_uiForm.inputChoice->currentIndex() == 1) {
+    auto const workspace = getADSMatrixWorkspace(workspaceName.toStdString());
+    setInputWorkspace(workspace);
+    updateAvailableSpectra();
+    plotInput();
   }
 }
 
@@ -628,6 +652,8 @@ void IndirectDataAnalysisElwinTab::plotInput() {
 }
 
 void IndirectDataAnalysisElwinTab::handlePreviewSpectrumChanged() {
+  if (m_uiForm.elwinPreviewSpec->currentIndex() == 1)
+    setSelectedSpectrum(m_uiForm.cbPlotSpectrum->currentText().toInt());
   IndirectDataAnalysisTab::plotInput(m_uiForm.ppPlot);
 }
 
@@ -841,6 +867,7 @@ void IndirectDataAnalysisElwinTab::removeSelectedData() {
     m_dataModel->removeDataByIndex(FitDomainIndex(item->row()));
   }
   updateTableFromModel();
+  updateAvailableSpectra();
 }
 
 /**
@@ -850,7 +877,8 @@ void IndirectDataAnalysisElwinTab::removeSelectedData() {
  */
 void IndirectDataAnalysisElwinTab::newInputFilesFromDialog(IAddWorkspaceDialog const *dialog) {
   // Clear the existing list of files
-  m_uiForm.cbPreviewFile->clear();
+  if (m_dataModel->getNumberOfWorkspaces().value < 2)
+    m_uiForm.cbPreviewFile->clear();
 
   // Populate the combo box with the filenames
   QString workspaceNames;
@@ -859,6 +887,7 @@ void IndirectDataAnalysisElwinTab::newInputFilesFromDialog(IAddWorkspaceDialog c
     workspaceNames = QString::fromStdString(indirectDialog->workspaceName());
     filename = QString::fromStdString(indirectDialog->getFileName());
   }
+
   m_uiForm.cbPreviewFile->addItem(workspaceNames, filename);
 
   // Default to the first file
@@ -873,6 +902,41 @@ void IndirectDataAnalysisElwinTab::newInputFilesFromDialog(IAddWorkspaceDialog c
                    m_properties["IntegrationEnd"], range);
   setRangeSelector(m_uiForm.ppPlot->getRangeSelector("ElwinBackgroundRange"), m_properties["BackgroundStart"],
                    m_properties["BackgroundEnd"], range);
+}
+
+void IndirectDataAnalysisElwinTab::setAvailableSpectra(WorkspaceIndex minimum, WorkspaceIndex maximum) {
+  m_uiForm.elwinPreviewSpec->setCurrentIndex(0);
+  m_uiForm.spPlotSpectrum->setMinimum(boost::numeric_cast<int>(minimum.value));
+  m_uiForm.spPlotSpectrum->setMaximum(boost::numeric_cast<int>(maximum.value));
+}
+
+void IndirectDataAnalysisElwinTab::setAvailableSpectra(const std::vector<WorkspaceIndex>::const_iterator &from,
+                                                       const std::vector<WorkspaceIndex>::const_iterator &to) {
+  m_uiForm.elwinPreviewSpec->setCurrentIndex(1);
+  m_uiForm.cbPlotSpectrum->clear();
+
+  for (auto spectrum = from; spectrum < to; ++spectrum)
+    m_uiForm.cbPlotSpectrum->addItem(QString::number(spectrum->value));
+}
+
+void IndirectDataAnalysisElwinTab::updateAvailableSpectra() {
+  auto spectra = m_dataModel->getSpectra(findWorkspaceID());
+  if (m_uiForm.inputChoice->currentIndex() == 1) {
+    if (spectra.isContinuous()) {
+      auto const minmax = spectra.getMinMax();
+      setAvailableSpectra(minmax.first, minmax.second);
+    } else {
+      setAvailableSpectra(spectra.begin(), spectra.end());
+    }
+  }
+}
+
+int IndirectDataAnalysisElwinTab::findWorkspaceID() {
+  auto currentWorkspace = m_uiForm.cbPreviewFile->currentText().toStdString();
+  auto allWorkspaces = m_dataModel->getWorkspaceNames();
+  auto findWorkspace = find(allWorkspaces.begin(), allWorkspaces.end(), currentWorkspace);
+  int workspaceID = findWorkspace - allWorkspaces.begin();
+  return workspaceID;
 }
 
 } // namespace IDA
