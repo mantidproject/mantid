@@ -666,7 +666,8 @@ class MantidAxes(Axes):
             workspace = args[0]
             spec_num = self.get_spec_number_or_bin(workspace, kwargs)
             normalize_by_bin_width, kwargs = get_normalize_by_bin_width(workspace, self, **kwargs)
-            is_normalized = normalize_by_bin_width or workspace.isDistribution()
+            is_normalized = normalize_by_bin_width or \
+                            (hasattr(workspace, 'isDistribution') and workspace.isDistribution())
 
             with autoscale_on_update(self, autoscale_on):
                 artist = self.track_workspace_artist(workspace,
@@ -786,7 +787,8 @@ class MantidAxes(Axes):
             workspace = args[0]
             spec_num = self.get_spec_number_or_bin(workspace, kwargs)
             normalize_by_bin_width, kwargs = get_normalize_by_bin_width(workspace, self, **kwargs)
-            is_normalized = normalize_by_bin_width or workspace.isDistribution()
+            is_normalized = normalize_by_bin_width or \
+                            (hasattr(workspace, 'isDistribution') and workspace.isDistribution())
 
             with autoscale_on_update(self, autoscale_on):
                 artist = self.track_workspace_artist(workspace,
