@@ -30,7 +30,7 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
         # overwrite default peak with that in settings (gets init when UI opened)
         default_peak = get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX,
                                    "default_peak")
-        self.setDefaultPeakType(default_peak)  # this will also update peak func in config settings
+        self.setDefaultPeakType(default_peak)
         self.fit_notifier = GenericObservable()
         self.fit_enabled_notifier = GenericObservable()
 
