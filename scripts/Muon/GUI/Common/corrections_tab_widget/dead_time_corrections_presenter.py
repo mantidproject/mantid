@@ -37,7 +37,7 @@ class DeadTimeCorrectionsPresenter:
 
     def handle_instrument_changed(self) -> None:
         """User changes the selected instrument."""
-        self.set_dead_time_source_to_from_file()
+        self.model.set_dead_time_source_to_from_file()
         self.view.set_dead_time_from_data_file_selected()
 
     def handle_run_selector_changed(self) -> None:
