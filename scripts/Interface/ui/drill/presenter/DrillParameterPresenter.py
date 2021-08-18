@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from qtpy.QtGui import QBrush, QColor
-from qtpy.QtCore import *
+from qtpy.QtCore import Qt
 
 
 class DrillParameterPresenter:
