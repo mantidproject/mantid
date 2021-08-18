@@ -128,7 +128,7 @@ class DrillTest(unittest.TestCase):
                 self.view.table.setColumnHidden(c, False)
                 self.setCellContents(n, c, text + str(n) + str(c))
             data.append(dict())
-            data[-1].update(self.model.samples[n].getParameterValues())
+            data[-1].update(self.model._samples[n].getParameterValues())
             n += 1
         self.view.table.selectionModel().clear()
         return data
@@ -305,8 +305,8 @@ class DrillTest(unittest.TestCase):
         # 1 row at the end
         QTest.mouseClick(self.view.addrow, Qt.LeftButton)
         data.append(dict())
-        for i in range(len(self.model.samples)):
-            self.assertEqual(self.model.samples[i].getParameterValues(),
+        for i in range(len(self.model._samples)):
+            self.assertEqual(self.model._samples[i].getParameterValues(),
                              data[i])
 
         # 2 rows at the end
@@ -314,8 +314,8 @@ class DrillTest(unittest.TestCase):
         QTest.mouseClick(self.view.addrow, Qt.LeftButton)
         data.append(dict())
         data.append(dict())
-        for i in range(len(self.model.samples)):
-            self.assertEqual(self.model.samples[i].getParameterValues(),
+        for i in range(len(self.model._samples)):
+            self.assertEqual(self.model._samples[i].getParameterValues(),
                              data[i])
 
         # 1 row after the first
@@ -323,8 +323,8 @@ class DrillTest(unittest.TestCase):
         self.selectRow(0, Qt.NoModifier)
         QTest.mouseClick(self.view.addrow, Qt.LeftButton)
         data.insert(1, dict())
-        for i in range(len(self.model.samples)):
-            self.assertEqual(self.model.samples[i].getParameterValues(),
+        for i in range(len(self.model._samples)):
+            self.assertEqual(self.model._samples[i].getParameterValues(),
                              data[i])
 
     def test_deleteRows(self):
@@ -332,16 +332,16 @@ class DrillTest(unittest.TestCase):
 
         # no selection
         QTest.mouseClick(self.view.deleterow, Qt.LeftButton)
-        for i in range(len(self.model.samples)):
-            self.assertEqual(self.model.samples[i].getParameterValues(),
+        for i in range(len(self.model._samples)):
+            self.assertEqual(self.model._samples[i].getParameterValues(),
                              data[i])
 
         # 1 row
         self.selectRow(0, Qt.NoModifier)
         QTest.mouseClick(self.view.deleterow, Qt.LeftButton)
         del data[0]
-        for i in range(len(self.model.samples)):
-            self.assertEqual(self.model.samples[i].getParameterValues(),
+        for i in range(len(self.model._samples)):
+            self.assertEqual(self.model._samples[i].getParameterValues(),
                              data[i])
 
         # several rows
@@ -350,8 +350,8 @@ class DrillTest(unittest.TestCase):
         QTest.mouseClick(self.view.deleterow, Qt.LeftButton)
         del data[2]
         del data[0]
-        for i in range(len(self.model.samples)):
-            self.assertEqual(self.model.samples[i].getParameterValues(),
+        for i in range(len(self.model._samples)):
+            self.assertEqual(self.model._samples[i].getParameterValues(),
                              data[i])
         self.selectRow(0, Qt.NoModifier)
         self.selectRow(2, Qt.ShiftModifier)
@@ -359,8 +359,8 @@ class DrillTest(unittest.TestCase):
         del data[2]
         del data[1]
         del data[0]
-        for i in range(len(self.model.samples)):
-            self.assertEqual(self.model.samples[i].getParameterValues(),
+        for i in range(len(self.model._samples)):
+            self.assertEqual(self.model._samples[i].getParameterValues(),
                              data[i])
 
     def test_cut(self):
@@ -368,16 +368,16 @@ class DrillTest(unittest.TestCase):
 
         # no selection
         QTest.mouseClick(self.view.cut, Qt.LeftButton)
-        for i in range(len(self.model.samples)):
-            self.assertEqual(self.model.samples[i].getParameterValues(),
+        for i in range(len(self.model._samples)):
+            self.assertEqual(self.model._samples[i].getParameterValues(),
                              data[i])
 
         # 1 row
         self.selectRow(0, Qt.NoModifier)
         QTest.mouseClick(self.view.cut, Qt.LeftButton)
         data[0] = {}
-        for i in range(len(self.model.samples)):
-            self.assertEqual(self.model.samples[i].getParameterValues(),
+        for i in range(len(self.model._samples)):
+            self.assertEqual(self.model._samples[i].getParameterValues(),
                              data[i])
 
         # several rows
@@ -386,8 +386,8 @@ class DrillTest(unittest.TestCase):
         QTest.mouseClick(self.view.cut, Qt.LeftButton)
         data[0] = {}
         data[2] = {}
-        for i in range(len(self.model.samples)):
-            self.assertEqual(self.model.samples[i].getParameterValues(),
+        for i in range(len(self.model._samples)):
+            self.assertEqual(self.model._samples[i].getParameterValues(),
                              data[i])
         self.selectRow(3, Qt.NoModifier)
         self.selectRow(5, Qt.ShiftModifier)
@@ -395,8 +395,8 @@ class DrillTest(unittest.TestCase):
         data[3] = {}
         data[4] = {}
         data[5] = {}
-        for i in range(len(self.model.samples)):
-            self.assertEqual(self.model.samples[i].getParameterValues(),
+        for i in range(len(self.model._samples)):
+            self.assertEqual(self.model._samples[i].getParameterValues(),
                              data[i])
 
         # cells
@@ -405,8 +405,8 @@ class DrillTest(unittest.TestCase):
         QTest.mouseClick(self.view.cut, Qt.LeftButton)
         del data[6][self.view.columns[0]]
         del data[6][self.view.columns[1]]
-        for i in range(len(self.model.samples)):
-            self.assertEqual(self.model.samples[i].getParameterValues(),
+        for i in range(len(self.model._samples)):
+            self.assertEqual(self.model._samples[i].getParameterValues(),
                              data[i])
 
     def test_copy(self):
@@ -414,34 +414,34 @@ class DrillTest(unittest.TestCase):
 
         # no selection
         QTest.mouseClick(self.view.copy, Qt.LeftButton)
-        for i in range(len(self.model.samples)):
-            self.assertEqual(self.model.samples[i].getParameterValues(),
+        for i in range(len(self.model._samples)):
+            self.assertEqual(self.model._samples[i].getParameterValues(),
                              data[i])
 
         # row(s)
         self.selectRow(0, Qt.NoModifier)
         QTest.mouseClick(self.view.copy, Qt.LeftButton)
-        for i in range(len(self.model.samples)):
-            self.assertEqual(self.model.samples[i].getParameterValues(),
+        for i in range(len(self.model._samples)):
+            self.assertEqual(self.model._samples[i].getParameterValues(),
                              data[i])
         self.selectRow(0, Qt.NoModifier)
         self.selectRow(5, Qt.ControlModifier)
         QTest.mouseClick(self.view.copy, Qt.LeftButton)
-        for i in range(len(self.model.samples)):
-            self.assertEqual(self.model.samples[i].getParameterValues(),
+        for i in range(len(self.model._samples)):
+            self.assertEqual(self.model._samples[i].getParameterValues(),
                              data[i])
 
         # cells
         self.selectCell(0, 0, Qt.NoModifier)
         QTest.mouseClick(self.view.copy, Qt.LeftButton)
-        for i in range(len(self.model.samples)):
-            self.assertEqual(self.model.samples[i].getParameterValues(),
+        for i in range(len(self.model._samples)):
+            self.assertEqual(self.model._samples[i].getParameterValues(),
                              data[i])
         self.selectCell(0, 0, Qt.NoModifier)
         self.selectCell(5, 0, Qt.ShiftModifier)
         QTest.mouseClick(self.view.copy, Qt.LeftButton)
-        for i in range(len(self.model.samples)):
-            self.assertEqual(self.model.samples[i].getParameterValues(),
+        for i in range(len(self.model._samples)):
+            self.assertEqual(self.model._samples[i].getParameterValues(),
                              data[i])
 
     @mock.patch("Interface.ui.drill.presenter.DrillParametersPresenter"
@@ -451,8 +451,8 @@ class DrillTest(unittest.TestCase):
 
         # no selection
         QTest.mouseClick(self.view.paste, Qt.LeftButton)
-        for i in range(len(self.model.samples)):
-            self.assertEqual(self.model.samples[i].getParameterValues(),
+        for i in range(len(self.model._samples)):
+            self.assertEqual(self.model._samples[i].getParameterValues(),
                              data[i])
 
         # copy paste
@@ -460,13 +460,13 @@ class DrillTest(unittest.TestCase):
         QTest.mouseClick(self.view.copy, Qt.LeftButton)
         self.selectRow(1, Qt.NoModifier)
         QTest.mouseClick(self.view.paste, Qt.LeftButton)
-        self.assertDictEqual(self.model.samples[1].getParameterValues(),
+        self.assertDictEqual(self.model._samples[1].getParameterValues(),
                              data[0])
         self.selectCell(2, 0, Qt.NoModifier)
         QTest.mouseClick(self.view.copy, Qt.LeftButton)
         self.selectRow(3, Qt.NoModifier)
         QTest.mouseClick(self.view.paste, Qt.LeftButton)
-        for (k, v) in self.model.samples[3].getParameterValues().items():
+        for (k, v) in self.model._samples[3].getParameterValues().items():
             self.assertEqual(v, data[2][self.view.columns[0]])
 
         # cut paste
@@ -474,13 +474,13 @@ class DrillTest(unittest.TestCase):
         QTest.mouseClick(self.view.cut, Qt.LeftButton)
         self.selectRow(5, Qt.NoModifier)
         QTest.mouseClick(self.view.paste, Qt.LeftButton)
-        self.assertDictEqual(self.model.samples[1].getParameterValues(),
+        self.assertDictEqual(self.model._samples[1].getParameterValues(),
                              data[0])
         self.selectCell(6, 0, Qt.NoModifier)
         QTest.mouseClick(self.view.cut, Qt.LeftButton)
         self.selectRow(7, Qt.NoModifier)
         QTest.mouseClick(self.view.paste, Qt.LeftButton)
-        for (k, v) in self.model.samples[7].getParameterValues().items():
+        for (k, v) in self.model._samples[7].getParameterValues().items():
             self.assertEqual(v, data[6][self.view.columns[0]])
 
     def test_erase(self):
@@ -488,16 +488,16 @@ class DrillTest(unittest.TestCase):
 
         # no selection
         QTest.mouseClick(self.view.erase, Qt.LeftButton)
-        for i in range(len(self.model.samples)):
-            self.assertEqual(self.model.samples[i].getParameterValues(),
+        for i in range(len(self.model._samples)):
+            self.assertEqual(self.model._samples[i].getParameterValues(),
                              data[i])
 
         ## 1 row
         self.selectRow(0, Qt.NoModifier)
         QTest.mouseClick(self.view.erase, Qt.LeftButton)
         data[0] = {}
-        for i in range(len(self.model.samples)):
-            self.assertEqual(self.model.samples[i].getParameterValues(),
+        for i in range(len(self.model._samples)):
+            self.assertEqual(self.model._samples[i].getParameterValues(),
                              data[i])
 
         # several rows
@@ -505,21 +505,21 @@ class DrillTest(unittest.TestCase):
         self.selectRow(2, Qt.ControlModifier)
         QTest.mouseClick(self.view.erase, Qt.LeftButton)
         data[2] = {}
-        for i in range(len(self.model.samples)):
-            self.assertEqual(self.model.samples[i].getParameterValues(),
+        for i in range(len(self.model._samples)):
+            self.assertEqual(self.model._samples[i].getParameterValues(),
                              data[i])
         self.selectRow(1, Qt.NoModifier)
         self.selectRow(4, Qt.ShiftModifier)
         QTest.mouseClick(self.view.erase, Qt.LeftButton)
         data = [{}] * 5
-        for i in range(len(self.model.samples)):
-            self.assertEqual(self.model.samples[i].getParameterValues(),
+        for i in range(len(self.model._samples)):
+            self.assertEqual(self.model._samples[i].getParameterValues(),
                              data[i])
 
     def test_increment(self):
         self.view.nrows.setValue(9)
         QTest.mouseClick(self.view.addrow, Qt.LeftButton)
-        self.assertEqual(len(self.model.samples), 10)
+        self.assertEqual(len(self.model._samples), 10)
 
         # 0 increment
         self.view.increment.setValue(0)
@@ -528,7 +528,7 @@ class DrillTest(unittest.TestCase):
         QTest.mouseClick(self.view.fill, Qt.LeftButton)
         column = self.view.table._columns[0]
         for i in range(10):
-            self.assertEqual(self.model.samples[i].getParameterValues()[column],
+            self.assertEqual(self.model._samples[i].getParameterValues()[column],
                              "0")
 
         # increment
@@ -539,7 +539,7 @@ class DrillTest(unittest.TestCase):
         column = self.view.table._columns[1]
         value = 1
         for i in range(10):
-            self.assertEqual(self.model.samples[i].getParameterValues()[column],
+            self.assertEqual(self.model._samples[i].getParameterValues()[column],
                              str(value))
             value += 7
 

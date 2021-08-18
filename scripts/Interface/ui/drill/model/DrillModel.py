@@ -56,6 +56,11 @@ class DrillModel(QObject):
     """
     _parameters = None
 
+    """
+    List of samples.
+    """
+    _samples = None
+
     ###########################################################################
     # signals                                                                 #
     ###########################################################################
@@ -86,7 +91,7 @@ class DrillModel(QObject):
         self.cycleNumber = None
         self.experimentId = None
         self.algorithm = None
-        self.samples = list()
+        self._samples = list()
         self.controller = None
         self.visualSettings = dict()
         self.rundexIO = None
@@ -105,7 +110,7 @@ class DrillModel(QObject):
         """
         Clear the sample list and the settings.
         """
-        self.samples = list()
+        self._samples = list()
         self.visualSettings = dict()
         self._initController()
         self._initProcessingParameters()
@@ -119,7 +124,7 @@ class DrillModel(QObject):
         Args:
             instrument (str): instrument name
         """
-        self.samples = list()
+        self._samples = list()
         self.visualSettings = dict()
         self.instrument = None
         self.acquisitionMode = None
@@ -162,7 +167,7 @@ class DrillModel(QObject):
                 or (mode not in RundexSettings.ACQUISITION_MODES[
                     self.instrument])):
             return
-        self.samples = list()
+        self._samples = list()
         self.visualSettings = dict()
         if mode in RundexSettings.VISUAL_SETTINGS:
             self.visualSettings = RundexSettings.VISUAL_SETTINGS[mode]
@@ -306,7 +311,7 @@ class DrillModel(QObject):
             list(DrillSample): samples that belong to the group
         """
         return list(filter(lambda sample : sample.getGroupName() == groupName,
-                           self.samples))
+                           self._samples))
 
     def groupSamples(self, sampleIndexes, groupName=None):
         """
@@ -339,7 +344,7 @@ class DrillModel(QObject):
         i = 0
         modifiedGroups = list()
         for s in sampleIndexes:
-            sample = self.samples[s]
+            sample = self._samples[s]
             currentGroup = sample.getGroupName()
             if currentGroup:
                 modifiedGroups.append(currentGroup)
@@ -362,10 +367,10 @@ class DrillModel(QObject):
         """
         modifiedGroups = list()
         for s in sampleIndexes:
-            group = self.samples[s].getGroupName()
+            group = self._samples[s].getGroupName()
             if group and group not in modifiedGroups:
                 modifiedGroups.append(group)
-            self.samples[s].setGroup(None)
+            self._samples[s].setGroup(None)
         for group in modifiedGroups:
             samples = self._getSamplesFromGroup(group)
             sampleIndexes = list()
@@ -396,7 +401,7 @@ class DrillModel(QObject):
             sampleIndex (int): sample index
             state (bool): True to set the master sample
         """
-        sample = self.samples[sampleIndex]
+        sample = self._samples[sampleIndex]
         groupName = sample.getGroupName()
         if groupName is None or sample.isMaster() == state:
             return
@@ -425,7 +430,7 @@ class DrillModel(QObject):
         for p in self._parameters:
             params[p.getName()] = p.getValue()
 
-        sample = self.samples[index]
+        sample = self._samples[index]
         # search for master sample
         groupName = sample.getGroupName()
         if groupName:
@@ -458,9 +463,9 @@ class DrillModel(QObject):
         """
         tasks = list()
         for e in elements:
-            if (e >= len(self.samples)) or (not self.samples[e]):
+            if (e >= len(self._samples)) or (not self._samples[e]):
                 continue
-            if not self.samples[e].isValid():
+            if not self._samples[e].isValid():
                 return False
             kwargs = self.getProcessingParameters(e)
             tasks.append(DrillTask(str(e), self.algorithm, **kwargs))
@@ -479,9 +484,9 @@ class DrillModel(QObject):
         """
         sampleIndexes = []
         for e in elements:
-            if (e >= len(self.samples)) or (not self.samples[e]):
+            if (e >= len(self._samples)) or (not self._samples[e]):
                 continue
-            groupName = self.samples[e].getGroupName()
+            groupName = self._samples[e].getGroupName()
             if groupName is not None:
                 sampleIndexes += [sample.getIndex()
                                   for sample
@@ -495,7 +500,7 @@ class DrillModel(QObject):
         Args:
             ref (int): sample index
         """
-        self.samples[int(ref)].onProcessStarted()
+        self._samples[int(ref)].onProcessStarted()
 
     def _onTaskSuccess(self, ref):
         """
@@ -504,8 +509,8 @@ class DrillModel(QObject):
         Args:
             ref (int): sample index
         """
-        self.samples[int(ref)].onProcessSuccess()
-        self.exportModel.run(self.samples[int(ref)])
+        self._samples[int(ref)].onProcessSuccess()
+        self.exportModel.run(self._samples[int(ref)])
 
     def _onTaskError(self, ref, msg):
         """
@@ -516,7 +521,7 @@ class DrillModel(QObject):
             ref (int): sample index
             msg (str): error msg
         """
-        self.samples[int(ref)].onProcessError(msg)
+        self._samples[int(ref)].onProcessError(msg)
 
     def _onProcessingProgress(self, progress):
         """
@@ -605,15 +610,15 @@ class DrillModel(QObject):
         Args:
             index (int): sample index; if -1 the sample is added to the end
         """
-        if (index == -1) or (index >= len(self.samples)):
-            sample = DrillSample(len(self.samples))
-            self.samples.append(sample)
+        if (index == -1) or (index >= len(self._samples)):
+            sample = DrillSample(len(self._samples))
+            self._samples.append(sample)
         else:
             sample = DrillSample(index)
-            self.samples.insert(index, sample)
+            self._samples.insert(index, sample)
             i = index + 1
-            while i < len(self.samples):
-                self.samples[i].setIndex(i)
+            while i < len(self._samples):
+                self._samples[i].setIndex(i)
                 i += 1
         sample.setController(self.controller)
         self.newSample.emit(sample)
@@ -626,10 +631,10 @@ class DrillModel(QObject):
         Args:
             ref (int): sample index
         """
-        del self.samples[ref]
+        del self._samples[ref]
         i = ref
-        while i < len(self.samples):
-            self.samples[i].setIndex(i)
+        while i < len(self._samples):
+            self._samples[i].setIndex(i)
             i += 1
 
     def getSamples(self):
@@ -639,4 +644,4 @@ class DrillModel(QObject):
         Return:
             list(dict(str:str)): samples
         """
-        return self.samples
+        return self._samples

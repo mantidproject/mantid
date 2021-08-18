@@ -147,7 +147,7 @@ class DrillModelTest(unittest.TestCase):
         s1.getGroupName.return_value = "A"
         s2 = mock.Mock()
         s2.getGroupName.return_value = "B"
-        self.model.samples = [s0, s1, s2]
+        self.model._samples = [s0, s1, s2]
         samples = self.model._getSamplesFromGroup("C")
         self.assertEqual(samples, [])
         samples = self.model._getSamplesFromGroup("A")
@@ -162,7 +162,7 @@ class DrillModelTest(unittest.TestCase):
         s2.getGroupName.return_value = None
         s3 = mock.Mock()
         s3.getGroupName.return_value = None
-        self.model.samples = [s0, s1, s2, s3]
+        self.model._samples = [s0, s1, s2, s3]
         self.model.groupSamples([0, 1, 3])
         s0.setGroup.assert_called_once_with("A", 0)
         s1.setGroup.assert_called_once_with("A", 1)
@@ -177,7 +177,7 @@ class DrillModelTest(unittest.TestCase):
         s2.getGroupName.return_value = "B"
         s3 = mock.Mock()
         s3.getGroupName.return_value = None
-        self.model.samples = [s0, s1, s2, s3]
+        self.model._samples = [s0, s1, s2, s3]
         self.model._getSamplesFromGroup = mock.Mock()
         self.model._getSamplesFromGroup.return_value = [s1]
         self.model.groupSamples = mock.Mock()
@@ -196,7 +196,7 @@ class DrillModelTest(unittest.TestCase):
         s2 = mock.Mock()
         s2.getIndex.return_value = 2
         s2.getGroupName.return_value = "B"
-        self.model.samples = [s0, s1, s2]
+        self.model._samples = [s0, s1, s2]
         self.model.groupSamples = mock.Mock()
         self.model.ungroupSamples = mock.Mock()
         self.model.addToGroup([2], "A")
@@ -213,7 +213,7 @@ class DrillModelTest(unittest.TestCase):
         s2 = mock.Mock()
         s2.getGroupName.return_value = None
         s2.isMaster.retrun_value = False
-        self.model.samples = [s0, s1]
+        self.model._samples = [s0, s1]
         self.model._getSamplesFromGroup = mock.Mock()
         self.model._getSamplesFromGroup.return_value = [s0, s1]
         self.model.setGroupMaster(0, True)
@@ -239,7 +239,7 @@ class DrillModelTest(unittest.TestCase):
         s4.getParameterValues.return_value = {"p2": "DEFAULT"}
         s4.getGroupName.retrun_value = "A"
         s4.isMaster.return_value = False
-        self.model.samples = [s1, s2, s3, s4]
+        self.model._samples = [s1, s2, s3, s4]
         self.model._getSamplesFromGroup = mock.Mock()
         self.model._getSamplesFromGroup.return_value = [s1, s2, s3, s4]
         params = {"p2": "value2", "p3": "value3"}
@@ -259,7 +259,7 @@ class DrillModelTest(unittest.TestCase):
         self.model.getProcessingParameters = mock.Mock()
         self.model.getProcessingParameters.return_value = {}
         s0 = mock.Mock()
-        self.model.samples = [s0]
+        self.model._samples = [s0]
         self.model.process([0])
         self.model.getProcessingParameters.assert_called_once()
         mTask.assert_called()
@@ -272,21 +272,21 @@ class DrillModelTest(unittest.TestCase):
 
     def test_onTaskStated(self):
         s0 = mock.Mock()
-        self.model.samples = [s0]
+        self.model._samples = [s0]
         self.model._onTaskStarted(0)
         s0.onProcessStarted.assert_called_once()
 
     def test_onTaskSuccess(self):
         self.model.exportModel = mock.Mock()
         s0 = mock.Mock()
-        self.model.samples = [s0]
+        self.model._samples = [s0]
         self.model._onTaskSuccess(0)
         s0.onProcessSuccess.assert_called_once()
         self.model.exportModel.run.assert_called_once_with(s0)
 
     def test_onTaskError(self):
         s0 = mock.Mock()
-        self.model.samples = [s0]
+        self.model._samples = [s0]
         self.model._onTaskError(0, "test")
         s0.onProcessError.assert_called_once_with("test")
 
@@ -346,26 +346,26 @@ class DrillModelTest(unittest.TestCase):
     @mock.patch("Interface.ui.drill.model.DrillModel.DrillSample")
     def test_addSample(self, mSample):
         self.model.newSample = mock.Mock()
-        self.assertEqual(self.model.samples, [])
+        self.assertEqual(self.model._samples, [])
         self.model.addSample(0)
         mSample.assert_called_once()
         self.model.newSample.emit.assert_called_once()
-        self.assertEqual(self.model.samples, [mSample.return_value])
+        self.assertEqual(self.model._samples, [mSample.return_value])
 
     def test_deleteSample(self):
         s1 = mock.Mock()
         s2 = mock.Mock()
         s3 = mock.Mock()
-        self.model.samples = [s1, s2, s3]
+        self.model._samples = [s1, s2, s3]
         self.model.deleteSample(0)
-        self.assertEqual(self.model.samples, [s2, s3])
+        self.assertEqual(self.model._samples, [s2, s3])
         self.model.deleteSample(0)
-        self.assertEqual(self.model.samples, [s3])
+        self.assertEqual(self.model._samples, [s3])
 
     def test_getSamples(self):
         s0 = mock.Mock()
         s1 = mock.Mock()
-        self.model.samples = [s0, s1]
+        self.model._samples = [s0, s1]
         self.assertEqual(self.model.getSamples(), [s0, s1])
 
 
