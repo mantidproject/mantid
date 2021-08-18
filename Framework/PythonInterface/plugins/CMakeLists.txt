@@ -276,7 +276,6 @@ set(PYTHON_PLUGINS
     algorithms/WorkflowAlgorithms/SANS/SANSBeamCentreFinderCore.py
     algorithms/WorkflowAlgorithms/SANS/SANSBeamCentreFinderMassMethod.py
     algorithms/WorkflowAlgorithms/SANS/SANSConvertToWavelengthAndRebin.py
-    algorithms/WorkflowAlgorithms/SANS/SANSCreateAdjustmentWorkspaces.py
     algorithms/WorkflowAlgorithms/SANS/SANSLoad.py
     algorithms/WorkflowAlgorithms/SANS/SANSReductionCore.py
     algorithms/WorkflowAlgorithms/SANS/SANSReductionCoreBase.py
