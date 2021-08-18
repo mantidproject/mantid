@@ -140,6 +140,15 @@ class RawPaneModelTest(unittest.TestCase):
         self.assertEqual(self.model.get_ws_names.call_count, 2)
         self.assertEqual(names, ["test", "test"])
 
+    def test_get_workspaces_to_plot_multi_period_selection(self):
+        self.model.get_ws_names = mock.Mock(return_value = ["test"])
+        self.context.data_context.num_periods = mock.Mock(return_value =2)
+        self.context.data_context._current_runs = [[62260], [62261]]
+
+        names = self.model.get_workspaces_to_plot(True, "Counts", "1:16", "62260","2")
+        self.model.get_ws_names.assert_called_once_with("62260", True, '2', "1:16")
+        self.assertEqual(names, ["test"])
+
     def test_convert_index_to_axis(self):
         self.model._max_spec = 4
         self.assertEqual(self.model.convert_index_to_axis(2), 2)
