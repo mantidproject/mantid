@@ -717,7 +717,7 @@ def write_ENGINX_GSAS_iparam_file(output_file, difa, difc, tzero, bk2bk_params=N
     # - BackToBackExponential parameters (PRCF11+12)
     for b_idx, _bank_name in enumerate(bank_names):
         patterns = ["INS  %d ICONS" % (b_idx + 1),  # bank calibration parameters: DIFC, DIFA, TZERO
-                    "INS    CALIB",  # calibration run numbers (Vanadium and Ceria)
+                    "INS    CALIB",  # calibration run number (Ceria)
                     "INS    INCBM"   # A his file for open genie (with ceria run number in the name)
                     ]
         # the ljust(80) ensures a length of 80 characters for the lines (GSAS rules...)
