@@ -82,6 +82,7 @@ class BackgroundCorrectionsView(widget, ui_form):
         self._handle_use_raw_changed = None
         self._handle_start_x_changed = None
         self._handle_end_x_changed = None
+        self._handle_background_changed = None
         self.handle_show_fit_output_clicked = None
 
     def set_slot_for_mode_combo_box_changed(self, slot) -> None:
@@ -111,6 +112,10 @@ class BackgroundCorrectionsView(widget, ui_form):
     def set_slot_for_end_x_changed(self, slot) -> None:
         """Sets the slot for when a end x table cell is changed."""
         self._handle_end_x_changed = slot
+
+    def set_slot_for_background_changed(self, slot) -> None:
+        """Sets the slot for when a background table cell is changed."""
+        self._handle_background_changed = slot
 
     def set_slot_for_show_fit_output_clicked(self, slot) -> None:
         """Sets the slot for when the 'Show Output' is clicked."""
@@ -261,6 +266,10 @@ class BackgroundCorrectionsView(widget, ui_form):
         """Returns the Start X associated with the provided Run and Group."""
         return float(self._table_item_value_for(run, group, END_X_COLUMN_INDEX))
 
+    def set_background(self, run: str, group: str, background: float) -> None:
+        """Sets the Background associated with the provided Run and Group."""
+        self._set_table_item_value_for(run, group, BG_COLUMN_INDEX, background)
+
     def selected_start_x(self) -> float:
         """Returns the Start X in the row that is selected."""
         if self._selected_row is not None:
@@ -272,6 +281,13 @@ class BackgroundCorrectionsView(widget, ui_form):
         """Returns the End X in the row that is selected."""
         if self._selected_row is not None:
             return float(self.correction_options_table.item(self._selected_row, END_X_COLUMN_INDEX).text())
+        else:
+            raise RuntimeError("There is no selected run/group table row.")
+
+    def selected_background(self) -> float:
+        """Returns the Background in the row that is selected."""
+        if self._selected_row is not None:
+            return float(self.correction_options_table.item(self._selected_row, BG_COLUMN_INDEX).text())
         else:
             raise RuntimeError("There is no selected run/group table row.")
 
@@ -347,6 +363,8 @@ class BackgroundCorrectionsView(widget, ui_form):
             self._handle_start_x_changed()
         elif column == END_X_COLUMN_INDEX:
             self._handle_end_x_changed()
+        elif column == BG_COLUMN_INDEX:
+            self._handle_background_changed()
 
     def create_show_fit_output_button_for_row(self, row_index: int) -> QPushButton:
         """Creates the Show Matrix button and connects its slot for a specific row."""

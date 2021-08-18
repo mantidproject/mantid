@@ -265,6 +265,14 @@ class BackgroundCorrectionsModel:
 
         raise RuntimeError(f"The provided run and group could not be found ({run}, {group}).")
 
+    def set_background(self, run: str, group: str, background: float) -> None:
+        """Sets the Background associated with the provided Run and Group."""
+        run_group = tuple([run, group])
+        if run_group in self._corrections_context.background_correction_data:
+            correction_data = self._corrections_context.background_correction_data[run_group]
+            correction_data.flat_background.setParameter(BACKGROUND_PARAM, background)
+            correction_data.flat_background.setError(BACKGROUND_PARAM, 0.0)
+
     def all_runs_and_groups(self) -> tuple:
         """Returns all the runs and groups stored in the context. The list indices of the runs and groups correspond."""
         runs, groups = [], []

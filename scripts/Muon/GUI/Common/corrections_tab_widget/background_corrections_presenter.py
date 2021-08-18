@@ -29,6 +29,7 @@ class BackgroundCorrectionsPresenter:
         self.view.set_slot_for_use_raw_changed(self.handle_use_raw_changed)
         self.view.set_slot_for_start_x_changed(self.handle_start_x_changed)
         self.view.set_slot_for_end_x_changed(self.handle_end_x_changed)
+        self.view.set_slot_for_background_changed(self.handle_background_changed)
         self.view.set_slot_for_show_fit_output_clicked(lambda row: self.handle_show_fit_output_clicked(row))
 
     def initialize_model_options(self) -> None:
@@ -101,6 +102,15 @@ class BackgroundCorrectionsPresenter:
         """Handles when a End X table cell is changed."""
         self._handle_start_or_end_x_changed(self._get_new_x_range_when_end_x_changed)
 
+    def handle_background_changed(self) -> None:
+        """Handles when a Background table cell is changed."""
+        runs, groups = self._selected_runs_and_groups()
+        background = self.view.selected_background()
+        for run, group in zip(runs, groups):
+            self._update_background_in_view_and_model(run, group, background)
+
+        self._perform_background_corrections_for(runs, groups)
+
     def handle_show_fit_output_clicked(self, row_index: int) -> None:
         """Handles when the Show Output button is clicked in one of the table rows."""
         run, group = self.view.get_run_and_group_for_row(row_index)
@@ -168,6 +178,12 @@ class BackgroundCorrectionsPresenter:
             self.view.set_end_x(run, group, end_x)
         self.model.set_start_x(run, group, start_x)
         self.model.set_end_x(run, group, end_x)
+
+    def _update_background_in_view_and_model(self, run: str, group: str, background: float) -> None:
+        """Updates the background in the view and model using the provided values."""
+        if self.view.is_run_group_displayed(run, group):
+            self.view.set_background(run, group, background)
+        self.model.set_background(run, group, background)
 
     def _perform_background_corrections_for(self, runs: list, groups: list) -> None:
         """Performs the background corrections for the provided runs and groups."""
