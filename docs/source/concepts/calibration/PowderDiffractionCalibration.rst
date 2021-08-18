@@ -333,17 +333,17 @@ The same complete calibration can just be run with just
 
     from Calibration.tofpd.group_calibration import do_group_calibration
 
-    diffcal, mask = do_group_calibration(ws,
-                                        groups,
-                                        cc_kwargs={
-                                            "DReference": 2.0,
-                                            "Xmin": 1.75,
-                                            "Xmax": 2.25,
-                                            "OffsetThreshold": 1.0},
-                                        pdcal_kwargs={
-                                            "PeakPositions": [1.0, 2.0, 3.0],
-                                            "PeakFunction": 'Gaussian',
-                                            "PeakWindow": 0.4})
+    diffcal = do_group_calibration(ws,
+                                   groups,
+                                   cc_kwargs={
+                                       "DReference": 2.0,
+                                       "Xmin": 1.75,
+                                       "Xmax": 2.25,
+                                       "OffsetThreshold": 1.0},
+                                   pdcal_kwargs={
+                                       "PeakPositions": [1.0, 2.0, 3.0],
+                                       "PeakFunction": 'Gaussian',
+                                       "PeakWindow": 0.4})
 
     print("DetID DIFC")
     for detid, difc in zip(diffcal.column('detid'), diffcal.column('difc')):
