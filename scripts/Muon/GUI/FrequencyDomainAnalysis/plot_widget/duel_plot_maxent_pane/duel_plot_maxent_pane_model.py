@@ -65,7 +65,7 @@ class DuelPlotMaxentPaneModel(BasePaneModel):
     Handle reconstructed data
     """
     def set_reconstructed_data(self, ws, table_name):
-        # get the indicies and groups first
+        # get the indices and groups first
         self.reconstructed_data_name = ws
         if table_name:
             table = retrieve_ws(table_name)
@@ -73,7 +73,7 @@ class DuelPlotMaxentPaneModel(BasePaneModel):
                 data = table.row(index)
                 self.reconstructed_data[index] = data["Group"]
 
-    def add_reconstructed_data(self, workspaces, indicies):
+    def add_reconstructed_data(self, workspaces, indices):
         first, last = 0, 0
         if self._is_groups:
             first, last = self.get_first_and_last_group_by_index()
@@ -83,8 +83,8 @@ class DuelPlotMaxentPaneModel(BasePaneModel):
         #plus 1 to include last
         for key in range(first, last):
             workspaces += [self.reconstructed_data_name]
-            indicies += [key]
-        return workspaces, indicies
+            indices += [key]
+        return workspaces, indices
 
     """
     Plotting
@@ -117,14 +117,14 @@ class DuelPlotMaxentPaneModel(BasePaneModel):
         return ""
 
     def get_workspace_list_and_indices_to_plot(self):
-        workspace_list, indicies = [], []
+        workspace_list, indices = [], []
         if self._is_groups:
             group_list = self.get_group_list()
-            workspace_list, indicies = self._time_group_model.get_workspace_list_and_indices_to_plot(True, "Counts", group_list)
+            workspace_list, indices = self._time_group_model.get_workspace_list_and_indices_to_plot(True, "Counts", group_list)
         elif self._run:
             workspace_list, indicies = self._raw_model.get_workspace_list_and_indices_to_plot(True, "Counts", self._selection, self._run,
                                                                                               self._period)
-        return workspace_list, indicies
+        return workspace_list, indices
 
     def create_tiled_keys(self, tiled_by):
         if self._is_groups:
@@ -151,6 +151,8 @@ class DuelPlotMaxentPaneModel(BasePaneModel):
             group_pair_name, run_as_string = self.context.group_pair_context.get_group_pair_name_and_run_from_workspace_name(workspace_name)
             if group_pair_name in axes_workspace_map:
                 return axes_workspace_map[group_pair_name]
+            else:
+                return 0
         else:
             return self._raw_model.convert_index_to_axis(index) + 1
 
