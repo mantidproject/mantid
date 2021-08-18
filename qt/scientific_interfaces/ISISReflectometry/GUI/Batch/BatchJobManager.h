@@ -7,7 +7,7 @@
 #pragma once
 
 #include "Common/DllConfig.h"
-#include "IBatchJobRunner.h"
+#include "IBatchJobManager.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
@@ -18,12 +18,12 @@ namespace CustomInterfaces {
 namespace ISISReflectometry {
 
 /**
- * The BatchJobRunner class sets up algorithms to run based on the reduction
+ * The BatchJobManager class sets up algorithms to run based on the reduction
  * configuration, and handles updating state when algorithms complete
  */
-class MANTIDQT_ISISREFLECTOMETRY_DLL BatchJobRunner : public IBatchJobRunner {
+class MANTIDQT_ISISREFLECTOMETRY_DLL BatchJobManager : public IBatchJobManager {
 public:
-  explicit BatchJobRunner(Batch batch);
+  explicit BatchJobManager(Batch batch);
 
   bool isProcessing() const override;
   bool isAutoreducing() const override;

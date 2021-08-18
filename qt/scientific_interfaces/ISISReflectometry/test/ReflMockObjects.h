@@ -7,7 +7,7 @@
 #pragma once
 
 #include "GUI/Batch/IBatchJobAlgorithm.h"
-#include "GUI/Batch/IBatchJobRunner.h"
+#include "GUI/Batch/IBatchJobManager.h"
 #include "GUI/Batch/IBatchPresenter.h"
 #include "GUI/Batch/IBatchPresenterFactory.h"
 #include "GUI/Common/IDecoder.h"
@@ -296,9 +296,9 @@ public:
 
 /**** Job runner ****/
 
-class MockBatchJobRunner : public IBatchJobRunner {
+class MockBatchJobManager : public IBatchJobManager {
 public:
-  MockBatchJobRunner(){};
+  MockBatchJobManager(){};
   MOCK_CONST_METHOD0(isProcessing, bool());
   MOCK_CONST_METHOD0(isAutoreducing, bool());
   MOCK_CONST_METHOD0(percentComplete, int());

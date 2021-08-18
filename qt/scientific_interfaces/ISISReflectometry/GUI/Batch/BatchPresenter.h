@@ -13,7 +13,7 @@
 #include "GUI/Preview/IPreviewPresenter.h"
 #include "GUI/Runs/IRunsPresenter.h"
 #include "GUI/Save/ISavePresenter.h"
-#include "IBatchJobRunner.h"
+#include "IBatchJobManager.h"
 #include "IBatchPresenter.h"
 #include "IBatchView.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
@@ -118,7 +118,7 @@ private:
   friend class CoderCommonTester;
 
 protected:
-  std::unique_ptr<IBatchJobRunner> m_jobRunner;
+  std::unique_ptr<IBatchJobManager> m_jobManager;
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

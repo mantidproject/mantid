@@ -2,7 +2,7 @@ set(BATCH_SRC_FILES
     BatchPresenter.cpp
     QtBatchView.cpp
     BatchJobAlgorithm.cpp
-    BatchJobRunner.cpp
+    BatchJobManager.cpp
     AlgorithmProperties.cpp
     GroupProcessingAlgorithm.cpp
     RowPreprocessingAlgorithm.cpp
@@ -15,13 +15,13 @@ set(BATCH_INC_FILES
     IBatchPresenter.h
     IBatchView.h
     IBatchJobAlgorithm.h
-    IBatchJobRunner.h
+    IBatchJobManager.h
     IBatchPresenterFactory.h
     BatchPresenter.h
     BatchPresenterFactory.h
     QtBatchView.h
     BatchJobAlgorithm.h
-    BatchJobRunner.h
+    BatchJobManager.h
     AlgorithmProperties.h
     GroupProcessingAlgorithm.h
     RowPreprocessingAlgorithm.h

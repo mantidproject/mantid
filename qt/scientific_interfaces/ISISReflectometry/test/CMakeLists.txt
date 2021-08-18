@@ -3,10 +3,10 @@ set(TEST_FILES
   Instrument/InstrumentOptionDefaultsTest.h
   Instrument/InstrumentPresenterTest.h
   Batch/BatchPresenterTest.h
-  Batch/BatchJobRunnerProgressBarTest.h
-  Batch/BatchJobRunnerWorkspacesTest.h
+  Batch/BatchJobManagerProgressBarTest.h
+  Batch/BatchJobManagerWorkspacesTest.h
   Batch/GroupProcessingAlgorithmTest.h
-  Batch/BatchJobRunnerProcessingTest.h
+  Batch/BatchJobManagerProcessingTest.h
   Batch/RowProcessingAlgorithmTest.h
   Batch/RowPreprocessingAlgorithmTest.h
 

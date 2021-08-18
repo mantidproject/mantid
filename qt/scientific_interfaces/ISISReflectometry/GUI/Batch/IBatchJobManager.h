@@ -15,9 +15,9 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
-class MANTIDQT_ISISREFLECTOMETRY_DLL IBatchJobRunner {
+class MANTIDQT_ISISREFLECTOMETRY_DLL IBatchJobManager {
 public:
-  virtual ~IBatchJobRunner() = default;
+  virtual ~IBatchJobManager() = default;
 
   virtual bool isProcessing() const = 0;
   virtual bool isAutoreducing() const = 0;
