@@ -11,8 +11,8 @@ from mantidqt.widgets.workspacedisplay.table.presenter import TableWorkspaceDisp
 
 from Muon.GUI.Common.utilities import table_utils
 
-from qtpy.QtWidgets import QWidget
 from qtpy.QtCore import Qt
+from qtpy.QtWidgets import QWidget
 
 ui_form, base_widget = load_ui(__file__, "fit_function_options.ui")
 
