@@ -6,22 +6,36 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from mantid.api import IEventWorkspace, MatrixWorkspace, WorkspaceGroup
+from mantid import config
+from mantid.api import AnalysisDataService, IEventWorkspace, MatrixWorkspace, WorkspaceGroup
 from mantid.simpleapi import CreateSampleWorkspace
 from plugins.algorithms.WorkflowAlgorithms.ReflectometryISISPreprocess import ReflectometryISISPreprocess
 from testhelpers import create_algorithm
 
 
 class ReflectometryISISPreprocessTest(unittest.TestCase):
+    def setUp(self):
+        self._oldFacility = config['default.facility']
+        if self._oldFacility.strip() == '':
+            self._oldFacility = 'TEST_LIVE'
+        self._oldInstrument = config['default.instrument']
+        config['default.facility'] = 'ISIS'
+        config['default.instrument'] = 'INTER'
+
+    def tearDown(self):
+        AnalysisDataService.clear()
+        config['default.facility'] = self._oldFacility
+        config['default.instrument'] = self._oldInstrument
+
     def test_input_run_is_loaded_histo_mode_by_default(self):
-        args = {'InputRunList': '13460',
+        args = {'InputRunList': 'INTER13460',
                 "OutputWorkspace": "ws"}
         output_ws = self._run_test(args)
         self.assertIsInstance(output_ws, MatrixWorkspace)
         self.assertEqual("Workspace2D", output_ws.id())
 
     def test_input_run_is_loaded_histo_mode(self):
-        args = {'InputRunList': '13460',
+        args = {'InputRunList': 'INTER13460',
                 "EventMode": False,
                 "OutputWorkspace": "ws"}
         output_ws = self._run_test(args)
@@ -29,7 +43,7 @@ class ReflectometryISISPreprocessTest(unittest.TestCase):
         self.assertEqual("Workspace2D", output_ws.id())
 
     def test_input_run_is_loaded_event_mode(self):
-        args = {'InputRunList': '13460',
+        args = {'InputRunList': 'INTER13460',
                 "EventMode": True,
                 "OutputWorkspace": "ws"}
         output_ws = self._run_test(args)
@@ -48,7 +62,7 @@ class ReflectometryISISPreprocessTest(unittest.TestCase):
             ReflectometryISISPreprocess._validate_event_ws(ws)
 
     def test_monitors_are_not_loaded_in_histo_mode(self):
-        args = {'InputRunList': '13460',
+        args = {'InputRunList': 'INTER13460',
                 "EventMode": False,
                 "OutputWorkspace": "ws"}
         output_ws, monitor_ws = self._run_test_with_monitors(args)
@@ -56,7 +70,7 @@ class ReflectometryISISPreprocessTest(unittest.TestCase):
         self.assertIsNone(monitor_ws)
 
     def test_monitors_are_loaded_in_event_mode(self):
-        args = {'InputRunList': '13460',
+        args = {'InputRunList': 'INTER13460',
                 "EventMode": True,
                 "OutputWorkspace": "ws"}
         output_ws, monitor_ws = self._run_test_with_monitors(args)
