@@ -14,8 +14,14 @@ New Features
 - The Frequency Domain Analysis interface now allows you to perform a sequential fit using the Sequential Fitting tab.
 - The Sequential Fitting tab allows you to choose the type of dataset you want to fit.
 
-Muon Analysis
--------------
+Bug Fixes
+#########
+
+- In frequency domain analysis the phasetables calculated from :ref:`MuonMaxent <algm-MuonMaxent>` can be used for
+  :ref:`PhaseQuad <algm-PhaseQuad>` calculations on the phase tab.
+
+Muon Analysis 2
+---------------
 
 New Features
 ############
@@ -30,14 +36,14 @@ Improvements
 
 - When running the Dynamic Kubo Toyabe fit function you should now be able to see the BinWidth to 3 decimal places.
 
-BugFixes
-############
+Bug Fixes
+#########
 - A bug has been fixed in the BinWidth for the Dynamic Kobu Toyabe Fitting Function which caused a crash and did not provide
   any information about why the value was invalid. Will now revert to last viable BinWidth used and explain why.
 - The autoscale option when `All` is selected will now show the largest and smallest y value from the all of the plots.
 
-Muon Analysis and Frequency Domain Analysis
--------------------------------------------
+Muon Analysis 2 and Frequency Domain Analysis
+---------------------------------------------
 
 New Features
 ############
@@ -58,11 +64,14 @@ Improvements
 - Frequency domain analysis can now use groups in :ref:`MuonMaxent <algm-MuonMaxent>` calculations.
 - The labels on the tabs in the GUIs will now show in full
 
-BugFixes
-########
 
-- In frequency domain analysis the phasetables calculated from :ref:`MuonMaxent <algm-MuonMaxent>` can be used for
-  :ref:`PhaseQuad <algm-PhaseQuad>` calculations on the phase tab.
+
+Bug Fixes
+#########
+- The GUIs will no longer crash if there are any whitespaces in the run range (e.g. 6010- 3).
+- The GUIs can also now cope with a range of runs that span between two different decades where the second number
+  in the range is smaller than the final digit of the first number in the range (e.g. 6018-3 will give 6018-6023 now).
+
 
 ALC
 ---
