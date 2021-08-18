@@ -9,8 +9,10 @@ import numpy
 
 from qtpy.QtCore import QObject, Signal
 
-from mantid.kernel import *
-from mantid.api import *
+from mantid.kernel import StringPropertyWithValue, BoolPropertyWithValue, \
+                          FloatArrayProperty, IntArrayProperty
+from mantid.api import FileProperty, MultipleFileProperty, \
+                       WorkspaceGroupProperty, MatrixWorkspaceProperty
 
 
 class DrillParameter(QObject):
