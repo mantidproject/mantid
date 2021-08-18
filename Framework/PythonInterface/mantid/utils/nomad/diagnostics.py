@@ -5,10 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-# package imports
-from mantid.simpleapi import (DeleteWorkspaces, Divide, ExtractMask, LoadEmptyInstrument, MaskDetectors,
-                              mtd, SaveMask, SolidAngle)
-
 # 3rd-party imports
 import numpy
 import numpy as np
@@ -304,6 +300,7 @@ class _NOMADMedianDetectorTest:
         -------
         1D array of size number-of-pixels
         """
+        from mantid.simpleapi import DeleteWorkspaces, Divide, SolidAngle
         intensities_workspace = input_workspace  # clean up temporary workspaces
         if solid_angle_normalize:
             solid_angles, normalized_workspace = self._random_string(), self._random_string()  # temporary
@@ -479,6 +476,7 @@ class _NOMADMedianDetectorTest:
         instrument_name: str
             name of the instrument
         """
+        from mantid.simpleapi import DeleteWorkspaces, ExtractMask, LoadEmptyInstrument, MaskDetectors, mtd, SaveMask
         detector_ids_masked = np.where(pixel_mask_states)[0]  # detector ID's start at zero (monitors have negative ID)
         if '.xml' in mask_file_name:
             # Load empty instrument
