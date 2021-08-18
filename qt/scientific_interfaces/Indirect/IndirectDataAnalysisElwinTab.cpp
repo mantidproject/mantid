@@ -931,11 +931,11 @@ void IndirectDataAnalysisElwinTab::updateAvailableSpectra() {
   }
 }
 
-int IndirectDataAnalysisElwinTab::findWorkspaceID() {
+size_t IndirectDataAnalysisElwinTab::findWorkspaceID() {
   auto currentWorkspace = m_uiForm.cbPreviewFile->currentText().toStdString();
   auto allWorkspaces = m_dataModel->getWorkspaceNames();
   auto findWorkspace = find(allWorkspaces.begin(), allWorkspaces.end(), currentWorkspace);
-  int workspaceID = findWorkspace - allWorkspaces.begin();
+  size_t workspaceID = findWorkspace - allWorkspaces.begin();
   return workspaceID;
 }
 

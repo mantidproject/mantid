@@ -97,7 +97,7 @@ private:
 
   void newPreviewFileSelected(const QString workspaceName, const QString filename);
   void newPreviewWorkspaceSelected(const QString workspaceName);
-  int findWorkspaceID();
+  size_t findWorkspaceID();
 
 private slots:
   void newInputFiles();
