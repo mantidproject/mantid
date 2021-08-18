@@ -43,8 +43,8 @@ public:
     Mantid::API::FrameworkManager::Instance();
   }
 
-  void testPresenterSubscribesToView() {
-    EXPECT_CALL(m_view, subscribe(_)).Times(1);
+  void testPresenterSubscribesToJobRunner() {
+    EXPECT_CALL(*m_jobRunner, subscribe(_)).Times(1);
     auto presenter = makePresenter();
     verifyAndClear();
   }
@@ -224,7 +224,7 @@ public:
 
   void testBatchIsCancelledWhenReductionPaused() {
     auto presenter = makePresenter();
-    EXPECT_CALL(m_view, cancelAlgorithmQueue()).Times(1);
+    EXPECT_CALL(*m_jobRunner, cancelAlgorithmQueue()).Times(1);
     presenter->notifyPauseReductionRequested();
     verifyAndClear();
   }
@@ -295,7 +295,7 @@ public:
 
   void testBatchIsCancelledWhenAutoreductionPaused() {
     auto presenter = makePresenter();
-    EXPECT_CALL(m_view, cancelAlgorithmQueue()).Times(1);
+    EXPECT_CALL(*m_jobRunner, cancelAlgorithmQueue()).Times(1);
     presenter->notifyPauseAutoreductionRequested();
     verifyAndClear();
   }
@@ -463,6 +463,7 @@ public:
 private:
   NiceMock<MockBatchView> m_view;
   NiceMock<MockBatchJobManager> *m_jobManager;
+  NiceMock<MockJobRunner> *m_jobRunner;
   NiceMock<MockMainWindowPresenter> m_mainPresenter;
   NiceMock<MockRunsPresenter> *m_runsPresenter;
   NiceMock<MockEventPresenter> *m_eventPresenter;
@@ -582,8 +583,8 @@ private:
 
   void expectBatchIsExecuted() {
     EXPECT_CALL(*m_jobManager, getAlgorithms()).Times(1);
-    EXPECT_CALL(m_view, clearAlgorithmQueue()).Times(1);
-    EXPECT_CALL(m_view, setAlgorithmQueue(m_mockAlgorithmsList)).Times(1);
-    EXPECT_CALL(m_view, executeAlgorithmQueue()).Times(1);
+    EXPECT_CALL(*m_jobRunner, clearAlgorithmQueue()).Times(1);
+    EXPECT_CALL(*m_jobRunner, setAlgorithmQueue(m_mockAlgorithmsList)).Times(1);
+    EXPECT_CALL(*m_jobRunner, executeAlgorithmQueue()).Times(1);
   }
 };

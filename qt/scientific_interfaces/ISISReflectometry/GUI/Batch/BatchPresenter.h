@@ -7,6 +7,7 @@
 #pragma once
 
 #include "Common/DllConfig.h"
+#include "GUI/Common/IJobRunner.h"
 #include "GUI/Event/IEventPresenter.h"
 #include "GUI/Experiment/IExperimentPresenter.h"
 #include "GUI/Instrument/IInstrumentPresenter.h"
@@ -15,7 +16,6 @@
 #include "GUI/Save/ISavePresenter.h"
 #include "IBatchJobManager.h"
 #include "IBatchPresenter.h"
-#include "IBatchView.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
 #include <memory>
 
@@ -31,7 +31,7 @@ class IBatchView;
     functionality defined by the interface IBatchPresenter.
 */
 class MANTIDQT_ISISREFLECTOMETRY_DLL BatchPresenter : public IBatchPresenter,
-                                                      public BatchViewSubscriber,
+                                                      public JobRunnerSubscriber,
                                                       public MantidQt::API::WorkspaceObserver {
 public:
   /// Constructor
@@ -45,7 +45,7 @@ public:
   BatchPresenter const &operator=(BatchPresenter const &rhs) = delete;
   BatchPresenter &operator=(BatchPresenter &&rhs) = delete;
 
-  // BatchViewSubscriber overrides
+  // JobRunnerSubscriber overrides
   void notifyBatchComplete(bool error) override;
   void notifyBatchCancelled() override;
   void notifyAlgorithmStarted(MantidQt::API::IConfiguredAlgorithm_sptr algorithm) override;
@@ -111,6 +111,7 @@ private:
   std::unique_ptr<IInstrumentPresenter> m_instrumentPresenter;
   std::unique_ptr<ISavePresenter> m_savePresenter;
   std::unique_ptr<IPreviewPresenter> m_previewPresenter;
+  IJobRunner *m_jobRunner;
   bool m_unsavedBatchFlag;
 
   friend class Encoder;

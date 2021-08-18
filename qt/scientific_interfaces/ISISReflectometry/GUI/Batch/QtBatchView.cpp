@@ -29,7 +29,7 @@ QtBatchView::QtBatchView(QWidget *parent) : QWidget(parent), m_batchAlgoRunner(t
   connectBatchAlgoRunnerSlots();
 }
 
-void QtBatchView::subscribe(BatchViewSubscriber *notifyee) { m_notifyee = notifyee; }
+void QtBatchView::subscribe(JobRunnerSubscriber *notifyee) { m_notifyee = notifyee; }
 
 void QtBatchView::initLayout() {
   m_ui.setupUi(this);

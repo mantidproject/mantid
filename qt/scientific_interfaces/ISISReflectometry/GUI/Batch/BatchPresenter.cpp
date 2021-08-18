@@ -44,7 +44,7 @@ BatchPresenter::BatchPresenter(IBatchView *view, Batch model, std::unique_ptr<IR
       m_previewPresenter(std::move(previewPresenter)), m_unsavedBatchFlag(false),
       m_jobManager(new BatchJobManager(model)) {
 
-  m_view->subscribe(this);
+  m_jobRunner->subscribe(this);
 
   // Tell the tab presenters that this is going to be the main presenter
   m_savePresenter->acceptMainPresenter(this);
@@ -140,9 +140,9 @@ void BatchPresenter::notifyAlgorithmError(IConfiguredAlgorithm_sptr algorithm, s
  * @returns : true if processing was started, false if there was nothing to do
  */
 bool BatchPresenter::startBatch(std::deque<IConfiguredAlgorithm_sptr> algorithms) {
-  m_view->clearAlgorithmQueue();
-  m_view->setAlgorithmQueue(std::move(algorithms));
-  m_view->executeAlgorithmQueue();
+  m_jobRunner->clearAlgorithmQueue();
+  m_jobRunner->setAlgorithmQueue(std::move(algorithms));
+  m_jobRunner->executeAlgorithmQueue();
   return true;
 }
 
@@ -171,7 +171,7 @@ void BatchPresenter::notifyReductionResumed() {
   m_mainPresenter->notifyAnyBatchReductionResumed();
 }
 
-void BatchPresenter::pauseReduction() { m_view->cancelAlgorithmQueue(); }
+void BatchPresenter::pauseReduction() { m_jobRunner->cancelAlgorithmQueue(); }
 
 void BatchPresenter::notifyReductionPaused() {
   // Update the model
