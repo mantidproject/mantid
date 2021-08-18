@@ -109,7 +109,7 @@ class IndirectILLEnergyTransferTest(unittest.TestCase):
     def test_bats_monitor(self):
         args = {'Run': self._runs['bats'], 'PulseChopper': '34', 'GroupDetectors': False, 'DeleteMonitorWorkspace':False}
         res = IndirectILLEnergyTransfer(**args)
-        mon_ws = res_215962_mon
+        mon_ws = 'res_215962_mon'
         self.assertTrue(mtd.doesExist(mon_ws))
         self.assertTrue(mtd[mon_ws])
         self.assertTrue(isinstance(mtd[mon_ws], MatrixWorkspace))
