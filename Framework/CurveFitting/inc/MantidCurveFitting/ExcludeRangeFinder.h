@@ -8,6 +8,7 @@
 
 #include "MantidCurveFitting/DllConfig.h"
 
+#include <cstddef>
 #include <vector>
 
 namespace Mantid {
@@ -31,7 +32,7 @@ private:
   /// Find the range from m_exclude that may contain points x >= p
   void findNextExcludedRange(double p);
   /// Index of current excluded range
-  size_t m_exclIndex;
+  std::size_t m_exclIndex;
   /// Start of current excluded range
   double m_startExcludedRange;
   /// End of current excluded range
@@ -39,7 +40,7 @@ private:
   /// Reference to a list of exclusion ranges.
   const std::vector<double> m_exclude;
   /// Size of m_exclude.
-  const size_t m_size;
+  const std::size_t m_size;
 };
 
 } // namespace CurveFitting

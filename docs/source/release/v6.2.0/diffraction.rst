@@ -14,7 +14,9 @@ Powder Diffraction
 New features
 ############
 - New algorithm :ref:`CombineDiffCal <algm-CombineDiffCal>` to calibrate groups of pixels after cross correlation so that diffraction peaks can be adjusted to the correct positions
+- New algorithm :ref:`SetSampleFromLogs <algm-SetSampleFromLogs>` inspects the sample enviroment logs for sample material and geometry information
 - New script for doing calibration by groups, :ref:`PowderDiffractionCalibration <calibration_tofpd_group_calibration-ref>`
+- New algorithm :ref:`MultipleScatteringCorrection <algm-MultipleScatteringCorrection>` to compute the multiple scattering correction factor for sample using numerical integration.
 
 Improvements
 ############
@@ -34,6 +36,7 @@ Improvements
   on a scatter plot, new option for self-attenuation treatment using measured tranmission.
 - added a 3mf format file describing the PEARL sample and environment shapes for the P-E press. Also fixed a couple of minor issues in the 3mf file format loader used in ref:`LoadSampleEnvironment  <algm-LoadSampleEnvironment>`
 - :ref:`LoadILLDiffraction <algm-LoadILLDiffraction>` now adds input run number also to a metadata field `run_list`, indended to contain a full list of numors, handled by :ref:`MergeRuns <algm-MergeRuns>`
+- :ref:`LoadWANDSCD <algm-LoadWANDSCD-v1>` now has a new option to perform normalization in the same loading process.
 
 Bugfixes
 ########
@@ -59,6 +62,8 @@ Improvements
 - The cropping/region of interest selection for Calibration/Focusing is now chosen only on the Calibration tab, to avoid confusion and duplication of input.
 - The region of interest for Calibration/Focusing can now be selected with a user-supplied custom calibration file.
 - The Focused Run Files input box defaults to the last runs focused on the Focus tab, even if multiple runs were focussed
+- The full calibration setting now has a default value consisting of the path to the ENGINX_full_instrument_calibration_193749.nxs file
+- The usability of the file finder on the Fitting tab has been improved by the addition of file filters based on unit and/or bank
 
 Bugfixes
 ########

@@ -1022,30 +1022,6 @@ set(
   ${CMAKE_CURRENT_LIST_DIR}/test/WidgetsCommonTestInitialization.h
 )
 
-mtd_add_qt_tests(
-  TARGET_NAME MantidQtWidgetsCommonTest
-  QT_VERSION 4
-  SRC ${TEST_FILES}
-  INCLUDE_DIRS
-    ../../../Framework/TestHelpers/inc
-    ../../../Framework/DataObjects/inc
-    ../../../Framework/Crystal/inc
-
-  TEST_HELPER_SRCS
-    ../../../Framework/TestHelpers/src/TearDownWorld.cpp
-    ../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
-    ../../../Framework/TestHelpers/src/DataProcessorTestHelper.cpp
-    ../../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
-    ../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
-    ../../../Framework/TestHelpers/src/MDEventsTestHelper.cpp
-  LINK_LIBS
-    ${TARGET_LIBRARIES}
-    DataObjects
-    gmock
-  MTD_QT_LINK_LIBS MantidQtWidgetsCommon
-  PARENT_DEPENDENCIES GUITests
-)
-
 set(
   QT5_TEST_FILES
   test/AddWorkspaceDialogTest.h

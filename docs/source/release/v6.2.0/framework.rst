@@ -67,6 +67,17 @@ MantidWorkbench
 
 See :doc:`mantidworkbench`.
 
+Algorithms
+----------
+
+Improvements
+############
+- :ref:`LoadNexusMonitors <algm-LoadNexusMonitors-v2>` now utilizes the log filter provided by `LoadNexusLogs <algm-LoadNexusLogs>`
+
+Bugfixes
+########
+- :ref:`LoadNexusLogs <algm-LoadNexusLogs>` now logs that are poorly formed create a warning message and the other logs are loaded. Previously it stopped loading logs at that point.
+
 SliceViewer
 -----------
 
@@ -76,9 +87,9 @@ Improvements
 Bugfixes
 ########
 - Fix cursor tracking from getting stuck and displaying incorrect signals when viewing MDHistogram workspaces in :ref:`sliceviewer`.
-
 - Added parser for input Names to :ref:`algm-CreateMDHistoWorkspace` to allow inputs such as `Names='[H,0,0],[0,K,0],[0,0,L]'`.
 - Fixed bug in :ref:`algm-ConvertToMDMinMaxLocal` where wrong min max calculated if the workspace includes monitor spectra or spectra without any detectors
 - Fix bug in :ref:`CalculateMultipleScattering <algm-CalculateMultipleScattering>` where detector position was incorrectly determined on a workspace where the workspace index didn't match the detector
   index eg if the workspace was loaded with SpectrumMin specified to exclude some monitors
 
+:ref:`Release 6.2.0 <v6.2.0>`

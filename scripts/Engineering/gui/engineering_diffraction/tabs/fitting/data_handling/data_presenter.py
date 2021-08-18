@@ -30,7 +30,8 @@ class FittingDataPresenter(object):
         self.view.set_on_seq_fit_clicked(self._start_seq_fit)
         self.view.set_on_serial_fit_clicked(self._start_serial_fit)
         self.view.set_on_table_cell_changed(self._handle_table_cell_changed)
-        self.view.set_on_xunit_changed(self._log_xunit_change)
+        self.view.set_on_bank_changed(self._update_file_filter)
+        self.view.set_on_xunit_changed(self._update_file_filter)
         self.view.set_table_selection_changed(self._handle_selection_changed)
 
         # Observable Setup
@@ -60,13 +61,13 @@ class FittingDataPresenter(object):
         ws_list = self.model.get_ws_list()
         self.fit_all_started_notifier.notify_subscribers(ws_list, do_sequential=False)
 
-    def _log_xunit_change(self, xunit):
-        logger.notice("Subsequent files will be loaded with the x-axis unit:\t{}".format(xunit))
+    def _update_file_filter(self, bank, xunit):
+        self.view.update_file_filter(bank, xunit)
 
-    def on_load_clicked(self, xunit):
+    def on_load_clicked(self):
         if self._validate():
             filenames = self._get_filenames()
-            self._start_load_worker(filenames, xunit)
+            self._start_load_worker(filenames)
 
     def remove_workspace(self, ws_name):
         if ws_name in self.get_loaded_workspaces():
@@ -116,12 +117,12 @@ class FittingDataPresenter(object):
     def restore_table(self):  # used when the interface is being restored from a save or crash
         self._repopulate_table()
 
-    def _start_load_worker(self, filenames, xunit):
+    def _start_load_worker(self, filenames):
         """
         Load one to many files into mantid that are tracked by the interface.
         :param filenames: Comma separated list of filenames to load
         """
-        self.worker = AsyncTask(self.model.load_files, (filenames, xunit),
+        self.worker = AsyncTask(self.model.load_files, (filenames,),
                                 error_cb=self._on_worker_error,
                                 finished_cb=self._emit_enable_load_button_signal,
                                 success_cb=self._on_worker_success)
