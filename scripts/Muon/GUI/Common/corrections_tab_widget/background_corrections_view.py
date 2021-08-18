@@ -276,7 +276,8 @@ class BackgroundCorrectionsView(widget, ui_form):
             raise RuntimeError("There is no selected run/group table row.")
 
     def populate_corrections_table(self, runs: list, groups: list, use_raws: list, start_xs: list, end_xs: list,
-                                   backgrounds: list, background_errors: list, statuses: list, use_raw_visible: bool) -> None:
+                                   backgrounds: list, background_errors: list, statuses: list, fixed_rebin: bool,
+                                   auto_corrections: bool) -> None:
         """Populates the background corrections table with the provided data."""
         self.correction_options_table.blockSignals(True)
         self.correction_options_table.setRowCount(0)
@@ -293,14 +294,14 @@ class BackgroundCorrectionsView(widget, ui_form):
             self.correction_options_table.setItem(row, START_X_COLUMN_INDEX, create_double_table_item(start_x))
             self.correction_options_table.setItem(row, END_X_COLUMN_INDEX, create_double_table_item(end_x))
             self.correction_options_table.setItem(row, BG_COLUMN_INDEX,
-                                                  create_double_table_item(background, enabled=False))
+                                                  create_double_table_item(background, enabled=not auto_corrections))
             self.correction_options_table.setItem(row, BG_ERROR_COLUMN_INDEX,
                                                   create_double_table_item(background_error, enabled=False))
             self.correction_options_table.setItem(row, STATUS_COLUMN_INDEX,
                                                   create_string_table_item(status, False, alignment=Qt.AlignVCenter))
             self.correction_options_table.setCellWidget(row, SHOW_MATRIX_COLUMN_INDEX,
                                                         self.create_show_fit_output_button_for_row(row))
-        self.correction_options_table.setColumnHidden(USE_RAW_COLUMN_INDEX, not use_raw_visible)
+        self.correction_options_table.setColumnHidden(USE_RAW_COLUMN_INDEX, not fixed_rebin or not auto_corrections)
         self.correction_options_table.blockSignals(False)
         self.correction_options_table.resizeColumnsToContents()
 

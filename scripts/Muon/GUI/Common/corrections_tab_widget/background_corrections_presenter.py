@@ -152,7 +152,8 @@ class BackgroundCorrectionsPresenter:
         runs, groups, use_raws, start_xs, end_xs, backgrounds, background_errors, statuses = \
             self.model.selected_correction_data()
         self.view.populate_corrections_table(runs, groups, use_raws, start_xs, end_xs, backgrounds, background_errors,
-                                             statuses, self.model.is_rebin_fixed_selected())
+                                             statuses, self.model.is_rebin_fixed_selected(),
+                                             self.model.is_background_mode_auto())
 
     def _update_use_raw_in_view_and_model(self, run: str, group: str, use_raw: bool) -> None:
         """Updates the Use Raw option in the view and model using the provided value."""
