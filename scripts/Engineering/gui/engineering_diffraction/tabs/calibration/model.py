@@ -118,15 +118,23 @@ class CalibrationModel(object):
         if not path.exists(file_path):
             msg = "Could not open GSAS calibration file: " + file_path
             logger.warning(msg)
-            return
+            raise
         try:
             instrument, ceria_no, params_table = self.get_info_from_file(file_path)
             self.update_calibration_params_table(params_table)
         except RuntimeError:
-            logger.error("Invalid file selected: ", file_path)
-            return
-        bank = EnggUtils.load_relevant_calibration_files(file_path)
-        grp_ws_name, roi_text = EnggUtils.load_custom_grouping_workspace(file_path)
+            logger.error("Invalid file selected: " + file_path)
+            raise
+        try:
+            bank = EnggUtils.load_relevant_calibration_files(file_path)
+        except Exception as e:
+            logger.error("Unable to loading calibration files corresponding to " + file_path + ". Error: " + str(e))
+            raise
+        try:
+            grp_ws_name, roi_text = EnggUtils.load_custom_grouping_workspace(file_path)
+        except Exception as e:
+            logger.error("Unable to load grouping workspace corresponding to " + file_path + ". Error: " + str(e))
+            raise
         return instrument, ceria_no, grp_ws_name, roi_text, bank
 
     @staticmethod

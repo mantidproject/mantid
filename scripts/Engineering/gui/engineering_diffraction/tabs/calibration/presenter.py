@@ -59,8 +59,11 @@ class CalibrationPresenter(object):
                 logger.notice("Invalid calibration path")
                 return
             filename = self.view.get_path_filename()
-            instrument, sample_file, grp_ws_name, roi_text, banks = \
-                self.model.load_existing_calibration_files(filename)
+            try:
+                instrument, sample_file, grp_ws_name, roi_text, banks = \
+                    self.model.load_existing_calibration_files(filename)
+            except:
+                return
             self.pending_calibration.set_calibration(sample_file, instrument)
             self.pending_calibration.set_roi_info_load(banks, grp_ws_name, roi_text)
             self.set_current_calibration()
