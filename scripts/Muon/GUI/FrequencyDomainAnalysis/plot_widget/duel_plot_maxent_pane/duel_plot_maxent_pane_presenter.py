@@ -29,6 +29,7 @@ class DuelPlotMaxentPanePresenter(BasePanePresenter):
         self._maxent_ws_name = None
         # connections
         self.method_changed =  GenericObserverWithArgPassing(self.change_time_plot)
+        self.period_changed =  GenericObserverWithArgPassing(self.change_period)
         self.new_data_observer = GenericObserverWithArgPassing(
             self.handle_maxent_data_updated)
         self.reconstructed_data_observer = GenericObserverWithArgPassing(
@@ -38,6 +39,9 @@ class DuelPlotMaxentPanePresenter(BasePanePresenter):
     def change_time_plot(self, method):
         self._model.set_if_groups(method=="Groups")
         self.clear()
+
+    def change_period(self, period):
+        self._model.set_period(period)
 
     def handle_maxent_data_updated(self, name):
         self._maxent_ws_name = name

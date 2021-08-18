@@ -22,6 +22,7 @@ class DuelPlotMaxentPaneModel(BasePaneModel):
         self._time_spec_limit = 8
         self._run = None
         self._is_groups = True
+        self._period = 1
 
         self._time_group_model = time_group_model
 
@@ -38,6 +39,9 @@ class DuelPlotMaxentPaneModel(BasePaneModel):
 
     def set_selection(self, selection):
         self._selection = selection
+
+    def set_period(self, period):
+        self._period = period
 
     def set_if_groups(self, is_groups):
         self._is_groups = is_groups
@@ -118,7 +122,8 @@ class DuelPlotMaxentPaneModel(BasePaneModel):
             group_list = self.get_group_list()
             workspace_list, indicies = self._time_group_model.get_workspace_list_and_indices_to_plot(True, "Counts", group_list)
         elif self._run:
-            workspace_list, indicies = self._raw_model.get_workspace_list_and_indices_to_plot(True, "Counts", self._selection, self._run)
+            workspace_list, indicies = self._raw_model.get_workspace_list_and_indices_to_plot(True, "Counts", self._selection, self._run,
+                                                                                              self._period)
         return workspace_list, indicies
 
     def create_tiled_keys(self, tiled_by):
