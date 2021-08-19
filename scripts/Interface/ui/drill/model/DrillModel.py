@@ -310,6 +310,15 @@ class DrillModel(QObject):
         """
         return self._parameters
 
+    def getSampleGroups(self):
+        """
+        Get the sample groups.
+
+        Returns:
+            list(DrillSampleGroup): list of groups
+        """
+        return self._sampleGroups
+
     def _getSamplesFromGroup(self, groupName):
         """
         Get the list of samples that belong to a group.
