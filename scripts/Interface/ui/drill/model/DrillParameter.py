@@ -129,7 +129,8 @@ class DrillParameter(QObject):
             self._type = self.STRING_TYPE
 
         if isinstance(value, numpy.ndarray):
-            self._value = value.tolist()
+            if value.ndim == 1:
+                self._value = value.tolist()
         elif value is None:
             self._value = ""
         else:
