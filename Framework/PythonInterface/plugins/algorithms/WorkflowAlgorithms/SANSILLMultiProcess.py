@@ -282,57 +282,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
                              doc='The output workspace group containing the reduced data.')
         self.setPropertyGroup('OutputWorkspace', 'Output Workspaces')
 
-    def _reset(self):
-        '''Resets the class member variables'''
-        self.instrument = None
-        self.rank = None
-        self.lambda_rank = None
-        self.n_samples = None
-        self.properties = dict()
-        self.sample_transmissions = []
-        self.container_transmissions = []
-
-    def _set_rank(self):
-        '''Sets the actual rank of the reduction'''
-        self.rank = 0
-        for d in range(N_DISTANCES):
-            if self.getPropertyValue(f'SampleRunsD{d+1}'):
-                self.rank += 1
-        if self.rank == 0:
-            raise RuntimeError('No sample runs are provided, at least one distance must not be empty.')
-        else:
-            self.log().notice(f'Set the rank of reduction to {self.rank}')
-
-    def _set_lambda_rank(self):
-        '''Sets the actual lambda rank'''
-        self.lambda_rank = 0
-        for l in range(N_LAMBDAS):
-            if self.getPropertyValue(f'SampleTrRunsW{l+1}'):
-                self.lambda_rank += 1
-        self.log().notice(f'Set the lambda rank of reduction to {self.lambda_rank}')
-
-    def _set_n_samples(self):
-        '''Sets the number of samples based on the inputs of the sample runs in the first non-empty distance'''
-        for d in range(self.rank):
-            if self.getPropertyValue(f'SampleRunsD{d+1}'):
-                self.n_samples = self.getPropertyValue(f'SampleRunsD{d+1}').count(',') + 1
-                self.log().notice(f'Set number of samples to {self.n_samples}')
-                break
-
-    def _setup_light(self):
-        '''Performs a light setup, which can be done before loading any data'''
-        self._reset()
-        self._set_rank()
-        self._set_lambda_rank()
-        self._set_n_samples() # must be after set_rank()
-
-    def _setup(self, ws):
-        '''Performs a full setup, which can be done only after having loaded the sample data'''
-        self._setup_light()
-        self.instrument = ws.getInstrument().getName()
-        unit = ws.getAxis(0).getUnit().unitID()
-        if unit == 'Wavelength':
-            raise RuntimeError('TOF is not yet supported in the new workflow, please use the old one.')
+    #================================CHECKS FOR INPUT VALIDATION================================#
 
     def _check_sample_runs_dimensions(self):
         '''Makes sure all the sample inputs have matching extents'''
@@ -454,12 +404,65 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
             issues = self._check_wedges_panels_mutex()
         return issues
 
-    def PyExec(self):
-        '''Executes the algorithm'''
+    #================================CONFIGURING LOGIC================================#
+
+    def _reset(self):
+        '''Resets the class member variables'''
+        self.instrument = None
+        self.rank = None
+        self.lambda_rank = None
+        self.n_samples = None
+        self.properties = dict()
+        self.sample_transmissions = []
+        self.container_transmissions = []
+
+    def _set_rank(self):
+        '''Sets the actual rank of the reduction'''
+        self.rank = 0
+        for d in range(N_DISTANCES):
+            if self.getPropertyValue(f'SampleRunsD{d+1}'):
+                self.rank += 1
+        if self.rank == 0:
+            raise RuntimeError('No sample runs are provided, at least one distance must not be empty.')
+        else:
+            self.log().notice(f'Set the rank of reduction to {self.rank}')
+
+    def _set_lambda_rank(self):
+        '''Sets the actual lambda rank'''
+        self.lambda_rank = 0
+        for l in range(N_LAMBDAS):
+            if self.getPropertyValue(f'SampleTrRunsW{l+1}'):
+                self.lambda_rank += 1
+        self.log().notice(f'Set the lambda rank of reduction to {self.lambda_rank}')
+
+    def _set_n_samples(self):
+        '''Sets the number of samples based on the inputs of the sample runs in the first non-empty distance'''
+        for d in range(self.rank):
+            if self.getPropertyValue(f'SampleRunsD{d+1}'):
+                self.n_samples = self.getPropertyValue(f'SampleRunsD{d+1}').count(',') + 1
+                self.log().notice(f'Set number of samples to {self.n_samples}')
+                break
+
+    def _setup_light(self):
+        '''Performs a light setup, which can be done before loading any data'''
+        self._reset()
+        self._set_rank()
+        self._set_lambda_rank()
+        self._set_n_samples() # must be after set_rank()
+
+    def _setup(self, ws):
+        '''Performs a full setup, which can be done only after having loaded the sample data'''
         self._setup_light()
-        self.process_all_transmissions()
-        outputs = self.process_all_samples()
-        self.package(outputs)
+        self.instrument = ws.getInstrument().getName()
+        unit = ws.getAxis(0).getUnit().unitID()
+        if unit == 'Wavelength':
+            raise RuntimeError('TOF is not yet supported in the new workflow, please use the old one.')
+
+    def tr_index(self, d):
+        '''Returns the index of the transmission wavelength based on the index of distance'''
+        return 1 if d+1 in self.getProperty('DistancesAtWavelength2').value else 0
+
+    #================================PROCESSING ALL===============================#
 
     def process_all_transmissions(self):
         '''Calculates all the transmissions'''
@@ -489,6 +492,67 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
             self.container_transmissions.append(tr_empty_can_ws)
         if tr_sample_ws:
             self.sample_transmissions.append(tr_sample_ws)
+
+    def process_all_samples_at_distance(self, d):
+        '''
+        Reduces all the samples at a given distance
+        '''
+        dark_current_ws = self.process_dark_current(d)
+        [empty_beam1_ws, empty_beam1_flux] = self.process_empty_beam(d, dark_current_ws)
+        [empty_beam2_ws, empty_beam2_flux] = self.process_flux(d, dark_current_ws)
+        empty_can_ws = self.process_container(d, dark_current_ws, empty_beam1_ws)
+        actual_flux_ws = empty_beam2_flux if empty_beam2_flux else empty_beam1_flux
+        return self.process_sample(d, dark_current_ws, empty_beam1_ws, empty_can_ws, actual_flux_ws)
+
+    #================================LOAD PROCESSED CALIBRANTS================================#
+
+    def load_sensitivity(self, d):
+        sens = self.getPropertyValue('SensitivityMap')
+        if sens:
+            [load_sens, sens_ws] = needs_loading(sens, 'Sensitivity')
+            if load_sens:
+                LoadNexusProcessed(Filename=sens, OutputWorkspace=sens_ws)
+            return sens_ws
+        else:
+            return ''
+
+    def load_masks(self, d):
+        edge_mask = self.getPropertyValue('DefaultMask')
+        [load_edge_mask, edge_mask_ws] = needs_loading(edge_mask, 'DefaultMask')
+        if load_edge_mask:
+            LoadNexusProcessed(Filename=edge_mask, OutputWorkspace=edge_mask_ws)
+        beam_stop = self.getPropertyValue('BeamStopMasks')
+        beam_stop_mask_ws = ''
+        if beam_stop:
+            beam_stop_mask = beam_stop.split(',')[d]
+            [load_beam_stop_mask, beam_stop_mask_ws] = needs_loading(beam_stop_mask, 'Mask')
+            if load_beam_stop_mask:
+                LoadNexusProcessed(Filename=beam_stop_mask, OutputWorkspace=beam_stop_mask_ws)
+        return [edge_mask_ws, beam_stop_mask_ws]
+
+    def load_flat_field(self, d):
+        flat_fields = self.getPropertyValue('FlatFields')
+        if flat_fields:
+            flat_field = flat_fields.split(',')[d]
+            [load_flat_field, flat_field_ws] = needs_loading(flat_field, 'FlatField')
+            if load_flat_field:
+                LoadNexusProcessed(Filename=flat_field, OutputWorkspace=flat_field_ws)
+            return flat_field_ws
+        else:
+            return ''
+
+    def load_solvent(self, d):
+        solvents = self.getPropertyValue('Solvents')
+        if solvents:
+            solvent = solvents.split(',')[d]
+            [load_solvent, solvent_ws] = needs_loading(solvent, 'Solvent')
+            if load_solvent:
+                LoadNexusProcessed(Filename=solvent, OutputWorkspace=solvent_ws)
+            return solvent_ws
+        else:
+            return ''
+
+    #================================INDIVIDUAL PROCESS REDUCTIONS================================#
 
     def process_tr_dark_current(self, l):
         runs = self.getPropertyValue('TrDarkCurrentRuns')
@@ -555,17 +619,6 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
             return tr_sample_ws
         else:
             return ''
-
-    def process_all_samples_at_distance(self, d):
-        '''
-        Reduces all the samples at a given distance
-        '''
-        dark_current_ws = self.process_dark_current(d)
-        [empty_beam1_ws, empty_beam1_flux] = self.process_empty_beam(d, dark_current_ws)
-        [empty_beam2_ws, empty_beam2_flux] = self.process_flux(d, dark_current_ws)
-        empty_can_ws = self.process_container(d, dark_current_ws, empty_beam1_ws)
-        actual_flux_ws = empty_beam2_flux if empty_beam2_flux else empty_beam1_flux
-        return self.process_sample(d, dark_current_ws, empty_beam1_ws, empty_can_ws, actual_flux_ws)
 
     def process_dark_current(self, d):
         runs = self.getPropertyValue('DarkCurrentRuns')
@@ -671,52 +724,6 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         else:
             return []
 
-    def load_sensitivity(self, d):
-        sens = self.getPropertyValue('SensitivityMap')
-        if sens:
-            [load_sens, sens_ws] = needs_loading(sens, 'Sensitivity')
-            if load_sens:
-                LoadNexusProcessed(Filename=sens, OutputWorkspace=sens_ws)
-            return sens_ws
-        else:
-            return ''
-
-    def load_masks(self, d):
-        edge_mask = self.getPropertyValue('DefaultMask')
-        [load_edge_mask, edge_mask_ws] = needs_loading(edge_mask, 'DefaultMask')
-        if load_edge_mask:
-            LoadNexusProcessed(Filename=edge_mask, OutputWorkspace=edge_mask_ws)
-        beam_stop = self.getPropertyValue('BeamStopMasks')
-        beam_stop_mask_ws = ''
-        if beam_stop:
-            beam_stop_mask = beam_stop.split(',')[d]
-            [load_beam_stop_mask, beam_stop_mask_ws] = needs_loading(beam_stop_mask, 'Mask')
-            if load_beam_stop_mask:
-                LoadNexusProcessed(Filename=beam_stop_mask, OutputWorkspace=beam_stop_mask_ws)
-        return [edge_mask_ws, beam_stop_mask_ws]
-
-    def load_flat_field(self, d):
-        flat_fields = self.getPropertyValue('FlatFields')
-        if flat_fields:
-            flat_field = flat_fields.split(',')[d]
-            [load_flat_field, flat_field_ws] = needs_loading(flat_field, 'FlatField')
-            if load_flat_field:
-                LoadNexusProcessed(Filename=flat_field, OutputWorkspace=flat_field_ws)
-            return flat_field_ws
-        else:
-            return ''
-
-    def load_solvent(self, d):
-        solvents = self.getPropertyValue('Solvents')
-        if solvents:
-            solvent = solvents.split(',')[d]
-            [load_solvent, solvent_ws] = needs_loading(solvent, 'Solvent')
-            if load_solvent:
-                LoadNexusProcessed(Filename=solvent, OutputWorkspace=solvent_ws)
-            return solvent_ws
-        else:
-            return ''
-
     def integrate(self, d, sample_ws):
         results = []
         panel_names = ''
@@ -747,14 +754,18 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         SANSILLIntegration(**kwargs)
         return results
 
-    def tr_index(self, d):
-        return 1 if d+1 in self.getProperty('DistancesAtWavelength2').value else 0
-
     def package(self, output):
         out = self.getPropertyValue('OutputWorkspace')
         output = list(filter(lambda x: x, output))
         GroupWorkspaces(InputWorkspaces=output, OutputWorkspace=out)
         self.setProperty('OutputWorkspace', out)
+
+    def PyExec(self):
+        '''Executes the algorithm'''
+        self._setup_light()
+        self.process_all_transmissions()
+        outputs = self.process_all_samples()
+        self.package(outputs)
 
 
 AlgorithmFactory.subscribe(SANSILLMultiProcess)
