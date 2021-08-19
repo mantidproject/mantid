@@ -24,6 +24,7 @@ New and Improved
 - Script editor tab completion and call tip support for Numpy 1.21
 - The visibility of a component parameter in the Pick tab of the InstrumentViewer is now steered by the 'visible' atrribute of a parameter in IPF
 - Plot legends can be shown or hidden from the plot context menu.
+- The plot config dialog notifies the user when there has been an error applying the config to the plot, and allows them to change the config further.
 
 Bugfixes
 --------
