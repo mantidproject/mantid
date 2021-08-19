@@ -19,7 +19,7 @@ Format Changes
 V0 to V1
 --------
 
-- *normalisation* and *normalisation* are both accepted and equivalent
+- *normalisation* and *normalization* are both accepted and equivalent
 - *detector.calibration* was renamed to *detector.correction*
 - *mask.beamstop_shadow* and *mask.mask_pixels* were moved to
   *mask.spatial.beamstop_shadow* and *mask.spatial.mask_pixels*
