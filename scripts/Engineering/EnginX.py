@@ -281,13 +281,13 @@ def create_calibration_files(ceria_run, van_run, full_inst_calib, int_van, van_c
         difc = [output[0]['difc']]
         tzero = [output[0]['tzero']]
         if bank is None and spectrum_numbers is None:
-            save_calibration(ceria_run, van_run, calibration_directory, calibration_general, "all_banks", [crop_name],
+            save_calibration(ceria_run, calibration_directory, calibration_general, "all_banks", [crop_name],
                              tzero, difc, difa, bk2bk_params)
         if spectrum_numbers is not None:
-            save_calibration(ceria_run, van_run, calibration_directory, calibration_general,
+            save_calibration(ceria_run, calibration_directory, calibration_general,
                              "bank_cropped", [crop_name], tzero, difc, difa, bk2bk_params)
         else:
-            save_calibration(ceria_run, van_run, calibration_directory, calibration_general,
+            save_calibration(ceria_run, calibration_directory, calibration_general,
                              "bank_{}".format(spec_nos), [crop_name], tzero, difc, difa, bk2bk_params)
         # create the table workspace containing the parameters
         param_tbl_name = crop_name if crop_name is not None else "Cropped"
@@ -300,11 +300,11 @@ def create_calibration_files(ceria_run, van_run, full_inst_calib, int_van, van_c
         tzeros = [row['tzero'] for row in output]
         plot_dicts = list()
         for i in range(1, 3):
-            save_calibration(ceria_run, van_run, calibration_directory, calibration_general,
+            save_calibration(ceria_run, calibration_directory, calibration_general,
                              f"bank_{i}", [bank_names[i - 1]],
                              [tzeros[i - 1]], [difcs[i - 1]], [difas[i - 1]], bk2bk_params)
             plot_dicts.append(Utils.generate_tof_fit_dictionary(f"bank_{i}"))
-        save_calibration(ceria_run, van_run, calibration_directory, calibration_general, "all_banks", bank_names,
+        save_calibration(ceria_run, calibration_directory, calibration_general, "all_banks", bank_names,
                          tzeros, difcs, difas, bk2bk_params)
         # create the table workspace containing the parameters
         create_params_table(difcs, tzeros, difas)
@@ -462,13 +462,12 @@ def load_van_curves_file(curves_van):
     return van_curves_ws
 
 
-def save_calibration(ceria_run, van_run, calibration_directory, calibration_general, name, bank_names, zeros, difcs,
+def save_calibration(ceria_run, calibration_directory, calibration_general, name, bank_names, zeros, difcs,
                      difas, bk2bk_params):
     """
     save the calibration data
 
     @param ceria_run :: the run number of the ceria
-    @param van_run :: the run number of the vanadium
     @param calibration_directory :: the user specific calibration directory to save to
     @param calibration_general :: the general calibration directory to save to
     @param name ::  the name of the banks being saved
@@ -478,7 +477,7 @@ def save_calibration(ceria_run, van_run, calibration_directory, calibration_gene
     @param zeros :: the list of tzero values to save
 
     """
-    file_save_prefix = os.path.join(calibration_directory, "ENGINX_" + van_run + "_" + ceria_run + "_")
+    file_save_prefix = os.path.join(calibration_directory, "ENGINX_" + ceria_run + "_")
     gsas_iparm_fname = file_save_prefix + name + ".prm"
     pdcals_to_save = dict()  # fname: workspace
     # work out what template to use, and which PDCalibration files to save
@@ -487,18 +486,18 @@ def save_calibration(ceria_run, van_run, calibration_directory, calibration_gene
         pdcals_to_save[file_save_prefix + "bank_North.nxs"] = 'engg_calibration_bank_1'
         pdcals_to_save[file_save_prefix + "bank_South.nxs"] = 'engg_calibration_bank_2'
     elif name == "bank_2":
-        template_file = "template_ENGINX_241391_236516_South_bank.prm"
+        template_file = "template_ENGINX_241391_South_bank.prm"
         pdcals_to_save[file_save_prefix + "bank_South.nxs"] = 'engg_calibration_bank_2'
     elif name == "bank_1":
-        template_file = "template_ENGINX_241391_236516_North_bank.prm"
+        template_file = "template_ENGINX_241391_North_bank.prm"
         pdcals_to_save[file_save_prefix + "bank_North.nxs"] = 'engg_calibration_bank_1'
     else:  # cropped uses North bank template
-        template_file = "template_ENGINX_241391_236516_North_bank.prm"
+        template_file = "template_ENGINX_241391_North_bank.prm"
         pdcals_to_save[file_save_prefix + "cropped.nxs"] = 'engg_calibration_cropped'
     # write out the param file to the users directory
 
     Utils.write_ENGINX_GSAS_iparam_file(output_file=gsas_iparm_fname, bank_names=bank_names, difa=difas, difc=difcs,
-                                        tzero=zeros, ceria_run=ceria_run, vanadium_run=van_run,
+                                        tzero=zeros, ceria_run=ceria_run,
                                         template_file=template_file, bk2bk_params=bk2bk_params)
     for fname, ws in pdcals_to_save.items():
         simple.SaveNexus(InputWorkspace=ws, Filename=fname)

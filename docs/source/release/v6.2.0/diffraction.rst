@@ -54,6 +54,10 @@ New features
 - Automatically subtract background from runs on loading in EngDiff UI.
 - The most recently created or loaded Calibration is now selected by default in the load path when the interface is opened.
 - The last used RB number is now saved for the next session
+- The generation of the files required for Vanadium normalization is now done on the Focus tab of the user interface. This means the Vanadium data can be updated without
+having to rerun the Ceria calibration. As part of this change the setting "Force Vanadium Recalculation" has been removed and the Vanadium run number input has been
+moved from the Calibration tab to the Focus tab. The Vanadium run number is also no longer written to the prm generated on the Calibration tab (Note: this is a breaking
+change and means .prm files generated from the EngDiff UI with older versions of Mantid won't load successfully)
 
 
 Improvements
@@ -99,5 +103,6 @@ Improvements
 Bugfixes
 ########
 - Expand the Q space search radius in DetectorSearcher to avoid missing peaks when using :ref:`PredictPeaks <algm-PredictPeaks>`.
+- :ref:`IndexPeaks <algm-IndexPeaks>` can now index peaks in a PeaksWorkspace with only a single run without optimising the UB (i.e. it is now possible to set CommonUBForAll=True in this instance).
 
 :ref:`Release 6.2.0 <v6.2.0>`

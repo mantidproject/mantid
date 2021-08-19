@@ -41,6 +41,7 @@ Bugfixes
 - Fixed a bug in the Sliceviewer when transposing MDE workspaces multiple times would cause the data to become all zeros.
 - Fixed a bug in colorfill plots which lead to the loss of a spectrum from the resulting image.
 - Fixed a bug where the errorbar tab in the figure options was wrongly enabled while selecting multiple curves.
+- Fixed a bug where removing the plot guess line in the fit browser could lead to an exception being thrown.
 - Fixed a bug where the workspace index spinbox in the fit browser wouldn't update when the user added or removed curves from the figure.
 
 :ref:`Release 6.2.0 <v6.2.0>`

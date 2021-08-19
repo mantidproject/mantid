@@ -47,13 +47,6 @@ QGroupBox:title {
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
       <item row="0" column="0">
-       <widget class="QCheckBox" name="check_vanRecalc">
-        <property name="text">
-         <string>Force Vanadium Recalculation</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
        <widget class="FileFinderWidget" name="finder_fullCalib" native="true"/>
       </item>
      </layout>
