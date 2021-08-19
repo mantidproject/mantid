@@ -62,8 +62,6 @@ class NOMADMedianDetectorTestTest(unittest.TestCase):
         test_data[4, tube_size - 1] *= 10
         test_data[5, 0] *= 12
 
-        print(f'[DEBUG] Test 3 x 2 pack:\n{test_data}')
-
         # Mock instrument
         info_dict = dict()
 
