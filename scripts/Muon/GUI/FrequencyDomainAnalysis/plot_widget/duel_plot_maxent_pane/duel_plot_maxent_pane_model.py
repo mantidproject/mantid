@@ -15,7 +15,7 @@ from math import ceil
 class DuelPlotMaxentPaneModel(BasePaneModel):
 
     def __init__(self, context, time_group_model, raw_model):
-        super().__init__(context, "Maxent Duel plot")
+        super().__init__(context, "Maxent Dual plot")
         self.reconstructed_data = {}
         self.reconstructed_data_name = ""
         self._selection = ""
@@ -122,7 +122,7 @@ class DuelPlotMaxentPaneModel(BasePaneModel):
             group_list = self.get_group_list()
             workspace_list, indices = self._time_group_model.get_workspace_list_and_indices_to_plot(True, "Counts", group_list)
         elif self._run:
-            workspace_list, indicies = self._raw_model.get_workspace_list_and_indices_to_plot(True, "Counts", self._selection, self._run,
+            workspace_list, indices = self._raw_model.get_workspace_list_and_indices_to_plot(True, "Counts", self._selection, self._run,
                                                                                               self._period)
         return workspace_list, indices
 

@@ -88,7 +88,6 @@ class RawPaneModel(BasePaneModel):
          """
         workspace_list = self.get_workspaces_to_plot(is_raw, plot_type, detectors, run, period)
         indices = self._generate_run_indices(workspace_list, detectors)
-
         return workspace_list, indices
 
     def create_tiled_keys(self, tiled_by, def_zero = 1):

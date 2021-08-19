@@ -13,7 +13,7 @@ New Features
 
 - The Frequency Domain Analysis interface now allows you to perform a sequential fit using the Sequential Fitting tab.
 - The Sequential Fitting tab allows you to choose the type of dataset you want to fit.
-- New `Maxent Duel Plot` option has been added to the plotting. This will show the reconstructed data and the
+- New `Maxent Dual Plot` option has been added to the plotting. This will show the reconstructed data and the
   raw data together, along with the frequency domain data.
 
 Muon Analysis
