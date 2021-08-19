@@ -10,7 +10,8 @@ import numpy
 from qtpy.QtCore import QObject, Signal
 
 from mantid.kernel import StringPropertyWithValue, BoolPropertyWithValue, \
-                          FloatArrayProperty, IntArrayProperty
+                          FloatArrayProperty, IntArrayProperty, \
+                          StringArrayProperty
 from mantid.api import FileProperty, MultipleFileProperty, \
                        WorkspaceGroupProperty, MatrixWorkspaceProperty
 
@@ -122,6 +123,8 @@ class DrillParameter(QObject):
             self._type = self.FLOAT_ARRAY_TYPE
         elif (isinstance(mantidProperty, IntArrayProperty)):
             self._type = self.INT_ARRAY_TYPE
+        elif (isinstance(mantidProperty, StringArrayProperty)):
+            self._type = self.STRING_TYPE
         else:
             self._type = self.STRING_TYPE
 
