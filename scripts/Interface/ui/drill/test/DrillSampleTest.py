@@ -22,7 +22,6 @@ class DrillSampleTest(unittest.TestCase):
         self.assertDictEqual(self.sample._parameters, {})
         self.assertEqual(self.sample._index, self.INDEX)
         self.assertIsNone(self.sample._group)
-        self.assertFalse(self.sample._master)
 
     def test_setController(self):
         controller = mock.Mock()
@@ -61,70 +60,15 @@ class DrillSampleTest(unittest.TestCase):
 
     def test_setGroup(self):
         self.sample.groupChanged = mock.Mock()
-        self.assertIsNone(self.sample._group)
-        self.assertIsNone(self.sample._groupIndex)
-        self.assertFalse(self.sample._master)
-        self.sample.setGroup("test")
-        self.assertEqual(self.sample._group, "test")
-        self.assertIsNone(self.sample._groupIndex)
-        self.sample.groupChanged.emit.assert_called_once()
-        self.sample.groupChanged.reset_mock()
-        self.sample.setGroup("test2", 10)
-        self.assertEqual(self.sample._group, "test2")
-        self.assertEqual(self.sample._groupIndex, 10)
-        self.assertFalse(self.sample._master)
-        self.sample._master = True
-        self.sample.groupChanged.emit.assert_called_once()
-        self.sample.groupChanged.reset_mock()
-        self.sample.setGroup("test3", 20)
-        self.assertEqual(self.sample._group, "test3")
-        self.assertEqual(self.sample._groupIndex, 20)
-        self.assertFalse(self.sample._master)
-        self.sample.groupChanged.emit.assert_called_once()
-        self.sample.groupChanged.reset_mock()
-        self.sample._master = True
-        self.sample.setGroup(None)
-        self.assertIsNone(self.sample._group)
-        self.assertIsNone(self.sample._groupIndex)
-        self.assertFalse(self.sample._master)
-        self.sample.groupChanged.emit.assert_called_once()
-        self.sample.groupChanged.reset_mock()
-
-    def test_getGroupName(self):
-        self.assertIsNone(self.sample._group)
-        self.sample._group = "test"
-        group = self.sample.getGroupName()
-        self.assertEqual(group, "test")
-
-    def test_getGroupIndex(self):
-        self.assertIsNone(self.sample._groupIndex)
-        self.sample._groupIndex = 22
-        index = self.sample.getGroupIndex()
-        self.assertEqual(index, 22)
-
-    def test_setmaster(self):
-        self.sample.groupChanged = mock.Mock()
-        self.assertFalse(self.sample._master)
-        self.assertIsNone(self.sample._group)
-        self.sample.setMaster(True)
-        self.assertFalse(self.sample._master)
-        self.sample.groupChanged.emit.assert_not_called()
-        self.sample._group = "test"
-        self.sample.setMaster(True)
-        self.assertTrue(self.sample._master)
-        self.sample.groupChanged.emit.assert_called_once()
-        self.sample.groupChanged.reset_mock()
-        self.sample.setMaster(False)
-        self.assertFalse(self.sample._master)
+        group = mock.Mock()
+        self.sample.setGroup(group)
+        self.assertEqual(self.sample._group, group)
         self.sample.groupChanged.emit.assert_called_once()
 
-    def test_isMaster(self):
-        self.assertFalse(self.sample._master)
-        master = self.sample.isMaster()
-        self.assertFalse(master)
-        self.sample._master = True
-        master = self.sample.isMaster()
-        self.assertTrue(master)
+    def test_getGroup(self):
+        group = mock.Mock()
+        self.sample._group = group
+        self.assertEqual(self.sample.getGroup(), group)
 
     @mock.patch("Interface.ui.drill.model.DrillSample.DrillParameter")
     def test_addParameter(self, mParam):
