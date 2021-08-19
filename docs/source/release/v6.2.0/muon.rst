@@ -64,14 +64,12 @@ Improvements
 - Frequency domain analysis can now use groups in :ref:`MuonMaxent <algm-MuonMaxent>` calculations.
 - The labels on the tabs in the GUIs will now show in full
 
-
-
 Bug Fixes
 #########
 - The GUIs will no longer crash if there are any whitespaces in the run range (e.g. 6010- 3).
 - The GUIs can also now cope with a range of runs that span between two different decades where the second number
   in the range is smaller than the final digit of the first number in the range (e.g. 6018-3 will give 6018-6023 now).
-
+- In fitting tabs fit to raw checkbox can no longer be unchecked if no rebinned data is present.
 
 ALC
 ---
