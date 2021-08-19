@@ -396,11 +396,14 @@ class DrillModel(QObject):
             sampleIndexes (list(int)): sample indexes
             groupName (str): name of the group
         """
-        self.ungroupSamples(sampleIndexes)
-        samples = [sample.getIndex() for sample
-                   in self._getSamplesFromGroup(groupName)]
-        samples += sampleIndexes
-        self.groupSamples(samples, groupName)
+        for group in self._sampleGroups:
+            if group.getName() == groupName:
+                for i in sampleIndexes:
+                    sample = self._samples[i]
+                    currentGroup = sample.getGroup()
+                    if currentGroup is not None:
+                        currentGroup.delSample(sample)
+                    group.addSample(sample)
 
     def setGroupMaster(self, sampleIndex, state):
         """
