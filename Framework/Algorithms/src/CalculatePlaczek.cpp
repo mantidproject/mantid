@@ -50,6 +50,8 @@ double calculateSummationTerm(const Kernel::Material &material) {
   return neutronMass * unnormalizedTerm / (4. * M_PI * totalStoich);
 }
 
+const double k_B = PhysicalConstants::BoltzmannConstant; // in meV/K
+
 } // anonymous namespace
 
 // Register the algorithm into the AlgorithmFactory
@@ -73,7 +75,9 @@ const std::string CalculatePlaczek::summary() const {
 }
 
 /// Algorithm's see also for use in the GUI and help. @see Algorithm::seeAlso
-const std::vector<std::string> CalculatePlaczek::seeAlso() const { return {"CalculatePlaczekSelfScattering"}; }
+const std::vector<std::string> CalculatePlaczek::seeAlso() const {
+  return {"CalculatePlaczekSelfScattering", "He3TubeEfficiency"};
+}
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
@@ -93,6 +97,14 @@ void CalculatePlaczek::init() {
                       "EfficiencySpectra", "", Kernel::Direction::Input, API::PropertyMode::Optional),
                   "Workspace of efficiency spectrum with its derivatives (1st &| 2nd)."
                   "Default to use the build-in efficiency profile for He3 tube if not provided.");
+  auto lambdadValidator = std::make_shared<Kernel::BoundedValidator<double>>();
+  lambdadValidator->setExclusive(true);
+  lambdadValidator->setLower(0.0);
+  declareProperty("LambdaD", 1.44, lambdadValidator,
+                  "Reference wavelength in Angstrom, related to detector efficient coefficient alpha."
+                  "The coefficient used to generate a generic detector efficiency curve,"
+                  "eps = 1 - exp(1 - alpha*lambda), where alpha is 1/LambdaD."
+                  "Defult is set to 1.44 for 3He detectors and 1/0.83 for scintillator detectors.");
   declareProperty("CrystalDensity", EMPTY_DBL(), "The crystalographic density of the sample material.");
   auto orderValidator = std::make_shared<Kernel::BoundedValidator<int>>(1, 2);
   declareProperty("Order", 1, orderValidator, "Placzek correction order (1 or 2), default to 1 (self scattering).");
@@ -100,6 +112,7 @@ void CalculatePlaczek::init() {
                   "Sample temperature in Kelvin."
                   "The input properties is prioritized over the temperature recorded in the sample log."
                   "The temperature is necessary for computing second order correction.");
+  declareProperty("ScaleByPackingFraction", true, "Scale the correction value by packing fraction.");
 
   // Output property
   declareProperty(
@@ -161,6 +174,7 @@ void CalculatePlaczek::exec() {
   const API::MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
   const API::MatrixWorkspace_sptr incidentWS = getProperty("IncidentSpectra");
   const int order = getProperty("Order");
+  const bool scaleByPackingFraction = getProperty("ScaleByPackingFraction");
 
   // prep output
   API::MatrixWorkspace_sptr outputWS = DataObjects::create<API::HistoWorkspace>(*inWS);
@@ -189,13 +203,24 @@ void CalculatePlaczek::exec() {
   // - calculate summation term w/ neutron mass over molecular mass ratio
   const double summationTerm = calculateSummationTerm(inWS->sample().getMaterial());
   const double packingFraction = getPackingFraction(inWS);
+  // NOTE:
+  // - when order==1, we don't care what's inside sampleTemperature.
+  // - when order==2, the value here will be a valid one in K.
+  const double sampleTemperature = getSampleTemperature();
+
+  // NOTE:
+  // The following coefficients are defined in the appendix 1 of
+  // Ref: Howe, McGreevy, and Howells, J. Phys.: Condens. Matter v1, (1989), pp.
+  //      doi: 10.1088/0953-8984/1/22/005
+  // The associated analytical forms are given on the second page of
+  // Ref: Howells, W.S., Nuclear Instruments and Methods in Physics Research 223, no. 1 (June 1984): 141–46.
+  //      doi: 10.1016/0167-5087(84)90256-4
   // - 1st order related coefficients
   const std::vector<double> phi1 = getFluxCoefficient1();
   const std::vector<double> eps1 = getEfficiencyCoefficient1();
   // - 2nd order related coefficients
-  if (order == 2) {
-    // NOTE:
-  }
+  const std::vector<double> phi2 = (order == 2) ? getFluxCoefficient2() : std::vector<double>();
+  const std::vector<double> eps2 = (order == 2) ? getEfficiencyCoefficient2() : std::vector<double>();
 
   // loop over all spectra
   const API::SpectrumInfo specInfo = inWS->spectrumInfo();
@@ -204,6 +229,9 @@ void CalculatePlaczek::exec() {
     PARALLEL_START_INTERUPT_REGION
     auto &y = outputWS->mutableY(specIndex);
     auto &x = outputWS->mutableX(specIndex);
+    // only perform calculation for components that
+    // - is monitor
+    // - at (0,0,0)
     if (!specInfo.isMonitor(specIndex) && !(specInfo.l2(specIndex) == 0.0)) {
       Kernel::Units::Wavelength wavelength;
       Kernel::Units::TOF tof;
@@ -217,21 +245,27 @@ void CalculatePlaczek::exec() {
       if (pmap.find(Kernel::UnitParams::twoTheta) != pmap.end()) {
         twoTheta = pmap[Kernel::UnitParams::twoTheta];
       }
-
+      // first order (self scattering) is mandatory, second order is optional
       const double sinThetaBy2 = sin(twoTheta / 2.0);
       const double f = l1 / (l1 + l2);
       wavelength.initialize(specInfo.l1(), 0, pmap);
+      // TODO: confirm the units used here
+      //
+      // const double kBToverE = k_B * sampleTemperature / energy;
       for (size_t xIndex = 0; xIndex < xLambda.size() - 1; xIndex++) {
+        // -- calculate first order correction
         const double term1 = (f - 1.0) * phi1[xIndex];
-        // TODO:
-        // The second term is different from the formula provided, what should we do here?????
         const double term2 = f * (1.0 - eps1[xIndex]);
         const double inelasticPlaczekSelfCorrection =
             2.0 * (term1 + term2 - 3) * sinThetaBy2 * sinThetaBy2 * summationTerm;
-        // TODO:
-        //   add calculation related to the second order here if applies
+        // -- calculate second order correction
+        if (order == 2) {
+          // TODO:
+        }
+        // -- consolidate
         x[xIndex] = wavelength.singleToTOF(xLambda[xIndex]);
-        y[xIndex] = (1 + inelasticPlaczekSelfCorrection) * packingFraction;
+        y[xIndex] = scaleByPackingFraction ? (1 + inelasticPlaczekSelfCorrection) * packingFraction
+                                           : inelasticPlaczekSelfCorrection;
       }
       x.back() = wavelength.singleToTOF(xLambda.back());
     } else {
@@ -276,6 +310,45 @@ double CalculatePlaczek::getPackingFraction(const API::MatrixWorkspace_const_spt
   }
 
   return packingFraction;
+}
+
+/**
+ * @brief query the sample temperature from input property or sample log
+ *
+ * @return double
+ */
+double CalculatePlaczek::getSampleTemperature() {
+  double sampleTemperature = getProperty("SampleTemperature");
+  const int order = getProperty("Order");
+
+  // get the sample temperature from sample log if not provided by the user
+  // NOTE:
+  // we only need to go the extra mile when we really need a valid sample temperature,
+  // i.e. when calculating the second order correction
+  if (isDefault("SampleTemperature") && (order == 2)) {
+    // get the sample temperature from sample log
+    const API::MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
+    const auto run = inWS->run();
+    const auto sampleTempLogORNL = run.getLogData("SampleTemp");
+    const auto sampleTempLogISIS = run.getLogData("sample_temp");
+    if (sampleTempLogORNL) {
+      sampleTemperature = run.getPropertyAsSingleValue("SampleTemp");
+      const std::string sampleTempUnit = run.getProperty("SampleTemp")->units();
+      if (sampleTempUnit == "C") {
+        sampleTemperature = sampleTemperature + 273.15; // convert to K
+      }
+    } else if (sampleTempLogISIS) {
+      sampleTemperature = run.getPropertyAsSingleValue("sample_temp");
+      const std::string sampleTempUnit = run.getProperty("sample_temp")->units();
+      if (sampleTempUnit == "C") {
+        sampleTemperature = sampleTemperature + 273.15; // convert to K
+      }
+    } else {
+      // the validator should already catch this early on
+      throw std::runtime_error("Sample temperature is not found in the log.");
+    }
+  }
+  return sampleTemperature;
 }
 
 /**
@@ -342,7 +415,6 @@ std::vector<double> CalculatePlaczek::getEfficiencyCoefficient1() {
   if (efficiencyWS) {
     // Use the formula
     // eps1 = k * eps'/eps, k = 2pi/lambda
-    // NOTE: we might have a mismatch size issue here
     std::vector<double> eps = efficiencyWS->readY(0);
     std::vector<double> epsPrime = efficiencyWS->readY(1);
     for (size_t i = 0; i < xLambda.size() - 1; i++) {
@@ -353,14 +425,61 @@ std::vector<double> CalculatePlaczek::getEfficiencyCoefficient1() {
       eps1.emplace_back(k * epsPrime_i / eps_i);
     }
   } else {
-    // This is based on an assume efficiency curve
-    constexpr auto LambdaD = 1.44;
+    // This is based on an assume efficiency curve from
+    const double LambdaD = getProperty("LambdaD");
     for (size_t i = 0; i < xLambda.size() - 1; i++) {
       const auto xTerm = -(xLambda[i] + dx) / LambdaD;
       eps1.emplace_back(xTerm * exp(xTerm) / (1.0 - exp(xTerm)));
     }
   }
   return eps1;
+}
+
+/**
+ * @brief compute the second order detector efficiency coefficient vector
+ *
+ * @return std::vector<double>
+ */
+std::vector<double> CalculatePlaczek::getEfficiencyCoefficient2() {
+  g_log.information("Compute detector efficiency coefficient 2");
+  std::vector<double> eps2;
+
+  // NOTE: we need the xlambda here to
+  // - ensure the bins are properly aligned
+  // - compute the coefficient based on an assumed efficiency curve
+  const API::MatrixWorkspace_sptr incidentWS = getProperty("IncidentSpectra");
+  const MantidVec incident = incidentWS->readY(0);
+  const MantidVec xLambda = incidentWS->readX(0);
+  const double dx = (xLambda[1] - xLambda[0]) / 2.0; // assume constant bin width
+
+  const API::MatrixWorkspace_sptr efficiencyWS = getProperty("EfficiencySpectra");
+  if (efficiencyWS) {
+    // Use the formula
+    // eps1 = k^2 * eps''/eps, k = 2pi/lambda
+    std::vector<double> eps = efficiencyWS->readY(0);
+    std::vector<double> epsPrime2 = efficiencyWS->readY(2);
+    for (size_t i = 0; i < xLambda.size() - 1; i++) {
+      double lambda = xLambda[i] + dx;
+      double k = 2.0 * M_PI / lambda;
+      double eps_i = (eps[i] + eps[i + 1]) / 2.0;
+      double epsPrime2_i = (epsPrime2[i] + epsPrime2[i + 1]) / 2.0;
+      eps2.emplace_back(k * k * epsPrime2_i / eps_i);
+    }
+  } else {
+    // using the analytical formula from the second page of
+    // Ref: Howells, W.S., Nuclear Instruments and Methods in Physics Research 223, no. 1 (June 1984): 141–46.
+    //      doi: 10.1016/0167-5087(84)90256-4
+    // DEV NOTE:
+    // The detector efficiency coefficient is denoted with F1 and _2F in the paper instead of the eps1 and eps2
+    // used in the code.
+    const double LambdaD = getProperty("LambdaD");
+    for (size_t i = 0; i < xLambda.size() - 1; i++) {
+      const auto xTerm = -(xLambda[i] + dx) / LambdaD;
+      double eps1 = xTerm * exp(xTerm) / (1.0 - exp(xTerm));
+      eps2.emplace_back((-xTerm - 2) * eps1);
+    }
+  }
+  return eps2;
 }
 
 } // namespace Algorithms

@@ -34,6 +34,8 @@ private:
 
   double getPackingFraction(const API::MatrixWorkspace_const_sptr &ws);
 
+  double getSampleTemperature();
+
   std::vector<double> getFluxCoefficient1();
   std::vector<double> getFluxCoefficient2();
   std::vector<double> getEfficiencyCoefficient1();
