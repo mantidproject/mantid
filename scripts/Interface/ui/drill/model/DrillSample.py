@@ -50,19 +50,9 @@ class DrillSample(QObject):
     _index = None
 
     """
-    Name of the group, if the sample is in a group.
+    Sample group, if the sample is in a group.
     """
     _group = None
-
-    """
-    Index of the sample in its group.
-    """
-    _groupIndex = None
-
-    """
-    True if the sample is the master sample of its group.
-    """
-    _master = None
 
     _status = None
 
@@ -96,7 +86,6 @@ class DrillSample(QObject):
         self._parameters = dict()
         self._index = index
         self._group = None
-        self._master = False
 
     def setController(self, controller):
         """
@@ -161,65 +150,25 @@ class DrillSample(QObject):
         """
         return self._outputName
 
-    def setGroup(self, group, index=None):
+    def setGroup(self, group):
         """
         Set the group and index of the sample.
 
         Args:
-            group (str): name of the group. None if the sample is not in a
-                         group.
-            index (int): index of the sample in its group
+            group (DrillSampleGroup): group. None if the sample is not in a
+                                      group.
         """
-        if not group:
-            self._group = None
-            self._groupIndex = None
-            self._master = False
-        else:
-            self._group = group
-            self._groupIndex = index
-            self._master = False
+        self._group = group
         self.groupChanged.emit()
 
-    def getGroupName(self):
+    def getGroup(self):
         """
         Get the name of the group.
 
         Returns:
-            str: name of the group. None if the sample is not in a group
+            DrillSampleGroup: group. None if the sample is not in a group
         """
         return self._group
-
-    def getGroupIndex(self):
-        """
-        Get the index of the sample in its group.
-
-        Returns:
-            int: index of the sample. None if the sample is not in a group
-        """
-        return self._groupIndex
-
-    def setMaster(self, state):
-        """
-        Set the master status.
-
-        Args:
-            state (bool): if True, the sample become the master sample of its
-                          group
-        """
-        if self._group is None:
-            self._master = False
-            return
-        self._master = state
-        self.groupChanged.emit()
-
-    def isMaster(self):
-        """
-        Return the "group master" status.
-
-        Returns:
-            bool: True if the sample is the master sample of its group.
-        """
-        return self._master
 
     def addParameter(self, name):
         """

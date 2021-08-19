@@ -75,13 +75,14 @@ class DrillSamplePresenter:
         """
         Triggered when the group of the sample changed.
         """
-        groupName = self._sample.getGroupName()
+        group = self._sample.getGroup()
         index = self._sample.getIndex()
-        if groupName is None:
+        if group is None:
             self._table.delRowLabel(index)
         else:
-            isMaster = self._sample.isMaster()
-            groupIndex = self._sample.getGroupIndex()
+            groupName = group.getName()
+            isMaster = (group.getMaster() == self._sample)
+            groupIndex = group.getSampleIndex(self._sample)
             self._table.setRowLabel(index, groupName + str(groupIndex + 1),
                                     bold=isMaster)
         self._table.setWindowModified(True)

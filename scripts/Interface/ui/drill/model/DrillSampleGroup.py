@@ -64,6 +64,18 @@ class DrillSampleGroup:
         if sample in self._samples:
             self._samples.remove(sample)
 
+    def getSampleIndex(self, sample):
+        """
+        Get the index of a sample in the group. Sample has to be in the group.
+
+        Args:
+            sample (DrillSample): sample
+
+        Returns:
+            int: index
+        """
+        return self._samples.index(sample)
+
     def isInGroup(self, sample):
         """
         Check if a sample is in the group.
