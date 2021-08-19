@@ -44,7 +44,7 @@ public:
   }
 
   void testPresenterSubscribesToJobRunner() {
-    EXPECT_CALL(*m_jobRunner, subscribe(_)).Times(1);
+    EXPECT_CALL(m_jobRunner, subscribe(_)).Times(1);
     auto presenter = makePresenter();
     verifyAndClear();
   }
@@ -224,7 +224,7 @@ public:
 
   void testBatchIsCancelledWhenReductionPaused() {
     auto presenter = makePresenter();
-    EXPECT_CALL(*m_jobRunner, cancelAlgorithmQueue()).Times(1);
+    EXPECT_CALL(m_jobRunner, cancelAlgorithmQueue()).Times(1);
     presenter->notifyPauseReductionRequested();
     verifyAndClear();
   }
@@ -295,7 +295,7 @@ public:
 
   void testBatchIsCancelledWhenAutoreductionPaused() {
     auto presenter = makePresenter();
-    EXPECT_CALL(*m_jobRunner, cancelAlgorithmQueue()).Times(1);
+    EXPECT_CALL(m_jobRunner, cancelAlgorithmQueue()).Times(1);
     presenter->notifyPauseAutoreductionRequested();
     verifyAndClear();
   }
@@ -463,7 +463,7 @@ public:
 private:
   NiceMock<MockBatchView> m_view;
   NiceMock<MockBatchJobManager> *m_jobManager;
-  NiceMock<MockJobRunner> *m_jobRunner;
+  NiceMock<MockJobRunner> m_jobRunner;
   NiceMock<MockMainWindowPresenter> m_mainPresenter;
   NiceMock<MockRunsPresenter> *m_runsPresenter;
   NiceMock<MockEventPresenter> *m_eventPresenter;
@@ -483,13 +483,13 @@ private:
     friend class BatchPresenterTest;
 
   public:
-    BatchPresenterFriend(IBatchView *view, Batch model, std::unique_ptr<IRunsPresenter> runsPresenter,
-                         std::unique_ptr<IEventPresenter> eventPresenter,
+    BatchPresenterFriend(IBatchView *view, Batch model, IJobRunner *jobRunner,
+                         std::unique_ptr<IRunsPresenter> runsPresenter, std::unique_ptr<IEventPresenter> eventPresenter,
                          std::unique_ptr<IExperimentPresenter> experimentPresenter,
                          std::unique_ptr<IInstrumentPresenter> instrumentPresenter,
                          std::unique_ptr<ISavePresenter> savePresenter,
                          std::unique_ptr<IPreviewPresenter> previewPresenter)
-        : BatchPresenter(view, std::move(model), std::move(runsPresenter), std::move(eventPresenter),
+        : BatchPresenter(view, std::move(model), jobRunner, std::move(runsPresenter), std::move(eventPresenter),
                          std::move(experimentPresenter), std::move(instrumentPresenter), std::move(savePresenter),
                          std::move(previewPresenter)) {}
   };
@@ -517,8 +517,9 @@ private:
     m_previewPresenter = previewPresenter.get();
     // Create the batch presenter
     auto presenter = std::make_unique<BatchPresenterFriend>(
-        &m_view, makeModel(), std::move(runsPresenter), std::move(eventPresenter), std::move(experimentPresenter),
-        std::move(instrumentPresenter), std::move(savePresenter), std::move(previewPresenter));
+        &m_view, makeModel(), &m_jobRunner, std::move(runsPresenter), std::move(eventPresenter),
+        std::move(experimentPresenter), std::move(instrumentPresenter), std::move(savePresenter),
+        std::move(previewPresenter));
     presenter->acceptMainPresenter(&m_mainPresenter);
     // Replace the constructed job runner with a mock
     m_jobManager = new NiceMock<MockBatchJobManager>();
@@ -583,8 +584,8 @@ private:
 
   void expectBatchIsExecuted() {
     EXPECT_CALL(*m_jobManager, getAlgorithms()).Times(1);
-    EXPECT_CALL(*m_jobRunner, clearAlgorithmQueue()).Times(1);
-    EXPECT_CALL(*m_jobRunner, setAlgorithmQueue(m_mockAlgorithmsList)).Times(1);
-    EXPECT_CALL(*m_jobRunner, executeAlgorithmQueue()).Times(1);
+    EXPECT_CALL(m_jobRunner, clearAlgorithmQueue()).Times(1);
+    EXPECT_CALL(m_jobRunner, setAlgorithmQueue(m_mockAlgorithmsList)).Times(1);
+    EXPECT_CALL(m_jobRunner, executeAlgorithmQueue()).Times(1);
   }
 };

@@ -7,6 +7,7 @@
 
 #include "PreviewPresenter.h"
 #include "GUI/Batch/IBatchJobAlgorithm.h"
+#include "GUI/Common/IJobRunner.h"
 #include "IPreviewModel.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "Reduction/Item.h"
@@ -14,9 +15,10 @@
 #include <memory>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
-PreviewPresenter::PreviewPresenter(IPreviewView *view, std::unique_ptr<IPreviewModel> model)
-    : m_view(view), m_model(std::move(model)) {
+PreviewPresenter::PreviewPresenter(IPreviewView *view, std::unique_ptr<IPreviewModel> model, IJobRunner *jobRunner)
+    : m_view(view), m_model(std::move(model)), m_jobRunner(jobRunner) {
   m_view->subscribe(this);
+  m_jobRunner->subscribe(this);
 }
 
 void PreviewPresenter::notifyLoadWorkspaceRequested() {

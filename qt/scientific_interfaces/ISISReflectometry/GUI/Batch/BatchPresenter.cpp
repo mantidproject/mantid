@@ -32,7 +32,8 @@ using API::IConfiguredAlgorithm_sptr;
  * presenter
  * @param savePresenter :: [input] A pointer to the 'Save ASCII' tab presenter
  */
-BatchPresenter::BatchPresenter(IBatchView *view, Batch model, std::unique_ptr<IRunsPresenter> runsPresenter,
+BatchPresenter::BatchPresenter(IBatchView *view, Batch model, IJobRunner *jobRunner,
+                               std::unique_ptr<IRunsPresenter> runsPresenter,
                                std::unique_ptr<IEventPresenter> eventPresenter,
                                std::unique_ptr<IExperimentPresenter> experimentPresenter,
                                std::unique_ptr<IInstrumentPresenter> instrumentPresenter,
@@ -41,7 +42,7 @@ BatchPresenter::BatchPresenter(IBatchView *view, Batch model, std::unique_ptr<IR
     : m_view(view), m_mainPresenter(), m_runsPresenter(std::move(runsPresenter)),
       m_eventPresenter(std::move(eventPresenter)), m_experimentPresenter(std::move(experimentPresenter)),
       m_instrumentPresenter(std::move(instrumentPresenter)), m_savePresenter(std::move(savePresenter)),
-      m_previewPresenter(std::move(previewPresenter)), m_unsavedBatchFlag(false),
+      m_previewPresenter(std::move(previewPresenter)), m_unsavedBatchFlag(false), m_jobRunner(jobRunner),
       m_jobManager(new BatchJobManager(model)) {
 
   m_jobRunner->subscribe(this);
@@ -306,7 +307,7 @@ void BatchPresenter::notifyResetRoundPrecision() { m_runsPresenter->resetRoundPr
  */
 int BatchPresenter::percentComplete() const { return m_jobManager->percentComplete(); }
 
-AlgorithmRuntimeProps BatchPresenter::rowProcessingProperties() const {
+API::IConfiguredAlgorithm::AlgorithmRuntimeProps BatchPresenter::rowProcessingProperties() const {
   return m_jobManager->rowProcessingProperties();
 }
 

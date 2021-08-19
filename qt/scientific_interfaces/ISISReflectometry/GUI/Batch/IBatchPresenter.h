@@ -57,7 +57,7 @@ public:
   virtual bool discardChanges(std::string const &message) const = 0;
   virtual bool requestClose() const = 0;
   virtual int percentComplete() const = 0;
-  virtual AlgorithmRuntimeProps rowProcessingProperties() const = 0;
+  virtual API::IConfiguredAlgorithm::AlgorithmRuntimeProps rowProcessingProperties() const = 0;
 
   virtual bool isBatchUnsaved() const = 0;
   virtual void setBatchUnsaved() = 0;

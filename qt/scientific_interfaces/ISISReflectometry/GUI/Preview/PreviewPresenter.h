@@ -17,11 +17,13 @@
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
+class IJobRunner;
+
 class MANTIDQT_ISISREFLECTOMETRY_DLL PreviewPresenter : public PreviewViewSubscriber,
                                                         public IPreviewPresenter,
                                                         public JobRunnerSubscriber {
 public:
-  PreviewPresenter(IPreviewView *view, std::unique_ptr<IPreviewModel> model);
+  PreviewPresenter(IPreviewView *view, std::unique_ptr<IPreviewModel> model, IJobRunner *jobRunner);
   virtual ~PreviewPresenter() = default;
   // PreviewViewSubscriber overrides
   void notifyLoadWorkspaceRequested() override;
@@ -36,5 +38,6 @@ public:
 private:
   IPreviewView *m_view{nullptr};
   std::unique_ptr<IPreviewModel> m_model;
+  IJobRunner *m_jobRunner;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

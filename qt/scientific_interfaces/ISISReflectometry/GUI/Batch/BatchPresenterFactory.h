@@ -41,15 +41,16 @@ public:
     auto eventPresenter = m_eventPresenterFactory.make(view->eventHandling());
     auto experimentPresenter = m_experimentPresenterFactory.make(view->experiment());
     auto instrumentPresenter = m_instrumentPresenterFactory.make(view->instrument());
-    auto previewPresenter = m_previewPresenterFactory.make(view->preview());
+    auto previewPresenter = m_previewPresenterFactory.make(view->preview(), view);
     auto savePresenter = m_savePresenterFactory.make(view->save());
 
     auto model = Batch(experimentPresenter->experiment(), instrumentPresenter->instrument(),
                        runsPresenter->mutableRunsTable(), eventPresenter->slicing());
 
-    return std::make_unique<BatchPresenter>(view, std::move(model), std::move(runsPresenter), std::move(eventPresenter),
-                                            std::move(experimentPresenter), std::move(instrumentPresenter),
-                                            std::move(savePresenter), std::move(previewPresenter));
+    return std::make_unique<BatchPresenter>(view, std::move(model), view, std::move(runsPresenter),
+                                            std::move(eventPresenter), std::move(experimentPresenter),
+                                            std::move(instrumentPresenter), std::move(savePresenter),
+                                            std::move(previewPresenter));
   }
 
 private:

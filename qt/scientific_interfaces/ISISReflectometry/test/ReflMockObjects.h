@@ -88,7 +88,7 @@ public:
   MOCK_CONST_METHOD0(getUnsavedBatchFlag, bool());
   MOCK_METHOD1(setUnsavedBatchFlag, void(bool));
   MOCK_CONST_METHOD0(percentComplete, int());
-  MOCK_CONST_METHOD0(rowProcessingProperties, AlgorithmRuntimeProps());
+  MOCK_CONST_METHOD0(rowProcessingProperties, MantidQt::API::IConfiguredAlgorithm::AlgorithmRuntimeProps());
   MOCK_CONST_METHOD0(requestClose, bool());
   MOCK_CONST_METHOD0(instrument, Mantid::Geometry::Instrument_const_sptr());
   MOCK_CONST_METHOD0(instrumentName, std::string());
@@ -326,7 +326,7 @@ public:
   MOCK_METHOD2(notifyWorkspaceRenamed, boost::optional<Item const &>(std::string const &, std::string const &));
   MOCK_METHOD0(notifyAllWorkspacesDeleted, void());
   MOCK_METHOD0(getAlgorithms, std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>());
-  MOCK_CONST_METHOD0(rowProcessingProperties, AlgorithmRuntimeProps());
+  MOCK_CONST_METHOD0(rowProcessingProperties, MantidQt::API::IConfiguredAlgorithm::AlgorithmRuntimeProps());
   MOCK_CONST_METHOD0(getProcessPartial, bool());
   MOCK_CONST_METHOD0(getProcessAll, bool());
 };
