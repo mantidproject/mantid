@@ -183,13 +183,14 @@ void WorkspaceSelector::setValidatingAlgorithm(const QString &algName) {
 }
 
 void WorkspaceSelector::handleAddEvent(Mantid::API::WorkspaceAddNotification_ptr pNf) {
+  const std::lock_guard<std::mutex> lock(m_adsMutex);
   if (!showHiddenWorkspaces() &&
       Mantid::API::AnalysisDataService::Instance().isHiddenDataServiceObject(pNf->objectName())) {
     return;
   }
-
   QString name = QString::fromStdString(pNf->objectName());
   if (checkEligibility(name, pNf->object())) {
+
     addItem(name);
     if (isSorted()) {
       model()->sort(0);
@@ -198,6 +199,7 @@ void WorkspaceSelector::handleAddEvent(Mantid::API::WorkspaceAddNotification_ptr
 }
 
 void WorkspaceSelector::handleRemEvent(Mantid::API::WorkspacePostDeleteNotification_ptr pNf) {
+  const std::lock_guard<std::mutex> lock(m_adsMutex);
   QString name = QString::fromStdString(pNf->objectName());
   int index = findText(name);
   if (index != -1) {
@@ -209,6 +211,7 @@ void WorkspaceSelector::handleRemEvent(Mantid::API::WorkspacePostDeleteNotificat
 }
 
 void WorkspaceSelector::handleClearEvent(Mantid::API::ClearADSNotification_ptr /*unused*/) {
+  const std::lock_guard<std::mutex> lock(m_adsMutex);
   this->clear();
   if (m_optional)
     addItem("");
@@ -216,6 +219,7 @@ void WorkspaceSelector::handleClearEvent(Mantid::API::ClearADSNotification_ptr /
 }
 
 void WorkspaceSelector::handleRenameEvent(Mantid::API::WorkspaceRenameNotification_ptr pNf) {
+  const std::lock_guard<std::mutex> lock(m_adsMutex);
   QString name = QString::fromStdString(pNf->objectName());
   QString newName = QString::fromStdString(pNf->newObjectName());
   auto &ads = Mantid::API::AnalysisDataService::Instance();
@@ -223,6 +227,7 @@ void WorkspaceSelector::handleRenameEvent(Mantid::API::WorkspaceRenameNotificati
   bool eligible = checkEligibility(newName, ads.retrieve(pNf->newObjectName()));
   int index = findText(name);
   int newIndex = findText(newName);
+
   if (eligible) {
     if (index != -1 && newIndex == -1) {
       this->setItemText(index, newName);
@@ -244,7 +249,7 @@ void WorkspaceSelector::handleRenameEvent(Mantid::API::WorkspaceRenameNotificati
 }
 
 void WorkspaceSelector::handleReplaceEvent(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf) {
-
+  const std::lock_guard<std::mutex> lock(m_adsMutex);
   QString name = QString::fromStdString(pNf->objectName());
   auto &ads = Mantid::API::AnalysisDataService::Instance();
 
@@ -316,6 +321,7 @@ bool WorkspaceSelector::hasValidNumberOfBins(const Mantid::API::Workspace_sptr &
 }
 
 void WorkspaceSelector::refresh() {
+  const std::lock_guard<std::mutex> lock(m_adsMutex);
   clear();
   if (m_optional)
     addItem("");
@@ -345,6 +351,7 @@ void WorkspaceSelector::refresh() {
  * @param de :: the drop event data package
  */
 void WorkspaceSelector::dropEvent(QDropEvent *de) {
+  const std::lock_guard<std::mutex> lock(m_adsMutex);
   const QMimeData *mimeData = de->mimeData();
   QString text = mimeData->text();
   int equal_pos = text.indexOf("=");
@@ -365,6 +372,7 @@ void WorkspaceSelector::dropEvent(QDropEvent *de) {
  * @param de :: the drag event data package
  */
 void WorkspaceSelector::dragEnterEvent(QDragEnterEvent *de) {
+  const std::lock_guard<std::mutex> lock(m_adsMutex);
   const QMimeData *mimeData = de->mimeData();
   if (mimeData->hasText()) {
     QString text = mimeData->text();

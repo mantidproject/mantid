@@ -10,8 +10,6 @@ from qtpy.QtCore import Qt
 from qtpy import QtGui
 from qtpy.QtWidgets import QWidget
 from mantidqt.utils.qt import load_ui
-import time
-import threading
 
 
 class WorkspaceCalculatorView(QWidget):
@@ -42,9 +40,9 @@ class WorkspaceCalculatorView(QWidget):
         self.output_ws.focussed.connect(lambda: self.connectADS('output'))
 
         # cases for disconnecting ADS observers
-        self.pushButton.clicked.connect(self.disconnectADS)
-        self.lhs_scaling.returnPressed.connect(self.disconnectADS)
-        self.rhs_scaling.returnPressed.connect(self.disconnectADS)
+        self.lhs_ws.activated.connect(lambda: self.disconnectADS('lhs'))
+        self.rhs_ws.activated.connect(lambda: self.disconnectADS('rhs'))
+        self.output_ws.activated.connect(lambda: self.disconnectADS('output'))
 
         # by default the observers to the ADS should be disconnected, and connected only when user focuses on the widget
         self.lhs_ws.disconnectObservers()
@@ -64,12 +62,6 @@ class WorkspaceCalculatorView(QWidget):
             self.label_validation_rhs.setVisible(not validationValue)
             self.label_validation_rhs.setToolTip(tooltip)
 
-    def timeout_disconnect(self):
-        """This method runs in a separate thread and will disconnect WorkspaceSelectors listening to changes in the ADS,
-        with a timeout of 15 seconds."""
-        time.sleep(15)
-        self.disconnectADS()
-
     def connectADS(self, selector_name):
         """Explicitly connects the workspace selector observers to the ADS."""
         if selector_name == "lhs" and not self.lhs_ws.isConnected():
@@ -79,16 +71,17 @@ class WorkspaceCalculatorView(QWidget):
         elif selector_name == "output" and not self.output_ws.isConnected():
             self.output_ws.connectObservers()
 
-        _thread = threading.Thread(target=self.timeout_disconnect)
-        _thread.start()
-
-    def disconnectADS(self):
+    def disconnectADS(self, selector_name = ""):
         """Disconnects connected workspace selectors from signals coming from the ADS."""
-        if self.lhs_ws.isConnected():
+        if selector_name == "lhs":
             self.lhs_ws.disconnectObservers()
-        if self.rhs_ws.isConnected():
+        elif selector_name == "rhs":
             self.rhs_ws.disconnectObservers()
-        if self.output_ws.isConnected():
+        elif selector_name == "output":
+            self.output_ws.disconnectObservers()
+        else:
+            self.lhs_ws.disconnectObservers()
+            self.rhs_ws.disconnectObservers()
             self.output_ws.disconnectObservers()
 
     def hideEvent(self, event):

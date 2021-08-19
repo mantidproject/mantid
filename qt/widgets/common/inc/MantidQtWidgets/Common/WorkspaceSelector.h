@@ -10,6 +10,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include <QComboBox>
 #include <QStringList>
+#include <mutex>
 
 #include <Poco/AutoPtr.h>
 #include <Poco/NObserver.h>
@@ -137,6 +138,9 @@ private:
 
   // Algorithm to validate against
   std::shared_ptr<Mantid::API::Algorithm> m_algorithm;
+
+  // Mutex for synchronized event handling
+  std::mutex m_adsMutex;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
