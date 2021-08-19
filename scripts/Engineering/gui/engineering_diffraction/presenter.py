@@ -93,9 +93,8 @@ class EngineeringDiffractionPresenter(object):
 
     def update_calibration(self, calibration):
         instrument = calibration.get_instrument()
-        van_no = path_handling.get_run_number_from_path(calibration.get_vanadium(), instrument)
         sample_no = path_handling.get_run_number_from_path(calibration.get_sample(), instrument)
-        self.statusbar_observable.notify_subscribers(f"V: {van_no}, CeO2: {sample_no}, Instrument: {instrument}")
+        self.statusbar_observable.notify_subscribers(f"CeO2: {sample_no}, Instrument: {instrument}")
 
     @staticmethod
     def get_saved_rb_number() -> str:

@@ -58,6 +58,10 @@ Python
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
+Bugfixes
+########
+- Fix a bug (crash) in plotting MD workspaces when "Normalize to bin width" is set to False
+
 Installation
 ------------
 
