@@ -88,6 +88,15 @@ class DrillSampleGroup:
         """
         return self._samples.index(sample)
 
+    def isEmpty(self):
+        """
+        Check if the group is empty.
+
+        Returns:
+            bool: True if the group is empty
+        """
+        return len(self._samples) == 0
+
     def isInGroup(self, sample):
         """
         Check if a sample is in the group.
