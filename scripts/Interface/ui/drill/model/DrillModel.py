@@ -319,19 +319,6 @@ class DrillModel(QObject):
         """
         return self._sampleGroups
 
-    def _getSamplesFromGroup(self, groupName):
-        """
-        Get the list of samples that belong to a group.
-
-        Args:
-            groupName (str): name of the group
-
-        Returns:
-            list(DrillSample): samples that belong to the group
-        """
-        return list(filter(lambda sample : sample.getGroupName() == groupName,
-                           self._samples))
-
     def groupSamples(self, sampleIndexes, groupName=None):
         """
         Group samples.
