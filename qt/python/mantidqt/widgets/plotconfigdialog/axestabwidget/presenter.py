@@ -303,7 +303,7 @@ class AxesTabWidgetPresenter:
         """Call apply_all_properties, notifying the parent presenter of whether there were any errors"""
         try:
             self.apply_all_properties()
-        except Exception as exception:
+        except (AssertionError, IndexError, KeyError, TypeError, ValueError) as exception:
             self.error_callback(str(exception))
             return
         self.success_callback()

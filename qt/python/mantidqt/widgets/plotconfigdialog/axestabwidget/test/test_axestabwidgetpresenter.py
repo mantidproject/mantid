@@ -276,24 +276,25 @@ class AxesTabWidgetPresenterTest(unittest.TestCase):
 
         self.assertEqual(presenter.current_view_props["xlim"], (-1.0, 10.0))
 
-    def test_apply_all_properties_with_errors_notifies_parent_presenter_on_exception(self):
-        canvas_draw_exception = Exception("Exception in canvas.draw")
-
-        def raise_():
-            raise canvas_draw_exception
-
+    def test_apply_all_properties_with_errors_notifies_parent_presenter_on_allowed_exceptions(self):
         mock_view = mock.Mock(get_selected_ax_name=lambda: "My Axes: (0, 0)",
                               get_axis=lambda: "x",
                               get_properties=lambda: {})
         mock_success_callback, mock_error_callback = mock.Mock(), mock.Mock()
         presenter = Presenter(self.fig, view=mock_view, success_callback=mock_success_callback,
                               error_callback=mock_error_callback)
-        presenter.apply_all_properties = mock.Mock(side_effect=lambda: raise_())
 
-        presenter._apply_all_properties_with_errors()
+        # Only these exceptions should be caught by the axes tab.
+        for exception in [AssertionError, IndexError, KeyError, TypeError, ValueError]:
+            presenter.apply_all_properties = mock.Mock(side_effect=exception("This exception should be caught!"))
+            presenter._apply_all_properties_with_errors()
 
-        mock_success_callback.assert_not_called()
-        mock_error_callback.assert_called()
+            mock_success_callback.assert_not_called()
+            mock_error_callback.assert_called()
+
+            presenter.apply_all_properties.reset_mock()
+            mock_success_callback.reset_mock()
+            mock_error_callback.reset_mock()
 
     def test_apply_all_properties_with_errors_notifies_parent_presenter_on_success(self):
         mock_view = mock.Mock(get_selected_ax_name=lambda: "My Axes: (0, 0)",
