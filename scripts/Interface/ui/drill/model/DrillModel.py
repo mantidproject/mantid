@@ -442,12 +442,11 @@ class DrillModel(QObject):
 
         sample = self._samples[index]
         # search for master sample
-        groupName = sample.getGroupName()
-        if groupName:
-            samplesFromGroup = self._getSamplesFromGroup(groupName)
-            for s in samplesFromGroup:
-                if s.isMaster():
-                    params.update(s.getParameterValues())
+        group = sample.getGroup()
+        if group:
+            masterSample = group.getMaster()
+            if masterSample:
+                params.update(masterSample.getParameterValues())
 
         params.update(sample.getParameterValues())
         # remove empty params
