@@ -164,7 +164,11 @@ class FitPropertyBrowserPlotInteraction(QObject):
         """
         if self.guess_all_line is None:
             return
-        self.guess_all_line.remove()
+        try:
+            self.guess_all_line.remove()
+        except ValueError:
+            # line already removed
+            pass
         self.guess_all_line = None
         self.update_legend()
         self.fit_browser.setTextPlotGuess('Plot Guess')
@@ -181,7 +185,7 @@ class FitPropertyBrowserPlotInteraction(QObject):
             line.remove()
             self.update_legend()
             self.canvas.draw()
-        except KeyError:
+        except (KeyError, ValueError):
             pass
 
     def update_guess(self):
@@ -203,8 +207,11 @@ class FitPropertyBrowserPlotInteraction(QObject):
         out_ws_name = self._get_current_prefixed_function_name()
         line = self.guess_lines[self._get_current_prefixed_function_name()]
         color = line.get_color()
-        line.remove()
-
+        try:
+            line.remove()
+        except ValueError:
+            # line already removed
+            pass
         line = self._plot_guess_workspace(ws_name, fun, out_ws_name, color=color)
         if line:
             self.guess_lines[self._get_current_prefixed_function_name()] = line
@@ -220,7 +227,11 @@ class FitPropertyBrowserPlotInteraction(QObject):
         out_ws_name = f'{ws_name}_guess'
         old_line = self.guess_all_line
         color = old_line.get_color()
-        old_line.remove()
+        try:
+            old_line.remove()
+        except ValueError:
+            # line must have already been removed
+            pass
 
         line = self._plot_guess_workspace(ws_name, fun, out_ws_name, color=color)
         self.guess_all_line = line

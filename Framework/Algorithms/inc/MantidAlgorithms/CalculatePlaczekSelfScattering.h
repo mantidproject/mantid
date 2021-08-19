@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
@@ -32,6 +33,7 @@ public:
 private:
   void init() override;
   void exec() override;
+  double getPackingFraction(const API::MatrixWorkspace_const_sptr &ws);
 };
 
 } // namespace Algorithms

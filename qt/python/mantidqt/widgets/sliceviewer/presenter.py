@@ -72,7 +72,7 @@ class SliceViewer(ObservingPresenter):
         self.ads_observer = SliceViewerADSObserver(self.replace_workspace, self.rename_workspace,
                                                    self.ADS_cleared, self.delete_workspace)
 
-    def new_plot_MDH(self):
+    def new_plot_MDH(self, dimensions_transposing=False, dimensions_changing=False):
         """
         Tell the view to display a new plot of an MDHistoWorkspace
         """
@@ -83,9 +83,9 @@ class SliceViewer(ObservingPresenter):
             data_view.plot_MDH(self.model.get_ws(), slicepoint=self.get_slicepoint())
             self._call_peaks_presenter_if_created("notify", PeaksViewerPresenter.Event.OverlayPeaks)
         else:
-            self.new_plot_MDE()
+            self.new_plot_MDE(dimensions_transposing, dimensions_changing)
 
-    def new_plot_MDE(self):
+    def new_plot_MDE(self, dimensions_transposing=False, dimensions_changing=False):
         """
         Tell the view to display a new plot of an MDEventWorkspace
         """
@@ -93,24 +93,34 @@ class SliceViewer(ObservingPresenter):
         limits = data_view.get_axes_limits()
 
         if limits is not None:
-            xlim, ylim = limits
             # view limits are in orthogonal frame. transform to nonorthogonal
             # model frame
             if data_view.nonorthogonal_mode:
+                xlim, ylim = limits
                 inv_tr = data_view.nonortho_transform.inv_tr
                 # viewing axis y not aligned with plot axis
                 xmin_p, ymax_p = inv_tr(xlim[0], ylim[1])
                 xmax_p, ymin_p = inv_tr(xlim[1], ylim[0])
                 xlim, ylim = (xmin_p, xmax_p), (ymin_p, ymax_p)
-            if data_view.dimensions.transpose:
-                limits = ylim, xlim
-            else:
-                limits = xlim, ylim
+                limits = [xlim, ylim]
+
+        # The value at the i'th index of this tells us that the axis with that value (0 or 1) will display dimension i
+        dimension_indices = self.view.dimensions.get_states()
+
+        if dimensions_transposing:
+            # Since the dimensions are transposing, the limits we have from the view are the wrong way around
+            # with respect to the axes the dimensions are about to be displayed, so get the previous dimension states.
+            dimension_indices = self.view.dimensions.get_previous_states()
+        elif dimensions_changing:
+            # If we are changing which dimensions are to be displayed, the limits we got from the view are stale
+            # as they refer to the previous two dimensions that were displayed.
+            limits = None
 
         data_view.plot_MDH(
             self.model.get_ws_MDE(slicepoint=self.get_slicepoint(),
                                   bin_params=data_view.dimensions.get_bin_params(),
-                                  limits=limits))
+                                  limits=limits,
+                                  dimension_indices=dimension_indices))
         self._call_peaks_presenter_if_created("notify", PeaksViewerPresenter.Event.OverlayPeaks)
 
     def new_plot_matrix(self):
@@ -123,8 +133,7 @@ class SliceViewer(ObservingPresenter):
         """
         self.view.data_view.update_plot_data(
             self.model.get_data(self.get_slicepoint(),
-                                transpose=self.view.data_view.dimensions.transpose),
-            self.view.data_view.dimensions.transpose)
+                                transpose=self.view.data_view.dimensions.transpose))
 
     def update_plot_data_MDE(self):
         """
@@ -134,9 +143,9 @@ class SliceViewer(ObservingPresenter):
         data_view.update_plot_data(
             self.model.get_data(self.get_slicepoint(),
                                 bin_params=data_view.dimensions.get_bin_params(),
+                                dimension_indices=data_view.dimensions.get_states(),
                                 limits=data_view.get_axes_limits(),
-                                transpose=self.view.data_view.dimensions.transpose),
-            self.view.data_view.dimensions.transpose)
+                                transpose=self.view.data_view.dimensions.transpose))
 
     def update_plot_data_matrix(self):
         # should never be called, since this workspace type is only 2D the plot dimensions never change
@@ -181,7 +190,15 @@ class SliceViewer(ObservingPresenter):
             else:
                 data_view.disable_tool_button(ToolItemText.NONORTHOGONAL_AXES)
 
-        self.new_plot()
+        ws_type = self.model.get_ws_type()
+        if ws_type == WS_TYPE.MDH or ws_type == WS_TYPE.MDE:
+            if sliceinfo.slicepoint[data_view.dimensions.get_previous_states().index(None)] is None:
+                # The dimension of the slicepoint has changed
+                self.new_plot(dimensions_changing=True)
+            else:
+                self.new_plot(dimensions_transposing=True)
+        else:
+            self.new_plot()
 
     def slicepoint_changed(self):
         """Indicates the slicepoint has been updated"""
@@ -274,7 +291,8 @@ class SliceViewer(ObservingPresenter):
                 self.model.export_roi_to_workspace(self.get_slicepoint(),
                                                    bin_params=data_view.dimensions.get_bin_params(),
                                                    limits=limits,
-                                                   transpose=data_view.dimensions.transpose))
+                                                   transpose=data_view.dimensions.transpose,
+                                                   dimension_indices=data_view.dimensions.get_states()))
         except Exception as exc:
             self._logger.error(str(exc))
             self._show_status_message("Error exporting ROI")
@@ -294,6 +312,7 @@ class SliceViewer(ObservingPresenter):
                     bin_params=data_view.dimensions.get_bin_params(),
                     limits=limits,
                     transpose=data_view.dimensions.transpose,
+                    dimension_indices=data_view.dimensions.get_states(),
                     cut=cut_type))
         except Exception as exc:
             self._logger.error(str(exc))
