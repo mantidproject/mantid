@@ -29,6 +29,7 @@ endif(UNITY_BUILD)
 
 # Add the target for this directory
 add_library(Beamline ${SRC_FILES} ${INC_FILES})
+add_library(Mantid::Beamline ALIAS Beamline)
 # Set the name of the generated library
 set_target_properties(Beamline
                       PROPERTIES OUTPUT_NAME
@@ -43,29 +44,36 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
                         PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
 endif()
 
-target_include_directories(Beamline SYSTEM PUBLIC ${Boost_INCLUDE_DIRS})
-
+target_include_directories(Beamline PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+		$<INSTALL_INTERFACE:include/Mantid>
+)
 # Add to the 'Framework' group in VS
 set_property(TARGET Beamline PROPERTY FOLDER "MantidFramework")
 
 target_link_libraries(Beamline
-                      LINK_PUBLIC
+                      PUBLIC
                       Eigen3::Eigen
-                      LINK_PRIVATE
-                      ${GSL_LIBRARIES}
-                      Kernel
-                      ${MANTIDLIBS})
+                      Mantid::Kernel)
 
 # Add the unit tests directory
 add_subdirectory(test)
 
 # Auto-generate exports header
-target_include_directories(Beamline PUBLIC ${CMAKE_BINARY_DIR}/Framework/Beamline)
+target_include_directories(Beamline PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/Beamline>
+  $<INSTALL_INTERFACE:include/Mantid>
+)
 generate_mantid_export_header(Beamline FALSE)
 
 # Installation settings
+if (CONDA_BUILD)
+set(TARGET_EXPORT_NAME "MantidBeamlineTargets")
+mtd_install_framework_lib(TARGETS Beamline INSTALL_EXPORT_FILE EXPORT_NAME ${TARGET_EXPORT_NAME})
+else()
 mtd_install_targets(TARGETS
                     Beamline
                     INSTALL_DIRS
                     ${LIB_DIR}
                     ${WORKBENCH_LIB_DIR})
+endif()

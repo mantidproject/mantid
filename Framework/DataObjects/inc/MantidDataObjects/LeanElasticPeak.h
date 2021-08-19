@@ -57,6 +57,9 @@ public:
 
   std::shared_ptr<const Geometry::ReferenceFrame> getReferenceFrame() const override;
 
+  int getCol() const override;
+  int getRow() const override;
+
   Mantid::Kernel::V3D getQLabFrame() const override;
   Mantid::Kernel::V3D getQSampleFrame() const override;
 

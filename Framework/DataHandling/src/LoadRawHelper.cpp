@@ -55,7 +55,7 @@ inline bool hasAlternateDataStream([[maybe_unused]] const Poco::Path &pathToFile
  * file and returns the filenames of the log files that exist in the same
  * directory as the given file
  * @param pathToRawFile The path and name of the raw file.
- * @return list of logfile names.
+ * @return set of logfile names.
  */
 std::set<std::string> logFilesFromAlternateDataStream(const Poco::Path &pathToRawFile) {
   std::set<std::string> logfilesList;
@@ -79,7 +79,8 @@ std::set<std::string> logFilesFromAlternateDataStream(const Poco::Path &pathToRa
       const size_t asteriskPos = line.find('*');
       if (asteriskPos == std::string::npos)
         continue;
-      Poco::Path logFilePath(dirOfFile.append(line.substr(asteriskPos + 1)));
+      Poco::Path logFilePath(dirOfFile);
+      logFilePath.append(line.substr(asteriskPos + 1));
       if (Poco::File(logFilePath).exists()) {
         logfilesList.insert(logFilePath.toString());
       }
@@ -669,7 +670,7 @@ void LoadRawHelper::runLoadMappingTable(const std::string &fileName,
 /// @param progEnd :: ending progress fraction
 void LoadRawHelper::runLoadLog(const std::string &fileName, const DataObjects::Workspace2D_sptr &localWorkspace,
                                double progStart, double progEnd) {
-  // search for the log file to load, and save their names in a set.
+  // search for the log file to load, and save their names in a list.
   std::list<std::string> logFiles = searchForLogFiles(Poco::Path(fileName));
 
   g_log.debug("Loading the log files...");
@@ -1160,16 +1161,16 @@ std::list<std::string> LoadRawHelper::searchForLogFiles(const Poco::Path &pathTo
         Kernel::Glob::glob(pattern, potentialLogFiles);
       } catch (std::exception &) {
       }
+      // Check for .log
+      const Poco::File combinedLogPath(Poco::Path(pathToRawFile).setExtension("log"));
+      if (combinedLogPath.exists()) {
+        // Push three column filename to end of list.
+        potentialLogFilesList.insert(potentialLogFilesList.end(), combinedLogPath.path());
+      }
     }
 
     // push potential log files from set to list.
     potentialLogFilesList.insert(potentialLogFilesList.begin(), potentialLogFiles.begin(), potentialLogFiles.end());
-    // Check for .log
-    const Poco::File combinedLogPath(Poco::Path(pathToRawFile).setExtension("log"));
-    if (combinedLogPath.exists()) {
-      // Push three column filename to end of list.
-      potentialLogFilesList.insert(potentialLogFilesList.end(), combinedLogPath.path());
-    }
   }
   return potentialLogFilesList;
 }

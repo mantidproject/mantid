@@ -313,4 +313,4 @@ class BasicFittingView(ui_form, base_widget):
 
     def enable_view(self) -> None:
         """Enable all widgets in this fitting widget."""
-        self.setEnabled(True)
+        self.setEnabled(self.workspace_selector.number_of_datasets() != 0)

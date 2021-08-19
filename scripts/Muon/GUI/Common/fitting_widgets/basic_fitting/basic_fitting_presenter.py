@@ -51,6 +51,8 @@ class BasicFittingPresenter:
         self.instrument_changed_observer = GenericObserver(self.handle_instrument_changed)
         self.selected_group_pair_observer = GenericObserver(self.handle_selected_group_pair_changed)
         self.double_pulse_observer = GenericObserverWithArgPassing(self.handle_pulse_type_changed)
+        self.sequential_fit_finished_observer = GenericObserver(self.handle_sequential_fit_finished)
+        self.fit_parameter_updated_observer = GenericObserver(self.update_fit_function_in_view_from_model)
 
         self.fsg_model = None
         self.fsg_view = None
@@ -294,6 +296,11 @@ class BasicFittingPresenter:
         """Handle the Fit to raw data checkbox state change."""
         if self._check_rebin_options():
             self.model.fit_to_raw = self.view.fit_to_raw
+
+    def handle_sequential_fit_finished(self) -> None:
+        """Handles when a sequential fit has been performed and has finished executing in the sequential fitting tab."""
+        self.update_fit_function_in_view_from_model()
+        self.update_fit_statuses_and_chi_squared_in_view_from_model()
 
     def clear_undo_data(self) -> None:
         """Clear all the previously saved undo fit functions and other data."""

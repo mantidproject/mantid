@@ -7,6 +7,7 @@ add_subdirectory(Options)
 add_subdirectory(Runs)
 add_subdirectory(RunsTable)
 add_subdirectory(Save)
+add_subdirectory(Preview)
 add_subdirectory(Common)
 
 set(GUI_SRC_FILES
@@ -20,6 +21,7 @@ set(GUI_SRC_FILES
     ${RUNS_TABLE_SRC_FILES}
     ${SAVE_SRC_FILES}
     ${COMMON_SRC_FILES}
+    ${PREVIEW_SRC_FILES}
     PARENT_SCOPE
 )
 
@@ -34,6 +36,7 @@ set(GUI_INC_FILES
     ${RUNS_TABLE_INC_FILES}
     ${SAVE_INC_FILES}
     ${COMMON_INC_FILES}
+    ${PREVIEW_INC_FILES}
     PARENT_SCOPE
 )
 
@@ -47,6 +50,7 @@ set(GUI_MOC_FILES
     ${RUNS_MOC_FILES}
     ${RUNS_TABLE_MOC_FILES}
     ${SAVE_MOC_FILES}
+    ${PREVIEW_MOC_FILES}
     PARENT_SCOPE)
 
 set(GUI_UI_FILES
@@ -59,4 +63,5 @@ set(GUI_UI_FILES
     ${RUNS_UI_FILES}
     ${RUNS_TABLE_UI_FILES}
     ${SAVE_UI_FILES}
+    ${PREVIEW_UI_FILES}
     PARENT_SCOPE)

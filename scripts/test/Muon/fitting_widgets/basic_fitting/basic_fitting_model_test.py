@@ -11,6 +11,8 @@ from mantid.api import AnalysisDataService, FrameworkManager, FunctionFactory
 from mantid.simpleapi import CreateEmptyTableWorkspace, CreateSampleWorkspace
 
 from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model import BasicFittingModel, DEFAULT_START_X
+from Muon.GUI.Common.muon_pair import MuonPair
+from Muon.GUI.Common.muon_base_pair import MuonBasePair
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
 from Muon.GUI.Common.utilities.workspace_utils import StaticWorkspaceWrapper
 
@@ -24,7 +26,7 @@ class BasicFittingModelTest(unittest.TestCase):
     def setUp(self):
         context = setup_context()
         self.model = BasicFittingModel(context, context.fitting_context)
-        self.dataset_names = ["Name1", "Name2"]
+        self.dataset_names = ["EMU20884; Group; fwd; Asymmetry", "EMU20884; Group; top; Asymmetry"]
         self.fit_function = FunctionFactory.createFunction("FlatBackground")
         self.single_fit_functions = [self.fit_function.clone(), self.fit_function.clone()]
 
@@ -58,7 +60,7 @@ class BasicFittingModelTest(unittest.TestCase):
         self.model.start_xs = [2.0, 3.0]
         self.model.end_xs = [4.0, 5.0]
 
-        self.model.dataset_names = ["NewName", "Name1"]
+        self.model.dataset_names = ["NewName", "EMU20884; Group; fwd; Asymmetry"]
 
         self.assertEqual(self.model.start_xs, [2.0, 3.0])
         self.assertEqual(self.model.end_xs, [4.0, 5.0])
@@ -71,7 +73,7 @@ class BasicFittingModelTest(unittest.TestCase):
         self.model.start_xs = [2.0, 3.0]
         self.model.end_xs = [4.0, 5.0]
 
-        self.model.dataset_names = ["Name1", "Name2", "Name3"]
+        self.model.dataset_names = ["EMU20884; Group; fwd; Asymmetry", "EMU20884; Group; top; Asymmetry", "Name3"]
 
         self.assertEqual(self.model.start_xs, [2.0, 3.0, 3.0])
         self.assertEqual(self.model.end_xs, [4.0, 5.0, 5.0])
@@ -81,7 +83,7 @@ class BasicFittingModelTest(unittest.TestCase):
         self.model.start_xs = [2.0, 3.0]
         self.model.end_xs = [4.0, 5.0]
 
-        self.model.dataset_names = ["Name2"]
+        self.model.dataset_names = ["EMU20884; Group; top; Asymmetry"]
 
         self.assertEqual(self.model.start_xs, [3.0])
         self.assertEqual(self.model.end_xs, [5.0])
@@ -93,7 +95,7 @@ class BasicFittingModelTest(unittest.TestCase):
         self.model.fitting_context.exclude_start_xs = [2.2, 4.2]
         self.model.fitting_context.exclude_end_xs = [2.5, 4.5]
 
-        self.model.dataset_names = ["Name2"]
+        self.model.dataset_names = ["EMU20884; Group; top; Asymmetry"]
 
         self.assertEqual(self.model.fitting_context.exclude_start_xs, [5.0])
         self.assertEqual(self.model.fitting_context.exclude_end_xs, [5.0])
@@ -105,7 +107,7 @@ class BasicFittingModelTest(unittest.TestCase):
         self.model.fitting_context.exclude_start_xs = [2.2, 2.2]
         self.model.fitting_context.exclude_end_xs = [2.5, 2.5]
 
-        self.model.dataset_names = ["Name2", "Name3", "Name4"]
+        self.model.dataset_names = ["EMU20884; Group; top; Asymmetry", "Name3", "Name4"]
 
         self.assertEqual(self.model.fitting_context.exclude_start_xs, [2.2, 2.2, 4.0])
         self.assertEqual(self.model.fitting_context.exclude_end_xs, [2.5, 2.5, 4.0])
@@ -117,7 +119,7 @@ class BasicFittingModelTest(unittest.TestCase):
         self.model.fitting_context.exclude_start_xs = [2.2, 2.2]
         self.model.fitting_context.exclude_end_xs = [2.5, 2.5]
 
-        self.model.dataset_names = ["Name2", "Name3"]
+        self.model.dataset_names = ["EMU20884; Group; top; Asymmetry", "Name3"]
 
         self.assertEqual(self.model.fitting_context.exclude_start_xs, [2.2, 2.2])
         self.assertEqual(self.model.fitting_context.exclude_end_xs, [2.5, 2.5])
@@ -267,8 +269,8 @@ class BasicFittingModelTest(unittest.TestCase):
         self.model.dataset_names = self.dataset_names
         self.model.single_fit_functions = [self.fit_function, None]
 
-        fit_function1 = self.model.get_single_fit_function_for("Name1")
-        fit_function2 = self.model.get_single_fit_function_for("Name2")
+        fit_function1 = self.model.get_single_fit_function_for("EMU20884; Group; fwd; Asymmetry")
+        fit_function2 = self.model.get_single_fit_function_for("EMU20884; Group; top; Asymmetry")
 
         self.assertEqual(str(fit_function1), "name=FlatBackground,A0=0")
         self.assertEqual(fit_function2, None)
@@ -460,7 +462,7 @@ class BasicFittingModelTest(unittest.TestCase):
         self.model.dataset_names = self.dataset_names
         self.model.current_dataset_index = 1
 
-        self.assertEqual(self.model.get_active_workspace_names(), ["Name2"])
+        self.assertEqual(self.model.get_active_workspace_names(), ["EMU20884; Group; top; Asymmetry"])
 
     def test_that_get_active_fit_results_returns_an_empty_list_if_there_are_no_datasets(self):
         self.assertEqual(self.model.get_active_fit_results(), [])
@@ -624,7 +626,8 @@ class BasicFittingModelTest(unittest.TestCase):
         # The last two datasets are the same as the previously loaded datasets. This means their functions should be
         # reused for these last two single fit functions. The first two single fit functions are completely new, and so
         # are just given a copy of the previous currently selected function (i.e. A0=1).
-        self.model.dataset_names = ["New Name1", "New Name2", "Name1", "Name2"]
+        self.model.dataset_names = ["New Name1", "New Name2", "EMU20884; Group; fwd; Asymmetry",
+                                    "EMU20884; Group; top; Asymmetry"]
 
         self.assertEqual(str(self.model.single_fit_functions[0]), "name=FlatBackground,A0=1")
         self.assertEqual(str(self.model.single_fit_functions[1]), "name=FlatBackground,A0=1")
@@ -639,13 +642,13 @@ class BasicFittingModelTest(unittest.TestCase):
         self.model.single_fit_functions[1].setParameter("A0", 5)
 
         # This dataset is the second dataset previously and so the A0=5 fit function should be reused.
-        self.model.dataset_names = ["Name2"]
+        self.model.dataset_names = ["EMU20884; Group; top; Asymmetry"]
         self.assertEqual(str(self.model.single_fit_functions[0]), "name=FlatBackground,A0=5")
 
     def test_that_x_limits_of_current_dataset_will_return_the_x_limits_of_the_workspace(self):
         self.model.dataset_names = self.dataset_names
         workspace = CreateSampleWorkspace()
-        AnalysisDataService.addOrReplace("Name1", workspace)
+        AnalysisDataService.addOrReplace("EMU20884; Group; fwd; Asymmetry", workspace)
 
         x_lower, x_upper = self.model.x_limits_of_workspace(self.model.current_dataset_name)
 
@@ -663,6 +666,132 @@ class BasicFittingModelTest(unittest.TestCase):
 
         self.assertEqual(x_lower, 0.0)
         self.assertEqual(x_upper, 15.0)
+
+    """
+    Tests for functions used by the Sequential fitting tab.
+    """
+
+    def test_that_get_runs_groups_and_pairs_for_fits_will_attempt_to_get_the_runs_groups_and_pairs_when_in_single_fit_mode(self):
+        self.mock_context_instrument = mock.PropertyMock(return_value="EMU")
+        type(self.model.context.data_context).instrument = self.mock_context_instrument
+
+        self.model.dataset_names = self.dataset_names
+
+        workspace_names, runs, groups_and_pairs = self.model.get_runs_groups_and_pairs_for_fits("All")
+        self.assertEqual(workspace_names, self.dataset_names)
+        self.assertEqual(runs, ["20884", "20884"])
+        self.assertEqual(groups_and_pairs, ["fwd", "top"])
+
+    def test_that_get_runs_groups_and_pairs_for_fits_will_attempt_to_get_the_runs_groups_and_pairs_for_a_fwd_type(self):
+        self.mock_context_instrument = mock.PropertyMock(return_value="EMU")
+        type(self.model.context.data_context).instrument = self.mock_context_instrument
+
+        self.model.dataset_names = self.dataset_names
+
+        workspace_names, runs, groups_and_pairs = self.model.get_runs_groups_and_pairs_for_fits("fwd")
+        self.assertEqual(list(workspace_names), ["EMU20884; Group; fwd; Asymmetry"])
+        self.assertEqual(list(runs), ["20884"])
+        self.assertEqual(list(groups_and_pairs), ["fwd"])
+
+    def test_that_get_all_fit_functions_for_will_get_all_the_fit_functions_when_the_display_type_is_all(self):
+        self.model.dataset_names = self.dataset_names
+        self.model.single_fit_functions = self.single_fit_functions
+
+        filtered_functions = self.model.get_all_fit_functions_for("All")
+
+        self.assertEqual(len(filtered_functions), len(self.model.single_fit_functions))
+        self.assertEqual(self.model.get_fit_function_parameter_values(filtered_functions[0])[0], [0.0])
+        self.assertEqual(self.model.get_fit_function_parameter_values(filtered_functions[1])[0], [0.0])
+
+    def test_that_get_all_fit_functions_for_will_get_only_the_fwd_fit_function_when_the_display_type_is_fwd(self):
+        self.model.dataset_names = self.dataset_names
+        self.model.single_fit_functions = self.single_fit_functions
+
+        filtered_functions = self.model.get_all_fit_functions_for("fwd")
+
+        self.assertEqual(len(filtered_functions), 1)
+        self.assertEqual(self.model.get_fit_function_parameter_values(filtered_functions[0])[0], [0.0])
+
+    def test_that_get_fit_function_parameter_values_will_return_the_parameter_values_in_the_specified_function(self):
+        self.assertEqual(self.model.get_fit_function_parameter_values(self.single_fit_functions[0])[0], [0.0])
+
+    def test_that_update_ws_fit_function_parameters_will_update_the_parameters_for_the_specified_dataset_in_single_mode(self):
+        self.model.dataset_names = self.dataset_names
+        self.model.single_fit_functions = self.single_fit_functions
+
+        self.model.update_ws_fit_function_parameters(self.model.dataset_names[:1], [1.0])
+
+        self.assertEqual(self.model.get_fit_function_parameter_values(self.model.single_fit_functions[0])[0], [1.0])
+        self.assertEqual(self.model.get_fit_function_parameter_values(self.model.single_fit_functions[1])[0], [0.0])
+
+    def test_get_fit_workspace_names_from_groups_and_runs_when_fit_to_raw_is_false(self):
+        self.model.fit_to_raw = False
+        self.model.context.data_context.instrument = "MUSR"
+
+        self.model.context.group_pair_context.add_pair(MuonPair("long", "f", "b", 1.0))
+        self.model.context.group_pair_context.add_pair(MuonPair("long2", "f", "b", 2.0))
+        self.model.context.group_pair_context.add_pair(MuonBasePair("phase_Re_"))
+        self.model.context.group_pair_context.add_pair(MuonBasePair("phase_Im_"))
+        self.model.context.group_pair_context.add_pair(MuonBasePair("phase2_Re_"))
+        self.model.context.group_pair_context.add_pair(MuonBasePair("phase2_Im_"))
+        self.model.context.group_pair_context.add_pair_to_selected_pairs("long")
+        self.model.context.group_pair_context.add_pair_to_selected_pairs("phase_Re_")
+        self.model.context.group_pair_context.add_pair_to_selected_pairs("phase2_Im_")
+
+        selection = ["long", "long2", "phase_Re_", "phase_Im_", "phase2_Re_", "phase2_Im_"]
+        result = self.model.get_fit_workspace_names_from_groups_and_runs([1, 2, 3], selection)
+
+        self.assertEqual(["MUSR1; Pair Asym; long; Rebin; MA",
+                          "MUSR1; PhaseQuad; phase_Re_; Rebin; MA",
+                          "MUSR1; PhaseQuad; phase2_Im_; Rebin; MA",
+                          "MUSR2; Pair Asym; long; Rebin; MA",
+                          "MUSR2; PhaseQuad; phase_Re_; Rebin; MA",
+                          "MUSR2; PhaseQuad; phase2_Im_; Rebin; MA",
+                          "MUSR3; Pair Asym; long; Rebin; MA",
+                          "MUSR3; PhaseQuad; phase_Re_; Rebin; MA",
+                          "MUSR3; PhaseQuad; phase2_Im_; Rebin; MA"], result)
+
+    def test_get_fit_workspace_names_from_groups_and_runs_when_fit_to_raw_is_true(self):
+        self.model.fit_to_raw = True
+        self.model.context.data_context.instrument = "MUSR"
+
+        self.model.context.group_pair_context.add_pair(MuonPair("long", "f", "b", 1.0))
+        self.model.context.group_pair_context.add_pair(MuonPair("long2", "f", "b", 2.0))
+        self.model.context.group_pair_context.add_pair(MuonBasePair("phase_Re_"))
+        self.model.context.group_pair_context.add_pair(MuonBasePair("phase_Im_"))
+        self.model.context.group_pair_context.add_pair(MuonBasePair("phase2_Re_"))
+        self.model.context.group_pair_context.add_pair(MuonBasePair("phase2_Im_"))
+        self.model.context.group_pair_context.add_pair_to_selected_pairs("long")
+        self.model.context.group_pair_context.add_pair_to_selected_pairs("phase_Re_")
+        self.model.context.group_pair_context.add_pair_to_selected_pairs("phase2_Im_")
+
+        selection = ["long", "long2", "phase_Re_", "phase_Im_", "phase2_Re_", "phase2_Im_"]
+        result = self.model.get_fit_workspace_names_from_groups_and_runs([1, 2, 3], selection)
+
+        self.assertEqual(["MUSR1; Pair Asym; long; MA",
+                          "MUSR1; PhaseQuad; phase_Re_; MA",
+                          "MUSR1; PhaseQuad; phase2_Im_; MA",
+                          "MUSR2; Pair Asym; long; MA",
+                          "MUSR2; PhaseQuad; phase_Re_; MA",
+                          "MUSR2; PhaseQuad; phase2_Im_; MA",
+                          "MUSR3; Pair Asym; long; MA",
+                          "MUSR3; PhaseQuad; phase_Re_; MA",
+                          "MUSR3; PhaseQuad; phase2_Im_; MA"], result)
+
+    def test_that_validate_sequential_fit_returns_an_empty_message_when_the_data_provided_is_valid_in_normal_fitting(self):
+        self.model.dataset_names = self.dataset_names
+        self.model.single_fit_functions = self.single_fit_functions
+
+        message = self.model.validate_sequential_fit([self.model.dataset_names])
+
+        self.assertEqual(message, "")
+
+    def test_that_validate_sequential_fit_returns_an_error_message_when_no_fit_function_is_selected(self):
+        self.model.dataset_names = self.dataset_names
+
+        message = self.model.validate_sequential_fit([self.model.dataset_names])
+
+        self.assertEqual(message, "No data or fit function selected for fitting.")
 
 
 if __name__ == '__main__':

@@ -85,6 +85,8 @@ QHash<QString, QVariant> ALCBaselineModellingView::getPlotKwargs(PreviewPlot *pl
   UNUSED_ARG(curveName);
   kwargs.insert("linestyle", QString("None").toLatin1().constData());
   kwargs.insert("marker", QString(".").toLatin1().constData());
+  kwargs.insert("distribution", QString("False").toLatin1().constData());
+
   return kwargs;
 }
 

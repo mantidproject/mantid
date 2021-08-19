@@ -38,6 +38,8 @@ public:
                                              int periodNumber);
   // Load first good data from the nexus entry
   double loadFirstGoodDataFromNexus();
+  // Load last good data from the nexus entry
+  double loadLastGoodDataFromNexus();
   // Load time zero from the nexus entry
   double loadTimeZeroFromNexusFile();
   // Load time zero from nexus entry into a vector

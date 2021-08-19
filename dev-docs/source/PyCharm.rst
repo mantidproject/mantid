@@ -1,33 +1,142 @@
 .. _PyCharm:
 
+=======
 PyCharm
 =======
-
-PyCharm can be installed from `here <https://jetbrains.com/pycharm/download/>`_.
-
-This tutorial assumes you are familiar with the process of building Mantid (with separate source and build directories inside a root directory), and that you have built a working version. If you are unclear about this see :ref:`here <GettingStarted>`.
 
 .. contents::
   :local:
 
-.. _setting-up-pycharm-on-windows:
+Selecting PyCharm versions
+##########################
+
+There are two versions of PyCharm that are in use in the team, Community and Professional. The main difference for our workflow is that professional offers support for remote debugging which can help with debugging Python code that is called from C++, such as algorithms called from Python interfaces.
+
+If you haven't installed PyCharm yet do that now, PyCharm can be installed from `here <https://jetbrains.com/pycharm/download/>`_.
+
+Setup Python development environment with Conda
+###############################################
+
+The assumption has been made that you have setup and built Mantid already, if you have not, please do so before hand by following, `this guide <GettingStarted/GettingStarted.html>`_.
+
+At any point in these instructions where ``RelWithDebInfo`` is used (including in file paths), you can replace it with any other build type such as ``Debug`` or ``Release``. We use ``RelWithDebInfo`` for Conda specific builds to allow debugging due to ``Debug`` not being functional with the ``Release ABIs``.
+
+- Open PyCharm
+- If no project has been selected already, open the Mantid source code as a project.
+- Open the ``File->Settings menu``.
+- In the left hand side select the option that is ``Project: {SOURCE_CODE_FOLDER_NAME}`` for example ``Project: mantid``.
+- Select the ``Python Interpreter`` option.
+- Select the button top right in the of the window, that looks like a settings cog, then select ``Add...`` from the submenu.
+- From the left side of the window select ``Conda Environment``.
+- Select the ``Existing environment``.
+- Click on the ``...`` to open a file browser, and navigate to your Conda environment's Python executable. This can be found in the directory you installed Conda (i.e. Mambaforge, Miniconda3 etc), on Windows navigate to your ``{CONDA_DIRECTORY}/envs/mantid-developer/Python.exe``, your ``{CONDA_DIRECTORY}`` on windows may be in a similar location to this: ``C:/Users/user/AppData/Local/mambaforge`` on other OSs navigate to ``{CONDA_DIRECTORY}/envs/mantid-developer/bin/python``.
+- (Windows Only) Ensure that the line for ``Conda executable`` correctly points at your ``conda.exe``, an example of this would be ``{CONDA_DIRECTORY}/Scripts/conda.exe``.
+- When done, click ok to close the window.
+- Ensure that next to ``Python Interpreter:`` it says your Python version and ``(mantid-developer)`` e.g. ``Python 3.8 (mantid-developer)``.
+- Then click Apply.
+- Back on the left side, under ``Python Interpreter`` there should be an option for ``Project Structure`` select that.
+- If you do not build Mantid in the same directory as your source but somewhere else add this as another Content Root, by selecting ``+ Add Content Root`` on the right hand side now.
+- In the file tree, select each of the following and mark them as Sources by clicking the ``Sources`` button whilst it's selected:
+
+    - ``{SOURCE}/scripts``
+    - ``{SOURCE}/Framework/PythonInterface``
+    - ``{SOURCE}/qt/applications/workbench``
+    - ``{SOURCE}/qt/widgets``
+    - ``{SOURCE}/qt/Python``
+
+- In the file tree select your build directory and mark as Excluded by clicking the ``Excluded`` button whilst it's selected.
+- On Windows, select the ``{BUILD}/bin/RelWithDeb`` file and mark as Source by clicking the ``Sources`` button whilst it's selected.
+- On Linux or MacOS, select your ``{BUILD}/bin`` directory and mark as Source by clicking the ``Sources`` button whilst it's selected.
+- Click Apply, and then Ok to close the window.
+
+Debug Python in Workbench
+#########################
+
+Now that your Python development environment has been setup we can setup the debugging using Workbench.
+
+- With an open project in Pycharm, open the Play configuration menu by Opening ``Run->Edit Configurations...``.
+- Click the ``+`` icon top left
+- Select Python
+- Name it something to do with ``Workbench``
+- In the ``Script Path:`` box, on Linux/MacOS enter the ``{BUILD}/bin/workbench`` Python script, on Windows enter ``{BUILD}/bin/RelWithDebInfo/workbench-script.pyw``, ``.pyw`` files will not appear in the search window as it only shows ``.py`` files, so you cannot search for it with the GUI.
+- In the ``Working directory:`` box, on Linux/MacOS enter the ``{BUILD}/bin`` directory, on Windows enter ``{BUILD}/bin/RelWithDebInfo`` directory.
+- Ensure the ``Python Interpreter:`` box is your Python version following by ``(mantid-developer)``, this ensures it runs using your Conda environment.
+- Click Ok and exit out the window.
+- You can now click the green play button in the top right of the window to create a Workbench instance from pycharm.
+- Alternatively you can click the green bug next to the green play button to start a debug session.
+
+Debug Python in unit tests
+##########################
+
+This section assumes you have followed all previous instructions for debugging Python in workbench
+
+There are 2 main ways to debug Python unit tests using the Unittests Python module.
+
+1. Navigate to the test you want to run in PyCharm, on the left side of the file in the margin, just to the right of the line numbers there should be a green play button, click that and it will let you start a debug or normal run of the tests.
+
+2. A little more involved, but is easier to expand and test many things at once.
+    - Same as when creating the Workbench debug session. Open the configuration menu by navigating to ``Run->Edit Configurations...``
+    - Click the ``+`` icon top left
+    - Select Unittests
+    - Give an appropriate name for the section of code you will be testing
+    - You have 3 options, enter the module name, script path or custom.
+
+        - Module name for testing workbench project recovery tests looks like this ``workbench.projectrecovery``, this runs all of the tests in the project recovery section. This is very useful for testing all of a specific section of the code base, without running it in a terminal.
+        - Script path is very similar instead of passing a module name, you just give a filepath such as ``{SOURCE}/qt/applications/workbench/workbench/projectrecovery`` this achieves exactly the same as the previous step.
+        - Custom is for passing custom arguments to the Unittests executable such as these: https://docs.python.org/3/library/unittest.html#command-line-interface
+
+Debug Python in system tests/remote debugging
+#############################################
+
+This functionality is useful for debugging Python code that is spawned in separate threads, such as Python algorithms called from C++ and system tests.
+
+A PyCharm Professional license is required to use the Remote Debugging feature.
+
+This section assumes you have followed all previous instructions for debugging Python in workbench and unit tests.
+
+- Like the Unit tests and workbench we need to add it as a configuration, open the configuration menu by navigating to ``Run->Edit Configurations...``
+- Click the ``+`` icon top left
+- Select ``Python Debug Server``
+- Give an appropriate name for remote debugging such as ``Remote Debugging``
+- Copy the snippet of code that consists of ``pip install pydevd-pycharm``
+- Close the configuration window
+- Open Terminal at the bottom of the PyCharm window
+- Paste the snippet of code and hit enter, this will install the remote debugger for PyCharm to use.
+- Once installed, re-open the configuration menu by navigating to ``Run->Edit Configurations...``
+- Ensure that the previously created ``Python Debug Server`` is selected in the left hand side tree selection.
+- Ensure that you set the port box to something that isn't 0 and isn't in use by your system at present such as ``8080``.
+- Copy the snippet of Python code that looks like this:
+
+    .. code-block:: python
+
+        import pydevd_pycharm
+        pydevd_pycharm.settrace('localhost', port=8080, stdoutToServer=True, stderrToServer=True)
+
+- Paste this code where you want to start debugging from, this will act like a breakpoint during normal debugging.
+- Click the drop down menu next to the play icon in the top right. Select the ``Python Debug Server`` you configured, then click the debug next to the play icon.
+- Run the python code that you want to debug, for example run the system tests, and it will pause execution on where you pasted your remote debug code earlier.
+- Any new breakpoints can be added like normal but they must come after the remote code snippet pasted earlier.
+
+==================================================================================
+Legacy and not maintained past this point (Only use if explicitly not using Conda)
+==================================================================================
 
 Setting up PyCharm on Windows
 #############################
 
 1. Once PyCharm is open, set up the project. Go to ``File->Open`` and select the root directory in which both your source and build directories reside.
 
-   Go to ``File->Settings``, then under ``Project`` you will set two sub-menus ``Project Interpreter`` and ``Project Structure``. The interpreter defines the python executable that will be used to run your code, and the structure menu allows you to decide which folders within the project to include and index.
+   Go to ``File->Settings``, then under ``Project`` you will set two sub-menus ``Project Interpreter`` and ``Project Structure``. The interpreter defines the Python executable that will be used to run your code, and the structure menu allows you to decide which folders within the project to include and index.
 
-2. In the ``Project Interpreter`` sub menu, at the top select the options button and click ``Add...``, a new window should appear titled "Add Python Interpreter". In the menu on the left, select "System Interpreter" (a version of Python with all the correct variables set already exists within Mantid). Click on the ``...`` to open a file browser, and navigate to;
+2. In the ``Project Interpreter`` sub menu, at the top select the options button and click ``Add...``, a new window should appear titled "Add Python Interpreter". In the menu on the left, if you are using Conda select "Conda Environment", if you haven't set up Conda follow the Getting Started guidance for it, select existing environment and if not present already put in the path to your Python interpreter, and your conda executable. Alternatively select "System Interpreter" (a version of Python with all the correct variables set already exists within Mantid, if you are not using Conda). Click on the ``...`` to open a file browser, and navigate to;
 
    .. code-block:: sh
 
-      <Mantid Source Directory>/external/src/ThirdParty/lib/python3.8/python.exe
+      <Mantid Source Directory>/external/src/ThirdParty/lib/Python3.8/Python.exe
 
    This is the interpreter, so select "Ok" and apply the changes. This should bring up a list of all the packages associated to the interpreter. There should be many packages, however you should not see PyQt (but instead QtPy).
 
-3. In the ``Project Structure`` sub menu you should see your root directory with the source/build directories both visible (if not, add them). The folder structure should be present in the centre of the window allowing you to mark folders orange (excluded) or blue (source). Source directories will be searched for python code.
+3. In the ``Project Structure`` sub menu you should see your root directory with the source/build directories both visible (if not, add them). The folder structure should be present in the centre of the window allowing you to mark folders orange (excluded) or blue (source). Source directories will be searched for Python code.
 
    Within the source directory add the following to your sources:
 
@@ -37,7 +146,7 @@ Setting up PyCharm on Windows
        <Mantid Source Directory>/Framework/PythonInterface
        <Mantid Source Directory>/qt/applications/workbench
        <Mantid Source Directory>/qt/widgets
-       <Mantid Source Directory>/qt/python
+       <Mantid Source Directory>/qt/Python
        <Mantid Source Directory>/external/src/ThirdParty/lib
 
 
@@ -55,12 +164,13 @@ Setting up PyCharm on Windows
 
 NOTE : In some cases, imports in the code will still be highlighted red when they come from folders within the ``script/`` folder, or from other folders entirely. To fix this simply add the relevant folder that contains the module you are importing in the same fashion as step 3 above.
 
-.. _running-file-debug-with-envfile-extension:
 
 Running Files in the Debugger with EnvFile extension
 ####################################################
 
-Running python code from within PyCharm which depends on the python API, or PyQt for example requires one extra step. Because the source root labelling from the previous section only affects PyCharm searching and not the run configuration, before running the file we must set up the run configuration correctly.
+Do not run files in the debugger with EnvFile extension with Conda, as Conda does this job for you.
+
+Running Python code from within PyCharm which depends on the Python API, or PyQt for example requires one extra step. Because the source root labelling from the previous section only affects PyCharm searching and not the run configuration, before running the file we must set up the run configuration correctly.
 
 4. Install the EnvFile plugin by Borys Pierov. The plugin can be installed in multiple ways:
 
@@ -89,21 +199,20 @@ Disadvantages:
 Running Files in the Debugger without EnvFile extension
 #######################################################
 
-
 This can be done in two ways:
 
 - Open PyCharm using ``pycharm.bat`` which can be found in the build directory (this sets some additional environment variables compared with simply opening PyCharm directly).
 
   - This is preferred if you only have 1 repository with which PyCharm is used. If you need to use PyCharm on multiple repositories, it is recommended that you use the EnvFile extension.
 
-- To edit the configurations go to ``Run->Run...`` and select ``Edit Configurations``. This should open up a sub window. Hit the green ``+`` in the top left to create a new configuration and name it. In order to tell PyCharm where to look for python modules and libraries we need to add some folders to the ``PATH`` environment variable. Click on the ``...`` next to the *Environment Variables* box, and hit the ``+`` icon. In the Name column enter "PATH", in the value column enter the following;
+- To edit the configurations go to ``Run->Run...`` and select ``Edit Configurations``. This should open up a sub window. Hit the green ``+`` in the top left to create a new configuration and name it. In order to tell PyCharm where to look for Python modules and libraries we need to add some folders to the ``PATH`` environment variable. Click on the ``...`` next to the *Environment Variables* box, and hit the ``+`` icon. In the Name column enter "PATH", in the value column enter the following;
 
    .. code-block:: sh
 
        <Mantid Build Directory>\bin\Debug;
        <Mantid Source Directory>\external\src\ThirdParty\bin;
        <Mantid Source Directory>\external\src\ThirdParty\bin\mingw;
-       <Mantid Source Directory>\external\src\ThirdParty\lib\python3.8;
+       <Mantid Source Directory>\external\src\ThirdParty\lib\Python3.8;
        <Mantid Source Directory>\external\src\ThirdParty\lib\qt5\plugins;
        <Mantid Source Directory>\external\src\ThirdParty\lib\qt5\bin;
        <Mantid Source Directory>\external\src\ThirdParty\lib\qt5\lib;
@@ -124,7 +233,7 @@ To test that the above instructions have worked, you can simply create a new Pyt
 
     # Check that PyQt imports
     from qtpy import QtCore, QtGui, QtWidgets
-    # Check that the Mantid python API imports
+    # Check that the Mantid Python API imports
     import mantid.simpleapi
 
     class DummyView(QtWidgets.QWidget):
@@ -154,47 +263,11 @@ This **does not** require a PyCharm Professional license for debugging, but requ
 4. Add the EnvFile to the Unittests configuration, instructions in :ref:`running-file-debug-with-envfile-extension`.
 5. You should now be able to click the Run/Debug icons next to each unit test method or class to run/debug them.
 
-
-Remote Debugging with PyCharm
-#############################
-
-A PyCharm Professional license is required to use the Remote Debugging feature.
-
-This functionality is useful for debugging python code that is spawned in separate threads, such as Python algorithms and system tests.
-
-The remote debugger needs to be added as a configuration to be used easily:
-
-1. Click the Add Configuration button at the top of the main window or click ``Run->Edit Configurations...``
-2. Click the + button and add "Python Debug Server" to the list of configurations.
-3. Give it a name, and set the port number to ``44444``.
-4. Leave "Suspend after connect" ticked if you would like any connections to the debugger to act as a breakpoint. It may be useful to untick this if you would like to hit a breakpoint in a loop inside an algorithm that runs many times but does not always hit that breakpoint.
-5. Click OK.
-
-You will also need to install the python package ``pydevd_pycharm`` which can be done by:
-
-1. Navigating to the directory that contains the python interpreter ``<Mantid Source Directory>/external/src/ThirdParty/lib/python3.8/``
-2. Running the following in the terminal ``.\python -m pip install pydevd_pycharm``
-
-To use the remote debugger:
-
-1. Select the remote debugger from the drop down list of configurations.
-2. Click the green bug icon to start the debugger.
-3. Copy and paste the two lines shown in the terminal into the code you wish to debug:
-
-    .. code-block:: python
-
-        import pydevd_pycharm
-        pydevd_pycharm.settrace('localhost', port=44444, stdoutToServer=True, stderrToServer=True)
-
-4. Start Mantid or the test you wish to debug (do not stop the remote debugger).
-5. If "Suspend after connect" has been ticked the point at which the two lines have been pasted will act as a breakpoint. Otherwise, the code will stop at the next breakpoint *after* the pasted lines.
-6. You can now use the PyCharm debugger as normal.
-
 Setting up PyCharm on Linux
 ###########################
 
-1. Use the native python interpreter (``/usr/bin/python3``) rather than from ``<Mantid Source Directory>/external/src/ThirdParty/lib/python3.8/python.exe``
-2. In the ``Project Structure`` sub menu you should see your root directory with the source/build directories both visible (if not, add them). The folder structure should be present in the centre of the window allowing you to mark folders orange (excluded) or blue (source). Source directories will be searched for python code.
+1. Use the native Python interpreter (``/usr/bin/Python3``) rather than from ``<Mantid Source Directory>/external/src/ThirdParty/lib/Python3.8/Python.exe``
+2. In the ``Project Structure`` sub menu you should see your root directory with the source/build directories both visible (if not, add them). The folder structure should be present in the centre of the window allowing you to mark folders orange (excluded) or blue (source). Source directories will be searched for Python code.
 
    Within the source directory add the following to your sources:
 
@@ -204,7 +277,7 @@ Setting up PyCharm on Linux
        <Mantid Source Directory>/Framework/PythonInterface
        <Mantid Source Directory>/qt/applications/workbench
        <Mantid Source Directory>/qt/widgets
-       <Mantid Source Directory>/qt/python
+       <Mantid Source Directory>/qt/Python
 
 
    If you are writing scripts in any other directories, you can also mark them as sources. This helps PyCharm give better auto-complete and import suggestions during development.

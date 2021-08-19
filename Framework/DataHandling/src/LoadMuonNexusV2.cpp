@@ -112,6 +112,7 @@ void LoadMuonNexusV2::init() {
   declareProperty("TimeZero", 0.0, "Time zero in units of micro-seconds (default to 0.0)", Direction::Output);
   declareProperty("FirstGoodData", 0.0, "First good data in units of micro-seconds (default to 0.0)",
                   Direction::Output);
+  declareProperty("LastGoodData", 0.0, "Last good data in the OutputWorkspace's spectra", Kernel::Direction::Output);
 
   declareProperty(std::make_unique<ArrayProperty<double>>("TimeZeroList", Direction::Output),
                   "A vector of time zero values");
@@ -259,6 +260,9 @@ void LoadMuonNexusV2::loadMuonProperties(size_t numSpectra) {
 
   auto firstGoodData = m_nexusLoader->loadFirstGoodDataFromNexus();
   setProperty("FirstGoodData", firstGoodData);
+
+  auto lastGoodData = m_nexusLoader->loadLastGoodDataFromNexus();
+  setProperty("LastGoodData", lastGoodData);
 
   auto timeZeroVector = m_nexusLoader->loadTimeZeroListFromNexusFile(numSpectra);
   setProperty("TimeZeroList", timeZeroVector);

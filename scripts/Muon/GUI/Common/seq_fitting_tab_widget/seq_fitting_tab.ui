@@ -14,7 +14,38 @@
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_3">
-   <item row="8" column="0" colspan="3">
+   <item row="0" column="2">
+    <widget class="QLabel" name="filter_by_label">
+     <property name="text">
+      <string>Filter by:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="3" colspan="2">
+    <widget class="QComboBox" name="data_type_combo_box">
+     <property name="toolTip">
+      <string>Select the type of data you want to sequentially fit</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="0">
+    <widget class="QRadioButton" name="previous_fit_values_radio">
+     <property name="text">
+      <string>Parameters from previous fit</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1">
+    <widget class="QPushButton" name="fit_selected_button">
+     <property name="text">
+      <string>Fit selected</string>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="0" colspan="5">
     <widget class="QSplitter" name="splitter">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
@@ -24,24 +55,10 @@
      </widget>
     </widget>
    </item>
-   <item row="5" column="0">
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
-     <item>
-      <widget class="QRadioButton" name="previous_fit_values_radio">
-       <property name="text">
-        <string>Parameters from previous fit</string>
-       </property>
-       <property name="checked">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item row="5" column="1">
-    <widget class="QRadioButton" name="initial_fit_values_radio">
+   <item row="4" column="2" colspan="3">
+    <widget class="QCheckBox" name="copy_fit_checkbox">
      <property name="text">
-      <string>Initial parameters for each fit</string>
+      <string>Copy fit parameters to all</string>
      </property>
     </widget>
    </item>
@@ -58,20 +75,10 @@
      </property>
     </widget>
    </item>
-   <item row="2" column="0">
-    <layout class="QGridLayout" name="gridLayout"/>
-   </item>
-   <item row="0" column="1">
-    <widget class="QPushButton" name="fit_selected_button">
+   <item row="4" column="1">
+    <widget class="QRadioButton" name="initial_fit_values_radio">
      <property name="text">
-      <string>Fit selected</string>
-     </property>
-    </widget>
-   </item>
-   <item row="5" column="2">
-    <widget class="QCheckBox" name="copy_fit_checkbox">
-     <property name="text">
-      <string>Copy fit parameters to all</string>
+      <string>Initial parameters for each fit</string>
      </property>
     </widget>
    </item>

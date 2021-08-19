@@ -10,7 +10,7 @@ from Muon.GUI.Common.muon_pair import MuonPair
 from typing import Iterable
 
 
-def calculate_group_data(context, group, run, rebin, workspace_name, periods):
+def calculate_group_data(context, group, run, workspace_name, periods):
     processed_data = get_pre_process_workspace_name(run, context.data_context.instrument)
 
     params = _get_MuonGroupingCounts_parameters(group, periods)
@@ -28,7 +28,7 @@ def calculate_pair_data(pair: MuonPair, forward_group: str, backward_group: str,
     return pair_data
 
 
-def estimate_group_asymmetry_data(context, group, run, rebin, workspace_name, unormalised_workspace_name, periods):
+def estimate_group_asymmetry_data(context, group, run, workspace_name, unormalised_workspace_name, periods):
     params = _get_EstimateMuonAsymmetryFromCounts_parameters(context, group, run, periods)
     params["InputWorkspace"] = workspace_name.replace("Asymmetry", "Counts")
     group_asymmetry, group_asymmetry_unnorm = \

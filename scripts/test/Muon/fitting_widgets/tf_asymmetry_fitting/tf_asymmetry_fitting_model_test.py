@@ -11,8 +11,6 @@ from mantid.api import FrameworkManager, FunctionFactory
 from mantid.simpleapi import CreateSampleWorkspace
 
 from Muon.GUI.Common.fitting_widgets.tf_asymmetry_fitting.tf_asymmetry_fitting_model import TFAsymmetryFittingModel
-from Muon.GUI.Common.muon_pair import MuonPair
-from Muon.GUI.Common.muon_base_pair import MuonBasePair
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
 
 
@@ -563,65 +561,6 @@ class TFAsymmetryFittingModelTest(unittest.TestCase):
         self.assertEqual(parameter_values, [5.0, 6.0, 7.0, 8.0])
         self.assertEqual(normalisations, [1.234, 2.234])
 
-    def test_that_get_runs_groups_and_pairs_for_fits_will_attempt_to_get_the_runs_groups_and_pairs_when_in_single_fit_mode(self):
-        self.model._get_runs_groups_and_pairs_for_single_fit = mock.Mock(return_value=(["62260"], ["fwd", "bwd"]))
-
-        runs, groups_and_pairs = self.model.get_runs_groups_and_pairs_for_fits()
-        self.assertEqual(runs, ["62260"])
-        self.assertEqual(groups_and_pairs, ["fwd", "bwd"])
-
-        self.model._get_runs_groups_and_pairs_for_single_fit.assert_called_once_with()
-
-    def test_that_get_runs_groups_and_pairs_for_fits_will_attempt_to_get_it_by_runs_when_in_simultaneous_fitting_mode(self):
-        self.model._get_runs_groups_and_pairs_for_simultaneous_fit_by_runs = mock.Mock(return_value=(["62260"], ["fwd;bwd;long"]))
-        self.model.simultaneous_fitting_mode = True
-        self.model.simultaneous_fit_by = "Run"
-
-        runs, groups_and_pairs = self.model.get_runs_groups_and_pairs_for_fits()
-        self.assertEqual(runs, ["62260"])
-        self.assertEqual(groups_and_pairs, ["fwd;bwd;long"])
-
-        self.model._get_runs_groups_and_pairs_for_simultaneous_fit_by_runs.assert_called_once_with()
-
-    def test_that_get_runs_groups_and_pairs_for_fits_will_attempt_to_get_it_by_groups_when_in_simultaneous_fitting_mode(self):
-        self.model._get_runs_groups_and_pairs_for_simultaneous_fit_by_groups_and_pairs = \
-            mock.Mock(return_value=(["62260;62261;62262"], ["fwd", "bwd"]))
-        self.model.simultaneous_fitting_mode = True
-        self.model.simultaneous_fit_by = "Group/Pair"
-
-        runs, groups_and_pairs = self.model.get_runs_groups_and_pairs_for_fits()
-        self.assertEqual(runs, ["62260;62261;62262"])
-        self.assertEqual(groups_and_pairs, ["fwd", "bwd"])
-
-        self.model._get_runs_groups_and_pairs_for_simultaneous_fit_by_groups_and_pairs.assert_called_once_with()
-
-    def test_that_get_fit_function_parameter_values_will_return_the_parameter_values_in_the_specified_function(self):
-        self.assertEqual(self.model.get_fit_function_parameter_values(self.single_fit_functions[0])[0], [0.0])
-        self.assertEqual(self.model.get_fit_function_parameter_values(self.simultaneous_fit_function)[0], [0.0, 0.0])
-
-    def test_that_update_ws_fit_function_parameters_will_update_the_parameters_for_the_specified_dataset_in_single_mode(self):
-        self.model.dataset_names = self.dataset_names
-        self.model.single_fit_functions = self.single_fit_functions
-        self.model.simultaneous_fitting_mode = False
-
-        self.model.update_ws_fit_function_parameters(self.model.dataset_names[:1], [1.0])
-
-        self.assertEqual(self.model.get_fit_function_parameter_values(self.model.single_fit_functions[0])[0], [1.0])
-        self.assertEqual(self.model.get_fit_function_parameter_values(self.model.single_fit_functions[1])[0], [0.0])
-
-    def test_that_update_ws_fit_function_parameters_will_update_the_parameters_when_in_simultaneous_mode(self):
-        self.model.dataset_names = self.dataset_names
-        self.model.simultaneous_fit_function = self.simultaneous_fit_function
-        self.model.simultaneous_fitting_mode = True
-
-        self.model.update_ws_fit_function_parameters(self.model.dataset_names[:1], [1.0, 0.0])
-        self.assertEqual(self.model.get_fit_function_parameter_values(self.model.simultaneous_fit_function),
-                         ([1.0, 0.0], [0.0, 0.0]))
-
-        self.model.update_ws_fit_function_parameters(self.model.dataset_names[1:], [1.0, 2.0])
-        self.assertEqual(self.model.get_fit_function_parameter_values(self.model.simultaneous_fit_function),
-                         ([1.0, 2.0], [0.0, 0.0]))
-
     def test_that_update_ws_fit_function_parameters_will_update_the_parameters_when_in_TF_asymmetry_simultaneous_mode(self):
         normalisation1, normalisation2 = 1.345, 2.345
         param1, param2 = 3.345, 4.345
@@ -635,60 +574,6 @@ class TFAsymmetryFittingModelTest(unittest.TestCase):
         self.model.update_ws_fit_function_parameters(self.dataset_names, [normalisation1, param1, normalisation2, param2])
         self.assertEqual(self.model.get_fit_function_parameter_values(self.model.tf_asymmetry_simultaneous_function)[0],
                          [normalisation1, 0.0, param1, 0.2, 0.2, normalisation2, 0.0, param2, 0.2, 0.2])
-
-    def test_get_fit_workspace_names_from_groups_and_runs_when_fit_to_raw_is_false(self):
-        self.model.fit_to_raw = False
-        self.model.context.data_context.instrument = "MUSR"
-
-        self.model.context.group_pair_context.add_pair(MuonPair("long", "f", "b", 1.0))
-        self.model.context.group_pair_context.add_pair(MuonPair("long2", "f", "b", 2.0))
-        self.model.context.group_pair_context.add_pair(MuonBasePair("phase_Re_"))
-        self.model.context.group_pair_context.add_pair(MuonBasePair("phase_Im_"))
-        self.model.context.group_pair_context.add_pair(MuonBasePair("phase2_Re_"))
-        self.model.context.group_pair_context.add_pair(MuonBasePair("phase2_Im_"))
-        self.model.context.group_pair_context.add_pair_to_selected_pairs("long")
-        self.model.context.group_pair_context.add_pair_to_selected_pairs("phase_Re_")
-        self.model.context.group_pair_context.add_pair_to_selected_pairs("phase2_Im_")
-
-        selection = ["long", "long2", "phase_Re_", "phase_Im_", "phase2_Re_", "phase2_Im_"]
-        result = self.model.get_fit_workspace_names_from_groups_and_runs([1, 2, 3], selection)
-
-        self.assertEqual(["MUSR1; Pair Asym; long; Rebin; MA",
-                          "MUSR1; PhaseQuad; phase_Re_; Rebin; MA",
-                          "MUSR1; PhaseQuad; phase2_Im_; Rebin; MA",
-                          "MUSR2; Pair Asym; long; Rebin; MA",
-                          "MUSR2; PhaseQuad; phase_Re_; Rebin; MA",
-                          "MUSR2; PhaseQuad; phase2_Im_; Rebin; MA",
-                          "MUSR3; Pair Asym; long; Rebin; MA",
-                          "MUSR3; PhaseQuad; phase_Re_; Rebin; MA",
-                          "MUSR3; PhaseQuad; phase2_Im_; Rebin; MA"], result)
-
-    def test_get_fit_workspace_names_from_groups_and_runs_when_fit_to_raw_is_true(self):
-        self.model.fit_to_raw = True
-        self.model.context.data_context.instrument = "MUSR"
-
-        self.model.context.group_pair_context.add_pair(MuonPair("long", "f", "b", 1.0))
-        self.model.context.group_pair_context.add_pair(MuonPair("long2", "f", "b", 2.0))
-        self.model.context.group_pair_context.add_pair(MuonBasePair("phase_Re_"))
-        self.model.context.group_pair_context.add_pair(MuonBasePair("phase_Im_"))
-        self.model.context.group_pair_context.add_pair(MuonBasePair("phase2_Re_"))
-        self.model.context.group_pair_context.add_pair(MuonBasePair("phase2_Im_"))
-        self.model.context.group_pair_context.add_pair_to_selected_pairs("long")
-        self.model.context.group_pair_context.add_pair_to_selected_pairs("phase_Re_")
-        self.model.context.group_pair_context.add_pair_to_selected_pairs("phase2_Im_")
-
-        selection = ["long", "long2", "phase_Re_", "phase_Im_", "phase2_Re_", "phase2_Im_"]
-        result = self.model.get_fit_workspace_names_from_groups_and_runs([1, 2, 3], selection)
-
-        self.assertEqual(["MUSR1; Pair Asym; long; MA",
-                          "MUSR1; PhaseQuad; phase_Re_; MA",
-                          "MUSR1; PhaseQuad; phase2_Im_; MA",
-                          "MUSR2; Pair Asym; long; MA",
-                          "MUSR2; PhaseQuad; phase_Re_; MA",
-                          "MUSR2; PhaseQuad; phase2_Im_; MA",
-                          "MUSR3; Pair Asym; long; MA",
-                          "MUSR3; PhaseQuad; phase_Re_; MA",
-                          "MUSR3; PhaseQuad; phase2_Im_; MA"], result)
 
     def test_that_perform_sequential_fit_will_call_the_correct_functions_when_not_in_tf_asymmetry_mode(self):
         workspaces = [self.dataset_names[:1], self.dataset_names[1:]]
@@ -751,6 +636,62 @@ class TFAsymmetryFittingModelTest(unittest.TestCase):
         dataset_names = self.dataset_names + ["EMU20884; Group; bottom; Asymmetry"]
         self.model.dataset_names = self.dataset_names
         self.assertTrue(not self.model._are_same_workspaces_as_the_datasets(dataset_names))
+
+    def test_that_validate_sequential_fit_returns_an_empty_message_when_the_data_provided_is_valid_in_tf_fitting(self):
+        self.model.dataset_names = ["EMU20884; Group; bottom; Asymmetry", "EMU20884; Group; top; Asymmetry"]
+        self.model.single_fit_functions = self.single_fit_functions
+        self.model.tf_asymmetry_mode = True
+
+        message = self.model.validate_sequential_fit([self.model.dataset_names])
+
+        self.assertEqual(message, "")
+
+    def test_that_validate_sequential_fit_returns_an_error_message_for_pair_data_in_tf_asymmetry_fitting_mode(self):
+        self.model.dataset_names = ["EMU20884; Pair Asym; bottom; Asymmetry", "EMU20884; Pair Asym; top; Asymmetry"]
+        self.model.single_fit_functions = self.single_fit_functions
+        self.model.tf_asymmetry_mode = True
+
+        message = self.model.validate_sequential_fit([self.model.dataset_names])
+
+        self.assertEqual(message, "Only Groups can be fitted in TF Asymmetry mode. "
+                                  "Please unselect the following Pairs/Diffs in the grouping tab: 'bottom', 'top'")
+
+    def test_that_get_all_fit_functions_for_returns_all_the_tf_single_functions_for_the_display_type_all(self):
+        self.model.dataset_names = self.dataset_names
+        self.model.single_fit_functions = self.single_fit_functions
+        self.model.tf_asymmetry_single_functions = [self.tf_single_function.clone(), self.tf_single_function.clone()]
+        self.model.tf_asymmetry_mode = True
+
+        filtered_functions = self.model.get_all_fit_functions_for("All")
+
+        self.assertEqual(len(filtered_functions), len(self.model.single_fit_functions))
+        self.assertEqual(self.model.get_fit_function_parameter_values(filtered_functions[0])[0], [0.0, 0.0, 0.0, 0.2, 0.2])
+        self.assertEqual(self.model.get_fit_function_parameter_values(filtered_functions[1])[0], [0.0, 0.0, 0.0, 0.2, 0.2])
+
+    def test_that_get_all_fit_functions_for_does_not_do_filtering_even_for_a_fwd_display_type(self):
+        self.model.dataset_names = self.dataset_names
+        self.model.single_fit_functions = self.single_fit_functions
+        self.model.tf_asymmetry_single_functions = [self.tf_single_function.clone(), self.tf_single_function.clone()]
+        self.model.tf_asymmetry_mode = True
+
+        filtered_functions = self.model.get_all_fit_functions_for("fwd")
+
+        self.assertEqual(len(filtered_functions), 2)
+        self.assertEqual(self.model.get_fit_function_parameter_values(filtered_functions[0])[0], [0.0, 0.0, 0.0, 0.2, 0.2])
+        self.assertEqual(self.model.get_fit_function_parameter_values(filtered_functions[1])[0], [0.0, 0.0, 0.0, 0.2, 0.2])
+
+    def test_that_get_all_fit_functions_for_returns_the_tf_simultaneous_function_when_in_simultaneous_mode(self):
+        self.model.dataset_names = self.dataset_names
+        self.model.simultaneous_fitting_mode = True
+        self.model.tf_asymmetry_mode = True
+        self.model.simultaneous_fit_function = self.simultaneous_fit_function
+        self.model.tf_asymmetry_simultaneous_function = self.tf_simultaneous_fit_function
+
+        filtered_functions_all = self.model.get_all_fit_functions_for("All")
+        self.assertEqual(str(filtered_functions_all[0]), str(self.tf_simultaneous_fit_function))
+
+        filtered_functions_fwd = self.model.get_all_fit_functions_for("fwd")
+        self.assertEqual(str(filtered_functions_fwd[0]), str(self.tf_simultaneous_fit_function))
 
 
 if __name__ == '__main__':

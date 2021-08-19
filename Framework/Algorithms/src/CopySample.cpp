@@ -6,8 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CopySample.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
+#include "MantidGeometry/Objects/MeshObject.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/Material.h"
 
@@ -109,9 +113,11 @@ void CopySample::exec() {
     int outputSampleNumber = getProperty("MDOutputSampleNumber");
     if ((outputSampleNumber == EMPTY_INT()) || (outputSampleNumber < 0)) // copy to all samples
     {
-      for (uint16_t i = 0; i < outMDWS->getNumExperimentInfo(); i++)
-        copyParameters(sample, outMDWS->getExperimentInfo(i)->mutableSample(), copyName, copyMaterial, copyEnvironment,
-                       copyShape, copyLattice, copyOrientation);
+      for (uint16_t i = 0; i < outMDWS->getNumExperimentInfo(); i++) {
+        auto ei = outMDWS->getExperimentInfo(i);
+        copyParameters(sample, ei->mutableSample(), copyName, copyMaterial, copyEnvironment, copyShape, copyLattice,
+                       copyOrientation, ei->run().getGoniometer().getR());
+      }
     } else // copy to a single sample
     {
       if (static_cast<uint16_t>(outputSampleNumber) > (outMDWS->getNumExperimentInfo() - 1)) {
@@ -120,8 +126,9 @@ void CopySample::exec() {
                         << (outMDWS->getNumExperimentInfo() - 1) << "). Will use sample number 0 instead\n";
         outputSampleNumber = 0;
       }
-      copyParameters(sample, outMDWS->getExperimentInfo(static_cast<uint16_t>(outputSampleNumber))->mutableSample(),
-                     copyName, copyMaterial, copyEnvironment, copyShape, copyLattice, copyOrientation);
+      auto ei = outMDWS->getExperimentInfo(static_cast<uint16_t>(outputSampleNumber));
+      copyParameters(sample, ei->mutableSample(), copyName, copyMaterial, copyEnvironment, copyShape, copyLattice,
+                     copyOrientation, ei->run().getGoniometer().getR());
     }
   } else // peaks workspace or matrix workspace
   {
@@ -129,13 +136,14 @@ void CopySample::exec() {
     if (!ei)
       throw std::invalid_argument("Wrong type of output workspace");
     copyParameters(sample, ei->mutableSample(), copyName, copyMaterial, copyEnvironment, copyShape, copyLattice,
-                   copyOrientation);
+                   copyOrientation, ei->run().getGoniometer().getR());
   }
   this->setProperty("OutputWorkspace", outWS);
 }
 
 void CopySample::copyParameters(Sample &from, Sample &to, bool nameFlag, bool materialFlag, bool environmentFlag,
-                                bool shapeFlag, bool latticeFlag, bool orientationOnlyFlag) {
+                                bool shapeFlag, bool latticeFlag, bool orientationOnlyFlag,
+                                const Kernel::Matrix<double> &rotationMatrix) {
   if (nameFlag)
     to.setName(from.getName());
   if (environmentFlag) {
@@ -150,6 +158,19 @@ void CopySample::copyParameters(Sample &from, Sample &to, bool nameFlag, bool ma
       rhsMaterial = to.getMaterial();
     }
     auto rhsObject = std::shared_ptr<IObject>(from.getShape().cloneWithMaterial(rhsMaterial));
+
+    if (auto csgObj = std::dynamic_pointer_cast<Geometry::CSGObject>(rhsObject)) {
+      // Rotate CSGObject by goniometer by editing XML, if possible for that shape
+      std::string xml = csgObj->getShapeXML();
+      xml = Geometry::ShapeFactory().addGoniometerTag(rotationMatrix, xml);
+      rhsObject = Geometry::ShapeFactory().createShape(xml, 0);
+      rhsObject->setMaterial(rhsMaterial); // add back in Material
+    }
+    if (auto meshObj = std::dynamic_pointer_cast<Geometry::MeshObject>(rhsObject)) {
+      // Rotate MeshObject by goniometer
+      std::dynamic_pointer_cast<Geometry::MeshObject>(rhsObject)->rotate(rotationMatrix);
+    }
+
     to.setShape(rhsObject);
     to.setGeometryFlag(from.getGeometryFlag());
     to.setHeight(from.getHeight());

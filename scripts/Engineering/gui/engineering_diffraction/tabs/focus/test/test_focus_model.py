@@ -11,8 +11,8 @@ from os import path
 
 from unittest.mock import patch, MagicMock, call
 from mantid.simpleapi import CreateSampleWorkspace
-from Engineering.common import path_handling
 from Engineering.gui.engineering_diffraction.tabs.focus import model
+from Engineering.gui.engineering_diffraction.tabs.common import output_settings
 from Engineering.gui.engineering_diffraction.tabs.common.calibration_info import CalibrationInfo
 
 file_path = "Engineering.gui.engineering_diffraction.tabs.focus.model"
@@ -30,8 +30,7 @@ class FocusModelTest(unittest.TestCase):
     def setUp(self):
         self.test_dir = tempfile.mkdtemp()
         self.model = model.FocusModel()
-        self.current_calibration = CalibrationInfo(vanadium_path="/mocked/out/anyway",
-                                                   sample_path="this_is_mocked_out_too",
+        self.current_calibration = CalibrationInfo(sample_path="this_is_mocked_out_too",
                                                    instrument="ENGINX")
 
     def tearDown(self):
@@ -133,12 +132,13 @@ class FocusModelTest(unittest.TestCase):
     @patch(file_path + ".SaveFocusedXYE")
     @patch(file_path + ".SaveGSS")
     @patch(file_path + ".SaveNexus")
-    def test_save_output_files_with_no_RB_number(self, nexus, gss, xye):
+    @patch(file_path + ".AddSampleLog")
+    def test_save_output_files_with_no_RB_number(self, addlog, nexus, gss, xye):
         mocked_workspace = "mocked-workspace"
-        output_file = path.join(path_handling.get_output_path(), "Focus",
-                                "ENGINX_123_North_TOF.nxs")
+        output_file = path.join(output_settings.get_output_path(), "Focus",
+                                "ENGINX_123_456_North_TOF.nxs")
 
-        self.model._save_output("ENGINX", "Path/To/ENGINX000123.whatever", "North",
+        self.model._save_output("ENGINX", "123", "456", "North",
                                 mocked_workspace, None)
 
         self.assertEqual(1, nexus.call_count)
@@ -149,15 +149,16 @@ class FocusModelTest(unittest.TestCase):
     @patch(file_path + ".SaveFocusedXYE")
     @patch(file_path + ".SaveGSS")
     @patch(file_path + ".SaveNexus")
-    def test_save_output_files_with_RB_number(self, nexus, gss, xye):
-        self.model._save_output("ENGINX", "Path/To/ENGINX000123.whatever", "North",
+    @patch(file_path + ".AddSampleLog")
+    def test_save_output_files_with_RB_number(self, addlog, nexus, gss, xye):
+        self.model._save_output("ENGINX", "123", "456", "North",
                                 "mocked-workspace", "An Experiment Number")
         self.assertEqual(nexus.call_count, 2)
         self.assertEqual(gss.call_count, 2)
         self.assertEqual(xye.call_count, 2)
 
     @patch(file_path + ".logger")
-    @patch(file_path + ".path_handling.get_output_path")
+    @patch(file_path + ".output_settings.get_output_path")
     @patch(file_path + ".csv")
     def test_output_sample_logs_with_rb_number(self, mock_csv, mock_path, mock_logger):
         mock_writer = MagicMock()
@@ -165,14 +166,14 @@ class FocusModelTest(unittest.TestCase):
         mock_path.return_value = self.test_dir
         ws = CreateSampleWorkspace()
 
-        self.model._output_sample_logs("ENGINX", "00000", ws, "0")
+        self.model._output_sample_logs("ENGINX", "00000", "00000", ws, "0")
 
         self.assertEqual(5, len(ws.getRun().keys()))
         self.assertEqual(1, mock_logger.information.call_count)
         self.assertEqual(8, mock_writer.writerow.call_count)
 
     @patch(file_path + ".logger")
-    @patch(file_path + ".path_handling.get_output_path")
+    @patch(file_path + ".output_settings.get_output_path")
     @patch(file_path + ".csv")
     def test_output_sample_logs_without_rb_number(self, mock_csv, mock_path, mock_logger):
         mock_writer = MagicMock()
@@ -180,7 +181,7 @@ class FocusModelTest(unittest.TestCase):
         mock_path.return_value = self.test_dir
         ws = CreateSampleWorkspace()
 
-        self.model._output_sample_logs("ENGINX", "00000", ws, None)
+        self.model._output_sample_logs("ENGINX", "00000", "00000", ws, None)
 
         self.assertEqual(5, len(ws.getRun().keys()))
         self.assertEqual(1, mock_logger.information.call_count)
@@ -189,14 +190,13 @@ class FocusModelTest(unittest.TestCase):
     @patch(file_path + ".SaveFocusedXYE")
     @patch(file_path + ".SaveGSS")
     @patch(file_path + ".SaveNexus")
-    def test_last_path_updates_with_no_RB_number(self, nexus, gss, xye):
+    @patch(file_path + ".AddSampleLog")
+    def test_last_path_updates_with_no_RB_number(self, addlog, nexus, gss, xye):
         mocked_workspace = "mocked-workspace"
-        output_file = path.join(path_handling.get_output_path(), "Focus",
-                                "ENGINX_123_North_TOF.nxs")
+        output_file = path.join(output_settings.get_output_path(), "Focus",
+                                "ENGINX_123_456_North_TOF.nxs")
 
-        self.model._last_path_ws = 'ENGINX_123_North_TOF.nxs'
-
-        self.model._save_output("ENGINX", "Path/To/ENGINX000123.whatever", "North",
+        self.model._save_output("ENGINX", "123", "456", "North",
                                 mocked_workspace, None)
 
         self.assertEqual(self.model._last_focused_files[0], output_file)
@@ -204,15 +204,14 @@ class FocusModelTest(unittest.TestCase):
     @patch(file_path + ".SaveFocusedXYE")
     @patch(file_path + ".SaveGSS")
     @patch(file_path + ".SaveNexus")
-    def test_last_path_updates_with_RB_number(self, nexus, gss, xye):
+    @patch(file_path + ".AddSampleLog")
+    def test_last_path_updates_with_RB_number(self, addlog, nexus, gss, xye):
         mocked_workspace = "mocked-workspace"
         rb_num = '2'
-        output_file = path.join(path_handling.get_output_path(), "User", rb_num, "Focus",
-                                "ENGINX_123_North_TOF.nxs")
+        output_file = path.join(output_settings.get_output_path(), "User", rb_num, "Focus",
+                                "ENGINX_123_456_North_TOF.nxs")
 
-        self.model._last_path_ws = 'ENGINX_123_North_TOF.nxs'
-
-        self.model._save_output("ENGINX", "Path/To/ENGINX000123.whatever", "North",
+        self.model._save_output("ENGINX", "123", "456", "North",
                                 mocked_workspace, rb_num)
 
         self.assertEqual(self.model._last_focused_files[0], output_file)

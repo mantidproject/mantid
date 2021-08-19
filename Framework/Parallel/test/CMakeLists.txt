@@ -9,13 +9,12 @@ if(CXXTEST_FOUND)
   set(TESTHELPER_SRCS ../../TestHelpers/src/ParallelRunner.cpp)
 
   cxxtest_add_test(ParallelTest ${TEST_FILES} ${GMOCK_TEST_FILES})
-  target_include_directories(ParallelTest SYSTEM PRIVATE ${HDF5_INCLUDE_DIRS})
+
   target_link_libraries(ParallelTest
-                        LINK_PRIVATE
-                        ${MANTIDLIBS}
-                        Parallel
-                        gmock
-                        ${HDF5_LIBRARIES})
+                        PRIVATE
+                        Mantid::Parallel
+                        Mantid::Types
+                        gmock)
 
   add_dependencies(FrameworkTests ParallelTest)
   # Add to the 'FrameworkTests' group in VS

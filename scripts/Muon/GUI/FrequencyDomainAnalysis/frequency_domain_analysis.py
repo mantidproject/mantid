@@ -28,6 +28,7 @@ from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget import GroupingTabW
 from Muon.GUI.Common.help_widget.help_widget_presenter import HelpWidget
 from Muon.GUI.Common.home_tab.home_tab_widget import HomeTabWidget
 from Muon.GUI.Common.muon_load_data import MuonLoadData
+from Muon.GUI.Common.seq_fitting_tab_widget.seq_fitting_tab_widget import SeqFittingTabWidget
 from Muon.GUI.FrequencyDomainAnalysis.Transform.transform_widget import TransformWidget
 from Muon.GUI.FrequencyDomainAnalysis.FFT.fft_widget import FFTWidget
 from Muon.GUI.FrequencyDomainAnalysis.MaxEnt.maxent_widget import MaxEntWidget
@@ -101,7 +102,6 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
             frequency_context=self.frequency_context)
 
         # create the dockable widget
-        self.fitting_tab = FittingTabWidget(self.context, self)
         self.plot_widget = FrequencyAnalysisPlotWidget(self.context, parent=self)
 
         self.dockable_plot_widget_window = PlottingDockWidget(parent=self,
@@ -122,13 +122,10 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.corrections_tab = CorrectionsTabWidget(self.context, self)
         self.home_tab = HomeTabWidget(self.context, self)
         self.phase_tab = PhaseTabWidget(self.context, self)
-        self.transform = TransformWidget(
-            self.context,
-            FFTWidget,
-            MaxEntWidget,
-            parent=self)
-        self.results_tab = ResultsTabWidget(
-            self.context.fitting_context, self.context, self)
+        self.transform = TransformWidget(self.context, FFTWidget, MaxEntWidget, parent=self)
+        self.fitting_tab = FittingTabWidget(self.context, self)
+        self.seq_fitting_tab = SeqFittingTabWidget(self.context, self.fitting_tab.fitting_tab_model, self)
+        self.results_tab = ResultsTabWidget(self.context.fitting_context, self.context, self)
 
         self.setup_tabs()
         self.help_widget = HelpWidget(self.context.window_title)
@@ -175,7 +172,9 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.setup_phase_table_changed_notifier()
         self.setup_fitting_notifier()
 
-        self.setup_on_recalculation_finished_notifier()
+        self.setup_counts_calculation_finished_notifier()
+
+        self.setup_asymmetry_pair_and_diff_calculations_finished_notifier()
 
         self.transform.set_up_calculation_observers(
             self.fitting_tab.fitting_tab_view.enable_tab_observer,
@@ -198,6 +197,7 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.tabs.addTabWithOrder(self.phase_tab.phase_table_view, 'Phase Table')
         self.tabs.addTabWithOrder(self.transform.widget, 'Transform')
         self.tabs.addTabWithOrder(self.fitting_tab.fitting_tab_view, 'Fitting')
+        self.tabs.addTabWithOrder(self.seq_fitting_tab.seq_fitting_tab_view, 'Sequential Fitting')
         self.tabs.addTabWithOrder(self.results_tab.results_tab_view, 'Results')
         self.transform_finished_observer = GenericObserverWithArgPassing(self.handle_transform_performed)
         self.tabs.set_slot_for_tab_changed(self.handle_tab_changed)
@@ -206,9 +206,9 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
 
     def handle_tab_changed(self):
         index = self.tabs.currentIndex()
-        if TAB_ORDER[index] in ["Home", "Grouping", "Phase Table"]:  # Plot all the selected data
+        if TAB_ORDER[index] in ["Home", "Grouping", "Corrections", "Phase Table"]:  # Plot all the selected data
             plot_mode = self.plot_widget.data_index
-        elif TAB_ORDER[index] in ["Fitting", "Transform"]:  # Plot the displayed workspace
+        elif TAB_ORDER[index] in ["Fitting", "Sequential Fitting", "Transform"]:  # Plot the displayed workspace
             plot_mode = self.plot_widget.frequency_index
         else:
             return
@@ -218,6 +218,11 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
     def handle_transform_performed(self, new_data_workspace_name):
         self.fitting_tab.fitting_tab_presenter.handle_new_data_loaded()
         self.fitting_tab.fitting_tab_presenter.set_selected_dataset(new_data_workspace_name)
+        self.seq_fitting_tab.seq_fitting_tab_presenter.handle_selected_workspaces_changed()
+
+    def set_tab_warning(self, tab_name: str, message: str):
+        """Sets a warning message as the tooltip of the provided tab."""
+        self.tabs.set_tab_warning(TAB_ORDER.index(tab_name), message)
 
     def setup_disable_notifier(self):
 
@@ -230,6 +235,8 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.disable_notifier.add_subscriber(self.corrections_tab.corrections_tab_view.disable_tab_observer)
 
         self.disable_notifier.add_subscriber(self.fitting_tab.fitting_tab_view.disable_tab_observer)
+
+        self.disable_notifier.add_subscriber(self.seq_fitting_tab.seq_fitting_tab_presenter.disable_tab_observer)
 
         self.disable_notifier.add_subscriber(self.phase_tab.phase_table_presenter.disable_tab_observer)
 
@@ -246,6 +253,8 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.enable_notifier.add_subscriber(self.corrections_tab.corrections_tab_view.enable_tab_observer)
 
         self.enable_notifier.add_subscriber(self.fitting_tab.fitting_tab_view.enable_tab_observer)
+
+        self.enable_notifier.add_subscriber(self.seq_fitting_tab.seq_fitting_tab_presenter.enable_tab_observer)
 
         self.enable_notifier.add_subscriber(self.phase_tab.phase_table_presenter.enable_tab_observer)
 
@@ -266,9 +275,6 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
             self.corrections_tab.corrections_tab_presenter.load_observer)
 
         self.load_widget.load_widget.loadNotifier.add_subscriber(
-            self.transform.LoadObserver)
-
-        self.load_widget.load_widget.loadNotifier.add_subscriber(
             self.phase_tab.phase_table_presenter.run_change_observer)
 
         self.load_widget.load_widget.loadNotifier.add_subscriber(
@@ -276,6 +282,9 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
 
         self.load_widget.load_widget.loadNotifier.add_subscriber(
             self.plot_widget.raw_mode.new_data_observer)
+
+        self.load_widget.load_widget.loadNotifier.add_subscriber(
+            self.seq_fitting_tab.seq_fitting_tab_presenter.disable_tab_observer)
 
     def setup_gui_variable_observers(self):
         self.context.gui_context.gui_variables_notifier.add_subscriber(
@@ -301,7 +310,22 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
             [self.transform.GroupPairObserver,
              self.plot_widget.data_mode.added_group_or_pair_observer])
 
+        self.fitting_tab.fitting_tab_presenter.fit_function_changed_notifier.add_subscriber(
+            self.seq_fitting_tab.seq_fitting_tab_presenter.fit_function_updated_observer)
+
+        self.fitting_tab.fitting_tab_presenter.fit_parameter_changed_notifier.add_subscriber(
+            self.seq_fitting_tab.seq_fitting_tab_presenter.fit_parameter_updated_observer)
+
+        self.seq_fitting_tab.seq_fitting_tab_presenter.fit_parameter_changed_notifier.add_subscriber(
+            self.fitting_tab.fitting_tab_presenter.fit_parameter_updated_observer)
+
+        self.seq_fitting_tab.seq_fitting_tab_presenter.sequential_fit_finished_notifier.add_subscriber(
+            self.fitting_tab.fitting_tab_presenter.sequential_fit_finished_observer)
+
         self.fitting_tab.fitting_tab_presenter.selected_fit_results_changed.add_subscriber(
+            self.plot_widget.fit_mode.plot_selected_fit_observer)
+
+        self.seq_fitting_tab.seq_fitting_tab_presenter.selected_sequential_fit_notifier.add_subscriber(
             self.plot_widget.fit_mode.plot_selected_fit_observer)
 
         self.phase_tab.phase_table_presenter.selected_phasequad_changed_notifier.add_subscriber(
@@ -309,6 +333,9 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
 
         self.phase_tab.phase_table_presenter.selected_phasequad_changed_notifier.add_subscriber(
             self.transform.GroupPairObserver)
+
+        self.phase_tab.phase_table_presenter.selected_phasequad_changed_notifier.add_subscriber(
+            self.seq_fitting_tab.seq_fitting_tab_presenter.selected_workspaces_observer)
 
     def setup_grouping_changed_observers(self):
         self.grouping_tab_widget.group_tab_presenter.groupingNotifier.add_subscriber(
@@ -392,13 +419,21 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.load_widget.load_widget.load_run_widget.disable_notifier.add_subscriber(
             self.transform.disable_observer)
 
-    def setup_on_recalculation_finished_notifier(self):
+    def setup_counts_calculation_finished_notifier(self):
+        self.grouping_tab_widget.group_tab_presenter.counts_calculation_finished_notifier.add_subscriber(
+            self.corrections_tab.corrections_tab_presenter.pre_process_and_counts_calculated_observer)
+
+    def setup_asymmetry_pair_and_diff_calculations_finished_notifier(self):
         for observer in self.plot_widget.data_changed_observers:
-            self.grouping_tab_widget.group_tab_presenter.calculation_finished_notifier.add_subscriber(observer)
+            self.corrections_tab.corrections_tab_presenter.asymmetry_pair_and_diff_calculations_finished_notifier.\
+                add_subscriber(observer)
             self.phase_tab.phase_table_presenter.calculation_finished_notifier.add_subscriber(observer)
 
-        self.grouping_tab_widget.group_tab_presenter.calculation_finished_notifier.add_subscriber(
-            self.corrections_tab.corrections_tab_presenter.pre_process_and_grouping_complete_observer)
+        self.corrections_tab.corrections_tab_presenter.asymmetry_pair_and_diff_calculations_finished_notifier.add_subscriber(
+            self.transform.load_observer)
+
+        self.corrections_tab.corrections_tab_presenter.asymmetry_pair_and_diff_calculations_finished_notifier.add_subscriber(
+            self.seq_fitting_tab.seq_fitting_tab_presenter.selected_workspaces_observer)
 
     def setup_phase_quad_changed_notifier(self):
         self.phase_tab.phase_table_presenter.phasequad_calculation_complete_notifier.add_subscriber(
@@ -407,6 +442,7 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
     def setup_phase_table_changed_notifier(self):
         self.phase_tab.phase_table_presenter.phase_table_calculation_complete_notifier.add_subscriber(
             self.transform._maxent._presenter.phase_table_observer)
+        self.transform._maxent._presenter.new_phase_table.add_subscriber(self.phase_tab.phase_table_presenter.phase_table_observer)
 
     def setup_fitting_notifier(self):
         """Connect fitting and results tabs to inform of new fits"""

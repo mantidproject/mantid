@@ -23,6 +23,7 @@ New and Improved
 - Added tooltips to all the widgets in the Slice Viewer. Please contact the developers if any are missing.
 - Script editor tab completion and call tip support for Numpy 1.21
 - The visibility of a component parameter in the Pick tab of the InstrumentViewer is now steered by the 'visible' atrribute of a parameter in IPF
+- Plot legends can be shown or hidden from the plot context menu.
 
 Bugfixes
 --------
@@ -37,5 +38,9 @@ Bugfixes
 - Added missing icon for the uninstaller in Windows "Apps & features" list.
 - Fixed a bug where output workspaces of different types would interfere with successive calls to binary operations, such as multiply.
 - Fixed JSON serialization issue of MantidAxType by explicitly extracting its value
+- Fixed a bug in the Sliceviewer when transposing MDE workspaces multiple times would cause the data to become all zeros.
+- Fixed a bug in colorfill plots which lead to the loss of a spectrum from the resulting image.
+- Fixed a bug where removing the plot guess line in the fit browser could lead to an exception being thrown.
+- Fixed a bug where the workspace index spinbox in the fit browser wouldn't update when the user added or removed curves from the figure.
 
 :ref:`Release 6.2.0 <v6.2.0>`

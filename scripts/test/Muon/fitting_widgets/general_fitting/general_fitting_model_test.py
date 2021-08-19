@@ -488,6 +488,60 @@ class GeneralFittingModelTest(unittest.TestCase):
 
         self.assertEqual(str(self.model.simultaneous_fit_function), "name=FlatBackground,A0=5")
 
+    """
+    Tests for functions used by the Sequential fitting tab.
+    """
+
+    def test_that_get_runs_groups_and_pairs_for_fits_will_attempt_to_get_it_by_runs_when_in_simultaneous_fitting_mode(self):
+        self.model._get_runs_groups_and_pairs_for_simultaneous_fit_by_runs = mock.Mock(return_value=(["62260"], ["fwd;bwd;long"]))
+        self.model.simultaneous_fitting_mode = True
+        self.model.simultaneous_fit_by = "Run"
+
+        runs, groups_and_pairs = self.model.get_runs_groups_and_pairs_for_fits("All")
+        self.assertEqual(runs, ["62260"])
+        self.assertEqual(groups_and_pairs, ["fwd;bwd;long"])
+
+        self.model._get_runs_groups_and_pairs_for_simultaneous_fit_by_runs.assert_called_once_with("All")
+
+    def test_that_get_runs_groups_and_pairs_for_fits_will_attempt_to_get_it_by_groups_when_in_simultaneous_fitting_mode(self):
+        self.model._get_runs_groups_and_pairs_for_simultaneous_fit_by_groups_and_pairs = \
+            mock.Mock(return_value=(["62260;62261;62262"], ["fwd", "bwd"]))
+        self.model.simultaneous_fitting_mode = True
+        self.model.simultaneous_fit_by = "Group/Pair"
+
+        runs, groups_and_pairs = self.model.get_runs_groups_and_pairs_for_fits("All")
+        self.assertEqual(runs, ["62260;62261;62262"])
+        self.assertEqual(groups_and_pairs, ["fwd", "bwd"])
+
+        self.model._get_runs_groups_and_pairs_for_simultaneous_fit_by_groups_and_pairs.assert_called_once_with("All")
+
+    def test_that_get_all_fit_functions_for_will_return_the_simultaneous_fit_function_when_in_simultaneous_mode(self):
+        self.model.dataset_names = self.dataset_names
+        self.model.simultaneous_fit_function = self.simultaneous_fit_function
+        self.model.simultaneous_fitting_mode = True
+
+        filtered_function_all = self.model.get_all_fit_functions_for("All")
+        self.assertEqual(self.model.get_fit_function_parameter_values(filtered_function_all[0]), ([0.0, 0.0], [0.0, 0.0]))
+
+        filtered_function_fwd = self.model.get_all_fit_functions_for("fwd")
+        self.assertEqual(self.model.get_fit_function_parameter_values(filtered_function_fwd[0]), ([0.0, 0.0], [0.0, 0.0]))
+
+    def test_that_get_fit_function_parameter_values_will_return_the_parameter_values_in_the_specified_function(self):
+        self.assertEqual(self.model.get_fit_function_parameter_values(self.simultaneous_fit_function)[0], [0.0, 0.0])
+
+    def test_that_update_ws_fit_function_parameters_will_update_the_parameters_when_in_simultaneous_mode(self):
+        self.model.dataset_names = self.dataset_names
+        self.model.simultaneous_fit_function = self.simultaneous_fit_function
+        self.model.simultaneous_fitting_mode = True
+
+        self.model.update_ws_fit_function_parameters(self.model.dataset_names[:1], [1.0, 0.0])
+        self.assertEqual(self.model.get_fit_function_parameter_values(self.model.simultaneous_fit_function),
+                         ([1.0, 0.0], [0.0, 0.0]))
+
+        self.model.update_ws_fit_function_parameters(self.model.dataset_names[1:], [1.0, 2.0])
+        self.assertEqual(self.model.get_fit_function_parameter_values(self.model.simultaneous_fit_function),
+                         ([1.0, 2.0], [0.0, 0.0]))
+
 
 if __name__ == '__main__':
     unittest.main()

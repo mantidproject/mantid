@@ -168,7 +168,9 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
 
         self.setup_fitting_notifier()
 
-        self.setup_on_recalulation_finished_notifier()
+        self.setup_counts_calculation_finished_notifier()
+
+        self.setup_asymmetry_pair_and_diff_calculations_finished_notifier()
 
         self.setup_results_notifier()
 
@@ -200,7 +202,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
     def handle_tab_changed(self):
         index = self.tabs.currentIndex()
         # the plot mode indicies are from the order the plots are stored
-        if TAB_ORDER[index] in ["Home", "Grouping", "Phase Table"]:  # Plot all the selected data
+        if TAB_ORDER[index] in ["Home", "Grouping", "Corrections", "Phase Table"]:  # Plot all the selected data
             plot_mode = self.plot_widget.data_index
         # Plot the displayed workspace
         elif TAB_ORDER[index] in ["Fitting", "Sequential Fitting"]:
@@ -210,6 +212,10 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         else:
             return
         self.plot_widget.set_plot_view(plot_mode)
+
+    def set_tab_warning(self, tab_name: str, message: str):
+        """Sets a warning message as the tooltip of the provided tab."""
+        self.tabs.set_tab_warning(TAB_ORDER.index(tab_name), message)
 
     def setup_disable_notifier(self):
 
@@ -441,18 +447,20 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.load_widget.load_widget.load_run_widget.disable_notifier.add_subscriber(
             self.fitting_tab.fitting_tab_view.disable_tab_observer)
 
-    def setup_on_recalulation_finished_notifier(self):
-        self.grouping_tab_widget.group_tab_presenter.calculation_finished_notifier.add_subscriber(
-            self.corrections_tab.corrections_tab_presenter.pre_process_and_grouping_complete_observer)
+    def setup_counts_calculation_finished_notifier(self):
+        self.grouping_tab_widget.group_tab_presenter.counts_calculation_finished_notifier.add_subscriber(
+            self.corrections_tab.corrections_tab_presenter.pre_process_and_counts_calculated_observer)
 
-        self.grouping_tab_widget.group_tab_presenter.calculation_finished_notifier.add_subscriber(
-            self.fitting_tab.fitting_tab_presenter.input_workspace_observer)
+    def setup_asymmetry_pair_and_diff_calculations_finished_notifier(self):
+        self.corrections_tab.corrections_tab_presenter.asymmetry_pair_and_diff_calculations_finished_notifier.\
+            add_subscriber(self.fitting_tab.fitting_tab_presenter.input_workspace_observer)
 
-        self.grouping_tab_widget.group_tab_presenter.calculation_finished_notifier.add_subscriber(
-            self.seq_fitting_tab.seq_fitting_tab_presenter.selected_workspaces_observer)
+        self.corrections_tab.corrections_tab_presenter.asymmetry_pair_and_diff_calculations_finished_notifier.\
+            add_subscriber(self.seq_fitting_tab.seq_fitting_tab_presenter.selected_workspaces_observer)
 
         for observer in self.plot_widget.data_changed_observers:
-            self.grouping_tab_widget.group_tab_presenter.calculation_finished_notifier.add_subscriber(observer)
+            self.corrections_tab.corrections_tab_presenter.asymmetry_pair_and_diff_calculations_finished_notifier.\
+                add_subscriber(observer)
             self.phase_tab.phase_table_presenter.calculation_finished_notifier.add_subscriber(observer)
 
     def setup_phase_quad_changed_notifier(self):

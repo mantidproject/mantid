@@ -10,22 +10,19 @@ class CalibrationInfo(object):
     """
     Keeps track of the parameters that went into a calibration created by the engineering diffraction GUI.
     """
-    def __init__(self, vanadium_path=None, sample_path=None, instrument=None, grouping_ws=None, roi_text: str = ""):
-        self.vanadium_path = vanadium_path
+    def __init__(self, sample_path=None, instrument=None, grouping_ws=None, roi_text: str = ""):
         self.sample_path = sample_path
         self.instrument = instrument
         self.grouping_ws_name = grouping_ws
         self.roi_text = roi_text
         self.bank = None
 
-    def set_calibration(self, vanadium_path, sample_path, instrument):
+    def set_calibration(self, sample_path, instrument):
         """
-        Set the values of the calibration. requires a complete set of calibration info to be supplied.
-        :param vanadium_path: Path to the vanadium data file used in the calibration.
+        Set the values of the calibration
         :param sample_path: Path to the sample data file used.
         :param instrument: String defining the instrument the data came from.
         """
-        self.vanadium_path = vanadium_path
         self.sample_path = sample_path
         self.instrument = instrument
 
@@ -100,9 +97,6 @@ class CalibrationInfo(object):
     def get_roi_text(self):
         return self.roi_text
 
-    def get_vanadium(self):
-        return self.vanadium_path
-
     def get_sample(self):
         return self.sample_path
 
@@ -110,9 +104,8 @@ class CalibrationInfo(object):
         return self.instrument
 
     def clear(self):
-        self.vanadium_path = None
         self.sample_path = None
         self.instrument = None
 
     def is_valid(self):
-        return True if self.vanadium_path and self.sample_path and self.instrument else False
+        return True if self.sample_path and self.instrument else False

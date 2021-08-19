@@ -7,7 +7,7 @@
 import unittest
 
 from Muon.GUI.FrequencyDomainAnalysis.frequency_context import FrequencyContext
-
+from unittest import mock
 from mantid.simpleapi import CreateWorkspace
 
 FFT_NAME_RE_2 = "FFT; Re MUSR62260; Group; fwd; Asymmmetry; FD_Re"
@@ -115,6 +115,59 @@ class MuonFreqContextTest(unittest.TestCase):
                                                             frequency_type="All")
         self.assertCountEqual(output, [FFT_NAME_COMPLEX_RE, FFT_NAME_COMPLEX_IM, FFT_NAME_COMPLEX_MOD, FFT_NAME_RE_2,
                                        FFT_NAME_RE_MOD, "MUSR62260_raw_data FD; MaxEnt"])
+
+    def mock_table(self,name):
+        table = mock.Mock()
+        type(table).workspace_name = mock.PropertyMock(return_value=name)
+        return table
+
+    def test_add_group_phase_table(self):
+        groups_2 = self.mock_table("MUSR phase table 2 groups")
+        two_groups = self.mock_table("MUSR phases table two groups")
+        three_groups = self.mock_table("MUSR phases table 3 groups")
+
+        self.assertEqual(self.context._group_phase_tables, {})
+
+        self.context.add_group_phase_table(groups_2, 2)
+        self.context.add_group_phase_table(two_groups, 2)
+        self.context.add_group_phase_table(three_groups, 3)
+
+        self.assertEqual(list(self.context._group_phase_tables.keys()), [2,3])
+        self.assertEqual(self.context._group_phase_tables[2], [groups_2, two_groups])
+        self.assertEqual(self.context._group_phase_tables[3], [three_groups])
+
+    def test_add_group_phase_table_same_table_twice(self):
+        groups_2 = self.mock_table("MUSR phase table 2 groups")
+        two_groups = self.mock_table("MUSR phases table two groups")
+        three_groups = self.mock_table("MUSR phases table 3 groups")
+
+        self.assertEqual(self.context._group_phase_tables, {})
+
+        self.context.add_group_phase_table(groups_2, 2)
+        self.context.add_group_phase_table(two_groups, 2)
+        self.context.add_group_phase_table(three_groups, 3)
+        self.context.add_group_phase_table(three_groups, 3)
+
+        self.assertEqual(list(self.context._group_phase_tables.keys()), [2,3])
+        self.assertEqual(self.context._group_phase_tables[2], [groups_2, two_groups])
+        self.assertEqual(self.context._group_phase_tables[3], [three_groups])
+
+    def test_get_group_phase_table(self):
+        groups_2 = self.mock_table("MUSR phase table 2 groups")
+        two_groups = self.mock_table("MUSR phases table two groups")
+        different_inst = self.mock_table("EMU phases table two groups")
+        three_groups = self.mock_table("MUSR phases table 3 groups")
+
+        self.assertEqual(self.context._group_phase_tables, {})
+
+        self.context.add_group_phase_table(groups_2, 2)
+        self.context.add_group_phase_table(two_groups, 2)
+        self.context.add_group_phase_table(different_inst, 2)
+        self.context.add_group_phase_table(three_groups, 3)
+
+        self.assertEqual(self.context.get_group_phase_tables(2,"MUSR"),[groups_2.workspace_name, two_groups.workspace_name])
+        self.assertEqual(self.context.get_group_phase_tables(3,"MUSR"),[three_groups.workspace_name])
+        self.assertEqual(self.context.get_group_phase_tables(2,"EMU"),[different_inst.workspace_name])
 
 
 if __name__ == '__main__':

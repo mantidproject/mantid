@@ -3,18 +3,13 @@ if(CXXTEST_FOUND)
                       ${CXXTEST_INCLUDE_DIR}
 )
 
-  include_directories(../../ScriptRepository/inc)
   include_directories(../)
 
   cxxtest_add_test(ScriptRepositoryTest ${TEST_FILES} ${GMOCK_TEST_FILES})
   target_link_libraries(ScriptRepositoryTest
-                        LINK_PRIVATE
-                        API
-                        Types
-                        Kernel
-                        ScriptRepository
-                        ${Boost_LIBRARIES}
-                        ${POCO_LIBRARIES}
+                        PRIVATE
+                        Mantid::Types
+                        Mantid::ScriptRepository
                         gmock
 )
 

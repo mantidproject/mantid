@@ -87,10 +87,11 @@ void QtMainWindowView::initLayout() {
   auto makeSaveSettingsPresenter = SavePresenterFactory();
   auto makeExperimentPresenter = ExperimentPresenterFactory(thetaTolerance);
   auto makeInstrumentPresenter = InstrumentPresenterFactory();
+  auto makePreviewPresenter = PreviewPresenterFactory();
 
   auto makeBatchPresenter = std::make_unique<BatchPresenterFactory>(
       std::move(makeRunsPresenter), std::move(makeEventPresenter), std::move(makeExperimentPresenter),
-      std::move(makeInstrumentPresenter), std::move(makeSaveSettingsPresenter));
+      std::move(makeInstrumentPresenter), std::move(makePreviewPresenter), std::move(makeSaveSettingsPresenter));
 
   // Create the presenter
   auto slitCalculator = std::make_unique<SlitCalculator>(this);
