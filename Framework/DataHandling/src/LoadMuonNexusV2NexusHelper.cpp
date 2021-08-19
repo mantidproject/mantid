@@ -15,7 +15,7 @@
 namespace {
 template <typename type> std::string convertVectorToString(const std::vector<type> &vector) {
   std::string stringOfVector = "";
-  for (auto value : vector) {
+  for (const auto &value : vector) {
     stringOfVector += std::to_string(value) + ";";
   }
   return stringOfVector.substr(0, stringOfVector.size() - 1);
