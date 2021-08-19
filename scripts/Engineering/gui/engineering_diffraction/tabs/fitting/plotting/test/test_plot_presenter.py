@@ -53,11 +53,11 @@ class FittingPlotPresenterTest(unittest.TestCase):
 
     @mock.patch(dir_path + '.Fit')
     def test_do_sequential_fit(self, mock_fit):
-        self.fit_all_helper(self, mock_fit, do_sequential=True)
+        self.fit_all_helper(mock_fit, do_sequential=True)
 
     @mock.patch(dir_path + '.Fit')
     def test_do_serial_fit(self, mock_fit):
-        self.fit_all_helper(self, mock_fit, do_sequential=False)
+        self.fit_all_helper(mock_fit, do_sequential=False)
 
     @mock.patch(dir_path + '.Fit')
     def test_do_sequential_fit_does_not_use_failed_fit_as_input(self, mock_fit):
@@ -93,7 +93,7 @@ class FittingPlotPresenterTest(unittest.TestCase):
         mock_notifier = mock.MagicMock()
         self.presenter.fit_all_done_notifier = mock_notifier
 
-        self.presenter.do_fit_all(ws_list, do_sequential=False)
+        self.presenter.do_fit_all(ws_list, do_sequential=do_sequential)
 
         self.assertEqual(mock_fit.call_count, len(ws_list))
         fitprop_list = []
