@@ -121,7 +121,11 @@ class DrillSampleGroup:
             sample (DrillSample): sample to be set as master of the group
         """
         if sample in self._samples:
+            previousMaster = self._master
             self._master = sample
+            if previousMaster is not None:
+                previousMaster.groupChanged.emit()
+            sample.groupChanged.emit()
 
     def unsetMaster(self):
         """
