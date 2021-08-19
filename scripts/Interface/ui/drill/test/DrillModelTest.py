@@ -140,108 +140,93 @@ class DrillModelTest(unittest.TestCase):
         params = self.model.getParameters()
         self.assertEqual(params, ["p1", "p2"])
 
-    def test_getSamplesFromGroup(self):
+    @mock.patch("Interface.ui.drill.model.DrillModel.DrillSampleGroup")
+    def test_groupSamples(self, mGroup):
         s0 = mock.Mock()
-        s0.getGroupName.return_value = "A"
+        s0.getGroup.return_value = None
         s1 = mock.Mock()
-        s1.getGroupName.return_value = "A"
+        s1.getGroup.return_value = None
         s2 = mock.Mock()
-        s2.getGroupName.return_value = "B"
-        self.model._samples = [s0, s1, s2]
-        samples = self.model._getSamplesFromGroup("C")
-        self.assertEqual(samples, [])
-        samples = self.model._getSamplesFromGroup("A")
-        self.assertEqual(samples, [s0, s1])
-
-    def test_groupSamples(self):
-        s0 = mock.Mock()
-        s0.getGroupName.return_value = None
-        s1 = mock.Mock()
-        s1.getGroupName.return_value = None
-        s2 = mock.Mock()
-        s2.getGroupName.return_value = None
+        s2.getGroup.return_value = None
         s3 = mock.Mock()
-        s3.getGroupName.return_value = None
+        s3.getGroup.return_value = None
         self.model._samples = [s0, s1, s2, s3]
         self.model.groupSamples([0, 1, 3])
-        s0.setGroup.assert_called_once_with("A", 0)
-        s1.setGroup.assert_called_once_with("A", 1)
-        s3.setGroup.assert_called_once_with("A", 2)
+        mGroup.return_value.setName.assert_called_once_with("A")
+        calls = [mock.call(s0), mock.call(s1), mock.call(s3)]
+        mGroup.return_value.addSample.assert_has_calls(calls)
 
     def test_ungroupSamples(self):
+        g1 = mock.Mock()
+        g1.isEmpty.return_value = False
+        g2 = mock.Mock()
+        g2.isEmpty.return_value = False
         s0 = mock.Mock()
-        s0.getGroupName.return_value = "A"
+        s0.getGroup.return_value = g1
         s1 = mock.Mock()
-        s1.getGroupName.return_value = "A"
+        s1.getGroup.return_value = g1
         s2 = mock.Mock()
-        s2.getGroupName.return_value = "B"
+        s2.getGroup.return_value = g2
         s3 = mock.Mock()
-        s3.getGroupName.return_value = None
+        s3.getGroup.return_value = None
         self.model._samples = [s0, s1, s2, s3]
-        self.model._getSamplesFromGroup = mock.Mock()
-        self.model._getSamplesFromGroup.return_value = [s1]
-        self.model.groupSamples = mock.Mock()
+        self.model._sampleGroups = [g1, g2]
         self.model.ungroupSamples([0])
-        self.model._getSamplesFromGroup.assert_called_once_with("A")
-        s0.setGroup.assert_called_once_with(None)
-        s1.setGroup.assert_called_once()
+        g1.delSample.assert_called_once_with(s0)
+        g1.reset_mock()
+        self.model.ungroupSamples([1, 2])
+        g1.delSample.assert_called_once_with(s1)
+        g2.delSample.assert_called_once_with(s2)
 
     def test_addToGroup(self):
+        g1 = mock.Mock()
+        g1.getName.return_value = "A"
+        g2 = mock.Mock()
+        g2.getName.return_value = "B"
         s0 = mock.Mock()
-        s0.getIndex.return_value = 0
-        s0.getGroupName.return_value = "A"
+        s0.getGroup.return_value = g1
         s1 = mock.Mock()
-        s1.getIndex.return_value = 1
-        s1.getGroupName.return_value = "A"
+        s1.getGroup.return_value = g1
         s2 = mock.Mock()
-        s2.getIndex.return_value = 2
-        s2.getGroupName.return_value = "B"
+        s2.getGroup.return_value = g2
         self.model._samples = [s0, s1, s2]
-        self.model.groupSamples = mock.Mock()
-        self.model.ungroupSamples = mock.Mock()
+        self.model._sampleGroups = [g1, g2]
         self.model.addToGroup([2], "A")
-        self.model.ungroupSamples.assert_called_once_with([2])
-        self.model.groupSamples.assert_called_once_with([0, 1, 2], "A")
+        g2.delSample.assert_called_once_with(s2)
+        g1.addSample.assert_called_once_with(s2)
 
     def test_setGroupMaster(self):
+        g1 = mock.Mock()
         s0 = mock.Mock()
-        s0.getGroupName.return_value = "A"
-        s0.isMaster.return_value = False
+        s0.getGroup.return_value = g1
         s1 = mock.Mock()
-        s1.getGroupName.return_value = "A"
-        s1.isMaster.retrun_value = True
-        s2 = mock.Mock()
-        s2.getGroupName.return_value = None
-        s2.isMaster.retrun_value = False
+        s1.getGroup.return_value = g1
         self.model._samples = [s0, s1]
-        self.model._getSamplesFromGroup = mock.Mock()
-        self.model._getSamplesFromGroup.return_value = [s0, s1]
         self.model.setGroupMaster(0, True)
-        s0.setMaster.assert_called_once_with(True)
-        s1.setMaster.assert_called_once_with(False)
+        g1.setMaster.assert_called_once_with(s0)
+        g1.reset_mock()
         self.model.setGroupMaster(1, True)
-        s2.setMaster.assert_not_called()
+        g1.setMaster.assert_called_once_with(s1)
+        g1.reset_mock()
+        self.model.setGroupMaster(1, False)
+        g1.unsetMaster.assert_called_once()
 
     def test_getProcessingParameters(self):
+        g1 = mock.Mock()
         s1 = mock.Mock()
         s1.getParameterValues.return_value = {"p1": "v1", "p2": "v2"}
-        s1.getGroupName.retrun_value = "A"
-        s1.isMaster.return_value = True
+        s1.getGroup.return_value = g1
         s2 = mock.Mock()
         s2.getParameterValues.return_value = {}
-        s2.getGroupName.retrun_value = "A"
-        s2.isMaster.return_value = False
+        s2.getGroup.return_value = g1
         s3 = mock.Mock()
         s3.getParameterValues.return_value = {"p2": "v2'"}
-        s3.getGroupName.retrun_value = "A"
-        s3.isMaster.return_value = False
+        s3.getGroup.return_value = g1
         s4 = mock.Mock()
         s4.getParameterValues.return_value = {"p2": "DEFAULT"}
-        s4.getGroupName.retrun_value = "A"
-        s4.isMaster.return_value = False
+        s4.getGroup.return_value = g1
+        g1.getMaster.return_value = s1
         self.model._samples = [s1, s2, s3, s4]
-        self.model._getSamplesFromGroup = mock.Mock()
-        self.model._getSamplesFromGroup.return_value = [s1, s2, s3, s4]
         params = {"p2": "value2", "p3": "value3"}
         p2 = mock.Mock()
         p2.getName.return_value = "p2"
