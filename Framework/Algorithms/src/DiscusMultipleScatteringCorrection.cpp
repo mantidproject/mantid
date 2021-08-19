@@ -671,6 +671,7 @@ double DiscusMultipleScatteringCorrection::simulatePaths(const int nPaths, const
  * @param detPos The detector position xyz coordinates
  * @param specialSingleScatterCalc Boolean indicating whether special single
  * scatter calculation should be performed
+ * @param importanceSampling Boolean indicating whether to use importance sampling on Q values
  * @return A tuple containing a success/fail boolean, the calculated weight and
  * a sum of the QSS values across the n-1 multiple scatters
  */
