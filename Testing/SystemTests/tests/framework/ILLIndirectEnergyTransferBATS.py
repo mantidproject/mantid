@@ -26,7 +26,7 @@ class ILLIndirectEnergyTransferBATSTest(systemtesting.MantidSystemTest):
         config['default.instrument'] = 'IN16B'
         config.appendDataSearchSubDir('ILL/IN16B/')
 
-        self.tolerance = 1e-6
+        self.tolerance = 1e-3
         self.tolerance_rel_err = True
         # this fails the test every time a new instrument parameter is added
         # parameters file evolves quite often, so this is not checked
@@ -76,7 +76,7 @@ class ILLIndirectEnergyTransferEquatorialTest(systemtesting.MantidSystemTest):
         config['default.instrument'] = 'IN16B'
         config.appendDataSearchSubDir('ILL/IN16B/')
 
-        self.tolerance = 1e-6
+        self.tolerance = 1e-3
         self.tolerance_rel_err = True
         # this fails the test every time a new instrument parameter is added
         # parameters file evolves quite often, so this is not checked
