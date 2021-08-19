@@ -458,14 +458,8 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         '''Calculates all the transmissions'''
         all_outputs = []
         for l in range(self.lambda_rank):
-            outputs = dict()
             transmissions = self.process_all_transmissions_at_lambda(l)
-            if transmissions:
-                outputs['SampleTransmissions'] = transmissions[0]
-            if len(transmissions) > 1:
-                # if there is a second output, it must be container transmission
-                outputs['ContainerTransmission'] = transmissions[1]
-            all_outputs.append(outputs)
+            all_outputs.append(transmissions)
         return all_outputs
 
     def process_all_samples(self, transmissions):
@@ -496,11 +490,11 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         [tr_empty_beam_ws, tr_empty_beam_flux] = self.process_tr_empty_beam(l, tr_dark_current_ws)
         tr_empty_can_ws = self.process_empty_can_tr(l, tr_dark_current_ws, tr_empty_beam_ws, tr_empty_beam_flux)
         tr_sample_ws = self.process_sample_tr(l, tr_dark_current_ws, tr_empty_beam_ws, tr_empty_beam_flux)
-        results = []
+        results = dict()
         if tr_sample_ws:
-            results.append(tr_sample_ws)
+            results['SampleTransmission'] = tr_sample_ws
         if tr_empty_can_ws:
-            results.append(tr_empty_can_ws)
+            results['ContainerTransmission'] = tr_empty_can_ws
         return results
 
     def process_all_samples_at_distance(self, d, transmissions):
@@ -767,8 +761,31 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         SANSILLIntegration(**kwargs)
         return results
 
+    def generate_combined_sensitivity(self, samples):
+        real_space_ws_list = []
+        for ws_dict in samples:
+            if 'RealSpace' in ws_dict:
+                real_space_ws_list.append(ws_dict['RealSpace'])
+        if real_space_ws_list:
+            out_ws = self.getPropertyValue('OutputWorkspace')
+            tmp_group = '__combined_sens_grp_' + out_ws
+            comb_sens = out_ws + '_combined_sens'
+            GroupWorkspaces(InputWorkspaces=real_space_ws_list, OutputWorkspace=tmp_group)
+            CalculateEfficiency(InputWorkspace=tmp_group, MergeGroup=True, OutputWorkspace=comb_sens)
+            UnGroupWorkspace(tmp_group)
+            return comb_sens
+        else:
+            return ''
+
     def combine(self, samples):
-        pass
+        if len(samples)>1:
+            if self.getProperty('PerformStitching').value:
+                pass
+            if self.getProperty('SensitivityWithOffsets').value:
+                comb_sens = self.generate_combined_sensitivity(samples)
+                if comb_sens:
+                    samples.append({'CombinedSens':comb_sens})
+        return samples
 
     def package(self, samples):
         out_ws = self.getPropertyValue('OutputWorkspace')
