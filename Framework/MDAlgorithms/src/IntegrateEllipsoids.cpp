@@ -476,7 +476,7 @@ void IntegrateEllipsoids::exec() {
     // Any leftover satellite peaks in this list means these did not have a bragg peak
     if (satellitePeaks.size() > 0) {
       g_log.debug() << "Unable to find Bragg peaks for " << satellitePeaks.size()
-                    << " satellite peaks.. integrating these using the satellite background radii options.";
+                    << " satellite peaks.. integrating these using the satellite background radii options.\n";
     }
   }
 
@@ -587,17 +587,6 @@ void IntegrateEllipsoids::exec() {
         // update the sigma intensity based on the new background
         double sigInt = (*satPeak)->getSigmaIntensity();
         (*satPeak)->setSigmaIntensity(sqrt(sigInt * sigInt + cachedBraggBackground[it->first].second));
-
-        const PeakShapeEllipsoid braggPeakShape =
-            static_cast<const PeakShapeEllipsoid &>(peaks[it->first].getPeakShape());
-        const PeakShapeEllipsoid satellitePeakShape =
-            static_cast<const PeakShapeEllipsoid &>((*satPeak)->getPeakShape());
-
-        // update the satellite's shape background radii
-        Mantid::Geometry::PeakShape_const_sptr newShape = std::make_shared<const PeakShapeEllipsoid>(
-            satellitePeakShape.directions(), satellitePeakShape.abcRadii(), braggPeakShape.abcRadiiBackgroundInner(),
-            braggPeakShape.abcRadiiBackgroundOuter(), Mantid::Kernel::QLab, "IntegrateEllipsoids");
-        (*satPeak)->setPeakShape(newShape);
       }
     }
   }

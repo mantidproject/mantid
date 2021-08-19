@@ -599,11 +599,10 @@ public:
     TS_ASSERT_DELTA(satellitePeak.getIntensity(), 1812.889456, 1e-2);
     TS_ASSERT_DELTA(satellitePeak.getSigmaIntensity(), 83.3664, 1e-2);
 
-    // check that the background radii are the same in the peak shape
-    const PeakShapeEllipsoid braggShape = static_cast<const PeakShapeEllipsoid &>(braggPeak.getPeakShape());
+    // check that the background radii are the same as the peak radii
     const PeakShapeEllipsoid satelliteShape = static_cast<const PeakShapeEllipsoid &>(satellitePeak.getPeakShape());
-    TS_ASSERT_EQUALS(braggShape.abcRadiiBackgroundInner(), satelliteShape.abcRadiiBackgroundInner())
-    TS_ASSERT_EQUALS(braggShape.abcRadiiBackgroundOuter(), satelliteShape.abcRadiiBackgroundOuter())
+    TS_ASSERT_EQUALS(satelliteShape.abcRadiiBackgroundInner(), satelliteShape.abcRadii());
+    TS_ASSERT_EQUALS(satelliteShape.abcRadiiBackgroundOuter(), satelliteShape.abcRadii());
 
     AnalysisDataService::Instance().remove("peaks_integrated_shared");
     AnalysisDataService::Instance().remove(peaksWS->getName());
