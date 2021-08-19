@@ -90,8 +90,6 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
     rank = None # the rank of the reduction, i.e. the number of (detector distance, wavelength) configurations
     lambda_rank = None # how many wavelengths are we dealing with, i.e. how many transmissions need to be calculated
     n_samples = None # how many samples are being reduced
-    sample_transmissions = [] # list of sample transmission workspaces
-    container_transmissions = [] # list of container transmission workspace
 
     def category(self):
         return 'ILL\\SANS;ILL\\Auto'
@@ -263,6 +261,10 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
 
         #==================================STITCH OPTIONS=================================#
 
+        self.declareProperty(name='PerformStitching', defaultValue=True,
+                             doc='Wheter or not to perform stitching.')
+        self.setPropertyGroup('PerformStitching', 'Stitch Options')
+
         stitch_options = ['ManualScaleFactors', 'TieScaleFactors', 'ScaleFactorCalculation']
         self.copyProperties('Stitch', stitch_options)
         for opt in stitch_options:
@@ -408,13 +410,9 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
 
     def _reset(self):
         '''Resets the class member variables'''
-        self.instrument = None
         self.rank = None
         self.lambda_rank = None
         self.n_samples = None
-        self.properties = dict()
-        self.sample_transmissions = []
-        self.container_transmissions = []
 
     def _set_rank(self):
         '''Sets the actual rank of the reduction'''
@@ -450,14 +448,6 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         self._set_lambda_rank()
         self._set_n_samples() # must be after set_rank()
 
-    def _setup(self, ws):
-        '''Performs a full setup, which can be done only after having loaded the sample data'''
-        self._setup_light()
-        self.instrument = ws.getInstrument().getName()
-        unit = ws.getAxis(0).getUnit().unitID()
-        if unit == 'Wavelength':
-            raise RuntimeError('TOF is not yet supported in the new workflow, please use the old one.')
-
     def tr_index(self, d):
         '''Returns the index of the transmission wavelength based on the index of distance'''
         return 1 if d+1 in self.getProperty('DistancesAtWavelength2').value else 0
@@ -466,19 +456,37 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
 
     def process_all_transmissions(self):
         '''Calculates all the transmissions'''
+        all_outputs = []
         for l in range(self.lambda_rank):
-            self.process_all_transmissions_at_lambda(l)
+            outputs = dict()
+            transmissions = self.process_all_transmissions_at_lambda(l)
+            if transmissions:
+                outputs['SampleTransmissions'] = transmissions[0]
+            if len(transmissions) > 1:
+                # if there is a second output, it must be container transmission
+                outputs['ContainerTransmission'] = transmissions[1]
+            all_outputs.append(outputs)
+        return all_outputs
 
-    def process_all_samples(self):
+    def process_all_samples(self, transmissions):
         '''Reduces all the samples'''
-        samples = []
+        all_outputs = []
         for d in range(self.rank):
-            sample_ws = self.process_all_samples_at_distance(d)
-            samples.extend(sample_ws)
+            outputs = dict()
+            sample_ws = self.process_all_samples_at_distance(d, transmissions)
+            outputs['RealSpace'] = sample_ws[0]
+            if len(sample_ws) > 1:
+                # if there is a 2nd output, it must be sensitivity
+                outputs['Sensitivity'] = sample_ws[1]
             if self.getPropertyValue('OutputType') != 'None':
                 integrated_ws = self.integrate(d, sample_ws)
-                samples.extend(integrated_ws)
-        return samples
+                outputs['IQ'] = integrated_ws[0]
+                if len(integrated_ws) > 1:
+                    # if there is a second output, it must be either the panels or the wedges
+                    key = 'IQP' if self.getProperty('OutputPanels').value else 'IQW'
+                    outputs[key] = integrated_ws[1]
+            all_outputs.append(outputs)
+        return all_outputs
 
     def process_all_transmissions_at_lambda(self, l):
         '''
@@ -488,21 +496,23 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         [tr_empty_beam_ws, tr_empty_beam_flux] = self.process_tr_empty_beam(l, tr_dark_current_ws)
         tr_empty_can_ws = self.process_empty_can_tr(l, tr_dark_current_ws, tr_empty_beam_ws, tr_empty_beam_flux)
         tr_sample_ws = self.process_sample_tr(l, tr_dark_current_ws, tr_empty_beam_ws, tr_empty_beam_flux)
-        if tr_empty_can_ws:
-            self.container_transmissions.append(tr_empty_can_ws)
+        results = []
         if tr_sample_ws:
-            self.sample_transmissions.append(tr_sample_ws)
+            results.append(tr_sample_ws)
+        if tr_empty_can_ws:
+            results.append(tr_empty_can_ws)
+        return results
 
-    def process_all_samples_at_distance(self, d):
+    def process_all_samples_at_distance(self, d, transmissions):
         '''
         Reduces all the samples at a given distance
         '''
         dark_current_ws = self.process_dark_current(d)
         [empty_beam1_ws, empty_beam1_flux] = self.process_empty_beam(d, dark_current_ws)
         [empty_beam2_ws, empty_beam2_flux] = self.process_flux(d, dark_current_ws)
-        empty_can_ws = self.process_container(d, dark_current_ws, empty_beam1_ws)
+        empty_can_ws = self.process_container(d, dark_current_ws, empty_beam1_ws, transmissions)
         actual_flux_ws = empty_beam2_flux if empty_beam2_flux else empty_beam1_flux
-        return self.process_sample(d, dark_current_ws, empty_beam1_ws, empty_can_ws, actual_flux_ws)
+        return self.process_sample(d, dark_current_ws, empty_beam1_ws, empty_can_ws, actual_flux_ws, transmissions)
 
     #================================LOAD PROCESSED CALIBRANTS================================#
 
@@ -670,17 +680,20 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         else:
             return ['','']
 
-    def process_container(self, d, dark_current_ws, empty_beam_ws):
+    def process_container(self, d, dark_current_ws, empty_beam_ws, transmissions):
         runs = self.getPropertyValue('EmptyContainerRuns')
         if runs:
             empty_can = runs.split(',')[l]
             [process_empty_can, empty_can_ws] = needs_processing(empty_can, 'EmptyContainer')
             if process_empty_can:
+                can_tr_ws = ''
+                if transmissions and 'Container' in transmissions[self.tr_index(d)]:
+                    can_tr_ws = transmissions[self.tr_index(d)]['Container']
                 SANSILLReduction(Runs=empty_can,
                                  ProcessAs='EmptyContainer',
                                  DarkCurrentWorkspace=dark_current_ws,
                                  EmptyBeamWorkspace=empty_beam_ws,
-                                 TransmissionInputWorkspace=self.container_transmissions[self.tr_index(d)],
+                                 TransmissionInputWorkspace=can_tr_ws,
                                  TransmissionThetaDependent=self.getProperty('TransmissionThetaDependent').value,
                                  NormaliseBy=self.getProperty('NormaliseBy').value,
                                  OutputWorkspace=empty_can_ws)
@@ -688,14 +701,14 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         else:
             return ''
 
-    def process_sample(self, d, dark_current_ws, empty_beam_ws, empty_can_ws, flux_ws):
+    def process_sample(self, d, dark_current_ws, empty_beam_ws, empty_can_ws, flux_ws, transmissions):
         runs = self.getPropertyValue(f'SampleRunsD{d+1}')
         if runs:
             [edge_mask_ws, beam_stop_mask_ws] = self.load_masks(d)
             flat_field_ws = self.load_flat_field(d)
             solvent_ws = self.load_solvent(d)
             sens_ws = self.load_sensitivity(d)
-            sample_tr_ws = self.sample_transmissions[self.tr_index(d)] if self.sample_transmissions else ''
+            sample_tr_ws = transmissions[self.tr_index(d)]['Sample'] if transmissions else ''
             process = 'Sample'
             [_, sample_ws] = needs_processing(runs, 'Sample')
             sens_out = ''
@@ -754,18 +767,26 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         SANSILLIntegration(**kwargs)
         return results
 
-    def package(self, output):
-        out = self.getPropertyValue('OutputWorkspace')
-        output = list(filter(lambda x: x, output))
-        GroupWorkspaces(InputWorkspaces=output, OutputWorkspace=out)
-        self.setProperty('OutputWorkspace', out)
+    def combine(self, samples):
+        pass
+
+    def package(self, samples):
+        out_ws = self.getPropertyValue('OutputWorkspace')
+        outputs = []
+        for pack in samples:
+            for _,output in pack.items():
+                if output:
+                    outputs.append(output)
+        GroupWorkspaces(InputWorkspaces=outputs, OutputWorkspace=out_ws)
+        self.setProperty('OutputWorkspace', out_ws)
 
     def PyExec(self):
         '''Executes the algorithm'''
         self._setup_light()
-        self.process_all_transmissions()
-        outputs = self.process_all_samples()
-        self.package(outputs)
+        transmissions = self.process_all_transmissions()
+        samples = self.process_all_samples(transmissions)
+        samples = self.combine(samples)
+        self.package(samples)
 
 
 AlgorithmFactory.subscribe(SANSILLMultiProcess)
