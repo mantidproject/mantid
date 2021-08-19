@@ -24,7 +24,7 @@ def plot_at_index(index):
 class DuelQuickEditTest(unittest.TestCase):
 
     def setUp(self):
-        self.view = QuickEditView(None, None)
+        self.view = mock.Mock(spec=QuickEditView)
         self.context = PlottingContext()
         self.presenter = DuelQuickEditPresenter(self.view, self.context)
 
