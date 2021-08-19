@@ -49,6 +49,7 @@ All these tabs can be dragged away from the interface into their own window.
 * :ref:`Phase Table Tab <muon_phase_table_tab-ref>`
 * :ref:`Transform Tab <muon_transform_tab-ref>`
 * :ref:`Fitting Tab <muon_fitting_tab-ref>`
+* :ref:`Sequential Fitting Tab <muon_sequential_fitting_tab-ref>`
 * :ref:`Results Table Tab <muon_results_tab-ref>`
 
 Feedback & Comments
