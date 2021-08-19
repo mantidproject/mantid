@@ -208,6 +208,9 @@ class MaxEntView(QtWidgets.QWidget):
     def method_changed_slot(self, slot):
         self.method.currentIndexChanged.connect(slot)
 
+    def period_changed_slot(self, slot):
+        self._period_selector.set_slot_for_dataset_changed(slot)
+
     @property
     def get_run(self):
         return str(self._runs_selector.current_dataset_name)
