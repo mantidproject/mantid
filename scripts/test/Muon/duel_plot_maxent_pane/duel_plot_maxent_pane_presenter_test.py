@@ -14,10 +14,7 @@ from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_presenter_inter
     PlottingCanvasPresenterInterface
 from mantid import AnalysisDataService
 
-from mantidqt.utils.qt.testing import start_qapplication
 
-
-@start_qapplication
 class DuelPlotMaxentPanePresenterTest(unittest.TestCase):
 
     def setUp(self):
