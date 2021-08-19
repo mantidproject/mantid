@@ -124,7 +124,7 @@ class BackgroundCorrectionsPresenter:
         self._update_displayed_corrections_data()
 
         self._corrections_presenter.set_tab_warning(self.model.get_warning_for_correction_tab())
-        if self.model.any_negative_backgrounds():
+        if self.model.is_background_mode_auto() and self.model.any_negative_backgrounds():
             self._corrections_presenter.warning_popup("A negative background has been calculated in Auto correction "
                                                       "mode.\n\nIf this is not expected then please use Manual mode,"
                                                       " or adjust the fitting range.")
