@@ -14,7 +14,6 @@ from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.plot_widget.raw_pane.raw_pane_model import RawPaneModel
 from Muon.GUI.Common.plot_widget.data_pane.plot_data_pane_model import PlotDataPaneModel
 from Muon.GUI.FrequencyDomainAnalysis.plot_widget.duel_plot_maxent_pane.duel_plot_maxent_pane_model import DuelPlotMaxentPaneModel
-from mantidqt.utils.qt.testing import start_qapplication
 
 
 def gen_table():
@@ -29,7 +28,6 @@ def gen_table():
     return tab
 
 
-@start_qapplication
 class DuelPlotMaxentPaneModelTest(unittest.TestCase):
 
     @classmethod
