@@ -52,7 +52,12 @@ class DrillSampleGroup:
         Args:
             sample (DrillSample): sample to be added in the group
         """
-        self._samples.append(sample)
+        i = 0
+        while ((i < len(self._samples))
+               and (self._samples[i].getIndex() < sample.getIndex())):
+            i += 1
+        self._samples.insert(i, sample)
+        sample.setGroup(self)
 
     def delSample(self, sample):
         """
