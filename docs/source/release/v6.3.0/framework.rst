@@ -29,6 +29,7 @@ Improvements
 - Event nexuses produced at ILL can now be loaded using :ref:`LoadEventNexus <algm-LoadEventNexus>`.
 - :ref:`Rebin <algm-Rebin>` now has an option for binning with reverse logarithmic and inverse power bins.
 - :ref:`SetSample <algm-SetSample>` can now load sample environment XML files from any directory using ``SetSample(ws, Environment={'Name': 'NameOfXMLFile', 'Path':'/path/to/file/'})``.
+- An importance sampling option has been added to :ref:`DiscusMultipleScatteringCorrection <algm-DiscusMultipleScatteringCorrection>` so that it handles spikes in the structure factor S(Q) better
 
 Bugfixes
 ########

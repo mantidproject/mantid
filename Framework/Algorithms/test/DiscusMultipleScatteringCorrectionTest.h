@@ -10,6 +10,7 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/DiscusMultipleScatteringCorrection.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -17,7 +18,6 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include <cmath>
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::DataObjects;
@@ -26,11 +26,15 @@ using namespace Mantid::Kernel;
 
 class DiscusMultipleScatteringCorrectionHelper : public Mantid::Algorithms::DiscusMultipleScatteringCorrection {
 public:
-  double interpolateGaussian(const Mantid::HistogramData::Histogram &histToInterpolate, double x) {
-    return DiscusMultipleScatteringCorrection::interpolateGaussian(histToInterpolate, x);
+  double interpolateSquareRoot(const Mantid::HistogramData::Histogram &histToInterpolate, double x) {
+    return DiscusMultipleScatteringCorrection::interpolateSquareRoot(histToInterpolate, x);
   }
   void updateTrackDirection(Mantid::Geometry::Track &track, const double cosT, const double phi) {
     DiscusMultipleScatteringCorrection::updateTrackDirection(track, cosT, phi);
+  }
+  std::shared_ptr<Mantid::HistogramData::Histogram> integrateCumulative(const Mantid::HistogramData::Histogram &h,
+                                                                        double xmax) {
+    return DiscusMultipleScatteringCorrection::integrateCumulative(h, xmax);
   }
 };
 
@@ -42,14 +46,83 @@ public:
   static void destroySuite(DiscusMultipleScatteringCorrectionTest *suite) { delete suite; }
 
   DiscusMultipleScatteringCorrectionTest() {
-    SofQWorkspace = WorkspaceCreationHelper::create2DWorkspace(1, 1);
-    SofQWorkspace->mutableY(0)[0] = 1.;
+    const int NBINS = 1;
+    // wavelength = 1 in most tests, so k = 2 * M_PI. q max = 2k
+    SofQWorkspace = WorkspaceCreationHelper::create2DWorkspaceBinned(1, NBINS, 0., 4 * M_PI / NBINS);
+    for (size_t i = 0; i < SofQWorkspace->blocksize(); i++)
+      SofQWorkspace->mutableY(0)[i] = 1.;
     SofQWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("MomentumTransfer");
+  }
+
+  void test_testSQDeltaFunction() {
+    const double THICKNESS = 0.001; // metres
+
+    const int NTHETA = 900;
+    auto inputWorkspace = SetupFlatPlateWorkspace(1, NTHETA, 0.2, 1, THICKNESS);
+
+    auto SofQWorkspace = WorkspaceCreationHelper::create2DWorkspace(1, 3);
+    SofQWorkspace->mutableX(0)[0] = 4.985;
+    SofQWorkspace->mutableX(0)[1] = 4.995;
+    SofQWorkspace->mutableX(0)[2] = 5.005;
+    SofQWorkspace->mutableX(0)[3] = 5.015;
+    // S(Q) zero everywhere apart from spike at Q=5
+    SofQWorkspace->mutableY(0)[0] = 0.;
+    SofQWorkspace->mutableY(0)[1] = 100.;
+    SofQWorkspace->mutableY(0)[2] = 0.;
+    SofQWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("MomentumTransfer");
+
+    auto alg = std::make_shared<Mantid::Algorithms::DiscusMultipleScatteringCorrection>();
+    alg->initialize();
+    alg->setRethrows(true);
+    TS_ASSERT(alg->isInitialized());
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("SofqWorkspace", SofQWorkspace));
+    alg->setPropertyValue("OutputWorkspace", "MuscatResults");
+    // input workspace has single bin - centred at 1 Angstrom, so kinc=2*pi=6.28 inverse Angstroms
+    // DiscusMultipleScatteringCorrection will sample q between 0 and 2k (12.56)
+    // so q=5 requires sin(theta) = 5 /(4*pi) = 0.39789, theta=23.44 degrees, 2theta=46.88 degrees
+    // So two scatters at max S(Q) will take the track to ~93.76 degrees
+    alg->setProperty("InputWorkspace", inputWorkspace);
+    const int NSCATTERINGS = 2;
+    alg->setProperty("NumberScatterings", NSCATTERINGS);
+    alg->setProperty("NeutronPathsSingle", 10000);
+    alg->setProperty("NeutronPathsMultiple", 10000);
+    alg->setProperty("ImportanceSampling", true);
+    alg->execute();
+    Mantid::API::WorkspaceGroup_sptr output =
+        Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>("MuscatResults");
+    Mantid::API::Workspace_sptr wsPtr = output->getItem("Scatter_2");
+    auto doubleScatterResult = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(wsPtr);
+
+    // validate that the max scatter angle is ~94 degrees
+    for (size_t i = 0; i < NTHETA; i++)
+      if (doubleScatterResult->spectrumInfo().twoTheta(i) > M_PI * 94.0 / 180.0)
+        TS_ASSERT_EQUALS(doubleScatterResult->y(i)[0], 0.);
+
+    // crude check on peak positions at theta=0 and ~94 degrees
+    double sum = 0.;
+    for (size_t i = 0; i < NTHETA; i++)
+      sum += doubleScatterResult->y(i)[0];
+    double avgY = sum / NTHETA;
+    std::vector<size_t> peakPos;
+    int PEAKSPACING = NTHETA / 10;
+    int lastPeakFound = -PEAKSPACING;
+    for (size_t i = 0; i < NTHETA; i++)
+      if ((doubleScatterResult->y(i)[0] > 3 * avgY) && (static_cast<int>(i - lastPeakFound) >= PEAKSPACING)) {
+        peakPos.push_back(i);
+        lastPeakFound = static_cast<int>(i);
+      }
+    TS_ASSERT_EQUALS(peakPos.size(), 2);
+    if (peakPos.size() > 0) {
+      TS_ASSERT_EQUALS(peakPos.front(), 0);
+      TS_ASSERT((static_cast<double>(peakPos.back()) * 0.2 > 93) && (static_cast<double>(peakPos.back()) * 0.2 < 94));
+    }
+
+    Mantid::API::AnalysisDataService::Instance().deepRemoveGroup("MuscatResults");
   }
 
   void test_output_workspaces() {
     const double THICKNESS = 0.001; // metres
-    auto inputWorkspace = SetupFlatPlateWorkspace(46, 1, 1, THICKNESS);
+    auto inputWorkspace = SetupFlatPlateWorkspace(46, 1, 1.0, 1, THICKNESS);
 
     auto alg = createAlgorithm();
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWorkspace));
@@ -77,7 +150,7 @@ public:
     // generate a result corresponding to Figure 4 in the Mancinelli paper (flat
     // plate sample for once scattered neutrons) where there's an analytical solution
     const double THICKNESS = 0.001; // metres
-    auto inputWorkspace = SetupFlatPlateWorkspace(46, 1, 1, THICKNESS);
+    auto inputWorkspace = SetupFlatPlateWorkspace(46, 1, 1.0, 1, THICKNESS);
 
     auto alg = createAlgorithm();
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWorkspace));
@@ -103,17 +176,18 @@ public:
     }
   }
 
-  void test_flat_plate_sample_multiple_scatter() {
+  void run_flat_plate_sample_multiple_scatter(int nPaths, bool importanceSampling) {
     // same set up as previous test but increase nscatter to 2
     const double THICKNESS = 0.001; // metres
-    auto inputWorkspace = SetupFlatPlateWorkspace(2, 1, 1, THICKNESS);
+    auto inputWorkspace = SetupFlatPlateWorkspace(2, 1, 1.0, 1, THICKNESS);
 
     auto alg = createAlgorithm();
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWorkspace));
     const int NSCATTERINGS = 2;
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("NumberScatterings", NSCATTERINGS));
-    TS_ASSERT_THROWS_NOTHING(alg->setProperty("NeutronPathsSingle", 100000));
-    TS_ASSERT_THROWS_NOTHING(alg->setProperty("NeutronPathsMultiple", 100000));
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("NeutronPathsSingle", nPaths));
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("NeutronPathsMultiple", nPaths));
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("ImportanceSampling", importanceSampling));
     TS_ASSERT_THROWS_NOTHING(alg->execute(););
     TS_ASSERT(alg->isExecuted());
 
@@ -137,10 +211,20 @@ public:
     }
   }
 
+  void test_flat_plate_sample_multiple_scatter_without_importance_sampling() {
+    run_flat_plate_sample_multiple_scatter(100000, false);
+  }
+
+  void test_flat_plate_sample_multiple_scatter_with_importance_sampling() {
+    // this test runs with flat S(Q). Not seeing the importance sampling having much effect but test ensures it hasn't
+    // broken anything
+    run_flat_plate_sample_multiple_scatter(100000, true);
+  }
+
   void test_flat_plate_sample_multiple_scatter_with_wavelength_interp() {
     // same set up as previous test but increase nscatter to 2
     const double THICKNESS = 0.001; // metres
-    auto inputWorkspace = SetupFlatPlateWorkspace(2, 1, 3, THICKNESS);
+    auto inputWorkspace = SetupFlatPlateWorkspace(2, 1, 1.0, 3, THICKNESS);
 
     auto alg = createAlgorithm();
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWorkspace));
@@ -187,7 +271,7 @@ public:
     // set up instrument with five detectors at different latitudes (=5 different rows)
     // run simulation for detectors at latitude=0 and 2 degrees and interpolate at lat=1 degree
     const double THICKNESS = 0.001; // metres
-    auto inputWorkspace = SetupFlatPlateWorkspace(5, 2, 1, THICKNESS);
+    auto inputWorkspace = SetupFlatPlateWorkspace(5, 2, 1.0, 1, THICKNESS);
 
     auto alg = createAlgorithm();
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWorkspace));
@@ -229,18 +313,12 @@ public:
 
   void test_interpolateGaussian() {
     DiscusMultipleScatteringCorrectionHelper alg;
-    const int NBINS = 10;
 
-    auto ws2 = WorkspaceCreationHelper::create2DWorkspacePoints(1, NBINS, 0.5);
-    for (auto i = 0; i < 4; i++) {
-      ws2->mutableY(0)[i] = pow(2 * i, 2);
-    }
-    auto interpY = alg.interpolateGaussian(ws2->histogram(0), 2.0);
-    TS_ASSERT_EQUALS(interpY, exp(9.0));
-
-    // check point beyond half way point uses same three points
-    interpY = alg.interpolateGaussian(ws2->histogram(0), 2.00000001);
-    TS_ASSERT_DELTA(interpY, exp(9.0), 0.01);
+    auto ws = Mantid::DataObjects::create<Workspace2D>(
+        1, Mantid::HistogramData::Histogram(Mantid::HistogramData::Points({0., 4., 16.}),
+                                            Mantid::HistogramData::Counts({0., 2., 4.})));
+    auto interpY = alg.interpolateSquareRoot(ws->histogram(0), 9.0);
+    TS_ASSERT_EQUALS(interpY, 3.0);
   }
 
   void test_updateTrackDirection() {
@@ -257,6 +335,19 @@ public:
     alg.updateTrackDirection(trackUp, cosTwoTheta, phi);
   }
 
+  void test_integrateCumulative() {
+    DiscusMultipleScatteringCorrectionHelper alg;
+    Mantid::HistogramData::Histogram test(Mantid::HistogramData::Points({0., 1., 2., 3.}),
+                                          Mantid::HistogramData::Frequencies({1., 1., 1., 1.}));
+    auto testResult = alg.integrateCumulative(test, 2.2);
+    TS_ASSERT_EQUALS(testResult->dataY()[3], 2.2);
+    TS_ASSERT_THROWS(testResult = alg.integrateCumulative(test, 3.2), std::runtime_error &);
+    testResult = alg.integrateCumulative(test, 2.0);
+    TS_ASSERT_EQUALS(testResult->dataY()[2], 2.0);
+    testResult = alg.integrateCumulative(test, 0.);
+    TS_ASSERT_EQUALS(testResult->dataY()[0], 0.);
+  }
+
   //---------------------------------------------------------------------------
   // Failure cases
   //---------------------------------------------------------------------------
@@ -264,7 +355,7 @@ public:
   void test_invalidSOfQ() {
     DiscusMultipleScatteringCorrectionHelper alg;
     const double THICKNESS = 0.001; // metres
-    auto inputWorkspace = SetupFlatPlateWorkspace(5, 2, 1, THICKNESS);
+    auto inputWorkspace = SetupFlatPlateWorkspace(1, 1, 1.0, 1, THICKNESS);
     auto SofQWorkspaceTwoSp = WorkspaceCreationHelper::create2DWorkspace(2, 1);
     SofQWorkspaceTwoSp->mutableY(0)[0] = 1.;
     SofQWorkspaceTwoSp->getAxis(0)->unit() = UnitFactory::Instance().create("MomentumTransfer");
@@ -291,13 +382,32 @@ public:
     TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
   }
 
+  void test_invalidZeroSOfQ() {
+    DiscusMultipleScatteringCorrectionHelper alg;
+    const double THICKNESS = 0.001; // metres
+    auto inputWorkspace = SetupFlatPlateWorkspace(1, 1, 1.0, 1, THICKNESS);
+    auto SofQWorkspaceZero = WorkspaceCreationHelper::create2DWorkspace(1, 1);
+    SofQWorkspaceZero->mutableY(0)[0] = 0.;
+    SofQWorkspaceZero->getAxis(0)->unit() = UnitFactory::Instance().create("MomentumTransfer");
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWorkspace));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SofqWorkspace", SofQWorkspaceZero));
+    const int NSCATTERINGS = 2;
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("NumberScatterings", NSCATTERINGS));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("NeutronPathsSingle", 1));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("NeutronPathsMultiple", 1));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "MuscatResults"));
+    alg.execute();
+    TS_ASSERT(!alg.isExecuted());
+  }
+
   void test_cant_run_withAlwaysStoreInADS_false() {
     const double THICKNESS = 0.001; // metres
     DiscusMultipleScatteringCorrectionHelper alg;
     alg.setAlwaysStoreInADS(false);
     alg.setRethrows(true);
     alg.initialize();
-    auto inputWorkspace = SetupFlatPlateWorkspace(5, 2, 1, THICKNESS);
+    auto inputWorkspace = SetupFlatPlateWorkspace(1, 1, 1.0, 1, THICKNESS);
     alg.setProperty("InputWorkspace", inputWorkspace);
     alg.setProperty("SofqWorkspace", SofQWorkspace);
     alg.setPropertyValue("OutputWorkspace", "MuscatResults");
@@ -317,10 +427,11 @@ private:
     return alg;
   }
 
-  Mantid::API::MatrixWorkspace_sptr SetupFlatPlateWorkspace(const int nlat, const int nlong, const int nbins,
-                                                            const double thickness) {
+  Mantid::API::MatrixWorkspace_sptr SetupFlatPlateWorkspace(const int nlat, const int nlong, const double anginc,
+                                                            const int nbins, const double thickness) {
 
-    auto inputWorkspace = WorkspaceCreationHelper::create2DWorkspaceWithGeographicalDetectors(nlat, nlong, 1.0, nbins);
+    auto inputWorkspace =
+        WorkspaceCreationHelper::create2DWorkspaceWithGeographicalDetectors(nlat, nlong, anginc, nbins);
 
     // create flat plate that is 1mm thick
     auto flatPlateShape = ComponentCreationHelper::createCuboid((10 * thickness) / 2, (10 * thickness) / 2,
@@ -328,6 +439,7 @@ private:
     auto mat = Mantid::Kernel::Material("Ni", Mantid::PhysicalConstants::getNeutronAtom(28, 0), 0.091337537);
     flatPlateShape->setMaterial(mat);
     inputWorkspace->mutableSample().setShape(flatPlateShape);
+
     return inputWorkspace;
   }
 
