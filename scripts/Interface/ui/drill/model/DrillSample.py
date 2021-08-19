@@ -247,10 +247,8 @@ class DrillSample(QObject):
         Returns:
             dict(str: str): parameters
         """
-        out = dict()
-        for name, param in self._parameters.items():
-            out[name] = param.getValue()
-        return out
+        return {name: param.getValue()
+                for name, param in self._parameters.items()}
 
     def onProcessStarted(self):
         """
