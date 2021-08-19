@@ -7,28 +7,28 @@
 import unittest
 from unittest import mock
 
-from Muon.GUI.FrequencyDomainAnalysis.plot_widget.duel_plot_maxent_pane.duel_plot_maxent_pane_view import DuelPlotMaxentPaneView
-from Muon.GUI.FrequencyDomainAnalysis.plot_widget.duel_plot_maxent_pane.duel_plot_maxent_pane_model import DuelPlotMaxentPaneModel
-from Muon.GUI.FrequencyDomainAnalysis.plot_widget.duel_plot_maxent_pane.duel_plot_maxent_pane_presenter import DuelPlotMaxentPanePresenter
+from Muon.GUI.FrequencyDomainAnalysis.plot_widget.dual_plot_maxent_pane.dual_plot_maxent_pane_view import DualPlotMaxentPaneView
+from Muon.GUI.FrequencyDomainAnalysis.plot_widget.dual_plot_maxent_pane.dual_plot_maxent_pane_model import DualPlotMaxentPaneModel
+from Muon.GUI.FrequencyDomainAnalysis.plot_widget.dual_plot_maxent_pane.dual_plot_maxent_pane_presenter import DualPlotMaxentPanePresenter
 from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_presenter_interface import \
     PlottingCanvasPresenterInterface
 from mantid import AnalysisDataService
 
 
-class DuelPlotMaxentPanePresenterTest(unittest.TestCase):
+class DualPlotMaxentPanePresenterTest(unittest.TestCase):
 
     def setUp(self):
         self.context = mock.MagicMock()
-        self.model = mock.Mock(spec=DuelPlotMaxentPaneModel)
+        self.model = mock.Mock(spec=DualPlotMaxentPaneModel)
         self.model.name = "data"
-        self.view = mock.Mock(spec=DuelPlotMaxentPaneView)
+        self.view = mock.Mock(spec=DualPlotMaxentPaneView)
         self.view.warning_popup = mock.MagicMock()
         self.figure_presenter = mock.Mock(spec=PlottingCanvasPresenterInterface)
 
         self.context.group_pair_context.selected_groups = ['bottom']
         self.context.group_pair_context.selected_pairs = []
 
-        self.presenter = DuelPlotMaxentPanePresenter(view=self.view, model=self.model, context=self.context,
+        self.presenter = DualPlotMaxentPanePresenter(view=self.view, model=self.model, context=self.context,
                                                      figure_presenter=self.figure_presenter)
 
     def tearDown(self):
