@@ -184,7 +184,7 @@ class DuelPlotMaxentPaneModelTest(unittest.TestCase):
         self.raw.get_workspace_list_and_indices_to_plot = mock.Mock(return_value=(["unit","test"],[5,6]))
         ws, indices = self.model.get_workspace_list_and_indices_to_plot()
 
-        self.raw.get_workspace_list_and_indices_to_plot.assert_called_once_with(True, "Counts", "5:7", "62260")
+        self.raw.get_workspace_list_and_indices_to_plot.assert_called_once_with(True, "Counts", "5:7", "62260", 1)
         self.assertEqual(ws, ["unit", "test"])
         self.assertEqual(indices, [5,6])
 
