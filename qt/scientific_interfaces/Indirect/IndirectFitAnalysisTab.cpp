@@ -650,12 +650,14 @@ void IndirectFitAnalysisTab::respondToPlotSpectrumChanged() {
   m_fitPropertyBrowser->setCurrentDataset(index);
 }
 
-void IndirectFitAnalysisTab::respondToFwhmChanged(double) {
+void IndirectFitAnalysisTab::respondToFwhmChanged(double fwhm) {
+  m_fittingModel->setFWHM(fwhm, m_plotPresenter->getActiveWorkspaceID());
   updateFitBrowserParameterValues();
   m_plotPresenter->updateGuess();
 }
 
 void IndirectFitAnalysisTab::respondToBackgroundChanged(double value) {
+  m_fittingModel->setBackground(value, m_plotPresenter->getActiveWorkspaceID());
   m_fitPropertyBrowser->setBackgroundA0(value);
   setModelFitFunction();
   m_plotPresenter->updateGuess();

@@ -124,16 +124,6 @@ void IndirectFitPlotModel::setActiveIndex(WorkspaceID workspaceID) { m_activeWor
 
 void IndirectFitPlotModel::setActiveSpectrum(WorkspaceIndex spectrum) { m_activeWorkspaceIndex = spectrum; }
 
-void IndirectFitPlotModel::setFWHM(double fwhm) {
-  m_fittingModel->setDefaultParameterValue("FWHM", fwhm, m_activeWorkspaceID);
-  setFunctionParameters(m_fittingModel->getFitFunction(), "Peak", "FWHM", fwhm);
-}
-
-void IndirectFitPlotModel::setBackground(double background) {
-  m_fittingModel->setDefaultParameterValue("A0", background, m_activeWorkspaceID);
-  setFirstBackground(m_fittingModel->getFitFunction(), background);
-}
-
 void IndirectFitPlotModel::deleteExternalGuessWorkspace() {
   if (AnalysisDataService::Instance().doesExist(INPUT_AND_GUESS_NAME))
     deleteWorkspace(INPUT_AND_GUESS_NAME);

@@ -46,10 +46,8 @@ IndirectFitPlotPresenter::IndirectFitPlotPresenter(IndirectFittingModel *model, 
 
   connect(m_view, SIGNAL(hwhmMaximumChanged(double)), this, SLOT(setHWHMMinimum(double)));
   connect(m_view, SIGNAL(hwhmMinimumChanged(double)), this, SLOT(setHWHMMaximum(double)));
-  connect(m_view, SIGNAL(hwhmChanged(double, double)), this, SLOT(setModelHWHM(double, double)));
-  connect(m_view, SIGNAL(hwhmChanged(double, double)), this, SLOT(emitFWHMChanged(double, double)));
 
-  connect(m_view, SIGNAL(backgroundChanged(double)), this, SLOT(setModelBackground(double)));
+  connect(m_view, SIGNAL(hwhmChanged(double, double)), this, SLOT(emitFWHMChanged(double, double)));
   connect(m_view, SIGNAL(backgroundChanged(double)), this, SIGNAL(backgroundChanged(double)));
 
   updateRangeSelectors();
@@ -90,10 +88,6 @@ void IndirectFitPlotPresenter::setActiveSpectrum(WorkspaceIndex spectrum) {
 }
 
 void IndirectFitPlotPresenter::disableSpectrumPlotSelection() { m_view->disableSpectrumPlotSelection(); }
-
-void IndirectFitPlotPresenter::setModelHWHM(double minimum, double maximum) { m_model->setFWHM(maximum - minimum); }
-
-void IndirectFitPlotPresenter::setModelBackground(double background) { m_model->setBackground(background); }
 
 void IndirectFitPlotPresenter::setStartX(double startX) { m_view->setFitRangeMinimum(startX); }
 

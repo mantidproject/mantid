@@ -62,6 +62,8 @@ public:
   virtual boost::optional<std::string> isInvalidFunction() const override;
   std::vector<std::string> getFitParameterNames() const override;
   void setFitFunction(Mantid::API::MultiDomainFunction_sptr function) override;
+  void setFWHM(double fwhm, WorkspaceID WorkspaceID) override;
+  void setBackground(double fwhm, WorkspaceID WorkspaceID) override;
   virtual Mantid::API::MultiDomainFunction_sptr getFitFunction() const override;
   void setDefaultParameterValue(const std::string &name, double value, WorkspaceID workspaceID) override;
   std::unordered_map<std::string, ParameterValue> getParameterValues(WorkspaceID workspaceID,

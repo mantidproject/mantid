@@ -224,6 +224,83 @@ void addFitProperties(Mantid::API::IAlgorithm &algorithm, const Mantid::API::IFu
   algorithm.setProperty("Function", function);
   algorithm.setProperty("ResultXAxisUnit", xAxisUnit);
 }
+
+IFunction_sptr firstFunctionWithParameter(IFunction_sptr function, const std::string &category,
+                                          const std::string &parameterName);
+
+IFunction_sptr firstFunctionWithParameter(const CompositeFunction_sptr &composite, const std::string &category,
+                                          const std::string &parameterName) {
+  for (auto i = 0u; i < composite->nFunctions(); ++i) {
+    const auto value = firstFunctionWithParameter(composite->getFunction(i), category, parameterName);
+    if (value)
+      return value;
+  }
+  return nullptr;
+}
+
+IFunction_sptr firstFunctionWithParameter(IFunction_sptr function, const std::string &category,
+                                          const std::string &parameterName) {
+  if (function->category() == category && function->hasParameter(parameterName))
+    return function;
+
+  const auto composite = std::dynamic_pointer_cast<CompositeFunction>(function);
+  if (composite)
+    return firstFunctionWithParameter(composite, category, parameterName);
+  return nullptr;
+}
+
+boost::optional<double> firstParameterValue(const IFunction_sptr &function, const std::string &category,
+                                            const std::string &parameterName) {
+  if (!function)
+    return boost::none;
+
+  const auto functionWithParameter = firstFunctionWithParameter(function, category, parameterName);
+  if (functionWithParameter)
+    return functionWithParameter->getParameter(parameterName);
+  return boost::none;
+}
+
+boost::optional<double> findFirstPeakCentre(const IFunction_sptr &function) {
+  return firstParameterValue(std::move(function), "Peak", "PeakCentre");
+}
+
+boost::optional<double> findFirstFWHM(const IFunction_sptr &function) {
+  return firstParameterValue(std::move(function), "Peak", "FWHM");
+}
+
+boost::optional<double> findFirstBackgroundLevel(const IFunction_sptr &function) {
+  return firstParameterValue(std::move(function), "Background", "A0");
+}
+
+void setFunctionParameters(const IFunction_sptr &function, const std::string &category,
+                           const std::string &parameterName, double value);
+
+void setFunctionParameters(const CompositeFunction_sptr &composite, const std::string &category,
+                           const std::string &parameterName, double value) {
+  for (auto i = 0u; i < composite->nFunctions(); ++i)
+    setFunctionParameters(composite->getFunction(i), category, parameterName, value);
+}
+
+void setFunctionParameters(const IFunction_sptr &function, const std::string &category,
+                           const std::string &parameterName, double value) {
+  if (function->category() == category && function->hasParameter(parameterName))
+    function->setParameter(parameterName, value);
+
+  auto composite = std::dynamic_pointer_cast<CompositeFunction>(function);
+  if (composite)
+    setFunctionParameters(composite, category, parameterName, value);
+}
+
+void setFunctionParameters(const MultiDomainFunction_sptr &function, const std::string &category,
+                           const std::string &parameterName, double value) {
+  for (size_t i = 0u; i < function->nFunctions(); ++i)
+    setFunctionParameters(function->getFunction(i), category, parameterName, value);
+}
+
+void setFirstBackground(IFunction_sptr function, double value) {
+  firstFunctionWithParameter(std::move(function), "Background", "A0")->setParameter("A0", value);
+}
+
 } // namespace
 
 namespace MantidQt::CustomInterfaces::IDA {
@@ -324,6 +401,16 @@ void IndirectFittingModel::setFittingMode(FittingMode mode) { m_fittingMode = mo
 void IndirectFittingModel::setFitFunction(MultiDomainFunction_sptr function) {
   m_activeFunction = std::move(function);
   m_previousModelSelected = isPreviousModelSelected();
+}
+
+void IndirectFittingModel::setFWHM(double fwhm, WorkspaceID WorkspaceID) {
+  setDefaultParameterValue("FWHM", fwhm, WorkspaceID);
+  setFunctionParameters(getFitFunction(), "Peak", "FWHM", fwhm);
+}
+
+void IndirectFittingModel::setBackground(double background, WorkspaceID WorkspaceID) {
+  setDefaultParameterValue("A0", background, WorkspaceID);
+  setFirstBackground(getFitFunction(), background);
 }
 
 void IndirectFittingModel::setDefaultParameterValue(const std::string &name, double value, WorkspaceID workspaceID) {

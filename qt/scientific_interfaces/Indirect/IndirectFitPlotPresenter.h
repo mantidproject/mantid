@@ -67,8 +67,6 @@ signals:
   void backgroundChanged(double /*_t1*/);
 
 private slots:
-  void setModelHWHM(double minimum, double maximum);
-  void setModelBackground(double background);
   void setActiveIndex(WorkspaceID workspaceID);
   void setHWHMMaximum(double minimum);
   void setHWHMMinimum(double maximum);
