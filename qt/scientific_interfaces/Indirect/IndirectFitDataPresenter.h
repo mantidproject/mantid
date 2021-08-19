@@ -35,6 +35,10 @@ public:
   void setSampleFBSuffices(const QStringList &suffices);
   void setResolutionWSSuffices(const QStringList &suffices);
   void setResolutionFBSuffices(const QStringList &suffices);
+  void setStartX(double startX, WorkspaceID workspaceID);
+  void setStartX(double startX, WorkspaceID workspaceID, WorkspaceIndex spectrum);
+  void setEndX(double startX, WorkspaceID workspaceID);
+  void setEndX(double startX, WorkspaceID workspaceID, WorkspaceIndex spectrum);
   std::vector<std::pair<std::string, size_t>> getResolutionsForFit() const;
   QStringList getSampleWSSuffices() const;
   QStringList getSampleFBSuffices() const;

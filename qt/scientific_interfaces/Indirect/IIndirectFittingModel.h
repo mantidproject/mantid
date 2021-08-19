@@ -49,10 +49,6 @@ public:
   virtual WorkspaceID getNumberOfWorkspaces() const = 0;
   virtual size_t getNumberOfSpectra(WorkspaceID workspaceID) const = 0;
   virtual std::vector<std::pair<std::string, size_t>> getResolutionsForFit() const = 0;
-  virtual void setStartX(double startX, WorkspaceID workspaceID, WorkspaceIndex spectrum) = 0;
-  virtual void setStartX(double startX, WorkspaceID workspaceID) = 0;
-  virtual void setEndX(double endX, WorkspaceID workspaceID, WorkspaceIndex spectrum) = 0;
-  virtual void setEndX(double endX, WorkspaceID workspaceID) = 0;
   virtual std::string createDisplayName(WorkspaceID workspaceID) const = 0;
   virtual bool isMultiFit() const = 0;
 

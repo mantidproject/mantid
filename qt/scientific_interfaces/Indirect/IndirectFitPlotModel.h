@@ -33,8 +33,8 @@ public:
 
   Mantid::API::MatrixWorkspace_sptr appendGuessToInput(const Mantid::API::MatrixWorkspace_sptr &guessWorkspace) const;
 
-  WorkspaceID getActiveWorkspaceIndex() const;
-  WorkspaceIndex getActiveSpectrum() const;
+  WorkspaceID getActiveWorkspaceID() const;
+  WorkspaceIndex getActiveWorkspaceIndex() const;
   WorkspaceID numberOfWorkspaces() const;
   FitDomainIndex getActiveDomainIndex() const;
   std::string getFitDataName(WorkspaceID workspaceID) const;
@@ -52,8 +52,6 @@ public:
 
   void setActiveIndex(WorkspaceID workspaceID);
   void setActiveSpectrum(WorkspaceIndex spectrum);
-  void setStartX(double startX);
-  void setEndX(double endX);
   void setFWHM(double fwhm);
   void setBackground(double background);
 

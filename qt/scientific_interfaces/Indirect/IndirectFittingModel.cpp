@@ -275,20 +275,6 @@ std::vector<std::pair<std::string, size_t>> IndirectFittingModel::getResolutions
   return std::vector<std::pair<std::string, size_t>>();
 }
 
-void IndirectFittingModel::setStartX(double startX, WorkspaceID workspaceID, WorkspaceIndex spectrum) {
-  m_fitDataModel->setStartX(startX, workspaceID, spectrum);
-}
-
-void IndirectFittingModel::setStartX(double startX, WorkspaceID workspaceID) {
-  m_fitDataModel->setStartX(startX, workspaceID);
-}
-
-void IndirectFittingModel::setEndX(double endX, WorkspaceID workspaceID, WorkspaceIndex spectrum) {
-  m_fitDataModel->setEndX(endX, workspaceID, spectrum);
-}
-
-void IndirectFittingModel::setEndX(double endX, WorkspaceID workspaceID) { m_fitDataModel->setEndX(endX, workspaceID); }
-
 std::string IndirectFittingModel::createDisplayName(WorkspaceID workspaceID) const {
   return m_fitDataModel->createDisplayName(workspaceID);
 }

@@ -41,9 +41,6 @@ IndirectFitPlotPresenter::IndirectFitPlotPresenter(IndirectFittingModel *model, 
 
   connect(m_view, SIGNAL(plotGuessChanged(bool)), this, SLOT(plotGuess(bool)));
 
-  connect(m_view, SIGNAL(startXChanged(double)), this, SLOT(setModelStartX(double)));
-  connect(m_view, SIGNAL(endXChanged(double)), this, SLOT(setModelEndX(double)));
-
   connect(m_view, SIGNAL(startXChanged(double)), this, SIGNAL(startXChanged(double)));
   connect(m_view, SIGNAL(endXChanged(double)), this, SIGNAL(endXChanged(double)));
 
@@ -75,14 +72,14 @@ void IndirectFitPlotPresenter::handlePlotSpectrumChanged(WorkspaceIndex spectrum
 
 void IndirectFitPlotPresenter::watchADS(bool watch) { m_view->watchADS(watch); }
 
-WorkspaceID IndirectFitPlotPresenter::getSelectedDataIndex() const { return m_model->getActiveWorkspaceIndex(); }
+WorkspaceID IndirectFitPlotPresenter::getActiveWorkspaceID() const { return m_model->getActiveWorkspaceID(); }
 
-WorkspaceIndex IndirectFitPlotPresenter::getSelectedSpectrum() const { return m_model->getActiveSpectrum(); }
+WorkspaceIndex IndirectFitPlotPresenter::getActiveWorkspaceIndex() const { return m_model->getActiveWorkspaceIndex(); }
 
 FitDomainIndex IndirectFitPlotPresenter::getSelectedDomainIndex() const { return m_model->getActiveDomainIndex(); }
 
 bool IndirectFitPlotPresenter::isCurrentlySelected(WorkspaceID workspaceID, WorkspaceIndex spectrum) const {
-  return getSelectedDataIndex() == workspaceID && getSelectedSpectrum() == spectrum;
+  return getActiveWorkspaceID() == workspaceID && getActiveWorkspaceIndex() == spectrum;
 }
 
 void IndirectFitPlotPresenter::setActiveIndex(WorkspaceID workspaceID) { m_model->setActiveIndex(workspaceID); }
@@ -93,10 +90,6 @@ void IndirectFitPlotPresenter::setActiveSpectrum(WorkspaceIndex spectrum) {
 }
 
 void IndirectFitPlotPresenter::disableSpectrumPlotSelection() { m_view->disableSpectrumPlotSelection(); }
-
-void IndirectFitPlotPresenter::setModelStartX(double startX) { m_model->setStartX(startX); }
-
-void IndirectFitPlotPresenter::setModelEndX(double endX) { m_model->setEndX(endX); }
 
 void IndirectFitPlotPresenter::setModelHWHM(double minimum, double maximum) { m_model->setFWHM(maximum - minimum); }
 
@@ -152,7 +145,7 @@ void IndirectFitPlotPresenter::appendLastDataToSelection() {
 }
 
 void IndirectFitPlotPresenter::updateSelectedDataName() {
-  m_view->setNameInDataSelection(m_model->getFitDataName(), m_model->getActiveWorkspaceIndex());
+  m_view->setNameInDataSelection(m_model->getFitDataName(), m_model->getActiveWorkspaceID());
 }
 
 void IndirectFitPlotPresenter::updateDataSelection() {
@@ -213,7 +206,7 @@ void IndirectFitPlotPresenter::updateFit() {
 
 void IndirectFitPlotPresenter::plotLines() {
   if (auto const resultWorkspace = m_model->getResultWorkspace()) {
-    plotInput(m_model->getWorkspace(), m_model->getActiveSpectrum());
+    plotInput(m_model->getWorkspace(), m_model->getActiveWorkspaceIndex());
     plotFit(resultWorkspace);
     updatePlotRange(m_model->getResultRange());
   } else if (auto const inputWorkspace = m_model->getWorkspace()) {
@@ -223,7 +216,7 @@ void IndirectFitPlotPresenter::plotLines() {
 }
 
 void IndirectFitPlotPresenter::plotInput(MatrixWorkspace_sptr workspace) {
-  plotInput(std::move(workspace), m_model->getActiveSpectrum());
+  plotInput(std::move(workspace), m_model->getActiveWorkspaceIndex());
   if (auto doGuess = m_view->isPlotGuessChecked())
     plotGuess(doGuess);
 }
@@ -262,7 +255,7 @@ void IndirectFitPlotPresenter::updateFitRangeSelector() {
 void IndirectFitPlotPresenter::plotCurrentPreview() {
   const auto inputWorkspace = m_model->getWorkspace();
   if (inputWorkspace && !inputWorkspace->getName().empty()) {
-    plotSpectrum(m_model->getActiveSpectrum());
+    plotSpectrum(m_model->getActiveWorkspaceIndex());
   } else
     m_view->displayMessage("Workspace not found - data may not be loaded.");
 }
@@ -343,7 +336,7 @@ void IndirectFitPlotPresenter::plotSpectrum(WorkspaceIndex spectrum) const {
 }
 
 void IndirectFitPlotPresenter::emitFitSingleSpectrum() {
-  emit fitSingleSpectrum(m_model->getActiveWorkspaceIndex(), m_model->getActiveSpectrum());
+  emit fitSingleSpectrum(m_model->getActiveWorkspaceID(), m_model->getActiveWorkspaceIndex());
 }
 
 void IndirectFitPlotPresenter::emitFWHMChanged(double minimum, double maximum) { emit fwhmChanged(maximum - minimum); }

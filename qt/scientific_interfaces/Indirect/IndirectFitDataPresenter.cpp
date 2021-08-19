@@ -62,6 +62,31 @@ void IndirectFitDataPresenter::setResolutionWSSuffices(const QStringList &suffix
 void IndirectFitDataPresenter::setResolutionFBSuffices(const QStringList &suffixes) {
   m_fbResolutionSuffixes = suffixes;
 }
+
+void IndirectFitDataPresenter::setStartX(double startX, WorkspaceID workspaceID) {
+  if (m_model->getNumberOfWorkspaces() > workspaceID) {
+    m_model->setStartX(startX, workspaceID);
+  }
+}
+
+void IndirectFitDataPresenter::setStartX(double startX, WorkspaceID workspaceID, WorkspaceIndex spectrum) {
+  if (m_model->getNumberOfWorkspaces() > workspaceID) {
+    m_model->setStartX(startX, workspaceID, spectrum);
+  }
+}
+
+void IndirectFitDataPresenter::setEndX(double endX, WorkspaceID workspaceID) {
+  if (m_model->getNumberOfWorkspaces() > workspaceID) {
+    m_model->setEndX(endX, workspaceID);
+  }
+}
+
+void IndirectFitDataPresenter::setEndX(double endX, WorkspaceID workspaceID, WorkspaceIndex spectrum) {
+  if (m_model->getNumberOfWorkspaces() > workspaceID) {
+    m_model->setEndX(endX, workspaceID, spectrum);
+  }
+}
+
 std::vector<std::pair<std::string, size_t>> IndirectFitDataPresenter::getResolutionsForFit() const {
   return m_model->getResolutionsForFit();
 }

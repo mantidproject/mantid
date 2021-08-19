@@ -124,16 +124,6 @@ void IndirectFitPlotModel::setActiveIndex(WorkspaceID workspaceID) { m_activeWor
 
 void IndirectFitPlotModel::setActiveSpectrum(WorkspaceIndex spectrum) { m_activeWorkspaceIndex = spectrum; }
 
-void IndirectFitPlotModel::setStartX(double startX) {
-  if (getRange().second > startX)
-    m_fittingModel->setStartX(startX, m_activeWorkspaceID);
-}
-
-void IndirectFitPlotModel::setEndX(double endX) {
-  if (getRange().first < endX)
-    m_fittingModel->setEndX(endX, m_activeWorkspaceID);
-}
-
 void IndirectFitPlotModel::setFWHM(double fwhm) {
   m_fittingModel->setDefaultParameterValue("FWHM", fwhm, m_activeWorkspaceID);
   setFunctionParameters(m_fittingModel->getFitFunction(), "Peak", "FWHM", fwhm);
@@ -171,9 +161,9 @@ std::pair<double, double> IndirectFitPlotModel::getResultRange() const {
   return {xValues.front(), xValues.back()};
 }
 
-WorkspaceID IndirectFitPlotModel::getActiveWorkspaceIndex() const { return m_activeWorkspaceID; }
+WorkspaceID IndirectFitPlotModel::getActiveWorkspaceID() const { return m_activeWorkspaceID; }
 
-WorkspaceIndex IndirectFitPlotModel::getActiveSpectrum() const { return m_activeWorkspaceIndex; }
+WorkspaceIndex IndirectFitPlotModel::getActiveWorkspaceIndex() const { return m_activeWorkspaceIndex; }
 
 WorkspaceID IndirectFitPlotModel::numberOfWorkspaces() const { return m_fittingModel->getNumberOfWorkspaces(); }
 

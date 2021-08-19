@@ -28,8 +28,8 @@ public:
 
   void watchADS(bool watch);
 
-  WorkspaceID getSelectedDataIndex() const;
-  WorkspaceIndex getSelectedSpectrum() const;
+  WorkspaceID getActiveWorkspaceID() const;
+  WorkspaceIndex getActiveWorkspaceIndex() const;
   FitDomainIndex getSelectedDomainIndex() const;
   bool isCurrentlySelected(WorkspaceID workspaceID, WorkspaceIndex spectrum) const;
 
@@ -67,8 +67,6 @@ signals:
   void backgroundChanged(double /*_t1*/);
 
 private slots:
-  void setModelStartX(double value);
-  void setModelEndX(double value);
   void setModelHWHM(double minimum, double maximum);
   void setModelBackground(double background);
   void setActiveIndex(WorkspaceID workspaceID);

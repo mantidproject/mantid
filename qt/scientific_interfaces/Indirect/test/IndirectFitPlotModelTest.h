@@ -181,8 +181,8 @@ public:
   void test_that_IndirectFittingModel_instantiates_a_model_with_the_correct_starting_member_variables() {
     auto const model = getFitPlotModel();
 
-    TS_ASSERT_EQUALS(model.getActiveWorkspaceIndex(), WorkspaceID{0});
-    TS_ASSERT_EQUALS(model.getActiveSpectrum(), WorkspaceIndex{0});
+    TS_ASSERT_EQUALS(model.getActiveWorkspaceID(), WorkspaceID{0});
+    TS_ASSERT_EQUALS(model.getActiveWorkspaceIndex(), WorkspaceIndex{0});
     TS_ASSERT_EQUALS(model.numberOfWorkspaces(), WorkspaceID{2});
   }
 
@@ -249,7 +249,7 @@ public:
 
     model.setActiveIndex(WorkspaceID{2});
 
-    TS_ASSERT_EQUALS(model.getActiveWorkspaceIndex(), WorkspaceID{2});
+    TS_ASSERT_EQUALS(model.getActiveWorkspaceID(), WorkspaceID{2});
   }
 
   void test_that_getActiveSpectrum_returns_the_spectrum_which_it_has_been_set_to() {
@@ -257,7 +257,7 @@ public:
 
     model.setActiveSpectrum(WorkspaceIndex{3});
 
-    TS_ASSERT_EQUALS(model.getActiveSpectrum(), WorkspaceIndex{3});
+    TS_ASSERT_EQUALS(model.getActiveWorkspaceIndex(), WorkspaceIndex{3});
   }
 
   void test_that_getFitDataName_returns_the_correctly_calculated_name() {

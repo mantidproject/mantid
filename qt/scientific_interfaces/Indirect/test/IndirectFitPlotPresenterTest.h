@@ -226,7 +226,7 @@ public:
 
   void test_that_the_selectedFitDataChanged_signal_will_set_the_activeIndex() {
     m_view->emitSelectedFitDataChanged(1);
-    TS_ASSERT_EQUALS(m_presenter->getSelectedDataIndex(), 1);
+    TS_ASSERT_EQUALS(m_presenter->getActiveWorkspaceIndex(), 1);
   }
 
   void test_that_the_selectedFitDataChanged_signal_will_set_the_available_spectra() {
@@ -290,7 +290,7 @@ public:
 
   void test_that_the_plotSpectrumChanged_signal_will_set_the_active_spectrum() {
     m_view->emitPlotSpectrumChanged(2);
-    TS_ASSERT_EQUALS(m_presenter->getSelectedSpectrum(), 2);
+    TS_ASSERT_EQUALS(m_presenter->getActiveWorkspaceIndex(), 2);
   }
 
   void test_that_the_plotSpectrumChanged_signal_will_plot_the_input_when_there_is_only_an_input_workspace() {
@@ -550,7 +550,7 @@ public:
     EXPECT_CALL(*m_view, appendToDataSelection("DisplayName-0")).Times(1);
     EXPECT_CALL(*m_view, appendToDataSelection("DisplayName-1")).Times(1);
     EXPECT_CALL(*m_view, setPlotSpectrum(WorkspaceIndex{0})).Times(2);
-    TS_ASSERT_EQUALS(m_presenter->getSelectedSpectrum(), WorkspaceIndex{0});
+    TS_ASSERT_EQUALS(m_presenter->getActiveWorkspaceIndex(), WorkspaceIndex{0});
 
     m_presenter->updateDataSelection();
   }
