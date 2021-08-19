@@ -173,10 +173,22 @@ std::map<std::string, std::string> CalculateMultipleScattering::validateInputs()
 void CalculateMultipleScattering::exec() {
   g_log.warning("CalculateMultipleScattering is in the beta stage of development. Its name, properties and behaviour "
                 "may change without warning.");
+  if (!getAlwaysStoreInADS())
+    throw std::runtime_error("This algorithm explicitly stores named output workspaces in the ADS so must be run with "
+                             "AlwaysStoreInADS set to true");
   const MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   MatrixWorkspace_sptr SQWS = getProperty("SofqWorkspace");
-  // take log of S(Q) and store it this way
   SQWS = SQWS->clone();
+  // avoid repeated conversion of bin edges to points inside loop by converting to point data
+  if (SQWS->isHistogramData()) {
+    auto pointDataAlgorithm = this->createChildAlgorithm("ConvertToPointData");
+    pointDataAlgorithm->initialize();
+    pointDataAlgorithm->setProperty("InputWorkspace", SQWS);
+    pointDataAlgorithm->setProperty("OutputWorkspace", "_");
+    pointDataAlgorithm->execute();
+    SQWS = pointDataAlgorithm->getProperty("OutputWorkspace");
+  }
+  // take log of S(Q) and store it this way
   auto &y = SQWS->mutableY(0);
   std::transform(y.begin(), y.end(), y.begin(), static_cast<double (*)(double)>(std::log));
 
@@ -187,6 +199,7 @@ void CalculateMultipleScattering::exec() {
     auto &y = sigmaSSWS->mutableY(0);
     std::transform(y.begin(), y.end(), y.begin(), static_cast<double (*)(double)>(std::log));
   }
+  auto SQHist = SQWS->histogram(0);
   const auto inputNbins = static_cast<int>(inputWS->blocksize());
   int nlambda = getProperty("NumberOfWavelengthPoints");
   if (isEmpty(nlambda) || nlambda > inputNbins) {
@@ -224,6 +237,8 @@ void CalculateMultipleScattering::exec() {
                                           : static_cast<int64_t>(inputWS->getNumberHistograms());
 
   const auto &sample = inputWS->sample();
+  // generate the bounding box before the multithreaded section
+  sample.getShape().getBoundingBox();
 
   const int nSingleScatterEvents = getProperty("NeutronPathsSingle");
   const int nMultiScatterEvents = getProperty("NeutronPathsMultiple");
@@ -243,12 +258,17 @@ void CalculateMultipleScattering::exec() {
   }
   enableParallelFor = enableParallelFor && Kernel::threadSafe(*noAbsOutputWS);
 
+  const auto &spectrumInfo = instrumentWS.spectrumInfo();
+
   PARALLEL_FOR_IF(enableParallelFor)
   for (int64_t i = 0; i < nhists; ++i) {
     PARALLEL_START_INTERUPT_REGION
-    MersenneTwister rng(seed + int(i));
+    auto &spectrum = instrumentWS.getSpectrum(i);
+    Mantid::specnum_t specNo = spectrum.getSpectrumNo();
+    MersenneTwister rng(seed + specNo);
     // no two theta for monitors
-    if (!instrumentWS.spectrumInfo().isMonitor(i)) {
+
+    if (spectrumInfo.hasDetectors(i) && !spectrumInfo.isMonitor(i) && !spectrumInfo.isMasked(i)) {
 
       const auto lambdas = instrumentWS.points(i).rawData();
 
@@ -257,20 +277,20 @@ void CalculateMultipleScattering::exec() {
       const size_t nsteps = std::max(1, nlambda - 1);
       const size_t lambdaStepSize = nbins == 1 ? 1 : (nbins - 1) / nsteps;
 
+      const auto detPos = spectrumInfo.position(i);
+
       for (size_t bin = 0; bin < nbins; bin += lambdaStepSize) {
 
-        const double kinc = 2 * M_PI / instrumentWS.histogram(i).points()[bin];
-
-        const auto detPos = instrumentWS.detectorInfo().position(i);
+        const double kinc = 2 * M_PI / lambdas[bin];
 
         double total =
-            simulatePaths(nSingleScatterEvents, 1, sample, *instrument, rng, sigmaSSWS, SQWS, kinc, detPos, true);
+            simulatePaths(nSingleScatterEvents, 1, sample, *instrument, rng, sigmaSSWS, SQHist, kinc, detPos, true);
         noAbsSimulationWS->getSpectrum(i).dataY()[bin] = total;
 
         for (int ne = 0; ne < nScatters; ne++) {
           int nEvents = ne == 0 ? nSingleScatterEvents : nMultiScatterEvents;
 
-          total = simulatePaths(nEvents, ne + 1, sample, *instrument, rng, sigmaSSWS, SQWS, kinc, detPos, false);
+          total = simulatePaths(nEvents, ne + 1, sample, *instrument, rng, sigmaSSWS, SQHist, kinc, detPos, false);
           simulationWSs[ne]->getSpectrum(i).dataY()[bin] = total;
         }
 
@@ -324,14 +344,18 @@ void CalculateMultipleScattering::exec() {
 
   // Create workspace group that holds output workspaces
   auto wsgroup = std::make_shared<WorkspaceGroup>();
+  auto outputGroupWSName = getPropertyValue("OutputWorkspace");
+  if (AnalysisDataService::Instance().doesExist(outputGroupWSName))
+    API::AnalysisDataService::Instance().deepRemoveGroup(outputGroupWSName);
 
   const std::string wsNamePrefix = "Scatter_";
-  std::string wsname = wsNamePrefix + "1_NoAbs";
-  API::AnalysisDataService::Instance().addOrReplace(wsname, noAbsOutputWS);
+  std::string wsName = wsNamePrefix + "1_NoAbs";
+  setWorkspaceName(noAbsOutputWS, wsName);
   wsgroup->addWorkspace(noAbsOutputWS);
+
   for (size_t i = 0; i < outputWSs.size(); i++) {
-    wsname = wsNamePrefix + std::to_string(i + 1);
-    API::AnalysisDataService::Instance().addOrReplace(wsname, outputWSs[i]);
+    wsName = wsNamePrefix + std::to_string(i + 1);
+    setWorkspaceName(outputWSs[i], wsName);
     wsgroup->addWorkspace(outputWSs[i]);
   }
 
@@ -340,15 +364,20 @@ void CalculateMultipleScattering::exec() {
     for (size_t i = 1; i < outputWSs.size(); i++) {
       summedOutput = summedOutput + outputWSs[i];
     }
-    API::AnalysisDataService::Instance().addOrReplace("Scatter_2_" + std::to_string(outputWSs.size()) + "_Summed",
-                                                      summedOutput);
+    wsName = "Scatter_2_" + std::to_string(outputWSs.size()) + "_Summed";
+    setWorkspaceName(summedOutput, wsName);
     wsgroup->addWorkspace(summedOutput);
   }
 
   // set the output property
   setProperty("OutputWorkspace", wsgroup);
 
-  g_log.warning() << "Calls to interceptSurface= " + std::to_string(m_callsToInterceptSurface) + "\n";
+  if (g_log.is(Kernel::Logger::Priority::PRIO_WARNING)) {
+    for (auto &kv : m_attemptsToGenerateInitialTrack)
+      g_log.warning() << "Generating initial track required " + std::to_string(kv.first) + " attempts on " +
+                             std::to_string(kv.second) + " occasions.\n";
+    g_log.warning() << "Calls to interceptSurface= " + std::to_string(m_callsToInterceptSurface) + "\n";
+  }
 }
 
 /**
@@ -373,7 +402,7 @@ double CalculateMultipleScattering::new_vector(const MatrixWorkspace_sptr sigmaS
     absorbXsection = material.absorbXSection(wavelength);
   }
   if (sigmaSSWS) {
-    scatteringXSection = interpolateLogQuadratic(sigmaSSWS, kinc);
+    scatteringXSection = interpolateGaussian(sigmaSSWS->histogram(0), kinc);
   } else {
     scatteringXSection = material.totalScatterXSection();
   }
@@ -383,27 +412,31 @@ double CalculateMultipleScattering::new_vector(const MatrixWorkspace_sptr sigmaS
 }
 
 /**
- * Interpolate a value from a spectrum where the y value is quadratic and return e^y
- * @param workspaceToInterpolate The workspace containing the data to
- * interpolate (pass whole workspace to get access to yIndexOfX method)
+ * Interpolate a value from a spectrum containing Gaussian peaks. The log of the spectrum has previously
+  been taken so this method does a quadratic interpolation and returns e^y
+ * @param histToInterpolate The histogram containing the data to interpolate
  * @param x The x value to interpolate at
  * @return The exponential of the interpolated value
  */
-double CalculateMultipleScattering::interpolateLogQuadratic(const MatrixWorkspace_sptr &workspaceToInterpolate,
-                                                            double x) {
-  if (x > workspaceToInterpolate->points(0).back()) {
-    return exp(workspaceToInterpolate->y(0).back());
+double CalculateMultipleScattering::interpolateGaussian(const HistogramData::Histogram &histToInterpolate, double x) {
+  // could have written using points() method so it also worked on histogram data but found that the points
+  // method was bottleneck on multithreaded code due to cow_ptr atomic_load
+  assert(histToInterpolate.xMode() == HistogramData::Histogram::XMode::Points);
+  if (x > histToInterpolate.x().back()) {
+    return exp(histToInterpolate.y().back());
   }
-  if (x < workspaceToInterpolate->points(0).front()) {
-    return exp(workspaceToInterpolate->y(0).front());
+  if (x < histToInterpolate.x().front()) {
+    return exp(histToInterpolate.y().front());
   }
   // assume log(cross section) is quadratic in k
-  size_t idx;
-  auto binWidth = workspaceToInterpolate->x(0)[1] - workspaceToInterpolate->x(0)[0];
-  idx = workspaceToInterpolate->yIndexOfX(x, 0, 0.5 * binWidth);
+  auto deltax = histToInterpolate.x()[1] - histToInterpolate.x()[0];
+
+  auto iter = std::upper_bound(histToInterpolate.x().cbegin(), histToInterpolate.x().cend(), x);
+  auto idx = static_cast<size_t>(std::distance(histToInterpolate.x().cbegin(), iter) - 1);
+
   // need at least two points to the right of the x value for the quadratic
   // interpolation to work
-  auto ny = workspaceToInterpolate->blocksize();
+  auto ny = histToInterpolate.y().size();
   if (ny < 3) {
     throw std::runtime_error("Need at least 3 y values to perform quadratic interpolation");
   }
@@ -412,8 +445,8 @@ double CalculateMultipleScattering::interpolateLogQuadratic(const MatrixWorkspac
   }
   // this interpolation assumes the set of 3 bins\point have the same width
   // U=0 on point or bin edge to the left of where x lies
-  const auto U = (x - workspaceToInterpolate->points(0)[idx]) / binWidth;
-  const auto &y = workspaceToInterpolate->y(0);
+  const auto U = (x - histToInterpolate.x()[idx]) / deltax;
+  const auto &y = histToInterpolate.y();
   const auto A = (y[idx] - 2 * y[idx + 1] + y[idx + 2]) / 2;
   const auto B = (-3 * y[idx] + 4 * y[idx + 1] - y[idx + 2]) / 2;
   const auto C = y[idx];
@@ -443,9 +476,9 @@ double CalculateMultipleScattering::interpolateLogQuadratic(const MatrixWorkspac
 double CalculateMultipleScattering::simulatePaths(const int nPaths, const int nScatters, const Sample &sample,
                                                   const Geometry::Instrument &instrument,
                                                   Kernel::PseudoRandomNumberGenerator &rng,
-                                                  const MatrixWorkspace_sptr sigmaSSWS, const MatrixWorkspace_sptr SOfQ,
-                                                  const double kinc, Kernel::V3D detPos,
-                                                  bool specialSingleScatterCalc) {
+                                                  const MatrixWorkspace_sptr sigmaSSWS,
+                                                  const HistogramData::Histogram &SOfQ, const double kinc,
+                                                  Kernel::V3D detPos, bool specialSingleScatterCalc) {
   double sumOfWeights = 0, sumOfQSS = 0.;
   auto sourcePos = instrument.getSource()->getPos();
 
@@ -495,7 +528,7 @@ double CalculateMultipleScattering::simulatePaths(const int nPaths, const int nS
 std::tuple<bool, double, double> CalculateMultipleScattering::scatter(
     const int nScatters, const Sample &sample, const Geometry::Instrument &instrument, const V3D sourcePos,
     Kernel::PseudoRandomNumberGenerator &rng, const double sigma_total, double scatteringXSection,
-    const MatrixWorkspace_sptr SOfQ, const double kinc, Kernel::V3D detPos, bool specialSingleScatterCalc) {
+    const HistogramData::Histogram &SOfQ, const double kinc, Kernel::V3D detPos, bool specialSingleScatterCalc) {
   double weight = 1;
   double numberDensity = sample.getMaterial().numberDensityEffective();
   // if scale up scatteringXSection by 100*numberDensity then may not need
@@ -529,7 +562,7 @@ std::tuple<bool, double, double> CalculateMultipleScattering::scatter(
   }
   const double dl = track.front().distInsideObject;
   const auto q = (directionToDetector - prevDirection) * kinc;
-  const auto SQ = interpolateLogQuadratic(SOfQ, q.norm());
+  const auto SQ = interpolateGaussian(SOfQ, q.norm());
   if (specialSingleScatterCalc)
     vmu = 0;
   const auto AT2 = exp(-dl * vmu);
@@ -538,7 +571,7 @@ std::tuple<bool, double, double> CalculateMultipleScattering::scatter(
 }
 
 // update track direction, QSS and weight
-void CalculateMultipleScattering::q_dir(Geometry::Track &track, const MatrixWorkspace_sptr SOfQ, const double kinc,
+void CalculateMultipleScattering::q_dir(Geometry::Track &track, const HistogramData::Histogram &SOfQ, const double kinc,
                                         const double scatteringXSection, Kernel::PseudoRandomNumberGenerator &rng,
                                         double &QSS, double &weight) {
   const double kf = kinc; // elastic only so far
@@ -549,7 +582,7 @@ void CalculateMultipleScattering::q_dir(Geometry::Track &track, const MatrixWork
   // T = 2theta
   const double cosT = (kinc * kinc + kf * kf - QQ * QQ) / (2 * kinc * kf);
 
-  const double SQ = interpolateLogQuadratic(SOfQ, QQ);
+  const double SQ = interpolateGaussian(SOfQ, QQ);
   QSS += QQ * SQ;
   weight = weight * scatteringXSection * SQ * QQ;
   updateTrackDirection(track, cosT, rng.nextValue() * 2 * M_PI);
@@ -619,7 +652,9 @@ Geometry::Track CalculateMultipleScattering::start_point(const Geometry::IObject
     m_callsToInterceptSurface++;
     if (nlinks > 0) {
       if (i > 0) {
-        g_log.warning() << "Generating initial track required " + std::to_string(i + 1) + " attempts.\n";
+        if (g_log.is(Kernel::Logger::Priority::PRIO_WARNING)) {
+          m_attemptsToGenerateInitialTrack[i + 1]++;
+        }
       }
       return t;
     }
@@ -651,7 +686,7 @@ void CalculateMultipleScattering::updateWeightAndPosition(Geometry::Track &track
  */
 Geometry::Track CalculateMultipleScattering::generateInitialTrack(const Geometry::IObject &shape,
                                                                   std::shared_ptr<const Geometry::ReferenceFrame> frame,
-                                                                  const V3D sourcePos,
+                                                                  const V3D &sourcePos,
                                                                   Kernel::PseudoRandomNumberGenerator &rng) {
   auto sampleBox = shape.getBoundingBox();
   // generate random point on front surface of sample bounding box
@@ -668,8 +703,7 @@ Geometry::Track CalculateMultipleScattering::generateInitialTrack(const Geometry
   ptOnBeamProfile[frame->pointingAlongBeam()] = sourcePos[frame->pointingAlongBeam()];
   auto toSample = Kernel::V3D();
   toSample[frame->pointingAlongBeam()] = 1.;
-  Geometry::Track trackToSample = Geometry::Track(ptOnBeamProfile, toSample);
-  return trackToSample;
+  return Geometry::Track(ptOnBeamProfile, toSample);
 }
 
 /**
@@ -750,6 +784,35 @@ void CalculateMultipleScattering::interpolateFromSparse(MatrixWorkspace &targetW
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
+}
+
+void CalculateMultipleScattering::correctForWorkspaceNameClash(std::string &wsName) {
+  bool noClash(false);
+
+  for (int i = 0; !noClash; ++i) {
+    std::string wsIndex; // dont use an index if there is no other
+                         // workspace
+    if (i > 0) {
+      wsIndex = "_" + std::to_string(i);
+    }
+
+    bool wsExists = AnalysisDataService::Instance().doesExist(wsName + wsIndex);
+    if (!wsExists) {
+      wsName += wsIndex;
+      noClash = true;
+    }
+  }
+}
+
+/**
+ * Set the name on a workspace, adjusting for potential clashes in the ADS.
+ * Used to set the names on the output workspace group members. N
+ * @param ws The ws to set the name on
+ * @param wsName The name to set on the workspace
+ */
+void CalculateMultipleScattering::setWorkspaceName(const API::MatrixWorkspace_sptr &ws, std::string wsName) {
+  correctForWorkspaceNameClash(wsName);
+  API::AnalysisDataService::Instance().addOrReplace(wsName, ws);
 }
 
 } // namespace Algorithms

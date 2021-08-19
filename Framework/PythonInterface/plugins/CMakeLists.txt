@@ -68,6 +68,7 @@ set(PYTHON_PLUGINS
     algorithms/ExtractMonitors.py
     algorithms/FilterLogByTime.py
     algorithms/FindGoniometerFromUB.py
+    algorithms/FindGlobalBMatrix.py
     algorithms/FindSatellitePeaks.py
     algorithms/FitGaussian.py
     algorithms/FitIncidentSpectrum.py
@@ -151,6 +152,7 @@ set(PYTHON_PLUGINS
     algorithms/PoldiCreatePeaksFromFile.py
     algorithms/PoldiLoadRuns.py
     algorithms/PoldiMerge.py
+    algorithms/PowderReduceP2D.py
     algorithms/RebinRagged.py
     algorithms/RefinePowderDiffProfileSeq.py
     algorithms/ReflectometryReductionOneLiveData.py
@@ -171,6 +173,7 @@ set(PYTHON_PLUGINS
     algorithms/SaveYDA.py
     algorithms/SelectNexusFilesByMetadata.py
     algorithms/SetDetScale.py
+    algorithms/SetSampleFromLogs.py
     algorithms/SortByQVectors.py
     algorithms/SortDetectors.py
     algorithms/StatisticsOfTableWorkspace.py

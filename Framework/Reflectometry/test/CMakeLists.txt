@@ -17,10 +17,9 @@ if(CXXTEST_FOUND)
 
   cxxtest_add_test(ReflectometryTest ${TEST_FILES})
   target_link_libraries(ReflectometryTest
-                        LINK_PRIVATE
-                        ${MANTIDLIBS}
-                        Algorithms
-                        Reflectometry
+                        PRIVATE
+                        Mantid::Algorithms
+                        Mantid::Reflectometry
                         gmock
 )
   add_dependencies(FrameworkTests ReflectometryTest)

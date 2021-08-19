@@ -70,11 +70,13 @@ public:
 private:
   /// Create an output workspace
   API::MatrixWorkspace_sptr createOutputWorkspace(const API::MatrixWorkspace_const_sptr &, const size_t,
-                                                  const std::vector<double> &);
+                                                  const std::vector<double> &, const size_t);
 
   void bootstrap(const API::MatrixWorkspace_const_sptr &);
   void calculate(const API::MatrixWorkspace_const_sptr &);
   void finalize(const API::MatrixWorkspace_const_sptr &);
+  void fillMonochromaticOutput(API::MatrixWorkspace_sptr &, const size_t);
+  void fillTOFOutput(API::MatrixWorkspace_sptr &, const size_t);
 
   struct Wedge {
     Wedge(double innerRadius, double outerRadius, double centerX, double centerY, double angleMiddle, double angleRange)
@@ -105,10 +107,7 @@ private:
 
       bool hasSymmetricalAngle = std::fabs(diffAngle - M_PI) < epsilon || diffAngle < epsilon;
 
-      if (hasSameRadii && hasSameCenter && hasSameAngleRange && hasSymmetricalAngle) {
-        return true;
-      }
-      return false;
+      return (hasSameRadii && hasSameCenter && hasSameAngleRange && hasSymmetricalAngle);
     }
   };
 
@@ -123,7 +122,7 @@ private:
   std::vector<std::vector<std::vector<double>>> m_normalisation;
   std::vector<double> m_qBinEdges;
   size_t m_nQ;
-  size_t m_nLambda;
+  size_t m_nBins;
   size_t m_nWedges;
 
   std::vector<Wedge> m_wedgesParameters;
@@ -135,6 +134,7 @@ private:
   bool m_asymmWedges;
   bool m_errorWeighting;
   bool m_correctGravity;
+  bool m_isMonochromatic;
 
   /// Initialisation code
   void init() override;

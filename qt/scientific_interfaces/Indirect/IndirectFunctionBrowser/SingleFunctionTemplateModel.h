@@ -51,8 +51,6 @@ private:
   QMap<QString, IFunction_sptr> m_fitTypeToFunctionStore;
   QMap<QString, QStringList> m_globalParameterStore;
   QStringList m_fitTypeList;
-  std::string m_resolutionName;
-  TableDatasetIndex m_resolutionIndex;
   boost::optional<QString> findFitTypeForFunctionName(const QString &name) const;
   // Parameter estimation
   std::unique_ptr<IDAFunctionParameterEstimation> m_parameterEstimation;

@@ -2,13 +2,17 @@
 # Matplotlib-based implementation
 # ##############################################################################
 set(MPL_SRC_FILES
-    src/Mpl/ContourPreviewPlot.cpp src/Mpl/PeakPicker.cpp
-    src/Mpl/PreviewPlot.cpp src/Mpl/RangeSelector.cpp
+    src/Mpl/ContourPreviewPlot.cpp
+    src/Mpl/ExternalPlotter.cpp
+    src/Mpl/PeakPicker.cpp
+    src/Mpl/PreviewPlot.cpp
+    src/Mpl/RangeSelector.cpp
     src/Mpl/SingleSelector.cpp
 )
 
 set(MPL_MOC_FILES
     inc/MantidQtWidgets/Plotting/Mpl/ContourPreviewPlot.h
+    inc/MantidQtWidgets/Plotting/Mpl/ExternalPlotter.h
     inc/MantidQtWidgets/Plotting/Mpl/PeakPicker.h
     inc/MantidQtWidgets/Plotting/Mpl/PreviewPlot.h
     inc/MantidQtWidgets/Plotting/Mpl/RangeSelector.h
@@ -53,7 +57,10 @@ mtd_add_qt_library(
     "\$ORIGIN/../${LIB_DIR}"
 )
 
-set(TEST_FILES test/ContourPreviewPlotTest.h)
+set(TEST_FILES
+  test/ContourPreviewPlotTest.h
+  test/ExternalPlotterTest.h
+)
 
 set(CXXTEST_EXTRA_HEADER_INCLUDE
     "${CMAKE_CURRENT_LIST_DIR}/test/PlottingTestInitialization.h"
@@ -62,13 +69,13 @@ set(CXXTEST_EXTRA_HEADER_INCLUDE
 mtd_add_qt_tests(
   TARGET_NAME MantidQtWidgetsPlottingTest
   QT_VERSION 5
-  SRC
-    ${TEST_FILES}
   INCLUDE_DIRS
     inc
     ../common/inc
     ../../../Framework/DataObjects/inc
     ../../../Framework/TestHelpers/inc
+  SRC
+    ${TEST_FILES}
   TEST_HELPER_SRCS
     ../../../Framework/TestHelpers/src/TearDownWorld.cpp
     ../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
@@ -79,9 +86,13 @@ mtd_add_qt_tests(
     DataObjects
     ${POCO_LIBRARIES}
     ${Boost_LIBRARIES}
+    PythonInterfaceCore
     gmock
+    Python::Python
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon
     MantidQtWidgetsPlotting
-  PARENT_DEPENDENCIES GUITests
+    MantidQtWidgetsMplCpp
+  PARENT_DEPENDENCIES
+    GUITests
 )

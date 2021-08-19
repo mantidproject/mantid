@@ -49,7 +49,7 @@ class ElementalAnalysisContextTest(unittest.TestCase):
         mock_get_item.return_value = EAGroup("9999; Detector 1", "detector 1", "9999")
         name = '9999; Detector 1'
         rebinned_name = '9999; Detector 1' + REBINNED_VARIABLE_WS_SUFFIX
-        mock_params = [0, 2, 9]
+        mock_params = "0, 2, 9"
 
         x_data = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
         y_data = [1, 1, 1, 1, 1, 1, 1, 1, 1]
@@ -92,34 +92,50 @@ class ElementalAnalysisContextTest(unittest.TestCase):
 
     @mock.patch("mantidqt.utils.observer_pattern.GenericObservable.notify_subscribers")
     def test_remove_workspace_with_a_string(self, mock_notify_subscirbers):
-        self.context.data_context.remove_workspace_by_name = mock.Mock()
+        mock_group = EAGroup("mock_workspace", "detector 1", "9999")
+        self.context.group_context.add_group(mock_group)
         self.context.group_context.remove_group = mock.Mock()
-        self.context.gui_context.remove_workspace_by_name = mock.Mock()
         # call remove_workspace function
         self.context.remove_workspace("mock_workspace")
 
         # assert statement
-        mock_notify_subscirbers.assert_called_once_with("mock_workspace")
-        self.context.gui_context.remove_workspace_by_name.assert_called_once_with("mock_workspace")
-        self.context.data_context.remove_workspace_by_name.assert_called_once_with("mock_workspace")
+        mock_notify_subscirbers.assert_has_calls([mock.call("mock_workspace"), mock.call("mock_workspace")])
         self.context.group_context.remove_group.assert_called_once_with("mock_workspace")
 
     @mock.patch("mantidqt.utils.observer_pattern.GenericObservable.notify_subscribers")
     def test_remove_workspace_with_a_workspace(self, mock_notify_subscirbers):
         # setup
-        self.context.data_context.remove_workspace_by_name = mock.Mock()
         self.context.group_context.remove_group = mock.Mock()
-        self.context.gui_context.remove_workspace_by_name = mock.Mock()
+        mock_group = EAGroup("mock_workspace", "detector 1", "9999")
+        self.context.group_context.add_group(mock_group)
         mock_ws = CreateWorkspace(OutputWorkspace="mock_workspace", DataX=[0, 2, 4, 6, 8, 9], DataY=[2, 2, 2, 2, 1])
 
         # call remove_workspace function
         self.context.remove_workspace(mock_ws)
 
         # assert statement
-        mock_notify_subscirbers.assert_called_once_with("mock_workspace")
-        self.context.gui_context.remove_workspace_by_name.assert_called_once_with("mock_workspace")
-        self.context.data_context.remove_workspace_by_name.assert_called_once_with("mock_workspace")
+        mock_notify_subscirbers.assert_has_calls([mock.call("mock_workspace"), mock.call(mock_ws)])
         self.context.group_context.remove_group.assert_called_once_with("mock_workspace")
+
+    @mock.patch("mantidqt.utils.observer_pattern.GenericObservable.notify_subscribers")
+    def test_remove_workspace_with_a_rebinned_workspace(self, mock_notify_subscirbers):
+        self.context.group_context.remove_workspace_from_group = mock.Mock()
+        # call remove_workspace function
+        self.context.remove_workspace("rebinned_mock_workspace")
+
+        # assert statement
+        mock_notify_subscirbers.assert_has_calls([mock.call("rebinned_mock_workspace")])
+        self.context.group_context.remove_workspace_from_group.assert_called_once_with("rebinned_mock_workspace")
+
+    @mock.patch("mantidqt.utils.observer_pattern.GenericObservable.notify_subscribers")
+    def test_remove_workspace_with_a_string_and_not_present_in_group(self, mock_notify_subscirbers):
+        self.context.group_context.remove_workspace_from_group = mock.Mock()
+        # call remove_workspace function
+        self.context.remove_workspace("mock_workspace")
+
+        # assert statement
+        mock_notify_subscirbers.assert_has_calls([mock.call("mock_workspace"), mock.call("mock_workspace")])
+        self.context.group_context.remove_workspace_from_group.assert_called_once_with("mock_workspace")
 
     def test_update_current_data_with_empty_data_context(self):
         # check if data context is empty
@@ -240,6 +256,69 @@ class EAGroupContextTest(unittest.TestCase):
 
         self.context.clear()
         self.assertEqual(len(self.context.groups), 0)
+
+    @mock.patch("Muon.GUI.ElementalAnalysis2.ea_group.EAGroup.remove_rebinned_workspace")
+    @mock.patch("Muon.GUI.ElementalAnalysis2.ea_group.EAGroup.remove_peak_table")
+    @mock.patch("Muon.GUI.ElementalAnalysis2.ea_group.EAGroup.remove_matches_group")
+    def test_remove_rebinned_workspace_from_group(self, mock_remove_matches, mock_remove_peak, mock_remove_rebinned):
+        mock_group = EAGroup("9999; Detector 1", "detector 1", "9999")
+        self.context.add_group(mock_group)
+        self.context.remove_workspace_from_group('9999; Detector 1_EA_Rebinned_Fixed')
+        mock_remove_rebinned.assert_called_once()
+        mock_remove_peak.assert_not_called()
+        mock_remove_matches.assert_not_called()
+
+    @mock.patch("Muon.GUI.ElementalAnalysis2.ea_group.EAGroup.remove_rebinned_workspace")
+    @mock.patch("Muon.GUI.ElementalAnalysis2.ea_group.EAGroup.remove_peak_table")
+    @mock.patch("Muon.GUI.ElementalAnalysis2.ea_group.EAGroup.remove_matches_group")
+    def test_remove_peak_table_from_group(self, mock_remove_matches, mock_remove_peak, mock_remove_rebinned):
+        mock_group = EAGroup("9999; Detector 1", "detector 1", "9999")
+        self.context.add_group(mock_group)
+        self.context.remove_workspace_from_group('9999; Detector 1_EA_peak_table')
+        mock_remove_rebinned.assert_not_called()
+        mock_remove_peak.aassert_called_once()
+        mock_remove_matches.assert_not_called()
+
+    @mock.patch("Muon.GUI.ElementalAnalysis2.ea_group.EAGroup.remove_rebinned_workspace")
+    @mock.patch("Muon.GUI.ElementalAnalysis2.ea_group.EAGroup.remove_peak_table")
+    @mock.patch("Muon.GUI.ElementalAnalysis2.ea_group.EAGroup.remove_matches_group")
+    def test_remove_matches_table_from_group(self, mock_remove_matches, mock_remove_peak, mock_remove_rebinned):
+        mock_group = EAGroup("9999; Detector 1", "detector 1", "9999")
+        self.context.add_group(mock_group)
+        self.context.remove_workspace_from_group('9999; Detector 1_EA_matches')
+        mock_remove_rebinned.assert_not_called()
+        mock_remove_peak.aassert_not_called()
+        mock_remove_matches.assert_called_once()
+
+    @mock.patch("Muon.GUI.ElementalAnalysis2.ea_group.EAGroup.remove_rebinned_workspace")
+    @mock.patch("Muon.GUI.ElementalAnalysis2.ea_group.EAGroup.remove_peak_table")
+    @mock.patch("Muon.GUI.ElementalAnalysis2.ea_group.EAGroup.remove_matches_group")
+    def test_remove_workspace_from_group_when_not_in_group(self, mock_remove_matches, mock_remove_peak,
+                                                           mock_remove_rebinned):
+        mock_group = EAGroup("9999; Detector 1", "detector 1", "9999")
+        self.context.add_group(mock_group)
+        self.context.remove_workspace_from_group('mock_workspace')
+        mock_remove_rebinned.assert_not_called()
+        mock_remove_peak.aassert_not_called()
+        mock_remove_matches.assert_not_called()
+
+    @mock.patch("Muon.GUI.ElementalAnalysis2.ea_group.remove_ws_if_present")
+    def test_error_raised_when_deleting_EAGroup(self, mock_remove_ws):
+        self.loadedData.clear()
+        self.create_group_workspace_and_load()
+        self.context.reset_group_to_default(self.loadedData)
+        self.assertEqual(len(self.context.groups), 2)
+        group_name1 = '9999; Detector 1'
+        self.assertTrue(group_name1 in self.context.group_names)
+        mock_remove_ws.side_effect = ValueError("mock error")
+        error_notifier_mock = mock.Mock()
+        self.context[group_name1].error_notifier = error_notifier_mock
+
+        self.context.remove_group(group_name1)
+        self.assertFalse(group_name1 in self.context.group_names)
+        mock_remove_ws.assert_called_once_with(group_name1)
+        error_notifier_mock.notify_subscribers.assert_called_once_with(f"Unexpected error occurred when"
+                                                                       f" deleting group {group_name1}: mock error")
 
 
 if __name__ == '__main__':

@@ -82,10 +82,10 @@ public:
   Geometry::Instrument_const_sptr getInstrument() const;
   std::shared_ptr<const Geometry::ReferenceFrame> getReferenceFrame() const override;
 
-  int getCol() const;
+  int getCol() const override;
   void setCol(int col);
 
-  int getRow() const;
+  int getRow() const override;
   void setRow(int row);
 
   std::string getBankName() const;

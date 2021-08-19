@@ -71,7 +71,6 @@ from above and use the following as your main:
 
 .. code-block:: python
 
-    from __future__ import (absolute_import,division,print_function)
     from qtpy import QtWidgets
     import sys
     import my_widget.view as view
@@ -93,7 +92,6 @@ the form of a package that will be called by another script.
 
 .. code-block:: python
 
-    from __future__ import (absolute_import, division, print_function)
     from my_widget.main import demo
 
     widget = demo()

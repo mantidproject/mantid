@@ -36,32 +36,32 @@ set(SRC_FILES)
 set(INC_FILES)
 
 # Create the target for this directory
-set(FRAMEWORK_DIR ../../..)
-include_directories(${FRAMEWORK_DIR}/DataObjects/inc)
 
 add_library(
   PythonDataObjectsModule ${MODULE_DEFINITION} ${EXPORT_FILES} ${SRC_FILES}
                           ${INC_FILES} ${PYTHON_INSTALL_FILES}
 )
+add_library(Mantid::PythonDataObjectsModule ALIAS PythonDataObjectsModule )
+
+target_include_directories(PythonDataObjectsModule PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+		$<INSTALL_INTERFACE:include/Mantid>
+
+)
+
 set_python_properties(PythonDataObjectsModule _dataobjects)
 
 # Add the required dependencies
-target_link_libraries(
-  PythonDataObjectsModule
-  LINK_PRIVATE
-  PythonInterfaceCore
-  PythonAPIModule
-  PythonGeometryModule
-  PythonKernelModule
-  API
-  DataObjects
-  Types
-  Kernel
-  HistogramData
-  Geometry
-  Indexing
-  ${POCO_LIBRARIES}
-  ${Boost_LIBRARIES}
+target_link_libraries(PythonDataObjectsModule
+  PUBLIC Mantid::DataObjects
+  PRIVATE
+  Mantid::PythonInterfaceCore
+  Mantid::PythonAPIModule
+  Mantid::PythonGeometryModule
+  Mantid::PythonKernelModule
+  Mantid::Types
+  Mantid::HistogramData
+  Mantid::Indexing
 )
 
 # Installation settings

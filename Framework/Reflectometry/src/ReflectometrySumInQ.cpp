@@ -163,6 +163,7 @@ Mantid::Reflectometry::ReflectometrySumInQ::MinMax twoThetaWidth(const size_t ws
 namespace Mantid {
 namespace Reflectometry {
 
+using namespace API;
 /**
  * Construct a new MinMax object.
  * The minimum of the arguments is assigned to the `min` field and
@@ -234,7 +235,8 @@ void ReflectometrySumInQ::init() {
   auto nonnegative = std::make_shared<Kernel::BoundedValidator<double>>();
   nonnegative->setLower(0.);
   mandatoryNonnegative->add(nonnegative);
-  declareWorkspaceInputProperties<API::MatrixWorkspace, API::IndexType::SpectrumNum | API::IndexType::WorkspaceIndex>(
+  declareWorkspaceInputProperties<API::MatrixWorkspace, static_cast<int>(IndexType::SpectrumNum) |
+                                                            static_cast<int>(IndexType::WorkspaceIndex)>(
       Prop::INPUT_WS, "A workspace in X units of wavelength to be summed.", inputWSValidator);
   declareProperty(
       std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(Prop::OUTPUT_WS, "", Kernel::Direction::Output),

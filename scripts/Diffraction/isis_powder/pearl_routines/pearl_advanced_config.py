@@ -43,6 +43,7 @@ general_params = {
         -0.0006,  # Bank 13
         -0.0006,  # Bank 14
     ],
+    "custom_focused_bin_widths" : -0.0006
 }
 
 long_mode_off_params = {
@@ -68,6 +69,7 @@ long_mode_off_params = {
         (1500, 19900),  # Bank 13
         (1500, 19900)   # Bank 14
     ],
+    "custom_focused_cropping_values": (1500, 19990),
     "monitor_spline_coefficient": 20,
     "spline_coefficient": 60
 }
@@ -96,6 +98,7 @@ long_mode_on_params = {
         (20300, 38830),  # Bank 13
         (20300, 38830)   # Bank 14
     ],
+    "custom_focused_cropping_values": (20300, 38830),
     "monitor_spline_coefficient": 20,
     "spline_coefficient": 5
 }

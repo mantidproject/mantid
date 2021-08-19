@@ -8,7 +8,7 @@ set(
   FqFitModelTest.h
   IDAFunctionParameterEstimationTest.h
   IndirectDataValidationHelperTest.h
-  IndirectDataTablePresenterTest.h
+  IndirectFitDataTablePresenterTest.h
   IndirectFitAnalysisTabTest.h
   IndirectFitDataPresenterTest.h
   IndirectFitDataTest.h
@@ -22,10 +22,8 @@ set(
   IndirectFittingModelTest.h
   IndirectPlotOptionsModelTest.h
   IndirectPlotOptionsPresenterTest.h
-  IndirectPlotterTest.h
   IndirectSettingsModelTest.h
   IndirectSettingsPresenterTest.h
-  IndirectSpectrumSelectionPresenterTest.h
   IqtFitModelTest.h
 )
 
@@ -37,7 +35,6 @@ mtd_add_qt_tests(
   QT_VERSION 5
   SRC ${TEST_FILES}
   INCLUDE_DIRS
-    ../../../../Framework/CurveFitting/inc
     ../../../../Framework/DataObjects/inc
     ../../../../Framework/TestHelpers/inc
     ../
@@ -50,7 +47,6 @@ mtd_add_qt_tests(
     ../IndirectDataValidationHelper.cpp
   LINK_LIBS
     ${CORE_MANTIDLIBS}
-    CurveFitting
     DataObjects
     gmock
     ${POCO_LIBRARIES}

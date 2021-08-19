@@ -31,7 +31,7 @@ class D7AbsoluteCrossSectionsTest(unittest.TestCase):
         Load('397004_reduced.nxs', OutputWorkspace='sample_data')
 
     def setUp(self):
-        self._sampleProperties = {'FormulaUnits': 1, 'SampleMass': 2.93, 'FormulaUnitMass': 182.56, 'SampleSpin':0.5,
+        self._sampleProperties = {'SampleMass': 2.93, 'FormulaUnitMass': 182.56, 'SampleSpin':0.5,
                             'ThetaOffset':0.01}
 
     def tearDown(self):

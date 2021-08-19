@@ -10,6 +10,7 @@
 #include "MantidAPI/SampleValidator.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAlgorithms/SampleCorrections/MayersSampleCorrectionStrategy.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
@@ -162,6 +163,7 @@ void MayersSampleCorrection::exec() {
 Kernel::IValidator_sptr MayersSampleCorrection::createInputWSValidator() const {
   using API::InstrumentValidator;
   using API::SampleValidator;
+  using API::WorkspaceUnitValidator;
   using Kernel::CompositeValidator;
   auto validator = std::make_shared<CompositeValidator>();
 
@@ -170,6 +172,9 @@ Kernel::IValidator_sptr MayersSampleCorrection::createInputWSValidator() const {
 
   requires = (SampleValidator::Shape | SampleValidator::Material);
   validator->add<SampleValidator, unsigned int>(requires);
+
+  // NOTE: Mayers correction requires the input to be of TOF
+  validator->add<WorkspaceUnitValidator>("TOF");
 
   return validator;
 }

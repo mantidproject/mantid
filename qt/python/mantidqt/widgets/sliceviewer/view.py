@@ -79,6 +79,7 @@ class SliceViewerDataView(QWidget):
         self.colorbar_layout.setSpacing(0)
 
         self.image_info_widget = ImageInfoWidget(self)
+        self.image_info_widget.setToolTip("Information about the selected pixel")
         self.track_cursor = QCheckBox("Track Cursor", self)
         self.track_cursor.setToolTip(
             "Update the image readout table when the cursor is over the plot. "
@@ -112,6 +113,13 @@ class SliceViewerDataView(QWidget):
         self.colorbar_layout.addWidget(self.colorbar_label)
         norm_scale = self.get_default_scale_norm()
         self.colorbar = ColorbarWidget(self, norm_scale)
+        self.colorbar.cmap.setToolTip("Colormap options")
+        self.colorbar.crev.setToolTip("Reverse colormap")
+        self.colorbar.norm.setToolTip("Colormap normalisation options")
+        self.colorbar.powerscale.setToolTip("Power colormap scale")
+        self.colorbar.cmax.setToolTip("Colormap maximum limit")
+        self.colorbar.cmin.setToolTip("Colormap minimum limit")
+        self.colorbar.autoscale.setToolTip("Automatically changes colormap limits when zooming on the plot")
         self.colorbar_layout.addWidget(self.colorbar)
         self.colorbar.colorbarChanged.connect(self.update_data_clim)
         self.colorbar.scaleNormChanged.connect(self.scale_norm_changed)
@@ -355,7 +363,7 @@ class SliceViewerDataView(QWidget):
         """
         self.presenter.export_region(limits, cut)
 
-    def update_plot_data(self, data, transposed=False):
+    def update_plot_data(self, data):
         """
         This just updates the plot data without creating a new plot. The extents
         can change if the data has been rebinned.
@@ -363,14 +371,7 @@ class SliceViewerDataView(QWidget):
         if self.nonortho_transform:
             self.image.set_array(data.T.ravel())
         else:
-            # need to update extent and limits of orthog axes when transposed (non orthog limits reset anyway)
-            extent = self.image.get_extent()
             self.image.set_data(data.T)
-            if transposed:
-                extent = (extent[2], extent[3], extent[0], extent[1])
-                self.image.set_extent(extent)
-                self.ax.set_xlim((extent[0], extent[1]))
-                self.ax.set_ylim((extent[2], extent[3]))
         self.colorbar.update_clim()
 
     def track_cursor_checked(self):

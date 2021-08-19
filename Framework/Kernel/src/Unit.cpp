@@ -654,67 +654,46 @@ double dSpacing::singleToTOF(const double x) const {
 }
 
 double dSpacing::singleFromTOF(const double tof) const {
+  // DIFA * d^2 + DIFC * d + T0 - TOF = 0
+
+  // Use the citardauq formula to solve quadratic in order to minimise loss of precision. DIFC and sqrt term are often
+  // similar and the "classic" quadratic formula involves calculating their difference in the numerator
+
+  //               2*(T0 - TOF)                                            (T0 - TOF)
+  // d = -------------------------------------------  =  ---------------------------------------------------
+  //     -DIFC -+ SQRT(DIFC^2 - 4*DIFA*(T0 - TOF))       0.5 * DIFC (-1 -+ SQRT(1 - 4*DIFA*(T0 - TOF)/DIFC^2)
+
   // dealing with various edge cases
   if (!isInitialized())
     throw std::runtime_error("dSpacingBase::singleFromTOF called before object "
                              "has been initialized.");
   if (!toDSpacingError.empty())
     throw std::runtime_error(toDSpacingError);
+  double c = tzero - tof;
   // handle special cases first...
+  // citardauq formula hides non-zero root if c=0
   if (tof == tzero) {
-    if (difa != 0)
+    if (difa < 0)
       return -difc / difa;
+    else
+      return 0;
   }
-  if ((difc * difc - 4 * difa * (tzero - tof)) < 0) {
+  double sqrtTerm = 1 - 4 * difa * c / (difc * difc);
+  if (sqrtTerm < 0) {
     throw std::runtime_error("Cannot convert to d spacing. Quadratic doesn't have real roots");
   }
-  if ((difa > 0) && ((tzero - tof) > 0)) {
+  if ((difa > 0) && (c > 0)) {
     throw std::runtime_error("Cannot convert to d spacing. Quadratic doesn't "
                              "have a positive root");
   }
-
-  // --------------------
-  //  solve for dpsacing
-  // --------------------
-  // NOTE: stupid explicity is the beauty
-  static constexpr double EPSILON = std::numeric_limits<double>::epsilon();
-  if (std::abs(difa) < EPSILON) {
-    // TOF = DIFA * d^2 + DIFC * d + T0
-    // 0.0 = DIFA * d^2 + DIFC * d + (T0 - TOF)
-    // degenerates to
-    // TOF = DIFC * d + T0
-    // gives us
-    // d = (TOF - T0) / DIFC
-    //
-    // NOTE: DIFC is always positive!!!
-    return (tof - tzero) / difc;
-  } else {
-    // TOF = DIFA * d^2 + DIFC * d + T0
-    // 0.0 = DIFA * d^2 + DIFC * d + (T0 - TOF)
-    // solve for this quadratic equation, we have
-    //       -DIFC + SQRT(DIFC^2 - 4*DIFA*(T0 - TOF))
-    // d = -------------------------------------------
-    //                  2*DIFA
-    // and
-    //       -DIFC - SQRT(DIFC^2 - 4*DIFA*(T0 - TOF))
-    // d = -------------------------------------------
-    //                  2*DIFA
-    // NOTE:
-    //   bottom line is that d has to be a positive number that is closer to 0
-    double sqrtTerm = sqrt(difc * difc - 4 * difa * (tzero - tof));
-    double d1 = 0.5 / difa * (-difc + sqrtTerm);
-    double d2 = 0.5 / difa * (-difc - sqrtTerm);
-    double dspacing;
-    //
-    if (d1 * d2 < 0.0) {
-      dspacing = std::max(d1, d2);
-    } else {
-      d1 = std::max(0.0, d1);
-      d2 = std::max(0.0, d2);
-      dspacing = std::min(d1, d2);
-    }
-    return dspacing;
-  }
+  // pick smallest positive root. Since difc is positive it just depends on sign of c
+  // Note - c is generally negative
+  if (c > 0)
+    // single positive root
+    return c / (0.5 * difc * (-1 + sqrt(sqrtTerm)));
+  else
+    // two positive roots. pick most negative denominator to get smallest root
+    return c / (0.5 * difc * (-1 - sqrt(sqrtTerm)));
 }
 
 double dSpacing::conversionTOFMin() const {

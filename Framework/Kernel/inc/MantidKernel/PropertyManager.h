@@ -92,6 +92,8 @@ public:
 
   /// removes the property from properties map
   void removeProperty(const std::string &name, const bool delproperty = true) override;
+  /// removes the property from the properties map and returns a pointer to it
+  std::unique_ptr<Property> takeProperty(const size_t index) override;
   /// Clears the whole property map
   void clear() override;
 
@@ -105,10 +107,11 @@ public:
   bool operator==(const PropertyManager &other) const;
   bool operator!=(const PropertyManager &other) const;
 
+  Property *getPointerToProperty(const std::string &name) const override;
+
 protected:
   friend class PropertyManagerOwner;
 
-  Property *getPointerToProperty(const std::string &name) const override;
   Property *getPointerToPropertyOrdinal(const int &index) const override;
   Property *getPointerToPropertyOrNull(const std::string &name) const;
 

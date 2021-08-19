@@ -111,7 +111,7 @@ API::Workspace_sptr MultiPeriodLoadMuonStrategy::loadDeadTimeTable() const {
 
 /**
  * Gets time zero table from loaded time zeros
- * Assumes all peridos have same time zero
+ * Assumes all periods have same time zero
  * @returns :: Time zero table
  */
 Workspace_sptr MultiPeriodLoadMuonStrategy::getTimeZeroTable() {

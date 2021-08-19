@@ -35,7 +35,7 @@ By providing MaxNumberOfBreaks as a parameter, the users are also will
 be able to successfully and efficiently apply the algorithm to a workspace
 with multiple spectrums, which would generate an output of workspace
 with multiple spectrums of :ref:`SplineSmoothing <algm-SplineSmoothing-v1>`
-algorithm applied to it. `BSpline <http://www.mantidproject.org/BSpline>`_
+algorithm applied to it. :ref:`BSpline <func-BSpline>`
 can be used to help you understand break-points in further detail.
 
 

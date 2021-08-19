@@ -86,6 +86,9 @@ public:
   virtual Mantid::Kernel::Matrix<double> getGoniometerMatrix() const = 0;
   virtual void setGoniometerMatrix(const Mantid::Kernel::Matrix<double> &m_GoniometerMatrix) = 0;
 
+  virtual int getRow() const = 0;
+  virtual int getCol() const = 0;
+
   virtual double getL1() const = 0;
   virtual double getL2() const = 0;
 

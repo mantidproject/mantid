@@ -138,7 +138,8 @@ class DimensionSelectorWidget(QtWidgets.QWidget):
         #basis
         self.basis=['1,0,0','0,1,0','0,0,1']
         #default values
-        self.dimNames=['[H,0,0]','[0,K,0]','[0,0,L]','DeltaE']
+        self.dimNames=['[H,0,0]','[0,K,0]','[0,0,L]', 'DeltaE']
+
         self.dimMin=[-numpy.inf,-numpy.inf,-numpy.inf,-numpy.inf]
         self.dimMax=[numpy.inf,numpy.inf,numpy.inf,numpy.inf]
         self.dimStep=[0.05,0.05,0.05,1]
@@ -313,6 +314,22 @@ class DimensionSelectorWidget(QtWidgets.QWidget):
         self.updateGui()
         self.updateChanges()
 
+    def toggleDeltaE(self, on):
+        self._editMin4.setEnabled(on)
+        self._editMax4.setEnabled(on)
+        self._comboDim4.setEnabled(on)
+
+        if not on:
+            self._comboDim4.setCurrentIndex(self.dimNames.index('DeltaE'))
+            self.updateCombo()
+            self._comboDim1.model().item(3).setFlags(QtCore.Qt.NoItemFlags)
+            self._comboDim2.model().item(3).setFlags(QtCore.Qt.NoItemFlags)
+            self._comboDim3.model().item(3).setFlags(QtCore.Qt.NoItemFlags)
+        else:
+            self.set_editMin4(-numpy.inf)
+            self.set_editMax4(numpy.inf)
+            self.updateCombo()
+
     def updateGui(self):
         self._editMin1.setText(FloatToQString(self.dimMin[0]))
         self._editMin2.setText(FloatToQString(self.dimMin[1]))
@@ -331,11 +348,10 @@ class DimensionSelectorWidget(QtWidgets.QWidget):
         self._comboDim2.clear()
         self._comboDim3.clear()
         self._comboDim4.clear()
-        for name in self.dimNames:
-            self._comboDim1.addItem(name)
-            self._comboDim2.addItem(name)
-            self._comboDim3.addItem(name)
-            self._comboDim4.addItem(name)
+        self._comboDim1.addItems(self.dimNames)
+        self._comboDim2.addItems(self.dimNames)
+        self._comboDim3.addItems(self.dimNames)
+        self._comboDim4.addItems(self.dimNames)
         self._comboDim1.setCurrentIndex(0)
         self._comboDim2.setCurrentIndex(1)
         self._comboDim3.setCurrentIndex(2)
@@ -351,6 +367,16 @@ class DimensionSelectorWidget(QtWidgets.QWidget):
         d['dimStep']=self.dimStep
         d['dimIndex']=self.dimIndex
         self.changed.emit(d)
+
+    def set_editMin4(self, val):
+        self._editMin4.setText(FloatToQString(val))
+        self.dimMin[3] = val
+        self.updateChanges()
+
+    def set_editMax4(self, val):
+        self._editMax4.setText(FloatToQString(val))
+        self.dimMax[3] = val
+        self.updateChanges()
 
 
 if __name__=='__main__':

@@ -18,12 +18,14 @@ SPECIAL_UPPER = [specialname.upper for specialname in SPECIAL]
 # TODO this list should be empty
 ALG_BAD_PARAMS = {
     "Bin2DPowderDiffraction(v1)": ("dSpaceBinning", "dPerpendicularBinning"),
+    "PowderReduceP2D(v1)": ("dSpaceBinning","dPerpendicularBinning"),
     "CalculateUMatrix(v1)": ("a", "b", "c", "alpha", "beta", "gamma"),
     "ConvertToMD(v1)": ("dEAnalysisMode"),
     "ConvertToMDMinMaxLocal(v1)": ("dEAnalysisMode"),
     "ConvertToMDMinMaxGlobal(v1)": ("dEAnalysisMode"),
     "EstimateDivergence(v1)": ("alpha", "beta0", "beta1"),
     "FindUBUsingLatticeParameters(v1)": ("a", "b", "c", "alpha", "beta", "gamma"),
+    "FindGlobalBMatrix(v1)": ("a", "b", "c", "alpha", "beta", "gamma"),
     "IndexSXPeaks(v1)": ("a", "b", "c", "alpha", "beta", "gamma", "dTolerance"),
     "LoadDNSSCD(v1)": ("a", "b", "c", "alpha", "beta", "gamma"),
     "ModeratorTzero(v1)": ("tolTOF"),
@@ -49,6 +51,7 @@ ALG_BAD_PARAMS = {
     "CreateMD(v1)": ("u", "v"),
     "AccumulateMD(v1)": ("u", "v")
 }
+
 
 # TODO this list should be empty
 FUNC_BAD_NAME = ("Muon_ExpDecayOscTest")

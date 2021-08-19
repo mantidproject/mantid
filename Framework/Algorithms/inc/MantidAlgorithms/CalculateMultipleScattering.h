@@ -54,7 +54,7 @@ protected:
                                                                  const size_t wavelengthPoints, const size_t rows,
                                                                  const size_t columns);
   virtual std::unique_ptr<InterpolationOption> createInterpolateOption();
-  double interpolateLogQuadratic(const API::MatrixWorkspace_sptr &workspaceToInterpolate, double x);
+  double interpolateGaussian(const HistogramData::Histogram &histToInterpolate, double x);
   void updateTrackDirection(Geometry::Track &track, const double cosT, const double phi);
 
 private:
@@ -66,26 +66,29 @@ private:
                     bool specialSingleScatterCalc);
   double simulatePaths(const int nEvents, const int nScatters, const API::Sample &sample,
                        const Geometry::Instrument &instrument, Kernel::PseudoRandomNumberGenerator &rng,
-                       const API::MatrixWorkspace_sptr sigmaSSWS, const API::MatrixWorkspace_sptr SOfQ,
+                       const API::MatrixWorkspace_sptr sigmaSSWS, const HistogramData::Histogram &SOfQ,
                        const double kinc, Kernel::V3D detPos, bool specialSingleScatterCalc);
   std::tuple<bool, double, double> scatter(const int nScatters, const API::Sample &sample,
                                            const Geometry::Instrument &instrument, Kernel::V3D sourcePos,
                                            Kernel::PseudoRandomNumberGenerator &rng, const double sigma_total,
-                                           double scatteringXSection, const API::MatrixWorkspace_sptr SOfQ,
+                                           double scatteringXSection, const HistogramData::Histogram &SOfQ,
                                            const double kinc, Kernel::V3D detPos, bool specialSingleScatterCalc);
   Geometry::Track start_point(const Geometry::IObject &shape, std::shared_ptr<const Geometry::ReferenceFrame>,
                               Kernel::V3D sourcePos, Kernel::PseudoRandomNumberGenerator &rng);
   Geometry::Track generateInitialTrack(const Geometry::IObject &shape,
                                        std::shared_ptr<const Geometry::ReferenceFrame> frame,
-                                       const Kernel::V3D sourcePos, Kernel::PseudoRandomNumberGenerator &rng);
+                                       const Kernel::V3D &sourcePos, Kernel::PseudoRandomNumberGenerator &rng);
   void inc_xyz(Geometry::Track &track, double vl);
   void updateWeightAndPosition(Geometry::Track &track, double &weight, const double vmfp, const double sigma_total,
                                Kernel::PseudoRandomNumberGenerator &rng);
-  void q_dir(Geometry::Track &track, const API::MatrixWorkspace_sptr SOfQ, const double kinc,
+  void q_dir(Geometry::Track &track, const HistogramData::Histogram &SOfQ, const double kinc,
              const double scatteringXSection, Kernel::PseudoRandomNumberGenerator &rng, double &QSS, double &weight);
   void interpolateFromSparse(API::MatrixWorkspace &targetWS, const SparseWorkspace &sparseWS,
                              const Mantid::Algorithms::InterpolationOption &interpOpt);
-  int m_callsToInterceptSurface{0};
+  void correctForWorkspaceNameClash(std::string &wsName);
+  void setWorkspaceName(const API::MatrixWorkspace_sptr &ws, std::string wsName);
+  long long m_callsToInterceptSurface{0};
+  std::map<int, int> m_attemptsToGenerateInitialTrack;
 };
 } // namespace Algorithms
 } // namespace Mantid

@@ -244,7 +244,7 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
         if (bkgdWS->getNumDims() <= 3) {
           errorMessage.emplace("BackgroundWorkspace", "The input background workspace must have at 4 dimensions when "
                                                       "input workspace has more than 4 dimensions (inelastic case).");
-        } else if (bkgdWS->getDimension(3)->getMDFrame().name() != inputWS->getDimension(3)->getMDFrame().name()) {
+        } else if (bkgdWS->getDimension(3)->getName() != inputWS->getDimension(3)->getName()) {
           errorMessage.emplace("BackgroundWorkspace", "The input background workspace 4th dimension must be DeltaE "
                                                       "for inelastic case.");
         }
@@ -549,7 +549,7 @@ void MDNorm::exec() {
     API::IMDWorkspace_sptr outbkgd = divideMD(outputBackgroundDataWS, m_bkgdNormWS, normedBkgdWSName, 0.98, 0.99);
 
     // Clean workspace
-    IAlgorithm_sptr minusMD = createChildAlgorithm("MinusMD", 0.99, 1.00);
+    auto minusMD = createChildAlgorithm("MinusMD", 0.99, 1.00);
     // set up
     minusMD->setProperty("LHSWorkspace", out);
     minusMD->setProperty("RHSWorkspace", outbkgd);
@@ -570,7 +570,7 @@ void MDNorm::exec() {
 inline API::IMDWorkspace_sptr MDNorm::divideMD(API::IMDHistoWorkspace_sptr lhs, API::IMDHistoWorkspace_sptr rhs,
                                                const std::string &outputwsname, const double &startProgress,
                                                const double &endProgress) {
-  IAlgorithm_sptr divideMD = createChildAlgorithm("DivideMD", startProgress, endProgress);
+  auto divideMD = createChildAlgorithm("DivideMD", startProgress, endProgress);
   divideMD->setProperty("LHSWorkspace", lhs);
   divideMD->setProperty("RHSWorkspace", rhs);
   divideMD->setPropertyValue("OutputWorkspace", outputwsname);
@@ -1107,7 +1107,7 @@ MDNorm::binBackgroundWS(const std::vector<Geometry::SymmetryOperation> &symmetry
 
       // Set up BinMD for this symmetry opeation
       double progress_fraction = 1. / static_cast<double>(symmetryOps.size() * numexpinfo);
-      IAlgorithm_sptr binMD =
+      auto binMD =
           createChildAlgorithm("BinMD", soIndex * 0.3 * progress_fraction, (soIndex + 1) * 0.3 * progress_fraction);
 
       binMD->setPropertyValue("AxisAligned", "0");
@@ -1191,7 +1191,7 @@ DataObjects::MDHistoWorkspace_sptr MDNorm::binInputWS(const std::vector<Geometry
 
     // bin the data
     double fraction = 1. / static_cast<double>(symmetryOps.size());
-    IAlgorithm_sptr binMD = createChildAlgorithm("BinMD", soIndex * 0.3 * fraction, (soIndex + 1) * 0.3 * fraction);
+    auto binMD = createChildAlgorithm("BinMD", soIndex * 0.3 * fraction, (soIndex + 1) * 0.3 * fraction);
     binMD->setPropertyValue("AxisAligned", "0");
     binMD->setProperty("InputWorkspace", m_inputWS);
     binMD->setProperty("TemporaryDataWorkspace", tempDataWS);

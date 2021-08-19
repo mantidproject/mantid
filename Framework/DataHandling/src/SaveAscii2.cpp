@@ -205,11 +205,6 @@ void SaveAscii2::exec() {
     }
   }
 
-  // Check whether we need to write the fourth column
-  if (!m_ws->hasDx(0) && m_writeDX) {
-    throw std::runtime_error("x data errors have been requested but do not exist.");
-  }
-
   // e + and - are included as they're part of the scientific notation
   if (!boost::regex_match(m_sep.begin(), m_sep.end(), boost::regex("[^0-9e+-]+", boost::regex::perl))) {
     throw std::invalid_argument("Separators cannot contain numeric characters, "
@@ -327,6 +322,7 @@ void SaveAscii2::writeSpectrum(const int &wsIndex, std::ofstream &file) {
   auto pointDeltas = m_ws->pointStandardDeviations(0);
   auto points0 = m_ws->points(0);
   auto pointsSpec = m_ws->points(wsIndex);
+  bool hasDx = m_ws->hasDx(0);
   for (int bin = 0; bin < m_nBins; bin++) {
     if (m_isCommonBins) {
       file << points0[bin];
@@ -340,8 +336,12 @@ void SaveAscii2::writeSpectrum(const int &wsIndex, std::ofstream &file) {
     file << m_sep;
     file << m_ws->e(wsIndex)[bin];
     if (m_writeDX) {
-      file << m_sep;
-      file << pointDeltas[bin];
+      if (hasDx) {
+        file << m_sep;
+        file << pointDeltas[bin];
+      } else {
+        g_log.information("SaveAscii2: WriteXError is requested but there are no Dx data in the workspace");
+      }
     }
     file << '\n';
   }

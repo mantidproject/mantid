@@ -28,26 +28,31 @@ set(TEST_FILES
   Common/EncoderTest.h
   Common/PlotterTestQt5.h
   Experiment/ExperimentPresenterTest.h
-  Experiment/PerThetaDefaultsTableValidatorTest.h
+  Experiment/LookupTableValidatorTest.h
   Experiment/ExperimentOptionDefaultsTest.h
   Reduction/ReductionJobsMergeTest.h
   Reduction/ParseReflectometryStringsTest.h
-  Reduction/ValidatePerThetaDefaultsTest.h
+  Reduction/ValidateLookupRowTest.h
   Reduction/GroupTest.h
   Reduction/ValidateRowTest.h
+
+  Preview/PreviewModelTest.h
+  Preview/PreviewPresenterTest.h
 )
 
 set(CXXTEST_EXTRA_HEADER_INCLUDE
     ${CMAKE_CURRENT_LIST_DIR}/InterfacesReflectometryTestInitialization.h)
 
 mtd_add_qt_tests(
-  TARGET_NAME MantidQtInterfacesISISReflectometryTest
+  TARGET_NAME MantidScientificInterfacesISISReflectometryTest
   QT_VERSION 5
   SRC ${TEST_FILES}
   INCLUDE_DIRS
     ../../../../Framework/CurveFitting/inc
     ../../../../Framework/DataObjects/inc
     ../../../../Framework/TestHelpers/inc
+    ../GUI/Preview
+    Preview
   TEST_HELPER_SRCS
     ../../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
     ../../../../Framework/TestHelpers/src/IndirectFitDataCreationHelper.cpp
@@ -57,13 +62,12 @@ mtd_add_qt_tests(
     ../../../../Framework/TestHelpers/src/TearDownWorld.cpp
   LINK_LIBS
     ${CORE_MANTIDLIBS}
-    CurveFitting
     DataObjects
     gmock
     ${POCO_LIBRARIES}
     ${Boost_LIBRARIES}
     PythonInterfaceCore
-    ${PYTHON_LIBRARIES}
+    Python::Python
   MTD_QT_LINK_LIBS
     MantidScientificInterfacesISISReflectometry
     MantidQtWidgetsCommon

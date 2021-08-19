@@ -16,6 +16,7 @@
 // These includes seem to make the difference between initialization of the
 // workspace names (workspace2D/1D etc), instrument classes and not for this
 // test case.
+#include "MantidDataHandling/Load.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include <Poco/Path.h>
@@ -65,6 +66,30 @@ public:
 
     AnalysisDataService::Instance().remove(outputSpace + "_1");
     AnalysisDataService::Instance().remove(outputSpace + "_2");
+  }
+
+  void test_run_via_load() {
+    // We are verifying that the confidence information provided by the loader is good
+    std::string inputFile = "mcstas.h5";
+    Load loader;
+    loader.initialize();
+    loader.setChild(true);
+    loader.setProperty("Filename", inputFile);
+    loader.setPropertyValue("OutputWorkspace", "dummy");
+    TS_ASSERT_EQUALS(loader.getPropertyValue("LoaderName"), "LoadMcStasNexus");
+    loader.execute();
+    Workspace_sptr out = loader.getProperty("OutputWorkspace");
+    auto asMatrixOut = std::dynamic_pointer_cast<MatrixWorkspace>(out);
+  }
+
+  void test_cannot_run_via_load() {
+    // We are verifying that the confidence information provided by the loader is idenfiying unsuitable files
+    std::string inputFile = "POLREF00014966.nxs";
+    Load loader;
+    loader.initialize();
+    loader.setChild(true);
+    loader.setProperty("Filename", inputFile);
+    TS_ASSERT_DIFFERS(loader.getPropertyValue("LoaderName"), "LoadMcStasNexus");
   }
 
 private:

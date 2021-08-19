@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>background_corrections_view</class>
+ <widget class="QWidget" name="background_corrections_view">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>473</width>
+    <height>296</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0">
+    <widget class="QGroupBox" name="groupBox">
+     <property name="styleSheet">
+      <string notr="true">QGroupBox {
+border: 1px solid grey;
+border-radius: 10px;
+margin-top: 1ex;
+margin-right: 0ex
+}
+
+QGroupBox:title {
+subcontrol-origin: margin;
+padding: 0 3px;
+subcontrol-position: top center;
+padding-top: 0px;
+padding-bottom: 0px;
+padding-right: 10px;
+color: grey; }
+</string>
+     </property>
+     <property name="title">
+      <string>Background Correction</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_2">
+      <property name="topMargin">
+       <number>20</number>
+      </property>
+      <item row="1" column="1">
+       <widget class="QLabel" name="mode_label">
+        <property name="minimumSize">
+         <size>
+          <width>200</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Background:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QLabel" name="select_function_label">
+        <property name="minimumSize">
+         <size>
+          <width>200</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Select Function:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QLabel" name="show_data_for_label">
+        <property name="minimumSize">
+         <size>
+          <width>200</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Show data for:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1" colspan="4">
+       <widget class="QTableWidget" name="correction_options_table">
+        <property name="styleSheet">
+         <string notr="true">QTableWidget {
+font-size: 8pt;
+ border: 1px solid #828790;
+}
+
+QTableWidget::item:selected {
+background-color: #c7e0ff;
+color: #000000;
+}
+
+QTableWidget::item:hover {
+background-color: #c7e0ff;
+}</string>
+        </property>
+        <property name="alternatingRowColors">
+         <bool>true</bool>
+        </property>
+        <property name="selectionMode">
+         <enum>QAbstractItemView::SingleSelection</enum>
+        </property>
+        <attribute name="horizontalHeaderDefaultSectionSize">
+         <number>80</number>
+        </attribute>
+        <attribute name="horizontalHeaderStretchLastSection">
+         <bool>true</bool>
+        </attribute>
+        <attribute name="verticalHeaderVisible">
+         <bool>false</bool>
+        </attribute>
+        <column>
+         <property name="text">
+          <string>Run</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Group</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Use Raw</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Start X</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>End X</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>BG</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>BG Error</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Status</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Fit Output</string>
+         </property>
+        </column>
+       </widget>
+      </item>
+      <item row="2" column="2" colspan="3">
+       <widget class="QComboBox" name="function_combo_box">
+        <property name="toolTip">
+         <string>Select a fit function to use for the corrections</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>Flat Background + Exp Decay</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Flat Background</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="1" column="2" colspan="3">
+       <widget class="QComboBox" name="mode_combo_box">
+        <property name="toolTip">
+         <string>Select the mode to use to perform background corrections</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>None</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Auto</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="3" column="2">
+       <widget class="QCheckBox" name="show_all_runs_checkbox">
+        <property name="toolTip">
+         <string>Tick to show data for all the runs</string>
+        </property>
+        <property name="text">
+         <string>All Runs</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="3" colspan="2">
+       <widget class="QComboBox" name="group_combo_box">
+        <property name="toolTip">
+         <string>Select the Group to show data for</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>All</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="4" column="1" colspan="4">
+       <widget class="QCheckBox" name="apply_table_changes_to_all_checkbox">
+        <property name="toolTip">
+         <string>Apply all changes made in the table to all of the domains, including domains not currently displayed</string>
+        </property>
+        <property name="text">
+         <string>Apply parameter changes to all domains</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

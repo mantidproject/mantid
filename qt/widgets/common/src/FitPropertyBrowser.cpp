@@ -70,7 +70,6 @@ using namespace Mantid::API;
 int getNumberOfSpectra(const MatrixWorkspace_sptr &workspace) {
   return static_cast<int>(workspace->getNumberHistograms());
 }
-
 } // namespace
 
 /**
@@ -1233,6 +1232,7 @@ void FitPropertyBrowser::enumChanged(QtProperty *prop) {
   if (prop == m_workspace) {
     workspaceChange(QString::fromStdString(workspaceName()));
     setWorkspaceProperties();
+    intChanged(m_workspaceIndex);
     m_storedWorkspaceName = workspaceName();
   } else if (prop->propertyName() == "Type") {
     disableUndo();
@@ -1297,6 +1297,7 @@ void FitPropertyBrowser::intChanged(QtProperty *prop) {
     return;
 
   if (prop == m_workspaceIndex) {
+    // Get current value displayed by the workspace index spinbox
     auto const currentIndex = workspaceIndex();
     auto const allowedIndex = getAllowedIndex(currentIndex);
     if (allowedIndex != currentIndex) {
@@ -1549,14 +1550,12 @@ void FitPropertyBrowser::doFit(int maxIterations) {
     }
     m_fitActionUndoFit->setEnabled(true);
 
-    const std::string funStr = getFunctionString();
-
     Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
     alg->initialize();
     if (isHistogramFit()) {
       alg->setProperty("EvaluationType", "Histogram");
     }
-    alg->setPropertyValue("Function", funStr);
+    alg->setProperty("Function", std::dynamic_pointer_cast<Mantid::API::IFunction>(compositeFunction())->clone());
     alg->setProperty("InputWorkspace", ws);
     auto tbl = std::dynamic_pointer_cast<ITableWorkspace>(ws);
     if (!tbl) {
@@ -1595,7 +1594,6 @@ void FitPropertyBrowser::doFit(int maxIterations) {
     observeFinish(alg);
     alg->executeAsync();
     m_fitAlgParameters = alg->toString();
-
   } catch (const std::exception &e) {
     QString msg = "Fit algorithm failed.\n\n" + QString(e.what()) + "\n";
     QMessageBox::critical(this, "Mantid - Error", msg);
@@ -1637,8 +1635,9 @@ void FitPropertyBrowser::finishHandle(const Mantid::API::IAlgorithm *alg) {
     std::string out = alg->getProperty("OutputWorkspace");
     emit algorithmFinished(QString::fromStdString(out));
   }
-  // Update Status string
-  auto status = QString::fromStdString(alg->getPropertyValue("OutputStatus"));
+  // Update Status string in member variable (so can be retrieved)
+  m_fitAlgOutputStatus = alg->getPropertyValue("OutputStatus");
+  auto status = QString::fromStdString(m_fitAlgOutputStatus);
   emit fitResultsChanged(status);
   // update Quality string
   if (m_displayActionQuality->isChecked()) {
@@ -1646,9 +1645,7 @@ void FitPropertyBrowser::finishHandle(const Mantid::API::IAlgorithm *alg) {
     std::string costFunction = alg->getProperty("CostFunction");
     std::shared_ptr<Mantid::API::ICostFunction> costfun =
         Mantid::API::CostFunctionFactory::Instance().create(costFunction);
-    if (status != "success") {
-      status = "failed";
-    }
+    status = (status == "success") ? "success" : "failed";
     emit changeWindowTitle(QString("Fit Function (") + costfun->shortName().c_str() + " = " + QString::number(quality) +
                            ", " + status + ")");
   } else
@@ -2040,11 +2037,6 @@ void FitPropertyBrowser::getFitResults() {
         std::string name;
         double value, error;
         row >> name >> value >> error;
-
-        // In case of a single function Fit doesn't create a CompositeFunction
-        if (count() == 1) {
-          name.insert(0, "f0.");
-        }
 
         size_t paramIndex = compositeFunction()->parameterIndex(name);
 
@@ -2459,10 +2451,6 @@ int FitPropertyBrowser::getAllowedIndex(int currentIndex) const {
 
   if (!workspace) {
     return 0;
-  }
-
-  if (currentIndex == m_oldWorkspaceIndex) {
-    return currentIndex < 0 ? 0 : currentIndex;
   }
 
   auto const allowedIndices =
@@ -3213,6 +3201,11 @@ QStringList FitPropertyBrowser::getParameterNames() const {
 std::string FitPropertyBrowser::getFitAlgorithmParameters() const { return m_fitAlgParameters; }
 
 /**=================================================================================================
+ * Get Fit Algorithm output statuss
+ */
+std::string FitPropertyBrowser::getFitAlgorithmOutputStatus() const { return m_fitAlgOutputStatus; }
+
+/**=================================================================================================
  * Show online function help
  */
 void FitPropertyBrowser::functionHelp() {
@@ -3266,7 +3259,16 @@ void FitPropertyBrowser::addAllowedSpectra(const QString &wsName, const QList<in
     for (auto const i : wsSpectra) {
       indices.push_back(static_cast<int>(ws->getIndexFromSpectrumNumber(i)));
     }
+    auto wsFound = m_allowedSpectra.find(wsName);
     m_allowedSpectra.insert(wsName, indices);
+    if (wsFound != m_allowedSpectra.end()) {
+      // we already knew about this workspace
+      // update workspace index list
+      intChanged(m_workspaceIndex);
+    } else {
+      // new workspace, update workspace names
+      populateWorkspaceNames();
+    }
   } else {
     throw std::runtime_error("Workspace " + name + " is not a MatrixWorkspace");
   }

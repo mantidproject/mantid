@@ -5,7 +5,10 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/FunctionDomain.h"
+#include "MantidAPI/Jacobian.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidCurveFitting/Jacobian.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/api/FitFunctions/IFunctionAdapter.h"
 #include "MantidPythonInterface/core/GetPointer.h"
@@ -14,8 +17,10 @@
 
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
+#include <boost/python/manage_new_object.hpp>
 #include <boost/python/overloads.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
+#include <boost/python/to_python_value.hpp>
 
 using Mantid::API::IFunction;
 using Mantid::API::IFunction_sptr;
@@ -85,6 +90,12 @@ using removeTieByName = void (IFunction::*)(const std::string &);
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unused-local-typedef")
 ///@endcond
+
+Mantid::API::Jacobian *getFunctionDeriv(IFunction &self, const Mantid::API::FunctionDomain &domain) {
+  auto *out = new Mantid::CurveFitting::Jacobian(domain.size(), self.nParams());
+  self.functionDeriv(domain, *out);
+  return out;
+}
 
 void setMatrixWorkspace(IFunction &self, const boost::python::object &workspace, int wi, float startX, float endX) {
   Mantid::API::MatrixWorkspace_sptr matWS = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
@@ -240,6 +251,9 @@ void export_IFunction() {
            "Returns the pointer to i-th child function")
 
       .def("nDomains", &IFunction::getNumberDomains, arg("self"), "Get the number of domains.")
+
+      .def("functionDeriv", &getFunctionDeriv, (arg("self"), arg("domain")), return_value_policy<manage_new_object>(),
+           "Calculate the values of the function for the given domain and returns them")
 
       .def("setMatrixWorkspace", &setMatrixWorkspace,
            (arg("self"), arg("workspace"), arg("wi"), arg("startX"), arg("endX")),

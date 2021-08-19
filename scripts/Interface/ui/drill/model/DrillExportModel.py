@@ -56,9 +56,7 @@ class DrillExportModel:
         Args:
             acquisitionMode (str): acquisition mode
         """
-        self._exportAlgorithms = {k:v
-                for k,v
-                in RundexSettings.EXPORT_ALGORITHMS[acquisitionMode].items()}
+        self._exportAlgorithms = {k: v for k, v in RundexSettings.EXPORT_ALGORITHMS[acquisitionMode].items()}
         self._exportExtensions = dict()
         self._exportDocs = dict()
         for a in self._exportAlgorithms.keys():
@@ -273,6 +271,8 @@ class DrillExportModel:
                     if 'Reflectometry' in algo:
                         kwargs['WriteHeader'] = True
                         kwargs['FileExtension'] = 'custom'
+                    else:
+                        kwargs['WriteXError'] = True
                 task = DrillTask(name, algo, InputWorkspace=wsName,
                                  FileName=filename, **kwargs)
                 tasks.append(task)

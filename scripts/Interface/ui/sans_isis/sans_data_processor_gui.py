@@ -15,24 +15,27 @@ from qtpy.QtGui import (QDoubleValidator, QIntValidator, QRegExpValidator)
 from qtpy.QtWidgets import (QListWidgetItem, QMessageBox, QFileDialog, QMainWindow, QLineEdit)
 from mantid.kernel import (Logger, UsageService, FeatureType)
 from enum import Enum
+
 from mantidqt import icons
 from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.utils.qt import load_ui
 from mantidqt.widgets import jobtreeview, manageuserdirectories
 from reduction_gui.reduction.scripter import execute_script
-from sans.common.enums import (ReductionDimensionality, OutputMode, SaveType, SANSInstrument,
+from sans.common.enums import (ReductionDimensionality, OutputMode, SANSInstrument,
                                RangeStepType, ReductionMode, FitType)
 from sans.gui_logic.gui_common import (get_reduction_mode_from_gui_selection,
                                        get_reduction_mode_strings_for_gui,
                                        get_string_for_gui_from_reduction_mode, GENERIC_SETTINGS,
                                        load_file, load_property, set_setting,
                                        get_instrument_from_gui_selection)
+from sans.gui_logic.models.POD.save_options import SaveOptions
 from sans.gui_logic.models.RowEntries import RowEntries
-from sans.gui_logic.models.SumRunsModel import SumRunsModel
+from sans.gui_logic.models.sum_runs_model import SumRunsModel
 from sans.gui_logic.presenter.add_runs_presenter import AddRunsPagePresenter
 from ui.sans_isis.SANSSaveOtherWindow import SANSSaveOtherDialog
-from ui.sans_isis.work_handler import WorkHandler
 from ui.sans_isis.modified_qt_field_factory import ModifiedQtFieldFactory
+
+from ui.sans_isis.sans_gui_observable import SansGuiObservable
 
 Ui_SansDataProcessorWindow, _ = load_ui(__file__, "sans_data_processor_window.ui")
 
@@ -93,10 +96,6 @@ class SANSDataProcessorGui(QMainWindow,
 
         @abstractmethod
         def on_sample_geometry_selection(self, show_geometry):
-            pass
-
-        @abstractmethod
-        def on_reduction_dimensionality_changed(self, is_1d):
             pass
 
         @abstractmethod
@@ -196,6 +195,7 @@ class SANSDataProcessorGui(QMainWindow,
         self.export_table_button.setIcon(icons.get_icon("mdi.file-export"))
 
         self._attach_signal_slots()
+        self._create_observables()
 
         # Attach validators
         self._attach_validators()
@@ -216,10 +216,20 @@ class SANSDataProcessorGui(QMainWindow,
         self.export_table_button.clicked.connect(self._export_table_clicked)
         self.save_other_pushButton.clicked.connect(self._on_save_other_button_pressed)
         self.save_can_checkBox.clicked.connect(self._on_save_can_clicked)
-        self.reduction_dimensionality_1D.toggled.connect(self._on_reduction_dimensionality_changed)
 
         modified_field_factory = ModifiedQtFieldFactory(self._on_field_edit)
         modified_field_factory.attach_to_children(self.settings_page)
+
+    def _create_observables(self):
+        self._observable_items = SansGuiObservable()
+        for save_checkbox in [self.can_sas_checkbox, self.nx_can_sas_checkbox, self.rkh_checkbox]:
+            save_checkbox.clicked.connect(self._observable_items.save_options.notify_subscribers)
+
+        for reduction_checkboxes in [self.reduction_dimensionality_1D, self.reduction_dimensionality_2D]:
+            reduction_checkboxes.clicked.connect(self._observable_items.reduction_dim.notify_subscribers)
+
+    def get_observable(self) -> SansGuiObservable:
+        return self._observable_items
 
     def _setup_progress_bar(self):
         self.batch_progress_bar.setMinimum(0)
@@ -243,7 +253,7 @@ class SANSDataProcessorGui(QMainWindow,
         self.main_stacked_widget.setCurrentIndex(index)
 
     def _setup_add_runs_page(self):
-        self.add_runs_presenter = AddRunsPagePresenter(SumRunsModel(WorkHandler(), self.add_runs_page),
+        self.add_runs_presenter = AddRunsPagePresenter(SumRunsModel(self.add_runs_page),
                                                        self.add_runs_page, self)
 
     def setup_layout(self):
@@ -559,9 +569,6 @@ class SANSDataProcessorGui(QMainWindow,
         self.save_can_checkBox.setChecked(value)
         UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS", "Save Can Toggled"], False)
         set_setting(self.__generic_settings, self.__save_can_key, value)
-
-    def _on_reduction_dimensionality_changed(self, is_1d):
-        self._call_settings_listeners(lambda listener: listener.on_reduction_dimensionality_changed(is_1d))
 
     def _on_user_file_load(self):
         """
@@ -1004,28 +1011,18 @@ class SANSDataProcessorGui(QMainWindow,
     # Save Options
     # -----------------------------------------------------------------
     @property
-    def save_types(self):
-        checked_save_types = []
-        if self.can_sas_checkbox.isChecked():
-            checked_save_types.append(SaveType.CAN_SAS)
-        if self.nx_can_sas_checkbox.isChecked():
-            checked_save_types.append(SaveType.NX_CAN_SAS)
-        if self.rkh_checkbox.isChecked():
-            checked_save_types.append(SaveType.RKH)
-        # If empty, provide the NoType type
-        if not checked_save_types:
-            checked_save_types = [SaveType.NO_TYPE]
-        return checked_save_types
+    def save_types(self) -> SaveOptions:
+        selected_options = SaveOptions()
+        selected_options.can_sas_1d = self.can_sas_checkbox.isChecked()
+        selected_options.nxs_can_sas =  self.nx_can_sas_checkbox.isChecked()
+        selected_options.rkh = self.rkh_checkbox.isChecked()
+        return selected_options
 
     @save_types.setter
-    def save_types(self, values):
-        for value in values:
-            if value is SaveType.CAN_SAS:
-                self.can_sas_checkbox.setChecked(True)
-            elif value is SaveType.NX_CAN_SAS:
-                self.nx_can_sas_checkbox.setChecked(True)
-            elif value is SaveType.RKH:
-                self.rkh_checkbox.setChecked(True)
+    def save_types(self, values: SaveOptions):
+        self.can_sas_checkbox.setChecked(values.can_sas_1d)
+        self.nx_can_sas_checkbox.setChecked(values.nxs_can_sas)
+        self.rkh_checkbox.setChecked(values.rkh)
 
     @property
     def zero_error_free(self):
@@ -1145,12 +1142,12 @@ class SANSDataProcessorGui(QMainWindow,
     # General group
     # ------------------------------------------------------------------------------------------------------------------
     @property
-    def reduction_dimensionality(self):
+    def reduction_dimensionality(self) -> ReductionDimensionality:
         return ReductionDimensionality.ONE_DIM if self.reduction_dimensionality_1D.isChecked() \
             else ReductionDimensionality.TWO_DIM
 
     @reduction_dimensionality.setter
-    def reduction_dimensionality(self, value):
+    def reduction_dimensionality(self, value: ReductionDimensionality):
         is_1d = value is ReductionDimensionality.ONE_DIM
         self.reduction_dimensionality_1D.setChecked(is_1d)
         self.reduction_dimensionality_2D.setChecked(not is_1d)

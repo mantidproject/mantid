@@ -124,7 +124,7 @@ std::map<std::string, std::string> LoadILLPolarizedDiffraction::validateInputs()
  */
 void LoadILLPolarizedDiffraction::exec() {
 
-  Progress progress(this, 0, 1, 2);
+  Progress progress(this, 0, 1, 3);
 
   m_fileName = getPropertyValue("Filename");
   m_outputWorkspaceGroup = std::make_shared<API::WorkspaceGroup>();
@@ -135,6 +135,9 @@ void LoadILLPolarizedDiffraction::exec() {
 
   progress.report("Loading the metadata");
   loadMetaData();
+
+  progress.report("Sorting polarisations");
+  sortPolarisations();
 
   setProperty("OutputWorkspace", m_outputWorkspaceGroup);
 }
@@ -299,7 +302,7 @@ void LoadILLPolarizedDiffraction::loadInstrument(API::MatrixWorkspace_sptr works
   // the start time is needed in the workspace when loading the parameter file
   workspace->mutableRun().addProperty("start_time", startTime);
 
-  IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
+  auto loadInst = createChildAlgorithm("LoadInstrument");
   loadInst->setPropertyValue("Filename", m_instName + "_Definition.xml");
   loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", workspace);
   loadInst->setProperty("RewriteSpectraMap", OptionalBool(true));
@@ -326,7 +329,7 @@ std::vector<double> LoadILLPolarizedDiffraction::loadTwoThetaDetectors(const API
     float *twoThetaDataEnd = twoThetaDataStart + D7_NUMBER_PIXELS_BANK;
     twoTheta.assign(twoThetaDataStart, twoThetaDataEnd);
   } else {
-    IAlgorithm_sptr loadIpf = createChildAlgorithm("LoadParameterFile");
+    auto loadIpf = createChildAlgorithm("LoadParameterFile");
     loadIpf->setPropertyValue("Filename", getPropertyValue("YIGFilename"));
     loadIpf->setProperty("Workspace", workspace);
     loadIpf->execute();
@@ -447,7 +450,7 @@ std::vector<double> LoadILLPolarizedDiffraction::prepareAxes(const NXEntry &entr
  * @param workspace : workspace to change the
  */
 API::MatrixWorkspace_sptr LoadILLPolarizedDiffraction::convertSpectrumAxis(API::MatrixWorkspace_sptr workspace) {
-  IAlgorithm_sptr convertSpectrumAxis = createChildAlgorithm("ConvertSpectrumAxis");
+  auto convertSpectrumAxis = createChildAlgorithm("ConvertSpectrumAxis");
   convertSpectrumAxis->initialize();
   convertSpectrumAxis->setProperty("InputWorkspace", workspace);
   convertSpectrumAxis->setProperty("OutputWorkspace", "__unused_for_child");
@@ -457,7 +460,7 @@ API::MatrixWorkspace_sptr LoadILLPolarizedDiffraction::convertSpectrumAxis(API::
   convertSpectrumAxis->execute();
   workspace = convertSpectrumAxis->getProperty("OutputWorkspace");
 
-  IAlgorithm_sptr changeSign = createChildAlgorithm("ConvertAxisByFormula");
+  auto changeSign = createChildAlgorithm("ConvertAxisByFormula");
   changeSign->initialize();
   changeSign->setProperty("InputWorkspace", workspace);
   changeSign->setProperty("OutputWorkspace", "__unused_for_child");
@@ -472,12 +475,37 @@ API::MatrixWorkspace_sptr LoadILLPolarizedDiffraction::convertSpectrumAxis(API::
  * @param workspace : workspace to be transposed
  */
 API::MatrixWorkspace_sptr LoadILLPolarizedDiffraction::transposeMonochromatic(API::MatrixWorkspace_sptr workspace) {
-  IAlgorithm_sptr transpose = createChildAlgorithm("Transpose");
+  auto transpose = createChildAlgorithm("Transpose");
   transpose->initialize();
   transpose->setProperty("InputWorkspace", workspace);
   transpose->setProperty("OutputWorkspace", "__unused_for_child");
   transpose->execute();
   return transpose->getProperty("OutputWorkspace");
+}
+
+/**
+ * Ensures that the order of flipper state values is 'ON' and then 'OFF' for each polarisation orientation
+ */
+void LoadILLPolarizedDiffraction::sortPolarisations() {
+  if (m_outputWorkspaceGroup->getNumberOfEntries() < 2) {
+    return;
+  }
+  auto sortedGroup = std::make_shared<API::WorkspaceGroup>();
+  for (auto workspaceId = 0; workspaceId < (m_outputWorkspaceGroup->getNumberOfEntries() - 1); workspaceId += 2) {
+    MatrixWorkspace_sptr ws1 =
+        std::static_pointer_cast<API::MatrixWorkspace>(m_outputWorkspaceGroup->getItem(workspaceId));
+    auto polarisation = ws1->mutableRun().getLogData("POL.actual_stateB1B2")->value();
+    MatrixWorkspace_sptr ws2 =
+        std::static_pointer_cast<API::MatrixWorkspace>(m_outputWorkspaceGroup->getItem(workspaceId + 1));
+    if (polarisation != "ON") { // need to reverse order of SF ("ON") and NSF ("OFF")
+      sortedGroup->addWorkspace(ws2);
+      sortedGroup->addWorkspace(ws1);
+    } else {
+      sortedGroup->addWorkspace(ws1);
+      sortedGroup->addWorkspace(ws2);
+    }
+  }
+  m_outputWorkspaceGroup = sortedGroup;
 }
 
 } // namespace DataHandling

@@ -46,10 +46,23 @@ class FrequencyContext(object):
         self._maxEnt_freq = {}
         self._FFT_freq = {}
         self.plot_type = "All"
+        self._group_phase_tables = {}
 
     @property
     def window_title(self):
         return "Frequency Domain Analysis"
+
+    def add_group_phase_table(self, table, num_groups):
+        if num_groups not in self._group_phase_tables.keys():
+            self._group_phase_tables[num_groups] = [table]
+        elif table.workspace_name not in [table.workspace_name for table in self._group_phase_tables[num_groups]]:
+            self._group_phase_tables[num_groups] += [table]
+
+    def get_group_phase_tables(self, num_groups, instrument):
+        if num_groups not in self._group_phase_tables.keys():
+            return []
+        return [phase_table.workspace_name for phase_table in self._group_phase_tables[num_groups]
+                if instrument in phase_table.workspace_name]
 
     def add_maxEnt(self, run, ws_freq):
         self._maxEnt_freq[ws_freq] = MaxEnt(run, AnalysisDataService.retrieve(ws_freq))

@@ -13,6 +13,8 @@ from mantidqt.utils.qt import import_qt
 from mantidqt.utils.observer_pattern import GenericObservable
 from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowser
 from mantid.api import AnalysisDataService as ADS
+from Engineering.gui.engineering_diffraction.tabs.common import output_settings
+from Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 
 BaseBrowser = import_qt('.._common', 'mantidqt.widgets', 'FitPropertyBrowser')
 
@@ -25,6 +27,10 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
 
     def __init__(self, canvas, toolbar_manager, parent=None):
         super(EngDiffFitPropertyBrowser, self).__init__(canvas, toolbar_manager, parent)
+        # overwrite default peak with that in settings (gets init when UI opened)
+        default_peak = get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX,
+                                   "default_peak")
+        self.setDefaultPeakType(default_peak)  # this will also update peak func in config settings
         self.fit_notifier = GenericObservable()
         self.fit_enabled_notifier = GenericObservable()
 
@@ -37,7 +43,7 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
 
     def get_fitprop(self):
         """
-        Get the algorithm parameters updated post-fit
+        Get the algorithm parameters updated post-fit (including output status of fit)
         :return: dictionary of parameters
         """
         dict_str = self.getFitAlgorithmParameters()
@@ -45,6 +51,7 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
             # evaluate string to make a dict (replace case of bool values)
             fitprop = eval(dict_str.replace('true', 'True').replace('false', 'False'))
             fitprop['peak_centre_params'] = self._get_center_param_names()
+            fitprop['status'] = self.getFitAlgorithmOutputStatus()
             return fitprop
         else:
             # if no fit has been performed
@@ -52,7 +59,9 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
 
     def read_current_fitprop(self):
         """
-        Get algorithm parameters currently displayed in the UI browser (incl. defaults that user cannot change)
+        Get algorithm parameters currently displayed in the UI browser (incl. defaults that user cannot change) which
+        will be used as input for the sequential fit. This return does not include the output status of the last fit
+        which is not forced to be valid for the current parameters (i.e. could have been changed post-fit)
         :return: dict in style of self.getFitAlgorithmParameters()
         """
         try:
@@ -124,9 +133,7 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
         This is called after Fit finishes to update the fit curves.
         :param name: The name of Fit's output workspace.
         """
-        ws = ADS.retrieve(name)
-        self.do_plot(ws, plot_diff=self.plotDiff())
-        self.fit_result_ws_name = name
+        super(EngDiffFitPropertyBrowser, self).fitting_done_slot(name)
         self.save_current_setup(self.workspaceName())
         self.fit_notifier.notify_subscribers([self.get_fitprop()])
 

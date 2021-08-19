@@ -14,15 +14,11 @@ if(CXXTEST_FOUND)
                              ../../TestHelpers/inc)
   target_link_libraries(KernelTest
                         PRIVATE
-                        Types
-                        Kernel
-                        ${NEXUS_LIBRARIES}
-                        ${Boost_LIBRARIES}
-                        ${POCO_LIBRARIES}
+                        Mantid::Types
+                        Mantid::Kernel
+                        Mantid::Json
                         gmock
-                        ${JSONCPP_LIBRARIES}
-                        ${TBB_LIBRARIES}
-                        ${TBB_MALLOC_LIBRARIES})
+                        Boost::filesystem)
   add_dependencies(FrameworkTests KernelTest)
   # Test data
   add_dependencies(KernelTest StandardTestData)
