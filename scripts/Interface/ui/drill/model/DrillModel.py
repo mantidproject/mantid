@@ -371,19 +371,13 @@ class DrillModel(QObject):
         Args:
             sampleIndexes (list(int)): sample indexes
         """
-        modifiedGroups = list()
-        for s in sampleIndexes:
-            group = self._samples[s].getGroupName()
-            if group and group not in modifiedGroups:
-                modifiedGroups.append(group)
-            self._samples[s].setGroup(None)
-        for group in modifiedGroups:
-            samples = self._getSamplesFromGroup(group)
-            sampleIndexes = list()
-            for sample in samples:
-                sampleIndexes.append(sample.getIndex())
-                sample.setGroup(None)
-            self.groupSamples(sampleIndexes, group)
+        for i in sampleIndexes:
+            sample = self._samples[i]
+            currentGroup = sample.getGroup()
+            if currentGroup is not None:
+                currentGroup.delSample(sample)
+                if currentGroup.isEmpty():
+                    self._sampleGroups.remove(currentGroup)
 
     def addToGroup(self, sampleIndexes, groupName):
         """
