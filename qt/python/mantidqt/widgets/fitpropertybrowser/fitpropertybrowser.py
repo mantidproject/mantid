@@ -458,8 +458,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
             c, h, w = self.getPeakCentreOf(prefix), self.getPeakHeightOf(
                 prefix), self.getPeakFwhmOf(prefix)
             if w > (self.endX() - self.startX()):
-                w = (self.endX() - self.startX()) / 20.
-                self.setPeakFwhmOf(prefix, w)
+                logger.warning("Peak FWHM > X range. Width markers will not be shown")
             if prefix in peaks:
                 self.tool.update_peak(peaks[prefix], c, h, w)
                 del peaks[prefix]
