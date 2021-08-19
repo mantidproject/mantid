@@ -34,14 +34,12 @@ class NOMADMedianDetectorTestTest(unittest.TestCase):
         # verify the XML mask
         with open(file_xml_mask) as f:
             contents = f.read()
-        os.remove(file_xml_mask)
         for segment in ['0-3122', '48847-48900', '65020-65029', '98295-101375']:  # test a few
             assert segment in contents
 
         # verify the single-column ASCII mask
         with open(file_txt_mask) as f:
             contents = f.read()
-        os.remove(file_txt_mask)
         for detector_id in [0, 3122, 48847, 48900, 65020, 65029, 98295]:
             assert f' {detector_id}\n' in contents
 
