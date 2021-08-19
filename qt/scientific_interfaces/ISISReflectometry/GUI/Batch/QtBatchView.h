@@ -25,7 +25,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
-class MANTIDQT_ISISREFLECTOMETRY_DLL QtBatchView : public QWidget, public IBatchView, public IJobRunner {
+class MANTIDQT_ISISREFLECTOMETRY_DLL QtBatchView : public QWidget, public IBatchView {
   Q_OBJECT
 public:
   explicit QtBatchView(QWidget *parent);

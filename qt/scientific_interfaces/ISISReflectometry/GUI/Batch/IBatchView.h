@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "GUI/Common/IJobRunner.h"
 #include "GUI/Event/IEventView.h"
 #include "GUI/Experiment/IExperimentView.h"
 #include "GUI/Instrument/IInstrumentView.h"
@@ -31,7 +32,7 @@ IBatchView is the base view class for the Reflectometry "Batch"
 tab. It contains no QT specific functionality as that should be handled by a
 subclass.
 */
-class IBatchView {
+class IBatchView : public IJobRunner {
 public:
   virtual ~IBatchView() = default;
   virtual IRunsView *runs() const = 0;
