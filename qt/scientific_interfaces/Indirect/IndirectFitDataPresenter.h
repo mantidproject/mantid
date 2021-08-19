@@ -47,7 +47,8 @@ public:
   void updateTableFromModel();
   size_t getNumberOfDomains();
   std::vector<double> getQValuesForData() const;
-
+  std::string createDisplayName(WorkspaceID workspaceID) const;
+  std::vector<std::string> createDisplayNames() const;
   UserInputValidator &validate(UserInputValidator &validator);
 
   virtual void addWorkspace(const std::string &workspaceName, const std::string &paramType, const int &spectrum_index) {

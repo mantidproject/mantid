@@ -208,4 +208,16 @@ void IndirectFitDataPresenter::removeSelectedData() {
   updateTableFromModel();
 }
 
+std::string IndirectFitDataPresenter::createDisplayName(WorkspaceID workspaceID) const {
+  return m_model->createDisplayName(workspaceID);
+}
+
+std::vector<std::string> IndirectFitDataPresenter::createDisplayNames() const {
+  std::vector<std::string> displayNames;
+  for (auto i = WorkspaceID(0); i < m_model->getNumberOfWorkspaces(); i++) {
+    displayNames.push_back(m_model->createDisplayName(i));
+  }
+  return displayNames;
+}
+
 } // namespace MantidQt::CustomInterfaces::IDA

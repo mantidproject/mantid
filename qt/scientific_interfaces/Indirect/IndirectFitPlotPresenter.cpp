@@ -126,16 +126,16 @@ void IndirectFitPlotPresenter::disablePlotGuessInSeparateWindow() {
   m_model->deleteExternalGuessWorkspace();
 }
 
-void IndirectFitPlotPresenter::appendLastDataToSelection() {
-  const auto workspaceCount = m_model->numberOfWorkspaces();
+void IndirectFitPlotPresenter::appendLastDataToSelection(std::vector<std::string> displayNames) {
+  const auto workspaceCount = displayNames.size();
   if (m_view->dataSelectionSize() == workspaceCount) {
     // if adding a spectra to an existing workspace, update all the combo box
     // entries.
-    for (size_t i = 0; i < workspaceCount.value; i++) {
-      m_view->setNameInDataSelection(m_model->getFitDataName(WorkspaceID(i)), WorkspaceID(i));
+    for (size_t i = 0; i < workspaceCount; i++) {
+      m_view->setNameInDataSelection(displayNames[i], WorkspaceID(i));
     }
   } else
-    m_view->appendToDataSelection(m_model->getLastFitDataName());
+    m_view->appendToDataSelection(displayNames.back());
 }
 
 void IndirectFitPlotPresenter::updateSelectedDataName() {

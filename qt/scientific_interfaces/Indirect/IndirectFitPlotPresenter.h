@@ -43,7 +43,7 @@ public slots:
   void setEndX(double /*endX*/);
   void updatePlotSpectrum(WorkspaceIndex spectrum);
   void updateRangeSelectors();
-  void appendLastDataToSelection();
+  void appendLastDataToSelection(std::vector<std::string> displayNames);
   void updateSelectedDataName();
   void updateDataSelection();
   void updateAvailableSpectra();

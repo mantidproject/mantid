@@ -634,7 +634,8 @@ void IndirectFitAnalysisTab::respondToDataChanged() {
 void IndirectFitAnalysisTab::respondToDataAdded(IAddWorkspaceDialog const *dialog) {
   addDataToModel(dialog);
   updateDataReferences();
-  m_plotPresenter->appendLastDataToSelection();
+  auto displayNames = m_dataPresenter->createDisplayNames();
+  m_plotPresenter->appendLastDataToSelection(displayNames);
   updateParameterEstimationData();
 }
 
