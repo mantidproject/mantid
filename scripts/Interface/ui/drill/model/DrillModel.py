@@ -22,6 +22,7 @@ from .DrillExportModel import DrillExportModel
 from .DrillRundexIO import DrillRundexIO
 from .DrillSample import DrillSample
 from .DrillParameter import DrillParameter
+from .DrillSampleGroup import DrillSampleGroup
 
 
 class DrillModel(QObject):
@@ -347,25 +348,21 @@ class DrillModel(QObject):
 
         if not groupName:
             groupName = 'A'
-            while self._getSamplesFromGroup(groupName):
+            while groupName in [grp.getName() for grp in self._sampleGroups]:
                 groupName = incrementName(groupName)
 
-        i = 0
-        modifiedGroups = list()
-        for s in sampleIndexes:
-            sample = self._samples[s]
-            currentGroup = sample.getGroupName()
-            if currentGroup:
-                modifiedGroups.append(currentGroup)
-            sample.setGroup(groupName, i)
-            i += 1
-        for group in modifiedGroups:
-            i = 0
-            for s in self._getSamplesFromGroup(group):
-                master = s.isMaster()
-                s.setGroup(group, i)
-                s.setMaster(master)
-                i += 1
+        newGroup = DrillSampleGroup()
+        newGroup.setName(groupName)
+        self._sampleGroups.append(newGroup)
+
+        for i in sampleIndexes:
+            sample = self._samples[i]
+            currentGroup = sample.getGroup()
+            if currentGroup is not None:
+                currentGroup.delSample(sample)
+                if currentGroup.isEmpty():
+                    self._sampleGroups.remove(currentGroup)
+            newGroup.addSample(sample)
 
     def ungroupSamples(self, sampleIndexes):
         """
