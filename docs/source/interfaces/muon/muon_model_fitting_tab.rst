@@ -1,7 +1,7 @@
 .. _muon_model_fitting_tab-ref:
 
-Corrections Tab
----------------
+Model Fitting Tab
+-----------------
 
 .. image::  ../../images/muon_interface_tab_model_fitting.png
    :align: right

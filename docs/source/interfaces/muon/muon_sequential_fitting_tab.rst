@@ -23,7 +23,7 @@ Sequential fitting options
 
 **Initial parameters for each fit** Uses the initial values (as specified in the Fit Table) in each fit calculation.
 
-**Copy fit parameters to all** Editing a fit fit parameter will be copy its new value across to all domains if this is ticked.
+**Copy fit parameters to all** Editing a fit parameter will copy its new value to all domains if this is ticked.
 
 Fit Table
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^

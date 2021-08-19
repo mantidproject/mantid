@@ -52,7 +52,7 @@ The corrections data table contains the data used for the background subtraction
 
 **Group** The group corresponding to a specific domain.
 
-**Use Raw** This is only available when in ``Auto`` mode, and a fixed rebin has been selected. It is used to specify whether the raw or rebinned data is used to calculate the background.
+**Use Raw** This is only available when in ``Auto`` mode, and the fixed rebin option is selected. It is used to specify whether the raw or rebinned data is used to calculate the background.
 
 **Start X** This is only available when in ``Auto`` mode. It is the Start X used for the fit to calculate the background.
 
