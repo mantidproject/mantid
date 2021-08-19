@@ -7,10 +7,8 @@
 #pragma once
 
 #include "IAddWorkspaceDialog.h"
-#include "IIndirectFitDataView.h"
 #include "IndirectDataAnalysisTab.h"
-#include "IndirectFitDataTableModel.h"
-#include "IndirectFittingModel.h"
+#include "IndirectFitDataModel.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/FunctionModelSpectra.h"
 #include "ui_IndirectDataAnalysisElwinTab.h"
@@ -87,7 +85,7 @@ private:
   QtTreePropertyBrowser *m_elwTree;
   IndirectDataAnalysis *m_parent;
   QTableWidget *m_dataTable;
-  std::unique_ptr<IndirectFitDataTableModel> m_dataModel;
+  std::unique_ptr<IndirectFitDataModel> m_dataModel;
 
   bool m_emitCellChanged = true;
 
