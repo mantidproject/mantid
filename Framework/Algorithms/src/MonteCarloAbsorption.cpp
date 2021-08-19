@@ -308,7 +308,7 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(const MatrixWorkspace &i
   const auto nhists = static_cast<int64_t>(instrumentWS.getNumberHistograms());
 
   EFixedProvider efixed(instrumentWS);
-  auto beamProfile = createBeamProfile(*instrument, inputWS.sample());
+  auto beamProfile = createBeamProfile(*instrument, inputWS.sample().getShape());
 
   // Configure progress
   Progress prog(this, 0.0, 1.0, nhists);
@@ -417,7 +417,7 @@ MatrixWorkspace_uptr MonteCarloAbsorption::createOutputWorkspace(const MatrixWor
  * @return A new IBeamProfile object
  */
 std::unique_ptr<IBeamProfile> MonteCarloAbsorption::createBeamProfile(const Instrument &instrument,
-                                                                      const Sample &sample) const {
+                                                                      const IObject &sample) const {
   const auto frame = instrument.getReferenceFrame();
   const auto source = instrument.getSource();
   double beamWidth(-1.0), beamHeight(-1.0), beamRadius(-1.0);
@@ -438,11 +438,12 @@ std::unique_ptr<IBeamProfile> MonteCarloAbsorption::createBeamProfile(const Inst
       return std::make_unique<CircularBeamProfile>(*frame, source->getPos(), beamRadius);
     }
   } // revert to sample dimensions if no return by this point
-  if (!sample.getShape().hasValidShape())
+  if (!sample.hasValidShape())
     throw std::invalid_argument("Cannot determine beam profile without a sample shape");
-  const auto bbox = sample.getShape().getBoundingBox().width();
-  beamWidth = bbox[frame->pointingHorizontal()];
-  beamHeight = bbox[frame->pointingUp()];
+  const auto bbox = sample.getBoundingBox().width();
+  const auto bboxCentre = sample.getBoundingBox().centrePoint();
+  beamWidth = 2 * bboxCentre[frame->pointingHorizontal()] + bbox[frame->pointingHorizontal()];
+  beamHeight = 2 * bboxCentre[frame->pointingUp()] + bbox[frame->pointingUp()];
   return std::make_unique<RectangularBeamProfile>(*frame, source->getPos(), beamWidth, beamHeight);
 }
 
