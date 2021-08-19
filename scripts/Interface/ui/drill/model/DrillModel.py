@@ -495,11 +495,10 @@ class DrillModel(QObject):
         for e in elements:
             if (e >= len(self._samples)) or (not self._samples[e]):
                 continue
-            groupName = self._samples[e].getGroupName()
-            if groupName is not None:
+            group = self._samples[e].getGroup()
+            if group is not None:
                 sampleIndexes += [sample.getIndex()
-                                  for sample
-                                  in self._getSamplesFromGroup(groupName)]
+                                  for sample in group.getSamples()]
         return self.process(sampleIndexes)
 
     def _onTaskStarted(self, ref):
