@@ -414,14 +414,12 @@ class DrillModel(QObject):
             state (bool): True to set the master sample
         """
         sample = self._samples[sampleIndex]
-        groupName = sample.getGroupName()
-        if groupName is None or sample.isMaster() == state:
-            return
-        if state:
-            for s in self._getSamplesFromGroup(groupName):
-                if s.isMaster():
-                    s.setMaster(False)
-        sample.setMaster(state)
+        group = sample.getGroup()
+        if group is not None:
+            if state:
+                group.setMaster(sample)
+            else:
+                group.unsetMaster()
 
     def getProcessingParameters(self, index):
         """
