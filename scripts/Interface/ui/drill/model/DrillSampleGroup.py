@@ -66,8 +66,15 @@ class DrillSampleGroup:
         Args:
             sample (DrillSample): sample to be removed from the group
         """
+        index = None
         if sample in self._samples:
+            index = self._samples.index(sample)
             self._samples.remove(sample)
+            sample.setGroup(None)
+        if index is not None:
+            while index < len(self._samples):
+                self._samples[index].groupChanged.emit()
+                index += 1
 
     def getSampleIndex(self, sample):
         """
