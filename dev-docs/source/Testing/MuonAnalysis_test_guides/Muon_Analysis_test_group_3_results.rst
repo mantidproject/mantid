@@ -93,6 +93,11 @@ Test 2: Sequential Fits And Simultaneous Fits
    :alt: results_test2.png
    :width: 600
 
+- Go to the **Model Fitting** tab and select the ``SeqFitOfSimFits`` as the results table
+- Change the **select data** to ``sample_temp`` and ``f1.Sigma``
+- Add a LinearBackground and click Fit
+- The plot should show 3 data points and a fit
+
 Test 3: TF Asymmetry Results
 ----------------------------
 
