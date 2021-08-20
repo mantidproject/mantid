@@ -51,13 +51,13 @@ public:
   virtual WorkspaceID getNumberOfWorkspaces() const = 0;
   virtual size_t getNumberOfSpectra(WorkspaceID workspaceID) const = 0;
   virtual std::vector<std::pair<std::string, size_t>> getResolutionsForFit() const = 0;
-  virtual std::string createDisplayName(WorkspaceID workspaceID) const = 0;
   virtual bool isMultiFit() const = 0;
 
   // IIndirectFitOutput
   virtual void addSingleFitOutput(const Mantid::API::IAlgorithm_sptr &fitAlgorithm, WorkspaceID workspaceID,
                                   WorkspaceIndex spectrum) = 0;
   virtual void addOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm) = 0;
+  virtual IIndirectFitOutput *getFitOutput() const = 0;
 
   // Generic
   virtual void setFittingMode(FittingMode mode) = 0;

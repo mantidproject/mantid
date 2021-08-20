@@ -352,10 +352,6 @@ std::vector<std::pair<std::string, size_t>> IndirectFittingModel::getResolutions
   return std::vector<std::pair<std::string, size_t>>();
 }
 
-std::string IndirectFittingModel::createDisplayName(WorkspaceID workspaceID) const {
-  return m_fitDataModel->createDisplayName(workspaceID);
-}
-
 bool IndirectFittingModel::isMultiFit() const { return m_fitDataModel->getNumberOfWorkspaces().value > 1; }
 
 // Other Functions
@@ -391,6 +387,8 @@ std::vector<std::string> IndirectFittingModel::getFitParameterNames() const {
     return m_fitOutput->getResultParameterNames();
   return std::vector<std::string>();
 }
+
+IIndirectFitOutput *IndirectFittingModel::getFitOutput() const { return m_fitOutput.get(); }
 
 Mantid::API::MultiDomainFunction_sptr IndirectFittingModel::getFitFunction() const { return m_activeFunction; }
 

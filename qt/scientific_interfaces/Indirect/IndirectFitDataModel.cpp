@@ -40,6 +40,8 @@ IndirectFitDataModel::IndirectFitDataModel()
       m_resolutions(std::make_unique<std::vector<std::weak_ptr<Mantid::API::MatrixWorkspace>>>()),
       m_adsInstance(Mantid::API::AnalysisDataService::Instance()) {}
 
+std::vector<IndirectFitData> *IndirectFitDataModel::getFittingData() { return m_fittingData.get(); }
+
 bool IndirectFitDataModel::hasWorkspace(std::string const &workspaceName) const {
   auto const names = getWorkspaceNames();
   auto const iter = std::find(names.cbegin(), names.cend(), workspaceName);

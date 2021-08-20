@@ -120,7 +120,10 @@ void IndirectFitAnalysisTab::setFitDataPresenter(std::unique_ptr<IndirectFitData
 }
 
 void IndirectFitAnalysisTab::setPlotView(IIndirectFitPlotView *view) {
-  m_plotPresenter = std::make_unique<IndirectFitPlotPresenter>(m_fittingModel.get(), view);
+  m_plotPresenter = std::make_unique<IndirectFitPlotPresenter>(view);
+  m_plotPresenter->setFittingData(m_dataPresenter->getFittingData());
+  m_plotPresenter->setFitOutput(m_fittingModel->getFitOutput());
+  m_plotPresenter->updatePlots();
 }
 
 void IndirectFitAnalysisTab::setOutputOptionsView(IIndirectFitOutputOptionsView *view) {
@@ -194,6 +197,7 @@ size_t IndirectFitAnalysisTab::getNumberOfCustomFunctions(const std::string &fun
 
 void IndirectFitAnalysisTab::setModelFitFunction() {
   auto func = m_fitPropertyBrowser->getFitFunction();
+  m_plotPresenter->setFitFunction(func);
   m_fittingModel->setFitFunction(func);
 }
 
@@ -226,7 +230,6 @@ void IndirectFitAnalysisTab::tableEndXChanged(double endX, WorkspaceID workspace
 void IndirectFitAnalysisTab::startXChanged(double startX) {
   m_plotPresenter->setStartX(startX);
   m_dataPresenter->setStartX(startX, m_plotPresenter->getActiveWorkspaceID());
-  // m_fittingModel->setStartX(startX, m_plotPresenter->getActiveWorkspaceID());
   updateParameterEstimationData();
   m_plotPresenter->updateGuess();
 }
@@ -234,7 +237,6 @@ void IndirectFitAnalysisTab::startXChanged(double startX) {
 void IndirectFitAnalysisTab::endXChanged(double endX) {
   m_plotPresenter->setEndX(endX);
   m_dataPresenter->setEndX(endX, m_plotPresenter->getActiveWorkspaceID());
-  // m_fittingModel->setEndX(endX, m_plotPresenter->getActiveWorkspaceID());
   updateParameterEstimationData();
   m_plotPresenter->updateGuess();
 }
@@ -642,7 +644,8 @@ void IndirectFitAnalysisTab::respondToDataAdded(IAddWorkspaceDialog const *dialo
 void IndirectFitAnalysisTab::respondToDataRemoved() {
   m_fittingModel->removeDefaultParameters();
   updateDataReferences();
-  m_plotPresenter->updateDataSelection();
+  auto displayNames = m_dataPresenter->createDisplayNames();
+  m_plotPresenter->updateDataSelection(displayNames);
   updateParameterEstimationData();
 }
 

@@ -29,6 +29,7 @@ class MANTIDQT_INDIRECT_DLL IndirectFitDataPresenter : public QObject, public An
 public:
   IndirectFitDataPresenter(IIndirectFitDataModel *model, IIndirectFitDataView *view);
   ~IndirectFitDataPresenter();
+  std::vector<IndirectFitData> *getFittingData();
   void addWorkspace(const std::string &workspaceName, const std::string &spectra);
   void setResolution(const std::string &name);
   void setSampleWSSuffices(const QStringList &suffices);
@@ -47,7 +48,6 @@ public:
   void updateTableFromModel();
   size_t getNumberOfDomains();
   std::vector<double> getQValuesForData() const;
-  std::string createDisplayName(WorkspaceID workspaceID) const;
   std::vector<std::string> createDisplayNames() const;
   UserInputValidator &validate(UserInputValidator &validator);
 

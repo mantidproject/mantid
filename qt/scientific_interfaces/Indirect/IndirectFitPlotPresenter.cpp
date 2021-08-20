@@ -28,8 +28,8 @@ struct HoldRedrawing {
 
 using namespace Mantid::API;
 
-IndirectFitPlotPresenter::IndirectFitPlotPresenter(IndirectFittingModel *model, IIndirectFitPlotView *view)
-    : m_model(new IndirectFitPlotModel(model)), m_view(view), m_plotGuessInSeparateWindow(false),
+IndirectFitPlotPresenter::IndirectFitPlotPresenter(IIndirectFitPlotView *view)
+    : m_model(new IndirectFitPlotModel()), m_view(view), m_plotGuessInSeparateWindow(false),
       m_plotter(std::make_unique<ExternalPlotter>()) {
   connect(m_view, SIGNAL(selectedFitDataChanged(WorkspaceID)), this, SLOT(handleSelectedFitDataChanged(WorkspaceID)));
 
@@ -50,8 +50,9 @@ IndirectFitPlotPresenter::IndirectFitPlotPresenter(IndirectFittingModel *model, 
   connect(m_view, SIGNAL(hwhmChanged(double, double)), this, SLOT(emitFWHMChanged(double, double)));
   connect(m_view, SIGNAL(backgroundChanged(double)), this, SIGNAL(backgroundChanged(double)));
 
-  updateRangeSelectors();
-  updateAvailableSpectra();
+  // updatePlots();
+  // updateRangeSelectors();
+  // updateAvailableSpectra();
 }
 
 void IndirectFitPlotPresenter::handleSelectedFitDataChanged(WorkspaceID workspaceID) {
@@ -97,6 +98,12 @@ void IndirectFitPlotPresenter::setXBounds(std::pair<double, double> const &bound
   m_view->setFitRangeBounds(bounds);
 }
 
+void IndirectFitPlotPresenter::setFittingData(std::vector<IndirectFitData> *fittingData) {
+  m_model->setFittingData(fittingData);
+}
+
+void IndirectFitPlotPresenter::setFitOutput(IIndirectFitOutput *fitOutput) { m_model->setFitOutput(fitOutput); }
+
 void IndirectFitPlotPresenter::updatePlotSpectrum(WorkspaceIndex spectrum) {
   setActiveSpectrum(spectrum);
   updatePlots();
@@ -138,15 +145,13 @@ void IndirectFitPlotPresenter::appendLastDataToSelection(std::vector<std::string
     m_view->appendToDataSelection(displayNames.back());
 }
 
-void IndirectFitPlotPresenter::updateSelectedDataName() {
-  m_view->setNameInDataSelection(m_model->getFitDataName(), m_model->getActiveWorkspaceID());
-}
-
-void IndirectFitPlotPresenter::updateDataSelection() {
+void IndirectFitPlotPresenter::updateDataSelection(std::vector<std::string> displayNames) {
   MantidQt::API::SignalBlocker blocker(m_view);
   m_view->clearDataSelection();
-  for (WorkspaceID i{0}; i < m_model->numberOfWorkspaces(); ++i)
-    m_view->appendToDataSelection(m_model->getFitDataName(i));
+  const auto workspaceCount = displayNames.size();
+  for (int i = 0; i < workspaceCount; ++i) {
+    m_view->appendToDataSelection(displayNames[i]);
+  }
   setActiveIndex(WorkspaceID{0});
   setActiveSpectrum(WorkspaceIndex{0});
   updateAvailableSpectra();
@@ -156,7 +161,7 @@ void IndirectFitPlotPresenter::updateDataSelection() {
 void IndirectFitPlotPresenter::updateAvailableSpectra() {
   if (m_model->getWorkspace()) {
     enableAllDataSelection();
-    auto spectra = m_model->getSpectra();
+    auto spectra = m_model->getSpectra(m_model->getActiveWorkspaceID());
     if (spectra.isContinuous()) {
       auto const minmax = spectra.getMinMax();
       m_view->setAvailableSpectra(minmax.first, minmax.second);
@@ -176,6 +181,10 @@ void IndirectFitPlotPresenter::disableAllDataSelection() {
 void IndirectFitPlotPresenter::enableAllDataSelection() {
   m_view->enableSpectrumSelection(true);
   m_view->enableFitRangeSelection(true);
+}
+
+void IndirectFitPlotPresenter::setFitFunction(Mantid::API::MultiDomainFunction_sptr function) {
+  m_model->setFitFunction(function);
 }
 
 void IndirectFitPlotPresenter::setFitSingleSpectrumIsFitting(bool fitting) {

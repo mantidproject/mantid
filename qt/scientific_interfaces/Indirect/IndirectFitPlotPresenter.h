@@ -9,6 +9,7 @@
 #include "DllConfig.h"
 
 #include "IndirectFitPlotModel.h"
+#include "MantidAPI/IFunction_fwd.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
 #include "MantidQtWidgets/Plotting/Mpl/ExternalPlotter.h"
 
@@ -24,7 +25,7 @@ class MANTIDQT_INDIRECT_DLL IndirectFitPlotPresenter : public QObject {
   Q_OBJECT
 
 public:
-  IndirectFitPlotPresenter(IndirectFittingModel *model, IIndirectFitPlotView *view);
+  IndirectFitPlotPresenter(IIndirectFitPlotView *view);
 
   void watchADS(bool watch);
 
@@ -33,6 +34,9 @@ public:
   FitDomainIndex getSelectedDomainIndex() const;
   bool isCurrentlySelected(WorkspaceID workspaceID, WorkspaceIndex spectrum) const;
 
+  void setFittingData(std::vector<IndirectFitData> *fittingData);
+  void setFitOutput(IIndirectFitOutput *fitOutput);
+  void setFitFunction(Mantid::API::MultiDomainFunction_sptr function);
   void setFitSingleSpectrumIsFitting(bool fitting);
   void setFitSingleSpectrumEnabled(bool enable);
 
@@ -44,8 +48,7 @@ public slots:
   void updatePlotSpectrum(WorkspaceIndex spectrum);
   void updateRangeSelectors();
   void appendLastDataToSelection(std::vector<std::string> displayNames);
-  void updateSelectedDataName();
-  void updateDataSelection();
+  void updateDataSelection(std::vector<std::string> displayNames);
   void updateAvailableSpectra();
   void updatePlots();
   void updateFit();

@@ -53,7 +53,6 @@ public:
   WorkspaceID getNumberOfWorkspaces() const override;
   size_t getNumberOfSpectra(WorkspaceID workspaceID) const override;
   virtual std::vector<std::pair<std::string, size_t>> getResolutionsForFit() const override;
-  std::string createDisplayName(WorkspaceID workspaceID) const override;
   bool isMultiFit() const override;
 
   // IIndirectFittingModel
@@ -76,6 +75,7 @@ public:
   void addSingleFitOutput(const Mantid::API::IAlgorithm_sptr &fitAlgorithm, WorkspaceID workspaceID,
                           WorkspaceIndex spectrum) override;
   virtual void addOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm) override;
+  IIndirectFitOutput *getFitOutput() const override;
 
   // Generic
   void setFittingMode(FittingMode mode) override;

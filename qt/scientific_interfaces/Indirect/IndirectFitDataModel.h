@@ -27,6 +27,8 @@ class MANTIDQT_INDIRECT_DLL IndirectFitDataModel : public IIndirectFitDataModel 
 public:
   IndirectFitDataModel();
   virtual ~IndirectFitDataModel() = default;
+  std::vector<IndirectFitData> *getFittingData() override;
+
   void addWorkspace(const std::string &workspaceName, const std::string &spectra) override;
   void addWorkspace(const std::string &workspaceName, const FunctionModelSpectra &spectra) override;
   void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace, const FunctionModelSpectra &spectra) override;
@@ -76,9 +78,6 @@ private:
 
   std::unique_ptr<std::vector<IndirectFitData>> m_fittingData;
   std::unique_ptr<std::vector<std::weak_ptr<Mantid::API::MatrixWorkspace>>> m_resolutions;
-
-  std::unique_ptr<std::vector<IndirectFitData>> m_fittingDataMultiple;
-  std::unique_ptr<std::vector<std::weak_ptr<Mantid::API::MatrixWorkspace>>> m_resolutionsMultiple;
   Mantid::API::AnalysisDataServiceImpl &m_adsInstance;
 };
 

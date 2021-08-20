@@ -28,6 +28,7 @@ using IndirectFitDataCollectionType = IndexCollectionType<WorkspaceID, std::uniq
 class MANTIDQT_INDIRECT_DLL IIndirectFitDataModel {
 public:
   virtual ~IIndirectFitDataModel() = default;
+  virtual std::vector<IndirectFitData> *getFittingData() = 0;
   virtual bool hasWorkspace(std::string const &workspaceName) const = 0;
   virtual Mantid::API::MatrixWorkspace_sptr getWorkspace(WorkspaceID workspaceID) const = 0;
   virtual FunctionModelSpectra getSpectra(WorkspaceID workspaceID) const = 0;
