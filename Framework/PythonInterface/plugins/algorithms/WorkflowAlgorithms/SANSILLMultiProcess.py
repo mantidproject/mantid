@@ -474,7 +474,8 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
                 outputs['Sensitivity'] = sample_ws[1]
             if self.getPropertyValue('OutputType') != 'None':
                 integrated_ws = self.integrate(d, sample_ws)
-                self.convert_to_point_data(integrated_ws)
+                # set distribution to false since stitch doesn't deal with frequencies
+                self.set_distribution(integrated_ws, False)
                 outputs['IQ'] = integrated_ws[0]
                 if len(integrated_ws) > 1:
                     # if there is a second output from integration, it must be either the panels or the wedges
@@ -764,15 +765,15 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         SANSILLIntegration(**kwargs)
         return results
 
-    def convert_to_point_data(self, ws_list):
+    def set_distribution(self, ws_list, flag):
         for ws in ws_list:
             if isinstance(mtd[ws], WorkspaceGroup):
                 for wsi in mtd[ws]:
                     ConvertToPointData(InputWorkspace=wsi.name(), OutputWorkspace=wsi.name())
-                    mtd[wsi.name()].setDistribution(False)
+                    mtd[wsi.name()].setDistribution(flag)
             else:
                 ConvertToPointData(InputWorkspace=ws, OutputWorkspace=ws)
-                mtd[ws].setDistribution(False)
+                mtd[ws].setDistribution(flag)
 
     def generate_combined_sensitivity(self, samples):
         real_space_ws_list = []
@@ -848,13 +849,20 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
                     samples.append(comb_sens)
         return samples
 
+    def rename(self, key, ws):
+        '''Renames the workspace ws to a user-friendly scheme based on the key'''
+        return ws
+
     def package(self, samples):
         out_ws = self.getPropertyValue('OutputWorkspace')
         outputs = []
         for pack in samples:
-            for _,output in pack.items():
-                if output:
-                    outputs.append(output)
+            for k,v in pack.items():
+                if v:
+                    if k.startswith('IQ') or k.startswith('Stitched'):
+                        self.set_distribution([v], True)
+                    last_name = self.rename(k, v)
+                    outputs.append(last_name)
         GroupWorkspaces(InputWorkspaces=outputs, OutputWorkspace=out_ws)
         self.setProperty('OutputWorkspace', out_ws)
 
