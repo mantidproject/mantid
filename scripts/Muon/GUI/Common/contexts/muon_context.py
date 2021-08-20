@@ -9,15 +9,15 @@ from Muon.GUI.Common.ADSHandler.workspace_naming import (get_raw_data_workspace_
                                                          get_group_asymmetry_name,
                                                          get_group_asymmetry_unnorm_name,
                                                          get_deadtime_data_workspace_name,
-                                                         get_pair_phasequad_name,
+                                                         get_pair_phasequad_name, UNNORM,
                                                          add_phasequad_extensions, get_diff_asymmetry_name)
 from Muon.GUI.Common.calculate_pair_and_group import calculate_group_data, calculate_pair_data, \
     estimate_group_asymmetry_data, run_pre_processing
 from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string, run_string_to_list
 from Muon.GUI.Common.utilities.algorithm_utils import run_PhaseQuad, split_phasequad, rebin_ws, apply_deadtime, \
-    calculate_diff_data, run_crop_workspace
+    calculate_diff_data, run_crop_workspace, run_apply_norm
 import Muon.GUI.Common.ADSHandler.workspace_naming as wsName
-from Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws
+from Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws, get_normalisation
 from Muon.GUI.Common.contexts.muon_group_pair_context import get_default_grouping
 from Muon.GUI.Common.contexts.muon_context_ADS_observer import MuonContextADSObserver
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper, WorkspaceGroupDefinition
@@ -110,6 +110,12 @@ class MuonContext(object):
         return group_workspace, group_asymmetry, group_asymmetry_unnormalised
 
     def calculate_diff(self, diff: MuonDiff, run: List[int], rebin: bool=False):
+        if diff.group_or_pair == "group":
+            return self.calculate_group_diff(diff, run, rebin)
+        else:
+            return self.calculate_pair_diff(diff, run, rebin)
+
+    def calculate_pair_diff(self, diff: MuonDiff, run: List[int], rebin: bool=False):
         try:
             positive_workspace_name = self._group_pair_context[diff.positive].get_asymmetry_workspace_for_run(run, rebin)
             negative_workspace_name = self._group_pair_context[diff.negative].get_asymmetry_workspace_for_run(run, rebin)
@@ -118,7 +124,27 @@ class MuonContext(object):
             return None
         run_as_string = run_list_to_string(run)
         output_workspace_name = get_diff_asymmetry_name(self, diff.name, run_as_string, rebin=rebin)
-        return calculate_diff_data(diff, positive_workspace_name, negative_workspace_name, output_workspace_name)
+        return calculate_diff_data(diff, positive_workspace_name, negative_workspace_name, output_workspace_name), None
+
+    def calculate_group_diff(self, diff: MuonDiff, run: List[int], rebin: bool=False):
+        try:
+            positive_workspace_name = self._group_pair_context[diff.positive].get_asymmetry_unormalised_workspace_for_run(run, rebin)
+            negative_workspace_name = self._group_pair_context[diff.negative].get_asymmetry_unormalised_workspace_for_run(run, rebin)
+
+        except KeyError:
+            # A key error here means the requested workspace does not exist so return None
+            return None
+        run_as_string = run_list_to_string(run)
+        output_workspace_name = get_diff_asymmetry_name(self, diff.name, run_as_string, rebin=rebin)
+        unnorm = calculate_diff_data(diff, positive_workspace_name, negative_workspace_name, "__"+output_workspace_name+UNNORM)
+        norm = self.get_diff_norm(diff, run, rebin)
+        return run_apply_norm(input_name=unnorm, ouput_name=output_workspace_name, norm=norm), unnorm
+
+    def get_diff_norm(self, diff, run, rebin):
+        # need these to get the norms
+        positive_asymmetry_name = self._group_pair_context[diff.positive].get_asymmetry_workspace_for_run(run, rebin)
+        negative_asymmetry_name = self._group_pair_context[diff.negative].get_asymmetry_workspace_for_run(run, rebin)
+        return get_normalisation(positive_asymmetry_name) - get_normalisation(negative_asymmetry_name)
 
     def calculate_pair(self, pair: MuonPair, run: List[int], rebin: bool=False):
         try:
@@ -254,7 +280,7 @@ class MuonContext(object):
             # construct the diffs
             for diff in self._group_pair_context.diffs:
                 if isinstance(diff, MuonDiff):
-                    diff_asymmetry_workspace = self.calculate_diff(
+                    diff_asymmetry_workspace, unnorm_diff = self.calculate_diff(
                         diff, run, rebin=rebin)
                 else:
                     continue
@@ -265,6 +291,12 @@ class MuonContext(object):
                      diff_asymmetry_workspace,
                      run,
                      rebin=rebin)
+
+                if unnorm_diff:
+                    diff.update_unnormalised_asymmetry_workspace(
+                        unnorm_diff,
+                        run,
+                        rebin=rebin)
 
     def calculate_all_groups(self):
         self._calculate_groups(rebin=False)

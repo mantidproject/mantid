@@ -189,6 +189,7 @@ def run_CalculateMuonAsymmetry(parameters_dict, alg):
     alg.setAlwaysStoreInADS(True)
     alg.setRethrows(True)
     alg.setProperties(parameters_dict)
+    print("gi", parameters_dict)
     alg.execute()
     return alg.getProperty('OutputWorkspace').valueAsStr, alg.getProperty('OutputParameters').valueAsStr, \
         alg.getProperty("OutputFunction").value, alg.getProperty('OutputStatus').value, \
@@ -317,5 +318,19 @@ def run_crop_workspace(ws, start, end):
     alg.setProperty("OutputWorkspace", ws)
     alg.setProperty("XMin", start)
     alg.setProperty("XMax", end)
+    alg.execute()
+    return alg.getProperty("OutputWorkspace").valueAsStr
+
+
+def run_apply_norm(input_name, ouput_name, norm=0):
+    alg = mantid.AlgorithmManager.create("EstimateMuonAsymmetryFromCounts")
+    alg.initialize()
+    alg.setAlwaysStoreInADS(True)
+    alg.setProperty("InputWorkspace", input_name)
+    alg.setProperty("OutputWorkspace", ouput_name)
+    alg.setProperty("NormalizationIn", norm)
+    # unnorm data = input
+    alg.setProperty("NormaliseCounts", False)
+    alg.setProperty("AllowNegativeNorm", True)
     alg.execute()
     return alg.getProperty("OutputWorkspace").valueAsStr

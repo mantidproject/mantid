@@ -62,6 +62,12 @@ class MuonGroup(object):
         else:
             return self._asymmetry_estimate[MuonRun(run)].workspace_name
 
+    def get_asymmetry_unormalised_workspace_for_run(self, run, rebin):
+        if rebin:
+            return self._asymmetry_estimate_rebin_unormalised[MuonRun(run)].workspace_name
+        else:
+            return self._asymmetry_estimate_unormalised[MuonRun(run)].workspace_name
+
     @property
     def name(self):
         return self._group_name

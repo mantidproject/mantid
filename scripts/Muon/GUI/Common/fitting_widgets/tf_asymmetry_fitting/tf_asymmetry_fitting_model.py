@@ -577,7 +577,9 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
         params = self._get_common_tf_asymmetry_parameters()
         params["InputFunction"] = tf_single_function.clone()
         params["ReNormalizedWorkspaceList"] = dataset_name
+        print("moo")
         params["UnNormalizedWorkspaceList"] = self._get_unnormalised_workspace_list([dataset_name])[0]
+        print("hi")
 
         fit_workspace_name, _ = create_fitted_workspace_name(dataset_name, self.fitting_context.function_name)
         params["OutputFitWorkspace"] = fit_workspace_name
@@ -590,9 +592,10 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
         params["InputFunction"] = str(tf_simultaneous_function) + self._construct_global_tie_appendage()
         params["ReNormalizedWorkspaceList"] = dataset_names
         params["UnNormalizedWorkspaceList"] = self._get_unnormalised_workspace_list(dataset_names)
-
+        print("hhhh", params)
         fit_workspace_name, _ = create_multi_domain_fitted_workspace_name(dataset_names[0],
                                                                           self.fitting_context.function_name)
+        print("fff", params)
         params["OutputFitWorkspace"] = fit_workspace_name
         return params
 

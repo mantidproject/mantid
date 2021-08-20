@@ -436,6 +436,12 @@ class MuonGroupPairContext(object):
             unnormalised_workspace = group.find_unormalised(workspace)
             if unnormalised_workspace:
                 return unnormalised_workspace
+        for diff in self.diffs:
+            if diff.group_or_pair == "group":
+                unnormalised_workspace = diff.find_unormalised(workspace)
+                print("ttt", unnormalised_workspace)
+                if unnormalised_workspace:
+                    return unnormalised_workspace
 
     def get_group_pair_name_and_run_from_workspace_name(self, workspace_name):
         for group_pair in self.all_groups_and_pairs:

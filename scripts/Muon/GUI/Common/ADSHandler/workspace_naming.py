@@ -17,6 +17,7 @@ REBIN_STR = 'Rebin'
 FFT_STR = 'FFT'
 MAXENT_STR = 'MaxEnt'
 PERIOD_STR = "_period_"
+UNNORM = '_unnorm'
 
 
 def get_raw_data_workspace_name(instrument, run, multi_period, period='1', workspace_suffix=' MA'):
@@ -136,7 +137,7 @@ def get_group_or_pair_from_name(name):
 
 
 def get_group_asymmetry_unnorm_name(context, group_name, run, periods, rebin):
-    return '__' + get_group_asymmetry_name(context, group_name, run, periods, rebin) + '_unnorm'
+    return '__' + get_group_asymmetry_name(context, group_name, run, periods, rebin) + UNNORM
 
 
 def get_base_data_directory(context, run):

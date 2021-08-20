@@ -50,6 +50,9 @@ void EstimateMuonAsymmetryFromCounts::init() {
       std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
       "The name of the output 2D workspace.");
   declareProperty("OutputUnNormData", false, "If to output the data with just the exponential decay removed.");
+  declareProperty("NormaliseCounts", true,
+                  "If to remove the exponential decay. If false OutputUnNormData will be a copy of the input data.");
+  declareProperty("AllowNegativeNorm", false, "If to allow the user to define a negative norm.");
 
   declareProperty(std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
                       "OutputUnNormWorkspace", "unNormalisedData", Direction::Output, API::PropertyMode::Optional),
@@ -88,7 +91,8 @@ std::map<std::string, std::string> EstimateMuonAsymmetryFromCounts::validateInpu
                                  "data to apply the algorithm to.";
   }
   double norm = getProperty("NormalizationIn");
-  if (norm < 0.0) {
+  bool allowNegative = getProperty("AllowNegativeNorm");
+  if (norm < 0.0 & !allowNegative) {
     validationOutput["NormalizationIn"] = "Normalization to use must be positive.";
   }
   return validationOutput;
@@ -112,6 +116,7 @@ void EstimateMuonAsymmetryFromCounts::exec() {
     outputWS = create<API::MatrixWorkspace>(*inputWS);
   }
   bool extraData = getProperty("OutputUnNormData");
+  bool normaliseCountData = getProperty("NormaliseCounts");
   API::MatrixWorkspace_sptr unnormWS = create<API::MatrixWorkspace>(*outputWS);
   double startX = getProperty("StartX");
   double endX = getProperty("EndX");
@@ -178,7 +183,12 @@ void EstimateMuonAsymmetryFromCounts::exec() {
     }
 
     // Calculate the asymmetry
-    outputWS->setHistogram(specNum, normaliseCounts(inputWS->histogram(specNum), numGoodFrames));
+    if (normaliseCountData) {
+
+      outputWS->setHistogram(specNum, normaliseCounts(inputWS->histogram(specNum), numGoodFrames));
+    } else {
+      outputWS->setHistogram(specNum, inputWS->histogram(specNum));
+    }
     if (extraData) {
       unnormWS->setSharedX(specNum, outputWS->sharedX(specNum));
       unnormWS->mutableY(specNum) = outputWS->y(specNum);
