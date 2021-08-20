@@ -14,7 +14,7 @@ from distutils.version import LooseVersion
 def setup(app):
     """Called automatically by Sphinx when starting the build process
     """
-    app.add_stylesheet("custom.css")
+    app.add_css_file("custom.css")
 
 
 # Add any Sphinx extension module names here, as strings. They can be
