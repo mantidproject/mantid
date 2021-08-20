@@ -124,11 +124,11 @@ This test covers the Cropping functionality.
 Test 4
 ^^^^^^
 
-This test covers the loading and plotting focussed data in the fitting tab. It is advisable to have at least two focussed datasets for the subsequent tests: this could be the two banks of run 305761 already generated, but a better test would be to use focussed data for runs 305793-305795 which have different stress and strain log values.
+This test covers the loading and plotting focused data in the fitting tab. It is advisable to have at least two focused datasets for the subsequent tests: this could be the two banks of run 305761 already generated, but a better test would be to use focussed data for runs 305793-305795 which have different stress and strain log values.
 
-1. Navigate to one or more focussed TOF .nxs files in the `Load Focussed Data` section. If this test is run immediately after the previous one, the path to the focussed files should be auto populated
+1. Navigate to one or more focused TOF .nxs files in the `Load Focused Data` section. If this test is run immediately after the previous one, the path to the focused files should be auto populated
 
-2. Click the `Load` button. A row should be added to the UI table for each focussed run.There should be a grouped workspace with the suffix `_logs` in the ADS with tables    corresponding to each log value specified in the settings (to open the settings use the cog in the bottom left corner of the UI). Each row in these tables should correspond to the equivalent row in the UI table. There should be an additional table called `run_info` that provides some of the metadata for each run.
+2. Click the `Load` button. A row should be added to the UI table for each focused run.There should be a grouped workspace with the suffix `_logs` in the ADS with tables    corresponding to each log value specified in the settings (to open the settings use the cog in the bottom left corner of the UI). Each row in these tables should correspond to the equivalent row in the UI table. There should be an additional table called `run_info` that provides some of the metadata for each run.
 
 3. The log values that are averaged can be selected in the settings (cog button in the bottom left corner of the UI). Change them and close the UI. Open a new instance of the UI to check these settings have been remembered. note that any change to the selected logs won't take effect in the current session.
 
@@ -143,7 +143,7 @@ This test covers the loading and plotting focussed data in the fitting tab. It i
 Test 5
 ^^^^^^
 
-This tests the removal of focussed runs from the fitting tab.
+This tests the removal of focused runs from the fitting tab.
 
 1. Having loaded multiple runs, select a row in the UI table and then click the `Remove Selected` button below the table. The row should be removed, if the run was plotted it will disappear from the plot and there should be one less row in each of the log tables with each row corresponding to the run in the same row of the UI table. The workspace of the focussed run that was removed from the UI will still exist in the ADS.
 
