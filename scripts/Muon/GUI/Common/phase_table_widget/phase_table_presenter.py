@@ -33,6 +33,7 @@ class PhaseTablePresenter(object):
         self.instrument_changed_observer = GenericObserver(self.update_current_phase_tables)
 
         self.phase_table_calculation_complete_notifier = Observable()
+        self.phase_table_observer = GenericObserver(self.update_current_phase_tables)
         self.phasequad_calculation_complete_notifier = Observable()
         self.enable_editing_notifier = Observable()
         self.disable_editing_notifier = Observable()

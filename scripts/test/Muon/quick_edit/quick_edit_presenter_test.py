@@ -16,6 +16,10 @@ from mantid.simpleapi import AnalysisDataService
 from mantidqt.utils.qt.testing import start_qapplication
 
 
+def plot_at_index(index):
+    return "plot "+str(index)
+
+
 @start_qapplication
 class QuickEditTest(unittest.TestCase):
 
@@ -87,6 +91,13 @@ class QuickEditTest(unittest.TestCase):
         self.presenter.rm_subplot("Plot 2")
         self.view.rm_subplot.assert_called_once_with(2)
         self.view.set_selection.assert_called_once_with(0)  # Set to all
+
+    def test_multiple_plots(self):
+        self.view.number_of_plots = mock.Mock(return_value=4)
+        self.view.plot_at_index = mock.Mock(side_effect = plot_at_index)
+        # plot  name at index 0 is reserved so its excluded
+        expected = ["plot 1", "plot 2", "plot 3"]
+        self.assertEqual(self.presenter.multiple_plots(), expected)
 
 
 if __name__ == '__main__':

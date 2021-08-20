@@ -429,38 +429,40 @@ class GeneralFittingModel(BasicFittingModel):
     Methods used by the Sequential Fitting Tab
     """
 
-    def get_runs_groups_and_pairs_for_fits(self):
+    def get_runs_groups_and_pairs_for_fits(self, display_type: str) -> tuple:
         """Returns the runs and group/pairs corresponding to the selected dataset names."""
         if not self.fitting_context.simultaneous_fitting_mode:
-            return super().get_runs_groups_and_pairs_for_fits()
+            return super().get_runs_groups_and_pairs_for_fits(display_type)
         else:
-            return self._get_runs_groups_and_pairs_for_simultaneous_fit()
+            return self._get_runs_groups_and_pairs_for_simultaneous_fit(display_type)
 
-    def _get_runs_groups_and_pairs_for_simultaneous_fit(self) -> tuple:
+    def _get_runs_groups_and_pairs_for_simultaneous_fit(self, display_type: str) -> tuple:
         """Returns the runs and group/pairs corresponding to the selected dataset names in simultaneous fitting mode."""
         if self.fitting_context.simultaneous_fit_by == "Run":
-            return self._get_runs_groups_and_pairs_for_simultaneous_fit_by_runs()
+            return self._get_runs_groups_and_pairs_for_simultaneous_fit_by_runs(display_type)
         elif self.fitting_context.simultaneous_fit_by == "Group/Pair":
-            return self._get_runs_groups_and_pairs_for_simultaneous_fit_by_groups_and_pairs()
+            return self._get_runs_groups_and_pairs_for_simultaneous_fit_by_groups_and_pairs(display_type)
         else:
             return [], [], []
 
-    def _get_runs_groups_and_pairs_for_simultaneous_fit_by_runs(self):
+    def _get_runs_groups_and_pairs_for_simultaneous_fit_by_runs(self, display_type: str):
         """Returns the runs and group/pairs for the selected data in simultaneous fit by runs mode."""
         runs = self._get_selected_runs()
         groups_and_pairs = [get_group_or_pair_from_name(name) for name in self.fitting_context.dataset_names]
         workspace_names = ["/".join(self.get_fit_workspace_names_from_groups_and_runs([run], groups_and_pairs))
                            for run in runs]
-        return workspace_names, runs, [";".join(groups_and_pairs)] * len(runs)
+        return self._get_datasets_containing_string(display_type, workspace_names, runs,
+                                                    [";".join(groups_and_pairs)] * len(runs))
 
-    def _get_runs_groups_and_pairs_for_simultaneous_fit_by_groups_and_pairs(self):
+    def _get_runs_groups_and_pairs_for_simultaneous_fit_by_groups_and_pairs(self, display_type: str):
         """Returns the runs and group/pairs for the selected data in simultaneous fit by group/pairs mode."""
         runs = [get_run_numbers_as_string_from_workspace_name(name, self.context.data_context.instrument)
                 for name in self.fitting_context.dataset_names]
         groups_and_pairs = self._get_selected_groups_and_pairs()
         workspace_names = ["/".join(self.get_fit_workspace_names_from_groups_and_runs(runs, [group_and_pair]))
                            for group_and_pair in groups_and_pairs]
-        return workspace_names, [";".join(runs)] * len(groups_and_pairs), groups_and_pairs
+        return self._get_datasets_containing_string(display_type, workspace_names,
+                                                    [";".join(runs)] * len(groups_and_pairs), groups_and_pairs)
 
     def get_all_fit_functions(self) -> list:
         """Returns all the fit functions for the current fitting mode."""
@@ -468,6 +470,13 @@ class GeneralFittingModel(BasicFittingModel):
             return [self.fitting_context.simultaneous_fit_function]
         else:
             return super().get_all_fit_functions()
+
+    def get_all_fit_functions_for(self, display_type: str) -> list:
+        """Returns all the fit functions for datasets with a name containing a string."""
+        if self.fitting_context.simultaneous_fitting_mode:
+            return [self.fitting_context.simultaneous_fit_function]
+        else:
+            return super().get_all_fit_functions_for(display_type)
 
     def update_ws_fit_function_parameters(self, dataset_names: list, parameter_values: list) -> None:
         """Updates the function parameter values for the given dataset names."""

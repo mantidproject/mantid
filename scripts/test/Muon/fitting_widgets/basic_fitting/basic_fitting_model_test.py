@@ -677,10 +677,40 @@ class BasicFittingModelTest(unittest.TestCase):
 
         self.model.dataset_names = self.dataset_names
 
-        workspace_names, runs, groups_and_pairs = self.model.get_runs_groups_and_pairs_for_fits()
+        workspace_names, runs, groups_and_pairs = self.model.get_runs_groups_and_pairs_for_fits("All")
         self.assertEqual(workspace_names, self.dataset_names)
         self.assertEqual(runs, ["20884", "20884"])
         self.assertEqual(groups_and_pairs, ["fwd", "top"])
+
+    def test_that_get_runs_groups_and_pairs_for_fits_will_attempt_to_get_the_runs_groups_and_pairs_for_a_fwd_type(self):
+        self.mock_context_instrument = mock.PropertyMock(return_value="EMU")
+        type(self.model.context.data_context).instrument = self.mock_context_instrument
+
+        self.model.dataset_names = self.dataset_names
+
+        workspace_names, runs, groups_and_pairs = self.model.get_runs_groups_and_pairs_for_fits("fwd")
+        self.assertEqual(list(workspace_names), ["EMU20884; Group; fwd; Asymmetry"])
+        self.assertEqual(list(runs), ["20884"])
+        self.assertEqual(list(groups_and_pairs), ["fwd"])
+
+    def test_that_get_all_fit_functions_for_will_get_all_the_fit_functions_when_the_display_type_is_all(self):
+        self.model.dataset_names = self.dataset_names
+        self.model.single_fit_functions = self.single_fit_functions
+
+        filtered_functions = self.model.get_all_fit_functions_for("All")
+
+        self.assertEqual(len(filtered_functions), len(self.model.single_fit_functions))
+        self.assertEqual(self.model.get_fit_function_parameter_values(filtered_functions[0])[0], [0.0])
+        self.assertEqual(self.model.get_fit_function_parameter_values(filtered_functions[1])[0], [0.0])
+
+    def test_that_get_all_fit_functions_for_will_get_only_the_fwd_fit_function_when_the_display_type_is_fwd(self):
+        self.model.dataset_names = self.dataset_names
+        self.model.single_fit_functions = self.single_fit_functions
+
+        filtered_functions = self.model.get_all_fit_functions_for("fwd")
+
+        self.assertEqual(len(filtered_functions), 1)
+        self.assertEqual(self.model.get_fit_function_parameter_values(filtered_functions[0])[0], [0.0])
 
     def test_that_get_fit_function_parameter_values_will_return_the_parameter_values_in_the_specified_function(self):
         self.assertEqual(self.model.get_fit_function_parameter_values(self.single_fit_functions[0])[0], [0.0])

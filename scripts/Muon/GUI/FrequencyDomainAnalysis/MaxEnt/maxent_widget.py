@@ -12,10 +12,10 @@ from qtpy import QtWidgets
 
 class MaxEntWidget(QtWidgets.QWidget):
 
-    def __init__(self, load, parent=None):
+    def __init__(self, context, parent=None):
         super(MaxEntWidget, self).__init__(parent)
         view = MaxEntView(parent)
-        self._presenter = MaxEntPresenter(view, load)
+        self._presenter = MaxEntPresenter(view, context)
 
     @property
     def presenter(self):

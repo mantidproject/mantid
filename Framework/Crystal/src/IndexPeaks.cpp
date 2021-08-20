@@ -404,18 +404,6 @@ std::map<std::string, std::string> IndexPeaks::validateInputs() {
     return helpMsgs;
   }
 
-  // get all runs which have peaks in the table
-  const bool commonUB = this->getProperty(Prop::COMMONUB);
-  if (commonUB) {
-    std::unordered_map<int, int> peaksPerRun;
-    for (int i = 0; i < ws->getNumberPeaks(); i++)
-      peaksPerRun[ws->getPeak(i).getRunNumber()] = 1;
-    if (peaksPerRun.size() < 2) {
-      helpMsgs[Prop::COMMONUB] = "CommonUBForAll can only be True if there are peaks from more "
-                                 "than one run present in the peaks worksapce";
-    };
-  };
-
   const auto args = Prop::IndexPeaksArgs::parse(*this);
   const bool isSave = this->getProperty(Prop::SAVEMODINFO);
   const bool isMOZero = (args.satellites.maxOrder == 0);
@@ -503,6 +491,10 @@ void IndexPeaks::exec() {
     std::unordered_map<int, std::vector<IPeak *>> peaksPerRun;
     for (int i = 0; i < args.workspace->getNumberPeaks(); i++)
       peaksPerRun[args.workspace->getPeak(i).getRunNumber()].emplace_back(args.workspace->getPeakPtr(i));
+    if (peaksPerRun.size() < 2) {
+      g_log.warning("Peaks from only one run exist but CommonUBForAll=True so peaks will be indexed with an optimised "
+                    "UB which will not be saved in the workspace.");
+    }
     const bool optimizeUB{true};
     for (const auto &runPeaks : peaksPerRun) {
       const auto &peaks = runPeaks.second;

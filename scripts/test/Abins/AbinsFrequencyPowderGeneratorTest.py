@@ -16,7 +16,7 @@ from numpy.testing import assert_array_equal
 class FrequencyPowderGeneratorTest(unittest.TestCase):
 
     def setUp(self):
-        self.simple_freq_generator = abins.FrequencyPowderGenerator()
+        self.simple_freq_generator = abins.FrequencyPowderGenerator
         self.min_wavenumber = abins.parameters.sampling['min_wavenumber']
         self.max_wavenumber = abins.parameters.sampling['max_wavenumber']
 

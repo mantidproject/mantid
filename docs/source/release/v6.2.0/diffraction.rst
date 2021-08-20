@@ -14,10 +14,14 @@ Powder Diffraction
 New features
 ############
 - New algorithm :ref:`CombineDiffCal <algm-CombineDiffCal>` to calibrate groups of pixels after cross correlation so that diffraction peaks can be adjusted to the correct positions
+- New algorithm :ref:`SetSampleFromLogs <algm-SetSampleFromLogs>` inspects the sample enviroment logs for sample material and geometry information
 - New script for doing calibration by groups, :ref:`PowderDiffractionCalibration <calibration_tofpd_group_calibration-ref>`
+- New algorithm :ref:`MultipleScatteringCorrection <algm-MultipleScatteringCorrection>` to compute the multiple scattering correction factor for sample using numerical integration.
 
 Improvements
 ############
+- Documentation added for the group calibration routine for :ref:`PowderDiffractionCalibration <calibration_tofpd_group_calibration-ref>`, as as guidance for general users.
+- The group calibration routine for :ref:`PowderDiffractionCalibration <calibration_tofpd_group_calibration-ref>` is made more generic. Groups are now allowed with dedicated control parameters.
 - :ref:`ConvertDiffCal <algm-ConvertDiffCal-v1>` now optionally updates a previous calibration when converting offsets.
 - :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` major interface update along with enabling the calibration of T0 and sample position.
 - :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` minor interface update that allows fine control of bank rotation calibration.
@@ -32,6 +36,7 @@ Improvements
   on a scatter plot, new option for self-attenuation treatment using measured tranmission.
 - added a 3mf format file describing the PEARL sample and environment shapes for the P-E press. Also fixed a couple of minor issues in the 3mf file format loader used in ref:`LoadSampleEnvironment  <algm-LoadSampleEnvironment>`
 - :ref:`LoadILLDiffraction <algm-LoadILLDiffraction>` now adds input run number also to a metadata field `run_list`, indended to contain a full list of numors, handled by :ref:`MergeRuns <algm-MergeRuns>`
+- :ref:`LoadWANDSCD <algm-LoadWANDSCD-v1>` now has a new option to perform normalization in the same loading process.
 
 Bugfixes
 ########
@@ -49,6 +54,10 @@ New features
 - Automatically subtract background from runs on loading in EngDiff UI.
 - The most recently created or loaded Calibration is now selected by default in the load path when the interface is opened.
 - The last used RB number is now saved for the next session
+- The generation of the files required for Vanadium normalization is now done on the Focus tab of the user interface. This means the Vanadium data can be updated without
+having to rerun the Ceria calibration. As part of this change the setting "Force Vanadium Recalculation" has been removed and the Vanadium run number input has been
+moved from the Calibration tab to the Focus tab. The Vanadium run number is also no longer written to the prm generated on the Calibration tab (Note: this is a breaking
+change and means .prm files generated from the EngDiff UI with older versions of Mantid won't load successfully)
 
 
 Improvements
@@ -57,6 +66,8 @@ Improvements
 - The cropping/region of interest selection for Calibration/Focusing is now chosen only on the Calibration tab, to avoid confusion and duplication of input.
 - The region of interest for Calibration/Focusing can now be selected with a user-supplied custom calibration file.
 - The Focused Run Files input box defaults to the last runs focused on the Focus tab, even if multiple runs were focussed
+- The full calibration setting now has a default value consisting of the path to the ENGINX_full_instrument_calibration_193749.nxs file
+- The usability of the file finder on the Fitting tab has been improved by the addition of file filters based on unit and/or bank
 
 Bugfixes
 ########
@@ -84,6 +95,7 @@ Improvements
 ############
 - Find detector in peaks will check which det is closer when dealing with peak-in-gap situation for tube-type detectors.
 - Existing :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` now provides better calibration of panel orientation for flat panel detectors.
+- Existing :ref:`DGSPlanner <dgsplanner-ref>` expanded to support WAND²
 - Existing :ref:`MaskPeaksWorkspace <algm-MaskPeaksWorkspace-v1>` now also supports tube-type detectors used at the CORELLI instrument.
 - Existing :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` now retains the value of small optimization results instead of zeroing them.
 - Existing :ref:`IntegrateEllipsoids <algm-IntegrateEllipsoids-v1>` now can use a different integrator for satellite peaks.
@@ -91,5 +103,6 @@ Improvements
 Bugfixes
 ########
 - Expand the Q space search radius in DetectorSearcher to avoid missing peaks when using :ref:`PredictPeaks <algm-PredictPeaks>`.
+- :ref:`IndexPeaks <algm-IndexPeaks>` can now index peaks in a PeaksWorkspace with only a single run without optimising the UB (i.e. it is now possible to set CommonUBForAll=True in this instance).
 
 :ref:`Release 6.2.0 <v6.2.0>`

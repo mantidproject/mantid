@@ -5,6 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
+from typing import List, Dict
 from unittest import mock
 
 from sans.common.enums import SANSInstrument, SANSFacility, DetectorType, ReductionMode, RangeStepType, \
@@ -13,6 +14,7 @@ from sans.common.enums import SANSInstrument, SANSFacility, DetectorType, Reduct
 from sans.state.StateObjects.StateData import get_data_builder
 from sans.state.StateObjects.StateMaskDetectors import StateMaskDetectors, StateMask
 from sans.test_helper.file_information_mock import SANSFileInformationMock
+from sans.user_file.parser_helpers.toml_parser_impl_base import MissingMandatoryParam
 from sans.user_file.toml_parsers.toml_v1_parser import TomlV1Parser
 
 
@@ -28,12 +30,21 @@ class TomlV1ParserTest(unittest.TestCase):
         return data_builder.build()
 
     def _setup_parser(self, dict_vals):
+        def _add_missing_mandatory_key(dict_to_check: Dict, key_path: List[str], replacement_val):
+            _dict = dict_to_check
+            for key in key_path[0:-1]:
+                if key not in _dict:
+                    _dict[key] = {}
+                _dict = _dict[key]
+
+            if key_path[-1] not in _dict:
+                _dict[key_path[-1]] = replacement_val  # Add in child value
+            return dict_to_check
+
         self._mocked_data_info = self._get_mock_data_info()
-        if "instrument" not in dict_vals:
-            # instrument key needs to generally be present
-            dict_vals["instrument"] = {}
-        if "name" not in dict_vals["instrument"]:
-            dict_vals["instrument"]["name"] = "LOQ"
+        # instrument key needs to generally be present
+        dict_vals = _add_missing_mandatory_key(dict_vals, ["instrument", "name"], "LOQ")
+        dict_vals = _add_missing_mandatory_key(dict_vals, ["detector", "configuration", "selected_detector"], "rear")
 
         return TomlV1Parser(dict_vals, file_information=None)
 
@@ -74,7 +85,8 @@ class TomlV1ParserTest(unittest.TestCase):
             ("norm_monitor", lambda x: x.get_state_calculate_transmission().incident_monitor),
             ("trans_monitor", lambda x: x.get_state_calculate_transmission().transmission_monitor),
             ("sample_aperture_diameter", lambda x: x.get_state_convert_to_q().q_resolution_a2),
-            ("sample_offset", lambda x: x.get_state_move(None).sample_offset)
+            ("sample_offset", lambda x: x.get_state_move(None).sample_offset),
+            ("gravity_enabled", lambda x: x.get_state_convert_to_q().use_gravity)
         ]
 
         self._loop_over_supported_keys(supported_keys=supported_keys, top_level_keys=["instrument", "configuration"])
@@ -105,6 +117,43 @@ class TomlV1ParserTest(unittest.TestCase):
         self.assertTrue(parser.get_state_reduction_mode().reduction_mode is expected_reduction_mode)
         self.assertEqual((1, 2), get_beam_position(state_move, DetectorType.HAB))
         self.assertEqual((2, 3), get_beam_position(state_move, DetectorType.LAB))
+
+    def test_all_centre_entry(self):
+        input_dict = {"detector": {"configuration": {"all_centre": {"x": 2, "y": 3.4}}}}
+        parser = self._setup_parser(input_dict)
+        for i in [ReductionMode.HAB, ReductionMode.LAB]:
+            move = parser.get_state_move(None)
+            self.assertEqual(2, move.detectors[i.value].sample_centre_pos1)
+            self.assertEqual(3.4, move.detectors[i.value].sample_centre_pos2)
+
+    def test_throws_when_all_and_rear_specified(self):
+        input_dict = {"detector": {"configuration": {"all_centre": {"x": 2, "y": 3.4},
+                                                     "rear_centre": {"x": 2}}}}
+        with self.assertRaisesRegex(ValueError, "front_centre"):
+            self._setup_parser(input_dict)
+
+    def test_throws_when_all_and_front_specified(self):
+        input_dict = {"detector": {"configuration": {"all_centre": {"x": 2, "y": 3.4},
+                                                     "front_centre": {"x": 2}}}}
+        with self.assertRaisesRegex(ValueError, "front_centre"):
+            self._setup_parser(input_dict)
+
+    def test_rear_front_maps_to_enum_correctly(self):
+        for user_input, enum_val in [("rear", ReductionMode.LAB), ("front", ReductionMode.HAB),
+                                     ("all", ReductionMode.ALL), ("merged", ReductionMode.MERGED)]:
+            input_dict = {"detector": {"configuration": {"selected_detector": user_input}}}
+            parser = self._setup_parser(dict_vals=input_dict)
+            self.assertEqual(enum_val, parser.get_state_reduction_mode().reduction_mode)
+
+    def test_legacy_reduction_mode_rejected(self):
+        for legacy_input in ["hab", "lab"]:
+            with self.assertRaisesRegex(ValueError, "rear"):
+                input_dict = {"detector": {"configuration": {"selected_detector": legacy_input}}}
+                self._setup_parser(dict_vals=input_dict)
+
+    def test_reduction_mode_mandatory(self):
+        with self.assertRaisesRegex(MissingMandatoryParam, "selected_detector"):
+            TomlV1Parser({"instrument": {"name": "LOQ"}}, None)
 
     def test_binning_commands_parsed(self):
         # Wavelength
@@ -163,27 +212,27 @@ class TomlV1ParserTest(unittest.TestCase):
         self.assertEqual(state_reduction.merge_fit_mode, FitModeForMerge.BOTH)
 
     def test_detector_parsed(self):
-        top_level_dict = {"detector": {"calibration": {"direct": {},
-                                                       "flat": {},
-                                                       "tube": {},
-                                                       "position": {}},
+        top_level_dict = {"detector": {"correction": {"direct": {},
+                                                      "flat": {},
+                                                      "tube": {},
+                                                      "position": {}},
                                        "radius_limit": {"min": None,
                                                         "max": None}}}
 
-        calibration_dict = top_level_dict["detector"]["calibration"]
+        correction_dict = top_level_dict["detector"]["correction"]
 
         direct_front = mock.NonCallableMock()
         direct_rear = mock.NonCallableMock()
-        calibration_dict["direct"]["front_file"] = direct_front
-        calibration_dict["direct"]["rear_file"] = direct_rear
+        correction_dict["direct"]["front_file"] = direct_front
+        correction_dict["direct"]["rear_file"] = direct_rear
 
         flat_front = mock.NonCallableMock()
         flat_rear = mock.NonCallableMock()
-        calibration_dict["flat"]["front_file"] = flat_front
-        calibration_dict["flat"]["rear_file"] = flat_rear
+        correction_dict["flat"]["front_file"] = flat_front
+        correction_dict["flat"]["rear_file"] = flat_rear
 
         tube_file = mock.NonCallableMock()
-        calibration_dict["tube"]["file"] = tube_file
+        correction_dict["tube"]["file"] = tube_file
 
         radius_limit = top_level_dict["detector"]["radius_limit"]
         radius_limit["min"] = 100
@@ -210,9 +259,9 @@ class TomlV1ParserTest(unittest.TestCase):
         self.assertEqual(100, mask.radius_min)
         self.assertEqual(200, mask.radius_max)
 
-    def test_detector_calibration_position(self):
-        top_level_dict = {"detector": {"calibration": {"position": {}}}}
-        position_dict = top_level_dict["detector"]["calibration"]["position"]
+    def test_detector_correction_position(self):
+        top_level_dict = {"detector": {"correction": {"position": {}}}}
+        position_dict = top_level_dict["detector"]["correction"]["position"]
 
         for adjustment in ["_x", "_y", "_z", "_rot", "_radius", "_side", "_x_tilt", "_y_tilt", "_z_tilt"]:
             position_dict["front" + adjustment] = mock.NonCallableMock()
@@ -249,12 +298,6 @@ class TomlV1ParserTest(unittest.TestCase):
         self.assertEqual(5, q_resolution.q_resolution_w1)
         self.assertEqual(6, q_resolution.q_resolution_w2)
         self.assertEqual(q_resolution_dict["moderator_file"], q_resolution.moderator_file)
-
-    def test_gravity(self):
-        test_dict = {"gravity": {"enabled": True}}
-        q_state = self._setup_parser(test_dict).get_state_convert_to_q()
-
-        self.assertEqual(True, q_state.use_gravity)
 
     def test_transmission(self):
         top_level_dict = {"transmission": {"monitor": {"M3": {}, "M5": {}}}}
@@ -325,6 +368,41 @@ class TomlV1ParserTest(unittest.TestCase):
         fitting_dict["enabled"] = False
         self.assertIsNotNone(self._setup_parser(top_level_dict))
 
+    def test_normalisation_normalization_both_accepted(self):
+        for norm_variant in "normalisation", "normalization":
+            norm_dict = {norm_variant: {"monitor": {"M1": {}, "A2": {}}, "selected_monitor": "M1"}}
+            monitor_dict = norm_dict[norm_variant]["monitor"]
+
+            m1_dict = monitor_dict["M1"]
+            m1_dict["background"] = [100, 200]
+            m1_dict["spectrum_number"] = 1
+
+            calc_transmission = self._setup_parser(norm_dict).get_state_calculate_transmission()
+            self.assertEqual({'1': 100}, calc_transmission.background_TOF_monitor_start)
+            self.assertEqual({'1': 200}, calc_transmission.background_TOF_monitor_stop)
+
+    def test_parsing_all_monitor_background(self):
+        top_level_dict = {"normalisation": {"all_monitors": {"enabled": True,
+                                                             "background": [1200, 2400]}}}
+        parsed = self._setup_parser(top_level_dict)
+        parsed_transmission = parsed.get_state_calculate_transmission()
+        self.assertEqual(1200, parsed_transmission.background_TOF_general_start)
+        self.assertEqual(2400, parsed_transmission.background_TOF_general_stop)
+        parsed_norm_monitors = parsed.get_state_normalize_to_monitor(None)
+        self.assertEqual(1200, parsed_norm_monitors.background_TOF_general_start)
+        self.assertEqual(2400, parsed_norm_monitors.background_TOF_general_stop)
+
+    def test_parsing_all_monitor_background_ignored_false(self):
+        top_level_dict = {"normalisation": {"all_monitors": {"enabled": False,
+                                                             "background": [1200, 2400]}}}
+        parsed = self._setup_parser(top_level_dict)
+        parsed_transmission = parsed.get_state_calculate_transmission()
+        self.assertIsNone(parsed_transmission.background_TOF_general_start)
+        self.assertIsNone(parsed_transmission.background_TOF_general_stop)
+        parsed_norm_monitors = parsed.get_state_normalize_to_monitor(None)
+        self.assertIsNone(parsed_norm_monitors.background_TOF_general_start)
+        self.assertIsNone(parsed_norm_monitors.background_TOF_general_stop)
+
     def test_parse_normalisation(self):
         # A2 is intentional to check were not hardcoded to Mx
         top_level_dict = {"normalisation": {"monitor": {"M1": {}, "A2": {}},
@@ -356,8 +434,12 @@ class TomlV1ParserTest(unittest.TestCase):
             self._setup_parser(top_level_dict)
 
     def test_parse_mask_spatial(self):
-        top_level_dict = {"mask": {"spatial": {"rear": {},
-                                               "front": {}}}}
+        top_level_dict = {"mask": {"spatial": {
+            "beamstop_shadow": {},
+            "front": {},
+            "rear": {},
+            "mask_pixels": [],
+        }}}
 
         rear_spatial_dict = top_level_dict["mask"]["spatial"]["rear"]
         rear_spatial_dict["detector_columns"] = [101, 102]
@@ -370,6 +452,10 @@ class TomlV1ParserTest(unittest.TestCase):
         front_spatial_dict["detector_rows"] = [2, 3]
         front_spatial_dict["detector_column_ranges"] = [[0, 10]]
         front_spatial_dict["detector_row_ranges"] = [[100, 400]]
+
+        top_level_dict["mask"]["spatial"]["beamstop_shadow"] = {"width": 10, "angle": 180}
+        mask_pixels_expected = [1, 2, 4, 17000]  # 17000 is in HAB on LOQ
+        top_level_dict["mask"]["spatial"]["mask_pixels"] = mask_pixels_expected
 
         mask_state = self._setup_parser(top_level_dict).get_state_mask(None)
 
@@ -391,22 +477,35 @@ class TomlV1ParserTest(unittest.TestCase):
         self.assertEqual([100], front_result.range_horizontal_strip_start)
         self.assertEqual([400], front_result.range_horizontal_strip_stop)
 
-    def test_parse_mask(self):
-        top_level_dict = {"mask": {"beamstop_shadow": {},
-                                   "prompt_peak": {},
-                                   "mask_pixels": [],
-                                   "mask_files": [],
-                                   "time": {"tof": []}},
-                          "phi": {}}
+        # Pixel masks
+        self.assertEqual([1, 2, 4], mask_state.detectors[DetectorType.LAB.value].single_spectra)
+        self.assertEqual([17000], mask_state.detectors[DetectorType.HAB.value].single_spectra)
+        # Beamstop angle
+        self.assertEqual(180, mask_state.beam_stop_arm_angle)
+        self.assertEqual(10, mask_state.beam_stop_arm_width)
 
-        top_level_dict["mask"]["beamstop_shadow"] = {"width": 10, "angle": 180}
+    def test_beamstop_masking_x_y_positions(self):
+        for beamstop_values in [{"width": 0.1, "angle": 0.2},
+                                {"width": 0.1, "angle": 0.2, "x_pos": 0.3, "y_pos": 0.4}]:
+            parser = self._setup_parser({"mask": {"spatial": {"beamstop_shadow": beamstop_values}}})
+            masks = parser.get_state_mask(None)
+            self.assertEqual(beamstop_values["width"], masks.beam_stop_arm_width)
+            self.assertEqual(beamstop_values["angle"], masks.beam_stop_arm_angle)
+            self.assertEqual(beamstop_values.get("x_pos", 0.0), masks.beam_stop_arm_pos1)
+            self.assertEqual(beamstop_values.get("y_pos", 0.0), masks.beam_stop_arm_pos2)
+
+    def test_parse_mask(self):
+        top_level_dict = {"mask": {
+            "prompt_peak": {},
+            "mask_files": [],
+            "time": {"tof": []}
+        },
+            "phi": {}}
+
         top_level_dict["mask"]["prompt_peak"] = {"start": 101, "stop": 102}
 
         mask_files_mock = [mock.NonCallableMock()]
-        mask_pixels_expected = [1, 2, 4, 17000]  # 17000 is in HAB on LOQ
         top_level_dict["mask"]["mask_files"] = mask_files_mock
-        top_level_dict["mask"]["mask_pixels"] = mask_pixels_expected
-
         time_dict = top_level_dict["mask"]["time"]
 
         time_dict["tof"].extend([{"start": 100, "stop": 200},
@@ -419,12 +518,7 @@ class TomlV1ParserTest(unittest.TestCase):
         masks = parser_result.get_state_mask(None)
 
         self.assertIsInstance(masks, StateMask)
-        self.assertEqual(180, masks.beam_stop_arm_angle)
-        self.assertEqual(10, masks.beam_stop_arm_width)
-
         self.assertEqual(mask_files_mock, masks.mask_files)
-        self.assertEqual([1, 2, 4], masks.detectors[DetectorType.LAB.value].single_spectra)
-        self.assertEqual([17000], masks.detectors[DetectorType.HAB.value].single_spectra)
 
         self.assertEqual([100, 300], masks.bin_mask_general_start)
         self.assertEqual([200, 400], masks.bin_mask_general_stop)

@@ -49,65 +49,57 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
-  void testViaProxy() {
-    auto proxy = AlgorithmManager::Instance().create("Load");
-    TS_ASSERT_EQUALS(proxy->existsProperty("Filename"), true);
-    TS_ASSERT_EQUALS(proxy->existsProperty("OutputWorkspace"), true);
+  void testPropertyValues() {
+    auto loader = AlgorithmManager::Instance().create("Load");
+    TS_ASSERT_EQUALS(loader->existsProperty("Filename"), true);
+    TS_ASSERT_EQUALS(loader->existsProperty("OutputWorkspace"), true);
 
-    TS_ASSERT_THROWS_NOTHING(proxy->setPropertyValue("Filename", "IRS38633.raw"));
-    TS_ASSERT_EQUALS(proxy->existsProperty("Cache"), true);
-    TS_ASSERT_EQUALS(proxy->existsProperty("LoadLogFiles"), true);
+    TS_ASSERT_THROWS_NOTHING(loader->setPropertyValue("Filename", "MUSR00022725.nxs"));
+    TS_ASSERT_EQUALS(loader->existsProperty("EntryNumber"), true);
+    TS_ASSERT_EQUALS(loader->existsProperty("AutoGroup"), true);
+    TS_ASSERT_EQUALS(loader->existsProperty("MainFieldDirection"), true);
+    TS_ASSERT_THROWS_NOTHING(loader->setPropertyValue("SpectrumMin", "2"));
+    TS_ASSERT_THROWS_NOTHING(loader->setPropertyValue("SpectrumMax", "5"));
 
-    proxy->setPropertyValue("Filename", "IRS38633.raw");
-    TS_ASSERT_EQUALS(proxy->existsProperty("Cache"), true);
-    TS_ASSERT_EQUALS(proxy->existsProperty("LoadLogFiles"), true);
+    // Execute & Test that the properties have the expected values
+    loader->setPropertyValue("OutputWorkspace", "dummy");
+    loader->setPropertyValue("DeadTimeTable", "dummy");
+    loader->setChild(true);
+    loader->execute();
 
-    TS_ASSERT_THROWS_NOTHING(proxy->setPropertyValue("Filename", "LOQ49886.nxs"));
-    TS_ASSERT_EQUALS(proxy->existsProperty("Cache"), false);
-    TS_ASSERT_EQUALS(proxy->existsProperty("LoadLogFiles"), false);
+    TS_ASSERT_EQUALS(static_cast<int>(loader->getProperty("SpectrumMin")), 2);
+    TS_ASSERT_EQUALS(static_cast<int>(loader->getProperty("SpectrumMax")), 5);
+    TS_ASSERT_EQUALS(loader->getPropertyValue("MainFieldDirection"), "Transverse");
+    TS_ASSERT_DELTA(static_cast<double>(loader->getProperty("TimeZero")), 0.55, 1e-7);
+    TS_ASSERT_DELTA(static_cast<double>(loader->getProperty("FirstGoodData")), 0.656, 1e-7);
+    TS_ASSERT(static_cast<Workspace_sptr>(loader->getProperty("DeadTimeTable")));
   }
 
-  void testPropertyValuesViaProxy() {
-    auto proxy = AlgorithmManager::Instance().create("Load");
-    TS_ASSERT_EQUALS(proxy->existsProperty("Filename"), true);
-    TS_ASSERT_EQUALS(proxy->existsProperty("OutputWorkspace"), true);
+  void testSwitchingLoader() {
+    auto loader = AlgorithmManager::Instance().create("Load");
+    TS_ASSERT_EQUALS(loader->existsProperty("Filename"), true);
+    TS_ASSERT_EQUALS(loader->existsProperty("OutputWorkspace"), true);
+    TS_ASSERT_THROWS_NOTHING(loader->setPropertyValue("Filename", "IRS38633.raw"));
+    TS_ASSERT_EQUALS(loader->existsProperty("Cache"), true);
+    TS_ASSERT_EQUALS(loader->existsProperty("LoadLogFiles"), true);
 
-    TS_ASSERT_THROWS_NOTHING(proxy->setPropertyValue("Filename", "IRS38633.raw"));
-    TS_ASSERT_EQUALS(proxy->existsProperty("Cache"), true);
-    TS_ASSERT_EQUALS(proxy->existsProperty("LoadLogFiles"), true);
-    TS_ASSERT_THROWS_NOTHING(proxy->setPropertyValue("SpectrumMin", "10"));
-    TS_ASSERT_THROWS_NOTHING(proxy->setPropertyValue("SpectrumMax", "100"));
-
-    // Test that the properties have the correct values
-    TS_ASSERT_EQUALS(proxy->getPropertyValue("SpectrumMin"), "10");
-    TS_ASSERT_EQUALS(proxy->getPropertyValue("SpectrumMax"), "100");
-  }
-
-  void testSwitchingLoaderViaProxy() {
-    auto proxy = AlgorithmManager::Instance().create("Load");
-    TS_ASSERT_EQUALS(proxy->existsProperty("Filename"), true);
-    TS_ASSERT_EQUALS(proxy->existsProperty("OutputWorkspace"), true);
-    TS_ASSERT_THROWS_NOTHING(proxy->setPropertyValue("Filename", "IRS38633.raw"));
-    TS_ASSERT_EQUALS(proxy->existsProperty("Cache"), true);
-    TS_ASSERT_EQUALS(proxy->existsProperty("LoadLogFiles"), true);
-
-    TS_ASSERT_THROWS_NOTHING(proxy->setPropertyValue("SpectrumMin", "10"));
-    TS_ASSERT_THROWS_NOTHING(proxy->setPropertyValue("SpectrumMax", "100"));
+    TS_ASSERT_THROWS_NOTHING(loader->setPropertyValue("SpectrumMin", "10"));
+    TS_ASSERT_THROWS_NOTHING(loader->setPropertyValue("SpectrumMax", "100"));
 
     // Test that the properties have the correct values
-    TS_ASSERT_EQUALS(proxy->getPropertyValue("SpectrumMin"), "10");
-    TS_ASSERT_EQUALS(proxy->getPropertyValue("SpectrumMax"), "100");
+    TS_ASSERT_EQUALS(loader->getPropertyValue("SpectrumMin"), "10");
+    TS_ASSERT_EQUALS(loader->getPropertyValue("SpectrumMax"), "100");
 
     // Change loader
-    proxy->setPropertyValue("Filename", "LOQ49886.nxs");
-    TS_ASSERT_EQUALS(proxy->existsProperty("EntryNumber"), true);
-    TS_ASSERT_EQUALS(proxy->existsProperty("Cache"), false);
+    loader->setPropertyValue("Filename", "LOQ49886.nxs");
+    TS_ASSERT_EQUALS(loader->existsProperty("EntryNumber"), true);
+    TS_ASSERT_EQUALS(loader->existsProperty("Cache"), false);
 
-    TS_ASSERT_THROWS_NOTHING(proxy->setPropertyValue("SpectrumMin", "11"));
-    TS_ASSERT_THROWS_NOTHING(proxy->setPropertyValue("SpectrumMax", "101"));
+    TS_ASSERT_THROWS_NOTHING(loader->setPropertyValue("SpectrumMin", "11"));
+    TS_ASSERT_THROWS_NOTHING(loader->setPropertyValue("SpectrumMax", "101"));
 
-    TS_ASSERT_EQUALS(proxy->getPropertyValue("SpectrumMin"), "11");
-    TS_ASSERT_EQUALS(proxy->getPropertyValue("SpectrumMax"), "101");
+    TS_ASSERT_EQUALS(loader->getPropertyValue("SpectrumMin"), "11");
+    TS_ASSERT_EQUALS(loader->getPropertyValue("SpectrumMax"), "101");
   }
 
   void testFindLoader() {

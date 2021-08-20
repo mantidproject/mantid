@@ -13,6 +13,7 @@ from sans.command_interface.batch_csv_parser import BatchCsvParser
 from sans.common.enums import (SANSFacility, ReductionDimensionality, SaveType, RowState)
 from sans.common.enums import SANSInstrument
 from sans.gui_logic.models.RowEntries import RowEntries
+from sans.gui_logic.models.file_loading import UserFileLoadException
 from sans.gui_logic.models.run_tab_model import RunTabModel
 from sans.gui_logic.models.state_gui_model import StateGuiModel
 from sans.gui_logic.models.table_model import TableModel
@@ -22,6 +23,7 @@ from sans.test_helper.common import (remove_file)
 from sans.test_helper.mock_objects import (create_mock_view)
 from sans.test_helper.user_file_test_helper import (create_user_file, sample_user_file)
 from ui.sans_isis.sans_gui_observable import SansGuiObservable
+from sans.user_file.toml_parsers.toml_v1_schema import TomlValidationError
 
 BATCH_FILE_TEST_CONTENT_1 = [RowEntries(sample_scatter=1, sample_transmission=2,
                                         sample_direct=3, output_name='test_file',
@@ -132,6 +134,19 @@ class RunTabPresenterTest(unittest.TestCase):
 
         # clean up
         remove_file(user_file_path)
+
+    @mock.patch("sans.gui_logic.presenter.run_tab_presenter.FileLoading")
+    @mock.patch("sans.gui_logic.presenter.run_tab_presenter.FileFinder")
+    def test_user_file_loading_handles_exceptions(self, _, mocked_loader):
+        for e in [UserFileLoadException("e"), TomlValidationError("e")]:
+            self._mock_view.display_message_box.reset_mock()
+            self._mock_view.on_user_file_load_failure.reset_mock()
+
+            mocked_loader.load_user_file.side_effect = e
+            self.presenter.on_user_file_load()
+
+            self._mock_view.on_user_file_load_failure.assert_called_once()
+            self._mock_view.display_message_box.assert_called_once_with(mock.ANY, mock.ANY, "e")
 
     def test_that_checks_default_user_file(self):
         # Setup self.presenter.and mock view

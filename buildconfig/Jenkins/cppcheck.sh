@@ -41,7 +41,7 @@ cmake --build . --target cppcheck
 cppcheck-htmlreport --file=cppcheck.xml --title=Embedded --report-dir=cppcheck-report
 
 # Mark build as passed or failed
-errors_count=$(grep -c '</error>' $1)
+errors_count=$(grep -c '</error>' cppcheck.xml)
 if [ $errors_count -gt ${ALLOWED_ERRORS_COUNT} ]; then
   echo "CppCheck found ${ALLOWED_ERRORS_COUNT} errors."
   echo "See CppCheck link on the job page for more detail."
