@@ -477,7 +477,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
                 self.convert_to_point_data(integrated_ws)
                 outputs['IQ'] = integrated_ws[0]
                 if len(integrated_ws) > 1:
-                    # if there is a second output, it must be either the panels or the wedges
+                    # if there is a second output from integration, it must be either the panels or the wedges
                     key = 'IQP' if self.getProperty('OutputPanels').value else 'IQW'
                     outputs[key] = integrated_ws[1]
             all_outputs.append(outputs)
@@ -746,7 +746,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         kwargs['OutputWorkspace'] = sample_ws[0] + '_iq'
         results.append(kwargs['OutputWorkspace'])
         # for the moment only I(Q) is supported, since with the workspace containing all the samples,
-        # I(Phi,Q) and I(Qx, Qy) will need to be reworked to be MDHistoWorkspace
+        # I(Phi,Q) and I(Qx,Qy) will need to be reworked to become MDHistoWorkspace
         kwargs['OutputType'] = 'I(Q)'
         props = ['CalculateResolution', 'DefaultQBinning', 'BinningFactor', 'NumberOfWedges', 'WedgeAngle',
                  'WedgeOffset', 'AsymmetricWedges', 'WavelengthRange', 'ShapeTable']
@@ -769,7 +769,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
             if isinstance(mtd[ws], WorkspaceGroup):
                 for wsi in mtd[ws]:
                     ConvertToPointData(InputWorkspace=wsi.name(), OutputWorkspace=wsi.name())
-                    wsi.setDistribution(False)
+                    mtd[wsi.name()].setDistribution(False)
             else:
                 ConvertToPointData(InputWorkspace=ws, OutputWorkspace=ws)
                 mtd[ws].setDistribution(False)
@@ -786,29 +786,52 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
             GroupWorkspaces(InputWorkspaces=real_space_ws_list, OutputWorkspace=tmp_group)
             CalculateEfficiency(InputWorkspace=tmp_group, MergeGroup=True, OutputWorkspace=comb_sens)
             UnGroupWorkspace(tmp_group)
-            return comb_sens
+            return {'CombinedSens':comb_sens}
         else:
-            return ''
+            return dict()
 
     def stitch(self, samples):
+        results = dict()
         to_stitch = []
-        out = self.getPropertyValue('OutputWorkspace')
-        stitched_ws = out + '_stitched'
-        stitch_scales = out + '_stitch_scale_factors'
+        to_stitch_wedges = []
         for pack in samples:
             if 'IQ' in pack:
                 to_stitch.append(pack['IQ'])
+            if 'IQW' in pack:
+                to_stitch_wedges.append(pack['IQW'])
+        out = self.getPropertyValue('OutputWorkspace')
+        stitched_ws = out + '_stitched'
+        stitch_scale_factors = out + '_stitch_scale_factors'
+        stitched_main = self.do_stitch(to_stitch, stitched_ws, stitch_scale_factors)
+        if stitched_main:
+            results['Stitched'] = stitched_main[0]
+            results['StitchScaleFactors'] = stitched_main[1]
+        if to_stitch_wedges:
+            n_wedges = mtd[to_stitch_wedges[0]].getNumberOfEntries()
+            for w in range(n_wedges):
+                to_stitch_w = []
+                for i in range(len(to_stitch_wedges)):
+                    to_stitch_w.append(mtd[to_stitch_wedges[i]][w].name())
+                stitched_wedge_ws = out + '_stitched_wedge_' + str(w+1)
+                stitch_scale_factors = out + '_stitch_scale_factors_wedge_' + str(w+1)
+                stitched_wedge = self.do_stitch(to_stitch_w, stitched_wedge_ws, stitch_scale_factors)
+                if stitched_wedge:
+                    results[f'Stitched_Wedge{w+1}'] = stitched_wedge[0]
+                    results[f'StitchScaleFactors_Wedge{w+1}'] = stitched_wedge[1]
+        return results
+
+    def do_stitch(self, inputs, output, output_scale_factors):
         stitch_options = ['ManualScaleFactors', 'TieScaleFactors', 'ScaleFactorCalculation']
         kwargs = dict()
         for opt in stitch_options:
             kwargs[opt] = self.getProperty(opt).value
         try:
-            Stitch(InputWorkspaces=to_stitch,
-                   OutputWorkspace=stitched_ws,
-                   OutputScaleFactorsWorkspace=stitch_scales,
-                   ReferenceWorkspace=to_stitch[self.getProperty('StitchReferenceIndex').value],
+            Stitch(InputWorkspaces=inputs,
+                   OutputWorkspace=output,
+                   OutputScaleFactorsWorkspace=output_scale_factors,
+                   ReferenceWorkspace=inputs[self.getProperty('StitchReferenceIndex').value],
                    **kwargs)
-            return [stitched_ws, stitch_scales]
+            return [output, output_scale_factors]
         except RuntimeError as e:
             self.log().error('Unable to stitch, consider stitching manually: '+str(e))
         return []
@@ -818,11 +841,11 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
             if self.getProperty('PerformStitching').value:
                 stitched = self.stitch(samples)
                 if stitched:
-                    samples.append({'Stitched':stitched[0], 'StitchScaleFactors':stitched[1]})
+                    samples.append(stitched)
             if self.getProperty('SensitivityWithOffsets').value:
                 comb_sens = self.generate_combined_sensitivity(samples)
                 if comb_sens:
-                    samples.append({'CombinedSens':comb_sens})
+                    samples.append(comb_sens)
         return samples
 
     def package(self, samples):
@@ -841,8 +864,8 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         self._setup_light()
         transmissions = self.process_all_transmissions()
         samples = self.process_all_samples(transmissions)
-        samples = self.combine(samples)
-        self.package(samples)
+        outputs = self.combine(samples)
+        self.package(outputs)
 
 
 AlgorithmFactory.subscribe(SANSILLMultiProcess)
