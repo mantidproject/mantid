@@ -22,17 +22,18 @@ class BeamCentreModel(object):
         self._left_right = True
         self._up_down = True
         self._tolerance = 1.251E-07 # metres
-        self._lab_pos_1 = ''
-        self._lab_pos_2 = ''
-        self._hab_pos_2 = ''
-        self._hab_pos_1 = ''
+        self._rear_pos_1 = ''
+        self._rear_pos_2 = ''
+        self._front_pos_2 = ''
+        self._front_pos_1 = ''
         self.COM = False
         self.verbose = False
         self.q_min = 0.01
         self.q_max = 0.1
+        # Where LAB == Rear and HAB == Front
         self._component = DetectorType.LAB
-        self.update_lab = True
-        self.update_hab = True
+        self.update_rear = True
+        self.update_front = True
         self.instrument = None
 
         self.reset_inst_defaults(instrument=SANSInstrument.NO_INSTRUMENT)
@@ -45,7 +46,7 @@ class BeamCentreModel(object):
             self._r_min = 0.096 # metres
             self._r_max = 0.216 # metres
 
-            # TODO HAB on LOQ prefers 96-750
+            # TODO front on LOQ prefers 96-750
         else:
             # All other instruments hard-code this as follows
             self._r_min = 0.06 # metres
@@ -53,13 +54,13 @@ class BeamCentreModel(object):
 
         self.instrument = instrument
 
-    def _update_centre_positions(self, results):
+    def update_centre_positions(self, results):
         if self.component is DetectorType.LAB:
-            self._lab_pos_1 = results["pos1"]
-            self._lab_pos_2 = results["pos2"]
+            self._rear_pos_1 = results["pos1"]
+            self._rear_pos_2 = results["pos2"]
         elif self.component is DetectorType.HAB:
-            self._hab_pos_1 = results['pos1']
-            self._hab_pos_2 = results['pos2']
+            self._front_pos_1 = results['pos1']
+            self._front_pos_2 = results['pos2']
         else:
             raise RuntimeError("Unexpected detector type, got %r" % results)
 
@@ -80,8 +81,8 @@ class BeamCentreModel(object):
         # 2. We only move the attrs that are relevant across threads
         return BeamCentreFields(component=self.component, centre_of_mass=self.COM,
                                 find_direction=self.get_finder_direction(),
-                                lab_pos_1=self._lab_pos_1, lab_pos_2=self._lab_pos_2,
-                                hab_pos_1=self._hab_pos_1, hab_pos_2=self._hab_pos_2,
+                                lab_pos_1=self._rear_pos_1, lab_pos_2=self._rear_pos_2,
+                                hab_pos_1=self._front_pos_1, hab_pos_2=self._front_pos_2,
                                 max_iterations=self.max_iterations,
                                 r_min=self.r_min, r_max=self.r_max,
                                 tolerance=self.tolerance, verbose=self.verbose)
@@ -168,43 +169,43 @@ class BeamCentreModel(object):
 
     @property
     @apply_selective_view_scaling
-    def lab_pos_1(self):
-        return self._lab_pos_1 if self._lab_pos_1 is not None else ''
+    def rear_pos_1(self):
+        return self._rear_pos_1 if self._rear_pos_1 is not None else ''
 
-    @lab_pos_1.setter
+    @rear_pos_1.setter
     @undo_selective_view_scaling
-    def lab_pos_1(self, value):
-        self._lab_pos_1 = value
+    def rear_pos_1(self, value):
+        self._rear_pos_1 = value
 
     @property
     @apply_selective_view_scaling
-    def lab_pos_2(self):
-        return self._lab_pos_2 if self._lab_pos_2 is not None else ''
+    def rear_pos_2(self):
+        return self._rear_pos_2 if self._rear_pos_2 is not None else ''
 
-    @lab_pos_2.setter
+    @rear_pos_2.setter
     @undo_selective_view_scaling
-    def lab_pos_2(self, value):
-        self._lab_pos_2 = value
+    def rear_pos_2(self, value):
+        self._rear_pos_2 = value
 
     @property
     @apply_selective_view_scaling
-    def hab_pos_1(self):
-        return self._hab_pos_1 if self._hab_pos_1 is not None else ''
+    def front_pos_1(self):
+        return self._front_pos_1 if self._front_pos_1 is not None else ''
 
-    @hab_pos_1.setter
+    @front_pos_1.setter
     @undo_selective_view_scaling
-    def hab_pos_1(self, value):
-        self._hab_pos_1 = value
+    def front_pos_1(self, value):
+        self._front_pos_1 = value
 
     @property
     @apply_selective_view_scaling
-    def hab_pos_2(self):
-        return self._hab_pos_2 if self._hab_pos_2 is not None else ''
+    def front_pos_2(self):
+        return self._front_pos_2 if self._front_pos_2 is not None else ''
 
-    @hab_pos_2.setter
+    @front_pos_2.setter
     @undo_selective_view_scaling
-    def hab_pos_2(self, value):
-        self._hab_pos_2 = value
+    def front_pos_2(self, value):
+        self._front_pos_2 = value
 
     @property
     def component(self):
@@ -215,17 +216,17 @@ class BeamCentreModel(object):
         self._component = value
 
     @property
-    def update_hab(self):
-        return self._update_hab
+    def update_front(self):
+        return self._update_front
 
-    @update_hab.setter
-    def update_hab(self, value):
-        self._update_hab = value
+    @update_front.setter
+    def update_front(self, value):
+        self._update_front = value
 
     @property
-    def update_lab(self):
-        return self._update_lab
+    def update_rear(self):
+        return self._update_rear
 
-    @update_lab.setter
-    def update_lab(self, value):
-        self._update_lab = value
+    @update_rear.setter
+    def update_rear(self, value):
+        self._update_rear = value

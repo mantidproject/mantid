@@ -874,9 +874,9 @@ class RunTabPresenter(PresenterCommon):
             return
         mode = get_reduction_mode_from_gui_selection(selection)
         if mode == ReductionMode.HAB:
-            self._beam_centre_presenter.update_hab_selected()
+            self._beam_centre_presenter.update_front_selected()
         elif mode == ReductionMode.LAB:
-            self._beam_centre_presenter.update_lab_selected()
+            self._beam_centre_presenter.update_rear_selected()
         else:
             self._beam_centre_presenter.update_all_selected()
 
@@ -1147,8 +1147,8 @@ class RunTabPresenter(PresenterCommon):
             self._set_on_custom_model("batch_file", state_model)
 
             # Beam Centre
-            self._beam_centre_presenter.set_on_state_model("lab_pos_1", state_model)
-            self._beam_centre_presenter.set_on_state_model("lab_pos_2", state_model)
+            self._beam_centre_presenter.set_on_state_model("rear_pos_1", state_model)
+            self._beam_centre_presenter.set_on_state_model("rear_pos_2", state_model)
         except (RuntimeError, ValueError) as e:
             self.display_warning_box(title="Invalid Settings Entered", text=str(e), detailed_text=str(e))
 
