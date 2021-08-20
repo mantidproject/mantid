@@ -68,6 +68,7 @@ set(PYTHON_PLUGINS
     algorithms/ExtractMonitors.py
     algorithms/FilterLogByTime.py
     algorithms/FindGoniometerFromUB.py
+    algorithms/FindGlobalBMatrix.py
     algorithms/FindSatellitePeaks.py
     algorithms/FitGaussian.py
     algorithms/FitIncidentSpectrum.py
@@ -135,6 +136,7 @@ set(PYTHON_PLUGINS
     algorithms/MuonMaxent.py
     algorithms/MuscatSofQW.py
     algorithms/NMoldyn4Interpolation.py
+    algorithms/NOMADMedianDetectorTest.py
     algorithms/NormaliseSpectra.py
     algorithms/OptimizeCrystalPlacementByRun.py
     algorithms/OrderWorkspaceHistory.py
@@ -149,6 +151,7 @@ set(PYTHON_PLUGINS
     algorithms/PoldiCreatePeaksFromFile.py
     algorithms/PoldiLoadRuns.py
     algorithms/PoldiMerge.py
+    algorithms/PowderReduceP2D.py
     algorithms/RebinRagged.py
     algorithms/RefinePowderDiffProfileSeq.py
     algorithms/ReflectometryReductionOneLiveData.py
