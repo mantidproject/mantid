@@ -1371,7 +1371,11 @@ class CrystalFieldFit(object):
             iter += 1
 
     def two_step_fit_sc(self, OverwriteMaxIterations=None, OverwriteMinimizers=None, Options=None):
+        from CrystalField.CrystalFieldMultiSite import CrystalFieldMultiSite
         from mantid.kernel import logger
+        if isinstance(self.model, CrystalFieldMultiSite):
+            logger.notice('The two_step_fit_sc algorithm is only available for single-site calculations at the moment')
+            return
         logger.notice("Please note that this is a first experimental version of the two_step_fit_sc algorithm.")
         fix_all_peaks = self.model.FixAllPeaks
         fit_properties = self._fit_properties
@@ -1388,7 +1392,6 @@ class CrystalFieldFit(object):
         if Options is None:
             Options = {'disp': False}
         self.check_consistency()
-        from CrystalField.CrystalFieldMultiSite import CrystalFieldMultiSite
         # Store free CEF parameters
         if isinstance(self.model, CrystalFieldMultiSite):
             fun = self.model.function

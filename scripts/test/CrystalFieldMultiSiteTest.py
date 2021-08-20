@@ -631,6 +631,73 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         self.assertTrue(cf.function.isFixed(cf.function.getParameterIndex("ion1.B66")))
         self.assertTrue(cf.function.isFixed(cf.function.getParameterIndex("ion1.IB62")))
 
+    def test_two_step_fit_multi_ion_single_spectrum(self):
+        from CrystalField.fitting import makeWorkspace
+        from CrystalField import CrystalField, CrystalFieldFit
+        from mantid.simpleapi import CalculateChiSquared
+
+        params = {'B20': 0.37737, 'B22': 3.9770, 'B40': -0.031787, 'B42': -0.11611, 'B44': -0.12544,
+                  'Temperature': 44.0, 'FWHM': 1.1}
+        cf1 = CrystalField('Ce', 'C2v', **params)
+        cf2 = CrystalField('Pr', 'C2v', **params)
+        cf = cf1 + cf2
+        r = [0.0, 1.45, 2.4, 3.0, 3.85]
+        x, y = cf.getSpectrum(r)
+        ws = makeWorkspace(x, y)
+
+        params = {'ion0.B20': 0.37737, 'ion0.B22': 3.9770, 'ion0.B40': -0.031787, 'ion0.B42': -0.11611,
+                  'ion0.B44': -0.12544, 'ion1.B20': 0.37737, 'ion1.B22': 3.9770, 'ion1.B40': -0.031787,
+                  'ion1.B42': -0.11611, 'ion1.B44': -0.12544}
+        cf = CrystalFieldMultiSite(Ions=['Ce', 'Pr'], Symmetries=['C2v', 'C2v'], Temperatures=[44.0], FWHM=[1.1],
+                                   ToleranceIntensity=6.0, ToleranceEnergy=1.0, FixAllPeaks=True, parameters=params)
+
+        cf.fix('ion0.BmolX', 'ion0.BmolY', 'ion0.BmolZ', 'ion0.BextX', 'ion0.BextY', 'ion0.BextZ', 'ion0.B40',
+               'ion0.B42', 'ion0.B44', 'ion0.B60', 'ion0.B62', 'ion0.B64', 'ion0.B66', 'ion0.IntensityScaling',
+               'ion1.BmolX', 'ion1.BmolY', 'ion1.BmolZ', 'ion1.BextX', 'ion1.BextY', 'ion1.BextZ', 'ion1.B40',
+               'ion1.B42', 'ion1.B44', 'ion1.B60', 'ion1.B62', 'ion1.B64', 'ion1.B66', 'ion1.IntensityScaling')
+
+        chi2 = CalculateChiSquared(cf.makeSpectrumFunction(), InputWorkspace=ws)[1]
+
+        fit = CrystalFieldFit(Model=cf, InputWorkspace=ws, MaxIterations=10)
+        fit.two_step_fit(OverwriteMaxIterations=[2,2], OverwriteMinimizers=['BFGS', 'BFGS'], Iterations=2)
+
+        self.assertGreater(cf.chi2, 0.0)
+        self.assertLess(cf.chi2, chi2)
+
+    def test_two_step_fit_multi_ion_and_spectra(self):
+        from CrystalField.fitting import makeWorkspace
+        from CrystalField import CrystalField, CrystalFieldFit
+        from mantid.simpleapi import CalculateChiSquared
+
+        params = {'B20': 0.37737, 'B22': 3.9770, 'B40': -0.031787, 'B42': -0.11611, 'B44': -0.12544,
+                  'Temperature': [44.0, 50.0], 'FWHM': [1.1, 0.9]}
+        cf1 = CrystalField('Ce', 'C2v', **params)
+        cf2 = CrystalField('Pr', 'C2v', **params)
+        cf = cf1 + cf2
+        r = [0.0, 1.45, 2.4, 3.0, 3.85]
+        ws1 = makeWorkspace(*cf.getSpectrum(0, r))
+        ws2 = makeWorkspace(*cf.getSpectrum(1, r))
+
+        params = {'ion0.B20': 0.37737, 'ion0.B22': 3.9770, 'ion0.B40': -0.031787, 'ion0.B42': -0.11611,
+                  'ion0.B44': -0.12544, 'ion1.B20': 0.37737, 'ion1.B22': 3.9770, 'ion1.B40': -0.031787,
+                  'ion1.B42': -0.11611, 'ion1.B44': -0.12544}
+        cf = CrystalFieldMultiSite(Ions=['Ce', 'Pr'], Symmetries=['C2v', 'C2v'], Temperatures=[44.0, 50.0],
+                                   FWHM=[1.0, 1.0], ToleranceIntensity=6.0, ToleranceEnergy=1.0, FixAllPeaks=True,
+                                   parameters=params)
+
+        cf.fix('ion0.BmolX', 'ion0.BmolY', 'ion0.BmolZ', 'ion0.BextX', 'ion0.BextY', 'ion0.BextZ', 'ion0.B40',
+               'ion0.B42', 'ion0.B44', 'ion0.B60', 'ion0.B62', 'ion0.B64', 'ion0.B66', 'ion0.IntensityScaling',
+               'ion1.BmolX', 'ion1.BmolY', 'ion1.BmolZ', 'ion1.BextX', 'ion1.BextY', 'ion1.BextZ', 'ion1.B40',
+               'ion1.B42', 'ion1.B44', 'ion1.B60', 'ion1.B62', 'ion1.B64', 'ion1.B66', 'ion1.IntensityScaling',
+               'sp0.IntensityScaling', 'sp1.IntensityScaling')
+
+        chi2 = CalculateChiSquared(str(cf.function), InputWorkspace=ws1, InputWorkspace_1=ws2)[1]
+
+        fit = CrystalFieldFit(Model=cf, InputWorkspace=[ws1, ws2], MaxIterations=10)
+        fit.two_step_fit(OverwriteMaxIterations=[2,2], OverwriteMinimizers=['BFGS', 'BFGS'], Iterations=2)
+
+        self.assertGreater(cf.chi2, 0.0)
+        self.assertLess(cf.chi2, chi2)
 
 if __name__ == '__main__':
     unittest.main()
