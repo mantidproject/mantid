@@ -317,12 +317,12 @@ void SaveAscii2::exec() {
 
     // data writting
     if (oneSpectrumPerFile) {
-      writeSpectrum((*idxIt), file);
+      writeSpectrum(*idxIt, file);
       progress.report();
       idxIt++;
     } else {
       while (idxIt != idx.end()) {
-        writeSpectrum((*idxIt), file);
+        writeSpectrum(*idxIt, file);
         progress.report();
         idxIt++;
       }
