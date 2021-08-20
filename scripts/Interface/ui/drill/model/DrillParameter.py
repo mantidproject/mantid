@@ -176,10 +176,7 @@ class DrillParameter(QObject):
             msg (str): optional error message
         """
         self._valid = valid
-        if not valid:
-            self._validationErrorMsg = msg
-        else:
-            self._validationErrorMsg = None
+        self._validationErrorMsg = msg if not valid else None
         self.checked.emit()
 
     def isValid(self):
