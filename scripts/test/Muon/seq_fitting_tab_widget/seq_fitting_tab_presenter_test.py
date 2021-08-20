@@ -228,13 +228,29 @@ class SeqFittingTabPresenterTest(unittest.TestCase):
         disable_notifier.notify_subscribers()
         self.view.setEnabled.assert_called_once_with(False)
 
-    def test_that_enable_observer_calls_on_view_when_triggered(self):
+    def test_that_enable_observer_will_enable_the_view_when_there_is_one_of_more_datasets(self):
+        mock_model_number_of_datasets = mock.PropertyMock(return_value=1)
+        type(self.model).number_of_datasets = mock_model_number_of_datasets
+
         enable_notifier = GenericObservable()
         enable_notifier.add_subscriber(self.presenter.enable_tab_observer)
         self.view.setEnabled = mock.MagicMock()
 
         enable_notifier.notify_subscribers()
+        mock_model_number_of_datasets.assert_called_once_with()
         self.view.setEnabled.assert_called_once_with(True)
+
+    def test_that_enable_observer_will_disable_the_view_when_there_is_zero_datasets(self):
+        mock_model_number_of_datasets = mock.PropertyMock(return_value=0)
+        type(self.model).number_of_datasets = mock_model_number_of_datasets
+
+        enable_notifier = GenericObservable()
+        enable_notifier.add_subscriber(self.presenter.enable_tab_observer)
+        self.view.setEnabled = mock.MagicMock()
+
+        enable_notifier.notify_subscribers()
+        mock_model_number_of_datasets.assert_called_once_with()
+        self.view.setEnabled.assert_called_once_with(False)
 
     def test_handle_updated_fit_parameter_in_table_without_copying_fit_param(self):
         workspaces = ["EMU20884; Group; fwd; Asymmetry"]
