@@ -102,6 +102,7 @@ Improvements
   have all been updated to return the same outputs. Check their documentation pages for more.
 - It is now possible to exclude a fit range when executing the :ref:`CalculateMuonAsymmetry <algm-CalculateMuonAsymmetry>` algorithm.
 - The :ref:`PlotAsymmetryByLogValue <algm-PlotAsymmetryByLogValue>` algorithm will include the units for the log value (when they are available)
+- :ref:`LoadMuonNexusV2 <algm-LoadMuonNexusV2>` now loads the period information.
 
 BugFixes
 ############
