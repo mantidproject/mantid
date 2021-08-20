@@ -9,6 +9,7 @@
 #include "GUI/Event/IEventView.h"
 #include "GUI/Experiment/IExperimentView.h"
 #include "GUI/Instrument/IInstrumentView.h"
+#include "GUI/Preview/IPreviewView.h"
 #include "GUI/Runs/IRunsView.h"
 #include "GUI/Save/ISaveView.h"
 #include <string>
@@ -48,6 +49,7 @@ public:
   virtual ISaveView *save() const = 0;
   virtual IExperimentView *experiment() const = 0;
   virtual IInstrumentView *instrument() const = 0;
+  virtual IPreviewView *preview() const = 0;
   virtual void clearAlgorithmQueue() = 0;
   virtual void setAlgorithmQueue(std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> algorithms) = 0;
   virtual void executeAlgorithmQueue() = 0;

@@ -127,8 +127,10 @@ public:
     TS_ASSERT(field == "Transverse");
     double timeZero = nxL.getProperty("TimeZero");
     TS_ASSERT_DELTA(timeZero, 0.55, 0.001);
-    double firstgood = nxL.getProperty("FirstGoodData");
-    TS_ASSERT_DELTA(firstgood, 0.656, 0.001);
+    double firstGood = nxL.getProperty("FirstGoodData");
+    TS_ASSERT_DELTA(firstGood, 0.656, 0.001);
+    double lastGood = nxL.getProperty("LastGoodData");
+    TS_ASSERT_DELTA(lastGood, 32.0, 0.001);
 
     // Test that the output workspace knows the field direction
     MatrixWorkspace_sptr output;

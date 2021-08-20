@@ -9,6 +9,7 @@
 #include "MantidQtWidgets/Common/EditLocalParameterDialog.h"
 #include "MantidQtWidgets/Common/FitScriptGeneratorDataTable.h"
 #include "MantidQtWidgets/Common/FittingGlobals.h"
+#include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/IFitScriptGeneratorPresenter.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleDialogEditor.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
@@ -23,6 +24,8 @@
 #include <QClipboard>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QMetaObject>
+#include <QThread>
 
 using namespace Mantid::Kernel;
 using namespace MantidQt::API;
@@ -91,10 +94,9 @@ using ViewEvent = IFitScriptGeneratorView::Event;
 
 FitScriptGeneratorView::FitScriptGeneratorView(QWidget *parent, FittingMode fittingMode,
                                                QMap<QString, QString> const &fitOptions)
-    : IFitScriptGeneratorView(parent), m_presenter(), m_dialog(std::make_unique<AddWorkspaceDialog>(this)),
-      m_dataTable(std::make_unique<FitScriptGeneratorDataTable>()),
+    : IFitScriptGeneratorView(parent), m_presenter(), m_dataTable(std::make_unique<FitScriptGeneratorDataTable>()),
       m_functionTreeView(std::make_unique<FunctionTreeView>(nullptr, true)),
-      m_fitOptionsBrowser(std::make_unique<BasicFitOptionsBrowser>(nullptr)), m_editLocalParameterDialog(nullptr) {
+      m_fitOptionsBrowser(std::make_unique<FitScriptOptionsBrowser>(nullptr)), m_editLocalParameterDialog(nullptr) {
   m_ui.setupUi(this);
 
   m_ui.fDataTable->layout()->addWidget(m_dataTable.get());
@@ -105,10 +107,20 @@ FitScriptGeneratorView::FitScriptGeneratorView(QWidget *parent, FittingMode fitt
   setFittingMode(fittingMode);
   setFitBrowserOptions(fitOptions);
   connectUiSignals();
+
+  observeDelete(true);
+  observeClear(true);
+  observeRename(true);
 }
 
 FitScriptGeneratorView::~FitScriptGeneratorView() {
-  m_dialog.reset();
+  observeDelete(false);
+  observeClear(false);
+  observeRename(false);
+
+  if (m_addWorkspaceDialog)
+    closeAddWorkspaceDialog();
+
   m_dataTable.reset();
   m_functionTreeView.reset();
   m_fitOptionsBrowser.reset();
@@ -143,11 +155,14 @@ void FitScriptGeneratorView::connectUiSignals() {
   connect(m_functionTreeView.get(), SIGNAL(localParameterButtonClicked(QString const &)), this,
           SLOT(onEditLocalParameterClicked(QString const &)));
 
+  connect(m_fitOptionsBrowser.get(), SIGNAL(outputBaseNameChanged(std::string const &)), this,
+          SLOT(onOutputBaseNameChanged(std::string const &)));
   connect(m_fitOptionsBrowser.get(), SIGNAL(fittingModeChanged(FittingMode)), this,
           SLOT(onFittingModeChanged(FittingMode)));
 
   connect(m_ui.pbGenerateScriptToFile, SIGNAL(clicked()), this, SLOT(onGenerateScriptToFileClicked()));
   connect(m_ui.pbGenerateScriptToClipboard, SIGNAL(clicked()), this, SLOT(onGenerateScriptToClipboardClicked()));
+  connect(m_ui.pbHelp, SIGNAL(clicked()), this, SLOT(onHelpClicked()));
 
   /// Disconnected because it causes a crash when selecting a table row while
   /// editing a parameters value. This is because selecting a different row will
@@ -172,18 +187,55 @@ void FitScriptGeneratorView::subscribePresenter(IFitScriptGeneratorPresenter *pr
   m_presenter->notifyPresenter(ViewEvent::FittingModeChanged, m_fitOptionsBrowser->getFittingMode());
 }
 
+void FitScriptGeneratorView::deleteHandle(std::string const &wsName, [[maybe_unused]] Workspace_sptr const &ws) {
+  if (QThread::currentThread() != QApplication::instance()->thread()) {
+    QMetaObject::invokeMethod(this, "notifyADSDeleteEvent", Qt::AutoConnection, Q_ARG(std::string const &, wsName));
+  } else {
+    notifyADSDeleteEvent(wsName);
+  }
+}
+
+void FitScriptGeneratorView::clearHandle() {
+  if (QThread::currentThread() != QApplication::instance()->thread()) {
+    QMetaObject::invokeMethod(this, "notifyADSClearEvent", Qt::AutoConnection);
+  } else {
+    notifyADSClearEvent();
+  }
+}
+
+void FitScriptGeneratorView::renameHandle(std::string const &wsName, std::string const &newName) {
+  if (QThread::currentThread() != QApplication::instance()->thread()) {
+    QMetaObject::invokeMethod(this, "notifyADSRenameEvent", Qt::AutoConnection, Q_ARG(std::string const &, wsName),
+                              Q_ARG(std::string const &, newName));
+  } else {
+    notifyADSRenameEvent(wsName, newName);
+  }
+}
+
+void FitScriptGeneratorView::notifyADSDeleteEvent(std::string const &workspaceName) {
+  m_presenter->notifyPresenter(ViewEvent::ADSDeleteEvent, workspaceName);
+}
+
+void FitScriptGeneratorView::notifyADSClearEvent() { m_presenter->notifyPresenter(ViewEvent::ADSClearEvent); }
+
+void FitScriptGeneratorView::notifyADSRenameEvent(std::string const &workspaceName, std::string const &newName) {
+  m_presenter->notifyPresenter(ViewEvent::ADSRenameEvent, workspaceName, newName);
+}
+
 void FitScriptGeneratorView::onRemoveDomainClicked() { m_presenter->notifyPresenter(ViewEvent::RemoveDomainClicked); }
 
 void FitScriptGeneratorView::onAddDomainClicked() { m_presenter->notifyPresenter(ViewEvent::AddDomainClicked); }
 
 void FitScriptGeneratorView::onCellChanged(int row, int column) {
   UNUSED_ARG(row);
-  m_dataTable->formatSelection();
 
-  if (column == ColumnIndex::StartX)
+  if (column == ColumnIndex::StartX) {
+    m_dataTable->formatSelection();
     m_presenter->notifyPresenter(ViewEvent::StartXChanged);
-  else if (column == ColumnIndex::EndX)
+  } else if (column == ColumnIndex::EndX) {
+    m_dataTable->formatSelection();
     m_presenter->notifyPresenter(ViewEvent::EndXChanged);
+  }
 }
 
 void FitScriptGeneratorView::onItemSelected() { m_presenter->notifyPresenter(ViewEvent::SelectionChanged); }
@@ -235,6 +287,10 @@ void FitScriptGeneratorView::onFunctionHelpRequested() {
     m_functionTreeView->showFunctionHelp(QString::fromStdString(function->name()));
 }
 
+void FitScriptGeneratorView::onOutputBaseNameChanged(std::string const &outputBaseName) {
+  m_presenter->notifyPresenter(ViewEvent::OutputBaseNameChanged, outputBaseName);
+}
+
 void FitScriptGeneratorView::onFittingModeChanged(FittingMode fittingMode) {
   m_presenter->notifyPresenter(ViewEvent::FittingModeChanged, fittingMode);
 }
@@ -256,6 +312,10 @@ void FitScriptGeneratorView::onGenerateScriptToFileClicked() {
 
 void FitScriptGeneratorView::onGenerateScriptToClipboardClicked() {
   m_presenter->notifyPresenter(ViewEvent::GenerateScriptToClipboardClicked);
+}
+
+void FitScriptGeneratorView::onHelpClicked() {
+  MantidQt::API::HelpWindow::showCustomInterface(this, "Fit Script Generator", QString("utility"));
 }
 
 std::string FitScriptGeneratorView::workspaceName(FitDomainIndex index) const {
@@ -286,26 +346,53 @@ IFunction::Attribute FitScriptGeneratorView::attributeValue(std::string const &a
   return m_functionTreeView->getAttribute(QString::fromStdString(attribute));
 }
 
-void FitScriptGeneratorView::removeWorkspaceDomain(std::string const &workspaceName, WorkspaceIndex workspaceIndex) {
-  m_dataTable->removeDomain(workspaceName, workspaceIndex);
+void FitScriptGeneratorView::renameWorkspace(std::string const &workspaceName, std::string const &newName) {
+  m_dataTable->renameWorkspace(QString::fromStdString(workspaceName), QString::fromStdString(newName));
 }
+
+void FitScriptGeneratorView::removeDomain(FitDomainIndex domainIndex) { m_dataTable->removeDomain(domainIndex); }
 
 void FitScriptGeneratorView::addWorkspaceDomain(std::string const &workspaceName, WorkspaceIndex workspaceIndex,
                                                 double startX, double endX) {
   m_dataTable->addDomain(QString::fromStdString(workspaceName), workspaceIndex, startX, endX);
 }
 
-bool FitScriptGeneratorView::openAddWorkspaceDialog() { return m_dialog->exec() == QDialog::Accepted; }
+void FitScriptGeneratorView::openAddWorkspaceDialog() {
+  m_addWorkspaceDialog = std::make_unique<AddWorkspaceDialog>(this);
+  m_addWorkspaceDialog->show();
+  connect(m_addWorkspaceDialog.get(), SIGNAL(closeDialog()), this, SLOT(closeAddWorkspaceDialog()));
+  connect(m_addWorkspaceDialog.get(), SIGNAL(okClicked(bool)), this, SLOT(addWorkspaceDialogAccepted(bool)));
+}
+
+void FitScriptGeneratorView::closeAddWorkspaceDialog() {
+  disconnect(m_addWorkspaceDialog.get(), SIGNAL(closeDialog()), this, SLOT(closeAddWorkspaceDialog()));
+  disconnect(m_addWorkspaceDialog.get(), SIGNAL(okClicked(bool)), this, SLOT(addWorkspaceDialogAccepted(bool)));
+  m_addWorkspaceDialog->close();
+  m_addWorkspaceDialog.reset();
+}
+
+void FitScriptGeneratorView::addWorkspaceDialogAccepted(bool close) {
+  m_presenter->notifyPresenter(ViewEvent::AddDomainAccepted);
+  if (close)
+    closeAddWorkspaceDialog();
+}
 
 std::vector<MatrixWorkspace_const_sptr> FitScriptGeneratorView::getDialogWorkspaces() {
-  auto const workspaces = m_dialog->getWorkspaces();
-  if (workspaces.empty())
-    displayWarning("Failed to add workspace: '" + m_dialog->workspaceName().toStdString() + "' doesn't exist.");
+  std::vector<MatrixWorkspace_const_sptr> workspaces;
+  if (m_addWorkspaceDialog) {
+    workspaces = m_addWorkspaceDialog->getWorkspaces();
+    if (workspaces.empty())
+      displayWarning("Failed to add workspace: '" + m_addWorkspaceDialog->workspaceName().toStdString() +
+                     "' doesn't exist.");
+  }
   return workspaces;
 }
 
 std::vector<WorkspaceIndex> FitScriptGeneratorView::getDialogWorkspaceIndices() const {
-  return convertToWorkspaceIndex(m_dialog->workspaceIndices());
+  std::vector<WorkspaceIndex> workspaceIndices;
+  if (m_addWorkspaceDialog)
+    workspaceIndices = convertToWorkspaceIndex(m_addWorkspaceDialog->workspaceIndices());
+  return workspaceIndices;
 }
 
 void FitScriptGeneratorView::openEditLocalParameterDialog(
@@ -331,9 +418,11 @@ FitScriptGeneratorView::getEditLocalParameterResults() const {
           convertToStdVector(m_editLocalParameterDialog->getConstraints())};
 }
 
-std::tuple<std::string, std::string, std::string, std::string> FitScriptGeneratorView::fitOptions() const {
-  return {m_fitOptionsBrowser->getProperty("Max Iterations"), m_fitOptionsBrowser->getProperty("Minimizer"),
-          m_fitOptionsBrowser->getProperty("Cost Function"), m_fitOptionsBrowser->getProperty("Evaluation Type")};
+std::tuple<std::string, std::string, std::string, std::string, std::string, bool>
+FitScriptGeneratorView::fitOptions() const {
+  return {m_fitOptionsBrowser->getProperty("Max Iterations"),   m_fitOptionsBrowser->getProperty("Minimizer"),
+          m_fitOptionsBrowser->getProperty("Cost Function"),    m_fitOptionsBrowser->getProperty("Evaluation Type"),
+          m_fitOptionsBrowser->getProperty("Output Base Name"), m_fitOptionsBrowser->getBoolProperty("Plot Output")};
 }
 
 std::string FitScriptGeneratorView::filepath() const {
@@ -391,6 +480,12 @@ void FitScriptGeneratorView::saveTextToClipboard(std::string const &text) const 
 
 void FitScriptGeneratorView::displayWarning(std::string const &message) {
   QMessageBox::warning(this, "Warning!", QString::fromStdString(message));
+}
+
+void FitScriptGeneratorView::closeEvent(QCloseEvent *event) {
+  if (m_addWorkspaceDialog)
+    closeAddWorkspaceDialog();
+  QWidget::closeEvent(event);
 }
 
 } // namespace MantidWidgets

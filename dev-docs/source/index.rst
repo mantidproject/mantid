@@ -16,6 +16,7 @@ Guides
 
    DeveloperAccounts
    GettingStarted/GettingStarted
+   Architecture
    BuildingOnOSX
    BuildingWithCMake
    Standards/index
@@ -27,6 +28,9 @@ Guides
 
 :doc:`GettingStarted <GettingStarted/GettingStarted>`
    Describes the process of obtaining and building the mantid code base.
+
+:doc:`Architecture`
+   Describes the architecture of the mantid libraries and applications.
 
 :doc:`Standards <Standards/index>`
    Details of coding and documentation standards for the project. Includes specifics regarding algorithms.
@@ -59,6 +63,7 @@ Development Process
    PatchReleaseChecklist
    TSC
    DesignDocumentGuides
+   CodeCoverage
 
 :doc:`DevelopmentAndReleaseCycle`
    An overview of the development cycle.
@@ -108,6 +113,7 @@ Tools
    PyCharm
    VSCode
    Eclipse
+   WindowsSubsystemForLinux
 
 :doc:`ToolsOverview`
    Describes ``class_maker``, ``valgrind`` and related tools.
@@ -129,6 +135,9 @@ Tools
 
 :doc:`Eclipse`
    Guide to setting up Eclipse on Ubuntu
+
+:doc:`WindowsSubsystemForLinux`
+   Guide for setting up Ubuntu 18.04 and Centos7 as subsystems on Windows (WSL2).
 
 =======
 Testing

@@ -7,12 +7,21 @@
 from Muon.GUI.Common.ADSHandler.workspace_naming import PHASEQUAD_IM, PHASEQUAD_RE
 import mantid.simpleapi as mantid
 from mantid.kernel import Logger
-from Muon.GUI.Common.ADSHandler.ADS_calls import remove_ws
+from Muon.GUI.Common.ADSHandler.ADS_calls import remove_ws, retrieve_ws
 from copy import copy
 from mantid.kernel import PhysicalConstants as const
 
 
 muon_logger = Logger('Muon-Algs')
+
+
+def create_empty_table(name):
+    alg = mantid.AlgorithmManager.create("CreateEmptyTableWorkspace")
+    alg.initialize()
+    alg.setAlwaysStoreInADS(True)
+    alg.setProperty("OutputWorkspace", name)
+    alg.execute()
+    return retrieve_ws(name)
 
 
 def run_MuonPreProcess(parameter_dict):
@@ -60,13 +69,13 @@ def run_MuonPairingAsymmetry(parameter_dict, workspace_name):
     return workspace_name
 
 
-def run_MuonGroupingAsymmetry(parameter_dict, workspace_name, unormalised_workspace_name):
+def run_EstimateMuonAsymmetryFromCounts(parameter_dict, workspace_name, unormalised_workspace_name):
     """
-    Apply the MuonGroupingCounts algorithm with the properties supplied through
-    the input dictionary of {property_name:property_value} pairs.
-    Returns the calculated workspace name.
+        Apply the run_EstimateMuonAsymmetryFromCounts algorithm with the properties supplied through
+        the input dictionary of {property_name:property_value} pairs.
+        Returns the calculated workspace name.
     """
-    alg = mantid.AlgorithmManager.create("MuonGroupingAsymmetry")
+    alg = mantid.AlgorithmManager.create("EstimateMuonAsymmetryFromCounts")
     alg.initialize()
     alg.setAlwaysStoreInADS(True)
     alg.setRethrows(True)
@@ -135,21 +144,28 @@ def run_MuonMaxent(parameters_dict, alg, output_workspace_name):
 
 
 def run_Fit(parameters_dict, alg):
+    create_output = parameters_dict['CreateOutput'] if 'CreateOutput' in parameters_dict else True
+
     alg.initialize()
     alg.setAlwaysStoreInADS(True)
     alg.setRethrows(True)
-    alg.setProperty('CreateOutput', True)
+    alg.setProperty('CreateOutput', create_output)
     pruned_parameter_dict = {key: value for key, value in parameters_dict.items() if
-                             key not in ['InputWorkspace', 'StartX', 'EndX']}
+                             key not in ['InputWorkspace', 'StartX', 'EndX', 'Exclude']}
     alg.setProperties(pruned_parameter_dict)
     alg.setProperty('InputWorkspace', parameters_dict['InputWorkspace'])
     alg.setProperty('StartX', parameters_dict['StartX'])
     alg.setProperty('EndX', parameters_dict['EndX'])
+    if 'Exclude' in parameters_dict:
+        alg.setProperty('Exclude', parameters_dict['Exclude'])
     alg.execute()
-    return alg.getProperty("OutputWorkspace").valueAsStr, alg.getProperty(
-        "OutputParameters").valueAsStr, alg.getProperty(
-        "Function").value, alg.getProperty('OutputStatus').value, alg.getProperty('OutputChi2overDoF').value, \
-        alg.getProperty("OutputNormalisedCovarianceMatrix").valueAsStr
+    if create_output:
+        return alg.getProperty("OutputWorkspace").valueAsStr, alg.getProperty("OutputParameters").valueAsStr, \
+               alg.getProperty("Function").value, alg.getProperty('OutputStatus').value, \
+               alg.getProperty('OutputChi2overDoF').value, alg.getProperty("OutputNormalisedCovarianceMatrix").valueAsStr
+    else:
+        return alg.getProperty("Function").value, alg.getProperty('OutputStatus').value, \
+               alg.getProperty('OutputChi2overDoF').value
 
 
 def run_simultaneous_Fit(parameters_dict, alg):
@@ -158,7 +174,7 @@ def run_simultaneous_Fit(parameters_dict, alg):
     alg.setRethrows(True)
     alg.setProperty('CreateOutput', True)
     pruned_parameter_dict = {key: value for key,value in parameters_dict.items() if
-                             key not in ['InputWorkspace', 'StartX', 'EndX']}
+                             key not in ['InputWorkspace', 'StartX', 'EndX', 'Exclude']}
     alg.setProperties(pruned_parameter_dict)
 
     for index, input_workspace in enumerate(parameters_dict['InputWorkspace']):
@@ -166,6 +182,8 @@ def run_simultaneous_Fit(parameters_dict, alg):
         alg.setProperty('InputWorkspace' + index_str, input_workspace)
         alg.setProperty('StartX' + index_str, parameters_dict['StartX'][index])
         alg.setProperty('EndX' + index_str, parameters_dict['EndX'][index])
+        if 'Exclude' in parameters_dict:
+            alg.setProperty('Exclude' + index_str, parameters_dict['Exclude'][index])
 
     alg.execute()
 
@@ -289,12 +307,40 @@ def apply_deadtime(ws, output, table):
     return alg.getProperty("OutputWorkspace").valueAsStr
 
 
-def calculate_diff_data(diff, positive_workspace_name, negative_workspace_name, output):
+def run_minus(lhs_workspace, rhs_workspace, output_name):
     alg = mantid.AlgorithmManager.create("Minus")
     alg.initialize()
     alg.setAlwaysStoreInADS(True)
-    alg.setProperty("LHSWorkspace", positive_workspace_name)
-    alg.setProperty("RHSWorkspace", negative_workspace_name)
-    alg.setProperty("OutputWorkspace", output)
+    alg.setProperty("LHSWorkspace", lhs_workspace)
+    alg.setProperty("RHSWorkspace", rhs_workspace)
+    alg.setProperty("OutputWorkspace", output_name)
+    alg.execute()
+    return alg.getProperty("OutputWorkspace").valueAsStr
+
+
+def run_crop_workspace(ws, start, end):
+    alg = mantid.AlgorithmManager.create("CropWorkspace")
+    alg.initialize()
+    alg.setAlwaysStoreInADS(False)
+    alg.setProperty("InputWorkspace", ws)
+    alg.setProperty("OutputWorkspace", ws)
+    alg.setProperty("XMin", start)
+    alg.setProperty("XMax", end)
+    alg.execute()
+    return alg.getProperty("OutputWorkspace").valueAsStr
+
+
+def run_create_single_valued_workspace(parameter_dict):
+    alg = mantid.AlgorithmManager.create("CreateSingleValuedWorkspace")
+    alg.initialize()
+    alg.setProperties(parameter_dict)
+    alg.execute()
+    return alg.getProperty("OutputWorkspace").valueAsStr
+
+
+def run_clone_workspace(parameter_dict):
+    alg = mantid.AlgorithmManager.create("CloneWorkspace")
+    alg.initialize()
+    alg.setProperties(parameter_dict)
     alg.execute()
     return alg.getProperty("OutputWorkspace").valueAsStr

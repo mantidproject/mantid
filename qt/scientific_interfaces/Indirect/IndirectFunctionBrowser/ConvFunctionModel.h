@@ -87,7 +87,6 @@ public:
   void removeBackground();
   bool hasBackground() const;
   void updateParameterEstimationData(DataForParameterEstimationCollection &&data);
-  void setResolution(std::string const &name, TableDatasetIndex const &index);
   void setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions);
   void setQValues(const std::vector<double> &qValues);
 
@@ -119,13 +118,15 @@ private:
   std::string buildFitTypeString() const;
   std::string buildBackgroundFunctionString() const;
   std::string buildStretchExpFTFunctionString() const;
-  std::string buildIsoRotDiffFunctionString() const;
   std::string buildDiffSphereFunctionString() const;
   std::string buildElasticDiffSphereFunctionString() const;
   std::string buildInelasticDiffSphereFunctionString() const;
   std::string buildDiffRotDiscreteCircleFunctionString() const;
   std::string buildInelasticDiffRotDiscreteCircleFunctionString() const;
   std::string buildElasticDiffRotDiscreteCircleFunctionString() const;
+  std::string buildIsoRotDiffFunctionString() const;
+  std::string buildElasticIsoRotDiffFunctionString() const;
+  std::string buildInelasticIsoRotDiffFunctionString() const;
   void addGlobal(const QString &parName);
   void removeGlobal(const QString &parName);
   QStringList makeGlobalList() const;
@@ -144,8 +145,6 @@ private:
   QList<ParamID> m_globals;
   FitSubType m_fitSubType;
   BackgroundSubType m_backgroundSubtype;
-  std::string m_resolutionName;
-  TableDatasetIndex m_resolutionIndex;
   std::vector<std::pair<std::string, size_t>> m_fitResolutions;
   std::vector<double> m_qValues;
   bool m_isQDependentFunction = false;

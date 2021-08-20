@@ -24,7 +24,8 @@ namespace Functions {
 */
 class MANTID_CURVEFITTING_DLL Bk2BkExpConvPV : virtual public API::IPeakFunction, virtual public API::IFunctionMW {
 public:
-  Bk2BkExpConvPV();
+  /// Default constructor.
+  Bk2BkExpConvPV() = default;
 
   /// overwrite IPeakFunction base class methods
   double centre() const override;
@@ -42,8 +43,6 @@ public:
   // void setCalculationRange(double tof_low, double tof_upper);
   /// Calculate peak
   void geneatePeak(double *out, const double *xValues, const size_t nData);
-  ///
-  void resetFWHM();
 
   void setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> workspace, size_t wi, double startX,
                           double endX) override;
@@ -66,8 +65,7 @@ private:
   std::complex<double> E1(std::complex<double> z) const;
 
   void calHandEta(double sigma2, double gamma, double &H, double &eta) const;
-
-  mutable double mFWHM;
+  double expWidth() const;
 };
 
 // typedef std::shared_ptr<TableWorkspace> TableWorkspace_sptr;

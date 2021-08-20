@@ -108,7 +108,7 @@ void StripVanadiumPeaks2::exec() {
   double pro0 = 0.0;
   double prof = 1.0;
   bool sublog = true;
-  IAlgorithm_sptr stripPeaks = createChildAlgorithm("StripPeaks", pro0, prof, sublog);
+  auto stripPeaks = createChildAlgorithm("StripPeaks", pro0, prof, sublog);
   stripPeaks->setProperty("InputWorkspace", inputWS);
   stripPeaks->setProperty("FWHM", param_fwhm);
   stripPeaks->setProperty("Tolerance", param_tolerance);

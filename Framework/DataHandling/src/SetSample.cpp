@@ -711,8 +711,14 @@ void SetSample::setSampleShape(API::ExperimentInfo &experiment, const Kernel::Pr
   // Try known shapes or CSG first if supplied
   if (args) {
     const auto refFrame = experiment.getInstrument()->getReferenceFrame();
-    const auto xml = tryCreateXMLFromArgsOnly(*args, *refFrame);
+    auto xml = tryCreateXMLFromArgsOnly(*args, *refFrame);
     if (!xml.empty()) {
+      Kernel::Matrix<double> rotationMatrix = experiment.run().getGoniometer().getR();
+      if (rotationMatrix != Kernel::Matrix<double>(3, 3, 1) && !sampleEnv) {
+        // Only add goniometer tag if rotationMatrix is not the Identity,
+        // and this shape is not defined within a sample environment
+        xml = Geometry::ShapeFactory().addGoniometerTag(rotationMatrix, xml);
+      }
       CreateSampleShape::setSampleShape(experiment, xml);
       return;
     }

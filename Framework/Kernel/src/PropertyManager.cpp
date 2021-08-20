@@ -8,6 +8,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/PropertyManager.h"
+#include "MantidJson/Json.h"
 #include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/IPropertySettings.h"
 #include "MantidKernel/LogFilter.h"
@@ -316,10 +317,9 @@ void PropertyManager::setProperties(const std::string &propertiesJson,
  */
 void PropertyManager::setProperties(const std::string &propertiesJson, IPropertyManager *targetPropertyManager,
                                     const std::unordered_set<std::string> &ignoreProperties, bool createMissing) {
-  ::Json::Reader reader;
   ::Json::Value jsonValue;
 
-  if (reader.parse(propertiesJson, jsonValue)) {
+  if (Mantid::JsonHelpers::parse(propertiesJson, &jsonValue)) {
     setProperties(jsonValue, targetPropertyManager, ignoreProperties, createMissing);
   } else {
     throw std::invalid_argument("propertiesArray was not valid json");
@@ -405,10 +405,9 @@ void PropertyManager::setPropertiesWithString(const std::string &propertiesStrin
 */
 void PropertyManager::setPropertiesWithJSONString(const std::string &propertiesString,
                                                   const std::unordered_set<std::string> &ignoreProperties) {
-  ::Json::Reader reader;
   ::Json::Value propertyJson;
 
-  if (reader.parse(propertiesString, propertyJson)) {
+  if (Mantid::JsonHelpers::parse(propertiesString, &propertyJson)) {
     setProperties(propertyJson, ignoreProperties);
   } else {
     throw std::invalid_argument("Could not parse JSON string when trying to set a property from: " + propertiesString);
@@ -567,8 +566,9 @@ std::string PropertyManager::getPropertyValue(const std::string &name) const {
  * @returns A serialized version of the manager
  */
 std::string PropertyManager::asString(bool withDefaultValues) const {
-  ::Json::FastWriter writer;
-  const string output = writer.write(asJson(withDefaultValues));
+  Json::StreamWriterBuilder builder;
+  builder.settings_["indentation"] = "";
+  const string output = Json::writeString(builder, asJson(withDefaultValues));
 
   return output;
 }
@@ -696,6 +696,24 @@ void PropertyManager::removeProperty(const std::string &name, const bool delprop
     itr = find(m_orderedProperties.begin(), m_orderedProperties.end(), prop);
     m_orderedProperties.erase(itr);
     (void)delproperty; // not used
+  }
+}
+
+/**
+ * Removes a property from the properties map by index and return a pointer to it
+ * @param index :: index of the property to be removed
+ * @returns :: pointer to the removed property if found, NULL otherwise
+ */
+std::unique_ptr<Property> PropertyManager::takeProperty(const size_t index) {
+  try {
+    auto property = m_orderedProperties[index];
+    const std::string key = createKey(property->name());
+    auto propertyPtr = std::move(m_properties[key]);
+    m_properties.erase(key);
+    m_orderedProperties.erase(m_orderedProperties.cbegin() + index);
+    return propertyPtr;
+  } catch (const std::out_of_range &) {
+    return NULL;
   }
 }
 

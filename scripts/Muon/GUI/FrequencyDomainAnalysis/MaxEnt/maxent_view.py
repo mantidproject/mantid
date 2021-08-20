@@ -7,9 +7,8 @@
 from qtpy import QtWidgets, QtCore
 
 from Muon.GUI.Common.utilities import table_utils
-
-
-construct = "Construct"
+from Muon.GUI.Common.message_box import warning
+from Muon.GUI.Common.data_selectors.cyclic_data_selector_view import CyclicDataSelectorView
 
 
 class MaxEntView(QtWidgets.QWidget):
@@ -21,11 +20,18 @@ class MaxEntView(QtWidgets.QWidget):
     # signals
     maxEntButtonSignal = QtCore.Signal()
     cancelSignal = QtCore.Signal()
-    phaseSignal = QtCore.Signal(object, object)
 
     def __init__(self, parent=None):
         super(MaxEntView, self).__init__(parent)
         self.grid = QtWidgets.QVBoxLayout(self)
+
+        self._runs_selector = CyclicDataSelectorView(self)
+        self._runs_selector.set_data_combo_box_label("Runs:")
+        self._runs_selector.set_data_combo_box_label_width(50)
+
+        self._period_selector = CyclicDataSelectorView(self)
+        self._period_selector.set_data_combo_box_label("Period:")
+        self._period_selector.set_data_combo_box_label_width(50)
 
         # add splitter for resizing
         splitter = QtWidgets.QSplitter(QtCore.Qt.Vertical)
@@ -35,7 +41,7 @@ class MaxEntView(QtWidgets.QWidget):
         self.table = QtWidgets.QTableWidget(self)
         self.table.resize(800, 800)
 
-        self.table.setRowCount(11)
+        self.table.setRowCount(7)
         self.table.setColumnCount(2)
         self.table.setColumnWidth(0, 300)
         self.table.setColumnWidth(1, 300)
@@ -46,51 +52,32 @@ class MaxEntView(QtWidgets.QWidget):
         table_utils.setTableHeaders(self.table)
 
         # populate table
-        options = ['test']
+        options = []
 
-        table_utils.setRowName(self.table, 0, "Workspace")
-        self.ws = table_utils.addComboToTable(self.table, 0, options)
+        table_utils.setRowName(self.table, 0, "Calculate by")
+        self.method = table_utils.addComboToTable(self.table, 0, options)
 
-        table_utils.setRowName(self.table, 1, "First good time")
-        self.first_good, _ = table_utils.addDoubleToTable(self.table, 0.1, 1)
+        table_utils.setRowName(self.table, 1, "Phase Table")
+        self.phase_table_combo = table_utils.addComboToTable(self.table, 1, options)
 
-        table_utils.setRowName(self.table, 2, "Last good time")
-        self.last_good, _ = table_utils.addDoubleToTable(self.table, 15.0, 2)
+        table_utils.setRowName(self.table, 2, "Fit dead times")
+        self.dead_box = table_utils.addCheckBoxToTable(self.table, True, 2)
 
-        table_utils.setRowName(self.table, 3, "Fit dead times")
-        self.dead_box = table_utils.addCheckBoxToTable(self.table, True, 3)
+        table_utils.setRowName(self.table, 3, "Output phase table")
+        self.output_phase_box = table_utils.addCheckBoxToTable(
+            self.table, False, 3)
 
-        table_utils.setRowName(self.table, 4, "Use Phase Table")
-        self.use_phaseTable_box = table_utils.addCheckBoxToTable(
+        table_utils.setRowName(self.table, 4, "Output deadtimes")
+        self.output_dead_box = table_utils.addCheckBoxToTable(
             self.table, False, 4)
 
-        table_utils.setRowName(self.table, 5, "Select Phase Table")
-        options = [construct]
-        self.phaseTable_box = table_utils.addComboToTable(
-            self.table, 5, options)
-
-        table_utils.setRowName(self.table, 6, "Fix phases")
-        self.fix_phase_box = table_utils.addCheckBoxToTable(
-            self.table, False, 6)
-
-        self.table.hideRow(5)
-        self.table.hideRow(6)
-
-        table_utils.setRowName(self.table, 7, "Output phase table")
-        self.output_phase_box = table_utils.addCheckBoxToTable(
-            self.table, False, 7)
-
-        table_utils.setRowName(self.table, 8, "Output deadtimes")
-        self.output_dead_box = table_utils.addCheckBoxToTable(
-            self.table, False, 8)
-
-        table_utils.setRowName(self.table, 9, "Output reconstructed data")
+        table_utils.setRowName(self.table, 5, "Output reconstructed data")
         self.output_data_box = table_utils.addCheckBoxToTable(
-            self.table, False, 9)
+            self.table, False, 5)
 
-        table_utils.setRowName(self.table, 10, "Output phase convergence")
+        table_utils.setRowName(self.table, 6, "Output phase convergence")
         self.output_phase_evo_box = table_utils.addCheckBoxToTable(
-            self.table, False, 10)
+            self.table, False, 6)
 
         self.table.resizeRowsToContents()
 
@@ -148,12 +135,13 @@ class MaxEntView(QtWidgets.QWidget):
         # connects
         self.button.clicked.connect(self.MaxEntButtonClick)
         self.cancel.clicked.connect(self.cancelClick)
-        self.table.cellClicked.connect(self.phaseBoxClick)
         # button layout
         self.buttonLayout = QtWidgets.QHBoxLayout()
         self.buttonLayout.addWidget(self.button)
         self.buttonLayout.addWidget(self.cancel)
         # add to layout
+        self.grid.addWidget(self._runs_selector)
+        self.grid.addWidget(self._period_selector)
         splitter.addWidget(self.table)
         splitter.addWidget(self.advancedLabel)
         splitter.addWidget(self.tableA)
@@ -164,42 +152,19 @@ class MaxEntView(QtWidgets.QWidget):
         return self.grid
 
     # add data to view
-    def addItems(self, options):
-        self.ws.clear()
-        self.ws.addItems(options)
+    def addRuns(self, runs):
+        self._runs_selector.update_dataset_name_combo_box(runs)
 
-    def clearPhaseTables(self):
-        self.phaseTable_box.clear()
-        self.phaseTable_box.addItems([construct])
+    def add_periods(self, periods):
+        self._period_selector.update_dataset_name_combo_box(periods)
 
-    def getPhaseTableIndex(self):
-        return self.phaseTable_box.currentIndex()
-
-    def setPhaseTableIndex(self, index):
-        self.phaseTable_box.setCurrentIndex(index)
-
-    def getPhaseTableOptions(self):
-        return [self.phaseTable_box.itemText(j) for j in range(self.phaseTable_box.count())]
-
-    def addPhaseTableToGUI(self, option):
-        self.phaseTable_box.addItem(option)
+    def set_methods(self, options):
+        self.method.clear()
+        self.method.addItems(options)
 
     def addNPoints(self, options):
         self.N_points.clear()
         self.N_points.addItems(options)
-
-    def setRun(self, run):
-        self.run = run
-
-    def changedPhaseBox(self):
-        self.table.setRowHidden(
-            5,
-            self.use_phaseTable_box.checkState(
-            ) != QtCore.Qt.Checked)
-        self.table.setRowHidden(
-            6,
-            self.use_phaseTable_box.checkState(
-            ) != QtCore.Qt.Checked)
 
     # send signal
     def MaxEntButtonClick(self):
@@ -208,101 +173,108 @@ class MaxEntView(QtWidgets.QWidget):
     def cancelClick(self):
         self.cancelSignal.emit()
 
-    def phaseBoxClick(self, row, col):
-        self.phaseSignal.emit(row, col)
-
-    # get some inputs for model
-    def initMaxEntInput(self):
-        inputs = {}
-
-        #  this will be removed once maxEnt does a simultaneous fit
-        inputs['InputWorkspace'] = str(self.ws.currentText())
-        # will use this instead of the above
-        inputs["FirstGoodTime"] = float(self.first_good.text())
-        inputs['LastGoodTime'] = float(self.last_good.text())
-
-        inputs["Npts"] = int(self.N_points.currentText())
-        inputs["MaxField"] = float(self.max_field.text())
-        inputs["FitDeadTime"] = self.dead_box.checkState() == QtCore.Qt.Checked
-        inputs["DoublePulse"] = self.double_pulse_box.checkState() == QtCore.Qt.Checked
-        inputs["OuterIterations"] = int(self.outer_loop.text())
-        inputs["InnerIterations"] = int(self.inner_loop.text())
-        inputs["DefaultLevel"] = float(self.AConst.text())
-        inputs["Factor"] = float(self.factor.text())
-
-        # will remove this when sim maxent Works
-        out = self.run.replace(";", "; ")
-        inputs['OutputWorkspace'] = out + ";" + \
-            str(self.ws.currentText()) + ";FrequencyDomain;MaxEnt"
-        return inputs
-
-    def addPhaseTable(self, inputs):
-        inputs["FixPhases"] = self.fix_phase_box.checkState() == QtCore.Qt.Checked
-        if self.usePhases() and self.phaseTable_box.currentText() == construct:
-            inputs['InputPhaseTable'] = "PhaseTable"
-        elif self.usePhases():
-            inputs['InputPhaseTable'] = self.phaseTable_box.currentText()
-
-    def outputPhases(self):
-        return self.output_phase_box.checkState() == QtCore.Qt.Checked
-
-    def addOutputPhases(self, inputs):
-        inputs['OutputPhaseTable'] = self.run + ";" + \
-            str(self.ws.currentText()) + ";PhaseTable;MaxEnt"
-
-    def outputDeadTime(self):
-        return self.output_dead_box.checkState() == QtCore.Qt.Checked
-
-    def addOutputDeadTime(self, inputs):
-        inputs['OutputDeadTimeTable'] = self.run + ";" + \
-            str(self.ws.currentText()) + ";DeadTimeTable;MaxEnt"
-
-    def outputPhaseEvo(self):
-        return self.output_phase_evo_box.checkState() == QtCore.Qt.Checked
-
-    def addOutputPhaseEvo(self, inputs):
-        inputs['PhaseConvergenceTable'] = self.run + ";" + \
-            str(self.ws.currentText()) + ";PhaseConvergenceTable;MaxEnt"
-
-    def outputTime(self):
-        return self.output_data_box.checkState() == QtCore.Qt.Checked
-
-    def addOutputTime(self, inputs):
-        inputs['ReconstructedSpectra'] = self.run + ";" + \
-            str(self.ws.currentText()) + ";TimeDomain;MaxEnt"
-
-    def calcPhases(self):
-        return self.phaseTable_box.currentText() == construct
-
-    def usePhases(self):
-        return self.use_phaseTable_box.checkState() == QtCore.Qt.Checked
-
-    def getInputWS(self):
-        return str(self.ws.currentText())
-
-#    def calcPhasesInit(self):
-#        inputs={}
-#
-# this will be removed once maxEnt does a simultaneous fit
-#        inputs['InputWorkspace']=str( self.ws.currentText())
-# will use this instead of the above
-#        inputs["FirstGoodData"]= float( self.first_good.text())
-#        inputs['LastGoodData']=float(self.last_good.text())
-#        inputs["DetectorTable"] = "PhaseTable"
-#        inputs["DataFitted"] = "fits"
-#
-#        return inputs
-    def getFirstGoodData(self):
-        return float(self.first_good.text())
-
-    def getLastGoodData(self):
-        return float(self.last_good.text())
-    # turn button on and off
+    def warning_popup(self, message):
+        warning(message, parent=self)
 
     def activateCalculateButton(self):
         self.button.setEnabled(True)
+        self._period_selector.setEnabled(True)
+        self._runs_selector.setEnabled(True)
         self.cancel.setEnabled(False)
 
     def deactivateCalculateButton(self):
         self.button.setEnabled(False)
+        self._period_selector.setEnabled(False)
+        self._runs_selector.setEnabled(False)
         self.cancel.setEnabled(True)
+
+    def update_phase_table_combo(self, phase_table_list):
+        name = self.phase_table_combo.currentText()
+
+        self.phase_table_combo.clear()
+        self.phase_table_combo.addItems(phase_table_list)
+
+        index = self.phase_table_combo.findText(name)
+
+        if index != -1:
+            self.phase_table_combo.setCurrentIndex(index)
+        else:
+            self.phase_table_combo.setCurrentIndex(0)
+
+    # slots
+    def run_changed_slot(self, slot):
+        self._runs_selector.set_slot_for_dataset_changed(slot)
+
+    def method_changed_slot(self, slot):
+        self.method.currentIndexChanged.connect(slot)
+
+    def period_changed_slot(self, slot):
+        self._period_selector.set_slot_for_dataset_changed(slot)
+
+    @property
+    def get_run(self):
+        return str(self._runs_selector.current_dataset_name)
+
+    @property
+    def num_periods(self):
+        return len(self._period_selector.dataset_names)
+
+    @property
+    def get_period(self):
+        return str(self._period_selector.current_dataset_name)
+
+    @property
+    def get_method(self):
+        return str(self.method.currentText())
+
+    @property
+    def num_points(self):
+        return int(self.N_points.currentText())
+
+    @property
+    def maximum_field(self):
+        return float(self.max_field.text())
+
+    @property
+    def fit_dead_times(self):
+        return self.dead_box.checkState() == QtCore.Qt.Checked
+
+    @property
+    def double_pulse(self):
+        return self.double_pulse_box.checkState() == QtCore.Qt.Checked
+
+    @property
+    def outer_iterations(self):
+        return int(self.outer_loop.text())
+
+    @property
+    def inner_iterations(self):
+        return int(self.inner_loop.text())
+
+    @property
+    def maximum_entropy_constant(self):
+        return float(self.AConst.text())
+
+    @property
+    def lagrange_multiplier(self):
+        return float(self.factor.text())
+
+    @property
+    def phase_table(self):
+        return str(self.phase_table_combo.currentText())
+
+    @property
+    def output_phase_table(self):
+        return self.output_phase_box.checkState() == QtCore.Qt.Checked
+
+    @property
+    def output_dead_times(self):
+        return self.output_dead_box.checkState() == QtCore.Qt.Checked
+
+    @property
+    def output_phase_convergence(self):
+        return self.output_phase_evo_box.checkState() == QtCore.Qt.Checked
+
+    @property
+    def output_reconstructed_spectra(self):
+        return self.output_data_box.checkState() == QtCore.Qt.Checked

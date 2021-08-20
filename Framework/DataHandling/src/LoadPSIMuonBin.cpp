@@ -111,12 +111,17 @@ void LoadPSIMuonBin::init() {
   declareProperty(std::make_unique<Kernel::ArrayProperty<double>>("TimeZeroList", Kernel::Direction::Output),
                   "A vector of time zero values");
 
-  declareProperty(std::make_unique<Mantid::API::WorkspaceProperty<Mantid::API::ITableWorkspace>>(
+  declareProperty(std::make_unique<Mantid::API::WorkspaceProperty<Mantid::API::Workspace>>(
                       "TimeZeroTable", "", Mantid::Kernel::Direction::Output, Mantid::API::PropertyMode::Optional),
                   "TableWorkspace of time zeros for each spectra");
 
   declareProperty("CorrectTime", true, "Boolean flag controlling whether time should be corrected by timezero.",
                   Kernel::Direction::Input);
+  declareProperty(
+      std::make_unique<Mantid::API::WorkspaceProperty<Mantid::API::Workspace>>(
+          "DetectorGroupingTable", "", Mantid::Kernel::Direction::Output, Mantid::API::PropertyMode::Optional),
+      "Table or a group of tables with information about the "
+      "detector grouping stored in the file (if any).");
 }
 
 void LoadPSIMuonBin::exec() {
@@ -224,6 +229,22 @@ void LoadPSIMuonBin::exec() {
       }
     }
   }
+
+  // Set DetectorGroupingTable if needed
+  setEmptyDetectorGroupingTable(m_histograms.size());
+}
+
+void LoadPSIMuonBin::setEmptyDetectorGroupingTable(const size_t &numSpec) {
+  if (getPropertyValue("DetectorGroupingTable").empty())
+    return;
+  Mantid::DataObjects::TableWorkspace_sptr detectorTable =
+      std::dynamic_pointer_cast<Mantid::DataObjects::TableWorkspace>(
+          Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace"));
+  detectorTable->addColumn("int", "detector");
+  for (size_t i = 0; i < numSpec; i++) {
+    Mantid::API::TableRow row = detectorTable->appendRow();
+  }
+  setProperty("DetectorGroupingTable", detectorTable);
 }
 
 void LoadPSIMuonBin::makeDeadTimeTable(const size_t &numSpec) {

@@ -94,7 +94,7 @@ void PoldiAnalyseResiduals::init() {
 DataObjects::Workspace2D_sptr
 PoldiAnalyseResiduals::calculateResidualWorkspace(const DataObjects::Workspace2D_sptr &measured,
                                                   const DataObjects::Workspace2D_sptr &calculated) {
-  IAlgorithm_sptr minus = createChildAlgorithm("Minus");
+  auto minus = createChildAlgorithm("Minus");
   minus->setProperty("LHSWorkspace", measured);
   minus->setProperty("RHSWorkspace", calculated);
   minus->execute();
@@ -118,7 +118,7 @@ void PoldiAnalyseResiduals::normalizeResiduals(DataObjects::Workspace2D_sptr &re
 /// Add workspaces and return result.
 DataObjects::Workspace2D_sptr PoldiAnalyseResiduals::addWorkspaces(const DataObjects::Workspace2D_sptr &lhs,
                                                                    const DataObjects::Workspace2D_sptr &rhs) {
-  IAlgorithm_sptr plus = createChildAlgorithm("Plus");
+  auto plus = createChildAlgorithm("Plus");
   plus->setProperty("LHSWorkspace", lhs);
   plus->setProperty("RHSWorkspace", rhs);
   plus->execute();

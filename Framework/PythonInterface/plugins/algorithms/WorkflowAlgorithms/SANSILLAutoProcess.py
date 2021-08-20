@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import DataProcessorAlgorithm, MatrixWorkspaceProperty, MultipleFileProperty, PropertyMode, Progress, \
-    WorkspaceGroupProperty, FileAction
+    WorkspaceGroupProperty, FileAction, WorkspaceGroup
 from mantid.kernel import Direction, FloatBoundedValidator, FloatArrayProperty, IntBoundedValidator
 from mantid.simpleapi import *
 import numpy as np
@@ -36,7 +36,10 @@ def needs_processing(property_value, process_reduction_type):
         run_number = get_run_number(property_value)
         ws_name = run_number + '_' + process_reduction_type
         if mtd.doesExist(ws_name):
-            run = mtd[ws_name].getRun()
+            if isinstance(mtd[ws_name], WorkspaceGroup):
+                run = mtd[ws_name][0].getRun()
+            else:
+                run = mtd[ws_name].getRun()
             if run.hasProperty('ProcessedAs'):
                 process = run.getLogData('ProcessedAs').value
                 if process == process_reduction_type:
@@ -139,6 +142,11 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         maxqxy_dim = len(self.maxqxy)
         deltaq_dim = len(self.deltaq)
         radius_dim = len(self.radius)
+
+        qvalid = self.validateQRanges()
+        if qvalid:
+            result['OutputBinning'] = qvalid
+
         if self.getPropertyValue('SampleRuns') == '':
             result['SampleRuns'] = 'Please provide at least one sample run.'
         if abs_dim != sample_dim and abs_dim > 1:
@@ -191,7 +199,27 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
             result['NumberOfWedges'] = "For I(Phi,Q) processing, the number " \
                                        "of wedges must be different from 0."
 
+        if self.getPropertyValue('OutputWorkspace')[0].isdigit():
+            result['OutputWorkspace'] = "Output workspace name must be alphanumeric, it should start with a letter."
+
         return result
+
+    def validateQRanges(self):
+        retval = ''
+        qbinning = self.getPropertyValue('OutputBinning')
+        if qbinning:
+            if qbinning.count(':') + 1 != len(self.sample):
+                retval = 'Number of Q binning params must be equal to the number of distances.'
+            else:
+                for qbin_params in qbinning.split(':'):
+                    if qbin_params:
+                        for qbin_param in qbin_params.split(','):
+                            try:
+                                float(qbin_param)
+                            except ValueError:
+                                retval = 'Q binning params must be float.'
+                                break
+        return retval
 
     def setUp(self):
         self.sample = self.getPropertyValue('SampleRuns').split(',')
@@ -357,11 +385,13 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
 
         self.copyProperties('SANSILLIntegration',
                             ['OutputType', 'CalculateResolution',
-                             'DefaultQBinning', 'BinningFactor',
-                             'OutputBinning', 'NPixelDivision',
+                             'DefaultQBinning', 'BinningFactor', 'NPixelDivision',
                              'NumberOfWedges', 'WedgeAngle', 'WedgeOffset',
                              'AsymmetricWedges', 'IQxQyLogBinning', 'WavelengthRange'])
 
+        self.declareProperty('OutputBinning', '',
+                             doc='Output binning for each distance. : separated list of binning params.')
+        self.setPropertyGroup('OutputBinning', 'Integration Options')
         self.setPropertyGroup('OutputType', 'Integration Options')
         self.setPropertyGroup('CalculateResolution', 'Integration Options')
         self.declareProperty('ClearCorrected2DWorkspace', True,
@@ -376,13 +406,12 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
 
         self.copyProperties('SANSILLIntegration', ['ShapeTable'])
 
-    # flake8: noqa: C901
     def PyExec(self):
         self.setUp()
         outputSamples = []
         outputWedges = []
-        panel_output_groups = []
-        sensitivity_outputs = []
+        outputPanels = []
+        outputSens = []
 
         container_transmission, sample_transmission = \
             self.processTransmissions()
@@ -401,31 +430,38 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                     self.processSample(d, flux, sample_transmission, beam,
                                        absorber, container)
                 outputSamples.append(sample)
-                outputWedges.append(wedges)
 
-                if sensitivity:
-                    sensitivity_outputs.append(sensitivity)
                 if panels:
-                    panel_output_groups.append(panels)
+                    outputPanels.append(panels)
+                if wedges:
+                    outputWedges.append(wedges)
+                if sensitivity:
+                    outputSens.append(sensitivity)
+
             else:
                 self.log().information('Skipping empty token run.')
 
         # rename to a user friendly naming scheme
         for i in range(len(outputSamples)):
-            suffix = self.createCustomSuffix(outputSamples[i])
-            RenameWorkspace(InputWorkspace=outputSamples[i],
-                            OutputWorkspace=outputSamples[i] + suffix)
-            outputSamples[i] += suffix
+            if isinstance(mtd[outputSamples[i]], WorkspaceGroup): #kinetic
+                for ws in mtd[outputSamples[i]]:
+                    ws_name = ws.getName()
+                    suffix = self.createCustomSuffix(ws_name)
+                    RenameWorkspace(InputWorkspace=ws_name,
+                                    OutputWorkspace=ws_name + suffix)
+            else:
+                suffix = self.createCustomSuffix(outputSamples[i])
+                RenameWorkspace(InputWorkspace=outputSamples[i],
+                                OutputWorkspace=outputSamples[i] + suffix)
+                outputSamples[i] += suffix
 
         # try to stitch automatically
-        if (len(outputSamples) > 1
-           and self.getPropertyValue('OutputType') == 'I(Q)'):
+        if len(outputSamples) > 1 and self.getPropertyValue('OutputType') == 'I(Q)':
             try:
                 stitched = self.output + "_stitched"
-                Stitch1DMany(InputWorkspaces=outputSamples,
-                             OutputWorkspace=stitched,
-                             ScaleRHSWorkspace=True,
-                             IndexOfReference=self.stitch_reference_index)
+                Stitch(InputWorkspaces=outputSamples,
+                       OutputWorkspace=stitched,
+                       ReferenceWorkspace=outputSamples[self.stitch_reference_index])
                 outputSamples.append(stitched)
             except RuntimeError as re:
                 self.log().warning("Unable to stitch automatically, consider "
@@ -438,49 +474,56 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         if outputWedges:
             self.outputWedges(outputWedges)
 
-        if self.output_sens:
-            self.outputSensitivity(sensitivity_outputs)
+        if outputSens:
+            self.outputSensitivity(outputSens)
 
-        if panel_output_groups:
-            self.outputPanels(panel_output_groups)
+        if outputPanels:
+            self.outputPanels(outputPanels)
 
     def outputWedges(self, outputWedges):
-        # convert to point data and remove nan and 0 from wedges
+        # ungroup and regroup wedge outputs per wedge
+        for wg in outputWedges:
+            UnGroupWorkspace(wg)
+        for w in range(self.n_wedges):
+            group_name = self.output + "_wedge_" + str(w + 1)
+            to_group_all = [self.output + "_wedge_#" + str(i + 1) + '_' + str(w + 1) for i in range(self.dimensionality)]
+            to_group = []
+            for ws_name in to_group_all:
+                if mtd.doesExist(ws_name):
+                    to_group.append(ws_name)
+            if to_group:
+                GroupWorkspaces(InputWorkspaces=to_group, OutputWorkspace=group_name)
+
         for i in range(self.dimensionality):
-            for j in range(len(outputWedges[i])):
-                ws = outputWedges[i][j]
-                ConvertToPointData(InputWorkspace=ws, OutputWorkspace=ws)
-                ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws,
-                                     NaNValue=0)
-                y = mtd[ws].readY(0)
-                x = mtd[ws].readX(0)
-                nonzero = np.nonzero(y)
+            for w in range(self.n_wedges):
+                old_name = self.output + "_wedge_#" + str(i + 1) + '_' + str(w + 1)
+                new_name = self.output + "_wedge_" + str(w + 1) + '_#' + str(i + 1)
+                if mtd.doesExist(old_name):
+                    RenameWorkspace(InputWorkspace=old_name, OutputWorkspace=new_name)
+                    ConvertToPointData(InputWorkspace=new_name, OutputWorkspace=new_name)
+                    ReplaceSpecialValues(InputWorkspace=new_name, OutputWorkspace=new_name, NaNValue=0)
+                    y = mtd[new_name].readY(0)
+                    x = mtd[new_name].readX(0)
+                    nonzero = np.nonzero(y)
+                    CropWorkspace(InputWorkspace=new_name, XMin=x[nonzero][0] - 1,
+                                  XMax=x[nonzero][-1], OutputWorkspace=new_name)
+                    suffix = self.createCustomSuffix(new_name)
+                    RenameWorkspace(InputWorkspace=new_name,
+                                    OutputWorkspace=new_name + suffix)
 
-                CropWorkspace(InputWorkspace=ws, XMin=x[nonzero][0] - 1,
-                              XMax=x[nonzero][-1], OutputWorkspace=ws)
-
-                # add the suffix
-                suffix = self.createCustomSuffix(outputWedges[i][j])
-                RenameWorkspace(InputWorkspace=outputWedges[i][j],
-                                OutputWorkspace=outputWedges[i][j] + suffix)
-                outputWedges[i][j] += suffix
-
-        # stitch if possible and group
-        for i in range(len(outputWedges[0])):
-            inWs = [outputWedges[d][i] for d in range(self.dimensionality)]
-            if len(inWs) > 1:
+        for w in range(self.n_wedges):
+            group_name = self.output + '_wedge_' + str(w + 1)
+            if mtd.doesExist(group_name) and mtd[group_name].getNumberOfEntries() > 1:
+                stitched = group_name + '_stitched'
                 try:
-                    stitched = self.output + "_wedge_" + str(i + 1) + "_stitched"
-                    Stitch1DMany(InputWorkspaces=inWs,
-                                 OutputWorkspace=stitched,
-                                 ScaleRHSWorkspace=True,
-                                 IndexOfReference=self.stitch_reference_index)
-                    inWs.append(stitched)
+                    Stitch(InputWorkspaces=group_name,
+                           OutputWorkspace=stitched,
+                           ReferenceWorkspace=mtd[group_name][self.stitch_reference_index].getName())
+                    GroupWorkspaces(InputWorkspaces=[group_name, stitched],
+                                    OutputWorkspace=group_name)
                 except RuntimeError as re:
                     self.log().warning("Unable to stitch automatically, consider "
                                        "stitching manually: " + str(re))
-            GroupWorkspaces(InputWorkspaces=inWs,
-                            OutputWorkspace=self.output + "_wedge_" + str(i + 1))
 
     def outputSensitivity(self, sensitivity_outputs):
         if len(sensitivity_outputs) > 1:
@@ -493,17 +536,26 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         self.setProperty('SensitivityOutputWorkspace', mtd[self.output_sens])
 
     def outputPanels(self, panel_output_groups):
-        panelWs = []
+        panel_names = set()
         for groupName in panel_output_groups:
-            wsNames = mtd[groupName].getNames()
-            UnGroupWorkspace(InputWorkspace=groupName)
-            for ws in wsNames:
-                suffix = self.createCustomSuffix(ws)
-                RenameWorkspace(InputWorkspace=ws,
-                                OutputWorkspace=ws + suffix)
-                panelWs.append(ws + suffix)
-        GroupWorkspaces(InputWorkspaces=panelWs,
-                        OutputWorkspace=self.output_panels)
+            if mtd.doesExist(groupName):
+                old_names = mtd[groupName].getNames()
+                UnGroupWorkspace(InputWorkspace=groupName)
+                for old_name in old_names:
+                    hash_suffix = old_name.split('#')[1]
+                    panel_name_start = hash_suffix.find('_')
+                    panel_name = hash_suffix[panel_name_start+1:]
+                    panel_names.add(panel_name)
+                    distance_mark = hash_suffix[:panel_name_start]
+                    new_name = self.output + '_' + panel_name + '_#' + distance_mark
+                    if mtd.doesExist(old_name):
+                        RenameWorkspace(InputWorkspace=old_name, OutputWorkspace=new_name)
+                        suffix = self.createCustomSuffix(new_name)
+                        RenameWorkspace(InputWorkspace=new_name, OutputWorkspace=new_name + suffix)
+
+        for panel_name in panel_names:
+            GroupWorkspaces(GlobExpression=self.output + '_' + panel_name + '_*',
+                            OutputWorkspace=self.output + '_' + panel_name)
 
     def processTransmissions(self):
         absorber_transmission_names = []
@@ -799,11 +851,10 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         self.progress.report('Processing sample at detector configuration '
                              + str(i + 1))
 
-        if (self.getPropertyValue('SensitivityOutputWorkspace') != ''
-                and self.dimensionality > 1):
-            output_sens = self.output_sens + '_' + str(i + 1)
-        else:
-            output_sens = self.output_sens
+        output_sens = self.output_sens
+        if self.getPropertyValue('SensitivityOutputWorkspace') and self.dimensionality > 1:
+            output_sens += '_' + str(i + 1)
+
         SANSILLReduction(
                 Run=self.sample[i],
                 ProcessAs='Sample',
@@ -828,21 +879,22 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 self.getProperty('WaterCrossSection').value,
                 )
 
-        output_sample = self.output + '_' + str(i + 1)
+        output_sample = self.output + '_#' + str(i + 1)
 
+        output_panels = ''
         if self.getProperty('OutputPanels').value:
-            panel_ws_group = self.output_panels + '_' + str(i + 1)
-        else:
-            panel_ws_group = ""
+            output_panels = self.output_panels + '_#' + str(i + 1)
 
-        if (self.n_wedges or self.getPropertyValue("ShapeTable")) and self.output_type == "I(Q)":
-            output_wedges = self.output + "_wedge_d" + str(i + 1)
-        else:
-            output_wedges = ""
+        output_wedges = ''
+        if (self.n_wedges or self.getPropertyValue('ShapeTable')) and self.output_type == 'I(Q)':
+            output_wedges = self.output + "_wedge_#" + str(i + 1)
 
         if self.getProperty('SensitivityWithOffsets').value:
             CloneWorkspace(InputWorkspace=sample_name, OutputWorkspace=output_sens)
 
+        qbinning = self.getPropertyValue('OutputBinning')
+        if qbinning:
+            qbinning = qbinning.split(':')[i]
         SANSILLIntegration(
                 InputWorkspace=sample_name,
                 OutputWorkspace=output_sample,
@@ -851,14 +903,14 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 self.getPropertyValue('CalculateResolution'),
                 DefaultQBinning=self.getPropertyValue('DefaultQBinning'),
                 BinningFactor=self.getProperty('BinningFactor').value,
-                OutputBinning=self.getPropertyValue('OutputBinning'),
+                OutputBinning=qbinning,
                 NPixelDivision=self.getProperty('NPixelDivision').value,
                 NumberOfWedges=self.n_wedges,
                 WedgeAngle=self.getProperty('WedgeAngle').value,
                 WedgeOffset=self.getProperty('WedgeOffset').value,
                 WedgeWorkspace=output_wedges,
                 AsymmetricWedges=self.getProperty('AsymmetricWedges').value,
-                PanelOutputWorkspaces=panel_ws_group,
+                PanelOutputWorkspaces=output_panels,
                 MaxQxy=(self.maxqxy[i]
                         if len(self.maxqxy) == self.dimensionality
                         else self.maxqxy[0]),
@@ -870,30 +922,16 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 ShapeTable=self.getPropertyValue('ShapeTable')
                 )
 
-        ConvertToPointData(InputWorkspace=output_sample, OutputWorkspace=output_sample)
+        # if a shape table is used, we can not know upfront what is the number of wedges
+        if self.getPropertyValue('ShapeTable') and self.output_type == 'I(Q)':
+            self.n_wedges = mtd[output_wedges].getNumberOfEntries()
 
-        # wedges ungrouping and renaming
-        if output_wedges:
-            self.n_wedges = mtd[output_wedges].size()
-            wedges_old_names = [output_wedges + "_" + str(w + 1)
-                                for w in range(self.n_wedges)]
-            wedges_new_names = [self.output + "_wedge_" + str(w + 1)
-                                + "_" + str(i + 1)
-                                for w in range(self.n_wedges)]
-            UnGroupWorkspace(InputWorkspace=output_wedges)
-            RenameWorkspaces(InputWorkspaces=wedges_old_names,
-                             WorkspaceNames=wedges_new_names)
-            output_wedges = wedges_new_names
-        else:
-            output_wedges = []
+        ConvertToPointData(InputWorkspace=output_sample, OutputWorkspace=output_sample)
 
         if self.cleanup:
             DeleteWorkspace(sample_name)
 
-        if not mtd.doesExist(panel_ws_group):
-            panel_ws_group = ""
-
-        return output_sample, output_wedges, panel_ws_group, output_sens
+        return output_sample, output_wedges, output_panels, output_sens
 
 
 AlgorithmFactory.subscribe(SANSILLAutoProcess)

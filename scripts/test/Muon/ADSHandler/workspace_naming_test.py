@@ -57,6 +57,24 @@ class WorkspaceNamingTest(unittest.TestCase):
         self.assertEqual(period_name_rebin, add_rebin_to_name(period_name))
         self.assertEqual(period_name_rebin, add_rebin_to_name(period_name_rebin))
 
+    def test_get_run_number_from_raw_name(self):
+        run = "2532"
+        name = get_raw_data_workspace_name("HIFI", run, False)
+
+        self.assertEqual(run, get_run_number_from_raw_name(name, "HIFI"))
+
+    def test_get_period_from_raw_name_single(self):
+        run = "2532"
+        name = get_raw_data_workspace_name("HIFI", run, False)
+
+        self.assertEqual("", get_period_from_raw_name(name, "MA"))
+
+    def test_get_period_from_raw_name_mutli(self):
+        run = "2532"
+        name = get_raw_data_workspace_name("HIFI", run, True, "3")
+
+        self.assertEqual("_period3 ", get_period_from_raw_name(name, "MA"))
+
     def test_check_phasequad_name(self):
         self.assertEqual(True, check_phasequad_name("Ref_data_Re_"))
         self.assertEqual(True, check_phasequad_name("Ref_data_Im_"))
@@ -102,17 +120,44 @@ class WorkspaceNamingTest(unittest.TestCase):
         input_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1'
         trial_function_name = "GausOsc"
         expected_directory_name = 'MUSR22725; Group; top; Asymmetry; #1; Fitted;GausOsc/'
-        expected_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1; Fitted Parameters;GausOsc'
+        expected_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1; Fitted;GausOsc; Parameters'
 
         name, directory = create_parameter_table_name(input_workspace_name, trial_function_name)
 
         self.assertEqual(name, expected_workspace_name)
         self.assertEqual(directory, expected_directory_name)
 
+    def test_create_covariance_matrix_name(self):
+        input_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1'
+        trial_function_name = "GausOsc"
+        expected_directory_name = 'MUSR22725; Group; top; Asymmetry; #1; Fitted;GausOsc/'
+        expected_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1; Fitted;GausOsc; Normalised Covariance Matrix'
+
+        name, directory = create_covariance_matrix_name(input_workspace_name, trial_function_name)
+
+        self.assertEqual(name, expected_workspace_name)
+        self.assertEqual(directory, expected_directory_name)
+
+    def test_create_model_fitting_parameter_combination_name(self):
+        results_table_name = "Result1"
+        x_parameter = "A0"
+        y_parameter = "A1"
+
+        name = create_model_fitting_parameter_combination_name(results_table_name, x_parameter, y_parameter)
+
+        self.assertEqual(name, "Result1; A1 vs A0")
+
+    def test_create_model_fitting_parameters_group_name(self):
+        results_table_name = "Result1"
+
+        name = create_model_fitting_parameters_group_name(results_table_name)
+
+        self.assertEqual(name, "Result1; Parameter Combinations")
+
     def test_create_multi_domain_fitted_workspace_name(self):
         input_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1'
         trial_function_name = 'Polynomial'
-        expected_directory_name = 'MUSR22725; Group; top; Asymmetry; #1; Fitted;Polynomial/'
+        expected_directory_name = 'MUSR22725; Group; top; Asymmetry; #1+ ...; Fitted;Polynomial/'
         expected_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1+ ...; Fitted;Polynomial'
 
         name, directory = create_multi_domain_fitted_workspace_name(input_workspace_name, trial_function_name)

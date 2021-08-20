@@ -6,10 +6,10 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from os import path
 
-from mantid.simpleapi import Load, logger, EnggEstimateFocussedBackground, ConvertUnits, Minus, AverageLogData, \
+from mantid.simpleapi import Load, logger, EnggEstimateFocussedBackground, Minus, AverageLogData, \
     CreateEmptyTableWorkspace, GroupWorkspaces, DeleteWorkspace, DeleteTableRows, RenameWorkspace, CreateWorkspace
 from Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
-from Engineering.gui.engineering_diffraction.tabs.common import path_handling
+from Engineering.gui.engineering_diffraction.tabs.common import output_settings
 from mantid.api import AnalysisDataService as ADS
 from mantid.api import TextAxis
 from mantid.kernel import UnitConversion, DeltaEModeType, UnitParams
@@ -53,17 +53,15 @@ class FittingDataModel(object):
                     f"Failed to restore workspace: {ws_name}. Error: {e}. \n Continuing loading of other files.")
         self.update_log_workspace_group()
 
-    def load_files(self, filenames_string, xunit):
+    def load_files(self, filenames_string):
         self._last_added = []
         filenames = [name.strip() for name in filenames_string.split(",")]
         for filename in filenames:
-            ws_name = self._generate_workspace_name(filename, xunit)
+            ws_name = self._generate_workspace_name(filename)
             if ws_name not in self._loaded_workspaces:
                 try:
                     if not ADS.doesExist(ws_name):
                         ws = Load(filename, OutputWorkspace=ws_name)
-                        if xunit != "TOF":
-                            ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws_name, Target=xunit)
                     else:
                         ws = ADS.retrieve(ws_name)
                     if ws.getNumberHistograms() == 1:
@@ -88,7 +86,7 @@ class FittingDataModel(object):
         run_info = self.make_runinfo_table()
         self._log_workspaces = GroupWorkspaces([run_info], OutputWorkspace='logs')
         # a table per logs
-        logs = get_setting(path_handling.INTERFACES_SETTINGS_GROUP, path_handling.ENGINEERING_PREFIX, "logs")
+        logs = get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, "logs")
         if logs:
             self._log_names = logs.split(',')
             for log in self._log_names:
@@ -177,13 +175,16 @@ class FittingDataModel(object):
         else:
             self.clear_logs()
 
+    def get_ws_list(self):
+        return list(self._loaded_workspaces.keys())
+
     def get_ws_sorted_by_primary_log(self):
-        ws_list = list(self._loaded_workspaces.keys())
+        ws_list = self.get_ws_list()
         tof_ws_inds = [ind for ind, ws in enumerate(ws_list) if
                        self._loaded_workspaces[ws].getAxis(0).getUnit().caption() == 'Time-of-flight']
-        primary_log = get_setting(path_handling.INTERFACES_SETTINGS_GROUP, path_handling.ENGINEERING_PREFIX,
+        primary_log = get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX,
                                   "primary_log")
-        sort_ascending = get_setting(path_handling.INTERFACES_SETTINGS_GROUP, path_handling.ENGINEERING_PREFIX,
+        sort_ascending = get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX,
                                      "sort_ascending")
         if primary_log:
             log_table = ADS.retrieve(primary_log)
@@ -199,7 +200,8 @@ class FittingDataModel(object):
     def update_fit(self, fit_props):
         for fit_prop in fit_props:
             wsname = fit_prop['properties']['InputWorkspace']
-            self._fit_results[wsname] = {'model': fit_prop['properties']['Function']}
+            self._fit_results[wsname] = {'model': fit_prop['properties']['Function'],
+                                         'status': fit_prop['status']}
             self._fit_results[wsname]['results'] = defaultdict(list)  # {function_param: [[Y1, E1], [Y2,E2],...] }
             fnames = [x.split('=')[-1] for x in findall('name=[^,]*', fit_prop['properties']['Function'])]
             # get num params for each function (first elem empty as str begins with 'name=')
@@ -261,10 +263,12 @@ class FittingDataModel(object):
         model = CreateEmptyTableWorkspace(OutputWorkspace='model')
         model.addColumn(type="str", name="Workspace")
         model.addColumn(type="float", name="chisq/DOF")  # always is for LM minimiser (users can't change)
+        model.addColumn(type="str", name="status")
         model.addColumn(type="str", name="Model")
         for iws, wsname in enumerate(self._loaded_workspaces.keys()):
             if wsname in self._fit_results:
-                row = [wsname, self._fit_results[wsname]['costFunction'], self._fit_results[wsname]['model']]
+                row = [wsname, self._fit_results[wsname]['costFunction'],
+                       self._fit_results[wsname]['status'], self._fit_results[wsname]['model']]
                 self.write_table_row(model, row, iws)
             else:
                 self.write_table_row(model, ['', nan, ''], iws)
@@ -312,6 +316,10 @@ class FittingDataModel(object):
         else:
             logger.notice("Background workspace already calculated")
 
+    def update_bgsub_status(self, ws_name, status):
+        if self._bg_params[ws_name]:
+            self._bg_params[ws_name][0] = status
+
     def estimate_background(self, ws_name, niter, xwindow, doSGfilter):
         ws_bg = EnggEstimateFocussedBackground(InputWorkspace=ws_name, OutputWorkspace=ws_name + "_bg",
                                                NIterations=niter, XWindow=xwindow, ApplyFilterSG=doSGfilter)
@@ -334,6 +342,10 @@ class FittingDataModel(object):
 
     def get_sample_log_from_ws(self, ws_name, log_name):
         return self._loaded_workspaces[ws_name].getSampleDetails().getLogData(log_name).value
+
+    def set_log_workspaces_none(self):
+        # to be used in the event of Ads clear, as trying to reference the deleted grp ws results in an error
+        self._log_workspaces = None
 
     def _convert_TOF_to_d(self, tof, ws_name):
         diff_consts = self._get_diff_constants(ws_name)
@@ -362,5 +374,6 @@ class FittingDataModel(object):
         [ws_table.setCell(irow, icol, row[icol]) for icol in range(0, len(row))]
 
     @staticmethod
-    def _generate_workspace_name(filepath, xunit):
-        return path.splitext(path.split(filepath)[1])[0] + '_' + xunit
+    def _generate_workspace_name(filepath):
+        wsname = path.splitext(path.split(filepath)[1])[0]
+        return wsname

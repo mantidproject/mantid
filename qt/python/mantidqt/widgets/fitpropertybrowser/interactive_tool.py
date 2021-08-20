@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from qtpy.QtCore import QObject, Signal, Slot
 
+from mantid import ConfigService
 from mantidqt.plotting.markers import PeakMarker, RangeMarker
 from .mouse_state_machine import StateMachine
 from .addfunctiondialog.presenter import AddFunctionDialog
@@ -203,13 +204,17 @@ class FitInteractiveTool(QObject):
         """
         dialog = AddFunctionDialog(parent=self.canvas,
                                    function_names=self.peak_names,
-                                   default_function_name=self.current_peak_type)
+                                   default_function_name=self.current_peak_type,
+                                   default_checkbox=True)
         dialog.view.function_added.connect(self.action_peak_added)
         dialog.view.open()
 
-    def action_peak_added(self, function_name):
+    def action_peak_added(self, function_name, set_global_default=False):
         self.peak_type_changed.emit(function_name)
         self.mouse_state.transition_to('add_peak')
+
+        if set_global_default:
+            ConfigService.setString('curvefitting.defaultPeak', function_name)
 
     def add_background_dialog(self):
         """

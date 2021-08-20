@@ -273,6 +273,7 @@ void LoadILLTOF2::addAllNexusFieldsAsProperties(const std::string &filename) {
   }
   m_loader.addNexusFieldsToWsRun(nxfileID, runDetails);
   NXclose(&nxfileID);
+  runDetails.addProperty("run_list", runDetails.getPropertyValueAsType<int>("run_number"));
   g_log.debug() << "End parsing properties from : " << filename << '\n';
 }
 
@@ -435,7 +436,7 @@ void LoadILLTOF2::loadSpectra(size_t &spec, const size_t numberOfTubes, const st
  */
 void LoadILLTOF2::runLoadInstrument() {
 
-  IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
+  auto loadInst = createChildAlgorithm("LoadInstrument");
 
   loadInst->setPropertyValue("InstrumentName", m_instrumentName);
   loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);

@@ -144,6 +144,8 @@ public:
   virtual std::vector<bool> getBoolParameter(const std::string &pname, bool recursive = true) const = 0;
   /// get a string representation of a parameter
   virtual std::string getParameterAsString(const std::string &pname, bool recursive = true) const = 0;
+  /// get visibility attribute of a parameter
+  virtual bool getParameterVisible(const std::string &pname, bool recursive = true) const = 0;
   //@}
   /** Prints a text representation of itself
    */

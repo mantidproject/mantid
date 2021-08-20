@@ -319,6 +319,31 @@ class SliceViewerModelTest(unittest.TestCase):
         self.assertEqual(dim_info['qdim'], False)
 
     @patch('mantidqt.widgets.sliceviewer.model.BinMD')
+    def test_model_MDE_basis_vectors_not_normalised_when_HKL(self, mock_binmd):
+        ws = _create_mock_mdeventworkspace(ndims=3,
+                                           coords=SpecialCoordinateSystem.HKL,
+                                           extents=(-3, 3, -4, 4, -5, 5),
+                                           names=('h', 'k', 'l'),
+                                           units=('r.l.u.', 'r.l.u.', 'r.l.u.'),
+                                           isq=(True, True, True))
+        model = SliceViewerModel(ws)
+        mock_binmd.return_value = self.ws_MD_3D  # different workspace
+
+        self.assertNotEqual(model.get_ws((None, None, 0), (1, 2, 4)), ws)
+
+        mock_binmd.assert_called_once_with(AxisAligned=False,
+                                           NormalizeBasisVectors=False,
+                                           BasisVector0='h,r.l.u.,1.0,0.0,0.0',
+                                           BasisVector1='k,r.l.u.,0.0,1.0,0.0',
+                                           BasisVector2='l,r.l.u.,0.0,0.0,1.0',
+                                           EnableLogging=False,
+                                           InputWorkspace=ws,
+                                           OutputBins=[1, 2, 1],
+                                           OutputExtents=[-3, 3, -4, 4, -2.0, 2.0],
+                                           OutputWorkspace=ws.name() + '_svrebinned')
+        mock_binmd.reset_mock()
+
+    @patch('mantidqt.widgets.sliceviewer.model.BinMD')
     def test_get_ws_MDE_with_limits_uses_limits_over_dimension_extents(self, mock_binmd):
         model = SliceViewerModel(self.ws_MDE_3D)
         mock_binmd.return_value = self.ws_MD_3D

@@ -29,7 +29,7 @@ class QuickEditPresenter(object):
 
     @property
     def get_all_subplots(self):
-        return self.all()
+        return self.multiple_plots()
 
     @property
     def autoscale(self):
@@ -68,10 +68,10 @@ class QuickEditPresenter(object):
     def connect_plot_selection(self, slot):
         self._view.connect_plot_selection(slot)
 
-    def all(self):
+    def multiple_plots(self):
         return [self._view.plot_at_index(index) for index in range(1, self._view.number_of_plots())]
 
-    def set_to_all(self):
+    def set_to_multiple_plots(self):
         self._view.set_index(0)
 
     def set_plot_x_range(self, range):
@@ -97,8 +97,8 @@ class QuickEditPresenter(object):
 
     def get_selection(self):
         name = self._view.current_selection()
-        if name == "All":
-            return self.all()
+        if name == self._view.get_multiple_selection_name:
+            return self.multiple_plots()
         return [name]
 
     def get_selection_index(self) -> int:
@@ -110,8 +110,18 @@ class QuickEditPresenter(object):
     def rm_subplot(self, name):
         current = self._view.current_selection()
         if current == name:
-            current = "All"
+            current = self._view.get_multiple_selection_name
         to_remove = self._view.find_subplot(name)
         self._view.rm_subplot(to_remove)
         index = self._view.find_subplot(current)
         self._view.set_selection(index)
+
+
+class DuelQuickEditPresenter(QuickEditPresenter):
+
+    def __init__(self, view, plotting_context):
+        super().__init__(view, plotting_context)
+
+    def multiple_plots(self):
+        # the 1st plot is reserved for freq spec -> start at 2
+        return [self._view.plot_at_index(index) for index in range(2, self._view.number_of_plots())]

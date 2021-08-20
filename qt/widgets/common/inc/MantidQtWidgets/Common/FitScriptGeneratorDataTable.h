@@ -56,7 +56,9 @@ public:
 
   [[nodiscard]] QString selectedDomainFunctionPrefix() const;
 
-  void removeDomain(std::string const &workspaceName, MantidWidgets::WorkspaceIndex workspaceIndex);
+  void renameWorkspace(QString const &workspaceName, QString const &newName);
+
+  void removeDomain(MantidWidgets::FitDomainIndex domainIndex);
   void addDomain(QString const &workspaceName, MantidWidgets::WorkspaceIndex workspaceIndex, double startX,
                  double endX);
 
@@ -77,8 +79,6 @@ private:
   QPersistentModelIndex hoveredRowIndex(QEvent *event);
 
   void updateVerticalHeaders();
-
-  int indexOfDomain(std::string const &workspaceName, MantidWidgets::WorkspaceIndex workspaceIndex) const;
 
   QString getText(FitDomainIndex row, int column) const;
 

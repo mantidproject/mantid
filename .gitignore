@@ -13,6 +13,9 @@ cmake_install.cmake
 install_manifest.txt
 compile_commands.json
 
+# Ignore CMakeUserPresets
+CMakeUserPresets.json
+
 
 # Compiled Object files
 *.slo
@@ -76,6 +79,9 @@ local.properties
 
 #Test results
 *.log
+
+#Coverage results
+*.gcov
 
 # Build results
 build/
@@ -162,11 +168,13 @@ Thumbs.db
 # Folder config file
 Desktop.ini
 
-# PyCharm IDE
+# CLion and PyCharm IDE
 .idea/
+cmake-build-*/
 
 # VSCode
 .vscode/
+.cache/
 .clangd/
 XDG_CACHE_HOME/
 # The file that contains metadata for VSCode Workspace
@@ -188,3 +196,7 @@ rel/
 
 # NFS files
 *.nfs*
+
+# in source installed conda
+mambaforge/
+miniconda3/

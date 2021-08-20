@@ -151,12 +151,15 @@ class StateGuiModelTest(unittest.TestCase):
         state_gui_model.reduction_mode = ReductionMode.MERGED
         self.assertEqual(state_gui_model.reduction_mode, ReductionMode.MERGED)
 
-    def test_that_raises_when_setting_with_wrong_input(self):
-        def red_mode_wrapper():
-            state_gui_model = StateGuiModel(AllStates())
-            state_gui_model.reduction_mode = "string"
+    def test_reduction_mode_not_set(self):
+        state_gui_model = StateGuiModel(AllStates())
+        state_gui_model.reduction_mode = ReductionMode.NOT_SET
+        self.assertEqual(state_gui_model.reduction_mode, ReductionMode.NOT_SET)
 
-        self.assertRaises(ValueError, red_mode_wrapper)
+    def test_that_raises_when_setting_with_wrong_input(self):
+        state_gui_model = StateGuiModel(AllStates())
+        with self.assertRaises(ValueError):
+            state_gui_model.reduction_mode = "string"
 
     def test_that_can_update_reduction_mode(self):
         state = AllStates()

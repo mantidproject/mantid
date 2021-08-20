@@ -11,9 +11,9 @@ from Muon.GUI.Common.plot_widget.quick_edit.axis_changer.axis_changer_presenter 
 class QuickEditView(QtWidgets.QWidget):
     error_signal = QtCore.Signal(object)
 
-    def __init__(self, subcontext, parent=None):
+    def __init__(self, subcontext, parent=None, default_msg = "All"):
         super(QuickEditView, self).__init__(parent)
-
+        self._default_selector_msg = default_msg
         button_layout = QtWidgets.QHBoxLayout()
         self.plot_selector = QtWidgets.QComboBox()
         self.plot_selector.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
@@ -27,7 +27,7 @@ class QuickEditView(QtWidgets.QWidget):
         self.plot_selector.completer().setFilterMode(
             QtCore.Qt.MatchContains)
 
-        self.plot_selector.addItem("All")
+        self.plot_selector.addItem(self._default_selector_msg)
         self.plot_selector.setEditable(False)
         self.x_axis_changer = AxisChangerWidget("X", self)
 
@@ -47,7 +47,14 @@ class QuickEditView(QtWidgets.QWidget):
         button_layout.addWidget(self.errors)
         self.setLayout(button_layout)
 
+    @property
+    def get_multiple_selection_name(self):
+        return self._default_selector_msg
+
     """ plot selection """
+    def disable_plot_selection(self):
+        self.plot_selector.setEnabled(False)
+
     def add_subplot(self, name):
         self.plot_selector.blockSignals(True)
         self.plot_selector.addItem(name)
@@ -79,7 +86,7 @@ class QuickEditView(QtWidgets.QWidget):
     def clear_subplots(self):
         self.plot_selector.blockSignals(True)
         self.plot_selector.clear()
-        self.plot_selector.addItem("All")
+        self.plot_selector.addItem(self._default_selector_msg)
         self.plot_selector.blockSignals(False)
 
     def connect_plot_selection(self, slot):

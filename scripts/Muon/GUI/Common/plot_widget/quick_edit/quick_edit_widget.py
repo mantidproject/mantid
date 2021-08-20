@@ -5,14 +5,15 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from Muon.GUI.Common.plot_widget.quick_edit.quick_edit_view import QuickEditView
-from Muon.GUI.Common.plot_widget.quick_edit.quick_edit_presenter import QuickEditPresenter
+from Muon.GUI.Common.plot_widget.quick_edit.quick_edit_presenter import QuickEditPresenter, DuelQuickEditPresenter
 
 
-class QuickEditWidget(object):
+class QuickEditWidgetInterface(object):
 
-    def __init__(self, context, parent=None):
-        view = QuickEditView(None, parent)
-        self._presenter = QuickEditPresenter(view, context)
+    def __init__(self, context, view, presenter, parent=None):
+        self._view = view
+        self._presenter = presenter
+        self._context = context
 
     @property
     def widget(self):
@@ -33,6 +34,9 @@ class QuickEditWidget(object):
 
     def enable_autoscale(self):
         self._presenter.enable_autoscale()
+
+    def disable_plot_selection(self):
+        self._view.disable_plot_selection()
 
     def add_subplot(self, name):
         self._presenter.add_subplot(name)
@@ -90,3 +94,20 @@ class QuickEditWidget(object):
 
     def connect_plot_selection(self, slot):
         self._presenter.connect_plot_selection(slot)
+
+
+class QuickEditWidget(QuickEditWidgetInterface):
+
+    def __init__(self, context, parent=None):
+        view = QuickEditView(None, parent)
+        super().__init__(context, view, QuickEditPresenter(view, context))
+
+
+class DuelQuickEditWidget(QuickEditWidgetInterface):
+
+    def __init__(self, context, parent=None):
+        view = QuickEditView(None, parent, "Time domains")
+        super().__init__(context, view, DuelQuickEditPresenter(view, context))
+
+    def add_subplot(self, name):
+        self._presenter.add_subplot(name)

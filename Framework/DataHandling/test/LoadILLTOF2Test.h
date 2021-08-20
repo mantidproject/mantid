@@ -120,9 +120,12 @@ public:
     const bool convertToTOF = true;
     MatrixWorkspace_sptr ws = loadDataFile("ILL/IN4/084446.nxs", histogramCount, monitorCount, channelCount, tofDelay,
                                            tofChannelWidth, convertToTOF);
-
-    const double pulseInterval = ws->run().getLogAsSingleValue("pulse_interval");
+    auto const run = ws->run();
+    const double pulseInterval = run.getLogAsSingleValue("pulse_interval");
     TS_ASSERT_DELTA(0.003, pulseInterval, 1e-10)
+    TS_ASSERT(run.hasProperty("run_list"))
+    const auto runList = run.getLogData("run_list");
+    TS_ASSERT_EQUALS(runList->value(), "84446")
   }
 
   void test_IN5_load() {
@@ -133,8 +136,12 @@ public:
     const size_t histogramCount = 98305;
     const size_t monitorCount = 1;
     const bool convertToTOF = true;
-    loadDataFile("ILL/IN5/104007.nxs", histogramCount, monitorCount, channelCount, tofDelay, tofChannelWidth,
-                 convertToTOF);
+    MatrixWorkspace_sptr ws = loadDataFile("ILL/IN5/104007.nxs", histogramCount, monitorCount, channelCount, tofDelay,
+                                           tofChannelWidth, convertToTOF);
+    auto const run = ws->run();
+    TS_ASSERT(run.hasProperty("run_list"))
+    const auto runList = run.getLogData("run_list");
+    TS_ASSERT_EQUALS(runList->value(), "104007")
   }
 
   void test_IN6_load() {
@@ -148,8 +155,12 @@ public:
     MatrixWorkspace_sptr ws = loadDataFile("ILL/IN6/164192.nxs", histogramCount, monitorCount, channelCount, tofDelay,
                                            tofChannelWidth, convertToTOF);
 
-    const double pulseInterval = ws->run().getLogAsSingleValue("pulse_interval");
+    auto const run = ws->run();
+    const double pulseInterval = run.getLogAsSingleValue("pulse_interval");
     TS_ASSERT_DELTA(0.0060337892, pulseInterval, 1e-10)
+    TS_ASSERT(run.hasProperty("run_list"))
+    const auto runList = run.getLogData("run_list");
+    TS_ASSERT_EQUALS(runList->value(), "164192")
   }
 
   void test_PANTHER_diffraction_load() {
@@ -211,8 +222,12 @@ public:
     const size_t histogramCount = 73729;
     const size_t monitorCount = 1;
     const bool convertToTOF = false;
-    loadDataFile("ILL/PANTHER/001723.nxs", histogramCount, monitorCount, channelCount, tofDelay, tofChannelWidth,
-                 convertToTOF);
+    MatrixWorkspace_sptr ws = loadDataFile("ILL/PANTHER/001723.nxs", histogramCount, monitorCount, channelCount,
+                                           tofDelay, tofChannelWidth, convertToTOF);
+    auto const run = ws->run();
+    TS_ASSERT(run.hasProperty("run_list"))
+    const auto runList = run.getLogData("run_list");
+    TS_ASSERT_EQUALS(runList->value(), "1723")
   }
 
   void test_convertToTOF() {
@@ -235,8 +250,12 @@ public:
     const size_t histogramCount = 61441;
     const size_t monitorCount = 1;
     const bool convertToTOF = false;
-    loadDataFile("ILL/SHARP/000102.nxs", histogramCount, monitorCount, channelCount, tofDelay, tofChannelWidth,
-                 convertToTOF);
+    MatrixWorkspace_sptr ws = loadDataFile("ILL/SHARP/000102.nxs", histogramCount, monitorCount, channelCount, tofDelay,
+                                           tofChannelWidth, convertToTOF);
+    auto const run = ws->run();
+    TS_ASSERT(run.hasProperty("run_list"))
+    const auto runList = run.getLogData("run_list");
+    TS_ASSERT_EQUALS(runList->value(), "102")
   }
 
   void test_SHARP_TOF_load() {

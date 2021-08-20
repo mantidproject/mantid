@@ -7,8 +7,6 @@
 #  This file is part of the mantidqt package
 #
 #
-from threading import Timer
-
 from ..memorywidget.memoryinfo import get_memory_info
 from ...utils.asynchronous import set_interval
 

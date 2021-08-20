@@ -44,12 +44,14 @@ class MantidFigureCanvas(FigureCanvasQTAgg):
         # Draw the zoom rectangle to the QPainter.  _draw_rect_callback needs
         # to be called at the end of paintEvent.
         if rect is not None:
+            self._drawRect = [pt / self._dpi_ratio for pt in rect]
 
             def _draw_rect_callback(painter):
                 pen = QPen(self.pen_color, self.pen_thickness / self._dpi_ratio, Qt.DotLine)
                 painter.setPen(pen)
                 painter.drawRect(*(pt / self._dpi_ratio for pt in rect))
         else:
+            self._drawRect = None
 
             def _draw_rect_callback(painter):
                 return

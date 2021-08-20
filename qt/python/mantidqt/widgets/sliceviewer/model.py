@@ -156,6 +156,7 @@ class SliceViewerModel:
                        not provided the full extent of each dimension is used
         """
         workspace = self._get_ws()
+
         params, _, __ = _roi_binmd_parameters(workspace, slicepoint, bin_params, limits, dimension_indices)
         params['EnableLogging'] = LOG_GET_WS_MDE_ALGORITHM_CALLS
         binned = BinMD(InputWorkspace=workspace, OutputWorkspace=self._rebinned_name, **params)
@@ -544,6 +545,8 @@ def _roi_binmd_parameters(workspace, slicepoint: Sequence[Optional[float]],
     ws_basis = np.eye(ndims)
     output_extents, output_bins = [], []
     params = {'AxisAligned': False}
+    if workspace.getSpecialCoordinateSystem() == SpecialCoordinateSystem.HKL:
+        params['NormalizeBasisVectors'] = False  # Default is True
     for n in range(ndims):
         dimension = workspace.getDimension(n)
         basis_vec_n = _to_str(ws_basis[:, n])

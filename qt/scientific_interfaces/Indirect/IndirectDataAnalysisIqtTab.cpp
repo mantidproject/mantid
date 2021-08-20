@@ -140,7 +140,7 @@ IndirectDataAnalysisIqtTab::IndirectDataAnalysisIqtTab(QWidget *parent)
     : IndirectDataAnalysisTab(parent), m_iqtTree(nullptr), m_iqtResFileType() {
   m_uiForm.setupUi(parent);
   setOutputPlotOptionsPresenter(
-      std::make_unique<IndirectPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, this, PlotWidget::SpectraTiled));
+      std::make_unique<IndirectPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::SpectraTiled));
 }
 
 IndirectDataAnalysisIqtTab::~IndirectDataAnalysisIqtTab() { m_iqtTree->unsetFactoryForManager(m_dblManager); }
@@ -372,7 +372,7 @@ void IndirectDataAnalysisIqtTab::updateDisplayedBinParameters() {
   }
 }
 
-void IndirectDataAnalysisIqtTab::loadSettings(const QSettings &settings) {
+void IndirectDataAnalysisIqtTab::loadTabSettings(const QSettings &settings) {
   m_uiForm.dsInput->readSettings(settings.group());
   m_uiForm.dsResolution->readSettings(settings.group());
 }

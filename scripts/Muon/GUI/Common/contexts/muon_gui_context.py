@@ -51,11 +51,3 @@ class MuonGuiContext(dict):
 
     def add_non_calc_subscriber(self, observer):
         self.gui_variable_non_calulation_notifier.add_subscriber(observer)
-
-    def remove_workspace_by_name(self, workspace_name):
-        try:
-            if self['DeadTimeTable'].name() == workspace_name:
-                self.pop('DeadTimeTable')
-                self['DeadTimeSource'] = 'FromFile'
-        except KeyError:
-            pass

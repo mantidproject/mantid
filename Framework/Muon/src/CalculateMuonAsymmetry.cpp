@@ -22,6 +22,7 @@
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/Run.h"
 
+#include "MantidKernel/ArrayOrderedPairsValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
@@ -65,6 +66,11 @@ void CalculateMuonAsymmetry::init() {
 
   declareProperty("StartX", 0.1, "The lower limit for calculating the asymmetry (an X value).");
   declareProperty("EndX", 15.0, "The upper limit for calculating the asymmetry  (an X value).");
+  declareProperty(
+      std::make_unique<ArrayProperty<double>>("Exclude", std::make_shared<ArrayOrderedPairsValidator<double>>()),
+      "A list of pairs of real numbers, defining the regions to "
+      "exclude from the fit for all spectra.");
+
   declareProperty(std::make_unique<API::FunctionProperty>("InputFunction"), "The fitting function to be converted.");
 
   std::vector<std::string> minimizerOptions = API::FuncMinimizerFactory::Instance().getKeys();
@@ -250,6 +256,7 @@ std::vector<double> CalculateMuonAsymmetry::getNormConstants(const std::vector<s
   std::vector<double> norms;
   double startX = getProperty("StartX");
   double endX = getProperty("EndX");
+  std::string exclude = getProperty("Exclude");
   int maxIterations = getProperty("MaxIterations");
   auto minimizer = getProperty("Minimizer");
   API::IAlgorithm_sptr fit;
@@ -284,6 +291,7 @@ std::vector<double> CalculateMuonAsymmetry::getNormConstants(const std::vector<s
   fit->setProperty("InputWorkspace", wsNames[0]);
   fit->setProperty("StartX", startX);
   fit->setProperty("EndX", endX);
+  fit->setProperty("Exclude", exclude);
   fit->setProperty("WorkspaceIndex", 0);
 
   if (wsNames.size() > 1) {

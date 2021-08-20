@@ -45,7 +45,7 @@ Grouped Tasks
 
 In order to test a wide range of functionality and avoid repeating work, areas to test are split into groups. These tasks are for testing how Workbench links to the Framework, through the different :ref:`Toolboxes <main_window>`. The links here are to give you an idea, but please mess around a little too and try to break Mantid!
 
-This was last updated for Release 5.1. Check if the organiser has considered if the Core testers can test on different environments.
+This was last updated for Release 6.2. Check if the organiser has considered if the Core testers can test on different environments.
 
 
 
@@ -53,6 +53,7 @@ This was last updated for Release 5.1. Check if the organiser has considered if 
     :widths: 30 5 5 5 5 50
     :header: "Area", ":r:`1`", ":b:`2`", ":g:`3`", ":o:`4`", "Description and Links"
 
+    Install/Uninstall,:r:`Y`,:b:`Y`,:g:`Y`,:o:`Y`, "**Windows only**: install Mantid, go to the Windows 'Apps & features' list and verify the icon is there for Mantid. Uninstall Mantid from within the 'Apps & features' list and verify that the desktop and start menu shortcuts are removed."
     Project Save/Load,:r:`Y`,:b:`Y`,:g:`Y`,:o:`Y`, "Test the small areas below and do not delete workspaces or plots you produce and manipulate, maybe open a few interfaces. Then File > Save Project and try to reload it! Diagnose any problems."
     About / First Time Setup Menu,:r:`Y`,,,,"Check Opens Successfully + all buttons and links work"
     Help Documentation,,:b:`Y`,:g:`Y`,,"Open all `Help` menu bar options. Load a few algorithm dialogs and click the **?**. Produce some plots (1D, Waterfall,Colorfill,3D Surface) and check **?** links."
@@ -64,6 +65,7 @@ This was last updated for Release 5.1. Check if the organiser has considered if 
     Script Editor / Interpreter,:r:`Y`,,,:o:`Y`,"Check basic functionality, such as checking the buttons/options at the top of SE, running algorithms, accessing workspace properties in both environments. Does autocompletion work for mantid algorithms/numpy/matplotlib? :ref:`02_scripts`"
     MantidPython and Jupyter Notebook,:r:`Y`,:b:`Y`,:g:`Y`,,"Open MantidPython and a Jupyter Notebook. Check you can import mantid.simpleapi and run a script/notebook. `Click here <https://www.mantidproject.org/Using_IPython_Notebook>`_ for Further Instructions and an example Notebook (You may need to rename without spaces)"
     Memory Widget,:r:`Y`,:b:`Y`,:g:`Y`,:o:`Y`,"Check that the System Memory Usage widget updates at a frequency of no more than once every two seconds, ideally on a system with limited resourses. Check that the default position of the widget is in the top right, in the same column as the Messages widget."
+    Script Repository,,:b:`Y`,:g:`Y`,:o:`Y`,"Test downloading and uploading scripts to the Script Repository. Try to move the Script Repository to another folder. Check out `this <http://www.mantidproject.org/ScriptRepository>`__ page for more information."
 
 .. csv-table:: Larger tasks
     :widths: 10 20 5 5 5 5 50

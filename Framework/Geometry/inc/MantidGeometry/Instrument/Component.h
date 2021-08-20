@@ -249,6 +249,32 @@ public:
     return retVal;
   }
 
+  /**
+   *  Get a visibility attribute of a parameter from the parameter map
+   * @param p_name :: The name of the parameter
+   * @param recursive :: If true then the lookup will walk up the tree if this
+   * component does not have parameter
+   * @return A boolean containing the visibility attribute of the parameter, false if does not exist
+   */
+  bool getParameterVisible(const std::string &p_name, bool recursive) const override {
+    if (m_map) {
+      Parameter_sptr param = Parameter_sptr(); // Null shared pointer
+      if (recursive) {
+        param = m_map->getRecursive(this, p_name);
+      } else {
+        param = m_map->get(this, p_name);
+      }
+      if (param != Parameter_sptr()) {
+        return param->visible();
+      } else {
+        return false;
+      }
+    } else {
+      // Not parametrized = not visible by default
+      return false;
+    }
+  }
+
   void printSelf(std::ostream &) const override;
 
   /// Returns the address of the base component
