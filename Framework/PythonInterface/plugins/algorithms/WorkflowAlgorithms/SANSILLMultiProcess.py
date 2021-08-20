@@ -520,7 +520,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
                                  ProcessAs='EmptyBeam',
                                  DarkCurrentWorkspace=tr_dark_current_ws,
                                  NormaliseBy=self.getProperty('NormaliseBy').value,
-                                 TrBeamRadius=self.getProperty('TrBeamRadius').value[l],
+                                 TransmissionBeamRadius=self.getProperty('TrBeamRadius').value[l],
                                  OutputWorkspace=tr_empty_beam_ws,
                                  OutputFluxWorkspace=tr_empty_beam_flux)
             return [tr_empty_beam_ws, tr_empty_beam_flux]
@@ -539,7 +539,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
                                  EmptyBeamWorkspace=tr_empty_beam_ws,
                                  FluxWorkspace=tr_empty_beam_flux,
                                  NormaliseBy=self.getProperty('NormaliseBy').value,
-                                 TrBeamRadius=self.getProperty('TrBeamRadius').value[l],
+                                 TransmissionBeamRadius=self.getProperty('TrBeamRadius').value[l],
                                  OutputWorkspace=tr_empty_can_ws)
             return tr_empty_can_ws
         else:
@@ -555,7 +555,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
                              EmptyBeamWorkspace=tr_empty_beam_ws,
                              FluxWorkspace=tr_empty_beam_flux,
                              NormaliseBy=self.getProperty('NormaliseBy').value,
-                             TrBeamRadius=self.getProperty('TrBeamRadius').value[l],
+                             TransmissionBeamRadius=self.getProperty('TrBeamRadius').value[l],
                              OutputWorkspace=tr_sample_ws)
             return tr_sample_ws
         else:
@@ -604,7 +604,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
                                  ProcessAs='EmptyBeam',
                                  DarkCurrentWorkspace=dark_current_ws,
                                  NormaliseBy=self.getProperty('NormaliseBy').value,
-                                 TrBeamRadius=self.getProperty('BeamRadius').value[l],
+                                 TransmissionBeamRadius=self.getProperty('BeamRadius').value[l],
                                  OutputWorkspace=empty_beam_ws,
                                  OutputFluxWorkspace=empty_beam_flux)
             return [empty_beam_ws, empty_beam_flux]
@@ -639,7 +639,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
             flat_field_ws = self.load_flat_field(d)
             solvent_ws = self.load_solvent(d)
             sens_ws = self.load_sensitivity(d)
-            sample_tr_ws = transmissions[self.tr_index(d)]['Sample'] if transmissions else ''
+            sample_tr_ws = transmissions[self.tr_index(d)]['SampleTransmission'] if transmissions else ''
             process = 'Sample'
             [_, sample_ws] = needs_processing(runs, 'Sample')
             sens_out = ''
@@ -718,7 +718,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         if real_space_ws_list:
             out_ws = self.getPropertyValue('OutputWorkspace')
             tmp_group = '__combined_sens_grp_' + out_ws
-            comb_sens = out_ws + '_combined_sens'
+            comb_sens = out_ws + '_sensitivity_combined'
             GroupWorkspaces(InputWorkspaces=real_space_ws_list, OutputWorkspace=tmp_group)
             CalculateEfficiency(InputWorkspace=tmp_group, MergeGroup=True, OutputWorkspace=comb_sens)
             UnGroupWorkspace(tmp_group)
@@ -802,7 +802,14 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
                 RenameWorkspace(ws, name)
         return name
 
-    def package(self, samples):
+    def rename_tr(self, tr):
+        out = self.getPropertyValue('OutputWorkspace')
+        wavelength = mtd[tr].getRun()['wavelength'].value
+        name = f'{out}_transmissions_w{wavelength:.1f}A'
+        RenameWorkspace(tr, name)
+        return name
+
+    def package(self, samples, transmissions):
         out_ws = self.getPropertyValue('OutputWorkspace')
         outputs = []
         for pack in samples:
@@ -810,8 +817,9 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
                 if v:
                     if k.startswith('IQ') or k.startswith('Stitched'):
                         self.set_distribution([v], True)
-                    last_name = self.rename(k, v)
-                    outputs.append(last_name)
+                    outputs.append(self.rename(k, v))
+        for tr in transmissions:
+            outputs.append(self.rename_tr(tr['SampleTransmission']))
         GroupWorkspaces(InputWorkspaces=outputs, OutputWorkspace=out_ws)
         self.setProperty('OutputWorkspace', out_ws)
 
@@ -822,7 +830,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         transmissions = self.process_all_transmissions()
         samples = self.process_all_samples(transmissions)
         outputs = self.combine(samples)
-        self.package(outputs)
+        self.package(outputs, transmissions)
 
 
 AlgorithmFactory.subscribe(SANSILLMultiProcess)
