@@ -20,9 +20,14 @@ The Engineering Diffraction interface allows scientists using the EnginX instrum
 process their data. There are 3 tabs which are ordered according to the main steps performed.
 These are:
 
-- Calibration - This is where a vanadium and cerium oxide run are entered to calibrate the subsequent data.
-- Focus - Where are the data across multiple spectra are summed into a single spectrum for later steps.
-- Fitting - Currently a work in progress, no testing is required
+- Calibration - This is where a cerium oxide run are entered to calibrate the subsequent data.
+- Focus - Where are the data across multiple spectra are normalised and summed into a single spectrum for later steps.
+- Fitting - Where peaks can be fitted on focussed data
+
+The tests are designed to be run from a starting point where no settings relating to the Engineering Diffraction Gui
+have been saved in the Mantid Workbench ini file. This file is in ``C:\Users\<fed id>\AppData\Roaming\mantidproject`` on
+Windows and ``~/.config/mantidproject/`` on linux. To ensure there are no saved settings open up the file mantidworkbench.ini
+and delete the settings with names starting with EngineeringDiffraction2 from the CustomInterfaces section
 
 Test 1
 ^^^^^^
@@ -41,29 +46,34 @@ Calibration
 
 5. Set the Save location to a directory of your choice.
 
-6. For the vanadium number enter `307521`, and for the Calibration Sample number enter `305738`.
+6. Check that the Full Calibration setting has a default path to a .nxs file (currently ENGINX_full_instrument_calibration_193749.nxs)
 
-7. Tick the Plot Calibrated Workspace option.
+7. Close the settings window
 
-8. Click Calibrate, after completing calibration it should produce two plots.
+8. For the Calibration Sample number enter `305738`.
 
-.. image:: /images/EngineeringDiffractionTest/EnggDiffExpectedVanCurve.png
-    :width: 900px
+9. Tick the Plot Calibrated Workspace option.
+
+10. Click Calibrate, after completing calibration it should produce the following plot.
 
 .. image:: /images/EngineeringDiffractionTest/EnggDiffExpectedLinear.png
     :width: 900px
 
-9. Check that in your save location there is a Calibration folder containing three files
-   `ENGINX_307521_305738` with the suffixes `_all_bank`, `_bank_North`, `_bank_South`, and
-   a Vanadium_Runs folder containing two files: `307521_precalculated_vanadium_run_bank_curves`
-   and `307521_precalculated_vanadium_run_integration`.
+11. Check that in your save location there is a Calibration folder containing three .prm files
+   `ENGINX_305738` with the suffixes `_all_banks`, `_bank_1`, `_bank_2`.
+
+12. Close down the Engineering Diffraction gui and reopen it. The Load Existing Calibration radio
+    button should be checked on the Calibration tab and the path should be populated with the
+    `_bank_2`.prm file generated earlier in this test
+
+13. Click Load button to reload the .prm file
 
 Focus
 -----
 
 1. Change to the Focus tab.
 
-2. For the Sample Run number use `305761`.
+2. For the Sample Run number use `305761` and for the Vanadium run number enter `307521`.
 
 3. Tick the Plot Focused Workspace option.
 
@@ -72,8 +82,10 @@ Focus
 .. image:: /images/EngineeringDiffractionTest/EnggDiffExampleFocusOutput.png
     :width: 900px
 
-5. Check that in your save location there is a Focus folder containing six files
-   `ENGINX_305761_bank_1` and `ENGINX_305761_bank_2` for each of `.abc`, `.gss`, and `.nxs`.
+5. Check that in your save location there is a Focus folder containing the following files:
+
+   - ENGINX_305761_307521_sample_logs.csv
+   - `ENGINX_305761_307521_bank_1_dSpacing`, `ENGINX_305761_307521_bank_2_dSpacing`, `ENGINX_305761_307521_bank_1_TOF` and `ENGINX_305761_307521_bank_2_TOF` for each of `.abc`, `.gss`, and `.nxs`.
 
 Test 2
 ^^^^^^
@@ -84,35 +96,21 @@ This test covers the RB number.
 
 2. Follow the steps of Test 1, any output files should now be located in [Save location]/user/[RB number]
 
+
 Test 3
-^^^^^^
-
-This test covers the Force Vanadium Recalculation functionality.
-
-1. With the previous setup run calibration again. It should happen much faster as it loads
-   the previous calibration.
-
-2. In the Engineering Diffraction settings tick the Force Vanadium Recalculation.
-
-3. Calibrate again. It should take a longer time to perform as it does the entire calibration again.
-
-4. Check that the "Last Modified" timestamp on the files in the `Vanadium_Runs` folder and ensure that they have
-   been updated.
-
-Test 4
 ^^^^^^
 
 This test covers the Cropping functionality.
 
 1. Change the RB Number to "North", this is purely to separate the cropped output files into their own space.
 
-2. Tick the Crop Calibration option. In the select Bank/Spectra select `1 (North)`
+2. Tick the Crop Calibration option. In the drop down "Region of Interest" select `1 (North)`
 
 3. Check the "Plot Calibrated Workspace" checkbox and click calibrate.
 
-4. The two generated figures should be one with two vanadium plots and one with a single TOF Peaks plot.
+4. The generated figure should show a plot of TOF vs d-spacing and plot showing residuals of the quadratic fit
 
-5. Check that only a single output file was generated.
+5. Check that only one .prm and one .nxs output file was generated.
 
 6. Go to focus tab and do the same with the Crop Focus. In comparison to the previous focus test, this will only
    generate a single axis on the figure, rather than two.
@@ -123,12 +121,12 @@ This test covers the Cropping functionality.
    cause the algorithms to fail.
 
 
-Test 5
+Test 4
 ^^^^^^
 
 This test covers the loading and plotting focussed data in the fitting tab. It is advisable to have at least two focussed datasets for the subsequent tests: this could be the two banks of run 305761 already generated, but a better test would be to use focussed data for runs 305793-305795 which have different stress and strain log values.
 
-1. Navigate to one or more focussed .nxs files in the `Focussed Run Files` box
+1. Navigate to one or more focussed TOF .nxs files in the `Load Focussed Data` section. If this test is run immediately after the previous one, the path to the focussed files should be auto populated
 
 2. Click the `Load` button. A row should be added to the UI table for each focussed run.There should be a grouped workspace with the suffix `_logs` in the ADS with tables    corresponding to each log value specified in the settings (to open the settings use the cog in the bottom left corner of the UI). Each row in these tables should correspond to the equivalent row in the UI table. There should be an additional table called `run_info` that provides some of the metadata for each run.
 
@@ -136,13 +134,13 @@ This test covers the loading and plotting focussed data in the fitting tab. It i
 
 4. Repeat steps 1-2 above but this time try checking the `Add To Plot` checkbox, when loading the run(s) the data should now be plotted and the checkbox in the `Plot` column of the UI table should be checked.
 
-5. Repeat steps 1-2 again but try changing the x-unit
+5. Repeat steps 1-2 again but load the d-spacing .nxs file(s) instead
 
 6. Plot some data and un-dock the plot in the UI by dragging or double-clicking the bar at the top of the plot labelled `Fit Plot`. The plot can now be re-sized.
 
 7. To dock it double click the `Fit Plot` bar (or drag to the bottom of the toolbar). You may want to un-dock it again for subsequent tests.
 
-Test 6
+Test 5
 ^^^^^^
 
 This tests the removal of focussed runs from the fitting tab.
@@ -155,7 +153,7 @@ This tests the removal of focussed runs from the fitting tab.
 
 4. Try removing a workspace by deleting it in the ADS, the corresponding row in the log tables and the UI table should have been removed.
 
-Test 7
+Test 6
 ^^^^^^
 
 This tests that the background subtraction works.
@@ -164,7 +162,7 @@ This tests that the background subtraction works.
 
 2. Select the row in the table for which the background has been subtracted, the `Inspect Background` button should now be enabled, click it to open a new figure which shows the raw data, the background and the subtracted data. Changing the values of Niter, BG, XWindow and SG (input to ``EnggEstimateFocussedBackground``, hover over a cell inn the table to see a tool tip for explanation) should produce a change in the background on the external plot and in the UI plot.
 
-Test 8
+Test 7
 ^^^^^^
 
 This tests the operation of the fit browser.
@@ -179,7 +177,7 @@ This tests the operation of the fit browser.
 
 5. The function string including the best-fit parameters should also have been automatically saved as a custom setup in the fit browser (Setup > Custom Setup). To inspect the fit for a given run, select a custom setup and the values in the fit property browser should update, now click Fit > Evaluate Function.
 
-Test 9
+Test 8
 ^^^^^^
 
 This tests the sequential fitting capability of the UI (where the result of a fit to one workspace is used as the initial guess for the next).
