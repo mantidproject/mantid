@@ -67,8 +67,7 @@ Saved File Outputs
 Calibration
 -----------
 
-This tab currently provides a graphical interface to create new calibrations, using the
-:ref:`EnggCalibrate<algm-EnggCalibrate>` algorithm, and visualise them.
+This tab currently provides a graphical interface to create new calibrations and visualise them.
 It also allows for the loading of GSAS parameter files (.prm) created by the calibration process
 to load a previously created calibration into the interface.
 
@@ -80,7 +79,7 @@ The "Plot Output" check-box will plot the ceria peaks for new calibrations, one 
 
 Creating a new calibration file generates instrument parameter files for the selected region of interest.
 If both banks are selected then two additional .prm files are created - one for each individual bank.
-The calibration files are writtent o the directory:
+The calibration files are written to the directory:
 
 `<CHOSEN_OUTPUT_DIRECTORY>/Calibration/`
 
@@ -126,8 +125,8 @@ Custom Spectra
 Focus
 -----
 
-This tab allows for the focusing of data files by making use of the :ref:`EnggFocus<algm-EnggFocus>` algorithm.
-To do this a  new or existing calibration must be created or loaded (see above) and a
+This tab allows for the focusing of data files - summing up spectra in a given region of interest.
+To do this a new or existing calibration must be created or loaded (see above) and a
 vanadium run must also be supplied for normalisation.
 
 The data will be focused over the region of interest selected in the calibration tab.
