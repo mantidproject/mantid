@@ -71,6 +71,7 @@ class SliceViewerTest(unittest.TestCase):
         data_view.norm_opts = mock.Mock()
         data_view.image_info_widget = mock.Mock()
         data_view.canvas = mock.Mock()
+        data_view.help_button = mock.Mock()
         data_view.nonorthogonal_mode = False
         data_view.nonortho_transform = None
         data_view.get_axes_limits.return_value = None

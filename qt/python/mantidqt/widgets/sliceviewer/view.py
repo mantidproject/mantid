@@ -19,7 +19,7 @@ from mpl_toolkits.axisartist import Subplot as CurveLinearSubPlot
 from mpl_toolkits.axisartist.grid_helper_curvelinear import GridHelperCurveLinear
 from qtpy.QtCore import Qt, QTimer, Signal
 from qtpy.QtWidgets import (QCheckBox, QComboBox, QGridLayout, QLabel, QHBoxLayout, QSplitter,
-                            QStatusBar, QVBoxLayout, QWidget)
+                            QStatusBar, QToolButton, QVBoxLayout, QWidget)
 
 # local imports
 from workbench.plotting.mantidfigurecanvas import MantidFigureCanvas
@@ -140,7 +140,11 @@ class SliceViewerDataView(QWidget):
 
         # Status bar
         self.status_bar = QStatusBar(parent=self)
+        self.status_bar.setStyleSheet('QStatusBar::item {border: None;}')  # Hide spacers between button and label
         self.status_bar_label = QLabel()
+        self.help_button = QToolButton()
+        self.help_button.setText("?")
+        self.status_bar.addWidget(self.help_button)
         self.status_bar.addWidget(self.status_bar_label)
 
         # layout
