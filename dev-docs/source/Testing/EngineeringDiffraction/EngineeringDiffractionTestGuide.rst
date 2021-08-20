@@ -22,7 +22,7 @@ These are:
 
 - Calibration - This is where a cerium oxide run are entered to calibrate the subsequent data.
 - Focus - Where are the data across multiple spectra are normalised and summed into a single spectrum for later steps.
-- Fitting - Where peaks can be fitted on focussed data
+- Fitting - Where peaks can be fitted on focused data
 
 The tests are designed to be run from a starting point where no settings relating to the Engineering Diffraction Gui
 have been saved in the Mantid Workbench ini file. This file is in ``C:\Users\<fed id>\AppData\Roaming\mantidproject`` on
@@ -169,7 +169,7 @@ This tests the operation of the fit browser.
 
 1. Check that when no data are plotted the `Fit` button on the toolbar does nothing.
 
-2. Plot more than one focussed run with xunit of TOF and click the `Fit` button. A simplified version of the standard mantid fit browser should now be visible.
+2. Plot more than one focused run with xunit of TOF and click the `Fit` button. A simplified version of the standard mantid fit browser should now be visible.
 
 3. You should be able to select runs in the Settings > Workspace combo box. If you remove a run the combobox should update. Try adding some peaks (for testing purposes add different types) and a background by right-clicking on the plot. If BackToBackExponential peaks are used then the A,B parameters should be fixed automatically for ENGIN-X data.
 
@@ -182,7 +182,7 @@ Test 8
 
 This tests the sequential fitting capability of the UI (where the result of a fit to one workspace is used as the initial guess for the next).
 
-1. Load in several focussed runs (preferably some that differ by a log value, e.g. 305793-305795).
+1. Load in several focused runs (preferably some that differ by a log value, e.g. 305793-305795).
 
 2. Plot a single run, open the fit browser and input a valid fit function (either manually or from Setup > Custom Setup).
 
@@ -193,3 +193,15 @@ This tests the sequential fitting capability of the UI (where the result of a fi
 5. Try changing the primary log and the order (ascending/descending) in the settings (note that leaving the primary log blank will make the Sequential fit use the order of the runs in the UI table). Repeat the steps above to check that the sequential fit is operating in the expected order.
 
 6. Close the UI and open a new instance, it should remember the primary log and the order.
+
+Test 9
+^^^^^^
+
+This tests the serial fitting capability of the UI (where all loaded workspaces are fitted from the same starting parameters).
+
+1. Repeat steps 1-2 in the previous test (Test 8).
+
+2. The `Serial Fit` button should now be enabled. Click it and the  group of fit workspaces should appear in the ADS, each with a row for each of the runs in the table. All the runs should have been fitted.
+
+3. The order of the runs in the serial fit should be obtainable from the log at notice level - check that this corresponds to the order of the runs in the table.
+
