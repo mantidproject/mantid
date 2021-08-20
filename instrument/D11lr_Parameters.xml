@@ -8,7 +8,7 @@
       </parameter>
       <!-- Logs to sum when merging the runs -->
       <parameter name="sample_logs_sum" type="string" visible="false">
-        <value val="timer" />
+        <value val="duration" />
       </parameter>
       <!-- GroupingPattern for DeadTimeCorrection, groups the entire detector-->
       <parameter name="grouping" type="string" visible="false">

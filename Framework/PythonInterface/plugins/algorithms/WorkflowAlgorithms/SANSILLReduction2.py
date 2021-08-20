@@ -817,12 +817,7 @@ class SANSILLReduction(PythonAlgorithm):
             ConvertToPointData(InputWorkspace=ws, OutputWorkspace=ws)
             blank_mon = mtd[ws].getNumberHistograms() + blank_monitor_ws_neg_index(self.instrument)
             run = mtd[ws].getRun()
-            if 'duration' in run:
-                time = run['duration'].value
-            elif 'time' in run:
-                time = run['time'].value
-            elif 'timer' in run:
-                time = run['timer'].value
+            time = run['duration'].value
             if self.mode == AcqMode.MONO:
                 mtd[ws].setY(blank_mon, np.array([time]))
                 mtd[ws].setE(blank_mon, np.array([0.]))

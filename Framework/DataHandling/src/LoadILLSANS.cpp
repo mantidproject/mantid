@@ -334,22 +334,7 @@ void LoadILLSANS::initWorkSpaceD11B(NeXus::NXEntry &firstEntry, const std::strin
     m_localWorkspace->setCountVariances(nextIndex - 1,
                                         HistogramData::CountVariances(std::vector<double>(dataCenter.dim2(), 0)));
   }
-  if (type == MultichannelType::KINETIC) {
-    setTimeLog();
-  }
 }
-
-/**
- * @brief LoadILLSANS::setTimeLog
- * Sets sample logs time and timer in case of kinetic
- * They are absent in nexus as the times per frame are stored in slices entry
- * These logs are not going to be used, since we store the acq time in the 2nd monitor
- * However, not having them causes an error when merging runs, i.e. in case of sum
- * This is due to a rule that tells that time and timer must be summed when merging
- * The rules are defined in IPF, so they are instrument-wide, no matter the acq mode
- * Hence, we have to add empty logs, just to avoid error log in merge runs
- */
-void LoadILLSANS::setTimeLog() { m_localWorkspace->mutableRun().addProperty("time", 0.); }
 
 /**
  * @brief LoadILLSANS::initWorkSpaceD22B Load D22B data
@@ -846,9 +831,6 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry, const std::string &i
     m_defaultBinning[0] = wavelength - wavelengthRes * wavelength * 0.01 / 2;
     m_defaultBinning[1] = wavelength + wavelengthRes * wavelength * 0.01 / 2;
   }
-  // Add a log called timer with the value of duration
-  const double duration = entry.getFloat("duration");
-  runDetails.addProperty<double>("timer", duration);
 
   // the start time is needed in the workspace when loading the parameter file
   std::string startDate = entry.getString("start_time");
@@ -863,10 +845,8 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry, const std::string &i
  */
 void LoadILLSANS::setFinalProperties(const std::string &filename) {
   API::Run &runDetails = m_localWorkspace->mutableRun();
-  runDetails.addProperty("is_frame_skipping", 0);
   NXhandle nxHandle;
   NXstatus nxStat = NXopen(filename.c_str(), NXACC_READ, &nxHandle);
-
   if (nxStat != NX_ERROR) {
     m_loadHelper.addNexusFieldsToWsRun(nxHandle, runDetails);
     NXclose(&nxHandle);

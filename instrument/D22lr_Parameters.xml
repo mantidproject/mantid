@@ -8,7 +8,7 @@
       </parameter>
       <!-- Logs to sum when merging the runs -->
       <parameter name="sample_logs_sum" type="string">
-        <value val="timer" />
+        <value val="duration" />
       </parameter>
       <!-- GroupingPattern for DeadTimeCorrection, groups ws indices tube-wise -->
       <parameter name="grouping" type="string" visible="false">

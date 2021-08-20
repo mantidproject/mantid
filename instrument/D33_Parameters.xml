@@ -21,7 +21,7 @@
     </parameter>
     <!-- Logs to sum when merging the runs -->
     <parameter name="sample_logs_sum" type="string" visible="false">
-      <value val="timer" />
+      <value val="duration" />
     </parameter>
     <!-- Tau coefficient for DeadTimeCorrection, to be applied tube by tube -->
     <parameter name="tau" type="number">
