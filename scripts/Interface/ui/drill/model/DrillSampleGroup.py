@@ -100,18 +100,6 @@ class DrillSampleGroup:
         """
         return len(self._samples) == 0
 
-    def isInGroup(self, sample):
-        """
-        Check if a sample is in the group.
-
-        Args:
-            sample (DrillSample): sample to be checked
-
-        Returns:
-            (bool): True if the sample is in the group
-        """
-        return sample in self._samples
-
     def setMaster(self, sample):
         """
         Set the master sample of the group. The sample has to be in the group
