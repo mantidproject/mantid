@@ -20,6 +20,9 @@ class ILL_SANS_D11_MONO_TEST(systemtesting.MantidSystemTest):
         self.instrument = config['default.instrument']
         self.directories = config['datasearch.directories']
 
+    def excludeInPullRequests(self):
+        return True
+
     def setUp(self):
         config['default.facility'] = 'ILL'
         config['default.instrument'] = 'D11'
@@ -154,6 +157,9 @@ class ILL_SANS_D22_MONO_TEST(systemtesting.MantidSystemTest):
         self.facility = config['default.facility']
         self.instrument = config['default.instrument']
         self.directories = config['datasearch.directories']
+
+    def excludeInPullRequests(self):
+        return True
 
     def setUp(self):
         config['default.facility'] = 'ILL'
