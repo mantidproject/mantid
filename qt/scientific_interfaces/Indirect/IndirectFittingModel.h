@@ -46,13 +46,8 @@ public:
 
   // Functions that interact with IndirectFitDataModel
   void clearWorkspaces() override;
-  bool hasWorkspace(std::string const &workspaceName) const override;
   Mantid::API::MatrixWorkspace_sptr getWorkspace(WorkspaceID workspaceID) const override;
-  FunctionModelSpectra getSpectra(WorkspaceID workspaceID) const override;
-  std::pair<double, double> getFittingRange(WorkspaceID workspaceID, WorkspaceIndex spectrum) const override;
   WorkspaceID getNumberOfWorkspaces() const override;
-  size_t getNumberOfSpectra(WorkspaceID workspaceID) const override;
-  virtual std::vector<std::pair<std::string, size_t>> getResolutionsForFit() const override;
   bool isMultiFit() const override;
 
   // IIndirectFittingModel
@@ -92,8 +87,6 @@ public:
 
   void cleanFailedRun(const Mantid::API::IAlgorithm_sptr &fittingAlgorithm) override;
   void cleanFailedSingleRun(const Mantid::API::IAlgorithm_sptr &fittingAlgorithm, WorkspaceID workspaceID) override;
-  DataForParameterEstimationCollection
-  getDataForParameterEstimation(const EstimationDataSelector &selector) const override;
   void removeFittingData() override;
   void addDefaultParameters() override;
   void removeDefaultParameters() override;

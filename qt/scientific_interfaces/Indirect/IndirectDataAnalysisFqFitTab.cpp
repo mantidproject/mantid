@@ -128,7 +128,7 @@ void IndirectDataAnalysisFqFitTab::addDataToModel(IAddWorkspaceDialog const *dia
     m_FqFittingModel->addDefaultParameters();
     setActiveWorkspaceIDToCurrentWorkspace(fqFitDialog);
     setModelSpectrum(fqFitDialog->parameterNameIndex(), fqFitDialog->parameterType());
-    m_activeWorkspaceID = m_FqFittingModel->getNumberOfWorkspaces();
+    m_activeWorkspaceID = m_dataPresenter->getNumberOfWorkspaces();
   }
 }
 

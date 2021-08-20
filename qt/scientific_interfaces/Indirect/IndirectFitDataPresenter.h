@@ -46,7 +46,10 @@ public:
   QStringList getResolutionWSSuffices() const;
   QStringList getResolutionFBSuffices() const;
   void updateTableFromModel();
-  size_t getNumberOfDomains();
+  WorkspaceID getNumberOfWorkspaces() const;
+  size_t getNumberOfDomains() const;
+  FunctionModelSpectra getSpectra(WorkspaceID workspaceID) const;
+  DataForParameterEstimationCollection getDataForParameterEstimation(const EstimationDataSelector &selector) const;
   std::vector<double> getQValuesForData() const;
   std::vector<std::string> createDisplayNames() const;
   UserInputValidator &validate(UserInputValidator &validator);

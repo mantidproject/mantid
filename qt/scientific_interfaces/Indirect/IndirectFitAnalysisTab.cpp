@@ -456,8 +456,6 @@ bool IndirectFitAnalysisTab::validate() {
   const auto invalidFunction = m_fittingModel->isInvalidFunction();
   if (invalidFunction)
     validator.addErrorMessage(QString::fromStdString(*invalidFunction));
-  if (m_fittingModel->getNumberOfWorkspaces() == WorkspaceID{0})
-    validator.addErrorMessage(QString::fromStdString("No data has been selected for a fit."));
 
   const auto error = validator.generateErrorMessage();
   emit showMessageBox(error);
@@ -523,7 +521,7 @@ void IndirectFitAnalysisTab::setPDFWorkspace(std::string const &workspaceName) {
 
 void IndirectFitAnalysisTab::updateParameterEstimationData() {
   m_fitPropertyBrowser->updateParameterEstimationData(
-      m_fittingModel->getDataForParameterEstimation(getEstimationDataSelector()));
+      m_dataPresenter->getDataForParameterEstimation(getEstimationDataSelector()));
   const bool isFit = m_fittingModel->isPreviouslyFit(getSelectedDataIndex(), getSelectedSpectrum());
   // If we haven't fit the data yet we may update the guess
   if (!isFit) {
@@ -588,11 +586,11 @@ void IndirectFitAnalysisTab::setupFit(IAlgorithm_sptr fitAlgorithm) {
 QList<FunctionModelDataset> IndirectFitAnalysisTab::getDatasets() const {
   QList<FunctionModelDataset> datasets;
 
-  for (auto i = 0u; i < m_fittingModel->getNumberOfWorkspaces().value; ++i) {
+  for (auto i = 0u; i < m_dataPresenter->getNumberOfWorkspaces().value; ++i) {
     WorkspaceID workspaceID{i};
 
     auto const name = m_fittingModel->getWorkspace(workspaceID)->getName();
-    datasets.append(FunctionModelDataset(QString::fromStdString(name), m_fittingModel->getSpectra(workspaceID)));
+    datasets.append(FunctionModelDataset(QString::fromStdString(name), m_dataPresenter->getSpectra(workspaceID)));
   }
   return datasets;
 }
@@ -600,7 +598,7 @@ QList<FunctionModelDataset> IndirectFitAnalysisTab::getDatasets() const {
 void IndirectFitAnalysisTab::updateDataReferences() {
   m_fitPropertyBrowser->updateFunctionBrowserData(static_cast<int>(m_dataPresenter->getNumberOfDomains()),
                                                   getDatasets(), m_dataPresenter->getQValuesForData(),
-                                                  m_fittingModel->getResolutionsForFit());
+                                                  m_dataPresenter->getResolutionsForFit());
   m_fittingModel->setFitFunction(m_fitPropertyBrowser->getFitFunction());
 }
 

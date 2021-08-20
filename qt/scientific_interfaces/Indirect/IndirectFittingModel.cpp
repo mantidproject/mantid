@@ -325,32 +325,11 @@ void IndirectFittingModel::clearWorkspaces() {
   m_fitDataModel->clear();
 }
 
-bool IndirectFittingModel::hasWorkspace(std::string const &workspaceName) const {
-  return m_fitDataModel->hasWorkspace(workspaceName);
-}
-
 MatrixWorkspace_sptr IndirectFittingModel::getWorkspace(WorkspaceID workspaceID) const {
   return m_fitDataModel->getWorkspace(workspaceID);
 }
 
-FunctionModelSpectra IndirectFittingModel::getSpectra(WorkspaceID workspaceID) const {
-  return m_fitDataModel->getSpectra(workspaceID);
-}
-
-std::pair<double, double> IndirectFittingModel::getFittingRange(WorkspaceID workspaceID,
-                                                                WorkspaceIndex spectrum) const {
-  return m_fitDataModel->getFittingRange(workspaceID, spectrum);
-}
-
 WorkspaceID IndirectFittingModel::getNumberOfWorkspaces() const { return m_fitDataModel->getNumberOfWorkspaces(); }
-
-size_t IndirectFittingModel::getNumberOfSpectra(WorkspaceID workspaceID) const {
-  return m_fitDataModel->getNumberOfSpectra(workspaceID);
-}
-
-std::vector<std::pair<std::string, size_t>> IndirectFittingModel::getResolutionsForFit() const {
-  return std::vector<std::pair<std::string, size_t>>();
-}
 
 bool IndirectFittingModel::isMultiFit() const { return m_fitDataModel->getNumberOfWorkspaces().value > 1; }
 
@@ -610,21 +589,6 @@ void IndirectFittingModel::cleanFailedSingleRun(const IAlgorithm_sptr &fittingAl
   const auto base = "__" + fittingAlgorithm->name() + "_ws" + std::to_string(workspaceID.value + 1);
   removeFromADSIfExists(base);
   cleanTemporaries(base + "_0");
-}
-
-DataForParameterEstimationCollection
-IndirectFittingModel::getDataForParameterEstimation(const EstimationDataSelector &selector) const {
-  DataForParameterEstimationCollection dataCollection;
-  for (auto i = WorkspaceID{0}; i < m_fitDataModel->getNumberOfWorkspaces(); ++i) {
-    auto const ws = m_fitDataModel->getWorkspace(i);
-    for (const auto &spectrum : m_fitDataModel->getSpectra(i)) {
-      auto const &x = ws->readX(spectrum.value);
-      auto const &y = ws->readY(spectrum.value);
-      auto range = getFittingRange(i, spectrum);
-      dataCollection.emplace_back(selector(x, y, range));
-    }
-  }
-  return dataCollection;
 }
 
 IIndirectFitDataModel *IndirectFittingModel::getFitDataModel() { return m_fitDataModel.get(); }

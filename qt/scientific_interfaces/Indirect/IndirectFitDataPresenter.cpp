@@ -147,7 +147,28 @@ void IndirectFitDataPresenter::updateTableFromModel() {
   }
 }
 
-size_t IndirectFitDataPresenter::getNumberOfDomains() { return m_model->getNumberOfDomains(); }
+WorkspaceID IndirectFitDataPresenter::getNumberOfWorkspaces() const { return m_model->getNumberOfWorkspaces(); }
+
+size_t IndirectFitDataPresenter::getNumberOfDomains() const { return m_model->getNumberOfDomains(); }
+
+FunctionModelSpectra IndirectFitDataPresenter::getSpectra(WorkspaceID workspaceID) const {
+  return m_model->getSpectra(workspaceID);
+}
+
+DataForParameterEstimationCollection
+IndirectFitDataPresenter::getDataForParameterEstimation(const EstimationDataSelector &selector) const {
+  DataForParameterEstimationCollection dataCollection;
+  for (auto i = WorkspaceID{0}; i < m_model->getNumberOfWorkspaces(); ++i) {
+    auto const ws = m_model->getWorkspace(i);
+    for (const auto &spectrum : m_model->getSpectra(i)) {
+      auto const &x = ws->readX(spectrum.value);
+      auto const &y = ws->readY(spectrum.value);
+      auto range = m_model->getFittingRange(i, spectrum);
+      dataCollection.emplace_back(selector(x, y, range));
+    }
+  }
+  return dataCollection;
+}
 
 std::vector<double> IndirectFitDataPresenter::getQValuesForData() const { return m_model->getQValuesForData(); }
 
