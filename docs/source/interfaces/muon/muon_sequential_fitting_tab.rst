@@ -17,7 +17,7 @@ Sequential fitting options
 
 **Fit selected** Performs a fit on the fit object selected in the table.
 
-**Filter by** This is only available on the Frequency Domain Analysis interface. It allows you to select the type of data you want to sequential fit.
+**Filter by** This is only available on the Frequency Domain Analysis interface. It allows you to select the type of data you want to sequentially fit.
 
 **Parameters for previous fit** Uses the parameters from the previous fit calculation as initial values for the next fit.
 

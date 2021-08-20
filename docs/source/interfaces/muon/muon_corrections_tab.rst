@@ -30,14 +30,14 @@ Background Corrections
 **Background** There are three background correction options:
 
 * ``None``: No background correction should be applied.
-* ``Auto``: The background is automatically calculated by performing a fit on the loaded data before being subtracted from the data. The diagram below describes this process.
+* ``Auto``: The background is automatically calculated by performing a fit on the loaded data before being subtracted from the data. The accompanying diagram describes this process.
 * ``Manual``: The background is entered manually by the user before being subtracted from the data.
 
 .. image::  ../../images/muon_auto_corrections_flowchart.PNG
    :align: right
    :height: 400px
 
-**Select Function** This is only available when in ``Auto`` mode. It allows you to choose between using a ``Flat Background + Exp Decay``, or just a ``Flat Background`` to calculate the background. The Lambda value in the Exp Decay is fixed to a value of roughly 1.0/2.2.
+**Select Function** This is only available when in ``Auto`` mode. It allows you to choose between using a ``Flat Background + Exp Decay``, or just a ``Flat Background`` to calculate the background. The Lambda value in the Exp Decay is fixed to a value of 1.0 over the muon lifetime.
 
 **Show data for** There are two options for selecting which data should be displayed:
 

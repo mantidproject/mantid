@@ -32,8 +32,8 @@ Right clicking in the central box will bring up a context menu for adding or rem
 
 **Property** This is a list of property names, individual functions can be collapsed down for greater legibility.
 
-**Value** This lists the initial guesses for variables within fitting functions.Variables can be fixed for a given fit
-from the edit paramiter values dialog box (the ellipsis to the right of the value box).
+**Value** This lists the initial guesses for variables within fitting functions. Variables can be fixed for a given fit
+from the edit parameter values dialog box (click the ellipsis to the right of the value box).
 
 **Global** If we are performing a simultaneous fit, parameters for each workspace in the fit can be tied by checking this box.
 
