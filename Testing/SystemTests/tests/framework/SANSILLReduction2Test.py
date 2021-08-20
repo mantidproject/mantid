@@ -238,6 +238,9 @@ class ILL_SANS_D22_MULTISENS(systemtesting.MantidSystemTest):
         self.instrument = config['default.instrument']
         self.directories = config['datasearch.directories']
 
+    def excludeInPullRequests(self):
+        return True
+
     def setUp(self):
         config['default.facility'] = 'ILL'
         config['default.instrument'] = 'D22'
