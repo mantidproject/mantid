@@ -102,6 +102,17 @@ def needs_loading(property_value, loading_reduction_type):
     return [loading, ws_name]
 
 
+def create_name(ws):
+    DISTANCE_LOG = "L2" # the distance of the main detector
+    COLLIMATION_LOG = "collimation.actual_position"
+    WAVELENGTH_LOG = "wavelength"
+    logs = mtd[ws].run()
+    distance = logs[DISTANCE_LOG].value
+    collimation = logs[COLLIMATION_LOG].value
+    wavelength =logs[WAVELENGTH_LOG].value
+    return "d{:.1f}m_c{:.1f}m_w{:.1f}A".format(distance, collimation, wavelength)
+
+
 def check_distances_match(ws1, ws2):
     """
         Checks if the detector distance between two workspaces are close enough

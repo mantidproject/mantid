@@ -786,7 +786,23 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
 
     def rename(self, key, ws):
         '''Renames the workspace ws to a user-friendly scheme based on the key'''
-        return ws
+        name = ws
+        out = self.getPropertyValue('OutputWorkspace')
+        if isinstance(mtd[ws], WorkspaceGroup):
+            # if it is a group, it can be either IQP or IQW
+            # no need to rename the group, but need to rename the items in it
+            for wsi in mtd[ws]:
+                old_name = wsi.name()
+                new_name =  out + '_iq_' + create_name(old_name) + old_name[old_name.find('iq')+2:]
+                RenameWorkspace(wsi, new_name)
+        else:
+            if key == 'IQ':
+                name = out + '_iq_' + create_name(ws)
+            elif key == 'RealSpace':
+                name = out + '_realspace_' + create_name(ws)
+            if name != ws:
+                RenameWorkspace(ws, name)
+        return name
 
     def package(self, samples):
         out_ws = self.getPropertyValue('OutputWorkspace')
