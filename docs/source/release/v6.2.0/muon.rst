@@ -41,6 +41,7 @@ Improvements
 ############
 
 - When running the Dynamic Kubo Toyabe fit function you should now be able to see the BinWidth to 3 decimal places.
+- Can now select the normalisation (``analysis_asymmetry_norm``) and group (``analysis_group``) in the results table tab.
 
 Bug Fixes
 #########
