@@ -110,6 +110,12 @@ However, in many cases analytical and numerical integration solutions are satisf
 Absorption
 ------------
 
+.. plot:: concepts/AbsorptionAndMultipleScattering_plot_abs.py
+
+   Comparison of absorption methods with the assumptions of elastic scattering and isotropic scattering for in-plane detectors
+
+
+
 Introduction
 ###############
 Determination of the structure and/or dynamics of samples depends on the analysis of single scattering data.
@@ -362,6 +368,11 @@ Absorption Correction Algorithms in Mantid Table
 
 Multiple Scattering
 -------------------
+
+.. plot:: concepts/AbsorptionAndMultipleScattering_plot_ms.py
+
+   Comparison of multiple scattering methods with the assumptions of elastic scattering and isotropic scattering for in-plane detectors.
+
 
 Introduction
 ############
