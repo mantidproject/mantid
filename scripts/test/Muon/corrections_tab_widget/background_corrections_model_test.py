@@ -56,9 +56,17 @@ class BackgroundCorrectionsModelTest(unittest.TestCase):
         self.assertEqual(self.model._corrections_context.selected_group, "All")
         self.assertEqual(self.model._corrections_context.show_all_runs, False)
 
-    def test_that_set_background_correction_mode_will_set_the_background_mode_as_expected(self):
+    def test_that_set_background_correction_mode_will_set_the_background_mode_to_auto_as_expected(self):
         self.model.set_background_correction_mode("Auto")
         self.assertTrue(not self.model.is_background_mode_none())
+        self.assertTrue(self.model.is_background_mode_auto())
+        self.assertTrue(not self.model.is_background_mode_manual())
+
+    def test_that_set_background_correction_mode_will_set_the_background_mode_to_manual_as_expected(self):
+        self.model.set_background_correction_mode("Manual")
+        self.assertTrue(not self.model.is_background_mode_none())
+        self.assertTrue(not self.model.is_background_mode_auto())
+        self.assertTrue(self.model.is_background_mode_manual())
 
     def test_that_set_selected_function_will_set_the_selected_function_in_the_context(self):
         function = "Flat Background + Exp Decay"
@@ -122,6 +130,22 @@ class BackgroundCorrectionsModelTest(unittest.TestCase):
         self.assertEqual(self.model.end_x(run, "bwd"), 6.0)
         self.assertEqual(self.model.end_x(run, "top"), 7.0)
         self.assertEqual(self.model.end_x(run, "bottom"), 8.0)
+
+    def test_that_set_background_will_set_the_background_in_the_background_correction_data_for_a_specific_domain(self):
+        run = "84447"
+
+        self.model.x_limits_of_workspace = mock.Mock(return_value=(0.0, 30.0))
+        self.model.set_show_all_runs(True)
+        self._populate_background_corrections_data()
+
+        self.model.set_background(run, "fwd", 1.0)
+        self.model.set_background(run, "bwd", 2.0)
+        self.model.set_background(run, "top", 3.0)
+        self.model.set_background(run, "bottom", 4.0)
+
+        _, groups, _, _, _, backgrounds, _, _ = self.model.selected_correction_data()
+        self.assertEqual(groups, ["fwd", "bwd", "top", "bottom"])
+        self.assertEqual(backgrounds, [1.0, 2.0, 3.0, 4.0])
 
     def test_that_selected_correction_data_returns_all_correction_data_if_all_runs_and_groups_are_selected(self):
         self.model.x_limits_of_workspace = mock.Mock(return_value=(0.0, 30.0))
@@ -206,6 +230,7 @@ class BackgroundCorrectionsModelTest(unittest.TestCase):
         self.assertEqual(groups, self.groups)
 
     def test_that_run_background_correction_for_all_will_cause_an_exception_when_the_start_and_end_x_are_out_of_range(self):
+        self.model.set_background_correction_mode("Auto")
         self._populate_background_corrections_data()
 
         for run, group in zip(self.runs, self.groups):
@@ -219,6 +244,7 @@ class BackgroundCorrectionsModelTest(unittest.TestCase):
         mock_run_fit.return_value = (self.fitted_function, self.fit_status, self.chi_squared)
         self.model.x_limits_of_workspace = mock.Mock(return_value=(0.0, 30.0))
         self.model.set_show_all_runs(True)
+        self.model.set_background_correction_mode("Auto")
 
         self._populate_background_corrections_data()
 
@@ -255,6 +281,7 @@ class BackgroundCorrectionsModelTest(unittest.TestCase):
 
     def test_that_run_background_correction_for_will_cause_an_exception_when_the_start_and_end_x_are_out_of_range(self):
         run, group = "84447", "bwd"
+        self.model.set_background_correction_mode("Auto")
         self._populate_background_corrections_data()
 
         self.model.set_start_x(run, group, 20.0)
