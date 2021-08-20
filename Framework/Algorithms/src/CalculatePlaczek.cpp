@@ -50,7 +50,8 @@ double calculateSummationTerm(const Kernel::Material &material) {
   return neutronMass * unnormalizedTerm / (4. * M_PI * totalStoich);
 }
 
-const double k_B = PhysicalConstants::BoltzmannConstant; // in meV/K
+const double k_B = PhysicalConstants::BoltzmannConstant;                                   // in meV/K
+const double E_mev_toNeutronWavenumberSq = PhysicalConstants::E_mev_toNeutronWavenumberSq; // in [meV*Angstrom^2]
 
 } // anonymous namespace
 
@@ -246,21 +247,41 @@ void CalculatePlaczek::exec() {
         twoTheta = pmap[Kernel::UnitParams::twoTheta];
       }
       // first order (self scattering) is mandatory, second order is optional
+      // - pre-compute constants that can be cached outside loop
       const double sinThetaBy2 = sin(twoTheta / 2.0);
       const double f = l1 / (l1 + l2);
       wavelength.initialize(specInfo.l1(), 0, pmap);
-      // TODO: confirm the units used here
-      //
-      // const double kBToverE = k_B * sampleTemperature / energy;
+      const double kBT = k_B * sampleTemperature; // k_B in meV / K, T in K -> kBT in meV
+      // - convenience variables
+      const double sinHalfAngleSq = sinThetaBy2 * sinThetaBy2;
+      // - loop over all lambda
       for (size_t xIndex = 0; xIndex < xLambda.size() - 1; xIndex++) {
         // -- calculate first order correction
         const double term1 = (f - 1.0) * phi1[xIndex];
         const double term2 = f * (1.0 - eps1[xIndex]);
-        const double inelasticPlaczekSelfCorrection =
-            2.0 * (term1 + term2 - 3) * sinThetaBy2 * sinThetaBy2 * summationTerm;
+        double inelasticPlaczekSelfCorrection = 2.0 * (term1 + term2 - 3) * sinHalfAngleSq * summationTerm;
         // -- calculate second order correction
         if (order == 2) {
-          // TODO:
+          const double k = 2 * M_PI / xLambda[xIndex];                       // wave vector in 1/angstrom
+          const double energy = (1 / E_mev_toNeutronWavenumberSq) * (k * k); // in meV
+          const double kBToverE = kBT / energy;                              // unitless
+          // NOTE: see the equation A1.15 in Howe et al. The analysis of liquid structure, 1989
+          const double bracket_1 = (8 * f - 9) * (f - 1) * phi1[xIndex]            //
+                                   - 3 * f * (2 * f - 3) * eps1[xIndex]            //
+                                   + 2 * f * (1 - f) * phi1[xIndex] * eps1[xIndex] //
+                                   + (1 - f) * (1 - f) * phi2[xIndex]              //
+                                   + f * f * eps2[xIndex]                          //
+                                   + 3 * (4 * f - 5) * (f - 1);
+          const double P2_part1 = summationTerm * (kBToverE / 2.0 + kBToverE * sinHalfAngleSq * bracket_1);
+          const double bracket_2 = (4 * f - 7) * (f - 1) * phi1[xIndex]            //
+                                   + f * (7 - 2 * f) * eps1[xIndex]                //
+                                   + 2 * f * (1 - f) * phi1[xIndex] * eps1[xIndex] //
+                                   + (1 - f) * (1 - f) * phi2[xIndex]              //
+                                   + f * f * eps2[xIndex]                          //
+                                   + (2 * f * f - 7 * f + 8);
+          const double P2_part2 = 2 * sinHalfAngleSq * summationTerm * (1 + sinHalfAngleSq * bracket_2);
+          // added to the factor
+          inelasticPlaczekSelfCorrection += P2_part1 + P2_part2;
         }
         // -- consolidate
         x[xIndex] = wavelength.singleToTOF(xLambda[xIndex]);
