@@ -142,6 +142,44 @@ createDiffractionData(const int nPixels = 200, const int nEventsPerPeak = 24, co
   // Return test data.
   return boost::tuple<EventWorkspace_sptr, PeaksWorkspace_sptr>(eventWS, peaksWS);
 }
+
+EventWorkspace_sptr createSatelliteData() {
+  auto loadalg = AlgorithmManager::Instance().createUnmanaged("LoadNexusProcessed");
+  TS_ASSERT_THROWS_NOTHING(loadalg->initialize());
+  TS_ASSERT_THROWS_NOTHING(loadalg->setPropertyValue("Filename", "TOPAZ_36079_crop.nxs"));
+  TS_ASSERT_THROWS_NOTHING(loadalg->setProperty("OutputWorkspace", "TOPAZ_36079_event"));
+  TS_ASSERT_THROWS_NOTHING(loadalg->execute());
+  TS_ASSERT_THROWS_NOTHING(loadalg->isExecuted());
+
+  auto loadinstralg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("LoadInstrument");
+  TS_ASSERT_THROWS_NOTHING(loadinstralg->initialize());
+  TS_ASSERT_THROWS_NOTHING(loadinstralg->setProperty("Workspace", "TOPAZ_36079_event"));
+  TS_ASSERT_THROWS_NOTHING(loadinstralg->setProperty("InstrumentName", "TOPAZ"));
+  TS_ASSERT_THROWS_NOTHING(loadinstralg->setProperty("RewriteSpectraMap", "False"));
+  TS_ASSERT_THROWS_NOTHING(loadinstralg->execute());
+
+  auto loadcalalg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("LoadIsawDetCal");
+  TS_ASSERT_THROWS_NOTHING(loadcalalg->initialize());
+  TS_ASSERT_THROWS_NOTHING(loadcalalg->setProperty("Filename", "TOPAZ_2020A.DetCal"));
+  TS_ASSERT_THROWS_NOTHING(loadcalalg->setProperty("InputWorkspace", "TOPAZ_36079_event"));
+  TS_ASSERT_THROWS_NOTHING(loadcalalg->execute());
+
+  auto convertalg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("ConvertToMD");
+  TS_ASSERT_THROWS_NOTHING(convertalg->initialize());
+  TS_ASSERT_THROWS_NOTHING(convertalg->setProperty("InputWorkspace", "TOPAZ_36079_event"));
+  TS_ASSERT_THROWS_NOTHING(convertalg->setProperty("OutputWorkspace", "TOPAZ_36079_md"));
+  TS_ASSERT_THROWS_NOTHING(convertalg->setProperty("QDimensions", "Q3D"));
+  TS_ASSERT_THROWS_NOTHING(convertalg->setProperty("dEAnalysisMode", "Elastic"));
+  TS_ASSERT_THROWS_NOTHING(convertalg->setProperty("Q3DFrames", "Q_sample"));
+  TS_ASSERT_THROWS_NOTHING(convertalg->setProperty("LorentzCorrection", true));
+  TS_ASSERT_THROWS_NOTHING(convertalg->setProperty("MinValues", std::vector<double>{1.0, 1.0, 1.675}));
+  TS_ASSERT_THROWS_NOTHING(convertalg->setProperty("MaxValues", std::vector<double>{10.0, 5.0, 8.425}));
+  TS_ASSERT_THROWS_NOTHING(convertalg->execute());
+
+  EventWorkspace_sptr eventWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("TOPAZ_36079_event");
+
+  return eventWS;
+}
 } // namespace
 
 class IntegrateEllipsoidsTest : public CxxTest::TestSuite {
@@ -149,6 +187,7 @@ class IntegrateEllipsoidsTest : public CxxTest::TestSuite {
 private:
   Mantid::DataObjects::EventWorkspace_sptr m_eventWS;
   Mantid::DataObjects::PeaksWorkspace_sptr m_peaksWS;
+  Mantid::DataObjects::EventWorkspace_sptr m_satelliteEventWS;
   Mantid::API::MatrixWorkspace_sptr m_histoWS;
 
   // Check that n-peaks from the workspace are integrated as we expect
@@ -195,6 +234,49 @@ private:
     }
   }
 
+  PeaksWorkspace_sptr createPeaksForSatelliteTests(const std::vector<V3D> peaksHKL) {
+
+    const std::vector<double> ub = {0.15468228,  0.10908475,  -0.14428671, -0.08922105, -0.08617147,
+                                    -0.22976459, -0.05616441, 0.12536522,  -0.03238277};
+
+    auto peaksalg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("CreatePeaksWorkspace");
+    TS_ASSERT_THROWS_NOTHING(peaksalg->initialize());
+    TS_ASSERT_THROWS_NOTHING(peaksalg->setProperty("InstrumentWorkspace", "TOPAZ_36079_event"));
+    TS_ASSERT_THROWS_NOTHING(peaksalg->setProperty("NumberOfPeaks", 0));
+    TS_ASSERT_THROWS_NOTHING(peaksalg->setProperty("OutputWorkspace", "TOPAZ_36079_peaks"));
+    TS_ASSERT_THROWS_NOTHING(peaksalg->execute());
+
+    auto setubalg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("SetUB");
+    TS_ASSERT_THROWS_NOTHING(setubalg->initialize());
+    TS_ASSERT_THROWS_NOTHING(setubalg->setProperty("Workspace", "TOPAZ_36079_peaks"));
+    TS_ASSERT_THROWS_NOTHING(setubalg->setProperty("UB", ub));
+    TS_ASSERT_THROWS_NOTHING(setubalg->execute());
+
+    // add some peaks for testing
+    PeaksWorkspace_sptr peakWS = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>("TOPAZ_36079_peaks");
+    for (const V3D &hkl : peaksHKL) {
+      peakWS->addPeak(*peakWS->createPeakHKL(hkl));
+    }
+    TS_ASSERT_EQUALS(peakWS->getNumberPeaks(), peaksHKL.size());
+
+    // index the peaks
+    auto indexalg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("IndexPeaks");
+    TS_ASSERT_THROWS_NOTHING(indexalg->initialize());
+    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("PeaksWorkspace", "TOPAZ_36079_peaks"));
+    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("Tolerance", 0.06));
+    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("ToleranceForSatellite", 0.05));
+    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("RoundHKLs", false));
+    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("ModVector1", std::vector<double>{0.125, 0.0, 0.0}));
+    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("ModVector2", std::vector<double>{0.0, 0.125, 0.0}));
+    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("ModVector3", std::vector<double>{-0.125, 0.125, 0.0}));
+    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("MaxOrder", 1));
+    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("CrossTerms", false));
+    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("SaveModulationInfo", true));
+    TS_ASSERT_THROWS_NOTHING(indexalg->execute());
+
+    return peakWS;
+  }
+
 public:
   static void destroySuite(IntegrateEllipsoidsTest *suite) { delete suite; }
 
@@ -211,6 +293,8 @@ public:
 
     m_eventWS = data.get<0>();
     m_peaksWS = data.get<1>();
+
+    m_satelliteEventWS = createSatelliteData();
 
     /*
      Simply rebin the event workspace to a histo workspace to create the input
@@ -404,82 +488,18 @@ public:
 
   void test_execution_background_shell() {
 
-    const std::vector<double> ub = {0.15468228,  0.10908475,  -0.14428671, -0.08922105, -0.08617147,
-                                    -0.22976459, -0.05616441, 0.12536522,  -0.03238277};
+    const std::vector<V3D> peaksHKL = {V3D(0.15, 1.85, -1.0), V3D(1.0, 4.0, -3.0), V3D(1.0, 5.0, -3.0)};
 
-    auto loadalg = AlgorithmManager::Instance().createUnmanaged("LoadNexusProcessed");
-    TS_ASSERT_THROWS_NOTHING(loadalg->initialize());
-    TS_ASSERT_THROWS_NOTHING(loadalg->setPropertyValue("Filename", "TOPAZ_36079_crop.nxs"));
-    TS_ASSERT_THROWS_NOTHING(loadalg->setProperty("OutputWorkspace", "TOPAZ_36079_event"));
-    TS_ASSERT_THROWS_NOTHING(loadalg->execute());
-    TS_ASSERT_THROWS_NOTHING(loadalg->isExecuted());
-
-    auto loadinstralg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("LoadInstrument");
-    TS_ASSERT_THROWS_NOTHING(loadinstralg->initialize());
-    TS_ASSERT_THROWS_NOTHING(loadinstralg->setProperty("Workspace", "TOPAZ_36079_event"));
-    TS_ASSERT_THROWS_NOTHING(loadinstralg->setProperty("InstrumentName", "TOPAZ"));
-    TS_ASSERT_THROWS_NOTHING(loadinstralg->setProperty("RewriteSpectraMap", "False"));
-    TS_ASSERT_THROWS_NOTHING(loadinstralg->execute());
-
-    auto loadcalalg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("LoadIsawDetCal");
-    TS_ASSERT_THROWS_NOTHING(loadcalalg->initialize());
-    TS_ASSERT_THROWS_NOTHING(loadcalalg->setProperty("Filename", "TOPAZ_2020A.DetCal"));
-    TS_ASSERT_THROWS_NOTHING(loadcalalg->setProperty("InputWorkspace", "TOPAZ_36079_event"));
-    TS_ASSERT_THROWS_NOTHING(loadcalalg->execute());
-
-    auto convertalg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("ConvertToMD");
-    TS_ASSERT_THROWS_NOTHING(convertalg->initialize());
-    TS_ASSERT_THROWS_NOTHING(convertalg->setProperty("InputWorkspace", "TOPAZ_36079_event"));
-    TS_ASSERT_THROWS_NOTHING(convertalg->setProperty("OutputWorkspace", "TOPAZ_36079_md"));
-    TS_ASSERT_THROWS_NOTHING(convertalg->setProperty("QDimensions", "Q3D"));
-    TS_ASSERT_THROWS_NOTHING(convertalg->setProperty("dEAnalysisMode", "Elastic"));
-    TS_ASSERT_THROWS_NOTHING(convertalg->setProperty("Q3DFrames", "Q_sample"));
-    TS_ASSERT_THROWS_NOTHING(convertalg->setProperty("LorentzCorrection", true));
-    TS_ASSERT_THROWS_NOTHING(convertalg->setProperty("MinValues", std::vector<double>{1.0, 1.0, 1.675}));
-    TS_ASSERT_THROWS_NOTHING(convertalg->setProperty("MaxValues", std::vector<double>{10.0, 5.0, 8.425}));
-    TS_ASSERT_THROWS_NOTHING(convertalg->execute());
-
-    auto peaksalg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("CreatePeaksWorkspace");
-    TS_ASSERT_THROWS_NOTHING(peaksalg->initialize());
-    TS_ASSERT_THROWS_NOTHING(peaksalg->setProperty("InstrumentWorkspace", "TOPAZ_36079_event"));
-    TS_ASSERT_THROWS_NOTHING(peaksalg->setProperty("NumberOfPeaks", 0));
-    TS_ASSERT_THROWS_NOTHING(peaksalg->setProperty("OutputWorkspace", "TOPAZ_36079_peaks"));
-    TS_ASSERT_THROWS_NOTHING(peaksalg->execute());
-
-    auto setubalg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("SetUB");
-    TS_ASSERT_THROWS_NOTHING(setubalg->initialize());
-    TS_ASSERT_THROWS_NOTHING(setubalg->setProperty("Workspace", "TOPAZ_36079_peaks"));
-    TS_ASSERT_THROWS_NOTHING(setubalg->setProperty("UB", ub));
-    TS_ASSERT_THROWS_NOTHING(setubalg->execute());
-
-    // add some peaks for testing
-    PeaksWorkspace_sptr peakWS = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>("TOPAZ_36079_peaks");
-    peakWS->addPeak(*peakWS->createPeakHKL(V3D(0.15, 1.85, -1.0)));
-    peakWS->addPeak(*peakWS->createPeakHKL(V3D(1.0, 4.0, -3.0)));
-    peakWS->addPeak(*peakWS->createPeakHKL(V3D(1.0, 5.0, -3.0)));
-    TS_ASSERT_EQUALS(peakWS->getNumberPeaks(), 3);
-
-    auto indexalg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("IndexPeaks");
-    TS_ASSERT_THROWS_NOTHING(indexalg->initialize());
-    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("PeaksWorkspace", "TOPAZ_36079_peaks"));
-    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("Tolerance", 0.06));
-    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("ToleranceForSatellite", 0.05));
-    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("RoundHKLs", false));
-    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("ModVector1", std::vector<double>{0.125, 0.0, 0.0}));
-    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("ModVector2", std::vector<double>{0.0, 0.125, 0.0}));
-    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("ModVector3", std::vector<double>{-0.125, 0.125, 0.0}));
-    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("MaxOrder", 1));
-    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("CrossTerms", false));
-    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("SaveModulationInfo", true));
-    TS_ASSERT_THROWS_NOTHING(indexalg->execute());
+    // creates the peak workspace, sets UB, and indexes them
+    PeaksWorkspace_sptr peaksWS = createPeaksForSatelliteTests(peaksHKL);
 
     // integrate without satellite background for comparison
     IntegrateEllipsoids alg;
     TS_ASSERT_THROWS_NOTHING(alg.setChild(true));
     TS_ASSERT_THROWS_NOTHING(alg.setRethrows(true));
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", "TOPAZ_36079_event"));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeaksWorkspace", "TOPAZ_36079_peaks"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", m_satelliteEventWS));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeaksWorkspace", peaksWS));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "peaks_integrated_nosatellite"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("RegionRadius", 0.055));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("SpecifySize", true));
@@ -496,8 +516,8 @@ public:
 
     // integrate the data now with satellite background options
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", "TOPAZ_36079_event"));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeaksWorkspace", "TOPAZ_36079_peaks"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", m_satelliteEventWS));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeaksWorkspace", peaksWS));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "peaks_integrated_satellite"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("RegionRadius", 0.055));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("SpecifySize", true));
@@ -532,11 +552,60 @@ public:
       TS_ASSERT_EQUALS(peakNoSatellite.getDetectorPosition(), peakSatellite.getDetectorPosition());
     }
 
-    AnalysisDataService::Instance().remove("TOPAZ_36079_event");
     AnalysisDataService::Instance().remove("TOPAZ_36079_md");
-    AnalysisDataService::Instance().remove("TOPAZ_36079_peaks");
     AnalysisDataService::Instance().remove("peaks_integrated_satellite");
     AnalysisDataService::Instance().remove("peaks_integrated_nosatellite");
+    AnalysisDataService::Instance().remove(peaksWS->getName());
+  }
+
+  void test_execution_shared_background() {
+
+    const std::vector<V3D> peaksHKL = {V3D(0.0, 2.0, 1.0), V3D(0.15, 1.85, 1.0), V3D(-0.15, 2.15, 1.0),
+                                       V3D(1.0, 4.0, -3.0)};
+
+    // creates the peak workspace, sets UB, and indexes them
+    PeaksWorkspace_sptr peaksWS = createPeaksForSatelliteTests(peaksHKL);
+
+    // integrate with sharing background region to satellite peaks
+    IntegrateEllipsoids alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", m_satelliteEventWS));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeaksWorkspace", peaksWS));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "peaks_integrated_shared"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("RegionRadius", 0.11));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SpecifySize", true));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakSize", 0.085));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundInnerSize", 0.086));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundOuterSize", 0.11));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("UseOnePercentBackgroundCorrection", false));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SatelliteRegionRadius", 0.11));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SatellitePeakSize", 0.10));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("ShareBackground", true));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SatelliteBackgroundInnerSize", 0.101));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SatelliteBackgroundOuterSize", 0.11));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT_THROWS_NOTHING(alg.isExecuted());
+
+    PeaksWorkspace_sptr peaksShared = alg.getProperty("OutputWorkspace");
+    TS_ASSERT_EQUALS(peaksShared->getNumberPeaks(), peaksHKL.size());
+
+    // first peak is a bragg peak: intensity = 46372 - 0.883704*3086 = 43644.889456
+    // second peak is a satellite with intensity = 4540 - 3.32558*722 = 2138.93124
+    // However, sat peak should share background of bragg: 4540 - 0.883704*3086 = 1812.889456
+    const Peak braggPeak = peaksShared->getPeak(0);
+    const Peak satellitePeak = peaksShared->getPeak(1);
+
+    TS_ASSERT_DELTA(braggPeak.getIntensity(), 43644.889456, 1e-2);
+    TS_ASSERT_DELTA(satellitePeak.getIntensity(), 1812.889456, 1e-2);
+    TS_ASSERT_DELTA(satellitePeak.getSigmaIntensity(), 83.3664, 1e-2);
+
+    // check that the background radii are the same as the peak radii
+    const PeakShapeEllipsoid satelliteShape = static_cast<const PeakShapeEllipsoid &>(satellitePeak.getPeakShape());
+    TS_ASSERT_EQUALS(satelliteShape.abcRadiiBackgroundInner(), satelliteShape.abcRadii());
+    TS_ASSERT_EQUALS(satelliteShape.abcRadiiBackgroundOuter(), satelliteShape.abcRadii());
+
+    AnalysisDataService::Instance().remove("peaks_integrated_shared");
+    AnalysisDataService::Instance().remove(peaksWS->getName());
   }
 };
 
