@@ -261,7 +261,7 @@ void SaveAscii2::exec() {
     throw std::runtime_error("Trying to save an empty workspace");
   }
 
-  bool OneSpectrumPerFile = getProperty("OneSpectrumPerFile");
+  bool oneSpectrumPerFile = getProperty("OneSpectrumPerFile");
 
   Progress progress(this, 0.0, 1.0, idx.size());
 
@@ -274,7 +274,7 @@ void SaveAscii2::exec() {
   while (idxIt != idx.end()) {
     std::string currentFilename = filename;
     size_t extPosition;
-    if (OneSpectrumPerFile) {
+    if (oneSpectrumPerFile) {
       for (const std::string &ext : ASCII_EXTS) {
         extPosition = filename.find(ext);
         if (extPosition != std::string::npos)
@@ -316,7 +316,7 @@ void SaveAscii2::exec() {
     }
 
     // data writting
-    if (OneSpectrumPerFile) {
+    if (oneSpectrumPerFile) {
       writeSpectrum((*idxIt), file);
       progress.report();
       idxIt++;
