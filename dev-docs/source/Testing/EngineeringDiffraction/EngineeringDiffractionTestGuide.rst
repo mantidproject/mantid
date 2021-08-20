@@ -158,9 +158,11 @@ Test 6
 
 This tests that the background subtraction works.
 
-1. load in a run and check the `Subtract BG` button in the UI table. This should generate a workspace with suffix `_bg` and the data should look like the background is flat and roughly zero on the plot using the default parameters (other columns in the UI table).
+1. Load in a run - the `Subtract BG` box should be checked in the UI table by default. This should generate a workspace with suffix `_bg` and the data should look like the background is flat and roughly zero on the plot using the default parameters (other columns in the UI table).
 
-2. Select the row in the table for which the background has been subtracted, the `Inspect Background` button should now be enabled, click it to open a new figure which shows the raw data, the background and the subtracted data. Changing the values of Niter, BG, XWindow and SG (input to ``EnggEstimateFocussedBackground``, hover over a cell inn the table to see a tool tip for explanation) should produce a change in the background on the external plot and in the UI plot.
+2. Select the row in the table and check the `Inspect Background` button should now be enabled regardless of whether the `Subtract BG` box is checked.
+
+3. Click  `Inspect Background` to open a new figure which shows the raw data, the background and the subtracted data. Changing the values of Niter, BG, XWindow and SG (input to ``EnggEstimateFocussedBackground``, hover over a cell inn the table to see a tool tip for explanation) should produce a change in the background on the external plot and in the UI plot.
 
 Test 7
 ^^^^^^
