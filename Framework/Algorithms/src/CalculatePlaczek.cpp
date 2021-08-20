@@ -158,7 +158,7 @@ std::map<std::string, std::string> CalculatePlaczek::validateInputs() {
   if (order == 2) {
     const API::MatrixWorkspace_sptr incidentWS = getProperty("IncidentSpectra");
     const MantidVec incidentPrime2 = incidentWS->readY(2);
-    if (!incidentPrime2.empty()) {
+    if (incidentPrime2.empty()) {
       issues["IncidentSpectra"] = "Input workspace does not have second order derivate of the incident spectrum";
     }
   }
@@ -303,7 +303,7 @@ void CalculatePlaczek::exec() {
   // consolidate output to workspace
   auto incidentUnit = inWS->getAxis(0)->unit();
   outputWS->getAxis(0)->unit() = incidentUnit;
-  outputWS->setDistribution(false); // ?why
+  outputWS->setDistribution(false);
 
   // set output
   setProperty("OutputWorkspace", outputWS);

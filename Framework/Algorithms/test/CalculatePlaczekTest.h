@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAlgorithms/CalculatePlaczek.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -34,24 +35,26 @@ public:
     // ---- Create the simple workspace ----
     Mantid::DataObjects::Workspace2D_sptr InputWorkspace =
         WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(5, 100, 380);
+    const std::string inwsn = "inws";
+    Mantid::API::AnalysisDataService::Instance().addOrReplace(inwsn, InputWorkspace);
+
+    // add sample
+    addSampleMaterialToWorkspace(inwsn);
 
     // ---- Get the incident spectrum ----
     const std::string IncidentSpectaWSN = "incidentSpectrumWS";
     generateIncidentSpectrum(IncidentSpectaWSN);
-    addSampleMaterialToWorkspace(IncidentSpectaWSN);
 
     CalculatePlaczek alg;
-    TS_ASSERT_THROWS_NOTHING(alg.initialize())
-    TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", InputWorkspace));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("IncidentSpectra", IncidentSpectaWSN));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Order", 1));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SampleTemperature", 300.0)); // K
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("CrystalDensity", 0.01));
-    // TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("EfficiencySpectra", efficientSpectrumWSN));  // Not implemented
-    // yet
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "outws"));
-    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    alg.initialize();
+    TS_ASSERT(alg.isInitialized());
+    alg.setProperty("InputWorkspace", inwsn);
+    alg.setPropertyValue("IncidentSpectra", IncidentSpectaWSN);
+    alg.setProperty("Order", 1);
+    alg.setProperty("SampleTemperature", 300.0); // K
+    alg.setProperty("CrystalDensity", 0.01);
+    alg.setPropertyValue("OutputWorkspace", "outws");
+    alg.execute();
     TS_ASSERT(alg.isExecuted());
 
     // TODO: check the output against some reference values (TBD)
@@ -64,24 +67,25 @@ public:
     // ---- Create the simple workspace ----
     Mantid::DataObjects::Workspace2D_sptr InputWorkspace =
         WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(5, 100, 380);
+    const std::string inwsn = "inws2";
+    Mantid::API::AnalysisDataService::Instance().addOrReplace(inwsn, InputWorkspace);
+    // add sample
+    addSampleMaterialToWorkspace(inwsn);
 
     // ---- Get the incident spectrum ----
     const std::string IncidentSpectaWSN = "incidentSpectrumWS";
     generateIncidentSpectrum(IncidentSpectaWSN);
-    addSampleMaterialToWorkspace(IncidentSpectaWSN);
 
     CalculatePlaczek alg;
-    TS_ASSERT_THROWS_NOTHING(alg.initialize())
-    TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", InputWorkspace));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("IncidentSpectra", IncidentSpectaWSN));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Order", 2));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SampleTemperature", 300.0)); // K
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("CrystalDensity", 0.01));
-    // TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("EfficiencySpectra", efficientSpectrumWSN));  // Not implemented
-    // yet
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "outws"));
-    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    alg.initialize();
+    TS_ASSERT(alg.isInitialized());
+    alg.setProperty("InputWorkspace", inwsn);
+    alg.setPropertyValue("IncidentSpectra", IncidentSpectaWSN);
+    alg.setProperty("Order", 2);
+    alg.setProperty("SampleTemperature", 300.0); // K
+    alg.setProperty("CrystalDensity", 0.01);
+    alg.setPropertyValue("OutputWorkspace", "outws");
+    alg.execute();
     TS_ASSERT(alg.isExecuted());
 
     // TODO: check the output against some reference values (TBD)
