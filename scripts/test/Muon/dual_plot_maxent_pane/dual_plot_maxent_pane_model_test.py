@@ -13,7 +13,7 @@ from Muon.GUI.Common.utilities.algorithm_utils import create_empty_table
 from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.plot_widget.raw_pane.raw_pane_model import RawPaneModel
 from Muon.GUI.Common.plot_widget.data_pane.plot_data_pane_model import PlotDataPaneModel
-from Muon.GUI.FrequencyDomainAnalysis.plot_widget.duel_plot_maxent_pane.duel_plot_maxent_pane_model import DuelPlotMaxentPaneModel
+from Muon.GUI.FrequencyDomainAnalysis.plot_widget.dual_plot_maxent_pane.dual_plot_maxent_pane_model import DualPlotMaxentPaneModel
 
 
 def gen_table():
@@ -42,7 +42,7 @@ class DuelPlotMaxentPaneModelTest(unittest.TestCase):
         self.raw = mock.Mock(spec=RawPaneModel)
         self.group = mock.Mock(spec=PlotDataPaneModel)
 
-        self.model = DuelPlotMaxentPaneModel(context=self.context, time_group_model=self.group, raw_model=self.raw)
+        self.model = DualPlotMaxentPaneModel(context=self.context, time_group_model=self.group, raw_model=self.raw)
         test_group = MuonGroup(group_name="fwd", detector_ids=[1, 2, 3, 4, 5])
         self.context.group_pair_context._groups = [test_group]
         self.context.group_pair_context._pairs = []
@@ -74,7 +74,7 @@ class DuelPlotMaxentPaneModelTest(unittest.TestCase):
 
         self.assertEqual(self.model.create_options(), ["1", "2"])
 
-    @mock.patch('Muon.GUI.FrequencyDomainAnalysis.plot_widget.duel_plot_maxent_pane.duel_plot_maxent_pane_model.retrieve_ws')
+    @mock.patch('Muon.GUI.FrequencyDomainAnalysis.plot_widget.dual_plot_maxent_pane.dual_plot_maxent_pane_model.retrieve_ws')
     def test_set_reconstructed_data(self, mock_retrieve):
         mock_retrieve.return_value = gen_table()
         self.assertEqual(self.model.reconstructed_data_name, "")

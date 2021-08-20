@@ -8,7 +8,7 @@ from Muon.GUI.Common.plot_widget.base_pane.base_pane_presenter import BasePanePr
 from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing, GenericObserver
 
 
-class DuelPlotMaxentPanePresenter(BasePanePresenter):
+class DualPlotMaxentPanePresenter(BasePanePresenter):
 
     def __init__(self, view, model, context, figure_presenter):
         super().__init__(view, model, context, figure_presenter)

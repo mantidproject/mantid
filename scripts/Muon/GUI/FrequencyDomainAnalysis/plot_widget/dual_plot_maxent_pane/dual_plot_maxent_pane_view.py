@@ -13,7 +13,7 @@ from Muon.GUI.Common.data_selectors.cyclic_data_selector_view import CyclicDataS
 # might need to have a baseqidget instance and add to layout
 # then have access methods into the base widget
 
-class DuelPlotMaxentPaneView(BasePaneView):
+class DualPlotMaxentPaneView(BasePaneView):
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)

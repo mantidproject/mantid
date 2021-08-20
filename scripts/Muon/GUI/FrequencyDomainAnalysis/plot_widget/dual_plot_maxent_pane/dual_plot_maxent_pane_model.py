@@ -12,7 +12,7 @@ from Muon.GUI.Common.ADSHandler.workspace_naming import (MAXENT_STR,
 from math import ceil
 
 
-class DuelPlotMaxentPaneModel(BasePaneModel):
+class DualPlotMaxentPaneModel(BasePaneModel):
 
     def __init__(self, context, time_group_model, raw_model):
         super().__init__(context, "Maxent Dual plot")
