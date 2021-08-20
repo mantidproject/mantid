@@ -8,75 +8,10 @@ from SANSILLCommon import *
 from mantid.api import DataProcessorAlgorithm, WorkspaceGroupProperty, MultipleFileProperty, FileAction, WorkspaceGroup
 from mantid.kernel import Direction, FloatBoundedValidator, FloatArrayProperty, IntArrayProperty, IntBoundedValidator, StringListValidator
 from mantid.simpleapi import *
-from os import path
+
 
 N_DISTANCES = 5 # maximum number of distinct distance configurations
 N_LAMBDAS = 2 # maximum number of distinct wavelengths used in the experiment
-
-
-def get_run_number(value):
-    """
-    Extracts the run number from the first run out of the string value of a
-    multiple file property of numors
-    """
-    return path.splitext(path.basename(value.split(',')[0].split('+')[0]))[0]
-
-
-def needs_processing(property_value, process_reduction_type):
-    """
-    Checks whether a given unary reduction needs processing or is already cached
-    in ADS with expected name.
-    @param property_value: the string value of the corresponding MultipleFile
-                           input property
-    @param process_reduction_type: the reduction_type of process
-    """
-    do_process = False
-    ws_name = ''
-    if property_value:
-        run_number = get_run_number(property_value)
-        ws_name = run_number + '_' + process_reduction_type
-        if mtd.doesExist(ws_name):
-            if isinstance(mtd[ws_name], WorkspaceGroup):
-                run = mtd[ws_name][0].getRun()
-            else:
-                run = mtd[ws_name].getRun()
-            if run.hasProperty('ProcessedAs'):
-                process = run.getLogData('ProcessedAs').value
-                if process == process_reduction_type:
-                    logger.notice('Reusing {0} workspace: {1}'
-                                  .format(process_reduction_type, ws_name))
-                else:
-                    logger.warning('{0} workspace found, but processed '
-                                   'differently: {1}'
-                                   .format(process_reduction_type, ws_name))
-                    do_process = True
-            else:
-                logger.warning('{0} workspace found, but missing the '
-                               'ProcessedAs flag: {1}'
-                               .format(process_reduction_type, ws_name))
-                do_process = True
-        else:
-            do_process = True
-    return [do_process, ws_name]
-
-
-def needs_loading(property_value, loading_reduction_type):
-    """
-    Checks whether a given unary input needs loading or is already loaded in
-    ADS.
-    @param property_value: the string value of the corresponding FileProperty
-    @param loading_reduction_type : the reduction_type of input to load
-    """
-    loading = False
-    ws_name = ''
-    if property_value:
-        ws_name = path.splitext(path.basename(property_value))[0]
-        if mtd.doesExist(ws_name):
-            logger.notice('Reusing {0} workspace: {1}'
-                          .format(loading_reduction_type, ws_name))
-        else:
-            loading = True
-    return [loading, ws_name]
 
 
 class SANSILLMultiProcess(DataProcessorAlgorithm):
