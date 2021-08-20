@@ -110,6 +110,7 @@ void ParallaxCorrection::init() {
  * @param indices : the workspaces indices corresponding to the bank
  * @param parallax : the correction formula for the bank
  * @param direction : the tube direction in the bank
+ * @param angleOffset : the tilt angle that needs to be subtracted from 2thetas before evaluating the formula
  */
 void ParallaxCorrection::performCorrection(const API::MatrixWorkspace_sptr &outWS, const std::vector<size_t> &indices,
                                            const std::string &parallax, const std::string &direction,
