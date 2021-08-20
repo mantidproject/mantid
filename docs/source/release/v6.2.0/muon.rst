@@ -28,10 +28,14 @@ Muon Analysis 2
 New Features
 ############
 
-- The Model Fitting tab allows you to perform fits across the sample logs and fit parameters stored in your results table.
 - Users can now copy sequential fitting parameters to all other runs. To do this, click the checkbox to turn this feature
   on and change a parmeter. The change should be copied to the other cells in the same column. Turn the feature off to make
   changes to single rows.
+- The :ref:`Model Fitting Tab <muon_model_fitting_tab-ref>` allows you to perform fits across the sample logs and fit parameters stored in your results table.
+
+.. image::  ../../images/muon_model_fitting_tab.PNG
+   :align: center
+   :height: 800px
 
 Improvements
 ############
@@ -53,6 +57,11 @@ New Features
 - It is now possible to Exclude a range from a fit range when doing a fit on the Fitting tab.
 - Added a 'Covariance Matrix' button to the Fitting tab that can be used to open and inspect the normalised covariance parameters of a fit.
 - Can now plot the raw count data in the GUI.
+- It is now possible to perform an Automatic or Manual background correction in the new :ref:`Corrections Tab <muon_corrections_tab-ref>`.
+
+.. image::  ../../images/muon_corrections_tab.PNG
+   :align: center
+   :height: 800px
 
 Improvements
 ############
