@@ -796,10 +796,8 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
                 new_name =  out + '_iq_' + create_name(old_name) + old_name[old_name.find('iq')+2:]
                 RenameWorkspace(wsi, new_name)
         else:
-            if key == 'IQ':
-                name = out + '_iq_' + create_name(ws)
-            elif key == 'RealSpace':
-                name = out + '_realspace_' + create_name(ws)
+            if not key.startswith('Stitch') and key != 'CombinedSens':
+                name = f'{out}_{key.lower()}_{create_name(ws)}'
             if name != ws:
                 RenameWorkspace(ws, name)
         return name
