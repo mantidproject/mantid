@@ -10,6 +10,7 @@ set(TEST_PY_FILES
   DrillParameterControllerTest.py
   DrillSettingsDialogTest.py
   DrillSampleTest.py
+  DrillSampleGroupTest.py
   DrillExportModelTest.py
   DrillParameterTest.py
   )
