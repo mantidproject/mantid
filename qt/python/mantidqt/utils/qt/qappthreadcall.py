@@ -48,10 +48,8 @@ class QAppThreadCall(QObject):
         else:
             self._ensure_self_on_qapp_thread()
             self._store_function_args(args, kwargs)
-            if self.blocking:
-                QMetaObject.invokeMethod(self, "on_call", Qt.BlockingQueuedConnection)
-            else:
-                QMetaObject.invokeMethod(self, "on_call", Qt.AutoConnection)
+            connection_type = Qt.BlockingQueuedConnection if self.blocking else Qt.AutoConnection
+            QMetaObject.invokeMethod(self, "on_call", connection_type)
             if self._exc_info is not None:
                 raise self._exc_info[1].with_traceback(self._exc_info[2])
             return self._result
