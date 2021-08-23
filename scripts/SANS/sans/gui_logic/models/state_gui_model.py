@@ -9,6 +9,7 @@
 This is one of the two models which is used for the data reduction. It contains generally all the settings which
 are not available in the model associated with the data table.
 """
+from typing import Union
 
 from sans.common.enums import (ReductionDimensionality, ReductionMode, RangeStepType, SaveType,
                                DetectorType, FitModeForMerge)
@@ -111,51 +112,51 @@ class StateGuiModel(ModelCommon):
     # ==================================================================================================================
     @property
     @apply_selective_view_scaling
-    def lab_pos_1(self):
+    def rear_pos_1(self):
         val = self._all_states.move.detectors[DetectorType.LAB.value].sample_centre_pos1
         return self._get_val_or_default(val, 0)
 
-    @lab_pos_1.setter
+    @rear_pos_1.setter
     @undo_selective_view_scaling
-    def lab_pos_1(self, value):
+    def rear_pos_1(self, value):
         self._all_states.move.detectors[DetectorType.LAB.value].sample_centre_pos1 = value
 
     @property
     @apply_selective_view_scaling
-    def lab_pos_2(self):
+    def rear_pos_2(self):
         val = self._all_states.move.detectors[DetectorType.LAB.value].sample_centre_pos2
         return self._get_val_or_default(val, 0)
 
-    @lab_pos_2.setter
+    @rear_pos_2.setter
     @undo_selective_view_scaling
-    def lab_pos_2(self, value):
+    def rear_pos_2(self, value):
         self._all_states.move.detectors[DetectorType.LAB.value].sample_centre_pos2 = value
 
     @property
     @apply_selective_view_scaling
-    def hab_pos_1(self):
+    def front_pos_1(self):
         val = None
         if DetectorType.HAB.value in self._all_states.move.detectors:
             val = self._all_states.move.detectors[DetectorType.HAB.value].sample_centre_pos1
         return self._get_val_or_default(val, 0)
 
-    @hab_pos_1.setter
+    @front_pos_1.setter
     @undo_selective_view_scaling
-    def hab_pos_1(self, value):
+    def front_pos_1(self, value):
         if DetectorType.HAB.value in self._all_states.move.detectors:
             self._all_states.move.detectors[DetectorType.HAB.value].sample_centre_pos1 = value
 
     @property
     @apply_selective_view_scaling
-    def hab_pos_2(self):
+    def front_pos_2(self):
         val = None
         if DetectorType.HAB.value in self._all_states.move.detectors:
             val = self._all_states.move.detectors[DetectorType.HAB.value].sample_centre_pos2
         return self._get_val_or_default(val, 0)
 
-    @hab_pos_2.setter
+    @front_pos_2.setter
     @undo_selective_view_scaling
-    def hab_pos_2(self, value):
+    def front_pos_2(self, value):
         if DetectorType.HAB.value in self._all_states.move.detectors:
             self._all_states.move.detectors[DetectorType.HAB.value].sample_centre_pos1 = value
 
@@ -207,12 +208,10 @@ class StateGuiModel(ModelCommon):
         return self._get_val_or_default(val, ReductionMode.LAB)
 
     @reduction_mode.setter
-    def reduction_mode(self, value):
-        if (value is ReductionMode.LAB or value is ReductionMode.HAB
-                or value is ReductionMode.MERGED or value is ReductionMode.ALL):  # noqa
-            self._all_states.reduction.reduction_mode = value
-        else:
-            raise ValueError("A reduction mode was expected, got instead {}".format(value))
+    def reduction_mode(self, value: Union[str, ReductionMode]):
+        if isinstance(value, str):
+            value = ReductionMode(value)
+        self._all_states.reduction.reduction_mode = value
 
     @property
     def merge_scale(self):

@@ -10,13 +10,12 @@ from mantidqt.utils.observer_pattern import Observable
 
 CALIB_FOLDER = path.join(path.dirname(path.dirname(path.dirname(path.dirname(path.realpath(__file__))))), "calib")
 DEFAULT_FULL_INST_CALIB = "ENGINX_full_instrument_calibration_193749.nxs"
-SETTINGS_DICT = {"save_location": str, "full_calibration": str, "recalc_vanadium": bool, "logs": str,
+SETTINGS_DICT = {"save_location": str, "full_calibration": str, "logs": str,
                  "primary_log": str, "sort_ascending": bool, "default_peak": str}
 
 DEFAULT_SETTINGS = {
     "full_calibration": path.join(CALIB_FOLDER, DEFAULT_FULL_INST_CALIB),
     "save_location": path.join(path.expanduser("~"), "Engineering_Mantid"),
-    "recalc_vanadium": False,
     "logs": ','.join(
         ['Temp_1', 'W_position', 'X_position', 'Y_position', 'Z_position', 'stress', 'strain', 'stressrig_go']),
     "primary_log": 'strain',
@@ -86,7 +85,6 @@ class SettingsPresenter(object):
         self._validate_settings()
         self.settings["save_location"] = self.view.get_save_location()
         self.settings["full_calibration"] = self.view.get_full_calibration()
-        self.settings["recalc_vanadium"] = self.view.get_van_recalc()
         self.settings["logs"] = self.view.get_checked_logs()
         self.settings["primary_log"] = self.view.get_primary_log()
         self.settings["sort_ascending"] = self.view.get_ascending_checked()
@@ -96,7 +94,6 @@ class SettingsPresenter(object):
         self._validate_settings()
         self.view.set_save_location(self.settings["save_location"])
         self.view.set_full_calibration(self.settings["full_calibration"])
-        self.view.set_van_recalc(self.settings["recalc_vanadium"])
         self.view.set_checked_logs(self.settings["logs"])
         self.view.set_primary_log_combobox(self.settings["primary_log"])
         self.view.set_ascending_checked(self.settings["sort_ascending"])
@@ -135,7 +132,6 @@ class SettingsPresenter(object):
         self.check_and_populate_with_default("logs")
         self.check_and_populate_with_default("full_calibration")
         self.check_and_populate_with_default("primary_log")
-        self.check_and_populate_with_default("recalc_vanadium")
         # boolean values already checked to be "" or True or False in settings_helper
         self.check_and_populate_with_default("sort_ascending")
 

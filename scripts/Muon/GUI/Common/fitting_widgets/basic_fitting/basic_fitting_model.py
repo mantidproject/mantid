@@ -839,7 +839,10 @@ class BasicFittingModel:
             return (dataset_names, *corresponding_dataset_args)
 
         # Filter the data based on a name in the dataset_names containing a string
-        return zip(*filter(lambda x: display_type in x[0], zip(dataset_names, *corresponding_dataset_args)))
+        filtered_data = list(zip(*filter(lambda x: display_type in x[0], zip(dataset_names, *corresponding_dataset_args))))
+
+        # Return a tuple of empty lists if the filtered data is empty
+        return tuple(filtered_data) if len(filtered_data) != 0 else ([] for _ in range(len(corresponding_dataset_args) + 1))
 
     def get_all_fit_function_parameter_values_for(self, fit_function: IFunction) -> list:
         """Returns the values of the fit function parameters."""

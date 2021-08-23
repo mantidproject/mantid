@@ -342,10 +342,10 @@ class FittingDataPresenterTest(unittest.TestCase):
         self.presenter.row_numbers["name2"] = 1
         self.view.get_selected_rows.return_value = self.presenter.row_numbers
         self.presenter._handle_selection_changed()
-        self.view.set_inspect_bg_button_enabled.assert_called_with(False)
-        self.view.get_item_checked.return_value = True
-        self.presenter._handle_selection_changed()
         self.view.set_inspect_bg_button_enabled.assert_called_with(True)
+        self.view.get_selected_rows.return_value = {}
+        self.presenter._handle_selection_changed()
+        self.view.set_inspect_bg_button_enabled.assert_called_with(False)
 
     def _setup_bgsub_test(self):
         mocked_table_item = mock.MagicMock()

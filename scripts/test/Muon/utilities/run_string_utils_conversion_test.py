@@ -148,6 +148,16 @@ class RunStringUtilsStringToListTest(unittest.TestCase):
         run_list = utils.run_string_to_list(run_string)
         self.assertEqual(run_list, [1, 2, 3, 4, 5])
 
+    def test_run_string_removes_whitespace(self):
+        run_string = "1 -3,48- 50"
+        run_list = [1, 2, 3, 48, 49, 50]
+        self.assertEqual(utils.run_string_to_list(run_string), run_list)
+
+    def test_run_string_allows_range_over_decade(self):
+        run_string = '62268-2'
+        run_list = [62268, 62269, 62270, 62271, 62272]
+        self.assertEqual(utils.run_string_to_list(run_string), run_list)
+
 
 if __name__ == '__main__':
     unittest.main()

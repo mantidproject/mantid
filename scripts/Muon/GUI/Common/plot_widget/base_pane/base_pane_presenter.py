@@ -206,3 +206,6 @@ class BasePanePresenter():
             keys = self._model.create_tiled_keys(tiled_by)
             self._figure_presenter.create_tiled_plot(keys)
             self._figure_presenter._handle_autoscale_y_axes()
+
+    def clear_subplots(self):
+        self._figure_presenter.clear_subplots()

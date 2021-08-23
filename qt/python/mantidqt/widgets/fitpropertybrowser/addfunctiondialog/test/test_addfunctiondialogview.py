@@ -15,7 +15,7 @@ from mantidqt.utils.qt.testing import start_qapplication
 
 
 @start_qapplication
-class AddFunctionDialogPresenterTest(unittest.TestCase):
+class AddFunctionDialogViewTest(unittest.TestCase):
     TEST_FUNCTION_NAMES = ['func1', 'secondfunc']
 
     def test_construction_with_no_functions_gives_empty_list(self):
@@ -50,6 +50,14 @@ class AddFunctionDialogPresenterTest(unittest.TestCase):
         QTest.keyPress(view.ui.functionBox, Qt.Key_Return)
 
         self.assertEqual(self.TEST_FUNCTION_NAMES[0], view.ui.functionBox.currentText())
+
+    def test_checkbox_exists_if_requested(self):
+        view = AddFunctionDialogView(default_checkbox=True)
+        self.assertTrue(hasattr(view, '_default_checkbox'))
+
+    def test_checkbox_not_exists_if_not_requested(self):
+        view = AddFunctionDialogView()
+        self.assertFalse(hasattr(view, '_default_checkbox'))
 
 
 if __name__ == '__main__':

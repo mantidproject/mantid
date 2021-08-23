@@ -57,23 +57,24 @@ class PlotDataPaneModel(PlotGroupPairModel):
 
         return workspace_list, indices
 
-    def get_workspaces_to_plot(self, is_raw, plot_type):
+    def get_workspaces_to_plot(self, is_raw, plot_type,currently_selected):
         """
         :param is_raw: Whether to use raw or rebinned data
         :param plot_type: plotting type, e.g Counts, Frequency Re
         :return: a list of workspace names
         """
-        currently_selected = self.context.group_pair_context.selected_groups_and_pairs
         workspace_list = []
         for group_pair in currently_selected:
             workspace_list += self.get_time_workspaces_to_plot(group_pair, is_raw, plot_type)
         return workspace_list
 
-    def get_workspace_list_and_indices_to_plot(self, is_raw, plot_type):
+    def get_workspace_list_and_indices_to_plot(self, is_raw, plot_type, selected = None):
         """
          :return: a list of workspace names to plot
          """
-        workspace_list = self.get_workspaces_to_plot(is_raw, plot_type)
+        if selected is None:
+            selected =  self.context.group_pair_context.selected_groups_and_pairs
+        workspace_list = self.get_workspaces_to_plot(is_raw, plot_type, selected)
         indices = self._generate_run_indices(workspace_list)
 
         return workspace_list, indices

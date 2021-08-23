@@ -54,9 +54,10 @@ class DeadTimeCorrectionsPresenterTest(unittest.TestCase):
     def test_that_handle_instrument_changed_will_reset_the_dead_time_source_and_attempt_a_recalculation(self):
         self.presenter.handle_instrument_changed()
 
-        self.model.set_dead_time_source_to_from_file.assert_called_with()
-        self.presenter._notify_perform_dead_time_corrections.assert_called_once_with()
         self.view.set_dead_time_from_data_file_selected.assert_called_once_with()
+        self.model.set_dead_time_source_to_from_file.assert_called_with()
+        # calling this will cause a crash
+        self.presenter._notify_perform_dead_time_corrections.assert_not_called()
 
     def test_that_handle_run_selector_changed_will_update_the_run_string_in_the_model(self):
         self.presenter.update_dead_time_info_text_in_view = mock.Mock()
