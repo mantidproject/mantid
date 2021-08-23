@@ -493,12 +493,15 @@ class SANSILLReduction(PythonAlgorithm):
         '''Normalises by sample thickness'''
         thicknesses = self.getProperty('SampleThickness').value
         length = len(thicknesses)
-        if length == 1:
+        if length == 1 and thicknesses[0] > 0:
             Scale(InputWorkspace=ws, Factor=1/thicknesses[0], OutputWorkspace=ws)
-        elif length > 1:
+        else:
+            if thicknesses[0] < 0:
+                thicknesses = mtd[ws].getRun()['SampleThickness'].value.split(',')
             thick_ws = ws + '_thickness'
             CreateWorkspace(NSpec=1, OutputWorkspace=thick_ws,
-                            DataY=np.array(length), DataE=np.zeros(length),
+                            DataY=np.array(thicknesses),
+                            DataE=np.zeros(length),
                             DataX=np.arange(length))
             thick_to_apply = thick_ws
             if self.mode == AcqMode.KINETIC:

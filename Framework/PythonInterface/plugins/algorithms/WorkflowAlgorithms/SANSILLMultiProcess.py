@@ -152,6 +152,11 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
                              doc='Sample thickness [cm] used in final normalisation.')
         self.setPropertyGroup('SampleThickness', 'Parameters')
 
+        self.declareProperty(name='SampleThicknessFrom', defaultValue='User',
+                             validator=StringListValidator(['User', 'Nexus']),
+                             doc='Define where to read the sample thicknesses from.')
+        self.setPropertyGroup('SampleThicknessFrom', 'Parameters')
+
         self.declareProperty(name='WaterCrossSection', defaultValue=1.,
                              validator=FloatBoundedValidator(lower=0.),
                              doc='Provide the water cross-section; used only if the absolute scale is done by dividing to water.')
@@ -267,12 +272,24 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
     def _check_aux_sample_params_dimensions(self):
         '''Checks if provided primitive parameters match the rank of the samples'''
         issues = dict()
-        props_to_match_rank = ['SampleThickness', 'BeamRadius']
+        props_to_match_rank = ['BeamRadius']
         for prop in props_to_match_rank:
             if self.getPropertyValue(prop):
                 prop_rank = self.getPropertyValue(prop).count(',') + 1
                 if prop_rank > 1 and prop_rank != self.rank:
                     issues[prop] = f'{prop} has {prop_rank} elements which does not match the number of distances {self.rank}'
+        return issues
+
+    def _check_sample_thickness_dimensions(self):
+        '''Checks if provided sample thickness length is acceptable'''
+        issues = dict()
+        read_from = self.getPropertyValue('SampleThicknessFrom')
+        thicknesses = self.getProperty('SampleThickness').value
+        if read_from == 'User':
+            n_thick = len(thicknesses)
+            if n_thick > 1 and n_thick != self.n_samples:
+                issues['SampleThickness'] = f'SampleThickness has {n_thick} elements \
+                                             which does not match the number of samples {self.n_samples}.'
         return issues
 
     def _check_aux_tr_params_dimensions(self):
@@ -646,6 +663,9 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
             if self.getProperty('ProduceSensitivity').value:
                 process = 'Water'
                 sens_out = sample_ws + '_Sens'
+            uesr_thickness = self.getProperty('SampleThickness').value
+            thickness_from = self.getPropertyValue('SampleThicknessFrom')
+            thickness_to_use = uesr_thickness if thickness_from == 'User' else [-1]
             SANSILLReduction(Runs=runs,
                              ProcessAs=process,
                              DarkCurrentWorkspace=dark_current_ws,
@@ -660,7 +680,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
                              FluxWorkspace=flux_ws,
                              NormaliseBy=self.getProperty('NormaliseBy').value,
                              TransmissionThetaDependent=self.getProperty('TransmissionThetaDependent').value,
-                             SampleThickness=self.getProperty('SampleThickness').value,
+                             SampleThickness=thickness_to_use,
                              WaterCrossSection=self.getProperty('WaterCrossSection').value,
                              OutputWorkspace=sample_ws,
                              OutputSensitivityWorkspace=sens_out)
