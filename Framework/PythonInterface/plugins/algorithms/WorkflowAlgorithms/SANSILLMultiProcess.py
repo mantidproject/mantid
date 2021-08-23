@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from SANSILLCommon import *
 from mantid.api import DataProcessorAlgorithm, WorkspaceGroupProperty, MultipleFileProperty, FileAction, WorkspaceGroup, \
-    TextAxis
+    TextAxis, Progress
 from mantid.kernel import Direction, FloatBoundedValidator, FloatArrayProperty, StringArrayProperty, IntArrayProperty, \
     IntBoundedValidator, StringListValidator
 from mantid.simpleapi import *
@@ -28,6 +28,8 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
     lambda_rank = None # how many wavelengths are we dealing with, i.e. how many transmissions need to be calculated
     n_samples = None # how many samples are being reduced
     name_axis = None # TextAxis holding the sample names
+    progress = None # the global progress object
+    n_reports = None # the number of progress reports
 
     def category(self):
         return 'ILL\\SANS;ILL\\Auto'
@@ -395,6 +397,8 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         self.lambda_rank = None
         self.n_samples = None
         self.name_axis = None
+        self.progress = None
+        self.n_reports = None
 
     def _set_rank(self):
         '''Sets the actual rank of the reduction'''
@@ -429,6 +433,8 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         self._set_rank()
         self._set_lambda_rank()
         self._set_n_samples() # must be after set_rank()
+        self.n_reports = (self.rank + self.lambda_rank + 1) * self.n_samples
+        self.progress = Progress(self, start=0., end=1., nreports=self.n_reports)
 
     def tr_index(self, d):
         '''Returns the index of the transmission wavelength based on the index of distance'''
@@ -441,6 +447,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         all_outputs = []
         for l in range(self.lambda_rank):
             transmissions = self.process_all_transmissions_at_lambda(l)
+            self.progress.report((l+1)*self.n_samples, 'Calculated transmissions for wavelength index {l+1}')
             all_outputs.append(transmissions)
         return all_outputs
 
@@ -450,6 +457,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         for d in range(self.rank):
             outputs = dict()
             sample_ws = self.process_all_samples_at_distance(d, transmissions)
+            self.progress.report((d+1)*self.n_samples, 'Reduced sample data at distance index {d+1}')
             outputs['RealSpace'] = sample_ws[0]
             if len(sample_ws) > 1:
                 # if there is a 2nd output, it must be sensitivity
@@ -603,7 +611,9 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
                              FluxWorkspace=tr_empty_beam_flux,
                              NormaliseBy=self.getProperty('NormaliseBy').value,
                              TransmissionBeamRadius=self.getProperty('TrBeamRadius').value[l],
-                             OutputWorkspace=tr_sample_ws)
+                             OutputWorkspace=tr_sample_ws,
+                             startProgress=l*self.n_samples/self.n_reports,
+                             endProgress=(l+1)*self.n_samples/self.n_reports)
             return tr_sample_ws
         else:
             return ''
@@ -713,7 +723,9 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
                              SampleThickness=thickness_to_use,
                              WaterCrossSection=self.getProperty('WaterCrossSection').value,
                              OutputWorkspace=sample_ws,
-                             OutputSensitivityWorkspace=sens_out)
+                             OutputSensitivityWorkspace=sens_out,
+                             startProgress=(self.lambda_rank+d)*self.n_samples/self.n_reports,
+                             endProgress=(self.lambda_rank+d+1)*self.n_samples/self.n_reports)
             return [sample_ws, sens_out]
         else:
             return []
@@ -920,6 +932,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         samples = self.process_all_samples(transmissions)
         outputs = self.combine(samples)
         self.package(outputs, transmissions)
+        self.progress.report(self.n_reports, 'Combined and packaged reduced data')
 
 
 AlgorithmFactory.subscribe(SANSILLMultiProcess)
