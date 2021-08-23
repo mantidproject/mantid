@@ -260,7 +260,7 @@ void SaveAscii2::exec() {
     throw std::runtime_error("Trying to save an empty workspace");
   }
 
-  bool oneSpectrumPerFile = getProperty("OneSpectrumPerFile");
+  const bool oneSpectrumPerFile = getProperty("OneSpectrumPerFile");
 
   Progress progress(this, 0.0, 1.0, idx.size());
 
