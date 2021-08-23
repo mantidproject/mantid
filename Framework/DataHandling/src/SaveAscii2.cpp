@@ -272,24 +272,12 @@ void SaveAscii2::exec() {
 
   auto idxIt = idx.begin();
   while (idxIt != idx.end()) {
-    std::string currentFilename = filename;
-    size_t extPosition;
-    if (oneSpectrumPerFile) {
-      for (const std::string &ext : ASCII_EXTS) {
-        extPosition = filename.find(ext);
-        if (extPosition != std::string::npos)
-          break;
-      }
-      std::ostringstream ss;
-      double axisValue = m_ws->getAxis(1)->getValue(*idxIt);
-      std::string axisLabel = m_ws->getAxis(1)->unit()->label();
-      ss << std::scientific;
-      ss << std::string(filename, 0, extPosition) << "_" << *idxIt;
-      if (!(m_ws->getAxis(1)->isSpectra()))
-        ss << "_" << axisValue << axisLabel;
-      ss << std::string(filename, extPosition);
-      currentFilename = ss.str();
-    }
+    std::string currentFilename;
+    if (oneSpectrumPerFile)
+      currentFilename = createSpectrumFilename(*idxIt);
+    else
+      currentFilename = filename;
+
     std::ofstream file(currentFilename, (appendToFile ? std::ios::app : std::ios::out));
 
     if (file.bad()) {
@@ -331,6 +319,33 @@ void SaveAscii2::exec() {
     file.unsetf(std::ios_base::floatfield);
     file.close();
   }
+}
+
+/** Create the filename used for the export of a specific spectrum. Valid only
+ *  when spectra are exported in separate files.
+ *
+ *  @param workspaceIndex :: index of the corresponding spectrum
+ */
+
+std::string SaveAscii2::createSpectrumFilename(size_t workspaceInex) {
+  std::string filename = getProperty("Filename");
+  size_t extPosition;
+  for (const std::string &ext : ASCII_EXTS) {
+    extPosition = filename.find(ext);
+    if (extPosition != std::string::npos)
+      break;
+  }
+
+  std::ostringstream ss;
+  double axisValue = m_ws->getAxis(1)->getValue(workspaceInex);
+  std::string axisLabel = m_ws->getAxis(1)->unit()->label();
+  ss << std::scientific;
+  ss << std::string(filename, 0, extPosition) << "_" << workspaceInex;
+  if (!(m_ws->getAxis(1)->isSpectra()))
+    ss << "_" << axisValue << axisLabel;
+  ss << std::string(filename, extPosition);
+
+  return ss.str();
 }
 
 /** Writes a spectrum to the file using a workspace index

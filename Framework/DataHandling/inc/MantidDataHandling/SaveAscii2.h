@@ -76,6 +76,7 @@ private:
   std::pair<std::string, std::string> sampleLogValueUnit(const std::string &logName);
   /// Write file header
   void writeFileHeader(const std::vector<std::string> &logList, std::ofstream &file);
+  std::string createSpectrumFilename(size_t workspaceIndex);
 
   /// Map the separator options to their string equivalents
   std::map<std::string, std::string> m_separatorIndex;
