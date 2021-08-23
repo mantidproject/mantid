@@ -325,7 +325,7 @@ void SaveAscii2::exec() {
  *  @param workspaceIndex :: index of the corresponding spectrum
  */
 
-std::string SaveAscii2::createSpectrumFilename(size_t workspaceInex) {
+std::string SaveAscii2::createSpectrumFilename(size_t workspaceIndex) {
   std::string filename = getProperty("Filename");
   size_t extPosition;
   for (const std::string &ext : m_asciiExts) {
@@ -337,10 +337,10 @@ std::string SaveAscii2::createSpectrumFilename(size_t workspaceInex) {
     extPosition = filename.size();
 
   std::ostringstream ss;
-  double axisValue = m_ws->getAxis(1)->getValue(workspaceInex);
+  double axisValue = m_ws->getAxis(1)->getValue(workspaceIndex);
   std::string axisLabel = m_ws->getAxis(1)->unit()->label();
   ss << std::scientific;
-  ss << std::string(filename, 0, extPosition) << "_" << workspaceInex;
+  ss << std::string(filename, 0, extPosition) << "_" << workspaceIndex;
   if (!(m_ws->getAxis(1)->isSpectra()))
     ss << "_" << axisValue << axisLabel;
   ss << std::string(filename, extPosition);
