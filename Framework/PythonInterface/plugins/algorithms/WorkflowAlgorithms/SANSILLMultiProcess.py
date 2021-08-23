@@ -5,8 +5,10 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from SANSILLCommon import *
-from mantid.api import DataProcessorAlgorithm, WorkspaceGroupProperty, MultipleFileProperty, FileAction, WorkspaceGroup
-from mantid.kernel import Direction, FloatBoundedValidator, FloatArrayProperty, IntArrayProperty, IntBoundedValidator, StringListValidator
+from mantid.api import DataProcessorAlgorithm, WorkspaceGroupProperty, MultipleFileProperty, FileAction, WorkspaceGroup, \
+    TextAxis
+from mantid.kernel import Direction, FloatBoundedValidator, FloatArrayProperty, StringArrayProperty, IntArrayProperty, \
+    IntBoundedValidator, StringListValidator
 from mantid.simpleapi import *
 
 
@@ -157,6 +159,15 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
                              doc='Define where to read the sample thicknesses from.')
         self.setPropertyGroup('SampleThicknessFrom', 'Parameters')
 
+        self.declareProperty(StringArrayProperty(name='SampleNames', values=[]),
+                             doc='Sample names to put in the axis of the output workspaces.')
+        self.setPropertyGroup('SampleNames', 'Parameters')
+
+        self.declareProperty(name='SampleNamesFrom', defaultValue='RunNumber',
+                             validator=StringListValidator(['User', 'Nexus', 'RunNumber']),
+                             doc='Define where to read the sample names from.')
+        self.setPropertyGroup('SampleNamesFrom', 'Parameters')
+
         self.declareProperty(name='WaterCrossSection', defaultValue=1.,
                              validator=FloatBoundedValidator(lower=0.),
                              doc='Provide the water cross-section; used only if the absolute scale is done by dividing to water.')
@@ -292,6 +303,18 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
                                              which does not match the number of samples {self.n_samples}.'
         return issues
 
+    def _check_sample_names_dimensions(self):
+        '''Checks if provided sample names length is acceptable'''
+        issues = dict()
+        read_from = self.getPropertyValue('SampleNamesFrom')
+        user_names = self.getProperty('SampleNames').value
+        if read_from == 'User':
+            n_names = len(user_names)
+            if n_names != self.n_samples:
+                issues['SampleNames'] = f'SampleNames has {n_names} elements \
+                                         which does not match the number of samples {self.n_samples}.'
+        return issues
+
     def _check_aux_tr_params_dimensions(self):
         '''Checks if provided primitive parameters for transmissions match the rank of the wavelengths'''
         issues = dict()
@@ -346,6 +369,8 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
             issues = self._check_aux_sample_input_dimensions()
         if not issues:
             issues = self._check_sample_thickness_dimensions()
+        if not issues:
+            issues = self._check_sample_names_dimensions()
         if not issues:
             issues = self._check_aux_tr_input_dimensions()
         if not issues:
@@ -722,7 +747,39 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
             kwargs['PanelOutputWorkspaces'] = sample_ws[0] + '_iq_panels'
             results.append(kwargs['PanelOutputWorkspaces'])
         SANSILLIntegration(**kwargs)
+        for output in results:
+            self.replace_spectrum_axis_with_names(output)
         return results
+
+    def replace_spectrum_axis_with_names(self, ws_name):
+        names_from = self.getPropertyValue('SampleNamesFrom')
+        user_names = self.getProperty('SampleNames').value
+        ws = mtd[ws_name][0] if isinstance(mtd[ws_name], WorkspaceGroup) else mtd[ws_name]
+        run = ws.getRun()
+        actual_names = []
+        if names_from == 'User':
+            actual_names = user_names
+        elif names_from == 'RunNumber':
+            actual_names = str(run['run_number'].value).split(',')
+        elif names_from == 'Nexus':
+            actual_names = run['sample_description'].value.split(',')
+        mode = run['AcqMode'].value
+        n_frames = run['N_frames'].value
+        if mode == AcqMode.KINETIC or mode == AcqMode.REVENT:
+            axis = TextAxis.create(len(actual_names) * n_frames)
+            for index, label in enumerate(actual_names):
+                for frame in range(n_frames):
+                    axis.setLabel(index * n_frames + frame, f'{label}_frame_#{frame}')
+        else:
+            axis = TextAxis.create(len(actual_names))
+            for index, label in enumerate(actual_names):
+                axis.setLabel(index, label)
+        if isinstance(mtd[ws_name], WorkspaceGroup):
+            # ws_name will be a group workspace for panels and wedges outputs
+            for ws in mtd[ws_name]:
+                ws.replaceAxis(1, axis)
+        else:
+            mtd[ws_name].replaceAxis(1, axis)
 
     def set_distribution(self, ws_list, flag):
         for ws in ws_list:

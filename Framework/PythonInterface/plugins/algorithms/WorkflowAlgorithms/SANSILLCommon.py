@@ -5,12 +5,12 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.simpleapi import CropToComponent, logger, mtd
-from enum import Enum
+from enum import IntEnum
 from math import fabs
 from os import path
 
 
-class AcqMode(Enum):
+class AcqMode(IntEnum):
     '''
     |        |  MONO  |  KINETIC  |  TOF  |  REVENT  |
     | X Unit |  Empty |   Empty   | Lambda|    TOF   |

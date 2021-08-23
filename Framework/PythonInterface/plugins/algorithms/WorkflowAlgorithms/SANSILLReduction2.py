@@ -254,6 +254,9 @@ class SANSILLReduction(PythonAlgorithm):
                 self.mode = AcqMode.KINETIC
         else:
             self.mode = AcqMode.MONO
+        # store the n_frames and acq mode for future reference
+        AddSampleLog(Workspace=ws, LogName='N_frames', LogType='Number', NumberType='Int', LogText=str(self.n_frames))
+        AddSampleLog(Workspace=ws, LogName='AcqMode', LogType='Number', NumberType='Int', LogText=str(int(self.mode)))
         self.log().notice(f'Set the acquisition mode to {self.mode}')
         if self.mode == AcqMode.KINETIC:
             if self.process != 'Sample' and self.process != 'Transmission':
