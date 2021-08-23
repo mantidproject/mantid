@@ -27,6 +27,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
     rank = None # the rank of the reduction, i.e. the number of (detector distance, wavelength) configurations
     lambda_rank = None # how many wavelengths are we dealing with, i.e. how many transmissions need to be calculated
     n_samples = None # how many samples are being reduced
+    name_axis = None # TextAxis holding the sample names
 
     def category(self):
         return 'ILL\\SANS;ILL\\Auto'
@@ -390,8 +391,10 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
     def _reset(self):
         '''Resets the class member variables'''
         self.rank = None
+        self.instrument = None
         self.lambda_rank = None
         self.n_samples = None
+        self.name_axis = None
 
     def _set_rank(self):
         '''Sets the actual rank of the reduction'''
@@ -747,11 +750,13 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
             kwargs['PanelOutputWorkspaces'] = sample_ws[0] + '_iq_panels'
             results.append(kwargs['PanelOutputWorkspaces'])
         SANSILLIntegration(**kwargs)
+        if not self.name_axis:
+            self.name_axis = self.generate_name_axis(results[0])
         for output in results:
-            self.replace_spectrum_axis_with_names(output)
+            self.replace_axis(output, self.name_axis, 1)
         return results
 
-    def replace_spectrum_axis_with_names(self, ws_name):
+    def generate_name_axis(self, ws_name):
         names_from = self.getPropertyValue('SampleNamesFrom')
         user_names = self.getProperty('SampleNames').value
         ws = mtd[ws_name][0] if isinstance(mtd[ws_name], WorkspaceGroup) else mtd[ws_name]
@@ -774,12 +779,15 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
             axis = TextAxis.create(len(actual_names))
             for index, label in enumerate(actual_names):
                 axis.setLabel(index, label)
+        return axis
+
+    def replace_axis(self, ws_name, axis, index=1):
         if isinstance(mtd[ws_name], WorkspaceGroup):
             # ws_name will be a group workspace for panels and wedges outputs
             for ws in mtd[ws_name]:
-                ws.replaceAxis(1, axis)
+                ws.replaceAxis(index, axis)
         else:
-            mtd[ws_name].replaceAxis(1, axis)
+            mtd[ws_name].replaceAxis(index, axis)
 
     def set_distribution(self, ws_list, flag):
         for ws in ws_list:
