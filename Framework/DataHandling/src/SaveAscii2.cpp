@@ -71,7 +71,6 @@ void SaveAscii2::init() {
                   "single-spectrum workspaces. "
                   "It is always written for workspaces with multiple spectra, "
                   "unless spectrum axis value is written. Ignored for Table Workspaces.");
-  declareProperty("OneSpectrumPerFile", false, "If true, each spectrum will be saved to an individual file");
 
   declareProperty("CommentIndicator", "#", "Character(s) to put in front of comment lines.");
 
@@ -116,6 +115,8 @@ void SaveAscii2::init() {
   declareProperty(std::make_unique<ArrayProperty<std::string>>("LogList"),
                   "List of logs to write to the file header. Ignored for Table "
                   "Workspaces.");
+
+  declareProperty("OneSpectrumPerFile", false, "If true, each spectrum will be saved to an individual file");
 }
 
 /**
