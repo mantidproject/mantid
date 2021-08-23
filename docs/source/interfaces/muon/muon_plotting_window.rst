@@ -15,7 +15,7 @@ double-clicking on the title bar of the window.
 This data can be displayed as a single plot, or as tiled plots.
 
 The custom plotting for Muon Analysis are described in the :ref:`here <Muon_Analysis_plotting-ref>`.
-The custom plotting for Frequency Doamin Analysis are described in the :ref:`here <Frequency_Domain_Analysis_plotting-ref>`.
+The custom plotting for Frequency Domain Analysis are described in the :ref:`here <Frequency_Domain_Analysis_plotting-ref>`.
 
 Plotting Controls
 ^^^^^^^^^^^^^^^^^
@@ -37,7 +37,7 @@ This is not always available.
 This is not always available.
 
 **Plot difference** is only available for Fit Data and Model Data.
-When it is tiked it shows the difference between the data and the fit to the data.
+When it is ticked it shows the difference between the data and the fit to the data.
 
 .. image::  ../../images/muon_plotting_window_tiled.png
    :width: 350px

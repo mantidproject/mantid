@@ -48,10 +48,10 @@ Flat Background Corrections:
 ----------------------------
 
 - Change the ``Select Function`` to ``Flat Background``
-- The curves wil be curved upwards again and the table will report error
-- The **Corrections** tab will show a red astrix
+- The curves will be curved upwards again and the table will report an error
+- The **Corrections** tab will show a red asterisk
 - Go to the **Home** tab
-- Unitck ``Time Zero``
+- Untick ``Time Zero``
 - Switch the plot from ``Asymmetry`` to ``Counts``
 - Set the ``Time Zero`` to be ``0``
 - The plots will now show a large peak

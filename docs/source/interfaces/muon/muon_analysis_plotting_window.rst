@@ -22,7 +22,7 @@ In the sequential fitting tab, the user can select the data to plot by highlight
 Model Data
 ^^^^^^^^^^
 
-This shows the data that has been selected on the the **Model Fitting** tab.
+This shows the data that has been selected on the **Model Fitting** tab.
 If a fit is calculated for the data, this is also displayed on the plot.
 
 
