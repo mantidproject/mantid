@@ -440,6 +440,20 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         '''Returns the index of the transmission wavelength based on the index of distance'''
         return 1 if d+1 in self.getProperty('DistancesAtWavelength2').value else 0
 
+    def get_beam_radius(self, d):
+        radii = self.getProperty('BeamRadius').value
+        if len(radii) == 1:
+            return radii[0]
+        else:
+            return radii[d]
+
+    def get_tr_beam_radius(self, l):
+        radii = self.getProperty('TrBeamRadius').value
+        if len(radii) == 1:
+            return radii[0]
+        else:
+            return radii[l]
+
     #================================PROCESSING ALL===============================#
 
     def process_all_transmissions(self):
@@ -575,7 +589,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
                                  ProcessAs='EmptyBeam',
                                  DarkCurrentWorkspace=tr_dark_current_ws,
                                  NormaliseBy=self.getProperty('NormaliseBy').value,
-                                 TransmissionBeamRadius=self.getProperty('TrBeamRadius').value[l],
+                                 TransmissionBeamRadius=self.get_tr_beam_radius(l),
                                  OutputWorkspace=tr_empty_beam_ws,
                                  OutputFluxWorkspace=tr_empty_beam_flux)
             return [tr_empty_beam_ws, tr_empty_beam_flux]
@@ -594,7 +608,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
                                  EmptyBeamWorkspace=tr_empty_beam_ws,
                                  FluxWorkspace=tr_empty_beam_flux,
                                  NormaliseBy=self.getProperty('NormaliseBy').value,
-                                 TransmissionBeamRadius=self.getProperty('TrBeamRadius').value[l],
+                                 TransmissionBeamRadius=self.get_tr_beam_radius(l),
                                  OutputWorkspace=tr_empty_can_ws)
             return tr_empty_can_ws
         else:
@@ -610,7 +624,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
                              EmptyBeamWorkspace=tr_empty_beam_ws,
                              FluxWorkspace=tr_empty_beam_flux,
                              NormaliseBy=self.getProperty('NormaliseBy').value,
-                             TransmissionBeamRadius=self.getProperty('TrBeamRadius').value[l],
+                             TransmissionBeamRadius=self.get_tr_beam_radius(l),
                              OutputWorkspace=tr_sample_ws,
                              startProgress=l*self.n_samples/self.n_reports,
                              endProgress=(l+1)*self.n_samples/self.n_reports)
@@ -621,7 +635,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
     def process_dark_current(self, d):
         runs = self.getPropertyValue('DarkCurrentRuns')
         if runs:
-            dark_current = runs.split(',')[l]
+            dark_current = runs.split(',')[d]
             [process_dark_current, dark_current_ws] = needs_processing(dark_current, 'DarkCurrent')
             if process_dark_current:
                 SANSILLReduction(Runs=dark_current,
@@ -635,7 +649,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
     def process_empty_beam(self, d, dark_current_ws):
         runs = self.getPropertyValue('EmptyBeamRuns')
         if runs:
-            empty_beam = runs.split(',')[l]
+            empty_beam = runs.split(',')[d]
             [process_empty_beam, empty_beam_ws] = needs_processing(empty_beam, 'EmptyBeam')
             empty_beam_flux = empty_beam_ws + 'Flux'
             if process_empty_beam:
@@ -643,7 +657,8 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
                                  ProcessAs='EmptyBeam',
                                  DarkCurrentWorkspace=dark_current_ws,
                                  NormaliseBy=self.getProperty('NormaliseBy').value,
-                                 BeamRadius=self.getProperty('BeamRadius').value[l],
+                                 BeamRadius=self.get_beam_radius(d),
+                                 TransmissionBeamRadius=self.get_tr_beam_radius(self.tr_index(d)),
                                  OutputWorkspace=empty_beam_ws,
                                  OutputFluxWorkspace=empty_beam_flux)
             return [empty_beam_ws, empty_beam_flux]
@@ -653,7 +668,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
     def process_flux(self, d, dark_current_ws):
         runs = self.getPropertyValue('FluxRuns')
         if runs:
-            empty_beam = runs.split(',')[l]
+            empty_beam = runs.split(',')[d]
             [process_empty_beam, empty_beam_ws] = needs_processing(empty_beam, 'EmptyBeam')
             empty_beam_flux = empty_beam_ws + 'Flux'
             if process_empty_beam:
@@ -661,7 +676,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
                                  ProcessAs='EmptyBeam',
                                  DarkCurrentWorkspace=dark_current_ws,
                                  NormaliseBy=self.getProperty('NormaliseBy').value,
-                                 TransmissionBeamRadius=self.getProperty('BeamRadius').value[l],
+                                 TransmissionBeamRadius=self.get_tr_beam_radius(self.tr_index(d)),
                                  OutputWorkspace=empty_beam_ws,
                                  OutputFluxWorkspace=empty_beam_flux)
             return [empty_beam_ws, empty_beam_flux]
@@ -671,7 +686,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
     def process_container(self, d, dark_current_ws, empty_beam_ws, transmissions):
         runs = self.getPropertyValue('EmptyContainerRuns')
         if runs:
-            empty_can = runs.split(',')[l]
+            empty_can = runs.split(',')[d]
             [process_empty_can, empty_can_ws] = needs_processing(empty_can, 'EmptyContainer')
             if process_empty_can:
                 can_tr_ws = ''
@@ -681,7 +696,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
                                  ProcessAs='EmptyContainer',
                                  DarkCurrentWorkspace=dark_current_ws,
                                  EmptyBeamWorkspace=empty_beam_ws,
-                                 TransmissionInputWorkspace=can_tr_ws,
+                                 TransmissionWorkspace=can_tr_ws,
                                  TransmissionThetaDependent=self.getProperty('TransmissionThetaDependent').value,
                                  NormaliseBy=self.getProperty('NormaliseBy').value,
                                  OutputWorkspace=empty_can_ws)

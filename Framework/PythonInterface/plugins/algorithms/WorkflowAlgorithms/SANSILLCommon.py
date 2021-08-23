@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.simpleapi import CropToComponent, logger, mtd
+from mantid.api import WorkspaceGroup
 from enum import IntEnum
 from math import fabs
 from os import path
