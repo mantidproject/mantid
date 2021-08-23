@@ -34,8 +34,6 @@ DECLARE_ALGORITHM(SaveAscii2)
 using namespace Kernel;
 using namespace API;
 
-const std::vector<std::string> SaveAscii2::ASCII_EXTS = {".dat", ".txt", ".csv"};
-
 /// Empty constructor
 SaveAscii2::SaveAscii2()
     : m_separatorIndex(), m_nBins(0), m_sep(), m_writeDX(false), m_writeID(false), m_isCommonBins(false),
@@ -47,7 +45,7 @@ void SaveAscii2::init() {
                   "The name of the workspace containing the data you want to save to a "
                   "Ascii file.");
 
-  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Save, ASCII_EXTS),
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Save, m_asciiExts),
                   "The filename of the output Ascii file.");
 
   auto mustBePositive = std::make_shared<BoundedValidator<int>>();
@@ -330,7 +328,7 @@ void SaveAscii2::exec() {
 std::string SaveAscii2::createSpectrumFilename(size_t workspaceInex) {
   std::string filename = getProperty("Filename");
   size_t extPosition;
-  for (const std::string &ext : ASCII_EXTS) {
+  for (const std::string &ext : m_asciiExts) {
     extPosition = filename.find(ext);
     if (extPosition != std::string::npos)
       break;
