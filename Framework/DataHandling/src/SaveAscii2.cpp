@@ -280,7 +280,6 @@ void SaveAscii2::exec() {
     std::ofstream file(currentFilename, (appendToFile ? std::ios::app : std::ios::out));
 
     if (file.bad()) {
-      g_log.error("Unable to create file: " + currentFilename);
       throw Exception::FileError("Unable to create file: ", currentFilename);
     }
     // Set the number precision
@@ -501,7 +500,6 @@ void SaveAscii2::writeTableWorkspace(const ITableWorkspace_const_sptr &tws, cons
   std::ofstream file(filename.c_str(), (appendToFile ? std::ios::app : std::ios::out));
 
   if (file.bad()) {
-    g_log.error("Unable to create file: " + filename);
     throw Exception::FileError("Unable to create file: ", filename);
   }
   // Set the number precision
