@@ -333,6 +333,8 @@ std::string SaveAscii2::createSpectrumFilename(size_t workspaceInex) {
     if (extPosition != std::string::npos)
       break;
   }
+  if (extPosition == std::string::npos)
+    extPosition = filename.size();
 
   std::ostringstream ss;
   double axisValue = m_ws->getAxis(1)->getValue(workspaceInex);
