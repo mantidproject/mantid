@@ -45,6 +45,7 @@ public:
 public slots:
   void setStartX(double /*startX*/);
   void setEndX(double /*endX*/);
+  void setActiveSpectrum(WorkspaceIndex spectrum);
   void updatePlotSpectrum(WorkspaceIndex spectrum);
   void updateRangeSelectors();
   void appendLastDataToSelection(std::vector<std::string> displayNames);
@@ -54,11 +55,10 @@ public slots:
   void updateFit();
   void updateGuess();
   void updateGuessAvailability();
+
   void enablePlotGuessInSeparateWindow();
   void disablePlotGuessInSeparateWindow();
   void disableSpectrumPlotSelection();
-  void handlePlotSpectrumChanged(WorkspaceIndex spectrum);
-  void setActiveSpectrum(WorkspaceIndex spectrum);
 
 signals:
   void selectedFitDataChanged(WorkspaceID /*_t1*/);
@@ -79,6 +79,7 @@ private slots:
   void emitFitSingleSpectrum();
   void emitFWHMChanged(double minimum, double maximum);
   void handleSelectedFitDataChanged(WorkspaceID workspaceID);
+  void handlePlotSpectrumChanged(WorkspaceIndex spectrum);
 
 private:
   void disableAllDataSelection();

@@ -216,7 +216,7 @@ boost::optional<double> IndirectFitPlotModel::getFirstBackgroundLevel() const {
   if (spectra.empty())
     return boost::optional<double>();
   auto index = spectra.indexOf(m_activeWorkspaceIndex);
-  if (!m_activeFunction)
+  if (!m_activeFunction || m_activeFunction->nFunctions() == 0)
     return boost::optional<double>();
   return findFirstBackgroundLevel(m_activeFunction->getFunction(index.value));
 }

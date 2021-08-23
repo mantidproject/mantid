@@ -445,7 +445,7 @@ void IndirectFitAnalysisTab::executeFit() {
     setRunIsRunning(true);
     enableFitButtons(false);
     enableOutputOptions(false);
-    runFitAlgorithm(m_fittingModel->getFittingAlgorithm());
+    runFitAlgorithm(m_fittingModel->getFittingAlgorithm(m_fittingModel->getFittingMode()));
   }
 }
 
@@ -470,7 +470,7 @@ void IndirectFitAnalysisTab::run() {
   enableFitButtons(false);
   enableOutputOptions(false);
   m_fittingModel->setFittingMode(m_fitPropertyBrowser->getFittingMode());
-  runFitAlgorithm(m_fittingModel->getFittingAlgorithm());
+  runFitAlgorithm(m_fittingModel->getFittingAlgorithm(m_fittingModel->getFittingMode()));
 }
 
 /**

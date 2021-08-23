@@ -80,7 +80,7 @@ public:
   boost::optional<ResultLocationNew> getResultLocation(WorkspaceID workspaceID, WorkspaceIndex spectrum) const override;
   Mantid::API::WorkspaceGroup_sptr getResultWorkspace() const override;
   Mantid::API::WorkspaceGroup_sptr getResultGroup() const override;
-  virtual Mantid::API::IAlgorithm_sptr getFittingAlgorithm() const override;
+  Mantid::API::IAlgorithm_sptr getFittingAlgorithm(FittingMode mode) const;
   Mantid::API::IAlgorithm_sptr getSingleFit(WorkspaceID workspaceID, WorkspaceIndex spectrum) const override;
   Mantid::API::IFunction_sptr getSingleFunction(WorkspaceID workspaceID, WorkspaceIndex spectrum) const override;
   std::string getOutputBasename() const override;
@@ -94,9 +94,9 @@ public:
   IIndirectFitDataModel *getFitDataModel() override;
 
 protected:
-  std::string createOutputName(const std::string &fitMode) const;
-  Mantid::API::IAlgorithm_sptr getFittingAlgorithm(FittingMode mode) const;
-  Mantid::API::IAlgorithm_sptr createSequentialFit(const Mantid::API::IFunction_sptr &function) const;
+  std::string createOutputName(const std::string &fitMode, const std::string &workspaceName,
+                               const std::string &spectra) const;
+  Mantid::API::IAlgorithm_sptr createSequentialFit(Mantid::API::IFunction_sptr function) const;
   Mantid::API::IAlgorithm_sptr createSimultaneousFit(const Mantid::API::MultiDomainFunction_sptr &function) const;
   virtual Mantid::API::MultiDomainFunction_sptr getMultiDomainFunction() const;
   virtual std::unordered_map<std::string, std::string> mapDefaultParameterNames() const;
@@ -114,7 +114,7 @@ private:
   virtual Mantid::API::IAlgorithm_sptr simultaneousFitAlgorithm() const;
   virtual std::string sequentialFitOutputName() const;
   virtual std::string simultaneousFitOutputName() const;
-  virtual std::string singleFitOutputName(WorkspaceID workspaceID, WorkspaceIndex spectrum) const;
+  virtual std::string singleFitOutputName(std::string workspaceName, WorkspaceIndex spectrum) const;
   virtual std::unordered_map<std::string, ParameterValue> createDefaultParameters(WorkspaceID workspaceID) const;
 
   virtual std::string getResultXAxisUnit() const;

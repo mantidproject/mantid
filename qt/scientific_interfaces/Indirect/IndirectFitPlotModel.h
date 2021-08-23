@@ -30,18 +30,14 @@ public:
   Mantid::API::MatrixWorkspace_sptr getWorkspace() const;
   Mantid::API::MatrixWorkspace_sptr getResultWorkspace() const;
   Mantid::API::MatrixWorkspace_sptr getGuessWorkspace() const;
-  Mantid::API::IFunction_sptr getSingleFunction(WorkspaceID workspaceID, WorkspaceIndex spectrum) const;
-  FitDomainIndex getDomainIndex(WorkspaceID workspaceID, WorkspaceIndex spectrum) const;
-  boost::optional<ResultLocationNew> getResultLocation(WorkspaceID workspaceID, WorkspaceIndex spectrum) const;
   MantidWidgets::FunctionModelSpectra getSpectra(WorkspaceID workspaceID) const;
 
   Mantid::API::MatrixWorkspace_sptr appendGuessToInput(const Mantid::API::MatrixWorkspace_sptr &guessWorkspace) const;
 
   WorkspaceID getActiveWorkspaceID() const;
   WorkspaceIndex getActiveWorkspaceIndex() const;
-  WorkspaceID numberOfWorkspaces() const;
-  size_t numberOfSpectra(WorkspaceID workspaceID) const;
   FitDomainIndex getActiveDomainIndex() const;
+  WorkspaceID numberOfWorkspaces() const;
   std::pair<double, double> getRange() const;
   std::pair<double, double> getWorkspaceRange() const;
   std::pair<double, double> getResultRange() const;
@@ -62,6 +58,11 @@ public:
 
 private:
   std::pair<double, double> getGuessRange() const;
+
+  Mantid::API::IFunction_sptr getSingleFunction(WorkspaceID workspaceID, WorkspaceIndex spectrum) const;
+  FitDomainIndex getDomainIndex(WorkspaceID workspaceID, WorkspaceIndex spectrum) const;
+  boost::optional<ResultLocationNew> getResultLocation(WorkspaceID workspaceID, WorkspaceIndex spectrum) const;
+  size_t numberOfSpectra(WorkspaceID workspaceID) const;
 
   Mantid::API::MatrixWorkspace_sptr
   createInputAndGuessWorkspace(const Mantid::API::MatrixWorkspace_sptr &inputWS,

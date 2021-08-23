@@ -32,7 +32,6 @@ std::unique_ptr<QTableWidget> createEmptyTableWidget(int columns, int rows) {
       table->setItem(row, column, new QTableWidgetItem("item"));
   return table;
 }
-
 } // namespace
 
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
@@ -63,6 +62,7 @@ public:
 class MockIndirectFitDataModel : public IIndirectFitDataModel {
 public:
   /// Public Methods
+  MOCK_METHOD0(getFittingData, std::vector<IndirectFitData> *());
   MOCK_METHOD2(addWorkspace, void(const std::string &workspaceName, const std::string &spectra));
   MOCK_METHOD2(addWorkspace, void(const std::string &workspaceName, const FunctionModelSpectra &spectra));
   MOCK_METHOD2(addWorkspace, void(MatrixWorkspace_sptr workspace, const FunctionModelSpectra &spectra));

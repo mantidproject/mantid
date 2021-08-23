@@ -131,67 +131,9 @@ public:
     TS_ASSERT_EQUALS(storedWorkspace->getNumberHistograms(), 3);
   }
 
-  void test_that_hasWorkspace_returns_true_when_the_model_contains_a_workspace() {
-    addWorkspaceToModel("WorkspaceName", 3, "0-2");
-    TS_ASSERT(m_model->hasWorkspace("WorkspaceName"));
-  }
-
-  void test_that_hasWorkspace_returns_false_when_the_model_does_not_contain_a_workspace() {
-    addWorkspaceToModel("WorkspaceName", 3, "0-2");
-    TS_ASSERT(!m_model->hasWorkspace("WrongName"));
-  }
-
   void test_that_getWorkspace_returns_a_nullptr_when_getWorkspace_is_provided_an_out_of_range_index() {
     addWorkspaceToModel("WorkspaceName", 3, "0-2");
     TS_ASSERT_EQUALS(m_model->getWorkspace(1), nullptr);
-  }
-
-  void test_that_setSpectra_does_not_throw_when_provided_an_out_of_range_dataIndex() {
-    addWorkspaceToModel("WorkspaceName", 3, "0-2");
-    TS_ASSERT_THROWS_NOTHING(m_model->getSpectra(1));
-  }
-
-  void test_that_getSpectra_returns_an_empty_DiscontinuousSpectra_when_provided_an_out_of_range_index() {
-    addWorkspaceToModel("WorkspaceName", 3, "0-2");
-
-    FunctionModelSpectra const emptySpectra(FunctionModelSpectra(""));
-    FunctionModelSpectra const spectra = m_model->getSpectra(3);
-
-    TS_ASSERT_EQUALS(spectra, emptySpectra);
-  }
-
-  void test_that_setStartX_will_set_the_startX_at_the_first_dataIndex_when_the_fit_is_sequential() {
-    addWorkspaceToModel("WorkspaceName", 3, "0-2");
-
-    m_model->setStartX(4.0, 0, 0);
-
-    TS_ASSERT_EQUALS(m_model->getFittingRange(0, 0).first, 4.0);
-  }
-
-  void test_that_setEndX_will_set_the_endX_at_the_first_dataIndex_when_the_fit_is_sequential() {
-    addWorkspaceToModel("WorkspaceName", 3, "0-2");
-
-    m_model->setEndX(4.0, 0, 0);
-
-    TS_ASSERT_EQUALS(m_model->getFittingRange(0, 0).second, 4.0);
-  }
-
-  void test_that_getFittingRange_returns_correct_range_when_provided_a_valid_index_and_spectrum() {
-    addWorkspaceToModel("WorkspaceName", 3, "0-2");
-    m_model->setStartX(1.2, 0, 0);
-    m_model->setEndX(5.6, 0, 0);
-
-    TS_ASSERT_EQUALS(m_model->getFittingRange(0, 0).first, 1.2);
-    TS_ASSERT_EQUALS(m_model->getFittingRange(0, 0).second, 5.6);
-  }
-
-  void test_that_getFittingRange_returns_empty_range_when_provided_an_out_of_range_dataIndex() {
-    addWorkspaceToModel("WorkspaceName", 3, "0-2");
-    m_model->setStartX(1.2, 0, 0);
-    m_model->setEndX(5.6, 0, 0);
-
-    TS_ASSERT_EQUALS(m_model->getFittingRange(1, 0).first, 0.0);
-    TS_ASSERT_EQUALS(m_model->getFittingRange(1, 0).second, 0.0);
   }
 
   void test_that_isMultiFit_returns_true_when_there_are_more_than_one_workspaces_stored_in_the_model() {
@@ -274,11 +216,6 @@ public:
     TS_ASSERT(m_model->isPreviouslyFit(WorkspaceID(0), WorkspaceIndex(0)));
   }
 
-  void test_that_number_of_spectra_is_not_zero_if_workspace_contains_one_or_more_spectra() {
-    addWorkspaceToModel("WorkspaceName", 3, "0-2");
-    TS_ASSERT_DIFFERS(m_model->getSpectra(WorkspaceID(0)).size(), 0);
-  }
-
   void test_that_isInvalidFunction_returns_a_message_when_no_activeFunction_exists() {
     addWorkspaceToModel("WorkspaceName", 3, "0-2");
     TS_ASSERT(m_model->isInvalidFunction());
@@ -306,23 +243,6 @@ public:
     addWorkspaceToModel("Workspace2", 3, "0-2");
     addWorkspaceToModel("Workspace3", 3, "0-2");
     TS_ASSERT_EQUALS(m_model->getNumberOfWorkspaces(), 3);
-  }
-
-  void test_that_getNumberOfSpectra_throws_if_dataIndex_is_out_of_range() {
-    addWorkspaceToModel("Workspace1", 3, "0-2");
-    TS_ASSERT_THROWS(m_model->getNumberOfSpectra(1), const std::runtime_error &);
-  }
-
-  void test_that_getNumberOfSpectra_returns_the_number_of_spectra_stored_in_the_workspace_given() {
-    addWorkspaceToModel("Workspace1", 3, "0-2");
-    TS_ASSERT_EQUALS(m_model->getNumberOfSpectra(0), 3);
-  }
-
-  void test_that_getNumberOfSpectra_returns_the_number_of_spectra_stored_in_multiple_workspaces() {
-    addWorkspaceToModel("Workspace1", 3, "0-2");
-    addWorkspaceToModel("Workspace2", 3, "0");
-    TS_ASSERT_EQUALS(m_model->getNumberOfSpectra(0), 3);
-    TS_ASSERT_EQUALS(m_model->getNumberOfSpectra(1), 1);
   }
 
   void test_that_getFitParameterNames_returns_an_empty_vector_if_the_fitOutput_is_empty() {
@@ -512,7 +432,7 @@ public:
                                  "false;name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0."
                                  "0175)))";
     setFittingFunction(m_model, function);
-    TS_ASSERT_THROWS_NOTHING(m_model->getFittingAlgorithm());
+    TS_ASSERT_THROWS_NOTHING(m_model->getFittingAlgorithm(FittingMode::SEQUENTIAL));
   }
 
   void test_getSingleFit_does_not_throw() {
@@ -543,23 +463,6 @@ public:
     addWorkspaceToModel("wsName", 3, "0-2");
     std::string outputString = "wsName_FitType_seq_FitString_0-2";
     TS_ASSERT_EQUALS(m_model->getOutputBasename(), outputString);
-  }
-
-  void test_createDisplayName_raises_error_when_index_out_of_range() {
-    addWorkspaceToModel("wsName", 3, "0-2");
-    TS_ASSERT_THROWS(m_model->createDisplayName(WorkspaceID{1}), const std::runtime_error &);
-  }
-
-  void test_createDisplayName_produces_correct_format() {
-    addWorkspaceToModel("wsName", 3, "0-2");
-    TS_ASSERT_EQUALS(m_model->createDisplayName(WorkspaceID{0}), "wsName (0-2)");
-  }
-
-  void test_getDataForParameterEstimation_returns_values_for_each_spectrum() {
-    addWorkspaceToModel("wsName", 5, "0-4");
-    auto selector = getEstimationDataSelector();
-    auto data = m_model->getDataForParameterEstimation(selector);
-    TS_ASSERT_EQUALS(data.size(), 5);
   }
 
 private:

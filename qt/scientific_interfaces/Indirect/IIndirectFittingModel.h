@@ -63,7 +63,7 @@ public:
                                                                WorkspaceIndex spectrum) const = 0;
   virtual Mantid::API::WorkspaceGroup_sptr getResultWorkspace() const = 0;
   virtual Mantid::API::WorkspaceGroup_sptr getResultGroup() const = 0;
-  virtual Mantid::API::IAlgorithm_sptr getFittingAlgorithm() const = 0;
+  virtual Mantid::API::IAlgorithm_sptr getFittingAlgorithm(FittingMode mode) const = 0;
   virtual Mantid::API::IAlgorithm_sptr getSingleFit(WorkspaceID workspaceID, WorkspaceIndex spectrum) const = 0;
   virtual Mantid::API::IFunction_sptr getSingleFunction(WorkspaceID workspaceID, WorkspaceIndex spectrum) const = 0;
   virtual std::string getOutputBasename() const = 0;
