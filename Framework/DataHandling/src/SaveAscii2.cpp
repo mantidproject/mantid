@@ -500,7 +500,7 @@ void SaveAscii2::writeTableWorkspace(const ITableWorkspace_const_sptr &tws, cons
 
   std::ofstream file(filename.c_str(), (appendToFile ? std::ios::app : std::ios::out));
 
-  if (!file) {
+  if (file.bad()) {
     g_log.error("Unable to create file: " + filename);
     throw Exception::FileError("Unable to create file: ", filename);
   }
