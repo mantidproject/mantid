@@ -336,7 +336,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         return issues
 
     def validateInputs(self):
-        '''Validates all the inputs'''
+        '''Validates all the inputs, one by one. Returns at first failure.'''
         issues = dict()
         self._setup_light()
         issues = self._check_sample_runs_dimensions()
@@ -344,6 +344,8 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
             issues = self._check_tr_runs_dimensions()
         if not issues:
             issues = self._check_aux_sample_input_dimensions()
+        if not issues:
+            issues = self._check_sample_thickness_dimensions()
         if not issues:
             issues = self._check_aux_tr_input_dimensions()
         if not issues:
