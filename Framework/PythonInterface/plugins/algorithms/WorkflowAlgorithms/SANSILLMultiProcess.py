@@ -677,6 +677,8 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         if instrument.hasParameter('detector_panels'):
             panel_names = instrument.getStringParameter('detector_panels')[0].split(',')
         CalculateDynamicRange(Workspace=sample_ws[0], ComponentNames=panel_names)
+        # This will mask the pixel if it counts NaN in any of the frames
+        MaskDetectorsIf(InputWorkspace=sample_ws[0], OutputWorkspace=sample_ws[0], Operator='NotFinite')
         kwargs = dict()
         kwargs['InputWorkspace'] = sample_ws[0]
         kwargs['OutputWorkspace'] = sample_ws[0] + '_iq'
