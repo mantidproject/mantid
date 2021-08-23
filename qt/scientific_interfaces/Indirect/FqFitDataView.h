@@ -1,39 +1,35 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2021 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "ConvFitModel.h"
-#include "IndirectFitDataTablePresenter.h"
+#include "IndirectFitDataView.h"
 
-#include <QTableWidget>
+#include "DllConfig.h"
 
-#include <cstddef>
-#include <unordered_map>
+#include <QTabWidget>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
-
 /**
-  Presenter for a table of convolution fitting data.
+Presenter for a table of convolution fitting data.
 */
-class DLLExport ConvFitDataTablePresenter : public IndirectFitDataTablePresenter {
+class MANTIDQT_INDIRECT_DLL FqFitDataView : public IndirectFitDataView {
   Q_OBJECT
 public:
-  ConvFitDataTablePresenter(ConvFitModel *model, QTableWidget *dataTable);
-
-protected:
-  void addTableEntry(FitDomainIndex row) override;
-
-private:
+  FqFitDataView(QWidget *parent = nullptr);
+  void addTableEntry(size_t row, FitDataRow newRow) override;
   int workspaceIndexColumn() const override;
   int startXColumn() const override;
   int endXColumn() const override;
   int excludeColumn() const override;
+
+protected:
+  FqFitDataView(const QStringList &headers, QWidget *parent = nullptr);
 };
 
 } // namespace IDA
