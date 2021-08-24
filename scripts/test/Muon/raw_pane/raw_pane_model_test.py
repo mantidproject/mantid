@@ -18,20 +18,19 @@ class RawPaneModelTest(unittest.TestCase):
         self.model = RawPaneModel(self.context)
         self.name = self.model.name
 
-    def test_generate_run_indicies_3_runs(self):
+    def test_generate_run_indices_3_runs(self):
         self.model._max_spec = 4
         ws_list = [mock.Mock(), mock.Mock(),mock.Mock()]
         indices = [k for k in range(self.model._max_spec)]
-        indices += indices + indices
         self.assertEqual(indices, self.model._generate_run_indices(ws_list, "1:4"))
 
-    def test_generate_run_indicies(self):
+    def test_generate_run_indices(self):
         self.model._max_spec = 12
         ws_list = [mock.Mock()]
         indices = [k for k in range(self.model._max_spec)]
         self.assertEqual(indices, self.model._generate_run_indices(ws_list, "1:12"))
 
-    def test_generate_run_indicies_from_other_detectors(self):
+    def test_generate_run_indices_from_other_detectors(self):
         self.model._max_spec = 4
         ws_list = [mock.Mock()]
         det = "5:8"
@@ -59,6 +58,11 @@ class RawPaneModelTest(unittest.TestCase):
         self.model._max_spec = 4
         keys = ['Detector: 1', 'Detector: 2', 'Detector: 3', 'Detector: 4']
         self.assertEqual(keys, self.model.create_tiled_keys("unused"))
+
+    def test_create_tiled_keys_with_offset(self):
+        self.model._max_spec = 4
+        keys = ['Detector: 9', 'Detector: 10', 'Detector: 11', 'Detector: 12']
+        self.assertEqual(keys, self.model.create_tiled_keys("unused", 9))
 
     def test_get_workspace_plot_axis(self):
         index = 2
@@ -135,6 +139,15 @@ class RawPaneModelTest(unittest.TestCase):
         self.model.get_ws_names.assert_any_call("62260", True, '2', "1:16")
         self.assertEqual(self.model.get_ws_names.call_count, 2)
         self.assertEqual(names, ["test", "test"])
+
+    def test_get_workspaces_to_plot_multi_period_selection(self):
+        self.model.get_ws_names = mock.Mock(return_value = ["test"])
+        self.context.data_context.num_periods = mock.Mock(return_value =2)
+        self.context.data_context._current_runs = [[62260], [62261]]
+
+        names = self.model.get_workspaces_to_plot(True, "Counts", "1:16", "62260","2")
+        self.model.get_ws_names.assert_called_once_with("62260", True, '2', "1:16")
+        self.assertEqual(names, ["test"])
 
     def test_convert_index_to_axis(self):
         self.model._max_spec = 4

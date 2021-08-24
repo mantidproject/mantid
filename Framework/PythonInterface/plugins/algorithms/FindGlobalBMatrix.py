@@ -106,6 +106,8 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
         alatt0 = [a, b, c, alpha, beta, gamma]
         try:
             alatt, cov, info, msg, ier = leastsq(fobj, x0=alatt0, full_output=True)
+            # eval the fobj at optimal solution to set UB (leastsq iteration stops at a next sub-optimal solution)
+            fobj(alatt)
         except ValueError:
             logger.error("CalculateUMatrix failed - check initial lattice parameters and tolerance provided.")
             return
@@ -196,10 +198,12 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
         residsq = np.zeros(sum([AnalysisDataService.retrieve(wsname).getNumberPeaks() for wsname in ws_list]))
         ipk = 0  # normalise by n peaks indexed so no penalty in indexing more peaks
         for wsname in ws_list:
-            nindexed = self.child_IndexPeaks(PeaksWorkspace=wsname, RoundHKLs=True)
+            # index peaks with CommonUBForAll=False (optimises a temp. UB when indexing - helps for bad guesses)
+            nindexed = self.child_IndexPeaks(PeaksWorkspace=wsname, RoundHKLs=True, CommonUBForAll=False)
             if nindexed >= _MIN_NUM_INDEXED_PEAKS:
                 self.child_CalculateUMatrix(wsname, *x0)
-                self.child_IndexPeaks(PeaksWorkspace=wsname, RoundHKLs=False)
+                # don't index with optimisation after this point and don't round HKL (to calc resids)
+                self.child_IndexPeaks(PeaksWorkspace=wsname, RoundHKLs=False, CommonUBForAll=True)
                 ws = AnalysisDataService.retrieve(wsname)
                 UB = 2 * np.pi * ws.sample().getOrientedLattice().getUB()
                 for ii in range(ws.getNumberPeaks()):
@@ -209,11 +213,12 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
                         ipk += 1
         return np.sqrt(residsq / (ipk + 1))
 
-    def child_IndexPeaks(self, PeaksWorkspace, RoundHKLs=True):
+    def child_IndexPeaks(self, PeaksWorkspace, RoundHKLs=True, CommonUBForAll=False):
         alg = self.createChildAlgorithm("IndexPeaks", enableLogging=False)
         alg.setProperty("PeaksWorkspace", PeaksWorkspace)
         alg.setProperty("Tolerance", self.tol)
         alg.setProperty("RoundHKLs", RoundHKLs)
+        alg.setProperty("CommonUBForAll", CommonUBForAll)  # if False then optimises a temp UB before indexing
         alg.execute()
         return alg.getProperty("NumIndexed").value
 

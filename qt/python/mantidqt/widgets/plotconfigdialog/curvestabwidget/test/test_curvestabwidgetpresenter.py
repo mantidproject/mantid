@@ -60,6 +60,7 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
                              get_current_curve_name=lambda: "Workspace")
         if not fig:
             fig = self.fig
+        mock_view.select_curve_list=Mock(selectedItems=lambda: [])
         return CurvesTabWidgetPresenter(fig=fig, view=mock_view)
 
     def test_axes_names_dict_gets_axes_on_init_(self):
@@ -170,7 +171,7 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
         mock_view = Mock(get_selected_ax_name=lambda: "(0, 0)",
                          get_current_curve_name=lambda: "line1",
                          get_selected_curves_names=lambda: ["line1"])
-        mock_view.select_curve_list.count = Mock(return_value=0)
+        mock_view.select_curve_list=Mock(selectedItems=lambda: [], count=lambda: 0)
         mock_view.select_axes_combo_box.count = Mock(return_value=0)
 
         parent_presenter_mock = Mock()
@@ -392,9 +393,8 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
     def test_selecting_many_curves_disables_curve_config(self):
         mock_view = Mock(get_selected_ax_name=lambda: "Axes 0: (0, 0)",
                          get_current_curve_name=lambda: "Workspace")
-        mock_view.select_curve_list.selectedItems = lambda: ["item1", "item2"]
-
         presenter = self._generate_presenter(fig=None, mock_view=mock_view)
+        mock_view.select_curve_list.selectedItems = lambda: ["item1", "item2"]
         presenter.on_curves_selection_changed()
 
         mock_view.enable_curve_config.assert_called_with(False)
@@ -402,9 +402,8 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
     def test_selection_one_curve_enables_curve_config(self):
         mock_view = Mock(get_selected_ax_name=lambda: "Axes 0: (0, 0)",
                          get_current_curve_name=lambda: "Workspace")
-        mock_view.select_curve_list.selectedItems = lambda: ["item1"]
-
         presenter = self._generate_presenter(fig=None, mock_view=mock_view)
+        mock_view.select_curve_list.selectedItems = lambda: ["item1"]
         presenter.on_curves_selection_changed()
 
         mock_view.enable_curve_config.assert_called_with(True)

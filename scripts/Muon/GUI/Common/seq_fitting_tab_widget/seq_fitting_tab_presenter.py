@@ -41,7 +41,7 @@ class SeqFittingTabPresenter(object):
         self.disable_tab_observer = GenericObserver(lambda: self.view.
                                                     setEnabled(False))
         self.enable_tab_observer = GenericObserver(lambda: self.view.
-                                                   setEnabled(True))
+                                                   setEnabled(self.model.number_of_datasets > 0))
 
     def create_thread(self, callback):
         self.fitting_calculation_model = ThreadModelWrapperWithOutput(callback)

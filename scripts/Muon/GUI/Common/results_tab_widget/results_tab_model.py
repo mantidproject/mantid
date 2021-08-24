@@ -12,7 +12,8 @@ from enum import Enum
 # Constants
 DEFAULT_TABLE_NAME = 'ResultsTable'
 ALLOWED_NON_TIME_SERIES_LOGS = ("run_number", "run_start", "run_end", "group",
-                                "period", "sample_temp", "sample_magn_field")
+                                "period", "sample_temp", "sample_magn_field",
+                                "analysis_asymmetry_norm", "analysis_group_name")
 ERROR_COL_SUFFIX = 'Error'
 # This is not a particularly robust way of ignoring this as it
 # depends on how Fit chooses to output the name of that value
