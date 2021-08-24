@@ -35,6 +35,8 @@ SliceViewer
 Improvements
 ############
 
+- :ref:`SaveAscii <algm-SaveAscii>` has new property OneSpectrumPerFile.
+
 Bugfixes
 ########
 
