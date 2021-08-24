@@ -929,10 +929,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(save.execute());
     size_t extPos = filename.find(".dat");
     std::ostringstream ss0, ss1;
-    ss0 << std::string(filename, 0, extPos) << "_0"
-        << std::string(filename, extPos);
-    ss1 << std::string(filename, 0, extPos) << "_1"
-        << std::string(filename, extPos);
+    ss0 << std::string(filename, 0, extPos) << "_0" << std::string(filename, extPos);
+    ss1 << std::string(filename, 0, extPos) << "_1" << std::string(filename, extPos);
     TS_ASSERT(Poco::File(ss0.str()).exists());
     TS_ASSERT(Poco::File(ss1.str()).exists());
   }
