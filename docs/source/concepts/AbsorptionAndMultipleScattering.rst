@@ -112,7 +112,7 @@ Absorption
 
 .. plot:: concepts/AbsorptionAndMultipleScattering_plot_abs.py
 
-   Comparison of absorption methods with the assumptions of elastic scattering and isotropic scattering for in-plane detectors
+   Comparison of absorption methods with the assumptions of elastic scattering and isotropic scattering for in-plane detectors. The sample is Vanadium rod 4cm tall with 0.25cm diameter with standard number density. Algorithms compared are :ref:`MayersSampleCorrection <algm-MayersSampleCorrection>`, :ref:`CarpenterSampleCorrection <algm-CarpenterSampleCorrection>`, :ref:`AbsorptionCorrection <algm-AbsorptionCorrection>` (numerical integration), and :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` (monte carlo ray tracing).
 
 
 
@@ -371,8 +371,7 @@ Multiple Scattering
 
 .. plot:: concepts/AbsorptionAndMultipleScattering_plot_ms.py
 
-   Comparison of multiple scattering methods with the assumptions of elastic scattering and isotropic scattering for in-plane detectors.
-
+   Comparison of multiple scattering methods with the assumptions of elastic scattering and isotropic scattering for in-plane detectors. The sample is Vanadium rod 4cm tall with 0.25cm diameter with standard number density. Algorithms compared are :ref:`MayersSampleCorrection <algm-MayersSampleCorrection>`, :ref:`CarpenterSampleCorrection <algm-CarpenterSampleCorrection>`, :ref:`MultipleScatteringCorrection <algm-MultipleScatteringCorrection>` (numerical integration), and :ref:`CalculateMultipleScattering <algm-CalculateMultipleScattering>` (monte carlo ray tracing).
 
 Introduction
 ############
@@ -708,6 +707,8 @@ Multiple Scattering Correction Algorithms in Mantid Table
 |                                                                                     |             |            |                                 |                      |                     ||  Can extract multiple scattering and subtract from scattering in Mantid              |
 +-------------------------------------------------------------------------------------+-------------+------------+---------------------------------+----------------------+---------------------+---------------------------------------------------------------------------------------+
 | :ref:`MayersSampleCorrection <algm-MayersSampleCorrection>`                         | E           | NI+MC      | Cylinder                        | TOF                  | IA,EA,FI,W          |   Uses Monte Carlo integration to evaluate the analytical integral.                   |
++-------------------------------------------------------------------------------------+-------------+------------+---------------------------------+----------------------+---------------------+---------------------------------------------------------------------------------------+
+| :ref:`MultipleScatteringCorrection <algm-MultipleScatteringCorrection>`             | E           | NI         | Any shape                       | Wavelength           | FI,IA,EA            |                                                                                       |
 +-------------------------------------------------------------------------------------+-------------+------------+---------------------------------+----------------------+---------------------+---------------------------------------------------------------------------------------+
 | :ref:`MuscatData <algm-MuscatData>`                                                 | I           | MC         | Cylinder or Flat Plate / Slab   | :math:`S(Q,\omega)`  | FI                  ||  Uses an input :math:`S(Q,\omega)` workspace created by :ref:`SofQW <algm-SofQW>`    |
 |                                                                                     |             |            |                                 |                      |                     ||  Based on Monte Carlo program DISCUS [16]_ (or MINUS) written in FORTRAN. [17]_      |
