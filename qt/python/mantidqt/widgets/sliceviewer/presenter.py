@@ -22,6 +22,7 @@ from .view import SliceViewerView
 from .adsobsever import SliceViewerADSObserver
 from .peaksviewer import PeaksViewerPresenter, PeaksViewerCollectionPresenter
 from ..observers.observing_presenter import ObservingPresenter
+from ...interfacemanager import InterfaceManager
 
 
 class SliceViewer(ObservingPresenter):
@@ -63,6 +64,8 @@ class SliceViewer(ObservingPresenter):
             self.view.data_view.disable_tool_button(ToolItemText.OVERLAY_PEAKS)
         if not self.model.can_support_nonorthogonal_axes():
             self.view.data_view.disable_tool_button(ToolItemText.NONORTHOGONAL_AXES)
+
+        self.view.data_view.help_button.clicked.connect(self.action_open_help_window)
 
         self.refresh_view()
 
@@ -502,3 +505,6 @@ class SliceViewer(ObservingPresenter):
     def _close_view_with_message(self, message: str):
         self.view.emit_close()  # inherited from ObservingView
         self._logger.warning(message)
+
+    def action_open_help_window(self):
+        InterfaceManager().showHelpPage('qthelp://org.mantidproject/doc/workbench/sliceviewer.html')

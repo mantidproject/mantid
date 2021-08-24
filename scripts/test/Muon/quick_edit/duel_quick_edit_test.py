@@ -9,7 +9,7 @@ import unittest
 from unittest import mock
 
 from Muon.GUI.Common.plot_widget.quick_edit.quick_edit_view import QuickEditView
-from Muon.GUI.Common.plot_widget.quick_edit.quick_edit_presenter import DuelQuickEditPresenter
+from Muon.GUI.Common.plot_widget.quick_edit.quick_edit_presenter import DualQuickEditPresenter
 from Muon.GUI.Common.contexts.plotting_context import PlottingContext
 
 from mantid.simpleapi import AnalysisDataService
@@ -21,12 +21,12 @@ def plot_at_index(index):
 
 
 @start_qapplication
-class DuelQuickEditTest(unittest.TestCase):
+class DualQuickEditTest(unittest.TestCase):
 
     def setUp(self):
         self.view = mock.Mock(spec=QuickEditView)
         self.context = PlottingContext()
-        self.presenter = DuelQuickEditPresenter(self.view, self.context)
+        self.presenter = DualQuickEditPresenter(self.view, self.context)
 
     def tearDown(self):
         AnalysisDataService.Instance().clear()

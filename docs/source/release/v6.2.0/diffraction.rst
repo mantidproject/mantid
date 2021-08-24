@@ -17,6 +17,7 @@ New features
 - New algorithm :ref:`SetSampleFromLogs <algm-SetSampleFromLogs>` inspects the sample enviroment logs for sample material and geometry information
 - New script for doing calibration by groups, :ref:`PowderDiffractionCalibration <calibration_tofpd_group_calibration-ref>`
 - New algorithm :ref:`MultipleScatteringCorrection <algm-MultipleScatteringCorrection>` to compute the multiple scattering correction factor for sample using numerical integration.
+- New algorithm :ref:`NOMADMedianDetectorTest <algm-NOMADMedianDetectorTest>` to mask pixels showing deficient or excessive total counts.
 
 Improvements
 ############
@@ -75,7 +76,7 @@ Bugfixes
 - An empty Engineering Diffraction interface is no longer saved if the user saves a project having previously had the interface open at some point in that session
 - The help button on the Engineering Diffraction interface points to the correct page, having been broken in the last release
 - Using the Clear button on the Workspace widget while using the Fitting tab no longer causes issues when you try to load runs back in.
-
+- On the fitting tab of the EngDiff UI the background can be inspected whether the background subtraction box is checked or not.
 
 Single Crystal Diffraction
 --------------------------
@@ -99,6 +100,7 @@ Improvements
 - Existing :ref:`MaskPeaksWorkspace <algm-MaskPeaksWorkspace-v1>` now also supports tube-type detectors used at the CORELLI instrument.
 - Existing :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` now retains the value of small optimization results instead of zeroing them.
 - Existing :ref:`IntegrateEllipsoids <algm-IntegrateEllipsoids-v1>` now can use a different integrator for satellite peaks.
+- New option in :ref:`IntegrateEllipsoids <algm-IntegrateEllipsoids-v1>` to share Bragg peak background with satellite peaks.
 
 Bugfixes
 ########

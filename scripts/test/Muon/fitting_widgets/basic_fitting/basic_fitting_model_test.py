@@ -693,6 +693,17 @@ class BasicFittingModelTest(unittest.TestCase):
         self.assertEqual(list(runs), ["20884"])
         self.assertEqual(list(groups_and_pairs), ["fwd"])
 
+    def test_that_get_runs_groups_and_pairs_for_fits_will_return_a_tuple_of_empty_lists_when_all_data_is_filtered_out(self):
+        self.mock_context_instrument = mock.PropertyMock(return_value="EMU")
+        type(self.model.context.data_context).instrument = self.mock_context_instrument
+
+        self.model.dataset_names = self.dataset_names
+
+        workspace_names, runs, groups_and_pairs = self.model.get_runs_groups_and_pairs_for_fits("Non-matching string")
+        self.assertEqual(list(workspace_names), [])
+        self.assertEqual(list(runs), [])
+        self.assertEqual(list(groups_and_pairs), [])
+
     def test_that_get_all_fit_functions_for_will_get_all_the_fit_functions_when_the_display_type_is_all(self):
         self.model.dataset_names = self.dataset_names
         self.model.single_fit_functions = self.single_fit_functions

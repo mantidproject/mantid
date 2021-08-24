@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from Muon.GUI.Common.plot_widget.quick_edit.quick_edit_view import QuickEditView
-from Muon.GUI.Common.plot_widget.quick_edit.quick_edit_presenter import QuickEditPresenter, DuelQuickEditPresenter
+from Muon.GUI.Common.plot_widget.quick_edit.quick_edit_presenter import QuickEditPresenter, DualQuickEditPresenter
 
 
 class QuickEditWidgetInterface(object):
@@ -103,11 +103,11 @@ class QuickEditWidget(QuickEditWidgetInterface):
         super().__init__(context, view, QuickEditPresenter(view, context))
 
 
-class DuelQuickEditWidget(QuickEditWidgetInterface):
+class DualQuickEditWidget(QuickEditWidgetInterface):
 
     def __init__(self, context, parent=None):
         view = QuickEditView(None, parent, "Time domains")
-        super().__init__(context, view, DuelQuickEditPresenter(view, context))
+        super().__init__(context, view, DualQuickEditPresenter(view, context))
 
     def add_subplot(self, name):
         self._presenter.add_subplot(name)

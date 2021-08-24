@@ -117,7 +117,7 @@ class QuickEditPresenter(object):
         self._view.set_selection(index)
 
 
-class DuelQuickEditPresenter(QuickEditPresenter):
+class DualQuickEditPresenter(QuickEditPresenter):
 
     def __init__(self, view, plotting_context):
         super().__init__(view, plotting_context)
