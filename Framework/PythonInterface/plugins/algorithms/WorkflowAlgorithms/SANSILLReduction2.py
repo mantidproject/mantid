@@ -645,7 +645,7 @@ class SANSILLReduction(PythonAlgorithm):
             result.insert(index,blank)
         return result
 
-    def inject_repeat_transmissions(self, ws):
+    def inject_replica_transmissions(self, ws):
         '''Repeats the transmission workspaces if they are reused for several samples'''
         result = []
         runs = self.getPropertyValue('Runs').split(',')
@@ -663,10 +663,11 @@ class SANSILLReduction(PythonAlgorithm):
 
     def remove_repeated(self, list):
         '''Removes the repetitions from the list'''
-        result = set()
+        result = []
         for it in list:
-            result.add(it)
-        return [*result,]
+            if it not in result:
+                result.append(it)
+        return result
 
     def set_process_as(self, ws):
         '''Sets the process as flag as sample log for future sanity checks'''
@@ -741,7 +742,6 @@ class SANSILLReduction(PythonAlgorithm):
         '''Calculates the transmission'''
         flux_ws = self.getPropertyValue('FluxWorkspace')
         check_distances_match(mtd[ws], mtd[flux_ws])
-        self.apply_direct_beam(ws)
         self.calculate_flux(ws)
         if self.mode != AcqMode.TOF:
             check_wavelengths_match(mtd[ws], mtd[flux_ws])
@@ -763,6 +763,7 @@ class SANSILLReduction(PythonAlgorithm):
         Loads, merges and concatenates the input runs, as appropriate.
         TODO: Consider moving this out to a separate algorithm, once v2 of the loader is in
         There it could load the instrument only with the first run to save some time
+        The main complexity here is the injection of blanks (for sample) and replicas (for transmission)
         '''
         ws = self.getPropertyValue('OutputWorkspace')
         tmp = f'__{ws}'
@@ -788,7 +789,7 @@ class SANSILLReduction(PythonAlgorithm):
                     if self.process == 'Sample':
                         ws_list = self.inject_blank_samples(tmp)
                     if self.process == 'Transmission':
-                        ws_list = self.inject_repeat_transmissions(tmp)
+                        ws_list = self.inject_replica_transmissions(tmp)
                     ConjoinXRuns(InputWorkspaces=ws_list, OutputWorkspace=ws, LinearizeAxis=True)
                     DeleteWorkspaces(WorkspaceList=ws_list)
                 else:
