@@ -84,7 +84,7 @@ public:
   void refresh();
   void disconnectObservers();
   void connectObservers();
-  bool isConnected();
+  bool isConnected() const;
 
 signals:
   void emptied();

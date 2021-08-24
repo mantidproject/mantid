@@ -140,7 +140,7 @@ void WorkspaceSelector::setSorted(bool sorted) {
   }
 }
 
-bool WorkspaceSelector::isConnected() { return m_connected; }
+bool WorkspaceSelector::isConnected() const { return m_connected; }
 
 QStringList WorkspaceSelector::getSuffixes() const { return m_suffix; }
 

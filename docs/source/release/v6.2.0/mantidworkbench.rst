@@ -24,7 +24,7 @@ New and Improved
 - Script editor tab completion and call tip support for Numpy 1.21
 - The visibility of a component parameter in the Pick tab of the InstrumentViewer is now steered by the 'visible' atrribute of a parameter in IPF
 - Plot legends can be shown or hidden from the plot context menu.
-- ADS signal handlers are made synchronized in `WorkspaceSelector`. This reduces the probability of hard crash when interacting with the widget while a script manipulating a large number of workspaces is being run.
+- ADS signal handlers are now synchronized in `WorkspaceSelector`. This reduces the probability of hard crash when interacting with the widget while a script manipulating a large number of workspaces is being run.
 - The plot config dialog notifies the user when there has been an error applying the config to the plot, and allows them to change the config further.
 - When fitting a plot, selecting the peak type will only update the default peak shape in the settings if the "Set as global default" checkbox is ticked.
 - Added help button to the sliceviewer
