@@ -13,17 +13,17 @@ New Features
 
 - The Frequency Domain Analysis interface now allows you to perform a sequential fit using the Sequential Fitting tab.
 - The Sequential Fitting tab allows you to choose the type of dataset you want to fit.
-- New `Maxent Dual Plot` option has been added to the plotting. This will show the reconstructed data and the
+- New :ref:`Maxent Dual Plot <Maxent_Dual_Plot-ref>` option has been added to the plotting. This will show the reconstructed data and the
   raw data together, along with the frequency domain data.
 
-Bug Fixes
-#########
+Bugfixes
+########
 
 - In frequency domain analysis the phasetables calculated from :ref:`MuonMaxent <algm-MuonMaxent>` can be used for
   :ref:`PhaseQuad <algm-PhaseQuad>` calculations on the phase tab.
 
-Muon Analysis 2
----------------
+Muon Analysis
+-------------
 
 New Features
 ############
@@ -40,17 +40,17 @@ New Features
 Improvements
 ############
 
-- When running the Dynamic Kubo Toyabe fit function you should now be able to see the BinWidth to 3 decimal places.
+- When running the :ref:`DynamicKobuToyabe <func-DynamicKuboToyabe>` fitting function you should now be able to see the BinWidth to 3 decimal places.
 - Can now select the normalisation (``analysis_asymmetry_norm``) and group (``analysis_group``) in the results table tab.
 
-Bug Fixes
-#########
-- A bug has been fixed in the BinWidth for the Dynamic Kobu Toyabe Fitting Function which caused a crash and did not provide
+Bugfixes
+########
+- A bug has been fixed in the BinWidth for the :ref:`DynamicKobuToyabe <func-DynamicKuboToyabe>` Fitting Function which caused a crash and did not provide
   any information about why the value was invalid. Will now revert to last viable BinWidth used and explain why.
 - The autoscale option when `All` is selected will now show the largest and smallest y value from the all of the plots.
 
-Muon Analysis 2 and Frequency Domain Analysis
----------------------------------------------
+Muon Analysis and Frequency Domain Analysis
+-------------------------------------------
 
 New Features
 ############
@@ -76,8 +76,8 @@ Improvements
 - Frequency domain analysis can now use groups in :ref:`MuonMaxent <algm-MuonMaxent>` calculations.
 - The labels on the tabs in the GUIs will now show in full
 
-Bug Fixes
-#########
+Bugfixes
+########
 - The GUIs will no longer crash if there are any whitespaces in the run range (e.g. 6010- 3).
 - The GUIs can also now cope with a range of runs that span between two different decades where the second number
   in the range is smaller than the final digit of the first number in the range (e.g. 6018-3 will give 6018-6023 now).
@@ -114,8 +114,8 @@ Improvements
 - The :ref:`PlotAsymmetryByLogValue <algm-PlotAsymmetryByLogValue>` algorithm will include the units for the log value (when they are available)
 - :ref:`LoadMuonNexusV2 <algm-LoadMuonNexusV2>` now loads the period information.
 
-BugFixes
-############
+Bugfixes
+########
 - Fixed bug in :ref:`FitGaussianPeaks <algm-FitGaussianPeaks>` algorithm in which a peak at the end of range would cause an error due to not enough data point being available to fit parameters.
 
 :ref:`Release 6.2.0 <v6.2.0>`
