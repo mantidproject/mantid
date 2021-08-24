@@ -11,6 +11,7 @@ from mantid.simpleapi import CompareWorkspaces, LoadMask, LoadNexusProcessed, NO
 
 # standard imports
 import tempfile
+from pathlib import Path
 
 
 class MedianDetectorTestTest(systemtesting.MantidSystemTest):
@@ -19,21 +20,26 @@ class MedianDetectorTestTest(systemtesting.MantidSystemTest):
         return ['NOM_144974_SingleBin.nxs', 'NOMAD_mask_gen_config.yml', 'NOM_144974_mask.xml']
 
     def runTest(self):
-        with tempfile.NamedTemporaryFile(suffix='.xml') as xml_handle, \
-                tempfile.NamedTemporaryFile(suffix='.txt') as txt_handle:
-            file_xml_mask = xml_handle.name
-            file_txt_mask = txt_handle.name
-            LoadNexusProcessed(Filename='NOM_144974_SingleBin.nxs', OutputWorkspace='NOM_144974')
-            NOMADMedianDetectorTest(InputWorkspace='NOM_144974',
-                                    ConfigurationFile='NOMAD_mask_gen_config.yml',
-                                    SolidAngleNorm=False,
-                                    OutputMaskXML=file_xml_mask,
-                                    OutputMaskASCII=file_txt_mask)
+        # TemporaryFile will rather unhelpfully open a handle to our temporary object
+        # On POSIX this is fine as "two" writers (Python and the save step) is a-okay
+        # but on Windows this will throw. So instead create a temp directory and manage the lifetime
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            self._test_impl(Path(tmp_dir))
 
-            self.loaded_ws = LoadMask(Instrument='NOMAD',
-                                      InputFile=file_xml_mask,
-                                      RefWorkspace='NOM_144974',
-                                      StoreInADS=False)
+    def _test_impl(self, tmp_dir: Path):
+        file_xml_mask = (tmp_dir / "NOMADTEST.xml").resolve()
+        file_txt_mask = (tmp_dir / "NOMADTEST.txt").resolve()
+        LoadNexusProcessed(Filename='NOM_144974_SingleBin.nxs', OutputWorkspace='NOM_144974')
+        NOMADMedianDetectorTest(InputWorkspace='NOM_144974',
+                                ConfigurationFile='NOMAD_mask_gen_config.yml',
+                                SolidAngleNorm=False,
+                                OutputMaskXML=str(file_xml_mask),
+                                OutputMaskASCII=str(file_txt_mask))
+
+        self.loaded_ws = LoadMask(Instrument='NOMAD',
+                                  InputFile=str(file_xml_mask),
+                                  RefWorkspace='NOM_144974',
+                                  StoreInADS=False)
 
     def validate(self):
         ref = LoadMask(Instrument='NOMAD',
