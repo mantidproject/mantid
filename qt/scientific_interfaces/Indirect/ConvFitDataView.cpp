@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "ConvFitDataTablePresenter.h"
+#include "ConvFitDataView.h"
 
 #include <QComboBox>
 #include <QHeaderView>
@@ -27,26 +27,25 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-ConvFitDataTablePresenter::ConvFitDataTablePresenter(ConvFitModel *model, QTableWidget *dataTable)
-    : IndirectFitDataTablePresenter(model->getFitDataModel(), dataTable, convFitHeaders()) {
-  auto header = dataTable->horizontalHeader();
+ConvFitDataView::ConvFitDataView(QWidget *parent) : ConvFitDataView(convFitHeaders(), parent) {}
+
+ConvFitDataView::ConvFitDataView(const QStringList &headers, QWidget *parent) : IndirectFitDataView(headers, parent) {
+  auto header = m_uiForm->tbFitData->horizontalHeader();
   header->setSectionResizeMode(1, QHeaderView::Stretch);
 }
 
-int ConvFitDataTablePresenter::workspaceIndexColumn() const { return 2; }
+int ConvFitDataView::workspaceIndexColumn() const { return 2; }
 
-int ConvFitDataTablePresenter::startXColumn() const { return 3; }
+int ConvFitDataView::startXColumn() const { return 3; }
 
-int ConvFitDataTablePresenter::endXColumn() const { return 4; }
+int ConvFitDataView::endXColumn() const { return 4; }
 
-int ConvFitDataTablePresenter::excludeColumn() const { return 5; }
+int ConvFitDataView::excludeColumn() const { return 5; }
 
-void ConvFitDataTablePresenter::addTableEntry(FitDomainIndex row) {
-  IndirectFitDataTablePresenter::addTableEntry(row);
+void ConvFitDataView::addTableEntry(size_t row, FitDataRow newRow) {
+  IndirectFitDataView::addTableEntry(row, newRow);
 
-  auto resolutionVector = m_model->getResolutionsForFit();
-  const auto name = resolutionVector.at(row.value).first;
-  auto cell = std::make_unique<QTableWidgetItem>(QString::fromStdString(name));
+  auto cell = std::make_unique<QTableWidgetItem>(QString::fromStdString(newRow.resolution));
   auto flags = cell->flags();
   flags ^= Qt::ItemIsEditable;
   cell->setFlags(flags);
