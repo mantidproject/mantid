@@ -8,7 +8,6 @@
 # package imports
 import systemtesting
 from mantid.simpleapi import CompareWorkspaces, LoadMask, LoadNexusProcessed, NOMADMedianDetectorTest
-from mantid.api import AnalysisDataService
 
 # standard imports
 import tempfile
@@ -18,9 +17,6 @@ class MedianDetectorTestTest(systemtesting.MantidSystemTest):
 
     def requiredFiles(self):
         return ['NOM_144974_SingleBin.nxs', 'NOMAD_mask_gen_config.yml', 'NOM_144974_mask.xml']
-
-    def tearDownClass(cls) -> None:
-        AnalysisDataService.Instance().clear()
 
     def runTest(self):
         with tempfile.NamedTemporaryFile(suffix='.xml') as xml_handle, \
@@ -37,11 +33,11 @@ class MedianDetectorTestTest(systemtesting.MantidSystemTest):
             self.loaded_ws = LoadMask(Instrument='NOMAD',
                                       InputFile=file_xml_mask,
                                       RefWorkspace='NOM_144974',
-                                      OutputWorkspace="mask_test")
+                                      StoreInADS=False)
 
     def validate(self):
         ref = LoadMask(Instrument='NOMAD',
                        InputFile="NOM_144974_mask.xml",
                        RefWorkspace='NOM_144974',
-                       OutputWorkspace="reference")
+                       StoreInADS=False)
         return CompareWorkspaces(Workspace1=self.loaded_ws, Workspace2=ref, CheckMasking=True).Result
