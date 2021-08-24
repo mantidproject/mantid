@@ -311,6 +311,22 @@ public:
     do_test_collimation_settings(geometry, width, height, expectedGeometryFlag, expectedWidth, expectedHeight);
   }
 
+  void test_one_spectrum_per_file() {
+    SaveCanSAS1D2 savealg;
+    TS_ASSERT_THROWS_NOTHING(savealg.initialize());
+    savealg.setPropertyValue("InputWorkspace", m_workspace1);
+    savealg.setPropertyValue("Filename", m_filename);
+    savealg.setProperty("OneSpectrumPerFile", true);
+    TS_ASSERT_THROWS_NOTHING(savealg.execute());
+
+    size_t extPos = m_filename.find(".xml");
+    std::ostringstream ss;
+    ss << std::string(m_filename, 0, extPos) << "_0" << std::string(m_filename, extPos);
+
+    TS_ASSERT(Poco::File(ss.str()).exists());
+    Poco::File(ss.str()).remove();
+  }
+
 private:
   void do_test_collimation_settings(const std::string &geometry, double width, double height, int expectedGeometry,
                                     double expectedWidth, double expectedHeight) {
