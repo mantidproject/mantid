@@ -102,7 +102,7 @@ class SANSILLReduction(PythonAlgorithm):
         self.declareProperty(name='BeamRadius',
                              defaultValue=0.25,
                              validator=FloatBoundedValidator(lower=0.),
-                             doc='Beam radius [m]; used for beam center finding.')
+                             doc='Beam radius [m]; used for beam center search.')
 
         self.setPropertySettings('BeamRadius', beam)
 

@@ -145,12 +145,12 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
                              validator=StringListValidator(['None', 'Time', 'Monitor']))
         self.setPropertyGroup('NormaliseBy', 'Parameters')
 
-        self.declareProperty(FloatArrayProperty(name='TrBeamRadius', values=[1.]),
+        self.declareProperty(FloatArrayProperty(name='TrBeamRadius', values=[0.1]),
                              doc='Beam radius [m] used for transmission and flux calculations.')
         self.setPropertyGroup('TrBeamRadius', 'Parameters')
 
-        self.declareProperty(FloatArrayProperty(name='BeamRadius', values=[1.]),
-                             doc='Beam radius [m] used for beam center finding.')
+        self.declareProperty(FloatArrayProperty(name='BeamRadius', values=[0.25]),
+                             doc='Beam radius [m] used for beam center search.')
         self.setPropertyGroup('BeamRadius', 'Parameters')
 
         self.declareProperty(FloatArrayProperty(name='SampleThickness', values=[0.1]),
