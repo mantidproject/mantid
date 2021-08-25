@@ -7,6 +7,8 @@
 import copy
 from typing import Dict
 
+from mantid import UsageService
+from mantid.kernel import FeatureType
 from mantid.kernel import Logger
 from sans.gui_logic.models.async_workers.beam_centre_async import BeamCentreAsync
 from sans.gui_logic.models.beam_centre_model import BeamCentreModel
@@ -78,6 +80,7 @@ class BeamCentrePresenter(object):
         self._view.set_run_button_to_normal()
 
     def on_run_clicked(self):
+        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS", "Beam Centre Finder - Run"], False)
         # Get the state information for the first row.
         state = self._parent_presenter.get_state_for_row(0)
 
