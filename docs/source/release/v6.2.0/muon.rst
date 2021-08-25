@@ -11,10 +11,20 @@ Frequency Domain Analysis
 New Features
 ############
 
-- The Frequency Domain Analysis interface now allows you to perform a sequential fit using the Sequential Fitting tab.
-- The Sequential Fitting tab allows you to choose the type of dataset you want to fit.
-- New :ref:`Maxent Dual Plot <Maxent_Dual_Plot-ref>` option has been added to the plotting. This will show the reconstructed data and the
-  raw data together, along with the frequency domain data.
+- The Frequency Domain Analysis interface now allows you to perform a sequential fit using the :ref:`Sequential Fitting tab <muon_sequential_fitting_tab-ref>`.
+- The :ref:`Sequential Fitting tab <muon_sequential_fitting_tab-ref>` allows you to choose the type of dataset you want to fit.
+- **New** :ref:`Maxent Dual Plot <Maxent_Dual_Plot-ref>` **option has been added to the plotting. This will show the reconstructed data and the
+  raw data together, along with the frequency domain data.**
+
+.. image::  ../../images/maxent_dual_plot.PNG
+   :align: center
+   :height: 800px
+
+Improvements
+############
+
+- Frequency Domain Analysis can now use groups in :ref:`MuonMaxent <algm-MuonMaxent>` calculations.
+- It is easier to select data for Maxent calculations.
 
 Bugfixes
 ########
@@ -29,25 +39,14 @@ New Features
 ############
 
 - Users can now copy sequential fitting parameters to all other runs. To do this, click the checkbox to turn this feature
-  on and change a parmeter. The change should be copied to the other cells in the same column. Turn the feature off to make
-  changes to single rows.
-- The :ref:`Model Fitting Tab <muon_model_fitting_tab-ref>` allows you to perform fits across the sample logs and fit parameters stored in your results table.
+  on and change a parameter. The change should be copied to the other cells in the same column. Turn the feature off to make
+  changes to a single row.
+- **The** :ref:`Model Fitting Tab <muon_model_fitting_tab-ref>` **allows you to perform fits across the sample logs and fit parameters stored in your results table.**
 
 .. image::  ../../images/muon_model_fitting_tab.PNG
    :align: center
    :height: 800px
 
-Improvements
-############
-
-- When running the :ref:`DynamicKobuToyabe <func-DynamicKuboToyabe>` fitting function you should now be able to see the BinWidth to 3 decimal places.
-- Can now select the normalisation (``analysis_asymmetry_norm``) and group (``analysis_group``) in the results table tab.
-
-Bugfixes
-########
-- A bug has been fixed in the BinWidth for the :ref:`DynamicKobuToyabe <func-DynamicKuboToyabe>` Fitting Function which caused a crash and did not provide
-  any information about why the value was invalid. Will now revert to last viable BinWidth used and explain why.
-- The autoscale option when `All` is selected will now show the largest and smallest y value from the all of the plots.
 
 Muon Analysis and Frequency Domain Analysis
 -------------------------------------------
@@ -55,10 +54,10 @@ Muon Analysis and Frequency Domain Analysis
 New Features
 ############
 
-- It is now possible to Exclude a range from a fit range when doing a fit on the Fitting tab.
+- It is now possible to exclude a single range from a fit range when doing a fit on the Fitting tab.
 - Added a 'Covariance Matrix' button to the Fitting tab that can be used to open and inspect the normalised covariance parameters of a fit.
 - Can now plot the raw count data in the GUI.
-- It is now possible to perform an Automatic or Manual background correction in the new :ref:`Corrections Tab <muon_corrections_tab-ref>`.
+- **It is now possible to perform an Automatic or Manual background correction in the new** :ref:`Corrections Tab <muon_corrections_tab-ref>`.
 
 .. image::  ../../images/muon_corrections_tab.PNG
    :align: center
@@ -73,8 +72,9 @@ Improvements
 - It is now possible to load nexusV2 files in the GUI.
 - Added a table to store phasequads in the phase tab, phasequads also no longer automatically delete themselves
   when new data is loaded
-- Frequency domain analysis can now use groups in :ref:`MuonMaxent <algm-MuonMaxent>` calculations.
 - The labels on the tabs in the GUIs will now show in full
+- When running the :ref:`DynamicKobuToyabe <func-DynamicKuboToyabe>` fitting function you should now be able to see the BinWidth to 3 decimal places.
+- Can now select the normalisation (``analysis_asymmetry_norm``) and group (``analysis_group``) in the results table tab.
 
 Bugfixes
 ########
@@ -82,6 +82,9 @@ Bugfixes
 - The GUIs can also now cope with a range of runs that span between two different decades where the second number
   in the range is smaller than the final digit of the first number in the range (e.g. 6018-3 will give 6018-6023 now).
 - In fitting tabs fit to raw checkbox can no longer be unchecked if no rebinned data is present.
+- A bug has been fixed in the BinWidth for the :ref:`DynamicKobuToyabe <func-DynamicKuboToyabe>` Fitting Function which caused a crash and did not provide
+  any information about why the value was invalid. Will now revert to last viable BinWidth used and explain why.
+- The autoscale option when `All` is selected will now show the largest and smallest y value from the all of the plots.
 
 ALC
 ---
@@ -93,6 +96,10 @@ New Features
 - Added a period info button to the ALC interface which displays a table of period information from the loaded runs
   (this is equivalent to the periods button in the Muon Analysis and Frequency Domain Analysis Interfaces)
 - If the sample log has a unit, it will be displayed on the axis of the plot
+
+
+Improvements
+############
 - The plots are no longer normalised by bin width
 
 Elemental Analysis
