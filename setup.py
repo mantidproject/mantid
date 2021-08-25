@@ -14,7 +14,6 @@ from pprint import pprint
 from distutils import sysconfig
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
-from setuptools.command.install_lib import install_lib
 
 
 # Command line flags forwarded to CMake
@@ -40,9 +39,10 @@ class CMakeBuild(build_ext):
                      ('build-type=', None,
                       'build type (debug or release), default release'),
                      ('with-conda', None,
-                      'build pyarrow with TensorFlow support'),
+                      'build mantid within a conda environment'),
                      ('install-prefix', None,
-                      'bundle the (shared) Boost libraries')])
+                      'cmake install prefix'),
+                     ('install-mantid-cpp', None, 'Install the mantid cpp libs')] + build_ext.user_options)
 
     def get_ext_built(self, name):
         suffix = sysconfig.get_config_var('SO')
@@ -54,29 +54,40 @@ class CMakeBuild(build_ext):
         ext = os.path.splitext(filename)[1]
         return filename.replace(suffix, "") + ext
 
+    def initialize_options(self):
+        build_ext.initialize_options(self)
+        self.extra_cmake_args = ''
+        self.build_type = os.environ.get('MANTID_BUILD_TYPE', 'Release')
+        self.cmake_generator = os.environ.get('MANTID_CMAKE_GENERATOR', 'Ninja')
+        self.with_conda = os.environ.get('MANTID_WITH_CONDA', 'True')
+        self.install_mantid_cpp = os.environ.get('MANTID_INSTALL_CPP_LIBS', 'True')
+        self.install_prefix = os.environ.get('CONDA_PREFIX', self.build_lib)
+
+    def finalize_options(self):
+        if self.inplace:
+            self.install_mantid_cpp = False
+        return super().finalize_options()
+
     def build_extensions(self):
         try:
             subprocess.check_output(['cmake', '--version'])
         except OSError:
             raise RuntimeError('Cannot find CMake executable')
 
-        cfg = "Release"
-
         # build directory is in build temp
         build_directory = os.path.abspath(self.build_temp)
 
         cmake_args = [
                 '-DENABLE_WORKBENCH=OFF',
-                '-DENABLE_OPENGL=OFF',
                 '-DENABLE_DOCS=OFF',
-                '-DCMAKE_BUILD_TYPE=%s' % cfg,
+                '-DUSE_SETUPPY=True',
+                '-DINPLACE_BUILD=True',
+                '-DCMAKE_BUILD_TYPE=' + self.build_type,
                 '-DPYTHON_EXECUTABLE={}'.format(sys.executable),
                 '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + build_directory,
-                '-GNinja',
-                '-DINPLACE_BUILD=True',
-                '-DCMAKE_INSTALL_PREFIX=' + os.environ['CONDA_PREFIX'],
-                '-DCONDA_BUILD=True',
-                '-DUSE_SETUPPY=True',
+                '-DCMAKE_INSTALL_PREFIX=' + self.install_prefix,
+                '-DCONDA_BUILD='+ self.with_conda,
+                '-G' + self.cmake_generator,
             ]
 
         cmake_args += cmake_cmd_args
@@ -92,8 +103,13 @@ class CMakeBuild(build_ext):
         subprocess.check_call(['cmake', cmake_list_dir] + cmake_args,
                               cwd=self.build_temp)
         print("-- Running cmake --build for mantid")
-        subprocess.check_call(['cmake', '--build', '.', '--config', cfg],
+        subprocess.check_call(['cmake', '--build', '.', '--config', self.build_type],
                               cwd=self.build_temp)
+        if self.install_mantid_cpp:
+            self.announce("Installating mantid cpp files", level=3)
+
+            subprocess.check_call(['cmake', '--build', '.', '--config', self.build_type, '--target', 'install'],
+                                  cwd=self.build_temp)
 
         # Move from build temp to final position
         for ext in self.extensions:
@@ -106,30 +122,6 @@ class CMakeBuild(build_ext):
             dest_directory = dest_path.parents[0]
             dest_directory.mkdir(parents=True, exist_ok=True)
             self.copy_file(source_path, dest_path)
-
-
-class InstallCMakeLibs(install_lib):
-    """
-    We need to install the mantid-cpp files
-    The python extensions installation will be handled by setup tools
-    """
-
-    def run(self):
-
-        self.announce("Installating mantid cpp files", level=3)
-
-        # We have already built the libraries in the previous build_ext step
-        self.skip_build = True
-
-        subprocess.check_call(['cmake', '--build', '.', '--config', "Release", '--target', 'install'],
-                              cwd=self.build_dir)
-
-        # we have some options now
-        # we've just installed a bunch of cpp libs which setup tools has no idea about
-        # we can manually add these files to the outfiles, so they are tracked
-        # but in doing so we need to hard code the file locations
-
-        super().run()
 
 
 # define mantid framework extensions
@@ -148,9 +140,7 @@ setup(name='mantid',
       author='Mantid Project Developers',
       package_dir={'': 'Framework/PythonInterface'},
       ext_modules=ext_modules,
-      cmdclass={'build_ext': CMakeBuild,
-                'install_lib': InstallCMakeLibs,
-                },
+      cmdclass={'build_ext': CMakeBuild},
       classifiers=[
           "Programming Language :: Python :: 3",
           "License :: OSI Approved :: MIT License",
