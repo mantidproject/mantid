@@ -5,6 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.kernel import Logger
+from mantid import UsageService
+from mantid.kernel import FeatureType
 from ui.sans_isis.diagnostics_page import DiagnosticsPage
 from sans.common.enums import IntegralEnum
 from sans.gui_logic.gui_common import get_detector_strings_for_diagnostic_page, get_detector_from_gui_selection
@@ -56,6 +58,7 @@ class DiagnosticsPagePresenter:
         self._view.user_file_name = user_file
 
     def on_horizontal_clicked(self):
+        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS", "Diagnostics - Horizontal"], False)
         self._view.disable_integrals()
         input_file = self._view.run_input
         period = self._view.period
@@ -67,6 +70,7 @@ class DiagnosticsPagePresenter:
         self._worker.run_integral(range, mask, IntegralEnum.Horizontal, detector, state)
 
     def on_vertical_clicked(self):
+        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS", "Diagnostics - Vertical"], False)
         self._view.disable_integrals()
         input_file = self._view.run_input
         period = self._view.period
@@ -78,6 +82,7 @@ class DiagnosticsPagePresenter:
         self._worker.run_integral(range, mask, IntegralEnum.Vertical, detector, state)
 
     def on_time_clicked(self):
+        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS", "Diagnostics - Time"], False)
         self._view.disable_integrals()
         input_file = self._view.run_input
         period = self._view.period
