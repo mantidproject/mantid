@@ -28,6 +28,7 @@ from mantidqt.widgets.sliceviewer.presenter import SliceViewer  # noqa: E402
 from mantidqt.widgets.sliceviewer.toolbar import ToolItemText  # noqa: E402
 from qtpy.QtWidgets import QApplication  # noqa: E402
 from math import inf  # noqa: E402
+from numpy.testing import assert_allclose  # noqa: E402
 
 
 class MockConfig(object):
@@ -177,16 +178,17 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
         pres.view.data_view.dimensions.transpose = False
         pres.update_plot_data()
         extent = pres.view.data_view.image.get_extent()
-        self.assertListEqual(extent, [-10.0, 10.0, -9.0, 9.0])
+        assert_allclose(extent, [-10.0, 10.0, -9.0, 9.0])
 
         # transpose
         pres.view.data_view.dimensions.transpose = True
         pres.update_plot_data()
         extent = pres.view.data_view.image.get_extent()
+
         # Should be the same as before as transposition is handled in the model
-        self.assertListEqual(extent, [-10.0, 10.0, -9.0, 9.0])
-        self.assertListEqual(extent[0:2], list(pres.view.data_view.ax.get_xlim()))
-        self.assertListEqual(extent[2:], list(pres.view.data_view.ax.get_ylim()))
+        assert_allclose(extent, [-10.0, 10.0, -9.0, 9.0])
+        assert_allclose(extent[0:2], list(pres.view.data_view.ax.get_xlim()))
+        assert_allclose(extent[2:], list(pres.view.data_view.ax.get_ylim()))
 
         pres.view.close()
 

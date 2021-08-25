@@ -357,7 +357,7 @@ class SliceViewerDataView(QWidget):
             self._line_plots.plotter.delete_line_plot_lines()
             self._line_plots.plotter.update_line_plot_labels()
 
-        self.canvas.draw_idle()
+        self.canvas.draw()
 
     def export_region(self, limits, cut):
         """
