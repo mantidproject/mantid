@@ -108,6 +108,8 @@ build/
 Framework/Kernel/inc/MantidKernel/GitHubApiHelper.h
 qt/python/mantidqt/mantidqt/resources.py
 qt/applications/workbench/workbench/app/resources.py
+*.pth
+*.properties
 
 # Visual C++ cache files
 ipch/

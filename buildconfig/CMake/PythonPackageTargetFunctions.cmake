@@ -72,46 +72,50 @@ function(add_python_package pkg_name)
 
   add_custom_target(${pkg_name} ALL DEPENDS ${_outputs})
 
-  # setuptools by default wants to build into a directory called 'build' relative the to the working directory. We have
-  # overridden commands in setup.py.in to force the build directory to take place out of source. The install directory
-  # is specified here and then --install-scripts=bin --install-lib=lib removes any of the platform/distribution specific
-  # install directories so we can have a flat structure
-  if(CONDA_BUILD)
-    install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E env MANTID_VERSION_STR=${_version_str} \
+  # Let distutils handle this if using setup.py
+  if(NOT USE_SETUPPY)
+    # setuptools by default wants to build into a directory called 'build' relative the to the working directory. We
+    # have overridden commands in setup.py.in to force the build directory to take place out of source. The install
+    # directory is specified here and then --install-scripts=bin --install-lib=lib removes any of the
+    # platform/distribution specific install directories so we can have a flat structure
+    if(CONDA_BUILD)
+      install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E env MANTID_VERSION_STR=${_version_str} \
     ${Python_EXECUTABLE} -m pip install ${CMAKE_CURRENT_SOURCE_DIR} --no-deps --ignore-installed --no-cache-dir -vvv)"
-    )
-  else()
-    install(
-      CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E env MANTID_VERSION_STR=${_version_str} \
+      )
+    else()
+      install(
+        CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E env MANTID_VERSION_STR=${_version_str} \
     ${Python_EXECUTABLE} ${_setup_py} install -O1 --single-version-externally-managed \
     --root=${_setup_py_build_root}/install --install-scripts=bin --install-lib=lib \
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})"
-    )
-  endif()
+      )
+    endif()
 
-  if(NOT CONDA_BUILD)
-    # Registers the "installed" components with CMake so it will carry them over
-    if(_parsed_arg_EXCLUDE_FROM_INSTALL)
-      foreach(_dest ${_parsed_arg_INSTALL_LIB_DIRS})
-        install(
-          DIRECTORY ${_setup_py_build_root}/install/lib/
-          DESTINATION ${_dest}
-          PATTERN "test" EXCLUDE
-          REGEX "${_parsed_arg_EXCLUDE_FROM_INSTALL}" EXCLUDE
-        )
-      endforeach()
-    else()
-      foreach(_dest ${_parsed_arg_INSTALL_LIB_DIRS})
-        install(
-          DIRECTORY ${_setup_py_build_root}/install/lib/
-          DESTINATION ${_dest}
-          PATTERN "test" EXCLUDE
-        )
-      endforeach()
+    if(NOT CONDA_BUILD)
+      # Registers the "installed" components with CMake so it will carry them over
+      if(_parsed_arg_EXCLUDE_FROM_INSTALL)
+        foreach(_dest ${_parsed_arg_INSTALL_LIB_DIRS})
+          install(
+            DIRECTORY ${_setup_py_build_root}/install/lib/
+            DESTINATION ${_dest}
+            PATTERN "test" EXCLUDE
+            REGEX "${_parsed_arg_EXCLUDE_FROM_INSTALL}" EXCLUDE
+          )
+        endforeach()
+      else()
+        foreach(_dest ${_parsed_arg_INSTALL_LIB_DIRS})
+          install(
+            DIRECTORY ${_setup_py_build_root}/install/lib/
+            DESTINATION ${_dest}
+            PATTERN "test" EXCLUDE
+          )
+        endforeach()
+      endif()
+      # install the generated executable
+      if(_parsed_arg_EXECUTABLE AND _parsed_arg_INSTALL_BIN_DIR)
+        install(PROGRAMS ${_setup_py_build_root}/install/bin/${pkg_name} DESTINATION ${_parsed_arg_INSTALL_BIN_DIR})
+      endif()
     endif()
-    # install the generated executable
-    if(_parsed_arg_EXECUTABLE AND _parsed_arg_INSTALL_BIN_DIR)
-      install(PROGRAMS ${_setup_py_build_root}/install/bin/${pkg_name} DESTINATION ${_parsed_arg_INSTALL_BIN_DIR})
-    endif()
+  endif()
   endif()
 endfunction()

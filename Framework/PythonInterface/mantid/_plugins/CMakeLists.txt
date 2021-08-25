@@ -44,12 +44,21 @@ target_link_libraries(
 )
 
 # Installation settings
+<<<<<<< HEAD
 set_target_properties(
   PythonCurveFittingModule
   PROPERTIES INSTALL_RPATH
              "${EXT_INSTALL_RPATH};${DL_ORIGIN_TAG}/../kernel/;${DL_ORIGIN_TAG}/../geometry/;${DL_ORIGIN_TAG}/../api/"
 )
+=======
+set_target_properties(PythonCurveFittingModule
+    PROPERTIES INSTALL_RPATH "${EXT_INSTALL_RPATH};${DL_ORIGIN_TAG}/../kernel/;${DL_ORIGIN_TAG}/../geometry/;${DL_ORIGIN_TAG}/../api/")
+
+# if we are using setup.py we don't need to do this
+if (NOT USE_SETUPPY)
+>>>>>>> 89bbeb1d927 (work towards a setup.py file to build the framework)
 mtd_install_targets(
   TARGETS PythonCurveFittingModule INSTALL_DIRS ${SITE_PACKAGES}/mantid/_plugins
   ${WORKBENCH_SITE_PACKAGES}/mantid/_plugins
 )
+endif()

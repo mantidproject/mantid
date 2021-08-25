@@ -149,10 +149,20 @@ target_link_libraries(
 )
 
 # Installation settings
+<<<<<<< HEAD
 set_target_properties(
   PythonAPIModule PROPERTIES INSTALL_RPATH
                              "${EXT_INSTALL_RPATH};${DL_ORIGIN_TAG}/../kernel/;${DL_ORIGIN_TAG}/../geometry/"
 )
+=======
+set_target_properties(PythonAPIModule
+    PROPERTIES INSTALL_RPATH "${EXT_INSTALL_RPATH};${DL_ORIGIN_TAG}/../kernel/;${DL_ORIGIN_TAG}/../geometry/")
+
+
+# if we are using setup.py we don't need to install the extension ourselves
+if (NOT USE_SETUPPY)
+>>>>>>> 89bbeb1d927 (work towards a setup.py file to build the framework)
 mtd_install_targets(
   TARGETS PythonAPIModule INSTALL_DIRS ${SITE_PACKAGES}/mantid/api ${WORKBENCH_SITE_PACKAGES}/mantid/api
 )
+endif()

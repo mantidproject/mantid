@@ -138,9 +138,12 @@ target_link_libraries(
 # Installation settings
 set_target_properties(PythonKernelModule PROPERTIES INSTALL_RPATH "${EXT_INSTALL_RPATH}")
 
+# if we are using setup.py we don't need to do this
+if (NOT USE_SETUPPY)
 mtd_install_targets(
   TARGETS PythonKernelModule INSTALL_DIRS ${SITE_PACKAGES}/mantid/kernel ${WORKBENCH_SITE_PACKAGES}/mantid/kernel
 )
+endif()
 
 # packagesetup.py that will overwrite the ones from the built target
 mtd_install_files(
