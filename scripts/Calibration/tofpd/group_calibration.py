@@ -73,7 +73,6 @@ def cc_calibrate_groups(data_ws,
     group_list = np.unique(group_ws.extractY())
 
     _accum_cc = None
-    cycled = False
     to_skip = []
     for group in group_list:
         # Figure out input parameters for CrossCorrelate and GetDetectorOffset, specifically
@@ -167,7 +166,6 @@ def cc_calibrate_groups(data_ws,
                         logger.notice(f'with offset threshold {OT_group}.')
                 break
             else:
-                cycled = True
                 previous_calibration = ConvertDiffCal('_tmp_group_cc',
                                                       PreviousCalibration=previous_calibration,
                                                       OutputWorkspace='_tmp_group_cc_diffcal')
@@ -190,7 +188,7 @@ def cc_calibrate_groups(data_ws,
     DeleteWorkspace('_accum_cc')
     DeleteWorkspace('_tmp_group_cc')
     DeleteWorkspace('_tmp_group_cc_raw')
-    if cycling and cycled:
+    if cycling and '_tmp_group_cc_diffcal' in mtd:
         DeleteWorkspace('_tmp_group_cc_diffcal')
 
     return mtd[f'{output_basename}_cc_diffcal'], to_skip
