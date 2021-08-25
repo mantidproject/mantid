@@ -32,7 +32,9 @@ using namespace Geometry;
 using namespace DataObjects;
 
 void FindCenterOfMassPosition2::init() {
-  auto wsValidator = std::make_shared<CompositeValidator>();
+  const auto wsValidator = std::make_shared<CompositeValidator>();
+  const auto positiveDouble = std::make_shared<BoundedValidator<double>>();
+
   wsValidator->add<HistogramValidator>();
   declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, wsValidator));
   declareProperty("Output", "",
@@ -51,7 +53,6 @@ void FindCenterOfMassPosition2::init() {
                   "center of mass "
                   "of the scattering data will be computed by excluding the beam area.");
 
-  auto positiveDouble = std::make_shared<BoundedValidator<double>>();
   positiveDouble->setLower(0);
   declareProperty("BeamRadius", 0.0155, positiveDouble,
                   "Radius of the beam area, in meters, used the exclude the "
@@ -59,63 +60,42 @@ void FindCenterOfMassPosition2::init() {
                   "the center of mass of the scattering pattern.");
 }
 
-void FindCenterOfMassPosition2::exec() {
-  MatrixWorkspace_sptr inputWSWvl = getProperty("InputWorkspace");
-  MatrixWorkspace_sptr inputWS;
+// TODO: Break this down further, still feel like this is too large?
+API::MatrixWorkspace_sptr
+FindCenterOfMassPosition2::sumUsingSpectra(DataObjects::EventWorkspace_const_sptr inputEventWS, const int numSpec,
+                                           Progress &progress) {
+  std::vector<double> y_values(numSpec);
+  std::vector<double> e_values(numSpec);
 
-  // Option to exclude beam area
-  bool direct_beam = getProperty("DirectBeam");
-
-  // TODO: Need an input for the X bin to use, assume 0 for now
-  int specID = 0;
-  // Initial center location
-  double center_x = getProperty("CenterX");
-  double center_y = getProperty("CenterY");
-  const double tolerance = getProperty("Tolerance");
-  // Iteration cutoff
-  int max_iteration = 200;
-  // Radius of the beam area, in pixels
-  double beam_radius = getProperty("BeamRadius");
-
-  // Get the number of monitors. We assume that all monitors are stored in the
-  // first spectra
-  const auto numSpec = static_cast<int>(inputWSWvl->getNumberHistograms());
-
-  // Set up the progress reporting object
-  Progress progress(this, 0.0, 1.0, max_iteration);
-
-  EventWorkspace_const_sptr inputEventWS = std::dynamic_pointer_cast<const EventWorkspace>(inputWSWvl);
-  if (inputEventWS) {
-    std::vector<double> y_values(numSpec);
-    std::vector<double> e_values(numSpec);
-
-    PARALLEL_FOR_NO_WSP_CHECK()
-    for (int i = 0; i < numSpec; i++) {
-      double sum_i(0), err_i(0);
-      progress.report("Integrating events");
-      const EventList &el = inputEventWS->getSpectrum(i);
-      el.integrate(0, 0, true, sum_i, err_i);
-      y_values[i] = sum_i;
-      e_values[i] = err_i;
-    }
-
-    IAlgorithm_sptr algo = createChildAlgorithm("CreateWorkspace", 0.7, 1.0);
-    algo->setProperty<std::vector<double>>("DataX", std::vector<double>(2, 0.0));
-    algo->setProperty<std::vector<double>>("DataY", y_values);
-    algo->setProperty<std::vector<double>>("DataE", e_values);
-    algo->setProperty<int>("NSpec", numSpec);
-    algo->execute();
-
-    inputWS = algo->getProperty("OutputWorkspace");
-    WorkspaceFactory::Instance().initializeFromParent(*inputWSWvl, *inputWS, false);
-  } else {
-    // Sum up all the wavelength bins
-    IAlgorithm_sptr childAlg = createChildAlgorithm("Integration");
-    childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWSWvl);
-    childAlg->executeAsChildAlg();
-    inputWS = childAlg->getProperty("OutputWorkspace");
+  PARALLEL_FOR_NO_WSP_CHECK()
+  for (int i = 0; i < numSpec; i++) {
+    double sum_i(0), err_i(0);
+    progress.report("Integrating events");
+    const EventList &el = inputEventWS->getSpectrum(i);
+    el.integrate(0, 0, true, sum_i, err_i);
+    y_values[i] = sum_i;
+    e_values[i] = err_i;
   }
 
+  IAlgorithm_sptr algo = createChildAlgorithm("CreateWorkspace", 0.7, 1.0);
+  algo->setProperty<std::vector<double>>("DataX", std::vector<double>(2, 0.0));
+  algo->setProperty<std::vector<double>>("DataY", y_values);
+  algo->setProperty<std::vector<double>>("DataE", e_values);
+  algo->setProperty<int>("NSpec", numSpec);
+  algo->execute();
+
+  MatrixWorkspace_sptr inputWS = algo->getProperty("OutputWorkspace");
+  return inputWS;
+}
+
+void FindCenterOfMassPosition2::findCenterOfMass(API::MatrixWorkspace_sptr inputWS, double &center_x, double &center_y,
+                                                 const int numSpec, Progress &progress) {
+  const double tolerance = getProperty("Tolerance");
+  const bool direct_beam = getProperty("DirectBeam");
+  const double beam_radius = getProperty("BeamRadius");
+
+  // TODO: Need an input for the X bin to use, assume 0 for now
+  const int specID = 0;
   // Define box around center of mass so that only pixels in an area
   // _centered_ on the latest center position are considered. At each
   // iteration we will recompute the bounding box, and we will make
@@ -138,7 +118,7 @@ void FindCenterOfMassPosition2::exec() {
   int n_iteration = 0;
 
   // Find center of mass and iterate until we converge
-  // to within a quarter of a pixel
+  // to within the tolerance specified in meters
   bool first_run = true;
   while (distance > tolerance || distance < 0) {
     // Count histogram for normalization
@@ -165,6 +145,7 @@ void FindCenterOfMassPosition2::exec() {
       double x = pos.X();
       double y = pos.Y();
 
+      // TODO: find out why this is necessary
       if (first_run) {
         xmin0 = std::min(x, xmin0);
         xmax0 = std::max(x, xmax0);
@@ -172,6 +153,7 @@ void FindCenterOfMassPosition2::exec() {
         ymax0 = std::max(y, ymax0);
       }
 
+      // TODO: Separated dense conditonal out into legible function or variable
       if (first_run || (x >= xmin && x <= xmax && y >= ymin && y <= ymax)) {
         if (!direct_beam) {
           double dx = x - center_x;
@@ -199,12 +181,15 @@ void FindCenterOfMassPosition2::exec() {
     double radius_x = std::min((position_x - xmin0), (xmax0 - position_x));
     double radius_y = std::min((position_y - ymin0), (ymax0 - position_y));
 
+    // TODO: This apparently shouldnt be an issue, might break the scattering pattern???
     if (!direct_beam && (radius_x <= beam_radius || radius_y <= beam_radius)) {
       g_log.error() << "Center of mass falls within the beam center area: "
                        "stopping here\n";
       break;
     }
 
+    // TODO: Is this fine or not, do I need a conditional or do you not actually care if this is applied regardless of
+    // method?
     center_x = position_x;
     center_y = position_y;
 
@@ -213,12 +198,18 @@ void FindCenterOfMassPosition2::exec() {
     ymin = center_y - radius_y;
     ymax = center_y + radius_y;
 
-    // Sanity check to avoid getting stuck
+    // Check to see if we have the same result
+    // as the previous iteration
+
+    // TODO: double compare should not be done with ==
     if (distance == distance_check) {
       n_local_minima++;
     } else {
       n_local_minima = 0;
     }
+
+    // PERSONAL NOTE:  This doesnt smell right, there has to be a better way to tell that you are stuck than to just
+    // quit if you hit the same thing some arbitrary number of times, masks the issue really
 
     // Quit if we found the exact same distance five times in a row.
     if (n_local_minima > 5) {
@@ -228,8 +219,8 @@ void FindCenterOfMassPosition2::exec() {
     }
 
     // Quit if we haven't converged after the maximum number of iterations.
-    if (++n_iteration > max_iteration) {
-      g_log.warning() << "More than " << max_iteration << " iteration to find beam center: stopping here\n";
+    if (++n_iteration > m_maxIteration) {
+      g_log.warning() << "More than " << m_maxIteration << " iteration to find beam center: stopping here\n";
       break;
     }
 
@@ -238,7 +229,9 @@ void FindCenterOfMassPosition2::exec() {
 
     progress.report("Find Beam Center");
   }
+}
 
+void FindCenterOfMassPosition2::storeOutputWorkspace(double center_x, double center_y) {
   std::string output = getProperty("Output");
 
   // If an output workspace name was given, create a TableWorkspace with the
@@ -274,6 +267,35 @@ void FindCenterOfMassPosition2::exec() {
   }
 
   g_log.information() << "Center of Mass found at x=" << center_x << " y=" << center_y << '\n';
+}
+
+void FindCenterOfMassPosition2::exec() {
+  const MatrixWorkspace_sptr inputWSWvl = getProperty("InputWorkspace");
+  double center_x = getProperty("CenterX");
+  double center_y = getProperty("CenterY");
+
+  MatrixWorkspace_sptr inputWS;
+
+  // Get the number of monitors. We assume that all monitors are stored in the
+  // first spectra
+  const auto numSpec = static_cast<int>(inputWSWvl->getNumberHistograms());
+  // Set up the progress reporting object
+  Progress progress(this, 0.0, 1.0, m_maxIteration);
+  EventWorkspace_const_sptr inputEventWS = std::dynamic_pointer_cast<const EventWorkspace>(inputWSWvl);
+
+  if (inputEventWS) {
+    inputWS = sumUsingSpectra(inputEventWS, numSpec, progress);
+    WorkspaceFactory::Instance().initializeFromParent(*inputWSWvl, *inputWS, false);
+  } else {
+    // Sum up all the wavelength bins
+    IAlgorithm_sptr childAlg = createChildAlgorithm("Integration");
+    childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWSWvl);
+    childAlg->executeAsChildAlg();
+    inputWS = childAlg->getProperty("OutputWorkspace");
+  }
+
+  findCenterOfMass(inputWS, center_x, center_y, numSpec, progress);
+  storeOutputWorkspace(center_x, center_y);
 }
 
 } // namespace Algorithms
