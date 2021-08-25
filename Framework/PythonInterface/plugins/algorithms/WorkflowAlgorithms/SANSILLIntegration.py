@@ -486,12 +486,9 @@ class SANSILLIntegration(PythonAlgorithm):
                 # (because of possible symmetry choices)
                 n_wedges = mtd[wedge_ws].size()
             if self._resolution != 'None':
-                x = mtd[ws_out].readX(0)
-                mid_x = (x[1:] + x[:-1]) / 2
-                res = self._deltaQ(mid_x)
-                mtd[ws_out].setDx(0, res)
+                res = self._set_resolution(ws_out)
                 for wedge in range(n_wedges):
-                    mtd[wedge_ws].getItem(wedge).setDx(0, res)
+                    self._set_resolution(mtd[wedge_ws][wedge].name(), res)
             if n_wedges != 0:
                 self.setProperty('WedgeWorkspace', mtd[wedge_ws])
         elif self._output_type == 'I(Phi,Q)':
@@ -515,12 +512,18 @@ class SANSILLIntegration(PythonAlgorithm):
             ConjoinSpectra(InputWorkspaces=wedge_ws, OutputWorkspace=ws_out)
             mtd[ws_out].replaceAxis(1, azimuth_axis)
             DeleteWorkspace(wedge_ws)
-            if self._resolution != 'None':
-                x = mtd[ws_out].readX(0)
+            self._set_resolution(ws_out)
+
+    def _set_resolution(self, ws, res=None):
+        '''Calculates, sets as dX and returns the resolution'''
+        if self._resolution != 'None':
+            if not res:
+                x = mtd[ws].readX(0)
                 mid_x = (x[1:] + x[:-1]) / 2
                 res = self._deltaQ(mid_x)
-                for i in range(mtd[ws_out].getNumberHistograms()):
-                    mtd[ws_out].setDx(i, res)
+            for i in range(mtd[ws].getNumberHistograms()):
+                mtd[ws].setDx(i, res)
+        return res
 
 
 # Register algorithm with Mantid
