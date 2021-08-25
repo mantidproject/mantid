@@ -131,7 +131,7 @@ std::map<std::string, std::string> CalculatePlaczek::validateInputs() {
   std::map<std::string, std::string> issues;
   const API::MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
   const API::SpectrumInfo specInfo = inWS->spectrumInfo();
-  const int order = getProperty("Ord:math:`x = -\lambda / \lambda_d`.er");
+  const int order = getProperty("Order");
 
   // Case0:missing detector info
   if (specInfo.size() == 0) {
