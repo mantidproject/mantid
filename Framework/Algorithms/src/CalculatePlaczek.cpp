@@ -72,7 +72,7 @@ const std::string CalculatePlaczek::category() const { return "CorrectionFunctio
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string CalculatePlaczek::summary() const {
-  return "Perform 1st or 2nd order Placzek correction for given spectrum.";
+  return "Calculate 1st or 2nd order Placzek correction factors using given workspace and incident spectrums.";
 }
 
 /// Algorithm's see also for use in the GUI and help. @see Algorithm::seeAlso
@@ -131,7 +131,7 @@ std::map<std::string, std::string> CalculatePlaczek::validateInputs() {
   std::map<std::string, std::string> issues;
   const API::MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
   const API::SpectrumInfo specInfo = inWS->spectrumInfo();
-  const int order = getProperty("Order");
+  const int order = getProperty("Ord:math:`x = -\lambda / \lambda_d`.er");
 
   // Case0:missing detector info
   if (specInfo.size() == 0) {
@@ -259,7 +259,7 @@ void CalculatePlaczek::exec() {
         // -- calculate first order correction
         const double term1 = (f - 1.0) * phi1[xIndex];
         const double term2 = f * (1.0 - eps1[xIndex]);
-        double inelasticPlaczekSelfCorrection = 2.0 * (term1 + term2 - 3) * sinHalfAngleSq * summationTerm;
+        double inelasticPlaczekCorrection = 2.0 * (term1 + term2 - 3) * sinHalfAngleSq * summationTerm;
         // -- calculate second order correction
         if (order == 2) {
           const double k = 2 * M_PI / xLambda[xIndex];                       // wave vector in 1/angstrom
@@ -281,12 +281,12 @@ void CalculatePlaczek::exec() {
                                    + (2 * f * f - 7 * f + 8);
           const double P2_part2 = 2 * sinHalfAngleSq * summationTerm * (1 + sinHalfAngleSq * bracket_2);
           // added to the factor
-          inelasticPlaczekSelfCorrection += P2_part1 + P2_part2;
+          inelasticPlaczekCorrection += P2_part1 + P2_part2;
         }
         // -- consolidate
         x[xIndex] = wavelength.singleToTOF(xLambda[xIndex]);
-        y[xIndex] = scaleByPackingFraction ? (1 + inelasticPlaczekSelfCorrection) * packingFraction
-                                           : inelasticPlaczekSelfCorrection;
+        y[xIndex] =
+            scaleByPackingFraction ? (1 + inelasticPlaczekCorrection) * packingFraction : inelasticPlaczekCorrection;
       }
       x.back() = wavelength.singleToTOF(xLambda.back());
     } else {
