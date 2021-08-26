@@ -28,7 +28,6 @@ class ReflectometryISIS(systemtesting.MantidSystemTest, metaclass=ABCMeta):
         workspace_nexus_file = workspace_name + ".nxs"
 
         PIX=1.1E-3 #m
-        SC=75
         avgDB=29
         Load(Filename=workspace_nexus_file,OutputWorkspace=workspace_name)
         X=mtd[workspace_name]
@@ -46,7 +45,7 @@ class ReflectometryISIS(systemtesting.MantidSystemTest, metaclass=ABCMeta):
         I=mtd['I'][0]
 
         # Move the detector so that the detector channel matching the reflected beam is at 0,0
-        MoveInstrumentComponent(Workspace=I,ComponentName="lineardetector",X=0,Y=0,Z=-PIX*( (SC-avgDB)/2.0 +avgDB) )
+        MoveInstrumentComponent(Workspace=I,ComponentName="lineardetector",X=0,Y=0,Z=-PIX*avgDB)
 
         # Should now have signed theta vs Lambda
         ConvertSpectrumAxis(InputWorkspace=I,OutputWorkspace='SignedTheta_vs_Wavelength',Target='signed_theta')
@@ -62,11 +61,11 @@ class ReflectometryISIS(systemtesting.MantidSystemTest, metaclass=ABCMeta):
 
         # MD transformations
         QxQy, _QxQy_vertexes = ConvertToReflectometryQ(InputWorkspace='SignedTheta_vs_Wavelength',
-                                                       OutputDimensions='Q (lab frame)', Extents='-0.0005,0.0005,0,0.12', Version=1)
+                                                       OutputDimensions='Q (lab frame)', Extents='-0.0005,0.0005,0,0.12')
         KiKf, _KiKF_vertexes = ConvertToReflectometryQ(InputWorkspace='SignedTheta_vs_Wavelength',
-                                                       OutputDimensions='K (incident, final)', Extents='0,0.05,0,0.05', Version=1)
+                                                       OutputDimensions='K (incident, final)', Extents='0,0.05,0,0.05')
         PiPf, _PiPf_vertexes = ConvertToReflectometryQ(InputWorkspace='SignedTheta_vs_Wavelength',
-                                                       OutputDimensions='P (lab frame)', Extents='0,0.1,-0.02,0.15', Version=1)
+                                                       OutputDimensions='P (lab frame)', Extents='0,0.1,-0.02,0.15')
 
         # Bin the outputs to histograms because observations are not important.
         BinMD(InputWorkspace=QxQy, AxisAligned='0',BasisVector0='Qx,(Ang^-1),1,0',BasisVector1='Qz,(Ang^-1),0,1',
@@ -77,9 +76,9 @@ class ReflectometryISIS(systemtesting.MantidSystemTest, metaclass=ABCMeta):
               OutputExtents='0,0.1,-0.02,0.15',OutputBins='50,50',Parallel='1',OutputWorkspace='PiPf_rebinned')
 
         # Fetch benchmarks for testing against
-        LoadMD(Filename="POLREF_qxqy_benchmark_v2.nxs", OutputWorkspace="QxQy_benchmark")
-        LoadMD(Filename="POLREF_kikf_benchmark_v2.nxs", OutputWorkspace="KiKf_benchmark")
-        LoadMD(Filename="POLREF_pipf_benchmark_v2.nxs", OutputWorkspace="PiPf_benchmark")
+        LoadMD(Filename="POLREF_qxqy_benchmark_v3.nxs", OutputWorkspace="QxQy_benchmark")
+        LoadMD(Filename="POLREF_kikf_benchmark_v3.nxs", OutputWorkspace="KiKf_benchmark")
+        LoadMD(Filename="POLREF_pipf_benchmark_v3.nxs", OutputWorkspace="PiPf_benchmark")
 
         # Check the outputs
         qxqy_comparison = CompareMDWorkspaces(Workspace1='QxQy_rebinned',Workspace2='QxQy_benchmark', Tolerance=0.01, CheckEvents=False)
