@@ -167,7 +167,8 @@ class SANSILLParameterScan(PythonAlgorithm):
             SANSILLReduction(Run=self.absorber,
                              ProcessAs='Absorber',
                              NormaliseBy=self.normalise,
-                             OutputWorkspace=absorber_name)
+                             OutputWorkspace=absorber_name,
+                             Version=1)
 
         process_container, container_name = needs_processing(self.container, 'Container')
 
@@ -178,7 +179,8 @@ class SANSILLParameterScan(PythonAlgorithm):
                              OutputWorkspace=container_name,
                              AbsorberInputWorkspace=absorber_name,
                              CacheSolidAngle=True,
-                             NormaliseBy=self.normalise)
+                             NormaliseBy=self.normalise,
+                             Version=1)
 
         self.progress.report(0, "Reducing data.")
         SANSILLReduction(InputWorkspace=sort_x_axis_output,
@@ -189,7 +191,8 @@ class SANSILLParameterScan(PythonAlgorithm):
                          NormaliseBy=self.normalise,
                          OutputWorkspace=sort_x_axis_output,
                          startProgress=0.8,
-                         endProgress=0.95)
+                         endProgress=0.95,
+                         Version=1)
 
         instrument = mtd[load_ws_name + "_joined"].getInstrument()
         detector = instrument.getComponentByName("detector")
