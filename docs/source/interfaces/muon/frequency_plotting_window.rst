@@ -20,6 +20,8 @@ If a fit is requested this is also shown on the plot.
 In the sequential fitting tab, the user can select the data to plot by highlighting the different rows in the table.
 
 
+.. _Maxent_Dual_Plot-ref:
+
 Maxent Dual Plot
 ^^^^^^^^^^^^^^^^
 
