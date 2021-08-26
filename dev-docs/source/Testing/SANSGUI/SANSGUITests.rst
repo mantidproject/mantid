@@ -22,7 +22,7 @@ Set up
    search paths. Ensure the Training data directory is in the search
    directories.
 #. If you haven't set one up yet, add a folder to save test data into later.
-#. Set the default save directory in Manage User Directories
+#. Set the default save directory in ``Manage Directories``
 #. Click OK on the manage-directories dialog and ensure the ``Save Path`` on
    the SANS GUI (below batch file) displays the correct save path.
 #. Click ``Load User File``; from the Training data in the ``loqdemo`` folder,
