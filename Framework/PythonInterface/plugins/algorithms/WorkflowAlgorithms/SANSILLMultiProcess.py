@@ -254,7 +254,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         '''Makes sure all the sample transmission inputs have matching extents'''
         issues = dict()
         for l in range(self.lambda_rank):
-            prop = f'SampleRunsD{l+1}'
+            prop = f'SampleTrRunsW{l+1}'
             n_items = self.getPropertyValue(prop).count(',') + 1
             if n_items > 1 and n_items != self.n_samples:
                 issues[prop] = f'{prop} has {n_items} elements instead of {self.n_samples}'
@@ -441,6 +441,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         return 1 if d+1 in self.getProperty('DistancesAtWavelength2').value else 0
 
     def get_beam_radius(self, d):
+        '''Returns the beam search radius at the given distance'''
         radii = self.getProperty('BeamRadius').value
         if len(radii) == 1:
             return radii[0]
@@ -448,6 +449,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
             return radii[d]
 
     def get_tr_beam_radius(self, l):
+        '''Returns transmission beam radius at the given wavelength'''
         radii = self.getProperty('TrBeamRadius').value
         if len(radii) == 1:
             return radii[0]
@@ -517,6 +519,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
     #================================LOAD PROCESSED CALIBRANTS================================#
 
     def load_sensitivity(self, d):
+        '''Loads the sensitivity map if it is not in ADS'''
         sens = self.getPropertyValue('SensitivityMap')
         if sens:
             [load_sens, sens_ws] = needs_loading(sens, 'Sensitivity')
@@ -527,6 +530,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
             return ''
 
     def load_masks(self, d):
+        '''Loads the beam stop and edge masks if they are not in ADS'''
         edge_mask = self.getPropertyValue('DefaultMask')
         [load_edge_mask, edge_mask_ws] = needs_loading(edge_mask, 'DefaultMask')
         if load_edge_mask:
@@ -541,6 +545,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         return [edge_mask_ws, beam_stop_mask_ws]
 
     def load_flat_field(self, d):
+        '''Loads the flat field if it is not in ADS'''
         flat_fields = self.getPropertyValue('FlatFields')
         if flat_fields:
             flat_field = flat_fields.split(',')[d]
@@ -552,6 +557,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
             return ''
 
     def load_solvent(self, d):
+        '''Loads the solvent if it is not in ADS'''
         solvents = self.getPropertyValue('Solvents')
         if solvents:
             solvent = solvents.split(',')[d]
@@ -565,6 +571,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
     #================================PROCESS REDUCTIONS================================#
 
     def process_tr_dark_current(self, l):
+        '''Processes the dark current at the tranmission configuration'''
         runs = self.getPropertyValue('TrDarkCurrentRuns')
         if runs:
             tr_dark_current = runs.split(',')[l]
@@ -579,6 +586,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
             return ''
 
     def process_tr_empty_beam(self, l, tr_dark_current_ws):
+        '''Processes the empty beam at the tranmission configuration'''
         runs = self.getPropertyValue('TrEmptyBeamRuns')
         if runs:
             tr_empty_beam = runs.split(',')[l]
@@ -597,6 +605,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
             return ['','']
 
     def process_empty_can_tr(self, l, tr_dark_current_ws, tr_empty_beam_ws, tr_empty_beam_flux):
+        '''Processes the empty container transmission at the given wavelength'''
         runs = self.getPropertyValue('ContainerTrRuns')
         if runs:
             tr_empty_can = runs.split(',')[l]
@@ -615,6 +624,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
             return ''
 
     def process_sample_tr(self, l, tr_dark_current_ws, tr_empty_beam_ws, tr_empty_beam_flux):
+        '''Processes the sample transmissions at the given wavelength'''
         tr_sample = self.getPropertyValue(f'SampleTrRunsW{l+1}')
         if tr_sample:
             [_, tr_sample_ws] = needs_processing(tr_sample, 'Transmission')
@@ -633,6 +643,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
             return ''
 
     def process_dark_current(self, d):
+        '''Processes the dark current at the given distance'''
         runs = self.getPropertyValue('DarkCurrentRuns')
         if runs:
             dark_current = runs.split(',')[d]
@@ -647,6 +658,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
             return ''
 
     def process_empty_beam(self, d, dark_current_ws):
+        '''Processes the empty beam at the given distance'''
         runs = self.getPropertyValue('EmptyBeamRuns')
         if runs:
             empty_beam = runs.split(',')[d]
@@ -666,6 +678,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
             return ['','']
 
     def process_flux(self, d, dark_current_ws):
+        '''Processes the empty beam for flux at the given distance'''
         runs = self.getPropertyValue('FluxRuns')
         if runs:
             empty_beam = runs.split(',')[d]
@@ -684,6 +697,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
             return ['','']
 
     def process_container(self, d, dark_current_ws, empty_beam_ws, transmissions):
+        '''Processes the empty container at the given distance'''
         runs = self.getPropertyValue('EmptyContainerRuns')
         if runs:
             empty_can = runs.split(',')[d]
@@ -705,6 +719,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
             return ''
 
     def process_sample(self, d, dark_current_ws, empty_beam_ws, empty_can_ws, flux_ws, transmissions):
+        '''Processes all the samples at the given distance'''
         runs = self.getPropertyValue(f'SampleRunsD{d+1}')
         if runs:
             [edge_mask_ws, beam_stop_mask_ws] = self.load_masks(d)
@@ -748,6 +763,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
     #================================INTEGRATION AND COMBINATIONS================================#
 
     def integrate(self, d, sample_ws):
+        '''Performs azimuthal averaging, optionally with sectors'''
         results = []
         panel_names = ''
         instrument = mtd[sample_ws[0]].getInstrument()
@@ -784,6 +800,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         return results
 
     def generate_name_axis(self, ws_name):
+        '''Generate a sample name axis to be put in the output workspaces'''
         names_from = self.getPropertyValue('SampleNamesFrom')
         user_names = self.getProperty('SampleNames').value
         ws = mtd[ws_name][0] if isinstance(mtd[ws_name], WorkspaceGroup) else mtd[ws_name]
@@ -809,6 +826,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         return axis
 
     def replace_axis(self, ws_name, axis, index=1):
+        '''Replaces the requested axis of the workspace with the specified axis'''
         if isinstance(mtd[ws_name], WorkspaceGroup):
             # ws_name will be a group workspace for panels and wedges outputs
             for ws in mtd[ws_name]:
@@ -817,6 +835,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
             mtd[ws_name].replaceAxis(index, axis)
 
     def set_distribution(self, ws_list, flag):
+        '''Sets/unsets the distribution flag'''
         for ws in ws_list:
             if isinstance(mtd[ws], WorkspaceGroup):
                 for wsi in mtd[ws]:
@@ -827,6 +846,10 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
                 mtd[ws].setDistribution(flag)
 
     def generate_combined_sensitivity(self, samples):
+        '''
+        Generates the combined sensitivity w/o beam stop shadow.
+        This is possible only on D22 with and w/o offsets.
+        '''
         real_space_ws_list = []
         for ws_dict in samples:
             if 'RealSpace' in ws_dict:
@@ -843,6 +866,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
             return dict()
 
     def stitch(self, samples):
+        '''Stitches the full azimuthal integrals, and optionally the wedge integrals'''
         results = dict()
         to_stitch = []
         to_stitch_wedges = []
@@ -873,6 +897,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         return results
 
     def do_stitch(self, inputs, output, output_scale_factors):
+        '''Performs the stitching'''
         stitch_options = ['ManualScaleFactors', 'TieScaleFactors', 'ScaleFactorCalculation']
         kwargs = dict()
         for opt in stitch_options:
@@ -889,6 +914,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         return []
 
     def combine(self, samples):
+        '''Combines stitched and combined sensitivity outputs to the package'''
         if len(samples)>1:
             if self.getProperty('PerformStitching').value:
                 stitched = self.stitch(samples)
@@ -919,6 +945,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         return name
 
     def rename_tr(self, tr):
+        '''Renames the transmission workspace'''
         out = self.getPropertyValue('OutputWorkspace')
         wavelength = mtd[tr].getRun()['wavelength'].value
         name = f'{out}_transmissions_w{wavelength:.1f}A'
@@ -926,6 +953,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         return name
 
     def package(self, samples, transmissions):
+        '''Packages all the output workspaces into a workspace group'''
         out_ws = self.getPropertyValue('OutputWorkspace')
         outputs = []
         for pack in samples:
