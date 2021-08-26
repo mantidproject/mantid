@@ -53,7 +53,7 @@ New Features
 ############
 
 - It is now possible to exclude a single range from a fit range when doing a fit on the :ref:`Fitting Tab <muon_fitting_tab-ref>`.
-- Added a 'Covariance Matrix' button to the :ref:`Fitting Tab <muon_fitting_tab-ref>` that can be used to open and inspect the normalised covariance parameters of a fit.
+- Added a ``Covariance Matrix`` button to the :ref:`Fitting Tab <muon_fitting_tab-ref>` that can be used to open and inspect the normalised covariance parameters of a fit.
 - It is now possible to plot the raw count data in the GUI.
 - **It is now possible to perform an Automatic or Manual background correction in the new** :ref:`Corrections Tab <muon_corrections_tab-ref>`.
 
@@ -68,11 +68,10 @@ Improvements
 - The plotting has been updated for better stability.
 - The plotting now has autoscale active by default.
 - It is now possible to load nexusV2 files in the GUI.
-- Added a table to store phasequads in the phase tab. Phasequads also no longer automatically delete themselves
-  when new data is loaded
+- Added a table to store phasequads in the phase tab. Also, phasequads no longer delete themselves automatically.
 - The labels on the tabs in the GUIs will now show in full
 - When running the :ref:`DynamicKobuToyabe <func-DynamicKuboToyabe>` fitting function you should now be able to see the BinWidth to 3 decimal places.
-- It is now possible to select the normalisation (``analysis_asymmetry_norm``) and group (``analysis_group``) in the results table tab.
+- It is now possible to select the normalisation (``analysis_asymmetry_norm``) and group (``analysis_group``) in the :ref:`Results Table Tab <muon-results-tab-ref>`.
 
 Bugfixes
 ########
@@ -81,8 +80,8 @@ Bugfixes
   in the range is smaller than the final digit of the first number in the range (e.g. 6018-3 can be used for the range 6018-6023).
 - In the :ref:`Fitting Tab <muon_fitting_tab-ref>` the ``fit to raw`` checkbox can no longer be unchecked if no rebinned data is present.
 - A bug has been fixed in the BinWidth for the :ref:`DynamicKobuToyabe <func-DynamicKuboToyabe>` Fitting Function which caused a crash and did not provide
-  any information about why the value was invalid. Will now revert to last viable BinWidth used and explain why.
-- The autoscale option when ``All`` is selected will now show the largest and smallest y value from the all of the plots.
+  any information about why the value was invalid. It will now revert to last viable BinWidth used and explain why.
+- The autoscale option when ``All`` is selected will now show the largest and smallest y value for all of the plots.
 
 ALC
 ---
