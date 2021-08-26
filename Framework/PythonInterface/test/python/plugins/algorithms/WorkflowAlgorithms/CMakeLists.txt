@@ -63,6 +63,7 @@ set(TEST_PY_FILES
     SANSDarkRunBackgroundCorrectionTest.py
     SANSFitShiftScaleTest.py
     SANSILLAutoProcessTest.py
+    SANSILLMultiProcessTest.py
     SANSILLIntegrationTest.py
     SANSILLReductionTest.py
     SANSILLParameterScanTest.py
