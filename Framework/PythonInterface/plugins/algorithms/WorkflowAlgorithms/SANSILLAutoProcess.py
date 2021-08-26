@@ -320,7 +320,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         self.setPropertyGroup('TransmissionBeamRuns', 'Transmissions')
         self.setPropertyGroup('TransmissionAbsorberRuns', 'Transmissions')
         self.copyProperties('SANSILLReduction',
-                            ['ThetaDependent'])
+                            ['ThetaDependent'], Version=1)
         self.setPropertyGroup('ThetaDependent', 'Transmissions')
 
         self.declareProperty('SensitivityMaps', '',
@@ -344,7 +344,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                                                      optional=PropertyMode.Optional),
                              doc='The output sensitivity map workspace.')
 
-        self.copyProperties('SANSILLReduction', ['NormaliseBy'])
+        self.copyProperties('SANSILLReduction', ['NormaliseBy'], Version=1)
 
         self.declareProperty('SampleThickness', 0.1,
                              validator=FloatBoundedValidator(lower=-1),
@@ -572,7 +572,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 SANSILLReduction(Run=absorber,
                                  ProcessAs='Absorber',
                                  NormaliseBy=self.normalise,
-                                 OutputWorkspace=transmission_absorber_name)
+                                 OutputWorkspace=transmission_absorber_name,
+                                 Version=1)
         for beam_no, beam in enumerate(self.btransmission.split(',')):
             [process_transmission_beam, transmission_beam_name] = \
                 needs_processing(beam, 'Beam')
@@ -591,7 +592,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                                  BeamRadius=self.tr_radius,
                                  FluxOutputWorkspace=flux_name,
                                  AbsorberInputWorkspace=
-                                 transmission_absorber_name)
+                                 transmission_absorber_name,
+                                 Version=1)
         for transmission_no, transmission in enumerate(self.ctransmission.split(',')):
             [process_container_transmission, container_transmission_name] = \
                 needs_processing(transmission, 'Transmission')
@@ -613,7 +615,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                                  transmission_absorber_name,
                                  BeamInputWorkspace=transmission_beam_name,
                                  NormaliseBy=self.normalise,
-                                 BeamRadius=self.tr_radius)
+                                 BeamRadius=self.tr_radius,
+                                 Version=1)
         for transmission_no, transmission in enumerate(self.stransmission.split(',')):
             [process_sample_transmission, sample_transmission_name] = \
                 needs_processing(transmission, 'Transmission')
@@ -635,7 +638,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                                  transmission_absorber_name,
                                  BeamInputWorkspace=transmission_beam_name,
                                  NormaliseBy=self.normalise,
-                                 BeamRadius=self.tr_radius)
+                                 BeamRadius=self.tr_radius,
+                                 Version=1)
         return container_transmission_names, sample_transmission_names
 
     def processAbsorber(self, i):
@@ -649,7 +653,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
             SANSILLReduction(Run=absorber,
                              ProcessAs='Absorber',
                              NormaliseBy=self.normalise,
-                             OutputWorkspace=absorber_name)
+                             OutputWorkspace=absorber_name,
+                             Version=1)
         return absorber_name
 
     def processBeam(self, i, absorber_name):
@@ -669,7 +674,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                              NormaliseBy=self.normalise,
                              BeamRadius=radius,
                              AbsorberInputWorkspace=absorber_name,
-                             FluxOutputWorkspace=flux_name)
+                             FluxOutputWorkspace=flux_name,
+                             Version=1)
         return beam_name, flux_name
 
     def processFlux(self, i, absorber_name):
@@ -690,7 +696,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                                  NormaliseBy=self.normalise,
                                  BeamRadius=radius,
                                  AbsorberInputWorkspace=absorber_name,
-                                 FluxOutputWorkspace=flux_name)
+                                 FluxOutputWorkspace=flux_name,
+                                 Version=1)
             return flux_name
         else:
             return None
@@ -717,7 +724,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                              TransmissionInputWorkspace=
                              container_transmission_name,
                              ThetaDependent=self.theta_dependent,
-                             NormaliseBy=self.normalise)
+                             NormaliseBy=self.normalise,
+                             Version=1)
         return container_name
 
     def createCustomSuffix(self, ws):
@@ -878,6 +886,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 self.getProperty('SampleThickness').value,
                 WaterCrossSection=
                 self.getProperty('WaterCrossSection').value,
+                Version=1
                 )
 
         output_sample = self.output + '_#' + str(i + 1)
