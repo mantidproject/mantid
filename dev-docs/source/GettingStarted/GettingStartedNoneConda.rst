@@ -119,13 +119,13 @@ Install pre-commit for use in our current developer workflow
 
 if you wish to setup eclipse for use developing mantid, then instructions can be found :ref:`here <Eclipse>`.
 
-Now you can :ref:`here <Getting the Mantid code>`, and build it:
+Now you can :ref:`Clone Mantid <wsl-cloning-mantid-ref>`, and build as follows:
 
 .. code-block:: sh
 
   mkdir build
   cd build
-  cmake -GNinja [mantid source]
+  cmake -G Ninja [mantid source]
   cmake --build .
 
 See the instructions on :ref:`this <RunningTheUnitTests>` page to run the Mantid unit tests.

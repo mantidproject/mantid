@@ -442,12 +442,11 @@ fi
 # Developer Documentation
 ###############################################################################
 # Uncomment this when the dev-docs are ready to build without warnings
-# if [[ ${DO_BUILD_DEVDOCS} == true ]]; then
-#   if [ -d $BUILD_DIR/dev-docs/doctree ]; then
-#     rm -fr $BUILD_DIR/dev-docs/doctree/*
-#   fi
-#   ${CMAKE_EXE} --build . --target dev-docs-html
-# fi
+if [[ ${DO_BUILD_DEVDOCS} == true ]]; then
+  rm -fr $BUILD_DIR/dev-docs/doctree/*
+  rm -f $BUILD_DIR/dev-docs/dev_docs_warnings.txt
+  ${CMAKE_EXE} --build . --target dev-docs-html
+fi
 
 ###############################################################################
 # Create the install kit if required. This includes building the Qt help
