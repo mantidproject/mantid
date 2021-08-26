@@ -485,7 +485,7 @@ class RunTabPresenter(PresenterCommon):
         for row in self._table_model.get_non_empty_rows():
             try:
                 file_info = row.file_information
-            except (ValueError, RuntimeError):
+            except (ValueError, RuntimeError, OSError):
                 pass
 
         if self._file_information != file_info:
