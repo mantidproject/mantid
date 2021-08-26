@@ -320,7 +320,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         self.setPropertyGroup('TransmissionBeamRuns', 'Transmissions')
         self.setPropertyGroup('TransmissionAbsorberRuns', 'Transmissions')
         self.copyProperties('SANSILLReduction',
-                            ['ThetaDependent'], Version=1)
+                            ['ThetaDependent'], version=1)
         self.setPropertyGroup('ThetaDependent', 'Transmissions')
 
         self.declareProperty('SensitivityMaps', '',
@@ -344,7 +344,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                                                      optional=PropertyMode.Optional),
                              doc='The output sensitivity map workspace.')
 
-        self.copyProperties('SANSILLReduction', ['NormaliseBy'], Version=1)
+        self.copyProperties('SANSILLReduction', ['NormaliseBy'], version=1)
 
         self.declareProperty('SampleThickness', 0.1,
                              validator=FloatBoundedValidator(lower=-1),
