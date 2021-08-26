@@ -7,24 +7,26 @@
 import unittest
 
 from mantid.api import MatrixWorkspace, WorkspaceGroup
-from mantid.simpleapi import SANSILLIntegration, SANSILLReduction, config, mtd
+from mantid.simpleapi import *
 
 
 class SANSILLIntegrationTest(unittest.TestCase):
 
     _facility = None
 
-    def setUp(self):
-        self._facility = config['default.facility']
-        self._data_search_dirs = config.getDataSearchDirs()
+    @classmethod
+    def setUpClass(cls):
+        cls._facility = config['default.facility']
+        cls._data_search_dirs = config.getDataSearchDirs()
         config.appendDataSearchSubDir('ILL/D11/')
         config.appendDataSearchSubDir('ILL/D33/')
         config.setFacility("ILL")
-        SANSILLReduction(Run='010569', ProcessAs='Sample', OutputWorkspace='sample')
+        SANSILLReduction(Run='010569', ProcessAs='Sample', OutputWorkspace='sample', Version=1)
 
-    def tearDown(self):
-        config.setFacility(self._facility)
-        config.setDataSearchDirs(self._data_search_dirs)
+    @classmethod
+    def tearDownClass(cls):
+        config.setFacility(cls._facility)
+        config.setDataSearchDirs(cls._data_search_dirs)
         mtd.clear()
 
     def test_monochromatic(self):
@@ -98,9 +100,9 @@ class SANSILLIntegrationTest(unittest.TestCase):
 
     def test_tof(self):
         # D33 VTOF
-        SANSILLReduction(Run='093410', ProcessAs='Sample', OutputWorkspace='sample')
+        SANSILLReduction(Run='093410', ProcessAs='Sample', OutputWorkspace='tof_sample', Version=1)
         # TOF resolution is not yet implemented
-        SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq')
+        SANSILLIntegration(InputWorkspace='tof_sample', OutputWorkspace='iq')
         self._check_output(mtd['iq'])
         self.assertEqual(mtd['iq'].blocksize(), 162)
 
