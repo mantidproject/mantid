@@ -83,7 +83,7 @@ void CalculatePlaczekSelfScattering2::exec() {
   CalculatePlaczek alg;
   alg.initialize();
   if (alg.isInitialized()) {
-    alg.setProperty("IncidentSpecta", incidentWS);
+    alg.setProperty("IncidentSpectra", incidentWS);
     alg.setProperty("InputWorkspace", inWS);
     alg.setProperty("OutputWorkspace", "correction_ws");
 

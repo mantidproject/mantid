@@ -178,10 +178,12 @@ void CalculatePlaczek::exec() {
   const bool scaleByPackingFraction = getProperty("ScaleByPackingFraction");
 
   // prep output
-  API::MatrixWorkspace_sptr outputWS = DataObjects::create<API::HistoWorkspace>(*inWS);
-  // NOTE:
-  // The algorithm computes the signal values at bin centers so they should
-  // be treated as a distribution
+  // build the output workspace
+  // - use instrument information from InputWorkspace
+  // - use the bin Edges from the incident flux
+  API::MatrixWorkspace_sptr outputWS =
+      DataObjects::create<API::HistoWorkspace>(*inWS, incidentWS->getSpectrum(0).binEdges());
+  outputWS->getAxis(0)->unit() = incidentWS->getAxis(0)->unit();
   outputWS->setDistribution(true);
   outputWS->setYUnit("");
   outputWS->setYUnitLabel("Counts");
@@ -199,7 +201,7 @@ void CalculatePlaczek::exec() {
      3433-3451 NOTE: Powles's Equation for inelastic self-scattering is equal to
      Howe's Equation for P(theta) by adding the elastic self-scattering
   */
-  const MantidVec xLambda = incidentWS->readX(0);
+  const auto xLambda = incidentWS->getSpectrum(0).points();
   // pre-compute the coefficients
   // - calculate summation term w/ neutron mass over molecular mass ratio
   const double summationTerm = calculateSummationTerm(inWS->sample().getMaterial());
@@ -228,8 +230,7 @@ void CalculatePlaczek::exec() {
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (size_t specIndex = 0; specIndex < specInfo.size(); specIndex++) {
     PARALLEL_START_INTERUPT_REGION
-    auto &y = outputWS->mutableY(specIndex);
-    auto &x = outputWS->mutableX(specIndex);
+    auto &y = outputWS->mutableY(specIndex); // x-axis is directly copied from incident flux
     // only perform calculation for components that
     // - is monitor
     // - at (0,0,0)
@@ -255,7 +256,7 @@ void CalculatePlaczek::exec() {
       // - convenience variables
       const double sinHalfAngleSq = sinThetaBy2 * sinThetaBy2;
       // - loop over all lambda
-      for (size_t xIndex = 0; xIndex < xLambda.size() - 1; xIndex++) {
+      for (size_t xIndex = 0; xIndex < xLambda.size(); xIndex++) {
         // -- calculate first order correction
         const double term1 = (f - 1.0) * phi1[xIndex];
         const double term2 = f * (1.0 - eps1[xIndex]);
@@ -284,25 +285,20 @@ void CalculatePlaczek::exec() {
           inelasticPlaczekCorrection += P2_part1 + P2_part2;
         }
         // -- consolidate
-        x[xIndex] = wavelength.singleToTOF(xLambda[xIndex]);
         y[xIndex] =
             scaleByPackingFraction ? (1 + inelasticPlaczekCorrection) * packingFraction : inelasticPlaczekCorrection;
       }
-      x.back() = wavelength.singleToTOF(xLambda.back());
     } else {
-      for (size_t xIndex = 0; xIndex < xLambda.size() - 1; xIndex++) {
-        x[xIndex] = xLambda[xIndex];
+      for (size_t xIndex = 0; xIndex < xLambda.size(); xIndex++) {
         y[xIndex] = 0;
       }
-      x.back() = xLambda.back();
     }
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
 
   // consolidate output to workspace
-  auto incidentUnit = inWS->getAxis(0)->unit();
-  outputWS->getAxis(0)->unit() = incidentUnit;
+
   outputWS->setDistribution(false);
 
   // set output
@@ -382,13 +378,12 @@ std::vector<double> CalculatePlaczek::getFluxCoefficient1() {
   std::vector<double> phi1;
 
   const API::MatrixWorkspace_sptr incidentWS = getProperty("IncidentSpectra");
-  const MantidVec xLambda = incidentWS->readX(0);
+  const auto xLambda = incidentWS->getSpectrum(0).points();
   const MantidVec incident = incidentWS->readY(0);
   const MantidVec incidentPrime = incidentWS->readY(1);
-  const double dx = (xLambda[1] - xLambda[0]) / 2.0; // assume constant bin width
   // phi1 = lambda * phi'(lambda)/phi(lambda)
-  for (size_t i = 0; i < xLambda.size() - 1; i++) {
-    phi1.emplace_back((xLambda[i] + dx) * incidentPrime[i] / incident[i]);
+  for (size_t i = 0; i < xLambda.size(); i++) {
+    phi1.emplace_back(xLambda[i] * incidentPrime[i] / incident[i]);
   }
   return phi1;
 }
@@ -403,13 +398,12 @@ std::vector<double> CalculatePlaczek::getFluxCoefficient2() {
   std::vector<double> phi2;
 
   const API::MatrixWorkspace_sptr incidentWS = getProperty("IncidentSpectra");
-  const MantidVec xLambda = incidentWS->readX(0);
+  const auto xLambda = incidentWS->getSpectrum(0).points();
   const MantidVec incident = incidentWS->readY(0);
   const MantidVec incidentPrime2 = incidentWS->readY(2);
-  const double dx = (xLambda[1] - xLambda[0]) / 2.0; // assume constant bin width
   // phi2 = lambda^2 * phi''(lambda)/phi(lambda)
-  for (size_t i = 0; i < xLambda.size() - 1; i++) {
-    phi2.emplace_back((xLambda[i] + dx) * (xLambda[i] + dx) * incidentPrime2[i] / incident[i]);
+  for (size_t i = 0; i < xLambda.size(); i++) {
+    phi2.emplace_back(xLambda[i] * xLambda[i] * incidentPrime2[i] / incident[i]);
   }
   return phi2;
 }
@@ -425,21 +419,18 @@ std::vector<double> CalculatePlaczek::getEfficiencyCoefficient1() {
   std::vector<double> eps1;
 
   // NOTE: we need the xlambda here to
-  // - ensure the bins are properly aligned
   // - compute the coefficient based on an assumed efficiency curve
   const API::MatrixWorkspace_sptr incidentWS = getProperty("IncidentSpectra");
   const MantidVec incident = incidentWS->readY(0);
-  const MantidVec xLambda = incidentWS->readX(0);
-  const double dx = (xLambda[1] - xLambda[0]) / 2.0; // assume constant bin width
-
+  const auto xLambda = incidentWS->getSpectrum(0).points();
   const API::MatrixWorkspace_sptr efficiencyWS = getProperty("EfficiencySpectra");
   if (efficiencyWS) {
     // Use the formula
     // eps1 = k * eps'/eps, k = 2pi/lambda
     std::vector<double> eps = efficiencyWS->readY(0);
     std::vector<double> epsPrime = efficiencyWS->readY(1);
-    for (size_t i = 0; i < xLambda.size() - 1; i++) {
-      double lambda = xLambda[i] + dx;
+    for (size_t i = 0; i < xLambda.size(); i++) {
+      double lambda = xLambda[i];
       double k = 2.0 * M_PI / lambda;
       double eps_i = (eps[i] + eps[i + 1]) / 2.0;
       double epsPrime_i = (epsPrime[i] + epsPrime[i + 1]) / 2.0;
@@ -448,8 +439,8 @@ std::vector<double> CalculatePlaczek::getEfficiencyCoefficient1() {
   } else {
     // This is based on an assume efficiency curve from
     const double LambdaD = getProperty("LambdaD");
-    for (size_t i = 0; i < xLambda.size() - 1; i++) {
-      const auto xTerm = -(xLambda[i] + dx) / LambdaD;
+    for (size_t i = 0; i < xLambda.size(); i++) {
+      const auto xTerm = -xLambda[i] / LambdaD;
       eps1.emplace_back(xTerm * exp(xTerm) / (1.0 - exp(xTerm)));
     }
   }
@@ -466,12 +457,10 @@ std::vector<double> CalculatePlaczek::getEfficiencyCoefficient2() {
   std::vector<double> eps2;
 
   // NOTE: we need the xlambda here to
-  // - ensure the bins are properly aligned
   // - compute the coefficient based on an assumed efficiency curve
   const API::MatrixWorkspace_sptr incidentWS = getProperty("IncidentSpectra");
   const MantidVec incident = incidentWS->readY(0);
-  const MantidVec xLambda = incidentWS->readX(0);
-  const double dx = (xLambda[1] - xLambda[0]) / 2.0; // assume constant bin width
+  const auto xLambda = incidentWS->getSpectrum(0).points();
 
   const API::MatrixWorkspace_sptr efficiencyWS = getProperty("EfficiencySpectra");
   if (efficiencyWS) {
@@ -479,8 +468,8 @@ std::vector<double> CalculatePlaczek::getEfficiencyCoefficient2() {
     // eps1 = k^2 * eps''/eps, k = 2pi/lambda
     std::vector<double> eps = efficiencyWS->readY(0);
     std::vector<double> epsPrime2 = efficiencyWS->readY(2);
-    for (size_t i = 0; i < xLambda.size() - 1; i++) {
-      double lambda = xLambda[i] + dx;
+    for (size_t i = 0; i < xLambda.size(); i++) {
+      double lambda = xLambda[i];
       double k = 2.0 * M_PI / lambda;
       double eps_i = (eps[i] + eps[i + 1]) / 2.0;
       double epsPrime2_i = (epsPrime2[i] + epsPrime2[i + 1]) / 2.0;
@@ -494,8 +483,8 @@ std::vector<double> CalculatePlaczek::getEfficiencyCoefficient2() {
     // The detector efficiency coefficient is denoted with F1 and _2F in the paper instead of the eps1 and eps2
     // used in the code.
     const double LambdaD = getProperty("LambdaD");
-    for (size_t i = 0; i < xLambda.size() - 1; i++) {
-      const auto xTerm = -(xLambda[i] + dx) / LambdaD;
+    for (size_t i = 0; i < xLambda.size(); i++) {
+      const auto xTerm = -xLambda[i] / LambdaD;
       double eps1 = xTerm * exp(xTerm) / (1.0 - exp(xTerm));
       eps2.emplace_back((-xTerm - 2) * eps1);
     }
