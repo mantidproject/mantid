@@ -313,7 +313,7 @@ def pdcalibration_groups(data_ws,
         if mtd[f'{output_basename}_pd_diffcal_mask'].readY(i)[0] == 0.0:
             diff_difc = abs(difc_bak - difc_calib) / difc_calib * 100.0
         else:
-            diff_difc = numpy.inf
+            diff_difc = np.inf
         if diff_difc >= BadCalibThreshold:
             difc_calib = difc_bak
         new_row = { 'detid': mtd[f'{output_basename}_cc_pd_diffcal_tmp'].row(i)['detid'],
