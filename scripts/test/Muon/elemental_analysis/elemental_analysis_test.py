@@ -513,7 +513,7 @@ class ElementalAnalysisTest(unittest.TestCase):
         mock_generate_element_widgets.side_effect = self.raise_ValueError_once
         self.gui.select_data_file()
         warning_text = 'The file does not contain correctly formatted data, resetting to default data file.' \
-                       'See "https://docs.mantidproject.org/nightly/interfaces/' \
+                       'See "https://docs.mantidproject.org/nightly/interfaces/muon/' \
                        'Muon%20Elemental%20Analysis.html" for more information.'
         mock_warning.assert_called_with(warning_text)
 
