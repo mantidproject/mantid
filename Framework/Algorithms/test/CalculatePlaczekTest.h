@@ -57,10 +57,12 @@ public:
     alg.execute();
     TS_ASSERT(alg.isExecuted());
 
-    // TODO: check the output against some reference values (TBD)
-    // Workspace_sptr outputWS = alg.getProperty("OutputWorkspace");
-    // TS_ASSERT(outputWS);
-    // TS_FAIL("TODO: Check the results and remove this line");
+    // check the output against some reference values
+    // NOTE: we are using fake incident flux, so these values here are not physically meaningful
+    Mantid::API::MatrixWorkspace_sptr outputWS =
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("outws"));
+    TS_ASSERT_DELTA(outputWS->readY(0)[0], 10.0, 1e-8);
+    TS_ASSERT_DELTA(outputWS->readY(0)[1], 10.0, 1e-8);
   }
 
   void test_2ndOrderPlaczekCorrection() {
@@ -88,10 +90,12 @@ public:
     alg.execute();
     TS_ASSERT(alg.isExecuted());
 
-    // TODO: check the output against some reference values (TBD)
-    // Workspace_sptr outputWS = alg.getProperty("OutputWorkspace");
-    // TS_ASSERT(outputWS);
-    // TS_FAIL("TODO: Check the results and remove this line");
+    // check the output against some reference values
+    // NOTE: we are using fake incident flux, so these values here are not physically meaningful
+    Mantid::API::MatrixWorkspace_sptr outputWS =
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("outws"));
+    TS_ASSERT_DELTA(outputWS->readY(0)[0], 10.0001512625, 1e-8);
+    TS_ASSERT_DELTA(outputWS->readY(0)[1], 10.0002058857, 1e-8);
   }
 
 private:
