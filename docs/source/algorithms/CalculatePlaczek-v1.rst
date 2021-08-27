@@ -15,26 +15,26 @@ For this particular algorithm:
 
 * The input workspace must
 
-   * contain a sample with proper chemical formula as the correction calculation relies on it.
-   * have a valid instrument geometry attached to it as the correction factors are calculated on a per spectrum (i.e. detector) basis.
+  * contain a sample with proper chemical formula as the correction calculation relies on it.
+  * have a valid instrument geometry attached to it as the correction factors are calculated on a per spectrum (i.e. detector) basis.
 
 * A workspace containing the incident spectrum extracted from the monitor is needed.
 
-   * For the first order correction, only the incident spectrum and its first order derivative is needed.
-   * For the second order correction, the incident spectrum along with its first and second derivate are needed.
-   * It is implicitly assumed that
+  * For the first order correction, only the incident spectrum and its first order derivative is needed.
+  * For the second order correction, the incident spectrum along with its first and second derivate are needed.
+  * It is implicitly assumed that
 
-      * `IncidentSpectra.ReadY(0)` returns the incident spectrum.
-      * `IncidentSpectra.ReadY(1)` returns the first order derivative.
-      * `IncidentSpectra.ReadY(2)` returns the second order derivative.
+    * ``IncidentSpectra.readY(0)`` returns the incident spectrum.
+    * ``IncidentSpectra.readY(1)`` returns the first order derivative.
+    * ``IncidentSpectra.readY(2)`` returns the second order derivative.
 
 * The algorithm will try to extract temperature from the sample log if it is not provided. However, this will be a simple average without any additional consideration about outliers or bad reading. Therefore, it is recommended to provide a sample temperature in Kelvin explicitly.
 
-* The Placzek correction calculation requires a detector efficiency curve and its derivatives. This algorithm will prioritize the use of input `EfficiencySpectra`. However, when `EfficiencySpectra` is not provided:
+* The Placzek correction calculation requires a detector efficiency curve and its derivatives. This algorithm will prioritize the use of input ``EfficiencySpectra``. However, when ``EfficiencySpectra`` is not provided:
 
-   * The algorithm will can generate a theoretical detector efficiency curve (see :ref:`He3TubeEfficiency <algm-He3TubeEfficiency>` for details) using the input Parameter `LambdaD`.
-   * When no `LambdaD` is provided, the default value 1.44 will be used, which is also the implicit value used in the original :ref:`CalculatePlaczekSelfScattering <algm-CalculatePlaczekSelfScattering-v1>`.
-   * Generally speaking it is better to measure the detector efficiency instead of relying on a theoretical one.
+  * The algorithm will can generate a theoretical detector efficiency curve (see :ref:`He3TubeEfficiency <algm-He3TubeEfficiency>` for details) using the input Parameter ``LambdaD``.
+  * When no ``LambdaD`` is provided, the default value 1.44 will be used, which is also the implicit value used in the original :ref:`CalculatePlaczekSelfScattering <algm-CalculatePlaczekSelfScattering-v1>`.
+  * Generally speaking it is better to measure the detector efficiency instead of relying on a theoretical one.
 
 * The calculated Placzek correction factor will be scaled by the packing fraction if `ScaleByPackingFraction` is set to `True` (Default value).
 
@@ -43,7 +43,7 @@ For this particular algorithm:
 
    P_\text{scaled} = (1 + P) * p_\text{packingFraction}
 
-where `P` is the Placzek correction factor, and `p` is the packing fraction.
+where :math:`P` is the Placzek correction factor, and :math:`p` is the packing fraction.
 
 Physics
 -------
@@ -60,14 +60,14 @@ In the original work [1]_ , the formula to compute the first order Placzek corre
 
 where
 
-   * :math:`\theta` is the scattering angle.
-   * :math:`f = \frac{L_1}{L_1+L_2}` with :math:`L_1` being the distance between moderator and the sample and :math:`L_2` being the distance between the sample and the detector.
-   * :math:`\phi_1` is the first order incident flux coefficient.
-   * :math:`\epsilon_1` is the first order detector efficiency coefficient.
-   * :math:`c_\alpha` is the number proportion of species :math:`\alpha`.
-   * :math:`b_\alpha` is the total scattering length of species :math:`\alpha`.
-   * :math:`m` is the mass of neutron.
-   * :math:`M_\alpha` refers to the atomic mass of species :math:`\alpha`.
+* :math:`\theta` is the scattering angle.
+* :math:`f = \frac{L_1}{L_1+L_2}` with :math:`L_1` being the distance between moderator and the sample and :math:`L_2` being the distance between the sample and the detector.
+* :math:`\phi_1` is the first order incident flux coefficient.
+* :math:`\epsilon_1` is the first order detector efficiency coefficient.
+* :math:`c_\alpha` is the number proportion of species :math:`\alpha`.
+* :math:`b_\alpha` is the total scattering length of species :math:`\alpha`.
+* :math:`m` is the mass of neutron.
+* :math:`M_\alpha` refers to the atomic mass of species :math:`\alpha`.
 
 When the incident flux :math:`\phi` is available from monitor, the first order incident flux coefficient, :math:`\phi_1` can be calculated with
 
@@ -76,7 +76,12 @@ When the incident flux :math:`\phi` is available from monitor, the first order i
 
    \phi_1 = \lambda_i \dfrac{\phi'(\lambda_i)}{\phi(\lambda_i)}
 
-where :math:`\phi'(\lambda_i)` is the first order derivative of :math:`\phi(\lambda)` evaluated at :math:`\lambda_i`.
+where :math:`\phi'(\lambda)` is defined as
+
+.. math::
+   :label: phiprime
+
+   \phi'(\lambda) = \dfrac{\ln(\phi(\lambda))}{\ln(\lambda)}
 
 When the detector efficiency :math:`\epsilon` is measured as a function of wave vector :math:`k = 2\pi / \lambda`, the first order detector efficiency coefficient, :math:`\epsilon_1` can be calculated with
 
@@ -141,11 +146,11 @@ The second order Placzek correction, :math:`P_2` is similar to the first order, 
 
 where
 
-   * :math:`k_B` is the Boltzmann constant.
-   * :math:`T` is the temperature in Kelvin.
-   * :math:`E` is the energy of the incident neutron as :math:`E = h^2/(2m\lambda^2_i).
-   * :math:`\phi_2` is the second order incident flux coefficient.
-   * :math:`\epsilon_2` is the second order detector efficiency coefficient.
+* :math:`k_B` is the Boltzmann constant.
+* :math:`T` is the temperature in Kelvin.
+* :math:`E` is the energy of the incident neutron as :math:`E = h^2/(2m\lambda^2_i)`.
+* :math:`\phi_2` is the second order incident flux coefficient.
+* :math:`\epsilon_2` is the second order detector efficiency coefficient.
 
 Similar to :math:`\phi_1`, :math:`\phi_2` can be calculated when incident flux is measured by the monitor,
 
