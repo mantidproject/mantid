@@ -14,20 +14,28 @@ This algorithm can calculate the 1st and 2nd order Placzek inelastic scattering 
 For this particular algorithm:
 
 * The input workspace must
+
    * contain a sample with proper chemical formula as the correction calculation relies on it.
    * have a valid instrument geometry attached to it as the correction factors are calculated on a per spectrum (i.e. detector) basis.
+
 * A workspace containing the incident spectrum extracted from the monitor is needed.
+
    * For the first order correction, only the incident spectrum and its first order derivative is needed.
    * For the second order correction, the incident spectrum along with its first and second derivate are needed.
    * It is implicitly assumed that
+
       * `IncidentSpectra.ReadY(0)` returns the incident spectrum.
       * `IncidentSpectra.ReadY(1)` returns the first order derivative.
       * `IncidentSpectra.ReadY(2)` returns the second order derivative.
+
 * The algorithm will try to extract temperature from the sample log if it is not provided. However, this will be a simple average without any additional consideration about outliers or bad reading. Therefore, it is recommended to provide a sample temperature in Kelvin explicitly.
+
 * The Placzek correction calculation requires a detector efficiency curve and its derivatives. This algorithm will prioritize the use of input `EfficiencySpectra`. However, when `EfficiencySpectra` is not provided:
+
    * The algorithm will can generate a theoretical detector efficiency curve (see :ref:`He3TubeEfficiency <algm-He3TubeEfficiency>` for details) using the input Parameter `LambdaD`.
    * When no `LambdaD` is provided, the default value 1.44 will be used, which is also the implicit value used in the original :ref:`CalculatePlaczekSelfScattering <algm-CalculatePlaczekSelfScattering-v1>`.
    * Generally speaking it is better to measure the detector efficiency instead of relying on a theoretical one.
+
 * The calculated Placzek correction factor will be scaled by the packing fraction if `ScaleByPackingFraction` is set to `True` (Default value).
 
 .. math::
@@ -51,6 +59,7 @@ In the original work [1]_ , the formula to compute the first order Placzek corre
           \sum_\alpha c_\alpha \bar{b_\alpha^2} \dfrac{m}{M_\alpha}
 
 where
+
    * :math:`\theta` is the scattering angle.
    * :math:`f = \frac{L_1}{L_1+L_2}` with :math:`L_1` being the distance between moderator and the sample and :math:`L_2` being the distance between the sample and the detector.
    * :math:`\phi_1` is the first order incident flux coefficient.
@@ -100,6 +109,8 @@ It is worth points out that the derivative of the detector efficiency is compute
 
 The detailed explanation can be found in [2]_ .
 
+.. plot:: CalculatePlaczekPlotP1.py
+
 The second order Placzek correction, :math:`P_2` is similar to the first order, just with some new components
 
 .. math::
@@ -129,6 +140,7 @@ The second order Placzek correction, :math:`P_2` is similar to the first order, 
             \}
 
 where
+
    * :math:`k_B` is the Boltzmann constant.
    * :math:`T` is the temperature in Kelvin.
    * :math:`E` is the energy of the incident neutron as :math:`E = h^2/(2m\lambda^2_i).
