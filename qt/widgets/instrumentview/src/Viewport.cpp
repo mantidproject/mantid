@@ -75,6 +75,13 @@ void Viewport::setProjection(double l, double r, double b, double t,
     std::swap(m_bottom, m_top);
   m_near = nearz;
   m_far = farz;
+  // save the current projection bounds to reuse on view changes
+  m_leftOrig = m_left;
+  m_rightOrig = m_right;
+  m_topOrig = m_top;
+  m_bottomOrig = m_bottom;
+  m_nearOrig = m_near;
+  m_farOrig = m_far;
 }
 
 /**
@@ -253,6 +260,7 @@ void Viewport::setViewToXPositive() {
                              Mantid::Kernel::V3D(-1.0, 0.0, 0.0));
   m_quaternion = tempy;
   m_quaternion.GLMatrix(&m_rotationmatrix[0]);
+  adjustProjection();
 }
 
 /**
@@ -265,6 +273,7 @@ void Viewport::setViewToYPositive() {
                              Mantid::Kernel::V3D(0.0, -1.0, 0.0));
   m_quaternion = tempy;
   m_quaternion.GLMatrix(&m_rotationmatrix[0]);
+  adjustProjection();
 }
 
 /**
@@ -275,6 +284,7 @@ void Viewport::setViewToZPositive() {
   reset();
   m_quaternion.init();
   m_quaternion.GLMatrix(&m_rotationmatrix[0]);
+  adjustProjection();
 }
 
 /**
@@ -287,6 +297,7 @@ void Viewport::setViewToXNegative() {
                              Mantid::Kernel::V3D(1.0, 0.0, 0.0));
   m_quaternion = tempy;
   m_quaternion.GLMatrix(&m_rotationmatrix[0]);
+  adjustProjection();
 }
 
 /**
@@ -299,6 +310,7 @@ void Viewport::setViewToYNegative() {
                              Mantid::Kernel::V3D(0.0, 1.0, 0.0));
   m_quaternion = tempy;
   m_quaternion.GLMatrix(&m_rotationmatrix[0]);
+  adjustProjection();
 }
 
 /**
@@ -310,6 +322,29 @@ void Viewport::setViewToZNegative() {
   Mantid::Kernel::Quat tempy(180.0, Mantid::Kernel::V3D(0.0, 1.0, 0.0));
   m_quaternion = tempy;
   m_quaternion.GLMatrix(&m_rotationmatrix[0]);
+  adjustProjection();
+}
+
+void Viewport::adjustProjection() {
+  // reset the projection bounds to the original values
+  m_left = m_leftOrig;
+  m_right = m_rightOrig;
+  m_top = m_topOrig;
+  m_bottom = m_bottomOrig;
+  m_near = 0.0;
+  m_far = 0.0;
+  // rotate the original projection based on the new quaternion
+  m_quaternion.rotateBB(m_left, m_bottom, m_near, m_right, m_top, m_far);
+  // restore the Z bounds
+  m_near = m_nearOrig;
+  m_far = m_farOrig;
+  // update the GL projection with the new bounds
+  applyProjection();
+}
+
+void Viewport::getProjection(Mantid::Kernel::V3D &minBound, Mantid::Kernel::V3D &maxBound) const {
+  minBound = Mantid::Kernel::V3D(m_left, m_bottom, m_near);
+  maxBound = Mantid::Kernel::V3D(m_right, m_top, m_far);
 }
 
 /**
