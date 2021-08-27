@@ -129,3 +129,12 @@ class DrillSampleGroup:
             (DrillSample): master sample or None
         """
         return self._master
+
+    def getSamples(self):
+        """
+        Get the samples of the group.
+
+        Returns:
+            list(DrillSample): list of samples
+        """
+        return self._samples
