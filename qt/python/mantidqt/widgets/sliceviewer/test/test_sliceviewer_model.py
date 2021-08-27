@@ -348,7 +348,7 @@ class SliceViewerModelTest(unittest.TestCase):
         model = SliceViewerModel(self.ws_MDE_3D)
         mock_binmd.return_value = self.ws_MD_3D
 
-        self.assertNotEqual(model.get_ws((None, None, 0), (1, 2, 4), ((-2, 2), (-1, 1))),
+        self.assertNotEqual(model.get_ws((None, None, 0), (1, 2, 4), ((-2, 2), (-1, 1)), [0, 1, None]),
                             self.ws_MDE_3D)
 
         call_params = dict(AxisAligned=False,
@@ -363,7 +363,7 @@ class SliceViewerModelTest(unittest.TestCase):
         mock_binmd.assert_called_once_with(**call_params)
         mock_binmd.reset_mock()
 
-        model.get_data((None, None, 0), (1, 2, 4), ((-2, 2), (-1, 1)))
+        model.get_data((None, None, 0), (1, 2, 4), [0, 1, None], ((-2, 2), (-1, 1)))
         mock_binmd.assert_called_once_with(**call_params)
 
     @patch('mantidqt.widgets.sliceviewer.model.BinMD')
@@ -373,7 +373,7 @@ class SliceViewerModelTest(unittest.TestCase):
         xmin = -5e-8
         xmax = 5e-8
 
-        self.assertNotEqual(model.get_ws((None, None, 0), (1, 2, 4), ((xmin, xmax), (-1, 1))),
+        self.assertNotEqual(model.get_ws((None, None, 0), (1, 2, 4), ((xmin, xmax), (-1, 1)), [0, 1, None]),
                             self.ws_MDE_3D)
 
         call_params = dict(AxisAligned=False,
@@ -675,10 +675,10 @@ class SliceViewerModelTest(unittest.TestCase):
                                                    y_is_spectra=is_spectra)
             mock_ws.name.return_value = 'mock_ws'
             model = SliceViewerModel(mock_ws)
-            slicepoint, bin_params = MagicMock(), MagicMock()
+            slicepoint, bin_params, dimension_indices = MagicMock(), MagicMock(), MagicMock()
 
             help_msg = model.export_roi_to_workspace(slicepoint, bin_params,
-                                                     ((xmin, xmax), (ymin, ymax)), transpose)
+                                                     ((xmin, xmax), (ymin, ymax)), transpose, dimension_indices)
 
             self.assertEqual('ROI created: mock_ws_roi', help_msg)
             if is_spectra:
@@ -710,10 +710,10 @@ class SliceViewerModelTest(unittest.TestCase):
 
         def assert_call_as_expected(mock_ws, transpose, export_type, is_spectra, is_ragged):
             model = SliceViewerModel(mock_ws)
-            slicepoint, bin_params = MagicMock(), MagicMock()
+            slicepoint, bin_params, dimension_indices = MagicMock(), MagicMock(), MagicMock()
 
             help_msg = model.export_cuts_to_workspace(slicepoint, bin_params,
-                                                      ((xmin, xmax), (ymin, ymax)), transpose,
+                                                      ((xmin, xmax), (ymin, ymax)), transpose, dimension_indices,
                                                       export_type)
 
             if export_type == 'c':
@@ -788,16 +788,18 @@ class SliceViewerModelTest(unittest.TestCase):
         xmin, xmax, ymin, ymax = -1., 3., 2., 4.
         slicepoint, bin_params = (None, None, 0.5), (100, 100, 0.1)
         zmin, zmax = 0.45, 0.55  # 3rd dimension extents
+        dimension_indices = [0, 1, None]  # Value at index i is the index of the axis that dimension i is displayed on
+        transposed_dimension_indices = [1, 0, None]
 
-        def assert_call_as_expected(transpose, export_type):
+        def assert_call_as_expected(transpose, dimension_indices, export_type):
             model = SliceViewerModel(self.ws_MDE_3D)
 
             if export_type == 'r':
                 help_msg = model.export_roi_to_workspace(slicepoint, bin_params,
-                                                         ((xmin, xmax), (ymin, ymax)), transpose)
+                                                         ((xmin, xmax), (ymin, ymax)), transpose, dimension_indices)
             else:
                 help_msg = model.export_cuts_to_workspace(slicepoint, bin_params,
-                                                          ((xmin, xmax), (ymin, ymax)), transpose,
+                                                          ((xmin, xmax), (ymin, ymax)), transpose, dimension_indices,
                                                           export_type)
 
             if transpose:
@@ -870,8 +872,8 @@ class SliceViewerModelTest(unittest.TestCase):
             mock_transposemd.reset_mock()
 
         for export_type in ('r', 'x', 'y', 'c'):
-            assert_call_as_expected(transpose=False, export_type=export_type)
-            assert_call_as_expected(transpose=True, export_type=export_type)
+            assert_call_as_expected(transpose=False, dimension_indices=dimension_indices, export_type=export_type)
+            assert_call_as_expected(transpose=True, dimension_indices=transposed_dimension_indices, export_type=export_type)
 
     @patch('mantidqt.widgets.sliceviewer.model.BinMD')
     @patch('mantidqt.widgets.sliceviewer.roi.ExtractSpectra')
@@ -879,15 +881,15 @@ class SliceViewerModelTest(unittest.TestCase):
                                                                 mock_binmd):
         def assert_error_returned_in_help(workspace, export_type, mock_alg, err_msg):
             model = SliceViewerModel(workspace)
-            slicepoint, bin_params = (None, None, None), MagicMock()
+            slicepoint, bin_params, dimension_indices = (None, None, None), MagicMock(), [0, 1, None]
             mock_alg.side_effect = RuntimeError(err_msg)
             try:
                 if export_type == 'r':
                     help_msg = model.export_roi_to_workspace(slicepoint, bin_params,
-                                                             ((1.0, 2.0), (-1, 2.0)), True)
+                                                             ((1.0, 2.0), (-1, 2.0)), True, dimension_indices)
                 else:
                     help_msg = model.export_cuts_to_workspace(slicepoint, bin_params,
-                                                              ((1.0, 2.0), (-1, 2.0)), True,
+                                                              ((1.0, 2.0), (-1, 2.0)), True, dimension_indices,
                                                               export_type)
             except Exception as exc:
                 help_msg = str(exc)

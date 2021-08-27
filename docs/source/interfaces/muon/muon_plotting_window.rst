@@ -8,27 +8,36 @@ Plotting Window
    :width: 350px
 
 
-The plotting window displays the data specified by the tabs within the interface. This data can be displayed as a single plot,
-or as tiled plots, where each tile corresponds to either a Group/pair or a run.
+The plotting window displays the data specified by the tabs within the interface.
 By default this plot window is docked to the right-hand side of the main interface window, but can be undocked by
 double-clicking on the title bar of the window.
 
-The workspaces plotted in the figure depends on the tab which is currently being viewed:
+This data can be displayed as a single plot, or as tiled plots.
 
-- If the user is on the Home, Grouping or Phase table tabs the workspaces corresponding to the loaded runs and
-  selected groups are plotted.
-- If the user is on the fitting tab, the workspace displayed in the workspace selection box is plotted.
-- If the user is on the sequential the plotted workspace is controlled through the table present in this tab.
+The custom plotting for Muon Analysis are described in the :ref:`here <Muon_Analysis_plotting-ref>`.
+The custom plotting for Frequency Domain Analysis are described in the :ref:`here <Frequency_Domain_Analysis_plotting-ref>`.
 
 Plotting Controls
 ^^^^^^^^^^^^^^^^^
+At the very top of the interface is a drop down menu that selects the type of plot.
+The main types are:
+
+- **Plot Data**, which shows the measured/calculated data
+- **Raw Data**, which shows the spectra per detector
+- **Model Data**, which shows plots of the sample logs and fit parameter values. It also show fits to the data
+
 The plotting can be controlled through serveral options:
 
 **Plot type** Changes the plot type (e.g from asymmetry to counts).
 
 **Tiled plotting** The 'tile plots by' checkbox enables tiled plotting, which can be performed over runs or Groups/pairs.
+This is not always available.
 
 **Plot raw** Plot raw controls whether the raw or rebinned workspaces are plotted.
+This is not always available.
+
+**Plot difference** is only available for Fit Data and Model Data.
+When it is ticked it shows the difference between the data and the fit to the data.
 
 .. image::  ../../images/muon_plotting_window_tiled.png
    :width: 350px
@@ -49,5 +58,20 @@ Plotting Options
 
 **Errors** Whether to display errors for the workspaces plotted on the selected axes.
 
-:ref:`Muon Analysis <Muon_Analysis-ref>`
-:ref:`Frequency Domain Analysis <Frequency_Domain_Analysis-ref>`
+
+Raw Data Plots
+^^^^^^^^^^^^^^
+
+This can be used for inspecting individual detectors for potential faults.
+There are two selectors above the plot; one for `runs` and one for `detectors`.
+The `runs` selector allows the user to pick the run they want to plot (when loading multiple runs).
+The 'detectors' selector allows the user to choose the detectors they want to inspect.
+Only tiled plots can be shown and to improve the visibility of the plots the axis are identical for all subplots.
+
+.. image::  ../../images/muon_plotting_raw.png
+   :width: 500px
+
+:ref:`Muon Analysis <Muon_Analysis-ref>`,
+:ref:`Muon Analysis Plotting <Muon_Analysis_plotting-ref>`,
+:ref:`Frequency Domain Analysis <Frequency_Domain_Analysis-ref>`,
+:ref:`Frequency Domain Analysis Plotting <Frequency_Domain_Analysis_plotting-ref>`,

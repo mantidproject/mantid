@@ -20,7 +20,6 @@ class SettingsPresenterTest(unittest.TestCase):
         self.presenter.settings = {}
         self.settings = {"save_location": "save",
                          "full_calibration": "cal",
-                         "recalc_vanadium": False,
                          "logs": "some,logs",
                          "primary_log": "some",
                          "sort_ascending": True,
@@ -60,7 +59,6 @@ class SettingsPresenterTest(unittest.TestCase):
         def return_value(self):
             return {"save_location": "save",
                     "full_calibration": "", # invalid
-                    "recalc_vanadium": True, # not the default but valid
                     "logs": "some,logs",
                     "primary_log": "some",
                     "sort_ascending": True,
@@ -80,7 +78,6 @@ class SettingsPresenterTest(unittest.TestCase):
     def test_save_new_settings(self):
         self.view.get_save_location.return_value = self.settings['save_location'][:]
         self.view.get_full_calibration.return_value = self.settings['full_calibration'][:]
-        self.view.get_van_recalc.return_value = self.settings['recalc_vanadium']
         self.view.get_checked_logs.return_value = self.settings['logs'][:]
         self.view.get_primary_log.return_value = self.settings['primary_log'][:]
         self.view.get_ascending_checked.return_value = self.settings['sort_ascending']
@@ -102,7 +99,6 @@ class SettingsPresenterTest(unittest.TestCase):
         # check that view is updated before being shown
         self.view.set_save_location.assert_called_with(self.settings["save_location"])
         self.view.set_full_calibration.assert_called_with(self.settings["full_calibration"])
-        self.view.set_van_recalc.assert_called_with(self.settings["recalc_vanadium"])
         self.view.set_checked_logs.assert_called_with(self.settings["logs"])
         self.view.set_primary_log_combobox.assert_called_with(self.settings["primary_log"])
         self.view.set_ascending_checked.assert_called_with(self.settings["sort_ascending"])
@@ -111,7 +107,6 @@ class SettingsPresenterTest(unittest.TestCase):
     def test_save_settings_and_close(self):
         self.view.get_save_location.return_value = self.settings['save_location'][:]
         self.view.get_full_calibration.return_value = self.settings['full_calibration'][:]
-        self.view.get_van_recalc.return_value = self.settings['recalc_vanadium']
         self.view.get_checked_logs.return_value = self.settings['logs'][:]
         self.view.get_primary_log.return_value = self.settings['primary_log'][:]
         self.view.get_ascending_checked.return_value = self.settings['sort_ascending']

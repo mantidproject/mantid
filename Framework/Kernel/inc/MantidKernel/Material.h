@@ -93,6 +93,8 @@ public:
   double numberDensityEffective() const;
   /// Get the packing fraction
   double packingFraction() const;
+  /// The total number of atoms in the formula
+  double totalAtoms() const;
   /// Get the temperature
   double temperature() const;
   /// Get the pressure

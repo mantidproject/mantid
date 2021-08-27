@@ -73,6 +73,7 @@ void export_Material() {
                     "Packing fraction as a number, ideally, 0 to 1")
       .add_property("temperature", make_function(&Material::temperature), "Temperature")
       .add_property("pressure", make_function(&Material::pressure), "Pressure")
+      .add_property("totalAtoms", make_function(&Material::totalAtoms), "Total number of atoms")
 #if PY_MAJOR_VERSION >= 3
       .def("__bool__", &toBool, "Returns True if any of the scattering values are non-zero")
 #else

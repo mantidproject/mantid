@@ -76,6 +76,19 @@ class BeamCentreAsyncTest(unittest.TestCase):
 
         mocked_instance.assert_has_calls(expected_calls, any_order=True)
 
+    def test_returned_value_is_forwarded_on_success(self, mocked_alg):
+        state = mock.NonCallableMock()
+        fields = mock.NonCallableMock()
+        fields.centre_of_mass = True
+        fields.component = DetectorType.HAB
+
+        mocked_instance = mocked_alg.return_value
+        expected = {"pos1": 1.0, "pos2": 3.0}
+        mocked_instance.return_value = expected
+
+        self.worker.find_beam_centre(state, settings=fields)
+        self.mocked_presenter.on_update_centre_values.assert_called_once_with(expected)
+
     def test_beam_centre_errors_with_no_direction(self, mocked_alg):
         state = mock.NonCallableMock()
         fields = mock.NonCallableMock()

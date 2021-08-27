@@ -82,6 +82,7 @@ class BackgroundCorrectionsView(widget, ui_form):
         self._handle_use_raw_changed = None
         self._handle_start_x_changed = None
         self._handle_end_x_changed = None
+        self._handle_background_changed = None
         self.handle_show_fit_output_clicked = None
 
     def set_slot_for_mode_combo_box_changed(self, slot) -> None:
@@ -112,9 +113,29 @@ class BackgroundCorrectionsView(widget, ui_form):
         """Sets the slot for when a end x table cell is changed."""
         self._handle_end_x_changed = slot
 
+    def set_slot_for_background_changed(self, slot) -> None:
+        """Sets the slot for when a background table cell is changed."""
+        self._handle_background_changed = slot
+
     def set_slot_for_show_fit_output_clicked(self, slot) -> None:
         """Sets the slot for when the 'Show Output' is clicked."""
         self.handle_show_fit_output_clicked = slot
+
+    def set_none_background_correction_options_visible(self) -> None:
+        """Sets the Background corrections widgets as being hidden."""
+        self.set_background_correction_options_visible(False)
+
+    def set_auto_background_correction_options_visible(self) -> None:
+        """Sets the Background corrections widgets as being hidden."""
+        self.set_background_correction_options_visible(True)
+        self.set_fitting_table_options_visible(True)
+
+    def set_manual_background_correction_options_visible(self) -> None:
+        """Sets the Background corrections widgets as being hidden."""
+        self.set_background_correction_options_visible(True)
+        self.set_fitting_table_options_visible(False)
+        self.select_function_label.setVisible(False)
+        self.function_combo_box.setVisible(False)
 
     def set_background_correction_options_visible(self, visible: bool) -> None:
         """Sets the Background corrections widgets as being visible or hidden."""
@@ -125,6 +146,14 @@ class BackgroundCorrectionsView(widget, ui_form):
         self.show_all_runs_checkbox.setVisible(visible)
         self.apply_table_changes_to_all_checkbox.setVisible(visible)
         self.correction_options_table.setVisible(visible)
+
+    def set_fitting_table_options_visible(self, visible: bool) -> None:
+        """Sets the fitting related options in the table as being visible or hidden."""
+        self.correction_options_table.setColumnHidden(USE_RAW_COLUMN_INDEX, not visible)
+        self.correction_options_table.setColumnHidden(START_X_COLUMN_INDEX, not visible)
+        self.correction_options_table.setColumnHidden(END_X_COLUMN_INDEX, not visible)
+        self.correction_options_table.setColumnHidden(BG_ERROR_COLUMN_INDEX, not visible)
+        self.correction_options_table.setColumnHidden(SHOW_MATRIX_COLUMN_INDEX, not visible)
 
     def set_function_combo_box_tooltips(self) -> None:
         """Update the tooltips for the combobox."""
@@ -237,6 +266,10 @@ class BackgroundCorrectionsView(widget, ui_form):
         """Returns the Start X associated with the provided Run and Group."""
         return float(self._table_item_value_for(run, group, END_X_COLUMN_INDEX))
 
+    def set_background(self, run: str, group: str, background: float) -> None:
+        """Sets the Background associated with the provided Run and Group."""
+        self._set_table_item_value_for(run, group, BG_COLUMN_INDEX, background)
+
     def selected_start_x(self) -> float:
         """Returns the Start X in the row that is selected."""
         if self._selected_row is not None:
@@ -251,8 +284,16 @@ class BackgroundCorrectionsView(widget, ui_form):
         else:
             raise RuntimeError("There is no selected run/group table row.")
 
+    def selected_background(self) -> float:
+        """Returns the Background in the row that is selected."""
+        if self._selected_row is not None:
+            return float(self.correction_options_table.item(self._selected_row, BG_COLUMN_INDEX).text())
+        else:
+            raise RuntimeError("There is no selected run/group table row.")
+
     def populate_corrections_table(self, runs: list, groups: list, use_raws: list, start_xs: list, end_xs: list,
-                                   backgrounds: list, background_errors: list, statuses: list, use_raw_visible: bool) -> None:
+                                   backgrounds: list, background_errors: list, statuses: list, fixed_rebin: bool,
+                                   auto_corrections: bool) -> None:
         """Populates the background corrections table with the provided data."""
         self.correction_options_table.blockSignals(True)
         self.correction_options_table.setRowCount(0)
@@ -269,14 +310,14 @@ class BackgroundCorrectionsView(widget, ui_form):
             self.correction_options_table.setItem(row, START_X_COLUMN_INDEX, create_double_table_item(start_x))
             self.correction_options_table.setItem(row, END_X_COLUMN_INDEX, create_double_table_item(end_x))
             self.correction_options_table.setItem(row, BG_COLUMN_INDEX,
-                                                  create_double_table_item(background, enabled=False))
+                                                  create_double_table_item(background, enabled=not auto_corrections))
             self.correction_options_table.setItem(row, BG_ERROR_COLUMN_INDEX,
                                                   create_double_table_item(background_error, enabled=False))
             self.correction_options_table.setItem(row, STATUS_COLUMN_INDEX,
                                                   create_string_table_item(status, False, alignment=Qt.AlignVCenter))
             self.correction_options_table.setCellWidget(row, SHOW_MATRIX_COLUMN_INDEX,
                                                         self.create_show_fit_output_button_for_row(row))
-        self.correction_options_table.setColumnHidden(USE_RAW_COLUMN_INDEX, not use_raw_visible)
+        self.correction_options_table.setColumnHidden(USE_RAW_COLUMN_INDEX, not fixed_rebin or not auto_corrections)
         self.correction_options_table.blockSignals(False)
         self.correction_options_table.resizeColumnsToContents()
 
@@ -322,6 +363,8 @@ class BackgroundCorrectionsView(widget, ui_form):
             self._handle_start_x_changed()
         elif column == END_X_COLUMN_INDEX:
             self._handle_end_x_changed()
+        elif column == BG_COLUMN_INDEX:
+            self._handle_background_changed()
 
     def create_show_fit_output_button_for_row(self, row_index: int) -> QPushButton:
         """Creates the Show Matrix button and connects its slot for a specific row."""

@@ -136,6 +136,7 @@ set(PYTHON_PLUGINS
     algorithms/MuonMaxent.py
     algorithms/MuscatSofQW.py
     algorithms/NMoldyn4Interpolation.py
+    algorithms/NOMADMedianDetectorTest.py
     algorithms/NormaliseSpectra.py
     algorithms/OptimizeCrystalPlacementByRun.py
     algorithms/OrderWorkspaceHistory.py

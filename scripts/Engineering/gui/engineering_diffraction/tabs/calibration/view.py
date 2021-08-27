@@ -13,7 +13,7 @@ Ui_calib, _ = load_ui(__file__, "calibration_tab.ui")
 
 class CalibrationView(QtWidgets.QWidget, Ui_calib):
     sig_enable_controls = QtCore.Signal(bool)
-    sig_update_fields = QtCore.Signal()
+    sig_update_sample_field = QtCore.Signal()
 
     def __init__(self, parent=None, instrument="ENGINX"):
         super(CalibrationView, self).__init__(parent)
@@ -21,9 +21,6 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
         self.setup_tabbing_order()
         self.finder_sample.setLabelText("Calibration Sample #")
         self.finder_sample.setInstrumentOverride(instrument)
-
-        self.finder_vanadium.setLabelText("Vanadium #")
-        self.finder_vanadium.setInstrumentOverride(instrument)
 
         self.finder_path.setLabelText("Path")
         self.finder_path.isForRunFiles(False)
@@ -35,11 +32,9 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
     # =================
 
     def set_on_text_changed(self, slot):
-        self.finder_vanadium.fileTextChanged.connect(slot)
         self.finder_sample.fileTextChanged.connect(slot)
 
     def set_on_finding_files_finished(self, slot):
-        self.finder_vanadium.fileFindingFinished.connect(slot)
         self.finder_sample.fileFindingFinished.connect(slot)
 
     def set_on_calibrate_clicked(self, slot):
@@ -54,8 +49,8 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
     def set_enable_controls_connection(self, slot):
         self.sig_enable_controls.connect(slot)
 
-    def set_update_fields_connection(self, slot):
-        self.sig_update_fields.connect(slot)
+    def set_update_field_connection(self, slot):
+        self.sig_update_sample_field.connect(slot)
 
     def set_on_check_cropping_state_changed(self, slot):
         self.check_cropCalib.stateChanged.connect(slot)
@@ -71,20 +66,13 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
         self.check_plotOutput.setEnabled(enabled)
 
     def set_instrument_override(self, instrument):
-        self.finder_vanadium.setInstrumentOverride(instrument)
         self.finder_sample.setInstrumentOverride(instrument)
-
-    def set_vanadium_enabled(self, set_to):
-        self.finder_vanadium.setEnabled(set_to)
 
     def set_sample_enabled(self, set_to):
         self.finder_sample.setEnabled(set_to)
 
     def set_path_enabled(self, set_to):
         self.finder_path.setEnabled(set_to)
-
-    def set_vanadium_text(self, text):
-        self.finder_vanadium.setText(text)
 
     def set_sample_text(self, text):
         self.finder_sample.setText(text)
@@ -110,12 +98,6 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
     # =================
     # Component Getters
     # =================
-
-    def get_vanadium_filename(self):
-        return self.finder_vanadium.getFirstFilename()
-
-    def get_vanadium_valid(self):
-        return self.finder_vanadium.isValid()
 
     def get_sample_filename(self):
         return self.finder_sample.getFirstFilename()
@@ -149,7 +131,7 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
     # =================
 
     def is_searching(self):
-        return self.finder_sample.isSearching() or self.finder_sample.isSearching()
+        return self.finder_sample.isSearching()
 
     # =================
     # Force Actions
@@ -158,21 +140,17 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
     def find_sample_files(self):
         self.finder_sample.findFiles(True)
 
-    def find_vanadium_files(self):
-        self.finder_vanadium.findFiles(True)
-
     # =================
     # Internal Setup
     # =================
 
     def setup_tabbing_order(self):
-        self.finder_vanadium.focusProxy().setFocusPolicy(QtCore.Qt.StrongFocus)
         self.finder_sample.focusProxy().setFocusPolicy(QtCore.Qt.StrongFocus)
         self.finder_path.focusProxy().setFocusPolicy(QtCore.Qt.StrongFocus)
 
-        self.setTabOrder(self.radio_newCalib, self.finder_vanadium.focusProxy())
-        self.setTabOrder(self.finder_vanadium.focusProxy(), self.finder_sample.focusProxy())
-        self.setTabOrder(self.finder_sample.focusProxy(), self.finder_path.focusProxy())
+        self.setTabOrder(self.radio_newCalib, self.finder_sample.focusProxy())
+        self.setTabOrder(self.finder_sample.focusProxy(), self.radio_loadCalib)
+        self.setTabOrder(self.radio_loadCalib, self.finder_path.focusProxy())
         self.setTabOrder(self.finder_path.focusProxy(), self.check_cropCalib)
         self.setTabOrder(self.check_cropCalib, self.widget_cropping)
         self.setTabOrder(self.widget_cropping, self.check_plotOutput)

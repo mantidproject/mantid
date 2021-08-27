@@ -17,6 +17,7 @@ New features
 - New algorithm :ref:`SetSampleFromLogs <algm-SetSampleFromLogs>` inspects the sample enviroment logs for sample material and geometry information
 - New script for doing calibration by groups, :ref:`PowderDiffractionCalibration <calibration_tofpd_group_calibration-ref>`
 - New algorithm :ref:`MultipleScatteringCorrection <algm-MultipleScatteringCorrection>` to compute the multiple scattering correction factor for sample using numerical integration.
+- New algorithm :ref:`NOMADMedianDetectorTest <algm-NOMADMedianDetectorTest>` to mask pixels showing deficient or excessive total counts.
 
 Improvements
 ############
@@ -54,6 +55,10 @@ New features
 - Automatically subtract background from runs on loading in EngDiff UI.
 - The most recently created or loaded Calibration is now selected by default in the load path when the interface is opened.
 - The last used RB number is now saved for the next session
+- The generation of the files required for Vanadium normalization is now done on the Focus tab of the user interface. This means the Vanadium data can be updated without
+having to rerun the Ceria calibration. As part of this change the setting "Force Vanadium Recalculation" has been removed and the Vanadium run number input has been
+moved from the Calibration tab to the Focus tab. The Vanadium run number is also no longer written to the prm generated on the Calibration tab (Note: this is a breaking
+change and means .prm files generated from the EngDiff UI with older versions of Mantid won't load successfully)
 
 
 Improvements
@@ -71,7 +76,7 @@ Bugfixes
 - An empty Engineering Diffraction interface is no longer saved if the user saves a project having previously had the interface open at some point in that session
 - The help button on the Engineering Diffraction interface points to the correct page, having been broken in the last release
 - Using the Clear button on the Workspace widget while using the Fitting tab no longer causes issues when you try to load runs back in.
-
+- On the fitting tab of the EngDiff UI the background can be inspected whether the background subtraction box is checked or not.
 
 Single Crystal Diffraction
 --------------------------
@@ -95,9 +100,11 @@ Improvements
 - Existing :ref:`MaskPeaksWorkspace <algm-MaskPeaksWorkspace-v1>` now also supports tube-type detectors used at the CORELLI instrument.
 - Existing :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` now retains the value of small optimization results instead of zeroing them.
 - Existing :ref:`IntegrateEllipsoids <algm-IntegrateEllipsoids-v1>` now can use a different integrator for satellite peaks.
+- New option in :ref:`IntegrateEllipsoids <algm-IntegrateEllipsoids-v1>` to share Bragg peak background with satellite peaks.
 
 Bugfixes
 ########
 - Expand the Q space search radius in DetectorSearcher to avoid missing peaks when using :ref:`PredictPeaks <algm-PredictPeaks>`.
+- :ref:`IndexPeaks <algm-IndexPeaks>` can now index peaks in a PeaksWorkspace with only a single run without optimising the UB (i.e. it is now possible to set CommonUBForAll=True in this instance).
 
 :ref:`Release 6.2.0 <v6.2.0>`

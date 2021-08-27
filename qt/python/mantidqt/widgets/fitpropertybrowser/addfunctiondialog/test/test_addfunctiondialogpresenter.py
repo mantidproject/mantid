@@ -22,9 +22,10 @@ class AddFunctionDialogPresenterTest(unittest.TestCase):
         dialog = AddFunctionDialog(view=mock_view)
         with patch.object(mock_view.ui.functionBox.lineEdit(), 'text', lambda: "Gaussian"):
             with patch.object(mock_view, 'is_text_in_function_list', lambda x: True):
-                dialog.action_add_function()
-                mock_view.function_added.emit.assert_called_once_with("Gaussian")
-                self.assertEqual(1, dialog.view.accept.call_count)
+                with patch.object(mock_view, 'is_set_global_default', lambda: False):
+                    dialog.action_add_function()
+                    mock_view.function_added.emit.assert_called_once_with("Gaussian", False)
+                    self.assertEqual(1, dialog.view.accept.call_count)
 
     def test_add_function_with_placeholder_text_uses_placeholder_if_present(self, mock_view):
         dialog = AddFunctionDialog(view=mock_view)
@@ -32,9 +33,10 @@ class AddFunctionDialogPresenterTest(unittest.TestCase):
             with patch.object(mock_view.ui.functionBox.lineEdit(), 'placeholderText',
                               lambda: "Gaussian"):
                 with patch.object(mock_view, 'is_text_in_function_list', lambda x: True):
-                    dialog.action_add_function()
-                    mock_view.function_added.emit.assert_called_once_with("Gaussian")
-                    self.assertEqual(1, dialog.view.accept.call_count)
+                    with patch.object(mock_view, 'is_set_global_default', lambda: False):
+                        dialog.action_add_function()
+                        mock_view.function_added.emit.assert_called_once_with("Gaussian", False)
+                        self.assertEqual(1, dialog.view.accept.call_count)
 
     def test_add_function_give_error_if_function_not_valid(self, mock_view):
         dialog = AddFunctionDialog(view=mock_view)

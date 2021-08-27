@@ -12,6 +12,16 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 
+namespace {
+template <typename type> std::string convertVectorToString(const std::vector<type> &vector) {
+  std::string stringOfVector = "";
+  for (const auto &value : vector) {
+    stringOfVector += std::to_string(value) + ";";
+  }
+  return stringOfVector.substr(0, stringOfVector.size() - 1);
+}
+} // namespace
+
 namespace Mantid {
 namespace DataHandling {
 
@@ -31,6 +41,12 @@ const std::string SAMPLE{"sample"};
 const std::string TEMPERATURE{"temperature"};
 const std::string MAGNETICFIELD{"magnetic_field"};
 const std::string RAWDATA{"/raw_data_1"};
+const std::string SEQUENCES{"sequences"};
+const std::string TYPE{"type"};
+const std::string REQUESTED{"frames_requested"};
+const std::string RAWFRAMES{"raw_frames"};
+const std::string PERIODOUTPUT{"output"};
+const std::string PERIODCOUNTS{"total_counts"};
 } // namespace NeXusEntry
 
 using namespace NeXus;
@@ -226,5 +242,53 @@ int LoadMuonNexusV2NexusHelper::getNumberOfPeriods() const {
   NXClass periodClass = m_entry.openNXGroup(NeXusEntry::PERIOD);
   return periodClass.getInt("number");
 }
+
+std::string LoadMuonNexusV2NexusHelper::getPeriodLabels() const {
+  NXClass periodClass = m_entry.openNXGroup(NeXusEntry::PERIOD);
+  return periodClass.getString("labels");
+}
+
+std::vector<int> LoadMuonNexusV2NexusHelper::getIntVector(const int &numPeriods, const std::string &name) const {
+  NXClass periodClass = m_entry.openNXGroup(NeXusEntry::PERIOD);
+
+  NXInt dataClass = periodClass.openNXInt(name);
+  std::vector<int> dataVector;
+  dataClass.load();
+  for (int i = 0; i < numPeriods; ++i) {
+    dataVector.push_back(dataClass[i]);
+  }
+  return dataVector;
+}
+
+std::string LoadMuonNexusV2NexusHelper::getPeriodSequenceString(const int &numPeriods) const {
+  return convertVectorToString(getIntVector(numPeriods, NeXusEntry::SEQUENCES));
+}
+
+std::string LoadMuonNexusV2NexusHelper::getPeriodTypes(const int &numPeriods) const {
+  return convertVectorToString(getIntVector(numPeriods, NeXusEntry::TYPE));
+}
+
+std::string LoadMuonNexusV2NexusHelper::getPeriodFramesRequested(const int &numPeriods) const {
+  return convertVectorToString(getIntVector(numPeriods, NeXusEntry::REQUESTED));
+}
+std::string LoadMuonNexusV2NexusHelper::getPeriodRawFrames(const int &numPeriods) const {
+  return convertVectorToString(getIntVector(numPeriods, NeXusEntry::RAWFRAMES));
+}
+std::string LoadMuonNexusV2NexusHelper::getPeriodOutput(const int &numPeriods) const {
+  return convertVectorToString(getIntVector(numPeriods, NeXusEntry::PERIODOUTPUT));
+}
+
+std::string LoadMuonNexusV2NexusHelper::getPeriodTotalCounts(const int &numPeriods) const {
+  NXClass periodClass = m_entry.openNXGroup(NeXusEntry::PERIOD);
+
+  NXFloat countsData = periodClass.openNXFloat(NeXusEntry::PERIODCOUNTS);
+  std::vector<double> countsVector;
+  countsData.load();
+  for (int i = 0; i < numPeriods; ++i) {
+    countsVector.push_back(countsData[i]);
+  }
+  return convertVectorToString(countsVector);
+}
+
 } // namespace DataHandling
 } // namespace Mantid
