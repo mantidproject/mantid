@@ -338,14 +338,22 @@ class DrillModelTest(unittest.TestCase):
         self.assertEqual(self.model._samples, [mSample.return_value])
 
     def test_deleteSample(self):
+        g1 = mock.Mock()
         s1 = mock.Mock()
+        s1.getGroup.return_value = g1
         s2 = mock.Mock()
+        s2.getGroup.return_value = g1
         s3 = mock.Mock()
         self.model._samples = [s1, s2, s3]
+        self.model._sampleGroups = [g1]
+        g1.isEmpty.return_value = False
         self.model.deleteSample(0)
         self.assertEqual(self.model._samples, [s2, s3])
+        self.assertEqual(self.model._sampleGroups, [g1])
+        g1.isEmpty.return_value = True
         self.model.deleteSample(0)
         self.assertEqual(self.model._samples, [s3])
+        self.assertEqual(self.model._sampleGroups, [])
 
     def test_getSamples(self):
         s0 = mock.Mock()

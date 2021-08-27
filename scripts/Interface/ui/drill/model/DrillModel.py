@@ -626,6 +626,11 @@ class DrillModel(QObject):
         Args:
             ref (int): sample index
         """
+        group = self._samples[ref].getGroup()
+        if group:
+            group.delSample(self._samples[ref])
+            if group.isEmpty():
+                self._sampleGroups.remove(group)
         del self._samples[ref]
         i = ref
         while i < len(self._samples):
