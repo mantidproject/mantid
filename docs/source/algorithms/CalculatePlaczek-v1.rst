@@ -174,30 +174,46 @@ where :math:`x = -\lambda / \lambda_d`.
 
 Usage
 -----
-..  Example ddd
-    but if you cannot avoid it then the (small) files must be added to
-    autotestdata\UsageData and the following tag unindented
-    .. include:: ../usagedata-note.txt
 
 **Example - CalculatePlaczek**
 
-.. testcode:: CalculatePlaczekExample
+The data files used in the following example code are available as part of the Mantid testing data.
 
-   # Create a host workspace
-   ws = CreateWorkspace(DataX=range(0,3), DataY=(0,2))
-   or
-   ws = CreateSampleWorkspace()
+.. code-block:: python
 
-   wsOut = CalculatePlaczek()
+   # Load the incident flux from file
+   Load(
+     Filename='fluxSmoothedNOM161959.nxs',
+     OutputWorkspace='influx',
+     )
+   # Load the input workspace
+   # - must have instrument
+   # - must have sample with valid chemical formula
+   Load(Filename='inputwsNOM_164109.nxs', OutputWorkspace='NOM_164109')
 
-   # Print the result
-   print "The output workspace has %%i spectra" %% wsOut.getNumberHistograms()
+   # Calculate first order
+   # NOTE: temperature is not needed for first order calculation
+   CalculatePlaczek(
+    InputWorkspace="NOM_164109",
+    IncidentSpectra="influx",
+    LambdaD=1.44,
+    Order=1,
+    ScaleByPackingFraction=False,
+    CrystalDensity=0.01,
+    OutputWorkspace="NOM_P1",
+    )
 
-Output:
-
-.. testoutput:: CalculatePlaczekExample
-
-  The output workspace has ?? spectra
+   # Calculate first and second order
+   CalculatePlaczek(
+    InputWorkspace="NOM_164109",
+    IncidentSpectra="influx",
+    LambdaD=1.44,
+    Order=2,
+    SampleTemperature=943.15,  # in Kelvin
+    ScaleByPackingFraction=False,
+    CrystalDensity=0.01,
+    OutputWorkspace="NOM_P2",
+   )
 
 
 References
