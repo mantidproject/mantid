@@ -13,10 +13,12 @@ New Features
 - :ref:`LoadILLSANS <algm-LoadILLSANS>` is extended to support loading monochromatic kinetic files from the new D11.
 - :ref:`SANSILLReduction <algm-SANSILLReduction>` is extended to support processing of monochromatic kinetic runs.
 - A series of improvements have been introduced to :ref:`SANSILLAutoProcess <algm-SANSILLAutoProcess>` including
+
 	- the use of the new :ref:`Stitch <algm-Stitch>` algorithm
 	- allowing for semi-automatic q binning
 	- supporting attenuator 2 on D22
 	- improved naming and grouping for the output workspaces.
+
 - The :ref:`ISIS SANS Interface <ISIS_Sans_interface_contents>` will automatically toggle between Can SAS and NXS Can SAS when switching between 1D and 2D reductions.
   If you have toggled any save options it will not update the selected methods until the interface is restarted to avoid interfering with the user's saved selection.
 - :ref:`Q1DWeighted <algm-Q1DWeighted>` now supports kinetic data from SANS, with multiple samples instead of time bins.
