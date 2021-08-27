@@ -85,6 +85,9 @@ public:
   /// Call to set the View to Z- direction
   void setViewToZNegative();
 
+  void adjustProjection();
+  void getProjection(Mantid::Kernel::V3D &minBound, Mantid::Kernel::V3D &maxBound) const;
+
   /// Init rotation at a point on the screen
   void initRotationFrom(int a, int b);
   /// Generate a new rotation matrix
@@ -152,6 +155,12 @@ protected:
   /// z axis)
   double m_far; ///< Ortho/Prespective Projection zmax value (Far side of the z
   /// axis)
+  double m_leftOrig;
+  double m_rightOrig;
+  double m_bottomOrig;
+  double m_topOrig;
+  double m_nearOrig;
+  double m_farOrig;
 
   /* Trackball rotation */
 
