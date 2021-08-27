@@ -206,6 +206,12 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         for subplot in self.plotting.get_subplots():
             self.plotting.rm_vline_and_annotate(subplot, name)
 
+    def _create_peak_selector(self, element):
+        data = self.ptable.element_data(element)
+        widget = PeakSelectorPresenter(PeakSelectorView(data, element))
+        widget.on_finished(self._update_peak_data)
+        return widget
+
     # setup element pop up
     def _generate_element_widgets(self):
         self.element_widgets = {}
@@ -213,9 +219,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         for element in self.ptable.peak_data.keys():
             if element in self.ptable.elements_list():
                 any_data_loaded = True
-                data = self.ptable.element_data(element)
-                widget = PeakSelectorPresenter(PeakSelectorView(data, element))
-                widget.on_finished(self._update_peak_data)
+                widget = self._create_peak_selector(element)
                 self.element_widgets[element] = widget
         return any_data_loaded
 
@@ -393,11 +397,10 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
 
         try:
             any_data_loaded = self._generate_element_widgets()
+            if not any_data_loaded:
+                self._reset_data_file_warning_and_action()
         except ValueError:
             self._reset_data_file_warning_and_action()
-        if not any_data_loaded:
-            self._reset_data_file_warning_and_action()
-
         for element in old_lines:
             if element in self.element_widgets.keys():
                 self.ptable.select_element(element)
