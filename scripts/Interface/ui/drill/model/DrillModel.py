@@ -98,7 +98,7 @@ class DrillModel(QObject):
         self.experimentId = None
         self.algorithm = None
         self._samples = list()
-        self._sampleGroups = list()
+        self._sampleGroups = dict()
         self.controller = None
         self.visualSettings = dict()
         self.rundexIO = None
@@ -118,7 +118,7 @@ class DrillModel(QObject):
         Clear the sample list and the settings.
         """
         self._samples = list()
-        self._sampleGroups = list()
+        self._sampleGroups = dict()
         self.visualSettings = dict()
         self._initController()
         self._initProcessingParameters()
@@ -133,7 +133,7 @@ class DrillModel(QObject):
             instrument (str): instrument name
         """
         self._samples = list()
-        self._sampleGroups = list()
+        self._sampleGroups = dict()
         self.visualSettings = dict()
         self.instrument = None
         self.acquisitionMode = None
@@ -177,7 +177,7 @@ class DrillModel(QObject):
                     self.instrument])):
             return
         self._samples = list()
-        self._sampleGroups = list()
+        self._sampleGroups = dict()
         self.visualSettings = dict()
         if mode in RundexSettings.VISUAL_SETTINGS:
             self.visualSettings = RundexSettings.VISUAL_SETTINGS[mode]
@@ -315,7 +315,7 @@ class DrillModel(QObject):
         Get the sample groups.
 
         Returns:
-            list(DrillSampleGroup): list of groups
+            dict(str: DrillSampleGroup): dict of groupName:group
         """
         return self._sampleGroups
 
@@ -344,12 +344,12 @@ class DrillModel(QObject):
 
         if not groupName:
             groupName = 'A'
-            while groupName in [grp.getName() for grp in self._sampleGroups]:
+            while groupName in self._sampleGroups:
                 groupName = incrementName(groupName)
 
         newGroup = DrillSampleGroup()
         newGroup.setName(groupName)
-        self._sampleGroups.append(newGroup)
+        self._sampleGroups[groupName] = newGroup
 
         for i in sampleIndexes:
             sample = self._samples[i]
@@ -357,7 +357,7 @@ class DrillModel(QObject):
             if currentGroup is not None:
                 currentGroup.delSample(sample)
                 if currentGroup.isEmpty():
-                    self._sampleGroups.remove(currentGroup)
+                    del self._sampleGroups[currentGroup.getName()]
             newGroup.addSample(sample)
 
     def ungroupSamples(self, sampleIndexes):
@@ -373,7 +373,7 @@ class DrillModel(QObject):
             if currentGroup is not None:
                 currentGroup.delSample(sample)
                 if currentGroup.isEmpty():
-                    self._sampleGroups.remove(currentGroup)
+                    del self._sampleGroups[currentGroup.getName()]
 
     def addToGroup(self, sampleIndexes, groupName):
         """
@@ -383,14 +383,14 @@ class DrillModel(QObject):
             sampleIndexes (list(int)): sample indexes
             groupName (str): name of the group
         """
-        for group in self._sampleGroups:
-            if group.getName() == groupName:
-                for i in sampleIndexes:
-                    sample = self._samples[i]
-                    currentGroup = sample.getGroup()
-                    if currentGroup is not None:
-                        currentGroup.delSample(sample)
-                    group.addSample(sample)
+        if groupName in self._sampleGroups:
+            group = self._sampleGroups[groupName]
+            for i in sampleIndexes:
+                sample = self._samples[i]
+                currentGroup = sample.getGroup()
+                if currentGroup is not None:
+                    currentGroup.delSample(sample)
+                group.addSample(sample)
 
     def setGroupMaster(self, sampleIndex, state):
         """
@@ -630,7 +630,7 @@ class DrillModel(QObject):
         if group:
             group.delSample(self._samples[ref])
             if group.isEmpty():
-                self._sampleGroups.remove(group)
+                del self._sampleGroups[group.getName()]
         del self._samples[ref]
         i = ref
         while i < len(self._samples):

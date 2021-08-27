@@ -190,7 +190,7 @@ class DrillModelTest(unittest.TestCase):
         s2 = mock.Mock()
         s2.getGroup.return_value = g2
         self.model._samples = [s0, s1, s2]
-        self.model._sampleGroups = [g1, g2]
+        self.model._sampleGroups = {"A": g1, "B": g2}
         self.model.addToGroup([2], "A")
         g2.delSample.assert_called_once_with(s2)
         g1.addSample.assert_called_once_with(s2)
@@ -339,21 +339,22 @@ class DrillModelTest(unittest.TestCase):
 
     def test_deleteSample(self):
         g1 = mock.Mock()
+        g1.getName.return_value = "A"
         s1 = mock.Mock()
         s1.getGroup.return_value = g1
         s2 = mock.Mock()
         s2.getGroup.return_value = g1
         s3 = mock.Mock()
         self.model._samples = [s1, s2, s3]
-        self.model._sampleGroups = [g1]
+        self.model._sampleGroups = {"A": g1}
         g1.isEmpty.return_value = False
         self.model.deleteSample(0)
         self.assertEqual(self.model._samples, [s2, s3])
-        self.assertEqual(self.model._sampleGroups, [g1])
+        self.assertEqual(self.model._sampleGroups, {"A": g1})
         g1.isEmpty.return_value = True
         self.model.deleteSample(0)
         self.assertEqual(self.model._samples, [s3])
-        self.assertEqual(self.model._sampleGroups, [])
+        self.assertEqual(self.model._sampleGroups, {})
 
     def test_getSamples(self):
         s0 = mock.Mock()

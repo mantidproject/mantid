@@ -41,9 +41,8 @@ class DrillContextMenuPresenter:
         allColumns = self._view.columns
         hiddenColumns = self._view.table.getHiddenColumns()
         groups = list()
-        sampleGroups = self._samplesModel.getSampleGroups()
-        for g in sampleGroups:
-            name = g.getName()
+        sampleGroupNames = self._samplesModel.getSampleGroups().keys()
+        for name in sampleGroupNames:
             if name is not None and name not in groups:
                 groups.append(name)
         self._menu.setColumns(allColumns, hiddenColumns)
