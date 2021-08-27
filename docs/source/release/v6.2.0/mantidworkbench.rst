@@ -48,5 +48,6 @@ Bugfixes
 - Fixed a bug where removing the plot guess line in the fit browser could lead to an exception being thrown.
 - Fixed a bug where marker formatting options were disabled upon opening the figure options.
 - Fixed a bug where the workspace index spinbox in the fit browser wouldn't update when the user added or removed curves from the figure.
+- Fixed the help icon not showing on OSX and high-resolution monitors.
 
 :ref:`Release 6.2.0 <v6.2.0>`
