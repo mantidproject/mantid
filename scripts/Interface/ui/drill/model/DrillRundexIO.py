@@ -123,7 +123,6 @@ class DrillRundexIO:
                            .format(self._filename))
 
         # groups
-        samples = drill.getSamples()
         if "SamplesGroups" in json_data and json_data["SamplesGroups"]:
             for groupName, indexes in json_data["SamplesGroups"].items():
                 drill.groupSamples(indexes, groupName)
