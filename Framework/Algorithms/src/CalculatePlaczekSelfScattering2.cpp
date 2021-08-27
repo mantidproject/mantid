@@ -29,7 +29,7 @@ void CalculatePlaczekSelfScattering2::init() {
   declareProperty(
       std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>("InputWorkspace", "", Kernel::Direction::Input),
       "Raw diffraction data workspace for associated correction to be "
-      "calculated for. Workspace must have instument and sample data.");
+      "calculated for. Workspace must have instrument and sample data.");
   declareProperty(
       std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>("IncidentSpecta", "", Kernel::Direction::Input),
       "Workspace of fitted incident spectrum with it's first derivative.");
@@ -37,40 +37,6 @@ void CalculatePlaczekSelfScattering2::init() {
       std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>("OutputWorkspace", "", Kernel::Direction::Output),
       "Workspace with the Self scattering correction");
   declareProperty("CrystalDensity", EMPTY_DBL(), "The crystalographic density of the sample material.");
-}
-//----------------------------------------------------------------------------------------------
-/** Validate inputs.
- */
-std::map<std::string, std::string> CalculatePlaczekSelfScattering2::validateInputs() {
-  std::map<std::string, std::string> issues;
-  const API::MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
-  const API::SpectrumInfo specInfo = inWS->spectrumInfo();
-  if (specInfo.size() == 0) {
-    issues["InputWorkspace"] = "Input workspace does not have detector information";
-  }
-  Kernel::Material::ChemicalFormula formula = inWS->sample().getMaterial().chemicalFormula();
-  if (formula.size() == 0) {
-    issues["InputWorkspace"] = "Input workspace does not have a valid sample";
-  }
-  return issues;
-}
-
-//----------------------------------------------------------------------------------------------
-double CalculatePlaczekSelfScattering2::getPackingFraction(const API::MatrixWorkspace_const_sptr &ws) {
-  // get a handle to the material
-  const auto &material = ws->sample().getMaterial();
-
-  // default value is packing fraction
-  double packingFraction = material.packingFraction();
-
-  // see if the user thinks the material wasn't setup right
-  const double crystalDensity = getProperty("CrystalDensity");
-  if (crystalDensity > 0.) {
-    // assume that the number density set in the Material is the effective number density
-    packingFraction = material.numberDensity() / crystalDensity;
-  }
-
-  return packingFraction;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -80,19 +46,27 @@ void CalculatePlaczekSelfScattering2::exec() {
   const API::MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
   const API::MatrixWorkspace_sptr incidentWS = getProperty("IncidentSpecta");
 
-  CalculatePlaczek alg;
-  alg.initialize();
-  if (alg.isInitialized()) {
-    alg.setProperty("IncidentSpectra", incidentWS);
-    alg.setProperty("InputWorkspace", inWS);
-    alg.setProperty("OutputWorkspace", "correction_ws");
-
-    alg.execute();
-    API::MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
-    setProperty("OutputWorkspace", outputWS);
-  } else {
-    g_log.error() << "CalculatePlaczek failed to initialize, aborting CalculatePlaczekSelfScattering";
+  auto alg = createChildAlgorithm("CalculatePlaczek");
+  alg->setProperty("IncidentSpectra", incidentWS);
+  alg->setProperty("InputWorkspace", inWS);
+  alg->setProperty("Order", 1); // default order is one, just being explicit here
+  alg->execute();
+  API::MatrixWorkspace_sptr outputWS = alg->getProperty("OutputWorkspace");
+  if (!bool(outputWS)) {
+    throw std::runtime_error("Failed to get the outputworkspace");
   }
+
+  // NOTE: the original version forces the output to be in TOF instead of matching the
+  //       input. Therefore, we need to mimic that behaviour here by explicitly converting
+  //       the unit of the output workspace to TOF.
+  auto cvtalg = createChildAlgorithm("ConvertUnits");
+  cvtalg->setProperty("InputWorkspace", outputWS);
+  cvtalg->setProperty("outputWorkspace", outputWS);
+  cvtalg->setProperty("Target", "TOF");
+  cvtalg->execute();
+  outputWS = cvtalg->getProperty("OutputWorkspace");
+
+  setProperty("OutputWorkspace", outputWS);
 }
 
 } // namespace Algorithms

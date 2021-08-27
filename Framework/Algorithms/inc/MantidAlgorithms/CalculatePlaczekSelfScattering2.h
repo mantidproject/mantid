@@ -20,18 +20,16 @@ public:
   CalculatePlaczekSelfScattering2() : API::Algorithm() {}
   virtual const std::string name() const override { return "CalculatePlaczekSelfScattering"; }
   virtual int version() const override { return (2); }
-  const std::vector<std::string> seeAlso() const override { return {"FitIncidentSpectrum"}; }
+  const std::vector<std::string> seeAlso() const override { return {"FitIncidentSpectrum", "CalculatePlaczek"}; }
   const std::string category() const override { return "CorrectionFunctions"; };
   const std::string summary() const override {
     return "Calculates the Placzek self scattering correction of an incident "
            "spectrum";
   };
-  std::map<std::string, std::string> validateInputs() override;
 
 private:
   void init() override;
   void exec() override;
-  double getPackingFraction(const API::MatrixWorkspace_const_sptr &ws);
 };
 
 } // namespace Algorithms

@@ -36,7 +36,7 @@ For this particular algorithm:
   * When no ``LambdaD`` is provided, the default value 1.44 will be used, which is also the implicit value used in the original :ref:`CalculatePlaczekSelfScattering <algm-CalculatePlaczekSelfScattering-v1>`.
   * Generally speaking it is better to measure the detector efficiency instead of relying on a theoretical one.
 
-* The calculated Placzek correction factor will be scaled by the packing fraction if `ScaleByPackingFraction` is set to `True` (Default value).
+* The calculated Placzek correction factor will be scaled by the packing fraction if ``ScaleByPackingFraction=True`` (default).
 
 .. math::
    :label: ScaleByPackingFraction

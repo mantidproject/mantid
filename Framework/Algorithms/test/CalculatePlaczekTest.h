@@ -176,6 +176,7 @@ private:
     alg->setProperty("DataX", xVec);
     alg->setProperty("DataY", yVec);
     alg->setProperty("NSpec", 3);
+    alg->setProperty("UnitX", "Wavelength");
     alg->execute();
   }
 

@@ -9,14 +9,18 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAPI/SampleValidator.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/Atom.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Unit.h"
@@ -28,6 +32,8 @@ namespace Algorithms {
 
 using Mantid::API::WorkspaceProperty;
 using Mantid::Kernel::Direction;
+using PhysicalConstants::BoltzmannConstant;
+using PhysicalConstants::E_mev_toNeutronWavenumberSq; // in [meV*Angstrom^2]
 
 namespace { // anonymous namespace
 
@@ -49,9 +55,6 @@ double calculateSummationTerm(const Kernel::Material &material) {
   // converting scattering cross section to scattering length square comes out of the sum
   return neutronMass * unnormalizedTerm / (4. * M_PI * totalStoich);
 }
-
-const double k_B = PhysicalConstants::BoltzmannConstant;                                   // in meV/K
-const double E_mev_toNeutronWavenumberSq = PhysicalConstants::E_mev_toNeutronWavenumberSq; // in [meV*Angstrom^2]
 
 } // anonymous namespace
 
@@ -85,40 +88,50 @@ const std::vector<std::string> CalculatePlaczek::seeAlso() const {
  */
 void CalculatePlaczek::init() {
   // Mandatory properties
-  declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>("InputWorkspace", "", Kernel::Direction::Input),
-      "Raw diffraction data workspace for associated correction to be "
-      "calculated for. Workspace must have instrument and sample data.");
-  declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>("IncidentSpectra", "", Kernel::Direction::Input),
-      "Workspace of fitted incident spectrum with its derivatives (1st &| 2nd).");
+  // 1. Input workspace should have
+  //    - a valid instrument
+  //    - a sample with chemical formula
+  auto wsValidator = std::make_shared<Mantid::Kernel::CompositeValidator>();
+  wsValidator->add<Mantid::API::InstrumentValidator>();
+  wsValidator->add<Mantid::API::SampleValidator, unsigned int>(Mantid::API::SampleValidator::Material);
+  declareProperty(std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>("InputWorkspace", "",
+                                                                                 Kernel::Direction::Input, wsValidator),
+                  "Raw diffraction data workspace for associated correction to be "
+                  "calculated for. Workspace must have instrument and sample data.");
+  // 2. Incident spectra should have a unit of wavelength
+  auto inspValidator = std::make_shared<Mantid::Kernel::CompositeValidator>();
+  inspValidator->add<Mantid::API::WorkspaceUnitValidator>("Wavelength");
+  declareProperty(std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+                      "IncidentSpectra", "", Kernel::Direction::Input, inspValidator),
+                  "Workspace of fitted incident spectrum with its derivatives (1st &| 2nd).");
 
   // Optional properties
   declareProperty(std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
                       "EfficiencySpectra", "", Kernel::Direction::Input, API::PropertyMode::Optional),
                   "Workspace of efficiency spectrum with its derivatives (1st &| 2nd)."
-                  "Default to use the build-in efficiency profile for He3 tube if not provided.");
+                  "Default (not specified) will use LambdaD to calculate the efficiency spectrum.");
   auto lambdadValidator = std::make_shared<Kernel::BoundedValidator<double>>();
   lambdadValidator->setExclusive(true);
   lambdadValidator->setLower(0.0);
-  declareProperty("LambdaD", 1.44, lambdadValidator,
-                  "Reference wavelength in Angstrom, related to detector efficient coefficient alpha."
-                  "The coefficient used to generate a generic detector efficiency curve,"
-                  "eps = 1 - exp(1 - alpha*lambda), where alpha is 1/LambdaD."
-                  "Defult is set to 1.44 for 3He detectors and 1/0.83 for scintillator detectors.");
+  declareProperty(
+      "LambdaD", 1.44, lambdadValidator,
+      "Reference wavelength in Angstrom, related to detector efficient coefficient alpha."
+      "The coefficient used to generate a generic detector efficiency curve,"
+      "eps = 1 - exp(1 - alpha*lambda), where alpha is 1/LambdaD."
+      "Default is set to 1.44 for ISIS 3He detectors and 1/0.83 for ISIS:LAD circa 1990 scintillator detectors.");
   declareProperty("CrystalDensity", EMPTY_DBL(), "The crystalographic density of the sample material.");
   auto orderValidator = std::make_shared<Kernel::BoundedValidator<int>>(1, 2);
   declareProperty("Order", 1, orderValidator, "Placzek correction order (1 or 2), default to 1 (self scattering).");
   declareProperty("SampleTemperature", EMPTY_DBL(),
                   "Sample temperature in Kelvin."
-                  "The input properties is prioritized over the temperature recorded in the sample log."
+                  "The input property is prioritized over the temperature recorded in the sample log."
                   "The temperature is necessary for computing second order correction.");
   declareProperty("ScaleByPackingFraction", true, "Scale the correction value by packing fraction.");
 
   // Output property
   declareProperty(
       std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>("OutputWorkspace", "", Kernel::Direction::Output),
-      "Workspace with the Self scattering correction");
+      "Workspace with the Placzek scattering correction factors.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -138,13 +151,7 @@ std::map<std::string, std::string> CalculatePlaczek::validateInputs() {
     issues["InputWorkspace"] = "Input workspace does not have detector information";
   }
 
-  // Case1: missing sample
-  Kernel::Material::ChemicalFormula formula = inWS->sample().getMaterial().chemicalFormula();
-  if (formula.size() == 0) {
-    issues["InputWorkspace"] = "Input workspace does not have a valid sample.";
-  }
-
-  // Case2: cannot locate sample temperature
+  // Case1: cannot locate sample temperature
   if (isDefault("SampleTemperature") && (order == 2)) {
     const auto run = inWS->run();
     const auto sampleTempLogORNL = run.getLogData("SampleTemp");
@@ -154,12 +161,69 @@ std::map<std::string, std::string> CalculatePlaczek::validateInputs() {
     }
   }
 
-  // Case3: missing second order derivate of the flux spectrum (incident spectrum)
+  // Case2: check number of spectra in flux workspace match required order
+  const API::MatrixWorkspace_sptr incidentWS = getProperty("IncidentSpectra");
+  const int64_t numHist = incidentWS->spectrumInfo().size();
   if (order == 2) {
-    const API::MatrixWorkspace_sptr incidentWS = getProperty("IncidentSpectra");
-    const MantidVec incidentPrime2 = incidentWS->readY(2);
-    if (incidentPrime2.empty()) {
-      issues["IncidentSpectra"] = "Input workspace does not have second order derivate of the incident spectrum";
+    // we need three spectra here
+    if (numHist < 3) {
+      issues["IncidentSpectra"] = "Need three spectra here for second order calculation.";
+    }
+    // make sure all are not empty
+    if (incidentWS->readY(0).empty()) {
+      issues["IncidentSpectra"] = "Flux is empty";
+    }
+    if (incidentWS->readY(1).empty()) {
+      issues["IncidentSpectra"] = "First order derivate of the incident spectrum is empty";
+    }
+    if (incidentWS->readY(2).empty()) {
+      issues["IncidentSpectra"] = "Second order derivate of the incident spectrum is empty";
+    }
+  } else {
+    // we are at first order here
+    if (numHist < 2) {
+      issues["IncidentSpectra"] = "Need two spectra here for first order calculation.";
+    }
+    // make sure all are not empty
+    if (incidentWS->readY(0).empty()) {
+      issues["IncidentSpectra"] = "Flux is empty";
+    }
+    if (incidentWS->readY(1).empty()) {
+      issues["IncidentSpectra"] = "First order derivate of the incident spectrum is empty";
+    }
+  }
+
+  // Case3: check number of spectra in efficiency workspace match required order IF provided
+  const API::MatrixWorkspace_sptr efficiencyWS = getProperty("EfficiencySpectra");
+  if (efficiencyWS) {
+    const int64_t numHistEff = efficiencyWS->spectrumInfo().size();
+    if (order == 2) {
+      // we need three spectra here
+      if (numHistEff < 3) {
+        issues["EfficiencySpectra"] = "Need three spectra here for second order calculation.";
+      }
+      // make sure all are not empty
+      if (efficiencyWS->readY(0).empty()) {
+        issues["EfficiencySpectra"] = "Detector efficiency is empty";
+      }
+      if (efficiencyWS->readY(1).empty()) {
+        issues["EfficiencySpectra"] = "First order derivate of the efficiency spectrum is empty";
+      }
+      if (efficiencyWS->readY(2).empty()) {
+        issues["EfficiencySpectra"] = "Second order derivate of the efficiency spectrum is empty";
+      }
+    } else {
+      // we are at first order here
+      if (numHistEff < 2) {
+        issues["EfficiencySpectra"] = "Need two spectra here for first order calculation.";
+      }
+      // make sure all are not empty
+      if (efficiencyWS->readY(0).empty()) {
+        issues["EfficiencySpectra"] = "Detector efficiency is empty";
+      }
+      if (efficiencyWS->readY(1).empty()) {
+        issues["EfficiencySpectra"] = "First order derivate of the efficiency spectrum is empty";
+      }
     }
   }
 
@@ -227,8 +291,9 @@ void CalculatePlaczek::exec() {
 
   // loop over all spectra
   const API::SpectrumInfo specInfo = inWS->spectrumInfo();
+  const int64_t numHist = specInfo.size();
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
-  for (size_t specIndex = 0; specIndex < specInfo.size(); specIndex++) {
+  for (int64_t specIndex = 0; specIndex < numHist; specIndex++) {
     PARALLEL_START_INTERUPT_REGION
     auto &y = outputWS->mutableY(specIndex); // x-axis is directly copied from incident flux
     // only perform calculation for components that
@@ -252,7 +317,7 @@ void CalculatePlaczek::exec() {
       const double sinThetaBy2 = sin(twoTheta / 2.0);
       const double f = l1 / (l1 + l2);
       wavelength.initialize(specInfo.l1(), 0, pmap);
-      const double kBT = k_B * sampleTemperature; // k_B in meV / K, T in K -> kBT in meV
+      const double kBT = BoltzmannConstant * sampleTemperature; // BoltzmannConstant in meV / K, T in K -> kBT in meV
       // - convenience variables
       const double sinHalfAngleSq = sinThetaBy2 * sinThetaBy2;
       // - loop over all lambda
@@ -379,8 +444,8 @@ std::vector<double> CalculatePlaczek::getFluxCoefficient1() {
 
   const API::MatrixWorkspace_sptr incidentWS = getProperty("IncidentSpectra");
   const auto xLambda = incidentWS->getSpectrum(0).points();
-  const MantidVec incident = incidentWS->readY(0);
-  const MantidVec incidentPrime = incidentWS->readY(1);
+  const auto &incident = incidentWS->readY(0);
+  const auto &incidentPrime = incidentWS->readY(1);
   // phi1 = lambda * phi'(lambda)/phi(lambda)
   for (size_t i = 0; i < xLambda.size(); i++) {
     phi1.emplace_back(xLambda[i] * incidentPrime[i] / incident[i]);
@@ -399,8 +464,8 @@ std::vector<double> CalculatePlaczek::getFluxCoefficient2() {
 
   const API::MatrixWorkspace_sptr incidentWS = getProperty("IncidentSpectra");
   const auto xLambda = incidentWS->getSpectrum(0).points();
-  const MantidVec incident = incidentWS->readY(0);
-  const MantidVec incidentPrime2 = incidentWS->readY(2);
+  const auto &incident = incidentWS->readY(0);
+  const auto &incidentPrime2 = incidentWS->readY(2);
   // phi2 = lambda^2 * phi''(lambda)/phi(lambda)
   for (size_t i = 0; i < xLambda.size(); i++) {
     phi2.emplace_back(xLambda[i] * xLambda[i] * incidentPrime2[i] / incident[i]);
@@ -421,7 +486,6 @@ std::vector<double> CalculatePlaczek::getEfficiencyCoefficient1() {
   // NOTE: we need the xlambda here to
   // - compute the coefficient based on an assumed efficiency curve
   const API::MatrixWorkspace_sptr incidentWS = getProperty("IncidentSpectra");
-  const MantidVec incident = incidentWS->readY(0);
   const auto xLambda = incidentWS->getSpectrum(0).points();
   const API::MatrixWorkspace_sptr efficiencyWS = getProperty("EfficiencySpectra");
   if (efficiencyWS) {
@@ -439,9 +503,9 @@ std::vector<double> CalculatePlaczek::getEfficiencyCoefficient1() {
   } else {
     // This is based on an assume efficiency curve from
     const double LambdaD = getProperty("LambdaD");
-    for (size_t i = 0; i < xLambda.size(); i++) {
-      const auto xTerm = -xLambda[i] / LambdaD;
-      eps1.emplace_back(xTerm * exp(xTerm) / (1.0 - exp(xTerm)));
+    for (auto x : xLambda) {
+      x /= -LambdaD;
+      eps1.emplace_back(x * exp(x) / (1.0 - exp(-x)));
     }
   }
   return eps1;
@@ -459,7 +523,6 @@ std::vector<double> CalculatePlaczek::getEfficiencyCoefficient2() {
   // NOTE: we need the xlambda here to
   // - compute the coefficient based on an assumed efficiency curve
   const API::MatrixWorkspace_sptr incidentWS = getProperty("IncidentSpectra");
-  const MantidVec incident = incidentWS->readY(0);
   const auto xLambda = incidentWS->getSpectrum(0).points();
 
   const API::MatrixWorkspace_sptr efficiencyWS = getProperty("EfficiencySpectra");
@@ -483,10 +546,10 @@ std::vector<double> CalculatePlaczek::getEfficiencyCoefficient2() {
     // The detector efficiency coefficient is denoted with F1 and _2F in the paper instead of the eps1 and eps2
     // used in the code.
     const double LambdaD = getProperty("LambdaD");
-    for (size_t i = 0; i < xLambda.size(); i++) {
-      const auto xTerm = -xLambda[i] / LambdaD;
-      double eps1 = xTerm * exp(xTerm) / (1.0 - exp(xTerm));
-      eps2.emplace_back((-xTerm - 2) * eps1);
+    for (auto x : xLambda) {
+      x /= -LambdaD;
+      double eps1 = x * exp(x) / (1.0 - exp(-x));
+      eps2.emplace_back((-x - 2.0) * eps1);
     }
   }
   return eps2;
