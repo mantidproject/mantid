@@ -14,6 +14,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/MantidVersion.h"
 #include "MantidKernel/Unit.h"
+#include "MantidAPI/BinEdgeAxis.h"
 
 namespace {
 void encode(std::string &data) {
@@ -108,11 +109,15 @@ void SaveCanSAS1D2::exec() {
           extPosition = fileName.size();
       std::ostringstream ss;
       ss << std::string(fileName, 0, extPosition) << "_" << i;
-      if (m_workspace->getAxis(1)->isNumeric())
-        ss << "_" << m_workspace->getAxis(1)->getValue(i)
-           << m_workspace->getAxis(1)->unit()->label().ascii();
-      else if (m_workspace->getAxis(1)->isText())
-        ss << "_" << m_workspace->getAxis(1)->label(i);
+      auto axis = m_workspace->getAxis(1);
+      if (axis->isNumeric()) {
+        auto binEdgeAxis = dynamic_cast<BinEdgeAxis*>(axis);
+        if (binEdgeAxis)
+          ss << "_" << binEdgeAxis->label(i);
+        else
+          ss << "_" << axis->getValue(i) << axis->unit()->label().ascii();
+      } else if (axis->isText())
+        ss << "_" << axis->label(i);
       ss << std::string(fileName, extPosition);
       fileName = ss.str();
     } else {
