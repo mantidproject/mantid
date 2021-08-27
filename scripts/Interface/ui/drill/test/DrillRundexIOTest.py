@@ -184,7 +184,9 @@ class DrillRundexIOTest(unittest.TestCase):
         s0.getGroup.return_value = g0
         g0.getName.return_value = "A"
         g0.getMaster.return_value = s0
+        g0.getSamples.return_value = [s0]
         mD.getSamples.return_value = [s0]
+        mD.getSampleGroups.return_value = {"A": g0}
 
         json = {
                 "Instrument": "i1",

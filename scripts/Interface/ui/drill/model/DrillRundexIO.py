@@ -183,16 +183,10 @@ class DrillRundexIO:
         # groups
         groups = dict()
         masters = dict()
-        for sample in samples:
-            group = sample.getGroup()
-            if group is not None:
-                groupName = group.getName()
-                if groupName in groups:
-                    groups[groupName].append(sample.getIndex())
-                else:
-                    groups[groupName] = [sample.getIndex()]
-                if group.getMaster() == sample:
-                    masters[groupName] = sample.getIndex()
+        for groupName, group in drill.getSampleGroups().items():
+            groups[groupName] = [sample.getIndex() for sample in group.getSamples()]
+            if group.getMaster() is not None:
+                masters[groupName] = group.getMaster().getIndex()
         if groups:
             json_data["SamplesGroups"] = groups
         if masters:
