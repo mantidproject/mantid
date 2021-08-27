@@ -130,17 +130,7 @@ void CalculatePlaczekSelfScattering::exec() {
      Howe's Equation for P(theta) by adding the elastic self-scattering
   */
 
-  // MantidVec xLambdas;
-  // MantidVec placzekCorrection;
-  // size_t nReserve = 0;
   const auto &specInfo = inWS->spectrumInfo();
-  // for (size_t detIndex = 0; detIndex < specInfo.size(); detIndex++) {
-  //   if (!(specInfo.isMonitor(detIndex)) && !(specInfo.l2(detIndex) == 0.0)) {
-  //     nReserve += 1;
-  //   }
-  // }
-  // xLambdas.reserve(nReserve);
-  // placzekCorrection.reserve(nReserve);
   API::MatrixWorkspace_sptr outputWS = DataObjects::create<API::HistoWorkspace>(*inWS);
   // The algorithm computes the signal values at bin centres so they should
   // be treated as a distribution
