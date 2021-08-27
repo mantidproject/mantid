@@ -106,12 +106,13 @@ void SaveCanSAS1D2::exec() {
       size_t extPosition = fileName.find(".xml");
       if (extPosition == std::string::npos)
           extPosition = fileName.size();
-      double axisValue = m_workspace->getAxis(1)->getValue(i);
-      std::string axisLabel = m_workspace->getAxis(1)->unit()->label();
       std::ostringstream ss;
       ss << std::string(fileName, 0, extPosition) << "_" << i;
-      if (!(m_workspace->getAxis(1)->isSpectra()))
-        ss << "_" << axisValue << axisLabel;
+      if (m_workspace->getAxis(1)->isNumeric())
+        ss << "_" << m_workspace->getAxis(1)->getValue(i)
+           << m_workspace->getAxis(1)->unit()->label().ascii();
+      else if (m_workspace->getAxis(1)->isText())
+        ss << "_" << m_workspace->getAxis(1)->label(i);
       ss << std::string(fileName, extPosition);
       fileName = ss.str();
     } else {
