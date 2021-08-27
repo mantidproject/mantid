@@ -41,6 +41,7 @@ class ElementalAnalysisTest(unittest.TestCase):
         self.gui.detectors = mock.Mock()
         self.gui.detectors.detectors = [mock.Mock(), mock.Mock(), mock.Mock(), mock.Mock()]
         self.gui.lines = mock.Mock()
+        self.gui.ptable.set_peak_datafile = mock.Mock()
 
     def raise_ValueError_once(self):
         if not self.has_raise_ValueError_been_called_once:
@@ -451,25 +452,22 @@ class ElementalAnalysisTest(unittest.TestCase):
         self.assertEqual(self.gui.plot_window, None)
 
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.message_box.warning')
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.PeriodicTablePresenter.set_peak_datafile')
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.QtWidgets.QFileDialog.getOpenFileName')
     def test_that_set_peak_datafile_is_called_with_select_data_file(self,
                                                                     mock_get_open_file_name,
-                                                                    mock_set_peak_datafile,
                                                                     mock_warning):
-        mock_get_open_file_name.return_value = 'filename'
+        name = "data to load"
+        mock_get_open_file_name.return_value = name
         self.gui.select_data_file()
-        mock_set_peak_datafile.assert_called_with('filename')
+        self.assertEqual(self.gui.ptable.set_peak_datafile.call_count, 1)
         self.assertEqual(0, mock_warning.call_count)
 
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.PeriodicTablePresenter.set_peak_datafile')
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.QtWidgets.QFileDialog.getOpenFileName')
     def test_that_select_data_file_uses_the_first_element_of_a_tuple_when_given_as_a_filename(self,
-                                                                                              mock_get_open_file_name,
-                                                                                              mock_set_peak_datafile):
+                                                                                              mock_get_open_file_name):
         mock_get_open_file_name.return_value = ('string1', 'string2')
         self.gui.select_data_file()
-        mock_set_peak_datafile.assert_called_with('string1')
+        self.gui.ptable.set_peak_datafile.assert_called_with('string1')
 
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.PeriodicTablePresenter.peak_data')
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._create_peak_selector')
@@ -519,22 +517,16 @@ class ElementalAnalysisTest(unittest.TestCase):
                        'Muon%20Elemental%20Analysis.html" for more information.'
         mock_warning.assert_called_with(warning_text)
 
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.message_box.warning')
+    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._reset_data_file_warning_and_action')
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.QtWidgets.QFileDialog.getOpenFileName')
-    def test_that_select_data_file_raises_warning_with_bad_input(self,
+    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._generate_element_widgets')
+    def test_that_select_data_file_raises_warning_with_bad_input(self, mock_generate,
                                                                     mock_get_open_file_name,
                                                                     mock_warning):
-        pass
-        #mock_get_open_file_name.return_value = 'filename'
-        #self.gui._generate_element_widgets = mock.Mock(return_value = False)
-        #self.gui.ptable.set_peak_datafile = mock.Mock()
-        #self.gui.select_data_file()
-        #warning_text = 'The file does not contain correctly formatted data, resetting to default data file.' \
-        #               'See "https://docs.mantidproject.org/nightly/interfaces/' \
-        #               'Muon%20Elemental%20Analysis.html" for more information.'
-        #mock_warning.assert_called_with(warning_text)
-        ## None loads default
-        #self.gui.ptable.set_peak_datafile.assert_called_once_with(None)
+        mock_get_open_file_name.return_value = 'filename'
+        mock_generate.return_value = False
+        self.gui.select_data_file()
+        self.assertEqual(mock_warning.call_count, 1)
 
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.message_box.warning')
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.QtWidgets.QFileDialog.getOpenFileName')

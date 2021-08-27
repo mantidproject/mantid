@@ -102,6 +102,11 @@ Improvements
 ############
 - Updated :ref:`LoadElementalAnalysisData <algm-LoadElementalAnalysisData>` algorithm to include Poisson errors for the counts data.
 
+Bug Fixes
+#########
+
+- No longer crashes when the input file contains a non-existant element.
+
 Algorithms
 ----------
 
