@@ -341,7 +341,7 @@ std::string SaveAscii2::createSpectrumFilename(size_t workspaceIndex) {
   ss << std::string(filename, 0, extPosition) << "_" << workspaceIndex;
   auto axis = m_ws->getAxis(1);
   if (axis->isNumeric()) {
-    auto binEdgeAxis = dynamic_cast<BinEdgeAxis*>(axis);
+    auto binEdgeAxis = dynamic_cast<BinEdgeAxis *>(axis);
     if (binEdgeAxis)
       ss << "_" << binEdgeAxis->label(workspaceIndex);
     else
