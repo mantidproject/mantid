@@ -111,7 +111,7 @@ void SaveCanSAS1D2::exec() {
       ss << std::string(fileName, 0, extPosition) << "_" << i;
       auto axis = m_workspace->getAxis(1);
       if (axis->isNumeric()) {
-        auto binEdgeAxis = dynamic_cast<BinEdgeAxis*>(axis);
+        auto binEdgeAxis = dynamic_cast<BinEdgeAxis *>(axis);
         if (binEdgeAxis)
           ss << "_" << binEdgeAxis->label(i);
         else
