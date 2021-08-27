@@ -178,10 +178,12 @@ class DrillRundexIOTest(unittest.TestCase):
         self.mExportModel.getAlgorithms.return_value = ["ex1", "ex2"]
         self.mExportModel.isAlgoritmActivated.return_value = True
         s0 = mock.Mock()
+        g0 = mock.Mock()
         s0.getIndex.return_value = 0
         s0.getParameterValues.return_value = {"param1": "value1"}
-        s0.getGroupName.return_value = "A"
-        s0.isMaster.return_value = True
+        s0.getGroup.return_value = g0
+        g0.getName.return_value = "A"
+        g0.getMaster.return_value = s0
         mD.getSamples.return_value = [s0]
 
         json = {
