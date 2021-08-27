@@ -109,7 +109,7 @@ It is worth points out that the derivative of the detector efficiency is compute
 
 The detailed explanation can be found in [2]_ .
 
-.. plot:: CalculatePlaczekPlotP1.py
+.. plot:: algorithms/CalculatePlaczekPlotP1.py
 
 The second order Placzek correction, :math:`P_2` is similar to the first order, just with some new components
 
@@ -170,9 +170,11 @@ If no detector efficiency is measured, :math:`\epsilon_2` can also be approximat
 
 where :math:`x = -\lambda / \lambda_d`.
 
+.. plot:: algorithms/CalculatePlaczekPlotP2.py
+
 Usage
 -----
-..  Try not to use files in your examples,
+..  Example ddd
     but if you cannot avoid it then the (small) files must be added to
     autotestdata\UsageData and the following tag unindented
     .. include:: ../usagedata-note.txt
