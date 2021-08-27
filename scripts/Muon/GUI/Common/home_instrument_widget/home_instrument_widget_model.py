@@ -5,8 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from decimal import Decimal, InvalidOperation
-from mantid import api
-from mantid.api import ITableWorkspace
 
 
 class InstrumentWidgetModel(object):
