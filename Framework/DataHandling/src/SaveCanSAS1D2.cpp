@@ -106,7 +106,7 @@ void SaveCanSAS1D2::exec() {
       fileName = getPropertyValue("FileName");
       size_t extPosition = fileName.find(".xml");
       if (extPosition == std::string::npos)
-          extPosition = fileName.size();
+        extPosition = fileName.size();
       std::ostringstream ss;
       ss << std::string(fileName, 0, extPosition) << "_" << i;
       auto axis = m_workspace->getAxis(1);
