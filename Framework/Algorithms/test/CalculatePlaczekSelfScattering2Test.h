@@ -133,7 +133,7 @@ public:
   void testCalculatePlaczekSelfScatteringDoesNotRunWithNoDetectors() {
     MatrixWorkspace_sptr IncidentSpecta = generateIncidentSpectrum();
     Mantid::DataObjects::Workspace2D_sptr InputWorkspace = WorkspaceCreationHelper::create2DWorkspace(30, 381);
-    Mantid::API::AnalysisDataService::Instance().addOrReplace("InputWorkspace", InputWorkspace);
+    Mantid::API::AnalysisDataService::Instance().addOrReplace("InputWorkspace2", InputWorkspace);
     addSampleMaterialToWorkspace();
     auto alg = makeAlgorithm();
     alg->setProperty("IncidentSpecta", IncidentSpecta);
