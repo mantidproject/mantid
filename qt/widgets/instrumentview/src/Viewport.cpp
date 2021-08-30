@@ -325,7 +325,7 @@ void Viewport::setViewToZNegative() {
   adjustProjection(2);
 }
 
-void Viewport::adjustProjection(unsigned int axis) {
+void Viewport::adjustProjection(const unsigned int axis) {
   // reset the projection bounds to the original values
   m_left = m_leftOrig;
   m_right = m_rightOrig;
@@ -349,11 +349,6 @@ void Viewport::adjustProjection(unsigned int axis) {
   m_far = m_farOrig;
   // update the GL projection with the new bounds
   applyProjection();
-}
-
-void Viewport::getProjection(Mantid::Kernel::V3D &minBound, Mantid::Kernel::V3D &maxBound) const {
-  minBound = Mantid::Kernel::V3D(m_left, m_bottom, m_near);
-  maxBound = Mantid::Kernel::V3D(m_right, m_top, m_far);
 }
 
 /**
