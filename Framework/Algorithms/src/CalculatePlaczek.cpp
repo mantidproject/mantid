@@ -547,7 +547,7 @@ std::vector<double> CalculatePlaczek::getEfficiencyCoefficient2() {
     const double LambdaD = getProperty("LambdaD");
     for (auto x : xLambda) {
       x /= -LambdaD;
-      double eps1 = x * exp(x) / (1.0 - exp(-x));
+      double eps1 = x * exp(x) / (1.0 - exp(x));
       eps2.emplace_back((-x - 2.0) * eps1);
     }
   }
