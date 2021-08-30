@@ -363,7 +363,6 @@ void CalculatePlaczek::exec() {
   PARALLEL_CHECK_INTERUPT_REGION
 
   // consolidate output to workspace
-
   outputWS->setDistribution(false);
 
   // set output
@@ -505,7 +504,7 @@ std::vector<double> CalculatePlaczek::getEfficiencyCoefficient1() {
     const double LambdaD = getProperty("LambdaD");
     for (auto x : xLambda) {
       x /= -LambdaD;
-      eps1.emplace_back(x * exp(x) / (1.0 - exp(-x)));
+      eps1.emplace_back(x * exp(x) / (1.0 - exp(x)));
     }
   }
   return eps1;
