@@ -328,15 +328,15 @@ public:
     Types::Core::DateAndTime runstarttime(runstarttimestr);
     int64_t runstarttime_ns = runstarttime.totalNanoseconds();
 
+    size_t numintervals = 13; // the number of log bins then the remaining number of bins
     // b) First interval - which is actually the last one because we are generating them from the end, ie the closest
     // to endTime
     Kernel::SplittingInterval splitter0 = splittersws->getSplitter(0);
     TS_ASSERT_EQUALS(splitter0.start().totalNanoseconds(), runstarttime_ns + stopTime - startTime);
     TS_ASSERT_EQUALS(splitter0.stop().totalNanoseconds(), runstarttime_ns + stopTime);
 
-    TS_ASSERT_EQUALS(splitter0.index(), 0);
+    TS_ASSERT_EQUALS(splitter0.index(), numintervals - 1);
 
-    size_t numintervals = 13; // the number of log bins then the remaining number of bins
     TS_ASSERT_EQUALS(splittersws->getNumberSplitters(), numintervals);
 
     // c) Last interval - ie the closest to startTime
@@ -344,7 +344,7 @@ public:
     TS_ASSERT_EQUALS(splitterf.start().totalNanoseconds(), runstarttime_ns + startTime);
     TS_ASSERT_EQUALS(splitterf.stop().totalNanoseconds(),
                      runstarttime_ns + stopTime - static_cast<int>(std::pow(2, 12)) + 1);
-    TS_ASSERT_EQUALS(splitterf.index(), numintervals - 1);
+    TS_ASSERT_EQUALS(splitterf.index(), 0);
 
     // d) Randomly
     Kernel::SplittingInterval splitterR = splittersws->getSplitter(4);
@@ -402,15 +402,15 @@ public:
     Types::Core::DateAndTime runstarttime(runstarttimestr);
     int64_t runstarttime_ns = runstarttime.totalNanoseconds();
 
+    size_t numintervals = 14;
     // b) First interval - which is actually the last one because we are generating them from the end, ie the closest
     // to endTime.
     Kernel::SplittingInterval splitter0 = splittersws->getSplitter(0);
     TS_ASSERT_EQUALS(splitter0.start().totalNanoseconds(), runstarttime_ns + stopTime - startTime);
     TS_ASSERT_EQUALS(splitter0.stop().totalNanoseconds(), runstarttime_ns + stopTime);
 
-    TS_ASSERT_EQUALS(splitter0.index(), 0);
+    TS_ASSERT_EQUALS(splitter0.index(), numintervals - 1);
 
-    size_t numintervals = 14; // the number of log bins then the remaining number of bins
     TS_ASSERT_EQUALS(splittersws->getNumberSplitters(), numintervals);
 
     // c) Last interval - ie the closest to startTime
@@ -418,7 +418,7 @@ public:
     TS_ASSERT_EQUALS(splitterf.start().totalNanoseconds(), runstarttime_ns + startTime);
     TS_ASSERT_EQUALS(splitterf.stop().totalNanoseconds(),
                      runstarttime_ns + stopTime - static_cast<int>(std::pow(2, 13)) + 1);
-    TS_ASSERT_EQUALS(splitterf.index(), numintervals - 1);
+    TS_ASSERT_EQUALS(splitterf.index(), 0);
 
     // d) Randomly
     Kernel::SplittingInterval splitterR = splittersws->getSplitter(4);
