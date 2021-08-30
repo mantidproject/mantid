@@ -12,6 +12,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace_fwd.h"
+#include "MantidAlgorithms/WorkspaceBoundingBox.h"
 
 namespace Mantid {
 namespace Algorithms {

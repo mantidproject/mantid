@@ -335,6 +335,7 @@ set(SRC_FILES
     src/WeightingStrategy.cpp
     src/WienerSmooth.cpp
     src/WorkflowAlgorithmRunner.cpp
+    src/WorkspaceBoundingBox.cpp
     src/WorkspaceJoiners.cpp
     src/XDataConverter.cpp
     src/XrayAbsorptionCorrection.cpp)
@@ -684,6 +685,7 @@ set(INC_FILES
     inc/MantidAlgorithms/WeightingStrategy.h
     inc/MantidAlgorithms/WienerSmooth.h
     inc/MantidAlgorithms/WorkflowAlgorithmRunner.h
+    inc/MantidAlgorithms/WorkspaceBoundingBox.h
     inc/MantidAlgorithms/WorkspaceJoiners.h
     inc/MantidAlgorithms/XDataConverter.h
     inc/MantidAlgorithms/XrayAbsorptionCorrection.h)
