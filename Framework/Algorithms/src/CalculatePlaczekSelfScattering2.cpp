@@ -45,10 +45,12 @@ void CalculatePlaczekSelfScattering2::init() {
 void CalculatePlaczekSelfScattering2::exec() {
   const API::MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
   const API::MatrixWorkspace_sptr incidentWS = getProperty("IncidentSpecta");
+  const double crystalDensity = getProperty("CrystalDensity");
 
   auto alg = createChildAlgorithm("CalculatePlaczek");
   alg->setProperty("IncidentSpectra", incidentWS);
   alg->setProperty("InputWorkspace", inWS);
+  alg->setProperty("CrystalDensity", crystalDensity);
   alg->setProperty("Order", 1); // default order is one, just being explicit here
   alg->execute();
   API::MatrixWorkspace_sptr outputWS = alg->getProperty("OutputWorkspace");
