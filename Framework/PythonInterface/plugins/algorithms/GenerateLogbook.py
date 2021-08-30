@@ -194,7 +194,7 @@ class GenerateLogbook(PythonAlgorithm):
     def _get_entries(self):
         """Gets default and optional metadata entries using the specified instrument IPF."""
         self._metadata_entries = []
-        self._metadata_headers = [('d', 'run_number')]
+        self._metadata_headers = [('s', 'file_name')]
         tmp_instr = self._instrument + '_tmp'
         # Load empty instrument to access parameters defining metadata entries to be searched
         LoadEmptyInstrument(Filename=self._instrument + "_Definition.xml", OutputWorkspace=tmp_instr)
@@ -334,9 +334,10 @@ class GenerateLogbook(PythonAlgorithm):
             if file_no % (len(data_array)/10) == 0:
                 progress.report("Filling logbook table...")
             file_path = os.path.join(self._data_directory, file_name + '.nxs')
+
             with h5py.File(file_path, 'r') as f:
                 rowData = np.empty(n_entries, dtype=object)
-                rowData[0] = int(file_name)
+                rowData[0] = str(file_name)
                 for entry_no, entry in enumerate(self._metadata_entries, 1):
                     if any(op in entry for op in operators):
                         if entry in cache_entries_ops:
