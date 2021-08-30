@@ -258,6 +258,7 @@ void LoadILLDiffraction::loadMetaData() {
     m_loadHelper.addNexusFieldsToWsRun(nxHandle, m_outWorkspace->mutableRun());
     NXclose(&nxHandle);
   }
+  mutableRun.addProperty("run_list", mutableRun.getPropertyValueAsType<int>("run_number"));
 
   if (mutableRun.hasProperty("Detector.calibration_file")) {
     if (getPropertyValue("DataType") == "Raw")

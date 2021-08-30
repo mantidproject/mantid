@@ -194,7 +194,7 @@ public:
       std::string transformedSymbol = getTransformedSymbolOrthorhombic(hmSymbol, transformation);
 
       bool symbolExists = std::find(transformedSpaceGroupSymbols.cbegin(), transformedSpaceGroupSymbols.cend(),
-                                    transformedSymbol) != transformedSpaceGroupSymbols.end();
+                                    transformedSymbol) != transformedSpaceGroupSymbols.cend();
 
       if (transformedSymbol != hmSymbol && !symbolExists) {
         subscribeUsingGenerator<TransformationSpaceGroupGenerator>(

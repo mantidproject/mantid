@@ -109,7 +109,8 @@ class D11_AbsoluteScaleFlux_Test(systemtesting.MantidSystemTest):
         self.assertTrue(result1)
 
         # Then we want to simulate the situation where water has no flux measurement
-        # Reduce water, but normalise it to the sample flux (water will get scaled here)
+        # Reduce water, but normalise it to the sample flux
+        # Commit f25a6cd5 removed the rescaling by the distance ratio squared in the algorithm
         SANSILLReduction(Run='010453', ProcessAs='Sample', MaskedInputWorkspace='mask',
                          OutputWorkspace='water_with_sample_flux', FluxInputWorkspace='fl')
 
@@ -119,8 +120,11 @@ class D11_AbsoluteScaleFlux_Test(systemtesting.MantidSystemTest):
                          OutputWorkspace='sample_with_flux_water_with_sample_flux',
                          FluxInputWorkspace='fl', ReferenceInputWorkspace='water_with_sample_flux')
 
-        # Now this output should still be at the same scale as the two above
+        # Before f25a6cd5 this output should still be at the same scale as the two above
         # (basically it is the same scaling, just happening in different place)
+        # After f25a6cd5, since the scaling is removed, we need to scale by that factor before comparing
+        Scale(InputWorkspace='sample_with_flux_water_with_sample_flux',
+              OutputWorkspace='sample_with_flux_water_with_sample_flux', Factor=(20.007/8)**2)
         result2, _ = CompareWorkspaces(Workspace1='sample_with_flux_water_with_sample_flux',
                                        Workspace2='sample_wo_flux', Tolerance=0.1)
         self.assertTrue(result2)

@@ -65,6 +65,7 @@ private:
   void handleGlobalParametersChanged(std::vector<std::string> const &globalParameters);
   void handleEditLocalParameterClicked(std::string const &parameter);
   void handleEditLocalParameterFinished();
+  void handleOutputBaseNameChanged(std::string const &outputBaseName);
   void handleFittingModeChanged(FittingMode fittingMode);
   void handleGenerateScriptToFileClicked();
   void handleGenerateScriptToClipboardClicked();

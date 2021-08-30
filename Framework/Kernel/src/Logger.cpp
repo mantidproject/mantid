@@ -304,7 +304,7 @@ void Logger::setLevelForAll(const int level) {
  * @param message :: The message to log
  * @param priority :: The priority level
  */
-void Logger::log(const std::string &message, Logger::Priority priority) {
+void Logger::log(const std::string &message, const Logger::Priority &priority) {
   if (!m_enabled)
     return;
 
@@ -349,7 +349,7 @@ void Logger::log(const std::string &message, Logger::Priority priority) {
  * @param priority :: The priority level
  * @return :: the stream
  */
-std::ostream &Logger::getLogStream(Logger::Priority priority) {
+std::ostream &Logger::getLogStream(const Logger::Priority &priority) {
   if (!m_enabled)
     return NULL_STREAM;
 

@@ -9,12 +9,14 @@ from os import path, makedirs
 from matplotlib import gridspec
 import matplotlib.pyplot as plt
 
-from Engineering.gui.engineering_diffraction.tabs.common import vanadium_corrections, path_handling
+from Engineering.common import path_handling
+from Engineering.gui.engineering_diffraction.tabs.common import vanadium_corrections
+from Engineering.gui.engineering_diffraction.tabs.common import output_settings
 from Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 from Engineering import EnggUtils
 from mantid.simpleapi import logger, AnalysisDataService as Ads, SaveNexus, SaveGSS, SaveFocusedXYE, \
     Load, NormaliseByCurrent, Divide, DiffractionFocussing, RebinToWorkspace, DeleteWorkspace, ApplyDiffCal, \
-    ConvertUnits, ReplaceSpecialValues, EnggEstimateFocussedBackground
+    ConvertUnits, ReplaceSpecialValues, EnggEstimateFocussedBackground, AddSampleLog
 
 SAMPLE_RUN_WORKSPACE_NAME = "engggui_focusing_input_ws"
 FOCUSED_OUTPUT_WORKSPACE_NAME = "engggui_focusing_output_ws_"
@@ -45,8 +47,8 @@ class FocusModel(object):
         :param rb_num: Number to signify the user who is running this focus
         :param regions_dict: dict region name -> grp_ws_name, defining region(s) of interest to focus over
         """
-        full_calib_path = get_setting(path_handling.INTERFACES_SETTINGS_GROUP,
-                                      path_handling.ENGINEERING_PREFIX, "full_calibration")
+        full_calib_path = get_setting(output_settings.INTERFACES_SETTINGS_GROUP,
+                                      output_settings.ENGINEERING_PREFIX, "full_calibration")
         if not Ads.doesExist("full_inst_calib"):
             try:
                 full_calib_workspace = Load(full_calib_path, OutputWorkspace="full_inst_calib")
@@ -55,12 +57,7 @@ class FocusModel(object):
                 return
         else:
             full_calib_workspace = Ads.retrieve("full_inst_calib")
-        if not vanadium_corrections.check_workspaces_exist():
-            van_integration_ws, van_processed_inst_ws = vanadium_corrections.fetch_correction_workspaces(vanadium_path,
-                                                                                                         instrument)
-        else:
-            van_integration_ws = Ads.retrieve(vanadium_corrections.INTEGRATED_WORKSPACE_NAME)
-            van_processed_inst_ws = Ads.retrieve(vanadium_corrections.PROCESSED_WORKSPACE_NAME)
+        van_integration_ws, van_processed_inst_ws = vanadium_corrections.fetch_correction_workspaces(vanadium_path, instrument)
 
         # check correct region calibration(s) and grouping workspace(s) exists
         inst_ws = path_handling.load_workspace(sample_paths[0])
@@ -73,6 +70,7 @@ class FocusModel(object):
         # loop over samples provided, focus each over region(s) specified in regions_dict
         output_workspaces = []  # List of collated workspaces to plot.
         self._last_focused_files = []
+        van_run_no = path_handling.get_run_number_from_path(vanadium_path, instrument)
         for sample_path in sample_paths:
             sample_workspace = path_handling.load_workspace(sample_path)
             run_no = path_handling.get_run_number_from_path(sample_path, instrument)
@@ -91,9 +89,9 @@ class FocusModel(object):
                 self._run_focus(sample_workspace, tof_output_name, curves, grouping_kwarg,
                                 region_calib_ws)
                 sample_plots.append(tof_output_name)
-                self._save_output(instrument, sample_path, region, tof_output_name, rb_num)
-                self._save_output(instrument, sample_path, region, dspacing_output_name, rb_num, unit="dSpacing")
-                self._output_sample_logs(instrument, run_no, sample_workspace, rb_num)
+                self._save_output(instrument, run_no, van_run_no, region, tof_output_name, rb_num)
+                self._save_output(instrument, run_no, van_run_no, region, dspacing_output_name, rb_num, unit="dSpacing")
+                self._output_sample_logs(instrument, run_no, van_run_no, sample_workspace, rb_num)
             output_workspaces.append(sample_plots)
             DeleteWorkspace(sample_workspace)
         # remove created grouping workspace if present
@@ -246,72 +244,68 @@ class FocusModel(object):
             ax.set_title(ws_name)
         fig.show()
 
-    def _save_output(self, instrument, sample_path, bank, sample_workspace, rb_num, unit="TOF"):
+    def _save_output(self, instrument, sample_run, van_run, bank, sample_workspace, rb_num, unit="TOF"):
         """
         Save a focused workspace to the file system. Saves separate copies to a User directory if an rb number has
         been set.
         :param instrument: The instrument the data is from.
-        :param sample_path: The path to the data file that was focused.
+        :param sample_run: The sample run number that was focussed
         :param bank: The name of the bank being saved.
         :param sample_workspace: The name of the workspace to be saved.
         :param rb_num: Usually an experiment id, defines the name of the user directory.
         """
-        self._save_focused_output_files_as_nexus(instrument, sample_path, bank, sample_workspace,
+        self._save_focused_output_files_as_nexus(instrument, sample_run, van_run, bank, sample_workspace,
                                                  rb_num, unit)
-        self._save_focused_output_files_as_gss(instrument, sample_path, bank, sample_workspace,
+        self._save_focused_output_files_as_gss(instrument, sample_run, van_run, bank, sample_workspace,
                                                rb_num, unit)
-        self._save_focused_output_files_as_topas_xye(instrument, sample_path, bank, sample_workspace,
+        self._save_focused_output_files_as_topas_xye(instrument, sample_run, van_run, bank, sample_workspace,
                                                      rb_num, unit)
-        output_path = path.join(path_handling.get_output_path(), 'Focus')
+        output_path = path.join(output_settings.get_output_path(), 'Focus')
         logger.notice(f"\n\nFocus files saved to: \"{output_path}\"\n\n")
         if rb_num:
-            output_path = path.join(path_handling.get_output_path(), 'User', rb_num, 'Focus')
+            output_path = path.join(output_settings.get_output_path(), 'User', rb_num, 'Focus')
             logger.notice(f"\n\nFocus files also saved to: \"{output_path}\"\n\n")
 
-    def _save_focused_output_files_as_gss(self, instrument, sample_path, bank, sample_workspace,
+    def _save_focused_output_files_as_gss(self, instrument, sample_run, van_run, bank, sample_workspace,
                                           rb_num, unit):
-        gss_output_path = path.join(
-            path_handling.get_output_path(), "Focus",
-            self._generate_output_file_name(instrument, sample_path, bank, unit, ".gss"))
+        gss_output_path = path.join(output_settings.get_output_path(), "Focus",
+                                    self._generate_output_file_name(instrument, sample_run, van_run, bank, unit, ".gss"))
         SaveGSS(InputWorkspace=sample_workspace, Filename=gss_output_path)
         if rb_num:
-            gss_output_path = path.join(
-                path_handling.get_output_path(), "User", rb_num, "Focus",
-                self._generate_output_file_name(instrument, sample_path, bank, unit, ".gss"))
+            gss_output_path = path.join(output_settings.get_output_path(), "User", rb_num, "Focus",
+                                        self._generate_output_file_name(instrument, sample_run, van_run, bank, unit, ".gss"))
             SaveGSS(InputWorkspace=sample_workspace, Filename=gss_output_path)
 
-    def _save_focused_output_files_as_nexus(self, instrument, sample_path, bank, sample_workspace,
+    def _save_focused_output_files_as_nexus(self, instrument, sample_run, van_run, bank, sample_workspace,
                                             rb_num, unit):
-        file_name = self._generate_output_file_name(instrument, sample_path, bank, unit, ".nxs")
-        nexus_output_path = path.join(path_handling.get_output_path(), "Focus", file_name)
+        file_name = self._generate_output_file_name(instrument, sample_run, van_run, bank, unit, ".nxs")
+        nexus_output_path = path.join(output_settings.get_output_path(), "Focus", file_name)
+        AddSampleLog(Workspace=sample_workspace, LogName="Vanadium Run", LogText=van_run)
         SaveNexus(InputWorkspace=sample_workspace, Filename=nexus_output_path)
         if rb_num:
-            nexus_output_path = path.join(
-                path_handling.get_output_path(), "User", rb_num, "Focus", file_name)
+            nexus_output_path = path.join(output_settings.get_output_path(), "User", rb_num, "Focus", file_name)
             SaveNexus(InputWorkspace=sample_workspace, Filename=nexus_output_path)
         if unit == "TOF":
             self._last_focused_files.append(nexus_output_path)
 
-    def _save_focused_output_files_as_topas_xye(self, instrument, sample_path, bank,
+    def _save_focused_output_files_as_topas_xye(self, instrument, sample_run, van_run, bank,
                                                 sample_workspace, rb_num, unit):
-        xye_output_path = path.join(
-            path_handling.get_output_path(), "Focus",
-            self._generate_output_file_name(instrument, sample_path, bank, unit, ".abc"))
+        xye_output_path = path.join(output_settings.get_output_path(), "Focus",
+                                    self._generate_output_file_name(instrument, sample_run, van_run, bank, unit, ".abc"))
         SaveFocusedXYE(InputWorkspace=sample_workspace,
                        Filename=xye_output_path,
                        SplitFiles=False,
                        Format="TOPAS")
         if rb_num:
-            xye_output_path = path.join(
-                path_handling.get_output_path(), "User", rb_num, "Focus",
-                self._generate_output_file_name(instrument, sample_path, bank, unit, ".abc"))
+            xye_output_path = path.join(output_settings.get_output_path(), "User", rb_num, "Focus",
+                                        self._generate_output_file_name(instrument, sample_run, van_run, bank, unit, ".abc"))
             SaveFocusedXYE(InputWorkspace=sample_workspace,
                            Filename=xye_output_path,
                            SplitFiles=False,
                            Format="TOPAS")
 
     @staticmethod
-    def _output_sample_logs(instrument, run_number, workspace, rb_num):
+    def _output_sample_logs(instrument, run_number, van_run_number, workspace, rb_num):
         def write_to_file():
             with open(output_path, "w", newline="") as logfile:
                 writer = csv.writer(logfile, ["Sample Log", "Avg Value"])
@@ -328,19 +322,18 @@ class FocusModel(object):
             except ValueError:
                 logger.information(f"Could not convert {name} to a numerical value. It will not be included in the "
                                    f"sample logs output file.")
-        focus_dir = path.join(path_handling.get_output_path(), "Focus")
+        focus_dir = path.join(output_settings.get_output_path(), "Focus")
         if not path.exists(focus_dir):
             makedirs(focus_dir)
-        output_path = path.join(focus_dir, (instrument + "_" + run_number + "_sample_logs.csv"))
+        output_path = path.join(focus_dir, (instrument + "_" + run_number + "_" + van_run_number + "_sample_logs.csv"))
         write_to_file()
         if rb_num:
-            focus_user_dir = path.join(path_handling.get_output_path(), "User", rb_num, "Focus")
+            focus_user_dir = path.join(output_settings.get_output_path(), "User", rb_num, "Focus")
             if not path.exists(focus_user_dir):
                 makedirs(focus_user_dir)
-            output_path = path.join(focus_user_dir, (instrument + "_" + run_number + "_sample_logs.csv"))
+            output_path = path.join(focus_user_dir, (instrument + "_" + run_number + "_" + van_run_number + "_sample_logs.csv"))
             write_to_file()
 
     @staticmethod
-    def _generate_output_file_name(instrument, sample_path, bank, unit, suffix):
-        run_no = path_handling.get_run_number_from_path(sample_path, instrument)
-        return instrument + '_' + run_no + '_' + bank + '_' + unit + suffix
+    def _generate_output_file_name(instrument, run_no, van_run_no, bank, unit, suffix):
+        return instrument + '_' + run_no + '_' + van_run_no +'_' + bank + '_' + unit + suffix

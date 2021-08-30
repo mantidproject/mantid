@@ -13,6 +13,8 @@ from Muon.GUI.Common.corrections_tab_widget.corrections_model import Corrections
 from Muon.GUI.Common.corrections_tab_widget.corrections_view import CorrectionsView
 from Muon.GUI.Common.corrections_tab_widget.dead_time_corrections_model import DeadTimeCorrectionsModel
 from Muon.GUI.Common.corrections_tab_widget.dead_time_corrections_presenter import DeadTimeCorrectionsPresenter
+from Muon.GUI.Common.thread_model import ThreadModel
+from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapperWithOutput
 
 from qtpy.QtCore import QMetaObject, QObject, Slot
 
@@ -27,6 +29,8 @@ class CorrectionsPresenter(QObject):
         super(CorrectionsPresenter, self).__init__()
         self.view = view
         self.model = model
+
+        self.thread_success = True
 
         self.dead_time_model = DeadTimeCorrectionsModel(model, context.data_context, context.corrections_context)
         self.dead_time_presenter = DeadTimeCorrectionsPresenter(self.view.dead_time_view, self.dead_time_model, self)
@@ -44,11 +48,13 @@ class CorrectionsPresenter(QObject):
         self.instrument_changed_observer = GenericObserver(self.handle_instrument_changed)
         self.load_observer = GenericObserver(self.handle_runs_loaded)
         self.group_change_observer = GenericObserver(self.handle_groups_changed)
-        self.pre_process_and_grouping_complete_observer = GenericObserver(self.handle_pre_process_and_grouping_complete)
+        self.pre_process_and_counts_calculated_observer = GenericObserver(self.handle_pre_process_and_counts_calculated)
 
         self.enable_editing_notifier = GenericObservable()
         self.disable_editing_notifier = GenericObservable()
+        self.set_tab_warning_notifier = GenericObservable()
         self.perform_corrections_notifier = GenericObservable()
+        self.asymmetry_pair_and_diff_calculations_finished_notifier = GenericObservable()
 
     def initialize_model_options(self) -> None:
         """Initialise the model with the default fitting options."""
@@ -95,15 +101,73 @@ class CorrectionsPresenter(QObject):
         self.dead_time_presenter.handle_run_selector_changed()
         self.background_presenter.handle_run_selector_changed()
 
-    def handle_pre_process_and_grouping_complete(self) -> None:
-        """Handles when MuonPreProcess and grouping has been completed."""
-        self.dead_time_presenter.handle_pre_process_and_grouping_complete()
-        self.background_presenter.handle_pre_process_and_grouping_complete()
+    def handle_pre_process_and_counts_calculated(self) -> None:
+        """Handles when MuonPreProcess and counts workspaces have been calculated."""
+        self.dead_time_presenter.handle_pre_process_and_counts_calculated()
+        self.background_presenter.handle_pre_process_and_counts_calculated()
+
+    def handle_thread_calculation_started(self) -> None:
+        """Handles when a calculation on a thread has started."""
+        self.disable_editing_notifier.notify_subscribers()
+        self.thread_success = True
+
+    def handle_background_corrections_for_all_finished(self) -> None:
+        """Handle when the background corrections for all has finished."""
+        self.enable_editing_notifier.notify_subscribers()
+        if not self.thread_success:
+            return
+
+        self.background_presenter.handle_background_corrections_for_all_finished()
+
+        corrected_runs_and_groups = self.thread_model_wrapper.result
+        if corrected_runs_and_groups is not None:
+            runs, groups = corrected_runs_and_groups
+            self._perform_asymmetry_pairs_and_diffs_calculation(runs, groups)
+
+    def handle_asymmetry_pairs_and_diffs_calc_finished(self) -> None:
+        """Handle when the calculation of Asymmetry, Pairs and Diffs has finished finished."""
+        self.enable_editing_notifier.notify_subscribers()
+        self.asymmetry_pair_and_diff_calculations_finished_notifier.notify_subscribers()
+
+    def handle_thread_error(self, error: str) -> None:
+        """Handle when an error occurs while doing calculations on a thread."""
+        self.disable_editing_notifier.notify_subscribers()
+        self.thread_success = False
+        self.view.warning_popup(error)
 
     def current_run_string(self) -> str:
         """Returns the currently selected run string."""
         return self.model.current_run_string()
 
+    def _perform_asymmetry_pairs_and_diffs_calculation(self, *args) -> None:
+        """Calculate the Asymmetry workspaces, Pairs and Diffs on a thread after background corrections are complete."""
+        try:
+            self.calculation_thread = self.create_calculation_thread(self._calculate_asymmetry_pairs_and_diffs, *args)
+            self.calculation_thread.threadWrapperSetUp(self.handle_thread_calculation_started,
+                                                       self.handle_asymmetry_pairs_and_diffs_calc_finished,
+                                                       self.handle_thread_error)
+            self.calculation_thread.start()
+        except ValueError as error:
+            self.view.warning_popup(error)
+
+    def _calculate_asymmetry_pairs_and_diffs(self, runs: list, groups: list) -> None:
+        """Calculates the Asymmetry workspaces, Pairs and Diffs only for the provided runs and groups."""
+        # Calculates the Asymmetry workspaces for the corresponding runs and groups that have just been corrected
+        self.model.calculate_asymmetry_workspaces_for(runs, groups)
+        # Calculates the Pair Asymmetry workspaces for pairs formed from one or more groups which have been corrected
+        pairs = self.model.calculate_pairs_for(runs, groups)
+        # Calculates the Diff Asymmetry workspaces formed from one or more groups/pairs which have been corrected
+        self.model.calculate_diffs_for(runs, groups + pairs)
+
+    def create_calculation_thread(self, callback, *args) -> ThreadModel:
+        """Create a thread for calculations."""
+        self.thread_model_wrapper = ThreadModelWrapperWithOutput(callback, *args)
+        return ThreadModel(self.thread_model_wrapper)
+
     def warning_popup(self, message: str) -> None:
         """Displays a warning message."""
         self.view.warning_popup(message)
+
+    def set_tab_warning(self, message: str) -> None:
+        """Sets a warning message as the tooltip of the corrections tab."""
+        self.view.set_tab_warning(message)

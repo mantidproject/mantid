@@ -280,7 +280,10 @@ class CurvesTabWidgetPresenter:
         # Then update the rest of the view to reflect the selected combo items.
         curve_props = CurveProperties.from_curve(self.get_current_curve())
         self.view.update_fields(curve_props)
-        self.set_errorbars_tab_enabled()
+        # only enable error bar tabs if we do not have multiple curves selected
+        if not len(self.view.select_curve_list.selectedItems()) > 1:
+            self.set_errorbars_tab_enabled()
+
         self.current_view_properties = curve_props
 
     # Private methods

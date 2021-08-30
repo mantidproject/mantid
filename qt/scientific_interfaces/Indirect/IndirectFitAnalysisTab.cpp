@@ -7,6 +7,7 @@
 #include "IndirectFitAnalysisTab.h"
 #include "IndirectSettingsHelper.h"
 
+#include "IndirectAddWorkspaceDialog.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/TextAxis.h"
@@ -22,13 +23,13 @@
 #include <algorithm>
 #include <utility>
 
-/// Logger
-Mantid::Kernel::Logger g_log("IndirectFitAnalysisTab");
-
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
 
 namespace {
+/// Logger
+Mantid::Kernel::Logger g_log("IndirectFitAnalysisTab");
+
 bool doesExistInADS(std::string const &workspaceName) {
   return AnalysisDataService::Instance().doesExist(workspaceName);
 }
@@ -90,7 +91,8 @@ void IndirectFitAnalysisTab::connectDataPresenter() {
 
   connect(m_dataPresenter.get(), SIGNAL(singleResolutionLoaded()), this, SLOT(respondToSingleResolutionLoaded()));
   connect(m_dataPresenter.get(), SIGNAL(dataChanged()), this, SLOT(respondToDataChanged()));
-  connect(m_dataPresenter.get(), SIGNAL(dataAdded()), this, SLOT(respondToDataAdded()));
+  connect(m_dataPresenter.get(), SIGNAL(dataAdded(IAddWorkspaceDialog const *)), this,
+          SLOT(respondToDataAdded(IAddWorkspaceDialog const *)));
   connect(m_dataPresenter.get(), SIGNAL(dataRemoved()), this, SLOT(respondToDataRemoved()));
 }
 
@@ -204,7 +206,7 @@ void IndirectFitAnalysisTab::setModelEndX(double endX) {
   }
 }
 
-void IndirectFitAnalysisTab::updateDataInTable() { m_dataPresenter->updateDataInTable(); }
+void IndirectFitAnalysisTab::updateDataInTable() { m_dataPresenter->updateTableFromModel(); }
 
 void IndirectFitAnalysisTab::tableStartXChanged(double startX, WorkspaceID workspaceID, WorkspaceIndex spectrum) {
   if (isRangeCurrentlySelected(workspaceID, spectrum)) {
@@ -333,7 +335,7 @@ void IndirectFitAnalysisTab::updateFitBrowserParameterValuesFromAlg() {
         auto const paramWsName = m_fittingAlgorithm->getPropertyValue("OutputParameterWorkspace");
         auto paramWs = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(paramWsName);
         auto rowCount = static_cast<int>(paramWs->rowCount());
-        if (rowCount == static_cast<int>(m_fittingModel->getNumberOfDomains()))
+        if (rowCount == static_cast<int>(m_dataPresenter->getNumberOfDomains()))
           m_fitPropertyBrowser->updateMultiDatasetParameters(*paramWs);
       } else {
         IFunction_sptr fun = m_fittingAlgorithm->getProperty("Function");
@@ -357,8 +359,8 @@ void IndirectFitAnalysisTab::updateFitStatus() {
   if (m_fittingModel->getFittingMode() == FittingMode::SIMULTANEOUS) {
     std::string fit_status = m_fittingAlgorithm->getProperty("OutputStatus");
     double chi2 = m_fittingAlgorithm->getProperty("OutputChiSquared");
-    const std::vector<std::string> status(m_fittingModel->getNumberOfDomains(), fit_status);
-    const std::vector<double> chiSquared(m_fittingModel->getNumberOfDomains(), chi2);
+    const std::vector<std::string> status(m_dataPresenter->getNumberOfDomains(), fit_status);
+    const std::vector<double> chiSquared(m_dataPresenter->getNumberOfDomains(), chi2);
     m_fitPropertyBrowser->updateFitStatusData(status, chiSquared);
   } else {
     const std::vector<std::string> status = m_fittingAlgorithm->getProperty("OutputStatus");
@@ -517,7 +519,7 @@ void IndirectFitAnalysisTab::setPDFWorkspace(std::string const &workspaceName) {
 
 void IndirectFitAnalysisTab::updateParameterEstimationData() {
   m_fitPropertyBrowser->updateParameterEstimationData(
-      m_dataPresenter->getDataForParameterEstimation(getEstimationDataSelector()));
+      m_fittingModel->getDataForParameterEstimation(getEstimationDataSelector()));
   const bool isFit = m_fittingModel->isPreviouslyFit(getSelectedDataIndex(), getSelectedSpectrum());
   // If we haven't fit the data yet we may update the guess
   if (!isFit) {
@@ -592,8 +594,8 @@ QList<FunctionModelDataset> IndirectFitAnalysisTab::getDatasets() const {
 }
 
 void IndirectFitAnalysisTab::updateDataReferences() {
-  m_fitPropertyBrowser->updateFunctionBrowserData(static_cast<int>(m_fittingModel->getNumberOfDomains()), getDatasets(),
-                                                  m_fittingModel->getQValuesForData(),
+  m_fitPropertyBrowser->updateFunctionBrowserData(static_cast<int>(m_dataPresenter->getNumberOfDomains()),
+                                                  getDatasets(), m_dataPresenter->getQValuesForData(),
                                                   m_fittingModel->getResolutionsForFit());
   m_fittingModel->setFitFunction(m_fitPropertyBrowser->getFitFunction());
 }
@@ -627,13 +629,15 @@ void IndirectFitAnalysisTab::respondToDataChanged() {
   updateResultOptions();
 }
 
-void IndirectFitAnalysisTab::respondToDataAdded() {
+void IndirectFitAnalysisTab::respondToDataAdded(IAddWorkspaceDialog const *dialog) {
+  addDataToModel(dialog);
   updateDataReferences();
   m_plotPresenter->appendLastDataToSelection();
   updateParameterEstimationData();
 }
 
 void IndirectFitAnalysisTab::respondToDataRemoved() {
+  m_fittingModel->removeDefaultParameters();
   updateDataReferences();
   m_plotPresenter->updateDataSelection();
   updateParameterEstimationData();
@@ -661,6 +665,13 @@ void IndirectFitAnalysisTab::respondToFunctionChanged() {
   m_plotPresenter->updatePlots();
   m_plotPresenter->updateFit();
   emit functionChanged();
+}
+
+void IndirectFitAnalysisTab::addDataToModel(IAddWorkspaceDialog const *dialog) {
+  if (const auto indirectDialog = dynamic_cast<IndirectAddWorkspaceDialog const *>(dialog)) {
+    m_dataPresenter->addWorkspace(indirectDialog->workspaceName(), indirectDialog->workspaceIndices());
+    m_fittingModel->addDefaultParameters();
+  }
 }
 
 } // namespace IDA

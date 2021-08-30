@@ -108,9 +108,14 @@ if(APPLE)
 else()
   set(_install_lib_dirs "${SITE_PACKAGES}")
 endif()
+
 add_python_package(
-  PythonInterface EGGLINKNAME mantid INSTALL_LIB_DIRS ${_install_lib_dirs}
+  PythonInterface
+  EGGLINKNAME mantid
+  INSTALL_LIB_DIRS ${_install_lib_dirs}
+  GENERATE_SITECUSTOMIZE
 )
+
 set_property(TARGET PythonInterface PROPERTY FOLDER "MantidFramework/Python")
 add_dependencies(
   PythonInterface
@@ -150,7 +155,11 @@ add_subdirectory(test)
 
 # Python algorithms
 mtd_install_dirs(
-  DIRECTORY plugins/
-  INSTALL_DIRS ${PLUGINS_DIR}/python ${WORKBENCH_PLUGINS_DIR}/python
-  EXCLUDE "*.pyc"
+  DIRECTORY
+  plugins/
+  INSTALL_DIRS
+  ${PLUGINS_DIR}/python
+  ${WORKBENCH_PLUGINS_DIR}/python
+  EXCLUDE
+  "*.pyc"
 )

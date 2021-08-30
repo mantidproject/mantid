@@ -16,6 +16,8 @@ set ( TEST_PY_FILES
    corrections_tab_widget/dead_time_corrections_presenter_test.py
    corrections_tab_widget/dead_time_corrections_view_test.py
    data_selectors/cyclic_data_selector_view_test.py
+   dual_plot_maxent_pane/dual_plot_maxent_pane_model_test.py
+   dual_plot_maxent_pane/dual_plot_maxent_pane_presenter_test.py
    elemental_analysis/elemental_analysis_test.py
    elemental_analysis/name_generator_test.py
    elemental_analysis/detectors_presenter_test.py
@@ -98,7 +100,6 @@ set ( TEST_PY_FILES
    loading_tab/loadwidget_presenter_multiple_file_test.py
    loading_tab/loadwidget_presenter_test.py
    max_ent_presenter_load_interaction_test.py
-   MaxEntModel_test.py
    MaxEntPresenter_test.py
    model_fitting_context_test.py
    muon_context_test.py
@@ -122,6 +123,8 @@ set ( TEST_PY_FILES
    plotting_canvas/plotting_canvas_presenter_test.py
    plotting_canvas/plotting_canvas_utils_test.py
    plotting_canvas/plotting_canvas_view_test.py
+   quick_edit/dual_quick_edit_test.py
+   quick_edit/quick_edit_presenter_test.py
    raw_pane/raw_pane_model_test.py
    results_context_test.py
    results_tab_widget/results_tab_model_test.py

@@ -12,6 +12,7 @@ DEAD_TIME_FROM_ADS = "FromADS"
 
 BACKGROUND_MODE_NONE = "None"
 BACKGROUND_MODE_AUTO = "Auto"
+BACKGROUND_MODE_MANUAL = "Manual"
 
 FLAT_BACKGROUND = "Flat Background"
 FLAT_BACKGROUND_AND_EXP_DECAY = "Flat Background + Exp Decay"
@@ -33,7 +34,7 @@ class CorrectionsContext:
 
     # The background corrections mode can be 'None', 'Auto' or 'Manual'
     background_corrections_mode: str = BACKGROUND_MODE_NONE
-    selected_function: str = FLAT_BACKGROUND
+    selected_function: str = FLAT_BACKGROUND_AND_EXP_DECAY
     selected_group: str = GROUPS_ALL
     show_all_runs: bool = False
 

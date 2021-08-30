@@ -95,7 +95,8 @@ public:
   MOCK_CONST_METHOD0(getEditLocalParameterResults, std::tuple<std::string, std::vector<double>, std::vector<bool>,
                                                               std::vector<std::string>, std::vector<std::string>>());
 
-  MOCK_CONST_METHOD0(fitOptions, std::tuple<std::string, std::string, std::string, std::string>());
+  MOCK_CONST_METHOD0(fitOptions, std::tuple<std::string, std::string, std::string, std::string, std::string, bool>());
+  MOCK_CONST_METHOD0(outputBaseName, std::string());
   MOCK_CONST_METHOD0(filepath, std::string());
 
   MOCK_METHOD0(resetSelection, void());
@@ -176,6 +177,8 @@ public:
 
   MOCK_METHOD1(setGlobalParameters, void(std::vector<std::string> const &parameters));
 
+  MOCK_METHOD1(setOutputBaseName, void(std::string const &outputBaseName));
+
   MOCK_METHOD1(setFittingMode, void(FittingMode fittingMode));
   MOCK_CONST_METHOD0(getFittingMode, FittingMode());
   MOCK_CONST_METHOD0(isSimultaneousMode, bool());
@@ -209,9 +212,9 @@ public:
 
   MOCK_CONST_METHOD0(isValid, std::tuple<bool, std::string>());
 
-  std::string generatePythonFitScript(
-      [[maybe_unused]] std::tuple<std::string, std::string, std::string, std::string> const &fitOptions,
-      [[maybe_unused]] std::string const &filepath = "") override {
+  std::string generatePythonFitScript([[maybe_unused]] std::tuple<std::string, std::string, std::string, std::string,
+                                                                  std::string, bool> const &fitOptions,
+                                      [[maybe_unused]] std::string const &filepath = "") override {
     return "# mock python script";
   }
 };

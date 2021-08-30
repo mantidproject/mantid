@@ -16,6 +16,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/ISISRunLogs.h"
+#include "MantidDataHandling/LoadMuonStrategy.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/Detector.h"
@@ -108,6 +109,33 @@ void LoadMuonNexus1::exec() {
     }
   } catch (std::exception &e) {
     g_log.warning() << "Error while loading the FirstGoodData value: " << e.what() << "\n";
+  }
+
+  try {
+    NXInfo infoResolution = entry.getDataSetInfo("resolution");
+    NXInt counts = root.openNXInt("run/histogram_data_1/counts");
+    std::string lastGoodBin = counts.attributes("last_good_bin");
+    if (!lastGoodBin.empty() && infoResolution.stat != NX_ERROR) {
+      double resolution;
+
+      switch (infoResolution.type) {
+      case NX_FLOAT32:
+        resolution = static_cast<double>(entry.getFloat("resolution"));
+        break;
+      case NX_INT32:
+        resolution = static_cast<double>(entry.getInt("resolution"));
+        break;
+      default:
+        throw std::runtime_error("Unsupported data type for resolution");
+      }
+
+      auto bin = static_cast<double>(boost::lexical_cast<int>(lastGoodBin));
+      double bin_size = resolution / 1000000.0;
+
+      setProperty("LastGoodData", bin * bin_size);
+    }
+  } catch (std::exception &e) {
+    g_log.warning() << "Error while loading the LastGoodData value: " << e.what() << "\n";
   }
 
   NXEntry nxRun = root.openEntry("run");
@@ -308,6 +336,13 @@ void LoadMuonNexus1::exec() {
       outWs = groupedWs;
     } else {
       outWs = localWorkspace;
+    }
+
+    if (existsProperty("TimeZero")) {
+      auto timeZeroList = std::vector<double>(m_numberOfSpectra, getProperty("TimeZero"));
+      setProperty("TimeZeroList", timeZeroList);
+      if (!getPropertyValue("TimeZeroTable").empty())
+        setProperty("TimeZeroTable", createTimeZeroTable(m_numberOfSpectra, timeZeroList));
     }
 
     if (m_numberOfPeriods == 1)

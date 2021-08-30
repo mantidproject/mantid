@@ -51,6 +51,8 @@ class BasicFittingPresenter:
         self.instrument_changed_observer = GenericObserver(self.handle_instrument_changed)
         self.selected_group_pair_observer = GenericObserver(self.handle_selected_group_pair_changed)
         self.double_pulse_observer = GenericObserverWithArgPassing(self.handle_pulse_type_changed)
+        self.sequential_fit_finished_observer = GenericObserver(self.handle_sequential_fit_finished)
+        self.fit_parameter_updated_observer = GenericObserver(self.update_fit_function_in_view_from_model)
 
         self.fsg_model = None
         self.fsg_view = None
@@ -62,6 +64,7 @@ class BasicFittingPresenter:
         self.view.set_slot_for_plot_guess_changed(self.handle_plot_guess_changed)
         self.view.set_slot_for_fit_name_changed(self.handle_function_name_changed_by_user)
         self.view.set_slot_for_dataset_changed(self.handle_dataset_name_changed)
+        self.view.set_slot_for_covariance_matrix_clicked(self.handle_covariance_matrix_clicked)
         self.view.set_slot_for_function_structure_changed(self.handle_function_structure_changed)
         self.view.set_slot_for_function_parameter_changed(
             lambda function_index, parameter: self.handle_function_parameter_changed(function_index, parameter))
@@ -134,6 +137,7 @@ class BasicFittingPresenter:
 
         self.update_fit_function_in_view_from_model()
         self.update_fit_statuses_and_chi_squared_in_view_from_model()
+        self.update_covariance_matrix_button()
 
         self.update_plot_fit()
         self.update_plot_guess()
@@ -178,6 +182,7 @@ class BasicFittingPresenter:
         self.update_fit_function_in_model(fit_function)
 
         self.update_fit_statuses_and_chi_squared_in_view_from_model()
+        self.update_covariance_matrix_button()
         self.update_fit_function_in_view_from_model()
 
         self.update_plot_fit()
@@ -200,11 +205,18 @@ class BasicFittingPresenter:
         self.model.current_dataset_index = self.view.current_dataset_index
 
         self.update_fit_statuses_and_chi_squared_in_view_from_model()
+        self.update_covariance_matrix_button()
         self.update_fit_function_in_view_from_model()
         self.update_start_and_end_x_in_view_from_model()
 
         self.update_plot_fit()
         self.update_plot_guess()
+
+    def handle_covariance_matrix_clicked(self) -> None:
+        """Handle when the Covariance Matrix button is clicked."""
+        covariance_matrix = self.model.current_normalised_covariance_matrix()
+        if covariance_matrix is not None:
+            self.view.show_normalised_covariance_matrix(covariance_matrix.workspace, covariance_matrix.workspace_name)
 
     def handle_function_name_changed_by_user(self) -> None:
         """Handle when the fit name is changed by the user."""
@@ -285,6 +297,11 @@ class BasicFittingPresenter:
         if self._check_rebin_options():
             self.model.fit_to_raw = self.view.fit_to_raw
 
+    def handle_sequential_fit_finished(self) -> None:
+        """Handles when a sequential fit has been performed and has finished executing in the sequential fitting tab."""
+        self.update_fit_function_in_view_from_model()
+        self.update_fit_statuses_and_chi_squared_in_view_from_model()
+
     def clear_undo_data(self) -> None:
         """Clear all the previously saved undo fit functions and other data."""
         self.model.clear_undo_data()
@@ -358,6 +375,10 @@ class BasicFittingPresenter:
         self.view.update_local_fit_status_and_chi_squared(self.model.current_fit_status,
                                                           self.model.current_chi_squared)
         self.view.update_global_fit_status(self.model.fit_statuses, self.model.current_dataset_index)
+
+    def update_covariance_matrix_button(self) -> None:
+        """Updates the covariance matrix button to be enabled if a covariance matrix exists for the selected data."""
+        self.view.set_covariance_button_enabled(self.model.has_normalised_covariance_matrix())
 
     def update_start_and_end_x_in_view_from_model(self) -> None:
         """Updates the start and end x in the view using the current values in the model."""

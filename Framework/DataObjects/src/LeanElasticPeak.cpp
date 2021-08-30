@@ -115,6 +115,16 @@ double LeanElasticPeak::getTOF() const {
   throw Exception::NotImplementedError("LeanElasticPeak::getTOF(): no detector infomation in LeanElasticPeak");
 }
 
+/// returns the row (y) of the pixel of the detector, throws NotImplementedError for LeanElasticPeak
+int LeanElasticPeak::getRow() const {
+  throw Exception::NotImplementedError("LeanElasticPeak::getRow(): no detector infomation in LeanElasticPeak");
+}
+
+/// returns the column (x) of the pixel of the detector, throws NotImplementedError for LeanElasticPeak
+int LeanElasticPeak::getCol() const {
+  throw Exception::NotImplementedError("LeanElasticPeak::getCol(): no detector infomation in LeanElasticPeak");
+}
+
 // -------------------------------------------------------------------------------------
 /** Calculate the scattering angle of the peak  */
 double LeanElasticPeak::getScattering() const { return asin(getWavelength() / (2 * getDSpacing())) * 2; }

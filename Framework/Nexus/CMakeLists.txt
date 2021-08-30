@@ -20,6 +20,12 @@ add_definitions(-DIN_NEXUS_CPP_LIBRARY)
 
 # Add the target for this directory
 add_library(Nexus ${SRC_FILES} ${INC_FILES})
+add_library(Mantid::Nexus ALIAS Nexus)
+
+target_include_directories(Nexus PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+		$<INSTALL_INTERFACE:include/Mantid>
+)
 # Set the name of the generated library
 set_target_properties(Nexus
                       PROPERTIES OUTPUT_NAME
@@ -36,16 +42,15 @@ endif()
 # Add to the 'Framework' group in VS
 set_property(TARGET Nexus PROPERTY FOLDER "MantidFramework")
 
-include_directories(inc)
-
-target_link_libraries(Nexus
-                      LINK_PRIVATE
-                      ${MANTIDLIBS}
-                      ${NEXUS_C_LIBRARIES}
-                      ${NEXUS_LIBRARIES})
+target_link_libraries(Nexus PUBLIC Mantid::API Mantid::DataObjects Mantid::Kernel Nexus::nexus Nexus::nexuscpp)
 
 # Add the unit tests directory
 add_subdirectory(test)
 
 # Installation settings
+if (CONDA_BUILD)
+set(TARGET_EXPORT_NAME "MantidNexusTargets")
+mtd_install_framework_lib(TARGETS Nexus EXPORT_NAME ${TARGET_EXPORT_NAME})
+else()
 mtd_install_targets(TARGETS Nexus INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
+endif()

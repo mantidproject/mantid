@@ -10,6 +10,8 @@ from unittest import mock
 
 from mantidqt.widgets.superplot.presenter import SuperplotPresenter
 
+from mantid.plots import MantidAxes
+
 
 class SuperplotPresenterTest(unittest.TestCase):
 
@@ -33,6 +35,7 @@ class SuperplotPresenterTest(unittest.TestCase):
         self.m_canvas = mock.Mock()
         self.m_figure = self.m_canvas.figure
         self.m_axes = self.m_canvas.figure.gca.return_value
+        self.m_axes.__class__ = MantidAxes
         self.m_axes.get_lines.return_value = list()
         self.m_axes.creation_args = [{}]
         a1 = mock.Mock()
@@ -42,6 +45,7 @@ class SuperplotPresenterTest(unittest.TestCase):
             ws, sp
         self.m_axes.get_tracked_artists.return_value = [a1]
         self.m_view.get_selection.return_value = {}
+        self.m_view.get_hold_button_size.return_value = 0,0
         self.presenter = SuperplotPresenter(self.m_canvas)
         self.m_view.reset_mock()
         self.m_model.reset_mock()
@@ -56,6 +60,43 @@ class SuperplotPresenterTest(unittest.TestCase):
         self.m_axes.creation_args = [{"axis": 0}]
         self.presenter = SuperplotPresenter(self.m_canvas)
         self.m_model.set_bin_mode.assert_called_once()
+
+    def test_set_bin_mode(self):
+        self.presenter._update_spectrum_slider = mock.Mock()
+        self.presenter._update_plot = mock.Mock()
+        self.presenter.set_bin_mode(True)
+        self.m_view.set_mode.assert_called_once_with(
+                self.presenter.BIN_MODE_TEXT)
+        self.presenter._update_spectrum_slider.assert_called_once()
+        self.presenter._update_plot.assert_called_once()
+        self.m_view.reset_mock()
+        self.presenter._update_spectrum_slider.reset_mock()
+        self.presenter._update_plot.reset_mock()
+        self.presenter.set_bin_mode(False)
+        self.m_view.set_mode.assert_called_once_with(
+                self.presenter.SPECTRUM_MODE_TEXT)
+        self.presenter._update_spectrum_slider.assert_called_once()
+        self.presenter._update_plot.assert_called_once()
+
+    def test_enable_error_bars(self):
+        self.presenter._update_plot = mock.Mock()
+        self.presenter.enable_error_bars(True)
+        self.assertTrue(self.presenter._error_bars)
+        self.presenter._update_plot.assert_called_once()
+        self.presenter._update_plot.reset_mock()
+        self.presenter.enable_error_bars(False)
+        self.assertFalse(self.presenter._error_bars)
+        self.presenter._update_plot.assert_called_once()
+
+    def test_set_workspaces(self):
+        self.m_model.get_workspaces.return_value = ["ws1"]
+        self.presenter._update_list = mock.Mock()
+        self.presenter._update_spectrum_slider = mock.Mock()
+        self.presenter._update_hold_button = mock.Mock()
+        self.presenter._update_plot = mock.Mock()
+        self.presenter.set_workspaces(["ws2"])
+        self.m_model.del_workspace.assert_called_once_with("ws1")
+        self.m_model.add_workspace.assert_called_once_with("ws2")
 
     def test_get_side_view(self):
         self.presenter.get_side_view()
@@ -103,6 +144,11 @@ class SuperplotPresenterTest(unittest.TestCase):
         self.presenter.on_del_button_clicked("ws3")
         self.m_model.del_workspace.assert_called_once_with("ws3")
         self.presenter._update_plot.assert_called_once()
+        self.presenter._update_spectrum_slider.assert_not_called()
+        self.presenter.on_del_button_clicked("ws2")
+        self.presenter._update_spectrum_slider.assert_not_called()
+        self.m_view.get_selection.return_value = {"ws1": 1}
+        self.presenter.on_del_button_clicked("ws1")
         self.presenter._update_spectrum_slider.assert_called_once()
 
     def test_update_spectrum_slider(self):
@@ -266,7 +312,6 @@ class SuperplotPresenterTest(unittest.TestCase):
         self.m_model.remove_data.assert_has_calls(calls)
         self.presenter._update_list.assert_called_once()
         self.presenter._update_plot.assert_called_once()
-        self.presenter._update_spectrum_slider.assert_called_once()
 
     def test_on_hold_button_clicked(self):
         self.presenter._on_hold = mock.Mock()

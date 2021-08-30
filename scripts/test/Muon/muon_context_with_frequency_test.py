@@ -14,6 +14,8 @@ from mantid.simpleapi import CreateWorkspace
 from collections import Counter
 from Muon.GUI.Common.utilities.load_utils import load_workspace_from_filename
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
+from Muon.GUI.Common.muon_group import MuonGroup
+from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
 
 
@@ -44,14 +46,25 @@ class MuonContextWithFrequencyTest(unittest.TestCase):
         self.group_pair_context.reset_group_and_pairs_to_default(self.load_result['OutputWorkspace'][0].workspace,
                                                                  'EMU', '', 1)
 
+        self.run_list = [19489]
+        self.groups = [MuonGroup("bwd"), MuonGroup("fwd")]
+        self.rebins = [False, False]
+        self.pairs = [MuonPair("long", "bwd", "fwd")]
+
     def tearDown(self):
         ConfigService['MantidOptions.InvisibleWorkspaces'] = 'False'
 
+    def _calculate_all_data(self):
+        self.context.calculate_all_counts()
+        for group, rebin in zip(self.groups, self.rebins):
+            self.context.calculate_asymmetry_for(self.run_list, group, rebin)
+            self.context.show_group(self.run_list, group, rebin)
+        for pair in self.pairs:
+            self.context.calculate_pair_for(self.run_list, pair)
+            self.context.show_pair(self.run_list, pair)
+
     def populate_ADS(self):
-        self.context.calculate_all_groups()
-        self.context.show_all_groups()
-        self.context.calculate_all_pairs()
-        self.context.show_all_pairs()
+        self._calculate_all_data()
         CreateWorkspace([0], [0], OutputWorkspace='EMU19489; PhaseQuad; PhaseTable EMU19489')
         self.context.phase_context.add_phase_quad(
             MuonWorkspaceWrapper('EMU19489; PhaseQuad; PhaseTable EMU19489'), '19489')

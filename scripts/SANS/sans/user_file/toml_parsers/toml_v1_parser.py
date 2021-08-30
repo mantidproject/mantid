@@ -104,7 +104,6 @@ class _TomlV1ParserImpl(TomlParserImplBase):
         self._parse_binning()
         self._parse_detector()
         self._parse_detector_configuration()
-        self._parse_gravity()
         self._parse_instrument_configuration()
         self._parse_mask()
         self._parse_normalisation()
@@ -157,43 +156,51 @@ class _TomlV1ParserImpl(TomlParserImplBase):
         self.convert_to_q.q_resolution_a2 = self.get_val("sample_aperture_diameter", inst_config_dict)
 
         self.move.sample_offset = self.get_val("sample_offset", inst_config_dict, 0.0)
+        self.convert_to_q.use_gravity = self.get_val("gravity_enabled", inst_config_dict, default=True)
 
     def _parse_detector_configuration(self):
         det_config_dict = self.get_val(["detector", "configuration"])
 
         self.scale.scale = self.get_val("rear_scale", det_config_dict)
 
-        reduction_mode_key = self.get_val(["detector", "configuration", "selected_detector"])
-        # Low angle bank was set by default in user parser as it's the main detectors
-        reduction_mode = ReductionMode(reduction_mode_key) if reduction_mode_key else ReductionMode.LAB
-        self.reduction_mode.reduction_mode = reduction_mode
+        reduction_mode_key = self.get_mandatory_val(["detector", "configuration", "selected_detector"])
+        # LAB/Rear was set by default in user parser, so we fall-back to this
+        self.reduction_mode.reduction_mode = ReductionMode.convert(reduction_mode_key, support_deprecated=False)
+        self._parse_centre_pos(det_config_dict)
 
+    def _parse_centre_pos(self, det_config_dict):
         def update_translations(det_type, values: dict):
             if values:
                 self.move.detectors[det_type.value].sample_centre_pos1 = values["x"]
                 self.move.detectors[det_type.value].sample_centre_pos2 = values["y"]
 
-        update_translations(DetectorType.LAB, self.get_val("rear_centre", det_config_dict))
+        rear = self.get_val("rear_centre", det_config_dict)
+        front = self.get_val("front_centre", det_config_dict)
+        all = self.get_val("all_centre", det_config_dict)
+        if (front or rear) and all:
+            raise ValueError("front_centre, rear_centre and all_centre were all specified together.")
+
+        update_translations(DetectorType.LAB, next((i for i in [rear, all] if i), None))
         if DetectorType.HAB.value in self.move.detectors:
-            update_translations(DetectorType.HAB, self.get_val("front_centre", det_config_dict))
+            update_translations(DetectorType.HAB, next((i for i in [front, all] if i), None))
 
     def _parse_detector(self):
         detector_dict = self.get_val("detector")
         self.mask.radius_min = self.get_val(["radius_limit", "min"], detector_dict)
         self.mask.radius_max = self.get_val(["radius_limit", "max"], detector_dict)
 
-        calibration_dict = self.get_val("calibration", detector_dict)
+        correction_dict = self.get_val("correction", detector_dict)
 
         lab_adjustment = self.wavelength_and_pixel.adjustment_files[DetectorType.LAB.value]
         hab_adjustment = self.wavelength_and_pixel.adjustment_files[DetectorType.HAB.value]
 
-        lab_adjustment.wavelength_adjustment_file = self.get_val(["direct", "rear_file"], calibration_dict)
-        hab_adjustment.wavelength_adjustment_file = self.get_val(["direct", "front_file"], calibration_dict)
+        lab_adjustment.wavelength_adjustment_file = self.get_val(["direct", "rear_file"], correction_dict)
+        hab_adjustment.wavelength_adjustment_file = self.get_val(["direct", "front_file"], correction_dict)
 
-        lab_adjustment.pixel_adjustment_file = self.get_val(["flat", "rear_file"], calibration_dict)
-        hab_adjustment.pixel_adjustment_file = self.get_val(["flat", "front_file"], calibration_dict)
+        lab_adjustment.pixel_adjustment_file = self.get_val(["flat", "rear_file"], correction_dict)
+        hab_adjustment.pixel_adjustment_file = self.get_val(["flat", "front_file"], correction_dict)
 
-        self.adjustment.calibration = self.get_val(["tube", "file"], calibration_dict)
+        self.adjustment.calibration = self.get_val(["tube", "file"], correction_dict)
 
         name_attr_pairs = {"_x": "x_translation_correction",
                            "_y": "y_translation_correction",
@@ -205,7 +212,7 @@ class _TomlV1ParserImpl(TomlParserImplBase):
                            "_y_tilt": "y_tilt_correction",
                            "_z_tilt": "z_tilt_correction"}
 
-        position_dict = self.get_val("position", calibration_dict)
+        position_dict = self.get_val("position", correction_dict)
         lab_move = self.move.detectors[DetectorType.LAB.value]
         # Some detectors do not have HAB
         hab_move = self.move.detectors.get(DetectorType.HAB.value, None)
@@ -304,9 +311,6 @@ class _TomlV1ParserImpl(TomlParserImplBase):
         self.convert_to_q.q_resolution_w1 = self.get_val("w1", q_dict)
         self.convert_to_q.q_resolution_w2 = self.get_val("w2", q_dict)
 
-    def _parse_gravity(self):
-        self.convert_to_q.use_gravity = self.get_val(["gravity", "enabled"], default=True)
-
     def _parse_transmission(self):
         transmission_dict = self.get_val("transmission")
         monitor_name = self.get_val("selected_monitor", transmission_dict)
@@ -367,7 +371,18 @@ class _TomlV1ParserImpl(TomlParserImplBase):
 
     def _parse_normalisation(self):
         normalisation_dict = self.get_val("normalisation")
+        if not normalisation_dict:
+            normalisation_dict = self.get_val("normalization")
+
         selected_monitor = self.get_val("selected_monitor", normalisation_dict)
+        if self.get_val(["all_monitors", "enabled"], normalisation_dict):
+            background = self.get_val(["all_monitors", "background"], normalisation_dict)
+            if len(background) != 2:
+                raise ValueError("Two background values required")
+            self.calculate_transmission.background_TOF_general_start = background[0]
+            self.calculate_transmission.background_TOF_general_stop = background[1]
+            self.normalize_to_monitor.background_TOF_general_start = background[0]
+            self.normalize_to_monitor.background_TOF_general_stop = background[1]
 
         if not normalisation_dict or not selected_monitor:
             return
@@ -389,7 +404,7 @@ class _TomlV1ParserImpl(TomlParserImplBase):
             self.normalize_to_monitor.background_TOF_monitor_stop.update({str(monitor_spec_num): background[1]})
 
     def _parse_spatial_masks(self):
-        mask_dict = self.get_val("mask")
+        spatial_dict = self.get_val(["mask", "spatial"])
 
         def parse_mask_dict(spatial_dict, bank_type):
             mask_detectors = self.mask.detectors[bank_type.value]
@@ -417,18 +432,28 @@ class _TomlV1ParserImpl(TomlParserImplBase):
                 mask_detectors.range_horizontal_strip_start.append(pair[0])
                 mask_detectors.range_horizontal_strip_stop.append(pair[1])
 
-        rear_dict = self.get_val(["spatial", "rear"], mask_dict)
+        rear_dict = self.get_val("rear", spatial_dict)
         if rear_dict:
             parse_mask_dict(rear_dict, DetectorType.LAB)
 
-        front_dict = self.get_val(["spatial", "front"], mask_dict)
+        front_dict = self.get_val("front", spatial_dict)
         if front_dict:
             parse_mask_dict(front_dict, DetectorType.HAB)
 
+        self.mask.beam_stop_arm_angle = self.get_val(["beamstop_shadow", "angle"], spatial_dict)
+        self.mask.beam_stop_arm_width = self.get_val(["beamstop_shadow", "width"], spatial_dict)
+        self.mask.beam_stop_arm_pos1 = self.get_val(["beamstop_shadow", "x_pos"], spatial_dict, 0.0)
+        self.mask.beam_stop_arm_pos2 = self.get_val(["beamstop_shadow", "y_pos"], spatial_dict, 0.0)
+
+        mask_pixels = self.get_val("mask_pixels", spatial_dict)
+        if mask_pixels:
+            for pixel in mask_pixels:
+                # TODO we shouldn't be trying to guess which bank each pixel belongs to
+                bank = get_bank_for_spectrum_number(pixel, instrument=self.instrument)
+                self.mask.detectors[bank.value].single_spectra.append(pixel)
+
     def _parse_mask(self):
         mask_dict = self.get_val("mask")
-        self.mask.beam_stop_arm_angle = self.get_val(["beamstop_shadow", "angle"], mask_dict)
-        self.mask.beam_stop_arm_width = self.get_val(["beamstop_shadow", "width"], mask_dict)
 
         prompt_peak_vals = self.get_val("prompt_peak", mask_dict)
         self.calculate_transmission.prompt_peak_correction_enabled = bool(prompt_peak_vals)
@@ -444,13 +469,6 @@ class _TomlV1ParserImpl(TomlParserImplBase):
         mask_files = self.get_val("mask_files", mask_dict)
         if mask_files:
             self.mask.mask_files.extend(mask_files)
-
-        mask_pixels = self.get_val("mask_pixels", mask_dict)
-        if mask_pixels:
-            for pixel in mask_pixels:
-                # TODO we shouldn't be trying to guess which bank each pixel belongs to
-                bank = get_bank_for_spectrum_number(pixel, instrument=self.instrument)
-                self.mask.detectors[bank.value].single_spectra.append(pixel)
 
         tof_masks = self.get_val(["time", "tof"], mask_dict)
         if tof_masks:

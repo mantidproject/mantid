@@ -17,7 +17,7 @@ class CorrectionsTabWidget(object):
 
     def __init__(self, context, parent):
         self.corrections_tab_view = CorrectionsView(parent)
-        self.corrections_tab_model = CorrectionsModel(context.data_context, context.corrections_context)
+        self.corrections_tab_model = CorrectionsModel(context)
         self.corrections_tab_presenter = CorrectionsPresenter(self.corrections_tab_view, self.corrections_tab_model,
                                                               context)
 

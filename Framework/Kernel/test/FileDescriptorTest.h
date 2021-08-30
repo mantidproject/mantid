@@ -38,11 +38,15 @@ public:
       Poco::Path asciiPath(dataPath, "AsciiExample.txt");
       if (Poco::File(asciiPath).exists())
         m_testAsciiPath = asciiPath.toString();
+      Poco::Path emptyFilePath(dataPath, "emptyFile.txt");
+      if (Poco::File(emptyFilePath).exists())
+        m_emptyFilePath = emptyFilePath.toString();
 
-      if (!m_testNexusPath.empty() && !m_testNonNexusPath.empty() && !m_testAsciiPath.empty())
+      if (!m_testNexusPath.empty() && !m_testNonNexusPath.empty() && !m_testAsciiPath.empty() &&
+          !m_emptyFilePath.empty())
         break;
     }
-    if (m_testNexusPath.empty() || m_testNonNexusPath.empty() || m_testAsciiPath.empty()) {
+    if (m_testNexusPath.empty() || m_testNonNexusPath.empty() || m_testAsciiPath.empty() || m_emptyFilePath.empty()) {
       throw std::runtime_error("Unable to find test files for FileDescriptorTest. "
                                "The AutoTestData directory needs to be in the search path");
     }
@@ -130,6 +134,11 @@ public:
     TS_ASSERT_EQUALS(0, stream.tellg());
   }
 
+  void testEmptyFile() {
+    TS_ASSERT_EQUALS(false, FileDescriptor::isEmpty(m_testAsciiPath));
+    TS_ASSERT(FileDescriptor::isEmpty(m_emptyFilePath));
+  }
+
   //===================== Failure cases
   //============================================
   void test_IsAscii_Throws_For_Inaccessible_Filename() {
@@ -159,8 +168,14 @@ public:
     TS_ASSERT_THROWS(FileDescriptor("__ThisShouldBeANonExistantFile.txt"), const std::invalid_argument &);
   }
 
+  void testIsEmptyThrowsForInaccessibleFileName() {
+    TS_ASSERT_THROWS(FileDescriptor::isEmpty(""), const std::invalid_argument &);
+    TS_ASSERT_THROWS(FileDescriptor::isEmpty("__not_a_File.txt__"), const std::invalid_argument &);
+  }
+
 private:
   std::string m_testNexusPath;
   std::string m_testNonNexusPath;
   std::string m_testAsciiPath;
+  std::string m_emptyFilePath;
 };

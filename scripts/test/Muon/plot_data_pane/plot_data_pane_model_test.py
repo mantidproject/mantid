@@ -73,11 +73,12 @@ class PlotDataPaneModelTest(unittest.TestCase):
         self.assertEqual(expected_indices, indices)
 
     def test_get_workspaces_to_plot(self):
+        selected = ["fwd", "bwd", "top"]
         self.model.get_time_workspaces_to_plot = mock.Mock(return_value="test")
         self.context.group_pair_context.add_group(MuonGroup(group_name="bwd", detector_ids=[2]))
         self.context.group_pair_context.add_group(MuonGroup(group_name="top", detector_ids=[3]))
-        self.context.group_pair_context._selected_groups = ["fwd", "bwd", "top"]
-        self.model.get_workspaces_to_plot(True, "Counts")
+        self.context.group_pair_context._selected_groups = selected
+        self.model.get_workspaces_to_plot(True, "Counts", selected)
         self.assertEqual(self.model.get_time_workspaces_to_plot.call_count,3)
         self.model.get_time_workspaces_to_plot.assert_any_call("fwd", True, "Counts")
         self.model.get_time_workspaces_to_plot.assert_any_call("bwd", True, "Counts")
@@ -88,7 +89,7 @@ class PlotDataPaneModelTest(unittest.TestCase):
         self.model._generate_run_indices = mock.Mock(return_value=[0])
 
         self.model.get_workspace_list_and_indices_to_plot(True,"Counts")
-        self.model.get_workspaces_to_plot.assert_called_once_with(True, "Counts")
+        self.model.get_workspaces_to_plot.assert_called_once_with(True, "Counts", ["fwd"])
         self.model._generate_run_indices.assert_called_once_with(["test"])
 
     def test_get_workspaces_to_remove(self):
