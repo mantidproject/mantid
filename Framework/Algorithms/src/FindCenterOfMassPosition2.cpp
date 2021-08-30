@@ -23,6 +23,18 @@
 namespace Mantid {
 namespace Algorithms {
 
+struct BoundingBox {
+  API::MatrixWorkspace_sptr workspace;
+  double position_x = 0;
+  double position_y = 0;
+  double *center_x;
+  double *center_y;
+  double xmin = 0;
+  double xmax = 0;
+  double ymin = 0;
+  double ymax = 0;
+}
+
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(FindCenterOfMassPosition2)
 
@@ -60,7 +72,6 @@ void FindCenterOfMassPosition2::init() {
                   "the center of mass of the scattering pattern.");
 }
 
-// TODO: Break this down further, still feel like this is too large?
 API::MatrixWorkspace_sptr
 FindCenterOfMassPosition2::sumUsingSpectra(DataObjects::EventWorkspace_const_sptr inputEventWS, const int numSpec,
                                            Progress &progress) {
@@ -88,24 +99,24 @@ FindCenterOfMassPosition2::sumUsingSpectra(DataObjects::EventWorkspace_const_spt
   return inputWS;
 }
 
+// TODO: Break this down further, still feel like this is too large?
 void FindCenterOfMassPosition2::findCenterOfMass(API::MatrixWorkspace_sptr inputWS, double &center_x, double &center_y,
                                                  const int numSpec, Progress &progress) {
   const double tolerance = getProperty("Tolerance");
   const bool direct_beam = getProperty("DirectBeam");
   const double beam_radius = getProperty("BeamRadius");
-
-  // TODO: Need an input for the X bin to use, assume 0 for now
-  const int specID = 0;
+  
+  const auto &spectrumInfo = inputWS->spectrumInfo();
+  const int indexFirstValidWs = findFirstValidWs(spectrumInfo, numSpec);
   // Define box around center of mass so that only pixels in an area
   // _centered_ on the latest center position are considered. At each
   // iteration we will recompute the bounding box, and we will make
   // it as large as possible. The largest box is defined as:
-  double xmin0 = 0;
-  double xmax0 = 0;
-  double ymin0 = 0;
-  double ymax0 = 0;
+  WorkspaceBoundingBox boundingBox(inputWs);
+  boundingBox.setCenter(center_x, center_y);
 
   // Starting values for the bounding box and the center
+  //NOTE only ever used for checks and set at the end
   double xmin = xmin0;
   double xmax = xmax0;
   double ymin = ymin0;
@@ -123,63 +134,48 @@ void FindCenterOfMassPosition2::findCenterOfMass(API::MatrixWorkspace_sptr input
   while (distance > tolerance || distance < 0) {
     // Count histogram for normalization
     double total_count = 0;
-    double position_x = 0;
-    double position_y = 0;
+    boundingBox.position_x = 0;
+    boundingBox.position_y = 0;
 
-    const auto &spectrumInfo = inputWS->spectrumInfo();
-    for (int i = 0; i < numSpec; i++) {
-      if (!spectrumInfo.hasDetectors(i)) {
-        g_log.warning() << "Workspace index " << i << " has no detector assigned to it - discarding\n";
-        continue;
-      }
-      // Skip if we have a monitor or if the detector is masked.
-      if (spectrumInfo.isMonitor(i) || spectrumInfo.isMasked(i))
-        continue;
 
+    //NOOOOOOOOOOOOTE:  MOVE THIS TO THE END AND DO THE FIRST RUN OUT OF THE LOOP SO WE DONT NEED A FIRST RUN FLAG
+
+    for (int i = indexFirstValidWs; i < numSpec; i++) {
+      if(!isValidWs(spectrumInfo, i))
+        continue;
       // Get the current spectrum
       auto &YIn = inputWS->y(i);
-      // Skip if NaN of inf
-      if (std::isnan(YIn[specID]) || std::isinf(YIn[specID]))
-        continue;
+
       const V3D pos = spectrumInfo.position(i);
       double x = pos.X();
       double y = pos.Y();
 
-      // TODO: find out why this is necessary
-      if (first_run) {
-        xmin0 = std::min(x, xmin0);
-        xmax0 = std::max(x, xmax0);
-        ymin0 = std::min(y, ymin0);
-        ymax0 = std::max(y, ymax0);
+      if(first_run) {
+        updateMinMax(boundingBox, i);
       }
 
       // TODO: Separated dense conditonal out into legible function or variable
       if (first_run || (x >= xmin && x <= xmax && y >= ymin && y <= ymax)) {
-        if (!direct_beam) {
-          double dx = x - center_x;
-          double dy = y - center_y;
-          if (dx * dx + dy * dy < beam_radius * beam_radius)
-            continue;
-        }
-        position_x += YIn[specID] * x;
-        position_y += YIn[specID] * y;
-        total_count += YIn[specID];
+        if (isOutOfBoundsOfNonDirectBeam(boundingBox, beam_radius, i, direct_beam))
+          continue;
+        else
+          updatePositionAndCount(boundingBox, total_count, i);
       }
     }
 
     // Normalize output to find center of mass position
-    position_x /= total_count;
-    position_y /= total_count;
+    boundingBox.position_x /= total_count;
+    boundingBox.position_y /= total_count;
 
     // Compute the distance to the previous iteration
     distance =
-        sqrt((center_x - position_x) * (center_x - position_x) + (center_y - position_y) * (center_y - position_y));
+        sqrt((boundingBox.center_x - boundingBox.position_x) * (boundingBox.center_x - boundingBox.position_x) + (boundingBox.center_y - boundingBox.position_y) * (boundingBox.center_y - boundingBox.position_y));
 
     // Modify the bounding box around the detector region used to
     // compute the center of mass so that it is centered around
     // the new center of mass position.
-    double radius_x = std::min((position_x - xmin0), (xmax0 - position_x));
-    double radius_y = std::min((position_y - ymin0), (ymax0 - position_y));
+    double radius_x = std::min((boundingBox.position_x - boundingBox.xmin0), (boundingBox.xmax0 - boundingBox.position_x));
+    double radius_y = std::min((boundingBox.position_y - boundingBox.ymin0), (boundingBox.ymax0 - boundingBox.position_y));
 
     // TODO: This apparently shouldnt be an issue, might break the scattering pattern???
     if (!direct_beam && (radius_x <= beam_radius || radius_y <= beam_radius)) {
@@ -190,13 +186,13 @@ void FindCenterOfMassPosition2::findCenterOfMass(API::MatrixWorkspace_sptr input
 
     // TODO: Is this fine or not, do I need a conditional or do you not actually care if this is applied regardless of
     // method?
-    center_x = position_x;
-    center_y = position_y;
+    boundingBox.center_x = boundingBox.position_x;
+    boundingBox.center_y = boundingBox.position_y;
 
-    xmin = center_x - radius_x;
-    xmax = center_x + radius_x;
-    ymin = center_y - radius_y;
-    ymax = center_y + radius_y;
+    xmin = boundingBox.center_x - radius_x;
+    xmax = boundingBox.center_x + radius_x;
+    ymin = boundingBox.center_y - radius_y;
+    ymax = boundingBox.center_y + radius_y;
 
     // Check to see if we have the same result
     // as the previous iteration
@@ -286,7 +282,7 @@ void FindCenterOfMassPosition2::exec() {
   if (inputEventWS) {
     inputWS = sumUsingSpectra(inputEventWS, numSpec, progress);
     WorkspaceFactory::Instance().initializeFromParent(*inputWSWvl, *inputWS, false);
-  } else {
+  } else {/diffraction/-/boards?scope=all&assignee_username=wqp
     // Sum up all the wavelength bins
     IAlgorithm_sptr childAlg = createChildAlgorithm("Integration");
     childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWSWvl);
