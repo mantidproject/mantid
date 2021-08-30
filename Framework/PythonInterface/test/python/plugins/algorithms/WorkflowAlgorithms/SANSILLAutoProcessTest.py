@@ -14,11 +14,11 @@ class SANSILLAutoProcessTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        config.appendDataSearchSubDir("ILL/D11/")
-        config.appendDataSearchSubDir("ILL/D16/")
         cls._facility = config["default.facility"]
         cls._instrument = config["default.instrument"]
         cls._dirs = config["datasearch.directories"]
+        config.appendDataSearchSubDir("ILL/D11/")
+        config.appendDataSearchSubDir("ILL/D16/")
         config["default.facility"] = "ILL"
         config["default.instrument"] = "D11"
 
