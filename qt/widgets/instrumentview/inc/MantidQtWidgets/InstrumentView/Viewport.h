@@ -85,8 +85,7 @@ public:
   /// Call to set the View to Z- direction
   void setViewToZNegative();
 
-  void adjustProjection(unsigned int axis);
-  void getProjection(Mantid::Kernel::V3D &minBound, Mantid::Kernel::V3D &maxBound) const;
+  void adjustProjection(const unsigned int axis);
 
   /// Init rotation at a point on the screen
   void initRotationFrom(int a, int b);
