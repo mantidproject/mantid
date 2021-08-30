@@ -260,7 +260,7 @@ void Viewport::setViewToXPositive() {
                              Mantid::Kernel::V3D(-1.0, 0.0, 0.0));
   m_quaternion = tempy;
   m_quaternion.GLMatrix(&m_rotationmatrix[0]);
-  adjustProjection();
+  adjustProjection(0);
 }
 
 /**
@@ -273,7 +273,7 @@ void Viewport::setViewToYPositive() {
                              Mantid::Kernel::V3D(0.0, -1.0, 0.0));
   m_quaternion = tempy;
   m_quaternion.GLMatrix(&m_rotationmatrix[0]);
-  adjustProjection();
+  adjustProjection(1);
 }
 
 /**
@@ -284,7 +284,7 @@ void Viewport::setViewToZPositive() {
   reset();
   m_quaternion.init();
   m_quaternion.GLMatrix(&m_rotationmatrix[0]);
-  adjustProjection();
+  adjustProjection(2);
 }
 
 /**
@@ -297,7 +297,7 @@ void Viewport::setViewToXNegative() {
                              Mantid::Kernel::V3D(1.0, 0.0, 0.0));
   m_quaternion = tempy;
   m_quaternion.GLMatrix(&m_rotationmatrix[0]);
-  adjustProjection();
+  adjustProjection(0);
 }
 
 /**
@@ -310,7 +310,7 @@ void Viewport::setViewToYNegative() {
                              Mantid::Kernel::V3D(0.0, 1.0, 0.0));
   m_quaternion = tempy;
   m_quaternion.GLMatrix(&m_rotationmatrix[0]);
-  adjustProjection();
+  adjustProjection(1);
 }
 
 /**
@@ -322,20 +322,29 @@ void Viewport::setViewToZNegative() {
   Mantid::Kernel::Quat tempy(180.0, Mantid::Kernel::V3D(0.0, 1.0, 0.0));
   m_quaternion = tempy;
   m_quaternion.GLMatrix(&m_rotationmatrix[0]);
-  adjustProjection();
+  adjustProjection(2);
 }
 
-void Viewport::adjustProjection() {
+void Viewport::adjustProjection(unsigned int axis) {
   // reset the projection bounds to the original values
   m_left = m_leftOrig;
   m_right = m_rightOrig;
   m_top = m_topOrig;
   m_bottom = m_bottomOrig;
-  m_near = 0.0;
-  m_far = 0.0;
+  m_near = m_nearOrig;
+  m_far = m_farOrig;
   // rotate the original projection based on the new quaternion
   m_quaternion.rotateBB(m_left, m_bottom, m_near, m_right, m_top, m_far);
-  // restore the Z bounds
+  if (axis == 0) {
+    // X axis rotation, so use rotated Z values as new X
+    m_left = m_near;
+    m_right = m_far;
+  } else if (axis == 1) {
+    // Y axis rotation, so use rotated Z values as new Y
+    m_bottom = m_near;
+    m_top = m_far;
+  }
+  // restore the Z projection bounds
   m_near = m_nearOrig;
   m_far = m_farOrig;
   // update the GL projection with the new bounds
