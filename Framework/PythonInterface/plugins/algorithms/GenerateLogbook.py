@@ -238,8 +238,8 @@ class GenerateLogbook(PythonAlgorithm):
         logbook_ws = self.getPropertyValue('OutputWorkspace')
         CreateEmptyTableWorkspace(OutputWorkspace=logbook_ws)
         type_dict = {'s': 'str', 'd': 'int', 'f': 'float'}
-        for type, headline in self._metadata_headers:
-            mtd[logbook_ws].addColumn(type_dict[type], headline)
+        for header_type, headline in self._metadata_headers:
+            mtd[logbook_ws].addColumn(type_dict[header_type], headline)
         return logbook_ws
 
     def _perform_binary_operations(self, values, binary_operations, operations):
