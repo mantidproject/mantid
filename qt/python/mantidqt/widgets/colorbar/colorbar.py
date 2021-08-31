@@ -282,7 +282,9 @@ class ColorbarWidget(QWidget):
         try:
             try:
                 masked_data = data[~data.mask]
-                masked_data = masked_data[np.nonzero(data)] if norm == "Log" else masked_data
+                # use the smallest positive value as vmin when using log scale,
+                # matplotlib will take care of the data skipping part.
+                masked_data = masked_data[data > 0] if norm == "Log" else masked_data
                 self.cmin_value = masked_data.min()
                 self.cmax_value = masked_data.max()
             except (AttributeError, IndexError):
@@ -321,7 +323,7 @@ class ColorbarWidget(QWidget):
     def _validate_mappable(self, mappable):
         index = NORM_OPTS.index("Log")
         if mappable.get_array() is not None:
-            if np.any(mappable.get_array() <= 0):
+            if np.all(mappable.get_array() <= 0):
                 self.norm.model().item(index, 0).setEnabled(False)
                 self.norm.setItemData(index, "Log scale is disabled for non-positive data",
                                       Qt.ToolTipRole)
