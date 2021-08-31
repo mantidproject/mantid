@@ -17,6 +17,7 @@ public:
     WorkspaceBoundingBox(API::MatrixWorkspace_sptr workspace);
     ~WorkspaceBoundingBox();
 
+    API::MatrixWorkspace_sptr getWorkspace() { return workspace;}
     double getX() { return x;}
     double getY() { return y;}
     double getCenterX() { return *centerX;}
@@ -46,11 +47,13 @@ public:
     double calculateDistance();
     double calculateRadiusX();
     double calculateRadiusY();
-    bool isValidWs(int index);
+    double updatePositionAndReturnCount(int index);
     int findFirstValidWs(const int numSpec);
-    double updatePositionAndReturnCount(double total_count, int index);
-    void updateMinMax(int index);
+    bool isValidWs(int index);
     bool isOutOfBoundsOfNonDirectBeam(const double beam_radius, int index, const bool direct_beam);
+    bool containsPoint(double x, double y);
+    void normalizePosition(double x, double y);
+    void updateMinMax(int index);
 
 private:
     API::MatrixWorkspace_sptr workspace;

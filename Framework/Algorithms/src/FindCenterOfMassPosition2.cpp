@@ -23,18 +23,6 @@
 namespace Mantid {
 namespace Algorithms {
 
-struct BoundingBox {
-  API::MatrixWorkspace_sptr workspace;
-  double position_x = 0;
-  double position_y = 0;
-  double *center_x;
-  double *center_y;
-  double xmin = 0;
-  double xmax = 0;
-  double ymin = 0;
-  double ymax = 0;
-}
-
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(FindCenterOfMassPosition2)
 
@@ -99,7 +87,44 @@ FindCenterOfMassPosition2::sumUsingSpectra(DataObjects::EventWorkspace_const_spt
   return inputWS;
 }
 
-// TODO: Break this down further, still feel like this is too large?
+double initBoundingBox(WorkspaceBoundingBox boundingBox, const double beam_radius, const bool direct_beam) {
+  double total_count = 0;
+  for (int i = 0; i < numSpec; i++) {
+      if(!boundingBox.isValidWs(i))
+        continue;
+        
+      boundingBox.updateMinMax(i);
+      
+      if (boundingBox.isOutOfBoundsOfNonDirectBeam(beam_radius, i, direct_beam))
+        continue;
+      else
+        total_count += boundingBox.updatePositionAndReturnCount(i);
+  }
+  return total_count;
+}
+
+double updateBoundingBox(WorkspaceBoundingBox boundingBox, const double beam_radius, const bool direct_beam) {
+  double total_count = 0;
+  for (int i = 0; i < numSpec; i++) {
+      if(!boundingBox.isValidWs(i))
+        continue;
+
+      const V3D position = boundingBox.getWorkspace()->spectrumInfo().position(i);
+
+      if (previousBoundingBox.containsPoint(position.X(), position.Y())) {
+        if (boundingBox.isOutOfBoundsOfNonDirectBeam(beam_radius, i, direct_beam))
+          continue;
+        else
+          total_count += boundingBox.updatePositionAndCount(i);
+      }
+    }
+  return total_count;
+}
+
+bool equals(double a, double b) {
+  return fabs(a, b) < std::numeric_limits<double>::lowest;
+}
+
 void FindCenterOfMassPosition2::findCenterOfMass(API::MatrixWorkspace_sptr inputWS, double &center_x, double &center_y,
                                                  const int numSpec, Progress &progress) {
   const double tolerance = getProperty("Tolerance");
@@ -107,24 +132,22 @@ void FindCenterOfMassPosition2::findCenterOfMass(API::MatrixWorkspace_sptr input
   const double beam_radius = getProperty("BeamRadius");
   
   const auto &spectrumInfo = inputWS->spectrumInfo();
-  const int indexFirstValidWs = findFirstValidWs(spectrumInfo, numSpec);
   // Define box around center of mass so that only pixels in an area
   // _centered_ on the latest center position are considered. At each
   // iteration we will recompute the bounding box, and we will make
-  // it as large as possible. The largest box is defined as:
+  // it as large as possible. The largest box is defined in:
   WorkspaceBoundingBox boundingBox(inputWs);
   boundingBox.setCenter(center_x, center_y);
 
   // Starting values for the bounding box and the center
-  //NOTE only ever used for checks and set at the end
-  double xmin = xmin0;
-  double xmax = xmax0;
-  double ymin = ymin0;
-  double ymax = ymax0;
+  WorkspaceBoundingBox previousBoundingBox(inputWs);
+  previousBoundingBox.setBounds(0,0,0,0);
 
   // Initialize book-keeping
   double distance = -1;
   double distance_check = 0;
+  double total_count = initBoundingBox(boundingBox, beam_radius, direct_beam);
+
   int n_local_minima = 0;
   int n_iteration = 0;
 
@@ -132,80 +155,33 @@ void FindCenterOfMassPosition2::findCenterOfMass(API::MatrixWorkspace_sptr input
   // to within the tolerance specified in meters
   bool first_run = true;
   while (distance > tolerance || distance < 0) {
-    // Count histogram for normalization
-    double total_count = 0;
-    boundingBox.position_x = 0;
-    boundingBox.position_y = 0;
-
-
-    //NOOOOOOOOOOOOTE:  MOVE THIS TO THE END AND DO THE FIRST RUN OUT OF THE LOOP SO WE DONT NEED A FIRST RUN FLAG
-
-    for (int i = indexFirstValidWs; i < numSpec; i++) {
-      if(!isValidWs(spectrumInfo, i))
-        continue;
-      // Get the current spectrum
-      auto &YIn = inputWS->y(i);
-
-      const V3D pos = spectrumInfo.position(i);
-      double x = pos.X();
-      double y = pos.Y();
-
-      if(first_run) {
-        updateMinMax(boundingBox, i);
-      }
-
-      // TODO: Separated dense conditonal out into legible function or variable
-      if (first_run || (x >= xmin && x <= xmax && y >= ymin && y <= ymax)) {
-        if (isOutOfBoundsOfNonDirectBeam(boundingBox, beam_radius, i, direct_beam))
-          continue;
-        else
-          updatePositionAndCount(boundingBox, total_count, i);
-      }
-    }
-
     // Normalize output to find center of mass position
-    boundingBox.position_x /= total_count;
-    boundingBox.position_y /= total_count;
-
+    boundingBox.normalizePosition(total_count, total_count);
     // Compute the distance to the previous iteration
-    distance =
-        sqrt((boundingBox.center_x - boundingBox.position_x) * (boundingBox.center_x - boundingBox.position_x) + (boundingBox.center_y - boundingBox.position_y) * (boundingBox.center_y - boundingBox.position_y));
+    distance = boundingBox.calculateDistance();
+    // Recenter around new mass position
+    double radius_x = boundingBox.calculateRadiusX()
+    double radius_y = boundingBox.calculateRadiusY();
 
-    // Modify the bounding box around the detector region used to
-    // compute the center of mass so that it is centered around
-    // the new center of mass position.
-    double radius_x = std::min((boundingBox.position_x - boundingBox.xmin0), (boundingBox.xmax0 - boundingBox.position_x));
-    double radius_y = std::min((boundingBox.position_y - boundingBox.ymin0), (boundingBox.ymax0 - boundingBox.position_y));
-
-    // TODO: This apparently shouldnt be an issue, might break the scattering pattern???
     if (!direct_beam && (radius_x <= beam_radius || radius_y <= beam_radius)) {
       g_log.error() << "Center of mass falls within the beam center area: "
                        "stopping here\n";
       break;
     }
 
-    // TODO: Is this fine or not, do I need a conditional or do you not actually care if this is applied regardless of
-    // method?
-    boundingBox.center_x = boundingBox.position_x;
-    boundingBox.center_y = boundingBox.position_y;
-
-    xmin = boundingBox.center_x - radius_x;
-    xmax = boundingBox.center_x + radius_x;
-    ymin = boundingBox.center_y - radius_y;
-    ymax = boundingBox.center_y + radius_y;
+    boundingBox.setCenter(boundingBox.getX(), boundingBox.getY());
+    previousBoundingBox.setBounds(boundingBox.getCenterX() - radius_x,
+                                  boundingBox.getCenterX() + radius_x,
+                                  boundingBox.getCenterY() - radius_y,
+                                  boundingBox.getCenterY() + radius_y);
 
     // Check to see if we have the same result
     // as the previous iteration
-
-    // TODO: double compare should not be done with ==
-    if (distance == distance_check) {
+    if (equals(distance, distance_check)) {
       n_local_minima++;
     } else {
       n_local_minima = 0;
     }
-
-    // PERSONAL NOTE:  This doesnt smell right, there has to be a better way to tell that you are stuck than to just
-    // quit if you hit the same thing some arbitrary number of times, masks the issue really
 
     // Quit if we found the exact same distance five times in a row.
     if (n_local_minima > 5) {
@@ -223,8 +199,14 @@ void FindCenterOfMassPosition2::findCenterOfMass(API::MatrixWorkspace_sptr input
     distance_check = distance;
     first_run = false;
 
+    // Count histogram for normalization
+    boudningBox.setPosition(0,0);
+    total_count = updateBoundingBox(boundingBox, beam_radius, direct_beam);
+
     progress.report("Find Beam Center");
   }
+  center_x = boundingBox.getCenterX();
+  center_y = boundingBox.getCenterY();
 }
 
 void FindCenterOfMassPosition2::storeOutputWorkspace(double center_x, double center_y) {
