@@ -87,97 +87,93 @@ FindCenterOfMassPosition2::sumUsingSpectra(DataObjects::EventWorkspace_const_spt
   return inputWS;
 }
 
-double initBoundingBox(WorkspaceBoundingBox boundingBox, const double beam_radius, const bool direct_beam) {
+double initBoundingBox(WorkspaceBoundingBox &boundingBox, const int numSpec, const double beamRadius,
+                       const bool directBeam) {
   double total_count = 0;
   for (int i = 0; i < numSpec; i++) {
-      if(!boundingBox.isValidWs(i))
-        continue;
-        
-      boundingBox.updateMinMax(i);
-      
-      if (boundingBox.isOutOfBoundsOfNonDirectBeam(beam_radius, i, direct_beam))
-        continue;
-      else
-        total_count += boundingBox.updatePositionAndReturnCount(i);
+    if (!boundingBox.isValidWs(i))
+      continue;
+
+    boundingBox.updateMinMax(i);
+
+    if (!boundingBox.isOutOfBoundsOfNonDirectBeam(beamRadius, i, directBeam))
+      continue;
+    else
+      total_count += boundingBox.updatePositionAndReturnCount(i);
   }
   return total_count;
 }
 
-double updateBoundingBox(WorkspaceBoundingBox boundingBox, const double beam_radius, const bool direct_beam) {
+double updateBoundingBox(WorkspaceBoundingBox &boundingBox, WorkspaceBoundingBox previousBoundingBox, const int numSpec,
+                         const double beamRadius, const bool directBeam) {
   double total_count = 0;
   for (int i = 0; i < numSpec; i++) {
-      if(!boundingBox.isValidWs(i))
+    if (!boundingBox.isValidWs(i))
+      continue;
+
+    const V3D position = boundingBox.getWorkspace()->spectrumInfo().position(i);
+
+    if (previousBoundingBox.containsPoint(position.X(), position.Y())) {
+      if (!boundingBox.isOutOfBoundsOfNonDirectBeam(beamRadius, i, directBeam))
         continue;
-
-      const V3D position = boundingBox.getWorkspace()->spectrumInfo().position(i);
-
-      if (previousBoundingBox.containsPoint(position.X(), position.Y())) {
-        if (boundingBox.isOutOfBoundsOfNonDirectBeam(beam_radius, i, direct_beam))
-          continue;
-        else
-          total_count += boundingBox.updatePositionAndCount(i);
-      }
+      else
+        total_count += boundingBox.updatePositionAndReturnCount(i);
     }
+  }
   return total_count;
 }
 
-bool equals(double a, double b) {
-  return fabs(a, b) < std::numeric_limits<double>::lowest;
-}
+bool equals(double a, double b) { return fabs(a - b) < std::numeric_limits<double>::min(); }
 
 void FindCenterOfMassPosition2::findCenterOfMass(API::MatrixWorkspace_sptr inputWS, double &center_x, double &center_y,
                                                  const int numSpec, Progress &progress) {
   const double tolerance = getProperty("Tolerance");
-  const bool direct_beam = getProperty("DirectBeam");
-  const double beam_radius = getProperty("BeamRadius");
-  
-  const auto &spectrumInfo = inputWS->spectrumInfo();
+  const bool directBeam = getProperty("DirectBeam");
+  const double beamRadius = getProperty("BeamRadius");
+
   // Define box around center of mass so that only pixels in an area
   // _centered_ on the latest center position are considered. At each
   // iteration we will recompute the bounding box, and we will make
   // it as large as possible. The largest box is defined in:
-  WorkspaceBoundingBox boundingBox(inputWs);
+  WorkspaceBoundingBox boundingBox(inputWS, g_log);
   boundingBox.setCenter(center_x, center_y);
 
   // Starting values for the bounding box and the center
-  WorkspaceBoundingBox previousBoundingBox(inputWs);
-  previousBoundingBox.setBounds(0,0,0,0);
+  WorkspaceBoundingBox previousBoundingBox(g_log);
+  previousBoundingBox.setBounds(0., 0., 0., 0.);
 
   // Initialize book-keeping
   double distance = -1;
-  double distance_check = 0;
-  double total_count = initBoundingBox(boundingBox, beam_radius, direct_beam);
+  double distanceCheck = 0;
+  double total_count = initBoundingBox(boundingBox, numSpec, beamRadius, directBeam);
 
   int n_local_minima = 0;
   int n_iteration = 0;
 
   // Find center of mass and iterate until we converge
   // to within the tolerance specified in meters
-  bool first_run = true;
   while (distance > tolerance || distance < 0) {
     // Normalize output to find center of mass position
     boundingBox.normalizePosition(total_count, total_count);
     // Compute the distance to the previous iteration
     distance = boundingBox.calculateDistance();
     // Recenter around new mass position
-    double radius_x = boundingBox.calculateRadiusX()
+    double radius_x = boundingBox.calculateRadiusX();
     double radius_y = boundingBox.calculateRadiusY();
 
-    if (!direct_beam && (radius_x <= beam_radius || radius_y <= beam_radius)) {
+    if (!directBeam && (radius_x <= beamRadius || radius_y <= beamRadius)) {
       g_log.error() << "Center of mass falls within the beam center area: "
                        "stopping here\n";
       break;
     }
 
     boundingBox.setCenter(boundingBox.getX(), boundingBox.getY());
-    previousBoundingBox.setBounds(boundingBox.getCenterX() - radius_x,
-                                  boundingBox.getCenterX() + radius_x,
-                                  boundingBox.getCenterY() - radius_y,
-                                  boundingBox.getCenterY() + radius_y);
+    previousBoundingBox.setBounds(boundingBox.getCenterX() - radius_x, boundingBox.getCenterX() + radius_x,
+                                  boundingBox.getCenterY() - radius_y, boundingBox.getCenterY() + radius_y);
 
     // Check to see if we have the same result
     // as the previous iteration
-    if (equals(distance, distance_check)) {
+    if (equals(distance, distanceCheck)) {
       n_local_minima++;
     } else {
       n_local_minima = 0;
@@ -196,12 +192,11 @@ void FindCenterOfMassPosition2::findCenterOfMass(API::MatrixWorkspace_sptr input
       break;
     }
 
-    distance_check = distance;
-    first_run = false;
+    distanceCheck = distance;
 
     // Count histogram for normalization
-    boudningBox.setPosition(0,0);
-    total_count = updateBoundingBox(boundingBox, beam_radius, direct_beam);
+    boundingBox.setPosition(0, 0);
+    total_count = updateBoundingBox(boundingBox, previousBoundingBox, numSpec, beamRadius, directBeam);
 
     progress.report("Find Beam Center");
   }
@@ -264,7 +259,7 @@ void FindCenterOfMassPosition2::exec() {
   if (inputEventWS) {
     inputWS = sumUsingSpectra(inputEventWS, numSpec, progress);
     WorkspaceFactory::Instance().initializeFromParent(*inputWSWvl, *inputWS, false);
-  } else {/diffraction/-/boards?scope=all&assignee_username=wqp
+  } else {
     // Sum up all the wavelength bins
     IAlgorithm_sptr childAlg = createChildAlgorithm("Integration");
     childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWSWvl);
