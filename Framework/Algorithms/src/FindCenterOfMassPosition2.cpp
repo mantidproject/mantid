@@ -63,8 +63,8 @@ void FindCenterOfMassPosition2::init() {
 API::MatrixWorkspace_sptr
 FindCenterOfMassPosition2::sumUsingSpectra(DataObjects::EventWorkspace_const_sptr inputEventWS, const int numSpec,
                                            Progress &progress) {
-  std::vector<double> y_values(numSpec);
-  std::vector<double> e_values(numSpec);
+  std::vector<double> yValues(numSpec);
+  std::vector<double> eValues(numSpec);
 
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int i = 0; i < numSpec; i++) {
@@ -72,14 +72,14 @@ FindCenterOfMassPosition2::sumUsingSpectra(DataObjects::EventWorkspace_const_spt
     progress.report("Integrating events");
     const EventList &el = inputEventWS->getSpectrum(i);
     el.integrate(0, 0, true, sum_i, err_i);
-    y_values[i] = sum_i;
-    e_values[i] = err_i;
+    yValues[i] = sum_i;
+    eValues[i] = err_i;
   }
 
   IAlgorithm_sptr algo = createChildAlgorithm("CreateWorkspace", 0.7, 1.0);
   algo->setProperty<std::vector<double>>("DataX", std::vector<double>(2, 0.0));
-  algo->setProperty<std::vector<double>>("DataY", y_values);
-  algo->setProperty<std::vector<double>>("DataE", e_values);
+  algo->setProperty<std::vector<double>>("DataY", yValues);
+  algo->setProperty<std::vector<double>>("DataE", eValues);
   algo->setProperty<int>("NSpec", numSpec);
   algo->execute();
 
@@ -89,7 +89,7 @@ FindCenterOfMassPosition2::sumUsingSpectra(DataObjects::EventWorkspace_const_spt
 
 double initBoundingBox(WorkspaceBoundingBox &boundingBox, const int numSpec, const double beamRadius,
                        const bool directBeam) {
-  double total_count = 0;
+  double totalCount = 0;
   for (int i = 0; i < numSpec; i++) {
     if (!boundingBox.isValidWs(i))
       continue;
@@ -99,14 +99,14 @@ double initBoundingBox(WorkspaceBoundingBox &boundingBox, const int numSpec, con
     if (!boundingBox.isOutOfBoundsOfNonDirectBeam(beamRadius, i, directBeam))
       continue;
     else
-      total_count += boundingBox.updatePositionAndReturnCount(i);
+      totalCount += boundingBox.updatePositionAndReturnCount(i);
   }
-  return total_count;
+  return totalCount;
 }
 
 double updateBoundingBox(WorkspaceBoundingBox &boundingBox, WorkspaceBoundingBox previousBoundingBox, const int numSpec,
                          const double beamRadius, const bool directBeam) {
-  double total_count = 0;
+  double totalCount = 0;
   for (int i = 0; i < numSpec; i++) {
     if (!boundingBox.isValidWs(i))
       continue;
@@ -117,15 +117,15 @@ double updateBoundingBox(WorkspaceBoundingBox &boundingBox, WorkspaceBoundingBox
       if (!boundingBox.isOutOfBoundsOfNonDirectBeam(beamRadius, i, directBeam))
         continue;
       else
-        total_count += boundingBox.updatePositionAndReturnCount(i);
+        totalCount += boundingBox.updatePositionAndReturnCount(i);
     }
   }
-  return total_count;
+  return totalCount;
 }
 
 bool equals(double a, double b) { return fabs(a - b) < std::numeric_limits<double>::min(); }
 
-void FindCenterOfMassPosition2::findCenterOfMass(API::MatrixWorkspace_sptr inputWS, double &center_x, double &center_y,
+void FindCenterOfMassPosition2::findCenterOfMass(API::MatrixWorkspace_sptr inputWS, double &centerX, double &centerY,
                                                  const int numSpec, Progress &progress) {
   const double tolerance = getProperty("Tolerance");
   const bool directBeam = getProperty("DirectBeam");
@@ -136,7 +136,7 @@ void FindCenterOfMassPosition2::findCenterOfMass(API::MatrixWorkspace_sptr input
   // iteration we will recompute the bounding box, and we will make
   // it as large as possible. The largest box is defined in:
   WorkspaceBoundingBox boundingBox(inputWS, g_log);
-  boundingBox.setCenter(center_x, center_y);
+  boundingBox.setCenter(centerX, centerY);
 
   // Starting values for the bounding box and the center
   WorkspaceBoundingBox previousBoundingBox(g_log);
@@ -145,49 +145,49 @@ void FindCenterOfMassPosition2::findCenterOfMass(API::MatrixWorkspace_sptr input
   // Initialize book-keeping
   double distance = -1;
   double distanceCheck = 0;
-  double total_count = initBoundingBox(boundingBox, numSpec, beamRadius, directBeam);
+  double totalCount = initBoundingBox(boundingBox, numSpec, beamRadius, directBeam);
 
-  int n_local_minima = 0;
-  int n_iteration = 0;
+  int totalLocalMinima = 0;
+  int totalIterations = 0;
 
   // Find center of mass and iterate until we converge
   // to within the tolerance specified in meters
   while (distance > tolerance || distance < 0) {
     // Normalize output to find center of mass position
-    boundingBox.normalizePosition(total_count, total_count);
+    boundingBox.normalizePosition(totalCount, totalCount);
     // Compute the distance to the previous iteration
     distance = boundingBox.calculateDistance();
     // Recenter around new mass position
-    double radius_x = boundingBox.calculateRadiusX();
-    double radius_y = boundingBox.calculateRadiusY();
+    double radiusX = boundingBox.calculateRadiusX();
+    double radiusY = boundingBox.calculateRadiusY();
 
-    if (!directBeam && (radius_x <= beamRadius || radius_y <= beamRadius)) {
+    if (!directBeam && (radiusX <= beamRadius || radiusY <= beamRadius)) {
       g_log.error() << "Center of mass falls within the beam center area: "
                        "stopping here\n";
       break;
     }
 
     boundingBox.setCenter(boundingBox.getX(), boundingBox.getY());
-    previousBoundingBox.setBounds(boundingBox.getCenterX() - radius_x, boundingBox.getCenterX() + radius_x,
-                                  boundingBox.getCenterY() - radius_y, boundingBox.getCenterY() + radius_y);
+    previousBoundingBox.setBounds(boundingBox.getCenterX() - radiusX, boundingBox.getCenterX() + radiusX,
+                                  boundingBox.getCenterY() - radiusY, boundingBox.getCenterY() + radiusY);
 
     // Check to see if we have the same result
     // as the previous iteration
     if (equals(distance, distanceCheck)) {
-      n_local_minima++;
+      totalLocalMinima++;
     } else {
-      n_local_minima = 0;
+      totalLocalMinima = 0;
     }
 
     // Quit if we found the exact same distance five times in a row.
-    if (n_local_minima > 5) {
+    if (totalLocalMinima > 5) {
       g_log.warning() << "Found the same or equivalent center of mass locations "
                          "more than 5 times in a row: stopping here\n";
       break;
     }
 
     // Quit if we haven't converged after the maximum number of iterations.
-    if (++n_iteration > m_maxIteration) {
+    if (++totalIterations > m_maxIteration) {
       g_log.warning() << "More than " << m_maxIteration << " iteration to find beam center: stopping here\n";
       break;
     }
@@ -196,15 +196,15 @@ void FindCenterOfMassPosition2::findCenterOfMass(API::MatrixWorkspace_sptr input
 
     // Count histogram for normalization
     boundingBox.setPosition(0, 0);
-    total_count = updateBoundingBox(boundingBox, previousBoundingBox, numSpec, beamRadius, directBeam);
+    totalCount = updateBoundingBox(boundingBox, previousBoundingBox, numSpec, beamRadius, directBeam);
 
     progress.report("Find Beam Center");
   }
-  center_x = boundingBox.getCenterX();
-  center_y = boundingBox.getCenterY();
+  centerX = boundingBox.getCenterX();
+  centerY = boundingBox.getCenterY();
 }
 
-void FindCenterOfMassPosition2::storeOutputWorkspace(double center_x, double center_y) {
+void FindCenterOfMassPosition2::storeOutputWorkspace(double centerX, double centerY) {
   std::string output = getProperty("Output");
 
   // If an output workspace name was given, create a TableWorkspace with the
@@ -223,9 +223,9 @@ void FindCenterOfMassPosition2::storeOutputWorkspace(double center_x, double cen
     m_result->addColumn("double", "Value");
 
     Mantid::API::TableRow row = m_result->appendRow();
-    row << "X (m)" << center_x;
+    row << "X (m)" << centerX;
     row = m_result->appendRow();
-    row << "Y (m)" << center_y;
+    row << "Y (m)" << centerY;
 
     setProperty("OutputWorkspace", m_result);
   } else {
@@ -234,18 +234,18 @@ void FindCenterOfMassPosition2::storeOutputWorkspace(double center_x, double cen
       declareProperty(std::make_unique<ArrayProperty<double>>("CenterOfMass", std::make_shared<NullValidator>(),
                                                               Direction::Output));
     std::vector<double> center_of_mass;
-    center_of_mass.emplace_back(center_x);
-    center_of_mass.emplace_back(center_y);
+    center_of_mass.emplace_back(centerX);
+    center_of_mass.emplace_back(centerY);
     setProperty("CenterOfMass", center_of_mass);
   }
 
-  g_log.information() << "Center of Mass found at x=" << center_x << " y=" << center_y << '\n';
+  g_log.information() << "Center of Mass found at x=" << centerX << " y=" << centerY << '\n';
 }
 
 void FindCenterOfMassPosition2::exec() {
   const MatrixWorkspace_sptr inputWSWvl = getProperty("InputWorkspace");
-  double center_x = getProperty("CenterX");
-  double center_y = getProperty("CenterY");
+  double centerX = getProperty("CenterX");
+  double centerY = getProperty("CenterY");
 
   MatrixWorkspace_sptr inputWS;
 
@@ -267,8 +267,8 @@ void FindCenterOfMassPosition2::exec() {
     inputWS = childAlg->getProperty("OutputWorkspace");
   }
 
-  findCenterOfMass(inputWS, center_x, center_y, numSpec, progress);
-  storeOutputWorkspace(center_x, center_y);
+  findCenterOfMass(inputWS, centerX, centerY, numSpec, progress);
+  storeOutputWorkspace(centerX, centerY);
 }
 
 } // namespace Algorithms
