@@ -75,6 +75,13 @@ class SliceViewer(ObservingPresenter):
         self.ads_observer = SliceViewerADSObserver(self.replace_workspace, self.rename_workspace,
                                                    self.ADS_cleared, self.delete_workspace)
 
+        # simulate clicking on the home button, which will force all signal and slot connections
+        # properly set.
+        # NOTE: Some part of the connections are not set in the correct, resulting in a strange behavior
+        #       where the colorbar and view is not updated with switch between different scales.
+        #       This is a ducktape fix and should be revisited once we have a better way to do this.
+        self.show_all_data_requested()
+
     def new_plot_MDH(self, dimensions_transposing=False, dimensions_changing=False):
         """
         Tell the view to display a new plot of an MDHistoWorkspace
