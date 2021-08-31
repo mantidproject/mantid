@@ -48,7 +48,7 @@ void CalculatePlaczekSelfScattering::init() {
   declareProperty(
       std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>("InputWorkspace", "", Kernel::Direction::Input),
       "Raw diffraction data workspace for associated correction to be "
-      "calculated for. Workspace must have instument and sample data.");
+      "calculated for. Workspace must have instrument and sample data.");
   declareProperty(
       std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>("IncidentSpecta", "", Kernel::Direction::Input),
       "Workspace of fitted incident spectrum with it's first derivative.");
@@ -130,17 +130,7 @@ void CalculatePlaczekSelfScattering::exec() {
      Howe's Equation for P(theta) by adding the elastic self-scattering
   */
 
-  MantidVec xLambdas;
-  MantidVec placzekCorrection;
-  size_t nReserve = 0;
-  const API::SpectrumInfo specInfo = inWS->spectrumInfo();
-  for (size_t detIndex = 0; detIndex < specInfo.size(); detIndex++) {
-    if (!(specInfo.isMonitor(detIndex)) && !(specInfo.l2(detIndex) == 0.0)) {
-      nReserve += 1;
-    }
-  }
-  xLambdas.reserve(nReserve);
-  placzekCorrection.reserve(nReserve);
+  const auto &specInfo = inWS->spectrumInfo();
   API::MatrixWorkspace_sptr outputWS = DataObjects::create<API::HistoWorkspace>(*inWS);
   // The algorithm computes the signal values at bin centres so they should
   // be treated as a distribution

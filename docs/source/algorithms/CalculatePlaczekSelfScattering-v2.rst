@@ -16,6 +16,9 @@ scattering correction from the workspaces material sample and detector info.
 monitors or calibrant sample), the :ref:`FitIncidentSpectrum <algm-FitIncidentSpectrum>`
 can provide the necessary inputs.
 
+Note:  Version 2 is simply a passthrough to :ref:`CalculatePlaczek <algm-CalculatePlaczek>`
+so that scripts still using this algorithm may benefit from the updated calculations.
+
 Usage
 -----
 
