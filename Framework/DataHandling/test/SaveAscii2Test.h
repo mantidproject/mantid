@@ -133,6 +133,7 @@ public:
     for (int spec = 0; spec < 3; ++spec) {
       std::ostringstream ss;
       ss << std::string(filename, 0, extPos) << "_" << spec << "_" << spec * spec << std::string(filename, extPos);
+      std::cout << ss.str() << std::endl;
       TS_ASSERT(Poco::File(ss.str()).exists());
       Poco::File(ss.str()).remove();
     }
