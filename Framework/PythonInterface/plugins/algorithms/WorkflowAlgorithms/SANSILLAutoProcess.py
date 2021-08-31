@@ -209,8 +209,9 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         qbinning = self.getPropertyValue('OutputBinning')
         if qbinning:
             n_items = qbinning.count(':') + 1
-            if n_items != len(self.sample) and n_items != 1:
-                retval = 'Number of Q binning params must be equal to the number of distances.'
+            n_samples = len(self.sample)
+            if n_items != n_samples and n_items != 1:
+                retval = f'Number of Q binning params must be equal to the number of distances; found {n_items} instead of {n_samples}.'
             else:
                 for qbin_params in qbinning.split(':'):
                     if qbin_params:
