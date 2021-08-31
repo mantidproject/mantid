@@ -32,13 +32,13 @@ const auto spectrumInfo = this.workspace->spectrumInfo();
   return i;
 }
 
-double WorkspaceBoundingBox::updatePositionAndReturnCount(double total_count, int index){
+double WorkspaceBoundingBox::updatePositionAndReturnCount(int index){
   const auto spectrumInfo = this.workspace->spectrumInfo();
   double x = spectrumInfo.position(index).X();
   double y = spectrumInfo.position(index).Y();
   this.x += YIn[m_specID] * x;
   this.y += YIn[m_specID] * y;
-  total_count += YIn[m_specID];
+  return YIn[m_specID];
 }
 
 void WorkspaceBoundingBox::updateMinMax(int index){
@@ -73,3 +73,14 @@ double WorkspaceBoundingBox::calculateRadiusX() {
 double WorkspaceBoundingBox::calculateRadiusY() {
   return std::min((y - yMin), (yMax - y));
 }
+
+void WorkspaceBoundingBox::normalizePosition(double x, double y){
+    this.x /= x;
+    this.y /= y;
+}
+
+ bool WorkspaceBoundingBox::containsPoint(double x, double y) {
+     if(x > this.xMax || x < this.xMin || y > yMax, || y < yMin)
+        return false;
+    return true;
+ }
