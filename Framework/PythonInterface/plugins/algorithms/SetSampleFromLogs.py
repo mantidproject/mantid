@@ -6,21 +6,10 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import (AlgorithmFactory, DistributedDataProcessorAlgorithm)
 from mantid.kernel import (ConfigService)
-from mantid import _kernel as mtd_kernel
 from mantid.simpleapi import (SetSample)
 
 
 PROPS_FOR_SETSAMPLE = ["InputWorkspace", "Geometry", "Material", "Environment", "ContainerGeometry", "ContainerMaterial"]
-
-
-def _toDict(propertyManager):
-    result = {}
-    if propertyManager:
-        for key in propertyManager.keys():
-            result[key] = propertyManager[key].value
-            if isinstance(result[key], mtd_kernel.std_vector_dbl):
-                result[key] = list(result[key])
-    return result
 
 
 def _findKey(dictlike, *args):
@@ -65,7 +54,7 @@ class SetSampleFromLogs(DistributedDataProcessorAlgorithm):
     def _createMaterial(self, runObject):
         '''Create the sample material by combining the supplied material information with things found in the logs'''
         # grab the starting information from the algorithm property
-        material = _toDict(self.getProperty("Material").value)
+        material = self.getProperty("Material").value
         # only look in the logs if the user asks for it
         if self.getProperty("FindSample").value:  # SetSample calls it the material
             if (not _hasValue(material, 'ChemicalFormula')) and _hasValue(runObject, "SampleFormula"):
@@ -86,7 +75,7 @@ class SetSampleFromLogs(DistributedDataProcessorAlgorithm):
     def _createGeometry(self, runObject, instrEnum):
         # get height of sample from the logs
         # this assumes the shape has a "Height" property
-        geometry = _toDict(self.getProperty("Geometry").value)
+        geometry = self.getProperty("Geometry").value
 
         if self.getProperty("FindGeometry").value:
             if not _hasValue(geometry, "Height"):
@@ -142,7 +131,7 @@ class SetSampleFromLogs(DistributedDataProcessorAlgorithm):
     def _createEnvironment(self, runObject, instrEnum):
         '''Create the sample material by combining the supplied environment information with things found in the logs'''
         # grab the starting information from the algorithm property
-        environment = _toDict(self.getProperty("Environment").value)
+        environment = self.getProperty("Environment").value
         # get the container from the logs
         if self.getProperty("FindEnvironment").value:
             if (not _hasValue(environment, "Container")) and _hasValue(runObject, "SampleContainer"):
@@ -160,8 +149,8 @@ class SetSampleFromLogs(DistributedDataProcessorAlgorithm):
     def PyExec(self):
         wksp = self.getProperty("InputWorkspace").value
         # these items are not grabbed from the logs
-        geometryContainer = _toDict(self.getProperty("ContainerGeometry").value)
-        materialContainer = _toDict(self.getProperty("ContainerMaterial").value)
+        geometryContainer = self.getProperty("ContainerGeometry").value
+        materialContainer = self.getProperty("ContainerMaterial").value
 
         # get a convenient handle to the logs
         runObject = wksp.run()

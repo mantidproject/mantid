@@ -311,7 +311,10 @@ def calculate_absorption_correction(
     if number_density != Property.EMPTY_DBL:
         material["SampleNumberDensity"] = number_density
 
-    environment = {'Name': 'InAir', 'Container': container_shape}
+    environment = {}
+    if container_shape:
+        environment['Name'] = 'InAir'
+        environment['Container'] = container_shape
 
     donorWS = create_absorption_input(filename,
                                       props,

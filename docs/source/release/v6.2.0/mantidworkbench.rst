@@ -24,6 +24,10 @@ New and Improved
 - Script editor tab completion and call tip support for Numpy 1.21
 - The visibility of a component parameter in the Pick tab of the InstrumentViewer is now steered by the 'visible' atrribute of a parameter in IPF
 - Plot legends can be shown or hidden from the plot context menu.
+- ADS signal handlers are now synchronized in `WorkspaceSelector`. This reduces the probability of hard crash when interacting with the widget while a script manipulating a large number of workspaces is being run.
+- The plot config dialog notifies the user when there has been an error applying the config to the plot, and allows them to change the config further.
+- When fitting a plot, selecting the peak type will only update the default peak shape in the settings if the "Set as global default" checkbox is ticked.
+- Added help button to the sliceviewer
 
 Bugfixes
 --------
@@ -40,6 +44,10 @@ Bugfixes
 - Fixed JSON serialization issue of MantidAxType by explicitly extracting its value
 - Fixed a bug in the Sliceviewer when transposing MDE workspaces multiple times would cause the data to become all zeros.
 - Fixed a bug in colorfill plots which lead to the loss of a spectrum from the resulting image.
+- Fixed a bug where the errorbar tab in the figure options was wrongly enabled while selecting multiple curves.
+- Fixed a bug where removing the plot guess line in the fit browser could lead to an exception being thrown.
+- Fixed a bug where marker formatting options were disabled upon opening the figure options.
 - Fixed a bug where the workspace index spinbox in the fit browser wouldn't update when the user added or removed curves from the figure.
+- Fixed the help icon not showing on OSX and high-resolution monitors.
 
 :ref:`Release 6.2.0 <v6.2.0>`

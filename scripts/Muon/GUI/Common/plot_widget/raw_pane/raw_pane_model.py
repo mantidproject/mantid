@@ -46,7 +46,7 @@ class RawPaneModel(BasePaneModel):
         elif self._max_spec < num_detectors:
             self._max_spec = self._spec_limit
 
-    def get_workspaces_to_plot(self, is_raw, plot_type, detectors:str, run_string):
+    def get_workspaces_to_plot(self, is_raw, plot_type, detectors:str, run_string, period=None):
         """
         :param is_raw: Whether to use raw or rebinned data
         :param plot_type: plotting type, e.g Counts, Frequency Re
@@ -60,32 +60,38 @@ class RawPaneModel(BasePaneModel):
         multi_period = False
         if self.context.data_context.num_periods(run) >1:
             multi_period = True
-            for period in range(self.context.data_context.num_periods(run)):
-                # periods start at 1 and not 0
-                workspace_list += self.get_ws_names(run_string, multi_period, str(period+1),detectors)
+            if period:
+                workspace_list += self.get_ws_names(run_string, multi_period, str(period),detectors)
+            else:
+                for period_i in range(self.context.data_context.num_periods(run)):
+                    # periods start at 1 and not 0
+                    workspace_list += self.get_ws_names(run_string, multi_period, str(period_i+1),detectors)
         else:
             workspace_list += self.get_ws_names(run_string, multi_period, '1',detectors)
         return workspace_list
 
     def _generate_run_indices(self, workspace_list, detectors):
         lower, upper = self._get_first_and_last_detector_to_plot(detectors)
-        indicies = []
-        for k in range(len(workspace_list)):
+        indices = []
+        if upper == lower:
+            return indices
+        # workspace list repeats value multiple times
+        # step size only fills in unique workspaces
+        for k in range(0, len(workspace_list), upper-lower):
             for spec in range(lower, upper):
-                indicies += [spec]
-        return indicies
+                indices += [spec]
+        return indices
 
-    def get_workspace_list_and_indices_to_plot(self, is_raw, plot_type, detectors:str, run):
+    def get_workspace_list_and_indices_to_plot(self, is_raw, plot_type, detectors:str, run, period=None):
         """
          :return: a list of workspace names to plot
          """
-        workspace_list = self.get_workspaces_to_plot(is_raw, plot_type, detectors, run)
+        workspace_list = self.get_workspaces_to_plot(is_raw, plot_type, detectors, run, period)
         indices = self._generate_run_indices(workspace_list, detectors)
-
         return workspace_list, indices
 
-    def create_tiled_keys(self, tiled_by):
-        return ["Detector: "+str(spec+1) for spec in range(self._max_spec)]
+    def create_tiled_keys(self, tiled_by, def_zero = 1):
+        return ["Detector: "+str(spec+def_zero) for spec in range(self._max_spec)]
 
     def convert_index_to_axis(self, index):
         return index - floor(index/self._max_spec)*self._max_spec

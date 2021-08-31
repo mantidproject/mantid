@@ -16,6 +16,10 @@ from Muon.GUI.FrequencyDomainAnalysis.plot_widget.plot_freq_fit_pane_presenter i
 from Muon.GUI.Common.plot_widget.raw_pane.raw_pane_presenter import RawPanePresenter
 from Muon.GUI.Common.plot_widget.raw_pane.raw_pane_model import RawPaneModel
 from Muon.GUI.Common.plot_widget.raw_pane.raw_pane_view import RawPaneView
+from Muon.GUI.FrequencyDomainAnalysis.plot_widget.dual_plot_maxent_pane.dual_plot_maxent_pane_presenter import DualPlotMaxentPanePresenter
+from Muon.GUI.FrequencyDomainAnalysis.plot_widget.dual_plot_maxent_pane.dual_plot_maxent_pane_model import DualPlotMaxentPaneModel
+from Muon.GUI.FrequencyDomainAnalysis.plot_widget.dual_plot_maxent_pane.dual_plot_maxent_pane_view import DualPlotMaxentPaneView
+from Muon.GUI.Common.plot_widget.quick_edit.quick_edit_widget import DualQuickEditWidget
 
 
 class FrequencyAnalysisPlotWidget(object):
@@ -23,7 +27,8 @@ class FrequencyAnalysisPlotWidget(object):
         self.data_model = PlotDataPaneModel(context)
         self.fit_model = PlotFreqFitPaneModel(context)
         self.raw_model = RawPaneModel(context)
-        models = [self.data_model, self.fit_model, self.raw_model]
+        self.plot_maxent_model = DualPlotMaxentPaneModel(context, self.data_model, RawPaneModel(context))
+        models = [self.data_model, self.fit_model, self.raw_model, self.plot_maxent_model]
 
         self.view = MainPlotWidgetView(parent)
         self.model = PlotDataPaneModel(context)
@@ -33,12 +38,24 @@ class FrequencyAnalysisPlotWidget(object):
         self._views = {}
 
         for model in models:
-            self.plotting_canvas_widgets[model.name] = PlottingCanvasWidget(parent, context=
+
+            if model == self.plot_maxent_model:
+                dual_quick_edit = DualQuickEditWidget(context.plot_panes_context[model.name], parent)
+                self.plotting_canvas_widgets[model.name] = PlottingCanvasWidget(parent, context=
+                                                                                 context.plot_panes_context[model.name],
+                                                                                 plot_model=model, figure_options=dual_quick_edit)
+                self._views[model.name] = DualPlotMaxentPaneView(parent)
+
+            elif model == self.raw_model:
+                self.plotting_canvas_widgets[model.name] = PlottingCanvasWidget(parent, context=
                                                                                  context.plot_panes_context[model.name],
                                                                                  plot_model=model)
-            if model == self.raw_model:
                 self._views[model.name] = RawPaneView(parent)
+
             else:
+                self.plotting_canvas_widgets[model.name] = PlottingCanvasWidget(parent, context=
+                                                                                 context.plot_panes_context[model.name],
+                                                                                 plot_model=model)
                 self._views[model.name] = BasePaneView(parent)
             self._views[model.name].add_canvas_widget(self.plotting_canvas_widgets[model.name].widget)
 
@@ -59,8 +76,12 @@ class FrequencyAnalysisPlotWidget(object):
         self.raw_mode = RawPanePresenter(self._views[name], self.raw_model,
                                                  context,self.plotting_canvas_widgets[name].presenter)
 
+        name = self.plot_maxent_model.name
+        self.maxent_mode = DualPlotMaxentPanePresenter(self._views[name], self.plot_maxent_model,
+                                                       context, self.plotting_canvas_widgets[name].presenter)
+
         self.presenter = MainPlotWidgetPresenter(self.view,
-                                                   [self.data_mode, self.raw_mode, self.fit_mode])
+                                                   [self.data_mode, self.raw_mode, self.fit_mode, self.maxent_mode])
 
         self._current_plot_mode = self.presenter.get_plot_mode
         self.presenter.set_plot_mode_changed_slot(self.handle_plot_mode_changed_by_user)

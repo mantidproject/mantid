@@ -220,6 +220,7 @@ Workspace_sptr LoadMuonNexusV2::runLoadISISNexus() {
   this->copyPropertiesFrom(*ISISLoader);
   Workspace_sptr outWS = getProperty("OutputWorkspace");
   applyTimeAxisUnitCorrection(*outWS);
+  loadPeriodInfo(*outWS);
   return outWS;
 }
 /**
@@ -286,5 +287,42 @@ void LoadMuonNexusV2::applyTimeAxisUnitCorrection(Workspace &workspace) {
     workspace2D.getAxis(0)->unit() = newUnit;
   }
 }
+void LoadMuonNexusV2::loadPeriodInfo(Workspace &workspace) {
+  // get value
+  int numberOfPeriods = m_nexusLoader->getNumberOfPeriods();
+  auto labels = m_nexusLoader->getPeriodLabels();
+  auto sequences = m_nexusLoader->getPeriodSequenceString(numberOfPeriods);
+  auto types = m_nexusLoader->getPeriodTypes(numberOfPeriods);
+  auto requested = m_nexusLoader->getPeriodFramesRequested(numberOfPeriods);
+  auto rawFrames = m_nexusLoader->getPeriodRawFrames(numberOfPeriods);
+  auto output = m_nexusLoader->getPeriodOutput(numberOfPeriods);
+  auto counts = m_nexusLoader->getPeriodTotalCounts(numberOfPeriods);
+  // put values into workspaces
+  auto workspaceGroup = dynamic_cast<WorkspaceGroup *>(&workspace);
+  if (workspaceGroup) {
+    for (int i = 0; i < workspaceGroup->getNumberOfEntries(); ++i) {
+      auto workspace2D = std::dynamic_pointer_cast<Workspace2D>(workspaceGroup->getItem(i));
+      auto &run = workspace2D->mutableRun();
+      run.addProperty("period_labels", labels);
+      run.addProperty("period_sequences", sequences);
+      run.addProperty("period_type", types);
+      run.addProperty("frames_period_requested", requested);
+      run.addProperty("frames_period_raw", rawFrames);
+      run.addProperty("period_output", output);
+      run.addProperty("total_counts_period", counts);
+    }
+  } else {
+    auto &workspace2D = dynamic_cast<Workspace2D &>(workspace);
+    auto &run = workspace2D.mutableRun();
+    run.addProperty("period_labels", labels);
+    run.addProperty("period_sequences", sequences);
+    run.addProperty("period_type", types);
+    run.addProperty("frames_period_requested", requested);
+    run.addProperty("frames_period_raw", rawFrames);
+    run.addProperty("period_output", output);
+    run.addProperty("total_counts_period", counts);
+  }
+}
+
 } // namespace DataHandling
 } // namespace Mantid

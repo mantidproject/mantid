@@ -86,6 +86,7 @@ set(TEST_PY_FILES
     MuscatSofQWTest.py
     MuonMaxEntTest.py
     NMoldyn4InterpolationTest.py
+    NOMADMedianDetectorTestTest.py
     NormaliseSpectraTest.py
     OptimizeCrystalPlacementByRunTest.py
     PDConvertRealSpaceTest.py

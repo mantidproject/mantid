@@ -22,6 +22,7 @@ from .view import SliceViewerView
 from .adsobsever import SliceViewerADSObserver
 from .peaksviewer import PeaksViewerPresenter, PeaksViewerCollectionPresenter
 from ..observers.observing_presenter import ObservingPresenter
+from ...interfacemanager import InterfaceManager
 
 
 class SliceViewer(ObservingPresenter):
@@ -63,6 +64,8 @@ class SliceViewer(ObservingPresenter):
             self.view.data_view.disable_tool_button(ToolItemText.OVERLAY_PEAKS)
         if not self.model.can_support_nonorthogonal_axes():
             self.view.data_view.disable_tool_button(ToolItemText.NONORTHOGONAL_AXES)
+
+        self.view.data_view.help_button.clicked.connect(self.action_open_help_window)
 
         self.refresh_view()
 
@@ -400,7 +403,7 @@ class SliceViewer(ObservingPresenter):
             # New model is OK, proceed with updating Slice Viewer
             self.model = candidate_model
             self.new_plot, self.update_plot_data = self._decide_plot_update_methods()
-            self.view.delayed_refresh()
+            self.refresh_view()
         except ValueError as err:
             self._close_view_with_message(
                 f"Closing Sliceviewer as the underlying workspace was changed: {str(err)}")
@@ -415,10 +418,16 @@ class SliceViewer(ObservingPresenter):
         # the meantime, so check it still exists. See github issue #30406 for detail.
         if sip.isdeleted(self.view):
             return
+
         # we don't want to use model.get_ws for the image info widget as this needs
         # extra arguments depending on workspace type.
-        self.view.data_view.image_info_widget.setWorkspace(self.model._get_ws())
-        self.new_plot()
+        ws = self.model._get_ws()
+        ws.readLock()
+        try:
+            self.view.data_view.image_info_widget.setWorkspace(ws)
+            self.new_plot()
+        finally:
+            ws.unlock()
 
     def rename_workspace(self, old_name, new_name):
         if str(self.model._get_ws()) == old_name:
@@ -502,3 +511,6 @@ class SliceViewer(ObservingPresenter):
     def _close_view_with_message(self, message: str):
         self.view.emit_close()  # inherited from ObservingView
         self._logger.warning(message)
+
+    def action_open_help_window(self):
+        InterfaceManager().showHelpPage('qthelp://org.mantidproject/doc/workbench/sliceviewer.html')

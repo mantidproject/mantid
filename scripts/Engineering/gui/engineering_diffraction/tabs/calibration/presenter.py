@@ -40,7 +40,7 @@ class CalibrationPresenter(object):
     def connect_view_signals(self):
         self.view.set_on_calibrate_clicked(self.on_calibrate_clicked)
         self.view.set_enable_controls_connection(self.set_calibrate_controls_enabled)
-        self.view.set_update_fields_connection(self.set_field_values)
+        self.view.set_update_field_connection(self.set_field_value)
         self.view.set_on_radio_new_toggled(self.set_create_new_enabled)
         self.view.set_on_radio_existing_toggled(self.set_load_existing_enabled)
         self.view.set_on_check_cropping_state_changed(self.show_cropping)
@@ -48,30 +48,32 @@ class CalibrationPresenter(object):
     def on_calibrate_clicked(self):
         plot_output = self.view.get_plot_output()
         if self.view.get_new_checked() and self._validate():
-            vanadium_file = self.view.get_vanadium_filename()
             sample_file = self.view.get_sample_filename()
             if self.view.get_crop_checked():
-                self.start_cropped_calibration_worker(vanadium_file, sample_file, plot_output, self.rb_num)
+                self.start_cropped_calibration_worker(sample_file,
+                                                      plot_output, self.rb_num)
             else:
-                self.start_calibration_worker(vanadium_file, sample_file, plot_output, self.rb_num)
+                self.start_calibration_worker(sample_file,plot_output, self.rb_num)
         elif self.view.get_load_checked():
             if not self.validate_path():
-                logger.notice("Invalid path")
+                logger.notice("Invalid calibration path")
                 return
             filename = self.view.get_path_filename()
-            instrument, vanadium_file, sample_file, grp_ws_name, roi_text, banks = \
-                self.model.load_existing_calibration_files(filename)
-            self.pending_calibration.set_calibration(vanadium_file, sample_file, instrument)
+            try:
+                instrument, sample_file, grp_ws_name, roi_text, banks = \
+                    self.model.load_existing_calibration_files(filename)
+            except:
+                return
+            self.pending_calibration.set_calibration(sample_file, instrument)
             self.pending_calibration.set_roi_info_load(banks, grp_ws_name, roi_text)
             self.set_current_calibration()
             set_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX,
                         "last_calibration_path", filename)
 
-    def start_calibration_worker(self, vanadium_path, sample_path, plot_output, rb_num, bank=None, calfile=None,
+    def start_calibration_worker(self, sample_path, plot_output, rb_num, bank=None, calfile=None,
                                  spectrum_numbers=None):
         """
         Calibrate the data in a separate thread so as to not freeze the GUI.
-        :param vanadium_path: Path to vanadium data file.
         :param sample_path: Path to sample data file.
         :param plot_output: Whether to plot the output.
         :param rb_num: The current RB number set in the GUI.
@@ -79,7 +81,7 @@ class CalibrationPresenter(object):
         :param calfile: Custom calibration file the user can supply for the calibration region of interest.
         :param spectrum_numbers: Optional parameter to crop by spectrum number.
         """
-        self.worker = AsyncTask(self.model.create_new_calibration, (vanadium_path, sample_path),
+        self.worker = AsyncTask(self.model.create_new_calibration, (sample_path,),
                                 {
                                 "plot_output": plot_output,
                                 "instrument": self.instrument,
@@ -90,28 +92,30 @@ class CalibrationPresenter(object):
                                 },
                                 error_cb=self._on_error,
                                 success_cb=self._on_success)
-        self.pending_calibration.set_calibration(vanadium_path, sample_path, self.instrument)
+        self.pending_calibration.set_calibration(sample_path, self.instrument)
         self.pending_calibration.set_roi_info(bank, calfile, spectrum_numbers)
         self.set_calibrate_controls_enabled(False)
         self.worker.start()
 
-    def start_cropped_calibration_worker(self, vanadium_path, sample_path, plot_output, rb_num):
+    def start_cropped_calibration_worker(self, sample_path, plot_output, rb_num):
         if self.cropping_widget.get_custom_calfile_enabled():
             calfile = self.cropping_widget.get_custom_calfile()
-            self.start_calibration_worker(vanadium_path, sample_path, plot_output, rb_num, calfile=calfile)
+            self.start_calibration_worker(sample_path, plot_output, rb_num,
+                                          calfile=calfile)
         elif self.cropping_widget.get_custom_spectra_enabled():
             spec_nums = self.cropping_widget.get_custom_spectra()
-            self.start_calibration_worker(vanadium_path, sample_path, plot_output, rb_num, spectrum_numbers=spec_nums)
+            self.start_calibration_worker(sample_path, plot_output, rb_num,
+                                          spectrum_numbers=spec_nums)
         else:
             bank = str(self.cropping_widget.get_bank())
-            self.start_calibration_worker(vanadium_path, sample_path, plot_output, rb_num, bank=bank)
+            self.start_calibration_worker(sample_path, plot_output, rb_num,
+                                          bank=bank)
 
     def set_current_calibration(self, success_info=None):
         if success_info:
             logger.information("Thread executed in " + str(success_info.elapsed_time) + " seconds.")
         self.current_calibration = deepcopy(self.pending_calibration)
         self.calibration_notifier.notify_subscribers(self.current_calibration)
-        self.emit_update_fields_signal()
         self.pending_calibration.clear()
 
     def load_last_calibration(self) -> None:
@@ -125,9 +129,8 @@ class CalibrationPresenter(object):
             self.view.set_load_checked(True)
             self.view.set_file_text_with_search(last_cal_path)
 
-    def set_field_values(self):
+    def set_field_value(self):
         self.view.set_sample_text(self.current_calibration.get_sample())
-        self.view.set_vanadium_text(self.current_calibration.get_vanadium())
 
     def set_instrument_override(self, instrument):
         instrument = INSTRUMENT_DICT[instrument]
@@ -142,7 +145,7 @@ class CalibrationPresenter(object):
         if self.view.is_searching():
             create_error_message(self.view, "Mantid is searching for data files. Please wait.")
             return False
-        if not self.validate_run_numbers():
+        if not self.view.get_sample_valid():
             create_error_message(self.view, "Check run numbers/path is valid.")
             return False
         if self.view.get_crop_checked():
@@ -154,21 +157,14 @@ class CalibrationPresenter(object):
                 return False
         return True
 
-    def validate_run_numbers(self):
-        return self.view.get_sample_valid() and self.view.get_vanadium_valid()
-
     def validate_path(self):
         return self.view.get_path_valid()
 
     def emit_enable_button_signal(self):
         self.view.sig_enable_controls.emit(True)
 
-    def emit_update_fields_signal(self):
-        self.view.sig_update_fields.emit()
-
     def set_calibrate_controls_enabled(self, enabled):
         self.view.set_calibrate_button_enabled(enabled)
-        self.view.set_check_plot_output_enabled(enabled)
 
     def _on_error(self, error_info):
         logger.error(str(error_info))
@@ -179,7 +175,6 @@ class CalibrationPresenter(object):
         self.emit_enable_button_signal()
 
     def set_create_new_enabled(self, enabled):
-        self.view.set_vanadium_enabled(enabled)
         self.view.set_sample_enabled(enabled)
         if enabled:
             self.set_calibrate_button_text("Calibrate")
@@ -200,7 +195,6 @@ class CalibrationPresenter(object):
 
     def find_files(self):
         self.view.find_sample_files()
-        self.view.find_vanadium_files()
 
     def show_cropping(self, show):
         self.view.set_cropping_widget_visibility(show)

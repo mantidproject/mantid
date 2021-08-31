@@ -14,7 +14,7 @@ class PlotEditContext(object):
         self._ylim = [-0.3, 0.3]
         self._plot_index = 0
         self._errors = False
-        self._auto = False
+        self._auto = True
 
     def update_xlim(self, values: List[float]):
         self._xlim = values

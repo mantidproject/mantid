@@ -174,7 +174,7 @@ void CompareWorkspaces::exec() {
 
   if (!m_result) {
     std::string message = m_messages->cell<std::string>(0, 0);
-    g_log.notice() << "The workspaces did not match: " << message << '\n';
+    g_log.warning() << "The workspaces did not match: " << message << '\n';
   } else {
     std::string ws1 = Workspace_const_sptr(getProperty("Workspace1"))->getName();
     std::string ws2 = Workspace_const_sptr(getProperty("Workspace2"))->getName();
