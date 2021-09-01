@@ -580,6 +580,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         :param ws: Output of the cross-section separation and/or normalisation.
         :return: WorkspaceGroup containing 2D distributions on a Qx-Qy grid.
         """
+        DEG_2_RAD = np.pi / 180.0
         fld = self._sampleAndEnvironmentProperties['fld'].value if 'fld' in self._sampleAndEnvironmentProperties else 1
         nQ = self._sampleAndEnvironmentProperties['nQ'].value if 'nQ' in self._sampleAndEnvironmentProperties else 80
         omega_shift = self._sampleAndEnvironmentProperties['OmegaShift'].value \
@@ -587,13 +588,13 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         wavelength = mtd[ws][0].getRun().getLogData('monochromator.wavelength').value
         ki = 2 * np.pi / wavelength
         dE = 0.0  # monochromatic data
-        kf = np.sqrt(ki * ki - dE / 2.07194)
-        twoTheta = -mtd[ws][0].getAxis(1).extractValues() * np.pi / 180.0  # detector positions in radians
-        omega = mtd[ws][0].getAxis(0).extractValues() * np.pi / 180.0  # omega scan angle in radians
+        const_val = 2.07194  # hbar^2/2m
+        kf = np.sqrt(ki * ki - dE / const_val)
+        twoTheta = -mtd[ws][0].getAxis(1).extractValues() * DEG_2_RAD  # detector positions in radians
+        omega = mtd[ws][0].getAxis(0).extractValues() * DEG_2_RAD  # omega scan angle in radians
         ntheta = len(twoTheta)
         nomega = len(omega)
-        # omega = -1.0 * np.matrix(np.flip(omega, 0)) - omega_shift * np.pi / 180.0
-        omega = np.matrix(omega) + omega_shift * np.pi / 180.0
+        omega = np.matrix(omega) + omega_shift * DEG_2_RAD
         Qmag = np.sqrt(ki * ki + kf * kf - 2 * ki * kf * np.cos(twoTheta))
         # beta is the angle between ki and Q
         beta = (twoTheta / np.abs(twoTheta)) * np.arccos((ki * ki - kf * kf + Qmag * Qmag) / (2 * ki * Qmag))
@@ -627,11 +628,9 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             w_out_name = entry.name() + '_qxqy'
             output_names.append(w_out_name)
             data_x = [(val-(fld*nQ)) * dQ for val in range((fld+1)*nQ)]
-            # data_x = [(val-(fld*nQ)) * dQ * 6.759 * np.cos(17.26*np.pi/180.0)/(2*np.pi) for val in range((fld+1)*nQ)]
             y_axis = NumericAxis.create(int((fld+1)*nQ))
             for q_index in range(int((fld+1)*nQ)):
                 y_axis.setValue(q_index, (q_index-(fld*nQ))*dQ)
-                # y_axis.setValue(q_index, (q_index-(fld*nQ))*dQ*10.412/(2*np.pi))
             CreateWorkspace(DataX=data_x, DataY=w_out, DataE=e_out, NSpec=int((fld+1)*nQ),
                             OutputWorkspace=w_out_name)
             mtd[w_out_name].replaceAxis(1, y_axis)
