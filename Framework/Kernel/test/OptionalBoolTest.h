@@ -129,10 +129,16 @@ public:
     TS_ASSERT_EQUALS(OptionalBool::StrTrue, map[OptionalBool::True]);
   }
 
-  void testEncodeOptionalBoolPropertyThrows() {
+  void testEncodeOptionalBoolPropertyEncodesSetValue() {
     using Mantid::Kernel::OptionalBool;
-    using Mantid::Kernel::Exception::NotImplementedError;
-    OptionalBool truth{OptionalBool::True};
-    TS_ASSERT_THROWS(encodeAsJson(truth), const NotImplementedError &);
+
+    TS_ASSERT_EQUALS(Json::Value(true), encodeAsJson(OptionalBool{OptionalBool::True}));
+    TS_ASSERT_EQUALS(Json::Value(false), encodeAsJson(OptionalBool{OptionalBool::False}));
+  }
+
+  void testEncodeOptionalBoolPropertyReturnsNullJsonforUnsetValue() {
+    using Mantid::Kernel::OptionalBool;
+
+    TS_ASSERT_EQUALS(Json::Value(), encodeAsJson(OptionalBool{OptionalBool::Unset}));
   }
 };
