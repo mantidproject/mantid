@@ -80,3 +80,8 @@ class PlotFitPanePresenter(BasePanePresenter):
     def handle_update_plot_guess(self):
         if self._fitting_context.guess_workspace_name is not None and self._fitting_context.plot_guess:
             self._figure_presenter.plot_guess_workspace(self._fitting_context.guess_workspace_name)
+
+    def create_empty_plot(self):
+        self._figure_presenter.create_single_plot()
+        # need to do this manually
+        self._current_fit_info = None
