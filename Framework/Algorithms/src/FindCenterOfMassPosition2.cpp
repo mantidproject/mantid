@@ -138,11 +138,11 @@ void FindCenterOfMassPosition2::findCenterOfMass(API::MatrixWorkspace_sptr input
   // _centered_ on the latest center position are considered. At each
   // iteration we will recompute the bounding box, and we will make
   // it as large as possible. The largest box is defined in:
-  WorkspaceBoundingBox boundingBox(inputWS, g_log);
+  WorkspaceBoundingBox boundingBox(inputWS);
   boundingBox.setCenter(centerX, centerY);
 
   // Starting values for the bounding box and the center
-  WorkspaceBoundingBox previousBoundingBox(g_log);
+  WorkspaceBoundingBox previousBoundingBox;
   previousBoundingBox.setBounds(0., 0., 0., 0.);
 
   // Initialize book-keeping

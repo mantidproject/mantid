@@ -11,14 +11,18 @@
 
 namespace Mantid {
 namespace Algorithms {
+namespace {
+// static logger
+Kernel::Logger g_log("WorkspaceBoundingBox");
+} // namespace
 
 /* This is a simple class originally intended for use solely with FindCenterOfMassPosition2.cpp
  *
  */
 class WorkspaceBoundingBox {
 public:
-  WorkspaceBoundingBox(API::MatrixWorkspace_sptr workspace, Kernel::Logger &g_log);
-  WorkspaceBoundingBox(Kernel::Logger &g_log);
+  WorkspaceBoundingBox(API::MatrixWorkspace_sptr workspace);
+  WorkspaceBoundingBox();
   ~WorkspaceBoundingBox();
 
   API::MatrixWorkspace_sptr getWorkspace() { return workspace; }
@@ -97,9 +101,6 @@ private:
   double yMin = 0;
   double yMax = 0;
   const int m_specID = 0;
-
-  /// Logger for this helper
-  Kernel::Logger &g_log;
 };
 
 } // namespace Algorithms
