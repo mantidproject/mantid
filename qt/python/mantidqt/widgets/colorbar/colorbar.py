@@ -321,6 +321,7 @@ class ColorbarWidget(QWidget):
         return Normalize(vmin=cmin, vmax=cmax)
 
     def _validate_mappable(self, mappable):
+        """Disable the Log option if no positive value can be found from given data (image)"""
         index = NORM_OPTS.index("Log")
         if mappable.get_array() is not None:
             if np.all(mappable.get_array() <= 0):
