@@ -66,10 +66,32 @@ private:
   /// Execution code
   void exec() override;
   /// Helper functions
+  /** Iterates through spectrum in the input workspace finding the center of mass until
+   *  we converge to within the tolerance specified in meters
+   *
+   *  @param inputWS  :: workspace to find the center of mass of
+   *  @param centerX  :: save the real center of mass x coord here
+   *  @param centerY  :: save the real center of mass y coord here
+   *  @param numSpec  :: number of spectrum in the workspace to iterate through
+   *  @param progress :: object for reporting progress of the operation
+   */
   void findCenterOfMass(API::MatrixWorkspace_sptr inputWS, double &centerX, double &centerY, const int numSpec,
                         API::Progress &progress);
+  /** Integrate events in the inputEventWS to determine thier sum and error values
+   *
+   *  @param inputEventWS  :: event workspace to ingegrate
+   *  @param numSpec  :: number of events in the workspace to iterate through
+   *  @param progress :: object for reporting progress of the operation
+   *  @return workspace containing the calculated x, y, and e data over numSpec
+   */
   API::MatrixWorkspace_sptr sumUsingSpectra(DataObjects::EventWorkspace_const_sptr inputEventWS, const int numSpec,
                                             API::Progress &progress);
+  /** Package the algorithm outputs one of two ways depending on whether or
+   *  not it was given an input EventWorkspace to start with
+   *
+   *  @param centerX  :: center of mass x coord to package
+   *  @param centerY  :: center of mass y coord to package
+   */
   void storeOutputWorkspace(double centerX, double centerY);
   // Iteration cutoff
   const int m_maxIteration = 200;
