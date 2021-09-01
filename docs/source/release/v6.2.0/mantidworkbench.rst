@@ -49,5 +49,6 @@ Bugfixes
 - Fixed a bug where marker formatting options were disabled upon opening the figure options.
 - Fixed a bug where the workspace index spinbox in the fit browser wouldn't update when the user added or removed curves from the figure.
 - Fixed out of range errors in the Sliceviewer that sometimes occured whilst hovering over transposed data.
+- Fixed the help icon not showing on OSX and high-resolution monitors.
 
 :ref:`Release 6.2.0 <v6.2.0>`

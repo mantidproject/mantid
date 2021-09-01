@@ -16,11 +16,14 @@ New features
 - New algorithm :ref:`CombineDiffCal <algm-CombineDiffCal>` to calibrate groups of pixels after cross correlation so that diffraction peaks can be adjusted to the correct positions
 - New algorithm :ref:`SetSampleFromLogs <algm-SetSampleFromLogs>` inspects the sample enviroment logs for sample material and geometry information
 - New script for doing calibration by groups, :ref:`PowderDiffractionCalibration <calibration_tofpd_group_calibration-ref>`
+- New algorithm :ref:`CalculatePlaczek <algm-CalculatePlaczek>` to compute both first and second Placzek correction factors.
+- New algorithm :ref:`CacculatePlaczekSelfScattering2 <algm-CalculatePlaczekSelfScattering-v2>` utilizes :ref:`CalculatePlaczek <algm-CalculatePlaczek>` to compute first order correction.
 - New algorithm :ref:`MultipleScatteringCorrection <algm-MultipleScatteringCorrection>` to compute the multiple scattering correction factor for sample using numerical integration.
 - New algorithm :ref:`NOMADMedianDetectorTest <algm-NOMADMedianDetectorTest>` to mask pixels showing deficient or excessive total counts.
 
 Improvements
 ############
+- More input control parameters added to the group calibration routine, including peak function type for estimating offset after cross correlation and an option to turn on or off the smoothing of data for cross correlation purpose. The workflow of group calibration script is also polished to make it smoother. Accordingly, unit tests have been updated.
 - Documentation added for the group calibration routine for :ref:`PowderDiffractionCalibration <calibration_tofpd_group_calibration-ref>`, as as guidance for general users.
 - The group calibration routine for :ref:`PowderDiffractionCalibration <calibration_tofpd_group_calibration-ref>` is made more generic. Groups are now allowed with dedicated control parameters.
 - :ref:`ConvertDiffCal <algm-ConvertDiffCal-v1>` now optionally updates a previous calibration when converting offsets.
@@ -41,6 +44,7 @@ Improvements
 
 Bugfixes
 ########
+- Fix the issue with the calibration diagnostics script when dealing with instruments of which the detector ID does not start from 0.
 - Fix the issue with :ref:`SNSPowderReduction <algm-SNSPowderReduction>` - when invalid height unit is encountered while reading sample log, we should continue by ignoring geometry and rely purely on user input.
 - fix d-spacing calculation when parabolic model is selected.
 - Correct equation for pseudo-voigt FWHM and mixing parameter in peak profile function :ref:`Bk2BkExpConvPV <func-Bk2BkExpConvPV>`.
