@@ -151,13 +151,6 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
         self.assertTrue(isinstance(colorbar.get_norm(), Normalize))
         pres.view.close()
 
-    def test_log_norm_disabled_for_non_positive_data(self):
-        conf = MockConfig()
-        pres = SliceViewer(self.histo_ws, conf=conf)
-        colorbar = pres.view.data_view.colorbar
-        self.assertFalse(colorbar.norm.model().item(1, 0).isEnabled())
-        pres.view.close()
-
     def test_changing_norm_updates_clim_validators(self):
         pres = SliceViewer(self.histo_ws_positive)
         colorbar = pres.view.data_view.colorbar
@@ -356,8 +349,6 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
 
 
 # private helper functions
-
-
 def toolbar_actions(presenter, text_labels):
     """
     Return a list of actions with the given text labels
