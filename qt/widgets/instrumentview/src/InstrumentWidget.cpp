@@ -146,11 +146,7 @@ InstrumentWidget::InstrumentWidget(QString wsName, QWidget *parent, bool resetGe
 
   m_instrumentActor.reset(new InstrumentActor(m_workspaceName, autoscaling, scaleMin, scaleMax));
 
-  bool isDiscrete =
-      m_instrumentActor->getWorkspace()->isCommonBins() && m_instrumentActor->getWorkspace()->isIntegerBins();
-  int stepsTotal = static_cast<int>(m_instrumentActor->getWorkspace()->getNumberBins(0));
-
-  m_xIntegration = new XIntegrationControl(this, isDiscrete, stepsTotal);
+  m_xIntegration = new XIntegrationControl(this);
   m_mainLayout->addWidget(m_xIntegration);
   m_qtConnect->connect(m_xIntegration, SIGNAL(changed(double, double)), this,
                        SLOT(setIntegrationRange(double, double)));
@@ -279,8 +275,6 @@ void InstrumentWidget::init(bool resetGeometry, bool autoscaling, double scaleMi
     m_instrumentActor.reset(new InstrumentActor(m_workspaceName, autoscaling, scaleMin, scaleMax));
   }
 
-  updateIntegrationWidget(true);
-
   auto surface = getSurface();
   if (resetGeometry || !surface) {
     if (setDefaultView) {
@@ -302,6 +296,7 @@ void InstrumentWidget::init(bool resetGeometry, bool autoscaling, double scaleMi
     surface->resetInstrumentActor(m_instrumentActor.get());
     updateInfoText();
   }
+  updateIntegrationWidget(true);
 }
 
 /**
@@ -617,16 +612,20 @@ void InstrumentWidget::replaceWorkspace(const std::string &newWs, const std::str
 
 /**
  * @brief InstrumentWidget::updateIntegrationWidget
- * Update the range of the integration widget, and show or hide it is needed
- * @param init : boolean set to true if the integration widget is still being
- * initialized
+ * Update the range of the integration widget, and show or hide it if needed
+ * @param init : boolean set to true if the integration widget is still being initialized
  */
 void InstrumentWidget::updateIntegrationWidget(bool init) {
-  m_xIntegration->setDiscrete(m_instrumentActor->getWorkspace()->isCommonBins() &&
-                              m_instrumentActor->getWorkspace()->isIntegerBins());
+  // discrete integration range is only used if all the bins are common and integers, as a convention
+  bool isDiscrete =
+      m_instrumentActor->getWorkspace()->isCommonBins() && m_instrumentActor->getWorkspace()->isIntegerBins();
+
+  m_xIntegration->setDiscrete(isDiscrete);
   m_xIntegration->setTotalRange(m_instrumentActor->minBinValue(), m_instrumentActor->maxBinValue());
 
   if (!init) {
+    // setRange needs the initialization of the instrument viewer to run, but is only needed when replacing a workspace,
+    // hence the check
     m_xIntegration->setRange(m_instrumentActor->minBinValue(), m_instrumentActor->maxBinValue());
   }
 

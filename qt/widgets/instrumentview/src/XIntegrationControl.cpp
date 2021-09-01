@@ -25,10 +25,9 @@
 
 namespace MantidQt::MantidWidgets {
 
-XIntegrationScrollBar::XIntegrationScrollBar(QWidget *parent, bool isDiscrete, int stepsTotal)
+XIntegrationScrollBar::XIntegrationScrollBar(QWidget *parent)
     : QFrame(parent), m_resizeMargin(5), m_init(false), m_resizingLeft(false), m_resizingRight(false), m_moving(false),
-      m_changed(false), m_x(0), m_width(0), m_minimum(0.0), m_maximum(1.0), m_stepsTotal(stepsTotal),
-      m_isDiscrete(isDiscrete), m_currentStepMin(0), m_currentStepMax(stepsTotal - 1) {
+      m_changed(false), m_x(0), m_width(0), m_minimum(0.0), m_maximum(1.0) {
   setMouseTracking(true);
   setFrameShape(StyledPanel);
   m_slider = new QPushButton(this);
@@ -58,15 +57,40 @@ bool XIntegrationScrollBar::eventFilter(QObject *object, QEvent *e) {
   auto *slider = dynamic_cast<QPushButton *>(object);
   if (!slider)
     return false;
-  if (m_isDiscrete) {
-    return manageEventDiscrete(e);
-  }
-  if (e->type() == QEvent::Leave) {
+
+  // first we take care of events that don't depend on the slider being discrete or not
+  switch (e->type()) {
+  case QEvent::Leave:
     if (QApplication::overrideCursor()) {
       QApplication::restoreOverrideCursor();
     }
     return true;
-  } else if (e->type() == QEvent::MouseButtonPress) {
+
+  case QEvent::KeyRelease: {
+    QKeyEvent *keyEv = static_cast<QKeyEvent *>(e);
+
+    // for key press, update only on release of the key
+    if ((keyEv->key() == Qt::Key_Left || keyEv->key() == Qt::Key_Right || keyEv->key() == Qt::Key_Up ||
+         keyEv->key() == Qt::Key_Down) &&
+        !keyEv->isAutoRepeat()) {
+      emit changed(m_minimum, m_maximum);
+    }
+    m_changed = false;
+    return true;
+  }
+
+  case QEvent::MouseButtonRelease: {
+    m_resizingLeft = false;
+    m_resizingRight = false;
+    m_moving = false;
+    if (m_changed) {
+      emit changed(m_minimum, m_maximum);
+    }
+    m_changed = false;
+    return false;
+  }
+
+  case QEvent::MouseButtonPress: {
     auto *me = static_cast<QMouseEvent *>(e);
     m_x = me->x();
     m_width = m_slider->width();
@@ -77,15 +101,29 @@ bool XIntegrationScrollBar::eventFilter(QObject *object, QEvent *e) {
     } else {
       m_moving = true;
     }
-  } else if (e->type() == QEvent::MouseButtonRelease) {
-    m_resizingLeft = false;
-    m_resizingRight = false;
-    m_moving = false;
-    if (m_changed) {
-      emit changed(m_minimum, m_maximum);
-    }
-    m_changed = false;
-  } else if (e->type() == QEvent::MouseMove) {
+    return false;
+  }
+  default:
+    break;
+  }
+
+  // in all other cases, the treatment is different
+  if (m_isDiscrete) {
+    return manageEventDiscrete(e);
+  } else {
+    return manageEventContinuous(e);
+  }
+}
+
+/**
+ * @brief XIntegrationScrollBar::manageEventContinuous
+ * Takes care of qt event when the slider is pseudo continuous
+ * @param e the qt event to manage
+ * @return
+ */
+bool XIntegrationScrollBar::manageEventContinuous(QEvent *e) {
+  switch (e->type()) {
+  case QEvent::MouseMove: {
     auto *me = static_cast<QMouseEvent *>(e);
     int x = me->x();
     int w = m_slider->width();
@@ -127,7 +165,8 @@ bool XIntegrationScrollBar::eventFilter(QObject *object, QEvent *e) {
       }
     }
     return true;
-  } else if (e->type() == QEvent::KeyPress) {
+  }
+  case QEvent::KeyPress: {
 
     QKeyEvent *keyEv = static_cast<QKeyEvent *>(e);
     int step = 1;
@@ -138,27 +177,25 @@ bool XIntegrationScrollBar::eventFilter(QObject *object, QEvent *e) {
     int totalWidth = this->width();
 
     switch (keyEv->key()) {
-    case Qt::Key_Left:
+    case Qt::Key_Left: {
       if (sliderx >= step) {
         m_slider->move(sliderx - step, slidery);
       } else {
         m_slider->move(0, slidery);
       }
-      m_changed = true;
-      updateMinMax();
       break;
+    }
 
-    case Qt::Key_Right:
+    case Qt::Key_Right: {
       if (sliderx + sliderWidth + step < totalWidth) {
         m_slider->move(sliderx + step, slidery);
       } else {
         m_slider->move(totalWidth - sliderWidth, slidery);
       }
-      m_changed = true;
-      updateMinMax();
       break;
+    }
 
-    case Qt::Key_Up:
+    case Qt::Key_Up: {
       // widen the range
 
       // expand to the left, depending on the space on this side
@@ -176,11 +213,10 @@ bool XIntegrationScrollBar::eventFilter(QObject *object, QEvent *e) {
       } else {
         m_slider->resize(totalWidth - m_slider->x(), sliderHeight);
       }
-      m_changed = true;
-      updateMinMax();
       break;
+    }
 
-    case Qt::Key_Down:
+    case Qt::Key_Down: {
       // shrink the range
 
       // only change the range if it is not already minimal
@@ -194,116 +230,75 @@ bool XIntegrationScrollBar::eventFilter(QObject *object, QEvent *e) {
           m_slider->move(sliderx + (sliderWidth - m_resizeMargin) / 2, slidery);
           m_slider->resize(m_resizeMargin, sliderHeight);
         }
-        m_changed = true;
-        updateMinMax();
       }
       break;
-
+    }
     default:
-      break;
+      return false;
     }
-    return true;
-  } else if (e->type() == QEvent::KeyRelease) {
-    QKeyEvent *keyEv = static_cast<QKeyEvent *>(e);
-    if ((keyEv->key() == Qt::Key_Left || keyEv->key() == Qt::Key_Right || keyEv->key() == Qt::Key_Up ||
-         keyEv->key() == Qt::Key_Down) &&
-        !keyEv->isAutoRepeat()) {
-      emit changed(m_minimum, m_maximum);
-    }
-    return true;
+    m_changed = true;
+    updateMinMax();
+    return false;
   }
-  return false;
+  default:
+    return false;
+  }
 }
 
+/**
+ * @brief XIntegrationScrollBar::manageEventDiscrete
+ * Manage events for the scroll bar when the bar is supposed to work along discrete intervals rather than pseudo
+ * continuous ones.
+ * @param e the qt event
+ */
 bool XIntegrationScrollBar::manageEventDiscrete(QEvent *e) {
 
   switch (e->type()) {
-  case QEvent::Leave:
-    if (QApplication::overrideCursor()) {
-      QApplication::restoreOverrideCursor();
-    }
-    return true;
   case QEvent::KeyPress: {
     QKeyEvent *keyEv = static_cast<QKeyEvent *>(e);
+
     switch (keyEv->key()) {
     case Qt::Key_Right:
       if (m_currentStepMax < m_stepsTotal - 1) {
         m_currentStepMax += 1;
         m_currentStepMin += 1;
       }
-      m_changed = true;
-      updateMinMax();
       break;
     case Qt::Key_Left:
       if (m_currentStepMin > 0) {
         m_currentStepMin -= 1;
         m_currentStepMax -= 1;
       }
-      m_changed = true;
-      updateMinMax();
       break;
     case Qt::Key_Up:
-      if ((m_currentStepMax + m_currentStepMin) % 2 == 0 && m_currentStepMax < m_stepsTotal - 1) {
+      // condition so that the slider alternate the growing side
+      if (((m_currentStepMax + m_currentStepMin) % 2 == 0 || m_currentStepMin == 0) &&
+          m_currentStepMax < m_stepsTotal - 1) {
         m_currentStepMax += 1;
-        m_changed = true;
       } else if (m_currentStepMin > 0) {
         m_currentStepMin -= 1;
-        m_changed = true;
       }
-      updateMinMax();
       break;
     case Qt::Key_Down:
+      // first check if the slider can be smaller
       if (m_currentStepMax - m_currentStepMin > 0) {
+        // if so, alternate from which side it shrinks
         if ((m_currentStepMax + m_currentStepMin) % 2 == 1) {
           m_currentStepMax -= 1;
         } else {
           m_currentStepMin += 1;
         }
-        m_changed = true;
       }
-      updateMinMax();
       break;
     default:
-      break;
+      // an unhelpful key was pressed, nothing to do here
+      return false;
     }
+    // this wasn't the default case, a useful key was actually pressed, so the values need to be updated
     setDiscreteValues();
+    emit running(m_minimum, m_maximum);
     return true;
   }
-
-  case QEvent::KeyRelease: {
-    QKeyEvent *keyEv = static_cast<QKeyEvent *>(e);
-    if ((keyEv->key() == Qt::Key_Left || keyEv->key() == Qt::Key_Right || keyEv->key() == Qt::Key_Up ||
-         keyEv->key() == Qt::Key_Down) &&
-        !keyEv->isAutoRepeat()) {
-      emit changed(m_minimum, m_maximum);
-    }
-    m_changed = false;
-    return true;
-  }
-
-  case QEvent::MouseButtonPress: {
-    auto *me = static_cast<QMouseEvent *>(e);
-    m_x = me->x();
-    m_width = m_slider->width();
-    if (m_x < m_resizeMargin) {
-      m_resizingLeft = true;
-    } else if (m_x > m_width - m_resizeMargin) {
-      m_resizingRight = true;
-    } else {
-      m_moving = true;
-    }
-    break;
-  }
-
-  case QEvent::MouseButtonRelease:
-    m_resizingLeft = false;
-    m_resizingRight = false;
-    m_moving = false;
-    if (m_changed) {
-      emit changed(m_minimum, m_maximum);
-    }
-    m_changed = false;
-    break;
 
   case QEvent::MouseMove: {
     auto *me = static_cast<QMouseEvent *>(e);
@@ -317,45 +312,48 @@ bool XIntegrationScrollBar::manageEventDiscrete(QEvent *e) {
       QApplication::restoreOverrideCursor();
     }
 
+    int idx = x - m_x;
+
     if (m_moving) {
-      int idx = x - m_x;
       int new_x = m_slider->x() + idx;
       int width = m_currentStepMax - m_currentStepMin;
       m_currentStepMin = std::min(
           static_cast<int>(std::round(static_cast<double>(std::max(new_x, 0) * (m_stepsTotal - 1)) / this->width())),
           m_stepsTotal - width - 1);
       m_currentStepMax = m_currentStepMin + width;
-      m_changed = true;
-
-      updateMinMax();
 
     } else if (m_resizingLeft) {
-      int idx = x - m_x;
       int new_x = m_slider->x() + idx;
       m_currentStepMin =
           static_cast<int>(std::round(static_cast<double>(std::max(new_x, 0) * (m_stepsTotal - 1)) / this->width()));
       m_currentStepMin = std::min(m_currentStepMin, m_currentStepMax);
-      m_changed = true;
-      updateMinMax();
 
     } else if (m_resizingRight) {
-      int idx = x - m_x;
       int new_x = m_slider->x() + idx + m_width;
       m_currentStepMax = static_cast<int>(
           std::round(static_cast<double>(std::min(new_x, this->width()) * (m_stepsTotal - 1) / this->width())));
       m_currentStepMax = std::max(m_currentStepMax, m_currentStepMin);
-      m_changed = true;
-      updateMinMax();
+    } else {
+      // the mouse is just moving around, no need to update anything
+      return true;
     }
+
+    m_changed = true;
     setDiscreteValues();
+    emit running(m_minimum, m_maximum);
+
     return true;
   }
   default:
-    break;
+    return false;
   }
-  return false;
 }
 
+/**
+ * @brief XIntegrationScrollBar::setDiscreteValues
+ * If the slider is discrete, convert the current step min and step max to new min and max (between 0 and 1) and update
+ * the slider. Mostly a convenience function.
+ */
 void XIntegrationScrollBar::setDiscreteValues() {
   if (!m_isDiscrete)
     return;
@@ -379,6 +377,19 @@ double XIntegrationScrollBar::getMaximum() const { return m_maximum; }
 double XIntegrationScrollBar::getWidth() const { return m_maximum - m_minimum; }
 
 /**
+ * @brief XIntegrationScrollBar::setStepsTotal
+ * Set the total number of steps and reset the current scroll bar internal variables to match these new values.
+ * @param steps the new total number of step for the discrete bar.b
+ */
+void XIntegrationScrollBar::setStepsTotal(int steps) {
+  m_stepsTotal = steps;
+  m_currentStepMin = 0;
+  m_currentStepMax = steps - 1;
+  m_minimum = 0;
+  m_maximum = 1;
+}
+
+/**
  * Set new minimum and maximum values
  */
 void XIntegrationScrollBar::set(double minimum, double maximum) {
@@ -392,6 +403,7 @@ void XIntegrationScrollBar::set(double minimum, double maximum) {
   m_maximum = maximum;
   m_currentStepMin = static_cast<int>(std::round(minimum * static_cast<double>(m_stepsTotal - 1)));
   m_currentStepMax = static_cast<int>(std::round(maximum * static_cast<double>(m_stepsTotal - 1)));
+
   int x = static_cast<int>(m_minimum * this->width());
   int w = static_cast<int>((m_maximum - m_minimum) * this->width());
 
@@ -404,6 +416,10 @@ void XIntegrationScrollBar::set(double minimum, double maximum) {
   m_slider->resize(w, this->height());
 }
 
+/**
+ * @brief XIntegrationScrollBar::updateMinMax
+ * Use the current slider position to update the integration. Do not use in discrete case.
+ */
 void XIntegrationScrollBar::updateMinMax() {
   if (!m_isDiscrete) {
     m_minimum = double(m_slider->x()) / this->width();
@@ -413,9 +429,9 @@ void XIntegrationScrollBar::updateMinMax() {
 }
 
 //---------------------------------------------------------------------------------//
-XIntegrationControl::XIntegrationControl(InstrumentWidget *instrWindow, bool isDiscrete, int stepsTotal)
-    : QFrame(instrWindow), m_instrWindow(instrWindow), m_totalMinimum(0), m_totalMaximum(1), m_minimum(0), m_maximum(1),
-      m_isDiscrete(isDiscrete) {
+XIntegrationControl::XIntegrationControl(InstrumentWidget *instrWindow)
+    : QFrame(instrWindow), m_instrWindow(instrWindow), m_totalMinimum(0), m_totalMaximum(1), m_minimum(0),
+      m_maximum(1) {
   auto *layout = new QHBoxLayout();
   m_minText = new QLineEdit(this);
   m_minText->setMaximumWidth(100);
@@ -434,7 +450,7 @@ XIntegrationControl::XIntegrationControl(InstrumentWidget *instrWindow, bool isD
   m_units = new QLabel("TOF", this);
   m_setWholeRange = new QPushButton("Reset");
   m_setWholeRange->setToolTip("Reset integration range to maximum");
-  m_scrollBar = new XIntegrationScrollBar(this, isDiscrete, stepsTotal);
+  m_scrollBar = new XIntegrationScrollBar(this);
 
   layout->addWidget(m_units, 0);
   layout->addWidget(m_minSpin, 0);
@@ -442,8 +458,6 @@ XIntegrationControl::XIntegrationControl(InstrumentWidget *instrWindow, bool isD
   layout->addWidget(m_scrollBar, 1);
   layout->addWidget(m_maxSpin, 0);
   layout->addWidget(m_maxText, 0);
-
-  setDiscrete(m_isDiscrete);
 
   layout->addWidget(m_setWholeRange, 0);
   setLayout(layout);
@@ -493,7 +507,13 @@ void XIntegrationControl::setTotalRange(double minimum, double maximum) {
   m_minimum = minimum;
   m_maximum = maximum;
 
-  updateTextBoxes();
+  if (m_isDiscrete) {
+    discretize();
+    m_scrollBar->setStepsTotal(static_cast<int>(m_totalMaximum - m_totalMinimum + 1));
+  }
+
+  // we reset the slider to max range, since its size has been changed
+  setWholeRange();
 }
 
 void XIntegrationControl::setRange(double minimum, double maximum) {
@@ -529,6 +549,8 @@ void XIntegrationControl::setDiscrete(bool isDiscrete) {
     m_minText->show();
     m_maxText->show();
   }
+
+  m_scrollBar->setDiscrete(m_isDiscrete);
 }
 
 void XIntegrationControl::setWholeRange() { setRange(m_totalMinimum, m_totalMaximum); }
