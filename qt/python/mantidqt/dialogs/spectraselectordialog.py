@@ -153,7 +153,6 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
 
         if self._advanced:
             ui.advanced_options_widget = AdvancedPlottingOptionsWidget(parent=self)
-            self.setMinimumSize(300,351)
             ui.layout.replaceWidget(ui.advanced_plots_dummy_widget, ui.advanced_options_widget)
             if len(self._workspaces) > 2:
                 ui.plotType.addItem(SURFACE)
