@@ -5,10 +5,9 @@
 namespace Mantid {
 namespace Algorithms {
 
-WorkspaceBoundingBox::WorkspaceBoundingBox(API::MatrixWorkspace_sptr workspace, Kernel::Logger &g_log)
-    : workspace(workspace), g_log(g_log) {}
+WorkspaceBoundingBox::WorkspaceBoundingBox(API::MatrixWorkspace_sptr workspace) : workspace(workspace) {}
 
-WorkspaceBoundingBox::WorkspaceBoundingBox(Kernel::Logger &g_log) : g_log(g_log) {}
+WorkspaceBoundingBox::WorkspaceBoundingBox() {}
 
 WorkspaceBoundingBox::~WorkspaceBoundingBox() {}
 
