@@ -15,6 +15,12 @@ Concepts
 Algorithms
 ----------
 
+Improvements
+############
+
+- :ref:`GenerateLogbook <algm-GenerateLogbook>` now allows to perform binary operations even when certain entries do not exist, e.g. to create a string with all polarisation orientations contained in a collection of data files
+
+
 Data Objects
 ------------
 
