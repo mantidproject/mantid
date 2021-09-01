@@ -357,7 +357,7 @@ class ILL_D33_Test(systemtesting.MantidSystemTest):
 
         # Sample container transmission
         SANSILLReduction(Run='027860', ProcessAs='Transmission',
-                         AbsorberInputWorkspace='Cd', BeamInputWorkspace='Dbtr', OutputWorkspace='sc_tr', Version=1, Version=1)
+                         AbsorberInputWorkspace='Cd', BeamInputWorkspace='Dbtr', OutputWorkspace='sc_tr', Version=1)
 
         # Sample container
         SANSILLReduction(Run='027930', ProcessAs='Container',
