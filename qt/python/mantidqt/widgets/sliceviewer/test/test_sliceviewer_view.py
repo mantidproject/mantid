@@ -151,13 +151,6 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
         self.assertTrue(isinstance(colorbar.get_norm(), Normalize))
         pres.view.close()
 
-    def test_log_norm_disabled_for_non_positive_data(self):
-        conf = MockConfig()
-        pres = SliceViewer(self.histo_ws, conf=conf)
-        colorbar = pres.view.data_view.colorbar
-        self.assertFalse(colorbar.norm.model().item(1, 0).isEnabled())
-        pres.view.close()
-
     def test_changing_norm_updates_clim_validators(self):
         pres = SliceViewer(self.histo_ws_positive)
         colorbar = pres.view.data_view.colorbar
@@ -254,7 +247,16 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
                                Units='1\\A,1\\A,1\\A')
         FakeMDEventData(ws, UniformParams="1000000")
         pres = SliceViewer(ws)
-        self._assertNoErrorInADSHandlerFromSeparateThread(partial(scale_ws, ws))
+        try:
+            # the ads handler catches all exceptions so that the handlers don't
+            # bring down the sliceviewer. Check if anything is writtent to stderr
+            stderr_capture = io.StringIO()
+            stderr_orig = sys.stderr
+            sys.stderr = stderr_capture
+            ws *= 100
+            self.assertTrue('Error occurred in handler' not in stderr_capture.getvalue(), msg=stderr_capture.getvalue())
+        finally:
+            sys.stderr = stderr_orig
 
         QApplication.sendPostedEvents()
 
@@ -353,6 +355,7 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
             self.assertTrue('Error occurred in handler' not in stderr_capture.getvalue(), msg=stderr_capture.getvalue())
         finally:
             sys.stderr = stderr_orig
+
 
 
 # private helper functions
