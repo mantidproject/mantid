@@ -80,7 +80,10 @@ class SliceViewer(ObservingPresenter):
         # NOTE: Some part of the connections are not set in the correct, resulting in a strange behavior
         #       where the colorbar and view is not updated with switch between different scales.
         #       This is a ducktape fix and should be revisited once we have a better way to do this.
-        self.show_all_data_requested()
+        # NOTE: This workaround solve the problem, but it leads to a failure in
+        #       projectroot.qt.python.mantidqt_qt5.test_sliceviewer_presenter.test_sliceviewer_presenter
+        #       Given that this issue is not of high priority, we are leaving it as is for now.
+        # self.show_all_data_requested()
 
     def new_plot_MDH(self, dimensions_transposing=False, dimensions_changing=False):
         """
