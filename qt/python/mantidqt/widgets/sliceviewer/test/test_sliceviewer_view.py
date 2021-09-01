@@ -357,10 +357,7 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
             sys.stderr = stderr_orig
 
 
-
 # private helper functions
-
-
 def toolbar_actions(presenter, text_labels):
     """
     Return a list of actions with the given text labels
