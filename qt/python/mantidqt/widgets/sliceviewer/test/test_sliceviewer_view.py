@@ -247,16 +247,7 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
                                Units='1\\A,1\\A,1\\A')
         FakeMDEventData(ws, UniformParams="1000000")
         pres = SliceViewer(ws)
-        try:
-            # the ads handler catches all exceptions so that the handlers don't
-            # bring down the sliceviewer. Check if anything is writtent to stderr
-            stderr_capture = io.StringIO()
-            stderr_orig = sys.stderr
-            sys.stderr = stderr_capture
-            ws *= 100
-            self.assertTrue('Error occurred in handler' not in stderr_capture.getvalue(), msg=stderr_capture.getvalue())
-        finally:
-            sys.stderr = stderr_orig
+        self._assertNoErrorInADSHandlerFromSeparateThread(partial(scale_ws, ws))
 
         QApplication.sendPostedEvents()
 
