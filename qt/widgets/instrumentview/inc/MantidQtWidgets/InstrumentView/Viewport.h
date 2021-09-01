@@ -85,7 +85,7 @@ public:
   /// Call to set the View to Z- direction
   void setViewToZNegative();
 
-  void adjustProjection(const unsigned int axis);
+  void adjustProjection();
 
   /// Init rotation at a point on the screen
   void initRotationFrom(int a, int b);
@@ -158,8 +158,10 @@ protected:
   double m_rightOrig;
   double m_bottomOrig;
   double m_topOrig;
-  double m_nearOrig;
-  double m_farOrig;
+  double m_zminOrig;
+  double m_zmaxOrig;
+  double m_zmin;
+  double m_zmax;
 
   /* Trackball rotation */
 

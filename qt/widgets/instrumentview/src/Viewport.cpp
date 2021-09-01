@@ -80,8 +80,6 @@ void Viewport::setProjection(double l, double r, double b, double t,
   m_rightOrig = m_right;
   m_topOrig = m_top;
   m_bottomOrig = m_bottom;
-  m_nearOrig = m_near;
-  m_farOrig = m_far;
 }
 
 /**
@@ -99,6 +97,12 @@ void Viewport::setProjection(const Mantid::Kernel::V3D &minBounds,
   double tmp = maxBounds.norm();
   if (tmp > radius)
     radius = tmp;
+
+  // save the Z value of the bounding box to use when rotating views
+  m_zmin = minBounds.Z();
+  m_zmax = maxBounds.Z();
+  m_zminOrig = m_zmin;
+  m_zmaxOrig = m_zmax;
 
   setProjection(minBounds.X(), maxBounds.X(), minBounds.Y(), maxBounds.Y(),
                 -radius, radius, type);
@@ -260,7 +264,7 @@ void Viewport::setViewToXPositive() {
                              Mantid::Kernel::V3D(-1.0, 0.0, 0.0));
   m_quaternion = tempy;
   m_quaternion.GLMatrix(&m_rotationmatrix[0]);
-  adjustProjection(0);
+  adjustProjection();
 }
 
 /**
@@ -273,7 +277,7 @@ void Viewport::setViewToYPositive() {
                              Mantid::Kernel::V3D(0.0, -1.0, 0.0));
   m_quaternion = tempy;
   m_quaternion.GLMatrix(&m_rotationmatrix[0]);
-  adjustProjection(1);
+  adjustProjection();
 }
 
 /**
@@ -284,7 +288,7 @@ void Viewport::setViewToZPositive() {
   reset();
   m_quaternion.init();
   m_quaternion.GLMatrix(&m_rotationmatrix[0]);
-  adjustProjection(2);
+  adjustProjection();
 }
 
 /**
@@ -297,7 +301,7 @@ void Viewport::setViewToXNegative() {
                              Mantid::Kernel::V3D(1.0, 0.0, 0.0));
   m_quaternion = tempy;
   m_quaternion.GLMatrix(&m_rotationmatrix[0]);
-  adjustProjection(0);
+  adjustProjection();
 }
 
 /**
@@ -310,7 +314,7 @@ void Viewport::setViewToYNegative() {
                              Mantid::Kernel::V3D(0.0, 1.0, 0.0));
   m_quaternion = tempy;
   m_quaternion.GLMatrix(&m_rotationmatrix[0]);
-  adjustProjection(1);
+  adjustProjection();
 }
 
 /**
@@ -322,31 +326,20 @@ void Viewport::setViewToZNegative() {
   Mantid::Kernel::Quat tempy(180.0, Mantid::Kernel::V3D(0.0, 1.0, 0.0));
   m_quaternion = tempy;
   m_quaternion.GLMatrix(&m_rotationmatrix[0]);
-  adjustProjection(2);
+  adjustProjection();
 }
 
-void Viewport::adjustProjection(const unsigned int axis) {
+void Viewport::adjustProjection() {
   // reset the projection bounds to the original values
   m_left = m_leftOrig;
   m_right = m_rightOrig;
   m_top = m_topOrig;
   m_bottom = m_bottomOrig;
-  m_near = m_nearOrig;
-  m_far = m_farOrig;
-  // rotate the original projection based on the new quaternion
-  m_quaternion.rotateBB(m_left, m_bottom, m_near, m_right, m_top, m_far);
-  if (axis == 0) {
-    // X axis rotation, so use rotated Z values as new X
-    m_left = m_near;
-    m_right = m_far;
-  } else if (axis == 1) {
-    // Y axis rotation, so use rotated Z values as new Y
-    m_bottom = m_near;
-    m_top = m_far;
-  }
-  // restore the Z projection bounds
-  m_near = m_nearOrig;
-  m_far = m_farOrig;
+  m_zmin = m_zminOrig;
+  m_zmax = m_zmaxOrig;
+
+  m_quaternion.rotateBB(m_left, m_bottom, m_zmin, m_right, m_top, m_zmax);
+
   // update the GL projection with the new bounds
   applyProjection();
 }
