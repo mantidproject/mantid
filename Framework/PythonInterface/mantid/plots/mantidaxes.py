@@ -666,7 +666,8 @@ class MantidAxes(Axes):
             workspace = args[0]
             spec_num = self.get_spec_number_or_bin(workspace, kwargs)
             normalize_by_bin_width, kwargs = get_normalize_by_bin_width(workspace, self, **kwargs)
-            is_normalized = normalize_by_bin_width or workspace.isDistribution()
+            is_normalized = normalize_by_bin_width or \
+                            (hasattr(workspace, 'isDistribution') and workspace.isDistribution())
 
             with autoscale_on_update(self, autoscale_on):
                 artist = self.track_workspace_artist(workspace,
@@ -786,7 +787,8 @@ class MantidAxes(Axes):
             workspace = args[0]
             spec_num = self.get_spec_number_or_bin(workspace, kwargs)
             normalize_by_bin_width, kwargs = get_normalize_by_bin_width(workspace, self, **kwargs)
-            is_normalized = normalize_by_bin_width or workspace.isDistribution()
+            is_normalized = normalize_by_bin_width or \
+                            (hasattr(workspace, 'isDistribution') and workspace.isDistribution())
 
             with autoscale_on_update(self, autoscale_on):
                 artist = self.track_workspace_artist(workspace,
@@ -1515,6 +1517,27 @@ class MantidAxes3D(Axes3D):
             return axesfunctions3D.contourf(self, *args, **kwargs)
         else:
             return Axes3D.contourf(self, *args, **kwargs)
+
+    def set_mesh_axes_equal(self, mesh):
+        """Set the 3D axes centred on the provided mesh and with the aspect ratio equal"""
+
+        ax_limits = mesh.flatten()
+        self.auto_scale_xyz(ax_limits[0::3], ax_limits[1::3], ax_limits[2::3])
+        x_limits = self.get_xlim3d()
+        y_limits = self.get_ylim3d()
+        z_limits = self.get_zlim3d()
+
+        x_range = abs(x_limits[1] - x_limits[0])
+        x_middle = np.mean(x_limits)
+        y_range = abs(y_limits[1] - y_limits[0])
+        y_middle = np.mean(y_limits)
+        z_range = abs(z_limits[1] - z_limits[0])
+        z_middle = np.mean(z_limits)
+        plot_radius = 0.5 * max([x_range, y_range, z_range])
+
+        self.set_xlim3d([x_middle - plot_radius, x_middle + plot_radius])
+        self.set_ylim3d([y_middle - plot_radius, y_middle + plot_radius])
+        self.set_zlim3d([z_middle - plot_radius, z_middle + plot_radius])
 
 
 class _WorkspaceArtists(object):

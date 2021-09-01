@@ -350,6 +350,21 @@ class PhaseTablePresenterTest(unittest.TestCase):
         self.presenter.add_phasequad_to_analysis.assert_any_call(False, False, phasequad_2)
         self.assertEqual(2, self.presenter.calculation_finished_notifier.notify_subscribers.call_count)
 
+    def test_calculate_phasequad(self):
+        self.presenter.phasequad_calculation_complete_notifier = mock.Mock()
+        self.presenter.phasequad_calculation_complete_notifier.notify_subscribers = mock.Mock()
+        self.context.group_pair_context.add_phasequad = mock.Mock()
+        self.context.calculate_phasequads = mock.Mock()
+        phasequad = MuonPhasequad("test", "table")
+        self.presenter._phasequad_obj = phasequad
+
+        self.presenter.calculate_phasequad()
+        self.context.group_pair_context.add_phasequad.assert_called_once_with(phasequad)
+        self.context.calculate_phasequads.assert_called_once_with(phasequad)
+        self.presenter.phasequad_calculation_complete_notifier.notify_subscribers.assert_any_call(phasequad.Re.name)
+        self.presenter.phasequad_calculation_complete_notifier.notify_subscribers.assert_any_call(phasequad.Im.name)
+        self.assertEqual(self.presenter.phasequad_calculation_complete_notifier.notify_subscribers.call_count, 2)
+
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)

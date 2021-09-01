@@ -17,6 +17,7 @@ REBIN_STR = 'Rebin'
 FFT_STR = 'FFT'
 MAXENT_STR = 'MaxEnt'
 PERIOD_STR = "_period_"
+RECONSTRUCTED_SPECTRA='_reconstructed_spectra'
 
 
 def get_raw_data_workspace_name(instrument, run, multi_period, period='1', workspace_suffix=' MA'):
@@ -195,8 +196,8 @@ def get_fft_workspace_name(input_workspace, imaginary_input_workspace):
         return 'FFT; Re ' + input_workspace
 
 
-def get_maxent_workspace_name(input_workspace):
-    return input_workspace + "".join(['; ', MAXENT_STR])
+def get_maxent_workspace_name(input_workspace, method):
+    return input_workspace + "".join(['; by ',method, '; ', MAXENT_STR])
 
 
 def get_fft_component_from_workspace_name(input_workspace):

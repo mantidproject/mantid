@@ -70,25 +70,36 @@ enable_precompiled_headers(inc/MantidPythonInterface/core/PrecompiledHeader.h SR
 
 # Add the target for this directory
 set(_target_name PythonInterfaceCore)
+
 add_library(${_target_name} ${SRC_FILES} ${INC_FILES})
-target_include_directories(${_target_name} PUBLIC inc)
-target_include_directories(${_target_name} SYSTEM PUBLIC ${Boost_INCLUDE_DIRS})
+add_library(Mantid::${_target_name} ALIAS ${_target_name})
+
+
+target_include_directories(${_target_name} PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+		$<INSTALL_INTERFACE:include/Mantid>
+)
 
 # Set the name of the generated library
 set_target_properties(
   ${_target_name} PROPERTIES OUTPUT_NAME MantidPythonInterfaceCore
                              COMPILE_DEFINITIONS IN_MANTID_PYTHONINTERFACE_CORE
 )
-
+# We need an if check here as older versions of boost won't define this target
+# we can remove it once we adopt conda fully.
+if (TARGET Boost::python${Python_VERSION_MAJOR}${Python_VERSION_MINOR})
+set(PUBLIC_TARGETS Python::NumPy Boost::python${Python_VERSION_MAJOR}${Python_VERSION_MINOR})
+else()
 set(PUBLIC_TARGETS Python::NumPy ${BoostPython_LIBRARIES})
+endif()
 if(USE_PYTHON_DYNAMIC_LIB)
 	list(APPEND PUBLIC_TARGETS Python::Python)
 endif()
 # Dependencies
 target_link_libraries(
   ${_target_name}
-  PUBLIC ${PUBLIC_TARGETS}
-  PRIVATE Types Kernel ${Boost_LIBRARIES}  ${POCO_LIBRARIES}
+  PUBLIC ${PUBLIC_TARGETS} Mantid::Kernel
+  PRIVATE Mantid::Types
 )
 
 # Add to the 'Framework/Python' group in MSVS
@@ -105,6 +116,12 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   )
 endif()
 
+
+if (CONDA_BUILD)
+set(TARGET_EXPORT_NAME "MantidPythonInterfaceCoreTargets")
+mtd_install_framework_lib(TARGETS PythonInterfaceCore EXPORT_NAME ${TARGET_EXPORT_NAME})
+else()
 mtd_install_targets(
   TARGETS PythonInterfaceCore INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR}
 )
+endif()

@@ -57,6 +57,7 @@ class ApplyToReducedDataTest(systemtesting.MantidSystemTest):
                                       SignalPeakPixelRange=[155, 165],
                                       SubtractSignalBackground=True,
                                       SignalBackgroundPixelRange=[146, 165],
+                                      ErrorWeighting=True,
                                       NormFlag=True,
                                       NormPeakPixelRange=[154, 162],
                                       NormBackgroundPixelRange=[151, 165],

@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidPythonInterface/kernel/Registry/MappingTypeHandler.h"
+#include "MantidPythonInterface/core/ExtractSharedPtr.h"
 #include "MantidPythonInterface/kernel/Registry/PropertyManagerFactory.h"
 #include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
 
@@ -18,7 +19,9 @@ using boost::python::dict;
 using boost::python::object;
 
 namespace Mantid {
+using Kernel::PropertyManager;
 using Kernel::PropertyManager_sptr;
+
 namespace PythonInterface {
 namespace Registry {
 
@@ -30,10 +33,14 @@ namespace Registry {
  * @param mapping The new value of the property
  */
 void MappingTypeHandler::set(Kernel::IPropertyManager *alg, const std::string &name, const object &mapping) const {
-  if (!PyObject_TypeCheck(mapping.ptr(), &PyDict_Type)) {
+  auto ptrExtract = Mantid::PythonInterface::ExtractSharedPtr<PropertyManager>(mapping);
+  if (ptrExtract.check()) { // try converting directly to a PropertyManager
+    alg->setProperty(name, ptrExtract());
+  } else if (PyObject_TypeCheck(mapping.ptr(), &PyDict_Type)) { // treat the value as a dict
+    alg->setProperty(name, createPropertyManager(dict(mapping)));
+  } else {
     throw std::invalid_argument("Property " + name + " expects a dictionary");
   }
-  alg->setProperty(name, createPropertyManager(dict(mapping)));
 }
 
 /**

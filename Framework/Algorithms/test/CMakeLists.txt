@@ -26,10 +26,7 @@ if(CXXTEST_FOUND)
   configure_file(PlusMinusTest.in.h ${CMAKE_CURRENT_SOURCE_DIR}/MinusTest.h)
 
   # Make the rest of the tests
-  include_directories(../../CurveFitting/inc
-                      ../../DataHandling/inc
-                      ../../Nexus/inc
-                      ../../TestHelpers/inc)
+  include_directories(../../TestHelpers/inc)
   # This variable is used within the cxxtest_add_test macro to build these
   # helper classes into the test executable. It will go out of scope at the end
   # of this file so doesn't need un-setting
@@ -52,15 +49,20 @@ if(CXXTEST_FOUND)
     set(BCRYPT bcrypt)
   endif()
   target_link_libraries(AlgorithmsTest
-                        LINK_PRIVATE
-                        ${MANTIDLIBS}
-                        Algorithms
-                        DataHandling
-                        CurveFitting
-                        Nexus
+                        PRIVATE
+                        Mantid::Algorithms
+                        Mantid::DataHandling
+                        Mantid::CurveFitting
+                        Mantid::Nexus
+                        Mantid::NexusGeometry
+                        Mantid::Geometry
+                        Mantid::API
+                        Mantid::DataObjects
+                        Mantid::Kernel
+                        Boost::boost
+                        Boost::filesystem
                         ${BCRYPT}
-                        gmock
-)
+                        gmock)
   add_dependencies(AlgorithmsTest Crystal CurveFitting)
   add_dependencies(FrameworkTests AlgorithmsTest)
   # Test data

@@ -11,12 +11,11 @@
 
 #include "ConvFitModel.h"
 #include "IndirectFitPlotModel.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/TextAxis.h"
-#include "MantidCurveFitting/Algorithms/ConvolutionFit.h"
-#include "MantidCurveFitting/Algorithms/QENSFitSequential.h"
 #include "MantidTestHelpers/IndirectFitDataCreationHelper.h"
 
 using namespace Mantid::API;
@@ -24,8 +23,6 @@ using namespace Mantid::CurveFitting;
 using namespace MantidQt::CustomInterfaces::IDA;
 using namespace Mantid::IndirectFitDataCreationHelper;
 using namespace MantidQt::CustomInterfaces;
-
-using ConvolutionFitSequential = Algorithms::ConvolutionFit<Algorithms::QENSFitSequential>;
 
 namespace {
 
@@ -103,7 +100,7 @@ IndirectFittingModel *getEmptyDummyModel() { return new DummyModel(); }
 
 void addWorkspaceToModel(IndirectFittingModel *model, int const &numberOfSpectra, std::string workspaceName) {
   ads_instance.addOrReplace(workspaceName, createWorkspace(numberOfSpectra));
-  model->addWorkspace(workspaceName);
+  model->getFitDataModel()->addWorkspace(workspaceName, "0-" + std::to_string(numberOfSpectra - 1));
 }
 template <class FitModel>
 IndirectFittingModel *createModelWithMultipleWorkspaces(int const &numberOfSpectra, bool setFitFunction,
@@ -121,12 +118,12 @@ IndirectFittingModel *createModelWithSingleInstrumentWorkspace(std::string const
                                                                int const &yLength) {
   auto model = getEmptyDummyModel();
   SetUpADSWithWorkspace ads(workspaceName, createWorkspaceWithInstrument(xLength, yLength));
-  model->addWorkspace(workspaceName);
+  model->getFitDataModel()->addWorkspace(workspaceName, "0-" + std::to_string(xLength - 1));
   return model;
 }
 
 IAlgorithm_sptr setupFitAlgorithm(const MatrixWorkspace_sptr &workspace, std::string const &functionString) {
-  auto alg = std::make_shared<ConvolutionFitSequential>();
+  auto alg = AlgorithmManager::Instance().create("ConvolutionFitSequential");
   alg->initialize();
   alg->setProperty("InputWorkspace", workspace);
   alg->setProperty("Function", functionString);

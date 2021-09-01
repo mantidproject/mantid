@@ -496,8 +496,9 @@ def plot_peakd(wksp: Union[str, Workspace2D], peak_positions: Union[float, list]
 
     # Use full detector range if not specified
     max_detid = int(np.max(mtd[str(wksp)].detectorInfo().detectorIDs()))
-    if drange == (0, 0) or drange > (0, max_detid):
-        drange = (0, max_detid)
+    min_detid = int(np.min([item for item in mtd[str(wksp)].detectorInfo().detectorIDs() if item > 0]))
+    if drange == (0, 0) or drange > (min_detid, max_detid):
+        drange = (min_detid, max_detid)
         print("Specified drange out of bounds, using {}".format(drange))
 
     # Plot data for each peak position

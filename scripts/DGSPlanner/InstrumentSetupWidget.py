@@ -152,7 +152,7 @@ class InstrumentSetupWidget(QtWidgets.QWidget):
         metrics=QtGui.QFontMetrics(self.font())
         self.signaldict=dict()
         #instrument selector
-        self.instrumentList=['ARCS','CHESS','CNCS','DNS','EXED','FOCUS','HET','HYSPEC','LET','MAPS','MARI','MERLIN','SEQUOIA']
+        self.instrumentList=['ARCS','CHESS','CNCS','DNS','EXED','FOCUS','HET','HYSPEC','LET','MAPS','MARI','MERLIN','SEQUOIA','WAND\u00B2']
         self.combo = QtWidgets.QComboBox(self)
         for inst in self.instrumentList:
             self.combo.addItem(inst)
@@ -168,17 +168,24 @@ class InstrumentSetupWidget(QtWidgets.QWidget):
         #S2 and Ei edits
         self.S2=0.0
         self.Ei=10.0
+        self.DetZ =0.0
         self.signaldict['S2']=self.S2
         self.signaldict['Ei']=self.Ei
+        self.signaldict['DetZ']=self.DetZ
         self.validatorS2=QtGui.QDoubleValidator(-90.,90.,5,self)
+        self.validatorDetZ=QtGui.QDoubleValidator(-999999.,999999.,5,self)
         self.validatorEi=QtGui.QDoubleValidator(1.,10000.,5,self)
         self.labelS2=QtWidgets.QLabel('S2')
+        self.labelDetZ=QtWidgets.QLabel('DetZ')
         self.labelEi=QtWidgets.QLabel('Incident Energy')
         self.editS2=QtWidgets.QLineEdit()
         self.editS2.setValidator(self.validatorS2)
+        self.editDetZ=QtWidgets.QLineEdit()
+        self.editDetZ.setValidator(self.validatorDetZ)
         self.editEi=QtWidgets.QLineEdit()
         self.editEi.setValidator(self.validatorEi)
         self.editS2.setText(QString(format(self.S2,'.2f')))
+        self.editDetZ.setText(QString(format(self.DetZ,'.1f')))
         self.editEi.setText(QString(format(self.Ei,'.1f')))
         self.editEi.setFixedWidth(metrics.width("8888.88"))
         self.editS2.setFixedWidth(metrics.width("888.88"))
@@ -196,18 +203,15 @@ class InstrumentSetupWidget(QtWidgets.QWidget):
         self.tableViewGon.setMinimumWidth(metrics.width("Minimum ")*8)
         self.tableViewGon.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
         self.tableViewGon.verticalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
+
         self.goniometerNames=['psi','gl','gs']
         self.goniometerDirections=['0,1,0','0,0,1','1,0,0']
         self.goniometerRotationSense=[1,1,1]
         self.goniometerMin=[0.,0.,0.]
         self.goniometerMax=[0.,0.,0.]
         self.goniometerStep=[1.,1.,1.]
-        values={'gonioLabels':self.goniometerNames,'gonioDirs':self.goniometerDirections,'gonioSenses':self.goniometerRotationSense,
-                'gonioMinvals':self.goniometerMin,'gonioMaxvals':self.goniometerMax,'gonioSteps':self.goniometerStep}
-        self.goniomodel = GonioTableModel(values,self)
-        self.tableViewGon.setModel(self.goniomodel)
-        self.tableViewGon.update()
-        self.signaldict.update(values)
+        self.updateTable()
+
         #goniometer figure
         self.figure=Figure(figsize=(2,3))
         self.figure.patch.set_facecolor('white')
@@ -222,7 +226,9 @@ class InstrumentSetupWidget(QtWidgets.QWidget):
         self.gridI.addWidget(self.editEi,0,3)
         self.gridI.addWidget(self.labelS2,0,4)
         self.gridI.addWidget(self.editS2,0,5)
-        self.gridI.addWidget(self.fast,0,6)
+        self.gridI.addWidget(self.labelDetZ,0,6)
+        self.gridI.addWidget(self.editDetZ,0,7)
+        self.gridI.addWidget(self.fast,0,8)
         self.setLayout(QtWidgets.QHBoxLayout())
         self.rightside=QtWidgets.QVBoxLayout()
         self.maskLayout=QtWidgets.QHBoxLayout()
@@ -237,6 +243,7 @@ class InstrumentSetupWidget(QtWidgets.QWidget):
         self.layout().addWidget(self.canvas)
         #connections
         self.editS2.textEdited.connect(self.checkValidInputs)
+        self.editDetZ.textEdited.connect(self.checkValidInputs)
         self.editMask.textEdited.connect(self.setMaskFile)
         self.combo.activated[str].connect(self.instrumentSelected)
         self.fast.stateChanged.connect(self.updateFast)
@@ -313,12 +320,19 @@ class InstrumentSetupWidget(QtWidgets.QWidget):
         d=dict()
         self.instrument=text
         d['instrument']=str(self.instrument)
-        if self.instrument in ["HYSPEC", "EXED"]:
+        if self.instrument in ["HYSPEC", "EXED", "WAND\u00B2"]:
             self.labelS2.show()
             self.editS2.show()
         else:
             self.labelS2.hide()
             self.editS2.hide()
+
+        if self.instrument in ["WAND\u00B2"]:
+            self.labelDetZ.show()
+            self.editDetZ.show()
+        else:
+            self.labelDetZ.hide()
+            self.editDetZ.hide()
         self.updateAll(**d)
 
     def updateFast(self,*dummy_args):
@@ -342,6 +356,43 @@ class InstrumentSetupWidget(QtWidgets.QWidget):
         d={'maskFilename':filename}
         self.updateAll(**d)
 
+    def setLabelEi(self, newLabel):
+        self.labelEi.setText(newLabel)
+
+    def setEiVal(self, val):
+        self.Ei = float(val)
+        self.editEi.setText(val)
+        self.updateAll(Ei=float(val))
+
+    def getInstrumentComboBox(self):
+        return self.combo
+
+    def getEditEi(self):
+        return self.editEi
+
+    def setGoniometerNames(self, names):
+        self.goniometerNames = names.copy()
+        self.updateTable()
+        self.updateFigure()
+
+    def setGoniometerDirections(self, directions):
+        self.goniometerDirections = directions.copy()
+        self.updateTable()
+        self.updateFigure()
+
+    def setGoniometerRotationSense(self, rotationSense):
+        self.goniometerRotationSense = rotationSense.copy()
+        self.updateTable()
+        self.updateFigure()
+
+    def updateTable(self):
+        values={'gonioLabels':self.goniometerNames,'gonioDirs':self.goniometerDirections,'gonioSenses':self.goniometerRotationSense,
+                'gonioMinvals':self.goniometerMin,'gonioMaxvals':self.goniometerMax,'gonioSteps':self.goniometerStep}
+        self.goniomodel = GonioTableModel(values,self)
+        self.tableViewGon.setModel(self.goniomodel)
+        self.tableViewGon.update()
+        self.signaldict.update(values)
+
     def checkValidInputs(self, *dummy_args, **dummy_kwargs):
         sender = self.sender()
         state = sender.validator().validate(sender.text(), 0)[0]
@@ -354,6 +405,9 @@ class InstrumentSetupWidget(QtWidgets.QWidget):
             if sender==self.editEi:
                 self.Ei=float(sender.text())
                 d['Ei']=self.Ei
+            if sender==self.editDetZ:
+                self.DetZ=float(sender.text())
+                d['DetZ']=self.DetZ
         else:
             color = '#ff0000'
         sender.setStyleSheet('QLineEdit { background-color: %s }' % color)

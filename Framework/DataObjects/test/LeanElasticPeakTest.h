@@ -39,6 +39,8 @@ public:
     TS_ASSERT_THROWS(p.getTOF(), const Exception::NotImplementedError &)
     TS_ASSERT_EQUALS(p.getScattering(), 0.)
     TS_ASSERT_EQUALS(p.getAzimuthal(), -M_PI)
+    TS_ASSERT_THROWS(p.getRow(), const Exception::NotImplementedError &)
+    TS_ASSERT_THROWS(p.getCol(), const Exception::NotImplementedError &)
     TS_ASSERT_THROWS(p.getL1(), const Exception::NotImplementedError &)
     TS_ASSERT_THROWS(p.getL2(), const Exception::NotImplementedError &)
   }

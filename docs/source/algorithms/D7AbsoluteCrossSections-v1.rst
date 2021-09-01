@@ -35,7 +35,6 @@ This information is used for proper normalisation of the given sample.
 The following keys need to be defined:
 
 - *SampleMass*
-- *FormulaUnits*
 - *FormulaUnitMass*
 - *SampleSpin* if the `NormalisationMethod` is set to `Paramagnetic`
 - *IncoherentCrossSection* if the `NormalisationMethod` is set to `Incoherent` and `AbsoluteUnitsNormalisation` is *True*
@@ -53,9 +52,9 @@ At least two separate measurements along the same axis with opposite spin orient
 
 .. math::
 
-      N = 2 \cdot \left(\frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{nsf}} - \left(\frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{sf}}
+      N &= \left(\frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{nsf}} - \frac{1}{2} \left(\frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{sf}}
 
-      I = 2 \cdot \left(\frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{sf}} - \left(\frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{nsf}}
+      I &= \frac{3}{2} \left(\frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{sf}}
 
 
 In this case, the magnetic cross-section cannot be separated from data.
@@ -100,7 +99,7 @@ where :math:`c_{0} = \text{cos}^{2} \alpha` and :math:`c_{4} = \text{cos}^{2} (\
 
 .. math::
 
-   N = \frac{1}{12} \cdot \left(2 \cdot \left( \left(\frac{\text{d}\sigma_{x}}{\text{d}\Omega}\right)_{\text{nsf}} + \left(\frac{\text{d}\sigma_{y}}{\text{d}\Omega}\right)_{\text{nsf}} + 2 \cdot \left(\frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{nsf}} + \left(\frac{\text{d}\sigma_{x+y}}{\text{d}\Omega}\right)_{\text{nsf}} + \left(\frac{\text{d}\sigma_{x-y}}{\text{d}\Omega}\right)_{\text{nsf}} \right) \\ - \left( \left(\frac{\text{d}\sigma_{x}}{\text{d}\Omega}\right)_{\text{sf}} + \left(\frac{\text{d}\sigma_{y}}{\text{d}\Omega}\right)_{\text{sf}} + \left(\frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{sf}} + \left(\frac{\text{d}\sigma_{x+y}}{\text{d}d\Omega}\right)_{\text{sf}} + \left(\frac{\text{d}\sigma_{x-y}}{\text{d}\Omega}\right)_{\text{sf}} \right) \right)
+   N = \frac{1}{12} \cdot \left(2 \cdot \left( \left(\frac{\text{d}\sigma_{x}}{\text{d}\Omega}\right)_{\text{nsf}} + \left(\frac{\text{d}\sigma_{y}}{\text{d}\Omega}\right)_{\text{nsf}} + 2 \cdot \left(\frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{nsf}} + \left(\frac{\text{d}\sigma_{x+y}}{\text{d}\Omega}\right)_{\text{nsf}} + \left(\frac{\text{d}\sigma_{x-y}}{\text{d}\Omega}\right)_{\text{nsf}} \right) \right. \\ - \left. \left( \left(\frac{\text{d}\sigma_{x}}{\text{d}\Omega}\right)_{\text{sf}} + \left(\frac{\text{d}\sigma_{y}}{\text{d}\Omega}\right)_{\text{sf}} + \left(\frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{sf}} + \left(\frac{\text{d}\sigma_{x+y}}{\text{d}d\Omega}\right)_{\text{sf}} + \left(\frac{\text{d}\sigma_{x-y}}{\text{d}\Omega}\right)_{\text{sf}} \right) \right)
 
 .. math::
 
@@ -159,7 +158,7 @@ Usage
 
 .. testcode:: ExD7AbsoluteCrossSections_XYZ_separation
 
-   sampleProperties = {'FormulaUnits': 1, 'SampleMass': 2.932, 'FormulaUnitMass': 50.942}
+   sampleProperties = {'SampleMass': 2.932, 'FormulaUnitMass': 50.942}
 
    Load('ILL/D7/vanadium_xyz.nxs', OutputWorkspace='vanadium_xyz') # loads already reduced data
    D7AbsoluteCrossSections(InputWorkspace='vanadium_xyz', CrossSectionSeparationMethod='XYZ',
@@ -176,7 +175,7 @@ Output:
 .. testoutput:: ExD7AbsoluteCrossSections_XYZ_separation
 
    Number of separated cross-sections: 6
-   Ratio of spin-incoherent to nuclear coherent cross-sections measured for vanadium is equal to: 170.0
+   Ratio of spin-incoherent to nuclear coherent cross-sections measured for vanadium is equal to: 11.9
 
 .. testcleanup:: ExD7AbsoluteCrossSections_XYZ_separation
 
@@ -187,7 +186,7 @@ Output:
 
 .. testcode:: ExD7AbsoluteCrossSections_vanadium_normalisation
 
-   sampleProperties = {'FormulaUnits': 1, 'SampleMass': 2.932, 'FormulaUnitMass': 182.54}
+   sampleProperties = {'SampleMass': 2.932, 'FormulaUnitMass': 182.54}
 
    Load('ILL/D7/396993_reduced.nxs', OutputWorkspace='vanadium_input')
    GroupWorkspaces(InputWorkspaces='vanadium_input', OutputWorkspace='vanadium_data')
@@ -214,7 +213,7 @@ Output:
 
 .. testcode:: ExD7AbsoluteCrossSections_paramagnetic_normalisation
 
-   sampleProperties = {'FormulaUnits': 1, 'SampleMass': 2.932, 'FormulaUnitMass': 182.54, 'SampleSpin':0.5}
+   sampleProperties = {'SampleMass': 2.932, 'FormulaUnitMass': 182.54, 'SampleSpin':0.5}
 
    Load('ILL/D7/397004_reduced.nxs', OutputWorkspace='sample_data')
    D7AbsoluteCrossSections(InputWorkspace='sample_data', OutputWorkspace='normalised_sample_magnetic',

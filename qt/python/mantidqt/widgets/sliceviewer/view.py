@@ -17,9 +17,9 @@ from mantid.plots.datafunctions import get_normalize_by_bin_width
 from matplotlib.figure import Figure
 from mpl_toolkits.axisartist import Subplot as CurveLinearSubPlot
 from mpl_toolkits.axisartist.grid_helper_curvelinear import GridHelperCurveLinear
-from qtpy.QtCore import Qt, QTimer, Signal
+from qtpy.QtCore import Qt, Signal
 from qtpy.QtWidgets import (QCheckBox, QComboBox, QGridLayout, QLabel, QHBoxLayout, QSplitter,
-                            QStatusBar, QVBoxLayout, QWidget)
+                            QStatusBar, QToolButton, QVBoxLayout, QWidget)
 
 # local imports
 from workbench.plotting.mantidfigurecanvas import MantidFigureCanvas
@@ -65,6 +65,7 @@ class SliceViewerDataView(QWidget):
         self._line_plots = None
         self._image_info_tracker = None
         self._region_selection_on = False
+        self._orig_lims = None
 
         # Dimension widget
         self.dimensions_layout = QGridLayout()
@@ -139,7 +140,11 @@ class SliceViewerDataView(QWidget):
 
         # Status bar
         self.status_bar = QStatusBar(parent=self)
+        self.status_bar.setStyleSheet('QStatusBar::item {border: None;}')  # Hide spacers between button and label
         self.status_bar_label = QLabel()
+        self.help_button = QToolButton()
+        self.help_button.setText("?")
+        self.status_bar.addWidget(self.help_button)
         self.status_bar.addWidget(self.status_bar_label)
 
         # layout
@@ -261,8 +266,6 @@ class SliceViewerDataView(QWidget):
                                     transpose=self.dimensions.transpose,
                                     norm=self.colorbar.get_norm(),
                                     **kwargs)
-        self.on_track_cursor_state_change(self.track_cursor_checked())
-
         # ensure the axes data limits are updated to match the
         # image. For example if the axes were zoomed and the
         # swap dimensions was clicked we need to restore the
@@ -270,6 +273,11 @@ class SliceViewerDataView(QWidget):
         extent = self.image.get_extent()
         self.ax.set_xlim(extent[0], extent[1])
         self.ax.set_ylim(extent[2], extent[3])
+        # Set the original data limits which get passed to the ImageInfoWidget so that
+        # the mouse projection to data space is correct for MDH workspaces when zoomed/changing slices
+        self._orig_lims = self.get_axes_limits()
+
+        self.on_track_cursor_state_change(self.track_cursor_checked())
 
         self.draw_plot()
 
@@ -349,7 +357,7 @@ class SliceViewerDataView(QWidget):
             self._line_plots.plotter.delete_line_plot_lines()
             self._line_plots.plotter.update_line_plot_labels()
 
-        self.canvas.draw_idle()
+        self.canvas.draw()
 
     def export_region(self, limits, cut):
         """
@@ -359,7 +367,7 @@ class SliceViewerDataView(QWidget):
         """
         self.presenter.export_region(limits, cut)
 
-    def update_plot_data(self, data, transposed=False):
+    def update_plot_data(self, data):
         """
         This just updates the plot data without creating a new plot. The extents
         can change if the data has been rebinned.
@@ -367,14 +375,7 @@ class SliceViewerDataView(QWidget):
         if self.nonortho_transform:
             self.image.set_array(data.T.ravel())
         else:
-            # need to update extent and limits of orthog axes when transposed (non orthog limits reset anyway)
-            extent = self.image.get_extent()
             self.image.set_data(data.T)
-            if transposed:
-                extent = (extent[2], extent[3], extent[0], extent[1])
-                self.image.set_extent(extent)
-                self.ax.set_xlim((extent[0], extent[1]))
-                self.ax.set_ylim((extent[2], extent[3]))
         self.colorbar.update_clim()
 
     def track_cursor_checked(self):
@@ -392,7 +393,8 @@ class SliceViewerDataView(QWidget):
         self._image_info_tracker = ImageInfoTracker(image=self.image,
                                                     transform=self.nonortho_transform,
                                                     do_transform=self.nonorthogonal_mode,
-                                                    widget=self.image_info_widget)
+                                                    widget=self.image_info_widget,
+                                                    cursor_transform=self._orig_lims)
 
         if state:
             self._image_info_tracker.connect()
@@ -615,14 +617,6 @@ class SliceViewerView(QWidget, ObservingView):
             self._splitter.addWidget(self._peaks_view)
 
         return self._peaks_view
-
-    def delayed_refresh(self):
-        """Post an event to the event loop that causes the view to
-        update on the next cycle
-
-        A 1 msec delay is added to appease RHEL7 where in some cases
-        it fails"""
-        QTimer.singleShot(1, self.presenter.refresh_view)
 
     def peaks_overlay_clicked(self):
         """Peaks overlay button has been toggled

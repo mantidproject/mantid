@@ -54,8 +54,8 @@ Click Menus
 |
 |
 
-Options Menu
-------------
+|O| ptions Menu
+---------------
 
 .. figure:: /images/PlotOptions.png
    :alt: Plot Options Axes Legend
@@ -152,8 +152,8 @@ Click Menus
 |
 |
 
-Options Menu
-------------
+|O| ptions Menu
+---------------
 
 Tiled plots are essentially an array of axes (1D plots) on the same figure. As such, when editing them in the Options Menu, you should take care to select the correct set of axes:
 
@@ -292,7 +292,7 @@ File > Settings
 * :ref:`plotting`
 * `Matplotlib Keyboard Shortcuts <https://matplotlib.org/3.1.1/users/navigation_toolbar.html#navigation-keyboard-shortcuts>`_
 
-.. |FigureOptionsGear.png| image:: /images/FigureOptionsGear.png
+.. |O| image:: /images/FigureOptionsGear.png
    :width: 150px
 .. |GenerateAScript.png| image:: /images/GenerateAScript.png
    :width: 30px

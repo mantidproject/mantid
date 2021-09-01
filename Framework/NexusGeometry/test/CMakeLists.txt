@@ -1,7 +1,6 @@
 if(CXXTEST_FOUND)
   include_directories(SYSTEM
                       ${CXXTEST_INCLUDE_DIR}
-                      ${Boost_INCLUDE_DIRS}
                       ../../TestHelpers/inc)
 
   set(TESTHELPER_SRCS ../../TestHelpers/src/NexusGeometryTestHelpers.cpp
@@ -11,21 +10,14 @@ if(CXXTEST_FOUND)
 
   cxxtest_add_test(NexusGeometryTest ${TEST_FILES})
 
-  target_include_directories(NexusGeometryTest SYSTEM
-                             PRIVATE ${HDF5_INCLUDE_DIRS})
   target_link_libraries(NexusGeometryTest
-                        LINK_PRIVATE
-                        ${MANTIDLIBS}
-                        NexusGeometry
-                        Geometry
-                        Nexus
-                        API
-						Types
-						Kernel
-                        ${NEXUS_LIBRARIES}
-                        ${HDF5_LIBRARIES}
-                        ${HDF5_HL_LIBRARIES}
+                        PRIVATE
+                        Mantid::NexusGeometry
+                        Mantid::Types
+                        Mantid::Kernel
+                        Boost::filesystem
                         gmock)
+
   add_dependencies(NexusGeometryTest Geometry)
   add_dependencies(FrameworkTests NexusGeometryTest)
   add_dependencies(NexusGeometryTest StandardTestData)

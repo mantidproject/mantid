@@ -65,10 +65,12 @@ You can run either of these linux subsystems from the Windows command prompt usi
 
 where [OS] is replaced by `Ubuntu-18.04` or `Centos7`.
 
-Getting the Mantid Code
-#######################
+.. _wsl-cloning-mantid-ref:
 
-Before you get the Mantid code, follow the :ref:`getting started <GettingStarted>` instructions to install all of the required dependencies for your linux environment.
+Cloning Mantid
+##############
+
+Before you clone Mantid code, follow the :ref:`getting started <GettingStarted>` instructions to install all of the required dependencies for your linux environment.
 
 The Mantid code can then be retrieved in the usual way using `git clone` from the Ubuntu or Centos7 terminal. The first time you do this you might need to set up an `ssh key <https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh>`_ for authentication.
 

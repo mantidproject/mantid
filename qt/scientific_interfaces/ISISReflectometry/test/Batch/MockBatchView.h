@@ -24,6 +24,7 @@ public:
   MOCK_CONST_METHOD0(save, ISaveView *());
   MOCK_CONST_METHOD0(experiment, IExperimentView *());
   MOCK_CONST_METHOD0(instrument, IInstrumentView *());
+  MOCK_CONST_METHOD0(preview, IPreviewView *());
   MOCK_METHOD0(clearAlgorithmQueue, void());
   MOCK_METHOD1(setAlgorithmQueue, void(std::deque<API::IConfiguredAlgorithm_sptr>));
   MOCK_METHOD0(executeAlgorithmQueue, void());

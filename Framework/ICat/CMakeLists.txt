@@ -75,13 +75,18 @@ if(UNITY_BUILD)
 endif(UNITY_BUILD)
 
 # Add ssl dependency
-include_directories(${OPENSSL_INCLUDE_DIR})
 add_definitions(-DWITH_OPENSSL -DWITH_NONAMESPACES)
 
 # Add a precompiled header where they are supported
 enable_precompiled_headers(inc/MantidICat/PrecompiledHeader.h SRC_FILES)
 # Add the target for this directory
 add_library(ICat ${SRC_FILES} ${INC_FILES})
+add_library(Mantid::ICat ALIAS ICat)
+
+target_include_directories(ICat PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+		$<INSTALL_INTERFACE:include/Mantid>
+)
 # Set the name of the generated library
 set_target_properties(ICat
                       PROPERTIES OUTPUT_NAME
@@ -100,25 +105,28 @@ endif()
 # Add to the 'Framework' group in VS
 set_property(TARGET ICat PROPERTY FOLDER "MantidFramework")
 
-include_directories(inc)
 
-target_link_libraries(ICat
-                      LINK_PRIVATE
-                      ${MANTIDLIBS}
-                      ${OPENSSL_LIBRARIES}
-                      ${JSONCPP_LIBRARIES})
+target_link_libraries(ICat PUBLIC Mantid::Kernel Mantid::API Mantid::DataObjects OpenSSL::SSL PRIVATE JsonCPP::jsoncpp )
+
 
 # Add the unit tests directory
 add_subdirectory(test)
 
 # Auto-generate exports header
-target_include_directories(ICat PUBLIC ${CMAKE_BINARY_DIR}/Framework/ICat)
-generate_mantid_export_header(ICat TRUE)
+target_include_directories(ICat PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/ICat>
+  $<INSTALL_INTERFACE:include/Mantid>
+)
+generate_mantid_export_header(ICat True)
 
 # Installation settings
+if (CONDA_BUILD)
+mtd_install_framework_lib(TARGETS ICat PLUGIN_LIB)
+else()
 mtd_install_targets(TARGETS
                     ICat
                     INSTALL_DIRS
                     ${PLUGINS_DIR}
                     ${WORKBENCH_PLUGINS_DIR})
+endif()
 

@@ -46,6 +46,12 @@ endif()
 
 # Add the target for this directory
 add_library(NexusGeometry ${SRC_FILES} ${INC_FILES})
+add_library(Mantid::NexusGeometry ALIAS NexusGeometry)
+
+target_include_directories(NexusGeometry PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+		$<INSTALL_INTERFACE:include/Mantid>
+)
 # Set the name of the generated library
 set_target_properties(NexusGeometry
                       PROPERTIES OUTPUT_NAME
@@ -58,27 +64,35 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
                         PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Frameworks")
 endif()
 
-# Include HDF5 libraries
-target_include_directories(NexusGeometry SYSTEM PRIVATE ${HDF5_INCLUDE_DIRS})
 # Add to the 'Framework' group in VS
 set_property(TARGET NexusGeometry PROPERTY FOLDER "MantidFramework")
 
-target_link_libraries(NexusGeometry
-                      LINK_PRIVATE
-                      ${MANTIDLIBS}
-                      ${HDF5_LIBRARIES}
-                      ${HDF5_HL_LIBRARIES}
-                      ${HDF5_CXX_LIBRARIES})
+target_link_libraries(NexusGeometry PUBLIC Mantid::Geometry Mantid::API
+                      PRIVATE
+                      Mantid::Kernel
+                      Mantid::Json
+                      Mantid::Indexing
+                      Boost::filesystem
+                      )
 
 # Add the unit tests directory
 add_subdirectory(test)
 
 # Auto-generate exports header
-target_include_directories(NexusGeometry PUBLIC ${CMAKE_BINARY_DIR}/Framework/NexusGeometry)
+target_include_directories(NexusGeometry PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/NexusGeometry>
+  $<INSTALL_INTERFACE:include/Mantid>
+)
 generate_mantid_export_header(NexusGeometry TRUE)
 
+# Installation settings
+if (CONDA_BUILD)
+set(TARGET_EXPORT_NAME "MantidNexusGeometryTargets")
+mtd_install_framework_lib(TARGETS NexusGeometry INSTALL_EXPORT_FILE EXPORT_NAME ${TARGET_EXPORT_NAME})
+else()
 mtd_install_targets(TARGETS
                     NexusGeometry
                     INSTALL_DIRS
                     ${LIB_DIR}
                     ${WORKBENCH_LIB_DIR})
+endif()

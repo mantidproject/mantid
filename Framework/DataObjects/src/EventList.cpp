@@ -307,7 +307,8 @@ void EventList::createFromHistogram(const ISpectrum *inSpec, bool GenerateZeros,
  * @return reference to this
  * */
 EventList &EventList::operator=(const EventList &rhs) {
-  // Note that we are NOT copying the MRU pointer.
+  // Note that we are NOT copying the MRU pointer
+  // the EventWorkspace that posseses the EventList has already configured the mru
   IEventList::operator=(rhs);
   m_histogram = rhs.m_histogram;
   events = rhs.events;
@@ -945,13 +946,14 @@ void EventList::setSortOrder(const EventSortType order) const { this->order = or
 // --------------------------------------------------------------------------
 /** Sort events by TOF in one thread */
 void EventList::sortTof() const {
-  if (this->order == TOF_SORT)
-    return; // nothing to do
+  // nothing to do
+  if (this->order == TOF_SORT) // cppcheck-suppress identicalConditionAfterEarlyExit
+    return;
 
   // Avoid sorting from multiple threads
   std::lock_guard<std::mutex> _lock(m_sortMutex);
   // If the list was sorted while waiting for the lock, return.
-  if (this->order == TOF_SORT)
+  if (this->order == TOF_SORT) // cppcheck-suppress identicalConditionAfterEarlyExit
     return;
 
   switch (eventType) {
@@ -1011,13 +1013,13 @@ void EventList::sortTimeAtSample(const double &tofFactor, const double &tofShift
 // --------------------------------------------------------------------------
 /** Sort events by Frame */
 void EventList::sortPulseTime() const {
-  if (this->order == PULSETIME_SORT)
-    return; // nothing to do
+  if (this->order == PULSETIME_SORT) // cppcheck-suppress identicalConditionAfterEarlyExit
+    return;                          // nothing to do
 
   // Avoid sorting from multiple threads
   std::lock_guard<std::mutex> _lock(m_sortMutex);
   // If the list was sorted while waiting for the lock, return.
-  if (this->order == PULSETIME_SORT)
+  if (this->order == PULSETIME_SORT) // cppcheck-suppress identicalConditionAfterEarlyExit
     return;
 
   // Perform sort.
@@ -1041,13 +1043,13 @@ void EventList::sortPulseTime() const {
  * (the absolute time)
  */
 void EventList::sortPulseTimeTOF() const {
-  if (this->order == PULSETIMETOF_SORT)
-    return; // already ordered.
+  if (this->order == PULSETIMETOF_SORT) // cppcheck-suppress identicalConditionAfterEarlyExit
+    return;                             // already ordered
 
   // Avoid sorting from multiple threads
   std::lock_guard<std::mutex> _lock(m_sortMutex);
   // If the list was sorted while waiting for the lock, return.
-  if (this->order == PULSETIMETOF_SORT)
+  if (this->order == PULSETIMETOF_SORT) // cppcheck-suppress identicalConditionAfterEarlyExit
     return;
 
   switch (eventType) {

@@ -163,6 +163,7 @@ void ALCDataLoadingView::setDataCurve(MatrixWorkspace_sptr workspace, std::size_
   QHash<QString, QVariant> kwargs;
   kwargs.insert("linestyle", QString("None").toLatin1().constData());
   kwargs.insert("marker", QString(".").toLatin1().constData());
+  kwargs.insert("distribution", QString("False").toLatin1().constData());
 
   m_ui.dataPlot->clear();
   auto _log = log();

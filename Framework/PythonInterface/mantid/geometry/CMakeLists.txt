@@ -45,6 +45,7 @@ set(EXPORT_FILES
     src/Exports/ComponentInfoPythonIterator.cpp
     src/Exports/MeshObject.cpp
     src/Exports/SampleEnvironment.cpp
+    src/Exports/Container.cpp
 )
 
 # Generate a source file from the export definitions and provided template
@@ -69,24 +70,21 @@ add_library(
   PythonGeometryModule ${ALL_FILES} ${MODULE_DEFINITION}
                        ${INC_FILES} ${PYTHON_INSTALL_FILES}
 )
+add_library(Mantid::PythonGeometryModule ALIAS PythonGeometryModule)
 set_python_properties(PythonGeometryModule _geometry)
 
-target_include_directories(PythonGeometryModule PUBLIC inc)
-
+target_include_directories(PythonGeometryModule PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+		$<INSTALL_INTERFACE:include/Mantid>
+)
 # Add the required dependencies
-target_link_libraries(
-  PythonGeometryModule
-  PRIVATE
-          PythonInterfaceCore
-          PythonKernelModule
-          Geometry
-          Beamline
-          Types
-          Kernel
-          ${POCO_LIBRARIES}
-          ${Boost_LIBRARIES}
-          ${TBB_LIBRARIES}
-          ${TBB_MALLOC_LIBRARIES}
+target_link_libraries(PythonGeometryModule
+          PUBLIC Mantid::Geometry
+          PRIVATE
+          Mantid::PythonInterfaceCore
+          Mantid::PythonKernelModule
+          Mantid::Beamline
+          Mantid::Types
 )
 
 # Installation settings
