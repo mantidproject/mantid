@@ -19,8 +19,8 @@ mpl.use('Agg')
 from mantidqt.widgets.colorbar.colorbar import MIN_LOG_VALUE  # noqa: E402
 from mantidqt.widgets.sliceviewer.view import SCALENORM  # noqa: E402
 from mantid.simpleapi import (  # noqa: E402
-    CreateMDHistoWorkspace, CreateMDWorkspace, CreateSampleWorkspace, DeleteWorkspace,
-    FakeMDEventData, ConvertToDistribution, Scale, SetUB, RenameWorkspace)
+    CreateMDHistoWorkspace, CreateMDWorkspace, CreateSampleWorkspace, DeleteWorkspace, FakeMDEventData, ConvertToDistribution, Scale, SetUB,
+    RenameWorkspace)
 from mantid.api import AnalysisDataService  # noqa: E402
 from mantidqt.utils.qt.testing import start_qapplication  # noqa: E402
 from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder  # noqa: E402
@@ -94,8 +94,7 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
     def test_enable_nonorthogonal_view_disables_lineplots_if_enabled(self):
         pres = SliceViewer(self.hkl_ws)
         line_plots_action, region_sel_action, non_ortho_action = toolbar_actions(
-            pres,
-            (ToolItemText.LINEPLOTS, ToolItemText.REGIONSELECTION, ToolItemText.NONORTHOGONAL_AXES))
+            pres, (ToolItemText.LINEPLOTS, ToolItemText.REGIONSELECTION, ToolItemText.NONORTHOGONAL_AXES))
         line_plots_action.trigger()
         QApplication.sendPostedEvents()
 
@@ -112,8 +111,7 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
 
     def test_disable_lineplots_disables_region_selector(self):
         pres = SliceViewer(self.hkl_ws)
-        line_plots_action, region_sel_action = toolbar_actions(
-            pres, (ToolItemText.LINEPLOTS, ToolItemText.REGIONSELECTION))
+        line_plots_action, region_sel_action = toolbar_actions(pres, (ToolItemText.LINEPLOTS, ToolItemText.REGIONSELECTION))
         line_plots_action.trigger()
         region_sel_action.trigger()
         QApplication.sendPostedEvents()
@@ -148,13 +146,6 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
         pres = SliceViewer(self.histo_ws, conf=conf)
         colorbar = pres.view.data_view.colorbar
         self.assertTrue(isinstance(colorbar.get_norm(), Normalize))
-        pres.view.close()
-
-    def test_log_norm_disabled_for_non_positive_data(self):
-        conf = MockConfig()
-        pres = SliceViewer(self.histo_ws, conf=conf)
-        colorbar = pres.view.data_view.colorbar
-        self.assertFalse(colorbar.norm.model().item(1, 0).isEnabled())
         pres.view.close()
 
     def test_changing_norm_updates_clim_validators(self):
@@ -253,8 +244,7 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
             stderr_orig = sys.stderr
             sys.stderr = stderr_capture
             ws *= 100
-            self.assertTrue('Error occurred in handler' not in stderr_capture.getvalue(),
-                            msg=stderr_capture.getvalue())
+            self.assertTrue('Error occurred in handler' not in stderr_capture.getvalue(), msg=stderr_capture.getvalue())
         finally:
             sys.stderr = stderr_orig
 
@@ -337,6 +327,7 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
         pres.view.close()
 
         pres.clear_observer.assert_called()
+
 
 # private helper functions
 
