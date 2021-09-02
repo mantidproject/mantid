@@ -15,7 +15,7 @@
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 class MANTIDQT_ISISREFLECTOMETRY_DLL PreviewRow : public Item {
 public:
-  PreviewRow(const std::vector<std::string> runNumbers);
+  explicit PreviewRow(const std::vector<std::string> runNumbers);
   std::vector<std::string> const &runNumbers() const;
 
   bool isGroup() const override;
