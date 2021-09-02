@@ -282,16 +282,168 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                         NSpec=len(alpha))
         return cos2_m_sin2_alpha_name
 
-    def _cross_section_separation(self, ws, nMeasurements):
-        """Separates coherent, incoherent, and magnetic components based on spin-flip and non-spin-flip intensities of the
-        current sample. The method used is based on either the user's choice or the provided data structure."""
+    @staticmethod
+    def _calculate_uniaxial_separation(cr_section):
+        """Separates measured uniaxial (Z-only) cross-sections into total, nuclear coherent/isotope-incoherent,
+        and spin-incoherent components and returns them separately. Based on DOI:10.1063/1.4819739, Eq. 9,
+        where magnetic contribution is assumed to be 0.
+        Keyword arguments:
+        cr_section -- dictionary with measured cross-sections
+        """
+        total = cr_section['z_nsf'] + cr_section['z_sf']
+        nuclear = cr_section['z_nsf'] - 0.5 * cr_section['z_sf']
+        incoherent = 1.5 * cr_section['z_sf']
+        return total, nuclear, incoherent
+
+    def _calculate_XYZ_separation(self, cr_section, cos2_m_sin2_alpha):
+        """Separates measured 6-point (XYZ) cross-sections into total, nuclear coherent/isotope-incoherent,
+        spin-incoherent, and magnetic components and returns them separately. Based on DOI:10.1063/1.4819739, Eq. 9-12.
+        Keyword arguments:
+        cr_section -- dictionary with measured cross-sections
+        cos2_m_sin2_alpha - cos^2 (alpha) - sin^2 (alpha), where alpha is Scharpf angle for each detector
+        """
+        isotropic_magnetism = self.getProperty('IsotropicMagnetism').value
+        # Total cross-section:
+        data_total = (cr_section['z_nsf'] + cr_section['x_nsf'] + cr_section['y_nsf'] + cr_section['z_sf']
+                      + cr_section['x_sf'] + cr_section['y_sf']) / 3.0
+        if isotropic_magnetism:  # Steward's isotropic cross-section separation
+            # Magnetic component
+            # spin-flip magnetic component:
+            magnetic_1_cs = 2.0 * (-2.0 * cr_section['z_sf'] + cr_section['x_sf'] + cr_section['y_sf'])
+            # non-spin-flip component:
+            magnetic_2_cs = 2.0 * (2.0 * cr_section['z_nsf'] - cr_section['x_nsf'] - cr_section['y_nsf'])
+            data_average_magnetic = WeightedMean(InputWorkspace1=magnetic_1_cs,
+                                                 InputWorkspace2=magnetic_2_cs)
+            # Nuclear coherent component
+            data_nuclear = (2.0 * (cr_section['x_nsf'] + cr_section['y_nsf'] + cr_section['z_nsf'])
+                            - (cr_section['x_sf'] + cr_section['y_sf'] + cr_section['z_sf'])) / 6.0
+            # Incoherent component
+            data_incoherent = 0.5 * (cr_section['x_sf'] + cr_section['y_sf'] + cr_section['z_sf'])\
+                - data_average_magnetic
+        else:  # anisotropic, Schweika's cross-section separation
+            # Nuclear coherent component
+            data_nuclear = 0.5 * (cr_section['x_nsf'] + cr_section['y_nsf'] - cr_section['z_sf'])
+            # Incoherent component
+            data_incoherent = 1.5 * ((cr_section['x_nsf'] - cr_section['y_nsf']) / mtd[cos2_m_sin2_alpha]
+                                     + cr_section['z_sf'])
+            # Magnetic components
+            magnetic_1_cs = cr_section['z_sf'] - (2.0 / 3.0) * data_incoherent  # perpendicular Y
+            magnetic_2_cs = cr_section['z_nsf'] - data_incoherent / 3.0 - data_nuclear  # perpendicular Z
+            data_average_magnetic = WeightedMean(InputWorkspace1=magnetic_1_cs,
+                                                 InputWorkspace2=magnetic_2_cs)
+        return data_total, data_nuclear, data_incoherent, magnetic_1_cs, magnetic_2_cs, data_average_magnetic
+
+    def _create_auxiliary_workspaces(self, parent_ws, n_detectors, to_clean):
+        """Returns auxiliary intermediate workspaces, needed to calculate separated cross-sections. Based on
+        definitions from DOI:10.1063/1.4819739. Eq. 22 and 23.
+        Keyword arguments:
+        parent_ws -- workspace used to provide dimensionality and units for the output
+        n_detectors -- number of detectors in the instrument
+        to_clean -- list with intermediate workspace names to be deleted at later stage
+        """
         DEG_2_RAD = np.pi / 180.0
+        theta_0 = DEG_2_RAD * self._sampleAndEnvironmentProperties['ThetaOffset'].value
+        theta_value = np.zeros(n_detectors)
+        for det_no in range(n_detectors):
+            theta_value[det_no] = mtd[parent_ws].detectorInfo().twoTheta(det_no)
+        alpha_value = theta_value - 0.5 * np.pi - theta_0
+        cos_alpha_value = np.cos(alpha_value)
+        c0_value = cos_alpha_value ** 2
+        c4_value = (cos_alpha_value - np.pi / 4.0) ** 2
+
+        x_axis = mtd[parent_ws].readX(0)
+        c0_t2_m4 = CreateWorkspace(DataX=x_axis, DataY=2 * c0_value - 4, NSPec=n_detectors,
+                                   ParentWorkspace=parent_ws)
+        to_clean.add('c0_t2_m4')
+        c0_t2_p2 = CreateWorkspace(DataX=x_axis, DataY=2 * c0_value + 2, NSPec=n_detectors,
+                                   ParentWorkspace=parent_ws)
+        to_clean.add('c0_t2_p2')
+        mc0_t4_p2 = CreateWorkspace(DataX=x_axis, DataY=-4 * c0_value + 2, NSPec=n_detectors,
+                                    ParentWorkspace=parent_ws)
+        to_clean.add('mc0_t4_p2')
+        c4_t2_m4 = CreateWorkspace(DataX=x_axis, DataY=2 * c4_value - 4, NSPec=n_detectors,
+                                   ParentWorkspace=parent_ws)
+        to_clean.add('c4_t2_m4')
+        c4_t2_p2 = CreateWorkspace(DataX=x_axis, DataY=2 * c4_value + 2, NSPec=n_detectors,
+                                   ParentWorkspace=parent_ws)
+        to_clean.add('c4_t2_p2')
+        mc4_t4_p2 = CreateWorkspace(DataX=x_axis, DataY=-4 * c4_value + 2, NSPec=n_detectors,
+                                    ParentWorkspace=parent_ws)
+        to_clean.add('mc4_t4_p2')
+        cos_2alpha = CreateWorkspace(DataX=x_axis, DataY=np.cos(2 * alpha_value), NSPec=n_detectors,
+                                     ParentWorkspace=parent_ws)
+        to_clean.add('cos_2alpha')
+        sin_2alpha = CreateWorkspace(DataX=x_axis, DataY=np.cos(2 * alpha_value), NSPec=n_detectors,
+                                     ParentWorkspace=parent_ws)
+        to_clean.add('sin_2alpha')
+
+        return c0_t2_m4, c0_t2_p2, mc0_t4_p2, c4_t2_m4, c4_t2_p2, mc4_t4_p2, cos_2alpha, sin_2alpha, to_clean
+
+    def _calculate_10p_separation(self, parent_ws, n_detectors, to_clean, cr_section):
+        """Separates measured 10-point or two measurements of 6-point cross-sections into total,
+        nuclear coherent/isotope-incoherent, spin-incoherent, and magnetic components and returns them separately.
+        Based on DOI:10.1063/1.4819739, Eq. 22-24.
+        Keyword arguments:
+        parent_ws -- workspace used to provide dimensionality and units for the auxiliary workspaces
+        n_detectors -- number of detectors in the instrument
+        to_clean -- list with intermediate workspace names to be deleted at later stage
+        cr_section -- dictionary with measured cross-sections
+        """
+
+        total = (cr_section['z_nsf'] + cr_section['x_nsf'] + cr_section['y_nsf'] + cr_section['xmy_nsf']
+                 + cr_section['xpy_nsf'] + cr_section['z_sf'] + cr_section['x_sf'] + cr_section['y_sf']
+                 + cr_section['xpy_sf'] + cr_section['xpy_sf']) / 5.0
+
+        c0_t2_m4, c0_t2_p2, mc0_t4_p2, c4_t2_m4, c4_t2_p2, mc4_t4_p2, cos_2alpha, sin_2alpha, to_clean = \
+            self._create_auxiliary_workspaces(parent_ws, n_detectors, to_clean)
+
+        # Magnetic component
+        magnetic_nsf_cos2alpha = c0_t2_m4 * cr_section['x_nsf'] + c0_t2_p2 * cr_section['y_nsf'] \
+            + mc0_t4_p2 * cr_section['z_nsf']
+        magnetic_sf_cos2alpha = (-1) * c0_t2_m4 * cr_section['x_sf'] - c0_t2_p2 * cr_section['y_sf'] \
+            - mc0_t4_p2 * cr_section['z_sf']
+        magnetic_nsf_sin2alpha = c4_t2_m4 * cr_section['xpy_sf'] + c4_t2_p2 * cr_section['xmy_nsf'] \
+            + mc4_t4_p2 * cr_section['z_nsf']
+        magnetic_sf_sin2alpha = (-1) * c4_t2_m4 * cr_section['xpy_sf'] - c4_t2_p2 * cr_section['xpy_sf'] \
+            - mc4_t4_p2 * cr_section['z_sf']
+        to_clean.add('magnetic_sf_cos2alpha')
+        to_clean.add('magnetic_nsf_cos2alpha')
+        to_clean.add('magnetic_sf_sin2alpha')
+        to_clean.add('magnetic_nsf_sin2alpha')
+
+        nsf_magnetic = magnetic_nsf_cos2alpha * cos_2alpha + magnetic_nsf_sin2alpha * sin_2alpha
+        nsf_magnetic.getAxis(0).setUnit(mtd[parent_ws].getAxis(0).getUnit().unitID())
+        nsf_magnetic.getAxis(1).setUnit(mtd[parent_ws].getAxis(1).getUnit().unitID())
+
+        sf_magnetic = magnetic_sf_cos2alpha * cos_2alpha + magnetic_sf_sin2alpha * sin_2alpha
+        sf_magnetic.getAxis(0).setUnit(mtd[parent_ws].getAxis(0).getUnit().unitID())
+        sf_magnetic.getAxis(1).setUnit(mtd[parent_ws].getAxis(1).getUnit().unitID())
+
+        average_magnetic = WeightedMean(InputWorkspace1=sf_magnetic, InputWorkspace2=nsf_magnetic)
+
+        # Nuclear coherent component
+        nuclear = (2.0 * (cr_section['x_nsf'] + cr_section['y_nsf'] + 2 * cr_section['z_nsf'] + cr_section['xpy_nsf']
+                          + cr_section['xmy_nsf'])
+                   - (cr_section['x_sf'] + cr_section['y_sf'] + 2 * cr_section['z_sf'] + cr_section['xpy_sf']
+                      + cr_section['xmy_sf'])) / 12.0
+        # Incoherent component
+        incoherent = 0.25 * (cr_section['x_sf'] + cr_section['y_sf'] + 2 * cr_section['z_sf'] + cr_section['xpy_sf']
+                             + cr_section['xmy_sf'])
+        Minus(LHSWOrkspace=incoherent, RHSWorkspace=average_magnetic, OutputWorkspace=incoherent)
+
+        return total, nuclear, incoherent, sf_magnetic, nsf_magnetic, average_magnetic, to_clean
+
+    def _cross_section_separation(self, ws, nMeasurements):
+        """Separates coherent, incoherent, and magnetic components based on spin-flip and non-spin-flip intensities of
+        the current sample. The method used is based on either the user's choice or the provided data structure."""
         user_method = self.getPropertyValue('CrossSectionSeparationMethod')
         isotropic_magnetism = self.getProperty('IsotropicMagnetism').value
-        tmp_names = set()
+        to_clean = set()
+        cross_sections = dict()
+        cos2_m_sin2_alpha = ""
         if user_method == "XYZ" and not isotropic_magnetism:
             cos2_m_sin2_alpha = self._create_angle_dists(ws)
-            tmp_names.add(cos2_m_sin2_alpha)
+            to_clean.add(cos2_m_sin2_alpha)
         n_detectors = mtd[ws][0].getNumberHistograms()
         double_xyz_method = False
         if not self.getProperty('RotatedXYZWorkspace').isDefault:
@@ -299,168 +451,86 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             second_xyz_ws = self.getPropertyValue('RotatedXYZWorkspace')
         separated_cs = []
         for entry_no in range(0, mtd[ws].getNumberOfEntries(), nMeasurements):
-            sigma_z_sf = mtd[ws][entry_no]
-            sigma_z_nsf = mtd[ws][entry_no+1]
+            cross_sections['z_sf'] = mtd[ws][entry_no]
+            cross_sections['z_nsf'] = mtd[ws][entry_no+1]
             numor = self._extract_numor(mtd[ws][entry_no].name())
             total_cs = numor + '_Total'
             nuclear_cs = numor + '_Coherent'
             incoherent_cs = numor + '_Incoherent'
             if nMeasurements == 2:
-                data_total = sigma_z_nsf + sigma_z_sf
+                data_total, data_nuclear, data_incoherent = self._calculate_uniaxial_separation(cross_sections)
                 RenameWorkspace(InputWorkspace=data_total, OutputWorkspace=total_cs)
                 separated_cs.append(total_cs)
-                data_nuclear = sigma_z_nsf - 0.5 * sigma_z_sf
                 RenameWorkspace(InputWorkspace=data_nuclear, OutputWorkspace=nuclear_cs)
                 separated_cs.append(nuclear_cs)
-                data_incoherent = 1.5 * sigma_z_sf
                 RenameWorkspace(InputWorkspace=data_incoherent, OutputWorkspace=incoherent_cs)
                 separated_cs.append(incoherent_cs)
             elif nMeasurements == 6 or nMeasurements == 10:
-                sigma_x_sf = mtd[ws][entry_no+2]
-                sigma_x_nsf = mtd[ws][entry_no+3]
-                sigma_y_sf = mtd[ws][entry_no+4]
-                sigma_y_nsf = mtd[ws][entry_no+5]
-                if any(["Y" in ws_name for ws_name in [sigma_x_sf.name(), sigma_x_nsf.name()]]):
+                cross_sections['x_sf'] = mtd[ws][entry_no+2]
+                cross_sections['x_nsf'] = mtd[ws][entry_no+3]
+                cross_sections['y_sf'] = mtd[ws][entry_no+4]
+                cross_sections['y_nsf'] = mtd[ws][entry_no+5]
+                if any(["Y" in ws_name for ws_name in [cross_sections['x_sf'].name(), cross_sections['x_nsf'].name()]]):
                     # if the order of X and Y polarisations is different than assumed, swap
-                    sigma_x_sf,  sigma_y_sf = sigma_y_sf, sigma_x_sf
-                    sigma_x_nsf, sigma_y_nsf = sigma_y_nsf, sigma_x_nsf
+                    cross_sections['x_sf'],  cross_sections['y_sf'] = cross_sections['y_sf'], cross_sections['x_sf']
+                    cross_sections['x_nsf'], cross_sections['y_nsf'] = cross_sections['y_nsf'], cross_sections['x_nsf']
                 average_magnetic_cs = numor + '_AverageMagnetic'
                 if isotropic_magnetism:
                     magnetic_name_1 = '_SFMagnetic'
                     magnetic_name_2 = '_NSFMagnetic'
                 else:
-                    magnetic_name_1 = '_PerpendicularMagnetic_Y'
-                    magnetic_name_2 = '_PerpendicularMagnetic_Z'
+                    magnetic_name_1 = '_PerpMagnetic_Y'
+                    magnetic_name_2 = '_PerpMagnetic_Z'
                 magnetic_1_cs = numor + magnetic_name_1
                 magnetic_2_cs = numor + magnetic_name_2
                 if nMeasurements == 6 and user_method == 'XYZ':
-                    # Total cross-section:
-                    data_total = (sigma_z_nsf + sigma_x_nsf + sigma_y_nsf + sigma_z_sf + sigma_x_sf + sigma_y_sf) / 3.0
-                    RenameWorkspace(InputWorkspace=data_total, OutputWorkspace=total_cs)
+                    output_data = self._calculate_XYZ_separation(cr_section=cross_sections,
+                                                                 cos2_m_sin2_alpha=cos2_m_sin2_alpha)
+                    RenameWorkspace(InputWorkspace=output_data[0], OutputWorkspace=total_cs)
                     separated_cs.append(total_cs)
-                    if isotropic_magnetism: # Steward's isotropic cross-section separation
-                        # Magnetic component
-                        data_sf_magnetic = 2.0 * (-2.0 * sigma_z_sf + sigma_x_sf + sigma_y_sf)
-                        data_nsf_magnetic = 2.0 * (2.0 * sigma_z_nsf - sigma_x_nsf - sigma_y_nsf)
-                        RenameWorkspace(InputWorkspace=data_sf_magnetic, OutputWorkspace=magnetic_1_cs)
-                        RenameWorkspace(InputWorkspace=data_nsf_magnetic, OutputWorkspace=magnetic_2_cs)
-                        data_average_magnetic = WeightedMean(InputWorkspace1=magnetic_1_cs,
-                                                             InputWorkspace2=magnetic_2_cs)
-                        # Nuclear coherent component
-                        data_nuclear = (2.0*(sigma_x_nsf + sigma_y_nsf + sigma_z_nsf)
-                                        - (sigma_x_sf + sigma_y_sf + sigma_z_sf)) / 6.0
-                        # Incoherent component
-                        data_incoherent = 0.5 * (sigma_x_sf + sigma_y_sf + sigma_z_sf) - data_average_magnetic
-                    else: # anisotropic, Schweika's cross-section separation
-                        # Nuclear coherent component
-                        data_nuclear = 0.5 * (sigma_x_nsf + sigma_y_nsf - sigma_z_sf)
-                        # Incoherent component
-                        data_incoherent = 1.5 * ((sigma_x_nsf - sigma_y_nsf) / mtd[cos2_m_sin2_alpha] + sigma_z_sf)
-                        # Magnetic components
-                        data_perp_magnetic_y = sigma_z_sf - (2.0/3.0) * data_incoherent
-                        data_perp_magnetic_z = sigma_z_nsf - data_incoherent / 3.0 - data_nuclear
-                        RenameWorkspace(InputWorkspace=data_perp_magnetic_y, OutputWorkspace=magnetic_1_cs)
-                        RenameWorkspace(InputWorkspace=data_perp_magnetic_z, OutputWorkspace=magnetic_2_cs)
-                        data_average_magnetic = WeightedMean(InputWorkspace1=magnetic_1_cs,
-                                                             InputWorkspace2=magnetic_2_cs)
-                    RenameWorkspace(InputWorkspace=data_nuclear, OutputWorkspace=nuclear_cs)
+                    RenameWorkspace(InputWorkspace=output_data[1], OutputWorkspace=nuclear_cs)
                     separated_cs.append(nuclear_cs)
-                    RenameWorkspace(InputWorkspace=data_incoherent, OutputWorkspace=incoherent_cs)
+                    RenameWorkspace(InputWorkspace=output_data[2], OutputWorkspace=incoherent_cs)
                     separated_cs.append(incoherent_cs)
-                    RenameWorkspace(InputWorkspace=data_average_magnetic, OutputWorkspace=average_magnetic_cs)
+                    RenameWorkspace(InputWorkspace=output_data[5], OutputWorkspace=average_magnetic_cs)
                     separated_cs.append(average_magnetic_cs)
+                    RenameWorkspace(InputWorkspace=output_data[3], OutputWorkspace=magnetic_1_cs)
                     separated_cs.append(magnetic_1_cs)
+                    RenameWorkspace(InputWorkspace=output_data[4], OutputWorkspace=magnetic_2_cs)
                     separated_cs.append(magnetic_2_cs)
                 else:
                     if not double_xyz_method:
-                        sigma_xmy_sf = mtd[ws][entry_no+6]
-                        sigma_xmy_nsf = mtd[ws][entry_no+7]
-                        sigma_xpy_sf = mtd[ws][entry_no+8]
-                        sigma_xpy_nsf = mtd[ws][entry_no+9]
+                        cross_sections['xmy_sf'] = mtd[ws][entry_no+6]
+                        cross_sections['xmy_nsf'] = mtd[ws][entry_no+7]
+                        cross_sections['xpy_sf'] = mtd[ws][entry_no+8]
+                        cross_sections['xpy_nsf'] = mtd[ws][entry_no+9]
                     else:
                         # assumed is averaging of twice measured Z-axis:
-                        sigma_z_sf = 0.5 * (sigma_z_sf + mtd[second_xyz_ws][entry_no])
-                        sigma_z_nsf = 0.5 * (sigma_z_nsf + mtd[second_xyz_ws][entry_no+1])
-                        sigma_xmy_sf = mtd[second_xyz_ws][entry_no+2]
-                        sigma_xmy_nsf = mtd[second_xyz_ws][entry_no+3]
-                        sigma_xpy_sf = mtd[second_xyz_ws][entry_no+4]
-                        sigma_xpy_nsf = mtd[second_xyz_ws][entry_no+5]
-                    # Magnetic component
-                    theta_0 = DEG_2_RAD * self._sampleAndEnvironmentProperties['ThetaOffset'].value
-                    theta_value = np.zeros(n_detectors)
-                    for det_no in range(n_detectors):
-                        theta_value[det_no] = mtd[ws][entry_no].detectorInfo().twoTheta(det_no)
-                    alpha_value = theta_value - 0.5*np.pi - theta_0
-                    cos_alpha_value = np.cos(alpha_value)
-                    c0_value = cos_alpha_value**2
-                    c4_value = (cos_alpha_value - np.pi / 4.0)**2
-
-                    x_axis = mtd[ws][entry_no].readX(0)
-                    c0_t2_m4 = CreateWorkspace(DataX=x_axis, DataY=2*c0_value-4, NSPec=n_detectors,
-                                               ParentWorkspace=mtd[ws][entry_no])
-                    tmp_names.add('c0_t2_m4')
-                    c0_t2_p2 = CreateWorkspace(DataX=x_axis, DataY=2*c0_value+2, NSPec=n_detectors,
-                                               ParentWorkspace=mtd[ws][entry_no])
-                    tmp_names.add('c0_t2_p2')
-                    mc0_t4_p2 = CreateWorkspace(DataX=x_axis, DataY=-4*c0_value+2, NSPec=n_detectors,
-                                                ParentWorkspace=mtd[ws][entry_no])
-                    tmp_names.add('mc0_t4_p2')
-                    c4_t2_m4 = CreateWorkspace(DataX=x_axis, DataY=2*c4_value-4, NSPec=n_detectors,
-                                               ParentWorkspace=mtd[ws][entry_no])
-                    tmp_names.add('c4_t2_m4')
-                    c4_t2_p2 = CreateWorkspace(DataX=x_axis, DataY=2*c4_value+2, NSPec=n_detectors,
-                                               ParentWorkspace=mtd[ws][entry_no])
-                    tmp_names.add('c4_t2_p2')
-                    mc4_t4_p2 = CreateWorkspace(DataX=x_axis, DataY=-4*c4_value+2, NSPec=n_detectors,
-                                                ParentWorkspace=mtd[ws][entry_no])
-                    tmp_names.add('mc4_t4_p2')
-                    cos_2alpha = CreateWorkspace(DataX=x_axis, DataY=np.cos(2*alpha_value), NSPec=n_detectors,
-                                                 ParentWorkspace=mtd[ws][entry_no])
-                    tmp_names.add('cos_2alpha')
-                    sin_2alpha = CreateWorkspace(DataX=x_axis, DataY=np.cos(2*alpha_value), NSPec=n_detectors,
-                                                 ParentWorkspace=mtd[ws][entry_no])
-                    tmp_names.add('sin_2alpha')
-
-                    magnetic_nsf_cos2alpha = c0_t2_m4 * sigma_x_nsf + c0_t2_p2 * sigma_y_nsf + mc0_t4_p2 * sigma_z_nsf
-                    magnetic_sf_cos2alpha = (-1) * c0_t2_m4 * sigma_x_sf - c0_t2_p2 * sigma_y_sf - mc0_t4_p2 * sigma_z_sf
-                    magnetic_nsf_sin2alpha = c4_t2_m4 * sigma_xpy_nsf + c4_t2_p2 * sigma_xmy_nsf + mc4_t4_p2 * sigma_z_nsf
-                    magnetic_sf_sin2alpha = (-1) * c4_t2_m4 * sigma_xpy_sf - c4_t2_p2 * sigma_xmy_sf - mc4_t4_p2 * sigma_z_sf
-                    tmp_names.add('magnetic_sf_cos2alpha')
-                    tmp_names.add('magnetic_nsf_cos2alpha')
-                    tmp_names.add('magnetic_sf_sin2alpha')
-                    tmp_names.add('magnetic_nsf_sin2alpha')
-
-                    data_nsf_magnetic = magnetic_nsf_cos2alpha * cos_2alpha \
-                        + magnetic_nsf_sin2alpha * sin_2alpha
-                    data_nsf_magnetic.getAxis(0).setUnit(mtd[ws][entry_no].getAxis(0).getUnit().unitID())
-                    data_nsf_magnetic.getAxis(1).setUnit(mtd[ws][entry_no].getAxis(1).getUnit().unitID())
-
-                    data_sf_magnetic = magnetic_sf_cos2alpha * cos_2alpha + magnetic_sf_sin2alpha * sin_2alpha
-                    data_sf_magnetic.getAxis(0).setUnit(mtd[ws][entry_no].getAxis(0).getUnit().unitID())
-                    data_sf_magnetic.getAxis(1).setUnit(mtd[ws][entry_no].getAxis(1).getUnit().unitID())
-
-                    data_average_magnetic = WeightedMean(InputWorkspace1=data_sf_magnetic,
-                                                         InputWorkspace2=data_nsf_magnetic)
-
-                    # Nuclear coherent component
-                    data_nuclear = (2.0 * (sigma_x_nsf + sigma_y_nsf + 2*sigma_z_nsf + sigma_xpy_nsf + sigma_xmy_nsf)
-                                    - (sigma_x_sf + sigma_y_sf + 2*sigma_z_sf + sigma_xpy_sf + sigma_xmy_sf)) / 12.0
-                    RenameWorkspace(InputWorkspace=data_nuclear, OutputWorkspace=nuclear_cs)
+                        cross_sections['z_sf'] = 0.5 * (cross_sections['z_sf'] + mtd[second_xyz_ws][entry_no])
+                        cross_sections['z_nsf'] = 0.5 * (cross_sections['z_nsf'] + mtd[second_xyz_ws][entry_no+1])
+                        cross_sections['xmy_sf'] = mtd[second_xyz_ws][entry_no+2]
+                        cross_sections['xmy_nsf'] = mtd[second_xyz_ws][entry_no+3]
+                        cross_sections['xpy_sf'] = mtd[second_xyz_ws][entry_no+4]
+                        cross_sections['xpy_nsf'] = mtd[second_xyz_ws][entry_no+5]
+                    output_data = self._calculate_10p_separation(parent_ws=mtd[ws][entry_no].name(),
+                                                                 n_detectors=n_detectors,
+                                                                 to_clean=to_clean,
+                                                                 cr_section=cross_sections)
+                    to_clean = output_data[-1]
+                    RenameWorkspace(InputWorkspace=output_data[0], OutputWorkspace=total_cs)
+                    RenameWorkspace(InputWorkspace=output_data[1], OutputWorkspace=nuclear_cs)
                     separated_cs.append(nuclear_cs)
-                    # Incoherent component
-                    data_incoherent_lhs = 0.25 * (sigma_x_sf + sigma_y_sf + 2*sigma_z_sf + sigma_xpy_sf + sigma_xmy_sf)
-                    tmp_names.add('data_incoherent_lhs')
-                    Minus(LHSWOrkspace=data_incoherent_lhs, RHSWorkspace=data_average_magnetic, OutputWorkspace=incoherent_cs)
+                    RenameWorkspace(InputWorkspace=output_data[2], OutputWorkspace=incoherent_cs)
                     separated_cs.append(incoherent_cs)
-                    RenameWorkspace(InputWorkspace=data_average_magnetic, OutputWorkspace=average_magnetic_cs)
+                    RenameWorkspace(InputWorkspace=output_data[3], OutputWorkspace=average_magnetic_cs)
                     separated_cs.append(average_magnetic_cs)
-                    RenameWorkspace(InputWorkspace=data_sf_magnetic, OutputWorkspace=magnetic_1_cs)
+                    RenameWorkspace(InputWorkspace=output_data[4], OutputWorkspace=magnetic_1_cs)
                     separated_cs.append(magnetic_1_cs)
-                    RenameWorkspace(InputWorkspace=data_nsf_magnetic, OutputWorkspace=magnetic_2_cs)
+                    RenameWorkspace(InputWorkspace=output_data[5], OutputWorkspace=magnetic_2_cs)
                     separated_cs.append(magnetic_2_cs)
 
-        if self.getProperty('ClearCache').value and tmp_names != set(): # clean only when non-empty
-            DeleteWorkspaces(WorkspaceList=list(tmp_names))
+        if self.getProperty('ClearCache').value and to_clean != set():  # clean only when non-empty
+            DeleteWorkspaces(WorkspaceList=list(to_clean))
         output_name = ws + '_separated_cs'
         GroupWorkspaces(InputWorkspaces=separated_cs, OutputWorkspace=output_name)
         return output_name
