@@ -134,6 +134,7 @@ void ProcessingAlgoWidget::changeAlgorithm() {
   QStringList disabled;
   disabled.push_back("OutputWorkspace");
   disabled.push_back("InputWorkspace");
+  disabled.push_back("Workspace");
   ui.algoProperties->addEnabledAndDisableLists(QStringList(), disabled);
   // Sets the m_algorithm and also the properties from the InputHistory
   ui.algoProperties->setAlgorithm(m_alg);

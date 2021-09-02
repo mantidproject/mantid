@@ -393,6 +393,9 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.context.data_context.instrumentNotifier.add_subscriber(
             self.fitting_tab.fitting_tab_presenter.instrument_changed_observer)
 
+        for observer in self.plot_widget.clear_plot_observers:
+            self.context.data_context.instrumentNotifier.add_subscriber(observer)
+
     def setup_group_calculation_enable_notifier(self):
 
         self.grouping_tab_widget.group_tab_presenter.enable_editing_notifier.add_subscriber(

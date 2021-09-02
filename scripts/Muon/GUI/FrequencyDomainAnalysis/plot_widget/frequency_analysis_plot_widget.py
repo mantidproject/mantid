@@ -95,6 +95,10 @@ class FrequencyAnalysisPlotWidget(object):
         self.view.set_plot_mode(plot_mode)
 
     @property
+    def clear_plot_observers(self):
+        return self.presenter.clear_plot_observers
+
+    @property
     def data_changed_observers(self):
         return [self.data_mode.data_changed_observer]
 
