@@ -15,6 +15,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
+class PreviewRow;
+
 class MANTIDQT_ISISREFLECTOMETRY_DLL IBatchJobManager {
 public:
   virtual ~IBatchJobManager() = default;
@@ -38,7 +40,7 @@ public:
                                                                std::string const &newName) = 0;
   virtual void notifyAllWorkspacesDeleted() = 0;
   virtual std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> getAlgorithms() = 0;
-  virtual MantidQt::API::IConfiguredAlgorithm_sptr getPreprocessingAlgorithm() = 0;
+  virtual MantidQt::API::IConfiguredAlgorithm_sptr getPreprocessingAlgorithm(PreviewRow &) = 0;
   virtual API::IConfiguredAlgorithm::AlgorithmRuntimeProps rowProcessingProperties() const = 0;
   virtual bool getProcessPartial() const = 0;
   virtual bool getProcessAll() const = 0;

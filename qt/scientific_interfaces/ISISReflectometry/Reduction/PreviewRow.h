@@ -29,8 +29,14 @@ public:
   Mantid::API::MatrixWorkspace_sptr getLoadedWs() const noexcept;
   void setLoadedWs(Mantid::API::MatrixWorkspace_sptr ws) noexcept;
 
+  friend bool operator==(const PreviewRow &lhs, const PreviewRow &rhs) {
+    // Note: This does not consider if the underlying item is equal currently
+    return (&lhs == &rhs) || ((lhs.m_runNumbers == rhs.m_runNumbers) && (lhs.m_loadedWs == rhs.m_loadedWs));
+  }
+
 private:
   std::vector<std::string> m_runNumbers;
   Mantid::API::MatrixWorkspace_sptr m_loadedWs;
 };
+
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

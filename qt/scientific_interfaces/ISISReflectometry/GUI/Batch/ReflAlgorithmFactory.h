@@ -12,11 +12,12 @@
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 class Batch;
+class PreviewRow;
 
 class ReflAlgorithmFactory : public IReflAlgorithmFactory {
 public:
   explicit ReflAlgorithmFactory(Batch const &batch);
-  MantidQt::API::IConfiguredAlgorithm_sptr makePreprocessingAlgorithm() const override;
+  MantidQt::API::IConfiguredAlgorithm_sptr makePreprocessingAlgorithm(PreviewRow &row) const override;
 
 private:
   Batch const &m_batch;

@@ -14,8 +14,7 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 ReflAlgorithmFactory::ReflAlgorithmFactory(Batch const &batch) : m_batch(batch) {}
 
-MantidQt::API::IConfiguredAlgorithm_sptr ReflAlgorithmFactory::makePreprocessingAlgorithm() const {
-  auto row = PreviewRow({"1234"});
+MantidQt::API::IConfiguredAlgorithm_sptr ReflAlgorithmFactory::makePreprocessingAlgorithm(PreviewRow &row) const {
   return PreprocessRow::createConfiguredAlgorithm(m_batch, row, nullptr);
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

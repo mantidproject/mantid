@@ -20,6 +20,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
+class PreviewRow;
+
 /**
  * The BatchJobManager class sets up algorithms to run based on the reduction
  * configuration, and handles updating state when algorithms complete
@@ -51,7 +53,7 @@ public:
   void notifyAllWorkspacesDeleted() override;
 
   std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> getAlgorithms() override;
-  MantidQt::API::IConfiguredAlgorithm_sptr getPreprocessingAlgorithm() override;
+  MantidQt::API::IConfiguredAlgorithm_sptr getPreprocessingAlgorithm(PreviewRow &) override;
   API::IConfiguredAlgorithm::AlgorithmRuntimeProps rowProcessingProperties() const override;
 
   bool getProcessPartial() const override;

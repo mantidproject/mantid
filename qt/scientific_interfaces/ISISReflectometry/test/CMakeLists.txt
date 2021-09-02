@@ -6,9 +6,11 @@ set(TEST_FILES
   Batch/BatchJobManagerProgressBarTest.h
   Batch/BatchJobManagerWorkspacesTest.h
   Batch/GroupProcessingAlgorithmTest.h
+  Batch/BatchJobManagerPreviewTest.h
   Batch/BatchJobManagerProcessingTest.h
   Batch/RowProcessingAlgorithmTest.h
   Batch/RowPreprocessingAlgorithmTest.h
+
 
   Event/EventPresenterTest.h
   MainWindow/MainWindowPresenterTest.h

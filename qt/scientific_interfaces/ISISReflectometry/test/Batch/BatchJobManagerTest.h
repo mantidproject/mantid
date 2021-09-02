@@ -57,7 +57,8 @@ protected:
     friend class BatchJobManagerWorkspacesTest;
 
   public:
-    BatchJobManagerFriend(Batch batch) : BatchJobManager(batch) {}
+    BatchJobManagerFriend(Batch batch, std::unique_ptr<IReflAlgorithmFactory> factory)
+        : BatchJobManager(batch, std::move(factory)) {}
   };
 
   void verifyAndClear() { TS_ASSERT(Mock::VerifyAndClearExpectations(&m_jobAlgorithm)); }
@@ -67,11 +68,20 @@ protected:
   }
 
   BatchJobManagerFriend makeJobManager(ReductionJobs reductionJobs = ReductionJobs()) {
+    return makeJobManager(reductionJobs, nullptr);
+  }
+
+  BatchJobManagerFriend makeJobManager(std::unique_ptr<IReflAlgorithmFactory> mockFactory) {
+    return makeJobManager(ReductionJobs(), std::move(mockFactory));
+  }
+
+  BatchJobManagerFriend makeJobManager(ReductionJobs reductionJobs,
+                                       std::unique_ptr<IReflAlgorithmFactory> mockFactory) {
     m_experiment = makeEmptyExperiment();
     m_instrument = makeEmptyInstrument();
     m_runsTable = makeRunsTable(std::move(reductionJobs));
     m_slicing = Slicing();
-    return BatchJobManagerFriend(Batch(m_experiment, m_instrument, m_runsTable, m_slicing));
+    return BatchJobManagerFriend(Batch(m_experiment, m_instrument, m_runsTable, m_slicing), std::move(mockFactory));
   }
 
   Workspace2D_sptr createWorkspace() {

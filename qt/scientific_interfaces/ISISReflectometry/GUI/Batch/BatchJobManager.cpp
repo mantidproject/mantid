@@ -174,11 +174,8 @@ std::deque<IConfiguredAlgorithm_sptr> BatchJobManager::getAlgorithms() {
   return std::deque<IConfiguredAlgorithm_sptr>();
 }
 
-MantidQt::API::IConfiguredAlgorithm_sptr BatchJobManager::getPreprocessingAlgorithm() {
-  auto row = PreviewRow({"1234"});
-  // TODO shall we test this?
-  auto result = PreprocessRow::createConfiguredAlgorithm(m_batch, row, nullptr);
-  return result;
+MantidQt::API::IConfiguredAlgorithm_sptr BatchJobManager::getPreprocessingAlgorithm(PreviewRow &row) {
+  return m_algFactory->makePreprocessingAlgorithm(row);
 }
 
 /** Add the algorithms and related properties for postprocessing a group

@@ -37,6 +37,8 @@
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/Hint.h"
+#include "Reduction/PreviewRow.h"
+
 #include <QMap>
 #include <QString>
 #include <QVariant>
@@ -326,7 +328,7 @@ public:
   MOCK_METHOD2(notifyWorkspaceRenamed, boost::optional<Item const &>(std::string const &, std::string const &));
   MOCK_METHOD0(notifyAllWorkspacesDeleted, void());
   MOCK_METHOD0(getAlgorithms, std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>());
-  MOCK_METHOD0(getPreprocessingAlgorithm, MantidQt::API::IConfiguredAlgorithm_sptr());
+  MOCK_METHOD1(getPreprocessingAlgorithm, MantidQt::API::IConfiguredAlgorithm_sptr(PreviewRow &));
   MOCK_CONST_METHOD0(rowProcessingProperties, MantidQt::API::IConfiguredAlgorithm::AlgorithmRuntimeProps());
   MOCK_CONST_METHOD0(getProcessPartial, bool());
   MOCK_CONST_METHOD0(getProcessAll, bool());
