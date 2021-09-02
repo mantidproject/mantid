@@ -25,7 +25,6 @@ Improvements
 - :ref:`CrossCorrelate <algm-CrossCorrelate>` has additional parameter to set the maximum d-space shift during cross correlation.
 - :ref:`Load <algm-Load>` will now set output properties of all types, not just workspaces.
 - :ref:`LoadRaw <algm-LoadRaw>` will now ignore empty ICPalarm log files.
-- Event nexuses produced at ILL can now be loaded using :ref:`LoadEventNexus <algm-LoadEventNexus>`.
 
 Bugfixes
 ########
