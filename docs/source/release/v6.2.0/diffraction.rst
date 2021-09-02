@@ -19,27 +19,25 @@ New features
 
 Improvements
 ############
-- :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder-v1>` permits masking of discrete wavelength ranges to zero, for resonance filtering
-- Improved performance of :ref:`ApplyDiffCal <algm-ApplyDiffCal>` on large instruments e.g. WISH. This in turn improves the performance of :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>`.
-- :ref:`ConvertDiffCal <algm-ConvertDiffCal-v1>` now optionally updates a previous calibration when converting offsets.
-- :ref:`LoadILLDiffraction <algm-LoadILLDiffraction>` now adds input run number also to a metadata field `run_list`, intended to contain a full list of numbers, handled by :ref:`MergeRuns <algm-MergeRuns>`.
-- :ref:`LoadILLPolarizedDiffraction <algm-LoadILLPolarizedDiffraction>` now sorts the polarization orientations and enforces spin-flip, then non-spin-flip order
-- :ref:`LoadWANDSCD <algm-LoadWANDSCD-v1>` now has a new option to perform normalization in the same loading process.
-- :ref:`PDCalibration <algm-PDCalibration-v1>` has a new option to use the :ref:`IkedaCarpenterPV <func-IkedaCarpenterPV>` peak function.
-- :ref:`PolDiffILLReduction <algm-PolDiffILLReduction>` received a number of improvements: changes names of input workspaces to contain polarization information,
+* :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder-v1>` permits masking of discrete wavelength ranges to zero, for resonance filtering
+* Improved performance of :ref:`ApplyDiffCal <algm-ApplyDiffCal>` on large instruments e.g. WISH. This in turn improves the performance of :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>`.
+* :ref:`ConvertDiffCal <algm-ConvertDiffCal-v1>` now optionally updates a previous calibration when converting offsets.
+* :ref:`LoadILLDiffraction <algm-LoadILLDiffraction>` now adds input run number also to a metadata field `run_list`, intended to contain a full list of numbers, handled by :ref:`MergeRuns <algm-MergeRuns>`.
+* :ref:`LoadILLPolarizedDiffraction <algm-LoadILLPolarizedDiffraction>` now sorts the polarization orientations and enforces spin-flip, then non-spin-flip order
+* :ref:`LoadWANDSCD <algm-LoadWANDSCD-v1>` now has a new option to perform normalization in the same loading process.
+* :ref:`PDCalibration <algm-PDCalibration-v1>` has a new option to use the :ref:`IkedaCarpenterPV <func-IkedaCarpenterPV>` peak function.
+* :ref:`PolDiffILLReduction <algm-PolDiffILLReduction>` received a number of improvements: changes names of input workspaces to contain polarization information,
   transmission can be provided as a number or a workspace group, new data averaging option depending on measurement 2theta, option to display all measured points
   on a scatter plot, new option for self-attenuation treatment using measured transmission.
-- Several improvements have been made to the group calibration routine including
+* Several improvements have been made to the group calibration routine including
 
 
-	- More input control parameters, including peak function type for estimating offset after cross correlation and an option to turn on or off the smoothing of data for cross correlation purpose.
-	- The workflow of group calibration script is also polished to make it smoother. Accordingly, unit tests have been updated.
-	- Making it more generic.
-	- Groups are now allowed with dedicated control parameters.
-	- Documentation has been added as a guidance for general users.
+	* More input control parameters, including peak function type for estimating offset after cross correlation and an option to turn on or off the smoothing of data for cross correlation purpose.
+	* The workflow of group calibration script is also polished to make it smoother. Accordingly, unit tests have been updated.
+	* Making it more generic.
+	* Groups are now allowed with dedicated control parameters.
+	* Documentation has been added as a guidance for general users.
 
-- :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` major interface update along with enabling the calibration of T0 and sample position.
-- :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` minor interface update that allows fine control of bank rotation calibration.
 - :ref:`SNAPReduce <algm-SNAPReduce-v1>` permits saving selected property names and values to file, to aid autoreduction.
 - Add a custom ttmode to the PEARL powder diffraction scripts for running with a custom grouping file.
 - Added a 3mf format file describing the PEARL sample and environment shapes for the P-E press. Also fixed a couple of minor issues in the 3mf file format loader used in :ref:`LoadSampleEnvironment  <algm-LoadSampleEnvironment>`.
@@ -78,13 +76,13 @@ Improvements
 
 .. image::  ../../images/EngDiff_Fit_Browse_Filters.png
    :align: center
-   :height: 800px
+   :height: 700px
 
 
 Bugfixes
 ########
 - Sequential fitting in the :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>` now uses the output of the last successful fit (as opposed to the previous fit) as the initial parameters for the next fit.
-- An empty :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>` is no longer saved if the user saves a project having previously had the interface open at some point in that session.
+- If the user saves a project having previously opened and closed the :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>`, loading the project will not re-open the interface.
 - The help button on the :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>` points to the correct page, having been broken in the last release.
 - Using the Clear button on the Workspace widget while using the :ref:`Fitting tab <ui engineering fitting>` no longer causes issues when you try to load runs back in.
 - On the :ref:`Fitting tab <ui engineering fitting>` of the :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>` the background can be inspected whether the background subtraction box is checked or not.
@@ -96,22 +94,27 @@ New features
 - New algorithm :ref:`ApplyInstrumentToPeaks <algm-ApplyInstrumentToPeaks>` to update the instrument of peaks within a PeaksWorkspace.
 - New algorithm :ref:`ConvertPeaksWorkspace <algm-ConvertPeaksWorkspace>` for quick conversion between PeaksWorkspace and LeanElasticPeaksWorkspace.
 - New algorithm :ref:`FindGlobalBMatrix <algm-FindGlobalBMatrix>` that refines common lattice parameters across peak workspaces from multiple runs with a different U matrix (which encodes the orientation) per run.
-- New algorithm :ref:`HB3AIntegrateDetectorPeaks <algm-HB3AIntegrateDetectorPeaks>` for integrating four-circle data from HB3A in detector space.
+- New algorithm :ref:`HB3AIntegrateDetectorPeaks <algm-HB3AIntegrateDetectorPeaks>` for integrating four-circle data from HB3A in detector space using simple cuboid integration with and without fitted background.
 - New plotting script that provides diagnostic plots of :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` on a per panel/bank basis.
 - Exposed :meth:`mantid.api.IPeak.getCol` and :meth:`mantid.api.IPeak.getRow` to python.
-- Added two integration methods to :ref:`HB3AIntegrateDetectorPeaks <algm-HB3AIntegrateDetectorPeaks>` for simple cuboid integration with and without fitted background.
 - New definition file for D19 ILL instrument added.
 
 Improvements
 ############
 
-- Existing :ref:`DGSPlanner <dgsplanner-ref>` expanded to support WAND².
-- Existing algorithm :ref:`IntegrateEllipsoids <algm-IntegrateEllipsoids-v1>` now can use a different integrator for satellite peaks.
-- Existing algorithm:ref:`MaskPeaksWorkspace <algm-MaskPeaksWorkspace-v1>` now also supports tube-type detectors used at the CORELLI instrument.
-- Existing algorithm :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` now provides better calibration of panel orientation for flat panel detectors.
-- Existing algorithm :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` now retains the value of small optimization results instead of zeroing them.
-- Find detector in peaks will check which detector is closer when dealing with peak-in-gap situation for tube-type detectors.
-- New option in :ref:`IntegrateEllipsoids <algm-IntegrateEllipsoids-v1>` to share Bragg peak background with satellite peaks.
+* Existing :ref:`DGSPlanner <dgsplanner-ref>` expanded to support WAND².
+* Existing algorithm :ref:`IntegrateEllipsoids <algm-IntegrateEllipsoids-v1>` now can use a different integrator for satellite peaks.
+* New option in :ref:`IntegrateEllipsoids <algm-IntegrateEllipsoids-v1>` to share Bragg peak background with satellite peaks.
+* Existing algorithm:ref:`MaskPeaksWorkspace <algm-MaskPeaksWorkspace-v1>` now also supports tube-type detectors used at the CORELLI instrument.
+* Improvements to :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` including
+
+  * major interface update
+  * enabling the calibration of T0 and sample position
+  * fine control of bank rotation calibration
+  * better calibration of panel orientation for flat panel detectors
+  * retains the value of small optimization results instead of zeroing them.
+
+* Find detector in peaks will check which detector is closer when dealing with peak-in-gap situation for tube-type detectors.
 
 Bugfixes
 ########
