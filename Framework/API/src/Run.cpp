@@ -502,13 +502,11 @@ void Run::loadNexus(::NeXus::File *file, const std::string &group,
   if (!group.empty()) {
     file->openGroup(group, "NXgroup");
   }
-  // TODO /MDEventWorkspace/experiment4 + / + logs
-  std::map<std::string, std::string> entries;
-  file->getEntries(entries);
-  LogManager::loadNexus(file, entries);
 
   // Example: /MDEventWorkspace/experiment4 + / + logs
   const std::string absoluteGroupName = prefix + "/" + group;
+  LogManager::loadNexus(file, fileInfo, absoluteGroupName);
+
   // group hierarchy levels
   const auto levels = std::count(absoluteGroupName.begin(), absoluteGroupName.end(), '/');
 
@@ -524,19 +522,24 @@ void Run::loadNexus(::NeXus::File *file, const std::string &group,
     // for the bounds of the current experiment number
     // take advantage of the fact that std::set is sorted, find by prefix bounds
     auto itLower = nxClassEntries.lower_bound(absoluteGroupName);
+    // not prefixed
     if (itLower == nxClassEntries.end()) {
       continue;
     }
-    auto itUpper = nxClassEntries.upper_bound(absoluteGroupName);
+    if (itLower->compare(0, absoluteGroupName.size(), absoluteGroupName) != 0) {
+      continue;
+    }
 
-    // loop through the set
-    for (auto it = itLower; it != itUpper; ++it) {
+    // loop through the set with prefix absoluteGroupName
+    for (auto it = itLower;
+         it != nxClassEntries.end() && it->compare(0, absoluteGroupName.size(), absoluteGroupName) == 0; ++it) {
+
       // only next level entries
       const std::string &absoluteEntryName = *it;
       if (std::count(absoluteEntryName.begin(), absoluteEntryName.end(), '/') != levels + 1) {
         continue;
       }
-      const std::string nameClass = absoluteEntryName.substr(absoluteEntryName.find_last_of('/'));
+      const std::string nameClass = absoluteEntryName.substr(absoluteEntryName.find_last_of('/') + 1);
 
       if (nameClass == GONIOMETER_LOG_NAME) {
         // Goniometer class

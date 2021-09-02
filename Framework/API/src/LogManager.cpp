@@ -519,18 +519,33 @@ void LogManager::loadNexus(::NeXus::File *file, const std::string &group, bool k
 
 void LogManager::loadNexus(::NeXus::File *file, const std::shared_ptr<Mantid::Kernel::NexusHDF5Descriptor> &fileInfo,
                            const std::string &prefix) {
-  // TODO
-  // Only load NXlog
+
+  // Only load from NXlog entries
   const auto &allEntries = fileInfo->getAllEntries();
   auto itNxLogEntries = allEntries.find("NXlog");
   const std::set<std::string> &nxLogEntries =
       (itNxLogEntries != allEntries.end()) ? itNxLogEntries->second : std::set<std::string>{};
 
-  for (const std::string &nxLogEntry : nxLogEntries) {
-    // TODO fix name
-    const std::string name = nxLogEntry.substr(nxLogEntry.find(prefix));
+  const auto levels = std::count(prefix.begin(), prefix.end(), '/');
 
-    auto prop = PropertyNexus::loadProperty(file, name);
+  auto itLower = nxLogEntries.lower_bound(prefix);
+
+  if (itLower == nxLogEntries.end()) {
+    return;
+  }
+  if (itLower->compare(0, prefix.size(), prefix) != 0) {
+    return;
+  }
+
+  for (auto it = itLower; it != nxLogEntries.end() && it->compare(0, prefix.size(), prefix) == 0; ++it) {
+    // only next level entries
+    const std::string &absoluteEntryName = *it;
+    if (std::count(absoluteEntryName.begin(), absoluteEntryName.end(), '/') != levels + 1) {
+      continue;
+    }
+    const std::string nameClass = absoluteEntryName.substr(absoluteEntryName.find_last_of('/') + 1);
+
+    auto prop = PropertyNexus::loadProperty(file, nameClass);
     if (prop) {
       if (m_manager->existsProperty(prop->name())) {
         m_manager->removeProperty(prop->name());
