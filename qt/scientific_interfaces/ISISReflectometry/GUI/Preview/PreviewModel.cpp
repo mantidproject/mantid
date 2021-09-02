@@ -25,6 +25,7 @@ void PreviewModel::loadWorkspace(std::string const &workspaceName) {
   createRunDetails(workspaceName);
   auto ws = loadFromAds(workspaceName);
   if (!ws) {
+    // Row is automatically updated (as we pass by-ref) on completion
     // Load using preprocess
   }
   m_runDetails->setLoadedWs(ws);
