@@ -11,22 +11,22 @@ from mantid.simpleapi import *
 class ILL_D7_Powder_Test(systemtesting.MantidSystemTest):
 
     @classmethod
-    def setUpClass(cls):
+    def setUp(cls):
         cls._original_facility = config['default.facility']
         cls._original_instrument = config['default.instrument']
         cls._data_search_dirs = config.getDataSearchDirs()
-
-    @classmethod
-    def tearDownClass(cls):
-        config['default.facility'] = cls._original_facility
-        config['default.instrument'] = cls._original_instrument
-        config.setDataSearchDirs(cls._data_search_dirs)
-        mtd.clear()
-
-    def setUp(self):
         config['default.facility'] = 'ILL'
         config['default.instrument'] = 'D7'
         config.appendDataSearchSubDir('ILL/D7/')
+
+    @classmethod
+    def tearDown(cls):
+        config['default.facility'] = cls._original_facility
+        config['default.instrument'] = cls._original_instrument
+        config.setDataSearchDirs(cls._data_search_dirs)
+
+    def cleanup(self):
+        mtd.clear()
 
     def validate(self):
         self.tolerance = 1e-3
@@ -123,22 +123,22 @@ class ILL_D7_Powder_Test(systemtesting.MantidSystemTest):
 class ILL_D7_SingleCrystal_Test(systemtesting.MantidSystemTest):
 
     @classmethod
-    def setUpClass(cls):
+    def setUp(cls):
         cls._original_facility = config['default.facility']
         cls._original_instrument = config['default.instrument']
         cls._data_search_dirs = config.getDataSearchDirs()
-
-    @classmethod
-    def tearDownClass(cls):
-        config['default.facility'] = cls._original_facility
-        config['default.instrument'] = cls._original_instrument
-        config.setDataSearchDirs(cls._data_search_dirs)
-        mtd.clear()
-
-    def setUp(self):
         config['default.facility'] = 'ILL'
         config['default.instrument'] = 'D7'
         config.appendDataSearchSubDir('ILL/D7/')
+
+    @classmethod
+    def tearDown(cls):
+        config['default.facility'] = cls._original_facility
+        config['default.instrument'] = cls._original_instrument
+        config.setDataSearchDirs(cls._data_search_dirs)
+
+    def cleanup(self):
+        mtd.clear()
 
     def validate(self):
         self.tolerance = 1e-3
