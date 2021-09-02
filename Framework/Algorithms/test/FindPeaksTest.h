@@ -152,14 +152,15 @@ public:
     TS_ASSERT_DELTA(peaklist->Double(8, 1), 2.14, 0.01);
   }
 
-  void NtestFindMultiPeaksGivenPeaksList() {
-    this->LoadPG3_733();
+  void testFindMultiPeaksGivenPeaksList() {
+    const std::string WKSP_NAME("FindPeaksTest_vanadium");
+    this->loadNexusProcessed("PG3_733_focussed.nxs", WKSP_NAME);
 
     FindPeaks finder;
     if (!finder.isInitialized())
       finder.initialize();
-    TS_ASSERT_THROWS_NOTHING(finder.setPropertyValue("InputWorkspace", "FindPeaksTest_vanadium"));
-    TS_ASSERT_THROWS_NOTHING(finder.setPropertyValue("WorkspaceIndex", "0"));
+    TS_ASSERT_THROWS_NOTHING(finder.setPropertyValue("InputWorkspace", WKSP_NAME));
+    TS_ASSERT_THROWS_NOTHING(finder.setPropertyValue("WorkspaceIndex", "0")); // only fit first spectrum
     TS_ASSERT_THROWS_NOTHING(finder.setPropertyValue("PeakPositions",
                                                      "0.5044,0.5191,0.5350,0.5526,0.5936,0.6178,0.6453,0."
                                                      "6768,0.7134,0.7566,0.8089,0.8737,0.9571,1.0701,1."
@@ -168,6 +169,9 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(finder.execute());
     TS_ASSERT(finder.isExecuted());
+
+    // cleanup
+    AnalysisDataService::Instance().remove(WKSP_NAME);
   }
 
   //----------------------------------------------------------------------------------------------
@@ -199,12 +203,13 @@ public:
   }
 
   /// Load PG3_733 focussed data from AutoTest
-  void LoadPG3_733() {
+  void loadNexusProcessed(const std::string &filename, const std::string &wsname) {
     Mantid::DataHandling::LoadNexusProcessed loader;
     loader.initialize();
-    loader.setProperty("Filename", "PG3_733_focussed.nxs");
-    loader.setProperty("OutputWorkspace", "FindPeaksTest_vanadium");
+    loader.setProperty("Filename", filename);
+    loader.setProperty("OutputWorkspace", wsname);
     loader.execute();
+    TS_ASSERT(loader.isExecuted());
   }
 
   //----------------------------------------------------------------------------------------------
