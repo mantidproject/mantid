@@ -6,22 +6,25 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "BatchJobManagerTest.h"
+#include "../Reduction/MockBatch.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MockReflAlgorithmFactory.h"
+#include "PreviewJobManager.h"
+
+#include "test/Batch/BatchJobManagerTest.h"
+#include "test/Batch/MockReflAlgorithmFactory.h"
 
 #include <gmock/gmock.h>
 
 using ::testing::Eq;
 using ::testing::Return;
 
-class BatchJobManagerPreviewTest : public CxxTest::TestSuite, public BatchJobManagerTest {
+class PreviewJobManagerTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static BatchJobManagerPreviewTest *createSuite() { return new BatchJobManagerPreviewTest(); }
-  static void destroySuite(BatchJobManagerPreviewTest *suite) { delete suite; }
+  static PreviewJobManagerTest *createSuite() { return new PreviewJobManagerTest(); }
+  static void destroySuite(PreviewJobManagerTest *suite) { delete suite; }
 
   void testGetPreprocessingAlgorithm() {
     auto mock = std::make_unique<MockReflAlgorithmFactory>();
@@ -29,12 +32,17 @@ public:
     auto stubAlg = createConfiguredAlgorithm();
     EXPECT_CALL(*mock, makePreprocessingAlgorithm(Eq(previewRow))).Times(1).WillOnce(Return(stubAlg));
 
-    auto jobManager = makeJobManager(std::move(mock));
+    auto batch = MockBatch();
+    auto jobManager = createJobManager(batch, std::move(mock));
     auto const preprocessAlg = jobManager.getPreprocessingAlgorithm(previewRow);
     TS_ASSERT_EQUALS(stubAlg, preprocessAlg);
   }
 
 private:
+  PreviewJobManager createJobManager(IBatch &batch, std::unique_ptr<IReflAlgorithmFactory> algFactory) {
+    return PreviewJobManager(batch, std::move(algFactory));
+  }
+
   PreviewRow createPreviewRow() { return PreviewRow({"12345"}); }
 
   IConfiguredAlgorithm_sptr createConfiguredAlgorithm() {

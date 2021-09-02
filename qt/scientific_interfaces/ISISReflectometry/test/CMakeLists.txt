@@ -6,7 +6,6 @@ set(TEST_FILES
   Batch/BatchJobManagerProgressBarTest.h
   Batch/BatchJobManagerWorkspacesTest.h
   Batch/GroupProcessingAlgorithmTest.h
-  Batch/BatchJobManagerPreviewTest.h
   Batch/BatchJobManagerProcessingTest.h
   Batch/RowProcessingAlgorithmTest.h
   Batch/RowPreprocessingAlgorithmTest.h
@@ -40,6 +39,7 @@ set(TEST_FILES
   Reduction/GroupTest.h
   Reduction/ValidateRowTest.h
 
+  Preview/PreviewJobManagerTest.h
   Preview/PreviewModelTest.h
   Preview/PreviewPresenterTest.h
 )

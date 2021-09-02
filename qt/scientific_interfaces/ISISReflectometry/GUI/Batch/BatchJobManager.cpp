@@ -38,7 +38,7 @@ int countItemsForLocation(ReductionJobs const &jobs, MantidWidgets::Batch::RowLo
 
 using API::IConfiguredAlgorithm_sptr;
 
-BatchJobManager::BatchJobManager(Batch batch, std::unique_ptr<IReflAlgorithmFactory> algFactory)
+BatchJobManager::BatchJobManager(Batch &batch, std::unique_ptr<IReflAlgorithmFactory> algFactory)
     : m_batch(batch), m_algFactory(std::move(algFactory)), m_isProcessing(false), m_isAutoreducing(false),
       m_reprocessFailed(false), m_processAll(false), m_processPartial(false) {
   if (!m_algFactory)
@@ -172,10 +172,6 @@ std::deque<IConfiguredAlgorithm_sptr> BatchJobManager::getAlgorithms() {
       return algorithmForPostprocessingGroup(group);
   }
   return std::deque<IConfiguredAlgorithm_sptr>();
-}
-
-MantidQt::API::IConfiguredAlgorithm_sptr BatchJobManager::getPreprocessingAlgorithm(PreviewRow &row) {
-  return m_algFactory->makePreprocessingAlgorithm(row);
 }
 
 /** Add the algorithms and related properties for postprocessing a group

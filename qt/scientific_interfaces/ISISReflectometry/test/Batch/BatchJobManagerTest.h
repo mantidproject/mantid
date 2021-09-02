@@ -37,7 +37,8 @@ public:
   BatchJobManagerTest()
       : m_instruments{"INTER", "OFFSPEC", "POLREF", "SURF", "CRISP"}, m_tolerance(0.1),
         m_experiment(makeEmptyExperiment()), m_instrument(makeEmptyInstrument()),
-        m_runsTable(m_instruments, m_tolerance, ReductionJobs()), m_slicing() {
+        m_runsTable(m_instruments, m_tolerance, ReductionJobs()), m_slicing(),
+        m_batch(m_experiment, m_instrument, m_runsTable, m_slicing) {
     m_jobAlgorithm = std::make_shared<MockBatchJobAlgorithm>();
   }
 
@@ -48,6 +49,7 @@ protected:
   Instrument m_instrument;
   RunsTable m_runsTable;
   Slicing m_slicing;
+  Batch m_batch;
   std::shared_ptr<MockBatchJobAlgorithm> m_jobAlgorithm;
 
   class BatchJobManagerFriend : public BatchJobManager {
@@ -57,7 +59,7 @@ protected:
     friend class BatchJobManagerWorkspacesTest;
 
   public:
-    BatchJobManagerFriend(Batch batch, std::unique_ptr<IReflAlgorithmFactory> factory)
+    BatchJobManagerFriend(Batch &batch, std::unique_ptr<IReflAlgorithmFactory> factory)
         : BatchJobManager(batch, std::move(factory)) {}
   };
 
@@ -77,11 +79,8 @@ protected:
 
   BatchJobManagerFriend makeJobManager(ReductionJobs reductionJobs,
                                        std::unique_ptr<IReflAlgorithmFactory> mockFactory) {
-    m_experiment = makeEmptyExperiment();
-    m_instrument = makeEmptyInstrument();
     m_runsTable = makeRunsTable(std::move(reductionJobs));
-    m_slicing = Slicing();
-    return BatchJobManagerFriend(Batch(m_experiment, m_instrument, m_runsTable, m_slicing), std::move(mockFactory));
+    return BatchJobManagerFriend(m_batch, std::move(mockFactory));
   }
 
   Workspace2D_sptr createWorkspace() {

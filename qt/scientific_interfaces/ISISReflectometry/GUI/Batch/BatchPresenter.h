@@ -104,6 +104,7 @@ private:
   void settingsChanged();
 
   IBatchView *m_view;
+  Batch m_model;
   IMainWindowPresenter *m_mainPresenter;
   std::unique_ptr<IRunsPresenter> m_runsPresenter;
   std::unique_ptr<IEventPresenter> m_eventPresenter;

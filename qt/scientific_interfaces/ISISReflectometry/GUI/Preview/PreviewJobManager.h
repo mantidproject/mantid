@@ -6,20 +6,20 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IReflAlgorithmFactory.h"
-#include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
+#include "Common/DllConfig.h"
+#include "GUI/Batch/IReflAlgorithmFactory.h"
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
-
 class IBatch;
-class PreviewRow;
 
-class ReflAlgorithmFactory : public IReflAlgorithmFactory {
+class MANTIDQT_ISISREFLECTOMETRY_DLL PreviewJobManager {
 public:
-  explicit ReflAlgorithmFactory(IBatch const &batch);
-  MantidQt::API::IConfiguredAlgorithm_sptr makePreprocessingAlgorithm(PreviewRow &row) const override;
+  PreviewJobManager(IBatch &batch, std::unique_ptr<IReflAlgorithmFactory> algFactory = nullptr);
+
+  MantidQt::API::IConfiguredAlgorithm_sptr getPreprocessingAlgorithm(PreviewRow &) const;
 
 private:
-  IBatch const &m_batch;
+  std::unique_ptr<IReflAlgorithmFactory> m_algFactory;
 };
+
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

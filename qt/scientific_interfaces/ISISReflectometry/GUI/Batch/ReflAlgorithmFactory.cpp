@@ -12,7 +12,7 @@
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
-ReflAlgorithmFactory::ReflAlgorithmFactory(Batch const &batch) : m_batch(batch) {}
+ReflAlgorithmFactory::ReflAlgorithmFactory(IBatch const &batch) : m_batch(batch) {}
 
 MantidQt::API::IConfiguredAlgorithm_sptr ReflAlgorithmFactory::makePreprocessingAlgorithm(PreviewRow &row) const {
   return PreprocessRow::createConfiguredAlgorithm(m_batch, row, nullptr);
