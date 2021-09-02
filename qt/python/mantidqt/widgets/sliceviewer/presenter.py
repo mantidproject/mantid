@@ -105,18 +105,6 @@ class SliceViewer(ObservingPresenter):
         data_view = self.view.data_view
         limits = data_view.get_axes_limits()
 
-        if limits is not None:
-            # view limits are in orthogonal frame. transform to nonorthogonal
-            # model frame
-            if data_view.nonorthogonal_mode:
-                xlim, ylim = limits
-                inv_tr = data_view.nonortho_transform.inv_tr
-                # viewing axis y not aligned with plot axis
-                xmin_p, ymax_p = inv_tr(xlim[0], ylim[1])
-                xmax_p, ymin_p = inv_tr(xlim[1], ylim[0])
-                xlim, ylim = (xmin_p, xmax_p), (ymin_p, ymax_p)
-                limits = [xlim, ylim]
-
         # The value at the i'th index of this tells us that the axis with that value (0 or 1) will display dimension i
         dimension_indices = self.view.dimensions.get_states()
 
