@@ -8,10 +8,13 @@
 
 #include "Common/DllConfig.h"
 #include "IBatchJobManager.h"
+#include "IReflAlgorithmFactory.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "Reduction/Batch.h"
+
+#include <memory>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -23,7 +26,7 @@ namespace ISISReflectometry {
  */
 class MANTIDQT_ISISREFLECTOMETRY_DLL BatchJobManager : public IBatchJobManager {
 public:
-  explicit BatchJobManager(Batch batch);
+  BatchJobManager(Batch batch, std::unique_ptr<IReflAlgorithmFactory> algFactory = nullptr);
 
   bool isProcessing() const override;
   bool isAutoreducing() const override;
@@ -56,6 +59,7 @@ public:
 
 protected:
   Batch m_batch;
+  std::unique_ptr<IReflAlgorithmFactory> m_algFactory;
   bool m_isProcessing;
   bool m_isAutoreducing;
   bool m_reprocessFailed;

@@ -7,7 +7,9 @@
 #include "BatchJobManager.h"
 #include "BatchJobAlgorithm.h"
 #include "GroupProcessingAlgorithm.h"
+#include "IReflAlgorithmFactory.h"
 #include "Reduction/PreviewRow.h"
+#include "ReflAlgorithmFactory.h"
 #include "RowPreprocessingAlgorithm.h"
 #include "RowProcessingAlgorithm.h"
 
@@ -36,9 +38,12 @@ int countItemsForLocation(ReductionJobs const &jobs, MantidWidgets::Batch::RowLo
 
 using API::IConfiguredAlgorithm_sptr;
 
-BatchJobManager::BatchJobManager(Batch batch)
-    : m_batch(batch), m_isProcessing(false), m_isAutoreducing(false), m_reprocessFailed(false),
-      m_processAll(false), m_processPartial(false) {}
+BatchJobManager::BatchJobManager(Batch batch, std::unique_ptr<IReflAlgorithmFactory> algFactory)
+    : m_batch(batch), m_algFactory(std::move(algFactory)), m_isProcessing(false), m_isAutoreducing(false),
+      m_reprocessFailed(false), m_processAll(false), m_processPartial(false) {
+  if (!m_algFactory)
+    m_algFactory = std::make_unique<ReflAlgorithmFactory>(m_batch);
+}
 
 bool BatchJobManager::isProcessing() const { return m_isProcessing; }
 
