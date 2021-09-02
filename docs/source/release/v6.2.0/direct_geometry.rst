@@ -44,13 +44,13 @@ Improvements
 
 .. image::  ../../images/MSlice_plot_manager.png
    :align: center
-   :height: 800px
+   :height: 650px
 
 - **Enable powder (Bragg) peaks on cut plots.**
 
 .. image::  ../../images/Bragg_peak_cut_plot.png
    :align: center
-   :height: 800px
+   :height: 700px
 
 BugFixes
 ########
