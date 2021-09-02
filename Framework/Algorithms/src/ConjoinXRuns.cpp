@@ -240,10 +240,10 @@ std::vector<double> ConjoinXRuns::getXAxis(const MatrixWorkspace_sptr &ws, doubl
   axis.reserve(s);
   auto &run = ws->run();
   if (getProperty("LinearizeAxis")) {
-    for (double ix = xstart; ix < xstart + s; ++ix) {
+    for (double ix = xstart; ix < xstart + double(s); ++ix) {
       axis.push_back(ix);
     }
-    xstart += s;
+    xstart += double(s);
   } else {
     // try time series first
     TimeSeriesProperty<double> *timeSeriesDouble(nullptr);
