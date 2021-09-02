@@ -6,10 +6,12 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
+from functools import partial
 import io
 import sys
+from threading import Thread
 import unittest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 import matplotlib as mpl
 from matplotlib.colors import Normalize
@@ -19,8 +21,8 @@ mpl.use('Agg')
 from mantidqt.widgets.colorbar.colorbar import MIN_LOG_VALUE  # noqa: E402
 from mantidqt.widgets.sliceviewer.view import SCALENORM  # noqa: E402
 from mantid.simpleapi import (  # noqa: E402
-    CreateMDHistoWorkspace, CreateMDWorkspace, CreateSampleWorkspace, DeleteWorkspace,
-    FakeMDEventData, ConvertToDistribution, Scale, SetUB, RenameWorkspace)
+    CreateMDHistoWorkspace, CreateMDWorkspace, CreateSampleWorkspace, DeleteWorkspace, FakeMDEventData, ConvertToDistribution, Scale, SetUB,
+    RenameWorkspace)
 from mantid.api import AnalysisDataService  # noqa: E402
 from mantidqt.utils.qt.testing import start_qapplication  # noqa: E402
 from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder  # noqa: E402
@@ -28,6 +30,7 @@ from mantidqt.widgets.sliceviewer.presenter import SliceViewer  # noqa: E402
 from mantidqt.widgets.sliceviewer.toolbar import ToolItemText  # noqa: E402
 from qtpy.QtWidgets import QApplication  # noqa: E402
 from math import inf  # noqa: E402
+from numpy.testing import assert_allclose  # noqa: E402
 
 
 class MockConfig(object):
@@ -94,8 +97,7 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
     def test_enable_nonorthogonal_view_disables_lineplots_if_enabled(self):
         pres = SliceViewer(self.hkl_ws)
         line_plots_action, region_sel_action, non_ortho_action = toolbar_actions(
-            pres,
-            (ToolItemText.LINEPLOTS, ToolItemText.REGIONSELECTION, ToolItemText.NONORTHOGONAL_AXES))
+            pres, (ToolItemText.LINEPLOTS, ToolItemText.REGIONSELECTION, ToolItemText.NONORTHOGONAL_AXES))
         line_plots_action.trigger()
         QApplication.sendPostedEvents()
 
@@ -112,8 +114,7 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
 
     def test_disable_lineplots_disables_region_selector(self):
         pres = SliceViewer(self.hkl_ws)
-        line_plots_action, region_sel_action = toolbar_actions(
-            pres, (ToolItemText.LINEPLOTS, ToolItemText.REGIONSELECTION))
+        line_plots_action, region_sel_action = toolbar_actions(pres, (ToolItemText.LINEPLOTS, ToolItemText.REGIONSELECTION))
         line_plots_action.trigger()
         region_sel_action.trigger()
         QApplication.sendPostedEvents()
@@ -177,15 +178,17 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
         pres.view.data_view.dimensions.transpose = False
         pres.update_plot_data()
         extent = pres.view.data_view.image.get_extent()
-        self.assertListEqual(extent, [-10.0, 10.0, -9.0, 9.0])
+        assert_allclose(extent, [-10.0, 10.0, -9.0, 9.0])
 
         # transpose
         pres.view.data_view.dimensions.transpose = True
         pres.update_plot_data()
         extent = pres.view.data_view.image.get_extent()
-        self.assertTupleEqual(extent, (-9.0, 9.0, -10.0, 10.0))
-        self.assertTupleEqual(extent[0:2], pres.view.data_view.ax.get_xlim())
-        self.assertTupleEqual(extent[2:], pres.view.data_view.ax.get_ylim())
+
+        # Should be the same as before as transposition is handled in the model
+        assert_allclose(extent, [-10.0, 10.0, -9.0, 9.0])
+        assert_allclose(extent[0:2], list(pres.view.data_view.ax.get_xlim()))
+        assert_allclose(extent[2:], list(pres.view.data_view.ax.get_ylim()))
 
         pres.view.close()
 
@@ -226,9 +229,12 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
         self.assertEqual(pres.ads_observer, None)
 
     def test_view_updates_on_replace_when_model_properties_dont_change_matrixws(self):
+        def scale_ws(ws):
+            ws = Scale(ws, 100, "Multiply")
+
         ws = CreateSampleWorkspace()
         pres = SliceViewer(ws)
-        ws = Scale(ws, 100, "Multiply")
+        self._assertNoErrorInADSHandlerFromSeparateThread(partial(scale_ws, ws))
 
         QApplication.sendPostedEvents()
 
@@ -238,6 +244,9 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
         pres.view.close()
 
     def test_view_updates_on_replace_when_model_properties_dont_change_mdeventws(self):
+        def scale_ws(ws):
+            ws = ws * 100
+
         ws = CreateMDWorkspace(Dimensions='3',
                                EventType='MDEvent',
                                Extents='-10,10,-5,5,-1,1',
@@ -245,17 +254,7 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
                                Units='1\\A,1\\A,1\\A')
         FakeMDEventData(ws, UniformParams="1000000")
         pres = SliceViewer(ws)
-        try:
-            # the ads handler catches all exceptions so that the handlers don't
-            # bring down the sliceviewer. Check if anything is writtent to stderr
-            stderr_capture = io.StringIO()
-            stderr_orig = sys.stderr
-            sys.stderr = stderr_capture
-            ws *= 100
-            self.assertTrue('Error occurred in handler' not in stderr_capture.getvalue(),
-                            msg=stderr_capture.getvalue())
-        finally:
-            sys.stderr = stderr_orig
+        self._assertNoErrorInADSHandlerFromSeparateThread(partial(scale_ws, ws))
 
         QApplication.sendPostedEvents()
 
@@ -295,13 +294,12 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
 
     def test_view_closes_on_ADS_cleared(self):
         ws = CreateSampleWorkspace()
-        pres = SliceViewer(ws)
+        SliceViewer(ws)
         AnalysisDataService.clear()
 
         QApplication.sendPostedEvents()
 
         self.assert_no_toplevel_widgets()
-        self.assertEqual(pres.ads_observer, None)
 
     def test_plot_matrix_xlimits_ignores_monitors(self):
         xmin = 5000
@@ -331,11 +329,31 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
         ws = CreateSampleWorkspace()
         pres = SliceViewer(ws)
         self.assert_widget_created()
-        pres.clear_observer = MagicMock()
 
         pres.view.close()
+        pres = None
+        QApplication.sendPostedEvents()
 
-        pres.clear_observer.assert_called()
+        self.assert_no_toplevel_widgets()
+
+    # private methods
+    def _assertNoErrorInADSHandlerFromSeparateThread(self, operation):
+        """Check the error stream for any errors when calling operation.
+        Raise an assertion error if errors are detected
+        """
+        try:
+            # the ads handler catches all exceptions so that the handlers don't
+            # bring down the sliceviewer. Check if anything is written to stderr
+            stderr_capture = io.StringIO()
+            stderr_orig = sys.stderr
+            sys.stderr = stderr_capture
+            op_thread = Thread(target=operation)
+            op_thread.start()
+            op_thread.join()
+            self.assertTrue('Error occurred in handler' not in stderr_capture.getvalue(), msg=stderr_capture.getvalue())
+        finally:
+            sys.stderr = stderr_orig
+
 
 # private helper functions
 

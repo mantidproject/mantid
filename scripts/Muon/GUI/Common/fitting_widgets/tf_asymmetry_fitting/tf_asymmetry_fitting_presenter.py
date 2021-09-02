@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import IFunction
-from mantidqt.utils.observer_pattern import GenericObserver
 
 from Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_presenter import GeneralFittingPresenter
 from Muon.GUI.Common.fitting_widgets.tf_asymmetry_fitting.tf_asymmetry_fitting_model import TFAsymmetryFittingModel
@@ -21,8 +20,6 @@ class TFAsymmetryFittingPresenter(GeneralFittingPresenter):
     def __init__(self, view: TFAsymmetryFittingView, model: TFAsymmetryFittingModel):
         """Initialize the TFAsymmetryFittingPresenter. Sets up the slots and event observers."""
         super(TFAsymmetryFittingPresenter, self).__init__(view, model)
-
-        self.sequential_fit_finished_observer = GenericObserver(self.handle_sequential_fit_finished)
 
         self.view.set_slot_for_fitting_type_changed(self.handle_tf_asymmetry_mode_changed)
         self.view.set_slot_for_normalisation_changed(self.handle_normalisation_changed)
@@ -92,11 +89,6 @@ class TFAsymmetryFittingPresenter(GeneralFittingPresenter):
     def handle_fix_normalisation_changed(self, is_fixed: bool) -> None:
         """Handles when the value of the current normalisation has been fixed or unfixed."""
         self.model.toggle_fix_current_normalisation(is_fixed)
-
-    def handle_sequential_fit_finished(self) -> None:
-        """Handles when a sequential fit has been performed and has finished executing in the sequential fitting tab."""
-        self.update_fit_function_in_view_from_model()
-        self.update_fit_statuses_and_chi_squared_in_view_from_model()
 
     def update_and_reset_all_data(self) -> None:
         """Updates the various data displayed in the fitting widget. Resets and clears previous fit information."""

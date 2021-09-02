@@ -1042,7 +1042,6 @@ std::string FitPropertyBrowser::defaultPeakType() {
 void FitPropertyBrowser::setDefaultPeakType(const std::string &fnType) {
   m_defaultPeak = fnType;
   setDefaultFunctionType(fnType);
-  Mantid::Kernel::ConfigService::Instance().setString("curvefitting.defaultPeak", fnType);
 }
 /// Get the default background type
 std::string FitPropertyBrowser::defaultBackgroundType() const { return m_defaultBackground; }
@@ -1232,6 +1231,7 @@ void FitPropertyBrowser::enumChanged(QtProperty *prop) {
   if (prop == m_workspace) {
     workspaceChange(QString::fromStdString(workspaceName()));
     setWorkspaceProperties();
+    intChanged(m_workspaceIndex);
     m_storedWorkspaceName = workspaceName();
   } else if (prop->propertyName() == "Type") {
     disableUndo();
@@ -1296,6 +1296,7 @@ void FitPropertyBrowser::intChanged(QtProperty *prop) {
     return;
 
   if (prop == m_workspaceIndex) {
+    // Get current value displayed by the workspace index spinbox
     auto const currentIndex = workspaceIndex();
     auto const allowedIndex = getAllowedIndex(currentIndex);
     if (allowedIndex != currentIndex) {
@@ -2451,10 +2452,6 @@ int FitPropertyBrowser::getAllowedIndex(int currentIndex) const {
     return 0;
   }
 
-  if (currentIndex == m_oldWorkspaceIndex) {
-    return currentIndex < 0 ? 0 : currentIndex;
-  }
-
   auto const allowedIndices =
       m_allowedSpectra.empty() ? QList<int>() : m_allowedSpectra[QString::fromStdString(workspaceName())];
   auto const firstIndex = m_allowedSpectra.empty() ? 0 : allowedIndices.front();
@@ -3261,7 +3258,16 @@ void FitPropertyBrowser::addAllowedSpectra(const QString &wsName, const QList<in
     for (auto const i : wsSpectra) {
       indices.push_back(static_cast<int>(ws->getIndexFromSpectrumNumber(i)));
     }
+    auto wsFound = m_allowedSpectra.find(wsName);
     m_allowedSpectra.insert(wsName, indices);
+    if (wsFound != m_allowedSpectra.end()) {
+      // we already knew about this workspace
+      // update workspace index list
+      intChanged(m_workspaceIndex);
+    } else {
+      // new workspace, update workspace names
+      populateWorkspaceNames();
+    }
   } else {
     throw std::runtime_error("Workspace " + name + " is not a MatrixWorkspace");
   }

@@ -29,6 +29,10 @@ Basic binary arithmetic operations: addition (the only one supported if the data
 multiplication and division on entries data are supported. No support is offered for organizing the operations using parentheses
 or scaling by read data by constant numbers.
 
+Binary operations can also be defined for entries that are not always present in the data, for example in the case of D7 at the ILL,
+NeXus files contain a varying number of entries, from 1 to 6. There, by defining a sum over all possible entries containing polarisation
+identifier, it is possible to get to display in the logbook which polarisations are actually contained in the data file.
+
 The logbook can be stored as a CSV file and read outside of the Mantid using spreadsheet software, such as Microsoft Excel.
 
 Usage
@@ -55,7 +59,7 @@ Output:
 .. testoutput:: ExGenerateLogbook_D7
 
    Number of numors in the logbook: 3
-   Number of headers in the logbook: 8
+   Number of headers in the logbook: 9
 
 .. testcleanup:: ExGenerateLogbook_D7
 
@@ -71,7 +75,7 @@ Output:
 
    GenerateLogbook(Directory=data_directory,
                    OutputWorkspace='d7_logbook', Facility='ILL', Instrument='D7',
-                   NumorRange="396990:396993", CustomHeaders='polarisation',
+                   NumorRange="396990:396993", CustomHeaders='wavelength',
                    CustomEntries='/entry0/D7/POL/actual_state+/entry0/D7/POL/actual_stateB1B2')
    print("Number of numors in the logbook: {}".format(len(mtd['d7_logbook'].column(0))))
    print("Number of headers in the logbook: {}".format(len(mtd['d7_logbook'].row(0))))
@@ -81,7 +85,7 @@ Output:
 .. testoutput:: ExGenerateLogbook_D7_binary_operations
 
    Number of numors in the logbook: 3
-   Number of headers in the logbook: 7
+   Number of headers in the logbook: 8
 
 .. testcleanup:: ExGenerateLogbook_D7_binary_operations
 

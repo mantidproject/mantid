@@ -14,7 +14,7 @@
 	<!-- following parameters are saved to the run log,
 	     parameters are entered as log_[log_name] and the 
 	     and the value is: "hdf_tag,scale,def_value"
-		the default value determines if the value is
+		the scale value determines if the value is
 		interpreted as a numeric or string-->
     <parameter name="log_sample_aperture" type="string">
       <value val="sample/sample_aperture, 1.0, 0.0"/>
@@ -33,26 +33,26 @@
     </parameter>	
 	
     <parameter name="log_Lt0_value" type="string">
-      <value val="instrument/Lt0, 0.001, 0.0"/>
+      <value val="instrument/Lt0, 0.001,"/>
     </parameter>		 
     <parameter name="log_Ltof_curtainl_value" type="string">
-      <value val="instrument/Ltof_curtainl, 0.001, 0.0"/>
+      <value val="instrument/Ltof_curtainl, 0.001,"/>
     </parameter>		 
     <parameter name="log_Ltof_curtainr_value" type="string">
-      <value val="instrument/Ltof_curtainr, 0.001, 0.0"/>
+      <value val="instrument/Ltof_curtainr, 0.001,"/>
     </parameter>		 
     <parameter name="log_Ltof_curtainu_value" type="string">
-      <value val="instrument/Ltof_curtainu, 0.001, 0.0"/>
+      <value val="instrument/Ltof_curtainu, 0.001,"/>
     </parameter>		 
     <parameter name="log_Ltof_curtaind_value" type="string">
-      <value val="instrument/Ltof_curtaind, 0.001, 0.0"/>
+      <value val="instrument/Ltof_curtaind, 0.001,"/>
     </parameter>	
 
     <parameter name="log_L2_det_value" type="string">
       <value val="instrument/L2_det, 0.001, 33.1562"/>
     </parameter>	
     <parameter name="log_Ltof_det_value" type="string">
-      <value val="instrument/Ltof_det, 0.001, 0.0"/>
+      <value val="instrument/Ltof_det, 0.001,"/>
     </parameter>	
     <parameter name="log_L1" type="string">
       <value val="instrument/L1, 0.001, 16.671"/>
@@ -85,15 +85,22 @@
     </parameter>
 
 	<parameter name="log_rough_40" type="string">
-      <value val="instrument/shutters/rough_40, 1, in"/>
+      <value val="instrument/shutters/rough_40, na, in"/>
     </parameter>	
 	<parameter name="log_rough_100" type="string">
-      <value val="instrument/shutters/rough_100, 1, in"/>
+      <value val="instrument/shutters/rough_100, na, in"/>
     </parameter>
 	
 	<!-- parameter to be added to log that is not in the hdf file -->
 	<parameter name="log_curtain_rotation" type="string">
       <value val=",,10.0"/>
+    </parameter>
+	
+	<!-- dummy parameter to support unit testing,
+		the parameter is not present in the data file and does not
+		have a default value so is not added to the workspace log -->
+    <parameter name="log_sample_xxx" type="string">
+      <value val="sample/sample_xxx, na,"/>
     </parameter>
 	
 	

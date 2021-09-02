@@ -63,20 +63,20 @@ When multiple runs are summed, the run number of the first run is attributed to 
             OutputWorkspace='iq_s' + str(i + 1)
         )
 
-    print('Distance 1 Q-range:{0:4f}-{1:4f} AA'.format(mtd['iq_s1_1_d39.0m_c40.5m_w5.6A'].readX(0)[0],
-                                                       mtd['iq_s1_1_d39.0m_c40.5m_w5.6A'].readX(0)[-1]))
-    print('Distance 2 Q-range:{0:4f}-{1:4f} AA'.format(mtd['iq_s1_2_d8.0m_c8.0m_w5.6A'].readX(0)[0],
-                                                       mtd['iq_s1_2_d8.0m_c8.0m_w5.6A'].readX(0)[-1]))
-    print('Distance 3 Q-range:{0:4f}-{1:4f} AA'.format(mtd['iq_s1_3_d2.0m_c5.5m_w5.6A'].readX(0)[0],
-                                                       mtd['iq_s1_3_d2.0m_c5.5m_w5.6A'].readX(0)[-1]))
+    print('Distance 1 Q-range:{0:4f}-{1:4f} AA'.format(mtd['iq_s1_#1_d39.0m_c40.5m_w5.6A'].readX(0)[0],
+                                                       mtd['iq_s1_#1_d39.0m_c40.5m_w5.6A'].readX(0)[-1]))
+    print('Distance 2 Q-range:{0:4f}-{1:4f} AA'.format(mtd['iq_s1_#2_d8.0m_c8.0m_w5.6A'].readX(0)[0],
+                                                       mtd['iq_s1_#2_d8.0m_c8.0m_w5.6A'].readX(0)[-1]))
+    print('Distance 3 Q-range:{0:4f}-{1:4f} AA'.format(mtd['iq_s1_#3_d2.0m_c5.5m_w5.6A'].readX(0)[0],
+                                                       mtd['iq_s1_#3_d2.0m_c5.5m_w5.6A'].readX(0)[-1]))
 
 Output:
 
 .. testoutput:: ExSANSILLAutoProcess
 
-    Distance 1 Q-range:0.001440-0.020011 AA
-    Distance 2 Q-range:0.007263-0.091701 AA
-    Distance 3 Q-range:0.033776-0.342831 AA
+    Distance 1 Q-range:0.001350-0.020028 AA
+    Distance 2 Q-range:0.007625-0.092061 AA
+    Distance 3 Q-range:0.032571-0.343635 AA
 
 .. testcleanup:: ExSANSILLAutoProcess
 

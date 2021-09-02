@@ -4,19 +4,13 @@ if(CXXTEST_FOUND)
                       ../../TestHelpers/inc)
 
   cxxtest_add_test(HistogramDataTest ${TEST_FILES} ${GMOCK_TEST_FILES})
-  target_include_directories(HistogramDataTest SYSTEM
-                             PRIVATE ${Boost_INCLUDE_DIRS})
+
   target_link_libraries(HistogramDataTest
                         PRIVATE
-                        HistogramData
-                        Kernel
-                        ${Boost_LIBRARIES}
+                        Mantid::HistogramData
+                        Mantid::Kernel
                         gmock
   )
-  if(OpenMP_CXX_FOUND)
-    # Access to config service is required
-    target_link_libraries(HistogramDataTest PRIVATE Kernel)
-  endif()
 
   add_dependencies(FrameworkTests HistogramDataTest)
   # Add to the 'FrameworkTests' group in VS

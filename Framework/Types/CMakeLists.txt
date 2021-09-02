@@ -24,7 +24,7 @@ if(COVERAGE)
 endif()
 
 add_library(Types ${SRC_FILES} ${INC_FILES})
-
+add_library(Mantid::Types ALIAS Types)
 set_target_properties(Types
                       PROPERTIES OUTPUT_NAME
                                  MantidTypes
@@ -32,15 +32,28 @@ set_target_properties(Types
                                  "Types_EXPORTS;PSAPI_VERSION=1")
 
 set_property(TARGET Types PROPERTY FOLDER "MantidFramework")
-target_link_libraries(Types LINK_PUBLIC ${Boost_LIBRARIES})
-target_include_directories(Types SYSTEM PUBLIC ${Boost_INCLUDE_DIRS})
+
+target_include_directories(Types PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+		$<INSTALL_INTERFACE:include/Mantid>
+)
 
 # Auto-generate exports header
-target_include_directories(Types PUBLIC ${CMAKE_BINARY_DIR}/Framework/Types)
+target_include_directories(Types PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/Types>
+  $<INSTALL_INTERFACE:include/Mantid>
+)
+
+target_link_libraries(Types PUBLIC Boost::date_time Boost::regex)
 generate_mantid_export_header(Types FALSE)
 
 # Installation settings
+if (CONDA_BUILD)
+set(TARGET_EXPORT_NAME "MantidTypesTargets")
+mtd_install_framework_lib(TARGETS Types INSTALL_EXPORT_FILE EXPORT_NAME ${TARGET_EXPORT_NAME})
+else()
 mtd_install_targets(TARGETS Types INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
+endif()
 
 # Add the unit tests directory
 add_subdirectory(test)

@@ -22,6 +22,7 @@ from mantid.plots.plotfunctions import get_plot_fig
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 import numpy as np
+from textwrap import wrap
 
 from mantidqt.MPLwidgets import FigureCanvas
 
@@ -38,6 +39,8 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
         self._settings = settings
         self._min_y_range = settings.min_y_range
         self._y_axis_margin = settings.y_axis_margin
+        self._x_tick_labels = None
+        self._y_tick_labels = None
         # create the figure
         self.fig = Figure()
         self.fig.canvas = FigureCanvas(self.fig)
@@ -89,6 +92,12 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
     @property
     def number_of_axes(self):
         return self._number_of_axes
+
+    def set_x_ticks(self, x_ticks=None):
+        self._x_tick_labels = x_ticks
+
+    def set_y_ticks(self, y_ticks=None):
+        self._y_tick_labels = y_ticks
 
     def create_new_plot_canvas(self, num_axes):
         """Creates a new blank plotting canvas"""
@@ -142,12 +151,28 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
             axis_number = self._make_plot(workspace_plot_info)
             if axis_number < 0:
                 continue
+            self._set_text_tick_labels(axis_number)
             if self._settings.is_condensed:
                 self.hide_axis(axis_number, nrows, ncols)
         #remove labels from empty plots
         if self._settings.is_condensed:
             for axis_number in range(int(self._number_of_axes), int(nrows*ncols)):
                 self.hide_axis(axis_number, nrows, ncols)
+
+    def _wrap_labels(self, labels: list) -> list:
+        """Wraps a list of labels so that every line is at most self._settings.wrap_width characters long."""
+        return ["\n".join(wrap(label, self._settings.wrap_width)) for label in labels]
+
+    def _set_text_tick_labels(self, axis_number):
+        ax = self.fig.axes[axis_number]
+        if self._x_tick_labels:
+            ax.set_xticks(range(len(self._x_tick_labels)))
+            labels = self._wrap_labels(self._x_tick_labels)
+            ax.set_xticklabels(labels, fontsize = self._settings.font_size, rotation = self._settings.rotation, ha = "right")
+        if self._y_tick_labels:
+            ax.set_yticks(range(len(self._y_tick_labels)))
+            labels = self._wrap_labels(self._y_tick_labels)
+            ax.set_yticklabels(labels, fontsize = self._settings.font_size)
 
     def hide_axis(self, axis_number, nrows, ncols):
         row, col = convert_index_to_row_and_col(axis_number,  nrows, ncols)
@@ -320,6 +345,8 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
     def _get_plot_kwargs(self, workspace_info: WorkspacePlotInformation):
         label = workspace_info.label
         plot_kwargs = {'distribution': True, 'autoscale_on_update': False, 'label': label}
+        plot_kwargs["marker"] = self._settings.get_marker(workspace_info.workspace_name)
+        plot_kwargs["linestyle"] = self._settings.get_linestyle(workspace_info.workspace_name)
         return plot_kwargs
 
     def _get_y_axis_autoscale_limits(self, axis):

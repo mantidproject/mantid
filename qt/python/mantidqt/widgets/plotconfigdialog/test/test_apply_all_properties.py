@@ -181,6 +181,7 @@ class ApplyAllPropertiesTest(unittest.TestCase):
         # Mock curves tab view
         cls.curve_view_mock = Mock(
             get_selected_ax_name=lambda: '(0, 0)',
+            select_curve_list=Mock(selectedItems=lambda: []),
             get_properties=lambda: CurveProperties(new_curve_view_props))
         cls.curve_view_patch = patch(CURVE_VIEW, lambda x: cls.curve_view_mock)
         cls.curve_view_patch.start()

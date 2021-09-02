@@ -17,13 +17,9 @@ if(CXXTEST_FOUND)
 
   cxxtest_add_test(PSISINQTest ${TEST_FILES} ${GMOCK_TEST_FILES})
   target_link_libraries(PSISINQTest
-                        LINK_PRIVATE
-                        API
-                        Geometry
-                        Kernel
-                        SINQ
-                        CurveFitting
-                        ${MANTIDLIBS}
+                        PRIVATE
+                        Mantid::SINQ
+                        Mantid::CurveFitting
                         gmock
 )
 

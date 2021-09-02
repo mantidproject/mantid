@@ -28,6 +28,12 @@ endif()
 
 # Add the target for this directory
 add_library(RemoteJobManagers ${SRC_FILES} ${INC_FILES})
+add_library(Mantid::RemoteJobManagers ALIAS RemoteJobManagers)
+
+target_include_directories(RemoteJobManagers PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+		$<INSTALL_INTERFACE:include/Mantid>
+)
 
 # Set the name of the generated library
 set_target_properties(RemoteJobManagers
@@ -45,20 +51,18 @@ endif()
 # Add to the 'Framework' group in VS
 set_property(TARGET RemoteJobManagers PROPERTY FOLDER "MantidFramework")
 
-target_include_directories(RemoteJobManagers PUBLIC inc)
-target_include_directories(RemoteJobManagers PRIVATE ${OPENSSL_INCLUDE_DIR})
-
-target_link_libraries(RemoteJobManagers
-                      LINK_PRIVATE
-                      ${MANTIDLIBS}
-                      ${GSL_LIBRARIES})
+target_link_libraries(RemoteJobManagers PUBLIC Mantid::Kernel Mantid::API)
 
 # Add the unit tests directory
 add_subdirectory(test)
 
 # Installation settings
+if (CONDA_BUILD)
+mtd_install_framework_lib(TARGETS RemoteJobManagers PLUGIN_LIB)
+else()
 mtd_install_targets(TARGETS
                     RemoteJobManagers
                     INSTALL_DIRS
                     ${PLUGINS_DIR}
                     ${WORKBENCH_PLUGINS_DIR})
+endif()

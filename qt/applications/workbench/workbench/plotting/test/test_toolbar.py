@@ -132,7 +132,7 @@ class ToolBarTest(unittest.TestCase):
     def _is_grid_button_checked(cls, fig):
         """
         Create the figure manager and check whether its toolbar is toggled on or off for the given figure.
-        We have to explicity call set_button_visibilty() here, which would otherwise be called within the show()
+        We have to explicitly call set_button_visibility() here, which would otherwise be called within the show()
         function.
         """
         canvas = MantidFigureCanvas(fig)
@@ -145,7 +145,7 @@ class ToolBarTest(unittest.TestCase):
     def _is_button_enabled(cls, fig, button):
         """
         Create the figure manager and check whether its toolbar is toggled on or off for the given figure.
-        We have to explicity call set_button_visibilty() here, which would otherwise be called within the show()
+        We have to explicitly call set_button_visibility() here, which would otherwise be called within the show()
         function.
         """
         canvas = MantidFigureCanvas(fig)

@@ -186,7 +186,6 @@ def create_vanadium_integration(van_run, calibration_directory):
     simple.SaveNexus(ws_van_int, van_int_file)
     simple.DeleteWorkspace(van_name)
     simple.DeleteWorkspace(ws_van_int)
-    simple.DeleteWorkspace(van_ws)
 
 
 def handle_van_curves(van_curves, van_path):
@@ -268,27 +267,28 @@ def create_calibration_files(ceria_run, van_run, full_inst_calib, int_van, van_c
             spectrum_numbers = None
             bank = None
 
-    output, curves = run_calibration(sample_ws=ceria_ws,
-                                     vanadium_workspace=van_ws,
-                                     van_integration=van_integrated_ws,
-                                     bank=bank,
-                                     spectrum_numbers=spectrum_numbers,
-                                     full_inst_calib=full_inst_calib)
+    output, ceria_raw, curves = run_calibration(sample_ws=ceria_ws,
+                                                vanadium_workspace=van_ws,
+                                                van_integration=van_integrated_ws,
+                                                bank=bank,
+                                                spectrum_numbers=spectrum_numbers,
+                                                full_inst_calib=full_inst_calib)
     handle_van_curves(curves, van_curves_file)
+    bk2bk_params = extract_b2b_params(ceria_raw)
     if len(output) == 1:
         # get the values needed for saving out the .prm files
         difa = [output[0]['difa']]
         difc = [output[0]['difc']]
         tzero = [output[0]['tzero']]
         if bank is None and spectrum_numbers is None:
-            save_calibration(ceria_run, van_run, calibration_directory, calibration_general, "all_banks", [crop_name],
-                             tzero, difc, difa)
+            save_calibration(ceria_run, calibration_directory, calibration_general, "all_banks", [crop_name],
+                             tzero, difc, difa, bk2bk_params)
         if spectrum_numbers is not None:
-            save_calibration(ceria_run, van_run, calibration_directory, calibration_general,
-                             "bank_cropped", [crop_name], tzero, difc, difa)
+            save_calibration(ceria_run, calibration_directory, calibration_general,
+                             "bank_cropped", [crop_name], tzero, difc, difa, bk2bk_params)
         else:
-            save_calibration(ceria_run, van_run, calibration_directory, calibration_general,
-                             "bank_{}".format(spec_nos), [crop_name], tzero, difc, difa)
+            save_calibration(ceria_run, calibration_directory, calibration_general,
+                             "bank_{}".format(spec_nos), [crop_name], tzero, difc, difa, bk2bk_params)
         # create the table workspace containing the parameters
         param_tbl_name = crop_name if crop_name is not None else "Cropped"
         create_params_table(difc, tzero, difa)
@@ -300,12 +300,12 @@ def create_calibration_files(ceria_run, van_run, full_inst_calib, int_van, van_c
         tzeros = [row['tzero'] for row in output]
         plot_dicts = list()
         for i in range(1, 3):
-            save_calibration(ceria_run, van_run, calibration_directory, calibration_general,
+            save_calibration(ceria_run, calibration_directory, calibration_general,
                              f"bank_{i}", [bank_names[i - 1]],
-                             [tzeros[i - 1]], [difcs[i - 1]], [difas[i - 1]])
+                             [tzeros[i - 1]], [difcs[i - 1]], [difas[i - 1]], bk2bk_params)
             plot_dicts.append(Utils.generate_tof_fit_dictionary(f"bank_{i}"))
-        save_calibration(ceria_run, van_run, calibration_directory, calibration_general, "all_banks", bank_names,
-                         tzeros, difcs, difas)
+        save_calibration(ceria_run, calibration_directory, calibration_general, "all_banks", bank_names,
+                         tzeros, difcs, difas, bk2bk_params)
         # create the table workspace containing the parameters
         create_params_table(difcs, tzeros, difas)
         Utils.plot_tof_fit(plot_dicts, ["bank_1", "bank_2"])
@@ -406,7 +406,6 @@ def run_calibration(sample_ws,
         df_kwarg = {"GroupingWorkspace": grp_ws}
         calibrate_region_of_interest("Cropped", df_kwarg)
 
-    simple.DeleteWorkspace(sample_raw)
     simple.DeleteWorkspace(ws_van)
     simple.DeleteWorkspace("tof_focused")
 
@@ -424,7 +423,21 @@ def run_calibration(sample_ws,
         row = cal_output[bank_cal].row(read)
         current_fit_params = {'difc': row['difc'], 'difa': row['difa'], 'tzero': row['tzero']}
         cal_params.append(current_fit_params)
-    return cal_params, curves_output
+    return cal_params, sample_raw, curves_output
+
+
+def extract_b2b_params(workspace):
+
+    ws_inst = workspace.getInstrument()
+    NorthBank = ws_inst.getComponentByName("NorthBank")
+    SouthBank = ws_inst.getComponentByName("SouthBank")
+    params_north = []
+    params_south = []
+    for param_name in ["alpha_0", "beta_0", "beta_1", "sigma_0_sq", "sigma_1_sq", "sigma_2_sq"]:
+        params_north += [NorthBank.getNumberParameter(param_name)[0]]
+        params_south += [SouthBank.getNumberParameter(param_name)[0]]
+
+    return [params_north, params_south]
 
 
 def load_van_integration_file(ints_van):
@@ -449,13 +462,12 @@ def load_van_curves_file(curves_van):
     return van_curves_ws
 
 
-def save_calibration(ceria_run, van_run, calibration_directory, calibration_general, name, bank_names, zeros, difcs,
-                     difas):
+def save_calibration(ceria_run, calibration_directory, calibration_general, name, bank_names, zeros, difcs,
+                     difas, bk2bk_params):
     """
     save the calibration data
 
     @param ceria_run :: the run number of the ceria
-    @param van_run :: the run number of the vanadium
     @param calibration_directory :: the user specific calibration directory to save to
     @param calibration_general :: the general calibration directory to save to
     @param name ::  the name of the banks being saved
@@ -465,7 +477,7 @@ def save_calibration(ceria_run, van_run, calibration_directory, calibration_gene
     @param zeros :: the list of tzero values to save
 
     """
-    file_save_prefix = os.path.join(calibration_directory, "ENGINX_" + van_run + "_" + ceria_run + "_")
+    file_save_prefix = os.path.join(calibration_directory, "ENGINX_" + ceria_run + "_")
     gsas_iparm_fname = file_save_prefix + name + ".prm"
     pdcals_to_save = dict()  # fname: workspace
     # work out what template to use, and which PDCalibration files to save
@@ -474,19 +486,19 @@ def save_calibration(ceria_run, van_run, calibration_directory, calibration_gene
         pdcals_to_save[file_save_prefix + "bank_North.nxs"] = 'engg_calibration_bank_1'
         pdcals_to_save[file_save_prefix + "bank_South.nxs"] = 'engg_calibration_bank_2'
     elif name == "bank_2":
-        template_file = "template_ENGINX_241391_236516_South_bank.prm"
+        template_file = "template_ENGINX_241391_South_bank.prm"
         pdcals_to_save[file_save_prefix + "bank_South.nxs"] = 'engg_calibration_bank_2'
     elif name == "bank_1":
-        template_file = "template_ENGINX_241391_236516_North_bank.prm"
+        template_file = "template_ENGINX_241391_North_bank.prm"
         pdcals_to_save[file_save_prefix + "bank_North.nxs"] = 'engg_calibration_bank_1'
     else:  # cropped uses North bank template
-        template_file = "template_ENGINX_241391_236516_North_bank.prm"
+        template_file = "template_ENGINX_241391_North_bank.prm"
         pdcals_to_save[file_save_prefix + "cropped.nxs"] = 'engg_calibration_cropped'
     # write out the param file to the users directory
 
     Utils.write_ENGINX_GSAS_iparam_file(output_file=gsas_iparm_fname, bank_names=bank_names, difa=difas, difc=difcs,
-                                        tzero=zeros, ceria_run=ceria_run, vanadium_run=van_run,
-                                        template_file=template_file)
+                                        tzero=zeros, ceria_run=ceria_run,
+                                        template_file=template_file, bk2bk_params=bk2bk_params)
     for fname, ws in pdcals_to_save.items():
         simple.SaveNexus(InputWorkspace=ws, Filename=fname)
     if not calibration_general == calibration_directory:

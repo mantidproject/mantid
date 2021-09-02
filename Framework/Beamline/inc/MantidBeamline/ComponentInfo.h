@@ -57,8 +57,8 @@ private:
   std::vector<bool> buildMergeIndices(const ComponentInfo &other) const;
   void checkSizes(const ComponentInfo &other) const;
   void initIndices();
-  void checkIdenticalIntervals(const ComponentInfo &other, const std::pair<size_t, size_t> indexOther,
-                               const std::pair<size_t, size_t> indexThis) const;
+  void checkIdenticalIntervals(const ComponentInfo &other, const std::pair<size_t, size_t> &indexOther,
+                               const std::pair<size_t, size_t> &indexThis) const;
   void checkSpecialIndices(size_t componentIndex) const;
   size_t nonDetectorSize() const;
   /// Copy constructor is private because of the way DetectorInfo stored
@@ -101,9 +101,9 @@ public:
   Eigen::Vector3d relativePosition(const size_t componentIndex) const;
   Eigen::Quaterniond relativeRotation(const size_t componentIndex) const;
   void setPosition(const size_t componentIndex, const Eigen::Vector3d &newPosition);
-  void setPosition(const std::pair<size_t, size_t> index, const Eigen::Vector3d &newPosition);
+  void setPosition(const std::pair<size_t, size_t> &index, const Eigen::Vector3d &newPosition);
   void setRotation(const size_t componentIndex, const Eigen::Quaterniond &newRotation);
-  void setRotation(const std::pair<size_t, size_t> index, const Eigen::Quaterniond &newRotation);
+  void setRotation(const std::pair<size_t, size_t> &index, const Eigen::Quaterniond &newRotation);
 
   size_t parent(const size_t componentIndex) const;
   bool hasParent(const size_t componentIndex) const;

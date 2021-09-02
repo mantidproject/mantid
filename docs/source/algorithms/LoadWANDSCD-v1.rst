@@ -9,25 +9,36 @@
 Description
 -----------
 
-This algorithm will load a series of run into a MDHistoWorkspace that
-has dimensions x and y detector pixels vs scanIndex. The scanIndex is
-the omega rotation of the sample. The instrument from the first run
-only will be copied to the OutputWorkspace. In addition the s1 (omega
-rotation), duration, run_number and monitor count is read from every
+This algorithm will load a series of runs into a MDHistoWorkspace that
+has dimensions x and y detector pixels vs scanIndex.
+The scanIndex is the omega rotation of the sample.
+The instrument attached to the OutputWorkspace is directly copied from the FIRST run, therefore
+it is crucial to have the correct instrument attached to the first run.
+In addition the s1 (omega rotation), duration, run_number and monitor count is read from every
 file and included in the logs of the OutputWorkspace.
 
-If the "HB2C:CS:CrystalAlign:UBMatrix" property exist it will be
-converted into the OrientedLattice on the OutputWorkspace. The
-goniometer tilts (sgu and sgl) are combined into the UB Matrix so that
-only omega (s1) needs to be taken into account during rotation.
+During a recent feature expansion, normalization can be optionally performed in the same process
+provided that the necessary Vanadium data is specified.
+By default, the algorithm will try to locate the Vanadium data using IPTS and run number.
+If failed, it will check the Vanadium filename entry to see if the data can be loaded directly
+from file.
+If neither is provided, the algorithm will try to check if the Vanadium data is provided as a
+workspace in memory.
+Currently there are three normalization scheme supported: by Count, by Monitor and by Time.
+If None is selected, no normalization will be performed and all normalization related properties
+will be ignored (on the GUI end, they will be disabled instead).
 
-This algorithm doesn't use Mantid loaders but instead h5py and numpy
-to load and integrate the events.
+If the "HB2C:CS:CrystalAlign:UBMatrix" property exist, it will be converted into the OrientedLattice
+on the OutputWorkspace.
+The goniometer tilts (sgu and sgl) are combined into the UB Matrix so that only omega (s1) needs to
+be taken into account during rotation.
 
-There is a grouping option to group pixels by either 2x2 or 4x4 which
-will help in reducing memory usage and speed up the later reduction
-steps. In most cases you will not see a difference in reduced data
-with 4x4 pixel grouping.
+This algorithm doesn't use Mantid loaders but instead h5py and numpy to load and integrate the events.
+
+There is a grouping option to group pixels by either 2x2 or 4x4 which will help in reducing memory
+usage and speed up the later reduction steps.
+In most cases you will not see a difference in reduced data with 4x4 pixel grouping.
+Also, both input data and the Vanadium data will share the same grouping scheme.
 
 The loaded workspace is designed to be the input to
 :ref:`algm-ConvertWANDSCDtoQ`.
@@ -58,6 +69,17 @@ Output:
     Run start: 2018-Mar-12 17:10:59
     Run end:  not available
     Sample: a 1.0, b 1.0, c 1.0; alpha 90, beta 90, gamma 90
+
+
+**Load data and Vanadium at the same time**
+
+.. code-block:: python
+
+    data = LoadWANDSCD(
+        IPTS=7776, RunNumbers='26640-27944',
+        VanadiumIPTS=7776, VanadiumRunNumber=26509,
+        NormalizedBy='Monitor',
+        )
 
 
 **Load multiple data file**

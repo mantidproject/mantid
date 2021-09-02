@@ -114,7 +114,7 @@ public:
     SaveAscii2 save;
     initSaveAscii2(save);
     TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("WriteXError", "1"));
-    TS_ASSERT_THROWS_ANYTHING(save.execute());
+    TS_ASSERT_THROWS_NOTHING(save.execute());
     AnalysisDataService::Instance().remove(m_name);
   }
 
@@ -916,6 +916,23 @@ public:
 
     Poco::File(filename).remove();
     AnalysisDataService::Instance().remove(m_name);
+  }
+
+  void test_OnSpectrumPerFile() {
+    Mantid::DataObjects::Workspace2D_sptr wsToSave;
+    writeSampleWS(wsToSave);
+
+    SaveAscii2 save;
+    std::string filename = initSaveAscii2(save);
+    save.setProperty("OneSpectrumPerFile", true);
+
+    TS_ASSERT_THROWS_NOTHING(save.execute());
+    size_t extPos = filename.find(".dat");
+    std::ostringstream ss0, ss1;
+    ss0 << std::string(filename, 0, extPos) << "_0" << std::string(filename, extPos);
+    ss1 << std::string(filename, 0, extPos) << "_1" << std::string(filename, extPos);
+    TS_ASSERT(Poco::File(ss0.str()).exists());
+    TS_ASSERT(Poco::File(ss1.str()).exists());
   }
 
   // public as it is used in LoadAsciiTest as well.

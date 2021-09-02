@@ -114,19 +114,19 @@ class MuonGroup(object):
         run_object not in self._asymmetry_estimate_rebin_unormalised or \
             self._asymmetry_estimate_rebin_unormalised[run_object].show(asym_name_unnorm)
 
-    def update_workspaces(self, run, counts_workspace, asymmetry_workspace, asymmetry_workspace_unnorm, rebin):
-        run_object = MuonRun(run)
+    def update_counts_workspace(self, run: MuonRun, counts_workspace, rebin=False):
         if rebin:
-            self._counts_workspace_rebin.update({run_object: MuonWorkspaceWrapper(counts_workspace)})
-            self._asymmetry_estimate_rebin.update({run_object: MuonWorkspaceWrapper(asymmetry_workspace)})
-            self._asymmetry_estimate_rebin_unormalised.update({run_object: MuonWorkspaceWrapper(asymmetry_workspace_unnorm)})
+            self._counts_workspace_rebin.update({run: MuonWorkspaceWrapper(counts_workspace)})
         else:
-            self._counts_workspace.update({run_object: MuonWorkspaceWrapper(counts_workspace)})
-            self._asymmetry_estimate.update({run_object: MuonWorkspaceWrapper(asymmetry_workspace)})
-            self._asymmetry_estimate_unormalised.update({run_object: MuonWorkspaceWrapper(asymmetry_workspace_unnorm)})
+            self._counts_workspace.update({run: MuonWorkspaceWrapper(counts_workspace)})
 
-    def update_counts_workspace(self, counts_workspace, run):
-        self._counts_workspace.update({run: MuonWorkspaceWrapper(counts_workspace)})
+    def update_asymmetry_workspace(self, run: MuonRun, asymmetry_workspace, asymmetry_workspace_unnorm, rebin=False):
+        if rebin:
+            self._asymmetry_estimate_rebin.update({run: MuonWorkspaceWrapper(asymmetry_workspace)})
+            self._asymmetry_estimate_rebin_unormalised.update({run: MuonWorkspaceWrapper(asymmetry_workspace_unnorm)})
+        else:
+            self._asymmetry_estimate.update({run: MuonWorkspaceWrapper(asymmetry_workspace)})
+            self._asymmetry_estimate_unormalised.update({run: MuonWorkspaceWrapper(asymmetry_workspace_unnorm)})
 
     def get_asymmetry_workspace_names(self, runs):
         workspace_list = []

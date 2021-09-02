@@ -54,6 +54,7 @@ void ALCPeakFittingView::setDataCurve(MatrixWorkspace_sptr workspace, std::size_
   QHash<QString, QVariant> kwargs;
   kwargs.insert("linestyle", QString("None").toLatin1().constData());
   kwargs.insert("marker", QString(".").toLatin1().constData());
+  kwargs.insert("distribution", QString("False").toLatin1().constData());
 
   m_ui.plot->clear();
   m_ui.plot->addSpectrum("Corrected", workspace, workspaceIndex, Qt::black, kwargs);

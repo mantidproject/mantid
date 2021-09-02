@@ -9,7 +9,7 @@ from itertools import chain
 import logging
 import os
 import re
-from typing import Any, Dict, Iterator, Optional, Union
+from typing import Any, Dict, Iterator, List, Optional, Union
 from xml.etree import ElementTree
 
 import mantid.kernel
@@ -243,38 +243,6 @@ class VASPLoader(AbInitioLoader):
 
         root = ElementTree.parse(filename).getroot()
 
-        def _iter_find_or_error(etree: ElementTree.Element,
-                                tag: str,
-                                name: Optional[str] = None,
-                                message: Optional[str] = None) -> Iterator[ElementTree.Element]:
-            found = False
-            for element in etree.findall(tag):
-                if name is None:
-                    found = True
-                    yield element
-                elif name == element.get('name'):
-                    found = True
-                    yield element
-            else:
-                if not found:
-                    if message is None:
-                        raise ValueError("Could not find {tag}{name} in {parent} section of VASP XML file.".format(
-                            tag=tag, name=(f' (name={name})' if name else ''), parent=etree.tag))
-                    else:
-                        raise ValueError(message)
-
-        def _find_or_error(etree: ElementTree.Element,
-                           tag: str,
-                           name: Optional[str] = None,
-                           message: Optional[str] = None) -> ElementTree.Element:
-            return next(_iter_find_or_error(etree, tag, name=name, message=message))
-
-        def _to_text(item: ElementTree.Element) -> str:
-            """wraps the  Element.text property to avoid confusing type errors"""
-            if item.text is None:
-                raise ValueError(f"XML Element {item} didn't contain expected text")
-            return item.text
-
         structure_block = _find_or_error(root, 'structure', name='finalpos')
         varray = _find_or_error(_find_or_error(structure_block, 'crystal'),
                                 'varray', name='basis')
@@ -290,6 +258,19 @@ class VASPLoader(AbInitioLoader):
         if len(positions.shape) != 2 or positions.shape[1] != 3:
             raise AssertionError("Positions in XML 'finalpos' don't look like an Nx3 array.")
 
+        try:
+            selective_varray = _find_or_error(structure_block, 'varray', name='selective')
+        except ValueError:
+            # No selective dynamics (i.e. no frozen atoms)
+            selective_varray = None
+
+        if selective_varray:
+            selective_bools = np.asarray(list(map(_collapse_bools,
+                                                  [_to_text(v).split()
+                                                   for v in selective_varray.findall('v')])),
+                                         dtype=bool)
+            positions = positions[selective_bools]
+
         atom_info = _find_or_error(root, 'atominfo')
 
         # Get list of atoms by type e.g. [1, 1, 2, 2, 2, 2, 2, 2] for C2H6
@@ -298,6 +279,8 @@ class VASPLoader(AbInitioLoader):
             return int(atom_type)
         atom_types = [_rc_to_atom_type(rc) for rc in
                       _find_or_error(_find_or_error(atom_info, 'array', name='atoms'),'set').findall('rc')]
+        if selective_varray:
+            atom_types = np.asarray(atom_types)[selective_bools]
 
         # Get symbols and masses corresponding to these types, and construct full lists of atom properties
         atom_data = [rc.findall('c')
@@ -342,3 +325,51 @@ class VASPLoader(AbInitioLoader):
                                                         1, 2)
 
         return file_data
+
+
+def _iter_find_or_error(etree: ElementTree.Element,
+                        tag: str,
+                        name: Optional[str] = None,
+                        message: Optional[str] = None) -> Iterator[ElementTree.Element]:
+    """Get an iterator for a given tag and ElementTree, raising error if non-existent"""
+    found = False
+    for element in etree.findall(tag):
+        if name is None:
+            found = True
+            yield element
+        elif name == element.get('name'):
+            found = True
+            yield element
+    else:
+        if not found:
+            if message is None:
+                raise ValueError("Could not find {tag}{name} in {parent} section of VASP XML file.".format(
+                    tag=tag, name=(f' (name={name})' if name else ''), parent=etree.tag))
+            else:
+                raise ValueError(message)
+
+
+def _find_or_error(etree: ElementTree.Element,
+                   tag: str,
+                   name: Optional[str] = None,
+                   message: Optional[str] = None) -> ElementTree.Element:
+    """Get the first result for a tag in an etree, raising error if non-existent"""
+    return next(_iter_find_or_error(etree, tag, name=name, message=message))
+
+
+def _to_text(item: ElementTree.Element) -> str:
+    """Get an Element.text property, avoiding confusing type errors"""
+    if item.text is None:
+        raise ValueError(f"XML Element {item} didn't contain expected text")
+    return item.text
+
+
+def _collapse_bools(bools: List[str]) -> bool:
+    """Intepret T T T/F F F from vasprun.xml varray as True/False"""
+    if bools == ['T', 'T', 'T']:
+        return True
+    elif bools == ['F', 'F', 'F']:
+        return False
+    else:
+        raise ValueError(f"Found unsupported selective dynamics constraint {' '.join(bools)} "
+                         "in vasprun.xml; only 'T T T' or 'F F F' can be used.")

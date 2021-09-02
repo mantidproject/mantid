@@ -7,19 +7,10 @@
 from os import path
 from mantid.kernel import logger
 from mantid.simpleapi import Load
-from Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
-
-INTERFACES_SETTINGS_GROUP = "CustomInterfaces"
-ENGINEERING_PREFIX = "EngineeringDiffraction2/"
 
 
 def get_run_number_from_path(run_path, instrument):
     return path.splitext(path.basename(run_path))[0].replace(instrument, '').lstrip('0')
-
-
-def get_output_path():
-    location = get_setting(INTERFACES_SETTINGS_GROUP, ENGINEERING_PREFIX, "save_location")
-    return location if location is not None else ""
 
 
 def load_workspace(file_path):

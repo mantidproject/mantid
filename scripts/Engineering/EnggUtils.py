@@ -52,7 +52,7 @@ def load_relevant_calibration_files(file_path, output_prefix="engggui") -> list:
     """
     basepath, fname = path.split(file_path)
     fname_words = fname.split('_')
-    prefix = '_'.join(fname_words[0:3])
+    prefix = '_'.join(fname_words[0:2])
     roi = determine_roi_from_prm_fname(fname)
     bank = None
     if roi == "BOTH":
@@ -106,12 +106,12 @@ def load_custom_grouping_workspace(file_path: str) -> (str, str):
     return ws_name, roi_text
 
 
-def save_grouping_workspace(grp_ws, directory: str, ceria_path: str, vanadium_path: str, instrument: str,
+def save_grouping_workspace(grp_ws, directory: str, ceria_path: str, instrument: str,
                             calfile: str = None, spec_nos=None) -> None:
     if calfile:
-        name = generate_output_file_name(vanadium_path, ceria_path, instrument, "Custom", '.xml')
+        name = generate_output_file_name(ceria_path, instrument, "Custom", '.xml')
     elif spec_nos:
-        name = generate_output_file_name(vanadium_path, ceria_path, instrument, "Cropped", '.xml')
+        name = generate_output_file_name(ceria_path, instrument, "Cropped", '.xml')
     else:
         logger.warning("No Calfile or Spectra given, no grouping workspace saved")
         return
@@ -119,9 +119,9 @@ def save_grouping_workspace(grp_ws, directory: str, ceria_path: str, vanadium_pa
     mantid.SaveDetectorsGrouping(InputWorkspace=grp_ws, OutputFile=save_path)
 
 
-def generate_output_file_name(vanadium_path, ceria_path, instrument, bank, ext='.prm'):
+def generate_output_file_name(ceria_path, instrument, bank, ext='.prm'):
     """
-    Generate an output filename in the form INSTRUMENT_VanadiumRunNo_ceriaRunNo_BANKS
+    Generate an output filename in the form INSTRUMENT_ceriaRunNo_BANKS
     :param vanadium_path: Path to vanadium data file
     :param ceria_path: Path to ceria data file
     :param instrument: The instrument in use.
@@ -129,9 +129,8 @@ def generate_output_file_name(vanadium_path, ceria_path, instrument, bank, ext='
     :param ext: Extension to be used on the saved file
     :return: The filename, the vanadium run number, and ceria run number.
     """
-    vanadium_no = path_handling.get_run_number_from_path(vanadium_path, instrument)
     ceria_no = path_handling.get_run_number_from_path(ceria_path, instrument)
-    filename = instrument + "_" + vanadium_no + "_" + ceria_no + "_"
+    filename = instrument + "_" + ceria_no + "_"
     if bank == "all":
         filename = filename + "all_banks" + ext
     elif bank == "north":
@@ -653,7 +652,7 @@ def sum_spectra(parent, ws):
 
 
 def write_ENGINX_GSAS_iparam_file(output_file, difa, difc, tzero, bk2bk_params=None, bank_names=None, ceria_run=241391,
-                                  vanadium_run=236516, template_file=None):
+                                  template_file=None):
     """
     Produces and writes an ENGIN-X instrument parameter file for GSAS
     (in the GSAS iparam format, as partially described in the GSAS
@@ -676,9 +675,6 @@ def write_ENGINX_GSAS_iparam_file(output_file, difa, difc, tzero, bk2bk_params=N
     @param ceria_run :: number of the ceria (CeO2) run used for this calibration.
                         this number goes in the file and should also be used to
                         name the file
-    @param vanadium_run :: number of the vanadium (VNb) run used for this
-                           calibration. This number goes in the file and should
-                           also be used to name the file.
     @param template_file :: file to use as template (with relative or full path)
 
     @returns
@@ -693,7 +689,7 @@ def write_ENGINX_GSAS_iparam_file(output_file, difa, difc, tzero, bk2bk_params=N
 
     # Defaults for a "both banks" file
     if not template_file:
-        template_file = 'template_ENGINX_241391_236516_North_and_South_banks.prm'
+        template_file = 'template_ENGINX_241391_North_and_South_banks.prm'
     import os
     template_file = os.path.join(os.path.dirname(__file__), template_file)
 
@@ -721,14 +717,14 @@ def write_ENGINX_GSAS_iparam_file(output_file, difa, difc, tzero, bk2bk_params=N
     # - BackToBackExponential parameters (PRCF11+12)
     for b_idx, _bank_name in enumerate(bank_names):
         patterns = ["INS  %d ICONS" % (b_idx + 1),  # bank calibration parameters: DIFC, DIFA, TZERO
-                    "INS    CALIB",  # calibration run numbers (Vanadium and Ceria)
+                    "INS    CALIB",  # calibration run number (Ceria)
                     "INS    INCBM"   # A his file for open genie (with ceria run number in the name)
                     ]
         # the ljust(80) ensures a length of 80 characters for the lines (GSAS rules...)
         replacements = [("INS  {0} ICONS  {1:.2f}    {2:.2f}    {3:.2f}".
                          format(b_idx + 1, difc[b_idx], difa[b_idx], tzero[b_idx])).ljust(80) + '\n',
-                        ("INS    CALIB   {0}   {1} ceo2".
-                         format(ceria_run, vanadium_run)).ljust(80) + '\n',
+                        ("INS    CALIB   {0}   ceo2".
+                         format(ceria_run)).ljust(80) + '\n',
                         ("INS    INCBM  ob+mon_{0}_North_and_South_banks.his".
                          format(ceria_run)).ljust(80) + '\n']
 

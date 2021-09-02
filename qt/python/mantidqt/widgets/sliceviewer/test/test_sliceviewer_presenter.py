@@ -11,7 +11,7 @@ import sys
 import unittest
 from unittest import mock
 from unittest.mock import patch
-from mantid.api import MultipleExperimentInfos
+from mantid.api import IMDHistoWorkspace
 
 import matplotlib
 
@@ -52,12 +52,16 @@ def _create_presenter(model, view, mock_sliceinfo_cls, enable_nonortho_axes, sup
     return presenter, data_view_mock
 
 
-def create_workspace_mock():
+def create_mdhistoworkspace_mock():
     # Mock out workspace methods needed for SliceViewerModel.__init__
-    workspace = mock.Mock(spec=MultipleExperimentInfos)
-    workspace.isMDHistoWorkspace = lambda: False
+    workspace = mock.Mock(spec=IMDHistoWorkspace)
+    workspace.isMDHistoWorkspace = lambda: True
+    workspace.getDimension = lambda: mock.MagicMock()
     workspace.getNumDims = lambda: 2
+    workspace.getNumNonIntegratedDims = lambda: 2
     workspace.name = lambda: "workspace"
+    workspace.readLock = mock.MagicMock()
+    workspace.unlock = mock.MagicMock()
 
     return workspace
 
@@ -71,6 +75,7 @@ class SliceViewerTest(unittest.TestCase):
         data_view.norm_opts = mock.Mock()
         data_view.image_info_widget = mock.Mock()
         data_view.canvas = mock.Mock()
+        data_view.help_button = mock.Mock()
         data_view.nonorthogonal_mode = False
         data_view.nonortho_transform = None
         data_view.get_axes_limits.return_value = None
@@ -408,7 +413,7 @@ class SliceViewerTest(unittest.TestCase):
         presenter.refresh_view = mock.Mock()
         presenter._decide_plot_update_methods = mock.Mock()
 
-        workspace = create_workspace_mock()
+        workspace = create_mdhistoworkspace_mock()
 
         # Not equivalent to self.model.get_properties()
         new_model_properties = {
@@ -433,19 +438,18 @@ class SliceViewerTest(unittest.TestCase):
                                          mock.MagicMock(),
                                          enable_nonortho_axes=False,
                                          supports_nonortho=False)
-        self.view.delayed_refresh = mock.Mock()
-        presenter._decide_plot_update_methods = mock.Mock(
-            return_value=(presenter.new_plot_matrix(), presenter.update_plot_data_matrix()))
-        workspace = create_workspace_mock()
+        workspace = create_mdhistoworkspace_mock()
         new_model_properties = self.model.get_properties()
 
         # Patch get_properties so that the properties of the new model match those of self.model
         with patch.object(SliceViewerModel, "get_properties", return_value=new_model_properties):
+            presenter.view.data_view.plot_MDH.assert_called_once()
+            presenter.view.data_view.plot_MDH.reset_mock()
+
             presenter.replace_workspace('workspace', workspace)
 
-            self.view.emit_close.assert_not_called()
-            presenter._decide_plot_update_methods.assert_called_once()
-            self.view.delayed_refresh.assert_called_once()
+            presenter.view.emit_close.assert_not_called()
+            presenter.view.data_view.plot_MDH.assert_called_once()
 
     @patch("sip.isdeleted", return_value=False)
     def test_refresh_view(self, _):

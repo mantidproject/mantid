@@ -56,7 +56,7 @@ class SpectrumNumberTranslator;
 */
 class MANTID_INDEXING_DLL IndexInfo {
 public:
-  explicit IndexInfo(const size_t globalSize, const Parallel::StorageMode storageMode = Parallel::StorageMode::Cloned);
+  explicit IndexInfo(const size_t globalSize, const Parallel::StorageMode &storageMode = Parallel::StorageMode::Cloned);
   IndexInfo(const size_t globalSize, const Parallel::StorageMode storageMode,
             const Parallel::Communicator &communicator);
   explicit IndexInfo(std::vector<SpectrumNumber> spectrumNumbers,

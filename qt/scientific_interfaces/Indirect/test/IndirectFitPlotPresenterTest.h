@@ -178,7 +178,7 @@ public:
     m_presenter = std::make_unique<IndirectFitPlotPresenter>(std::move(m_fittingModel.get()), std::move(m_view.get()));
 
     SetUpADSWithWorkspace m_ads("WorkspaceName", createWorkspace(10));
-    m_fittingModel->addWorkspace("WorkspaceName");
+    m_fittingModel->getFitDataModel()->addWorkspace("WorkspaceName", "0-9");
   }
 
   void tearDown() override {

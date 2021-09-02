@@ -13,6 +13,7 @@ set_property(TARGET PythonModule PROPERTY FOLDER "MantidFramework/Python")
 
 # Sub modules
 
+# These sub modules are currently not exported by cmake as they are not needed in a dev environment
 add_subdirectory(kernel)
 # Ensure the module files are in place
 add_dependencies(PythonKernelModule PythonModule)

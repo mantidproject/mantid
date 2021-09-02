@@ -33,6 +33,7 @@ class PhaseTablePresenter(object):
         self.instrument_changed_observer = GenericObserver(self.update_current_phase_tables)
 
         self.phase_table_calculation_complete_notifier = Observable()
+        self.phase_table_observer = GenericObserver(self.update_current_phase_tables)
         self.phasequad_calculation_complete_notifier = Observable()
         self.enable_editing_notifier = Observable()
         self.disable_editing_notifier = Observable()
@@ -245,7 +246,7 @@ class PhaseTablePresenter(object):
     def calculate_phasequad(self):
         self.context.group_pair_context.add_phasequad(self._phasequad_obj)
         self.context.calculate_phasequads(
-            self._phasequad_obj.name, self._phasequad_obj)
+             self._phasequad_obj)
 
         self.phasequad_calculation_complete_notifier.notify_subscribers(
             self._phasequad_obj.Re.name)
