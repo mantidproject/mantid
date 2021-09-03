@@ -483,7 +483,7 @@ private:
     friend class BatchPresenterTest;
 
   public:
-    BatchPresenterFriend(IBatchView *view, Batch model, IJobRunner *jobRunner,
+    BatchPresenterFriend(IBatchView *view, std::unique_ptr<Batch> model, IJobRunner *jobRunner,
                          std::unique_ptr<IRunsPresenter> runsPresenter, std::unique_ptr<IEventPresenter> eventPresenter,
                          std::unique_ptr<IExperimentPresenter> experimentPresenter,
                          std::unique_ptr<IInstrumentPresenter> instrumentPresenter,
@@ -496,9 +496,8 @@ private:
 
   RunsTable makeRunsTable() { return RunsTable(m_instruments, m_tolerance, ReductionJobs()); }
 
-  Batch makeModel() {
-    Batch batch(m_experiment, m_instrument, m_runsTable, m_slicing);
-    return batch;
+  std::unique_ptr<Batch> makeModel() {
+    return std::make_unique<Batch>(m_experiment, m_instrument, m_runsTable, m_slicing);
   }
 
   std::unique_ptr<BatchPresenterFriend> makePresenter() {

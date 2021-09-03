@@ -35,8 +35,8 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL BatchPresenter : public IBatchPresenter,
                                                       public MantidQt::API::WorkspaceObserver {
 public:
   /// Constructor
-  BatchPresenter(IBatchView *view, Batch model, IJobRunner *jobRunner, std::unique_ptr<IRunsPresenter> runsPresenter,
-                 std::unique_ptr<IEventPresenter> eventPresenter,
+  BatchPresenter(IBatchView *view, std::unique_ptr<Batch> model, IJobRunner *jobRunner,
+                 std::unique_ptr<IRunsPresenter> runsPresenter, std::unique_ptr<IEventPresenter> eventPresenter,
                  std::unique_ptr<IExperimentPresenter> experimentPresenter,
                  std::unique_ptr<IInstrumentPresenter> instrumentPresenter,
                  std::unique_ptr<ISavePresenter> savePresenter, std::unique_ptr<IPreviewPresenter> previewPresenter);
@@ -104,7 +104,7 @@ private:
   void settingsChanged();
 
   IBatchView *m_view;
-  Batch m_model;
+  std::unique_ptr<Batch> m_model;
   IMainWindowPresenter *m_mainPresenter;
   std::unique_ptr<IRunsPresenter> m_runsPresenter;
   std::unique_ptr<IEventPresenter> m_eventPresenter;
