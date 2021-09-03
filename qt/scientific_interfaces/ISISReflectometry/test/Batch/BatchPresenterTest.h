@@ -543,6 +543,7 @@ private:
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_previewPresenter));
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_jobManager));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_mainPresenter));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_jobRunner));
   }
 
   void expectReductionResumed() {
