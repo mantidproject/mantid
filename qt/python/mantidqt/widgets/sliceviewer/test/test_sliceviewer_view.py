@@ -329,6 +329,32 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
 
         self.assert_no_toplevel_widgets()
 
+    def test_axes_limits_respect_nonorthog_transfrom(self):
+        limits = (-10.0, 10.0, -9.0, 9.0)
+        ws_nonrotho = CreateMDWorkspace(Dimensions=3,
+                                        Extents=','.join([str(lim) for lim in limits]) + ',-8,8',
+                                        Names='A,B,C',
+                                        Units='r.l.u.,r.l.u.,r.l.u.',
+                                        Frames='HKL,HKL,HKL')
+        expt_info_nonortho = CreateSampleWorkspace()
+        ws_nonrotho.addExperimentInfo(expt_info_nonortho)
+        SetUB(ws_nonrotho, 1, 1, 2, 90, 90, 120)
+        pres = SliceViewer(ws_nonrotho)
+
+        # assert limits of orthog
+        limits_orthog = pres.view.data_view.get_axes_limits()
+        self.assertEqual(limits_orthog[0], limits[0:2])
+        self.assertEqual(limits_orthog[1], limits[2:])
+
+        # set nonorthog view and retrieve new limits
+        pres.nonorthogonal_axes(True)
+        limits_nonorthog = pres.view.data_view.get_axes_limits()
+        self.assertAlmostEqual(limits_nonorthog[0][0], -19, delta=1e-5)
+        self.assertAlmostEqual(limits_nonorthog[0][1], 19, delta=1e-5)
+        self.assertEqual(limits_nonorthog[1], limits[2:])
+
+        pres.view.close()
+
     # private methods
     def _assertNoErrorInADSHandlerFromSeparateThread(self, operation):
         """Check the error stream for any errors when calling operation.
