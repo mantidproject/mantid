@@ -51,5 +51,8 @@ Bugfixes
 - Fixed a bug where the workspace index spinbox in the fit browser wouldn't update when the user added or removed curves from the figure.
 - Fixed out of range errors in the Sliceviewer that sometimes occured whilst hovering over transposed data.
 - Fixed the help icon not showing on OSX and high-resolution monitors.
+- Tabbing between fields in the error reporter now works as expected, rather than jumping to a random place each time.
+- Fixed the advanced plotting dialog incorrectly laying out, causing the options to be partially occluded.
+
 
 :ref:`Release 6.2.0 <v6.2.0>`

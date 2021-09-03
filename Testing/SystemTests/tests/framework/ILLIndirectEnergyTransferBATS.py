@@ -9,7 +9,7 @@ from mantid.simpleapi import GroupWorkspaces, IndirectILLEnergyTransfer, config
 
 
 class ILLIndirectEnergyTransferBATSTest(systemtesting.MantidSystemTest):
-
+    '''Tests with a sample with tunnel peaks measured at 3 different configurations'''
     # cache default instrument and datadirs
     facility = config['default.facility']
     instrument = config['default.instrument']
@@ -26,7 +26,7 @@ class ILLIndirectEnergyTransferBATSTest(systemtesting.MantidSystemTest):
         config['default.instrument'] = 'IN16B'
         config.appendDataSearchSubDir('ILL/IN16B/')
 
-        self.tolerance = 1e-2
+        self.tolerance = 1e-3
         self.tolerance_rel_err = True
         # this fails the test every time a new instrument parameter is added
         # parameters file evolves quite often, so this is not checked
@@ -55,6 +55,11 @@ class ILLIndirectEnergyTransferBATSTest(systemtesting.MantidSystemTest):
 
 
 class ILLIndirectEnergyTransferEquatorialTest(systemtesting.MantidSystemTest):
+    '''
+    Tests with a sample with tunnel peaks measured at 3 different configurations.
+    There are 3 single detectors here, and monitor workspace is also output.
+    Fitting method is FitEquatorialOnly.
+    '''
     # cache default instrument and datadirs
     facility = config['default.facility']
     instrument = config['default.instrument']
@@ -71,7 +76,7 @@ class ILLIndirectEnergyTransferEquatorialTest(systemtesting.MantidSystemTest):
         config['default.instrument'] = 'IN16B'
         config.appendDataSearchSubDir('ILL/IN16B/')
 
-        self.tolerance = 1e-2
+        self.tolerance = 1e-3
         self.tolerance_rel_err = True
         # this fails the test every time a new instrument parameter is added
         # parameters file evolves quite often, so this is not checked
@@ -87,14 +92,16 @@ class ILLIndirectEnergyTransferEquatorialTest(systemtesting.MantidSystemTest):
         center, epp = IndirectILLEnergyTransfer(Run='318308',
                                                 PulseChopper='34',
                                                 ElasticPeakFitting='FitEquatorialOnly',
-                                                GroupDetectors=False)
+                                                DeleteMonitorWorkspace=False,
+                                                DiscardSingleDetectors=False)
 
         offset = IndirectILLEnergyTransfer(Run='315515',
                                            PulseChopper='34',
-                                           GroupDetectors=False,
+                                           DeleteMonitorWorkspace=False,
+                                           DiscardSingleDetectors=False,
                                            InputElasticChannelWorkspace=epp)
 
-        GroupWorkspaces(InputWorkspaces=[center, offset, epp], OutputWorkspace='grouped')
+        GroupWorkspaces(InputWorkspaces=[center, offset, epp, 'center_318308_mon', 'offset_315515_mon'], OutputWorkspace='grouped')
 
     @staticmethod
     def validate():
