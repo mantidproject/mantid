@@ -80,6 +80,6 @@ SliceViewer
 Bugfixes
 ########
 - Fixed cursor tracking from getting stuck and displaying incorrect signals when viewing MDHistogram workspaces in :ref:`sliceviewer`.
-
+- Fixed bug in resetting axes limits in nonorthogonal view when a plot is updated in sliceviewer.
 
 :ref:`Release 6.2.0 <v6.2.0>`
