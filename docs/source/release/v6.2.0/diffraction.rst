@@ -28,19 +28,19 @@ Improvements
 * :ref:`PDCalibration <algm-PDCalibration-v1>` has a new option to use the :ref:`IkedaCarpenterPV <func-IkedaCarpenterPV>` peak function.
 * :ref:`PolDiffILLReduction <algm-PolDiffILLReduction>` received a number of improvements
 
-  	* Changes names of input workspaces to contain polarization information.
-  	* Transmission can be provided as a number or a workspace group.
-  	* New data averaging option depending on measurement 2theta.
-  	* Option to display all measured points on a scatter plot.
-  	* New option for self-attenuation treatment using measured transmission.
+  * Changes names of input workspaces to contain polarization information.
+  * Transmission can be provided as a number or a workspace group.
+  * New data averaging option depending on measurement 2theta.
+  * Option to display all measured points on a scatter plot.
+  * New option for self-attenuation treatment using measured transmission.
 
 * Several improvements have been made to the group calibration routine including
 
-	* More input control parameters, including peak function type for estimating offset after cross correlation and an option to turn on or off the smoothing of data for cross correlation purpose.
-	* The workflow of group calibration script is also polished to make it smoother. Accordingly, unit tests have been updated.
-	* Groups are now allowed with dedicated control parameters.
-	* Documentation has been added as a guidance for general users.
-	* Making it more generic.
+  * More input control parameters, including peak function type for estimating offset after cross correlation and an option to turn on or off the smoothing of data for cross correlation purpose.
+  * The workflow of group calibration script is also polished to make it smoother. Accordingly, unit tests have been updated.
+  * Groups are now allowed with dedicated control parameters.
+  * Documentation has been added as a guidance for general users.
+  * Making it more generic.
 
 * :ref:`SNAPReduce <algm-SNAPReduce-v1>` permits saving selected property names and values to file, to aid autoreduction.
 * Add a custom ttmode to the PEARL powder diffraction scripts for running with a custom grouping file.
