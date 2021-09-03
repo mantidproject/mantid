@@ -90,7 +90,7 @@ class SliceInfo:
                          point[self._display_z]))
 
     def inverse_transform(self, point: Sequence) -> np.ndarray:
-        """Does the inverse fransform (inverse of self.transform) from slice
+        """Does the inverse transform (inverse of self.transform) from slice
         frame to data frame
 
         :param point: A 3D point in the slice frame
@@ -128,7 +128,8 @@ class SliceInfo:
             x_index, y_index = y_index, x_index
 
         self._nonorthogonal_axes_supported = (self.frame == SpecialCoordinateSystem.HKL
-                                              and qflags[x_index] and qflags[y_index])
+                                              and qflags[x_index] and qflags[y_index]
+                                              and not self._axes_tr == _unit_transform)
 
         if z_index is not None:
             self._slicevalue_z = self.slicepoint[z_index]
