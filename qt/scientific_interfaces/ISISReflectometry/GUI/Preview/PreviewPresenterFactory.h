@@ -6,10 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 #include "Common/DllConfig.h"
-#include "GUI/Common/IJobRunner.h"
 #include "IPreviewModel.h"
 #include "IPreviewPresenter.h"
 #include "IPreviewView.h"
+#include "PreviewJobManager.h"
 #include "PreviewModel.h"
 #include "PreviewPresenter.h"
 #include <memory>
@@ -20,8 +20,10 @@ class PreviewPresenterFactory {
 public:
   PreviewPresenterFactory() = default;
 
-  std::unique_ptr<IPreviewPresenter> make(IPreviewView *view, IJobRunner *jobRunner) {
-    return std::make_unique<PreviewPresenter>(view, std::make_unique<PreviewModel>(), jobRunner);
+  std::unique_ptr<IPreviewPresenter> make(IPreviewView *view, IJobRunner *jobRunner,
+                                          std::unique_ptr<IReflAlgorithmFactory> algFactory) {
+    auto jobManager = std::make_unique<PreviewJobManager>(jobRunner, std::move(algFactory));
+    return std::make_unique<PreviewPresenter>(view, std::make_unique<PreviewModel>(), std::move(jobManager));
   }
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

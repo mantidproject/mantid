@@ -24,6 +24,8 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
  */
 class MANTIDQT_ISISREFLECTOMETRY_DLL JobRunnerSubscriber {
 public:
+  virtual ~JobRunnerSubscriber() = default;
+
   virtual void notifyBatchComplete(bool error) = 0;
   virtual void notifyBatchCancelled() = 0;
   virtual void notifyAlgorithmStarted(API::IConfiguredAlgorithm_sptr algorithm) = 0;

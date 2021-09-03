@@ -7,6 +7,7 @@
 #pragma once
 
 #include "../Reduction/MockBatch.h"
+#include "GUI/Batch/BatchJobAlgorithm.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "PreviewJobManager.h"
@@ -18,6 +19,7 @@
 #include <gmock/gmock.h>
 
 using ::testing::Eq;
+using ::testing::NotNull;
 using ::testing::Return;
 
 class PreviewJobManagerTest : public CxxTest::TestSuite {
@@ -31,7 +33,7 @@ public:
     auto mockAlgFactory = std::make_unique<MockReflAlgorithmFactory>();
     auto mockJobRunner = MockJobRunner();
     auto previewRow = createPreviewRow();
-    auto stubAlg = createConfiguredAlgorithm();
+    auto stubAlg = makeConfiguredAlg();
     EXPECT_CALL(*mockAlgFactory, makePreprocessingAlgorithm(Eq(previewRow))).Times(1).WillOnce(Return(stubAlg));
     // TODO test calls on mockJobRunner
 
@@ -41,6 +43,50 @@ public:
     TS_ASSERT_EQUALS(stubAlg, preprocessAlg);
   }
 
+  void test_subscribe_to_job_runner() {
+    auto mockAlgFactory = std::make_unique<MockReflAlgorithmFactory>();
+    auto mockJobRunner = MockJobRunner();
+    EXPECT_CALL(mockJobRunner, subscribe(NotNull())).Times(1);
+    auto jobManager = PreviewJobManager(&mockJobRunner, std::move(mockAlgFactory));
+  }
+
+  void test_notify_preprocessing_algorithm_complete_notifies_subscriber() {
+    auto mockAlgFactory = std::make_unique<MockReflAlgorithmFactory>();
+    auto mockJobRunner = MockJobRunner();
+    auto mockSubscriber = MockJobManagerSubscriber();
+
+    auto row = PreviewRow({"12345"});
+    auto configuredAlg = makeConfiguredAlg(row);
+
+    EXPECT_CALL(mockSubscriber, notifyLoadWorkspaceCompleted).Times(1);
+
+    auto jobManager = PreviewJobManager(&mockJobRunner, std::move(mockAlgFactory));
+    jobManager.subscribe(&mockSubscriber);
+    jobManager.notifyAlgorithmComplete(configuredAlg);
+  }
+
+  void test_notify_preprocessing_algorithm_complete_skips_non_preview_items() {
+    // Other item types are Row and Group
+    auto row = makeEmptyRow();
+    auto group = makeEmptyGroup();
+
+    auto items = std::array<Item *, 2>{&row, &group};
+
+    for (auto *item : items) {
+      auto mockAlgFactory = std::make_unique<MockReflAlgorithmFactory>();
+      auto mockJobRunner = MockJobRunner();
+      auto mockSubscriber = MockJobManagerSubscriber();
+
+      auto configuredAlg = makeConfiguredAlg(*item);
+
+      EXPECT_CALL(mockSubscriber, notifyLoadWorkspaceCompleted).Times(0);
+
+      auto jobManager = PreviewJobManager(&mockJobRunner, std::move(mockAlgFactory));
+      jobManager.subscribe(&mockSubscriber);
+      jobManager.notifyAlgorithmComplete(configuredAlg);
+    }
+  }
+
 private:
   PreviewJobManager createJobManager(MockJobRunner *jobRunner, std::unique_ptr<IReflAlgorithmFactory> algFactory) {
     return PreviewJobManager(jobRunner, std::move(algFactory));
@@ -48,9 +94,16 @@ private:
 
   PreviewRow createPreviewRow() { return PreviewRow({"12345"}); }
 
-  IConfiguredAlgorithm_sptr createConfiguredAlgorithm() {
+  IConfiguredAlgorithm_sptr makeConfiguredAlg() {
     IAlgorithm_sptr stubAlg = std::make_shared<WorkspaceCreationHelper::StubAlgorithm>();
     auto emptyProps = MantidQt::API::ConfiguredAlgorithm::AlgorithmRuntimeProps();
     return std::make_shared<MantidQt::API::ConfiguredAlgorithm>(stubAlg, emptyProps);
+  }
+
+  std::shared_ptr<BatchJobAlgorithm> makeConfiguredAlg(Item &item) {
+    Mantid::API::IAlgorithm_sptr mockAlg = std::make_shared<WorkspaceCreationHelper::StubAlgorithm>();
+    auto properties = IConfiguredAlgorithm::AlgorithmRuntimeProps();
+    auto configuredAlg = std::make_shared<BatchJobAlgorithm>(mockAlg, properties, nullptr, &item);
+    return configuredAlg;
   }
 };

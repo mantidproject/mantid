@@ -7,7 +7,6 @@
 #pragma once
 
 #include "../ReflMockObjects.h"
-#include "GUI/Batch/BatchJobAlgorithm.h"
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -41,48 +40,27 @@ public:
   void test_notify_load_workspace_requested() {
     auto mockModel = makeModel();
     auto mockView = makeView();
-    auto mockRunner = makeJobRunner();
+    auto mockJobManager = makeJobManager();
     auto const workspaceName = std::string("test workspace");
 
     EXPECT_CALL(*mockView, getWorkspaceName()).Times(1).WillOnce(Return(workspaceName));
     EXPECT_CALL(*mockModel, loadWorkspace(Eq(workspaceName))).Times(1);
 
-    auto presenter = PreviewPresenter(mockView.get(), std::move(mockModel), mockRunner.get());
+    auto presenter = PreviewPresenter(mockView.get(), std::move(mockModel), std::move(mockJobManager));
     presenter.notifyLoadWorkspaceRequested();
   }
 
-  void test_notify_preprocessing_algorithm_complete() {
+  void test_notify_load_workspace_complete() {
     auto mockModel = makeModel();
     auto mockView = makeView();
-    auto mockRunner = makeJobRunner();
+    auto mockJobManager = makeJobManager();
 
     auto row = PreviewRow({"12345"});
-    auto configuredAlg = makeConfiguredAlg(row);
 
     EXPECT_CALL(*mockModel, getLoadedWs).Times(1);
 
-    auto presenter = PreviewPresenter(mockView.get(), std::move(mockModel), mockRunner.get());
-    presenter.notifyAlgorithmComplete(configuredAlg);
-  }
-
-  void test_notify_preprocessing_algorithm_skips_non_existing_rows() {
-    auto row = makeEmptyRow();
-    auto group = makeEmptyGroup();
-
-    auto items = std::array<Item *, 2>{&row, &group};
-
-    for (auto *item : items) {
-      auto mockModel = makeModel();
-      auto mockView = makeView();
-      auto mockRunner = makeJobRunner();
-
-      auto configuredAlg = makeConfiguredAlg(*item);
-
-      EXPECT_CALL(*mockModel, getLoadedWs).Times(0);
-
-      auto presenter = PreviewPresenter(mockView.get(), std::move(mockModel), mockRunner.get());
-      presenter.notifyAlgorithmComplete(configuredAlg);
-    }
+    auto presenter = PreviewPresenter(mockView.get(), std::move(mockModel), std::move(mockJobManager));
+    presenter.notifyLoadWorkspaceCompleted();
   }
 
 private:
@@ -97,12 +75,9 @@ private:
     return mockModel;
   }
 
-  std::unique_ptr<IJobRunner> makeJobRunner() { return std::make_unique<MockJobRunner>(); }
-
-  std::shared_ptr<BatchJobAlgorithm> makeConfiguredAlg(Item &item) {
-    Mantid::API::IAlgorithm_sptr mockAlg = std::make_shared<WorkspaceCreationHelper::StubAlgorithm>();
-    auto properties = IConfiguredAlgorithm::AlgorithmRuntimeProps();
-    auto configuredAlg = std::make_shared<BatchJobAlgorithm>(mockAlg, properties, nullptr, &item);
-    return configuredAlg;
+  std::unique_ptr<IJobManager> makeJobManager() {
+    auto mockJobManager = std::make_unique<MockJobManager>();
+    EXPECT_CALL(*mockJobManager, subscribe(NotNull())).Times(1);
+    return mockJobManager;
   }
 };

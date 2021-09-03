@@ -6,19 +6,17 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "PreviewPresenter.h"
-#include "GUI/Batch/IBatchJobAlgorithm.h"
-#include "GUI/Common/IJobRunner.h"
+#include "GUI/Common/IJobManager.h"
 #include "IPreviewModel.h"
-#include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
-#include "Reduction/Item.h"
 
 #include <memory>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
-PreviewPresenter::PreviewPresenter(IPreviewView *view, std::unique_ptr<IPreviewModel> model, IJobRunner *jobRunner)
-    : m_view(view), m_model(std::move(model)), m_jobRunner(jobRunner) {
+PreviewPresenter::PreviewPresenter(IPreviewView *view, std::unique_ptr<IPreviewModel> model,
+                                   std::unique_ptr<IJobManager> jobManager)
+    : m_view(view), m_model(std::move(model)), m_jobManager(std::move(jobManager)) {
   m_view->subscribe(this);
-  m_jobRunner->subscribe(this);
+  m_jobManager->subscribe(this);
 }
 
 void PreviewPresenter::notifyLoadWorkspaceRequested() {
@@ -26,21 +24,9 @@ void PreviewPresenter::notifyLoadWorkspaceRequested() {
   m_model->loadWorkspace(name);
 }
 
-void PreviewPresenter::notifyBatchComplete(bool) {}
-
-void PreviewPresenter::notifyBatchCancelled() {}
-
-void PreviewPresenter::notifyAlgorithmStarted(API::IConfiguredAlgorithm_sptr) {}
-
-void PreviewPresenter::notifyAlgorithmComplete(API::IConfiguredAlgorithm_sptr algorithm) {
-  auto jobAlgorithm = std::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
-  auto item = jobAlgorithm->item();
-  if (!item || !item->isPreview())
-    return;
-
-  auto loadedWs = m_model->getLoadedWs();
+void PreviewPresenter::notifyLoadWorkspaceCompleted() {
+  auto model = m_model->getLoadedWs();
   // TODO plot the result
 }
 
-void PreviewPresenter::notifyAlgorithmError(API::IConfiguredAlgorithm_sptr, std::string const &) {}
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

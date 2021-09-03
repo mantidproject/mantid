@@ -8,7 +8,7 @@
 
 #include "Common/DllConfig.h"
 #include "GUI/Batch/IBatchView.h"
-#include "GUI/Common/IJobRunner.h"
+#include "GUI/Common/IJobManager.h"
 #include "IPreviewModel.h"
 #include "IPreviewPresenter.h"
 #include "IPreviewView.h"
@@ -17,27 +17,22 @@
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
-class IJobRunner;
-
-class MANTIDQT_ISISREFLECTOMETRY_DLL PreviewPresenter : public PreviewViewSubscriber,
-                                                        public IPreviewPresenter,
-                                                        public JobRunnerSubscriber {
+class MANTIDQT_ISISREFLECTOMETRY_DLL PreviewPresenter : public IPreviewPresenter,
+                                                        public PreviewViewSubscriber,
+                                                        public JobManagerSubscriber {
 public:
-  PreviewPresenter(IPreviewView *view, std::unique_ptr<IPreviewModel> model, IJobRunner *jobRunner);
+  PreviewPresenter(IPreviewView *view, std::unique_ptr<IPreviewModel> model, std::unique_ptr<IJobManager> jobManager);
   virtual ~PreviewPresenter() = default;
+
   // PreviewViewSubscriber overrides
   void notifyLoadWorkspaceRequested() override;
 
-  // JobRunnerSubscriber overrides
-  void notifyBatchComplete(bool error) override;
-  void notifyBatchCancelled() override;
-  void notifyAlgorithmStarted(API::IConfiguredAlgorithm_sptr algorithm) override;
-  void notifyAlgorithmComplete(API::IConfiguredAlgorithm_sptr algorithm) override;
-  void notifyAlgorithmError(API::IConfiguredAlgorithm_sptr algorithm, std::string const &message) override;
+  // JobManagerSubscriber overrides
+  void notifyLoadWorkspaceCompleted() override;
 
 private:
   IPreviewView *m_view{nullptr};
   std::unique_ptr<IPreviewModel> m_model;
-  IJobRunner *m_jobRunner;
+  std::unique_ptr<IJobManager> m_jobManager;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

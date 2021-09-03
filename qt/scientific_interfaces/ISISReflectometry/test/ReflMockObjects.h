@@ -13,6 +13,7 @@
 #include "GUI/Common/IDecoder.h"
 #include "GUI/Common/IEncoder.h"
 #include "GUI/Common/IFileHandler.h"
+#include "GUI/Common/IJobManager.h"
 #include "GUI/Common/IJobRunner.h"
 #include "GUI/Common/IMessageHandler.h"
 #include "GUI/Common/IPlotter.h"
@@ -275,6 +276,16 @@ public:
   MOCK_METHOD1(setAlgorithmQueue, void(std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>));
   MOCK_METHOD0(executeAlgorithmQueue, void());
   MOCK_METHOD0(cancelAlgorithmQueue, void());
+};
+
+class MockJobManager : public IJobManager {
+public:
+  MOCK_METHOD1(subscribe, void(JobManagerSubscriber *notifyee));
+};
+
+class MockJobManagerSubscriber : public JobManagerSubscriber {
+public:
+  MOCK_METHOD0(notifyLoadWorkspaceCompleted, void());
 };
 
 class MockEncoder : public IEncoder {

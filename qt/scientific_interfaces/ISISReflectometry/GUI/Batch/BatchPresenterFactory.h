@@ -10,7 +10,6 @@
 #include "GUI/Event/EventPresenterFactory.h"
 #include "GUI/Experiment/ExperimentPresenterFactory.h"
 #include "GUI/Instrument/InstrumentPresenterFactory.h"
-#include "GUI/Preview/PreviewJobManager.h"
 #include "GUI/Preview/PreviewPresenterFactory.h"
 #include "GUI/Runs/RunsPresenterFactory.h"
 #include "GUI/Save/SavePresenterFactory.h"
@@ -47,9 +46,8 @@ public:
 
     auto batchModel = std::make_unique<Batch>(experimentPresenter->experiment(), instrumentPresenter->instrument(),
                                               runsPresenter->mutableRunsTable(), eventPresenter->slicing());
-    auto previewJobManager = PreviewJobManager(view, std::make_unique<ReflAlgorithmFactory>(*batchModel));
-
-    auto previewPresenter = m_previewPresenterFactory.make(view->preview(), view);
+    auto algFactory = std::make_unique<ReflAlgorithmFactory>(*batchModel);
+    auto previewPresenter = m_previewPresenterFactory.make(view->preview(), view, std::move(algFactory));
 
     return std::make_unique<BatchPresenter>(view, std::move(batchModel), view, std::move(runsPresenter),
                                             std::move(eventPresenter), std::move(experimentPresenter),
