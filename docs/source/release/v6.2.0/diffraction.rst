@@ -28,11 +28,11 @@ Improvements
 * :ref:`PDCalibration <algm-PDCalibration-v1>` has a new option to use the :ref:`IkedaCarpenterPV <func-IkedaCarpenterPV>` peak function.
 * :ref:`PolDiffILLReduction <algm-PolDiffILLReduction>` received a number of improvements
 
-  * Changes names of input workspaces to contain polarization information.
-  * Transmission can be provided as a number or a workspace group.
-  * New data averaging option depending on measurement 2theta.
-  * Option to display all measured points on a scatter plot.
-  * New option for self-attenuation treatment using measured transmission.
+  	* Changes names of input workspaces to contain polarization information.
+  	* Transmission can be provided as a number or a workspace group.
+  	* New data averaging option depending on measurement 2theta.
+  	* Option to display all measured points on a scatter plot.
+  	* New option for self-attenuation treatment using measured transmission.
 
 * Several improvements have been made to the group calibration routine including
 
@@ -80,7 +80,7 @@ Improvements
 
 .. image::  ../../images/EngDiff_Fit_Browse_Filters.png
    :align: center
-   :height: 700px
+   :height: 400px
 
 
 Bugfixes
@@ -109,7 +109,7 @@ Improvements
 * Existing :ref:`DGSPlanner <dgsplanner-ref>` expanded to support WAND².
 * Existing algorithm :ref:`IntegrateEllipsoids <algm-IntegrateEllipsoids-v1>` now can use a different integrator for satellite peaks.
 * New option in :ref:`IntegrateEllipsoids <algm-IntegrateEllipsoids-v1>` to share Bragg peak background with satellite peaks.
-* Existing algorithm:ref:`MaskPeaksWorkspace <algm-MaskPeaksWorkspace-v1>` now also supports tube-type detectors used at the CORELLI instrument.
+* Existing algorithm :ref:`MaskPeaksWorkspace <algm-MaskPeaksWorkspace-v1>` now also supports tube-type detectors used at the CORELLI instrument.
 * Improvements to :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` including
 
   * major interface update
