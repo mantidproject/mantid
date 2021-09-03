@@ -11,7 +11,6 @@ Algorithms
 New Features
 ############
 
-- :ref:`SaveAscii <algm-SaveAscii>` will no longer throw an error if `WriteXErrors` is requested, but there are no `Dx` data present in the workspace.
 - A new algorithm :ref:`Stitch <algm-Stitch>` will perform stitching of multiple 2D workspaces by calculating the scale factors as medians of point-wise ratios in the overlap regions.
 - All remote algorithms have been deprecated as they have not been used since v3.8.
 
@@ -24,6 +23,7 @@ Improvements
 - :ref:`Load <algm-Load>` will now set output properties of all types, not just workspaces.
 - :ref:`LoadNexusMonitors <algm-LoadNexusMonitors-v2>` now utilizes the log filter provided by :ref:`LoadNexusLogs <algm-LoadNexusLogs>`.
 - :ref:`LoadRaw <algm-LoadRaw>` will now ignore empty ICPalarm log files.
+- :ref:`SaveAscii <algm-SaveAscii>` will no longer throw an error if `WriteXErrors` is requested, but there are no `Dx` data present in the workspace.
 
 Bugfixes
 ########
