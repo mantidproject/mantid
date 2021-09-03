@@ -170,6 +170,15 @@ class RunTabPresenterTest(unittest.TestCase):
 
         self.assertIsNone(self.presenter.on_user_file_load())
 
+    def test_file_information_exceptions_handled(self):
+        for e in [ValueError, RuntimeError, OSError]:
+            mocked_row = mock.Mock()
+            type(mocked_row).file_information = mock.PropertyMock(side_effect=e)
+            exception_rows = [mocked_row, mocked_row]
+            self._mock_table.get_non_empty_rows = mock.Mock(return_value=exception_rows)
+
+            self.presenter.on_update_rows()  # should not throw
+
     def test_that_gets_states_from_view(self):
         # Arrange
         batch_file_path, user_file_path, _ = self._get_files_and_mock_presenter(BATCH_FILE_TEST_CONTENT_2)
