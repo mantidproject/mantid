@@ -18,8 +18,8 @@ from matplotlib.figure import Figure
 from mpl_toolkits.axisartist import Subplot as CurveLinearSubPlot
 from mpl_toolkits.axisartist.grid_helper_curvelinear import GridHelperCurveLinear
 from qtpy.QtCore import Qt, Signal
-from qtpy.QtWidgets import (QCheckBox, QComboBox, QGridLayout, QLabel, QHBoxLayout, QSplitter,
-                            QStatusBar, QToolButton, QVBoxLayout, QWidget)
+from qtpy.QtWidgets import (QCheckBox, QComboBox, QGridLayout, QLabel, QHBoxLayout, QSplitter, QStatusBar, QToolButton, QVBoxLayout,
+                            QWidget)
 
 # local imports
 from workbench.plotting.mantidfigurecanvas import MantidFigureCanvas
@@ -599,6 +599,15 @@ class SliceViewerView(QWidget, ObservingView):
         #  peaks viewer off by default
         self._peaks_view = None
 
+        # config the splitter appearance
+        splitterStyleStr = """QSplitter::handle{
+            border: 1px dotted gray;
+            min-height: 10px;
+            max-height: 20px;
+            }"""
+        self._splitter.setStyleSheet(splitterStyleStr)
+        self._splitter.setHandleWidth(1)
+
         layout = QHBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(self._splitter)
@@ -644,7 +653,7 @@ class SliceViewerView(QWidget, ObservingView):
 
     def set_peaks_viewer_visible(self, on):
         """
-        Set the visiblity of the PeaksViewer.
+        Set the visibility of the PeaksViewer.
         :param on: If True make the view visible, else make it invisible
         :return: The PeaksViewerCollectionView
         """

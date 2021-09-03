@@ -29,6 +29,7 @@ New and Improved
 - When fitting a plot, selecting the peak type will only update the default peak shape in the settings if the "Set as global default" checkbox is ticked.
 - Added help button to the sliceviewer
 - SliceViewer can toggle between different scales again without any issue.
+- SliceViewer uses a more visible divider between the main data view and the peaks table view.
 
 Bugfixes
 --------
