@@ -10,12 +10,14 @@
 #include "GUI/Event/EventPresenterFactory.h"
 #include "GUI/Experiment/ExperimentPresenterFactory.h"
 #include "GUI/Instrument/InstrumentPresenterFactory.h"
+#include "GUI/Preview/PreviewJobManager.h"
 #include "GUI/Preview/PreviewPresenterFactory.h"
 #include "GUI/Runs/RunsPresenterFactory.h"
 #include "GUI/Save/SavePresenterFactory.h"
 #include "IBatchPresenter.h"
 #include "IBatchPresenterFactory.h"
 #include "IBatchView.h"
+#include "ReflAlgorithmFactory.h"
 #include <memory>
 
 namespace MantidQt {
@@ -38,16 +40,18 @@ public:
 
   std::unique_ptr<IBatchPresenter> make(IBatchView *view) override {
     auto runsPresenter = m_runsPresenterFactory.make(view->runs());
-    auto eventPresenter = m_eventPresenterFactory.make(view->eventHandling());
     auto experimentPresenter = m_experimentPresenterFactory.make(view->experiment());
     auto instrumentPresenter = m_instrumentPresenterFactory.make(view->instrument());
-    auto previewPresenter = m_previewPresenterFactory.make(view->preview(), view);
+    auto eventPresenter = m_eventPresenterFactory.make(view->eventHandling());
     auto savePresenter = m_savePresenterFactory.make(view->save());
 
-    auto model = std::make_unique<Batch>(experimentPresenter->experiment(), instrumentPresenter->instrument(),
-                                         runsPresenter->mutableRunsTable(), eventPresenter->slicing());
+    auto batchModel = std::make_unique<Batch>(experimentPresenter->experiment(), instrumentPresenter->instrument(),
+                                              runsPresenter->mutableRunsTable(), eventPresenter->slicing());
+    auto previewJobManager = PreviewJobManager(view, std::make_unique<ReflAlgorithmFactory>(*batchModel));
 
-    return std::make_unique<BatchPresenter>(view, std::move(model), view, std::move(runsPresenter),
+    auto previewPresenter = m_previewPresenterFactory.make(view->preview(), view);
+
+    return std::make_unique<BatchPresenter>(view, std::move(batchModel), view, std::move(runsPresenter),
                                             std::move(eventPresenter), std::move(experimentPresenter),
                                             std::move(instrumentPresenter), std::move(savePresenter),
                                             std::move(previewPresenter));

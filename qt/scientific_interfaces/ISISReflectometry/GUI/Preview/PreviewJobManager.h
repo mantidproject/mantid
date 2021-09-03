@@ -11,14 +11,16 @@
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 class IBatch;
+class IJobRunner;
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL PreviewJobManager {
 public:
-  PreviewJobManager(IBatch &batch, std::unique_ptr<IReflAlgorithmFactory> algFactory = nullptr);
+  PreviewJobManager(IJobRunner *jobRunner, std::unique_ptr<IReflAlgorithmFactory> algFactory);
 
   MantidQt::API::IConfiguredAlgorithm_sptr getPreprocessingAlgorithm(PreviewRow &) const;
 
 private:
+  IJobRunner *m_jobRunner;
   std::unique_ptr<IReflAlgorithmFactory> m_algFactory;
 };
 

@@ -41,6 +41,7 @@ using API::IConfiguredAlgorithm_sptr;
 BatchJobManager::BatchJobManager(Batch &batch, std::unique_ptr<IReflAlgorithmFactory> algFactory)
     : m_batch(batch), m_algFactory(std::move(algFactory)), m_isProcessing(false), m_isAutoreducing(false),
       m_reprocessFailed(false), m_processAll(false), m_processPartial(false) {
+  // TODO Pass IJobRunner into this class and move job execution here instead of in the presenter
   if (!m_algFactory)
     m_algFactory = std::make_unique<ReflAlgorithmFactory>(m_batch);
 }

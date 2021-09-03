@@ -13,6 +13,7 @@
 
 #include "test/Batch/BatchJobManagerTest.h"
 #include "test/Batch/MockReflAlgorithmFactory.h"
+#include "test/ReflMockObjects.h"
 
 #include <gmock/gmock.h>
 
@@ -27,20 +28,22 @@ public:
   static void destroySuite(PreviewJobManagerTest *suite) { delete suite; }
 
   void testGetPreprocessingAlgorithm() {
-    auto mock = std::make_unique<MockReflAlgorithmFactory>();
+    auto mockAlgFactory = std::make_unique<MockReflAlgorithmFactory>();
+    auto mockJobRunner = MockJobRunner();
     auto previewRow = createPreviewRow();
     auto stubAlg = createConfiguredAlgorithm();
-    EXPECT_CALL(*mock, makePreprocessingAlgorithm(Eq(previewRow))).Times(1).WillOnce(Return(stubAlg));
+    EXPECT_CALL(*mockAlgFactory, makePreprocessingAlgorithm(Eq(previewRow))).Times(1).WillOnce(Return(stubAlg));
+    // TODO test calls on mockJobRunner
 
     auto batch = MockBatch();
-    auto jobManager = createJobManager(batch, std::move(mock));
+    auto jobManager = createJobManager(&mockJobRunner, std::move(mockAlgFactory));
     auto const preprocessAlg = jobManager.getPreprocessingAlgorithm(previewRow);
     TS_ASSERT_EQUALS(stubAlg, preprocessAlg);
   }
 
 private:
-  PreviewJobManager createJobManager(IBatch &batch, std::unique_ptr<IReflAlgorithmFactory> algFactory) {
-    return PreviewJobManager(batch, std::move(algFactory));
+  PreviewJobManager createJobManager(MockJobRunner *jobRunner, std::unique_ptr<IReflAlgorithmFactory> algFactory) {
+    return PreviewJobManager(jobRunner, std::move(algFactory));
   }
 
   PreviewRow createPreviewRow() { return PreviewRow({"12345"}); }

@@ -8,17 +8,14 @@
 #include "PreviewJobManager.h"
 #include "GUI/Batch/IReflAlgorithmFactory.h"
 #include "GUI/Batch/ReflAlgorithmFactory.h"
-#include "Reduction/IBatch.h"
+#include "GUI/Common/IJobRunner.h"
 
 #include <memory>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
-PreviewJobManager::PreviewJobManager(IBatch &batch, std::unique_ptr<IReflAlgorithmFactory> algFactory)
-    : m_algFactory(std::move(algFactory)) {
-  if (!m_algFactory)
-    m_algFactory = std::make_unique<ReflAlgorithmFactory>(batch);
-}
+PreviewJobManager::PreviewJobManager(IJobRunner *jobRunner, std::unique_ptr<IReflAlgorithmFactory> algFactory)
+    : m_jobRunner(jobRunner), m_algFactory(std::move(algFactory)) {}
 
 MantidQt::API::IConfiguredAlgorithm_sptr PreviewJobManager::getPreprocessingAlgorithm(PreviewRow &row) const {
   return m_algFactory->makePreprocessingAlgorithm(row);
