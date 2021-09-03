@@ -71,7 +71,7 @@ Improvements
 - Added a table to store phasequads in the phase tab. Also, phasequads no longer delete themselves automatically.
 - The labels on the tabs in the GUIs will now show in full
 - When running the :ref:`DynamicKobuToyabe <func-DynamicKuboToyabe>` fitting function you should now be able to see the BinWidth to 3 decimal places.
-- It is now possible to select the normalisation (``analysis_asymmetry_norm``) and group (``analysis_group``) in the :ref:`Results Tab <muon-results-tab-ref>`.
+- It is now possible to select the normalisation (``analysis_asymmetry_norm``) and group (``analysis_group``) in the :ref:`Results Tab <muon_results_tab-ref>`.
 
 Bugfixes
 ########
