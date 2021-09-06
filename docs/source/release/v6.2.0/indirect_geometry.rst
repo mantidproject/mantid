@@ -41,6 +41,7 @@ Bug Fixes
 - A bug has been fixed in Indirect data analysis on the F(Q)Fit tab, Multiple Input tab that allowed duplicate spectra to be added.
 - A bug has been fixed that stopped additional spectra being added to Indirect Data Analysis if spectra from that workspace had already been added.
 - :ref:`IndirectILLEnertyTransfer <algm-IndirectILLEnertyTransfer>` will now perform the monitor normalisation correctly; that is, in wavelength instead of energy. It will also provide the monitor workspace as a diagnostic output, if requested.
+- A bug has been fixed in Indirect Data Analysis that limited the integration range on the tabs to between -1 and 1.
 
 
 :ref:`Release 6.2.0 <v6.2.0>`
