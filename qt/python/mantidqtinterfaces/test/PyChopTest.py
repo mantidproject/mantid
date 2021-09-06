@@ -13,7 +13,7 @@ import builtins
 import warnings
 import numpy as np
 
-from PyChop import PyChop2
+from mantidqtinterfaces.PyChop import PyChop2
 
 
 class PyChop2Tests(unittest.TestCase):
@@ -193,50 +193,67 @@ class PyChopGuiTests(unittest.TestCase):
                 self.menuBar = mock.MagicMock()
                 self.setCentralWidget = mock.MagicMock()
                 self.setWindowTitle = mock.MagicMock()
+
             def setWindowFlags(self, *args, **kwargs):            # noqa: E306
                 pass
+
             def show(self):                                       # noqa: E306
                 pass
+
         class fake_QCombo(mock.MagicMock):                        # noqa: E306
             def __init__(self, *args, **kwargs):
                 super().__init__(*args, **kwargs)
                 self.clear()
+
             def clear(self):                                      # noqa: E306
                 self.items = []
                 self.currentIndex = 0
+
             def addItem(self, item):                              # noqa: E306
                 self.items.append(item)
+
             def currentText(self):                                # noqa: E306
                 return self.items[self.currentIndex]
+
             def count(self):                                      # noqa: E306
                 return len(self.items)
+
             def itemText(self, idx):                              # noqa: E306
                 return self.items[idx]
+
             def setCurrentIndex(self, idx):                       # noqa: E306
                 self.currentIndex = idx
+
             def __getattr__(self, attribute):                     # noqa: E306
                 if attribute not in self.__dict__:
                     self.__dict__[attribute] = mock.MagicMock()
                 return self.__dict__[attribute]
+
         class fake_Line(mock.MagicMock):                          # noqa: E306
             def __init__(self, parent, *args, **kwargs):
                 super().__init__(*args, **kwargs)
                 self.parent = parent
+
             def set_label(self, label):                           # noqa: E306
                 parent.legends[self] = label
+
         class fake_Axes(mock.MagicMock):                          # noqa: E306
             def __init__(self, *args, **kwargs):
                 super().__init__(*args, **kwargs)
                 self.legends = {}
+
             def plot(self, *args, **kwargs):                      # noqa: E306
                 self.lines.append(fake_Line(self))
                 return self.lines[-1],
+
             def get_legend_handles_labels(self):                  # noqa: E306
                 labels = [self.legends[line] for line in self.lines]
                 return self.lines, labels
+
         class fake_Figure(mock.MagicMock):                        # noqa: E306
             def add_subplot(self, *args, **kwargs):
                 return fake_Axes()
+
         class fake_Slider(mock.MagicMock):                        # noqa: E306
             def __init__(self, parent, label, valmin, valmax, **kwargs):
                 super().__init__(parent, label, valmin, valmax, **kwargs)
@@ -251,7 +268,7 @@ class PyChopGuiTests(unittest.TestCase):
                                                 'Slider':MockedModule(mock_class=fake_Slider)})
         # Mess around with import mechanism _inside_ PyChopGui so GUI libs not really imported
         with patch('builtins.__import__', cls.mock_modules.import_func):
-            from PyChop import PyChopGui
+            from mantidqtinterfaces.PyChop import PyChopGui
             cls.window = PyChopGui.PyChopGui()
             cls.window.eiPlots.isChecked = mock.MagicMock(return_value=False)
             cls.mock_modules.matplotlib.__version__ = '2.1.0'
