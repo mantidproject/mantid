@@ -13,7 +13,6 @@
 #include "MantidKernel/Timer.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
-//#include "../../TestHelpers/src/WorkspaceCreationHelper.cpp"
 
 using Mantid::Algorithms::Rebin2D;
 using namespace Mantid::API;

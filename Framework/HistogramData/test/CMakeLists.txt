@@ -1,9 +1,16 @@
 if(CXXTEST_FOUND)
-  include_directories(SYSTEM ${CXXTEST_INCLUDE_DIR} ../../TestHelpers/inc)
+  include_directories(SYSTEM
+                      ${CXXTEST_INCLUDE_DIR})
 
   cxxtest_add_test(HistogramDataTest ${TEST_FILES} ${GMOCK_TEST_FILES})
 
-  target_link_libraries(HistogramDataTest PRIVATE Mantid::HistogramData Mantid::Kernel gmock)
+  target_link_libraries(HistogramDataTest
+                        PRIVATE
+                        Mantid::HistogramData
+                        Mantid::Kernel
+                        Mantid::TestHelpers
+                        gmock
+  )
 
   add_dependencies(FrameworkTests HistogramDataTest)
   # Add to the 'FrameworkTests' group in VS

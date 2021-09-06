@@ -2,18 +2,18 @@ if(CXXTEST_FOUND)
   include_directories(SYSTEM ${CXXTEST_INCLUDE_DIR})
 
   # Make the rest of the tests
-  include_directories(../../TestHelpers/inc)
-  # This variable is used within the cxxtest_add_test macro to build these helper classes into the test executable. It
-  # will go out of scope at the end of this file so doesn't need un-setting
-  set(TESTHELPER_SRCS
-      ../../TestHelpers/src/TearDownWorld.cpp ../../TestHelpers/src/ComponentCreationHelper.cpp
-      ../../TestHelpers/src/InstrumentCreationHelper.cpp ../../TestHelpers/src/WorkspaceCreationHelper.cpp
-  )
+  # This variable is used within the cxxtest_add_test macro to build these
+  # helper classes into the test executable. It will go out of scope at the end
+  # of this file so doesn't need un-setting
   cxxtest_add_test(WorkflowAlgorithmsTest ${TEST_FILES})
-  target_link_libraries(
-    WorkflowAlgorithmsTest PRIVATE Mantid::WorkflowAlgorithms Mantid::Algorithms Mantid::DataHandling Boost::filesystem
-                                   gmock
-  )
+  target_link_libraries(WorkflowAlgorithmsTest
+                        PRIVATE
+                        Mantid::WorkflowAlgorithms
+                        Mantid::Algorithms
+                        Mantid::DataHandling
+                        Mantid::TestHelpers
+                        Boost::filesystem
+                        gmock)
   add_dependencies(WorkflowAlgorithmsTest CurveFitting)
   add_dependencies(FrameworkTests WorkflowAlgorithmsTest)
   # Test data
