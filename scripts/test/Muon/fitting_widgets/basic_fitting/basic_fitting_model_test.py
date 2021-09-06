@@ -9,13 +9,12 @@ from unittest import mock
 
 from mantid.api import AnalysisDataService, FrameworkManager, FunctionFactory
 from mantid.simpleapi import CreateEmptyTableWorkspace, CreateSampleWorkspace
-
-from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model import BasicFittingModel, DEFAULT_START_X
-from Muon.GUI.Common.muon_pair import MuonPair
-from Muon.GUI.Common.muon_base_pair import MuonBasePair
-from Muon.GUI.Common.test_helpers.context_setup import setup_context
-from Muon.GUI.Common.utilities.workspace_data_utils import X_OFFSET
-from Muon.GUI.Common.utilities.workspace_utils import StaticWorkspaceWrapper
+from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model import BasicFittingModel, DEFAULT_START_X
+from mantidqtinterfaces.Muon.GUI.Common.muon_pair import MuonPair
+from mantidqtinterfaces.Muon.GUI.Common.muon_base_pair import MuonBasePair
+from mantidqtinterfaces.Muon.GUI.Common.test_helpers.context_setup import setup_context
+from mantidqtinterfaces.Muon.GUI.Common.utilities.workspace_data_utils import X_OFFSET
+from mantidqtinterfaces.Muon.GUI.Common.utilities.workspace_utils import StaticWorkspaceWrapper
 
 
 class BasicFittingModelTest(unittest.TestCase):
@@ -501,7 +500,7 @@ class BasicFittingModelTest(unittest.TestCase):
         self.model.context = mock.Mock()
         self.model._double_pulse_enabled = mock.Mock(return_value=False)
         self.model._get_plot_guess_name = mock.Mock(return_value=guess_workspace_name)
-        with mock.patch('Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model.EvaluateFunction') as mock_evaluate:
+        with mock.patch('scientific_interfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model.EvaluateFunction') as mock_evaluate:
             self.model._get_guess_parameters = mock.Mock(return_value=['func', 'ws'])
             self.model.update_plot_guess()
             mock_evaluate.assert_called_with(InputWorkspace=self.model.current_dataset_name,
@@ -510,7 +509,7 @@ class BasicFittingModelTest(unittest.TestCase):
                                              EndX=self.model.current_end_x,
                                              OutputWorkspace=guess_workspace_name)
 
-    @mock.patch('Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model.EvaluateFunction')
+    @mock.patch('scientific_interfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model.EvaluateFunction')
     def test_update_plot_guess_notifies_subscribers_with_the_guess_workspace_name_if_plot_guess_is_true(self, mock_evaluate):
         guess_workspace_name = "__frequency_domain_analysis_fitting_guessName1"
         self.model.dataset_names = self.dataset_names

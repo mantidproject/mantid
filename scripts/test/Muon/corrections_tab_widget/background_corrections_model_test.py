@@ -10,11 +10,11 @@ from unittest import mock
 from mantid.api import AnalysisDataService, FrameworkManager, FunctionFactory
 from mantid.simpleapi import CreateSampleWorkspace
 
-from Muon.GUI.Common.corrections_tab_widget.corrections_model import CorrectionsModel
-from Muon.GUI.Common.corrections_tab_widget.background_corrections_model import (BackgroundCorrectionsModel,
-                                                                                 DEFAULT_USE_RAW)
-from Muon.GUI.Common.test_helpers.context_setup import setup_context
-from Muon.GUI.Common.utilities.workspace_data_utils import DEFAULT_X_LOWER, DEFAULT_X_UPPER, X_OFFSET
+from mantidqtinterfaces.Muon.GUI.Common.corrections_tab_widget.corrections_model import CorrectionsModel
+from mantidqtinterfaces.Muon.GUI.Common.corrections_tab_widget.background_corrections_model import (BackgroundCorrectionsModel,
+                                                                                                    DEFAULT_USE_RAW)
+from mantidqtinterfaces.Muon.GUI.Common.test_helpers.context_setup import setup_context
+from mantidqtinterfaces.Muon.GUI.Common.utilities.workspace_data_utils import DEFAULT_X_LOWER, DEFAULT_X_UPPER
 
 
 class BackgroundCorrectionsModelTest(unittest.TestCase):
@@ -239,7 +239,7 @@ class BackgroundCorrectionsModelTest(unittest.TestCase):
 
         self.assertRaises(ValueError, self.model.run_background_correction_for_all)
 
-    @mock.patch("Muon.GUI.Common.corrections_tab_widget.background_corrections_model.run_Fit")
+    @mock.patch("scientific_interfaces.Muon.GUI.Common.corrections_tab_widget.background_corrections_model.run_Fit")
     def test_that_reset_background_function_data_will_reset_the_background_function_data_after_a_fit(self, mock_run_fit):
         mock_run_fit.return_value = (self.fitted_function, self.fit_status, self.chi_squared)
         self.model.x_limits_of_workspace = mock.Mock(return_value=(0.0, 30.0))

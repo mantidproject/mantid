@@ -8,9 +8,9 @@ import unittest
 
 from mantid.api import AnalysisDataService, FrameworkManager, FunctionFactory, WorkspaceFactory
 
-from Muon.GUI.Common.ADSHandler.ADS_calls import add_ws_to_ads, check_if_workspace_exist
-from Muon.GUI.Common.fitting_widgets.model_fitting.model_fitting_model import ModelFittingModel
-from Muon.GUI.Common.test_helpers.context_setup import setup_context
+from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.ADS_calls import add_ws_to_ads, check_if_workspace_exist
+from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.model_fitting.model_fitting_model import ModelFittingModel
+from mantidqtinterfaces.Muon.GUI.Common.test_helpers.context_setup import setup_context
 
 
 def create_results_table():

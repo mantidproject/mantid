@@ -7,8 +7,8 @@
 import unittest
 from unittest import mock
 
-from Muon.GUI.Common.seq_fitting_tab_widget.seq_fitting_tab_widget import SeqFittingTabWidget
-from Muon.GUI.Common.test_helpers.context_setup import setup_context
+from mantidqtinterfaces.Muon.GUI.Common.seq_fitting_tab_widget.seq_fitting_tab_widget import SeqFittingTabWidget
+from mantidqtinterfaces.Muon.GUI.Common.test_helpers.context_setup import setup_context
 from qtpy.QtWidgets import QApplication
 from mantidqt.utils.observer_pattern import GenericObservable
 from mantidqt.utils.qt.testing import start_qapplication
@@ -109,7 +109,7 @@ class SeqFittingTabPresenterTest(unittest.TestCase):
         self.view.seq_fit_button.setEnabled.assert_called_once_with(True)
         self.view.fit_selected_button.setEnabled.assert_called_once_with(True)
 
-    @mock.patch('Muon.GUI.Common.seq_fitting_tab_widget.seq_fitting_tab_presenter.functools')
+    @mock.patch('scientific_interfaces.Muon.GUI.Common.seq_fitting_tab_widget.seq_fitting_tab_presenter.functools')
     def test_handle_fit_selected_correctly_sets_up_fit(self, mock_function_tools):
         workspace = "EMU20884; Group; fwd; Asymmetry"
         parameter_values = [0.2, 0.1, 0, 0]
@@ -124,7 +124,7 @@ class SeqFittingTabPresenterTest(unittest.TestCase):
         mock_function_tools.partial.assert_called_once_with(self.model.perform_sequential_fit, [[workspace]],
                                                             [parameter_values], False)
 
-    @mock.patch('Muon.GUI.Common.seq_fitting_tab_widget.seq_fitting_tab_presenter.functools')
+    @mock.patch('scientific_interfaces.Muon.GUI.Common.seq_fitting_tab_widget.seq_fitting_tab_presenter.functools')
     def test_handle_fit_selected_does_nothing_if_fit_function_is_none(self, mock_function_tools):
         self.model.get_active_fit_function = mock.Mock(return_value=None)
         self.view.fit_table.get_selected_rows = mock.MagicMock(return_value=[0, 1])
@@ -133,7 +133,7 @@ class SeqFittingTabPresenterTest(unittest.TestCase):
 
         mock_function_tools.partial.assert_not_called()
 
-    @mock.patch('Muon.GUI.Common.seq_fitting_tab_widget.seq_fitting_tab_presenter.functools')
+    @mock.patch('scientific_interfaces.Muon.GUI.Common.seq_fitting_tab_widget.seq_fitting_tab_presenter.functools')
     def test_handle_fit_selected_pressed_does_nothing_if_no_fit_selected(self, mock_function_tools):
         self._setup_test_fit_function([0.2, 0.1, 0, 0])
         self.view.fit_table.get_selected_rows = mock.MagicMock(return_value=[])
@@ -156,7 +156,7 @@ class SeqFittingTabPresenterTest(unittest.TestCase):
         self.view.fit_table.set_fit_quality.assert_called_once_with(2, 'Success', 1.07)
         self.view.fit_selected_button.setEnabled.assert_called_once_with(True)
 
-    @mock.patch('Muon.GUI.Common.seq_fitting_tab_widget.seq_fitting_tab_presenter.functools')
+    @mock.patch('scientific_interfaces.Muon.GUI.Common.seq_fitting_tab_widget.seq_fitting_tab_presenter.functools')
     def test_handle_sequential_fit_correctly_sets_up_fit(self, mock_function_tools):
         workspaces = ["EMU20884; Group; fwd; Asymmetry"]
         parameters_values = [0.2, 0.2, 0.1, 0]
@@ -174,7 +174,7 @@ class SeqFittingTabPresenterTest(unittest.TestCase):
                                                             [workspaces] * number_of_entries,
                                                             [parameters_values] * number_of_entries, False)
 
-    @mock.patch('Muon.GUI.Common.seq_fitting_tab_widget.seq_fitting_tab_presenter.functools')
+    @mock.patch('scientific_interfaces.Muon.GUI.Common.seq_fitting_tab_widget.seq_fitting_tab_presenter.functools')
     def test_handle_sequential_fit_does_nothing_if_fit_function_is_none(self, mock_function_tools):
         self.model.fit_function = None
 

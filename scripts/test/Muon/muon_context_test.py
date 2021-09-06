@@ -5,21 +5,19 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-
-from Muon.GUI.Common.calculate_pair_and_group import run_pre_processing
-from mantidqt.utils.qt.testing import start_qapplication
 from unittest import mock
+from collections import Counter
 
 from mantid.api import AnalysisDataService, FileFinder
 from mantid import ConfigService
-from collections import Counter
-from Muon.GUI.Common.utilities.load_utils import load_workspace_from_filename
-from Muon.GUI.Common.test_helpers.context_setup import setup_context
-from Muon.GUI.Common.muon_base_pair import MuonBasePair
-from Muon.GUI.Common.muon_diff import MuonDiff
-from Muon.GUI.Common.muon_group import MuonGroup
-from Muon.GUI.Common.muon_pair import MuonPair
-from Muon.GUI.Common.muon_phasequad import MuonPhasequad
+from mantidqt.utils.qt.testing import start_qapplication
+from mantidqtinterfaces.Muon.GUI.Common.calculate_pair_and_group import run_pre_processing
+from mantidqtinterfaces.Muon.GUI.Common.utilities.load_utils import load_workspace_from_filename
+from mantidqtinterfaces.Muon.GUI.Common.test_helpers.context_setup import setup_context
+from mantidqtinterfaces.Muon.GUI.Common.muon_diff import MuonDiff
+from mantidqtinterfaces.Muon.GUI.Common.muon_group import MuonGroup
+from mantidqtinterfaces.Muon.GUI.Common.muon_pair import MuonPair
+from mantidqtinterfaces.Muon.GUI.Common.muon_phasequad import MuonPhasequad
 
 
 def run_side_effect(param, name):
@@ -505,9 +503,9 @@ class MuonContextTest(unittest.TestCase):
         self.context._get_bin_width = mock.Mock(return_value = 0.1)
         self.context._average_by_bin_widths = mock.Mock(side_effect=average_side_effect)
 
-    @mock.patch('Muon.GUI.Common.contexts.muon_context.run_PhaseQuad')
-    @mock.patch('Muon.GUI.Common.contexts.muon_context.split_phasequad')
-    @mock.patch('Muon.GUI.Common.contexts.muon_context.run_crop_workspace')
+    @mock.patch('scientific_interfaces.Muon.GUI.Common.contexts.muon_context.run_PhaseQuad')
+    @mock.patch('scientific_interfaces.Muon.GUI.Common.contexts.muon_context.split_phasequad')
+    @mock.patch('scientific_interfaces.Muon.GUI.Common.contexts.muon_context.run_crop_workspace')
     def test_calculate_phasequad(self, crop_mock, split_mock, run_mock):
         table = "test_table"
         phasequad = MuonPhasequad("test", table)
@@ -530,9 +528,9 @@ class MuonContextTest(unittest.TestCase):
         self.context._get_bin_width.assert_not_called()
         self.context._average_by_bin_widths.assert_not_called()
 
-    @mock.patch('Muon.GUI.Common.contexts.muon_context.run_PhaseQuad')
-    @mock.patch('Muon.GUI.Common.contexts.muon_context.split_phasequad')
-    @mock.patch('Muon.GUI.Common.contexts.muon_context.run_crop_workspace')
+    @mock.patch('scientific_interfaces.Muon.GUI.Common.contexts.muon_context.run_PhaseQuad')
+    @mock.patch('scientific_interfaces.Muon.GUI.Common.contexts.muon_context.split_phasequad')
+    @mock.patch('scientific_interfaces.Muon.GUI.Common.contexts.muon_context.run_crop_workspace')
     def test_calculate_phasequad_rebin(self, crop_mock, split_mock, run_mock):
         table = "test_table"
         name = "EMU5234; PhaseQuad; test_Re__Im_; Rebin; MA"
@@ -555,9 +553,9 @@ class MuonContextTest(unittest.TestCase):
         self.context._get_bin_width.assert_called_once_with(name)
         self.context._average_by_bin_widths.assert_called_once_with(name,0.1)
 
-    @mock.patch('Muon.GUI.Common.contexts.muon_context.run_PhaseQuad')
-    @mock.patch('Muon.GUI.Common.contexts.muon_context.split_phasequad')
-    @mock.patch('Muon.GUI.Common.contexts.muon_context.run_crop_workspace')
+    @mock.patch('scientific_interfaces.Muon.GUI.Common.contexts.muon_context.run_PhaseQuad')
+    @mock.patch('scientific_interfaces.Muon.GUI.Common.contexts.muon_context.split_phasequad')
+    @mock.patch('scientific_interfaces.Muon.GUI.Common.contexts.muon_context.run_crop_workspace')
     def test_calculate_phasequad_deadtime(self, crop_mock, split_mock, run_mock):
         table = "test_table"
         phasequad = MuonPhasequad("test",table)
@@ -580,9 +578,9 @@ class MuonContextTest(unittest.TestCase):
         self.context._get_bin_width.assert_not_called()
         self.context._average_by_bin_widths.assert_not_called()
 
-    @mock.patch('Muon.GUI.Common.contexts.muon_context.run_PhaseQuad')
-    @mock.patch('Muon.GUI.Common.contexts.muon_context.split_phasequad')
-    @mock.patch('Muon.GUI.Common.contexts.muon_context.run_crop_workspace')
+    @mock.patch('scientific_interfaces.Muon.GUI.Common.contexts.muon_context.run_PhaseQuad')
+    @mock.patch('scientific_interfaces.Muon.GUI.Common.contexts.muon_context.split_phasequad')
+    @mock.patch('scientific_interfaces.Muon.GUI.Common.contexts.muon_context.run_crop_workspace')
     def test_calculate_phasequad_rebin_deadtime(self, crop_mock, split_mock, run_mock):
         table = "test_table"
         self.context._run_deadtime = mock.Mock(side_effect=run_side_effect)
@@ -628,8 +626,8 @@ class MuonContextTest(unittest.TestCase):
         divide.assert_called_once_with(name, tmp, name)
         delete.assert_called_once_with(tmp)
 
-    @mock.patch('Muon.GUI.Common.contexts.muon_context.get_raw_data_workspace_name')
-    @mock.patch('Muon.GUI.Common.contexts.muon_context.apply_deadtime')
+    @mock.patch('scientific_interfaces.Muon.GUI.Common.contexts.muon_context.get_raw_data_workspace_name')
+    @mock.patch('scientific_interfaces.Muon.GUI.Common.contexts.muon_context.apply_deadtime')
     def test_run_deadtime_false(self, apply_mock, name_mock):
         name = "EMU5234; PhaseQuad; test_Re__Im_; Rebin; MA"
         raw_name = 'EMU5234_raw_data MA'
@@ -640,8 +638,8 @@ class MuonContextTest(unittest.TestCase):
         self.assertEqual(0, apply_mock.call_count)
         self.assertEqual(result, raw_name)
 
-    @mock.patch('Muon.GUI.Common.contexts.muon_context.get_raw_data_workspace_name')
-    @mock.patch('Muon.GUI.Common.contexts.muon_context.apply_deadtime')
+    @mock.patch('scientific_interfaces.Muon.GUI.Common.contexts.muon_context.get_raw_data_workspace_name')
+    @mock.patch('scientific_interfaces.Muon.GUI.Common.contexts.muon_context.apply_deadtime')
     def test_run_deadtime_true(self, apply_mock, name_mock):
         name = "EMU5234; PhaseQuad; test_Re__Im_; Rebin; MA"
         raw_name = 'EMU5234_raw_data MA'

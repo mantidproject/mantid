@@ -10,8 +10,8 @@ from unittest import mock
 from mantid.api import FrameworkManager, FunctionFactory
 from mantid.simpleapi import CreateEmptyTableWorkspace
 from mantidqt.widgets.fitscriptgenerator import FittingMode
-from Muon.GUI.Common.test_helpers.fitting_mock_setup import MockBasicFitting
-from Muon.GUI.Common.utilities.workspace_utils import StaticWorkspaceWrapper
+from mantidqtinterfaces.Muon.GUI.Common.test_helpers.fitting_mock_setup import MockBasicFitting
+from mantidqtinterfaces.Muon.GUI.Common.utilities.workspace_utils import StaticWorkspaceWrapper
 
 
 class BasicFittingPresenterTest(unittest.TestCase, MockBasicFitting):
@@ -325,7 +325,7 @@ class BasicFittingPresenterTest(unittest.TestCase, MockBasicFitting):
 
         self.mock_view_start_x.assert_called_with(0.0)
 
-    @mock.patch("Muon.GUI.Common.utilities.workspace_data_utils.x_limits_of_workspace")
+    @mock.patch("scientific_interfaces.Muon.GUI.Common.utilities.workspace_data_utils.x_limits_of_workspace")
     def test_that_handle_start_x_updated_will_use_the_min_start_x_when_the_set_start_x_is_too_small(self, mock_x_limits):
         x_lower = 3.0
         mock_x_limits.return_value = (x_lower, self.end_x)
@@ -335,7 +335,7 @@ class BasicFittingPresenterTest(unittest.TestCase, MockBasicFitting):
 
         self.mock_view_start_x.assert_called_with(3.0)
 
-    @mock.patch("Muon.GUI.Common.utilities.workspace_data_utils.x_limits_of_workspace")
+    @mock.patch("scientific_interfaces.Muon.GUI.Common.utilities.workspace_data_utils.x_limits_of_workspace")
     def test_that_handle_start_x_updated_will_use_the_max_start_x_when_the_set_start_x_is_too_large(self, mock_x_limits):
         x_upper = -0.1
         mock_x_limits.return_value = (self.start_x, x_upper)
@@ -364,7 +364,7 @@ class BasicFittingPresenterTest(unittest.TestCase, MockBasicFitting):
         self.mock_model_exclude_range.assert_has_calls([mock.call(True), mock.call()])
         self.view.set_exclude_start_and_end_x_visible.assert_called_once_with(True)
 
-    @mock.patch("Muon.GUI.Common.utilities.workspace_data_utils.check_exclude_start_x_is_valid")
+    @mock.patch("scientific_interfaces.Muon.GUI.Common.utilities.workspace_data_utils.check_exclude_start_x_is_valid")
     def test_that_handle_exclude_start_x_updated_will_check_the_exclude_start_x_is_valid_before_updating_it(self, mock_check):
         mock_check.return_value = (self.start_x, self.end_x)
 
@@ -375,7 +375,7 @@ class BasicFittingPresenterTest(unittest.TestCase, MockBasicFitting):
         self.mock_model_current_exclude_start_x.assert_called_once_with()
         self.presenter.update_exclude_start_and_end_x_in_view_and_model.assert_called_once_with(self.start_x, self.end_x)
 
-    @mock.patch("Muon.GUI.Common.utilities.workspace_data_utils.check_exclude_end_x_is_valid")
+    @mock.patch("scientific_interfaces.Muon.GUI.Common.utilities.workspace_data_utils.check_exclude_end_x_is_valid")
     def test_that_handle_exclude_end_x_updated_will_check_the_exclude_end_x_is_valid_before_updating_it(self, mock_check):
         mock_check.return_value = (self.start_x, self.end_x)
 

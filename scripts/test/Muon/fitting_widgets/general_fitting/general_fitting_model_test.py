@@ -10,8 +10,8 @@ from unittest import mock
 from mantid.api import AnalysisDataService, CompositeFunction, FrameworkManager, FunctionFactory
 from mantid.simpleapi import CreateSampleWorkspace
 
-from Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_model import GeneralFittingModel
-from Muon.GUI.Common.test_helpers.context_setup import setup_context
+from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_model import GeneralFittingModel
+from mantidqtinterfaces.Muon.GUI.Common.test_helpers.context_setup import setup_context
 
 
 class GeneralFittingModelTest(unittest.TestCase):
@@ -261,7 +261,7 @@ class GeneralFittingModelTest(unittest.TestCase):
         self.assertEqual(str(self.model.single_fit_functions[0]), "name=FlatBackground,A0=0")
         self.assertEqual(str(self.model.simultaneous_fit_function), "name=FlatBackground,A0=0")
 
-    @mock.patch('Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_model.GeneralFittingModel.'
+    @mock.patch('scientific_interfaces.Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_model.GeneralFittingModel.'
                 '_get_selected_runs')
     def test_that_get_simultaneous_fit_by_specifiers_to_display_from_context_attempts_to_get_the_runs(self,
                                                                                                       mock_get_runs):
@@ -272,7 +272,7 @@ class GeneralFittingModelTest(unittest.TestCase):
 
         self.assertEqual(1, mock_get_runs.call_count)
 
-    @mock.patch('Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_model.GeneralFittingModel.'
+    @mock.patch('scientific_interfaces.Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_model.GeneralFittingModel.'
                 '_get_selected_groups_and_pairs')
     def test_that_get_simultaneous_fit_by_specifiers_to_display_from_context_attempts_to_get_the_groups_pairs(self,
                                                                                                               mock_get_group_pairs):
