@@ -26,7 +26,7 @@ mantidqt.python_interfaces = ILL/Drill.py Direct/DGS_Reduction.py Direct/DGSPlan
 mantidqt.python_interfaces_io_registry = Engineering_Diffraction_register.py
 
 # Directory containing the above startup scripts
-mantidqt.python_interfaces_directory = @MANTID_ROOT@/scripts
+mantidqt.python_interfaces_directory = @PYTHON_INTERFACES_DIR@
 
 # Where to find mantid framework plugins
 framework.plugins.directory = @FRAMEWORK_PLUGINS_DIR@
