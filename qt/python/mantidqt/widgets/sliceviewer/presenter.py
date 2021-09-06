@@ -155,12 +155,11 @@ class SliceViewer(ObservingPresenter):
     def get_sliceinfo(self):
         """Returns a SliceInfo object describing the current slice"""
         dimensions = self.view.data_view.dimensions
-        return SliceInfo(frame=self.model.get_frame(),
-                         point=dimensions.get_slicepoint(),
+        return SliceInfo(point=dimensions.get_slicepoint(),
                          transpose=dimensions.transpose,
                          range=dimensions.get_slicerange(),
                          qflags=dimensions.qflags,
-                         nonortho_transform=self.view.data_view.nonortho_transform)
+                         axes_angles=self.model.get_axes_angles())
 
     def get_slicepoint(self):
         """Returns the current slicepoint as a list of 3 elements.
@@ -180,8 +179,7 @@ class SliceViewer(ObservingPresenter):
         if data_view.nonorthogonal_mode:
             if sliceinfo.can_support_nonorthogonal_axes():
                 # axes need to be recreated to have the correct transform associated
-                data_view.create_axes_nonorthogonal(
-                    self.model.create_nonorthogonal_transform(sliceinfo))
+                data_view.create_axes_nonorthogonal(sliceinfo.get_northogonal_transform())
             else:
                 data_view.disable_tool_button(ToolItemText.NONORTHOGONAL_AXES)
                 data_view.create_axes_orthogonal()
@@ -348,8 +346,7 @@ class SliceViewer(ObservingPresenter):
         if state:
             data_view.deactivate_and_disable_tool(ToolItemText.REGIONSELECTION)
             data_view.disable_tool_button(ToolItemText.LINEPLOTS)
-            data_view.create_axes_nonorthogonal(
-                self.model.create_nonorthogonal_transform(self.get_sliceinfo()))
+            data_view.create_axes_nonorthogonal(self.get_sliceinfo().get_northogonal_transform())
             self.show_all_data_requested()
         else:
             data_view.create_axes_orthogonal()
