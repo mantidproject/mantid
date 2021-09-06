@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,unused-import
 import sys
-from DGSPlanner import DGSPlannerGUI
+from mantidqtinterfaces.DGSPlanner import DGSPlannerGUI
 from mantidqt.gui_helper import get_qapplication
 
 app, within_mantid = get_qapplication()
