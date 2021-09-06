@@ -12,7 +12,7 @@ At present, the subclasses understand the ISIS instruments 'LET', 'MAPS', 'MARI'
 
 Usage:
 
-from PyChop import PyChop2
+from mantidqtinterfaces.PyChop import PyChop2
 
 merlin = PyChop2('merlin','s',250)
 merlin.setEi(25)

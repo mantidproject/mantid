@@ -8,7 +8,7 @@
 from systemtesting import MantidSystemTest
 from mantid.simpleapi import CreateWorkspace, LinearBackground, FlatBackground, Gaussian, CalculateChiSquared, mtd
 from CrystalField.fitting import makeWorkspace
-from PyChop import PyChop2
+from mantidqtinterfaces.PyChop import PyChop2
 import numpy as np
 
 
