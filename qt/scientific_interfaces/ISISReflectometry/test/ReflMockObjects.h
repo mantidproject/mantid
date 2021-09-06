@@ -281,6 +281,7 @@ public:
 class MockJobManager : public IJobManager {
 public:
   MOCK_METHOD1(subscribe, void(JobManagerSubscriber *notifyee));
+  MOCK_METHOD1(startPreprocessing, void(PreviewRow &row));
 };
 
 class MockJobManagerSubscriber : public JobManagerSubscriber {

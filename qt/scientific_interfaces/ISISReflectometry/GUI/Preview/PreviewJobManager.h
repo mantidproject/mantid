@@ -18,10 +18,9 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL PreviewJobManager final : public IJobManage
 public:
   PreviewJobManager(IJobRunner *jobRunner, std::unique_ptr<IReflAlgorithmFactory> algFactory);
 
-  MantidQt::API::IConfiguredAlgorithm_sptr getPreprocessingAlgorithm(PreviewRow &) const;
-
   // IJobManager overrides
   void subscribe(JobManagerSubscriber *notifyee) override;
+  void startPreprocessing(PreviewRow &row) override;
 
   // JobRunnerSubscriber overrides
   void notifyBatchComplete(bool) override;
@@ -34,6 +33,8 @@ private:
   IJobRunner *m_jobRunner;
   std::unique_ptr<IReflAlgorithmFactory> m_algFactory;
   JobManagerSubscriber *m_notifyee;
+
+  void executeAlg(API::IConfiguredAlgorithm_sptr alg);
 };
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

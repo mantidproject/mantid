@@ -27,8 +27,10 @@ using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 using namespace MantidQt::CustomInterfaces::ISISReflectometry::ModelCreationHelper;
 using namespace MantidQt::API;
 
+using ::testing::ByRef;
 using ::testing::Eq;
 using ::testing::NotNull;
+using ::testing::Ref;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
@@ -44,7 +46,7 @@ public:
     auto const workspaceName = std::string("test workspace");
 
     EXPECT_CALL(*mockView, getWorkspaceName()).Times(1).WillOnce(Return(workspaceName));
-    EXPECT_CALL(*mockModel, loadWorkspace(Eq(workspaceName))).Times(1);
+    EXPECT_CALL(*mockModel, loadWorkspace(Eq(workspaceName), Ref(*mockJobManager))).Times(1);
 
     auto presenter = PreviewPresenter(mockView.get(), std::move(mockModel), std::move(mockJobManager));
     presenter.notifyLoadWorkspaceRequested();

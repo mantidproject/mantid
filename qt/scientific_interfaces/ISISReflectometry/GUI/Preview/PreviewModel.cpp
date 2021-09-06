@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "PreviewModel.h"
+#include "GUI/Common/IJobManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Logger.h"
@@ -21,14 +22,15 @@ Mantid::Kernel::Logger g_log("Reflectometry Preview Model");
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
-void PreviewModel::loadWorkspace(std::string const &workspaceName) {
+void PreviewModel::loadWorkspace(std::string const &workspaceName, IJobManager &jobManager) {
   createRunDetails(workspaceName);
   auto ws = loadFromAds(workspaceName);
   if (!ws) {
     // Row is automatically updated (as we pass by-ref) on completion
-    // Load using preprocess
+    jobManager.startPreprocessing(m_runDetails.value());
+  } else {
+    m_runDetails->setLoadedWs(ws);
   }
-  m_runDetails->setLoadedWs(ws);
 }
 
 MatrixWorkspace_sptr PreviewModel::getLoadedWs() const { return m_runDetails->getLoadedWs(); }
@@ -36,7 +38,7 @@ MatrixWorkspace_sptr PreviewModel::getLoadedWs() const { return m_runDetails->ge
 MatrixWorkspace_sptr PreviewModel::loadFromAds(std::string const &workspaceName) const {
   auto &adsInstance = AnalysisDataService::Instance();
   if (adsInstance.doesExist(workspaceName)) {
-    g_log.information("Loaded " + workspaceName);
+    g_log.information("Loaded from ADS" + workspaceName);
     return adsInstance.retrieveWS<MatrixWorkspace>(workspaceName);
   }
   return nullptr;

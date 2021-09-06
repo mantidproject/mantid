@@ -11,6 +11,10 @@
 
 #include <memory>
 
+namespace {
+Mantid::Kernel::Logger g_log("Reflectometry Preview Presenter");
+}
+
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 PreviewPresenter::PreviewPresenter(IPreviewView *view, std::unique_ptr<IPreviewModel> model,
                                    std::unique_ptr<IJobManager> jobManager)
@@ -21,12 +25,13 @@ PreviewPresenter::PreviewPresenter(IPreviewView *view, std::unique_ptr<IPreviewM
 
 void PreviewPresenter::notifyLoadWorkspaceRequested() {
   auto const name = m_view->getWorkspaceName();
-  m_model->loadWorkspace(name);
+  m_model->loadWorkspace(name, *m_jobManager);
 }
 
 void PreviewPresenter::notifyLoadWorkspaceCompleted() {
-  auto model = m_model->getLoadedWs();
-  // TODO plot the result
+  auto workspace = m_model->getLoadedWs();
+  assert(workspace);
+  g_log.debug("Loaded ws pointer");
 }
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

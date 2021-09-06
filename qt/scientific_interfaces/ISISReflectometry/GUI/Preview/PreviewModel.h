@@ -15,10 +15,12 @@
 #include <string>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
+class IJobManager;
+
 class MANTIDQT_ISISREFLECTOMETRY_DLL PreviewModel : public IPreviewModel {
 public:
   virtual ~PreviewModel() = default;
-  void loadWorkspace(std::string const &workspaceName) override;
+  void loadWorkspace(std::string const &workspaceName, IJobManager &jobManager) override;
   Mantid::API::MatrixWorkspace_sptr getLoadedWs() const override;
 
 private:

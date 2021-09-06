@@ -10,6 +10,8 @@
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
+class PreviewRow;
+
 class MANTIDQT_ISISREFLECTOMETRY_DLL JobManagerSubscriber {
 public:
   virtual ~JobManagerSubscriber() = default;
@@ -22,5 +24,6 @@ public:
   virtual ~IJobManager() = default;
 
   virtual void subscribe(JobManagerSubscriber *notifyee) = 0;
+  virtual void startPreprocessing(PreviewRow &row) = 0;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

@@ -18,6 +18,7 @@
 
 #include <gmock/gmock.h>
 
+using ::testing::ByRef;
 using ::testing::Eq;
 using ::testing::NotNull;
 using ::testing::Return;
@@ -29,18 +30,19 @@ public:
   static PreviewJobManagerTest *createSuite() { return new PreviewJobManagerTest(); }
   static void destroySuite(PreviewJobManagerTest *suite) { delete suite; }
 
-  void testGetPreprocessingAlgorithm() {
+  void test_start_preprocessing() {
     auto mockAlgFactory = std::make_unique<MockReflAlgorithmFactory>();
     auto mockJobRunner = MockJobRunner();
     auto previewRow = createPreviewRow();
     auto stubAlg = makeConfiguredAlg();
-    EXPECT_CALL(*mockAlgFactory, makePreprocessingAlgorithm(Eq(previewRow))).Times(1).WillOnce(Return(stubAlg));
-    // TODO test calls on mockJobRunner
+    EXPECT_CALL(*mockAlgFactory, makePreprocessingAlgorithm(Eq(ByRef(previewRow)))).Times(1).WillOnce(Return(stubAlg));
+    EXPECT_CALL(mockJobRunner, clearAlgorithmQueue()).Times(1);
+    EXPECT_CALL(mockJobRunner, setAlgorithmQueue(Eq(std::deque<IConfiguredAlgorithm_sptr>{stubAlg}))).Times(1);
+    EXPECT_CALL(mockJobRunner, executeAlgorithmQueue()).Times(1);
 
     auto batch = MockBatch();
     auto jobManager = createJobManager(&mockJobRunner, std::move(mockAlgFactory));
-    auto const preprocessAlg = jobManager.getPreprocessingAlgorithm(previewRow);
-    TS_ASSERT_EQUALS(stubAlg, preprocessAlg);
+    jobManager.startPreprocessing(previewRow);
   }
 
   void test_subscribe_to_job_runner() {

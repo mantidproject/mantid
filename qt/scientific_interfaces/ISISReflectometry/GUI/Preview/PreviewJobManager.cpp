@@ -17,16 +17,14 @@
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
+using MantidQt::API::IConfiguredAlgorithm_sptr;
+
 PreviewJobManager::PreviewJobManager(IJobRunner *jobRunner, std::unique_ptr<IReflAlgorithmFactory> algFactory)
     : m_jobRunner(jobRunner), m_algFactory(std::move(algFactory)) {
   m_jobRunner->subscribe(this);
 }
 
 void PreviewJobManager::subscribe(JobManagerSubscriber *notifyee) { m_notifyee = notifyee; }
-
-MantidQt::API::IConfiguredAlgorithm_sptr PreviewJobManager::getPreprocessingAlgorithm(PreviewRow &row) const {
-  return m_algFactory->makePreprocessingAlgorithm(row);
-}
 
 void PreviewJobManager::notifyBatchComplete(bool) {}
 
@@ -46,4 +44,14 @@ void PreviewJobManager::notifyAlgorithmComplete(API::IConfiguredAlgorithm_sptr a
 }
 
 void PreviewJobManager::notifyAlgorithmError(API::IConfiguredAlgorithm_sptr, std::string const &) {}
+
+void PreviewJobManager::startPreprocessing(PreviewRow &row) {
+  executeAlg(m_algFactory->makePreprocessingAlgorithm(row));
+}
+
+void PreviewJobManager::executeAlg(IConfiguredAlgorithm_sptr alg) {
+  m_jobRunner->clearAlgorithmQueue();
+  m_jobRunner->setAlgorithmQueue(std::deque<IConfiguredAlgorithm_sptr>{std::move(alg)});
+  m_jobRunner->executeAlgorithmQueue();
+}
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
