@@ -122,6 +122,8 @@ Custom Spectra
     :width: 900px
     :align: center
 
+.. _ui engineering focus:
+
 Focus
 -----
 
@@ -166,6 +168,8 @@ Custom Spectra
 .. image:: ../../../../dev-docs/source/images/EngineeringDiffractionTest/EnggDiffExampleFocusOutput.png
     :width: 900px
     :align: center
+
+.. _ui engineering fitting:
 
 Fitting
 -------

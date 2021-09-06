@@ -18,8 +18,8 @@ from matplotlib.figure import Figure
 from mpl_toolkits.axisartist import Subplot as CurveLinearSubPlot
 from mpl_toolkits.axisartist.grid_helper_curvelinear import GridHelperCurveLinear
 from qtpy.QtCore import Qt, Signal
-from qtpy.QtWidgets import (QCheckBox, QComboBox, QGridLayout, QLabel, QHBoxLayout, QSplitter,
-                            QStatusBar, QToolButton, QVBoxLayout, QWidget)
+from qtpy.QtWidgets import (QCheckBox, QComboBox, QGridLayout, QLabel, QHBoxLayout, QSplitter, QStatusBar, QToolButton, QVBoxLayout,
+                            QWidget)
 
 # local imports
 from workbench.plotting.mantidfigurecanvas import MantidFigureCanvas
@@ -457,12 +457,19 @@ class SliceViewerDataView(QWidget):
 
     def get_axes_limits(self):
         """
-        Return the limits on the image axes in the orthogonal frame
+        Return the limits on the image axes transformed into the nonorthogonal frame if appropriate
         """
         if self.image is None:
             return None
         else:
-            return self.ax.get_xlim(), self.ax.get_ylim()
+            xlim, ylim = self.ax.get_xlim(), self.ax.get_ylim()
+            if self.nonorthogonal_mode:
+                inv_tr = self.nonortho_transform.inv_tr
+                # viewing axis y not aligned with plot axis
+                xmin_p, ymax_p = inv_tr(xlim[0], ylim[1])
+                xmax_p, ymin_p = inv_tr(xlim[1], ylim[0])
+                xlim, ylim = (xmin_p, xmax_p), (ymin_p, ymax_p)
+            return xlim, ylim
 
     def get_full_extent(self):
         """
@@ -592,6 +599,15 @@ class SliceViewerView(QWidget, ObservingView):
         #  peaks viewer off by default
         self._peaks_view = None
 
+        # config the splitter appearance
+        splitterStyleStr = """QSplitter::handle{
+            border: 1px dotted gray;
+            min-height: 10px;
+            max-height: 20px;
+            }"""
+        self._splitter.setStyleSheet(splitterStyleStr)
+        self._splitter.setHandleWidth(1)
+
         layout = QHBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(self._splitter)
@@ -637,7 +653,7 @@ class SliceViewerView(QWidget, ObservingView):
 
     def set_peaks_viewer_visible(self, on):
         """
-        Set the visiblity of the PeaksViewer.
+        Set the visibility of the PeaksViewer.
         :param on: If True make the view visible, else make it invisible
         :return: The PeaksViewerCollectionView
         """

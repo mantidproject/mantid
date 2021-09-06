@@ -313,6 +313,18 @@ p, li { white-space: pre-wrap; }
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>radioButtonExit</tabstop>
+  <tabstop>radioButtonContinue</tabstop>
+  <tabstop>requestTextBrowser</tabstop>
+  <tabstop>input_free_text</tabstop>
+  <tabstop>input_name_line_edit</tabstop>
+  <tabstop>input_email_line_edit</tabstop>
+  <tabstop>fullShareButton</tabstop>
+  <tabstop>nonIDShareButton</tabstop>
+  <tabstop>noShareButton</tabstop>
+  <tabstop>moreDetailsButton</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
