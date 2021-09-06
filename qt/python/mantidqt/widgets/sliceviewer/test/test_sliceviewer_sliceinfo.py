@@ -7,12 +7,14 @@
 #  This file is part of the mantid workbench.
 # std imports
 import unittest
+from numpy import radians
 
 # 3rd party
 from mantid.kernel import SpecialCoordinateSystem
 
 # local imports
 from mantidqt.widgets.sliceviewer.sliceinfo import SliceInfo
+from mantidqt.widgets.sliceviewer.transform import NonOrthogonalTransform
 
 
 class FakeTransform:
@@ -161,6 +163,19 @@ class SliceInfoTest(unittest.TestCase):
             transpose=True,
             range=[(-15, 15), None, None, (-5, -5)],
             qflags=(True, True, True, True))
+
+    def test_set_transform(self):
+        # make sliceinfo with unit transform (default)
+        info = SliceInfo(
+            frame=SpecialCoordinateSystem.HKL,
+            point=(None, None, 0.5),
+            transpose=False,
+            range=[None, None, (-15, 15)],
+            qflags=[True, True, True])
+
+        info.set_transform(NonOrthogonalTransform(angle=radians(120)))
+
+        self.assertEqual(info.can_support_nonorthogonal_axes(), True)
 
     # private
     def _assert_can_support_nonorthogonal_axes(self, expectation, frame, qflags, transform=None):
