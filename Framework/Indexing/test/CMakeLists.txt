@@ -1,12 +1,21 @@
 if(CXXTEST_FOUND)
-  include_directories(SYSTEM ${CXXTEST_INCLUDE_DIR})
-  include_directories(../../TestHelpers/inc)
-  # This variable is used within the cxxtest_add_test macro to build these helper classes into the test executable. It
-  # will go out of scope at the end of this file so doesn't need un-setting
-  set(TESTHELPER_SRCS ../../TestHelpers/src/ParallelRunner.cpp)
+  include_directories(SYSTEM
+                      ${CXXTEST_INCLUDE_DIR}
+)
+  # This variable is used within the cxxtest_add_test macro to build these
+  # helper classes into the test executable. It will go out of scope at the end
+  # of this file so doesn't need un-setting
 
   cxxtest_add_test(IndexingTest ${TEST_FILES} ${GMOCK_TEST_FILES})
-  target_link_libraries(IndexingTest PRIVATE Mantid::Types Mantid::Indexing Mantid::Parallel gmock)
+  target_link_libraries(IndexingTest
+                        PRIVATE
+                        Mantid::Types
+                        Mantid::Indexing
+                        Mantid::Parallel
+                        Mantid::TestHelpers
+                        gmock
+  )
+
 
   add_dependencies(FrameworkTests IndexingTest)
   # Add to the 'FrameworkTests' group in VS

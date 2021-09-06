@@ -1,16 +1,17 @@
 if(CXXTEST_FOUND)
-  include_directories(SYSTEM ${CXXTEST_INCLUDE_DIR} ../../TestHelpers/inc)
-
-  set(TESTHELPER_SRCS
-      ../../TestHelpers/src/NexusGeometryTestHelpers.cpp ../../TestHelpers/src/JSONGeometryParserTestHelper.cpp
-      ../../TestHelpers/src/ComponentCreationHelper.cpp ../../TestHelpers/src/FileResource.cpp
-  )
+  include_directories(SYSTEM
+                      ${CXXTEST_INCLUDE_DIR})
 
   cxxtest_add_test(NexusGeometryTest ${TEST_FILES})
 
-  target_link_libraries(
-    NexusGeometryTest PRIVATE Mantid::NexusGeometry Mantid::Types Mantid::Kernel Boost::filesystem gmock
-  )
+  target_link_libraries(NexusGeometryTest
+                        PRIVATE
+                        Mantid::NexusGeometry
+                        Mantid::Types
+                        Mantid::Kernel
+                        Mantid::TestHelpers
+                        Boost::filesystem
+                        gmock)
 
   add_dependencies(NexusGeometryTest Geometry)
   add_dependencies(FrameworkTests NexusGeometryTest)
