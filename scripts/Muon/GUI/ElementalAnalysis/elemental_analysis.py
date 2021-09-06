@@ -411,7 +411,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
     def _reset_data_file_warning_and_action(self):
         message_box.warning(
             'The file does not contain correctly formatted data, resetting to default data file.'
-            'See "https://docs.mantidproject.org/nightly/interfaces/'
+            'See "https://docs.mantidproject.org/nightly/interfaces/muon/'
             'Muon%20Elemental%20Analysis.html" for more information.')
         self.ptable.set_peak_datafile(None)
         self._generate_element_widgets()
