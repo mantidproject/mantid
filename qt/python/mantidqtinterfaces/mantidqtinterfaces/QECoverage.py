@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import sys
 from mantidqt.gui_helper import get_qapplication
-from QECoverage.QECoverageGUI import QECoverageGUI
+from mantidqtinterfaces.QECoverage.QECoverageGUI import QECoverageGUI
 
 app, within_mantid = get_qapplication()
 if 'workbench' in sys.modules:
