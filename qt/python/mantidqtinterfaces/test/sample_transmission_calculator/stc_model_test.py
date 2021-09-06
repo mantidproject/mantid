@@ -4,7 +4,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from unittest.mock import patch
-from SampleTransmissionCalculator.stc_model import SampleTransmissionCalculatorModel
+from mantidqtinterfaces.SampleTransmissionCalculator.stc_model import SampleTransmissionCalculatorModel
 
 
 class SampleTransmissionCalculatorModelTest(unittest.TestCase):
@@ -26,7 +26,7 @@ class SampleTransmissionCalculatorModelTest(unittest.TestCase):
         output_dict = self.model.calculate(input_dict)
         self.assertEqual(len(output_dict['x']), 100)
 
-    @patch('SampleTransmissionCalculator.stc_model.CalculateSampleTransmission')
+    @patch('mantidqtinterfaces.SampleTransmissionCalculator.stc_model.CalculateSampleTransmission')
     def test_calculate_uses_single_binning_when_type_set_to_single(self, alg_mock):
         model = SampleTransmissionCalculatorModel()
         input_dict = {
@@ -48,7 +48,7 @@ class SampleTransmissionCalculatorModelTest(unittest.TestCase):
             density=0.1,
             thickness=0.1)
 
-    @patch('SampleTransmissionCalculator.stc_model.CalculateSampleTransmission')
+    @patch('mantidqtinterfaces.SampleTransmissionCalculator.stc_model.CalculateSampleTransmission')
     def test_calculate_uses_single_binning_when_type_set_to_multiple(self, alg_mock):
         model = SampleTransmissionCalculatorModel()
         input_dict = {

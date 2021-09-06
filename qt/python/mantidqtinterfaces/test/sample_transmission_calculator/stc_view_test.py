@@ -5,7 +5,7 @@
 import unittest
 from unittest.mock import Mock, patch
 
-from SampleTransmissionCalculator.stc_view import SampleTransmissionCalculatorView
+from mantidqtinterfaces.SampleTransmissionCalculator.stc_view import SampleTransmissionCalculatorView
 from mantidqt.utils.qt.testing import start_qapplication
 
 
@@ -58,7 +58,7 @@ class SampleTransmissionCalculatorViewTest(unittest.TestCase):
             key = item.text(0)
             self.assertEqual(item.text(1), str(output_dict[key]))
 
-    @patch('SampleTransmissionCalculator.stc_view.FigureCanvas')
+    @patch('mantidqtinterfaces.SampleTransmissionCalculator.stc_view.FigureCanvas')
     def test_plot(self, figure_canvas_mock):
         x = [1.0, 2.0]
         y = [1.0, 2.0]

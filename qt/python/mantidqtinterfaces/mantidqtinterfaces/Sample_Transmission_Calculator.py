@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import sys
-from SampleTransmissionCalculator import stc_gui
+from mantidqtinterfaces.SampleTransmissionCalculator import stc_gui
 from mantidqt.gui_helper import get_qapplication
 
 app, within_mantid = get_qapplication()
