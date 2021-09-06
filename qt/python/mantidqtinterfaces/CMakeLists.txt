@@ -16,4 +16,4 @@ add_python_package(mantidqtinterfaces INSTALL_LIB_DIRS ${_install_lib_dirs})
 # Setup dependency chain
 add_dependencies(mantidqtinterfaces PythonInterface)
 
-add_subdirectory(mantidqtinterfaces/test)
+add_subdirectory(test)
