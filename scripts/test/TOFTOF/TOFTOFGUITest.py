@@ -9,7 +9,7 @@ import unittest
 
 from unittest import mock
 from reduction_gui.reduction.toftof.toftof_reduction import TOFTOFScriptElement, OptionalFloat
-from reduction_gui.widgets.toftof.toftof_setup import TOFTOFSetupWidget
+from mantidqtinterfaces.reduction_gui.widgets.toftof.toftof_setup import TOFTOFSetupWidget
 
 try:
     unicode('test for unicode type')
