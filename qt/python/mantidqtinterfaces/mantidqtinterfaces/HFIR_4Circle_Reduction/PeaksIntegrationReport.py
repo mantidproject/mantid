@@ -14,13 +14,14 @@ except ImportError:
     Logger("HFIR_4Circle_Reduction").information('Using legacy ui importer')
     from mantidplot import load_ui
 from qtpy.QtWidgets import (QVBoxLayout)
-from HFIR_4Circle_Reduction.hfctables import PeaksIntegrationSpreadSheet
+from mantidqtinterfaces.HFIR_4Circle_Reduction.hfctables import PeaksIntegrationSpreadSheet
 
 
 class PeaksIntegrationReportDialog(QDialog):
     """
     Dialog to report the details of peaks integration
     """
+
     def __init__(self, parent):
         """
         initialization

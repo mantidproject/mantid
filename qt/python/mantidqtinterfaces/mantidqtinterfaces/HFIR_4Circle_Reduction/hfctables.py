@@ -7,11 +7,11 @@
 #pylint: disable=W0403,C0103,R0901,R0904,R0913,C0302
 import numpy
 import sys
-from HFIR_4Circle_Reduction import fourcircle_utility
-from HFIR_4Circle_Reduction import guiutility
+from mantidqtinterfaces.HFIR_4Circle_Reduction import fourcircle_utility
+from mantidqtinterfaces.HFIR_4Circle_Reduction import guiutility
 from qtpy import QtCore   # noqa
 import math
-import HFIR_4Circle_Reduction.NTableWidget as tableBase
+import mantidqtinterfaces.HFIR_4Circle_Reduction.NTableWidget as tableBase
 import os
 
 
@@ -90,6 +90,7 @@ class MatrixTable(tableBase.NTableWidget):
     """
 
     """
+
     def __init__(self, parent):
         """
 

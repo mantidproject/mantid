@@ -4,8 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import HFIR_4Circle_Reduction.fourcircle_utility as fourcircle_utility
-from HFIR_4Circle_Reduction.integratedpeakview import GeneralPurposedPlotView
+import mantidqtinterfaces.HFIR_4Circle_Reduction.fourcircle_utility as fourcircle_utility
+from mantidqtinterfaces.HFIR_4Circle_Reduction.integratedpeakview import GeneralPurposedPlotView
 import os
 from qtpy.QtWidgets import QMainWindow, QFileDialog
 from mantid.kernel import Logger
@@ -21,6 +21,7 @@ class GeneralPlotWindow(QMainWindow):
     """
     A window for general-purposed graphic (1-D plot) view
     """
+
     def __init__(self, parent):
         """
         initialization
