@@ -247,10 +247,11 @@ void LoadEventNexus::init() {
                   "If true, only the meta data and sample logs will be loaded.");
 
   declareProperty(std::make_unique<PropertyWithValue<bool>>("LoadLogs", true, Direction::Input),
-                  "Load the Sample/DAS logs from the file (default True).");
+                  "Load only the Sample/DAS logs from the file (default True).");
 
   declareProperty(std::make_unique<PropertyWithValue<bool>>("LoadAllLogs", false, Direction::Input),
-                  "Load all the logs from the nxs, without checking or processing them; use with caution");
+                  "Load all the logs from the nxs, without checking or processing them; if checked, LoadLogs will be "
+                  "ignored; use with caution");
 
   std::vector<std::string> loadType{"Default"};
 
@@ -846,7 +847,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
         takeTimesFromEvents = true;
       }
     } else {
-      prog->doReport("Loading all loads");
+      prog->doReport("Loading all logs");
       // Open NeXus file
       NXhandle nxHandle;
       NXstatus nxStat = NXopen(m_filename.c_str(), NXACC_READ, &nxHandle);
