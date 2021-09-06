@@ -167,12 +167,23 @@ class SliceViewer(ObservingPresenter):
     def get_sliceinfo(self):
         """Returns a SliceInfo object describing the current slice"""
         dimensions = self.view.data_view.dimensions
-        return SliceInfo(frame=self.model.get_frame(),
-                         point=dimensions.get_slicepoint(),
-                         transpose=dimensions.transpose,
-                         range=dimensions.get_slicerange(),
-                         qflags=dimensions.qflags,
-                         nonortho_transform=self.view.data_view.nonortho_transform)
+        sliceinfo = SliceInfo(frame=self.model.get_frame(),
+                              point=dimensions.get_slicepoint(),
+                              transpose=dimensions.transpose,
+                              range=dimensions.get_slicerange(),
+                              qflags=dimensions.qflags,
+                              nonortho_transform=self.view.data_view.nonortho_transform)
+        # NOTE THIS IS A TEMPORARY FIX FOR RELEASE 6.2
+        # We want to remove circular dependence of transform between model, data_view and slice_info
+        # which could be done by removing transform from slice_info and always getting from model
+        try:
+            # try to update transform from model - but don't update transform in view as this will perform non-orthog
+            # transform on transpose of non-orthog axes without clicking button
+            sliceinfo.set_transform(self.model.create_nonorthogonal_transform(sliceinfo))
+        except Exception:
+            # not possible to make transform - should be raised as RuntimeError but playing it safe for this temp fix
+            pass
+        return sliceinfo
 
     def get_slicepoint(self):
         """Returns the current slicepoint as a list of 3 elements.

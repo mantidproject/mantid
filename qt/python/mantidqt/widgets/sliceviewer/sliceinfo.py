@@ -56,7 +56,7 @@ class SliceInfo:
         self._display_x, self._display_y, self._display_z = (None, ) * 3
         self._axes_tr = _unit_transform if nonortho_transform is None else nonortho_transform.tr
         self._axes_inv_tr = _unit_transform if nonortho_transform is None else nonortho_transform.inv_tr
-
+        self._qflags = qflags
         self._init(transpose, qflags)
 
     @property
@@ -79,6 +79,18 @@ class SliceInfo:
         Both display axes must be spatial for this to be supported.
         """
         return self._nonorthogonal_axes_supported
+
+    def set_transform(self, nonortho_transform: NonOrthogonalTransform):
+        if isinstance(nonortho_transform, NonOrthogonalTransform):
+            self._axes_tr = nonortho_transform.tr
+            self._axes_inv_tr = nonortho_transform.inv_tr
+            self._nonorthogonal_axes_supported = (self.frame == SpecialCoordinateSystem.HKL
+                                                  and self._qflags[self._display_x] and self._qflags[self._display_y])
+        else:
+            # e.g if None
+            self._axes_tr = _unit_transform
+            self._axes_inv_tr = _unit_transform
+            self._nonorthogonal_axes_supported = False
 
     def transform(self, point: Sequence) -> np.ndarray:
         """Transform a point to the slice frame.
