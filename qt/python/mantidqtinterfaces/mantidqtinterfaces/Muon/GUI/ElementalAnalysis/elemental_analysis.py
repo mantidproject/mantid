@@ -12,8 +12,8 @@ from mantidqtinterfaces.Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_
 from mantidqtinterfaces.Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_view import PeriodicTableView
 from mantidqtinterfaces.Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_model import PeriodicTableModel
 
-from MultiPlotting.multi_plotting_widget import MultiPlotWindow
-from MultiPlotting.label import Label
+from mantidqtinterfaces.MultiPlotting.multi_plotting_widget import MultiPlotWindow
+from mantidqtinterfaces.MultiPlotting.label import Label
 
 from mantidqtinterfaces.Muon.GUI.ElementalAnalysis.LoadWidget.load_model import LoadModel, CoLoadModel
 from mantidqtinterfaces.Muon.GUI.ElementalAnalysis.LoadWidget.load_utils import spectrum_index

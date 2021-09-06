@@ -6,9 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from qtpy import QtWidgets, QtCore
 from copy import deepcopy
-from MultiPlotting.subplot.subplot import subplot
-from MultiPlotting.QuickEdit.quickEdit_widget import QuickEditWidget
-from MultiPlotting.multi_plotting_context import *
+from mantidqtinterfaces.MultiPlotting.subplot.subplot import subplot
+from mantidqtinterfaces.MultiPlotting.QuickEdit.quickEdit_widget import QuickEditWidget
+from mantidqtinterfaces.MultiPlotting.multi_plotting_context import *
 
 
 class MultiPlotWindow(QtWidgets.QMainWindow):
@@ -57,6 +57,7 @@ class MultiPlotWidget(QtWidgets.QWidget):
         self.setLayout(layout)
 
     """ plotting """
+
     def add_subplot(self, name):
         self.plots.add_subplot(name, len(self.quickEdit.get_subplots()))
 
@@ -136,6 +137,7 @@ class MultiPlotWidget(QtWidgets.QWidget):
         self.plots.disconnect_rm_subplot_signal()
 
     """ update GUI """
+
     def _if_empty_close(self):
         if not self._context.subplots:
             self.closeSignal.emit()

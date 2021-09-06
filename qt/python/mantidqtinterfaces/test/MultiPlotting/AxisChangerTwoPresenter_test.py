@@ -7,8 +7,8 @@
 import unittest
 
 from unittest import mock
-from MultiPlotting.AxisChanger.axis_changer_presenter import AxisChangerPresenter
-from MultiPlotting.AxisChanger.axis_changer_view import AxisChangerView
+from mantidqtinterfaces.MultiPlotting.AxisChanger.axis_changer_presenter import AxisChangerPresenter
+from mantidqtinterfaces.MultiPlotting.AxisChanger.axis_changer_view import AxisChangerView
 
 
 class AxisChangerTwoPresenterTest(unittest.TestCase):

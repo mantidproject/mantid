@@ -4,8 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from MultiPlotting.gridspec_engine import gridspecEngine
-from MultiPlotting.subplot.subplot_context import subplotContext
+from mantidqtinterfaces.MultiPlotting.gridspec_engine import gridspecEngine
+from mantidqtinterfaces.MultiPlotting.subplot.subplot_context import subplotContext
 
 import mantid.simpleapi as mantid
 

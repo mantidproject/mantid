@@ -17,9 +17,9 @@ import matplotlib
 from mantidqtinterfaces.Muon.GUI.ElementalAnalysis.elemental_analysis import ElementalAnalysisGui
 from mantidqtinterfaces.Muon.GUI.ElementalAnalysis.LoadWidget.load_utils import spectrum_index
 from mantidqtinterfaces.Muon.GUI.ElementalAnalysis.elemental_analysis import gen_name
-from MultiPlotting.multi_plotting_widget import MultiPlotWindow
-from MultiPlotting.multi_plotting_widget import MultiPlotWidget
-from MultiPlotting.label import Label
+from mantidqtinterfaces.MultiPlotting.multi_plotting_widget import MultiPlotWindow
+from mantidqtinterfaces.MultiPlotting.multi_plotting_widget import MultiPlotWidget
+from mantidqtinterfaces.MultiPlotting.label import Label
 
 
 @start_qapplication

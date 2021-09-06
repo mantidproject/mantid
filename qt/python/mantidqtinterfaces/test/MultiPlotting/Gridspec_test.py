@@ -7,13 +7,14 @@
 from matplotlib.gridspec import GridSpec
 import unittest
 
-from MultiPlotting.gridspec_engine import gridspecEngine
+from mantidqtinterfaces.MultiPlotting.gridspec_engine import gridspecEngine
 
 
 class GridSpecTest(unittest.TestCase):
     """ We do not need to test
         the layout from the gridspec
         as it is tested elsewhere    """
+
     def test_noMax(self):
         self.engine = gridspecEngine()
         result = self.engine.getGridSpec(100)

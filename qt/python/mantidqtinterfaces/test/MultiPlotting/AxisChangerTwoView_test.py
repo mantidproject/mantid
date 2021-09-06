@@ -9,7 +9,7 @@ import unittest
 from unittest import mock
 from mantidqt.utils.qt.testing import start_qapplication
 
-from MultiPlotting.AxisChanger.axis_changer_view import AxisChangerView
+from mantidqtinterfaces.MultiPlotting.AxisChanger.axis_changer_view import AxisChangerView
 
 
 @start_qapplication

@@ -9,8 +9,8 @@ import unittest
 from unittest import mock
 from mantidqt.utils.qt.testing import start_qapplication
 
-from MultiPlotting.QuickEdit.quickEdit_presenter import QuickEditPresenter
-from MultiPlotting.QuickEdit.quickEdit_widget import QuickEditWidget
+from mantidqtinterfaces.MultiPlotting.QuickEdit.quickEdit_presenter import QuickEditPresenter
+from mantidqtinterfaces.MultiPlotting.QuickEdit.quickEdit_widget import QuickEditWidget
 
 
 @start_qapplication
