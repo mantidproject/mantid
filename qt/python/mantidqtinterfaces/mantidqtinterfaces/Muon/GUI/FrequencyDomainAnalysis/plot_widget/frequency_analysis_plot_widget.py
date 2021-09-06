@@ -16,9 +16,12 @@ from mantidqtinterfaces.Muon.GUI.FrequencyDomainAnalysis.plot_widget.plot_freq_f
 #from mantidqtinterfaces.Muon.GUI.Common.plot_widget.raw_pane.raw_pane_presenter import RawPanePresenter
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.raw_pane.raw_pane_model import RawPaneModel
 #from mantidqtinterfaces.Muon.GUI.Common.plot_widget.raw_pane.raw_pane_view import RawPaneView
-from mantidqtinterfaces.Muon.GUI.FrequencyDomainAnalysis.plot_widget.dual_plot_maxent_pane.dual_plot_maxent_pane_presenter import DualPlotMaxentPanePresenter
-from mantidqtinterfaces.Muon.GUI.FrequencyDomainAnalysis.plot_widget.dual_plot_maxent_pane.dual_plot_maxent_pane_model import DualPlotMaxentPaneModel
-from mantidqtinterfaces.Muon.GUI.FrequencyDomainAnalysis.plot_widget.dual_plot_maxent_pane.dual_plot_maxent_pane_view import DualPlotMaxentPaneView
+from mantidqtinterfaces.Muon.GUI.FrequencyDomainAnalysis.plot_widget.dual_plot_maxent_pane.\
+    dual_plot_maxent_pane_presenter import DualPlotMaxentPanePresenter
+from mantidqtinterfaces.Muon.GUI.FrequencyDomainAnalysis.plot_widget.dual_plot_maxent_pane.\
+     dual_plot_maxent_pane_model import DualPlotMaxentPaneModel
+from mantidqtinterfaces.Muon.GUI.FrequencyDomainAnalysis.plot_widget.dual_plot_maxent_pane.\
+    dual_plot_maxent_pane_view import DualPlotMaxentPaneView
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.quick_edit.quick_edit_widget import DualQuickEditWidget
 
 
