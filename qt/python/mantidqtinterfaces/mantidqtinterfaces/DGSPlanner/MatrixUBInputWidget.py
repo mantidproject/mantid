@@ -8,8 +8,8 @@
 from qtpy import QtCore, QtGui, QtWidgets
 import sys
 import mantid
-from DGSPlanner.ValidateOL import ValidateUB
-from DGSPlanner.LoadNexusUB import LoadNexusUB
+from mantidqtinterfaces.DGSPlanner.ValidateOL import ValidateUB
+from mantidqtinterfaces.DGSPlanner.LoadNexusUB import LoadNexusUB
 
 try:
     from qtpy.QtCore import QString

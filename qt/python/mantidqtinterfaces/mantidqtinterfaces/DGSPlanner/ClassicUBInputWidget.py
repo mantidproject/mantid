@@ -9,7 +9,7 @@ from qtpy import QtWidgets, QtGui, QtCore
 import sys
 import mantid
 import numpy
-from DGSPlanner.ValidateOL import ValidateOL
+from mantidqtinterfaces.DGSPlanner.ValidateOL import ValidateOL
 
 try:
     from qtpy.QtCore import QString
