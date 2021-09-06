@@ -15,6 +15,14 @@ from mantid.kernel import SpecialCoordinateSystem
 from mantidqt.widgets.sliceviewer.sliceinfo import SliceInfo
 
 
+class FakeTransform:
+    def tr(self, x, y):
+        return x + 1, y - 1
+
+    def inv_tr(self, x, y):
+        pass
+
+
 class SliceInfoTest(unittest.TestCase):
     def test_construction_with_named_fields(self):
         frame, point, transpose, = SpecialCoordinateSystem.HKL, (None, None, 0.5), False
@@ -53,7 +61,7 @@ class SliceInfoTest(unittest.TestCase):
 
     def test_HKL_workspace_with_two_slice_spatial_dimensions_can_support_nonorthogonal_axes(self):
         self._assert_can_support_nonorthogonal_axes(
-            True, SpecialCoordinateSystem.HKL, qflags=[True, True, False])
+            True, SpecialCoordinateSystem.HKL, qflags=[True, True, False], transform=FakeTransform())
 
     def test_transform_selects_dimensions_correctly_when_not_transposed(self):
         # Set slice info such that display(X,Y) = data(Y,Z)
@@ -129,14 +137,6 @@ class SliceInfoTest(unittest.TestCase):
 
     def test_transform_respects_nonortho_tr_if_given(self):
         # Set slice info such that display(X,Y) = data(Z,Y)
-
-        class FakeTransform:
-            def tr(self, x, y):
-                return x + 1, y - 1
-
-            def inv_tr(self, x, y):
-                pass
-
         info = SliceInfo(
             frame=SpecialCoordinateSystem.HKL,
             point=(None, None, 0.5),
@@ -163,12 +163,13 @@ class SliceInfoTest(unittest.TestCase):
             qflags=(True, True, True, True))
 
     # private
-    def _assert_can_support_nonorthogonal_axes(self, expectation, frame, qflags):
+    def _assert_can_support_nonorthogonal_axes(self, expectation, frame, qflags, transform=None):
         frame, point, transpose, = frame, (None, None, 0.5), False
         dimrange, spatial = (None, None, (-15, 15)), qflags
 
         info = SliceInfo(
-            frame=frame, point=point, transpose=transpose, range=dimrange, qflags=spatial)
+            frame=frame, point=point, transpose=transpose, range=dimrange, qflags=spatial,
+            nonortho_transform=transform)
 
         self.assertEqual(expectation, info.can_support_nonorthogonal_axes())
 
