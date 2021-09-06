@@ -4,7 +4,7 @@ digraph Beam {
   subgraph params {
     $param_style
     Run
-    AbsorberTransmissionInputWorkspace
+    CadmiumTransmissionWorkspace
   }
 
   subgraph values {
@@ -14,12 +14,14 @@ digraph Beam {
 
   subgraph algorithms {
     $algorithm_style
-    Load
+    LoadAndMerge
+    Divide [label="Normalize to monitor/time"]
     Minus
   }
 
-  Run -> Load
-  Load -> Minus
-  AbsorberTransmissionInputWorkspace -> Minus
+  Run -> LoadAndMerge
+  LoadAndMerge -> Divide
+  Divide -> Minus
+  CadmiumTransmissionWorkspace -> Minus
   Minus -> OutputWorkspace
 }
