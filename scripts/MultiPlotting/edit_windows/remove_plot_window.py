@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from qtpy import QtCore, QtWidgets
 
-from Muon.GUI.Common.utilities import table_utils
+from mantidqtinterfaces.Muon.GUI.Common.utilities import table_utils
 
 
 class RemovePlotWindow(QtWidgets.QDialog):

@@ -24,12 +24,14 @@ set(TEST_PY_FILES
     StitchingTest.py
     VesuvioBackgroundTest.py
     VesuvioFittingTest.py
-    VesuvioProfileTest.py)
+    VesuvioProfileTest.py
+)
 
-if (ENABLE_WORKBENCH)
+if(ENABLE_WORKBENCH)
   set(PYUNITTEST_QT_API pyqt5) # force to use qt5
-  pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} python.scripts
-    ${TEST_PY_FILES})
+  pyunittest_add_test(
+    ${CMAKE_CURRENT_SOURCE_DIR} python.scripts ${TEST_PY_FILES}
+  )
   unset(PYUNITTEST_QT_API)
 endif()
 
@@ -39,7 +41,6 @@ add_subdirectory(directtools)
 add_subdirectory(Calibration)
 add_subdirectory(corelli)
 add_subdirectory(MultiPlotting)
-add_subdirectory(Muon)
 add_subdirectory(sample_transmission_calculator)
 add_subdirectory(SANS)
 add_subdirectory(TOFTOF)

@@ -5,9 +5,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
-from Muon.GUI.ElementalAnalysis2.elemental_analysis import ElementalAnalysisGui
+from mantidqtinterfaces.Muon.GUI.ElementalAnalysis2.elemental_analysis import ElementalAnalysisGui
 from qtpy import QtCore
-from Muon.GUI.Common.usage_report import report_interface_startup
+from mantidqtinterfaces.Muon.GUI.Common.usage_report import report_interface_startup
 
 Name = "Elemental_Analysis_2"
 

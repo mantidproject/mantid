@@ -8,7 +8,7 @@ from PyQt4 import QtGui
 
 import sys
 
-from Muon.GUI.Common import message_box
+from mantidqtinterfaces.Muon.GUI.Common import message_box
 
 from MultiPlotting.multi_plotting_widget import MultiPlotWidget
 from MultiPlotting.multi_plotting_context import *

@@ -12,8 +12,8 @@ from mantid.api import AnalysisDataService, WorkspaceFactory, WorkspaceGroup
 from mantid.kernel import FloatTimeSeriesProperty, StringPropertyWithValue
 from unittest import mock
 
-from Muon.GUI.Common.contexts.fitting_contexts.fitting_context import FittingContext, FitInformation, FitParameters
-from Muon.GUI.Common.utilities.workspace_utils import StaticWorkspaceWrapper
+from mantidqtinterfaces.Muon.GUI.Common.contexts.fitting_contexts.fitting_context import FittingContext, FitInformation, FitParameters
+from mantidqtinterfaces.Muon.GUI.Common.utilities.workspace_utils import StaticWorkspaceWrapper
 
 
 def create_test_workspace(ws_name=None,

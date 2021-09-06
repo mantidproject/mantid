@@ -14,9 +14,9 @@ from testhelpers import assertRaisesNothing
 from qtpy.QtGui import QCloseEvent
 
 import matplotlib
-from Muon.GUI.ElementalAnalysis.elemental_analysis import ElementalAnalysisGui
-from Muon.GUI.ElementalAnalysis.LoadWidget.load_utils import spectrum_index
-from Muon.GUI.ElementalAnalysis.elemental_analysis import gen_name
+from mantidqtinterfaces.Muon.GUI.ElementalAnalysis.elemental_analysis import ElementalAnalysisGui
+from mantidqtinterfaces.Muon.GUI.ElementalAnalysis.LoadWidget.load_utils import spectrum_index
+from mantidqtinterfaces.Muon.GUI.ElementalAnalysis.elemental_analysis import gen_name
 from MultiPlotting.multi_plotting_widget import MultiPlotWindow
 from MultiPlotting.multi_plotting_widget import MultiPlotWidget
 from MultiPlotting.label import Label
@@ -113,7 +113,7 @@ class ElementalAnalysisTest(unittest.TestCase):
     def test_that_gen_label_with_element_none_returns_none(self):
         self.assertEqual(self.gui._gen_label('label', 0.0), None)
 
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.Label')
+    @mock.patch('scientific_interfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.Label')
     def test_that_gen_label_name_is_appended_to_list_if_not_present(self, mock_label):
         element = 'Cu'
         name = u'new_label'
@@ -129,7 +129,7 @@ class ElementalAnalysisTest(unittest.TestCase):
                                       rotation=-90,
                                       protected=True)
 
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.Label')
+    @mock.patch('scientific_interfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.Label')
     def test_that_gen_label_name_is_not_duplicated_in_list_if_already_present(self, mock_label):
         element = 'Cu'
         name = u'old_label'
@@ -146,8 +146,8 @@ class ElementalAnalysisTest(unittest.TestCase):
                                       rotation=-90,
                                       protected=True)
 
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._gen_label')
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._plot_line_once')
+    @mock.patch('scientific_interfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._gen_label')
+    @mock.patch('scientific_interfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._plot_line_once')
     def test_that_plot_line_returns_if_plot_window_is_none(self, mock_plot_line_once,
                                                            mock_gen_label):
         self.gui.plot_window = None
@@ -156,8 +156,8 @@ class ElementalAnalysisTest(unittest.TestCase):
 
         self.assertEqual(mock_plot_line_once.call_count, 0)
 
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._gen_label')
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._plot_line_once')
+    @mock.patch('scientific_interfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._gen_label')
+    @mock.patch('scientific_interfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._plot_line_once')
     def test_that_plot_line_calls_plot_line_once_if_window_not_none(self, mock_plot_line_once,
                                                                     mock_gen_label):
         self.gui.plot_window = mock.create_autospec(MultiPlotWindow)
@@ -199,25 +199,25 @@ class ElementalAnalysisTest(unittest.TestCase):
         elem = len(self.gui.ptable.peak_data)
         self.assertEqual(len(self.gui.element_widgets), elem)
 
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._add_element_lines')
+    @mock.patch('scientific_interfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._add_element_lines')
     def test_table_left_clicked_adds_lines_if_element_selected(self, mock_add_element_lines):
         self.gui.ptable.is_selected = mock.Mock(return_value=True)
         self.gui._add_element_lines(mock.Mock())
         self.assertEqual(mock_add_element_lines.call_count, 1)
 
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._remove_element_lines')
+    @mock.patch('scientific_interfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._remove_element_lines')
     def test_table_left_clicked_removed_lines_if_element_not_selected(self,
                                                                       mock_remove_element_lines):
         self.gui.ptable.is_selected = mock.Mock(return_value=False)
         self.gui.table_left_clicked(mock.Mock())
         self.assertEqual(mock_remove_element_lines.call_count, 1)
 
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui.get_color')
+    @mock.patch('scientific_interfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui.get_color')
     def test_that_add_element_lines_will_call_get_color(self, mock_get_color):
         self.gui._add_element_lines('Cu')
         self.assertEqual(mock_get_color.call_count, 1)
 
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._plot_line')
+    @mock.patch('scientific_interfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._plot_line')
     def test_that_add_element_lines_will_call_plot_line(self, mock_plot_line):
         data = {'line1': 10.0, 'line2': 20.0, 'line3': 30.0}
         self.gui._add_element_lines('Cu', data)
@@ -229,32 +229,32 @@ class ElementalAnalysisTest(unittest.TestCase):
         ]
         mock_plot_line.assert_has_calls(call_list, any_order=True)
 
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._rm_line')
+    @mock.patch('scientific_interfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._rm_line')
     def test_remove_element_lines_does_nothing_if_element_not_in_element_lines(self, mock_rm_line):
         self.gui.element_lines['H'] = ['alpha', 'beta']
         self.gui._remove_element_lines('He')
         self.assertEqual(mock_rm_line.call_count, 0)
 
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._rm_line')
+    @mock.patch('scientific_interfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._rm_line')
     def test_remove_element_lines_removes_all_values_for_a_given_element(self, mock_rm_line):
         self.gui.element_lines['H'] = ['alpha', 'beta']
         self.gui._remove_element_lines('H')
         self.assertEqual(mock_rm_line.call_count, 2)
 
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.MultiPlotWindow')
+    @mock.patch('scientific_interfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.MultiPlotWindow')
     def test_load_run_opens_new_plot_window_if_none_open(self, mock_multi_plot_window):
         self.gui.add_detector_to_plot = mock.Mock()
         self.gui.load_run('GE1', '2695')
         self.assertEqual(mock_multi_plot_window.call_count, 1)
 
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.MultiPlotWindow')
+    @mock.patch('scientific_interfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.MultiPlotWindow')
     def test_load_run_does_not_open_new_plot_window_if_one_is_open(self, mock_multi_plot_window):
         self.gui.add_detector_to_plot = mock.Mock()
         self.gui.plot_window = MultiPlotWindow(str('2695'))
         self.gui.load_run('GE1', 2695)
         self.assertEqual(mock_multi_plot_window.call_count, 0)
 
-    @mock.patch('Muon.GUI.ElementalAnalysis.Detectors.detectors_view.QtWidgets.QWidget')
+    @mock.patch('scientific_interfaces.Muon.GUI.ElementalAnalysis.Detectors.detectors_view.QtWidgets.QWidget')
     def test_loading_finished_returns_nothing_if_no_run_loaded(self, mock_qwidget):
         self.gui.load_widget.last_loaded_run = mock.Mock(return_value=None)
         mock_qwidget.return_value = True
@@ -264,7 +264,7 @@ class ElementalAnalysisTest(unittest.TestCase):
         self.gui.loading_finished()
         self.assertEqual(self.gui.plotting.remove_subplot.call_count, 0)
 
-    @mock.patch('Muon.GUI.ElementalAnalysis.Detectors.detectors_view.QtWidgets.QWidget')
+    @mock.patch('scientific_interfaces.Muon.GUI.ElementalAnalysis.Detectors.detectors_view.QtWidgets.QWidget')
     def test_loading_finished_returns_correctly_if_no_plot_window_but_has_to_plot(self, mock_qwidget):
         self.gui.load_widget.last_loaded_run = mock.Mock(return_value=2695)
         self.gui.load_widget.get_run_num_loaded_detectors = mock.Mock(return_value=4)
@@ -279,7 +279,7 @@ class ElementalAnalysisTest(unittest.TestCase):
         for detector in self.gui.detectors.detectors:
             self.assertEqual(detector.setChecked.call_count, 1)
 
-    @mock.patch('Muon.GUI.ElementalAnalysis.Detectors.detectors_view.QtWidgets.QWidget')
+    @mock.patch('scientific_interfaces.Muon.GUI.ElementalAnalysis.Detectors.detectors_view.QtWidgets.QWidget')
     def test_loading_finished_returns_correctly_if_no_to_plot_but_has_plot_window(
             self, mock_qwidget):
         self.gui.load_widget.last_loaded_run = mock.Mock(return_value=2695)
@@ -291,7 +291,7 @@ class ElementalAnalysisTest(unittest.TestCase):
         self.gui.loading_finished()
         self.assertEqual(self.gui.plotting.remove_subplot.call_count, 3)
 
-    @mock.patch('Muon.GUI.ElementalAnalysis.Detectors.detectors_view.QtWidgets.QWidget')
+    @mock.patch('scientific_interfaces.Muon.GUI.ElementalAnalysis.Detectors.detectors_view.QtWidgets.QWidget')
     def test_loading_finished_correctly_disables_detectors_if_less_detectors_are_loaded(
             self, mock_qwidget):
         num_loaded_detectors = 1
@@ -311,8 +311,8 @@ class ElementalAnalysisTest(unittest.TestCase):
         # Should disable (num_detectors - num_loaded_detectors) detectors
         self.assertEqual(self.gui.detectors.disableDetector.call_count, num_detectors-num_loaded_detectors)
 
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui.add_peak_data')
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.mantid')
+    @mock.patch('scientific_interfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui.add_peak_data')
+    @mock.patch('scientific_interfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.mantid')
     def test_add_detectors_to_plot_plots_all_given_ws_and_all_selected_elements(
             self, mock_mantid, mock_add_peak_data):
         mock_mantid.mtd = {
@@ -338,8 +338,8 @@ class ElementalAnalysisTest(unittest.TestCase):
         self.assertEqual(self.gui.detectors.setStateQuietly.call_count, 3)
         self.assertEqual(self.gui.plot_window, None)
 
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._gen_label')
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._plot_line_once')
+    @mock.patch('scientific_interfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._gen_label')
+    @mock.patch('scientific_interfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._plot_line_once')
     def test_add_peak_data_plot_line_called_with_correct_terms(self, mock_plot_line_once,
                                                                mock_gen_label):
         mock_subplot = mock.Mock()
@@ -348,8 +348,8 @@ class ElementalAnalysisTest(unittest.TestCase):
         self.gui.add_peak_data('H', mock_subplot, data=test_data)
         mock_plot_line_once.assert_called_with(mock_subplot, 1.0, 'label', 'C0')
 
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._add_element_lines')
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._remove_element_lines')
+    @mock.patch('scientific_interfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._add_element_lines')
+    @mock.patch('scientific_interfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._remove_element_lines')
     def test_update_peak_data_element_is_selected(self, mock_remove_element_lines,
                                                   mock_add_element_lines):
         self.gui.ptable.is_selected = mock.Mock(return_value=True)
@@ -357,8 +357,8 @@ class ElementalAnalysisTest(unittest.TestCase):
         mock_remove_element_lines.assert_called_with('test_element')
         mock_add_element_lines.assert_called_with('test_element')
 
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._add_element_lines')
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._remove_element_lines')
+    @mock.patch('scientific_interfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._add_element_lines')
+    @mock.patch('scientific_interfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._remove_element_lines')
     def test_update_peak_data_element_is_not_selected(self, mock_remove_element_lines,
                                                       mock_add_element_lines):
         self.gui.ptable.is_selected = mock.Mock(return_value=False)
@@ -366,14 +366,14 @@ class ElementalAnalysisTest(unittest.TestCase):
         mock_remove_element_lines.assert_called_with('test_element')
         self.assertEqual(mock_add_element_lines.call_count, 0)
 
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui.load_run')
+    @mock.patch('scientific_interfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui.load_run')
     def test_add_plot_does_nothing_is_no_loaded_run(self, mock_load_run):
         self.gui.load_widget.last_loaded_run = mock.Mock(return_value=None)
         self.gui.add_plot(mock.Mock())
         self.assertEqual(mock_load_run.call_count, 0)
 
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui.add_peak_data')
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui.load_run')
+    @mock.patch('scientific_interfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui.add_peak_data')
+    @mock.patch('scientific_interfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui.load_run')
     def test_add_plot_loads_run_and_electron_peaks_not_plotted(self, mock_load_run, add_peak_data):
         self.gui.load_widget.last_loaded_run = mock.Mock(return_value=2695)
         self.gui.peaks.electron.isChecked = mock.Mock(return_value=False)
@@ -385,7 +385,7 @@ class ElementalAnalysisTest(unittest.TestCase):
         mock_load_run.assert_called_with('GE1', 2695)
         self.assertEqual(add_peak_data.call_count, 0)
 
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui.load_run')
+    @mock.patch('scientific_interfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui.load_run')
     def test_add_plot_loads_run(self, mock_load_run):
         self.gui.load_widget.last_loaded_run = mock.Mock(return_value=2695)
         mock_checkbox = mock.Mock()
@@ -451,8 +451,9 @@ class ElementalAnalysisTest(unittest.TestCase):
         self.assertEqual(self.gui.detectors.setStateQuietly.call_count, 1)
         self.assertEqual(self.gui.plot_window, None)
 
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.message_box.warning')
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.QtWidgets.QFileDialog.getOpenFileName')
+    @mock.patch('scientific_interfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.message_box.warning')
+    @mock.patch('scientific_interfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.PeriodicTablePresenter.set_peak_datafile')
+    @mock.patch('scientific_interfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.QtWidgets.QFileDialog.getOpenFileName')
     def test_that_set_peak_datafile_is_called_with_select_data_file(self,
                                                                     mock_get_open_file_name,
                                                                     mock_warning):
@@ -462,49 +463,17 @@ class ElementalAnalysisTest(unittest.TestCase):
         self.assertEqual(self.gui.ptable.set_peak_datafile.call_count, 1)
         self.assertEqual(0, mock_warning.call_count)
 
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.QtWidgets.QFileDialog.getOpenFileName')
+    @mock.patch('scientific_interfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.PeriodicTablePresenter.set_peak_datafile')
+    @mock.patch('scientific_interfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.QtWidgets.QFileDialog.getOpenFileName')
     def test_that_select_data_file_uses_the_first_element_of_a_tuple_when_given_as_a_filename(self,
                                                                                               mock_get_open_file_name):
         mock_get_open_file_name.return_value = ('string1', 'string2')
         self.gui.select_data_file()
         self.gui.ptable.set_peak_datafile.assert_called_with('string1')
 
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.PeriodicTablePresenter.peak_data')
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._create_peak_selector')
-    def test_generate_element_widget_pass(self, create_mock, peak_mock):
-        inputs = {'H': 3, 'Cu': 4, 'Ag':2}
-        peak_mock.return_value = inputs
-        peak_mock.keys = mock.Mock(return_value = inputs.keys())
-        create_mock.return_value = mock.Mock()
-        any_elements = self.gui._generate_element_widgets()
-        self.assertEqual(any_elements, True)
-        self.assertEqual(self.gui._create_peak_selector.call_count, 3)
-
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.PeriodicTablePresenter.peak_data')
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._create_peak_selector')
-    def test_generate_element_widget_partial(self, create_mock, peak_mock):
-        inputs = {'Hi': 3, 'Cu': 4, 'unit':2}
-        peak_mock.return_value = inputs
-        peak_mock.keys = mock.Mock(return_value = inputs.keys())
-        create_mock.return_value = mock.Mock()
-        any_elements = self.gui._generate_element_widgets()
-        self.assertEqual(any_elements, True)
-        self.assertEqual(self.gui._create_peak_selector.call_count, 1)
-
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.PeriodicTablePresenter.peak_data')
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._create_peak_selector')
-    def test_generate_element_widget_fail(self, create_mock, peak_mock):
-        inputs = {'Hi': 3, 'test': 4, 'unit':2}
-        peak_mock.return_value = inputs
-        peak_mock.keys = mock.Mock(return_value = inputs.keys())
-        create_mock.return_value = mock.Mock()
-        any_elements = self.gui._generate_element_widgets()
-        self.assertEqual(any_elements,False)
-        self.assertEqual(self.gui._create_peak_selector.call_count, 0)
-
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.message_box.warning')
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._generate_element_widgets')
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.QtWidgets.QFileDialog.getOpenFileName')
+    @mock.patch('scientific_interfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.message_box.warning')
+    @mock.patch('scientific_interfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._generate_element_widgets')
+    @mock.patch('scientific_interfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.QtWidgets.QFileDialog.getOpenFileName')
     def test_that_select_data_file_raises_warning_with_correct_text(self,
                                                                     mock_get_open_file_name,
                                                                     mock_generate_element_widgets,
@@ -517,19 +486,8 @@ class ElementalAnalysisTest(unittest.TestCase):
                        'Muon%20Elemental%20Analysis.html" for more information.'
         mock_warning.assert_called_with(warning_text)
 
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._reset_data_file_warning_and_action')
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.QtWidgets.QFileDialog.getOpenFileName')
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._generate_element_widgets')
-    def test_that_select_data_file_raises_warning_with_bad_input(self, mock_generate,
-                                                                    mock_get_open_file_name,
-                                                                    mock_warning):
-        mock_get_open_file_name.return_value = 'filename'
-        mock_generate.return_value = False
-        self.gui.select_data_file()
-        self.assertEqual(mock_warning.call_count, 1)
-
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.message_box.warning')
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.QtWidgets.QFileDialog.getOpenFileName')
+    @mock.patch('scientific_interfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.message_box.warning')
+    @mock.patch('scientific_interfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.QtWidgets.QFileDialog.getOpenFileName')
     def test_select_data_file_calls_update_checked_data(self, mock_getOpenFileName, mock_warning):
         mock_getOpenFileName.return_value = 'filename'
         tmp = self.gui._update_checked_data
@@ -586,7 +544,7 @@ class ElementalAnalysisTest(unittest.TestCase):
         self.gui.electrons_changed(self.gui.peaks.electron)
         self.assertEqual(self.gui.checked_data.call_count, elem)
 
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._update_peak_data')
+    @mock.patch('scientific_interfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._update_peak_data')
     def test_checked_data_changes_all_states_in_list(self, mock_update_peak_data):
         selection = [mock.Mock() for i in range(10)]
         self.gui.checked_data('Cu', selection, True)
@@ -614,7 +572,7 @@ class ElementalAnalysisTest(unittest.TestCase):
 
         self.assertEqual(0, self.gui.plotting.get_subplots.call_count)
 
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.mantid')
+    @mock.patch('scientific_interfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.mantid')
     def test_that_add_line_by_type_plots_correct_lines_with_correct_colour(self, mock_mantid):
         self.gui.plotting = mock.Mock()
         self.gui.plot_window = mock.Mock()
@@ -642,7 +600,7 @@ class ElementalAnalysisTest(unittest.TestCase):
 
         self.assertEqual(0, self.gui.plotting.get_subplots.call_count)
 
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.mantid')
+    @mock.patch('scientific_interfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.mantid')
     def test_remove_line_type_calls_remove_line(self, mock_mantid):
         self.gui.plot_window = mock.Mock()
         self.gui.plotting = mock.Mock()
@@ -713,7 +671,7 @@ class ElementalAnalysisTest(unittest.TestCase):
 
         self.gui.detectors.detectors = tmp_detectors
 
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui.add_line_by_type')
+    @mock.patch('scientific_interfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui.add_line_by_type')
     def test_line_total_checked_checks_line_and_calls_add_line_by_type(self, mock_add_line_by_type):
         self.gui.load_widget.last_loaded_run = mock.Mock(return_value=2695)
         mock_line = mock.Mock()
@@ -724,7 +682,7 @@ class ElementalAnalysisTest(unittest.TestCase):
         self.assertEqual(1, mock_add_line_by_type.call_count)
 
     @mock.patch(
-        'Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui.add_line_by_type')
+        'scientific_interfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui.add_line_by_type')
     def test_line_prompt_checked_checks_line_and_calls_add_line_by_type(self, mock_add_line_by_type):
         self.gui.load_widget.last_loaded_run = mock.Mock(return_value=2695)
         mock_line = mock.Mock()
@@ -734,7 +692,7 @@ class ElementalAnalysisTest(unittest.TestCase):
         self.gui.lines.prompt.setChecked.assert_called_with(True)
         self.assertEqual(1, mock_add_line_by_type.call_count)
 
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui.add_line_by_type')
+    @mock.patch('scientific_interfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui.add_line_by_type')
     def test_line_delayed_checked_checks_line_and_calls_add_line_by_type(self, mock_add_line_by_type):
         self.gui.load_widget.last_loaded_run = mock.Mock(return_value=2695)
         mock_line = mock.Mock()
@@ -744,7 +702,7 @@ class ElementalAnalysisTest(unittest.TestCase):
         self.gui.lines.delayed.setChecked.assert_called_with(True)
         self.assertEqual(1, mock_add_line_by_type.call_count)
 
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._remove_element_lines')
+    @mock.patch('scientific_interfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._remove_element_lines')
     def test_deselect_elements(self,mock_remove_element_lines):
 
         self.gui.ptable.deselect_element = mock.Mock()
@@ -764,7 +722,7 @@ class ElementalAnalysisTest(unittest.TestCase):
         self.gui.ptable.deselect_element.assert_has_calls(calls)
         mock_remove_element_lines.assert_has_calls(calls)
 
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._remove_element_lines')
+    @mock.patch('scientific_interfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._remove_element_lines')
     def test_deselect_elements_fails(self,mock_remove_element_lines):
 
         self.gui.ptable.deselect_element = mock.Mock()
