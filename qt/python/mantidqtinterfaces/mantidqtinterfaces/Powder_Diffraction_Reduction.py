@@ -11,7 +11,7 @@
 import os
 import sys
 
-from reduction_application import ReductionGUI
+from mantidqtinterfaces.reduction_application import ReductionGUI
 
 if 'workbench' in sys.modules:
     from workbench.config import get_window_config
