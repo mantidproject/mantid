@@ -1,11 +1,11 @@
-set(ICONS_INC_DIR ${CMAKE_CURRENT_LIST_DIR}/../../../icons/inc/)
+set(ICONS_INC_DIR ${CMAKE_CURRENT_LIST_DIR}/../../../../icons/inc/)
 
 set(_header_depends ${ICONS_INC_DIR}/MantidQtIcons/Icon.h)
 
 set(WORKBENCH_LINK_LIBS MantidQtIconsQt5 Qt5::Core Qt5::Gui)
 
 if(USE_PYTHON_DYNAMIC_LIB)
-	list(APPEND WORKBENCH_LINK_LIBS Python::Python)
+  list(APPEND WORKBENCH_LINK_LIBS Python::Python)
 endif()
 
 # Wrapper module linked against Qt5
@@ -27,5 +27,5 @@ if(ENABLE_WORKBENCH)
 endif()
 
 if(APPLE AND NOT USE_PYTHON_DYNAMIC_LIB)
-target_link_options(mantidqt_iconsqt5 PRIVATE -Wl,-undefined,dynamic_lookup)
+  target_link_options(mantidqt_iconsqt5 PRIVATE -Wl,-undefined,dynamic_lookup)
 endif()
