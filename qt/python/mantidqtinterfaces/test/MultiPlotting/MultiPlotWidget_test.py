@@ -9,8 +9,8 @@ import unittest
 from unittest import mock
 from mantidqt.utils.qt.testing import start_qapplication
 
-from MultiPlotting.multi_plotting_context import PlottingContext
-from MultiPlotting.multi_plotting_widget import MultiPlotWidget
+from mantidqtinterfaces.MultiPlotting.multi_plotting_context import PlottingContext
+from mantidqtinterfaces.MultiPlotting.multi_plotting_widget import MultiPlotWidget
 
 
 class bounds(object):
@@ -47,12 +47,12 @@ class MultiPlotWidgetTest(unittest.TestCase):
         self.widget = MultiPlotWidget(context)
 
     def test_add_subplot(self):
-        with mock.patch("MultiPlotting.QuickEdit.quickEdit_widget.QuickEditWidget.add_subplot") as qe_patch:
+        with mock.patch("mantidqtinterfaces.MultiPlotting.QuickEdit.quickEdit_widget.QuickEditWidget.add_subplot") as qe_patch:
             self.widget.add_subplot("test")
             self.assertEqual(qe_patch.call_count, 1)
 
     def test_plot(self):
-        with mock.patch("MultiPlotting.subplot.subplot.subplot.plot") as patch:
+        with mock.patch("mantidqtinterfaces.MultiPlotting.subplot.subplot.subplot.plot") as patch:
             ws = mock.MagicMock()
             subplot_name = "test"
             spec_num = 4

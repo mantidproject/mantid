@@ -7,8 +7,8 @@
 import unittest
 
 from unittest import mock
-from MultiPlotting.multi_plotting_context import PlottingContext
-from MultiPlotting.subplot.subplot_context import subplotContext
+from mantidqtinterfaces.MultiPlotting.multi_plotting_context import PlottingContext
+from mantidqtinterfaces.MultiPlotting.subplot.subplot_context import subplotContext
 from line_helper import line
 
 
@@ -35,7 +35,7 @@ class MultiPlottingContextTest(unittest.TestCase):
         # add mock subplot
         subplot = mock.MagicMock()
         self.subplot = mock.create_autospec(subplotContext)
-        with mock.patch("MultiPlotting.subplot.subplot_context.subplotContext.addLine") as patch:
+        with mock.patch("mantidqtinterfaces.MultiPlotting.subplot.subplot_context.subplotContext.addLine") as patch:
             self.context.addSubplot("one", subplot)
             self.context.addLine("one", ws, spec_num, 'C0')
             self.assertEqual(patch.call_count, 1)
@@ -48,7 +48,7 @@ class MultiPlottingContextTest(unittest.TestCase):
         # add mock subplot
         subplot = mock.MagicMock()
         self.subplot = mock.create_autospec(subplotContext)
-        with mock.patch("MultiPlotting.subplot.subplot_context.subplotContext.addLine") as patch:
+        with mock.patch("mantidqtinterfaces.MultiPlotting.subplot.subplot_context.subplotContext.addLine") as patch:
             self.context.addSubplot("one", subplot)
             self.context.addLine("one", ws, spec_num, 'C0')
             self.assertEqual(patch.call_count, 1)
@@ -65,7 +65,7 @@ class MultiPlottingContextTest(unittest.TestCase):
         gridspec = mock.Mock()
         self.context._gridspec = gridspec
         with mock.patch(
-                "MultiPlotting.subplot.subplot_context.subplotContext.update_gridspec") as patch:
+                "mantidqtinterfaces.MultiPlotting.subplot.subplot_context.subplotContext.update_gridspec") as patch:
             self.context.update_layout(figure)
             self.assertEqual(patch.call_count, 3)
             # only last iteration survives

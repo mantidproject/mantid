@@ -11,10 +11,10 @@ from copy import deepcopy
 from matplotlib.figure import Figure
 from mantidqt.MPLwidgets import FigureCanvasQTAgg as FigureCanvas
 
-from MultiPlotting.navigation_toolbar import myToolbar
-from MultiPlotting.edit_windows.remove_plot_window import RemovePlotWindow
-from MultiPlotting.edit_windows.select_subplot import SelectSubplot
-from MultiPlotting.subplot.subplot_ADS_observer import SubplotADSObserver
+from mantidqtinterfaces.MultiPlotting.navigation_toolbar import myToolbar
+from mantidqtinterfaces.MultiPlotting.edit_windows.remove_plot_window import RemovePlotWindow
+from mantidqtinterfaces.MultiPlotting.edit_windows.select_subplot import SelectSubplot
+from mantidqtinterfaces.MultiPlotting.subplot.subplot_ADS_observer import SubplotADSObserver
 
 # use this to manage lines and workspaces directly
 
@@ -54,6 +54,7 @@ class subplot(QtWidgets.QWidget):
     """ this is called when the zoom
     or pan are used. We want to send a
     signal to update the axis ranges """
+
     def draw_event_callback(self, event):
         self.figure.tight_layout()
         for subplot in self.plot_objects.keys():

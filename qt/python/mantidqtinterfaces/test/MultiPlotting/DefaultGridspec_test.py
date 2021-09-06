@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from MultiPlotting.gridspec_engine import defaultGridspecGrid
+from mantidqtinterfaces.MultiPlotting.gridspec_engine import defaultGridspecGrid
 
 
 class DefaultGridSpecTest(unittest.TestCase):

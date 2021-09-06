@@ -6,8 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from qtpy import QtWidgets, QtCore
 import qtpy
-from MultiPlotting.AxisChanger.axis_changer_presenter import AxisChangerPresenter
-from MultiPlotting.AxisChanger.axis_changer_view import AxisChangerView
+from mantidqtinterfaces.MultiPlotting.AxisChanger.axis_changer_presenter import AxisChangerPresenter
+from mantidqtinterfaces.MultiPlotting.AxisChanger.axis_changer_view import AxisChangerView
 
 
 class QuickEditView(QtWidgets.QWidget):

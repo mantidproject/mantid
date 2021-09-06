@@ -10,9 +10,9 @@ import sys
 
 from mantidqtinterfaces.Muon.GUI.Common import message_box
 
-from MultiPlotting.multi_plotting_widget import MultiPlotWidget
-from MultiPlotting.multi_plotting_context import *
-from MultiPlotting.label import Label
+from mantidqtinterfaces.MultiPlotting.multi_plotting_widget import MultiPlotWidget
+from mantidqtinterfaces.MultiPlotting.multi_plotting_context import *
+from mantidqtinterfaces.MultiPlotting.label import Label
 
 import mantid.simpleapi as mantid
 

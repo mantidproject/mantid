@@ -7,8 +7,8 @@
 import unittest
 
 from unittest import mock
-from MultiPlotting.QuickEdit.quickEdit_presenter import QuickEditPresenter
-from MultiPlotting.QuickEdit.quickEdit_view import QuickEditView
+from mantidqtinterfaces.MultiPlotting.QuickEdit.quickEdit_presenter import QuickEditPresenter
+from mantidqtinterfaces.MultiPlotting.QuickEdit.quickEdit_view import QuickEditView
 
 
 class QuickEditPresenterTest(unittest.TestCase):

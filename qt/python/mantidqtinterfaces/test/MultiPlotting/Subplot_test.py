@@ -10,8 +10,8 @@ from matplotlib.gridspec import GridSpec
 from unittest import mock
 from mantidqt.utils.qt.testing import start_qapplication
 
-from MultiPlotting.multi_plotting_context import PlottingContext
-from MultiPlotting.subplot.subplot import subplot
+from mantidqtinterfaces.MultiPlotting.multi_plotting_context import PlottingContext
+from mantidqtinterfaces.MultiPlotting.subplot.subplot import subplot
 
 
 def rm_logic(name):

@@ -7,7 +7,7 @@
 import unittest
 
 from unittest import mock
-from MultiPlotting.subplot.subplot_ADS_observer import SubplotADSObserver
+from mantidqtinterfaces.MultiPlotting.subplot.subplot_ADS_observer import SubplotADSObserver
 
 
 class SubplotADSObserverTest(unittest.TestCase):

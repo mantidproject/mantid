@@ -7,7 +7,7 @@
 import unittest
 from unittest import mock
 
-from MultiPlotting.subplot.subplot_context import subplotContext
+from mantidqtinterfaces.MultiPlotting.subplot.subplot_context import subplotContext
 
 
 class line(object):
