@@ -6,9 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from qtpy import QtWidgets
 
-from SampleTransmissionCalculator.stc_model import SampleTransmissionCalculatorModel
-from SampleTransmissionCalculator.stc_view import SampleTransmissionCalculatorView
-from SampleTransmissionCalculator.stc_presenter import SampleTransmissionCalculatorPresenter
+from mantidqtinterfaces.SampleTransmissionCalculator.stc_model import SampleTransmissionCalculatorModel
+from mantidqtinterfaces.SampleTransmissionCalculator.stc_view import SampleTransmissionCalculatorView
+from mantidqtinterfaces.SampleTransmissionCalculator.stc_presenter import SampleTransmissionCalculatorPresenter
 
 
 class SampleTransmissionCalculator(QtWidgets.QMainWindow):

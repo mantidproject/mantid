@@ -4,7 +4,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from unittest import mock
-from SampleTransmissionCalculator.stc_presenter import SampleTransmissionCalculatorPresenter
+from mantidqtinterfaces.SampleTransmissionCalculator.stc_presenter import SampleTransmissionCalculatorPresenter
 
 
 class SampleTransmissionCalculatorPresenterTest(unittest.TestCase):
