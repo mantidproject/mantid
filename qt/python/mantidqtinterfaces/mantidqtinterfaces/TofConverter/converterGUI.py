@@ -11,7 +11,7 @@ from qtpy import QtCore
 from mantid.kernel import Logger
 from mantidqt.gui_helper import show_interface_help
 import math
-import TofConverter.convertUnits
+from mantidqtinterfaces.TofConverter import convertUnits
 
 try:
     from mantidqt.utils.qt import load_ui
@@ -119,9 +119,9 @@ class MainWindow(QMainWindow):
             else:
                 self.Theta = -1.0
 
-            self.output = TofConverter.convertUnits.doConversion(self.ui.InputVal.text(), inOption,
-                                                                 outOption, self.Theta,
-                                                                 self.flightpath)
+            self.output = convertUnits.doConversion(self.ui.InputVal.text(), inOption,
+                                                    outOption, self.Theta,
+                                                    self.flightpath)
 
             self.ui.convertedVal.clear()
             self.ui.convertedVal.insert(str(self.output))

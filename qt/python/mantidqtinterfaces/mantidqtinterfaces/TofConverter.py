@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 import sys
-from TofConverter import converterGUI
+from mantidqtinterfaces.TofConverter import converterGUI
 from mantidqt.gui_helper import get_qapplication
 
 app, within_mantid = get_qapplication()
