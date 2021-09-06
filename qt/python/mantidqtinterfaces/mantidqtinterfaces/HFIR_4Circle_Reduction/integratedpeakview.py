@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=W0403,R0904,R0903
 import numpy
-from HFIR_4Circle_Reduction import mplgraphicsview
+from mantidqtinterfaces.HFIR_4Circle_Reduction import mplgraphicsview
 
 
 class IntegratedPeakView(mplgraphicsview.MplGraphicsView):
@@ -200,6 +200,7 @@ class GeneralPurposedPlotView(mplgraphicsview.MplGraphicsView):
     """
     Extended matplotlib based 1D plot viewer for general-purposed useage
     """
+
     def __init__(self, parent):
         """
         initialization
@@ -285,6 +286,7 @@ class SinglePtIntegrationView(mplgraphicsview.MplGraphicsView):
     """
     Single Pt peak integration viewer.  Extended from regular 1D view
     """
+
     def __init__(self, parent):
         """
         initialization

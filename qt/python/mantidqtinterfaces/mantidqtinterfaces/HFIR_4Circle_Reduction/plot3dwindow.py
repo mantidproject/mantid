@@ -17,8 +17,8 @@ except ImportError:
 from qtpy.QtWidgets import (QVBoxLayout)
 
 
-from HFIR_4Circle_Reduction.mplgraphicsview3d import MplPlot3dCanvas
-from HFIR_4Circle_Reduction import guiutility
+from mantidqtinterfaces.HFIR_4Circle_Reduction.mplgraphicsview3d import MplPlot3dCanvas
+from mantidqtinterfaces.HFIR_4Circle_Reduction import guiutility
 
 __author__ = 'wzz'
 

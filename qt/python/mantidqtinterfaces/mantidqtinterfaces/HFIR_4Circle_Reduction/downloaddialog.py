@@ -9,7 +9,7 @@
 ##########
 import os
 from qtpy.QtWidgets import (QDialog, QFileDialog, QMessageBox)  # noqa
-import HFIR_4Circle_Reduction.fourcircle_utility as hb3a_util
+import mantidqtinterfaces.HFIR_4Circle_Reduction.fourcircle_utility as hb3a_util
 
 import qtpy  # noqa
 from mantid.kernel import Logger
@@ -24,6 +24,7 @@ class DataDownloadDialog(QDialog):
     """ dialog for set up HTTP server and download files to local computer
     This feature will be valid until SNS disables the HTTP server for HFIR data
     """
+
     def __init__(self, parent):
         """
         initialization

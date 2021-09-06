@@ -5,9 +5,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=C0103
-from HFIR_4Circle_Reduction.hfctables import SinglePtIntegrationTable
-from HFIR_4Circle_Reduction.integratedpeakview import SinglePtIntegrationView
-import HFIR_4Circle_Reduction.guiutility as guiutility
+from mantidqtinterfaces.HFIR_4Circle_Reduction.hfctables import SinglePtIntegrationTable
+from mantidqtinterfaces.HFIR_4Circle_Reduction.integratedpeakview import SinglePtIntegrationView
+import mantidqtinterfaces.HFIR_4Circle_Reduction.guiutility as guiutility
 import os
 from qtpy.QtWidgets import (QMainWindow, QFileDialog)  # noqa
 from qtpy.QtCore import Signal as pyqtSignal

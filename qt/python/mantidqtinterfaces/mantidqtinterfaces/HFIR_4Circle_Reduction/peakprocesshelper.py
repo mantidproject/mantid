@@ -8,7 +8,7 @@
 import numpy
 import time
 import random
-from HFIR_4Circle_Reduction.fourcircle_utility import *
+from mantidqtinterfaces.HFIR_4Circle_Reduction.fourcircle_utility import *
 from mantid.api import AnalysisDataService
 from mantid.kernel import V3D
 
@@ -620,6 +620,7 @@ class SinglePointPeakIntegration(object):
     """
     simple class to store the result of ONE and ONLY ONE single point measurement peak integration
     """
+
     def __init__(self, exp_number, scan_number, roi_name, pt_number, two_theta):
         """
         initialization
@@ -849,6 +850,7 @@ class SinglePtScansIntegrationOperation(object):
     a class to handle and manage Mantid Workspace2D instance created from integrated single pt-scan peaks
     along either vertical direction or horizontal direction
     """
+
     def __init__(self, exp_number, scan_number_list, matrix_ws_name, scan_spectrum_map, spectrum_scan_map):
         """
         initialization

@@ -12,7 +12,7 @@ import csv
 from scipy.optimize import curve_fit
 import mantid.simpleapi as mantidsimple
 from mantid.api import AnalysisDataService
-from HFIR_4Circle_Reduction.fourcircle_utility import *
+from mantidqtinterfaces.HFIR_4Circle_Reduction.fourcircle_utility import *
 
 
 def apply_lorentz_correction(peak_intensity, q, wavelength, step_omega):
@@ -584,7 +584,6 @@ def integrate_single_scan_peak(merged_scan_workspace_name, integrated_peak_ws_na
                                merge_peaks=True,
                                normalization='', mask_ws_name=None,
                                scale_factor=1.):
-
     """ Integrate the peak in a single scan with merged Pt.
     :param merged_scan_workspace_name: MDEventWorkspace with merged Pts.
     :param integrated_peak_ws_name: output PeaksWorkspace for integrated peak
