@@ -23,6 +23,17 @@ using ::testing::Eq;
 using ::testing::NotNull;
 using ::testing::Return;
 
+namespace {
+struct AlgCompleteCallback {
+  static void updateRowOnAlgorithmComplete(const IAlgorithm_sptr &, Item &) {
+    AlgCompleteCallback::m_callbackWasCalled = true;
+  }
+  static bool m_callbackWasCalled;
+};
+
+bool AlgCompleteCallback::m_callbackWasCalled = false;
+} // namespace
+
 class PreviewJobManagerTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -53,18 +64,25 @@ public:
   }
 
   void test_notify_preprocessing_algorithm_complete_notifies_subscriber() {
+    AlgCompleteCallback::m_callbackWasCalled = false;
+
     auto mockAlgFactory = std::make_unique<MockReflAlgorithmFactory>();
     auto mockJobRunner = MockJobRunner();
     auto mockSubscriber = MockJobManagerSubscriber();
 
     auto row = PreviewRow({"12345"});
-    auto configuredAlg = makeConfiguredAlg(row);
+    Mantid::API::IAlgorithm_sptr mockAlg = std::make_shared<WorkspaceCreationHelper::StubAlgorithm>();
+    auto properties = IConfiguredAlgorithm::AlgorithmRuntimeProps();
+    auto configuredAlg = std::make_shared<BatchJobAlgorithm>(mockAlg, properties,
+                                                             AlgCompleteCallback::updateRowOnAlgorithmComplete, &row);
 
     EXPECT_CALL(mockSubscriber, notifyLoadWorkspaceCompleted).Times(1);
-
     auto jobManager = PreviewJobManager(&mockJobRunner, std::move(mockAlgFactory));
     jobManager.subscribe(&mockSubscriber);
-    jobManager.notifyAlgorithmComplete(configuredAlg);
+
+    auto configuredAlgRef = std::static_pointer_cast<IConfiguredAlgorithm>(configuredAlg);
+    jobManager.notifyAlgorithmComplete(configuredAlgRef);
+    TS_ASSERT(AlgCompleteCallback::m_callbackWasCalled);
   }
 
   void test_notify_preprocessing_algorithm_complete_skips_non_preview_items() {
@@ -85,7 +103,8 @@ public:
 
       auto jobManager = PreviewJobManager(&mockJobRunner, std::move(mockAlgFactory));
       jobManager.subscribe(&mockSubscriber);
-      jobManager.notifyAlgorithmComplete(configuredAlg);
+      auto configuredAlgRef = std::static_pointer_cast<IConfiguredAlgorithm>(configuredAlg);
+      jobManager.notifyAlgorithmComplete(configuredAlgRef);
     }
   }
 

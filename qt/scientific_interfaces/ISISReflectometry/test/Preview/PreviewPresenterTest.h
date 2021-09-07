@@ -59,7 +59,8 @@ public:
 
     auto row = PreviewRow({"12345"});
 
-    EXPECT_CALL(*mockModel, getLoadedWs).Times(1);
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
+    EXPECT_CALL(*mockModel, getLoadedWs).Times(1).WillOnce(Return(ws));
 
     auto presenter = PreviewPresenter(mockView.get(), std::move(mockModel), std::move(mockJobManager));
     presenter.notifyLoadWorkspaceCompleted();

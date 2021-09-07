@@ -38,6 +38,8 @@ void PreviewJobManager::notifyAlgorithmComplete(API::IConfiguredAlgorithm_sptr &
   if (!item || !item->isPreview())
     return;
 
+  jobAlgorithm->updateItem();
+
   // TODO When the full implementation is added we will need to switch between different algorithm cases.
   // For now we just deal with loading.
   m_notifyee->notifyLoadWorkspaceCompleted();
