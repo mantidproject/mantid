@@ -14,7 +14,7 @@ namespace {
 ///@cond
 // Forward-declaration of minimizer
 int slsqp_(int *m, int *meq, int *la, int *n, double *x, double *xl, double *xu, double *f, double *c__, double *g,
-           double *a, double *acc, int *iter, int *mode, double *w, int *l_w__, int *jw, int *l_jw__);
+           double *a, double *acc, int *iter, int *mode, double *w, const int *l_w__, int *jw, const int *l_jw__);
 ///@endcond
 } // namespace
 
@@ -211,7 +211,7 @@ static int c__0 = 0;
 static int c__1 = 1;
 static int c__2 = 2;
 
-double d_sign(double *a, double *b) {
+double d_sign(const double *a, const double *b) {
   double x;
   x = (*a >= 0 ? *a : -*a);
   return (*b >= 0 ? x : -x);
@@ -219,31 +219,32 @@ double d_sign(double *a, double *b) {
 
 // --------------------- Forward declarations of helpers ---------------------
 int slsqpb_(int * /*m*/, int * /*meq*/, int * /*la*/, int * /*n*/, double * /*x*/, double * /*xl*/, double * /*xu*/,
-            double * /*f*/, double * /*c__*/, double * /*g*/, double * /*a*/, double * /*acc*/, int * /*iter*/,
+            const double * /*f*/, double * /*c__*/, double * /*g*/, double * /*a*/, double * /*acc*/, int * /*iter*/,
             int * /*mode*/, double * /*r__*/, double * /*l*/, double * /*x0*/, double * /*mu*/, double * /*s*/,
             double * /*u*/, double * /*v*/, double * /*w*/, int * /*iw*/);
-int dcopy___(int *n, double *dx, int *incx, double *dy, int *incy);
-int daxpy_sl__(int *n, double *da, double *dx, int *incx, double *dy, int *incy);
-int lsq_(int *m, int *meq, int *n, int *nl, int *la, double *l, double *g, double *a, double *b, double *xl, double *xu,
-         double *x, double *y, double *w, int *jw, int *mode);
-double ddot_sl__(int *n, double *dx, int *incx, double *dy, int *incy);
-int dscal_sl__(int *n, double *da, double *dx, int *incx);
-double linmin_(int *mode, double *ax, double *bx, double *f, double *tol);
-double dnrm2___(int *n, double *dx, int *incx);
-int ldl_(int *n, double *a, double *z__, double *sigma, double *w);
+int dcopy___(const int *n, double *dx, const int *incx, double *dy, const int *incy);
+int daxpy_sl__(const int *n, const double *da, double *dx, const int *incx, double *dy, const int *incy);
+int lsq_(int *m, int *meq, int *n, const int *nl, int *la, double *l, double *g, double *a, double *b, double *xl,
+         double *xu, double *x, double *y, double *w, int *jw, int *mode);
+double ddot_sl__(const int *n, double *dx, const int *incx, double *dy, const int *incy);
+int dscal_sl__(const int *n, const double *da, double *dx, const int *incx);
+double linmin_(int *mode, const double *ax, const double *bx, const double *f, const double *tol);
+double dnrm2___(const int *n, double *dx, const int *incx);
+int ldl_(const int *n, double *a, double *z__, const double *sigma, double *w);
 int lsei_(double *c__, double *d__, double *e, double *f, double *g, double *h__, int *lc, int *mc, int *le, int *me,
           int *lg, int *mg, int *n, double *x, double *xnrm, double *w, int *jw, int *mode);
-int h12_(int *mode, int *lpivot, int *l1, int *m, double *u, int *iue, double *up, double *c__, int *ice, int *icv,
-         int *ncv);
-int hfti_(double *a, int *mda, int *m, int *n, double *b, int *mdb, int *nb, double *tau, int *krank, double *rnorm,
-          double *h__, double *g, int *ip);
+int h12_(const int *mode, const int *lpivot, const int *l1, const int *m, double *u, const int *iue, double *up,
+         double *c__, const int *ice, const int *icv, const int *ncv);
+int hfti_(double *a, int *mda, int *m, int *n, double *b, int *mdb, int *nb, const double *tau, int *krank,
+          double *rnorm, double *h__, double *g, int *ip);
 int lsi_(double *e, double *f, double *g, double *h__, int *le, int *me, int *lg, int *mg, int *n, double *x,
          double *xnorm, double *w, int *jw, int *mode);
-int ldp_(double *g, int *mg, int *m, int *n, double *h__, double *x, double *xnorm, double *w, int *index, int *mode);
+int ldp_(double *g, const int *mg, int *m, int *n, double *h__, double *x, double *xnorm, double *w, int *index,
+         int *mode);
 int nnls_(double *a, int *mda, int *m, int *n, double *b, double *x, double *rnorm, double *w, double *z__, int *index,
           int *mode);
 int dsrotg_(double *da, double *db, double *c__, double *s);
-int dsrot_(int *n, double *dx, int *incx, double *dy, int *incy, double *c__, double *s);
+int dsrot_(const int *n, double *dx, const int *incx, double *dy, const int *incy, const double *c__, const double *s);
 //----------------------------------------------------------------------------
 
 /*      ALGORITHM 733, COLLECTED ALGORITHMS FROM ACM. */
@@ -280,7 +281,7 @@ int dsrot_(int *n, double *dx, int *incx, double *dy, int *incy, double *c__, do
 /*                              optimizer                               * */
 /* *********************************************************************** */
 int slsqp_(int *m, int *meq, int *la, int *n, double *x, double *xl, double *xu, double *f, double *c__, double *g,
-           double *a, double *acc, int *iter, int *mode, double *w, int *l_w__, int *jw, int *l_jw__) {
+           double *a, double *acc, int *iter, int *mode, double *w, const int *l_w__, int *jw, const int *l_jw__) {
   /* System generated locals */
   int a_dim1, a_offset, i__1, i__2;
 
@@ -507,9 +508,9 @@ int slsqp_(int *m, int *meq, int *la, int *n, double *x, double *xl, double *xu,
   return 0;
 } /* slsqp_ */
 
-int slsqpb_(int *m, int *meq, int *la, int *n, double *x, double *xl, double *xu, double *f, double *c__, double *g,
-            double *a, double *acc, int *iter, int *mode, double *r__, double *l, double *x0, double *mu, double *s,
-            double *u, double *v, double *w, int *iw) {
+int slsqpb_(int *m, int *meq, int *la, int *n, double *x, double *xl, double *xu, const double *f, double *c__,
+            double *g, double *a, double *acc, int *iter, int *mode, double *r__, double *l, double *x0, double *mu,
+            double *s, double *u, double *v, double *w, int *iw) {
   /* Initialized data */
 
   static double zero = 0.;
@@ -862,8 +863,8 @@ L330:
   return 0;
 } /* slsqpb_ */
 
-int lsq_(int *m, int *meq, int *n, int *nl, int *la, double *l, double *g, double *a, double *b, double *xl, double *xu,
-         double *x, double *y, double *w, int *jw, int *mode) {
+int lsq_(int *m, int *meq, int *n, const int *nl, int *la, double *l, double *g, double *a, double *b, double *xl,
+         double *xu, double *x, double *y, double *w, int *jw, int *mode) {
   /* Initialized data */
 
   static double zero = 0.;
@@ -1351,7 +1352,8 @@ L50:
   return 0;
 } /* lsi_ */
 
-int ldp_(double *g, int *mg, int *m, int *n, double *h__, double *x, double *xnorm, double *w, int *index, int *mode) {
+int ldp_(double *g, const int *mg, int *m, int *n, double *h__, double *x, double *xnorm, double *w, int *index,
+         int *mode) {
   /* Initialized data */
 
   static double zero = 0.;
@@ -1731,8 +1733,8 @@ L290:
   return 0;
 } /* nnls_ */
 
-int hfti_(double *a, int *mda, int *m, int *n, double *b, int *mdb, int *nb, double *tau, int *krank, double *rnorm,
-          double *h__, double *g, int *ip) {
+int hfti_(double *a, int *mda, int *m, int *n, double *b, int *mdb, int *nb, const double *tau, int *krank,
+          double *rnorm, double *h__, double *g, int *ip) {
   /* Initialized data */
 
   static double zero = 0.;
@@ -1947,8 +1949,8 @@ L270:
   return 0;
 } /* hfti_ */
 
-int h12_(int *mode, int *lpivot, int *l1, int *m, double *u, int *iue, double *up, double *c__, int *ice, int *icv,
-         int *ncv) {
+int h12_(const int *mode, const int *lpivot, const int *l1, const int *m, double *u, const int *iue, double *up,
+         double *c__, const int *ice, const int *icv, const int *ncv) {
   /* Initialized data */
 
   static double one = 1.;
@@ -2077,7 +2079,7 @@ L80:
   return 0;
 } /* h12_ */
 
-int ldl_(int *n, double *a, double *z__, double *sigma, double *w) {
+int ldl_(const int *n, double *a, double *z__, const double *sigma, double *w) {
   /* Initialized data */
 
   static double zero = 0.;
@@ -2213,7 +2215,7 @@ L280:
   /* END OF LDL */
 } /* ldl_ */
 
-double linmin_(int *mode, double *ax, double *bx, double *f, double *tol) {
+double linmin_(int *mode, const double *ax, const double *bx, const double *f, const double *tol) {
   /* Initialized data */
 
   static double c__ = .381966011;
@@ -2396,7 +2398,7 @@ L100:
 } /* linmin_ */
 
 /* ## Following a selection from BLAS Level 1 */
-int daxpy_sl__(int *n, double *da, double *dx, int *incx, double *dy, int *incy) {
+int daxpy_sl__(const int *n, const double *da, double *dx, const int *incx, double *dy, const int *incy) {
   /* System generated locals */
   int i__1;
 
@@ -2466,7 +2468,7 @@ L40:
   return 0;
 } /* daxpy_sl__ */
 
-int dcopy___(int *n, double *dx, int *incx, double *dy, int *incy) {
+int dcopy___(const int *n, double *dx, const int *incx, double *dy, const int *incy) {
   /* System generated locals */
   int i__1;
 
@@ -2536,7 +2538,7 @@ L40:
   return 0;
 } /* dcopy___ */
 
-double ddot_sl__(int *n, double *dx, int *incx, double *dy, int *incy) {
+double ddot_sl__(const int *n, double *dx, const int *incx, double *dy, const int *incy) {
   /* System generated locals */
   int i__1;
   double ret_val;
@@ -2608,7 +2610,7 @@ L60:
   return ret_val;
 } /* ddot_sl__ */
 
-double dnrm2___(int *n, double *dx, int *incx) {
+double dnrm2___(const int *n, double *dx, const int *incx) {
   /* Initialized data */
 
   static double zero = 0.;
@@ -2778,7 +2780,7 @@ L300:
   return ret_val;
 } /* dnrm2___ */
 
-int dsrot_(int *n, double *dx, int *incx, double *dy, int *incy, double *c__, double *s) {
+int dsrot_(const int *n, double *dx, const int *incx, double *dy, const int *incy, const double *c__, const double *s) {
   /* System generated locals */
   int i__1;
 
@@ -2877,7 +2879,7 @@ L20:
   return 0;
 } /* dsrotg_ */
 
-int dscal_sl__(int *n, double *da, double *dx, int *incx) {
+int dscal_sl__(const int *n, const double *da, double *dx, const int *incx) {
   /* System generated locals */
   int i__1, i__2;
 

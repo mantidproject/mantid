@@ -15,9 +15,6 @@ namespace MantidWidgets {
 FunctionModelDataset::FunctionModelDataset(QString workspaceName, FunctionModelSpectra spectra)
     : m_workspaceName(std::move(workspaceName)), m_spectra(std::move(spectra)) {}
 
-FunctionModelDataset::FunctionModelDataset(QString workspaceName, FunctionModelSpectra &&spectra)
-    : m_workspaceName(std::move(workspaceName)), m_spectra(std::move(spectra)) {}
-
 /**
  * Returns the names given to each domain (i.e. spectrum) in this dataset. This
  * is required for display in the EditLocalParameter Dialog.

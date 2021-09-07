@@ -85,9 +85,9 @@ const char *PLUGINS_EXCLUDE_KEY = "framework.plugins.exclude";
  * @param data :: data passed in NXMSetError (will be NULL)
  * @param text :: text of the error.
  */
-void NexusErrorFunction(void *data, char *text) {
-  UNUSED_ARG(data);
-  UNUSED_ARG(text);
+// Prevent clang-tidy trying to change the signature as this is an external lib
+// NOLINTNEXTLINE(readability-non-const-parameter)
+void NexusErrorFunction(void *, char *) {
   // Do nothing.
 }
 
