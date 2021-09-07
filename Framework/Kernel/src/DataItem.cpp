@@ -30,6 +30,9 @@ DataItem::DataItem(const DataItem & /*other*/) {
  */
 DataItem::~DataItem() {}
 
+void DataItem::readLock() { getLock()->readLock(); }
+void DataItem::unlock() { getLock()->unlock(); }
+
 /** Private method to access the RWLock object.
  *
  * @return the RWLock object.

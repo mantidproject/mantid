@@ -5,10 +5,9 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
-#include "IndirectFitDataView.h"
+#include "IIndirectFitDataView.h"
 #include "IndirectFitPlotView.h"
 #include "IndirectFitPropertyBrowser.h"
-#include "ui_IndirectDockWidgetArea.h"
 
 #include <QMainWindow>
 #include <QObject>
@@ -23,9 +22,9 @@ class IndirectDockWidgetArea : public QMainWindow {
 public:
   IndirectDockWidgetArea(QWidget *parent = nullptr);
   virtual ~IndirectDockWidgetArea(){};
-  std::unique_ptr<Ui::IndirectDockWidgetArea> m_uiForm;
+  void setFitDataView(IIndirectFitDataView *fitDataView);
   IndirectFitPropertyBrowser *m_fitPropertyBrowser;
-  IndirectFitDataView *m_fitDataView;
+  IIndirectFitDataView *m_fitDataView;
   IndirectFitPlotView *m_fitPlotView;
 };
 

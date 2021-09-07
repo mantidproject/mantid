@@ -14,7 +14,7 @@ from mantid.simpleapi import CreateWorkspace, EvaluateFunction, Fit
 from mantid.simpleapi import FunctionWrapper, CompositeFunctionWrapper, ProductFunctionWrapper, ConvolutionWrapper, MultiDomainFunctionWrapper
 from mantid.simpleapi import Gaussian, LinearBackground, Polynomial, MultiDomainFunction, Convolution, ProductFunction,\
     CompositeFunction, IFunction1D, FunctionFactory, Fit
-from mantid.api import mtd, MatrixWorkspace, ITableWorkspace
+from mantid.api import mtd, MatrixWorkspace, ITableWorkspace, FunctionDomain1DVector, FunctionDomain1DHistogram
 import numpy as np
 from testhelpers import run_algorithm
 
@@ -757,6 +757,43 @@ class FitFunctionsTest(unittest.TestCase):
         from mantid.simpleapi import Lorentz
         self.assertEqual(str(Lorentz()), 'name=Lorentz,Scale=1,Length=50,Background=0')
 
+    def test_function_deriv_with_1DVector_Domain(self):
+        g = FunctionWrapper( "Gaussian", Height=7.5, Sigma=1.2, PeakCentre=10)
+        ws = CreateWorkspace(DataX=[0,1,2,3,4], DataY=[5,5,5,5])
+
+        dom = FunctionDomain1DVector(ws.readX(0))
+        out = g.functionDeriv(dom)
+
+        self.assertAlmostEqual(out.get(0,0), 0.0000000000000008323969676981107)
+        self.assertAlmostEqual(out.get(0,1), -0.000000000000043354008734276606)
+        self.assertAlmostEqual(out.get(0,2), -0.00000000000031214886288679154)
+
+        self.assertAlmostEqual(out.get(1,0), 0.0000000000006101936677605303)
+        self.assertAlmostEqual(out.get(1,1), -0.00000000002860282817627486)
+        self.assertAlmostEqual(out.get(1,2), -0.00000000018534632658226106)
+
+        self.assertAlmostEqual(out.get(2,0), 0.00000000022336314362031582)
+        self.assertAlmostEqual(out.get(2,1), -0.000000009306797650846493)
+        self.assertAlmostEqual(out.get(2,2), -0.0000000536071544688758)
+
+    def test_function_deriv_with_1DHistogram_Domain(self):
+        g = FunctionWrapper( "Gaussian", Height=7.5, Sigma=1.2, PeakCentre=10)
+        ws = CreateWorkspace(DataX=[0,1,2,3,4], DataY=[5,5,5,5])
+
+        dom = FunctionDomain1DHistogram(ws.readX(0))
+        out = g.functionDeriv(dom)
+
+        self.assertAlmostEqual(out.get(0,0), 0.00000000000009592326932761353)
+        self.assertAlmostEqual(out.get(0,1), -0.000000000004570209530946241)
+        self.assertAlmostEqual(out.get(0,2), -0.00000000003012829985493681)
+
+        self.assertAlmostEqual(out.get(1,0), 0.00000000003925992864139971)
+        self.assertAlmostEqual(out.get(1,1), -0.0000000016706471246441646)
+        self.assertAlmostEqual(out.get(1,2), -0.000000009831636305079881)
+
+        self.assertAlmostEqual(out.get(2,0), 0.000000008131882500705956)
+        self.assertAlmostEqual(out.get(2,1), -0.0000003045374795085354)
+        self.assertAlmostEqual(out.get(2,2), -0.0000015775749015123351)
 
 if __name__ == '__main__':
     unittest.main()

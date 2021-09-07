@@ -12,22 +12,17 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-using ResolutionCollectionType = IndexCollectionType<TableDatasetIndex, std::weak_ptr<Mantid::API::MatrixWorkspace>>;
-using ExtendedResolutionType = IndexCollectionType<TableDatasetIndex, std::string>;
+using ResolutionCollectionType = IndexCollectionType<WorkspaceID, std::weak_ptr<Mantid::API::MatrixWorkspace>>;
+using ExtendedResolutionType = IndexCollectionType<WorkspaceID, std::string>;
 
 class MANTIDQT_INDIRECT_DLL ConvFitModel : public IndirectFittingModel {
 public:
   ConvFitModel();
-  ~ConvFitModel() override;
+  ~ConvFitModel() = default;
 
-  Mantid::API::MultiDomainFunction_sptr getFitFunction() const override;
-  boost::optional<double> getInstrumentResolution(TableDatasetIndex dataIndex) const;
-  std::size_t getNumberHistograms(TableDatasetIndex index) const;
+  boost::optional<double> getInstrumentResolution(WorkspaceID workspaceID) const;
 
-  void setFitFunction(Mantid::API::MultiDomainFunction_sptr function) override;
   void setTemperature(const boost::optional<double> &temperature);
-  void removeWorkspace(TableDatasetIndex index) override;
-  void setResolution(const std::string &name, TableDatasetIndex index);
 
   void addOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm) override;
 
@@ -37,18 +32,15 @@ private:
   Mantid::API::IAlgorithm_sptr sequentialFitAlgorithm() const override;
   Mantid::API::IAlgorithm_sptr simultaneousFitAlgorithm() const override;
   Mantid::API::MultiDomainFunction_sptr getMultiDomainFunction() const override;
-  std::unordered_map<std::string, ParameterValue> createDefaultParameters(TableDatasetIndex index) const override;
+  std::unordered_map<std::string, ParameterValue> createDefaultParameters(WorkspaceID workspaceID) const override;
   std::unordered_map<std::string, std::string> mapDefaultParameterNames() const override;
   void addSampleLogs();
 
   void setParameterNameChanges(const Mantid::API::IFunction &model, boost::optional<std::size_t> backgroundIndex);
 
   ResolutionCollectionType m_resolution;
-  ExtendedResolutionType m_extendedResolution;
   std::unordered_map<std::string, std::string> m_parameterNameChanges;
   boost::optional<double> m_temperature;
-  boost::optional<std::size_t> m_backgroundIndex;
-  std::string m_backgroundString;
 };
 
 } // namespace IDA

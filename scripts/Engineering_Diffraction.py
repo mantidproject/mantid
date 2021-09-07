@@ -9,10 +9,19 @@ from Engineering.gui.engineering_diffraction.engineering_diffraction import Engi
 from qtpy import QtCore
 import sys
 
-if 'engineering_gui' in globals() and not globals()['engineering_gui'].isHidden():
-    engineering_gui = globals()['engineering_gui']
-    engineering_gui.setWindowState(engineering_gui.windowState() & ~QtCore.Qt.WindowMinimized | QtCore.Qt.WindowActive)
-    engineering_gui.activateWindow()
+
+# Single instance. If minimized the menu should show it and not create a new one
+ENGG_UI_INSTANCE = None
+
+
+def _on_delete():
+    global ENGG_UI_INSTANCE
+    ENGG_UI_INSTANCE = None
+
+
+if ENGG_UI_INSTANCE is not None and ENGG_UI_INSTANCE.isHidden():
+    ENGG_UI_INSTANCE.setWindowState(ENGG_UI_INSTANCE.windowState() & ~QtCore.Qt.WindowMinimized | QtCore.Qt.WindowActive)
+    ENGG_UI_INSTANCE.activateWindow()
 else:
     if 'workbench' in sys.modules:
         from workbench.config import get_window_config
@@ -20,5 +29,6 @@ else:
         parent, flags = get_window_config()
     else:
         parent, flags = None, None
-    engineering_gui = EngineeringDiffractionGui(parent=parent, window_flags=flags)
-    engineering_gui.show()
+    ENGG_UI_INSTANCE = EngineeringDiffractionGui(parent=parent, window_flags=flags)
+    ENGG_UI_INSTANCE.destroyed.connect(_on_delete)
+    ENGG_UI_INSTANCE.show()

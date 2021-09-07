@@ -38,7 +38,6 @@ struct MANTID_DATAOBJECTS_DLL DetectorAngularCache {
  @date 2012-05-29
  */
 class MANTID_DATAOBJECTS_DLL ReflectometryTransform {
-
 protected:
   const size_t m_d0NumBins;
   const size_t m_d1NumBins;

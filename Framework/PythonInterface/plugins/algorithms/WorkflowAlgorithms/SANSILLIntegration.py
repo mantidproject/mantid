@@ -11,6 +11,7 @@ from mantid.kernel import EnabledWhenProperty, FloatArrayProperty, Direction, St
     FloatArrayLengthValidator, CompositeValidator
 from mantid.simpleapi import *
 from MildnerCarpenter import *
+from DirectBeamResolution import *
 import numpy as np
 
 
@@ -22,6 +23,7 @@ class SANSILLIntegration(PythonAlgorithm):
     _resolution = ''
     _masking_criterion = ''
     _lambda_range = []
+    _is_tof = False
 
     def category(self):
         return 'ILL\\SANS'
@@ -81,7 +83,7 @@ class SANSILLIntegration(PythonAlgorithm):
 
         self.declareProperty(name='CalculateResolution',
                              defaultValue='None',
-                             validator=StringListValidator(['MildnerCarpenter', 'None']),
+                             validator=StringListValidator(['MildnerCarpenter', 'DirectBeam', 'None']),
                              doc='Choose to calculate the Q resolution.')
 
         output_iq = EnabledWhenProperty('OutputType', PropertyCriterion.IsEqualTo, 'I(Q)')
@@ -188,8 +190,9 @@ class SANSILLIntegration(PythonAlgorithm):
         self._resolution = self.getPropertyValue('CalculateResolution')
         self._output_ws = self.getPropertyValue('OutputWorkspace')
         self._lambda_range = self.getProperty('WavelengthRange').value
-        is_tof = mtd[self._input_ws].getRun().getLogData('tof_mode').value == 'TOF' # D33 only
-        if is_tof:
+        self._is_tof = mtd[self._input_ws].getRun().getLogData('tof_mode').value == 'TOF' and \
+                       mtd[self._input_ws].getInstrument().getName() == 'D33' # D33 only
+        if self._is_tof:
             cut_input_ws = self._input_ws+'_cut'
             CropWorkspaceRagged(InputWorkspace=self._input_ws,
                                 OutputWorkspace=cut_input_ws,
@@ -216,7 +219,7 @@ class SANSILLIntegration(PythonAlgorithm):
                 panel_outputs.append(out_ws)
             GroupWorkspaces(InputWorkspaces=panel_outputs, OutputWorkspace=panels_out_ws)
             self.setProperty('PanelOutputWorkspaces', mtd[panels_out_ws])
-        if is_tof:
+        if self._is_tof:
             DeleteWorkspace(self._input_ws)
 
     def _integrate(self, in_ws, out_ws, panel=None):
@@ -225,7 +228,7 @@ class SANSILLIntegration(PythonAlgorithm):
         elif self._output_type == 'I(Qx,Qy)':
             self._integrate_iqxy(in_ws, out_ws)
 
-    def _get_iq_binning(self, q_min, q_max, pixel_size, wavelength, l2, binning_factor, offset):
+    def _get_iq_binning(self, q_min, q_max, pixel_size, wavelength, l2, binning_factor):
         """
         Returns the OutputBinning string to be used in Q1DWeighted
         """
@@ -236,7 +239,7 @@ class SANSILLIntegration(PythonAlgorithm):
         strategy = self.getPropertyValue('DefaultQBinning')
         if len(binning) == 0:
             if strategy == 'ResolutionBased':
-                q_binning = self._mildner_carpenter_q_binning(q_min, q_max, binning_factor)
+                q_binning = self._resolution_q_binning(q_min, q_max, binning_factor)
             else:
                 if wavelength != 0:
                     run = mtd[self._input_ws].getRun()
@@ -249,19 +252,28 @@ class SANSILLIntegration(PythonAlgorithm):
                             pixel_nb = 320
                         q_binning = self._pixel_q_binning_non_aligned(q_min, q_max, pixel_nb, binning_factor)
                     else:
-                        q_binning = self._pixel_q_binning(q_min, q_max, pixel_size * binning_factor, wavelength, l2, offset)
+                        q_binning = self._pixel_q_binning(q_min, q_max, pixel_size * binning_factor, wavelength, l2)
                 else:
                     q_binning = self._tof_default_q_binning(q_min, q_max)
         elif len(binning) == 1:
             q_binning = [q_min, binning[0], q_max]
         elif len(binning) == 2:
+            q_min_actual = max(q_min, binning[0])
+            q_max_actual = min(q_max, binning[1])
+            if q_min_actual >= q_max_actual:
+                raise ValueError('The provided q range does not overlap with the actual range:\n'
+                                 'provided [{0:.5f}, {1:.5f}] \n'
+                                 'actual [{2:.5f}, {3:.5f}]'
+                                 .format(binning[0], binning[1], q_min, q_max))
+            else:
+                self.log().notice('Using qmin_actual={0:.5f}, qmax_actual={1:.5f}'.format(q_min_actual, q_max_actual))
             if strategy == 'ResolutionBased':
-                q_binning = self._mildner_carpenter_q_binning(binning[0], binning[1], binning_factor)
+                q_binning = self._resolution_q_binning(q_min_actual, q_max_actual, binning_factor)
             else:
                 if wavelength != 0:
-                    q_binning = self._pixel_q_binning(binning[0], binning[1], pixel_size * binning_factor, wavelength, l2, offset)
+                    q_binning = self._pixel_q_binning(q_min_actual, q_max_actual, pixel_size * binning_factor, wavelength, l2)
                 else:
-                    q_binning = self._tof_default_q_binning(binning[0], binning[1])
+                    q_binning = self._tof_default_q_binning(q_min_actual, q_max_actual)
         else:
             q_binning = binning
         return q_binning
@@ -279,7 +291,7 @@ class SANSILLIntegration(PythonAlgorithm):
         step = (q_max - q_min) * binning_factor / pixel_nb
         return [q_min-step/2, step, q_max+step/2]
 
-    def _pixel_q_binning(self, q_min, q_max, pixel_size, wavelength, l2, offset):
+    def _pixel_q_binning(self, q_min, q_max, pixel_size, wavelength, l2):
         """
         Returns q binning based on the size of a single pixel within the range of q_min and q_max
         Size is the largest size, i.e. max(height, width)
@@ -288,7 +300,7 @@ class SANSILLIntegration(PythonAlgorithm):
         q = 0.
         pixels = 1
         while q < q_max:
-            two_theta = np.arctan((pixel_size * pixels + offset) / l2)
+            two_theta = np.arctan(pixel_size * pixels / l2)
             q = 4 * np.pi * np.sin(two_theta / 2) / wavelength
             bins.append(q)
             pixels += 1
@@ -300,7 +312,7 @@ class SANSILLIntegration(PythonAlgorithm):
         q_binning[1::2] = q_bin_widths
         return q_binning
 
-    def _mildner_carpenter_q_binning(self, qmin, qmax, factor):
+    def _resolution_q_binning(self, qmin, qmax, factor):
         """
         Returns q binning such that at each q, bin width is almost factor*sigma
         """
@@ -327,18 +339,23 @@ class SANSILLIntegration(PythonAlgorithm):
             y3 = instrument.getNumberParameter('y-pixel-size')[0] / 1000
         else:
             raise RuntimeError('Unable to calculate resolution, missing pixel size.')
-        delta_wavelength = run.getLogData('selector.wavelength_res').value * 0.01
+        if 'selector.wavelength_res' in run:
+            delta_wavelength = run.getLogData('selector.wavelength_res').value * 0.01
+        elif 'selector.wave_lenght_res' in run:
+            delta_wavelength = run.getLogData('selector.wave_lenght_res').value * 0.01 # sic! log name for at least some D22 data
+        else:
+            raise RuntimeError("Wavelength resolution log not available.")
         if run.hasProperty('collimation.sourceAperture'):
             source_aperture = run.getLogData('collimation.sourceAperture').value
         elif run.hasProperty('collimation.ap_size'):
             source_aperture = str(run.getLogData('collimation.ap_size').value)
+        elif run.hasProperty('collimation.apt_size_1'): # D22
+            source_aperture = str(run.getLogData('collimation.apt_size_1').value)
         else:
             raise RuntimeError('Unable to calculate resolution, missing source aperture size.')
-        is_tof = False
         if not run.hasProperty('tof_mode'):
             self.log().information('No TOF flag available, assuming monochromatic.')
-        else:
-            is_tof = run.getLogData('tof_mode').value == 'TOF'
+
         to_meter = 0.001
         is_rectangular = True
         if 'x' not in source_aperture:
@@ -351,7 +368,7 @@ class SANSILLIntegration(PythonAlgorithm):
             y1 = float(source_aperture[pos2 + 1:pos3]) * to_meter
             x2 = run.getLogData('Beam.sample_ap_x_or_diam').value * to_meter
             y2 = run.getLogData('Beam.sample_ap_y').value * to_meter
-            if is_tof:
+            if self._is_tof:
                 raise RuntimeError('TOF resolution is not supported yet')
             else:
                 self._deltaQ = MonochromaticScalarQCartesian(wavelength, delta_wavelength, x1, y1, x2, y2, x3, y3, l1, l2)
@@ -362,10 +379,27 @@ class SANSILLIntegration(PythonAlgorithm):
                 source_aperture = source_aperture[pos1:pos3]
             r1 = float(source_aperture) * to_meter
             r2 = run.getLogData('Beam.sample_ap_x_or_diam').value * to_meter
-            if is_tof:
+            if self._is_tof:
                 raise RuntimeError('TOF resolution is not supported yet')
             else:
                 self._deltaQ = MonochromaticScalarQCylindric(wavelength, delta_wavelength, r1, r2, x3, y3, l1, l2)
+
+    def _resolution_direct_beam(self):
+        if self._is_tof:
+            raise RuntimeError('TOF resolution is not supported yet')
+        run = mtd[self._input_ws].getRun()
+        wavelength = run.getLogData('wavelength').value
+        if 'selector.wavelength_res' in run:
+            delta_wavelength = run.getLogData('selector.wavelength_res').value * 0.01
+        elif 'selector.wave_lenght_res' in run:
+            delta_wavelength = run.getLogData('selector.wave_lenght_res').value * 0.01 # sic! log name for at least some D22 data
+        else:
+            raise RuntimeError("Wavelength resolution log not available.")
+        if 'BeamWidthX' in run:
+            beam_width = run.getLogData('BeamWidthX').value
+        else:
+            raise RuntimeError("BeamWidthX log not available. Have you provided empty beam measurement?")
+        self._deltaQ = DirectBeamResolution(wavelength, delta_wavelength, beam_width)
 
     def _integrate_iqxy(self, ws_in, ws_out):
         """
@@ -395,6 +429,8 @@ class SANSILLIntegration(PythonAlgorithm):
         """
         if self._resolution == 'MildnerCarpenter':
             self._setup_mildner_carpenter()
+        elif self._resolution == 'DirectBeam':
+            self._resolution_direct_beam()
         run = mtd[ws_in].getRun()
         q_min_name = 'qmin'
         q_max_name = 'qmax'
@@ -403,7 +439,7 @@ class SANSILLIntegration(PythonAlgorithm):
             q_max_name += ('_' + panel)
         q_min = run.getLogData(q_min_name).value
         q_max = run.getLogData(q_max_name).value
-        self.log().information('Using qmin={0:.2f}, qmax={1:.2f}'.format(q_min, q_max))
+        self.log().information('From sample logs qmin={0:.5f}, qmax={1:.5f}'.format(q_min, q_max))
         instrument = mtd[self._input_ws].getInstrument()
         pixel_width = instrument.getNumberParameter('x-pixel-size')[0] / 1000
         pixel_height = instrument.getNumberParameter('y-pixel-size')[0] / 1000
@@ -414,10 +450,7 @@ class SANSILLIntegration(PythonAlgorithm):
         if run.hasProperty('wavelength'):
             wavelength = run.getLogData('wavelength').value
         l2 = run.getLogData('l2').value
-        beamY = 0.
-        if run.hasProperty('BeamCenterY'):
-            beamY = run.getLogData('BeamCenterY').value
-        q_binning = self._get_iq_binning(q_min, q_max, pixel_size, wavelength, l2, binning_factor, -beamY)
+        q_binning = self._get_iq_binning(q_min, q_max, pixel_size, wavelength, l2, binning_factor)
         n_wedges = self.getProperty('NumberOfWedges').value
         pixel_division = self.getProperty('NPixelDivision').value
         gravity = wavelength == 0.
@@ -426,21 +459,27 @@ class SANSILLIntegration(PythonAlgorithm):
             if panel:
                 # do not process wedges for panels
                 n_wedges = 0
+                shape_table = ''
             wedge_ws = self.getPropertyValue('WedgeWorkspace')
             wedge_angle = self.getProperty('WedgeAngle').value
             wedge_offset = self.getProperty('WedgeOffset').value
             asymm_wedges = self.getProperty('AsymmetricWedges').value
-            Q1DWeighted(InputWorkspace=ws_in, OutputWorkspace=ws_out,
-                        NumberOfWedges=n_wedges, OutputBinning=q_binning,
-                        AccountForGravity=gravity, WedgeWorkspace=wedge_ws,
-                        WedgeAngle=wedge_angle, WedgeOffset=wedge_offset,
+            Q1DWeighted(InputWorkspace=ws_in,
+                        OutputWorkspace=ws_out,
+                        NumberOfWedges=n_wedges,
+                        OutputBinning=q_binning,
+                        AccountForGravity=gravity,
+                        WedgeWorkspace=wedge_ws,
+                        WedgeAngle=wedge_angle,
+                        WedgeOffset=wedge_offset,
                         AsymmetricWedges=asymm_wedges,
-                        NPixelDivision=pixel_division, ShapeTable=shape_table)
+                        NPixelDivision=pixel_division,
+                        ShapeTable=shape_table)
             if shape_table:
                 # if there is a shape table, the final number of wedges cannot be known beforehand
-                # (because of possible symmetry issues)
+                # (because of possible symmetry choices)
                 n_wedges = mtd[wedge_ws].size()
-            if self._resolution == 'MildnerCarpenter':
+            if self._resolution != 'None':
                 x = mtd[ws_out].readX(0)
                 mid_x = (x[1:] + x[:-1]) / 2
                 res = self._deltaQ(mid_x)
@@ -457,16 +496,20 @@ class SANSILLIntegration(PythonAlgorithm):
             azimuth_axis.setUnit("Phi")
             for i in range(n_wedges):
                 azimuth_axis.setValue(i, i * wedge_angle)
-            Q1DWeighted(InputWorkspace=ws_in, OutputWorkspace=iq_ws,
-                        NumberOfWedges=n_wedges, NPixelDivision=pixel_division,
-                        OutputBinning=q_binning, WedgeWorkspace=wedge_ws,
-                        WedgeAngle=wedge_angle, AsymmetricWedges=True,
+            Q1DWeighted(InputWorkspace=ws_in,
+                        OutputWorkspace=iq_ws,
+                        NumberOfWedges=n_wedges,
+                        NPixelDivision=pixel_division,
+                        OutputBinning=q_binning,
+                        WedgeWorkspace=wedge_ws,
+                        WedgeAngle=wedge_angle,
+                        AsymmetricWedges=True,
                         AccountForGravity=gravity)
             DeleteWorkspace(iq_ws)
             ConjoinSpectra(InputWorkspaces=wedge_ws, OutputWorkspace=ws_out)
             mtd[ws_out].replaceAxis(1, azimuth_axis)
             DeleteWorkspace(wedge_ws)
-            if self._resolution == 'MildnerCarpenter':
+            if self._resolution != 'None':
                 x = mtd[ws_out].readX(0)
                 mid_x = (x[1:] + x[:-1]) / 2
                 res = self._deltaQ(mid_x)

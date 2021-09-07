@@ -38,7 +38,7 @@ class TomlSchemaV1Validator(object):
         unrecognised = [s for s in unrecognised if not any(wild_matcher.match(s) for wild_matcher in wildcard_matchers)]
 
         if len(unrecognised) > 0:
-            err = "The following keys were not recognised\n:"
+            err = "The following keys were not recognised:\n"
             err += "".join("{0} \n".format(k) for k in unrecognised)
             raise TomlValidationError(err)
 
@@ -50,6 +50,7 @@ class TomlSchemaV1Validator(object):
         """
         instrument_keys = {"name": None,
                            "configuration": {"collimation_length",
+                                             "gravity_enabled",
                                              "gravity_extra_length",
                                              "norm_monitor",
                                              "sample_aperture_diameter",
@@ -58,9 +59,10 @@ class TomlSchemaV1Validator(object):
 
         detector_keys = {"configuration": {"selected_detector": None,
                                            "rear_scale": None,
-                                           "front_centre": {"x", "y", "z"},
-                                           "rear_centre": {"x", "y", "z"}},
-                         "calibration": {"direct": {"front_file", "rear_file"},
+                                           "all_centre": {"x", "y"},
+                                           "front_centre": {"x", "y"},
+                                           "rear_centre": {"x", "y"}},
+                         "correction": {"direct": {"front_file", "rear_file"},
                                          "flat": {"front_file", "rear_file"},
                                          "tube": {"file"},
                                          "position": {"front_x", "front_y", "front_z",
@@ -83,35 +85,36 @@ class TomlSchemaV1Validator(object):
         q_resolution_keys = {"enabled", "moderator_file", "source_aperture", "delta_r",
                              "h1", "h2", "w1", "w2"}
 
-        gravity_keys = {"enabled"}
-
         transmission_keys = {"monitor": {"*": {"spectrum_number", "background", "shift", "use_own_background"}},
                              "fitting": {"enabled": None, "function": None, "polynomial_order": None,
                                          "parameters": {"lambda_min", "lambda_max"}},
                              "selected_monitor": None}
 
         normalisation_keys = {"monitor": {"*": {"spectrum_number", "background"}},
+                              "all_monitors": {"background", "enabled"},
                               "selected_monitor": None}
 
-        mask_keys = {"beamstop_shadow": {"angle", "width"},
+        mask_keys = {
                      "prompt_peak" : {"start", "stop"},
                      "mask_files": None,
-                     "mask_pixels": None,
                      "phi": {"mirror", "start", "stop"},
                      "time": {"tof"},
                      "spatial": {"rear": {"detector_columns", "detector_rows",
                                           "detector_column_ranges", "detector_row_ranges"},
                                  "front": {"detector_columns", "detector_rows",
-                                           "detector_column_ranges", "detector_row_ranges"}}}
+                                           "detector_column_ranges", "detector_row_ranges"},
+                                 "beamstop_shadow": {"angle", "width", "x_pos", "y_pos"},
+                                 "mask_pixels": None}
+                     }
 
         return {"toml_file_version": None,
                 "binning": binning_keys,
                 "metadata": ".*",
                 "detector": detector_keys,
-                "gravity": gravity_keys,
                 "mask": mask_keys,
                 "instrument": instrument_keys,
                 "normalisation": normalisation_keys,
+                "normalization": normalisation_keys,  # Accept both forms
                 "q_resolution": q_resolution_keys,
                 "reduction": reduction_keys,
                 "transmission": transmission_keys

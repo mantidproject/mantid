@@ -147,7 +147,7 @@ public:
     MCInteractionStatistics trackStatistics(-1, Mantid::API::Sample{});
     Mantid::Geometry::BoundingBox emptyBoundingBox;
     EXPECT_CALL(testBeamProfile, generatePoint(_, _)).Times(Exactly(static_cast<int>(6)));
-    EXPECT_CALL(testInteractionVolume, getBoundingBox()).Times(1).WillOnce(ReturnRef(emptyBoundingBox));
+    EXPECT_CALL(testInteractionVolume, getFullBoundingBox()).Times(1).WillOnce(Return(emptyBoundingBox));
 
     auto beforeScatter = std::make_shared<MockTrack>();
     auto afterScatter = std::make_shared<MockTrack>();
@@ -228,7 +228,6 @@ private:
                                                      const Mantid::Kernel::V3D &startPos,
                                                      const Mantid::Kernel::V3D &endPos,
                                                      MCInteractionStatistics &stats));
-    MOCK_CONST_METHOD0(getBoundingBox, Mantid::Geometry::BoundingBox &());
     MOCK_CONST_METHOD0(getFullBoundingBox, const Mantid::Geometry::BoundingBox());
     MOCK_METHOD1(setActiveRegion, void(const Mantid::Geometry::BoundingBox &));
     GNU_DIAG_ON_SUGGEST_OVERRIDE

@@ -213,11 +213,11 @@ class PyChopGui(QMainWindow):
         """
         try:
             eitxt = float(self.widgets['EiEdit']['Edit'].text())
-            self.engine.setEi(eitxt)
-            if self.eiPlots.isChecked():
-                self.calc_callback()
         except ValueError:
             raise ValueError('No Ei specified, or Ei string not understood')
+        self.engine.setEi(eitxt)
+        if self.eiPlots.isChecked():
+            self.calc_callback()
 
     def setS2(self):
         """
@@ -254,8 +254,9 @@ class PyChopGui(QMainWindow):
                 self.update_script()
         except ValueError as err:
             self.errormessage(err)
-        self.plot_flux_ei()
-        self.plot_flux_hz()
+        else:
+            self.plot_flux_ei()
+            self.plot_flux_hz()
 
     def calculate(self):
         """

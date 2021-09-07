@@ -16,12 +16,13 @@ from contextlib import contextmanager
 from functools import wraps
 from typing import Optional
 
-from qtpy import PYQT4
+from mantidqt.utils.observer_pattern import GenericObserver
+from sans.user_file.toml_parsers.toml_v1_schema import TomlValidationError
 from ui.sans_isis import SANSSaveOtherWindow
 from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
-from ui.sans_isis.work_handler import WorkHandler
+from ui.sans_isis.sans_gui_observable import SansGuiObservable
 
-from mantid.api import (FileFinder)
+from mantid.api import FileFinder
 from mantid.kernel import Logger, ConfigService, ConfigPropertyObserver
 from sans.command_interface.batch_csv_parser import BatchCsvParser
 from sans.common.enums import (ReductionMode, RangeStepType, RowState, SampleShape,
@@ -30,13 +31,14 @@ from sans.gui_logic.gui_common import (add_dir_to_datasearch, get_reduction_mode
                                        get_reduction_mode_strings_for_gui, get_string_for_gui_from_instrument,
                                        SANSGuiPropertiesHandler)
 from sans.gui_logic.models.RowEntries import RowEntries
-from sans.gui_logic.models.batch_process_runner import BatchProcessRunner
+from sans.gui_logic.models.async_workers.sans_run_tab_async import SansRunTabAsync
 from sans.gui_logic.models.create_state import create_states
-from sans.gui_logic.models.diagnostics_page_model import run_integral, create_state
 from sans.gui_logic.models.file_loading import FileLoading, UserFileLoadException
+from sans.gui_logic.models.run_tab_model import RunTabModel
 from sans.gui_logic.models.settings_adjustment_model import SettingsAdjustmentModel
 from sans.gui_logic.models.state_gui_model import StateGuiModel
 from sans.gui_logic.models.table_model import TableModel
+from sans.gui_logic.presenter.Observers.run_tab_observers import RunTabObservers
 from sans.gui_logic.presenter.beam_centre_presenter import BeamCentrePresenter
 from sans.gui_logic.presenter.diagnostic_presenter import DiagnosticsPagePresenter
 from sans.gui_logic.presenter.masking_table_presenter import MaskingTablePresenter
@@ -44,18 +46,8 @@ from sans.gui_logic.presenter.presenter_common import PresenterCommon
 from sans.gui_logic.presenter.save_other_presenter import SaveOtherPresenter
 from sans.gui_logic.presenter.settings_adjustment_presenter import SettingsAdjustmentPresenter
 from sans.gui_logic.presenter.settings_diagnostic_presenter import SettingsDiagnosticPresenter
-from sans.sans_batch import SANSCentreFinder
 from sans.state.AllStates import AllStates
-
-IN_MANTIDPLOT = False
-if PYQT4:
-    try:
-        from mantidplot import graph, newGraph
-        IN_MANTIDPLOT = True
-    except ImportError:
-        pass
-else:
-    from mantid.plots.plotfunctions import get_plot_fig
+from mantid.plots.plotfunctions import get_plot_fig
 
 row_state_to_colour_mapping = {RowState.UNPROCESSED: '#FFFFFF', RowState.PROCESSED: '#d0f4d0',
                                RowState.ERROR: '#accbff'}
@@ -150,9 +142,6 @@ class RunTabPresenter(PresenterCommon):
         def on_multi_period_selection(self, show_periods):
             self._presenter.on_multiperiod_changed(show_periods)
 
-        def on_reduction_dimensionality_changed(self, is_1d):
-            self._presenter.on_reduction_dimensionality_changed(is_1d)
-
         def on_output_mode_changed(self):
             self._presenter.on_output_mode_changed()
 
@@ -195,18 +184,7 @@ class RunTabPresenter(PresenterCommon):
         def on_field_edit(self):
             self._presenter.update_model_from_view()
 
-    class ProcessListener(WorkHandler.WorkListener):
-        def __init__(self, presenter):
-            super(RunTabPresenter.ProcessListener, self).__init__()
-            self._presenter = presenter
-
-        def on_processing_finished(self, result):
-            self._presenter.on_processing_finished(result)
-
-        def on_processing_error(self, error):
-            self._presenter.on_processing_error(error)
-
-    def __init__(self, facility, model=None, table_model=None, view=None, ):
+    def __init__(self, facility, run_tab_model, model=None, table_model=None, view=None):
         # We don't have access to state model really at this point
         super(RunTabPresenter, self).__init__(view, None)
 
@@ -221,13 +199,14 @@ class RunTabPresenter(PresenterCommon):
 
         # Models that are being used by the presenter
         self._model = model if model else StateGuiModel(all_states=AllStates())
+        self._run_tab_model: RunTabModel = run_tab_model
         self._table_model = table_model if table_model else TableModel()
         self._table_model.subscribe_to_model_changes(self)
 
         self._processing = False
-        self.batch_process_runner = BatchProcessRunner(self.notify_progress,
-                                                       self.on_processing_finished,
-                                                       self.on_processing_error)
+        self.batch_process_runner = SansRunTabAsync(self.notify_progress,
+                                                    self.on_processing_finished,
+                                                    self.on_processing_error)
 
         # File information for the first input
         self._file_information = None
@@ -244,6 +223,7 @@ class RunTabPresenter(PresenterCommon):
         # Check save dir for display
         self._save_directory_observer = \
             SaveDirectoryObserver(self._handle_output_directory_changed)
+        self._register_observers()
 
     def _setup_sub_presenters(self):
         # Holds a list of sub presenters which uses the CommonPresenter class to set views
@@ -259,17 +239,25 @@ class RunTabPresenter(PresenterCommon):
         self._table_model.subscribe_to_model_changes(self._masking_table_presenter)
 
         # Beam centre presenter
-        self._beam_centre_presenter = BeamCentrePresenter(self, SANSCentreFinder)
+        self._beam_centre_presenter = BeamCentrePresenter(self)
         self._table_model.subscribe_to_model_changes(self._beam_centre_presenter)
 
         # Workspace Diagnostic page presenter
-        self._workspace_diagnostic_presenter = DiagnosticsPagePresenter(self, WorkHandler,
-                                                                        run_integral, create_state,
-                                                                        self._facility)
+        self._workspace_diagnostic_presenter = DiagnosticsPagePresenter(self, self._facility)
         # Adjustment Tab presenter
         self._settings_adjustment_presenter = SettingsAdjustmentPresenter(
             model=SettingsAdjustmentModel(), view=self._view)
         self._common_sub_presenters.append(self._settings_adjustment_presenter)
+
+    def _register_observers(self):
+        self._observers = RunTabObservers(
+            reduction_dim = GenericObserver(callback=self.on_reduction_dimensionality_changed),
+            save_options = GenericObserver(callback=self.on_save_options_change)
+        )
+
+        view_observable: SansGuiObservable = self._view.get_observable()
+        view_observable.reduction_dim.add_subscriber(self._observers.reduction_dim)
+        view_observable.save_options.add_subscriber(self._observers.save_options)
 
     def default_gui_setup(self):
         """
@@ -324,7 +312,7 @@ class RunTabPresenter(PresenterCommon):
             traceback.print_stack()
             return
 
-        self._view = view
+        self._view: SANSDataProcessorGui = view
 
         listener = RunTabPresenter.ConcreteRunTabListener(self)
         self._view.add_listener(listener)
@@ -378,6 +366,10 @@ class RunTabPresenter(PresenterCommon):
     def instrument(self):
         return self._model.instrument
 
+    def on_save_options_change(self):
+        selected_save_types = self._view.save_types
+        self._run_tab_model.update_save_types(selected_save_types)
+
     def on_user_file_load(self):
         """
         Loads the user file. Populates the models and the view.
@@ -403,7 +395,7 @@ class RunTabPresenter(PresenterCommon):
             # Always set the instrument to NoInstrument unless otherwise specified as our fallback
             user_file_items = FileLoading.load_user_file(file_path=user_file_path,
                                                          file_information=self._file_information)
-        except UserFileLoadException as e:
+        except (UserFileLoadException, TomlValidationError) as e:
             # It is in this exception block that loading fails if the file is invalid (e.g. a csv)
             self._on_user_file_load_failure(e, error_msg + " when reading file.", use_error_name=True)
             return
@@ -493,7 +485,7 @@ class RunTabPresenter(PresenterCommon):
         for row in self._table_model.get_non_empty_rows():
             try:
                 file_info = row.file_information
-            except (ValueError, RuntimeError):
+            except (ValueError, RuntimeError, OSError):
                 pass
 
         if self._file_information != file_info:
@@ -540,15 +532,11 @@ class RunTabPresenter(PresenterCommon):
         Plot a graph if continuous output specified.
         """
         if self._view.plot_results:
-            if IN_MANTIDPLOT:
-                if not graph(self.output_graph):
-                    newGraph(self.output_graph)
-            elif not PYQT4:
-                ax_properties = {'yscale': 'log',
-                                 'xscale': 'log'}
-                fig, _ = get_plot_fig(ax_properties=ax_properties, window_title=self.output_graph)
-                fig.show()
-                self.output_fig = fig
+            ax_properties = {'yscale': 'log',
+                             'xscale': 'log'}
+            fig, _ = get_plot_fig(ax_properties=ax_properties, window_title=self.output_graph)
+            fig.show()
+            self.output_fig = fig
 
     def _set_progress_bar(self, current, number_steps):
         """
@@ -566,58 +554,36 @@ class RunTabPresenter(PresenterCommon):
         """
         self._set_progress_bar(current=0, number_steps=len(rows))
 
+        # Trip up early if output modes are invalid
         try:
-            # Trip up early if output modes are invalid
             self._validate_output_modes()
+        except ValueError as e:
+            return self.on_processing_error(str(e))
 
-            row_index_pair = []
+        row_index_pair = []
 
-            for row in rows:
-                row.reset_row_state()
-                row_index_pair.append((row, self._table_model.get_row_index(row)))
+        for row in rows:
+            row.reset_row_state()
+            row_index_pair.append((row, self._table_model.get_row_index(row)))
 
-            self.update_view_from_table_model()
+        self.update_view_from_table_model()
 
-            self._view.disable_buttons()
-            self._processing = True
-            self.sans_logger.information("Starting processing of batch table.")
+        self._view.disable_buttons()
+        self._processing = True
+        self.sans_logger.information("Starting processing of batch table.")
 
-            self._plot_graph()
-            save_can = self._view.save_can
+        self._plot_graph()
+        save_can = self._view.save_can
 
-            # MantidPlot and Workbench have different approaches to plotting
-            output_graph = self.output_graph if PYQT4 else self.output_fig
+        self.batch_process_runner.process_states_on_thread(
+            row_index_pair, self.get_states, self._view.use_optimizations,
+            self._view.output_mode, self._view.plot_results, self.output_fig, save_can)
 
-            self.batch_process_runner.process_states(row_index_pair, self.get_states,
-                                                     self._view.use_optimizations,
-                                                     self._view.output_mode,
-                                                     self._view.plot_results,
-                                                     output_graph,
-                                                     save_can)
-
-        except Exception as e:
-            self.on_processing_finished()
-            self.sans_logger.error("Process halted due to: {}".format(str(e)))
-            self.display_warning_box('Warning', 'Process halted', str(e))
-
-    def on_reduction_dimensionality_changed(self, is_1d):
-        """
-        Unchecks and disabled canSAS output mode if switching to 2D reduction.
-        Enabled canSAS if switching to 1D.
-        :param is_1d: bool. If true then switching TO 1D reduction.
-        """
-        self._model.reduction_dimensionality = self._view.reduction_dimensionality
-
-        if not self._view.output_mode_memory_radio_button.isChecked():
-            # If we're in memory mode, all file types should always be disabled
-            if is_1d:
-                self._view.can_sas_checkbox.setEnabled(True)
-            else:
-                if self._view.can_sas_checkbox.isChecked():
-                    self._view.can_sas_checkbox.setChecked(False)
-                    self.sans_logger.information("2D reductions are incompatible with canSAS output. "
-                                                 "canSAS output has been unchecked.")
-                self._view.can_sas_checkbox.setEnabled(False)
+    def on_reduction_dimensionality_changed(self):
+        self._run_tab_model.update_reduction_mode(self._view.reduction_dimensionality)
+        # Update save options in case they've updated in the model
+        save_opts = self._run_tab_model.get_save_types()
+        self._view.save_types = save_opts
 
     def _validate_output_modes(self):
         """
@@ -629,8 +595,8 @@ class RunTabPresenter(PresenterCommon):
         if (self._view.output_mode_file_radio_button.isChecked()
                 or self._view.output_mode_both_radio_button.isChecked()):
             if self._view.save_types == [SaveType.NO_TYPE]:
-                raise RuntimeError("You have selected an output mode which saves to file, "
-                                   "but no file types have been selected.")
+                raise ValueError("You have selected an output mode which saves to file, "
+                                 "but no file types have been selected.")
 
     def on_output_mode_changed(self):
         """
@@ -641,10 +607,7 @@ class RunTabPresenter(PresenterCommon):
             # If in memory mode, disable all buttons regardless of dimension
             self._view.disable_file_type_buttons()
         else:
-            self._view.nx_can_sas_checkbox.setEnabled(True)
-            self._view.rkh_checkbox.setEnabled(True)
-            if self._view.reduction_dimensionality_1D.isChecked():
-                self._view.can_sas_checkbox.setEnabled(True)
+            self._view.enable_file_type_buttons()
 
     def on_process_all_clicked(self):
         """
@@ -668,18 +631,18 @@ class RunTabPresenter(PresenterCommon):
         if to_process:
             self._process_rows(to_process)
 
-    def on_processing_error(self, row_index, error_msg):
+    def on_processing_error(self, error_msg):
         """
         An error occurs while processing the row with index row, error_msg is displayed as a
         tooltip on the row.
         """
-        self.increment_progress()
-        row = self._table_model.get_row(row_index)
-        row.state = RowState.ERROR
-        row.tool_tip = error_msg
+        self._view.enable_buttons()
+        self._processing = False
         self.update_view_from_table_model()
+        self.sans_logger.error("Process halted due to: {}".format(str(error_msg)))
+        self.display_warning_box("Warning", "Process halted", str(error_msg))
 
-    def on_processing_finished(self, result):
+    def on_processing_finished(self):
         self._view.enable_buttons()
         self._processing = False
         self.update_view_from_table_model()
@@ -703,13 +666,7 @@ class RunTabPresenter(PresenterCommon):
             row_index_pair.append((row, self._table_model.get_row_index(row)))
 
         self._set_progress_bar(current=0, number_steps=len(selected_rows))
-
-        try:
-            self.batch_process_runner.load_workspaces(row_index_pair=row_index_pair, get_states_func=self.get_states)
-        except Exception as e:
-            self._view.enable_buttons()
-            self.sans_logger.error("Process halted due to: {}".format(str(e)))
-            self.display_warning_box("Warning", "Process halted", str(e))
+        self.batch_process_runner.load_workspaces_on_thread(row_index_pairs=row_index_pair, get_states_func=self.get_states)
 
     @staticmethod
     def _get_filename_to_save(filename):
@@ -737,10 +694,14 @@ class RunTabPresenter(PresenterCommon):
             filename = self.display_save_file_box("Save table as", default_filename, "*.csv")
             filename = self._get_filename_to_save(filename)
 
-            if filename:
-                self.sans_logger.information("Starting export of table. Filename: {}".format(filename))
+            if not filename:
+                return
+            self.sans_logger.information("Starting export of table. Filename: {}".format(filename))
+            try:
                 self._csv_parser.save_batch_file(rows=non_empty_rows, file_path=filename)
-                self.sans_logger.information("Table exporting finished.")
+            except (PermissionError, IOError) as e:
+                self.display_errors(error=e, context_msg="Failed to save the .csv file.", use_error_name=True)
+            self.sans_logger.information("Table exporting finished.")
 
     def on_multiperiod_changed(self, show_periods):
         if show_periods:
@@ -913,9 +874,9 @@ class RunTabPresenter(PresenterCommon):
             return
         mode = get_reduction_mode_from_gui_selection(selection)
         if mode == ReductionMode.HAB:
-            self._beam_centre_presenter.update_hab_selected()
+            self._beam_centre_presenter.update_front_selected()
         elif mode == ReductionMode.LAB:
-            self._beam_centre_presenter.update_lab_selected()
+            self._beam_centre_presenter.update_rear_selected()
         else:
             self._beam_centre_presenter.update_all_selected()
 
@@ -1010,8 +971,8 @@ class RunTabPresenter(PresenterCommon):
             presenter.update_view_from_model()
 
         # Front tab view
+        self._view.save_types = self._run_tab_model.get_save_types()
         self._set_on_view("zero_error_free")
-        self._set_on_view("save_types")
         self._set_on_view("compatibility_mode")
         self._set_on_view("merge_scale")
         self._set_on_view("merge_shift")
@@ -1119,10 +1080,11 @@ class RunTabPresenter(PresenterCommon):
         for presenter in self._common_sub_presenters:
             presenter.update_model_from_view()
 
+        state_model.save_types = self._run_tab_model.get_save_types().to_all_states()
+
         try:
             # Run tab view
             self._set_on_custom_model("zero_error_free", state_model)
-            self._set_on_custom_model("save_types", state_model)
             self._set_on_custom_model("compatibility_mode", state_model)
             self._set_on_custom_model("event_slice_optimisation", state_model)
             self._set_on_custom_model("merge_scale", state_model)
@@ -1185,8 +1147,8 @@ class RunTabPresenter(PresenterCommon):
             self._set_on_custom_model("batch_file", state_model)
 
             # Beam Centre
-            self._beam_centre_presenter.set_on_state_model("lab_pos_1", state_model)
-            self._beam_centre_presenter.set_on_state_model("lab_pos_2", state_model)
+            self._beam_centre_presenter.set_on_state_model("rear_pos_1", state_model)
+            self._beam_centre_presenter.set_on_state_model("rear_pos_2", state_model)
         except (RuntimeError, ValueError) as e:
             self.display_warning_box(title="Invalid Settings Entered", text=str(e), detailed_text=str(e))
 

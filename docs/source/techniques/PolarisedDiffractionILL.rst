@@ -26,7 +26,8 @@ This document tries to give an overview on how the algorithms work together via 
 Reduction workflow and recommendations
 ######################################
 
-A description of the usage of the algorithms for the D7 data reduction is presented along with several possible workflows, depending on the number of desired corrections and the type of normalisation.
+A description of the usage of the algorithms for the D7 data reduction is presented along with several possible workflows, depending on the number of desired corrections, the type of normalisation, as well
+as the type of measurement that the data comes from (powder sample, TOF, single crystal).
 
 Reduction basics
 ================
@@ -50,7 +51,7 @@ A very basic reduction would include a vanadium reference and a sample, without 
 .. testcode:: BasicReduction
 
     # Define vanadium properties:
-    vanadiumProperties = {'FormulaUnits': 1, 'SampleMass': 8.54, 'FormulaUnitMass': 50.94}
+    vanadiumProperties = {'SampleMass': 8.54, 'FormulaUnitMass': 50.94}
 
     # Vanadium reduction
     PolDiffILLReduction(Run='396993', ProcessAs='Vanadium', OutputTreatment='Sum',
@@ -58,7 +59,7 @@ A very basic reduction would include a vanadium reference and a sample, without 
                         SampleAndEnvironmentProperties=vanadiumProperties)
 
     # Define the number of formula units for the sample
-    sampleProperties = {'FormulaUnits': 1, 'SampleMass': 2.932, 'FormulaUnitMass': 182.54}
+    sampleProperties = {'SampleMass': 2.932, 'FormulaUnitMass': 182.54}
     # Sample reduction
     PolDiffILLReduction(Run='397004', ProcessAs='Sample', OutputWorkspace='reduced_sample',
                             SampleAndEnvironmentProperties=sampleProperties)
@@ -140,11 +141,11 @@ To save time in this iterative process, `InputWorkspace` property can be specifi
 Transmission calculation
 ========================
 
-The transmission (T) is calculated using counts measured by monitor 2 (M2), and according to the following formula:
+The transmission (T) is calculated using counts measured by monitor 2 (M2) normalised to either measurement time or monitor 1, and according to the following formula:
 
 .. math:: T = \frac{S - E_{Cd}}{E - E_{Cd}},
 
-where :math:`S` is M2 counts measured with the current sample, :math:`E_{Cd}` is counts when cadmium absorber is measured, and :math:`E` is counts from the direct beam.
+where :math:`S` is normalised M2 counts measured with the current sample, :math:`E_{Cd}` is normalised counts when cadmium absorber is measured, and :math:`E` is normalised counts from the direct beam.
 
 The measurement of the cadmium absorber is optional and does not have to be provided as input for the transmission to be calculated. However, it allows
 to take into account dark currents in the readout system electronics and thus this measurement is advised to be included in transmission calculations.
@@ -152,6 +153,9 @@ to take into account dark currents in the readout system electronics and thus th
 It is possible to provide more than one numor as input for the transmission calculation. In such a case, the input workspaces are averaged.
 
 The output of the transmission calculation is given as a :ref:`WorkspaceGroup <WorkspaceGroup>` with a single workspace containing a single value of the calculated polarisation.
+
+Instead of running the transmission calculation it is also possible to either provide a workspace with a single value or a floating-point value for the transmission to the workflows
+that require transmission.
 
 Workflow diagrams and working example
 -------------------------------------
@@ -195,7 +199,7 @@ Transmission
     PolDiffILLReduction(
         Run='396983',
         OutputWorkspace='beam_ws',
-        CadmiumTransmissionInputWorkspace='cadmium_transmission_ws_1',
+        CadmiumTransmissionWorkspace='cadmium_transmission_ws',
         ProcessAs='EmptyBeam'
     )
     print('Cadmium absorber transmission is {0:.3f}'.format(mtd['cadmium_transmission_ws_1'].readY(0)[0] / mtd['beam_ws_1'].readY(0)[0]))
@@ -204,8 +208,8 @@ Transmission
     PolDiffILLReduction(
         Run='396985',
         OutputWorkspace='quartz_transmission',
-        CadmiumTransmissionInputWorkspace='cadmium_transmission_ws_1',
-        BeamInputWorkspace='beam_ws_1',
+        CadmiumTransmissionWorkspace='cadmium_transmission_ws',
+        EmptyBeamWorkspace='beam_ws',
         ProcessAs='Transmission'
     )
     print('Quartz transmission is {0:.3f}'.format(mtd['quartz_transmission_1'].readY(0)[0]))
@@ -232,15 +236,20 @@ differences in the polarizing efficiency and choosing the quartz to have the sam
 is not a problem, as the correction is given by a ratio and there is no spin-flip scattering to depolarize the beam. The polarization efficiencies
 are calculated from ratios of non-spin-flip to spin-flip scattering, hence absolute numbers are not necessary.
 
-First, the data is normalised to monitor 1 (M1). Then, if the necessary inputs of empty container and absorber (please note this is a different measurement
-than mentioned in the `Transmission` section) measurements are provided, the background can be subtracted from the data:
+First, the data is normalised to monitor 1 (M1) or measurement time. Then, if the necessary inputs of empty container and absorber (please note
+this is a different measurement than mentioned in the `Transmission` section) measurements are provided, the background can be subtracted from the data:
 
 .. math:: \dot{I_{B}} = \dot{I} - T\dot{E} - (1-T) \dot{C},
 
-where :math:`\dot{I}` denotes monitor-normalised quartz data, :math:`T` is transmission, and :math:`\dot{E}` and :math:`\dot{C}` are the normalised counts
+where :math:`\dot{I}` denotes monitor or time-normalised quartz data, :math:`T` is transmission, and :math:`\dot{E}` and :math:`\dot{C}` are the normalised counts
 measured with empty container and cadmium absorber, respectively.
 
 In the case where either absorber or empty container inputs are not provided, this correction is not performed.
+
+The data can be processed individually for all polarisation orientations available in the provided sample, or alternatively, the processing is done on averaged
+data. To process data averaged over polarisation orienantions, `OutputTreatment` property needs to be set to `AveragePol`. The alternative averaging is done
+over twoTheta positions of detectors, when `OutputTreatment` is set to `AverageTwoTheta`. In the latter case, the data is processed individually and averaged
+after polarisation correction is calculated.
 
 Finally, the polariser-analyser efficiency can be calculated, using the following formula:
 
@@ -282,7 +291,7 @@ Below is the relevant workflow diagram describing reduction steps of the quartz 
     PolDiffILLReduction(
         Run='396983',
         OutputWorkspace='beam_ws',
-        CadmiumTransmissionInputWorkspace='cadmium_transmission_ws_1',
+        CadmiumTransmissionWorkspace='cadmium_transmission_ws',
         ProcessAs='EmptyBeam'
     )
 
@@ -290,8 +299,8 @@ Below is the relevant workflow diagram describing reduction steps of the quartz 
     PolDiffILLReduction(
         Run='396985',
         OutputWorkspace='quartz_transmission',
-        CadmiumTransmissionInputWorkspace='cadmium_transmission_ws_1',
-        BeamInputWorkspace='beam_ws_1',
+        CadmiumTransmissionWorkspace='cadmium_transmission_ws',
+        EmptyBeamWorkspace='beam_ws',
         ProcessAs='Transmission'
     )
 
@@ -313,10 +322,10 @@ Below is the relevant workflow diagram describing reduction steps of the quartz 
     PolDiffILLReduction(
         Run='396939',
         OutputWorkspace='pol_corrections',
-        CadmiumInputWorkspace='cadmium_ws',
-        EmptyInputWorkspace='empty_ws',
-        TransmissionInputWorkspace='quartz_transmission_1',
-        OutputTreatment='Average',
+        CadmiumWorkspace='cadmium_ws',
+        EmptyContainerWorkspace='empty_ws',
+        Transmission='quartz_transmission',
+        OutputTreatment='AveragePol',
         ProcessAs='Quartz'
     )
 
@@ -353,13 +362,15 @@ nuclear-spin-incoherent cross-section can be derived, this cross-section can be 
 In this case, the vanadium cross-section is unnecessary.
 
 For the best results of using the reduced vanadium data as input for sample data normalisation, the `OutputTreatment` property of the
-:ref:`PolDiffILLReduction <algm-PolDiffILLReduction>` algorithm needs to be set to `Sum`.
+:ref:`PolDiffILLReduction <algm-PolDiffILLReduction>` algorithm needs to be set to `Sum`. Alternatively, it is possible to inspect data
+for diagnostic purposes by setting the `OutputTreatment` property to either `AveragePol` for averaging over polarisation orientations,
+or `AverageTwoTheta` to obtain an average over twoTheta positions.
 
 
 Reduction workflow
 ------------------
 
-The first two steps of the reduction of vanadium data are the same as for quartz, with normalisation to the monitor and background
+The first two steps of the reduction of vanadium data are the same as for quartz, with normalisation to the monitor or time, and background
 subtraction (provided the necessary inputs). The polarisation efficiency of the instrument can be corrected using the previously reduced
 quartz data. The correction is applied according to the following formula:
 
@@ -381,8 +392,9 @@ and :math:`\dot{I_{B}}(0)` and :math:`\dot{I_{B}}(1)` are the events with the fl
 Self-attenuation correction
 ---------------------------
 
-There are three ways the self-attenuation of a sample can be taken into account in the implemented D7 reduction: `Numerical`, `MonteCarlo`, and `User`.
-In all three cases, the correction is applied to data with :ref:`ApplyPaalmanPingsCorrection <algm-ApplyPaalmanPingsCorrection>` algorithm.
+There are several ways the self-attenuation of a sample can be taken into account in the implemented D7 reduction: `None`, `Transmission`, `Numerical`, `MonteCarlo`, and `User`.
+In the first case, no corrections are calculated nor applied to data. In the second, the transmission value is used to scale all detector counts by the transmission value.
+In the three final cases, the correction is applied to data with :ref:`ApplyPaalmanPingsCorrection <algm-ApplyPaalmanPingsCorrection>` algorithm.
 
 The `User` option depends on the self-attenuation parameters provided by the user through `SampleSelfAttenuationFactors` property of the :ref:`PolDiffILLReduction <algm-PolDiffILLReduction>`
 algorithm. This option allows to study the self-attenuation of a sample that can have arbitrary shape separately from running the reduction algorithm,
@@ -404,14 +416,13 @@ The complete list of keys can is summarised below:
 Sample-only keys:
 
 - *SampleMass*
-- *FormulaUnits*
 - *FormulaUnitMass*
 - *SampleChemicalFormula*
 - *SampleDensity*
 - *Height*
 
 The first three keys need to be always defined, so that the number of moles of the sample can be calculated, to ensure proper data normalisation.
-All of the density parameters are **number density in formula units**.
+The sample and container density parameters are in units of **mass density**.
 
 Container-only keys:
 
@@ -486,10 +497,10 @@ Below is the relevant workflow diagram describing reduction steps of the vanadiu
 
 .. testcode:: ExPolarisedDifffractionVanadium
 
-    vanadium_dictionary = {'SampleMass':8.54,'FormulaUnits':1,'FormulaUnitMass':50.94,'SampleChemicalFormula':'V',
-                           'Height':2.0,'SampleDensity':0.118,'SampleInnerRadius':2.0, 'SampleOuterRadius':2.49,
+    vanadium_dictionary = {'SampleMass':8.54,'FormulaUnitMass':50.94,'SampleChemicalFormula':'V',
+                           'Height':2.0,'SampleDensity':6.1,'SampleInnerRadius':2.0, 'SampleOuterRadius':2.49,
                            'BeamWidth':2.5,'BeamHeight':2.5,
-                           'ContainerChemicalFormula':'Al','ContainerDensity':0.0027,'ContainerOuterRadius':2.52,
+                           'ContainerChemicalFormula':'Al','ContainerDensity':2.7,'ContainerOuterRadius':2.52,
                            'ContainerInnerRadius':1.99, 'EventsPerPoint':1000}
 
     calibration_file='D7_YIG_calibration.xml' # example calibration file
@@ -504,7 +515,7 @@ Below is the relevant workflow diagram describing reduction steps of the vanadiu
     PolDiffILLReduction(
         Run='396983',
         OutputWorkspace='beam_ws',
-        CadmiumTransmissionInputWorkspace='cadmium_transmission_ws_1',
+        CadmiumTransmissionWorkspace='cadmium_transmission_ws',
         ProcessAs='EmptyBeam'
     )
 
@@ -512,8 +523,8 @@ Below is the relevant workflow diagram describing reduction steps of the vanadiu
     PolDiffILLReduction(
         Run='396985',
         OutputWorkspace='quartz_transmission',
-        CadmiumTransmissionInputWorkspace='cadmium_transmission_ws_1',
-        BeamInputWorkspace='beam_ws_1',
+        CadmiumTransmissionWorkspace='cadmium_transmission_ws',
+        EmptyBeamWorkspace='beam_ws',
         ProcessAs='Transmission'
     )
 
@@ -535,10 +546,10 @@ Below is the relevant workflow diagram describing reduction steps of the vanadiu
     PolDiffILLReduction(
         Run='396939',
         OutputWorkspace='pol_corrections',
-        CadmiumInputWorkspace='cadmium_ws',
-        EmptyInputWorkspace='empty_ws',
-        TransmissionInputWorkspace='quartz_transmission_1',
-        OutputTreatment='Average',
+        CadmiumWorkspace='cadmium_ws',
+        EmptyContainerWorkspace='empty_ws',
+        Transmission='quartz_transmission',
+        OutputTreatment='AveragePol',
         ProcessAs='Quartz'
     )
 
@@ -546,8 +557,8 @@ Below is the relevant workflow diagram describing reduction steps of the vanadiu
     PolDiffILLReduction(
         Run='396990',
         OutputWorkspace='vanadium_transmission',
-        CadmiumTransmissionInputWorkspace='cadmium_transmission_ws_1',
-        BeamInputWorkspace='beam_ws_1',
+        CadmiumTransmissionWorkspace='cadmium_transmission_ws',
+        EmptyBeamWorkspace='beam_ws',
         ProcessAs='Transmission'
     )
     print('Vanadium transmission is {0:.3f}'.format(mtd['vanadium_transmission_1'].readY(0)[0]))
@@ -556,10 +567,10 @@ Below is the relevant workflow diagram describing reduction steps of the vanadiu
     PolDiffILLReduction(
         Run='396993',
         OutputWorkspace='vanadium_ws',
-        CadmiumInputWorkspace='cadmium_ws',
-        EmptyInputWorkspace='empty_ws',
-        TransmissionInputWorkspace='vanadium_transmission_1',
-        QuartzInputWorkspace='pol_corrections',
+        CadmiumWorkspace='cadmium_ws',
+        EmptyContainerWorkspace='empty_ws',
+        Transmission='vanadium_transmission',
+        QuartzWorkspace='pol_corrections',
         OutputTreatment='Sum',
         SelfAttenuationMethod='MonteCarlo',
         SampleGeometry='Annulus',
@@ -585,10 +596,14 @@ Output:
 Sample data reduction
 =====================
 
-The sample data reduction follows the same steps of monitor normalisation, background subtraction, polarisation correction, and
+The sample data reduction follows the same steps of monitor or time normalisation, background subtraction, polarisation correction, and
 self-attenuation correction as vanadium data reduction. Should the self-attenuation correction be taken into account, the relevant
 sample and environment parameters need to be defined in a dictionary that is provided to `SampleAndEnvironmentProperty` with
-keys described in the vanadium reduction section.
+keys described in the vanadium reduction section. The extra keys, required by :ref:`D7AbsoluteCrossSections <algm-D7AbsoluteCrossSections>`
+and relevant only for the `SingleCrystal` reduction are:
+
+* KiXAngle - the angle between the incident momentum and the Sharpf angle,
+* OmegaShift - omega offset of the sample.
 
 The output of the  is a :ref:`WorkspaceGroup <WorkspaceGroup>` with the number of entries equal to number of measured polarisations
 times number of steps in a :math:`2\theta` scan. This output can be provided to :ref:`D7AbsoluteCrossSections <algm-D7AbsoluteCrossSections>`
@@ -608,6 +623,10 @@ documentation of the :ref:`D7AbsoluteCrossSections <algm-D7AbsoluteCrossSections
 measured scattering cross-section. The specifics of the 10-point measurement as a set of two separate 6-point measurements are taken into account.
 In that case, the second set of 6-point data needs to be provided to `RotatedXYZWorkspace` property of the :ref:`D7AbsoluteCrossSections <algm-D7AbsoluteCrossSections>`
 algorithm, and the '10-p' needs to be chosen as the `CrossSectionSeparationMethod`.
+
+In the case of `SingleCrystal` measurements, cross-section separation can be performed following Ref. [#Schweika]_ formulae, which apply in the case
+of anisotropic magnetism. The relevant property to be checked as `False` is `IsotropicMagnetism` of the :ref:`D7AbsoluteCrossSections <algm-D7AbsoluteCrossSections>`
+algorithm.
 
 
 Sample data normalisation
@@ -633,15 +652,14 @@ options available to normalise the sample data:
    an additional parameter needs to be defined in the sample properties dictionary, named `IncoherentCrossSection`, to provide the total
    nuclear-spin-incoherent cross-section of the sample.
 
-In all cases, a relative normalisation to the detector with highest number of counts is always performed.
-
 Output
 ------
 
 The output of the reduction and normalisation is a :ref:`WorkspaceGroup <WorkspaceGroup>` with the number of entries consistent with the input
 if the `OutputTreatment` property was selected to be `Individual`, or the number of entries will be consistent with either the number of polarisation
 orientations present in the data (e.g. six for a XYZ method) or the number of separated cross-section.
-Each entry of the output group is a workspace with X-axis unit being either momentum exchange :math:`Q` or the scattering angle :math:`2\theta`.
+Each entry of the output group is a workspace with X-axis unit being either momentum exchange :math:`Q`, the scattering angle :math:`2\theta`,
+or, in the case of `SingleCrystal` reduction, cross-section values on a :math:`Q_{x}` - :math:`Q_{y}` plane.
 
 
 Workflow diagrams and working example
@@ -670,12 +688,12 @@ Sample normalisation
 
 .. testcode:: ExPolarisedDifffractionSampleFull
 
-    vanadium_dictionary = {'SampleMass':8.54,'FormulaUnits':1,'FormulaUnitMass':50.94}
+    vanadium_dictionary = {'SampleMass':8.54,'FormulaUnitMass':50.94}
 
-    sample_dictionary = {'SampleMass':2.932,'SampleDensity':2.0,'FormulaUnits':1,'FormulaUnitMass':182.56,
-                         'SampleChemicalFormula':'Mn0.5-Fe0.5-P-S3','Height':2.0,'SampleDensity':0.118,
+    sample_dictionary = {'SampleMass':2.932,'SampleDensity':7.8,'FormulaUnitMass':182.56,
+                         'SampleChemicalFormula':'Mn0.5-Fe0.5-P-S3','Height':2.0,
                          'SampleInnerRadius':2.0, 'SampleOuterRadius':2.49,'BeamWidth':2.5,'BeamHeight':2.5,
-                         'ContainerChemicalFormula':'Al','ContainerDensity':0.027,'ContainerOuterRadius':2.52,
+                         'ContainerChemicalFormula':'Al','ContainerDensity':2.7,'ContainerOuterRadius':2.52,
                          'ContainerInnerRadius':1.99, 'ElementSize':0.5}
 
     calibration_file = 'D7_YIG_calibration.xml'
@@ -684,13 +702,15 @@ Sample normalisation
     PolDiffILLReduction(
         Run='396991',
         OutputWorkspace='cadmium_transmission_ws',
+        NormaliseBy='Monitor',
         ProcessAs='BeamWithCadmium'
     )
     # Beam measurement for transmisison
     PolDiffILLReduction(
         Run='396983',
         OutputWorkspace='beam_ws',
-        CadmiumTransmissionInputWorkspace='cadmium_transmission_ws_1',
+        CadmiumTransmissionWorkspace='cadmium_transmission_ws',
+        NormaliseBy='Monitor',
         ProcessAs='EmptyBeam'
     )
 
@@ -698,8 +718,9 @@ Sample normalisation
     PolDiffILLReduction(
         Run='396985, 396986',
         OutputWorkspace='quartz_transmission',
-        CadmiumTransmissionInputWorkspace='cadmium_transmission_ws_1',
-        BeamInputWorkspace='beam_ws_1',
+        CadmiumTransmissionWorkspace='cadmium_transmission_ws',
+        EmptyBeamWorkspace='beam_ws',
+        NormaliseBy='Monitor',
         ProcessAs='Transmission'
     )
 
@@ -707,6 +728,7 @@ Sample normalisation
     PolDiffILLReduction(
         Run='396917, 396918',
         OutputWorkspace='empty_ws',
+        NormaliseBy='Monitor',
         ProcessAs='Empty'
     )
 
@@ -714,6 +736,7 @@ Sample normalisation
     PolDiffILLReduction(
         Run='396928, 396929',
         OutputWorkspace='cadmium_ws',
+        NormaliseBy='Monitor',
         ProcessAs='Cadmium'
     )
 
@@ -721,10 +744,11 @@ Sample normalisation
     PolDiffILLReduction(
         Run='396939, 396940',
         OutputWorkspace='pol_corrections',
-        CadmiumInputWorkspace='cadmium_ws',
-        EmptyInputWorkspace='empty_ws',
-        TransmissionInputWorkspace='quartz_transmission_1',
-        OutputTreatment='Average',
+        CadmiumWorkspace='cadmium_ws',
+        EmptyContainerWorkspace='empty_ws',
+        Transmission='quartz_transmission',
+        OutputTreatment='AveragePol',
+        NormaliseBy='Monitor',
         ProcessAs='Quartz'
     )
 
@@ -732,8 +756,9 @@ Sample normalisation
     PolDiffILLReduction(
         Run='396990',
         OutputWorkspace='vanadium_transmission',
-        CadmiumTransmissionInputWorkspace='cadmium_transmission_ws_1',
-        BeamInputWorkspace='beam_ws_1',
+        CadmiumTransmissionWorkspace='cadmium_transmission_ws',
+        EmptyBeamWorkspace='beam_ws',
+        NormaliseBy='Monitor',
         ProcessAs='Transmission'
     )
 
@@ -741,24 +766,26 @@ Sample normalisation
     PolDiffILLReduction(
         Run='396993, 396994',
         OutputWorkspace='vanadium_ws',
-        CadmiumInputWorkspace='cadmium_ws',
-        EmptyInputWorkspace='empty_ws',
-        TransmissionInputWorkspace='vanadium_transmission_1',
-        QuartzInputWorkspace='pol_corrections',
+        CadmiumWorkspace='cadmium_ws',
+        EmptyContainerWorkspace='empty_ws',
+        Transmission='vanadium_transmission',
+        QuartzWorkspace='pol_corrections',
         OutputTreatment='Sum',
         SampleGeometry='None',
         SampleAndEnvironmentProperties=vanadium_dictionary,
         AbsoluteNormalisation=True,
         InstrumentCalibration=calibration_file,
+        NormaliseBy='Monitor',
         ProcessAs='Vanadium'
     )
     # Sample transmission
     PolDiffILLReduction(
-       Run='396986, 396987',
-       OutputWorkspace='sample_transmission',
-       CadmiumTransmissionInputWorkspace='cadmium_transmission_ws_1',
-       BeamInputWorkspace='beam_ws_1',
-       ProcessAs='Transmission'
+        Run='396986, 396987',
+        OutputWorkspace='sample_transmission',
+        CadmiumTransmissionWorkspace='cadmium_transmission_ws',
+        EmptyBeamWorkspace='beam_ws',
+        NormaliseBy='Monitor',
+        ProcessAs='Transmission'
     )
     print('Sample transmission is {0:.3f}'.format(mtd['sample_transmission_1'].readY(0)[0]))
 
@@ -766,16 +793,17 @@ Sample normalisation
     PolDiffILLReduction(
         Run='397004, 397005',
         OutputWorkspace='sample_ws',
-        CadmiumInputWorkspace='cadmium_ws',
-        EmptyInputWorkspace='empty_ws',
-        TransmissionInputWorkspace='sample_transmission_1',
-        QuartzInputWorkspace='pol_corrections',
+        CadmiumWorkspace='cadmium_ws',
+        EmptyContainerWorkspace='empty_ws',
+        Transmission='sample_transmission',
+        QuartzWorkspace='pol_corrections',
         OutputTreatment='Individual',
         InstrumentCalibration=calibration_file,
         SelfAttenuationMethod='Numerical',
         SampleGeometry='Annulus',
         SampleAndEnvironmentProperties=sample_dictionary,
-	ProcessAs='Sample'
+        NormaliseBy='Monitor',
+        ProcessAs='Sample'
     )
     print("The reduced sample data contains {} entries with {} spectra and {} bins.".format(mtd['sample_ws'].getNumberOfEntries(),
 	      mtd['sample_ws'][0].getNumberHistograms(), mtd['sample_ws'][0].blocksize()))
@@ -802,7 +830,7 @@ Output:
 
 .. testoutput:: ExPolarisedDifffractionSampleFull
 
-   Sample transmission is 0.962
+   Sample transmission is 0.963
    The reduced sample data contains 12 entries with 132 spectra and 1 bins.
    The normalised sample data contains 6 entries with 1 spectrum and 134 bins.
 
@@ -810,16 +838,130 @@ Output:
 
     mtd.clear()
 
+**Example - full treatment of a single crystal sample**
+
+.. code-block:: python
+
+    vanadium_mass = 8.535
+    sample_formula_mass = 137.33 * 2.0 + 54.93 + 127.6 + 15.999 * 6.0
+    sample_mass = 7.83
+    vanadium_dictionary = {'SampleMass': vanadium_mass, 'FormulaUnits': 1, 'FormulaUnitMass': 50.942}
+    sample_dictionary = {'SampleMass': sample_mass, 'FormulaUnits': 1, 'FormulaUnitMass': sample_formula_mass,
+                             'KiXAngle': 45.0, 'OmegaShift': 52.5}
+    calibration_file = "D7_YIG_calibration.xml"
+
+    # Empty container for quartz and vanadium
+    PolDiffILLReduction(
+        Run='450747:450748',
+            OutputWorkspace='container_ws',
+            ProcessAs='Empty'
+   )
+
+   # Empty container for bank position 1 (bt1), tth=79.5
+   PolDiffILLReduction(
+       Run='397406:397407',
+       OutputTreatment='AveragePol',
+       OutputWorkspace='container_bt1_ws',
+       ProcessAs='Empty'
+   )
+   # empty container for bt2, tth=75
+   PolDiffILLReduction(
+       Run='397397:397398',
+       OutputTreatment='AveragePol',
+       OutputWorkspace='container_bt2_ws',
+       ProcessAs='Empty'
+   )
+
+   PolDiffILLReduction(
+       Run='450769:450770',
+       OutputWorkspace='pol_corrections',
+       EmptyContainerWorkspace='container_ws',
+       Transmission='0.9',
+       OutputTreatment='AveragePol',
+       ProcessAs='Quartz'
+   )
+
+   PolDiffILLReduction(
+       Run='450835:450836',
+       OutputWorkspace='vanadium_ws',
+       EmptyContainerWorkspace='container_ws',
+       Transmission='0.89',
+       QuartzWorkspace='pol_corrections',
+       OutputTreatment='Sum',
+       SampleGeometry='None',
+       SelfAttenuationMethod='Transmission',
+       SampleAndEnvironmentProperties=vanadium_dictionary,
+       AbsoluteNormalisation=True,
+       InstrumentCalibration=calibration_file,
+       ProcessAs='Vanadium'
+   )
+
+   # bank position 1, tth=79.5
+   PolDiffILLReduction(
+       Run='399451:399452',
+       OutputWorkspace='bt1',
+       EmptyContainerWorkspace='container_bt1_ws',
+       Transmission='0.95',
+       QuartzWorkspace='pol_corrections',
+       OutputTreatment='Individual',
+       SampleGeometry='None',
+       SampleAndEnvironmentProperties=sample_dictionary,
+       MeasurementTechnique='SingleCrystal',
+       InstrumentCalibration=calibration_file,
+       ProcessAs='Sample'
+   )
+   # bank position 2, tth=75
+   PolDiffILLReduction(
+       Run='400287:400288',
+       OutputWorkspace='bt2',
+       EmptyContainerWorkspace='container_bt2_ws',
+       Transmission='0.95',
+       QuartzWorkspace='pol_corrections',
+       OutputTreatment='Individual',
+       SampleGeometry='None',
+       SampleAndEnvironmentProperties=sample_dictionary,
+       MeasurementTechnique='SingleCrystal',
+       InstrumentCalibration=calibration_file,
+       ProcessAs='Sample'
+   )
+   appended_ws = 'appended_ws'
+   AppendSpectra(InputWorkspace1='bt1', InputWorkspace2='bt2',
+   OutputWorkspace=appended_ws)
+   # names need to be re-set, AppendSpectra just concatenates them
+   possible_polarisations = ['ZPO_ON', 'ZPO_OFF', 'XPO_ON', 'XPO_OFF', 'YPO_ON', 'YPO_OFF']
+   polarisation = ""
+   for entry in mtd[appended_ws]:
+       entry_name = entry.name()
+       for polarisation in possible_polarisations:
+           if polarisation in entry_name:
+	       break
+       RenameWorkspace(InputWorkspace=entry, OutputWorkspace="{}_{}".format(appended_ws, polarisation))
+
+
+   D7AbsoluteCrossSections(
+       InputWorkspace=appended_ws,
+       OutputWorkspace='normalized_single_crystal_XYZ',
+       CrossSectionSeparationMethod='XYZ',
+       NormalisationMethod='Vanadium',
+       VanadiumInputWorkspace='vanadium_ws',
+       OutputUnits='Qxy',
+       SampleAndEnvironmentProperties=sample_dictionary,
+       AbsoluteUnitsNormalisation=False,
+       IsotropicMagnetism=False,
+       MeasurementTechnique='SingleCrystal',
+       ClearCache=True
+   )
+
 
 References
 ----------
 
-.. [#Fennell] T. Fennell, L. Mangin-Thro, H.Mutka, G.J. Nilsen, A.R. Wildes.
+.. [#Fennell] Fennell T. , Mangin-Thro L., Mutka H., Nilsen G.J., Wildes A.R..
    *Wavevector and energy resolution of the polarized diffuse scattering spectrometer D7*,
    Nuclear Instruments and Methods in Physics Research A **857** (2017) 24–30
    `doi: 10.1016/j.nima.2017.03.024 <https://doi.org/10.1016/j.nima.2017.03.024>`_
 
-.. [#Nakatsuka] A. Nakatsuka, A. Yoshiasa, and S. Takeno.
+.. [#Nakatsuka] Nakatsuka A., Yoshiasa A., and Takeno S..
    *Site preference of cations and structural variation in Y3Fe5O12 solid solutions with garnet structure*,
    Acta Crystallographica Section B **51** (1995) 737–745
    `doi: 10.1107/S0108768194014813 <https://doi.org/10.1107/S0108768194014813>`_
@@ -834,10 +976,15 @@ References
    Journal of Applied Crystallography **42** (2009) 69-84
    `doi: 10.1107/S0021889808039162 <https://doi.org/10.1107/S0021889808039162>`_
 
-.. [#Ehlers] G. Ehlers, J. R. Stewart, A. R. Wildes, P. P. Deen, and K. H. Andersen
+.. [#Ehlers] Ehlers G., Stewart J. R., Wildes A. R., Deen P. P., and Andersen K. H.
    *Generalization of the classical xyz-polarization analysis technique to out-of-plane and inelastic scattering*
    Review of Scientific Instruments **84** (2013), 093901
    `doi: 10.1063/1.4819739 <https://doi.org/10.1063/1.4819739>`_
+
+.. [#Schweika] Schweika W.
+    *XYZ-polarisation analysis of diffuse magnetic neutron scattering from single crystals*
+    J. Phys.: Conf. Ser. **211** (2010) 012026
+    `doi: 10.1088/1742-6596/211/1/012026 <https://doi.org/10.1088/1742-6596/211/1/012026>`_
 
 
 .. categories:: Techniques

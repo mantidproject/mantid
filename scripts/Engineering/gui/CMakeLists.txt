@@ -16,6 +16,8 @@ set(TEST_PY_FILES
     # Fitting
     engineering_diffraction/tabs/fitting/data_handling/test/test_data_model.py
     engineering_diffraction/tabs/fitting/data_handling/test/test_data_presenter.py
+    engineering_diffraction/tabs/fitting/plotting/test/test_plot_presenter.py
+    engineering_diffraction/tabs/fitting/plotting/test/test_plot_model.py
     # Focus
     engineering_diffraction/tabs/focus/test/test_focus_model.py
     engineering_diffraction/tabs/focus/test/test_focus_presenter.py

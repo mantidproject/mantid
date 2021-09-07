@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 from qtpy import QtCore, QtWidgets
-
 from mantidqt.icons import get_icon
 from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing
 from mantidqt.utils.qt import load_ui
@@ -33,6 +32,7 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         self.setupUi(self)
         self.tabs = self.tab_main
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
+        self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
 
         self.btn_settings.setIcon(get_icon("mdi.settings", "black", 1.2))
 
@@ -55,6 +55,13 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         self.set_on_rb_num_changed(self.presenter.calibration_presenter.set_rb_num)
         self.set_on_instrument_changed(self.presenter.focus_presenter.set_instrument_override)
         self.set_on_rb_num_changed(self.presenter.focus_presenter.set_rb_num)
+
+        # load most recent calibration, if one saved
+        self.presenter.calibration_presenter.load_last_calibration()
+
+        # load previous rb number if saved, create mechanism to save
+        self.set_rb_no(self.presenter.get_saved_rb_number())
+        self.set_on_rb_num_changed(self.presenter.set_saved_rb_number)
 
         # Usage Reporting
         try:
@@ -93,11 +100,16 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         self.savedir_label.setToolTip(savedir_text)
         self.savedir_label.setText(savedir_text)
 
-    def closeEvent(self, _):
+    def closeEvent(self, event):
         self.presenter.handle_close()
+        self.setParent(None)
+        event.accept()
 
     def get_rb_no(self):
         return self.lineEdit_RBNumber.text()
+
+    def set_rb_no(self, text) -> None:
+        self.lineEdit_RBNumber.setText(text)
 
     def set_on_help_clicked(self, slot):
         self.pushButton_help.clicked.connect(slot)

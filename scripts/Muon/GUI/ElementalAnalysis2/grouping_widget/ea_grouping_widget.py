@@ -24,6 +24,5 @@ class EAGroupingTabWidget(object):
         self.group_tab_view = EAGroupingTabView(self.grouping_table_view)
         self.group_tab_presenter = EAGroupingTabPresenter(self.group_tab_view,
                                                           self.group_tab_model,
-                                                          self.grouping_table_widget)
 
-        context.update_view_from_model_notifier.add_subscriber(self.group_tab_presenter.update_view_from_model_observer)
+                                                          self.grouping_table_widget)

@@ -17,9 +17,9 @@ from mantid.plots.datafunctions import get_normalize_by_bin_width
 from matplotlib.figure import Figure
 from mpl_toolkits.axisartist import Subplot as CurveLinearSubPlot
 from mpl_toolkits.axisartist.grid_helper_curvelinear import GridHelperCurveLinear
-from qtpy.QtCore import Qt, QTimer, Signal
-from qtpy.QtWidgets import (QCheckBox, QComboBox, QGridLayout, QLabel, QHBoxLayout, QSplitter,
-                            QStatusBar, QVBoxLayout, QWidget)
+from qtpy.QtCore import Qt, Signal
+from qtpy.QtWidgets import (QCheckBox, QComboBox, QGridLayout, QLabel, QHBoxLayout, QSplitter, QStatusBar, QToolButton, QVBoxLayout,
+                            QWidget)
 
 # local imports
 from workbench.plotting.mantidfigurecanvas import MantidFigureCanvas
@@ -79,6 +79,7 @@ class SliceViewerDataView(QWidget):
         self.colorbar_layout.setSpacing(0)
 
         self.image_info_widget = ImageInfoWidget(self)
+        self.image_info_widget.setToolTip("Information about the selected pixel")
         self.track_cursor = QCheckBox("Track Cursor", self)
         self.track_cursor.setToolTip(
             "Update the image readout table when the cursor is over the plot. "
@@ -112,6 +113,13 @@ class SliceViewerDataView(QWidget):
         self.colorbar_layout.addWidget(self.colorbar_label)
         norm_scale = self.get_default_scale_norm()
         self.colorbar = ColorbarWidget(self, norm_scale)
+        self.colorbar.cmap.setToolTip("Colormap options")
+        self.colorbar.crev.setToolTip("Reverse colormap")
+        self.colorbar.norm.setToolTip("Colormap normalisation options")
+        self.colorbar.powerscale.setToolTip("Power colormap scale")
+        self.colorbar.cmax.setToolTip("Colormap maximum limit")
+        self.colorbar.cmin.setToolTip("Colormap minimum limit")
+        self.colorbar.autoscale.setToolTip("Automatically changes colormap limits when zooming on the plot")
         self.colorbar_layout.addWidget(self.colorbar)
         self.colorbar.colorbarChanged.connect(self.update_data_clim)
         self.colorbar.scaleNormChanged.connect(self.scale_norm_changed)
@@ -132,7 +140,11 @@ class SliceViewerDataView(QWidget):
 
         # Status bar
         self.status_bar = QStatusBar(parent=self)
+        self.status_bar.setStyleSheet('QStatusBar::item {border: None;}')  # Hide spacers between button and label
         self.status_bar_label = QLabel()
+        self.help_button = QToolButton()
+        self.help_button.setText("?")
+        self.status_bar.addWidget(self.help_button)
         self.status_bar.addWidget(self.status_bar_label)
 
         # layout
@@ -345,7 +357,7 @@ class SliceViewerDataView(QWidget):
             self._line_plots.plotter.delete_line_plot_lines()
             self._line_plots.plotter.update_line_plot_labels()
 
-        self.canvas.draw_idle()
+        self.canvas.draw()
 
     def export_region(self, limits, cut):
         """
@@ -445,12 +457,19 @@ class SliceViewerDataView(QWidget):
 
     def get_axes_limits(self):
         """
-        Return the limits on the image axes in the orthogonal frame
+        Return the limits on the image axes transformed into the nonorthogonal frame if appropriate
         """
         if self.image is None:
             return None
         else:
-            return self.ax.get_xlim(), self.ax.get_ylim()
+            xlim, ylim = self.ax.get_xlim(), self.ax.get_ylim()
+            if self.nonorthogonal_mode:
+                inv_tr = self.nonortho_transform.inv_tr
+                # viewing axis y not aligned with plot axis
+                xmin_p, ymax_p = inv_tr(xlim[0], ylim[1])
+                xmax_p, ymin_p = inv_tr(xlim[1], ylim[0])
+                xlim, ylim = (xmin_p, xmax_p), (ymin_p, ymax_p)
+            return xlim, ylim
 
     def get_full_extent(self):
         """
@@ -546,6 +565,7 @@ class SliceViewerDataView(QWidget):
             exponent = self.conf.get(POWERSCALE)
             scale = (scale, exponent)
 
+        scale = "SymmetricLog10" if scale == 'Log' else scale
         return scale
 
     def scale_norm_changed(self):
@@ -579,6 +599,15 @@ class SliceViewerView(QWidget, ObservingView):
         #  peaks viewer off by default
         self._peaks_view = None
 
+        # config the splitter appearance
+        splitterStyleStr = """QSplitter::handle{
+            border: 1px dotted gray;
+            min-height: 10px;
+            max-height: 20px;
+            }"""
+        self._splitter.setStyleSheet(splitterStyleStr)
+        self._splitter.setHandleWidth(1)
+
         layout = QHBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(self._splitter)
@@ -606,14 +635,6 @@ class SliceViewerView(QWidget, ObservingView):
 
         return self._peaks_view
 
-    def delayed_refresh(self):
-        """Post an event to the event loop that causes the view to
-        update on the next cycle
-
-        A 1 msec delay is added to appease RHEL7 where in some cases
-        it fails"""
-        QTimer.singleShot(1, self.presenter.refresh_view)
-
     def peaks_overlay_clicked(self):
         """Peaks overlay button has been toggled
         """
@@ -632,7 +653,7 @@ class SliceViewerView(QWidget, ObservingView):
 
     def set_peaks_viewer_visible(self, on):
         """
-        Set the visiblity of the PeaksViewer.
+        Set the visibility of the PeaksViewer.
         :param on: If True make the view visible, else make it invisible
         :return: The PeaksViewerCollectionView
         """

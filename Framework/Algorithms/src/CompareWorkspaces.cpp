@@ -174,7 +174,7 @@ void CompareWorkspaces::exec() {
 
   if (!m_result) {
     std::string message = m_messages->cell<std::string>(0, 0);
-    g_log.notice() << "The workspaces did not match: " << message << '\n';
+    g_log.warning() << "The workspaces did not match: " << message << '\n';
   } else {
     std::string ws1 = Workspace_const_sptr(getProperty("Workspace1"))->getName();
     std::string ws2 = Workspace_const_sptr(getProperty("Workspace2"))->getName();
@@ -1244,7 +1244,7 @@ void CompareWorkspaces::doMDComparison(const Workspace_sptr &w1, const Workspace
   mdws1 = std::dynamic_pointer_cast<IMDWorkspace>(w1);
   mdws2 = std::dynamic_pointer_cast<IMDWorkspace>(w2);
 
-  IAlgorithm_sptr alg = this->createChildAlgorithm("CompareMDWorkspaces");
+  auto alg = createChildAlgorithm("CompareMDWorkspaces");
   alg->setProperty<IMDWorkspace_sptr>("Workspace1", mdws1);
   alg->setProperty<IMDWorkspace_sptr>("Workspace2", mdws2);
   const double tolerance = getProperty("Tolerance");

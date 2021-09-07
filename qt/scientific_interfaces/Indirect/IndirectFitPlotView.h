@@ -65,13 +65,9 @@ public:
   void watchADS(bool watch) override;
 
   WorkspaceIndex getSelectedSpectrum() const override;
-  FitDomainIndex getSelectedSpectrumIndex() const override;
-  TableDatasetIndex getSelectedDataIndex() const override;
-  TableDatasetIndex dataSelectionSize() const override;
+  WorkspaceID getSelectedDataIndex() const override;
+  WorkspaceID dataSelectionSize() const override;
   bool isPlotGuessChecked() const override;
-
-  void hideMultipleDataSelection() override;
-  void showMultipleDataSelection() override;
 
   void setAvailableSpectra(WorkspaceIndex minimum, WorkspaceIndex maximum) override;
   void setAvailableSpectra(const std::vector<WorkspaceIndex>::const_iterator &from,
@@ -81,7 +77,7 @@ public:
   void setMaximumSpectrum(int maximum) override;
   void setPlotSpectrum(WorkspaceIndex spectrum) override;
   void appendToDataSelection(const std::string &dataName) override;
-  void setNameInDataSelection(const std::string &dataName, TableDatasetIndex index) override;
+  void setNameInDataSelection(const std::string &dataName, WorkspaceID workspaceID) override;
   void clearDataSelection() override;
 
   void plotInTopPreview(const QString &name, Mantid::API::MatrixWorkspace_sptr workspace, WorkspaceIndex spectrum,

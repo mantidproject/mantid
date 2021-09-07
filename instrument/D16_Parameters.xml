@@ -3,7 +3,7 @@
 
     <component-link name="D16">
       <!-- Logs to sum when merging the runs -->
-      <parameter name="sample_logs_sum" type="string">
+      <parameter name="sample_logs_sum" type="string" visible="false">
         <value val="time, duration, timer" />
       </parameter>
       <!-- The width of the detector in pixels -->
@@ -28,7 +28,7 @@
       </parameter>
 
       <!-- These parameters are used to define headers and entries for GenerateLogbook algorithm -->
-      <parameter name="logbook_default_parameters" type="string">
+      <parameter name="logbook_default_parameters" type="string" visible="false">
 	<value val="SampleDescription:/entry0/experiment_identifier:s,
 		    TotalTime:/entry0/duration:f,
 		    RateMonitor1:/entry0/monitor1/monrate:f,
@@ -39,7 +39,7 @@
 		    Attenuator:/entry0/instrument/attenuator/attenuation_value:f,
 		    Det:/entry0/instrument/Det/value:f" />
       </parameter>
-      <parameter name="logbook_optional_parameters" type="string">
+      <parameter name="logbook_optional_parameters" type="string" visible="false">
 	<value val="AcquisitionMode:/entry0/acquisition_mode:d,
 		    Mode:/entry0/mode:d,
 		    BeamStopYOffset:/entry0/instrument/BStopY/offset_value:f,
@@ -69,7 +69,7 @@
 		    Bath2Temperature:/entry0/sample/bath2_regulation_temperature:f,
 		    SampleChangerPos:/entry0/instrument/VirtualSampleChanger/sample_changer_slot_value:f" />
       </parameter>
-      <parameter name="log_list_to_save" type="string">
+      <parameter name="log_list_to_save" type="string" visible="false">
 	<value val="facility,instrument.name,experiment_identifier,
 		    start_time,end_time,numor_list,processedAs,
 		    wavelength,sample_transmission_numors,L2"/>

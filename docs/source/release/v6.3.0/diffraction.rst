@@ -23,29 +23,13 @@ Bugfixes
 Deprecation
 ###########
 
-- alibrateRectangularDetectors is deprecated.
+- CalibrateRectangularDetectors is deprecated.
 
 Engineering Diffraction
 -----------------------
-New features
-############
-
-
-Improvements
-############
-
-Bugfixes
-########
 
 Single Crystal Diffraction
 --------------------------
-New features
-############
+- Existing :ref:`PolDiffILLReduction <algm-PolDiffILLReduction>` and :ref:`D7AbsoluteCrossSections <algm-D7AbsoluteCrossSections>` can now reduce and properly normalise single-crystal data for the D7 ILL instrument.
 
-Improvements
-############
-
-Bugfixes
-########
-
-:ref:`Release 6.2.0 <v6.2.0>`
+:ref:`Release 6.3.0 <v6.3.0>`

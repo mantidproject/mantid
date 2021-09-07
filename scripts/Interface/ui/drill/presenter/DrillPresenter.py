@@ -191,13 +191,13 @@ class DrillPresenter:
                 else:
                     return value
 
-            if re.match("^-{,1}\d+$", value):
+            if re.match(r"^-{,1}\d+$", value):
                 if int(value) == 0:
                     return value
                 if int(value) + i == 0:
                     return value
                 return str(int(value) + i)
-            suffix = re.search("\d+$", value)
+            suffix = re.search(r"\d+$", value)
             if suffix:
                 n = suffix.group(0)
                 ni = int(n) + i
@@ -443,6 +443,7 @@ class DrillPresenter:
         QDialog only if no file was previously used to load or save.
         """
         if self.model.getIOFile():
+            self.model.setVisualSettings(self.view.getVisualSettings())
             self.model.exportRundexData()
             self.view.setWindowModified(False)
         else:

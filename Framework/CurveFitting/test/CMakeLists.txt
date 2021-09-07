@@ -17,13 +17,11 @@ if(CXXTEST_FOUND)
       ../../TestHelpers/src/WorkspaceCreationHelper.cpp)
   cxxtest_add_test(CurveFittingTest ${TEST_FILES})
   target_link_libraries(CurveFittingTest
-                        LINK_PRIVATE
-                        ${MANTIDLIBS}
-                        CurveFitting
-                        DataHandling
-                        ${GSL_LIBRARIES}
-                        gmock
-)
+                        PRIVATE
+                        Mantid::CurveFitting
+                        Mantid::DataHandling
+                        gmock)
+
   add_dependencies(CurveFittingTest Algorithms)
   add_dependencies(FrameworkTests CurveFittingTest)
   # Test data

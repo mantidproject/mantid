@@ -58,11 +58,8 @@ Ionic Diffusion Test
 	- **f1.Delta:** ``0.389``
 	- **f1.Nu:** ``0.474``
 
-- Back in the workspaces toolbox, click the workspace group for the fitted,
-  data (Name similar to *EMU51341; Pair Asym; long; MA+ ...; Fitted; FlatBackground,DynamicKuboToyabe*)
-- Ctrl + Click all the Workspace 2D data, then right click **Plot** > **Spectrum ...**
-- Choose Plot type **Individual** and click **Plot All**
-- You should get something like the following plot:
+- In the plotting window click the ``External Plot`` button
+- You should get a plot that looks like the following:
 
 .. figure:: ../../images/MuonAnalysisTests/MATestingIDF.png
 	:alt: MATestingIDF.png
@@ -90,10 +87,11 @@ Superconducting Copper Test
 - Go to the **Results** tab
 	- In the **Log Values** table, check **run_number** and **Field_Danfysik**
 	- Click **Output Results**
-- Open the results table by double clicking the table in the workspace toolbox
-- Ctrl-Click the **field_danfysik** and the **lambda** column
-- Right click **lambda** column, click **Plot...** and then **Line**
-- You should get something like the following plot:
+- Go to the **Model Fitting** tab
+- Set the ``Select Data`` to ``field_danfysik`` and ``Lambda``
+- The plot will look similar to the one below
+- Add a peak function (e.g. Gaussian)
+- You should be able to fit to the data
 
 .. figure:: ../../images/MuonAnalysisTests/Cu-fitting.png
 	:alt: Cu-fitting.png
@@ -129,7 +127,7 @@ HIFI Transverse Field Simultaneous Fitting
 	- Click **Undo Fits**
 	- Click the value for the **Frequency** parameter; A ``...`` should appear
 	  next to it, click it. A new window should appear
-	- Enter values for each run in the table as from ``0.1`` to ``1.1`` in
+	- Enter values for each run in the table as from ``0.0`` to ``1.1`` in
 	  steps of ``0.1``
 	- Click **Ok**
 	- Click **Fit**
@@ -163,6 +161,73 @@ Transverse Field Asymmetry Test
 	- Set ``Frequency = 1.3``
 	- In the bottom table, check **TF Asymmetry Mode** to be ``true``
 	- Click **Fit**
+
+------------------------------------
+
+.. _single_pulse_test:
+
+Single Pulse Test
+-----------------
+
+**Time required 5 minutes**
+
+- Open **Muon Analysis** (*Interfaces* > *Muon* > *Muon Analysis*)
+- Change *Instrument* to **ARGUS**, found in the *Home* tab
+- Load run ``71799``
+- Go to the **Grouping** tab
+     - click **Guess Alpha**, should get ``0.95``
+- Load the next run
+- Go to the **Fitting** tab
+     - Add a **StaticKuboToyabeTimeExpDecay** and **FlatBackground**
+     - Click the **Fit** button
+- Expected Values are (similar):
+	- **A:** ``0.13``
+	- **Delta:** ``0.52``
+	- **Lambda:** ``0.11``
+	- **A0:** ``0.07``
+
+------------------------------------
+
+.. _double_pulse_test:
+
+Double Pulse Test
+-----------------
+
+**Time required 5 minutes**
+This users the same sample as the single pulse test
+
+- Open **Muon Analysis** (*Interfaces* > *Muon* > *Muon Analysis*)
+- Change *Instrument* to **ARGUS**, found in the *Home* tab
+- Load run ``71796``
+- Set to **Double Pulse**
+- Go to the **Grouping** tab
+     - click **Guess Alpha**, should get ``0.93``
+- Load the next run
+- Go to the **Fitting** tab
+     - Add a **StaticKuboToyabeTimeExpDecay** and **FlatBackground**
+     - click the **Fit** button
+- Expected Values are (similar):
+	- **A:** ``0.12``
+	- **Delta:** ``0.55``
+	- **Lambda:** ``0.13``
+	- **A0:** ``0.09``
+
+- These values are slightly different from the single pulse results
+- Load run ``71796``
+- Go to the **Home** tab
+	- Change back to **Single Pulse**
+	- Untick the **Time zero** and set the value to **0.493**
+- Go to the **Grouping** tab
+	- Click **Guess Alpha**, should get ``0.91``
+- Load the next run
+- Go to the **Fitting** tab
+	- Add a **StaticKuboToyabeTimeExpDecay** and **FlatBackground**
+	- Click the **Fit** button
+- Expected Values are (similar):
+	- **A:** ``0.12``
+	- **Delta:** ``0.59``
+	- **Lambda:** ``0.14``
+	- **A0:** ``0.1``
 
 Possible Prolems
 ----------------

@@ -53,6 +53,9 @@ using namespace MantidQt::MantidWidgets::Batch;
 qRegisterMetaType<std::string>("StdString");
 qRegisterMetaType<Mantid::API::Workspace_sptr>("Workspace");
 qRegisterMetaType<Message>("Message");
+qRegisterMetaType<QList<QPersistentModelIndex>>("QList<QPersistentModelIndex>");
+qRegisterMetaType<QAbstractItemModel::LayoutChangeHint>("QAbstractItemModel::LayoutChangeHint");
+qRegisterMetaType<QVector<int>>("QVector<int>");
 %End
 
 
@@ -496,6 +499,7 @@ public:
     %MethodCode
     sipRes = boost::python::to_python_value<const Mantid::API::IFunction_sptr &>()(sipCpp->ifun());
     %End
+    bool hasTies();
     void setHasPlot(bool);
     QString functionPrefix() const;
     PropertyHandler * findHandler(SIP_PYOBJECT);
@@ -558,6 +562,7 @@ public:
     void postDeleteHandle(const std::string &wsName);
     void removeWorkspaceAndSpectra(const std::string &wsName);
     std::string getFitAlgorithmParameters() const;
+    std::string getFitAlgorithmOutputStatus() const;
     PropertyHandler * currentHandler() const;
 
     SIP_PYOBJECT defaultPeakType();
@@ -958,6 +963,10 @@ public:
          return NULL;
       }
     %End
+    SIP_PYOBJECT getFunction();
+    %MethodCode
+      sipRes = boost::python::to_python_value<const Mantid::API::IFunction_sptr &>()(sipCpp->getFunction());
+    %End
     SIP_PYOBJECT getGlobalFunction();
     %MethodCode
       sipRes = boost::python::to_python_value<const Mantid::API::IFunction_sptr &>()(sipCpp->getGlobalFunction());
@@ -1022,6 +1031,10 @@ public:
     void findFiles(bool isModified);
     void isOptional(bool);
     void setLastDirectory(const QString &lastDir);
+    void setUseNativeWidget(bool native);
+    void setProxyModel(QAbstractProxyModel* /Transfer/);
+    void readSettings(const QString &group);
+    void saveSettings(const QString &group);
 
 signals:
     void fileTextChanged(const QString & /*_t1*/);
@@ -1098,7 +1111,12 @@ class WorkspaceSelector : QComboBox
 %End
 public:
     WorkspaceSelector(QWidget *parent = nullptr, bool init = true) /KeywordArgs="All"/;
+    void setWorkspaceTypes(const QStringList &types);
     void setOptional(bool optional);
+    void setSorted(bool sorted);
+    bool isConnected();
+    void disconnectObservers();
+    void connectObservers();
 };
 
 // ----------------------------------------------------------------------------
@@ -1152,4 +1170,38 @@ public:
         double startX = 0.0, double endX = 0.0) /KeywordArgs="All"/;
 
     void openFitScriptGenerator();
+};
+
+// ---------------------------------
+// Muon Period Info
+// ---------------------------------
+
+class MuonPeriodInfo : QWidget {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/MuonPeriodInfo.h"
+#include "MantidPythonInterface/core/ExtractSharedPtr.h"
+#include <boost/python/object.hpp>
+#include <boost/python/handle.hpp>
+%End
+public:
+    MuonPeriodInfo(QWidget *parent = nullptr) /KeywordArgs="All"/;
+    void clear();
+    void setWidgetTitleRuns(const std::string &title);
+    bool isEmpty() const ;
+    void addInfo(SIP_PYOBJECT);
+    %MethodCode
+    try {
+      using boost::python::extract;
+      using Mantid::PythonInterface::ExtractSharedPtr;
+      sipCpp->addInfo(ExtractSharedPtr<Mantid::API::Workspace>(a0)());
+    } catch(const std::exception & exc) {
+      SIP_BLOCK_THREADS
+      PyErr_SetString(PyExc_RuntimeError, exc.what());
+      SIP_UNBLOCK_THREADS
+      return NULL;
+    } catch(...) {
+      sipRaiseUnknownException();
+      return NULL;
+    }
+    %End
 };

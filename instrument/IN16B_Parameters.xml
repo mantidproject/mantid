@@ -19,16 +19,16 @@
 <parameter name="sample_logs_sum" type="string">
   <value val="time, duration" />
 </parameter>
-<parameter name="sample_logs_time_series" type="string">
+<parameter name="sample_logs_time_series" type="string" visible="false">
     <value val="sample.temperature, sample.pressure, sample.field" />
 </parameter>
-<parameter name="sample_logs_list" type="string">
+<parameter name="sample_logs_list" type="string" visible="false">
     <value val="run_number, start_time, end_time, SamS_Rot.offset_value, SamS_Rot.target_value, SamS_Rot.value, sample.setpoint_field, sample.setpoint_pressure, sample.setpoint_temperature" />
 </parameter>
-<parameter name="sample_logs_fail" type="string">
+<parameter name="sample_logs_fail" type="string" visible="false">
     <value val="PSD.PSD angle 1, Doppler.mirror_sense, acquisition_mode, Doppler.maximum_delta_energy, wavelength" />
 </parameter>
-<parameter name="sample_logs_fail_tolerances" type="string">
+<parameter name="sample_logs_fail_tolerances" type="string" visible="false">
     <value val="1, 0, 0, 0.001, 0.001" />
 </parameter>
 

@@ -34,7 +34,8 @@ public:
                               double endX = 0.0);
   ~FitScriptGeneratorPresenter() override;
 
-  void notifyPresenter(ViewEvent const &event, std::string const &arg1 = "", std::string const &arg2 = "") override;
+  void notifyPresenter(ViewEvent const &event, [[maybe_unused]] std::string const &arg1 = "",
+                       [[maybe_unused]] std::string const &arg2 = "") override;
   void notifyPresenter(ViewEvent const &event, std::vector<std::string> const &vec) override;
   void notifyPresenter(ViewEvent const &event, FittingMode fittingMode) override;
 
@@ -44,8 +45,12 @@ public:
   void setGlobalParameters(std::vector<GlobalParameter> const &globalParameters) override;
 
 private:
+  void handleADSDeleteEvent(std::string const &workspaceName);
+  void handleADSClearEvent();
+  void handleADSRenameEvent(std::string const &workspaceName, std::string const &newName);
   void handleRemoveDomainClicked();
   void handleAddDomainClicked();
+  void handleAddDomainAccepted();
   void handleSelectionChanged();
   void handleStartXChanged();
   void handleEndXChanged();
@@ -60,6 +65,7 @@ private:
   void handleGlobalParametersChanged(std::vector<std::string> const &globalParameters);
   void handleEditLocalParameterClicked(std::string const &parameter);
   void handleEditLocalParameterFinished();
+  void handleOutputBaseNameChanged(std::string const &outputBaseName);
   void handleFittingModeChanged(FittingMode fittingMode);
   void handleGenerateScriptToFileClicked();
   void handleGenerateScriptToClipboardClicked();
@@ -72,6 +78,8 @@ private:
   void addWorkspace(Mantid::API::MatrixWorkspace_const_sptr const &workspace, WorkspaceIndex workspaceIndex,
                     double startX, double endX);
   void addWorkspace(std::string const &workspaceName, WorkspaceIndex workspaceIndex, double startX, double endX);
+
+  void removeDomains(std::vector<FitDomainIndex> const &domainIndices);
 
   void updateStartX(std::string const &workspaceName, WorkspaceIndex workspaceIndex, double startX);
   void updateEndX(std::string const &workspaceName, WorkspaceIndex workspaceIndex, double endX);

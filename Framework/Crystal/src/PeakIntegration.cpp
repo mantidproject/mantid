@@ -288,7 +288,6 @@ void PeakIntegration::retrieveProperties() {
 
 int PeakIntegration::fitneighbours(int ipeak, const std::string &det_name, int x0, int y0, int idet, double qspan,
                                    PeaksWorkspace_sptr &Peaks, const detid2index_map &pixel_to_wi) {
-  UNUSED_ARG(ipeak);
   UNUSED_ARG(det_name);
   UNUSED_ARG(x0);
   UNUSED_ARG(y0);
@@ -296,7 +295,7 @@ int PeakIntegration::fitneighbours(int ipeak, const std::string &det_name, int x
   // Number of slices
   int TOFmax = 0;
 
-  IAlgorithm_sptr slice_alg = createChildAlgorithm("IntegratePeakTimeSlices");
+  auto slice_alg = createChildAlgorithm("IntegratePeakTimeSlices");
   slice_alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputW);
   std::ostringstream tab_str;
   tab_str << "LogTable" << ipeak;

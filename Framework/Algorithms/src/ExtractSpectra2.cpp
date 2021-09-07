@@ -41,7 +41,8 @@ const std::string ExtractSpectra2::summary() const {
 
 /// Initialize the algorithm's properties.
 void ExtractSpectra2::init() {
-  declareWorkspaceInputProperties<MatrixWorkspace, IndexType::SpectrumNum | IndexType::WorkspaceIndex>(
+  declareWorkspaceInputProperties<MatrixWorkspace, static_cast<int>(IndexType::SpectrumNum) |
+                                                       static_cast<int>(IndexType::WorkspaceIndex)>(
       "InputWorkspace", "The input workspace");
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace");
