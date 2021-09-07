@@ -30,6 +30,7 @@ class BasePanePresenter():
         self._view.on_rebin_options_changed(self.handle_use_raw_workspaces_changed)
         self.workspace_replaced_in_ads_observer = GenericObserverWithArgPassing(self.handle_workspace_replaced_in_ads)
         self.workspace_deleted_from_ads_observer = GenericObserverWithArgPassing(self.handle_workspace_deleted_from_ads)
+        self.clear_plot_observer = GenericObserver(self.create_empty_plot)
 
         self._setup_view_connections()
 
@@ -209,3 +210,6 @@ class BasePanePresenter():
 
     def clear_subplots(self):
         self._figure_presenter.clear_subplots()
+
+    def create_empty_plot(self):
+        self._figure_presenter.create_single_plot()
