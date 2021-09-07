@@ -41,6 +41,7 @@ class ElementalAnalysisTest(unittest.TestCase):
         self.gui.detectors = mock.Mock()
         self.gui.detectors.detectors = [mock.Mock(), mock.Mock(), mock.Mock(), mock.Mock()]
         self.gui.lines = mock.Mock()
+        self.gui.ptable.set_peak_datafile = mock.Mock()
 
     def raise_ValueError_once(self):
         if not self.has_raise_ValueError_been_called_once:
@@ -107,7 +108,7 @@ class ElementalAnalysisTest(unittest.TestCase):
         x_value_in = 1.0
         self.gui.element_lines["H"] = []
         gen_label_output = self.gui._gen_label(name, x_value_in, element="H")
-        self.assertEquals(Label, type(gen_label_output))
+        self.assertEqual(Label, type(gen_label_output))
 
     def test_that_gen_label_with_element_none_returns_none(self):
         self.assertEqual(self.gui._gen_label('label', 0.0), None)
@@ -451,25 +452,55 @@ class ElementalAnalysisTest(unittest.TestCase):
         self.assertEqual(self.gui.plot_window, None)
 
     @mock.patch('mantidqtinterfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.message_box.warning')
-    @mock.patch('mantidqtinterfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.PeriodicTablePresenter.set_peak_datafile')
     @mock.patch('mantidqtinterfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.QtWidgets.QFileDialog.getOpenFileName')
     def test_that_set_peak_datafile_is_called_with_select_data_file(self,
                                                                     mock_get_open_file_name,
-                                                                    mock_set_peak_datafile,
                                                                     mock_warning):
-        mock_get_open_file_name.return_value = 'filename'
+        name = "data to load"
+        mock_get_open_file_name.return_value = name
         self.gui.select_data_file()
-        mock_set_peak_datafile.assert_called_with('filename')
+        self.assertEqual(self.gui.ptable.set_peak_datafile.call_count, 1)
         self.assertEqual(0, mock_warning.call_count)
 
-    @mock.patch('mantidqtinterfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.PeriodicTablePresenter.set_peak_datafile')
     @mock.patch('mantidqtinterfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.QtWidgets.QFileDialog.getOpenFileName')
     def test_that_select_data_file_uses_the_first_element_of_a_tuple_when_given_as_a_filename(self,
-                                                                                              mock_get_open_file_name,
-                                                                                              mock_set_peak_datafile):
+                                                                                              mock_get_open_file_name):
         mock_get_open_file_name.return_value = ('string1', 'string2')
         self.gui.select_data_file()
-        mock_set_peak_datafile.assert_called_with('string1')
+        self.gui.ptable.set_peak_datafile.assert_called_with('string1')
+
+    @mock.patch('mantidqtinterfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.PeriodicTablePresenter.peak_data')
+    @mock.patch('mantidqtinterfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._create_peak_selector')
+    def test_generate_element_widget_pass(self, create_mock, peak_mock):
+        inputs = {'H': 3, 'Cu': 4, 'Ag':2}
+        peak_mock.return_value = inputs
+        peak_mock.keys = mock.Mock(return_value = inputs.keys())
+        create_mock.return_value = mock.Mock()
+        any_elements = self.gui._generate_element_widgets()
+        self.assertEqual(any_elements, True)
+        self.assertEqual(self.gui._create_peak_selector.call_count, 3)
+
+    @mock.patch('mantidqtinterfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.PeriodicTablePresenter.peak_data')
+    @mock.patch('mantidqtinterfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._create_peak_selector')
+    def test_generate_element_widget_partial(self, create_mock, peak_mock):
+        inputs = {'Hi': 3, 'Cu': 4, 'unit':2}
+        peak_mock.return_value = inputs
+        peak_mock.keys = mock.Mock(return_value = inputs.keys())
+        create_mock.return_value = mock.Mock()
+        any_elements = self.gui._generate_element_widgets()
+        self.assertEqual(any_elements, True)
+        self.assertEqual(self.gui._create_peak_selector.call_count, 1)
+
+    @mock.patch('mantidqtinterfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.PeriodicTablePresenter.peak_data')
+    @mock.patch('mantidqtinterfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._create_peak_selector')
+    def test_generate_element_widget_fail(self, create_mock, peak_mock):
+        inputs = {'Hi': 3, 'test': 4, 'unit':2}
+        peak_mock.return_value = inputs
+        peak_mock.keys = mock.Mock(return_value = inputs.keys())
+        create_mock.return_value = mock.Mock()
+        any_elements = self.gui._generate_element_widgets()
+        self.assertEqual(any_elements,False)
+        self.assertEqual(self.gui._create_peak_selector.call_count, 0)
 
     @mock.patch('mantidqtinterfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.message_box.warning')
     @mock.patch('mantidqtinterfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._generate_element_widgets')
@@ -482,9 +513,20 @@ class ElementalAnalysisTest(unittest.TestCase):
         mock_generate_element_widgets.side_effect = self.raise_ValueError_once
         self.gui.select_data_file()
         warning_text = 'The file does not contain correctly formatted data, resetting to default data file.' \
-                       'See "https://docs.mantidproject.org/nightly/interfaces/' \
+                       'See "https://docs.mantidproject.org/nightly/interfaces/muon/' \
                        'Muon%20Elemental%20Analysis.html" for more information.'
         mock_warning.assert_called_with(warning_text)
+
+    @mock.patch('mantidqtinterfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._reset_data_file_warning_and_action')
+    @mock.patch('mantidqtinterfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.QtWidgets.QFileDialog.getOpenFileName')
+    @mock.patch('mantidqtinterfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._generate_element_widgets')
+    def test_that_select_data_file_raises_warning_with_bad_input(self, mock_generate,
+                                                                 mock_get_open_file_name,
+                                                                 mock_warning):
+        mock_get_open_file_name.return_value = 'filename'
+        mock_generate.return_value = False
+        self.gui.select_data_file()
+        self.assertEqual(mock_warning.call_count, 1)
 
     @mock.patch('mantidqtinterfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.message_box.warning')
     @mock.patch('mantidqtinterfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.QtWidgets.QFileDialog.getOpenFileName')
@@ -515,12 +557,18 @@ class ElementalAnalysisTest(unittest.TestCase):
         self.gui.electrons_changed.assert_called_with(self.gui.peaks.electron)
 
     def test_major_changed_calls_checked_data_for_each_element(self):
+        # need to do this to reset the elements
+        self.gui._generate_element_widgets()
+
         elem = len(self.gui.ptable.peak_data)
         self.gui.checked_data = mock.Mock()
         self.gui.major_peaks_changed(self.gui.peaks.major)
         self.assertEqual(self.gui.checked_data.call_count, elem)
 
     def test_minor_changed_calls_checked_data_for_each_element(self):
+        # need to do this to reset the elements
+        self.gui._generate_element_widgets()
+
         elem = len(self.gui.ptable.peak_data)
         self.gui.checked_data = mock.Mock()
         self.gui.minor_peaks_changed(self.gui.peaks.minor)
@@ -706,11 +754,11 @@ class ElementalAnalysisTest(unittest.TestCase):
 
         self.gui.deselect_elements()
 
-        self.assertEquals(self.gui.peaks.enable_deselect_elements_btn.call_count , 1)
-        self.assertEquals(self.gui.peaks.disable_deselect_elements_btn.call_count , 1)
+        self.assertEqual(self.gui.peaks.enable_deselect_elements_btn.call_count , 1)
+        self.assertEqual(self.gui.peaks.disable_deselect_elements_btn.call_count , 1)
 
-        self.assertEquals(self.gui.ptable.deselect_element.call_count , len(self.gui.element_widgets))
-        self.assertEquals(mock_remove_element_lines.call_count , len(self.gui.element_widgets))
+        self.assertEqual(self.gui.ptable.deselect_element.call_count , len(self.gui.element_widgets))
+        self.assertEqual(mock_remove_element_lines.call_count , len(self.gui.element_widgets))
 
         calls = [mock.call(element) for element in self.gui.element_widgets.keys()]
         self.gui.ptable.deselect_element.assert_has_calls(calls)
