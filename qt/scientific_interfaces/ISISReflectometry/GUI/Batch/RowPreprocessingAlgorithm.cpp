@@ -41,8 +41,10 @@ IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const & /*model*/, Pr
   // Create the algorithm
   if (!alg) {
     alg = Mantid::API::AlgorithmManager::Instance().create("ReflectometryISISPreprocess");
-    alg->setRethrows(true);
   }
+  alg->setRethrows(true);
+  alg->setAlwaysStoreInADS(false);
+  alg->getPointerToProperty("OutputWorkspace")->createTemporaryValue();
 
   // Set the algorithm properties from the model
   auto properties = IConfiguredAlgorithm::AlgorithmRuntimeProps();

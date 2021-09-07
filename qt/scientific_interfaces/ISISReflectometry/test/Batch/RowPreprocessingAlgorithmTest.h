@@ -27,14 +27,17 @@ using MantidQt::API::IConfiguredAlgorithm;
 class RowPreprocessingAlgorithmTest : public CxxTest::TestSuite {
   class StubbedPreProcess : public WorkspaceCreationHelper::StubAlgorithm {
   public:
-    StubbedPreProcess() { this->setChild(true); }
-    void addOutputWorkspace(Mantid::API::MatrixWorkspace_sptr &ws) {
-      const std::string propName = "OutputWorkspace";
-      auto prop = std::make_unique<Mantid::API::WorkspaceProperty<>>(propName, "", Mantid::Kernel::Direction::Output);
-      prop->createTemporaryValue();
+    StubbedPreProcess() {
+      this->setChild(true);
+      auto prop = std::make_unique<Mantid::API::WorkspaceProperty<>>(m_propName, "", Mantid::Kernel::Direction::Output);
       declareProperty(std::move(prop));
-      setProperty(propName, ws);
     }
+
+    void addOutputWorkspace(Mantid::API::MatrixWorkspace_sptr &ws) {
+      this->getPointerToProperty("OutputWorkspace")->createTemporaryValue();
+      setProperty(m_propName, ws);
+    }
+    const std::string m_propName = "OutputWorkspace";
   };
 
 public:
@@ -47,7 +50,7 @@ public:
     auto batch = MockBatch();
     auto inputRuns = std::vector<std::string>{"12345"};
     auto row = PreviewRow(inputRuns);
-    auto mockAlg = std::make_shared<WorkspaceCreationHelper::StubAlgorithm>();
+    auto mockAlg = std::make_shared<StubbedPreProcess>();
 
     auto configuredAlg = createConfiguredAlgorithm(batch, row, mockAlg);
     TS_ASSERT_EQUALS(configuredAlg->algorithm(), mockAlg);

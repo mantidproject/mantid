@@ -25,8 +25,8 @@ public:
   // JobRunnerSubscriber overrides
   void notifyBatchComplete(bool) override;
   void notifyBatchCancelled() override;
-  void notifyAlgorithmStarted(API::IConfiguredAlgorithm_sptr) override;
-  void notifyAlgorithmComplete(API::IConfiguredAlgorithm_sptr algorithm) override;
+  void notifyAlgorithmStarted(API::IConfiguredAlgorithm_sptr &) override;
+  void notifyAlgorithmComplete(API::IConfiguredAlgorithm_sptr &algorithm) override;
   void notifyAlgorithmError(API::IConfiguredAlgorithm_sptr, std::string const &) override;
 
 private:

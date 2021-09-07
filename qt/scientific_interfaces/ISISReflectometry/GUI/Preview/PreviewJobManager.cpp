@@ -30,9 +30,9 @@ void PreviewJobManager::notifyBatchComplete(bool) {}
 
 void PreviewJobManager::notifyBatchCancelled() {}
 
-void PreviewJobManager::notifyAlgorithmStarted(API::IConfiguredAlgorithm_sptr) {}
+void PreviewJobManager::notifyAlgorithmStarted(API::IConfiguredAlgorithm_sptr &) {}
 
-void PreviewJobManager::notifyAlgorithmComplete(API::IConfiguredAlgorithm_sptr algorithm) {
+void PreviewJobManager::notifyAlgorithmComplete(API::IConfiguredAlgorithm_sptr &algorithm) {
   auto jobAlgorithm = std::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
   auto item = jobAlgorithm->item();
   if (!item || !item->isPreview())

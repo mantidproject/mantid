@@ -20,6 +20,7 @@
 
 #include <QCloseEvent>
 #include <memory>
+#include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -62,7 +63,7 @@ private:
   std::unique_ptr<QtSaveView> createSaveTab();
 
   Ui::BatchWidget m_ui;
-  JobRunnerSubscriber *m_notifyee;
+  std::vector<JobRunnerSubscriber *> m_notifyees;
   std::unique_ptr<QtRunsView> m_runs;
   std::unique_ptr<QtEventView> m_eventHandling;
   std::unique_ptr<QtSaveView> m_save;

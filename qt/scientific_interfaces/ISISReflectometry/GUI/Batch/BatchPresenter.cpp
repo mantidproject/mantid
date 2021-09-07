@@ -113,14 +113,18 @@ void BatchPresenter::notifyBatchCancelled() {
   notifyAutoreductionPaused();
 }
 
-void BatchPresenter::notifyAlgorithmStarted(IConfiguredAlgorithm_sptr algorithm) {
+void BatchPresenter::notifyAlgorithmStarted(IConfiguredAlgorithm_sptr &algorithm) {
   auto const &item = m_jobManager->algorithmStarted(algorithm);
+  if (item.isPreview())
+    return;
   m_runsPresenter->notifyRowOutputsChanged(item);
   m_runsPresenter->notifyRowStateChanged(item);
 }
 
-void BatchPresenter::notifyAlgorithmComplete(IConfiguredAlgorithm_sptr algorithm) {
+void BatchPresenter::notifyAlgorithmComplete(IConfiguredAlgorithm_sptr &algorithm) {
   auto const &item = m_jobManager->algorithmComplete(algorithm);
+  if (item.isPreview())
+    return;
   m_runsPresenter->notifyRowOutputsChanged(item);
   m_runsPresenter->notifyRowStateChanged(item);
   /// TODO Longer term it would probably be better if algorithms took care

@@ -31,7 +31,7 @@ void PreviewPresenter::notifyLoadWorkspaceRequested() {
 void PreviewPresenter::notifyLoadWorkspaceCompleted() {
   auto workspace = m_model->getLoadedWs();
   assert(workspace);
-  g_log.debug("Loaded ws pointer");
+  g_log.warning("Loaded ws pointer");
 }
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
