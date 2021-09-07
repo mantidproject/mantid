@@ -63,6 +63,7 @@ public:
   void setProjection(const Mantid::Kernel::V3D &minBounds,
                      const Mantid::Kernel::V3D &maxBounds,
                      ProjectionType type = Viewport::ORTHO);
+  void setProjectionZPlane(const Mantid::Kernel::V3D &minBounds, const Mantid::Kernel::V3D &maxBounds);
   /// Apply the projection to OpenGL engine
   void applyProjection() const;
   /// Rotate the model

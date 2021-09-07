@@ -70,8 +70,7 @@ public:
   /// Draw the instrument in 3D
   void draw(bool picking = false) const;
   /// Return the bounding box in 3D
-  void getBoundingBox(Mantid::Kernel::V3D &minBound,
-                      Mantid::Kernel::V3D &maxBound) const;
+  void getBoundingBox(Mantid::Kernel::V3D &minBound, Mantid::Kernel::V3D &maxBound, const bool excludeMonitors) const;
   /// Set a component (and all its children) visible.
   void setComponentVisible(size_t componentIndex);
   /// Set visibilit of all components.

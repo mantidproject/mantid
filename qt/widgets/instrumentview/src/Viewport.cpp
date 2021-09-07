@@ -109,6 +109,22 @@ void Viewport::setProjection(const Mantid::Kernel::V3D &minBounds,
 }
 
 /**
+ * Sets the near and far clipping plane based on the size of given points
+ *
+ * @param minBounds :: Near-bottom-left corner of the scene.
+ * @param maxBounds :: Far-top-right corner of the scene.
+ */
+void Viewport::setProjectionZPlane(const Mantid::Kernel::V3D &minBounds, const Mantid::Kernel::V3D &maxBounds) {
+  double radius = minBounds.norm();
+  double tmp = maxBounds.norm();
+  if (tmp > radius)
+    radius = tmp;
+
+  m_near = -radius;
+  m_far = radius;
+}
+
+/**
  * Return XY plane bounds corrected for the aspect ratio.
  */
 void Viewport::correctForAspectRatioAndZoom(double &xmin, double &xmax,
@@ -338,6 +354,7 @@ void Viewport::adjustProjection() {
   m_zmin = m_zminOrig;
   m_zmax = m_zmaxOrig;
 
+  // rotate the original projection based on the new quaternion
   m_quaternion.rotateBB(m_left, m_bottom, m_zmin, m_right, m_top, m_zmax);
 
   // update the GL projection with the new bounds
