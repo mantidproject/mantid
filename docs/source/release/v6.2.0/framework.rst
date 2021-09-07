@@ -23,11 +23,12 @@ Improvements
 - :ref:`LoadNexusMonitors <algm-LoadNexusMonitors-v2>` now utilizes the log filter provided by :ref:`LoadNexusLogs <algm-LoadNexusLogs>`.
 - :ref:`LoadRaw <algm-LoadRaw>` will now ignore empty ICPalarm log files.
 - :ref:`SaveAscii <algm-SaveAscii>` will no longer throw an error if `WriteXErrors` is requested, but there are no `Dx` data present in the workspace.
+- The algorithm CalculateMultipleScattering has been renamed to :ref:`DiscusMultipleScatteringCorrection <algm-DiscusMultipleScatteringCorrection>` to avoid confusion with the new :ref:`MultipleScatteringCorrection <algm-MultipleScatteringCorrection>` algorithm
 
 Bugfixes
 ########
 
-* Fix bug in :ref:`CalculateMultipleScattering <algm-CalculateMultipleScattering>` where detector position was incorrectly determined on a workspace where the workspace index didn't match the detector
+- Fix bug in :ref:`DiscusMultipleScatteringCorrection <algm-DiscusMultipleScatteringCorrection>` where detector position was incorrectly determined on a workspace where the workspace index didn't match the detector
   index e.g. if the workspace was loaded with ``SpectrumMin`` specified to exclude some monitors.
 * Fixed bug in :ref:`algm-ConvertToMDMinMaxLocal` where wrong min max calculated if the workspace includes monitor spectra or spectra without any detectors.
 * Added parser for input Names to :ref:`algm-CreateMDHistoWorkspace` to allow inputs such as `Names='[H,0,0],[0,K,0],[0,0,L]'`.
