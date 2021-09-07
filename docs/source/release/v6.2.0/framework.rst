@@ -79,6 +79,7 @@ SliceViewer
 
 Bugfixes
 ########
+- Fix bug where non-orthogonal view was enabled on an orthogonal workspace with no UB.
 - Fixed cursor tracking from getting stuck and displaying incorrect signals when viewing MDHistogram workspaces in :ref:`sliceviewer`.
 
 
