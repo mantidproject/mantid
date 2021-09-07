@@ -83,7 +83,7 @@ void QtExperimentView::initLayout(const Mantid::API::IAlgorithm_sptr &algorithmF
   m_ui.setupUi(this);
   m_deleteShortcut = std::make_unique<QShortcut>(QKeySequence(tr("Delete")), m_ui.optionsTable);
   connect(m_deleteShortcut.get(), SIGNAL(activated()), this, SLOT(onRemoveLookupRowRequested()));
-  initOptionsTable(std::move(algorithmForTooltips));
+  initOptionsTable(algorithmForTooltips);
   initFloodControls();
 
   auto blacklist = std::vector<std::string>({"InputWorkspaces", "OutputWorkspace"});
@@ -145,7 +145,7 @@ void QtExperimentView::initOptionsTable(const Mantid::API::IAlgorithm_sptr &algo
   table->resizeColumnsToContents();
   table->setColumnCount(LookupRow::OPTIONS_TABLE_COLUMN_COUNT);
   table->setRowCount(1);
-  initializeTableColumns(*table, std::move(algorithmForTooltips));
+  initializeTableColumns(*table, algorithmForTooltips);
   initializeTableItems(*table);
 
   auto header = table->horizontalHeader();
@@ -237,7 +237,7 @@ void QtExperimentView::disableAll() { setEnabledStateForAllWidgets(false); }
 void QtExperimentView::enableAll() { setEnabledStateForAllWidgets(true); }
 
 void QtExperimentView::registerSettingsWidgets(const Mantid::API::IAlgorithm_sptr &alg) {
-  registerExperimentSettingsWidgets(std::move(alg));
+  registerExperimentSettingsWidgets(alg);
   connectExperimentSettingsWidgets();
 }
 

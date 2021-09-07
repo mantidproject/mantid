@@ -356,7 +356,7 @@ void PreviewPlot::resetView() {
  * Set the face colour for the canvas
  * @param colour A new colour for the figure facecolor
  */
-void PreviewPlot::setCanvasColour(const QColor &colour) { m_canvas->gcf().setFaceColor(std::move(colour)); }
+void PreviewPlot::setCanvasColour(const QColor &colour) { m_canvas->gcf().setFaceColor(colour); }
 
 /**
  * @brief PreviewPlot::setLinesWithErrors

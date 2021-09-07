@@ -117,7 +117,7 @@ void LoadILLSANS::exec() {
     runLoadInstrument();
     const DetectorPosition detPos = getDetectorPositionD33(firstEntry, instrumentPath);
     progress.report("Moving detectors");
-    moveDetectorsD33(std::move(detPos));
+    moveDetectorsD33(detPos);
     if (m_isTOF) {
       adjustTOF();
       moveSource();
@@ -330,7 +330,7 @@ void LoadILLSANS::initWorkSpaceD11B(NeXus::NXEntry &firstEntry, const std::strin
     NXFloat durations = firstEntry.openNXFloat("slices");
     durations.load();
     const HistogramData::Counts histoCounts(durations(), durations() + dataCenter.dim2());
-    m_localWorkspace->setCounts(nextIndex - 1, std::move(histoCounts));
+    m_localWorkspace->setCounts(nextIndex - 1, histoCounts);
     m_localWorkspace->setCountVariances(nextIndex - 1,
                                         HistogramData::CountVariances(std::vector<double>(dataCenter.dim2(), 0)));
   }
@@ -496,9 +496,9 @@ size_t LoadILLSANS::loadDataFromMonitors(NeXus::NXEntry &firstEntry, size_t firs
       g_log.debug() << "Monitor: " << it->nxname << " dims = " << data.dim0() << "x" << data.dim1() << "x"
                     << data.dim2() << '\n';
       const HistogramData::Counts histoCounts(data(), data() + data.dim2());
-      m_localWorkspace->setCounts(firstIndex, std::move(histoCounts));
+      m_localWorkspace->setCounts(firstIndex, histoCounts);
       const HistogramData::CountVariances histoVariances(data(), data() + data.dim2());
-      m_localWorkspace->setCountVariances(firstIndex, std::move(histoVariances));
+      m_localWorkspace->setCountVariances(firstIndex, histoVariances);
 
       if (m_isTOF) {
         HistogramData::BinEdges histoBinEdges(data.dim2() + 1, HistogramData::LinearGenerator(0.0, 1));
@@ -566,19 +566,19 @@ size_t LoadILLSANS::loadDataFromTubes(NeXus::NXInt &data, const std::vector<doub
       const size_t index = firstIndex + i * numberOfPixelsPerTube + j;
       const HistogramData::Counts histoCounts(data_p, data_p + numberOfChannels);
       const HistogramData::CountVariances histoVariances(data_p, data_p + numberOfChannels);
-      m_localWorkspace->setCounts(index, std::move(histoCounts));
-      m_localWorkspace->setCountVariances(index, std::move(histoVariances));
+      m_localWorkspace->setCounts(index, histoCounts);
+      m_localWorkspace->setCountVariances(index, histoVariances);
 
       if (m_isD16Omega) {
         const HistogramData::Points histoPoints(std::vector<double>(1, 0.5 * (timeBinning[0] + timeBinning[1])));
-        m_localWorkspace->setPoints(index, std::move(histoPoints));
+        m_localWorkspace->setPoints(index, histoPoints);
       } else {
         if (type == MultichannelType::KINETIC) {
           const HistogramData::Points histoPoints(timeBinning);
-          m_localWorkspace->setPoints(index, std::move(histoPoints));
+          m_localWorkspace->setPoints(index, histoPoints);
         } else {
           const HistogramData::BinEdges binEdges(timeBinning);
-          m_localWorkspace->setBinEdges(index, std::move(binEdges));
+          m_localWorkspace->setBinEdges(index, binEdges);
         }
       }
     }
@@ -889,7 +889,7 @@ void LoadILLSANS::adjustTOF() {
   for (size_t mIndex = nHist - N_MONITORS; mIndex < nHist; ++mIndex) {
     const HistogramData::Counts counts = m_localWorkspace->histogram(mIndex).counts();
     const HistogramData::BinEdges binEdges(firstPixel);
-    m_localWorkspace->setHistogram(mIndex, std::move(binEdges), std::move(counts));
+    m_localWorkspace->setHistogram(mIndex, binEdges, counts);
   }
 }
 

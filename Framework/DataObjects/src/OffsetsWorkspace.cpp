@@ -23,7 +23,7 @@ DECLARE_WORKSPACE(OffsetsWorkspace)
  * @param inst :: input instrument that is the base for this workspace
  * @return created OffsetsWorkspace
  */
-OffsetsWorkspace::OffsetsWorkspace(const Geometry::Instrument_const_sptr &inst) : SpecialWorkspace2D(std::move(inst)) {}
+OffsetsWorkspace::OffsetsWorkspace(const Geometry::Instrument_const_sptr &inst) : SpecialWorkspace2D(inst) {}
 
 } // namespace DataObjects
 } // namespace Mantid

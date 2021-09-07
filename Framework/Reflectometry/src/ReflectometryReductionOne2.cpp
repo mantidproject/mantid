@@ -1072,8 +1072,7 @@ void ReflectometryReductionOne2::sumInQProcessValue(const int inputIdx, const do
   double lambdaVMax = 0.0;
   getProjectedLambdaRange(lambda, twoTheta, bLambda, bTwoTheta, detectors, lambdaVMin, lambdaVMax);
   // Share the input counts into the output array
-  sumInQShareCounts(inputCounts, inputE[inputIdx], bLambda, lambdaVMin, lambdaVMax, outSpecIdx, std::move(IvsLam),
-                    outputE);
+  sumInQShareCounts(inputCounts, inputE[inputIdx], bLambda, lambdaVMin, lambdaVMax, outSpecIdx, IvsLam, outputE);
 }
 
 /**

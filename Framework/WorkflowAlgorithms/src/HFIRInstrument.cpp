@@ -84,7 +84,7 @@ void getPixelFromCoordinate(const double &x, const double &y, const API::MatrixW
  * of real-space coordinates (0,0).
  */
 void getDefaultBeamCenter(const API::MatrixWorkspace_sptr &dataWS, double &pixel_x, double &pixel_y) {
-  getPixelFromCoordinate(0.0, 0.0, std::move(dataWS), pixel_x, pixel_y);
+  getPixelFromCoordinate(0.0, 0.0, dataWS, pixel_x, pixel_y);
 }
 
 /*

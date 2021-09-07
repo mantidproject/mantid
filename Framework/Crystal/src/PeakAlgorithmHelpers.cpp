@@ -171,13 +171,13 @@ std::vector<MNPOffset> generateOffsetVectors(const std::vector<Kernel::V3D> &mod
         V3D offset{modVector * order};
         switch (i) {
         case 0:
-          offsets.emplace_back(order, 0, 0, std::move(offset));
+          offsets.emplace_back(order, 0, 0, offset);
           break;
         case 1:
-          offsets.emplace_back(0, order, 0, std::move(offset));
+          offsets.emplace_back(0, order, 0, offset);
           break;
         case 2:
-          offsets.emplace_back(0, 0, order, std::move(offset));
+          offsets.emplace_back(0, 0, order, offset);
           break;
         }
       }

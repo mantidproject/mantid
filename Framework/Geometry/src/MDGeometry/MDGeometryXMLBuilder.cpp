@@ -105,7 +105,7 @@ bool MDGeometryBuilderXML<CheckDimensionPolicy>::addXDimension(const IMDDimensio
   if (dimension) {
     applyPolicyChecking(*dimension);
     addOrdinaryDimension(dimension);
-    m_spXDimension = std::move(dimension);
+    m_spXDimension = dimension;
     m_changed = true;
     bAdded = true;
   }
@@ -124,7 +124,7 @@ bool MDGeometryBuilderXML<CheckDimensionPolicy>::addYDimension(const IMDDimensio
   if (dimension) {
     applyPolicyChecking(*dimension);
     addOrdinaryDimension(dimension);
-    m_spYDimension = std::move(dimension);
+    m_spYDimension = dimension;
     m_changed = true;
     bAdded = true;
   }
@@ -142,7 +142,7 @@ bool MDGeometryBuilderXML<CheckDimensionPolicy>::addZDimension(const IMDDimensio
   if (dimension) {
     applyPolicyChecking(*dimension);
     addOrdinaryDimension(dimension);
-    m_spZDimension = std::move(dimension);
+    m_spZDimension = dimension;
     m_changed = true;
     bAdded = true;
   }
@@ -161,7 +161,7 @@ bool MDGeometryBuilderXML<CheckDimensionPolicy>::addTDimension(const IMDDimensio
   if (dimension) {
     applyPolicyChecking(*dimension);
     addOrdinaryDimension(dimension);
-    m_spTDimension = std::move(dimension);
+    m_spTDimension = dimension;
     m_changed = true;
     bAdded = true;
   }

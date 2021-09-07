@@ -1002,7 +1002,7 @@ void Interval::init(int start, int end) {
 //----------------------------------
 IntervalList::IntervalList(void) {}
 
-IntervalList::IntervalList(const QString &intervals) { addIntervals(std::move(intervals)); }
+IntervalList::IntervalList(const QString &intervals) { addIntervals(intervals); }
 
 IntervalList::IntervalList(const Interval &interval) { m_list.append(interval); }
 

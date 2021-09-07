@@ -630,7 +630,7 @@ void ProjectionSurface::saveShapesToTableWorkspace() { m_maskShapes.saveToTableW
  * @param ws :: table workspace to load shapes from
  */
 void ProjectionSurface::loadShapesFromTableWorkspace(const Mantid::API::ITableWorkspace_const_sptr &ws) {
-  m_maskShapes.loadFromTableWorkspace(std::move(ws));
+  m_maskShapes.loadFromTableWorkspace(ws);
 }
 
 /**

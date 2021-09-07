@@ -385,7 +385,7 @@ void Q1D2::calculateNormalization(const size_t wavStart, const size_t wsIndex,
                                   double const *const binNormEs, HistogramData::HistogramY::iterator norm,
                                   HistogramData::HistogramY::iterator normETo2) const {
   double detectorAdj, detAdjErr;
-  pixelWeight(std::move(pixelAdj), wsIndex, detectorAdj, detAdjErr);
+  pixelWeight(pixelAdj, wsIndex, detectorAdj, detAdjErr);
   // use that the normalization array ends at the start of the error array
   for (auto n = norm, e = normETo2; n != normETo2; ++n, ++e) {
     *n = detectorAdj;

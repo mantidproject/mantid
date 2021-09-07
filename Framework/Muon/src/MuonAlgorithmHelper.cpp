@@ -336,7 +336,7 @@ std::vector<int> getAllDetectorIDsFromGroup(const Grouping &grouping) {
 // Checks if all the detectors in the groups in a Grouping are in the workspace.
 // Workspace can be matrix or group type.
 bool checkGroupDetectorsInWorkspace(const Grouping &grouping, const Workspace_sptr &ws) {
-  std::set<int> detectorIDs = getAllDetectorIDsFromWorkspace(std::move(ws));
+  std::set<int> detectorIDs = getAllDetectorIDsFromWorkspace(ws);
   std::vector<int> groupDetectorIDs = getAllDetectorIDsFromGroup(grouping);
   return checkItemsInSet(groupDetectorIDs, detectorIDs);
 }

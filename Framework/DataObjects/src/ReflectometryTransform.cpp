@@ -124,8 +124,8 @@ ReflectometryTransform::createMDWorkspace(const Mantid::Geometry::IMDDimension_s
                                           const BoxController_sptr &boxController) const {
   auto ws = std::make_shared<MDEventWorkspace2Lean>();
 
-  ws->addDimension(std::move(a));
-  ws->addDimension(std::move(b));
+  ws->addDimension(a);
+  ws->addDimension(b);
 
   BoxController_sptr wsbc = ws->getBoxController(); // Get the box controller
   wsbc->setSplitInto(boxController->getSplitInto(0));
@@ -275,7 +275,7 @@ ReflectometryTransform::executeMD(const Mantid::API::MatrixWorkspace_const_sptr 
   auto dim1 = std::make_shared<MDHistoDimension>(m_d1Label, m_d1ID, *frame, static_cast<Mantid::coord_t>(m_d1Min),
                                                  static_cast<Mantid::coord_t>(m_d1Max), m_d1NumBins);
 
-  auto ws = createMDWorkspace(dim0, dim1, std::move(boxController));
+  auto ws = createMDWorkspace(dim0, dim1, boxController);
 
   auto spectraAxis = inputWs->getAxis(1);
   for (size_t index = 0; index < inputWs->getNumberHistograms(); ++index) {

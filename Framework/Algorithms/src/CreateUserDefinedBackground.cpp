@@ -76,7 +76,7 @@ void CreateUserDefinedBackground::exec() {
   // Generate output workspace with background data
   const auto outputWS = createBackgroundWorkspace(pointsTable, inputWS);
 
-  setProperty("OutputBackgroundWorkspace", API::MatrixWorkspace_sptr(std::move(outputWS)));
+  setProperty("OutputBackgroundWorkspace", API::MatrixWorkspace_sptr(outputWS));
 }
 
 /**

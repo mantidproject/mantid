@@ -303,7 +303,7 @@ Workspace_sptr ApplyMuonDetectorGrouping::createAnalysisWorkspace(const Workspac
     options.rebinArgs = "";
   }
 
-  setMuonProcessPeriodProperties(*alg, std::move(inputWS), options);
+  setMuonProcessPeriodProperties(*alg, inputWS, options);
   setMuonProcessAlgorithmProperties(*alg, options);
   alg->setPropertyValue("OutputWorkspace", "__NotUsed__");
   alg->execute();

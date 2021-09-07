@@ -48,7 +48,7 @@ using namespace Mantid::Geometry;
 namespace MantidQt {
 namespace MantidWidgets {
 Projection3D::Projection3D(const InstrumentActor *rootActor, QSize viewportSize)
-    : ProjectionSurface(rootActor), m_drawAxes(true), m_wireframe(false), m_viewport(std::move(viewportSize)) {
+    : ProjectionSurface(rootActor), m_drawAxes(true), m_wireframe(false), m_viewport(viewportSize) {
   V3D minBounds, maxBounds;
   // exclude monitors and choppers from bounding box to set tighter view bounds
   m_instrActor->getBoundingBox(minBounds, maxBounds, true);

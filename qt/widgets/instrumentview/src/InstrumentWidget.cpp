@@ -1229,7 +1229,7 @@ void InstrumentWidget::updateInstrumentDetectors() {
 }
 
 void InstrumentWidget::deletePeaksWorkspace(const Mantid::API::IPeaksWorkspace_sptr &pws) {
-  this->getSurface()->deletePeaksWorkspace(std::move(pws));
+  this->getSurface()->deletePeaksWorkspace(pws);
   updateInstrumentView();
 }
 
@@ -1436,7 +1436,7 @@ void InstrumentWidget::clearADSHandle() {
 void InstrumentWidget::overlayPeaksWorkspace(const IPeaksWorkspace_sptr &ws) {
   auto surface = getUnwrappedSurface();
   if (surface) {
-    surface->setPeaksWorkspace(std::move(ws));
+    surface->setPeaksWorkspace(ws);
     updateInstrumentView();
   }
 }

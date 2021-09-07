@@ -130,7 +130,7 @@ double ChangeTimeZero::getTimeShift(const API::MatrixWorkspace_sptr &ws) const {
   std::string timeOffset = getProperty("AbsoluteTimeOffset");
   if (isAbsoluteTimeShift(timeOffset)) {
     DateAndTime desiredTime(timeOffset);
-    DateAndTime originalTime(getStartTimeFromWorkspace(std::move(ws)));
+    DateAndTime originalTime(getStartTimeFromWorkspace(ws));
     timeShift = DateAndTime::secondsFromDuration(desiredTime - originalTime);
   } else {
     timeShift = getProperty("RelativeTimeOffset");

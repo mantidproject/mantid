@@ -325,7 +325,7 @@ void ComplexMatrix::sortColumns(const std::vector<size_t> &indices) {
 }
 
 /// Create a new matrix and move the data to it.
-ComplexMatrix ComplexMatrix::move() { return ComplexMatrix(std::move(m_matrix)); }
+ComplexMatrix ComplexMatrix::move() { return ComplexMatrix(m_matrix); }
 
 /// Pack the matrix into a single std vector of doubles (for passing in and out
 /// of algorithms)

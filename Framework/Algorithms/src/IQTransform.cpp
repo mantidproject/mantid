@@ -151,7 +151,7 @@ void IQTransform::exec() {
 API::MatrixWorkspace_sptr IQTransform::subtractBackgroundWS(const API::MatrixWorkspace_sptr &ws,
                                                             const API::MatrixWorkspace_sptr &background) {
   g_log.debug() << "Subtracting the workspace " << background->getName() << " from the input workspace.\n";
-  return std::move(ws) - background;
+  return ws - background;
 }
 
 /** @name Available transformation functions */

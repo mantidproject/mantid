@@ -635,7 +635,7 @@ int PlotAsymmetryByLogValue::extractRunNumberFromRunName(std::string runName) {
  */
 void PlotAsymmetryByLogValue::applyDeadtimeCorr(Workspace_sptr &loadedWs, const Workspace_sptr &deadTimes) {
   ScopedWorkspace ws(loadedWs);
-  ScopedWorkspace dt(std::move(deadTimes));
+  ScopedWorkspace dt(deadTimes);
 
   auto applyCorr = AlgorithmManager::Instance().createUnmanaged("ApplyDeadTimeCorr");
   applyCorr->initialize();
@@ -676,7 +676,7 @@ void PlotAsymmetryByLogValue::groupDetectors(Workspace_sptr &loadedWs, const Wor
 
   // Could be groups of workspaces, so need to work with ADS
   ScopedWorkspace inWS(loadedWs);
-  ScopedWorkspace grWS(std::move(grouping));
+  ScopedWorkspace grWS(grouping);
   ScopedWorkspace outWS;
 
   auto alg = AlgorithmManager::Instance().createUnmanaged("MuonGroupDetectors");

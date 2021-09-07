@@ -234,7 +234,7 @@ void Decoder::decodeRunsTable(QtRunsTableView *gui, ReductionJobs *redJobs, Runs
   decodeRunsTableModel(redJobs, runsTable);
 
   // Still need to do this for groups
-  updateRunsTableViewFromModel(gui, redJobs, std::move(precision));
+  updateRunsTableViewFromModel(gui, redJobs, precision);
 
   if (m_projectSave) {
     // Apply styling and restore completed state for output range values

@@ -423,8 +423,7 @@ void RefinePowderInstrumentParameters::refineInstrumentParametersMC(const TableW
 
   // 2. Parse parameter (table) workspace
   vector<double> stepsizes, lowerbounds, upperbounds;
-  importMonteCarloParametersFromTable(std::move(parameterWS), m_PeakFunctionParameterNames, stepsizes, lowerbounds,
-                                      upperbounds);
+  importMonteCarloParametersFromTable(parameterWS, m_PeakFunctionParameterNames, stepsizes, lowerbounds, upperbounds);
 
   stringstream dbss;
   for (size_t i = 0; i < m_PeakFunctionParameterNames.size(); ++i) {

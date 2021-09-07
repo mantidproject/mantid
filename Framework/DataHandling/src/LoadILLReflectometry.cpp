@@ -503,7 +503,7 @@ void LoadILLReflectometry::loadData(NeXus::NXEntry &entry, const std::vector<std
     for (int j = 0; j < static_cast<int>(m_numberOfHistograms); ++j) {
       const int *data_p = &data(0, static_cast<int>(j), 0);
       const HistogramData::Counts counts(data_p, data_p + m_numberOfChannels);
-      m_localWorkspace->setHistogram(j, binEdges, std::move(counts));
+      m_localWorkspace->setHistogram(j, binEdges, counts);
       m_localWorkspace->getSpectrum(j).setSpectrumNo(j);
       progress.report();
     }
@@ -511,7 +511,7 @@ void LoadILLReflectometry::loadData(NeXus::NXEntry &entry, const std::vector<std
       const int *monitor_p = monitorsData[im].data();
       const HistogramData::Counts monitorCounts(monitor_p, monitor_p + m_numberOfChannels);
       const size_t spectrum = im + m_numberOfHistograms;
-      m_localWorkspace->setHistogram(spectrum, binEdges, std::move(monitorCounts));
+      m_localWorkspace->setHistogram(spectrum, binEdges, monitorCounts);
       m_localWorkspace->getSpectrum(spectrum).setSpectrumNo(static_cast<specnum_t>(spectrum));
       progress.report();
     }

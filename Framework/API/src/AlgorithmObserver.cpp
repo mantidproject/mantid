@@ -34,7 +34,7 @@ AlgorithmObserver::AlgorithmObserver(const IAlgorithm_const_sptr &alg)
       m_finishObserver(*this, &AlgorithmObserver::_finishHandle),
       m_errorObserver(*this, &AlgorithmObserver::_errorHandle),
       m_startingObserver(*this, &AlgorithmObserver::_startingHandle) {
-  observeAll(std::move(alg));
+  observeAll(alg);
 }
 
 /// Virtual destructor

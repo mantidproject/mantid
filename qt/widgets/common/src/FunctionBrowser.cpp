@@ -180,7 +180,7 @@ void FunctionBrowser::setCurrentDataset(int i) { m_presenter->setCurrentDataset(
 
 /// Remove local parameter values for a number of datasets.
 /// @param indices :: A list of indices of datasets to remove.
-void FunctionBrowser::removeDatasets(const QList<int> &indices) { m_presenter->removeDatasets(std::move(indices)); }
+void FunctionBrowser::removeDatasets(const QList<int> &indices) { m_presenter->removeDatasets(indices); }
 
 /// Add some datasets to those already set.
 /// @param names :: A list of names for the new datasets.

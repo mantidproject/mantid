@@ -23,8 +23,8 @@ namespace MantidWidgets {
  * @param glWidgetDimensions Viewport width/height in device pixels
  */
 Viewport::Viewport(QSize dimensions)
-    : m_projectionType(Viewport::ORTHO), m_dimensions(std::move(dimensions)), m_left(-1), m_right(1), m_bottom(-1),
-      m_top(1), m_near(-1), m_far(1), m_rotationspeed(180.0 / M_PI), m_zoomFactor(1.0), m_xTrans(0.0), m_yTrans(0.0),
+    : m_projectionType(Viewport::ORTHO), m_dimensions(dimensions), m_left(-1), m_right(1), m_bottom(-1), m_top(1),
+      m_near(-1), m_far(1), m_rotationspeed(180.0 / M_PI), m_zoomFactor(1.0), m_xTrans(0.0), m_yTrans(0.0),
       m_zTrans(0.0) {
   m_quaternion.GLMatrix(&m_rotationmatrix[0]);
 }
@@ -33,7 +33,7 @@ Viewport::Viewport(QSize dimensions)
  * Resize the viewport = size of the displaying widget.
  * @param dimensions Viewport width/height in device pixels
  */
-void Viewport::resize(QSize dimensions) { m_dimensions = std::move(dimensions); }
+void Viewport::resize(QSize dimensions) { m_dimensions = dimensions; }
 
 /**
  * Get the size of the viewport in logical pixels (size of the displaying

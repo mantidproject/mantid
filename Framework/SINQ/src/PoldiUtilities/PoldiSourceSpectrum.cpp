@@ -19,7 +19,7 @@ using namespace Mantid::Geometry;
 PoldiSourceSpectrum::PoldiSourceSpectrum(const Interpolation &spectrum) : m_spectrum(spectrum) {}
 
 PoldiSourceSpectrum::PoldiSourceSpectrum(const Instrument_const_sptr &poldiInstrument) : m_spectrum() {
-  setSpectrumFromInstrument(std::move(poldiInstrument));
+  setSpectrumFromInstrument(poldiInstrument);
 }
 
 /** Returns the interpolated intensity at the given wavelength

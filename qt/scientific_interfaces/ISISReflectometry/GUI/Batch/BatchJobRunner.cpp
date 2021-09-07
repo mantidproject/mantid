@@ -37,8 +37,8 @@ int countItemsForLocation(ReductionJobs const &jobs, MantidWidgets::Batch::RowLo
 using API::IConfiguredAlgorithm_sptr;
 
 BatchJobRunner::BatchJobRunner(Batch batch)
-    : m_batch(std::move(batch)), m_isProcessing(false), m_isAutoreducing(false), m_reprocessFailed(false),
-      m_processAll(false), m_processPartial(false) {}
+    : m_batch(batch), m_isProcessing(false), m_isAutoreducing(false), m_reprocessFailed(false), m_processAll(false),
+      m_processPartial(false) {}
 
 bool BatchJobRunner::isProcessing() const { return m_isProcessing; }
 

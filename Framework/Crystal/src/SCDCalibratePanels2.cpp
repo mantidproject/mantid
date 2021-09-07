@@ -401,7 +401,7 @@ void SCDCalibratePanels2::optimizeL1(IPeaksWorkspace_sptr pws, IPeaksWorkspace_s
   auto fitL1_alg = createChildAlgorithm("Fit", -1, -1, false);
   auto objf = std::make_shared<SCDCalibratePanels2ObjFunc>();
   // NOTE: always use the original pws to get the tofs
-  std::vector<double> tofs = captureTOF(std::move(pws_original));
+  std::vector<double> tofs = captureTOF(pws_original);
   objf->setPeakWorkspace(pws, "moderator", tofs);
   fitL1_alg->setProperty("Function", std::dynamic_pointer_cast<IFunction>(objf));
 
@@ -628,7 +628,7 @@ void SCDCalibratePanels2::optimizeT0(IPeaksWorkspace_sptr pws, IPeaksWorkspace_s
 
   auto objf = std::make_shared<SCDCalibratePanels2ObjFunc>();
   // NOTE: always use the original pws to get the tofs
-  std::vector<double> tofs = captureTOF(std::move(pws_original));
+  std::vector<double> tofs = captureTOF(pws_original);
   objf->setPeakWorkspace(pws, "none", tofs);
   fitT0_alg->setProperty("Function", std::dynamic_pointer_cast<IFunction>(objf));
 
@@ -681,7 +681,7 @@ void SCDCalibratePanels2::optimizeSamplePos(IPeaksWorkspace_sptr pws, IPeaksWork
 
   auto objf = std::make_shared<SCDCalibratePanels2ObjFunc>();
   // NOTE: always use the original pws to get the tofs
-  std::vector<double> tofs = captureTOF(std::move(pws_original));
+  std::vector<double> tofs = captureTOF(pws_original);
   objf->setPeakWorkspace(pws, "none", tofs);
   fitSamplePos_alg->setProperty("Function", std::dynamic_pointer_cast<IFunction>(objf));
 
@@ -1280,7 +1280,7 @@ void SCDCalibratePanels2::profileL1(Mantid::API::IPeaksWorkspace_sptr &pws,
   // setting up as if we are doing optimization
   auto objf = std::make_shared<SCDCalibratePanels2ObjFunc>();
   // NOTE: always use the original pws to get the tofs
-  std::vector<double> tofs = captureTOF(std::move(pws_original));
+  std::vector<double> tofs = captureTOF(pws_original);
   objf->setPeakWorkspace(pws, "moderator", tofs);
 
   // call the obj to perform evaluation
@@ -1491,7 +1491,7 @@ void SCDCalibratePanels2::profileT0(Mantid::API::IPeaksWorkspace_sptr &pws,
   // setting up as if we are doing optimization
   auto objf = std::make_shared<SCDCalibratePanels2ObjFunc>();
   // NOTE: always use the original pws to get the tofs
-  std::vector<double> tofs = captureTOF(std::move(pws_original));
+  std::vector<double> tofs = captureTOF(pws_original);
   objf->setPeakWorkspace(pws, "none", tofs);
 
   // generate the target
@@ -1569,7 +1569,7 @@ void SCDCalibratePanels2::profileL1T0(Mantid::API::IPeaksWorkspace_sptr &pws,
   // setting up as if we are doing optimization
   auto objf = std::make_shared<SCDCalibratePanels2ObjFunc>();
   // NOTE: always use the original pws to get the tofs
-  std::vector<double> tofs = captureTOF(std::move(pws_original));
+  std::vector<double> tofs = captureTOF(pws_original);
   objf->setPeakWorkspace(pws, "moderator", tofs);
 
   // generate the target

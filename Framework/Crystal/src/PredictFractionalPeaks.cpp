@@ -74,8 +74,8 @@ public:
    * number.
    */
   PeaksInRangeStrategy(V3D hklMin, V3D hklMax, HKLFilter *filter, const PeaksWorkspace *const inputPeaks)
-      : m_hklGenerator(std::move(hklMin), std::move(hklMax)), m_hklIterator(m_hklGenerator.begin()),
-        m_hklFilter(filter), m_inputPeaks(inputPeaks) {
+      : m_hklGenerator(hklMin, hklMax), m_hklIterator(m_hklGenerator.begin()), m_hklFilter(filter),
+        m_inputPeaks(inputPeaks) {
     assert(filter);
   }
 
@@ -255,7 +255,7 @@ predictFractionalPeaks(Algorithm *const alg, const bool requirePeaksOnDetector, 
       GNU_DIAG_ON("missing-braces")
       auto it = find(alreadyDonePeaks.begin(), alreadyDonePeaks.end(), savedPeak);
       if (it == alreadyDonePeaks.end())
-        alreadyDonePeaks.emplace_back(std::move(savedPeak));
+        alreadyDonePeaks.emplace_back(savedPeak);
       else
         continue;
 
@@ -349,8 +349,7 @@ void PredictFractionalPeaks::init() {
     EnabledWhenProperty modVectorOneIsDefault{ModulationProperties::ModVector1, Kernel::IS_DEFAULT};
     EnabledWhenProperty modVectorTwoIsDefault{ModulationProperties::ModVector2, Kernel::IS_DEFAULT};
     EnabledWhenProperty modVectorThreeIsDefault{ModulationProperties::ModVector3, Kernel::IS_DEFAULT};
-    EnabledWhenProperty modVectorOneAndTwoIsDefault{std::move(modVectorOneIsDefault), std::move(modVectorTwoIsDefault),
-                                                    Kernel::AND};
+    EnabledWhenProperty modVectorOneAndTwoIsDefault{modVectorOneIsDefault, modVectorTwoIsDefault, Kernel::AND};
     setPropertySettings(offsetName,
                         std::make_unique<Kernel::EnabledWhenProperty>(std::move(modVectorOneAndTwoIsDefault),
                                                                       std::move(modVectorThreeIsDefault), Kernel::AND));
@@ -422,10 +421,10 @@ void PredictFractionalPeaks::exec() {
       using Mantid::Geometry::HKLFilterNone;
       filter = std::make_unique<HKLFilterNone>();
     }
-    outPeaks = predictFractionalPeaks(this, requirePeakOnDetector, *inputPeaks, std::move(modulationInfo),
+    outPeaks = predictFractionalPeaks(this, requirePeakOnDetector, *inputPeaks, modulationInfo,
                                       PeaksInRangeStrategy(hklMin, hklMax, filter.get(), inputPeaks.get()));
   } else {
-    outPeaks = predictFractionalPeaks(this, requirePeakOnDetector, *inputPeaks, std::move(modulationInfo),
+    outPeaks = predictFractionalPeaks(this, requirePeakOnDetector, *inputPeaks, modulationInfo,
                                       PeaksFromIndexedStrategy(inputPeaks.get()));
   }
   setProperty(PropertyNames::FRACPEAKS, outPeaks);

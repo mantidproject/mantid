@@ -14,7 +14,7 @@ namespace Icons {
 
 CharIconEngine::CharIconEngine(IconicFont *iconic, CharIconPainter *painter,
                                const QList<QHash<QString, QVariant>> &options)
-    : m_iconic(iconic), m_painter(painter), m_options(std::move(options)) {}
+    : m_iconic(iconic), m_painter(painter), m_options(options) {}
 
 void CharIconEngine::paint(QPainter *painter, const QRect &rect, QIcon::Mode mode, QIcon::State state) {
   m_painter->paint(m_iconic, painter, rect, mode, state, m_options);

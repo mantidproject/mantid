@@ -4,8 +4,7 @@ if(ENABLE_CLANG_TIDY)
     option(APPLY_CLANG_TIDY_FIX "Apply fixes found through clang-tidy checks" OFF)
 
     find_program(
-        CLANG_TIDY_EXE
-        NAMES
+        CLANG_TIDY_EXE NAMES
             "clang-tidy-14"
             "clang-tidy-13"
             "clang-tidy-12"

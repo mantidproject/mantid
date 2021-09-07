@@ -1660,8 +1660,8 @@ API::MatrixWorkspace_sptr FitPeaks::createMatrixWorkspace(const std::vector<doub
   size_t ysize = vec_y.size();
 
   HistogramBuilder builder;
-  builder.setX(std::move(size));
-  builder.setY(std::move(ysize));
+  builder.setX(size);
+  builder.setY(ysize);
   MatrixWorkspace_sptr matrix_ws = create<Workspace2D>(1, builder.build());
 
   auto &dataX = matrix_ws->mutableX(0);

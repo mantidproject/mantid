@@ -242,7 +242,7 @@ void renameWorkspacesInQENSFit(Algorithm *qensFit, const Algorithm_sptr &renameA
   auto getName = [&](std::size_t i) { return outputBaseName + "_" + getNameSuffix(i); };
 
   auto renamer = [&](const Workspace_sptr &workspace, const std::string &name) {
-    renameWorkspace(renameAlgorithm, std::move(workspace), name);
+    renameWorkspace(renameAlgorithm, workspace, name);
     renamerProg.report("Renamed workspace in group.");
   };
   renameWorkspacesWith(outputGroup, getName, renamer);
@@ -754,8 +754,8 @@ ITableWorkspace_sptr QENSFitSequential::performFit(const std::string &input, con
     declareProperty(std::make_unique<ArrayProperty<double>>("OutputChiSquared", Direction::Output));
     std::vector<std::string> outputStatus = plotPeaks->getProperty("OutputStatus");
     std::vector<double> outputChiSquared = plotPeaks->getProperty("OutputChiSquared");
-    setProperty("OutputStatus", std::move(outputStatus));
-    setProperty("OutputChiSquared", std::move(outputChiSquared));
+    setProperty("OutputStatus", outputStatus);
+    setProperty("OutputChiSquared", outputChiSquared);
   }
 
   return plotPeaks->getProperty("OutputWorkspace");
@@ -792,7 +792,7 @@ void QENSFitSequential::extractMembers(const WorkspaceGroup_sptr &resultGroupWs,
   std::transform(workspaces.begin(), workspaces.end(), std::back_inserter(workspaceNames),
                  [](const API::MatrixWorkspace_sptr &workspace) { return workspace->getName(); });
 
-  auto extractAlgorithm = extractMembersAlgorithm(std::move(resultGroupWs), outputWsName);
+  auto extractAlgorithm = extractMembersAlgorithm(resultGroupWs, outputWsName);
   extractAlgorithm->setProperty("InputWorkspaces", workspaceNames);
   extractAlgorithm->execute();
 }
