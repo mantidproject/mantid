@@ -5,11 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt.
-# std imports
-from typing import Sequence
 
 # thirdparty
-from mantid.geometry import OrientedLattice
 import numpy as np
 
 
@@ -18,15 +15,6 @@ class NonOrthogonalTransform:
     Defines transformations to move between an orthogonal system and a non-orthogonal system
     defined by the lattice and projection vectors.
     """
-    @classmethod
-    def from_lattice(cls, lattice: OrientedLattice, x_proj: Sequence, y_proj: Sequence):
-        """
-        :param lattice: An OrientedLattice object defining the unit cell
-        :param x_proj: Projection vector of dimension associated with X coordinate
-        :param y_proj: Projection vector of dimension associated with Y coordinate
-        """
-        return cls(np.radians(lattice.recAngle(*x_proj, *y_proj)))
-
     def __init__(self, angle: float):
         """
         :param angle: Angle in radians of skewed. Angle increases anti-clockwise from X
