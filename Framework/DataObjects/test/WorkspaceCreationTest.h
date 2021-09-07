@@ -19,8 +19,8 @@
 #include "MantidParallel/StorageMode.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/ParallelRunner.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/ParallelRunner.h"
 
 using namespace Mantid;
 using namespace API;

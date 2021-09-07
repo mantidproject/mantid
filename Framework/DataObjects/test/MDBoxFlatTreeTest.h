@@ -8,7 +8,7 @@
 
 #include "MantidDataObjects/MDBoxFlatTree.h"
 #include "MantidDataObjects/MDLeanEvent.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
 
 #include <Poco/File.h>
 #include <cxxtest/TestSuite.h>

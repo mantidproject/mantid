@@ -13,7 +13,7 @@ if(CXXTEST_FOUND)
                         Mantid::DataHandling
                         Mantid::MDAlgorithms
                         Mantid::Nexus
-                        Mantid::TestHelpers
+                        Mantid::FrameworkTestHelpers
                         Boost::filesystem
                         gmock
 )

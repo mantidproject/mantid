@@ -25,7 +25,7 @@ namespace Kernel {
 class V3D;
 }
 
-namespace TestHelpers {
+namespace FrameworkTestHelpers {
 
 namespace JSONTestInstrumentBuilder {
 void initialiseRoot(Json::Value &root, const std::string &name);
@@ -117,5 +117,5 @@ std::string getFullJSONInstrumentSimpleWithMonitorNoShape();
 std::string getFullJSONInstrumentSimpleWithMonitor();
 std::string getFullJSONInstrumentSimpleWithZPixelOffset();
 
-} // namespace TestHelpers
+} // namespace FrameworkTestHelpers
 } // namespace Mantid

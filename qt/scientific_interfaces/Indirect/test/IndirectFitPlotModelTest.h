@@ -17,7 +17,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/TextAxis.h"
-#include "MantidTestHelpers/IndirectFitDataCreationHelper.h"
+#include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;

@@ -16,12 +16,12 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/MDGeometry/HKL.h"
 #include "MantidKernel/UnitLabelTypes.h"
 #include "MantidKernel/V3D.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
 #include <boost/tuple/tuple.hpp>

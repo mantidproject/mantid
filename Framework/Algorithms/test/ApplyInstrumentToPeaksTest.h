@@ -11,8 +11,8 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAlgorithms/ApplyInstrumentToPeaks.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::API;

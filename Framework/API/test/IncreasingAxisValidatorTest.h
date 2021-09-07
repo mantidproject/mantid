@@ -10,7 +10,7 @@
 
 #include "MantidAPI/IncreasingAxisValidator.h"
 #include "MantidAPI/NumericAxis.h"
-#include "MantidTestHelpers/FakeObjects.h"
+#include "MantidFrameworkTestHelpers/FakeObjects.h"
 
 #include <memory>
 

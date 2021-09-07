@@ -8,7 +8,7 @@ if(CXXTEST_FOUND)
                         PRIVATE
                         Mantid::Beamline
 			                  Mantid::Kernel
-                        Mantid::TestHelpers
+                        Mantid::FrameworkTestHelpers
                         gmock
   )
 

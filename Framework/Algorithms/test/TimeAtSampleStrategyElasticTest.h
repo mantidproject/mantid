@@ -12,12 +12,12 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/TimeAtSampleStrategy.h"
 #include "MantidAlgorithms/TimeAtSampleStrategyElastic.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/V3D.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::Geometry;

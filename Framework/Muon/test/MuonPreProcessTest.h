@@ -8,8 +8,8 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidFrameworkTestHelpers/MuonWorkspaceCreationHelper.h"
 #include "MantidMuon/MuonPreProcess.h"
-#include "MantidTestHelpers/MuonWorkspaceCreationHelper.h"
 
 #include <cxxtest/TestSuite.h>
 

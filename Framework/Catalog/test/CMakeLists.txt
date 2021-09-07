@@ -6,7 +6,7 @@ if(CXXTEST_FOUND)
   target_link_libraries(CatalogTest
                         PRIVATE
                         Mantid::Catalog
-                        Mantid::TestHelpers
+                        Mantid::FrameworkTestHelpers
                         gmock
                         )
   add_dependencies(FrameworkTests CatalogTest)

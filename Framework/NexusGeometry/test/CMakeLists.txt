@@ -9,7 +9,7 @@ if(CXXTEST_FOUND)
                         Mantid::NexusGeometry
                         Mantid::Types
                         Mantid::Kernel
-                        Mantid::TestHelpers
+                        Mantid::FrameworkTestHelpers
                         Boost::filesystem
                         gmock)
 

@@ -11,10 +11,10 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAlgorithms/SampleCorrections/MayersSampleCorrection.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/Material.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Algorithms::MayersSampleCorrection;
 using Mantid::API::IAlgorithm_sptr;

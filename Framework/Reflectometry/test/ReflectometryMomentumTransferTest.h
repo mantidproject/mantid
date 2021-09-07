@@ -14,9 +14,9 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Crystal/AngleUnits.h"
 #include "MantidKernel/Unit.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <boost/math/special_functions/pow.hpp>
 

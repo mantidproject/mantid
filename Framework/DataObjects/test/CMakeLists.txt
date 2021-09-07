@@ -11,7 +11,7 @@ if(CXXTEST_FOUND)
                         Mantid::DataObjects
                         Mantid::Kernel
                         Nexus::nexuscpp
-                        Mantid::TestHelpers
+                        Mantid::FrameworkTestHelpers
                         gmock)
   # Specify implicit dependency, but don't link to it
   add_dependencies(FrameworkTests DataObjectsTest)

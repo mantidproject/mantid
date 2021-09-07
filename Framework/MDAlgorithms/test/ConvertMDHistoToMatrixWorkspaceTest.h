@@ -17,9 +17,9 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidMDAlgorithms/ConvertMDHistoToMatrixWorkspace.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
 #include <boost/lexical_cast.hpp>

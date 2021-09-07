@@ -8,7 +8,7 @@ if(CXXTEST_FOUND)
                         PRIVATE
                         Mantid::HistogramData
                         Mantid::Kernel
-                        Mantid::TestHelpers
+                        Mantid::FrameworkTestHelpers
                         gmock
   )
 

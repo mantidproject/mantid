@@ -13,11 +13,11 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidAlgorithms/TOFSANSResolutionByPixel.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
 #include "boost/shared_ptr.hpp"

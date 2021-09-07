@@ -9,9 +9,9 @@
 #include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAlgorithms/Rebin2D.h"
 #include "MantidDataObjects/RebinnedOutput.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/Timer.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
 using Mantid::Algorithms::Rebin2D;

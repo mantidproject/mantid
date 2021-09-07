@@ -14,6 +14,8 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidFrameworkTestHelpers/ParallelAlgorithmCreation.h"
+#include "MantidFrameworkTestHelpers/ParallelRunner.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidIndexing/SpectrumIndexSet.h"
@@ -23,8 +25,6 @@
 #include "MantidNexusGeometry/Hdf5Version.h"
 #include "MantidParallel/Collectives.h"
 #include "MantidParallel/Communicator.h"
-#include "MantidTestHelpers/ParallelAlgorithmCreation.h"
-#include "MantidTestHelpers/ParallelRunner.h"
 
 #include "Poco/Path.h"
 #include <cxxtest/TestSuite.h>

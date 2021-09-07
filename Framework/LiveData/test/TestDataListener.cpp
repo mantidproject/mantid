@@ -9,10 +9,10 @@
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/MersenneTwister.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;

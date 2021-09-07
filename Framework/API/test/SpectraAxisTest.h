@@ -9,10 +9,10 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidFrameworkTestHelpers/FakeObjects.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidTestHelpers/FakeObjects.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

@@ -8,8 +8,8 @@
 
 #include "MantidAPI/Axis.h"
 #include "MantidAlgorithms/SumRowColumn.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/Unit.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;

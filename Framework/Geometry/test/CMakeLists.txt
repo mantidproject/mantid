@@ -13,7 +13,7 @@ if(CXXTEST_FOUND)
                         Mantid::Beamline
                         Mantid::Types
                         Mantid::Kernel
-                        Mantid::TestHelpers
+                        Mantid::FrameworkTestHelpers
                         ${OpenGL_LIBRARIES}
                         gmock)
 

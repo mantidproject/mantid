@@ -11,7 +11,7 @@ if(CXXTEST_FOUND)
                         Mantid::WorkflowAlgorithms
                         Mantid::Algorithms
                         Mantid::DataHandling
-                        Mantid::TestHelpers
+                        Mantid::FrameworkTestHelpers
                         Boost::filesystem
                         gmock)
   add_dependencies(WorkflowAlgorithmsTest CurveFitting)

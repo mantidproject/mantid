@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidTestHelpers/NexusGeometryTestHelpers.h"
+#include "MantidFrameworkTestHelpers/NexusGeometryTestHelpers.h"
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidNexusGeometry/NexusShapeFactory.h"
 #include <numeric>

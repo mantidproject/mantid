@@ -9,8 +9,8 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/DeleteLog.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 class DeleteLogTest : public CxxTest::TestSuite {
 public:

@@ -9,9 +9,9 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidDataObjects/MDEventFactory.h"
+#include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
 #include "MantidMDAlgorithms/BinMD.h"
 #include "MantidMDAlgorithms/ChangeQConvention.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
 
 #include <cxxtest/TestSuite.h>
 

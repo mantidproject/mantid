@@ -16,7 +16,7 @@
 #include "MantidCurveFitting/Functions/BSpline.h"
 #include "MantidCurveFitting/Functions/UserFunction.h"
 
-#include "MantidTestHelpers/MultiDomainFunctionHelper.h"
+#include "MantidFrameworkTestHelpers/MultiDomainFunctionHelper.h"
 
 #include <sstream>
 
@@ -407,7 +407,7 @@ public:
   }
 
   void test_Multidomain() {
-    auto domain = Mantid::TestHelpers::makeMultiDomainDomain3();
+    auto domain = Mantid::FrameworkTestHelpers::makeMultiDomainDomain3();
 
     auto values = std::make_shared<FunctionValues>(*domain);
     const double A0 = 0, A1 = 1, A2 = 2;
@@ -429,7 +429,7 @@ public:
     }
     values->setFitWeights(1);
 
-    auto multi = Mantid::TestHelpers::makeMultiDomainFunction3();
+    auto multi = Mantid::FrameworkTestHelpers::makeMultiDomainFunction3();
 
     std::shared_ptr<CostFuncLeastSquares> costFun = std::make_shared<CostFuncLeastSquares>();
     costFun->setFittingFunction(multi, domain, values);

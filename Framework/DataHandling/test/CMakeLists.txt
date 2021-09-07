@@ -16,7 +16,7 @@ if(CXXTEST_FOUND)
                         Mantid::Nexus
                         Mantid::NexusGeometry
                         Mantid::HistogramData
-                        Mantid::TestHelpers
+                        Mantid::FrameworkTestHelpers
                         Boost::filesystem
                         gmock)
 

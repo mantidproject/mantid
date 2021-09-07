@@ -9,7 +9,7 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/ExtractMask.h"
 #include "MantidDataObjects/MaskWorkspace.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
