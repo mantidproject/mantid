@@ -509,11 +509,12 @@ class SliceViewerModel:
                 proj_matrix = np.eye(3)
 
             # calculate angles for all combinations of axes
-            angles_matrix = np.zeros((3, 3))  # technically only nees to be triangular matrix?
-            for ix in range(0, 3):
-                for iy in range(0, 3):
+            angles_matrix = np.zeros((3, 3))
+            for ix in range(1, 3):
+                for iy in range(0, 2):
                     if ix != iy:
-                        angles_matrix[ix,iy] = np.radians(lattice.recAngle(*proj_matrix[:, ix], *proj_matrix[:, iy]))
+                        angles_matrix[ix, iy] = np.radians(lattice.recAngle(*proj_matrix[:, ix], *proj_matrix[:, iy]))
+                        angles_matrix[iy, ix] = angles_matrix[ix, iy]
             return angles_matrix
         else:
             return None
