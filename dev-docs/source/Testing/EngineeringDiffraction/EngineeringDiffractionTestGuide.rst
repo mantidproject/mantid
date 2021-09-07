@@ -75,14 +75,16 @@ Focus
 
 2. For the Sample Run number use `305761` and for the Vanadium run number enter `307521`.
 
-3. Tick the Plot Focused Workspace option.
+3. Tick the Plot Focused Workspace option and click Focus. It should produce a plot of a single spectrum for bank 2.
 
-4. Click Focus, after completing calibration it should produce a plot.
+4. Go back to the Calibration tab and load in an existing calibration for both banks `ENGINX_305738_all_banks.prm`
+
+5. Go back to the Focus tab and click Focus, after completing calibration it should produce a plot.
 
 .. image:: /images/EngineeringDiffractionTest/EnggDiffExampleFocusOutput.png
     :width: 900px
 
-5. Check that in your save location there is a Focus folder containing the following files:
+6. Check that in your save location there is a Focus folder containing the following files:
 
    - ENGINX_305761_307521_sample_logs.csv
    - `ENGINX_305761_307521_bank_1_dSpacing`, `ENGINX_305761_307521_bank_2_dSpacing`, `ENGINX_305761_307521_bank_1_TOF` and `ENGINX_305761_307521_bank_2_TOF` for each of `.abc`, `.gss`, and `.nxs`.
@@ -100,11 +102,11 @@ This test covers the RB number.
 Test 3
 ^^^^^^
 
-This test covers the Cropping functionality.
+This test covers the Cropping functionality in the Calibration tab.
 
 1. Change the RB Number to "North", this is purely to separate the cropped output files into their own space.
 
-2. Tick the Crop Calibration option. In the drop down "Region of Interest" select `1 (North)`
+2. Go to the Calibration tab and tick the Crop Calibration option. In the drop down "Region of Interest" select `1 (North)`.
 
 3. Check the "Plot Calibrated Workspace" checkbox and click calibrate.
 
@@ -112,12 +114,11 @@ This test covers the Cropping functionality.
 
 5. Check that only one .prm and one .nxs output file was generated.
 
-6. Go to focus tab and do the same with the Crop Focus. In comparison to the previous focus test, this will only
-   generate a single axis on the figure, rather than two.
+6. Go to focus tab and click Focus - again this will generate a single axis on the figure, rather than two.
 
 7. Change the RB number to "Custom".
 
-8. Repeat steps 2-5 this time using Custom Spectra `1200-1400`. Please note that some custom spectra values may
+8. Repeat steps 2-5 this time using Custom Spectra `1200-1400` (these spectrum number correspond to the South Bank). Please note that some custom spectra values may
    cause the algorithms to fail.
 
 
