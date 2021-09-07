@@ -203,6 +203,13 @@ double Material::numberDensityEffective() const { return m_numberDensity * m_pac
 double Material::packingFraction() const { return m_packingFraction; }
 
 /**
+ * The total number of atoms in the chemical formula. This is commonly
+ * used to convert multiplicity into relative values.
+ * @return The total number of atoms
+ */
+double Material::totalAtoms() const { return m_atomTotal; }
+
+/**
  * Get the temperature
  * @returns The temperature of the material in Kelvin
  */
@@ -210,7 +217,7 @@ double Material::temperature() const { return m_temperature; }
 
 /**
  * Get the pressure
- * @returns The pressure of the material
+ * @returns The pressure of the material, in kPa (Default: 101.325 kPa)
  */
 double Material::pressure() const { return m_pressure; }
 

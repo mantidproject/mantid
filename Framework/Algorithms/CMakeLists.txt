@@ -29,7 +29,9 @@ set(SRC_FILES
     src/CalculateFlatBackground.cpp
     src/CalculateIqt.cpp
     src/CalculateMultipleScattering.cpp
+    src/CalculatePlaczek.cpp
     src/CalculatePlaczekSelfScattering.cpp
+    src/CalculatePlaczekSelfScattering2.cpp
     src/CalculatePolynomialBackground.cpp
     src/CalculateTransmission.cpp
     src/CalculateTransmissionBeamSpreader.cpp
@@ -212,6 +214,8 @@ set(SRC_FILES
     src/MonitorEfficiencyCorUser.cpp
     src/MonteCarloAbsorption.cpp
     src/MostLikelyMean.cpp
+    src/MultipleScatteringCorrection.cpp
+    src/MultipleScatteringCorrectionDistGraber.cpp
     src/Multiply.cpp
     src/MultiplyRange.cpp
     src/NormaliseByCurrent.cpp
@@ -367,7 +371,9 @@ set(INC_FILES
     inc/MantidAlgorithms/CalculateFlatBackground.h
     inc/MantidAlgorithms/CalculateIqt.h
     inc/MantidAlgorithms/CalculateMultipleScattering.h
+    inc/MantidAlgorithms/CalculatePlaczek.h
     inc/MantidAlgorithms/CalculatePlaczekSelfScattering.h
+    inc/MantidAlgorithms/CalculatePlaczekSelfScattering2.h
     inc/MantidAlgorithms/CalculatePolynomialBackground.h
     inc/MantidAlgorithms/CalculateTransmission.h
     inc/MantidAlgorithms/CalculateTransmissionBeamSpreader.h
@@ -554,6 +560,8 @@ set(INC_FILES
     inc/MantidAlgorithms/MonitorEfficiencyCorUser.h
     inc/MantidAlgorithms/MonteCarloAbsorption.h
     inc/MantidAlgorithms/MostLikelyMean.h
+    inc/MantidAlgorithms/MultipleScatteringCorrection.h
+    inc/MantidAlgorithms/MultipleScatteringCorrectionDistGraber.h
     inc/MantidAlgorithms/Multiply.h
     inc/MantidAlgorithms/MultiplyRange.h
     inc/MantidAlgorithms/NormaliseByCurrent.h
@@ -723,7 +731,9 @@ set(TEST_FILES
     CalculateFlatBackgroundTest.h
     CalculateIqtTest.h
     CalculateMultipleScatteringTest.h
+    CalculatePlaczekSelfScattering2Test.h
     CalculatePlaczekSelfScatteringTest.h
+    CalculatePlaczekTest.h
     CalculatePolynomialBackgroundTest.h
     CalculateTransmissionBeamSpreaderTest.h
     CalculateTransmissionTest.h
@@ -905,6 +915,7 @@ set(TEST_FILES
     MonitorEfficiencyCorUserTest.h
     MonteCarloAbsorptionTest.h
     MostLikelyMeanTest.h
+    MultipleScatteringCorrectionTest.h
     MultiplyRangeTest.h
     MultiplyTest.h
     MuonWorkspaceCreationHelperTest.h

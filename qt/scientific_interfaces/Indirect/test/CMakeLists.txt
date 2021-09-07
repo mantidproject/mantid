@@ -8,11 +8,10 @@ set(
   FqFitModelTest.h
   IDAFunctionParameterEstimationTest.h
   IndirectDataValidationHelperTest.h
-  IndirectFitDataTablePresenterTest.h
   IndirectFitAnalysisTabTest.h
   IndirectFitDataPresenterTest.h
   IndirectFitDataTest.h
-  IndirectFitDataTableModelTest.h
+  IndirectFitDataModelTest.h
   IndirectFitOutputModelTest.h
   IndirectFitOutputOptionsModelTest.h
   IndirectFitOutputOptionsPresenterTest.h

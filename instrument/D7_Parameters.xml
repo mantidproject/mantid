@@ -25,15 +25,16 @@
     </parameter>
 
     <parameter name="logbook_default_parameters" type="string" visible="false">
-      <value val="wavelength:/entry0/D7/monochromator/wavelength:f,
+      <value val="proposal_number:/entry0/user/proposal:s,
 		  experiment_identifier:/entry0/experiment_identifier:s,
 		  start_time:/entry0/start_time:s,
-		  end_time:/entry0/end_time:s,
-		  duration:/entry0/duration:d" />
+		  total_duration:/entry0/duration+/entry1/duration+/entry2/duration+/entry3/duration+/entry4/duration+/entry5/duration:d,
+		  count_repeater:/entry0/duration//entry1/duration:f,
+		  polarisation:/entry0/D7/POL/actual_state+/entry2/D7/POL/actual_state+/entry4/D7/POL/actual_state:s" />
     </parameter>
     <parameter name="logbook_optional_parameters" type="string" visible="false">
-      <value val="TOF:/entry0/acquisition_mode:d,
-		  polarisation:/entry0/D7/POL/actual_state+/entry0/D7/POL/actual_stateB1B2:s" />
+      <value val="wavelength:/entry0/D7/monochromator/wavelength:f,
+		  TOF:/entry0/acquisition_mode:d" />
     </parameter>
 
   </component-link>

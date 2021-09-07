@@ -246,7 +246,7 @@ class PhaseTablePresenter(object):
     def calculate_phasequad(self):
         self.context.group_pair_context.add_phasequad(self._phasequad_obj)
         self.context.calculate_phasequads(
-            self._phasequad_obj.name, self._phasequad_obj)
+             self._phasequad_obj)
 
         self.phasequad_calculation_complete_notifier.notify_subscribers(
             self._phasequad_obj.Re.name)

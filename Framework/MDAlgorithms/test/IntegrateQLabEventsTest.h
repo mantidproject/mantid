@@ -85,9 +85,11 @@ public:
     std::vector<Kernel::V3D> E1Vec;
     double inti;
     double sigi;
+    std::pair<double, double> backi;
     for (size_t i = 0; i < peak_q_list.size(); i++) {
-      auto shape = integrator.ellipseIntegrateEvents(E1Vec, peak_q_list[i].second, specify_size, peak_radius,
-                                                     back_inner_radius, back_outer_radius, new_sigma, inti, sigi);
+      auto shape =
+          integrator.ellipseIntegrateEvents(E1Vec, peak_q_list[i].second, specify_size, peak_radius, back_inner_radius,
+                                            back_outer_radius, new_sigma, inti, sigi, backi);
       TS_ASSERT_DELTA(inti, 2 * inti_all[i], 0.1);
       TS_ASSERT_DELTA(sigi, sigi_all[i], 0.01);
 
@@ -100,7 +102,7 @@ public:
     specify_size = false;
     for (size_t i = 0; i < peak_q_list.size(); i++) {
       integrator.ellipseIntegrateEvents(E1Vec, peak_q_list[i].second, specify_size, peak_radius, back_inner_radius,
-                                        back_outer_radius, new_sigma, inti, sigi);
+                                        back_outer_radius, new_sigma, inti, sigi, backi);
       TS_ASSERT_DELTA(inti, 2 * inti_some[i], 0.1);
       TS_ASSERT_DELTA(sigi, sigi_some[i], 0.01);
     }

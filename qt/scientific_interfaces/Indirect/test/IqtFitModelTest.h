@@ -32,6 +32,8 @@ public:
   static void destroySuite(IqtFitModelTest *suite) { delete suite; }
 
   void setUp() override {
+    // The only difference in IqtFitModel is the default parameters and a currently unused process for constraining
+    // parameters. these tests will be included in the PR for fit functions and function browser formatting.
     m_workspace = createWorkspace(4, 5);
     m_ads = std::make_unique<SetUpADSWithWorkspace>("Name", m_workspace);
     m_model = std::make_unique<IqtFitModel>();
@@ -48,7 +50,7 @@ public:
   void test_that_the_model_is_instantiated_and_can_hold_a_workspace() {
     FunctionModelSpectra const spectra = FunctionModelSpectra("0-1");
 
-    m_model->addWorkspace(m_workspace->getName(), spectra);
+    m_model->getFitDataModel()->addWorkspace(m_workspace->getName(), spectra);
 
     TS_ASSERT_EQUALS(m_model->getNumberOfWorkspaces(), WorkspaceID{1});
   }

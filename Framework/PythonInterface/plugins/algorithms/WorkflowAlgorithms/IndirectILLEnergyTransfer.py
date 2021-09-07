@@ -174,6 +174,10 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         self.declareProperty(name='DiscardSingleDetectors', defaultValue=False,
                              doc='Whether to discard the spectra of single detectors.')
 
+        self.declareProperty(name='DeleteMonitorWorkspace', defaultValue=True,
+                             doc='Whether to delete the monitor spectrum.')
+        self.setPropertyGroup('DeleteMonitorWorkspace', bats_options)
+
     def validateInputs(self):
 
         issues = dict()
@@ -573,8 +577,9 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         mon_elastic_tof = mtd[mon_ws].readX(0)[mon_elastic]
         n_frames_diff = math.floor((mon_elastic_tof - elastic_tof_equator) / frame_width) + 1
         ScaleX(InputWorkspace=mon_ws, OutputWorkspace=mon_ws, Factor=-n_frames_diff * frame_width, Operation='Add')
-        ConvertUnits(InputWorkspace=mon_ws, OutputWorkspace=mon_ws, Target='Energy', EMode='Elastic')
-        ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws, Target='Energy', EMode='Indirect')
+        # Energy is elastic energy and currently doesn't take the energy transfer into account, so do this in lambda
+        ConvertUnits(InputWorkspace=mon_ws, OutputWorkspace=mon_ws, Target='Wavelength', EMode='Elastic')
+        ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws, Target='Wavelength', EMode='Indirect')
         monitor = mtd[mon_ws].readY(0)
         x_axis = mtd[mon_ws].readX(0)
         cutoff = np.max(monitor) * self._monitor_cutoff
@@ -587,7 +592,14 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
             Divide(LHSWorkspace=ws, RHSWorkspace=mon_ws, OutputWorkspace=ws)
             ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws, NaNValue=0, NaNError=0, InfinityValue=0,
                                  InfinityError=0)
-        DeleteWorkspace(mon_ws)
+        if self.getProperty('DeleteMonitorWorkspace').value:
+            DeleteWorkspace(mon_ws)
+        else:
+            # if kept, it is desired to have in DeltaE, which is not defined for monitor, so we need to do E, then scale X by Efixed
+            ConvertUnits(InputWorkspace=mon_ws, OutputWorkspace=mon_ws, Target='Energy', EMode='Elastic')
+            ScaleX(InputWorkspace=mon_ws, OutputWorkspace=mon_ws, Operation='Add', Factor=-self._efixed)
+            mtd[mon_ws].getAxis(0).setUnit('DeltaE')
+            RenameWorkspace(InputWorkspace=mon_ws, OutputWorkspace=mon_ws[2:])
 
     def _reduce_bats(self, ws):
         """

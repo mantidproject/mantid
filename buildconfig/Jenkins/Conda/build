@@ -58,6 +58,8 @@ if [[ $ENABLE_DOCS == true ]]; then
 fi
 
 # Build dev-docs turned off until dev docs run without error
-# if [[ $ENABLE_DEV_DOCS == true ]]; then
-#     cmake --build . --target dev-docs-html
-# fi
+if [[ $ENABLE_DEV_DOCS == true ]]; then
+    rm -fr $BUILD_DIR/dev-docs/doctree/*
+    rm -f $BUILD_DIR/dev-docs/dev_docs_warnings.txt
+    cmake --build . --target dev-docs-html
+fi

@@ -12,16 +12,23 @@ from mantid.api import WorkspaceGroup, MatrixWorkspace
 
 class SANSILLAutoProcessTest(unittest.TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
+        cls._facility = config["default.facility"]
+        cls._instrument = config["default.instrument"]
+        cls._dirs = config["datasearch.directories"]
         config.appendDataSearchSubDir("ILL/D11/")
-        self._facility = config["default.facility"]
-        self._instrument = config["default.instrument"]
+        config.appendDataSearchSubDir("ILL/D16/")
         config["default.facility"] = "ILL"
         config["default.instrument"] = "D11"
 
+    @classmethod
+    def tearDownClass(cls):
+        config["default.facility"] = cls._facility
+        config["default.instrument"] = cls._instrument
+        config["datasearch.directories"] = cls._dirs
+
     def tearDown(self):
-        config["default.facility"] = self._facility
-        config["default.instrument"] = self._instrument
         mtd.clear()
 
     def test_noSampleRun(self):
@@ -110,6 +117,10 @@ class SANSILLAutoProcessTest(unittest.TestCase):
                                 FluxRuns='010462')
 
         self.assertTrue(isinstance(ws, WorkspaceGroup))
+
+    def test_one_q_binning_params(self):
+        ws = SANSILLAutoProcess(SampleRuns="3674, 3677, 3680", OutputBinning='0.01')
+        self.assertTrue(ws)
 
     def test_minimalProcessing(self):
         ws = SANSILLAutoProcess(SampleRuns="010462")

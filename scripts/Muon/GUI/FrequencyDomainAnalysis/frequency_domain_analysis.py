@@ -176,14 +176,27 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
 
         self.setup_asymmetry_pair_and_diff_calculations_finished_notifier()
 
+        self.setup_transform()
+
+        self.context.data_context.message_notifier.add_subscriber(
+            self.grouping_tab_widget.group_tab_presenter.message_observer)
+
+    def setup_transform(self):
         self.transform.set_up_calculation_observers(
             self.fitting_tab.fitting_tab_view.enable_tab_observer,
             self.fitting_tab.fitting_tab_view.disable_tab_observer)
         self.transform.new_data_observer(
             self.transform_finished_observer)
-
-        self.context.data_context.message_notifier.add_subscriber(
-            self.grouping_tab_widget.group_tab_presenter.message_observer)
+        self.transform._maxent._presenter.calculation_finished_notifier.add_subscriber(
+            self.plot_widget.maxent_mode.new_data_observer)
+        self.transform._maxent._presenter.new_reconstructed_data.add_subscriber(
+            self.plot_widget.maxent_mode.reconstructed_data_observer)
+        self.transform._maxent._presenter.method_changed.add_subscriber(
+            self.plot_widget.maxent_mode.method_changed)
+        self.transform._maxent._presenter.period_changed.add_subscriber(
+            self.plot_widget.maxent_mode.period_changed)
+        self.context.data_context.instrumentNotifier.add_subscriber(
+            self.plot_widget.maxent_mode.instrument_observer)
 
     def setup_tabs(self):
         """
@@ -372,6 +385,9 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
 
         self.context.data_context.instrumentNotifier.add_subscriber(
             self.fitting_tab.fitting_tab_presenter.instrument_changed_observer)
+
+        for observer in self.plot_widget.clear_plot_observers:
+            self.context.data_context.instrumentNotifier.add_subscriber(observer)
 
     def setup_group_calculation_enable_notifier(self):
         self.grouping_tab_widget.group_tab_presenter.enable_editing_notifier.add_subscriber(

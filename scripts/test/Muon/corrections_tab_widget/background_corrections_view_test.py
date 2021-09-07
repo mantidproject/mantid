@@ -16,9 +16,12 @@ from Muon.GUI.Common.corrections_tab_widget.background_corrections_view import (
                                                                                 RUN_COLUMN_INDEX,
                                                                                 GROUP_COLUMN_INDEX,
                                                                                 USE_RAW_COLUMN_INDEX,
-                                                                                A0_COLUMN_INDEX,
-                                                                                A0_ERROR_COLUMN_INDEX,
-                                                                                STATUS_COLUMN_INDEX)
+                                                                                START_X_COLUMN_INDEX,
+                                                                                END_X_COLUMN_INDEX,
+                                                                                BG_COLUMN_INDEX,
+                                                                                BG_ERROR_COLUMN_INDEX,
+                                                                                STATUS_COLUMN_INDEX,
+                                                                                SHOW_MATRIX_COLUMN_INDEX)
 
 from qtpy.QtWidgets import QApplication
 
@@ -40,6 +43,7 @@ class BackgroundCorrectionsViewTest(unittest.TestCase, QtWidgetFinder):
         self.a0_errors = [0.0, 0.0, 0.0, 0.0]
         self.statuses = ["Corrections success", "Corrections success", "Corrections success", "Corrections skipped"]
         self.use_raw_enabled = False
+        self.auto_mode = True
 
     def tearDown(self):
         self.assertTrue(self.view.close())
@@ -55,7 +59,7 @@ class BackgroundCorrectionsViewTest(unittest.TestCase, QtWidgetFinder):
         self.assertTrue(self.view.correction_options_table.isHidden())
 
     def test_that_set_background_correction_options_visible_will_make_the_correction_options_visible(self):
-        self.view.set_background_correction_options_visible(True)
+        self.view.set_auto_background_correction_options_visible()
 
         self.assertTrue(not self.view.select_function_label.isHidden())
         self.assertTrue(not self.view.function_combo_box.isHidden())
@@ -64,6 +68,58 @@ class BackgroundCorrectionsViewTest(unittest.TestCase, QtWidgetFinder):
         self.assertTrue(not self.view.show_all_runs_checkbox.isHidden())
         self.assertTrue(not self.view.apply_table_changes_to_all_checkbox.isHidden())
         self.assertTrue(not self.view.correction_options_table.isHidden())
+
+    def test_that_set_manual_background_correction_options_visible_will_hide_the_relevant_options(self):
+        self.view.set_manual_background_correction_options_visible()
+
+        self.assertTrue(self.view.select_function_label.isHidden())
+        self.assertTrue(self.view.function_combo_box.isHidden())
+        self.assertTrue(not self.view.show_data_for_label.isHidden())
+        self.assertTrue(not self.view.group_combo_box.isHidden())
+        self.assertTrue(not self.view.show_all_runs_checkbox.isHidden())
+        self.assertTrue(not self.view.apply_table_changes_to_all_checkbox.isHidden())
+        self.assertTrue(not self.view.correction_options_table.isHidden())
+
+    def test_that_set_none_background_correction_options_visible_will_hide_the_correction_options(self):
+        self.view.set_auto_background_correction_options_visible()
+        self.view.set_none_background_correction_options_visible()
+
+        self.assertTrue(self.view.select_function_label.isHidden())
+        self.assertTrue(self.view.function_combo_box.isHidden())
+        self.assertTrue(self.view.show_data_for_label.isHidden())
+        self.assertTrue(self.view.group_combo_box.isHidden())
+        self.assertTrue(self.view.show_all_runs_checkbox.isHidden())
+        self.assertTrue(self.view.apply_table_changes_to_all_checkbox.isHidden())
+        self.assertTrue(self.view.correction_options_table.isHidden())
+
+    def test_that_set_fitting_table_options_visible_will_hide_the_fitting_option_columns(self):
+        self.view.set_fitting_table_options_visible(False)
+
+        self.assertTrue(not self.view.correction_options_table.isColumnHidden(RUN_COLUMN_INDEX))
+        self.assertTrue(not self.view.correction_options_table.isColumnHidden(GROUP_COLUMN_INDEX))
+        self.assertTrue(not self.view.correction_options_table.isColumnHidden(BG_COLUMN_INDEX))
+        self.assertTrue(not self.view.correction_options_table.isColumnHidden(STATUS_COLUMN_INDEX))
+
+        self.assertTrue(self.view.correction_options_table.isColumnHidden(USE_RAW_COLUMN_INDEX))
+        self.assertTrue(self.view.correction_options_table.isColumnHidden(START_X_COLUMN_INDEX))
+        self.assertTrue(self.view.correction_options_table.isColumnHidden(END_X_COLUMN_INDEX))
+        self.assertTrue(self.view.correction_options_table.isColumnHidden(BG_ERROR_COLUMN_INDEX))
+        self.assertTrue(self.view.correction_options_table.isColumnHidden(SHOW_MATRIX_COLUMN_INDEX))
+
+    def test_that_set_fitting_table_options_visible_will_show_the_fitting_option_columns(self):
+        self.view.set_fitting_table_options_visible(False)
+        self.view.set_fitting_table_options_visible(True)
+
+        self.assertTrue(not self.view.correction_options_table.isColumnHidden(RUN_COLUMN_INDEX))
+        self.assertTrue(not self.view.correction_options_table.isColumnHidden(GROUP_COLUMN_INDEX))
+        self.assertTrue(not self.view.correction_options_table.isColumnHidden(BG_COLUMN_INDEX))
+        self.assertTrue(not self.view.correction_options_table.isColumnHidden(STATUS_COLUMN_INDEX))
+
+        self.assertTrue(not self.view.correction_options_table.isColumnHidden(USE_RAW_COLUMN_INDEX))
+        self.assertTrue(not self.view.correction_options_table.isColumnHidden(START_X_COLUMN_INDEX))
+        self.assertTrue(not self.view.correction_options_table.isColumnHidden(END_X_COLUMN_INDEX))
+        self.assertTrue(not self.view.correction_options_table.isColumnHidden(BG_ERROR_COLUMN_INDEX))
+        self.assertTrue(not self.view.correction_options_table.isColumnHidden(SHOW_MATRIX_COLUMN_INDEX))
 
     def test_that_background_correction_mode_will_return_and_set_the_correction_mode_as_expected(self):
         self.assertEqual(self.view.background_correction_mode, "None")
@@ -101,7 +157,7 @@ class BackgroundCorrectionsViewTest(unittest.TestCase, QtWidgetFinder):
 
     def test_that_is_run_group_displayed_returns_true_if_a_run_and_group_does_not_exist(self):
         self.view.populate_corrections_table(self.runs, self.groups, self.use_raws, self.start_xs, self.end_xs, self.a0s,
-                                             self.a0_errors, self.statuses, self.use_raw_enabled)
+                                             self.a0_errors, self.statuses, self.use_raw_enabled, self.auto_mode)
         for run, group in zip(self.runs, self.groups):
             self.assertTrue(self.view.is_run_group_displayed(run, group))
 
@@ -120,7 +176,7 @@ class BackgroundCorrectionsViewTest(unittest.TestCase, QtWidgetFinder):
 
     def test_that_populate_corrections_table_will_display_the_data_provided_in_the_table(self):
         self.view.populate_corrections_table(self.runs, self.groups, self.use_raws, self.start_xs, self.end_xs, self.a0s,
-                                             self.a0_errors, self.statuses, self.use_raw_enabled)
+                                             self.a0_errors, self.statuses, self.use_raw_enabled, self.auto_mode)
 
         for row_i in range(self.view.correction_options_table.rowCount()):
             self.assertEqual(self.view.correction_options_table.item(row_i, RUN_COLUMN_INDEX).text(), self.runs[row_i])
@@ -130,9 +186,9 @@ class BackgroundCorrectionsViewTest(unittest.TestCase, QtWidgetFinder):
                              Qt.Checked)
             self.assertEqual(self.view.start_x(self.runs[row_i], self.groups[row_i]), self.start_xs[row_i])
             self.assertEqual(self.view.end_x(self.runs[row_i], self.groups[row_i]), self.end_xs[row_i])
-            self.assertEqual(self.view.correction_options_table.item(row_i, A0_COLUMN_INDEX).text(),
+            self.assertEqual(self.view.correction_options_table.item(row_i, BG_COLUMN_INDEX).text(),
                              f"{self.a0s[row_i]:.3f}")
-            self.assertEqual(self.view.correction_options_table.item(row_i, A0_ERROR_COLUMN_INDEX).text(),
+            self.assertEqual(self.view.correction_options_table.item(row_i, BG_ERROR_COLUMN_INDEX).text(),
                              f"{self.a0_errors[row_i]:.3f}")
             self.assertEqual(self.view.correction_options_table.item(row_i, STATUS_COLUMN_INDEX).text(),
                              self.statuses[row_i])
@@ -140,7 +196,7 @@ class BackgroundCorrectionsViewTest(unittest.TestCase, QtWidgetFinder):
     def test_that_set_start_x_will_set_the_start_x_for_a_specific_run_and_group(self):
         run = "84447"
         self.view.populate_corrections_table(self.runs, self.groups, self.use_raws, self.start_xs, self.end_xs, self.a0s,
-                                             self.a0_errors, self.statuses, self.use_raw_enabled)
+                                             self.a0_errors, self.statuses, self.use_raw_enabled, self.auto_mode)
 
         self.view.set_start_x(run, "fwd", 1.1)
         self.view.set_start_x(run, "bwd", 2.2)
@@ -155,7 +211,7 @@ class BackgroundCorrectionsViewTest(unittest.TestCase, QtWidgetFinder):
     def test_that_set_end_x_will_set_the_end_x_for_a_specific_run_and_group(self):
         run = "84447"
         self.view.populate_corrections_table(self.runs, self.groups, self.use_raws, self.start_xs, self.end_xs, self.a0s,
-                                             self.a0_errors, self.statuses, self.use_raw_enabled)
+                                             self.a0_errors, self.statuses, self.use_raw_enabled, self.auto_mode)
 
         self.view.set_end_x(run, "fwd", 1.1)
         self.view.set_end_x(run, "bwd", 2.2)
@@ -167,38 +223,57 @@ class BackgroundCorrectionsViewTest(unittest.TestCase, QtWidgetFinder):
         self.assertEqual(self.view.end_x(run, "top"), 3.3)
         self.assertEqual(self.view.end_x(run, "bottom"), 4.4)
 
+    def test_that_set_background_will_set_the_background_for_a_specific_run_and_group(self):
+        run = "84447"
+        self.view.populate_corrections_table(self.runs, self.groups, self.use_raws, self.start_xs, self.end_xs, self.a0s,
+                                             self.a0_errors, self.statuses, self.use_raw_enabled, self.auto_mode)
+
+        self.view.set_background(run, "fwd", 1.0)
+        self.view.set_background(run, "bwd", 2.0)
+        self.view.set_background(run, "top", 3.0)
+        self.view.set_background(run, "bottom", 4.0)
+
+        self._select_table_cell(0, 0)
+        self.assertEqual(self.view.selected_background(), 1.0)
+        self._select_table_cell(1, 0)
+        self.assertEqual(self.view.selected_background(), 2.0)
+        self._select_table_cell(2, 0)
+        self.assertEqual(self.view.selected_background(), 3.0)
+        self._select_table_cell(3, 0)
+        self.assertEqual(self.view.selected_background(), 4.0)
+
     def test_that_selected_run_and_group_will_raise_if_there_is_no_group_selected(self):
         self.view.populate_corrections_table(self.runs, self.groups, self.use_raws, self.start_xs, self.end_xs, self.a0s,
-                                             self.a0_errors, self.statuses, self.use_raw_enabled)
+                                             self.a0_errors, self.statuses, self.use_raw_enabled, self.auto_mode)
         self.assertRaises(RuntimeError, self.view.selected_run_and_group)
 
     def test_that_selected_run_and_group_will_return_the_run_and_group_of_the_selected_row(self):
         self.view.populate_corrections_table(self.runs, self.groups, self.use_raws, self.start_xs, self.end_xs, self.a0s,
-                                             self.a0_errors, self.statuses, self.use_raw_enabled)
+                                             self.a0_errors, self.statuses, self.use_raw_enabled, self.auto_mode)
 
         self._select_table_cell(2, 0)
         self.assertEqual(self.view.selected_run_and_group(), (["84447"], ["top"]))
 
     def test_that_selected_start_x_will_raise_if_there_is_no_row_selected(self):
         self.view.populate_corrections_table(self.runs, self.groups, self.use_raws, self.start_xs, self.end_xs, self.a0s,
-                                             self.a0_errors, self.statuses, self.use_raw_enabled)
+                                             self.a0_errors, self.statuses, self.use_raw_enabled, self.auto_mode)
         self.assertRaises(RuntimeError, self.view.selected_start_x)
 
     def test_that_selected_start_x_will_return_the_start_x_of_the_selected_row(self):
         self.view.populate_corrections_table(self.runs, self.groups, self.use_raws, self.start_xs, self.end_xs, self.a0s,
-                                             self.a0_errors, self.statuses, self.use_raw_enabled)
+                                             self.a0_errors, self.statuses, self.use_raw_enabled, self.auto_mode)
 
         self._select_table_cell(2, 0)
         self.assertEqual(self.view.selected_start_x(), 7.0)
 
     def test_that_selected_end_x_will_raise_if_there_is_no_row_selected(self):
         self.view.populate_corrections_table(self.runs, self.groups, self.use_raws, self.start_xs, self.end_xs, self.a0s,
-                                             self.a0_errors, self.statuses, self.use_raw_enabled)
+                                             self.a0_errors, self.statuses, self.use_raw_enabled, self.auto_mode)
         self.assertRaises(RuntimeError, self.view.selected_end_x)
 
     def test_that_selected_end_x_will_return_the_end_x_of_the_selected_row(self):
         self.view.populate_corrections_table(self.runs, self.groups, self.use_raws, self.start_xs, self.end_xs, self.a0s,
-                                             self.a0_errors, self.statuses, self.use_raw_enabled)
+                                             self.a0_errors, self.statuses, self.use_raw_enabled, self.auto_mode)
 
         self._select_table_cell(2, 0)
         self.assertEqual(self.view.selected_end_x(), 11.0)

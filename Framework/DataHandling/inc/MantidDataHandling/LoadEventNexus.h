@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/IFileLoader.h"
+#include "MantidAPI/InstrumentFileFinder.h"
 #include "MantidAPI/NexusFileLoader.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/BankPulseTimes.h"
@@ -16,6 +17,8 @@
 #include "MantidDataObjects/Events.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/NexusHDF5Descriptor.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -37,6 +40,7 @@
 #include <memory>
 #include <mutex>
 #include <numeric>
+#include <Poco/Path.h>
 
 namespace Mantid {
 namespace DataHandling {
@@ -531,6 +535,20 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename, T local
     // Now let's close the file as we don't need it anymore to load the
     // instrument.
     nxfile.close();
+  }
+
+  if (instFilename.empty()) {
+    try {
+      instFilename =
+          API::InstrumentFileFinder::getInstrumentFilename(instrument, localWorkspace->getWorkspaceStartDate());
+    } catch (Kernel::Exception::NotFoundError) {
+      if (instFilename.empty()) {
+        Poco::Path directory(Kernel::ConfigService::Instance().getInstrumentDirectory());
+        Poco::Path file(instrument + "_Definition.xml");
+        Poco::Path fullPath(directory, file);
+        instFilename = fullPath.toString();
+      }
+    }
   }
 
   // do the actual work

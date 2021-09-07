@@ -8,7 +8,8 @@ from mantid.py36compat import dataclass
 
 from mantid.api import AlgorithmManager, CompositeFunction, FunctionFactory, IFunction, Workspace
 from mantid.kernel import PhysicalConstants
-from Muon.GUI.Common.contexts.corrections_context import (BACKGROUND_MODE_NONE, FLAT_BACKGROUND,
+from Muon.GUI.Common.contexts.corrections_context import (BACKGROUND_MODE_NONE, BACKGROUND_MODE_AUTO,
+                                                          BACKGROUND_MODE_MANUAL, FLAT_BACKGROUND,
                                                           FLAT_BACKGROUND_AND_EXP_DECAY, RUNS_ALL, GROUPS_ALL)
 from Muon.GUI.Common.contexts.muon_context import MuonContext
 from Muon.GUI.Common.corrections_tab_widget.corrections_model import CorrectionsModel
@@ -18,8 +19,11 @@ from Muon.GUI.Common.utilities.run_string_utils import run_string_to_list
 from Muon.GUI.Common.utilities.workspace_data_utils import x_limits_of_workspace
 
 BACKGROUND_PARAM = "A0"
+CORRECTION_SUCCESS_STATUS = "Correction success"
+NO_CORRECTION_STATUS = "No background correction"
 DEFAULT_A_VALUE = 1e6
 DEFAULT_LAMBDA_VALUE = 1.0e-6 / PhysicalConstants.MuonLifetime
+DEFAULT_USE_RAW = False
 MAX_ACCEPTABLE_CHI_SQUARED = 10.0
 TEMPORARY_BACKGROUND_WORKSPACE_NAME = "__temp_background_workspace"
 
@@ -41,7 +45,7 @@ class BackgroundCorrectionData:
     end_x: float
     flat_background: IFunction
     exp_decay: IFunction
-    status: str = "No background correction"
+    status: str = NO_CORRECTION_STATUS
 
     def __init__(self, use_raw: bool, rebin_fixed_step: int, start_x: float, end_x: float,
                  flat_background: IFunction = None, exp_decay: IFunction = None):
@@ -111,7 +115,8 @@ class BackgroundCorrectionData:
                 "EndX": self.end_x,
                 "CreateOutput": create_output,
                 "CalcErrors": True,
-                "MaxIterations": max_iterations}
+                "MaxIterations": max_iterations,
+                "IgnoreInvalidData": True}
 
     def _handle_background_fit_output(self, function: IFunction, fit_status: str, chi_squared: float) -> None:
         """Handles the output of the background fit."""
@@ -139,7 +144,7 @@ class BackgroundCorrectionData:
 
         self.flat_background.setParameter(BACKGROUND_PARAM, background)
         self.flat_background.setError(BACKGROUND_PARAM, background_error)
-        self.status = "Correction success"
+        self.status = CORRECTION_SUCCESS_STATUS
 
     def perform_background_subtraction(self) -> None:
         """Performs the background subtraction on the counts workspace, and then generates the asymmetry workspace."""
@@ -166,7 +171,7 @@ class BackgroundCorrectionData:
 
     def _use_raw_data(self) -> bool:
         """Returns true if the raw data should be used to calculate the background."""
-        return self.use_raw or self.rebin_fixed_step == 0
+        return self.use_raw or self.rebin_fixed_step == 0 or self.rebin_workspace_name is None
 
 
 class BackgroundCorrectionsModel:
@@ -199,6 +204,14 @@ class BackgroundCorrectionsModel:
     def is_background_mode_none(self) -> bool:
         """Returns true if the current background correction mode is none."""
         return self._corrections_context.background_corrections_mode == BACKGROUND_MODE_NONE
+
+    def is_background_mode_auto(self) -> bool:
+        """Returns true if the current background correction mode is auto."""
+        return self._corrections_context.background_corrections_mode == BACKGROUND_MODE_AUTO
+
+    def is_background_mode_manual(self) -> bool:
+        """Returns true if the current background correction mode is manual."""
+        return self._corrections_context.background_corrections_mode == BACKGROUND_MODE_MANUAL
 
     def set_selected_function(self, selected_function: str) -> None:
         """Sets the currently selected function which is displayed in the function combo box."""
@@ -254,6 +267,14 @@ class BackgroundCorrectionsModel:
 
         raise RuntimeError(f"The provided run and group could not be found ({run}, {group}).")
 
+    def set_background(self, run: str, group: str, background: float) -> None:
+        """Sets the Background associated with the provided Run and Group."""
+        run_group = tuple([run, group])
+        if run_group in self._corrections_context.background_correction_data:
+            correction_data = self._corrections_context.background_correction_data[run_group]
+            correction_data.flat_background.setParameter(BACKGROUND_PARAM, background)
+            correction_data.flat_background.setError(BACKGROUND_PARAM, 0.0)
+
     def all_runs_and_groups(self) -> tuple:
         """Returns all the runs and groups stored in the context. The list indices of the runs and groups correspond."""
         runs, groups = [], []
@@ -300,16 +321,16 @@ class BackgroundCorrectionsModel:
         run, group = run_group
         if run_group in previous_data:
             data = previous_data[run_group]
-            return BackgroundCorrectionData(data.use_raw if is_rebin_fixed else True, rebin_fixed, data.start_x,
+            return BackgroundCorrectionData(data.use_raw if is_rebin_fixed else DEFAULT_USE_RAW, rebin_fixed, data.start_x,
                                             data.end_x, data.flat_background, data.exp_decay)
         else:
             for key, value in previous_data.items():
                 if key[1] == group:
-                    return BackgroundCorrectionData(value.use_raw if is_rebin_fixed else True, rebin_fixed,
+                    return BackgroundCorrectionData(value.use_raw if is_rebin_fixed else DEFAULT_USE_RAW, rebin_fixed,
                                                     value.start_x, value.end_x, value.flat_background, value.exp_decay)
 
         start_x, end_x = self.default_x_range(run, group)
-        return BackgroundCorrectionData(True, rebin_fixed, start_x, end_x)
+        return BackgroundCorrectionData(DEFAULT_USE_RAW, rebin_fixed, start_x, end_x)
 
     def create_background_output_workspaces_for(self, run: str, group: str) -> tuple:
         """Creates the parameter table and normalised covariance matrix for a Run/Group by performing a fit."""
@@ -342,9 +363,13 @@ class BackgroundCorrectionsModel:
 
     def _run_background_correction(self, correction_data: BackgroundCorrectionData) -> None:
         """Calculates the background for some data using a Fit."""
-        fit_function = self._get_fit_function_for_background_fit(correction_data)
+        if self.is_background_mode_auto():
+            fit_function = self._get_fit_function_for_background_fit(correction_data)
+            correction_data.calculate_background(fit_function)
+        elif self.is_background_mode_manual():
+            correction_data.status = CORRECTION_SUCCESS_STATUS \
+                if correction_data.flat_background.getParameterValue(BACKGROUND_PARAM) != 0.0 else NO_CORRECTION_STATUS
 
-        correction_data.calculate_background(fit_function)
         correction_data.perform_background_subtraction()
 
     def _get_fit_function_for_background_fit(self, correction_data: BackgroundCorrectionData) -> IFunction:

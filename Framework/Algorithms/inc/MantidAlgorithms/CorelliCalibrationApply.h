@@ -36,9 +36,7 @@ public:
   const std::string category() const override { return "Diffraction\\Calibration"; };
 
   /// Extra help info
-  const std::vector<std::string> seeAlso() const override {
-    return {"CorelliPowderCalibrationCreate", "CorelliCalibrationDatabase"};
-  };
+  const std::vector<std::string> seeAlso() const override { return {"CorelliCalibrationDatabase"}; };
 
 private:
   /// Overwrites Algorithm method. Does nothing at present

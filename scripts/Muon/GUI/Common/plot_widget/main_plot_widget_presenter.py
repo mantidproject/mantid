@@ -37,6 +37,10 @@ class MainPlotWidgetPresenter(HomeTabSubWidget):
         return [self._plot_modes[mode].data_changed_observer for mode in list(self._plot_modes.keys())]
 
     @property
+    def clear_plot_observers(self):
+        return [self._plot_modes[mode].clear_plot_observer for mode in list(self._plot_modes.keys())]
+
+    @property
     def rebin_options_set_observers(self):
         return [self._plot_modes[mode].rebin_options_set_observer for mode in list(self._plot_modes.keys())]
 

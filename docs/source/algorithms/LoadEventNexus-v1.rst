@@ -78,6 +78,10 @@ Veto pulses can be filtered out in a separate step using
 Data Loaded from Nexus File
 ###########################
 
+If `LoadAllLogs` is checked, all the logs in the Nexus files will be loaded directly in the sample logs as they are.
+The `LoadLogs` flag will be ignored.
+If only `LoadLogs` is checked, only a subset of the logs will be processed and loaded, in the manner described afterward.
+
 The nexus file must have ``/raw_data_1`` or ``/entry`` as its main group and
 that group be of type ``NXentry``. It also needs a group of type ``NXevent_data``.
 

@@ -8,8 +8,8 @@
 import numpy
 
 from qtpy.QtWidgets import (QFileDialog, QMainWindow, QMessageBox, QSlider, QVBoxLayout, QWidget)  # noqa
-from qtpy.QtGui import (QDoubleValidator, QDesktopServices)  # noqa
-from qtpy.QtCore import QUrl
+from qtpy.QtGui import (QDoubleValidator, QDesktopServices, QRegExpValidator)  # noqa
+from qtpy.QtCore import QUrl, QRegExp
 
 
 import mantid
@@ -102,10 +102,8 @@ class MainWindow(QMainWindow):
         self.ui.horizontalSlider_2.valueChanged.connect(self.move_rightSlider)
 
         self.ui.lineEdit_3.editingFinished.connect(self.set_startTime)
-        self.ui.lineEdit_3.setValidator(QDoubleValidator(self.ui.lineEdit_3))
         self.ui.pushButton_setT0.clicked.connect(self.set_startTime)
         self.ui.lineEdit_4.editingFinished.connect(self.set_stopTime)
-        self.ui.lineEdit_4.setValidator(QDoubleValidator(self.ui.lineEdit_4))
         self.ui.pushButton_setTf.clicked.connect(self.set_stopTime)
 
         # File loader
@@ -115,19 +113,27 @@ class MainWindow(QMainWindow):
         self.ui.pushButton_load.clicked.connect(self.load_File)
         self.ui.pushButton_3.clicked.connect(self.use_existWS)
 
+        # validates any number, but does not accept comma, contrary to QDoubleValidator
+        # this way, it is possible to cast to float without checking for stray commas.
+        regexp = QRegExp("[-+]?((\d+\.?\d*)|(\.\d+))(e[-+]?\d+)?")  # noqa
+        # noqa because flake is not happy about regex escape sequences
+
+        regexp_val = QRegExpValidator(regexp, self)
+
         # Set up time
-        self.ui.lineEdit_3.setValidator(QDoubleValidator(self.ui.lineEdit_3))
-        self.ui.lineEdit_4.setValidator(QDoubleValidator(self.ui.lineEdit_4))
+        self.ui.lineEdit_3.setValidator(regexp_val)
+        self.ui.lineEdit_4.setValidator(regexp_val)
 
         # Filter by time
         self.ui.pushButton_filterTime.clicked.connect(self.filterByTime)
+        self.ui.lineEdit_timeInterval.returnPressed.connect(self.filterByTime)
 
         # Filter by log value
-        self.ui.lineEdit_5.setValidator(QDoubleValidator(self.ui.lineEdit_5))
-        self.ui.lineEdit_6.setValidator(QDoubleValidator(self.ui.lineEdit_6))
-        self.ui.lineEdit_7.setValidator(QDoubleValidator(self.ui.lineEdit_7))
-        self.ui.lineEdit_8.setValidator(QDoubleValidator(self.ui.lineEdit_8))
-        self.ui.lineEdit_9.setValidator(QDoubleValidator(self.ui.lineEdit_9))
+        self.ui.lineEdit_5.setValidator(regexp_val)
+        self.ui.lineEdit_6.setValidator(regexp_val)
+        self.ui.lineEdit_7.setValidator(regexp_val)
+        self.ui.lineEdit_8.setValidator(regexp_val)
+        self.ui.lineEdit_9.setValidator(regexp_val)
 
         self.ui.lineEdit_5.textChanged.connect(self.set_minLogValue)
         self.ui.lineEdit_6.textChanged.connect(self.set_maxLogValue)
@@ -169,7 +175,7 @@ class MainWindow(QMainWindow):
         self.ui.comboBox_tofCorr.currentIndexChanged.connect(self.showHideEi)
         self.ui.pushButton_refreshCorrWSList.clicked.connect(self._searchTableWorkspaces)
 
-        self.ui.lineEdit_Ei.setValidator(QDoubleValidator(self.ui.lineEdit_Ei))
+        self.ui.lineEdit_Ei.setValidator(regexp_val)
 
         self.ui.label_Ei.hide()
         self.ui.lineEdit_Ei.hide()
@@ -246,11 +252,10 @@ class MainWindow(QMainWindow):
             xlim = self.ui.mainplot.get_xlim()
 
             if self.ui.lineEdit_4.text():
-                newx = max(xlim[0] + newx*(xlim[1] - xlim[0])*0.01, float(self.ui.lineEdit_4.text()))
+                newx = min(xlim[0] + newx*(xlim[1] - xlim[0])*0.01, float(self.ui.lineEdit_4.text()))
             else:
                 newx = xlim[0] + newx*(xlim[1] - xlim[0])*0.01
 
-            newx = xlim[0] + newx*(xlim[1] - xlim[0])*0.01
             leftx = [newx, newx]
             lefty = self.ui.mainplot.get_ylim()
             setp(self.leftslideline, xdata=leftx, ydata=lefty)
@@ -416,10 +421,7 @@ class MainWindow(QMainWindow):
             # Out of upper range
             inewy = self._upperSlideValue - 1
 
-        if inewy == 0 and self._lowerSlideValue < 0:
-            setLineEdit = False
-        else:
-            setLineEdit = True
+        setLineEdit = inewy != 0 or self._lowerSlideValue >= 0
 
         # Move the lower vertical bar
         ylim = self.ui.mainplot.get_ylim()
@@ -466,7 +468,7 @@ class MainWindow(QMainWindow):
         else:
             resetL = False
 
-        if resetL is True:
+        if resetL:
             newminY = ylim[0] + iminlogval * (ylim[1]-ylim[0]) * 0.01
 
         # Move the vertical line
@@ -880,9 +882,14 @@ class MainWindow(QMainWindow):
         vecx = sumws.readX(0)
         vecy = sumws.readY(0)
 
-        # get the x limits using the original workspace, as they are far more precise
-        xmin = min(wksp.readX(0)) / 1000000
-        xmax = max(wksp.readX(0)) / 1000000
+        # if there is only one xbin in the summed workspace, that means we have an evetn file without pulse,
+        # and in this case we use the original workspace time limits
+        if len(vecx) == 1:
+            xmin = min(wksp.readX(0)) / 1000000
+            xmax = max(wksp.readX(0)) / 1000000
+        else:
+            xmin = min(vecx)
+            xmax = max(vecx)
 
         ymin = min(vecy)
         ymax = max(vecy)
@@ -917,15 +924,13 @@ class MainWindow(QMainWindow):
             return
 
         kwargs = {}
-        if self.ui.lineEdit_3.text() != "":
-            rel_starttime = float(self.ui.lineEdit_3.text())
-            kwargs["StartTime"] = str(rel_starttime)
-        if self.ui.lineEdit_4.text() != "":
-            rel_stoptime = float(self.ui.lineEdit_4.text())
-            kwargs["StopTime"] = str(rel_stoptime)
+
+        xlim = self.ui.mainplot.get_xlim()
+        kwargs["StartTime"] = self.ui.lineEdit_3.text()if self.ui.lineEdit_3.text() != "" else str(xlim[0])
+        kwargs["StopTime"] = self.ui.lineEdit_4.text() if self.ui.lineEdit_4.text() != "" else str(xlim[1])
+
         if self.ui.lineEdit_timeInterval.text() != "":
-            interval = float(self.ui.lineEdit_timeInterval.text())
-            kwargs["TimeInterval"] = interval
+            kwargs["TimeInterval"] = self.ui.lineEdit_timeInterval.text()
         kwargs["useReverseLogarithmic"] = self.ui.useReverseLogarithmic.isChecked()
 
         splitwsname = str(self._dataWS) + "_splitters"
@@ -934,13 +939,17 @@ class MainWindow(QMainWindow):
         title = str(self.ui.lineEdit_title.text())
         fastLog = self.ui.checkBox_fastLog.isChecked()
 
-        splitws, infows = api.GenerateEventsFilter(InputWorkspace=self._dataWS,
-                                                   UnitOfTime="Seconds",
-                                                   TitleOfSplitters=title,
-                                                   OutputWorkspace=splitwsname,
-                                                   FastLog=fastLog,
-                                                   InformationWorkspace=splitinfowsname,
-                                                   **kwargs)
+        try:
+            splitws, infows = api.GenerateEventsFilter(InputWorkspace=self._dataWS,
+                                                       UnitOfTime="Seconds",
+                                                       TitleOfSplitters=title,
+                                                       OutputWorkspace=splitwsname,
+                                                       FastLog=fastLog,
+                                                       InformationWorkspace=splitinfowsname,
+                                                       **kwargs)
+        except (RuntimeError, ValueError) as e:
+            Logger("Filter_Events").error("Splitting failed ! \n {0}".format(e))
+            return
 
         self.splitWksp(splitws, infows)
 

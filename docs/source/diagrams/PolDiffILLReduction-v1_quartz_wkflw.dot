@@ -5,9 +5,9 @@ digraph Quartz {
     $param_style
     Run
     D7YIGPositionCalibration
-    AbsorberInputWorkspace
-    ContainerInputWorkspace
-    TransmissionInputWorkspace
+    CadmiumWorkspace
+    EmptyContainerWorkspace
+    Transmission
   }
 
   subgraph values {
@@ -17,19 +17,19 @@ digraph Quartz {
 
   subgraph algorithms {
     $algorithm_style
-    Load
-    Divide [label="Normalize to monitor"]
+    LoadAndMerge
+    Divide [label="Normalize to monitor/time"]
     Minus [label="Subtract background"]
     Divide2 [label="Calculate polarising efficiencies"]
   }
 
-  Run -> Load
-  D7YIGPositionCalibration -> Load
-  Load -> Divide
+  Run -> LoadAndMerge
+  D7YIGPositionCalibration -> LoadAndMerge
+  LoadAndMerge -> Divide
   Divide -> Minus
-  AbsorberInputWorkspace -> Minus
-  ContainerInputWorkspace -> Minus
-  TransmissionInputWorkspace -> Minus
+  CadmiumWorkspace -> Minus
+  EmptyContainerWorkspace -> Minus
+  Transmission -> Minus
   Minus -> Divide2
   Divide2 -> OutputWorkspace
 }

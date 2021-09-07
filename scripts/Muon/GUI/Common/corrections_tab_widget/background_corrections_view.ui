@@ -139,12 +139,12 @@ background-color: #c7e0ff;
         </column>
         <column>
          <property name="text">
-          <string>A0</string>
+          <string>BG</string>
          </property>
         </column>
         <column>
          <property name="text">
-          <string>A0 Error</string>
+          <string>BG Error</string>
          </property>
         </column>
         <column>
@@ -189,6 +189,11 @@ background-color: #c7e0ff;
         <item>
          <property name="text">
           <string>Auto</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Manual</string>
          </property>
         </item>
        </widget>
