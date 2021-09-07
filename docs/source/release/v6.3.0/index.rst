@@ -1,7 +1,7 @@
-.. _v6.2.0:
+.. _v6.3.0:
 
 ===========================
-Mantid 6.2.0 Release Notes
+Mantid 6.3.0 Release Notes
 ===========================
 
 .. figure:: ../../images/ImageNotFound.png
@@ -14,7 +14,7 @@ Mantid 6.2.0 Release Notes
 
 .. warning:: This release is still under construction. The changes can be found in the nightly builds on the `download page`_.
 
-We are proud to announce version 6.2.0 of Mantid.
+We are proud to announce version 6.3.0 of Mantid.
 
 **TODO: Add paragraph summarizing big changes**
 
@@ -39,7 +39,7 @@ Citation
 
 Please cite any usage of Mantid as follows:
 
-- *Mantid 6.2.0: Manipulation and Analysis Toolkit for Instrument Data.; Mantid Project*. `doi: 10.5286/SOFTWARE/MANTID6.2 <https://dx.doi.org/10.5286/SOFTWARE/MANTID6.2>`_
+- *Mantid 6.3.0: Manipulation and Analysis Toolkit for Instrument Data.; Mantid Project*. `doi: 10.5286/SOFTWARE/MANTID6.3 <https://dx.doi.org/10.5286/SOFTWARE/MANTID6.3>`_
 
 - Arnold, O. et al. *Mantid-Data Analysis and Visualization Package for Neutron Scattering and mu-SR Experiments.* Nuclear Instruments
   and Methods in Physics Research Section A: Accelerators, Spectrometers, Detectors and Associated Equipment 764 (2014): 156-166
@@ -80,6 +80,6 @@ For a full list of all issues addressed during this release please see the `GitH
 
 .. _forum: https://forum.mantidproject.org
 
-.. _GitHub milestone: https://github.com/mantidproject/mantid/pulls?utf8=%E2%9C%93&q=is%3Apr+milestone%3A"Release 6.2"+is%3Amerged
+.. _GitHub milestone: https://github.com/mantidproject/mantid/pulls?utf8=%E2%9C%93&q=is%3Apr+milestone%3A"Release+6.3"+is%3Amerged
 
-.. _GitHub release page: https://github.com/mantidproject/mantid/releases/tag/v6.2.0
+.. _GitHub release page: https://github.com/mantidproject/mantid/releases/tag/v6.3.0
