@@ -15,6 +15,8 @@ Concepts
 Algorithms
 ----------
 
+- :ref:`SaveAscii <algm-SaveAscii>` and :ref:`SaveCanSAS1D <algm-SaveCanSAS1D>` have a new property OneSpectrumPerFile, controlling whether or not to save each spectrum in an individual file or all the spectra into a single file.
+
 Data Objects
 ------------
 
@@ -35,7 +37,6 @@ SliceViewer
 Improvements
 ############
 
-- :ref:`SaveAscii <algm-SaveAscii>` has new property OneSpectrumPerFile.
 
 Bugfixes
 ########
