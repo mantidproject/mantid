@@ -77,7 +77,7 @@ class SliceInfo:
         """
         return self._nonorthogonal_axes_supported
 
-    def get_northogonal_transform(self):
+    def get_northogonal_transform(self) -> NonOrthogonalTransform:
         return self._transform
 
     def transform(self, point: Sequence) -> np.ndarray:
@@ -137,7 +137,7 @@ class SliceInfo:
             z_range = self.range[z_index]
             self._slicewidth_z = z_range[1] - z_range[0]
 
-    def _init_transform(self, qflags: Sequence[bool], axes_angles):
+    def _init_transform(self, qflags: Sequence[bool], axes_angles: Optional[np.ndarray] = None):
         # find transform for the chosen display indices
         if isinstance(axes_angles, np.ndarray) and qflags[self._display_x] and qflags[self._display_y]:
             self._transform = NonOrthogonalTransform(axes_angles[self._display_x, self._display_y])

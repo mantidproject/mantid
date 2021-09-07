@@ -484,10 +484,9 @@ class SliceViewerModel:
     def _get_ws(self):
         return self._ws
 
-    def _calculate_axes_angles(self):
+    def _calculate_axes_angles(self) -> Optional[np.ndarray]:
         """
-        Calculate angles between all permutations of display axes
-        STORE AS MEMBER VARIABLE - DON'T CALCULATE EVERY TIME MAKE NEW SLICE!
+        Calculate angles between all combination of display axes
         """
         if self.can_support_nonorthogonal_axes():
             # find projection matrix for axes
