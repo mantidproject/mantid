@@ -15,6 +15,9 @@ from mantid.kernel import Direction
 COMPRESS_TOL_TOF = .01
 EXTENSIONS_NXS = ["_event.nxs", ".nxs.h5"]
 
+DEPRECATION_NOTICE = """CalibrateRectangularDetectors is deprecated from v6.3.0.
+Instead, use PDCalibration."""
+
 
 def getBasename(filename):
     name = os.path.split(filename)[-1]
@@ -63,7 +66,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         return "CalibrateRectangularDetectors"
 
     def summary(self):
-        return "Calibrate the detector pixels and write a calibration file"
+        return DEPRECATION_NOTICE
 
     def PyInit(self):
         self.declareProperty(MultipleFileProperty(name="RunNumber",
@@ -423,6 +426,9 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
 
     #pylint: disable=too-many-branches
     def PyExec(self):
+        # Exit with deprecation notice
+        self.log().error(DEPRECATION_NOTICE)
+
         # get generic information
         self._binning = self.getProperty("Binning").value
         if len(self._binning) != 1 and len(self._binning) != 3:

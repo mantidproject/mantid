@@ -12,6 +12,11 @@ Diffraction Changes
 Powder Diffraction
 ------------------
 
+Deprecation
+###########
+
+- CalibrateRectangularDetectors is deprecated.
+
 Engineering Diffraction
 -----------------------
 
