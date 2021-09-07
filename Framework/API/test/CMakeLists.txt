@@ -11,7 +11,7 @@ if(CXXTEST_FOUND)
                         Mantid::Types
                         Mantid::API
                         Mantid::Nexus
-                        Mantid::TestHelpers
+                        Mantid::FrameworkTestHelpers
                         Python::Python
                         gmock
                         ${BCRYPT}

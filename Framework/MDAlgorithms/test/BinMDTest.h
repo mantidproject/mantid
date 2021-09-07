@@ -13,6 +13,7 @@
 #include "MantidAPI/ImplicitFunctionFactory.h"
 #include "MantidAPI/ImplicitFunctionParameterParserFactory.h"
 #include "MantidAPI/ImplicitFunctionParser.h"
+#include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
@@ -23,7 +24,6 @@
 #include "MantidMDAlgorithms/FakeMDEventData.h"
 #include "MantidMDAlgorithms/LoadMD.h"
 #include "MantidMDAlgorithms/SaveMD2.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
 
 #include <cmath>
 #include <utility>

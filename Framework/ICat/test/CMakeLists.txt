@@ -15,7 +15,7 @@ if(CXXTEST_FOUND)
                         Mantid::ICat
                         Mantid::API
                         Mantid::DataObjects
-                        Mantid::TestHelpers
+                        Mantid::FrameworkTestHelpers
                         gmock)
   add_dependencies(FrameworkTests ICatTest)
 

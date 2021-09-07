@@ -11,7 +11,7 @@ if(CXXTEST_FOUND)
                         PRIVATE
                         Mantid::Parallel
                         Mantid::Types
-                        Mantid::TestHelpers
+                        Mantid::FrameworkTestHelpers
                         gmock)
 
   add_dependencies(FrameworkTests ParallelTest)

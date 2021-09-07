@@ -14,7 +14,7 @@ if(CXXTEST_FOUND)
                         Mantid::MDAlgorithms
                         Mantid::Nexus
                         Mantid::Kernel
-                        Mantid::TestHelpers
+                        Mantid::FrameworkTestHelpers
                         gmock)
 
   target_include_directories(MDAlgorithmsTest PRIVATE

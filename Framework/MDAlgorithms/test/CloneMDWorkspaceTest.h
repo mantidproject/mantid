@@ -8,10 +8,10 @@
 
 #include "LoadMDTest.h"
 #include "MantidDataObjects/MDEventFactory.h"
+#include "MantidFrameworkTestHelpers/MDAlgorithmsTestHelper.h"
+#include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidMDAlgorithms/CloneMDWorkspace.h"
-#include "MantidTestHelpers/MDAlgorithmsTestHelper.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
 
 #include <cxxtest/TestSuite.h>
 

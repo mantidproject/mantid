@@ -10,10 +10,10 @@
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/V3D.h"
 #include "MantidSINQ/PoldiIndexKnownCompounds.h"
 #include "MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <boost/algorithm/string/split.hpp>
 
 using namespace Mantid::Poldi;

@@ -2,7 +2,6 @@ set(SRC_FILES
     src/BinaryOperationMDTestHelper.cpp
     src/BoxControllerDummyIO.cpp
     src/ComponentCreationHelper.cpp
-    src/DataProcessorTestHelper.cpp
     src/FakeObjects.cpp
     src/FileComparisonHelper.cpp
     src/FileResource.cpp
@@ -30,35 +29,34 @@ set(SRC_FILES
 )
 
 set(INC_FILES
-    inc/MantidTestHelpers/BinaryOperationMDTestHelper.h
-    inc/MantidTestHelpers/BoxControllerDummyIO.h
-    inc/MantidTestHelpers/ComponentCreationHelper.h
-    inc/MantidTestHelpers/DataProcessorTestHelper.h
-    inc/MantidTestHelpers/FacilityHelper.h
-    inc/MantidTestHelpers/FakeObjects.h
-    inc/MantidTestHelpers/FileComparisonHelper.h
-    inc/MantidTestHelpers/FileResource.h
-    inc/MantidTestHelpers/FunctionCreationHelper.h
-    inc/MantidTestHelpers/IndirectFitDataCreationHelper.h
-    inc/MantidTestHelpers/InstrumentCreationHelper.h
-    inc/MantidTestHelpers/JSONGeometryParserTestHelper.h
-    inc/MantidTestHelpers/MDAlgorithmsTestHelper.h
-    inc/MantidTestHelpers/MDEventsTestHelper.h
-    inc/MantidTestHelpers/MultiDomainFunctionHelper.h
-    inc/MantidTestHelpers/MuonGroupingXMLHelper.h
-    inc/MantidTestHelpers/MuonWorkspaceCreationHelper.h
-    inc/MantidTestHelpers/NexusFileReader.h
-    inc/MantidTestHelpers/NexusGeometryTestHelpers.h
-    inc/MantidTestHelpers/NexusTestHelper.h
-    inc/MantidTestHelpers/ONCatHelper.h
-    inc/MantidTestHelpers/ParallelAlgorithmCreation.h
-    inc/MantidTestHelpers/ParallelRunner.h
-    inc/MantidTestHelpers/ReflectometryHelper.h
-    inc/MantidTestHelpers/SANSInstrumentCreationHelper.h
-    inc/MantidTestHelpers/ScopedFileHelper.h
-    inc/MantidTestHelpers/SingleCrystalDiffractionTestHelper.h
-    inc/MantidTestHelpers/TearDownWorld.h
-    inc/MantidTestHelpers/WorkspaceCreationHelper.h
+    inc/MantidFrameworkTestHelpers/BinaryOperationMDTestHelper.h
+    inc/MantidFrameworkTestHelpers/BoxControllerDummyIO.h
+    inc/MantidFrameworkTestHelpers/ComponentCreationHelper.h
+    inc/MantidFrameworkTestHelpers/FacilityHelper.h
+    inc/MantidFrameworkTestHelpers/FakeObjects.h
+    inc/MantidFrameworkTestHelpers/FileComparisonHelper.h
+    inc/MantidFrameworkTestHelpers/FileResource.h
+    inc/MantidFrameworkTestHelpers/FunctionCreationHelper.h
+    inc/MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h
+    inc/MantidFrameworkTestHelpers/InstrumentCreationHelper.h
+    inc/MantidFrameworkTestHelpers/JSONGeometryParserTestHelper.h
+    inc/MantidFrameworkTestHelpers/MDAlgorithmsTestHelper.h
+    inc/MantidFrameworkTestHelpers/MDEventsTestHelper.h
+    inc/MantidFrameworkTestHelpers/MultiDomainFunctionHelper.h
+    inc/MantidFrameworkTestHelpers/MuonGroupingXMLHelper.h
+    inc/MantidFrameworkTestHelpers/MuonWorkspaceCreationHelper.h
+    inc/MantidFrameworkTestHelpers/NexusFileReader.h
+    inc/MantidFrameworkTestHelpers/NexusGeometryTestHelpers.h
+    inc/MantidFrameworkTestHelpers/NexusTestHelper.h
+    inc/MantidFrameworkTestHelpers/ONCatHelper.h
+    inc/MantidFrameworkTestHelpers/ParallelAlgorithmCreation.h
+    inc/MantidFrameworkTestHelpers/ParallelRunner.h
+    inc/MantidFrameworkTestHelpers/ReflectometryHelper.h
+    inc/MantidFrameworkTestHelpers/SANSInstrumentCreationHelper.h
+    inc/MantidFrameworkTestHelpers/ScopedFileHelper.h
+    inc/MantidFrameworkTestHelpers/SingleCrystalDiffractionTestHelper.h
+    inc/MantidFrameworkTestHelpers/TearDownWorld.h
+    inc/MantidFrameworkTestHelpers/WorkspaceCreationHelper.h
 )
 
 if(COVERAGE)
@@ -69,15 +67,15 @@ if(COVERAGE)
   endforeach(loop_var)
 endif()
 
-add_library(TestHelpers STATIC ${SRC_FILES} ${INC_FILES})
-add_library(Mantid::TestHelpers ALIAS TestHelpers)
-set_property(TARGET TestHelpers PROPERTY FOLDER "UnitTests")
+add_library(FrameworkTestHelpers STATIC ${SRC_FILES} ${INC_FILES})
+add_library(Mantid::FrameworkTestHelpers ALIAS FrameworkTestHelpers)
+set_property(TARGET FrameworkTestHelpers PROPERTY FOLDER "UnitTests")
 
-target_include_directories(TestHelpers PUBLIC
+target_include_directories(FrameworkTestHelpers PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
 )
 
-target_link_libraries(TestHelpers
+target_link_libraries(FrameworkTestHelpers
                         PUBLIC
                         Mantid::API
                         PRIVATE
@@ -89,13 +87,7 @@ target_link_libraries(TestHelpers
                         Mantid::MDAlgorithms
                         Mantid::Muon
                         Mantid::NexusGeometry
-                        # TODO these should be split out into
-                        # a GUI test helpers target
-                        MantidQtWidgetsCommonQt5
-                        Qt5::Core
 )
 
-target_include_directories( TestHelpers PRIVATE
-                            ${CXXTEST_INCLUDE_DIR}
-
-                            )
+target_include_directories(FrameworkTestHelpers PRIVATE
+                           ${CXXTEST_INCLUDE_DIR})

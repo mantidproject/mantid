@@ -13,8 +13,8 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Crystal/AngleUnits.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <boost/math/special_functions/pow.hpp>
 

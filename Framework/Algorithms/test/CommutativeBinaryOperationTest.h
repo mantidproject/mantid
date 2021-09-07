@@ -10,7 +10,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/CommutativeBinaryOperation.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::API;

@@ -14,8 +14,8 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAlgorithms/ConvertEmptyToTof.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Algorithms::ConvertEmptyToTof;
 using namespace Mantid;

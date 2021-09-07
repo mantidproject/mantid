@@ -14,9 +14,9 @@
 #include "IndirectFitDataModel.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/UnitConversion.h"
-#include "MantidTestHelpers/IndirectFitDataCreationHelper.h"
 
 namespace {
 auto &ads_instance = Mantid::API::AnalysisDataService::Instance();

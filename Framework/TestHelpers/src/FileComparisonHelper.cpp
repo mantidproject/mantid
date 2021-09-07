@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidTestHelpers/FileComparisonHelper.h"
+#include "MantidFrameworkTestHelpers/FileComparisonHelper.h"
 
 #include "MantidAPI/FileFinder.h"
 #include "MantidKernel/Logger.h"

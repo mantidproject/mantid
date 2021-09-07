@@ -3,7 +3,7 @@ if(CXXTEST_FOUND)
 cxxtest_add_test(MPIAlgorithmsTest ${TEST_FILES})
 target_link_libraries(MPIAlgorithmsTest PRIVATE
                       Mantid::MPIAlgorithms
-                      Mantid::TestHelpers)
+                      Mantid::FrameworkTestHelpers)
 
 add_dependencies(FrameworkTests MPIAlgorithmsTest)
 

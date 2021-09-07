@@ -8,8 +8,8 @@
 
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/SaveRKH.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidHistogramData/LinearGenerator.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
 #include <Poco/File.h>

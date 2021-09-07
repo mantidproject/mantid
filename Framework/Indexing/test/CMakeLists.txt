@@ -12,7 +12,7 @@ if(CXXTEST_FOUND)
                         Mantid::Types
                         Mantid::Indexing
                         Mantid::Parallel
-                        Mantid::TestHelpers
+                        Mantid::FrameworkTestHelpers
                         gmock
   )
 

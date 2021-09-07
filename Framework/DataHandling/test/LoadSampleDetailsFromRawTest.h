@@ -10,7 +10,7 @@
 
 #include "MantidAPI/Sample.h"
 #include "MantidDataHandling/LoadSampleDetailsFromRaw.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::DataHandling;

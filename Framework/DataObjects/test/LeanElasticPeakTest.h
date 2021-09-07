@@ -13,7 +13,7 @@
 #include "MantidDataObjects/LeanElasticPeak.h"
 
 #include "MantidDataObjects/Peak.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;

@@ -12,9 +12,9 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Crystal/AngleUnits.h"
 #include "MantidHistogramData/HistogramIterator.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Geometry::deg2rad;
 using Mantid::Reflectometry::ReflectometrySumInQ;

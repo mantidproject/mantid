@@ -11,7 +11,7 @@
 #include <cmath>
 #include <stdexcept>
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAlgorithms/Divide.h"
 #include "MantidAlgorithms/Multiply.h"
 #include "MantidAPI/AnalysisDataService.h"

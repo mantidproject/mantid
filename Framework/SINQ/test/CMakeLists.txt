@@ -6,7 +6,7 @@ if(CXXTEST_FOUND)
                         PRIVATE
                         Mantid::SINQ
                         Mantid::CurveFitting
-                        Mantid::TestHelpers
+                        Mantid::FrameworkTestHelpers
                         gmock
 )
 

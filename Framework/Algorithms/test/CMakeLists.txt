@@ -26,22 +26,23 @@ if(CXXTEST_FOUND)
     # On Windows Boost uuid requires the bcrypt library
     set(BCRYPT bcrypt)
   endif()
-  target_link_libraries(
-    AlgorithmsTest
-    PRIVATE Mantid::Algorithms
-            Mantid::DataHandling
-            Mantid::CurveFitting
-            Mantid::Nexus
-            Mantid::NexusGeometry
-            Mantid::Geometry
-            Mantid::API
-            Mantid::DataObjects
-            Mantid::Kernel
-            Boost::boost
-            Boost::filesystem
-            ${BCRYPT}
-            gmock
-  )
+  target_link_libraries(AlgorithmsTest
+                        PRIVATE
+                        Mantid::Algorithms
+                        Mantid::DataHandling
+                        Mantid::CurveFitting
+                        Mantid::Nexus
+                        Mantid::NexusGeometry
+                        Mantid::Geometry
+                        Mantid::API
+                        Mantid::DataObjects
+                        Mantid::Kernel
+                        Mantid::FrameworkTestHelpers
+                        Boost::boost
+                        Boost::filesystem
+                        ${BCRYPT}
+                        gmock)
+
   add_dependencies(AlgorithmsTest Crystal CurveFitting)
   add_dependencies(FrameworkTests AlgorithmsTest)
   # Test data

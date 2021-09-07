@@ -17,8 +17,8 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataHandling/LoadMask.h"
 #include "MantidDataObjects/MaskWorkspace.h"
+#include "MantidFrameworkTestHelpers/ScopedFileHelper.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidTestHelpers/ScopedFileHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::DataHandling;

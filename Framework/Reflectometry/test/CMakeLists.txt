@@ -12,12 +12,12 @@ if(CXXTEST_FOUND)
                         PRIVATE
                         Mantid::Algorithms
                         Mantid::Reflectometry
-                        Mantid::TestHelpers
+                        Mantid::FrameworkTestHelpers
                         gmock)
 
   target_include_directories(ReflectometryTest PRIVATE
                               Mantid::Algorithms
-                              Mantid::TestHelpers
+                              Mantid::FrameworkTestHelpers
                               Mantid::Reflectometry)
 
   add_dependencies(FrameworkTests ReflectometryTest)

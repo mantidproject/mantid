@@ -11,8 +11,8 @@
 #include "MantidAPI/Axis.h"
 #include "MantidDataHandling/CompressEvents.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/Unit.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::MantidVecPtr;
 using namespace Mantid::Kernel;

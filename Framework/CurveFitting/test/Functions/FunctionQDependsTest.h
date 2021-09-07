@@ -17,8 +17,8 @@
 #include "MantidAPI/ParamFunction.h"
 #include "MantidDataHandling/LoadNexus.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/EmptyValues.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 // 3rd party library headers
 #include <cxxtest/TestSuite.h>
 // Standard library

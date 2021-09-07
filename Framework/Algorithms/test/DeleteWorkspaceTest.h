@@ -9,7 +9,7 @@
 //------------------------------------------------------------------------------
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/DeleteWorkspace.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 #include <cxxtest/TestSuite.h>
 

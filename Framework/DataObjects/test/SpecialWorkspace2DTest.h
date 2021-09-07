@@ -8,10 +8,10 @@
 
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/SpecialWorkspace2D.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "PropertyManagerHelper.h"
 #include <cxxtest/TestSuite.h>
 

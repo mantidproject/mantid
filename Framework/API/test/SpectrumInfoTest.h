@@ -16,8 +16,8 @@
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/MultiThreaded.h"
 
-#include "MantidTestHelpers/FakeObjects.h"
-#include "MantidTestHelpers/InstrumentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/FakeObjects.h"
+#include "MantidFrameworkTestHelpers/InstrumentCreationHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::Geometry;
