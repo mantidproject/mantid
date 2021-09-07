@@ -324,9 +324,6 @@ void ComplexMatrix::sortColumns(const std::vector<size_t> &indices) {
   gsl_matrix_complex_free(matrix);
 }
 
-/// Create a new matrix and move the data to it.
-ComplexMatrix ComplexMatrix::move() { return ComplexMatrix(m_matrix); }
-
 /// Pack the matrix into a single std vector of doubles (for passing in and out
 /// of algorithms)
 std::vector<double> ComplexMatrix::packToStdVector() const {

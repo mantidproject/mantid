@@ -219,13 +219,9 @@ public:
   /// of the vector
   void unpackFromStdVector(const std::vector<double> &v);
 
-protected:
-  /// Create a new matrix and move the data to it.
-  ComplexMatrix move();
-
 private:
   /// Move constructor
-  ComplexMatrix(gsl_matrix_complex *&&gslMatrix);
+  explicit ComplexMatrix(gsl_matrix_complex *&&gslMatrix);
   /// The pointer to the GSL matrix
   gsl_matrix_complex *m_matrix;
 };
