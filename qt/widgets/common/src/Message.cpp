@@ -28,8 +28,8 @@ Message::Message() : QObject(), m_text(), m_priority(Priority::PRIO_NOTICE), m_s
  * @param scriptPath The path of the script the message originated from. Empty
  * string if no script applicable
  */
-Message::Message(const QString &text, Priority priority, const QString &scriptPath)
-    : QObject(), m_text(text), m_priority(priority), m_scriptPath(std::move(scriptPath)) {}
+Message::Message(QString text, Priority priority, const QString &scriptPath)
+    : QObject(), m_text(std::move(text)), m_priority(priority), m_scriptPath(std::move(scriptPath)) {}
 
 /**
  * @param text A std::string containing the message text

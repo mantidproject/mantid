@@ -4,6 +4,8 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+#include <utility>
+
 #include "MantidAPI/CatalogSession.h"
 #include "MantidKernel/Logger.h"
 
@@ -15,8 +17,8 @@ namespace API {
  * @param facility  :: The facility of the catalog the user logged in to.
  * @param endpoint  :: The endpoint of the catalog the user logged in to.
  */
-CatalogSession::CatalogSession(const std::string &sessionID, const std::string &facility, const std::string &endpoint)
-    : m_sessionID(sessionID), m_facility(facility), m_endpoint(endpoint) {}
+CatalogSession::CatalogSession(std::string sessionID, std::string facility, std::string endpoint)
+    : m_sessionID(std::move(sessionID)), m_facility(std::move(facility)), m_endpoint(std::move(endpoint)) {}
 
 /**
  * Obtain the session ID for the catalog created.

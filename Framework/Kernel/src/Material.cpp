@@ -12,6 +12,7 @@
 #include <boost/lexical_cast.hpp>
 #include <memory>
 #include <numeric>
+#include <utility>
 
 namespace Mantid {
 
@@ -54,9 +55,9 @@ inline double scatteringXS(const double realLength, const double imagLength) {
 }
 } // namespace
 
-Mantid::Kernel::Material::FormulaUnit::FormulaUnit(const std::shared_ptr<PhysicalConstants::Atom> &atom,
+Mantid::Kernel::Material::FormulaUnit::FormulaUnit(std::shared_ptr<PhysicalConstants::Atom> atom,
                                                    const double multiplicity)
-    : atom(atom), multiplicity(multiplicity) {}
+    : atom(std::move(atom)), multiplicity(multiplicity) {}
 
 Mantid::Kernel::Material::FormulaUnit::FormulaUnit(const PhysicalConstants::Atom &atom, const double multiplicity)
     : atom(std::make_shared<PhysicalConstants::Atom>(atom)), multiplicity(multiplicity) {}
@@ -77,9 +78,9 @@ Material::Material()
  * @param temperature :: The temperature in Kelvin (Default = 300K)
  * @param pressure :: Pressure in kPa (Default: 101.325 kPa)
  */
-Material::Material(const std::string &name, const ChemicalFormula &formula, const double numberDensity,
+Material::Material(std::string name, const ChemicalFormula &formula, const double numberDensity,
                    const double packingFraction, const double temperature, const double pressure)
-    : m_name(name), m_atomTotal(0.0), m_numberDensity(numberDensity), m_packingFraction(packingFraction),
+    : m_name(std::move(name)), m_atomTotal(0.0), m_numberDensity(numberDensity), m_packingFraction(packingFraction),
       m_temperature(temperature), m_pressure(pressure) {
   m_chemicalFormula.assign(formula.begin(), formula.end());
   this->countAtoms();
@@ -96,9 +97,9 @@ Material::Material(const std::string &name, const ChemicalFormula &formula, cons
  * @param temperature :: The temperature in Kelvin (Default = 300K)
  * @param pressure :: Pressure in kPa (Default: 101.325 kPa)
  */
-Material::Material(const std::string &name, const PhysicalConstants::NeutronAtom &atom, const double numberDensity,
+Material::Material(std::string name, const PhysicalConstants::NeutronAtom &atom, const double numberDensity,
                    const double packingFraction, const double temperature, const double pressure)
-    : m_name(name), m_chemicalFormula(), m_atomTotal(1.0), m_numberDensity(numberDensity),
+    : m_name(std::move(name)), m_chemicalFormula(), m_atomTotal(1.0), m_numberDensity(numberDensity),
       m_packingFraction(packingFraction), m_temperature(temperature), m_pressure(pressure) {
   if (atom.z_number == 0) { // user specified atom
     m_chemicalFormula.emplace_back(atom, 1.);

@@ -7,6 +7,7 @@
 #include "MantidGeometry/Crystal/SpaceGroup.h"
 #include "MantidGeometry/Crystal/PointGroupFactory.h"
 #include <algorithm>
+#include <utility>
 
 namespace Mantid {
 namespace Geometry {
@@ -24,8 +25,8 @@ using namespace Kernel;
  * @param group :: Group that contains all symmetry operations (including
  *centering).
  */
-SpaceGroup::SpaceGroup(size_t itNumber, const std::string &hmSymbol, const Group &group)
-    : Group(group), m_number(itNumber), m_hmSymbol(hmSymbol) {}
+SpaceGroup::SpaceGroup(size_t itNumber, std::string hmSymbol, const Group &group)
+    : Group(group), m_number(itNumber), m_hmSymbol(std::move(hmSymbol)) {}
 
 /// Returns the stored space group number
 size_t SpaceGroup::number() const { return m_number; }

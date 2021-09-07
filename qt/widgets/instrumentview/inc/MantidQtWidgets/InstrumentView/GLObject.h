@@ -32,7 +32,7 @@ public:
   /// or using a display list (withDisplayList=true).
   /// @param withDisplayList: rendering mode
   /// @param name: name of the object
-  GLObject(bool withDisplayList, const std::string &name = "");
+  GLObject(bool withDisplayList, std::string name = "");
   /// Destructor
   virtual ~GLObject();
   /// Draw the object in direct mode or using glCallList

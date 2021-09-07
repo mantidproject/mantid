@@ -16,6 +16,7 @@
 
 #include <algorithm>
 #include <stdexcept>
+#include <utility>
 
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
@@ -51,8 +52,8 @@ bool isValueWithinConstraint(std::string const &constraint, double value) {
 namespace MantidQt {
 namespace MantidWidgets {
 
-FitDomain::FitDomain(std::string const &workspaceName, WorkspaceIndex workspaceIndex, double startX, double endX)
-    : m_workspaceName(workspaceName), m_workspaceIndex(workspaceIndex), m_startX(startX), m_endX(endX),
+FitDomain::FitDomain(std::string workspaceName, WorkspaceIndex workspaceIndex, double startX, double endX)
+    : m_workspaceName(std::move(workspaceName)), m_workspaceIndex(workspaceIndex), m_startX(startX), m_endX(endX),
       m_function(nullptr) {}
 
 void FitDomain::setWorkspaceName(std::string const &workspaceName) { m_workspaceName = workspaceName; }

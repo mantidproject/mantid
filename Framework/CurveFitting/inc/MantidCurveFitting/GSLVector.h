@@ -27,7 +27,7 @@ public:
   /// Constructor
   explicit GSLVector(const size_t n);
   /// Construct from a std vector
-  explicit GSLVector(const std::vector<double> &v);
+  explicit GSLVector(std::vector<double> v);
   /// Copy from a gsl vector
   explicit GSLVector(const gsl_vector *v);
   /// Construct from an initialisation list

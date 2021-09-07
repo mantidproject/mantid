@@ -14,6 +14,7 @@
 #include <cmath>
 #include <memory>
 #include <numeric>
+#include <utility>
 
 namespace Mantid {
 namespace Geometry {
@@ -142,9 +143,9 @@ bool MeshObject2D::pointsCoplanar(const std::vector<Kernel::V3D> &vertices) {
 /**
  * Constructor
  */
-MeshObject2D::MeshObject2D(const std::vector<uint32_t> &faces, const std::vector<Kernel::V3D> &vertices,
+MeshObject2D::MeshObject2D(std::vector<uint32_t> faces, std::vector<Kernel::V3D> vertices,
                            const Kernel::Material &material)
-    : m_triangles(faces), m_vertices(vertices), m_material(material) {
+    : m_triangles(std::move(faces)), m_vertices(std::move(vertices)), m_material(material) {
   initialize();
 }
 

@@ -37,7 +37,7 @@ class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW BaseCustomInstrumentModel : public virt
 
 public:
   BaseCustomInstrumentModel();
-  BaseCustomInstrumentModel(const std::string &tmpName, const std::string &instrumentName, const std::string &wsName);
+  BaseCustomInstrumentModel(std::string tmpName, std::string instrumentName, std::string wsName);
   ~BaseCustomInstrumentModel(){};
   void loadEmptyInstrument() override;
   std::pair<int, std::string> loadData(const std::string &name) override;

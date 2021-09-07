@@ -17,6 +17,7 @@
 #include <numeric>
 #include <sstream>
 #include <stdexcept>
+#include <utility>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -30,8 +31,8 @@ GSLVector::GSLVector(const size_t n) : m_data(n), m_view(gsl_vector_view_array(m
 
 /// Construct from a std vector
 /// @param v :: A std vector.
-GSLVector::GSLVector(const std::vector<double> &v)
-    : m_data(v), m_view(gsl_vector_view_array(m_data.data(), m_data.size())) {}
+GSLVector::GSLVector(std::vector<double> v)
+    : m_data(std::move(v)), m_view(gsl_vector_view_array(m_data.data(), m_data.size())) {}
 
 /// Construct from an initialisation list
 /// @param ilist :: A list of doubles: {V0, V1, V2, ...}

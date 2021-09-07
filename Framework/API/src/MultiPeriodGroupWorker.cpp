@@ -4,10 +4,12 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidAPI/MultiPeriodGroupWorker.h"
+#include <utility>
+
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MultiPeriodGroupWorker.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -24,8 +26,8 @@ namespace API {
  * @param workspacePropertyName : Property name to treat as source of
  * multiperiod workspaces.
  */
-MultiPeriodGroupWorker::MultiPeriodGroupWorker(const std::string &workspacePropertyName)
-    : m_workspacePropertyName(workspacePropertyName) {}
+MultiPeriodGroupWorker::MultiPeriodGroupWorker(std::string workspacePropertyName)
+    : m_workspacePropertyName(std::move(workspacePropertyName)) {}
 
 /**
  * Try to add the input workspace to the multiperiod input group list.

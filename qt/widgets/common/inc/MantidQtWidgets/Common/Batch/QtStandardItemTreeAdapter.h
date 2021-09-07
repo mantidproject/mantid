@@ -22,7 +22,7 @@ namespace Batch {
 
 class EXPORT_OPT_MANTIDQT_COMMON QtStandardItemTreeModelAdapter {
 public:
-  QtStandardItemTreeModelAdapter(QStandardItemModel &model, Cell const &emptyCellStyle);
+  QtStandardItemTreeModelAdapter(QStandardItemModel &model, Cell emptyCellStyle);
 
   QModelIndexForMainModel rootIndex() const;
   std::vector<Cell> emptyRow(int columnCount) const;

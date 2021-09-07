@@ -26,9 +26,10 @@ namespace MantidWidgets {
 BaseCustomInstrumentModel::BaseCustomInstrumentModel()
     : m_currentRun(0), m_tmpName("tmp"), m_instrumentName("MUSR"), m_wsName("testData") {}
 
-BaseCustomInstrumentModel::BaseCustomInstrumentModel(const std::string &tmpName, const std::string &instrumentName,
-                                                     const std::string &wsName)
-    : m_currentRun(0), m_tmpName(tmpName), m_instrumentName(instrumentName), m_wsName(wsName) {}
+BaseCustomInstrumentModel::BaseCustomInstrumentModel(std::string tmpName, std::string instrumentName,
+                                                     std::string wsName)
+    : m_currentRun(0), m_tmpName(std::move(tmpName)), m_instrumentName(std::move(instrumentName)),
+      m_wsName(std::move(wsName)) {}
 
 void BaseCustomInstrumentModel::loadEmptyInstrument() {
   auto alg = Mantid::API::AlgorithmManager::Instance().create("LoadEmptyInstrument");

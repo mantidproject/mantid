@@ -30,6 +30,7 @@
 
 #include <algorithm>
 #include <fstream>
+#include <utility>
 
 using namespace std;
 
@@ -49,7 +50,7 @@ const char INT32 = 'i';
  * @brief SpiceXMLNode::SpiceXMLNode
  * @param nodename
  */
-SpiceXMLNode::SpiceXMLNode(const std::string &nodename) : m_name{nodename}, m_typechar('s') {}
+SpiceXMLNode::SpiceXMLNode(std::string nodename) : m_name{std::move(nodename)}, m_typechar('s') {}
 
 /** Set node value in string format
  * @brief SpiceXMLNode::setValue

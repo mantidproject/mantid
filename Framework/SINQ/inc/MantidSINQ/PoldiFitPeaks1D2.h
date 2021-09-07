@@ -23,7 +23,7 @@ namespace Poldi {
 class MANTID_SINQ_DLL RefinedRange {
 public:
   RefinedRange(const PoldiPeak_sptr &peak, double fwhmMultiples);
-  RefinedRange(double xStart, double xEnd, const std::vector<PoldiPeak_sptr> &peaks);
+  RefinedRange(double xStart, double xEnd, std::vector<PoldiPeak_sptr> peaks);
   double getWidth() const;
 
   bool operator<(const RefinedRange &other) const;

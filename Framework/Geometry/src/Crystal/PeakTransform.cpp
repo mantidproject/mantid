@@ -4,15 +4,17 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+#include <utility>
+
 #include "MantidGeometry/Crystal/PeakTransform.h"
 
 namespace Mantid {
 namespace Geometry {
-PeakTransform::PeakTransform(const std::string &xPlotLabel, const std::string &yPlotLabel, const boost::regex &regexOne,
+PeakTransform::PeakTransform(std::string xPlotLabel, std::string yPlotLabel, const boost::regex &regexOne,
                              const boost::regex &regexTwo, const boost::regex &regexThree)
-    : m_xPlotLabel(xPlotLabel), m_yPlotLabel(yPlotLabel), m_indexOfPlotX(0), m_indexOfPlotY(1), m_indexOfPlotZ(2),
-      m_indexOfPeakX(0), m_indexOfPeakY(1), m_indexOfPeakZ(2), m_FirstRegex(regexOne), m_SecondRegex(regexTwo),
-      m_ThirdRegex(regexThree) {
+    : m_xPlotLabel(std::move(xPlotLabel)), m_yPlotLabel(std::move(yPlotLabel)), m_indexOfPlotX(0), m_indexOfPlotY(1),
+      m_indexOfPlotZ(2), m_indexOfPeakX(0), m_indexOfPeakY(1), m_indexOfPeakZ(2), m_FirstRegex(regexOne),
+      m_SecondRegex(regexTwo), m_ThirdRegex(regexThree) {
   const std::string &xLabel = m_xPlotLabel;
   const std::string &yLabel = m_yPlotLabel;
 

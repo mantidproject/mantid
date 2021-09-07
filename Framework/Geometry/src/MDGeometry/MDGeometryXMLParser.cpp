@@ -23,7 +23,7 @@ namespace Geometry {
 /// Helper unary comparison type for finding IMDDimensions by a specified id.
 struct findID {
   const std::string m_id;
-  explicit findID(const std::string &id) : m_id(id) {}
+  explicit findID(std::string id) : m_id(std::move(id)) {}
 
   bool operator()(const Mantid::Geometry::IMDDimension_sptr &obj) const { return m_id == obj->getDimensionId(); }
 };
@@ -143,8 +143,8 @@ void MDGeometryXMLParser::execute() {
 Constructor
 @param xmlToProcess : vtkDataSet to process
 */
-MDGeometryXMLParser::MDGeometryXMLParser(const std::string &xmlToProcess)
-    : m_executed(false), m_xmlToProcess(xmlToProcess) {}
+MDGeometryXMLParser::MDGeometryXMLParser(std::string xmlToProcess)
+    : m_executed(false), m_xmlToProcess(std::move(xmlToProcess)) {}
 
 /**
 Constructor

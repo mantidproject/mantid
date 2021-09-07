@@ -102,9 +102,9 @@ namespace MantidWidgets {
  * @param categories :: Function categories to be included to the Add Function
  * dialog. An empty vector means include all available categories.
  */
-FunctionTreeView::FunctionTreeView(QWidget *parent, bool multi, const std::vector<std::string> &categories)
-    : IFunctionView(parent), m_multiDataset(multi), m_multiDomainFunctionPrefix(), m_allowedCategories(categories),
-      m_selectFunctionDialog(nullptr)
+FunctionTreeView::FunctionTreeView(QWidget *parent, bool multi, std::vector<std::string> categories)
+    : IFunctionView(parent), m_multiDataset(multi), m_multiDomainFunctionPrefix(),
+      m_allowedCategories(std::move(categories)), m_selectFunctionDialog(nullptr)
 
 {
   // create m_browser

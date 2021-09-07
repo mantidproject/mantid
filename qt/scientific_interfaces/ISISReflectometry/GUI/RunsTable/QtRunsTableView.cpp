@@ -11,12 +11,14 @@
 #include "MantidQtWidgets/Common/AlgorithmHintStrategy.h"
 #include <QMessageBox>
 #include <QString>
+#include <utility>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
-QtRunsTableView::QtRunsTableView(std::vector<std::string> const &instruments) : m_jobs(), m_instruments(instruments) {
+QtRunsTableView::QtRunsTableView(std::vector<std::string> instruments)
+    : m_jobs(), m_instruments(std::move(instruments)) {
   m_ui.setupUi(this);
   m_ui.progressBar->setRange(0, 100);
   m_jobs = std::make_unique<MantidQt::MantidWidgets::Batch::JobTreeView>(
@@ -237,7 +239,8 @@ void QtRunsTableView::setSelected(QComboBox &box, std::string const &str) {
     box.setCurrentIndex(index);
 }
 
-RunsTableViewFactory::RunsTableViewFactory(std::vector<std::string> const &instruments) : m_instruments(instruments) {}
+RunsTableViewFactory::RunsTableViewFactory(std::vector<std::string> instruments)
+    : m_instruments(std::move(instruments)) {}
 
 QtRunsTableView *RunsTableViewFactory::operator()() const { return new QtRunsTableView(m_instruments); }
 

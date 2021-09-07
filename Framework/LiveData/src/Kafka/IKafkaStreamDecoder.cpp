@@ -50,13 +50,13 @@ namespace LiveData {
  * @param sampleEnvTopic The name of the topic stream sample environment
  * information. run mapping
  */
-IKafkaStreamDecoder::IKafkaStreamDecoder(std::shared_ptr<IKafkaBroker> broker, const std::string &streamTopic,
-                                         const std::string &runInfoTopic, const std::string &sampleEnvTopic,
-                                         const std::string &chopperTopic, const std::string &monitorTopic)
-    : m_broker(std::move(broker)), m_streamTopic(streamTopic), m_runInfoTopic(runInfoTopic),
-      m_sampleEnvTopic(sampleEnvTopic), m_chopperTopic(chopperTopic), m_monitorTopic(monitorTopic), m_interrupt(false),
-      m_specToIdx(), m_runStart(), m_runId(""), m_thread(), m_capturing(false), m_exception(), m_extractWaiting(false),
-      m_cbIterationEnd([] {}), m_cbError([] {}) {}
+IKafkaStreamDecoder::IKafkaStreamDecoder(std::shared_ptr<IKafkaBroker> broker, std::string streamTopic,
+                                         std::string runInfoTopic, std::string sampleEnvTopic, std::string chopperTopic,
+                                         std::string monitorTopic)
+    : m_broker(std::move(broker)), m_streamTopic(std::move(streamTopic)), m_runInfoTopic(std::move(runInfoTopic)),
+      m_sampleEnvTopic(std::move(sampleEnvTopic)), m_chopperTopic(std::move(chopperTopic)),
+      m_monitorTopic(std::move(monitorTopic)), m_interrupt(false), m_specToIdx(), m_runStart(), m_runId(""), m_thread(),
+      m_capturing(false), m_exception(), m_extractWaiting(false), m_cbIterationEnd([] {}), m_cbError([] {}) {}
 
 IKafkaStreamDecoder::IKafkaStreamDecoder(IKafkaStreamDecoder &&o) noexcept
     : m_broker(std::move(o.m_broker)), m_streamTopic(o.m_streamTopic), m_runInfoTopic(o.m_runInfoTopic),

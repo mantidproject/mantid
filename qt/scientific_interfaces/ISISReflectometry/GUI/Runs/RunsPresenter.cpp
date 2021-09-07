@@ -20,6 +20,7 @@
 #include <fstream>
 #include <iterator>
 #include <sstream>
+#include <utility>
 #include <vector>
 
 #include "Reduction/ValidateRow.h"
@@ -44,10 +45,10 @@ namespace ISISReflectometry {
  */
 RunsPresenter::RunsPresenter(IRunsView *mainView, ProgressableView *progressableView,
                              const RunsTablePresenterFactory &makeRunsTablePresenter, double thetaTolerance,
-                             std::vector<std::string> const &instruments, IMessageHandler *messageHandler)
+                             std::vector<std::string> instruments, IMessageHandler *messageHandler)
     : m_runNotifier(std::make_unique<CatalogRunNotifier>(mainView)),
       m_searcher(std::make_unique<QtCatalogSearcher>(mainView)), m_view(mainView), m_progressView(progressableView),
-      m_mainPresenter(nullptr), m_messageHandler(messageHandler), m_instruments(instruments),
+      m_mainPresenter(nullptr), m_messageHandler(messageHandler), m_instruments(std::move(instruments)),
       m_thetaTolerance(thetaTolerance), m_tableUnsaved{false} {
 
   assert(m_view != nullptr);

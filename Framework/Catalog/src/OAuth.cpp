@@ -9,6 +9,7 @@
 #include "MantidKernel/ConfigService.h"
 
 #include <sstream>
+#include <utility>
 
 #include <Poco/Net/HTMLForm.h>
 #include <Poco/Net/HTTPResponse.h>
@@ -25,10 +26,11 @@ using Mantid::Catalog::Exception::TokenParsingError;
 // OAuthToken
 //----------------------------------------------------------------------
 
-OAuthToken::OAuthToken(const std::string &tokenType, int expiresIn, const std::string &accessToken,
-                       const std::string &scope, const boost::optional<std::string> &refreshToken)
-    : m_expiresAt(DateAndTime::getCurrentTime() + static_cast<double>(expiresIn)), m_tokenType(tokenType),
-      m_expiresIn(expiresIn), m_accessToken(accessToken), m_scope(scope), m_refreshToken(refreshToken) {}
+OAuthToken::OAuthToken(std::string tokenType, int expiresIn, std::string accessToken, std::string scope,
+                       boost::optional<std::string> refreshToken)
+    : m_expiresAt(DateAndTime::getCurrentTime() + static_cast<double>(expiresIn)), m_tokenType(std::move(tokenType)),
+      m_expiresIn(expiresIn), m_accessToken(std::move(accessToken)), m_scope(std::move(scope)),
+      m_refreshToken(std::move(refreshToken)) {}
 
 OAuthToken::~OAuthToken() {}
 

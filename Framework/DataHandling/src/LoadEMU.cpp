@@ -36,6 +36,7 @@
 #include <cmath>
 #include <cstdio>
 #include <fstream>
+#include <utility>
 
 namespace Mantid {
 namespace DataHandling {
@@ -350,11 +351,11 @@ protected:
 
 public:
   EventProcessor(const std::vector<bool> &roi, const std::vector<size_t> &mapIndex, const size_t stride,
-                 const double framePeriod, const double gatePeriod, const TimeLimits &timeBoundary,
-                 const TimeLimits &directLimits, const TimeLimits &analysedLimits)
+                 const double framePeriod, const double gatePeriod, TimeLimits timeBoundary, TimeLimits directLimits,
+                 TimeLimits analysedLimits)
       : m_roi(roi), m_mapIndex(mapIndex), m_stride(stride), m_framePeriod(framePeriod), m_gatePeriod(gatePeriod),
-        m_frames(0), m_framesValid(0), m_timeBoundary(timeBoundary), m_directTaux(directLimits),
-        m_analysedTaux(analysedLimits) {}
+        m_frames(0), m_framesValid(0), m_timeBoundary(std::move(timeBoundary)), m_directTaux(std::move(directLimits)),
+        m_analysedTaux(std::move(analysedLimits)) {}
 
   void newFrame() {
     m_frames++;
