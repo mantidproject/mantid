@@ -57,9 +57,10 @@ GSLVector::GSLVector(const gsl_vector *v)
   }
 }
 
-/// Move constructor.
-GSLVector::GSLVector(std::vector<double> &&v)
-    : m_data(std::move(v)), m_view(gsl_vector_view_array(m_data.data(), m_data.size())) {}
+GSLVector::GSLVector(GSLVector &&v) noexcept : m_data(std::move(v.m_data)), m_view() {
+  // m_view is trivially copyable, but does not provide an operator()
+  m_view = v.m_view;
+}
 
 /// Copy assignment operator
 /// @param v :: The other vector
@@ -267,9 +268,6 @@ void GSLVector::sort(const std::vector<size_t> &indices) {
   std::swap(m_data, data);
   m_view = gsl_vector_view_array(m_data.data(), m_data.size());
 }
-
-/// Create a new GSLVector and move all data to it. Destroys this vector.
-GSLVector GSLVector::move() { return GSLVector(std::move(m_data)); }
 
 /// Copy the values to an std vector of doubles
 std::vector<double> GSLVector::toStdVector() const { return m_data; }

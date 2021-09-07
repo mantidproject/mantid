@@ -35,7 +35,7 @@ public:
   /// Copy constructor.
   GSLVector(const GSLVector &v);
   /// Move constructor.
-  GSLVector(std::vector<double> &&v);
+  GSLVector(GSLVector &&v) noexcept;
   /// Copy assignment operator
   GSLVector &operator=(const GSLVector &v);
   /// Assignment operator
@@ -92,10 +92,6 @@ public:
   GSLVector &operator*=(const double d);
   /// Add a number
   GSLVector &operator+=(const double d);
-
-protected:
-  /// Create a new GSLVector and move all data to it. Destroys this vector.
-  GSLVector move();
 
 private:
   /// Default element storage
