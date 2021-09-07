@@ -28,6 +28,12 @@ void WorkspaceBoundingBox::setBounds(double xMin, double xMax, double yMin, doub
   this->yMax = yMax;
 }
 
+/** Performs checks on the spectrum located at index to determine if
+ *  it is acceptable to be operated on
+ *
+ *  @param index :: index of spectrum data
+ *  @return true/false if its valid
+ */
 bool WorkspaceBoundingBox::isValidWs(int index) {
   const auto spectrumInfo = this->workspace->spectrumInfo();
   if (!spectrumInfo.hasDetectors(index)) {
@@ -46,6 +52,11 @@ bool WorkspaceBoundingBox::isValidWs(int index) {
   return true;
 }
 
+/** Searches for the first valid spectrum info in member variable `workspace`
+ *
+ *  @param numSpec :: the number of spectrum in the workspace to search through
+ *  @return index of first valid spectrum
+ */
 int WorkspaceBoundingBox::findFirstValidWs(const int numSpec) {
   const auto spectrumInfo = this->workspace->spectrumInfo();
   int i;
@@ -56,6 +67,12 @@ int WorkspaceBoundingBox::findFirstValidWs(const int numSpec) {
   return i;
 }
 
+/** Sets member variables x/y to new x/y based on
+ *  spectrum info and historgram data at the given index
+ *
+ *  @param index :: index of spectrum data
+ *  @return number of points of histogram data at index
+ */
 double WorkspaceBoundingBox::updatePositionAndReturnCount(int index) {
   const auto spectrumInfo = this->workspace->spectrumInfo();
   auto &YIn = this->workspace->y(index);
@@ -66,6 +83,11 @@ double WorkspaceBoundingBox::updatePositionAndReturnCount(int index) {
   return YIn[m_specID];
 }
 
+/** Compare current mins and maxs to the coordinates of the spectrum at index
+ *  expnd mins and maxs to include this spectrum
+ *
+ *  @param index :: index of spectrum data
+ */
 void WorkspaceBoundingBox::updateMinMax(int index) {
   const auto spectrumInfo = this->workspace->spectrumInfo();
   double x = spectrumInfo.position(index).X();
@@ -76,6 +98,13 @@ void WorkspaceBoundingBox::updateMinMax(int index) {
   this->yMax = std::max(y, this->yMax);
 }
 
+/** Checks to see if spectrum at index is within the diameter of the given beamRadius
+ *
+ *  @param beamRadius :: radius of beam in meters
+ *  @param index :: index of spectrum data
+ *  @param directBeam :: whether or not the spectrum is subject to the beam
+ *  @return number of points of histogram data at index
+ */
 bool WorkspaceBoundingBox::isOutOfBoundsOfNonDirectBeam(const double beamRadius, int index, const bool directBeam) {
   const auto spectrumInfo = this->workspace->spectrumInfo();
   double x = spectrumInfo.position(index).X();
@@ -95,11 +124,22 @@ double WorkspaceBoundingBox::calculateDistance() {
 double WorkspaceBoundingBox::calculateRadiusX() { return std::min((x - xMin), (xMax - x)); }
 double WorkspaceBoundingBox::calculateRadiusY() { return std::min((y - yMin), (yMax - y)); }
 
+/** Perform normalization on x/y coords over given values
+ *
+ *  @param x :: value to normalize member x over
+ *  @param y :: value to normalize member y over
+ */
 void WorkspaceBoundingBox::normalizePosition(double x, double y) {
   this->x /= x;
   this->y /= y;
 }
 
+/** Checks if a given x/y coord is within the bounding box
+ *
+ *  @param x :: x coordinate
+ *  @param y :: y coordinate
+ *  @return true/false if it is within the mins/maxs of the box
+ */
 bool WorkspaceBoundingBox::containsPoint(double x, double y) {
   if (x > this->xMax || x < this->xMin || y > yMax || y < yMin)
     return false;
