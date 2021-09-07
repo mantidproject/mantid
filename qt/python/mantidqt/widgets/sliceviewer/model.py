@@ -16,8 +16,6 @@ from mantid.simpleapi import BinMD, IntegrateMDHistoWorkspace, TransposeMD
 import numpy as np
 
 from .roi import extract_cuts_matrix, extract_roi_matrix
-# from .sliceinfo import SliceInfo
-# from .transform import NonOrthogonalTransform
 
 # Constants
 PROJ_MATRIX_LOG_NAME = "W_MATRIX"
@@ -257,12 +255,6 @@ class SliceViewerModel:
 
     def get_axes_angles(self):
         return self._axes_angles
-
-    def get_oriented_lattice(self):
-        if not self.can_support_nonorthogonal_axes():
-            raise RuntimeError("Workspace cannot support non-orthogonal axes view")
-        expt_info = self._get_ws().getExperimentInfo(0)
-        return expt_info.sample().getOrientedLattice()
 
     def export_roi_to_workspace_mdevent(self, slicepoint: Sequence[Optional[float]],
                                         bin_params: Sequence[float], limits: tuple,
