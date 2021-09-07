@@ -139,7 +139,7 @@ void CalculateEfficiency2::exec() {
   progress(1.0, "Done!");
 }
 
-API::MatrixWorkspace_sptr CalculateEfficiency2::calculateEfficiency(MatrixWorkspace_sptr inputWorkspace,
+API::MatrixWorkspace_sptr CalculateEfficiency2::calculateEfficiency(const MatrixWorkspace_sptr &inputWorkspace,
                                                                     double startProgress, double stepProgress) {
 
   // create the output workspace from the input, while NOT preserving events

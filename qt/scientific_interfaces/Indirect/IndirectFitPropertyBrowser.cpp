@@ -85,7 +85,7 @@ void IndirectFitPropertyBrowser::initFitOptionsBrowser() {
   m_fitOptionsBrowser->setCurrentFittingType(FittingMode::SEQUENTIAL);
 }
 
-void IndirectFitPropertyBrowser::setHiddenProperties(std::vector<std::string> hiddenProperties) {
+void IndirectFitPropertyBrowser::setHiddenProperties(const std::vector<std::string> &hiddenProperties) {
   for (const auto &propertyName : hiddenProperties) {
     m_fitOptionsBrowser->addPropertyToBlacklist(QString::fromStdString(propertyName));
   }

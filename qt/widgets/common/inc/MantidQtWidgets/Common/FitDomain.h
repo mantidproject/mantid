@@ -52,7 +52,7 @@ public:
   void setParameterFixed(std::string const &parameter, bool fix) const;
   [[nodiscard]] bool isParameterFixed(std::string const &parameter) const;
 
-  void setAttributeValue(std::string const &attribute, Mantid::API::IFunction::Attribute newValue);
+  void setAttributeValue(std::string const &attribute, const Mantid::API::IFunction::Attribute &newValue);
   [[nodiscard]] Mantid::API::IFunction::Attribute getAttributeValue(std::string const &attribute) const;
 
   [[nodiscard]] bool hasParameter(std::string const &parameter) const;

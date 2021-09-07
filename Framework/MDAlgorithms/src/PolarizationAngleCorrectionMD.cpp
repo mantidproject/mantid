@@ -279,7 +279,7 @@ std::string PolarizationAngleCorrectionMD::checkInputMDDimension() {
  * Temperature value can be specified by either property Temperature, or
  * it can be calcualted from sample temperture log in the MDWorkspace
  */
-std::string PolarizationAngleCorrectionMD::checkEi(API::IMDEventWorkspace_sptr mdws) {
+std::string PolarizationAngleCorrectionMD::checkEi(const API::IMDEventWorkspace_sptr &mdws) {
   // Get temperture sample log name
   std::string Estring("Ei");
   std::stringstream eiss;

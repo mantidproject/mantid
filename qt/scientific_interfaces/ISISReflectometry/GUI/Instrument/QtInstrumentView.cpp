@@ -31,7 +31,7 @@ void showAsValid(QDoubleSpinBox &spinBox) { spinBox.setStyleSheet(""); }
  * used to find tooltips for the input properties
  * @param parent :: [input] The parent of this widget
  */
-QtInstrumentView::QtInstrumentView(Mantid::API::IAlgorithm_sptr algorithmForTooltips, QWidget *parent)
+QtInstrumentView::QtInstrumentView(const Mantid::API::IAlgorithm_sptr &algorithmForTooltips, QWidget *parent)
     : QWidget(parent) {
   initLayout();
   registerSettingsWidgets(std::move(algorithmForTooltips));

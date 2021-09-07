@@ -222,24 +222,24 @@ void IntegratePeaksMD2::init() {
   setPropertyGroup("MaskEdgeTubes", general_grp);
 
   // SetValue when another property value changes
-  setPropertySettings(
-      "Ellipsoid", std::make_unique<SetValueWhenProperty>("Cylinder", [](std::string ellipsoid, std::string cylinder) {
-        // Set Ellipsoid to 0, if user has set Cylinder to 1
-        if (ellipsoid == "1" && cylinder == "1") {
-          return std::string{"0"};
-        } else {
-          return ellipsoid;
-        };
-      }));
-  setPropertySettings(
-      "Cylinder", std::make_unique<SetValueWhenProperty>("Ellipsoid", [](std::string cylinder, std::string ellipsoid) {
-        // Set Cylinder to 0, if user has set Ellipsoid to 1
-        if (cylinder == "1" && ellipsoid == "1") {
-          return std::string{"0"};
-        } else {
-          return cylinder;
-        };
-      }));
+  setPropertySettings("Ellipsoid", std::make_unique<SetValueWhenProperty>(
+                                       "Cylinder", [](std::string ellipsoid, const std::string &cylinder) {
+                                         // Set Ellipsoid to 0, if user has set Cylinder to 1
+                                         if (ellipsoid == "1" && cylinder == "1") {
+                                           return std::string{"0"};
+                                         } else {
+                                           return ellipsoid;
+                                         };
+                                       }));
+  setPropertySettings("Cylinder", std::make_unique<SetValueWhenProperty>(
+                                      "Ellipsoid", [](std::string cylinder, const std::string &ellipsoid) {
+                                        // Set Cylinder to 0, if user has set Ellipsoid to 1
+                                        if (cylinder == "1" && ellipsoid == "1") {
+                                          return std::string{"0"};
+                                        } else {
+                                          return cylinder;
+                                        };
+                                      }));
 
   // Set these Properties as visible only when Cylinder = 1
   setPropertySettings("CylinderLength", std::make_unique<VisibleWhenProperty>("Cylinder", IS_EQUAL_TO, "1"));

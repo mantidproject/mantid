@@ -27,7 +27,7 @@ IFunction_sptr createIFunction(std::string const &functionString) {
   return FunctionFactory::Instance().createInitialized(functionString);
 }
 
-CompositeFunction_sptr toComposite(IFunction_sptr function) {
+CompositeFunction_sptr toComposite(const IFunction_sptr &function) {
   return std::dynamic_pointer_cast<CompositeFunction>(function);
 }
 
@@ -168,7 +168,7 @@ double FitDomain::getTieValue(std::string const &tie) const {
   return getParameterValue(tie);
 }
 
-void FitDomain::setAttributeValue(std::string const &attribute, IFunction::Attribute newValue) {
+void FitDomain::setAttributeValue(std::string const &attribute, const IFunction::Attribute &newValue) {
   if (m_function && m_function->hasAttribute(attribute))
     m_function->setAttribute(attribute, newValue);
 }

@@ -432,7 +432,7 @@ bool ALCDataLoadingPresenter::isLoading() const { return m_loadingData; }
  */
 void ALCDataLoadingPresenter::cancelLoading() const { m_LoadingAlg->cancel(); }
 
-void ALCDataLoadingPresenter::handleInstrumentChanged(std::string instrument) {
+void ALCDataLoadingPresenter::handleInstrumentChanged(const std::string &instrument) {
   // Clear path as instrument has changed
   m_view->setPath(std::string{});
 

@@ -22,7 +22,7 @@ class EXPORT_OPT_MANTIDQT_COMMON MuonPeriodInfo : public QWidget {
 
 public:
   /// Reads the data of the sample log from the workspace
-  static std::string readSampleLog(Mantid::API::MatrixWorkspace_sptr ws, const std::string &logName);
+  static std::string readSampleLog(const Mantid::API::MatrixWorkspace_sptr &ws, const std::string &logName);
   /// Splits a string separated by a delimeter
   static std::vector<std::string> parseSampleLog(const std::string &log, const std::string &delim);
   /// Unifies the length of all vectors given
@@ -32,9 +32,9 @@ public:
   void addPeriodToTable(const std::string &name, const std::string &type, const std::string &frames,
                         const std::string &totalFrames, const std::string &counts, const std::string &tag);
   /// Gets all sample log data related to periods
-  std::vector<std::vector<std::string>> getInfo(Mantid::API::MatrixWorkspace_sptr ws);
+  std::vector<std::vector<std::string>> getInfo(const Mantid::API::MatrixWorkspace_sptr &ws);
   /// Takes the workspace and adds it's period info to the table if any
-  void addInfo(const Mantid::API::Workspace_sptr ws);
+  void addInfo(const Mantid::API::Workspace_sptr &ws);
   /// Set the title of the widget
   void setWidgetTitleRuns(const std::string &title);
   /// Get the title of the widget

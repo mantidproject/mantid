@@ -41,8 +41,8 @@ std::shared_ptr<IDetector> ParComponentFactory::createDetector(const IDetector *
  * @param map A pointer to the ParameterMap
  * @returns A pointer to a parameterized component
  */
-std::shared_ptr<Instrument> ParComponentFactory::createInstrument(std::shared_ptr<const Instrument> base,
-                                                                  std::shared_ptr<ParameterMap> map) {
+std::shared_ptr<Instrument> ParComponentFactory::createInstrument(const std::shared_ptr<const Instrument> &base,
+                                                                  const std::shared_ptr<ParameterMap> &map) {
   return std::make_shared<Instrument>(base, map);
 }
 

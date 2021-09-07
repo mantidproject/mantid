@@ -341,7 +341,7 @@ HistogramData::Histogram SparseWorkspace::interpolateFromDetectorGrid(const doub
  *  @param e A HistgramE object
  *  @return A HistogramE object containing the squared values
  */
-HistogramData::HistogramE SparseWorkspace::esq(HistogramData::HistogramE e) const { return e * e; }
+HistogramData::HistogramE SparseWorkspace::esq(const HistogramData::HistogramE &e) const { return e * e; }
 
 /** Square the error values in a histogram
  *  @param e A HistgramE object

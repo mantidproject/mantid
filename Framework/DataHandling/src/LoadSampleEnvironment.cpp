@@ -182,7 +182,7 @@ std::map<std::string, std::string> LoadSampleEnvironment::validateInputs() {
  * be added to any pre-existing components already in the environment
  * @param debugString Debug string that can be appended to by this function
  */
-void LoadSampleEnvironment::loadEnvironmentFromSTL(const std::string filename, Sample &sample, const bool add,
+void LoadSampleEnvironment::loadEnvironmentFromSTL(const std::string &filename, Sample &sample, const bool add,
                                                    std::string debugString) {
   std::unique_ptr<SampleEnvironment> environment = nullptr;
   std::shared_ptr<MeshObject> environmentMesh = nullptr;
@@ -281,10 +281,10 @@ void LoadSampleEnvironment::loadEnvironmentFromSTL(const std::string filename, S
  * be added to any pre-existing components already in the environment
  * @param debugString Debug string that can be appended to by this function
  */
-void LoadSampleEnvironment::loadEnvironmentFrom3MF([[maybe_unused]] MatrixWorkspace_const_sptr inputWS,
-                                                   [[maybe_unused]] const std::string filename,
+void LoadSampleEnvironment::loadEnvironmentFrom3MF([[maybe_unused]] const MatrixWorkspace_const_sptr &inputWS,
+                                                   [[maybe_unused]] const std::string &filename,
                                                    [[maybe_unused]] Sample &sample, [[maybe_unused]] const bool add,
-                                                   [[maybe_unused]] std::string debugString) {
+                                                   [[maybe_unused]] const std::string &debugString) {
 #ifdef ENABLE_LIB3MF
   std::unique_ptr<Geometry::SampleEnvironment> environment = nullptr;
   Mantid3MFFileIO MeshLoader;

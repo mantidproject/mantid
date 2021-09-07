@@ -52,8 +52,8 @@ protected:
   double getMaximumTimeValue(size_t calculatedBinCount);
   double getMinimumExtraTimeValue(size_t calculatedBinCount);
 
-  API::MatrixWorkspace_sptr getCroppedWorkspace(API::MatrixWorkspace_sptr workspace);
-  API::MatrixWorkspace_sptr getExtraCountsWorkspace(API::MatrixWorkspace_sptr workspace);
+  API::MatrixWorkspace_sptr getCroppedWorkspace(const API::MatrixWorkspace_sptr &workspace);
+  API::MatrixWorkspace_sptr getExtraCountsWorkspace(const API::MatrixWorkspace_sptr &workspace);
 
   API::MatrixWorkspace_sptr getWorkspaceBelowX(const API::MatrixWorkspace_sptr &workspace, double x);
   API::MatrixWorkspace_sptr getWorkspaceAboveX(const API::MatrixWorkspace_sptr &workspace, double x);

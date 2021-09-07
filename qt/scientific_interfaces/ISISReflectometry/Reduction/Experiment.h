@@ -51,7 +51,7 @@ public:
   LookupTable const &lookupTable() const;
   std::vector<LookupRow::ValueArray> lookupTableToArray() const;
 
-  LookupRow const *findLookupRow(boost::optional<double> thetaAngle, double tolerance) const;
+  LookupRow const *findLookupRow(const boost::optional<double> &thetaAngle, double tolerance) const;
 
 private:
   AnalysisMode m_analysisMode;

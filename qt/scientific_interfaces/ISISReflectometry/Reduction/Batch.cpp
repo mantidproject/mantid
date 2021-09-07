@@ -5,6 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "Batch.h"
+
+#include <utility>
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
@@ -29,7 +31,7 @@ std::vector<MantidWidgets::Batch::RowLocation> Batch::selectedRowLocations() con
 std::vector<Group> Batch::selectedGroups() const { return m_runsTable.selectedGroups(); }
 
 LookupRow const *Batch::findLookupRow(boost::optional<double> thetaAngle) const {
-  return experiment().findLookupRow(thetaAngle, runsTable().thetaTolerance());
+  return experiment().findLookupRow(std::move(thetaAngle), runsTable().thetaTolerance());
 }
 
 void Batch::resetState() { m_runsTable.resetState(); }

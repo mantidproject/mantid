@@ -276,7 +276,7 @@ MatrixWorkspace_sptr CalculateIqt::calculateIqt(MatrixWorkspace_sptr workspace,
   return divide(workspace, std::move(resolutionWorkspace));
 }
 
-MatrixWorkspace_sptr CalculateIqt::doSimulation(MatrixWorkspace_sptr sample, MatrixWorkspace_sptr resolution,
+MatrixWorkspace_sptr CalculateIqt::doSimulation(MatrixWorkspace_sptr sample, const MatrixWorkspace_sptr &resolution,
                                                 const std::string &rebinParams, MersenneTwister &mTwister) {
   auto simulatedWorkspace = randomizeWorkspaceWithinError(std::move(sample), mTwister);
   return calculateIqt(simulatedWorkspace, std::move(resolution), rebinParams);

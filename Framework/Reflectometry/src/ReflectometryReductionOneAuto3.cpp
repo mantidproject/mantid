@@ -726,7 +726,8 @@ bool ReflectometryReductionOneAuto3::checkGroups() {
  * only the first workspace in the group is used, and again is applied to all
  * of the workspaces in the input workspace group.
  */
-void ReflectometryReductionOneAuto3::setTransmissionProperties(Algorithm_sptr alg, std::string const &propertyName) {
+void ReflectometryReductionOneAuto3::setTransmissionProperties(const Algorithm_sptr &alg,
+                                                               std::string const &propertyName) {
 
   // Get the input transmission workspace. Note that we have to get it by name
   // and retrieve it from the ADS because the property type is MatrixWorkspace
@@ -807,7 +808,7 @@ Algorithm_sptr ReflectometryReductionOneAuto3::createAlgorithmForGroupMember(std
   return alg;
 }
 
-void ReflectometryReductionOneAuto3::groupWorkspaces(std::vector<std::string> workspaceNames,
+void ReflectometryReductionOneAuto3::groupWorkspaces(const std::vector<std::string> &workspaceNames,
                                                      std::string const &outputName) {
   if (anyWorkspaceInListExists(workspaceNames)) {
     Algorithm_sptr groupAlg = createChildAlgorithm("GroupWorkspaces");
@@ -844,13 +845,13 @@ void ReflectometryReductionOneAuto3::setOutputGroupedWorkspaces(std::vector<Work
 
 /** Set an output property from a child algorithm
  */
-void ReflectometryReductionOneAuto3::setOutputPropertyFromChild(Algorithm_sptr alg, std::string const &name) {
+void ReflectometryReductionOneAuto3::setOutputPropertyFromChild(const Algorithm_sptr &alg, std::string const &name) {
   setPropertyValue(name, alg->getPropertyValue(name));
 }
 
 /** Set our output properties from a child algorithm
  */
-void ReflectometryReductionOneAuto3::setOutputPropertiesFromChild(Algorithm_sptr alg) {
+void ReflectometryReductionOneAuto3::setOutputPropertiesFromChild(const Algorithm_sptr &alg) {
   setOutputPropertyFromChild(alg, "ThetaIn");
   setOutputPropertyFromChild(alg, "MomentumTransferMin");
   setOutputPropertyFromChild(alg, "MomentumTransferMax");

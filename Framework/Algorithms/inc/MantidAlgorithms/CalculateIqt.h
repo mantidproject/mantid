@@ -47,7 +47,7 @@ private:
   API::MatrixWorkspace_sptr calculateIqt(API::MatrixWorkspace_sptr workspace,
                                          const API::MatrixWorkspace_sptr &resolutionWorkspace,
                                          const std::string &rebinParams);
-  API::MatrixWorkspace_sptr doSimulation(API::MatrixWorkspace_sptr sample, API::MatrixWorkspace_sptr resolution,
+  API::MatrixWorkspace_sptr doSimulation(API::MatrixWorkspace_sptr sample, const API::MatrixWorkspace_sptr &resolution,
                                          const std::string &rebinParams, Kernel::MersenneTwister &mTwister);
   API::MatrixWorkspace_sptr
   setErrorsToStandardDeviation(const std::vector<API::MatrixWorkspace_sptr> &simulatedWorkspaces);

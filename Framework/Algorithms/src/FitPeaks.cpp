@@ -1575,7 +1575,7 @@ double FitPeaks::fitFunctionMD(API::IFunction_sptr fit_function, const API::Matr
   std::shared_ptr<MultiDomainFunction> md_function = std::make_shared<MultiDomainFunction>();
 
   // Set function first
-  md_function->addFunction(fit_function);
+  md_function->addFunction(std::move(fit_function));
 
   //  set domain for function with index 0 covering both sides
   md_function->clearDomainIndices();

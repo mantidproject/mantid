@@ -111,7 +111,7 @@ private:
   /// Calculate the average gonoimeter matrix
   void calculateAverageGoniometerMatrix();
   /// Calculate the gonoimeter matrices from logs
-  void calculateGoniometerMatrices(Geometry::Goniometer goniometer);
+  void calculateGoniometerMatrices(const Geometry::Goniometer &goniometer);
 
   /// Goniometer for this run
   std::vector<std::unique_ptr<Geometry::Goniometer>> m_goniometers;

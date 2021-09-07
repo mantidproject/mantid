@@ -24,7 +24,7 @@ constexpr bool MULTIPERIODSLOADED = true;
 } // namespace
 
 // Constructor
-MultiPeriodLoadMuonStrategy::MultiPeriodLoadMuonStrategy(Kernel::Logger &g_log, const std::string filename,
+MultiPeriodLoadMuonStrategy::MultiPeriodLoadMuonStrategy(Kernel::Logger &g_log, const std::string &filename,
                                                          LoadMuonNexusV2NexusHelper &nexusLoader,
                                                          API::WorkspaceGroup &workspace)
     : LoadMuonStrategy(g_log, filename, nexusLoader), m_workspaceGroup(workspace), m_detectors(getLoadedDetectors()) {}

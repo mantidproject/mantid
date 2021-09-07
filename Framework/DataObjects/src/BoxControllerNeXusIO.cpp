@@ -389,7 +389,8 @@ int64_t BoxControllerNeXusIO::dataEventCount(void) const {
 }
 
 template <typename FloatOrDouble>
-void BoxControllerNeXusIO::adjustEventDataBlock(std::vector<FloatOrDouble> &Block, const std::string accessMode) const {
+void BoxControllerNeXusIO::adjustEventDataBlock(std::vector<FloatOrDouble> &Block,
+                                                const std::string &accessMode) const {
   // check the validity of accessMode
   const std::vector<std::string> validAccessModes{"READ", "WRITE"};
   if (std::find(validAccessModes.begin(), validAccessModes.end(), accessMode) == validAccessModes.end())
@@ -470,9 +471,9 @@ void BoxControllerNeXusIO::adjustEventDataBlock(std::vector<FloatOrDouble> &Bloc
 
 // explicit instantiations
 template DLLExport void BoxControllerNeXusIO::adjustEventDataBlock<float>(std::vector<float> &Block,
-                                                                          std::string accessMode) const;
+                                                                          const std::string &accessMode) const;
 template DLLExport void BoxControllerNeXusIO::adjustEventDataBlock<double>(std::vector<double> &Block,
-                                                                           std::string accessMode) const;
+                                                                           const std::string &accessMode) const;
 
 template <typename Type>
 void BoxControllerNeXusIO::loadGenericBlock(std::vector<Type> &Block, const uint64_t blockPosition,
