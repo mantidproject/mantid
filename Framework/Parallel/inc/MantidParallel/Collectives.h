@@ -42,8 +42,8 @@ template <typename T> void gather(const Communicator &comm, const T &in_value, s
 }
 
 template <typename T> void gather(const Communicator &comm, const T &in_value, int root) {
-  int tag{0};
   if (comm.rank() != root) {
+    int tag{0};
     comm.send(root, tag, in_value);
   } else {
     throw std::logic_error("Parallel::gather on root rank without output argument.");
