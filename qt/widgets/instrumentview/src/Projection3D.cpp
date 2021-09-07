@@ -51,9 +51,14 @@ Projection3D::Projection3D(const InstrumentActor *rootActor, QSize viewportSize)
     : ProjectionSurface(rootActor), m_drawAxes(true), m_wireframe(false),
       m_viewport(std::move(viewportSize)) {
   V3D minBounds, maxBounds;
-  m_instrActor->getBoundingBox(minBounds, maxBounds);
+  // exclude monitors and choppers from bounding box to set tighter view bounds
+  m_instrActor->getBoundingBox(minBounds, maxBounds, true);
 
   m_viewport.setProjection(minBounds, maxBounds);
+
+  // use the full bounding box to get the Z bounds for the clipping plane
+  m_instrActor->getBoundingBox(minBounds, maxBounds, false);
+  m_viewport.setProjectionZPlane(minBounds, maxBounds);
 
   changeColorMap();
 
