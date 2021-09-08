@@ -216,30 +216,37 @@ void BatchJobManager::addAlgorithmForProcessingRow(Row &row, std::deque<IConfigu
 
 AlgorithmRuntimeProps BatchJobManager::rowProcessingProperties() const { return createAlgorithmRuntimeProps(m_batch); }
 
-Item const &BatchJobManager::algorithmStarted(IConfiguredAlgorithm_sptr algorithm) {
-  auto jobAlgorithm = std::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
-  jobAlgorithm->item()->resetOutputs();
-  jobAlgorithm->item()->setRunning();
-  return *jobAlgorithm->item();
+void BatchJobManager::algorithmStarted(IConfiguredAlgorithm_sptr algorithm) {
+  auto item = getRunsTableItem(algorithm);
+  assert(item);
+  item->resetOutputs();
+  item->setRunning();
 }
 
-Item const &BatchJobManager::algorithmComplete(IConfiguredAlgorithm_sptr algorithm) {
+void BatchJobManager::algorithmComplete(IConfiguredAlgorithm_sptr algorithm) {
+  auto item = getRunsTableItem(algorithm);
+  assert(item);
   auto jobAlgorithm = std::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
-
   jobAlgorithm->updateItem();
-  jobAlgorithm->item()->setSuccess();
-  return *jobAlgorithm->item();
+  item->setSuccess();
 }
 
-Item const &BatchJobManager::algorithmError(IConfiguredAlgorithm_sptr algorithm, std::string const &message) {
-  auto jobAlgorithm = std::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
-  auto *item = jobAlgorithm->item();
+void BatchJobManager::algorithmError(IConfiguredAlgorithm_sptr algorithm, std::string const &message) {
+  auto item = getRunsTableItem(algorithm);
+  assert(item);
   item->resetOutputs();
   item->setError(message);
   // Mark the item as skipped so we don't reprocess it in the current round of
   // reductions.
   item->setSkipped(true);
-  return *item;
+}
+
+boost::optional<Item &> BatchJobManager::getRunsTableItem(IConfiguredAlgorithm_sptr const &algorithm) {
+  auto jobAlgorithm = std::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
+  if (!jobAlgorithm->item() || jobAlgorithm->item()->isPreview()) {
+    return boost::none;
+  }
+  return *jobAlgorithm->item();
 }
 
 std::vector<std::string> BatchJobManager::algorithmOutputWorkspacesToSave(IConfiguredAlgorithm_sptr algorithm) const {

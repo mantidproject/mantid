@@ -114,19 +114,23 @@ void BatchPresenter::notifyBatchCancelled() {
 }
 
 void BatchPresenter::notifyAlgorithmStarted(IConfiguredAlgorithm_sptr &algorithm) {
-  auto const &item = m_jobManager->algorithmStarted(algorithm);
-  if (item.isPreview())
+  auto item = m_jobManager->getRunsTableItem(algorithm);
+  if (!item) {
     return;
-  m_runsPresenter->notifyRowOutputsChanged(item);
-  m_runsPresenter->notifyRowStateChanged(item);
+  }
+  m_jobManager->algorithmStarted(algorithm);
+  m_runsPresenter->notifyRowOutputsChanged(item.value());
+  m_runsPresenter->notifyRowStateChanged(item.value());
 }
 
 void BatchPresenter::notifyAlgorithmComplete(IConfiguredAlgorithm_sptr &algorithm) {
-  auto const &item = m_jobManager->algorithmComplete(algorithm);
-  if (item.isPreview())
+  auto item = m_jobManager->getRunsTableItem(algorithm);
+  if (!item) {
     return;
-  m_runsPresenter->notifyRowOutputsChanged(item);
-  m_runsPresenter->notifyRowStateChanged(item);
+  }
+  m_jobManager->algorithmComplete(algorithm);
+  m_runsPresenter->notifyRowOutputsChanged(item.value());
+  m_runsPresenter->notifyRowStateChanged(item.value());
   /// TODO Longer term it would probably be better if algorithms took care
   /// of saving their outputs so we could remove this callback
   if (m_savePresenter->shouldAutosave()) {
@@ -136,9 +140,13 @@ void BatchPresenter::notifyAlgorithmComplete(IConfiguredAlgorithm_sptr &algorith
 }
 
 void BatchPresenter::notifyAlgorithmError(IConfiguredAlgorithm_sptr algorithm, std::string const &message) {
-  auto const &item = m_jobManager->algorithmError(algorithm, message);
-  m_runsPresenter->notifyRowOutputsChanged(item);
-  m_runsPresenter->notifyRowStateChanged(item);
+  auto item = m_jobManager->getRunsTableItem(algorithm);
+  if (!item) {
+    return;
+  }
+  m_jobManager->algorithmError(algorithm, message);
+  m_runsPresenter->notifyRowOutputsChanged(item.value());
+  m_runsPresenter->notifyRowStateChanged(item.value());
 }
 
 /** Start processing the next batch of algorithms.

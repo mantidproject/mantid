@@ -14,6 +14,7 @@
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "Reduction/Batch.h"
 
+#include <boost/optional.hpp>
 #include <memory>
 
 namespace MantidQt {
@@ -41,9 +42,11 @@ public:
 
   void setReprocessFailedItems(bool reprocessFailed) override;
 
-  Item const &algorithmStarted(MantidQt::API::IConfiguredAlgorithm_sptr algorithm) override;
-  Item const &algorithmComplete(MantidQt::API::IConfiguredAlgorithm_sptr algorithm) override;
-  Item const &algorithmError(MantidQt::API::IConfiguredAlgorithm_sptr algorithm, std::string const &message) override;
+  boost::optional<Item &> getRunsTableItem(API::IConfiguredAlgorithm_sptr const &algorithm) override;
+
+  void algorithmStarted(MantidQt::API::IConfiguredAlgorithm_sptr algorithm) override;
+  void algorithmComplete(MantidQt::API::IConfiguredAlgorithm_sptr algorithm) override;
+  void algorithmError(MantidQt::API::IConfiguredAlgorithm_sptr algorithm, std::string const &message) override;
 
   std::vector<std::string>
   algorithmOutputWorkspacesToSave(MantidQt::API::IConfiguredAlgorithm_sptr algorithm) const override;
