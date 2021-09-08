@@ -410,6 +410,8 @@ void StartLiveDataDialog::initListenerPropLayout(const QString &listener) {
     //    m_algorithm->setPropertyValue("Instrument", ui.cmbInstrument->currentText().toStdString());
     //    m_algorithm->setPropertyValue("Listener", listener.toStdString());
     // create or clear the layout
+    std::cout << "Listerner " << listener.toStdString() << " will not be used here"
+              << "\n";
     QLayout *layout = ui.listenerProps->layout();
     if (!layout) {
       QGridLayout *listenerPropLayout = new QGridLayout(ui.listenerProps);
