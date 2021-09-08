@@ -33,7 +33,7 @@ class SliceInfo:
                or None for a non-slice dimension
         qflags: A list of booleans indicating if a dimension is a Q dimension or not.
                 There can only be a maximum of 3 dimensions flagged.
-        nonortho_transform: An optional transform object defining tr/inv_tr methods
+        axes_angles: An optional transform object defining tr/inv_tr methods
                             to transform to rectilinear system and back.
     """
 
@@ -43,7 +43,7 @@ class SliceInfo:
                  transpose: bool,
                  range: DimensionRangeCollection,
                  qflags: Sequence[bool],
-                 axes_angles=None):
+                 axes_angles: Optional[np.ndarray] = None):
         assert len(point) == len(qflags)
         assert 3 >= sum(1 for i in filter(
             lambda x: x is True, qflags)), "A maximum of 3 spatial dimensions can be specified"
