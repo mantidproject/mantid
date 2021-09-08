@@ -518,69 +518,118 @@ class PolDiffILLReduction(PythonAlgorithm):
             CreateSingleValuedWorkspace(DataValue=float(transmission), OutputWorkspace=transmission_ws)
         return transmission_ws
 
+    def _extract_time_dependent_background(self, empty_ws, transmission_ws):
+        """Extracts time-independent and time-dependent contributions to the background from the provided
+        workspace (empty container or vanadium) measured in the TOF mode."""
+        # number of channels around the peak, if X-axis data unit is time channels
+        peak_width = self._sampleAndEnvironmentProperties['EPWidth'] \
+            if 'EPWidth' in self._sampleAndEnvironmentProperties else 15
+        epp_table = mtd[self._elastic_channels_ws]
+        bckg_list = []
+        transmission = mtd[transmission_ws].readY(0)[0]
+        for empty in mtd[empty_ws]:
+            # calculate the background in the region around the elastic peaks separately to the rest of TOF channels
+            background = "{}_bckg".format(empty.name())
+            bckg_list.append(background)
+            CloneWorkspace(InputWorkspace=empty, OutputWorkspace=background)
+            elastic_peaks = epp_table.column("PeakCentre")
+            for pixel_no in range(mtd[background].getNumberHistograms()):
+                time_channels = mtd[background].readX(pixel_no)
+                counts = mtd[background].dataY(pixel_no)
+                ep_index = np.abs(time_channels - elastic_peaks[pixel_no]).argmin()
+                lower_peak_edge = ep_index - peak_width
+                upper_peak_edge = ep_index + peak_width
+                time_indep_component = np.mean(np.concatenate((counts[:lower_peak_edge], counts[upper_peak_edge+1:])))
+                counts[:lower_peak_edge] = time_indep_component
+                counts[upper_peak_edge+1:] = time_indep_component
+                counts[lower_peak_edge+1:upper_peak_edge] -= time_indep_component
+                counts[lower_peak_edge+1:upper_peak_edge] *= transmission
+        background_ws = 'background_ws'
+        GroupWorkspaces(InputWorkspaces=bckg_list, OutputWorkspace=background_ws)
+        return background_ws
+
+    def _get_background(self, empty_ws, cadmium_ws, transmission_ws, transmission_corr, max_empty_entry,
+                        max_cadmium_entry, entry_no, tof_background=""):
+        """Provides the background to be subtracted from currently reduced sample. This method takes into account
+        whether empty container, and cadmium are provided, and whether the measurement method is TOF or powder/single
+        crystal."""
+        background_ws = "background_ws"
+        nMeasurements = self._data_structure_helper()
+        measurement_technique = self.getPropertyValue('MeasurementTechnique')
+        tmp_names = []
+        if empty_ws != "":
+            empty_no = entry_no
+            if max_empty_entry == nMeasurements:
+                empty_no = entry_no % nMeasurements
+            elif entry_no >= max_empty_entry:
+                empty_no = entry_no % max_empty_entry
+            empty_entry = mtd[empty_ws][empty_no].name()
+            if measurement_technique != "TOF":
+                empty_corr = empty_entry + '_corr'
+                tmp_names.append(empty_corr)
+                Multiply(LHSWorkspace=transmission_ws, RHSWorkspace=empty_entry, OutputWorkspace=empty_corr)
+        if cadmium_ws != "":
+            # this is not measured for TOF, so no special case like for the empty can
+            cadmium_no = entry_no
+            if max_cadmium_entry == nMeasurements:
+                cadmium_no = entry_no % nMeasurements
+            elif entry_no >= max_cadmium_entry:
+                cadmium_no = entry_no % max_cadmium_entry
+            cadmium_entry = mtd[cadmium_ws][cadmium_no].name()
+            cadmium_corr = cadmium_entry + '_corr'
+            tmp_names.append(cadmium_corr)
+            Multiply(LHSWorkspace=transmission_corr, RHSWorkspace=cadmium_entry, OutputWorkspace=cadmium_corr)
+
+        if measurement_technique == "TOF":
+            # time-(in)dependent background follows the same ws group structure as empty_ws
+            background_ws = mtd[tof_background][empty_no]
+        else:
+            if max_empty_entry != 0 and max_cadmium_entry != 0:
+                Plus(LHSWorkspace=empty_corr, RHSWorkspace=cadmium_corr, OutputWorkspace=background_ws)
+            else:
+                if max_empty_entry != 0:
+                    tmp_names.pop()
+                    RenameWorkspace(InputWorkspace=empty_corr, OutputWorkspace=background_ws)
+                else:
+                    tmp_names.pop()
+                    RenameWorkspace(InputWorkspace=cadmium_corr, OutputWorkspace=background_ws)
+
+        tmp_names.append(background_ws)
+        return background_ws, tmp_names
+
     def _subtract_background(self, ws, transmission_ws):
-        """Subtracts, if provided, empty container and cadmium absorber scaled by transmission."""
+        """Subtracts, if those exist, empty container and cadmium absorber scaled by transmission. For TOF measurement
+        it calculates time-dependent and independent components to be subtracted."""
+        cadmium_ws = self.getPropertyValue('CadmiumWorkspace')
+        empty_ws = self.getPropertyValue('EmptyContainerWorkspace')
+        measurement_technique = self.getPropertyValue('MeasurementTechnique')
+        tof_backgrounds = ""
+        if empty_ws == "" and cadmium_ws == "":
+            return
+        max_cadmium_entry = 0
+        if cadmium_ws != "":
+            max_cadmium_entry = mtd[cadmium_ws].getNumberOfEntries()
+        if empty_ws != "":
+            max_empty_entry = mtd[empty_ws].getNumberOfEntries()
+            if measurement_technique == "TOF":
+                tof_backgrounds = self._extract_time_dependent_background(empty_ws, transmission_ws)
+        elif measurement_technique == "TOF":
+            return
+
         unit_ws = 'unit_ws'
         CreateSingleValuedWorkspace(DataValue=1.0, OutputWorkspace=unit_ws)
         tmp_names = [unit_ws]
         transmission_corr = transmission_ws + '_corr'
         Minus(LHSWorkspace=unit_ws, RHSWorkspace=transmission_ws, OutputWorkspace=transmission_corr)
         tmp_names.append(transmission_corr)
-
-        nMeasurements = self._data_structure_helper()
-        cadmium_present = True
-        cadmium_ws = self.getPropertyValue('CadmiumWorkspace')
-        if cadmium_ws == "":
-            cadmium_present = False
-        else:
-            max_cadmium_entry = mtd[cadmium_ws].getNumberOfEntries()
-            singleCadmiumPerPOL = max_cadmium_entry == nMeasurements
-        empty_present = True
-        empty_ws = self.getPropertyValue('EmptyContainerWorkspace')
-        if empty_ws == "":
-            empty_present = False
-        else:
-            max_empty_entry = mtd[empty_ws].getNumberOfEntries()
-            singleEmptyPerPOL = max_empty_entry == nMeasurements
-        if not empty_present and not cadmium_present:
-            DeleteWorkspaces(WorkspaceList=tmp_names)
-            return
-
-        background_ws = 'background_ws'
-        tmp_names.append(background_ws)
         for entry_no, entry in enumerate(mtd[ws]):
-            empty_no = entry_no
-            cadmium_no = entry_no
-            if empty_present:
-                if singleEmptyPerPOL:
-                    empty_no = entry_no % nMeasurements
-                elif entry_no >= max_empty_entry:
-                    empty_no = entry_no % max_empty_entry
-                empty_entry = mtd[empty_ws][empty_no].name()
-                empty_corr = empty_entry + '_corr'
-                tmp_names.append(empty_corr)
-                Multiply(LHSWorkspace=transmission_ws, RHSWorkspace=empty_entry, OutputWorkspace=empty_corr)
-            if cadmium_present:
-                if singleCadmiumPerPOL:
-                    cadmium_no = entry_no % nMeasurements
-                elif entry_no >= max_cadmium_entry:
-                    cadmium_no = entry_no % max_cadmium_entry
-                cadmium_entry = mtd[cadmium_ws][cadmium_no].name()
-                cadmium_corr = cadmium_entry + '_corr'
-                tmp_names.append(cadmium_corr)
-                Multiply(LHSWorkspace=transmission_corr, RHSWorkspace=cadmium_entry, OutputWorkspace=cadmium_corr)
-            if empty_present and cadmium_present:
-                Plus(LHSWorkspace=empty_corr, RHSWorkspace=cadmium_corr, OutputWorkspace=background_ws)
-            else:
-                if empty_present:
-                    tmp_names.pop()
-                    RenameWorkspace(InputWorkspace=empty_corr, OutputWorkspace=background_ws)
-                else:
-                    tmp_names.pop()
-                    RenameWorkspace(InputWorkspace=cadmium_corr, OutputWorkspace=background_ws)
+            background_ws, tmp_ws = self._get_background(empty_ws, cadmium_ws, transmission_ws, transmission_corr,
+                                                         max_empty_entry, max_cadmium_entry,
+                                                         entry_no, tof_backgrounds)
             Minus(LHSWorkspace=entry,
                   RHSWorkspace=background_ws,
                   OutputWorkspace=entry)
+            tmp_names.extend(tmp_ws)
         if self.getProperty('ClearCache').value and len(tmp_names) > 0:
             DeleteWorkspaces(WorkspaceList=tmp_names)
         return ws
