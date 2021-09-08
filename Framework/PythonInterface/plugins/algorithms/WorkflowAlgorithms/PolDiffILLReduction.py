@@ -389,7 +389,7 @@ class PolDiffILLReduction(PythonAlgorithm):
             new_name = "{0}_{1}_{2}".format(numor, direction, flipper_state)
             RenameWorkspace(InputWorkspace=entry, OutputWorkspace=new_name)
 
-    def _load_and_prepare_data(self, measurement_technique, progress):
+    def _load_and_prepare_data(self, measurement_technique, process, progress):
         """Loads the data, sets the instrument, and runs function to check the measurement method. In the case
         of a single crystal measurement, it also merges the omega scan data into one workspace per polarisation
         orientation."""
@@ -410,6 +410,8 @@ class PolDiffILLReduction(PythonAlgorithm):
             input_ws = self._merge_omega_scan(ws, self._data_structure_helper(), ws+'_conjoined')
             DeleteWorkspace(Workspace=ws)
             RenameWorkspace(InputWorkspace=input_ws, OutputWorkspace=ws)
+        if process in ['Vanadium', 'Sample']:
+            self._read_experiment_properties(ws)
         return ws
 
     def _normalise(self, ws):
@@ -993,14 +995,13 @@ class PolDiffILLReduction(PythonAlgorithm):
     def PyExec(self):
         process = self.getPropertyValue('ProcessAs')
         processes = ['Cadmium', 'EmptyBeam', 'BeamWithCadmium', 'Transmission', 'Empty', 'Quartz', 'Vanadium', 'Sample']
-
         nReports = np.array([3, 2, 2, 3, 3, 3, 10, 10])
         measurement_technique = self.getPropertyValue('MeasurementTechnique')
         if measurement_technique == 'SingleCrystal':
             nReports += 2
         progress = Progress(self, start=0.0, end=1.0, nreports=int(nReports[processes.index(process)]))
 
-        ws = self._load_and_prepare_data(measurement_technique, progress)
+        ws = self._load_and_prepare_data(measurement_technique, process, progress)
         if process in ['EmptyBeam', 'BeamWithCadmium', 'Transmission']:
             if mtd[ws].getNumberOfEntries() > 1:
                 tmp_ws = ws + '_tmp'
@@ -1041,7 +1042,6 @@ class PolDiffILLReduction(PythonAlgorithm):
                 self._calculate_polarising_efficiencies(ws)
 
             if process in ['Vanadium', 'Sample']:
-                self._read_experiment_properties(ws)
                 pol_eff_ws = self.getPropertyValue('QuartzWorkspace')
                 if pol_eff_ws:
                     progress.report('Applying polarisation corrections')
