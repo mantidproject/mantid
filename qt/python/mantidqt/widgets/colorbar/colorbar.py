@@ -28,7 +28,6 @@ MIN_LOG_VALUE = 1e-4
 
 def register_customized_colormaps():
     """register customized colormaps to matplotlib runtime"""
-    print("register new map")
     cmap_path = os.path.dirname(os.path.realpath(__file__))
     cmap_files = glob.glob(os.path.join(cmap_path, "*.map"))
     for cmap_file in cmap_files:
