@@ -32,9 +32,7 @@ def register_customized_colormaps():
     cmap_files = glob.glob(os.path.join(cmap_path, "*.map"))
     for cmap_file in cmap_files:
         cmap_name = os.path.basename(cmap_file).split(".")[0]
-        with open(cmap_file, "r") as f:
-            cmap_data = np.array([list(map(float, line.split())) for line in f.readlines()])/255.0
-        #
+        cmap_data = np.loadtxt(cmap_file)/255.0
         cmap = ListedColormap(cmap_data, name=cmap_name)
         cm.register_cmap(name=cmap_name, cmap=cmap)
 
