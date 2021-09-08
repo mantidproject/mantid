@@ -113,6 +113,7 @@ private slots:
   void shapeCreated();
   void updatePlotMultipleDetectors();
   void onRunRebin();
+  void onRebinParamsWritten(const QString &text);
 
 private:
   void showEvent(QShowEvent * /*unused*/) override;

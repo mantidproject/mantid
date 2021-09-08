@@ -110,6 +110,8 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   m_rebinSaveToHisto->setToolTip("Convert the data to histogram, and thus removes the events. CANNOT BE UNDONE.");
 
   m_runRebin = new QPushButton("Run", m_rebin);
+  connect(m_rebinParams, SIGNAL(textChanged(QString)), this, SLOT(onRebinParamsWritten(QString)));
+  m_runRebin->setEnabled(false);
 
   rebinLayout->addWidget(m_rebinParams, 0, 0);
 
@@ -117,6 +119,7 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   rebinCheckBoxesLayout->addWidget(m_rebinUseReverseLog, 0, 0);
   rebinCheckBoxesLayout->addWidget(m_rebinSaveToHisto, 0, 1);
   rebinLayout->addLayout(rebinCheckBoxesLayout, 1, 0);
+
   rebinLayout->addWidget(m_runRebin, 2, 0);
   connect(m_rebinParams, SIGNAL(returnPressed()), this, SLOT(onRunRebin()));
   connect(m_runRebin, SIGNAL(clicked(bool)), this, SLOT(onRunRebin()));
@@ -317,14 +320,28 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
 }
 
 /**
- * If the workspace is monochromatic, the plot panel is useless and should be
- * collapsed
+ * If the workspace is monochromatic, the plot panel is useless and should be collapsed
  */
 void InstrumentWidgetPickTab::collapsePlotPanel() {
   if (!m_instrWidget->isIntegrable()) {
     m_plotPanel->collapseCaption();
   } else {
     m_plotPanel->expandCaption();
+  }
+}
+
+/**
+ * @brief InstrumentWidgetPickTab::onRebinParamsWritten
+ * Forbid running rebin if no parameters are provided
+ * @param text the text in the params field
+ */
+void InstrumentWidgetPickTab::onRebinParamsWritten(const QString &text) {
+  m_runRebin->setEnabled(!text.isEmpty());
+  if (text.isEmpty()) {
+    disconnect(m_rebinParams, SIGNAL(returnPressed()), this, SLOT(onRunRebin()));
+  } else {
+    // set up the connection, unique so that they are not added over and over
+    connect(m_rebinParams, SIGNAL(returnPressed()), this, SLOT(onRunRebin()), Qt::UniqueConnection);
   }
 }
 
