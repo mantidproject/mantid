@@ -126,3 +126,5 @@ class FrequencyAnalysisPlotWidget(object):
         self._current_plot_mode = self.presenter.get_plot_mode
         self.presenter.hide(old_plot_mode)
         self.presenter.show(self._current_plot_mode)
+        if self._current_plot_mode==self.raw_mode.name:
+            self.raw_mode.handle_data_updated()
