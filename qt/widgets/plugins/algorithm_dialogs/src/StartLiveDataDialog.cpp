@@ -406,8 +406,9 @@ void StartLiveDataDialog::initListenerPropLayout(const QString &listener) {
 
   // update algorithm's properties
   if (ui.cmbInstrument->currentText().toStdString() != "") {
-    m_algorithm->setPropertyValue("Instrument", ui.cmbInstrument->currentText().toStdString());
-    m_algorithm->setPropertyValue("Listener", listener.toStdString());
+    // There is no need to set up m_algorithm property here.  It is done in parseInput()
+    //    m_algorithm->setPropertyValue("Instrument", ui.cmbInstrument->currentText().toStdString());
+    //    m_algorithm->setPropertyValue("Listener", listener.toStdString());
     // create or clear the layout
     QLayout *layout = ui.listenerProps->layout();
     if (!layout) {
