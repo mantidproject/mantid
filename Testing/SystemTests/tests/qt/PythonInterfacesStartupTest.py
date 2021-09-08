@@ -35,8 +35,8 @@ class PythonInterfacesStartupTest(systemtesting.MantidSystemTest):
     """
     def __init__(self):
         super(PythonInterfacesStartupTest, self).__init__()
-
-        self._interface_directory = ConfigService.getString('mantidqt.python_interfaces_directory')
+        import mantidqtinterfaces
+        self._interface_directory = os.path.dirname(mantidqtinterfaces.__file__)
         self._interface_scripts = [interface.split("/")[1] for interface in ConfigService.getString('mantidqt.python_interfaces').split()]
 
     def runTest(self):
