@@ -43,3 +43,7 @@ Output:
 .. testcleanup:: ExIndirectILLReductionDIFF
 
    DeleteWorkspace('ws')
+
+.. categories::
+
+.. sourcelink::
