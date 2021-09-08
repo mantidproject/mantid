@@ -378,8 +378,14 @@ void StartLiveDataDialog::updateUiElements(const QString &inst) {
 void StartLiveDataDialog::accept() {
   // Now manually set the StartTime property as there's a computation needed
   DateAndTime startTime = DateAndTime::getCurrentTime() - ui.dateTimeEdit->value() * 60.0;
-  m_algorithm->setPropertyValue("StartTime", startTime.toISO8601String());
+  std::string starttime = startTime.toISO8601String();
+  // Store the value to property value map: property value can be only set from the map to m_algorithm
+  // as the last step before executing
+  QString propertyname = QString::fromStdString("StartTime");
+  QString propertyvalue = QString::fromStdString(starttime);
+  this->storePropertyValue(propertyname, propertyvalue);
 
+  // Call base class
   AlgorithmDialog::accept(); // accept executes the algorithm
 }
 
