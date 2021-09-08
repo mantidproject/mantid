@@ -327,7 +327,7 @@ class FittingDataModel(object):
         except (ValueError, RuntimeError) as e:
             # ValueError when Niter not positive integer, RuntimeError when Window too small
             logger.error("Error on arguments supplied to EnggEstimateFocusedBackground: " + str(e))
-            ws_bg = SetUncertainties(InputWorkspace=ws_name, OutputWorkspace=ws_name)  # copy data and zero errors
+            ws_bg = SetUncertainties(InputWorkspace=ws_name)  # copy data and zero errors
             ws_bg = Minus(LHSWorkspace=ws_bg, RHSWorkspace=ws_bg)  # workspace of zeros with same num spectra
         return ws_bg
 
