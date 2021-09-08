@@ -8,13 +8,14 @@
 #
 #
 import sys
-
+import glob
+import os
 from mantid.kernel import ConfigService
 from mantid.plots.utility import mpl_version_info, get_current_cmap
 from mantidqt.MPLwidgets import FigureCanvas
 from matplotlib.colorbar import Colorbar
 from matplotlib.figure import Figure
-from matplotlib.colors import Normalize, SymLogNorm, PowerNorm, LogNorm
+from matplotlib.colors import ListedColormap, Normalize, SymLogNorm, PowerNorm, LogNorm
 from matplotlib import cm
 import numpy as np
 from qtpy.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QComboBox, QCheckBox, QLabel
@@ -25,14 +26,31 @@ NORM_OPTS = ["Linear", "Log", "SymmetricLog10", "Power"]
 MIN_LOG_VALUE = 1e-4
 
 
+def register_customized_colormaps():
+    """register customized colormaps to matplotlib runtime"""
+    print("register new map")
+    cmap_path = os.path.dirname(os.path.realpath(__file__))
+    cmap_files = glob.glob(os.path.join(cmap_path, "*.map"))
+    for cmap_file in cmap_files:
+        cmap_name = os.path.basename(cmap_file).split(".")[0]
+        with open(cmap_file, "r") as f:
+            cmap_data = np.array([list(map(float, line.split())) for line in f.readlines()])/255.0
+        #
+        cmap = ListedColormap(cmap_data, name=cmap_name)
+        cm.register_cmap(name=cmap_name, cmap=cmap)
+
+
 class ColorbarWidget(QWidget):
     colorbarChanged = Signal()  # The parent should simply redraw their canvas
     scaleNormChanged = Signal()
+    # register additional color maps from file
+    register_customized_colormaps()
+    # create the list
     cmap_list = sorted([cmap for cmap in cm.cmap_d.keys() if not cmap.endswith('_r')])
 
     def __init__(self, parent=None, default_norm_scale=None):
         """
-        :param default_scale: None uses linear, else either a string or tuple(string, other arguuments), e.g. tuple('Power', exponent)
+        :param default_scale: None uses linear, else either a string or tuple(string, other arguments), e.g. tuple('Power', exponent)
         """
 
         super(ColorbarWidget, self).__init__(parent)
