@@ -185,7 +185,7 @@ void LoadFITS::exec() {
  */
 void LoadFITS::doLoadHeaders(const std::vector<std::string> &paths, std::vector<FITSInfo> &headers, size_t firstIndex,
                              size_t lastIndex) {
-  for (size_t i = firstIndex; i <= lastIndex && i <= headers.size(); ++i) {
+  for (size_t i = firstIndex; i <= lastIndex && i < headers.size(); ++i) {
     loadHeader(paths[i], headers[i]);
   }
 }
