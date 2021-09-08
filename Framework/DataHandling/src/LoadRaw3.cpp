@@ -394,12 +394,12 @@ void LoadRaw3::separateMonitors(FILE *file, const int64_t &period, const std::ve
       if (!readData(file, histToRead)) {
         throw std::runtime_error("Error reading raw file");
       }
-      // if this a monitor  store that spectrum to monitor workspace
+      // if this a monitor, store that spectrum to monitor workspace
       if (isMonitor(monitorList, i)) {
         setWorkspaceData(mws_sptr, m_timeChannelsVec, mwsIndex, i, m_noTimeRegimes, m_lengthIn, 1);
         ++mwsIndex;
       } else {
-        // not a monitor,store the spectrum to normal output workspace
+        // not a monitor, store the spectrum to normal output workspace
         setWorkspaceData(ws_sptr, m_timeChannelsVec, wsIndex, i, m_noTimeRegimes, m_lengthIn, 1);
         ++wsIndex;
       }
