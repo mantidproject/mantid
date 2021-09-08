@@ -626,6 +626,8 @@ class PolDiffILLReduction(PythonAlgorithm):
             background_ws, tmp_ws = self._get_background(empty_ws, cadmium_ws, transmission_ws, transmission_corr,
                                                          max_empty_entry, max_cadmium_entry,
                                                          entry_no, tof_backgrounds)
+            mtd[background_ws].setYUnit(entry.YUnit())
+            mtd[background_ws].setYUnitLabel(entry.YUnitLabel())
             Minus(LHSWorkspace=entry,
                   RHSWorkspace=background_ws,
                   OutputWorkspace=entry)
