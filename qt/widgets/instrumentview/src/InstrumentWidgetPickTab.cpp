@@ -111,10 +111,13 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
 
   m_runRebin = new QPushButton("Run", m_rebin);
 
-  rebinLayout->addWidget(m_rebinParams);
-  rebinLayout->addWidget(m_rebinUseReverseLog);
-  rebinLayout->addWidget(m_rebinSaveToHisto);
-  rebinLayout->addWidget(m_runRebin);
+  rebinLayout->addWidget(m_rebinParams, 0, 0);
+
+  QGridLayout *rebinCheckBoxesLayout = new QGridLayout();
+  rebinCheckBoxesLayout->addWidget(m_rebinUseReverseLog, 0, 0);
+  rebinCheckBoxesLayout->addWidget(m_rebinSaveToHisto, 0, 1);
+  rebinLayout->addLayout(rebinCheckBoxesLayout, 1, 0);
+  rebinLayout->addWidget(m_runRebin, 2, 0);
   connect(m_rebinParams, SIGNAL(returnPressed()), this, SLOT(onRunRebin()));
   connect(m_runRebin, SIGNAL(clicked(bool)), this, SLOT(onRunRebin()));
 
@@ -179,6 +182,7 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   m_infoPanel = panelStack->addPanel("Selection", m_selectionInfoDisplay);
   m_plotPanel = panelStack->addPanel("Name", m_plot);
   m_rebinPanel = panelStack->addPanel("Rebin", m_rebin);
+  m_rebinPanel->collapseCaption();
   collapsePlotPanel();
 
   m_selectionType = Single;
@@ -319,10 +323,8 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
 void InstrumentWidgetPickTab::collapsePlotPanel() {
   if (!m_instrWidget->isIntegrable()) {
     m_plotPanel->collapseCaption();
-    m_rebinPanel->collapseCaption();
   } else {
     m_plotPanel->expandCaption();
-    m_rebinPanel->expandCaption();
   }
 }
 
