@@ -119,5 +119,9 @@ class MuonAnalysisPlotWidget(object):
             pane_to_match = self.fit_mode.name if old_plot_mode == self.data_mode.name else self.data_mode.name
             selection, x_range, auto, y_range, errors = self.plotting_canvas_widgets[pane_to_match].get_quick_edit_info
             self.plotting_canvas_widgets[pane_to_match].set_quick_edit_info(selection, x_range, auto, y_range, errors)
+
+        if self._current_plot_mode==self.raw_mode.name:
+            self.raw_mode.handle_data_updated()
+
         self.presenter.hide(old_plot_mode)
         self.presenter.show(self._current_plot_mode)

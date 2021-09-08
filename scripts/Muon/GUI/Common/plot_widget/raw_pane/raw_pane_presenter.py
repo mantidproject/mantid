@@ -29,7 +29,7 @@ class RawPanePresenter(BasePanePresenter):
     def handle_new_data(self, autoscale=True, hold_on=False):
         self._model.check_num_detectors()
         self.update_selectors()
-        self.handle_data_updated(autoscale,hold_on)
+        #self.handle_data_updated(autoscale,hold_on)
 
     def handle_data_updated(self, autoscale=True, hold_on=False):
         detectors = self._view.get_detectors
