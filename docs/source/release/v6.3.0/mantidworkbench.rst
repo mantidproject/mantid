@@ -9,6 +9,7 @@ New and Improved
 ----------------
 
 - Add ability to rotate Ellipse and Rectangle shapes in :ref:`InstrumentViewer`.
+- The integration slider in the instrument viewer now support discrete steps when the axis has discrete values.
 
 Bugfixes
 --------
