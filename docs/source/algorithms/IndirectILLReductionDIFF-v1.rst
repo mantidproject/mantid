@@ -22,6 +22,7 @@ Usage
 -----
 
 **Example - IndirectILLReductionDIFF**
+
 .. testsetup:: ExIndirectILLReductionDIFF
 
    config['default.facility'] = 'ILL'
