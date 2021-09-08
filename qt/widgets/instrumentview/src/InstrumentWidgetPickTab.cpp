@@ -97,13 +97,17 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   m_plot = new MiniPlot(this);
   connect(m_plot, SIGNAL(showContextMenu()), this, SLOT(plotContextMenu()));
 
-  // QVBoxLayout *rebinLayout = new QVBoxLayout(this);
+  // set up the rebin tab
   m_rebin = new QWidget(this);
   QGridLayout *rebinLayout = new QGridLayout(m_rebin);
   m_rebinParams = new QLineEdit(m_rebin);
-  m_rebinUseReverseLog = new QCheckBox("UseReverseLog", m_rebin);
-  m_rebinSaveToHisto = new QCheckBox("Save as histogram", m_rebin);
-  m_rebinSaveToHisto->setToolTip("Save the data as a histogram. Removes the events. CANNOT BE UNDONE.");
+  m_rebinParams->setToolTip("The parameters to use for the new binning, a comma separated list of first bin boundary, "
+                            "width, last bin boundary. See Rebin doc for details.");
+  m_rebinUseReverseLog = new QCheckBox("UseReverseLogarithmic", m_rebin);
+  m_rebinUseReverseLog->setToolTip("Use a reverse logarithmic binning, the bins getting exponentially smaller as they "
+                                   "approach the upper limit. See Rebin for details.");
+  m_rebinSaveToHisto = new QCheckBox("Convert to histogram", m_rebin);
+  m_rebinSaveToHisto->setToolTip("Convert the data to histogram, and thus removes the events. CANNOT BE UNDONE.");
 
   m_runRebin = new QPushButton("Run", m_rebin);
 
