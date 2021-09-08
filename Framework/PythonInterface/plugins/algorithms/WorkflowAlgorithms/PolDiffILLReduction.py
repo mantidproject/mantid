@@ -6,8 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from mantid.api import AlgorithmFactory, FileAction, FileProperty, \
-    MultipleFileProperty, PropertyMode, Progress, PythonAlgorithm, \
-    WorkspaceGroupProperty
+    MultipleFileProperty, ITableWorkspaceProperty, PropertyMode, \
+    Progress, PythonAlgorithm, WorkspaceGroupProperty
 from mantid.kernel import Direction, EnabledWhenProperty, FloatBoundedValidator, \
     LogicOperator, PropertyCriterion, PropertyManagerProperty, StringListValidator
 from mantid.simpleapi import *
@@ -279,10 +279,10 @@ class PolDiffILLReduction(PythonAlgorithm):
         tofMeasurement = EnabledWhenProperty('MeasurementTechnique', PropertyCriterion.IsEqualTo, 'TOF')
         self.setPropertySettings('TOFUnits', tofMeasurement)
 
-        self.declareProperty(WorkspaceGroupProperty('ElasticChannelsWorkspace', '',
-                                                    direction=Direction.Input,
-                                                    optional=PropertyMode.Optional),
-                             doc='The name of the group workspace containing tables with elastic peak channels.')
+        self.declareProperty(ITableWorkspaceProperty('ElasticChannelsWorkspace', '',
+                                                     direction=Direction.Input,
+                                                     optional=PropertyMode.Optional),
+                             doc='The name of the table workspace containing elastic peak positions.')
 
         self.setPropertySettings('ElasticChannelsWorkspace', tofMeasurement)
 
@@ -901,9 +901,12 @@ class PolDiffILLReduction(PythonAlgorithm):
         return nMeasurements
 
     def _elastic_channel_calibration(self, ws):
-        """Finds the elastic peaks and puts them in a WorkspaceGroup with the set name."""
+        """Finds elastic peaks and puts them in a WorkspaceGroup with the set name."""
         self._elastic_channels_ws = "{}_elastic".format(ws[2:])
-        FindEPP(InputWorkspace=ws, OutputWorkspace=self._elastic_channels_ws)
+        tmp_ws = "{}_tmp".format(ws)
+        MergeRuns(InputWorkspaces=ws, OutputWorkspace=tmp_ws)
+        FindEPP(InputWorkspace=tmp_ws, OutputWorkspace=self._elastic_channels_ws)
+        DeleteWorkspace(Workspace=tmp_ws)
 
     def _normalise_vanadium(self, ws):
         """Performs normalisation of the vanadium data to the expected cross-section."""
