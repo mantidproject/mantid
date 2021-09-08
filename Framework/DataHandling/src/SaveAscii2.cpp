@@ -337,12 +337,16 @@ std::string SaveAscii2::createSpectrumFilename(size_t workspaceIndex) {
     extPosition = filename.size();
 
   std::ostringstream ss;
-  double axisValue = m_ws->getAxis(1)->getValue(workspaceIndex);
-  std::string axisLabel = m_ws->getAxis(1)->unit()->label();
-  ss << std::scientific;
   ss << std::string(filename, 0, extPosition) << "_" << workspaceIndex;
-  if (!(m_ws->getAxis(1)->isSpectra()))
-    ss << "_" << axisValue << axisLabel;
+  auto axis = m_ws->getAxis(1);
+  if (axis->isNumeric()) {
+    auto binEdgeAxis = dynamic_cast<BinEdgeAxis *>(axis);
+    if (binEdgeAxis)
+      ss << "_" << binEdgeAxis->label(workspaceIndex) << axis->unit()->label().ascii();
+    else
+      ss << "_" << axis->getValue(workspaceIndex) << axis->unit()->label().ascii();
+  } else if (axis->isText())
+    ss << "_" << axis->label(workspaceIndex);
   ss << std::string(filename, extPosition);
 
   return ss.str();
