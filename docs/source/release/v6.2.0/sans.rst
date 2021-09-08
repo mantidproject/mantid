@@ -14,7 +14,8 @@ New Features
 * :ref:`SANSILLReduction <algm-SANSILLReduction>` is extended to support processing of monochromatic kinetic runs.
 * A series of improvements have been introduced to :ref:`SANSILLAutoProcess <algm-SANSILLAutoProcess>` including
 
-  * the use of the new :ref:`Stitch <algm-Stitch>` algorithm allowing for semi-automatic q binning
+  * the use of the new :ref:`Stitch <algm-Stitch>` algorithm
+  * allowing for semi-automatic q binning
   * supporting attenuator 2 on D22
   * improved naming and grouping for the output workspaces.
 
