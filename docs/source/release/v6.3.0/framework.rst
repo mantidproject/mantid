@@ -28,6 +28,11 @@ Data Objects
 Python
 ------
 
+- `createChildAlgorithm` now accepts property keyword arguments to set the child algorithm's properties during creation:
+
+  -  Existing arguments, such as version, start and end progress...etc. are unaffected by this change.
+  -  E.g. `createChildAlgorithm("CreateSampleWorkspace", version=1, XUnit="Wavelength")`
+
 Installation
 ------------
 
