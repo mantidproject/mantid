@@ -388,7 +388,7 @@ void GenerateEventsFilter::setFilterByTimeOnly() {
     if (isLogarithmic) {
       // if logarithmic, first an approximation of the value, then the final value depends if reverseLogarithmic is
       // used, because of the way the last bin is managed
-      double logSize = std::log(relativeEndTime_ns / relativeStartTime_ns) / std::log(1 + factor);
+      double logSize = std::log(relativeEndTime_ns / relativeStartTime_ns) / std::log1p(factor);
       if (!m_isReverseLogarithmic) {
         totalNumberOfSlices = static_cast<int>(std::ceil(logSize));
       } else {
