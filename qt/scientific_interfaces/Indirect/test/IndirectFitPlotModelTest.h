@@ -10,7 +10,7 @@
 #include <utility>
 
 #include "ConvFitModel.h"
-#include "IndirectFitOutputModel.h"
+#include "IndirectFitOutput.h"
 #include "IndirectFitPlotModel.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -85,7 +85,7 @@ public:
     m_model = std::make_unique<IndirectFitPlotModel>();
     m_fittingData = std::make_unique<std::vector<IndirectFitData>>();
     m_fittingData->emplace_back(m_workspace, FunctionModelSpectra("0-5"));
-    m_fitOutput = std::make_unique<IndirectFitOutputModel>();
+    m_fitOutput = std::make_unique<IndirectFitOutput>();
     m_model->setFittingData(m_fittingData.get());
     m_model->setFitOutput(m_fitOutput.get());
   }
@@ -320,6 +320,6 @@ public:
   std::unique_ptr<SetUpADSWithWorkspace> m_ads;
   std::unique_ptr<IndirectFitPlotModel> m_model;
   std::unique_ptr<std::vector<IndirectFitData>> m_fittingData;
-  std::unique_ptr<IndirectFitOutputModel> m_fitOutput;
+  std::unique_ptr<IndirectFitOutput> m_fitOutput;
   MultiDomainFunction_sptr m_activeFunction;
 };

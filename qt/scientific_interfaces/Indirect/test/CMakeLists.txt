@@ -12,7 +12,7 @@ set(
   IndirectFitDataPresenterTest.h
   IndirectFitDataTest.h
   IndirectFitDataModelTest.h
-  IndirectFitOutputModelTest.h
+  IndirectFitOutputTest.h
   IndirectFitOutputOptionsModelTest.h
   IndirectFitOutputOptionsPresenterTest.h
   IndirectFitPlotModelTest.h

@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFittingModel.h"
 #include "IndirectFitDataModel.h"
-#include "IndirectFitOutputModel.h"
+#include "IndirectFitOutput.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -310,7 +310,7 @@ std::unordered_map<FittingMode, std::string> fitModeToName = std::unordered_map<
 
 IndirectFittingModel::IndirectFittingModel()
     : m_fitDataModel(std::make_unique<IndirectFitDataModel>()), m_previousModelSelected(false),
-      m_fittingMode(FittingMode::SEQUENTIAL), m_fitOutput(std::make_unique<IndirectFitOutputModel>()) {}
+      m_fittingMode(FittingMode::SEQUENTIAL), m_fitOutput(std::make_unique<IndirectFitOutput>()) {}
 
 // Functions that interact with IndirectFitDataModel
 

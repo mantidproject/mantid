@@ -10,7 +10,7 @@
 #include <gmock/gmock.h>
 
 #include "IIndirectFitPlotView.h"
-#include "IndirectFitOutputModel.h"
+#include "IndirectFitOutput.h"
 #include "IndirectFitPlotPresenter.h"
 #include "IndirectFitPlotView.h"
 #include "IndirectFittingModel.h"
@@ -153,7 +153,7 @@ public:
     m_ads = std::make_unique<SetUpADSWithWorkspace>("WorkspaceName", m_workspace);
     m_fittingData = std::make_unique<std::vector<IndirectFitData>>();
     m_fittingData->emplace_back(m_workspace, FunctionModelSpectra("0-5"));
-    m_fitOutput = std::make_unique<IndirectFitOutputModel>();
+    m_fitOutput = std::make_unique<IndirectFitOutput>();
     m_presenter->setFittingData(m_fittingData.get());
     m_presenter->setFitOutput(m_fitOutput.get());
   }
@@ -466,5 +466,5 @@ private:
   MatrixWorkspace_sptr m_workspace;
   std::unique_ptr<SetUpADSWithWorkspace> m_ads;
   std::unique_ptr<std::vector<IndirectFitData>> m_fittingData;
-  std::unique_ptr<IndirectFitOutputModel> m_fitOutput;
+  std::unique_ptr<IndirectFitOutput> m_fitOutput;
 };

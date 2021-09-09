@@ -9,8 +9,6 @@
 #include "IIndirectFitDataModel.h"
 #include "IIndirectFitOutput.h"
 #include "IIndirectFittingModel.h"
-#include "IndirectFitData.h"
-#include "IndirectWorkspaceNames.h"
 #include "ParameterEstimation.h"
 
 #include "DllConfig.h"
@@ -31,9 +29,15 @@ using namespace MantidWidgets;
 
 extern std::unordered_map<FittingMode, std::string> fitModeToName;
 
-class IndirectFittingModel;
-
 using DefaultParametersType = IndexCollectionType<WorkspaceID, std::unordered_map<std::string, ParameterValue>>;
+
+static const std::string SIM_STRING = "sim";
+static const std::string SEQ_STRING = "seq";
+static const std::string IQTFIT_STRING = "IQt";
+static const std::string CONVFIT_STRING = "Conv";
+static const std::string MSDFIT_STRING = "Msd";
+static const std::string FQFIT_STRING = "FQ";
+static const std::string MULTI_STRING = "Multi";
 
 /*
     IndirectFittingModel - Provides methods for specifying and
