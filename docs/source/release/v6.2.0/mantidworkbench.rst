@@ -30,6 +30,7 @@ New and Improved
 - Added help button to the sliceviewer
 - SliceViewer can toggle between different scales again without any issue.
 - SliceViewer uses a more visible divider between the main data view and the peaks table view.
+- SliceViewer now loads customized colormap from the colorbar directory upon starting.
 
 Bugfixes
 --------
