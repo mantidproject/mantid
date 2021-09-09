@@ -12,11 +12,10 @@ if(CXXTEST_FOUND)
                         Mantid::Types
                         Mantid::Indexing
                         Mantid::Parallel
-                        Mantid::FrameworkTestHelpers
                         gmock
   )
 
-
+  add_framework_test_helpers(IndexingTest)
   add_dependencies(FrameworkTests IndexingTest)
   # Add to the 'FrameworkTests' group in VS
   set_property(TARGET IndexingTest PROPERTY FOLDER "UnitTests")

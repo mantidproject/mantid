@@ -9,10 +9,10 @@ if(CXXTEST_FOUND)
                         Mantid::NexusGeometry
                         Mantid::Types
                         Mantid::Kernel
-                        Mantid::FrameworkTestHelpers
                         Boost::filesystem
                         gmock)
 
+  add_framework_test_helpers(NexusGeometryTest)
   add_dependencies(NexusGeometryTest Geometry)
   add_dependencies(FrameworkTests NexusGeometryTest)
   add_dependencies(NexusGeometryTest StandardTestData)

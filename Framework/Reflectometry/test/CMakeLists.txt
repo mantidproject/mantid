@@ -12,17 +12,16 @@ if(CXXTEST_FOUND)
                         PRIVATE
                         Mantid::Algorithms
                         Mantid::Reflectometry
-                        Mantid::FrameworkTestHelpers
                         gmock)
 
   target_include_directories(ReflectometryTest PRIVATE
                               Mantid::Algorithms
-                              Mantid::FrameworkTestHelpers
                               Mantid::Reflectometry)
 
   add_dependencies(FrameworkTests ReflectometryTest)
   # Test data
   add_dependencies(ReflectometryTest StandardTestData)
+  add_framework_test_helpers(ReflectometryTest)
 
   # Add to the 'ReflectometryTest' group in VS
   set_property(TARGET ReflectometryTest PROPERTY FOLDER "UnitTests")

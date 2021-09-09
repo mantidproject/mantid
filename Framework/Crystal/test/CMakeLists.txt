@@ -13,10 +13,10 @@ if(CXXTEST_FOUND)
                         Mantid::DataHandling
                         Mantid::MDAlgorithms
                         Mantid::Nexus
-                        Mantid::FrameworkTestHelpers
                         Boost::filesystem
                         gmock
 )
+  add_framework_test_helpers(CrystalTest)
   add_dependencies(CrystalTest Algorithms CurveFitting)
   add_dependencies(FrameworkTests CrystalTest)
   # Test data

@@ -2,9 +2,9 @@ if(CXXTEST_FOUND)
 
 cxxtest_add_test(MPIAlgorithmsTest ${TEST_FILES})
 target_link_libraries(MPIAlgorithmsTest PRIVATE
-                      Mantid::MPIAlgorithms
-                      Mantid::FrameworkTestHelpers)
+                      Mantid::MPIAlgorithms)
 
+add_framework_test_helpers(MPIAlgorithmsTest)
 add_dependencies(FrameworkTests MPIAlgorithmsTest)
 
 target_include_directories(MPIAlgorithmsTest SYSTEM ${CXXTEST_INCLUDE_DIR})

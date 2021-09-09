@@ -15,8 +15,9 @@ if(CXXTEST_FOUND)
                         Mantid::ICat
                         Mantid::API
                         Mantid::DataObjects
-                        Mantid::FrameworkTestHelpers
                         gmock)
+
+  add_framework_test_helpers(ICatTest)
   add_dependencies(FrameworkTests ICatTest)
 
   # Add to the 'FrameworkTests' group in VS

@@ -11,13 +11,13 @@ if(CXXTEST_FOUND)
                         Mantid::WorkflowAlgorithms
                         Mantid::Algorithms
                         Mantid::DataHandling
-                        Mantid::FrameworkTestHelpers
                         Boost::filesystem
                         gmock)
   add_dependencies(WorkflowAlgorithmsTest CurveFitting)
   add_dependencies(FrameworkTests WorkflowAlgorithmsTest)
   # Test data
   add_dependencies(WorkflowAlgorithmsTest StandardTestData)
+  add_framework_test_helpers(WorkflowAlgorithmsTest)
 
   # Add to the 'FrameworkTests' group in VS
   set_property(TARGET WorkflowAlgorithmsTest PROPERTY FOLDER "UnitTests")

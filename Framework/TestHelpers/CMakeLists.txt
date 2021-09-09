@@ -67,18 +67,32 @@ if(COVERAGE)
   endforeach(loop_var)
 endif()
 
-add_library(FrameworkTestHelpers STATIC ${SRC_FILES} ${INC_FILES})
+# We use an object lib to avoid the problems with static libs and dynamic
+# factories. As the linker will only pull in the static init if the symbol
+# is used in the executable.
+# A DLL could be used but it requires each helper to be labelled with DLL export
+# and complexity one CMake file < DLL exports in every test helper header
+add_library(FrameworkTestHelpers OBJECT ${SRC_FILES} ${INC_FILES})
+add_library(FrameWorkTestHelpersHeaders INTERFACE)
+
 add_library(Mantid::FrameworkTestHelpers ALIAS FrameworkTestHelpers)
+add_library(Mantid::FrameWorkTestHelpersHeaders ALIAS FrameWorkTestHelpersHeaders)
 set_property(TARGET FrameworkTestHelpers PROPERTY FOLDER "UnitTests")
 
+# Unfortunately the INTERFACE property does not propegate through
 target_include_directories(FrameworkTestHelpers PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
 )
 
+target_include_directories(FrameWorkTestHelpersHeaders INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+)
+
 target_link_libraries(FrameworkTestHelpers
-                        PUBLIC
-                        Mantid::API
                         PRIVATE
+                        Mantid::API
+                        Boost::boost
+                        Boost::filesystem
                         Mantid::DataObjects
                         Mantid::Catalog
                         Mantid::DataHandling

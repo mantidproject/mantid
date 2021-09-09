@@ -7,8 +7,11 @@
 #include "MantidFrameworkTestHelpers/FakeObjects.h"
 
 // Property implementations
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.tcc"
 #include "MantidKernel/PropertyWithValue.tcc"
+
+DECLARE_WORKSPACE(WorkspaceTester)
 
 namespace Mantid {
 namespace Kernel {
