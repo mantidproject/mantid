@@ -35,6 +35,9 @@ def register_customized_colormaps():
         cmap_data = np.loadtxt(cmap_file)/255.0
         cmap = ListedColormap(cmap_data, name=cmap_name)
         cm.register_cmap(name=cmap_name, cmap=cmap)
+        cmap_data_r = np.flipud(cmap_data)
+        cmap_r = ListedColormap(cmap_data_r, name=f"{cmap_name}_r")
+        cm.register_cmap(name=f"{cmap_name}_r", cmap=cmap_r)
 
 
 class ColorbarWidget(QWidget):
