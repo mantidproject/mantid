@@ -29,3 +29,4 @@ set_property(TARGET CompileUIUI PROPERTY FOLDER "CompilePyUI")
 add_dependencies(mantidqtinterfaces PythonInterface)
 
 add_subdirectory(test)
+add_subdirectory(mantidqtinterfaces/Engineering/gui)

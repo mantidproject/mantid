@@ -69,7 +69,6 @@ mtd_install_files(
 # Testing
 add_subdirectory(test)
 add_subdirectory(Diffraction/isis_powder)
-add_subdirectory(Engineering/gui)
 
 # Ensure we don't get stale pyc files around
 clean_orphaned_pyc_files(${CMAKE_CURRENT_SOURCE_DIR})
