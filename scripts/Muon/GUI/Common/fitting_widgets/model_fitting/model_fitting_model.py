@@ -92,7 +92,7 @@ class ModelFittingModel(BasicFittingModel):
         """Returns the names of results tables to display in the view."""
         return self._check_data_exists(self.context.results_context.result_table_names)
 
-    def create_x_and_y_parameter_combination_workspaces(self) -> None:
+    def create_x_and_y_parameter_combinations(self) -> None:
         """Discovers the available X and Y parameters, and creates a MatrixWorkspace for each parameter combination."""
         self.fitting_context.x_parameters = {}
         self.fitting_context.x_parameter_errors = {}
@@ -100,12 +100,22 @@ class ModelFittingModel(BasicFittingModel):
         self.fitting_context.y_parameter_errors = {}
 
         self._extract_x_and_y_from_current_result_table()
+        self.dataset_names = self._create_parameter_workspace_names()
 
+    def _create_parameter_workspace_names(self) -> list:
+        """Creates the names to use for each parameter combination workspace."""
+        workspace_names = []
+        for x_parameter_name in self.x_parameters():
+            for y_parameter_name in self.y_parameters():
+                if x_parameter_name != y_parameter_name:
+                    workspace_names.append(self.parameter_combination_workspace_name(x_parameter_name, y_parameter_name))
+        return workspace_names
+
+    def create_x_and_y_parameter_combination_workspace(self, x_parameter_name: str, y_parameter_name: str) -> None:
+        """Creates the parameter combination workspace for the specified x and y parameter."""
         workspace_group = self._create_workspace_group_to_store_combination_workspaces()
         if workspace_group is not None:
-            self.dataset_names = self._create_matrix_workspaces_for_parameter_combinations(workspace_group)
-        else:
-            self.dataset_names = []
+            self._create_matrix_workspaces_for_parameter_combination(workspace_group, x_parameter_name, y_parameter_name)
 
     def _extract_x_and_y_from_current_result_table(self) -> None:
         """Extracts the X, Y and error values from the currently selected result table and saves them in the context."""
@@ -150,31 +160,25 @@ class ModelFittingModel(BasicFittingModel):
             add_ws_to_ads(group_name, workspace_group)
         return workspace_group
 
-    def _create_matrix_workspaces_for_parameter_combinations(self, workspace_group: WorkspaceGroup) -> list:
-        """Creates a MatrixWorkspace for each parameter combination. These are the workspaces that will be fitted."""
-        workspace_names = []
-        for x_parameter_name in self.x_parameters():
-            for y_parameter_name in self.y_parameters():
-                if x_parameter_name != y_parameter_name:
-                    x_values = self._convert_str_column_values_to_int(x_parameter_name,
-                                                                      self.fitting_context.x_parameters)
-                    x_errors = self.fitting_context.x_parameter_errors[x_parameter_name]
-                    y_values = self._convert_str_column_values_to_int(y_parameter_name,
-                                                                      self.fitting_context.y_parameters)
-                    y_errors = self.fitting_context.y_parameter_errors[y_parameter_name]
+    def _create_matrix_workspaces_for_parameter_combination(self, workspace_group: WorkspaceGroup,
+                                                            x_parameter_name: str, y_parameter_name: str) -> None:
+        """Creates the matrix workspace for a specific x and y parameter, and adds it to the workspace group."""
+        if x_parameter_name != y_parameter_name:
+            x_values = self._convert_str_column_values_to_int(x_parameter_name,
+                                                              self.fitting_context.x_parameters)
+            x_errors = self.fitting_context.x_parameter_errors[x_parameter_name]
+            y_values = self._convert_str_column_values_to_int(y_parameter_name,
+                                                              self.fitting_context.y_parameters)
+            y_errors = self.fitting_context.y_parameter_errors[y_parameter_name]
 
-                    # Sort the data based on the x_values being in ascending order
-                    x_values, x_errors, y_values, y_errors = zip(*sorted(zip(x_values, x_errors, y_values, y_errors)))
+            # Sort the data based on the x_values being in ascending order
+            x_values, x_errors, y_values, y_errors = zip(*sorted(zip(x_values, x_errors, y_values, y_errors)))
 
-                    output_name = self.parameter_combination_workspace_name(x_parameter_name, y_parameter_name)
-                    if not self._parameter_combination_workspace_exists(output_name, x_values, y_values, y_errors):
-                        self._create_workspace(x_values, x_errors, x_parameter_name, y_values, y_errors,
-                                               self._create_y_label(y_parameter_name), output_name)
-                        workspace_group.add(output_name)
-
-                    workspace_names.append(output_name)
-
-        return workspace_names
+            output_name = self.parameter_combination_workspace_name(x_parameter_name, y_parameter_name)
+            if not self._parameter_combination_workspace_exists(output_name, x_values, y_values, y_errors):
+                self._create_workspace(x_values, x_errors, x_parameter_name, y_values, y_errors,
+                                       self._create_y_label(y_parameter_name), output_name)
+                workspace_group.add(output_name)
 
     def _create_workspace(self, x_values: list, x_errors: list, x_parameter: str, y_values: list, y_errors: list,
                           y_label: str, output_name: str) -> None:
