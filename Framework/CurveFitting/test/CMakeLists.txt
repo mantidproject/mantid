@@ -10,8 +10,9 @@ if(CXXTEST_FOUND)
                         PRIVATE
                         Mantid::CurveFitting
                         Mantid::DataHandling
-                        Mantid::FrameworkTestHelpers
                         gmock)
+
+  add_framework_test_helpers(CurveFittingTest)
 
   add_dependencies(CurveFittingTest Algorithms)
   add_dependencies(FrameworkTests CurveFittingTest)

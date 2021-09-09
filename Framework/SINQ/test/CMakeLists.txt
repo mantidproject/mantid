@@ -6,7 +6,6 @@ if(CXXTEST_FOUND)
                         PRIVATE
                         Mantid::SINQ
                         Mantid::CurveFitting
-                        Mantid::FrameworkTestHelpers
                         gmock
 )
 
@@ -17,6 +16,8 @@ if(CXXTEST_FOUND)
                               Mantid::NexusCPP
 
   )
+
+  add_framework_test_helpers(PSISINQTest)
 
   # Test data
   add_dependencies(PSISINQTest StandardTestData)

@@ -37,11 +37,12 @@ if(CXXTEST_FOUND)
                         Mantid::API
                         Mantid::DataObjects
                         Mantid::Kernel
-                        Mantid::FrameworkTestHelpers
                         Boost::boost
                         Boost::filesystem
                         ${BCRYPT}
                         gmock)
+
+  add_framework_test_helpers(AlgorithmsTest)
 
   add_dependencies(AlgorithmsTest Crystal CurveFitting)
   add_dependencies(FrameworkTests AlgorithmsTest)

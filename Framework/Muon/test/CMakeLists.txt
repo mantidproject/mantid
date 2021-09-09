@@ -15,9 +15,9 @@ if(CXXTEST_FOUND)
                         Mantid::DataHandling
                         Mantid::Muon
                         Mantid::DataObjects
-                        Mantid::FrameworkTestHelpers
                         gmock
                         )
+  add_framework_test_helpers(MuonTest)
   add_dependencies(MuonTest Crystal CurveFitting)
   add_dependencies(FrameworkTests MuonTest)
   # Test data

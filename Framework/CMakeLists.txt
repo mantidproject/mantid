@@ -21,6 +21,7 @@ if(MPI_EXPERIMENTAL)
 endif()
 
 add_custom_target(FrameworkTests) # target for all framework tests
+include(TestTargetFunctions)
 add_dependencies(check FrameworkTests)
 add_dependencies(FrameworkTests Framework)
 

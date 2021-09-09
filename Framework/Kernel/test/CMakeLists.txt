@@ -12,9 +12,9 @@ if(CXXTEST_FOUND)
                         Mantid::Types
                         Mantid::Kernel
                         Mantid::Json
-                        Mantid::FrameworkTestHelpers
                         gmock
                         Boost::filesystem)
+  add_framework_test_helpers(KernelTest)
   add_dependencies(FrameworkTests KernelTest)
   # Test data
   add_dependencies(KernelTest StandardTestData)

@@ -16,7 +16,6 @@ if(CXXTEST_FOUND)
                         Mantid::Nexus
                         Mantid::NexusGeometry
                         Mantid::HistogramData
-                        Mantid::FrameworkTestHelpers
                         Boost::filesystem
                         gmock)
 
@@ -28,7 +27,7 @@ if(CXXTEST_FOUND)
       target_include_directories(DataHandlingTest PRIVATE ${LIB3MF_INCLUDE_DIR}/lib3mf)
     endif()
   endif()
-
+  add_framework_test_helpers(DataHandlingTest)
   add_dependencies(DataHandlingTest Algorithms MDAlgorithms)
   add_dependencies(FrameworkTests DataHandlingTest)
   # Test data

@@ -13,10 +13,10 @@ if(CXXTEST_FOUND)
                         Mantid::Beamline
                         Mantid::Types
                         Mantid::Kernel
-                        Mantid::FrameworkTestHelpers
                         ${OpenGL_LIBRARIES}
                         gmock)
 
+  add_framework_test_helpers(GeometryTest)
   add_dependencies(FrameworkTests GeometryTest)
   # Add to the 'FrameworkTests' group in VS
   set_property(TARGET GeometryTest PROPERTY FOLDER "UnitTests")

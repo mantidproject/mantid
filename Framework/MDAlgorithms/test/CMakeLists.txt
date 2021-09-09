@@ -14,13 +14,13 @@ if(CXXTEST_FOUND)
                         Mantid::MDAlgorithms
                         Mantid::Nexus
                         Mantid::Kernel
-                        Mantid::FrameworkTestHelpers
                         gmock)
 
   target_include_directories(MDAlgorithmsTest PRIVATE
                               CurveFitting
                               DataHandling)
 
+  add_framework_test_helpers(MDAlgorithmsTest)
   add_dependencies(MDAlgorithmsTest DataHandling Algorithms CurveFitting)
   add_dependencies(FrameworkTests MDAlgorithmsTest)
   # Test data

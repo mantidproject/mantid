@@ -8,10 +8,10 @@ if(CXXTEST_FOUND)
                         PRIVATE
                         Mantid::Beamline
 			                  Mantid::Kernel
-                        Mantid::FrameworkTestHelpers
                         gmock
   )
 
+  add_framework_test_helpers(BeamlineTest)
 
   add_dependencies(FrameworkTests BeamlineTest)
   # Add to the 'FrameworkTests' group in VS

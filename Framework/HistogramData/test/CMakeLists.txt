@@ -8,10 +8,10 @@ if(CXXTEST_FOUND)
                         PRIVATE
                         Mantid::HistogramData
                         Mantid::Kernel
-                        Mantid::FrameworkTestHelpers
                         gmock
   )
 
+  add_framework_test_helpers(HistogramDataTest)
   add_dependencies(FrameworkTests HistogramDataTest)
   # Add to the 'FrameworkTests' group in VS
   set_property(TARGET HistogramDataTest PROPERTY FOLDER "UnitTests")

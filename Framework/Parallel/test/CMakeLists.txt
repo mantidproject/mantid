@@ -11,9 +11,9 @@ if(CXXTEST_FOUND)
                         PRIVATE
                         Mantid::Parallel
                         Mantid::Types
-                        Mantid::FrameworkTestHelpers
                         gmock)
 
+  add_framework_test_helpers(ParallelTest)
   add_dependencies(FrameworkTests ParallelTest)
   # Add to the 'FrameworkTests' group in VS
   set_property(TARGET ParallelTest PROPERTY FOLDER "UnitTests")

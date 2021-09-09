@@ -15,9 +15,9 @@ if(CXXTEST_FOUND)
   target_link_libraries(LiveDataTest
                         PRIVATE
                         Mantid::LiveData
-                        Mantid::FrameworkTestHelpers
                         gmock)
   target_include_directories(LiveDataTest PRIVATE ../src/)
+  add_framework_test_helpers(LiveDataTest)
   add_dependencies(LiveDataTest DataHandling Algorithms MDAlgorithms)
   add_dependencies(FrameworkTests LiveDataTest)
   # Test data
