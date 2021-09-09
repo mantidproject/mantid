@@ -8,7 +8,10 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/BinEdgeAxis.h"
+#include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/LoadCanSAS1D2.h"
 #include "MantidDataHandling/LoadRaw3.h"
@@ -35,7 +38,7 @@ public:
   // set up the workspace that will be loaded
   SaveCanSAS1dTest2()
       : m_workspace1("SaveCanSAS1dTest2_in1"), m_workspace2("SaveCanSAS1dTest2_in2"),
-        m_workspace3("SaveCanSAS1dTest2_in3"), m_filename("./savecansas1d2.xml")
+        m_workspace3("SaveCanSAS1dTest2_in3"), m_workspace4("SaveCanSAS1dTest2_in4"), m_filename("./savecansas1d2.xml")
 
   {
     LoadRaw3 loader;
@@ -92,6 +95,10 @@ public:
     ws->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("MomentumTransfer");
 
     group->add(m_workspace2);
+
+    auto ws4 = WorkspaceCreationHelper::create2DWorkspace(3, 5);
+    ws4->getAxis(0)->setUnit("MomentumTransfer");
+    AnalysisDataService::Instance().addOrReplace("SaveCanSAS1dTest2_in4", ws4);
   }
 
   // saving is required by all the following test so, if this test fails so will
@@ -311,6 +318,68 @@ public:
     do_test_collimation_settings(geometry, width, height, expectedGeometryFlag, expectedWidth, expectedHeight);
   }
 
+  void test_one_spectrum_per_file() {
+    size_t extPos = m_filename.find(".xml");
+    ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_workspace4);
+    SaveCanSAS1D2 savealg;
+    TS_ASSERT_THROWS_NOTHING(savealg.initialize());
+    savealg.setPropertyValue("InputWorkspace", m_workspace4);
+    savealg.setPropertyValue("Filename", m_filename);
+    savealg.setProperty("OneSpectrumPerFile", true);
+
+    // spectrum axis
+    TS_ASSERT_THROWS_NOTHING(savealg.execute());
+    for (int spec = 0; spec < 3; ++spec) {
+      std::ostringstream ss;
+      ss << std::string(m_filename, 0, extPos) << "_" << spec << std::string(m_filename, extPos);
+      TS_ASSERT(Poco::File(ss.str()).exists());
+      Poco::File(ss.str()).remove();
+    }
+
+    // numeric axis
+    std::unique_ptr<Axis> numericAxis = std::make_unique<NumericAxis>(3);
+    for (int i = 0; i < 3; ++i) {
+      numericAxis->setValue(i, i * i);
+    }
+    ws->replaceAxis(1, std::move(numericAxis));
+    TS_ASSERT_THROWS_NOTHING(savealg.execute());
+    for (int spec = 0; spec < 3; ++spec) {
+      std::ostringstream ss;
+      ss << std::string(m_filename, 0, extPos) << "_" << spec << "_" << spec * spec << std::string(m_filename, extPos);
+      TS_ASSERT(Poco::File(ss.str()).exists());
+      Poco::File(ss.str()).remove();
+    }
+
+    // bin edge axis
+    std::unique_ptr<Axis> binEdgeAxis = std::make_unique<BinEdgeAxis>(4);
+    for (int i = 0; i < 4; ++i) {
+      binEdgeAxis->setValue(i, i * i);
+    }
+    ws->replaceAxis(1, std::move(binEdgeAxis));
+    TS_ASSERT_THROWS_NOTHING(savealg.execute());
+    for (int spec = 0; spec < 3; ++spec) {
+      std::ostringstream ss;
+      ss << std::string(m_filename, 0, extPos) << "_" << spec << "_" << 0.5 * (spec * spec + (spec + 1) * (spec + 1))
+         << std::string(m_filename, extPos);
+      TS_ASSERT(Poco::File(ss.str()).exists());
+      Poco::File(ss.str()).remove();
+    }
+
+    // text axis
+    std::unique_ptr<TextAxis> textAxis = std::make_unique<TextAxis>(3);
+    for (int i = 0; i < 3; ++i) {
+      textAxis->setLabel(i, std::string("ax_") + std::to_string(i));
+    }
+    ws->replaceAxis(1, std::unique_ptr<Axis>(std::move(textAxis)));
+    TS_ASSERT_THROWS_NOTHING(savealg.execute());
+    for (int spec = 0; spec < 3; ++spec) {
+      std::ostringstream ss;
+      ss << std::string(m_filename, 0, extPos) << "_" << spec << "_ax_" << spec << std::string(m_filename, extPos);
+      TS_ASSERT(Poco::File(ss.str()).exists());
+      Poco::File(ss.str()).remove();
+    }
+  }
+
 private:
   void do_test_collimation_settings(const std::string &geometry, double width, double height, int expectedGeometry,
                                     double expectedWidth, double expectedHeight) {
@@ -360,7 +429,7 @@ private:
     }
   }
 
-  std::string m_workspace1, m_workspace2, m_workspace3, m_filename;
+  std::string m_workspace1, m_workspace2, m_workspace3, m_workspace4, m_filename;
   std::string m_runNum;
   MatrixWorkspace_sptr ws;
 };

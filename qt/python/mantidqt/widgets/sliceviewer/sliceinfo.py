@@ -90,7 +90,7 @@ class SliceInfo:
                          point[self._display_z]))
 
     def inverse_transform(self, point: Sequence) -> np.ndarray:
-        """Does the inverse fransform (inverse of self.transform) from slice
+        """Does the inverse transform (inverse of self.transform) from slice
         frame to data frame
 
         :param point: A 3D point in the slice frame
