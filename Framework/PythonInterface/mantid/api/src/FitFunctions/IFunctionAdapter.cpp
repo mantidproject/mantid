@@ -35,17 +35,14 @@ public:
   void operator()(bool value) const override { m_attr.setValue(value); }
   void operator()(long value) const override { m_attr.setValue(static_cast<int>(value)); }
   void operator()(double value) const override { m_attr.setValue(value); }
-  void operator()(std::string value) const override { m_attr.setValue(value); }
+  void operator()(std::string value) const override { m_attr.setValue(std::move(value)); }
 
   void operator()(std::vector<bool>) const override { throw std::invalid_argument(m_errorMsg); }
   void operator()(std::vector<long> value) const override {
     // Previous existing code blindly converted any list type into a list of doubles.
     // We now have to preserve this behaviour to maintain API compatibility as
     // setValue only takes std::vector<double>.
-    std::vector<double> doubleVals;
-    doubleVals.reserve(value.size());
-    std::transform(value.cbegin(), value.cend(), std::back_inserter(doubleVals),
-                   [](const long val) { return static_cast<double>(val); });
+    std::vector<double> doubleVals(value.cbegin(), value.cend());
     m_attr.setValue(std::move(doubleVals));
   }
   void operator()(std::vector<double> value) const override { m_attr.setValue(std::move(value)); }
