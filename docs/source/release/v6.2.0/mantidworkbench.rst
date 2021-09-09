@@ -30,6 +30,7 @@ New and Improved
 - Added help button to the sliceviewer
 - SliceViewer can toggle between different scales again without any issue.
 - SliceViewer uses a more visible divider between the main data view and the peaks table view.
+- SliceViewer now loads customized colormap from the colorbar directory upon starting.
 
 Bugfixes
 --------
@@ -54,6 +55,7 @@ Bugfixes
 - Fixed the help icon not showing on OSX and high-resolution monitors.
 - Tabbing between fields in the error reporter now works as expected, rather than jumping to a random place each time.
 - Fixed the advanced plotting dialog incorrectly laying out, causing the options to be partially occluded.
+- Fixed a bug in the Instrument Viewer causing the projection to not be updated when different axis views were selected in Full 3D.
 
 
 :ref:`Release 6.2.0 <v6.2.0>`
