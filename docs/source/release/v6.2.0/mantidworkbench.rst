@@ -14,16 +14,16 @@ New and Improved
     :width: 500px
     :align: center
 
-- **New widget and workbench plugin:** ref:`WorkbenchWorkspaceCalculator`**, allows to perform binary operations and scaling by a floating number on workspaces;
+- **New widget and workbench plugin:** :ref:`WorkbenchWorkspaceCalculator` **, allows to perform binary operations and scaling by a floating number on workspaces;
   This will require your widget layout to be reset when starting workbench v6.2.0 for the first time. Previously saved layouts accessible from** ``View > User Layouts``
-  **may need to be saved again to include the** ref:`WorkbenchWorkspaceCalculator` **widget.**
+  **may need to be saved again to include the** :ref:`WorkbenchWorkspaceCalculator` **widget.**
 
-.. image:: ../images/Workbench/WorkspaceCalculator/WorkspaceCalculator.png
+.. image::  ../../images/Workbench/WorkspaceCalculator/WorkspaceCalculator.png
     :align: right
 
 - Workflow diagrams in help pages are now ``.svg`` rather than ``.png``.
 - Peaks can now be added or removed from a PeaksWorkspace using the :ref:`peaks overlay <sliceviewer_peaks_overlay>` in :ref:`sliceviewer`.
-- When fitting a plot, selecting the peak type will only update the default peak shape in the settings if the "Set as global default" checkbox is ticked.
+- When fitting a plot, selecting the peak type will only update the default peak shape in the settings if the ``Set as global default`` checkbox is ticked.
 - Plot legends can be shown or hidden from the plot context menu.
 - The plot config dialog notifies the user when there has been an error applying the config to the plot, and allows them to change the config further.
 - When fitting a plot, selecting the peak type will only update the default peak shape in the settings if the "Set as global default" checkbox is ticked.
