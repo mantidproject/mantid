@@ -198,7 +198,7 @@ void GenerateEventsFilter::processInOutWorkspaces() {
     // Using default
     title = "Splitters";
   }
-  m_filterInfoWS = m_filterInfoWS = std::make_shared<TableWorkspace>();
+  m_filterInfoWS = std::make_shared<TableWorkspace>();
   m_filterInfoWS->setTitle(title);
   m_filterInfoWS->addColumn("int", "workspacegroup");
   m_filterInfoWS->addColumn("str", "title");
