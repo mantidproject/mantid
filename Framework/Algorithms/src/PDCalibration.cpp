@@ -546,8 +546,9 @@ void PDCalibration::exec() {
      // object to hold the information about the peak positions, detid, and wksp
      // index
      PDCalibration::FittedPeaks peaks(m_uncalibratedWS, wkspIndex);
-     auto [difc, difa, tzero] = getDSpacingToTof(peaks.detid); // doesn't matter which one - all have same difc etc.
-     peaks.setPositions(m_peaksInDspacing, windowsInDSpacing, difa, difc, tzero);
+     const auto [dif_c, dif_a, tzero] =
+         getDSpacingToTof(peaks.detid); // doesn't matter which one - all have same difc etc.
+     peaks.setPositions(m_peaksInDspacing, windowsInDSpacing, dif_a, dif_c, tzero);
 
      // includes peaks that aren't used in the fit
      // The following data structures will hold information for the peaks
