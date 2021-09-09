@@ -435,11 +435,11 @@ class PolDiffILLReduction(PythonAlgorithm):
                     raise RuntimeError('Cannot normalise to monitor; monitor has 0 counts.')
                 else:
                     CreateWorkspace(OutputWorkspace=norm,
-                                    DataX=mtd[mon].readX(0),
+                                    DataX=mtd[detectors].readX(0),
                                     DataY=mtd[mon].readY(0) / lampCompatibilityFactor,
                                     DataE=np.sqrt(mtd[mon].readE(0) / lampCompatibilityFactor),
-                                    ParentWorkspace=mtd[mon],
-                                    UnitX=mtd[mon].getAxis(0).getUnit().unitID())
+                                    ParentWorkspace=detectors,
+                                    UnitX=mtd[detectors].getAxis(0).getUnit().unitID())
             if normaliseBy == 'Time':
                 duration = float(entry.getRun().getLogData('duration').value) * lampCompatibilityFactor
                 CreateSingleValuedWorkspace(DataValue=duration,
@@ -447,7 +447,8 @@ class PolDiffILLReduction(PythonAlgorithm):
             if transmissionProcess:
                 Divide(LHSWorkspace=mon, RHSWorkspace=norm, OutputWorkspace=entry)
             else:
-                Divide(LHSWorkspace=detectors, RHSWorkspace=norm, OutputWorkspace=entry)
+                Divide(LHSWorkspace=detectors, RHSWorkspace=norm, OutputWorkspace=detectors)
+                mtd[detectors].setDistribution(False)
             DeleteWorkspaces(WorkspaceList=[mon, norm])
         return ws
 
@@ -582,7 +583,7 @@ class PolDiffILLReduction(PythonAlgorithm):
 
         if measurement_technique == "TOF":
             # time-(in)dependent background follows the same ws group structure as empty_ws
-            background_ws = mtd[tof_background][empty_no]
+            background_ws = mtd[tof_background][empty_no].name()
         else:
             if max_empty_entry != 0 and max_cadmium_entry != 0:
                 Plus(LHSWorkspace=empty_corr, RHSWorkspace=cadmium_corr, OutputWorkspace=background_ws)
