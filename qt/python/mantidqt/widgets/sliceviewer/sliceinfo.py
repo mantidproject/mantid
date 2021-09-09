@@ -140,9 +140,10 @@ class SliceInfo:
     def _init_transform(self, qflags: Sequence[bool], axes_angles: Optional[np.ndarray] = None):
         # find transform for the chosen display indices
         if isinstance(axes_angles, np.ndarray) and qflags[self._display_x] and qflags[self._display_y]:
-            # adjust index if non-Q dimension is before a Q the dispalyed axes
-            ix = self._display_x - np.sum(~np.array(qflags[:self._display_x]))
-            iy = self._display_y - np.sum(~np.array(qflags[:self._display_y]))
+            # adjust index if non-Q dimension is before a Q the displayed axes
+            # force array to have dtype=bool otherwise ~ operator throws error for display indices == 0 (empty array)
+            ix = self._display_x - np.sum(~np.array(qflags[:self._display_x], dtype=bool))
+            iy = self._display_y - np.sum(~np.array(qflags[:self._display_y], dtype=bool))
             self._transform = NonOrthogonalTransform(axes_angles[ix, iy])
             self._nonorthogonal_axes_supported = True
         else:
