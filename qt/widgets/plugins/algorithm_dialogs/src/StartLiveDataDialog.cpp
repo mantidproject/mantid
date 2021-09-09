@@ -185,7 +185,7 @@ void StartLiveDataDialog::initLayout() {
   updateConnectionChoices(ui.cmbInstrument->currentText());
   updateConnectionDetails(ui.cmbConnection->currentText());
   setDefaultAccumulationMethod(ui.cmbConnListener->currentText());
-  initListenerPropLayout(ui.cmbConnListener->currentText());
+  initListenerPropLayout();
 
   //=========== SLOTS =============
   connect(ui.processingAlgo, SIGNAL(changedAlgorithm()), this, SLOT(changeProcessingAlgorithm()));
@@ -394,7 +394,7 @@ void StartLiveDataDialog::accept() {
  *
  * @param listener Name of the LiveListener class that is selected
  */
-void StartLiveDataDialog::initListenerPropLayout(const QString &listener) {
+void StartLiveDataDialog::initListenerPropLayout() {
   // remove previous listener's properties
   auto props = m_algorithm->getPropertiesInGroup("ListenerProperties");
   for (auto &prop : props) {
@@ -406,12 +406,7 @@ void StartLiveDataDialog::initListenerPropLayout(const QString &listener) {
 
   // update algorithm's properties
   if (ui.cmbInstrument->currentText().toStdString() != "") {
-    // There is no need to set up m_algorithm property here.  It is done in parseInput()
-    //    m_algorithm->setPropertyValue("Instrument", ui.cmbInstrument->currentText().toStdString());
-    //    m_algorithm->setPropertyValue("Listener", listener.toStdString());
     // create or clear the layout
-    std::cout << "Listerner " << listener.toStdString() << " will not be used here"
-              << "\n";
     QLayout *layout = ui.listenerProps->layout();
     if (!layout) {
       QGridLayout *listenerPropLayout = new QGridLayout(ui.listenerProps);
