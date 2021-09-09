@@ -1430,8 +1430,8 @@ void GenerateEventsFilter::processIntegerValueFilter(int minvalue, int maxvalue,
     // belonged to.
     if (currvalue >= minvalue && currvalue <= maxvalue) {
       // Log value is in specified range
-      if ((i == 0) || (i >= 1 && ((filterIncrease && vecValue[i] >= vecValue[i - 1]) ||
-                                  (filterDecrease && vecValue[i] <= vecValue[i - 1])))) {
+      if ((i == 0) || (filterIncrease && vecValue[i] >= vecValue[i - 1]) ||
+          (filterDecrease && vecValue[i] <= vecValue[i - 1])) {
         // First entry (regardless direction) and other entries considering
         // change of value
         if (singlevaluemode) {
