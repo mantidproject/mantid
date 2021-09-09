@@ -62,7 +62,10 @@ class SliceViewer(ObservingPresenter):
             self.view.data_view.norm_opts.currentTextChanged.connect(self.normalization_changed)
         if not self.model.can_support_peaks_overlays():
             self.view.data_view.disable_tool_button(ToolItemText.OVERLAY_PEAKS)
-        if not self.model.can_support_nonorthogonal_axes():
+        # check whether to enable non-orthog view
+        # don't know whether can always assume init with display indices (0,1) - so get sliceinfo
+        sliceinfo = self.get_sliceinfo()
+        if not sliceinfo.can_support_nonorthogonal_axes():
             self.view.data_view.disable_tool_button(ToolItemText.NONORTHOGONAL_AXES)
 
         self.view.data_view.help_button.clicked.connect(self.action_open_help_window)
