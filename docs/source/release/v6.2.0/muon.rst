@@ -82,6 +82,7 @@ Bugfixes
 - A bug has been fixed in the BinWidth for the :ref:`DynamicKobuToyabe <func-DynamicKuboToyabe>` Fitting Function which caused a crash and did not provide
   any information about why the value was invalid. It will now revert to last viable BinWidth used and explain why.
 - The autoscale option when ``All`` is selected will now show the largest and smallest y value for all of the plots.
+- The global parameters in a results table will no longer be given a zero error arbitrarily if one with an error exists.
 
 ALC
 ---
