@@ -210,6 +210,8 @@ private:
   MDBox(const MDBox &);
   /// common part of mdBox constructor
   void initMDBox(const size_t nBoxEvents);
+  /// member to avoid reallocation
+  std::vector<coord_t> m_tableData;
 
 public:
   /// Typedef for a shared pointer to a MDBox

@@ -894,11 +894,11 @@ TMDE(void MDBox)::loadAndAddFrom(API::IBoxControllerIO *const FileSaver, uint64_
 
   std::lock_guard<std::mutex> _lock(this->m_dataMutex);
 
-  std::vector<coord_t> TableData;
-  FileSaver->loadBlock(TableData, filePosition, nEvents);
+  m_tableData.clear();
+  FileSaver->loadBlock(m_tableData, filePosition, nEvents);
 
   // convert data to events appending new events to existing
-  MDE::dataToEvents(TableData, data, false);
+  MDE::dataToEvents(m_tableData, data, false);
 }
 /** clear file-backed information from the box if such information exists
  *
