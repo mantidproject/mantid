@@ -126,8 +126,6 @@ void PredictSatellitePeaks::exec() {
     lattice->setCrossTerm(crossTerms);
   }
 
-  const auto instrument = Peaks->getInstrument();
-
   outPeaks = std::dynamic_pointer_cast<IPeaksWorkspace>(WorkspaceFactory::Instance().createPeaks(Peaks->id()));
   outPeaks->copyExperimentInfoFrom(Peaks.get());
   outPeaks->mutableSample().setOrientedLattice(std::move(lattice));
@@ -235,8 +233,6 @@ void PredictSatellitePeaks::exec_peaks() {
     g_log.error() << "There are No peaks in the input PeaksWorkspace\n";
     return;
   }
-
-  const auto instrument = Peaks->getInstrument();
 
   outPeaks = std::dynamic_pointer_cast<IPeaksWorkspace>(WorkspaceFactory::Instance().createPeaks(Peaks->id()));
   outPeaks->copyExperimentInfoFrom(Peaks.get());
