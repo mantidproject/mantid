@@ -163,7 +163,8 @@ class ModelFittingModel(BasicFittingModel):
     def _create_matrix_workspaces_for_parameter_combination(self, workspace_group: WorkspaceGroup,
                                                             x_parameter_name: str, y_parameter_name: str) -> None:
         """Creates the matrix workspace for a specific x and y parameter, and adds it to the workspace group."""
-        if x_parameter_name != y_parameter_name:
+        if x_parameter_name != y_parameter_name and x_parameter_name in self.x_parameters() \
+                and y_parameter_name in self.y_parameters():
             x_values = self._convert_str_column_values_to_int(x_parameter_name,
                                                               self.fitting_context.x_parameters)
             x_errors = self.fitting_context.x_parameter_errors[x_parameter_name]
