@@ -365,7 +365,7 @@ std::vector<Types::Core::DateAndTime> AddSampleLog::getTimes(const API::MatrixWo
  * @param run_obj
  * @return
  */
-Types::Core::DateAndTime AddSampleLog::getRunStart(API::Run &run_obj) {
+Types::Core::DateAndTime AddSampleLog::getRunStart(const API::Run &run_obj) {
   // TODO/ISSUE/NOW - data ws should be the target workspace with run_start or
   // proton_charge property!
   Types::Core::DateAndTime runstart(0);
