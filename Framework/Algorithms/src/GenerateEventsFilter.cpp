@@ -1334,7 +1334,7 @@ void GenerateEventsFilter::makeMultipleFiltersByValuesPartialLog(
       currindex = -1;
 
       // Condition to generate a Splitter (close parenthesis)
-      if (!correctdir && start.totalNanoseconds() > 0) {
+      if (start.totalNanoseconds() > 0) {
         stop = currTime;
         createsplitter = true;
       }
