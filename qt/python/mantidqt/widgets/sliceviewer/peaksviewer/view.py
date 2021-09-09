@@ -107,6 +107,10 @@ class PeaksViewerView(QWidget):
         return self._sliceinfo_provider.get_sliceinfo()
 
     @property
+    def frame(self):
+        return self._sliceinfo_provider.get_frame()
+
+    @property
     def table_view(self):
         return self._table_view
 

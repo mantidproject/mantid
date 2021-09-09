@@ -102,10 +102,10 @@ class PeaksViewerPresenter:
             logger.warning("PeaksViewer: Unknown event detected: {}".format(event))
 
     def add_peak(self, pos):
-        self.model.add_peak(pos, self._view.sliceinfo.frame)
+        self.model.add_peak(pos, self._view.frame)
 
     def delete_peak(self, pos):
-        self.model.delete_peak(pos, self._view.sliceinfo.frame)
+        self.model.delete_peak(pos, self._view.frame)
 
     def _clear_peaks(self):
         """Clear all peaks from this view"""
@@ -120,7 +120,7 @@ class PeaksViewerPresenter:
           - Draw overlays.
         """
         self._clear_peaks()
-        self.model.draw_peaks(self._view.sliceinfo, self._view.painter)
+        self.model.draw_peaks(self._view.sliceinfo, self._view.painter, self._view.frame)
 
     def _peak_selected(self):
         """

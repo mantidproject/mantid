@@ -9,8 +9,7 @@
 # 3rdparty imports
 from qtpy.QtCore import Qt
 
-import mantid.api
-import mantid.kernel
+from mantid.kernel import Logger, SpecialCoordinateSystem
 import sip
 
 # local imports
@@ -37,7 +36,7 @@ class SliceViewer(ObservingPresenter):
         :param model: A model to define slicing operations. If None uses SliceViewerModel
         :param view: A view to display the operations. If None uses SliceViewerView
         """
-        self._logger = mantid.kernel.Logger("SliceViewer")
+        self._logger = Logger("SliceViewer")
         self._peaks_presenter = None
         self.model = model if model else SliceViewerModel(ws)
         self.conf = conf
@@ -154,6 +153,10 @@ class SliceViewer(ObservingPresenter):
     def update_plot_data_matrix(self):
         # should never be called, since this workspace type is only 2D the plot dimensions never change
         pass
+
+    def get_frame(self) -> SpecialCoordinateSystem:
+        """Returns frame of workspace - require access for adding a peak in peaksviewer"""
+        return self.model.get_frame()
 
     def get_sliceinfo(self):
         """Returns a SliceInfo object describing the current slice"""
@@ -450,7 +453,7 @@ class SliceViewer(ObservingPresenter):
                 sliceinfo = self.get_sliceinfo()
                 self._logger.debug(f"Coordinates selected x={event.xdata} y={event.ydata} z={sliceinfo.z_value}")
                 pos = sliceinfo.inverse_transform([event.xdata, event.ydata, sliceinfo.z_value])
-                self._logger.debug(f"Coordinates transformed into {sliceinfo.frame} frame, pos={pos}")
+                self._logger.debug(f"Coordinates transformed into {self.get_frame()} frame, pos={pos}")
                 self._peaks_presenter.add_delete_peak(pos)
                 self.view.data_view.canvas.draw_idle()
 

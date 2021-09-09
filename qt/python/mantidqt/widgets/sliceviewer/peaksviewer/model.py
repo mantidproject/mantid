@@ -70,13 +70,13 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
                 peak.remove()
         self._representations.clear()
 
-    def draw_peaks(self, slice_info, painter):
+    def draw_peaks(self, slice_info, painter, frame):
         """
         Draw a list of Peaks on the display
         :param slice_info: Object describing current slicing information
         :param painter: A reference to the object that will draw to the screen
         """
-        frame_to_slice_fn = self._frame_to_slice_fn(slice_info.frame)
+        frame_to_slice_fn = self._frame_to_slice_fn(frame)
 
         representations = []
         for peak in self.ws:
