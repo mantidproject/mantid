@@ -14,7 +14,7 @@ New and Improved
     :width: 500px
     :align: center
 
-- **New widget and workbench plugin:** :ref:`WorkbenchWorkspaceCalculator` **, allows to perform binary operations and scaling by a floating number on workspaces;
+- **New widget and workbench plugin:** :ref:`WorkbenchWorkspaceCalculator` **, allows users to perform binary operations and scaling by a floating number on workspaces;
   This will require your widget layout to be reset when starting workbench v6.2.0 for the first time. Previously saved layouts accessible from** ``View > User Layouts``
   **may need to be saved again to include the** :ref:`WorkbenchWorkspaceCalculator` **widget.**
 
@@ -33,11 +33,10 @@ New and Improved
 - SliceViewer now loads customized colormap from the colorbar directory upon starting.
 - The list of eligible workspaces in the `WorkspaceSelector` can now be sorted by name.
 - Added tooltips to all the widgets in the :ref:`sliceviewer`. Please contact the developers if any are missing.
-- Script editor function call tip support for Numpy 1.21.
+- Script editor code completion support for Numpy 1.21.
 - The visibility of a component parameter in the Pick tab of the :ref:`InstrumentViewer` is now steered by the 'visible' attribute of a parameter in :ref:`IPF <InstrumentParameterFile>`.
 - ADS signal handlers are now synchronized in `WorkspaceSelector`. This reduces the probability of hard crash when interacting with the widget while a script manipulating a large number of workspaces is being run.
-- Added help button to the :ref:`sliceviewer`.
-- :ref:`sliceviewer` can toggle between different scales again without any issue.
+- Added a help button to the :ref:`sliceviewer`.
 - :ref:`sliceviewer` uses a more visible divider between the main data view and the peaks table view.
 
 Bugfixes
@@ -46,7 +45,7 @@ Bugfixes
 - ``Grid`` checkbox in ``Edit axis`` dialog, and ``Grids on/off`` toolbar button will now have the correct checked state when running a plot script with major grid lines.
 - Fixed a bug in colorfill plots which lead to the loss of a spectrum from the resulting image.
 - Fixed a bug where removing the plot guess line in the fit browser could lead to an exception being thrown.
-- Fixed the advanced plotting dialog incorrectly laying out, causing the options to be partially occluded.
+- Fixed the advanced plotting dialog incorrect layout, which caused the options to be partially occluded.
 - Scroll bars added to about dialog if screen resolution is too low.
 - Fixed missing 'on top' windowing behaviour for the matrix and table workspace data displays.
 - :ref:`sliceviewer` now doesn't normalise basis vectors for HKL data such that Bragg peaks appear at integer HKL for cuts along e.g. HH0.
@@ -65,6 +64,7 @@ Bugfixes
 - Tabbing between fields in the error reporter now works as expected, rather than jumping to a random place each time.
 - Fixed the advanced plotting dialog incorrectly laying out, causing the options to be partially occluded.
 - Fixed a bug in the Instrument Viewer causing the projection to not be updated when different axis views were selected in Full 3D.
+- :ref:`sliceviewer` can toggle between different scales again without any issue.
 
 
 :ref:`Release 6.2.0 <v6.2.0>`
