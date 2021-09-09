@@ -1168,7 +1168,6 @@ void GenerateEventsFilter::makeMultipleFiltersByValuesPartialLog(
   const Types::Core::DateAndTime ZeroTime(0);
   int lastindex = -1;
   int currindex = -1;
-  DateAndTime lastTime;
   DateAndTime currTime = ZeroTime;
   DateAndTime start, stop;
   // size_t progslot = 0;
@@ -1186,7 +1185,6 @@ void GenerateEventsFilter::makeMultipleFiltersByValuesPartialLog(
     bool breakloop = false;
     bool createsplitter = false;
 
-    lastTime = currTime;
     currTime = m_dblLog->nthTime(i);
     double currValue = m_dblLog->nthValue(i);
 
