@@ -717,11 +717,10 @@ Geometry::Track DiscusMultipleScatteringCorrection::generateInitialTrack(
 void DiscusMultipleScatteringCorrection::inc_xyz(Geometry::Track &track, double vl) {
   Kernel::V3D position = track.front().entryPoint;
   Kernel::V3D direction = track.direction();
-  auto x = position[0] + vl * direction[0];
-  auto y = position[1] + vl * direction[1];
-  auto z = position[2] + vl * direction[2];
-  auto startPoint = track.startPoint();
-  startPoint = V3D(x, y, z);
+  const auto x = position[0] + vl * direction[0];
+  const auto y = position[1] + vl * direction[1];
+  const auto z = position[2] + vl * direction[2];
+  const auto startPoint = V3D(x, y, z);
   track.clearIntersectionResults();
   track.reset(startPoint, track.direction());
 }
