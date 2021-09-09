@@ -189,8 +189,8 @@ void DiscusMultipleScatteringCorrection::exec() {
     SQWS = pointDataAlgorithm->getProperty("OutputWorkspace");
   }
   // take log of S(Q) and store it this way
-  auto &y = SQWS->mutableY(0);
-  std::transform(y.begin(), y.end(), y.begin(), static_cast<double (*)(double)>(std::log));
+  auto &ySQ = SQWS->mutableY(0);
+  std::transform(ySQ.begin(), ySQ.end(), ySQ.begin(), static_cast<double (*)(double)>(std::log));
 
   MatrixWorkspace_sptr sigmaSSWS = getProperty("ScatteringCrossSection");
   if (sigmaSSWS) {
@@ -306,13 +306,13 @@ void DiscusMultipleScatteringCorrection::exec() {
       // reduced X values if using sparse instrument so no interpolation
       // required
       if (!useSparseInstrument && lambdaStepSize > 1) {
-        auto histnew = noAbsSimulationWS->histogram(i);
+        auto histNoAbs = noAbsSimulationWS->histogram(i);
         if (lambdaStepSize < nbins) {
-          interpolateOpt.applyInplace(histnew, lambdaStepSize);
+          interpolateOpt.applyInplace(histNoAbs, lambdaStepSize);
         } else {
-          std::fill(histnew.mutableY().begin() + 1, histnew.mutableY().end(), histnew.y()[0]);
+          std::fill(histNoAbs.mutableY().begin() + 1, histNoAbs.mutableY().end(), histNoAbs.y()[0]);
         }
-        noAbsOutputWS->setHistogram(i, histnew);
+        noAbsOutputWS->setHistogram(i, histNoAbs);
 
         for (size_t ne = 0; ne < static_cast<size_t>(nScatters); ne++) {
           auto histnew = simulationWSs[ne]->histogram(i);
@@ -332,8 +332,8 @@ void DiscusMultipleScatteringCorrection::exec() {
 
   if (useSparseInstrument) {
     Poco::Thread::sleep(200); // to ensure prog message changes
-    const std::string reportMsg = "Spatial Interpolation";
-    prog.report(reportMsg);
+    const std::string reportMsgSpatialInterpolation = "Spatial Interpolation";
+    prog.report(reportMsgSpatialInterpolation);
     interpolateFromSparse(*noAbsOutputWS, *std::dynamic_pointer_cast<SparseWorkspace>(noAbsSimulationWS),
                           interpolateOpt);
     for (size_t ne = 0; ne < static_cast<size_t>(nScatters); ne++) {
