@@ -59,7 +59,7 @@ Usage
     lambda_t = 1.58
 
     # Add the incident spectrum to the workspace
-    corrected_spectrum = incidentSpectrum(
+    corrected_spectrum = incident_spectrum(
         incident_wksp.readX(0), phi_max, phi_epi, alpha, lambda_1, lambda_2, lambda_t)
     incident_wksp.setY(0, corrected_spectrum)
 
@@ -69,12 +69,13 @@ Usage
         BinningForCalc=binning_for_calc,
         BinningForFit=binning_for_fit)
     SetSampleMaterial(
-        InputWorkspace='fit_wksp',
+        InputWorkspace='incident_wksp',
         ChemicalFormula='Co')
     CalculatePlaczekSelfScattering(
         InputWorkspace='incident_wksp',
-        InputSpectra='fit_wksp',
-        OutputWorkspace='placzek_scattering')
+        IncidentSpecta='fit_wksp',
+        OutputWorkspace='placzek_scattering',
+        Version=1)
 
 
 References
