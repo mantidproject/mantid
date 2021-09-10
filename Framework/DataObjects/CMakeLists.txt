@@ -74,6 +74,7 @@ set(INC_FILES
     inc/MantidDataObjects/DllConfig.h
     inc/MantidDataObjects/EventList.h
     inc/MantidDataObjects/EventWorkspace.h
+    inc/MantidDataObjects/EventWorkspace_fwd.h
     inc/MantidDataObjects/EventWorkspaceHelpers.h
     inc/MantidDataObjects/EventWorkspaceMRU.h
     inc/MantidDataObjects/Events.h
@@ -266,3 +267,4 @@ mtd_install_targets(TARGETS
                     INSTALL_DIRS
                     ${LIB_DIR}
                     ${WORKBENCH_LIB_DIR})
+endif()
