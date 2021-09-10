@@ -77,6 +77,10 @@ class BasicFittingView(ui_form, base_widget):
         """Connect the slot for a function parameter changing."""
         self.fit_function_options.set_slot_for_function_parameter_changed(slot)
 
+    def set_slot_for_function_attribute_changed(self, slot) -> None:
+        """Connect the slot for a function attribute changing."""
+        self.fit_function_options.set_slot_for_function_attribute_changed(slot)
+
     def set_slot_for_start_x_updated(self, slot) -> None:
         """Connect the slot for the start x option."""
         self.fit_function_options.set_slot_for_start_x_updated(slot)
@@ -270,6 +274,10 @@ class BasicFittingView(ui_form, base_widget):
     def parameter_value(self, full_parameter: str) -> float:
         """Returns the value of the specified parameter."""
         return self.fit_function_options.parameter_value(full_parameter)
+
+    def attribute_value(self, full_attribute: str):
+        """Returns the value of the specified attribute."""
+        return self.fit_function_options.attribute_value(full_attribute)
 
     def switch_to_simultaneous(self) -> None:
         """Switches the view to simultaneous fit mode."""

@@ -124,6 +124,7 @@ public:
 
 signals:
   void parameterChanged(const QString &funcIndex, const QString &paramName);
+  void attributeChanged(const QString &attributeName);
   void functionStructureChanged();
   /// User selects a different function (or one of it's sub-properties)
   void currentFunctionChanged();

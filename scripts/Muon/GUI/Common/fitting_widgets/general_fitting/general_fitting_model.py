@@ -101,6 +101,15 @@ class GeneralFittingModel(BasicFittingModel):
         else:
             super().update_parameter_value(full_parameter, value)
 
+    def update_attribute_value(self, full_attribute: str, value: float) -> None:
+        """Update the value of an attribute in the fit function."""
+        if self.fitting_context.simultaneous_fitting_mode:
+            current_domain_function = self.current_domain_fit_function()
+            if current_domain_function is not None:
+                current_domain_function.setAttributeValue(full_attribute, value)
+        else:
+            super().update_attribute_value(full_attribute, value)
+
     def automatically_update_function_name(self) -> None:
         """Attempt to update the function name automatically."""
         if self.fitting_context.function_name_auto_update:

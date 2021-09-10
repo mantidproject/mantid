@@ -978,6 +978,7 @@ public:
 signals:
     void functionStructureChanged();
     void parameterChanged(const QString &funcIndex, const QString &paramName);
+    void attributeChanged(const QString &attributeName);
 };
 
 // ---------------------------------
