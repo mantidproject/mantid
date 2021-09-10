@@ -290,11 +290,11 @@ class PhaseTableView(QtWidgets.QWidget):
 
         table_utils.setRowName(self.phase_table_options_table, 3, "First Good Data")
         self.first_good_data_item, self.first_good_data_validator = table_utils.addDoubleToTable(
-            self.phase_table_options_table, 0.1, 3)
+            self.phase_table_options_table, 0.1, 3, minimum=0.0)
 
         table_utils.setRowName(self.phase_table_options_table, 4, "Last Good Data")
         self.last_good_data_item, self.last_good_data_validator = table_utils.addDoubleToTable(
-            self.phase_table_options_table, 15.0, 4)
+            self.phase_table_options_table, 15.0, 4, minimum=0.0)
 
         table_utils.setRowName(self.phase_table_options_table, 5, "Output fit information")
         self.output_fit_info_box = table_utils.addCheckBoxToTable(
