@@ -75,6 +75,7 @@ Improvements
 
 Bugfixes
 ########
+- The fit ranges will now always allow you to encompass the entire x range of the loaded data.
 - The GUIs will no longer crash if there are any whitespaces in the run range (e.g. 6010- 3).
 - The GUIs will now cope with a range of runs that span between two different decades where the second number
   in the range is smaller than the final digit of the first number in the range (e.g. 6018-3 can be used for the range 6018-6023).
