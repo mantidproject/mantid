@@ -56,7 +56,7 @@ class SliceInfo:
         self._display_x, self._display_y, self._display_z = (None, ) * 3
         self._axes_tr = _unit_transform if nonortho_transform is None else nonortho_transform.tr
         self._axes_inv_tr = _unit_transform if nonortho_transform is None else nonortho_transform.inv_tr
-
+        self._qflags = qflags
         self._init(transpose, qflags)
 
     @property
@@ -80,6 +80,18 @@ class SliceInfo:
         """
         return self._nonorthogonal_axes_supported
 
+    def set_transform(self, nonortho_transform: NonOrthogonalTransform):
+        if isinstance(nonortho_transform, NonOrthogonalTransform):
+            self._axes_tr = nonortho_transform.tr
+            self._axes_inv_tr = nonortho_transform.inv_tr
+            self._nonorthogonal_axes_supported = (self.frame == SpecialCoordinateSystem.HKL
+                                                  and self._qflags[self._display_x] and self._qflags[self._display_y])
+        else:
+            # e.g if None
+            self._axes_tr = _unit_transform
+            self._axes_inv_tr = _unit_transform
+            self._nonorthogonal_axes_supported = False
+
     def transform(self, point: Sequence) -> np.ndarray:
         """Transform a point to the slice frame.
         It returns a ndarray(X,Y,Z) where X,Y are coordinates of X,Y of the display
@@ -90,7 +102,7 @@ class SliceInfo:
                          point[self._display_z]))
 
     def inverse_transform(self, point: Sequence) -> np.ndarray:
-        """Does the inverse fransform (inverse of self.transform) from slice
+        """Does the inverse transform (inverse of self.transform) from slice
         frame to data frame
 
         :param point: A 3D point in the slice frame
@@ -128,7 +140,8 @@ class SliceInfo:
             x_index, y_index = y_index, x_index
 
         self._nonorthogonal_axes_supported = (self.frame == SpecialCoordinateSystem.HKL
-                                              and qflags[x_index] and qflags[y_index])
+                                              and qflags[x_index] and qflags[y_index]
+                                              and not self._axes_tr == _unit_transform)
 
         if z_index is not None:
             self._slicevalue_z = self.slicepoint[z_index]

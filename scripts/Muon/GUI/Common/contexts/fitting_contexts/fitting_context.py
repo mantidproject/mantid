@@ -71,6 +71,12 @@ def _create_unique_param_lookup(parameter_workspace, global_parameters):
     for row in default_table:
         name = row[NAME_COL]
         exists, is_global = is_in(unique_params, name)
+
+        # If the parameter is global, and its error is zero, skip it so that the global with the error is found instead.
+        is_error_zero = row[ERRORS_COL] == 0.0
+        if is_global and is_error_zero:
+            continue
+
         if not exists:
             parameter = Parameter(name, row[VALUE_COL], row[ERRORS_COL],
                                   is_global)

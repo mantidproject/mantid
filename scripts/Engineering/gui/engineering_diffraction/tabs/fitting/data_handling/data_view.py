@@ -32,6 +32,9 @@ class FileFilterProxyModel (QtCore.QSortFilterProxyModel):
         else:
             return model.isDir(index0) or fnmatch(fname,self.text_filter)
 
+    def sort(self, column, order):
+        self.sourceModel().sort(column, order)
+
 
 class FittingDataView(QtWidgets.QWidget, Ui_data):
     sig_enable_load_button = QtCore.Signal(bool)

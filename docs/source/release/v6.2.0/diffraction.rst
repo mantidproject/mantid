@@ -90,6 +90,8 @@ Bugfixes
 - The help button on the :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>` points to the correct page, having been broken in the last release.
 - Using the Clear button on the Workspace widget while using the :ref:`Fitting tab <ui engineering fitting>` no longer causes errors when you try to load runs back in.
 - On the :ref:`Fitting tab <ui engineering fitting>` of the :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>` the background can be inspected whether the background subtraction box is checked or not.
+- Prevent crash when invalid arguments passed to background subtraction algorithm (:ref:`EnggEstimateFocussedBackground <algm-EnggEstimateFocussedBackground>`) in the :ref:`Fitting tab <ui engineering fitting>` of the :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>`.
+
 
 Single Crystal Diffraction
 --------------------------

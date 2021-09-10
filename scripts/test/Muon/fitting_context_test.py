@@ -227,6 +227,18 @@ class FittingContextTest(unittest.TestCase):
             self.assertTrue(
                 name in log_names, msg="{} not found in log list".format(name))
 
+    def test_that_the_non_zero_global_parameter_error_is_saved_in_the_fit_parameter(self):
+        globals = ['Height']
+        test_parameters = OrderedDict([('Height', (10., 0.0)),
+                                       ('Height', (10., 0.4)),
+                                       ('f0.A0', (1, 0.01)),
+                                       ('f1.A0', (1, 0.01)),
+                                       ('Cost function', (0.1, 0.))])
+        fit_params = create_test_fit_parameters(test_parameters, globals)
+
+        self.assertEqual(fit_params.value("Height"), 10.0)
+        self.assertEqual(fit_params.error("Height"), 0.4)
+
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)
