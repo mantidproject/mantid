@@ -248,15 +248,8 @@ class ModelFittingModel(BasicFittingModel):
 
     def _create_y_label(self, parameter_name: str) -> str:
         """Returns the string to use for the y label of a workspace."""
-        unit = self._get_parameter_unit(parameter_name)
+        unit = self._get_unit_from_sample_logs(parameter_name)
         return f"{parameter_name} ({unit})" if unit != "" else f"{parameter_name}"
-
-    def _get_parameter_unit(self, parameter_name: str) -> str:
-        """Returns the units of a parameter by searching the UnitFactory and Sample logs."""
-        unit = self._get_unit_from_unit_factory(parameter_name)
-        if unit == "":
-            unit = self._get_unit_from_sample_logs(parameter_name)
-        return unit
 
     def _get_unit_from_sample_logs(self, parameter_name: str) -> str:
         """Returns the units of a sample log if the parameter exists as a sample log."""
@@ -264,12 +257,6 @@ class ModelFittingModel(BasicFittingModel):
         if workspace:
             run = workspace.run()
             return run.getLogData(parameter_name).units if run.hasProperty(parameter_name) else ""
-        return ""
-
-    def _get_unit_from_unit_factory(self, parameter_name: str) -> str:
-        """Returns the units of a parameter if it exists in the UnitFactory."""
-        if self._is_in_unit_factory(parameter_name):
-            return UnitFactory.create(parameter_name).label()
         return ""
 
     @ staticmethod
