@@ -33,8 +33,7 @@ class SliceInfo:
                or None for a non-slice dimension
         qflags: A list of booleans indicating if a dimension is a Q dimension or not.
                 There can only be a maximum of 3 dimensions flagged.
-        axes_angles: An optional transform object defining tr/inv_tr methods
-                            to transform to rectilinear system and back.
+        axes_angles: matrix of angles between Q axes
     """
 
     def __init__(self,
@@ -141,11 +140,26 @@ class SliceInfo:
         # find transform for the chosen display indices
         if isinstance(axes_angles, np.ndarray) and qflags[self._display_x] and qflags[self._display_y]:
             # adjust index if non-Q dimension is before a Q the displayed axes
-            # force array to have dtype=bool otherwise ~ operator throws error for display indices == 0 (empty array)
+            # force array to have dtype=bool otherwise ~ operator throws error on empty array when index is zero
             ix = self._display_x - np.sum(~np.array(qflags[:self._display_x], dtype=bool))
             iy = self._display_y - np.sum(~np.array(qflags[:self._display_y], dtype=bool))
-            self._transform = NonOrthogonalTransform(axes_angles[ix, iy])
+            angle = axes_angles[ix, iy]
+            if abs(angle-(np.pi/2)) < 1e-5:
+                self._transform = OrthogonalTransform()  # use OrthogonalTransform for performance
+            else:
+                self._transform = NonOrthogonalTransform(axes_angles[ix, iy])
             self._nonorthogonal_axes_supported = True
         else:
-            self._transform = NonOrthogonalTransform(np.radians(90))  # orthogonal
+            self._transform = OrthogonalTransform()
             self._nonorthogonal_axes_supported = False
+
+
+class OrthogonalTransform(NonOrthogonalTransform):
+    def __init__(self):
+        self._angle = np.pi/2  # 90 degrees
+
+    def tr(self, x, y):
+        return x, y
+
+    def inv_tr(self, x, y):
+        return x, y
