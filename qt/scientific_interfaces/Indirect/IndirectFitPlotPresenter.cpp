@@ -149,7 +149,7 @@ void IndirectFitPlotPresenter::updateDataSelection(std::vector<std::string> disp
   MantidQt::API::SignalBlocker blocker(m_view);
   m_view->clearDataSelection();
   const auto workspaceCount = displayNames.size();
-  for (int i = 0; i < workspaceCount; ++i) {
+  for (size_t i = 0; i < workspaceCount; ++i) {
     m_view->appendToDataSelection(displayNames[i]);
   }
   setActiveIndex(WorkspaceID{0});

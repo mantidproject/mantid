@@ -249,29 +249,6 @@ IFunction_sptr firstFunctionWithParameter(IFunction_sptr function, const std::st
   return nullptr;
 }
 
-boost::optional<double> firstParameterValue(const IFunction_sptr &function, const std::string &category,
-                                            const std::string &parameterName) {
-  if (!function)
-    return boost::none;
-
-  const auto functionWithParameter = firstFunctionWithParameter(function, category, parameterName);
-  if (functionWithParameter)
-    return functionWithParameter->getParameter(parameterName);
-  return boost::none;
-}
-
-boost::optional<double> findFirstPeakCentre(const IFunction_sptr &function) {
-  return firstParameterValue(std::move(function), "Peak", "PeakCentre");
-}
-
-boost::optional<double> findFirstFWHM(const IFunction_sptr &function) {
-  return firstParameterValue(std::move(function), "Peak", "FWHM");
-}
-
-boost::optional<double> findFirstBackgroundLevel(const IFunction_sptr &function) {
-  return firstParameterValue(std::move(function), "Background", "A0");
-}
-
 void setFunctionParameters(const IFunction_sptr &function, const std::string &category,
                            const std::string &parameterName, double value);
 

@@ -205,8 +205,6 @@ public:
   }
 
   void test_that_getWorkspaceRange_returns_the_defaulted_values_before_a_fit() {
-
-    auto foo = m_model->getRange();
     TS_ASSERT_EQUALS(m_model->getWorkspaceRange().first, 1.25);
     TS_ASSERT_EQUALS(m_model->getWorkspaceRange().second, 4.25);
   }

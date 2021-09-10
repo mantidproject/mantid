@@ -272,7 +272,6 @@ public:
   void test_that_the_plotGuessChanged_signal_will_not_clear_the_guess_plot_when_passed_true() {
     WorkspaceID const index(0);
     std::string const workspaceName("WorkspaceName");
-    auto const range = std::make_pair(1.0, 2.0);
     auto const fitFunction = getFunctionWithWorkspaceName(workspaceName);
     m_presenter->setFitFunction(fitFunction);
 

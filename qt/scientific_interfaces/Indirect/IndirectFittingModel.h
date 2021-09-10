@@ -84,7 +84,7 @@ public:
   boost::optional<ResultLocationNew> getResultLocation(WorkspaceID workspaceID, WorkspaceIndex spectrum) const override;
   Mantid::API::WorkspaceGroup_sptr getResultWorkspace() const override;
   Mantid::API::WorkspaceGroup_sptr getResultGroup() const override;
-  Mantid::API::IAlgorithm_sptr getFittingAlgorithm(FittingMode mode) const;
+  Mantid::API::IAlgorithm_sptr getFittingAlgorithm(FittingMode mode) const override;
   Mantid::API::IAlgorithm_sptr getSingleFit(WorkspaceID workspaceID, WorkspaceIndex spectrum) const override;
   Mantid::API::IFunction_sptr getSingleFunction(WorkspaceID workspaceID, WorkspaceIndex spectrum) const override;
   std::string getOutputBasename() const override;
