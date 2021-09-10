@@ -88,8 +88,8 @@ Workspace_sptr MultiPeriodLoadMuonStrategy::loadDetectorGrouping() const {
  */
 void MultiPeriodLoadMuonStrategy::applyTimeZeroCorrection() {
   double timeZero = m_nexusLoader.loadTimeZeroFromNexusFile();
-  for (int i = 0; i < m_workspaceGroup.getNumberOfEntries(); ++i) {
-    auto workspace = std::dynamic_pointer_cast<Workspace2D>(m_workspaceGroup.getItem(i));
+  for (int wsIndex = 0; wsIndex < m_workspaceGroup.getNumberOfEntries(); ++wsIndex) {
+    auto workspace = std::dynamic_pointer_cast<Workspace2D>(m_workspaceGroup.getItem(wsIndex));
     auto numHistograms = workspace->getNumberHistograms();
     for (size_t i = 0; i < numHistograms; ++i) {
       auto &timeAxis = workspace->mutableX(i);
