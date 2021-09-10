@@ -253,8 +253,15 @@ class SliceViewerModel:
             "supports_peaks_overlays": self.can_support_peaks_overlays()
         }
 
-    def get_axes_angles(self):
-        return self._axes_angles
+    def get_axes_angles(self, force_orthogonal: bool = False) -> Optional[np.ndarray]:
+        """
+        :param force_orthogonal: return angles for orthogonal lattice (necessary when non-ortho mode off)
+        :return: if transform can be supported then return matrix of angles between axes (otherwise None)
+        """
+        if isinstance(self._axes_angles, np.ndarray) and force_orthogonal:
+            return np.full(self._axes_angles.shape, np.radians(90))
+        else:
+            return self._axes_angles
 
     def export_roi_to_workspace_mdevent(self, slicepoint: Sequence[Optional[float]],
                                         bin_params: Sequence[float], limits: tuple,

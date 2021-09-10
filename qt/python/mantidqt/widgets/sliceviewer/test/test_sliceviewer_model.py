@@ -610,6 +610,9 @@ class SliceViewerModelTest(unittest.TestCase):
         self.assertAlmostEqual(axes_angles[1, 2], np.pi / 4, delta=1e-10)
         for iy in range(1,3):
             self.assertAlmostEqual(axes_angles[0, iy], np.pi/2, delta=1e-10)
+        # test force_orthog works
+        axes_angles = model.get_axes_angles(force_orthogonal=True)
+        self.assertAlmostEqual(axes_angles[1, 2], np.pi / 2, delta=1e-10)
 
     def test_calculate_axes_angles_uses_identity_if_W_unavailable(self):
         ws = _create_mock_workspace(IMDEventWorkspace,
