@@ -7,12 +7,13 @@ Indirect Geometry Changes
 
 New Features
 ------------
-- Fit functions :ref:`ElasticIsoRotDiff <func-ElasticIsoRotDiff>` and :ref:`InelasticIsoRotDiff <func-InelasticIsoRotDiff>` have been made available in the :ref:`ConvFit <convfit>` tab in the :ref:`Inelastic Data Analysis <interface-inelastic-data-analysis>` interface.
-- - **The** :ref:`Elwin <Elwin-iqt-ref>` **tab in** :ref:`Inelastic Data Analysis <interface-inelastic-data-analysis>` **has a new loader which now allows users to add workspaces.**
+- **The** :ref:`Elwin <Elwin-iqt-ref>` **tab in** :ref:`Inelastic Data Analysis <interface-inelastic-data-analysis>` **has a new loader which now allows users to add workspaces.**
 
 .. figure:: ../../images/ElwinLoad.gif
    :width: 800px
    :align: center
+
+- Fit functions :ref:`ElasticIsoRotDiff <func-ElasticIsoRotDiff>` and :ref:`InelasticIsoRotDiff <func-InelasticIsoRotDiff>` have been made available in the :ref:`ConvFit <convfit>` tab in the :ref:`Inelastic Data Analysis <interface-inelastic-data-analysis>` interface.
 
 Improvements
 ------------
@@ -41,7 +42,7 @@ Improvements
   displacement data. This approximation is useful for the study of light (e.g. organic) molecules adsorbed to surfaces of heavy (e.g. noble-metal) catalysts.
 - :ref:`Abins Algorithm <algm-Abins>`: Thresholding of low-intensity modes has been changed. This
   impacts the second-order spectrum, especially at elevated temperature; excitations were being discarded on the basis of a low
-  intensity in the fundamental spectrum, when they could contribute to a noticable peak in the second-order spectrum.
+  intensity in the fundamental spectrum, when they could contribute to a noticeable peak in the second-order spectrum.
 
 Bugfixes
 ########
