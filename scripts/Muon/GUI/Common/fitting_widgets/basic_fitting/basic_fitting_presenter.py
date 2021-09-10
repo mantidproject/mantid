@@ -68,6 +68,8 @@ class BasicFittingPresenter:
         self.view.set_slot_for_function_structure_changed(self.handle_function_structure_changed)
         self.view.set_slot_for_function_parameter_changed(
             lambda function_index, parameter: self.handle_function_parameter_changed(function_index, parameter))
+        self.view.set_slot_for_function_attribute_changed(
+            lambda attribute: self.handle_function_attribute_changed(attribute))
         self.view.set_slot_for_start_x_updated(self.handle_start_x_updated)
         self.view.set_slot_for_end_x_updated(self.handle_end_x_updated)
         self.view.set_slot_for_exclude_range_state_changed(self.handle_exclude_range_state_changed)
@@ -249,7 +251,7 @@ class BasicFittingPresenter:
         # Required to update the function browser to display the errors when first adding a function.
         self.view.set_current_dataset_index(self.model.current_dataset_index)
 
-    def handle_function_parameter_changed(self, function_index, parameter) -> None:
+    def handle_function_parameter_changed(self, function_index: str, parameter: str) -> None:
         """Handle when the value of a parameter in a function is changed."""
         full_parameter = f"{function_index}{parameter}"
         self.model.update_parameter_value(full_parameter, self.view.parameter_value(full_parameter))
@@ -258,6 +260,10 @@ class BasicFittingPresenter:
 
         self.fit_function_changed_notifier.notify_subscribers()
         self.fit_parameter_changed_notifier.notify_subscribers()
+
+    def handle_function_attribute_changed(self, attribute: str) -> None:
+        """Handle when the value of a attribute in a function is changed."""
+        self.model.update_attribute_value(attribute, self.view.attribute_value(attribute))
 
     def handle_start_x_updated(self) -> None:
         """Handle when the start X is changed."""

@@ -22,6 +22,7 @@ def add_mock_methods_to_basic_fitting_view(view):
     view.set_slot_for_covariance_matrix_clicked = mock.Mock()
     view.set_slot_for_function_structure_changed = mock.Mock()
     view.set_slot_for_function_parameter_changed = mock.Mock()
+    view.set_slot_for_function_attribute_changed = mock.Mock()
     view.set_slot_for_start_x_updated = mock.Mock()
     view.set_slot_for_end_x_updated = mock.Mock()
     view.set_slot_for_exclude_range_state_changed = mock.Mock()

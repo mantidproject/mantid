@@ -75,6 +75,7 @@ Improvements
 
 Bugfixes
 ########
+- The fit ranges will now always allow you to encompass the entire x range of the loaded data.
 - The GUIs will no longer crash if there are any whitespaces in the run range (e.g. 6010- 3).
 - The GUIs will now cope with a range of runs that span between two different decades where the second number
   in the range is smaller than the final digit of the first number in the range (e.g. 6018-3 can be used for the range 6018-6023).
@@ -83,6 +84,7 @@ Bugfixes
   any information about why the value was invalid. It will now revert to last viable BinWidth used and explain why.
 - The autoscale option when ``All`` is selected will now show the largest and smallest y value for all of the plots.
 - The global parameters in a results table will no longer be given a zero error arbitrarily if one with an error exists.
+- The attribute values in a Chebyshev function will no longer get reset after performing a simultaneous fit.
 
 ALC
 ---
