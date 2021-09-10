@@ -18,8 +18,7 @@ namespace Kernel {
 /** MDUnitFactory : Abstract type. Factory method with chain of reponsibility
   succession for creating MDUnits.
 */
-class MANTID_KERNEL_DLL MDUnitFactory
-    : public ChainableFactory<MDUnitFactory, MDUnit, std::string> {
+class MANTID_KERNEL_DLL MDUnitFactory : public ChainableFactory<MDUnitFactory, MDUnit, std::string> {
 
 private:
   /// Create the product
@@ -44,8 +43,7 @@ class MANTID_KERNEL_DLL InverseAngstromsUnitFactory : public MDUnitFactory {
 };
 
 class MANTID_KERNEL_DLL ReciprocalLatticeUnitFactory : public MDUnitFactory {
-  ReciprocalLatticeUnit *
-  createRaw(const std::string &unitString) const override;
+  ReciprocalLatticeUnit *createRaw(const std::string &unitString) const override;
   bool canInterpret(const std::string &unitString) const override;
 };
 

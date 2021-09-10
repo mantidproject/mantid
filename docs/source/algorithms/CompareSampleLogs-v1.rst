@@ -11,7 +11,7 @@ Description
 
 Utility algorithm. Compares specified sample logs for a given list of workspaces or workspace groups. If sample logs match, no output will be produced. If sample logs do not match or do not exist, comma separated list of these sample logs will be returned. This list can be used as an input for :ref:`algm-CreateLogPropertyTable` algorithm to get a TableWorkspace with not identical properties.
 
-For the moment, algorithm does not support comparison of the time series logs. 
+For the moment, algorithm does not support comparison of the time series logs.
 
 
 Usage

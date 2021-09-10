@@ -20,8 +20,7 @@ DECLARE_ALGORITHM(Exponential)
 
 Exponential::Exponential() : UnaryOperation() { this->useHistogram = true; }
 
-void Exponential::performUnaryOperation(const double XIn, const double YIn,
-                                        const double EIn, double &YOut,
+void Exponential::performUnaryOperation(const double XIn, const double YIn, const double EIn, double &YOut,
                                         double &EOut) {
   (void)XIn; // Avoid compiler warning
   // Multiply the data and error by the correction factor

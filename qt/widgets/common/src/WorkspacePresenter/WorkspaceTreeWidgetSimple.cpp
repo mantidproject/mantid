@@ -26,87 +26,62 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
 namespace {
-bool singleValued(const MatrixWorkspace &ws) {
-  return (ws.getNumberHistograms() == 1 && ws.blocksize() == 1);
-}
+bool singleValued(const MatrixWorkspace &ws) { return (ws.getNumberHistograms() == 1 && ws.blocksize() == 1); }
 } // namespace
 
 namespace MantidQt {
 namespace MantidWidgets {
 
-WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(bool viewOnly,
-                                                     QWidget *parent)
-    : WorkspaceTreeWidget(new MantidTreeModel(), viewOnly, parent),
-      m_plotSpectrum(new QAction("Spectrum...", this)),
-      m_plotBin(new QAction("Bin", this)),
-      m_overplotSpectrum(new QAction("Overplot spectrum...", this)),
+WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(bool viewOnly, QWidget *parent)
+    : WorkspaceTreeWidget(new MantidTreeModel(), viewOnly, parent), m_plotSpectrum(new QAction("Spectrum...", this)),
+      m_plotBin(new QAction("Bin", this)), m_overplotSpectrum(new QAction("Overplot spectrum...", this)),
       m_plotSpectrumWithErrs(new QAction("Spectrum with errors...", this)),
-      m_overplotSpectrumWithErrs(
-          new QAction("Overplot spectrum with errors...", this)),
-      m_plotColorfill(new QAction("Colorfill", this)),
-      m_sampleLogs(new QAction("Show Sample Logs", this)),
-      m_sliceViewer(new QAction("Show Slice Viewer", this)),
-      m_showInstrument(new QAction("Show Instrument", this)),
-      m_showData(new QAction("Show Data", this)),
-      m_showAlgorithmHistory(new QAction("Show History", this)),
-      m_showDetectors(new QAction("Show Detectors", this)),
-      m_plotAdvanced(new QAction("Advanced...", this)),
-      m_plotSurface(new QAction("Surface", this)),
-      m_plotWireframe(new QAction("Wireframe", this)),
-      m_plotContour(new QAction("Contour", this)),
-      m_plotMDHisto1D(new QAction("Plot 1D MDHistogram...", this)),
+      m_overplotSpectrumWithErrs(new QAction("Overplot spectrum with errors...", this)),
+      m_plotColorfill(new QAction("Colorfill", this)), m_sampleLogs(new QAction("Show Sample Logs", this)),
+      m_sliceViewer(new QAction("Show Slice Viewer", this)), m_showInstrument(new QAction("Show Instrument", this)),
+      m_showData(new QAction("Show Data", this)), m_showAlgorithmHistory(new QAction("Show History", this)),
+      m_showDetectors(new QAction("Show Detectors", this)), m_plotAdvanced(new QAction("Advanced...", this)),
+      m_plotSurface(new QAction("Surface", this)), m_plotWireframe(new QAction("Wireframe", this)),
+      m_plotContour(new QAction("Contour", this)), m_plotMDHisto1D(new QAction("Plot 1D MDHistogram...", this)),
       m_overplotMDHisto1D(new QAction("Overplot 1D MDHistogram...", this)),
-      m_plotMDHisto1DWithErrs(
-          new QAction("Plot 1D MDHistogram with errors...", this)),
-      m_overplotMDHisto1DWithErrs(
-          new QAction("Overplot 1D MDHistogram with errors...", this)) {
+      m_plotMDHisto1DWithErrs(new QAction("Plot 1D MDHistogram with errors...", this)),
+      m_overplotMDHisto1DWithErrs(new QAction("Overplot 1D MDHistogram with errors...", this)),
+      m_sampleMaterial(new QAction("Show Sample Material", this)), m_superplot(new QAction("Superplot...", this)),
+      m_superplotWithErrs(new QAction("Superplot with errors...", this)),
+      m_superplotBins(new QAction("Superplot bins...", this)),
+      m_superplotBinsWithErrs(new QAction("Superplot bins with errors...", this)) {
 
   // Replace the double click action on the MantidTreeWidget
-  m_tree->m_doubleClickAction = [&](const QString &wsName) {
-    emit workspaceDoubleClicked(wsName);
-  };
+  m_tree->m_doubleClickAction = [&](const QString &wsName) { emit workspaceDoubleClicked(wsName); };
 
-  connect(m_plotSpectrum, SIGNAL(triggered()), this,
-          SLOT(onPlotSpectrumClicked()));
+  connect(m_plotSpectrum, SIGNAL(triggered()), this, SLOT(onPlotSpectrumClicked()));
   // connect event m_plotMDHisto1D to signal slot onPlotMDHistoWorkspaceClicked
-  connect(m_plotMDHisto1D, SIGNAL(triggered()), this,
-          SLOT(onPlotMDHistoWorkspaceClicked()));
-  connect(m_overplotMDHisto1D, SIGNAL(triggered()), this,
-          SLOT(onOverPlotMDHistoWorkspaceClicked()));
-  connect(m_plotMDHisto1DWithErrs, SIGNAL(triggered()), this,
-          SLOT(onPlotMDHistoWorkspaceWithErrorsClicked()));
-  connect(m_overplotMDHisto1DWithErrs, SIGNAL(triggered()), this,
-          SLOT(onOverPlotMDHistoWorkspaceWithErrorsClicked()));
+  connect(m_plotMDHisto1D, SIGNAL(triggered()), this, SLOT(onPlotMDHistoWorkspaceClicked()));
+  connect(m_overplotMDHisto1D, SIGNAL(triggered()), this, SLOT(onOverPlotMDHistoWorkspaceClicked()));
+  connect(m_plotMDHisto1DWithErrs, SIGNAL(triggered()), this, SLOT(onPlotMDHistoWorkspaceWithErrorsClicked()));
+  connect(m_overplotMDHisto1DWithErrs, SIGNAL(triggered()), this, SLOT(onOverPlotMDHistoWorkspaceWithErrorsClicked()));
 
   connect(m_plotBin, SIGNAL(triggered()), this, SLOT(onPlotBinClicked()));
-  connect(m_overplotSpectrum, SIGNAL(triggered()), this,
-          SLOT(onOverplotSpectrumClicked()));
-  connect(m_plotSpectrumWithErrs, SIGNAL(triggered()), this,
-          SLOT(onPlotSpectrumWithErrorsClicked()));
-  connect(m_overplotSpectrumWithErrs, SIGNAL(triggered()), this,
-          SLOT(onOverplotSpectrumWithErrorsClicked()));
-  connect(m_plotColorfill, SIGNAL(triggered()), this,
-          SLOT(onPlotColorfillClicked()));
+  connect(m_overplotSpectrum, SIGNAL(triggered()), this, SLOT(onOverplotSpectrumClicked()));
+  connect(m_plotSpectrumWithErrs, SIGNAL(triggered()), this, SLOT(onPlotSpectrumWithErrorsClicked()));
+  connect(m_overplotSpectrumWithErrs, SIGNAL(triggered()), this, SLOT(onOverplotSpectrumWithErrorsClicked()));
+  connect(m_plotColorfill, SIGNAL(triggered()), this, SLOT(onPlotColorfillClicked()));
   connect(m_sampleLogs, SIGNAL(triggered()), this, SLOT(onSampleLogsClicked()));
-  connect(m_sliceViewer, SIGNAL(triggered()), this,
-          SLOT(onSliceViewerClicked()));
-  connect(m_showInstrument, SIGNAL(triggered()), this,
-          SLOT(onShowInstrumentClicked()));
+  connect(m_sliceViewer, SIGNAL(triggered()), this, SLOT(onSliceViewerClicked()));
+  connect(m_showInstrument, SIGNAL(triggered()), this, SLOT(onShowInstrumentClicked()));
   connect(m_showData, SIGNAL(triggered()), this, SLOT(onShowDataClicked()));
-  connect(m_tree, SIGNAL(itemSelectionChanged()), this,
-          SIGNAL(treeSelectionChanged()));
-  connect(m_showAlgorithmHistory, SIGNAL(triggered()), this,
-          SLOT(onShowAlgorithmHistoryClicked()));
-  connect(m_showDetectors, SIGNAL(triggered()), this,
-          SLOT(onShowDetectorsClicked()));
-  connect(m_plotAdvanced, SIGNAL(triggered()), this,
-          SLOT(onPlotAdvancedClicked()));
-  connect(m_plotSurface, SIGNAL(triggered()), this,
-          SLOT(onPlotSurfaceClicked()));
-  connect(m_plotWireframe, SIGNAL(triggered()), this,
-          SLOT(onPlotWireframeClicked()));
-  connect(m_plotContour, SIGNAL(triggered()), this,
-          SLOT(onPlotContourClicked()));
+  connect(m_tree, SIGNAL(itemSelectionChanged()), this, SIGNAL(treeSelectionChanged()));
+  connect(m_showAlgorithmHistory, SIGNAL(triggered()), this, SLOT(onShowAlgorithmHistoryClicked()));
+  connect(m_showDetectors, SIGNAL(triggered()), this, SLOT(onShowDetectorsClicked()));
+  connect(m_plotAdvanced, SIGNAL(triggered()), this, SLOT(onPlotAdvancedClicked()));
+  connect(m_plotSurface, SIGNAL(triggered()), this, SLOT(onPlotSurfaceClicked()));
+  connect(m_plotWireframe, SIGNAL(triggered()), this, SLOT(onPlotWireframeClicked()));
+  connect(m_plotContour, SIGNAL(triggered()), this, SLOT(onPlotContourClicked()));
+  connect(m_sampleMaterial, SIGNAL(triggered()), this, SLOT(onSampleMaterialClicked()));
+  connect(m_superplot, SIGNAL(triggered()), this, SLOT(onSuperplotClicked()));
+  connect(m_superplotWithErrs, SIGNAL(triggered()), this, SLOT(onSuperplotWithErrsClicked()));
+  connect(m_superplotBins, SIGNAL(triggered()), this, SLOT(onSuperplotBinsClicked()));
+  connect(m_superplotBinsWithErrs, SIGNAL(triggered()), this, SLOT(onSuperplotBinsWithErrsClicked()));
 }
 
 WorkspaceTreeWidgetSimple::~WorkspaceTreeWidgetSimple() {}
@@ -138,8 +113,7 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
     // Check is defensive just in case the workspace has disappeared
     Workspace_sptr workspace;
     try {
-      workspace = AnalysisDataService::Instance().retrieve(
-          selectedWsName.toStdString());
+      workspace = AnalysisDataService::Instance().retrieve(selectedWsName.toStdString());
     } catch (Exception::NotFoundError &) {
       return;
     }
@@ -164,8 +138,12 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
         plotSubMenu->addAction(m_plotSpectrumWithErrs);
         plotSubMenu->addAction(m_overplotSpectrumWithErrs);
         plotSubMenu->addAction(m_plotAdvanced);
+        plotSubMenu->addAction(m_superplot);
+        plotSubMenu->addAction(m_superplotWithErrs);
       } else {
         plotSubMenu->addAction(m_plotBin);
+        plotSubMenu->addAction(m_superplotBins);
+        plotSubMenu->addAction(m_superplotBinsWithErrs);
       }
       plotSubMenu->addSeparator();
       plotSubMenu->addAction(m_plotColorfill);
@@ -185,10 +163,8 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
         menu->addAction(m_showData);
         menu->addAction(m_showAlgorithmHistory);
         menu->addAction(m_showInstrument);
-        m_showInstrument->setEnabled(
-            matrixWS->getInstrument() &&
-            !matrixWS->getInstrument()->getName().empty() &&
-            matrixWS->getAxis(1)->isSpectra());
+        m_showInstrument->setEnabled(matrixWS->getInstrument() && !matrixWS->getInstrument()->getName().empty() &&
+                                     matrixWS->getAxis(1)->isSpectra());
         menu->addAction(m_sampleLogs);
         menu->addAction(m_sliceViewer);
         menu->addAction(m_showDetectors);
@@ -202,8 +178,7 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
       if (std::dynamic_pointer_cast<IPeaksWorkspace>(workspace)) {
         menu->addAction(m_showDetectors);
       }
-    } else if (auto md_ws =
-                   std::dynamic_pointer_cast<IMDWorkspace>(workspace)) {
+    } else if (auto md_ws = std::dynamic_pointer_cast<IMDWorkspace>(workspace)) {
       menu->addAction(m_showAlgorithmHistory);
       menu->addAction(m_sampleLogs);
 
@@ -239,8 +214,7 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
         menu->addMenu(plotSubMenu);
       }
 
-    } else if (auto wsGroup =
-                   std::dynamic_pointer_cast<WorkspaceGroup>(workspace)) {
+    } else if (auto wsGroup = std::dynamic_pointer_cast<WorkspaceGroup>(workspace)) {
       auto workspaces = wsGroup->getAllItems();
       bool containsMatrixWorkspace{false};
       bool containsPeaksWorkspace{false};
@@ -249,8 +223,7 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
         if (auto matrixWS = std::dynamic_pointer_cast<MatrixWorkspace>(ws)) {
           containsMatrixWorkspace = true;
           break;
-        } else if (auto peaksWS =
-                       std::dynamic_pointer_cast<IPeaksWorkspace>(ws)) {
+        } else if (auto peaksWS = std::dynamic_pointer_cast<IPeaksWorkspace>(ws)) {
           containsPeaksWorkspace = true;
         }
       }
@@ -265,6 +238,8 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
         plotSubMenu->addAction(m_plotSpectrumWithErrs);
         plotSubMenu->addAction(m_overplotSpectrumWithErrs);
         plotSubMenu->addAction(m_plotAdvanced);
+        plotSubMenu->addAction(m_superplot);
+        plotSubMenu->addAction(m_superplotWithErrs);
 
         plotSubMenu->addSeparator();
         plotSubMenu->addAction(m_plotColorfill);
@@ -275,6 +250,17 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
 
       if (containsMatrixWorkspace || containsPeaksWorkspace) {
         menu->addAction(m_showDetectors);
+      }
+    }
+
+    // Only show sample material action if we have a single workspace
+    // selected.
+    if (m_tree->selectedItems().size() == 1) {
+      // SetSampleMaterial algorithm requires that the workspace
+      // inherits from ExperimentInfo, so check that it does
+      // before adding the action to the context menu.
+      if (auto experimentInfoWS = std::dynamic_pointer_cast<ExperimentInfo>(workspace)) {
+        menu->addAction(m_sampleMaterial);
       }
     }
 
@@ -294,9 +280,7 @@ void WorkspaceTreeWidgetSimple::onPlotSpectrumClicked() {
   emit plotSpectrumClicked(getSelectedWorkspaceNamesAsQList());
 }
 
-void WorkspaceTreeWidgetSimple::onPlotBinClicked() {
-  emit plotBinClicked(getSelectedWorkspaceNamesAsQList());
-}
+void WorkspaceTreeWidgetSimple::onPlotBinClicked() { emit plotBinClicked(getSelectedWorkspaceNamesAsQList()); }
 
 void WorkspaceTreeWidgetSimple::onOverplotSpectrumClicked() {
   emit overplotSpectrumClicked(getSelectedWorkspaceNamesAsQList());
@@ -314,21 +298,15 @@ void WorkspaceTreeWidgetSimple::onPlotColorfillClicked() {
   emit plotColorfillClicked(getSelectedWorkspaceNamesAsQList());
 }
 
-void WorkspaceTreeWidgetSimple::onSampleLogsClicked() {
-  emit sampleLogsClicked(getSelectedWorkspaceNamesAsQList());
-}
+void WorkspaceTreeWidgetSimple::onSampleLogsClicked() { emit sampleLogsClicked(getSelectedWorkspaceNamesAsQList()); }
 
-void WorkspaceTreeWidgetSimple::onSliceViewerClicked() {
-  emit sliceViewerClicked(getSelectedWorkspaceNamesAsQList());
-}
+void WorkspaceTreeWidgetSimple::onSliceViewerClicked() { emit sliceViewerClicked(getSelectedWorkspaceNamesAsQList()); }
 
 void WorkspaceTreeWidgetSimple::onShowInstrumentClicked() {
   emit showInstrumentClicked(getSelectedWorkspaceNamesAsQList());
 }
 
-void WorkspaceTreeWidgetSimple::onShowDataClicked() {
-  emit showDataClicked(getSelectedWorkspaceNamesAsQList());
-}
+void WorkspaceTreeWidgetSimple::onShowDataClicked() { emit showDataClicked(getSelectedWorkspaceNamesAsQList()); }
 
 void WorkspaceTreeWidgetSimple::onShowAlgorithmHistoryClicked() {
   emit showAlgorithmHistoryClicked(getSelectedWorkspaceNamesAsQList());
@@ -342,17 +320,13 @@ void WorkspaceTreeWidgetSimple::onPlotAdvancedClicked() {
   emit plotAdvancedClicked(getSelectedWorkspaceNamesAsQList());
 }
 
-void WorkspaceTreeWidgetSimple::onPlotSurfaceClicked() {
-  emit plotSurfaceClicked(getSelectedWorkspaceNamesAsQList());
-}
+void WorkspaceTreeWidgetSimple::onPlotSurfaceClicked() { emit plotSurfaceClicked(getSelectedWorkspaceNamesAsQList()); }
 
 void WorkspaceTreeWidgetSimple::onPlotWireframeClicked() {
   emit plotWireframeClicked(getSelectedWorkspaceNamesAsQList());
 }
 
-void WorkspaceTreeWidgetSimple::onPlotContourClicked() {
-  emit plotContourClicked(getSelectedWorkspaceNamesAsQList());
-}
+void WorkspaceTreeWidgetSimple::onPlotContourClicked() { emit plotContourClicked(getSelectedWorkspaceNamesAsQList()); }
 
 // Define signal
 void WorkspaceTreeWidgetSimple::onPlotMDHistoWorkspaceClicked() {
@@ -369,6 +343,24 @@ void WorkspaceTreeWidgetSimple::onPlotMDHistoWorkspaceWithErrorsClicked() {
 
 void WorkspaceTreeWidgetSimple::onOverPlotMDHistoWorkspaceWithErrorsClicked() {
   emit overplotMDHistoWithErrorsClicked(getSelectedWorkspaceNamesAsQList());
+}
+
+void WorkspaceTreeWidgetSimple::onSampleMaterialClicked() {
+  emit sampleMaterialClicked(getSelectedWorkspaceNamesAsQList());
+}
+
+void WorkspaceTreeWidgetSimple::onSuperplotClicked() { emit superplotClicked(getSelectedWorkspaceNamesAsQList()); }
+
+void WorkspaceTreeWidgetSimple::onSuperplotWithErrsClicked() {
+  emit superplotWithErrsClicked(getSelectedWorkspaceNamesAsQList());
+}
+
+void WorkspaceTreeWidgetSimple::onSuperplotBinsClicked() {
+  emit superplotBinsClicked(getSelectedWorkspaceNamesAsQList());
+}
+
+void WorkspaceTreeWidgetSimple::onSuperplotBinsWithErrsClicked() {
+  emit superplotBinsWithErrsClicked(getSelectedWorkspaceNamesAsQList());
 }
 
 } // namespace MantidWidgets

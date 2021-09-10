@@ -17,12 +17,8 @@ class ThermalNeutronBk2BkExpAlphaTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ThermalNeutronBk2BkExpAlphaTest *createSuite() {
-    return new ThermalNeutronBk2BkExpAlphaTest();
-  }
-  static void destroySuite(ThermalNeutronBk2BkExpAlphaTest *suite) {
-    delete suite;
-  }
+  static ThermalNeutronBk2BkExpAlphaTest *createSuite() { return new ThermalNeutronBk2BkExpAlphaTest(); }
+  static void destroySuite(ThermalNeutronBk2BkExpAlphaTest *suite) { delete suite; }
 
   void test_Calculation() {
     // 1. Input data for test

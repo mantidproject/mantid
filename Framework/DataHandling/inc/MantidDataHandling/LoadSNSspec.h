@@ -31,8 +31,7 @@ data.</li>
 @author Jean Bilheux, ORNL
 @date 08/27/10
 */
-class DLLExport LoadSNSspec : public API::IFileLoader<Kernel::FileDescriptor>,
-                              API::DeprecatedAlgorithm {
+class DLLExport LoadSNSspec : public API::IFileLoader<Kernel::FileDescriptor>, API::DeprecatedAlgorithm {
 public:
   LoadSNSspec();
   const std::string name() const override { return "LoadSNSspec"; }
@@ -43,9 +42,7 @@ public:
   }
 
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"LoadSpec"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"LoadSpec"}; }
   const std::string category() const override { return "DataHandling\\Text"; }
 
   /// Returns a confidence value that this algorithm can load a file
@@ -57,9 +54,8 @@ private:
 
   /// Allowed values for the cache property
   std::vector<std::string> m_seperator_options;
-  std::map<std::string, const char *> m_separatormap; ///< a map of seperators
-  using separator_pair =
-      std::pair<std::string, const char *>; ///< serparator pair type def
+  std::map<std::string, const char *> m_separatormap;          ///< a map of seperators
+  using separator_pair = std::pair<std::string, const char *>; ///< serparator pair type def
 };
 
 } // namespace DataHandling

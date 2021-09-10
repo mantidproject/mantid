@@ -2,6 +2,7 @@
 set(SRC_FILES
     src/AccumulateMD.cpp
     src/AndMD.cpp
+    src/ApplyDetailedBalanceMD.cpp
     src/BaseConvertToDiffractionMDWorkspace.cpp
     src/BinMD.cpp
     src/BinaryOperationMD.cpp
@@ -52,6 +53,7 @@ set(SRC_FILES
     src/ImportMDHistoWorkspace.cpp
     src/ImportMDHistoWorkspaceBase.cpp
     src/Integrate3DEvents.cpp
+    src/IntegrateQLabEvents.cpp
     src/IntegrateEllipsoids.cpp
     src/IntegrateEllipsoidsTwoStep.cpp
     src/IntegrateFlux.cpp
@@ -85,9 +87,9 @@ set(SRC_FILES
     src/MinusMD.cpp
     src/MultiplyMD.cpp
     src/NotMD.cpp
-    src/OneStepMDEW.cpp
     src/OrMD.cpp
     src/PlusMD.cpp
+    src/PolarizationAngleCorrectionMD.cpp
     src/PowerMD.cpp
     src/PreprocessDetectorsToMD.cpp
     src/QueryMDWorkspace.cpp
@@ -97,6 +99,7 @@ set(SRC_FILES
     src/SaveMD.cpp
     src/SaveMD2.cpp
     src/SaveZODS.cpp
+    src/DgsScatteredTransmissionCorrectionMD.cpp
     src/SetMDFrame.cpp
     src/SetMDUsingMask.cpp
     src/SliceMD.cpp
@@ -117,6 +120,7 @@ set(
   INC_FILES
   inc/MantidMDAlgorithms/AccumulateMD.h
   inc/MantidMDAlgorithms/AndMD.h
+  inc/MantidMDAlgorithms/ApplyDetailedBalanceMD.h
   inc/MantidMDAlgorithms/BaseConvertToDiffractionMDWorkspace.h
   inc/MantidMDAlgorithms/BinMD.h
   inc/MantidMDAlgorithms/BinaryOperationMD.h
@@ -166,6 +170,7 @@ set(
   inc/MantidMDAlgorithms/ImportMDHistoWorkspace.h
   inc/MantidMDAlgorithms/ImportMDHistoWorkspaceBase.h
   inc/MantidMDAlgorithms/Integrate3DEvents.h
+  inc/MantidMDAlgorithms/IntegrateQLabEvents.h
   inc/MantidMDAlgorithms/IntegrateEllipsoids.h
   inc/MantidMDAlgorithms/IntegrateEllipsoidsTwoStep.h
   inc/MantidMDAlgorithms/IntegrateFlux.h
@@ -202,9 +207,9 @@ set(
   inc/MantidMDAlgorithms/MinusMD.h
   inc/MantidMDAlgorithms/MultiplyMD.h
   inc/MantidMDAlgorithms/NotMD.h
-  inc/MantidMDAlgorithms/OneStepMDEW.h
   inc/MantidMDAlgorithms/OrMD.h
   inc/MantidMDAlgorithms/PlusMD.h
+  inc/MantidMDAlgorithms/PolarizationAngleCorrectionMD.h
   inc/MantidMDAlgorithms/PowerMD.h
   inc/MantidMDAlgorithms/PreprocessDetectorsToMD.h
   inc/MantidMDAlgorithms/QueryMDWorkspace.h
@@ -214,6 +219,7 @@ set(
   inc/MantidMDAlgorithms/SaveMD.h
   inc/MantidMDAlgorithms/SaveMD2.h
   inc/MantidMDAlgorithms/SaveZODS.h
+  inc/MantidMDAlgorithms/DgsScatteredTransmissionCorrectionMD.h
   inc/MantidMDAlgorithms/SetMDFrame.h
   inc/MantidMDAlgorithms/SetMDUsingMask.h
   inc/MantidMDAlgorithms/SliceMD.h
@@ -234,6 +240,7 @@ set(TEST_FILES
     # these tests are as they test verify different parts of the CPR algorithms
     AccumulateMDTest.h
     AndMDTest.h
+    ApplyDetailedBalanceMDTest.h
     BooleanBinaryOperationMDTest.h
     CalculateCoverageDGSTest.h
     CentroidPeaksMD2Test.h
@@ -277,6 +284,7 @@ set(TEST_FILES
     ImportMDEventWorkspaceTest.h
     ImportMDHistoWorkspaceTest.h
     Integrate3DEventsTest.h
+    IntegrateQLabEventsTest.h
     IntegrateEllipsoidsTest.h
     IntegrateEllipsoidsTwoStepTest.h
     IntegrateEllipsoidsWithSatellitesTest.h
@@ -310,9 +318,9 @@ set(TEST_FILES
     MinusMDTest.h
     MultiplyMDTest.h
     NotMDTest.h
-    OneStepMDEWTest.h
     OrMDTest.h
     PlusMDTest.h
+    PolarizationAngleCorrectionMDTest.h
     PowerMDTest.h
     PreprocessDetectorsToMDTest.h
     QueryMDWorkspaceTest.h
@@ -322,6 +330,7 @@ set(TEST_FILES
     SaveMD2Test.h
     SaveMDTest.h
     SaveZODSTest.h
+    DgsScatteredTransmissionCorrectionMDTest.h
     SetMDFrameTest.h
     SetMDUsingMaskTest.h
     SliceMDTest.h
@@ -337,7 +346,7 @@ set(TEST_FILES
 
 set(GMOCK_TEST_FILES BinaryOperationMDTest.h BinMDTest.h)
 
-if(COVERALLS)
+if(COVERAGE)
   foreach(loop_var ${SRC_FILES} ${INC_FILES})
     set_property(GLOBAL APPEND
                  PROPERTY COVERAGE_SRCS
@@ -354,6 +363,13 @@ endif(UNITY_BUILD)
 enable_precompiled_headers(inc/MantidMDAlgorithms/PrecompiledHeader.h SRC_FILES)
 # Add the target for this directory
 add_library(MDAlgorithms ${SRC_FILES} ${INC_FILES})
+add_library(Mantid::MDAlgorithms ALIAS MDAlgorithms)
+
+target_include_directories(MDAlgorithms PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+		$<INSTALL_INTERFACE:include/Mantid>
+)
+
 # Set the name of the generated library
 set_target_properties(MDAlgorithms
                       PROPERTIES OUTPUT_NAME
@@ -377,19 +393,19 @@ endif()
 # Add to the 'Framework' group in VS
 set_property(TARGET MDAlgorithms PROPERTY FOLDER "MantidFramework")
 
-target_include_directories(MDAlgorithms PUBLIC inc SYSTEM ${Boost_INCLUDE_DIRS})
-target_link_libraries(MDAlgorithms
-                      LINK_PRIVATE
-                      ${MANTIDLIBS}
-                      ${GSL_LIBRARIES}
-                      ${NEXUS_LIBRARIES})
+target_link_libraries(MDAlgorithms PUBLIC Mantid::API Mantid::DataObjects Mantid::Kernel Mantid::Geometry)
 
 # Add the unit tests directory
 add_subdirectory(test)
 
 # Installation settings
+if (CONDA_BUILD)
+mtd_install_framework_lib(TARGETS MDAlgorithms PLUGIN_LIB)
+else()
 mtd_install_targets(TARGETS
                     MDAlgorithms
                     INSTALL_DIRS
                     ${PLUGINS_DIR}
                     ${WORKBENCH_PLUGINS_DIR})
+endif()
+

@@ -81,8 +81,8 @@ class DrillSetting(QObject):
 
         elif (settingType == "floatArray") or (settingType == "intArray"):
             self._widget = QLineEdit()
-            self._widget.editingFinished.connect(
-                    lambda : self.valueChanged.emit(name)
+            self._widget.textChanged.connect(
+                    lambda _ : self.valueChanged.emit(name)
                     )
             self._setter = lambda v : self._widget.setText(','.join(str(e)
                                                            for e in v))
@@ -100,8 +100,8 @@ class DrillSetting(QObject):
 
         elif (settingType == "string"):
             self._widget = QLineEdit()
-            self._widget.editingFinished.connect(
-                    lambda : self.valueChanged.emit(name)
+            self._widget.textChanged.connect(
+                    lambda _ : self.valueChanged.emit(name)
                     )
             self._setter = lambda v : self._widget.setText(str(v))
             self._getter = self._widget.text
@@ -157,7 +157,7 @@ class DrillSettingsDialog(QDialog):
 
     valueChanged = Signal(str)  # setting name
 
-    def __init__(self, parent=None):
+    def __init__(self, presenter, parent=None):
         """
         Initialize ths dialog. Connect the static buttons.
         """
@@ -177,6 +177,8 @@ class DrillSettingsDialog(QDialog):
 
         self.invalidSettings = set()
 
+        self._presenter = presenter
+
     def initWidgets(self, types, values, doc):
         """
         Initialize the dialog widgets by providing the settings types, allowed
@@ -191,9 +193,7 @@ class DrillSettingsDialog(QDialog):
         for (n, t) in types.items():
             label = QLabel(n, self)
             self.settings[n] = DrillSetting(n, values[n], types[n], doc[n])
-            self.settings[n].valueChanged.connect(
-                    lambda p : self.valueChanged.emit(p)
-                    )
+            self.settings[n].valueChanged.connect(self.onValueChanged)
             self.settings[n].fileChecked.connect(
                     lambda v, n=n : self.onSettingValidation(n, v)
                     )
@@ -202,6 +202,20 @@ class DrillSettingsDialog(QDialog):
             widget.setToolTip(doc[n])
 
             self.formLayout.addRow(label, widget)
+
+    def onValueChanged(self, setting):
+        """
+        Check the get value before sending the signal.
+
+        Args:
+            setting (str): name of the setting
+        """
+        try:
+            self.getSettingValue(setting)
+            self.valueChanged.emit(setting)
+        except:
+            self.onSettingValidation(setting, False, "Unable to parse the "
+                                     "value. Check the input")
 
     def setSettings(self, settings):
         """
@@ -227,6 +241,16 @@ class DrillSettingsDialog(QDialog):
         for (k, v) in self.settings.items():
             settings[k] = v.getter()
         return settings
+
+    def setSettingValue(self, name, value):
+        """
+        Set the value of a specific setting.
+
+        Args:
+            value (any): the value
+        """
+        if name in self.settings:
+            self.settings[name].setter(value)
 
     def getSettingValue(self, name):
         """

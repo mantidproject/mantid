@@ -1,3 +1,5 @@
+.. _mantid.kernel.IntArrayBoundedValidator:
+
 ==========================
  IntArrayBoundedValidator
 ==========================
@@ -8,7 +10,7 @@ This is a Python binding to the C++ class Mantid::Kernel::ArrayBoundedValidator.
 
 .. module:`mantid.kernel`
 
-.. autoclass:: mantid.kernel.IntArrayBoundedValidator 
+.. autoclass:: mantid.kernel.IntArrayBoundedValidator
     :members:
     :undoc-members:
     :inherited-members:

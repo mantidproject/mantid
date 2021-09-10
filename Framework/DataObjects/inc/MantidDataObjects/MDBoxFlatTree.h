@@ -47,11 +47,9 @@ public:
   //---------------------------------------------------------------------------------------------------------------------
   /// convert MDWS box structure into flat structure used for saving/loading on
   /// hdd
-  void initFlatStructure(const API::IMDEventWorkspace_sptr &pws,
-                         const std::string &fileName);
+  void initFlatStructure(const API::IMDEventWorkspace_sptr &pws, const std::string &fileName);
 
-  uint64_t restoreBoxTree(std::vector<API::IMDNode *> &Boxes,
-                          API::BoxController_sptr &bc, bool FileBackEnd,
+  uint64_t restoreBoxTree(std::vector<API::IMDNode *> &Boxes, API::BoxController_sptr &bc, bool FileBackEnd,
                           bool BoxStructureOnly = false);
 
   /*** this function tries to set file positions of the boxes to
@@ -61,10 +59,8 @@ public:
 
   /**Save flat box structure into a file, defined by the file name*/
   void saveBoxStructure(const std::string &fileName);
-  void loadBoxStructure(const std::string &fileName, int &nDim,
-                        const std::string &EventType,
-                        bool onlyEventInfo = false,
-                        bool restoreExperimentInfo = false);
+  void loadBoxStructure(const std::string &fileName, int &nDim, const std::string &EventType,
+                        bool onlyEventInfo = false, bool restoreExperimentInfo = false);
 
   /**Export existing experiment info defined in the box structure to target
    * workspace (or other experiment info) */
@@ -110,36 +106,25 @@ private:
   std::shared_ptr<API::MultipleExperimentInfos> m_mEI;
 
 public:
-  static ::NeXus::File *createOrOpenMDWSgroup(const std::string &fileName,
-                                              int &nDims,
-                                              const std::string &WSEventType,
-                                              bool readOnly,
-                                              bool &alreadyExists);
+  static ::NeXus::File *createOrOpenMDWSgroup(const std::string &fileName, int &nDims, const std::string &WSEventType,
+                                              bool readOnly, bool &alreadyExists);
   // save each experiment info into its own NeXus group within an existing
   // opened group
-  static void saveExperimentInfos(::NeXus::File *const file,
-                                  const API::IMDEventWorkspace_const_sptr &ws);
+  static void saveExperimentInfos(::NeXus::File *const file, const API::IMDEventWorkspace_const_sptr &ws);
   // load experiment infos, previously saved through the the saveExperimentInfo
   // function
-  static void
-  loadExperimentInfos(::NeXus::File *const file, const std::string &filename,
-                      std::shared_ptr<API::MultipleExperimentInfos> mei,
-                      bool lazy = false);
+  static void loadExperimentInfos(::NeXus::File *const file, const std::string &filename,
+                                  std::shared_ptr<API::MultipleExperimentInfos> mei, bool lazy = false);
 
-  static void
-  saveAffineTransformMatricies(::NeXus::File *const file,
-                               const API::IMDWorkspace_const_sptr &ws);
-  static void saveAffineTransformMatrix(::NeXus::File *const file,
-                                        API::CoordTransform const *transform,
+  static void saveAffineTransformMatricies(::NeXus::File *const file, const API::IMDWorkspace_const_sptr &ws);
+  static void saveAffineTransformMatrix(::NeXus::File *const file, API::CoordTransform const *transform,
                                         const std::string &entry_name);
 
-  static void saveWSGenericInfo(::NeXus::File *const file,
-                                const API::IMDWorkspace_const_sptr &ws);
+  static void saveWSGenericInfo(::NeXus::File *const file, const API::IMDWorkspace_const_sptr &ws);
 };
 
 template <typename T>
-void saveMatrix(::NeXus::File *const file, const std::string &name,
-                Kernel::Matrix<T> &m, ::NeXus::NXnumtype type,
+void saveMatrix(::NeXus::File *const file, const std::string &name, Kernel::Matrix<T> &m, ::NeXus::NXnumtype type,
                 const std::string &tag);
 } // namespace DataObjects
 } // namespace Mantid

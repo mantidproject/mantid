@@ -26,8 +26,7 @@ public:
   }
 
   void test_exec() {
-    EventWorkspace_sptr eventWS =
-        WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(1, 50);
+    EventWorkspace_sptr eventWS = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(1, 50);
     AnalysisDataService::Instance().addOrReplace("temp_event_ws", eventWS);
 
     // Name of the output workspace.
@@ -36,12 +35,10 @@ public:
     DiffractionEventCalibrateDetectors alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", "temp_event_ws"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "temp_event_ws"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Params", "1.9, 0.001, 2.2"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("MaxIterations", "1"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("LocationOfPeakToOptimize", "2.038"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("LocationOfPeakToOptimize", "2.038"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BankName", "bank1"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DetCalFilename", filename));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
@@ -54,11 +51,9 @@ public:
     std::fstream outFile(filename.c_str());
     TS_ASSERT(outFile)
     int num, banknum, xpix, ypix;
-    double xsize, ysize, zsize, cennorm, cenx, ceny, cenz, basex, basey, basez,
-        upx, upy, upz;
-    outFile >> num >> banknum >> xpix >> ypix >> xsize >> ysize >> zsize >>
-        cennorm >> cenx >> ceny >> cenz >> basex >> basey >> basez >> upx >>
-        upy >> upz;
+    double xsize, ysize, zsize, cennorm, cenx, ceny, cenz, basex, basey, basez, upx, upy, upz;
+    outFile >> num >> banknum >> xpix >> ypix >> xsize >> ysize >> zsize >> cennorm >> cenx >> ceny >> cenz >> basex >>
+        basey >> basez >> upx >> upy >> upz;
     TS_ASSERT_DELTA(cennorm, 500., 0.0001)
     TS_ASSERT_DELTA(cenx, 0., 0.0001)
     TS_ASSERT_DELTA(ceny, 0., 0.0001)

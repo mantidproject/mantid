@@ -25,13 +25,10 @@ namespace Algorithms {
   @author Danny Hindson
   @date 2020-05-07
 */
-class MANTID_ALGORITHMS_DLL AddAbsorptionWeightedPathLengths
-    : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL AddAbsorptionWeightedPathLengths : public API::Algorithm {
 public:
   /// Algorithm's name for identification
-  const std::string name() const override {
-    return "AddAbsorptionWeightedPathLengths";
-  };
+  const std::string name() const override { return "AddAbsorptionWeightedPathLengths"; };
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "Add absorption weighted path lengths to each peak in a peaks "
@@ -52,9 +49,8 @@ private:
   /// Run the algorithm
   void exec() override;
   std::map<std::string, std::string> validateInputs() override;
-  std::unique_ptr<IBeamProfile>
-  createBeamProfile(const Geometry::Instrument &instrument,
-                    const API::Sample &sample) const;
+  std::unique_ptr<IBeamProfile> createBeamProfile(const Geometry::Instrument &instrument,
+                                                  const API::Sample &sample) const;
 };
 
 } // namespace Algorithms

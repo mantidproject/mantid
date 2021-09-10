@@ -36,8 +36,7 @@ using Mantid::HistogramData::CountStandardDeviations;
 
 namespace {
 
-std::unique_ptr<Rebin> prepare_rebin(const Parallel::Communicator &comm,
-                                     const std::string &storageMode) {
+std::unique_ptr<Rebin> prepare_rebin(const Parallel::Communicator &comm, const std::string &storageMode) {
   auto create = ParallelTestHelpers::create<Algorithms::CreateWorkspace>(comm);
   std::vector<double> dataEYX(2000);
   for (size_t i = 0; i < dataEYX.size(); ++i)
@@ -55,8 +54,7 @@ std::unique_ptr<Rebin> prepare_rebin(const Parallel::Communicator &comm,
   return rebin;
 }
 
-void run_rebin(const Parallel::Communicator &comm,
-               const std::string &storageMode) {
+void run_rebin(const Parallel::Communicator &comm, const std::string &storageMode) {
   using namespace Parallel;
   auto rebin = prepare_rebin(comm, storageMode);
   rebin->setProperty("Params", "1,1,3");
@@ -69,8 +67,7 @@ void run_rebin(const Parallel::Communicator &comm,
   }
 }
 
-void run_rebin_params_only_bin_width(const Parallel::Communicator &comm,
-                                     const std::string &storageMode) {
+void run_rebin_params_only_bin_width(const Parallel::Communicator &comm, const std::string &storageMode) {
   using namespace Parallel;
   auto rebin = prepare_rebin(comm, storageMode);
   rebin->setProperty("Params", "0.5");
@@ -116,8 +113,7 @@ public:
     rebin.setPropertyValue("Params", "1.5,2.0,20,-0.1,30,1.0,35");
     TS_ASSERT(rebin.execute());
     TS_ASSERT(rebin.isExecuted());
-    MatrixWorkspace_sptr rebindata =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out");
+    MatrixWorkspace_sptr rebindata = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out");
     auto &outX = rebindata->x(0);
     auto &outY = rebindata->y(0);
     auto &outE = rebindata->e(0);
@@ -150,8 +146,7 @@ public:
     rebin.setPropertyValue("Params", "1.5,2.0,20,-0.1,30,1.0,35");
     TS_ASSERT(rebin.execute());
     TS_ASSERT(rebin.isExecuted());
-    MatrixWorkspace_sptr rebindata =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out");
+    MatrixWorkspace_sptr rebindata = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out");
 
     auto &outX = rebindata->x(0);
     auto &outY = rebindata->y(0);
@@ -188,8 +183,7 @@ public:
     rebin.setPropertyValue("Params", "1.0,-1.0,1000.0");
     TS_ASSERT(rebin.execute());
     TS_ASSERT(rebin.isExecuted());
-    MatrixWorkspace_sptr rebindata =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out");
+    MatrixWorkspace_sptr rebindata = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out");
     auto &outX = rebindata->x(0);
 
     TS_ASSERT_EQUALS(outX.size(), 11);
@@ -216,8 +210,7 @@ public:
     rebin.setPropertyValue("Params", "1.5,2.0,20,-0.1,30,1.0,35");
     TS_ASSERT(rebin.execute());
     TS_ASSERT(rebin.isExecuted());
-    MatrixWorkspace_sptr rebindata =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out");
+    MatrixWorkspace_sptr rebindata = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out");
 
     auto &outX = rebindata->x(5);
     auto &outY = rebindata->y(5);
@@ -245,11 +238,9 @@ public:
     AnalysisDataService::Instance().remove("test_out");
   }
 
-  void do_test_EventWorkspace(EventType eventType, bool inPlace,
-                              bool PreserveEvents, bool expectOutputEvent) {
+  void do_test_EventWorkspace(EventType eventType, bool inPlace, bool PreserveEvents, bool expectOutputEvent) {
     // Two events per bin
-    EventWorkspace_sptr test_in =
-        WorkspaceCreationHelper::createEventWorkspace2(50, 100);
+    EventWorkspace_sptr test_in = WorkspaceCreationHelper::createEventWorkspace2(50, 100);
     test_in->switchEventType(eventType);
 
     std::string inName("test_inEvent");
@@ -270,8 +261,7 @@ public:
     MatrixWorkspace_sptr outWS;
     EventWorkspace_sptr eventOutWS;
     TS_ASSERT_THROWS_NOTHING(
-        outWS = std::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve(outName)));
+        outWS = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outName)));
     TS_ASSERT(outWS);
     if (!outWS)
       return;
@@ -315,33 +305,23 @@ public:
     AnalysisDataService::Instance().remove(outName);
   }
 
-  void testEventWorkspace_InPlace_PreserveEvents() {
-    do_test_EventWorkspace(TOF, true, true, true);
-  }
+  void testEventWorkspace_InPlace_PreserveEvents() { do_test_EventWorkspace(TOF, true, true, true); }
 
-  void testEventWorkspace_InPlace_PreserveEvents_weighted() {
-    do_test_EventWorkspace(WEIGHTED, true, true, true);
-  }
+  void testEventWorkspace_InPlace_PreserveEvents_weighted() { do_test_EventWorkspace(WEIGHTED, true, true, true); }
 
   void testEventWorkspace_InPlace_PreserveEvents_weightedNoTime() {
     do_test_EventWorkspace(WEIGHTED_NOTIME, true, true, true);
   }
 
-  void testEventWorkspace_InPlace_NoPreserveEvents() {
-    do_test_EventWorkspace(TOF, true, false, false);
-  }
+  void testEventWorkspace_InPlace_NoPreserveEvents() { do_test_EventWorkspace(TOF, true, false, false); }
 
-  void testEventWorkspace_InPlace_NoPreserveEvents_weighted() {
-    do_test_EventWorkspace(WEIGHTED, true, false, false);
-  }
+  void testEventWorkspace_InPlace_NoPreserveEvents_weighted() { do_test_EventWorkspace(WEIGHTED, true, false, false); }
 
   void testEventWorkspace_InPlace_NoPreserveEvents_weightedNoTime() {
     do_test_EventWorkspace(WEIGHTED_NOTIME, true, false, false);
   }
 
-  void testEventWorkspace_NotInPlace_NoPreserveEvents() {
-    do_test_EventWorkspace(TOF, false, false, false);
-  }
+  void testEventWorkspace_NotInPlace_NoPreserveEvents() { do_test_EventWorkspace(TOF, false, false, false); }
 
   void testEventWorkspace_NotInPlace_NoPreserveEvents_weighted() {
     do_test_EventWorkspace(WEIGHTED, false, false, false);
@@ -351,13 +331,9 @@ public:
     do_test_EventWorkspace(WEIGHTED_NOTIME, false, false, false);
   }
 
-  void testEventWorkspace_NotInPlace_PreserveEvents() {
-    do_test_EventWorkspace(TOF, false, true, true);
-  }
+  void testEventWorkspace_NotInPlace_PreserveEvents() { do_test_EventWorkspace(TOF, false, true, true); }
 
-  void testEventWorkspace_NotInPlace_PreserveEvents_weighted() {
-    do_test_EventWorkspace(WEIGHTED, false, true, true);
-  }
+  void testEventWorkspace_NotInPlace_PreserveEvents_weighted() { do_test_EventWorkspace(WEIGHTED, false, true, true); }
 
   void testEventWorkspace_NotInPlace_PreserveEvents_weightedNoTime() {
     do_test_EventWorkspace(WEIGHTED_NOTIME, false, true, true);
@@ -367,19 +343,15 @@ public:
     Workspace2D_sptr input = Create1DWorkspace(51);
     AnalysisDataService::Instance().add("test_RebinPointDataInput", input);
 
-    Mantid::API::Algorithm_sptr ctpd =
-        Mantid::API::AlgorithmFactory::Instance().create("ConvertToPointData",
-                                                         1);
+    Mantid::API::Algorithm_sptr ctpd = Mantid::API::AlgorithmFactory::Instance().create("ConvertToPointData", 1);
     ctpd->initialize();
     ctpd->setPropertyValue("InputWorkspace", "test_RebinPointDataInput");
     ctpd->setPropertyValue("OutputWorkspace", "test_RebinPointDataInput");
     ctpd->execute();
 
-    Mantid::API::Algorithm_sptr reb =
-        Mantid::API::AlgorithmFactory::Instance().create("Rebin", 1);
+    Mantid::API::Algorithm_sptr reb = Mantid::API::AlgorithmFactory::Instance().create("Rebin", 1);
     reb->initialize();
-    TS_ASSERT_THROWS_NOTHING(
-        reb->setPropertyValue("InputWorkspace", "test_RebinPointDataInput"));
+    TS_ASSERT_THROWS_NOTHING(reb->setPropertyValue("InputWorkspace", "test_RebinPointDataInput"));
     reb->setPropertyValue("OutputWorkspace", "test_RebinPointDataOutput");
     reb->setPropertyValue("Params", "7,0.75,23");
     TS_ASSERT_THROWS_NOTHING(reb->execute());
@@ -414,14 +386,11 @@ public:
     TS_ASSERT(rebin.execute());
     TS_ASSERT(rebin.isExecuted());
     MatrixWorkspace_sptr rebindata =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "test_Rebin_masked_ws");
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_Rebin_masked_ws");
     auto &outX = rebindata->x(0);
     auto &outY = rebindata->y(0);
 
-    MatrixWorkspace_sptr input =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "test_Rebin_mask_dist");
+    MatrixWorkspace_sptr input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_Rebin_mask_dist");
     auto &inX = input->x(0);
     auto &inY = input->y(0);
 
@@ -436,8 +405,7 @@ public:
     // the degree of masking must be the same as the reduction in the y-value,
     // for distributions, this is the easy case
     for (size_t i = 0; i < outY.size(); ++i) {
-      size_t inBin =
-          std::lower_bound(inX.begin(), inX.end(), outX[i]) - inX.begin();
+      size_t inBin = std::lower_bound(inX.begin(), inX.end(), outX[i]) - inX.begin();
       if (inBin < inX.size() - 2) {
         TS_ASSERT_DELTA(outY[i] / inY[inBin], 1 - weights[i], 0.000001);
       }
@@ -466,9 +434,7 @@ public:
     rebin.setPropertyValue("Params", "1.5,3.0,12,-0.1,30");
     rebin.execute();
 
-    MatrixWorkspace_sptr input =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "test_Rebin_unmasked");
+    MatrixWorkspace_sptr input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_Rebin_unmasked");
     auto &inX = input->x(0);
     auto &inY = input->y(0);
 
@@ -478,9 +444,7 @@ public:
     rebin.setPropertyValue("OutputWorkspace", "test_Rebin_masked_ws");
     rebin.setPropertyValue("Params", "1.5,3.0,12,-0.1,30");
     rebin.execute();
-    MatrixWorkspace_sptr masked =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "test_Rebin_masked_ws");
+    MatrixWorkspace_sptr masked = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_Rebin_masked_ws");
     auto &outX = masked->x(0);
     auto &outY = masked->y(0);
 
@@ -495,8 +459,7 @@ public:
     // the degree of masking must be the same as the reduction in the y-value,
     // for distributions, this is the easy case
     for (size_t i = 0; i < outY.size(); ++i) {
-      size_t inBin =
-          std::lower_bound(inX.begin(), inX.end(), outX[i]) - inX.begin();
+      size_t inBin = std::lower_bound(inX.begin(), inX.end(), outX[i]) - inX.begin();
       if (inBin < inX.size() - 2) {
         TS_ASSERT_DELTA(outY[i] / inY[inBin], 1 - weights[i], 0.000001);
       }
@@ -527,28 +490,18 @@ public:
     do_test_FullBinsOnly(params, yExpected, xExpected);
   }
 
-  void test_parallel_cloned() {
-    ParallelTestHelpers::runParallel(run_rebin,
-                                     "Parallel::StorageMode::Cloned");
-  }
+  void test_parallel_cloned() { ParallelTestHelpers::runParallel(run_rebin, "Parallel::StorageMode::Cloned"); }
 
   void test_parallel_distributed() {
-    ParallelTestHelpers::runParallel(run_rebin,
-                                     "Parallel::StorageMode::Distributed");
+    ParallelTestHelpers::runParallel(run_rebin, "Parallel::StorageMode::Distributed");
   }
 
-  void test_parallel_master_only() {
-    ParallelTestHelpers::runParallel(run_rebin,
-                                     "Parallel::StorageMode::MasterOnly");
-  }
+  void test_parallel_master_only() { ParallelTestHelpers::runParallel(run_rebin, "Parallel::StorageMode::MasterOnly"); }
 
   void test_parallel_only_bin_width() {
-    ParallelTestHelpers::runParallel(run_rebin_params_only_bin_width,
-                                     "Parallel::StorageMode::Cloned");
-    ParallelTestHelpers::runParallel(run_rebin_params_only_bin_width,
-                                     "Parallel::StorageMode::Distributed");
-    ParallelTestHelpers::runParallel(run_rebin_params_only_bin_width,
-                                     "Parallel::StorageMode::MasterOnly");
+    ParallelTestHelpers::runParallel(run_rebin_params_only_bin_width, "Parallel::StorageMode::Cloned");
+    ParallelTestHelpers::runParallel(run_rebin_params_only_bin_width, "Parallel::StorageMode::Distributed");
+    ParallelTestHelpers::runParallel(run_rebin_params_only_bin_width, "Parallel::StorageMode::MasterOnly");
   }
 
 private:
@@ -580,8 +533,7 @@ private:
     return retVal;
   }
 
-  void maskFirstBins(const std::string &in, const std::string &out,
-                     double maskBinsTo) {
+  void maskFirstBins(const std::string &in, const std::string &out, double maskBinsTo) {
     MaskBins mask;
     mask.initialize();
     mask.setPropertyValue("InputWorkspace", in);
@@ -591,8 +543,7 @@ private:
     mask.execute();
   }
 
-  void do_test_FullBinsOnly(const std::string &params,
-                            const std::vector<double> &yExpected,
+  void do_test_FullBinsOnly(const std::string &params, const std::vector<double> &yExpected,
                             const std::vector<double> &xExpected) {
     ScopedWorkspace inWsEntry(Create1DWorkspace(10));
     ScopedWorkspace outWsEntry;
@@ -629,14 +580,10 @@ class RebinTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static RebinTestPerformance *createSuite() {
-    return new RebinTestPerformance();
-  }
+  static RebinTestPerformance *createSuite() { return new RebinTestPerformance(); }
   static void destroySuite(RebinTestPerformance *suite) { delete suite; }
 
-  RebinTestPerformance() {
-    ws = WorkspaceCreationHelper::create2DWorkspaceBinned(5000, 20000);
-  }
+  RebinTestPerformance() { ws = WorkspaceCreationHelper::create2DWorkspaceBinned(5000, 20000); }
 
   void test_rebin() {
     Rebin rebin;

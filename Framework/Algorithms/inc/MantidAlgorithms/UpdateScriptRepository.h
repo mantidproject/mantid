@@ -21,14 +21,10 @@ class MANTID_ALGORITHMS_DLL UpdateScriptRepository : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Update the local instance of ScriptRepository.";
-  }
+  const std::string summary() const override { return "Update the local instance of ScriptRepository."; }
 
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"DownloadInstrument"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"DownloadInstrument"}; }
   const std::string category() const override;
 
 private:

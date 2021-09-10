@@ -16,10 +16,10 @@ The runs are specified in a `TableWorkspace` and given as the *SetupTable* input
 Each row in the *SetupTable* corresponds to a single run of the managed algorithm. Its properties are set without modifications from the corresponding columns of the row except for special input/output columns declare in the *InputOutputMap*. For example, two independent runs of the :ref:`algm-Scale` would be specified as
 
 =======  ==============  ===============  ======  =========
-Id       InputWorkspace  OutputWorkspace  Factor  Operation 
+Id       InputWorkspace  OutputWorkspace  Factor  Operation
 =======  ==============  ===============  ======  =========
-1st run  ws1             ws1              0.42    Multiply  
-2nd run  ws2             scaled_ws2       100     Multiply  
+1st run  ws1             ws1              0.42    Multiply
+2nd run  ws2             scaled_ws2       100     Multiply
 =======  ==============  ===============  ======  =========
 
 The *Operation* column could have been omitted in the above to use the default value of the *Operation* property of `Scale`.
@@ -71,7 +71,7 @@ Usage
     # This is our initial workspace. We want to scale it first by 100
     # and then by 0.42
     CreateSingleValuedWorkspace(OutputWorkspace='ws2', DataValue=1.0)
-    
+
     # Setup the runs for the Scale algorithm
     setupTable = WorkspaceFactoryImpl.Instance().createTable()
     setupTable.addColumn('str', 'Run name') # First column can have arbitrary name.
@@ -94,16 +94,16 @@ Usage
     }
     setupTable.addRow(row)
     AnalysisDataServiceImpl.Instance().addOrReplace('setupTable', setupTable)
-    
+
     # Map OutputWorkspace to InputWorkspace
     ioMap = WorkspaceFactoryImpl.Instance().createTable()
     ioMap.addColumn('str', 'InputWorkspace')
     ioMap.addRow({'InputWorkspace': 'OutputWorkspace'})
     AnalysisDataServiceImpl.Instance().addOrReplace('ioMapTable', ioMap)
-    
+
     # Execute the algorithm
     WorkflowAlgorithmRunner('Scale', SetupTable=setupTable, InputOutputMap=ioMap)
-    
+
     # Print some results
     print('Original input value: {0}'.format(mtd['ws2'].dataY(0)[0]))
     print('After scaling by 100: {0}'.format(mtd['scaled_ws2'].dataY(0)[0]))

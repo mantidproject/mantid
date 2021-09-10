@@ -24,8 +24,7 @@ namespace Reflectometry {
 /** SpecularReflectionPositionCorrect : Algorithm to perform position
 corrections based on the specular reflection condition. Version 2.
 */
-class MANTID_REFLECTOMETRY_DLL SpecularReflectionPositionCorrect2 final
-    : public API::Algorithm {
+class MANTID_REFLECTOMETRY_DLL SpecularReflectionPositionCorrect2 final : public API::Algorithm {
 public:
   /// Name of this algorithm
   const std::string name() const override;
@@ -43,21 +42,14 @@ private:
   void init() override;
   std::map<std::string, std::string> validateInputs() override;
   void exec() override;
-  void correctDetectorPosition(API::MatrixWorkspace_sptr &outWS,
-                               const std::string &detectorName,
-                               const detid_t detectorID,
-                               const double twoThetaInRad,
-                               const std::string &correctionType,
-                               const Geometry::ReferenceFrame &referenceFrame,
-                               const Kernel::V3D &samplePosition,
-                               const Kernel::V3D &sampleToDetector,
-                               const double beamOffsetOld);
-  static Kernel::V3D declareDetectorPosition(const Geometry::Instrument &inst,
-                                             const std::string &detectorName,
+  void correctDetectorPosition(API::MatrixWorkspace_sptr &outWS, const std::string &detectorName,
+                               const detid_t detectorID, const double twoThetaInRad, const std::string &correctionType,
+                               const Geometry::ReferenceFrame &referenceFrame, const Kernel::V3D &samplePosition,
+                               const Kernel::V3D &sampleToDetector, const double beamOffsetOld);
+  static Kernel::V3D declareDetectorPosition(const Geometry::Instrument &inst, const std::string &detectorName,
                                              const detid_t detectorID);
   Kernel::V3D declareSamplePosition(const API::MatrixWorkspace &ws);
-  double twoThetaFromProperties(const API::MatrixWorkspace &inWS,
-                                const double l2);
+  double twoThetaFromProperties(const API::MatrixWorkspace &inWS, const double l2);
 };
 
 } // namespace Reflectometry

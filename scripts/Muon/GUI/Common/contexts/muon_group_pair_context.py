@@ -7,7 +7,8 @@
 import os
 from math import floor
 import Muon.GUI.Common.utilities.xml_utils as xml_utils
-from Muon.GUI.Common.muon_group import MuonGroup, MuonDiff
+from Muon.GUI.Common.muon_diff import MuonDiff
+from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.muon_phasequad import MuonPhasequad
 from Muon.GUI.Common.muon_base_pair import MuonBasePair
@@ -40,7 +41,7 @@ def get_grouping_psi(workspace):
                 grouping_list.append(MuonGroup(sample_log_value, [ii + 1]))
             sample_log_value_list.append(sample_log_value)
 
-    return grouping_list, [], ''
+    return grouping_list, [], [], ''
 
 
 def get_default_grouping(workspace, instrument, main_field_direction):
@@ -56,7 +57,7 @@ def get_default_grouping(workspace, instrument, main_field_direction):
                 grouping_file = workspace.getInstrument().getStringParameter(parameter_name)[0]
 
         except IndexError:
-            return [], [], ''
+            return [], [], [], ''
     else:
         return get_grouping_psi(workspace)
     instrument_directory = ConfigServiceImpl.Instance().getInstrumentDirectory()
@@ -154,20 +155,23 @@ class MuonGroupPairContext(object):
         return self.groups + self.pairs + self.diffs
 
     @property
-    def selected_pairs(self):
-        return self._selected_pairs
+    def selected_groups(self) -> list:
+        """Returns the selected group names. Ensures the order of the returned group names is correct."""
+        return [group.name for group in self.groups if group.name in self._selected_groups]
 
     @property
-    def selected_groups(self):
-        return self._selected_groups
+    def selected_pairs(self) -> list:
+        """Returns the selected pair names. Ensures the order of the returned pair names is correct."""
+        return [pair.name for pair in self.pairs if pair.name in self._selected_pairs]
 
     @property
-    def selected_diffs(self):
-        return self._selected_diffs
+    def selected_diffs(self) -> list:
+        """Returns the selected diff names. Ensures the order of the returned diff names is correct."""
+        return [diff.name for diff in self.diffs if diff.name in self._selected_diffs]
 
     @property
     def selected_groups_and_pairs(self):
-        return self.selected_groups+self.selected_pairs+self.selected_diffs
+        return self.selected_groups + self.selected_pairs + self.selected_diffs
 
     def clear(self):
         self.clear_groups()
@@ -278,6 +282,10 @@ class MuonGroupPairContext(object):
                     self._phasequad.remove(phasequad_obj)
                 return
 
+    def update_phase_tables(self, table):
+        for index, _ in enumerate(self._phasequad):
+            self._phasequad[index].phase_table = table
+
     def add_diff(self, diff):
         assert isinstance(diff, MuonDiff)
         if self._check_name_unique(diff.name):
@@ -331,6 +339,16 @@ class MuonGroupPairContext(object):
             if item.name == name:
                 return False
         return True
+
+    def get_group_counts_workspace_names(self, runs, groups, rebin=False):
+        workspace_names = []
+        for group_name in groups:
+            try:
+                name = self[group_name].get_counts_workspace_for_run(runs, rebin)
+                workspace_names.append(name)
+            except KeyError:
+                continue
+        return workspace_names
 
     def get_group_workspace_names(self, runs, groups, rebin):
         workspace_list = []

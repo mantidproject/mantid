@@ -24,7 +24,7 @@ Documentation
 
 |
 
-This work on imaging has received funding from the Horizon 2020 Framework 
+This work on imaging has received funding from the Horizon 2020 Framework
 Programme of the European Union under the SINE2020 project Grant No 654000.
 
 |

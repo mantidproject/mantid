@@ -25,18 +25,15 @@ class GenericDataProcessorPresenterRowReducerWorker : public QObject {
   Q_OBJECT
 
 public:
-  GenericDataProcessorPresenterRowReducerWorker(
-      GenericDataProcessorPresenter *presenter, RowData_sptr rowData,
-      const int rowIndex, const int groupIndex)
-      : m_presenter(presenter), m_rowData(std::move(rowData)),
-        m_rowIndex(rowIndex), m_groupIndex(groupIndex) {}
+  GenericDataProcessorPresenterRowReducerWorker(GenericDataProcessorPresenter *presenter, RowData_sptr rowData,
+                                                const int rowIndex, const int groupIndex)
+      : m_presenter(presenter), m_rowData(std::move(rowData)), m_rowIndex(rowIndex), m_groupIndex(groupIndex) {}
 
 private slots:
   void startWorker() {
     try {
       m_presenter->reduceRow(m_rowData);
-      m_presenter->m_manager->update(m_groupIndex, m_rowIndex,
-                                     m_rowData->data());
+      m_presenter->m_manager->update(m_groupIndex, m_rowIndex, m_rowData->data());
       m_presenter->m_manager->setProcessed(true, m_rowIndex, m_groupIndex);
       emit finished(0);
     } catch (std::exception &ex) {
@@ -58,9 +55,7 @@ private:
 
   void handleError(const std::string &errorMessage) {
     m_presenter->m_manager->setProcessed(true, m_rowIndex, m_groupIndex);
-    m_presenter->m_manager->setError(std::string("Row reduction failed: ") +
-                                         errorMessage,
-                                     m_rowIndex, m_groupIndex);
+    m_presenter->m_manager->setError(std::string("Row reduction failed: ") + errorMessage, m_rowIndex, m_groupIndex);
     emit reductionErrorSignal(QString::fromStdString(errorMessage));
     emit finished(1);
   }

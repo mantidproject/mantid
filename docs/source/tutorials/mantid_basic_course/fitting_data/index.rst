@@ -1,15 +1,15 @@
-.. _fitting_data: 
+.. _fitting_data:
 
 ============
-Fitting Data 
+Fitting Data
 ============
 
 Regression analysis was developed throughout the 18th Century, leading to the first descriptions of Least Squares fitting by Legendre in 1805 and Gauss in 1809.
 
-.. toctree:: 
-   :hidden: 
-   :glob: 
-   :maxdepth: 1 
+.. toctree::
+   :hidden:
+   :glob:
+   :maxdepth: 1
 
    01_fitting_models_to_data
    02_complex_case
@@ -17,7 +17,7 @@ Regression analysis was developed throughout the 18th Century, leading to the fi
    04_intelligent_fitting
    05_fitting_exercises
 
-**Sections** 
+**Sections**
 
 * :ref:`01_fitting_models_to_data`
 * :ref:`02_complex_case`

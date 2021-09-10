@@ -30,9 +30,8 @@ using namespace Mantid::API;
 //----------------------
 /// Constructor
 DataComparison::DataComparison(QWidget *parent)
-    : UserSubWindow(parent), WorkspaceObserver(), m_plot(new QwtPlot(parent)),
-      m_zoomTool(nullptr), m_panTool(nullptr), m_magnifyTool(nullptr),
-      m_diffWorkspaceNames(qMakePair(QString(), QString())) {
+    : UserSubWindow(parent), WorkspaceObserver(), m_plot(new QwtPlot(parent)), m_zoomTool(nullptr), m_panTool(nullptr),
+      m_magnifyTool(nullptr), m_diffWorkspaceNames(qMakePair(QString(), QString())) {
   observeAfterReplace();
   observeRename();
   observePreDelete();
@@ -42,10 +41,8 @@ DataComparison::DataComparison(QWidget *parent)
 void DataComparison::initLayout() {
   m_uiForm.setupUi(this);
 
-  m_zoomTool =
-      new QwtPlotZoomer(QwtPlot::xBottom, QwtPlot::yLeft,
-                        QwtPicker::DragSelection | QwtPicker::CornerToCorner,
-                        QwtPicker::AlwaysOff, m_plot->canvas());
+  m_zoomTool = new QwtPlotZoomer(QwtPlot::xBottom, QwtPlot::yLeft, QwtPicker::DragSelection | QwtPicker::CornerToCorner,
+                                 QwtPicker::AlwaysOff, m_plot->canvas());
   m_zoomTool->setEnabled(false);
 
   m_panTool = new QwtPlotPanner(m_plot->canvas());
@@ -61,13 +58,10 @@ void DataComparison::initLayout() {
   // Connect push buttons
   connect(m_uiForm.pbAddData, SIGNAL(clicked()), this, SLOT(addData()));
 
-  connect(m_uiForm.pbRemoveSelectedData, SIGNAL(clicked()), this,
-          SLOT(removeSelectedData()));
-  connect(m_uiForm.pbRemoveAllData, SIGNAL(clicked()), this,
-          SLOT(removeAllData()));
+  connect(m_uiForm.pbRemoveSelectedData, SIGNAL(clicked()), this, SLOT(removeSelectedData()));
+  connect(m_uiForm.pbRemoveAllData, SIGNAL(clicked()), this, SLOT(removeAllData()));
 
-  connect(m_uiForm.pbDiffSelected, SIGNAL(clicked()), this,
-          SLOT(diffSelected()));
+  connect(m_uiForm.pbDiffSelected, SIGNAL(clicked()), this, SLOT(diffSelected()));
   connect(m_uiForm.pbClearDiff, SIGNAL(clicked()), this, SLOT(clearDiff()));
 
   connect(m_uiForm.pbPan, SIGNAL(toggled(bool)), this, SLOT(togglePan(bool)));
@@ -75,8 +69,7 @@ void DataComparison::initLayout() {
   connect(m_uiForm.pbResetView, SIGNAL(clicked()), this, SLOT(resetView()));
 
   // Replot spectra when the workspace index is changed
-  connect(m_uiForm.sbSpectrum, SIGNAL(valueChanged(int)), this,
-          SLOT(workspaceIndexChanged()));
+  connect(m_uiForm.sbSpectrum, SIGNAL(valueChanged(int)), this, SLOT(workspaceIndexChanged()));
 
   // Add headers to data table
   QStringList headerLabels;
@@ -105,11 +98,8 @@ void DataComparison::addData() {
     return;
 
   // Get the workspace
-  Workspace_const_sptr ws =
-      AnalysisDataService::Instance().retrieveWS<Workspace>(
-          dataName.toStdString());
-  WorkspaceGroup_const_sptr wsGroup =
-      std::dynamic_pointer_cast<const WorkspaceGroup>(ws);
+  Workspace_const_sptr ws = AnalysisDataService::Instance().retrieveWS<Workspace>(dataName.toStdString());
+  WorkspaceGroup_const_sptr wsGroup = std::dynamic_pointer_cast<const WorkspaceGroup>(ws);
 
   m_uiForm.twCurrentData->blockSignals(true);
 
@@ -141,8 +131,7 @@ void DataComparison::addData() {
  */
 void DataComparison::addDataItem(const Workspace_const_sptr &ws) {
   // Check that the workspace is the correct type
-  MatrixWorkspace_const_sptr matrixWs =
-      std::dynamic_pointer_cast<const MatrixWorkspace>(ws);
+  MatrixWorkspace_const_sptr matrixWs = std::dynamic_pointer_cast<const MatrixWorkspace>(ws);
   if (!matrixWs) {
     g_log.error() << "Workspace " << ws->getName() << "is of incorrect type!\n";
     return;
@@ -150,8 +139,7 @@ void DataComparison::addDataItem(const Workspace_const_sptr &ws) {
 
   // Check that the workspace does not already exist in the comparison
   if (containsWorkspace(matrixWs)) {
-    g_log.information() << "Workspace " << matrixWs->getName()
-                        << " already shown in comparison.\n";
+    g_log.information() << "Workspace " << matrixWs->getName() << " already shown in comparison.\n";
     return;
   }
 
@@ -183,8 +171,7 @@ void DataComparison::addDataItem(const Workspace_const_sptr &ws) {
   // Set the initial colour
   colourCombo->setCurrentIndex(getInitialColourIndex());
   // Update plots when colour changed
-  connect(colourCombo, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(plotWorkspaces()));
+  connect(colourCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(plotWorkspaces()));
   // Add widget to table
   m_uiForm.twCurrentData->setCellWidget(currentRows, COLOUR, colourCombo);
 
@@ -197,8 +184,7 @@ void DataComparison::addDataItem(const Workspace_const_sptr &ws) {
   auto *offsetSpin = new QSpinBox();
   offsetSpin->setMinimum(0);
   offsetSpin->setMaximum(INT_MAX);
-  connect(offsetSpin, SIGNAL(valueChanged(int)), this,
-          SLOT(spectrumIndexChanged()));
+  connect(offsetSpin, SIGNAL(valueChanged(int)), this, SLOT(spectrumIndexChanged()));
   m_uiForm.twCurrentData->setCellWidget(currentRows, SPEC_OFFSET, offsetSpin);
 
   // Insert the current displayed spectra
@@ -217,8 +203,7 @@ bool DataComparison::containsWorkspace(const MatrixWorkspace_const_sptr &ws) {
 
   int numRows = m_uiForm.twCurrentData->rowCount();
   for (int row = 0; row < numRows; row++) {
-    QString workspaceName =
-        m_uiForm.twCurrentData->item(row, WORKSPACE_NAME)->text();
+    QString workspaceName = m_uiForm.twCurrentData->item(row, WORKSPACE_NAME)->text();
     if (workspaceName == testWsName)
       return true;
   }
@@ -242,16 +227,13 @@ int DataComparison::getInitialColourIndex() {
   // Build a list of used colours
   QList<int> usedColours;
   for (int row = 0; row < numRows - 1; row++) {
-    auto *colourSelector = dynamic_cast<QComboBox *>(
-        m_uiForm.twCurrentData->cellWidget(row, COLOUR));
+    auto *colourSelector = dynamic_cast<QComboBox *>(m_uiForm.twCurrentData->cellWidget(row, COLOUR));
     int index = colourSelector->currentIndex();
     usedColours << index;
   }
 
   // Find the smallest unused colour
-  int numColours =
-      dynamic_cast<QComboBox *>(m_uiForm.twCurrentData->cellWidget(0, COLOUR))
-          ->count();
+  int numColours = dynamic_cast<QComboBox *>(m_uiForm.twCurrentData->cellWidget(0, COLOUR))->count();
   for (int i = 0; i < numColours; i++) {
     if (!usedColours.contains(i))
       return i;
@@ -264,19 +246,16 @@ int DataComparison::getInitialColourIndex() {
  * Removes the data currently selected in the table from the plot.
  */
 void DataComparison::removeSelectedData() {
-  QList<QTableWidgetItem *> selectedItems =
-      m_uiForm.twCurrentData->selectedItems();
+  QList<QTableWidgetItem *> selectedItems = m_uiForm.twCurrentData->selectedItems();
 
   while (!selectedItems.isEmpty()) {
     // Get the row number of the item
     int row = selectedItems[0]->row();
 
     // Get workspace name
-    QString workspaceName =
-        m_uiForm.twCurrentData->item(row, WORKSPACE_NAME)->text();
+    QString workspaceName = m_uiForm.twCurrentData->item(row, WORKSPACE_NAME)->text();
 
-    if (m_diffWorkspaceNames.first == workspaceName ||
-        m_diffWorkspaceNames.second == workspaceName) {
+    if (m_diffWorkspaceNames.first == workspaceName || m_diffWorkspaceNames.second == workspaceName) {
       clearDiff();
     }
 
@@ -303,8 +282,7 @@ void DataComparison::removeAllData() {
   int numRows = m_uiForm.twCurrentData->rowCount();
   for (int row = 0; row < numRows; row++) {
     // Get workspace name
-    QString workspaceName =
-        m_uiForm.twCurrentData->item(0, WORKSPACE_NAME)->text();
+    QString workspaceName = m_uiForm.twCurrentData->item(0, WORKSPACE_NAME)->text();
 
     // Remove from data tabel
     m_uiForm.twCurrentData->removeRow(0);
@@ -328,20 +306,16 @@ void DataComparison::plotWorkspaces() {
   int numRows = m_uiForm.twCurrentData->rowCount();
   for (int row = 0; row < numRows; row++) {
     // Get workspace
-    QString workspaceName =
-        m_uiForm.twCurrentData->item(row, WORKSPACE_NAME)->text();
+    QString workspaceName = m_uiForm.twCurrentData->item(row, WORKSPACE_NAME)->text();
     MatrixWorkspace_const_sptr workspace =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            workspaceName.toStdString());
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName.toStdString());
     int numSpec = static_cast<int>(workspace->getNumberHistograms());
 
     // Calculate spectrum number
-    QSpinBox *specOffsetSpin = dynamic_cast<QSpinBox *>(
-        m_uiForm.twCurrentData->cellWidget(row, SPEC_OFFSET));
+    QSpinBox *specOffsetSpin = dynamic_cast<QSpinBox *>(m_uiForm.twCurrentData->cellWidget(row, SPEC_OFFSET));
     int specOffset = specOffsetSpin->value();
     int wsIndex = globalWsIndex - specOffset;
-    g_log.debug() << "Workspace index for workspace "
-                  << workspaceName.toStdString() << " is " << wsIndex
+    g_log.debug() << "Workspace index for workspace " << workspaceName.toStdString() << " is " << wsIndex
                   << ", with offset " << specOffset << '\n';
 
     // See if this workspace extends the reach of the global spectrum selector
@@ -351,8 +325,7 @@ void DataComparison::plotWorkspaces() {
 
     // Check the workspace index is in range
     if (wsIndex >= numSpec || wsIndex < 0) {
-      g_log.debug() << "Workspace " << workspaceName.toStdString()
-                    << ", workspace index out of range.\n";
+      g_log.debug() << "Workspace " << workspaceName.toStdString() << ", workspace index out of range.\n";
       ;
 
       // Give "n/a" in current spectrum display
@@ -366,23 +339,18 @@ void DataComparison::plotWorkspaces() {
     }
 
     // Update current spectrum display
-    m_uiForm.twCurrentData->item(row, CURRENT_SPEC)
-        ->setText(tr(std::to_string(wsIndex).c_str()));
+    m_uiForm.twCurrentData->item(row, CURRENT_SPEC)->setText(tr(std::to_string(wsIndex).c_str()));
 
     // Create the curve data
     const bool logScale(false), distribution(false);
-    QwtWorkspaceSpectrumData wsData(*workspace, static_cast<int>(wsIndex),
-                                    logScale, distribution);
+    QwtWorkspaceSpectrumData wsData(*workspace, static_cast<int>(wsIndex), logScale, distribution);
 
     // Detach the old curve from the plot if it exists
     if (m_curves.contains(workspaceName))
       m_curves[workspaceName]->attach(nullptr);
 
-    auto *colourSelector = dynamic_cast<QComboBox *>(
-        m_uiForm.twCurrentData->cellWidget(row, COLOUR));
-    QColor curveColour =
-        colourSelector->itemData(colourSelector->currentIndex())
-            .value<QColor>();
+    auto *colourSelector = dynamic_cast<QComboBox *>(m_uiForm.twCurrentData->cellWidget(row, COLOUR));
+    QColor curveColour = colourSelector->itemData(colourSelector->currentIndex()).value<QColor>();
 
     // Create a new curve and attach it to the plot
     auto curve = std::make_shared<QwtPlotCurve>();
@@ -414,8 +382,7 @@ void DataComparison::normaliseSpectraOffsets() {
 
   // Find the lowest offset in the data table
   for (int row = 0; row < numRows; row++) {
-    auto *specOffsetSpin = dynamic_cast<QSpinBox *>(
-        m_uiForm.twCurrentData->cellWidget(row, SPEC_OFFSET));
+    auto *specOffsetSpin = dynamic_cast<QSpinBox *>(m_uiForm.twCurrentData->cellWidget(row, SPEC_OFFSET));
     int specOffset = specOffsetSpin->value();
     if (specOffset < lowestOffset)
       lowestOffset = specOffset;
@@ -424,8 +391,7 @@ void DataComparison::normaliseSpectraOffsets() {
   // Subtract the lowest offset from all offsets to ensure at least one offset
   // is zero
   for (int row = 0; row < numRows; row++) {
-    auto *specOffsetSpin = dynamic_cast<QSpinBox *>(
-        m_uiForm.twCurrentData->cellWidget(row, SPEC_OFFSET));
+    auto *specOffsetSpin = dynamic_cast<QSpinBox *>(m_uiForm.twCurrentData->cellWidget(row, SPEC_OFFSET));
     int specOffset = specOffsetSpin->value();
     specOffset -= lowestOffset;
     specOffsetSpin->setValue(specOffset);
@@ -463,17 +429,14 @@ void DataComparison::plotDiffWorkspace() {
     m_diffCurve->attach(nullptr);
 
   // Do nothing if there are not two workspaces
-  if (m_diffWorkspaceNames.first.isEmpty() ||
-      m_diffWorkspaceNames.second.isEmpty())
+  if (m_diffWorkspaceNames.first.isEmpty() || m_diffWorkspaceNames.second.isEmpty())
     return;
 
   // Get pointers to the workspaces to be diffed
   MatrixWorkspace_sptr ws1 =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          m_diffWorkspaceNames.first.toStdString());
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_diffWorkspaceNames.first.toStdString());
   MatrixWorkspace_sptr ws2 =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          m_diffWorkspaceNames.second.toStdString());
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_diffWorkspaceNames.second.toStdString());
 
   int ws1Spec = 0;
   int ws2Spec = 0;
@@ -481,10 +444,8 @@ void DataComparison::plotDiffWorkspace() {
   // Get the current spectrum for each workspace
   int numRows = m_uiForm.twCurrentData->rowCount();
   for (int row = 0; row < numRows; row++) {
-    QString workspaceName =
-        m_uiForm.twCurrentData->item(row, WORKSPACE_NAME)->text();
-    QString currentSpecName =
-        m_uiForm.twCurrentData->item(row, CURRENT_SPEC)->text();
+    QString workspaceName = m_uiForm.twCurrentData->item(row, WORKSPACE_NAME)->text();
+    QString currentSpecName = m_uiForm.twCurrentData->item(row, CURRENT_SPEC)->text();
     bool ok = false;
     bool found = false;
 
@@ -507,40 +468,34 @@ void DataComparison::plotDiffWorkspace() {
   }
 
   // Extract the current spectrum for both workspaces
-  IAlgorithm_sptr extractWs1Alg =
-      AlgorithmManager::Instance().create("ExtractSingleSpectrum");
+  IAlgorithm_sptr extractWs1Alg = AlgorithmManager::Instance().create("ExtractSingleSpectrum");
   extractWs1Alg->setChild(true);
   extractWs1Alg->initialize();
   extractWs1Alg->setProperty("InputWorkspace", ws1);
   extractWs1Alg->setProperty("OutputWorkspace", "__ws1_spec");
   extractWs1Alg->setProperty("WorkspaceIndex", ws1Spec);
   extractWs1Alg->execute();
-  MatrixWorkspace_sptr ws1SpecWs =
-      extractWs1Alg->getProperty("OutputWorkspace");
+  MatrixWorkspace_sptr ws1SpecWs = extractWs1Alg->getProperty("OutputWorkspace");
 
-  IAlgorithm_sptr extractWs2Alg =
-      AlgorithmManager::Instance().create("ExtractSingleSpectrum");
+  IAlgorithm_sptr extractWs2Alg = AlgorithmManager::Instance().create("ExtractSingleSpectrum");
   extractWs2Alg->setChild(true);
   extractWs2Alg->initialize();
   extractWs2Alg->setProperty("InputWorkspace", ws2);
   extractWs2Alg->setProperty("OutputWorkspace", "__ws2_spec");
   extractWs2Alg->setProperty("WorkspaceIndex", ws2Spec);
   extractWs2Alg->execute();
-  MatrixWorkspace_sptr ws2SpecWs =
-      extractWs2Alg->getProperty("OutputWorkspace");
+  MatrixWorkspace_sptr ws2SpecWs = extractWs2Alg->getProperty("OutputWorkspace");
 
   // Rebin the second workspace to the first
   // (needed for identical binning for Minus algorithm)
-  IAlgorithm_sptr rebinAlg =
-      AlgorithmManager::Instance().create("RebinToWorkspace");
+  IAlgorithm_sptr rebinAlg = AlgorithmManager::Instance().create("RebinToWorkspace");
   rebinAlg->setChild(true);
   rebinAlg->initialize();
   rebinAlg->setProperty("WorkspaceToRebin", ws2SpecWs);
   rebinAlg->setProperty("WorkspaceToMatch", ws1SpecWs);
   rebinAlg->setProperty("OutputWorkspace", "__ws2_spec_rebin");
   rebinAlg->execute();
-  MatrixWorkspace_sptr rebinnedWs2SpecWs =
-      rebinAlg->getProperty("OutputWorkspace");
+  MatrixWorkspace_sptr rebinnedWs2SpecWs = rebinAlg->getProperty("OutputWorkspace");
 
   // Subtract the two extracted spectra
   IAlgorithm_sptr minusAlg = AlgorithmManager::Instance().create("Minus");
@@ -561,9 +516,8 @@ void DataComparison::plotDiffWorkspace() {
   m_diffCurve = curve;
 
   // Set info message
-  QString infoMessage =
-      m_diffWorkspaceNames.first + "(" + QString::number(ws1Spec) + ") - " +
-      m_diffWorkspaceNames.second + "(" + QString::number(ws2Spec) + ")";
+  QString infoMessage = m_diffWorkspaceNames.first + "(" + QString::number(ws1Spec) + ") - " +
+                        m_diffWorkspaceNames.second + "(" + QString::number(ws2Spec) + ")";
   m_uiForm.lbDiffInfo->setText(infoMessage);
 }
 
@@ -575,8 +529,7 @@ void DataComparison::plotDiffWorkspace() {
  * Does nothing if there are not 2 workspaces selected.
  */
 void DataComparison::diffSelected() {
-  QList<QTableWidgetItem *> selectedItems =
-      m_uiForm.twCurrentData->selectedItems();
+  QList<QTableWidgetItem *> selectedItems = m_uiForm.twCurrentData->selectedItems();
   QList<int> selectedRows;
 
   // Generate a list of selected row numbers
@@ -588,16 +541,13 @@ void DataComparison::diffSelected() {
 
   // Check there is the correct number of selected items
   if (selectedRows.size() != 2) {
-    g_log.error()
-        << "Need to have exactly 2 workspaces selected for diff (have "
-        << selectedRows.size() << ")\n";
+    g_log.error() << "Need to have exactly 2 workspaces selected for diff (have " << selectedRows.size() << ")\n";
     return;
   }
 
   // Record the workspace names
-  m_diffWorkspaceNames = qMakePair(
-      m_uiForm.twCurrentData->item(selectedRows[0], WORKSPACE_NAME)->text(),
-      m_uiForm.twCurrentData->item(selectedRows[1], WORKSPACE_NAME)->text());
+  m_diffWorkspaceNames = qMakePair(m_uiForm.twCurrentData->item(selectedRows[0], WORKSPACE_NAME)->text(),
+                                   m_uiForm.twCurrentData->item(selectedRows[1], WORKSPACE_NAME)->text());
 
   // Update the plot
   plotWorkspaces();
@@ -669,9 +619,7 @@ void DataComparison::resetView() {
  * @param wsName Name of the workspace being deleted
  * @param ws Pointer to the workspace
  */
-void DataComparison::preDeleteHandle(
-    const std::string &wsName,
-    const std::shared_ptr<Mantid::API::Workspace> &ws) {
+void DataComparison::preDeleteHandle(const std::string &wsName, const std::shared_ptr<Mantid::API::Workspace> &ws) {
   UNUSED_ARG(ws);
   QString oldWsName = QString::fromStdString(wsName);
 
@@ -679,8 +627,7 @@ void DataComparison::preDeleteHandle(
   int numRows = m_uiForm.twCurrentData->rowCount();
   for (int row = 0; row < numRows; row++) {
     // Remove the row
-    QString workspaceName =
-        m_uiForm.twCurrentData->item(row, WORKSPACE_NAME)->text();
+    QString workspaceName = m_uiForm.twCurrentData->item(row, WORKSPACE_NAME)->text();
     if (workspaceName == oldWsName) {
       m_uiForm.twCurrentData->removeRow(row);
       break;
@@ -701,19 +648,16 @@ void DataComparison::preDeleteHandle(
  * @param oldName Old name for the workspace
  * @param newName New name for the workspace
  */
-void DataComparison::renameHandle(const std::string &oldName,
-                                  const std::string &newName) {
+void DataComparison::renameHandle(const std::string &oldName, const std::string &newName) {
   QString oldWsName = QString::fromStdString(oldName);
 
   // Find the row in the data table for the workspace
   int numRows = m_uiForm.twCurrentData->rowCount();
   for (int row = 0; row < numRows; row++) {
     // Rename the workspace in the data table
-    QString workspaceName =
-        m_uiForm.twCurrentData->item(row, WORKSPACE_NAME)->text();
+    QString workspaceName = m_uiForm.twCurrentData->item(row, WORKSPACE_NAME)->text();
     if (workspaceName == oldWsName) {
-      m_uiForm.twCurrentData->item(row, WORKSPACE_NAME)
-          ->setText(QString::fromStdString(newName));
+      m_uiForm.twCurrentData->item(row, WORKSPACE_NAME)->setText(QString::fromStdString(newName));
       break;
     }
   }
@@ -732,9 +676,7 @@ void DataComparison::renameHandle(const std::string &oldName,
  * @param wsName Name of changed workspace
  * @param ws Pointer to changed workspace
  */
-void DataComparison::afterReplaceHandle(
-    const std::string &wsName,
-    const std::shared_ptr<Mantid::API::Workspace> &ws) {
+void DataComparison::afterReplaceHandle(const std::string &wsName, const std::shared_ptr<Mantid::API::Workspace> &ws) {
   UNUSED_ARG(wsName);
   UNUSED_ARG(ws);
 

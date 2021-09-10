@@ -7,7 +7,7 @@ Mantid 3.13.0 Release Notes
 .. figure:: ../../images/Release3-13.png
    :class: screenshot
    :align: right
-   
+
    Mantid introduces project recovery for Mantidplot.
 
 .. contents:: Table of Contents

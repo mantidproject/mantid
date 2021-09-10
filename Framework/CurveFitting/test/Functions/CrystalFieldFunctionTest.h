@@ -59,10 +59,8 @@ public:
     auto fun = FunctionFactory::Instance().createInitialized(cf.asString());
     TS_ASSERT_EQUALS(fun->getAttribute("Ions").asUnquotedString(), "Ce");
     TS_ASSERT_EQUALS(fun->getAttribute("Symmetries").asUnquotedString(), "C2v");
-    TS_ASSERT_EQUALS(fun->getAttribute("Temperatures").asVector(),
-                     std::vector<double>({44}));
-    TS_ASSERT_EQUALS(fun->getAttribute("FWHMs").asVector(),
-                     std::vector<double>({1}));
+    TS_ASSERT_EQUALS(fun->getAttribute("Temperatures").asVector(), std::vector<double>({44}));
+    TS_ASSERT_EQUALS(fun->getAttribute("FWHMs").asVector(), std::vector<double>({1}));
   }
 
   void test_names_ss_with_backgrund() {
@@ -99,10 +97,8 @@ public:
     auto fun = FunctionFactory::Instance().createInitialized(cf.asString());
     TS_ASSERT_EQUALS(fun->getAttribute("Ions").asUnquotedString(), "Ce");
     TS_ASSERT_EQUALS(fun->getAttribute("Symmetries").asUnquotedString(), "C2v");
-    TS_ASSERT_EQUALS(fun->getAttribute("Temperatures").asVector(),
-                     std::vector<double>({44}));
-    TS_ASSERT_EQUALS(fun->getAttribute("FWHMs").asVector(),
-                     std::vector<double>({1}));
+    TS_ASSERT_EQUALS(fun->getAttribute("Temperatures").asVector(), std::vector<double>({44}));
+    TS_ASSERT_EQUALS(fun->getAttribute("FWHMs").asVector(), std::vector<double>({1}));
   }
 
   void test_names_sm() {
@@ -145,10 +141,8 @@ public:
     auto fun = FunctionFactory::Instance().createInitialized(cf.asString());
     TS_ASSERT_EQUALS(fun->getAttribute("Ions").asUnquotedString(), "Ce");
     TS_ASSERT_EQUALS(fun->getAttribute("Symmetries").asUnquotedString(), "C2v");
-    TS_ASSERT_EQUALS(fun->getAttribute("Temperatures").asVector(),
-                     std::vector<double>({44, 50}));
-    TS_ASSERT_EQUALS(fun->getAttribute("FWHMs").asVector(),
-                     std::vector<double>({1, 2}));
+    TS_ASSERT_EQUALS(fun->getAttribute("Temperatures").asVector(), std::vector<double>({44, 50}));
+    TS_ASSERT_EQUALS(fun->getAttribute("FWHMs").asVector(), std::vector<double>({1, 2}));
   }
 
   void test_names_sm_with_background() {
@@ -196,10 +190,8 @@ public:
     auto fun = FunctionFactory::Instance().createInitialized(cf.asString());
     TS_ASSERT_EQUALS(fun->getAttribute("Ions").asUnquotedString(), "Ce");
     TS_ASSERT_EQUALS(fun->getAttribute("Symmetries").asUnquotedString(), "C2v");
-    TS_ASSERT_EQUALS(fun->getAttribute("Temperatures").asVector(),
-                     std::vector<double>({44, 50}));
-    TS_ASSERT_EQUALS(fun->getAttribute("FWHMs").asVector(),
-                     std::vector<double>({1, 2}));
+    TS_ASSERT_EQUALS(fun->getAttribute("Temperatures").asVector(), std::vector<double>({44, 50}));
+    TS_ASSERT_EQUALS(fun->getAttribute("FWHMs").asVector(), std::vector<double>({1, 2}));
   }
 
   void test_names_ms() {
@@ -249,12 +241,9 @@ public:
 
     auto fun = FunctionFactory::Instance().createInitialized(cf.asString());
     TS_ASSERT_EQUALS(fun->getAttribute("Ions").asUnquotedString(), "Ce,Yb");
-    TS_ASSERT_EQUALS(fun->getAttribute("Symmetries").asUnquotedString(),
-                     "C2v,D6h");
-    TS_ASSERT_EQUALS(fun->getAttribute("Temperatures").asVector(),
-                     std::vector<double>({44}));
-    TS_ASSERT_EQUALS(fun->getAttribute("FWHMs").asVector(),
-                     std::vector<double>({1}));
+    TS_ASSERT_EQUALS(fun->getAttribute("Symmetries").asUnquotedString(), "C2v,D6h");
+    TS_ASSERT_EQUALS(fun->getAttribute("Temperatures").asVector(), std::vector<double>({44}));
+    TS_ASSERT_EQUALS(fun->getAttribute("FWHMs").asVector(), std::vector<double>({1}));
   }
 
   void test_names_ms_with_background() {
@@ -307,12 +296,9 @@ public:
 
     auto fun = FunctionFactory::Instance().createInitialized(cf.asString());
     TS_ASSERT_EQUALS(fun->getAttribute("Ions").asUnquotedString(), "Ce,Yb");
-    TS_ASSERT_EQUALS(fun->getAttribute("Symmetries").asUnquotedString(),
-                     "C2v,D6h");
-    TS_ASSERT_EQUALS(fun->getAttribute("Temperatures").asVector(),
-                     std::vector<double>({44}));
-    TS_ASSERT_EQUALS(fun->getAttribute("FWHMs").asVector(),
-                     std::vector<double>({1}));
+    TS_ASSERT_EQUALS(fun->getAttribute("Symmetries").asUnquotedString(), "C2v,D6h");
+    TS_ASSERT_EQUALS(fun->getAttribute("Temperatures").asVector(), std::vector<double>({44}));
+    TS_ASSERT_EQUALS(fun->getAttribute("FWHMs").asVector(), std::vector<double>({1}));
   }
 
   void test_names_mm() {
@@ -372,12 +358,9 @@ public:
 
     auto fun = FunctionFactory::Instance().createInitialized(cf.asString());
     TS_ASSERT_EQUALS(fun->getAttribute("Ions").asUnquotedString(), "Ce,Yb");
-    TS_ASSERT_EQUALS(fun->getAttribute("Symmetries").asUnquotedString(),
-                     "C2v,D6h");
-    TS_ASSERT_EQUALS(fun->getAttribute("Temperatures").asVector(),
-                     std::vector<double>({44, 50}));
-    TS_ASSERT_EQUALS(fun->getAttribute("FWHMs").asVector(),
-                     std::vector<double>({1, 2}));
+    TS_ASSERT_EQUALS(fun->getAttribute("Symmetries").asUnquotedString(), "C2v,D6h");
+    TS_ASSERT_EQUALS(fun->getAttribute("Temperatures").asVector(), std::vector<double>({44, 50}));
+    TS_ASSERT_EQUALS(fun->getAttribute("FWHMs").asVector(), std::vector<double>({1, 2}));
   }
 
   void test_names_mm_with_background() {
@@ -445,21 +428,17 @@ public:
 
     auto fun = FunctionFactory::Instance().createInitialized(cf.asString());
     TS_ASSERT_EQUALS(fun->getAttribute("Ions").asUnquotedString(), "Ce,Yb");
-    TS_ASSERT_EQUALS(fun->getAttribute("Symmetries").asUnquotedString(),
-                     "C2v,D6h");
-    TS_ASSERT_EQUALS(fun->getAttribute("Temperatures").asVector(),
-                     std::vector<double>({44, 50}));
-    TS_ASSERT_EQUALS(fun->getAttribute("FWHMs").asVector(),
-                     std::vector<double>({1, 2}));
+    TS_ASSERT_EQUALS(fun->getAttribute("Symmetries").asUnquotedString(), "C2v,D6h");
+    TS_ASSERT_EQUALS(fun->getAttribute("Temperatures").asVector(), std::vector<double>({44, 50}));
+    TS_ASSERT_EQUALS(fun->getAttribute("FWHMs").asVector(), std::vector<double>({1, 2}));
   }
 
   void test_fit_ss() {
-    std::string fun =
-        "name=CrystalFieldFunction,Ions=Ce,Symmetries=C2v,"
-        "Temperatures=44,FWHMs=2.3,ToleranceIntensity=0.2,B20="
-        "0.37,B22=3.9,B40=-0.03,B42=-0.1,B44=-0.12,pk0.FWHM=2.2,"
-        "pk1.FWHM=1.8,ties=(B60=0,B62=0,B64=0,B66=0,BmolX=0,"
-        "BmolY=0,BmolZ=0,BextX=0,BextY=0,BextZ=0, IntensityScaling=1)";
+    std::string fun = "name=CrystalFieldFunction,Ions=Ce,Symmetries=C2v,"
+                      "Temperatures=44,FWHMs=2.3,ToleranceIntensity=0.2,B20="
+                      "0.37,B22=3.9,B40=-0.03,B42=-0.1,B44=-0.12,pk0.FWHM=2.2,"
+                      "pk1.FWHM=1.8,ties=(B60=0,B62=0,B64=0,B66=0,BmolX=0,"
+                      "BmolY=0,BmolZ=0,BextX=0,BextY=0,BextZ=0, IntensityScaling=1)";
     auto ws = makeDataSS();
     Algorithms::Fit fit;
     fit.initialize();
@@ -482,13 +461,12 @@ public:
     auto sp0 = std::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(0));
     auto sp1 = std::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(1));
 
-    std::string fun =
-        "name=CrystalFieldFunction,Ions=Ce,Symmetries=C2v,"
-        "Temperatures=(10, 50),FWHMs=2.1,ToleranceIntensity=0.1,"
-        "B20=0.37737,B22=3.9770,B40=-0.031787,B42=-0.11611,B44=-0.12544,"
-        "ties=(B60=0,B62=0,B64=0,B66=0,BmolX=0,"
-        "BmolY=0,BmolZ=0,BextX=0,BextY=0,BextZ=0, sp0.IntensityScaling=1, "
-        "sp1.IntensityScaling=1)";
+    std::string fun = "name=CrystalFieldFunction,Ions=Ce,Symmetries=C2v,"
+                      "Temperatures=(10, 50),FWHMs=2.1,ToleranceIntensity=0.1,"
+                      "B20=0.37737,B22=3.9770,B40=-0.031787,B42=-0.11611,B44=-0.12544,"
+                      "ties=(B60=0,B62=0,B64=0,B66=0,BmolX=0,"
+                      "BmolY=0,BmolZ=0,BextX=0,BextY=0,BextZ=0, sp0.IntensityScaling=1, "
+                      "sp1.IntensityScaling=1)";
 
     Algorithms::Fit fit;
     fit.initialize();
@@ -509,19 +487,18 @@ public:
   }
 
   void test_fit_ms() {
-    std::string fun =
-        "name=CrystalFieldFunction,Ions=(Ce, Pr),Symmetries=(C2v, D4h), "
-        "FixAllPeaks=1,"
-        "Temperatures=4,FWHMs=2.0,ToleranceIntensity=0.02,"
-        "ion0.B20=0.37737,ion0.B22=3.9770,ion0.B40=-0.031787,ion0.B42=-0.11611,"
-        "ion0.B44=-0.12544,"
-        "ion1.B20=0.4268, ion1.B40=0.001031, ion1.B44=-0.01996, "
-        "ion1.B60=0.00005, ion1.B64=0.001563,"
-        "ties=(ion0.BmolX=0,ion0.BmolY=0,ion0.BmolZ=0,ion0.BextX=0,ion0.BextY="
-        "0,ion0.BextZ=0, ion0.B60=0,ion0.B62=0,ion0.B64=0,ion0.B66=0, "
-        "ion0.IntensityScaling=1),"
-        "ties=(ion1.BmolX=0,ion1.BmolY=0,ion1.BmolZ=0,ion1.BextX=0,ion1.BextY="
-        "0,ion1.BextZ=0, ion1.IntensityScaling=1),";
+    std::string fun = "name=CrystalFieldFunction,Ions=(Ce, Pr),Symmetries=(C2v, D4h), "
+                      "FixAllPeaks=1,"
+                      "Temperatures=4,FWHMs=2.0,ToleranceIntensity=0.02,"
+                      "ion0.B20=0.37737,ion0.B22=3.9770,ion0.B40=-0.031787,ion0.B42=-0.11611,"
+                      "ion0.B44=-0.12544,"
+                      "ion1.B20=0.4268, ion1.B40=0.001031, ion1.B44=-0.01996, "
+                      "ion1.B60=0.00005, ion1.B64=0.001563,"
+                      "ties=(ion0.BmolX=0,ion0.BmolY=0,ion0.BmolZ=0,ion0.BextX=0,ion0.BextY="
+                      "0,ion0.BextZ=0, ion0.B60=0,ion0.B62=0,ion0.B64=0,ion0.B66=0, "
+                      "ion0.IntensityScaling=1),"
+                      "ties=(ion1.BmolX=0,ion1.BmolY=0,ion1.BmolZ=0,ion1.BextX=0,ion1.BextY="
+                      "0,ion1.BextZ=0, ion1.IntensityScaling=1),";
 
     auto data = makeDataMS();
 
@@ -541,20 +518,19 @@ public:
   }
 
   void test_fit_mm() {
-    std::string fun =
-        "name=CrystalFieldFunction,Ions=(Ce, Pr),Symmetries=(C2v, D4h), "
-        "FixAllPeaks=1,"
-        "Temperatures=(4, 10),FWHMs=2.0,ToleranceIntensity=0.02,"
-        "ion0.B20=0.3773,ion0.B22=3.97,ion0.B40=-0.0317,ion0.B42=-0.116,ion0."
-        "B44=-0.125,"
-        "ion1.B20=0.42, ion1.B40=0.001, ion1.B44=-0.019, ion1.B60=0.000051, "
-        "ion1.B64=0.0015,"
-        "ties=(ion0.BmolX=0,ion0.BmolY=0,ion0.BmolZ=0,ion0.BextX=0,ion0.BextY="
-        "0,ion0.BextZ=0, ion0.B60=0,ion0.B62=0,ion0.B64=0,ion0.B66=0, "
-        "ion0.IntensityScaling=1),"
-        "ties=(ion1.BmolX=0,ion1.BmolY=0,ion1.BmolZ=0,ion1.BextX=0,ion1.BextY="
-        "0,ion1.BextZ=0, ion1.IntensityScaling=1),"
-        "ties=(sp0.IntensityScaling=1, sp1.IntensityScaling=1)";
+    std::string fun = "name=CrystalFieldFunction,Ions=(Ce, Pr),Symmetries=(C2v, D4h), "
+                      "FixAllPeaks=1,"
+                      "Temperatures=(4, 10),FWHMs=2.0,ToleranceIntensity=0.02,"
+                      "ion0.B20=0.3773,ion0.B22=3.97,ion0.B40=-0.0317,ion0.B42=-0.116,ion0."
+                      "B44=-0.125,"
+                      "ion1.B20=0.42, ion1.B40=0.001, ion1.B44=-0.019, ion1.B60=0.000051, "
+                      "ion1.B64=0.0015,"
+                      "ties=(ion0.BmolX=0,ion0.BmolY=0,ion0.BmolZ=0,ion0.BextX=0,ion0.BextY="
+                      "0,ion0.BextZ=0, ion0.B60=0,ion0.B62=0,ion0.B64=0,ion0.B66=0, "
+                      "ion0.IntensityScaling=1),"
+                      "ties=(ion1.BmolX=0,ion1.BmolY=0,ion1.BmolZ=0,ion1.BextX=0,ion1.BextY="
+                      "0,ion1.BextZ=0, ion1.IntensityScaling=1),"
+                      "ties=(sp0.IntensityScaling=1, sp1.IntensityScaling=1)";
 
     auto ws = makeDataMM();
     auto sp0 = std::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(0));
@@ -578,23 +554,22 @@ public:
   }
 
   void test_fit_mm_with_background() {
-    std::string fun =
-        "name=CrystalFieldFunction,Ions=(Ce, Pr),Symmetries=(C2v, D4h), "
-        "FixAllPeaks=1,"
-        "Temperatures=(4, "
-        "10),FWHMs=2.0,ToleranceIntensity=0.001,Background=\"name="
-        "LinearBackground,A0=20,\","
-        "ion0.B20=0.37737,ion0.B22=3.9770,ion0.B40=-0.031787,ion0.B42=-0.11611,"
-        "ion0.B44=-0.12544,"
-        "ion1.B20=0.4268, ion1.B40=0.001031, ion1.B44=-0.01996, "
-        "ion1.B60=0.00005, ion1.B64=0.001563,"
-        "ties=(ion0.BmolX=0,ion0.BmolY=0,ion0.BmolZ=0,ion0.BextX=0,ion0.BextY="
-        "0,ion0.BextZ=0, ion0.B60=0,ion0.B62=0,ion0.B64=0,ion0.B66=0, "
-        "ion0.IntensityScaling=1),"
-        "ties=(ion1.BmolX=0,ion1.BmolY=0,ion1.BmolZ=0,ion1.BextX=0,ion1.BextY="
-        "0,ion1.BextZ=0, ion1.IntensityScaling=1),"
-        "ties=(sp0.IntensityScaling=1, sp1.IntensityScaling=1),"
-        "ties=(sp1.bg.A1 = -sp0.bg.A1)";
+    std::string fun = "name=CrystalFieldFunction,Ions=(Ce, Pr),Symmetries=(C2v, D4h), "
+                      "FixAllPeaks=1,"
+                      "Temperatures=(4, "
+                      "10),FWHMs=2.0,ToleranceIntensity=0.001,Background=\"name="
+                      "LinearBackground,A0=20,\","
+                      "ion0.B20=0.37737,ion0.B22=3.9770,ion0.B40=-0.031787,ion0.B42=-0.11611,"
+                      "ion0.B44=-0.12544,"
+                      "ion1.B20=0.4268, ion1.B40=0.001031, ion1.B44=-0.01996, "
+                      "ion1.B60=0.00005, ion1.B64=0.001563,"
+                      "ties=(ion0.BmolX=0,ion0.BmolY=0,ion0.BmolZ=0,ion0.BextX=0,ion0.BextY="
+                      "0,ion0.BextZ=0, ion0.B60=0,ion0.B62=0,ion0.B64=0,ion0.B66=0, "
+                      "ion0.IntensityScaling=1),"
+                      "ties=(ion1.BmolX=0,ion1.BmolY=0,ion1.BmolZ=0,ion1.BextX=0,ion1.BextY="
+                      "0,ion1.BextZ=0, ion1.IntensityScaling=1),"
+                      "ties=(sp0.IntensityScaling=1, sp1.IntensityScaling=1),"
+                      "ties=(sp1.bg.A1 = -sp0.bg.A1)";
 
     auto ws = makeDataMMwithBackground();
     auto sp0 = std::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(0));
@@ -619,8 +594,7 @@ public:
     TS_ASSERT_DELTA(a1, -0.1001715899, 1e-3);
     TS_ASSERT_DELTA(a1 + function->getParameter("sp1.bg.A1"), 0.0, 1e-10);
 
-    auto new_fun =
-        FunctionFactory::Instance().createInitialized(function->asString());
+    auto new_fun = FunctionFactory::Instance().createInitialized(function->asString());
     TS_ASSERT(new_fun);
 
     auto &ads = API::AnalysisDataService::Instance();
@@ -665,14 +639,13 @@ public:
     auto sp0 = std::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(0));
     auto sp1 = std::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(1));
 
-    std::string fun =
-        "name=CrystalFieldFunction,Ions=\"Ce, Pr\",Symmetries=\"C2v, "
-        "D4h\",PhysicalProperties=\"cv, chi\","
-        "ion0.B20=0.37737,ion0.B22=3.9770, ion0.B40=-0.031787, "
-        "ion0.B42=-0.11611, ion0.B44=-0.12544, ion0.chi.Lambda=0.1,"
-        "ion1.B20=0.4268, ion1.B40=0.001031, ion1.B44=-0.01996, "
-        "ion1.B60=0.00005, ion1.B64=0.001563, ion1.chi.Lambda=0.2, "
-        "ion1.cv.ScaleFactor = 0.1";
+    std::string fun = "name=CrystalFieldFunction,Ions=\"Ce, Pr\",Symmetries=\"C2v, "
+                      "D4h\",PhysicalProperties=\"cv, chi\","
+                      "ion0.B20=0.37737,ion0.B22=3.9770, ion0.B40=-0.031787, "
+                      "ion0.B42=-0.11611, ion0.B44=-0.12544, ion0.chi.Lambda=0.1,"
+                      "ion1.B20=0.4268, ion1.B40=0.001031, ion1.B44=-0.01996, "
+                      "ion1.B60=0.00005, ion1.B64=0.001563, ion1.chi.Lambda=0.2, "
+                      "ion1.cv.ScaleFactor = 0.1";
 
     Algorithms::Fit fit;
     fit.initialize();
@@ -724,19 +697,17 @@ private:
     eval.setProperty("InputWorkspace", ws);
     eval.setPropertyValue("OutputWorkspace", "out");
     eval.execute();
-    auto out =
-        API::AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
+    auto out = API::AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
     API::AnalysisDataService::Instance().clear();
     return out;
   }
 
   WorkspaceGroup_sptr makeDataSM() {
     auto ws = create2DWorkspaceBinned(2, 100, 0.0, 0.5);
-    std::string fun =
-        "name=CrystalFieldMultiSpectrum,Ion=Ce,Temperatures=(10, 50), "
-        "FWHMs=(2, 2),"
-        "ToleranceIntensity=0.1,"
-        "B20=0.37737,B22=3.9770,B40=-0.031787,B42=-0.11611,B44=-0.12544";
+    std::string fun = "name=CrystalFieldMultiSpectrum,Ion=Ce,Temperatures=(10, 50), "
+                      "FWHMs=(2, 2),"
+                      "ToleranceIntensity=0.1,"
+                      "B20=0.37737,B22=3.9770,B40=-0.031787,B42=-0.11611,B44=-0.12544";
     Algorithms::EvaluateFunction eval;
     eval.initialize();
     eval.setProperty("Function", fun);
@@ -753,10 +724,9 @@ private:
 
   MatrixWorkspace_sptr makeDataMS() {
     auto ws = create2DWorkspaceBinned(1, 100, 0.0, 0.5);
-    std::string fun =
-        "name=CrystalFieldSpectrum,Ion=Pr, Symmetry=D4h,Temperature=4, FWHM=2,"
-        "ToleranceIntensity=0.001,B20=0.4268, B40=0.001031, B44=-0.01996, "
-        "B60=0.00005, B64=0.001563";
+    std::string fun = "name=CrystalFieldSpectrum,Ion=Pr, Symmetry=D4h,Temperature=4, FWHM=2,"
+                      "ToleranceIntensity=0.001,B20=0.4268, B40=0.001031, B44=-0.01996, "
+                      "B60=0.00005, B64=0.001563";
     std::string fun1 = "name=CrystalFieldSpectrum,Ion=Ce,Temperature=4, FWHM=2,"
                        "ToleranceIntensity=0.001,B20=0.37737,B22=3.9770,B40=-0."
                        "031787,B42=-0.11611,B44=-0.12544";
@@ -766,8 +736,7 @@ private:
     eval.setProperty("InputWorkspace", ws);
     eval.setPropertyValue("OutputWorkspace", "out");
     eval.execute();
-    auto out =
-        API::AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
+    auto out = API::AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
     API::AnalysisDataService::Instance().clear();
     return out;
   }
@@ -778,10 +747,9 @@ private:
                       "Symmetry=D4h,Temperatures=(4, 10), FWHMs=2,"
                       "ToleranceIntensity=0.001,B20=0.4268, B40=0.001031, "
                       "B44=-0.01996, B60=0.00005, B64=0.001563";
-    std::string fun1 =
-        "name=CrystalFieldMultiSpectrum,Ion=Ce,Temperatures=(4, 10), FWHMs=2,"
-        "ToleranceIntensity=0.001,B20=0.37737,B22=3.9770,B40=-0.031787,B42=-0."
-        "11611,B44=-0.12544";
+    std::string fun1 = "name=CrystalFieldMultiSpectrum,Ion=Ce,Temperatures=(4, 10), FWHMs=2,"
+                       "ToleranceIntensity=0.001,B20=0.37737,B22=3.9770,B40=-0.031787,B42=-0."
+                       "11611,B44=-0.12544";
     Algorithms::EvaluateFunction eval;
     eval.initialize();
     eval.setProperty("Function", fun + ";" + fun1);
@@ -802,11 +770,10 @@ private:
                        "Symmetry=D4h,Temperatures=(4, 10), FWHMs=2,"
                        "ToleranceIntensity=0.001,B20=0.4268, B40=0.001031, "
                        "B44=-0.01996, B60=0.00005, B64=0.001563";
-    std::string fun =
-        "name=CrystalFieldMultiSpectrum,Ion=Ce,Temperatures=(4, 10), "
-        "FWHMs=2,Background=\"name=LinearBackground,A0=20,A1=-0.11\","
-        "ToleranceIntensity=0.001,B20=0.37737,B22=3.9770,B40=-0.031787,B42=-0."
-        "11611,B44=-0.12544,f1.f0.A0=10,f1.f0.A1=0.09";
+    std::string fun = "name=CrystalFieldMultiSpectrum,Ion=Ce,Temperatures=(4, 10), "
+                      "FWHMs=2,Background=\"name=LinearBackground,A0=20,A1=-0.11\","
+                      "ToleranceIntensity=0.001,B20=0.37737,B22=3.9770,B40=-0.031787,B42=-0."
+                      "11611,B44=-0.12544,f1.f0.A0=10,f1.f0.A1=0.09";
     Algorithms::EvaluateFunction eval;
     eval.initialize();
     eval.setProperty("Function", fun + ";" + fun1);
@@ -844,14 +811,13 @@ private:
   WorkspaceGroup_sptr makeDataMP() {
     auto ws0 = create2DWorkspaceBinned(1, 100, 0.0, 0.5);
     auto ws1 = create2DWorkspaceBinned(1, 100, 0.0, 0.3);
-    std::string fun =
-        "name=CrystalFieldFunction,Ions=\"Ce, Pr\",Symmetries=\"C2v, "
-        "D4h\",PhysicalProperties=\"cv, chi\","
-        "ion0.B20=0.37737,ion0.B22=3.9770, ion0.B40=-0.031787, "
-        "ion0.B42=-0.11611, ion0.B44=-0.12544, ion0.chi.Lambda=0.,"
-        "ion1.B20=0.4268, ion1.B40=0.001031, ion1.B44=-0.01996, "
-        "ion1.B60=0.00005, ion1.B64=0.001563, ion1.chi.Lambda=0., "
-        "ion1.cv.ScaleFactor = 0.1";
+    std::string fun = "name=CrystalFieldFunction,Ions=\"Ce, Pr\",Symmetries=\"C2v, "
+                      "D4h\",PhysicalProperties=\"cv, chi\","
+                      "ion0.B20=0.37737,ion0.B22=3.9770, ion0.B40=-0.031787, "
+                      "ion0.B42=-0.11611, ion0.B44=-0.12544, ion0.chi.Lambda=0.,"
+                      "ion1.B20=0.4268, ion1.B40=0.001031, ion1.B44=-0.01996, "
+                      "ion1.B60=0.00005, ion1.B64=0.001563, ion1.chi.Lambda=0., "
+                      "ion1.cv.ScaleFactor = 0.1";
     Algorithms::EvaluateFunction eval;
     eval.initialize();
     eval.setProperty("Function", fun);

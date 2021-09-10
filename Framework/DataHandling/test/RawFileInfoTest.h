@@ -52,9 +52,8 @@ private:
     std::string title = alg.getProperty("RunTitle");
     TS_ASSERT_EQUALS(title, std::string("direct beam"));
     std::string header = alg.getProperty("RunHeader");
-    TS_ASSERT_EQUALS(header,
-                     std::string("LOQ 48127 LOQ team & SANS Xpre direct beam   "
-                                 "           18-DEC-2008  17:58:38    10.04"));
+    TS_ASSERT_EQUALS(header, std::string("LOQ 48127 LOQ team & SANS Xpre direct beam   "
+                                         "           18-DEC-2008  17:58:38    10.04"));
     int spectra_count = alg.getProperty("SpectraCount"); // 7290
     TS_ASSERT_EQUALS(spectra_count, 8);
 
@@ -65,17 +64,13 @@ private:
     TS_ASSERT_EQUALS(prd_count, 1);
 
     // Finally test that a workspace existence is correct
-    TS_ASSERT_EQUALS(
-        Mantid::API::AnalysisDataService::Instance().doesExist("Raw_RPB"),
-        tableToExist);
+    TS_ASSERT_EQUALS(Mantid::API::AnalysisDataService::Instance().doesExist("Raw_RPB"), tableToExist);
 
     if (tableToExist) {
-      Mantid::API::Workspace_sptr workspace =
-          Mantid::API::AnalysisDataService::Instance().retrieve("Raw_RPB");
+      Mantid::API::Workspace_sptr workspace = Mantid::API::AnalysisDataService::Instance().retrieve("Raw_RPB");
       TS_ASSERT(workspace.get());
 
-      Mantid::API::ITableWorkspace_sptr run_table =
-          std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(workspace);
+      Mantid::API::ITableWorkspace_sptr run_table = std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(workspace);
       TS_ASSERT(run_table.get());
 
       // Check a couple of things
@@ -96,8 +91,7 @@ private:
     }
 
     if (getSampleParameters) {
-      Mantid::API::Workspace_sptr workspace =
-          Mantid::API::AnalysisDataService::Instance().retrieve("Raw_SPB");
+      Mantid::API::Workspace_sptr workspace = Mantid::API::AnalysisDataService::Instance().retrieve("Raw_SPB");
       TS_ASSERT(workspace.get());
 
       Mantid::API::ITableWorkspace_sptr sample_table =

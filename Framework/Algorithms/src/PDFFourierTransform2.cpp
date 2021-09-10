@@ -59,64 +59,49 @@ const string BACKWARD("Backward");
 
 } // namespace
 
-const std::string PDFFourierTransform2::name() const {
-  return "PDFFourierTransform";
-}
+const std::string PDFFourierTransform2::name() const { return "PDFFourierTransform"; }
 
 int PDFFourierTransform2::version() const { return 2; }
 
-const std::string PDFFourierTransform2::category() const {
-  return "Diffraction\\Utility";
-}
+const std::string PDFFourierTransform2::category() const { return "Diffraction\\Utility"; }
 
 /** Initialize the algorithm's properties.
  */
 void PDFFourierTransform2::init() {
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
-  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
                   "Input spectrum density or paired-distribution function");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                            Direction::Output),
-      "Result paired-distribution function or Input spectrum density");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
+                  "Result paired-distribution function or Input spectrum density");
 
   std::vector<std::string> directionOptions;
   directionOptions.emplace_back(FORWARD);
   directionOptions.emplace_back(BACKWARD);
-  declareProperty("Direction", FORWARD,
-                  std::make_shared<StringListValidator>(directionOptions),
+  declareProperty("Direction", FORWARD, std::make_shared<StringListValidator>(directionOptions),
                   "The direction of the fourier transform");
-  declareProperty(
-      "rho0", EMPTY_DBL(), mustBePositive,
-      "Average number density used for g(r) and RDF(r) conversions (optional)");
-  declareProperty("Filter", false,
-                  "Set to apply Lorch function filter to the input");
+  declareProperty("rho0", EMPTY_DBL(), mustBePositive,
+                  "Average number density used for g(r) and RDF(r) conversions (optional)");
+  declareProperty("Filter", false, "Set to apply Lorch function filter to the input");
 
   // Set up spectral density data type
   std::vector<std::string> soqTypes;
   soqTypes.emplace_back(S_OF_Q);
   soqTypes.emplace_back(S_OF_Q_MINUS_ONE);
   soqTypes.emplace_back(Q_S_OF_Q_MINUS_ONE);
-  declareProperty("InputSofQType", S_OF_Q,
-                  std::make_shared<StringListValidator>(soqTypes),
+  declareProperty("InputSofQType", S_OF_Q, std::make_shared<StringListValidator>(soqTypes),
                   "To identify spectral density function (deprecated)");
   setPropertySettings("InputSofQType", std::make_unique<InvisibleProperty>());
-  declareProperty("SofQType", S_OF_Q,
-                  std::make_shared<StringListValidator>(soqTypes),
+  declareProperty("SofQType", S_OF_Q, std::make_shared<StringListValidator>(soqTypes),
                   "To identify spectral density function");
   mustBePositive->setLower(0.0);
 
   declareProperty("DeltaQ", EMPTY_DBL(), mustBePositive,
                   "Step size of Q of S(Q) to calculate.  Default = "
                   ":math:`\\frac{\\pi}{R_{max}}`.");
-  setPropertySettings("DeltaQ", std::make_unique<EnabledWhenProperty>(
-                                    "Direction", IS_EQUAL_TO, BACKWARD));
-  declareProperty(
-      "Qmin", EMPTY_DBL(), mustBePositive,
-      "Minimum Q in S(Q) to calculate in Fourier transform (optional).");
-  setPropertySettings("Qmin", std::make_unique<EnabledWhenProperty>(
-                                  "Direction", IS_EQUAL_TO, FORWARD));
+  setPropertySettings("DeltaQ", std::make_unique<EnabledWhenProperty>("Direction", IS_EQUAL_TO, BACKWARD));
+  declareProperty("Qmin", EMPTY_DBL(), mustBePositive,
+                  "Minimum Q in S(Q) to calculate in Fourier transform (optional).");
+  setPropertySettings("Qmin", std::make_unique<EnabledWhenProperty>("Direction", IS_EQUAL_TO, FORWARD));
   declareProperty("Qmax", EMPTY_DBL(), mustBePositive,
                   "Maximum Q in S(Q) to calculate in Fourier transform. "
                   "(optional, defaults to 40 on backward transform.)");
@@ -126,19 +111,15 @@ void PDFFourierTransform2::init() {
   pdfTypes.emplace_back(BIG_G_OF_R);
   pdfTypes.emplace_back(LITTLE_G_OF_R);
   pdfTypes.emplace_back(RDF_OF_R);
-  declareProperty("PDFType", BIG_G_OF_R,
-                  std::make_shared<StringListValidator>(pdfTypes),
+  declareProperty("PDFType", BIG_G_OF_R, std::make_shared<StringListValidator>(pdfTypes),
                   "Type of output PDF including G(r)");
 
   declareProperty("DeltaR", EMPTY_DBL(), mustBePositive,
                   "Step size of r of G(r) to calculate.  Default = "
                   ":math:`\\frac{\\pi}{Q_{max}}`.");
-  setPropertySettings("DeltaR", std::make_unique<EnabledWhenProperty>(
-                                    "Direction", IS_EQUAL_TO, FORWARD));
-  declareProperty("Rmin", EMPTY_DBL(), mustBePositive,
-                  "Minimum r for G(r) to calculate. (optional)");
-  setPropertySettings("Rmin", std::make_unique<EnabledWhenProperty>(
-                                  "Direction", IS_EQUAL_TO, BACKWARD));
+  setPropertySettings("DeltaR", std::make_unique<EnabledWhenProperty>("Direction", IS_EQUAL_TO, FORWARD));
+  declareProperty("Rmin", EMPTY_DBL(), mustBePositive, "Minimum r for G(r) to calculate. (optional)");
+  setPropertySettings("Rmin", std::make_unique<EnabledWhenProperty>("Direction", IS_EQUAL_TO, BACKWARD));
   declareProperty("Rmax", EMPTY_DBL(), mustBePositive,
                   "Maximum r for G(r) to calculate. (optional, defaults to 20 "
                   "on forward transform.)");
@@ -175,23 +156,19 @@ std::map<string, string> PDFFourierTransform2::validateInputs() {
     result["InputWorkspace"] = "Input workspace must have only one spectrum";
   }
   const std::string inputXunit = inputWS->getAxis(0)->unit()->unitID();
-  if (inputXunit != "MomentumTransfer" && inputXunit != "dSpacing" &&
-      inputXunit != "AtomicDistance") {
+  if (inputXunit != "MomentumTransfer" && inputXunit != "dSpacing" && inputXunit != "AtomicDistance") {
     result["InputWorkspace"] = "Input workspace units not supported";
   }
 
   return result;
 }
 
-size_t PDFFourierTransform2::determineMinIndex(double min,
-                                               const std::vector<double> &X,
-                                               const std::vector<double> &Y) {
+size_t PDFFourierTransform2::determineMinIndex(double min, const std::vector<double> &X, const std::vector<double> &Y) {
   // check against available X-range
   if (isEmpty(min)) {
     min = X.front();
   } else if (min < X.front()) {
-    g_log.information(
-        "Specified input min < range of data. Adjusting to data range.");
+    g_log.information("Specified input min < range of data. Adjusting to data range.");
     min = X.front();
   }
 
@@ -202,27 +179,22 @@ size_t PDFFourierTransform2::determineMinIndex(double min,
     min_index += 1; // so there doesn't have to be a check in integration loop
 
   // go to first non-nan value
-  iter = std::find_if(std::next(Y.begin(), min_index), Y.end(),
-                      static_cast<bool (*)(double)>(std::isnormal));
+  iter = std::find_if(std::next(Y.begin(), min_index), Y.end(), static_cast<bool (*)(double)>(std::isnormal));
   size_t first_normal_index = std::distance(Y.begin(), iter);
   if (first_normal_index > min_index) {
-    g_log.information(
-        "Specified input min where data is nan/inf. Adjusting to data range.");
+    g_log.information("Specified input min where data is nan/inf. Adjusting to data range.");
     min_index = first_normal_index;
   }
 
   return min_index;
 }
 
-size_t PDFFourierTransform2::determineMaxIndex(double max,
-                                               const std::vector<double> &X,
-                                               const std::vector<double> &Y) {
+size_t PDFFourierTransform2::determineMaxIndex(double max, const std::vector<double> &X, const std::vector<double> &Y) {
   // check against available X-range
   if (isEmpty(max)) {
     max = X.back();
   } else if (max > X.back()) {
-    g_log.information()
-        << "Specified input max > range of data. Adjusting to data range.\n";
+    g_log.information() << "Specified input max > range of data. Adjusting to data range.\n";
     max = X.back();
   }
 
@@ -231,13 +203,10 @@ size_t PDFFourierTransform2::determineMaxIndex(double max,
   size_t max_index = std::distance(X.begin(), iter);
 
   // go to first non-nan value
-  auto back_iter = std::find_if(Y.rbegin(), Y.rend(),
-                                static_cast<bool (*)(double)>(std::isnormal));
-  size_t first_normal_index =
-      Y.size() - std::distance(Y.rbegin(), back_iter) - 1;
+  auto back_iter = std::find_if(Y.rbegin(), Y.rend(), static_cast<bool (*)(double)>(std::isnormal));
+  size_t first_normal_index = Y.size() - std::distance(Y.rbegin(), back_iter) - 1;
   if (first_normal_index < max_index) {
-    g_log.information(
-        "Specified input max where data is nan/inf. Adjusting to data range.");
+    g_log.information("Specified input max where data is nan/inf. Adjusting to data range.");
     max_index = first_normal_index;
   }
 
@@ -262,17 +231,14 @@ double PDFFourierTransform2::determineRho0() {
   return rho0;
 }
 
-void PDFFourierTransform2::convertToSQMinus1(std::vector<double> &FOfQ,
-                                             std::vector<double> &Q,
-                                             std::vector<double> &DFOfQ,
-                                             std::vector<double> &DQ) {
+void PDFFourierTransform2::convertToSQMinus1(std::vector<double> &FOfQ, std::vector<double> &Q,
+                                             std::vector<double> &DFOfQ, std::vector<double> &DQ) {
   // convert to S(Q)-1
   string soqType = getProperty("SofQType");
   string inputSOQType = getProperty("InputSofQType");
   if (!isDefault("InputSofQType") && isDefault("SofQType")) {
     soqType = inputSOQType;
-    g_log.warning()
-        << "InputSofQType has been deprecated and replaced by SofQType\n";
+    g_log.warning() << "InputSofQType has been deprecated and replaced by SofQType\n";
   }
   if (soqType == S_OF_Q) {
     g_log.information() << "Subtracting one from all values\n";
@@ -287,8 +253,7 @@ void PDFFourierTransform2::convertToSQMinus1(std::vector<double> &FOfQ,
       DFOfQ[i] = (Q[i] / DQ[i] + FOfQ[i] / DFOfQ[i]) * (FOfQ[i] / Q[i]);
     }
     // convert the function
-    std::transform(FOfQ.begin(), FOfQ.end(), FOfQ.begin(), Q.begin(),
-                   std::divides<double>());
+    std::transform(FOfQ.begin(), FOfQ.end(), FOfQ.begin(), Q.begin(), std::divides<double>());
     soqType = S_OF_Q_MINUS_ONE;
   }
   if (soqType != S_OF_Q_MINUS_ONE) {
@@ -300,10 +265,8 @@ void PDFFourierTransform2::convertToSQMinus1(std::vector<double> &FOfQ,
   return;
 }
 
-void PDFFourierTransform2::convertToLittleGRMinus1(std::vector<double> &FOfR,
-                                                   std::vector<double> &R,
-                                                   std::vector<double> &DFOfR,
-                                                   std::vector<double> &DR) {
+void PDFFourierTransform2::convertToLittleGRMinus1(std::vector<double> &FOfR, std::vector<double> &R,
+                                                   std::vector<double> &DFOfR, std::vector<double> &DR) {
   string PDFType = getProperty("PDFType");
   double rho0 = determineRho0();
   if (PDFType == LITTLE_G_OF_R) {
@@ -331,16 +294,14 @@ void PDFFourierTransform2::convertToLittleGRMinus1(std::vector<double> &FOfR,
   return;
 }
 
-void PDFFourierTransform2::convertFromSQMinus1(
-    HistogramData::HistogramY &FOfQ, HistogramData::HistogramX &Q,
-    HistogramData::HistogramE &DFOfQ) {
+void PDFFourierTransform2::convertFromSQMinus1(HistogramData::HistogramY &FOfQ, HistogramData::HistogramX &Q,
+                                               HistogramData::HistogramE &DFOfQ) {
   // convert to S(Q)-1string
   string soqType = getProperty("SofQType");
   string inputSOQType = getProperty("InputSofQType");
   if (!isDefault("InputSofQType") && isDefault("SofQType")) {
     soqType = inputSOQType;
-    g_log.warning()
-        << "InputSofQType has been deprecated and replaced by SofQType\n";
+    g_log.warning() << "InputSofQType has been deprecated and replaced by SofQType\n";
   }
   if (soqType == S_OF_Q) {
     for (size_t i = 0; i < FOfQ.size(); ++i) {
@@ -356,9 +317,8 @@ void PDFFourierTransform2::convertFromSQMinus1(
   return;
 }
 
-void PDFFourierTransform2::convertFromLittleGRMinus1(
-    HistogramData::HistogramY &FOfR, HistogramData::HistogramX &R,
-    HistogramData::HistogramE &DFOfR) {
+void PDFFourierTransform2::convertFromLittleGRMinus1(HistogramData::HistogramY &FOfR, HistogramData::HistogramX &R,
+                                                     HistogramData::HistogramE &DFOfR) {
   // convert to the correct form of PDF
   double rho0 = determineRho0();
   string outputType = getProperty("PDFType");
@@ -407,10 +367,8 @@ void PDFFourierTransform2::exec() {
   } else if (inputXunit == "dSpacing") {
     // convert the x-units to Q/MomentumTransfer
     const double PI_2(2. * M_PI);
-    std::for_each(inputX.begin(), inputX.end(),
-                  [&PI_2](double &Q) { Q /= PI_2; });
-    std::transform(inputDX.begin(), inputDX.end(), inputX.begin(),
-                   inputDX.begin(), std::divides<double>());
+    std::for_each(inputX.begin(), inputX.end(), [&PI_2](double &Q) { Q /= PI_2; });
+    std::transform(inputDX.begin(), inputDX.end(), inputX.begin(), inputDX.begin(), std::divides<double>());
     // reverse all of the arrays
     std::reverse(inputX.begin(), inputX.end());
     std::reverse(inputDX.begin(), inputDX.end());
@@ -468,8 +426,8 @@ void PDFFourierTransform2::exec() {
   // determine input-range
   size_t Xmin_index = determineMinIndex(inMin, inputX, inputY);
   size_t Xmax_index = determineMaxIndex(inMax, inputX, inputY);
-  g_log.notice() << "Adjusting to data: input min = " << inputX[Xmin_index]
-                 << " input max = " << inputX[Xmax_index] << "\n";
+  g_log.notice() << "Adjusting to data: input min = " << inputX[Xmin_index] << " input max = " << inputX[Xmax_index]
+                 << "\n";
   // determine r axis for result
   if (isEmpty(outDelta))
     outDelta = M_PI / inputX[Xmax_index];
@@ -482,28 +440,21 @@ void PDFFourierTransform2::exec() {
   API::MatrixWorkspace_sptr outputWS = create<Workspace2D>(1, Points(sizer));
   outputWS->copyExperimentInfoFrom(inputWS.get());
   if (direction == FORWARD) {
-    outputWS->getAxis(0)->unit() =
-        UnitFactory::Instance().create("AtomicDistance");
+    outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("AtomicDistance");
     outputWS->setYUnitLabel("PDF");
-    outputWS->mutableRun().addProperty("Qmin", inputX[Xmin_index],
-                                       "Angstroms^-1", true);
-    outputWS->mutableRun().addProperty("Qmax", inputX[Xmax_index],
-                                       "Angstroms^-1", true);
+    outputWS->mutableRun().addProperty("Qmin", inputX[Xmin_index], "Angstroms^-1", true);
+    outputWS->mutableRun().addProperty("Qmax", inputX[Xmax_index], "Angstroms^-1", true);
   } else if (direction == BACKWARD) {
-    outputWS->getAxis(0)->unit() =
-        UnitFactory::Instance().create("MomentumTransfer");
+    outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("MomentumTransfer");
     outputWS->setYUnitLabel("Spectrum Density");
-    outputWS->mutableRun().addProperty("Rmin", inputX[Xmin_index], "Angstroms",
-                                       true);
-    outputWS->mutableRun().addProperty("Rmax", inputX[Xmax_index], "Angstroms",
-                                       true);
+    outputWS->mutableRun().addProperty("Rmin", inputX[Xmin_index], "Angstroms", true);
+    outputWS->mutableRun().addProperty("Rmax", inputX[Xmax_index], "Angstroms", true);
   }
   outputWS->setDistribution(true);
   BinEdges edges(sizer + 1, LinearGenerator(outDelta, outDelta));
   outputWS->setBinEdges(0, edges);
   auto &outputX = outputWS->mutableX(0);
-  g_log.information() << "Using output min = " << outputX.front()
-                      << "and output max = " << outputX.back() << "\n";
+  g_log.information() << "Using output min = " << outputX.front() << "and output max = " << outputX.back() << "\n";
   // always calculate G(r) then convert
   auto &outputY = outputWS->mutableY(0);
   auto &outputE = outputWS->mutableE(0);

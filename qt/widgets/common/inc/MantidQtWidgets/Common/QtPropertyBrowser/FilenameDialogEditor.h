@@ -17,8 +17,7 @@ namespace MantidWidgets {
 class FilenameDialogEditor : public StringDialogEditor {
   Q_OBJECT
 public:
-  FilenameDialogEditor(QtProperty *property, QWidget *parent)
-      : StringDialogEditor(property, parent) {}
+  FilenameDialogEditor(QtProperty *property, QWidget *parent) : StringDialogEditor(property, parent) {}
 protected slots:
   void runDialog() override;
 };
@@ -29,15 +28,12 @@ protected slots:
 class FilenameDialogEditorFactory : public StringDialogEditorFactory {
   Q_OBJECT
 public:
-  FilenameDialogEditorFactory(QObject *parent)
-      : StringDialogEditorFactory(parent) {}
+  FilenameDialogEditorFactory(QObject *parent) : StringDialogEditorFactory(parent) {}
 
 protected:
   using QtAbstractEditorFactoryBase::createEditor; // Avoid Intel compiler
                                                    // warning
-  QWidget *createEditorForManager(QtStringPropertyManager *manager,
-                                  QtProperty *property,
-                                  QWidget *parent) override {
+  QWidget *createEditorForManager(QtStringPropertyManager *manager, QtProperty *property, QWidget *parent) override {
     (void)manager; // Avoid unused warning
     return new FilenameDialogEditor(property, parent);
   }

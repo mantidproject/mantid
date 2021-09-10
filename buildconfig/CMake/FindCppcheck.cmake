@@ -101,7 +101,7 @@ function(add_cppcheck _name) # additional arguments are files to ignore
     # add the target
     if (CPPCHECK_GENERATE_XML )
       add_custom_target( cppcheck_${_name}
-                         COMMAND ${CPPCHECK_EXECUTABLE} ${_cppcheck_args} --xml --xml-version=2 ${_files} 2> ${CMAKE_BINARY_DIR}/cppcheck-${_name}.xml 
+                         COMMAND ${CPPCHECK_EXECUTABLE} ${_cppcheck_args} --xml --xml-version=2 ${_files} 2> ${CMAKE_BINARY_DIR}/cppcheck-${_name}.xml
                          WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
                          DEPENDS ${_files}
                          COMMENT "cppcheck_${_name}: Running cppcheck to generate cppcheck-${_name}.xml"

@@ -31,13 +31,10 @@ public:
 private:
   void init() override;
   void exec() override;
-  double computeTOF(const API::MatrixWorkspace &detectorWs,
-                    const double detectorEPP, const double monitorEPP,
+  double computeTOF(const API::MatrixWorkspace &detectorWs, const double detectorEPP, const double monitorEPP,
                     const double minTOF);
-  API::MatrixWorkspace_sptr groupSpectra(API::MatrixWorkspace_sptr &ws,
-                                         const std::vector<size_t> &wsIndices);
-  double minimumTOF(const API::MatrixWorkspace &ws,
-                    const double sampleToDetectorDistance);
+  API::MatrixWorkspace_sptr groupSpectra(API::MatrixWorkspace_sptr &ws, const std::vector<size_t> &wsIndices);
+  double minimumTOF(const API::MatrixWorkspace &ws, const double sampleToDetectorDistance);
   double monitorPeakPosition(const size_t monitorIndex);
   double peakPosition(API::MatrixWorkspace_sptr &ws);
 };

@@ -29,7 +29,7 @@ Phase Quad Calculator
 
 The phase quad calcuator use the :ref:`PhaseQuad <algm-PhaseQuad>` algorithm combine the signals from multiple detectors
 into a quadrature phase signal.
-It will calculate the phasequad for all of the loaded runs using the selected phase table. If you are using co-added runs, 
+It will calculate the phasequad for all of the loaded runs using the selected phase table. If you are using co-added runs,
 the deadtime table is only taken from the first run during calculation.
 When the runs are changed all of the phasequads are removed.
 
@@ -39,5 +39,5 @@ When the runs are changed all of the phasequads are removed.
 Used By
 ^^^^^^^
 
-:ref:`Muon Analysis <MuonAnalysis_2-ref>`,
-:ref:`Frequency Domain Analysis <Frequency_Domain_Analysis_2-ref>`
+:ref:`Muon Analysis <Muon_Analysis-ref>`,
+:ref:`Frequency Domain Analysis <Frequency_Domain_Analysis-ref>`

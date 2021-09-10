@@ -9,7 +9,7 @@
 Description
 -----------
 
-Check if the workspace has some given sample logs. An empty string will be returned if all the logs are found, otherwise the result is  an error message 
+Check if the workspace has some given sample logs. An empty string will be returned if all the logs are found, otherwise the result is  an error message
 
 
 Usage
@@ -21,7 +21,7 @@ Usage
 
     #load a workspace with logs
     ws=Load("CNCS_7860")
-    
+
     sampleLogs="Phase1,Phase3"
     result=CheckForSampleLogs(ws,sampleLogs)
     if len(result)==0:

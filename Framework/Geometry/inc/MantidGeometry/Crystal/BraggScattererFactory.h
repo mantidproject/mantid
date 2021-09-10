@@ -50,16 +50,13 @@ namespace Geometry {
       @author Michael Wedel, Paul Scherrer Institut - SINQ
       @date 26/10/2014
   */
-class MANTID_GEOMETRY_DLL BraggScattererFactoryImpl
-    : public Kernel::DynamicFactory<BraggScatterer> {
+class MANTID_GEOMETRY_DLL BraggScattererFactoryImpl : public Kernel::DynamicFactory<BraggScatterer> {
 public:
-  BraggScatterer_sptr createScatterer(const std::string &name,
-                                      const std::string &properties = "") const;
+  BraggScatterer_sptr createScatterer(const std::string &name, const std::string &properties = "") const;
 
   /// Subscribes a scatterer class into the factory.
   template <class C> void subscribeScatterer() {
-    auto instantiator =
-        std::make_unique<Kernel::Instantiator<C, BraggScatterer>>();
+    auto instantiator = std::make_unique<Kernel::Instantiator<C, BraggScatterer>>();
     BraggScatterer_sptr scatterer = instantiator->createInstance();
 
     subscribe(scatterer->name(), std::move(instantiator));
@@ -71,23 +68,20 @@ private:
   BraggScattererFactoryImpl();
 };
 
-using BraggScattererFactory =
-    Mantid::Kernel::SingletonHolder<BraggScattererFactoryImpl>;
+using BraggScattererFactory = Mantid::Kernel::SingletonHolder<BraggScattererFactoryImpl>;
 
 } // namespace Geometry
 } // namespace Mantid
 
 namespace Mantid {
 namespace Kernel {
-EXTERN_MANTID_GEOMETRY template class MANTID_GEOMETRY_DLL Mantid::Kernel::
-    SingletonHolder<Mantid::Geometry::BraggScattererFactoryImpl>;
+EXTERN_MANTID_GEOMETRY template class MANTID_GEOMETRY_DLL
+    Mantid::Kernel::SingletonHolder<Mantid::Geometry::BraggScattererFactoryImpl>;
 }
 } // namespace Mantid
 
-#define DECLARE_BRAGGSCATTERER(classname)                                      \
-  namespace {                                                                  \
-  Mantid::Kernel::RegistrationHelper register_scatterer_##classname(           \
-      ((Mantid::Geometry::BraggScattererFactory::Instance()                    \
-            .subscribeScatterer<classname>()),                                 \
-       0));                                                                    \
+#define DECLARE_BRAGGSCATTERER(classname)                                                                              \
+  namespace {                                                                                                          \
+  Mantid::Kernel::RegistrationHelper register_scatterer_##classname(                                                   \
+      ((Mantid::Geometry::BraggScattererFactory::Instance().subscribeScatterer<classname>()), 0));                     \
   }

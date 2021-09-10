@@ -31,6 +31,7 @@ calibration_folder_name = os.path.join("calibration", inst_name.lower())
 calibration_map_rel_path = os.path.join("yaml_files", "pearl_system_test_mapping.yaml")
 cycle = "17_1"
 spline_rel_path = os.path.join(cycle, "VanSplined_98472_tt70_pearl_offset_16_4.cal.nxs")
+summed_empty_rel_path = os.path.join(cycle, "summed_empty_98485.nxs")
 
 # Generate paths for the tests
 # This implies DIRS[0] is the system test data folder
@@ -42,6 +43,7 @@ output_dir = os.path.join(working_dir, output_folder_name)
 calibration_map_path = os.path.join(input_dir, calibration_map_rel_path)
 calibration_dir = os.path.join(input_dir, calibration_folder_name)
 spline_path = os.path.join(calibration_dir, spline_rel_path)
+summed_empty_path = os.path.join(calibration_dir, summed_empty_rel_path)
 
 
 class _CreateVanadiumTest(systemtesting.MantidSystemTest):
@@ -73,6 +75,7 @@ class _CreateVanadiumTest(systemtesting.MantidSystemTest):
         try:
             _try_delete(output_dir)
             _try_delete(spline_path)
+            _try_delete(summed_empty_path)
         finally:
             mantid.mtd.clear()
             config['datasearch.directories'] = self.existing_config
@@ -220,7 +223,6 @@ class FocusWithAbsorbCorrectionsTest(systemtesting.MantidSystemTest):
 
     def cleanup(self):
         try:
-            _try_delete(spline_path)
             _try_delete(output_dir)
         finally:
             config['datasearch.directories'] = self.existing_config
@@ -256,6 +258,8 @@ class CreateCalTest(systemtesting.MantidSystemTest):
 
     calibration_results = None
     existing_config = config["datasearch.directories"]
+    run_number = 98494
+    run_details = None
 
     def requiredFiles(self):
         return _gen_required_files()
@@ -263,10 +267,12 @@ class CreateCalTest(systemtesting.MantidSystemTest):
     def runTest(self):
         setup_mantid_paths()
         inst_object = setup_inst_object(tt_mode="tt88", focus_mode="trans")
-        self.calibration_results = run_create_cal(inst_object, focus_mode="all")
+        self.calibration_results = run_create_cal(inst_object, focus_mode="all", ceria_run=self.run_number)
 
         # Make sure that inst_settings reverted to the default after create_cal
         self.assertEqual(inst_object._inst_settings.focus_mode, "trans")
+
+        self.run_details = inst_object._get_run_details(self.run_number)
 
     def validate(self):
         self.tolerance = 1e-5
@@ -274,8 +280,7 @@ class CreateCalTest(systemtesting.MantidSystemTest):
 
     def cleanup(self):
         try:
-            _try_delete(spline_path)
-            _try_delete(output_dir)
+            _try_delete(self.run_details.offset_file_path)
         finally:
             config['datasearch.directories'] = self.existing_config
             mantid.mtd.clear()
@@ -292,8 +297,7 @@ def _gen_required_files():
     return input_files
 
 
-def run_create_cal(inst_object, focus_mode):
-    ceria_run = 98494
+def run_create_cal(inst_object, focus_mode, ceria_run):
     return inst_object.create_cal(run_number=ceria_run, focus_mode=focus_mode)
 
 

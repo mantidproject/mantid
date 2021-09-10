@@ -14,9 +14,7 @@ namespace Kernel {
  * Move constructor
  * @param src Constructor from this temporary
  */
-LibraryWrapper::LibraryWrapper(LibraryWrapper &&src) noexcept {
-  *this = std::move(src);
-}
+LibraryWrapper::LibraryWrapper(LibraryWrapper &&src) noexcept { *this = std::move(src); }
 
 /**
  * Move assignment

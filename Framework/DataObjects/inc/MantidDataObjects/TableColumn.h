@@ -51,12 +51,10 @@ template <class Type> class TableColumn : public API::Column {
     InconvertibleToDoubleType(const double &) {}
     /// Convertion to double throws a runtime_error.
     operator double() const {
-      throw std::runtime_error(std::string("Cannot convert ") +
-                               typeid(Type).name() + " to double.");
+      throw std::runtime_error(std::string("Cannot convert ") + typeid(Type).name() + " to double.");
     }
     operator Type() const {
-      throw std::runtime_error(std::string("Cannot convert double to ") +
-                               typeid(Type).name() + ".");
+      throw std::runtime_error(std::string("Cannot convert double to ") + typeid(Type).name() + ".");
     }
   };
 
@@ -64,8 +62,7 @@ public:
   TableColumn() {
     int length = sizeof(Type);
     std::string name = std::string(typeid(Type).name());
-    if ((name.find('i') != std::string::npos) ||
-        (name.find('l') != std::string::npos) ||
+    if ((name.find('i') != std::string::npos) || (name.find('l') != std::string::npos) ||
         (name.find('x') != std::string::npos)) {
       if (length == 4) {
         this->m_type = "int";
@@ -99,26 +96,18 @@ public:
   /// Type id of the data in the column
   const std::type_info &get_type_info() const override { return typeid(Type); }
   /// Type id of the pointer to data in the column
-  const std::type_info &get_pointer_type_info() const override {
-    return typeid(Type *);
-  }
+  const std::type_info &get_pointer_type_info() const override { return typeid(Type *); }
   /// Output to an ostream.
-  void print(size_t index, std::ostream &s) const override {
-    s << m_data[index];
-  }
+  void print(size_t index, std::ostream &s) const override { s << m_data[index]; }
   /// Read in a string and set the value at the given index
   void read(size_t index, const std::string &text) override;
   /// Read in from stream and set the value at the given index
   void read(const size_t index, std::istringstream &in) override;
   /// Type check
   bool isBool() const override { return typeid(Type) == typeid(API::Boolean); }
-  bool isNumber() const override {
-    return std::is_convertible<Type, double>::value;
-  }
+  bool isNumber() const override { return std::is_convertible<Type, double>::value; }
   /// Memory used by the column
-  long int sizeOfData() const override {
-    return static_cast<long int>(m_data.size() * sizeof(Type));
-  }
+  long int sizeOfData() const override { return static_cast<long int>(m_data.size() * sizeof(Type)); }
   /// Clone
   TableColumn *clone() const override { return new TableColumn(*this); }
 
@@ -132,8 +121,7 @@ public:
    */
   template <typename T> double convertToDouble(const T &value) const {
     using DoubleType =
-        typename std::conditional<std::is_convertible<double, T>::value, T,
-                                  InconvertibleToDoubleType>::type;
+        typename std::conditional<std::is_convertible<double, T>::value, T, InconvertibleToDoubleType>::type;
     return boost::numeric_cast<double, DoubleType>(value);
   }
 
@@ -146,13 +134,9 @@ public:
    * @param value :: The value of the element.
    */
 
-  double convertToDouble(const std::string &value) const {
-    return std::stod(value);
-  }
+  double convertToDouble(const std::string &value) const { return std::stod(value); }
 
-  double toDouble(size_t i) const override {
-    return convertToDouble(m_data[i]);
-  }
+  double toDouble(size_t i) const override { return convertToDouble(m_data[i]); }
 
   /**
    * Cast an element to double if possible. If it's impossible
@@ -165,10 +149,8 @@ public:
    */
   void fromDouble(size_t i, double value) override {
     using DoubleType =
-        typename std::conditional<std::is_convertible<double, Type>::value,
-                                  Type, InconvertibleToDoubleType>::type;
-    m_data[i] =
-        static_cast<Type>(boost::numeric_cast<DoubleType, double>(value));
+        typename std::conditional<std::is_convertible<double, Type>::value, Type, InconvertibleToDoubleType>::type;
+    m_data[i] = static_cast<Type>(boost::numeric_cast<DoubleType, double>(value));
   }
 
   /// Reference to the data.
@@ -190,10 +172,8 @@ public:
 
   /// Sort a vector of indices according to values in corresponding cells of
   /// this column.
-  void
-  sortIndex(bool ascending, size_t start, size_t end,
-            std::vector<size_t> &indexVec,
-            std::vector<std::pair<size_t, size_t>> &equalRanges) const override;
+  void sortIndex(bool ascending, size_t start, size_t end, std::vector<size_t> &indexVec,
+                 std::vector<std::pair<size_t, size_t>> &equalRanges) const override;
 
   /// Re-arrange values in this column according to indices in indexVec
   void sortValues(const std::vector<size_t> &indexVec) override;
@@ -202,19 +182,16 @@ public:
     if (!possibleToCompare(otherColumn)) {
       return false;
     }
-    const auto &otherColumnTyped =
-        static_cast<const TableColumn<Type> &>(otherColumn);
+    const auto &otherColumnTyped = static_cast<const TableColumn<Type> &>(otherColumn);
     const auto &otherData = otherColumnTyped.data();
     return compareVectors(otherData, tolerance);
   }
 
-  bool equalsRelErr(const Column &otherColumn,
-                    double tolerance) const override {
+  bool equalsRelErr(const Column &otherColumn, double tolerance) const override {
     if (!possibleToCompare(otherColumn)) {
       return false;
     }
-    const auto &otherColumnTyped =
-        static_cast<const TableColumn<Type> &>(otherColumn);
+    const auto &otherColumnTyped = static_cast<const TableColumn<Type> &>(otherColumn);
     const auto &otherData = otherColumnTyped.data();
     return compareVectorsRelError(otherData, tolerance);
   }
@@ -234,9 +211,7 @@ protected:
   /// Returns a pointer to the data element.
   void *void_pointer(size_t index) override { return &m_data.at(index); }
   /// Returns a pointer to the data element.
-  const void *void_pointer(size_t index) const override {
-    return &m_data.at(index);
-  }
+  const void *void_pointer(size_t index) const override { return &m_data.at(index); }
 
 private:
   /// Column data
@@ -244,8 +219,7 @@ private:
   friend class TableWorkspace;
 
   // helper function template for equality
-  bool compareVectors(const std::vector<Type> &newVector,
-                      double tolerance) const {
+  bool compareVectors(const std::vector<Type> &newVector, double tolerance) const {
     for (size_t i = 0; i < m_data.size(); i++) {
       if (fabs((double)m_data[i] - (double)newVector[i]) > tolerance) {
         return false;
@@ -255,8 +229,7 @@ private:
   }
 
   // helper function template for equality with relative error
-  bool compareVectorsRelError(const std::vector<Type> &newVector,
-                              double tolerance) const {
+  bool compareVectorsRelError(const std::vector<Type> &newVector, double tolerance) const {
     for (size_t i = 0; i < m_data.size(); i++) {
       double num = fabs((double)m_data[i] - (double)newVector[i]);
       double den = (fabs((double)m_data[i]) + fabs((double)newVector[i])) / 2;
@@ -271,9 +244,7 @@ private:
 };
 /// Template specialisation for long64
 template <>
-inline bool
-TableColumn<int64_t>::compareVectors(const std::vector<int64_t> &newVector,
-                                     double tolerance) const {
+inline bool TableColumn<int64_t>::compareVectors(const std::vector<int64_t> &newVector, double tolerance) const {
   int64_t roundedTol = llround(tolerance);
   for (size_t i = 0; i < m_data.size(); i++) {
     if (std::llabs(m_data[i] - newVector[i]) > roundedTol) {
@@ -285,12 +256,11 @@ TableColumn<int64_t>::compareVectors(const std::vector<int64_t> &newVector,
 
 /// Template specialisation for unsigned long int
 template <>
-inline bool TableColumn<unsigned long>::compareVectors(
-    const std::vector<unsigned long> &newVector, double tolerance) const {
+inline bool TableColumn<unsigned long>::compareVectors(const std::vector<unsigned long> &newVector,
+                                                       double tolerance) const {
   long long roundedTol = llround(tolerance);
   for (size_t i = 0; i < m_data.size(); i++) {
-    if (std::llabs((long long)m_data[i] - (long long)newVector[i]) >
-        roundedTol) {
+    if (std::llabs((long long)m_data[i] - (long long)newVector[i]) > roundedTol) {
       return false;
     }
   }
@@ -299,8 +269,8 @@ inline bool TableColumn<unsigned long>::compareVectors(
 
 /// Template specialisation for strings for comparison
 template <>
-inline bool TableColumn<std::string>::compareVectors(
-    const std::vector<std::string> &newVector, double tolerance) const {
+inline bool TableColumn<std::string>::compareVectors(const std::vector<std::string> &newVector,
+                                                     double tolerance) const {
   (void)tolerance;
   for (size_t i = 0; i < m_data.size(); i++) {
     if (m_data[i] != newVector[i]) {
@@ -312,8 +282,8 @@ inline bool TableColumn<std::string>::compareVectors(
 
 /// Template specialisation for strings for comparison
 template <>
-inline bool TableColumn<API::Boolean>::compareVectors(
-    const std::vector<API::Boolean> &newVector, double tolerance) const {
+inline bool TableColumn<API::Boolean>::compareVectors(const std::vector<API::Boolean> &newVector,
+                                                      double tolerance) const {
   (void)tolerance;
   for (size_t i = 0; i < m_data.size(); i++) {
     if (!(m_data[i] == newVector[i])) {
@@ -325,8 +295,8 @@ inline bool TableColumn<API::Boolean>::compareVectors(
 
 /// Template specialisation for V3D for comparison
 template <>
-inline bool TableColumn<Kernel::V3D>::compareVectors(
-    const std::vector<Kernel::V3D> &newVector, double tolerance) const {
+inline bool TableColumn<Kernel::V3D>::compareVectors(const std::vector<Kernel::V3D> &newVector,
+                                                     double tolerance) const {
   for (size_t i = 0; i < m_data.size(); i++) {
     double dif_x = fabs(m_data[i].X() - newVector[i].X());
     double dif_y = fabs(m_data[i].Y() - newVector[i].Y());
@@ -340,8 +310,8 @@ inline bool TableColumn<Kernel::V3D>::compareVectors(
 
 /// Template specialisation for long64 with relative error
 template <>
-inline bool TableColumn<int64_t>::compareVectorsRelError(
-    const std::vector<int64_t> &newVector, double tolerance) const {
+inline bool TableColumn<int64_t>::compareVectorsRelError(const std::vector<int64_t> &newVector,
+                                                         double tolerance) const {
   int64_t roundedTol = llround(tolerance);
   for (size_t i = 0; i < m_data.size(); i++) {
     int64_t num = llabs(m_data[i] - newVector[i]);
@@ -357,8 +327,8 @@ inline bool TableColumn<int64_t>::compareVectorsRelError(
 
 /// Template specialisation for unsigned long int
 template <>
-inline bool TableColumn<unsigned long>::compareVectorsRelError(
-    const std::vector<unsigned long> &newVector, double tolerance) const {
+inline bool TableColumn<unsigned long>::compareVectorsRelError(const std::vector<unsigned long> &newVector,
+                                                               double tolerance) const {
   long long roundedTol = lround(tolerance);
   for (size_t i = 0; i < m_data.size(); i++) {
     long long num = labs((long long)m_data[i] - (long long)newVector[i]);
@@ -374,22 +344,22 @@ inline bool TableColumn<unsigned long>::compareVectorsRelError(
 
 /// Template specialisation for strings for comparison
 template <>
-inline bool TableColumn<std::string>::compareVectorsRelError(
-    const std::vector<std::string> &newVector, double tolerance) const {
+inline bool TableColumn<std::string>::compareVectorsRelError(const std::vector<std::string> &newVector,
+                                                             double tolerance) const {
   return compareVectors(newVector, tolerance);
 }
 
 /// Template specialisation for bools for comparison
 template <>
-inline bool TableColumn<API::Boolean>::compareVectorsRelError(
-    const std::vector<API::Boolean> &newVector, double tolerance) const {
+inline bool TableColumn<API::Boolean>::compareVectorsRelError(const std::vector<API::Boolean> &newVector,
+                                                              double tolerance) const {
   return compareVectors(newVector, tolerance);
 }
 
 /// Template specialisation for V3D for comparison
 template <>
-inline bool TableColumn<Kernel::V3D>::compareVectorsRelError(
-    const std::vector<Kernel::V3D> &newVector, double tolerance) const {
+inline bool TableColumn<Kernel::V3D>::compareVectorsRelError(const std::vector<Kernel::V3D> &newVector,
+                                                             double tolerance) const {
   for (size_t i = 0; i < m_data.size(); i++) {
     double dif_x = fabs(m_data[i].X() - newVector[i].X());
     double dif_y = fabs(m_data[i].Y() - newVector[i].Y());
@@ -398,8 +368,7 @@ inline bool TableColumn<Kernel::V3D>::compareVectorsRelError(
     double den_y = 0.5 * (fabs(m_data[i].X()) + fabs(newVector[i].X()));
     double den_z = 0.5 * (fabs(m_data[i].X()) + fabs(newVector[i].X()));
     if (den_x > tolerance || den_y > tolerance || den_z > tolerance) {
-      if (dif_x / den_x > tolerance || dif_y / den_y > tolerance ||
-          dif_z / den_z > tolerance) {
+      if (dif_x / den_x > tolerance || dif_y / den_y > tolerance || dif_z / den_z > tolerance) {
         return false;
       }
     } else {
@@ -412,9 +381,7 @@ inline bool TableColumn<Kernel::V3D>::compareVectorsRelError(
 }
 
 /// Template specialization for strings so they can contain spaces
-template <>
-inline void TableColumn<std::string>::read(size_t index,
-                                           const std::string &text) {
+template <> inline void TableColumn<std::string>::read(size_t index, const std::string &text) {
   /* As opposed to other types, assigning strings via a stream does not work if
    * it contains a whitespace character, so instead the assignment operator is
    * used.
@@ -423,9 +390,7 @@ inline void TableColumn<std::string>::read(size_t index,
 }
 
 /// Template specialization for strings so they can contain spaces
-template <>
-inline void TableColumn<std::string>::read(size_t index,
-                                           std::istringstream &text) {
+template <> inline void TableColumn<std::string>::read(size_t index, std::istringstream &text) {
   /* As opposed to other types, assigning strings via a stream does not work if
    * it contains a whitespace character, so instead the assignment operator is
    * used.
@@ -434,15 +399,13 @@ inline void TableColumn<std::string>::read(size_t index,
 }
 
 /// Read in a string and set the value at the given index
-template <typename Type>
-void TableColumn<Type>::read(size_t index, const std::string &text) {
+template <typename Type> void TableColumn<Type>::read(size_t index, const std::string &text) {
   std::istringstream istr(text);
   istr >> m_data[index];
 }
 
 /// Read in from stream and set the value at the given index
-template <typename Type>
-void TableColumn<Type>::read(size_t index, std::istringstream &in) {
+template <typename Type> void TableColumn<Type>::read(size_t index, std::istringstream &in) {
   Type t;
   in >> t;
   m_data[index] = t;
@@ -455,11 +418,9 @@ template <typename Type> class CompareValues {
   const bool m_ascending;
 
 public:
-  CompareValues(const TableColumn<Type> &column, bool ascending)
-      : m_data(column.data()), m_ascending(ascending) {}
+  CompareValues(const TableColumn<Type> &column, bool ascending) : m_data(column.data()), m_ascending(ascending) {}
   bool operator()(size_t i, size_t j) {
-    return m_ascending ? m_data[i] < m_data[j]
-                       : !(m_data[i] < m_data[j] || m_data[i] == m_data[j]);
+    return m_ascending ? m_data[i] < m_data[j] : !(m_data[i] < m_data[j] || m_data[i] == m_data[j]);
   }
 };
 } // namespace
@@ -467,9 +428,8 @@ public:
 /// Sort a vector of indices according to values in corresponding cells of this
 /// column. @see Column::sortIndex
 template <typename Type>
-void TableColumn<Type>::sortIndex(
-    bool ascending, size_t start, size_t end, std::vector<size_t> &indexVec,
-    std::vector<std::pair<size_t, size_t>> &equalRanges) const {
+void TableColumn<Type>::sortIndex(bool ascending, size_t start, size_t end, std::vector<size_t> &indexVec,
+                                  std::vector<std::pair<size_t, size_t>> &equalRanges) const {
   equalRanges.clear();
 
   const size_t n = m_data.size();
@@ -492,8 +452,7 @@ void TableColumn<Type>::sortIndex(
       }
     } else {
       if (m_data[*i] != m_data[*(i - 1)]) {
-        auto p = std::make_pair(
-            eqStart, static_cast<size_t>(std::distance(indexVec.begin(), i)));
+        auto p = std::make_pair(eqStart, static_cast<size_t>(std::distance(indexVec.begin(), i)));
         equalRanges.emplace_back(p);
         same = false;
       }
@@ -502,15 +461,13 @@ void TableColumn<Type>::sortIndex(
 
   // last elements are equal
   if (same) {
-    auto p = std::make_pair(
-        eqStart, static_cast<size_t>(std::distance(indexVec.begin(), iEnd)));
+    auto p = std::make_pair(eqStart, static_cast<size_t>(std::distance(indexVec.begin(), iEnd)));
     equalRanges.emplace_back(p);
   }
 }
 
 /// Re-arrange values in this column in order of indices in indexVec
-template <typename Type>
-void TableColumn<Type>::sortValues(const std::vector<size_t> &indexVec) {
+template <typename Type> void TableColumn<Type>::sortValues(const std::vector<size_t> &indexVec) {
   assert(m_data.size() == indexVec.size());
   std::vector<Type> sortedData(m_data.size());
 
@@ -522,29 +479,21 @@ void TableColumn<Type>::sortValues(const std::vector<size_t> &indexVec) {
   std::swap(m_data, sortedData);
 }
 
-template <> inline double TableColumn<API::Boolean>::toDouble(size_t i) const {
-  return m_data[i] ? 1.0 : 0.0;
-}
+template <> inline double TableColumn<API::Boolean>::toDouble(size_t i) const { return m_data[i] ? 1.0 : 0.0; }
 
-template <>
-inline void TableColumn<API::Boolean>::fromDouble(size_t i, double value) {
-  m_data[i] = value != 0.0;
-}
+template <> inline void TableColumn<API::Boolean>::fromDouble(size_t i, double value) { m_data[i] = value != 0.0; }
 
 /// Shared pointer to a column with automatic type cast and data type check.
 /// Can be created with TableWorkspace::getColumn(...)
-template <class T>
-class TableColumn_ptr : public std::shared_ptr<TableColumn<T>> {
+template <class T> class TableColumn_ptr : public std::shared_ptr<TableColumn<T>> {
 public:
   /** Constructor
       @param c :: Shared pointer to a column
     */
   TableColumn_ptr(std::shared_ptr<API::Column> c)
-      : std::shared_ptr<TableColumn<T>>(
-            std::dynamic_pointer_cast<TableColumn<T>>(c)) {
+      : std::shared_ptr<TableColumn<T>>(std::dynamic_pointer_cast<TableColumn<T>>(c)) {
     if (!this->get()) {
-      std::string str = "Data type of column " + c->name() +
-                        " does not match " + typeid(T).name();
+      std::string str = "Data type of column " + c->name() + " does not match " + typeid(T).name();
       throw std::runtime_error(str);
     }
   }
@@ -556,11 +505,9 @@ public:
   /** Constructor
       @param c :: Shared pointer to a column
     */
-  TableColumn_ptr(const std::shared_ptr<API::Column> &c)
-      : TableColumn_ptr<API::Boolean>(c) {
+  TableColumn_ptr(const std::shared_ptr<API::Column> &c) : TableColumn_ptr<API::Boolean>(c) {
     if (!this->get()) {
-      std::string str = "Data type of column " + c->name() +
-                        " does not match " + typeid(API::Boolean).name();
+      std::string str = "Data type of column " + c->name() + " does not match " + typeid(API::Boolean).name();
       throw std::runtime_error(str);
     }
   }
@@ -575,10 +522,8 @@ public:
    TableWorkspace::createColumn(...)
     TypeName can contain only letters, numbers and _s.
 */
-#define DECLARE_TABLECOLUMN(DataType, TypeName)                                \
-  namespace {                                                                  \
-  Mantid::Kernel::RegistrationHelper register_column_##TypeName(               \
-      (Mantid::API::ColumnFactory::Instance()                                  \
-           .subscribe<Mantid::DataObjects::TableColumn<DataType>>(#TypeName),  \
-       0));                                                                    \
+#define DECLARE_TABLECOLUMN(DataType, TypeName)                                                                        \
+  namespace {                                                                                                          \
+  Mantid::Kernel::RegistrationHelper register_column_##TypeName(                                                       \
+      (Mantid::API::ColumnFactory::Instance().subscribe<Mantid::DataObjects::TableColumn<DataType>>(#TypeName), 0));   \
   }

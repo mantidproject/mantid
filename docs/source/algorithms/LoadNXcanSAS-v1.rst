@@ -25,19 +25,19 @@ Usage
 .. testcode:: LoadNXcanSAS
 
     import os
-    
+
     # Create a example workspace with units of momentum transfer
     ws = CreateSampleWorkspace("Histogram",NumBanks=1,BankPixelWidth=1)
     ws = ConvertUnits(ws,Target="MomentumTransfer")
     LoadInstrument(ws,False,InstrumentName="SANS2D")
-    
-    # Save the file 
+
+    # Save the file
     file_name = "test_file_for_nxcansas"
     SaveNXcanSAS(ws,file_name)
-    
+
     # Load the file back
     ws_loaded = LoadNXcanSAS(file_name)
-    
+
     #remove the file we created
     alg = ws_loaded.getHistory().lastAlgorithm()
     filePath = alg.getPropertyValue("Filename")

@@ -16,7 +16,6 @@ BANNED_FILES = ['80_tubes_Top_and_Bottom_April_2015.xml',
                 '80tubeCalibration_18-04-2016_r9330-9335.nxs',
                 '80tube_DIRECT_3146_M1_30April15_r3146.dat',
                 '992 Descriptions.txt',
-                'directBeamDatabaseFall2014_IPTS_11601_2.cfg',
                 'BASIS_AutoReduction_Mask.xml',
                 'BioSANS_dark_current.xml',
                 'BioSANS_empty_cell.xml',
@@ -62,7 +61,6 @@ BANNED_FILES = ['80_tubes_Top_and_Bottom_April_2015.xml',
                 'PG3_11485-1.dat',  # Generic load doesn't do very well with ASCII files
                 'PG3_char_2020_05_06-HighRes-PAC_1.4_MW.txt',
                 'PG3_char_2020_01_04_PAC_limit_1.4MW.txt',
-                'PG3_PAC_HR_d46168_2020_05_06.h5', # loaded by a different algorithm
                 'PG3_2538_event.nxs',  # Don't need to check all of the PG3 files
                 'PG3_9829_event.nxs',
                 'REF_M_9684_event.nxs',
@@ -144,7 +142,10 @@ BANNED_REGEXP = [r'SANS2D\d+.log$',
                  r'.*_pulseid\.dat',
                  r'.*\.phonon',
                  r'.*\.cif',
-                 r'.*\.toml']
+                 r'.*\.toml',
+                 r'.*\.h5',
+                 r'.*\.p2d',
+                 r'.*\.cfg']
 
 BANNED_DIRS = ["DocTest", "UnitTest", "reference"]
 

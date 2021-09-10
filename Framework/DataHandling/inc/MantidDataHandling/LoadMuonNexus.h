@@ -47,8 +47,7 @@ multiperiod file)
 together based on the groupings in the NeXus file. </LI>
 </UL>
 */
-class DLLExport LoadMuonNexus
-    : public API::IFileLoader<Kernel::NexusDescriptor> {
+class DLLExport LoadMuonNexus : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
   /// Default constructor
   LoadMuonNexus();
@@ -65,9 +64,7 @@ public:
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "DataHandling\\Nexus;Muon\\DataHandling";
-  }
+  const std::string category() const override { return "DataHandling\\Nexus;Muon\\DataHandling"; }
 
   /// Returns a confidence value that this algorithm can load a file
   int confidence(Kernel::NexusDescriptor &descriptor) const override;
@@ -76,6 +73,9 @@ protected:
   virtual void runLoadInstrumentFromNexus(DataObjects::Workspace2D_sptr) {}
   void checkOptionalProperties();
   void runLoadInstrument(const DataObjects::Workspace2D_sptr &);
+  Mantid::API::Algorithm_sptr createSampleLogAlgorithm(DataObjects::Workspace2D_sptr &ws);
+  void addToSampleLog(const std::string &logName, const int logNumber, DataObjects::Workspace2D_sptr &ws);
+  void addToSampleLog(const std::string &logName, const std::string log, DataObjects::Workspace2D_sptr &ws);
 
   /// The name and path of the input file
   std::string m_filename;

@@ -48,15 +48,13 @@ public:
   }
 
   void test_Constructor_Throws_With_Invalid_Pointers() {
-    TS_ASSERT_THROWS(Instrument(std::shared_ptr<Instrument>(),
-                                std::shared_ptr<ParameterMap>()),
+    TS_ASSERT_THROWS(Instrument(std::shared_ptr<Instrument>(), std::shared_ptr<ParameterMap>()),
                      const std::invalid_argument &);
     // std::shared_ptr<Instrument> instr = std::make_shared<Instrument>();
     // TS_ASSERT_THROWS(Instrument(instr,std::shared_ptr<ParameterMap>()),const
     // std::invalid_argument &);
     std::shared_ptr<ParameterMap> paramMap = std::make_shared<ParameterMap>();
-    TS_ASSERT_THROWS(Instrument(std::shared_ptr<Instrument>(), paramMap),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(Instrument(std::shared_ptr<Instrument>(), paramMap), const std::invalid_argument &);
   }
 
   void test_getMonitors() {
@@ -69,11 +67,9 @@ public:
 
   void testDetector() {
     Instrument pinstrument(instrument, pmap);
-    TS_ASSERT_THROWS(pinstrument.getDetector(0),
-                     const Exception::NotFoundError &);
+    TS_ASSERT_THROWS(pinstrument.getDetector(0), const Exception::NotFoundError &);
     TS_ASSERT_EQUALS(pinstrument.getDetector(1)->getID(), det->getID());
-    TS_ASSERT_THROWS(pinstrument.getDetector(2),
-                     const Exception::NotFoundError &);
+    TS_ASSERT_THROWS(pinstrument.getDetector(2), const Exception::NotFoundError &);
 
     TS_ASSERT(nullptr == pinstrument.getBaseDetector(0));
     Detector *d = new Detector("det", 2, nullptr);
@@ -93,16 +89,13 @@ public:
 
   void testIDs() {
     ComponentID id1 = det->getComponentID();
-    TS_ASSERT_EQUALS(det->getName(),
-                     instrument->getComponentByID(id1)->getName());
+    TS_ASSERT_EQUALS(det->getName(), instrument->getComponentByID(id1)->getName());
 
     ComponentID id2 = det2->getComponentID();
-    TS_ASSERT_EQUALS(det2->getName(),
-                     instrument->getComponentByID(id2)->getName());
+    TS_ASSERT_EQUALS(det2->getName(), instrument->getComponentByID(id2)->getName());
 
     ComponentID id3 = det3->getComponentID();
-    TS_ASSERT_EQUALS(det3->getName(),
-                     instrument->getComponentByID(id3)->getName());
+    TS_ASSERT_EQUALS(det3->getName(), instrument->getComponentByID(id3)->getName());
   }
 
 private:

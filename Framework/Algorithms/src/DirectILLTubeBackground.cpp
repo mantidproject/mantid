@@ -35,16 +35,14 @@ const std::string SIGMA_MULTIPLIER{"NonBkgRegionInSigmas"};
  * @param statuses the fit status column of a EPP workspace
  * @return a vector of [begin, end) pairs
  */
-std::vector<double> bkgFittingRanges(Mantid::API::MatrixWorkspace const &ws,
-                                     Mantid::API::Column const &statuses,
+std::vector<double> bkgFittingRanges(Mantid::API::MatrixWorkspace const &ws, Mantid::API::Column const &statuses,
                                      size_t const firstColumnIndex) {
   std::vector<double> ranges;
   auto const &spectrumInfo = ws.spectrumInfo();
   bool needsRangeStart{true};
   bool needsRangeEnd{false};
   for (size_t i = 0; i < ws.getNumberHistograms(); ++i) {
-    if (spectrumInfo.isMasked(i) ||
-        statuses.cell<std::string>(i + firstColumnIndex) != "success") {
+    if (spectrumInfo.isMasked(i) || statuses.cell<std::string>(i + firstColumnIndex) != "success") {
       if (needsRangeEnd) {
         needsRangeStart = true;
         needsRangeEnd = false;
@@ -83,10 +81,8 @@ struct PeakBounds {
  * @param fitStatusColumn a column of EPP fit statuses
  * @return a PeakBounds object containing the peak limits
  */
-PeakBounds peakBounds(size_t const firstIndex, size_t const lastIndex,
-                      double const sigmaMultiplier,
-                      Mantid::API::Column const &peakCentreColumn,
-                      Mantid::API::Column const &sigmaColumn,
+PeakBounds peakBounds(size_t const firstIndex, size_t const lastIndex, double const sigmaMultiplier,
+                      Mantid::API::Column const &peakCentreColumn, Mantid::API::Column const &sigmaColumn,
                       Mantid::API::Column const &fitStatusColumn) {
   PeakBounds bounds;
   size_t const boundsSize = lastIndex - firstIndex + 1;
@@ -114,21 +110,17 @@ PeakBounds peakBounds(size_t const firstIndex, size_t const lastIndex,
  * @param statusColumn an EPP fit status column
  * @throw NotFoundError if any of the parameters is nullptr
  */
-void checkEPPColumnsExist(Mantid::API::Column_sptr const &centreColumn,
-                          Mantid::API::Column_sptr const &sigmaColumn,
+void checkEPPColumnsExist(Mantid::API::Column_sptr const &centreColumn, Mantid::API::Column_sptr const &sigmaColumn,
                           Mantid::API::Column_sptr const &statusColumn) {
   using namespace Mantid::Kernel::Exception;
   if (!centreColumn) {
-    throw NotFoundError("EPPWorkspace does not contain 'PeakCentre' column.",
-                        "PeakCentre");
+    throw NotFoundError("EPPWorkspace does not contain 'PeakCentre' column.", "PeakCentre");
   }
   if (!sigmaColumn) {
-    throw NotFoundError("EPPWorkspace does not contain 'Sigma' column",
-                        "Sigma");
+    throw NotFoundError("EPPWorkspace does not contain 'Sigma' column", "Sigma");
   }
   if (!statusColumn) {
-    throw NotFoundError("EPPWorkspace does not contain 'FitStatus' column.",
-                        "FitStatus");
+    throw NotFoundError("EPPWorkspace does not contain 'FitStatus' column.", "FitStatus");
   }
 }
 
@@ -138,13 +130,11 @@ void checkEPPColumnsExist(Mantid::API::Column_sptr const &centreColumn,
  * @param instrument an instrument
  * @throw NotFoundError if the instrument does not contain the component
  */
-void checkComponentExists(std::string const &componentName,
-                          Mantid::Geometry::Instrument const &instrument) {
+void checkComponentExists(std::string const &componentName, Mantid::Geometry::Instrument const &instrument) {
   using namespace Mantid::Kernel::Exception;
   auto const component = instrument.getComponentByName(componentName);
   if (!component) {
-    throw NotFoundError("Component not found in InputWorkspace's instrument.",
-                        componentName);
+    throw NotFoundError("Component not found in InputWorkspace's instrument.", componentName);
   }
 }
 
@@ -165,12 +155,10 @@ struct Range {
 Range componentWSIndexRange(Mantid::API::MatrixWorkspace const &componentWS,
                             Mantid::API::MatrixWorkspace const &originalWS) {
   Range range;
-  auto const firstComponentSpectrumNo =
-      componentWS.getSpectrum(0).getSpectrumNo();
+  auto const firstComponentSpectrumNo = componentWS.getSpectrum(0).getSpectrumNo();
   range.first = originalWS.getIndexFromSpectrumNumber(firstComponentSpectrumNo);
   auto const nComponentHistograms = componentWS.getNumberHistograms();
-  auto const lastComponentSpectrumNo =
-      componentWS.getSpectrum(nComponentHistograms - 1).getSpectrumNo();
+  auto const lastComponentSpectrumNo = componentWS.getSpectrum(nComponentHistograms - 1).getSpectrumNo();
   range.last = originalWS.getIndexFromSpectrumNumber(lastComponentSpectrumNo);
   return range;
 }
@@ -181,9 +169,8 @@ Range componentWSIndexRange(Mantid::API::MatrixWorkspace const &componentWS,
  * @param targetWS the target workspace
  * @param firstTargetWSIndex begin writing at this workspace index
  */
-void writeComponentBackgroundToOutput(
-    Mantid::API::MatrixWorkspace const &componentBkgWS,
-    Mantid::API::MatrixWorkspace &targetWS, size_t const firstTargetWSIndex) {
+void writeComponentBackgroundToOutput(Mantid::API::MatrixWorkspace const &componentBkgWS,
+                                      Mantid::API::MatrixWorkspace &targetWS, size_t const firstTargetWSIndex) {
   auto const &ys = componentBkgWS.y(0);
   auto const &es = componentBkgWS.e(0);
   for (size_t i = 0; i < ys.size(); ++i) {
@@ -201,9 +188,7 @@ namespace Algorithms {
 DECLARE_ALGORITHM(DirectILLTubeBackground)
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string DirectILLTubeBackground::name() const {
-  return "DirectILLTubeBackground";
-}
+const std::string DirectILLTubeBackground::name() const { return "DirectILLTubeBackground"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int DirectILLTubeBackground::version() const { return 1; }
@@ -215,8 +200,7 @@ const std::string DirectILLTubeBackground::category() const {
 
 /// Return a vector of related algorithms.
 const std::vector<std::string> DirectILLTubeBackground::seeAlso() const {
-  return {"CalculateFlatBackground", "CalculatePolynomialBackground",
-          "CreateUserDefinedBackground", "RemoveBackground",
+  return {"CalculateFlatBackground", "CalculatePolynomialBackground", "CreateUserDefinedBackground", "RemoveBackground",
           "SplineBackground"};
 }
 
@@ -230,36 +214,27 @@ const std::string DirectILLTubeBackground::summary() const {
  */
 void DirectILLTubeBackground::init() {
   declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-          Prop::INPUT_WS, "", Kernel::Direction::Input),
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(Prop::INPUT_WS, "", Kernel::Direction::Input),
       "A workspace to fit the backgrounds to.");
   declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-          Prop::OUTPUT_WS, "", Kernel::Direction::Output),
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(Prop::OUTPUT_WS, "", Kernel::Direction::Output),
       "The fitted backgrounds.");
+  declareProperty(std::make_unique<Kernel::ArrayProperty<std::string>>(Prop::COMPONENTS, std::vector<std::string>()),
+                  "A list of component names for which to calculate the backgrounds.");
   declareProperty(
-      std::make_unique<Kernel::ArrayProperty<std::string>>(
-          Prop::COMPONENTS, std::vector<std::string>()),
-      "A list of component names for which to calculate the backgrounds.");
-  declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
-          Prop::EPP_WS, "", Kernel::Direction::Input),
+      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(Prop::EPP_WS, "", Kernel::Direction::Input),
       "A table workspace containing results from the FindEPP algorithm.");
   auto positiveDouble = std::make_shared<Kernel::BoundedValidator<double>>();
   positiveDouble->setLowerExclusive(0.);
-  declareProperty(
-      Prop::SIGMA_MULTIPLIER, 6., positiveDouble,
-      "Half width of the range excluded from background around "
-      "the elastic peaks in multiplies of 'Sigma' in the EPP table.'.");
+  declareProperty(Prop::SIGMA_MULTIPLIER, 6., positiveDouble,
+                  "Half width of the range excluded from background around "
+                  "the elastic peaks in multiplies of 'Sigma' in the EPP table.'.");
   auto nonnegativeInt = std::make_shared<Kernel::BoundedValidator<int>>();
   nonnegativeInt->setLower(0);
-  declareProperty(Prop::POLYNOMIAL_DEGREE, 0, nonnegativeInt,
-                  "The degree of the background polynomial.");
-  declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-          Prop::DIAGNOSTICS_WS, "", Kernel::Direction::Input,
-          API::PropertyMode::Optional),
-      "Detector diagnostics workspace for masking.");
+  declareProperty(Prop::POLYNOMIAL_DEGREE, 0, nonnegativeInt, "The degree of the background polynomial.");
+  declareProperty(std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+                      Prop::DIAGNOSTICS_WS, "", Kernel::Direction::Input, API::PropertyMode::Optional),
+                  "Detector diagnostics workspace for masking.");
 }
 
 /// Validate input properties.
@@ -268,16 +243,14 @@ std::map<std::string, std::string> DirectILLTubeBackground::validateInputs() {
   API::MatrixWorkspace_sptr inWS = getProperty(Prop::INPUT_WS);
   API::ITableWorkspace_sptr eppWS = getProperty(Prop::EPP_WS);
   if (inWS->getNumberHistograms() != eppWS->rowCount()) {
-    issues[Prop::EPP_WS] =
-        "Wrong EPP workspace? The number of the table rows "
-        "does not match the number of histograms in InputWorkspace.";
+    issues[Prop::EPP_WS] = "Wrong EPP workspace? The number of the table rows "
+                           "does not match the number of histograms in InputWorkspace.";
   }
   if (!isDefault(Prop::DIAGNOSTICS_WS)) {
     API::MatrixWorkspace_sptr maskWS = getProperty(Prop::DIAGNOSTICS_WS);
     if (inWS->getNumberHistograms() != maskWS->getNumberHistograms()) {
-      issues[Prop::EPP_WS] =
-          "Wrong diagnostics workspace? The number of histograms "
-          "does not match with InputWorkspace.";
+      issues[Prop::EPP_WS] = "Wrong diagnostics workspace? The number of histograms "
+                             "does not match with InputWorkspace.";
     }
   }
   return issues;
@@ -288,8 +261,7 @@ std::map<std::string, std::string> DirectILLTubeBackground::validateInputs() {
 void DirectILLTubeBackground::exec() {
   API::MatrixWorkspace_sptr inWS = getProperty(Prop::INPUT_WS);
   auto ws = applyDiagnostics(inWS->clone());
-  API::MatrixWorkspace_sptr bkgWS =
-      DataObjects::create<DataObjects::Workspace2D>(*ws);
+  API::MatrixWorkspace_sptr bkgWS = DataObjects::create<DataObjects::Workspace2D>(*ws);
   for (size_t i = 0; i < bkgWS->getNumberHistograms(); ++i) {
     bkgWS->convertToFrequencies(i);
   }
@@ -310,19 +282,15 @@ void DirectILLTubeBackground::exec() {
     checkComponentExists(componentName, *instrument);
     auto componentWS = cropToComponent(ws, componentName);
     auto const wsIndexRange = componentWSIndexRange(*componentWS, *ws);
-    auto const bkgRanges =
-        bkgFittingRanges(*componentWS, *fitStatusColumn, wsIndexRange.first);
+    auto const bkgRanges = bkgFittingRanges(*componentWS, *fitStatusColumn, wsIndexRange.first);
     if (bkgRanges.empty()) {
       continue;
     }
-    auto const bounds =
-        peakBounds(wsIndexRange.first, wsIndexRange.last, sigmaMultiplier,
-                   *peakCentreColumn, *sigmaColumn, *fitStatusColumn);
-    auto averageWS =
-        peakExcludingAverage(*componentWS, bounds.peakStarts, bounds.peakEnds);
+    auto const bounds = peakBounds(wsIndexRange.first, wsIndexRange.last, sigmaMultiplier, *peakCentreColumn,
+                                   *sigmaColumn, *fitStatusColumn);
+    auto averageWS = peakExcludingAverage(*componentWS, bounds.peakStarts, bounds.peakEnds);
     auto fittedComponentBkg = fitComponentBackground(averageWS, bkgRanges);
-    writeComponentBackgroundToOutput(*fittedComponentBkg, *bkgWS,
-                                     wsIndexRange.first);
+    writeComponentBackgroundToOutput(*fittedComponentBkg, *bkgWS, wsIndexRange.first);
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
@@ -339,8 +307,7 @@ void DirectILLTubeBackground::exec() {
  * @param ws a workspace to apply the mask to
  * @return a masked workspace
  */
-API::MatrixWorkspace_sptr
-DirectILLTubeBackground::applyDiagnostics(API::MatrixWorkspace_sptr ws) {
+API::MatrixWorkspace_sptr DirectILLTubeBackground::applyDiagnostics(API::MatrixWorkspace_sptr ws) {
   if (isDefault(Prop::DIAGNOSTICS_WS)) {
     return ws;
   }
@@ -358,8 +325,7 @@ DirectILLTubeBackground::applyDiagnostics(API::MatrixWorkspace_sptr ws) {
  * @return a list of comopnent names
  * @throw std::runtime_error if the names cannot be found anywhere
  */
-std::vector<std::string>
-DirectILLTubeBackground::components(Geometry::Instrument const &instrument) {
+std::vector<std::string> DirectILLTubeBackground::components(Geometry::Instrument const &instrument) {
   if (isDefault(Prop::COMPONENTS)) {
     std::string const COMPONENTS_PARAMETER{"components-for-backgrounds"};
     if (!instrument.hasParameter(COMPONENTS_PARAMETER)) {
@@ -368,8 +334,7 @@ DirectILLTubeBackground::components(Geometry::Instrument const &instrument) {
                                "names must be given using the '" +
                                Prop::COMPONENTS + "' property.");
     }
-    auto const componentList =
-        instrument.getStringParameter(COMPONENTS_PARAMETER).front();
+    auto const componentList = instrument.getStringParameter(COMPONENTS_PARAMETER).front();
     setPropertyValue(Prop::COMPONENTS, componentList);
   }
   return getProperty(Prop::COMPONENTS);
@@ -381,9 +346,8 @@ DirectILLTubeBackground::components(Geometry::Instrument const &instrument) {
  * @param componentName name of the component to crop
  * @return a component workspace
  */
-API::MatrixWorkspace_sptr
-DirectILLTubeBackground::cropToComponent(API::MatrixWorkspace_sptr &ws,
-                                         std::string const &componentName) {
+API::MatrixWorkspace_sptr DirectILLTubeBackground::cropToComponent(API::MatrixWorkspace_sptr &ws,
+                                                                   std::string const &componentName) {
   auto crop = createChildAlgorithm("CropToComponent");
   crop->setProperty("InputWorkspace", ws);
   crop->setProperty("OutputWorkspace", "_unused");
@@ -398,8 +362,8 @@ DirectILLTubeBackground::cropToComponent(API::MatrixWorkspace_sptr &ws,
  * @param xRanges fitting ranges
  * @return the fitted backgrounds
  */
-API::MatrixWorkspace_sptr DirectILLTubeBackground::fitComponentBackground(
-    API::MatrixWorkspace_sptr &ws, std::vector<double> const &xRanges) {
+API::MatrixWorkspace_sptr DirectILLTubeBackground::fitComponentBackground(API::MatrixWorkspace_sptr &ws,
+                                                                          std::vector<double> const &xRanges) {
   int const degree = getProperty(Prop::POLYNOMIAL_DEGREE);
   auto calculateBkg = createChildAlgorithm("CalculatePolynomialBackground");
   calculateBkg->setProperty("InputWorkspace", ws);
@@ -418,17 +382,15 @@ API::MatrixWorkspace_sptr DirectILLTubeBackground::fitComponentBackground(
  * @param peakEnds end X values of an exclusion range
  * @return a single histogram workspace containing the averages
  */
-API::MatrixWorkspace_sptr DirectILLTubeBackground::peakExcludingAverage(
-    API::MatrixWorkspace const &ws, std::vector<double> const &peakStarts,
-    std::vector<double> const &peakEnds) {
-  HistogramData::Points wsIndices{ws.getNumberHistograms(),
-                                  HistogramData::LinearGenerator(0., 1.)};
+API::MatrixWorkspace_sptr DirectILLTubeBackground::peakExcludingAverage(API::MatrixWorkspace const &ws,
+                                                                        std::vector<double> const &peakStarts,
+                                                                        std::vector<double> const &peakEnds) {
+  HistogramData::Points wsIndices{ws.getNumberHistograms(), HistogramData::LinearGenerator(0., 1.)};
   // zeroCounts actually holds the mean frequencies but since its
   // point data the type has to be Counts.
   HistogramData::Counts zeroCounts(ws.getNumberHistograms(), 0.);
   HistogramData::Histogram modelHistogram{wsIndices, zeroCounts};
-  API::MatrixWorkspace_sptr averageWS =
-      DataObjects::create<DataObjects::Workspace2D>(1, modelHistogram);
+  API::MatrixWorkspace_sptr averageWS = DataObjects::create<DataObjects::Workspace2D>(1, modelHistogram);
   for (size_t i = 0; i < ws.getNumberHistograms(); ++i) {
     auto const peakStart = peakStarts[i];
     auto const peakEnd = peakEnds[i];

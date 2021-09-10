@@ -20,9 +20,7 @@ class SampleEnvironmentSpecTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static SampleEnvironmentSpecTest *createSuite() {
-    return new SampleEnvironmentSpecTest();
-  }
+  static SampleEnvironmentSpecTest *createSuite() { return new SampleEnvironmentSpecTest(); }
   static void destroySuite(SampleEnvironmentSpecTest *suite) { delete suite; }
 
   //----------------------------------------------------------------------------
@@ -75,18 +73,17 @@ public:
     using Mantid::Kernel::V3D;
 
     ShapeFactory factory;
-    auto small = std::make_shared<Container>(factory.createShape(
-        ComponentCreationHelper::sphereXML(0.004, V3D(), "sp-1")));
+    auto small =
+        std::make_shared<Container>(factory.createShape(ComponentCreationHelper::sphereXML(0.004, V3D(), "sp-1")));
     small->setID("8mm");
-    auto large = std::make_shared<Container>(factory.createShape(
-        ComponentCreationHelper::sphereXML(0.005, V3D(), "sp-2")));
+    auto large =
+        std::make_shared<Container>(factory.createShape(ComponentCreationHelper::sphereXML(0.005, V3D(), "sp-2")));
     large->setID("10mm");
 
     SampleEnvironmentSpec spec("CRYO-001");
     spec.addContainer(small);
     spec.addContainer(large);
-    spec.addComponent(
-        ComponentCreationHelper::createSphere(0.05, V3D(0, 0, -0.1)));
+    spec.addComponent(ComponentCreationHelper::createSphere(0.05, V3D(0, 0, -0.1)));
 
     auto env = spec.buildEnvironment("10mm");
     TS_ASSERT(env);
@@ -102,8 +99,7 @@ public:
     SampleEnvironmentSpec spec("CRYO-001");
     auto testContainer = std::make_shared<const Container>("");
 
-    TS_ASSERT_THROWS(spec.addContainer(testContainer),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(spec.addContainer(testContainer), const std::invalid_argument &);
   }
 
   void test_Find_Throws_If_ID_Not_Found() {
@@ -117,7 +113,6 @@ public:
     using Mantid::Geometry::Container;
     SampleEnvironmentSpec spec("CRYO-001");
 
-    TS_ASSERT_THROWS(spec.buildEnvironment("8mm"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(spec.buildEnvironment("8mm"), const std::invalid_argument &);
   }
 };

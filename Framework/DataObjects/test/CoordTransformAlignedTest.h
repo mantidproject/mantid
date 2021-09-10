@@ -24,25 +24,18 @@ using namespace Mantid::Kernel;
 class CoordTransformAlignedTest : public CxxTest::TestSuite {
 public:
   void test_constructor_throws() {
-    TSM_ASSERT_THROWS_ANYTHING(
-        "Bad number of dimensions",
-        CoordTransformAligned ct(0, 0, nullptr, nullptr, nullptr););
-    TSM_ASSERT_THROWS_ANYTHING(
-        "Too many output dimensions",
-        CoordTransformAligned ct(3, 4, nullptr, nullptr, nullptr););
-    TSM_ASSERT_THROWS_ANYTHING(
-        "Null input",
-        CoordTransformAligned ct(1, 1, nullptr, nullptr, nullptr););
+    TSM_ASSERT_THROWS_ANYTHING("Bad number of dimensions", CoordTransformAligned ct(0, 0, nullptr, nullptr, nullptr););
+    TSM_ASSERT_THROWS_ANYTHING("Too many output dimensions",
+                               CoordTransformAligned ct(3, 4, nullptr, nullptr, nullptr););
+    TSM_ASSERT_THROWS_ANYTHING("Null input", CoordTransformAligned ct(1, 1, nullptr, nullptr, nullptr););
     size_t dimToBinFrom[3] = {4, 1, 0};
     coord_t origin[3] = {5, 10, 15};
     coord_t scaling[3] = {1, 2, 3};
-    TSM_ASSERT_THROWS_ANYTHING(
-        "DimtoBinFrom has too high an index",
-        CoordTransformAligned(4, 3, dimToBinFrom, origin, scaling));
+    TSM_ASSERT_THROWS_ANYTHING("DimtoBinFrom has too high an index",
+                               CoordTransformAligned(4, 3, dimToBinFrom, origin, scaling));
     std::vector<size_t> d(3);
     std::vector<coord_t> o(2), s(3);
-    TSM_ASSERT_THROWS_ANYTHING("Non-matching vector lengths",
-                               CoordTransformAligned(3, 3, d, o, s));
+    TSM_ASSERT_THROWS_ANYTHING("Non-matching vector lengths", CoordTransformAligned(3, 3, d, o, s));
   }
 
   /** Construct from vector */

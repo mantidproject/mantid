@@ -19,9 +19,7 @@ public:
   /// Algorithm's name
   const std::string name() const override { return "HFIRSANSNormalise"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Apply normalisation correction to HFIR SANS data.";
-  }
+  const std::string summary() const override { return "Apply normalisation correction to HFIR SANS data."; }
   /// Algorithm's version
   int version() const override { return (1); }
   /// Algorithm's category for identification

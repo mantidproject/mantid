@@ -31,8 +31,7 @@ enum ColumnNumber {
 };
 }
 
-template <typename T>
-class AppendErrorIfNotType : public boost::static_visitor<boost::optional<T>> {
+template <typename T> class AppendErrorIfNotType : public boost::static_visitor<boost::optional<T>> {
 public:
   AppendErrorIfNotType(std::vector<int> &invalidParams, int baseColumn)
       : m_invalidParams(invalidParams), m_baseColumn(baseColumn) {}
@@ -45,8 +44,7 @@ public:
   }
 
   boost::optional<T> operator()(const std::vector<int> &errorColumns) const {
-    std::transform(errorColumns.cbegin(), errorColumns.cend(),
-                   std::back_inserter(m_invalidParams),
+    std::transform(errorColumns.cbegin(), errorColumns.cend(), std::back_inserter(m_invalidParams),
                    [this](int column) -> int { return m_baseColumn + column; });
     return boost::none;
   }
@@ -56,50 +54,36 @@ private:
   int m_baseColumn;
 };
 
-boost::optional<std::vector<std::string>>
-RowValidator::parseRunNumbers(std::vector<std::string> const &cellText) {
-  auto runNumbers =
-      ::MantidQt::CustomInterfaces::ISISReflectometry::parseRunNumbers(
-          cellText[RUNS_COLUMN]);
+boost::optional<std::vector<std::string>> RowValidator::parseRunNumbers(std::vector<std::string> const &cellText) {
+  auto runNumbers = ::MantidQt::CustomInterfaces::ISISReflectometry::parseRunNumbers(cellText[RUNS_COLUMN]);
   if (!runNumbers.is_initialized())
     m_invalidColumns.emplace_back(RUNS_COLUMN);
   return runNumbers;
 }
 
-boost::optional<double>
-RowValidator::parseTheta(std::vector<std::string> const &cellText) {
-  auto theta = ::MantidQt::CustomInterfaces::ISISReflectometry::parseTheta(
-      cellText[THETA_COLUMN]);
+boost::optional<double> RowValidator::parseTheta(std::vector<std::string> const &cellText) {
+  auto theta = ::MantidQt::CustomInterfaces::ISISReflectometry::parseTheta(cellText[THETA_COLUMN]);
   if (!theta.is_initialized())
     m_invalidColumns.emplace_back(THETA_COLUMN);
   return theta;
 }
 
-boost::optional<TransmissionRunPair>
-RowValidator::parseTransmissionRuns(std::vector<std::string> const &cellText) {
-  auto transmissionRunsOrError =
-      ::MantidQt::CustomInterfaces::ISISReflectometry::parseTransmissionRuns(
-          cellText[FIRST_TRANS_COLUMN], cellText[SECOND_TRANS_COLUMN]);
-  return boost::apply_visitor(AppendErrorIfNotType<TransmissionRunPair>(
-                                  m_invalidColumns, FIRST_TRANS_COLUMN),
+boost::optional<TransmissionRunPair> RowValidator::parseTransmissionRuns(std::vector<std::string> const &cellText) {
+  auto transmissionRunsOrError = ::MantidQt::CustomInterfaces::ISISReflectometry::parseTransmissionRuns(
+      cellText[FIRST_TRANS_COLUMN], cellText[SECOND_TRANS_COLUMN]);
+  return boost::apply_visitor(AppendErrorIfNotType<TransmissionRunPair>(m_invalidColumns, FIRST_TRANS_COLUMN),
                               transmissionRunsOrError);
 }
 
-boost::optional<RangeInQ>
-RowValidator::parseQRange(std::vector<std::string> const &cellText) {
-  auto qRangeOrError =
-      ::MantidQt::CustomInterfaces::ISISReflectometry::parseQRange(
-          cellText[QMIN_COLUMN], cellText[QMAX_COLUMN], cellText[QSTEP_COLUMN]);
-  return boost::apply_visitor(
-      AppendErrorIfNotType<RangeInQ>(m_invalidColumns, QMIN_COLUMN),
-      qRangeOrError);
+boost::optional<RangeInQ> RowValidator::parseQRange(std::vector<std::string> const &cellText) {
+  auto qRangeOrError = ::MantidQt::CustomInterfaces::ISISReflectometry::parseQRange(
+      cellText[QMIN_COLUMN], cellText[QMAX_COLUMN], cellText[QSTEP_COLUMN]);
+  return boost::apply_visitor(AppendErrorIfNotType<RangeInQ>(m_invalidColumns, QMIN_COLUMN), qRangeOrError);
 }
 
-boost::optional<boost::optional<double>>
-RowValidator::parseScaleFactor(std::vector<std::string> const &cellText) {
+boost::optional<boost::optional<double>> RowValidator::parseScaleFactor(std::vector<std::string> const &cellText) {
   auto optionalScaleFactorOrNoneIfError =
-      ::MantidQt::CustomInterfaces::ISISReflectometry::parseScaleFactor(
-          cellText[SCALE_COLUMN]);
+      ::MantidQt::CustomInterfaces::ISISReflectometry::parseScaleFactor(cellText[SCALE_COLUMN]);
   if (!optionalScaleFactorOrNoneIfError.is_initialized())
     m_invalidColumns.emplace_back(SCALE_COLUMN);
 
@@ -108,15 +92,13 @@ RowValidator::parseScaleFactor(std::vector<std::string> const &cellText) {
 
 boost::optional<std::map<std::string, std::string>>
 RowValidator::parseOptions(std::vector<std::string> const &cellText) {
-  auto options = ::MantidQt::CustomInterfaces::ISISReflectometry::parseOptions(
-      cellText[OPTIONS_COLUMN]);
+  auto options = ::MantidQt::CustomInterfaces::ISISReflectometry::parseOptions(cellText[OPTIONS_COLUMN]);
   if (!options.is_initialized())
     m_invalidColumns.emplace_back(OPTIONS_COLUMN);
   return options;
 }
 
-ValidationResult<Row, std::vector<int>> RowValidator::
-operator()(std::vector<std::string> const &cellText) {
+ValidationResult<Row, std::vector<int>> RowValidator::operator()(std::vector<std::string> const &cellText) {
   auto maybeRunNumbers = parseRunNumbers(cellText);
   auto maybeTheta = parseTheta(cellText);
   auto maybeTransmissionRuns = parseTransmissionRuns(cellText);
@@ -125,12 +107,10 @@ operator()(std::vector<std::string> const &cellText) {
   auto maybeOptions = parseOptions(cellText);
 
   if (allInitialized(maybeRunNumbers, maybeTransmissionRuns)) {
-    auto wsNames =
-        workspaceNames(maybeRunNumbers.get(), maybeTransmissionRuns.get());
-    auto maybeRow = makeIfAllInitialized<Row>(
-        maybeRunNumbers, maybeTheta, maybeTransmissionRuns, maybeQRange,
-        maybeScaleFactor, maybeOptions,
-        boost::optional<ReductionWorkspaces>(wsNames));
+    auto wsNames = workspaceNames(maybeRunNumbers.get(), maybeTransmissionRuns.get());
+    auto maybeRow =
+        makeIfAllInitialized<Row>(maybeRunNumbers, maybeTheta, maybeTransmissionRuns, maybeQRange, maybeScaleFactor,
+                                  maybeOptions, boost::optional<ReductionWorkspaces>(wsNames));
     if (maybeRow.is_initialized())
       return RowValidationResult(maybeRow.get());
     else
@@ -146,8 +126,7 @@ RowValidationResult validateRow(std::vector<std::string> const &cells) {
   return result;
 }
 
-boost::optional<Row> validateRowFromRunAndTheta(std::string const &run,
-                                                std::string const &theta) {
+boost::optional<Row> validateRowFromRunAndTheta(std::string const &run, std::string const &theta) {
   std::vector<std::string> cells = {run, theta, "", "", "", "", "", "", ""};
   return validateRow(cells).validElseNone();
 }

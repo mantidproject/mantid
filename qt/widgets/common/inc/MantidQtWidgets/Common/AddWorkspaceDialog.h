@@ -38,18 +38,21 @@ public:
   QComboBox *workspaceNameComboBox() const { return m_uiForm.cbWorkspaceName; }
   QLineEdit *workspaceIndiceLineEdit() const { return m_uiForm.leWSIndices; }
 
+signals:
+  void closeDialog();
+  void okClicked(bool close);
+
 public slots:
-  void accept() override;
+  void handleCancelClicked();
+  void handleOKClicked();
 
 private slots:
-  void reject() override;
   void workspaceNameChanged(const QString & /*wsName*/);
   void selectAllSpectra(int state);
 
 private:
-  void addWorkspacesFromGroup(
-      std::vector<Mantid::API::MatrixWorkspace_const_sptr> &workspaces,
-      Mantid::API::WorkspaceGroup_const_sptr const &group) const;
+  void addWorkspacesFromGroup(std::vector<Mantid::API::MatrixWorkspace_const_sptr> &workspaces,
+                              Mantid::API::WorkspaceGroup_const_sptr const &group) const;
 
   QStringList availableWorkspaces() const;
   void findCommonMaxIndex(const QString &wsName);

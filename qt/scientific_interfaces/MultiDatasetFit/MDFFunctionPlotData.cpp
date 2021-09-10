@@ -37,9 +37,8 @@ auto FUNCTION_CURVE_COLOR = Qt::magenta;
 /// @param startX :: A lower bound of the evaluation interval.
 /// @param endX :: An upper bound of the evaluation interval.
 /// @param nX :: A number of values to evaluate.
-MDFFunctionPlotData::MDFFunctionPlotData(
-    const std::shared_ptr<Mantid::API::IFunction> &fun, double startX,
-    double endX, size_t nX)
+MDFFunctionPlotData::MDFFunctionPlotData(const std::shared_ptr<Mantid::API::IFunction> &fun, double startX, double endX,
+                                         size_t nX)
     : m_function(fun), m_functionCurve(new QwtPlotCurve()) {
   setDomain(startX, endX, nX);
   auto pen = m_functionCurve->pen();
@@ -66,8 +65,7 @@ void MDFFunctionPlotData::setDomain(double startX, double endX, size_t nX) {
   } catch (std::exception &e) {
     MultiDatasetFit::logWarning(e.what());
   }
-  m_functionCurve->setData(x.getPointerAt(0), y.getPointerToCalculated(0),
-                           static_cast<int>(x.size()));
+  m_functionCurve->setData(x.getPointerAt(0), y.getPointerToCalculated(0), static_cast<int>(x.size()));
 }
 
 /// Show the curves on a plot.
@@ -102,12 +100,10 @@ void MDFFunctionPlotData::updateFunction(const Mantid::API::IFunction &fun) {
   if (!m_function)
     return;
   if (m_function->nParams() != fun.nParams()) {
-    throw std::logic_error(
-        "Cannot update function: different number of parameters.");
+    throw std::logic_error("Cannot update function: different number of parameters.");
   }
   if (m_function->nAttributes() != fun.nAttributes()) {
-    throw std::logic_error(
-        "Cannot update function: different number of attributes.");
+    throw std::logic_error("Cannot update function: different number of attributes.");
   }
   // Copy the attributes
   auto attributes = fun.getAttributeNames();

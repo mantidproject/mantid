@@ -30,9 +30,7 @@ namespace {
  *calculation
  * @return The distance between self & the other component in metres
  */
-double getDistance(IComponent &self, IComponent &other) {
-  return self.getDistance(other);
-}
+double getDistance(IComponent &self, IComponent &other) { return self.getDistance(other); }
 } // namespace
 
 void export_IComponent() {
@@ -40,17 +38,12 @@ void export_IComponent() {
   register_ptr_to_python<std::shared_ptr<const IComponent>>();
 
   class_<IComponent, boost::noncopyable>("IComponent", no_init)
-      .def("getPos", &IComponent::getPos, arg("self"),
-           "Returns the absolute position of the component")
+      .def("getPos", &IComponent::getPos, arg("self"), "Returns the absolute position of the component")
       .def("getDistance", &getDistance, (arg("self"), arg("other")),
            "Returns the distance, in metres, "
            "between this and the given component")
-      .def("getName", &IComponent::getName, arg("self"),
-           "Returns the name of the component")
-      .def("getFullName", &IComponent::getFullName, arg("self"),
-           "Returns full path name of component")
-      .def("type", &IComponent::type, arg("self"),
-           "Returns the type of the component represented as a string")
-      .def("getRelativeRot", &IComponent::getRelativeRot, arg("self"),
-           "Returns the relative rotation as a Quat");
+      .def("getName", &IComponent::getName, arg("self"), "Returns the name of the component")
+      .def("getFullName", &IComponent::getFullName, arg("self"), "Returns full path name of component")
+      .def("type", &IComponent::type, arg("self"), "Returns the type of the component represented as a string")
+      .def("getRelativeRot", &IComponent::getRelativeRot, arg("self"), "Returns the relative rotation as a Quat");
 }

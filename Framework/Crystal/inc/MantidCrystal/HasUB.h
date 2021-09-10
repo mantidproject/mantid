@@ -21,14 +21,10 @@ class MANTID_CRYSTAL_DLL HasUB : public ClearUB {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Determines whether the workspace has one or more UB Matrix";
-  }
+  const std::string summary() const override { return "Determines whether the workspace has one or more UB Matrix"; }
 
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"SetUB", "ClearUB"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"SetUB", "ClearUB"}; }
   const std::string category() const override;
 
 private:

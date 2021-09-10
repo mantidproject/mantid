@@ -36,19 +36,16 @@ public:
   }
 
   void do_test(int numRuns, size_t numBanks, size_t numPeaksPerBank) {
-    Instrument_sptr inst =
-        ComponentCreationHelper::createTestInstrumentRectangular(4, 10, 1.0);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(4, 10, 1.0);
     PeaksWorkspace_sptr ws(new PeaksWorkspace());
     ws->setInstrument(inst);
 
     for (int run = 1000; run < numRuns + 1000; run++)
       for (size_t b = 1; b <= numBanks; b++)
         for (size_t i = 0; i < numPeaksPerBank; i++) {
-          V3D hkl(static_cast<double>(i), static_cast<double>(i),
-                  static_cast<double>(i));
+          V3D hkl(static_cast<double>(i), static_cast<double>(i), static_cast<double>(i));
           DblMatrix gon(3, 3, true);
-          Peak p(inst, static_cast<detid_t>(b * 100 + i + 1 + i * 10),
-                 static_cast<double>(i) * 1.0 + 0.5, hkl, gon);
+          Peak p(inst, static_cast<detid_t>(b * 100 + i + 1 + i * 10), static_cast<double>(i) * 1.0 + 0.5, hkl, gon);
           p.setRunNumber(run);
           p.setBankName("bank1");
           p.setIntensity(static_cast<double>(i) + 0.1);
@@ -124,8 +121,7 @@ public:
     TS_ASSERT(alg3.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg3.setProperty("InputWorkspace", ws));
     TS_ASSERT_THROWS_NOTHING(alg3.setPropertyValue("Filename", outfile3));
-    TS_ASSERT_THROWS_NOTHING(
-        alg3.setPropertyValue("EliminateBankNumbers", "1"));
+    TS_ASSERT_THROWS_NOTHING(alg3.setPropertyValue("EliminateBankNumbers", "1"));
     TS_ASSERT_THROWS_NOTHING(alg3.execute(););
     TS_ASSERT(alg3.isExecuted());
     // Get the file
@@ -143,8 +139,8 @@ public:
     loadPeaks.setPropertyValue("FileName", "Peaks5637.integrate");
     loadPeaks.setPropertyValue("OutputWorkspace", "abc");
     loadPeaks.execute();
-    PeaksWorkspace_sptr ows = std::dynamic_pointer_cast<PeaksWorkspace>(
-        AnalysisDataService::Instance().retrieve("abc"));
+    PeaksWorkspace_sptr ows =
+        std::dynamic_pointer_cast<PeaksWorkspace>(AnalysisDataService::Instance().retrieve("abc"));
     SaveLauenorm alg4;
     TS_ASSERT_THROWS_NOTHING(alg4.initialize())
     TS_ASSERT(alg4.isInitialized())

@@ -28,8 +28,7 @@ public:
   virtual bool isQ() const = 0;
   virtual bool isSameType(const MDFrame &frame) const = 0;
   virtual std::string name() const = 0;
-  virtual Mantid::Kernel::SpecialCoordinateSystem
-  equivalientSpecialCoordinateSystem() const = 0;
+  virtual Mantid::Kernel::SpecialCoordinateSystem equivalientSpecialCoordinateSystem() const = 0;
   virtual MDFrame *clone() const = 0;
   virtual ~MDFrame() = default;
 };

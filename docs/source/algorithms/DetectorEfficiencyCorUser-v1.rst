@@ -27,29 +27,29 @@ The output data will be corrected as:
 
 where :math:`eff` is
 
-:math:`eff = \frac{f(Ei - \Delta E)}{f(E_i)}`
+:math:`eff = \frac{f(E_{i} - \Delta E)}{f(E_i)}`
 
 The function :math:`f` is defined as "formula\_eff" in the IDF. To date
 this has been implemented at the ILL for ILL IN4, IN5 and IN6, and at
 the MLZ for TOFTOF.
 
 Unlike :ref:`algm-DetectorEfficiencyCor` algorithm, which uses tabulated formula
-accounting for neutron adsorption efficiency dependence on neutron energy, 
-the formula used by this algorithm 
-is provided by instrument scientist and is adjusted for the instrument, 
-accounting for a number of additional instrument specific factors. 
+accounting for neutron adsorption efficiency dependence on neutron energy,
+the formula used by this algorithm
+is provided by instrument scientist and is adjusted for the instrument,
+accounting for a number of additional instrument specific factors.
 
-As example, for `TOFTOF <http://www.mlz-garching.de/toftof>`_ instrument, the energy-dependent intensity 
-loss factor accounts also for absorption of neutrons by the Ar gas in the flight chamber, Al windows 
+As example, for `TOFTOF <http://www.mlz-garching.de/toftof>`_ instrument, the energy-dependent intensity
+loss factor accounts also for absorption of neutrons by the Ar gas in the flight chamber, Al windows
 of sample environment etc.
-The formula used by DetectorEfficiencyCorUser algorithm is derived for TOFTOF in paper of 
-T. Unruh, 2007, doi:10.1016/j.nima.2007.07.015 and is set up in the TOFTOF instrument parameters file. 
+The formula used by DetectorEfficiencyCorUser algorithm is derived for TOFTOF in Ref. [#Unruh]_,
+and is set up in the TOFTOF instrument parameters file.
 
 
 Usage
 -----
 
-**Example - A sample correction**  
+**Example - A sample correction**
 
 .. testcode:: Ex1
 
@@ -83,6 +83,10 @@ Output:
     The correct value in bin 30 is 0.30 compared to 0.30
 
 
+.. [#Unruh] T. Unruh, J. Neuhaus, W. Petry,
+   *The high-resolution time-of-flight spectrometer TOFTOF*,
+   Nuclear Instruments and Methods in Physics Research Section A, **580** (2007), 1414-1422.
+   `doi:101016/jnima200707015 <https://doi.org/10.1016/j.nima.2007.07.015>`_
 
 .. categories::
 

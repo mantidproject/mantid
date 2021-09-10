@@ -90,7 +90,7 @@ Usage
 .. testcode:: ExExportExpLogs
 
   import os
-  
+
   nxsfilename = "HYS_11092_event.nxs"
   wsname = "HYS_11092_event"
 
@@ -98,15 +98,15 @@ Usage
   if defaultdir == "":
     defaultdir = config["defaultsave.directory"]
   savefile = os.path.join(defaultdir, "testlog.txt")
-  
-  Load(Filename = nxsfilename, 
+
+  Load(Filename = nxsfilename,
       OutputWorkspace = wsname,
       MetaDataOnly = True,
       LoadLogs = True)
-  
+
   ExportExperimentLog(
       InputWorkspace = wsname,
-      OutputFilename = savefile,  
+      OutputFilename = savefile,
       FileMode = "new",
       SampleLogNames = "run_start, run_title",
       SampleLogTitles = "AA, BB",
@@ -115,7 +115,7 @@ Usage
       TimeZone = "America/New_York")
 
   print("File is created =  {}".format(os.path.exists(savefile)))
-  
+
   # Get lines of file
   sfile = open(savefile, 'r')
   slines = sfile.readlines()

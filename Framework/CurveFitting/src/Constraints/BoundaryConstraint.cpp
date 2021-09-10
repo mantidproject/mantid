@@ -29,15 +29,13 @@ DECLARE_CONSTRAINT(BoundaryConstraint)
 using namespace API;
 /// Default constructor
 BoundaryConstraint::BoundaryConstraint()
-    : API::IConstraint(), m_penaltyFactor(getDefaultPenaltyFactor()),
-      m_hasLowerBound(false), m_hasUpperBound(false), m_lowerBound(DBL_MAX),
-      m_upperBound(-DBL_MAX) {}
+    : API::IConstraint(), m_penaltyFactor(getDefaultPenaltyFactor()), m_hasLowerBound(false), m_hasUpperBound(false),
+      m_lowerBound(DBL_MAX), m_upperBound(-DBL_MAX) {}
 
 /// Constructor with no boundary arguments
 /// @param paramName :: The parameter name
 BoundaryConstraint::BoundaryConstraint(const std::string &paramName)
-    : API::IConstraint(), m_penaltyFactor(getDefaultPenaltyFactor()),
-      m_hasLowerBound(false), m_hasUpperBound(false) {
+    : API::IConstraint(), m_penaltyFactor(getDefaultPenaltyFactor()), m_hasLowerBound(false), m_hasUpperBound(false) {
   UNUSED_ARG(paramName);
 }
 
@@ -50,21 +48,17 @@ BoundaryConstraint::BoundaryConstraint(const std::string &paramName)
  * with this reference:
  *  a tie or a constraint.
  */
-BoundaryConstraint::BoundaryConstraint(API::IFunction *fun,
-                                       const std::string &paramName,
-                                       const double lowerBound,
+BoundaryConstraint::BoundaryConstraint(API::IFunction *fun, const std::string &paramName, const double lowerBound,
                                        const double upperBound, bool isDefault)
-    : m_penaltyFactor(getDefaultPenaltyFactor()), m_hasLowerBound(true),
-      m_hasUpperBound(true), m_lowerBound(lowerBound),
-      m_upperBound(upperBound) {
+    : m_penaltyFactor(getDefaultPenaltyFactor()), m_hasLowerBound(true), m_hasUpperBound(true),
+      m_lowerBound(lowerBound), m_upperBound(upperBound) {
   reset(fun, fun->parameterIndex(paramName), isDefault);
 }
 
-BoundaryConstraint::BoundaryConstraint(API::IFunction *fun,
-                                       const std::string &paramName,
-                                       const double lowerBound, bool isDefault)
-    : m_penaltyFactor(getDefaultPenaltyFactor()), m_hasLowerBound(true),
-      m_hasUpperBound(false), m_lowerBound(lowerBound), m_upperBound(-DBL_MAX) {
+BoundaryConstraint::BoundaryConstraint(API::IFunction *fun, const std::string &paramName, const double lowerBound,
+                                       bool isDefault)
+    : m_penaltyFactor(getDefaultPenaltyFactor()), m_hasLowerBound(true), m_hasUpperBound(false),
+      m_lowerBound(lowerBound), m_upperBound(-DBL_MAX) {
   reset(fun, fun->parameterIndex(paramName), isDefault);
 }
 
@@ -77,9 +71,7 @@ BoundaryConstraint::BoundaryConstraint(API::IFunction *fun,
  * with this reference:
  *  a tie or a constraint.
  */
-void BoundaryConstraint::initialize(API::IFunction *fun,
-                                    const API::Expression &expr,
-                                    bool isDefault) {
+void BoundaryConstraint::initialize(API::IFunction *fun, const API::Expression &expr, bool isDefault) {
   if (expr.size() < 2 || expr.name() != "==") {
     g_log.error("Wrong initialization expression");
     throw std::invalid_argument("Wrong initialization expression");
@@ -105,8 +97,7 @@ void BoundaryConstraint::initialize(API::IFunction *fun,
           ihi = static_cast<int>(i);
         } else {
           g_log.error("Unknown operator in initialization expression");
-          throw std::invalid_argument(
-              "Unknown operator in initialization expression");
+          throw std::invalid_argument("Unknown operator in initialization expression");
         }
       } // if empty
       else {
@@ -116,8 +107,7 @@ void BoundaryConstraint::initialize(API::IFunction *fun,
           ilow = static_cast<int>(i);
         } else {
           g_log.error("Unknown operator in initialization expression");
-          throw std::invalid_argument(
-              "Unknown operator in initialization expression");
+          throw std::invalid_argument("Unknown operator in initialization expression");
         }
       } // if not empty
     } catch (boost::bad_lexical_cast &) {
@@ -133,8 +123,7 @@ void BoundaryConstraint::initialize(API::IFunction *fun,
     size_t i = fun->parameterIndex(parName);
     reset(fun, i, isDefault);
   } catch (...) {
-    g_log.error() << "Parameter " << parName << " not found in function "
-                  << fun->name() << '\n';
+    g_log.error() << "Parameter " << parName << " not found in function " << fun->name() << '\n';
     throw;
   }
 
@@ -152,9 +141,8 @@ void BoundaryConstraint::initialize(API::IFunction *fun,
  */
 void BoundaryConstraint::setPenaltyFactor(const double &c) {
   if (c <= 0.0) {
-    g_log.warning()
-        << "Penalty factor <= 0 selected for boundary constraint."
-        << " Only positive penalty factor allowed. Penalty factor set to 1";
+    g_log.warning() << "Penalty factor <= 0 selected for boundary constraint."
+                    << " Only positive penalty factor allowed. Penalty factor set to 1";
     m_penaltyFactor = 1;
   }
   { m_penaltyFactor = c; }
@@ -162,10 +150,9 @@ void BoundaryConstraint::setPenaltyFactor(const double &c) {
 
 void BoundaryConstraint::setParamToSatisfyConstraint() {
   if (!(m_hasLowerBound || m_hasUpperBound)) {
-    g_log.warning()
-        << "No bounds have been set on BoundaryConstraint for parameter "
-        << parameterName() << ". Therefore"
-        << " this constraint serves no purpose!";
+    g_log.warning() << "No bounds have been set on BoundaryConstraint for parameter " << parameterName()
+                    << ". Therefore"
+                    << " this constraint serves no purpose!";
     return;
   }
 
@@ -179,10 +166,9 @@ void BoundaryConstraint::setParamToSatisfyConstraint() {
 
 double BoundaryConstraint::check() {
   if (!(m_hasLowerBound || m_hasUpperBound)) {
-    g_log.warning()
-        << "No bounds have been set on BoundaryConstraint for parameter "
-        << parameterName() << ". Therefore"
-        << " this constraint serves no purpose!";
+    g_log.warning() << "No bounds have been set on BoundaryConstraint for parameter " << parameterName()
+                    << ". Therefore"
+                    << " this constraint serves no purpose!";
     return 0.0;
   }
 

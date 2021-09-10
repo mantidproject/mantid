@@ -28,9 +28,7 @@ class CrystalFieldPeaksTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static CrystalFieldPeaksTest *createSuite() {
-    return new CrystalFieldPeaksTest();
-  }
+  static CrystalFieldPeaksTest *createSuite() { return new CrystalFieldPeaksTest(); }
   static void destroySuite(CrystalFieldPeaksTest *suite) { delete suite; }
 
   // Conversion factor from barn to milibarn/steradian
@@ -83,9 +81,8 @@ public:
   }
 
   void test_factory() {
-    std::string ini =
-        "name=CrystalFieldPeaks,Ion=Ce,Temperature=25.0,B20=1,B22="
-        "2,B40=3,B44=4,ties=(B42=B44/2)";
+    std::string ini = "name=CrystalFieldPeaks,Ion=Ce,Temperature=25.0,B20=1,B22="
+                      "2,B40=3,B44=4,ties=(B42=B44/2)";
     auto fun = FunctionFactory::Instance().createInitialized(ini);
     TS_ASSERT(fun);
     TS_ASSERT_EQUALS(fun->nParams(), 34);
@@ -112,11 +109,9 @@ public:
     peaks.setAttributeValue("Temperature", 44.0);
     peaks.setAttributeValue("ToleranceIntensity", 0.001 * c_mbsr);
     peaks.setAttributeValue("Ion", "something");
-    TS_ASSERT_THROWS(peaks.calculateEigenSystem(en, wf, nre),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(peaks.calculateEigenSystem(en, wf, nre), const std::runtime_error &);
     peaks.setAttributeValue("Ion", "S2.4");
-    TS_ASSERT_THROWS(peaks.calculateEigenSystem(en, wf, nre),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(peaks.calculateEigenSystem(en, wf, nre), const std::runtime_error &);
     peaks.setAttributeValue("Ion", "S2.5");
     TS_ASSERT_THROWS_NOTHING(peaks.calculateEigenSystem(en, wf, nre));
     TS_ASSERT_EQUALS(nre, -5);
@@ -156,8 +151,7 @@ public:
       return;
     }
 
-    ITableWorkspace_sptr output =
-        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("out");
+    ITableWorkspace_sptr output = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("out");
     TS_ASSERT(output);
     TS_ASSERT_EQUALS(output->rowCount(), 3);
     TS_ASSERT_EQUALS(output->columnCount(), 2);
@@ -207,8 +201,7 @@ public:
     eval.setProperty("OutputWorkspace", "out");
     eval.execute();
 
-    ITableWorkspace_sptr output =
-        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("out");
+    ITableWorkspace_sptr output = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("out");
     TS_ASSERT(output);
     TS_ASSERT_EQUALS(output->rowCount(), 3);
     TS_ASSERT_EQUALS(output->columnCount(), 4);
@@ -524,9 +517,7 @@ public:
     TS_ASSERT_EQUALS(tie->asString(), "B64=-21*B60");
   }
 
-  void test_CrystalFieldPeaksBaseImpl() {
-    Mantid::CurveFitting::Functions::CrystalFieldPeaksBaseImpl fun;
-  }
+  void test_CrystalFieldPeaksBaseImpl() { Mantid::CurveFitting::Functions::CrystalFieldPeaksBaseImpl fun; }
 
 private:
   bool isFixed(const IFunction &fun, const std::string &par) {

@@ -39,8 +39,7 @@ public:
   /// Calculate the covariance matrix.
   void calCovarianceMatrix(gsl_matrix *covar, double epsrel = 0.0001);
   /// Initialize minimizer, i.e. pass a function to minimize.
-  void initialize(API::ICostFunction_sptr function,
-                  size_t maxIterations = 0) override;
+  void initialize(API::ICostFunction_sptr function, size_t maxIterations = 0) override;
   /// Set maximum value of the gradient at which iterations can stop
   void setStopGradient(const double value);
 
@@ -71,8 +70,7 @@ protected:
   /// Used by the GSL
   static void dfun(const gsl_vector *x, void *params, gsl_vector *g);
   /// Used by the GSL
-  static void fundfun(const gsl_vector *x, void *params, double *f,
-                      gsl_vector *g);
+  static void fundfun(const gsl_vector *x, void *params, double *f, gsl_vector *g);
 
 private:
   /// simply init the values for the gsl minimizer

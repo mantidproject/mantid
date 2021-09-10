@@ -70,7 +70,8 @@ class ISISPowderInstrumentRunDetailsTest(unittest.TestCase):
         self.assertEqual(output_obj.vanadium_run_numbers, expected_vanadium_runs)
         self.assertEqual(output_obj.summed_empty_file_path,
                          os.path.join(mock_inst.calibration_dir, expected_label,
-                                      common.generate_summed_empty_name(expected_empty_runs)))
+                                      common.generate_summed_empty_name(expected_empty_runs,
+                                                                        expected_offset_file_name)))
 
     def test_create_run_details_object_when_van_cal(self):
         # When we are running the vanadium calibration we expected the run number to take the vanadium

@@ -56,7 +56,7 @@ Usage
     print("Log values: {}".format(wg.getRun().keys()))
     print("Goniometer angles:  {}".format(wg.getRun().getGoniometer().getEulerAngles('YZY')))
     print("Clearing goniometer up")
-    SetGoniometer(wg) 
+    SetGoniometer(wg)
     print("Goniometer angles:  {}".format(wg.getRun().getGoniometer().getEulerAngles('YZY')    ))
 
 .. testcleanup:: SetGoniometer
@@ -71,7 +71,7 @@ Output:
     Goniometer angles:  [50,0,0]
     Clearing goniometer up
     Goniometer angles:  [0,0,0]
- 
+
 **Example - multiple goniometers - omega scan**
 
 .. testcode:: OmegaScanExample

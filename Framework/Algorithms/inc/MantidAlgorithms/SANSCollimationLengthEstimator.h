@@ -15,13 +15,11 @@ namespace Mantid {
 namespace Algorithms {
 class MANTID_ALGORITHMS_DLL SANSCollimationLengthEstimator {
 public:
-  double
-  provideCollimationLength(const Mantid::API::MatrixWorkspace_sptr &workspace);
+  double provideCollimationLength(const Mantid::API::MatrixWorkspace_sptr &workspace);
 
 private:
-  double getCollimationLengthWithGuides(
-      const Mantid::API::MatrixWorkspace_sptr &inOutWS, const double L1,
-      const double collimationLengthCorrection) const;
+  double getCollimationLengthWithGuides(const Mantid::API::MatrixWorkspace_sptr &inOutWS, const double L1,
+                                        const double collimationLengthCorrection) const;
   double getGuideValue(Mantid::Kernel::Property *prop) const;
 };
 } // namespace Algorithms

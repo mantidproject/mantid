@@ -19,9 +19,7 @@ public:
 
 public:
   // ----------------- success tests ---------------------
-  void testConstructWithPyObjectAxes() {
-    TS_ASSERT_THROWS_NOTHING(Axes axes(pyAxes()));
-  }
+  void testConstructWithPyObjectAxes() { TS_ASSERT_THROWS_NOTHING(Axes axes(pyAxes())); }
 
   void testClear() {
     Axes axes(pyAxes());
@@ -41,9 +39,7 @@ public:
     TS_ASSERT_DIFFERS(newColour, line1.pyobj().attr("get_color")());
     TS_ASSERT_DIFFERS(newColour, line2.pyobj().attr("get_color")());
 
-    axes.forEachArtist("lines", [&newColour](Artist &&artist) {
-      artist.pyobj().attr("set_color")(newColour);
-    });
+    axes.forEachArtist("lines", [&newColour](Artist &&artist) { artist.pyobj().attr("set_color")(newColour); });
     TS_ASSERT_EQUALS(newColour, line1.pyobj().attr("get_color")());
     TS_ASSERT_EQUALS(newColour, line2.pyobj().attr("get_color")());
   }
@@ -108,8 +104,7 @@ public:
     Axes axes(pyAxes());
     const QString label{"mylabel"};
     const auto line = axes.plot({1, 2, 3}, {1, 2, 3}, "b-", label);
-    TS_ASSERT_EQUALS(label.toLatin1().constData(),
-                     line.pyobj().attr("get_label")());
+    TS_ASSERT_EQUALS(label.toLatin1().constData(), line.pyobj().attr("get_label")());
   }
 
   void testSetXScaleWithKnownScaleType() {
@@ -164,27 +159,22 @@ public:
 
   void testSetXScaleWithUnknownScaleTypeThrows() {
     Axes axes(pyAxes());
-    TS_ASSERT_THROWS(axes.setXScale("notascaletype"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(axes.setXScale("notascaletype"), const std::invalid_argument &);
   }
 
   void testSetYScaleWithUnknownScaleTypeThrows() {
     Axes axes(pyAxes());
-    TS_ASSERT_THROWS(axes.setYScale("notascaletype"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(axes.setYScale("notascaletype"), const std::invalid_argument &);
   }
 
 private:
   Python::Object pyAxes() {
     // An Axes requires a figure and rectangle definition
     // to be constructible
-    const Python::Object figureModule{
-        Python::NewRef(PyImport_ImportModule("matplotlib.figure"))};
+    const Python::Object figureModule{Python::NewRef(PyImport_ImportModule("matplotlib.figure"))};
     const Python::Object figure{figureModule.attr("Figure")()};
-    const Python::Object rect{
-        Python::NewRef(Py_BuildValue("(iiii)", 0, 0, 1, 1))};
-    const Python::Object axesModule{
-        Python::NewRef(PyImport_ImportModule("matplotlib.axes"))};
+    const Python::Object rect{Python::NewRef(Py_BuildValue("(iiii)", 0, 0, 1, 1))};
+    const Python::Object axesModule{Python::NewRef(PyImport_ImportModule("matplotlib.axes"))};
     return axesModule.attr("Axes")(figure, rect);
   }
 };

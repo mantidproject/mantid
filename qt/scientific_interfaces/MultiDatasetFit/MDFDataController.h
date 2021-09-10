@@ -71,8 +71,7 @@ private slots:
 
 private:
   MultiDatasetFit *owner() const;
-  void addWorkspaceSpectrum(const QString &wsName, int wsIndex,
-                            const Mantid::API::MatrixWorkspace &ws);
+  void addWorkspaceSpectrum(const QString &wsName, int wsIndex, const Mantid::API::MatrixWorkspace &ws);
   void removeSpectra(QList<int> rows);
 
   /// Table with data set names and other data.

@@ -10,17 +10,11 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
-CatalogRunNotifier::CatalogRunNotifier(IRunsView *view) : m_view(view) {
-  m_view->subscribeTimer(this);
-}
+CatalogRunNotifier::CatalogRunNotifier(IRunsView *view) : m_view(view) { m_view->subscribeTimer(this); }
 
-void CatalogRunNotifier::subscribe(RunNotifierSubscriber *notifyee) {
-  m_notifyee = notifyee;
-}
+void CatalogRunNotifier::subscribe(RunNotifierSubscriber *notifyee) { m_notifyee = notifyee; }
 
-void CatalogRunNotifier::startPolling() {
-  m_view->startTimer(POLLING_INTERVAL_MILLISECONDS);
-}
+void CatalogRunNotifier::startPolling() { m_view->startTimer(POLLING_INTERVAL_MILLISECONDS); }
 
 void CatalogRunNotifier::stopPolling() { m_view->stopTimer(); }
 

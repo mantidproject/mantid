@@ -18,12 +18,14 @@ SPECIAL_UPPER = [specialname.upper for specialname in SPECIAL]
 # TODO this list should be empty
 ALG_BAD_PARAMS = {
     "Bin2DPowderDiffraction(v1)": ("dSpaceBinning", "dPerpendicularBinning"),
+    "PowderReduceP2D(v1)": ("dSpaceBinning","dPerpendicularBinning"),
     "CalculateUMatrix(v1)": ("a", "b", "c", "alpha", "beta", "gamma"),
     "ConvertToMD(v1)": ("dEAnalysisMode"),
     "ConvertToMDMinMaxLocal(v1)": ("dEAnalysisMode"),
     "ConvertToMDMinMaxGlobal(v1)": ("dEAnalysisMode"),
     "EstimateDivergence(v1)": ("alpha", "beta0", "beta1"),
     "FindUBUsingLatticeParameters(v1)": ("a", "b", "c", "alpha", "beta", "gamma"),
+    "FindGlobalBMatrix(v1)": ("a", "b", "c", "alpha", "beta", "gamma"),
     "IndexSXPeaks(v1)": ("a", "b", "c", "alpha", "beta", "gamma", "dTolerance"),
     "LoadDNSSCD(v1)": ("a", "b", "c", "alpha", "beta", "gamma"),
     "ModeratorTzero(v1)": ("tolTOF"),
@@ -50,6 +52,7 @@ ALG_BAD_PARAMS = {
     "AccumulateMD(v1)": ("u", "v")
 }
 
+
 # TODO this list should be empty
 FUNC_BAD_NAME = ("Muon_ExpDecayOscTest")
 
@@ -57,9 +60,12 @@ FUNC_BAD_NAME = ("Muon_ExpDecayOscTest")
 FUNC_BAD_PARAMS = {
     "Bk2BkExpConvPV":("TOF_h"),
     "CubicSpline":("y0", "y1", "y2"),
-    "DiffRotDiscreteCircle":("f0.Height", "f0.Radius", "f0.Centre"),
-    "DiffSphere":("f0.Height", "f0.Radius", "f0.Centre"),
-    "IsoRotDiff":("f0.Height", "f0.Radius", "f0.Centre"),
+    "DiffRotDiscreteCircle":("f0.Height", "f0.Radius", "f0.Centre",
+                             "f1.Intensity", "f1.Radius", "f1.Decay", "f1.Shift"),
+    "DiffSphere":("f0.Height", "f0.Radius", "f0.Centre",
+                  "f1.Intensity", "f1.Radius", "f1.Diffusion", "f1.Shift"),
+    "IsoRotDiff":("f0.Height", "f0.Radius", "f0.Centre",
+                  "f1.Height", "f1.Radius", "f1.Tau", "f1.Centre"),
     "LatticeErrors":("p0", "p1", "p2", "p3", "p4", "p5"),
     "Muon_ExpDecayOscTest":("lambda", "frequency", "phi"),
     "SCDPanelErrors":("f0_detWidthScale", "f0_detHeightScale",
@@ -75,7 +81,7 @@ FUNC_BAD_PARAMS = {
                             "f4.Amplitude","f4.PeakCentre","f4.FWHM","f5.Amplitude","f5.PeakCentre","f5.FWHM"),
     "CrystalFieldMultiSpectrum":("f0.f0.A0","f0.f1.Amplitude","f0.f1.PeakCentre","f0.f1.FWHM",
                                  "f0.f2.Amplitude","f0.f2.PeakCentre","f0.f2.FWHM")
-    }
+}
 
 
 class Algorithms(systemtesting.MantidSystemTest):

@@ -12,7 +12,7 @@ Description
 
 This algorithm takes a list of component names and an input workspaces and produces an output workspace which only contains the detectors which are part of the specified components. If no components are specified then the full workspace is returned.
 
-The workspace allows users to select a specific bank for exclusive investigation in subsequent operations. 
+The workspace allows users to select a specific bank for exclusive investigation in subsequent operations.
 
 Usage
 -----

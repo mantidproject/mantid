@@ -8,7 +8,6 @@
 
 #include "ConvFitModel.h"
 #include "IndirectFitAnalysisTab.h"
-#include "IndirectSpectrumSelectionPresenter.h"
 #include "ParameterEstimation.h"
 
 #include "MantidAPI/CompositeFunction.h"
@@ -36,7 +35,7 @@ private:
   void setupFitTab() override;
   void setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) override;
   EstimationDataSelector getEstimationDataSelector() const override;
-
+  void addDataToModel(IAddWorkspaceDialog const *dialog) override;
   std::string getFitTypeString() const;
 
   std::unique_ptr<Ui::IndirectFitTab> m_uiForm;
@@ -47,9 +46,6 @@ private:
 protected slots:
   void runClicked();
   void fitFunctionChanged();
-  void setModelResolution(const std::string &resolutionName);
-  void setModelResolution(const std::string &resolutionName,
-                          TableDatasetIndex index);
 };
 
 } // namespace IDA

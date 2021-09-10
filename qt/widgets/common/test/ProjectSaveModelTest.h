@@ -29,12 +29,9 @@ GNU_DIAG_OFF_SUGGEST_OVERRIDE
 // Mock object for the model;
 class MockProjectSaveModel : public ProjectSaveModel {
 public:
-  MockProjectSaveModel(
-      const std::vector<MantidQt::API::IProjectSerialisable *> &windows,
-      std::vector<std::string> activePythonInterfaces =
-          std::vector<std::string>())
-      : ProjectSaveModel(std::move(windows),
-                         std::move(activePythonInterfaces)) {}
+  MockProjectSaveModel(const std::vector<MantidQt::API::IProjectSerialisable *> &windows,
+                       std::vector<std::string> activePythonInterfaces = std::vector<std::string>())
+      : ProjectSaveModel(std::move(windows), std::move(activePythonInterfaces)) {}
   MOCK_METHOD1(getProjectSize, size_t(const std::vector<std::string> &wsNames));
 };
 
@@ -140,8 +137,7 @@ public:
 
   void testGetInterfaceNames() {
     std::vector<MantidQt::API::IProjectSerialisable *> windows;
-    std::vector<std::string> interfaces{"Test_Interface",
-                                        "Test_Python_Interface_2"};
+    std::vector<std::string> interfaces{"Test_Interface", "Test_Python_Interface_2"};
 
     ProjectSaveModel model(windows, interfaces);
     auto names = model.getAllPythonInterfaces();
@@ -230,8 +226,7 @@ public:
   }
 
   void testGetWorkspaceInformationWithGroup() {
-    auto group =
-        WorkspaceCreationHelper::createWorkspaceGroup(3, 1, 10, "ws-group");
+    auto group = WorkspaceCreationHelper::createWorkspaceGroup(3, 1, 10, "ws-group");
 
     ProjectSaveModel model({});
     auto wsInfo = model.getWorkspaceInformation();

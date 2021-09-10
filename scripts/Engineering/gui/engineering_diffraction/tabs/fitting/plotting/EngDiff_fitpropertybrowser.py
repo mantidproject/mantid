@@ -13,6 +13,8 @@ from mantidqt.utils.qt import import_qt
 from mantidqt.utils.observer_pattern import GenericObservable
 from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowser
 from mantid.api import AnalysisDataService as ADS
+from Engineering.gui.engineering_diffraction.tabs.common import output_settings
+from Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 
 BaseBrowser = import_qt('.._common', 'mantidqt.widgets', 'FitPropertyBrowser')
 
@@ -25,6 +27,10 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
 
     def __init__(self, canvas, toolbar_manager, parent=None):
         super(EngDiffFitPropertyBrowser, self).__init__(canvas, toolbar_manager, parent)
+        # overwrite default peak with that in settings (gets init when UI opened)
+        default_peak = get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX,
+                                   "default_peak")
+        self.setDefaultPeakType(default_peak)
         self.fit_notifier = GenericObservable()
         self.fit_enabled_notifier = GenericObservable()
 
@@ -37,33 +43,42 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
 
     def get_fitprop(self):
         """
-        Get the algorithm parameters updated post-fit
+        Get the algorithm parameters updated post-fit (including output status of fit)
         :return: dictionary of parameters
         """
         dict_str = self.getFitAlgorithmParameters()
         if dict_str:
             # evaluate string to make a dict (replace case of bool values)
-            return eval(dict_str.replace('true', 'True').replace('false', 'False'))
+            fitprop = eval(dict_str.replace('true', 'True').replace('false', 'False'))
+            fitprop['peak_centre_params'] = self._get_center_param_names()
+            fitprop['status'] = self.getFitAlgorithmOutputStatus()
+            return fitprop
         else:
             # if no fit has been performed
             return None
 
     def read_current_fitprop(self):
         """
-        Get algorithm parameters currently displayed in the UI browser (incl. defaults that user cannot change)
+        Get algorithm parameters currently displayed in the UI browser (incl. defaults that user cannot change) which
+        will be used as input for the sequential fit. This return does not include the output status of the last fit
+        which is not forced to be valid for the current parameters (i.e. could have been changed post-fit)
         :return: dict in style of self.getFitAlgorithmParameters()
         """
-        fitprop = {'properties': {'InputWorkspace': self.workspaceName(),
-                                  'Output': self.outputName(),
-                                  'StartX': self.startX(),
-                                  'EndX': self.endX(),
-                                  'Function': self.getFunctionString(),
-                                  'ConvolveMembers': True,
-                                  'OutputCompositeMembers': True}}
-        exclude = self.getExcludeRange()
-        if exclude:
-            fitprop['properties']['Exclude'] = [int(s) for s in exclude.split(',')]
-        return fitprop
+        try:
+            fitprop = {'properties': {'InputWorkspace': self.workspaceName(),
+                                      'Output': self.outputName(),
+                                      'StartX': self.startX(),
+                                      'EndX': self.endX(),
+                                      'Function': self.getFunctionString(),
+                                      'ConvolveMembers': True,
+                                      'OutputCompositeMembers': True}}
+            exclude = self.getExcludeRange()
+            if exclude:
+                fitprop['properties']['Exclude'] = [int(s) for s in exclude.split(',')]
+            fitprop['peak_centre_params'] = self._get_center_param_names()
+            return fitprop
+        except BaseException:  # The cpp passes up an 'unknown' error if getFunctionString() fails, i.e. if no fit
+            return None
 
     def save_current_setup(self, name):
         self.executeCustomSetupRemove(name)
@@ -102,16 +117,7 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
                 pass
         return allowed_spectra
 
-    @Slot(str)
-    def fitting_done_slot(self, name):
-        """
-        This is called after Fit finishes to update the fit curves.
-        :param name: The name of Fit's output workspace.
-        """
-        ws = ADS.retrieve(name)
-        self.do_plot(ws, plot_diff=self.plotDiff())
-        self.fit_result_ws_name = name
-        self.save_current_setup(self.workspaceName())
+    def _get_center_param_names(self):
         peak_prefixes = self.getPeakPrefixes()
         peak_center_params = []
         for peak_pre in peak_prefixes:
@@ -119,7 +125,17 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
             func_name_prefixed = handler.functionName()
             func_name = func_name_prefixed.split('-')[1]  # separate the prefix from the function name
             peak_center_params.append(func_name + '_' + self.getCentreParameterNameOf(peak_pre))
-        self.fit_notifier.notify_subscribers([self.get_fitprop(), peak_center_params])  # needs to be passed a list
+        return peak_center_params
+
+    @Slot(str)
+    def fitting_done_slot(self, name):
+        """
+        This is called after Fit finishes to update the fit curves.
+        :param name: The name of Fit's output workspace.
+        """
+        super(EngDiffFitPropertyBrowser, self).fitting_done_slot(name)
+        self.save_current_setup(self.workspaceName())
+        self.fit_notifier.notify_subscribers([self.get_fitprop()])
 
     @Slot()
     def function_changed_slot(self):

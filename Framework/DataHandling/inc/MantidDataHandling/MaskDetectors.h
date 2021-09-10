@@ -50,12 +50,7 @@ public:
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; };
   const std::vector<std::string> seeAlso() const override {
-    return {"MaskDetectorsInShape",
-            "MaskDetectorsIf",
-            "MaskSpectra",
-            "MaskBTP",
-            "MaskAngle",
-            "InvertMask"};
+    return {"MaskDetectorsInShape", "MaskDetectorsIf", "MaskSpectra", "MaskBTP", "MaskAngle", "InvertMask"};
   }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Transforms\\Masking"; }
@@ -64,61 +59,39 @@ private:
   // create type for range information
   using RangeInfo = std::tuple<size_t, size_t, bool>;
 
-  const std::string workspaceMethodName() const override {
-    return "maskDetectors";
-  }
-  const std::string workspaceMethodInputProperty() const override {
-    return "Workspace";
-  }
+  const std::string workspaceMethodName() const override { return "maskDetectors"; }
+  const std::string workspaceMethodInputProperty() const override { return "Workspace"; }
 
   // Implement abstract Algorithm methods
   void init() override;
   void exec() override;
 
   /// Choose how to mask given that we have a mask workspace
-  void
-  handleMaskByMaskWorkspace(const DataObjects::MaskWorkspace_const_sptr &maskWs,
-                            const API::MatrixWorkspace_const_sptr &WS,
-                            std::vector<detid_t> &detectorList,
-                            std::vector<size_t> &indexList,
-                            const RangeInfo &rangeInfo);
+  void handleMaskByMaskWorkspace(const DataObjects::MaskWorkspace_const_sptr &maskWs,
+                                 const API::MatrixWorkspace_const_sptr &WS, std::vector<detid_t> &detectorList,
+                                 std::vector<size_t> &indexList, const RangeInfo &rangeInfo);
 
   /// Choose how to mask given that we have a matrix workspace
-  void
-  handleMaskByMatrixWorkspace(const API::MatrixWorkspace_const_sptr &maskWs,
-                              const API::MatrixWorkspace_const_sptr &WS,
-                              std::vector<detid_t> &detectorList,
-                              std::vector<size_t> &indexList,
-                              const RangeInfo &rangeInfo);
+  void handleMaskByMatrixWorkspace(const API::MatrixWorkspace_const_sptr &maskWs,
+                                   const API::MatrixWorkspace_const_sptr &WS, std::vector<detid_t> &detectorList,
+                                   std::vector<size_t> &indexList, const RangeInfo &rangeInfo);
 
   void execPeaks(const DataObjects::PeaksWorkspace_sptr &WS);
-  void
-  fillIndexListFromSpectra(std::vector<size_t> &indexList,
-                           std::vector<Indexing::SpectrumNumber> spectraList,
-                           const API::MatrixWorkspace_sptr &WS,
-                           const RangeInfo &range_info);
-  void appendToDetectorListFromComponentList(
-      std::vector<detid_t> &detectorList,
-      const std::vector<std::string> &componentList,
-      const API::MatrixWorkspace_const_sptr &WS);
-  void appendToIndexListFromWS(
-      std::vector<size_t> &indexList,
-      const API::MatrixWorkspace_const_sptr &maskedWorkspace,
-      const RangeInfo &range_info);
-  void appendToDetectorListFromWS(
-      std::vector<detid_t> &detectorList,
-      const API::MatrixWorkspace_const_sptr &inputWs,
-      const API::MatrixWorkspace_const_sptr &maskWs,
-      const std::tuple<size_t, size_t, bool> &range_info);
-  void appendToIndexListFromMaskWS(
-      std::vector<size_t> &indexList,
-      const DataObjects::MaskWorkspace_const_sptr &maskedWorkspace,
-      const std::tuple<size_t, size_t, bool> &range_info);
-  void
-  extractMaskedWSDetIDs(std::vector<detid_t> &detectorList,
-                        const DataObjects::MaskWorkspace_const_sptr &maskWS);
-  void constrainMaskedIndexes(std::vector<size_t> &indexList,
-                              const RangeInfo &range_info);
+  void fillIndexListFromSpectra(std::vector<size_t> &indexList, std::vector<Indexing::SpectrumNumber> spectraList,
+                                const API::MatrixWorkspace_sptr &WS, const RangeInfo &range_info);
+  void appendToDetectorListFromComponentList(std::vector<detid_t> &detectorList,
+                                             const std::vector<std::string> &componentList,
+                                             const API::MatrixWorkspace_const_sptr &WS);
+  void appendToIndexListFromWS(std::vector<size_t> &indexList, const API::MatrixWorkspace_const_sptr &maskedWorkspace,
+                               const RangeInfo &range_info);
+  void appendToDetectorListFromWS(std::vector<detid_t> &detectorList, const API::MatrixWorkspace_const_sptr &inputWs,
+                                  const API::MatrixWorkspace_const_sptr &maskWs,
+                                  const std::tuple<size_t, size_t, bool> &range_info);
+  void appendToIndexListFromMaskWS(std::vector<size_t> &indexList,
+                                   const DataObjects::MaskWorkspace_const_sptr &maskedWorkspace,
+                                   const std::tuple<size_t, size_t, bool> &range_info);
+  void extractMaskedWSDetIDs(std::vector<detid_t> &detectorList, const DataObjects::MaskWorkspace_const_sptr &maskWS);
+  void constrainMaskedIndexes(std::vector<size_t> &indexList, const RangeInfo &range_info);
 
   RangeInfo getRanges(const API::MatrixWorkspace_sptr &targWS);
 };

@@ -29,8 +29,8 @@ where
 1. Integer type, containing spectrum number (not index)
 2. Double type, containing :math:`t_{\mathrm{dead}}` value of the spectrum
 
-It is assumed that all bins in the *InputWorkspace* are the same 
-size (to within reasonable rounding error). 
+It is assumed that all bins in the *InputWorkspace* are the same
+size (to within reasonable rounding error).
 If they are not, the algorithm will exit with an error.
 
 The *InputWorkspace* must contain a sample log ``goodfrm`` (number of good frames) for the algorithm to run successfully.

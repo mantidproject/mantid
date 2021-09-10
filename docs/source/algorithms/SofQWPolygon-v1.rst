@@ -9,21 +9,21 @@
 Description
 -----------
 
-Converts a 2D workspace in :ref:`units <Unit Factory>` 
-of spectrum number/**energy transfer** to 
-the intensity as a function of momentum transfer 
-:math:`Q` and energy transfer :math:`\Delta E`. 
+Converts a 2D workspace in :ref:`units <Unit Factory>`
+of spectrum number/**energy transfer** to
+the intensity as a function of momentum transfer
+:math:`Q` and energy transfer :math:`\Delta E`.
 
-The rebinning is done as a weighted sum of overlapping polygons. The polygon 
-in :math:`Q-\Delta E` space is calculated from the energy bin boundaries and 
-the detector scattering angle :math:`2\theta`. The detectors (pixels) are 
-assumed to be uniform, and characterised by a single angular width 
-:math:`\Delta2\theta`. This is calculated from the nominal :math:`2\theta` of 
-each detector; this algorithm does not utilize the `DetectorTwoThetaRanges` 
-optional input property. The signal and error of the rebinned data (in 
-:math:`Q-\Delta E` space) is then the sum of the contributing pixels in each 
-bin weighted by their fractional overlap area. Unlike the more precise 
-:ref:`algm-SofQWNormalisedPolygon` algorithm, these fractional weights are not 
+The rebinning is done as a weighted sum of overlapping polygons. The polygon
+in :math:`Q-\Delta E` space is calculated from the energy bin boundaries and
+the detector scattering angle :math:`2\theta`. The detectors (pixels) are
+assumed to be uniform, and characterised by a single angular width
+:math:`\Delta2\theta`. This is calculated from the nominal :math:`2\theta` of
+each detector; this algorithm does not utilize the `DetectorTwoThetaRanges`
+optional input property. The signal and error of the rebinned data (in
+:math:`Q-\Delta E` space) is then the sum of the contributing pixels in each
+bin weighted by their fractional overlap area. Unlike the more precise
+:ref:`algm-SofQWNormalisedPolygon` algorithm, these fractional weights are not
 thereafter retained in the workspace produced by this algorithm.
 
 See :ref:`algm-SofQWCentre` for centre-point binning.
@@ -40,12 +40,12 @@ Usage
 
    # create sample inelastic workspace for MARI instrument containing 1 at all spectra values
    ws=CreateSimulationWorkspace(Instrument='MAR',BinParams='-10,1,10')
-   # convert workspace into MD workspace 
+   # convert workspace into MD workspace
    ws=SofQWPolygon(InputWorkspace=ws,QAxisBinning='-3,0.1,3',Emode='Direct',EFixed=12)
-  
+
    print("The converted X-Y values are:")
    Xrow=ws.readX(59);
-   Yrow=ws.readY(59);   
+   Yrow=ws.readY(59);
    line1= " ".join('! {0:>6.2f} {1:>6.2f} '.format(Xrow[i],Yrow[i]) for i in range(0,10))
    print(line1 + " !")
    line2= " ".join('! {0:>6.2f} {1:>6.2f} '.format(Xrow[i],Yrow[i]) for i in range(10,20))
@@ -57,7 +57,7 @@ Usage
 .. testcleanup:: SofQWPolygon
 
    DeleteWorkspace(ws)
-   
+
 **Output:**
 
 .. testoutput:: SofQWPolygon

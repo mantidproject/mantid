@@ -19,19 +19,16 @@ using namespace Mantid::API;
 const double A = 1.1;
 const double B = 2.2;
 
-class IFunction1DTest_Function : public virtual IFunction1D,
-                                 public virtual ParamFunction {
+class IFunction1DTest_Function : public virtual IFunction1D, public virtual ParamFunction {
 protected:
   std::string name() const override { return "IFunction1DTest_Function"; }
-  void function1D(double *out, const double *xValues,
-                  const size_t nData) const override {
+  void function1D(double *out, const double *xValues, const size_t nData) const override {
     for (size_t i = 0; i < nData; ++i) {
       double x = xValues[i];
       out[i] = A * x + B;
     }
   }
-  void functionDeriv1D(Jacobian *out, const double *xValues,
-                       const size_t nData) override {
+  void functionDeriv1D(Jacobian *out, const double *xValues, const size_t nData) override {
     for (size_t i = 0; i < nData; ++i) {
       double x = xValues[i];
       out->set(i, 0, x);
@@ -42,12 +39,8 @@ protected:
 
 class IFunction1DTest_Jacobian : public Jacobian {
 public:
-  IFunction1DTest_Jacobian(size_t ny, size_t np) : m_np(np) {
-    m_data.resize(ny * np);
-  }
-  void set(size_t iY, size_t iP, double value) override {
-    m_data[iY * m_np + iP] = value;
-  }
+  IFunction1DTest_Jacobian(size_t ny, size_t np) : m_np(np) { m_data.resize(ny * np); }
+  void set(size_t iY, size_t iP, double value) override { m_data[iY * m_np + iP] = value; }
   double get(size_t iY, size_t iP) override { return m_data[iY * m_np + iP]; }
   void zero() override { m_data.assign(m_data.size(), 0.0); }
 
@@ -68,8 +61,7 @@ public:
     FunctionValues values(domain);
     function.function(domain, values);
     for (size_t i = 0; i < domain.size(); ++i) {
-      TS_ASSERT_EQUALS(values.getCalculated(i),
-                       A * (1.0 + 0.1 * double(i)) + B);
+      TS_ASSERT_EQUALS(values.getCalculated(i), A * (1.0 + 0.1 * double(i)) + B);
     }
 
     IFunction1DTest_Jacobian jacobian(10, 2);

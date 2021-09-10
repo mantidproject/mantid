@@ -3,7 +3,7 @@ if(CXXTEST_FOUND)
                       ${CXXTEST_INCLUDE_DIR}
 )
 
-  include_directories(../../DataHandling/inc ../../TestHelpers/inc)
+  include_directories(../../TestHelpers/inc)
   # This variable is used within the cxxtest_add_test macro to build these
   # helper classes into the test executable. It will go out of scope at the end
   # of this file so doesn't need un-setting
@@ -15,12 +15,12 @@ if(CXXTEST_FOUND)
       ../../TestHelpers/src/MDEventsTestHelper.cpp)
   cxxtest_add_test(CrystalTest ${TEST_FILES})
   target_link_libraries(CrystalTest
-                        LINK_PRIVATE
-                        ${MANTIDLIBS}
-                        Crystal
-                        DataHandling
-                        MDAlgorithms
-                        Nexus
+                        PRIVATE
+                        Mantid::Crystal
+                        Mantid::DataHandling
+                        Mantid::MDAlgorithms
+                        Mantid::Nexus
+                        Boost::filesystem
                         gmock
 )
   add_dependencies(CrystalTest Algorithms CurveFitting)

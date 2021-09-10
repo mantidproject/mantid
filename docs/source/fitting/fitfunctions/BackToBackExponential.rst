@@ -26,12 +26,12 @@ the peak; more specifically it represent the point where the
 exponentially modelled neutron pulse goes from being exponentially
 rising to exponentially decaying. In general :math:`X0` does not conicide
 with the maximum of the peak (it is typically at slightly lower TOF than the
-maximum, by an amount that depends on :math:`A`, :math:`B` and :math:`S`). 
+maximum, by an amount that depends on :math:`A`, :math:`B` and :math:`S`).
 :math:`I` is the integrated intensity.
 
 For information about how to convert Fullprof back-to-back exponential
 parameters into those used for this function see
-`CreateBackToBackParameters <http://www.mantidproject.org/CreateBackToBackParameters>`_. 
+`CreateBackToBackParameters <http://www.mantidproject.org/CreateBackToBackParameters>`_.
 For information about how to create parameters from a GSAS parameter file see
 `CreateBackToBackParametersGSAS <http://www.mantidproject.org/CreateBackToBackParametersGSAS>`_.
 

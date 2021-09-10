@@ -53,11 +53,9 @@ private:
   void init() override;
   void exec() override;
   // Remove exponential decay from Y and E
-  HistogramData::Histogram
-  removeDecay(const HistogramData::Histogram &histogram) const;
+  HistogramData::Histogram removeDecay(const HistogramData::Histogram &histogram) const;
   // calculate Muon normalisation constant
-  double calNormalisationConst(const API::MatrixWorkspace_sptr &ws,
-                               int wsIndex);
+  double calNormalisationConst(const API::MatrixWorkspace_sptr &ws, int wsIndex);
 };
 
 } // namespace Algorithms

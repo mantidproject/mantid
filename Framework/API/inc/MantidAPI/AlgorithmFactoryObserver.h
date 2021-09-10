@@ -45,8 +45,7 @@ private:
   void _updateHandle(AlgorithmFactoryUpdateNotification_ptr pNf);
 
   /// Poco::NObserver for SubscribeNotification.
-  Poco::NObserver<AlgorithmFactoryObserver, AlgorithmFactoryUpdateNotification>
-      m_updateObserver;
+  Poco::NObserver<AlgorithmFactoryObserver, AlgorithmFactoryUpdateNotification> m_updateObserver;
 };
 
 } // namespace API

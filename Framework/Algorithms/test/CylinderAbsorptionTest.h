@@ -44,9 +44,8 @@ public:
     TS_ASSERT(atten.isExecuted());
 
     Mantid::API::MatrixWorkspace_sptr result;
-    TS_ASSERT_THROWS_NOTHING(
-        result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)));
+    TS_ASSERT_THROWS_NOTHING(result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)));
     TS_ASSERT_DELTA(result->readY(0).front(), 0.7210, 0.0001);
     TS_ASSERT_DELTA(result->readY(0).back(), 0.2052, 0.0001);
     TS_ASSERT_DELTA(result->readY(0)[8], 0.2356, 0.0001);
@@ -67,9 +66,8 @@ public:
     TS_ASSERT(atten.isExecuted());
 
     Mantid::API::MatrixWorkspace_sptr result;
-    TS_ASSERT_THROWS_NOTHING(
-        result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)));
+    TS_ASSERT_THROWS_NOTHING(result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)));
     TS_ASSERT_DELTA(result->readY(0).front(), 0.1535, 0.0001);
     TS_ASSERT_DELTA(result->readY(0).back(), 0.0001, 0.0001);
     TS_ASSERT_DELTA(result->readY(0)[8], 0.0002, 0.0001);
@@ -101,21 +99,16 @@ public:
 
     // create the material
     auto material = std::make_shared<Mantid::Kernel::PropertyManager>();
-    material->declareProperty(
-        std::make_unique<StringProperty>("ChemicalFormula", "V"), "");
-    material->declareProperty(
-        std::make_unique<FloatProperty>("SampleNumberDensity", 0.07192), "");
+    material->declareProperty(std::make_unique<StringProperty>("ChemicalFormula", "V"), "");
+    material->declareProperty(std::make_unique<FloatProperty>("SampleNumberDensity", 0.07192), "");
 
     // create the geometry
     auto geometry = std::make_shared<Mantid::Kernel::PropertyManager>();
-    geometry->declareProperty(
-        std::make_unique<StringProperty>("Shape", "Cylinder"), "");
+    geometry->declareProperty(std::make_unique<StringProperty>("Shape", "Cylinder"), "");
     geometry->declareProperty(std::make_unique<FloatProperty>("Height", 4), "");
-    geometry->declareProperty(std::make_unique<FloatProperty>("Radius", 0.4),
-                              "");
+    geometry->declareProperty(std::make_unique<FloatProperty>("Radius", 0.4), "");
     std::vector<double> center{0, 0, 0};
-    geometry->declareProperty(
-        std::make_unique<FloatArrayProperty>("Center", std::move(center)), "");
+    geometry->declareProperty(std::make_unique<FloatArrayProperty>("Center", std::move(center)), "");
 
     // set the sample information
     Mantid::DataHandling::SetSample setsample;
@@ -135,9 +128,8 @@ public:
     TS_ASSERT(atten.isExecuted());
 
     Mantid::API::MatrixWorkspace_sptr result;
-    TS_ASSERT_THROWS_NOTHING(
-        result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)));
+    TS_ASSERT_THROWS_NOTHING(result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)));
     TS_ASSERT_DELTA(result->readY(0).front(), 0.7210, 0.0001);
     TS_ASSERT_DELTA(result->readY(0).back(), 0.2052, 0.0001);
     TS_ASSERT_DELTA(result->readY(0)[8], 0.2356, 0.0001);
@@ -155,24 +147,18 @@ public:
 
     // create the material
     auto material = std::make_shared<Mantid::Kernel::PropertyManager>();
-    material->declareProperty(
-        std::make_unique<StringProperty>("ChemicalFormula", "V"), "");
-    material->declareProperty(
-        std::make_unique<FloatProperty>("SampleNumberDensity", 0.07192), "");
+    material->declareProperty(std::make_unique<StringProperty>("ChemicalFormula", "V"), "");
+    material->declareProperty(std::make_unique<FloatProperty>("SampleNumberDensity", 0.07192), "");
 
     // create the geometry
     auto geometry = std::make_shared<Mantid::Kernel::PropertyManager>();
-    geometry->declareProperty(
-        std::make_unique<StringProperty>("Shape", "Cylinder"), "");
+    geometry->declareProperty(std::make_unique<StringProperty>("Shape", "Cylinder"), "");
     geometry->declareProperty(std::make_unique<FloatProperty>("Height", 4), "");
-    geometry->declareProperty(std::make_unique<FloatProperty>("Radius", 0.4),
-                              "");
+    geometry->declareProperty(std::make_unique<FloatProperty>("Radius", 0.4), "");
     std::vector<double> center{0, 0, 0};
-    geometry->declareProperty(
-        std::make_unique<FloatArrayProperty>("Center", std::move(center)), "");
+    geometry->declareProperty(std::make_unique<FloatArrayProperty>("Center", std::move(center)), "");
     std::vector<double> cylinderAxis{0, 0, 1};
-    geometry->declareProperty(
-        std::make_unique<FloatArrayProperty>("Axis", cylinderAxis), "");
+    geometry->declareProperty(std::make_unique<FloatArrayProperty>("Axis", cylinderAxis), "");
 
     // set the sample information
     Mantid::DataHandling::SetSample setsample;
@@ -192,9 +178,8 @@ public:
     TS_ASSERT(atten.isExecuted());
 
     Mantid::API::MatrixWorkspace_sptr result;
-    TS_ASSERT_THROWS_NOTHING(
-        result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)));
+    TS_ASSERT_THROWS_NOTHING(result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)));
     TS_ASSERT_DELTA(result->readY(0).front(), 0.1535, 0.0001);
     TS_ASSERT_DELTA(result->readY(0).back(), 0.0001, 0.0001);
     TS_ASSERT_DELTA(result->readY(0)[8], 0.0002, 0.0001);
@@ -215,21 +200,16 @@ public:
 
     // create the material
     auto material = std::make_shared<Mantid::Kernel::PropertyManager>();
-    material->declareProperty(
-        std::make_unique<StringProperty>("ChemicalFormula", "V"), "");
-    material->declareProperty(
-        std::make_unique<FloatProperty>("SampleNumberDensity", 0.07192), "");
+    material->declareProperty(std::make_unique<StringProperty>("ChemicalFormula", "V"), "");
+    material->declareProperty(std::make_unique<FloatProperty>("SampleNumberDensity", 0.07192), "");
 
     // create the geometry
     auto geometry = std::make_shared<Mantid::Kernel::PropertyManager>();
-    geometry->declareProperty(
-        std::make_unique<StringProperty>("Shape", "Cylinder"), "");
+    geometry->declareProperty(std::make_unique<StringProperty>("Shape", "Cylinder"), "");
     geometry->declareProperty(std::make_unique<FloatProperty>("Height", 4), "");
-    geometry->declareProperty(std::make_unique<FloatProperty>("Radius", 0.4),
-                              "");
+    geometry->declareProperty(std::make_unique<FloatProperty>("Radius", 0.4), "");
     std::vector<double> center{0, 0, 0};
-    geometry->declareProperty(
-        std::make_unique<FloatArrayProperty>("Center", std::move(center)), "");
+    geometry->declareProperty(std::make_unique<FloatArrayProperty>("Center", std::move(center)), "");
 
     // set the sample information
     Mantid::DataHandling::SetSample setsample;
@@ -246,16 +226,14 @@ public:
     // set the number of segments to be really small like WISH system test
     TS_ASSERT_THROWS_NOTHING(atten.setPropertyValue("NumberOfSlices", "10"));
     TS_ASSERT_THROWS_NOTHING(atten.setPropertyValue("NumberOfAnnuli", "10"));
-    TS_ASSERT_THROWS_NOTHING(
-        atten.setPropertyValue("NumberOfWavelengthPoints", "25"));
+    TS_ASSERT_THROWS_NOTHING(atten.setPropertyValue("NumberOfWavelengthPoints", "25"));
     // the geometry was set on the input workspace
     TS_ASSERT_THROWS_NOTHING(atten.execute());
     TS_ASSERT(atten.isExecuted());
 
     Mantid::API::MatrixWorkspace_sptr result;
-    TS_ASSERT_THROWS_NOTHING(
-        result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)));
+    TS_ASSERT_THROWS_NOTHING(result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)));
 
     // these values are different than testWithSetSample because of the smaller
     // segment sizes
@@ -280,9 +258,8 @@ public:
     TS_ASSERT(atten.isExecuted());
 
     Mantid::API::MatrixWorkspace_sptr result;
-    TS_ASSERT_THROWS_NOTHING(
-        result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)));
+    TS_ASSERT_THROWS_NOTHING(result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)));
     TS_ASSERT_DELTA(result->readY(0).front(), 0.4796, 0.0001);
     TS_ASSERT_DELTA(result->readY(0).back(), 0.2510, 0.0001);
     TS_ASSERT_DELTA(result->readY(0)[2], 0.4110, 0.0001);
@@ -293,49 +270,35 @@ public:
 private:
   MatrixWorkspace_sptr createTestWorkspace() {
     // Create a small test workspace
-    MatrixWorkspace_sptr testWS =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 10);
+    MatrixWorkspace_sptr testWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 10);
     // Needs to have units of wavelength
-    testWS->getAxis(0)->unit() =
-        Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
+    testWS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
     return testWS;
   }
 
   /// set what is used for all - intentionally skip the sample information
-  void configureAbsCommon(Mantid::Algorithms::CylinderAbsorption &alg,
-                          MatrixWorkspace_sptr &inputWS,
-                          const std::string &outputWSname,
-                          const std::string &numberOfSlices = "2",
-                          const std::string &numberOfAnnuli = "2",
-                          const std::string &cylinderAxis = "0,1,0") {
+  void configureAbsCommon(Mantid::Algorithms::CylinderAbsorption &alg, MatrixWorkspace_sptr &inputWS,
+                          const std::string &outputWSname, const std::string &numberOfSlices = "2",
+                          const std::string &numberOfAnnuli = "2", const std::string &cylinderAxis = "0,1,0") {
     if (!alg.isInitialized())
       alg.initialize();
 
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWS));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outputWSname));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("NumberOfSlices", numberOfSlices));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("NumberOfAnnuli", numberOfAnnuli));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("NumberOfWavelengthPoints", "5"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWS));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outputWSname));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("NumberOfSlices", numberOfSlices));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("NumberOfAnnuli", numberOfAnnuli));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("NumberOfWavelengthPoints", "5"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ExpMethod", "Normal"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("CylinderAxis", cylinderAxis));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("CylinderAxis", cylinderAxis));
   }
 
   void configureAbsSample(Mantid::Algorithms::CylinderAbsorption &alg) {
     // sizes in cm
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("CylinderSampleHeight", "4"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("CylinderSampleRadius", "0.4"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("CylinderSampleRadius", "0.4"));
     // values for vanadium
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("AttenuationXSection", "5.08"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AttenuationXSection", "5.08"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ScatteringXSection", "5.1"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("SampleNumberDensity", "0.07192"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("SampleNumberDensity", "0.07192"));
   }
 };

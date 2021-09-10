@@ -26,6 +26,7 @@ class PaalmanPingsMonteCarloAbsorptionTest(unittest.TestCase):
         Load('irs26176_graphite002_red.nxs', OutputWorkspace='geoms_ws')
         # set this workspace to have defined sample and can geometries to test the preset option
         SetSample('geoms_ws', Geometry={'Shape': 'Cylinder', 'Height': 4.0, 'Radius': 2.0, 'Center': [0., 0., 0.]},
+                  Material={'ChemicalFormula': 'Ni'},
                   ContainerGeometry={'Shape': 'HollowCylinder', 'Height': 4.0, 'InnerRadius': 2.0,
                                      'OuterRadius': 3.5})
 
@@ -61,6 +62,8 @@ class PaalmanPingsMonteCarloAbsorptionTest(unittest.TestCase):
     def _flat_plate_test(self, test_func):
         self._test_arguments['SampleWidth'] = 2.0
         self._test_arguments['SampleThickness'] = 2.0
+        self._test_arguments['SampleCenter'] = 1.0
+        self._test_arguments['SampleAngle'] = -10.0
         test_func('FlatPlate')
 
     def _cylinder_test(self, test_func):
@@ -73,13 +76,13 @@ class PaalmanPingsMonteCarloAbsorptionTest(unittest.TestCase):
         test_func('Annulus')
 
     def _preset_with_override_material_test(self, test_func):
-        test_func(shape='Preset', sample_ws=self._geoms_ws, with_container=True)
+        test_func(shape='Preset', sample_ws=self._geoms_ws)
 
     def _preset_without_override_material_test(self, test_func):
         self._arguments = {'EventsPerPoint': 200,
                            'BeamHeight': 3.5,
                            'BeamWidth': 4.0}
-        test_func(shape='Preset', sample_ws=self._geoms_ws, with_container=True)
+        test_func(shape='Preset', sample_ws=self._geoms_ws)
 
     def _material_with_cross_section_test(self, test_func):
         self._test_arguments['SampleWidth'] = 2.0
@@ -135,7 +138,7 @@ class PaalmanPingsMonteCarloAbsorptionTest(unittest.TestCase):
                                                      **arguments)
         self._test_corrections_workspaces(corrected, spectrum_axis, with_container)
 
-    def _run_correction_with_container_test(self, shape):
+    def _run_correction_with_container_test(self, shape, sample_ws=None):
         self._test_arguments.update(self._container_args)
 
         if shape == 'FlatPlate':
@@ -145,7 +148,7 @@ class PaalmanPingsMonteCarloAbsorptionTest(unittest.TestCase):
         elif shape == 'Annulus':
             self._setup_annulus_container()
 
-        self._run_correction_and_test(shape=shape, with_container=True)
+        self._run_correction_and_test(shape=shape, sample_ws=sample_ws, with_container=True)
 
     def _run_indirect_elastic_test(self, shape):
         self._expected_unit = "MomentumTransfer"
@@ -196,10 +199,10 @@ class PaalmanPingsMonteCarloAbsorptionTest(unittest.TestCase):
         self._annulus_test(self._run_correction_and_test)
 
     def test_preset_with_override_material(self):
-        self._preset_with_override_material_test(self._run_correction_and_test)
+        self._preset_with_override_material_test(self._run_correction_with_container_test)
 
     def test_preset_without_overriding_material(self):
-        self._preset_without_override_material_test(self._run_correction_and_test)
+        self._preset_without_override_material_test(self._run_correction_with_container_test)
 
     def test_flat_plate_with_container(self):
         self._flat_plate_test(self._run_correction_with_container_test)

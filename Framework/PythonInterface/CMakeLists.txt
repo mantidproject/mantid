@@ -7,7 +7,7 @@ if(CMAKE_COMPILER_IS_GNUCXX
    AND Boost_MINOR_VERSION GREATER "63"
    AND Boost_MINOR_VERSION LESS "66"
 )
-  # Several bugs in boost 1.64-1.65 prevent python modues from loading on gcc
+  # Several bugs in boost 1.64-1.65 prevent python modules from loading on gcc
   # without this definition:   https://github.com/boostorg/python/issues/131
   add_definitions(-DBOOST_PYTHON_USE_GCC_SYMBOL_VISIBILITY)
 endif()
@@ -108,9 +108,14 @@ if(APPLE)
 else()
   set(_install_lib_dirs "${SITE_PACKAGES}")
 endif()
+
 add_python_package(
-  PythonInterface EGGLINKNAME mantid INSTALL_LIB_DIRS ${_install_lib_dirs}
+  PythonInterface
+  EGGLINKNAME mantid
+  INSTALL_LIB_DIRS ${_install_lib_dirs}
+  GENERATE_SITECUSTOMIZE
 )
+
 set_property(TARGET PythonInterface PROPERTY FOLDER "MantidFramework/Python")
 add_dependencies(
   PythonInterface
@@ -150,7 +155,11 @@ add_subdirectory(test)
 
 # Python algorithms
 mtd_install_dirs(
-  DIRECTORY plugins/
-  INSTALL_DIRS ${PLUGINS_DIR}/python ${WORKBENCH_PLUGINS_DIR}/python
-  EXCLUDE "*.pyc"
+  DIRECTORY
+  plugins/
+  INSTALL_DIRS
+  ${PLUGINS_DIR}/python
+  ${WORKBENCH_PLUGINS_DIR}/python
+  EXCLUDE
+  "*.pyc"
 )

@@ -68,12 +68,10 @@ std::once_flag SSL_INIT_FLAG;
  */
 void doSSLInit() {
   // initialize ssl
-  Poco::SharedPtr<InvalidCertificateHandler> certificateHandler =
-      new AcceptCertificateHandler(true);
+  Poco::SharedPtr<InvalidCertificateHandler> certificateHandler = new AcceptCertificateHandler(true);
   // Currently do not use any means of authentication. This should be updated
   // IDS has signed certificate.
-  const Context::Ptr context =
-      new Context(Context::CLIENT_USE, "", "", "", Context::VERIFY_NONE);
+  const Context::Ptr context = new Context(Context::CLIENT_USE, "", "", "", Context::VERIFY_NONE);
   // Create a singleton for holding the default context.
   // e.g. any future requests to publish are made to this certificate and
   // context.
@@ -91,27 +89,24 @@ void initializeSSL() { std::call_once(SSL_INIT_FLAG, doSSLInit); }
 /** Constructor
  */
 InternetHelper::InternetHelper()
-    : m_proxyInfo(), m_isProxySet(false), m_timeout(30), m_isTimeoutSet(false),
-      m_contentLength(0), m_method(HTTPRequest::HTTP_GET),
-      m_contentType("application/json"), m_body(), m_headers(),
-      m_request(nullptr), m_response(nullptr) {}
+    : m_proxyInfo(), m_isProxySet(false), m_timeout(30), m_isTimeoutSet(false), m_contentLength(0),
+      m_method(HTTPRequest::HTTP_GET), m_contentType("application/json"), m_body(), m_headers(), m_request(nullptr),
+      m_response(nullptr) {}
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
 InternetHelper::InternetHelper(const Kernel::ProxyInfo &proxy)
-    : m_proxyInfo(proxy), m_isProxySet(true), m_timeout(30),
-      m_isTimeoutSet(false), m_contentLength(0),
-      m_method(HTTPRequest::HTTP_GET), m_contentType("application/json"),
-      m_body(), m_headers(), m_request(nullptr), m_response(nullptr) {}
+    : m_proxyInfo(proxy), m_isProxySet(true), m_timeout(30), m_isTimeoutSet(false), m_contentLength(0),
+      m_method(HTTPRequest::HTTP_GET), m_contentType("application/json"), m_body(), m_headers(), m_request(nullptr),
+      m_response(nullptr) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
 InternetHelper::~InternetHelper() = default;
 
-void InternetHelper::setupProxyOnSession(HTTPClientSession &session,
-                                         const std::string &proxyUrl) {
+void InternetHelper::setupProxyOnSession(HTTPClientSession &session, const std::string &proxyUrl) {
   auto proxy = this->getProxy(proxyUrl);
   if (!proxy.emptyProxy()) {
     session.setProxyHost(proxy.host());
@@ -120,8 +115,7 @@ void InternetHelper::setupProxyOnSession(HTTPClientSession &session,
 }
 
 void InternetHelper::createRequest(Poco::URI &uri) {
-  m_request = std::make_unique<HTTPRequest>(m_method, uri.getPathAndQuery(),
-                                            HTTPMessage::HTTP_1_1);
+  m_request = std::make_unique<HTTPRequest>(m_method, uri.getPathAndQuery(), HTTPMessage::HTTP_1_1);
   m_response = std::make_unique<HTTPResponse>();
   if (!m_contentType.empty()) {
     m_request->setContentType(m_contentType);
@@ -145,20 +139,16 @@ void InternetHelper::createRequest(Poco::URI &uri) {
   }
 }
 
-int InternetHelper::sendRequestAndProcess(HTTPClientSession &session,
-                                          Poco::URI &uri,
-                                          std::ostream &responseStream) {
+int InternetHelper::sendRequestAndProcess(HTTPClientSession &session, Poco::URI &uri, std::ostream &responseStream) {
   // create a request
   this->createRequest(uri);
   session.sendRequest(*m_request) << m_body;
 
   std::istream &rs = session.receiveResponse(*m_response);
   int retStatus = m_response->getStatus();
-  g_log.debug() << "Answer from web: " << retStatus << " "
-                << m_response->getReason() << '\n';
+  g_log.debug() << "Answer from web: " << retStatus << " " << m_response->getReason() << '\n';
 
-  if (retStatus == HTTP_OK ||
-      (retStatus == HTTP_CREATED && m_method == HTTPRequest::HTTP_POST)) {
+  if (retStatus == HTTP_OK || (retStatus == HTTP_CREATED && m_method == HTTPRequest::HTTP_POST)) {
     Poco::StreamCopier::copyStream(rs, responseStream);
     if (m_response)
       processResponseHeaders(*m_response);
@@ -173,8 +163,7 @@ int InternetHelper::sendRequestAndProcess(HTTPClientSession &session,
   }
 }
 
-int InternetHelper::processRelocation(const HTTPResponse &response,
-                                      std::ostream &responseStream) {
+int InternetHelper::processRelocation(const HTTPResponse &response, std::ostream &responseStream) {
   std::string newLocation = response.get("location", "");
   if (!newLocation.empty()) {
     g_log.information() << "url relocated to " << newLocation << "\n";
@@ -189,8 +178,7 @@ int InternetHelper::processRelocation(const HTTPResponse &response,
  * @param url the address to the network resource
  * @param responseStream The stream to fill with the reply on success
  **/
-int InternetHelper::sendRequest(const std::string &url,
-                                std::ostream &responseStream) {
+int InternetHelper::sendRequest(const std::string &url, std::ostream &responseStream) {
 
   // send the request
   Poco::URI uri(url);
@@ -212,18 +200,15 @@ int InternetHelper::sendRequest(const std::string &url,
  * @param schemeName Normally "http" or "https"
  * @param url url being sent (will be logged)
  */
-void InternetHelper::logDebugRequestSending(const std::string &schemeName,
-                                            const std::string &url) const {
+void InternetHelper::logDebugRequestSending(const std::string &schemeName, const std::string &url) const {
   const std::string insecString = "password=";
   if (std::string::npos == url.find(insecString)) {
-    g_log.debug() << "Sending " << schemeName << " " << m_method
-                  << " request to: " << url << "\n";
+    g_log.debug() << "Sending " << schemeName << " " << m_method << " request to: " << url << "\n";
   } else {
-    g_log.debug()
-        << "Sending " << schemeName << " " << m_method
-        << " request to an url where the query string seems to contain a "
-           "password! (not shown for security reasons)."
-        << "\n";
+    g_log.debug() << "Sending " << schemeName << " " << m_method
+                  << " request to an url where the query string seems to contain a "
+                     "password! (not shown for security reasons)."
+                  << "\n";
   }
 }
 
@@ -231,8 +216,7 @@ void InternetHelper::logDebugRequestSending(const std::string &schemeName,
  * @param url the address to the network resource
  * @param responseStream The stream to fill with the reply on success
  **/
-int InternetHelper::sendHTTPRequest(const std::string &url,
-                                    std::ostream &responseStream) {
+int InternetHelper::sendHTTPRequest(const std::string &url, std::ostream &responseStream) {
   int retStatus = 0;
 
   logDebugRequestSending("http", url);
@@ -251,8 +235,7 @@ int InternetHelper::sendHTTPRequest(const std::string &url,
   } catch (HostNotFoundException &ex) {
     throwNotConnected(url, ex);
   } catch (Poco::Exception &ex) {
-    throw Exception::InternetError("Connection and request failed " +
-                                   ex.displayText());
+    throw Exception::InternetError("Connection and request failed " + ex.displayText());
   }
   return retStatus;
 }
@@ -261,8 +244,7 @@ int InternetHelper::sendHTTPRequest(const std::string &url,
  * @param url the address to the network resource
  * @param responseStream The stream to fill with the reply on success
  **/
-int InternetHelper::sendHTTPSRequest(const std::string &url,
-                                     std::ostream &responseStream) {
+int InternetHelper::sendHTTPSRequest(const std::string &url, std::ostream &responseStream) {
   int retStatus = 0;
 
   logDebugRequestSending("https", url);
@@ -271,16 +253,14 @@ int InternetHelper::sendHTTPSRequest(const std::string &url,
   try {
     initializeSSL();
     // Create the session
-    HTTPSClientSession session(uri.getHost(),
-                               static_cast<Poco::UInt16>(uri.getPort()));
+    HTTPSClientSession session(uri.getHost(), static_cast<Poco::UInt16>(uri.getPort()));
     session.setTimeout(Poco::Timespan(getTimeout(), 0));
 
     // HACK:: Currently the automatic proxy detection only supports http proxy
     // detection
     // most locations use the same proxy for http and https, so force it to use
     // the http proxy
-    std::string urlforProxy =
-        ConfigService::Instance().getString("proxy.httpsTargetUrl");
+    std::string urlforProxy = ConfigService::Instance().getString("proxy.httpsTargetUrl");
     if (urlforProxy.empty()) {
       urlforProxy = "http://" + uri.getHost();
     }
@@ -291,8 +271,7 @@ int InternetHelper::sendHTTPSRequest(const std::string &url,
   } catch (HostNotFoundException &ex) {
     throwNotConnected(url, ex);
   } catch (Poco::Exception &ex) {
-    throw Exception::InternetError("Connection and request failed " +
-                                   ex.displayText());
+    throw Exception::InternetError("Connection and request failed " + ex.displayText());
   }
   return retStatus;
 }
@@ -323,8 +302,7 @@ void InternetHelper::setProxy(const Kernel::ProxyInfo &proxy) {
 /** Process any headers from the response stream
 Basic implementation does nothing.
 */
-void InternetHelper::processResponseHeaders(
-    const Poco::Net::HTTPResponse & /*unused*/) {}
+void InternetHelper::processResponseHeaders(const Poco::Net::HTTPResponse & /*unused*/) {}
 
 /** Process any HTTP errors states.
 
@@ -335,21 +313,16 @@ void InternetHelper::processResponseHeaders(
 @exception Mantid::Kernel::Exception::InternetError : Coded for the failure
 state.
 */
-int InternetHelper::processErrorStates(const Poco::Net::HTTPResponse &res,
-                                       std::istream &rs,
-                                       const std::string &url) {
+int InternetHelper::processErrorStates(const Poco::Net::HTTPResponse &res, std::istream &rs, const std::string &url) {
   int retStatus = res.getStatus();
-  g_log.debug() << "Answer from web: " << res.getStatus() << " "
-                << res.getReason() << '\n';
+  g_log.debug() << "Answer from web: " << res.getStatus() << " " << res.getReason() << '\n';
 
   // get github api rate limit information if available;
   int rateLimitRemaining;
   DateAndTime rateLimitReset;
   try {
-    rateLimitRemaining =
-        boost::lexical_cast<int>(res.get("X-RateLimit-Remaining", "-1"));
-    rateLimitReset.set_from_time_t(
-        boost::lexical_cast<int>(res.get("X-RateLimit-Reset", "0")));
+    rateLimitRemaining = boost::lexical_cast<int>(res.get("X-RateLimit-Remaining", "-1"));
+    rateLimitReset.set_from_time_t(boost::lexical_cast<int>(res.get("X-RateLimit-Reset", "0")));
   } catch (boost::bad_lexical_cast const &) {
     rateLimitRemaining = -1;
   }
@@ -368,14 +341,11 @@ int InternetHelper::processErrorStates(const Poco::Net::HTTPResponse &res,
                                    "processErrorStates",
                                    retStatus);
   } else if (retStatus == HTTP_NOT_MODIFIED) {
-    throw Exception::InternetError("Not modified since provided date" +
-                                       rateLimitReset.toSimpleString(),
-                                   retStatus);
+    throw Exception::InternetError("Not modified since provided date" + rateLimitReset.toSimpleString(), retStatus);
   } else if ((retStatus == HTTP_FORBIDDEN) && (rateLimitRemaining == 0)) {
-    throw Exception::InternetError(
-        "The Github API rate limit has been reached, try again after " +
-            rateLimitReset.toSimpleString() + " GMT",
-        retStatus);
+    throw Exception::InternetError("The Github API rate limit has been reached, try again after " +
+                                       rateLimitReset.toSimpleString() + " GMT",
+                                   retStatus);
   } else {
     std::stringstream info;
     std::stringstream ss;
@@ -414,11 +384,9 @@ url_file.
 @exception Mantid::Kernel::Exception::InternetError : For any unexpected
 behaviour.
 */
-int InternetHelper::downloadFile(const std::string &urlFile,
-                                 const std::string &localFilePath) {
+int InternetHelper::downloadFile(const std::string &urlFile, const std::string &localFilePath) {
   int retStatus = 0;
-  g_log.debug() << "DownloadFile from \"" << urlFile << "\" to file: \""
-                << localFilePath << "\"\n";
+  g_log.debug() << "DownloadFile from \"" << urlFile << "\" to file: \"" << localFilePath << "\"\n";
 
   Poco::TemporaryFile tempFile;
   Poco::FileStream tempFileStream(tempFile.path());
@@ -451,8 +419,7 @@ void InternetHelper::setTimeout(int seconds) {
 /// @param response the HTTP status
 /// @returns true if the return code is considered a relocation
 bool InternetHelper::isRelocated(const int response) {
-  return ((response == HTTP_FOUND) || (response == HTTP_MOVED_PERMANENTLY) ||
-          (response == HTTP_TEMPORARY_REDIRECT) ||
+  return ((response == HTTP_FOUND) || (response == HTTP_MOVED_PERMANENTLY) || (response == HTTP_TEMPORARY_REDIRECT) ||
           (response == HTTP_SEE_OTHER));
 }
 
@@ -460,13 +427,10 @@ bool InternetHelper::isRelocated(const int response) {
 /// is not connected to the internet
 /// @param url The url that was use
 /// @param ex The exception generated by Poco
-void InternetHelper::throwNotConnected(const std::string &url,
-                                       const HostNotFoundException &ex) {
+void InternetHelper::throwNotConnected(const std::string &url, const HostNotFoundException &ex) {
   std::stringstream info;
-  info << "Failed to access " << url
-       << " because there is no connection to the host " << ex.message()
-       << ".\nHint: Check your connection following this link: <a href=\""
-       << url << "\">" << url << "</a> ";
+  info << "Failed to access " << url << " because there is no connection to the host " << ex.message()
+       << ".\nHint: Check your connection following this link: <a href=\"" << url << "\">" << url << "</a> ";
   throw Exception::InternetError(info.str() + ex.displayText());
 }
 
@@ -475,8 +439,7 @@ void InternetHelper::throwNotConnected(const std::string &url,
  **/
 int InternetHelper::getTimeout() {
   if (!m_isTimeoutSet) {
-    auto m_timeout =
-        ConfigService::Instance().getValue<int>("network.default.timeout");
+    auto m_timeout = ConfigService::Instance().getValue<int>("network.default.timeout");
     if (!m_timeout.is_initialized()) {
       m_timeout = 30; // the default value if the key is not found
     }
@@ -504,9 +467,7 @@ const std::string &InternetHelper::getMethod() { return m_method; }
 /** Sets the Content Type
  * @param contentType A string of the content type
  **/
-void InternetHelper::setContentType(const std::string &contentType) {
-  m_contentType = contentType;
-}
+void InternetHelper::setContentType(const std::string &contentType) { m_contentType = contentType; }
 
 /** Gets the Content Type
  * @returns A string of the content type
@@ -516,9 +477,7 @@ const std::string &InternetHelper::getContentType() { return m_contentType; }
 /** Sets the content length
  * @param length The content length in bytes
  **/
-void InternetHelper::setContentLength(std::streamsize length) {
-  m_contentLength = length;
-}
+void InternetHelper::setContentLength(std::streamsize length) { m_contentLength = length; }
 
 /** Gets the content length
  * @returns The content length in bytes
@@ -545,9 +504,7 @@ void InternetHelper::setBody(const std::string &body) {
  *   and GET if it is.
  * @param body A stringstream of the body
  **/
-void InternetHelper::setBody(const std::ostringstream &body) {
-  setBody(body.str());
-}
+void InternetHelper::setBody(const std::ostringstream &body) { setBody(body.str()); }
 
 /** Sets the body & content length for future requests, this will also
  *   set the method to POST is the body is not empty
@@ -583,33 +540,24 @@ int InternetHelper::getResponseStatus() { return m_response->getStatus(); }
 /** Gets the body set for future requests
  * @returns A string of the content type
  **/
-const std::string &InternetHelper::getResponseReason() {
-  return m_response->getReason();
-}
+const std::string &InternetHelper::getResponseReason() { return m_response->getReason(); }
 
 /** Adds a header
  * @param key The key to refer to the value
  * @param value The value in seconds for the timeout
  **/
-void InternetHelper::addHeader(const std::string &key,
-                               const std::string &value) {
-  m_headers.emplace(key, value);
-}
+void InternetHelper::addHeader(const std::string &key, const std::string &value) { m_headers.emplace(key, value); }
 
 /** Removes a header
  * @param key The key to refer to the value
  **/
-void InternetHelper::removeHeader(const std::string &key) {
-  m_headers.erase(key);
-}
+void InternetHelper::removeHeader(const std::string &key) { m_headers.erase(key); }
 
 /** Gets the value of a header
  * @param key The key to refer to the value
  * @returns the value as a string
  **/
-const std::string &InternetHelper::getHeader(const std::string &key) {
-  return m_headers[key];
-}
+const std::string &InternetHelper::getHeader(const std::string &key) { return m_headers[key]; }
 
 /** Clears all headers
  **/
@@ -617,9 +565,7 @@ void InternetHelper::clearHeaders() { m_headers.clear(); }
 
 /** Returns a reference to the headers map
  **/
-std::map<std::string, std::string> &InternetHelper::headers() {
-  return m_headers;
-}
+std::map<std::string, std::string> &InternetHelper::headers() { return m_headers; }
 
 /** Resets properties to defaults (except the proxy)
  **/

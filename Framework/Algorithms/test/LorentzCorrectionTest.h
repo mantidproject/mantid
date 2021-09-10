@@ -42,9 +42,7 @@ private:
     return weight;
   }
 
-  double calculate_pd_weight_at(double twotheta) {
-    return std::sin(0.5 * twotheta);
-  }
+  double calculate_pd_weight_at(double twotheta) { return std::sin(0.5 * twotheta); }
 
   /**
    Create a workspace in wavelength with a simple instrument defined with a
@@ -52,8 +50,7 @@ private:
    */
   MatrixWorkspace_sptr create_workspace(const int nBins) {
     Instrument_sptr instrument = std::make_shared<Instrument>();
-    instrument->setReferenceFrame(
-        std::make_shared<ReferenceFrame>(Y, X, Left, "0,0,0"));
+    instrument->setReferenceFrame(std::make_shared<ReferenceFrame>(Y, X, Left, "0,0,0"));
 
     ObjComponent *source = new ObjComponent("source");
     source->setPos(V3D(0, 0, 0));
@@ -88,9 +85,7 @@ private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static LorentzCorrectionTest *createSuite() {
-    return new LorentzCorrectionTest();
-  }
+  static LorentzCorrectionTest *createSuite() { return new LorentzCorrectionTest(); }
   static void destroySuite(LorentzCorrectionTest *suite) { delete suite; }
 
   void test_init() {
@@ -109,8 +104,7 @@ public:
     alg.initialize();
     alg.setProperty("InputWorkspace", ws_tof);
 
-    TSM_ASSERT_THROWS("Workspace must be in units of wavelength", alg.execute(),
-                      std::runtime_error &);
+    TSM_ASSERT_THROWS("Workspace must be in units of wavelength", alg.execute(), std::runtime_error &);
   }
 
   void test_throws_if_wavelength_zero() {
@@ -122,8 +116,7 @@ public:
     alg.initialize();
     alg.setProperty("InputWorkspace", ws_lam);
     alg.setPropertyValue("OutputWorkspace", "temp");
-    TSM_ASSERT_THROWS("Should throw with zero wavelength values.",
-                      alg.execute(), std::runtime_error &);
+    TSM_ASSERT_THROWS("Should throw with zero wavelength values.", alg.execute(), std::runtime_error &);
   }
 
   void test_execute_scd() {
@@ -147,8 +140,7 @@ public:
     const auto &spectrumInfo = out_ws->spectrumInfo();
 
     for (int index = 0; index < 2; ++index) {
-      const double weight = calculate_scd_weight_at(
-          xData[index], xData[index + 1], spectrumInfo.twoTheta(0));
+      const double weight = calculate_scd_weight_at(xData[index], xData[index + 1], spectrumInfo.twoTheta(0));
       TS_ASSERT_EQUALS(yData[index], weight);
       TS_ASSERT_EQUALS(eData[index], weight);
     }

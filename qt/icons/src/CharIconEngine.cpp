@@ -16,13 +16,11 @@ CharIconEngine::CharIconEngine(IconicFont *iconic, CharIconPainter *painter,
                                const QList<QHash<QString, QVariant>> &options)
     : m_iconic(iconic), m_painter(painter), m_options(std::move(options)) {}
 
-void CharIconEngine::paint(QPainter *painter, const QRect &rect,
-                           QIcon::Mode mode, QIcon::State state) {
+void CharIconEngine::paint(QPainter *painter, const QRect &rect, QIcon::Mode mode, QIcon::State state) {
   m_painter->paint(m_iconic, painter, rect, mode, state, m_options);
 }
 
-QPixmap CharIconEngine::pixmap(const QSize &size, QIcon::Mode mode,
-                               QIcon::State state) {
+QPixmap CharIconEngine::pixmap(const QSize &size, QIcon::Mode mode, QIcon::State state) {
   QPixmap pmap(size);
   pmap.fill(Qt::transparent);
   QPainter painter(&pmap);
@@ -30,9 +28,7 @@ QPixmap CharIconEngine::pixmap(const QSize &size, QIcon::Mode mode,
   return pmap;
 }
 
-QIconEngine *CharIconEngine::clone() const {
-  return new CharIconEngine(m_iconic, m_painter, m_options);
-}
+QIconEngine *CharIconEngine::clone() const { return new CharIconEngine(m_iconic, m_painter, m_options); }
 
 } // namespace Icons
 } // namespace MantidQt

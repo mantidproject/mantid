@@ -17,13 +17,10 @@ ProcessCommand defines the action "Pause"
 */
 class PauseCommand : public CommandBase {
 public:
-  PauseCommand(DataProcessorPresenter *tablePresenter)
-      : CommandBase(tablePresenter){};
+  PauseCommand(DataProcessorPresenter *tablePresenter) : CommandBase(tablePresenter){};
   virtual ~PauseCommand(){};
 
-  void execute() override {
-    m_presenter->notify(DataProcessorPresenter::PauseFlag);
-  };
+  void execute() override { m_presenter->notify(DataProcessorPresenter::PauseFlag); };
   QString name() override { return QString("Pause"); }
   QString icon() override { return QString("://pause.png"); }
   QString tooltip() override { return QString("Pause processing runs"); }

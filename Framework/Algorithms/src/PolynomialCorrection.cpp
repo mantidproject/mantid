@@ -22,22 +22,18 @@ namespace Algorithms {
 DECLARE_ALGORITHM(PolynomialCorrection)
 
 PolynomialCorrection::PolynomialCorrection()
-    : UnaryOperation(), m_coeffs(), m_polySize(), m_isOperationMultiply(false) {
-}
+    : UnaryOperation(), m_coeffs(), m_polySize(), m_isOperationMultiply(false) {}
 
 void PolynomialCorrection::defineProperties() {
   // We need an array property for the coefficients of the polynomial: C0 + C1*x
   // + C2*x*x + ....
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>(
-          "Coefficients",
-          std::make_shared<MandatoryValidator<std::vector<double>>>()),
-      "Array Property containing the coefficients of the polynomial correction "
-      "function in ascending powers of X. Can be given as a comma separated "
-      "list in string form.");
+  declareProperty(std::make_unique<ArrayProperty<double>>("Coefficients",
+                                                          std::make_shared<MandatoryValidator<std::vector<double>>>()),
+                  "Array Property containing the coefficients of the polynomial correction "
+                  "function in ascending powers of X. Can be given as a comma separated "
+                  "list in string form.");
   std::vector<std::string> propOptions{"Multiply", "Divide"};
-  declareProperty("Operation", "Multiply",
-                  std::make_shared<StringListValidator>(propOptions),
+  declareProperty("Operation", "Multiply", std::make_shared<StringListValidator>(propOptions),
                   "The operation with which the correction is applied to the "
                   "data (default: Multiply)");
 }
@@ -50,9 +46,7 @@ void PolynomialCorrection::retrieveProperties() {
   m_isOperationMultiply = operation == "Multiply";
 }
 
-void PolynomialCorrection::performUnaryOperation(const double XIn,
-                                                 const double YIn,
-                                                 const double EIn, double &YOut,
+void PolynomialCorrection::performUnaryOperation(const double XIn, const double YIn, const double EIn, double &YOut,
                                                  double &EOut) {
   // The first value of the coefficients vector is for the zeroth power of X.
   double factor = m_coeffs[0];

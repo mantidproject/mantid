@@ -20,12 +20,8 @@ class StructureFactorCalculatorSummationTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static StructureFactorCalculatorSummationTest *createSuite() {
-    return new StructureFactorCalculatorSummationTest();
-  }
-  static void destroySuite(StructureFactorCalculatorSummationTest *suite) {
-    delete suite;
-  }
+  static StructureFactorCalculatorSummationTest *createSuite() { return new StructureFactorCalculatorSummationTest(); }
+  static void destroySuite(StructureFactorCalculatorSummationTest *suite) { delete suite; }
 
   void testEquivalentPositionsAreUsed() {
     // Approximate crystal structure of Silicon
@@ -55,8 +51,7 @@ public:
     CrystalStructure si = getCrystalStructure();
 
     StructureFactorCalculator_sptr calculator =
-        StructureFactorCalculatorFactory::create<
-            StructureFactorCalculatorSummation>(si);
+        StructureFactorCalculatorFactory::create<StructureFactorCalculatorSummation>(si);
 
     // same reflections as in testEquivalentPositionsAreUsed
     TS_ASSERT_LESS_THAN(calculator->getFSquared(V3D(1, 0, 0)), 1e-9);
@@ -67,12 +62,10 @@ private:
   CrystalStructure getCrystalStructure() {
     CompositeBraggScatterer_sptr scatterers = CompositeBraggScatterer::create();
     scatterers->addScatterer(BraggScattererFactory::Instance().createScatterer(
-        "IsotropicAtomBraggScatterer",
-        R"({"Element":"Si","Position":"0,0,0","U":"0.05"})"));
+        "IsotropicAtomBraggScatterer", R"({"Element":"Si","Position":"0,0,0","U":"0.05"})"));
 
-    CrystalStructure si(
-        UnitCell(5.43, 5.43, 5.43),
-        SpaceGroupFactory::Instance().createSpaceGroup("F d -3 m"), scatterers);
+    CrystalStructure si(UnitCell(5.43, 5.43, 5.43), SpaceGroupFactory::Instance().createSpaceGroup("F d -3 m"),
+                        scatterers);
 
     return si;
   }

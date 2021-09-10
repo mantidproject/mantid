@@ -24,9 +24,7 @@ class MuonGroupDetectorsTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MuonGroupDetectorsTest *createSuite() {
-    return new MuonGroupDetectorsTest();
-  }
+  static MuonGroupDetectorsTest *createSuite() { return new MuonGroupDetectorsTest(); }
   static void destroySuite(MuonGroupDetectorsTest *suite) { delete suite; }
 
   void test_Init() {
@@ -39,12 +37,10 @@ public:
     // Name of the output workspace.
     const std::string outWSName("MuonGroupDetectorsTest_OutputWS");
 
-    MatrixWorkspace_sptr inWS =
-        WorkspaceCreationHelper::create2DWorkspace123(5, 3);
+    MatrixWorkspace_sptr inWS = WorkspaceCreationHelper::create2DWorkspace123(5, 3);
 
     for (size_t i = 0; i < inWS->getNumberHistograms(); ++i)
-      inWS->getSpectrum(i).setDetectorID(static_cast<detid_t>(
-          i + 1)); // To be consistent with how LoadMuonNexus works
+      inWS->getSpectrum(i).setDetectorID(static_cast<detid_t>(i + 1)); // To be consistent with how LoadMuonNexus works
 
     TableWorkspace_sptr grouping = createDetectorGroupingTable();
 
@@ -52,17 +48,13 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inWS));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("DetectorGroupingTable", grouping));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("DetectorGroupingTable", grouping));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     MatrixWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName));
     TS_ASSERT(ws);
 
     if (ws) {

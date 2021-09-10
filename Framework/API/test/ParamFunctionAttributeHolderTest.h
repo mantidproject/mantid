@@ -11,9 +11,7 @@
 
 class FakeParamFunctionAttributeHolder : public Mantid::API::ParamFunction {
 public:
-  std::string name() const override {
-    return "FakeParamFunctionAttributeHolder";
-  }
+  std::string name() const override { return "FakeParamFunctionAttributeHolder"; }
 
   void declareAttributes() override {
     declareAttribute("Att1", Mantid::API::IFunction::Attribute(3));
@@ -26,8 +24,7 @@ public:
     declareParameter("Par3", 10.0);
     declareParameter("Par4", 6.5);
   }
-  void function(const Mantid::API::FunctionDomain &,
-                Mantid::API::FunctionValues &) const override {}
+  void function(const Mantid::API::FunctionDomain &, Mantid::API::FunctionValues &) const override {}
 };
 
 class ParamFunctionAttributeHolderTest : public CxxTest::TestSuite {
@@ -50,10 +47,8 @@ public:
     using namespace Mantid::API;
     FakeParamFunctionAttributeHolder funct;
 
-    TS_ASSERT_THROWS(funct.getAttribute("NonExistent"),
-                     const std::invalid_argument &);
-    TS_ASSERT_THROWS(funct.setAttribute("NonExistent", IFunction::Attribute(1)),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(funct.getAttribute("NonExistent"), const std::invalid_argument &);
+    TS_ASSERT_THROWS(funct.setAttribute("NonExistent", IFunction::Attribute(1)), const std::invalid_argument &);
   }
 
   void test_hasAttribute_Returns_True_For_Existing_Attribute() {

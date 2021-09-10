@@ -46,9 +46,7 @@ public:
   };
 
   /// Constructor
-  MayersSampleCorrectionStrategy(
-      MayersSampleCorrectionStrategy::Parameters params,
-      HistogramData::Histogram inputHist);
+  MayersSampleCorrectionStrategy(MayersSampleCorrectionStrategy::Parameters params, HistogramData::Histogram inputHist);
   /// Destructor - defined in cpp file to use forward declaration with
   /// unique_ptr
   ~MayersSampleCorrectionStrategy();
@@ -60,8 +58,7 @@ public:
   double calculateSelfAttenuation(const double muR);
   /// Calculate the multiple scattering factor for a single mu*r value &
   /// absorption value
-  std::pair<double, double> calculateMS(const size_t irp, const double muR,
-                                        const double abs);
+  std::pair<double, double> calculateMS(const size_t irp, const double muR, const double abs);
 
 private:
   inline double muRmin() const { return m_muRrange.first; }

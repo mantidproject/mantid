@@ -18,9 +18,8 @@ using Mantid::API::FrameworkManager;
 using Mantid::API::MatrixWorkspace_sptr;
 
 namespace {
-MatrixWorkspace_sptr createWorkspace(const int nPixelsPerBank = 3,
-                                     const int nBins = 2,
-                                     const int numBanks = 2) {
+MatrixWorkspace_sptr createWorkspace(const int nPixelsPerBank = 3, const int nBins = 2, const int numBanks = 2,
+                                     const std::string &xUnit = "TOF") {
   CreateSampleWorkspace creator;
   creator.initialize();
   creator.setChild(true);
@@ -30,6 +29,7 @@ MatrixWorkspace_sptr createWorkspace(const int nPixelsPerBank = 3,
   creator.setProperty("XMax", 2.);
   creator.setProperty("BinWidth", 1. / nBins);
   creator.setProperty("BankPixelWidth", nPixelsPerBank);
+  creator.setProperty("XUnit", xUnit);
   creator.setPropertyValue("OutputWorkspace", "__unused");
   creator.execute();
   MatrixWorkspace_sptr in = creator.getProperty("OutputWorkspace");
@@ -41,9 +41,7 @@ class DeadTimeCorrectionTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static DeadTimeCorrectionTest *createSuite() {
-    return new DeadTimeCorrectionTest();
-  }
+  static DeadTimeCorrectionTest *createSuite() { return new DeadTimeCorrectionTest(); }
   static void destroySuite(DeadTimeCorrectionTest *suite) { delete suite; }
 
   DeadTimeCorrectionTest() { FrameworkManager::Instance(); }
@@ -68,8 +66,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", in))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Tau", tau))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupingPattern", "0-8,9-17"))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     MatrixWorkspace_sptr out = alg.getProperty("OutputWorkspace");
@@ -90,16 +87,56 @@ public:
       }
     }
   }
+
+  void test_exec_multiframe() {
+    // This tests correcting multi-frame monochromatic SANS data
+    const double tau = 0.001;
+    MatrixWorkspace_sptr in = createWorkspace(3, 2, 2, "Empty"); // default parameters except for 'Empty' X-axis unit
+    // we have 2 TOF bins, and will be grouping 9 pixels
+    const double countrateBin1 = 9 * in->readY(0)[0];
+    const double countrateBin2 = 9 * in->readY(0)[1];
+    const double expectationBin1 = 1. / (1. - tau * countrateBin1);
+    const double expectationBin2 = 1. / (1. - tau * countrateBin2);
+    DeadTimeCorrection alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", in))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Tau", tau))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupingPattern", "0-8,9-17"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+    MatrixWorkspace_sptr out = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(out)
+    TS_ASSERT_EQUALS(out->getNumberHistograms(), in->getNumberHistograms())
+    for (size_t index = 0; index < in->getNumberHistograms(); ++index) {
+      const auto &yIn = in->readY(index);
+      const auto &eIn = in->readE(index);
+      const auto &yOut = out->readY(index);
+      const auto &eOut = out->readE(index);
+      TS_ASSERT_EQUALS(yIn.size(), yOut.size())
+      TS_ASSERT_EQUALS(eIn.size(), eOut.size())
+      for (size_t bin = 0; bin < yIn.size(); ++bin) {
+        const double corrY = yOut[bin] / yIn[bin];
+        const double corrE = eOut[bin] / eIn[bin];
+        if (bin % 2 == 0) {
+          TS_ASSERT_DELTA(corrY, expectationBin1, 1E-10)
+          TS_ASSERT_DELTA(corrE, expectationBin1, 1E-10)
+        } else {
+          TS_ASSERT_DELTA(corrY, expectationBin2, 1E-10)
+          TS_ASSERT_DELTA(corrE, expectationBin2, 1E-10)
+        }
+      }
+    }
+  }
 };
 
 class DeadTimeCorrectionTestPerformance : public CxxTest::TestSuite {
 public:
-  static DeadTimeCorrectionTestPerformance *createSuite() {
-    return new DeadTimeCorrectionTestPerformance();
-  }
-  static void destroySuite(DeadTimeCorrectionTestPerformance *suite) {
-    delete suite;
-  }
+  static DeadTimeCorrectionTestPerformance *createSuite() { return new DeadTimeCorrectionTestPerformance(); }
+  static void destroySuite(DeadTimeCorrectionTestPerformance *suite) { delete suite; }
 
   DeadTimeCorrectionTestPerformance() { FrameworkManager::Instance(); }
 
@@ -111,10 +148,9 @@ public:
     m_alg.setProperty("InputWorkspace", in);
     m_alg.setPropertyValue("OutputWorkspace", "__unused");
     m_alg.setProperty("Tau", 0.0000001);
-    m_alg.setPropertyValue("GroupingPattern",
-                           "0-9999,10000-19999,20000-29999,30000-39999,40000-"
-                           "49999,50000-59999,60000-"
-                           "69999,70000-79999,80000-89999,90000-99999");
+    m_alg.setPropertyValue("GroupingPattern", "0-9999,10000-19999,20000-29999,30000-39999,40000-"
+                                              "49999,50000-59999,60000-"
+                                              "69999,70000-79999,80000-89999,90000-99999");
   }
 
   void test_performance() {

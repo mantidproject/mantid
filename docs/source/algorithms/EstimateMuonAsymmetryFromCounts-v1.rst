@@ -24,7 +24,7 @@ fitted normalization constant. The normalization is given by
 
 .. math:: N_0= \frac{\Delta t\sum_j(\textrm{OldData}_j)}{\tau F \left( \exp(-\frac{t_0}{\tau})-\exp(-\frac{t_N}{\tau})\right)  },
 
-where the summation only includes the data with times bewtween :math:`t_0` and :math:`t_N` and :math:`\Delta t` is the time step. 
+where the summation only includes the data with times bewtween :math:`t_0` and :math:`t_N` and :math:`\Delta t` is the time step.
 
 Usage
 -----
@@ -35,7 +35,7 @@ Usage
 
    import math
    import numpy as np
-   
+
    tab = CreateEmptyTableWorkspace()
    tab.addColumn('double', 'norm')
    tab.addColumn('str', 'name')
@@ -50,7 +50,7 @@ Usage
    print("Asymmetry   :  {}".format(['{0:.2f}'.format(value) for value in output.readY(0)]))
    print("Unnormalized:  {}".format(['{0:.2f}'.format(value) for value in unnorm.readY(0)]))
    print("Normalization constant: {0:.2f}".format(tab.column(0)[0]))
-   
+
 Output:
 
 .. testoutput:: ExSimple
@@ -65,7 +65,7 @@ Output:
 
    import math
    import numpy as np
-   
+
    tab = CreateEmptyTableWorkspace()
    tab.addColumn('double', 'norm')
    tab.addColumn('str', 'name')
@@ -81,7 +81,7 @@ Output:
 
    print("Asymmetry:  {}".format(['{0:.2f}'.format(value) for value in output.readY(0)]))
    print("Normalization constant: {0:.2f}".format(tab.column(0)[0]))
-   
+
 Output:
 
 .. testoutput:: ExNorm

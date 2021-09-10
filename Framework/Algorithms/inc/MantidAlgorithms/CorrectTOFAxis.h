@@ -27,9 +27,7 @@ class MANTID_ALGORITHMS_DLL CorrectTOFAxis : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"ConvertToConstantL2"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"ConvertToConstantL2"}; }
   const std::string category() const override;
   const std::string summary() const override;
 
@@ -46,8 +44,7 @@ private:
   void useReferenceWorkspace(const API::MatrixWorkspace_sptr &outputWs);
   void correctManually(const API::MatrixWorkspace_sptr &outputWs);
   double averageL2(const API::SpectrumInfo &spectrumInfo);
-  void averageL2AndEPP(const API::SpectrumInfo &spectrumInfo, double &l2,
-                       double &epp);
+  void averageL2AndEPP(const API::SpectrumInfo &spectrumInfo, double &l2, double &epp);
   std::vector<size_t> referenceWorkspaceIndices() const;
 };
 

@@ -22,14 +22,10 @@ class DLLExport MergeMD : public API::BoxControllerSettingsAlgorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Merge several MDWorkspaces into one.";
-  }
+  const std::string summary() const override { return "Merge several MDWorkspaces into one."; }
 
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"MergeMDFiles", "AccumulateMD"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"MergeMDFiles", "AccumulateMD"}; }
   const std::string category() const override;
 
 private:
@@ -37,8 +33,7 @@ private:
   void exec() override;
   void createOutputWorkspace(std::vector<std::string> &inputs);
 
-  template <typename MDE, size_t nd>
-  void doPlus(typename Mantid::DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
+  template <typename MDE, size_t nd> void doPlus(typename Mantid::DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
 
   /// Vector of input MDWorkspaces
   std::vector<Mantid::API::IMDEventWorkspace_sptr> m_workspaces;

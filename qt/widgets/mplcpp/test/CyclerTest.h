@@ -25,9 +25,7 @@ public:
     const std::string label("colors");
     auto colors = cycler(label.c_str(), "rgb");
 
-    auto toDict = [&label](const char *value) {
-      return Python::NewRef(Py_BuildValue("{ss}", label.c_str(), value));
-    };
+    auto toDict = [&label](const char *value) { return Python::NewRef(Py_BuildValue("{ss}", label.c_str(), value)); };
     TS_ASSERT_EQUALS(toDict("r"), colors());
     TS_ASSERT_EQUALS(toDict("g"), colors());
     TS_ASSERT_EQUALS(toDict("b"), colors());

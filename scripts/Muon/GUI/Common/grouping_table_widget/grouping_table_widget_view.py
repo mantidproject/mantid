@@ -54,7 +54,7 @@ class GroupingTableView(QtWidgets.QWidget):
 
         self.group_range_label = QtWidgets.QLabel()
         self.group_range_label.setText('Group Asymmetry Range from:')
-        self.group_range_min = QtWidgets.QLineEdit()
+        self.group_range_min = QtWidgets.QLineEdit("0.0")
         self.group_range_min.setEnabled(False)
         positive_float_validator = QtGui.QDoubleValidator(0.0, sys.float_info.max, 5)
         self.group_range_min.setValidator(positive_float_validator)
@@ -63,7 +63,7 @@ class GroupingTableView(QtWidgets.QWidget):
         self.group_range_use_first_good_data.setText(u"\u03BCs (From data file)")
 
         self.group_range_use_first_good_data.setChecked(True)
-        self.group_range_max = QtWidgets.QLineEdit()
+        self.group_range_max = QtWidgets.QLineEdit("1.0")
         self.group_range_max.setEnabled(False)
         self.group_range_max.setValidator(positive_float_validator)
 

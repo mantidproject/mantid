@@ -10,10 +10,10 @@ This page contains specific worked examples. The data files can be found `here <
 
 .. contents:: Table of contents
     :local:
-	
+
 Fitting INS spectrum
 ====================
-	
+
 .. code-block:: python
 
    from CrystalField import CrystalField, CrystalFieldFit
@@ -21,7 +21,7 @@ Fitting INS spectrum
    data_ws1 = Load('NdOs2Al10_5K35meV_Ecut_0to3ang_bp15V1.xye')
 
    # Set up the crystal field model.
-   cf = CrystalField('Nd', 'C2v', Temperature=5, FWHM=1, 
+   cf = CrystalField('Nd', 'C2v', Temperature=5, FWHM=1,
        B20=0.19, B22=0.11, B40=-0.0004, B42=-0.002, B44=-0.012, B60=5.e-05, B62=0.00054, B64=-0.0006, B66=0.0008)
    cf.PeakShape = 'Lorentzian'
    cf.IntensityScaling = 2   # Scale factor if data is not in absolute units (mbarn/sr/f.u./meV), will be fitted.
@@ -40,8 +40,8 @@ Fitting INS spectrum
 
    table = mtd['fit_Parameters']
    print ('Cost function value = '+str(table.row(table.rowCount()-1)['Value']))
-   
-  
+
+
 |FittingINSSpectrum.png|
 
 
@@ -52,7 +52,7 @@ Fitting with resolution function
 
    from CrystalField import CrystalField, CrystalFieldFit, Background, Function, ResolutionModel
    from PyChop import PyChop2
-   
+
    # load the data
    data_ws1 = Load('MER38435_10p22meV.txt')
    data_ws2 = Load('MER38436_10p22meV.txt')
@@ -61,7 +61,7 @@ Fitting with resolution function
    merlin = PyChop2('MERLIN', 'G', 250.)
    merlin.setEi(10.)
    resmod = ResolutionModel(merlin.getResolution, xstart=-10, xend=9.0, accuracy=0.01)
-   
+
    Kelvin_to_meV = 1./11.6
 
    # Parameters from https://doi.org/10.1016/0921-4526(91)90575-Y
@@ -96,13 +96,13 @@ Fitting with resolution function
    axs[0].set_xlabel('')
    fig.tight_layout()
    fig.show()
-   
+
 |FittingWithResolutionFunction.png|
 
- 
+
 Fitting magnetic susceptibility
 ===============================
-   
+
 .. code-block:: python
 
    from CrystalField import CrystalField, CrystalFieldFit, PhysicalProperties
@@ -112,7 +112,7 @@ Fitting magnetic susceptibility
    sus_b = Load('NdOs2Al10_sus_b.txt')
    sus_c = Load('NdOs2Al10_sus_c.txt')
 
-   cf = CrystalField('Nd', 'C2v', 
+   cf = CrystalField('Nd', 'C2v',
         B20=0.19, B22=0.11, B40=-0.0004, B42=-0.002, B44=-0.012, B60=5.e-05, B62=0.00054, B64=-0.0006, B66=0.0008)
 
    # Simultaneously fit data measured in a, b and c directions
@@ -142,10 +142,10 @@ Fitting magnetic susceptibility
    plt.xlabel('Temperature (K)')
    plt.ylabel('Inverse Susceptibility (mol/emu)')
    plt.show()
-   
-   
+
+
 |FittingMagneticSusceptibility.png|
-   
+
 
 .. Avoid Fitting INS spectrum and susceptibility simultaneously
 .. Avoid ======================================================
@@ -163,7 +163,7 @@ Fitting multiple INS spectra
    data_ws3=Load(datadir+'cecuga3Mlacuga3fp824_15meV100K0to2p5angbp2V1.xye')
 
    # Set up the crystal field model for multiple spectra.
-   # This is indicated by the number of elements in the list of temperatures. 
+   # This is indicated by the number of elements in the list of temperatures.
    # Optionally other parameters like FWHM and IntensityScaling can be lists if these initial parameters for each
    #    spectra should differ.
    cf = CrystalField('Ce', 'C4v', Temperature=[5,50,100], FWHM=[1,1,1], B20=0.0633, B40=0.01097, B44=0.09985)
@@ -210,11 +210,11 @@ Fitting multiple INS spectra
 
 .. |FittingWithResolutionFunction.png| image:: /images/FittingWithResolutionFunction.png
 
-.. |FittingMagneticSusceptibility.png| image:: /images/FittingMagneticSusceptibility.png   
+.. |FittingMagneticSusceptibility.png| image:: /images/FittingMagneticSusceptibility.png
 
 .. |FittingMultipleINSSpectra_0.png| image:: /images/FittingMultipleINSSpectra_0.png
    :width: 33%
-  
+
 .. |FittingMultipleINSSpectra_1.png| image:: /images/FittingMultipleINSSpectra_1.png
    :width: 33%
 

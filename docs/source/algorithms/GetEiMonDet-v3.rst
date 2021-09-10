@@ -13,7 +13,7 @@ This algorithm calculates the incident energy from the time-of-flight between on
 
 If the monitor peak has been previously fitted using :ref:`FindEPP <algm-FindEPP>`, one fitting step can be omitted by supplying the EPP table via ``MonitorEPPWorkspace``.
 
-If no *MonitorWorkspace* is specified, the monitor spectrum is expected to be in the detector workspace. *DetectorWorkspaceIndexSet* understands complex expression, for example ``2,3,5-7,101`` would use detectors 2, 3, 5, 6, 7, and 101 for the computation. 
+If no *MonitorWorkspace* is specified, the monitor spectrum is expected to be in the detector workspace. *DetectorWorkspaceIndexSet* understands complex expression, for example ``2,3,5-7,101`` would use detectors 2, 3, 5, 6, 7, and 101 for the computation.
 
 Usage
 -----
@@ -50,7 +50,7 @@ Output:
 
    import numpy
    from scipy.constants import elementary_charge, neutron_mass
-   
+
    spectrum = 'name = Gaussian, PeakCentre = 1000.0, Height = 500.0, Sigma = 30.0'
    ws = CreateSampleWorkspace(WorkspaceType='Histogram', XUnit='TOF',
      XMin=100.0, XMax=1100.0, BinWidth=10.0,
@@ -64,7 +64,7 @@ Output:
    monitorEPPs = FindEPP('monitors')
    calibratedE_i = GetEiMonDet(DetectorWorkspace='detectors',
      DetectorWorkspaceIndexSet="0-99", MonitorWorkspace='monitors', MonitorEPPTable=monitorEPPs, MonitorIndex=0)
-   
+
    print('Calibrated energy: {0:.3f}'.format(calibratedE_i))
 
 Output:

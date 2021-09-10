@@ -15,8 +15,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 /// Constructor
-LatticePresenter::LatticePresenter(LoanedMemento &memento)
-    : m_WsMemento(memento) {}
+LatticePresenter::LatticePresenter(LoanedMemento &memento) : m_WsMemento(memento) {}
 
 /// Destructor
 LatticePresenter::~LatticePresenter() {
@@ -53,8 +52,7 @@ Check that the inputs are okay. If not then pass up to view and return false.
 @param b3: Lattice parameter giving gamma angle
 @return false if invalid unit cell.
 */
-bool LatticePresenter::checkInput(double a1, double a2, double a3, double b1,
-                                  double b2, double b3) {
+bool LatticePresenter::checkInput(double a1, double a2, double a3, double b1, double b2, double b3) {
   bool parametersOk = false;
   try {
     Mantid::Geometry::OrientedLattice lattice(a1, a2, a3, b1, b2, b3);

@@ -34,9 +34,7 @@
 #include <ostream>
 
 // Test for gcc 4.4
-#if __GNUC__ > 4 ||                                                            \
-    (__GNUC__ == 4 &&                                                          \
-     (__GNUC_MINOR__ > 4 || (__GNUC_MINOR__ == 4 && __GNUC_PATCHLEVEL__ > 0)))
+#if __GNUC__ > 4 || (__GNUC__ == 4 && (__GNUC_MINOR__ > 4 || (__GNUC_MINOR__ == 4 && __GNUC_PATCHLEVEL__ > 0)))
 GNU_DIAG_OFF("strict-aliasing")
 #endif
 
@@ -51,12 +49,10 @@ Kernel::Logger logger("MDEventWorkspace");
 /** Constructor
  */
 
-TMDE(MDEventWorkspace)::MDEventWorkspace(
-    Mantid::API::MDNormalization preferredNormalization,
-    Mantid::API::MDNormalization preferredNormalizationHisto)
-    : API::IMDEventWorkspace(), m_BoxController(new API::BoxController(nd)),
-      data(), m_displayNormalization(preferredNormalization),
-      m_displayNormalizationHisto(preferredNormalizationHisto),
+TMDE(MDEventWorkspace)::MDEventWorkspace(Mantid::API::MDNormalization preferredNormalization,
+                                         Mantid::API::MDNormalization preferredNormalizationHisto)
+    : API::IMDEventWorkspace(), m_BoxController(new API::BoxController(nd)), data(),
+      m_displayNormalization(preferredNormalization), m_displayNormalizationHisto(preferredNormalizationHisto),
       m_coordSystem(Kernel::None) {
   // First box is at depth 0, and has this default boxController
   data = std::make_unique<MDBox<MDE, nd>>(m_BoxController.get(), 0);
@@ -66,23 +62,18 @@ TMDE(MDEventWorkspace)::MDEventWorkspace(
 /** Copy constructor
  */
 TMDE(MDEventWorkspace)::MDEventWorkspace(const MDEventWorkspace<MDE, nd> &other)
-    : IMDEventWorkspace(other), m_BoxController(other.m_BoxController->clone()),
-      data(), m_displayNormalization(other.m_displayNormalization),
-      m_displayNormalizationHisto(other.m_displayNormalizationHisto),
-      m_coordSystem(other.m_coordSystem) {
+    : IMDEventWorkspace(other), m_BoxController(other.m_BoxController->clone()), data(),
+      m_displayNormalization(other.m_displayNormalization),
+      m_displayNormalizationHisto(other.m_displayNormalizationHisto), m_coordSystem(other.m_coordSystem) {
 
-  const MDBox<MDE, nd> *mdbox =
-      dynamic_cast<const MDBox<MDE, nd> *>(other.data.get());
-  const MDGridBox<MDE, nd> *mdgridbox =
-      dynamic_cast<const MDGridBox<MDE, nd> *>(other.data.get());
+  const MDBox<MDE, nd> *mdbox = dynamic_cast<const MDBox<MDE, nd> *>(other.data.get());
+  const MDGridBox<MDE, nd> *mdgridbox = dynamic_cast<const MDGridBox<MDE, nd> *>(other.data.get());
   if (mdbox) {
     data = std::make_unique<MDBox<MDE, nd>>(*mdbox, m_BoxController.get());
   } else if (mdgridbox) {
-    data =
-        std::make_unique<MDGridBox<MDE, nd>>(*mdgridbox, m_BoxController.get());
+    data = std::make_unique<MDGridBox<MDE, nd>>(*mdgridbox, m_BoxController.get());
   } else {
-    throw std::runtime_error(
-        "MDEventWorkspace::copy_ctor(): unexpected data box type found.");
+    throw std::runtime_error("MDEventWorkspace::copy_ctor(): unexpected data box type found.");
   }
 }
 
@@ -100,9 +91,7 @@ TMDE(void MDEventWorkspace)::setFileBacked(const std::string & /*fileName*/) {
 /*
  * Set filebacked on the contained box
  */
-TMDE(void MDEventWorkspace)::setFileBacked() {
-  this->getBox()->setFileBacked();
-}
+TMDE(void MDEventWorkspace)::setFileBacked() { this->getBox()->setFileBacked(); }
 /** If the workspace was filebacked, this would clear file-backed information
  *from the workspace nodes and close the files responsible for file backing
  *
@@ -145,8 +134,7 @@ TMDE(void MDEventWorkspace)::initialize() {
 /** Get the data type (id) of the workspace */
 TMDE(const std::string MDEventWorkspace)::id() const {
   std::ostringstream out;
-  out << "MDEventWorkspace<" << MDE::getTypeName() << "," << getNumDims()
-      << ">";
+  out << "MDEventWorkspace<" << MDE::getTypeName() << "," << getNumDims() << ">";
   return out.str();
 }
 
@@ -154,9 +142,7 @@ TMDE(const std::string MDEventWorkspace)::id() const {
 /** Get the data type (id) of the events in the workspace.
  * @return a string, either "MDEvent" or "MDLeanEvent"
  */
-TMDE(std::string MDEventWorkspace)::getEventTypeName() const {
-  return MDE::getTypeName();
-}
+TMDE(std::string MDEventWorkspace)::getEventTypeName() const { return MDE::getTypeName(); }
 
 //-----------------------------------------------------------------------------------------------
 /** Returns the number of dimensions in this workspace */
@@ -164,9 +150,7 @@ TMDE(size_t MDEventWorkspace)::getNumDims() const { return nd; }
 
 //-----------------------------------------------------------------------------------------------
 /** Returns the total number of points (events) in this workspace */
-TMDE(uint64_t MDEventWorkspace)::getNPoints() const {
-  return data->getNPoints();
-}
+TMDE(uint64_t MDEventWorkspace)::getNPoints() const { return data->getNPoints(); }
 
 //-----------------------------------------------------------------------------------------------
 /** Recurse box structure down to a minimum depth.
@@ -190,8 +174,7 @@ TMDE(void MDEventWorkspace)::setMinRecursionDepth(size_t minDepth) {
   if (double(stats.availMem()) < memoryToUse) {
     std::ostringstream mess;
     mess << "Not enough memory available for the given MinRecursionDepth! "
-         << "MinRecursionDepth is set to " << minDepth
-         << ", which would create " << numBoxes << " boxes using "
+         << "MinRecursionDepth is set to " << minDepth << ", which would create " << numBoxes << " boxes using "
          << memoryToUse << " kB of memory."
          << " You have " << stats.availMem() << " kB available.\n";
     throw std::runtime_error(mess.str());
@@ -235,8 +218,7 @@ TMDE(std::vector<coord_t> MDEventWorkspace)::estimateResolution() const {
       finestSplit *= m_BoxController->getSplitInto(d);
     Geometry::IMDDimension_const_sptr dim = this->getDimension(d);
     // Calculate the bin size at the smallest split amount
-    out.emplace_back((dim->getMaximum() - dim->getMinimum()) /
-                     static_cast<coord_t>(finestSplit));
+    out.emplace_back((dim->getMaximum() - dim->getMinimum()) / static_cast<coord_t>(finestSplit));
   }
   return out;
 }
@@ -247,10 +229,8 @@ TMDE(std::vector<coord_t> MDEventWorkspace)::estimateResolution() const {
  * @param suggestedNumCores :: split iterator over this many cores.
  * @param function :: Optional MDImplicitFunction limiting the iterator
  */
-TMDE(std::vector<std::unique_ptr<Mantid::API::IMDIterator>>
-         MDEventWorkspace)::createIterators(size_t suggestedNumCores,
-                                            Mantid::Geometry::MDImplicitFunction
-                                                *function) const {
+TMDE(std::vector<std::unique_ptr<Mantid::API::IMDIterator>> MDEventWorkspace)::createIterators(
+    size_t suggestedNumCores, Mantid::Geometry::MDImplicitFunction *function) const {
   // Get all the boxes in this workspaces
   std::vector<API::IMDNode *> boxes;
   // TODO: Should this be leaf only? Depends on most common use case
@@ -276,8 +256,7 @@ TMDE(std::vector<std::unique_ptr<Mantid::API::IMDIterator>>
     size_t end = ((i + 1) * numElements) / numCores;
     if (end > numElements)
       end = numElements;
-    out.emplace_back(
-        std::make_unique<MDBoxIterator<MDE, nd>>(boxes, begin, end));
+    out.emplace_back(std::make_unique<MDBoxIterator<MDE, nd>>(boxes, begin, end));
   }
   return out;
 }
@@ -290,9 +269,8 @@ TMDE(std::vector<std::unique_ptr<Mantid::API::IMDIterator>>
  * @return the normalized signal of the box at the given coordinates. NaN if out
  *of bounds
  */
-TMDE(signal_t MDEventWorkspace)::getSignalAtCoord(
-    const coord_t *coords,
-    const Mantid::API::MDNormalization &normalization) const {
+TMDE(signal_t MDEventWorkspace)::getSignalAtCoord(const coord_t *coords,
+                                                  const Mantid::API::MDNormalization &normalization) const {
   if (!isInBounds(coords)) {
     return std::numeric_limits<signal_t>::quiet_NaN();
   }
@@ -301,9 +279,8 @@ TMDE(signal_t MDEventWorkspace)::getSignalAtCoord(
   return getNormalizedSignal(box, normalization);
 }
 
-TMDE(signal_t MDEventWorkspace)::getNormalizedSignal(
-    const API::IMDNode *box,
-    const Mantid::API::MDNormalization &normalization) const {
+TMDE(signal_t MDEventWorkspace)::getNormalizedSignal(const API::IMDNode *box,
+                                                     const Mantid::API::MDNormalization &normalization) const {
   if (box) {
     // What is our normalization factor?
     switch (normalization) {
@@ -320,9 +297,8 @@ TMDE(signal_t MDEventWorkspace)::getNormalizedSignal(
     return std::numeric_limits<signal_t>::quiet_NaN();
 }
 
-TMDE(signal_t MDEventWorkspace)::getNormalizedError(
-    const API::IMDNode *box,
-    const Mantid::API::MDNormalization &normalization) const {
+TMDE(signal_t MDEventWorkspace)::getNormalizedError(const API::IMDNode *box,
+                                                    const Mantid::API::MDNormalization &normalization) const {
   if (box) {
     // What is our normalization factor?
     switch (normalization) {
@@ -357,9 +333,8 @@ TMDE(bool MDEventWorkspace)::isInBounds(const coord_t *coords) const {
  * @return the (normalized) signal at a given coordinates.
  *         NaN if outside the range of this workspace
  */
-TMDE(signal_t MDEventWorkspace)::getSignalWithMaskAtCoord(
-    const coord_t *coords,
-    const Mantid::API::MDNormalization &normalization) const {
+TMDE(signal_t MDEventWorkspace)::getSignalWithMaskAtCoord(const coord_t *coords,
+                                                          const Mantid::API::MDNormalization &normalization) const {
   if (!isInBounds(coords)) {
     return std::numeric_limits<signal_t>::quiet_NaN();
   }
@@ -385,8 +360,8 @@ TMDE(signal_t MDEventWorkspace)::getSignalWithMaskAtCoord(
  *         If the workspace is empty, then this will be the size of the overall
  *workspace
  */
-TMDE(std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
-         MDEventWorkspace)::getMinimumExtents(size_t depth) const {
+TMDE(std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> MDEventWorkspace)::getMinimumExtents(
+    size_t depth) const {
   std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> out(nd);
   std::vector<API::IMDNode *> boxes;
   // Get all the end (leaf) boxes
@@ -404,8 +379,7 @@ TMDE(std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
   // Fix any missing dimensions (for empty workspaces)
   for (size_t d = 0; d < nd; d++) {
     if (out[d].isUndefined())
-      out[d].setExtents(this->getDimension(d)->getMinimum(),
-                        this->getDimension(d)->getMaximum());
+      out[d].setExtents(this->getDimension(d)->getMinimum(), this->getDimension(d)->getMaximum());
   }
   return out;
 }
@@ -418,18 +392,13 @@ TMDE(std::vector<std::string> MDEventWorkspace)::getBoxControllerStats() const {
   std::ostringstream mess;
 
   size_t mem;
-  mem = (this->m_BoxController->getTotalNumMDBoxes() * sizeof(MDBox<MDE, nd>)) /
-        1024;
-  mess << m_BoxController->getTotalNumMDBoxes() << " MDBoxes (" << mem
-       << " kB)";
+  mem = (this->m_BoxController->getTotalNumMDBoxes() * sizeof(MDBox<MDE, nd>)) / 1024;
+  mess << m_BoxController->getTotalNumMDBoxes() << " MDBoxes (" << mem << " kB)";
   out.emplace_back(mess.str());
   mess.str("");
 
-  mem = (this->m_BoxController->getTotalNumMDGridBoxes() *
-         sizeof(MDGridBox<MDE, nd>)) /
-        1024;
-  mess << m_BoxController->getTotalNumMDGridBoxes() << " MDGridBoxes (" << mem
-       << " kB)";
+  mem = (this->m_BoxController->getTotalNumMDGridBoxes() * sizeof(MDGridBox<MDE, nd>)) / 1024;
+  mess << m_BoxController->getTotalNumMDGridBoxes() << " MDGridBoxes (" << mem << " kB)";
   out.emplace_back(mess.str());
   mess.str("");
 
@@ -451,12 +420,8 @@ TMDE(std::vector<std::string> MDEventWorkspace)::getBoxControllerStats() const {
 
   if (m_BoxController->isFileBacked()) {
     mess << "File backed: ";
-    double avail = double(m_BoxController->getFileIO()->getWriteBufferSize() *
-                          sizeof(MDE)) /
-                   (1024 * 1024);
-    double used = double(m_BoxController->getFileIO()->getWriteBufferUsed() *
-                         sizeof(MDE)) /
-                  (1024 * 1024);
+    double avail = double(m_BoxController->getFileIO()->getWriteBufferSize() * sizeof(MDE)) / (1024 * 1024);
+    double used = double(m_BoxController->getFileIO()->getWriteBufferUsed() * sizeof(MDE)) / (1024 * 1024);
     mess << "Write buffer: " << used << " of " << avail << " MB. ";
     out.emplace_back(mess.str());
     mess.str("");
@@ -479,15 +444,11 @@ TMDE(std::vector<std::string> MDEventWorkspace)::getBoxControllerStats() const {
 
 //-----------------------------------------------------------------------------------------------
 /** Comparator for sorting MDBoxBase'es by ID */
-template <typename BOXTYPE>
-bool SortBoxesByID(const BOXTYPE &a, const BOXTYPE &b) {
-  return a->getID() < b->getID();
-}
+template <typename BOXTYPE> bool SortBoxesByID(const BOXTYPE &a, const BOXTYPE &b) { return a->getID() < b->getID(); }
 
 //-----------------------------------------------------------------------------------------------
 /** Create a table of data about the boxes contained */
-TMDE(Mantid::API::ITableWorkspace_sptr MDEventWorkspace)::makeBoxTable(
-    size_t start, size_t num) {
+TMDE(Mantid::API::ITableWorkspace_sptr MDEventWorkspace)::makeBoxTable(size_t start, size_t num) {
   Kernel::CPUTimer tim;
   UNUSED_ARG(start);
   UNUSED_ARG(num);
@@ -504,8 +465,7 @@ TMDE(Mantid::API::ITableWorkspace_sptr MDEventWorkspace)::makeBoxTable(
 
   // Now sort by ID
   using ibox_t = MDBoxBase<MDE, nd> *;
-  std::sort(boxes_filtered.begin(), boxes_filtered.end(),
-            SortBoxesByID<ibox_t>);
+  std::sort(boxes_filtered.begin(), boxes_filtered.end(), SortBoxesByID<ibox_t>);
 
   // Create the table
   int numRows = int(boxes_filtered.size());
@@ -542,8 +502,7 @@ TMDE(Mantid::API::ITableWorkspace_sptr MDEventWorkspace)::makeBoxTable(
 
       bool isDataAdded = (mdbox->isDataAdded());
       ws->cell<std::string>(i, col++) =
-          std::string(isDataAdded ? "Added " : "") +
-          std::string(pSaver->isBusy() ? "Modif." : "");
+          std::string(isDataAdded ? "Added " : "") + std::string(pSaver->isBusy() ? "Modif." : "");
     } else {
       ws->cell<std::string>(i, col++) = (pSaver ? "-" : "NA");
       ws->cell<std::string>(i, col++) = (pSaver ? "-" : "NA");
@@ -562,16 +521,14 @@ TMDE(size_t MDEventWorkspace)::getMemorySize() const {
   if (this->m_BoxController->isFileBacked()) {
     // File-backed workspace
     // How much is in the cache?
-    total =
-        this->m_BoxController->getFileIO()->getWriteBufferUsed() * sizeof(MDE);
+    total = this->m_BoxController->getFileIO()->getWriteBufferUsed() * sizeof(MDE);
   } else {
     // All the events
     total = this->getNPoints() * sizeof(MDE);
   }
   // The MDBoxes are always in memory
   total += this->m_BoxController->getTotalNumMDBoxes() * sizeof(MDBox<MDE, nd>);
-  total += this->m_BoxController->getTotalNumMDGridBoxes() *
-           sizeof(MDGridBox<MDE, nd>);
+  total += this->m_BoxController->getTotalNumMDGridBoxes() * sizeof(MDGridBox<MDE, nd>);
   return total;
 }
 
@@ -582,9 +539,7 @@ TMDE(size_t MDEventWorkspace)::getMemorySize() const {
  *
  * @param event :: event to add.
  */
-TMDE(size_t MDEventWorkspace)::addEvent(const MDE &event) {
-  return data->addEvent(event);
-}
+TMDE(size_t MDEventWorkspace)::addEvent(const MDE &event) { return data->addEvent(event); }
 
 //-----------------------------------------------------------------------------------------------
 /** Add a vector of MDEvents to the workspace.
@@ -593,9 +548,7 @@ TMDE(size_t MDEventWorkspace)::addEvent(const MDE &event) {
  *the
  *        MDBox'es contained within.
  */
-TMDE(size_t MDEventWorkspace)::addEvents(const std::vector<MDE> &events) {
-  return data->addEvents(events);
-}
+TMDE(size_t MDEventWorkspace)::addEvents(const std::vector<MDE> &events) { return data->addEvents(events); }
 
 //-----------------------------------------------------------------------------------------------
 /** Split the contained MDBox into a MDGridBox or MDSplitBox, if it is not
@@ -624,9 +577,7 @@ TMDE(void MDEventWorkspace)::splitBox() {
  * @param ts :: optional ThreadScheduler * that will be used to parallelize
  *        recursive splitting. Set to NULL to do it serially.
  */
-TMDE(void MDEventWorkspace)::splitAllIfNeeded(Kernel::ThreadScheduler *ts) {
-  data->splitAllIfNeeded(ts);
-}
+TMDE(void MDEventWorkspace)::splitAllIfNeeded(Kernel::ThreadScheduler *ts) { data->splitAllIfNeeded(ts); }
 
 //-----------------------------------------------------------------------------------------------
 /** Goes through the MDBoxes that were tracked by the BoxController
@@ -677,10 +628,11 @@ TMDE(void MDEventWorkspace)::refreshCache() {
  * @param length :: the length of the line
  * @returns :: ordered set of halfway points between box crossings
  */
-TMDE(std::set<coord_t> MDEventWorkspace)::getBoxBoundaryBisectsOnLine(
-    const Mantid::Kernel::VMD &start, const Mantid::Kernel::VMD &end,
-    const size_t num_d, const Mantid::Kernel::VMD &dir,
-    const coord_t length) const {
+TMDE(std::set<coord_t> MDEventWorkspace)::getBoxBoundaryBisectsOnLine(const Mantid::Kernel::VMD &start,
+                                                                      const Mantid::Kernel::VMD &end,
+                                                                      const size_t num_d,
+                                                                      const Mantid::Kernel::VMD &dir,
+                                                                      const coord_t length) const {
   std::set<coord_t> mid_points;
 
   // Get the smallest box size along each dimension
@@ -697,15 +649,12 @@ TMDE(std::set<coord_t> MDEventWorkspace)::getBoxBoundaryBisectsOnLine(
     auto dir_current_dim = dir[d];
 
     // +1 to get the last box
-    size_t num_boundaries =
-        static_cast<size_t>(ceil(std::abs(line_end - line_start) / box_size)) +
-        1;
+    size_t num_boundaries = static_cast<size_t>(ceil(std::abs(line_end - line_start) / box_size)) + 1;
 
     // If the line has some component in this dimension then look for boundaries
     // it crosses
     if (dir_current_dim != 0.0) {
-      getBoundariesInDimension(start, dir, num_boundaries, length,
-                               dir_current_dim, box_size, mid_points);
+      getBoundariesInDimension(start, dir, num_boundaries, length, dir_current_dim, box_size, mid_points);
     }
   }
   return mid_points;
@@ -725,11 +674,10 @@ TMDE(std::set<coord_t> MDEventWorkspace)::getBoxBoundaryBisectsOnLine(
  * @param box_size :: the minimum box size in this dimension
  * @param mid_points :: ordered set of halfway points between box crossings
  */
-TMDE(void MDEventWorkspace)::getBoundariesInDimension(
-    const Mantid::Kernel::VMD &start, const Mantid::Kernel::VMD &dir,
-    const size_t num_boundaries, const coord_t length,
-    const coord_t dir_current_dim, const coord_t box_size,
-    std::set<coord_t> &mid_points) const {
+TMDE(void MDEventWorkspace)::getBoundariesInDimension(const Mantid::Kernel::VMD &start, const Mantid::Kernel::VMD &dir,
+                                                      const size_t num_boundaries, const coord_t length,
+                                                      const coord_t dir_current_dim, const coord_t box_size,
+                                                      std::set<coord_t> &mid_points) const {
   auto lastPos = start;
   coord_t lastLinePos = 0;
   coord_t previousLinePos = 0;
@@ -762,14 +710,12 @@ TMDE(void MDEventWorkspace)::getBoundariesInDimension(
     if ((current_id != last_id && i != 1)) {
       // Check line position is within limits of the line and not too close to
       // previous position
-      if (line_pos_of_box_centre >= 0 && line_pos_of_box_centre <= length &&
-          fabs(linePos - lastLinePos) > 1e-5) {
+      if (line_pos_of_box_centre >= 0 && line_pos_of_box_centre <= length && fabs(linePos - lastLinePos) > 1e-5) {
         mid_points.insert(line_pos_of_box_centre);
       }
       lastLinePos = previousLinePos;
     }
-    line_pos_of_box_centre =
-        static_cast<coord_t>((linePos + lastLinePos) * 0.5);
+    line_pos_of_box_centre = static_cast<coord_t>((linePos + lastLinePos) * 0.5);
     previousLinePos = linePos;
 
     last_id = current_id;
@@ -797,15 +743,13 @@ TMDE(API::IMDWorkspace::LinePlot MDEventWorkspace)
     throw std::runtime_error("Start point must have the same number of "
                              "dimensions as the workspace.");
   if (end.getNumDims() != num_dims)
-    throw std::runtime_error(
-        "End point must have the same number of dimensions as the workspace.");
+    throw std::runtime_error("End point must have the same number of dimensions as the workspace.");
 
   // Unit-vector of the direction
   Mantid::Kernel::VMD dir = end - start;
   const auto length = dir.normalize();
 
-  const std::set<coord_t> mid_points =
-      getBoxBoundaryBisectsOnLine(start, end, num_dims, dir, length);
+  const std::set<coord_t> mid_points = getBoxBoundaryBisectsOnLine(start, end, num_dims, dir, length);
 
   LinePlot line;
 
@@ -847,8 +791,7 @@ TMDE(API::IMDWorkspace::LinePlot MDEventWorkspace)
 Setter for the masking region.
 @param maskingRegion : Implicit function defining mask region.
 */
-TMDE(void MDEventWorkspace)::setMDMasking(
-    std::unique_ptr<Mantid::Geometry::MDImplicitFunction> maskingRegion) {
+TMDE(void MDEventWorkspace)::setMDMasking(std::unique_ptr<Mantid::Geometry::MDImplicitFunction> maskingRegion) {
   if (maskingRegion) {
     std::vector<API::IMDNode *> toMaskBoxes;
 
@@ -878,8 +821,7 @@ TMDE(void MDEventWorkspace)::clearMDMasking() {
 Get the coordinate system (if any) to use.
 @return An enumeration specifying the coordinate system if any.
 */
-TMDE(Kernel::SpecialCoordinateSystem
-         MDEventWorkspace)::getSpecialCoordinateSystem() const {
+TMDE(Kernel::SpecialCoordinateSystem MDEventWorkspace)::getSpecialCoordinateSystem() const {
   MDFramesToSpecialCoordinateSystem converter;
   auto coordinatesFromMDFrames = converter(this);
   auto coordinates = m_coordSystem;
@@ -894,8 +836,7 @@ TMDE(Kernel::SpecialCoordinateSystem
 Set the coordinate system (if any) to use.
 @param coordSystem : Coordinate system to use.
 */
-TMDE(void MDEventWorkspace)::setCoordinateSystem(
-    const Kernel::SpecialCoordinateSystem coordSystem) {
+TMDE(void MDEventWorkspace)::setCoordinateSystem(const Kernel::SpecialCoordinateSystem coordSystem) {
   m_coordSystem = coordSystem;
 }
 
@@ -912,25 +853,20 @@ TMDE(void MDEventWorkspace)::setDisplayNormalizationHisto(
 /**
 Return the preferred normalization preference for subsequent histoworkspaces.
 */
-TMDE(API::MDNormalization MDEventWorkspace)::displayNormalizationHisto() const {
-  return m_displayNormalizationHisto;
-}
+TMDE(API::MDNormalization MDEventWorkspace)::displayNormalizationHisto() const { return m_displayNormalizationHisto; }
 
 /**
   Set the display normalization
   @param preferredNormalization : Display normalization preference.
 */
-TMDE(void MDEventWorkspace)::setDisplayNormalization(
-    const Mantid::API::MDNormalization preferredNormalization) {
+TMDE(void MDEventWorkspace)::setDisplayNormalization(const Mantid::API::MDNormalization preferredNormalization) {
   m_displayNormalization = preferredNormalization;
 }
 
 /**
 Return the preferred normalization to use for visualization.
 */
-TMDE(API::MDNormalization MDEventWorkspace)::displayNormalization() const {
-  return m_displayNormalization;
-}
+TMDE(API::MDNormalization MDEventWorkspace)::displayNormalization() const { return m_displayNormalization; }
 
 } // namespace DataObjects
 

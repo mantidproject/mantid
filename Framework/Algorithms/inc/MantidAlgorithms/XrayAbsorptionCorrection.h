@@ -38,27 +38,21 @@ public:
   /// Algorithm's version
   int version() const override { return 1; }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "CorrectionFunctions\\AbsorptionCorrections";
-  }
+  const std::string category() const override { return "CorrectionFunctions\\AbsorptionCorrections"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "Calculates attenuation of xrays produced by negative muons due"
            " to absorption in a sample for elemental analysis ";
   }
-  const std::vector<std::string> seeAlso() const override {
-    return {"SetSample", "SetSampleMaterial"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"SetSample", "SetSampleMaterial"}; }
 
 protected:
   double degreesToRadians(double degrees);
 
-  Kernel::V3D calculateDetectorPos(double const detectorAngle,
-                                   double detectorDistance);
+  Kernel::V3D calculateDetectorPos(double const detectorAngle, double detectorDistance);
 
-  std::vector<Kernel::V3D>
-  calculateMuonPos(API::MatrixWorkspace_sptr &muonProfile,
-                   API::MatrixWorkspace_sptr inputWS, double detectorDistance);
+  std::vector<Kernel::V3D> calculateMuonPos(API::MatrixWorkspace_sptr &muonProfile, API::MatrixWorkspace_sptr inputWS,
+                                            double detectorDistance);
 
   std::vector<double> normaliseMuonIntensity(MantidVec muonIntensity);
 

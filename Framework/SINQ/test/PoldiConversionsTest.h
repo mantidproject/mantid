@@ -14,9 +14,7 @@ using namespace Mantid::Poldi;
 
 class PoldiConversionsTest : public CxxTest::TestSuite {
 public:
-  static PoldiConversionsTest *createSuite() {
-    return new PoldiConversionsTest();
-  }
+  static PoldiConversionsTest *createSuite() { return new PoldiConversionsTest(); }
   static void destroySuite(PoldiConversionsTest *suite) { delete suite; }
 
   void testTOFandDConversions() {
@@ -29,16 +27,11 @@ public:
     TS_ASSERT_DELTA(d, 0.000606307, 1e-9);
     TS_ASSERT_EQUALS(Conversions::dtoTOF(d, distance, sinTheta), tof);
 
-    TS_ASSERT_THROWS(Conversions::TOFtoD(1.0, 0.0, 2.0),
-                     const std::domain_error &);
-    TS_ASSERT_THROWS(Conversions::TOFtoD(1.0, -2.0, 2.0),
-                     const std::domain_error &);
-    TS_ASSERT_THROWS(Conversions::TOFtoD(1.0, 2.0, 0.0),
-                     const std::domain_error &);
-    TS_ASSERT_THROWS(Conversions::TOFtoD(1.0, 2.0, -2.0),
-                     const std::domain_error &);
-    TS_ASSERT_THROWS(Conversions::TOFtoD(1.0, 0.0, 0.0),
-                     const std::domain_error &);
+    TS_ASSERT_THROWS(Conversions::TOFtoD(1.0, 0.0, 2.0), const std::domain_error &);
+    TS_ASSERT_THROWS(Conversions::TOFtoD(1.0, -2.0, 2.0), const std::domain_error &);
+    TS_ASSERT_THROWS(Conversions::TOFtoD(1.0, 2.0, 0.0), const std::domain_error &);
+    TS_ASSERT_THROWS(Conversions::TOFtoD(1.0, 2.0, -2.0), const std::domain_error &);
+    TS_ASSERT_THROWS(Conversions::TOFtoD(1.0, 0.0, 0.0), const std::domain_error &);
   }
 
   void testDandQConversions() {
@@ -54,9 +47,7 @@ public:
   void testDegAndRadConversions() {
     double degree = 30.0;
 
-    TS_ASSERT_DELTA(Conversions::degToRad(degree), 0.52359877559829887308,
-                    1e-15);
-    TS_ASSERT_EQUALS(Conversions::radToDeg(Conversions::degToRad(degree)),
-                     degree);
+    TS_ASSERT_DELTA(Conversions::degToRad(degree), 0.52359877559829887308, 1e-15);
+    TS_ASSERT_EQUALS(Conversions::radToDeg(Conversions::degToRad(degree)), degree);
   }
 };

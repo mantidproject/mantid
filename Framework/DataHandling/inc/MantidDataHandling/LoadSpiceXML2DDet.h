@@ -17,8 +17,7 @@ namespace DataHandling {
 class SpiceXMLNode {
 public:
   SpiceXMLNode(const std::string &nodename);
-  void setParameters(const std::string &nodetype, const std::string &nodeunit,
-                     const std::string &nodedescription);
+  void setParameters(const std::string &nodetype, const std::string &nodeunit, const std::string &nodedescription);
   void setValue(const std::string &strvalue);
 
   bool hasUnit() const;
@@ -53,9 +52,7 @@ public:
 
   /// Algorithm version
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"LoadSpice2D"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"LoadSpice2D"}; }
 
   /// Category
   const std::string category() const override;
@@ -71,8 +68,7 @@ private:
   void processInputs();
 
   /// create workspace (good to load instrument) from vector of counts
-  API::MatrixWorkspace_sptr
-  createMatrixWorkspace(const std::vector<unsigned int> &vec_counts);
+  API::MatrixWorkspace_sptr createMatrixWorkspace(const std::vector<unsigned int> &vec_counts);
   /// parse binary integer file
   std::vector<unsigned int> binaryParseIntegers(std::string &binary_file_name);
 
@@ -80,41 +76,35 @@ private:
   std::vector<SpiceXMLNode> xmlParseSpice(const std::string &xmlfilename);
 
   /// Create output MatrixWorkspace
-  API::MatrixWorkspace_sptr xmlCreateMatrixWorkspaceKnownGeometry(
-      const std::vector<SpiceXMLNode> &vecxmlnode, const size_t &numpixelx,
-      const size_t &numpixely, const std::string &detnodename,
-      const bool &loadinstrument);
+  API::MatrixWorkspace_sptr xmlCreateMatrixWorkspaceKnownGeometry(const std::vector<SpiceXMLNode> &vecxmlnode,
+                                                                  const size_t &numpixelx, const size_t &numpixely,
+                                                                  const std::string &detnodename,
+                                                                  const bool &loadinstrument);
 
   /// Create output MatrixWorkspace
-  API::MatrixWorkspace_sptr xmlCreateMatrixWorkspaceUnknowGeometry(
-      const std::vector<SpiceXMLNode> &vecxmlnode,
-      const std::string &detnodename, const bool &loadinstrument);
+  API::MatrixWorkspace_sptr xmlCreateMatrixWorkspaceUnknowGeometry(const std::vector<SpiceXMLNode> &vecxmlnode,
+                                                                   const std::string &detnodename,
+                                                                   const bool &loadinstrument);
 
-  API::MatrixWorkspace_sptr xmlParseDetectorNode(const std::string &detvaluestr,
-                                                 bool loadinstrument,
+  API::MatrixWorkspace_sptr xmlParseDetectorNode(const std::string &detvaluestr, bool loadinstrument,
                                                  double &max_counts);
 
   /// Set up sample logs from table workspace loaded where SPICE data file is
   /// loaded
-  void
-  setupSampleLogFromSpiceTable(const API::MatrixWorkspace_sptr &matrixws,
-                               const API::ITableWorkspace_sptr &spicetablews,
-                               int ptnumber);
+  void setupSampleLogFromSpiceTable(const API::MatrixWorkspace_sptr &matrixws,
+                                    const API::ITableWorkspace_sptr &spicetablews, int ptnumber);
 
   /// Set up sample logs in the output workspace
   bool setupSampleLogs(const API::MatrixWorkspace_sptr &outws);
 
   /// Load instrument
-  void loadInstrument(API::MatrixWorkspace_sptr matrixws,
-                      const std::string &idffilename);
+  void loadInstrument(API::MatrixWorkspace_sptr matrixws, const std::string &idffilename);
 
   /// Get wavelength from workspace
-  bool getHB3AWavelength(const API::MatrixWorkspace_sptr &dataws,
-                         double &wavelength);
+  bool getHB3AWavelength(const API::MatrixWorkspace_sptr &dataws, double &wavelength);
 
   /// Set output workspace's X-axs as lab-frame Q space
-  void setXtoLabQ(const API::MatrixWorkspace_sptr &dataws,
-                  const double &wavelength);
+  void setXtoLabQ(const API::MatrixWorkspace_sptr &dataws, const double &wavelength);
 
   /// SPICE detector XML file
   std::string m_detXMLFileName;

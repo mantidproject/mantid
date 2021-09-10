@@ -44,8 +44,7 @@ class ObjCompAssembly;
   provides accessors for the client to extract visited information such as
   ComponentIDs.
 */
-class MANTID_GEOMETRY_DLL InstrumentVisitor
-    : public Mantid::Geometry::ComponentVisitor {
+class MANTID_GEOMETRY_DLL InstrumentVisitor : public Mantid::Geometry::ComponentVisitor {
 private:
   /// Detector indices
   std::shared_ptr<std::vector<detid_t>> m_orderedDetectorIds;
@@ -72,12 +71,10 @@ private:
   std::shared_ptr<std::vector<std::pair<size_t, size_t>>> m_componentRanges;
 
   /// Component ID -> Component Index map
-  std::shared_ptr<std::unordered_map<Mantid::Geometry::IComponent *, size_t>>
-      m_componentIdToIndexMap;
+  std::shared_ptr<std::unordered_map<Mantid::Geometry::IComponent *, size_t>> m_componentIdToIndexMap;
 
   /// Detector ID -> index mappings
-  std::shared_ptr<const std::unordered_map<detid_t, size_t>>
-      m_detectorIdToIndexMap;
+  std::shared_ptr<const std::unordered_map<detid_t, size_t>> m_detectorIdToIndexMap;
 
   /// Positions for non-detectors
   std::shared_ptr<std::vector<Eigen::Vector3d>> m_positions;
@@ -86,14 +83,10 @@ private:
   std::shared_ptr<std::vector<Eigen::Vector3d>> m_detectorPositions;
 
   /// Rotations for non-detectors
-  std::shared_ptr<std::vector<Eigen::Quaterniond,
-                              Eigen::aligned_allocator<Eigen::Quaterniond>>>
-      m_rotations;
+  std::shared_ptr<std::vector<Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Quaterniond>>> m_rotations;
 
   /// Rotations for detectors
-  std::shared_ptr<std::vector<Eigen::Quaterniond,
-                              Eigen::aligned_allocator<Eigen::Quaterniond>>>
-      m_detectorRotations;
+  std::shared_ptr<std::vector<Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Quaterniond>>> m_detectorRotations;
 
   /// Monitor indexes for detectors
   std::shared_ptr<std::vector<size_t>> m_monitorIndices;
@@ -120,8 +113,7 @@ private:
   std::shared_ptr<const Mantid::Geometry::IObject> m_nullShape;
 
   /// Shapes stored in fly-weight fashion
-  std::shared_ptr<std::vector<std::shared_ptr<const Mantid::Geometry::IObject>>>
-      m_shapes;
+  std::shared_ptr<std::vector<std::shared_ptr<const Mantid::Geometry::IObject>>> m_shapes;
 
   /// Scale factors
   std::shared_ptr<std::vector<Eigen::Vector3d>> m_scaleFactors;
@@ -132,11 +124,9 @@ private:
   /// Component names
   std::shared_ptr<std::vector<std::string>> m_names;
 
-  void markAsSourceOrSample(Mantid::Geometry::IComponent *componentId,
-                            const size_t componentIndex);
+  void markAsSourceOrSample(Mantid::Geometry::IComponent *componentId, const size_t componentIndex);
 
-  std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
-  makeWrappers() const;
+  std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>> makeWrappers() const;
 
   /// Extract the common aspects relevant to all component types
   size_t commonRegistration(const Mantid::Geometry::IComponent &component);
@@ -146,45 +136,31 @@ public:
 
   void walkInstrument();
 
-  virtual size_t registerComponentAssembly(
-      const Mantid::Geometry::ICompAssembly &assembly) override;
+  virtual size_t registerComponentAssembly(const Mantid::Geometry::ICompAssembly &assembly) override;
 
-  virtual size_t registerGenericComponent(
-      const Mantid::Geometry::IComponent &component) override;
+  virtual size_t registerGenericComponent(const Mantid::Geometry::IComponent &component) override;
 
-  virtual size_t registerInfiniteComponent(
-      const Mantid::Geometry::IComponent &component) override;
+  virtual size_t registerInfiniteComponent(const Mantid::Geometry::IComponent &component) override;
 
-  virtual size_t registerGenericObjComponent(
-      const Mantid::Geometry::IObjComponent &objComponent) override;
+  virtual size_t registerGenericObjComponent(const Mantid::Geometry::IObjComponent &objComponent) override;
 
-  virtual size_t
-  registerGridBank(const Mantid::Geometry::ICompAssembly &bank) override;
+  virtual size_t registerGridBank(const Mantid::Geometry::ICompAssembly &bank) override;
 
-  virtual size_t
-  registerRectangularBank(const Mantid::Geometry::ICompAssembly &bank) override;
+  virtual size_t registerRectangularBank(const Mantid::Geometry::ICompAssembly &bank) override;
 
-  virtual size_t
-  registerInfiniteObjComponent(const IObjComponent &objComponent) override;
+  virtual size_t registerInfiniteObjComponent(const IObjComponent &objComponent) override;
 
-  virtual size_t
-  registerStructuredBank(const Mantid::Geometry::ICompAssembly &bank) override;
+  virtual size_t registerStructuredBank(const Mantid::Geometry::ICompAssembly &bank) override;
 
-  virtual size_t
-  registerDetector(const Mantid::Geometry::IDetector &detector) override;
+  virtual size_t registerDetector(const Mantid::Geometry::IDetector &detector) override;
 
-  virtual size_t
-  registerObjComponentAssembly(const ObjCompAssembly &obj) override;
+  virtual size_t registerObjComponentAssembly(const ObjCompAssembly &obj) override;
 
-  std::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>>
-  componentIds() const;
+  std::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>> componentIds() const;
 
-  std::shared_ptr<
-      const std::unordered_map<Mantid::Geometry::IComponent *, size_t>>
-  componentIdToIndexMap() const;
+  std::shared_ptr<const std::unordered_map<Mantid::Geometry::IComponent *, size_t>> componentIdToIndexMap() const;
 
-  std::shared_ptr<const std::unordered_map<detid_t, size_t>>
-  detectorIdToIndexMap() const;
+  std::shared_ptr<const std::unordered_map<detid_t, size_t>> detectorIdToIndexMap() const;
   size_t size() const;
 
   bool isEmpty() const;
@@ -194,8 +170,7 @@ public:
 
   std::shared_ptr<std::vector<detid_t>> detectorIds() const;
 
-  static std::pair<std::unique_ptr<ComponentInfo>,
-                   std::unique_ptr<DetectorInfo>>
+  static std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
   makeWrappers(const Instrument &instrument, ParameterMap *pmap = nullptr);
 };
 } // namespace Geometry

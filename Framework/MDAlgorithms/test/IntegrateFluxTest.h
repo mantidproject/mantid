@@ -37,8 +37,7 @@ struct TestingFunction {
   WorkspaceType type;
   const double dx;
   TestingFunction(const MatrixWorkspace &ws, WorkspaceType t)
-      : workspace(ws), type(t), dx((ws.getXMax() - ws.getXMin()) /
-                                   static_cast<double>(ws.blocksize())) {}
+      : workspace(ws), type(t), dx((ws.getXMax() - ws.getXMin()) / static_cast<double>(ws.blocksize())) {}
   double operator()(double x) const {
     switch (type) {
     case PointData:
@@ -102,24 +101,19 @@ public:
     size_t expectedNormalInterpolationSize = 100;
     const double tolerance = 1e-3;
     do_test_all(Histogram, expectedNormalInterpolationSize, tolerance);
-    expectedNormalInterpolationSize =
-        do_test_normal_case(Histogram, tolerance, 99);
+    expectedNormalInterpolationSize = do_test_normal_case(Histogram, tolerance, 99);
     TS_ASSERT_EQUALS(expectedNormalInterpolationSize, 99);
-    expectedNormalInterpolationSize =
-        do_test_normal_case(Histogram, tolerance, 30);
+    expectedNormalInterpolationSize = do_test_normal_case(Histogram, tolerance, 30);
     TS_ASSERT_EQUALS(expectedNormalInterpolationSize, 30);
   }
 
   void test_histogram_non_uniform() {
     size_t expectedNormalInterpolationSize = 100;
     const double tolerance = 1e-3;
-    do_test_all(HistogramNonUniform, expectedNormalInterpolationSize,
-                tolerance);
-    expectedNormalInterpolationSize =
-        do_test_normal_case(HistogramNonUniform, tolerance, 99);
+    do_test_all(HistogramNonUniform, expectedNormalInterpolationSize, tolerance);
+    expectedNormalInterpolationSize = do_test_normal_case(HistogramNonUniform, tolerance, 99);
     TS_ASSERT_EQUALS(expectedNormalInterpolationSize, 99);
-    expectedNormalInterpolationSize =
-        do_test_normal_case(HistogramNonUniform, tolerance, 30);
+    expectedNormalInterpolationSize = do_test_normal_case(HistogramNonUniform, tolerance, 30);
     TS_ASSERT_EQUALS(expectedNormalInterpolationSize, 30);
   }
 
@@ -133,27 +127,22 @@ public:
     size_t expectedNormalInterpolationSize = 100;
     const double tolerance = 1e-5;
     do_test_all(PointData, expectedNormalInterpolationSize, tolerance);
-    expectedNormalInterpolationSize =
-        do_test_normal_case(PointData, tolerance, 99);
+    expectedNormalInterpolationSize = do_test_normal_case(PointData, tolerance, 99);
     TS_ASSERT_EQUALS(expectedNormalInterpolationSize, 99);
   }
 
   void test_point_data_non_uniform() {
     size_t expectedNormalInterpolationSize = 100;
     const double tolerance = 1e-5;
-    do_test_all(PointDataNonUniform, expectedNormalInterpolationSize,
-                tolerance);
-    expectedNormalInterpolationSize =
-        do_test_normal_case(PointData, tolerance, 99);
+    do_test_all(PointDataNonUniform, expectedNormalInterpolationSize, tolerance);
+    expectedNormalInterpolationSize = do_test_normal_case(PointData, tolerance, 99);
     TS_ASSERT_EQUALS(expectedNormalInterpolationSize, 99);
-    expectedNormalInterpolationSize =
-        do_test_normal_case(PointData, tolerance, 30);
+    expectedNormalInterpolationSize = do_test_normal_case(PointData, tolerance, 30);
     TS_ASSERT_EQUALS(expectedNormalInterpolationSize, 30);
   }
 
 private:
-  void do_test_all(WorkspaceType type, size_t normalInterpolationSize,
-                   double tolerance = 0.1) {
+  void do_test_all(WorkspaceType type, size_t normalInterpolationSize, double tolerance = 0.1) {
     do_test_one_interpolation_point(type);
     auto n = do_test_normal_case(type, tolerance);
     TS_ASSERT_EQUALS(n, normalInterpolationSize);
@@ -161,8 +150,7 @@ private:
     TS_ASSERT_EQUALS(n, 2);
   }
 
-  size_t do_test_normal_case(WorkspaceType wsType, double tolerance,
-                             int nPoints = 1000) {
+  size_t do_test_normal_case(WorkspaceType wsType, double tolerance, int nPoints = 1000) {
     // Name of the input workspace.
     std::string inWSName("IntegrateFluxTest_InputWS");
     // Name of the output workspace.
@@ -175,8 +163,7 @@ private:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", inWSName));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("NPoints", nPoints));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
@@ -184,9 +171,7 @@ private:
     // Retrieve the workspace from data service. TODO: Change to your desired
     // type
     MatrixWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName));
     TS_ASSERT(ws);
     if (!ws)
       return -1;
@@ -196,8 +181,7 @@ private:
       return 0;
     }
 
-    auto inWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inWSName);
+    auto inWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inWSName);
 
     TS_ASSERT(ws->getAxis(0)->unit() == inWS->getAxis(0)->unit());
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 4);
@@ -238,8 +222,7 @@ private:
     alg.initialize();
     alg.setPropertyValue("InputWorkspace", inWSName);
     alg.setPropertyValue("OutputWorkspace", outWSName);
-    TS_ASSERT_THROWS(alg.setProperty("NPoints", 1),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg.setProperty("NPoints", 1), const std::invalid_argument &);
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().clear();
@@ -287,13 +270,11 @@ private:
   }
 
   void createInputWorkspaceWeightedNoTime(const std::string &wsName) {
-    auto alg = Mantid::API::AlgorithmManager::Instance().create(
-        "CreateSampleWorkspace");
+    auto alg = Mantid::API::AlgorithmManager::Instance().create("CreateSampleWorkspace");
     alg->initialize();
     alg->setPropertyValue("WorkspaceType", "Event");
     alg->setPropertyValue("Function", "User Defined");
-    alg->setPropertyValue("UserDefinedFunction",
-                          "name=LinearBackground,A0=1,A1=2");
+    alg->setPropertyValue("UserDefinedFunction", "name=LinearBackground,A0=1,A1=2");
     alg->setProperty("NumEvents", 10000);
     alg->setProperty("NumBanks", 1);
     alg->setProperty("BankPixelWidth", 2);
@@ -313,13 +294,11 @@ private:
   }
 
   void createInputWorkspaceTOF(const std::string &wsName) {
-    auto alg = Mantid::API::AlgorithmManager::Instance().create(
-        "CreateSampleWorkspace");
+    auto alg = Mantid::API::AlgorithmManager::Instance().create("CreateSampleWorkspace");
     alg->initialize();
     alg->setPropertyValue("WorkspaceType", "Event");
     alg->setPropertyValue("Function", "User Defined");
-    alg->setPropertyValue("UserDefinedFunction",
-                          "name=LinearBackground,A0=1,A1=2");
+    alg->setPropertyValue("UserDefinedFunction", "name=LinearBackground,A0=1,A1=2");
     alg->setProperty("NumEvents", 10000);
     alg->setProperty("NumBanks", 1);
     alg->setProperty("BankPixelWidth", 2);
@@ -332,8 +311,7 @@ private:
   }
 
   void createInputWorkspaceUnsorted(const std::string &wsName) {
-    auto alg = Mantid::API::AlgorithmManager::Instance().create(
-        "CreateSimulationWorkspace");
+    auto alg = Mantid::API::AlgorithmManager::Instance().create("CreateSimulationWorkspace");
     alg->initialize();
     alg->setPropertyValue("Instrument", "CNCS");
     alg->setPropertyValue("BinParams", "0,10,100");
@@ -341,8 +319,7 @@ private:
     alg->setPropertyValue("UnitX", "Momentum");
     alg->execute();
 
-    alg = Mantid::API::AlgorithmManager::Instance().create(
-        "ConvertToEventWorkspace");
+    alg = Mantid::API::AlgorithmManager::Instance().create("ConvertToEventWorkspace");
     alg->initialize();
     alg->setPropertyValue("InputWorkspace", wsName);
     alg->setProperty("OutputWorkspace", wsName);
@@ -356,8 +333,7 @@ private:
   }
 
   void createInputWorkspaceHistogram(const std::string &wsName) {
-    auto ws = Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", 4,
-                                                               101, 100);
+    auto ws = Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", 4, 101, 100);
     auto axis = ws->getAxis(0);
     axis->setUnit("Momentum");
     auto &x = ws->dataX(0);
@@ -377,8 +353,7 @@ private:
   }
 
   void createInputWorkspaceHistogramNonUniform(const std::string &wsName) {
-    auto ws = Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", 4,
-                                                               101, 100);
+    auto ws = Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", 4, 101, 100);
     auto axis = ws->getAxis(0);
     axis->setUnit("Momentum");
     auto &x = ws->dataX(0);
@@ -399,8 +374,7 @@ private:
   }
 
   void createInputWorkspaceDistribution(const std::string &wsName) {
-    auto ws = Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", 4,
-                                                               101, 100);
+    auto ws = Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", 4, 101, 100);
     auto axis = ws->getAxis(0);
     axis->setUnit("Momentum");
     auto &x = ws->dataX(0);
@@ -422,8 +396,7 @@ private:
   }
 
   void createInputWorkspacePointData(const std::string &wsName) {
-    auto ws = Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", 4,
-                                                               100, 100);
+    auto ws = Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", 4, 100, 100);
     auto axis = ws->getAxis(0);
     axis->setUnit("Momentum");
     auto &x = ws->dataX(0);
@@ -443,8 +416,7 @@ private:
   }
 
   void createInputWorkspacePointDataNonUniform(const std::string &wsName) {
-    auto ws = Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", 4,
-                                                               100, 100);
+    auto ws = Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", 4, 100, 100);
     auto axis = ws->getAxis(0);
     axis->setUnit("Momentum");
     auto &x = ws->dataX(0);

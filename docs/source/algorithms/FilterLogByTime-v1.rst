@@ -27,13 +27,13 @@ python numpy functions with the same name. These are documented
 Usage
 -----
 
-**Example - Filtering a simple time series Log**  
+**Example - Filtering a simple time series Log**
 
 .. testcode:: Filter
 
     ws = CreateSampleWorkspace("Histogram",BankPixelWidth=1)
 
-    AddTimeSeriesLog(ws, Name="proton_charge", Time="2010-01-01T00:00:00", Value=100) 
+    AddTimeSeriesLog(ws, Name="proton_charge", Time="2010-01-01T00:00:00", Value=100)
     AddTimeSeriesLog(ws, Name="proton_charge", Time="2010-01-01T00:10:00", Value=100)
     AddTimeSeriesLog(ws, Name="proton_charge", Time="2010-01-01T00:20:00", Value=100)
     AddTimeSeriesLog(ws, Name="proton_charge", Time="2010-01-01T00:30:00", Value=100)
@@ -52,7 +52,7 @@ Usage
     print("The min is: %i" % stat_result)
     (filtered_result,stat_result) = FilterLogByTime(ws,LogName="proton_charge", Method="median")
     print("The median is: %i" % stat_result)
-    print("") 
+    print("")
 
     print("Adding a start time and optionally an end time allows you to filter the values")
     (filtered_result,stat_result) = FilterLogByTime(ws,LogName="proton_charge",
@@ -60,7 +60,7 @@ Usage
     print("The filtered mean is: %i" % stat_result)
     print("The filtered result is")
     print(filtered_result)
- 
+
 
 Output:
 

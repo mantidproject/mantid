@@ -83,8 +83,7 @@ public:
 
   void test_contains_polygon() {
     Quadrilateral smallRectangle = makeRectangle();
-    Quadrilateral largeRectangle(V2D(), V2D(3.0, 0.0), V2D(3.0, 2.0),
-                                 V2D(0.0, 2.0));
+    Quadrilateral largeRectangle(V2D(), V2D(3.0, 0.0), V2D(3.0, 2.0), V2D(0.0, 2.0));
 
     TS_ASSERT(largeRectangle.contains(smallRectangle));
     TS_ASSERT(!smallRectangle.contains(largeRectangle));
@@ -131,8 +130,7 @@ public:
   }
 
   void test_clockwise_rotation() {
-    Quadrilateral quad(V2D(0.0, 0.0), V2D(1.0, 3.0), V2D(4.0, 4.0),
-                       V2D(4.0, 1.0));
+    Quadrilateral quad(V2D(0.0, 0.0), V2D(1.0, 3.0), V2D(4.0, 4.0), V2D(4.0, 1.0));
 
     quad.shiftVertexesClockwise();
 
@@ -147,9 +145,7 @@ public:
   }
 
 private:
-  Quadrilateral makeRectangle() {
-    return Quadrilateral(V2D(), V2D(2.0, 0.0), V2D(2.0, 1.5), V2D(0.0, 1.5));
-  }
+  Quadrilateral makeRectangle() { return Quadrilateral(V2D(), V2D(2.0, 0.0), V2D(2.0, 1.5), V2D(0.0, 1.5)); }
 };
 
 //------------------------------------------------------------------------------

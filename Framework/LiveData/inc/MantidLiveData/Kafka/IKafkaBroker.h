@@ -21,12 +21,10 @@ class DLLExport IKafkaBroker {
 public:
   virtual ~IKafkaBroker() = default;
 
-  virtual std::unique_ptr<IKafkaStreamSubscriber>
-  subscribe(std::vector<std::string> topics,
-            SubscribeAtOption subscribeOption) const = 0;
-  virtual std::unique_ptr<IKafkaStreamSubscriber>
-  subscribe(std::vector<std::string> topics, int64_t offset,
-            SubscribeAtOption subscribeOption) const = 0;
+  virtual std::unique_ptr<IKafkaStreamSubscriber> subscribe(std::vector<std::string> topics,
+                                                            SubscribeAtOption subscribeOption) const = 0;
+  virtual std::unique_ptr<IKafkaStreamSubscriber> subscribe(std::vector<std::string> topics, int64_t offset,
+                                                            SubscribeAtOption subscribeOption) const = 0;
 };
 
 } // namespace LiveData

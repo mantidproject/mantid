@@ -24,8 +24,7 @@ namespace PythonInterface {
  * The templated-base class provides a mechanism to reuse the same adapter
  * class for other classes that inherit from a different Algorithm sub class
  */
-template <typename BaseAlgorithm>
-class AlgorithmAdapter : public BaseAlgorithm {
+template <typename BaseAlgorithm> class AlgorithmAdapter : public BaseAlgorithm {
   using SuperClass = BaseAlgorithm;
 
 public:
@@ -78,30 +77,22 @@ public:
    */
   ///@{
   /// Declare a specialized property
-  static void declarePyAlgProperty(boost::python::object &self,
-                                   Kernel::Property *prop,
-                                   const std::string &doc = "");
+  static void declarePyAlgProperty(boost::python::object &self, Kernel::Property *prop, const std::string &doc = "");
   /// Declare a property using the type of the defaultValue with a validator and
   /// doc string
-  static void declarePyAlgProperty(
-      boost::python::object &self, const std::string &name,
-      const boost::python::object &defaultValue,
-      const boost::python::object &validator = boost::python::object(),
-      const std::string &doc = "",
-      const int direction = Kernel::Direction::Input);
+  static void declarePyAlgProperty(boost::python::object &self, const std::string &name,
+                                   const boost::python::object &defaultValue,
+                                   const boost::python::object &validator = boost::python::object(),
+                                   const std::string &doc = "", const int direction = Kernel::Direction::Input);
 
   /// Declare a property with a documentation string
-  static void
-  declarePyAlgProperty(boost::python::object &self, const std::string &name,
-                       const boost::python::object &defaultValue,
-                       const std::string &doc,
-                       const int direction = Kernel::Direction::Input);
+  static void declarePyAlgProperty(boost::python::object &self, const std::string &name,
+                                   const boost::python::object &defaultValue, const std::string &doc,
+                                   const int direction = Kernel::Direction::Input);
 
   /// Declare a property using the type of the defaultValue
-  static void declarePyAlgProperty(boost::python::object &self,
-                                   const std::string &name,
-                                   const boost::python::object &defaultValue,
-                                   const int direction);
+  static void declarePyAlgProperty(boost::python::object &self, const std::string &name,
+                                   const boost::python::object &defaultValue, const int direction);
 
 protected:
   /**

@@ -9,15 +9,11 @@
 
 namespace Mantid {
 namespace Kernel {
-IValidator_sptr NullValidator::clone() const {
-  return std::make_shared<NullValidator>(*this);
-}
+IValidator_sptr NullValidator::clone() const { return std::make_shared<NullValidator>(*this); }
 
 /** Always returns valid, that is ""
  *  @returns an empty string
  */
-std::string NullValidator::check(const boost::any & /*unused*/) const {
-  return "";
-}
+std::string NullValidator::check(const boost::any & /*unused*/) const { return ""; }
 } // namespace Kernel
 } // namespace Mantid

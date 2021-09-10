@@ -28,9 +28,7 @@ class IPeakFunctionIntensityTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static IPeakFunctionIntensityTest *createSuite() {
-    return new IPeakFunctionIntensityTest();
-  }
+  static IPeakFunctionIntensityTest *createSuite() { return new IPeakFunctionIntensityTest(); }
   static void destroySuite(IPeakFunctionIntensityTest *suite) { delete suite; }
 
   IPeakFunctionIntensityTest() : m_blackList() {
@@ -77,14 +75,12 @@ public:
         std::cout << "[Testing] " << m_peakFunctions[j]->name() << ":"
                   << "\n";
 
-        TSM_ASSERT_DELTA(
-            "ITERATION " + DBL2STR(i) + ", " + m_peakFunctions[j]->name() +
-                ": Height was increased from " + DBL2STR(oldHeight) + " to " +
-                DBL2STR(newHeight) + " (ratio " + DBL2STR(heightRatio) +
-                "), but intensity changed from " + DBL2STR(oldIntensity) +
-                " to " + DBL2STR(newIntensity) + " (ratio " +
-                DBL2STR(intensityRatio) + ").",
-            intensityRatio, heightRatio, 1e-10);
+        TSM_ASSERT_DELTA("ITERATION " + DBL2STR(i) + ", " + m_peakFunctions[j]->name() +
+                             ": Height was increased from " + DBL2STR(oldHeight) + " to " + DBL2STR(newHeight) +
+                             " (ratio " + DBL2STR(heightRatio) + "), but intensity changed from " +
+                             DBL2STR(oldIntensity) + " to " + DBL2STR(newIntensity) + " (ratio " +
+                             DBL2STR(intensityRatio) + ").",
+                         intensityRatio, heightRatio, 1e-10);
       }
 
       initialIntensities = newIntensities;
@@ -92,18 +88,15 @@ public:
   }
 
 private:
-  std::vector<IPeakFunction_sptr>
-  getAllPeakFunctions(const std::unordered_set<std::string> &blackList) const {
+  std::vector<IPeakFunction_sptr> getAllPeakFunctions(const std::unordered_set<std::string> &blackList) const {
     std::vector<IPeakFunction_sptr> peakFunctions;
 
-    std::vector<std::string> registeredFunctions =
-        FunctionFactory::Instance().getFunctionNames<IPeakFunction>();
+    std::vector<std::string> registeredFunctions = FunctionFactory::Instance().getFunctionNames<IPeakFunction>();
 
     for (auto &registeredFunction : registeredFunctions) {
       if (blackList.count(registeredFunction) == 0) {
         IPeakFunction_sptr peakFunction =
-            std::dynamic_pointer_cast<IPeakFunction>(
-                FunctionFactory::Instance().createFunction(registeredFunction));
+            std::dynamic_pointer_cast<IPeakFunction>(FunctionFactory::Instance().createFunction(registeredFunction));
 
         if (peakFunction) {
           peakFunctions.emplace_back(peakFunction);
@@ -114,8 +107,7 @@ private:
     return peakFunctions;
   }
 
-  void initializePeakFunctions(const std::vector<IPeakFunction_sptr> &peaks,
-                               const ParameterSet &parameters) const {
+  void initializePeakFunctions(const std::vector<IPeakFunction_sptr> &peaks, const ParameterSet &parameters) const {
 
     for (const auto &peak : peaks) {
       peak->setCentre(parameters.center);
@@ -146,8 +138,7 @@ private:
     return parameterSets;
   }
 
-  std::vector<double>
-  getIntensities(const std::vector<IPeakFunction_sptr> &peaks) const {
+  std::vector<double> getIntensities(const std::vector<IPeakFunction_sptr> &peaks) const {
     std::vector<double> intensities;
 
     for (const auto &peak : peaks) {

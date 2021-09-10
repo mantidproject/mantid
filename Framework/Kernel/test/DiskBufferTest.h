@@ -27,8 +27,7 @@ using Mantid::Kernel::CPUTimer;
 /** An ISaveable that fakes writing to a fixed-size file */
 class SaveableTesterWithFile : public ISaveable {
 public:
-  SaveableTesterWithFile(uint64_t pos, uint64_t size, char ch,
-                         bool wasSaved = true)
+  SaveableTesterWithFile(uint64_t pos, uint64_t size, char ch, bool wasSaved = true)
       : ISaveable(), m_memory(size), m_ch(ch) {
     // the object knows its place on file
     this->setFilePosition(pos, size, wasSaved);
@@ -115,8 +114,7 @@ public:
     SaveableTesterWithFile::fakeFile = "";
     data.clear();
     for (size_t i = 0; i < num; i++)
-      data.emplace_back(
-          new SaveableTesterWithFile(uint64_t(2 * i), 2, char(i + 0x41)));
+      data.emplace_back(new SaveableTesterWithFile(uint64_t(2 * i), 2, char(i + 0x41)));
   }
 
   void tearDown() override {
@@ -124,9 +122,7 @@ public:
       delete i;
     }
   }
-  void xest_nothing() {
-    TS_WARN("Tests here were disabled for the time being");
-  }
+  void xest_nothing() { TS_WARN("Tests here were disabled for the time being"); }
 
   /** Extreme case with nothing writable but exceeding the writable buffer */
   void test_noWriteBuffer_nothingWritable() {
@@ -219,9 +215,7 @@ public:
 
     dbuf.objectDeleted(data[1]);
     TS_ASSERT_EQUALS(dbuf.getWriteBufferUsed(), 8);
-    TSM_ASSERT_EQUALS(
-        "The data marked as been saved, so delete should free this",
-        dbuf.getFreeSpaceMap().size(), 1);
+    TSM_ASSERT_EQUALS("The data marked as been saved, so delete should free this", dbuf.getFreeSpaceMap().size(), 1);
 
     dbuf.flushCache();
     // This triggers a write. 1 is no longer in the to-write buffer
@@ -244,10 +238,8 @@ public:
 
     dbuf.objectDeleted(data[2]);
     TS_ASSERT_EQUALS(dbuf.getWriteBufferUsed(), 6);
-    TSM_ASSERT_EQUALS("It is still free space mapping the data on hdd",
-                      dbuf.getFreeSpaceMap().size(), 2);
-    TSM_ASSERT_EQUALS(
-        " and file is still the same size: ", dbuf.getFileLength(), 10);
+    TSM_ASSERT_EQUALS("It is still free space mapping the data on hdd", dbuf.getFreeSpaceMap().size(), 2);
+    TSM_ASSERT_EQUALS(" and file is still the same size: ", dbuf.getFileLength(), 10);
   }
 
   //--------------------------------------------------------------------------------
@@ -260,8 +252,7 @@ public:
     std::vector<ISaveable *> bigData;
     bigData.reserve(bigNum);
     for (size_t i = 0; i < bigNum; i++)
-      bigData.emplace_back(
-          new SaveableTesterWithFile(2 * i, 2, char(i + 0x41)));
+      bigData.emplace_back(new SaveableTesterWithFile(2 * i, 2, char(i + 0x41)));
 
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int i = 0; i < int(bigNum); i++) {
@@ -293,9 +284,7 @@ public:
     TS_ASSERT_EQUALS(map.size(), 2);
     // Free a block next to another one, AFTER
     dbuf.freeBlock(150, 50);
-    TSM_ASSERT_EQUALS(
-        "Map remained the same size because adjacent blocks were merged",
-        map.size(), 2);
+    TSM_ASSERT_EQUALS("Map remained the same size because adjacent blocks were merged", map.size(), 2);
 
     // Get a vector of the free blocks and sizes
     std::vector<uint64_t> free;
@@ -317,9 +306,7 @@ public:
     TS_ASSERT_EQUALS(map.size(), 2);
     // Free a block next to another one, BEFORE
     dbuf.freeBlock(150, 50);
-    TSM_ASSERT_EQUALS(
-        "Map remained the same size because adjacent blocks were merged",
-        map.size(), 2);
+    TSM_ASSERT_EQUALS("Map remained the same size because adjacent blocks were merged", map.size(), 2);
 
     // Get the 2nd free block.
     DiskBuffer::freeSpace_t::iterator it = map.begin();
@@ -329,9 +316,7 @@ public:
     TS_ASSERT_EQUALS(b.getSize(), 100);
 
     dbuf.freeBlock(50, 50);
-    TSM_ASSERT_EQUALS(
-        "Map remained the same size because adjacent blocks were merged",
-        map.size(), 2);
+    TSM_ASSERT_EQUALS("Map remained the same size because adjacent blocks were merged", map.size(), 2);
     TS_ASSERT_EQUALS(map.begin()->getSize(), 100);
   }
 
@@ -348,8 +333,7 @@ public:
     TS_ASSERT_EQUALS(map.size(), 4);
     // Free a block between two block
     dbuf.freeBlock(250, 50);
-    TSM_ASSERT_EQUALS("Map shrank because three blocks were merged", map.size(),
-                      3);
+    TSM_ASSERT_EQUALS("Map shrank because three blocks were merged", map.size(), 3);
 
     // Get the 2nd free block.
     DiskBuffer::freeSpace_t::iterator it = map.begin();
@@ -489,9 +473,8 @@ public:
     DiskBuffer::freeSpace_t &map = dbuf.getFreeSpaceMap();
 
     uint64_t freeSpaceBlocksArray[] = {1, 3, 6, 5};
-    std::vector<uint64_t> freeSpaceBlocksVector(
-        freeSpaceBlocksArray,
-        freeSpaceBlocksArray + sizeof(freeSpaceBlocksArray) / sizeof(uint64_t));
+    std::vector<uint64_t> freeSpaceBlocksVector(freeSpaceBlocksArray,
+                                                freeSpaceBlocksArray + sizeof(freeSpaceBlocksArray) / sizeof(uint64_t));
     dbuf.setFreeSpaceVector(freeSpaceBlocksVector);
 
     TS_ASSERT_EQUALS(map.size(), 2);
@@ -506,12 +489,10 @@ public:
     DiskBuffer dbuf(0);
 
     uint64_t freeSpaceBlocksArray[] = {1, 3, 6};
-    std::vector<uint64_t> freeSpaceBlocksVector(
-        freeSpaceBlocksArray,
-        freeSpaceBlocksArray + sizeof(freeSpaceBlocksArray) / sizeof(uint64_t));
+    std::vector<uint64_t> freeSpaceBlocksVector(freeSpaceBlocksArray,
+                                                freeSpaceBlocksArray + sizeof(freeSpaceBlocksArray) / sizeof(uint64_t));
 
-    TS_ASSERT_THROWS(dbuf.setFreeSpaceVector(freeSpaceBlocksVector),
-                     const std::length_error &);
+    TS_ASSERT_THROWS(dbuf.setFreeSpaceVector(freeSpaceBlocksVector), const std::length_error &);
   }
 
   //// Test for setting the DiskBuffer with a zero sized vector
@@ -575,9 +556,7 @@ public:
     // Grow blockD by 1
     blockD->AddNewObjects(1);
     newPos = dbuf.relocate(2, 2, 3);
-    TSM_ASSERT_EQUALS(
-        "Block D stayed in the same place since there was room after it",
-        newPos, 2);
+    TSM_ASSERT_EQUALS("Block D stayed in the same place since there was room after it", newPos, 2);
     blockD->setFilePosition(newPos, 3, true);
     blockD->save();
     dbuf.flushCache();
@@ -601,12 +580,9 @@ public:
     // filePosition has to be identified by the fileBuffer
     uint64_t filePos = std::numeric_limits<uint64_t>::max();
     // Start by faking a file
-    SaveableTesterWithFile *blockA =
-        new SaveableTesterWithFile(filePos, 2, 'A', false);
-    SaveableTesterWithFile *blockB =
-        new SaveableTesterWithFile(filePos, 3, 'B', false);
-    SaveableTesterWithFile *blockC =
-        new SaveableTesterWithFile(filePos, 5, 'C', false);
+    SaveableTesterWithFile *blockA = new SaveableTesterWithFile(filePos, 2, 'A', false);
+    SaveableTesterWithFile *blockB = new SaveableTesterWithFile(filePos, 3, 'B', false);
+    SaveableTesterWithFile *blockC = new SaveableTesterWithFile(filePos, 5, 'C', false);
 
     DiskBuffer dbuf(3);
     dbuf.toWrite(blockB);
@@ -629,8 +605,7 @@ public:
     TS_ASSERT(!blockB->isDataChanged())
 
     //// Now let's allocate a new block
-    SaveableTesterWithFile *blockD =
-        new SaveableTesterWithFile(filePos, 2, 'D', false);
+    SaveableTesterWithFile *blockD = new SaveableTesterWithFile(filePos, 2, 'D', false);
     dbuf.toWrite(blockD);
     // small block, nothing still sitting in the buffer
     TS_ASSERT_EQUALS(SaveableTesterWithFile::fakeFile, "AABBBCCCCCBBBBBBB");
@@ -661,8 +636,7 @@ public:
     // trigger save as object will stay in buffer otherwise (only 1 block is im
     // memory)
     dbuf.flushCache();
-    TSM_ASSERT_EQUALS("The new block went to the end of the file",
-                      SaveableTesterWithFile::fakeFile,
+    TSM_ASSERT_EQUALS("The new block went to the end of the file", SaveableTesterWithFile::fakeFile,
                       "AADDDCCCCCBBBBBBBDDDD");
     TS_ASSERT_EQUALS(dbuf.getFileLength(), 21);
     TSM_ASSERT_EQUALS("Nothing left one freed block", map.size(), 1);
@@ -745,8 +719,7 @@ public:
     int64_t seek = int64_t(filePos) - int64_t(newPos);
     if (seek < 0)
       seek = -seek;
-    double seekTime =
-        5e-3 * double(seek) / 2000.0; // 5 msec for a 2000-unit seek.
+    double seekTime = 5e-3 * double(seek) / 2000.0; // 5 msec for a 2000-unit seek.
     // A short write time (500 microsec) for a small block of data
     seekTime += 0.5e-3;
     Timer tim;
@@ -778,9 +751,7 @@ public:
 
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other xests
-  static DiskBufferTestPerformance *createSuite() {
-    return new DiskBufferTestPerformance();
-  }
+  static DiskBufferTestPerformance *createSuite() { return new DiskBufferTestPerformance(); }
   static void destroySuite(DiskBufferTestPerformance *suite) { delete suite; }
 
   DiskBufferTestPerformance() {
@@ -792,9 +763,7 @@ public:
   }
   void setUp() override { SaveableTesterWithSeek::fakeFile = ""; }
 
-  void xest_nothing() {
-    TS_WARN("Tests here were disabled for the time being");
-  }
+  void xest_nothing() { TS_WARN("Tests here were disabled for the time being"); }
 
   /** Demonstrate that using a write buffer reduces time spent seeking on disk
    */
@@ -805,8 +774,7 @@ public:
       // Pretend you just loaded the data
       i->load(dbuf);
     }
-    std::cout << tim << " to load " << dataSeek.size()
-              << " into MRU with fake seeking. \n";
+    std::cout << tim << " to load " << dataSeek.size() << " into MRU with fake seeking. \n";
   }
 
   /** Use a 0-sized write buffer so that it constantly needs to seek and write
@@ -818,8 +786,7 @@ public:
       // Pretend you just loaded the data
       i->load(dbuf);
     }
-    std::cout << tim << " to load " << dataSeek.size()
-              << " into MRU with fake seeking. \n";
+    std::cout << tim << " to load " << dataSeek.size() << " into MRU with fake seeking. \n";
   }
 
   /** Example of a situation where vectors grew, meaning that they need to be
@@ -835,8 +802,7 @@ public:
     }
     std::cout << "About to flush the cache to finish writes.\n";
     dbuf.flushCache();
-    std::cout << tim << " to grow " << dataSeek.size()
-              << " into MRU with fake seeking. \n";
+    std::cout << tim << " to grow " << dataSeek.size() << " into MRU with fake seeking. \n";
   }
 
   /** Demonstrate that calling "save" manually without using the MRU write
@@ -850,8 +816,7 @@ public:
       i->grow(dbuf, false);
       i->save();
     }
-    std::cout << tim << " to grow " << dataSeek.size()
-              << " into MRU with fake seeking. \n";
+    std::cout << tim << " to grow " << dataSeek.size() << " into MRU with fake seeking. \n";
   }
 
   /** Speed of freeing a lot of blocks and putting them in the free space map */
@@ -863,7 +828,6 @@ public:
     }
     // dbuf.defragFreeBlocks();
     TS_ASSERT_EQUALS(dbuf.getFreeSpaceMap().size(), 66667);
-    std::cout << tim << " to add " << 100000
-              << " blocks in the free space list.\n";
+    std::cout << tim << " to add " << 100000 << " blocks in the free space list.\n";
   }
 };

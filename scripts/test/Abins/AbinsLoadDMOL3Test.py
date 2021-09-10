@@ -13,7 +13,7 @@ import abins.test_helpers
 class AbinsLoadDMOL3Test(unittest.TestCase, abins.input.Tester):
 
     def tearDown(self):
-        abins.test_helpers.remove_output_files(list_of_names=["LoadDMOL3"])
+        abins.test_helpers.remove_output_files(list_of_names=["_LoadDMOL3"])
 
     _gamma_dmol3 = "LTA_40_O2_LoadDMOL3"
     _gamma_no_h_dmol3 = "Na2SiF6_LoadDMOL3"

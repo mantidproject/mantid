@@ -37,7 +37,7 @@ public:
         TS_FAIL( true );
         TS_FAIL( false );
     }
-    
+
     void testCharTraits()
     {
         TS_FAIL( 'A' );

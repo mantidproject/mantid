@@ -24,8 +24,7 @@ interface from a map
 class IDecoder {
 public:
   virtual ~IDecoder(){};
-  virtual void decodeBatch(const IMainWindowView *mwv, int batchIndex,
-                           const QMap<QString, QVariant> &map) = 0;
+  virtual void decodeBatch(const IMainWindowView *mwv, int batchIndex, const QMap<QString, QVariant> &map) = 0;
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

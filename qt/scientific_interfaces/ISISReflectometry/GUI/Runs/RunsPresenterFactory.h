@@ -20,18 +20,14 @@ namespace ISISReflectometry {
 class RunsPresenterFactory {
 public:
   RunsPresenterFactory( // cppcheck-suppress passedByValue
-      RunsTablePresenterFactory runsTablePresenterFactory,
-      double thetaTolerance, std::vector<std::string> instruments,
+      RunsTablePresenterFactory runsTablePresenterFactory, double thetaTolerance, std::vector<std::string> instruments,
       IMessageHandler *messageHandler)
-      : m_runsTablePresenterFactory(std::move(runsTablePresenterFactory)),
-        m_thetaTolerance(std::move(thetaTolerance)),
-        m_instruments(std::move(instruments)),
-        m_messageHandler(messageHandler) {}
+      : m_runsTablePresenterFactory(std::move(runsTablePresenterFactory)), m_thetaTolerance(std::move(thetaTolerance)),
+        m_instruments(std::move(instruments)), m_messageHandler(messageHandler) {}
 
   std::unique_ptr<IRunsPresenter> make(IRunsView *view) {
-    return std::make_unique<RunsPresenter>(
-        view, view, m_runsTablePresenterFactory, m_thetaTolerance,
-        m_instruments, m_messageHandler);
+    return std::make_unique<RunsPresenter>(view, view, m_runsTablePresenterFactory, m_thetaTolerance, m_instruments,
+                                           m_messageHandler);
   }
 
 private:

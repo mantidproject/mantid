@@ -42,7 +42,7 @@ Usage
    # Show workspaces
    print("TOF Before CropWorkspace {}".format(ws.readX(0)))
    print("TOF After CropWorkspace {}".format(OutputWorkspace.readX(0)))
-   
+
 Output:
 
 .. testoutput:: ExCropWorkspace

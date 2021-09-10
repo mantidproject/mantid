@@ -72,7 +72,7 @@ Engineering Diffraction
 - New *Load* button on the Fitting Tab, will enable user to load the
   focused file to the canvas, so that the user can select the peaks
   manually beforehand
-  
+
 - New tool-tip *How to use* quickly tells users how to use the peak
   picker tool by simply hovering their cursor over it.
 
@@ -104,7 +104,7 @@ Powder Diffraction
   weights applied to events have changed by a factor of the duty cycle
   (:math:`c\approx0.498`) as requested by the instrument scientists.
 
-- `Pearl Powder Diffraction Script <http://docs.mantidproject.org/v3.8.0/api/python/techniques/PearlPowderDiffractionISIS-v1.html>`_: 
+- `Pearl Powder Diffraction Script <http://docs.mantidproject.org/v3.8.0/api/python/techniques/PearlPowderDiffractionISIS-v1.html>`_:
   A workflow diagram for ``pearl_run_focus`` function has been created.
 
 - :ref:`CalibrateRectangularDetectors

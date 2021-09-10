@@ -11,6 +11,7 @@ from unittest.mock import call, patch, MagicMock, Mock
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.testing.strict_mock import StrictMock
 from workbench.widgets.settings.general.presenter import GeneralSettings, GeneralProperties
+from workbench.config import SAVE_STATE_VERSION
 from qtpy.QtCore import Qt
 
 
@@ -93,6 +94,8 @@ class GeneralSettingsTest(unittest.TestCase):
 
         self.assert_connected_once(presenter.view.main_font,
                                    presenter.view.main_font.clicked)
+        self.assert_connected_once(presenter.view.window_behaviour,
+                                   presenter.view.window_behaviour.currentTextChanged)
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_action_facility_changed(self, mock_ConfigService):
@@ -104,7 +107,7 @@ class GeneralSettingsTest(unittest.TestCase):
 
         mock_ConfigService.setFacility.assert_called_once_with(new_facility)
 
-        self.assertEqual(43, presenter.view.instrument.count())
+        self.assertEqual(1, presenter.view.instrument.count())
 
     def test_setup_confirmations(self):
         presenter = GeneralSettings(None)
@@ -128,6 +131,19 @@ class GeneralSettingsTest(unittest.TestCase):
         presenter.action_prompt_save_on_close(False)
 
         mock_conf.set.assert_called_once_with(GeneralProperties.PROMPT_SAVE_ON_CLOSE.value, False)
+
+    @patch(WORKBENCH_CONF_CLASSPATH)
+    def test_action_window_behaviour_changed(self, mock_conf):
+        presenter = GeneralSettings(None)
+        values = presenter.WINDOW_BEHAVIOUR
+        presenter.action_window_behaviour_changed(values[0])
+
+        mock_conf.set.assert_called_once_with(GeneralProperties.WINDOW_BEHAVIOUR.value, values[0])
+        mock_conf.set.reset_mock()
+
+        presenter.action_window_behaviour_changed(values[1])
+
+        mock_conf.set.assert_called_once_with(GeneralProperties.WINDOW_BEHAVIOUR.value, values[1])
 
     @patch(WORKBENCH_CONF_CLASSPATH)
     def test_action_prompt_save_editor_modified(self, mock_CONF):
@@ -339,7 +355,7 @@ class GeneralSettingsTest(unittest.TestCase):
 
         calls = [call(GeneralProperties.USER_LAYOUT.value), call(GeneralProperties.USER_LAYOUT.value)]
         mock_CONF.get.assert_has_calls(calls)
-        mock_parent.saveState.assert_called_once_with()
+        mock_parent.saveState.assert_called_once_with(SAVE_STATE_VERSION)
         mock_parent.populate_layout_menu.assert_called_once_with()
 
     @patch(WORKBENCH_CONF_CLASSPATH)
@@ -359,7 +375,7 @@ class GeneralSettingsTest(unittest.TestCase):
         presenter.load_layout()
 
         mock_CONF.get.assert_called_once_with(GeneralProperties.USER_LAYOUT.value)
-        mock_parent.restoreState.assert_called_once_with(test_dict['a'])
+        mock_parent.restoreState.assert_called_once_with(test_dict['a'], SAVE_STATE_VERSION)
 
     @patch(WORKBENCH_CONF_CLASSPATH)
     def test_delete_layout(self, mock_CONF):

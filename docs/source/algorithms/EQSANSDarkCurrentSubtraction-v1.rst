@@ -9,8 +9,8 @@
 Description
 -----------
 
-Subtract the dark current from an EQSANS data set. 
-This algorithm is rarely called directly. It is called by 
+Subtract the dark current from an EQSANS data set.
+This algorithm is rarely called directly. It is called by
 :ref:`SANSReduction <algm-SANSReduction>`.
 
 This workflow algorithm will:

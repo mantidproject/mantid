@@ -48,8 +48,8 @@ Usage
     monitor_counts = float(mtd['wsSample'].getRun().getLogData('monitor_counts').value)
     Ei = float(mtd['wsSample'].getRun().getLogData('Ei').value)
     print("Coefficient from theoretical formula = monitor_counts * sqrt(Ei/25.3): {:.3f}".format(monitor_counts*np.sqrt(Ei/25.3)))
- 
- 
+
+
 Output:
 
 .. testoutput:: ExMonitorEfficiencyCorUser
@@ -59,7 +59,7 @@ Output:
     Number of time channels of the input an output workspaces:
     1024 1024
     Coefficient of proportionality between Input and Output of MonitorEfficiencyCorUser algorithm: 41038.432
-    Coefficient from theoretical formula = monitor_counts * sqrt(Ei/25.3): 41038.432 
+    Coefficient from theoretical formula = monitor_counts * sqrt(Ei/25.3): 41038.432
 
 .. categories::
 

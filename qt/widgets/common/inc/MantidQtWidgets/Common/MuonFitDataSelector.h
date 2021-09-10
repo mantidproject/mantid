@@ -22,9 +22,7 @@ namespace MantidWidgets {
 
   Implements IMuonFitDataSelector
 */
-class EXPORT_OPT_MANTIDQT_COMMON MuonFitDataSelector
-    : public MantidQt::API::MantidWidget,
-      public IMuonFitDataSelector {
+class EXPORT_OPT_MANTIDQT_COMMON MuonFitDataSelector : public MantidQt::API::MantidWidget, public IMuonFitDataSelector {
   Q_OBJECT
 
 public:
@@ -48,12 +46,8 @@ public:
   /// Get names of chosen groups
   QStringList getChosenGroups() const override;
   /// Set chosen group/period
-  void setGroupsSelected(const QStringList &groups) {
-    m_chosenGroups = groups;
-  };
-  void setPeriodsSelected(const QStringList &periods) {
-    m_chosenPeriods = periods;
-  };
+  void setGroupsSelected(const QStringList &groups) { m_chosenGroups = groups; };
+  void setPeriodsSelected(const QStringList &periods) { m_chosenPeriods = periods; };
   /// Get selected periods
   QStringList getPeriodSelections() const override;
   /// Get type of fit

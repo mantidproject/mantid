@@ -159,8 +159,8 @@ Calculate Errors
   this option.
 
 Number Of Iterations
-  The number of iterations to perform in the Monte Carlo routine for error calculation 
-  in I(Q,t). 
+  The number of iterations to perform in the Monte Carlo routine for error calculation
+  in I(Q,t).
 
 Run
   Runs the processing configured on the current tab.
@@ -211,13 +211,13 @@ and the reflection is 002.
 
 A note on Binning
 ~~~~~~~~~~~~~~~~~
-  
-The bin width is determined from the energy range and the sample binning factor. The number of bins is automatically 
-calculated based on the **SampleBinning** specified. The width is determined from the width of the range divided 
+
+The bin width is determined from the energy range and the sample binning factor. The number of bins is automatically
+calculated based on the **SampleBinning** specified. The width is determined from the width of the range divided
 by the number of bins.
 
 The following binning parameters cannot be modified by the user and are instead automatically calculated through
-the :ref:`TransformToIqt <algm-TransformToIqt>` algorithm once a valid resolution file has been loaded. The calculated 
+the :ref:`TransformToIqt <algm-TransformToIqt>` algorithm once a valid resolution file has been loaded. The calculated
 binning parameters are displayed alongside the binning options:
 
 EWidth
@@ -230,6 +230,6 @@ ResolutionBins
   The number of bins in the resolution after rebinning. Typically this should be at
   least 5 and a warning will be shown if it is less.
 
-:ref:`Indirect Data Analysis <interface-indirect-data-analysis>`
+:ref:`Inelastic Data Analysis <interface-inelastic-data-analysis>`
 
 .. categories:: Interfaces Indirect

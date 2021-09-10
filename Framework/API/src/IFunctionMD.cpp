@@ -40,11 +40,9 @@ std::shared_ptr<IFunction> IFunctionMD::clone() const {
  */
 void IFunctionMD::setWorkspace(std::shared_ptr<const Workspace> ws) {
   try {
-    IMDWorkspace_const_sptr workspace =
-        std::dynamic_pointer_cast<const IMDWorkspace>(ws);
+    IMDWorkspace_const_sptr workspace = std::dynamic_pointer_cast<const IMDWorkspace>(ws);
     if (!workspace) {
-      throw std::invalid_argument(
-          "Workspace has a wrong type (not a IMDWorkspace)");
+      throw std::invalid_argument("Workspace has a wrong type (not a IMDWorkspace)");
     }
 
     if (m_dimensionIndexMap.empty()) {
@@ -52,17 +50,12 @@ void IFunctionMD::setWorkspace(std::shared_ptr<const Workspace> ws) {
     }
 
     m_dimensions.resize(m_dimensionIndexMap.size());
-    std::map<std::string, size_t>::const_iterator it =
-        m_dimensionIndexMap.begin();
-    std::map<std::string, size_t>::const_iterator end =
-        m_dimensionIndexMap.end();
+    std::map<std::string, size_t>::const_iterator it = m_dimensionIndexMap.begin();
+    std::map<std::string, size_t>::const_iterator end = m_dimensionIndexMap.end();
     for (; it != end; ++it) {
-      std::shared_ptr<const Mantid::Geometry::IMDDimension> dim =
-          workspace->getDimensionWithId(it->first);
+      std::shared_ptr<const Mantid::Geometry::IMDDimension> dim = workspace->getDimensionWithId(it->first);
       if (!dim) {
-        throw std::invalid_argument("Dimension " + it->first +
-                                    " dos not exist in workspace " +
-                                    ws->getName());
+        throw std::invalid_argument("Dimension " + it->first + " dos not exist in workspace " + ws->getName());
       }
       m_dimensions[it->second] = dim;
     }
@@ -76,8 +69,7 @@ void IFunctionMD::setWorkspace(std::shared_ptr<const Workspace> ws) {
  * @param domain :: The input domain over which to calculate the function
  * @param values :: A result holder to store the output of the calculation
  */
-void IFunctionMD::function(const FunctionDomain &domain,
-                           FunctionValues &values) const {
+void IFunctionMD::function(const FunctionDomain &domain, FunctionValues &values) const {
   const auto *dmd = dynamic_cast<const FunctionDomainMD *>(&domain);
   if (!dmd) {
     throw std::invalid_argument("Unexpected domain in IFunctionMD");
@@ -91,14 +83,11 @@ void IFunctionMD::function(const FunctionDomain &domain,
  * @param domain :: The MD domain to evaluate the function
  * @param values :: The computed values
  */
-void IFunctionMD::evaluateFunction(const FunctionDomainMD &domain,
-                                   FunctionValues &values) const {
+void IFunctionMD::evaluateFunction(const FunctionDomainMD &domain, FunctionValues &values) const {
   domain.reset();
   size_t i = 0;
-  for (const IMDIterator *r = domain.getNextIterator(); r != nullptr;
-       r = domain.getNextIterator()) {
-    this->reportProgress("Evaluating function for box " +
-                         std::to_string(i + 1));
+  for (const IMDIterator *r = domain.getNextIterator(); r != nullptr; r = domain.getNextIterator()) {
+    this->reportProgress("Evaluating function for box " + std::to_string(i + 1));
     values.setCalculated(i, functionMD(*r));
     i++;
   };

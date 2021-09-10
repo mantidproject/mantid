@@ -19,9 +19,7 @@ public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "CalculateZscore"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Calculate Z-score for Y and E of MatrixWorkspace.";
-  }
+  const std::string summary() const override { return "Calculate Z-score for Y and E of MatrixWorkspace."; }
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }

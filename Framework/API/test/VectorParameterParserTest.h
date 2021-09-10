@@ -20,15 +20,13 @@ private:
   DECLARE_VECTOR_PARAMETER(ConcreteVectorDblParam, double)
 
   // Declare a concrete vector parameter parser for testing.
-  using ConcreteVectorDblParamParser =
-      VectorParameterParser<ConcreteVectorDblParam>;
+  using ConcreteVectorDblParamParser = VectorParameterParser<ConcreteVectorDblParam>;
 
   // Declare a concrete type with elements of type bool for testing.
   DECLARE_VECTOR_PARAMETER(ConcreteVectorBoolParam, bool)
 
   // Declare a concrete vector parameter parser for testing.
-  using ConcreteVectorBoolParamParser =
-      VectorParameterParser<ConcreteVectorBoolParam>;
+  using ConcreteVectorBoolParamParser = VectorParameterParser<ConcreteVectorBoolParam>;
 
 public:
   void testParsesParmeterValue1D() {
@@ -71,11 +69,9 @@ public:
     ConcreteVectorDblParamParser parser;
     ImplicitFunctionParameter *product = parser.createParameter(pRootElem);
 
-    ConcreteVectorDblParam *actualProduct =
-        dynamic_cast<ConcreteVectorDblParam *>(product);
+    ConcreteVectorDblParam *actualProduct = dynamic_cast<ConcreteVectorDblParam *>(product);
 
-    TSM_ASSERT("The wrong product parameter has been produced",
-               (actualProduct != nullptr));
+    TSM_ASSERT("The wrong product parameter has been produced", (actualProduct != nullptr));
     double v1 = (*actualProduct)[0];
     double v2 = (*actualProduct)[1];
     double v3 = (*actualProduct)[2];
@@ -94,17 +90,14 @@ public:
     Element *pRootElem = pDoc->documentElement();
 
     ConcreteVectorDblParamParser parser;
-    TSM_ASSERT_THROWS("No successor, so should throw!",
-                      parser.createParameter(pRootElem),
-                      const std::runtime_error &);
+    TSM_ASSERT_THROWS("No successor, so should throw!", parser.createParameter(pRootElem), const std::runtime_error &);
   }
 
   DECLARE_VECTOR_PARAMETER(SucessorVectorParameter, double)
 
   void testChainOfResponsibility() {
     // Local declare of a successor parser with a successor parameter.
-    using ConcreteSuccessorVectorParameterParser =
-        VectorParameterParser<SucessorVectorParameter>;
+    using ConcreteSuccessorVectorParameterParser = VectorParameterParser<SucessorVectorParameter>;
 
     DOMParser pParser;
     std::string xmlToParse = "<Parameter><Type>SucessorVectorParameter</"
@@ -115,11 +108,9 @@ public:
     ConcreteVectorDblParamParser parser;
 
     parser.setSuccessorParser(new ConcreteSuccessorVectorParameterParser);
-    Mantid::API::ImplicitFunctionParameter *product =
-        parser.createParameter(pRootElem);
+    Mantid::API::ImplicitFunctionParameter *product = parser.createParameter(pRootElem);
 
-    TSM_ASSERT("Product should be a SucessorVectorParameter",
-               dynamic_cast<SucessorVectorParameter *>(product));
+    TSM_ASSERT("Product should be a SucessorVectorParameter", dynamic_cast<SucessorVectorParameter *>(product));
     delete product;
   }
 
@@ -133,11 +124,9 @@ public:
     ConcreteVectorBoolParamParser parser;
     ImplicitFunctionParameter *product = parser.createParameter(pRootElem);
 
-    ConcreteVectorBoolParam *actualProduct =
-        dynamic_cast<ConcreteVectorBoolParam *>(product);
+    ConcreteVectorBoolParam *actualProduct = dynamic_cast<ConcreteVectorBoolParam *>(product);
 
-    TSM_ASSERT("The wrong product parameter has been produced",
-               (actualProduct != nullptr));
+    TSM_ASSERT("The wrong product parameter has been produced", (actualProduct != nullptr));
 
     bool v1 = (*actualProduct)[0];
     bool v2 = (*actualProduct)[1];
@@ -153,14 +142,12 @@ public:
 
   void testCreateWithoutDelegationThrows() {
     DOMParser pParser;
-    std::string xmlToParse =
-        "<Parameter><Type>OTHER</Type><Value>1, 0, 1, 0</Value></Parameter>";
+    std::string xmlToParse = "<Parameter><Type>OTHER</Type><Value>1, 0, 1, 0</Value></Parameter>";
     Poco::AutoPtr<Document> pDoc = pParser.parseString(xmlToParse);
     Element *pRootElem = pDoc->documentElement();
 
     ConcreteVectorBoolParamParser parser;
-    TSM_ASSERT_THROWS("Should throw since delegation is not possible.",
-                      parser.createWithoutDelegation(pRootElem),
+    TSM_ASSERT_THROWS("Should throw since delegation is not possible.", parser.createWithoutDelegation(pRootElem),
                       const std::runtime_error &);
   }
 

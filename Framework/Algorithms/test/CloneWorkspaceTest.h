@@ -34,9 +34,7 @@ public:
 
   void testVersion() { TS_ASSERT_EQUALS(cloner.version(), 1); }
 
-  void testCategory() {
-    TS_ASSERT_EQUALS(cloner.category(), "Utility\\Workspaces");
-  }
+  void testCategory() { TS_ASSERT_EQUALS(cloner.category(), "Utility\\Workspaces"); }
 
   void testInit() {
     TS_ASSERT_THROWS_NOTHING(cloner.initialize());
@@ -53,8 +51,7 @@ public:
     loader.setPropertyValue("OutputWorkspace", "in");
     loader.execute();
 
-    MatrixWorkspace_sptr in =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("in");
+    MatrixWorkspace_sptr in = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("in");
     // Input file does not contain Dx, we just add it for testing.
     HistogramData::PointStandardDeviations dx(in->readX(0).size() - 1);
     for (size_t i = 0; i < in->getNumberHistograms(); ++i)
@@ -70,12 +67,10 @@ public:
     TSM_ASSERT_EQUALS("Dx vectors should be shared between spectra by default "
                       "(after a LoadRaw)",
                       in->sharedDx(0), in->sharedDx(1));
-    MatrixWorkspace_const_sptr out =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
+    MatrixWorkspace_const_sptr out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
     // Check sharing of the Dx vectors has not been broken
-    TSM_ASSERT_EQUALS(
-        "Dx vectors should remain shared between spectra after CloneWorkspace",
-        out->sharedDx(0), out->sharedDx(1));
+    TSM_ASSERT_EQUALS("Dx vectors should remain shared between spectra after CloneWorkspace", out->sharedDx(0),
+                      out->sharedDx(1));
 
     // Best way to test this is to use the CompareWorkspaces algorithm
     Mantid::Algorithms::CompareWorkspaces checker;
@@ -89,8 +84,7 @@ public:
 
   void testExecEvent() {
     // First make the algorithm
-    EventWorkspace_sptr ew =
-        WorkspaceCreationHelper::createEventWorkspace(100, 60, 50);
+    EventWorkspace_sptr ew = WorkspaceCreationHelper::createEventWorkspace(100, 60, 50);
     AnalysisDataService::Instance().addOrReplace("in_event", ew);
 
     Mantid::Algorithms::CloneWorkspace alg;
@@ -112,8 +106,7 @@ public:
 
   /** Test is not full, see CloneMDWorkspaceTest */
   void test_exec_MDEventWorkspace() {
-    MDEventWorkspace3Lean::sptr ws =
-        MDEventsTestHelper::makeMDEW<3>(5, 0.0, 10.0, 1);
+    MDEventWorkspace3Lean::sptr ws = MDEventsTestHelper::makeMDEW<3>(5, 0.0, 10.0, 1);
     AnalysisDataService::Instance().addOrReplace("inWS", ws);
     Mantid::Algorithms::CloneWorkspace alg;
     alg.initialize();
@@ -126,8 +119,7 @@ public:
   /** Build a test PeaksWorkspace
    * @return PeaksWorkspace   */
   PeaksWorkspace_sptr buildPW() {
-    Instrument_sptr inst =
-        ComponentCreationHelper::createTestInstrumentRectangular2(1, 10);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, 10);
     inst->setName("SillyInstrument");
     PeaksWorkspace *pw = new PeaksWorkspace();
     pw->setInstrument(inst);
@@ -151,8 +143,7 @@ public:
   }
 
   void test_group() {
-    WorkspaceGroup_const_sptr ingroup =
-        WorkspaceCreationHelper::createWorkspaceGroup(3, 1, 1, "grouptoclone");
+    WorkspaceGroup_const_sptr ingroup = WorkspaceCreationHelper::createWorkspaceGroup(3, 1, 1, "grouptoclone");
     Mantid::Algorithms::CloneWorkspace alg;
     alg.initialize();
     alg.setPropertyValue("InputWorkspace", "grouptoclone");
@@ -219,8 +210,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    TableWorkspace_sptr outWS = std::dynamic_pointer_cast<TableWorkspace>(
-        AnalysisDataService::Instance().retrieve("TestTableOut"));
+    TableWorkspace_sptr outWS =
+        std::dynamic_pointer_cast<TableWorkspace>(AnalysisDataService::Instance().retrieve("TestTableOut"));
     TS_ASSERT(outWS);
 
     TS_ASSERT_EQUALS(inpWS->columnCount(), outWS->columnCount());

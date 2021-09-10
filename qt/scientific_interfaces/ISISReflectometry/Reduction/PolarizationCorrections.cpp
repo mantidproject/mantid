@@ -9,21 +9,14 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
-PolarizationCorrections::PolarizationCorrections(
-    PolarizationCorrectionType correctionType)
+PolarizationCorrections::PolarizationCorrections(PolarizationCorrectionType correctionType)
     : m_correctionType(correctionType) {}
 
-PolarizationCorrectionType PolarizationCorrections::correctionType() const {
-  return m_correctionType;
-}
+PolarizationCorrectionType PolarizationCorrections::correctionType() const { return m_correctionType; }
 
-bool operator!=(PolarizationCorrections const &lhs,
-                PolarizationCorrections const &rhs) {
-  return !(lhs == rhs);
-}
+bool operator!=(PolarizationCorrections const &lhs, PolarizationCorrections const &rhs) { return !(lhs == rhs); }
 
-bool operator==(PolarizationCorrections const &lhs,
-                PolarizationCorrections const &rhs) {
+bool operator==(PolarizationCorrections const &lhs, PolarizationCorrections const &rhs) {
   return lhs.correctionType() == rhs.correctionType();
 }
 } // namespace ISISReflectometry

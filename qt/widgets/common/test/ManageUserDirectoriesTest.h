@@ -21,9 +21,7 @@ class ManageUserDirectoriesTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ManageUserDirectoriesTest *createSuite() {
-    return new ManageUserDirectoriesTest();
-  }
+  static ManageUserDirectoriesTest *createSuite() { return new ManageUserDirectoriesTest(); }
   static void destroySuite(ManageUserDirectoriesTest *suite) { delete suite; }
 
   ManageUserDirectoriesTest() {

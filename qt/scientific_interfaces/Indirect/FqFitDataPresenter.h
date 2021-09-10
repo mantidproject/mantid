@@ -8,7 +8,7 @@
 
 #include "FQFitConstants.h"
 #include "FqFitAddWorkspaceDialog.h"
-#include "FqFitModel.h"
+#include "FqFitDataView.h"
 #include "IFQFitObserver.h"
 #include "IndirectFitDataPresenter.h"
 #include "IndirectFunctionBrowser/SingleFunctionTemplateBrowser.h"
@@ -17,71 +17,53 @@
 #include <QComboBox>
 #include <QSpacerItem>
 
+namespace {
+struct FqFitParameters {
+  std::vector<std::string> widths;
+  std::vector<std::size_t> widthSpectra;
+  std::vector<std::string> eisf;
+  std::vector<std::size_t> eisfSpectra;
+};
+} // namespace
+
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class MANTIDQT_INDIRECT_DLL FqFitDataPresenter
-    : public IndirectFitDataPresenter {
+class MANTIDQT_INDIRECT_DLL FqFitDataPresenter : public IndirectFitDataPresenter {
   Q_OBJECT
 public:
-  FqFitDataPresenter(FqFitModel *model, IIndirectFitDataView *view,
-                     QComboBox *cbParameterType, QComboBox *cbParameter,
-                     QLabel *lbParameterType, QLabel *lbParameter,
+  FqFitDataPresenter(IIndirectFitDataModel *model, IIndirectFitDataView *view,
                      IFQFitObserver *SingleFunctionTemplateBrowser);
+  void addWorkspace(const std::string &workspaceName, const std::string &paramType, const int &spectrum_index) override;
+  void setActiveWidth(std::size_t widthIndex, WorkspaceID dataIndex, bool single = true) override;
+  void setActiveEISF(std::size_t eisfIndex, WorkspaceID dataIndex, bool single = true) override;
 
 private slots:
-  void hideParameterComboBoxes();
-  void showParameterComboBoxes();
-  void updateAvailableParameters();
-  void updateAvailableParameterTypes();
-  void updateAvailableParameters(const QString &type);
-  void updateParameterSelectionEnabled();
-  void setParameterLabel(const QString &parameter);
-  void dialogParameterTypeUpdated(FqFitAddWorkspaceDialog *dialog,
-                                  const std::string &type);
-  void setDialogParameterNames(FqFitAddWorkspaceDialog *dialog,
-                               const std::string &workspace);
+  void dialogParameterTypeUpdated(FqFitAddWorkspaceDialog *dialog, const std::string &type);
+  void setDialogParameterNames(FqFitAddWorkspaceDialog *dialog, const std::string &workspace);
   void setActiveParameterType(const std::string &type);
-  void updateActiveDataIndex();
-  void updateActiveDataIndex(int index);
-  void setSingleModelSpectrum(int index);
-  void handleParameterTypeChanged(const QString &parameter);
-  void handleSpectrumSelectionChanged(int parameterIndex);
-  void handleMultipleInputSelected();
-  void handleSingleInputSelected();
+  void updateActiveWorkspaceID();
+  void updateActiveWorkspaceID(WorkspaceID index);
 
 signals:
   void spectrumChanged(WorkspaceIndex);
 
-protected slots:
-  void handleSampleLoaded(const QString &) override;
+protected:
+  void addTableEntry(FitDomainIndex row) override;
 
 private:
-  void setAvailableParameters(const std::vector<std::string> &parameters);
-  void addDataToModel(IAddWorkspaceDialog const *dialog) override;
-  void closeDialog() override;
-  std::unique_ptr<IAddWorkspaceDialog>
-  getAddWorkspaceDialog(QWidget *parent) const override;
-  void updateParameterOptions(FqFitAddWorkspaceDialog *dialog);
-  void updateParameterTypes(FqFitAddWorkspaceDialog *dialog);
-  std::vector<std::string> getParameterTypes(TableDatasetIndex dataIndex) const;
-  void addWorkspace(IndirectFittingModel *model, const std::string &name);
-  void setModelSpectrum(int index);
-  void setDataIndexToCurrentWorkspace(IAddWorkspaceDialog const *dialog);
-
-  void setMultiInputResolutionFBSuffixes(IAddWorkspaceDialog *dialog) override;
-  void setMultiInputResolutionWSSuffixes(IAddWorkspaceDialog *dialog) override;
+  std::unique_ptr<IAddWorkspaceDialog> getAddWorkspaceDialog(QWidget *parent) const override;
+  void updateParameterOptions(FqFitAddWorkspaceDialog *dialog, FqFitParameters parameters);
+  void updateParameterTypes(FqFitAddWorkspaceDialog *dialog, FqFitParameters &parameters);
+  std::vector<std::string> getParameterTypes(FqFitParameters &parameters) const;
+  void setActiveWorkspaceIDToCurrentWorkspace(IAddWorkspaceDialog const *dialog);
 
   std::string m_activeParameterType;
-  TableDatasetIndex m_dataIndex;
+  WorkspaceID m_activeWorkspaceID;
 
-  QComboBox *m_cbParameterType;
-  QComboBox *m_cbParameter;
-  QLabel *m_lbParameterType;
-  QLabel *m_lbParameter;
-  FqFitModel *m_fqFitModel;
   Notifier<IFQFitObserver> m_notifier;
+  Mantid::API::AnalysisDataServiceImpl &m_adsInstance;
 };
 
 } // namespace IDA

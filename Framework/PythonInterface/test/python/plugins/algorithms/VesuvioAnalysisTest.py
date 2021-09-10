@@ -100,7 +100,7 @@ class VesuvioAnalysisTest(unittest.TestCase):
         alg.setProperty('TOFRangeVector', [1,2])
         alg.setProperty('ComptonProfile', table)
         alg.setProperty('Spectra', [135, 182])
- 
+
         errors = alg.validateInputs()
         self.assertEquals(len(errors),1)
         self.assertTrue("TOFRangeVector" in errors)
@@ -111,7 +111,7 @@ class VesuvioAnalysisTest(unittest.TestCase):
         alg.setProperty('TOFRangeVector', [1,2,3,4])
         alg.setProperty('ComptonProfile', table)
         alg.setProperty('Spectra', [135, 182])
- 
+
         errors = alg.validateInputs()
         self.assertEquals(len(errors),1)
         self.assertTrue("TOFRangeVector" in errors)
@@ -122,7 +122,7 @@ class VesuvioAnalysisTest(unittest.TestCase):
         alg.setProperty('ConstraintsProfileNumbers', [1])
         alg.setProperty('ComptonProfile', table)
         alg.setProperty('Spectra', [135, 182])
- 
+
         errors = alg.validateInputs()
         self.assertEquals(len(errors),1)
         self.assertTrue("ConstraintsProfileNumbers" in errors)
@@ -133,7 +133,7 @@ class VesuvioAnalysisTest(unittest.TestCase):
         alg.setProperty('ConstraintsProfileNumbers', [1,2,3])
         alg.setProperty('ComptonProfile', table)
         alg.setProperty('Spectra', [135, 182])
- 
+
         errors = alg.validateInputs()
         self.assertEquals(len(errors),1)
         self.assertTrue("ConstraintsProfileNumbers" in errors)
@@ -179,10 +179,10 @@ class VesuvioAnalysisTest(unittest.TestCase):
             alg = self.set_up_alg()
             alg.setProperty('ComptonProfile', table)
             alg.setProperty('Spectra', [135, 182])
-            alg.setProperty("Runs",run) 
+            alg.setProperty("Runs",run)
             errors = alg.validateInputs()
             self.assertEquals(len(errors),1)
-            self.assertTrue("Runs" in errors)      
+            self.assertTrue("Runs" in errors)
 
     def test_masked_sapectra_correct(self):
         table = self.generate_table()
@@ -203,7 +203,7 @@ class VesuvioAnalysisTest(unittest.TestCase):
             alg.setProperty('SpectraToBeMasked', spec)
             errors = alg.validateInputs()
             self.assertEquals(len(errors),1)
-            self.assertTrue("SpectraToBeMasked" in errors)      
+            self.assertTrue("SpectraToBeMasked" in errors)
 
 if __name__ == '__main__':
     unittest.main()

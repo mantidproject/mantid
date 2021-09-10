@@ -7,12 +7,13 @@
 import unittest
 from unittest import mock
 
+from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
 from Muon.GUI.Common.utilities import load_utils
 from Muon.GUI.FrequencyDomainAnalysis.FFT import fft_model
-from Muon.GUI.FrequencyDomainAnalysis.FFT import fft_presenter_new
-from Muon.GUI.FrequencyDomainAnalysis.FFT import fft_view_new
+from Muon.GUI.FrequencyDomainAnalysis.FFT import fft_presenter
+from Muon.GUI.FrequencyDomainAnalysis.FFT import fft_view
 from mantidqt.utils.qt.testing import start_qapplication
 
 from mantid.api import FileFinder
@@ -47,11 +48,16 @@ class FFTPresenterTest(unittest.TestCase):
 
         self.context.gui_context.update({'RebinType': 'None'})
 
-        self.view = fft_view_new.FFTView()
+        self.view = fft_view.FFTView()
         self.model1 = fft_model.FFTModel()
         self.model = fft_model.FFTWrapper
 
-        self.presenter = fft_presenter_new.FFTPresenter(
+        self.run_list = [22725]
+        self.groups = [MuonGroup(group) for group in GROUP_LIST]
+        self.rebins = [False] * len(self.groups)
+        self.pairs = [MuonPair(EXAMPLE_PAIR, 'top', 'bottom', alpha=0.75)]
+
+        self.presenter = fft_presenter.FFTPresenter(
             self.view, self.model, self.context)
 
         file_path = FileFinder.findRuns('MUSR00022725.nxs')[0]
@@ -61,10 +67,8 @@ class FFTPresenterTest(unittest.TestCase):
         self.context.data_context.current_runs = [[22725]]
 
         self.context.update_current_data()
-        test_pair = MuonPair(EXAMPLE_PAIR, 'top', 'bottom', alpha=0.75)
-        self.context.group_pair_context.add_pair(pair=test_pair)
-        self.context.show_all_groups()
-        self.context.show_all_pairs()
+        self.context.group_pair_context.add_pair(pair=self.pairs[0])
+        self._calculate_all_data()
         self.context.group_pair_context._selected_groups = GROUP_LIST
         self.context.group_pair_context._selected_pairs = [EXAMPLE_PAIR]
 
@@ -72,6 +76,15 @@ class FFTPresenterTest(unittest.TestCase):
 
     def tearDown(self):
         self.view = None
+
+    def _calculate_all_data(self):
+        self.context.calculate_all_counts()
+        for group, rebin in zip(self.groups, self.rebins):
+            self.context.calculate_asymmetry_for(self.run_list, group, rebin)
+            self.context.show_group(self.run_list, group, rebin)
+        for pair in self.pairs:
+            self.context.calculate_pair_for(self.run_list, pair)
+            self.context.show_pair(self.run_list, pair)
 
     def test_getWorkspaceNames_sets_workspace_and_imaginary_workspace_list_correctly(self):
         self.presenter.getWorkspaceNames()
@@ -130,8 +143,9 @@ class FFTPresenterTest(unittest.TestCase):
 
     def test_handle_use_raw_data_changed_when_rebin_set(self):
         self.context.gui_context.update({'RebinType': 'Fixed', 'RebinFixed': 2})
-        self.context.show_all_groups()
-        self.context.show_all_pairs()
+        self.groups = [MuonGroup(group) for group in GROUP_LIST] * 2
+        self.rebins = [False] * len(GROUP_LIST) + [True] * len(GROUP_LIST)
+        self._calculate_all_data()
         self.view.set_raw_checkbox_state(False)
 
         self.assertEqual(retrieve_combobox_info(self.view.ws),
@@ -168,8 +182,8 @@ class FFTPresenterTest(unittest.TestCase):
         self.presenter.getWorkspaceNames()
         self.view.ws.setCurrentIndex(1)
         self.assertEqual(self.presenter.get_fft_inputs('input_workspace', 'imaginary_input_workspace'),
-                         {'AcceptXRoundingErrors': True, 'AutoShift': True, 'Imaginary': 0,
-                          'InputImagWorkspace': 'imaginary_input_workspace', 'InputWorkspace': 'input_workspace',
+                         {'AcceptXRoundingErrors': True, 'AutoShift': True,
+                          'InputWorkspace': 'input_workspace',
                           'Real': 0, 'Transform': 'Forward'})
 
     def test_get_fft_inputs_with_no_imaginary_workspace_specified(self):
@@ -181,9 +195,9 @@ class FFTPresenterTest(unittest.TestCase):
                           'InputWorkspace': 'input_workspace',
                           'Real': 0, 'Transform': 'Forward'})
 
-    @mock.patch('Muon.GUI.FrequencyDomainAnalysis.FFT.fft_presenter_new.run_PaddingAndApodization')
-    @mock.patch('Muon.GUI.FrequencyDomainAnalysis.FFT.fft_presenter_new.run_FFT')
-    @mock.patch('Muon.GUI.FrequencyDomainAnalysis.FFT.fft_presenter_new.convert_to_field')
+    @mock.patch('Muon.GUI.FrequencyDomainAnalysis.FFT.fft_presenter.run_PaddingAndApodization')
+    @mock.patch('Muon.GUI.FrequencyDomainAnalysis.FFT.fft_presenter.run_FFT')
+    @mock.patch('Muon.GUI.FrequencyDomainAnalysis.FFT.fft_presenter.convert_to_field')
     def test_calculate_FFT_calls_correct_algorithm_sequence_for_no_imaginary(self, field_mock, fft_mock,
                                                                              apodization_mock):
         self.view.imaginary_data = False
@@ -216,9 +230,9 @@ class FFTPresenterTest(unittest.TestCase):
         field_mock.assert_called_once_with(fft_mock_return)
         self.presenter.add_fft_workspace_to_ADS.assert_called_once_with(name, '', field_mock_return)
 
-    @mock.patch('Muon.GUI.FrequencyDomainAnalysis.FFT.fft_presenter_new.run_PaddingAndApodization')
-    @mock.patch('Muon.GUI.FrequencyDomainAnalysis.FFT.fft_presenter_new.run_FFT')
-    @mock.patch('Muon.GUI.FrequencyDomainAnalysis.FFT.fft_presenter_new.convert_to_field')
+    @mock.patch('Muon.GUI.FrequencyDomainAnalysis.FFT.fft_presenter.run_PaddingAndApodization')
+    @mock.patch('Muon.GUI.FrequencyDomainAnalysis.FFT.fft_presenter.run_FFT')
+    @mock.patch('Muon.GUI.FrequencyDomainAnalysis.FFT.fft_presenter.convert_to_field')
     def test_calculate_FFT_calls_correct_algorithm_sequence_with_imaginary(self, field_mock, fft_mock,
                                                                            apodization_mock):
         self.view.imaginary_data = True

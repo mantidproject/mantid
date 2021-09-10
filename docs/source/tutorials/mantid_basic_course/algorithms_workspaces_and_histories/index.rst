@@ -1,15 +1,15 @@
-.. _algorithms_workspaces_and_histories: 
+.. _algorithms_workspaces_and_histories:
 
 ====================================
-Algorithms, Workspaces and Histories 
+Algorithms, Workspaces and Histories
 ====================================
 
 The word Algorithm comes from the Latinised name of a Persian mathematician named al-Khwārizmī. He has been described as the father of algebra.
 
-.. toctree:: 
-   :hidden: 
-   :glob: 
-   :maxdepth: 1 
+.. toctree::
+   :hidden:
+   :glob:
+   :maxdepth: 1
 
    01_introduction
    02_algorithms
@@ -18,7 +18,7 @@ The word Algorithm comes from the Latinised name of a Persian mathematician name
    05_interfaces
    06_exercises_a
 
-**Sections** 
+**Sections**
 
 * :ref:`01_introduction_awh`
 * :ref:`02_algorithms`

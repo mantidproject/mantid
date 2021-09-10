@@ -24,12 +24,8 @@ using namespace Mantid;
 
 class FindCenterOfMassPositionTest : public CxxTest::TestSuite {
 public:
-  static FindCenterOfMassPositionTest *createSuite() {
-    return new FindCenterOfMassPositionTest();
-  }
-  static void destroySuite(FindCenterOfMassPositionTest *suite) {
-    delete suite;
-  }
+  static FindCenterOfMassPositionTest *createSuite() { return new FindCenterOfMassPositionTest(); }
+  static void destroySuite(FindCenterOfMassPositionTest *suite) { delete suite; }
 
   /*
    * Generate fake data for which we know what the result should be
@@ -44,8 +40,7 @@ public:
     // Generate sample data as a 2D Gaussian around the defined center
     for (int ix = 0; ix < SANSInstrumentCreationHelper::nBins; ix++) {
       for (int iy = 0; iy < SANSInstrumentCreationHelper::nBins; iy++) {
-        int i = ix * SANSInstrumentCreationHelper::nBins + iy +
-                SANSInstrumentCreationHelper::nMonitors;
+        int i = ix * SANSInstrumentCreationHelper::nBins + iy + SANSInstrumentCreationHelper::nMonitors;
         MantidVec &X = ws->dataX(i);
         MantidVec &Y = ws->dataY(i);
         MantidVec &E = ws->dataE(i);
@@ -59,9 +54,7 @@ public:
     }
   }
 
-  ~FindCenterOfMassPositionTest() override {
-    AnalysisDataService::Instance().clear();
-  }
+  ~FindCenterOfMassPositionTest() override { AnalysisDataService::Instance().clear(); }
 
   void testParameters() {
     Mantid::Algorithms::FindCenterOfMassPosition center;
@@ -88,8 +81,7 @@ public:
 
     // Get the resulting table workspace
     Mantid::DataObjects::TableWorkspace_sptr table =
-        AnalysisDataService::Instance()
-            .retrieveWS<Mantid::DataObjects::TableWorkspace>(outputWS);
+        AnalysisDataService::Instance().retrieveWS<Mantid::DataObjects::TableWorkspace>(outputWS);
 
     TS_ASSERT_EQUALS(table->rowCount(), 2);
     TS_ASSERT_EQUALS(table->columnCount(), 2);
@@ -121,8 +113,7 @@ public:
 
     // Get the resulting table workspace
     Mantid::DataObjects::TableWorkspace_sptr table =
-        AnalysisDataService::Instance()
-            .retrieveWS<Mantid::DataObjects::TableWorkspace>(outputWS);
+        AnalysisDataService::Instance().retrieveWS<Mantid::DataObjects::TableWorkspace>(outputWS);
 
     TS_ASSERT_EQUALS(table->rowCount(), 2);
     TS_ASSERT_EQUALS(table->columnCount(), 2);
@@ -182,8 +173,7 @@ public:
 
     // Get the resulting table workspace
     Mantid::DataObjects::TableWorkspace_sptr table =
-        AnalysisDataService::Instance()
-            .retrieveWS<Mantid::DataObjects::TableWorkspace>(outputWS);
+        AnalysisDataService::Instance().retrieveWS<Mantid::DataObjects::TableWorkspace>(outputWS);
 
     TS_ASSERT_EQUALS(table->rowCount(), 2);
     TS_ASSERT_EQUALS(table->columnCount(), 2);

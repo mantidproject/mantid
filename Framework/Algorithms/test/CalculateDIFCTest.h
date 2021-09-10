@@ -39,24 +39,21 @@ public:
     TS_ASSERT(alg.isInitialized())
   }
 
-  void runTest(const Workspace2D_sptr &inputWS,
-               const OffsetsWorkspace_sptr &offsetsWS, std::string &outWSName) {
+  void runTest(const Workspace2D_sptr &inputWS, const OffsetsWorkspace_sptr &offsetsWS, std::string &outWSName) {
 
     CalculateDIFC alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OffsetsWorkspace", offsetsWS));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     // Retrieve the workspace from data service.
     MatrixWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(
-        ws = std::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve(outWSName)));
+        ws = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outWSName)));
     TS_ASSERT(ws);
     if (!ws)
       return;
@@ -74,20 +71,17 @@ public:
   }
 
   void test_withoutOffsets() {
-    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-        NUM_SPEC, 1);
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(NUM_SPEC, 1);
     std::string outWSName("CalculateDIFCTest_withoutOffsets_OutputWS");
 
     runTest(inputWS, OffsetsWorkspace_sptr(), outWSName);
   }
 
   void test_withOffsets() {
-    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-        NUM_SPEC, 1);
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(NUM_SPEC, 1);
     std::string outWSName("CalculateDIFCTest_withOffsets_OutputWS");
 
-    auto offsetsWS =
-        OffsetsWorkspace_sptr(new OffsetsWorkspace(inputWS->getInstrument()));
+    auto offsetsWS = OffsetsWorkspace_sptr(new OffsetsWorkspace(inputWS->getInstrument()));
     const auto &spectrumInfo = offsetsWS->spectrumInfo();
     for (int i = 0; i < NUM_SPEC; ++i) {
       const auto &det = spectrumInfo.detector(i);
@@ -98,12 +92,10 @@ public:
   }
 
   void test_withDiffCal() {
-    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-        NUM_SPEC, 1);
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(NUM_SPEC, 1);
     std::string outWSName("CalculateDIFCTest_withCalib_OutputWS");
 
-    ITableWorkspace_sptr calibWksp =
-        std::make_shared<Mantid::DataObjects::TableWorkspace>();
+    ITableWorkspace_sptr calibWksp = std::make_shared<Mantid::DataObjects::TableWorkspace>();
     calibWksp->addColumn("int", "detid");
     calibWksp->addColumn("double", "difc");
     for (size_t i = 0; i < NUM_SPEC; ++i) {
@@ -116,17 +108,14 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("CalibrationWorkspace", calibWksp));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("CalibrationWorkspace", calibWksp));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     MatrixWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(
-        ws = std::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve(outWSName)));
+        ws = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outWSName)));
     TS_ASSERT(ws);
     if (!ws)
       return;

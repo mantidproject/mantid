@@ -19,7 +19,7 @@ class MDEventWorkspaceTest(unittest.TestCase):
         run_algorithm('CreateMDWorkspace', Dimensions='3',Extents='0,10,0,10,0,10',Names='x,y,z',Units='m,m,m',SplitInto='5',
                       MaxRecursionDepth='20',OutputWorkspace='mdw')
         run_algorithm('FakeMDEventData', InputWorkspace="mdw",  UniformParams="1e4")
-        
+
 
     def tearDown(self):
         mtd.remove('mdw')

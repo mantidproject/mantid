@@ -28,12 +28,10 @@ namespace Geometry {
     in a hierarchical structure in the form of a tree.
     CompAssembly inherits from component.
 */
-class MANTID_GEOMETRY_DLL CompAssembly : public ICompAssembly,
-                                         public Component {
+class MANTID_GEOMETRY_DLL CompAssembly : public ICompAssembly, public Component {
 protected:
-  using comp_it = std::vector<IComponent *>::iterator; ///< Iterator type
-  using const_comp_it =
-      std::vector<IComponent *>::const_iterator; ///< Const iterator type
+  using comp_it = std::vector<IComponent *>::iterator;             ///< Iterator type
+  using const_comp_it = std::vector<IComponent *>::const_iterator; ///< Const iterator type
 
 public:
   /// String description of the type of component
@@ -66,14 +64,12 @@ public:
   //[] when you have a pointer
   std::shared_ptr<IComponent> getChild(const int i) const override;
   //! Returns a vector of all children contained.
-  void getChildren(std::vector<IComponent_const_sptr> &outVector,
-                   bool recursive) const override;
+  void getChildren(std::vector<IComponent_const_sptr> &outVector, bool recursive) const override;
   //! Get a pointer to the ith component in the assembly
   std::shared_ptr<IComponent> operator[](int i) const override;
   /// Returns a pointer to the first component of assembly encountered with the
   /// given name
-  std::shared_ptr<const IComponent>
-  getComponentByName(const std::string &cname, int nlevels = 0) const override;
+  std::shared_ptr<const IComponent> getComponentByName(const std::string &cname, int nlevels = 0) const override;
 
   Kernel::V3D getPos() const override;
 
@@ -88,12 +84,9 @@ public:
 
   /** Test the intersection of the ray with the children of the component
    * assembly, for InstrumentRayTracer  */
-  void testIntersectionWithChildren(
-      Track &testRay,
-      std::deque<IComponent_const_sptr> &searchQueue) const override;
+  void testIntersectionWithChildren(Track &testRay, std::deque<IComponent_const_sptr> &searchQueue) const override;
 
-  virtual size_t
-  registerContents(class ComponentVisitor &componentVisitor) const override;
+  virtual size_t registerContents(class ComponentVisitor &componentVisitor) const override;
 
 private:
   /// Private copy assignment operator
@@ -107,8 +100,7 @@ protected:
   mutable BoundingBox *m_cachedBoundingBox;
 };
 
-MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &,
-                                             const CompAssembly &);
+MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &, const CompAssembly &);
 
 } // Namespace Geometry
 } // Namespace Mantid

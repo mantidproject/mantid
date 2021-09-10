@@ -37,18 +37,14 @@ void LoadDspacemap::init() {
   LoadCalFile::getInstrument3WaysInit(this);
 
   const std::vector<std::string> exts{".dat", ".bin"};
-  declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
-      "The DspacemapFile containing the d-space mapping.");
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
+                  "The DspacemapFile containing the d-space mapping.");
 
-  std::vector<std::string> propOptions{"POWGEN", "VULCAN-ASCII",
-                                       "VULCAN-Binary"};
-  declareProperty("FileType", "POWGEN",
-                  std::make_shared<StringListValidator>(propOptions),
+  std::vector<std::string> propOptions{"POWGEN", "VULCAN-ASCII", "VULCAN-Binary"};
+  declareProperty("FileType", "POWGEN", std::make_shared<StringListValidator>(propOptions),
                   "The type of file being read.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<OffsetsWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<OffsetsWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "An output OffsetsWorkspace.");
 }
 
@@ -78,8 +74,7 @@ void LoadDspacemap::exec() {
     } else if (type == "VULCAN-Binary") {
       readVulcanBinaryFile(DFileName, vulcan);
     } else
-      throw std::invalid_argument(
-          "Unexpected FileType property value received.");
+      throw std::invalid_argument("Unexpected FileType property value received.");
 
     // Now that we have loaded the vulcan file (either type), convert it out.
     this->CalculateOffsetsFromVulcanFactors(vulcan, offsetsWS);
@@ -94,9 +89,8 @@ void LoadDspacemap::exec() {
  * @param DFileName :: name of dspacemap file
  * @param offsetsWS :: OffsetsWorkspace to be filled.
  */
-void LoadDspacemap::CalculateOffsetsFromDSpacemapFile(
-    const std::string &DFileName,
-    const Mantid::DataObjects::OffsetsWorkspace_sptr &offsetsWS) {
+void LoadDspacemap::CalculateOffsetsFromDSpacemapFile(const std::string &DFileName,
+                                                      const Mantid::DataObjects::OffsetsWorkspace_sptr &offsetsWS) {
   // Get a pointer to the instrument contained in the workspace
 
   const auto &detectorInfo = offsetsWS->detectorInfo();
@@ -116,16 +110,14 @@ void LoadDspacemap::CalculateOffsetsFromDSpacemapFile(
 
   const auto &detectorIds = detectorInfo.detectorIDs();
 
-  for (size_t detectorIndex = 0; detectorIndex < detectorInfo.size();
-       ++detectorIndex) {
+  for (size_t detectorIndex = 0; detectorIndex < detectorInfo.size(); ++detectorIndex) {
     const auto detectorId = detectorIds[detectorIndex];
 
     // Compute the factor
     double offset = 0.0;
     if (!detectorInfo.isMonitor(detectorIndex)) {
-      double factor = Geometry::Conversion::tofToDSpacingFactor(
-          l1, detectorInfo.l2(detectorIndex),
-          detectorInfo.twoTheta(detectorIndex), offset);
+      double factor = Geometry::Conversion::tofToDSpacingFactor(l1, detectorInfo.l2(detectorIndex),
+                                                                detectorInfo.twoTheta(detectorIndex), offset);
       offset = dspace[detectorId] / factor - 1.0;
     }
     // Save in the map
@@ -136,8 +128,7 @@ void LoadDspacemap::CalculateOffsetsFromDSpacemapFile(
   }
 }
 
-const double CONSTANT = (PhysicalConstants::h * 1e10) /
-                        (2.0 * PhysicalConstants::NeutronMass * 1e6);
+const double CONSTANT = (PhysicalConstants::h * 1e10) / (2.0 * PhysicalConstants::NeutronMass * 1e6);
 
 //-----------------------------------------------------------------------
 /**
@@ -148,9 +139,8 @@ const double CONSTANT = (PhysicalConstants::h * 1e10) /
  * @param vulcan :: map between detector ID and vulcan correction factor.
  * @param offsetsWS :: OffsetsWorkspace to be filled.
  */
-void LoadDspacemap::CalculateOffsetsFromVulcanFactors(
-    std::map<detid_t, double> &vulcan,
-    const Mantid::DataObjects::OffsetsWorkspace_sptr &offsetsWS) {
+void LoadDspacemap::CalculateOffsetsFromVulcanFactors(std::map<detid_t, double> &vulcan,
+                                                      const Mantid::DataObjects::OffsetsWorkspace_sptr &offsetsWS) {
   // Get a pointer to the instrument contained in the workspace
   // At this point, instrument VULCAN has been created?
   Instrument_const_sptr instrument = offsetsWS->getInstrument();
@@ -164,8 +154,7 @@ void LoadDspacemap::CalculateOffsetsFromVulcanFactors(
 
   detid2det_map::const_iterator it;
   int numfinds = 0;
-  g_log.notice() << "Input number of detectors = " << allDetectors.size()
-                 << '\n';
+  g_log.notice() << "Input number of detectors = " << allDetectors.size() << '\n';
 
   // Get detector information
   double l1, beamline_norm;
@@ -200,8 +189,7 @@ void LoadDspacemap::CalculateOffsetsFromVulcanFactors(
   }
   referencePos = det_iter->second->getParent()->getPos();
   double refl2 = referencePos.norm();
-  double halfcosTwoThetaRef =
-      referencePos.scalar_prod(beamline) / (refl2 * beamline_norm);
+  double halfcosTwoThetaRef = referencePos.scalar_prod(beamline) / (refl2 * beamline_norm);
   double sinThetaRef = sqrt(0.5 - halfcosTwoThetaRef);
   double difcRef = sinThetaRef * (l1 + refl2) / CONSTANT;
 
@@ -213,8 +201,7 @@ void LoadDspacemap::CalculateOffsetsFromVulcanFactors(
 
     // Find the vulcan factor;
     double vulcan_factor = 0.0;
-    std::map<detid_t, double>::const_iterator vulcan_iter =
-        vulcan.find(detectorID);
+    std::map<detid_t, double>::const_iterator vulcan_iter = vulcan.find(detectorID);
     if (vulcan_iter != vulcan.end()) {
       vulcan_factor = vulcan_iter->second;
       numfinds++;
@@ -229,8 +216,7 @@ void LoadDspacemap::CalculateOffsetsFromVulcanFactors(
     detid_t intermoduleid = detid_t(detectorID / 1250) * 1250 + 1250 - 2;
     vulcan_iter = vulcan.find(intermoduleid);
     if (vulcan_iter == vulcan.end()) {
-      g_log.error() << "Cannot find inter-module offset ID = " << intermoduleid
-                    << '\n';
+      g_log.error() << "Cannot find inter-module offset ID = " << intermoduleid << '\n';
     } else {
       intermoduleoffset = vulcan_iter->second;
     }
@@ -238,8 +224,7 @@ void LoadDspacemap::CalculateOffsetsFromVulcanFactors(
     detid_t interstackid = detid_t(detectorID / 1250) * 1250 + 1250 - 1;
     vulcan_iter = vulcan.find(interstackid);
     if (vulcan_iter == vulcan.end()) {
-      g_log.error() << "Cannot find inter-module offset ID = " << intermoduleid
-                    << '\n';
+      g_log.error() << "Cannot find inter-module offset ID = " << intermoduleid << '\n';
     } else {
       interstackoffset = vulcan_iter->second;
     }
@@ -263,8 +248,7 @@ void LoadDspacemap::CalculateOffsetsFromVulcanFactors(
     // Now detPos will be set with respect to samplePos
     detPos -= samplePos;
     double l2 = detPos.norm();
-    double halfcosTwoTheta =
-        detPos.scalar_prod(beamline) / (l2 * beamline_norm);
+    double halfcosTwoTheta = detPos.scalar_prod(beamline) / (l2 * beamline_norm);
     double sinTheta = sqrt(0.5 - halfcosTwoTheta);
     double difc_pixel = sinTheta * (l1 + l2) / CONSTANT;
 
@@ -280,20 +264,15 @@ void LoadDspacemap::CalculateOffsetsFromVulcanFactors(
     offset = difc_pixel/difc_parent*(pow(10.0, -vulcan_factor))-1.0;
     ***/
 
-    offset = difc_pixel / difcRef *
-                 (pow(10.0, -(vulcan_factor + intermoduleoffset +
-                              interstackoffset))) -
-             1.0;
+    offset = difc_pixel / difcRef * (pow(10.0, -(vulcan_factor + intermoduleoffset + interstackoffset))) - 1.0;
 
     // Save in the map
     try {
       offsetsWS->setValue(detectorID, offset);
 
-      if (intermoduleid != 27498 && intermoduleid != 28748 &&
-          intermoduleid != 29998 && intermoduleid != 33748 &&
+      if (intermoduleid != 27498 && intermoduleid != 28748 && intermoduleid != 29998 && intermoduleid != 33748 &&
           intermoduleid != 34998 && intermoduleid != 36248) {
-        g_log.error() << "Detector ID = " << detectorID
-                      << "  Inter-Module ID = " << intermoduleid << '\n';
+        g_log.error() << "Detector ID = " << detectorID << "  Inter-Module ID = " << intermoduleid << '\n';
         throw std::invalid_argument("Indexing error!");
       }
 
@@ -316,8 +295,7 @@ void LoadDspacemap::CalculateOffsetsFromVulcanFactors(
  * @param[out] vulcan :: a map of pixel ID : correction factor in the file (2nd
  *column)
  */
-void LoadDspacemap::readVulcanAsciiFile(const std::string &fileName,
-                                        std::map<detid_t, double> &vulcan) {
+void LoadDspacemap::readVulcanAsciiFile(const std::string &fileName, std::map<detid_t, double> &vulcan) {
   std::ifstream grFile(fileName.c_str());
   if (!grFile) {
     g_log.error() << "Unable to open vulcan file " << fileName << '\n';
@@ -359,8 +337,7 @@ struct VulcanCorrectionFactor {
  * @param[out] vulcan :: a map of pixel ID : correction factor in the file (2nd
  *column)
  */
-void LoadDspacemap::readVulcanBinaryFile(const std::string &fileName,
-                                         std::map<detid_t, double> &vulcan) {
+void LoadDspacemap::readVulcanBinaryFile(const std::string &fileName, std::map<detid_t, double> &vulcan) {
   BinaryFile<VulcanCorrectionFactor> file(fileName);
   std::vector<VulcanCorrectionFactor> results = file.loadAll();
   for (auto &result : results) {

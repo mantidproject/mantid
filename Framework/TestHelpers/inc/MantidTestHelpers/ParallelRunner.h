@@ -28,19 +28,16 @@ public:
 
   int size() const;
 
-  template <class Function, class... Args>
-  void run(Function &&f, Args &&... args);
+  template <class Function, class... Args> void run(Function &&f, Args &&...args);
 
 private:
   std::shared_ptr<Mantid::Parallel::detail::ThreadingBackend> m_backend;
   std::shared_ptr<Mantid::Parallel::detail::ThreadingBackend> m_serialBackend;
 };
 
-template <class Function, class... Args>
-void ParallelRunner::run(Function &&f, Args &&... args) {
+template <class Function, class... Args> void ParallelRunner::run(Function &&f, Args &&...args) {
   // 1. Run serial
-  f(Mantid::Parallel::Communicator(m_serialBackend, 0),
-    std::forward<Args>(args)...);
+  f(Mantid::Parallel::Communicator(m_serialBackend, 0), std::forward<Args>(args)...);
   // 2. Run parallel
   if (!m_backend) {
     Mantid::Parallel::Communicator comm;
@@ -49,8 +46,7 @@ void ParallelRunner::run(Function &&f, Args &&... args) {
     std::vector<std::thread> threads;
     for (int t = 0; t < m_backend->size(); ++t) {
       Mantid::Parallel::Communicator comm(m_backend, t);
-      threads.emplace_back(std::forward<Function>(f), comm,
-                           std::forward<Args>(args)...);
+      threads.emplace_back(std::forward<Function>(f), comm, std::forward<Args>(args)...);
     }
     for (auto &t : threads) {
       t.join();
@@ -58,7 +54,7 @@ void ParallelRunner::run(Function &&f, Args &&... args) {
   }
 }
 
-template <class... Args> void runParallel(Args &&... args) {
+template <class... Args> void runParallel(Args &&...args) {
   ParallelRunner runner;
   runner.run(std::forward<Args>(args)...);
 }

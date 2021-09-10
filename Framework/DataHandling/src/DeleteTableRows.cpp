@@ -26,12 +26,10 @@ using namespace API;
 
 /// Initialisation method.
 void DeleteTableRows::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
-                      "TableWorkspace", "", Direction::InOut),
+  declareProperty(std::make_unique<WorkspaceProperty<API::ITableWorkspace>>("TableWorkspace", "", Direction::InOut),
                   "The name of the workspace that will be modified.");
-  declareProperty(
-      std::make_unique<ArrayProperty<size_t>>("Rows"),
-      "A comma-separated list of row numbers. Row numbering starts with 0.");
+  declareProperty(std::make_unique<ArrayProperty<size_t>>("Rows"),
+                  "A comma-separated list of row numbers. Row numbering starts with 0.");
 }
 
 /**
@@ -39,8 +37,7 @@ void DeleteTableRows::init() {
  */
 void DeleteTableRows::exec() {
   API::ITableWorkspace_sptr tw = getProperty("TableWorkspace");
-  API::IPeaksWorkspace_sptr pw =
-      std::dynamic_pointer_cast<API::IPeaksWorkspace>(tw);
+  API::IPeaksWorkspace_sptr pw = std::dynamic_pointer_cast<API::IPeaksWorkspace>(tw);
   std::vector<size_t> rows = getProperty("Rows");
   // sort the row indices in reverse order
   std::set<size_t, std::greater<size_t>> sortedRows(rows.begin(), rows.end());

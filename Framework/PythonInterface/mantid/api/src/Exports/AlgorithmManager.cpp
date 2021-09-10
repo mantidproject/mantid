@@ -45,8 +45,7 @@ AlgorithmManagerImpl &instance() {
  * @param self The calling object
  * @param id An algorithm ID
  */
-IAlgorithm_sptr getAlgorithm(AlgorithmManagerImpl &self,
-                             AlgorithmIDProxy idHolder) {
+IAlgorithm_sptr getAlgorithm(AlgorithmManagerImpl &self, AlgorithmIDProxy idHolder) {
   return self.getAlgorithm(idHolder.id);
 }
 
@@ -57,17 +56,14 @@ IAlgorithm_sptr getAlgorithm(AlgorithmManagerImpl &self,
  * @param self The calling object
  * @param id An algorithm ID
  */
-void removeById(AlgorithmManagerImpl &self, AlgorithmIDProxy idHolder) {
-  return self.removeById(idHolder.id);
-}
+void removeById(AlgorithmManagerImpl &self, AlgorithmIDProxy idHolder) { return self.removeById(idHolder.id); }
 
 /**
  * @param self A reference to the calling object
  * @param algName The name of the algorithm
  * @return A python list of managed algorithms that are currently running
  */
-boost::python::list runningInstancesOf(AlgorithmManagerImpl &self,
-                                       const std::string &algName) {
+boost::python::list runningInstancesOf(AlgorithmManagerImpl &self, const std::string &algName) {
   boost::python::list algs;
   auto mgrAlgs = self.runningInstancesOf(algName);
   for (auto &mgrAlg : mgrAlgs) {
@@ -87,11 +83,8 @@ GNU_DIAG_OFF("unused-local-typedef")
 // Seen with GCC 7.1.1 and Boost 1.63.0
 GNU_DIAG_OFF("conversion")
 /// Define overload generators
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(create_overloads,
-                                       AlgorithmManagerImpl::create, 1, 2)
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(createUnmanaged_overloads,
-                                       AlgorithmManagerImpl::createUnmanaged, 1,
-                                       2)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(create_overloads, AlgorithmManagerImpl::create, 1, 2)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(createUnmanaged_overloads, AlgorithmManagerImpl::createUnmanaged, 1, 2)
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unused-local-typedef")
 ///@endcond
@@ -99,30 +92,22 @@ GNU_DIAG_ON("unused-local-typedef")
 
 void export_AlgorithmManager() {
 
-  class_<AlgorithmManagerImpl, boost::noncopyable>("AlgorithmManagerImpl",
-                                                   no_init)
+  class_<AlgorithmManagerImpl, boost::noncopyable>("AlgorithmManagerImpl", no_init)
       .def("create", &AlgorithmManagerImpl::create,
-           create_overloads((arg("name"), arg("version")),
-                            "Creates a managed algorithm."))
+           create_overloads((arg("name"), arg("version")), "Creates a managed algorithm."))
       .def("createUnmanaged", &AlgorithmManagerImpl::createUnmanaged,
-           createUnmanaged_overloads((arg("name"), arg("version")),
-                                     "Creates an unmanaged algorithm."))
-      .def("size", &AlgorithmManagerImpl::size, arg("self"),
-           "Returns the number of managed algorithms")
+           createUnmanaged_overloads((arg("name"), arg("version")), "Creates an unmanaged algorithm."))
+      .def("size", &AlgorithmManagerImpl::size, arg("self"), "Returns the number of managed algorithms")
       .def("getAlgorithm", &getAlgorithm, (arg("self"), arg("id_holder")),
            "Return the algorithm instance identified by the given id.")
-      .def("removeById", &removeById, (arg("self"), arg("id_holder")),
-           "Remove an algorithm from the managed list")
-      .def("runningInstancesOf", &runningInstancesOf,
-           (arg("self"), arg("algorithm_name")),
+      .def("removeById", &removeById, (arg("self"), arg("id_holder")), "Remove an algorithm from the managed list")
+      .def("runningInstancesOf", &runningInstancesOf, (arg("self"), arg("algorithm_name")),
            "Returns a list of managed algorithm instances that are "
            "currently executing")
-      .def("clear", &AlgorithmManagerImpl::clear, arg("self"),
-           "Clears the current list of managed algorithms")
+      .def("clear", &AlgorithmManagerImpl::clear, arg("self"), "Clears the current list of managed algorithms")
       .def("cancelAll", &AlgorithmManagerImpl::cancelAll, arg("self"),
            "Requests that all currently running algorithms be cancelled")
-      .def("Instance", instance,
-           return_value_policy<reference_existing_object>(),
+      .def("Instance", instance, return_value_policy<reference_existing_object>(),
            "Return a reference to the singleton instance")
       .staticmethod("Instance");
 }

@@ -34,13 +34,11 @@ private:
 
   void makeFakeEventWorkspace(const std::string &wsName) {
     // Make an event workspace with 2 events in each bin.
-    EventWorkspace_sptr test_in = WorkspaceCreationHelper::createEventWorkspace(
-        NUMPIXELS, NUMBINS, NUMEVENTS, 1000., BIN_DELTA, 2);
+    EventWorkspace_sptr test_in =
+        WorkspaceCreationHelper::createEventWorkspace(NUMPIXELS, NUMBINS, NUMEVENTS, 1000., BIN_DELTA, 2);
     // Fake a TOF unit in the data.
     test_in->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
-    test_in->setInstrument(
-        ComponentCreationHelper::createTestInstrumentCylindrical(NUMPIXELS /
-                                                                 9));
+    test_in->setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(NUMPIXELS / 9));
     // Make sure the detector IDs are ok
     for (int i = 0; i < NUMPIXELS; i++)
       test_in->getSpectrum(i).setDetectorID(i + 1);
@@ -52,9 +50,7 @@ private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static RemovePromptPulseTest *createSuite() {
-    return new RemovePromptPulseTest();
-  }
+  static RemovePromptPulseTest *createSuite() { return new RemovePromptPulseTest(); }
   static void destroySuite(RemovePromptPulseTest *suite) { delete suite; }
 
   RemovePromptPulseTest() {
@@ -76,16 +72,13 @@ public:
     this->makeFakeEventWorkspace(inWSName);
 
     EventWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(
-            inWSName));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(inWSName));
     std::size_t num_events = ws->getNumberEvents();
     RemovePromptPulse alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", inWSName));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Width", "1000."));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Frequency", "100"));
 
@@ -93,9 +86,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // Retrieve the workspace from data service.
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outWSName));
     TS_ASSERT(ws);
     if (!ws)
       return;
@@ -114,17 +105,14 @@ public:
     this->makeFakeEventWorkspace(inWSName);
 
     EventWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(
-            inWSName));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(inWSName));
     std::size_t num_events = ws->getNumberEvents();
 
     RemovePromptPulse alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", inWSName));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Width", "1000."));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Frequency", "200"));
 
@@ -133,9 +121,7 @@ public:
 
     // Retrieve the workspace from data service. TODO: Change to your desired
     // type
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outWSName));
     TS_ASSERT(ws);
     if (!ws)
       return;

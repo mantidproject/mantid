@@ -53,10 +53,9 @@ public:
   void show();
   Axes addAxes(double left, double bottom, double width, double height);
   Axes addSubPlot(const int subplotspec, const QString &projection = "");
-  Common::Python::Object
-  colorbar(const ScalarMappable &mappable, const Axes &cax,
-           const Common::Python::Object &ticks = Common::Python::Object(),
-           const Common::Python::Object &format = Common::Python::Object());
+  Common::Python::Object colorbar(const ScalarMappable &mappable, const Axes &cax,
+                                  const Common::Python::Object &ticks = Common::Python::Object(),
+                                  const Common::Python::Object &format = Common::Python::Object());
 };
 
 } // namespace MplCpp

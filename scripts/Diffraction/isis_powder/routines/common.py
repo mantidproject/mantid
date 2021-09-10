@@ -253,7 +253,7 @@ def generate_unsplined_name(vanadium_string, *args):
     return _generate_vanadium_name(vanadium_string, False, *args)
 
 
-def generate_summed_empty_name(empty_runs_string):
+def generate_summed_empty_name(empty_runs_string, *args):
     """
     Generates a name for the summed empty instrument runs
     so that the file can be later loaded.
@@ -261,8 +261,16 @@ def generate_summed_empty_name(empty_runs_string):
     :return: The generated file name
     """
     out_name = 'summed_empty'
-
     out_name += '_' + str(empty_runs_string)
+
+    # Only arg that may be added is long_mode. tt_mode and cal file are not needed.
+    for passed_arg in args:
+        if isinstance(passed_arg, list):
+            if 'long' in passed_arg:
+                out_name += '_long'
+        else:
+            if passed_arg == 'long':
+                out_name += '_long'
 
     out_name += ".nxs"
     return out_name
@@ -391,11 +399,15 @@ def rebin_workspace_list(workspace_list, bin_width_list, start_x_list=None, end_
     :param end_x_list: The list of ending x boundaries to rebin to
     :return: List of rebinned workspace
     """
-    if not isinstance(workspace_list, list) or not isinstance(bin_width_list, list):
-        raise RuntimeError("One of the types passed to rebin_workspace_list was not a list")
+    if not isinstance(workspace_list, list):
+        raise RuntimeError("Workspace list passed to rebin_workspace_list was not a list")
+    if not isinstance(bin_width_list, list) and not isinstance(bin_width_list, float):
+        raise RuntimeError("Bin width list passed to rebin_workspace_list was not a list or float")
 
     ws_list_len = len(workspace_list)
-    if ws_list_len != len(bin_width_list):
+    if not isinstance(bin_width_list, list):
+        bin_width_list = [bin_width_list] * ws_list_len
+    elif ws_list_len != len(bin_width_list):
         raise ValueError("The number of bin widths found to rebin to does not match the number of banks")
     if start_x_list and len(start_x_list) != ws_list_len:
         raise ValueError("The number of starting bin values does not match the number of banks")

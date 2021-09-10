@@ -40,50 +40,37 @@ void CalculateTransmissionBeamSpreader::init() {
   wsValidator->add<HistogramValidator>();
 
   declareProperty(
-      std::make_unique<WorkspaceProperty<>>("SampleSpreaderRunWorkspace", "",
-                                            Direction::Input, wsValidator),
+      std::make_unique<WorkspaceProperty<>>("SampleSpreaderRunWorkspace", "", Direction::Input, wsValidator),
       "The workspace containing the sample beam-spreader run");
   declareProperty(
-      std::make_unique<WorkspaceProperty<>>("DirectSpreaderRunWorkspace", "",
-                                            Direction::Input, wsValidator),
+      std::make_unique<WorkspaceProperty<>>("DirectSpreaderRunWorkspace", "", Direction::Input, wsValidator),
       "The workspace containing the direct beam-spreader run");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("SampleScatterRunWorkspace", "",
-                                            Direction::Input, wsValidator),
-      "The workspace containing the sample scattering run");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("DirectScatterRunWorkspace", "",
-                                            Direction::Input, wsValidator),
-      "The workspace containing the direct beam scattering run");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("SampleScatterRunWorkspace", "", Direction::Input, wsValidator),
+                  "The workspace containing the sample scattering run");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("DirectScatterRunWorkspace", "", Direction::Input, wsValidator),
+                  "The workspace containing the direct beam scattering run");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "The fitted transmission correction");
 
   auto zeroOrMore = std::make_shared<BoundedValidator<int>>();
   zeroOrMore->setLower(0);
   // The defaults here are the correct detector numbers for LOQ
-  declareProperty("IncidentBeamMonitor", 2, zeroOrMore,
-                  "The UDET of the incident beam monitor");
+  declareProperty("IncidentBeamMonitor", 2, zeroOrMore, "The UDET of the incident beam monitor");
 
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
 
-  declareProperty("SpreaderTransmissionValue", 1.0, mustBePositive,
-                  "Transmission coefficient of the beam spreader");
-  declareProperty(
-      "SpreaderTransmissionError", 0.0, mustBePositive,
-      "Uncertainty on the transmission coefficient of the beam spreader");
+  declareProperty("SpreaderTransmissionValue", 1.0, mustBePositive, "Transmission coefficient of the beam spreader");
+  declareProperty("SpreaderTransmissionError", 0.0, mustBePositive,
+                  "Uncertainty on the transmission coefficient of the beam spreader");
 
-  declareProperty("MinWavelength", 2.2, mustBePositive,
-                  "The minimum wavelength for the fit");
-  declareProperty("MaxWavelength", 10.0, mustBePositive,
-                  "The maximum wavelength for the fit");
+  declareProperty("MinWavelength", 2.2, mustBePositive, "The minimum wavelength for the fit");
+  declareProperty("MaxWavelength", 10.0, mustBePositive, "The maximum wavelength for the fit");
 
   std::vector<std::string> options(2);
   options[0] = "Linear";
   options[1] = "Log";
-  declareProperty("FitMethod", "Log",
-                  std::make_shared<StringListValidator>(options),
+  declareProperty("FitMethod", "Log", std::make_shared<StringListValidator>(options),
                   "Whether to fit directly to the transmission curve (Linear) "
                   "or to the log of it (Log)");
 
@@ -91,61 +78,45 @@ void CalculateTransmissionBeamSpreader::init() {
 }
 
 void CalculateTransmissionBeamSpreader::exec() {
-  MatrixWorkspace_sptr sample_spreaderWS =
-      getProperty("SampleSpreaderRunWorkspace");
-  MatrixWorkspace_sptr direct_spreaderWS =
-      getProperty("DirectSpreaderRunWorkspace");
-  MatrixWorkspace_sptr sample_scatterWS =
-      getProperty("SampleScatterRunWorkspace");
-  MatrixWorkspace_sptr direct_scatterWS =
-      getProperty("DirectScatterRunWorkspace");
+  MatrixWorkspace_sptr sample_spreaderWS = getProperty("SampleSpreaderRunWorkspace");
+  MatrixWorkspace_sptr direct_spreaderWS = getProperty("DirectSpreaderRunWorkspace");
+  MatrixWorkspace_sptr sample_scatterWS = getProperty("SampleScatterRunWorkspace");
+  MatrixWorkspace_sptr direct_scatterWS = getProperty("DirectScatterRunWorkspace");
 
   // Check that the two input workspaces are from the same instrument
-  if (sample_spreaderWS->getInstrument()->getName() !=
-          direct_spreaderWS->getInstrument()->getName() ||
-      sample_spreaderWS->getInstrument()->getName() !=
-          sample_scatterWS->getInstrument()->getName() ||
-      sample_spreaderWS->getInstrument()->getName() !=
-          direct_scatterWS->getInstrument()->getName()) {
+  if (sample_spreaderWS->getInstrument()->getName() != direct_spreaderWS->getInstrument()->getName() ||
+      sample_spreaderWS->getInstrument()->getName() != sample_scatterWS->getInstrument()->getName() ||
+      sample_spreaderWS->getInstrument()->getName() != direct_scatterWS->getInstrument()->getName()) {
     g_log.error("The input workspaces do not come from the same instrument");
-    throw std::invalid_argument(
-        "The input workspaces do not come from the same instrument");
+    throw std::invalid_argument("The input workspaces do not come from the same instrument");
   }
   // Check that the two inputs have matching binning
   if (!WorkspaceHelpers::matchingBins(*sample_spreaderWS, *direct_spreaderWS) ||
       !WorkspaceHelpers::matchingBins(*sample_spreaderWS, *sample_scatterWS) ||
       !WorkspaceHelpers::matchingBins(*sample_spreaderWS, *direct_scatterWS)) {
     g_log.error("Input workspaces do not have matching binning");
-    throw std::invalid_argument(
-        "Input workspaces do not have matching binning");
+    throw std::invalid_argument("Input workspaces do not have matching binning");
   }
 
   // Extract the required spectra into separate workspaces
   // The static_cast should not be necessary but it is required to avoid a
   // "internal compiler error: segmentation fault" when compiling with gcc
   // and std=c++1z
-  std::vector<detid_t> udets{
-      static_cast<detid_t>(getProperty("IncidentBeamMonitor"))};
+  std::vector<detid_t> udets{static_cast<detid_t>(getProperty("IncidentBeamMonitor"))};
 
   // Convert UDETs to workspace indices
   // Get monitors (assume that the detector mapping is the same for all data
   // sets)
-  std::vector<size_t> indices =
-      sample_scatterWS->getIndicesFromDetectorIDs(udets);
+  std::vector<size_t> indices = sample_scatterWS->getIndicesFromDetectorIDs(udets);
   if (indices.size() != 1) {
     g_log.error() << "Could not find the incident monitor spectra\n";
-    throw std::invalid_argument(
-        "Could not find the incident monitor spectra\n");
+    throw std::invalid_argument("Could not find the incident monitor spectra\n");
   }
 
-  MatrixWorkspace_sptr sample_scatter_mon =
-      this->extractSpectrum(sample_scatterWS, indices[0]);
-  MatrixWorkspace_sptr direct_scatter_mon =
-      this->extractSpectrum(direct_scatterWS, indices[0]);
-  MatrixWorkspace_sptr sample_spreader_mon =
-      this->extractSpectrum(sample_spreaderWS, indices[0]);
-  MatrixWorkspace_sptr direct_spreader_mon =
-      this->extractSpectrum(direct_spreaderWS, indices[0]);
+  MatrixWorkspace_sptr sample_scatter_mon = this->extractSpectrum(sample_scatterWS, indices[0]);
+  MatrixWorkspace_sptr direct_scatter_mon = this->extractSpectrum(direct_scatterWS, indices[0]);
+  MatrixWorkspace_sptr sample_spreader_mon = this->extractSpectrum(sample_spreaderWS, indices[0]);
+  MatrixWorkspace_sptr direct_spreader_mon = this->extractSpectrum(direct_spreaderWS, indices[0]);
 
   // Sum the whole detector for each of the four data sets
   MatrixWorkspace_sptr sample_scatter_sum;
@@ -155,8 +126,7 @@ void CalculateTransmissionBeamSpreader::exec() {
 
   // Note: Replaced PARALLEL_SECTION with this OMP for loop, due to occasional
   // unexplained segfault.
-  std::vector<MatrixWorkspace_sptr> in_ws{sample_scatterWS, direct_scatterWS,
-                                          sample_spreaderWS, direct_spreaderWS};
+  std::vector<MatrixWorkspace_sptr> in_ws{sample_scatterWS, direct_scatterWS, sample_spreaderWS, direct_spreaderWS};
 
   std::vector<MatrixWorkspace_sptr> out_ws(4);
 
@@ -170,8 +140,7 @@ void CalculateTransmissionBeamSpreader::exec() {
   direct_spreader_sum = out_ws[3];
 
   // Beam spreader transmission
-  MatrixWorkspace_sptr spreader_trans =
-      create<WorkspaceSingleValue>(1, Points(1));
+  MatrixWorkspace_sptr spreader_trans = create<WorkspaceSingleValue>(1, Points(1));
   spreader_trans->setYUnit("");
   spreader_trans->setDistribution(true);
   spreader_trans->mutableX(0)[0] = 0.0;
@@ -180,12 +149,10 @@ void CalculateTransmissionBeamSpreader::exec() {
 
   // The main calculation
   MatrixWorkspace_sptr numerator =
-      sample_spreader_sum / sample_spreader_mon -
-      spreader_trans * sample_scatter_sum / sample_scatter_mon;
+      sample_spreader_sum / sample_spreader_mon - spreader_trans * sample_scatter_sum / sample_scatter_mon;
 
   MatrixWorkspace_sptr denominator =
-      direct_spreader_sum / direct_spreader_mon -
-      spreader_trans * direct_scatter_sum / direct_scatter_mon;
+      direct_spreader_sum / direct_spreader_mon - spreader_trans * direct_scatter_sum / direct_scatter_mon;
 
   MatrixWorkspace_sptr transmission = numerator / denominator;
 
@@ -194,8 +161,7 @@ void CalculateTransmissionBeamSpreader::exec() {
   if (outputRaw) {
     std::string outputWSName = getPropertyValue("OutputWorkspace");
     outputWSName += "_unfitted";
-    declareProperty(std::make_unique<WorkspaceProperty<>>(
-        "UnfittedData", outputWSName, Direction::Output));
+    declareProperty(std::make_unique<WorkspaceProperty<>>("UnfittedData", outputWSName, Direction::Output));
     setProperty("UnfittedData", transmission);
   }
 
@@ -210,8 +176,7 @@ void CalculateTransmissionBeamSpreader::exec() {
     if (logFit) {
       g_log.debug("Fitting to the logarithm of the transmission");
       // Take a copy of this workspace for the fitting
-      MatrixWorkspace_sptr logTransmission =
-          this->extractSpectrum(transmission, 0);
+      MatrixWorkspace_sptr logTransmission = this->extractSpectrum(transmission, 0);
 
       // Take the log of each datapoint for fitting. Preserve errors
       // percentage-wise.
@@ -240,8 +205,7 @@ void CalculateTransmissionBeamSpreader::exec() {
  *  @param WS ::    The workspace containing the spectrum to sum
  *  @return A Workspace2D containing the sum
  */
-API::MatrixWorkspace_sptr CalculateTransmissionBeamSpreader::sumSpectra(
-    const API::MatrixWorkspace_sptr &WS) {
+API::MatrixWorkspace_sptr CalculateTransmissionBeamSpreader::sumSpectra(const API::MatrixWorkspace_sptr &WS) {
   Algorithm_sptr childAlg = createChildAlgorithm("SumSpectra");
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", WS);
   childAlg->setProperty<bool>("IncludeMonitors", false);
@@ -255,16 +219,14 @@ API::MatrixWorkspace_sptr CalculateTransmissionBeamSpreader::sumSpectra(
  *  @param index :: The workspace index of the spectrum to extract
  *  @return A Workspace2D containing the extracted spectrum
  */
-API::MatrixWorkspace_sptr CalculateTransmissionBeamSpreader::extractSpectrum(
-    const API::MatrixWorkspace_sptr &WS, const size_t index) {
+API::MatrixWorkspace_sptr CalculateTransmissionBeamSpreader::extractSpectrum(const API::MatrixWorkspace_sptr &WS,
+                                                                             const size_t index) {
   // Check that given spectra are monitors
   if (!WS->spectrumInfo().isMonitor(index)) {
-    g_log.information(
-        "The Incident Beam Monitor UDET provided is not marked as a monitor");
+    g_log.information("The Incident Beam Monitor UDET provided is not marked as a monitor");
   }
 
-  Algorithm_sptr childAlg =
-      createChildAlgorithm("ExtractSingleSpectrum", 0.0, 0.4);
+  Algorithm_sptr childAlg = createChildAlgorithm("ExtractSingleSpectrum", 0.0, 0.4);
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", WS);
   childAlg->setProperty<int>("WorkspaceIndex", static_cast<int>(index));
   childAlg->executeAsChildAlg();
@@ -276,8 +238,7 @@ API::MatrixWorkspace_sptr CalculateTransmissionBeamSpreader::extractSpectrum(
  *  @param WS :: The single-spectrum workspace to fit
  *  @return A workspace containing the fit
  */
-API::MatrixWorkspace_sptr CalculateTransmissionBeamSpreader::fitToData(
-    const API::MatrixWorkspace_sptr &WS) {
+API::MatrixWorkspace_sptr CalculateTransmissionBeamSpreader::fitToData(const API::MatrixWorkspace_sptr &WS) {
   g_log.information("Fitting the experimental transmission curve");
   Algorithm_sptr childAlg = createChildAlgorithm("Linear", 0.6, 1.0);
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", WS);

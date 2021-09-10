@@ -27,9 +27,7 @@ using Mantid::DataObjects::EventWorkspace;
 
 class CarpenterSampleCorrectionTest : public CxxTest::TestSuite {
 public:
-  void testName() {
-    TS_ASSERT_EQUALS(algorithm.name(), "CarpenterSampleCorrection");
-  }
+  void testName() { TS_ASSERT_EQUALS(algorithm.name(), "CarpenterSampleCorrection"); }
 
   void testVersion() { TS_ASSERT_EQUALS(algorithm.version(), 1); }
 
@@ -69,16 +67,13 @@ public:
   void testCalculationHist() {
     using namespace Mantid::HistogramData;
     auto wksp = DataObjects::create<DataObjects::Workspace2D>(
-        ComponentCreationHelper::createTestInstrumentCylindrical(1),
-        Indexing::IndexInfo(9),
-        Histogram(BinEdges(17, LinearGenerator(1000.0, 1000.0)),
-                  Counts(16, 2.0)));
+        ComponentCreationHelper::createTestInstrumentCylindrical(1), Indexing::IndexInfo(9),
+        Histogram(BinEdges(17, LinearGenerator(1000.0, 1000.0)), Counts(16, 2.0)));
     wksp->getAxis(0)->setUnit("TOF");
     AnalysisDataService::Instance().add("TestInputWS", std::move(wksp));
 
     // convert to wavelength
-    auto convertUnitsAlg =
-        Mantid::API::AlgorithmManager::Instance().create("ConvertUnits");
+    auto convertUnitsAlg = Mantid::API::AlgorithmManager::Instance().create("ConvertUnits");
     convertUnitsAlg->setPropertyValue("InputWorkspace", "TestInputWS");
     convertUnitsAlg->setPropertyValue("OutputWorkspace", "TestInputWS");
     convertUnitsAlg->setProperty("Target", "Wavelength");
@@ -89,36 +84,26 @@ public:
     TS_ASSERT_THROWS_NOTHING(algorithm_c.initialize());
     TS_ASSERT(algorithm_c.isInitialized());
 
-    TS_ASSERT_THROWS_NOTHING(
-        algorithm_c.setPropertyValue("InputWorkspace", "TestInputWS"));
-    TS_ASSERT_THROWS_NOTHING(
-        algorithm_c.setPropertyValue("OutputWorkspace", "TestOutputWS"));
-    TS_ASSERT_THROWS_NOTHING(
-        algorithm_c.setPropertyValue("CylinderSampleRadius", "0.3175"));
-    TS_ASSERT_THROWS_NOTHING(
-        algorithm_c.setPropertyValue("AttenuationXSection", "2.8"));
-    TS_ASSERT_THROWS_NOTHING(
-        algorithm_c.setPropertyValue("SampleNumberDensity", "0.0721"));
-    TS_ASSERT_THROWS_NOTHING(
-        algorithm_c.setPropertyValue("ScatteringXSection", "5.1"));
+    TS_ASSERT_THROWS_NOTHING(algorithm_c.setPropertyValue("InputWorkspace", "TestInputWS"));
+    TS_ASSERT_THROWS_NOTHING(algorithm_c.setPropertyValue("OutputWorkspace", "TestOutputWS"));
+    TS_ASSERT_THROWS_NOTHING(algorithm_c.setPropertyValue("CylinderSampleRadius", "0.3175"));
+    TS_ASSERT_THROWS_NOTHING(algorithm_c.setPropertyValue("AttenuationXSection", "2.8"));
+    TS_ASSERT_THROWS_NOTHING(algorithm_c.setPropertyValue("SampleNumberDensity", "0.0721"));
+    TS_ASSERT_THROWS_NOTHING(algorithm_c.setPropertyValue("ScatteringXSection", "5.1"));
 
     TS_ASSERT_THROWS_NOTHING(algorithm_c.execute());
     TS_ASSERT(algorithm_c.isExecuted());
 
     MatrixWorkspace_sptr test_output_WS;
 
-    TS_ASSERT_THROWS_NOTHING(
-        test_output_WS =
-            AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-                "TestOutputWS"));
+    TS_ASSERT_THROWS_NOTHING(test_output_WS =
+                                 AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("TestOutputWS"));
     TS_ASSERT(test_output_WS);
 
     // setup expected values
     const size_t size = 16;
-    std::array<double, size> y_expected = {
-        {2.22389, 2.2924, 2.36292, 2.43552, 2.51024, 2.58716, 2.66632, 2.7478,
-         2.83166, 2.91796, 3.00678, 3.0982, 3.19228, 3.28912, 3.38879,
-         3.49139}};
+    std::array<double, size> y_expected = {{2.22389, 2.2924, 2.36292, 2.43552, 2.51024, 2.58716, 2.66632, 2.7478,
+                                            2.83166, 2.91796, 3.00678, 3.0982, 3.19228, 3.28912, 3.38879, 3.49139}};
 
     // do the final comparison
     auto &y_actual = test_output_WS->y(0);
@@ -136,10 +121,8 @@ public:
     const std::string outName("CarpenterSampleCorrectionEventOutput");
 
     // setup the test workspace
-    auto wksp = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(
-        1, 1, false);
-    wksp->getAxis(0)->setUnit(
-        "Wavelength"); // cheat and set the units to Wavelength
+    auto wksp = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(1, 1, false);
+    wksp->getAxis(0)->setUnit("Wavelength"); // cheat and set the units to Wavelength
     wksp->getSpectrum(0).convertTof(.09,
                                     1.); // convert to be from 1->10 (about)
     const std::size_t NUM_EVENTS = wksp->getNumberEvents();
@@ -153,16 +136,13 @@ public:
 
     // execute the algorithm
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("InputWorkspace", wksp));
-    TS_ASSERT_THROWS_NOTHING(
-        algorithm.setPropertyValue("OutputWorkspace", outName));
+    TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("OutputWorkspace", outName));
     TS_ASSERT_THROWS_NOTHING(algorithm.execute());
     TS_ASSERT(algorithm.isExecuted());
 
     // quick checks on the output workspace
     MatrixWorkspace_sptr outputWS;
-    TS_ASSERT_THROWS_NOTHING(
-        outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outName));
+    TS_ASSERT_THROWS_NOTHING(outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outName));
     wksp = std::dynamic_pointer_cast<EventWorkspace>(outputWS);
     TS_ASSERT(wksp);
     TS_ASSERT_EQUALS(wksp->getNumberEvents(), NUM_EVENTS);

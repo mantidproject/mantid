@@ -54,12 +54,9 @@ Mantid::API::MatrixWorkspace_sptr setUpResolutionWorkspace() {
   return createWorkspace->getProperty("OutputWorkspace");
 }
 
-IAlgorithm_sptr calculateIqtAlgorithm(const MatrixWorkspace_sptr &sample,
-                                      const MatrixWorkspace_sptr &resolution,
-                                      const double EnergyMin = -0.5,
-                                      const double EnergyMax = 0.5,
-                                      const double EnergyWidth = 0.1,
-                                      const int NumberOfIterations = 10) {
+IAlgorithm_sptr calculateIqtAlgorithm(const MatrixWorkspace_sptr &sample, const MatrixWorkspace_sptr &resolution,
+                                      const double EnergyMin = -0.5, const double EnergyMax = 0.5,
+                                      const double EnergyWidth = 0.1, const int NumberOfIterations = 10) {
   auto calculateIqt = AlgorithmManager::Instance().create("CalculateIqt");
   calculateIqt->setChild(true);
   calculateIqt->initialize();
@@ -87,28 +84,23 @@ public:
   }
 
   void test_algorithm_executes() {
-    auto algorithm =
-        calculateIqtAlgorithm(m_sampleWorkspace, m_resolutionWorkspace);
+    auto algorithm = calculateIqtAlgorithm(m_sampleWorkspace, m_resolutionWorkspace);
     TS_ASSERT_THROWS_NOTHING(algorithm->execute());
     TS_ASSERT(algorithm->isExecuted());
   }
 
   void test_output_dimensions_are_correct() {
-    auto algorithm =
-        calculateIqtAlgorithm(m_sampleWorkspace, m_resolutionWorkspace);
+    auto algorithm = calculateIqtAlgorithm(m_sampleWorkspace, m_resolutionWorkspace);
     algorithm->execute();
-    MatrixWorkspace_sptr outWorkspace =
-        algorithm->getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr outWorkspace = algorithm->getProperty("OutputWorkspace");
     TS_ASSERT_EQUALS(outWorkspace->getNumberHistograms(), 1);
     TS_ASSERT_EQUALS(outWorkspace->blocksize(), 5);
   }
 
   void test_sample_output_values_are_correct() {
-    auto algorithm =
-        calculateIqtAlgorithm(m_sampleWorkspace, m_resolutionWorkspace);
+    auto algorithm = calculateIqtAlgorithm(m_sampleWorkspace, m_resolutionWorkspace);
     algorithm->execute();
-    MatrixWorkspace_sptr outWorkspace =
-        algorithm->getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr outWorkspace = algorithm->getProperty("OutputWorkspace");
     const auto &yValues = outWorkspace->y(0);
     const auto &eValues = outWorkspace->e(0);
     TS_ASSERT_DELTA(yValues[0], 1, 0.0001);
@@ -120,25 +112,20 @@ public:
   void test_throws_if_energy_bounds_invalid() {
     auto energyMin = 0.5;
     auto energyMax = -1; // invalid - less than energyMin
-    auto algorithm = calculateIqtAlgorithm(
-        m_sampleWorkspace, m_resolutionWorkspace, energyMin, energyMax);
+    auto algorithm = calculateIqtAlgorithm(m_sampleWorkspace, m_resolutionWorkspace, energyMin, energyMax);
     TS_ASSERT_THROWS(algorithm->execute(), const std::runtime_error &);
     TS_ASSERT(!algorithm->isExecuted());
   }
 
   void test_throws_if_number_of_iterations_is_negative() {
     auto nIterations = -1;
-    TS_ASSERT_THROWS(calculateIqtAlgorithm(m_sampleWorkspace,
-                                           m_resolutionWorkspace, -0.5, 0.5,
-                                           0.1, nIterations),
+    TS_ASSERT_THROWS(calculateIqtAlgorithm(m_sampleWorkspace, m_resolutionWorkspace, -0.5, 0.5, 0.1, nIterations),
                      const std::invalid_argument &);
   }
 
   void test_throws_if_number_of_iterations_is_zero() {
     auto nIterations = 0;
-    TS_ASSERT_THROWS(calculateIqtAlgorithm(m_sampleWorkspace,
-                                           m_resolutionWorkspace, -0.5, 0.5,
-                                           0.1, nIterations),
+    TS_ASSERT_THROWS(calculateIqtAlgorithm(m_sampleWorkspace, m_resolutionWorkspace, -0.5, 0.5, 0.1, nIterations),
                      const std::invalid_argument &);
   }
 

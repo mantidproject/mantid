@@ -22,8 +22,8 @@ namespace MantidQt::Widgets::Common::Python {
 class EXPORT_OPT_MANTIDQT_COMMON CodeExecution {
 public:
   CodeExecution(ScriptEditor *editor);
-  PyObject *execute(const QString &codeStr, const QString &filename, int flags,
-                    PyObject *globals, int lineOffset) const;
+  PyObject *execute(const QString &codeStr, const QString &filename, int flags, PyObject *globals,
+                    int lineOffset) const;
 
 private:
   ScriptEditor *m_editor{nullptr};

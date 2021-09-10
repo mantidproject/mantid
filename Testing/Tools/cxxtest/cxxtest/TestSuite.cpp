@@ -32,7 +32,7 @@ namespace CxxTest
     {
         currentAbortTestOnFail = value;
     }
-    
+
     void doAbortTest()
     {
 #   if defined(_CXXTEST_HAVE_EH)
@@ -50,7 +50,7 @@ namespace CxxTest
     {
         return currentMaxDumpSize;
     }
-    
+
     void setMaxDumpSize( unsigned value )
     {
         currentMaxDumpSize = value;
@@ -89,7 +89,7 @@ namespace CxxTest
     {
         if ( size == 0 )
             return true;
-        
+
         if ( x == y )
             return true;
 
@@ -225,7 +225,7 @@ namespace CxxTest
             tracker().failedTest( file, line, exception );
         if ( message )
             tracker().failedTest( file, line, message );
-        
+
         tracker().failedAssertThrows( file, line, expr, type, otherThrown );
         TS_ABORT();
     }
@@ -238,7 +238,7 @@ namespace CxxTest
             tracker().failedTest( file, line, exception );
         if ( message )
             tracker().failedTest( file, line, message );
-        
+
         tracker().failedAssertThrowsNot( file, line, expression );
         TS_ABORT();
     }

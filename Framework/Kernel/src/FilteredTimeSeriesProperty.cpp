@@ -19,13 +19,11 @@ namespace Kernel {
  * @param filterProp :: A boolean series property to filter on
  */
 template <typename HeldType>
-FilteredTimeSeriesProperty<HeldType>::FilteredTimeSeriesProperty(
-    TimeSeriesProperty<HeldType> *seriesProp,
-    const TimeSeriesProperty<bool> &filterProp)
+FilteredTimeSeriesProperty<HeldType>::FilteredTimeSeriesProperty(TimeSeriesProperty<HeldType> *seriesProp,
+                                                                 const TimeSeriesProperty<bool> &filterProp)
     : TimeSeriesProperty<HeldType>(*seriesProp), m_unfiltered(nullptr) {
 
-  m_unfiltered =
-      std::unique_ptr<const TimeSeriesProperty<HeldType>>(seriesProp->clone());
+  m_unfiltered = std::unique_ptr<const TimeSeriesProperty<HeldType>>(seriesProp->clone());
 
   // Now filter us with the filter
   this->filterWith(&filterProp);
@@ -39,8 +37,7 @@ FilteredTimeSeriesProperty<HeldType>::FilteredTimeSeriesProperty(
  */
 template <typename HeldType>
 FilteredTimeSeriesProperty<HeldType>::FilteredTimeSeriesProperty(
-    std::unique_ptr<const TimeSeriesProperty<HeldType>> seriesProp,
-    const TimeSeriesProperty<bool> &filterProp)
+    std::unique_ptr<const TimeSeriesProperty<HeldType>> seriesProp, const TimeSeriesProperty<bool> &filterProp)
     : TimeSeriesProperty<HeldType>(*seriesProp) {
   m_unfiltered = std::move(seriesProp);
   // Now filter us with the filter
@@ -50,24 +47,21 @@ FilteredTimeSeriesProperty<HeldType>::FilteredTimeSeriesProperty(
 /**
  * Destructor
  */
-template <typename HeldType>
-FilteredTimeSeriesProperty<HeldType>::~FilteredTimeSeriesProperty() {}
+template <typename HeldType> FilteredTimeSeriesProperty<HeldType>::~FilteredTimeSeriesProperty() {}
 
 /**
  * Access the unfiltered log
  * @returns A pointer to the unfiltered property
  */
 template <typename HeldType>
-const TimeSeriesProperty<HeldType> *
-FilteredTimeSeriesProperty<HeldType>::unfiltered() const {
+const TimeSeriesProperty<HeldType> *FilteredTimeSeriesProperty<HeldType>::unfiltered() const {
   return m_unfiltered.get();
 }
 
 /// @cond
 // -------------------------- Macro to instantiation concrete types
 // --------------------------------
-#define INSTANTIATE(TYPE)                                                      \
-  template class MANTID_KERNEL_DLL FilteredTimeSeriesProperty<TYPE>;
+#define INSTANTIATE(TYPE) template class MANTID_KERNEL_DLL FilteredTimeSeriesProperty<TYPE>;
 
 // -------------------------- Concrete instantiation
 // -----------------------------------------------

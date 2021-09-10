@@ -14,7 +14,7 @@
 
 #include <cxxtest/StdioFilePrinter.h>
 
-namespace CxxTest 
+namespace CxxTest
 {
     class StdioPrinter : public StdioFilePrinter
     {

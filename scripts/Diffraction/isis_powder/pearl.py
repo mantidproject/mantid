@@ -44,6 +44,7 @@ class Pearl(AbstractInst):
     def create_vanadium(self, **kwargs):
         kwargs[
             "perform_attenuation"] = None  # Hard code this off as we do not need an attenuation file
+
         with self._apply_temporary_inst_settings(kwargs, kwargs.get("run_in_cycle")):
             if str(self._inst_settings.tt_mode).lower() == "all":
                 for new_tt_mode in ["tt35", "tt70", "tt88"]:
@@ -105,7 +106,7 @@ class Pearl(AbstractInst):
             add_spline = [self._inst_settings.tt_mode, "long"] if self._inst_settings.long_mode else \
                 [self._inst_settings.tt_mode]
 
-            self._cached_run_details[run_number_string_key].update_spline(
+            self._cached_run_details[run_number_string_key].update_file_paths(
                 self._inst_settings, add_spline)
         yield
         # reset instrument settings
@@ -115,8 +116,7 @@ class Pearl(AbstractInst):
         add_spline = [self._inst_settings.tt_mode, "long"] if self._inst_settings.long_mode else \
             [self._inst_settings.tt_mode]
 
-        self._cached_run_details[run_number_string_key].update_spline(self._inst_settings,
-                                                                      add_spline)
+        self._cached_run_details[run_number_string_key].update_file_paths(self._inst_settings, add_spline)
 
     def _run_create_vanadium(self):
         # Provides a minimal wrapper so if we have tt_mode 'all' we can loop round
@@ -179,7 +179,10 @@ class Pearl(AbstractInst):
         return new_workspace_names
 
     def _get_instrument_bin_widths(self):
-        return self._inst_settings.focused_bin_widths
+        if self._inst_settings.tt_mode=="custom":
+            return self._inst_settings.custom_focused_bin_widths
+        else:
+            return self._inst_settings.focused_bin_widths
 
     def _output_focused_ws(self, processed_spectra, run_details, output_mode=None):
         if not output_mode:
@@ -220,8 +223,12 @@ class Pearl(AbstractInst):
         return grouped_d_spacing, None
 
     def _crop_banks_to_user_tof(self, focused_banks):
-        return common.crop_banks_using_crop_list(focused_banks,
-                                                 self._inst_settings.tof_cropping_values)
+        if self._inst_settings.tt_mode=="custom":
+            return common.crop_banks_using_crop_list(focused_banks,
+                                                     self._inst_settings.custom_tof_cropping_values)
+        else:
+            return common.crop_banks_using_crop_list(focused_banks,
+                                                     self._inst_settings.tof_cropping_values)
 
     def _crop_raw_to_expected_tof_range(self, ws_to_crop):
         out_ws = common.crop_in_tof(ws_to_crop=ws_to_crop,

@@ -19,7 +19,7 @@ where,
 
 :math:`\tau` is the muon decay life time,
 
-:math:`A` is the relative amplitude of the oscillatory term, 
+:math:`A` is the relative amplitude of the oscillatory term,
 
 :math:`\lambda` (MHz) is the relaxation rateo f the oscillatory term,
 
@@ -28,7 +28,7 @@ where,
 and :math:`\phi` is the phase.
 
 .. plot::
-	
+
    from mantid.simpleapi import FunctionWrapper
    import matplotlib.pyplot as plt
    import numpy as np

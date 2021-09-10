@@ -20,13 +20,12 @@ using std::size_t;
 using namespace DataObjects;
 
 // Constructor
-SinglePeriodLoadMuonStrategy::SinglePeriodLoadMuonStrategy(
-    Kernel::Logger &g_log, const std::string filename,
-    LoadMuonNexusV2NexusHelper &nexusLoader, Workspace2D &workspace,
-    int entryNumber, bool isFileMultiPeriod)
-    : LoadMuonStrategy(g_log, filename, nexusLoader), m_workspace(workspace),
-      m_entryNumber(entryNumber), m_isFileMultiPeriod(isFileMultiPeriod),
-      m_detectors(getLoadedDetectors()) {}
+SinglePeriodLoadMuonStrategy::SinglePeriodLoadMuonStrategy(Kernel::Logger &g_log, const std::string filename,
+                                                           LoadMuonNexusV2NexusHelper &nexusLoader,
+                                                           Workspace2D &workspace, int entryNumber,
+                                                           bool isFileMultiPeriod)
+    : LoadMuonStrategy(g_log, filename, nexusLoader), m_workspace(workspace), m_entryNumber(entryNumber),
+      m_isFileMultiPeriod(isFileMultiPeriod), m_detectors(getLoadedDetectors()) {}
 
 /**
  * Loads Muon specific logs into the stored workspace
@@ -36,8 +35,7 @@ void SinglePeriodLoadMuonStrategy::loadMuonLogData() {
 
   auto &run = m_workspace.mutableRun();
   auto sampleInformation = m_nexusLoader.loadSampleInformationFromNexus();
-  std::string mainFieldDirection =
-      m_nexusLoader.loadMainFieldDirectionFromNexus();
+  std::string mainFieldDirection = m_nexusLoader.loadMainFieldDirectionFromNexus();
   double firstGoodData = m_nexusLoader.loadFirstGoodDataFromNexus();
 
   run.addProperty("sample_temp", sampleInformation.temperature);
@@ -54,8 +52,7 @@ void SinglePeriodLoadMuonStrategy::loadGoodFrames() {
   std::string goodframeProp{"goodfrm"};
   auto &run = m_workspace.mutableRun();
   run.removeProperty(goodframeProp);
-  NXInt goodframes =
-      m_nexusLoader.loadGoodFramesDataFromNexus(m_isFileMultiPeriod);
+  NXInt goodframes = m_nexusLoader.loadGoodFramesDataFromNexus(m_isFileMultiPeriod);
 
   if (m_isFileMultiPeriod) {
     run.addProperty(goodframeProp, goodframes[m_entryNumber - 1]);
@@ -72,10 +69,8 @@ void SinglePeriodLoadMuonStrategy::loadGoodFrames() {
  */
 Workspace_sptr SinglePeriodLoadMuonStrategy::loadDetectorGrouping() const {
 
-  auto grouping = m_nexusLoader.loadDetectorGroupingFromNexus(
-      m_detectors, m_isFileMultiPeriod, m_entryNumber);
-  TableWorkspace_sptr table =
-      createDetectorGroupingTable(m_detectors, grouping);
+  auto grouping = m_nexusLoader.loadDetectorGroupingFromNexus(m_detectors, m_isFileMultiPeriod, m_entryNumber);
+  TableWorkspace_sptr table = createDetectorGroupingTable(m_detectors, grouping);
 
   if (table->rowCount() != 0) {
     return table;
@@ -89,8 +84,7 @@ Workspace_sptr SinglePeriodLoadMuonStrategy::loadDetectorGrouping() const {
  * @returns :: Dead time table
  */
 Workspace_sptr SinglePeriodLoadMuonStrategy::loadDeadTimeTable() const {
-  auto deadTimes = m_nexusLoader.loadDeadTimesFromNexus(
-      m_detectors, m_isFileMultiPeriod, m_entryNumber);
+  auto deadTimes = m_nexusLoader.loadDeadTimesFromNexus(m_detectors, m_isFileMultiPeriod, m_entryNumber);
   return createDeadTimeTable(m_detectors, deadTimes);
 }
 /**

@@ -12,9 +12,9 @@ Description
 The algorithm LoadNexusProcessed will read a Nexus data file created
 by :ref:`algm-SaveNexusProcessed` and place the data into the named
 workspace. The file name can be an absolute or relative path and
-should have the extension .nxs, .nx5 or .xml. 
+should have the extension .nxs, .nx5 or .xml.
 
-.. warning:: 
+.. warning::
 	Using XML format can be extremely slow for large data sets and generate very
 	large files.
 

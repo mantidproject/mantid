@@ -44,8 +44,7 @@ public:
     if (!loginobj.isInitialized())
       loginobj.initialize();
 
-    loginobj.setPropertyValue("Username",
-                              "mantidtest@fitsp10.isis.cclrc.ac.uk");
+    loginobj.setPropertyValue("Username", "mantidtest@fitsp10.isis.cclrc.ac.uk");
     loginobj.setPropertyValue("Password", "MantidTestUser4");
     loginobj.setProperty("KeepSessionAlive", false);
 

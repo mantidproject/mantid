@@ -38,10 +38,8 @@ void SofQWCentre::exec() {
   const int emode = m_EmodeProperties.m_emode;
 
   std::vector<double> verticalAxis;
-  MatrixWorkspace_sptr outputWorkspace =
-      SofQW::setUpOutputWorkspace<DataObjects::Workspace2D>(
-          *inputWorkspace, getProperty("QAxisBinning"), verticalAxis,
-          getProperty("EAxisBinning"), m_EmodeProperties);
+  MatrixWorkspace_sptr outputWorkspace = SofQW::setUpOutputWorkspace<DataObjects::Workspace2D>(
+      *inputWorkspace, getProperty("QAxisBinning"), verticalAxis, getProperty("EAxisBinning"), m_EmodeProperties);
   setProperty("OutputWorkspace", outputWorkspace);
   const auto &xAxis = outputWorkspace->binEdges(0).rawData();
 
@@ -51,8 +49,7 @@ void SofQWCentre::exec() {
 
   const auto &detectorInfo = inputWorkspace->detectorInfo();
   const auto &spectrumInfo = inputWorkspace->spectrumInfo();
-  const V3D beamDir =
-      normalize(detectorInfo.samplePosition() - detectorInfo.sourcePosition());
+  const V3D beamDir = normalize(detectorInfo.samplePosition() - detectorInfo.sourcePosition());
   const double l1 = detectorInfo.l1();
   g_log.debug() << "Source-sample distance: " << l1 << '\n';
 
@@ -85,8 +82,7 @@ void SofQWCentre::exec() {
       try {
         size_t idet = detectorInfo.indexOf(detID);
         // Calculate kf vector direction and then Q for each energy bin
-        const V3D scatterDir = normalize(detectorInfo.position(idet) -
-                                         detectorInfo.samplePosition());
+        const V3D scatterDir = normalize(detectorInfo.position(idet) - detectorInfo.samplePosition());
         for (size_t j = 0; j < numBins; ++j) {
           if (X[j] < xAxis.front() || X[j + 1] > xAxis.back())
             continue;
@@ -98,33 +94,28 @@ void SofQWCentre::exec() {
             ei = efixed;
             ef = efixed - deltaE;
             if (ef < 0) {
-              std::string mess =
-                  "Energy transfer requested in Direct mode exceeds incident "
-                  "energy.\n Found for det ID: " +
-                  std::to_string(idet) + " bin No " + std::to_string(j) +
-                  " with Ei=" + boost::lexical_cast<std::string>(efixed) +
-                  " and energy transfer: " +
-                  boost::lexical_cast<std::string>(deltaE);
+              std::string mess = "Energy transfer requested in Direct mode exceeds incident "
+                                 "energy.\n Found for det ID: " +
+                                 std::to_string(idet) + " bin No " + std::to_string(j) +
+                                 " with Ei=" + boost::lexical_cast<std::string>(efixed) +
+                                 " and energy transfer: " + boost::lexical_cast<std::string>(deltaE);
               throw std::runtime_error(mess);
             }
           } else {
             ei = efixed + deltaE;
             ef = efixed;
             if (ef < 0) {
-              std::string mess =
-                  "Incident energy of a neutron is negative. Are you trying to "
-                  "process Direct data in Indirect mode?\n Found for det ID: " +
-                  std::to_string(idet) + " bin No " + std::to_string(j) +
-                  " with efied=" + boost::lexical_cast<std::string>(efixed) +
-                  " and energy transfer: " +
-                  boost::lexical_cast<std::string>(deltaE);
+              std::string mess = "Incident energy of a neutron is negative. Are you trying to "
+                                 "process Direct data in Indirect mode?\n Found for det ID: " +
+                                 std::to_string(idet) + " bin No " + std::to_string(j) +
+                                 " with efied=" + boost::lexical_cast<std::string>(efixed) +
+                                 " and energy transfer: " + boost::lexical_cast<std::string>(deltaE);
               throw std::runtime_error(mess);
             }
           }
 
           if (ei < 0)
-            throw std::runtime_error(
-                "Negative incident energy. Check binning.");
+            throw std::runtime_error("Negative incident energy. Check binning.");
 
           const V3D ki = beamDir * sqrt(ei / E_mev_toNeutronWavenumberSq);
           const V3D kf = scatterDir * sqrt(ef / E_mev_toNeutronWavenumberSq);
@@ -135,16 +126,13 @@ void SofQWCentre::exec() {
             continue;
           // Find which q bin this point lies in
           const MantidVec::difference_type qIndex =
-              std::upper_bound(verticalAxis.begin(), verticalAxis.end(), q) -
-              verticalAxis.begin() - 1;
+              std::upper_bound(verticalAxis.begin(), verticalAxis.end(), q) - verticalAxis.begin() - 1;
           // Find which e bin this point lies in
           const MantidVec::difference_type eIndex =
-              std::upper_bound(xAxis.begin(), xAxis.end(), deltaE) -
-              xAxis.begin() - 1;
+              std::upper_bound(xAxis.begin(), xAxis.end(), deltaE) - xAxis.begin() - 1;
 
           // Add this spectra-detector pair to the mapping
-          specNumberMapping.emplace_back(
-              outputWorkspace->getSpectrum(qIndex).getSpectrumNo());
+          specNumberMapping.emplace_back(outputWorkspace->getSpectrum(qIndex).getSpectrumNo());
           detIDMapping.emplace_back(detID);
 
           // And add the data and it's error to that bin, taking into account
@@ -152,8 +140,7 @@ void SofQWCentre::exec() {
           outputWorkspace->mutableY(qIndex)[eIndex] += Y[j] / numDets_d;
           // Standard error on the average
           outputWorkspace->mutableE(qIndex)[eIndex] =
-              sqrt((pow(outputWorkspace->e(qIndex)[eIndex], 2) + pow(E[j], 2)) /
-                   numDets_d);
+              sqrt((pow(outputWorkspace->e(qIndex)[eIndex], 2) + pow(E[j], 2)) / numDets_d);
         }
       } catch (std::out_of_range &) {
         // Skip invalid detector IDs
@@ -190,8 +177,7 @@ void SofQWCentre::exec() {
  *  @param outputWS :: The output workspace
  *  @param qAxis ::    A vector of the q bin boundaries
  */
-void SofQWCentre::makeDistribution(API::MatrixWorkspace &outputWS,
-                                   const std::vector<double> &qAxis) {
+void SofQWCentre::makeDistribution(API::MatrixWorkspace &outputWS, const std::vector<double> &qAxis) {
   std::vector<double> widths(qAxis.size());
   std::adjacent_difference(qAxis.begin(), qAxis.end(), widths.begin());
 
@@ -200,10 +186,8 @@ void SofQWCentre::makeDistribution(API::MatrixWorkspace &outputWS,
     auto &Y = outputWS.mutableY(i);
     auto &E = outputWS.mutableE(i);
     using std::placeholders::_1;
-    std::transform(Y.begin(), Y.end(), Y.begin(),
-                   std::bind(std::divides<double>(), _1, widths[i + 1]));
-    std::transform(E.begin(), E.end(), E.begin(),
-                   std::bind(std::divides<double>(), _1, widths[i + 1]));
+    std::transform(Y.begin(), Y.end(), Y.begin(), std::bind(std::divides<double>(), _1, widths[i + 1]));
+    std::transform(E.begin(), E.end(), E.begin(), std::bind(std::divides<double>(), _1, widths[i + 1]));
   }
 }
 

@@ -32,14 +32,11 @@ class LevenbergMarquardtMDTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static LevenbergMarquardtMDTest *createSuite() {
-    return new LevenbergMarquardtMDTest();
-  }
+  static LevenbergMarquardtMDTest *createSuite() { return new LevenbergMarquardtMDTest(); }
   static void destroySuite(LevenbergMarquardtMDTest *suite) { delete suite; }
 
   void test_Gaussian() {
-    API::FunctionDomain1D_sptr domain(
-        new API::FunctionDomain1DVector(0.0, 10.0, 20));
+    API::FunctionDomain1D_sptr domain(new API::FunctionDomain1DVector(0.0, 10.0, 20));
     API::FunctionValues mockData(*domain);
     UserFunction dataMaker;
     dataMaker.setAttributeValue("Formula", "a*x+b+h*exp(-s*x^2)");
@@ -60,8 +57,7 @@ public:
     fun->setParameter("h", 3.);
     fun->setParameter("s", 0.1);
 
-    std::shared_ptr<CostFuncLeastSquares> costFun =
-        std::make_shared<CostFuncLeastSquares>();
+    std::shared_ptr<CostFuncLeastSquares> costFun = std::make_shared<CostFuncLeastSquares>();
     costFun->setFittingFunction(fun, domain, values);
 
     LevenbergMarquardtMDMinimizer s;
@@ -76,8 +72,7 @@ public:
   }
 
   void test_Gaussian_fixed() {
-    API::FunctionDomain1D_sptr domain(
-        new API::FunctionDomain1DVector(0.0, 10.0, 20));
+    API::FunctionDomain1D_sptr domain(new API::FunctionDomain1DVector(0.0, 10.0, 20));
     API::FunctionValues mockData(*domain);
     UserFunction dataMaker;
     dataMaker.setAttributeValue("Formula", "a*x+b+h*exp(-s*x^2)");
@@ -99,8 +94,7 @@ public:
     fun->setParameter("s", 0.1);
     fun->fix(0);
 
-    std::shared_ptr<CostFuncLeastSquares> costFun =
-        std::make_shared<CostFuncLeastSquares>();
+    std::shared_ptr<CostFuncLeastSquares> costFun = std::make_shared<CostFuncLeastSquares>();
     costFun->setFittingFunction(fun, domain, values);
     TS_ASSERT_EQUALS(costFun->nParams(), 3);
 
@@ -116,8 +110,7 @@ public:
   }
 
   void test_Gaussian_tied() {
-    API::FunctionDomain1D_sptr domain(
-        new API::FunctionDomain1DVector(0.0, 10.0, 20));
+    API::FunctionDomain1D_sptr domain(new API::FunctionDomain1DVector(0.0, 10.0, 20));
     API::FunctionValues mockData(*domain);
     UserFunction dataMaker;
     dataMaker.setAttributeValue("Formula", "a*x+b+h*exp(-s*x^2)");
@@ -139,8 +132,7 @@ public:
     fun->setParameter("s", 0.1);
     fun->tie("a", "1");
 
-    std::shared_ptr<CostFuncLeastSquares> costFun =
-        std::make_shared<CostFuncLeastSquares>();
+    std::shared_ptr<CostFuncLeastSquares> costFun = std::make_shared<CostFuncLeastSquares>();
     costFun->setFittingFunction(fun, domain, values);
     TS_ASSERT_EQUALS(costFun->nParams(), 3);
 
@@ -156,8 +148,7 @@ public:
   }
 
   void test_Gaussian_tied_with_formula() {
-    API::FunctionDomain1D_sptr domain(
-        new API::FunctionDomain1DVector(0.0, 10.0, 20));
+    API::FunctionDomain1D_sptr domain(new API::FunctionDomain1DVector(0.0, 10.0, 20));
     API::FunctionValues mockData(*domain);
     UserFunction dataMaker;
     dataMaker.setAttributeValue("Formula", "a*x+b+h*exp(-s*x^2)");
@@ -179,8 +170,7 @@ public:
     fun->setParameter("s", 0.1);
     fun->tie("b", "2*a+0.1");
 
-    std::shared_ptr<CostFuncLeastSquares> costFun =
-        std::make_shared<CostFuncLeastSquares>();
+    std::shared_ptr<CostFuncLeastSquares> costFun = std::make_shared<CostFuncLeastSquares>();
     costFun->setFittingFunction(fun, domain, values);
     TS_ASSERT_EQUALS(costFun->nParams(), 3);
 
@@ -197,8 +187,7 @@ public:
   }
 
   void test_Linear_constrained() {
-    API::FunctionDomain1D_sptr domain(
-        new API::FunctionDomain1DVector(0.0, 10.0, 20));
+    API::FunctionDomain1D_sptr domain(new API::FunctionDomain1DVector(0.0, 10.0, 20));
     API::FunctionValues mockData(*domain);
     UserFunction dataMaker;
     dataMaker.setAttributeValue("Formula", "a*x+b");
@@ -215,11 +204,9 @@ public:
     fun->setParameter("a", 1.);
     fun->setParameter("b", 2.);
 
-    fun->addConstraint(
-        std::make_unique<BoundaryConstraint>(fun.get(), "a", 0, 0.5));
+    fun->addConstraint(std::make_unique<BoundaryConstraint>(fun.get(), "a", 0, 0.5));
 
-    std::shared_ptr<CostFuncLeastSquares> costFun =
-        std::make_shared<CostFuncLeastSquares>();
+    std::shared_ptr<CostFuncLeastSquares> costFun = std::make_shared<CostFuncLeastSquares>();
     costFun->setFittingFunction(fun, domain, values);
     TS_ASSERT_EQUALS(costFun->nParams(), 2);
 
@@ -233,8 +220,7 @@ public:
   }
 
   void test_Linear_constrained1() {
-    API::FunctionDomain1D_sptr domain(
-        new API::FunctionDomain1DVector(0.0, 10.0, 20));
+    API::FunctionDomain1D_sptr domain(new API::FunctionDomain1DVector(0.0, 10.0, 20));
     API::FunctionValues mockData(*domain);
     UserFunction dataMaker;
     dataMaker.setAttributeValue("Formula", "a^2*x+b");
@@ -253,12 +239,10 @@ public:
 
     // lower bound is made > 0 because function's derivative over "a" at a=0 is
     // 0
-    fun->addConstraint(
-        std::make_unique<BoundaryConstraint>(fun.get(), "a", 0.001, 2.0));
+    fun->addConstraint(std::make_unique<BoundaryConstraint>(fun.get(), "a", 0.001, 2.0));
     fun->setConstraintPenaltyFactor("a", 1.e20);
 
-    std::shared_ptr<CostFuncLeastSquares> costFun =
-        std::make_shared<CostFuncLeastSquares>();
+    std::shared_ptr<CostFuncLeastSquares> costFun = std::make_shared<CostFuncLeastSquares>();
     costFun->setFittingFunction(fun, domain, values);
     TS_ASSERT_EQUALS(costFun->nParams(), 2);
 
@@ -447,8 +431,7 @@ public:
 
     auto multi = Mantid::TestHelpers::makeMultiDomainFunction3();
 
-    std::shared_ptr<CostFuncLeastSquares> costFun =
-        std::make_shared<CostFuncLeastSquares>();
+    std::shared_ptr<CostFuncLeastSquares> costFun = std::make_shared<CostFuncLeastSquares>();
     costFun->setFittingFunction(multi, domain, values);
     TS_ASSERT_EQUALS(costFun->nParams(), 6);
 
@@ -468,13 +451,11 @@ public:
   }
 
 private:
-  double fitBSpline(const std::shared_ptr<IFunction> &bsp,
-                    const std::string &func) {
+  double fitBSpline(const std::shared_ptr<IFunction> &bsp, const std::string &func) {
     const double startx = bsp->getAttribute("StartX").asDouble();
     const double endx = bsp->getAttribute("EndX").asDouble();
 
-    API::FunctionDomain1D_sptr domain(
-        new API::FunctionDomain1DVector(startx, endx, 100));
+    API::FunctionDomain1D_sptr domain(new API::FunctionDomain1DVector(startx, endx, 100));
     API::FunctionValues mockData(*domain);
     UserFunction dataMaker;
     dataMaker.setAttributeValue("Formula", func);
@@ -484,8 +465,7 @@ private:
     values->setFitDataFromCalculated(mockData);
     values->setFitWeights(1.0);
 
-    std::shared_ptr<CostFuncLeastSquares> costFun =
-        std::make_shared<CostFuncLeastSquares>();
+    std::shared_ptr<CostFuncLeastSquares> costFun = std::make_shared<CostFuncLeastSquares>();
     costFun->setFittingFunction(bsp, domain, values);
 
     FuncMinimisers::LevenbergMarquardtMDMinimizer s;

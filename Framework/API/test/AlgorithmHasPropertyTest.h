@@ -28,9 +28,7 @@ private:
 
   class AlgorithmWithNoWorkspace : public Algorithm {
   public:
-    const std::string name() const override {
-      return "AlgorithmWithNoWorkspace";
-    }
+    const std::string name() const override { return "AlgorithmWithNoWorkspace"; }
     int version() const override { return 1; }
     const std::string category() const override { return "Cat"; }
     const std::string summary() const override { return "Test summary"; }
@@ -41,9 +39,7 @@ private:
 
   class AlgorithmWithInvalidProperty : public Algorithm {
   public:
-    const std::string name() const override {
-      return "AlgorithmWithInvalidProperty";
-    }
+    const std::string name() const override { return "AlgorithmWithInvalidProperty"; }
     int version() const override { return 1; }
     const std::string category() const override { return "Cat"; }
     const std::string summary() const override { return "Test summary"; }
@@ -82,9 +78,7 @@ public:
     IAlgorithm_sptr tester(new AlgorithmWithInvalidProperty);
     tester->initialize();
 
-    TS_ASSERT_EQUALS(
-        check.isValid(tester),
-        "Algorithm object contains the required property \"OutputValue\" but "
-        "it has an invalid value: -1");
+    TS_ASSERT_EQUALS(check.isValid(tester), "Algorithm object contains the required property \"OutputValue\" but "
+                                            "it has an invalid value: -1");
   }
 };

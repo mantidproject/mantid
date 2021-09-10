@@ -32,9 +32,7 @@ const std::string NexusTester::name() const { return "NexusTester"; }
 int NexusTester::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string NexusTester::category() const {
-  return "Utility\\Development";
-}
+const std::string NexusTester::category() const { return "Utility\\Development"; }
 
 //----------------------------------------------------------------------------------------------
 
@@ -44,41 +42,29 @@ const std::string NexusTester::category() const {
 void NexusTester::init() {
   std::initializer_list<std::string> exts = {".nxs"};
 
-  declareProperty(std::make_unique<FileProperty>(
-                      "SaveFilename", "", FileProperty::OptionalSave, exts),
+  declareProperty(std::make_unique<FileProperty>("SaveFilename", "", FileProperty::OptionalSave, exts),
                   "The name of the Nexus file to write.");
 
-  declareProperty(std::make_unique<FileProperty>(
-                      "LoadFilename", "", FileProperty::OptionalLoad, exts),
+  declareProperty(std::make_unique<FileProperty>("LoadFilename", "", FileProperty::OptionalLoad, exts),
                   "The name of the Nexus file to load (optional).\n"
                   "Must have been written by NexusTester algorithm.");
 
-  declareProperty("ChunkSize", 10,
-                  "Chunk size for writing/loading, in kb of data");
+  declareProperty("ChunkSize", 10, "Chunk size for writing/loading, in kb of data");
   declareProperty("NumChunks", 10, "Number of chunks to load or write");
   declareProperty("Compress", true, "For writing: compress the data.");
   declareProperty("HDFCacheSize", 2000000, "HDF cache size, in bytes");
-  declareProperty(
-      "ClearDiskCache", false,
-      "Clear the linux disk cache before loading.\n"
-      "Only works on linux AND you need to run MantidPlot in sudo mode (!).");
+  declareProperty("ClearDiskCache", false,
+                  "Clear the linux disk cache before loading.\n"
+                  "Only works on linux AND you need to run MantidPlot in sudo mode (!).");
 
-  std::vector<std::string> types{"Zeros", "Incrementing Numbers",
-                                 "Random Numbers"};
-  declareProperty("FakeData", "Incrementing Numbers",
-                  std::make_shared<StringListValidator>(types),
+  std::vector<std::string> types{"Zeros", "Incrementing Numbers", "Random Numbers"};
+  declareProperty("FakeData", "Incrementing Numbers", std::make_shared<StringListValidator>(types),
                   "For writing: type of fake data to generate.");
 
-  declareProperty(
-      "CompressionFactor", 0.0,
-      "The size of the file divided by the the size of the data on disk.",
-      Direction::Output);
-  declareProperty("SaveSpeed", 0.0,
-                  "The measured rate of saving the file, in MB (of data)/sec.",
+  declareProperty("CompressionFactor", 0.0, "The size of the file divided by the the size of the data on disk.",
                   Direction::Output);
-  declareProperty("LoadSpeed", 0.0,
-                  "The measured rate of loading the file, in MB (of data)/sec.",
-                  Direction::Output);
+  declareProperty("SaveSpeed", 0.0, "The measured rate of saving the file, in MB (of data)/sec.", Direction::Output);
+  declareProperty("LoadSpeed", 0.0, "The measured rate of loading the file, in MB (of data)/sec.", Direction::Output);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -118,16 +104,14 @@ void NexusTester::exec() {
   chunkDims.emplace_back(int64_t(chunkSize));
 
   // Total size in BYTES
-  double dataSizeMB =
-      double(chunkSize * NumChunks * sizeof(uint32_t)) / (1024. * 1024.);
+  double dataSizeMB = double(chunkSize * NumChunks * sizeof(uint32_t)) / (1024. * 1024.);
   g_log.notice() << "Data size is " << dataSizeMB << " MB\n";
 
   // ------------------------ Save a File ----------------------------
   if (!SaveFilename.empty()) {
     ::NeXus::File file(SaveFilename, NXACC_CREATE5);
     file.makeGroup("FakeDataGroup", "NXdata", true);
-    file.makeCompData("FakeData", ::NeXus::UINT32, dims,
-                      Compress ? ::NeXus::LZW : ::NeXus::NONE, chunkDims, true);
+    file.makeCompData("FakeData", ::NeXus::UINT32, dims, Compress ? ::NeXus::LZW : ::NeXus::NONE, chunkDims, true);
     Progress prog(this, 0.0, 1.0, NumChunks);
     CPUTimer tim;
     for (int i = 0; i < NumChunks; i++) {
@@ -182,8 +166,7 @@ void NexusTester::exec() {
     double seconds = tim.elapsedWallClock(false);
     double MBperSec = dataSizeMB / seconds;
     this->setProperty("LoadSpeed", MBperSec);
-    g_log.notice() << tim << " to load the file = " << MBperSec
-                   << " MB/sec (data), " << MBperSec * CompressionFactor
+    g_log.notice() << tim << " to load the file = " << MBperSec << " MB/sec (data), " << MBperSec * CompressionFactor
                    << " MB/sec (file)\n";
   }
 }

@@ -62,258 +62,187 @@ public:
 #endif
 
   /// Web service operation 'login' (returns error code or SOAP_OK)
-  virtual int login(ns1__login *ns1__login_,
-                    ns1__loginResponse *ns1__loginResponse_) {
+  virtual int login(ns1__login *ns1__login_, ns1__loginResponse *ns1__loginResponse_) {
     return this->login(nullptr, nullptr, ns1__login_, ns1__loginResponse_);
   }
-  virtual int login(const char *endpoint, const char *soap_action,
-                    ns1__login *ns1__login_,
+  virtual int login(const char *endpoint, const char *soap_action, ns1__login *ns1__login_,
                     ns1__loginResponse *ns1__loginResponse_);
 
   /// Web service operation 'getUserName' (returns error code or SOAP_OK)
-  virtual int getUserName(ns1__getUserName *ns1__getUserName_,
-                          ns1__getUserNameResponse *ns1__getUserNameResponse_) {
-    return this->getUserName(nullptr, nullptr, ns1__getUserName_,
-                             ns1__getUserNameResponse_);
+  virtual int getUserName(ns1__getUserName *ns1__getUserName_, ns1__getUserNameResponse *ns1__getUserNameResponse_) {
+    return this->getUserName(nullptr, nullptr, ns1__getUserName_, ns1__getUserNameResponse_);
   }
-  virtual int getUserName(const char *endpoint, const char *soap_action,
-                          ns1__getUserName *ns1__getUserName_,
+  virtual int getUserName(const char *endpoint, const char *soap_action, ns1__getUserName *ns1__getUserName_,
                           ns1__getUserNameResponse *ns1__getUserNameResponse_);
 
   /// Web service operation 'get' (returns error code or SOAP_OK)
   virtual int get(ns1__get *ns1__get_, ns1__getResponse *ns1__getResponse_) {
     return this->get(nullptr, nullptr, ns1__get_, ns1__getResponse_);
   }
-  virtual int get(const char *endpoint, const char *soap_action,
-                  ns1__get *ns1__get_, ns1__getResponse *ns1__getResponse_);
+  virtual int get(const char *endpoint, const char *soap_action, ns1__get *ns1__get_,
+                  ns1__getResponse *ns1__getResponse_);
 
   /// Web service operation 'getProperties' (returns error code or SOAP_OK)
-  virtual int
-  getProperties(ns1__getProperties *ns1__getProperties_,
-                ns1__getPropertiesResponse *ns1__getPropertiesResponse_) {
-    return this->getProperties(nullptr, nullptr, ns1__getProperties_,
-                               ns1__getPropertiesResponse_);
+  virtual int getProperties(ns1__getProperties *ns1__getProperties_,
+                            ns1__getPropertiesResponse *ns1__getPropertiesResponse_) {
+    return this->getProperties(nullptr, nullptr, ns1__getProperties_, ns1__getPropertiesResponse_);
   }
-  virtual int
-  getProperties(const char *endpoint, const char *soap_action,
-                ns1__getProperties *ns1__getProperties_,
-                ns1__getPropertiesResponse *ns1__getPropertiesResponse_);
+  virtual int getProperties(const char *endpoint, const char *soap_action, ns1__getProperties *ns1__getProperties_,
+                            ns1__getPropertiesResponse *ns1__getPropertiesResponse_);
 
   /// Web service operation 'delete' (returns error code or SOAP_OK)
-  virtual int delete_(ns1__delete *ns1__delete_,
-                      ns1__deleteResponse *ns1__deleteResponse_) {
+  virtual int delete_(ns1__delete *ns1__delete_, ns1__deleteResponse *ns1__deleteResponse_) {
     return this->delete_(nullptr, nullptr, ns1__delete_, ns1__deleteResponse_);
   }
-  virtual int delete_(const char *endpoint, const char *soap_action,
-                      ns1__delete *ns1__delete_,
+  virtual int delete_(const char *endpoint, const char *soap_action, ns1__delete *ns1__delete_,
                       ns1__deleteResponse *ns1__deleteResponse_);
 
   /// Web service operation 'search' (returns error code or SOAP_OK)
-  virtual int search(ns1__search *ns1__search_,
-                     ns1__searchResponse *ns1__searchResponse_) {
+  virtual int search(ns1__search *ns1__search_, ns1__searchResponse *ns1__searchResponse_) {
     return this->search(nullptr, nullptr, ns1__search_, ns1__searchResponse_);
   }
-  virtual int search(const char *endpoint, const char *soap_action,
-                     ns1__search *ns1__search_,
+  virtual int search(const char *endpoint, const char *soap_action, ns1__search *ns1__search_,
                      ns1__searchResponse *ns1__searchResponse_);
 
   /// Web service operation 'create' (returns error code or SOAP_OK)
-  virtual int create(ns1__create *ns1__create_,
-                     ns1__createResponse *ns1__createResponse_) {
+  virtual int create(ns1__create *ns1__create_, ns1__createResponse *ns1__createResponse_) {
     return this->create(nullptr, nullptr, ns1__create_, ns1__createResponse_);
   }
-  virtual int create(const char *endpoint, const char *soap_action,
-                     ns1__create *ns1__create_,
+  virtual int create(const char *endpoint, const char *soap_action, ns1__create *ns1__create_,
                      ns1__createResponse *ns1__createResponse_);
 
   /// Web service operation 'update' (returns error code or SOAP_OK)
-  virtual int update(ns1__update *ns1__update_,
-                     ns1__updateResponse *ns1__updateResponse_) {
+  virtual int update(ns1__update *ns1__update_, ns1__updateResponse *ns1__updateResponse_) {
     return this->update(nullptr, nullptr, ns1__update_, ns1__updateResponse_);
   }
-  virtual int update(const char *endpoint, const char *soap_action,
-                     ns1__update *ns1__update_,
+  virtual int update(const char *endpoint, const char *soap_action, ns1__update *ns1__update_,
                      ns1__updateResponse *ns1__updateResponse_);
 
   /// Web service operation 'getApiVersion' (returns error code or SOAP_OK)
-  virtual int
-  getApiVersion(ns1__getApiVersion *ns1__getApiVersion_,
-                ns1__getApiVersionResponse *ns1__getApiVersionResponse_) {
-    return this->getApiVersion(nullptr, nullptr, ns1__getApiVersion_,
-                               ns1__getApiVersionResponse_);
+  virtual int getApiVersion(ns1__getApiVersion *ns1__getApiVersion_,
+                            ns1__getApiVersionResponse *ns1__getApiVersionResponse_) {
+    return this->getApiVersion(nullptr, nullptr, ns1__getApiVersion_, ns1__getApiVersionResponse_);
   }
-  virtual int
-  getApiVersion(const char *endpoint, const char *soap_action,
-                ns1__getApiVersion *ns1__getApiVersion_,
-                ns1__getApiVersionResponse *ns1__getApiVersionResponse_);
+  virtual int getApiVersion(const char *endpoint, const char *soap_action, ns1__getApiVersion *ns1__getApiVersion_,
+                            ns1__getApiVersionResponse *ns1__getApiVersionResponse_);
 
   /// Web service operation 'getEntityNames' (returns error code or SOAP_OK)
-  virtual int
-  getEntityNames(ns1__getEntityNames *ns1__getEntityNames_,
-                 ns1__getEntityNamesResponse *ns1__getEntityNamesResponse_) {
-    return this->getEntityNames(nullptr, nullptr, ns1__getEntityNames_,
-                                ns1__getEntityNamesResponse_);
+  virtual int getEntityNames(ns1__getEntityNames *ns1__getEntityNames_,
+                             ns1__getEntityNamesResponse *ns1__getEntityNamesResponse_) {
+    return this->getEntityNames(nullptr, nullptr, ns1__getEntityNames_, ns1__getEntityNamesResponse_);
   }
-  virtual int
-  getEntityNames(const char *endpoint, const char *soap_action,
-                 ns1__getEntityNames *ns1__getEntityNames_,
-                 ns1__getEntityNamesResponse *ns1__getEntityNamesResponse_);
+  virtual int getEntityNames(const char *endpoint, const char *soap_action, ns1__getEntityNames *ns1__getEntityNames_,
+                             ns1__getEntityNamesResponse *ns1__getEntityNamesResponse_);
 
   /// Web service operation 'refresh' (returns error code or SOAP_OK)
-  virtual int refresh(ns1__refresh *ns1__refresh_,
-                      ns1__refreshResponse *ns1__refreshResponse_) {
-    return this->refresh(nullptr, nullptr, ns1__refresh_,
-                         ns1__refreshResponse_);
+  virtual int refresh(ns1__refresh *ns1__refresh_, ns1__refreshResponse *ns1__refreshResponse_) {
+    return this->refresh(nullptr, nullptr, ns1__refresh_, ns1__refreshResponse_);
   }
-  virtual int refresh(const char *endpoint, const char *soap_action,
-                      ns1__refresh *ns1__refresh_,
+  virtual int refresh(const char *endpoint, const char *soap_action, ns1__refresh *ns1__refresh_,
                       ns1__refreshResponse *ns1__refreshResponse_);
 
   /// Web service operation 'dummy' (returns error code or SOAP_OK)
-  virtual int dummy(ns1__dummy *ns1__dummy_,
-                    ns1__dummyResponse *ns1__dummyResponse_) {
+  virtual int dummy(ns1__dummy *ns1__dummy_, ns1__dummyResponse *ns1__dummyResponse_) {
     return this->dummy(nullptr, nullptr, ns1__dummy_, ns1__dummyResponse_);
   }
-  virtual int dummy(const char *endpoint, const char *soap_action,
-                    ns1__dummy *ns1__dummy_,
+  virtual int dummy(const char *endpoint, const char *soap_action, ns1__dummy *ns1__dummy_,
                     ns1__dummyResponse *ns1__dummyResponse_);
 
   /// Web service operation 'logout' (returns error code or SOAP_OK)
-  virtual int logout(ns1__logout *ns1__logout_,
-                     ns1__logoutResponse *ns1__logoutResponse_) {
+  virtual int logout(ns1__logout *ns1__logout_, ns1__logoutResponse *ns1__logoutResponse_) {
     return this->logout(nullptr, nullptr, ns1__logout_, ns1__logoutResponse_);
   }
-  virtual int logout(const char *endpoint, const char *soap_action,
-                     ns1__logout *ns1__logout_,
+  virtual int logout(const char *endpoint, const char *soap_action, ns1__logout *ns1__logout_,
                      ns1__logoutResponse *ns1__logoutResponse_);
 
   /// Web service operation 'getRemainingMinutes' (returns error code or
   /// SOAP_OK)
-  virtual int getRemainingMinutes(
-      ns1__getRemainingMinutes *ns1__getRemainingMinutes_,
-      ns1__getRemainingMinutesResponse *ns1__getRemainingMinutesResponse_) {
-    return this->getRemainingMinutes(nullptr, nullptr,
-                                     ns1__getRemainingMinutes_,
-                                     ns1__getRemainingMinutesResponse_);
+  virtual int getRemainingMinutes(ns1__getRemainingMinutes *ns1__getRemainingMinutes_,
+                                  ns1__getRemainingMinutesResponse *ns1__getRemainingMinutesResponse_) {
+    return this->getRemainingMinutes(nullptr, nullptr, ns1__getRemainingMinutes_, ns1__getRemainingMinutesResponse_);
   }
-  virtual int getRemainingMinutes(
-      const char *endpoint, const char *soap_action,
-      ns1__getRemainingMinutes *ns1__getRemainingMinutes_,
-      ns1__getRemainingMinutesResponse *ns1__getRemainingMinutesResponse_);
+  virtual int getRemainingMinutes(const char *endpoint, const char *soap_action,
+                                  ns1__getRemainingMinutes *ns1__getRemainingMinutes_,
+                                  ns1__getRemainingMinutesResponse *ns1__getRemainingMinutesResponse_);
 
   /// Web service operation 'searchText' (returns error code or SOAP_OK)
-  virtual int searchText(ns1__searchText *ns1__searchText_,
-                         ns1__searchTextResponse *ns1__searchTextResponse_) {
-    return this->searchText(nullptr, nullptr, ns1__searchText_,
-                            ns1__searchTextResponse_);
+  virtual int searchText(ns1__searchText *ns1__searchText_, ns1__searchTextResponse *ns1__searchTextResponse_) {
+    return this->searchText(nullptr, nullptr, ns1__searchText_, ns1__searchTextResponse_);
   }
-  virtual int searchText(const char *endpoint, const char *soap_action,
-                         ns1__searchText *ns1__searchText_,
+  virtual int searchText(const char *endpoint, const char *soap_action, ns1__searchText *ns1__searchText_,
                          ns1__searchTextResponse *ns1__searchTextResponse_);
 
   /// Web service operation 'isAccessAllowed' (returns error code or SOAP_OK)
-  virtual int
-  isAccessAllowed(ns1__isAccessAllowed *ns1__isAccessAllowed_,
-                  ns1__isAccessAllowedResponse *ns1__isAccessAllowedResponse_) {
-    return this->isAccessAllowed(nullptr, nullptr, ns1__isAccessAllowed_,
-                                 ns1__isAccessAllowedResponse_);
+  virtual int isAccessAllowed(ns1__isAccessAllowed *ns1__isAccessAllowed_,
+                              ns1__isAccessAllowedResponse *ns1__isAccessAllowedResponse_) {
+    return this->isAccessAllowed(nullptr, nullptr, ns1__isAccessAllowed_, ns1__isAccessAllowedResponse_);
   }
-  virtual int
-  isAccessAllowed(const char *endpoint, const char *soap_action,
-                  ns1__isAccessAllowed *ns1__isAccessAllowed_,
-                  ns1__isAccessAllowedResponse *ns1__isAccessAllowedResponse_);
+  virtual int isAccessAllowed(const char *endpoint, const char *soap_action,
+                              ns1__isAccessAllowed *ns1__isAccessAllowed_,
+                              ns1__isAccessAllowedResponse *ns1__isAccessAllowedResponse_);
 
   /// Web service operation 'lucenePopulate' (returns error code or SOAP_OK)
-  virtual int
-  lucenePopulate(ns1__lucenePopulate *ns1__lucenePopulate_,
-                 ns1__lucenePopulateResponse *ns1__lucenePopulateResponse_) {
-    return this->lucenePopulate(nullptr, nullptr, ns1__lucenePopulate_,
-                                ns1__lucenePopulateResponse_);
+  virtual int lucenePopulate(ns1__lucenePopulate *ns1__lucenePopulate_,
+                             ns1__lucenePopulateResponse *ns1__lucenePopulateResponse_) {
+    return this->lucenePopulate(nullptr, nullptr, ns1__lucenePopulate_, ns1__lucenePopulateResponse_);
   }
-  virtual int
-  lucenePopulate(const char *endpoint, const char *soap_action,
-                 ns1__lucenePopulate *ns1__lucenePopulate_,
-                 ns1__lucenePopulateResponse *ns1__lucenePopulateResponse_);
+  virtual int lucenePopulate(const char *endpoint, const char *soap_action, ns1__lucenePopulate *ns1__lucenePopulate_,
+                             ns1__lucenePopulateResponse *ns1__lucenePopulateResponse_);
 
   /// Web service operation 'luceneClear' (returns error code or SOAP_OK)
-  virtual int luceneClear(ns1__luceneClear *ns1__luceneClear_,
-                          ns1__luceneClearResponse *ns1__luceneClearResponse_) {
-    return this->luceneClear(nullptr, nullptr, ns1__luceneClear_,
-                             ns1__luceneClearResponse_);
+  virtual int luceneClear(ns1__luceneClear *ns1__luceneClear_, ns1__luceneClearResponse *ns1__luceneClearResponse_) {
+    return this->luceneClear(nullptr, nullptr, ns1__luceneClear_, ns1__luceneClearResponse_);
   }
-  virtual int luceneClear(const char *endpoint, const char *soap_action,
-                          ns1__luceneClear *ns1__luceneClear_,
+  virtual int luceneClear(const char *endpoint, const char *soap_action, ns1__luceneClear *ns1__luceneClear_,
                           ns1__luceneClearResponse *ns1__luceneClearResponse_);
 
   /// Web service operation 'luceneCommit' (returns error code or SOAP_OK)
-  virtual int
-  luceneCommit(ns1__luceneCommit *ns1__luceneCommit_,
-               ns1__luceneCommitResponse *ns1__luceneCommitResponse_) {
-    return this->luceneCommit(nullptr, nullptr, ns1__luceneCommit_,
-                              ns1__luceneCommitResponse_);
+  virtual int luceneCommit(ns1__luceneCommit *ns1__luceneCommit_,
+                           ns1__luceneCommitResponse *ns1__luceneCommitResponse_) {
+    return this->luceneCommit(nullptr, nullptr, ns1__luceneCommit_, ns1__luceneCommitResponse_);
   }
-  virtual int
-  luceneCommit(const char *endpoint, const char *soap_action,
-               ns1__luceneCommit *ns1__luceneCommit_,
-               ns1__luceneCommitResponse *ns1__luceneCommitResponse_);
+  virtual int luceneCommit(const char *endpoint, const char *soap_action, ns1__luceneCommit *ns1__luceneCommit_,
+                           ns1__luceneCommitResponse *ns1__luceneCommitResponse_);
 
   /// Web service operation 'luceneSearch' (returns error code or SOAP_OK)
-  virtual int
-  luceneSearch(ns1__luceneSearch *ns1__luceneSearch_,
-               ns1__luceneSearchResponse *ns1__luceneSearchResponse_) {
-    return this->luceneSearch(nullptr, nullptr, ns1__luceneSearch_,
-                              ns1__luceneSearchResponse_);
+  virtual int luceneSearch(ns1__luceneSearch *ns1__luceneSearch_,
+                           ns1__luceneSearchResponse *ns1__luceneSearchResponse_) {
+    return this->luceneSearch(nullptr, nullptr, ns1__luceneSearch_, ns1__luceneSearchResponse_);
   }
-  virtual int
-  luceneSearch(const char *endpoint, const char *soap_action,
-               ns1__luceneSearch *ns1__luceneSearch_,
-               ns1__luceneSearchResponse *ns1__luceneSearchResponse_);
+  virtual int luceneSearch(const char *endpoint, const char *soap_action, ns1__luceneSearch *ns1__luceneSearch_,
+                           ns1__luceneSearchResponse *ns1__luceneSearchResponse_);
 
   /// Web service operation 'luceneGetPopulating' (returns error code or
   /// SOAP_OK)
-  virtual int luceneGetPopulating(
-      ns1__luceneGetPopulating *ns1__luceneGetPopulating_,
-      ns1__luceneGetPopulatingResponse *ns1__luceneGetPopulatingResponse_) {
-    return this->luceneGetPopulating(nullptr, nullptr,
-                                     ns1__luceneGetPopulating_,
-                                     ns1__luceneGetPopulatingResponse_);
+  virtual int luceneGetPopulating(ns1__luceneGetPopulating *ns1__luceneGetPopulating_,
+                                  ns1__luceneGetPopulatingResponse *ns1__luceneGetPopulatingResponse_) {
+    return this->luceneGetPopulating(nullptr, nullptr, ns1__luceneGetPopulating_, ns1__luceneGetPopulatingResponse_);
   }
-  virtual int luceneGetPopulating(
-      const char *endpoint, const char *soap_action,
-      ns1__luceneGetPopulating *ns1__luceneGetPopulating_,
-      ns1__luceneGetPopulatingResponse *ns1__luceneGetPopulatingResponse_);
+  virtual int luceneGetPopulating(const char *endpoint, const char *soap_action,
+                                  ns1__luceneGetPopulating *ns1__luceneGetPopulating_,
+                                  ns1__luceneGetPopulatingResponse *ns1__luceneGetPopulatingResponse_);
 
   /// Web service operation 'createMany' (returns error code or SOAP_OK)
-  virtual int createMany(ns1__createMany *ns1__createMany_,
-                         ns1__createManyResponse *ns1__createManyResponse_) {
-    return this->createMany(nullptr, nullptr, ns1__createMany_,
-                            ns1__createManyResponse_);
+  virtual int createMany(ns1__createMany *ns1__createMany_, ns1__createManyResponse *ns1__createManyResponse_) {
+    return this->createMany(nullptr, nullptr, ns1__createMany_, ns1__createManyResponse_);
   }
-  virtual int createMany(const char *endpoint, const char *soap_action,
-                         ns1__createMany *ns1__createMany_,
+  virtual int createMany(const char *endpoint, const char *soap_action, ns1__createMany *ns1__createMany_,
                          ns1__createManyResponse *ns1__createManyResponse_);
 
   /// Web service operation 'deleteMany' (returns error code or SOAP_OK)
-  virtual int deleteMany(ns1__deleteMany *ns1__deleteMany_,
-                         ns1__deleteManyResponse *ns1__deleteManyResponse_) {
-    return this->deleteMany(nullptr, nullptr, ns1__deleteMany_,
-                            ns1__deleteManyResponse_);
+  virtual int deleteMany(ns1__deleteMany *ns1__deleteMany_, ns1__deleteManyResponse *ns1__deleteManyResponse_) {
+    return this->deleteMany(nullptr, nullptr, ns1__deleteMany_, ns1__deleteManyResponse_);
   }
-  virtual int deleteMany(const char *endpoint, const char *soap_action,
-                         ns1__deleteMany *ns1__deleteMany_,
+  virtual int deleteMany(const char *endpoint, const char *soap_action, ns1__deleteMany *ns1__deleteMany_,
                          ns1__deleteManyResponse *ns1__deleteManyResponse_);
 
   /// Web service operation 'getEntityInfo' (returns error code or SOAP_OK)
-  virtual int
-  getEntityInfo(ns1__getEntityInfo *ns1__getEntityInfo_,
-                ns1__getEntityInfoResponse *ns1__getEntityInfoResponse_) {
-    return this->getEntityInfo(nullptr, nullptr, ns1__getEntityInfo_,
-                               ns1__getEntityInfoResponse_);
+  virtual int getEntityInfo(ns1__getEntityInfo *ns1__getEntityInfo_,
+                            ns1__getEntityInfoResponse *ns1__getEntityInfoResponse_) {
+    return this->getEntityInfo(nullptr, nullptr, ns1__getEntityInfo_, ns1__getEntityInfoResponse_);
   }
-  virtual int
-  getEntityInfo(const char *endpoint, const char *soap_action,
-                ns1__getEntityInfo *ns1__getEntityInfo_,
-                ns1__getEntityInfoResponse *ns1__getEntityInfoResponse_);
+  virtual int getEntityInfo(const char *endpoint, const char *soap_action, ns1__getEntityInfo *ns1__getEntityInfo_,
+                            ns1__getEntityInfoResponse *ns1__getEntityInfoResponse_);
 };
 
 } // namespace ICat4

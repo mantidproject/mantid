@@ -6,7 +6,7 @@ Working with Python
 
 This is a quick summary of how to use python scripts in Workbench. To learn more about this, see the further tutorials on the `home page <https://www.mantidproject.org/Main_Page>`_. Even if you are a novice at Python, it is useful to know how to run a script as you can produce one within Mantid: from the "Generate a script" button on a plot toolbar, or from project recovery when you reopen Mantid after a crash.
 
-Within the Mantid you can make use of the script window or IPython prompt to manipulate data and build plots exactly to your specifications in ways that you would not 
+Within the Mantid you can make use of the script window or IPython prompt to manipulate data and build plots exactly to your specifications in ways that you would not
 be able to with the interface alone.
 
 .. figure:: /images/Workbench_script_new.png
@@ -14,7 +14,7 @@ be able to with the interface alone.
    :alt: A view of the Workbench script window
    :align: center
 
-You can also use the IPython tab below the script editor to change to an inline Python interpreter. Both the python interpreter and scripts run through Mantid are able to interact 
+You can also use the IPython tab below the script editor to change to an inline Python interpreter. Both the python interpreter and scripts run through Mantid are able to interact
 with Mantid workspaces, plot and algorithms.
 
 1. Default imports
@@ -25,7 +25,7 @@ By default any new script opened in Workbench will come with some default import
 .. code-block:: python
 
    from mantid.simpleapi import *
-   
+
 This imports all the algorithms from Mantid to be used within your Python script.
 
 .. code-block:: python
@@ -65,7 +65,7 @@ The toggle whitespace visible option is global and will affect the appearance of
 
 4. Status
 =========
-The status bar tells you if the code in the currently open tab is running or not. If the code has been run previously the status bar will give details of the previous run including 
+The status bar tells you if the code in the currently open tab is running or not. If the code has been run previously the status bar will give details of the previous run including
 runtime, and whether the code ran without errors.
 
 Useful Links

@@ -36,21 +36,15 @@ namespace Algorithms {
  */
 class MANTID_ALGORITHMS_DLL CreateWorkspace : public API::Algorithm {
 public:
-  const std::string name() const override {
-    return "CreateWorkspace";
-  } ///< @return the algorithms name
+  const std::string name() const override { return "CreateWorkspace"; } ///< @return the algorithms name
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "This algorithm constructs a MatrixWorkspace when passed a vector "
            "for each of the X, Y, and E data values.";
   }
 
-  const std::string category() const override {
-    return "Utility\\Workspaces";
-  } ///< @return the algorithms category
-  int version() const override {
-    return (1);
-  } ///< @return version number of algorithm
+  const std::string category() const override { return "Utility\\Workspaces"; } ///< @return the algorithms category
+  int version() const override { return (1); }                                  ///< @return version number of algorithm
 
   const std::vector<std::string> seeAlso() const override {
     return {"CreateSingleValuedWorkspace", "CreateSampleWorkspace"};
@@ -58,9 +52,8 @@ public:
   std::map<std::string, std::string> validateInputs() override;
 
 protected:
-  Parallel::ExecutionMode getParallelExecutionMode(
-      const std::map<std::string, Parallel::StorageMode> &storageModes)
-      const override;
+  Parallel::ExecutionMode
+  getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const override;
 
 private:
   /// Initialise the Algorithm (declare properties)

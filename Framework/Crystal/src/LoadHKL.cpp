@@ -29,12 +29,10 @@ DECLARE_ALGORITHM(LoadHKL)
 /** Initialize the algorithm's properties.
  */
 void LoadHKL::init() {
-  declareProperty(std::make_unique<FileProperty>("Filename", "",
-                                                 FileProperty::Load, ".hkl"),
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Load, ".hkl"),
                   "Path to an hkl file to save.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace.");
 }
 
@@ -64,12 +62,10 @@ void LoadHKL::exec() {
   detector->setPos(0.0, 0.0, 0.0);
   inst->add(detector); // This takes care of deletion
   inst->markAsDetector(detector);
-  Mantid::Geometry::Component *sample =
-      new Mantid::Geometry::Component("Sample");
+  Mantid::Geometry::Component *sample = new Mantid::Geometry::Component("Sample");
   inst->add(sample); // This takes care of deletion
   inst->markAsSamplePos(sample);
-  Mantid::Geometry::ObjComponent *source =
-      new Mantid::Geometry::ObjComponent("Source");
+  Mantid::Geometry::ObjComponent *source = new Mantid::Geometry::ObjComponent("Source");
   source->setPos(0.0, 0.0, -1.0);
   inst->add(source); // This takes care of deletion
   inst->markAsSource(source);
@@ -147,8 +143,7 @@ void LoadHKL::exec() {
   double theta = sc1 * radtodeg_half;
   auto i = static_cast<int>(theta / 5.);
   double x0, x1, x2;
-  gsl_poly_solve_cubic(pc[2][i] / pc[3][i], pc[1][i] / pc[3][i],
-                       (pc[0][i] - astar1) / pc[3][i], &x0, &x1, &x2);
+  gsl_poly_solve_cubic(pc[2][i] / pc[3][i], pc[1][i] / pc[3][i], (pc[0][i] - astar1) / pc[3][i], &x0, &x1, &x2);
   double radius = 0.0;
   if (x0 > 0)
     radius = x0;
@@ -156,8 +151,8 @@ void LoadHKL::exec() {
     radius = x1;
   else if (x2 > 0)
     radius = x2;
-  gsl_poly_solve_cubic(pc[2][i + 1] / pc[3][i + 1], pc[1][i + 1] / pc[3][i + 1],
-                       (pc[0][i + 1] - astar1) / pc[3][i + 1], &x0, &x1, &x2);
+  gsl_poly_solve_cubic(pc[2][i + 1] / pc[3][i + 1], pc[1][i + 1] / pc[3][i + 1], (pc[0][i + 1] - astar1) / pc[3][i + 1],
+                       &x0, &x1, &x2);
   double radius1 = 0.0;
   if (x0 > 0)
     radius1 = x0;
@@ -165,20 +160,17 @@ void LoadHKL::exec() {
     radius1 = x1;
   else if (x2 > 0)
     radius1 = x2;
-  double frac = theta - static_cast<double>(static_cast<int>(theta / 5.)) *
-                            5.; // theta%5.
+  double frac = theta - static_cast<double>(static_cast<int>(theta / 5.)) * 5.; // theta%5.
   frac = frac / 5.;
   radius = radius * (1 - frac) + radius1 * frac;
   radius /= mu1;
-  g_log.notice() << "LinearScatteringCoef = " << smu
-                 << " LinearAbsorptionCoef = " << amu << " Radius = " << radius
+  g_log.notice() << "LinearScatteringCoef = " << smu << " LinearAbsorptionCoef = " << amu << " Radius = " << radius
                  << " calculated from tbar and transmission of 2 peaks\n";
   API::Run &mrun = ws->mutableRun();
   mrun.addProperty<double>("Radius", radius, true);
   NeutronAtom neutron(0, 0, 0.0, 0.0, smu, 0.0, smu, amu);
   auto shape =
-      std::shared_ptr<IObject>(ws->sample().getShape().cloneWithMaterial(
-          Material("SetInLoadHKL", neutron, 1.0)));
+      std::shared_ptr<IObject>(ws->sample().getShape().cloneWithMaterial(Material("SetInLoadHKL", neutron, 1.0)));
   ws->mutableSample().setShape(shape);
 
   setProperty("OutputWorkspace", std::dynamic_pointer_cast<PeaksWorkspace>(ws));

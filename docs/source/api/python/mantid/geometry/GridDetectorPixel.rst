@@ -8,7 +8,7 @@ This is a Python binding to the C++ class Mantid::Geometry::GridDetectorPixel.
 
 .. module:`mantid.geometry`
 
-.. autoclass:: mantid.geometry.GridDetectorPixel 
+.. autoclass:: mantid.geometry.GridDetectorPixel
     :members:
     :undoc-members:
     :inherited-members:

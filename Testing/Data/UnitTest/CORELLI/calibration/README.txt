@@ -1,5 +1,5 @@
-CORELLI_123455_bank20                                                                                        
-  control bank, it has no problems                                                                           
+CORELLI_123455_bank20
+  control bank, it has no problems
 
 CORELLI_123454_bank58
   beam center intensity spills over adjacent tubes, tube15 and tube16

@@ -1,9 +1,9 @@
-.. _Frequency_Domain_Analysis_2-ref:
+.. _Frequency_Domain_Analysis-ref:
 
 Frequency Domain Analysis
 =========================
 
-.. image::  ../../images/frequency_domain_analysis_2.png
+.. image::  ../../images/frequency_domain_analysis.png
    :align: right
    :height: 400px
 
@@ -14,8 +14,8 @@ Interface Overview
 ------------------
 
 This interface is used to analyse the data collected on Muon instruments in the frequency domain. The interface can be
-accessed from the main menu of MantidPlot, in *Interfaces → Muon → Frequency Domain Analysis*. For sample
-datasets, please visit `Muon - Downloads <http://sourceforge.net/projects/mantid/files/Sample%20Data/SampleData-Muon.zip/download>`_.
+accessed from the main menu of MantidWorkbench, in *Interfaces → Muon → Frequency Domain Analysis*. For sample
+datasets, please visit `Muon - Downloads <https://sourceforge.net/projects/mantid/files/Sample%20Data/SampleData-Muon.zip/download>`_.
 
 Analysis of the frequency spectrum can be achieved by clicking the fit function icon.
 
@@ -45,10 +45,12 @@ All these tabs can be dragged away from the interface into their own window.
 * :ref:`Plotting Window <muon_plotting_window-ref>`
 * :ref:`Home Tab <muon_home_tab-ref>`
 * :ref:`Grouping Tab <muon_grouping_tab-ref>`
+* :ref:`Corrections Tab <muon_corrections_tab-ref>`
 * :ref:`Phase Table Tab <muon_phase_table_tab-ref>`
 * :ref:`Transform Tab <muon_transform_tab-ref>`
 * :ref:`Fitting Tab <muon_fitting_tab-ref>`
-* :ref:`Results Table Tab <muon_results_tab-ref>`
+* :ref:`Sequential Fitting Tab <muon_sequential_fitting_tab-ref>`
+* :ref:`Results Tab <muon_results_tab-ref>`
 
 Feedback & Comments
 -------------------

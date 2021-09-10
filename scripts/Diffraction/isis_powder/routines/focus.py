@@ -65,8 +65,9 @@ def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm
                              Geometry=common.generate_sample_geometry(sample_details),
                              Material=common.generate_sample_material(sample_details))
     # Align
-    aligned_ws = mantid.AlignDetectors(InputWorkspace=input_workspace,
-                                       CalibrationFile=run_details.offset_file_path)
+    mantid.ApplyDiffCal(InstrumentWorkspace=input_workspace,
+                        CalibrationFile=run_details.offset_file_path)
+    aligned_ws = mantid.ConvertUnits(InputWorkspace=input_workspace, Target="dSpacing")
 
     solid_angle = instrument.get_solid_angle_corrections(run_details.vanadium_run_numbers, run_details)
     if solid_angle:
@@ -76,6 +77,8 @@ def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm
     # Focus the spectra into banks
     focused_ws = mantid.DiffractionFocussing(InputWorkspace=aligned_ws,
                                              GroupingFileName=run_details.grouping_file_path)
+
+    instrument.apply_calibration_to_focused_data(focused_ws)
 
     calibrated_spectra = _apply_vanadium_corrections(instrument=instrument,
                                                      input_workspace=focused_ws,
@@ -172,7 +175,6 @@ def _divide_by_vanadium_splines(spectra_list, vanadium_splines, instrument):
                        for data_ws, van_ws in zip(spectra_list, vanadium_splines)]
         return output_list
     output_list = [_divide_one_spectrum_by_spline(spectra_list[0], vanadium_splines, instrument)]
-    common.remove_intermediate_workspace(vanadium_splines)
     return output_list
 
 

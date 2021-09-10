@@ -11,10 +11,9 @@
 namespace Mantid {
 namespace API {
 
-void renameWorkspacesWith(
-    const WorkspaceGroup_sptr &groupWorkspace,
-    std::function<std::string(std::size_t)> const &getName,
-    std::function<void(Workspace_sptr, const std::string &)> const &renamer) {
+void renameWorkspacesWith(const WorkspaceGroup_sptr &groupWorkspace,
+                          std::function<std::string(std::size_t)> const &getName,
+                          std::function<void(Workspace_sptr, const std::string &)> const &renamer) {
   std::unordered_map<std::string, std::size_t> nameCount;
   for (auto i = 0u; i < groupWorkspace->size(); ++i) {
     const auto name = getName(i);
@@ -24,14 +23,11 @@ void renameWorkspacesWith(
       renamer(groupWorkspace->getItem(i), name);
       nameCount[name] = 1;
     } else
-      renamer(groupWorkspace->getItem(i),
-              name + "(" + std::to_string(++count->second) + ")");
+      renamer(groupWorkspace->getItem(i), name + "(" + std::to_string(++count->second) + ")");
   }
 }
 
-void renameWorkspace(const IAlgorithm_sptr &renamer,
-                     const Workspace_sptr &workspace,
-                     const std::string &newName) {
+void renameWorkspace(const IAlgorithm_sptr &renamer, const Workspace_sptr &workspace, const std::string &newName) {
   renamer->setProperty("InputWorkspace", workspace);
   renamer->setProperty("OutputWorkspace", newName);
   renamer->executeAsChildAlg();
@@ -39,16 +35,13 @@ void renameWorkspace(const IAlgorithm_sptr &renamer,
 
 bool containsMultipleData(const std::vector<MatrixWorkspace_sptr> &workspaces) {
   const auto &first = workspaces.front();
-  return std::any_of(
-      workspaces.cbegin(), workspaces.cend(),
-      [&first](const auto &workspace) { return workspace != first; });
+  return std::any_of(workspaces.cbegin(), workspaces.cend(),
+                     [&first](const auto &workspace) { return workspace != first; });
 }
 
-void renameWorkspacesInQENSFit(
-    Algorithm *qensFit, IAlgorithm_sptr renameAlgorithm,
-    const WorkspaceGroup_sptr &outputGroup, std::string const &outputBaseName,
-    std::string const &,
-    std::function<std::string(std::size_t)> const &getNameSuffix) {
+void renameWorkspacesInQENSFit(Algorithm *qensFit, IAlgorithm_sptr renameAlgorithm,
+                               const WorkspaceGroup_sptr &outputGroup, std::string const &outputBaseName,
+                               std::string const &, std::function<std::string(std::size_t)> const &getNameSuffix) {
   Progress renamerProg(qensFit, 0.98, 1.0, outputGroup->size() + 1);
   renamerProg.report("Renaming group workspaces...");
 

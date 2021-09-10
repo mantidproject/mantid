@@ -16,9 +16,13 @@ set(TEST_PY_FILES
     # Fitting
     engineering_diffraction/tabs/fitting/data_handling/test/test_data_model.py
     engineering_diffraction/tabs/fitting/data_handling/test/test_data_presenter.py
+    engineering_diffraction/tabs/fitting/plotting/test/test_plot_presenter.py
+    engineering_diffraction/tabs/fitting/plotting/test/test_plot_model.py
     # Focus
     engineering_diffraction/tabs/focus/test/test_focus_model.py
     engineering_diffraction/tabs/focus/test/test_focus_presenter.py
+    # IO
+    engineering_diffraction/test/engineering_diffraction_io_test.py
 )
 
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})

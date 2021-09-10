@@ -23,8 +23,7 @@ using namespace boost::python;
  * @param self A reference to the calling Python object
  */
 IFunction1DAdapter::IFunction1DAdapter(PyObject *self)
-    : API::ParamFunction(), API::IFunction1D(),
-      IFunctionAdapter(self, "function1D", "functionDeriv1D") {}
+    : API::ParamFunction(), API::IFunction1D(), IFunctionAdapter(self, "function1D", "functionDeriv1D") {}
 
 /**
  * Translates between the C++ signature & the Python signature called by Fit
@@ -32,8 +31,7 @@ IFunction1DAdapter::IFunction1DAdapter(PyObject *self)
  * @param xValues The input X values
  * @param nData The size of the two arrays
  */
-void IFunction1DAdapter::function1D(double *out, const double *xValues,
-                                    const size_t nData) const {
+void IFunction1DAdapter::function1D(double *out, const double *xValues, const size_t nData) const {
   evaluateFunction(out, xValues, nData);
 }
 
@@ -41,8 +39,7 @@ void IFunction1DAdapter::function1D(double *out, const double *xValues,
  * Python-type signature version of above to be called directly from Python
  * @param xvals The input X values in read-only numpy array
  */
-boost::python::object
-IFunction1DAdapter::function1D(const boost::python::object &xvals) const {
+boost::python::object IFunction1DAdapter::function1D(const boost::python::object &xvals) const {
   return callMethodNoCheck<object, object>(getSelf(), "function1D", xvals);
 }
 
@@ -54,9 +51,7 @@ IFunction1DAdapter::function1D(const boost::python::object &xvals) const {
  * @param xValues The input X values
  * @param nData The size of the two arrays
  */
-void IFunction1DAdapter::functionDeriv1D(API::Jacobian *out,
-                                         const double *xValues,
-                                         const size_t nData) {
+void IFunction1DAdapter::functionDeriv1D(API::Jacobian *out, const double *xValues, const size_t nData) {
   if (derivativeOverridden()) {
     evaluateDerivative(out, xValues, nData);
   } else {

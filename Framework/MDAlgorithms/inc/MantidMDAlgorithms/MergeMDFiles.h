@@ -38,13 +38,9 @@ public:
 
   /// Algorithm's version for identification
   int version() const override { return 1; };
-  const std::vector<std::string> seeAlso() const override {
-    return {"MergeMD"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"MergeMD"}; }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "MDAlgorithms\\Creation";
-  }
+  const std::string category() const override { return "MDAlgorithms\\Creation"; }
 
 private:
   /// Initialise the properties
@@ -54,8 +50,7 @@ private:
 
   void loadBoxData();
 
-  void doExecByCloning(const Mantid::API::IMDEventWorkspace_sptr &ws,
-                       const std::string &outputFile);
+  void doExecByCloning(const Mantid::API::IMDEventWorkspace_sptr &ws, const std::string &outputFile);
 
   void finalizeOutput(const std::string &outputFile);
 

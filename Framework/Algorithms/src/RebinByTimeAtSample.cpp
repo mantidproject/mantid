@@ -33,9 +33,7 @@ DECLARE_ALGORITHM(RebinByTimeAtSample)
 int RebinByTimeAtSample::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string RebinByTimeAtSample::category() const {
-  return "Transforms\\Rebin;Events\\EventFiltering";
-}
+const std::string RebinByTimeAtSample::category() const { return "Transforms\\Rebin;Events\\EventFiltering"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string RebinByTimeAtSample::summary() const {
@@ -43,9 +41,7 @@ const std::string RebinByTimeAtSample::summary() const {
          "arrival time at the sample environment.";
 }
 
-const std::string RebinByTimeAtSample::name() const {
-  return "RebinByTimeAtSample";
-}
+const std::string RebinByTimeAtSample::name() const { return "RebinByTimeAtSample"; }
 
 /**
  * Do histogramming of the data to create the output workspace.
@@ -55,11 +51,8 @@ const std::string RebinByTimeAtSample::name() const {
  * @param OutXValues_scaled : Vector of new x values
  * @param prog : Progress object
  */
-void RebinByTimeAtSample::doHistogramming(IEventWorkspace_sptr inWS,
-                                          MatrixWorkspace_sptr outputWS,
-                                          MantidVecPtr &XValues_new,
-                                          MantidVec &OutXValues_scaled,
-                                          Progress &prog) {
+void RebinByTimeAtSample::doHistogramming(IEventWorkspace_sptr inWS, MatrixWorkspace_sptr outputWS,
+                                          MantidVecPtr &XValues_new, MantidVec &OutXValues_scaled, Progress &prog) {
   const auto histnumber = static_cast<int>(inWS->getNumberHistograms());
 
   const double tofOffset = 0;
@@ -80,8 +73,7 @@ void RebinByTimeAtSample::doHistogramming(IEventWorkspace_sptr inWS,
     const auto &el = inWS->getSpectrum(i);
     MantidVec y_data, e_data;
     // The EventList takes care of histogramming.
-    el.generateHistogramTimeAtSample(*XValues_new, y_data, e_data, tofFactor,
-                                     tofOffset);
+    el.generateHistogramTimeAtSample(*XValues_new, y_data, e_data, tofFactor, tofOffset);
 
     // Set the X axis for each output histogram
     outputWS->setSharedX(i, x);
@@ -102,8 +94,7 @@ void RebinByTimeAtSample::doHistogramming(IEventWorkspace_sptr inWS,
  * @param ws : workspace to inspect
  * @return max time since epoch in nanoseconds.
  */
-uint64_t
-RebinByTimeAtSample::getMaxX(Mantid::API::IEventWorkspace_sptr ws) const {
+uint64_t RebinByTimeAtSample::getMaxX(Mantid::API::IEventWorkspace_sptr ws) const {
   return ws->getTimeAtSampleMax().totalNanoseconds();
 }
 
@@ -112,8 +103,7 @@ RebinByTimeAtSample::getMaxX(Mantid::API::IEventWorkspace_sptr ws) const {
  * @param ws : workspace to inspect
  * @return min time since epoch in nanoseconds.
  */
-uint64_t
-RebinByTimeAtSample::getMinX(Mantid::API::IEventWorkspace_sptr ws) const {
+uint64_t RebinByTimeAtSample::getMinX(Mantid::API::IEventWorkspace_sptr ws) const {
   return ws->getTimeAtSampleMin().totalNanoseconds();
 }
 

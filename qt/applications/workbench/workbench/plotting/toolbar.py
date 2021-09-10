@@ -7,7 +7,6 @@
 #    This file is part of the mantid workbench.
 #
 #
-from matplotlib.backends.backend_qt5 import NavigationToolbar2QT
 from matplotlib.collections import LineCollection
 from qtpy import QtCore, QtGui, QtPrintSupport, QtWidgets
 
@@ -15,15 +14,33 @@ from mantid.plots import MantidAxes
 from mantid.plots.legend import convert_color_to_hex
 from mantidqt.icons import get_icon
 from mantidqt.plotting.figuretype import FigureType, figure_type
+from mantidqt.plotting.mantid_navigation_toolbar import MantidNavigationToolbar, MantidStandardNavigationTools, MantidNavigationTool
 from mantidqt.widgets.plotconfigdialog import curve_in_ax
 
 
-class WorkbenchNavigationToolbar(NavigationToolbar2QT):
+def _create_script_action(self, text, tooltip_text, mdi_icon, *args):
+    # Add a QMenu under the QToolButton for "Create Script"
+    a = self.addAction(get_icon(mdi_icon), text, lambda: None)
+    # This is the only way I could find of getting hold of the QToolButton object
+    button = [child for child in self.children()
+              if isinstance(child, QtWidgets.QToolButton)][-1]
+    menu =  QtWidgets.QMenu("Menu", parent=button)
+    menu.addAction("Script to file",
+                   self.sig_generate_plot_script_file_triggered.emit)
+    menu.addAction("Script to clipboard",
+                   self.sig_generate_plot_script_clipboard_triggered.emit)
+    button.setMenu(menu)
+    button.setPopupMode(QtWidgets.QToolButton.InstantPopup)
+    return a
+
+
+class WorkbenchNavigationToolbar(MantidNavigationToolbar):
     sig_home_clicked = QtCore.Signal()
     sig_grid_toggle_triggered = QtCore.Signal(bool)
     sig_active_triggered = QtCore.Signal()
     sig_hold_triggered = QtCore.Signal()
     sig_toggle_fit_triggered = QtCore.Signal()
+    sig_toggle_superplot_triggered = QtCore.Signal()
     sig_copy_to_clipboard_triggered = QtCore.Signal()
     sig_plot_options_triggered = QtCore.Signal()
     sig_plot_help_triggered = QtCore.Signal()
@@ -36,76 +53,41 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
     sig_change_line_collection_colour_triggered = QtCore.Signal(QtGui.QColor)
 
     toolitems = (
-        ('Home', 'Reset axes limits', 'mdi.home', 'on_home_clicked', None),
-        ('Back', 'Back to previous view', 'mdi.arrow-left', 'back', None),
-        ('Forward', 'Forward to next view', 'mdi.arrow-right', 'forward', None),
-        (None, None, None, None, None),
-        ('Pan', 'Pan: L-click \nStretch: R-click', 'mdi.arrow-all', 'pan', False),
-        ('Zoom', 'Zoom \n In: L-click+drag \n Out: R-click+drag', 'mdi.magnify', 'zoom', False),
-        (None, None, None, None, None),
-        ('Grid', 'Grids on/off', 'mdi.grid', 'toggle_grid', False),
-        ('Copy', 'Copy image to clipboard', 'mdi.content-copy', 'copy_to_clipboard', None),
-        ('Save', 'Save image file', 'mdi.content-save', 'save_figure', None),
-        ('Print', 'Print image', 'mdi.printer', 'print_figure', None),
-        (None, None, None, None, None),
-        ('Customize', 'Options menu', 'mdi.settings', 'launch_plot_options', None),
-        (None, None, None, None, None),
-        ('Create Script', 'Generate script to recreate the current figure',
-         'mdi.script-text-outline', 'generate_plot_script', None),
-        (None, None, None, None, None),
-        ('Fit', 'Open/close fitting tab', None, 'toggle_fit', False),
-        (None, None, None, None, None),
-        ('Offset', 'Adjust curve offset %', 'mdi.arrow-expand-horizontal',
-         'waterfall_offset_amount', None),
-        ('Reverse Order', 'Reverse curve order', 'mdi.swap-horizontal', 'waterfall_reverse_order', None),
-        ('Fill Area', 'Fill area under curves', 'mdi.format-color-fill', 'waterfall_fill_area', None),
-        (None, None, None, None, None),
-        ('Help', 'Open plotting help documentation', 'mdi.help', 'launch_plot_help', None)
+        MantidNavigationTool('Home', 'Reset axes limits', 'mdi.home', 'on_home_clicked', None),
+        MantidStandardNavigationTools.BACK,
+        MantidStandardNavigationTools.FORWARD,
+        MantidStandardNavigationTools.SEPARATOR,
+        MantidStandardNavigationTools.PAN,
+        MantidStandardNavigationTools.ZOOM,
+        MantidStandardNavigationTools.SEPARATOR,
+        MantidNavigationTool('Grid', 'Grids on/off', 'mdi.grid', 'toggle_grid', False),
+        MantidNavigationTool('Copy', 'Copy image to clipboard', 'mdi.content-copy', 'copy_to_clipboard', None),
+        MantidStandardNavigationTools.SAVE,
+        MantidNavigationTool('Print', 'Print image', 'mdi.printer', 'print_figure', None),
+        MantidStandardNavigationTools.SEPARATOR,
+        MantidNavigationTool('Customize', 'Options menu', 'mdi.settings', 'launch_plot_options', None),
+        MantidStandardNavigationTools.SEPARATOR,
+        MantidNavigationTool('Create Script', 'Generate script to recreate the current figure',
+                             'mdi.script-text-outline', 'generate_plot_script', None, _create_script_action),
+        MantidStandardNavigationTools.SEPARATOR,
+        MantidNavigationTool('Fit', 'Open/close fitting tab', None, 'toggle_fit', False),
+        MantidStandardNavigationTools.SEPARATOR,
+        MantidNavigationTool('Superplot', 'Open/close superplot tab', None, 'toggle_superplot', False),
+        MantidStandardNavigationTools.SEPARATOR,
+        MantidNavigationTool('Offset', 'Adjust curve offset %', 'mdi.arrow-expand-horizontal',
+                             'waterfall_offset_amount', None),
+        MantidNavigationTool('Reverse Order', 'Reverse curve order', 'mdi.swap-horizontal', 'waterfall_reverse_order', None),
+        MantidNavigationTool('Fill Area', 'Fill area under curves', 'mdi.format-color-fill', 'waterfall_fill_area', None),
+        MantidStandardNavigationTools.SEPARATOR,
+        MantidNavigationTool('Help', 'Open plotting help documentation', 'mdi.help', 'launch_plot_help', None)
     )
 
-    def _init_toolbar(self):
-        for text, tooltip_text, mdi_icon, callback, checked in self.toolitems:
-            if text is None:
-                self.addSeparator()
-            else:
-                if text == 'Create Script':
-                    # Add a QMenu under the QToolButton for "Create Script"
-                    a = self.addAction(get_icon(mdi_icon), text, lambda: None)
-                    # This is the only way I could find of getting hold of the QToolButton object
-                    button = [child for child in self.children()
-                              if isinstance(child, QtWidgets.QToolButton)][-1]
-                    menu = QtWidgets.QMenu("Menu", parent=button)
-                    menu.addAction("Script to file",
-                                   self.sig_generate_plot_script_file_triggered.emit)
-                    menu.addAction("Script to clipboard",
-                                   self.sig_generate_plot_script_clipboard_triggered.emit)
-                    button.setMenu(menu)
-                    button.setPopupMode(QtWidgets.QToolButton.InstantPopup)
-                elif mdi_icon:
-                    a = self.addAction(get_icon(mdi_icon), text, getattr(self, callback))
-                else:
-                    a = self.addAction(text, getattr(self, callback))
-                self._actions[callback] = a
-                if checked is not None:
-                    a.setCheckable(True)
-                    a.setChecked(checked)
-                if tooltip_text is not None:
-                    a.setToolTip(tooltip_text)
-
-        # Add the x,y location widget at the right side of the toolbar
-        # The stretch factor is 1 which means any resizing of the toolbar
-        # will resize this label instead of the buttons.
-        if self.coordinates:
-            self.locLabel = QtWidgets.QLabel("", self)
-            self.locLabel.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignTop)
-            self.locLabel.setSizePolicy(
-                QtWidgets.QSizePolicy(QtWidgets.Expanding, QtWidgets.QSizePolicy.Ignored))
-            labelAction = self.addWidget(self.locLabel)
-            labelAction.setVisible(True)
+    def __init__(self, canvas, parent, coordinates=True):
+        super().__init__(canvas, parent, coordinates)
 
         # Adjust icon size or they are too small in PyQt5 by default
         dpi_ratio = QtWidgets.QApplication.instance().desktop().physicalDpiX() / 100
-        self.setIconSize(QtCore.QSize(24 * dpi_ratio, 24 * dpi_ratio))
+        self.setIconSize(QtCore.QSize(int(24 * dpi_ratio), int(24 * dpi_ratio)))
 
     def copy_to_clipboard(self):
         self.sig_copy_to_clipboard_triggered.emit()
@@ -130,6 +112,9 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
             if self._actions['pan'].isChecked():
                 self.pan()
         self.sig_toggle_fit_triggered.emit()
+
+    def toggle_superplot(self):
+        self.sig_toggle_superplot_triggered.emit()
 
     def trigger_fit_toggle_action(self):
         self._actions['toggle_fit'].trigger()
@@ -183,6 +168,13 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
         # Show/hide the separator between this button and help button / waterfall options
         self.toggle_separator_visibility(action, on)
 
+    def set_superplot_enabled(self, on):
+        action = self._actions['toggle_superplot']
+        action.setEnabled(on)
+        action.setVisible(on)
+        # Show/hide the separator between this button and help button / waterfall options
+        self.toggle_separator_visibility(action, on)
+
     def waterfall_offset_amount(self):
         self.sig_waterfall_offset_amount_triggered.emit()
 
@@ -207,12 +199,15 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
         # shows/hides the separator positioned immediately after the action
         for i, toolbar_action in enumerate(self.actions()):
             if toolbar_action == action:
-                self.actions()[i + 1].setVisible(enabled)
+                separator = self.actions()[i + 1]
+                if separator and separator.isSeparator():
+                    separator.setVisible(enabled)
                 break
 
-    def set_buttons_visiblity(self, fig):
+    def set_buttons_visibility(self, fig):
         if figure_type(fig) not in [FigureType.Line, FigureType.Errorbar] or len(fig.get_axes()) > 1:
             self.set_fit_enabled(False)
+            self.set_superplot_enabled(False)
 
         # if any of the lines are a sample log plot disable fitting
         for ax in fig.get_axes():
@@ -243,8 +238,20 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
         if figure_type(fig) in [FigureType.Wireframe, FigureType.Contour]:
             self.set_up_color_selector_toolbar_button(fig)
 
-        if figure_type(fig) in [FigureType.Surface, FigureType.Wireframe]:
+        if figure_type(fig) in [FigureType.Surface, FigureType.Wireframe, FigureType.Mesh]:
             self.adjust_for_3d_plots()
+
+        # Toggle grid on/off button in case plot is created from a script.
+        is_major_grid_on = False
+        for ax in fig.get_axes():
+            if hasattr(ax, 'grid_on'):
+                is_major_grid_on = ax.grid_on()
+            else:
+                is_major_grid_on = ax.xaxis._major_tick_kw.get('gridOn', False) and ax.yaxis._major_tick_kw.get('gridOn', False)
+            # If ANY of the axes have no grid, set the button to unchecked.
+            if not is_major_grid_on:
+                break
+        self._actions['toggle_grid'].setChecked(is_major_grid_on)
 
     def is_colormap(self, fig):
         """Identify as a single colopur map if it has a axes, one with the plot and the other the colorbar"""

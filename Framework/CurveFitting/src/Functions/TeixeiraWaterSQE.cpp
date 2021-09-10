@@ -34,8 +34,7 @@ DECLARE_FUNCTION(TeixeiraWaterSQE)
  */
 void TeixeiraWaterSQE::declareParameters() {
   this->declareParameter("Height", 1.0, "scaling factor");
-  this->declareParameter("DiffCoeff", 2.3,
-                         "Diffusion coefficient (10^(-5)cm^2/s)");
+  this->declareParameter("DiffCoeff", 2.3, "Diffusion coefficient (10^(-5)cm^2/s)");
   this->declareParameter("Tau", 1.25, "Residence time (ps)");
   this->declareParameter("Centre", 0.0, "Shift along the X-axis");
 }
@@ -46,8 +45,7 @@ void TeixeiraWaterSQE::declareParameters() {
  * @param xValues energy domain where function is evaluated
  * @param nData size of the energy domain
  */
-void TeixeiraWaterSQE::function1D(double *out, const double *xValues,
-                                  const size_t nData) const {
+void TeixeiraWaterSQE::function1D(double *out, const double *xValues, const size_t nData) const {
   double hbar(0.658211626); // ps*meV
   auto H = this->getParameter("Height");
   auto D = this->getParameter("DiffCoeff");
@@ -57,8 +55,7 @@ void TeixeiraWaterSQE::function1D(double *out, const double *xValues,
 
   // Penalize negative parameters, just in case they show up
   // when calculating the numeric derivative
-  if (H < std::numeric_limits<double>::epsilon() ||
-      D < std::numeric_limits<double>::epsilon() ||
+  if (H < std::numeric_limits<double>::epsilon() || D < std::numeric_limits<double>::epsilon() ||
       T < std::numeric_limits<double>::epsilon()) {
     for (size_t j = 0; j < nData; j++) {
       out[j] = std::numeric_limits<double>::infinity();
@@ -82,9 +79,7 @@ void TeixeiraWaterSQE::function1D(double *out, const double *xValues,
  * derivatives for parameters
  * DiffCoeff, Tau, and Centre, selecting sensible steps.
  */
-void TeixeiraWaterSQE::functionDeriv1D(Mantid::API::Jacobian *jacobian,
-                                       const double *xValues,
-                                       const size_t nData) {
+void TeixeiraWaterSQE::functionDeriv1D(Mantid::API::Jacobian *jacobian, const double *xValues, const size_t nData) {
   const double deltaF{0.1}; // increase parameter by this fraction
   const size_t nParam = this->nParams();
   // cutoff defines the smallest change in the parameter when calculating the
@@ -109,8 +104,7 @@ void TeixeiraWaterSQE::functionDeriv1D(Mantid::API::Jacobian *jacobian,
         this->function1D(derivative.data(), xValues, nData);
       } else {
         // numerical derivative
-        double delta =
-            cutoff[pName] > fabs(pVal * deltaF) ? cutoff[pName] : pVal * deltaF;
+        double delta = cutoff[pName] > fabs(pVal * deltaF) ? cutoff[pName] : pVal * deltaF;
         this->setActiveParameter(iP, pVal + delta);
         this->applyTies();
         this->function1D(derivative.data(), xValues, nData);

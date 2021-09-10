@@ -55,8 +55,7 @@ public:
     // get workspace
     //
     Workspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieve(outputSpace));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outputSpace));
     Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
     //
     if (!algToBeTested.isInitialized())
@@ -73,13 +72,11 @@ public:
     remove(outputFile.c_str());
 
     std::string result;
-    TS_ASSERT_THROWS_NOTHING(result =
-                                 algToBeTested.getPropertyValue("Filename"));
+    TS_ASSERT_THROWS_NOTHING(result = algToBeTested.getPropertyValue("Filename"));
     TS_ASSERT(!result.compare(outputFile));
     TS_ASSERT_THROWS_NOTHING(result = algToBeTested.getPropertyValue("Title"));
     TS_ASSERT(!result.compare(title));
-    TS_ASSERT_THROWS_NOTHING(
-        result = algToBeTested.getPropertyValue("InputWorkspace"));
+    TS_ASSERT_THROWS_NOTHING(result = algToBeTested.getPropertyValue("InputWorkspace"));
     TS_ASSERT(!result.compare(outputSpace));
 
     TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());

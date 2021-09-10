@@ -55,11 +55,9 @@ std::vector<std::string> parseFlipperSetup(const std::string &setupString) {
  * @param ws a workspace to check
  * @param tag a flipper configuration for the error message
  */
-void checkInputExists(const Mantid::API::MatrixWorkspace_sptr &ws,
-                      const std::string &tag) {
+void checkInputExists(const Mantid::API::MatrixWorkspace_sptr &ws, const std::string &tag) {
   if (!ws) {
-    throw std::runtime_error("A workspace designated as " + tag +
-                             " is missing in inputs.");
+    throw std::runtime_error("A workspace designated as " + tag + " is missing in inputs.");
   }
 }
 
@@ -84,36 +82,31 @@ void checkInputExists(const Mantid::API::MatrixWorkspace_sptr &ws,
  * @param p2 analyzer flipper efficiency
  * @param p2E error of p2
  */
-void fourInputsCorrectedAndErrors(
-    Eigen::Vector4d &corrected, Eigen::Vector4d &errors, const double ppy,
-    const double ppyE, const double pmy, const double pmyE, const double mpy,
-    const double mpyE, const double mmy, const double mmyE, const double f1,
-    const double f1E, const double f2, const double f2E, const double p1,
-    const double p1E, const double p2, const double p2E) {
+void fourInputsCorrectedAndErrors(Eigen::Vector4d &corrected, Eigen::Vector4d &errors, const double ppy,
+                                  const double ppyE, const double pmy, const double pmyE, const double mpy,
+                                  const double mpyE, const double mmy, const double mmyE, const double f1,
+                                  const double f1E, const double f2, const double f2E, const double p1,
+                                  const double p1E, const double p2, const double p2E) {
   using namespace boost::math;
   // Note that f1 and f2 correspond to 1-F1 and 1-F2 in [Wildes, 1999].
   // These are inverted forms of the efficiency matrices.
   const auto diag1 = 1. / f1;
   const auto off1 = (f1 - 1.) / f1;
   Eigen::Matrix4d F1m;
-  F1m << 1., 0., 0., 0., 0., 1., 0., 0., off1, 0., diag1, 0., 0., off1, 0.,
-      diag1;
+  F1m << 1., 0., 0., 0., 0., 1., 0., 0., off1, 0., diag1, 0., 0., off1, 0., diag1;
 
   const auto diag2 = 1. / f2;
   const auto off2 = (f2 - 1.) / f2;
   Eigen::Matrix4d F2m;
-  F2m << 1., 0., 0., 0., off2, diag2, 0., 0., 0., 0., 1., 0., 0., 0., off2,
-      diag2;
+  F2m << 1., 0., 0., 0., off2, diag2, 0., 0., 0., 0., 1., 0., 0., 0., off2, diag2;
   const auto diag3 = (p1 - 1.) / (2. * p1 - 1.);
   const auto off3 = p1 / (2. * p1 - 1);
   Eigen::Matrix4d P1m;
-  P1m << diag3, 0, off3, 0, 0, diag3, 0, off3, off3, 0, diag3, 0, 0, off3, 0,
-      diag3;
+  P1m << diag3, 0, off3, 0, 0, diag3, 0, off3, off3, 0, diag3, 0, 0, off3, 0, diag3;
   const auto diag4 = (p2 - 1.) / (2. * p2 - 1.);
   const auto off4 = p2 / (2. * p2 - 1.);
   Eigen::Matrix4d P2m;
-  P2m << diag4, off4, 0., 0., off4, diag4, 0., 0., 0., 0., diag4, off4, 0., 0.,
-      off4, diag4;
+  P2m << diag4, off4, 0., 0., off4, diag4, 0., 0., 0., 0., diag4, off4, 0., 0., off4, diag4;
   const Eigen::Vector4d intensities(ppy, pmy, mpy, mmy);
   const auto FProduct = F2m * F1m;
   const auto PProduct = P2m * P1m;
@@ -123,20 +116,16 @@ void fourInputsCorrectedAndErrors(
   // the matrices above, multiplied by the error.
   const auto elemE1 = -1. / pow<2>(f1) * f1E;
   Eigen::Matrix4d F1Em;
-  F1Em << 0., 0., 0., 0., 0., 0., 0., 0., -elemE1, 0., elemE1, 0., 0., -elemE1,
-      0., elemE1;
+  F1Em << 0., 0., 0., 0., 0., 0., 0., 0., -elemE1, 0., elemE1, 0., 0., -elemE1, 0., elemE1;
   const auto elemE2 = -1. / pow<2>(f2) * f2E;
   Eigen::Matrix4d F2Em;
-  F2Em << 0., 0., 0., 0., -elemE2, elemE2, 0., 0., 0., 0., 0., 0., 0., 0.,
-      -elemE2, elemE2;
+  F2Em << 0., 0., 0., 0., -elemE2, elemE2, 0., 0., 0., 0., 0., 0., 0., 0., -elemE2, elemE2;
   const auto elemE3 = 1. / pow<2>(2. * p1 - 1.) * p1E;
   Eigen::Matrix4d P1Em;
-  P1Em << elemE3, 0., -elemE3, 0., 0., elemE3, 0., -elemE3, -elemE3, 0., elemE3,
-      0., 0., -elemE3, 0., elemE3;
+  P1Em << elemE3, 0., -elemE3, 0., 0., elemE3, 0., -elemE3, -elemE3, 0., elemE3, 0., 0., -elemE3, 0., elemE3;
   const auto elemE4 = 1. / pow<2>(2. * p2 - 1.) * p2E;
   Eigen::Matrix4d P2Em;
-  P2Em << elemE4, -elemE4, 0., 0., -elemE4, elemE4, 0., 0., 0., 0., elemE4,
-      -elemE4, 0., 0., -elemE4, elemE4;
+  P2Em << elemE4, -elemE4, 0., 0., -elemE4, elemE4, 0., 0., 0., 0., elemE4, -elemE4, 0., 0., -elemE4, elemE4;
   const Eigen::Vector4d yErrors(ppyE, pmyE, mpyE, mmyE);
   const auto e1 = (P2Em * P1m * FProduct * intensities).array();
   const auto e2 = (P2m * P1Em * FProduct * intensities).array();
@@ -164,99 +153,65 @@ void fourInputsCorrectedAndErrors(
  * @param f2E error of f2
  * @return the error estimate
  */
-double twoInputsErrorEstimate01(const double i00, const double e00,
-                                const double i11, const double e11,
-                                const double p1, const double p1E,
-                                const double p2, const double p2E,
-                                const double f1, const double f1E,
+double twoInputsErrorEstimate01(const double i00, const double e00, const double i11, const double e11, const double p1,
+                                const double p1E, const double p2, const double p2E, const double f1, const double f1E,
                                 const double f2, const double f2E) {
   using namespace boost::math;
   // Derivatives of the equation which solves the I01 intensities
   // with respect to i00, i11, f1, etc.
   const auto pmdi00 =
-      -((f1 * (-1. + 2. * p1) *
-         (-f2 * pow<2>(1. - 2. * p2) + pow<2>(f2) * pow<2>(1. - 2. * p2) +
-          (-1. + p2) * p2)) /
+      -((f1 * (-1. + 2. * p1) * (-f2 * pow<2>(1. - 2. * p2) + pow<2>(f2) * pow<2>(1. - 2. * p2) + (-1. + p2) * p2)) /
         (f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) +
-         f1 * (-1. + 2. * p1) *
-             ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2))));
-  const auto pmdi11 =
-      (f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2)) /
-      (f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) +
-       f1 * (-1. + 2. * p1) *
-           ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)));
+         f1 * (-1. + 2. * p1) * ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2))));
+  const auto pmdi11 = (f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2)) /
+                      (f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) +
+                       f1 * (-1. + 2. * p1) * ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)));
   const auto pmdf1 =
-      -(((-1. + 2. * p1) *
-         ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)) *
+      -(((-1. + 2. * p1) * ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)) *
          (f2 * i11 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) -
           f1 * i00 * (-1. + 2. * p1) *
-              (-f2 * pow<2>(1. - 2. * p2) + pow<2>(f2) * pow<2>(1. - 2. * p2) +
-               (-1. + p2) * p2))) /
+              (-f2 * pow<2>(1. - 2. * p2) + pow<2>(f2) * pow<2>(1. - 2. * p2) + (-1. + p2) * p2))) /
         pow<2>(f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) +
-               f1 * (-1. + 2. * p1) *
-                   ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)))) -
-      (i00 * (-1. + 2. * p1) *
-       (-f2 * pow<2>(1. - 2. * p2) + pow<2>(f2) * pow<2>(1. - 2. * p2) +
-        (-1. + p2) * p2)) /
+               f1 * (-1. + 2. * p1) * ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)))) -
+      (i00 * (-1. + 2. * p1) * (-f2 * pow<2>(1. - 2. * p2) + pow<2>(f2) * pow<2>(1. - 2. * p2) + (-1. + p2) * p2)) /
           (f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) +
-           f1 * (-1. + 2. * p1) *
-               ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)));
+           f1 * (-1. + 2. * p1) * ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)));
   const auto pmdf2 =
-      -(((f1 * (-1. + 2. * p1) * (-1. + p1 + p2) * (-1 + 2 * p2) +
-          p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2)) *
+      -(((f1 * (-1. + 2. * p1) * (-1. + p1 + p2) * (-1 + 2 * p2) + p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2)) *
          (f2 * i11 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) -
           f1 * i00 * (-1. + 2. * p1) *
-              (-f2 * pow<2>(1. - 2. * p2) + pow<2>(f2) * pow<2>(1. - 2. * p2) +
-               (-1. + p2) * p2))) /
+              (-f2 * pow<2>(1. - 2. * p2) + pow<2>(f2) * pow<2>(1. - 2. * p2) + (-1. + p2) * p2))) /
         pow<2>(f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) +
-               f1 * (-1. + 2. * p1) *
-                   ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)))) +
-      (-f1 * i00 * (-1. + 2. * p1) *
-           (-pow<2>(1. - 2. * p2) + 2 * f2 * pow<2>(1. - 2. * p2)) +
+               f1 * (-1. + 2. * p1) * ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)))) +
+      (-f1 * i00 * (-1. + 2. * p1) * (-pow<2>(1. - 2. * p2) + 2 * f2 * pow<2>(1. - 2. * p2)) +
        i11 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2)) /
           (f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) +
-           f1 * (-1. + 2. * p1) *
-               ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)));
+           f1 * (-1. + 2. * p1) * ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)));
   const auto pmdp1 =
       -(((f2 * i11 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) -
           f1 * i00 * (-1. + 2. * p1) *
-              (-f2 * pow<2>(1. - 2. * p2) + pow<2>(f2) * pow<2>(1. - 2. * p2) +
-               (-1. + p2) * p2)) *
-         (f2 * p1 * (1. - 2. * p2) +
-          f1 * f2 * (-1. + 2. * p1) * (-1. + 2. * p2) +
+              (-f2 * pow<2>(1. - 2. * p2) + pow<2>(f2) * pow<2>(1. - 2. * p2) + (-1. + p2) * p2)) *
+         (f2 * p1 * (1. - 2. * p2) + f1 * f2 * (-1. + 2. * p1) * (-1. + 2. * p2) +
           f2 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) +
-          2. * f1 *
-              ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)))) /
+          2. * f1 * ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)))) /
         pow<2>(f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) +
-               f1 * (-1. + 2. * p1) *
-                   ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)))) +
-      (f2 * i11 * p1 * (1. - 2. * p2) +
-       f2 * i11 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) -
-       2. * f1 * i00 *
-           (-f2 * pow<2>(1. - 2. * p2) + pow<2>(f2) * pow<2>(1. - 2. * p2) +
-            (-1. + p2) * p2)) /
+               f1 * (-1. + 2. * p1) * ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)))) +
+      (f2 * i11 * p1 * (1. - 2. * p2) + f2 * i11 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) -
+       2. * f1 * i00 * (-f2 * pow<2>(1. - 2. * p2) + pow<2>(f2) * pow<2>(1. - 2. * p2) + (-1. + p2) * p2)) /
           (f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) +
-           f1 * (-1. + 2. * p1) *
-               ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)));
+           f1 * (-1. + 2. * p1) * ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)));
   const auto pmdp2 =
       -(((f2 * i11 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) -
           f1 * i00 * (-1. + 2. * p1) *
-              (-f2 * pow<2>(1. - 2. * p2) + pow<2>(f2) * pow<2>(1. - 2. * p2) +
-               (-1. + p2) * p2)) *
+              (-f2 * pow<2>(1. - 2. * p2) + pow<2>(f2) * pow<2>(1. - 2. * p2) + (-1. + p2) * p2)) *
          (f2 * (2. - 2. * p1) * p1 +
-          f1 * (-1. + 2. * p1) *
-              (1. - 2. * p2 + 2. * f2 * (-1. + p1 + p2) +
-               f2 * (-1. + 2. * p2)))) /
+          f1 * (-1. + 2. * p1) * (1. - 2. * p2 + 2. * f2 * (-1. + p1 + p2) + f2 * (-1. + 2. * p2)))) /
         pow<2>(f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) +
-               f1 * (-1. + 2. * p1) *
-                   ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)))) +
+               f1 * (-1. + 2. * p1) * ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)))) +
       (f2 * i11 * (2. - 2. * p1) * p1 -
-       f1 * i00 * (-1. + 2. * p1) *
-           (-1. + 4. * f2 * (1. - 2. * p2) - 4. * pow<2>(f2) * (1. - 2. * p2) +
-            2. * p2)) /
+       f1 * i00 * (-1. + 2. * p1) * (-1. + 4. * f2 * (1. - 2. * p2) - 4. * pow<2>(f2) * (1. - 2. * p2) + 2. * p2)) /
           (f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) +
-           f1 * (-1. + 2. * p1) *
-               ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)));
+           f1 * (-1. + 2. * p1) * ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)));
   // Estimate the error components using linearized extrapolation,
   // sum in squares.
   const auto e01_I00 = pow<2>(pmdi00 * e00);
@@ -284,11 +239,8 @@ double twoInputsErrorEstimate01(const double i00, const double e00,
  * @param f2E error of f2
  * @return the error estimate
  */
-double twoInputsErrorEstimate10(const double i00, const double e00,
-                                const double i11, const double e11,
-                                const double p1, const double p1E,
-                                const double p2, const double p2E,
-                                const double f1, const double f1E,
+double twoInputsErrorEstimate10(const double i00, const double e00, const double i11, const double e11, const double p1,
+                                const double p1E, const double p2, const double p2E, const double f1, const double f1E,
                                 const double f2, const double f2E) {
   using namespace boost::math;
   // Derivatives of the equation which solves the I10 intensities
@@ -297,54 +249,37 @@ double twoInputsErrorEstimate10(const double i00, const double e00,
   const auto b = -1. + 2. * p1;
   const auto c = -1. + 2. * p2;
   const auto d = -1. + p2;
-  const auto mpdi00 = (-pow<2>(f1) * f2 * pow<2>(b) * c +
-                       f1 * f2 * pow<2>(b) * c + f2 * p1 * a) /
+  const auto mpdi00 = (-pow<2>(f1) * f2 * pow<2>(b) * c + f1 * f2 * pow<2>(b) * c + f2 * p1 * a) /
                       (f2 * p1 * a + f1 * b * (-d * p2 + f2 * (p1 + d) * c));
-  const auto mpdi11 = -((f1 * b * d * p2) /
-                        (f2 * p1 * a + f1 * b * (-d * p2 + f2 * (p1 + d) * c)));
+  const auto mpdi11 = -((f1 * b * d * p2) / (f2 * p1 * a + f1 * b * (-d * p2 + f2 * (p1 + d) * c)));
   const auto mpdf1 =
-      -(((-1. + 2. * p1) *
-         ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)) *
+      -(((-1. + 2. * p1) * ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)) *
          (-pow<2>(f1) * f2 * i00 * pow<2>(1. - 2. * p1) * (-1. + 2. * p2) +
           f2 * i00 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) +
-          f1 * (-1. + 2. * p1) *
-              (-i11 * (-1. + p2) * p2 +
-               f2 * i00 * (-1. + 2. * p1) * (-1. + 2. * p2)))) /
+          f1 * (-1. + 2. * p1) * (-i11 * (-1. + p2) * p2 + f2 * i00 * (-1. + 2. * p1) * (-1. + 2. * p2)))) /
         pow<2>(f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) +
-               f1 * (-1. + 2. * p1) *
-                   ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)))) +
+               f1 * (-1. + 2. * p1) * ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)))) +
       (-2. * f1 * f2 * i00 * pow<2>(1. - 2. * p1) * (-1. + 2. * p2) +
-       (-1. + 2. * p1) * (-i11 * (-1. + p2) * p2 +
-                          f2 * i00 * (-1. + 2. * p1) * (-1. + 2. * p2))) /
+       (-1. + 2. * p1) * (-i11 * (-1. + p2) * p2 + f2 * i00 * (-1. + 2. * p1) * (-1. + 2. * p2))) /
           (f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) +
-           f1 * (-1. + 2. * p1) *
-               ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)));
-  const auto mpdf2 =
-      -(((f1 * b * (p1 + d) * c + p1 * a) *
-         (-pow<2>(f1) * f2 * i00 * pow<2>(b) * c + f2 * i00 * p1 * a +
-          f1 * b * (-i11 * d * p2 + f2 * i00 * b * c))) /
-        pow<2>(f2 * p1 * a + f1 * b * (-d * p2 + f2 * (p1 + d) * c))) +
-      (-pow<2>(f1) * i00 * pow<2>(b) * c + f1 * i00 * pow<2>(b) * c +
-       i00 * p1 * a) /
-          (f2 * p1 * a + f1 * b * (-d * p2 + f2 * (p1 + d) * c));
+           f1 * (-1. + 2. * p1) * ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)));
+  const auto mpdf2 = -(((f1 * b * (p1 + d) * c + p1 * a) * (-pow<2>(f1) * f2 * i00 * pow<2>(b) * c + f2 * i00 * p1 * a +
+                                                            f1 * b * (-i11 * d * p2 + f2 * i00 * b * c))) /
+                       pow<2>(f2 * p1 * a + f1 * b * (-d * p2 + f2 * (p1 + d) * c))) +
+                     (-pow<2>(f1) * i00 * pow<2>(b) * c + f1 * i00 * pow<2>(b) * c + i00 * p1 * a) /
+                         (f2 * p1 * a + f1 * b * (-d * p2 + f2 * (p1 + d) * c));
   const auto mpdp1 =
-      -(((-pow<2>(f1) * f2 * i00 * pow<2>(b) * c + f2 * i00 * p1 * a +
-          f1 * b * (-i11 * d * p2 + f2 * i00 * b * c)) *
-         (f2 * p1 * -c + f1 * f2 * b * c + f2 * a +
-          2. * f1 * (-d * p2 + f2 * (p1 + d) * c))) /
+      -(((-pow<2>(f1) * f2 * i00 * pow<2>(b) * c + f2 * i00 * p1 * a + f1 * b * (-i11 * d * p2 + f2 * i00 * b * c)) *
+         (f2 * p1 * -c + f1 * f2 * b * c + f2 * a + 2. * f1 * (-d * p2 + f2 * (p1 + d) * c))) /
         pow<2>(f2 * p1 * a + f1 * b * (-d * p2 + f2 * (p1 + d) * c))) +
-      (f2 * i00 * p1 * -c + 4. * pow<2>(f1) * f2 * i00 * -b * c +
-       2. * f1 * f2 * i00 * b * c + f2 * i00 * a +
+      (f2 * i00 * p1 * -c + 4. * pow<2>(f1) * f2 * i00 * -b * c + 2. * f1 * f2 * i00 * b * c + f2 * i00 * a +
        2. * f1 * (-i11 * d * p2 + f2 * i00 * b * c)) /
           (f2 * p1 * a + f1 * b * (-d * p2 + f2 * (p1 + d) * c));
   const auto mpdp2 =
-      -(((f2 * (2. - 2. * p1) * p1 +
-          f1 * b * (1. - 2. * p2 + 2. * f2 * (p1 + d) + f2 * c)) *
-         (-pow<2>(f1) * f2 * i00 * pow<2>(b) * c + f2 * i00 * p1 * a +
-          f1 * b * (-i11 * d * p2 + f2 * i00 * b * c))) /
+      -(((f2 * (2. - 2. * p1) * p1 + f1 * b * (1. - 2. * p2 + 2. * f2 * (p1 + d) + f2 * c)) *
+         (-pow<2>(f1) * f2 * i00 * pow<2>(b) * c + f2 * i00 * p1 * a + f1 * b * (-i11 * d * p2 + f2 * i00 * b * c))) /
         pow<2>(f2 * p1 * a + f1 * b * (-d * p2 + f2 * (p1 + d) * c))) +
-      (-2. * pow<2>(f1) * f2 * i00 * pow<2>(b) +
-       f2 * i00 * (2. - 2. * p1) * p1 +
+      (-2. * pow<2>(f1) * f2 * i00 * pow<2>(b) + f2 * i00 * (2. - 2. * p1) * p1 +
        f1 * b * (2. * f2 * i00 * b - i11 * d - i11 * p2)) /
           (f2 * p1 * a + f1 * b * (-d * p2 + f2 * (p1 + d) * c));
   // Estimate the error components using linearized extrapolation,
@@ -358,10 +293,8 @@ double twoInputsErrorEstimate10(const double i00, const double e00,
   return std::sqrt(e10_I00 + e10_I11 + e10_F1 + e10_F2 + e10_P1 + e10_P2);
 }
 
-Mantid::API::MatrixWorkspace_sptr createWorkspaceWithHistory(
-    const Mantid::API::MatrixWorkspace_const_sptr &inputWS) {
-  Mantid::API::MatrixWorkspace_sptr outputWS =
-      Mantid::DataObjects::create<Mantid::DataObjects::Workspace2D>(*inputWS);
+Mantid::API::MatrixWorkspace_sptr createWorkspaceWithHistory(const Mantid::API::MatrixWorkspace_const_sptr &inputWS) {
+  Mantid::API::MatrixWorkspace_sptr outputWS = Mantid::DataObjects::create<Mantid::DataObjects::Workspace2D>(*inputWS);
   outputWS->history().addHistory(inputWS->getHistory());
   return outputWS;
 }
@@ -376,17 +309,13 @@ DECLARE_ALGORITHM(PolarizationCorrectionWildes)
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string PolarizationCorrectionWildes::name() const {
-  return "PolarizationCorrectionWildes";
-}
+const std::string PolarizationCorrectionWildes::name() const { return "PolarizationCorrectionWildes"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int PolarizationCorrectionWildes::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string PolarizationCorrectionWildes::category() const {
-  return "Reflectometry";
-}
+const std::string PolarizationCorrectionWildes::category() const { return "Reflectometry"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string PolarizationCorrectionWildes::summary() const {
@@ -407,30 +336,23 @@ size_t PolarizationCorrectionWildes::WorkspaceMap::size() const noexcept {
  */
 void PolarizationCorrectionWildes::init() {
   declareProperty(std::make_unique<Kernel::ArrayProperty<std::string>>(
-                      Prop::INPUT_WS, "", std::make_shared<API::ADSValidator>(),
-                      Kernel::Direction::Input),
+                      Prop::INPUT_WS, "", std::make_shared<API::ADSValidator>(), Kernel::Direction::Input),
                   "A list of workspaces to be corrected corresponding to the "
                   "flipper configurations.");
-  declareProperty(std::make_unique<API::WorkspaceProperty<API::WorkspaceGroup>>(
-                      Prop::OUTPUT_WS, "", Kernel::Direction::Output),
-                  "A group of polarization efficiency corrected workspaces.");
-  const std::string full = Flippers::OffOff + ", " + Flippers::OffOn + ", " +
-                           Flippers::OnOff + ", " + Flippers::OnOn;
-  const std::string missing01 =
-      Flippers::OffOff + ", " + Flippers::OnOff + ", " + Flippers::OnOn;
-  const std::string missing10 =
-      Flippers::OffOff + ", " + Flippers::OffOn + ", " + Flippers::OnOn;
+  declareProperty(
+      std::make_unique<API::WorkspaceProperty<API::WorkspaceGroup>>(Prop::OUTPUT_WS, "", Kernel::Direction::Output),
+      "A group of polarization efficiency corrected workspaces.");
+  const std::string full = Flippers::OffOff + ", " + Flippers::OffOn + ", " + Flippers::OnOff + ", " + Flippers::OnOn;
+  const std::string missing01 = Flippers::OffOff + ", " + Flippers::OnOff + ", " + Flippers::OnOn;
+  const std::string missing10 = Flippers::OffOff + ", " + Flippers::OffOn + ", " + Flippers::OnOn;
   const std::string missing0110 = Flippers::OffOff + ", " + Flippers::OnOn;
   const std::string noAnalyzer = Flippers::Off + ", " + Flippers::On;
   const std::string directBeam = Flippers::Off;
-  const std::vector<std::string> setups{
-      {full, missing01, missing10, missing0110, noAnalyzer, directBeam}};
-  declareProperty(Prop::FLIPPERS, full,
-                  std::make_shared<Kernel::ListValidator<std::string>>(setups),
+  const std::vector<std::string> setups{{full, missing01, missing10, missing0110, noAnalyzer, directBeam}};
+  declareProperty(Prop::FLIPPERS, full, std::make_shared<Kernel::ListValidator<std::string>>(setups),
                   "Flipper configurations of the input workspaces.");
   declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-          Prop::EFFICIENCIES, "", Kernel::Direction::Input),
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(Prop::EFFICIENCIES, "", Kernel::Direction::Input),
       "A workspace containing the efficiency factors P1, P2, F1 and F2 as "
       "histograms");
 }
@@ -471,8 +393,7 @@ void PolarizationCorrectionWildes::exec() {
  * Validate the algorithm's input properties.
  * @return a map from property names to discovered issues
  */
-std::map<std::string, std::string>
-PolarizationCorrectionWildes::validateInputs() {
+std::map<std::string, std::string> PolarizationCorrectionWildes::validateInputs() {
   std::map<std::string, std::string> issues;
   API::MatrixWorkspace_const_sptr factorWS = getProperty(Prop::EFFICIENCIES);
   if (factorWS) {
@@ -480,11 +401,9 @@ PolarizationCorrectionWildes::validateInputs() {
     if (!factorAxis) {
       issues[Prop::EFFICIENCIES] = "The workspace is missing a vertical axis.";
     } else if (!factorAxis->isText()) {
-      issues[Prop::EFFICIENCIES] =
-          "The vertical axis in the workspace is not text axis.";
+      issues[Prop::EFFICIENCIES] = "The vertical axis in the workspace is not text axis.";
     } else if (factorWS->getNumberHistograms() < 4) {
-      issues[Prop::EFFICIENCIES] =
-          "The workspace should contain at least 4 histograms.";
+      issues[Prop::EFFICIENCIES] = "The workspace should contain at least 4 histograms.";
     } else {
       std::vector<std::string> tags{{"P1", "P2", "F1", "F2"}};
       for (size_t i = 0; i != factorAxis->length(); ++i) {
@@ -496,8 +415,7 @@ PolarizationCorrectionWildes::validateInputs() {
         }
       }
       if (!tags.empty()) {
-        issues[Prop::EFFICIENCIES] = "A histogram labeled " + tags.front() +
-                                     " is missing from the workspace.";
+        issues[Prop::EFFICIENCIES] = "A histogram labeled " + tags.front() + " is missing from the workspace.";
       }
     }
   }
@@ -505,11 +423,8 @@ PolarizationCorrectionWildes::validateInputs() {
   const std::string flipperProperty = getProperty(Prop::FLIPPERS);
   const auto flippers = parseFlipperSetup(flipperProperty);
   if (inputs.size() != flippers.size()) {
-    issues[Prop::FLIPPERS] =
-        "The number of flipper configurations (" +
-        std::to_string(flippers.size()) +
-        ") does not match the number of input workspaces (" +
-        std::to_string(inputs.size()) + ")";
+    issues[Prop::FLIPPERS] = "The number of flipper configurations (" + std::to_string(flippers.size()) +
+                             ") does not match the number of input workspaces (" + std::to_string(inputs.size()) + ")";
   }
   return issues;
 }
@@ -518,13 +433,11 @@ PolarizationCorrectionWildes::validateInputs() {
  * Check that all workspaces in inputs have the same number of histograms.
  * @param inputs a set of workspaces to check
  */
-void PolarizationCorrectionWildes::checkConsistentNumberHistograms(
-    const WorkspaceMap &inputs) {
+void PolarizationCorrectionWildes::checkConsistentNumberHistograms(const WorkspaceMap &inputs) {
   size_t nHist{0};
   bool nHistValid{false};
   // A local helper function to check the number of histograms.
-  auto checkNHist = [&nHist, &nHistValid](const API::MatrixWorkspace_sptr &ws,
-                                          const std::string &tag) {
+  auto checkNHist = [&nHist, &nHistValid](const API::MatrixWorkspace_sptr &ws, const std::string &tag) {
     if (nHistValid) {
       if (nHist != ws->getNumberHistograms()) {
         throw std::runtime_error("Number of histograms mismatch in " + tag);
@@ -553,21 +466,17 @@ void PolarizationCorrectionWildes::checkConsistentNumberHistograms(
  * @param inputs a set of workspaces to check
  * @param efficiencies efficiencies to check
  */
-void PolarizationCorrectionWildes::checkConsistentX(
-    const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
+void PolarizationCorrectionWildes::checkConsistentX(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
   // Compare everything to F1 efficiency.
   const auto &F1x = efficiencies.F1->x();
   // A local helper function to check a HistogramX against F1.
-  auto checkX = [&F1x](const HistogramData::HistogramX &x,
-                       const std::string &tag) {
+  auto checkX = [&F1x](const HistogramData::HistogramX &x, const std::string &tag) {
     if (x.size() != F1x.size()) {
-      throw std::runtime_error("Mismatch of histogram lengths between F1 and " +
-                               tag + '.');
+      throw std::runtime_error("Mismatch of histogram lengths between F1 and " + tag + '.');
     }
     for (size_t i = 0; i != x.size(); ++i) {
       if (x[i] != F1x[i]) {
-        throw std::runtime_error("Mismatch of X data between F1 and " + tag +
-                                 '.');
+        throw std::runtime_error("Mismatch of X data between F1 and " + tag + '.');
       }
     }
   };
@@ -578,8 +487,7 @@ void PolarizationCorrectionWildes::checkConsistentX(
   const auto &P2x = efficiencies.P2->x();
   checkX(P2x, "P2");
   // A local helper function to check an input workspace against F1.
-  auto checkWS = [&checkX](const API::MatrixWorkspace_sptr &ws,
-                           const std::string &tag) {
+  auto checkWS = [&checkX](const API::MatrixWorkspace_sptr &ws, const std::string &tag) {
     const auto nHist = ws->getNumberHistograms();
     for (size_t i = 0; i != nHist; ++i) {
       checkX(ws->x(i), tag);
@@ -606,29 +514,24 @@ void PolarizationCorrectionWildes::checkConsistentX(
  * @param outputs a set of workspaces to group
  * @return a group workspace
  */
-API::WorkspaceGroup_sptr
-PolarizationCorrectionWildes::groupOutput(const WorkspaceMap &outputs) {
+API::WorkspaceGroup_sptr PolarizationCorrectionWildes::groupOutput(const WorkspaceMap &outputs) {
   const std::string outWSName = getProperty(Prop::OUTPUT_WS);
   std::vector<std::string> names;
   if (outputs.mmWS) {
     names.emplace_back(outWSName + "_--");
-    API::AnalysisDataService::Instance().addOrReplace(names.back(),
-                                                      outputs.mmWS);
+    API::AnalysisDataService::Instance().addOrReplace(names.back(), outputs.mmWS);
   }
   if (outputs.mpWS) {
     names.emplace_back(outWSName + "_-+");
-    API::AnalysisDataService::Instance().addOrReplace(names.back(),
-                                                      outputs.mpWS);
+    API::AnalysisDataService::Instance().addOrReplace(names.back(), outputs.mpWS);
   }
   if (outputs.pmWS) {
     names.emplace_back(outWSName + "_+-");
-    API::AnalysisDataService::Instance().addOrReplace(names.back(),
-                                                      outputs.pmWS);
+    API::AnalysisDataService::Instance().addOrReplace(names.back(), outputs.pmWS);
   }
   if (outputs.ppWS) {
     names.emplace_back(outWSName + "_++");
-    API::AnalysisDataService::Instance().addOrReplace(names.back(),
-                                                      outputs.ppWS);
+    API::AnalysisDataService::Instance().addOrReplace(names.back(), outputs.ppWS);
   }
   auto group = createChildAlgorithm("GroupWorkspaces");
   group->initialize();
@@ -643,8 +546,7 @@ PolarizationCorrectionWildes::groupOutput(const WorkspaceMap &outputs) {
  * Make a convenience access object to the efficiency factors.
  * @return an EfficiencyMap object
  */
-PolarizationCorrectionWildes::EfficiencyMap
-PolarizationCorrectionWildes::efficiencyFactors() {
+PolarizationCorrectionWildes::EfficiencyMap PolarizationCorrectionWildes::efficiencyFactors() {
   EfficiencyMap e;
   API::MatrixWorkspace_const_sptr factorWS = getProperty(Prop::EFFICIENCIES);
   const auto &vertAxis = factorWS->getAxis(1);
@@ -672,8 +574,7 @@ PolarizationCorrectionWildes::efficiencyFactors() {
  * @return set of corrected workspaces
  */
 PolarizationCorrectionWildes::WorkspaceMap
-PolarizationCorrectionWildes::directBeamCorrections(
-    const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
+PolarizationCorrectionWildes::directBeamCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
   using namespace boost::math;
   checkInputExists(inputs.ppWS, Flippers::Off);
   WorkspaceMap outputs;
@@ -710,8 +611,7 @@ PolarizationCorrectionWildes::directBeamCorrections(
  * @return a set of corrected workspaces
  */
 PolarizationCorrectionWildes::WorkspaceMap
-PolarizationCorrectionWildes::analyzerlessCorrections(
-    const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
+PolarizationCorrectionWildes::analyzerlessCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
   using namespace boost::math;
   checkInputExists(inputs.mmWS, Flippers::On);
   checkInputExists(inputs.ppWS, Flippers::Off);
@@ -775,8 +675,7 @@ PolarizationCorrectionWildes::analyzerlessCorrections(
  * @return a set of corrected workspaces
  */
 PolarizationCorrectionWildes::WorkspaceMap
-PolarizationCorrectionWildes::twoInputCorrections(
-    const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
+PolarizationCorrectionWildes::twoInputCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
   using namespace boost::math;
   checkInputExists(inputs.mmWS, Flippers::OnOn);
   checkInputExists(inputs.ppWS, Flippers::OffOff);
@@ -797,8 +696,7 @@ PolarizationCorrectionWildes::twoInputCorrections(
  * @return a set of corrected workspaces
  */
 PolarizationCorrectionWildes::WorkspaceMap
-PolarizationCorrectionWildes::threeInputCorrections(
-    const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
+PolarizationCorrectionWildes::threeInputCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
   WorkspaceMap fullInputs = inputs;
   checkInputExists(inputs.mmWS, Flippers::OnOn);
   checkInputExists(inputs.ppWS, Flippers::OffOff);
@@ -821,8 +719,7 @@ PolarizationCorrectionWildes::threeInputCorrections(
  * @return a set of corrected workspaces
  */
 PolarizationCorrectionWildes::WorkspaceMap
-PolarizationCorrectionWildes::fullCorrections(
-    const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
+PolarizationCorrectionWildes::fullCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
   using namespace boost::math;
   checkInputExists(inputs.mmWS, Flippers::OnOn);
   checkInputExists(inputs.mpWS, Flippers::OnOff);
@@ -862,12 +759,10 @@ PolarizationCorrectionWildes::fullCorrections(
     for (size_t binIndex = 0; binIndex < mmY.size(); ++binIndex) {
       Eigen::Vector4d corrected;
       Eigen::Vector4d errors;
-      fourInputsCorrectedAndErrors(corrected, errors, ppY[binIndex],
-                                   ppE[binIndex], pmY[binIndex], pmE[binIndex],
-                                   mpY[binIndex], mpE[binIndex], mmY[binIndex],
-                                   mmE[binIndex], F1[binIndex], F1E[binIndex],
-                                   F2[binIndex], F2E[binIndex], P1[binIndex],
-                                   P1E[binIndex], P2[binIndex], P2E[binIndex]);
+      fourInputsCorrectedAndErrors(corrected, errors, ppY[binIndex], ppE[binIndex], pmY[binIndex], pmE[binIndex],
+                                   mpY[binIndex], mpE[binIndex], mmY[binIndex], mmE[binIndex], F1[binIndex],
+                                   F1E[binIndex], F2[binIndex], F2E[binIndex], P1[binIndex], P1E[binIndex],
+                                   P2[binIndex], P2E[binIndex]);
       ppYOut[binIndex] = corrected[0];
       pmYOut[binIndex] = corrected[1];
       mpYOut[binIndex] = corrected[2];
@@ -887,17 +782,13 @@ PolarizationCorrectionWildes::fullCorrections(
  * @return a set of workspaces to correct
  */
 PolarizationCorrectionWildes::WorkspaceMap
-PolarizationCorrectionWildes::mapInputsToDirections(
-    const std::vector<std::string> &flippers) {
+PolarizationCorrectionWildes::mapInputsToDirections(const std::vector<std::string> &flippers) {
   const std::vector<std::string> inputNames = getProperty(Prop::INPUT_WS);
   WorkspaceMap inputs;
   for (size_t i = 0; i < flippers.size(); ++i) {
-    auto ws =
-        (API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(
-            inputNames[i]));
+    auto ws = (API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(inputNames[i]));
     if (!ws) {
-      throw std::runtime_error(
-          "One of the input workspaces doesn't seem to be a MatrixWorkspace.");
+      throw std::runtime_error("One of the input workspaces doesn't seem to be a MatrixWorkspace.");
     }
     const auto &f = flippers[i];
     if (f == Flippers::OnOn || f == Flippers::On) {
@@ -909,8 +800,7 @@ PolarizationCorrectionWildes::mapInputsToDirections(
     } else if (f == Flippers::OffOff || f == Flippers::Off) {
       inputs.ppWS = ws;
     } else {
-      throw std::runtime_error(std::string{"Unknown entry in "} +
-                               Prop::FLIPPERS);
+      throw std::runtime_error(std::string{"Unknown entry in "} + Prop::FLIPPERS);
     }
   }
   return inputs;
@@ -922,8 +812,7 @@ PolarizationCorrectionWildes::mapInputsToDirections(
  * @param inputs a set of input workspaces
  * @param efficiencies a set of efficiency factors
  */
-void PolarizationCorrectionWildes::threeInputsSolve01(
-    WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
+void PolarizationCorrectionWildes::threeInputsSolve01(WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
   inputs.pmWS = createWorkspaceWithHistory(inputs.mpWS);
   const auto &F1 = efficiencies.F1->y();
   const auto &F2 = efficiencies.F2->y();
@@ -944,8 +833,7 @@ void PolarizationCorrectionWildes::threeInputsSolve01(
       const auto i10 = I10[binIndex];
       const auto i11 = I11[binIndex];
       I01[binIndex] =
-          (f1 * i00 * (-1. + 2. * p1) - (i00 - i10 + i11) * (p1 - p2) -
-           f2 * (i00 - i10) * (-1. + 2. * p2)) /
+          (f1 * i00 * (-1. + 2. * p1) - (i00 - i10 + i11) * (p1 - p2) - f2 * (i00 - i10) * (-1. + 2. * p2)) /
           (-p1 + f1 * (-1. + 2. * p1) + p2);
       // The errors are left to zero.
     }
@@ -958,8 +846,7 @@ void PolarizationCorrectionWildes::threeInputsSolve01(
  * @param inputs a set of input workspaces
  * @param efficiencies a set of efficiency factors
  */
-void PolarizationCorrectionWildes::threeInputsSolve10(
-    WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
+void PolarizationCorrectionWildes::threeInputsSolve10(WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
   inputs.mpWS = createWorkspaceWithHistory(inputs.pmWS);
   const auto &F1 = efficiencies.F1->y();
   const auto &F2 = efficiencies.F2->y();
@@ -980,8 +867,7 @@ void PolarizationCorrectionWildes::threeInputsSolve10(
       const auto i01 = I01[binIndex];
       const auto i11 = I11[binIndex];
       I10[binIndex] =
-          (-f1 * (i00 - i01) * (-1. + 2. * p1) + (i00 - i01 + i11) * (p1 - p2) +
-           f2 * i00 * (-1. + 2. * p2)) /
+          (-f1 * (i00 - i01) * (-1. + 2. * p1) + (i00 - i01 + i11) * (p1 - p2) + f2 * i00 * (-1. + 2. * p2)) /
           (p1 - p2 + f2 * (-1. + 2. * p2));
       // The errors are left to zero.
     }
@@ -995,9 +881,8 @@ void PolarizationCorrectionWildes::threeInputsSolve10(
  * @param inputs a set of input workspaces
  * @param efficiencies a set of efficiency factors
  */
-void PolarizationCorrectionWildes::twoInputsSolve01And10(
-    WorkspaceMap &fullInputs, const WorkspaceMap &inputs,
-    const EfficiencyMap &efficiencies) {
+void PolarizationCorrectionWildes::twoInputsSolve01And10(WorkspaceMap &fullInputs, const WorkspaceMap &inputs,
+                                                         const EfficiencyMap &efficiencies) {
   using namespace boost::math;
   const auto &F1 = efficiencies.F1->y();
   const auto &F1E = efficiencies.F1->e();
@@ -1030,21 +915,15 @@ void PolarizationCorrectionWildes::twoInputsSolve01And10(
       const auto d = -1. + p2;
       // Case: 01
       const auto divisor = f2 * p1 * a + f1 * b * (-d * p2 + f2 * (p1 + d) * c);
-      I01[binIndex] =
-          (f2 * i11 * p1 * a -
-           f1 * i00 * b * (-f2 * pow<2>(c) + pow<2>(f2 * c) + d * p2)) /
-          divisor;
-      E01[binIndex] = twoInputsErrorEstimate01(
-          i00, E00[binIndex], i11, E11[binIndex], p1, P1E[binIndex], p2,
-          P2E[binIndex], f1, F1E[binIndex], f2, F2E[binIndex]);
+      I01[binIndex] = (f2 * i11 * p1 * a - f1 * i00 * b * (-f2 * pow<2>(c) + pow<2>(f2 * c) + d * p2)) / divisor;
+      E01[binIndex] = twoInputsErrorEstimate01(i00, E00[binIndex], i11, E11[binIndex], p1, P1E[binIndex], p2,
+                                               P2E[binIndex], f1, F1E[binIndex], f2, F2E[binIndex]);
       // Case: 10
       I10[binIndex] =
-          (-pow<2>(f1) * f2 * i00 * pow<2>(b) * c + f2 * i00 * p1 * a +
-           f1 * b * (-i11 * d * p2 + f2 * i00 * b * c)) /
+          (-pow<2>(f1) * f2 * i00 * pow<2>(b) * c + f2 * i00 * p1 * a + f1 * b * (-i11 * d * p2 + f2 * i00 * b * c)) /
           divisor;
-      E10[binIndex] = twoInputsErrorEstimate10(
-          i00, E00[binIndex], i11, E11[binIndex], p1, P1E[binIndex], p2,
-          P2E[binIndex], f1, F1E[binIndex], f2, F2E[binIndex]);
+      E10[binIndex] = twoInputsErrorEstimate10(i00, E00[binIndex], i11, E11[binIndex], p1, P1E[binIndex], p2,
+                                               P2E[binIndex], f1, F1E[binIndex], f2, F2E[binIndex]);
     }
   }
 }

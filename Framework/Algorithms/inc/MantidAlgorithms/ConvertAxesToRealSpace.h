@@ -23,9 +23,7 @@ class MANTID_ALGORITHMS_DLL ConvertAxesToRealSpace : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"ConvertSpectrumAxis", "ConvertUnits"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"ConvertSpectrumAxis", "ConvertUnits"}; }
   const std::string category() const override;
   const std::string summary() const override;
 
@@ -54,10 +52,8 @@ private:
   // map to store unit captions and measures
   std::map<std::string, std::string> m_unitMap;
 
-  void fillAxisValues(MantidVec &vector, const AxisData &axisData,
-                      bool isHistogram);
-  void fillUnitMap(std::vector<std::string> &orderedVector,
-                   std::map<std::string, std::string> &unitMap,
+  void fillAxisValues(MantidVec &vector, const AxisData &axisData, bool isHistogram);
+  void fillUnitMap(std::vector<std::string> &orderedVector, std::map<std::string, std::string> &unitMap,
                    const std::string &caption, const std::string &unit);
 };
 

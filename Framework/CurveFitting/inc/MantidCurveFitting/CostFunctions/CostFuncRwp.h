@@ -61,12 +61,10 @@ public:
   std::string shortName() const override { return "Rwp"; }
 
 private:
-  std::vector<double>
-  getFitWeights(API::FunctionValues_sptr values) const override;
+  std::vector<double> getFitWeights(API::FunctionValues_sptr values) const override;
 
   /// Get weight (1/sigma)
-  double getWeight(const API::FunctionValues_sptr &values, size_t i,
-                   double sqrtW = 1.0) const;
+  double getWeight(const API::FunctionValues_sptr &values, size_t i, double sqrtW = 1.0) const;
 
   /// Calcualte sqrt(W). Final cost function = sum_i [ (obs_i - cal_i) / (sigma
   /// * sqrt(W))]**2

@@ -21,15 +21,10 @@ class PoldiResidualCorrelationCoreTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static PoldiResidualCorrelationCoreTest *createSuite() {
-    return new PoldiResidualCorrelationCoreTest();
-  }
-  static void destroySuite(PoldiResidualCorrelationCoreTest *suite) {
-    delete suite;
-  }
+  static PoldiResidualCorrelationCoreTest *createSuite() { return new PoldiResidualCorrelationCoreTest(); }
+  static void destroySuite(PoldiResidualCorrelationCoreTest *suite) { delete suite; }
 
-  PoldiResidualCorrelationCoreTest()
-      : m_log("PoldiResidualCorrelationCoreTest") {}
+  PoldiResidualCorrelationCoreTest() : m_log("PoldiResidualCorrelationCoreTest") {}
 
   void testGetSetWeight() {
     PoldiResidualCorrelationCore core(m_log);
@@ -133,21 +128,17 @@ public:
     TestablePoldiResidualCorrelationCore core(m_log);
 
     std::vector<double> numbers = {1.0, 2.0, 3.0, 4.0, 5.0, 6.0};
-    TS_ASSERT_EQUALS(core.calculateAverageDeviationFromValue(numbers, 3.5),
-                     1.5);
+    TS_ASSERT_EQUALS(core.calculateAverageDeviationFromValue(numbers, 3.5), 1.5);
 
     std::vector<double> empty;
-    TS_ASSERT_THROWS(core.calculateAverageDeviationFromValue(empty, 3.5),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(core.calculateAverageDeviationFromValue(empty, 3.5), const std::runtime_error &);
   }
 
 private:
   Mantid::Kernel::Logger m_log;
 
-  class TestablePoldiResidualCorrelationCore
-      : public PoldiResidualCorrelationCore {
+  class TestablePoldiResidualCorrelationCore : public PoldiResidualCorrelationCore {
     friend class PoldiResidualCorrelationCoreTest;
-    TestablePoldiResidualCorrelationCore(Mantid::Kernel::Logger &logger)
-        : PoldiResidualCorrelationCore(logger) {}
+    TestablePoldiResidualCorrelationCore(Mantid::Kernel::Logger &logger) : PoldiResidualCorrelationCore(logger) {}
   };
 };

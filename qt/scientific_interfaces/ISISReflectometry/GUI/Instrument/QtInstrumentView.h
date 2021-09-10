@@ -20,12 +20,10 @@ namespace ISISReflectometry {
 /** QtInstrumentView : Provides an interface for the "Instrument" tab in the
 ISIS Reflectometry interface.
 */
-class MANTIDQT_ISISREFLECTOMETRY_DLL QtInstrumentView : public QWidget,
-                                                        public IInstrumentView {
+class MANTIDQT_ISISREFLECTOMETRY_DLL QtInstrumentView : public QWidget, public IInstrumentView {
   Q_OBJECT
 public:
-  QtInstrumentView(Mantid::API::IAlgorithm_sptr algorithmForTooltips,
-                   QWidget *parent = nullptr);
+  QtInstrumentView(Mantid::API::IAlgorithm_sptr algorithmForTooltips, QWidget *parent = nullptr);
   void subscribe(InstrumentViewSubscriber *notifyee) override;
   void connectInstrumentSettingsWidgets() override;
   void disconnectInstrumentSettingsWidgets() override;
@@ -71,23 +69,18 @@ public slots:
   void onRestoreDefaultsRequested();
 
 private:
-  QString messageFor(
-      std::vector<MissingInstrumentParameterValue> const &missingValues) const;
+  QString messageFor(std::vector<MissingInstrumentParameterValue> const &missingValues) const;
   QString messageFor(const InstrumentParameterTypeMissmatch &typeError) const;
 
   /// Initialise the interface
   void initLayout();
   void registerSettingsWidgets(const Mantid::API::IAlgorithm_sptr &alg);
-  void
-  registerInstrumentSettingsWidgets(const Mantid::API::IAlgorithm_sptr &alg);
-  void
-  setToolTipAsPropertyDocumentation(QWidget &widget,
-                                    std::string const &propertyName,
-                                    const Mantid::API::IAlgorithm_sptr &alg);
+  void registerInstrumentSettingsWidgets(const Mantid::API::IAlgorithm_sptr &alg);
+  void setToolTipAsPropertyDocumentation(QWidget &widget, std::string const &propertyName,
+                                         const Mantid::API::IAlgorithm_sptr &alg);
 
   template <typename Widget>
-  void registerSettingWidget(Widget &widget, std::string const &propertyName,
-                             const Mantid::API::IAlgorithm_sptr &alg);
+  void registerSettingWidget(Widget &widget, std::string const &propertyName, const Mantid::API::IAlgorithm_sptr &alg);
   void connectSettingsChange(QLineEdit &edit);
   void connectSettingsChange(QComboBox &edit);
   void connectSettingsChange(QCheckBox &edit);

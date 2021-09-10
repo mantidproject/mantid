@@ -26,15 +26,12 @@ private:
   void declareParameters() override;
 
   /// Fill out with function values at given x points
-  void functionLocal(double *out, const double *xValues,
-                     const size_t nData) const override;
+  void functionLocal(double *out, const double *xValues, const size_t nData) const override;
   /// Derivatives of function with respect to active parameters
-  void functionDerivLocal(API::Jacobian *out, const double *xValues,
-                          const size_t nData) override;
+  void functionDerivLocal(API::Jacobian *out, const double *xValues, const size_t nData) override;
 
   /// Calculate both function & derivative together
-  void calculateFunctionAndDerivative(const double *xValues, const size_t nData,
-                                      double *functionValues,
+  void calculateFunctionAndDerivative(const double *xValues, const size_t nData, double *functionValues,
                                       API::Jacobian *derivatives) const;
 
   /// Return value of centre of peak

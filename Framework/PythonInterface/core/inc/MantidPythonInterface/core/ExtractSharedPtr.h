@@ -13,8 +13,7 @@
 namespace Mantid::PythonInterface {
 
 template <typename T> struct ExtractSharedPtr {
-  explicit ExtractSharedPtr(const boost::python::object &pyvalue) noexcept
-      : ExtractSharedPtr<T>(pyvalue.ptr()) {}
+  explicit ExtractSharedPtr(const boost::python::object &pyvalue) noexcept : ExtractSharedPtr<T>(pyvalue.ptr()) {}
   explicit ExtractSharedPtr(PyObject *pyvalue) noexcept;
   inline bool check() const noexcept { return m_value.get() != nullptr; }
   const std::shared_ptr<T> operator()() const;
@@ -27,8 +26,7 @@ private:
  * @param pyvalue Python object from which to attempt extraction of an object of
  * type T
  */
-template <typename T>
-ExtractSharedPtr<T>::ExtractSharedPtr(PyObject *pyvalue) noexcept : m_value() {
+template <typename T> ExtractSharedPtr<T>::ExtractSharedPtr(PyObject *pyvalue) noexcept : m_value() {
   // Here we assume we want to extract out an existing shared_ptr from a Python
   // object if one exists. Naievly one would just do extract<std::shared_ptr<T>>
   // but this will create a second shared_ptr managing the same resource and
@@ -41,11 +39,9 @@ ExtractSharedPtr<T>::ExtractSharedPtr(PyObject *pyvalue) noexcept : m_value() {
   // shared_ptr<T> if this fails.
 
   using boost::python::extract;
-  if (extract<std::weak_ptr<T> &> extractWeakRef(pyvalue);
-      extractWeakRef.check()) {
+  if (extract<std::weak_ptr<T> &> extractWeakRef(pyvalue); extractWeakRef.check()) {
     m_value = extractWeakRef().lock();
-  } else if (extract<std::shared_ptr<T> &> extractSharedRef(pyvalue);
-             extractSharedRef.check()) {
+  } else if (extract<std::shared_ptr<T> &> extractSharedRef(pyvalue); extractSharedRef.check()) {
     m_value = extractSharedRef();
   }
 }
@@ -53,13 +49,11 @@ ExtractSharedPtr<T>::ExtractSharedPtr(PyObject *pyvalue) noexcept : m_value() {
 /**
  * @return The extracted shared_ptr or throws std::invalid_argument
  */
-template <typename T>
-const std::shared_ptr<T> ExtractSharedPtr<T>::operator()() const {
+template <typename T> const std::shared_ptr<T> ExtractSharedPtr<T>::operator()() const {
   if (check()) {
     return m_value;
   } else {
-    throw std::invalid_argument(
-        "Unable to extract shared_ptr from Python object");
+    throw std::invalid_argument("Unable to extract shared_ptr from Python object");
   }
 }
 

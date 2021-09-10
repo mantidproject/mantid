@@ -8,8 +8,7 @@
 #include "MantidAPI/Algorithm.h"
 
 namespace Mantid {
-Instrumentation::AlgoTimeRegister
-    Instrumentation::AlgoTimeRegister::globalAlgoTimeRegister;
+Instrumentation::AlgoTimeRegister Instrumentation::AlgoTimeRegister::globalAlgoTimeRegister;
 namespace API {
 
 //---------------------------------------------------------------------------------------------

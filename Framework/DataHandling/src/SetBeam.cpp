@@ -42,9 +42,7 @@ int SetBeam::version() const { return 1; }
 const std::string SetBeam::category() const { return "Sample"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string SetBeam::summary() const {
-  return "Set properties of the beam such as size and shape";
-}
+const std::string SetBeam::summary() const { return "Set properties of the beam such as size and shape"; }
 
 /// @return A dict of any errors in parameters
 std::map<std::string, std::string> SetBeam::validateInputs() {
@@ -63,9 +61,8 @@ std::map<std::string, std::string> SetBeam::validateInputs() {
         errors["Geometry"] = "Only 'Slit' and 'Circle' shapes are supported.";
       }
     } else {
-      errors["Geometry"] =
-          "'Geometry' flags missing or incorrect. Required flags: Shape, "
-          "plus Width and Height, or Radius";
+      errors["Geometry"] = "'Geometry' flags missing or incorrect. Required flags: Shape, "
+                           "plus Width and Height, or Radius";
     }
   } else {
     errors["Geometry"] = "No 'Geometry' flags given.";
@@ -83,14 +80,12 @@ void SetBeam::init() {
   using Kernel::PropertyManagerProperty;
 
   // In/out
-  auto validator = std::make_shared<InstrumentValidator>(
-      InstrumentValidator::SourcePosition);
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input, validator),
-                  "An input workspace with an attached instrument.");
+  auto validator = std::make_shared<InstrumentValidator>(InstrumentValidator::SourcePosition);
   declareProperty(
-      std::make_unique<PropertyManagerProperty>("Geometry", Direction::Input),
-      "A dictionary of geometry parameters for the beam");
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input, validator),
+      "An input workspace with an attached instrument.");
+  declareProperty(std::make_unique<PropertyManagerProperty>("Geometry", Direction::Input),
+                  "A dictionary of geometry parameters for the beam");
 }
 
 /**
@@ -117,8 +112,7 @@ void SetBeam::exec() {
 
     // Add the values as parameters on the source object
     pmap.addDouble(source->getComponentID(), RADIUS_PARAM_NAME, radius);
-    pmap.addString(source->getComponentID(), SHAPE_PARAM_NAME,
-                   SHAPE_NAME_CIRCLE);
+    pmap.addString(source->getComponentID(), SHAPE_PARAM_NAME, SHAPE_NAME_CIRCLE);
   } else {
     double width = geometryArgs->getProperty("Width");
     double height = geometryArgs->getProperty("Height");

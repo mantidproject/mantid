@@ -28,9 +28,7 @@ public:
 
   SumSpectraTest() {
     this->nTestHist = 10;
-    this->inputSpace =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(nTestHist,
-                                                                     102, true);
+    this->inputSpace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(nTestHist, 102, true);
     inputSpace->mutableSpectrumInfo().setMasked(1, true);
 
     inputSpace->mutableE(5)[38] = 0.0;
@@ -57,12 +55,10 @@ public:
     runner.setProperty("EndWorkspaceIndex", 9);
     auto validationErrors = runner.validateInputs();
     TS_ASSERT_EQUALS(2, validationErrors.size());
-    TSM_ASSERT_THROWS_NOTHING(
-        "Validation errors should contain a StartWorkspaceIndex entry",
-        validationErrors["StartWorkspaceIndex"]);
-    TSM_ASSERT_THROWS_NOTHING(
-        "Validation errors should contain an EndWorkspaceIndex entry",
-        validationErrors["EndWorkspaceIndex"]);
+    TSM_ASSERT_THROWS_NOTHING("Validation errors should contain a StartWorkspaceIndex entry",
+                              validationErrors["StartWorkspaceIndex"]);
+    TSM_ASSERT_THROWS_NOTHING("Validation errors should contain an EndWorkspaceIndex entry",
+                              validationErrors["EndWorkspaceIndex"]);
   }
 
   void testValidateInputsWithWorkspaceChecksAgainstWorkspaceSize() {
@@ -76,28 +72,24 @@ public:
     runner.setProperty("StartWorkspaceIndex", 3);
     auto validationErrors = runner.validateInputs();
     TS_ASSERT_EQUALS(1, validationErrors.size());
-    TSM_ASSERT_THROWS_NOTHING(
-        "Validation errors should contain a StartWorkspaceIndex entry",
-        validationErrors["StartWorkspaceIndex"]);
+    TSM_ASSERT_THROWS_NOTHING("Validation errors should contain a StartWorkspaceIndex entry",
+                              validationErrors["StartWorkspaceIndex"]);
 
     // bad end workspace index
     runner.setProperty("StartWorkspaceIndex", 0);
     runner.setProperty("EndWorkspaceIndex", 5);
     validationErrors = runner.validateInputs();
     TS_ASSERT_EQUALS(1, validationErrors.size());
-    TSM_ASSERT_THROWS_NOTHING(
-        "Validation errors should contain a EndWorkspaceIndex entry",
-        validationErrors["EndWorkspaceIndex"]);
+    TSM_ASSERT_THROWS_NOTHING("Validation errors should contain a EndWorkspaceIndex entry",
+                              validationErrors["EndWorkspaceIndex"]);
   }
 
   void testValidateInputsWithValidWorkspaceGroup() {
     Mantid::Algorithms::SumSpectra runner;
     runner.setChild(true);
     runner.initialize();
-    const std::string nameStem(
-        "SumSpectraTest_testValidateInputsWithValidWorkspaceGroup");
-    auto testGroup =
-        WorkspaceCreationHelper::createWorkspaceGroup(2, 1, 1, nameStem);
+    const std::string nameStem("SumSpectraTest_testValidateInputsWithValidWorkspaceGroup");
+    auto testGroup = WorkspaceCreationHelper::createWorkspaceGroup(2, 1, 1, nameStem);
     runner.setProperty("InputWorkspace", nameStem);
 
     auto validationErrors = runner.validateInputs();
@@ -110,18 +102,15 @@ public:
     Mantid::Algorithms::SumSpectra runner;
     runner.setChild(true);
     runner.initialize();
-    const std::string nameStem(
-        "SumSpectraTest_testValidateInputsWithWorkspaceGroupAndInvalidIndex");
-    auto testGroup =
-        WorkspaceCreationHelper::createWorkspaceGroup(2, 1, 1, nameStem);
+    const std::string nameStem("SumSpectraTest_testValidateInputsWithWorkspaceGroupAndInvalidIndex");
+    auto testGroup = WorkspaceCreationHelper::createWorkspaceGroup(2, 1, 1, nameStem);
     runner.setPropertyValue("InputWorkspace", nameStem);
     runner.setProperty("StartWorkspaceIndex", 11);
 
     auto validationErrors = runner.validateInputs();
     TS_ASSERT_EQUALS(1, validationErrors.size());
-    TSM_ASSERT_THROWS_NOTHING(
-        "Validation errors should contain StartWorkspaceIndex",
-        validationErrors["StartWorkspaceIndex"]);
+    TSM_ASSERT_THROWS_NOTHING("Validation errors should contain StartWorkspaceIndex",
+                              validationErrors["StartWorkspaceIndex"]);
 
     Mantid::API::AnalysisDataService::Instance().remove(nameStem);
   }
@@ -135,8 +124,7 @@ public:
     // Set the properties
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputSpace));
     const std::string outputSpace1 = "SumSpectraOut1";
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outputSpace1));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outputSpace1));
 
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("StartWorkspaceIndex", "1"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("EndWorkspaceIndex", "3"));
@@ -146,11 +134,9 @@ public:
 
     // Get back the saved workspace
     Workspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieve(outputSpace1));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outputSpace1));
 
-    Workspace2D_const_sptr output2D =
-        std::dynamic_pointer_cast<const Workspace2D>(output);
+    Workspace2D_const_sptr output2D = std::dynamic_pointer_cast<const Workspace2D>(output);
     size_t max = 0;
     TS_ASSERT_EQUALS(max = inputSpace->blocksize(), output2D->blocksize());
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 1);
@@ -165,8 +151,7 @@ public:
     for (size_t i = 0; i < max; ++i) {
       TS_ASSERT_EQUALS(x[i], inputSpace->x(0)[i]);
       TS_ASSERT_EQUALS(y[i], inputSpace->y(2)[i] + inputSpace->y(3)[i]);
-      TS_ASSERT_DELTA(
-          e[i], std::sqrt(inputSpace->y(2)[i] + inputSpace->y(3)[i]), 1.0e-10);
+      TS_ASSERT_DELTA(e[i], std::sqrt(inputSpace->y(2)[i] + inputSpace->y(3)[i]), 1.0e-10);
     }
 
     // Check the detectors mapped to the single spectra
@@ -180,12 +165,9 @@ public:
     TS_ASSERT(output2D->run().hasProperty("NumMaskSpectra"))
     TS_ASSERT(output2D->run().hasProperty("NumZeroSpectra"))
 
-    TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(3 - 1),
-                     output2D->run().getLogData("NumAllSpectra")->value())
-    TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(1),
-                     output2D->run().getLogData("NumMaskSpectra")->value())
-    TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(0),
-                     output2D->run().getLogData("NumZeroSpectra")->value())
+    TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(3 - 1), output2D->run().getLogData("NumAllSpectra")->value())
+    TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(1), output2D->run().getLogData("NumMaskSpectra")->value())
+    TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(0), output2D->run().getLogData("NumZeroSpectra")->value())
   }
 
   void testExecWithoutLimits() {
@@ -200,18 +182,15 @@ public:
     alg2.setProperty("IncludeMonitors", false);
 
     // Check setting of invalid property value causes failure
-    TS_ASSERT_THROWS(alg2.setPropertyValue("StartWorkspaceIndex", "-1"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg2.setPropertyValue("StartWorkspaceIndex", "-1"), const std::invalid_argument &);
 
     TS_ASSERT_THROWS_NOTHING(alg2.execute());
     TS_ASSERT(alg2.isExecuted());
 
     // Get back the saved workspace
     Workspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieve(outputSpace2));
-    Workspace2D_const_sptr output2D =
-        std::dynamic_pointer_cast<const Workspace2D>(output);
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outputSpace2));
+    Workspace2D_const_sptr output2D = std::dynamic_pointer_cast<const Workspace2D>(output);
 
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 1);
 
@@ -252,38 +231,27 @@ public:
     // Spectra at workspace index 1 is masked, 8 & 9 are monitors
     TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(nTestHist - 3),
                      output2D->run().getLogData("NumAllSpectra")->value())
-    TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(1),
-                     output2D->run().getLogData("NumMaskSpectra")->value())
-    TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(0),
-                     output2D->run().getLogData("NumZeroSpectra")->value())
+    TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(1), output2D->run().getLogData("NumMaskSpectra")->value())
+    TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(0), output2D->run().getLogData("NumZeroSpectra")->value())
   }
 
-  void testExecEvent_inplace() {
-    dotestExecEvent("testEvent", "testEvent", "5,10-15");
-  }
+  void testExecEvent_inplace() { dotestExecEvent("testEvent", "testEvent", "5,10-15"); }
 
-  void testExecEvent_copy() {
-    dotestExecEvent("testEvent", "testEvent2", "5,10-15");
-  }
+  void testExecEvent_copy() { dotestExecEvent("testEvent", "testEvent2", "5,10-15"); }
 
   void testExecEvent_going_too_far() {
-    TS_ASSERT_THROWS(
-        dotestExecEvent("testEvent", "testEvent2", "5,10-15, 500-600"),
-        const std::runtime_error &);
+    TS_ASSERT_THROWS(dotestExecEvent("testEvent", "testEvent2", "5,10-15, 500-600"), const std::runtime_error &);
   }
 
   void testExecEvent_negative_indices() {
-    TS_ASSERT_THROWS(dotestExecEvent("testEvent", "testEvent2", "5-10,-10"),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(dotestExecEvent("testEvent", "testEvent2", "5-10,-10"), const std::runtime_error &);
   }
 
-  void dotestExecEvent(const std::string &inName, const std::string &outName,
-                       const std::string &indices_list) {
+  void dotestExecEvent(const std::string &inName, const std::string &outName, const std::string &indices_list) {
     int numPixels = 100;
     int numBins = 20;
     int numEvents = 20;
-    EventWorkspace_sptr input = WorkspaceCreationHelper::createEventWorkspace(
-        numPixels, numBins, numEvents);
+    EventWorkspace_sptr input = WorkspaceCreationHelper::createEventWorkspace(numPixels, numBins, numEvents);
     AnalysisDataService::Instance().addOrReplace(inName, input);
 
     Mantid::Algorithms::SumSpectra alg2;
@@ -302,8 +270,7 @@ public:
     TS_ASSERT(alg2.isExecuted());
 
     EventWorkspace_sptr output;
-    output =
-        AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outName);
+    output = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outName);
     TS_ASSERT(output);
     TS_ASSERT_EQUALS(output->getNumberHistograms(), 1);
     TS_ASSERT_EQUALS(output->getNumberEvents(), 9 * numEvents);
@@ -316,8 +283,7 @@ public:
 
   void testRebinnedOutputSum() {
     AnalysisDataService::Instance().clear();
-    RebinnedOutput_sptr ws =
-        WorkspaceCreationHelper::createRebinnedOutputWorkspace();
+    RebinnedOutput_sptr ws = WorkspaceCreationHelper::createRebinnedOutputWorkspace();
     std::string inName = "rebinTest";
     std::string outName = "rebin_sum";
 
@@ -339,8 +305,7 @@ public:
 
     // Check that things came out correctly
     RebinnedOutput_sptr output;
-    output =
-        AnalysisDataService::Instance().retrieveWS<RebinnedOutput>(outName);
+    output = AnalysisDataService::Instance().retrieveWS<RebinnedOutput>(outName);
 
     auto evaluate = [&, nHist](RebinnedOutput_sptr &output) {
       TS_ASSERT(output);
@@ -359,12 +324,9 @@ public:
       TS_ASSERT(output->run().hasProperty("NumMaskSpectra"))
       TS_ASSERT(output->run().hasProperty("NumZeroSpectra"))
 
-      TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(nHist),
-                       output->run().getLogData("NumAllSpectra")->value())
-      TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(0),
-                       output->run().getLogData("NumMaskSpectra")->value())
-      TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(0),
-                       output->run().getLogData("NumZeroSpectra")->value())
+      TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(nHist), output->run().getLogData("NumAllSpectra")->value())
+      TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(0), output->run().getLogData("NumMaskSpectra")->value())
+      TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(0), output->run().getLogData("NumZeroSpectra")->value())
     };
 
     evaluate(output);
@@ -384,8 +346,7 @@ public:
     alg3a.setProperty("RemoveSpecialValues", true);
     alg3a.execute();
     TS_ASSERT(alg3a.isExecuted());
-    output =
-        AnalysisDataService::Instance().retrieveWS<RebinnedOutput>(outName);
+    output = AnalysisDataService::Instance().retrieveWS<RebinnedOutput>(outName);
     evaluate(output);
   }
   void testExecNoLimitsWeighted() {
@@ -407,10 +368,8 @@ public:
 
     // Get back the saved workspace
     Workspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieve(outputSpace2));
-    Workspace2D_const_sptr output2D =
-        std::dynamic_pointer_cast<const Workspace2D>(output);
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outputSpace2));
+    Workspace2D_const_sptr output2D = std::dynamic_pointer_cast<const Workspace2D>(output);
 
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 1);
 
@@ -428,10 +387,8 @@ public:
     // Spectra at workspace index 1 is masked, 8 & 9 are monitors
     TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(nTestHist - 3),
                      output2D->run().getLogData("NumAllSpectra")->value())
-    TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(1),
-                     output2D->run().getLogData("NumMaskSpectra")->value())
-    TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(1),
-                     output2D->run().getLogData("NumZeroSpectra")->value())
+    TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(1), output2D->run().getLogData("NumMaskSpectra")->value())
+    TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(1), output2D->run().getLogData("NumZeroSpectra")->value())
 
     size_t nSignals = nTestHist - 3;
     // Check a few bins
@@ -480,10 +437,8 @@ public:
 
     // Get back the saved workspace
     Workspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieve(outputSpace2));
-    Workspace2D_const_sptr output2D =
-        std::dynamic_pointer_cast<const Workspace2D>(output);
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outputSpace2));
+    Workspace2D_const_sptr output2D = std::dynamic_pointer_cast<const Workspace2D>(output);
 
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 1);
 
@@ -501,10 +456,8 @@ public:
     // Spectra at workspace index 1 is masked, 8 & 9 are monitors
     TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(nTestHist - 3),
                      output2D->run().getLogData("NumAllSpectra")->value())
-    TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(1),
-                     output2D->run().getLogData("NumMaskSpectra")->value())
-    TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(1),
-                     output2D->run().getLogData("NumZeroSpectra")->value())
+    TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(1), output2D->run().getLogData("NumMaskSpectra")->value())
+    TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(1), output2D->run().getLogData("NumZeroSpectra")->value())
 
     size_t nSignals = nTestHist - 3;
     // Check a few bins
@@ -540,8 +493,7 @@ public:
     int nBins = 10;
     int nHist = 4;
 
-    MatrixWorkspace_sptr tws =
-        WorkspaceCreationHelper::create2DWorkspaceBinned(nHist, nBins);
+    MatrixWorkspace_sptr tws = WorkspaceCreationHelper::create2DWorkspaceBinned(nHist, nBins);
     std::string inName = "rebinTest";
     std::string outName = "sumWS";
 
@@ -577,10 +529,8 @@ public:
 
     // Get back the saved workspace
     Workspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieve(outName));
-    Workspace2D_const_sptr output2D =
-        std::dynamic_pointer_cast<const Workspace2D>(output);
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outName));
+    Workspace2D_const_sptr output2D = std::dynamic_pointer_cast<const Workspace2D>(output);
 
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 1);
 
@@ -595,12 +545,9 @@ public:
     TS_ASSERT(output2D->run().hasProperty("NumMaskSpectra"))
     TS_ASSERT(output2D->run().hasProperty("NumZeroSpectra"))
 
-    TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(nHist),
-                     output2D->run().getLogData("NumAllSpectra")->value())
-    TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(0),
-                     output2D->run().getLogData("NumMaskSpectra")->value())
-    TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(0),
-                     output2D->run().getLogData("NumZeroSpectra")->value())
+    TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(nHist), output2D->run().getLogData("NumAllSpectra")->value())
+    TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(0), output2D->run().getLogData("NumMaskSpectra")->value())
+    TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(0), output2D->run().getLogData("NumZeroSpectra")->value())
 
     // Check a few bins
     TS_ASSERT_EQUALS(x[0], tws->x(0)[0]);
@@ -619,8 +566,7 @@ public:
 
   void testRemoveSpecialValuesOn() {
     constexpr size_t numOfHistos = 2;
-    auto inWs =
-        WorkspaceCreationHelper::create2DWorkspace123(numOfHistos, 3, true);
+    auto inWs = WorkspaceCreationHelper::create2DWorkspace123(numOfHistos, 3, true);
     auto &yVals = inWs->mutableY(1);
 
     yVals[0] = std::numeric_limits<double>::infinity();
@@ -639,10 +585,8 @@ public:
     TS_ASSERT(sumSpectraAlg.isExecuted());
 
     Workspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieve(outWsName));
-    Workspace2D_const_sptr output2D =
-        std::dynamic_pointer_cast<const Workspace2D>(output);
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outWsName));
+    Workspace2D_const_sptr output2D = std::dynamic_pointer_cast<const Workspace2D>(output);
 
     const auto &outYVals = output2D->y(0);
     // We expect one less because of inf and NaN
@@ -656,8 +600,7 @@ public:
 
   void testRemoveSpecialValuesOff() {
     constexpr size_t numOfHistos = 2;
-    auto inWs =
-        WorkspaceCreationHelper::create2DWorkspace123(numOfHistos, 3, true);
+    auto inWs = WorkspaceCreationHelper::create2DWorkspace123(numOfHistos, 3, true);
     auto &yVals = inWs->mutableY(1);
 
     yVals[0] = std::numeric_limits<double>::infinity();
@@ -676,10 +619,8 @@ public:
     TS_ASSERT(sumSpectraAlg.isExecuted());
 
     Workspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieve(outWsName));
-    Workspace2D_const_sptr output2D =
-        std::dynamic_pointer_cast<const Workspace2D>(output);
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outWsName));
+    Workspace2D_const_sptr output2D = std::dynamic_pointer_cast<const Workspace2D>(output);
 
     const auto &outYVals = output2D->y(0);
     // We expect a NaN and an Inf to propagate here
@@ -701,9 +642,7 @@ class SumSpectraTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static SumSpectraTestPerformance *createSuite() {
-    return new SumSpectraTestPerformance();
-  }
+  static SumSpectraTestPerformance *createSuite() { return new SumSpectraTestPerformance(); }
   static void destroySuite(SumSpectraTestPerformance *suite) {
     AnalysisDataService::Instance().clear();
     delete suite;
@@ -711,8 +650,7 @@ public:
 
   SumSpectraTestPerformance() {
     input = WorkspaceCreationHelper::create2DWorkspaceBinned(40000, 10000);
-    inputEvent =
-        WorkspaceCreationHelper::createEventWorkspace(20000, 1000, 2000);
+    inputEvent = WorkspaceCreationHelper::createEventWorkspace(20000, 1000, 2000);
   }
 
   void testExec2D() {

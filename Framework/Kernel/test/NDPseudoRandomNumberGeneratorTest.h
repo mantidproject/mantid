@@ -63,9 +63,8 @@ public:
   }
 
 private:
-  std::shared_ptr<NDRandomNumberGenerator>
-  createTestGenerator(const size_t seedValue, const double start = -1.0,
-                      const double end = -1.0) {
+  std::shared_ptr<NDRandomNumberGenerator> createTestGenerator(const size_t seedValue, const double start = -1.0,
+                                                               const double end = -1.0) {
     using namespace Mantid::Kernel;
     using NDMersenneTwister = NDPseudoRandomNumberGenerator<MersenneTwister>;
     const unsigned int ndims(3);
@@ -75,9 +74,7 @@ private:
       return std::make_shared<NDMersenneTwister>(ndims, seedValue);
   }
 
-  std::vector<std::vector<double>>
-  doNextValueCalls(const unsigned int ncalls,
-                   NDRandomNumberGenerator &randGen) {
+  std::vector<std::vector<double>> doNextValueCalls(const unsigned int ncalls, NDRandomNumberGenerator &randGen) {
     std::vector<std::vector<double>> values(ncalls);
     for (unsigned int i = 0; i < ncalls; ++i) {
       values[i] = randGen.nextPoint();

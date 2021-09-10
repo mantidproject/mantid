@@ -104,16 +104,12 @@ public:
     ISaveableTester Sav(0);
 
     TSM_ASSERT_EQUALS("Default data ID should be 0 ", 0, Sav.getFileId());
-    TSM_ASSERT_EQUALS("Default file position is wrong ",
-                      std::numeric_limits<uint64_t>::max(),
-                      Sav.getFilePosition());
+    TSM_ASSERT_EQUALS("Default file position is wrong ", std::numeric_limits<uint64_t>::max(), Sav.getFilePosition());
     TSM_ASSERT_EQUALS("Default size should be 0 ", 0, Sav.getFileSize());
 
     ISaveableTester CopyTester(Sav);
-    TSM_ASSERT_EQUALS("Default data ID should be 0 ", 0,
-                      CopyTester.getFileId());
-    TSM_ASSERT_EQUALS("Default file position is wrong ",
-                      std::numeric_limits<uint64_t>::max(),
+    TSM_ASSERT_EQUALS("Default data ID should be 0 ", 0, CopyTester.getFileId());
+    TSM_ASSERT_EQUALS("Default file position is wrong ", std::numeric_limits<uint64_t>::max(),
                       CopyTester.getFilePosition());
     TSM_ASSERT_EQUALS("Default size should be 0 ", 0, CopyTester.getFileSize());
   }
@@ -203,18 +199,12 @@ public:
     DiskBuffer dbuf(3);
     // These 3 will get written out
     dbuf.toWrite(data[5].get());
-    TSM_ASSERT_EQUALS("Not yet written to file",
-                      std::numeric_limits<uint64_t>::max(),
-                      data[5]->getFilePosition());
+    TSM_ASSERT_EQUALS("Not yet written to file", std::numeric_limits<uint64_t>::max(), data[5]->getFilePosition());
 
     dbuf.toWrite(data[1].get());
-    TSM_ASSERT_EQUALS("Not yet written to file",
-                      std::numeric_limits<uint64_t>::max(),
-                      data[1]->getFilePosition());
+    TSM_ASSERT_EQUALS("Not yet written to file", std::numeric_limits<uint64_t>::max(), data[1]->getFilePosition());
     dbuf.toWrite(data[9].get());
-    TSM_ASSERT_EQUALS("Not yet written to file",
-                      std::numeric_limits<uint64_t>::max(),
-                      data[9]->getFilePosition());
+    TSM_ASSERT_EQUALS("Not yet written to file", std::numeric_limits<uint64_t>::max(), data[9]->getFilePosition());
     dbuf.flushCache();
 
     TSM_ASSERT_EQUALS("Is written to file at ", 0, data[9]->getFilePosition());
@@ -222,17 +212,11 @@ public:
     TSM_ASSERT_EQUALS("Is written to file at ", 2, data[5]->getFilePosition());
     // These 4 at the end will be in the cache
     dbuf.toWrite(data[2].get());
-    TSM_ASSERT_EQUALS("Not yet written to file",
-                      std::numeric_limits<uint64_t>::max(),
-                      data[2]->getFilePosition());
+    TSM_ASSERT_EQUALS("Not yet written to file", std::numeric_limits<uint64_t>::max(), data[2]->getFilePosition());
     dbuf.toWrite(data[3].get());
-    TSM_ASSERT_EQUALS("Not yet written to file",
-                      std::numeric_limits<uint64_t>::max(),
-                      data[3]->getFilePosition());
+    TSM_ASSERT_EQUALS("Not yet written to file", std::numeric_limits<uint64_t>::max(), data[3]->getFilePosition());
     dbuf.toWrite(data[4].get());
-    TSM_ASSERT_EQUALS("Not yet written to file",
-                      std::numeric_limits<uint64_t>::max(),
-                      data[4]->getFilePosition());
+    TSM_ASSERT_EQUALS("Not yet written to file", std::numeric_limits<uint64_t>::max(), data[4]->getFilePosition());
     dbuf.flushCache();
 
     TSM_ASSERT_EQUALS("Is written to file at ", 3, data[4]->getFilePosition());
@@ -240,9 +224,7 @@ public:
     TSM_ASSERT_EQUALS("Is written to file at ", 5, data[2]->getFilePosition());
 
     dbuf.toWrite(data[6].get());
-    TSM_ASSERT_EQUALS("Not yet written to file",
-                      std::numeric_limits<uint64_t>::max(),
-                      data[6]->getFilePosition());
+    TSM_ASSERT_EQUALS("Not yet written to file", std::numeric_limits<uint64_t>::max(), data[6]->getFilePosition());
 
     // 1 left in the buffer
     TS_ASSERT_EQUALS(dbuf.getWriteBufferUsed(), 1);
@@ -283,8 +265,7 @@ public:
 
     dbuf.objectDeleted(data[1].get());
     TS_ASSERT_EQUALS(dbuf.getWriteBufferUsed(), 4);
-    TSM_ASSERT_EQUALS("The data have never been written",
-                      dbuf.getFreeSpaceMap().size(), 0);
+    TSM_ASSERT_EQUALS("The data have never been written", dbuf.getFreeSpaceMap().size(), 0);
 
     dbuf.flushCache();
     TS_ASSERT_EQUALS(dbuf.getWriteBufferUsed(), 0);
@@ -347,9 +328,8 @@ public:
     for (long i = 0; i < BIG_NUM; i++) {
       dbuf.toWrite(bigData[i].get());
     }
-    std::cout << "\nFinished DiskBuffer insertion performance test, inserted "
-              << BIG_NUM << " objects on 1 thread in " << clock.elapsed()
-              << " sec\n";
+    std::cout << "\nFinished DiskBuffer insertion performance test, inserted " << BIG_NUM << " objects on 1 thread in "
+              << clock.elapsed() << " sec\n";
 
     for (long i = 0; i < DATA_SIZE; i++) {
       dbuf.objectDeleted(bigData[indexToRemove[i]].get());
@@ -387,9 +367,8 @@ public:
     for (long i = 0; i < BIG_NUM; i++) {
       dbuf.toWrite(bigData[i].get());
     }
-    std::cout << "\nFinished DiskBuffer insertion performance test, inserted "
-              << BIG_NUM << " objects on multithread in " << clock.elapsed()
-              << " sec\n";
+    std::cout << "\nFinished DiskBuffer insertion performance test, inserted " << BIG_NUM
+              << " objects on multithread in " << clock.elapsed() << " sec\n";
 
     PARALLEL_FOR_NO_WSP_CHECK()
     for (long i = 0; i < DATA_SIZE; i++) {
@@ -416,12 +395,8 @@ public:
 
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static DiskBufferISaveableTestPerformance *createSuite() {
-    return new DiskBufferISaveableTestPerformance();
-  }
-  static void destroySuite(DiskBufferISaveableTestPerformance *suite) {
-    delete suite;
-  }
+  static DiskBufferISaveableTestPerformance *createSuite() { return new DiskBufferISaveableTestPerformance(); }
+  static void destroySuite(DiskBufferISaveableTestPerformance *suite) { delete suite; }
 
   DiskBufferISaveableTestPerformance() {
     num = 100000;
@@ -454,8 +429,7 @@ public:
       dbuf.toWrite(i);
       i->setBusy(false);
     }
-    std::cout << " Elapsed : " << tim << " to load " << num
-              << " into MRU (no write cache).\n";
+    std::cout << " Elapsed : " << tim << " to load " << num << " into MRU (no write cache).\n";
   }
 
   void test_largeCache_writeBuffer() {
@@ -475,7 +449,6 @@ public:
       dbuf.toWrite(i);
       i->setBusy(false);
     }
-    std::cout << " Elapsed : " << tim << " to load " << num
-              << " into MRU (no write buffer).\n";
+    std::cout << " Elapsed : " << tim << " to load " << num << " into MRU (no write buffer).\n";
   }
 };

@@ -66,10 +66,8 @@ private slots:
 
   void setRunEnabled(bool enabled);
   void setSaveEnabled(bool enabled);
-  void updateRunButton(bool enabled = true,
-                       std::string const &enableOutputButtons = "unchanged",
-                       QString const &message = "Run",
-                       QString const &tooltip = "");
+  void updateRunButton(bool enabled = true, std::string const &enableOutputButtons = "unchanged",
+                       QString const &message = "Run", QString const &tooltip = "");
 
 private:
   void setFileExtensionsByName(bool filter) override;
@@ -77,6 +75,7 @@ private:
   Ui::IndirectSymmetrise m_uiForm;
   double m_originalMax;
   double m_originalMin;
+  Mantid::API::AnalysisDataServiceImpl &m_adsInstance;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

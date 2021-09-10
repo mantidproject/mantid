@@ -17,8 +17,7 @@ namespace ISISReflectometry {
  * @param view :: a handle to a view for this presenter
  * @param model :: a handle to a model for this presenter
  */
-OptionsDialogPresenter::OptionsDialogPresenter(
-    IOptionsDialogView *view, std::unique_ptr<IOptionsDialogModel> model)
+OptionsDialogPresenter::OptionsDialogPresenter(IOptionsDialogView *view, std::unique_ptr<IOptionsDialogModel> model)
     : m_view(view), m_model(std::move(model)), m_notifyee() {
   initOptions();
   m_view->subscribe(this);
@@ -52,19 +51,14 @@ void OptionsDialogPresenter::notifySaveOptions() {
 }
 
 /* Get a bool option state */
-bool OptionsDialogPresenter::getBoolOption(const std::string &optionName) {
-  return m_boolOptions[optionName];
-}
+bool OptionsDialogPresenter::getBoolOption(const std::string &optionName) { return m_boolOptions[optionName]; }
 
 /* Get an int option state */
-int &OptionsDialogPresenter::getIntOption(const std::string &optionName) {
-  return m_intOptions[optionName];
-}
+int &OptionsDialogPresenter::getIntOption(const std::string &optionName) { return m_intOptions[optionName]; }
 
 void OptionsDialogPresenter::showView() { m_view->show(); }
 
-void OptionsDialogPresenter::subscribe(
-    OptionsDialogPresenterSubscriber *notifyee) {
+void OptionsDialogPresenter::subscribe(OptionsDialogPresenterSubscriber *notifyee) {
   m_notifyee = notifyee;
   // the following call is required after m_notifyee is set, rather than
   // in the constructor, in order to avoid a segfault since

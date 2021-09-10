@@ -30,13 +30,11 @@ public:
     LoadDspacemap testerDSP;
     TS_ASSERT_THROWS_NOTHING(testerDSP.initialize());
     TS_ASSERT_THROWS_NOTHING(testerDSP.isInitialized());
-    testerDSP.setPropertyValue(
-        "InstrumentFilename",
-        ConfigService::Instance().getString("instrumentDefinition.directory") +
-            "/INES_Definition.xml");
+    testerDSP.setPropertyValue("InstrumentFilename",
+                               ConfigService::Instance().getString("instrumentDefinition.directory") +
+                                   "/INES_Definition.xml");
     std::string dspaceFile = "./INES_LoadDspacemaptoCalTest.dat";
-    std::ofstream fout("./INES_LoadDspacemaptoCalTest.dat",
-                       std::ios_base::out | std::ios_base::binary);
+    std::ofstream fout("./INES_LoadDspacemaptoCalTest.dat", std::ios_base::out | std::ios_base::binary);
     double read = 3.1992498205034756E-6;
     for (int i = 0; i < 147; i++)
       fout.write(reinterpret_cast<char *>(&read), sizeof read);
@@ -48,8 +46,7 @@ public:
 
     // Get the offsets out
     OffsetsWorkspace_sptr offsetsWS =
-        std::dynamic_pointer_cast<OffsetsWorkspace>(
-            AnalysisDataService::Instance().retrieve("ines_offsets"));
+        std::dynamic_pointer_cast<OffsetsWorkspace>(AnalysisDataService::Instance().retrieve("ines_offsets"));
     TS_ASSERT(offsetsWS);
     if (!offsetsWS)
       return;
@@ -58,15 +55,13 @@ public:
     TS_ASSERT_DELTA(offsetsWS->dataY(0)[0], -0.6162, 0.0001);
   }
 
-  void doTestVulcan(const std::string &dspaceFile,
-                    const std::string &fileType) {
+  void doTestVulcan(const std::string &dspaceFile, const std::string &fileType) {
     LoadDspacemap testerDSP;
     TS_ASSERT_THROWS_NOTHING(testerDSP.initialize());
     TS_ASSERT_THROWS_NOTHING(testerDSP.isInitialized());
-    testerDSP.setPropertyValue(
-        "InstrumentFilename",
-        ConfigService::Instance().getString("instrumentDefinition.directory") +
-            "/VULCAN_Definition.xml");
+    testerDSP.setPropertyValue("InstrumentFilename",
+                               ConfigService::Instance().getString("instrumentDefinition.directory") +
+                                   "/VULCAN_Definition.xml");
     testerDSP.setPropertyValue("Filename", dspaceFile);
     testerDSP.setPropertyValue("FileType", fileType);
     testerDSP.setPropertyValue("OutputWorkspace", "test_vulcan_offset");
@@ -75,8 +70,7 @@ public:
 
     // Get the offsets out
     OffsetsWorkspace_sptr offsetsWS =
-        std::dynamic_pointer_cast<OffsetsWorkspace>(
-            AnalysisDataService::Instance().retrieve("test_vulcan_offset"));
+        std::dynamic_pointer_cast<OffsetsWorkspace>(AnalysisDataService::Instance().retrieve("test_vulcan_offset"));
     TS_ASSERT(offsetsWS);
     if (!offsetsWS)
       return;
@@ -85,11 +79,7 @@ public:
     // TS_ASSERT_DELTA( offsetsWS->dataY(0)[0],  0.0938, 0.0001 );
   }
 
-  void testVulcan_ASCII() {
-    doTestVulcan("pid_offset_vulcan_new.dat", "VULCAN-ASCII");
-  }
+  void testVulcan_ASCII() { doTestVulcan("pid_offset_vulcan_new.dat", "VULCAN-ASCII"); }
 
-  void testVulcan_Binary() {
-    doTestVulcan("pid_offset_vulcan_new.dat.bin", "VULCAN-Binary");
-  }
+  void testVulcan_Binary() { doTestVulcan("pid_offset_vulcan_new.dat.bin", "VULCAN-Binary"); }
 };

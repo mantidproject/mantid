@@ -29,7 +29,7 @@ Usage
 **Example: Taking the derivative of logs**
 
 .. testcode:: AddLogDerivative
-    
+
     ws = CreateSampleWorkspace()
     AddTimeSeriesLog(ws,"MyLog","2010-01-01T00:00:00",1.0,DeleteExisting=False)
     AddTimeSeriesLog(ws,"MyLog","2010-01-01T00:00:10",2.0,DeleteExisting=False)

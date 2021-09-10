@@ -49,13 +49,9 @@ public:
 
   /// Algorithm's version for identification
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"SliceMDHisto", "ProjectMD", "CutMD", "SliceMD"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"SliceMDHisto", "ProjectMD", "CutMD", "SliceMD"}; }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "MDAlgorithms\\Slicing";
-  }
+  const std::string category() const override { return "MDAlgorithms\\Slicing"; }
 
 private:
   /// Initialise the properties
@@ -64,13 +60,11 @@ private:
   void exec() override;
 
   /// Helper method
-  template <typename MDE, size_t nd>
-  void binByIterating(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
+  template <typename MDE, size_t nd> void binByIterating(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
 
   /// Method to bin a single MDBox
   template <typename MDE, size_t nd>
-  void binMDBox(DataObjects::MDBox<MDE, nd> *box, const size_t *const chunkMin,
-                const size_t *const chunkMax);
+  void binMDBox(DataObjects::MDBox<MDE, nd> *box, const size_t *const chunkMin, const size_t *const chunkMax);
 
   /// The output MDHistoWorkspace
   Mantid::DataObjects::MDHistoWorkspace_sptr outWS;

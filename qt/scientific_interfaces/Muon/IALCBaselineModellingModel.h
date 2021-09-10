@@ -41,9 +41,8 @@ public:
    * @param xValues The x values to evaluate over
    * @return The baseline model data
    */
-  virtual Mantid::API::MatrixWorkspace_sptr
-  baselineData(Mantid::API::IFunction_const_sptr function,
-               const std::vector<double> &xValues) const = 0;
+  virtual Mantid::API::MatrixWorkspace_sptr baselineData(Mantid::API::IFunction_const_sptr function,
+                                                         const std::vector<double> &xValues) const = 0;
 
   /**
    * @return Current data used for fitting
@@ -57,8 +56,7 @@ public:
    * @param function :: Function to fit
    * @param sections :: Data sections to include in the fit
    */
-  virtual void fit(Mantid::API::IFunction_const_sptr function,
-                   const std::vector<Section> &sections) = 0;
+  virtual void fit(Mantid::API::IFunction_const_sptr function, const std::vector<Section> &sections) = 0;
 
 signals:
 

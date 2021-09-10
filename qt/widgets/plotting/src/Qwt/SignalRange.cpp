@@ -21,8 +21,7 @@ namespace API {
  * @param workspace A reference to a workspace object
  * @param normalization The type of normalization
  */
-SignalRange::SignalRange(const Mantid::API::IMDWorkspace &workspace,
-                         const Mantid::API::MDNormalization normalization)
+SignalRange::SignalRange(const Mantid::API::IMDWorkspace &workspace, const Mantid::API::MDNormalization normalization)
     : m_interval(), m_normalization(normalization) {
   findFullRange(workspace, nullptr);
 }
@@ -37,8 +36,7 @@ SignalRange::SignalRange(const Mantid::API::IMDWorkspace &workspace,
  *                 of the workspace
  * @param normalization The type of normalization
  */
-SignalRange::SignalRange(const Mantid::API::IMDWorkspace &workspace,
-                         Mantid::Geometry::MDImplicitFunction &function,
+SignalRange::SignalRange(const Mantid::API::IMDWorkspace &workspace, Mantid::Geometry::MDImplicitFunction &function,
                          const Mantid::API::MDNormalization normalization)
     : m_interval(), m_normalization(normalization) {
   findFullRange(workspace, &function);
@@ -58,11 +56,9 @@ QwtDoubleInterval SignalRange::interval() const { return m_interval; }
  * region
  *                 of the workspace. NULL indicates use whole workspace
  */
-void SignalRange::findFullRange(
-    const Mantid::API::IMDWorkspace &workspace,
-    Mantid::Geometry::MDImplicitFunction *function) {
-  auto iterators =
-      workspace.createIterators(PARALLEL_GET_MAX_THREADS, function);
+void SignalRange::findFullRange(const Mantid::API::IMDWorkspace &workspace,
+                                Mantid::Geometry::MDImplicitFunction *function) {
+  auto iterators = workspace.createIterators(PARALLEL_GET_MAX_THREADS, function);
   m_interval = getRange(iterators);
 }
 
@@ -70,8 +66,7 @@ void SignalRange::findFullRange(
  * @param iterators :: vector of IMDIterator of what to find
  * @return the min/max range, or 0-1.0 if not found
  */
-QwtDoubleInterval SignalRange::getRange(
-    const std::vector<std::unique_ptr<Mantid::API::IMDIterator>> &iterators) {
+QwtDoubleInterval SignalRange::getRange(const std::vector<std::unique_ptr<Mantid::API::IMDIterator>> &iterators) {
   std::vector<QwtDoubleInterval> intervals(iterators.size());
   // cppcheck-suppress syntaxError
       PRAGMA_OMP( parallel for schedule(dynamic, 1))

@@ -80,10 +80,9 @@ function (IFunction). The fit function defines the model that is used to model
 the data. The user defined fit function can be a complex mathematical product,
 sum and convolution of other fit functions. For more information for
 how to create a model see the documentation for :ref:`Fit <algm-Fit>`, the
-Fitting section of the Mantid Introduction tutorial
-(http://www.mantidproject.org/Mantid_Basic_Course)
+Fitting section of the Mantid Introduction :ref:`tutorial <mantid_basic_course>`
 for how to do this using the Fit Function Toolbox and
-this Python fit tutorial: http://www.mantidproject.org/Introduction_to_Python_Fit_Functions.
+this Python fit tutorial: :ref:`emwp_py_fit_funcs`.
 
 From the class diagram above note fitting also support constraints (IConstraint),
 see :ref:`here <algm-Fit>` for more on this. Further fitting parameters can be
@@ -94,14 +93,12 @@ through mathematical formulas.
 Multiple datasets and sequential fitting
 ----------------------------------------
 Mantid can fit multiple datasets to one model. This can perhaps most easily be
-done using the Multi-Dataset Fitting interface
-(http://www.mantidproject.org/Fitting_QENS_I%28Q,_t%29).
+done using the :ref:`Multi-Dataset Fitting interface <QENS-fitting-ref>`
 
 Sequential fitting is simply the sequential fitting of datasets
 using the same fit function, and where, for example, fitting parameters obtained
 from one fit may be used as starting values in a next fit and so on. For
-an example of sequential fitting see here:
-http://www.mantidproject.org/MantidPlot:_Simple_Peak_Fitting_with_the_Fit_Wizard
+an example of sequential fitting see :ref:`here <WorkbenchPlotWindow_Fitting>`
 
 
 How do you know if a fit is successful
@@ -132,7 +129,7 @@ is :ref:`FitPeak <algm-FitPeak>` which aims to fit single peaks
 with some checks to ensure results are physical.
 
 If you remain unsure if a given fit was successful then e.g. try the
-tool :ref:`CalculateChiSquared <algm-CalculateChiSquared>`, which allows
+tool :ref:`ProfileChiSquared1D <algm-ProfileChiSquared1D>`, which allows
 inspection of the cost function in the neighbourhood of a found minimum.
 
 
@@ -159,7 +156,6 @@ implementation used for solving crystal structures from powder diffraction data.
     # For this demo example, just one fitting parameter is globally fitted, the peak center of a Gaussian peak
     # Please bear in mind the example here is to demonstrate this algorithm not provide a real global fitting problem
 
-    from __future__ import print_function
     from random import random
     from time import sleep
 

@@ -3,7 +3,7 @@
 
     <component-link name="D16">
       <!-- Logs to sum when merging the runs -->
-      <parameter name="sample_logs_sum" type="string">
+      <parameter name="sample_logs_sum" type="string" visible="false">
         <value val="time, duration, timer" />
       </parameter>
       <!-- The width of the detector in pixels -->
@@ -25,6 +25,54 @@
       </parameter>
       <parameter name="detector-height" type="number">
         <value val="320"/>
+      </parameter>
+
+      <!-- These parameters are used to define headers and entries for GenerateLogbook algorithm -->
+      <parameter name="logbook_default_parameters" type="string" visible="false">
+	<value val="SampleDescription:/entry0/experiment_identifier:s,
+		    TotalTime:/entry0/duration:f,
+		    RateMonitor1:/entry0/monitor1/monrate:f,
+		    TotalCountsDet:/entry0/instrument/Detector1/detsum:d,
+		    RateCountsDet:/entry0/instrument/Detector1/detrate:f,
+		    StartTime:/entry0/start_time:s,
+		    Wavelength:/entry0/instrument/Beam/wavelength:f,
+		    Attenuator:/entry0/instrument/attenuator/attenuation_value:f,
+		    Det:/entry0/instrument/Det/value:f" />
+      </parameter>
+      <parameter name="logbook_optional_parameters" type="string" visible="false">
+	<value val="AcquisitionMode:/entry0/acquisition_mode:d,
+		    Mode:/entry0/mode:d,
+		    BeamStopYOffset:/entry0/instrument/BStopY/offset_value:f,
+		    BeamStopYValue:/entry0/instrument/BStopY/value:f,
+		    BeamStopXOffset:/entry0/instrument/BStopX/offset_value:f,
+		    BeamStopXValue:/entry0/instrument/BStopX/value:f,
+		    BeamstopX:/entry0/instrument/beamstop/bx_actual:f,
+		    BeamstopY:/entry0/instrument/beamstop/by_actual:f,
+		    TotalCountsMonitor1:/entry0/monitor1/monsum:d,
+		    TotalCountsMonitor2:/entry0/monitor2/monsum:d,
+		    RateMonitor2:/entry0/monitor2/monrate:f,
+		    ReactorPower:/entry0/reactor_power:f,
+		    Omega:/entry0/instrument/Omega/value:f,
+		    OmegaOffset:/entry0/instrument/Omega/offset_value:f,
+		    Phi:/entry0/instrument/Phi/value:f,
+		    PhiOffset:/entry0/instrument/Phi/offset_value:f,
+		    Khi:/entry0/instrument/Khi/value:f,
+		    KhiOffset:/entry0/instrument/Khi/offset_value:f,
+		    Str:/entry0/instrument/Str/value:f,
+		    StrOffset:/entry0/instrument/Str/offset_value:f,
+		    Slitr:/entry0/instrument/Slitr/value:f,
+		    SlitrOffset:/entry0/instrument/Slitr/offset_value:f,
+		    SampleTemperature:/entry0/sample/temperature:f,
+		    SetpointTemperature:/entry0/sample/setpoint_temperature:f,
+		    RegulationTemperature:/entry0/sample/regulation_temperature:f,
+		    Bath1Temperature:/entry0/sample/bath1_regulation_temperature:f,
+		    Bath2Temperature:/entry0/sample/bath2_regulation_temperature:f,
+		    SampleChangerPos:/entry0/instrument/VirtualSampleChanger/sample_changer_slot_value:f" />
+      </parameter>
+      <parameter name="log_list_to_save" type="string" visible="false">
+	<value val="facility,instrument.name,experiment_identifier,
+		    start_time,end_time,numor_list,processedAs,
+		    wavelength,sample_transmission_numors,L2"/>
       </parameter>
     </component-link>
 

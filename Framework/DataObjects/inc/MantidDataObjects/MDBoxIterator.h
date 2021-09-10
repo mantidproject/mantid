@@ -30,8 +30,7 @@ class DLLExport MDBoxIterator : public Mantid::API::IMDIterator {
 public:
   MDBoxIterator(API::IMDNode *topBox, size_t maxDepth, bool leafOnly,
                 Mantid::Geometry::MDImplicitFunction *function = nullptr);
-  MDBoxIterator(API::IMDNode *topBox, size_t maxDepth, bool leafOnly,
-                SkippingPolicy *skippingPolicy,
+  MDBoxIterator(API::IMDNode *topBox, size_t maxDepth, bool leafOnly, SkippingPolicy *skippingPolicy,
                 Mantid::Geometry::MDImplicitFunction *function = nullptr);
   MDBoxIterator(std::vector<API::IMDNode *> &boxes, size_t begin, size_t end);
   void init(std::vector<API::IMDNode *> &boxes, size_t begin, size_t end);
@@ -59,18 +58,18 @@ public:
 
   signal_t getError() const override;
 
-  std::unique_ptr<coord_t[]>
-  getVertexesArray(size_t &numVertices, const size_t outDimensions,
-                   const bool *maskDim) const override;
+  std::unique_ptr<coord_t[]> getVertexesArray(size_t &numVertices, const size_t outDimensions,
+                                              const bool *maskDim) const override;
 
-  std::unique_ptr<coord_t[]>
-  getVertexesArray(size_t &numVertices) const override;
+  std::unique_ptr<coord_t[]> getVertexesArray(size_t &numVertices) const override;
 
   Mantid::Kernel::VMD getCenter() const override;
 
   size_t getNumEvents() const override;
 
-  uint16_t getInnerRunIndex(size_t index) const override;
+  uint16_t getInnerExpInfoIndex(size_t index) const override;
+
+  uint16_t getInnerGoniometerIndex(size_t index) const override;
 
   int32_t getInnerDetectorID(size_t index) const override;
 

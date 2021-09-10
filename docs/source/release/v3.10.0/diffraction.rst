@@ -11,7 +11,7 @@ Powder Diffraction
 - New loader :ref:`LoadILLDiffraction <algm-LoadILLDiffraction>` has been added to load the data-scan nexus files from ILL diffractometers.
 - ISIS Powder diffraction scripts have been released. These include support for
   GEM, PEARL and POLARIS instruments. For more details see the ISIS Powder documentation
-  under API, Python category. 
+  under API, Python category.
 - New instrument definition files are added for D1B, D4, and D20 powder/liquid diffractometers at ILL. The source and monitor positions, as well as detector to sample distance have been corrected for existing D2B.
 - New IDF for the POWGEN upgrade
 - :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>` Now supports supplying an a second ``.cal`` file for the ``GroupingFilename``.

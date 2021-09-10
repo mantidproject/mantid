@@ -28,8 +28,7 @@ class Property;
 */
 namespace PropertyNexus {
 
-DLLExport std::unique_ptr<Property> loadProperty(::NeXus::File *file,
-                                                 const std::string &group);
+DLLExport std::unique_ptr<Property> loadProperty(::NeXus::File *file, const std::string &group);
 }
 
 } // namespace Kernel

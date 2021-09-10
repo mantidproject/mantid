@@ -31,8 +31,8 @@ public:
   static void destroySuite(CorrectKiKfTest *suite) { delete suite; }
 
   CorrectKiKfTest()
-      : inputWSname("testInput"), inputEvWSname("testEvInput"),
-        outputWSname("testOutput"), outputEvWSname("testEvOutput") {}
+      : inputWSname("testInput"), inputEvWSname("testEvInput"), outputWSname("testOutput"),
+        outputEvWSname("testEvOutput") {}
 
   void testInit() {
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -50,8 +50,7 @@ public:
     alg.setPropertyValue("EFixed", "7.5");
     alg.execute();
     TS_ASSERT(alg.isExecuted());
-    Workspace2D_sptr result =
-        AnalysisDataService::Instance().retrieveWS<Workspace2D>(outputWSname);
+    Workspace2D_sptr result = AnalysisDataService::Instance().retrieveWS<Workspace2D>(outputWSname);
     double ei, ef, factor, deltaE, stdval;
     size_t numBins = result->blocksize();
     for (size_t i = 0; i < numBins; ++i) {
@@ -79,8 +78,7 @@ public:
     alg.setPropertyValue("EFixed", "7.5");
     alg.execute();
     TS_ASSERT(alg.isExecuted());
-    result =
-        AnalysisDataService::Instance().retrieveWS<Workspace2D>(outputWSname);
+    result = AnalysisDataService::Instance().retrieveWS<Workspace2D>(outputWSname);
     numBins = result->blocksize();
     for (size_t i = 0; i < numBins; ++i) {
       ei = 7.5;
@@ -107,8 +105,7 @@ public:
     alg.setPropertyValue("EFixed", "7.5");
     alg.execute();
     TS_ASSERT(alg.isExecuted());
-    result =
-        AnalysisDataService::Instance().retrieveWS<Workspace2D>(outputWSname);
+    result = AnalysisDataService::Instance().retrieveWS<Workspace2D>(outputWSname);
     numBins = result->blocksize();
     for (size_t i = 0; i < numBins; ++i) {
       ef = 7.5;
@@ -135,8 +132,7 @@ public:
     alg.setPropertyValue("EFixed", "7.5");
     alg.execute();
     TS_ASSERT(alg.isExecuted());
-    result =
-        AnalysisDataService::Instance().retrieveWS<Workspace2D>(outputWSname);
+    result = AnalysisDataService::Instance().retrieveWS<Workspace2D>(outputWSname);
     numBins = result->blocksize();
     for (size_t i = 0; i < numBins; ++i) {
       ef = 7.5;
@@ -169,25 +165,20 @@ public:
 
     EventWorkspace_sptr in_ws, out_ws;
     TS_ASSERT_THROWS_NOTHING(
-        in_ws = std::dynamic_pointer_cast<EventWorkspace>(
-            AnalysisDataService::Instance().retrieve(inputEvWSname)));
+        in_ws = std::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(inputEvWSname)));
     TS_ASSERT_THROWS_NOTHING(
-        out_ws = std::dynamic_pointer_cast<EventWorkspace>(
-            AnalysisDataService::Instance().retrieve(outputEvWSname)));
+        out_ws = std::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outputEvWSname)));
 
     TS_ASSERT(out_ws);
     if (!out_ws)
       return;
 
-    TS_ASSERT_DELTA(
-        out_ws->getSpectrum(0).getEvent(0).weight(),
-        std::sqrt(3. / (3. - out_ws->getSpectrum(0).getEvent(0).tof())), 1e-7);
-    TS_ASSERT_DELTA(
-        out_ws->getSpectrum(0).getEvent(3).weight(),
-        std::sqrt(3. / (3. - out_ws->getSpectrum(0).getEvent(3).tof())), 1e-7);
-    TS_ASSERT_LESS_THAN(
-        out_ws->getNumberEvents(),
-        in_ws->getNumberEvents()); // Check that events with Ef<0 are dropped
+    TS_ASSERT_DELTA(out_ws->getSpectrum(0).getEvent(0).weight(),
+                    std::sqrt(3. / (3. - out_ws->getSpectrum(0).getEvent(0).tof())), 1e-7);
+    TS_ASSERT_DELTA(out_ws->getSpectrum(0).getEvent(3).weight(),
+                    std::sqrt(3. / (3. - out_ws->getSpectrum(0).getEvent(3).tof())), 1e-7);
+    TS_ASSERT_LESS_THAN(out_ws->getNumberEvents(),
+                        in_ws->getNumberEvents()); // Check that events with Ef<0 are dropped
 
     AnalysisDataService::Instance().remove(outputEvWSname);
     AnalysisDataService::Instance().remove(inputEvWSname);
@@ -217,8 +208,7 @@ public:
     CorrectKiKf alg1; // I use alg1 because I cannot remove Efixed property
     alg1.initialize();
 
-    TS_ASSERT_THROWS_NOTHING(
-        alg1.setPropertyValue("InputWorkspace", intermediaryWS));
+    TS_ASSERT_THROWS_NOTHING(alg1.setPropertyValue("InputWorkspace", intermediaryWS));
     TS_ASSERT_THROWS_NOTHING(alg1.setPropertyValue("OutputWorkspace", finalWS));
     TS_ASSERT_THROWS_NOTHING(alg1.setPropertyValue("EMode", "Indirect"));
     TS_ASSERT_THROWS_NOTHING(alg1.setPropertyValue("EFixed", "1.845"));
@@ -227,8 +217,7 @@ public:
 
     MatrixWorkspace_sptr result;
     TS_ASSERT_THROWS_NOTHING(
-        result = std::dynamic_pointer_cast<Workspace2D>(
-            AnalysisDataService::Instance().retrieve(finalWS)));
+        result = std::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve(finalWS)));
 
     TS_ASSERT_DELTA(result->x(0)[1976], 1.18785, 0.0001);
     TS_ASSERT_DELTA(result->x(0)[1977], 1.18912, 0.0001);
@@ -236,9 +225,8 @@ public:
 
     // Ef=1.845, Ei=Ef+0.5*(x[1977]+x[1976]), Y [1976] uncorrected=1,
     // ki/kf=sqrt(Ei/Ef)
-    TS_ASSERT_DELTA(
-        sqrt(((result->x(0)[1976] + result->x(0)[1977]) * 0.5 + 1.845) / 1.845),
-        result->y(0)[1976], 0.0001);
+    TS_ASSERT_DELTA(sqrt(((result->x(0)[1976] + result->x(0)[1977]) * 0.5 + 1.845) / 1.845), result->y(0)[1976],
+                    0.0001);
 
     AnalysisDataService::Instance().remove(initialWS);
     AnalysisDataService::Instance().remove(intermediaryWS);
@@ -288,8 +276,7 @@ private:
   }
 
   void createEventWorkspace() {
-    EventWorkspace_sptr event =
-        WorkspaceCreationHelper::createEventWorkspace(1, 5, 5, 0, 0.9, 2, 0);
+    EventWorkspace_sptr event = WorkspaceCreationHelper::createEventWorkspace(1, 5, 5, 0, 0.9, 2, 0);
     event->getAxis(0)->unit() = UnitFactory::Instance().create("DeltaE");
     AnalysisDataService::Instance().add(inputEvWSname, event);
   }

@@ -84,43 +84,35 @@ private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ProcessIndirectFitParametersTest *createSuite() {
-    return new ProcessIndirectFitParametersTest();
-  }
-  static void destroySuite(ProcessIndirectFitParametersTest *suite) {
-    delete suite;
-  }
+  static ProcessIndirectFitParametersTest *createSuite() { return new ProcessIndirectFitParametersTest(); }
+  static void destroySuite(ProcessIndirectFitParametersTest *suite) { delete suite; }
 
   void test_empty_input_is_not_allowed() {
     Mantid::Algorithms::ProcessIndirectFitParameters alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
-    TS_ASSERT_THROWS(alg.setPropertyValue("InputWorkspace", ""),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg.setPropertyValue("InputWorkspace", ""), const std::invalid_argument &);
   }
 
   void test_empty_x_column_is_not_allowed() {
     Mantid::Algorithms::ProcessIndirectFitParameters alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
-    TS_ASSERT_THROWS(alg.setPropertyValue("ColumnX", ""),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg.setPropertyValue("ColumnX", ""), const std::invalid_argument &);
   }
 
   void test_empty_param_names_is_not_allowed() {
     Mantid::Algorithms::ProcessIndirectFitParameters alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
-    TS_ASSERT_THROWS(alg.setPropertyValue("ParameterNames", ""),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg.setPropertyValue("ParameterNames", ""), const std::invalid_argument &);
   }
 
   void test_empty_output_is_not_allowed() {
     Mantid::Algorithms::ProcessIndirectFitParameters alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
-    TS_ASSERT_THROWS(alg.setPropertyValue("OutputWorkspace", ""),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg.setPropertyValue("OutputWorkspace", ""), const std::invalid_argument &);
   }
 
   void test_property_input() {
@@ -143,11 +135,9 @@ public:
 
     TS_ASSERT_EQUALS(tableProp, tableWs);
     TS_ASSERT_EQUALS(std::string(alg.getProperty("ColumnX")), xColumn);
-    TS_ASSERT_EQUALS(std::string(alg.getProperty("ParameterNames")),
-                     parameterValues);
+    TS_ASSERT_EQUALS(std::string(alg.getProperty("ParameterNames")), parameterValues);
     TS_ASSERT_EQUALS(std::string(alg.getProperty("XAxisUnit")), inAxis);
-    TS_ASSERT_EQUALS(std::string(alg.getProperty("OutputWorkspace")),
-                     outputName);
+    TS_ASSERT_EQUALS(std::string(alg.getProperty("OutputWorkspace")), outputName);
   }
 
   void test_output_of_regular_shaped_table_workspace() {
@@ -168,9 +158,7 @@ public:
     alg.execute();
 
     MatrixWorkspace_sptr outWs;
-    TS_ASSERT_THROWS_NOTHING(
-        outWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outputName));
+    TS_ASSERT_THROWS_NOTHING(outWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputName));
     size_t const histNum = outWs->getNumberHistograms();
     TS_ASSERT_EQUALS(histNum, 2);
     TS_ASSERT_EQUALS(outWs->getAxis(1)->label(0), "f1.f1.f0.Height");
@@ -213,9 +201,7 @@ public:
     alg.execute();
 
     MatrixWorkspace_sptr outWs;
-    TS_ASSERT_THROWS_NOTHING(
-        outWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outputName));
+    TS_ASSERT_THROWS_NOTHING(outWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputName));
     size_t const histNum = outWs->getNumberHistograms();
     TS_ASSERT_EQUALS(histNum, 4);
     TS_ASSERT_EQUALS(outWs->getAxis(1)->label(0), "f1.f1.f0.Height");

@@ -27,8 +27,7 @@ options.
 class DLLExport QtDataProcessorOptionsDialog : public QDialog {
   Q_OBJECT
 public:
-  QtDataProcessorOptionsDialog(DataProcessorView *view,
-                               DataProcessorPresenter *presenter);
+  QtDataProcessorOptionsDialog(DataProcessorView *view, DataProcessorPresenter *presenter);
   ~QtDataProcessorOptionsDialog() override;
 
 protected:

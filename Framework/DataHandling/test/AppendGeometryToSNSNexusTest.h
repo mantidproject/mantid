@@ -26,12 +26,8 @@ class AppendGeometryToSNSNexusTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static AppendGeometryToSNSNexusTest *createSuite() {
-    return new AppendGeometryToSNSNexusTest();
-  }
-  static void destroySuite(AppendGeometryToSNSNexusTest *suite) {
-    delete suite;
-  }
+  static AppendGeometryToSNSNexusTest *createSuite() { return new AppendGeometryToSNSNexusTest(); }
+  static void destroySuite(AppendGeometryToSNSNexusTest *suite) { delete suite; }
 
   void test_Init() {
     AppendGeometryToSNSNexus alg;

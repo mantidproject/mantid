@@ -22,12 +22,8 @@ class MayersSampleCorrectionStrategyTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MayersSampleCorrectionStrategyTest *createSuite() {
-    return new MayersSampleCorrectionStrategyTest();
-  }
-  static void destroySuite(MayersSampleCorrectionStrategyTest *suite) {
-    delete suite;
-  }
+  static MayersSampleCorrectionStrategyTest *createSuite() { return new MayersSampleCorrectionStrategyTest(); }
+  static void destroySuite(MayersSampleCorrectionStrategyTest *suite) { delete suite; }
 
   void test_Attentuaton_Correction_For_Fixed_Mur() {
     Histogram histo(Points{0, 1}, Counts{0, 1});
@@ -39,8 +35,7 @@ public:
   }
 
   void test_Correction_Skips_Zero_Counts() {
-    Histogram histo(Points{2, LinearGenerator(0, 1)},
-                    Counts{2, LinearGenerator(0, 1)});
+    Histogram histo(Points{2, LinearGenerator(0, 1)}, Counts{2, LinearGenerator(0, 1)});
     MayersSampleCorrectionStrategy mscat(createTestParameters(), histo);
     const auto outHisto = mscat.getCorrectedHisto();
 
@@ -51,8 +46,7 @@ public:
     TSM_ASSERT_EQUALS("Err val for 0 count was modified", eVals[0], 0);
   }
 
-  void
-  test_Multiple_Scattering_With_Fixed_Mur_And_Absorption_Correction_Factor() {
+  void test_Multiple_Scattering_With_Fixed_Mur_And_Absorption_Correction_Factor() {
     Histogram histo(Points{0, 1}, Counts{0, 1});
     MayersSampleCorrectionStrategy mscat(createTestParameters(), histo);
     const size_t irp(1);
@@ -66,8 +60,7 @@ public:
 
   void test_Corrects_Both_Absorption_And_Multiple_Scattering_For_Point_Data() {
     const size_t nypts(100);
-    Histogram histo(Points(nypts, LinearGenerator(100.0, 1.0)),
-                    Counts(nypts, 2.0));
+    Histogram histo(Points(nypts, LinearGenerator(100.0, 1.0)), Counts(nypts, 2.0));
     MayersSampleCorrectionStrategy mscat(createTestParameters(), histo);
 
     const auto outHisto = mscat.getCorrectedHisto();
@@ -87,11 +80,9 @@ public:
     TS_ASSERT_DELTA(1.636817, error.back(), delta);
   }
 
-  void
-  test_Corrects_Both_Absorption_And_Multiple_Scattering_For_Histogram_Data() {
+  void test_Corrects_Both_Absorption_And_Multiple_Scattering_For_Histogram_Data() {
     const size_t nypts(100);
-    Histogram histo(BinEdges(nypts + 1, LinearGenerator(99.5, 1.0)),
-                    Counts(nypts, 2.0));
+    Histogram histo(BinEdges(nypts + 1, LinearGenerator(99.5, 1.0)), Counts(nypts, 2.0));
     MayersSampleCorrectionStrategy mscat(createTestParameters(), histo);
 
     const auto outHisto = mscat.getCorrectedHisto();
@@ -114,8 +105,7 @@ public:
   void test_Corrects_For_Absorption_For_Histogram_Data() {
     const size_t nypts(100);
     const bool mscatOn(false);
-    Histogram histo(BinEdges(nypts + 1, LinearGenerator(99.5, 1.0)),
-                    Counts(nypts, 2.0));
+    Histogram histo(BinEdges(nypts + 1, LinearGenerator(99.5, 1.0)), Counts(nypts, 2.0));
     MayersSampleCorrectionStrategy mscat(createTestParameters(mscatOn), histo);
 
     auto outHisto = mscat.getCorrectedHisto();
@@ -138,8 +128,7 @@ public:
 
   void test_MutlipleScattering_NEvents_Parameter() {
     const size_t nypts(100);
-    Histogram histo(BinEdges(nypts + 1, LinearGenerator(99.5, 1.0)),
-                    Counts(nypts, 2.0));
+    Histogram histo(BinEdges(nypts + 1, LinearGenerator(99.5, 1.0)), Counts(nypts, 2.0));
     const bool mscatOn(true);
     auto corrPars = createTestParameters(mscatOn);
     corrPars.msNEvents = 1000;
@@ -165,8 +154,7 @@ public:
 
   void test_MutlipleScattering_NRuns_Parameter() {
     const size_t nypts(100);
-    Histogram histo(BinEdges(nypts + 1, LinearGenerator(99.5, 1.0)),
-                    Counts(nypts, 2.0));
+    Histogram histo(BinEdges(nypts + 1, LinearGenerator(99.5, 1.0)), Counts(nypts, 2.0));
     const bool mscatOn(true);
     auto corrPars = createTestParameters(mscatOn);
     corrPars.msNRuns = 2;
@@ -193,17 +181,13 @@ public:
   // ---------------------- Failure tests -----------------------------
   void test_Tof_Not_Monotonically_Increasing_Throws_Invalid_Argument() {
     const size_t nypts(10);
-    Histogram histo(BinEdges(nypts + 1, LinearGenerator(199.5, -1.0)),
-                    Counts(nypts, 2.0));
+    Histogram histo(BinEdges(nypts + 1, LinearGenerator(199.5, -1.0)), Counts(nypts, 2.0));
 
-    TS_ASSERT_THROWS(
-        MayersSampleCorrectionStrategy(createTestParameters(), histo),
-        const std::invalid_argument &);
+    TS_ASSERT_THROWS(MayersSampleCorrectionStrategy(createTestParameters(), histo), const std::invalid_argument &);
   }
 
 private:
-  MayersSampleCorrectionStrategy::Parameters
-  createTestParameters(bool mscatOn = true) {
+  MayersSampleCorrectionStrategy::Parameters createTestParameters(bool mscatOn = true) {
     // A bit like a POLARIS spectrum
     MayersSampleCorrectionStrategy::Parameters pars;
     pars.mscat = mscatOn;

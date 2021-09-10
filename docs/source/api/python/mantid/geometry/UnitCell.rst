@@ -9,7 +9,7 @@ on this class follow naming conventions for parameters as defined in the
 
 .. module:`mantid.geometry`
 
-.. autoclass:: mantid.geometry.UnitCell 
+.. autoclass:: mantid.geometry.UnitCell
     :members:
     :undoc-members:
     :inherited-members:

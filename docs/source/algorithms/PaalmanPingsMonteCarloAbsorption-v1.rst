@@ -239,7 +239,8 @@ Usage
     SetSample(sample_ws, Geometry={'Shape': 'Cylinder', 'Height': 4.0, 'Radius': 2.0, 'Center': [0.,0.,0.]},
                 Material={'ChemicalFormula': 'Ni', 'MassDensity': 7.0},
                 ContainerGeometry={'Shape': 'HollowCylinder', 'Height': 4.0, 'InnerRadius': 2.0,
-                'OuterRadius': 3.5})
+                'OuterRadius': 3.5},
+                ContainerMaterial={'ChemicalFormula': 'V'})
 
     corrections = PaalmanPingsMonteCarloAbsorption(
             InputWorkspace=sample_ws,
@@ -271,7 +272,6 @@ Usage
     print("Y-Unit Label of " + str(acc_ws.getName()) + ": " + str(acc_ws.YUnitLabel()))
 
 .. testcleanup:: Preset
-
     mtd.clear()
 
 .. testoutput:: Preset

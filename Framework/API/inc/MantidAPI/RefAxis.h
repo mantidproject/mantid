@@ -25,16 +25,13 @@ public:
   RefAxis(const MatrixWorkspace *const parentWorkspace);
 
   Axis *clone(const MatrixWorkspace *const parentWorkspace) override;
-  Axis *clone(const std::size_t length,
-              const MatrixWorkspace *const parentWorkspace) override;
+  Axis *clone(const std::size_t length, const MatrixWorkspace *const parentWorkspace) override;
   std::size_t length() const override;
   /// Get a value at the specified index
-  double operator()(const std::size_t &index,
-                    const std::size_t &verticalIndex) const override;
+  double operator()(const std::size_t &index, const std::size_t &verticalIndex) const override;
   void setValue(const std::size_t &index, const double &value) override;
   bool operator==(const Axis &) const override;
-  bool equalWithinTolerance(const Axis &axis2,
-                            const double tolerance) const override;
+  bool equalWithinTolerance(const Axis &axis2, const double tolerance) const override;
   // We must override these to prevent access to NumericAxis::m_values and
   // m_edges, which are unused by RefAxis and thus do not hold sensible values.
   size_t indexOfValue(const double value) const override;

@@ -36,22 +36,18 @@ class TestablePoldiPeakCollection : public PoldiPeakCollection {
 
   TestablePoldiPeakCollection() : PoldiPeakCollection() {}
 
-  TestablePoldiPeakCollection(const TableWorkspace_sptr &workspace)
-      : PoldiPeakCollection(workspace) {}
+  TestablePoldiPeakCollection(const TableWorkspace_sptr &workspace) : PoldiPeakCollection(workspace) {}
 };
 
 class PoldiPeakCollectionTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static PoldiPeakCollectionTest *createSuite() {
-    return new PoldiPeakCollectionTest();
-  }
+  static PoldiPeakCollectionTest *createSuite() { return new PoldiPeakCollectionTest(); }
   static void destroySuite(PoldiPeakCollectionTest *suite) { delete suite; }
 
   PoldiPeakCollectionTest() {
-    m_dummyData = std::dynamic_pointer_cast<TableWorkspace>(
-        WorkspaceFactory::Instance().createTable());
+    m_dummyData = std::dynamic_pointer_cast<TableWorkspace>(WorkspaceFactory::Instance().createTable());
     m_dummyData->addColumn("str", "HKL");
     m_dummyData->addColumn("double", "d");
     m_dummyData->addColumn("double", "delta d");
@@ -63,12 +59,10 @@ public:
     m_dummyData->addColumn("double", "delta FWHM (rel.)");
 
     TableRow first = m_dummyData->appendRow();
-    first << "1 0 0" << 0.5 << 0.001 << 12.566370 << 0.02513274 << 2000. << 3.
-          << 0.5 << 0.02;
+    first << "1 0 0" << 0.5 << 0.001 << 12.566370 << 0.02513274 << 2000. << 3. << 0.5 << 0.02;
 
     TableRow second = m_dummyData->appendRow();
-    second << "1 1 0" << 0.8 << 0.004 << 7.853981 << 0.039269905 << 200. << 14.
-           << 0.9 << 0.1;
+    second << "1 1 0" << 0.8 << 0.004 << 7.853981 << 0.039269905 << 200. << 14. << 0.9 << 0.1;
   }
 
   void testConstruction() {
@@ -95,12 +89,10 @@ public:
     TableRow secondRowReference = m_dummyData->getRow(1);
     TableRow secondRow = exported->getRow(1);
 
-    TS_ASSERT_EQUALS(secondRow.cell<std::string>(0),
-                     secondRowReference.cell<std::string>(0));
+    TS_ASSERT_EQUALS(secondRow.cell<std::string>(0), secondRowReference.cell<std::string>(0));
 
     for (size_t i = 1; i < exported->columnCount(); ++i) {
-      TS_ASSERT_DELTA(secondRow.cell<double>(i),
-                      secondRowReference.cell<double>(i), 1e-6);
+      TS_ASSERT_DELTA(secondRow.cell<double>(i), secondRowReference.cell<double>(i), 1e-6);
     }
   }
 
@@ -135,34 +127,22 @@ public:
   void testIntensityTypeFromString() {
     TestablePoldiPeakCollection collection;
 
-    TS_ASSERT_EQUALS(collection.intensityTypeFromString("Maximum"),
-                     PoldiPeakCollection::Maximum);
-    TS_ASSERT_EQUALS(collection.intensityTypeFromString("maximum"),
-                     PoldiPeakCollection::Maximum);
-    TS_ASSERT_EQUALS(collection.intensityTypeFromString("mAxIMuM"),
-                     PoldiPeakCollection::Maximum);
+    TS_ASSERT_EQUALS(collection.intensityTypeFromString("Maximum"), PoldiPeakCollection::Maximum);
+    TS_ASSERT_EQUALS(collection.intensityTypeFromString("maximum"), PoldiPeakCollection::Maximum);
+    TS_ASSERT_EQUALS(collection.intensityTypeFromString("mAxIMuM"), PoldiPeakCollection::Maximum);
 
-    TS_ASSERT_EQUALS(collection.intensityTypeFromString("Integral"),
-                     PoldiPeakCollection::Integral);
-    TS_ASSERT_EQUALS(collection.intensityTypeFromString("integral"),
-                     PoldiPeakCollection::Integral);
-    TS_ASSERT_EQUALS(collection.intensityTypeFromString("InTEgrAl"),
-                     PoldiPeakCollection::Integral);
+    TS_ASSERT_EQUALS(collection.intensityTypeFromString("Integral"), PoldiPeakCollection::Integral);
+    TS_ASSERT_EQUALS(collection.intensityTypeFromString("integral"), PoldiPeakCollection::Integral);
+    TS_ASSERT_EQUALS(collection.intensityTypeFromString("InTEgrAl"), PoldiPeakCollection::Integral);
 
-    TS_ASSERT_EQUALS(collection.intensityTypeFromString("Garbage"),
-                     PoldiPeakCollection::Maximum);
-    TS_ASSERT_EQUALS(collection.intensityTypeFromString(""),
-                     PoldiPeakCollection::Maximum);
+    TS_ASSERT_EQUALS(collection.intensityTypeFromString("Garbage"), PoldiPeakCollection::Maximum);
+    TS_ASSERT_EQUALS(collection.intensityTypeFromString(""), PoldiPeakCollection::Maximum);
   }
 
   void testIntensityTypeToString() {
     TestablePoldiPeakCollection collection;
-    TS_ASSERT_EQUALS(
-        collection.intensityTypeToString(PoldiPeakCollection::Maximum),
-        "Maximum");
-    TS_ASSERT_EQUALS(
-        collection.intensityTypeToString(PoldiPeakCollection::Integral),
-        "Integral");
+    TS_ASSERT_EQUALS(collection.intensityTypeToString(PoldiPeakCollection::Maximum), "Maximum");
+    TS_ASSERT_EQUALS(collection.intensityTypeToString(PoldiPeakCollection::Integral), "Integral");
   }
 
   void testIntensityTypeRecovery() {
@@ -173,38 +153,31 @@ public:
     ITableWorkspace_sptr newDummy(m_dummyData->clone().release());
     newDummy->logs()->addProperty<std::string>("IntensityType", "Integral");
 
-    PoldiPeakCollection otherCollection(
-        std::static_pointer_cast<TableWorkspace>(newDummy));
-    TS_ASSERT_EQUALS(otherCollection.intensityType(),
-                     PoldiPeakCollection::Integral);
+    PoldiPeakCollection otherCollection(std::static_pointer_cast<TableWorkspace>(newDummy));
+    TS_ASSERT_EQUALS(otherCollection.intensityType(), PoldiPeakCollection::Integral);
   }
 
   void testIntensityTypeRecoveryConversion() {
     ITableWorkspace_sptr newDummy(m_dummyData->clone().release());
     newDummy->logs()->addProperty<std::string>("IntensityType", "Integral");
 
-    PoldiPeakCollection collection(
-        std::static_pointer_cast<TableWorkspace>(newDummy));
+    PoldiPeakCollection collection(std::static_pointer_cast<TableWorkspace>(newDummy));
 
     TableWorkspace_sptr compare = collection.asTableWorkspace();
 
     TS_ASSERT(compare->logs()->hasProperty("IntensityType"));
-    TS_ASSERT_EQUALS(
-        compare->logs()->getPropertyValueAsType<std::string>("IntensityType"),
-        "Integral");
+    TS_ASSERT_EQUALS(compare->logs()->getPropertyValueAsType<std::string>("IntensityType"), "Integral");
 
     PoldiPeakCollection otherCollection(compare);
 
-    TS_ASSERT_EQUALS(otherCollection.intensityType(),
-                     PoldiPeakCollection::Integral);
+    TS_ASSERT_EQUALS(otherCollection.intensityType(), PoldiPeakCollection::Integral);
   }
 
   void testPointGroup() {
     PoldiPeakCollection peaks;
     TS_ASSERT_EQUALS(peaks.pointGroup()->getSymbol(), "1");
 
-    PointGroup_sptr m3m =
-        PointGroupFactory::Instance().createPointGroup("m-3m");
+    PointGroup_sptr m3m = PointGroupFactory::Instance().createPointGroup("m-3m");
 
     peaks.setPointGroup(m3m);
     TS_ASSERT_EQUALS(peaks.pointGroup()->getName(), m3m->getName());
@@ -213,16 +186,14 @@ public:
     TS_ASSERT_DIFFERS(peaks.pointGroup(), m3m);
 
     PointGroup_sptr invalid;
-    TS_ASSERT_THROWS(peaks.setPointGroup(invalid),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(peaks.setPointGroup(invalid), const std::invalid_argument &);
   }
 
   void testUnitCell() {
     PoldiPeakCollection peaks;
 
     UnitCell defaultCell;
-    TS_ASSERT_EQUALS(unitCellToStr(peaks.unitCell()),
-                     unitCellToStr(defaultCell));
+    TS_ASSERT_EQUALS(unitCellToStr(peaks.unitCell()), unitCellToStr(defaultCell));
 
     UnitCell cell(1, 2, 3, 90, 91, 92);
     peaks.setUnitCell(cell);
@@ -237,24 +208,19 @@ public:
     UnitCell cell(1, 2, 3, 90, 91, 92);
     newDummy->logs()->addProperty<std::string>("UnitCell", unitCellToStr(cell));
 
-    PoldiPeakCollection collection(
-        std::static_pointer_cast<TableWorkspace>(newDummy));
+    PoldiPeakCollection collection(std::static_pointer_cast<TableWorkspace>(newDummy));
     TS_ASSERT_EQUALS(unitCellToStr(collection.unitCell()), unitCellToStr(cell));
   }
 
   void testPointGroupStringConversion() {
     TestablePoldiPeakCollection peaks;
-    PointGroup_sptr m3m =
-        PointGroupFactory::Instance().createPointGroup("m-3m");
+    PointGroup_sptr m3m = PointGroupFactory::Instance().createPointGroup("m-3m");
 
     TS_ASSERT(peaks.pointGroupFromString(peaks.pointGroupToString(m3m)));
-    TS_ASSERT_EQUALS(
-        m3m->getName(),
-        peaks.pointGroupFromString(peaks.pointGroupToString(m3m))->getName());
+    TS_ASSERT_EQUALS(m3m->getName(), peaks.pointGroupFromString(peaks.pointGroupToString(m3m))->getName());
 
     PointGroup_sptr one = PointGroupFactory::Instance().createPointGroup("1");
-    TS_ASSERT_EQUALS(peaks.pointGroupFromString("DoesNotExist")->getSymbol(),
-                     one->getSymbol());
+    TS_ASSERT_EQUALS(peaks.pointGroupFromString("DoesNotExist")->getSymbol(), one->getSymbol());
   }
 
   void testGetPointGroupStringFromLog() {
@@ -262,8 +228,7 @@ public:
     newDummy->logs()->addProperty<std::string>("PointGroup", "SomeString");
 
     TestablePoldiPeakCollection peaks;
-    TS_ASSERT_EQUALS(peaks.getPointGroupStringFromLog(newDummy->logs()),
-                     "SomeString");
+    TS_ASSERT_EQUALS(peaks.getPointGroupStringFromLog(newDummy->logs()), "SomeString");
   }
 
   void testAddPeak() {
@@ -315,14 +280,11 @@ public:
     TS_ASSERT(clone != peaks);
 
     // everything else should be identical
-    TS_ASSERT_EQUALS(clone->getProfileFunctionName(),
-                     peaks->getProfileFunctionName());
+    TS_ASSERT_EQUALS(clone->getProfileFunctionName(), peaks->getProfileFunctionName());
     TS_ASSERT_EQUALS(clone->intensityType(), peaks->intensityType());
     TS_ASSERT_EQUALS(clone->peakCount(), peaks->peakCount());
-    TS_ASSERT_EQUALS(unitCellToStr(clone->unitCell()),
-                     unitCellToStr(peaks->unitCell()));
-    TS_ASSERT_EQUALS(clone->pointGroup()->getSymbol(),
-                     peaks->pointGroup()->getSymbol());
+    TS_ASSERT_EQUALS(unitCellToStr(clone->unitCell()), unitCellToStr(peaks->unitCell()));
+    TS_ASSERT_EQUALS(clone->pointGroup()->getSymbol(), peaks->pointGroup()->getSymbol());
 
     for (size_t i = 0; i < clone->peakCount(); ++i) {
       PoldiPeak_sptr clonePeak = clone->peak(i);
@@ -358,8 +320,7 @@ public:
     std::vector<PoldiPeak_sptr> poldiPeaks = p.peaks();
 
     // sort peak list and check that all peaks are within the limits
-    std::sort(poldiPeaks.begin(), poldiPeaks.end(),
-              std::bind(&PoldiPeak::greaterThan, _1, _2, &PoldiPeak::d));
+    std::sort(poldiPeaks.begin(), poldiPeaks.end(), std::bind(&PoldiPeak::greaterThan, _1, _2, &PoldiPeak::d));
 
     TS_ASSERT_LESS_THAN_EQUALS(poldiPeaks[0]->d(), 5.0);
     TS_ASSERT_LESS_THAN_EQUALS(0.55, poldiPeaks[68]->d());
@@ -383,22 +344,18 @@ public:
     TS_ASSERT_THROWS_NOTHING(p.setPeaks(hkls, dValues, fSquared));
 
     dValues.pop_back();
-    TS_ASSERT_THROWS(p.setPeaks(hkls, dValues, fSquared),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(p.setPeaks(hkls, dValues, fSquared), const std::invalid_argument &);
   }
 
 private:
   CrystalStructure getCsClStructure() {
     UnitCell CsCl(4.126, 4.126, 4.126);
-    SpaceGroup_const_sptr Pm3m =
-        SpaceGroupFactory::Instance().createSpaceGroup("P m -3 m");
+    SpaceGroup_const_sptr Pm3m = SpaceGroupFactory::Instance().createSpaceGroup("P m -3 m");
 
     BraggScatterer_sptr cs = BraggScattererFactory::Instance().createScatterer(
-        "IsotropicAtomBraggScatterer",
-        R"({"Element":"Cs","Position":"0.5,0.5,0.5","U":"0.005"})");
+        "IsotropicAtomBraggScatterer", R"({"Element":"Cs","Position":"0.5,0.5,0.5","U":"0.005"})");
     BraggScatterer_sptr cl = BraggScattererFactory::Instance().createScatterer(
-        "IsotropicAtomBraggScatterer",
-        R"({"Element":"Cl","Position":"0,0,0","U":"0.005"})");
+        "IsotropicAtomBraggScatterer", R"({"Element":"Cl","Position":"0,0,0","U":"0.005"})");
 
     CompositeBraggScatterer_sptr atoms = CompositeBraggScatterer::create();
     atoms->addScatterer(cs);

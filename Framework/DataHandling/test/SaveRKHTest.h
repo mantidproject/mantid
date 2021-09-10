@@ -50,8 +50,7 @@ public:
     // No parameters have been set yet, so it should throw
     TS_ASSERT_THROWS(testAlgorithm1.execute(), const std::runtime_error &);
     // Need a test workspace to use as input
-    MatrixWorkspace_sptr inputWS1 =
-        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 10, 1.0);
+    MatrixWorkspace_sptr inputWS1 = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 10, 1.0);
     inputWS1->setDistribution(true);
 
     // Register workspace
@@ -59,8 +58,7 @@ public:
 
     testAlgorithm1.setPropertyValue("InputWorkspace", "testInputOne");
     testAlgorithm1.setPropertyValue("Filename", outputFile);
-    outputFile =
-        testAlgorithm1.getPropertyValue("Filename"); // get absolute path
+    outputFile = testAlgorithm1.getPropertyValue("Filename"); // get absolute path
     testAlgorithm2.setProperty<bool>("Append", false);
 
     // Execute the algorithm
@@ -119,16 +117,14 @@ public:
     TS_ASSERT_THROWS(testAlgorithm2.execute(), const std::runtime_error &);
 
     using namespace Mantid::API;
-    MatrixWorkspace_sptr inputWS2 =
-        WorkspaceCreationHelper::create2DWorkspaceBinned(10, 1, 0.0);
+    MatrixWorkspace_sptr inputWS2 = WorkspaceCreationHelper::create2DWorkspaceBinned(10, 1, 0.0);
     inputWS2->setDistribution(true);
     // Register workspace
     AnalysisDataService::Instance().add("testInputTwo", inputWS2);
 
     testAlgorithm2.setPropertyValue("InputWorkspace", "testInputTwo");
     testAlgorithm2.setPropertyValue("Filename", outputFile);
-    outputFile =
-        testAlgorithm2.getPropertyValue("Filename"); // get absolute path
+    outputFile = testAlgorithm2.getPropertyValue("Filename"); // get absolute path
     testAlgorithm2.setProperty<bool>("Append", false);
 
     // Execute the algorithm
@@ -197,8 +193,7 @@ public:
 
     testAlgorithm3.setPropertyValue("InputWorkspace", "testInputThree");
     testAlgorithm3.setPropertyValue("Filename", outputFile);
-    outputFile =
-        testAlgorithm3.getPropertyValue("Filename"); // get absolute path
+    outputFile = testAlgorithm3.getPropertyValue("Filename"); // get absolute path
     testAlgorithm3.setProperty<bool>("Append", false);
 
     // Execute the algorithm
@@ -265,8 +260,7 @@ private:
     size_t nSpec = 1;
     const size_t x_length = 11;
     const size_t y_length = x_length - 1;
-    MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create(
-        "Workspace2D", nSpec, x_length, y_length);
+    MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D", nSpec, x_length, y_length);
     BinEdges x(x_length, LinearGenerator(0.0, 1.0));
     PointStandardDeviations dx(y_length, LinearGenerator(0.1, 1.0));
     for (size_t j = 0; j < nSpec; ++j) {

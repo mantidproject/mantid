@@ -30,7 +30,7 @@ Usage
                   dim.name, dim.getNBins(), dim.getMinimum(), dim.getMaximum()))
 
     #create a test MD event workspace
-    mdew = CreateMDWorkspace(Dimensions=3, Extents=[-1,1,-5,5,-9,10], 
+    mdew = CreateMDWorkspace(Dimensions=3, Extents=[-1,1,-5,5,-9,10],
         Names='A, B, C', Units='U, U, U')
     FakeMDEventData(mdew, PeakParams=[100000, 0, 0, 0, 1])
 

@@ -19,9 +19,7 @@ class InvisiblePropertyTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static InvisiblePropertyTest *createSuite() {
-    return new InvisiblePropertyTest();
-  }
+  static InvisiblePropertyTest *createSuite() { return new InvisiblePropertyTest(); }
   static void destroySuite(InvisiblePropertyTest *suite) { delete suite; }
 
   void test_construct() { TS_ASSERT_THROWS_NOTHING(InvisibleProperty{}); }

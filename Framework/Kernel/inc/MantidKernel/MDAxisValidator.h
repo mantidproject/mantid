@@ -28,8 +28,7 @@ namespace Kernel {
 */
 class MANTID_KERNEL_DLL MDAxisValidator {
 public:
-  MDAxisValidator(const std::vector<int> &axes, const size_t nDimensions,
-                  const bool checkIfEmpty);
+  MDAxisValidator(const std::vector<int> &axes, const size_t nDimensions, const bool checkIfEmpty);
   virtual ~MDAxisValidator() = default;
   virtual std::map<std::string, std::string> validate() const;
 

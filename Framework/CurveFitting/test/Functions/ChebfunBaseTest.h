@@ -62,9 +62,8 @@ public:
   }
 
   void testEvalVector_3() {
-    double x[] = {-3.,         -2.45454545, -1.90909091, -1.36363636,
-                  -0.81818182, -0.27272727, 0.27272727,  0.81818182,
-                  1.36363636,  1.90909091,  2.45454545,  3.};
+    double x[] = {-3.,        -2.45454545, -1.90909091, -1.36363636, -0.81818182, -0.27272727,
+                  0.27272727, 0.81818182,  1.36363636,  1.90909091,  2.45454545,  3.};
     do_test_eval_vector(SinCos, 10, -M_PI, M_PI, x, sizeof(x) / sizeof(double));
   }
 
@@ -98,9 +97,7 @@ public:
 
   void test_derivative_Cos() { do_test_derivative(Cos, -M_PI, M_PI, MinusSin); }
 
-  void test_derivative_SinCos() {
-    do_test_derivative(SinCos, -M_PI, M_PI, DSinCos);
-  }
+  void test_derivative_SinCos() { do_test_derivative(SinCos, -M_PI, M_PI, DSinCos); }
 
   void test_roots_Linear() {
     do_test_roots(Linear, -4, 4, 1);
@@ -116,8 +113,7 @@ public:
   void test_roots_SinCos() { do_test_roots(SinCos, -M_PI, M_PI, 2, 1e-5); }
 
 private:
-  void do_test_eval(const std::function<double(double)> &fun, double start,
-                    double end, size_t n) {
+  void do_test_eval(const std::function<double(double)> &fun, double start, double end, size_t n) {
     ChebfunBase base(n, start, end);
     auto p = base.fit(fun);
     auto x = base.linspace(2 * n);
@@ -126,8 +122,7 @@ private:
     }
   }
 
-  void do_test_eval_vector(std::function<double(double)> fun, size_t n,
-                           double start, double end, const double *xarr,
+  void do_test_eval_vector(std::function<double(double)> fun, size_t n, double start, double end, const double *xarr,
                            size_t narr) {
     std::vector<double> x;
     x.assign(xarr, xarr + narr);
@@ -148,8 +143,7 @@ private:
     }
   }
 
-  void do_test_bestFit(const std::function<double(double)> &fun, double start,
-                       double end, size_t expected_n) {
+  void do_test_bestFit(const std::function<double(double)> &fun, double start, double end, size_t expected_n) {
     std::vector<double> p, a;
     auto base = ChebfunBase::bestFit(start, end, fun, p, a);
     auto x = base->linspace(2 * base->size());
@@ -159,15 +153,13 @@ private:
     TS_ASSERT_EQUALS(base->size(), expected_n);
   }
 
-  void do_test_integrate(std::function<double(double)> fun, double start,
-                         double end, double expected_integral) {
+  void do_test_integrate(std::function<double(double)> fun, double start, double end, double expected_integral) {
     std::vector<double> p, a;
     auto base = ChebfunBase::bestFit(start, end, std::move(fun), p, a);
     TS_ASSERT_DELTA(base->integrate(p), expected_integral, 1e-14);
   }
 
-  void do_test_derivative(std::function<double(double)> fun, double start,
-                          double end,
+  void do_test_derivative(std::function<double(double)> fun, double start, double end,
                           const std::function<double(double)> &deriv) {
     std::vector<double> p, a, dp, da;
     auto base = ChebfunBase::bestFit(start, end, std::move(fun), p, a);
@@ -180,8 +172,7 @@ private:
     }
   }
 
-  void do_test_roots(std::function<double(double)> fun, double start,
-                     double end, size_t n_roots, double tol = 1e-13) {
+  void do_test_roots(std::function<double(double)> fun, double start, double end, size_t n_roots, double tol = 1e-13) {
     std::vector<double> p, a;
     auto base = ChebfunBase::bestFit(start, end, std::move(fun), p, a);
     auto roots = base->roots(a);

@@ -39,14 +39,12 @@ namespace bpl = boost::python;
  * @param name A name of a log
  * @return A double value
  */
-double getPropertyAsSingleValueWithDefaultStatistic(Run &self,
-                                                    const std::string &name) {
+double getPropertyAsSingleValueWithDefaultStatistic(Run &self, const std::string &name) {
   //   Before calling the function we need to release the GIL,
   //   drop the Python threadstate and reset anything installed
   //   via PyEval_SetTrace while we execute the C++ code -
   //   ReleaseGlobalInterpreter does this for us
-  Mantid::PythonInterface::ReleaseGlobalInterpreterLock
-      releaseGlobalInterpreterLock;
+  Mantid::PythonInterface::ReleaseGlobalInterpreterLock releaseGlobalInterpreterLock;
   return self.getPropertyAsSingleValue(name);
 }
 
@@ -57,10 +55,8 @@ double getPropertyAsSingleValueWithDefaultStatistic(Run &self,
  * @param name A name of a log
  * @return A double value
  */
-double getPropertyAsSingleValueWithTimeAveragedMean(Run &self,
-                                                    const std::string &name) {
-  return self.getPropertyAsSingleValue(name,
-                                       Mantid::Kernel::Math::TimeAveragedMean);
+double getPropertyAsSingleValueWithTimeAveragedMean(Run &self, const std::string &name) {
+  return self.getPropertyAsSingleValue(name, Mantid::Kernel::Math::TimeAveragedMean);
 }
 
 /**
@@ -72,22 +68,19 @@ double getPropertyAsSingleValueWithTimeAveragedMean(Run &self,
  * @param replace If true, replace an existing property with this one else
  * raise an error
  */
-void addPropertyWithUnit(Run &self, const std::string &name,
-                         const bpl::object &value, const std::string &units,
+void addPropertyWithUnit(Run &self, const std::string &name, const bpl::object &value, const std::string &units,
                          bool replace) {
   extract<Property *> extractor(value);
   if (extractor.check()) {
     Property *prop = extractor();
-    self.addProperty(
-        prop->clone(),
-        replace); // Clone the property as Python owns the one that is passed in
+    self.addProperty(prop->clone(),
+                     replace); // Clone the property as Python owns the one that is passed in
     return;
   }
 
   // Use the factory
-  auto property =
-      Mantid::PythonInterface::Registry::PropertyWithValueFactory::create(
-          name, value, Mantid::Kernel::Direction::Input);
+  auto property = Mantid::PythonInterface::Registry::PropertyWithValueFactory::create(name, value,
+                                                                                      Mantid::Kernel::Direction::Input);
   property->setUnits(units);
   self.addProperty(std::move(property), replace);
 }
@@ -100,8 +93,7 @@ void addPropertyWithUnit(Run &self, const std::string &name,
  * @param replace If true, replace an existing property with this one else raise
  * an error
  */
-void addProperty(Run &self, const std::string &name, const bpl::object &value,
-                 bool replace) {
+void addProperty(Run &self, const std::string &name, const bpl::object &value, bool replace) {
   addPropertyWithUnit(self, name, value, "", replace);
 }
 
@@ -112,8 +104,7 @@ void addProperty(Run &self, const std::string &name, const bpl::object &value,
  * @param name The name of the new property
  * @param value The value of the property
  */
-void addOrReplaceProperty(Run &self, const std::string &name,
-                          const bpl::object &value) {
+void addOrReplaceProperty(Run &self, const std::string &name, const bpl::object &value) {
   addProperty(self, name, value, true);
 }
 
@@ -124,8 +115,7 @@ void addOrReplaceProperty(Run &self, const std::string &name,
  * @param key The key
  * @param default_ The default to return if it does not exist
  */
-bpl::object getWithDefault(bpl::object self, const bpl::object &key,
-                           bpl::object default_) {
+bpl::object getWithDefault(bpl::object self, const bpl::object &key, bpl::object default_) {
   bpl::object exists(self.attr("__contains__"));
   if (extract<bool>(exists(key))()) {
     return self.attr("__getitem__")(key);
@@ -162,10 +152,8 @@ GNU_DIAG_OFF("unused-local-typedef")
 // Seen with GCC 7.1.1 and Boost 1.63.0
 GNU_DIAG_OFF("conversion")
 
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(integrateProtonCharge_Overload,
-                                       integrateProtonCharge, 0, 1)
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getPropertyAsSingleValue_Overload,
-                                       getPropertyAsSingleValue, 1, 1)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(integrateProtonCharge_Overload, integrateProtonCharge, 0, 1)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getPropertyAsSingleValue_Overload, getPropertyAsSingleValue, 1, 1)
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unused-local-typedef")
 
@@ -175,89 +163,70 @@ void export_Run() {
 
   // Run class
   class_<Run, boost::noncopyable>("Run")
-      .def("getProtonCharge", &Run::getProtonCharge, arg("self"),
-           "Return the total good proton charge for the run")
+      .def("getProtonCharge", &Run::getProtonCharge, arg("self"), "Return the total good proton charge for the run")
 
       .def("integrateProtonCharge", &Run::integrateProtonCharge,
-           integrateProtonCharge_Overload(
-               "Set the total good proton charge for the run, from the proton "
-               "charge log",
-               (arg("self"), arg("logname") = "proton_charge")))
+           integrateProtonCharge_Overload("Set the total good proton charge for the run, from the proton "
+                                          "charge log",
+                                          (arg("self"), arg("logname") = "proton_charge")))
 
       .def("hasProperty", &Run::hasProperty, (arg("self"), arg("name")),
            "Returns True if the given log value is contained within the run")
 
-      .def("getProperty", &Run::getProperty, (arg("self"), arg("name")),
-           return_value_policy<return_by_value>(),
+      .def("getProperty", &Run::getProperty, (arg("self"), arg("name")), return_value_policy<return_by_value>(),
            "Returns the named property "
            "(log value). Use '.value' "
            "to return the value.")
 
-      .def("getPropertyAsSingleValue",
-           getPropertyAsSingleValueWithDefaultStatistic,
-           (arg("self"), arg("name")),
+      .def("getPropertyAsSingleValue", getPropertyAsSingleValueWithDefaultStatistic, (arg("self"), arg("name")),
            "Return a log as a single float value. Time series values are "
            "averaged.")
 
-      .def("getPropertyAsSingleValueWithTimeAveragedMean",
-           getPropertyAsSingleValueWithTimeAveragedMean,
+      .def("getPropertyAsSingleValueWithTimeAveragedMean", getPropertyAsSingleValueWithTimeAveragedMean,
            (arg("self"), arg("name")),
            "Returns a log as a single float value. Calculated using "
            "time-averaged mean.")
 
-      .def("getTimeAveragedStd", &Run::getTimeAveragedStd,
-           (arg("self"), arg("name")),
+      .def("getTimeAveragedStd", &Run::getTimeAveragedStd, (arg("self"), arg("name")),
            "Returns the time averaged standard deviation")
 
-      .def("getProperties", &Run::getProperties, arg("self"),
-           return_internal_reference<>(),
+      .def("getProperties", &Run::getProperties, arg("self"), return_internal_reference<>(),
            "Return the list of run properties managed by this object.")
 
-      .def("getLogData",
-           (Property * (Run::*)(const std::string &)const) & Run::getLogData,
-           (arg("self"), arg("name")), return_value_policy<return_by_value>(),
+      .def("getLogData", (Property * (Run::*)(const std::string &) const) & Run::getLogData, (arg("self"), arg("name")),
+           return_value_policy<return_by_value>(),
            "Returns the named log. Use '.value' to return the value. The "
            "same "
            "as getProperty.")
 
-      .def("getLogData",
-           (const std::vector<Property *> &(Run::*)() const) & Run::getLogData,
-           arg("self"), return_internal_reference<>(),
+      .def("getLogData", (const std::vector<Property *> &(Run::*)() const) & Run::getLogData, arg("self"),
+           return_internal_reference<>(),
            "Return the list of logs for this run. The same as "
            "getProperties.")
 
-      .def("getGoniometer",
-           (const Mantid::Geometry::Goniometer &(Run::*)(const size_t) const) &
-               Run::getGoniometer,
-           (arg("self"), arg("index") = 0),
-           return_value_policy<reference_existing_object>(),
+      .def("getGoniometer", (const Mantid::Geometry::Goniometer &(Run::*)(const size_t) const) & Run::getGoniometer,
+           (arg("self"), arg("index") = 0), return_value_policy<reference_existing_object>(),
            "Return Goniometer object associated with this run by index, "
            "default first goniometer.")
 
       .def("getNumGoniometers", &Run::getNumGoniometers, arg("self"),
            "Return the number of goniometer objects associated with this run.")
 
-      .def("addProperty", &addProperty,
-           (arg("self"), arg("name"), arg("value"), arg("replace")),
+      .def("addProperty", &addProperty, (arg("self"), arg("name"), arg("value"), arg("replace")),
            "Adds a property with the given name "
            "and value. If replace=True then an "
            "existing property is overwritten")
 
-      .def("addProperty", &addPropertyWithUnit,
-           (arg("self"), arg("name"), arg("value"), arg("units"),
-            arg("replace")),
+      .def("addProperty", &addPropertyWithUnit, (arg("self"), arg("name"), arg("value"), arg("units"), arg("replace")),
            "Adds a property with the given name, value and unit. If "
            "replace=True then an existing property is overwritten")
 
-      .def("setStartAndEndTime", &Run::setStartAndEndTime,
-           (arg("self"), arg("start"), arg("end")),
+      .def("setStartAndEndTime", &Run::setStartAndEndTime, (arg("self"), arg("start"), arg("end")),
            "Set the start and end time of the run")
 
-      .def("startTime", &Run::startTime, arg("self"),
-           "Return the total starting time of the run.")
+      .def("startTime", &Run::startTime, arg("self"), "Return the total starting time of the run.")
 
-      .def("endTime", &Run::endTime, arg("self"),
-           "Return the total ending time of the run.")
+      .def("endTime", &Run::endTime, arg("self"), "Return the total ending time of the run.")
 
       //-------------------- Dictionary access----------------------------
       .def("get", &getWithDefault, (arg("self"), arg("key"), arg("default")),
@@ -266,13 +235,10 @@ void export_Run() {
       .def("get", &get, (arg("self"), arg("key")),
            "Returns the value pointed to by the key or "
            "None if it does not exist.")
-      .def("keys", &keys, arg("self"),
-           "Returns the names of the properties as list")
+      .def("keys", &keys, arg("self"), "Returns the names of the properties as list")
       .def("__contains__", &Run::hasProperty, (arg("self"), arg("name")))
-      .def("__getitem__", &Run::getProperty, (arg("self"), arg("name")),
-           return_value_policy<return_by_value>())
-      .def("__setitem__", &addOrReplaceProperty,
-           (arg("self"), arg("name"), arg("value")))
+      .def("__getitem__", &Run::getProperty, (arg("self"), arg("name")), return_value_policy<return_by_value>())
+      .def("__setitem__", &addOrReplaceProperty, (arg("self"), arg("name"), arg("value")))
       .def("__copy__", &Mantid::PythonInterface::generic__copy__<Run>)
       .def("__deepcopy__", &Mantid::PythonInterface::generic__deepcopy__<Run>)
       .def("__eq__", &Run::operator==, arg("self"), arg("other"));

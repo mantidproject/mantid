@@ -62,4 +62,4 @@ class HelpWidgetView(QtWidgets.QWidget):
         manageuserdirectories.ManageUserDirectories.openManageUserDirectories()
 
     def _on_help_button_clicked(self):
-        InterfaceManager().showCustomInterfaceHelp(self.doc)
+        InterfaceManager().showCustomInterfaceHelp(self.doc, 'muon')

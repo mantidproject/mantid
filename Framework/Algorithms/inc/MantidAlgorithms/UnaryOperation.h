@@ -68,8 +68,7 @@ protected:
    *  @param YOut :: A reference to the output data
    *  @param EOut :: A reference to the output error
    */
-  virtual void performUnaryOperation(const double XIn, const double YIn,
-                                     const double EIn, double &YOut,
+  virtual void performUnaryOperation(const double XIn, const double YIn, const double EIn, double &YOut,
                                      double &EOut) = 0;
 
   /// flag to use histogram representation instead of events for certain

@@ -33,18 +33,16 @@ DECLARE_ALGORITHM(FindPeakBackground)
 /** Define properties
  */
 void FindPeakBackground::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "InputWorkspace", "Anonymous", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "Anonymous", Direction::Input),
                   "Name of input MatrixWorkspace that contains peaks.");
 
   declareProperty("WorkspaceIndex", EMPTY_INT(),
                   "workspace indices to have peak and background separated. "
                   "No default is taken. ");
 
-  declareProperty(
-      "SigmaConstant", 1.0,
-      "Multiplier of standard deviations of the variance for convergence of "
-      "peak elimination.  Default is 1.0. ");
+  declareProperty("SigmaConstant", 1.0,
+                  "Multiplier of standard deviations of the variance for convergence of "
+                  "peak elimination.  Default is 1.0. ");
 
   declareProperty(std::make_unique<ArrayProperty<double>>("FitWindow"),
                   "Optional: enter a comma-separated list of the minimum and "
@@ -53,23 +51,18 @@ void FindPeakBackground::init() {
                   "length must be exactly two.");
 
   std::vector<std::string> bkgdtypes{"Flat", "Linear", "Quadratic"};
-  declareProperty("BackgroundType", "Linear",
-                  std::make_shared<StringListValidator>(bkgdtypes),
-                  "Type of Background.");
+  declareProperty("BackgroundType", "Linear", std::make_shared<StringListValidator>(bkgdtypes), "Type of Background.");
 
   // The found peak in a table
-  declareProperty(
-      std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
-          "OutputWorkspace", "", Direction::Output),
-      "The name of the TableWorkspace in which to store the background found "
-      "for each index.  "
-      "Table contains the indices of the beginning and ending of peak "
-      "and the estimated background coefficients for the constant, linear, and "
-      "quadratic terms.");
+  declareProperty(std::make_unique<WorkspaceProperty<API::ITableWorkspace>>("OutputWorkspace", "", Direction::Output),
+                  "The name of the TableWorkspace in which to store the background found "
+                  "for each index.  "
+                  "Table contains the indices of the beginning and ending of peak "
+                  "and the estimated background coefficients for the constant, linear, and "
+                  "quadratic terms.");
 }
 
-void FindPeakBackground::findWindowIndex(
-    const HistogramData::Histogram &histogram, size_t &l0, size_t &n) {
+void FindPeakBackground::findWindowIndex(const HistogramData::Histogram &histogram, size_t &l0, size_t &n) {
   auto &inpX = histogram.x();
   auto &inpY = histogram.y();
   size_t sizey = inpY.size(); // inpWS->y(inpwsindex).size();
@@ -116,8 +109,8 @@ void FindPeakBackground::exec() {
     double a1 = bkgd3[1];
     double a2 = bkgd3[2];
     API::TableRow t = m_outPeakTableWS->getRow(0);
-    t << static_cast<int>(m_inputWSIndex) << static_cast<int>(min_peak)
-      << static_cast<int>(max_peak) << a0 << a1 << a2 << goodfit;
+    t << static_cast<int>(m_inputWSIndex) << static_cast<int>(min_peak) << static_cast<int>(max_peak) << a0 << a1 << a2
+      << goodfit;
   }
 
   prog.report();
@@ -136,10 +129,8 @@ void FindPeakBackground::exec() {
  * @param bkgd3
  * @return
  */
-int FindPeakBackground::findBackground(
-    const HistogramData::Histogram &histogram, const size_t &l0,
-    const size_t &n, std::vector<size_t> &peak_min_max_indexes,
-    std::vector<double> &bkgd3) {
+int FindPeakBackground::findBackground(const HistogramData::Histogram &histogram, const size_t &l0, const size_t &n,
+                                       std::vector<size_t> &peak_min_max_indexes, std::vector<double> &bkgd3) {
   const size_t sizex = histogram.x().size();
   const auto &inpY = histogram.y();
   const size_t sizey = inpY.size();
@@ -157,20 +148,16 @@ int FindPeakBackground::findBackground(
   MantidVec mask(n - l0, 0.0);
   auto xn = static_cast<double>(n - l0);
   if ((0. == xn) || (0. == xn - 1.0))
-    throw std::runtime_error(
-        "The number of Y values in the input workspace for the "
-        "workspace index given, minus 'l0' or minus 'l0' minus 1, is 0. This "
-        "will produce a "
-        "divide-by-zero");
+    throw std::runtime_error("The number of Y values in the input workspace for the "
+                             "workspace index given, minus 'l0' or minus 'l0' minus 1, is 0. This "
+                             "will produce a "
+                             "divide-by-zero");
   do {
     Statistics stats = getStatistics(maskedY);
     Ymean = stats.mean;
     Yvariance = stats.standard_deviation * stats.standard_deviation;
-    Ysigma = std::sqrt((moment4(maskedY, static_cast<size_t>(xn), Ymean) -
-                        (xn - 3.0) / (xn - 1.0) * Yvariance) /
-                       xn);
-    MantidVec::const_iterator it =
-        std::max_element(maskedY.begin(), maskedY.end());
+    Ysigma = std::sqrt((moment4(maskedY, static_cast<size_t>(xn), Ymean) - (xn - 3.0) / (xn - 1.0) * Yvariance) / xn);
+    MantidVec::const_iterator it = std::max_element(maskedY.begin(), maskedY.end());
     const size_t pos = it - maskedY.begin();
     maskedY[pos] = 0;
     mask[pos] = 1.0;
@@ -183,16 +170,13 @@ int FindPeakBackground::findBackground(
     if (mask[0] == mask[2] && mask[2] == mask[3])
       mask[1] = mask[2];
     for (size_t l = 2; l < n - l0 - 3; ++l) {
-      if (mask[l - 1] == mask[l + 1] &&
-          (mask[l - 1] == mask[l - 2] || mask[l + 1] == mask[l + 2])) {
+      if (mask[l - 1] == mask[l + 1] && (mask[l - 1] == mask[l - 2] || mask[l + 1] == mask[l + 2])) {
         mask[l] = mask[l + 1];
       }
     }
-    if (mask[n - l0 - 2] == mask[n - l0 - 3] &&
-        mask[n - l0 - 3] == mask[n - l0 - 4])
+    if (mask[n - l0 - 2] == mask[n - l0 - 3] && mask[n - l0 - 3] == mask[n - l0 - 4])
       mask[n - l0 - 1] = mask[n - l0 - 2];
-    if (mask[n - l0 - 1] == mask[n - l0 - 3] &&
-        mask[n - l0 - 3] == mask[n - l0 - 4])
+    if (mask[n - l0 - 1] == mask[n - l0 - 3] && mask[n - l0 - 3] == mask[n - l0 - 4])
       mask[n - l0 - 2] = mask[n - l0 - 1];
 
     // mask regions not connected to largest region
@@ -217,8 +201,7 @@ int FindPeakBackground::findBackground(
     }
     size_t min_peak, max_peak;
     if (!peaks.empty()) {
-      g_log.debug() << "Peaks' size = " << peaks.size()
-                    << " -> esitmate background. \n";
+      g_log.debug() << "Peaks' size = " << peaks.size() << " -> esitmate background. \n";
       if (peaks.back().stop == 0)
         peaks.back().stop = n - 1;
       std::sort(peaks.begin(), peaks.end(), by_len());
@@ -238,8 +221,7 @@ int FindPeakBackground::findBackground(
     }
 
     double a0 = 0., a1 = 0., a2 = 0.;
-    estimateBackground(histogram, l0, n, min_peak, max_peak, (!peaks.empty()),
-                       a0, a1, a2);
+    estimateBackground(histogram, l0, n, min_peak, max_peak, (!peaks.empty()), a0, a1, a2);
 
     // Add a new row
     peak_min_max_indexes.resize(2);
@@ -267,23 +249,20 @@ int FindPeakBackground::findBackground(
  * @param out_bg1 :: slope
  * @param out_bg2 :: a2 = 0
  */
-void FindPeakBackground::estimateBackground(
-    const HistogramData::Histogram &histogram, const size_t i_min,
-    const size_t i_max, const size_t p_min, const size_t p_max,
-    const bool hasPeak, double &out_bg0, double &out_bg1, double &out_bg2) {
+void FindPeakBackground::estimateBackground(const HistogramData::Histogram &histogram, const size_t i_min,
+                                            const size_t i_max, const size_t p_min, const size_t p_max,
+                                            const bool hasPeak, double &out_bg0, double &out_bg1, double &out_bg2) {
   double redux_chisq;
   if (hasPeak) {
-    HistogramData::estimateBackground(m_backgroundOrder, histogram, i_min,
-                                      i_max, p_min, p_max, out_bg0, out_bg1,
+    HistogramData::estimateBackground(m_backgroundOrder, histogram, i_min, i_max, p_min, p_max, out_bg0, out_bg1,
                                       out_bg2, redux_chisq);
   } else {
-    HistogramData::estimatePolynomial(m_backgroundOrder, histogram, i_min,
-                                      i_max, out_bg0, out_bg1, out_bg2,
+    HistogramData::estimatePolynomial(m_backgroundOrder, histogram, i_min, i_max, out_bg0, out_bg1, out_bg2,
                                       redux_chisq);
   }
 
-  g_log.information() << "Estimated background: A0 = " << out_bg0
-                      << ", A1 = " << out_bg1 << ", A2 = " << out_bg2 << "\n";
+  g_log.information() << "Estimated background: A0 = " << out_bg0 << ", A1 = " << out_bg1 << ", A2 = " << out_bg2
+                      << "\n";
 }
 //----------------------------------------------------------------------------------------------
 /** Calculate 4th moment
@@ -313,13 +292,10 @@ void FindPeakBackground::processInputProperties() {
     } else {
       throw runtime_error("WorkspaceIndex must be given. ");
     }
-  } else if (inpwsindex < 0 ||
-             inpwsindex >= static_cast<int>(m_inputWS->getNumberHistograms())) {
+  } else if (inpwsindex < 0 || inpwsindex >= static_cast<int>(m_inputWS->getNumberHistograms())) {
     stringstream errss;
-    errss << "Input workspace " << m_inputWS->getName() << " has "
-          << m_inputWS->getNumberHistograms()
-          << " spectra.  Input workspace index " << inpwsindex
-          << " is out of boundary. ";
+    errss << "Input workspace " << m_inputWS->getName() << " has " << m_inputWS->getNumberHistograms()
+          << " spectra.  Input workspace index " << inpwsindex << " is out of boundary. ";
     throw runtime_error(errss.str());
   }
   m_inputWSIndex = static_cast<size_t>(inpwsindex);
@@ -342,14 +318,10 @@ void FindPeakBackground::processInputProperties() {
 }
 
 /// set sigma constant
-void FindPeakBackground::setSigma(const double &sigma) {
-  m_sigmaConstant = sigma;
-}
+void FindPeakBackground::setSigma(const double &sigma) { m_sigmaConstant = sigma; }
 
 /// set background order
-void FindPeakBackground::setBackgroundOrder(size_t order) {
-  m_backgroundOrder = order;
-}
+void FindPeakBackground::setBackgroundOrder(size_t order) { m_backgroundOrder = order; }
 
 //----------------------------------------------------------------------------------------------
 /** set fit window

@@ -23,9 +23,7 @@ class ChebyshevPolyFitImpl {
 public:
   explicit ChebyshevPolyFitImpl(const size_t order) : m_order(order) {}
 
-  std::vector<double> fit(const std::vector<double> &x,
-                          const std::vector<double> &y,
-                          const std::vector<double> &w);
+  std::vector<double> fit(const std::vector<double> &x, const std::vector<double> &y, const std::vector<double> &w);
 
 private:
   const size_t m_order;
@@ -35,8 +33,7 @@ private:
 // ChebyshevPolyFitImpl Public Members
 //-----------------------------------------------------------------------------
 // See doc for main class for parameter descriptions
-std::vector<double> ChebyshevPolyFitImpl::fit(const std::vector<double> &x,
-                                              const std::vector<double> &y,
+std::vector<double> ChebyshevPolyFitImpl::fit(const std::vector<double> &x, const std::vector<double> &y,
                                               const std::vector<double> &w) {
   assert(x.size() == y.size());
   assert(y.size() == w.size());
@@ -85,8 +82,7 @@ std::vector<double> ChebyshevPolyFitImpl::fit(const std::vector<double> &x,
  * @param n The maximum degree of polynomial required (+1 for the zeroth-order
  * term)
  */
-ChebyshevPolyFit::ChebyshevPolyFit(const size_t n)
-    : m_impl(new ChebyshevPolyFitImpl(n)) {}
+ChebyshevPolyFit::ChebyshevPolyFit(const size_t n) : m_impl(new ChebyshevPolyFitImpl(n)) {}
 
 /// Destructor
 ChebyshevPolyFit::~ChebyshevPolyFit() = default;
@@ -103,9 +99,8 @@ ChebyshevPolyFit::~ChebyshevPolyFit() = default;
  * @param wgts Weights for each Y point
  * @return
  */
-std::vector<double> ChebyshevPolyFit::
-operator()(const std::vector<double> &xs, const std::vector<double> &ys,
-           const std::vector<double> &wgts) {
+std::vector<double> ChebyshevPolyFit::operator()(const std::vector<double> &xs, const std::vector<double> &ys,
+                                                 const std::vector<double> &wgts) {
   return m_impl->fit(xs, ys, wgts);
 }
 

@@ -42,9 +42,7 @@ private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static WorkspaceValidatorsTest *createSuite() {
-    return new WorkspaceValidatorsTest();
-  }
+  static WorkspaceValidatorsTest *createSuite() { return new WorkspaceValidatorsTest(); }
   static void destroySuite(WorkspaceValidatorsTest *suite) { delete suite; }
 
   WorkspaceValidatorsTest() {
@@ -82,9 +80,7 @@ public:
     TS_ASSERT(dynamic_cast<IValidator *>(binVal));
   }
 
-  void testWorkspaceUnitValidator() {
-    TS_ASSERT_THROWS_NOTHING(WorkspaceUnitValidator());
-  }
+  void testWorkspaceUnitValidator() { TS_ASSERT_THROWS_NOTHING(WorkspaceUnitValidator()); }
 
   void testWorkspaceUnitValidator_getType() {
     TS_ASSERT_EQUALS(wavUnitVal->getType(), "workspaceunit");
@@ -92,71 +88,50 @@ public:
   }
 
   void testWorkspaceUnitValidator_isValid() {
-    TS_ASSERT_EQUALS(wavUnitVal->isValid(ws1),
-                     "The workspace must have units of Wavelength");
+    TS_ASSERT_EQUALS(wavUnitVal->isValid(ws1), "The workspace must have units of Wavelength");
     TS_ASSERT_EQUALS(wavUnitVal->isValid(ws2), "");
     TS_ASSERT_EQUALS(anyUnitVal->isValid(ws1), "The workspace must have units");
     TS_ASSERT_EQUALS(anyUnitVal->isValid(ws2), "");
   }
 
-  void testHistogramValidator() {
-    TS_ASSERT_THROWS_NOTHING(HistogramValidator(false));
-  }
+  void testHistogramValidator() { TS_ASSERT_THROWS_NOTHING(HistogramValidator(false)); }
 
-  void testHistogramValidator_getType() {
-    TS_ASSERT_EQUALS(histVal->getType(), "histogram");
-  }
+  void testHistogramValidator_getType() { TS_ASSERT_EQUALS(histVal->getType(), "histogram"); }
 
   void testHistogramValidator_isValid() {
     TS_ASSERT_EQUALS(histVal->isValid(ws1), "");
-    TS_ASSERT_EQUALS(histVal->isValid(ws2),
-                     "The workspace must contain histogram data");
+    TS_ASSERT_EQUALS(histVal->isValid(ws2), "The workspace must contain histogram data");
     HistogramValidator reverse(false);
-    TS_ASSERT_EQUALS(reverse.isValid(ws1),
-                     "The workspace must not contain histogram data");
+    TS_ASSERT_EQUALS(reverse.isValid(ws1), "The workspace must not contain histogram data");
     TS_ASSERT_EQUALS(reverse.isValid(ws2), "");
   }
 
-  void testRawCountValidator_getType() {
-    TS_ASSERT_EQUALS(nonRawVal->getType(), "rawcount");
-  }
+  void testRawCountValidator_getType() { TS_ASSERT_EQUALS(nonRawVal->getType(), "rawcount"); }
 
   void testRawCountValidator_isValid() {
     TS_ASSERT_EQUALS(rawVal->isValid(ws1), "");
-    TS_ASSERT_EQUALS(
-        rawVal->isValid(ws2),
-        "A workspace containing numbers of counts is required here");
-    TS_ASSERT_EQUALS(nonRawVal->isValid(ws1),
-                     "A workspace of numbers of counts is not allowed here");
+    TS_ASSERT_EQUALS(rawVal->isValid(ws2), "A workspace containing numbers of counts is required here");
+    TS_ASSERT_EQUALS(nonRawVal->isValid(ws1), "A workspace of numbers of counts is not allowed here");
     TS_ASSERT_EQUALS(nonRawVal->isValid(ws2), "");
   }
 
-  void testCommonBinsValidator_getType() {
-    TS_ASSERT_EQUALS(binVal->getType(), "commonbins");
-  }
+  void testCommonBinsValidator_getType() { TS_ASSERT_EQUALS(binVal->getType(), "commonbins"); }
 
   void testCommonBinsValidator_isValid() {
     TS_ASSERT_EQUALS(binVal->isValid(ws1), "");
     TS_ASSERT_EQUALS(binVal->isValid(ws2), "");
     ws1->dataX(0)[5] = 1.1;
-    TS_ASSERT_EQUALS(
-        binVal->isValid(ws1),
-        "The workspace must have common bin boundaries for all histograms");
+    TS_ASSERT_EQUALS(binVal->isValid(ws1), "The workspace must have common bin boundaries for all histograms");
   }
 
   void testWSPropertyandValidator() {
-    auto wavUnitValidator =
-        std::make_shared<WorkspaceUnitValidator>("Wavelength");
-    WorkspaceProperty<MatrixWorkspace> wsp1("workspace1", "ws1",
-                                            Direction::Input, wavUnitValidator);
+    auto wavUnitValidator = std::make_shared<WorkspaceUnitValidator>("Wavelength");
+    WorkspaceProperty<MatrixWorkspace> wsp1("workspace1", "ws1", Direction::Input, wavUnitValidator);
     // test property validation
-    TS_ASSERT_EQUALS(
-        wsp1.isValid(),
-        "Workspace \"ws1\" was not found in the Analysis Data Service");
+    TS_ASSERT_EQUALS(wsp1.isValid(), "Workspace \"ws1\" was not found in the Analysis Data Service");
     ;
 
-    TS_ASSERT_EQUALS(wsp1.setValue(""),
-                     "Enter a name for the Input/InOut workspace");
+    TS_ASSERT_EQUALS(wsp1.setValue(""), "Enter a name for the Input/InOut workspace");
 
     // fine and correct unit
     wsp1 = ws2;
@@ -166,10 +141,8 @@ public:
     // fine and no unit
     TS_ASSERT_THROWS(wsp1 = ws1, const std::invalid_argument &);
 
-    TS_ASSERT_EQUALS(wsp1.setValue(""),
-                     "Enter a name for the Input/InOut workspace");
-    TS_ASSERT_EQUALS(wsp1.isValid(),
-                     "Enter a name for the Input/InOut workspace");
+    TS_ASSERT_EQUALS(wsp1.setValue(""), "Enter a name for the Input/InOut workspace");
+    TS_ASSERT_EQUALS(wsp1.isValid(), "Enter a name for the Input/InOut workspace");
   }
 
   void testInstrumentValidator() {
@@ -181,9 +154,7 @@ public:
       inst->markAsSamplePos(sample);
 
       auto instVal = std::make_shared<InstrumentValidator>();
-      TS_ASSERT_EQUALS(
-          instVal->isValid(ws),
-          "The instrument is missing the following components: sample holder");
+      TS_ASSERT_EQUALS(instVal->isValid(ws), "The instrument is missing the following components: sample holder");
       ws->setInstrument(inst);
       TS_ASSERT_EQUALS(instVal->isValid(ws), "");
     }
@@ -192,11 +163,8 @@ public:
       auto ws = std::make_shared<Mantid::DataObjects::Workspace2D>();
       auto inst = std::make_shared<Mantid::Geometry::Instrument>();
 
-      auto instVal = std::make_shared<InstrumentValidator>(
-          InstrumentValidator::SourcePosition);
-      TS_ASSERT_EQUALS(
-          instVal->isValid(ws),
-          "The instrument is missing the following components: source");
+      auto instVal = std::make_shared<InstrumentValidator>(InstrumentValidator::SourcePosition);
+      TS_ASSERT_EQUALS(instVal->isValid(ws), "The instrument is missing the following components: source");
       auto *src = new Mantid::Geometry::ObjComponent("Source");
       inst->add(src);
       inst->markAsSource(src);
@@ -208,9 +176,8 @@ public:
       auto ws = std::make_shared<Mantid::DataObjects::Workspace2D>();
       auto inst = std::make_shared<Mantid::Geometry::Instrument>();
 
-      auto instVal = std::make_shared<InstrumentValidator>(
-          InstrumentValidator::SourcePosition |
-          InstrumentValidator::SamplePosition);
+      auto instVal = std::make_shared<InstrumentValidator>(InstrumentValidator::SourcePosition |
+                                                           InstrumentValidator::SamplePosition);
       TS_ASSERT_EQUALS(instVal->isValid(ws), "The instrument is missing the "
                                              "following components: "
                                              "source,sample holder");
@@ -231,9 +198,7 @@ public:
     using Mantid::Geometry::OrientedLattice;
     OrientedLatticeValidator validator;
     auto ws = std::make_shared<Workspace2D>();
-    TS_ASSERT_EQUALS(
-        validator.isValid(ws),
-        "Workspace must have a sample with an orientation matrix defined.");
+    TS_ASSERT_EQUALS(validator.isValid(ws), "Workspace must have a sample with an orientation matrix defined.");
 
     ws->mutableSample().setOrientedLattice(std::make_unique<OrientedLattice>());
 
@@ -247,11 +212,9 @@ public:
     // These should be separate tests when they are refactored out
     { // requires just shape
       auto ws = std::make_shared<Mantid::DataObjects::Workspace2D>();
-      auto sampleVal =
-          std::make_shared<SampleValidator>(SampleValidator::Shape);
+      auto sampleVal = std::make_shared<SampleValidator>(SampleValidator::Shape);
 
-      TS_ASSERT_EQUALS(sampleVal->isValid(ws),
-                       "The sample is missing the following properties: shape");
+      TS_ASSERT_EQUALS(sampleVal->isValid(ws), "The sample is missing the following properties: shape");
       auto shape = ComponentCreationHelper::createSphere(0.01);
       ws->mutableSample().setShape(shape);
       TS_ASSERT_EQUALS(sampleVal->isValid(ws), "");
@@ -259,12 +222,9 @@ public:
 
     { // requires just material
       auto ws = std::make_shared<Mantid::DataObjects::Workspace2D>();
-      auto sampleVal =
-          std::make_shared<SampleValidator>(SampleValidator::Material);
+      auto sampleVal = std::make_shared<SampleValidator>(SampleValidator::Material);
 
-      TS_ASSERT_EQUALS(
-          sampleVal->isValid(ws),
-          "The sample is missing the following properties: material");
+      TS_ASSERT_EQUALS(sampleVal->isValid(ws), "The sample is missing the following properties: material");
       auto noShape = std::make_shared<CSGObject>();
       noShape->setMaterial(Material("V", NeutronAtom(), 0.072));
       ws->mutableSample().setShape(noShape);
@@ -273,12 +233,9 @@ public:
 
     { // requires both
       auto ws = std::make_shared<Mantid::DataObjects::Workspace2D>();
-      auto sampleVal = std::make_shared<SampleValidator>(
-          SampleValidator::Shape | SampleValidator::Material);
+      auto sampleVal = std::make_shared<SampleValidator>(SampleValidator::Shape | SampleValidator::Material);
 
-      TS_ASSERT_EQUALS(
-          sampleVal->isValid(ws),
-          "The sample is missing the following properties: shape,material");
+      TS_ASSERT_EQUALS(sampleVal->isValid(ws), "The sample is missing the following properties: shape,material");
       auto shape = ComponentCreationHelper::createSphere(0.01);
       shape->setMaterial(Material("V", NeutronAtom(), 0.072));
       ws->mutableSample().setShape(shape);

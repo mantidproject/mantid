@@ -26,8 +26,7 @@ namespace QSettingsHelper {
  * @return The value stored for the requested setting
  *
  */
-template <typename T>
-T getSetting(std::string const &settingGroup, std::string const &settingName) {
+template <typename T> T getSetting(std::string const &settingGroup, std::string const &settingName) {
   QSettings settings;
   settings.beginGroup(QString::fromStdString(settingGroup));
   auto const settingValue = settings.value(QString::fromStdString(settingName));
@@ -43,8 +42,7 @@ T getSetting(std::string const &settingGroup, std::string const &settingName) {
  * @return A map of the values stored for all settings matching the given type
  *
  */
-template <typename T>
-std::map<std::string, T> getSettingsAsMap(std::string const &settingGroup) {
+template <typename T> std::map<std::string, T> getSettingsAsMap(std::string const &settingGroup) {
   std::map<std::string, T> settingsMap;
   QSettings settings;
   settings.beginGroup(QString::fromStdString(settingGroup));
@@ -52,11 +50,9 @@ std::map<std::string, T> getSettingsAsMap(std::string const &settingGroup) {
   std::string templateTypeName = typeid(T).name();
   for (auto &settingName : settingNames) {
     if (settingName.endsWith("/type")) {
-      std::string settingTypeName =
-          settings.value(settingName).toString().toStdString();
+      std::string settingTypeName = settings.value(settingName).toString().toStdString();
       if (settingTypeName == templateTypeName) {
-        auto settingValueName =
-            settingName.replace(QString("/type"), QString("/value"));
+        auto settingValueName = settingName.replace(QString("/type"), QString("/value"));
         auto setting = settings.value(settingValueName);
         auto strippedSettingName = settingName.remove(QString("/value"));
         settingsMap[strippedSettingName.toStdString()] = setting.value<T>();
@@ -76,15 +72,11 @@ std::map<std::string, T> getSettingsAsMap(std::string const &settingGroup) {
  * @return void
  *
  */
-template <typename T>
-void setSetting(std::string const &settingGroup, std::string const &settingName,
-                T const &value) {
+template <typename T> void setSetting(std::string const &settingGroup, std::string const &settingName, T const &value) {
   QSettings settings;
   settings.beginGroup(QString::fromStdString(settingGroup));
-  settings.setValue(QString::fromStdString(settingName).append("/value"),
-                    value);
-  settings.setValue(QString::fromStdString(settingName).append("/type"),
-                    typeid(value).name());
+  settings.setValue(QString::fromStdString(settingName).append("/value"), value);
+  settings.setValue(QString::fromStdString(settingName).append("/type"), typeid(value).name());
   settings.endGroup();
 }
 

@@ -32,13 +32,11 @@ namespace DataObjects {
 class DLLExport CoordTransformAffineParser {
 public:
   CoordTransformAffineParser();
-  virtual Mantid::API::CoordTransform *
-  createTransform(Poco::XML::Element *coordTransElement) const;
+  virtual Mantid::API::CoordTransform *createTransform(Poco::XML::Element *coordTransElement) const;
   virtual void setSuccessor(CoordTransformAffineParser *other);
   virtual ~CoordTransformAffineParser() = default;
-  using SuccessorType_sptr =
-      std::shared_ptr<CoordTransformAffineParser>; ///< successor parser
-                                                   ///< shared ptr typedef
+  using SuccessorType_sptr = std::shared_ptr<CoordTransformAffineParser>; ///< successor parser
+                                                                          ///< shared ptr typedef
 protected:
   SuccessorType_sptr m_successor; ///< successor parser
 private:

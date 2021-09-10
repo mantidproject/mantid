@@ -47,8 +47,7 @@ public:
   virtual void setFiniteGeometryFlag(bool) {}
   virtual bool hasValidShape() const = 0;
   virtual IObject *clone() const = 0;
-  virtual IObject *
-  cloneWithMaterial(const Kernel::Material &material) const = 0;
+  virtual IObject *cloneWithMaterial(const Kernel::Material &material) const = 0;
 
   virtual int getName() const = 0;
 
@@ -57,33 +56,26 @@ public:
   // Solid angle
   virtual double solidAngle(const Kernel::V3D &observer) const = 0;
   // Solid angle with a scaling of the object
-  virtual double solidAngle(const Kernel::V3D &observer,
-                            const Kernel::V3D &scaleFactor) const = 0;
+  virtual double solidAngle(const Kernel::V3D &observer, const Kernel::V3D &scaleFactor) const = 0;
   /// Return cached value of axis-aligned bounding box
   virtual const BoundingBox &getBoundingBox() const = 0;
   /// Calculate (or return cached value of) Axis Aligned Bounding box
   /// (DEPRECATED)
-  virtual void getBoundingBox(double &xmax, double &ymax, double &zmax,
-                              double &xmin, double &ymin,
+  virtual void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin,
                               double &zmin) const = 0;
   virtual double volume() const = 0;
 
   virtual int getPointInObject(Kernel::V3D &point) const = 0;
 
-  virtual boost::optional<Kernel::V3D>
-  generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
-                        const size_t) const = 0;
-  virtual boost::optional<Kernel::V3D>
-  generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
-                        const BoundingBox &activeRegion,
-                        const size_t) const = 0;
+  virtual boost::optional<Kernel::V3D> generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                                                             const size_t) const = 0;
+  virtual boost::optional<Kernel::V3D> generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                                                             const BoundingBox &activeRegion, const size_t) const = 0;
 
   virtual detail::ShapeInfo::GeometryShape shape() const = 0;
   virtual const detail::ShapeInfo &shapeInfo() const = 0;
-  virtual void GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
-                             std::vector<Kernel::V3D> &vectors,
-                             double &innerRadius, double &radius,
-                             double &height) const = 0;
+  virtual void GetObjectGeom(detail::ShapeInfo::GeometryShape &type, std::vector<Kernel::V3D> &vectors,
+                             double &innerRadius, double &radius, double &height) const = 0;
   // Rendering
   virtual void draw() const = 0;
   virtual void initDraw() const = 0;

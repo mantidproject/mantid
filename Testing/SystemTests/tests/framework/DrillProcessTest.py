@@ -25,16 +25,19 @@ app = QApplication(sys.argv)
 
 
 class DrillProcessSANSTest(systemtesting.MantidSystemTest):
+    '''This test runs the same as SANSILLAutoProcessTest::D11_AutoProcess_Test but through DrILL'''
 
     def __init__(self):
         super().__init__()
         config['default.facility'] = 'ILL'
         config['default.instrument'] = 'D11'
+        self.disableChecking = ['Instrument']
         config.appendDataSearchSubDir('ILL/D11/')
 
     def validate(self):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
+        self.disableChecking.append('Instrument')
         return ["out", "D11_AutoProcess_Reference.nxs"]
 
     def editCell(self, row, column, text):
@@ -46,7 +49,7 @@ class DrillProcessSANSTest(systemtesting.MantidSystemTest):
             column (int): column index
             text (str): string to be written in the cell
         """
-        columnIndex = self.drill.table.columns.index(column)
+        columnIndex = self.drill.table._columns.index(column)
         y = self.drill.table.rowViewportPosition(row) + 5
         x = self.drill.table.columnViewportPosition(columnIndex) + 5
         QTest.mouseClick(self.drill.table.viewport(),
@@ -118,7 +121,7 @@ class DrillProcessSANSTest(systemtesting.MantidSystemTest):
         self.editSettings({"SensitivityMaps": "sens-lamp.nxs",
                            "BeamRadius": "0.05,0.05,0.05",
                            "CalculateResolution": "MildnerCarpenter",
-                           "TransmissionBeamRadius": "0.05"})
+                           "TransmissionBeamRadius": "0.2"})
 
         self.editCell(0, "SampleRuns", sampleRuns[0])
         self.editCell(0, "SampleTransmissionRuns", sampleTransmissionRuns[0])

@@ -73,9 +73,8 @@ public:
     TS_ASSERT_EQUALS(bf.bin(5), 1);
     TS_ASSERT_EQUALS(bf.bin(15), 2);
     TS_ASSERT_EQUALS(bf.bin(95), 10);
-    TS_ASSERT_EQUALS(
-        bf.bin(101),
-        10); // Last tiny bin of size 2 is folded into the one before
+    TS_ASSERT_EQUALS(bf.bin(101),
+                     10); // Last tiny bin of size 2 is folded into the one before
     TS_ASSERT_EQUALS(bf.bin(105), 11);
     TS_ASSERT_EQUALS(bf.bin(195), 11);
     TS_ASSERT_EQUALS(bf.bin(205), 12);

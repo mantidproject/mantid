@@ -19,13 +19,11 @@ namespace CustomInterfaces {
 
 /** ALCBaselineModellingPresenter : Presenter for ALC Baseline Modelling step
  */
-class MANTIDQT_MUONINTERFACE_DLL ALCBaselineModellingPresenter
-    : public QObject {
+class MANTIDQT_MUONINTERFACE_DLL ALCBaselineModellingPresenter : public QObject {
   Q_OBJECT
 
 public:
-  ALCBaselineModellingPresenter(IALCBaselineModellingView *view,
-                                IALCBaselineModellingModel *model);
+  ALCBaselineModellingPresenter(IALCBaselineModellingView *view, IALCBaselineModellingModel *model);
 
   void initialize();
 

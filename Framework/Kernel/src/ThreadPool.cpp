@@ -41,13 +41,11 @@ namespace Kernel {
  *        automatic progress reporting will be handled by the thread pool.
  *        NOTE: The ThreadPool destructor will delete this.
  */
-ThreadPool::ThreadPool(ThreadScheduler *scheduler, size_t numThreads,
-                       ProgressBase *prog)
-    : m_scheduler(std::unique_ptr<ThreadScheduler>(scheduler)),
-      m_started(false), m_prog(std::unique_ptr<ProgressBase>(prog)) {
+ThreadPool::ThreadPool(ThreadScheduler *scheduler, size_t numThreads, ProgressBase *prog)
+    : m_scheduler(std::unique_ptr<ThreadScheduler>(scheduler)), m_started(false),
+      m_prog(std::unique_ptr<ProgressBase>(prog)) {
   if (!m_scheduler)
-    throw std::invalid_argument(
-        "NULL ThreadScheduler passed to ThreadPool constructor.");
+    throw std::invalid_argument("NULL ThreadScheduler passed to ThreadPool constructor.");
 
   if (numThreads == 0) {
     // Uses Poco to find how many cores there are.
@@ -75,8 +73,7 @@ size_t ThreadPool::getNumPhysicalCores() {
   int physicalCores = PARALLEL_GET_MAX_THREADS;
 #endif
 
-  auto maxCores =
-      Kernel::ConfigService::Instance().getValue<int>("MultiThreaded.MaxCores");
+  auto maxCores = Kernel::ConfigService::Instance().getValue<int>("MultiThreaded.MaxCores");
 
   if (!maxCores.is_initialized())
     return std::min(maxCores.get_value_or(0), physicalCores);
@@ -108,8 +105,7 @@ void ThreadPool::start(double waitSec) {
     // Create the thread
     auto thread = std::make_unique<Poco::Thread>(name.str());
     // Make the runnable object and run it
-    auto runnable = std::make_unique<ThreadPoolRunnable>(i, m_scheduler.get(),
-                                                         m_prog.get(), waitSec);
+    auto runnable = std::make_unique<ThreadPoolRunnable>(i, m_scheduler.get(), m_prog.get(), waitSec);
     thread->start(*runnable);
     m_threads.emplace_back(std::move(thread));
     m_runnables.emplace_back(std::move(runnable));

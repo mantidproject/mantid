@@ -18,8 +18,7 @@ namespace DataHandling {
  * @param params A struct containing all the parameters to be set.
  * @returns A map containing the relevent failure messages, if any.
  */
-ValidationErrors
-ReadMaterial::validateInputs(const MaterialParameters &params) {
+ValidationErrors ReadMaterial::validateInputs(const MaterialParameters &params) {
   ValidationErrors result;
   const bool chemicalSymbol{!params.chemicalSymbol.empty()};
   const bool atomicNumber{params.atomicNumber != 0};
@@ -34,8 +33,7 @@ ReadMaterial::validateInputs(const MaterialParameters &params) {
                                      "no ChemicalFormula or AtomicNumber is "
                                      "given.";
     }
-    if (isEmpty(params.attenuationXSection) &&
-        params.attenuationProfileFileName.empty()) {
+    if (isEmpty(params.attenuationXSection) && params.attenuationProfileFileName.empty()) {
       result["AttenuationXSection"] = "The cross section must be specified "
                                       "when no ChemicalFormula or AtomicNumber "
                                       "is given.";
@@ -45,51 +43,39 @@ ReadMaterial::validateInputs(const MaterialParameters &params) {
                                      "no ChemicalFormula or AtomicNumber is "
                                      "given.";
     }
-    if (isEmpty(params.numberDensity) &&
-        isEmpty(params.numberDensityEffective) &&
-        isEmpty(params.packingFraction)) {
-      result["NumberDensity"] =
-          "The number density or effective number density must "
-          " be specified with a user-defined material";
+    if (isEmpty(params.numberDensity) && isEmpty(params.numberDensityEffective) && isEmpty(params.packingFraction)) {
+      result["NumberDensity"] = "The number density or effective number density must "
+                                " be specified with a user-defined material";
     }
 
   } else if (chemicalSymbol && atomicNumber) {
-    result["AtomicNumber"] =
-        "Cannot specify both ChemicalFormula and AtomicNumber";
+    result["AtomicNumber"] = "Cannot specify both ChemicalFormula and AtomicNumber";
   }
 
-  if (!isEmpty(params.numberDensity) &&
-      !isEmpty(params.numberDensityEffective) &&
-      !isEmpty(params.packingFraction)) {
+  if (!isEmpty(params.numberDensity) && !isEmpty(params.numberDensityEffective) && !isEmpty(params.packingFraction)) {
     result["NumberDensity"] = "Number Density cannot be determined when "
                               "both the effective number density and "
                               "packing fraction are set. Only two can "
                               "be specified at most.";
   }
 
-  if (isEmpty(params.massDensity) && isEmpty(params.zParameter) &&
-      isEmpty(params.unitCellVolume)) {
+  if (isEmpty(params.massDensity) && isEmpty(params.zParameter) && isEmpty(params.unitCellVolume)) {
     // Checks if only the packing fraction has been specified with no other
     // way of computing the number density or eff. number density
-    if (isEmpty(params.numberDensity) &&
-        isEmpty(params.numberDensityEffective) &&
-        !isEmpty(params.packingFraction)) {
-      result["PackingFraction"] =
-          "Cannot determine number density from only "
-          " the packing fraction. The number density "
-          " or effective number density is also needed.";
+    if (isEmpty(params.numberDensity) && isEmpty(params.numberDensityEffective) && !isEmpty(params.packingFraction)) {
+      result["PackingFraction"] = "Cannot determine number density from only "
+                                  " the packing fraction. The number density "
+                                  " or effective number density is also needed.";
     }
   }
 
   // If these are all set, then number density and eff. number density can be
   // calculated. In this case, make sure the packing frac isn't set
-  if (!isEmpty(params.massDensity) && !isEmpty(params.zParameter) &&
-      !isEmpty(params.unitCellVolume)) {
+  if (!isEmpty(params.massDensity) && !isEmpty(params.zParameter) && !isEmpty(params.unitCellVolume)) {
     if (!isEmpty(params.packingFraction)) {
-      result["PackingFraction"] =
-          "Cannot set packing fraction when both the number density "
-          "and effective number density are determined from "
-          "the mass density and cell volume + zParameter.";
+      result["PackingFraction"] = "Cannot set packing fraction when both the number density "
+                                  "and effective number density are determined from "
+                                  "the mass density and cell volume + zParameter.";
     }
   }
 
@@ -97,18 +83,16 @@ ReadMaterial::validateInputs(const MaterialParameters &params) {
   // density is set
   if (!isEmpty(params.massDensity)) {
     if (!isEmpty(params.numberDensityEffective)) {
-      result["EffectiveNumberDensity"] =
-          "Cannot set effective number density when the mass density "
-          "is specified. The value specified will be overwritten "
-          "because it will be computed from the mass density.";
+      result["EffectiveNumberDensity"] = "Cannot set effective number density when the mass density "
+                                         "is specified. The value specified will be overwritten "
+                                         "because it will be computed from the mass density.";
     }
   }
 
   // Bounds check the packing fraction number [0, 2)
   if (!isEmpty(params.packingFraction)) {
     if (params.packingFraction >= 2.0) {
-      result["PackingFraction"] =
-          "Cannot have a packing fraction larger than 2";
+      result["PackingFraction"] = "Cannot have a packing fraction larger than 2";
     } else if (params.packingFraction < 0.0) {
       result["PackingFraction"] = "Cannot have a packing fraction less than 0";
     }
@@ -119,8 +103,7 @@ ReadMaterial::validateInputs(const MaterialParameters &params) {
 
   if (!isEmpty(params.zParameter)) {
     if (isEmpty(params.unitCellVolume)) {
-      result["UnitCellVolume"] =
-          "UnitCellVolume must be provided with ZParameter";
+      result["UnitCellVolume"] = "UnitCellVolume must be provided with ZParameter";
     }
   }
   return result;
@@ -142,13 +125,10 @@ void ReadMaterial::setMaterialParameters(const MaterialParameters &params) {
       massDensity = params.mass / params.volume;
   }
 
-  setNumberDensity(massDensity, params.numberDensity,
-                   params.numberDensityEffective, params.packingFraction,
-                   params.numberDensityUnit, params.zParameter,
-                   params.unitCellVolume);
-  setScatteringInfo(params.coherentXSection, params.incoherentXSection,
-                    params.attenuationXSection, params.scatteringXSection,
-                    params.attenuationProfileFileName,
+  setNumberDensity(massDensity, params.numberDensity, params.numberDensityEffective, params.packingFraction,
+                   params.numberDensityUnit, params.zParameter, params.unitCellVolume);
+  setScatteringInfo(params.coherentXSection, params.incoherentXSection, params.attenuationXSection,
+                    params.scatteringXSection, params.attenuationProfileFileName,
                     params.xRayAttenuationProfileFileName);
 }
 
@@ -161,8 +141,7 @@ std::unique_ptr<Kernel::Material> ReadMaterial::buildMaterial() {
   return std::make_unique<Kernel::Material>(builder.build());
 }
 
-void ReadMaterial::setMaterial(const std::string &chemicalSymbol,
-                               const int atomicNumber, const int massNumber) {
+void ReadMaterial::setMaterial(const std::string &chemicalSymbol, const int atomicNumber, const int massNumber) {
   if (!chemicalSymbol.empty()) {
     builder.setFormula(chemicalSymbol);
   } else if (atomicNumber != 0) {
@@ -171,10 +150,9 @@ void ReadMaterial::setMaterial(const std::string &chemicalSymbol,
   }
 }
 
-void ReadMaterial::setNumberDensity(
-    const double rho_m, const double rho, const double rho_eff,
-    const double pFrac, Kernel::MaterialBuilder::NumberDensityUnit rhoUnit,
-    const double zParameter, const double unitCellVolume) {
+void ReadMaterial::setNumberDensity(const double rho_m, const double rho, const double rho_eff, const double pFrac,
+                                    Kernel::MaterialBuilder::NumberDensityUnit rhoUnit, const double zParameter,
+                                    const double unitCellVolume) {
   if (!isEmpty(rho_m))
     builder.setMassDensity(rho_m);
 
@@ -195,11 +173,9 @@ void ReadMaterial::setNumberDensity(
   }
 }
 
-void ReadMaterial::setScatteringInfo(
-    double coherentXSection, double incoherentXSection,
-    double attenuationXSection, double scatteringXSection,
-    std::string attenuationProfileFileName,
-    std::string xRayAttenuationProfileFileName) {
+void ReadMaterial::setScatteringInfo(double coherentXSection, double incoherentXSection, double attenuationXSection,
+                                     double scatteringXSection, std::string attenuationProfileFileName,
+                                     std::string xRayAttenuationProfileFileName) {
   builder.setCoherentXSection(coherentXSection);       // in barns
   builder.setIncoherentXSection(incoherentXSection);   // in barns
   builder.setAbsorptionXSection(attenuationXSection);  // in barns
@@ -208,8 +184,6 @@ void ReadMaterial::setScatteringInfo(
   builder.setXRayAttenuationProfileFilename(xRayAttenuationProfileFileName);
 }
 
-bool ReadMaterial::isEmpty(const double toCheck) {
-  return std::abs((toCheck - EMPTY_DBL()) / (EMPTY_DBL())) < 1e-8;
-}
+bool ReadMaterial::isEmpty(const double toCheck) { return std::abs((toCheck - EMPTY_DBL()) / (EMPTY_DBL())) < 1e-8; }
 } // namespace DataHandling
 } // namespace Mantid

@@ -47,9 +47,7 @@ public:
   /**
    * Removes the sample workspace from ADS.
    */
-  void tearDown() override {
-    AnalysisDataService::Instance().remove(m_sampleWorkspace);
-  }
+  void tearDown() override { AnalysisDataService::Instance().remove(m_sampleWorkspace); }
 
   /**
    * Tests creation and initialisation of the algorithm.
@@ -66,17 +64,14 @@ public:
   void test_removeAllLogs() {
     // Get the sample workspace from ADS
     MatrixWorkspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            m_sampleWorkspace));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_sampleWorkspace));
 
     // Make sure it has log data
     TS_ASSERT_DIFFERS(output->run().getLogData().size(), 0);
 
     // Remove it's logs
     TS_ASSERT_THROWS_NOTHING(m_remover.initialize());
-    TS_ASSERT_THROWS_NOTHING(
-        m_remover.setPropertyValue("Workspace", m_sampleWorkspace));
+    TS_ASSERT_THROWS_NOTHING(m_remover.setPropertyValue("Workspace", m_sampleWorkspace));
     TS_ASSERT_THROWS_NOTHING(m_remover.execute());
     TS_ASSERT(m_remover.isExecuted());
 
@@ -90,29 +85,23 @@ public:
   void test_keepLogs() {
     // Get the sample workspace from ADS
     MatrixWorkspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            m_sampleWorkspace));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_sampleWorkspace));
 
     // Make sure it has log data
     TS_ASSERT_DIFFERS(output->run().getLogData().size(), 0);
 
     // Remove it's logs
     TS_ASSERT_THROWS_NOTHING(m_remover.initialize());
-    TS_ASSERT_THROWS_NOTHING(
-        m_remover.setPropertyValue("Workspace", m_sampleWorkspace));
-    TS_ASSERT_THROWS_NOTHING(
-        m_remover.setPropertyValue("KeepLogs", "Ei, scan_index"));
+    TS_ASSERT_THROWS_NOTHING(m_remover.setPropertyValue("Workspace", m_sampleWorkspace));
+    TS_ASSERT_THROWS_NOTHING(m_remover.setPropertyValue("KeepLogs", "Ei, scan_index"));
     TS_ASSERT_THROWS_NOTHING(m_remover.execute());
     TS_ASSERT(m_remover.isExecuted());
 
     // Ensure it has the correct log data
     TS_ASSERT_DIFFERS(output->run().getLogData().size(), 0);
 
-    TS_ASSERT_THROWS(output->run().getLogData("some_prop"),
-                     const std::runtime_error &);
-    TS_ASSERT_THROWS(output->run().getLogData("T0"),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(output->run().getLogData("some_prop"), const std::runtime_error &);
+    TS_ASSERT_THROWS(output->run().getLogData("T0"), const std::runtime_error &);
 
     TS_ASSERT_THROWS_NOTHING(output->run().getLogData("Ei"));
     TS_ASSERT_THROWS_NOTHING(output->run().getLogData("scan_index"));
@@ -124,8 +113,7 @@ private:
    */
   void createSampleWorkspace() {
     // Create the workspace
-    MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::create2DWorkspace(10, 100);
+    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspace(10, 100);
 
     // Add some log entries to it
     std::vector<DateAndTime> times;
@@ -155,8 +143,7 @@ private:
     ws->mutableRun().addProperty("T0", 42.);
 
     // Store it in ADS
-    TS_ASSERT_THROWS_NOTHING(
-        AnalysisDataService::Instance().add(m_sampleWorkspace, ws));
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(m_sampleWorkspace, ws));
   }
 
   RemoveLogs m_remover;

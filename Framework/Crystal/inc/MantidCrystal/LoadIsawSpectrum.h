@@ -28,13 +28,9 @@ public:
 
   /// Algorithm's version for identification
   int version() const override { return 1; };
-  const std::vector<std::string> seeAlso() const override {
-    return {"SaveIsawPeaks", "SaveIsawUB"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"SaveIsawPeaks", "SaveIsawUB"}; }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "Crystal\\DataHandling;DataHandling\\Text";
-  }
+  const std::string category() const override { return "Crystal\\DataHandling;DataHandling\\Text"; }
 
 private:
   /// Initialise the properties
@@ -42,8 +38,7 @@ private:
   /// Run the algorithm
   void exec() override;
 
-  double spectrumCalc(double TOF, int iSpec,
-                      std::vector<std::vector<double>> time,
+  double spectrumCalc(double TOF, int iSpec, std::vector<std::vector<double>> time,
                       std::vector<std::vector<double>> spectra, size_t id);
   void getInstrument3WaysInit(Algorithm *alg);
   Geometry::Instrument_const_sptr getInstrument3Ways(Algorithm *alg);

@@ -34,15 +34,12 @@ void SaveSampleEnvironmentAndShape::init() {
   auto wsValidator = std::make_shared<InstrumentValidator>();
 
   // input workspace
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                            Direction::Input, wsValidator),
-      "The name of the workspace containing the environment to save ");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, wsValidator),
+                  "The name of the workspace containing the environment to save ");
 
   // Environment file
   const std::vector<std::string> extensions{".stl", ".3mf"};
-  declareProperty(std::make_unique<FileProperty>(
-                      "Filename", "", FileProperty::Save, extensions),
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Save, extensions),
                   "The path name of the file to save");
 
   // scale to use for stl
@@ -50,8 +47,7 @@ void SaveSampleEnvironmentAndShape::init() {
 }
 
 void SaveSampleEnvironmentAndShape::mergeSampleEnvironmentIntoSingleMesh(
-    const MeshObject &sampleShape,
-    const std::vector<const Geometry::MeshObject *> &environmentPieces) {
+    const MeshObject &sampleShape, const std::vector<const Geometry::MeshObject *> &environmentPieces) {
 
   if (environmentPieces.size() > 0) {
 
@@ -98,16 +94,13 @@ void SaveSampleEnvironmentAndShape::exec() {
 
     // get the shape the container of the environment and add it to the vector
     bool environmentValid = true;
-    environmentPieces.emplace_back(
-        &toMeshObject(environment.getContainer().getShape()));
-    environmentValid =
-        environmentValid && environmentPieces[0]->hasValidShape();
+    environmentPieces.emplace_back(&toMeshObject(environment.getContainer().getShape()));
+    environmentValid = environmentValid && environmentPieces[0]->hasValidShape();
     numVertices += environmentPieces[0]->numberOfVertices();
     numTriangles += (environmentPieces[0]->numberOfTriangles() * 3);
 
     // get the shapes of the components and add them to the vector
-    for (size_t i = 1; i < numElements;
-         ++i) { // start at 1 because element 0 is container
+    for (size_t i = 1; i < numElements; ++i) { // start at 1 because element 0 is container
       const MeshObject *temp = &toMeshObject(environment.getComponent(i));
       numVertices += temp->numberOfVertices();
       numTriangles += (temp->numberOfTriangles() * 3);
@@ -137,8 +130,7 @@ void SaveSampleEnvironmentAndShape::exec() {
   } else {
 #ifdef ENABLE_LIB3MF
     Mantid3MFFileIO Mesh3MF;
-    Mesh3MF.writeMeshObjects(environmentPieces,
-                             MeshObject_const_sptr(&sampleShape), scaleType);
+    Mesh3MF.writeMeshObjects(environmentPieces, MeshObject_const_sptr(&sampleShape), scaleType);
     Mesh3MF.saveFile(filename);
 #else
     throw std::runtime_error("3MF format not supported on this platform");
@@ -155,10 +147,8 @@ void SaveSampleEnvironmentAndShape::exec() {
 void SaveSampleEnvironmentAndShape::addMeshToVector(const MeshObject &mesh) {
   auto vertices = mesh.getV3Ds();
   auto triangles = mesh.getTriangles();
-  m_vertices.insert(std::end(m_vertices), std::begin(vertices),
-                    std::end(vertices));
-  m_triangle.insert(std::end(m_triangle), std::begin(triangles),
-                    std::end(triangles));
+  m_vertices.insert(std::end(m_vertices), std::begin(vertices), std::end(vertices));
+  m_triangle.insert(std::end(m_triangle), std::begin(triangles), std::end(triangles));
 }
 
 /**
@@ -171,20 +161,16 @@ void SaveSampleEnvironmentAndShape::addMeshToVector(const MeshObject &mesh) {
  *
  * @return size_t the new offset value to use if this needs to be used again.
  */
-size_t SaveSampleEnvironmentAndShape::addMeshToVector(
-    const Mantid::Geometry::MeshObject &mesh, size_t offset) {
+size_t SaveSampleEnvironmentAndShape::addMeshToVector(const Mantid::Geometry::MeshObject &mesh, size_t offset) {
   auto vertices = mesh.getV3Ds();
   auto triangles = mesh.getTriangles();
 
   // increase the triangles by the offset, so they refer to the new index of
   // the vertices
-  std::transform(std::begin(triangles), std::end(triangles),
-                 std::begin(triangles),
+  std::transform(std::begin(triangles), std::end(triangles), std::begin(triangles),
                  [&offset](uint32_t &val) { return val + uint32_t(offset); });
-  m_vertices.insert(std::end(m_vertices), std::begin(vertices),
-                    std::end(vertices));
-  m_triangle.insert(std::end(m_triangle), std::begin(triangles),
-                    std::end(triangles));
+  m_vertices.insert(std::end(m_vertices), std::begin(vertices), std::end(vertices));
+  m_triangle.insert(std::end(m_triangle), std::begin(triangles), std::end(triangles));
 
   // add the newly added vertices to the offset
   return offset += vertices.size();
@@ -203,8 +189,7 @@ const Geometry::MeshObject &toMeshObject(const Geometry::IObject &object) {
   } catch (const std::bad_cast &) {
     // if bad_cast is thrown the sample or environment is not a mesh_object, and
     // therefore cannot be saved as an STL
-    throw std::invalid_argument(
-        "Attempted to Save out non mesh based Sample or Environment");
+    throw std::invalid_argument("Attempted to Save out non mesh based Sample or Environment");
   }
 }
 } // namespace DataHandling

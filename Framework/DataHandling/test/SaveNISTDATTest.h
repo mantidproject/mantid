@@ -22,8 +22,7 @@ public:
 
     Load loader;
     loader.initialize();
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setPropertyValue("Filename", "saveNISTDAT_data.nxs"));
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", "saveNISTDAT_data.nxs"));
     loader.setPropertyValue("OutputWorkspace", "SaveNISTDAT_Input");
     TS_ASSERT_THROWS_NOTHING(loader.execute());
     SaveNISTDAT writer;

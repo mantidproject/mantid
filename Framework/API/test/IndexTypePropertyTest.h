@@ -17,24 +17,20 @@ class IndexTypePropertyTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static IndexTypePropertyTest *createSuite() {
-    return new IndexTypePropertyTest();
-  }
+  static IndexTypePropertyTest *createSuite() { return new IndexTypePropertyTest(); }
   static void destroySuite(IndexTypePropertyTest *suite) { delete suite; }
 
   void testConstruct() {
-    TS_ASSERT_THROWS_NOTHING(
-        (IndexTypeProperty("IndexType", IndexType::SpectrumNum)));
+    TS_ASSERT_THROWS_NOTHING((IndexTypeProperty("IndexType", static_cast<int>(IndexType::SpectrumNum))));
   }
 
   void testContructorFailsWithInvalidIndexType() {
-    TS_ASSERT_THROWS(IndexTypeProperty("IndexType", 0),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(IndexTypeProperty("IndexType", 0), const std::invalid_argument &);
   }
 
   void testSingleIndexTypeAutomaticallySet() {
-    IndexTypeProperty prop1("IndexType", IndexType::SpectrumNum);
-    IndexTypeProperty prop2("IndexType", IndexType::WorkspaceIndex);
+    IndexTypeProperty prop1("IndexType", static_cast<int>(IndexType::SpectrumNum));
+    IndexTypeProperty prop2("IndexType", static_cast<int>(IndexType::WorkspaceIndex));
 
     TS_ASSERT_EQUALS(prop1.value(), "SpectrumNumber");
     TS_ASSERT_EQUALS(prop2.value(), "WorkspaceIndex");
@@ -42,28 +38,26 @@ public:
 
   void testAllowedValuesCorrectlySet() {
     IndexTypeProperty prop("IndexType",
-                           IndexType::SpectrumNum | IndexType::WorkspaceIndex);
+                           static_cast<int>(IndexType::SpectrumNum) | static_cast<int>(IndexType::WorkspaceIndex));
     auto allowed = prop.allowedValues();
 
     TS_ASSERT_EQUALS(allowed.size(), 2);
-    TS_ASSERT(std::find(allowed.cbegin(), allowed.cend(), "SpectrumNumber") !=
-              allowed.cend());
-    TS_ASSERT(std::find(allowed.cbegin(), allowed.cend(), "WorkspaceIndex") !=
-              allowed.cend());
+    TS_ASSERT(std::find(allowed.cbegin(), allowed.cend(), "SpectrumNumber") != allowed.cend());
+    TS_ASSERT(std::find(allowed.cbegin(), allowed.cend(), "WorkspaceIndex") != allowed.cend());
   }
 
   void testAllowedTypesCorrectlySet() {
     IndexTypeProperty prop("IndexType",
-                           IndexType::SpectrumNum | IndexType::WorkspaceIndex);
+                           static_cast<int>(IndexType::SpectrumNum) | static_cast<int>(IndexType::WorkspaceIndex));
     auto allowed = prop.allowedTypes();
 
-    TS_ASSERT(allowed & IndexType::SpectrumNum);
-    TS_ASSERT(allowed & IndexType::WorkspaceIndex);
+    TS_ASSERT(allowed & static_cast<int>(IndexType::SpectrumNum));
+    TS_ASSERT(allowed & static_cast<int>(IndexType::WorkspaceIndex));
   }
 
   void testCorrectTypeReturnedWhenSetWithString() {
     IndexTypeProperty prop("IndexType",
-                           IndexType::SpectrumNum | IndexType::WorkspaceIndex);
+                           static_cast<int>(IndexType::SpectrumNum) | static_cast<int>(IndexType::WorkspaceIndex));
 
     prop = "SpectrumNumber";
 
@@ -75,7 +69,7 @@ public:
   }
 
   void testCorrectTypeReturnedWhenSetWithIndexType() {
-    IndexTypeProperty prop("IndexType", IndexType::SpectrumNum);
+    IndexTypeProperty prop("IndexType", static_cast<int>(IndexType::SpectrumNum));
 
     prop = IndexType::SpectrumNum;
 
@@ -88,7 +82,6 @@ public:
 
   void testGeneratePropertyName() {
     std::string propName = "InputWorkspace";
-    TS_ASSERT_EQUALS(propName + "IndexType",
-                     IndexTypeProperty::generatePropertyName(propName));
+    TS_ASSERT_EQUALS(propName + "IndexType", IndexTypeProperty::generatePropertyName(propName));
   }
 };

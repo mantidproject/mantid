@@ -2,13 +2,13 @@
 
 .. role:: xml(literal)
    :class: highlight
-   
+
 Reduction for ORNL SANS
 =======================
 
 
 This document explains how to use Mantid to perform reduction of ORNL SANS data.
-Information about the underlying Mantid algorithms involved can be found in the 
+Information about the underlying Mantid algorithms involved can be found in the
 :ref:`SANSReduction <algm-SANSReduction>` algorithm documentation.
 For HFIR reduction specifically, you can also see the :ref:`HFIRSANSReduction <algm-HFIRSANSReduction>` algorithm documentation.
 
@@ -127,8 +127,8 @@ Options for finding the beam center
 
 ``BeamMonitorNormalization(reference_flux_file)``
     [**EQSANS only**] Specifies that we want to normalize by the beam monitor, using the specified reference flux file.
-    
-    
+
+
 .. _`Normalization options`:
 
 Normalization options
@@ -157,7 +157,7 @@ Absolute Normalization
     Tells the reducer to use the direct beam method to compute the absolute scale factor. The direct_beam parameter is a valid file path to the direct beam data file. attenuator_trans is the attenuator transmission. The sample_thickness should be given in cm. If apply_sensitivity=True, the sensitivity correction will be applied to the direct beam data before the absolute scale factor is computed.
 
     The absolute cross-section in 1/cm is computed after all corrections including the transmission correction have been applied to the sample data. It is given by:
-    
+
         :math:`d\Sigma/d\Omega = \frac{I(Q)}{KD}`
 
     where *D* is the sample thickness in *cm* and *K* is given by
@@ -199,7 +199,7 @@ Pixel masking
     Masks the given detector IDs.
 
 ``MaskDetectorSide(side_to_mask=None)``
-    Masks a detector plane. Choices are 'Front', 'Back', and 'None'. 
+    Masks a detector plane. Choices are 'Front', 'Back', and 'None'.
 
 ``MaskComponent(component_name)``
     Masks the given component_name. See the instrument IDF for the correct component name. Useful for BIOSANS to mask the 'wing_detector'.
@@ -254,13 +254,13 @@ Solid angle correction
         :math:`\sigma_{i'(x,y)} = \frac{\sigma_{I(x,y)}}{|\cos^3(2\theta)|}`
 
     If ``detector_tubes`` is selected, the correction is calculated according to a tube geometry. The cosine term above then becomes:
-    
+
         :math:`\cos^3(2\theta) \rightarrow \cos^2(2\theta) \cos(\alpha)`
 
     where :math:`\alpha`: is the angle between the sample-to-pixel vector and its projection on the X-Z plane.
 
     ``detector_wing=True`` is used only for BioSANS wing detector.
-    
+
 .. figure:: /images/sans_solid_angle_correction.png
    :figwidth: 10 cm
    :align: right
@@ -290,7 +290,7 @@ Transmission correction
         :math:`T=\frac{\sum_{i; \ d(i,j)<R} \sum_j{\frac{I_{sample}(i,j)}{T_{sample}}}}{\sum_{i; \ d(i,j)<R} \sum_j{\frac{I_{beam}(i,j)}{T_{beam}}}}`
 
     where :math:`I_{sample}` and :math:`I_{beam}` are the pixel counts for the sample data set and the direct beam data set, respectively. The sums for each data set runs only over the pixels within a distance ``R=beam_radium`` of the beam center. :math:`T_{sample}` and :math:`T_{sample}` are the counting times for each of the two data sets. If the user chose to normalize the data using the beam monitor when setting up the reduction process, the beam monitor will be used to normalize the sample and direct beam data sets instead of the timer.
-    
+
     If ``use_sample_dc`` is set to True, the dark current data that was chosen to be subtracted from the sample data will also be subtracted from the flood data.
 
     Once the transmission is calculated, it is applied to the input data set in the same way as described for ``SetTransmission()``.
@@ -317,7 +317,7 @@ Transmission correction
 
 ``SetTransmissionBeamCenter(x, y)``
     Sets the beam center position to be used when applying the transmission correction. The beam center position of the sample data is otherwise used.
-    
+
 ``TransmissionDirectBeamCenter(datafile)``
     Specifies a direct beam data file to use to determine a beam center to use when applying the transmission correction. The beam center position of the sample data is otherwise used.
 
@@ -334,7 +334,7 @@ Background subtraction
 
 ``NoBckTransmission()``
     Specifies that we do not want a transmission correction for the background.
-    
+
 ``SetBckTransmission(trans, error, theta_dependent=True)``
     Sets the background transmission.
 
@@ -352,7 +352,7 @@ Background subtraction
 
 ``SetBckTransmissionBeamCenter(x, y)``
     Similar to ``SetTransmissionBeamCenter``, sets the beam center position to be used when applying the transmission correction. The beam center position of the background data is otherwise used.
-    
+
 ``BckTransmissionDirectBeamCenter(datafile)``
     Similar to ``TransmissionDirectBeamCenter``,  specifies a direct beam data file to use to determine a beam center to use when applying the transmission correction. The beam center position of the background data is otherwise used.
 
@@ -404,15 +404,15 @@ Wedge calculation is done as part of the azimuthal averaging algorithm. The imag
    :figwidth: 10 cm
    :align: right
    :alt: Wedge definition.
-    
+
 ``SetWedges(number_of_wedges=2, wedge_angle=30.0, wedge_offset=0.0)``
     Specifies I(q) wedges to compute.
-    
+
     - ``number_of_wedges``: number of wedges to calculate
     - ``wedge_angle``: opening angle of each wedge, in degrees
     - ``wedge_offset``: angular offset relative to the x-axis, defining the first wedge.
-    
-    
+
+
 .. _`Data stitching`:
 
 Data Stitching
@@ -429,7 +429,7 @@ In the process of scaling two data sets, all the points of the lower Q set with 
 
 ``Stitch(data_list=[], q_min=None, q_max=None, output_workspace=None, scale=None, save_output=False)``
     Stitches a set of SANS data sets
-    
+
     - ``data_list``: List of workspaces to stitch.
     - ``q_min``: Minimum Q-value of the overlap between two consecutive data sets. The q_min argument must be an array when stitching more than two data sets. The length of the array should be 1 less than the number of data sets.
     - ``q_max``: Maximum Q-value of the overlap between two consecutive data sets (must be an array for more than two data sets). The q_max argument must be an array when stitching more than two data sets. The length of the array should be 1 less than the number of data sets.
@@ -465,10 +465,10 @@ General commands
 
 ``ResetWavelength()``
     Resets the wavelength to the value found in the data file.
-    
+
 ``DivideByThickness(thickness=1.0)``
     Specifies a thickness to normalize the output I(q) by, in cm.
-    
+
 ``PerformFlightPathCorrection(do_correction=True)``
     Specifies that we want to perform the flight path correction.
 

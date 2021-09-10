@@ -35,7 +35,7 @@ Usage
 
 Output:
 
-.. testoutput:: DeleteLogExample 
+.. testoutput:: DeleteLogExample
 
     Log is present before deletion: True
     Log is present after deletion: False

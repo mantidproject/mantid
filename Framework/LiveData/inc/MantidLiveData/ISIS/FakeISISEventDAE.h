@@ -24,17 +24,11 @@ public:
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "DataHandling\\DataAcquisition";
-  }
-  const std::vector<std::string> seeAlso() const override {
-    return {"FakeISISHistoDAE"};
-  }
+  const std::string category() const override { return "DataHandling\\DataAcquisition"; }
+  const std::vector<std::string> seeAlso() const override { return {"FakeISISHistoDAE"}; }
 
   /// Algorithm's summary
-  const std::string summary() const override {
-    return "Simulates ISIS event DAE.";
-  }
+  const std::string summary() const override { return "Simulates ISIS event DAE."; }
 
 private:
   void init() override;

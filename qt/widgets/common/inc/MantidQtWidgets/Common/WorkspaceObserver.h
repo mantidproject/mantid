@@ -45,33 +45,26 @@ class EXPORT_OPT_MANTIDQT_COMMON ObserverCallback : public QObject {
   Q_OBJECT
 
 public:
-  ObserverCallback(WorkspaceObserver *observer)
-      : QObject(nullptr), m_observer(observer) {}
+  ObserverCallback(WorkspaceObserver *observer) : QObject(nullptr), m_observer(observer) {}
 
 signals:
   /// Delete signal handler
-  void preDeleteRequested(const std::string &name,
-                          Mantid::API::Workspace_sptr workspace);
+  void preDeleteRequested(const std::string &name, Mantid::API::Workspace_sptr workspace);
   void postDeleteRequested(const std::string &name);
-  void addRequested(const std::string &name,
-                    Mantid::API::Workspace_sptr workspace);
-  void afterReplaced(const std::string &name,
-                     Mantid::API::Workspace_sptr workspace);
+  void addRequested(const std::string &name, Mantid::API::Workspace_sptr workspace);
+  void afterReplaced(const std::string &name, Mantid::API::Workspace_sptr workspace);
   void renamed(const std::string &oldName, const std::string &newName);
   void adsCleared();
 
 private slots:
   /// Pre Delete slot
-  void handlePreDelete(const std::string &name,
-                       Mantid::API::Workspace_sptr workspace);
+  void handlePreDelete(const std::string &name, Mantid::API::Workspace_sptr workspace);
   /// Post Delete slot
   void handlePostDelete(const std::string &name);
   /// Add slot
-  void handleAdd(const std::string &name,
-                 Mantid::API::Workspace_sptr workspace);
+  void handleAdd(const std::string &name, Mantid::API::Workspace_sptr workspace);
   /// Replace slot
-  void handleAfterReplace(const std::string &name,
-                          Mantid::API::Workspace_sptr workspace);
+  void handleAfterReplace(const std::string &name, Mantid::API::Workspace_sptr workspace);
   /// Rename slot
   void handleRename(const std::string &oldName, const std::string &newName);
   /// Clear slot
@@ -120,8 +113,7 @@ protected:
   @param wsName :: The name of the deleted workspace.
   @param ws :: Pointer to the workspace to be deleted.
   */
-  virtual void preDeleteHandle(const std::string &wsName,
-                               const Mantid::API::Workspace_sptr &ws) {
+  virtual void preDeleteHandle(const std::string &wsName, const Mantid::API::Workspace_sptr &ws) {
     Q_UNUSED(wsName);
     Q_UNUSED(ws);
   }
@@ -137,8 +129,7 @@ protected:
   @param wsName :: The name of the added workspace.
   @param ws :: The shared pointer to the workspace to be added.
   */
-  virtual void addHandle(const std::string &wsName,
-                         const Mantid::API::Workspace_sptr &ws) {
+  virtual void addHandle(const std::string &wsName, const Mantid::API::Workspace_sptr &ws) {
     Q_UNUSED(wsName);
     Q_UNUSED(ws);
   }
@@ -148,8 +139,7 @@ protected:
   @param wsName :: The name of the deleted workspace.
   @param ws :: The shared pointer to the workspace to be deleted.
   */
-  virtual void afterReplaceHandle(const std::string &wsName,
-                                  const Mantid::API::Workspace_sptr &ws) {
+  virtual void afterReplaceHandle(const std::string &wsName, const Mantid::API::Workspace_sptr &ws) {
     Q_UNUSED(wsName);
     Q_UNUSED(ws);
   }
@@ -160,8 +150,7 @@ protected:
   @param oldName :: The old name of a workspace
   @param newName :: The new name of a workspace
   */
-  virtual void renameHandle(const std::string &oldName,
-                            const std::string &newName) {
+  virtual void renameHandle(const std::string &oldName, const std::string &newName) {
     Q_UNUSED(oldName);
     Q_UNUSED(newName);
   }
@@ -179,9 +168,7 @@ protected:
     m_proxy->preDeleteRequested(pNf->objectName(), pNf->object());
   }
   /// Poco::NObserver for DataServise::DeleteNotification.
-  Poco::NObserver<WorkspaceObserver,
-                  Mantid::API::WorkspacePreDeleteNotification>
-      m_preDeleteObserver;
+  Poco::NObserver<WorkspaceObserver, Mantid::API::WorkspacePreDeleteNotification> m_preDeleteObserver;
 
   /** Poco notification handler for DataService::PostDeleteNotification.
   @param pNf :: The pointer to the notification.
@@ -190,9 +177,7 @@ protected:
     m_proxy->postDeleteRequested(pNf->objectName());
   }
   /// Poco::NObserver for DataServise::DeleteNotification.
-  Poco::NObserver<WorkspaceObserver,
-                  Mantid::API::WorkspacePostDeleteNotification>
-      m_postDeleteObserver;
+  Poco::NObserver<WorkspaceObserver, Mantid::API::WorkspacePostDeleteNotification> m_postDeleteObserver;
 
   /** Poco notification handler for DataService::DeleteNotification.
   @param pNf :: The pointer to the notification.
@@ -201,20 +186,16 @@ protected:
     m_proxy->addRequested(pNf->objectName(), pNf->object());
   }
   /// Poco::NObserver for DataServise::AddNotification.
-  Poco::NObserver<WorkspaceObserver, Mantid::API::WorkspaceAddNotification>
-      m_addObserver;
+  Poco::NObserver<WorkspaceObserver, Mantid::API::WorkspaceAddNotification> m_addObserver;
 
   /** Poco notification handler for DataService::AfterReplaceNotification.
   @param pNf :: The pointer to the notification.
   */
-  void
-  _afterReplaceHandle(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf) {
+  void _afterReplaceHandle(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf) {
     m_proxy->afterReplaced(pNf->objectName(), pNf->object());
   }
   /// Poco::NObserver for DataServise::AfterReplaceNotification.
-  Poco::NObserver<WorkspaceObserver,
-                  Mantid::API::WorkspaceAfterReplaceNotification>
-      m_afterReplaceObserver;
+  Poco::NObserver<WorkspaceObserver, Mantid::API::WorkspaceAfterReplaceNotification> m_afterReplaceObserver;
 
   /** Poco notification handler for DataService::RenameNotification.
   @param pNf :: The pointer to the notification.
@@ -223,23 +204,18 @@ protected:
     m_proxy->renamed(pNf->objectName(), pNf->newObjectName());
   }
   /// Poco::NObserver for DataServise::RenameNotification.
-  Poco::NObserver<WorkspaceObserver, Mantid::API::WorkspaceRenameNotification>
-      m_renameObserver;
+  Poco::NObserver<WorkspaceObserver, Mantid::API::WorkspaceRenameNotification> m_renameObserver;
 
   /// Clear notification observer
-  Poco::NObserver<WorkspaceObserver, Mantid::API::ClearADSNotification>
-      m_clearADSObserver;
+  Poco::NObserver<WorkspaceObserver, Mantid::API::ClearADSNotification> m_clearADSObserver;
   /// ADS clear notification
-  void _clearADSHandle(Mantid::API::ClearADSNotification_ptr /*unused*/) {
-    m_proxy->adsCleared();
-  }
+  void _clearADSHandle(Mantid::API::ClearADSNotification_ptr /*unused*/) { m_proxy->adsCleared(); }
 
 private:
   friend class ObserverCallback;
   ObserverCallback *m_proxy;
 
-  bool m_predel_observed, m_postdel_observed, m_add_observed, m_repl_observed,
-      m_rename_observed, m_clr_observed;
+  bool m_predel_observed, m_postdel_observed, m_add_observed, m_repl_observed, m_rename_observed, m_clr_observed;
 };
 
 } // namespace API

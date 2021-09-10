@@ -19,11 +19,9 @@ namespace MantidWidgets {
 namespace Batch {
 class CellDelegate : public QStyledItemDelegate {
 public:
-  explicit CellDelegate(QObject *parent, QTreeView const &view,
-                        FilteredTreeModel const &filterModel,
+  explicit CellDelegate(QObject *parent, QTreeView const &view, FilteredTreeModel const &filterModel,
                         QStandardItemModel const &mainModel);
-  void paint(QPainter *painter, const QStyleOptionViewItem &option,
-             const QModelIndex &index) const override;
+  void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
 
 private:
   QTreeView const &m_view;

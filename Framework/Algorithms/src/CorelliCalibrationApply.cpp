@@ -38,18 +38,16 @@ void CorelliCalibrationApply::init() {
   // [Input, Required, MatrixWorkspace or EventsWorkspace]
   // workspace to which the calibration should be applied
   auto wsValidator = std::make_shared<InstrumentValidator>();
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "Workspace", "", Direction::InOut,
-                      PropertyMode::Mandatory, wsValidator),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("Workspace", "", Direction::InOut,
+                                                                       PropertyMode::Mandatory, wsValidator),
                   "CORELLI workspace to calibrate");
 
   // CalibrationTable
   // [Input, Mandatory, TableWorkspace]
   // workspace resulting from uploading
-  declareProperty(
-      std::make_unique<WorkspaceProperty<TableWorkspace>>(
-          "CalibrationTable", "", Direction::Input, PropertyMode::Mandatory),
-      "TableWorkspace containing calibration table");
+  declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>("CalibrationTable", "", Direction::Input,
+                                                                      PropertyMode::Mandatory),
+                  "TableWorkspace containing calibration table");
 }
 
 /**
@@ -71,8 +69,7 @@ std::map<std::string, std::string> CorelliCalibrationApply::validateInputs() {
   auto refCalTableHeader = CorelliCalibration::calibrationTableColumnNames;
   std::vector<std::string> colnames = calTable->getColumnNames();
   if (colnames.size() != refCalTableHeader.size()) {
-    issues["CalibrationTable"] =
-        "Headers of input calibration table does not match required";
+    issues["CalibrationTable"] = "Headers of input calibration table does not match required";
   }
   for (size_t i = 0; i < colnames.size(); i++) {
     if (colnames[i] != refCalTableHeader[i]) {
@@ -123,8 +120,7 @@ void CorelliCalibrationApply::exec() {
   moveAlg->initialize();
   moveAlg->setProperty("Workspace", wsName);
   for (size_t row_num = 0; row_num < calTable->rowCount(); row_num++) {
-    moveAlg->setProperty("ComponentName",
-                         componentNames->cell<std::string>(row_num));
+    moveAlg->setProperty("ComponentName", componentNames->cell<std::string>(row_num));
     moveAlg->setProperty("X", x_poss->cell<double>(row_num));
     moveAlg->setProperty("Y", y_poss->cell<double>(row_num));
     moveAlg->setProperty("Z", z_poss->cell<double>(row_num));
@@ -167,8 +163,7 @@ void CorelliCalibrationApply::exec() {
     if (abs(rotangs->cell<double>(row_num)) < 1e-8) {
       continue;
     }
-    rotateAlg->setProperty("ComponentName",
-                           componentNames->cell<std::string>(row_num));
+    rotateAlg->setProperty("ComponentName", componentNames->cell<std::string>(row_num));
     rotateAlg->setProperty("X", rotxs->cell<double>(row_num));
     rotateAlg->setProperty("Y", rotys->cell<double>(row_num));
     rotateAlg->setProperty("Z", rotzs->cell<double>(row_num));

@@ -42,8 +42,7 @@ public:
     cloner.setChild(true);
     cloner.initialize();
     // create 2D input workspace
-    Mantid::API::MatrixWorkspace_sptr in =
-        WorkspaceCreationHelper::create2DWorkspace(5, 10);
+    Mantid::API::MatrixWorkspace_sptr in = WorkspaceCreationHelper::create2DWorkspace(5, 10);
     // add instance to variable 'in'
 
     Mantid::API::MatrixWorkspace_sptr out;
@@ -86,29 +85,18 @@ public:
       return;
 
     TS_ASSERT_EQUALS(in->getNumberHistograms(), out->getNumberHistograms());
-    TS_ASSERT_EQUALS(in->getInstrument()->getName(),
-                     out->getInstrument()->getName());
-    TS_ASSERT_EQUALS(in->getInstrument()->isParametrized(),
-                     out->getInstrument()->isParametrized());
+    TS_ASSERT_EQUALS(in->getInstrument()->getName(), out->getInstrument()->getName());
+    TS_ASSERT_EQUALS(in->getInstrument()->isParametrized(), out->getInstrument()->isParametrized());
     for (size_t i = 0; i < out->getNumberHistograms(); i++) {
       const auto &inSpec = in->getSpectrum(i);
       const auto &outSpec = out->getSpectrum(i);
-      TSM_ASSERT_EQUALS("Failed on comparing Spectrum Number for Histogram: " +
-                            boost::lexical_cast<std::string>(i),
+      TSM_ASSERT_EQUALS("Failed on comparing Spectrum Number for Histogram: " + boost::lexical_cast<std::string>(i),
                         inSpec.getSpectrumNo(), outSpec.getSpectrumNo());
-      TSM_ASSERT_EQUALS("Failed on comparing Detector ID for Histogram: " +
-                            boost::lexical_cast<std::string>(i),
-                        *inSpec.getDetectorIDs().begin(),
-                        *outSpec.getDetectorIDs().begin());
-      TSM_ASSERT_EQUALS("Failed on readX for Histogram: " +
-                            boost::lexical_cast<std::string>(i),
-                        in->x(i), out->x(i));
-      TSM_ASSERT_EQUALS("Failed on readY for Histogram: " +
-                            boost::lexical_cast<std::string>(i),
-                        in->y(i), out->y(i));
-      TSM_ASSERT_EQUALS("Failed on readE for Histogram: " +
-                            boost::lexical_cast<std::string>(i),
-                        in->e(i), out->e(i));
+      TSM_ASSERT_EQUALS("Failed on comparing Detector ID for Histogram: " + boost::lexical_cast<std::string>(i),
+                        *inSpec.getDetectorIDs().begin(), *outSpec.getDetectorIDs().begin());
+      TSM_ASSERT_EQUALS("Failed on readX for Histogram: " + boost::lexical_cast<std::string>(i), in->x(i), out->x(i));
+      TSM_ASSERT_EQUALS("Failed on readY for Histogram: " + boost::lexical_cast<std::string>(i), in->y(i), out->y(i));
+      TSM_ASSERT_EQUALS("Failed on readE for Histogram: " + boost::lexical_cast<std::string>(i), in->e(i), out->e(i));
     }
   }
 };

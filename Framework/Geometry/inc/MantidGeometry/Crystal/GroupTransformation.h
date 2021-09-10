@@ -43,8 +43,7 @@ public:
   GroupTransformation getInverse() const;
 
 private:
-  SymmetryOperation
-  transformOperation(const SymmetryOperation &operation) const;
+  SymmetryOperation transformOperation(const SymmetryOperation &operation) const;
 
   void setInverseFromPair();
 

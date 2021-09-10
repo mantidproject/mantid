@@ -22,28 +22,23 @@ QHash<QString, QVariant> defaultLineKwargs() {
 namespace MantidQt {
 namespace MantidWidgets {
 
-RangeSelector::RangeSelector(PreviewPlot *plot, SelectType type, bool visible,
-                             bool infoOnly, const QColor &colour)
+RangeSelector::RangeSelector(PreviewPlot *plot, SelectType type, bool visible, bool infoOnly, const QColor &colour)
     : QObject(), m_plot(plot),
-      m_rangeMarker(std::make_unique<RangeMarker>(
-          m_plot->canvas(), colour.name(QColor::HexRgb),
-          std::get<0>(getAxisRange(type)), std::get<1>(getAxisRange(type)),
-          selectTypeAsQString(type), defaultLineKwargs())),
+      m_rangeMarker(std::make_unique<RangeMarker>(m_plot->canvas(), colour.name(QColor::HexRgb),
+                                                  std::get<0>(getAxisRange(type)), std::get<1>(getAxisRange(type)),
+                                                  selectTypeAsQString(type), defaultLineKwargs())),
       m_type(type), m_visible(visible), m_markerMoving(false) {
   Q_UNUSED(infoOnly);
 
   m_plot->canvas()->draw();
 
-  connect(m_plot, SIGNAL(mouseDown(QPoint)), this,
-          SLOT(handleMouseDown(QPoint)));
-  connect(m_plot, SIGNAL(mouseMove(QPoint)), this,
-          SLOT(handleMouseMove(QPoint)));
+  connect(m_plot, SIGNAL(mouseDown(QPoint)), this, SLOT(handleMouseDown(QPoint)));
+  connect(m_plot, SIGNAL(mouseMove(QPoint)), this, SLOT(handleMouseMove(QPoint)));
   connect(m_plot, SIGNAL(mouseUp(QPoint)), this, SLOT(handleMouseUp(QPoint)));
   connect(m_plot, SIGNAL(redraw()), this, SLOT(redrawMarker()));
 }
 
-std::tuple<double, double>
-RangeSelector::getAxisRange(const SelectType &type) const {
+std::tuple<double, double> RangeSelector::getAxisRange(const SelectType &type) const {
   switch (type) {
   case SelectType::XMINMAX:
     return m_plot->getAxisRange(AxisID::XBottom);
@@ -65,9 +60,7 @@ QString RangeSelector::selectTypeAsQString(const SelectType &type) const {
                            "XMINMAX and YMINMAX.");
 }
 
-void RangeSelector::setRange(const std::pair<double, double> &range) {
-  setRange(range.first, range.second);
-}
+void RangeSelector::setRange(const std::pair<double, double> &range) { setRange(range.first, range.second); }
 
 void RangeSelector::setRange(double min, double max) {
   m_rangeMarker->setRange(min, max);
@@ -103,18 +96,14 @@ void RangeSelector::setVisible(bool visible) {
   m_plot->replot();
 }
 
-void RangeSelector::setBounds(const double min, const double max) {
-  m_rangeMarker->setBounds(min, max);
-}
+void RangeSelector::setBounds(const double min, const double max) { m_rangeMarker->setBounds(min, max); }
 
 void RangeSelector::detach() {
   m_rangeMarker->remove();
   m_plot->canvas()->draw();
 }
 
-void RangeSelector::setColour(const QColor &colour) {
-  m_rangeMarker->setColor(colour.name(QColor::HexRgb));
-}
+void RangeSelector::setColour(const QColor &colour) { m_rangeMarker->setColor(colour.name(QColor::HexRgb)); }
 
 void RangeSelector::handleMouseDown(const QPoint &point) {
   if (m_visible && !m_plot->selectorActive()) {
@@ -130,8 +119,7 @@ void RangeSelector::handleMouseDown(const QPoint &point) {
 void RangeSelector::handleMouseMove(const QPoint &point) {
   if (m_visible && m_markerMoving) {
     const auto dataCoords = m_plot->toDataCoords(point);
-    const auto markerMoved =
-        m_rangeMarker->mouseMove(dataCoords.x(), dataCoords.y());
+    const auto markerMoved = m_rangeMarker->mouseMove(dataCoords.x(), dataCoords.y());
 
     if (markerMoved) {
       const auto range = getRange();

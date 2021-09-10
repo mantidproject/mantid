@@ -1,3 +1,5 @@
+.. _mantid.api.IFunction1D:
+
 =============
  IFunction1D
 =============
@@ -8,7 +10,7 @@ This is a Python binding to the C++ class Mantid::API::IFunction1D.
 
 .. module:`mantid.api`
 
-.. autoclass:: mantid.api.IFunction1D 
+.. autoclass:: mantid.api.IFunction1D
     :members:
     :undoc-members:
     :inherited-members:

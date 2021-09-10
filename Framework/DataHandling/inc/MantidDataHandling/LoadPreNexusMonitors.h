@@ -32,13 +32,9 @@ public:
 
   /// Algorithm's version
   int version() const override { return (1); }
-  const std::vector<std::string> seeAlso() const override {
-    return {"LoadEventPreNexus", "LoadPreNexus"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"LoadEventPreNexus", "LoadPreNexus"}; }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "DataHandling\\PreNexus";
-  }
+  const std::string category() const override { return "DataHandling\\PreNexus"; }
   /// Algorithm's aliases
   const std::string alias() const override { return "LoadPreNeXusMonitors"; }
 
@@ -54,8 +50,7 @@ private:
   /// Set to true when instrument geometry was loaded.
   bool instrument_loaded_correctly;
 
-  void runLoadInstrument(const std::string &instrument,
-                         const API::MatrixWorkspace_sptr &localWorkspace);
+  void runLoadInstrument(const std::string &instrument, const API::MatrixWorkspace_sptr &localWorkspace);
 };
 
 } // namespace DataHandling

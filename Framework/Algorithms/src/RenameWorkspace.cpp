@@ -25,25 +25,21 @@ using namespace API;
  *
  */
 void RenameWorkspace::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-      "InputWorkspace", "", Direction::Input));
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-      "OutputWorkspace", "", Direction::Output));
-  declareProperty<bool>(
-      "RenameMonitors", false,
-      "If true, and monitor workspace found attached"
-      " to the source workspace, the monitors workspace is renamed too.\n"
-      "The monitor workspace name is created from the new workspace "
-      "name: NewWSName by adding the _monitors suffix"
-      " (e.g.: NewWSName_monitors)",
-      Direction::Input);
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("InputWorkspace", "", Direction::Input));
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "", Direction::Output));
+  declareProperty<bool>("RenameMonitors", false,
+                        "If true, and monitor workspace found attached"
+                        " to the source workspace, the monitors workspace is renamed too.\n"
+                        "The monitor workspace name is created from the new workspace "
+                        "name: NewWSName by adding the _monitors suffix"
+                        " (e.g.: NewWSName_monitors)",
+                        Direction::Input);
   // Set to default true to maintain compatibility with existing scripts
   // as this just allowed overriding by default
-  declareProperty<bool>(
-      "OverwriteExisting", true,
-      "If true any existing workspaces with the output name will be"
-      " overwritten. Defaults to true to maintain backwards compatibility.",
-      Direction::Input);
+  declareProperty<bool>("OverwriteExisting", true,
+                        "If true any existing workspaces with the output name will be"
+                        " overwritten. Defaults to true to maintain backwards compatibility.",
+                        Direction::Input);
 }
 
 /**
@@ -61,8 +57,7 @@ std::map<std::string, std::string> RenameWorkspace::validateInputs() {
   bool overrideWorkspaces = getProperty("OverwriteExisting");
 
   // First check input and output names are different
-  if (getPropertyValue("InputWorkspace") ==
-      getPropertyValue("OutputWorkspace")) {
+  if (getPropertyValue("InputWorkspace") == getPropertyValue("OutputWorkspace")) {
     errorList["InputWorkspace"] = "Input and output workspace"
                                   " names must be different";
     errorList["OutputWorkspace"] = "Input and output workspace"
@@ -77,8 +72,7 @@ std::map<std::string, std::string> RenameWorkspace::validateInputs() {
       // Where the workspace group handle is deleted if we are renaming
       // Its last workspace member, then when we add (or rename) that member
       // undefined behavior happens usually Python Unit tests breaking
-      errorList["OutputWorkspace"] =
-          "The workspace " + outputwsName + " already exists";
+      errorList["OutputWorkspace"] = "The workspace " + outputwsName + " already exists";
       errorList["OverwriteExisting"] = "Set OverwriteExisting to true"
                                        " to overwrite the existing workspace";
     }
@@ -97,8 +91,7 @@ void RenameWorkspace::exec() {
   // Get the input workspace
   Workspace_sptr inputWS = getProperty("InputWorkspace");
 
-  WorkspaceGroup_sptr inputGroup =
-      std::dynamic_pointer_cast<WorkspaceGroup>(inputWS);
+  WorkspaceGroup_sptr inputGroup = std::dynamic_pointer_cast<WorkspaceGroup>(inputWS);
 
   // get the workspace name
   std::string inputwsName = inputWS->getName();
@@ -145,13 +138,11 @@ bool RenameWorkspace::processGroups() {
   std::string outputwsName = getPropertyValue("OutputWorkspace");
 
   if (inputwsName == outputwsName) {
-    throw std::invalid_argument(
-        "The input and output workspace names must be different");
+    throw std::invalid_argument("The input and output workspace names must be different");
   }
 
   // Cast the input to a group
-  WorkspaceGroup_sptr inputGroup =
-      std::dynamic_pointer_cast<WorkspaceGroup>(inputWS);
+  WorkspaceGroup_sptr inputGroup = std::dynamic_pointer_cast<WorkspaceGroup>(inputWS);
   assert(inputGroup); // Should always be true
 
   // Decide whether we will rename the group members. Must do this before
@@ -174,8 +165,7 @@ bool RenameWorkspace::processGroups() {
         suffix << i + 1;
         std::string wsName = outputwsName + "_" + suffix.str();
 
-        auto alg = API::AlgorithmManager::Instance().createUnmanaged(
-            this->name(), this->version());
+        auto alg = API::AlgorithmManager::Instance().createUnmanaged(this->name(), this->version());
         alg->initialize();
         alg->setPropertyValue("InputWorkspace", names[i]);
         alg->setPropertyValue("OutputWorkspace", wsName);

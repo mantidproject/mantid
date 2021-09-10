@@ -32,9 +32,8 @@ namespace MDAlgorithms {
 /** Constructor
  */
 SlicingAlgorithm::SlicingAlgorithm()
-    : m_transform(), m_transformFromOriginal(), m_transformToOriginal(),
-      m_transformFromIntermediate(), m_transformToIntermediate(),
-      m_axisAligned(true), m_outD(0), // unititialized and should be invalid
+    : m_transform(), m_transformFromOriginal(), m_transformToOriginal(), m_transformFromIntermediate(),
+      m_transformToIntermediate(), m_axisAligned(true), m_outD(0), // unititialized and should be invalid
       m_NormalizeBasisVectors(false) {}
 
 /** Initialize the algorithm's properties.
@@ -44,23 +43,18 @@ void SlicingAlgorithm::initSlicingProps() {
 
   // --------------- Axis-aligned properties
   // ---------------------------------------
-  declareProperty(
-      "AxisAligned", true,
-      "Perform binning aligned with the axes of the input MDEventWorkspace?");
+  declareProperty("AxisAligned", true, "Perform binning aligned with the axes of the input MDEventWorkspace?");
   setPropertyGroup("AxisAligned", "Axis-Aligned Binning");
   for (size_t i = 0; i < dimChars.size(); i++) {
     std::string dim(" ");
     dim[0] = dimChars[i];
     std::string propName = "AlignedDim" + dim;
-    declareProperty(
-        std::make_unique<PropertyWithValue<std::string>>(propName, "",
-                                                         Direction::Input),
-        "Binning parameters for the " + Strings::toString(i) +
-            "th dimension.\n"
-            "Enter it as a comma-separated list of values with the format: "
-            "'name,minimum,maximum,number_of_bins'. Leave blank for NONE.");
-    setPropertySettings(propName, std::make_unique<VisibleWhenProperty>(
-                                      "AxisAligned", IS_EQUAL_TO, "1"));
+    declareProperty(std::make_unique<PropertyWithValue<std::string>>(propName, "", Direction::Input),
+                    "Binning parameters for the " + Strings::toString(i) +
+                        "th dimension.\n"
+                        "Enter it as a comma-separated list of values with the format: "
+                        "'name,minimum,maximum,number_of_bins'. Leave blank for NONE.");
+    setPropertySettings(propName, std::make_unique<VisibleWhenProperty>("AxisAligned", IS_EQUAL_TO, "1"));
     setPropertyGroup(propName, "Axis-Aligned Binning");
   }
 
@@ -77,49 +71,41 @@ void SlicingAlgorithm::initSlicingProps() {
     std::string dim(" ");
     dim[0] = dimChars[i];
     std::string propName = "BasisVector" + dim;
-    declareProperty(
-        std::make_unique<PropertyWithValue<std::string>>(propName, "",
-                                                         Direction::Input),
-        "Description of the basis vector of the " + Strings::toString(i) +
-            "th output dimension."
-            "Format: 'name, units, x,y,z,..'.\n"
-            "  name : string for the name of the output dimension.\n"
-            "  units : string for the units of the output dimension.\n"
-            "  x,y,z,...: vector definining the basis in the input dimensions "
-            "space.\n"
-            "Leave blank for NONE.");
+    declareProperty(std::make_unique<PropertyWithValue<std::string>>(propName, "", Direction::Input),
+                    "Description of the basis vector of the " + Strings::toString(i) +
+                        "th output dimension."
+                        "Format: 'name, units, x,y,z,..'.\n"
+                        "  name : string for the name of the output dimension.\n"
+                        "  units : string for the units of the output dimension.\n"
+                        "  x,y,z,...: vector definining the basis in the input dimensions "
+                        "space.\n"
+                        "Leave blank for NONE.");
     setPropertySettings(propName, ps());
     setPropertyGroup(propName, grpName);
   }
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>("Translation", Direction::Input),
-      "Coordinates in the INPUT workspace that corresponds to "
-      "(0,0,0) in the OUTPUT workspace.\n"
-      "Enter as a comma-separated string.\n"
-      "Default: 0 in all dimensions (no translation).");
+  declareProperty(std::make_unique<ArrayProperty<double>>("Translation", Direction::Input),
+                  "Coordinates in the INPUT workspace that corresponds to "
+                  "(0,0,0) in the OUTPUT workspace.\n"
+                  "Enter as a comma-separated string.\n"
+                  "Default: 0 in all dimensions (no translation).");
 
-  declareProperty(std::make_unique<ArrayProperty<double>>("OutputExtents",
-                                                          Direction::Input),
+  declareProperty(std::make_unique<ArrayProperty<double>>("OutputExtents", Direction::Input),
                   "The minimum, maximum edges of space of each dimension of "
                   "the OUTPUT workspace, as a comma-separated list");
 
-  declareProperty(
-      std::make_unique<ArrayProperty<int>>("OutputBins", Direction::Input),
-      "The number of bins for each dimension of the OUTPUT workspace.");
+  declareProperty(std::make_unique<ArrayProperty<int>>("OutputBins", Direction::Input),
+                  "The number of bins for each dimension of the OUTPUT workspace.");
 
-  declareProperty(std::make_unique<PropertyWithValue<bool>>(
-                      "NormalizeBasisVectors", true, Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("NormalizeBasisVectors", true, Direction::Input),
                   "Normalize the given basis vectors to unity. \n"
                   "If true, then a distance of 1 in the INPUT dimensions = 1 "
                   "in the OUTPUT dimensions.\n"
                   "If false, then a distance of norm(basis_vector) in the "
                   "INPUT dimension = 1 in the OUTPUT dimensions.");
 
-  declareProperty(
-      std::make_unique<PropertyWithValue<bool>>("ForceOrthogonal", false,
-                                                Direction::Input),
-      "Force the input basis vectors to form an orthogonal coordinate system. "
-      "Only works in 3 dimension!");
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("ForceOrthogonal", false, Direction::Input),
+                  "Force the input basis vectors to form an orthogonal coordinate system. "
+                  "Only works in 3 dimension!");
 
   // For GUI niceness
   setPropertyGroup("Translation", grpName);
@@ -152,8 +138,7 @@ void SlicingAlgorithm::makeBasisVectorFromString(const std::string &str) {
   if (input.empty())
     return;
   if (input.size() < 3)
-    throw std::invalid_argument("Dimension string is too short to be valid: " +
-                                str);
+    throw std::invalid_argument("Dimension string is too short to be valid: " + str);
 
   // The current dimension index.
   size_t dim = m_binDimensions.size();
@@ -165,14 +150,11 @@ void SlicingAlgorithm::makeBasisVectorFromString(const std::string &str) {
     // Find the name at the closing []
     size_t n = input.find_first_of(']', 1);
     if (n == std::string::npos)
-      throw std::invalid_argument(
-          "No closing ] character in the dimension name of : " + str);
+      throw std::invalid_argument("No closing ] character in the dimension name of : " + str);
     // Find the comma after the name
     n_first_comma = input.find_first_of(',', n);
     if (n_first_comma == std::string::npos)
-      throw std::invalid_argument(
-          "No comma after the closing ] character in the dimension string: " +
-          str);
+      throw std::invalid_argument("No comma after the closing ] character in the dimension string: " + str);
   } else
     // Find the comma after the name
     n_first_comma = input.find_first_of(',');
@@ -200,23 +182,20 @@ void SlicingAlgorithm::makeBasisVectorFromString(const std::string &str) {
   // Get the number of bins from
   int numBins = m_numBins[dim];
   if (numBins < 1)
-    throw std::invalid_argument("Number of bins for output dimension " +
-                                Strings::toString(dim) + " should be >= 1.");
+    throw std::invalid_argument("Number of bins for output dimension " + Strings::toString(dim) + " should be >= 1.");
 
   // Get the min/max extents in this OUTPUT dimension
   double min = m_minExtents[dim];
   double max = m_maxExtents[dim];
   double lengthInOutput = max - min;
   if (lengthInOutput <= 0)
-    throw std::invalid_argument("The maximum extents for dimension " +
-                                Strings::toString(dim) + " should be > 0.");
+    throw std::invalid_argument("The maximum extents for dimension " + Strings::toString(dim) + " should be > 0.");
 
   // Create the basis vector with the right # of dimensions
   VMD basis(this->m_inWS->getNumDims());
   for (size_t d = 0; d < this->m_inWS->getNumDims(); d++)
     if (!Strings::convert(strs[d + 1], basis[d]))
-      throw std::invalid_argument("Error converting argument '" + strs[d + 1] +
-                                  "' in the dimensions string '" + str +
+      throw std::invalid_argument("Error converting argument '" + strs[d + 1] + "' in the dimensions string '" + str +
                                   "' to a number.");
 
   // If B was binned from A (m_originalWS), and we are binning C from B,
@@ -264,9 +243,8 @@ void SlicingAlgorithm::makeBasisVectorFromString(const std::string &str) {
   auto frame = createMDFrameForNonAxisAligned(units, basis);
 
   // Create the output dimension
-  auto out = std::make_shared<MDHistoDimension>(
-      name, name, *frame, static_cast<coord_t>(min), static_cast<coord_t>(max),
-      numBins);
+  auto out = std::make_shared<MDHistoDimension>(name, name, *frame, static_cast<coord_t>(min),
+                                                static_cast<coord_t>(max), numBins);
 
   // Put both in the algo for future use
   m_bases.emplace_back(basis);
@@ -294,11 +272,9 @@ void SlicingAlgorithm::processGeneralTransformProperties() {
 
   std::vector<double> extents = this->getProperty("OutputExtents");
   if (extents.size() != m_outD * 2)
-    throw std::invalid_argument(
-        "The OutputExtents parameter must have " +
-        Strings::toString(m_outD * 2) +
-        " entries "
-        "(2 for each dimension in the OUTPUT workspace).");
+    throw std::invalid_argument("The OutputExtents parameter must have " + Strings::toString(m_outD * 2) +
+                                " entries "
+                                "(2 for each dimension in the OUTPUT workspace).");
 
   m_minExtents.clear();
   m_maxExtents.clear();
@@ -322,24 +298,21 @@ void SlicingAlgorithm::processGeneralTransformProperties() {
     try {
       makeBasisVectorFromString(getPropertyValue(propName));
     } catch (std::exception &e) {
-      throw std::invalid_argument("Error parsing the " + propName +
-                                  " parameter: " + std::string(e.what()));
+      throw std::invalid_argument("Error parsing the " + propName + " parameter: " + std::string(e.what()));
     }
   }
 
   // Number of output binning dimensions found
   m_outD = m_binDimensions.size();
   if (m_outD == 0)
-    throw std::runtime_error(
-        "No output dimensions were found in the MDEventWorkspace. Cannot bin!");
+    throw std::runtime_error("No output dimensions were found in the MDEventWorkspace. Cannot bin!");
 
   // Get the Translation parameter
   std::vector<double> translVector;
   try {
     translVector = getProperty("Translation");
   } catch (std::exception &e) {
-    throw std::invalid_argument("Error parsing the Translation parameter: " +
-                                std::string(e.what()));
+    throw std::invalid_argument("Error parsing the Translation parameter: " + std::string(e.what()));
   }
 
   // Default to 0,0,0 when not specified
@@ -348,18 +321,15 @@ void SlicingAlgorithm::processGeneralTransformProperties() {
   m_translation = VMD(translVector);
 
   if (m_translation.getNumDims() != m_inWS->getNumDims())
-    throw std::invalid_argument(
-        "The number of dimensions in the Translation parameter is "
-        "not consistent with the number of dimensions in the input workspace.");
+    throw std::invalid_argument("The number of dimensions in the Translation parameter is "
+                                "not consistent with the number of dimensions in the input workspace.");
 
   // Validate
   if (m_outD > m_inWS->getNumDims())
-    throw std::runtime_error(
-        "More output dimensions were specified than input dimensions "
-        "exist in the MDEventWorkspace. Cannot bin!");
+    throw std::runtime_error("More output dimensions were specified than input dimensions "
+                             "exist in the MDEventWorkspace. Cannot bin!");
   if (m_binningScaling.size() != m_outD)
-    throw std::runtime_error(
-        "Inconsistent number of entries in scaling vector.");
+    throw std::runtime_error("Inconsistent number of entries in scaling vector.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -405,38 +375,30 @@ void SlicingAlgorithm::createGeneralTransform() {
   // Create the CoordTransformAffine for BINNING with these basis vectors
   auto ct = std::make_unique<DataObjects::CoordTransformAffine>(inD, m_outD);
   // Note: the scaling makes the coordinate correspond to a bin index
-  ct->buildNonOrthogonal(m_inputMinPoint, this->m_bases,
-                         VMD(this->m_binningScaling) / VMD(m_transformScaling));
+  ct->buildNonOrthogonal(m_inputMinPoint, this->m_bases, VMD(this->m_binningScaling) / VMD(m_transformScaling));
   this->m_transform = std::move(ct);
 
   // Transformation original->binned
-  auto ctFrom =
-      std::make_unique<DataObjects::CoordTransformAffine>(inD, m_outD);
-  ctFrom->buildNonOrthogonal(m_translation, this->m_bases,
-                             VMD(m_transformScaling) / VMD(m_transformScaling));
+  auto ctFrom = std::make_unique<DataObjects::CoordTransformAffine>(inD, m_outD);
+  ctFrom->buildNonOrthogonal(m_translation, this->m_bases, VMD(m_transformScaling) / VMD(m_transformScaling));
   m_transformFromOriginal = std::move(ctFrom);
 
   // Validate
   if (m_transform->getInD() != inD)
-    throw std::invalid_argument(
-        "The number of input dimensions in the CoordinateTransform "
-        "object is not consistent with the number of dimensions in the input "
-        "workspace.");
+    throw std::invalid_argument("The number of input dimensions in the CoordinateTransform "
+                                "object is not consistent with the number of dimensions in the input "
+                                "workspace.");
   if (m_transform->getOutD() != m_outD)
-    throw std::invalid_argument(
-        "The number of output dimensions in the CoordinateTransform "
-        "object is not consistent with the number of dimensions specified in "
-        "the OutDimX, etc. properties.");
+    throw std::invalid_argument("The number of output dimensions in the CoordinateTransform "
+                                "object is not consistent with the number of dimensions specified in "
+                                "the OutDimX, etc. properties.");
 
   // Now the reverse transformation
   m_transformToOriginal = nullptr;
   if (m_outD == inD) {
     // Can't reverse transform if you lost dimensions.
-    auto ctTo =
-        std::make_unique<DataObjects::CoordTransformAffine>(inD, m_outD);
-    auto toMatrix = static_cast<DataObjects::CoordTransformAffine *>(
-                        m_transformFromOriginal.get())
-                        ->getMatrix();
+    auto ctTo = std::make_unique<DataObjects::CoordTransformAffine>(inD, m_outD);
+    auto toMatrix = static_cast<DataObjects::CoordTransformAffine *>(m_transformFromOriginal.get())->getMatrix();
     // Invert the affine matrix to get the reverse transformation
     toMatrix.Invert();
     ctTo->setMatrix(toMatrix);
@@ -453,14 +415,12 @@ void SlicingAlgorithm::createGeneralTransform() {
  */
 void SlicingAlgorithm::makeAlignedDimensionFromString(const std::string &str) {
   if (str.empty()) {
-    throw std::runtime_error(
-        "Empty string passed to one of the AlignedDim0 parameters.");
+    throw std::runtime_error("Empty string passed to one of the AlignedDim0 parameters.");
   } else {
     // Strip spaces
     std::string input = Strings::strip(str);
     if (input.size() < 4)
-      throw std::invalid_argument(
-          "Dimensions string is too short to be valid: " + str);
+      throw std::invalid_argument("Dimensions string is too short to be valid: " + str);
 
     // Find the 3rd comma from the end
     size_t n = std::string::npos;
@@ -471,8 +431,7 @@ void SlicingAlgorithm::makeAlignedDimensionFromString(const std::string &str) {
                                     "in the dimensions string: " +
                                     str);
       if (n == 0)
-        throw std::invalid_argument("Dimension string starts with a comma: " +
-                                    str);
+        throw std::invalid_argument("Dimension string starts with a comma: " + str);
       n--;
     }
     // The name is everything before the 3rd comma from the end
@@ -484,10 +443,9 @@ void SlicingAlgorithm::makeAlignedDimensionFromString(const std::string &str) {
     std::vector<std::string> strs;
     boost::split(strs, input, boost::is_any_of(","));
     if (strs.size() != 3)
-      throw std::invalid_argument(
-          "Wrong number of values (3 are expected) after the name "
-          "in the dimensions string: " +
-          str);
+      throw std::invalid_argument("Wrong number of values (3 are expected) after the name "
+                                  "in the dimensions string: " +
+                                  str);
 
     // Extract the arguments
     coord_t min, max;
@@ -521,8 +479,7 @@ void SlicingAlgorithm::makeAlignedDimensionFromString(const std::string &str) {
     IMDDimension_const_sptr inputDim = m_inWS->getDimension(dim_index);
     const auto &frame = inputDim->getMDFrame();
     m_binDimensions.emplace_back(MDHistoDimension_sptr(
-        new MDHistoDimension(inputDim->getName(), inputDim->getDimensionId(),
-                             frame, min, max, numBins)));
+        new MDHistoDimension(inputDim->getName(), inputDim->getDimensionId(), frame, min, max, numBins)));
 
     // Add the index from which we're binning to the vector
     this->m_dimensionToBinFrom.emplace_back(dim_index);
@@ -545,9 +502,8 @@ void SlicingAlgorithm::createAlignedTransform() {
     if (!prop.empty())
       numDims++;
     if (!prop.empty() && previousWasEmpty)
-      throw std::invalid_argument(
-          "Please enter the AlignedDim parameters in the order 0,1,2, etc.,"
-          "without skipping any entries.");
+      throw std::invalid_argument("Please enter the AlignedDim parameters in the order 0,1,2, etc.,"
+                                  "without skipping any entries.");
     previousWasEmpty = prop.empty();
   }
 
@@ -557,9 +513,8 @@ void SlicingAlgorithm::createAlignedTransform() {
   if (numDims == 0)
     throw std::runtime_error("No output dimensions specified.");
   if (numDims > inD)
-    throw std::runtime_error(
-        "More output dimensions were specified than input dimensions "
-        "exist in the MDEventWorkspace.");
+    throw std::runtime_error("More output dimensions were specified than input dimensions "
+                             "exist in the MDEventWorkspace.");
 
   // Create the dimensions based on the strings from the user
   for (size_t i = 0; i < numDims; i++) {
@@ -587,15 +542,14 @@ void SlicingAlgorithm::createAlignedTransform() {
   }
 
   // Transform for binning
-  m_transform = std::make_unique<DataObjects::CoordTransformAligned>(
-      m_inWS->getNumDims(), m_outD, m_dimensionToBinFrom, origin, scaling);
+  m_transform = std::make_unique<DataObjects::CoordTransformAligned>(m_inWS->getNumDims(), m_outD, m_dimensionToBinFrom,
+                                                                     origin, scaling);
 
   // Transformation original->binned. There is no offset or scaling!
   std::vector<coord_t> unitScaling(m_outD, 1.0);
   std::vector<coord_t> zeroOrigin(m_outD, 0.0);
   m_transformFromOriginal =
-      std::make_unique<DataObjects::CoordTransformAligned>(
-          inD, m_outD, m_dimensionToBinFrom, zeroOrigin, unitScaling);
+      std::make_unique<DataObjects::CoordTransformAligned>(inD, m_outD, m_dimensionToBinFrom, zeroOrigin, unitScaling);
 
   // Now the reverse transformation.
   if (m_outD == inD) {
@@ -609,10 +563,9 @@ void SlicingAlgorithm::createAlignedTransform() {
   } else {
     // Changed # of dimensions - can't reverse the transform
     m_transformToOriginal = nullptr;
-    g_log.warning(
-        "SlicingAlgorithm: Your slice will cause the output "
-        "workspace to have fewer dimensions than the input. This will "
-        "affect your ability to create subsequent slices.");
+    g_log.warning("SlicingAlgorithm: Your slice will cause the output "
+                  "workspace to have fewer dimensions than the input. This will "
+                  "affect your ability to create subsequent slices.");
   }
 }
 
@@ -633,36 +586,30 @@ void SlicingAlgorithm::createTransform() {
     throw std::runtime_error("SlicingAlgorithm::createTransform(): input "
                              "MDWorkspace must be set first!");
   if (std::dynamic_pointer_cast<MatrixWorkspace>(m_inWS))
-    throw std::runtime_error(this->name() +
-                             " cannot be run on a MatrixWorkspace!");
+    throw std::runtime_error(this->name() + " cannot be run on a MatrixWorkspace!");
 
   // Is the transformation aligned with axes?
   m_axisAligned = getProperty("AxisAligned");
 
   // Refer to the original workspace. Make sure that is possible
   if (m_inWS->numOriginalWorkspaces() > 0)
-    m_originalWS =
-        std::dynamic_pointer_cast<IMDWorkspace>(m_inWS->getOriginalWorkspace());
+    m_originalWS = std::dynamic_pointer_cast<IMDWorkspace>(m_inWS->getOriginalWorkspace());
   if (m_originalWS) {
     if (m_axisAligned)
-      throw std::runtime_error(
-          "Cannot perform axis-aligned binning on a MDHistoWorkspace. "
-          "Please use non-axis aligned binning.");
+      throw std::runtime_error("Cannot perform axis-aligned binning on a MDHistoWorkspace. "
+                               "Please use non-axis aligned binning.");
 
     if (m_originalWS->getNumDims() != m_inWS->getNumDims())
-      throw std::runtime_error(
-          "SlicingAlgorithm::createTransform(): Cannot propagate "
-          "a transformation if the number of dimensions has changed.");
+      throw std::runtime_error("SlicingAlgorithm::createTransform(): Cannot propagate "
+                               "a transformation if the number of dimensions has changed.");
 
     if (!m_inWS->getTransformToOriginal())
-      throw std::runtime_error(
-          "SlicingAlgorithm::createTransform(): Cannot propagate "
-          "a transformation. There is no transformation saved from " +
-          m_inWS->getName() + " back to " + m_originalWS->getName() + ".");
+      throw std::runtime_error("SlicingAlgorithm::createTransform(): Cannot propagate "
+                               "a transformation. There is no transformation saved from " +
+                               m_inWS->getName() + " back to " + m_originalWS->getName() + ".");
 
     // Fail if the MDHistoWorkspace was modified by binary operation
-    DataObjects::MDHistoWorkspace_sptr inHisto =
-        std::dynamic_pointer_cast<DataObjects::MDHistoWorkspace>(m_inWS);
+    DataObjects::MDHistoWorkspace_sptr inHisto = std::dynamic_pointer_cast<DataObjects::MDHistoWorkspace>(m_inWS);
     if (inHisto) {
       if (inHisto->getNumExperimentInfo() > 0) {
         const Run &run = inHisto->getExperimentInfo(0)->run();
@@ -670,27 +617,25 @@ void SlicingAlgorithm::createTransform() {
           Property *prop = run.getProperty("mdhisto_was_modified");
           if (prop) {
             if (prop->value() == "1") {
-              throw std::runtime_error(
-                  "This MDHistoWorkspace was modified by a binary operation "
-                  "(e.g. Plus, Minus). "
-                  "It is not currently possible to rebin a modified "
-                  "MDHistoWorkspace because that requires returning to the "
-                  "original "
-                  "(unmodified) MDEventWorkspace, and so would give incorrect "
-                  "results. "
-                  "Instead, you can use SliceMD and perform operations on the "
-                  "resulting "
-                  "MDEventWorkspaces, which preserve all events. "
-                  "You can override this check by removing the "
-                  "'mdhisto_was_modified' sample log.");
+              throw std::runtime_error("This MDHistoWorkspace was modified by a binary operation "
+                                       "(e.g. Plus, Minus). "
+                                       "It is not currently possible to rebin a modified "
+                                       "MDHistoWorkspace because that requires returning to the "
+                                       "original "
+                                       "(unmodified) MDEventWorkspace, and so would give incorrect "
+                                       "results. "
+                                       "Instead, you can use SliceMD and perform operations on the "
+                                       "resulting "
+                                       "MDEventWorkspaces, which preserve all events. "
+                                       "You can override this check by removing the "
+                                       "'mdhisto_was_modified' sample log.");
             }
           }
         }
       }
     }
 
-    g_log.notice() << "Performing " << this->name()
-                   << " on the original workspace, '" << m_originalWS->getName()
+    g_log.notice() << "Performing " << this->name() << " on the original workspace, '" << m_originalWS->getName()
                    << "'\n";
   }
 
@@ -705,30 +650,23 @@ void SlicingAlgorithm::createTransform() {
   if (m_originalWS) {
     // The intermediate workspace is the MDHistoWorkspace being BINNED
     m_intermediateWS = m_inWS;
-    CoordTransform const *originalToIntermediate =
-        m_intermediateWS->getTransformFromOriginal();
-    if (originalToIntermediate &&
-        (m_originalWS->getNumDims() == m_intermediateWS->getNumDims())) {
+    CoordTransform const *originalToIntermediate = m_intermediateWS->getTransformFromOriginal();
+    if (originalToIntermediate && (m_originalWS->getNumDims() == m_intermediateWS->getNumDims())) {
       try {
         // The transform from the INPUT to the INTERMEDIATE ws
         // intermediate_coords =  [OriginalToIntermediate] * [thisToOriginal] *
         // these_coords
-        Matrix<coord_t> matToOriginal =
-            m_transformToOriginal->makeAffineMatrix();
-        Matrix<coord_t> matOriginalToIntermediate =
-            originalToIntermediate->makeAffineMatrix();
-        Matrix<coord_t> matToIntermediate =
-            matOriginalToIntermediate * matToOriginal;
+        Matrix<coord_t> matToOriginal = m_transformToOriginal->makeAffineMatrix();
+        Matrix<coord_t> matOriginalToIntermediate = originalToIntermediate->makeAffineMatrix();
+        Matrix<coord_t> matToIntermediate = matOriginalToIntermediate * matToOriginal;
 
-        m_transformToIntermediate =
-            std::make_unique<DataObjects::CoordTransformAffine>(
-                m_originalWS->getNumDims(), m_intermediateWS->getNumDims());
+        m_transformToIntermediate = std::make_unique<DataObjects::CoordTransformAffine>(m_originalWS->getNumDims(),
+                                                                                        m_intermediateWS->getNumDims());
         m_transformToIntermediate->setMatrix(matToIntermediate);
         // And now the reverse
         matToIntermediate.Invert();
-        m_transformFromIntermediate =
-            std::make_unique<DataObjects::CoordTransformAffine>(
-                m_intermediateWS->getNumDims(), m_originalWS->getNumDims());
+        m_transformFromIntermediate = std::make_unique<DataObjects::CoordTransformAffine>(
+            m_intermediateWS->getNumDims(), m_originalWS->getNumDims());
         m_transformFromIntermediate->setMatrix(matToIntermediate);
       } catch (std::runtime_error &) {
         // Ignore error. Have no transform.
@@ -758,9 +696,8 @@ void SlicingAlgorithm::createTransform() {
  *        NULL to use the entire range.
  * @return MDImplicitFunction created
  */
-std::unique_ptr<MDImplicitFunction>
-SlicingAlgorithm::getGeneralImplicitFunction(const size_t *const chunkMin,
-                                             const size_t *const chunkMax) {
+std::unique_ptr<MDImplicitFunction> SlicingAlgorithm::getGeneralImplicitFunction(const size_t *const chunkMin,
+                                                                                 const size_t *const chunkMax) {
   size_t nd = m_inWS->getNumDims();
 
   // General implicit function
@@ -839,9 +776,8 @@ SlicingAlgorithm::getGeneralImplicitFunction(const size_t *const chunkMin,
     // Last-resort, totally general case
     // 2*N planes defined by N basis vectors, in any dimensionality workspace.
     // Assumes orthogonality!
-    g_log.warning("SlicingAlgorithm given " + std::to_string(boxDim) +
-                  " bases and " + std::to_string(nd) + " dimensions and " +
-                  "therefore will assume orthogonality");
+    g_log.warning("SlicingAlgorithm given " + std::to_string(boxDim) + " bases and " + std::to_string(nd) +
+                  " dimensions and " + "therefore will assume orthogonality");
     for (auto &base : bases) {
       // For each basis vector, make two planes, perpendicular to it and facing
       // inwards
@@ -866,15 +802,12 @@ SlicingAlgorithm::getGeneralImplicitFunction(const size_t *const chunkMin,
  *        NULL to use the entire range.
  * @return MDImplicitFunction created
  */
-std::unique_ptr<MDImplicitFunction>
-SlicingAlgorithm::getImplicitFunctionForChunk(const size_t *const chunkMin,
-                                              const size_t *const chunkMax) {
+std::unique_ptr<MDImplicitFunction> SlicingAlgorithm::getImplicitFunctionForChunk(const size_t *const chunkMin,
+                                                                                  const size_t *const chunkMax) {
   size_t nd = m_inWS->getNumDims();
   if (m_axisAligned) {
-    std::vector<coord_t> function_min(
-        nd, -1e30f); // default to all space if the dimension is not specified
-    std::vector<coord_t> function_max(
-        nd, +1e30f); // default to all space if the dimension is not specified
+    std::vector<coord_t> function_min(nd, -1e30f); // default to all space if the dimension is not specified
+    std::vector<coord_t> function_max(nd, +1e30f); // default to all space if the dimension is not specified
     for (size_t bd = 0; bd < m_outD; bd++) {
       // Dimension in the MDEventWorkspace
       size_t d = m_dimensionToBinFrom[bd];
@@ -885,8 +818,7 @@ SlicingAlgorithm::getImplicitFunctionForChunk(const size_t *const chunkMin,
       if (chunkMax)
         function_max[d] = m_binDimensions[bd]->getX(chunkMax[bd]);
       else
-        function_max[d] =
-            m_binDimensions[bd]->getX(m_binDimensions[bd]->getNBins());
+        function_max[d] = m_binDimensions[bd]->getX(m_binDimensions[bd]->getNBins());
     }
     return std::make_unique<MDBoxImplicitFunction>(function_min, function_max);
   } else {
@@ -903,8 +835,9 @@ SlicingAlgorithm::getImplicitFunctionForChunk(const size_t *const chunkMin,
  * @param basisVector: the basis vector
  * @returns the unique pointer
  */
-Mantid::Geometry::MDFrame_uptr SlicingAlgorithm::createMDFrameForNonAxisAligned(
-    const std::string &units, const Mantid::Kernel::VMD &basisVector) const {
+Mantid::Geometry::MDFrame_uptr
+SlicingAlgorithm::createMDFrameForNonAxisAligned(const std::string &units,
+                                                 const Mantid::Kernel::VMD &basisVector) const {
   // Get set of basis vectors
   auto oldBasis = getOldBasis(m_inWS->getNumDims());
 
@@ -912,12 +845,10 @@ Mantid::Geometry::MDFrame_uptr SlicingAlgorithm::createMDFrameForNonAxisAligned(
   auto indicesWithProjection = getIndicesWithProjection(basisVector, oldBasis);
 
   // Extract MDFrame
-  return extractMDFrameForNonAxisAligned(indicesWithProjection,
-                                         std::move(units));
+  return extractMDFrameForNonAxisAligned(indicesWithProjection, std::move(units));
 }
 
-std::vector<Mantid::Kernel::VMD>
-SlicingAlgorithm::getOldBasis(size_t dimension) const {
+std::vector<Mantid::Kernel::VMD> SlicingAlgorithm::getOldBasis(size_t dimension) const {
   std::vector<Mantid::Kernel::VMD> oldBasis;
   for (size_t i = 0; i < dimension; ++i) {
     Mantid::Kernel::VMD basisVector(dimension);
@@ -933,9 +864,8 @@ SlicingAlgorithm::getOldBasis(size_t dimension) const {
  * @param basisVector: the vector under investigation
  * @returns true if there is a projection  else false
  */
-bool SlicingAlgorithm::isProjectingOnFrame(
-    const Mantid::Kernel::VMD &oldVector,
-    const Mantid::Kernel::VMD &basisVector) const {
+bool SlicingAlgorithm::isProjectingOnFrame(const Mantid::Kernel::VMD &oldVector,
+                                           const Mantid::Kernel::VMD &basisVector) const {
   return std::fabs(oldVector.scalar_prod(basisVector)) > 0.0;
 }
 
@@ -945,9 +875,8 @@ bool SlicingAlgorithm::isProjectingOnFrame(
  * @param oldBasis: the old basis vectors
  * @returns the indices of vectors onto which the basisVector projects
  */
-std::vector<size_t> SlicingAlgorithm::getIndicesWithProjection(
-    const Mantid::Kernel::VMD &basisVector,
-    const std::vector<Mantid::Kernel::VMD> &oldBasis) const {
+std::vector<size_t> SlicingAlgorithm::getIndicesWithProjection(const Mantid::Kernel::VMD &basisVector,
+                                                               const std::vector<Mantid::Kernel::VMD> &oldBasis) const {
   std::vector<size_t> indexWithProjection;
   for (size_t index = 0; index < oldBasis.size(); ++index) {
     if (isProjectingOnFrame(oldBasis[index], basisVector)) {
@@ -965,15 +894,14 @@ std::vector<size_t> SlicingAlgorithm::getIndicesWithProjection(
  * @param units: the units
  */
 Mantid::Geometry::MDFrame_uptr
-SlicingAlgorithm::extractMDFrameForNonAxisAligned(
-    std::vector<size_t> indicesWithProjection, const std::string &units) const {
+SlicingAlgorithm::extractMDFrameForNonAxisAligned(std::vector<size_t> indicesWithProjection,
+                                                  const std::string &units) const {
   if (indicesWithProjection.empty()) {
     g_log.warning() << "Slicing Algorithm: Chosen vector does not "
                        "project on any vector of the old basis.";
   }
   // Get a reference frame to perform pairwise comparison
-  const auto &referenceMDFrame =
-      m_inWS->getDimension(indicesWithProjection[0])->getMDFrame();
+  const auto &referenceMDFrame = m_inWS->getDimension(indicesWithProjection[0])->getMDFrame();
 
   for (auto &index : indicesWithProjection) {
     const auto &toCheckMDFrame = m_inWS->getDimension(index)->getMDFrame();
@@ -994,8 +922,7 @@ SlicingAlgorithm::extractMDFrameForNonAxisAligned(
  * @param mdFrame: MDFrame to be added to the output workspace
  * @param unit: the unit to use in mdFrame
  */
-void SlicingAlgorithm::setTargetUnits(Mantid::Geometry::MDFrame_uptr &mdFrame,
-                                      const std::string &unit) const {
+void SlicingAlgorithm::setTargetUnits(Mantid::Geometry::MDFrame_uptr &mdFrame, const std::string &unit) const {
   boost::regex pattern("in.*A.*\\^-1");
 
   if (boost::regex_match(unit, pattern)) {

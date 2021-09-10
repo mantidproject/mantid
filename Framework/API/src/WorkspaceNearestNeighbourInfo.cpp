@@ -19,9 +19,8 @@ namespace API {
  * @param ignoreMaskedDetectors :: if true, masked detectors are ignored
  * @param nNeighbours :: number of neighbours to include
  */
-WorkspaceNearestNeighbourInfo::WorkspaceNearestNeighbourInfo(
-    const MatrixWorkspace &workspace, const bool ignoreMaskedDetectors,
-    const int nNeighbours)
+WorkspaceNearestNeighbourInfo::WorkspaceNearestNeighbourInfo(const MatrixWorkspace &workspace,
+                                                             const bool ignoreMaskedDetectors, const int nNeighbours)
     : m_workspace(workspace) {
   std::vector<specnum_t> spectrumNumbers;
   const auto nhist = m_workspace.getNumberHistograms();
@@ -29,9 +28,8 @@ WorkspaceNearestNeighbourInfo::WorkspaceNearestNeighbourInfo(
   for (size_t i = 0; i < nhist; ++i)
     spectrumNumbers.emplace_back(m_workspace.getSpectrum(i).getSpectrumNo());
 
-  m_nearestNeighbours = std::make_unique<WorkspaceNearestNeighbours>(
-      nNeighbours, workspace.spectrumInfo(), std::move(spectrumNumbers),
-      ignoreMaskedDetectors);
+  m_nearestNeighbours = std::make_unique<WorkspaceNearestNeighbours>(nNeighbours, workspace.spectrumInfo(),
+                                                                     std::move(spectrumNumbers), ignoreMaskedDetectors);
 }
 
 // Defined as default in source for forward declaration with std::unique_ptr.
@@ -44,12 +42,10 @@ WorkspaceNearestNeighbourInfo::~WorkspaceNearestNeighbourInfo() = default;
  * @param radius :: distance from detector on which to filter results
  * @return map of DetectorID to distance for the nearest neighbours
  */
-std::map<specnum_t, Kernel::V3D>
-WorkspaceNearestNeighbourInfo::getNeighbours(const Geometry::IDetector *comp,
-                                             const double radius) const {
+std::map<specnum_t, Kernel::V3D> WorkspaceNearestNeighbourInfo::getNeighbours(const Geometry::IDetector *comp,
+                                                                              const double radius) const {
   // Find the spectrum number
-  std::vector<specnum_t> spectra = m_workspace.getSpectraFromDetectorIDs(
-      std::vector<detid_t>(1, comp->getID()));
+  std::vector<specnum_t> spectra = m_workspace.getSpectraFromDetectorIDs(std::vector<detid_t>(1, comp->getID()));
   if (spectra.empty()) {
     throw Kernel::Exception::NotFoundError("MatrixWorkspace::getNeighbours - "
                                            "Cannot find spectrum number for "
@@ -66,9 +62,8 @@ WorkspaceNearestNeighbourInfo::getNeighbours(const Geometry::IDetector *comp,
  * @param radius :: distance from detector on which to filter results
  * @return map of DetectorID to distance for the nearest neighbours
  */
-std::map<specnum_t, Kernel::V3D>
-WorkspaceNearestNeighbourInfo::getNeighbours(specnum_t spec,
-                                             const double radius) const {
+std::map<specnum_t, Kernel::V3D> WorkspaceNearestNeighbourInfo::getNeighbours(specnum_t spec,
+                                                                              const double radius) const {
   return m_nearestNeighbours->neighboursInRadius(spec, radius);
 }
 
@@ -78,8 +73,7 @@ WorkspaceNearestNeighbourInfo::getNeighbours(specnum_t spec,
  * @param spec :: spectrum number of the detector you are looking at
  * @return map of DetectorID to distance for the nearest neighbours
  */
-std::map<specnum_t, Kernel::V3D>
-WorkspaceNearestNeighbourInfo::getNeighboursExact(specnum_t spec) const {
+std::map<specnum_t, Kernel::V3D> WorkspaceNearestNeighbourInfo::getNeighboursExact(specnum_t spec) const {
   return m_nearestNeighbours->neighbours(spec);
 }
 

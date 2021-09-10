@@ -41,8 +41,8 @@ The algorithm proceeds as follows. For each spectrum:
 
 #. for each event in `NEvents`
 
-   * loop over the bins. 
-   
+   * loop over the bins.
+
      - If `ResimulateTracksForDifferentWavelengths` = True then generate tracks using the following procedure for each wavelength step,
        where the size of each wavelength step is defined by `NumberOfWavelengthPoints`. If `ResimulateTracksForDifferentWavelengths` = false
        generate one set of tracks and define a step size of 1 ie all bins are visited. At the moment there are no wavelength dependent effects in the simulation that affect the simulation of the track geometry so the default value for `ResimulateTracksForDifferentWavelengths` is false.
@@ -106,7 +106,7 @@ The simulation may take long to complete on instruments with a large number of d
 The sparse instrument consists of a grid of detectors covering the full instrument entirely. The figure below shows an example of a such an instrument approximating the IN5 spectrometer at ILL.
 
 .. figure:: ../images/MonteCarloAbsorption_Sparse_Instrument.png
-   :alt: IN5 spectrometer and its sparse approximation. 
+   :alt: IN5 spectrometer and its sparse approximation.
    :scale: 60%
 
    Absorption corrections for IN5 spectrometer interpolated from the sparse instrument shown on the right. The sparse instrument has 6 detector rows and 22 columns, a total of 132 detectors. IN5, on the other hand, has approximately 100000 detectors.
@@ -129,7 +129,7 @@ If :math:`D` coincides with any :math:`D_{ij}`, the :math:`y` values of the hist
 .. math::
 
    y_1 = \frac{(\lambda_2 - \lambda) * y_{11} + (\lambda - \lambda_1) * y_{21}}{\lambda_2 - \lambda_1}
-   
+
    y_2 = \frac{(\lambda_2 - \lambda) * y_{12} + (\lambda - \lambda_1) * y_{22}}{\lambda_2 - \lambda_1},
 
 and then finally in the latitude direction:
@@ -137,7 +137,7 @@ and then finally in the latitude direction:
 .. math::
 
    y = \frac{(\phi_2 - \phi) * y_1 + (\phi - \phi_1) * y_2}{\phi_2 - \phi_1}
-   
+
 The errors present in the 4 simulated histograms are assumed to be independent and they are propagated through the bilinear formulae given above to give one contribution to the error on the interpolated histogram. The second contribution is the interpolation error (how well the bilinear interpolation matches the actual attenuation factor variation). This is calculated based on the second derivative of the attenuation factor in the :math:`\phi` and :math:`\lambda` directions ([#SEV]_)
 
 Wavelength interpolation for sparse instruments

@@ -30,8 +30,7 @@ public:
     TS_ASSERT_EQUALS(defConstr.z(), 0);
 
     // Constructor from rational numbers
-    V3R rational(RationalNumber(1, 4), RationalNumber(1, 2),
-                 RationalNumber(2, 3));
+    V3R rational(RationalNumber(1, 4), RationalNumber(1, 2), RationalNumber(2, 3));
     V3D rationalV3D = rational;
     TS_ASSERT_EQUALS(rationalV3D.X(), 0.25);
     TS_ASSERT_EQUALS(rationalV3D.Y(), 0.5);
@@ -44,8 +43,7 @@ public:
     TS_ASSERT_EQUALS(rationalIntVec.z(), 1);
 
     std::vector<int> bad(4, 1);
-    TS_ASSERT_THROWS(V3R rationalIntVecBad(bad),
-                     const Mantid::Kernel::Exception::MisMatch<size_t> &);
+    TS_ASSERT_THROWS(V3R rationalIntVecBad(bad), const Mantid::Kernel::Exception::MisMatch<size_t> &);
 
     // copy constructor
     V3R copied(rational);
@@ -88,13 +86,11 @@ public:
     TS_ASSERT_THROWS_NOTHING(vector[0] = RationalNumber(2, 3));
     TS_ASSERT_THROWS_NOTHING(vector[1] = RationalNumber(2, 3));
     TS_ASSERT_THROWS_NOTHING(vector[2] = RationalNumber(2, 3));
-    TS_ASSERT_THROWS(vector[3] = RationalNumber(2, 3),
-                     const Mantid::Kernel::Exception::IndexError &);
+    TS_ASSERT_THROWS(vector[3] = RationalNumber(2, 3), const Mantid::Kernel::Exception::IndexError &);
   }
 
   void testIntegerAddition() {
-    V3R vector(RationalNumber(1, 4), RationalNumber(2, 3),
-               RationalNumber(1, 2));
+    V3R vector(RationalNumber(1, 4), RationalNumber(2, 3), RationalNumber(1, 2));
     V3R originalVector(vector);
 
     V3R vectorAdd = vector + 1;
@@ -110,8 +106,7 @@ public:
   }
 
   void testIntegerSubtraction() {
-    V3R vector(RationalNumber(1, 4), RationalNumber(2, 3),
-               RationalNumber(1, 2));
+    V3R vector(RationalNumber(1, 4), RationalNumber(2, 3), RationalNumber(1, 2));
     V3R originalVector(vector);
 
     V3R vectorAdd = vector - 1;
@@ -127,8 +122,7 @@ public:
   }
 
   void testIntegerMultiplication() {
-    V3R vector(RationalNumber(1, 4), RationalNumber(2, 3),
-               RationalNumber(1, 2));
+    V3R vector(RationalNumber(1, 4), RationalNumber(2, 3), RationalNumber(1, 2));
     V3R originalVector(vector);
 
     V3R vectorAdd = vector * 2;
@@ -149,8 +143,7 @@ public:
   }
 
   void testIntegerDivision() {
-    V3R vector(RationalNumber(1, 4), RationalNumber(2, 3),
-               RationalNumber(1, 2));
+    V3R vector(RationalNumber(1, 4), RationalNumber(2, 3), RationalNumber(1, 2));
     V3R originalVector(vector);
 
     V3R vectorAdd = vector / 2;
@@ -168,8 +161,7 @@ public:
   }
 
   void testRationalAddition() {
-    V3R vector(RationalNumber(1, 4), RationalNumber(2, 3),
-               RationalNumber(1, 2));
+    V3R vector(RationalNumber(1, 4), RationalNumber(2, 3), RationalNumber(1, 2));
     V3R originalVector(vector);
 
     V3R vectorAdd = vector + RationalNumber(1, 2);
@@ -185,8 +177,7 @@ public:
   }
 
   void testRationalSubtraction() {
-    V3R vector(RationalNumber(1, 4), RationalNumber(2, 3),
-               RationalNumber(1, 2));
+    V3R vector(RationalNumber(1, 4), RationalNumber(2, 3), RationalNumber(1, 2));
     V3R originalVector(vector);
 
     V3R vectorAdd = vector - RationalNumber(1, 2);
@@ -202,8 +193,7 @@ public:
   }
 
   void testRationalMultiplication() {
-    V3R vector(RationalNumber(1, 4), RationalNumber(2, 3),
-               RationalNumber(1, 2));
+    V3R vector(RationalNumber(1, 4), RationalNumber(2, 3), RationalNumber(1, 2));
     V3R originalVector(vector);
 
     V3R vectorAdd = vector * RationalNumber(1, 2);
@@ -219,8 +209,7 @@ public:
   }
 
   void testRationalDivision() {
-    V3R vector(RationalNumber(1, 4), RationalNumber(2, 3),
-               RationalNumber(1, 2));
+    V3R vector(RationalNumber(1, 4), RationalNumber(2, 3), RationalNumber(1, 2));
     V3R originalVector(vector);
 
     V3R vectorAdd = vector / RationalNumber(1, 2);
@@ -236,10 +225,8 @@ public:
   }
 
   void testVectorAddition() {
-    V3R vector(RationalNumber(1, 4), RationalNumber(2, 3),
-               RationalNumber(1, 2));
-    V3R otherVector(RationalNumber(-3, 7), RationalNumber(1, 3),
-                    RationalNumber(7, 9));
+    V3R vector(RationalNumber(1, 4), RationalNumber(2, 3), RationalNumber(1, 2));
+    V3R otherVector(RationalNumber(-3, 7), RationalNumber(1, 3), RationalNumber(7, 9));
     V3R originalVector(vector);
 
     V3R vectorAdd = vector + otherVector;
@@ -260,10 +247,8 @@ public:
   }
 
   void testVectorSubtraction() {
-    V3R vector(RationalNumber(1, 4), RationalNumber(2, 3),
-               RationalNumber(1, 2));
-    V3R otherVector(RationalNumber(-3, 7), RationalNumber(1, 3),
-                    RationalNumber(7, 9));
+    V3R vector(RationalNumber(1, 4), RationalNumber(2, 3), RationalNumber(1, 2));
+    V3R otherVector(RationalNumber(-3, 7), RationalNumber(1, 3), RationalNumber(7, 9));
     V3R originalVector(vector);
 
     V3R vectorAdd = vector - otherVector;
@@ -284,8 +269,7 @@ public:
   }
 
   void testV3DAddition() {
-    V3R vector(RationalNumber(1, 4), RationalNumber(2, 3),
-               RationalNumber(1, 2));
+    V3R vector(RationalNumber(1, 4), RationalNumber(2, 3), RationalNumber(1, 2));
     V3D factor(0.5, 0.5, 0.5);
 
     V3D newVector = factor + vector;
@@ -305,8 +289,7 @@ public:
   }
 
   void testV3DSubtraction() {
-    V3R vector(RationalNumber(1, 4), RationalNumber(2, 3),
-               RationalNumber(1, 2));
+    V3R vector(RationalNumber(1, 4), RationalNumber(2, 3), RationalNumber(1, 2));
     V3D factor(0.5, 0.5, 0.5);
 
     V3D newVector = factor - vector;
@@ -326,8 +309,7 @@ public:
     V3R two(RationalNumber(1, 4), RationalNumber(2, 3), RationalNumber(1, 2));
     TS_ASSERT_EQUALS(one, two);
 
-    V3R three(RationalNumber(2, 8), RationalNumber(6, 9),
-              RationalNumber(14, 28));
+    V3R three(RationalNumber(2, 8), RationalNumber(6, 9), RationalNumber(14, 28));
     TS_ASSERT_EQUALS(one, three);
 
     V3R four(RationalNumber(1, 5), RationalNumber(2, 3), RationalNumber(1, 2));
@@ -370,8 +352,7 @@ public:
   }
 
   void testMatrixMultiplication() {
-    V3R vector(RationalNumber(1, 4), RationalNumber(2, 3),
-               RationalNumber(1, 2));
+    V3R vector(RationalNumber(1, 4), RationalNumber(2, 3), RationalNumber(1, 2));
     // unit matrix - resulting vector must be equal
     IntMatrix unity(3, 3, true);
     V3R transformedUnity = unity * vector;
@@ -397,19 +378,16 @@ public:
     operation[2][2] = 0;
 
     V3R transformedGeneral = operation * vector;
-    TS_ASSERT_EQUALS(transformedGeneral.x(), RationalNumber(7, 6)); // y + z
-    TS_ASSERT_EQUALS(transformedGeneral.y(),
-                     RationalNumber(1, 12)); // x - y + z
+    TS_ASSERT_EQUALS(transformedGeneral.x(), RationalNumber(7, 6));    // y + z
+    TS_ASSERT_EQUALS(transformedGeneral.y(), RationalNumber(1, 12));   // x - y + z
     TS_ASSERT_EQUALS(transformedGeneral.z(), RationalNumber(-11, 12)); // -x - y
 
     // wrong sizes
     IntMatrix wrongOne(3, 4);
-    TS_ASSERT_THROWS(wrongOne * vector,
-                     const Mantid::Kernel::Exception::MisMatch<size_t> &);
+    TS_ASSERT_THROWS(wrongOne * vector, const Mantid::Kernel::Exception::MisMatch<size_t> &);
 
     IntMatrix wrongTwo(4, 3);
-    TS_ASSERT_THROWS(wrongTwo * vector,
-                     const Mantid::Kernel::Exception::IndexError &);
+    TS_ASSERT_THROWS(wrongTwo * vector, const Mantid::Kernel::Exception::IndexError &);
 
     // Smaller works
     IntMatrix wrongThree(2, 3);

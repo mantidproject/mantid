@@ -82,8 +82,7 @@ public:
   void write(std::ostream &) const override;
 
   /// This will get the bounding box for the cone
-  void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin,
-                      double &ymin, double &zmin) override;
+  void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin) override;
 
   /// The number of slices to approximate a cone
   constexpr static int g_NSLICES = 10;

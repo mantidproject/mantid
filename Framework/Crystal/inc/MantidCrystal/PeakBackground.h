@@ -35,22 +35,19 @@ private:
   /// MD coordinates to use
   Mantid::Kernel::SpecialCoordinateSystem m_mdCoordinates;
   /// Pointer to member function used for coordinate determination.
-  boost::function<Mantid::Kernel::V3D(const Mantid::Geometry::IPeak *)>
-      m_coordFunction;
+  boost::function<Mantid::Kernel::V3D(const Mantid::Geometry::IPeak *)> m_coordFunction;
 
 public:
   /// Constructor
-  PeakBackground(Mantid::API::IPeaksWorkspace_const_sptr peaksWS,
-                 const double &radiusEstimate, const double &thresholdSignal,
-                 const Mantid::API::MDNormalization normalisation,
+  PeakBackground(Mantid::API::IPeaksWorkspace_const_sptr peaksWS, const double &radiusEstimate,
+                 const double &thresholdSignal, const Mantid::API::MDNormalization normalisation,
                  const Mantid::Kernel::SpecialCoordinateSystem coordinates);
 
   /// Overriden is background function
   bool isBackground(Mantid::API::IMDIterator *iterator) const override;
 
   /// Overriden configure iterator function.
-  void
-  configureIterator(Mantid::API::IMDIterator *const iterator) const override;
+  void configureIterator(Mantid::API::IMDIterator *const iterator) const override;
 
   /// Virutal constructor
   PeakBackground *clone() const override;

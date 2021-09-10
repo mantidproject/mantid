@@ -106,11 +106,9 @@ public:
     TS_ASSERT(loadWorkspace("nom_gr.nxs", groupName + "_1"));
     TS_ASSERT(loadWorkspace("nom_gr.nxs", groupName + "_2"));
 
-    auto grpAlg =
-        AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
+    auto grpAlg = AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
     grpAlg->initialize();
-    grpAlg->setPropertyValue("InputWorkspaces",
-                             groupName + "_1," + groupName + "_2");
+    grpAlg->setPropertyValue("InputWorkspaces", groupName + "_1," + groupName + "_2");
     grpAlg->setPropertyValue("OutputWorkspace", groupName);
     grpAlg->execute();
 
@@ -121,8 +119,7 @@ public:
     SaveRMCProfile alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", groupName));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("Filename", "SaveRMCProfileGroup.gr"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "SaveRMCProfileGroup.gr"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 

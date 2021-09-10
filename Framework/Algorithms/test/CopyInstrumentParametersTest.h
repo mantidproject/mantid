@@ -30,9 +30,7 @@ using Mantid::Kernel::V3D;
 
 class CopyInstrumentParametersTest : public CxxTest::TestSuite {
 public:
-  void testName() {
-    TS_ASSERT_EQUALS(copyInstParam.name(), "CopyInstrumentParameters")
-  }
+  void testName() { TS_ASSERT_EQUALS(copyInstParam.name(), "CopyInstrumentParameters") }
 
   void testInit() {
     copyInstParam.initialize();
@@ -42,9 +40,7 @@ public:
   void testExec_SameInstr() {
     // Create input workspace with parameterized instrument and put into data
     // store
-    MatrixWorkspace_sptr ws1 =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 10,
-                                                                     true);
+    MatrixWorkspace_sptr ws1 = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 10, true);
     const std::string wsName1("CopyInstParamWs1");
     AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();
     dataStore.add(wsName1, ws1);
@@ -55,10 +51,8 @@ public:
     dataStore.add(wsName2, ws2);
 
     // Set properties
-    TS_ASSERT_THROWS_NOTHING(
-        copyInstParam.setPropertyValue("InputWorkspace", wsName1));
-    TS_ASSERT_THROWS_NOTHING(
-        copyInstParam.setPropertyValue("OutputWorkspace", wsName2));
+    TS_ASSERT_THROWS_NOTHING(copyInstParam.setPropertyValue("InputWorkspace", wsName1));
+    TS_ASSERT_THROWS_NOTHING(copyInstParam.setPropertyValue("OutputWorkspace", wsName2));
     // Get instrument of input workspace and move some detectors
     ParameterMap *pmap;
     pmap = &(ws1->instrumentParameters());
@@ -111,8 +105,7 @@ public:
     // Create input workspace with parameterized instrument and put into data
     // store
     MatrixWorkspace_sptr ws1 =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-            4, 10, true, false, true, "Instr_modified");
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(4, 10, true, false, true, "Instr_modified");
     const std::string wsName1("CopyInstParamWs1");
     AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();
     dataStore.add(wsName1, ws1);
@@ -129,9 +122,7 @@ public:
 
     // Create output workspace with another parameterized instrument and put
     // into data store
-    MatrixWorkspace_sptr ws2 =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 10,
-                                                                     true);
+    MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 10, true);
     const std::string wsName2("CopyInstParamWs2");
     dataStore.add(wsName2, ws2);
 
@@ -143,10 +134,8 @@ public:
     detectorInfoWs2.setPosition(1, V3D(6.0, 0.2, 0.7));
 
     // Set properties
-    TS_ASSERT_THROWS_NOTHING(
-        copyInstParam.setPropertyValue("InputWorkspace", wsName1));
-    TS_ASSERT_THROWS_NOTHING(
-        copyInstParam.setPropertyValue("OutputWorkspace", wsName2));
+    TS_ASSERT_THROWS_NOTHING(copyInstParam.setPropertyValue("InputWorkspace", wsName1));
+    TS_ASSERT_THROWS_NOTHING(copyInstParam.setPropertyValue("OutputWorkspace", wsName2));
 
     // Execute Algorithm, should warn but proceed
     copyInstParam.setRethrows(true);
@@ -199,20 +188,15 @@ public:
   static CopyInstrumentParametersTestPerformance *createSuite() {
     return new CopyInstrumentParametersTestPerformance();
   }
-  static void destroySuite(CopyInstrumentParametersTestPerformance *suite) {
-    delete suite;
-  }
+  static void destroySuite(CopyInstrumentParametersTestPerformance *suite) { delete suite; }
 
-  CopyInstrumentParametersTestPerformance()
-      : m_SourceWSName("SourceWS"), m_TargetWSName("TargWS") {
+  CopyInstrumentParametersTestPerformance() : m_SourceWSName("SourceWS"), m_TargetWSName("TargWS") {
     size_t n_detectors = 44327;
     size_t n_Parameters = 200;
     // Create input workspace with parameterized instrument and put into data
     // store
-    MatrixWorkspace_sptr ws1 =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-            static_cast<int>(n_detectors + 2), 10, true, false, true,
-            "Instr_calibrated");
+    MatrixWorkspace_sptr ws1 = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+        static_cast<int>(n_detectors + 2), 10, true, false, true, "Instr_calibrated");
     AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();
     dataStore.add(m_SourceWSName, ws1);
 
@@ -221,24 +205,19 @@ public:
     pmap = &(ws1->instrumentParameters());
     for (size_t i = 0; i < n_Parameters; i++) {
       // add auxiliary instrument parameters
-      pmap->addDouble(instrument.get(),
-                      "Param-" + boost::lexical_cast<std::string>(i),
-                      static_cast<double>(i * 10));
+      pmap->addDouble(instrument.get(), "Param-" + boost::lexical_cast<std::string>(i), static_cast<double>(i * 10));
     }
     // calibrate detectors;
     auto &detectorInfo = ws1->mutableDetectorInfo();
     for (size_t i = 0; i < n_detectors; i++) {
-      size_t detIndex =
-          detectorInfo.indexOf(static_cast<Mantid::detid_t>(i + 1));
-      detectorInfo.setPosition(
-          detIndex, V3D(sin(M_PI * double(i)), cos(M_PI * double(i / 500)), 7));
+      size_t detIndex = detectorInfo.indexOf(static_cast<Mantid::detid_t>(i + 1));
+      detectorInfo.setPosition(detIndex, V3D(sin(M_PI * double(i)), cos(M_PI * double(i / 500)), 7));
     }
 
     // Create output workspace with another parameterized instrument and put
     // into data store
-    MatrixWorkspace_sptr ws2 =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-            static_cast<int>(n_detectors), 10, true, false, true, "Instr_base");
+    MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+        static_cast<int>(n_detectors), 10, true, false, true, "Instr_base");
     dataStore.add(m_TargetWSName, ws2);
 
     copyInstParam.initialize();
@@ -248,10 +227,8 @@ public:
   void test_copy_performance() {
 
     // Set properties
-    TS_ASSERT_THROWS_NOTHING(
-        copyInstParam.setPropertyValue("InputWorkspace", m_SourceWSName));
-    TS_ASSERT_THROWS_NOTHING(
-        copyInstParam.setPropertyValue("OutputWorkspace", m_TargetWSName));
+    TS_ASSERT_THROWS_NOTHING(copyInstParam.setPropertyValue("InputWorkspace", m_SourceWSName));
+    TS_ASSERT_THROWS_NOTHING(copyInstParam.setPropertyValue("OutputWorkspace", m_TargetWSName));
 
     // Execute Algorithm, should warn but proceed
     copyInstParam.setRethrows(true);
@@ -260,16 +237,14 @@ public:
     TS_ASSERT(copyInstParam.execute());
     clock_t t_end = clock();
 
-    double seconds = static_cast<double>(t_end - t_start) /
-                     static_cast<double>(CLOCKS_PER_SEC);
+    double seconds = static_cast<double>(t_end - t_start) / static_cast<double>(CLOCKS_PER_SEC);
     std::cout << " Time to copy all parameters is: " << seconds << " sec\n";
 
     TS_ASSERT(copyInstParam.isExecuted());
     TS_ASSERT(copyInstParam.isInstrumentDifferent());
 
     AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();
-    MatrixWorkspace_sptr ws2 =
-        dataStore.retrieveWS<MatrixWorkspace>(m_TargetWSName);
+    MatrixWorkspace_sptr ws2 = dataStore.retrieveWS<MatrixWorkspace>(m_TargetWSName);
     auto instr2 = ws2->getInstrument();
 
     auto param_names = instr2->getParameterNames();

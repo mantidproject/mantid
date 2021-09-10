@@ -26,10 +26,8 @@ namespace {
  * @returns A pointer to a new BoundedValidator object
  */
 template <typename T>
-ArrayBoundedValidator<T> *
-createExclusiveArrayBoundedValidator(object lower = object(),
-                                     object upper = object(),
-                                     const bool exclusive = false) {
+ArrayBoundedValidator<T> *createExclusiveArrayBoundedValidator(object lower = object(), object upper = object(),
+                                                               const bool exclusive = false) {
   auto validator = std::make_unique<ArrayBoundedValidator<T>>();
   if (lower.ptr() != Py_None) {
     validator->setLower(extract<T>(lower));
@@ -42,47 +40,32 @@ createExclusiveArrayBoundedValidator(object lower = object(),
   return validator.release();
 }
 
-#define EXPORT_ARRAYBOUNDEDVALIDATOR(type, prefix)                             \
-  class_<ArrayBoundedValidator<type>, bases<IValidator>, boost::noncopyable>(  \
-      #prefix "ArrayBoundedValidator")                                         \
-      .def(init<type, type>(                                                   \
-          (arg("self"), arg("lowerBound"), arg("upperBound")),                 \
-          "Construct a validator to ensure each value is in the given range")) \
-      .def("__init__",                                                         \
-           make_constructor(&createExclusiveArrayBoundedValidator<type>,       \
-                            default_call_policies(),                           \
-                            (arg("lower") = object(), arg("upper") = object(), \
-                             arg("exclusive") = false)))                       \
-      .def("hasLower", &ArrayBoundedValidator<type>::hasLower, arg("self"),    \
-           "Return true if a lower bound has been set")                        \
-      .def("hasUpper", &ArrayBoundedValidator<type>::hasUpper, arg("self"),    \
-           "Return true if an upper bound has been set")                       \
-      .def("lower", &ArrayBoundedValidator<type>::lower, arg("self"),          \
-           "Return the lower bound")                                           \
-      .def("upper", &ArrayBoundedValidator<type>::upper, arg("self"),          \
-           "Return the upper bound")                                           \
-      .def("setLowerExclusive",                                                \
-           &ArrayBoundedValidator<type>::setLowerExclusive,                    \
-           (arg("self"), arg("exclusive")),                                    \
-           "Set if the lower bound is exclusive")                              \
-      .def("setUpperExclusive",                                                \
-           &ArrayBoundedValidator<type>::setUpperExclusive,                    \
-           (arg("self"), arg("exclusive")),                                    \
-           "Set if the upper bound is exclusive")                              \
-      .def("setExclusive", &ArrayBoundedValidator<type>::setExclusive,         \
-           (arg("self"), arg("exclusive")), "Set if the bounds are exclusive") \
-      .def("isLowerExclusive", &ArrayBoundedValidator<type>::isLowerExclusive, \
-           arg("self"), "Return True if the lower bound is exclusive")         \
-      .def("isUpperExclusive", &ArrayBoundedValidator<type>::isUpperExclusive, \
-           arg("self"), "Return True if the upper bound is exclusive")         \
-      .def("setLower", &ArrayBoundedValidator<type>::setLower,                 \
-           (arg("self"), arg("lower")), "Set the lower bound")                 \
-      .def("setUpper", &ArrayBoundedValidator<type>::setUpper,                 \
-           (arg("self"), arg("upper")), "Set the upper bound")                 \
-      .def("clearLower", &ArrayBoundedValidator<type>::clearLower,             \
-           arg("self"), "Clear any set lower bound")                           \
-      .def("clearUpper", &ArrayBoundedValidator<type>::clearUpper,             \
-           arg("self"), "Clear any set upper bound");
+#define EXPORT_ARRAYBOUNDEDVALIDATOR(type, prefix)                                                                     \
+  class_<ArrayBoundedValidator<type>, bases<IValidator>, boost::noncopyable>(#prefix "ArrayBoundedValidator")          \
+      .def(init<type, type>((arg("self"), arg("lowerBound"), arg("upperBound")),                                       \
+                            "Construct a validator to ensure each value is in the given range"))                       \
+      .def("__init__", make_constructor(&createExclusiveArrayBoundedValidator<type>, default_call_policies(),          \
+                                        (arg("lower") = object(), arg("upper") = object(), arg("exclusive") = false))) \
+      .def("hasLower", &ArrayBoundedValidator<type>::hasLower, arg("self"),                                            \
+           "Return true if a lower bound has been set")                                                                \
+      .def("hasUpper", &ArrayBoundedValidator<type>::hasUpper, arg("self"),                                            \
+           "Return true if an upper bound has been set")                                                               \
+      .def("lower", &ArrayBoundedValidator<type>::lower, arg("self"), "Return the lower bound")                        \
+      .def("upper", &ArrayBoundedValidator<type>::upper, arg("self"), "Return the upper bound")                        \
+      .def("setLowerExclusive", &ArrayBoundedValidator<type>::setLowerExclusive, (arg("self"), arg("exclusive")),      \
+           "Set if the lower bound is exclusive")                                                                      \
+      .def("setUpperExclusive", &ArrayBoundedValidator<type>::setUpperExclusive, (arg("self"), arg("exclusive")),      \
+           "Set if the upper bound is exclusive")                                                                      \
+      .def("setExclusive", &ArrayBoundedValidator<type>::setExclusive, (arg("self"), arg("exclusive")),                \
+           "Set if the bounds are exclusive")                                                                          \
+      .def("isLowerExclusive", &ArrayBoundedValidator<type>::isLowerExclusive, arg("self"),                            \
+           "Return True if the lower bound is exclusive")                                                              \
+      .def("isUpperExclusive", &ArrayBoundedValidator<type>::isUpperExclusive, arg("self"),                            \
+           "Return True if the upper bound is exclusive")                                                              \
+      .def("setLower", &ArrayBoundedValidator<type>::setLower, (arg("self"), arg("lower")), "Set the lower bound")     \
+      .def("setUpper", &ArrayBoundedValidator<type>::setUpper, (arg("self"), arg("upper")), "Set the upper bound")     \
+      .def("clearLower", &ArrayBoundedValidator<type>::clearLower, arg("self"), "Clear any set lower bound")           \
+      .def("clearUpper", &ArrayBoundedValidator<type>::clearUpper, arg("self"), "Clear any set upper bound");
 } // namespace
 
 void export_ArrayBoundedValidator() {

@@ -28,30 +28,25 @@ using namespace std;
 /** Initialize the algorithm's properties.
  */
 void SaveIsawUB::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("InputWorkspace", "", Direction::Input),
                   "An input workspace containing the orientation matrix.");
 
   const std::vector<std::string> exts{".mat", ".ub", ".txt"};
-  declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::Save, exts),
-      "Path to an ISAW-style UB matrix text file.");
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Save, exts),
+                  "Path to an ISAW-style UB matrix text file.");
 }
 
 double SaveIsawUB::getErrorVolume(const OrientedLattice &lattice) {
   double Volume;
-  double latticeParams[6] = {lattice.a(),     lattice.b(),    lattice.c(),
-                             lattice.alpha(), lattice.beta(), lattice.gamma()};
-  double lattice_errors[6] = {lattice.errora(),    lattice.errorb(),
-                              lattice.errorc(),    lattice.erroralpha(),
-                              lattice.errorbeta(), lattice.errorgamma()};
+  double latticeParams[6] = {lattice.a(), lattice.b(), lattice.c(), lattice.alpha(), lattice.beta(), lattice.gamma()};
+  double lattice_errors[6] = {lattice.errora(),     lattice.errorb(),    lattice.errorc(),
+                              lattice.erroralpha(), lattice.errorbeta(), lattice.errorgamma()};
   if (lattice.volume() <= 0) {
 
     double xA = cos(lattice.alpha() / 180. * M_PI);
     double xB = cos(lattice.beta() / 180. * M_PI);
     double xC = cos(lattice.gamma() / 180. * M_PI);
-    Volume = lattice.a() * lattice.b() * lattice.c() *
-             sqrt(1 - xA * xA - xB * xB - xC * xC + 2 * xA * xB * xC);
+    Volume = lattice.a() * lattice.b() * lattice.c() * sqrt(1 - xA * xA - xB * xB - xC * xC + 2 * xA * xB * xC);
   } else
     Volume = lattice.volume();
 
@@ -61,20 +56,17 @@ double SaveIsawUB::getErrorVolume(const OrientedLattice &lattice) {
     dV += U * U;
   }
 
-  double U = (lattice_errors[3]) * (sin(2 * latticeParams[3] / 180. * M_PI) -
-                                    sin(latticeParams[3] / 180. * M_PI) *
-                                        cos(latticeParams[4] / 180 * M_PI) *
-                                        cos(latticeParams[5] / 180 * M_PI));
+  double U = (lattice_errors[3]) * (sin(2 * latticeParams[3] / 180. * M_PI) - sin(latticeParams[3] / 180. * M_PI) *
+                                                                                  cos(latticeParams[4] / 180 * M_PI) *
+                                                                                  cos(latticeParams[5] / 180 * M_PI));
   dV += U * U;
-  U = (lattice_errors[4]) * (sin(2 * latticeParams[4] / 180. * M_PI) -
-                             sin(latticeParams[4] / 180. * M_PI) *
-                                 cos(latticeParams[3] / 180 * M_PI) *
-                                 cos(latticeParams[5] / 180 * M_PI));
+  U = (lattice_errors[4]) *
+      (sin(2 * latticeParams[4] / 180. * M_PI) -
+       sin(latticeParams[4] / 180. * M_PI) * cos(latticeParams[3] / 180 * M_PI) * cos(latticeParams[5] / 180 * M_PI));
   dV += U * U;
-  U = (lattice_errors[5]) * (sin(2 * latticeParams[5] / 180. * M_PI) -
-                             sin(latticeParams[5] / 180. * M_PI) *
-                                 cos(latticeParams[4] / 180 * M_PI) *
-                                 cos(latticeParams[3] / 180 * M_PI));
+  U = (lattice_errors[5]) *
+      (sin(2 * latticeParams[5] / 180. * M_PI) -
+       sin(latticeParams[5] / 180. * M_PI) * cos(latticeParams[4] / 180 * M_PI) * cos(latticeParams[3] / 180 * M_PI));
   dV += U * U;
   dV = sqrt(dV);
 
@@ -87,8 +79,7 @@ void SaveIsawUB::exec() {
   try {
     Workspace_sptr ws1 = getProperty("InputWorkspace");
     ExperimentInfo_sptr ws;
-    MultipleExperimentInfos_sptr MDWS =
-        std::dynamic_pointer_cast<MultipleExperimentInfos>(ws1);
+    MultipleExperimentInfos_sptr MDWS = std::dynamic_pointer_cast<MultipleExperimentInfos>(ws1);
     if (MDWS != nullptr) {
       ws = MDWS->getExperimentInfo(0);
     } else {
@@ -100,8 +91,7 @@ void SaveIsawUB::exec() {
                                   "PeaksWorkspace or a MDWorkspace.");
 
     if (!ws->sample().hasOrientedLattice())
-      throw std::invalid_argument(
-          "Workspace must have an oriented lattice to save");
+      throw std::invalid_argument("Workspace must have an oriented lattice to save");
 
     std::string Filename = getProperty("Filename");
 
@@ -119,9 +109,8 @@ void SaveIsawUB::exec() {
     out << fixed;
 
     for (size_t basis = 0; basis < 3; basis++) {
-      out << setw(11) << setprecision(8) << ub[beam][basis] << setw(12)
-          << setprecision(8) << ub[back][basis] << setw(12) << setprecision(8)
-          << ub[up][basis] << " \n";
+      out << setw(11) << setprecision(8) << ub[beam][basis] << setw(12) << setprecision(8) << ub[back][basis]
+          << setw(12) << setprecision(8) << ub[up][basis] << " \n";
     }
 
     int ModDim = 0;
@@ -135,58 +124,43 @@ void SaveIsawUB::exec() {
     if (ModDim > 0) {
       out << "ModUB: \n";
       for (size_t basis = 0; basis < 3; basis++) {
-        out << setw(11) << setprecision(8) << modub[beam][basis] << setw(12)
-            << setprecision(8) << modub[back][basis] << setw(12)
-            << setprecision(8) << modub[up][basis] << " \n";
+        out << setw(11) << setprecision(8) << modub[beam][basis] << setw(12) << setprecision(8) << modub[back][basis]
+            << setw(12) << setprecision(8) << modub[up][basis] << " \n";
       }
     }
 
     //                out << "Lattice Parameters: \n";
-    out << setw(11) << setprecision(4) << lattice.a() << setw(12)
-        << setprecision(4) << lattice.b() << setw(12) << setprecision(4)
-        << lattice.c() << setw(12) << setprecision(4) << lattice.alpha()
-        << setw(12) << setprecision(4) << lattice.beta() << setw(12)
-        << setprecision(4) << lattice.gamma() << setw(12) << setprecision(4)
-        << lattice.volume() << " \n";
+    out << setw(11) << setprecision(4) << lattice.a() << setw(12) << setprecision(4) << lattice.b() << setw(12)
+        << setprecision(4) << lattice.c() << setw(12) << setprecision(4) << lattice.alpha() << setw(12)
+        << setprecision(4) << lattice.beta() << setw(12) << setprecision(4) << lattice.gamma() << setw(12)
+        << setprecision(4) << lattice.volume() << " \n";
     double ErrorVolume = getErrorVolume(lattice);
-    out << setw(11) << setprecision(4) << lattice.errora() << setw(12)
-        << setprecision(4) << lattice.errorb() << setw(12) << setprecision(4)
-        << lattice.errorc() << setw(12) << setprecision(4)
-        << lattice.erroralpha() << setw(12) << setprecision(4)
-        << lattice.errorbeta() << setw(12) << setprecision(4)
-        << lattice.errorgamma() << setw(12) << setprecision(4) << ErrorVolume
-        << " \n";
+    out << setw(11) << setprecision(4) << lattice.errora() << setw(12) << setprecision(4) << lattice.errorb()
+        << setw(12) << setprecision(4) << lattice.errorc() << setw(12) << setprecision(4) << lattice.erroralpha()
+        << setw(12) << setprecision(4) << lattice.errorbeta() << setw(12) << setprecision(4) << lattice.errorgamma()
+        << setw(12) << setprecision(4) << ErrorVolume << " \n";
 
     out << "\n";
     if (ModDim >= 1) {
-      out << "Modulation Vector 1:   " << setw(12) << setprecision(4)
-          << lattice.getdh(0) << setw(12) << setprecision(4) << lattice.getdk(0)
-          << setw(12) << setprecision(4) << lattice.getdl(0) << " \n";
+      out << "Modulation Vector 1:   " << setw(12) << setprecision(4) << lattice.getdh(0) << setw(12) << setprecision(4)
+          << lattice.getdk(0) << setw(12) << setprecision(4) << lattice.getdl(0) << " \n";
 
-      out << "Modulation Vector 1 error:   " << setw(6) << setprecision(4)
-          << lattice.getdherr(0) << setw(12) << setprecision(4)
-          << lattice.getdkerr(0) << setw(12) << setprecision(4)
-          << lattice.getdlerr(0) << " \n";
+      out << "Modulation Vector 1 error:   " << setw(6) << setprecision(4) << lattice.getdherr(0) << setw(12)
+          << setprecision(4) << lattice.getdkerr(0) << setw(12) << setprecision(4) << lattice.getdlerr(0) << " \n";
     }
     if (ModDim >= 2) {
-      out << "Modulation Vector 2:   " << setw(12) << setprecision(4)
-          << lattice.getdh(1) << setw(12) << setprecision(4) << lattice.getdk(1)
-          << setw(12) << setprecision(4) << lattice.getdl(1) << " \n";
+      out << "Modulation Vector 2:   " << setw(12) << setprecision(4) << lattice.getdh(1) << setw(12) << setprecision(4)
+          << lattice.getdk(1) << setw(12) << setprecision(4) << lattice.getdl(1) << " \n";
 
-      out << "Modulation Vector 2 error:   " << setw(6) << setprecision(4)
-          << lattice.getdherr(1) << setw(12) << setprecision(4)
-          << lattice.getdkerr(1) << setw(12) << setprecision(4)
-          << lattice.getdlerr(1) << " \n";
+      out << "Modulation Vector 2 error:   " << setw(6) << setprecision(4) << lattice.getdherr(1) << setw(12)
+          << setprecision(4) << lattice.getdkerr(1) << setw(12) << setprecision(4) << lattice.getdlerr(1) << " \n";
     }
     if (ModDim == 3) {
-      out << "Modulation Vector 3:   " << setw(12) << setprecision(4)
-          << lattice.getdh(2) << setw(12) << setprecision(4) << lattice.getdk(2)
-          << setw(12) << setprecision(4) << lattice.getdl(2) << " \n";
+      out << "Modulation Vector 3:   " << setw(12) << setprecision(4) << lattice.getdh(2) << setw(12) << setprecision(4)
+          << lattice.getdk(2) << setw(12) << setprecision(4) << lattice.getdl(2) << " \n";
 
-      out << "Modulation Vector 3 error:   " << setw(6) << setprecision(4)
-          << lattice.getdherr(2) << setw(12) << setprecision(4)
-          << lattice.getdkerr(2) << setw(12) << setprecision(4)
-          << lattice.getdlerr(2) << " \n";
+      out << "Modulation Vector 3 error:   " << setw(6) << setprecision(4) << lattice.getdherr(2) << setw(12)
+          << setprecision(4) << lattice.getdkerr(2) << setw(12) << setprecision(4) << lattice.getdlerr(2) << " \n";
     }
     if (ModDim >= 1) {
       out << "\n";

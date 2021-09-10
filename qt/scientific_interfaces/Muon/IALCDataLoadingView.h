@@ -103,8 +103,7 @@ public slots:
   /// Updates the plotted data
   /// @param workspace :: The workspace containing the data
   /// @param workspaceIndex :: the index to plot
-  virtual void setDataCurve(Mantid::API::MatrixWorkspace_sptr workspace,
-                            std::size_t const &workspaceIndex = 0) = 0;
+  virtual void setDataCurve(Mantid::API::MatrixWorkspace_sptr workspace, std::size_t const &workspaceIndex = 0) = 0;
 
   /// Displays an error
   /// @param error :: Error message to display
@@ -167,8 +166,7 @@ public slots:
   virtual std::string getFirstFile() = 0;
 
   /// Set status label for loading
-  virtual void setLoadStatus(const std::string &status,
-                             const std::string &colour) = 0;
+  virtual void setLoadStatus(const std::string &status, const std::string &colour) = 0;
 
   /// Handle check/uncheck of runs auto add
   virtual void runsAutoAddToggled(bool autoAdd) = 0;
@@ -186,7 +184,7 @@ signals:
   /// User has finished editing the runs
   void runsEditingFinishedSignal();
 
-  /// New data have been loaded
+  /// New data has been loaded
   void dataChanged();
 
   /// Instrument has been changed
@@ -200,6 +198,9 @@ signals:
 
   /// Runs Auto Add state changed
   void autoAddToggledSignal(bool);
+
+  /// Period Info Button Clicked
+  void periodInfoClicked();
 };
 
 } // namespace CustomInterfaces

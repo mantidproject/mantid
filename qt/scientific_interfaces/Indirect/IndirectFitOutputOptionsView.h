@@ -17,8 +17,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class MANTIDQT_INDIRECT_DLL IndirectFitOutputOptionsView
-    : public IIndirectFitOutputOptionsView {
+class MANTIDQT_INDIRECT_DLL IndirectFitOutputOptionsView : public IIndirectFitOutputOptionsView {
   Q_OBJECT
 
 public:
@@ -30,10 +29,8 @@ public:
 
   void clearPlotWorkspaces() override;
   void clearPlotTypes() override;
-  void setAvailablePlotWorkspaces(
-      std::vector<std::string> const &workspaceNames) override;
-  void setAvailablePlotTypes(
-      std::vector<std::string> const &parameterNames) override;
+  void setAvailablePlotWorkspaces(std::vector<std::string> const &workspaceNames) override;
+  void setAvailablePlotTypes(std::vector<std::string> const &parameterNames) override;
 
   void setPlotGroupWorkspaceIndex(int index) override;
   void setPlotWorkspacesIndex(int index) override;

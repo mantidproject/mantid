@@ -22,8 +22,7 @@ namespace CustomInterfaces {
 /** ALCPeakFittingView : Qt implementation of the ALC Peak Fitting step
   interface.
 */
-class MANTIDQT_MUONINTERFACE_DLL ALCPeakFittingView
-    : public IALCPeakFittingView {
+class MANTIDQT_MUONINTERFACE_DLL ALCPeakFittingView : public IALCPeakFittingView {
 public:
   ALCPeakFittingView(QWidget *widget);
   ~ALCPeakFittingView();
@@ -36,20 +35,14 @@ public:
 public slots:
 
   void initialize() override;
-  void setDataCurve(Mantid::API::MatrixWorkspace_sptr workspace,
-                    std::size_t const &workspaceIndex = 0) override;
-  void setFittedCurve(Mantid::API::MatrixWorkspace_sptr workspace,
-                      std::size_t const &workspaceIndex = 0) override;
-  void setGuessCurve(Mantid::API::MatrixWorkspace_sptr workspace,
-                     std::size_t const &workspaceIndex = 0) override;
+  void setDataCurve(Mantid::API::MatrixWorkspace_sptr workspace, std::size_t const &workspaceIndex = 0) override;
+  void setFittedCurve(Mantid::API::MatrixWorkspace_sptr workspace, std::size_t const &workspaceIndex = 0) override;
+  void setGuessCurve(Mantid::API::MatrixWorkspace_sptr workspace, std::size_t const &workspaceIndex = 0) override;
   void removePlot(QString const &plotName) override;
-  void
-  setFunction(const Mantid::API::IFunction_const_sptr &newFunction) override;
-  void setParameter(const QString &funcIndex, const QString &paramName,
-                    double value) override;
+  void setFunction(const Mantid::API::IFunction_const_sptr &newFunction) override;
+  void setParameter(const QString &funcIndex, const QString &paramName, double value) override;
   void setPeakPickerEnabled(bool enabled) override;
-  void
-  setPeakPicker(const Mantid::API::IPeakFunction_const_sptr &peak) override;
+  void setPeakPicker(const Mantid::API::IPeakFunction_const_sptr &peak) override;
   void displayError(const QString &message) override;
   void help() override;
   void plotGuess() override;

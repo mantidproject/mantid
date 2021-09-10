@@ -29,13 +29,13 @@ Importing this module starts the FrameworkManager instance.
 # std libs
 from collections import OrderedDict, namedtuple
 from contextlib import contextmanager
-import inspect
 import os
 import sys
 
 import mantid
 # This is a simple API so give access to the aliases by default as well
-from mantid import __gui__, api as _api, kernel as _kernel, apiVersion
+from mantid import api as _api, kernel as _kernel
+from mantid import apiVersion  # noqa: F401
 from mantid.kernel import plugins as _plugin_helper
 from mantid.kernel.funcinspect import customise_func as _customise_func, lhs_info as _lhs_info, \
     replace_signature as _replace_signature, LazyFunctionSignature
@@ -138,12 +138,12 @@ def Load(*args, **kwargs):
     try:
         algm.setProperty('Filename', filename)  # Must be set first
     except ValueError as ve:
-        raise ValueError('Problem when setting Filename. This is the detailed error '
-                         'description: ' + str(ve) + '\nIf the file has been found '
-                                                     'but you got this error, you might not have read permissions '
-                                                     'or the file might be corrupted.\nIf the file has not been found, '
-                                                     'you might have forgotten to add its location in the data search '
-                                                     'directories.')
+        msg = f'Problem setting "Filename" in Load: {ve}'
+        raise ValueError(msg + '\nIf the file has been found '
+                               'but you got this error, you might not have read permissions '
+                               'or the file might be corrupted.\nIf the file has not been found, '
+                               'you might have forgotten to add its location in the data search '
+                               'directories.')
     # Remove from keywords so it is not set twice
     if 'Filename' in kwargs:
         del kwargs['Filename']
@@ -210,8 +210,8 @@ def StartLiveData(*args, **kwargs):
             algm.setProperty(name, value)
 
         except ValueError as ve:
-            raise ValueError('Problem when setting %s. This is the detailed error '
-                             'description: %s' % (name, str(ve)))
+            raise ValueError('Problem setting "{}" in {}-v{}: {}'.format(name, algm.name(),
+                                                                         algm.version(), str(ve)))
         except KeyError:
             pass  # ignore if kwargs[name] doesn't exist
 
@@ -407,7 +407,7 @@ def IqtFitSimultaneous(*args, **kwargs):
 # --------------------------------------------------- --------------------------
 
 
-def CutMD(*args, **kwargs):
+def CutMD(*args, **kwargs):  # noqa: C901
     """
     Slices multidimensional workspaces using input projection information and binning limits.
     """
@@ -517,13 +517,8 @@ def CutMD(*args, **kwargs):
         return out_names[0]
 
 
-# enddef
-
-
 _replace_signature(CutMD, ("\bInputWorkspace", "**kwargs"))
 
-
-# --------------------- RenameWorkspace ------------- --------------------------
 
 def RenameWorkspace(*args, **kwargs):
     """ Rename workspace with option to renaming monitors
@@ -555,7 +550,7 @@ def RenameWorkspace(*args, **kwargs):
     _set_logging_option(algm, arguments)
     algm.setAlwaysStoreInADS(True)
     # does not make sense otherwise, this overwrites even the __STORE_ADS_DEFAULT__
-    if __STORE_KEYWORD__ in arguments and not (arguments[__STORE_KEYWORD__] == True):
+    if __STORE_KEYWORD__ in arguments and not (arguments[__STORE_KEYWORD__] is True):
         raise KeyError("RenameWorkspace operates only on named workspaces in ADS.")
 
     for key, val in arguments.items():
@@ -566,13 +561,7 @@ def RenameWorkspace(*args, **kwargs):
     return _gather_returns("RenameWorkspace", lhs, algm)
 
 
-# enddef
-
-
 _replace_signature(RenameWorkspace, ("\bInputWorkspace,[OutputWorkspace],[True||False]", "**kwargs"))
-
-
-# --------------------------------------------------- --------------------------
 
 
 def _get_function_spec(func):
@@ -633,9 +622,6 @@ def _get_function_spec(func):
                 calltip = args[index] + "," + calltip
         calltip = '(' + calltip.rstrip(',') + ')'
     return calltip
-
-
-# --------------------------------------------------- --------------------------
 
 
 def _get_mandatory_args(func_name, required_args, *args, **kwargs):
@@ -712,8 +698,6 @@ def _check_mandatory_args(algorithm, _algm_object, error, *args, **kwargs):
 
 
 # ------------------------ General simple function calls ----------------------
-
-
 def _is_workspace_property(prop):
     """
         Returns true if the property is a workspace property.
@@ -801,7 +785,7 @@ def _merge_keywords_with_lhs(keywords, lhs_args):
     return final_keywords
 
 
-def _gather_returns(func_name, lhs, algm_obj, ignore_regex=None, inout=False):
+def _gather_returns(func_name, lhs, algm_obj, ignore_regex=None, inout=False):  # noqa: C901
     """Gather the return values and ensure they are in the
        correct order as defined by the output properties and
        return them as a tuple. If their is a single return
@@ -929,10 +913,15 @@ def set_properties(alg_object, *args, **kwargs):
     def do_set_property(name, new_value):
         if new_value is None:
             return
-        if isinstance(new_value, _kernel.DataItem) and new_value.name():
-            alg_object.setPropertyValue(key, new_value.name())
-        else:
-            alg_object.setProperty(key, new_value)
+        try:
+            if isinstance(new_value, _kernel.DataItem) and new_value.name():
+                alg_object.setPropertyValue(key, new_value.name())
+            else:
+                alg_object.setProperty(key, new_value)
+        except (RuntimeError, TypeError, ValueError) as e:
+            msg = 'Problem setting "{}" in {}-v{}: {}'.format(name, alg_object.name(), alg_object.version(),
+                                                              str(e))
+            raise e.__class__(msg) from e
 
     # end
     if len(args) > 0:
@@ -1039,7 +1028,8 @@ def _create_algorithm_function(name, version, algm_object):
                         # Check for missing mandatory parameters
                         _check_mandatory_args(name, algm, e, *args, **kwargs)
                     else:
-                        raise
+                        msg = '{}-v{}: {}'.format(algm.name(), algm.version(), str(e))
+                        raise RuntimeError(msg) from e
 
                 return _gather_returns(name, lhs, algm)
         # Set the signature of the callable to be one that is only generated on request.
@@ -1131,7 +1121,7 @@ def _create_fake_function(name):
 
     # ------------------------------------------------------------------------------------------------
     def fake_function(*args, **kwargs):
-        raise RuntimeError("Mantid import error. The mock simple API functions have not been replaced!" +
+        raise RuntimeError("Mantid import error. The mock simple API functions have not been replaced!"
                            " This is an error in the core setup logic of the mantid module, "
                            "please contact the development team.")
 
@@ -1164,7 +1154,7 @@ def _mockup(plugins):
 
         # ------------------------------------------------------------------------------------------------
         def fake_function(*args, **kwargs):
-            raise RuntimeError("Mantid import error. The mock simple API functions have not been replaced!" +
+            raise RuntimeError("Mantid import error. The mock simple API functions have not been replaced!"
                                " This is an error in the core setup logic of the mantid module, "
                                "please contact the development team.")
 

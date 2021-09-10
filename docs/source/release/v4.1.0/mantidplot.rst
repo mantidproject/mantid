@@ -9,7 +9,7 @@ MantidPlot Changes
    :class: screenshot
    :width: 500px
    :align: right
-   
+
 Improvements
 ############
 

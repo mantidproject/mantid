@@ -55,7 +55,7 @@ Output:
     Number of filled time channels: 1020.0
     Output workspace
     Total number of time channels: 1020
-    
+
 .. categories::
 
 .. sourcelink::

@@ -39,8 +39,7 @@ static const signal_t MDMaskValue = std::numeric_limits<double>::quiet_NaN();
 
 class MANTID_API_DLL IMDWorkspace : public Workspace, public API::MDGeometry {
 public:
-  IMDWorkspace(
-      const Parallel::StorageMode storageMode = Parallel::StorageMode::Cloned);
+  IMDWorkspace(const Parallel::StorageMode storageMode = Parallel::StorageMode::Cloned);
   IMDWorkspace &operator=(const IMDWorkspace &other) = delete;
 
   /**
@@ -53,14 +52,10 @@ public:
   };
 
   /// Returns a clone of the workspace
-  std::unique_ptr<IMDWorkspace> clone() const {
-    return std::unique_ptr<IMDWorkspace>(doClone());
-  }
+  std::unique_ptr<IMDWorkspace> clone() const { return std::unique_ptr<IMDWorkspace>(doClone()); }
 
   /// Returns a default-initialized clone of the workspace
-  std::unique_ptr<IMDWorkspace> cloneEmpty() const {
-    return std::unique_ptr<IMDWorkspace>(doCloneEmpty());
-  }
+  std::unique_ptr<IMDWorkspace> cloneEmpty() const { return std::unique_ptr<IMDWorkspace>(doCloneEmpty()); }
 
   /// Get the number of points associated with the workspace.
   /// For MDEvenWorkspace it is the number of events contributing into the
@@ -77,59 +72,48 @@ public:
   virtual uint64_t getNEvents() const = 0;
 
   /// Creates a new iterator pointing to the first cell in the workspace
-  virtual std::vector<std::unique_ptr<IMDIterator>> createIterators(
-      size_t suggestedNumCores = 1,
-      Mantid::Geometry::MDImplicitFunction *function = nullptr) const = 0;
+  virtual std::vector<std::unique_ptr<IMDIterator>>
+  createIterators(size_t suggestedNumCores = 1, Mantid::Geometry::MDImplicitFunction *function = nullptr) const = 0;
 
   /// Returns the (normalized) signal at a given coordinates
-  virtual signal_t
-  getSignalAtCoord(const coord_t *coords,
-                   const Mantid::API::MDNormalization &normalization) const = 0;
+  virtual signal_t getSignalAtCoord(const coord_t *coords, const Mantid::API::MDNormalization &normalization) const = 0;
 
   /// Returns the (normalized) signal at a given coordinates or 0 if the value
   // is masked, used for plotting
-  virtual signal_t getSignalWithMaskAtCoord(
-      const coord_t *coords,
-      const Mantid::API::MDNormalization &normalization) const = 0;
+  virtual signal_t getSignalWithMaskAtCoord(const coord_t *coords,
+                                            const Mantid::API::MDNormalization &normalization) const = 0;
 
   /// Method to generate a line plot through a MD-workspace
-  virtual LinePlot getLinePlot(const Mantid::Kernel::VMD &start,
-                               const Mantid::Kernel::VMD &end,
+  virtual LinePlot getLinePlot(const Mantid::Kernel::VMD &start, const Mantid::Kernel::VMD &end,
                                Mantid::API::MDNormalization normalize) const;
 
-  std::unique_ptr<IMDIterator> createIterator(
-      Mantid::Geometry::MDImplicitFunction *function = nullptr) const;
+  std::unique_ptr<IMDIterator> createIterator(Mantid::Geometry::MDImplicitFunction *function = nullptr) const;
 
   std::string getConvention() const;
   void setConvention(std::string convention);
   std::string changeQConvention();
 
   signal_t getSignalAtVMD(const Mantid::Kernel::VMD &coords,
-                          const Mantid::API::MDNormalization &normalization =
-                              Mantid::API::VolumeNormalization) const;
+                          const Mantid::API::MDNormalization &normalization = Mantid::API::VolumeNormalization) const;
 
   signal_t
   getSignalWithMaskAtVMD(const Mantid::Kernel::VMD &coords,
-                         const Mantid::API::MDNormalization &normalization =
-                             Mantid::API::VolumeNormalization) const;
+                         const Mantid::API::MDNormalization &normalization = Mantid::API::VolumeNormalization) const;
 
   /// Setter for the masking region.
-  virtual void setMDMasking(
-      std::unique_ptr<Mantid::Geometry::MDImplicitFunction> maskingRegion) = 0;
+  virtual void setMDMasking(std::unique_ptr<Mantid::Geometry::MDImplicitFunction> maskingRegion) = 0;
 
   /// Clear existing masks
   virtual void clearMDMasking() = 0;
   ///
-  virtual Kernel::SpecialCoordinateSystem
-  getSpecialCoordinateSystem() const = 0;
+  virtual Kernel::SpecialCoordinateSystem getSpecialCoordinateSystem() const = 0;
   /// if a workspace was filebacked, this should clear file-based status, delete
   /// file-based information and close related files.
   virtual void clearFileBacked(bool /* loadFileContentsToMemory*/) {}
   /// this is the method to build table workspace from any workspace. It does
   /// not have much sence and may be placed here erroneously
   virtual ITableWorkspace_sptr makeBoxTable(size_t /*start*/, size_t /* num*/) {
-    throw Kernel::Exception::NotImplementedError(
-        "This method is not generally implemented ");
+    throw Kernel::Exception::NotImplementedError("This method is not generally implemented ");
   }
 
   // Preferred normalization to use for display
@@ -148,8 +132,7 @@ protected:
   /// Protected copy constructor. May be used by childs for cloning.
   IMDWorkspace(const IMDWorkspace &) = default;
 
-  void makeSinglePointWithNaN(std::vector<coord_t> &x, std::vector<signal_t> &y,
-                              std::vector<signal_t> &e) const;
+  void makeSinglePointWithNaN(std::vector<coord_t> &x, std::vector<signal_t> &y, std::vector<signal_t> &e) const;
 
   const std::string toString() const override;
 

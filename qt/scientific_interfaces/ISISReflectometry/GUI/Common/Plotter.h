@@ -25,8 +25,7 @@ public:
   Plotter(IPythonRunner *pythonRunner);
   void runPython(const std::string &pythonCode) const;
 #endif
-  void
-  reflectometryPlot(const std::vector<std::string> &workspaces) const override;
+  void reflectometryPlot(const std::vector<std::string> &workspaces) const override;
 
 private:
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)

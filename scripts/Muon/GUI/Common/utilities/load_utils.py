@@ -179,7 +179,7 @@ def load_dead_time_from_filename(filename):
     :param filename: The full path to the .nxs file.
     :return: The name of the workspace in the ADS.
     """
-    loaded_data, run, _, __ = load_workspace_from_filename(filename)
+    loaded_data, run, _, _ = load_workspace_from_filename(filename)
 
     if is_workspace_group(loaded_data["OutputWorkspace"]):
         dead_times = loaded_data["DataDeadTimeTable"][0]
@@ -204,7 +204,7 @@ def load_workspace_from_filename(filename,
 
     # The filename given to the loading algorithm can be different to the file that was actually loaded.
     # Pulling the filename back out of the algorithm after loading ensures that the path is accurate.
-    filename = alg.getProperty("Filename").value
+    filename = alg.getProperty("Filename").value[0]
     workspace = AnalysisDataService.retrieve(alg.getProperty("OutputWorkspace").valueAsStr)
     if is_workspace_group(workspace):
         # handle multi-period data
@@ -240,22 +240,16 @@ def empty_loaded_data():
 
 
 def create_load_algorithm(filename, property_dictionary):
-    # Assume if .bin it is a PSI file
-    psi_data = False
     output_filename = os.path.basename(filename)
-    if ".bin" in filename:
-        alg = mantid.AlgorithmManager.create("LoadPSIMuonBin")
-        psi_data = True
-    else:
-        alg = mantid.AlgorithmManager.create("LoadMuonNexus")
-        alg.setProperties(property_dictionary)
-    alg.setProperty("DeadTimeTable", output_filename + '_deadtime_table')
-
+    alg = mantid.AlgorithmManager.create("Load")
     alg.initialize()
     alg.setAlwaysStoreInADS(True)
-    alg.setProperty("OutputWorkspace", output_filename)
     alg.setProperty("Filename", filename)
-    return alg, psi_data
+    alg.setProperty("OutputWorkspace", output_filename)
+    alg.setProperty("DeadTimeTable", output_filename + '_deadtime_table')
+    alg.setProperty("DetectorGroupingTable", '__notUsed')
+    # Assume if .bin it is a PSI file so return True, else return False
+    return (alg, True) if ".bin" in filename else (alg, False)
 
 
 def _get_algorithm_properties(alg, property_dict):
@@ -290,8 +284,15 @@ def combine_loaded_runs(model, run_list, delete_added=False):
 
         running_total.append(running_total_item)
 
-    return_ws_actual = {key: return_ws[key] for key in ['MainFieldDirection', 'TimeZero', 'FirstGoodData',
-                                                        'DeadTimeTable', 'DetectorGroupingTable']}
+    return_ws_actual = {key: return_ws[key] for key in ['MainFieldDirection', 'TimeZero', 'FirstGoodData']}
+    try:
+        return_ws_actual['DetectorGroupingTable'] = return_ws['DetectorGroupingTable']
+    except KeyError:
+        pass  # PSI Data does not include Detector Grouping table as it's read from sample logs instead
+    try:
+        return_ws_actual['DeadTimeTable'] = return_ws['DeadTimeTable']
+    except KeyError:
+        pass  # Again, PSI data does not always include DeadTimeTable either
     return_ws_actual["OutputWorkspace"] = [MuonWorkspaceWrapper(running_total_period) for running_total_period in
                                            running_total]
     return_ws_actual['DataDeadTimeTable'] = CloneWorkspace(InputWorkspace=return_ws['DataDeadTimeTable'],

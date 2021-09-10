@@ -55,22 +55,15 @@ public:
   double getLocalParameterValue(const QString &parName, int i) const override;
   bool isLocalParameterFixed(const QString &parName, int i) const override;
   QString getLocalParameterTie(const QString &parName, int i) const override;
-  QString getLocalParameterConstraint(const QString &parName,
-                                      int i) const override;
-  void setLocalParameterValue(const QString &parName, int i,
-                              double value) override;
-  void setLocalParameterValue(const QString &parName, int i, double value,
-                              double error) override;
-  void setLocalParameterFixed(const QString &parName, int i,
-                              bool fixed) override;
-  void setLocalParameterTie(const QString &parName, int i,
-                            const QString &tie) override;
-  void setLocalParameterConstraint(const QString &parName, int i,
-                                   const QString &constraint) override;
+  QString getLocalParameterConstraint(const QString &parName, int i) const override;
+  void setLocalParameterValue(const QString &parName, int i, double value) override;
+  void setLocalParameterValue(const QString &parName, int i, double value, double error) override;
+  void setLocalParameterFixed(const QString &parName, int i, bool fixed) override;
+  void setLocalParameterTie(const QString &parName, int i, const QString &tie) override;
+  void setLocalParameterConstraint(const QString &parName, int i, const QString &constraint) override;
   void setGlobalParameterValue(const QString &paramName, double value) override;
   void changeTie(const QString &parName, const QString &tie) override;
-  void addConstraint(const QString &functionIndex,
-                     const QString &constraint) override;
+  void addConstraint(const QString &functionIndex, const QString &constraint) override;
   void removeConstraint(const QString &paramName) override;
   QStringList getGlobalParameters() const override;
   void setGlobalParameters(const QStringList &globals) override;
@@ -94,8 +87,7 @@ private:
   void checkIndex(int) const;
   void updateGlobals();
   void setResolutionFromWorkspace(IFunction_sptr fun);
-  void setResolutionFromWorkspace(IFunction_sptr fun,
-                                  const MatrixWorkspace_sptr workspace);
+  void setResolutionFromWorkspace(IFunction_sptr fun, const MatrixWorkspace_sptr workspace);
   size_t m_currentDomainIndex = 0;
   // The datasets being fitted. A list of workspace names paired to lists of
   // spectra.

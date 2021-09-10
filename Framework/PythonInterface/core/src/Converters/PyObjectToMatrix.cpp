@@ -31,8 +31,7 @@ namespace Converters {
  * Throws std::invalid_argument if not
  * if that is not the case.
  */
-PyObjectToMatrix::PyObjectToMatrix(const boost::python::object &p)
-    : m_obj(p), m_alreadyMatrix(false) {
+PyObjectToMatrix::PyObjectToMatrix(const boost::python::object &p) : m_obj(p), m_alreadyMatrix(false) {
   // Is it an already wrapped V3D ?
   extract<Kernel::Matrix<double>> converter(p);
   if (converter.check()) {
@@ -42,8 +41,7 @@ PyObjectToMatrix::PyObjectToMatrix(const boost::python::object &p)
   // Is it a 2D numpy array
   if (!NDArray::check(p)) {
     std::ostringstream msg;
-    msg << "Cannot convert object to Matrix. Expected numpy array, found "
-        << p.ptr()->ob_type->tp_name;
+    msg << "Cannot convert object to Matrix. Expected numpy array, found " << p.ptr()->ob_type->tp_name;
     throw std::invalid_argument(msg.str());
   }
   const auto ndim = PyArray_NDIM((PyArrayObject *)p.ptr());
@@ -66,9 +64,8 @@ Kernel::Matrix<double> PyObjectToMatrix::operator()() {
   if (m_alreadyMatrix) {
     return extract<Kernel::Matrix<double>>(m_obj)();
   }
-  auto *ndarray = (PyArrayObject *)PyArray_View(
-      (PyArrayObject *)m_obj.ptr(), PyArray_DescrFromType(NPY_DOUBLE),
-      &PyArray_Type);
+  auto *ndarray =
+      (PyArrayObject *)PyArray_View((PyArrayObject *)m_obj.ptr(), PyArray_DescrFromType(NPY_DOUBLE), &PyArray_Type);
   const auto shape = PyArray_DIMS(ndarray);
   npy_intp nx(shape[0]), ny(shape[1]);
   Kernel::Matrix<double> matrix(nx, ny);

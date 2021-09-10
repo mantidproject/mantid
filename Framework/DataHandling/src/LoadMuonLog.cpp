@@ -16,8 +16,7 @@
 
 namespace {
 void toLower(std::string &name) {
-  std::transform(name.begin(), name.end(), name.begin(),
-                 [](unsigned char c) { return std::tolower(c); });
+  std::transform(name.begin(), name.end(), name.begin(), [](unsigned char c) { return std::tolower(c); });
 }
 } // namespace
 
@@ -42,14 +41,11 @@ LoadMuonLog::LoadMuonLog() {}
 void LoadMuonLog::init() {
   // When used as a Child Algorithm the workspace name is not used - hence the
   // "Anonymous" to satisfy the validator
-  declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "Workspace", "Anonymous", Direction::InOut),
-      "The name of the workspace to which the log data will be added.");
-  declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::Load),
-      "The filename (including its full or relative path) of the "
-      "Muon Nexus file.");
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("Workspace", "Anonymous", Direction::InOut),
+                  "The name of the workspace to which the log data will be added.");
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Load),
+                  "The filename (including its full or relative path) of the "
+                  "Muon Nexus file.");
 }
 
 /** Executes the algorithm. Reading in Log entries from the Nexus file
@@ -94,10 +90,8 @@ void LoadMuonLog::exec() {
   // operation was a success and ended normally
 }
 
-void LoadMuonLog::addLogValueFromIndex(
-    MuonNexusReader &nxload, const int &index,
-    API::MatrixWorkspace_sptr &localWorkspace,
-    std::set<std::string> &logNames) {
+void LoadMuonLog::addLogValueFromIndex(MuonNexusReader &nxload, const int &index,
+                                       API::MatrixWorkspace_sptr &localWorkspace, std::set<std::string> &logNames) {
   std::string newLogName = nxload.getLogName(index);
   // want to keep the original case for the logs
   std::string logNameLower = nxload.getLogName(index);
@@ -110,10 +104,8 @@ void LoadMuonLog::addLogValueFromIndex(
     return;
   }
   logNames.insert(newLogName);
-  auto l_PropertyDouble =
-      std::make_unique<TimeSeriesProperty<double>>(newLogName);
-  auto l_PropertyString =
-      std::make_unique<TimeSeriesProperty<std::string>>(newLogName);
+  auto l_PropertyDouble = std::make_unique<TimeSeriesProperty<double>>(newLogName);
+  auto l_PropertyString = std::make_unique<TimeSeriesProperty<std::string>>(newLogName);
 
   // Read log file into Property which is then stored in Sample object
   if (!nxload.logTypeNumeric(index)) {
@@ -122,6 +114,7 @@ void LoadMuonLog::addLogValueFromIndex(
     for (int j = 0; j < nxload.getLogLength(index); j++) {
       nxload.getLogStringValues(index, j, logTime, logValue);
       l_PropertyString->addValue(logTime, logValue);
+      l_PropertyString->setUnits(nxload.logUnits(index));
     }
   } else {
     double logValue;
@@ -129,6 +122,7 @@ void LoadMuonLog::addLogValueFromIndex(
     for (int j = 0; j < nxload.getLogLength(index); j++) {
       nxload.getLogValues(index, j, logTime, logValue);
       l_PropertyDouble->addValue(logTime, logValue);
+      l_PropertyDouble->setUnits(nxload.logUnits(index));
     }
   }
 
@@ -145,8 +139,7 @@ void LoadMuonLog::addLogValueFromIndex(
  * @returns The string but with all characters in lower case
  */
 std::string LoadMuonLog::stringToLower(std::string strToConvert) {
-  std::transform(strToConvert.begin(), strToConvert.end(), strToConvert.begin(),
-                 ::tolower);
+  std::transform(strToConvert.begin(), strToConvert.end(), strToConvert.begin(), ::tolower);
   return strToConvert; // return the converted string
 }
 
@@ -157,9 +150,8 @@ std::string LoadMuonLog::stringToLower(std::string strToConvert) {
  */
 bool LoadMuonLog::isDateTimeString(const std::string &str) {
   if (str.size() >= 19)
-    if (str.compare(4, 1, "-") == 0 && str.compare(7, 1, "-") == 0 &&
-        str.compare(13, 1, ":") == 0 && str.compare(16, 1, ":") == 0 &&
-        str.compare(10, 1, "T") == 0)
+    if (str.compare(4, 1, "-") == 0 && str.compare(7, 1, "-") == 0 && str.compare(13, 1, ":") == 0 &&
+        str.compare(16, 1, ":") == 0 && str.compare(10, 1, "T") == 0)
       return true;
 
   return false;

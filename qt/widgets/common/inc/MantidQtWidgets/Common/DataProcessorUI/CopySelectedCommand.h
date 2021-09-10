@@ -17,15 +17,11 @@ CopySelectedCommand defines the action "Copy Selected"
 */
 class CopySelectedCommand : public CommandBase {
 public:
-  CopySelectedCommand(DataProcessorPresenter *tablePresenter)
-      : CommandBase(tablePresenter){};
-  CopySelectedCommand(const QDataProcessorWidget &widget)
-      : CommandBase(widget){};
+  CopySelectedCommand(DataProcessorPresenter *tablePresenter) : CommandBase(tablePresenter){};
+  CopySelectedCommand(const QDataProcessorWidget &widget) : CommandBase(widget){};
   virtual ~CopySelectedCommand(){};
 
-  void execute() override {
-    m_presenter->notify(DataProcessorPresenter::CopySelectedFlag);
-  };
+  void execute() override { m_presenter->notify(DataProcessorPresenter::CopySelectedFlag); };
   QString name() override { return QString("Copy Selected"); }
   QString icon() override { return QString("://copy.png"); }
   QString tooltip() override { return QString("Copy selected"); }

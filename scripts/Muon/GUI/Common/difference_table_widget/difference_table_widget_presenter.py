@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import re
 
-from Muon.GUI.Common.muon_group import MuonDiff
+from Muon.GUI.Common.muon_diff import MuonDiff
 from Muon.GUI.Common.utilities.run_string_utils import valid_name_regex
 from mantidqt.utils.observer_pattern import GenericObservable
 from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_model import RowValid
@@ -31,6 +31,11 @@ class DifferenceTablePresenter(object):
         self.selected_diff_changed_notifier = GenericObservable()
 
         self._dataChangedNotifier = lambda: 0
+
+        if group_or_pair == 'pair':
+            self._view.set_table_headers_pairs()
+        else:
+            self._view.set_table_headers_groups()
 
     def show(self):
         self._view.show()
@@ -57,10 +62,10 @@ class DifferenceTablePresenter(object):
             update_model = False
         if diff_columns[col] == 'group_1':
             if changed_item_text == self._view.get_table_item_text(row, diff_columns.index('group_2')):
-                table[row][diff_columns.index('group_2')] = self._model.get_diffs(self._group_or_pair)[row].forward_group
+                table[row][diff_columns.index('group_2')] = self._model.get_diffs(self._group_or_pair)[row].positive
         if diff_columns[col] == 'group_2':
             if changed_item_text == self._view.get_table_item_text(row, diff_columns.index('group_1')):
-                table[row][diff_columns.index('group_1')] = self._model.get_diffs(self._group_or_pair)[row].backward_group
+                table[row][diff_columns.index('group_1')] = self._model.get_diffs(self._group_or_pair)[row].negative
         if diff_columns[col] == 'to_analyse':
             update_model = False
             self.to_analyse_data_checkbox_changed(changed_item.checkState(), row, diff_name)
@@ -90,10 +95,10 @@ class DifferenceTablePresenter(object):
         for diff in self._model.diffs:
             if isinstance(diff, MuonDiff) and diff.group_or_pair == self._group_or_pair:
                 to_analyse = True if diff.name in self._model.selected_diffs else False
-                forward_group_periods = self._model._context.group_pair_context[diff.forward_group].periods
-                backward_group_periods = self._model._context.group_pair_context[diff.backward_group].periods
-                forward_period_warning = self._model.validate_periods_list(forward_group_periods)
-                backward_period_warning = self._model.validate_periods_list(backward_group_periods)
+                positive_periods = self._model._context.group_pair_context[diff.positive].periods
+                negative_periods = self._model._context.group_pair_context[diff.negative].periods
+                forward_period_warning = self._model.validate_periods_list(positive_periods)
+                backward_period_warning = self._model.validate_periods_list(negative_periods)
                 if forward_period_warning==RowValid.invalid_for_all_runs or backward_period_warning == RowValid.invalid_for_all_runs:
                     display_period_warning = RowValid.invalid_for_all_runs
                 elif forward_period_warning==RowValid.valid_for_some_runs or backward_period_warning == RowValid.valid_for_some_runs:
@@ -145,7 +150,7 @@ class DifferenceTablePresenter(object):
         self._view.disable_updates()
         self.update_group_selections()
         assert isinstance(diff, MuonDiff)
-        entry = [str(diff.name), to_analyse, str(diff.forward_group), str(diff.backward_group)]
+        entry = [str(diff.name), to_analyse, str(diff.positive), str(diff.negative)]
         self._view.add_entry_to_table(entry, color, tool_tip)
         self._view.enable_updates()
 

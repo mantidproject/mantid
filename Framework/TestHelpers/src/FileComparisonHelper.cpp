@@ -37,8 +37,7 @@ bool isEolDifference(streamCharIter &streamOne, streamCharIter &streamTwo) {
 
 // Checks if two char streams are identical whilst accounting for
 // EOL differences
-bool checkCharactersAreIdentical(streamCharIter streamOne,
-                                 streamCharIter streamTwo) {
+bool checkCharactersAreIdentical(streamCharIter streamOne, streamCharIter streamTwo) {
   const char charOne = *streamOne;
   const char charTwo = *streamTwo;
 
@@ -51,8 +50,7 @@ bool checkCharactersAreIdentical(streamCharIter streamOne,
   return isEolDifference(streamOne, streamTwo);
 }
 
-void logDifferenceError(char refChar, char testChar, size_t numNewLines,
-                        const std::string &seenChars) {
+void logDifferenceError(char refChar, char testChar, size_t numNewLines, const std::string &seenChars) {
   const std::string lineNumber = std::to_string(numNewLines);
 
   // Build our output string
@@ -84,8 +82,7 @@ namespace FileComparisonHelper {
  *
  * @return True if iterators are identical in value and length else false
  */
-bool areIteratorsEqual(streamCharIter refStream, streamCharIter testStream,
-                       streamCharIter refStreamEnd,
+bool areIteratorsEqual(streamCharIter refStream, streamCharIter testStream, streamCharIter refStreamEnd,
                        streamCharIter testStreamEnd) {
   // Used if we need to display to the user something did not match
   size_t numNewLines = 0;
@@ -138,8 +135,7 @@ bool areIteratorsEqual(streamCharIter refStream, streamCharIter testStream,
  *
  * @return True if files are equal in content and length, else false.
  */
-bool areFilesEqual(const std::string &referenceFileFullPath,
-                   const std::string &outFileFullPath) {
+bool areFilesEqual(const std::string &referenceFileFullPath, const std::string &outFileFullPath) {
   std::ifstream refFileStream(referenceFileFullPath, std::ifstream::binary);
   std::ifstream outFileStream(outFileFullPath, std::ifstream::binary);
 
@@ -165,8 +161,7 @@ bool areFilesEqual(const std::string &referenceFileFullPath,
  *
  * @return True if files are identical else false
  */
-bool areFileStreamsEqual(std::ifstream &referenceFileStream,
-                         std::ifstream &fileToCheck) {
+bool areFileStreamsEqual(std::ifstream &referenceFileStream, std::ifstream &fileToCheck) {
   // Open iterators for function to run on
   streamCharIter refIter(referenceFileStream), checkIter(fileToCheck);
   // Last iterator in istream is equivalent of uninitialized iterator
@@ -191,15 +186,12 @@ bool areFileStreamsEqual(std::ifstream &referenceFileStream,
  * @return :: True if files are equal length and content (ignoring EOL) else
  *false.
  */
-bool isEqualToReferenceFile(const std::string &referenceFileName,
-                            const std::string &outFileFullPath) {
-  const std::string referenceFilePath =
-      Mantid::API::FileFinder::Instance().getFullPath(referenceFileName);
+bool isEqualToReferenceFile(const std::string &referenceFileName, const std::string &outFileFullPath) {
+  const std::string referenceFilePath = Mantid::API::FileFinder::Instance().getFullPath(referenceFileName);
 
   if (referenceFilePath.empty()) {
-    throw std::invalid_argument(
-        "No reference file with the name: " + referenceFileName +
-        " could be found by FileComparisonHelper");
+    throw std::invalid_argument("No reference file with the name: " + referenceFileName +
+                                " could be found by FileComparisonHelper");
   }
   return areFilesEqual(referenceFilePath, outFileFullPath);
 }

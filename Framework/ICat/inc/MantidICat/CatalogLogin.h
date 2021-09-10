@@ -34,18 +34,14 @@ public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "CatalogLogin"; }
   /// Summary of algorithms purpose.
-  const std::string summary() const override {
-    return "Authenticates credentials against a given catalog.";
-  }
+  const std::string summary() const override { return "Authenticates credentials against a given catalog."; }
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
   const std::vector<std::string> seeAlso() const override {
     return {"CatalogLogout", "CatalogSearch", "CatalogPublish"};
   }
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "DataHandling\\Catalog";
-  }
+  const std::string category() const override { return "DataHandling\\Catalog"; }
 
 private:
   /// Overwrites Algorithm method.

@@ -21,14 +21,10 @@ public:
 
   void test_out_of_range() {
     const Histogram histogram(BinEdges{1, 2, 3});
-    TS_ASSERT_THROWS_EQUALS(
-        slice(histogram, 1, 0), const std::out_of_range &e,
-        std::string(e.what()),
-        "Histogram slice: begin must not be greater than end");
-    TS_ASSERT_THROWS_EQUALS(
-        slice(histogram, 0, 3), const std::out_of_range &e,
-        std::string(e.what()),
-        "Histogram slice: end may not be larger than the histogram size");
+    TS_ASSERT_THROWS_EQUALS(slice(histogram, 1, 0), const std::out_of_range &e, std::string(e.what()),
+                            "Histogram slice: begin must not be greater than end");
+    TS_ASSERT_THROWS_EQUALS(slice(histogram, 0, 3), const std::out_of_range &e, std::string(e.what()),
+                            "Histogram slice: end may not be larger than the histogram size");
   }
 
   void test_empty_slice() {

@@ -31,9 +31,7 @@ class ConvertToConstantL2Test : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ConvertToConstantL2Test *createSuite() {
-    return new ConvertToConstantL2Test();
-  }
+  static ConvertToConstantL2Test *createSuite() { return new ConvertToConstantL2Test(); }
   static void destroySuite(ConvertToConstantL2Test *suite) { delete suite; }
 
   ConvertToConstantL2Test() : m_l2(4) { FrameworkManager::Instance(); }
@@ -78,8 +76,7 @@ public:
     TS_ASSERT(c.isExecuted());
 
     Mantid::API::MatrixWorkspace_const_sptr outputWS =
-        Mantid::API::AnalysisDataService::Instance()
-            .retrieveWS<Mantid::API::MatrixWorkspace>(outputWSName);
+        Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(outputWSName);
 
     // AFTER - test the first tube to see if distance was well corrected to l2
     const auto &spectrumInfoOutput = outputWS->spectrumInfo();
@@ -119,8 +116,7 @@ private:
   std::string inputWSName = "test_input_ws";
   std::string outputWSName = "test_output_ws";
 
-  MatrixWorkspace_sptr createTestWorkspace(int numberOfAngles,
-                                           int numberOfBins) {
+  MatrixWorkspace_sptr createTestWorkspace(int numberOfAngles, int numberOfBins) {
     std::vector<double> L2(numberOfAngles, 5);
     std::vector<double> polar(numberOfAngles, (30. / 180.) * M_PI);
     polar[0] = 0;
@@ -131,8 +127,7 @@ private:
     azimuthal[4] = (180. / 180.) * M_PI;
 
     Mantid::API::MatrixWorkspace_sptr inputWS =
-        WorkspaceCreationHelper::createProcessedInelasticWS(
-            L2, polar, azimuthal, numberOfBins, -1, 3, 3);
+        WorkspaceCreationHelper::createProcessedInelasticWS(L2, polar, azimuthal, numberOfBins, -1, 3, 3);
 
     inputWS->getAxis(0)->setUnit("TOF");
 
@@ -160,8 +155,7 @@ private:
     create.execute();
 
     MatrixWorkspace_sptr inputWS =
-        Mantid::API::AnalysisDataService::Instance()
-            .retrieveWS<Mantid::API::MatrixWorkspace>(inputWSName);
+        Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(inputWSName);
     inputWS->populateInstrumentParameters();
 
     addSampleLogs(inputWS);
@@ -170,11 +164,9 @@ private:
   }
 
   void addSampleLogs(const MatrixWorkspace_sptr &inputWS) {
-    inputWS->mutableRun().addProperty(
-        "wavelength", boost::lexical_cast<std::string>(m_wavelength));
+    inputWS->mutableRun().addProperty("wavelength", boost::lexical_cast<std::string>(m_wavelength));
 
-    inputWS->instrumentParameters().addString(
-        inputWS->getInstrument()->getComponentID(), "l2",
-        boost::lexical_cast<std::string>(m_l2));
+    inputWS->instrumentParameters().addString(inputWS->getInstrument()->getComponentID(), "l2",
+                                              boost::lexical_cast<std::string>(m_l2));
   }
 };

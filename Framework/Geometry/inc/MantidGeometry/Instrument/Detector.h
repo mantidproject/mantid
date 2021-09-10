@@ -27,29 +27,22 @@ class Instrument;
   @author Laurent C Chapon, ISIS RAL
   @date 01/11/2007
  */
-class MANTID_GEOMETRY_DLL Detector : public virtual IDetector,
-                                     public ObjComponent {
+class MANTID_GEOMETRY_DLL Detector : public virtual IDetector, public ObjComponent {
 public:
   /// A string representation of the component type
   std::string type() const override { return "DetectorComponent"; }
 
   Detector(const std::string &name, int id, IComponent *parent);
-  Detector(const std::string &name, int id,
-           const std::shared_ptr<IObject> &shape, IComponent *parent);
+  Detector(const std::string &name, int id, const std::shared_ptr<IObject> &shape, IComponent *parent);
   // functions inherited from IObjectComponent
   Component *clone() const override { return new Detector(*this); }
 
   // IDetector methods
-  Detector *cloneParameterized(const ParameterMap *map) const override {
-    return new Detector(this, map);
-  }
+  Detector *cloneParameterized(const ParameterMap *map) const override { return new Detector(this, map); }
   detid_t getID() const override;
-  std::size_t nDets() const override {
-    return 1;
-  } ///< A Detector object represents a single physical detector
+  std::size_t nDets() const override { return 1; } ///< A Detector object represents a single physical detector
   double getDistance(const IComponent &comp) const override;
-  double getTwoTheta(const Kernel::V3D &observer,
-                     const Kernel::V3D &axis) const override;
+  double getTwoTheta(const Kernel::V3D &observer, const Kernel::V3D &axis) const override;
   double getSignedTwoTheta(const Kernel::V3D &observer, const Kernel::V3D &axis,
                            const Kernel::V3D &instrumentUp) const override;
   double getPhi() const override;
@@ -64,8 +57,7 @@ public:
   const ParameterMap &parameterMap() const override;
   size_t index() const override;
 
-  virtual size_t
-  registerContents(class ComponentVisitor &componentVisitor) const override;
+  virtual size_t registerContents(class ComponentVisitor &componentVisitor) const override;
 
 private:
   /// The detector id

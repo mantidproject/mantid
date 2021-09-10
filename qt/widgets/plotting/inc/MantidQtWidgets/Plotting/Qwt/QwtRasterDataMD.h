@@ -46,10 +46,8 @@ public:
   QwtDoubleInterval range() const override;
   void setRange(const QwtDoubleInterval &range);
 
-  virtual void setSliceParams(size_t dimX, size_t dimY,
-                              Mantid::Geometry::IMDDimension_const_sptr X,
-                              Mantid::Geometry::IMDDimension_const_sptr Y,
-                              std::vector<Mantid::coord_t> &slicePoint);
+  virtual void setSliceParams(size_t dimX, size_t dimY, Mantid::Geometry::IMDDimension_const_sptr X,
+                              Mantid::Geometry::IMDDimension_const_sptr Y, std::vector<Mantid::coord_t> &slicePoint);
 
   double value(double x, double y) const override;
 

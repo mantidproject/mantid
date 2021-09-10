@@ -49,36 +49,30 @@ DECLARE_ALGORITHM(LoadGSASInstrumentFile)
  */
 void LoadGSASInstrumentFile::init() {
   // Input file name
-  declareProperty(std::make_unique<FileProperty>("Filename", "",
-                                                 FileProperty::Load, ".prm"),
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Load, ".prm"),
                   "Path to an GSAS file to load.");
 
   // Output table workspace
-  auto wsprop = std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
-      "OutputTableWorkspace", "", Direction::Output, PropertyMode::Optional);
-  declareProperty(std::move(wsprop),
-                  "Name of the output TableWorkspace containing "
-                  "instrument parameter information read from file. ");
+  auto wsprop = std::make_unique<WorkspaceProperty<API::ITableWorkspace>>("OutputTableWorkspace", "", Direction::Output,
+                                                                          PropertyMode::Optional);
+  declareProperty(std::move(wsprop), "Name of the output TableWorkspace containing "
+                                     "instrument parameter information read from file. ");
 
   // Use bank numbers as given in file
-  declareProperty(
-      std::make_unique<PropertyWithValue<bool>>("UseBankIDsInFile", true,
-                                                Direction::Input),
-      "Use bank IDs as given in file rather than ordinal number of bank. "
-      "If the bank IDs in the file are not unique, it is advised to set this "
-      "to false.");
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("UseBankIDsInFile", true, Direction::Input),
+                  "Use bank IDs as given in file rather than ordinal number of bank. "
+                  "If the bank IDs in the file are not unique, it is advised to set this "
+                  "to false.");
 
   // Bank to import
-  declareProperty(std::make_unique<ArrayProperty<int>>("Banks"),
-                  "ID(s) of specified bank(s) to load, "
-                  "The IDs are as specified by UseBankIDsInFile. "
-                  "Default is all banks contained in input .prm file.");
+  declareProperty(std::make_unique<ArrayProperty<int>>("Banks"), "ID(s) of specified bank(s) to load, "
+                                                                 "The IDs are as specified by UseBankIDsInFile. "
+                                                                 "Default is all banks contained in input .prm file.");
 
   // Workspace to put parameters into. It must be a workspace group with one
   // worskpace per bank from the prm file
   declareProperty(
-      std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
-          "Workspace", "", Direction::InOut, PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<WorkspaceGroup>>("Workspace", "", Direction::InOut, PropertyMode::Optional),
       "A workspace group with the instrument to which we add the "
       "parameters from the GSAS instrument file, with one "
       "workspace for each bank of the .prm file");
@@ -110,11 +104,9 @@ void LoadGSASInstrumentFile::exec() {
   std::string histType = getHistogramType(lines);
   if (histType != "PNTR") {
     if (histType.size() == 4) {
-      throw std::runtime_error("Histogram type " + histType +
-                               " not supported \n");
+      throw std::runtime_error("Histogram type " + histType + " not supported \n");
     } else {
-      throw std::runtime_error("Error on checking histogram type: " + histType +
-                               "\n");
+      throw std::runtime_error("Error on checking histogram type: " + histType + "\n");
     }
   }
 
@@ -133,8 +125,7 @@ void LoadGSASInstrumentFile::exec() {
                                            // not equal the number of banks
                                            // found
     g_log.warning() << "The number of banks found" << bankStartIndex.size()
-                    << "is not equal to the number of banks stated" << numBanks
-                    << ".\n";
+                    << "is not equal to the number of banks stated" << numBanks << ".\n";
     g_log.warning() << "Number of banks found is used.";
     numBanks = bankStartIndex.size();
   }
@@ -143,8 +134,7 @@ void LoadGSASInstrumentFile::exec() {
   map<size_t, map<string, double>> bankparammap;
   for (size_t i = 0; i < numBanks; ++i) {
     size_t bankid = i + 1;
-    g_log.debug() << "Parse bank " << bankid << " of total " << numBanks
-                  << ".\n";
+    g_log.debug() << "Parse bank " << bankid << " of total " << numBanks << ".\n";
     map<string, double> parammap;
     parseBank(parammap, lines, bankid, bankStartIndex[bankid - 1]);
     bankparammap.emplace(bankid, parammap);
@@ -184,11 +174,9 @@ void LoadGSASInstrumentFile::exec() {
     }
 
     // Generate workspaceOfBank
-    LoadFullprofResolution::createBankToWorkspaceMap(bankIds, workspaceIds,
-                                                     workspaceOfBank);
+    LoadFullprofResolution::createBankToWorkspaceMap(bankIds, workspaceIds, workspaceOfBank);
     // Put parameters into workspace group
-    LoadFullprofResolution::getTableRowNumbers(
-        outTabWs, LoadFullprofResolution::m_rowNumbers);
+    LoadFullprofResolution::getTableRowNumbers(outTabWs, LoadFullprofResolution::m_rowNumbers);
     for (size_t i = 0; i < bankIds.size(); ++i) {
       int bankId = bankIds[i];
       size_t wsId = workspaceOfBank[bankId];
@@ -198,8 +186,7 @@ void LoadGSASInstrumentFile::exec() {
       API::Column_const_sptr OutTabColumn = outTabWs->getColumn(i + 1);
       std::string parameterXMLString;
       LoadFullprofResolution::putParametersIntoWorkspace(
-          OutTabColumn, workspace, static_cast<int>(bankparammap[i]["NPROF"]),
-          parameterXMLString);
+          OutTabColumn, workspace, static_cast<int>(bankparammap[i]["NPROF"]), parameterXMLString);
       // Load the string into the workspace
       Algorithm_sptr loadParamAlg = createChildAlgorithm("LoadParameterFile");
       loadParamAlg->setProperty("ParameterXML", parameterXMLString);
@@ -214,8 +201,7 @@ void LoadGSASInstrumentFile::exec() {
  * @param filename :: string for name of the .prm file
  * @param lines :: vector of strings for each non-empty line in .prm file
  */
-void LoadGSASInstrumentFile::loadFile(const string &filename,
-                                      vector<string> &lines) {
+void LoadGSASInstrumentFile::loadFile(const string &filename, vector<string> &lines) {
   string line;
 
   // the variable of type ifstream:
@@ -250,8 +236,7 @@ void LoadGSASInstrumentFile::loadFile(const string &filename,
  * @param lines :: vector of strings for each non-empty line in .irf file
  * @return Histogram type code
  */
-std::string
-LoadGSASInstrumentFile::getHistogramType(const vector<string> &lines) {
+std::string LoadGSASInstrumentFile::getHistogramType(const vector<string> &lines) {
   // We assume there is just one HTYPE line, look for it from beginning and
   // return its value.
   std::string lookFor = "INS   HTYPE";
@@ -281,8 +266,7 @@ size_t LoadGSASInstrumentFile::getNumberOfBanks(const vector<string> &lines) {
         // line too short
         return 0;
       }
-      return boost::lexical_cast<size_t>(
-          lines[i].substr(lookFor.size() + 2, 1)); // Found
+      return boost::lexical_cast<size_t>(lines[i].substr(lookFor.size() + 2, 1)); // Found
     }
   }
   return 0;
@@ -293,18 +277,15 @@ size_t LoadGSASInstrumentFile::getNumberOfBanks(const vector<string> &lines) {
  * @param bankStartIndex :: [output] vector of start indices of banks in the
  * order they occur in file
  */
-void LoadGSASInstrumentFile::scanBanks(const std::vector<std::string> &lines,
-                                       std::vector<size_t> &bankStartIndex) {
+void LoadGSASInstrumentFile::scanBanks(const std::vector<std::string> &lines, std::vector<size_t> &bankStartIndex) {
   // We look for each line that contains 'BNKPAR' and take it to be the first
   // line of a bank.
   // We currently ignore the bank number and assume they are numbered according
   // to their order in the file.
   for (size_t i = 0; i < lines.size(); ++i) {
     string line = lines[i];
-    if (line.substr(0, 3) ==
-        "INS") { // Ignore all lines that don't begin with INS
-      if (line.find("BNKPAR") !=
-          string::npos) { // We've found start of a new bank
+    if (line.substr(0, 3) == "INS") {            // Ignore all lines that don't begin with INS
+      if (line.find("BNKPAR") != string::npos) { // We've found start of a new bank
         bankStartIndex.emplace_back(i);
       }
     } // INS
@@ -319,30 +300,26 @@ void LoadGSASInstrumentFile::scanBanks(const std::vector<std::string> &lines,
  * @param startlineindex :: [input] index of the first line of the bank in
  * vector of lines
  */
-void LoadGSASInstrumentFile::parseBank(std::map<std::string, double> &parammap,
-                                       const std::vector<std::string> &lines,
+void LoadGSASInstrumentFile::parseBank(std::map<std::string, double> &parammap, const std::vector<std::string> &lines,
                                        size_t bankid, size_t startlineindex) {
   double param1, param2, param3, param4;
 
   // We ignore the first lines of the bank
   // The first useful line starts with "INS  nPRCF", where n is the bank number
   // From this line we get the profile function and number of parameters
-  size_t currentLineIndex =
-      findINSPRCFLine(lines, startlineindex, param1, param2, param3, param4);
+  size_t currentLineIndex = findINSPRCFLine(lines, startlineindex, param1, param2, param3, param4);
 
   parammap["NPROF"] = param2;
 
   // Ikeda-Carpenter PV
   // Then read 15 parameters from the next four INS lines.
-  currentLineIndex = findINSPRCFLine(lines, currentLineIndex + 1, param1,
-                                     param2, param3, param4);
+  currentLineIndex = findINSPRCFLine(lines, currentLineIndex + 1, param1, param2, param3, param4);
   parammap["Alph0"] = param1;
   parammap["Alph1"] = param2;
   parammap["Beta0"] = param3;
   parammap["Beta1"] = param4; // Kappa
 
-  currentLineIndex = findINSPRCFLine(lines, currentLineIndex + 1, param1,
-                                     param2, param3, param4);
+  currentLineIndex = findINSPRCFLine(lines, currentLineIndex + 1, param1, param2, param3, param4);
   parammap["Sig0"] = param1;
   parammap["Sig1"] = param2;
   parammap["Sig2"] = param3;
@@ -370,9 +347,8 @@ void LoadGSASInstrumentFile::parseBank(std::map<std::string, double> &parammap,
  * @return line index for INS file
  * @throw end of file error
  */
-size_t LoadGSASInstrumentFile::findINSPRCFLine(
-    const std::vector<std::string> &lines, size_t lineIndex, double &param1,
-    double &param2, double &param3, double &param4) {
+size_t LoadGSASInstrumentFile::findINSPRCFLine(const std::vector<std::string> &lines, size_t lineIndex, double &param1,
+                                               double &param2, double &param3, double &param4) {
   for (size_t i = lineIndex; i < lines.size(); ++i) {
     string line = lines[i];
     if ((line.substr(0, 3) == "INS") && (line.substr(6, 4) == "PRCF")) {
@@ -382,8 +358,7 @@ size_t LoadGSASInstrumentFile::findINSPRCFLine(
       return i;
     }
   }
-  throw std::runtime_error(
-      "Unexpected end of file reached while searching for INS line. \n");
+  throw std::runtime_error("Unexpected end of file reached while searching for INS line. \n");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -392,8 +367,7 @@ size_t LoadGSASInstrumentFile::findINSPRCFLine(
  * TODO Resolve duplication of this code with
  * LoadFullprofResolution::genetableWorkspace(...)
  */
-TableWorkspace_sptr LoadGSASInstrumentFile::genTableWorkspace(
-    map<size_t, map<string, double>> bankparammap) {
+TableWorkspace_sptr LoadGSASInstrumentFile::genTableWorkspace(map<size_t, map<string, double>> bankparammap) {
   g_log.notice() << "Start to generate table workspace ...."
                  << ".\n";
 
@@ -410,14 +384,12 @@ TableWorkspace_sptr LoadGSASInstrumentFile::genTableWorkspace(
   vector<size_t> vec_bankids;
 
   map<string, double>::iterator parmapiter;
-  for (parmapiter = bankmapiter->second.begin();
-       parmapiter != bankmapiter->second.end(); ++parmapiter) {
+  for (parmapiter = bankmapiter->second.begin(); parmapiter != bankmapiter->second.end(); ++parmapiter) {
     string parname = parmapiter->first;
     vec_parname.emplace_back(parname);
   }
 
-  for (bankmapiter = bankparammap.begin(); bankmapiter != bankparammap.end();
-       ++bankmapiter) {
+  for (bankmapiter = bankparammap.begin(); bankmapiter != bankparammap.end(); ++bankmapiter) {
     size_t bankid = bankmapiter->first;
     vec_bankids.emplace_back(bankid);
   }

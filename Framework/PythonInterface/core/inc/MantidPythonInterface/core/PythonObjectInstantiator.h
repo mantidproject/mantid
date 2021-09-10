@@ -25,10 +25,8 @@ namespace PythonInterface {
  * the underlying Python object
  */
 struct GILSharedPtrDeleter {
-  GILSharedPtrDeleter(
-      const boost::python::converter::shared_ptr_deleter &deleter)
-      : m_deleter(boost::python::converter::shared_ptr_deleter(deleter.owner)) {
-  }
+  GILSharedPtrDeleter(const boost::python::converter::shared_ptr_deleter &deleter)
+      : m_deleter(boost::python::converter::shared_ptr_deleter(deleter.owner)) {}
   /**
    * Called when the shared_ptr reference count is zero
    * @param data A pointer to the data to be deleted
@@ -45,12 +43,10 @@ struct GILSharedPtrDeleter {
  * @tparam Base A pointer to the C++ type that is stored in within the created
  *              python object
  */
-template <typename Base>
-class PythonObjectInstantiator : public Kernel::AbstractInstantiator<Base> {
+template <typename Base> class PythonObjectInstantiator : public Kernel::AbstractInstantiator<Base> {
 public:
   /// Constructor taking a Python class object wrapped as a boost::python:object
-  PythonObjectInstantiator(const boost::python::object &classObject)
-      : m_classObject(classObject) {}
+  PythonObjectInstantiator(const boost::python::object &classObject) : m_classObject(classObject) {}
 
   /// Creates an instance of the object as shared_ptr to the Base type
   std::shared_ptr<Base> createInstance() const override;
@@ -67,8 +63,7 @@ private:
  * Creates an instance of the object as shared_ptr to the Base type
  * @returns A shared_ptr to Base.
  */
-template <typename Base>
-std::shared_ptr<Base> PythonObjectInstantiator<Base>::createInstance() const {
+template <typename Base> std::shared_ptr<Base> PythonObjectInstantiator<Base>::createInstance() const {
   using namespace boost::python;
   GlobalInterpreterLock gil;
 
@@ -87,8 +82,7 @@ std::shared_ptr<Base> PythonObjectInstantiator<Base>::createInstance() const {
   // Python object or we get a segfault when deleting the objects on later
   // versions of Python 2.7
   auto instancePtr = extract<std::shared_ptr<Base>>(instance)();
-  auto *deleter =
-      std::get_deleter<converter::shared_ptr_deleter, Base>(instancePtr);
+  auto *deleter = std::get_deleter<converter::shared_ptr_deleter, Base>(instancePtr);
   instancePtr.reset(instancePtr.get(), GILSharedPtrDeleter(*deleter));
   return instancePtr;
 }
@@ -97,10 +91,8 @@ std::shared_ptr<Base> PythonObjectInstantiator<Base>::createInstance() const {
  * @throws std::runtime_error as we're unable to extract a non-shared ptr from
  * the wrapped object
  */
-template <typename Base>
-Base *PythonObjectInstantiator<Base>::createUnwrappedInstance() const {
-  throw std::runtime_error(
-      "Unable to create unwrapped instance of Python object");
+template <typename Base> Base *PythonObjectInstantiator<Base>::createUnwrappedInstance() const {
+  throw std::runtime_error("Unable to create unwrapped instance of Python object");
 }
 } // namespace PythonInterface
 } // namespace Mantid

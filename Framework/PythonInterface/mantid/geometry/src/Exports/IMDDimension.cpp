@@ -28,9 +28,7 @@ namespace {
  * @param self A reference to the calling object
  * @return A plain-text string giving the units
  */
-std::string getUnitsAsStr(IMDDimension &self) {
-  return self.getUnits().ascii();
-}
+std::string getUnitsAsStr(IMDDimension &self) { return self.getUnits().ascii(); }
 
 /**
  * @brief getMDFrame
@@ -50,8 +48,7 @@ std::shared_ptr<MDFrame> getMDFrame(const IMDDimension &self) {
  * @return name of the dimension.
  */
 std::string getName(IMDDimension &self) {
-  PyErr_Warn(PyExc_DeprecationWarning,
-             ".getName() is deprecated. Use .name instead.");
+  PyErr_Warn(PyExc_DeprecationWarning, ".getName() is deprecated. Use .name instead.");
   return self.getName();
 }
 
@@ -66,10 +63,8 @@ void export_IMDDimension() {
       .add_property("name", &IMDDimension::getName,
                     "Return the name of the dimension as can be displayed "
                     "along the axis")
-      .def("getMaximum", &IMDDimension::getMaximum, arg("self"),
-           "Return the maximum extent of this dimension")
-      .def("getMinimum", &IMDDimension::getMinimum, arg("self"),
-           "Return the maximum extent of this dimension")
+      .def("getMaximum", &IMDDimension::getMaximum, arg("self"), "Return the maximum extent of this dimension")
+      .def("getMinimum", &IMDDimension::getMinimum, arg("self"), "Return the maximum extent of this dimension")
       .def("getNBins", &IMDDimension::getNBins, arg("self"),
            "Return the number of bins dimension have (an integrated has one). "
            "A axis directed along dimension would have getNBins+1 axis points.")
@@ -77,17 +72,12 @@ void export_IMDDimension() {
            "Return the number of bins boundaries (axis points) dimension have "
            "(an integrated has two). "
            "A axis directed along dimension would have getNBins+1 axis points.")
-      .def("getX", &IMDDimension::getX, (arg("self"), arg("ind")),
-           "Return coordinate of the axis at the given index")
-      .def("getBinWidth", &IMDDimension::getBinWidth, arg("self"),
-           "Return the width of each bin.")
-      .def("getDimensionId", &IMDDimension::getDimensionId, arg("self"),
-           return_value_policy<copy_const_reference>(),
+      .def("getX", &IMDDimension::getX, (arg("self"), arg("ind")), "Return coordinate of the axis at the given index")
+      .def("getBinWidth", &IMDDimension::getBinWidth, arg("self"), "Return the width of each bin.")
+      .def("getDimensionId", &IMDDimension::getDimensionId, arg("self"), return_value_policy<copy_const_reference>(),
            "Return a short name which identify the dimension among other "
            "dimension."
            "A dimension can be usually find by its ID and various  ")
-      .def("getUnits", &getUnitsAsStr, arg("self"),
-           "Return the units associated with this dimension.")
-      .def("getMDFrame", &getMDFrame, arg("self"),
-           "Return the multidimensional frame for this dimension.");
+      .def("getUnits", &getUnitsAsStr, arg("self"), "Return the units associated with this dimension.")
+      .def("getMDFrame", &getMDFrame, arg("self"), "Return the multidimensional frame for this dimension.");
 }

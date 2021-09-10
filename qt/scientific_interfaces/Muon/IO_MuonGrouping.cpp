@@ -41,12 +41,10 @@ using namespace MantidQt::API;
  * @param grouping :: Struct with grouping information
  * @param filename :: XML filename where information will be saved
  */
-void MuonGroupingHelper::saveGroupingToXML(
-    const Mantid::API::Grouping &grouping, const std::string &filename) {
+void MuonGroupingHelper::saveGroupingToXML(const Mantid::API::Grouping &grouping, const std::string &filename) {
   std::ofstream outFile(filename.c_str());
   if (!outFile)
-    throw Mantid::Kernel::Exception::FileError("Unable to open output file",
-                                               filename);
+    throw Mantid::Kernel::Exception::FileError("Unable to open output file", filename);
 
   DOMWriter writer;
   writer.setNewLine("\n");
@@ -85,8 +83,7 @@ void MuonGroupingHelper::saveGroupingToXML(
     gElem->appendChild(bwElem);
 
     Poco::AutoPtr<Element> alphaElem = mDoc->createElement("alpha");
-    alphaElem->setAttribute(
-        "val", boost::lexical_cast<std::string>(grouping.pairAlphas[pi]));
+    alphaElem->setAttribute("val", boost::lexical_cast<std::string>(grouping.pairAlphas[pi]));
     gElem->appendChild(alphaElem);
   }
 
@@ -117,10 +114,8 @@ Mantid::API::Grouping MuonGroupingHelper::parseGroupingTable() const {
 
   // Fill group arrays
   for (size_t gi = 0; gi < groupToRow.size(); gi++) {
-    grouping.groupNames[gi] =
-        m_uiForm.groupTable->item(groupToRow[gi], 0)->text().toStdString();
-    grouping.groups[gi] =
-        m_uiForm.groupTable->item(groupToRow[gi], 1)->text().toStdString();
+    grouping.groupNames[gi] = m_uiForm.groupTable->item(groupToRow[gi], 0)->text().toStdString();
+    grouping.groups[gi] = m_uiForm.groupTable->item(groupToRow[gi], 1)->text().toStdString();
   }
 
   // Parse pair info
@@ -133,24 +128,18 @@ Mantid::API::Grouping MuonGroupingHelper::parseGroupingTable() const {
 
   // Fill pair arrays
   for (size_t pi = 0; pi < pairToRow.size(); pi++) {
-    grouping.pairNames[pi] =
-        m_uiForm.pairTable->item(pairToRow[pi], 0)->text().toStdString();
+    grouping.pairNames[pi] = m_uiForm.pairTable->item(pairToRow[pi], 0)->text().toStdString();
 
-    QComboBox *fwd = static_cast<QComboBox *>(
-        m_uiForm.pairTable->cellWidget(pairToRow[pi], 1));
-    QComboBox *bwd = static_cast<QComboBox *>(
-        m_uiForm.pairTable->cellWidget(pairToRow[pi], 2));
+    QComboBox *fwd = static_cast<QComboBox *>(m_uiForm.pairTable->cellWidget(pairToRow[pi], 1));
+    QComboBox *bwd = static_cast<QComboBox *>(m_uiForm.pairTable->cellWidget(pairToRow[pi], 2));
 
-    grouping.pairs[pi] =
-        std::make_pair(fwd->currentIndex(), bwd->currentIndex());
+    grouping.pairs[pi] = std::make_pair(fwd->currentIndex(), bwd->currentIndex());
 
-    grouping.pairAlphas[pi] =
-        m_uiForm.pairTable->item(pairToRow[pi], 3)->text().toDouble();
+    grouping.pairAlphas[pi] = m_uiForm.pairTable->item(pairToRow[pi], 3)->text().toDouble();
   }
 
   // Use currently selected group/pair as default value
-  grouping.defaultName =
-      m_uiForm.frontGroupGroupPairComboBox->currentText().toStdString();
+  grouping.defaultName = m_uiForm.frontGroupGroupPairComboBox->currentText().toStdString();
 
   return grouping;
 }
@@ -161,35 +150,27 @@ Mantid::API::Grouping MuonGroupingHelper::parseGroupingTable() const {
  * @param grouping :: [input] Grouping struct to use for filling the table
  * @returns Index of default group/group pair
  */
-int MuonGroupingHelper::fillGroupingTable(
-    const Mantid::API::Grouping &grouping) {
+int MuonGroupingHelper::fillGroupingTable(const Mantid::API::Grouping &grouping) {
   // Add groups to a table
   for (int gi = 0; gi < static_cast<int>(grouping.groups.size()); gi++) {
-    m_uiForm.groupTable->setItem(
-        gi, 0, new QTableWidgetItem(grouping.groupNames[gi].c_str()));
-    m_uiForm.groupTable->setItem(
-        gi, 1, new QTableWidgetItem(grouping.groups[gi].c_str()));
+    m_uiForm.groupTable->setItem(gi, 0, new QTableWidgetItem(grouping.groupNames[gi].c_str()));
+    m_uiForm.groupTable->setItem(gi, 1, new QTableWidgetItem(grouping.groups[gi].c_str()));
   }
 
   // Add pairs to the table
   for (int pi = 0; pi < static_cast<int>(grouping.pairs.size()); pi++) {
     // Set the name
-    m_uiForm.pairTable->setItem(
-        pi, 0, new QTableWidgetItem(grouping.pairNames[pi].c_str()));
+    m_uiForm.pairTable->setItem(pi, 0, new QTableWidgetItem(grouping.pairNames[pi].c_str()));
 
     // Set selected forward/backward groups
-    QComboBox *fwd =
-        static_cast<QComboBox *>(m_uiForm.pairTable->cellWidget(pi, 1));
+    QComboBox *fwd = static_cast<QComboBox *>(m_uiForm.pairTable->cellWidget(pi, 1));
     fwd->setCurrentIndex(static_cast<int>(grouping.pairs[pi].first));
-    QComboBox *bwd =
-        static_cast<QComboBox *>(m_uiForm.pairTable->cellWidget(pi, 2));
+    QComboBox *bwd = static_cast<QComboBox *>(m_uiForm.pairTable->cellWidget(pi, 2));
     bwd->setCurrentIndex(static_cast<int>(grouping.pairs[pi].second));
 
     // Set alpha
     m_uiForm.pairTable->setItem(
-        pi, 3,
-        new QTableWidgetItem(
-            boost::lexical_cast<std::string>(grouping.pairAlphas[pi]).c_str()));
+        pi, 3, new QTableWidgetItem(boost::lexical_cast<std::string>(grouping.pairAlphas[pi]).c_str()));
   }
 
   // Set description

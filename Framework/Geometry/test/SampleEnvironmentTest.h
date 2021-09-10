@@ -24,9 +24,7 @@ class SampleEnvironmentTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static SampleEnvironmentTest *createSuite() {
-    return new SampleEnvironmentTest();
-  }
+  static SampleEnvironmentTest *createSuite() { return new SampleEnvironmentTest(); }
   static void destroySuite(SampleEnvironmentTest *suite) { delete suite; }
 
   void test_Constructor_Sets_Name_And_Single_Element() {
@@ -97,8 +95,8 @@ private:
 
     // at centre
     ShapeFactory factory;
-    auto can = std::make_shared<Container>(factory.createShape(
-        ComponentCreationHelper::sphereXML(0.01, V3D(0, 0, 0), "sp-1")));
+    auto can = std::make_shared<Container>(
+        factory.createShape(ComponentCreationHelper::sphereXML(0.01, V3D(0, 0, 0), "sp-1")));
     can->setID("8mm");
     auto kit = std::make_shared<SampleEnvironment>("TestKit", can);
     // before sample

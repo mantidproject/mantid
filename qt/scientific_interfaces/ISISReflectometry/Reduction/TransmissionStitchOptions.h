@@ -27,8 +27,8 @@ using RebinParameters = std::string;
 class MANTIDQT_ISISREFLECTOMETRY_DLL TransmissionStitchOptions {
 public:
   TransmissionStitchOptions();
-  TransmissionStitchOptions(boost::optional<RangeInLambda> overlapRange,
-                            RebinParameters rebinParameters, bool scaleRHS);
+  TransmissionStitchOptions(boost::optional<RangeInLambda> overlapRange, RebinParameters rebinParameters,
+                            bool scaleRHS);
 
   boost::optional<RangeInLambda> overlapRange() const;
   RebinParameters rebinParameters() const;
@@ -40,12 +40,10 @@ private:
   bool m_scaleRHS;
 };
 
-MANTIDQT_ISISREFLECTOMETRY_DLL bool
-operator==(TransmissionStitchOptions const &lhs,
-           TransmissionStitchOptions const &rhs);
-MANTIDQT_ISISREFLECTOMETRY_DLL bool
-operator!=(TransmissionStitchOptions const &lhs,
-           TransmissionStitchOptions const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(TransmissionStitchOptions const &lhs,
+                                               TransmissionStitchOptions const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(TransmissionStitchOptions const &lhs,
+                                               TransmissionStitchOptions const &rhs);
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -123,8 +123,7 @@ int RotaryCounter::operator++()
 {
   int Npart = Rmax - 1;
   int I;
-  for (I = static_cast<int>(RC.size()) - 1; I >= 0 && RC[I] == Npart;
-       I--, Npart--)
+  for (I = static_cast<int>(RC.size()) - 1; I >= 0 && RC[I] == Npart; I--, Npart--)
     ;
 
   if (I < 0) {

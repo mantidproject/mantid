@@ -28,8 +28,7 @@ class MANTID_SINQ_DLL PoldiHeliumDetector : public PoldiAbstractDetector {
 public:
   PoldiHeliumDetector();
 
-  void
-  loadConfiguration(Geometry::Instrument_const_sptr poldiInstrument) override;
+  void loadConfiguration(Geometry::Instrument_const_sptr poldiInstrument) override;
 
   double efficiency() override;
 
@@ -41,17 +40,14 @@ public:
 
   const std::vector<int> &availableElements() override;
 
-  std::pair<double, double> qLimits(double lambdaMin,
-                                    double lambdaMax) override;
+  std::pair<double, double> qLimits(double lambdaMin, double lambdaMax) override;
 
 protected:
   double phi(int elementIndex);
   double phi(double twoTheta);
 
-  void initializeFixedParameters(double radius, size_t elementCount,
-                                 double elementWidth, double newEfficiency);
-  void initializeCalibratedParameters(Kernel::V2D position,
-                                      double centerTwoTheta);
+  void initializeFixedParameters(double radius, size_t elementCount, double elementWidth, double newEfficiency);
+  void initializeCalibratedParameters(Kernel::V2D position, double centerTwoTheta);
 
   /* These detector parameters are fixed and specific to the geometry or result
    * from it directly */

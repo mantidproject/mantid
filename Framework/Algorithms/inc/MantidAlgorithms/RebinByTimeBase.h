@@ -27,10 +27,8 @@ private:
   /// execute.
   void exec() override;
   /// Do the algorithm specific histogramming.
-  virtual void doHistogramming(Mantid::API::IEventWorkspace_sptr inWS,
-                               Mantid::API::MatrixWorkspace_sptr outputWS,
-                               Mantid::MantidVecPtr &XValues_new,
-                               Mantid::MantidVec &OutXValues_scaled,
+  virtual void doHistogramming(Mantid::API::IEventWorkspace_sptr inWS, Mantid::API::MatrixWorkspace_sptr outputWS,
+                               Mantid::MantidVecPtr &XValues_new, Mantid::MantidVec &OutXValues_scaled,
                                Mantid::API::Progress &prog) = 0;
 
   /// Get the minimum x across all spectra in workspace

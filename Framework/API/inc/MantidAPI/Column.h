@@ -117,29 +117,21 @@ public:
   ///          cell(indexVec[p.end-1]).
   ///          If equalRanges is empty then there are no equal velues in this
   ///          column.
-  virtual void
-  sortIndex(bool ascending, size_t start, size_t end,
-            std::vector<size_t> &indexVec,
-            std::vector<std::pair<size_t, size_t>> &equalRanges) const;
+  virtual void sortIndex(bool ascending, size_t start, size_t end, std::vector<size_t> &indexVec,
+                         std::vector<std::pair<size_t, size_t>> &equalRanges) const;
 
   /// Re-arrange values in this column according to indices in indexVec
   virtual void sortValues(const std::vector<size_t> &indexVec);
 
   /// Templated method for returning a value. No type checks are done.
-  template <class T> T &cell(size_t index) {
-    return *static_cast<T *>(void_pointer(index));
-  }
+  template <class T> T &cell(size_t index) { return *static_cast<T *>(void_pointer(index)); }
 
   /// Templated method for returning a value (const version). No type checks are
   /// done.
-  template <class T> const T &cell(size_t index) const {
-    return *static_cast<const T *>(void_pointer(index));
-  }
+  template <class T> const T &cell(size_t index) const { return *static_cast<const T *>(void_pointer(index)); }
 
   /// Type check.
-  template <class T> bool isType() const {
-    return !std::strcmp(get_type_info().name(), typeid(T).name());
-  }
+  template <class T> bool isType() const { return !std::strcmp(get_type_info().name(), typeid(T).name()); }
 
   /// get plot type
   /// @return See description of setPlotType() for the interpretation of the
@@ -157,9 +149,7 @@ public:
    * Fills a std vector with values from the column if the types are compatible.
    * @param maxSize :: Set size to less than the full column.
    */
-  template <class T = double>
-  std::vector<T>
-  numeric_fill(size_t maxSize = std::numeric_limits<size_t>::max()) const {
+  template <class T = double> std::vector<T> numeric_fill(size_t maxSize = std::numeric_limits<size_t>::max()) const {
     std::vector<T> vec(std::min(size(), maxSize));
     for (size_t i = 0; i < vec.size(); ++i) {
       vec[i] = static_cast<T>(toDouble(i));
@@ -167,13 +157,9 @@ public:
     return vec;
   }
 
-  virtual bool equals(const Column &, double) const {
-    throw std::runtime_error("equals not implemented");
-  };
+  virtual bool equals(const Column &, double) const { throw std::runtime_error("equals not implemented"); };
 
-  virtual bool equalsRelErr(const Column &, double) const {
-    throw std::runtime_error("equals not implemented");
-  };
+  virtual bool equalsRelErr(const Column &, double) const { throw std::runtime_error("equals not implemented"); };
 
 protected:
   /// Sets the new column size.

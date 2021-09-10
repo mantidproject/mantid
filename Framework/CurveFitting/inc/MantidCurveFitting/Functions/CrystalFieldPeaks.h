@@ -17,15 +17,13 @@ namespace Functions {
   CrystalFieldPeaks is a function that calculates crystal field peak
   positions and intensities.
 */
-class MANTID_CURVEFITTING_DLL CrystalFieldPeaks : public CrystalFieldPeaksBase,
-                                                  public API::IFunctionGeneral {
+class MANTID_CURVEFITTING_DLL CrystalFieldPeaks : public CrystalFieldPeaksBase, public API::IFunctionGeneral {
 public:
   CrystalFieldPeaks();
   std::string name() const override;
   size_t getNumberDomainColumns() const override;
   size_t getNumberValuesPerArgument() const override;
-  void functionGeneral(const API::FunctionDomainGeneral &generalDomain,
-                       API::FunctionValues &values) const override;
+  void functionGeneral(const API::FunctionDomainGeneral &generalDomain, API::FunctionValues &values) const override;
   size_t getDefaultDomainSize() const override;
 
 private:

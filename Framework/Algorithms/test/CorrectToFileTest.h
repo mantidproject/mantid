@@ -40,15 +40,12 @@ public:
   // that complicated
   void testExec2D() {
     // Need a workspace to correct
-    MatrixWorkspace_sptr testInput =
-        WorkspaceCreationHelper::create2DWorkspaceBinned(10, 102, 1.5);
-    testInput->getAxis(0)->unit() =
-        Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
+    MatrixWorkspace_sptr testInput = WorkspaceCreationHelper::create2DWorkspaceBinned(10, 102, 1.5);
+    testInput->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
 
     TS_ASSERT_DELTA(testInput->readY(0)[0], 2.0, 0.0001);
 
-    MatrixWorkspace_sptr data =
-        executeAlgorithm(testInput, "Wavelength", "Divide");
+    MatrixWorkspace_sptr data = executeAlgorithm(testInput, "Wavelength", "Divide");
 
     TS_ASSERT(data);
     TS_ASSERT_EQUALS(data->getNumberHistograms(), 10);
@@ -67,15 +64,12 @@ public:
 
   void testExecEvent() {
     // Need a workspace to correct
-    MatrixWorkspace_sptr testInput =
-        WorkspaceCreationHelper::createEventWorkspace(10, 102, 100, 1.5);
-    testInput->getAxis(0)->unit() =
-        Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
+    MatrixWorkspace_sptr testInput = WorkspaceCreationHelper::createEventWorkspace(10, 102, 100, 1.5);
+    testInput->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
 
     TS_ASSERT_DELTA(testInput->y(1)[0], 1.0, 0.0001);
 
-    MatrixWorkspace_sptr data =
-        executeAlgorithm(testInput, "Wavelength", "Divide");
+    MatrixWorkspace_sptr data = executeAlgorithm(testInput, "Wavelength", "Divide");
 
     TS_ASSERT(data);
     TS_ASSERT_EQUALS(data->getNumberHistograms(), 10);
@@ -93,11 +87,9 @@ public:
   }
 
   void testSpectraDivide() { // Need a workspace to correct
-    MatrixWorkspace_sptr testInput =
-        WorkspaceCreationHelper::create2DWorkspaceBinned(102, 32, 1.5);
+    MatrixWorkspace_sptr testInput = WorkspaceCreationHelper::create2DWorkspaceBinned(102, 32, 1.5);
 
-    MatrixWorkspace_sptr data =
-        executeAlgorithm(testInput, "SpectrumNumber", "Divide");
+    MatrixWorkspace_sptr data = executeAlgorithm(testInput, "SpectrumNumber", "Divide");
 
     // the tests aren't extensive because the algorithm just calls the LoadRKH
     // and Divide algorithms and these already have tests
@@ -118,11 +110,9 @@ public:
   }
 
   void testSpectraMultip() { // Need a workspace to correct
-    MatrixWorkspace_sptr testInput =
-        WorkspaceCreationHelper::create2DWorkspaceBinned(102, 32, 1.5);
+    MatrixWorkspace_sptr testInput = WorkspaceCreationHelper::create2DWorkspaceBinned(102, 32, 1.5);
 
-    MatrixWorkspace_sptr data =
-        executeAlgorithm(testInput, "SpectrumNumber", "Multiply", false);
+    MatrixWorkspace_sptr data = executeAlgorithm(testInput, "SpectrumNumber", "Multiply", false);
 
     // the tests aren't extensive because the algorithm just calls the LoadRKH
     // and Multiply algorithms and these already have tests
@@ -142,10 +132,8 @@ public:
     AnalysisDataService::Instance().remove(data->getName());
   }
 
-  MatrixWorkspace_sptr executeAlgorithm(const MatrixWorkspace_sptr &testInput,
-                                        const std::string &unit,
-                                        const std::string &operation,
-                                        bool newWksp = true) {
+  MatrixWorkspace_sptr executeAlgorithm(const MatrixWorkspace_sptr &testInput, const std::string &unit,
+                                        const std::string &operation, bool newWksp = true) {
 
     if (!correctToFile.isInitialized())
       correctToFile.initialize();
@@ -155,28 +143,21 @@ public:
 
     // Register this with the service
     using namespace Mantid::API;
-    TS_ASSERT_THROWS_NOTHING(
-        AnalysisDataService::Instance().add("CorrectThis", testInput));
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add("CorrectThis", testInput));
 
     // Set the properties
-    TS_ASSERT_THROWS_NOTHING(
-        correctToFile.setPropertyValue("WorkspaceToCorrect", "CorrectThis"));
-    TS_ASSERT_THROWS_NOTHING(
-        correctToFile.setPropertyValue("Filename", inputFile));
-    TS_ASSERT_THROWS_NOTHING(
-        correctToFile.setPropertyValue("FirstColumnValue", unit));
-    TS_ASSERT_THROWS_NOTHING(
-        correctToFile.setPropertyValue("WorkspaceOperation", operation));
+    TS_ASSERT_THROWS_NOTHING(correctToFile.setPropertyValue("WorkspaceToCorrect", "CorrectThis"));
+    TS_ASSERT_THROWS_NOTHING(correctToFile.setPropertyValue("Filename", inputFile));
+    TS_ASSERT_THROWS_NOTHING(correctToFile.setPropertyValue("FirstColumnValue", unit));
+    TS_ASSERT_THROWS_NOTHING(correctToFile.setPropertyValue("WorkspaceOperation", operation));
     std::string outputSpace("CorrectToFileOutputTest");
     if (!newWksp)
       outputSpace = correctToFile.getPropertyValue("WorkspaceToCorrect");
-    TS_ASSERT_THROWS_NOTHING(
-        correctToFile.setPropertyValue("OutputWorkspace", outputSpace));
+    TS_ASSERT_THROWS_NOTHING(correctToFile.setPropertyValue("OutputWorkspace", outputSpace));
 
     // check that retrieving the output workspace gets the correct value
     std::string result;
-    TS_ASSERT_THROWS_NOTHING(
-        result = correctToFile.getPropertyValue("OutputWorkspace"))
+    TS_ASSERT_THROWS_NOTHING(result = correctToFile.getPropertyValue("OutputWorkspace"))
     TS_ASSERT(result == outputSpace);
 
     // Should now not throw anything
@@ -185,10 +166,8 @@ public:
 
     // Now need to test the resultant workspace, first retrieve it
     Workspace_sptr wkspOut;
-    TS_ASSERT_THROWS_NOTHING(
-        wkspOut = AnalysisDataService::Instance().retrieve(outputSpace));
-    MatrixWorkspace_sptr data =
-        std::dynamic_pointer_cast<MatrixWorkspace>(wkspOut);
+    TS_ASSERT_THROWS_NOTHING(wkspOut = AnalysisDataService::Instance().retrieve(outputSpace));
+    MatrixWorkspace_sptr data = std::dynamic_pointer_cast<MatrixWorkspace>(wkspOut);
 
     // cleanup the input workspace
     AnalysisDataService::Instance().remove(testInput->getName());

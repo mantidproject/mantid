@@ -1,13 +1,13 @@
 .. _muon_results_tab-ref:
 
-Results Table Tab
------------------
+Results Tab
+------------
 
 .. image::  ../../images/muon_interface_tab_results.png
    :align: right
    :height: 400px
 
-The results table tab outputs the results from the fitting tab as well as the log values from selected runs into a
+The results tab outputs the results from the fitting tab as well as the log values from selected runs into a
 tableworkspace.
 
 Log Values Selection
@@ -55,5 +55,5 @@ Output
 Used By
 ^^^^^^^
 
-:ref:`Muon Analysis <MuonAnalysis_2-ref>`
-:ref:`Frequency Domain Analysis <Frequency_Domain_Analysis_2-ref>`
+:ref:`Muon Analysis <Muon_Analysis-ref>`
+:ref:`Frequency Domain Analysis <Frequency_Domain_Analysis-ref>`

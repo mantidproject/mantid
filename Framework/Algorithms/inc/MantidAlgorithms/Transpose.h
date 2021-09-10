@@ -43,8 +43,7 @@ public:
   /// Algorithm's version
   int version() const override { return (1); }
   const std::vector<std::string> seeAlso() const override {
-    return {"Transpose3D", "TransposeMD", "ConvertUnits", "ConvertSpectrumAxis",
-            "ConvertAxesToRealSpace"};
+    return {"Transpose3D", "TransposeMD", "ConvertUnits", "ConvertSpectrumAxis", "ConvertAxesToRealSpace"};
   }
   /// Algorithm's category for identification
   const std::string category() const override { return "Transforms\\Axes"; }
@@ -55,11 +54,9 @@ private:
   /// Execution code
   void exec() override;
   /// Create the output workspace
-  API::MatrixWorkspace_sptr
-  createOutputWorkspace(const API::MatrixWorkspace_const_sptr &inputWorkspace);
+  API::MatrixWorkspace_sptr createOutputWorkspace(const API::MatrixWorkspace_const_sptr &inputWorkspace);
   /// Return the vertical axis on the workspace, throwing if it is not valid
-  API::Axis *
-  getVerticalAxis(const API::MatrixWorkspace_const_sptr &workspace) const;
+  API::Axis *getVerticalAxis(const API::MatrixWorkspace_const_sptr &workspace) const;
 };
 
 } // namespace Algorithms

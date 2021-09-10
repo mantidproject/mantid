@@ -8,7 +8,6 @@
 
 #include "IAddWorkspaceDialog.h"
 #include "IIndirectFitDataView.h"
-#include "IndirectDataTablePresenter.h"
 #include "IndirectFitDataView.h"
 #include "IndirectFittingModel.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
@@ -22,100 +21,89 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
+
 using namespace MantidWidgets;
 
-class MANTIDQT_INDIRECT_DLL IndirectFitDataPresenter
-    : public QObject,
-      public AnalysisDataServiceObserver {
+class MANTIDQT_INDIRECT_DLL IndirectFitDataPresenter : public QObject, public AnalysisDataServiceObserver {
   Q_OBJECT
 public:
-  IndirectFitDataPresenter(IndirectFittingModel *model,
-                           IIndirectFitDataView *view);
+  IndirectFitDataPresenter(IIndirectFitDataModel *model, IIndirectFitDataView *view);
   ~IndirectFitDataPresenter();
-
+  void addWorkspace(const std::string &workspaceName, const std::string &spectra);
+  void setResolution(const std::string &name);
   void setSampleWSSuffices(const QStringList &suffices);
   void setSampleFBSuffices(const QStringList &suffices);
   void setResolutionWSSuffices(const QStringList &suffices);
   void setResolutionFBSuffices(const QStringList &suffices);
-  void setMultiInputSampleWSSuffixes();
-  void setMultiInputSampleFBSuffixes();
-  void setMultiInputResolutionWSSuffixes();
-  void setMultiInputResolutionFBSuffixes();
+  std::vector<std::pair<std::string, size_t>> getResolutionsForFit() const;
+  QStringList getSampleWSSuffices() const;
+  QStringList getSampleFBSuffices() const;
+  QStringList getResolutionWSSuffices() const;
+  QStringList getResolutionFBSuffices() const;
+  void updateTableFromModel();
+  size_t getNumberOfDomains();
+  std::vector<double> getQValuesForData() const;
 
-  void setStartX(double startX, TableDatasetIndex dataIndex,
-                 WorkspaceIndex spectrumIndex);
-  void setStartX(double startX, TableDatasetIndex dataIndex);
-  void setEndX(double endX, TableDatasetIndex dataIndex,
-               WorkspaceIndex spectrumIndex);
-  void setEndX(double endX, TableDatasetIndex dataIndex);
-  void setExclude(const std::string &exclude, TableDatasetIndex dataIndex,
-                  WorkspaceIndex spectrumIndex);
-
-  void loadSettings(const QSettings &settings);
   UserInputValidator &validate(UserInputValidator &validator);
 
-  void replaceHandle(const std::string &workspaceName,
-                     const Workspace_sptr &workspace) override;
-  DataForParameterEstimationCollection
-  getDataForParameterEstimation(const EstimationDataSelector &selector) const;
+  virtual void addWorkspace(const std::string &workspaceName, const std::string &paramType, const int &spectrum_index) {
+    UNUSED_ARG(workspaceName);
+    UNUSED_ARG(paramType);
+    UNUSED_ARG(spectrum_index);
+  };
 
-public slots:
-  void updateSpectraInTable(TableDatasetIndex dataIndex);
+  virtual void setActiveWidth(std::size_t widthIndex, WorkspaceID dataIndex, bool single = true) {
+    UNUSED_ARG(widthIndex);
+    UNUSED_ARG(dataIndex);
+    UNUSED_ARG(single);
+  };
+  virtual void setActiveEISF(std::size_t eisfIndex, WorkspaceID dataIndex, bool single = true) {
+    UNUSED_ARG(eisfIndex);
+    UNUSED_ARG(dataIndex);
+    UNUSED_ARG(single);
+  };
 
 protected slots:
-  void setModelWorkspace(const QString &name);
-  void setModelFromSingleData();
-  void setModelFromMultipleData();
   void showAddWorkspaceDialog();
-  virtual void handleSampleLoaded(const QString &);
 
   virtual void closeDialog();
 
 signals:
   void singleResolutionLoaded();
-  void dataAdded();
+  void dataAdded(IAddWorkspaceDialog const *);
   void dataRemoved();
   void dataChanged();
-  void startXChanged(double, TableDatasetIndex, WorkspaceIndex);
+  void startXChanged(double, WorkspaceID, WorkspaceIndex);
   void startXChanged(double);
-  void endXChanged(double, TableDatasetIndex, WorkspaceIndex);
+  void endXChanged(double, WorkspaceID, WorkspaceIndex);
   void endXChanged(double);
-  void excludeRegionChanged(const std::string &, TableDatasetIndex,
-                            WorkspaceIndex);
-  void multipleDataViewSelected();
-  void singleDataViewSelected();
   void requestedAddWorkspaceDialog();
-  void updateAvailableFitTypes();
 
 protected:
-  IndirectFitDataPresenter(
-      IndirectFittingModel *model, IIndirectFitDataView *view,
-      std::unique_ptr<IndirectDataTablePresenter> tablePresenter);
   IIndirectFitDataView const *getView() const;
   void addData(IAddWorkspaceDialog const *dialog);
-  virtual void addDataToModel(IAddWorkspaceDialog const *dialog);
-  void setSingleModelData(const std::string &name);
-  void updateRanges();
-  virtual void addModelData(const std::string &name);
-  void setResolutionHidden(bool hide);
   void displayWarning(const std::string &warning);
+  virtual void addTableEntry(FitDomainIndex row);
+  QStringList m_wsSampleSuffixes;
+  QStringList m_fbSampleSuffixes;
+  QStringList m_wsResolutionSuffixes;
+  QStringList m_fbResolutionSuffixes;
+  IIndirectFitDataModel *m_model;
+  IIndirectFitDataView *m_view;
 
 private slots:
   void addData();
+  void handleCellChanged(int row, int column);
+  void removeSelectedData();
 
 private:
-  virtual std::unique_ptr<IAddWorkspaceDialog>
-  getAddWorkspaceDialog(QWidget *parent) const;
-  void updateDataInTable(TableDatasetIndex dataIndex);
-  void selectReplacedWorkspace(const QString &workspaceName);
-
-  virtual void setMultiInputResolutionFBSuffixes(IAddWorkspaceDialog *dialog);
-  virtual void setMultiInputResolutionWSSuffixes(IAddWorkspaceDialog *dialog);
+  virtual std::unique_ptr<IAddWorkspaceDialog> getAddWorkspaceDialog(QWidget *parent) const;
+  void setModelStartXAndEmit(double startX, FitDomainIndex row);
+  void setModelEndXAndEmit(double endX, FitDomainIndex row);
+  void setModelExcludeAndEmit(const std::string &exclude, FitDomainIndex row);
 
   std::unique_ptr<IAddWorkspaceDialog> m_addWorkspaceDialog;
-  IndirectFittingModel *m_model;
-  IIndirectFitDataView *m_view;
-  std::unique_ptr<IndirectDataTablePresenter> m_tablePresenter;
+  bool m_emitCellChanged = true;
 };
 
 } // namespace IDA

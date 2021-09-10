@@ -21,27 +21,20 @@ using namespace API;
 using HistogramData::Histogram;
 
 void SmoothData::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
                   "Name of the input workspace");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                            Direction::Output),
-      "The name of the workspace to be created as the output of the algorithm");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
+                  "The name of the workspace to be created as the output of the algorithm");
   std::vector<int> npts0{3};
   auto min = std::make_shared<Kernel::ArrayBoundedValidator<int>>();
   min->setLower(3);
   // The number of points to use in the smoothing.
-  declareProperty(
-      std::make_unique<ArrayProperty<int>>("NPoints", std::move(npts0),
-                                           std::move(min), Direction::Input),
-      "The number of points to average over (minimum 3). If an even number is\n"
-      "given, it will be incremented by 1 to make it odd (default value 3)");
-  declareProperty(
-      std::make_unique<
-          WorkspaceProperty<Mantid::DataObjects::GroupingWorkspace>>(
-          "GroupingWorkspace", "", Direction::Input, PropertyMode::Optional),
-      "Optional: GroupingWorkspace to use for vector of NPoints.");
+  declareProperty(std::make_unique<ArrayProperty<int>>("NPoints", std::move(npts0), std::move(min), Direction::Input),
+                  "The number of points to average over (minimum 3). If an even number is\n"
+                  "given, it will be incremented by 1 to make it odd (default value 3)");
+  declareProperty(std::make_unique<WorkspaceProperty<Mantid::DataObjects::GroupingWorkspace>>(
+                      "GroupingWorkspace", "", Direction::Input, PropertyMode::Optional),
+                  "Optional: GroupingWorkspace to use for vector of NPoints.");
 }
 
 void SmoothData::exec() {
@@ -49,8 +42,7 @@ void SmoothData::exec() {
   inputWorkspace = getProperty("InputWorkspace");
 
   std::vector<int> nptsGroup = getProperty("NPoints");
-  Mantid::DataObjects::GroupingWorkspace_sptr groupWS =
-      getProperty("GroupingWorkspace");
+  Mantid::DataObjects::GroupingWorkspace_sptr groupWS = getProperty("GroupingWorkspace");
   if (groupWS) {
     udet2group.clear();
     int64_t nGroups;
@@ -62,13 +54,11 @@ void SmoothData::exec() {
   const auto vecSize = static_cast<int>(inputWorkspace->blocksize());
 
   // Create the output workspace
-  MatrixWorkspace_sptr outputWorkspace =
-      WorkspaceFactory::Instance().create(inputWorkspace);
+  MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(inputWorkspace);
 
   Progress progress(this, 0.0, 1.0, inputWorkspace->getNumberHistograms());
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWorkspace, *outputWorkspace))
-  for (int i = 0; i < static_cast<int>(inputWorkspace->getNumberHistograms());
-       ++i) {
+  for (int i = 0; i < static_cast<int>(inputWorkspace->getNumberHistograms()); ++i) {
     PARALLEL_START_INTERUPT_REGION
     int npts = nptsGroup[0];
     if (groupWS) {
@@ -94,8 +84,7 @@ void SmoothData::exec() {
       ++npts;
     }
 
-    outputWorkspace->setHistogram(i,
-                                  smooth(inputWorkspace->histogram(i), npts));
+    outputWorkspace->setHistogram(i, smooth(inputWorkspace->histogram(i), npts));
 
     progress.report();
     PARALLEL_END_INTERUPT_REGION
@@ -180,8 +169,7 @@ Histogram smooth(const Histogram &histogram, int npts) {
   for (int k = halfWidth + 1; k < vecSize - halfWidth; ++k) {
     const int kp = k + halfWidth;
     const int km = k - halfWidth - 1;
-    total += (Y[kp] != Y[kp] ? 0.0 : Y[kp]) -
-             (Y[km] != Y[km] ? 0.0 : Y[km]); // Exclude if NaN
+    total += (Y[kp] != Y[kp] ? 0.0 : Y[kp]) - (Y[km] != Y[km] ? 0.0 : Y[km]); // Exclude if NaN
     newY[k] = total / npts;
     totalE += E[kp] * E[kp] - E[km] * E[km];
     // Use of a moving average can lead to rounding error where what should be
@@ -192,8 +180,7 @@ Histogram smooth(const Histogram &histogram, int npts) {
   // This deals with the 'end' at the tail of each spectrum
   for (int l = vecSize - halfWidth; l < vecSize; ++l) {
     const int index = l - halfWidth;
-    total -=
-        (Y[index - 1] != Y[index - 1] ? 0.0 : Y[index - 1]); // Exclude if NaN
+    total -= (Y[index - 1] != Y[index - 1] ? 0.0 : Y[index - 1]); // Exclude if NaN
     newY[l] = total / (vecSize - index);
     totalE -= E[index - 1] * E[index - 1];
     newE[l] = std::sqrt(std::abs(totalE)) / (vecSize - index);

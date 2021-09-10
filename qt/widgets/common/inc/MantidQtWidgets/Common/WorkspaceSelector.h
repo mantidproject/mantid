@@ -10,6 +10,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include <QComboBox>
 #include <QStringList>
+#include <mutex>
 
 #include <Poco/AutoPtr.h>
 #include <Poco/NObserver.h>
@@ -46,15 +47,13 @@ input to the workspaces first input WorkspaceProperty
 class EXPORT_OPT_MANTIDQT_COMMON WorkspaceSelector : public QComboBox {
   Q_OBJECT
 
-  Q_PROPERTY(
-      QStringList WorkspaceTypes READ getWorkspaceTypes WRITE setWorkspaceTypes)
-  Q_PROPERTY(
-      bool ShowHidden READ showHiddenWorkspaces WRITE showHiddenWorkspaces)
+  Q_PROPERTY(QStringList WorkspaceTypes READ getWorkspaceTypes WRITE setWorkspaceTypes)
+  Q_PROPERTY(bool ShowHidden READ showHiddenWorkspaces WRITE showHiddenWorkspaces)
   Q_PROPERTY(bool ShowGroups READ showWorkspaceGroups WRITE showWorkspaceGroups)
   Q_PROPERTY(bool Optional READ isOptional WRITE setOptional)
+  Q_PROPERTY(bool Sorted READ isSorted WRITE setSorted)
   Q_PROPERTY(QStringList Suffix READ getSuffixes WRITE setSuffixes)
-  Q_PROPERTY(QString Algorithm READ getValidatingAlgorithm WRITE
-                 setValidatingAlgorithm)
+  Q_PROPERTY(QString Algorithm READ getValidatingAlgorithm WRITE setValidatingAlgorithm)
   friend class DataSelector;
 
 public:
@@ -73,6 +72,8 @@ public:
   void showWorkspaceGroups(bool show);
   bool isOptional() const;
   void setOptional(bool optional);
+  bool isSorted() const;
+  void setSorted(bool sorted);
   QStringList getSuffixes() const;
   void setSuffixes(const QStringList &suffix);
   void setLowerBinLimit(int numberOfBins);
@@ -81,20 +82,22 @@ public:
   void setValidatingAlgorithm(const QString &algName);
   bool isValid() const;
   void refresh();
+  void disconnectObservers();
+  void connectObservers();
+  bool isConnected() const;
 
 signals:
   void emptied();
+  void focussed();
 
 private:
   void handleAddEvent(Mantid::API::WorkspaceAddNotification_ptr pNf);
   void handleRemEvent(Mantid::API::WorkspacePostDeleteNotification_ptr pNf);
   void handleClearEvent(Mantid::API::ClearADSNotification_ptr pNf);
   void handleRenameEvent(Mantid::API::WorkspaceRenameNotification_ptr pNf);
-  void
-  handleReplaceEvent(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf);
+  void handleReplaceEvent(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf);
 
-  bool checkEligibility(const QString &name,
-                        const Mantid::API::Workspace_sptr &object) const;
+  bool checkEligibility(const QString &name, const Mantid::API::Workspace_sptr &object) const;
   bool hasValidSuffix(const QString &name) const;
   bool hasValidNumberOfBins(const Mantid::API::Workspace_sptr &object) const;
 
@@ -103,23 +106,19 @@ protected:
   void dropEvent(QDropEvent * /*unused*/) override;
   // called when a drag event enters the class
   void dragEnterEvent(QDragEnterEvent * /*unused*/) override;
+  // Method for handling focus in events
+  void focusInEvent(QFocusEvent * /*unused*/) override;
 
 private:
   /// Poco Observers for ADS Notifications
-  Poco::NObserver<WorkspaceSelector, Mantid::API::WorkspaceAddNotification>
-      m_addObserver;
-  Poco::NObserver<WorkspaceSelector,
-                  Mantid::API::WorkspacePostDeleteNotification>
-      m_remObserver;
-  Poco::NObserver<WorkspaceSelector, Mantid::API::ClearADSNotification>
-      m_clearObserver;
-  Poco::NObserver<WorkspaceSelector, Mantid::API::WorkspaceRenameNotification>
-      m_renameObserver;
-  Poco::NObserver<WorkspaceSelector,
-                  Mantid::API::WorkspaceAfterReplaceNotification>
-      m_replaceObserver;
+  Poco::NObserver<WorkspaceSelector, Mantid::API::WorkspaceAddNotification> m_addObserver;
+  Poco::NObserver<WorkspaceSelector, Mantid::API::WorkspacePostDeleteNotification> m_remObserver;
+  Poco::NObserver<WorkspaceSelector, Mantid::API::ClearADSNotification> m_clearObserver;
+  Poco::NObserver<WorkspaceSelector, Mantid::API::WorkspaceRenameNotification> m_renameObserver;
+  Poco::NObserver<WorkspaceSelector, Mantid::API::WorkspaceAfterReplaceNotification> m_replaceObserver;
 
   bool m_init;
+  bool m_connected;
 
   /// A list of workspace types that should be shown in the ComboBox
   QStringList m_workspaceTypes;
@@ -129,6 +128,8 @@ private:
   bool m_showGroups;
   /// Whether to add an extra empty entry to the combobox
   bool m_optional;
+  /// Whetherthe combobox model should be kept sorted
+  bool m_sorted;
   /// Allows you to put limits on the size of the workspace i.e. number of bins
   std::pair<int, int> m_binLimits;
   QStringList m_suffix;
@@ -137,6 +138,9 @@ private:
 
   // Algorithm to validate against
   std::shared_ptr<Mantid::API::Algorithm> m_algorithm;
+
+  // Mutex for synchronized event handling
+  std::mutex m_adsMutex;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

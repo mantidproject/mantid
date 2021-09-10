@@ -32,11 +32,9 @@ using namespace API;
  * @param workspacePropertyName :: Name of the output property for a created
  *workspace in case a PropertyManager is used.
  */
-SeqDomainSpectrumCreator::SeqDomainSpectrumCreator(
-    Kernel::IPropertyManager *manager, const std::string &workspacePropertyName)
-    : IDomainCreator(manager,
-                     std::vector<std::string>(1, workspacePropertyName),
-                     SeqDomainSpectrumCreator::Sequential),
+SeqDomainSpectrumCreator::SeqDomainSpectrumCreator(Kernel::IPropertyManager *manager,
+                                                   const std::string &workspacePropertyName)
+    : IDomainCreator(manager, std::vector<std::string>(1, workspacePropertyName), SeqDomainSpectrumCreator::Sequential),
       m_matrixWorkspace() {
   m_workspacePropertyName = m_workspacePropertyNames.front();
 }
@@ -52,14 +50,12 @@ SeqDomainSpectrumCreator::SeqDomainSpectrumCreator(
  * @param values :: Pointer to outgoing FunctionValues object.
  * @param i0 :: Size offset for values object if it already contains data.
  */
-void SeqDomainSpectrumCreator::createDomain(
-    std::shared_ptr<FunctionDomain> &domain,
-    std::shared_ptr<FunctionValues> &values, size_t i0) {
+void SeqDomainSpectrumCreator::createDomain(std::shared_ptr<FunctionDomain> &domain,
+                                            std::shared_ptr<FunctionValues> &values, size_t i0) {
   setParametersFromPropertyManager();
 
   if (!m_matrixWorkspace) {
-    throw std::invalid_argument(
-        "No matrix workspace assigned - can not create domain.");
+    throw std::invalid_argument("No matrix workspace assigned - can not create domain.");
   }
 
   SeqDomain *seqDomain = SeqDomain::create(m_domainType);
@@ -104,17 +100,15 @@ void SeqDomainSpectrumCreator::createDomain(
  * @return MatrixWorkspace with calculated values.
  */
 
-Workspace_sptr SeqDomainSpectrumCreator::createOutputWorkspace(
-    const std::string &baseName, IFunction_sptr function,
-    std::shared_ptr<FunctionDomain> domain,
-    std::shared_ptr<FunctionValues> values,
-    const std::string &outputWorkspacePropertyName) {
+Workspace_sptr SeqDomainSpectrumCreator::createOutputWorkspace(const std::string &baseName, IFunction_sptr function,
+                                                               std::shared_ptr<FunctionDomain> domain,
+                                                               std::shared_ptr<FunctionValues> values,
+                                                               const std::string &outputWorkspacePropertyName) {
   // don't need values, since the values need to be calculated spectrum by
   // spectrum (see loop below).
   UNUSED_ARG(values);
 
-  std::shared_ptr<SeqDomain> seqDomain =
-      std::dynamic_pointer_cast<SeqDomain>(domain);
+  std::shared_ptr<SeqDomain> seqDomain = std::dynamic_pointer_cast<SeqDomain>(domain);
 
   if (!seqDomain) {
     throw std::invalid_argument("CreateOutputWorkspace requires SeqDomain.");
@@ -125,8 +119,8 @@ Workspace_sptr SeqDomainSpectrumCreator::createOutputWorkspace(
                                 "proper output workspace.");
   }
 
-  MatrixWorkspace_sptr outputWs = std::dynamic_pointer_cast<MatrixWorkspace>(
-      WorkspaceFactory::Instance().create(m_matrixWorkspace));
+  MatrixWorkspace_sptr outputWs =
+      std::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceFactory::Instance().create(m_matrixWorkspace));
 
   // Assign y-values, taking into account masked detectors
   for (size_t i = 0; i < seqDomain->getNDomains(); ++i) {
@@ -155,20 +149,16 @@ Workspace_sptr SeqDomainSpectrumCreator::createOutputWorkspace(
   }
 
   if (m_manager && !outputWorkspacePropertyName.empty()) {
-    declareProperty(
-        new WorkspaceProperty<MatrixWorkspace>(outputWorkspacePropertyName, "",
-                                               Kernel::Direction::Output),
-        "Result workspace");
+    declareProperty(new WorkspaceProperty<MatrixWorkspace>(outputWorkspacePropertyName, "", Kernel::Direction::Output),
+                    "Result workspace");
 
-    m_manager->setPropertyValue(outputWorkspacePropertyName,
-                                baseName + "Workspace");
+    m_manager->setPropertyValue(outputWorkspacePropertyName, baseName + "Workspace");
     m_manager->setProperty(outputWorkspacePropertyName, outputWs);
   }
 
   // If the input is a not an EventWorkspace and is a distrubution, then convert
   // the output also to a distribution
-  if (!std::dynamic_pointer_cast<Mantid::API::IEventWorkspace>(
-          m_matrixWorkspace)) {
+  if (!std::dynamic_pointer_cast<Mantid::API::IEventWorkspace>(m_matrixWorkspace)) {
     if (m_matrixWorkspace->isDistribution()) {
       outputWs->setDistribution(true);
     }
@@ -207,11 +197,9 @@ void SeqDomainSpectrumCreator::setParametersFromPropertyManager() {
 }
 
 /// Sets the MatrixWorkspace the created domain is based on.
-void SeqDomainSpectrumCreator::setMatrixWorkspace(
-    const MatrixWorkspace_sptr &matrixWorkspace) {
+void SeqDomainSpectrumCreator::setMatrixWorkspace(const MatrixWorkspace_sptr &matrixWorkspace) {
   if (!matrixWorkspace) {
-    throw std::invalid_argument(
-        "InputWorkspace must be a valid MatrixWorkspace.");
+    throw std::invalid_argument("InputWorkspace must be a valid MatrixWorkspace.");
   }
 
   m_matrixWorkspace = matrixWorkspace;

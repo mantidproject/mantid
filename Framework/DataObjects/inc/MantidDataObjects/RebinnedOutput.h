@@ -25,16 +25,11 @@ namespace DataObjects {
 class DLLExport RebinnedOutput : public Workspace2D {
 public:
   RebinnedOutput() : m_finalized(false), m_hasSqrdErrs(true) {}
-  RebinnedOutput(bool finalized, bool hasSqrdErrs)
-      : m_finalized(finalized), m_hasSqrdErrs(hasSqrdErrs) {}
+  RebinnedOutput(bool finalized, bool hasSqrdErrs) : m_finalized(finalized), m_hasSqrdErrs(hasSqrdErrs) {}
   /// Returns a clone of the workspace
-  std::unique_ptr<RebinnedOutput> clone() const {
-    return std::unique_ptr<RebinnedOutput>(doClone());
-  }
+  std::unique_ptr<RebinnedOutput> clone() const { return std::unique_ptr<RebinnedOutput>(doClone()); }
   /// Returns a default-initialized clone of the workspace
-  std::unique_ptr<RebinnedOutput> cloneEmpty() const {
-    return std::unique_ptr<RebinnedOutput>(doCloneEmpty());
-  }
+  std::unique_ptr<RebinnedOutput> cloneEmpty() const { return std::unique_ptr<RebinnedOutput>(doCloneEmpty()); }
   RebinnedOutput &operator=(const RebinnedOutput &) = delete;
 
   /// Get the workspace ID.
@@ -76,8 +71,7 @@ protected:
   RebinnedOutput(const RebinnedOutput &) = default;
 
   /// Called by initialize() in MatrixWorkspace
-  void init(const std::size_t &NVectors, const std::size_t &XLength,
-            const std::size_t &YLength) override;
+  void init(const std::size_t &NVectors, const std::size_t &XLength, const std::size_t &YLength) override;
   void init(const HistogramData::Histogram &histogram) override;
 
   /// A vector that holds the 1D vectors for the fractional area.
@@ -91,9 +85,7 @@ protected:
 
 private:
   RebinnedOutput *doClone() const override { return new RebinnedOutput(*this); }
-  RebinnedOutput *doCloneEmpty() const override {
-    return new RebinnedOutput(m_finalized, m_hasSqrdErrs);
-  }
+  RebinnedOutput *doCloneEmpty() const override { return new RebinnedOutput(m_finalized, m_hasSqrdErrs); }
 };
 
 /// shared pointer to the RebinnedOutput class

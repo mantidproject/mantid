@@ -45,21 +45,17 @@ const std::string SmoothNeighbours::RECTANGULAR_GROUP = "Rectangular Detectors";
 const std::string SmoothNeighbours::INPUT_WORKSPACE = "InputWorkspace";
 
 SmoothNeighbours::SmoothNeighbours()
-    : API::Algorithm(), AdjX(0), AdjY(0), Edge(0), Radius(0.), nNeighbours(0),
-      WeightedSum(new NullWeighting), PreserveEvents(false),
-      expandSumAllPixels(false), outWI(0), inWS(), m_neighbours(),
-      m_progress(nullptr) {}
+    : API::Algorithm(), AdjX(0), AdjY(0), Edge(0), Radius(0.), nNeighbours(0), WeightedSum(new NullWeighting),
+      PreserveEvents(false), expandSumAllPixels(false), outWI(0), inWS(), m_neighbours(), m_progress(nullptr) {}
 
 /** Initialisation method.
  *
  */
 void SmoothNeighbours::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      INPUT_WORKSPACE, "", Direction::Input,
-                      std::make_shared<InstrumentValidator>()),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(INPUT_WORKSPACE, "", Direction::Input,
+                                                                       std::make_shared<InstrumentValidator>()),
                   "The workspace containing the spectra to be averaged.");
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "The name of the workspace to be created as the output of "
                   "the algorithm.");
 
@@ -71,10 +67,8 @@ void SmoothNeighbours::init() {
   auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
 
-  std::vector<std::string> propOptions{"Flat", "Linear", "Parabolic",
-                                       "Gaussian"};
-  declareProperty("WeightedSum", "Flat",
-                  std::make_shared<StringListValidator>(propOptions),
+  std::vector<std::string> propOptions{"Flat", "Linear", "Parabolic", "Gaussian"};
+  declareProperty("WeightedSum", "Flat", std::make_shared<StringListValidator>(propOptions),
                   "What sort of Weighting scheme to use?\n"
                   "  Flat: Effectively no-weighting, all weights are 1.\n"
                   "  Linear: Linear weighting 1 - r/R from origin.\n"
@@ -82,15 +76,10 @@ void SmoothNeighbours::init() {
                   "  Gaussian : Uses the absolute distance x^2 + y^2 ... "
                   "normalised by the cutoff^2");
 
-  declareProperty(
-      "Sigma", 0.5, mustBePositiveDouble,
-      "Sigma value for gaussian weighting schemes. Defaults to 0.5. ");
-  setPropertySettings("Sigma", std::make_unique<EnabledWhenProperty>(
-                                   "WeightedSum", IS_EQUAL_TO, "Gaussian"));
+  declareProperty("Sigma", 0.5, mustBePositiveDouble, "Sigma value for gaussian weighting schemes. Defaults to 0.5. ");
+  setPropertySettings("Sigma", std::make_unique<EnabledWhenProperty>("WeightedSum", IS_EQUAL_TO, "Gaussian"));
 
-  declareProperty(
-      "IgnoreMaskedDetectors", true,
-      "If true, do not consider masked detectors in the NN search.");
+  declareProperty("IgnoreMaskedDetectors", true, "If true, do not consider masked detectors in the NN search.");
 
   declareProperty("PreserveEvents", true,
                   "If the InputWorkspace is an "
@@ -101,27 +90,23 @@ void SmoothNeighbours::init() {
   // -- Rectangular properties
   // ----------------------------------------------------------------------
 
-  declareProperty(
-      "AdjX", 1, mustBePositive,
-      "The number of X (horizontal) adjacent pixels to average together. "
-      "Only for instruments with RectangularDetectors. ");
+  declareProperty("AdjX", 1, mustBePositive,
+                  "The number of X (horizontal) adjacent pixels to average together. "
+                  "Only for instruments with RectangularDetectors. ");
 
-  declareProperty(
-      "AdjY", 1, mustBePositive,
-      "The number of Y (vertical) adjacent pixels to average together. "
-      "Only for instruments with RectangularDetectors. ");
+  declareProperty("AdjY", 1, mustBePositive,
+                  "The number of Y (vertical) adjacent pixels to average together. "
+                  "Only for instruments with RectangularDetectors. ");
 
-  declareProperty(
-      "SumPixelsX", 1, mustBePositive,
-      "The total number of X (horizontal) adjacent pixels to sum together. "
-      "Only for instruments with RectangularDetectors.  AdjX will be ignored "
-      "if SumPixelsX > 1.");
+  declareProperty("SumPixelsX", 1, mustBePositive,
+                  "The total number of X (horizontal) adjacent pixels to sum together. "
+                  "Only for instruments with RectangularDetectors.  AdjX will be ignored "
+                  "if SumPixelsX > 1.");
 
-  declareProperty(
-      "SumPixelsY", 1, mustBePositive,
-      "The total number of Y (vertical) adjacent pixels to sum together. "
-      "Only for instruments with RectangularDetectors. AdjY will be ignored if "
-      "SumPixelsY > 1");
+  declareProperty("SumPixelsY", 1, mustBePositive,
+                  "The total number of Y (vertical) adjacent pixels to sum together. "
+                  "Only for instruments with RectangularDetectors. AdjY will be ignored if "
+                  "SumPixelsY > 1");
 
   declareProperty("ZeroEdgePixels", 0, mustBePositive,
                   "The number of pixels to zero at edges. "
@@ -137,23 +122,20 @@ void SmoothNeighbours::init() {
   // ----------------------------------------------------------------------
 
   std::vector<std::string> radiusPropOptions{"Meters", "NumberOfPixels"};
-  declareProperty(
-      "RadiusUnits", "Meters",
-      std::make_shared<StringListValidator>(radiusPropOptions),
-      "Units used to specify the radius.\n"
-      "  Meters : Radius is in meters.\n"
-      "  NumberOfPixels : Radius is in terms of the number of pixels.");
+  declareProperty("RadiusUnits", "Meters", std::make_shared<StringListValidator>(radiusPropOptions),
+                  "Units used to specify the radius.\n"
+                  "  Meters : Radius is in meters.\n"
+                  "  NumberOfPixels : Radius is in terms of the number of pixels.");
 
-  declareProperty(
-      "Radius", 0.0, mustBePositiveDouble,
-      "The radius cut-off around a pixel to look for nearest neighbours to "
-      "average. \n"
-      "This radius cut-off is applied to a set of nearest neighbours whose "
-      "number is "
-      "defined in the NumberOfNeighbours property. See below for more details. "
-      "\n"
-      "If 0, will use the AdjX and AdjY parameters for rectangular detectors "
-      "instead.");
+  declareProperty("Radius", 0.0, mustBePositiveDouble,
+                  "The radius cut-off around a pixel to look for nearest neighbours to "
+                  "average. \n"
+                  "This radius cut-off is applied to a set of nearest neighbours whose "
+                  "number is "
+                  "defined in the NumberOfNeighbours property. See below for more details. "
+                  "\n"
+                  "If 0, will use the AdjX and AdjY parameters for rectangular detectors "
+                  "instead.");
 
   declareProperty("NumberOfNeighbours", 8, mustBePositive,
                   "Number of nearest neighbouring pixels.\n"
@@ -186,8 +168,7 @@ void SmoothNeighbours::findNeighboursRectangular() {
   Instrument_const_sptr inst = inWS->getInstrument();
 
   // To get the workspace index from the detector ID
-  const detid2index_map pixel_to_wi =
-      inWS->getDetectorIDToWorkspaceIndexMap(true);
+  const detid2index_map pixel_to_wi = inWS->getDetectorIDToWorkspaceIndexMap(true);
 
   // std::cout << " inst->nelements() " << inst->nelements() << "\n";
   Progress prog(this, 0.0, 1.0, inst->nelements());
@@ -221,8 +202,7 @@ void SmoothNeighbours::findNeighboursRectangular() {
             assem2 = std::dynamic_pointer_cast<ICompAssembly>((*assem)[j]);
             if (assem2) {
               for (int k = 0; k < assem2->nelements(); k++) {
-                det = std::dynamic_pointer_cast<RectangularDetector>(
-                    (*assem2)[k]);
+                det = std::dynamic_pointer_cast<RectangularDetector>((*assem2)[k]);
                 if (det) {
                   detList.emplace_back(det);
                 }
@@ -326,8 +306,7 @@ void SmoothNeighbours::findNeighboursRectangular() {
 /** Use NearestNeighbours to find the neighbours for any instrument
  */
 void SmoothNeighbours::findNeighboursUbiqutious() {
-  g_log.debug(
-      "SmoothNeighbours processing NOT assuming rectangular detectors.");
+  g_log.debug("SmoothNeighbours processing NOT assuming rectangular detectors.");
 
   m_progress->resetNumSteps(inWS->getNumberHistograms(), 0.2, 0.5);
   this->progress(0.2, "Building Neighbour Map");
@@ -339,8 +318,7 @@ void SmoothNeighbours::findNeighboursUbiqutious() {
   m_neighbours.resize(inWS->getNumberHistograms());
 
   bool ignoreMaskedDetectors = getProperty("IgnoreMaskedDetectors");
-  WorkspaceNearestNeighbourInfo neighbourInfo(*inWS, ignoreMaskedDetectors,
-                                              nNeighbours);
+  WorkspaceNearestNeighbourInfo neighbourInfo(*inWS, ignoreMaskedDetectors, nNeighbours);
 
   // Cull by radius
   RadiusFilter radiusFilter(Radius);
@@ -348,8 +326,7 @@ void SmoothNeighbours::findNeighboursUbiqutious() {
   // Go through every input workspace pixel
   outWI = 0;
   int sum = getProperty("SumNumberOfNeighbours");
-  std::shared_ptr<const Geometry::IComponent> parent, neighbParent, grandparent,
-      neighbGParent;
+  std::shared_ptr<const Geometry::IComponent> parent, neighbParent, grandparent, neighbGParent;
   auto used = new bool[inWS->getNumberHistograms()];
   if (sum > 1) {
     for (size_t wi = 0; wi < inWS->getNumberHistograms(); wi++)
@@ -416,15 +393,12 @@ void SmoothNeighbours::findNeighboursUbiqutious() {
           size_t neighWI = mapIt->second;
           if (sum > 1) {
             // Get the list of detectors in this pixel
-            const std::set<detid_t> &dets =
-                inWS->getSpectrum(neighWI).getDetectorIDs();
+            const std::set<detid_t> &dets = inWS->getSpectrum(neighWI).getDetectorIDs();
             const auto &det = detectorInfo.detector(*dets.begin());
             neighbParent = det.getParent();
             neighbGParent = neighbParent->getParent();
-            if (noNeigh >= sum ||
-                neighbParent->getName() != parent->getName() ||
-                neighbGParent->getName() != grandparent->getName() ||
-                used[neighWI])
+            if (noNeigh >= sum || neighbParent->getName() != parent->getName() ||
+                neighbGParent->getName() != grandparent->getName() || used[neighWI])
               continue;
             noNeigh++;
             used[neighWI] = true;
@@ -457,26 +431,22 @@ it should stay as a NullWeighting, which will throw during usage.
 @param strategyName : The name of the weighting strategy to use
 @param cutOff : The cutoff distance
 */
-void SmoothNeighbours::setWeightingStrategy(const std::string &strategyName,
-                                            double &cutOff) {
+void SmoothNeighbours::setWeightingStrategy(const std::string &strategyName, double &cutOff) {
   if (strategyName == "Flat") {
     boost::scoped_ptr<WeightingStrategy> flatStrategy(new FlatWeighting);
     WeightedSum.swap(flatStrategy);
     g_log.information("Smoothing with Flat Weighting");
   } else if (strategyName == "Linear") {
-    boost::scoped_ptr<WeightingStrategy> linearStrategy(
-        new LinearWeighting(cutOff));
+    boost::scoped_ptr<WeightingStrategy> linearStrategy(new LinearWeighting(cutOff));
     WeightedSum.swap(linearStrategy);
     g_log.information("Smoothing with Linear Weighting");
   } else if (strategyName == "Parabolic") {
-    boost::scoped_ptr<WeightingStrategy> parabolicStrategy(
-        new ParabolicWeighting(cutOff));
+    boost::scoped_ptr<WeightingStrategy> parabolicStrategy(new ParabolicWeighting(cutOff));
     WeightedSum.swap(parabolicStrategy);
     g_log.information("Smoothing with Parabolic Weighting");
   } else if (strategyName == "Gaussian") {
     double sigma = getProperty("Sigma");
-    boost::scoped_ptr<WeightingStrategy> gaussian1DStrategy(
-        new GaussianWeightingnD(cutOff, sigma));
+    boost::scoped_ptr<WeightingStrategy> gaussian1DStrategy(new GaussianWeightingnD(cutOff, sigma));
     WeightedSum.swap(gaussian1DStrategy);
     g_log.information("Smoothing with Gaussian Weighting");
   }
@@ -488,8 +458,7 @@ Translate the radius into meters.
 @param enteredRadius : The numerical value of the radius in whatever units have
 been specified
 */
-double SmoothNeighbours::translateToMeters(const std::string &radiusUnits,
-                                           const double &enteredRadius) const {
+double SmoothNeighbours::translateToMeters(const std::string &radiusUnits, const double &enteredRadius) const {
   double translatedRadius = 0;
   if (radiusUnits == "Meters") {
     // Nothing more to do.
@@ -504,8 +473,7 @@ double SmoothNeighbours::translateToMeters(const std::string &radiusUnits,
     // takes on meaning of the number of pixels.
     translatedRadius = bbox.width().norm() * enteredRadius;
   } else {
-    const std::string message =
-        "SmoothNeighbours::translateToMeters, Unknown Unit: " + radiusUnits;
+    const std::string message = "SmoothNeighbours::translateToMeters, Unknown Unit: " + radiusUnits;
     throw std::invalid_argument(message);
   }
   return translatedRadius;
@@ -548,12 +516,10 @@ void SmoothNeighbours::exec() {
   nNeighbours = getProperty("NumberOfNeighbours");
 
   // Progress reporting, first for the sorting
-  m_progress =
-      std::make_unique<Progress>(this, 0.0, 0.2, inWS->getNumberHistograms());
+  m_progress = std::make_unique<Progress>(this, 0.0, 0.2, inWS->getNumberHistograms());
 
   // Run the appropriate method depending on the type of the instrument
-  if (inWS->getInstrument()->containsRectDetectors() ==
-      Instrument::ContainsState::Full)
+  if (inWS->getInstrument()->containsRectDetectors() == Instrument::ContainsState::Full)
     findNeighboursRectangular();
   else
     findNeighboursUbiqutious();
@@ -588,8 +554,7 @@ void SmoothNeighbours::execWorkspace2D() {
     outWS = MatrixWorkspace_sptr(new OffsetsWorkspace(inWS->getInstrument()));
   } else {
     outWS = std::dynamic_pointer_cast<MatrixWorkspace>(
-        API::WorkspaceFactory::Instance().create("Workspace2D", numberOfSpectra,
-                                                 YLength + 1, YLength));
+        API::WorkspaceFactory::Instance().create("Workspace2D", numberOfSpectra, YLength + 1, YLength));
   }
   this->setProperty("OutputWorkspace", outWS);
 
@@ -697,8 +662,7 @@ void SmoothNeighbours::spreadPixels(const MatrixWorkspace_sptr &outws) {
     outws2 = MatrixWorkspace_sptr(new OffsetsWorkspace(inWS->getInstrument()));
   } else {
     outws2 = std::dynamic_pointer_cast<MatrixWorkspace>(
-        API::WorkspaceFactory::Instance().create("Workspace2D", numberOfSpectra,
-                                                 YLength + 1, YLength));
+        API::WorkspaceFactory::Instance().create("Workspace2D", numberOfSpectra, YLength + 1, YLength));
   }
 
   // Copy geometry over.
@@ -738,15 +702,13 @@ void SmoothNeighbours::execEvent(Mantid::DataObjects::EventWorkspace_sptr &ws) {
   EventWorkspace_sptr outWS;
   // Make a brand new EventWorkspace
   outWS = std::dynamic_pointer_cast<EventWorkspace>(
-      API::WorkspaceFactory::Instance().create(
-          "EventWorkspace", numberOfSpectra, YLength + 1, YLength));
+      API::WorkspaceFactory::Instance().create("EventWorkspace", numberOfSpectra, YLength + 1, YLength));
   // Copy geometry over.
   API::WorkspaceFactory::Instance().initializeFromParent(*ws, *outWS, false);
   // Ensure thread-safety
   outWS->sortAll(TOF_SORT, nullptr);
 
-  this->setProperty("OutputWorkspace",
-                    std::dynamic_pointer_cast<MatrixWorkspace>(outWS));
+  this->setProperty("OutputWorkspace", std::dynamic_pointer_cast<MatrixWorkspace>(outWS));
 
   // Go through all the output workspace
   PARALLEL_FOR_IF(Kernel::threadSafe(*ws, *outWS))

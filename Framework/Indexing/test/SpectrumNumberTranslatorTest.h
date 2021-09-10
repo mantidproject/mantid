@@ -18,15 +18,10 @@ class SpectrumNumberTranslatorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static SpectrumNumberTranslatorTest *createSuite() {
-    return new SpectrumNumberTranslatorTest();
-  }
-  static void destroySuite(SpectrumNumberTranslatorTest *suite) {
-    delete suite;
-  }
+  static SpectrumNumberTranslatorTest *createSuite() { return new SpectrumNumberTranslatorTest(); }
+  static void destroySuite(SpectrumNumberTranslatorTest *suite) { delete suite; }
 
-  std::unique_ptr<SpectrumNumberTranslator> makeTranslator(int ranks,
-                                                           int rank) {
+  std::unique_ptr<SpectrumNumberTranslator> makeTranslator(int ranks, int rank) {
     // SpectrumNumber       2 1 4 5
     // GlobalSpectrumIndex  0 1 2 3
     // for 3 ranks:
@@ -36,25 +31,20 @@ public:
     std::vector<SpectrumNumber> spectrumNumbers(numbers.begin(), numbers.end());
     return std::make_unique<SpectrumNumberTranslator>(
         spectrumNumbers,
-        RoundRobinPartitioner(
-            ranks, PartitionIndex(0),
-            Partitioner::MonitorStrategy::CloneOnEachPartition,
-            std::vector<GlobalSpectrumIndex>{}),
+        RoundRobinPartitioner(ranks, PartitionIndex(0), Partitioner::MonitorStrategy::CloneOnEachPartition,
+                              std::vector<GlobalSpectrumIndex>{}),
         PartitionIndex(rank));
   }
 
-  std::vector<SpectrumNumber>
-  makeSpectrumNumbers(std::initializer_list<int32_t> init) {
+  std::vector<SpectrumNumber> makeSpectrumNumbers(std::initializer_list<int32_t> init) {
     return std::vector<SpectrumNumber>(init.begin(), init.end());
   }
 
-  template <class... T>
-  std::vector<SpectrumNumber> makeSpectrumNumbers(T &&... args) {
+  template <class... T> std::vector<SpectrumNumber> makeSpectrumNumbers(T &&...args) {
     return std::vector<SpectrumNumber>(std::forward<T>(args)...);
   }
 
-  std::vector<GlobalSpectrumIndex>
-  makeGlobalSpectrumIndices(std::initializer_list<int64_t> init) {
+  std::vector<GlobalSpectrumIndex> makeGlobalSpectrumIndices(std::initializer_list<int64_t> init) {
     return std::vector<GlobalSpectrumIndex>(init.begin(), init.end());
   }
 
@@ -63,10 +53,8 @@ public:
     std::vector<SpectrumNumber> spectrumNumbers(numbers.begin(), numbers.end());
     TS_ASSERT_THROWS_NOTHING(SpectrumNumberTranslator(
         spectrumNumbers,
-        RoundRobinPartitioner(
-            1, PartitionIndex(0),
-            Partitioner::MonitorStrategy::CloneOnEachPartition,
-            std::vector<GlobalSpectrumIndex>{}),
+        RoundRobinPartitioner(1, PartitionIndex(0), Partitioner::MonitorStrategy::CloneOnEachPartition,
+                              std::vector<GlobalSpectrumIndex>{}),
         PartitionIndex(0)));
   }
 
@@ -74,10 +62,8 @@ public:
     std::vector<SpectrumNumber> spectrumNumbers;
     TS_ASSERT_THROWS_NOTHING(SpectrumNumberTranslator(
         spectrumNumbers,
-        RoundRobinPartitioner(
-            1, PartitionIndex(0),
-            Partitioner::MonitorStrategy::CloneOnEachPartition,
-            std::vector<GlobalSpectrumIndex>{}),
+        RoundRobinPartitioner(1, PartitionIndex(0), Partitioner::MonitorStrategy::CloneOnEachPartition,
+                              std::vector<GlobalSpectrumIndex>{}),
         PartitionIndex(0)));
   }
 
@@ -87,23 +73,19 @@ public:
     // This works, but functionality is limited, see tests below.
     TS_ASSERT_THROWS_NOTHING(SpectrumNumberTranslator(
         spectrumNumbers,
-        RoundRobinPartitioner(
-            1, PartitionIndex(0),
-            Partitioner::MonitorStrategy::CloneOnEachPartition,
-            std::vector<GlobalSpectrumIndex>{}),
+        RoundRobinPartitioner(1, PartitionIndex(0), Partitioner::MonitorStrategy::CloneOnEachPartition,
+                              std::vector<GlobalSpectrumIndex>{}),
         PartitionIndex(0)));
   }
 
   void test_construct_parent() {
     auto numbers = {1, 2, 3, 4};
     std::vector<SpectrumNumber> spectrumNumbers(numbers.begin(), numbers.end());
-    SpectrumNumberTranslator parent(
-        spectrumNumbers,
-        RoundRobinPartitioner(
-            1, PartitionIndex(0),
-            Partitioner::MonitorStrategy::CloneOnEachPartition,
-            std::vector<GlobalSpectrumIndex>{}),
-        PartitionIndex(0));
+    SpectrumNumberTranslator parent(spectrumNumbers,
+                                    RoundRobinPartitioner(1, PartitionIndex(0),
+                                                          Partitioner::MonitorStrategy::CloneOnEachPartition,
+                                                          std::vector<GlobalSpectrumIndex>{}),
+                                    PartitionIndex(0));
 
     TS_ASSERT_THROWS_NOTHING(SpectrumNumberTranslator(spectrumNumbers, parent));
     spectrumNumbers.erase(spectrumNumbers.begin() + 1);
@@ -119,13 +101,11 @@ public:
   void test_construct_parent_reorder() {
     auto numbers = {1, 2, 3, 4};
     std::vector<SpectrumNumber> spectrumNumbers(numbers.begin(), numbers.end());
-    SpectrumNumberTranslator parent(
-        spectrumNumbers,
-        RoundRobinPartitioner(
-            1, PartitionIndex(0),
-            Partitioner::MonitorStrategy::CloneOnEachPartition,
-            std::vector<GlobalSpectrumIndex>{}),
-        PartitionIndex(0));
+    SpectrumNumberTranslator parent(spectrumNumbers,
+                                    RoundRobinPartitioner(1, PartitionIndex(0),
+                                                          Partitioner::MonitorStrategy::CloneOnEachPartition,
+                                                          std::vector<GlobalSpectrumIndex>{}),
+                                    PartitionIndex(0));
 
     std::iter_swap(spectrumNumbers.begin(), spectrumNumbers.end() - 1);
     SpectrumNumberTranslator reordered(spectrumNumbers, parent);
@@ -136,57 +116,45 @@ public:
   void test_construct_parent_bad_spectrum_numbers() {
     auto numbers = {1, 2, 3, 4};
     std::vector<SpectrumNumber> spectrumNumbers(numbers.begin(), numbers.end());
-    SpectrumNumberTranslator parent(
-        spectrumNumbers,
-        RoundRobinPartitioner(
-            1, PartitionIndex(0),
-            Partitioner::MonitorStrategy::CloneOnEachPartition,
-            std::vector<GlobalSpectrumIndex>{}),
-        PartitionIndex(0));
+    SpectrumNumberTranslator parent(spectrumNumbers,
+                                    RoundRobinPartitioner(1, PartitionIndex(0),
+                                                          Partitioner::MonitorStrategy::CloneOnEachPartition,
+                                                          std::vector<GlobalSpectrumIndex>{}),
+                                    PartitionIndex(0));
 
     spectrumNumbers[1] = 7; // 7 is not in parent.
-    TS_ASSERT_THROWS(SpectrumNumberTranslator(spectrumNumbers, parent),
-                     const std::out_of_range &);
+    TS_ASSERT_THROWS(SpectrumNumberTranslator(spectrumNumbers, parent), const std::out_of_range &);
   }
 
   void test_access_bad_spectrum_numbers() {
     auto numbers = {1, 2, 3, 3};
     std::vector<SpectrumNumber> spectrumNumbers(numbers.begin(), numbers.end());
-    SpectrumNumberTranslator translator(
-        spectrumNumbers,
-        RoundRobinPartitioner(
-            1, PartitionIndex(0),
-            Partitioner::MonitorStrategy::CloneOnEachPartition,
-            std::vector<GlobalSpectrumIndex>{}),
-        PartitionIndex(0));
+    SpectrumNumberTranslator translator(spectrumNumbers,
+                                        RoundRobinPartitioner(1, PartitionIndex(0),
+                                                              Partitioner::MonitorStrategy::CloneOnEachPartition,
+                                                              std::vector<GlobalSpectrumIndex>{}),
+                                        PartitionIndex(0));
 
     TS_ASSERT_THROWS_NOTHING(translator.spectrumNumber(0));
     // Accessing full set works, does not require spectrum numbers.
     TS_ASSERT_THROWS_NOTHING(translator.makeIndexSet());
     TS_ASSERT_EQUALS(translator.makeIndexSet().size(), 4);
     // Access via spectrum numbers fails.
-    TS_ASSERT_THROWS(
-        translator.makeIndexSet(SpectrumNumber(2), SpectrumNumber(3)),
-        const std::logic_error &);
-    TS_ASSERT_THROWS(translator.makeIndexSet(makeSpectrumNumbers({1})),
-                     const std::logic_error &);
+    TS_ASSERT_THROWS(translator.makeIndexSet(SpectrumNumber(2), SpectrumNumber(3)), const std::logic_error &);
+    TS_ASSERT_THROWS(translator.makeIndexSet(makeSpectrumNumbers({1})), const std::logic_error &);
     // Access via global spectrum index works.
-    TS_ASSERT_THROWS_NOTHING(translator.makeIndexSet(GlobalSpectrumIndex(1),
-                                                     GlobalSpectrumIndex(2)));
-    TS_ASSERT_THROWS_NOTHING(
-        translator.makeIndexSet(makeGlobalSpectrumIndices({1})));
+    TS_ASSERT_THROWS_NOTHING(translator.makeIndexSet(GlobalSpectrumIndex(1), GlobalSpectrumIndex(2)));
+    TS_ASSERT_THROWS_NOTHING(translator.makeIndexSet(makeGlobalSpectrumIndices({1})));
   }
 
   void test_spectrum_numbers_order_preserved() {
     auto numbers = {1, 0, 4, -1};
     std::vector<SpectrumNumber> spectrumNumbers(numbers.begin(), numbers.end());
-    SpectrumNumberTranslator translator(
-        spectrumNumbers,
-        RoundRobinPartitioner(
-            1, PartitionIndex(0),
-            Partitioner::MonitorStrategy::CloneOnEachPartition,
-            std::vector<GlobalSpectrumIndex>{}),
-        PartitionIndex(0));
+    SpectrumNumberTranslator translator(spectrumNumbers,
+                                        RoundRobinPartitioner(1, PartitionIndex(0),
+                                                              Partitioner::MonitorStrategy::CloneOnEachPartition,
+                                                              std::vector<GlobalSpectrumIndex>{}),
+                                        PartitionIndex(0));
 
     TS_ASSERT_EQUALS(translator.makeIndexSet(makeSpectrumNumbers({1}))[0], 0);
     TS_ASSERT_EQUALS(translator.makeIndexSet(makeSpectrumNumbers({0}))[0], 1);
@@ -207,13 +175,11 @@ public:
   void test_spectrumNumber() {
     auto numbers = {1, 0, 4, -1};
     std::vector<SpectrumNumber> spectrumNumbers(numbers.begin(), numbers.end());
-    SpectrumNumberTranslator translator(
-        spectrumNumbers,
-        RoundRobinPartitioner(
-            1, PartitionIndex(0),
-            Partitioner::MonitorStrategy::CloneOnEachPartition,
-            std::vector<GlobalSpectrumIndex>{}),
-        PartitionIndex(0));
+    SpectrumNumberTranslator translator(spectrumNumbers,
+                                        RoundRobinPartitioner(1, PartitionIndex(0),
+                                                              Partitioner::MonitorStrategy::CloneOnEachPartition,
+                                                              std::vector<GlobalSpectrumIndex>{}),
+                                        PartitionIndex(0));
 
     TS_ASSERT_EQUALS(translator.spectrumNumber(0), 1);
     TS_ASSERT_EQUALS(translator.spectrumNumber(1), 0);
@@ -246,12 +212,9 @@ public:
 
   void test_makeIndexSet_minmax_range_failures() {
     auto t = makeTranslator(1, 0);
-    TS_ASSERT_THROWS(t->makeIndexSet(SpectrumNumber(0), SpectrumNumber(5)),
-                     const std::out_of_range &);
-    TS_ASSERT_THROWS(t->makeIndexSet(SpectrumNumber(1), SpectrumNumber(6)),
-                     const std::out_of_range &);
-    TS_ASSERT_THROWS(t->makeIndexSet(SpectrumNumber(1), SpectrumNumber(3)),
-                     const std::out_of_range &);
+    TS_ASSERT_THROWS(t->makeIndexSet(SpectrumNumber(0), SpectrumNumber(5)), const std::out_of_range &);
+    TS_ASSERT_THROWS(t->makeIndexSet(SpectrumNumber(1), SpectrumNumber(6)), const std::out_of_range &);
+    TS_ASSERT_THROWS(t->makeIndexSet(SpectrumNumber(1), SpectrumNumber(3)), const std::out_of_range &);
   }
 
   void test_makeIndexSet_minmax_full_1_rank() {
@@ -292,52 +255,35 @@ public:
   void test_makeIndexSet_minmax_3_ranks_no_overlap() {
     // Rank 0 has spectrum numbers 2 and 5
     auto t0 = makeTranslator(3, 0);
-    TS_ASSERT_EQUALS(
-        t0->makeIndexSet(SpectrumNumber(1), SpectrumNumber(1)).size(), 0);
-    TS_ASSERT_EQUALS(
-        t0->makeIndexSet(SpectrumNumber(4), SpectrumNumber(4)).size(), 0);
+    TS_ASSERT_EQUALS(t0->makeIndexSet(SpectrumNumber(1), SpectrumNumber(1)).size(), 0);
+    TS_ASSERT_EQUALS(t0->makeIndexSet(SpectrumNumber(4), SpectrumNumber(4)).size(), 0);
     // Rank 1 has spectrum numbers 1
     auto t1 = makeTranslator(3, 1);
-    TS_ASSERT_EQUALS(
-        t1->makeIndexSet(SpectrumNumber(2), SpectrumNumber(5)).size(), 0);
+    TS_ASSERT_EQUALS(t1->makeIndexSet(SpectrumNumber(2), SpectrumNumber(5)).size(), 0);
     // Rank 2 has spectrum numbers 4
     auto t2 = makeTranslator(3, 2);
-    TS_ASSERT_EQUALS(
-        t2->makeIndexSet(SpectrumNumber(1), SpectrumNumber(2)).size(), 0);
-    TS_ASSERT_EQUALS(
-        t2->makeIndexSet(SpectrumNumber(5), SpectrumNumber(5)).size(), 0);
+    TS_ASSERT_EQUALS(t2->makeIndexSet(SpectrumNumber(1), SpectrumNumber(2)).size(), 0);
+    TS_ASSERT_EQUALS(t2->makeIndexSet(SpectrumNumber(5), SpectrumNumber(5)).size(), 0);
   }
 
   void test_makeIndexSet_minmax_GlobalSpectrumIndex_param_check_3_ranks() {
     auto t = makeTranslator(3, 1);
-    TS_ASSERT_THROWS(
-        t->makeIndexSet(GlobalSpectrumIndex(1), GlobalSpectrumIndex(0)),
-        const std::logic_error &);
-    TS_ASSERT_THROWS(
-        t->makeIndexSet(GlobalSpectrumIndex(0), GlobalSpectrumIndex(4)),
-        const std::out_of_range &);
-    TS_ASSERT_THROWS(
-        t->makeIndexSet(GlobalSpectrumIndex(5), GlobalSpectrumIndex(4)),
-        const std::logic_error &);
+    TS_ASSERT_THROWS(t->makeIndexSet(GlobalSpectrumIndex(1), GlobalSpectrumIndex(0)), const std::logic_error &);
+    TS_ASSERT_THROWS(t->makeIndexSet(GlobalSpectrumIndex(0), GlobalSpectrumIndex(4)), const std::out_of_range &);
+    TS_ASSERT_THROWS(t->makeIndexSet(GlobalSpectrumIndex(5), GlobalSpectrumIndex(4)), const std::logic_error &);
     // -1 converted to size_t is positive and >> 1
-    TS_ASSERT_THROWS(
-        t->makeIndexSet(GlobalSpectrumIndex(-1), GlobalSpectrumIndex(1)),
-        const std::logic_error &);
+    TS_ASSERT_THROWS(t->makeIndexSet(GlobalSpectrumIndex(-1), GlobalSpectrumIndex(1)), const std::logic_error &);
     // -1 converted to size_t is > 0 but out of range
-    TS_ASSERT_THROWS(
-        t->makeIndexSet(GlobalSpectrumIndex(0), GlobalSpectrumIndex(-1)),
-        const std::out_of_range &);
+    TS_ASSERT_THROWS(t->makeIndexSet(GlobalSpectrumIndex(0), GlobalSpectrumIndex(-1)), const std::out_of_range &);
   }
 
   void test_makeIndexSet_minmax_GlobalSpectrumIndex_3_ranks() {
     auto translator = makeTranslator(3, 0);
-    auto set = translator->makeIndexSet(GlobalSpectrumIndex(0),
-                                        GlobalSpectrumIndex(3));
+    auto set = translator->makeIndexSet(GlobalSpectrumIndex(0), GlobalSpectrumIndex(3));
     TS_ASSERT_EQUALS(set.size(), 2);
     TS_ASSERT_EQUALS(set[0], 0);
     TS_ASSERT_EQUALS(set[1], 1);
-    set = translator->makeIndexSet(GlobalSpectrumIndex(2),
-                                   GlobalSpectrumIndex(3));
+    set = translator->makeIndexSet(GlobalSpectrumIndex(2), GlobalSpectrumIndex(3));
     TS_ASSERT_EQUALS(set.size(), 1);
     TS_ASSERT_EQUALS(set[0], 1);
   }
@@ -357,11 +303,9 @@ public:
 
   void test_makeIndexSet_partial_3_ranks_range_checks() {
     auto translator = makeTranslator(3, 1);
-    TS_ASSERT_THROWS(translator->makeIndexSet(makeSpectrumNumbers({0})),
-                     const std::out_of_range &);
+    TS_ASSERT_THROWS(translator->makeIndexSet(makeSpectrumNumbers({0})), const std::out_of_range &);
     // Index is not on this rank but it is correct.
-    TS_ASSERT_THROWS_NOTHING(
-        translator->makeIndexSet(makeSpectrumNumbers({2})));
+    TS_ASSERT_THROWS_NOTHING(translator->makeIndexSet(makeSpectrumNumbers({2})));
   }
 
   void test_makeIndexSet_partial_3_ranks() {
@@ -390,10 +334,8 @@ public:
 
   void test_makeIndexSet_GlobalSpectrumIndex_partial_3_ranks_range_checks() {
     auto t = makeTranslator(3, 0);
-    TS_ASSERT_THROWS(t->makeIndexSet(makeGlobalSpectrumIndices({-1})),
-                     const std::out_of_range &);
-    TS_ASSERT_THROWS(t->makeIndexSet(makeGlobalSpectrumIndices({4})),
-                     const std::out_of_range &);
+    TS_ASSERT_THROWS(t->makeIndexSet(makeGlobalSpectrumIndices({-1})), const std::out_of_range &);
+    TS_ASSERT_THROWS(t->makeIndexSet(makeGlobalSpectrumIndices({4})), const std::out_of_range &);
     // Index is not on this rank but it is correct.
     TS_ASSERT_THROWS_NOTHING(t->makeIndexSet(makeGlobalSpectrumIndices({1})));
     TS_ASSERT_EQUALS(t->makeIndexSet(makeGlobalSpectrumIndices({1})).size(), 0);

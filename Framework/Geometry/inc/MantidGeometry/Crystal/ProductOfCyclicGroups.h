@@ -52,10 +52,8 @@ public:
 
 protected:
   Group_const_sptr getGeneratedGroup(const std::string &generators) const;
-  std::vector<Group_const_sptr> getFactorGroups(
-      const std::vector<SymmetryOperation> &symmetryOperations) const;
-  Group_const_sptr getProductOfCyclicGroups(
-      const std::vector<Group_const_sptr> &factorGroups) const;
+  std::vector<Group_const_sptr> getFactorGroups(const std::vector<SymmetryOperation> &symmetryOperations) const;
+  Group_const_sptr getProductOfCyclicGroups(const std::vector<Group_const_sptr> &factorGroups) const;
 };
 
 } // namespace Geometry

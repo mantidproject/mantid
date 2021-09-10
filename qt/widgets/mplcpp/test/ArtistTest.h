@@ -21,8 +21,7 @@ public:
 public:
   // ----------------- success tests ---------------------
   void testConstructWithArtistIsSuccessful() {
-    auto artistModule(
-        Python::NewRef(PyImport_ImportModule("matplotlib.artist")));
+    auto artistModule(Python::NewRef(PyImport_ImportModule("matplotlib.artist")));
     Python::Object pyartist = artistModule.attr("Artist")();
     TS_ASSERT_THROWS_NOTHING(Artist drawer(pyartist));
   }

@@ -33,9 +33,7 @@ public:
     Acomp A;
     A.setString("a'bcd+a(cd+ff(x+y+z))");
     TS_ASSERT_EQUALS(A.display(), "(a\'bcd)+(a((cd)+(f(x+y+z))))");
-    TS_ASSERT_EQUALS(
-        A.displayDepth(),
-        "D0 a\'bcd 0E+D0 aD1 (D2 cd 2E+D2 fD3 (x+y+z) 3E 2E) 1E 0E");
+    TS_ASSERT_EQUALS(A.displayDepth(), "D0 a\'bcd 0E+D0 aD1 (D2 cd 2E+D2 fD3 (x+y+z) 3E 2E) 1E 0E");
     TS_ASSERT_EQUALS(A.isNull(), 0);
     TS_ASSERT_EQUALS(A.isSimple(), 0);
     TS_ASSERT_EQUALS(A.isSingle(), 0);
@@ -55,9 +53,7 @@ public:
     Acomp A;
     A.setString("a'bcd+a(cd+ff(x+y+z))");
     TS_ASSERT_EQUALS(A.display(), "(a\'bcd)+(a((cd)+(f(x+y+z))))");
-    TS_ASSERT_EQUALS(
-        A.displayDepth(),
-        "D0 a\'bcd 0E+D0 aD1 (D2 cd 2E+D2 fD3 (x+y+z) 3E 2E) 1E 0E");
+    TS_ASSERT_EQUALS(A.displayDepth(), "D0 a\'bcd 0E+D0 aD1 (D2 cd 2E+D2 fD3 (x+y+z) 3E 2E) 1E 0E");
     TS_ASSERT_EQUALS(A.isNull(), 0);
     TS_ASSERT_EQUALS(A.isSimple(), 0);
     TS_ASSERT_EQUALS(A.isSingle(), 0);
@@ -67,9 +63,7 @@ public:
     TS_ASSERT_EQUALS(A.size().second, 2);
     Acomp B(A);
     TS_ASSERT_EQUALS(B.display(), "(a\'bcd)+(a((cd)+(f(x+y+z))))");
-    TS_ASSERT_EQUALS(
-        B.displayDepth(),
-        "D0 a\'bcd 0E+D0 aD1 (D2 cd 2E+D2 fD3 (x+y+z) 3E 2E) 1E 0E");
+    TS_ASSERT_EQUALS(B.displayDepth(), "D0 a\'bcd 0E+D0 aD1 (D2 cd 2E+D2 fD3 (x+y+z) 3E 2E) 1E 0E");
     TS_ASSERT_EQUALS(B.isNull(), 0);
     TS_ASSERT_EQUALS(B.isSimple(), 0);
     TS_ASSERT_EQUALS(B.isSingle(), 0);
@@ -83,9 +77,7 @@ public:
     Acomp A;
     A.setString("a'bcd+a(cd+ff(x+y+z))");
     TS_ASSERT_EQUALS(A.display(), "(a\'bcd)+(a((cd)+(f(x+y+z))))");
-    TS_ASSERT_EQUALS(
-        A.displayDepth(),
-        "D0 a\'bcd 0E+D0 aD1 (D2 cd 2E+D2 fD3 (x+y+z) 3E 2E) 1E 0E");
+    TS_ASSERT_EQUALS(A.displayDepth(), "D0 a\'bcd 0E+D0 aD1 (D2 cd 2E+D2 fD3 (x+y+z) 3E 2E) 1E 0E");
     TS_ASSERT_EQUALS(A.isNull(), 0);
     TS_ASSERT_EQUALS(A.isSimple(), 0);
     TS_ASSERT_EQUALS(A.isSingle(), 0);
@@ -96,9 +88,7 @@ public:
     Acomp B;
     B = A;
     TS_ASSERT_EQUALS(B.display(), "(a\'bcd)+(a((cd)+(f(x+y+z))))");
-    TS_ASSERT_EQUALS(
-        B.displayDepth(),
-        "D0 a\'bcd 0E+D0 aD1 (D2 cd 2E+D2 fD3 (x+y+z) 3E 2E) 1E 0E");
+    TS_ASSERT_EQUALS(B.displayDepth(), "D0 a\'bcd 0E+D0 aD1 (D2 cd 2E+D2 fD3 (x+y+z) 3E 2E) 1E 0E");
     TS_ASSERT_EQUALS(B.isNull(), 0);
     TS_ASSERT_EQUALS(B.isSimple(), 0);
     TS_ASSERT_EQUALS(B.isSingle(), 0);
@@ -125,8 +115,7 @@ public:
     A.setString("a'bcd+a(cd+ff(x+y+z))");
     TS_ASSERT_EQUALS(A.display(), "(a\'bcd)+(a((cd)+(f(x+y+z))))");
     A.makeCNFobject();
-    TS_ASSERT_EQUALS(A.display(),
-                     "(a+b)(a+c)(a+d)(c+f)(c+x+y+z)(d+f)(d+x+y+z)");
+    TS_ASSERT_EQUALS(A.display(), "(a+b)(a+c)(a+d)(c+f)(c+x+y+z)(d+f)(d+x+y+z)");
     TS_ASSERT_EQUALS(A.isCNF(), 1);
     TS_ASSERT_EQUALS(A.isDNF(), 0);
     TS_ASSERT_EQUALS(A.size().first, 0);
@@ -166,9 +155,7 @@ public:
     A.makeDNFobject();
     TS_ASSERT_EQUALS(A.display(), "(acd)+(afx)+(afy)+(afz)+(bcd)");
     A.complement();
-    TS_ASSERT_EQUALS(
-        A.display(),
-        "(z\'+f\'+a\')(y\'+f\'+a\')(x\'+f\'+a\')(d\'+c\'+b\')(d\'+c\'+a\')");
+    TS_ASSERT_EQUALS(A.display(), "(z\'+f\'+a\')(y\'+f\'+a\')(x\'+f\'+a\')(d\'+c\'+b\')(d\'+c\'+a\')");
   }
 
   void testLogicalEqual() {
@@ -211,8 +198,7 @@ public:
     Acomp B;
     B.setString("c");
     A += B;
-    TS_ASSERT_EQUALS(A.display(),
-                     "c+((a+b)(a+c)(a+d)(c+f)(c+x+y+z)(d+f)(d+x+y+z))");
+    TS_ASSERT_EQUALS(A.display(), "c+((a+b)(a+c)(a+d)(c+f)(c+x+y+z)(d+f)(d+x+y+z))");
   }
 
   void testAlgDiv() { // Problem with Algebric division

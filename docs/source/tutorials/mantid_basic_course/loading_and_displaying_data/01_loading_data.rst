@@ -1,7 +1,7 @@
 .. _01_loading_data:
 
 ============
-Loading Data 
+Loading Data
 ============
 
 .. figure:: /images/ShowLoadandWorkspaceAreaInMantidWB.png
@@ -17,7 +17,7 @@ instrument:
    red), and select "File". This will open the Load Dialog window.
 #. Browse to the location of the file MAR11060.raw.
 
-   -  If you successfully added the "TrainingCourseData" directory 
+   -  If you successfully added the "TrainingCourseData" directory
       to the data search directories (see
       :ref:`getting_started`) then you can simply
       enter the filename "MAR11060.raw" in the File textbox.
@@ -56,18 +56,22 @@ Loading Lots of Data Files
 
 You can load multiple files into Mantid at the same time,
 either keeping each workspace separate, or summing the data into a
-single workspace. To do so, use the following symbols in the ``Load Dialog > File`` input box:
+single workspace. To use the examples below, make sure to add ``TrainingCourseData`` and ``TrainingCourseData\loqdemo`` in
+:ref:`ManageUserDirectories <getting_started>`. Next, click "Load" at the top of the Workspaces Toolbox and in the new Load Dialog
+use these example inputs with symbols for the ``File`` input:
 
-+-----------+--------------------------------------------------------+---------------+
-| Usage     | Description                                            | Example       |
-+===========+========================================================+===============+
-| Input     | Result                                                 |               |
-+-----------+--------------------------------------------------------+---------------+
-| \ ``,``\  | Load a list of runs into a Group of Workspaces         | ``INST1,2,3`` |
-+-----------+--------------------------------------------------------+---------------+
-| \ ``+``\  | Sum a list of runs into one Workspace.                 | ``INST1+2+3`` |
-+-----------+--------------------------------------------------------+---------------+
-| \ ``:``\  | Load a range of runs into a Group of Workspaces        | ``INST1:4``   |
-+-----------+--------------------------------------------------------+---------------+
-| \ ``-``\  | Sum a range of runs into one Workspace.                | ``INST1-4``   |
-+-----------+--------------------------------------------------------+---------------+
++-----------+--------------------------------------------------------+--------------------+
+| Usage     | Description                                            | Example            |
++===========+========================================================+====================+
+| Input     | Result                                                 |                    |
++-----------+--------------------------------------------------------+--------------------+
+| \ ``,``\  | Load a list of runs into a Group of Workspaces         | ``MAR11060,11015`` |
++-----------+--------------------------------------------------------+--------------------+
+| \ ``+``\  | Sum a list of runs into one Workspace.                 | ``LOQ74014+74020`` |
++-----------+--------------------------------------------------------+--------------------+
+| \ ``:``\  | Load a range of runs into a Group of Workspaces        | ``LOQ74019:74020`` |
++-----------+--------------------------------------------------------+--------------------+
+| \ ``-``\  | Sum a range of runs into one Workspace.                | ``LOQ74019-74020`` |
++-----------+--------------------------------------------------------+--------------------+
+
+For the last example, you may see an error, which correctly mentions that only data files with the same structure (number of spectra), should be summed.

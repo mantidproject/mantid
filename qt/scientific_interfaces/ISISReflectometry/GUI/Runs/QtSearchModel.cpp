@@ -25,17 +25,14 @@ void QtSearchModel::mergeNewResults(SearchResults const &source) {
 
   // Extract the results that are not already in our list
   SearchResults newResults;
-  std::copy_if(source.begin(), source.end(), std::back_inserter(newResults),
-               [this](const auto &searchResult) {
-                 return std::find(m_runDetails.cbegin(), m_runDetails.cend(),
-                                  searchResult) == m_runDetails.cend();
-               });
+  std::copy_if(source.begin(), source.end(), std::back_inserter(newResults), [this](const auto &searchResult) {
+    return std::find(m_runDetails.cbegin(), m_runDetails.cend(), searchResult) == m_runDetails.cend();
+  });
 
   // Append the new results to our list. We need to tell the Qt model where we
   // are inserting and how many items we're adding
   const auto first = static_cast<int>(m_runDetails.size());
-  const auto last =
-      static_cast<int>(m_runDetails.size() + newResults.size() - 1);
+  const auto last = static_cast<int>(m_runDetails.size() + newResults.size() - 1);
   beginInsertRows(QModelIndex(), first, last);
   m_runDetails.insert(m_runDetails.end(), newResults.begin(), newResults.end());
   endInsertRows();
@@ -61,9 +58,7 @@ void QtSearchModel::replaceResults(SearchResults const &source) {
 /**
 @return the row count.
 */
-int QtSearchModel::rowCount(const QModelIndex &) const {
-  return static_cast<int>(m_runDetails.size());
-}
+int QtSearchModel::rowCount(const QModelIndex &) const { return static_cast<int>(m_runDetails.size()); }
 
 /**
 @return the number of columns in the model.
@@ -92,14 +87,11 @@ QVariant QtSearchModel::data(const QModelIndex &index, int role) const {
       // setting the tool tips for any unsuccessful transfers or user
       // annotations
       if (run.hasError())
-        return QString::fromStdString(std::string("Invalid transfer: ") +
-                                      run.error());
+        return QString::fromStdString(std::string("Invalid transfer: ") + run.error());
       else if (run.exclude())
-        return QString::fromStdString(std::string("Excluded by user: ") +
-                                      run.excludeReason());
+        return QString::fromStdString(std::string("Excluded by user: ") + run.excludeReason());
       else if (run.hasComment())
-        return QString::fromStdString(std::string("User comment: ") +
-                                      run.comment());
+        return QString::fromStdString(std::string("User comment: ") + run.comment());
     } else if (role == Qt::BackgroundRole) {
       // setting the background colour for any unsuccessful transfers / excluded
       // runs
@@ -123,8 +115,7 @@ QVariant QtSearchModel::data(const QModelIndex &index, int role) const {
   return QVariant();
 }
 
-bool QtSearchModel::setData(const QModelIndex &index, const QVariant &value,
-                            int role) {
+bool QtSearchModel::setData(const QModelIndex &index, const QVariant &value, int role) {
   if (role != Qt::EditRole)
     return true;
 
@@ -155,8 +146,7 @@ Get the heading for a given section, orientation and role.
 @param role : Role mode of table.
 @return HeaderData.
 */
-QVariant QtSearchModel::headerData(int section, Qt::Orientation orientation,
-                                   int role) const {
+QVariant QtSearchModel::headerData(int section, Qt::Orientation orientation, int role) const {
   const auto column = static_cast<Column>(section);
   if (role == Qt::DisplayRole) {
     if (orientation == Qt::Horizontal) {
@@ -227,9 +217,7 @@ void QtSearchModel::setUnsaved() { m_hasUnsavedChanges = true; }
 
 void QtSearchModel::setSaved() { m_hasUnsavedChanges = false; }
 
-SearchResult const &QtSearchModel::getRowData(int index) const {
-  return m_runDetails[index];
-}
+SearchResult const &QtSearchModel::getRowData(int index) const { return m_runDetails[index]; }
 
 SearchResults const &QtSearchModel::getRows() const { return m_runDetails; }
 } // namespace ISISReflectometry

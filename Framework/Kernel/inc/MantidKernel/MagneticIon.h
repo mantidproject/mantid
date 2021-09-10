@@ -26,11 +26,10 @@ struct MANTID_KERNEL_DLL MagneticIon {
   /// Default constructor
   MagneticIon();
   /// Construct the Ion with data
-  MagneticIon(const char *symbol, const uint16_t charge, const double j0i[8],
-              const double j2i[8], const double j4i[8], const double j6i[8],
+  MagneticIon(const char *symbol, const uint16_t charge, const double j0i[8], const double j2i[8], const double j4i[8],
+              const double j6i[8], const double gi);
+  MagneticIon(const char *symbol, const uint16_t charge, const double j0i[9], const double j2i[9], const double j4i[9],
               const double gi);
-  MagneticIon(const char *symbol, const uint16_t charge, const double j0i[9],
-              const double j2i[9], const double j4i[9], const double gi);
 
   /// Returns the value of \<jl(Q)\> for a given Q^2
   double getJLofQsqr(const double qsqr, const uint16_t l) const;
@@ -60,13 +59,11 @@ struct MANTID_KERNEL_DLL MagneticIon {
 };
 
 /// Returns the magnetic ion for the given symbol and charge
-MANTID_KERNEL_DLL const MagneticIon &getMagneticIon(const std::string &symbol,
-                                                    const uint16_t charge);
+MANTID_KERNEL_DLL const MagneticIon &getMagneticIon(const std::string &symbol, const uint16_t charge);
 /// Returns the magnetic ion from a combined symbol and charge given as string
 MANTID_KERNEL_DLL const MagneticIon &getMagneticIon(const std::string &symbol);
 /// Returns the Lth-coefficients for the given ion
-MANTID_KERNEL_DLL std::vector<double>
-getJL(const std::string &symbol, const uint16_t charge, const uint16_t l = 0);
+MANTID_KERNEL_DLL std::vector<double> getJL(const std::string &symbol, const uint16_t charge, const uint16_t l = 0);
 
 /// Returns a list of all ions
 MANTID_KERNEL_DLL std::vector<std::string> getMagneticIonList();

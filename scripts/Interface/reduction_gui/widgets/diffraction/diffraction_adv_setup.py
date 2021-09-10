@@ -270,7 +270,8 @@ class AdvancedSetupWidget(BaseWidget):
 
     def _validate_formula(self):
         try:
-            MaterialBuilder().setFormula(self._content.sampleformula_edit.text())
+            if self._content.sampleformula_edit.text().strip() != '':
+                MaterialBuilder().setFormula(self._content.sampleformula_edit.text().strip())
             self._content.sampleformula_edit.setToolTip("")
             self._content.sampleformula_edit.setStyleSheet("QLineEdit{}")
         except ValueError as e:

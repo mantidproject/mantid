@@ -25,14 +25,11 @@ using std::size_t;
 /** Initialize the algorithm's properties.
  */
 void ChangePulsetime2::init() {
-  declareWorkspaceInputProperties<EventWorkspace>("InputWorkspace",
-                                                  "An input event workspace.");
-  declareProperty(std::make_unique<PropertyWithValue<double>>("TimeOffset",
-                                                              Direction::Input),
+  declareWorkspaceInputProperties<EventWorkspace>("InputWorkspace", "An input event workspace.");
+  declareProperty(std::make_unique<PropertyWithValue<double>>("TimeOffset", Direction::Input),
                   "Number of seconds (a float) to add to each event's pulse "
                   "time. Required.");
-  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "An output event workspace.");
 }
 
@@ -43,8 +40,7 @@ void ChangePulsetime2::exec() {
   EventWorkspace_const_sptr in_ws;
   Indexing::SpectrumIndexSet indexSet;
 
-  std::tie(in_ws, indexSet) =
-      getWorkspaceAndIndices<EventWorkspace>("InputWorkspace");
+  std::tie(in_ws, indexSet) = getWorkspaceAndIndices<EventWorkspace>("InputWorkspace");
   EventWorkspace_sptr out_ws = getProperty("OutputWorkspace");
   if (!out_ws) {
     out_ws = in_ws->clone();

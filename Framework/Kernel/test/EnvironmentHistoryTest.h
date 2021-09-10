@@ -32,11 +32,9 @@ public:
   }
 
   void testPopulate() {
-    std::string correctOutput =
-        "Framework Version: " + std::string(MantidVersion::version()) + "\n";
+    std::string correctOutput = "Framework Version: " + std::string(MantidVersion::version()) + "\n";
     correctOutput += "OS name: " + ConfigService::Instance().getOSName() + "\n";
-    correctOutput +=
-        "OS version: " + ConfigService::Instance().getOSVersion() + "\n";
+    correctOutput += "OS version: " + ConfigService::Instance().getOSVersion() + "\n";
 
     // Not really much to test
     EnvironmentHistory EH;

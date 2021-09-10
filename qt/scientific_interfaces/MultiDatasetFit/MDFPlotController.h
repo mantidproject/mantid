@@ -52,8 +52,8 @@ class MDFFunctionPlotData;
 class PlotController : public QObject {
   Q_OBJECT
 public:
-  PlotController(MultiDatasetFit *parent, QwtPlot *plot, QTableWidget *table,
-                 QComboBox *plotSelector, QPushButton *prev, QPushButton *next);
+  PlotController(MultiDatasetFit *parent, QwtPlot *plot, QTableWidget *table, QComboBox *plotSelector,
+                 QPushButton *prev, QPushButton *next);
   ~PlotController() override;
   void clear(bool clearGuess = false);
   void update();

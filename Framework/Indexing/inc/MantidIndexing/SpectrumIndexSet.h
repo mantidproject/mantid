@@ -18,8 +18,7 @@ namespace Indexing {
   @author Simon Heybrock
   @date 2017
 */
-class MANTID_INDEXING_DLL SpectrumIndexSet
-    : public detail::IndexSet<SpectrumIndexSet> {
+class MANTID_INDEXING_DLL SpectrumIndexSet : public detail::IndexSet<SpectrumIndexSet> {
 public:
   using detail::IndexSet<SpectrumIndexSet>::IndexSet;
 };

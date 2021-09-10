@@ -25,19 +25,13 @@ public:
   /// Algorithm's name for identification
   const std::string name() const override { return "SaveHKL"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Save a PeaksWorkspace to a ASCII .hkl file.";
-  }
+  const std::string summary() const override { return "Save a PeaksWorkspace to a ASCII .hkl file."; }
 
   /// Algorithm's version for identification
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"LoadHKL", "SaveHKLCW"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"LoadHKL", "SaveHKLCW"}; }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "Crystal\\DataHandling;DataHandling\\Text";
-  }
+  const std::string category() const override { return "Crystal\\DataHandling;DataHandling\\Text"; }
 
 private:
   /// Initialise the properties
@@ -46,8 +40,7 @@ private:
   void exec() override;
 
   double absorbSphere(double radius, double twoth, double wl, double &tbar);
-  double spectrumCalc(double TOF, int iSpec,
-                      std::vector<std::vector<double>> time,
+  double spectrumCalc(double TOF, int iSpec, std::vector<std::vector<double>> time,
                       std::vector<std::vector<double>> spectra, size_t id);
   void sizeBanks(const std::string &bankName, int &nCols, int &nRows);
 

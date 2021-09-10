@@ -33,13 +33,10 @@ normalization constants
 @author Anthony Lim
 @date 22/05/2018
 */
-class MANTID_MUON_DLL ConvertFitFunctionForMuonTFAsymmetry
-    : public API::Algorithm {
+class MANTID_MUON_DLL ConvertFitFunctionForMuonTFAsymmetry : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
-  const std::string name() const override {
-    return "ConvertFitFunctionForMuonTFAsymmetry";
-  }
+  const std::string name() const override { return "ConvertFitFunctionForMuonTFAsymmetry"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "This algorithm converts adds/removes "
@@ -61,13 +58,10 @@ private:
   void init() override;
   void exec() override;
   std::map<std::string, std::string> validateInputs() override;
-  Mantid::API::IFunction_sptr
-  getTFAsymmFitFunction(const Mantid::API::IFunction_sptr &original,
-                        const std::vector<double> &norms);
-  Mantid::API::IFunction_sptr
-  extractFromTFAsymmFitFunction(const Mantid::API::IFunction_sptr &original);
-  Mantid::API::IFunction_sptr
-  extractUserFunction(const Mantid::API::IFunction_sptr &TFFunc);
+  Mantid::API::IFunction_sptr getTFAsymmFitFunction(const Mantid::API::IFunction_sptr &original,
+                                                    const std::vector<double> &norms);
+  Mantid::API::IFunction_sptr extractFromTFAsymmFitFunction(const Mantid::API::IFunction_sptr &original);
+  Mantid::API::IFunction_sptr extractUserFunction(const Mantid::API::IFunction_sptr &TFFunc);
   void setOutput(const Mantid::API::IFunction_sptr &function);
   std::vector<double> getNorms();
 };

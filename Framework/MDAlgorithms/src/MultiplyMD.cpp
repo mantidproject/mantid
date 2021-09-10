@@ -38,11 +38,9 @@ bool MultiplyMD::commutative() const { return true; }
 /// Check the inputs and throw if the algorithm cannot be run
 void MultiplyMD::checkInputs() {
   if (m_rhs_event)
-    throw std::runtime_error(
-        "Cannot multiply by a MDEventWorkspace on the RHS.");
+    throw std::runtime_error("Cannot multiply by a MDEventWorkspace on the RHS.");
   if (m_lhs_event && !m_rhs_scalar)
-    throw std::runtime_error(
-        "A MDEventWorkspace can only be multiplied by a scalar.");
+    throw std::runtime_error("A MDEventWorkspace can only be multiplied by a scalar.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -50,8 +48,7 @@ void MultiplyMD::checkInputs() {
  * Will do "ws *= scalar"
  * @param ws ::  MDEventWorkspace being modified
  */
-template <typename MDE, size_t nd>
-void MultiplyMD::execEventScalar(typename MDEventWorkspace<MDE, nd>::sptr ws) {
+template <typename MDE, size_t nd> void MultiplyMD::execEventScalar(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // Get the scalar multiplying
   auto scalar = static_cast<float>(m_rhs_scalar->y(0)[0]);
   auto scalarError = static_cast<float>(m_rhs_scalar->e(0)[0]);
@@ -81,8 +78,7 @@ void MultiplyMD::execEventScalar(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         // Multiply weight by a scalar, propagating error
         float oldSignal = it->getSignal();
         float signal = oldSignal * scalar;
-        float errorSquared = scalarSquared * it->getErrorSquared() +
-                             oldSignal * oldSignal * scalarErrorSquared;
+        float errorSquared = scalarSquared * it->getErrorSquared() + oldSignal * oldSignal * scalarErrorSquared;
         it->setSignal(signal);
         it->setErrorSquared(errorSquared);
       }
@@ -103,28 +99,24 @@ void MultiplyMD::execEventScalar(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 /// Run the algorithm with an MDEventWorkspace as output
 void MultiplyMD::execEvent() {
   if (m_lhs_event && !m_rhs_scalar)
-    throw std::runtime_error(
-        "A MDEventWorkspace can only be multiplied by a scalar.");
+    throw std::runtime_error("A MDEventWorkspace can only be multiplied by a scalar.");
   if (!m_out_event)
-    throw std::runtime_error(
-        "MultiplyMD::execEvent(): Error creating output MDEventWorkspace.");
+    throw std::runtime_error("MultiplyMD::execEvent(): Error creating output MDEventWorkspace.");
   // Call the method to do the multiplying
   CALL_MDEVENT_FUNCTION(this->execEventScalar, m_out_event);
 }
 
 //----------------------------------------------------------------------------------------------
 /// Run the algorithm with a MDHisotWorkspace as output and operand
-void MultiplyMD::execHistoHisto(
-    Mantid::DataObjects::MDHistoWorkspace_sptr out,
-    Mantid::DataObjects::MDHistoWorkspace_const_sptr operand) {
+void MultiplyMD::execHistoHisto(Mantid::DataObjects::MDHistoWorkspace_sptr out,
+                                Mantid::DataObjects::MDHistoWorkspace_const_sptr operand) {
   out->multiply(*operand);
 }
 
 //----------------------------------------------------------------------------------------------
 /// Run the algorithm with a MDHisotWorkspace as output, scalar and operand
-void MultiplyMD::execHistoScalar(
-    Mantid::DataObjects::MDHistoWorkspace_sptr out,
-    Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar) {
+void MultiplyMD::execHistoScalar(Mantid::DataObjects::MDHistoWorkspace_sptr out,
+                                 Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar) {
   out->multiply(scalar->y(0)[0], scalar->e(0)[0]);
 }
 

@@ -41,16 +41,13 @@ LoadIDFFromNexus::LoadIDFFromNexus() {}
 void LoadIDFFromNexus::init() {
   // When used as a Child Algorithm the workspace name is not used - hence the
   // "Anonymous" to satisfy the validator
-  declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "Workspace", "Anonymous", Direction::InOut),
-      "The name of the workspace in which to attach the imported instrument");
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("Workspace", "Anonymous", Direction::InOut),
+                  "The name of the workspace in which to attach the imported instrument");
 
   const std::vector<std::string> exts{".nxs", ".nxs.h5"};
-  declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
-      "The name (including its full or relative path) of the Nexus file to "
-      "attempt to load the instrument from.");
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
+                  "The name (including its full or relative path) of the Nexus file to "
+                  "attempt to load the instrument from.");
 
   declareProperty("InstrumentParentPath", std::string(""),
                   "Path name within the Nexus tree of the folder containing "
@@ -90,14 +87,11 @@ void LoadIDFFromNexus::exec() {
   localWorkspace->loadInstrumentInfoNexus(filename, &nxfile);
 
   // Look for parameter correction file
-  std::string parameterCorrectionFile =
-      getPropertyValue("ParameterCorrectionFilePath");
+  std::string parameterCorrectionFile = getPropertyValue("ParameterCorrectionFilePath");
   if (parameterCorrectionFile.empty()) {
-    parameterCorrectionFile =
-        getParameterCorrectionFile(localWorkspace->getInstrument()->getName());
+    parameterCorrectionFile = getParameterCorrectionFile(localWorkspace->getInstrument()->getName());
   }
-  g_log.debug() << "Parameter correction file: " << parameterCorrectionFile
-                << "\n";
+  g_log.debug() << "Parameter correction file: " << parameterCorrectionFile << "\n";
 
   // Read parameter correction file, if found
   std::string correctionParameterFile;
@@ -106,12 +100,9 @@ void LoadIDFFromNexus::exec() {
     // Read parameter correction file
     // to find out which parameter file to use
     // and whether it is appended to default parameters.
-    g_log.notice() << "Using parameter correction file: "
-                   << parameterCorrectionFile << ".\n";
-    readParameterCorrectionFile(
-        parameterCorrectionFile,
-        localWorkspace->getAvailableWorkspaceStartDate(),
-        correctionParameterFile, append);
+    g_log.notice() << "Using parameter correction file: " << parameterCorrectionFile << ".\n";
+    readParameterCorrectionFile(parameterCorrectionFile, localWorkspace->getAvailableWorkspaceStartDate(),
+                                correctionParameterFile, append);
   }
 
   // Load default parameters if either there is no correction parameter file or
@@ -126,18 +117,14 @@ void LoadIDFFromNexus::exec() {
   // Load parameters from correction parameter file, if it exists
   if (!correctionParameterFile.empty()) {
     Poco::Path corrFilePath(parameterCorrectionFile);
-    g_log.debug() << "Correction file path: " << corrFilePath.toString()
-                  << "\n";
+    g_log.debug() << "Correction file path: " << corrFilePath.toString() << "\n";
     Poco::Path corrDirPath = corrFilePath.parent();
-    g_log.debug() << "Correction directory path: " << corrDirPath.toString()
-                  << "\n";
+    g_log.debug() << "Correction directory path: " << corrDirPath.toString() << "\n";
     Poco::Path corrParamFile(corrDirPath, correctionParameterFile);
     if (append) {
-      g_log.notice() << "Using correction parameter file: "
-                     << corrParamFile.toString() << " to append parameters.\n";
+      g_log.notice() << "Using correction parameter file: " << corrParamFile.toString() << " to append parameters.\n";
     } else {
-      g_log.notice() << "Using correction parameter file: "
-                     << corrParamFile.toString() << " to replace parameters.\n";
+      g_log.notice() << "Using correction parameter file: " << corrParamFile.toString() << " to replace parameters.\n";
     }
     loadParameterFile(corrParamFile.toString(), localWorkspace);
   } else {
@@ -151,23 +138,18 @@ void LoadIDFFromNexus::exec() {
  * etc.
  * @returns  full path name of correction file if found else ""
  */
-std::string
-LoadIDFFromNexus::getParameterCorrectionFile(const std::string &instName) {
+std::string LoadIDFFromNexus::getParameterCorrectionFile(const std::string &instName) {
 
-  std::vector<std::string> directoryNames =
-      ConfigService::Instance().getInstrumentDirectories();
+  std::vector<std::string> directoryNames = ConfigService::Instance().getInstrumentDirectories();
   for (auto &directoryName : directoryNames) {
     // This will iterate around the directories from user ->etc ->install, and
     // find the first appropriate file
-    Poco::Path iPath(
-        directoryName,
-        "embedded_instrument_corrections"); // Go to correction file subfolder
+    Poco::Path iPath(directoryName,
+                     "embedded_instrument_corrections"); // Go to correction file subfolder
     // First see if the directory exists
     Poco::File ipDir(iPath);
     if (ipDir.exists() && ipDir.isDirectory()) {
-      iPath.append(
-          instName +
-          "_Parameter_Corrections.xml"); // Append file name to pathname
+      iPath.append(instName + "_Parameter_Corrections.xml"); // Append file name to pathname
       Poco::File ipFile(iPath);
       if (ipFile.exists() && ipFile.isFile()) {
         return ipFile.path(); // Return first found
@@ -190,9 +172,8 @@ LoadIDFFromNexus::getParameterCorrectionFile(const std::string &instName) {
  *
  *  @throw FileError Thrown if unable to parse XML file
  */
-void LoadIDFFromNexus::readParameterCorrectionFile(
-    const std::string &correction_file, const std::string &date,
-    std::string &parameter_file, bool &append) {
+void LoadIDFFromNexus::readParameterCorrectionFile(const std::string &correction_file, const std::string &date,
+                                                   std::string &parameter_file, bool &append) {
   using namespace Poco::XML;
   // Set output arguments to default
   parameter_file = "";
@@ -200,8 +181,8 @@ void LoadIDFFromNexus::readParameterCorrectionFile(
 
   // Check the date.
   if (date.empty()) {
-    g_log.notice() << "No date is supplied for parameter correction file "
-                   << correction_file << ". Correction file is ignored.\n";
+    g_log.notice() << "No date is supplied for parameter correction file " << correction_file
+                   << ". Correction file is ignored.\n";
     return;
   }
 
@@ -214,20 +195,17 @@ void LoadIDFFromNexus::readParameterCorrectionFile(
   try {
     pDoc = pParser.parseString(xmlText);
   } catch (Poco::Exception &exc) {
-    throw Kernel::Exception::FileError(
-        exc.displayText() + ". Unable to parse parameter correction file:",
-        correction_file);
+    throw Kernel::Exception::FileError(exc.displayText() + ". Unable to parse parameter correction file:",
+                                       correction_file);
   } catch (...) {
-    throw Kernel::Exception::FileError(
-        "Unable to parse parameter correction file:", correction_file);
+    throw Kernel::Exception::FileError("Unable to parse parameter correction file:", correction_file);
   }
   // Get pointer to root element
   Element *pRootElem = pDoc->documentElement();
   if (!pRootElem->hasChildNodes()) {
-    g_log.error("Parameter correction file: " + correction_file +
-                "contains no XML root element.");
-    throw Kernel::Exception::InstrumentDefinitionError(
-        "No root element in XML parameter correction file", correction_file);
+    g_log.error("Parameter correction file: " + correction_file + "contains no XML root element.");
+    throw Kernel::Exception::InstrumentDefinitionError("No root element in XML parameter correction file",
+                                                       correction_file);
   }
 
   // Convert date to Mantid object
@@ -235,8 +213,7 @@ void LoadIDFFromNexus::readParameterCorrectionFile(
   DateAndTime externalDate(date);
 
   // Examine the XML structure obtained by parsing
-  Poco::AutoPtr<NodeList> correctionNodeList =
-      pRootElem->getElementsByTagName("correction");
+  Poco::AutoPtr<NodeList> correctionNodeList = pRootElem->getElementsByTagName("correction");
   for (unsigned long i = 0; i < correctionNodeList->length(); ++i) {
     // For each correction element
     auto *corr = dynamic_cast<Element *>(correctionNodeList->item(i));
@@ -249,10 +226,9 @@ void LoadIDFFromNexus::readParameterCorrectionFile(
         break;
       }
     } else {
-      g_log.error("Parameter correction file: " + correction_file +
-                  "contains an invalid correction element.");
-      throw Kernel::Exception::InstrumentDefinitionError(
-          "Invalid element in XML parameter correction file", correction_file);
+      g_log.error("Parameter correction file: " + correction_file + "contains an invalid correction element.");
+      throw Kernel::Exception::InstrumentDefinitionError("Invalid element in XML parameter correction file",
+                                                         correction_file);
     }
   }
 }
@@ -265,8 +241,7 @@ void LoadIDFFromNexus::readParameterCorrectionFile(
  *
  *  @throw FileError Thrown if unable to parse XML file
  */
-void LoadIDFFromNexus::LoadParameters(
-    ::NeXus::File *nxfile, const MatrixWorkspace_sptr &localWorkspace) {
+void LoadIDFFromNexus::LoadParameters(::NeXus::File *nxfile, const MatrixWorkspace_sptr &localWorkspace) {
 
   std::string parameterString;
 
@@ -282,15 +257,12 @@ void LoadIDFFromNexus::LoadParameters(
   if (parameterString.empty()) {
     // No parameters have been found in Nexus file, so we look for them in a
     // parameter file.
-    std::vector<std::string> directoryNames =
-        ConfigService::Instance().getInstrumentDirectories();
-    const std::string instrumentName =
-        localWorkspace->getInstrument()->getName();
+    std::vector<std::string> directoryNames = ConfigService::Instance().getInstrumentDirectories();
+    const std::string instrumentName = localWorkspace->getInstrument()->getName();
     for (const auto &directoryName : directoryNames) {
       // This will iterate around the directories from user ->etc ->install, and
       // find the first appropriate file
-      const std::string paramFile =
-          directoryName + instrumentName + "_Parameters.xml";
+      const std::string paramFile = directoryName + instrumentName + "_Parameters.xml";
 
       // Attempt to load specified file, if successful, use file and stop
       // search.
@@ -307,9 +279,7 @@ void LoadIDFFromNexus::LoadParameters(
 
 // Private function to load parameter file specified by a full path name into
 // given workspace, returning success.
-bool LoadIDFFromNexus::loadParameterFile(
-    const std::string &fullPathName,
-    const MatrixWorkspace_sptr &localWorkspace) {
+bool LoadIDFFromNexus::loadParameterFile(const std::string &fullPathName, const MatrixWorkspace_sptr &localWorkspace) {
 
   try {
     // load and also populate instrument parameters from this 'fallback'
@@ -318,16 +288,13 @@ bool LoadIDFFromNexus::loadParameterFile(
     loadParamAlg->setProperty("Filename", fullPathName);
     loadParamAlg->setProperty("Workspace", localWorkspace);
     loadParamAlg->execute();
-    g_log.notice() << "Instrument parameter file: " << fullPathName
-                   << " has been loaded.\n\n";
+    g_log.notice() << "Instrument parameter file: " << fullPathName << " has been loaded.\n\n";
     return true; // Success
   } catch (std::invalid_argument &e) {
-    g_log.information(
-        "LoadParameterFile: No parameter file found for this instrument");
+    g_log.information("LoadParameterFile: No parameter file found for this instrument");
     g_log.information(e.what());
   } catch (std::runtime_error &e) {
-    g_log.information(
-        "Unable to successfully run LoadParameterFile Child Algorithm");
+    g_log.information("Unable to successfully run LoadParameterFile Child Algorithm");
     g_log.information(e.what());
   }
   return false;

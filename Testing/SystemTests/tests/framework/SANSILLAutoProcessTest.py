@@ -33,6 +33,7 @@ class D11_AutoProcess_Test(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
+        self.disableChecking.append("Instrument")
         return ['out', 'D11_AutoProcess_Reference.nxs']
 
     def runTest(self):
@@ -64,7 +65,7 @@ class D11_AutoProcess_Test(systemtesting.MantidSystemTest):
                 CalculateResolution='MildnerCarpenter',
                 OutputWorkspace='iq_s' + str(i + 1),
                 BeamRadius='0.05,0.05,0.05',
-                TransmissionBeamRadius=0.05
+                TransmissionBeamRadius=0.2
             )
 
         GroupWorkspaces(InputWorkspaces=['iq_s1', 'iq_s2', 'iq_s3'], OutputWorkspace='out')
@@ -91,6 +92,7 @@ class D11_AutoProcess_Wedges_Test(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
+        self.disableChecking.append("Instrument")
         return ['out', 'D11_AutoProcess_Wedges_Reference.nxs']
 
     def runTest(self):
@@ -103,15 +105,12 @@ class D11_AutoProcess_Wedges_Test(systemtesting.MantidSystemTest):
         sample_tr = '2869'
         thick = 0.2
 
-        # reduce samples
-        # this also tests that already loaded workspace can be passed instead of a file
-        LoadNexusProcessed(Filename='sens-lamp.nxs', OutputWorkspace='sens-lamp')
         SANSILLAutoProcess(
             SampleRuns=sample,
             BeamRuns=beams,
             ContainerRuns=containers,
+            SensitivityMaps='sens-lamp.nxs',
             MaskFiles='mask1.nxs,mask2.nxs,mask3.nxs',
-            SensitivityMaps='sens-lamp',
             SampleTransmissionRuns=sample_tr,
             ContainerTransmissionRuns=container_tr,
             TransmissionBeamRuns=beam_tr,
@@ -124,9 +123,15 @@ class D11_AutoProcess_Wedges_Test(systemtesting.MantidSystemTest):
             )
 
         GroupWorkspaces(
-            InputWorkspaces=['iq_1', 'iq_2', 'iq_3',
-                             'iq_wedge_1_1', 'iq_wedge_1_2', 'iq_wedge_1_3',
-                             'iq_wedge_2_1', 'iq_wedge_2_2', 'iq_wedge_2_3'],
+            InputWorkspaces=['iq_#1_d39.0m_c40.5m_w5.6A',
+                             'iq_#2_d8.0m_c8.0m_w5.6A',
+                             'iq_#3_d2.0m_c5.5m_w5.6A',
+                             'iq_wedge_1_#1_d39.0m_c40.5m_w5.6A',
+                             'iq_wedge_1_#2_d8.0m_c8.0m_w5.6A',
+                             'iq_wedge_1_#3_d2.0m_c5.5m_w5.6A',
+                             'iq_wedge_2_#1_d39.0m_c40.5m_w5.6A',
+                             'iq_wedge_2_#2_d8.0m_c8.0m_w5.6A',
+                             'iq_wedge_2_#3_d2.0m_c5.5m_w5.6A'],
             OutputWorkspace='out'
             )
 
@@ -152,6 +157,7 @@ class D11_AutoProcess_IQxQy_Test(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
+        self.disableChecking.append("Instrument")
         return ['iqxy', 'D11_AutoProcess_IQxQy_Reference.nxs']
 
     def runTest(self):
@@ -165,7 +171,6 @@ class D11_AutoProcess_IQxQy_Test(systemtesting.MantidSystemTest):
             ContainerTransmissionRuns='2870+2954',
             TransmissionBeamRuns='2867+2868',
             SampleThickness=0.2,
-            CalculateResolution='MildnerCarpenter',
             OutputWorkspace='iqxy',
             OutputType='I(Qx,Qy)',
             BeamRadius='0.05,0.05,0.05',
@@ -208,6 +213,7 @@ class D11_AutoProcess_Multiple_Transmissions_Test(systemtesting.MantidSystemTest
     def validate(self):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
+        self.disableChecking.append("Instrument")
         return ['iq_mult_wavelengths', 'D11_AutoProcess_Multiple_Tr_Reference.nxs']
 
     def runTest(self):
@@ -219,9 +225,6 @@ class D11_AutoProcess_Multiple_Transmissions_Test(systemtesting.MantidSystemTest
         sample_tr = '1204,990,990'
         thick = 0.1
 
-        # reduce samples
-        # this also tests that already loaded workspace can be passed instead of a file
-        LoadNexusProcessed(Filename='sens-lamp.nxs', OutputWorkspace='sens-lamp')
         SANSILLAutoProcess(
             SampleRuns=samples,
             BeamRuns=beams,
@@ -236,11 +239,225 @@ class D11_AutoProcess_Multiple_Transmissions_Test(systemtesting.MantidSystemTest
             CalculateResolution='MildnerCarpenter',
             OutputWorkspace='iq_mult_wavelengths',
             BeamRadius='0.05',
+            TransmissionBeamRadius=0.05,
+            StitchReferenceIndex = 0
+        )
+
+
+class D11_AutoProcess_Solvent_Test(systemtesting.MantidSystemTest):
+    """
+    Tests auto process for D11 with 1 sample at 3 different distances,
+    and with multiple transmissions per process.
+    """
+
+    def __init__(self):
+        super(D11_AutoProcess_Solvent_Test, self).__init__()
+        self.setUp()
+
+    def setUp(self):
+        config['default.facility'] = 'ILL'
+        config['default.instrument'] = 'D11'
+        config['logging.loggers.root.level'] = 'Warning'
+        config.appendDataSearchSubDir('ILL/D11/')
+        # prepare mask for instrument edges first:
+        MaskBTP(Instrument='D11', Tube='0-6,250-256')
+        RenameWorkspace(InputWorkspace='D11MaskBTP', OutputWorkspace='mask_vertical')
+        MaskBTP(Instrument='D11', Pixel='0-6,250-256')
+        Plus(LHSWorkspace='mask_vertical', RHSWorkspace='D11MaskBTP', OutputWorkspace='edge_masks')
+        # the edges mask can be used as a default mask for all distances and wavelengths
+
+        MaskBTP(Instrument='D11', Tube='114-142,', Pixel='114-142')
+        RenameWorkspace(InputWorkspace='D11MaskBTP', OutputWorkspace='mask_8m_4_6A_center')
+        MaskBTP(Instrument='D11', Tube='3-14', Pixel='240-256')
+        Plus(LHSWorkspace='D11MaskBTP', RHSWorkspace='mask_8m_4_6A_center', OutputWorkspace='mask_8m_4_6A')
+        MaskBTP(Instrument='D11', Tube='103-147', Pixel='103-147')
+        RenameWorkspace(InputWorkspace='D11MaskBTP', OutputWorkspace='mask_1m_4_6A_center')
+        MaskBTP(Instrument='D11', Tube='3-14', Pixel='240-256')
+        Plus(LHSWorkspace='D11MaskBTP', RHSWorkspace='mask_1m_4_6A_center', OutputWorkspace='mask_1m_4_6A')
+
+    def cleanup(self):
+        mtd.clear()
+        for i in range(2):
+            os.remove(os.path.join(gettempdir(), 'solvent_' + str(i) + '.nxs'))
+
+    def validate(self):
+        self.tolerance = 1e-3
+        self.tolerance_is_rel_err = True
+        self.disableChecking.append("Instrument")
+        return ['iq_mult_solvent', 'D11_AutoProcess_Solvent_Reference.nxs']
+
+    def runTest(self):
+        beams = '947,1088'
+        containers = '973,1003'
+        container_tr = '988'
+        beam_tr = '1119'
+        samples = '975,1005'
+        sample_tr = '990'
+        solvents = '1106,1091'
+        solvent_tr = '1121'
+        thick = 0.1
+
+        # this also tests that already loaded workspace can be passed instead of a file
+        LoadNexusProcessed(Filename='sens-lamp.nxs', OutputWorkspace='sens-lamp')
+        # first, process the solvent
+        SANSILLAutoProcess(
+            SampleRuns=solvents,
+            BeamRuns=beams,
+            DefaultMaskFile='edge_masks',
+            MaskFiles='mask_8m_4_6A,mask_1m_4_6A',
+            SensitivityMaps='sens-lamp',
+            SampleTransmissionRuns=solvent_tr,
+            ContainerTransmissionRuns=container_tr,
+            TransmissionBeamRuns=beam_tr,
+            SampleThickness=thick,
+            CalculateResolution='MildnerCarpenter',
+            OutputWorkspace='solvents',
+            BeamRadius='0.05',
+            TransmissionBeamRadius=0.05,
+            ClearCorrected2DWorkspace=False,
+            StitchReferenceIndex=0
+        )
+
+        tmp_dir = gettempdir()
+        solvent_dir = [os.path.join(tmp_dir, 'solvent_' + str(i) + '.nxs') for i in range(2)]
+        SaveNexusProcessed('001106_Sample', solvent_dir[0])
+        SaveNexusProcessed('001091_Sample', solvent_dir[1])
+
+        # reduce samples
+        SANSILLAutoProcess(
+            SampleRuns=samples,
+            BeamRuns=beams,
+            ContainerRuns=containers,
+            DefaultMaskFile='edge_masks',
+            MaskFiles='mask_8m_4_6A,mask_1m_4_6A',
+            SensitivityMaps='sens-lamp',
+            SampleTransmissionRuns=sample_tr,
+            ContainerTransmissionRuns=container_tr,
+            TransmissionBeamRuns=beam_tr,
+            SolventFiles=",".join(solvent_dir),
+            SampleThickness=thick,
+            CalculateResolution='MildnerCarpenter',
+            OutputWorkspace='iq_mult_solvent',
+            BeamRadius='0.05',
+            TransmissionBeamRadius=0.05,
+            StitchReferenceIndex=0
+        )
+
+
+class D11_AutoProcess_CustomStitching_Test(systemtesting.MantidSystemTest):
+    """
+    Tests auto process for D11 with 3 samples at 3 different distances
+    """
+
+    def __init__(self):
+        super(D11_AutoProcess_CustomStitching_Test, self).__init__()
+        self.setUp()
+
+    def setUp(self):
+        config['default.facility'] = 'ILL'
+        config['default.instrument'] = 'D11'
+        config['logging.loggers.root.level'] = 'Warning'
+        config.appendDataSearchSubDir('ILL/D11/')
+
+    def cleanup(self):
+        mtd.clear()
+
+    def validate(self):
+        self.tolerance = 1e-3
+        self.tolerance_is_rel_err = True
+        self.disableChecking.append("Instrument")
+        return ['out', 'D11_AutoProcess_CustomStitch_Reference.nxs']
+
+    def runTest(self):
+
+        beams = '2866,2867+2868,2878'
+        containers = '2888+2971,2884+2960,2880+2949'
+        container_tr = '2870+2954'
+        beam_tr = '2867+2868'
+        samples = ['2889,2885,2881',
+                   '2887,2883,2879',
+                   '3187,3177,3167']
+        sample_tr = ['2871', '2869', '3172']
+        thick = [0.1, 0.2, 0.2]
+
+        # reduce samples
+        # this also tests that already loaded workspace can be passed instead of a file
+        LoadNexusProcessed(Filename='sens-lamp.nxs', OutputWorkspace='sens-lamp')
+        for i in range(len(samples)):
+            SANSILLAutoProcess(
+                SampleRuns=samples[i],
+                BeamRuns=beams,
+                ContainerRuns=containers,
+                MaskFiles='mask1.nxs,mask2.nxs,mask3.nxs',
+                SensitivityMaps='sens-lamp',
+                SampleTransmissionRuns=sample_tr[i],
+                ContainerTransmissionRuns=container_tr,
+                TransmissionBeamRuns=beam_tr,
+                SampleThickness=thick[i],
+                CalculateResolution='MildnerCarpenter',
+                OutputWorkspace='iq_s' + str(i + 1),
+                BeamRadius='0.05,0.05,0.05',
+                TransmissionBeamRadius=0.05,
+                StitchReferenceIndex=1
+            )
+
+        GroupWorkspaces(InputWorkspaces=['iq_s1', 'iq_s2', 'iq_s3'], OutputWorkspace='out')
+
+
+class D11B_AutoProcess_DirectBeamResolution_Test(systemtesting.MantidSystemTest):
+    """
+    Tests auto process for D11B with 1 sample at 3 different distances,
+    and with direct beam resolution calculation in place of Mildner-Carpenter.
+    """
+
+    def __init__(self):
+        super(D11B_AutoProcess_DirectBeamResolution_Test, self).__init__()
+        self.setUp()
+
+    def setUp(self):
+        config['default.facility'] = 'ILL'
+        config['default.instrument'] = 'D11'
+        config['logging.loggers.root.level'] = 'Warning'
+        config.appendDataSearchSubDir('ILL/D11/')
+        config.appendDataSearchSubDir('ILL/D11B/')
+
+    def cleanup(self):
+        mtd.clear()
+
+    def validate(self):
+        self.tolerance = 1e-3
+        self.tolerance_is_rel_err = True
+        self.disableChecking.append("Instrument")
+        return ['iq_s', 'D11B_AutoProcess_DirectBeamResolution_Test.nxs']
+
+    def runTest(self):
+        beams = '2651,2733,2732'
+        containers = '2653,2693,2713'
+        container_tr = '2673'
+        beam_tr = '2733'
+        samples = '2656,2696,2716'
+        sample_tr = '2735'
+        thickness = 0.2
+
+        # reduce samples
+        SANSILLAutoProcess(
+            SampleRuns=samples,
+            BeamRuns=beams,
+            ContainerRuns=containers,
+            DefaultMaskFile='002692_mask_edges_8m',
+            MaskFiles='002652_mask_bs_2m,002692_mask_bs_8m,002712_mask_bs_28m',
+            SampleTransmissionRuns=sample_tr,
+            ContainerTransmissionRuns=container_tr,
+            TransmissionBeamRuns=beam_tr,
+            SampleThickness=thickness,
+            CalculateResolution='DirectBeam',
+            OutputWorkspace='iq_s',
+            BeamRadius='0.05,0.05,0.05',
             TransmissionBeamRadius=0.05
         )
 
 
-class D33_AutoProcess_Test(systemtesting.MantidSystemTest):
+class D33_AutoProcess_Panels_Test(systemtesting.MantidSystemTest):
     """
     Tests auto process with D33 monochromatic data
     One sample at one angle, with separation of the panels
@@ -248,7 +465,7 @@ class D33_AutoProcess_Test(systemtesting.MantidSystemTest):
     """
 
     def __init__(self):
-        super(D33_AutoProcess_Test, self).__init__()
+        super(D33_AutoProcess_Panels_Test, self).__init__()
         self.setUp()
 
     def setUp(self):
@@ -263,6 +480,7 @@ class D33_AutoProcess_Test(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
+        self.disableChecking.append("Instrument")
         return ['out', 'D33_AutoProcess_Reference.nxs']
 
     def runTest(self):
@@ -289,7 +507,13 @@ class D33_AutoProcess_Test(systemtesting.MantidSystemTest):
             TransmissionBeamRadius=0.05
         )
 
-        GroupWorkspaces(InputWorkspaces=['iq', 'iq_panels'], OutputWorkspace='out')
+        GroupWorkspaces(InputWorkspaces=['iq',
+                                         'iq_back_detector',
+                                         'iq_front_detector_bottom',
+                                         'iq_front_detector_left',
+                                         'iq_front_detector_right',
+                                         'iq_front_detector_top'],
+                                         OutputWorkspace='out')
 
 
 class D33_AutoProcess_IPhiQ_Test(systemtesting.MantidSystemTest):
@@ -314,7 +538,8 @@ class D33_AutoProcess_IPhiQ_Test(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
-        return ['out', 'D33_AutoProcess_IPhiQ_Reference.nxs']
+        self.disableChecking.append("Instrument")
+        return ['iphiq_#1_d2.0m_c7.8m_w6.0A', 'D33_AutoProcess_IPhiQ_Reference.nxs']
 
     def runTest(self):
 
@@ -335,15 +560,11 @@ class D33_AutoProcess_IPhiQ_Test(systemtesting.MantidSystemTest):
             ContainerTransmissionRuns=can_tr,
             TransmissionBeamRuns=tr_beam,
             OutputWorkspace='iphiq',
-            OutputPanels=True,
             NumberOfWedges=60,
             OutputType='I(Phi,Q)',
             BeamRadius=0.05,
             TransmissionBeamRadius=0.05
         )
-
-        GroupWorkspaces(InputWorkspaces=['iphiq', 'iphiq_panels'],
-                        OutputWorkspace='out')
 
 
 class D16_AutoProcess_Test(systemtesting.MantidSystemTest):
@@ -370,8 +591,7 @@ class D16_AutoProcess_Test(systemtesting.MantidSystemTest):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
         self.disableChecking.append("Instrument")
-
-        return ['iq', 'ILL_D16_Gamma_scan.nxs']
+        return ['iq', 'D16_Gamma_scan.nxs']
 
     def runTest(self):
         water = '3659, 3663, 3667'
@@ -425,7 +645,55 @@ class D16_AutoProcess_Test(systemtesting.MantidSystemTest):
                            SampleThickness=0.2,
                            TransmissionBeamRadius=1,
                            BeamRadius=1,
-                           ReferenceFiles=",".join(water_dir))
+                           ReferenceFiles=",".join(water_dir),
+                           StitchReferenceIndex=0
+                           )
+
+
+class D22_AutoProcess_Single_Sensitivity(systemtesting.MantidSystemTest):
+    """
+    Tests auto process with D22 data with one sensitivity measurement.
+    """
+
+    def __init__(self):
+        super(D22_AutoProcess_Single_Sensitivity, self).__init__()
+        self.setUp()
+
+    def setUp(self):
+        config['default.facility'] = 'ILL'
+        config['default.instrument'] = 'D22'
+        config['logging.loggers.root.level'] = 'Warning'
+        config.appendDataSearchSubDir('ILL/D22/')
+
+        MaskBTP(Instrument='D22', Pixel='0-12,245-255')
+        MaskBTP(Workspace='D22MaskBTP', Tube='54-75', Pixel='108-150')
+        RenameWorkspace(InputWorkspace='D22MaskBTP', OutputWorkspace='D22_mask_central')
+
+    def cleanup(self):
+        mtd.clear()
+
+    def validate(self):
+        self.tolerance = 1e-3
+        self.tolerance_is_rel_err = True
+        self.disableChecking.append('Instrument')
+        return ['d22_single_sens', 'D22_AutoProcess_Single_Sens_Reference.nxs']
+
+    def runTest(self):
+
+        samples = '344411'
+        masks = 'D22_mask_central'
+        thick = 0.1
+
+        # reduce samples
+        SANSILLAutoProcess(
+            SampleRuns=samples,
+            MaskFiles=masks,
+            SensitivityOutputWorkspace='sens',
+            SampleThickness=thick,
+            OutputWorkspace='ref',
+            SensitivityWithOffsets=False
+        )
+        GroupWorkspaces(InputWorkspaces=['ref', 'sens'], OutputWorkspace='d22_single_sens')
 
 
 class D22_AutoProcess_Multi_Sensitivity(systemtesting.MantidSystemTest):
@@ -459,6 +727,7 @@ class D22_AutoProcess_Multi_Sensitivity(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
+        self.disableChecking.append("Instrument")
         return ['sens', 'D22_AutoProcess_Multi_Sens_Reference.nxs']
 
     def runTest(self):

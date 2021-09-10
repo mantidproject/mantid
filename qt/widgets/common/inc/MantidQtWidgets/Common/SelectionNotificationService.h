@@ -25,8 +25,7 @@ need exist or have references to each other.  Currently the only
 an object just needs to call the sendQPointSelection() method on the
 single Instance() of this class.
 */
-class EXPORT_OPT_MANTIDQT_COMMON SelectionNotificationServiceImpl
-    : public QObject {
+class EXPORT_OPT_MANTIDQT_COMMON SelectionNotificationServiceImpl : public QObject {
   Q_OBJECT
 
 public:
@@ -34,8 +33,7 @@ public:
   void sendQPointSelection(bool lab_coords, double qx, double qy, double qz);
 
 signals:
-  void QPointSelection_signal(bool /*_t1*/, double /*_t2*/, double /*_t3*/,
-                              double /*_t4*/);
+  void QPointSelection_signal(bool /*_t1*/, double /*_t2*/, double /*_t3*/, double /*_t4*/);
 
 private:
   /// private constructor, since SelectionNotificationService is a singleton
@@ -44,17 +42,15 @@ private:
   /// private constructor, since SelectionNotificationService is a singleton
   ~SelectionNotificationServiceImpl() override;
 
-  friend struct Mantid::Kernel::CreateUsingNew<
-      SelectionNotificationServiceImpl>;
+  friend struct Mantid::Kernel::CreateUsingNew<SelectionNotificationServiceImpl>;
 };
 
-using SelectionNotificationService =
-    Mantid::Kernel::SingletonHolder<SelectionNotificationServiceImpl>;
+using SelectionNotificationService = Mantid::Kernel::SingletonHolder<SelectionNotificationServiceImpl>;
 } // namespace API
 } // namespace MantidQt
 namespace Mantid {
 namespace Kernel {
-EXTERN_MANTIDQT_COMMON template class EXPORT_OPT_MANTIDQT_COMMON Mantid::
-    Kernel::SingletonHolder<MantidQt::API::SelectionNotificationServiceImpl>;
+EXTERN_MANTIDQT_COMMON template class EXPORT_OPT_MANTIDQT_COMMON
+    Mantid::Kernel::SingletonHolder<MantidQt::API::SelectionNotificationServiceImpl>;
 }
 } // namespace Mantid

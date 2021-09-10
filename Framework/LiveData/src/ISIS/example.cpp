@@ -46,8 +46,7 @@ int liveData(const std::string &host) {
     if (!(events.head.type == TCPStreamEventHeader::Neutron)) {
       throw std::runtime_error("corrupt stream - you should reconnect");
     }
-    s.receiveBytes(junk_buffer, events.head.length -
-                                    static_cast<uint32_t>(sizeof(events.head)));
+    s.receiveBytes(junk_buffer, events.head.length - static_cast<uint32_t>(sizeof(events.head)));
     while (s.available() < static_cast<int>(sizeof(events.head_n))) {
       Poco::Thread::sleep(100);
     }
@@ -55,21 +54,16 @@ int liveData(const std::string &host) {
     if (!events.head_n.isValid()) {
       throw std::runtime_error("corrupt stream - you should reconnect");
     }
-    s.receiveBytes(junk_buffer,
-                   events.head_n.length -
-                       static_cast<uint32_t>(sizeof(events.head_n)));
+    s.receiveBytes(junk_buffer, events.head_n.length - static_cast<uint32_t>(sizeof(events.head_n)));
     events.data.resize(events.head_n.nevents);
     uint32_t nread = 0;
     while (nread < events.head_n.nevents) {
-      uint32_t ntoread = static_cast<uint32_t>(
-          s.available() / static_cast<int>(sizeof(TCPStreamEventNeutron)));
+      uint32_t ntoread = static_cast<uint32_t>(s.available() / static_cast<int>(sizeof(TCPStreamEventNeutron)));
       if (ntoread > (events.head_n.nevents - nread)) {
         ntoread = events.head_n.nevents - nread;
       }
       if (ntoread > 0) {
-        s.receiveBytes(&(events.data[nread]),
-                       ntoread *
-                           static_cast<int>(sizeof(TCPStreamEventNeutron)));
+        s.receiveBytes(&(events.data[nread]), ntoread * static_cast<int>(sizeof(TCPStreamEventNeutron)));
         nread += ntoread;
       } else {
         Poco::Thread::sleep(100);
@@ -80,12 +74,10 @@ int liveData(const std::string &host) {
     }
     // TCPStreamEventHeader& head = events.head;
     TCPStreamEventHeaderNeutron &head_n = events.head_n;
-    g_log.information() << "Read " << nread << " events for frame number "
-                        << head_n.frame_number << " time "
+    g_log.information() << "Read " << nread << " events for frame number " << head_n.frame_number << " time "
                         << head_n.frame_time_zero << '\n';
     for (int i = 0; i < 10; ++i) {
-      g_log.information() << events.data[i].time_of_flight << " "
-                          << events.data[i].spectrum << '\n';
+      g_log.information() << events.data[i].time_of_flight << " " << events.data[i].spectrum << '\n';
     }
   }
   s.close();

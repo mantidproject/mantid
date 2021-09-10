@@ -82,14 +82,11 @@ public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "Fit"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Fits a function to data in a Workspace";
-  }
+  const std::string summary() const override { return "Fits a function to data in a Workspace"; }
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return (1); }
   const std::vector<std::string> seeAlso() const override {
-    return {"FitGaussian", "UserFunction1D", "PlotPeakByLogValue",
-            "SplineBackground", "EvaluateFunction"};
+    return {"FitGaussian", "UserFunction1D", "PlotPeakByLogValue", "SplineBackground", "EvaluateFunction"};
   }
 
 private:

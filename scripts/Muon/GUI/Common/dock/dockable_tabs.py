@@ -4,8 +4,11 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from mantidqt import icons
+
 from qtpy import QtWidgets, QtCore, QtGui, PYQT4
 from qtpy.QtCore import Slot
+from qtpy.QtGui import QIcon
 
 """
 Original code by user Blackwood, Jan 2018.
@@ -36,11 +39,19 @@ class DetachableTabWidget(QtWidgets.QTabWidget):
         self.tab_order = []
         self.attached_tab_names = []
 
+        self.valid_tab_icon = QIcon()
+        self.invalid_tab_icon = icons.get_icon("mdi.asterisk", "red", 0.5)
+
         # Close all detached tabs if the application is closed explicitly
         # QtGui.qApp.aboutToQuit.connect(self.close_detached_tabs)  # @UndefinedVariable
 
     def closeEvent(self, event):
         self.close_detached_tabs()
+
+    def set_tab_warning(self, index: int, message: str) -> None:
+        """Adds a tooltip to a tab with a warning message."""
+        self.setTabIcon(index, self.invalid_tab_icon if message != "" else self.valid_tab_icon)
+        self.setTabToolTip(index, message)
 
     def setMovable(self, movable):
         """
@@ -52,7 +63,16 @@ class DetachableTabWidget(QtWidgets.QTabWidget):
     def addTabWithOrder(self, tab, name):
         self.tab_order.append(name)
         self.attached_tab_names.append(name)
+        self.addTab(tab, name)
+
+    def addTab(self, tab, name):
         super(DetachableTabWidget, self).addTab(tab, name)
+        self.setTabToolTip(self.indexOf(tab), name)
+
+    def insertTab(self, to_index, widget, *args):
+        index = super(DetachableTabWidget, self).insertTab(to_index, widget, *args)
+        self.setTabToolTip(to_index, args[-1])
+        return index
 
     def set_slot_for_tab_changed(self, slot):
         self.currentChanged.connect(slot)
@@ -418,14 +438,8 @@ class DetachableTabWidget(QtWidgets.QTabWidget):
                 if self.drag_end_pos.x() != 0 and self.drag_end_pos.y() != 0:
                     drop_action = QtCore.Qt.MoveAction
 
-                # If the drag completed outside of the tab bar, detach the tab and move
-                # the content to the current cursor position
-                if drop_action == QtCore.Qt.IgnoreAction:
-                    event.accept()
-                    self.onDetachTabSignal.emit(self.tabAt(self.drag_start_pos), self.mouse_cursor.pos())
-
-                # Else if the drag completed inside the tab bar, move the selected tab to the new position
-                elif drop_action == QtCore.Qt.MoveAction:
+                # If the drag completed inside the tab bar, move the selected tab to the new position
+                if drop_action == QtCore.Qt.MoveAction:
                     if not self.drag_end_pos.isNull():
                         event.accept()
                         self.onMoveTabSignal.emit(self.tabAt(self.drag_start_pos), self.tabAt(self.drag_end_pos))

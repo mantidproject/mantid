@@ -48,24 +48,15 @@ ColorBarWidget::ColorBarWidget(QWidget *parent) : QWidget(parent) {
   ui.verticalLayout->insertWidget(2, m_colorBar, 1, nullptr);
 
   // Hook up signals
-  QObject::connect(ui.dspnN, SIGNAL(valueChanged(double)), this,
-                   SLOT(changedExponent(double)));
-  QObject::connect(ui.cmbScaleType, SIGNAL(currentIndexChanged(int)), this,
-                   SLOT(changedScaleType(int)));
-  QObject::connect(ui.valMin, SIGNAL(editingFinished()), this,
-                   SLOT(changedMinimum()));
-  QObject::connect(ui.valMax, SIGNAL(editingFinished()), this,
-                   SLOT(changedMaximum()));
-  QObject::connect(ui.valMin, SIGNAL(valueChangedFromArrows()), this,
-                   SLOT(changedMinimum()));
-  QObject::connect(ui.valMax, SIGNAL(valueChangedFromArrows()), this,
-                   SLOT(changedMaximum()));
-  QObject::connect(ui.valMin, SIGNAL(valueChanged(double)), this,
-                   SLOT(changedMinimum()));
-  QObject::connect(ui.valMax, SIGNAL(valueChanged(double)), this,
-                   SLOT(changedMaximum()));
-  QObject::connect(m_colorBar, SIGNAL(mouseMoved(QPoint, double)), this,
-                   SLOT(colorBarMouseMoved(QPoint, double)));
+  QObject::connect(ui.dspnN, SIGNAL(valueChanged(double)), this, SLOT(changedExponent(double)));
+  QObject::connect(ui.cmbScaleType, SIGNAL(currentIndexChanged(int)), this, SLOT(changedScaleType(int)));
+  QObject::connect(ui.valMin, SIGNAL(editingFinished()), this, SLOT(changedMinimum()));
+  QObject::connect(ui.valMax, SIGNAL(editingFinished()), this, SLOT(changedMaximum()));
+  QObject::connect(ui.valMin, SIGNAL(valueChangedFromArrows()), this, SLOT(changedMinimum()));
+  QObject::connect(ui.valMax, SIGNAL(valueChangedFromArrows()), this, SLOT(changedMaximum()));
+  QObject::connect(ui.valMin, SIGNAL(valueChanged(double)), this, SLOT(changedMinimum()));
+  QObject::connect(ui.valMax, SIGNAL(valueChanged(double)), this, SLOT(changedMaximum()));
+  QObject::connect(m_colorBar, SIGNAL(mouseMoved(QPoint, double)), this, SLOT(colorBarMouseMoved(QPoint, double)));
 
   // Initial view
   this->updateColorMap();
@@ -79,9 +70,7 @@ double ColorBarWidget::getMinimum() const { return m_min; }
 double ColorBarWidget::getMaximum() const { return m_max; }
 
 /// @return then min/max range currently viewed
-QwtDoubleInterval ColorBarWidget::getViewRange() const {
-  return QwtDoubleInterval(m_min, m_max);
-}
+QwtDoubleInterval ColorBarWidget::getViewRange() const { return QwtDoubleInterval(m_min, m_max); }
 
 /// @return the color map in use (ref)
 MantidColorMap &ColorBarWidget::getColorMap() { return m_colorMap; }
@@ -281,9 +270,7 @@ void ColorBarWidget::setMaximum(double max) {
   updateMinMaxGUI();
 }
 
-void ColorBarWidget::setViewRange(QwtDoubleInterval range) {
-  this->setViewRange(range.minValue(), range.maxValue());
-}
+void ColorBarWidget::setViewRange(QwtDoubleInterval range) { this->setViewRange(range.minValue(), range.maxValue()); }
 
 //-------------------------------------------------------------------------------------------------
 /*
@@ -355,8 +342,7 @@ void ColorBarWidget::updateColorMap() {
   m_colorBar->setEnabled(true);
 
   // Try to limit the number of steps based on the height of the color bar
-  int maxMajorSteps =
-      m_colorBar->height() / 15; // 15 pixels per div looked about right
+  int maxMajorSteps = m_colorBar->height() / 15; // 15 pixels per div looked about right
   if (maxMajorSteps > 10)
     maxMajorSteps = 10;
 
@@ -366,21 +352,15 @@ void ColorBarWidget::updateColorMap() {
   MantidColorMap::ScaleType type = m_colorMap.getScaleType();
   if (type == MantidColorMap::ScaleType::Linear) {
     QwtLinearScaleEngine linScaler;
-    m_colorBar->setScaleDiv(
-        linScaler.transformation(),
-        linScaler.divideScale(minValue, maxValue, maxMajorSteps, 5));
+    m_colorBar->setScaleDiv(linScaler.transformation(), linScaler.divideScale(minValue, maxValue, maxMajorSteps, 5));
     m_colorBar->setColorMap(QwtDoubleInterval(minValue, maxValue), m_colorMap);
   } else if (type == MantidColorMap::ScaleType::Power) {
     PowerScaleEngine powScaler;
-    m_colorBar->setScaleDiv(
-        powScaler.transformation(),
-        powScaler.divideScale(minValue, maxValue, maxMajorSteps, 5));
+    m_colorBar->setScaleDiv(powScaler.transformation(), powScaler.divideScale(minValue, maxValue, maxMajorSteps, 5));
     m_colorBar->setColorMap(QwtDoubleInterval(minValue, maxValue), m_colorMap);
   } else {
     QwtLog10ScaleEngine logScaler;
-    m_colorBar->setScaleDiv(
-        logScaler.transformation(),
-        logScaler.divideScale(minValue, maxValue, maxMajorSteps, 5));
+    m_colorBar->setScaleDiv(logScaler.transformation(), logScaler.divideScale(minValue, maxValue, maxMajorSteps, 5));
     m_colorBar->setColorMap(QwtDoubleInterval(minValue, maxValue), m_colorMap);
   }
 }
@@ -406,15 +386,13 @@ void ColorBarWidget::setAutoScaleTooltipText(const std::string &newText) {
 
 //-------------------------------------------------------------------------------------------------
 /** Update the label text on the Auto Scale for Current Slice on Load label */
-void ColorBarWidget::setAutoScaleForCurrentSliceLabelText(
-    const std::string &newText) {
+void ColorBarWidget::setAutoScaleForCurrentSliceLabelText(const std::string &newText) {
   ui.autoScaleForCurrentSlice->setToolTip(QString::fromStdString(newText));
 }
 
 //-------------------------------------------------------------------------------------------------
 /** Update the tooltip text on the Auto Scale for Current Slice on Load label */
-void ColorBarWidget::setAutoScaleForCurrentSliceTooltipText(
-    const std::string &newText) {
+void ColorBarWidget::setAutoScaleForCurrentSliceTooltipText(const std::string &newText) {
   ui.autoScaleForCurrentSlice->setToolTip(QString::fromStdString(newText));
 }
 
@@ -437,9 +415,7 @@ bool ColorBarWidget::getAutoScale() const { return ui.autoScale->isChecked(); }
  * Gets the state of the "Autoscale for current slice" checkbox
  * @returns true if it is checked else false
  */
-bool ColorBarWidget::getAutoScaleforCurrentSlice() const {
-  return ui.autoScaleForCurrentSlice->isChecked();
-}
+bool ColorBarWidget::getAutoScaleforCurrentSlice() const { return ui.autoScaleForCurrentSlice->isChecked(); }
 
 /**
  * Load the state of the color bar widget from a Mantid project file

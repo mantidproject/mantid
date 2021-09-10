@@ -20,20 +20,16 @@ class PoldiDetectorFactoryTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static PoldiDetectorFactoryTest *createSuite() {
-    return new PoldiDetectorFactoryTest();
-  }
+  static PoldiDetectorFactoryTest *createSuite() { return new PoldiDetectorFactoryTest(); }
   static void destroySuite(PoldiDetectorFactoryTest *suite) { delete suite; }
 
   void testDetectorByType() {
     PoldiDetectorFactory detectorFactory;
 
-    PoldiAbstractDetector *detector =
-        detectorFactory.createDetector(std::string("any"));
+    PoldiAbstractDetector *detector = detectorFactory.createDetector(std::string("any"));
     TS_ASSERT(detector);
 
-    PoldiHeliumDetector *heliumDetector =
-        dynamic_cast<PoldiHeliumDetector *>(detector);
+    PoldiHeliumDetector *heliumDetector = dynamic_cast<PoldiHeliumDetector *>(detector);
     TS_ASSERT(heliumDetector);
 
     delete detector;
@@ -42,17 +38,14 @@ public:
   void testDetectorByDate() {
     PoldiDetectorFactory detectorFactory;
 
-    PoldiAbstractDetector *detector =
-        detectorFactory.createDetector(from_string("2014/05/12"));
+    PoldiAbstractDetector *detector = detectorFactory.createDetector(from_string("2014/05/12"));
     TS_ASSERT(detector);
-    PoldiHeliumDetector *heliumDetector =
-        dynamic_cast<PoldiHeliumDetector *>(detector);
+    PoldiHeliumDetector *heliumDetector = dynamic_cast<PoldiHeliumDetector *>(detector);
     TS_ASSERT(heliumDetector);
 
     delete detector;
 
-    PoldiAbstractDetector *newDetector =
-        detectorFactory.createDetector(from_string("2016/05/12"));
+    PoldiAbstractDetector *newDetector = detectorFactory.createDetector(from_string("2016/05/12"));
     TS_ASSERT(!newDetector);
   }
 };

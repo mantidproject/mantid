@@ -26,7 +26,7 @@ The main changes are:
 
 - fixed an unhandled exception when marking columns in a table workspace for plotting or deleting rows
   from a PeaksWorkspace
-  
+
 - updated ALC documentation to clarify instrument used for data loading
 
 - avoid error reporter on entering comma in scale box in MSlice

@@ -58,8 +58,7 @@ private:
 };
 
 /// output to stream operator for compute resource info objects
-MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &buffer,
-                                           const ComputeResourceInfo &cr);
+MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &buffer, const ComputeResourceInfo &cr);
 
 } // namespace Kernel
 } // namespace Mantid

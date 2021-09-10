@@ -22,15 +22,12 @@ public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "RealFFT"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Performs real Fast Fourier Transform";
-  }
+  const std::string summary() const override { return "Performs real Fast Fourier Transform"; }
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
   const std::vector<std::string> seeAlso() const override {
-    return {"ExtractFFTSpectrum", "FFT",      "FFTDerivative", "MaxEnt",
-            "SassenaFFT",         "FFTSmooth"};
+    return {"ExtractFFTSpectrum", "FFT", "FFTDerivative", "MaxEnt", "SassenaFFT", "FFTSmooth"};
   }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Arithmetic\\FFT"; }

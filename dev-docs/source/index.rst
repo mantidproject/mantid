@@ -15,10 +15,10 @@ Guides
    :hidden:
 
    DeveloperAccounts
-   GettingStarted
+   GettingStarted/GettingStarted
+   Architecture
    BuildingOnOSX
    BuildingWithCMake
-   BuildingVATES
    Standards/index
    Testing/index
    DoxygenSetup
@@ -26,8 +26,11 @@ Guides
 :doc:`DeveloperAccounts`
    Details of the accounts required for developers.
 
-:doc:`GettingStarted`
+:doc:`GettingStarted <GettingStarted/GettingStarted>`
    Describes the process of obtaining and building the mantid code base.
+
+:doc:`Architecture`
+   Describes the architecture of the mantid libraries and applications.
 
 :doc:`Standards <Standards/index>`
    Details of coding and documentation standards for the project. Includes specifics regarding algorithms.
@@ -52,6 +55,7 @@ Development Process
    Communication
    IssueTracking
    UserSupport
+   GitConfig
    GitWorkflow
    AutomatedBuildProcess
    JenkinsConfiguration
@@ -59,6 +63,7 @@ Development Process
    PatchReleaseChecklist
    TSC
    DesignDocumentGuides
+   CodeCoverage
 
 :doc:`DevelopmentAndReleaseCycle`
    An overview of the development cycle.
@@ -102,11 +107,13 @@ Tools
 
    ToolsOverview
    ProfilingOverview
+   ProfilingWithValgrind
    FlowchartCreation
    VisualStudioBuildImpact
    PyCharm
    VSCode
    Eclipse
+   WindowsSubsystemForLinux
 
 :doc:`ToolsOverview`
    Describes ``class_maker``, ``valgrind`` and related tools.
@@ -128,6 +135,9 @@ Tools
 
 :doc:`Eclipse`
    Guide to setting up Eclipse on Ubuntu
+
+:doc:`WindowsSubsystemForLinux`
+   Guide for setting up Ubuntu 18.04 and Centos7 as subsystems on Windows (WSL2).
 
 =======
 Testing
@@ -229,6 +239,7 @@ Component Overviews
    EventWorkspaceDev
    HandlingXML
    IndexProperty
+   IndirectDataAnalysisFileStructure
    InstrumentViewer
    ISISReflectometryInterface
    ISISSANSReductionBackend

@@ -18,7 +18,7 @@ public:
     {
         TS_ASSERT_LESS_THAN_EQUALS( 1, 2 );
         TS_ASSERT_LESS_THAN_EQUALS( 1, 1 );
-        
+
         TS_ASSERT_LESS_THAN_EQUALS( 1, 0 );
         TSM_ASSERT_LESS_THAN_EQUALS( "1 <=? 0", 1, 0 );
 

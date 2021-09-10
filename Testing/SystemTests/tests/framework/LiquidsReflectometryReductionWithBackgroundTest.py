@@ -29,6 +29,7 @@ class LiquidsReflectometryReductionWithBackgroundPreciseTest(systemtesting.Manti
                                       NormPeakPixelRange=[154, 162],
                                       NormBackgroundPixelRange=[151, 165],
                                       SubtractNormBackground=True,
+                                      ErrorWeighting=True,
                                       LowResDataAxisPixelRangeFlag=True,
                                       LowResDataAxisPixelRange=[99, 158],
                                       LowResNormAxisPixelRangeFlag=True,
@@ -63,6 +64,7 @@ class NoNormalizationTest(systemtesting.MantidSystemTest):
                                       SignalPeakPixelRange=[155, 165],
                                       SubtractSignalBackground=True,
                                       SignalBackgroundPixelRange=[146, 165],
+                                      ErrorWeighting=True,
                                       NormFlag=False,
                                       NormPeakPixelRange=[154, 162],
                                       NormBackgroundPixelRange=[151, 165],
@@ -100,6 +102,7 @@ class TOFRangeOFFTest(systemtesting.MantidSystemTest):
                                       NormalizationRunNumber=119692,
                                       SignalPeakPixelRange=[155, 165],
                                       SubtractSignalBackground=True,
+                                      ErrorWeighting=True,
                                       SignalBackgroundPixelRange=[146, 165],
                                       NormFlag=True,
                                       NormPeakPixelRange=[154, 162],
@@ -139,6 +142,7 @@ class NoBackgroundTest(systemtesting.MantidSystemTest):
                                       NormalizationRunNumber=119692,
                                       SignalPeakPixelRange=[155, 165],
                                       SubtractSignalBackground=False,
+                                      ErrorWeighting=True,
                                       SignalBackgroundPixelRange=[146, 165],
                                       NormFlag=True,
                                       NormPeakPixelRange=[154, 162],
@@ -182,6 +186,7 @@ class TOFMismatchTest(systemtesting.MantidSystemTest):
                                           SignalPeakPixelRange=[155, 165],
                                           SubtractSignalBackground=True,
                                           SignalBackgroundPixelRange=[146, 165],
+                                          ErrorWeighting=True,
                                           NormFlag=True,
                                           NormPeakPixelRange=[154, 162],
                                           NormBackgroundPixelRange=[151, 165],
@@ -203,8 +208,12 @@ class TOFMismatchTest(systemtesting.MantidSystemTest):
                                           CropFirstAndLastPoints=False,
                                           OutputWorkspace='reflectivity_119816')
         except RuntimeError as err:
-            if str(err).startswith("Requested TOF range does not match data"):
+            msg_exp = "LiquidsReflectometryReduction-v1: Requested TOF range does not match data"
+            if str(err).startswith(msg_exp):
                 self.correct_exception_caught = True
+            else:
+                print("EXPECTED ERROR:", msg_exp)
+                print("OBSERVED ERROR:", str(err))
 
     def validate(self):
         return self.correct_exception_caught
@@ -223,6 +232,7 @@ class BadDataTOFRangeTest(systemtesting.MantidSystemTest):
                                           SignalPeakPixelRange=[155, 165],
                                           SubtractSignalBackground=True,
                                           SignalBackgroundPixelRange=[146, 165],
+                                          ErrorWeighting=True,
                                           NormFlag=True,
                                           NormPeakPixelRange=[154, 162],
                                           NormBackgroundPixelRange=[151, 165],
@@ -244,8 +254,12 @@ class BadDataTOFRangeTest(systemtesting.MantidSystemTest):
                                           CropFirstAndLastPoints=False,
                                           OutputWorkspace='reflectivity_119816')
         except RuntimeError as err:
-            if str(err).startswith("Requested TOF range does not match data"):
+            msg_exp = "LiquidsReflectometryReduction-v1: Requested TOF range does not match data"
+            if str(err).startswith(msg_exp):
                 self.correct_exception_caught = True
+            else:
+                print("EXPECTED ERROR:", msg_exp)
+                print("OBSERVED ERROR:", str(err))
 
     def validate(self):
         return self.correct_exception_caught
@@ -264,6 +278,7 @@ class BadPeakSelectionTest(systemtesting.MantidSystemTest):
                                           SignalPeakPixelRange=[138, 145],
                                           SubtractSignalBackground=True,
                                           SignalBackgroundPixelRange=[135, 165],
+                                          ErrorWeighting=True,
                                           NormFlag=True,
                                           NormPeakPixelRange=[154, 162],
                                           NormBackgroundPixelRange=[151, 165],
@@ -284,8 +299,12 @@ class BadPeakSelectionTest(systemtesting.MantidSystemTest):
                                           CropFirstAndLastPoints=False,
                                           OutputWorkspace='reflectivity_119816')
         except RuntimeError as err:
-            if str(err).startswith("The reflectivity is all zeros"):
+            msg_exp = "LiquidsReflectometryReduction-v1: The reflectivity is all zeros"
+            if str(err).startswith(msg_exp):
                 self.correct_exception_caught = True
+            else:
+                print("EXPECTED ERROR:", msg_exp)
+                print("OBSERVED ERROR:", str(err))
 
     def validate(self):
         return self.correct_exception_caught

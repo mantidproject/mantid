@@ -1,4 +1,34 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+// SPDX - License - Identifier: GPL - 3.0 +
+// This file defines the Python bindings for the
+// _common library.
+%Module(name=_commonqt5)
+
+%UnitCode
+#if defined(_MSC_VER)
+  # pragma warning( disable: 4290 )
+#elif defined(__GNUC__) && !defined(__clang__)
+  // We need default visibility for this module so that
+  // python can see the init function.
+  #pragma GCC visibility push(default)
+  #pragma GCC diagnostic push
+  #pragma GCC diagnostic ignored "-Wpedantic"
+  #if __GNUC__ >= 5
+    #pragma GCC diagnostic ignored "-Wsuggest-override"
+  #endif
+#endif
+%End
+
+// PyQt5 widgets
+%Import QtGui/QtGuimod.sip
+%Import QtWidgets/QtWidgetsmod.sip
+
 %ModuleCode
+#include "MantidQtWidgets/Common/FittingMode.h"
 #include "MantidQtWidgets/Common/Message.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
 #include "MantidPythonInterface/core/VersionCompat.h"
@@ -9,14 +39,23 @@ using namespace MantidQt::MantidWidgets;
 using namespace MantidQt::MantidWidgets::Batch;
 %End
 
-%Include ../common_sip/exceptions.sip
-%Include ../common_sip/string.sip
-%Include ../common_sip/vector.sip
+// Remove namespace qualifiers in generated code. We control
+// the package layout separately in Python
+%HideNamespace(name=MantidQt)
+%HideNamespace(name=MantidQt::MantidWidgets)
+%HideNamespace(name=MantidQt::MantidWidgets::Batch)
+
+%Include ../sip/exceptions.sip
+%Include ../sip/string.sip
+%Include ../sip/vector.sip
 
 %InitialisationCode
 qRegisterMetaType<std::string>("StdString");
 qRegisterMetaType<Mantid::API::Workspace_sptr>("Workspace");
 qRegisterMetaType<Message>("Message");
+qRegisterMetaType<QList<QPersistentModelIndex>>("QList<QPersistentModelIndex>");
+qRegisterMetaType<QAbstractItemModel::LayoutChangeHint>("QAbstractItemModel::LayoutChangeHint");
+qRegisterMetaType<QVector<int>>("QVector<int>");
 %End
 
 
@@ -175,8 +214,6 @@ private:
   ScriptEditor(const ScriptEditor&);
 };
 
-%If (Qt_5_0_0 -)
-
 class AlgorithmProgressWidget : QWidget {
 %TypeHeaderCode
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressWidget.h"
@@ -199,9 +236,6 @@ public:
 private:
   CodeExecution(const CodeExecution&);
 };
-
-%End // end >= Qt5
-
 
 class AlgorithmDialog: QDialog {
 %TypeHeaderCode
@@ -328,7 +362,7 @@ public:
   void showAlgorithmHelp(const QString &name, const int version=-1);
   void showConceptHelp(const QString &name);
   void showFitFunctionHelp(const QString &name=QString());
-  void showCustomInterfaceHelp(const QString &name);
+  void showCustomInterfaceHelp(const QString &name, const QString &area=QString(), const QString &section=QString());
   void showWebPage(const QString &url);
   void closeHelpWindow();
 };
@@ -390,6 +424,7 @@ signals:
   void overplotMDHistoClicked(const QStringList &workspaceNames);
   void plotMDHistoWithErrorsClicked(const QStringList &workspaceNames);
   void overplotMDHistoWithErrorsClicked(const QStringList &workspaceNames);
+  void sampleMaterialClicked(const QStringList &workspaceNames);
 };
 
 class AlgorithmHistoryWindow : public QDialog {
@@ -437,6 +472,7 @@ public:
   InstrumentSelector(QWidget *parent /TransferThis/ = nullptr);
   void setTechniques(const QStringList &techniques);
   void setCurrentIndex(int);
+  void setCurrentText(QString);
   QString currentText();
   int count();
 };
@@ -464,6 +500,7 @@ public:
     %MethodCode
     sipRes = boost::python::to_python_value<const Mantid::API::IFunction_sptr &>()(sipCpp->ifun());
     %End
+    bool hasTies();
     void setHasPlot(bool);
     QString functionPrefix() const;
     PropertyHandler * findHandler(SIP_PYOBJECT);
@@ -526,6 +563,7 @@ public:
     void postDeleteHandle(const std::string &wsName);
     void removeWorkspaceAndSpectra(const std::string &wsName);
     std::string getFitAlgorithmParameters() const;
+    std::string getFitAlgorithmOutputStatus() const;
     PropertyHandler * currentHandler() const;
 
     SIP_PYOBJECT defaultPeakType();
@@ -640,12 +678,10 @@ public:
 // RowLocation needs to be wrapped in a SIP namespace class
 // otherwise it cannot be recognised as a type when passed into a signal
 // e.g. in JobTreeViewSignalAdapter's cellTextChanged signal
-namespace MantidQt
-{
-namespace MantidWidgets
-{
-namespace Batch
-{
+// The namespace is hidden so that it is not visible to the outside world.
+namespace MantidQt {
+namespace MantidWidgets {
+namespace Batch {
 
 class RowLocation
 {
@@ -675,9 +711,9 @@ public:
   bool operator>=(const MantidQt::MantidWidgets::Batch::RowLocation& other);
 };
 
-}; // Batch
-}; // MantidWidgets
-}; // MantidQt
+};
+};
+};
 
 class RowPredicate {
 %TypeHeaderCode
@@ -867,6 +903,7 @@ using namespace MantidQt::API;
 public:
     FunctionBrowser(QWidget *parent = nullptr, bool multi = false);
     FunctionTreeView *view() const;
+    void setStretchLastColumn(bool stretch);
     void setFunction(const QString &funStr);
     QString getFunctionString();
     QString getFitFunctionString() const;
@@ -926,6 +963,10 @@ public:
          sipRaiseUnknownException();
          return NULL;
       }
+    %End
+    SIP_PYOBJECT getFunction();
+    %MethodCode
+      sipRes = boost::python::to_python_value<const Mantid::API::IFunction_sptr &>()(sipCpp->getFunction());
     %End
     SIP_PYOBJECT getGlobalFunction();
     %MethodCode
@@ -991,6 +1032,10 @@ public:
     void findFiles(bool isModified);
     void isOptional(bool);
     void setLastDirectory(const QString &lastDir);
+    void setUseNativeWidget(bool native);
+    void setProxyModel(QAbstractProxyModel* /Transfer/);
+    void readSettings(const QString &group);
+    void saveSettings(const QString &group);
 
 signals:
     void fileTextChanged(const QString & /*_t1*/);
@@ -1067,8 +1112,19 @@ class WorkspaceSelector : QComboBox
 %End
 public:
     WorkspaceSelector(QWidget *parent = nullptr, bool init = true) /KeywordArgs="All"/;
+    void setWorkspaceTypes(const QStringList &types);
     void setOptional(bool optional);
+    void setSorted(bool sorted);
+    bool isConnected();
+    void disconnectObservers();
+    void connectObservers();
 };
+
+// ----------------------------------------------------------------------------
+// FittingMode
+// ----------------------------------------------------------------------------
+
+enum class FittingMode {SEQUENTIAL, SIMULTANEOUS, SEQUENTIAL_AND_SIMULTANEOUS};
 
 // ----------------------------------------------------------------------------
 // FitScriptGeneratorView
@@ -1081,6 +1137,7 @@ class FitScriptGeneratorView : QWidget {
 public:
     FitScriptGeneratorView(
         QWidget *parent = nullptr,
+        FittingMode fittingMode = FittingMode::SEQUENTIAL,
         const QMap<QString, QString> &fitOptions = QMap<QString, QString>()) /KeywordArgs="All"/;
 };
 
@@ -1094,6 +1151,9 @@ class FitScriptGeneratorModel {
 %End
 public:
     FitScriptGeneratorModel();
+
+private:
+    FitScriptGeneratorModel(const FitScriptGeneratorModel &model);
 };
 
 // ----------------------------------------------------------------------------
@@ -1111,4 +1171,38 @@ public:
         double startX = 0.0, double endX = 0.0) /KeywordArgs="All"/;
 
     void openFitScriptGenerator();
+};
+
+// ---------------------------------
+// Muon Period Info
+// ---------------------------------
+
+class MuonPeriodInfo : QWidget {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/MuonPeriodInfo.h"
+#include "MantidPythonInterface/core/ExtractSharedPtr.h"
+#include <boost/python/object.hpp>
+#include <boost/python/handle.hpp>
+%End
+public:
+    MuonPeriodInfo(QWidget *parent = nullptr) /KeywordArgs="All"/;
+    void clear();
+    void setWidgetTitleRuns(const std::string &title);
+    bool isEmpty() const ;
+    void addInfo(SIP_PYOBJECT);
+    %MethodCode
+    try {
+      using boost::python::extract;
+      using Mantid::PythonInterface::ExtractSharedPtr;
+      sipCpp->addInfo(ExtractSharedPtr<Mantid::API::Workspace>(a0)());
+    } catch(const std::exception & exc) {
+      SIP_BLOCK_THREADS
+      PyErr_SetString(PyExc_RuntimeError, exc.what());
+      SIP_UNBLOCK_THREADS
+      return NULL;
+    } catch(...) {
+      sipRaiseUnknownException();
+      return NULL;
+    }
+    %End
 };

@@ -17,12 +17,8 @@ class MultivariateGaussianComptonProfileTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MultivariateGaussianComptonProfileTest *createSuite() {
-    return new MultivariateGaussianComptonProfileTest();
-  }
-  static void destroySuite(MultivariateGaussianComptonProfileTest *suite) {
-    delete suite;
-  }
+  static MultivariateGaussianComptonProfileTest *createSuite() { return new MultivariateGaussianComptonProfileTest(); }
+  static void destroySuite(MultivariateGaussianComptonProfileTest *suite) { delete suite; }
 
   void test_Name_Is_As_Expected() {
     // These are used in scripts so should not change!
@@ -37,8 +33,7 @@ public:
     const size_t nnames = currentNames.size();
     TS_ASSERT_EQUALS(nparams, nnames);
     if (nnames == nparams) {
-      const char *expectedParams[nparams] = {"Mass", "Intensity", "SigmaX",
-                                             "SigmaY", "SigmaZ"};
+      const char *expectedParams[nparams] = {"Mass", "Intensity", "SigmaX", "SigmaY", "SigmaZ"};
       for (size_t i = 0; i < nnames; ++i) {
         TS_ASSERT_EQUALS(expectedParams[i], currentNames[i]);
       }
@@ -54,16 +49,13 @@ public:
     // Test names as they are used in scripts
     if (profile->nAttributes() > 0) {
       const char *expectedAttrs[nattrs] = {"IntegrationSteps"};
-      std::set<std::string> expectedAttrSet(expectedAttrs,
-                                            expectedAttrs + nattrs);
+      std::set<std::string> expectedAttrSet(expectedAttrs, expectedAttrs + nattrs);
       std::vector<std::string> actualNames = profile->getAttributeNames();
 
       for (size_t i = 0; i < nattrs; ++i) {
         const std::string &name = actualNames[i];
         size_t keyCount = expectedAttrSet.count(name);
-        TSM_ASSERT_EQUALS("Expected " + name +
-                              " to be found as attribute but it was not.",
-                          1, keyCount);
+        TSM_ASSERT_EQUALS("Expected " + name + " to be found as attribute but it was not.", 1, keyCount);
       }
     }
   }
@@ -73,13 +65,12 @@ public:
 
     auto func = createFunctionWithParamsSet();
     double x0(200.0), x1(220.0), dx(10.0);
-    auto testWS = ComptonProfileTestHelpers::createTestWorkspace(
-        1, x0, x1, dx, ComptonProfileTestHelpers::NoiseType::None);
+    auto testWS =
+        ComptonProfileTestHelpers::createTestWorkspace(1, x0, x1, dx, ComptonProfileTestHelpers::NoiseType::None);
     auto &dataX = testWS->dataX(0);
     using std::placeholders::_1;
-    std::transform(
-        dataX.begin(), dataX.end(), dataX.begin(),
-        std::bind(std::multiplies<double>(), _1, 1e-06)); // to seconds
+    std::transform(dataX.begin(), dataX.end(), dataX.begin(),
+                   std::bind(std::multiplies<double>(), _1, 1e-06)); // to seconds
     func->setMatrixWorkspace(testWS, 0, dataX.front(), dataX.back());
     FunctionDomain1DView domain(dataX.data(), dataX.size());
     FunctionValues values(domain);
@@ -109,8 +100,7 @@ public:
   }
 
 private:
-  std::shared_ptr<MultivariateGaussianComptonProfile>
-  createFunctionWithParamsSet() {
+  std::shared_ptr<MultivariateGaussianComptonProfile> createFunctionWithParamsSet() {
     auto func = createFunction();
     func->setAttributeValue("IntegrationSteps", 34);
     func->setParameter("Mass", 1.0);

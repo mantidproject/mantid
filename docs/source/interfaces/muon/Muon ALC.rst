@@ -124,15 +124,15 @@ Fitting.
 Data Loading
 ~~~~~~~~~~~~
 
-In the Data Loading step, the instrument will be decided by the users default instrument 
-in workbench, otherwise HIFI will be selected instead. The instrument can be manually 
-changed. Once changed if there are already runs found using the previous instrument, 
-the interface will automatically try to find the same runs for the new instrument. 
-A sequence of runs are loaded through the **Runs** field by entering a valid expression of 
-run numbers. The path is set once the entered run numbers have been found and is for 
+In the Data Loading step, the instrument will be decided by the users default instrument
+in workbench, otherwise HIFI will be selected instead. The instrument can be manually
+changed. Once changed if there are already runs found using the previous instrument,
+the interface will automatically try to find the same runs for the new instrument.
+A sequence of runs are loaded through the **Runs** field by entering a valid expression of
+run numbers. The path is set once the entered run numbers have been found and is for
 display purposes only i.e. it is not editable.
 
-The interface will attempt to locate runs by first searching any user defined directories 
+The interface will attempt to locate runs by first searching any user defined directories
 and then the Data archive (only useful if you’re at ISIS). You can manage your user directories
 with the :ref:`manage user directories <ManageUserDirectories>` button.
 
@@ -143,14 +143,14 @@ Some additional options may be specified: the **Dead Time Corrections**, if any,
 loaded from the input dataset itself or from a custom file specified by the user. The
 detector **Grouping** is defaulted to **Auto**, in which case the grouping information
 is read from the run data, although it can be customized by setting the list of spectra
-for the forward and backward groups. **Alpha** (the balance parameter) is defaulted to 1.0 and 
-can only be changed when analysing single period data.The user can also choose the **Period** 
+for the forward and backward groups. **Alpha** (the balance parameter) is defaulted to 1.0 and
+can only be changed when analysing single period data.The user can also choose the **Period**
 number that corresponds to the red period, and the number corresponding to the green period,
 if the option **Subtract** is checked, and finally the type of **Calculation** together
 with the time limits. A click on the **Load** button results in the calculation of the
 asymmetry, displayed on the right panel.
 
-Once data has been loaded, **Auto add** can be checked. This will watch for new files 
+Once data has been loaded, **Auto add** can be checked. This will watch for new files
 to be added to the path and try to load them automatically.
 
 .. figure:: ../../images/MuonALCDataLoading.png
@@ -161,10 +161,10 @@ Options
 ^^^^^^^
 Instrument
   The instrument
-  
+
 Manage User Directories
   Opens a dialog where a user can specify which directories to load from
-  
+
 Path
   The directory data has been loaded from
 
@@ -179,25 +179,25 @@ Log
 
 Take log value at
   The function to apply to the time series log: Mean/Min/Max/First/Last.
-  
+
  Load
-  Computes the asymmetry according to selected options and displays it against the 
+  Computes the asymmetry according to selected options and displays it against the
   chosen log value.
 
 Dead Time Correction
-  Type of dead time corrections to apply. Options are *None*, in which case no 
-  corrections will be applied, *From Data File*, to load corrections from 
-  the input dataset itself, or *From Custom File*, to load corrections from a 
+  Type of dead time corrections to apply. Options are *None*, in which case no
+  corrections will be applied, *From Data File*, to load corrections from
+  the input dataset itself, or *From Custom File*, to load corrections from a
   specified nexus file.
 
 Grouping
-  Detector grouping to apply. *Auto* will load the grouping information contained 
-  in the run file, while *Custom* allows to specify the list of spectra for both the 
-  forward and backward groups. *Alpha* is the balance parameter and is only available 
+  Detector grouping to apply. *Auto* will load the grouping information contained
+  in the run file, while *Custom* allows to specify the list of spectra for both the
+  forward and backward groups. *Alpha* is the balance parameter and is only available
   for single period data.
 
 Periods
-  Period number to use as red data. The *Subtract* option, if checked, allows to 
+  Period number to use as red data. The *Subtract* option, if checked, allows to
   select the green period number that will be subtracted to the red data.
 
 Calculation
@@ -205,7 +205,7 @@ Calculation
 
 ?
   Shows this help page.
- 
+
 Loaded Data
   Graph where the asymmetry as a function of the Log value is displayed. These are the
   data passed to the BaselineModelling step.
@@ -214,7 +214,7 @@ Baseline Modelling
 ~~~~~~~~~~~~~~~~~~
 
 In the Baseline Modelling step, the user can fit a baseline by selecting which
-sections of the data should be used in the fit, and what the baseline fit 
+sections of the data should be used in the fit, and what the baseline fit
 function should be. To select a baseline function, right-click on the **Function**
 region, then **Add function** and choose among the different possibilities. Then
 pick the desired fitting sections by right-clicking in the **Sections** area as
@@ -233,7 +233,7 @@ Function
   Right-click on the blank area to add a baseline function.
 
 Sections
-  Right-click on the blank area to add as many sections as needed to 
+  Right-click on the blank area to add as many sections as needed to
   select the different ranges to fit. Each section is coloured differently and
   can be modified by dragging the vertical lines.
 
@@ -251,12 +251,12 @@ Corrected data
   Graph where the corrected data, i.e., the original data with the baseline
   subtracted, are displayed. These are the data passed to the PeakFitting
   step.
-  
+
 Peak Fitting
 ~~~~~~~~~~~~
 
-In the Peak Fitting step, the data with the baseline subtracted are shown in 
-the right panel. The user can study the peaks of interest all with the same simple 
+In the Peak Fitting step, the data with the baseline subtracted are shown in
+the right panel. The user can study the peaks of interest all with the same simple
 interface. To add a new peak, right-click on the **Peaks** region, then select
 **Add function** and choose among the different possibilities in the category Peak.
 Add as many peaks as needed. To activate the peak picker tool, click on one of
@@ -296,6 +296,6 @@ Feedback & Comments
 -------------------
 
 If you have any questions or comments about this interface or this help page, please
-contact the `Mantid team <http://www.mantidproject.org/Contact>`__ or the `Muon group <http://www.isis.stfc.ac.uk/groups/muons/muons3385.html>`__. 
+contact the `Mantid team <http://www.mantidproject.org/Contact>`__ or the `Muon group <http://www.isis.stfc.ac.uk/groups/muons/muons3385.html>`__.
 
 .. categories:: Interfaces Muon

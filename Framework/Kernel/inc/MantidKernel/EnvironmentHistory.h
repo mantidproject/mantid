@@ -33,8 +33,7 @@ public:
   void printSelf(std::ostream &, const int indent = 0) const;
 };
 
-MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &,
-                                           const EnvironmentHistory &);
+MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &, const EnvironmentHistory &);
 
 } // namespace Kernel
 } // namespace Mantid

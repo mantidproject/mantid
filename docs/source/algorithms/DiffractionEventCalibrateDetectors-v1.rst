@@ -19,7 +19,7 @@ Usage
 **Example: move detectors to maximize intensity**
 
 .. testcode:: ExDiffractionEventCalibrateDetectors
-                   
+
     import os
     ws = CreateSampleWorkspace("Event",NumBanks=1,BankPixelWidth=1)
     ws = MoveInstrumentComponent(Workspace='ws', ComponentName='bank1', X=0.5, RelativePosition=False)

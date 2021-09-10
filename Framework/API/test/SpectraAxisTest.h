@@ -98,26 +98,21 @@ public:
   void testIndexOfValue_Treats_Axis_As_Binned() {
     for (int i = 1; i < 6; ++i) {
       // centre in this bin
-      TS_ASSERT_EQUALS(i - 1,
-                       spectraAxis->indexOfValue(static_cast<double>(i)));
+      TS_ASSERT_EQUALS(i - 1, spectraAxis->indexOfValue(static_cast<double>(i)));
       // value on lower boundary in bin below with exception of first boundary
       // where it is above
       if (i == 1) {
-        TS_ASSERT_EQUALS(
-            i - 1, spectraAxis->indexOfValue(static_cast<double>(i - 0.5)));
+        TS_ASSERT_EQUALS(i - 1, spectraAxis->indexOfValue(static_cast<double>(i - 0.5)));
       } else {
-        TS_ASSERT_EQUALS(
-            i - 2, spectraAxis->indexOfValue(static_cast<double>(i - 0.5)));
+        TS_ASSERT_EQUALS(i - 2, spectraAxis->indexOfValue(static_cast<double>(i - 0.5)));
       }
-      TS_ASSERT_EQUALS(i - 1,
-                       spectraAxis->indexOfValue(static_cast<double>(i + 0.5)));
+      TS_ASSERT_EQUALS(i - 1, spectraAxis->indexOfValue(static_cast<double>(i + 0.5)));
     }
   }
 
   // --------------------------------------- Failure cases --------------------
   void testIndexOfValue_Throws_out_of_range_error_If_Input_Not_In_Range() {
-    TS_ASSERT_THROWS(spectraAxis->indexOfValue(0.49),
-                     const std::out_of_range &);
+    TS_ASSERT_THROWS(spectraAxis->indexOfValue(0.49), const std::out_of_range &);
     TS_ASSERT_THROWS(spectraAxis->indexOfValue(20.), const std::out_of_range &);
   }
 

@@ -11,8 +11,7 @@ namespace Widgets {
 namespace Python = Common::Python;
 namespace MplCpp {
 
-ErrorbarContainer::ErrorbarContainer(Python::Object pyInstance)
-    : Python::InstanceHolder(std::move(pyInstance)) {}
+ErrorbarContainer::ErrorbarContainer(Python::Object pyInstance) : Python::InstanceHolder(std::move(pyInstance)) {}
 
 } // namespace MplCpp
 } // namespace Widgets

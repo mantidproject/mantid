@@ -34,13 +34,9 @@ class ALFCustomInstrumentModelTest : public CxxTest::TestSuite {
 public:
   ALFCustomInstrumentModelTest() { FrameworkManager::Instance(); }
 
-  static ALFCustomInstrumentModelTest *createSuite() {
-    return new ALFCustomInstrumentModelTest();
-  }
+  static ALFCustomInstrumentModelTest *createSuite() { return new ALFCustomInstrumentModelTest(); }
 
-  static void destroySuite(ALFCustomInstrumentModelTest *suite) {
-    delete suite;
-  }
+  static void destroySuite(ALFCustomInstrumentModelTest *suite) { delete suite; }
 
   void setUp() override { m_model = new PartMockALFCustomInstrumentModel(); }
 
@@ -68,8 +64,7 @@ public:
     TS_ASSERT_EQUALS(m_model->getLoadCount(), 1);
     TS_ASSERT_EQUALS(m_model->getTransformCount(), 0);
     TS_ASSERT_EQUALS(loadResult.first, 6113);
-    TS_ASSERT_EQUALS(loadResult.second,
-                     "Not the correct instrument, expected ALF");
+    TS_ASSERT_EQUALS(loadResult.second, "Not the correct instrument, expected ALF");
   }
 
   void test_loadDataDSpace() {
@@ -111,8 +106,7 @@ public:
 
     m_model->storeSingleTube("test");
 
-    auto outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        "extractedTubes_test");
+    auto outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("extractedTubes_test");
     TS_ASSERT_DELTA(outputWS->readX(0)[0], -22.9, 0.1);
     TS_ASSERT_EQUALS(outputWS->readY(0)[0], 0.2);
     TS_ASSERT_DELTA(outputWS->readX(0)[9], 492.7, 0.1);
@@ -128,14 +122,12 @@ public:
     m_model->extractSingleTube();
 
     // check original y values
-    auto tmpWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        "extractedTubes_ALF6113");
+    auto tmpWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("extractedTubes_ALF6113");
     TS_ASSERT_EQUALS(tmpWS->readY(0)[1], 0.2);
     TS_ASSERT_EQUALS(tmpWS->readY(0)[9], 0.2);
 
     // create another ws to add
-    auto ws = WorkspaceCreationHelper::create2DWorkspaceWithValuesAndXerror(
-        1, 10, false, 1.1, 2.2, 0.01, 0.3);
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceWithValuesAndXerror(1, 10, false, 1.1, 2.2, 0.01, 0.3);
     std::shared_ptr<Instrument> inst = std::make_shared<Instrument>();
     inst->setName("ALF");
     ws->mutableRun().addProperty("run_number", run, true);
@@ -151,16 +143,14 @@ public:
     m_model->averageTube();
 
     // check averages: (2.2+0.2)/2 = 2.4/2 = 1.2
-    auto outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        "extractedTubes_ALF6113");
+    auto outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("extractedTubes_ALF6113");
     TS_ASSERT_DELTA(outputWS->readX(0)[1], 34.4, 0.1);
     TS_ASSERT_DELTA(outputWS->readY(0)[1], 1.2, 0.01);
     TS_ASSERT_DELTA(outputWS->readX(0)[9], 492.7, 0.1);
     TS_ASSERT_DELTA(outputWS->readY(0)[9], 1.2, 0.01);
 
     // create another ws to add
-    auto ws3 = WorkspaceCreationHelper::create2DWorkspaceWithValuesAndXerror(
-        1, 10, false, 1.1, 3.2, 0.01, 0.3);
+    auto ws3 = WorkspaceCreationHelper::create2DWorkspaceWithValuesAndXerror(1, 10, false, 1.1, 3.2, 0.01, 0.3);
     inst = std::make_shared<Instrument>();
     inst->setName("ALF");
     ws3->mutableRun().addProperty("run_number", run, true);
@@ -176,8 +166,7 @@ public:
     m_model->averageTube();
 
     // check averages: (2.2+0.2+3.2)/2 = 5.6/3 = 1.8666
-    outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        "extractedTubes_ALF6113");
+    outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("extractedTubes_ALF6113");
     TS_ASSERT_DELTA(outputWS->readX(0)[1], 34.4, 0.1);
     TS_ASSERT_DELTA(outputWS->readY(0)[1], 1.86, 0.01);
     TS_ASSERT_DELTA(outputWS->readX(0)[9], 492.7, 0.1);
@@ -198,35 +187,29 @@ public:
   }
 
   void test_extractTubeCondition() {
-    std::map<std::string, bool> conditions = {
-        {"plotStored", true}, {"hasCurve", true}, {"isTube", true}};
+    std::map<std::string, bool> conditions = {{"plotStored", true}, {"hasCurve", true}, {"isTube", true}};
     TS_ASSERT(m_model->extractTubeCondition(conditions));
   }
   void test_extractTubeConditionNotTube() {
-    std::map<std::string, bool> conditions = {
-        {"plotStored", true}, {"hasCurve", true}, {"isTube", false}};
+    std::map<std::string, bool> conditions = {{"plotStored", true}, {"hasCurve", true}, {"isTube", false}};
     TS_ASSERT(!m_model->extractTubeCondition(conditions));
   }
 
   void test_extractTubeConditionNoPlot() {
-    std::map<std::string, bool> conditions = {
-        {"plotStored", false}, {"hasCurve", true}, {"isTube", true}};
+    std::map<std::string, bool> conditions = {{"plotStored", false}, {"hasCurve", true}, {"isTube", true}};
     TS_ASSERT(m_model->extractTubeCondition(conditions));
   }
   void test_extractTubeConditionNoCurve() {
-    std::map<std::string, bool> conditions = {
-        {"plotStored", true}, {"hasCurve", false}, {"isTube", true}};
+    std::map<std::string, bool> conditions = {{"plotStored", true}, {"hasCurve", false}, {"isTube", true}};
     TS_ASSERT(m_model->extractTubeCondition(conditions));
   }
   void test_extractTubeConditionNoPlotOrCurve() {
-    std::map<std::string, bool> conditions = {
-        {"plotStored", false}, {"hasCurve", false}, {"isTube", true}};
+    std::map<std::string, bool> conditions = {{"plotStored", false}, {"hasCurve", false}, {"isTube", true}};
     TS_ASSERT(!m_model->extractTubeCondition(conditions));
   }
 
   void test_averageTubeCondition() {
-    std::map<std::string, bool> conditions = {
-        {"plotStored", true}, {"hasCurve", true}, {"isTube", true}};
+    std::map<std::string, bool> conditions = {{"plotStored", true}, {"hasCurve", true}, {"isTube", true}};
     int run = 6113;
     auto data = mockALFData("CURVES", "ALF", run, false);
     m_model->setCurrentRun(run);
@@ -236,8 +219,7 @@ public:
     AnalysisDataService::Instance().remove("extractedTubes_ALF6113");
   }
   void test_averageTubeConditionNotTube() {
-    std::map<std::string, bool> conditions = {
-        {"plotStored", true}, {"hasCurve", true}, {"isTube", false}};
+    std::map<std::string, bool> conditions = {{"plotStored", true}, {"hasCurve", true}, {"isTube", false}};
     int run = 6113;
     auto data = mockALFData("CURVES", "ALF", run, false);
     m_model->setCurrentRun(run);
@@ -248,8 +230,7 @@ public:
   }
 
   void test_averageTubeConditionNoPlot() {
-    std::map<std::string, bool> conditions = {
-        {"plotStored", false}, {"hasCurve", false}, {"isTube", true}};
+    std::map<std::string, bool> conditions = {{"plotStored", false}, {"hasCurve", false}, {"isTube", true}};
     int run = 6113;
     auto data = mockALFData("CURVES", "ALF", run, false);
     m_model->setCurrentRun(run);
@@ -260,8 +241,7 @@ public:
   }
 
   void test_averageTubeConditionNothingToAverage() {
-    std::map<std::string, bool> conditions = {
-        {"plotStored", true}, {"hasCurve", true}, {"isTube", true}};
+    std::map<std::string, bool> conditions = {{"plotStored", true}, {"hasCurve", true}, {"isTube", true}};
     int run = 6113;
     // the extraced ws will exist but average will be 0 -> change runs
     auto data = mockALFData("extractedTubes_ALF6113", "ALF", run, false);
@@ -271,8 +251,7 @@ public:
   }
 
   void test_averageTubeConditionNoWSToAverage() {
-    std::map<std::string, bool> conditions = {
-        {"plotStored", true}, {"hasCurve", true}, {"isTube", true}};
+    std::map<std::string, bool> conditions = {{"plotStored", true}, {"hasCurve", true}, {"isTube", true}};
     int run = 6113;
     auto data = mockALFData("CURVES", "ALF", run, false);
     m_model->setCurrentRun(run);

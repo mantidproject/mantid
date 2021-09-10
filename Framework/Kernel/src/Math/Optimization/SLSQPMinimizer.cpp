@@ -13,9 +13,8 @@ namespace Math {
 namespace {
 ///@cond
 // Forward-declaration of minimizer
-int slsqp_(int *m, int *meq, int *la, int *n, double *x, double *xl, double *xu,
-           double *f, double *c__, double *g, double *a, double *acc, int *iter,
-           int *mode, double *w, int *l_w__, int *jw, int *l_jw__);
+int slsqp_(int *m, int *meq, int *la, int *n, double *x, double *xl, double *xu, double *f, double *c__, double *g,
+           double *a, double *acc, int *iter, int *mode, double *w, int *l_w__, int *jw, int *l_jw__);
 ///@endcond
 } // namespace
 
@@ -24,13 +23,11 @@ int slsqp_(int *m, int *meq, int *la, int *n, double *x, double *xl, double *xu,
  * @param x0 The starting parameter values
  * @return
  */
-std::vector<double>
-SLSQPMinimizer::minimize(const std::vector<double> &x0) const {
+std::vector<double> SLSQPMinimizer::minimize(const std::vector<double> &x0) const {
   assert(numParameters() == x0.size());
 
   // slsqp parameters
-  auto m =
-      static_cast<int>(numEqualityConstraints() + numInequalityConstraints());
+  auto m = static_cast<int>(numEqualityConstraints() + numInequalityConstraints());
   auto meq = static_cast<int>(numEqualityConstraints());
   int la = std::max(1, m);
   auto n = static_cast<int>(numParameters());
@@ -52,9 +49,8 @@ SLSQPMinimizer::minimize(const std::vector<double> &x0) const {
   // workspace spaces for slsqp
   int n1 = n + 1;
   int mineq = m - meq + n1 + n1;
-  int len_w = (3 * n1 + m) * (n1 + 1) + (n1 - meq + 1) * (mineq + 2) +
-              2 * mineq + (n1 + mineq) * (n1 - meq) + 2 * meq + n1 +
-              (n + 1) * n / 2 + 2 * m + 3 * n + 3 * n1 + 1;
+  int len_w = (3 * n1 + m) * (n1 + 1) + (n1 - meq + 1) * (mineq + 2) + 2 * mineq + (n1 + mineq) * (n1 - meq) + 2 * meq +
+              n1 + (n + 1) * n / 2 + 2 * m + 3 * n + 3 * n1 + 1;
   int len_jw = mineq;
   std::vector<double> vec_w(len_w, 0.0);
   double *w = vec_w.data();
@@ -74,9 +70,8 @@ SLSQPMinimizer::minimize(const std::vector<double> &x0) const {
       fprime(gradient, x);
     }
     // Call SLSQP
-    slsqp_(&m, &meq, &la, &n, x.data(), xl.data(), xu.data(), &fx,
-           constraintValues.data(), gradient.data(), m_constraintNorms.data(),
-           &acc, &majiter, &mode, w, &len_w, jw, &len_jw);
+    slsqp_(&m, &meq, &la, &n, x.data(), xl.data(), xu.data(), &fx, constraintValues.data(), gradient.data(),
+           m_constraintNorms.data(), &acc, &majiter, &mode, w, &len_w, jw, &len_jw);
 
     // If exit mode is not -1 or 1, slsqp has completed
     if (mode != 1 && mode != -1)
@@ -90,8 +85,7 @@ SLSQPMinimizer::minimize(const std::vector<double> &x0) const {
  * @param grad Output array to store gradient
  * @param x Current x pt
  */
-void SLSQPMinimizer::fprime(std::vector<double> &grad,
-                            const std::vector<double> &x) const {
+void SLSQPMinimizer::fprime(std::vector<double> &grad, const std::vector<double> &x) const {
   assert(grad.size() > numParameters()); // > for slsqp
 
   const double epsilon(1e-08);
@@ -112,10 +106,8 @@ void SLSQPMinimizer::fprime(std::vector<double> &grad,
  * @param constrValues Output array to store values
  * @param x Values of the parameters
  */
-void SLSQPMinimizer::evaluateConstraints(std::vector<double> &constrValues,
-                                         const std::vector<double> &x) const {
-  assert(numEqualityConstraints() + numInequalityConstraints() ==
-         constrValues.size());
+void SLSQPMinimizer::evaluateConstraints(std::vector<double> &constrValues, const std::vector<double> &x) const {
+  assert(numEqualityConstraints() + numInequalityConstraints() == constrValues.size());
 
   // Need to compute position in flat array
   const size_t numConstrs(constrValues.size());
@@ -137,10 +129,8 @@ void SLSQPMinimizer::evaluateConstraints(std::vector<double> &constrValues,
  * must match number of parameters
  *                 where \f$A_{eq} x \geq 0\f$
  */
-void SLSQPMinimizer::initializeConstraints(const DblMatrix &equality,
-                                           const DblMatrix &inequality) {
-  const size_t totalNumConstr =
-      numEqualityConstraints() + numInequalityConstraints();
+void SLSQPMinimizer::initializeConstraints(const DblMatrix &equality, const DblMatrix &inequality) {
+  const size_t totalNumConstr = numEqualityConstraints() + numInequalityConstraints();
   if (totalNumConstr == 0)
     return;
 
@@ -174,8 +164,7 @@ void SLSQPMinimizer::initializeConstraints(const DblMatrix &equality,
   // jump (numEqualityConstraints()+numInequalityConstraints()) in the array.
   // The array is then padded
   // by (numEqualityConstraints()+numInEqualityConstraints()) zeroes
-  const size_t constrVecSize =
-      totalNumConstr * numParameters() + totalNumConstr;
+  const size_t constrVecSize = totalNumConstr * numParameters() + totalNumConstr;
   m_constraintNorms.resize(constrVecSize, 0.0);
 
   size_t constrCounter(0);
@@ -229,41 +218,32 @@ double d_sign(double *a, double *b) {
 }
 
 // --------------------- Forward declarations of helpers ---------------------
-int slsqpb_(int * /*m*/, int * /*meq*/, int * /*la*/, int * /*n*/,
-            double * /*x*/, double * /*xl*/, double * /*xu*/, double * /*f*/,
-            double * /*c__*/, double * /*g*/, double * /*a*/, double * /*acc*/,
-            int * /*iter*/, int * /*mode*/, double * /*r__*/, double * /*l*/,
-            double * /*x0*/, double * /*mu*/, double * /*s*/, double * /*u*/,
-            double * /*v*/, double * /*w*/, int * /*iw*/);
+int slsqpb_(int * /*m*/, int * /*meq*/, int * /*la*/, int * /*n*/, double * /*x*/, double * /*xl*/, double * /*xu*/,
+            double * /*f*/, double * /*c__*/, double * /*g*/, double * /*a*/, double * /*acc*/, int * /*iter*/,
+            int * /*mode*/, double * /*r__*/, double * /*l*/, double * /*x0*/, double * /*mu*/, double * /*s*/,
+            double * /*u*/, double * /*v*/, double * /*w*/, int * /*iw*/);
 int dcopy___(int *n, double *dx, int *incx, double *dy, int *incy);
-int daxpy_sl__(int *n, double *da, double *dx, int *incx, double *dy,
-               int *incy);
-int lsq_(int *m, int *meq, int *n, int *nl, int *la, double *l, double *g,
-         double *a, double *b, double *xl, double *xu, double *x, double *y,
-         double *w, int *jw, int *mode);
+int daxpy_sl__(int *n, double *da, double *dx, int *incx, double *dy, int *incy);
+int lsq_(int *m, int *meq, int *n, int *nl, int *la, double *l, double *g, double *a, double *b, double *xl, double *xu,
+         double *x, double *y, double *w, int *jw, int *mode);
 double ddot_sl__(int *n, double *dx, int *incx, double *dy, int *incy);
 int dscal_sl__(int *n, double *da, double *dx, int *incx);
 double linmin_(int *mode, double *ax, double *bx, double *f, double *tol);
 double dnrm2___(int *n, double *dx, int *incx);
 int ldl_(int *n, double *a, double *z__, double *sigma, double *w);
-int lsei_(double *c__, double *d__, double *e, double *f, double *g,
-          double *h__, int *lc, int *mc, int *le, int *me, int *lg, int *mg,
-          int *n, double *x, double *xnrm, double *w, int *jw, int *mode);
-int h12_(int *mode, int *lpivot, int *l1, int *m, double *u, int *iue,
-         double *up, double *c__, int *ice, int *icv, int *ncv);
-int hfti_(double *a, int *mda, int *m, int *n, double *b, int *mdb, int *nb,
-          double *tau, int *krank, double *rnorm, double *h__, double *g,
-          int *ip);
-int lsi_(double *e, double *f, double *g, double *h__, int *le, int *me,
-         int *lg, int *mg, int *n, double *x, double *xnorm, double *w, int *jw,
-         int *mode);
-int ldp_(double *g, int *mg, int *m, int *n, double *h__, double *x,
-         double *xnorm, double *w, int *index, int *mode);
-int nnls_(double *a, int *mda, int *m, int *n, double *b, double *x,
-          double *rnorm, double *w, double *z__, int *index, int *mode);
+int lsei_(double *c__, double *d__, double *e, double *f, double *g, double *h__, int *lc, int *mc, int *le, int *me,
+          int *lg, int *mg, int *n, double *x, double *xnrm, double *w, int *jw, int *mode);
+int h12_(int *mode, int *lpivot, int *l1, int *m, double *u, int *iue, double *up, double *c__, int *ice, int *icv,
+         int *ncv);
+int hfti_(double *a, int *mda, int *m, int *n, double *b, int *mdb, int *nb, double *tau, int *krank, double *rnorm,
+          double *h__, double *g, int *ip);
+int lsi_(double *e, double *f, double *g, double *h__, int *le, int *me, int *lg, int *mg, int *n, double *x,
+         double *xnorm, double *w, int *jw, int *mode);
+int ldp_(double *g, int *mg, int *m, int *n, double *h__, double *x, double *xnorm, double *w, int *index, int *mode);
+int nnls_(double *a, int *mda, int *m, int *n, double *b, double *x, double *rnorm, double *w, double *z__, int *index,
+          int *mode);
 int dsrotg_(double *da, double *db, double *c__, double *s);
-int dsrot_(int *n, double *dx, int *incx, double *dy, int *incy, double *c__,
-           double *s);
+int dsrot_(int *n, double *dx, int *incx, double *dy, int *incy, double *c__, double *s);
 //----------------------------------------------------------------------------
 
 /*      ALGORITHM 733, COLLECTED ALGORITHMS FROM ACM. */
@@ -299,9 +279,8 @@ int dsrot_(int *n, double *dx, int *incx, double *dy, int *incy, double *c__,
 /* *********************************************************************** */
 /*                              optimizer                               * */
 /* *********************************************************************** */
-int slsqp_(int *m, int *meq, int *la, int *n, double *x, double *xl, double *xu,
-           double *f, double *c__, double *g, double *a, double *acc, int *iter,
-           int *mode, double *w, int *l_w__, int *jw, int *l_jw__) {
+int slsqp_(int *m, int *meq, int *la, int *n, double *x, double *xl, double *xu, double *f, double *c__, double *g,
+           double *a, double *acc, int *iter, int *mode, double *w, int *l_w__, int *jw, int *l_jw__) {
   /* System generated locals */
   int a_dim1, a_offset, i__1, i__2;
 
@@ -501,9 +480,8 @@ int slsqp_(int *m, int *meq, int *la, int *n, double *x, double *xl, double *xu,
   /* Function Body */
   n1 = *n + 1;
   mineq = *m - *meq + n1 + n1;
-  il = (n1 * 3 + *m) * (n1 + 1) + (n1 - *meq + 1) * (mineq + 2) + (mineq << 1) +
-       (n1 + mineq) * (n1 - *meq) + (*meq << 1) + n1 * *n / 2 + (*m << 1) +
-       *n * 3 + (n1 << 2) + 1;
+  il = (n1 * 3 + *m) * (n1 + 1) + (n1 - *meq + 1) * (mineq + 2) + (mineq << 1) + (n1 + mineq) * (n1 - *meq) +
+       (*meq << 1) + n1 * *n / 2 + (*m << 1) + *n * 3 + (n1 << 2) + 1;
   /* Computing MAX */
   i__1 = mineq, i__2 = n1 - *meq;
   im = std::max(i__1, i__2);
@@ -524,17 +502,14 @@ int slsqp_(int *m, int *meq, int *la, int *n, double *x, double *xl, double *xu,
   iv = iu + n1;
   iw = iv + n1;
 
-  slsqpb_(m, meq, la, n, &x[1], &xl[1], &xu[1], f, &c__[1], &g[1], &a[a_offset],
-          acc, iter, mode, &w[ir], &w[il], &w[ix], &w[im], &w[is], &w[iu],
-          &w[iv], &w[iw], &jw[1]);
+  slsqpb_(m, meq, la, n, &x[1], &xl[1], &xu[1], f, &c__[1], &g[1], &a[a_offset], acc, iter, mode, &w[ir], &w[il],
+          &w[ix], &w[im], &w[is], &w[iu], &w[iv], &w[iw], &jw[1]);
   return 0;
 } /* slsqp_ */
 
-int slsqpb_(int *m, int *meq, int *la, int *n, double *x, double *xl,
-            double *xu, double *f, double *c__, double *g, double *a,
-            double *acc, int *iter, int *mode, double *r__, double *l,
-            double *x0, double *mu, double *s, double *u, double *v, double *w,
-            int *iw) {
+int slsqpb_(int *m, int *meq, int *la, int *n, double *x, double *xl, double *xu, double *f, double *c__, double *g,
+            double *a, double *acc, int *iter, int *mode, double *r__, double *l, double *x0, double *mu, double *s,
+            double *u, double *v, double *w, int *iw) {
   /* Initialized data */
 
   static double zero = 0.;
@@ -641,8 +616,7 @@ L130:
   d__1 = -one;
   daxpy_sl__(n, &d__1, &x[1], &c__1, &v[1], &c__1);
   h4 = one;
-  lsq_(m, meq, n, &n3, la, &l[1], &g[1], &a[a_offset], &c__[1], &u[1], &v[1],
-       &s[1], &r__[1], &w[1], &iw[1], mode);
+  lsq_(m, meq, n, &n3, la, &l[1], &g[1], &a[a_offset], &c__[1], &u[1], &v[1], &s[1], &r__[1], &w[1], &iw[1], mode);
   /*   AUGMENTED PROBLEM FOR INCONSISTENT LINEARIZATION */
   if (*mode == 6) {
     if (*n == *meq) {
@@ -671,8 +645,7 @@ L130:
     v[n1] = one;
     incons = 0;
   L150:
-    lsq_(m, meq, &n1, &n3, la, &l[1], &g[1], &a[a_offset], &c__[1], &u[1],
-         &v[1], &s[1], &r__[1], &w[1], &iw[1], mode);
+    lsq_(m, meq, &n1, &n3, la, &l[1], &g[1], &a[a_offset], &c__[1], &u[1], &v[1], &s[1], &r__[1], &w[1], &iw[1], mode);
     h4 = one - s[n1];
     if (*mode == 4) {
       l[n3] = ten * l[n3];
@@ -810,9 +783,7 @@ L240:
     h3 += std::max(d__1, h1);
     /* L250: */
   }
-  if (((d__1 = *f - f0, std::abs(d__1)) < *acc ||
-       dnrm2___(n, &s[1], &c__1) < *acc) &&
-      h3 < *acc) {
+  if (((d__1 = *f - f0, std::abs(d__1)) < *acc || dnrm2___(n, &s[1], &c__1) < *acc) && h3 < *acc) {
     *mode = 0;
   } else {
     *mode = -1;
@@ -820,9 +791,7 @@ L240:
   goto L330;
 /*   CHECK relaxed CONVERGENCE in case of positive directional derivative */
 L255:
-  if (((d__1 = *f - f0, std::abs(d__1)) < tol ||
-       dnrm2___(n, &s[1], &c__1) < tol) &&
-      h3 < tol) {
+  if (((d__1 = *f - f0, std::abs(d__1)) < tol || dnrm2___(n, &s[1], &c__1) < tol) && h3 < tol) {
     *mode = 0;
   } else {
     *mode = 8;
@@ -833,8 +802,7 @@ L255:
 L260:
   i__1 = *n;
   for (i__ = 1; i__ <= i__1; ++i__) {
-    u[i__] = g[i__] -
-             ddot_sl__(m, &a[i__ * a_dim1 + 1], &c__1, &r__[1], &c__1) - v[i__];
+    u[i__] = g[i__] - ddot_sl__(m, &a[i__ * a_dim1 + 1], &c__1, &r__[1], &c__1) - v[i__];
     /* L270: */
   }
   /*   L'*S */
@@ -894,9 +862,8 @@ L330:
   return 0;
 } /* slsqpb_ */
 
-int lsq_(int *m, int *meq, int *n, int *nl, int *la, double *l, double *g,
-         double *a, double *b, double *xl, double *xu, double *x, double *y,
-         double *w, int *jw, int *mode) {
+int lsq_(int *m, int *meq, int *n, int *nl, int *la, double *l, double *g, double *a, double *b, double *xl, double *xu,
+         double *x, double *y, double *w, int *jw, int *mode) {
   /* Initialized data */
 
   static double zero = 0.;
@@ -907,8 +874,7 @@ int lsq_(int *m, int *meq, int *n, int *nl, int *la, double *l, double *g,
   double d__1;
 
   /* Local variables */
-  static int i__, i1, i2, i3, i4, m1, n1, n2, n3, ic, id, ie, if__, ig, ih, il,
-      im, ip, iu, iw;
+  static int i__, i1, i2, i3, i4, m1, n1, n2, n3, ic, id, ie, if__, ig, ih, il, im, ip, iu, iw;
   static double diag;
   static int mineq;
   static double xnorm;
@@ -993,8 +959,7 @@ int lsq_(int *m, int *meq, int *n, int *nl, int *la, double *l, double *g,
     dscal_sl__(&i__2, &diag, &w[i3], n);
     w[i3] = diag;
     i__2 = i__ - 1;
-    w[if__ - 1 + i__] =
-        (g[i__] - ddot_sl__(&i__2, &w[i4], &c__1, &w[if__], &c__1)) / diag;
+    w[if__ - 1 + i__] = (g[i__] - ddot_sl__(&i__2, &w[i4], &c__1, &w[if__], &c__1)) / diag;
     i2 = i2 + i1 - n2;
     i3 += n1;
     i4 += *n;
@@ -1068,8 +1033,8 @@ int lsq_(int *m, int *meq, int *n, int *nl, int *la, double *l, double *g,
   dscal_sl__(n, &d__1, &w[iu], &c__1);
   iw = iu + *n;
   i__1 = std::max(1, *meq);
-  lsei_(&w[ic], &w[id], &w[ie], &w[if__], &w[ig], &w[ih], &i__1, meq, n, n, &m1,
-        &m1, n, &x[1], &xnorm, &w[iw], &jw[1], mode);
+  lsei_(&w[ic], &w[id], &w[ie], &w[if__], &w[ig], &w[ih], &i__1, meq, n, n, &m1, &m1, n, &x[1], &xnorm, &w[iw], &jw[1],
+        mode);
   if (*mode == 1) {
     /*   restore Lagrange multipliers */
     dcopy___(m, &w[iw], &c__1, &y[1], &c__1);
@@ -1080,9 +1045,8 @@ int lsq_(int *m, int *meq, int *n, int *nl, int *la, double *l, double *g,
   return 0;
 } /* lsq_ */
 
-int lsei_(double *c__, double *d__, double *e, double *f, double *g,
-          double *h__, int *lc, int *mc, int *le, int *me, int *lg, int *mg,
-          int *n, double *x, double *xnrm, double *w, int *jw, int *mode) {
+int lsei_(double *c__, double *d__, double *e, double *f, double *g, double *h__, int *lc, int *mc, int *le, int *me,
+          int *lg, int *mg, int *n, double *x, double *xnrm, double *w, int *jw, int *mode) {
   /* Initialized data */
 
   static double epmach = 2.22e-16;
@@ -1170,15 +1134,12 @@ int lsei_(double *c__, double *d__, double *e, double *f, double *g,
     j = std::min(i__2, *lc);
     i__2 = i__ + 1;
     i__3 = *mc - i__;
-    h12_(&c__1, &i__, &i__2, n, &c__[i__ + c_dim1], lc, &w[iw + i__],
-         &c__[j + c_dim1], lc, &c__1, &i__3);
+    h12_(&c__1, &i__, &i__2, n, &c__[i__ + c_dim1], lc, &w[iw + i__], &c__[j + c_dim1], lc, &c__1, &i__3);
     i__2 = i__ + 1;
-    h12_(&c__2, &i__, &i__2, n, &c__[i__ + c_dim1], lc, &w[iw + i__],
-         &e[e_offset], le, &c__1, me);
+    h12_(&c__2, &i__, &i__2, n, &c__[i__ + c_dim1], lc, &w[iw + i__], &e[e_offset], le, &c__1, me);
     /* L10: */
     i__2 = i__ + 1;
-    h12_(&c__2, &i__, &i__2, n, &c__[i__ + c_dim1], lc, &w[iw + i__],
-         &g[g_offset], lg, &c__1, mg);
+    h12_(&c__2, &i__, &i__2, n, &c__[i__ + c_dim1], lc, &w[iw + i__], &g[g_offset], lg, &c__1, mg);
   }
   /*  SOLVE C*X=D AND MODIFY F */
   *mode = 6;
@@ -1188,9 +1149,7 @@ int lsei_(double *c__, double *d__, double *e, double *f, double *g,
       goto L75;
     }
     i__1 = i__ - 1;
-    x[i__] =
-        (d__[i__] - ddot_sl__(&i__1, &c__[i__ + c_dim1], lc, &x[1], &c__1)) /
-        c__[i__ + i__ * c_dim1];
+    x[i__] = (d__[i__] - ddot_sl__(&i__1, &c__[i__ + c_dim1], lc, &x[1], &c__1)) / c__[i__ + i__ * c_dim1];
     /* L15: */
   }
   *mode = 1;
@@ -1203,8 +1162,7 @@ int lsei_(double *c__, double *d__, double *e, double *f, double *g,
   i__2 = *me;
   for (i__ = 1; i__ <= i__2; ++i__) {
     /* L20: */
-    w[if__ - 1 + i__] =
-        f[i__] - ddot_sl__(mc, &e[i__ + e_dim1], le, &x[1], &c__1);
+    w[if__ - 1 + i__] = f[i__] - ddot_sl__(mc, &e[i__ + e_dim1], le, &x[1], &c__1);
   }
   /*  STORE TRANSFORMED E & G */
   i__2 = *me;
@@ -1224,8 +1182,7 @@ int lsei_(double *c__, double *d__, double *e, double *f, double *g,
   *mode = 7;
   k = std::max(*le, *n);
   t = sqrt(epmach);
-  hfti_(&w[ie], me, me, &l, &w[if__], &k, &c__1, &t, &krank, xnrm, &w[1],
-        &w[l + 1], &jw[1]);
+  hfti_(&w[ie], me, me, &l, &w[if__], &k, &c__1, &t, &krank, xnrm, &w[1], &w[l + 1], &jw[1]);
   dcopy___(&l, &w[if__], &c__1, &x[mc1], &c__1);
   if (krank != l) {
     goto L75;
@@ -1239,8 +1196,7 @@ L40:
     /* L45: */
     h__[i__] -= ddot_sl__(mc, &g[i__ + g_dim1], lg, &x[1], &c__1);
   }
-  lsi_(&w[ie], &w[if__], &w[ig], &h__[1], me, me, mg, mg, &l, &x[mc1], xnrm,
-       &w[mc1], &jw[1], mode);
+  lsi_(&w[ie], &w[if__], &w[ig], &h__[1], me, me, mg, mg, &l, &x[mc1], xnrm, &w[mc1], &jw[1], mode);
   if (*mc == 0) {
     goto L75;
   }
@@ -1265,17 +1221,14 @@ L50:
   for (i__ = *mc; i__ >= 1; --i__) {
     /* L65: */
     i__2 = i__ + 1;
-    h12_(&c__2, &i__, &i__2, n, &c__[i__ + c_dim1], lc, &w[iw + i__], &x[1],
-         &c__1, &c__1, &c__1);
+    h12_(&c__2, &i__, &i__2, n, &c__[i__ + c_dim1], lc, &w[iw + i__], &x[1], &c__1, &c__1, &c__1);
   }
   for (i__ = *mc; i__ >= 1; --i__) {
     /* Computing MIN */
     i__2 = i__ + 1;
     j = std::min(i__2, *lc);
     i__2 = *mc - i__;
-    w[i__] = (d__[i__] -
-              ddot_sl__(&i__2, &c__[j + i__ * c_dim1], &c__1, &w[j], &c__1)) /
-             c__[i__ + i__ * c_dim1];
+    w[i__] = (d__[i__] - ddot_sl__(&i__2, &c__[j + i__ * c_dim1], &c__1, &w[j], &c__1)) / c__[i__ + i__ * c_dim1];
     /* L70: */
   }
 /*  END OF SUBROUTINE LSEI */
@@ -1283,9 +1236,8 @@ L75:
   return 0;
 } /* lsei_ */
 
-int lsi_(double *e, double *f, double *g, double *h__, int *le, int *me,
-         int *lg, int *mg, int *n, double *x, double *xnorm, double *w, int *jw,
-         int *mode) {
+int lsi_(double *e, double *f, double *g, double *h__, int *le, int *me, int *lg, int *mg, int *n, double *x,
+         double *xnorm, double *w, int *jw, int *mode) {
   /* Initialized data */
 
   static double epmach = 2.22e-16;
@@ -1351,12 +1303,10 @@ int lsi_(double *e, double *f, double *g, double *h__, int *le, int *me,
     j = std::min(i__2, *n);
     i__2 = i__ + 1;
     i__3 = *n - i__;
-    h12_(&c__1, &i__, &i__2, me, &e[i__ * e_dim1 + 1], &c__1, &t,
-         &e[j * e_dim1 + 1], &c__1, le, &i__3);
+    h12_(&c__1, &i__, &i__2, me, &e[i__ * e_dim1 + 1], &c__1, &t, &e[j * e_dim1 + 1], &c__1, le, &i__3);
     /* L10: */
     i__2 = i__ + 1;
-    h12_(&c__2, &i__, &i__2, me, &e[i__ * e_dim1 + 1], &c__1, &t, &f[1], &c__1,
-         &c__1, &c__1);
+    h12_(&c__2, &i__, &i__2, me, &e[i__ * e_dim1 + 1], &c__1, &t, &f[1], &c__1, &c__1, &c__1);
   }
   /*  TRANSFORM G AND H TO GET LEAST DISTANCE PROBLEM */
   *mode = 5;
@@ -1370,9 +1320,7 @@ int lsi_(double *e, double *f, double *g, double *h__, int *le, int *me,
       /* L20: */
       i__3 = j - 1;
       g[i__ + j * g_dim1] =
-          (g[i__ + j * g_dim1] -
-           ddot_sl__(&i__3, &g[i__ + g_dim1], lg, &e[j * e_dim1 + 1], &c__1)) /
-          e[j + j * e_dim1];
+          (g[i__ + j * g_dim1] - ddot_sl__(&i__3, &g[i__ + g_dim1], lg, &e[j * e_dim1 + 1], &c__1)) / e[j + j * e_dim1];
     }
     /* L30: */
     h__[i__] -= ddot_sl__(n, &g[i__ + g_dim1], lg, &f[1], &c__1);
@@ -1390,9 +1338,7 @@ int lsi_(double *e, double *f, double *g, double *h__, int *le, int *me,
     j = std::min(i__2, *n);
     /* L40: */
     i__2 = *n - i__;
-    x[i__] =
-        (x[i__] - ddot_sl__(&i__2, &e[i__ + j * e_dim1], le, &x[j], &c__1)) /
-        e[i__ + i__ * e_dim1];
+    x[i__] = (x[i__] - ddot_sl__(&i__2, &e[i__ + j * e_dim1], le, &x[j], &c__1)) / e[i__ + i__ * e_dim1];
   }
   /* Computing MIN */
   i__2 = *n + 1;
@@ -1405,8 +1351,7 @@ L50:
   return 0;
 } /* lsi_ */
 
-int ldp_(double *g, int *mg, int *m, int *n, double *h__, double *x,
-         double *xnorm, double *w, int *index, int *mode) {
+int ldp_(double *g, int *mg, int *m, int *n, double *h__, double *x, double *xnorm, double *w, int *index, int *mode) {
   /* Initialized data */
 
   static double zero = 0.;
@@ -1498,8 +1443,7 @@ int ldp_(double *g, int *mg, int *m, int *n, double *h__, double *x,
   iy = iz + n1;
   iwdual = iy + *m;
   /*  SOLVE DUAL PROBLEM */
-  nnls_(&w[1], &n1, &n1, m, &w[if__], &w[iy], &rnorm, &w[iwdual], &w[iz],
-        &index[1], mode);
+  nnls_(&w[1], &n1, &n1, m, &w[if__], &w[iy], &rnorm, &w[iwdual], &w[iz], &index[1], mode);
   if (*mode != 1) {
     goto L50;
   }
@@ -1530,8 +1474,8 @@ L50:
   return 0;
 } /* ldp_ */
 
-int nnls_(double *a, int *mda, int *m, int *n, double *b, double *x,
-          double *rnorm, double *w, double *z__, int *index, int *mode) {
+int nnls_(double *a, int *mda, int *m, int *n, double *b, double *x, double *rnorm, double *w, double *z__, int *index,
+          int *mode) {
   /* Initialized data */
 
   static double zero = 0.;
@@ -1655,8 +1599,7 @@ L130:
   /* STEP FOUR (TEST INDEX J FOR LINEAR DEPENDENCY) */
   asave = a[npp1 + j * a_dim1];
   i__2 = npp1 + 1;
-  h12_(&c__1, &npp1, &i__2, m, &a[j * a_dim1 + 1], &c__1, &up, &z__[1], &c__1,
-       &c__1, &c__0);
+  h12_(&c__1, &npp1, &i__2, m, &a[j * a_dim1 + 1], &c__1, &up, &z__[1], &c__1, &c__1, &c__0);
   unorm = dnrm2___(&nsetp, &a[j * a_dim1 + 1], &c__1);
   t = factor * (d__1 = a[npp1 + j * a_dim1], std::abs(d__1));
   d__1 = unorm + t;
@@ -1665,8 +1608,7 @@ L130:
   }
   dcopy___(m, &b[1], &c__1, &z__[1], &c__1);
   i__2 = npp1 + 1;
-  h12_(&c__2, &npp1, &i__2, m, &a[j * a_dim1 + 1], &c__1, &up, &z__[1], &c__1,
-       &c__1, &c__1);
+  h12_(&c__2, &npp1, &i__2, m, &a[j * a_dim1 + 1], &c__1, &up, &z__[1], &c__1, &c__1, &c__1);
   if (z__[npp1] / a[npp1 + j * a_dim1] > zero) {
     goto L160;
   }
@@ -1686,8 +1628,7 @@ L160:
   for (jz = iz1; jz <= i__2; ++jz) {
     jj = index[jz];
     /* L170: */
-    h12_(&c__2, &nsetp, &npp1, m, &a[j * a_dim1 + 1], &c__1, &up,
-         &a[jj * a_dim1 + 1], &c__1, mda, &c__1);
+    h12_(&c__2, &nsetp, &npp1, m, &a[j * a_dim1 + 1], &c__1, &up, &a[jj * a_dim1 + 1], &c__1, mda, &c__1);
   }
   k = std::min(npp1, *mda);
   w[j] = zero;
@@ -1790,9 +1731,8 @@ L290:
   return 0;
 } /* nnls_ */
 
-int hfti_(double *a, int *mda, int *m, int *n, double *b, int *mdb, int *nb,
-          double *tau, int *krank, double *rnorm, double *h__, double *g,
-          int *ip) {
+int hfti_(double *a, int *mda, int *m, int *n, double *b, int *mdb, int *nb, double *tau, int *krank, double *rnorm,
+          double *h__, double *g, int *ip) {
   /* Initialized data */
 
   static double zero = 0.;
@@ -1913,12 +1853,10 @@ int hfti_(double *a, int *mda, int *m, int *n, double *b, int *mdb, int *nb,
     i__ = std::min(i__2, *n);
     i__2 = j + 1;
     i__3 = *n - j;
-    h12_(&c__1, &j, &i__2, m, &a[j * a_dim1 + 1], &c__1, &h__[j],
-         &a[i__ * a_dim1 + 1], &c__1, mda, &i__3);
+    h12_(&c__1, &j, &i__2, m, &a[j * a_dim1 + 1], &c__1, &h__[j], &a[i__ * a_dim1 + 1], &c__1, mda, &i__3);
     /* L80: */
     i__2 = j + 1;
-    h12_(&c__2, &j, &i__2, m, &a[j * a_dim1 + 1], &c__1, &h__[j], &b[b_offset],
-         &c__1, mdb, nb);
+    h12_(&c__2, &j, &i__2, m, &a[j * a_dim1 + 1], &c__1, &h__[j], &b[b_offset], &c__1, mdb, nb);
   }
   /*   DETERMINE PSEUDORANK */
   i__2 = ldiag;
@@ -1961,8 +1899,7 @@ L160:
   for (i__ = k; i__ >= 1; --i__) {
     /* L170: */
     i__2 = i__ - 1;
-    h12_(&c__1, &i__, &kp1, n, &a[i__ + a_dim1], mda, &g[i__], &a[a_offset],
-         mda, &c__1, &i__2);
+    h12_(&c__1, &i__, &kp1, n, &a[i__ + a_dim1], mda, &g[i__], &a[a_offset], mda, &c__1, &i__2);
   }
 L180:
   i__2 = *nb;
@@ -1975,8 +1912,7 @@ L180:
       /* L210: */
       i__1 = k - i__;
       b[i__ + jb * b_dim1] =
-          (b[i__ + jb * b_dim1] - ddot_sl__(&i__1, &a[i__ + j * a_dim1], mda,
-                                            &b[j + jb * b_dim1], &c__1)) /
+          (b[i__ + jb * b_dim1] - ddot_sl__(&i__1, &a[i__ + j * a_dim1], mda, &b[j + jb * b_dim1], &c__1)) /
           a[i__ + i__ * a_dim1];
     }
     /*   COMPLETE SOLUTION VECTOR */
@@ -1991,8 +1927,7 @@ L180:
     i__1 = k;
     for (i__ = 1; i__ <= i__1; ++i__) {
       /* L230: */
-      h12_(&c__2, &i__, &kp1, n, &a[i__ + a_dim1], mda, &g[i__],
-           &b[jb * b_dim1 + 1], &c__1, mdb, &c__1);
+      h12_(&c__2, &i__, &kp1, n, &a[i__ + a_dim1], mda, &g[i__], &b[jb * b_dim1 + 1], &c__1, mdb, &c__1);
     }
   /*   REORDER SOLUTION ACCORDING TO PREVIOUS COLUMN INTERCHANGES */
   L240:
@@ -2012,8 +1947,8 @@ L270:
   return 0;
 } /* hfti_ */
 
-int h12_(int *mode, int *lpivot, int *l1, int *m, double *u, int *iue,
-         double *up, double *c__, int *ice, int *icv, int *ncv) {
+int h12_(int *mode, int *lpivot, int *l1, int *m, double *u, int *iue, double *up, double *c__, int *ice, int *icv,
+         int *ncv) {
   /* Initialized data */
 
   static double one = 1.;
@@ -2289,8 +2224,7 @@ double linmin_(int *mode, double *ax, double *bx, double *f, double *tol) {
   double ret_val, d__1;
 
   /* Local variables */
-  static double a, b, d__, e, m, p, q, r__, u, v, w, x, fu, fv, fw, fx, tol1,
-      tol2;
+  static double a, b, d__, e, m, p, q, r__, u, v, w, x, fu, fv, fw, fx, tol1, tol2;
 
   /*   LINMIN  LINESEARCH WITHOUT DERIVATIVES */
   /*   PURPOSE: */
@@ -2375,8 +2309,7 @@ L20:
   e = d__;
 /*  IS PARABOLA ACCEPTABLE */
 L30:
-  if (std::abs(p) >= (d__1 = q * r__, std::abs(d__1)) * .5 ||
-      p <= q * (a - x) || p >= q * (b - x)) {
+  if (std::abs(p) >= (d__1 = q * r__, std::abs(d__1)) * .5 || p <= q * (a - x) || p >= q * (b - x)) {
     goto L40;
   }
   /*  PARABOLIC INTERPOLATION STEP */
@@ -2463,8 +2396,7 @@ L100:
 } /* linmin_ */
 
 /* ## Following a selection from BLAS Level 1 */
-int daxpy_sl__(int *n, double *da, double *dx, int *incx, double *dy,
-               int *incy) {
+int daxpy_sl__(int *n, double *da, double *dx, int *incx, double *dy, int *incy) {
   /* System generated locals */
   int i__1;
 
@@ -2667,9 +2599,8 @@ L40:
   mp1 = m + 1;
   i__1 = *n;
   for (i__ = mp1; i__ <= i__1; i__ += 5) {
-    dtemp = dtemp + dx[i__] * dy[i__] + dx[i__ + 1] * dy[i__ + 1] +
-            dx[i__ + 2] * dy[i__ + 2] + dx[i__ + 3] * dy[i__ + 3] +
-            dx[i__ + 4] * dy[i__ + 4];
+    dtemp = dtemp + dx[i__] * dy[i__] + dx[i__ + 1] * dy[i__ + 1] + dx[i__ + 2] * dy[i__ + 2] +
+            dx[i__ + 3] * dy[i__ + 3] + dx[i__ + 4] * dy[i__ + 4];
     /* L50: */
   }
 L60:
@@ -2847,8 +2778,7 @@ L300:
   return ret_val;
 } /* dnrm2___ */
 
-int dsrot_(int *n, double *dx, int *incx, double *dy, int *incy, double *c__,
-           double *s) {
+int dsrot_(int *n, double *dx, int *incx, double *dy, int *incy, double *c__, double *s) {
   /* System generated locals */
   int i__1;
 

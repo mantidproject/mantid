@@ -20,6 +20,7 @@
 #include <json/json.h>
 
 #include "MantidDataObjects/PeakShapeEllipsoid.h"
+#include "MantidJson/Json.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidKernel/VMD.h"
 #include "MantidKernel/cow_ptr.h"
@@ -36,12 +37,8 @@ class PeakShapeEllipsoidFactoryTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static PeakShapeEllipsoidFactoryTest *createSuite() {
-    return new PeakShapeEllipsoidFactoryTest();
-  }
-  static void destroySuite(PeakShapeEllipsoidFactoryTest *suite) {
-    delete suite;
-  }
+  static PeakShapeEllipsoidFactoryTest *createSuite() { return new PeakShapeEllipsoidFactoryTest(); }
+  static void destroySuite(PeakShapeEllipsoidFactoryTest *suite) { delete suite; }
 
   void test_invalid_json_with_no_successor() {
     PeakShapeEllipsoidFactory factory;
@@ -62,8 +59,7 @@ public:
     // Minimal valid JSON for describing the shape.
     Json::Value root;
     root["shape"] = "square";
-    Json::StyledWriter writer;
-    const std::string str_json = writer.write(root);
+    const std::string str_json = Mantid::JsonHelpers::jsonToString(root);
 
     factory.create(str_json);
 
@@ -81,16 +77,13 @@ public:
     const int algorithmVersion = 3;
 
     // Make a source shape
-    PeakShapeEllipsoid sourceShape(directions, abcRadii, abcInnerRadii,
-                                   abcOuterRadii, frame, algorithmName,
+    PeakShapeEllipsoid sourceShape(directions, abcRadii, abcInnerRadii, abcOuterRadii, frame, algorithmName,
                                    algorithmVersion);
 
     PeakShapeEllipsoidFactory factory;
-    Mantid::Geometry::PeakShape *productShape =
-        factory.create(sourceShape.toJSON());
+    Mantid::Geometry::PeakShape *productShape = factory.create(sourceShape.toJSON());
 
-    PeakShapeEllipsoid *ellipsoidShapeProduct =
-        dynamic_cast<PeakShapeEllipsoid *>(productShape);
+    PeakShapeEllipsoid *ellipsoidShapeProduct = dynamic_cast<PeakShapeEllipsoid *>(productShape);
     TS_ASSERT(ellipsoidShapeProduct);
 
     TS_ASSERT_EQUALS(sourceShape, *ellipsoidShapeProduct);

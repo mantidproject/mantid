@@ -21,9 +21,7 @@ class PropertyManagerPropertyTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static PropertyManagerPropertyTest *createSuite() {
-    return new PropertyManagerPropertyTest();
-  }
+  static PropertyManagerPropertyTest *createSuite() { return new PropertyManagerPropertyTest(); }
   static void destroySuite(PropertyManagerPropertyTest *suite) { delete suite; }
 
   //----------------------------------------------------------------------------
@@ -34,8 +32,7 @@ public:
 
     PropertyManagerProperty pmap("Test");
     // MSVC warns about comparing signed/unsigned here
-    TS_ASSERT_EQUALS(static_cast<unsigned int>(Direction::Input),
-                     pmap.direction());
+    TS_ASSERT_EQUALS(static_cast<unsigned int>(Direction::Input), pmap.direction());
   }
 
   void test_Constructor_Sets_Name_And_Direction() {
@@ -43,8 +40,7 @@ public:
 
     PropertyManagerProperty pmap("Test", Direction::Output);
     TS_ASSERT_EQUALS("Test", pmap.name());
-    TS_ASSERT_EQUALS(static_cast<unsigned int>(Direction::Output),
-                     pmap.direction());
+    TS_ASSERT_EQUALS(static_cast<unsigned int>(Direction::Output), pmap.direction());
   }
 
   void test_Constructor_Sets_Name_Direction_DefaultValue() {
@@ -53,8 +49,7 @@ public:
     auto testMgr = createPropMgrWithInt();
     PropertyManagerProperty pmap("Test", testMgr, Direction::Output);
     TS_ASSERT_EQUALS("Test", pmap.name());
-    TS_ASSERT_EQUALS(static_cast<unsigned int>(Direction::Output),
-                     pmap.direction());
+    TS_ASSERT_EQUALS(static_cast<unsigned int>(Direction::Output), pmap.direction());
     TS_ASSERT_EQUALS(testMgr, pmap());
     TS_ASSERT(pmap.isDefault());
   }
@@ -67,8 +62,7 @@ public:
     PropertyManagerProperty pmap("Test", testMgr, Direction::Output);
     boost::scoped_ptr<PropertyManagerProperty> copy(pmap.clone());
     TS_ASSERT_EQUALS("Test", copy->name());
-    TS_ASSERT_EQUALS(static_cast<unsigned int>(Direction::Output),
-                     copy->direction());
+    TS_ASSERT_EQUALS(static_cast<unsigned int>(Direction::Output), copy->direction());
     TS_ASSERT_EQUALS(testMgr, (*copy)());
     TS_ASSERT(copy->isDefault());
   }
@@ -113,16 +107,13 @@ public:
 
   void test_Property_Set_With_Json_String_Declares_Missing_Values() {
     PropertyManagerProperty prop("Test");
-    const std::string jsonString =
-        R"({"APROP":"equation=12+3","anotherProp":"1.3,2.5"})";
+    const std::string jsonString = R"({"APROP":"equation=12+3","anotherProp":"1.3,2.5"})";
 
     TS_ASSERT_THROWS_NOTHING(prop.setValue(jsonString));
 
     auto mgr = prop();
-    TS_ASSERT_EQUALS("equation=12+3",
-                     static_cast<std::string>(mgr->getProperty("APROP")));
-    TS_ASSERT_EQUALS("1.3,2.5",
-                     static_cast<std::string>(mgr->getProperty("anotherProp")));
+    TS_ASSERT_EQUALS("equation=12+3", static_cast<std::string>(mgr->getProperty("APROP")));
+    TS_ASSERT_EQUALS("1.3,2.5", static_cast<std::string>(mgr->getProperty("anotherProp")));
   }
 
   void test_Property_Set_With_Non_Json_ObjectValue_Returns_Help_Msg() {
@@ -144,8 +135,7 @@ public:
 
     auto propMgr = prop();
     TS_ASSERT_EQUALS(intValue, static_cast<int>(propMgr->getProperty(intKey)));
-    TS_ASSERT_EQUALS(realValue,
-                     static_cast<double>(propMgr->getProperty(realKey)));
+    TS_ASSERT_EQUALS(realValue, static_cast<double>(propMgr->getProperty(realKey)));
   }
 
   void test_Property_Set_With_String_Checks_PropertyManager_DataService() {
@@ -221,8 +211,7 @@ public:
     inner->declareProperty("DoubleProp", 16.1);
     auto outer = std::make_shared<PropertyManager>();
     outer->declareProperty("IntProp", 1);
-    outer->declareProperty(
-        std::make_unique<PropertyManagerProperty>("PropMgr", inner));
+    outer->declareProperty(std::make_unique<PropertyManagerProperty>("PropMgr", inner));
     PropertyManagerProperty prop("PMDSTest", outer);
 
     auto outerVal = prop.valueAsJson();
@@ -239,8 +228,7 @@ public:
   // Failure tests
   //----------------------------------------------------------------------------
   void test_Empty_Name_Is_Not_Accepted() {
-    TS_ASSERT_THROWS(PropertyManagerProperty(""),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(PropertyManagerProperty(""), const std::invalid_argument &);
   }
 
   void test_String_Not_Holding_Valid_Json_or_Global_PM_Name_Returns_Error() {
@@ -259,8 +247,7 @@ private:
     using Mantid::Kernel::PropertyWithValue;
 
     auto testMgr = std::make_shared<PropertyManager>();
-    testMgr->declareProperty(
-        std::make_unique<PropertyWithValue<int>>("Prop1", 1));
+    testMgr->declareProperty(std::make_unique<PropertyWithValue<int>>("Prop1", 1));
 
     return testMgr;
   }

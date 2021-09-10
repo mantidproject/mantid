@@ -27,9 +27,7 @@ using namespace Kernel;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(PoldiCreatePeaksFromCell)
 
-const std::string PoldiCreatePeaksFromCell::name() const {
-  return "PoldiCreatePeaksFromCell";
-}
+const std::string PoldiCreatePeaksFromCell::name() const { return "PoldiCreatePeaksFromCell"; }
 
 //----------------------------------------------------------------------------------------------
 
@@ -37,9 +35,7 @@ const std::string PoldiCreatePeaksFromCell::name() const {
 int PoldiCreatePeaksFromCell::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string PoldiCreatePeaksFromCell::category() const {
-  return "SINQ\\Poldi";
-}
+const std::string PoldiCreatePeaksFromCell::category() const { return "SINQ\\Poldi"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string PoldiCreatePeaksFromCell::summary() const {
@@ -55,16 +51,14 @@ std::map<std::string, std::string> PoldiCreatePeaksFromCell::validateInputs() {
 
   auto dMax = boost::lexical_cast<double>(dMaxProperty->value());
   if (!dMaxProperty->isDefault() && (dMax < dMin)) {
-    errorMap["LatticeSpacingMax"] =
-        std::string("LatticeSpacingMax is less than LatticeSpacingMin.");
+    errorMap["LatticeSpacingMax"] = std::string("LatticeSpacingMax is less than LatticeSpacingMin.");
   }
 
   return errorMap;
 }
 
 /// Tries to construct a space group object using the space group factory.
-SpaceGroup_const_sptr PoldiCreatePeaksFromCell::getSpaceGroup(
-    const std::string &spaceGroupString) const {
+SpaceGroup_const_sptr PoldiCreatePeaksFromCell::getSpaceGroup(const std::string &spaceGroupString) const {
   return SpaceGroupFactory::Instance().createSpaceGroup(spaceGroupString);
 }
 
@@ -99,8 +93,7 @@ double PoldiCreatePeaksFromCell::getDMaxValue(const UnitCell &unitCell) const {
 }
 
 /// Returns the largest possible lattice spacing for the given cell.
-double
-PoldiCreatePeaksFromCell::getLargestDValue(const UnitCell &unitCell) const {
+double PoldiCreatePeaksFromCell::getLargestDValue(const UnitCell &unitCell) const {
   return std::max(std::max(unitCell.a(), unitCell.b()), unitCell.c());
 }
 
@@ -131,9 +124,9 @@ UnitCell PoldiCreatePeaksFromCell::getUnitCellFromProperties() const {
  * @param crystalSystem :: Crystal system which is used for constraints
  * @return UnitCell-object with applied constraints
  */
-UnitCell PoldiCreatePeaksFromCell::getConstrainedUnitCell(
-    const UnitCell &unitCell, const PointGroup::CrystalSystem &crystalSystem,
-    const Group::CoordinateSystem &coordinateSystem) const {
+UnitCell PoldiCreatePeaksFromCell::getConstrainedUnitCell(const UnitCell &unitCell,
+                                                          const PointGroup::CrystalSystem &crystalSystem,
+                                                          const Group::CoordinateSystem &coordinateSystem) const {
   switch (crystalSystem) {
   case PointGroup::CrystalSystem::Cubic:
     return UnitCell(unitCell.a(), unitCell.a(), unitCell.a());
@@ -142,17 +135,14 @@ UnitCell PoldiCreatePeaksFromCell::getConstrainedUnitCell(
   case PointGroup::CrystalSystem::Orthorhombic:
     return UnitCell(unitCell.a(), unitCell.b(), unitCell.c());
   case PointGroup::CrystalSystem::Monoclinic:
-    return UnitCell(unitCell.a(), unitCell.b(), unitCell.c(), 90.0,
-                    unitCell.beta(), 90.0);
+    return UnitCell(unitCell.a(), unitCell.b(), unitCell.c(), 90.0, unitCell.beta(), 90.0);
   case PointGroup::CrystalSystem::Trigonal:
     if (coordinateSystem == Group::Orthogonal) {
-      return UnitCell(unitCell.a(), unitCell.a(), unitCell.a(),
-                      unitCell.alpha(), unitCell.alpha(), unitCell.alpha());
+      return UnitCell(unitCell.a(), unitCell.a(), unitCell.a(), unitCell.alpha(), unitCell.alpha(), unitCell.alpha());
     }
   // fall through to hexagonal.
   case PointGroup::CrystalSystem::Hexagonal:
-    return UnitCell(unitCell.a(), unitCell.a(), unitCell.c(), 90.0, 90.0,
-                    120.0);
+    return UnitCell(unitCell.a(), unitCell.a(), unitCell.c(), 90.0, 90.0, 120.0);
   default:
     return UnitCell(unitCell);
   }
@@ -162,10 +152,8 @@ UnitCell PoldiCreatePeaksFromCell::getConstrainedUnitCell(
 /** Initialize the algorithm's properties.
  */
 void PoldiCreatePeaksFromCell::init() {
-  std::vector<std::string> spaceGroups =
-      SpaceGroupFactory::Instance().subscribedSpaceGroupSymbols();
-  declareProperty("SpaceGroup", spaceGroups.front(),
-                  std::make_shared<StringListValidator>(spaceGroups),
+  std::vector<std::string> spaceGroups = SpaceGroupFactory::Instance().subscribedSpaceGroupSymbols();
+  declareProperty("SpaceGroup", spaceGroups.front(), std::make_shared<StringListValidator>(spaceGroups),
                   "SpaceGroup of the crystal structure.");
 
   declareProperty("Atoms", "",
@@ -175,32 +163,23 @@ void PoldiCreatePeaksFromCell::init() {
   std::shared_ptr<BoundedValidator<double>> latticeParameterEdgeValidator =
       std::make_shared<BoundedValidator<double>>(0.0, 0.0);
   latticeParameterEdgeValidator->clearUpper();
-  declareProperty("a", 1.0, latticeParameterEdgeValidator,
-                  "Lattice parameter a");
-  declareProperty("b", 1.0, latticeParameterEdgeValidator->clone(),
-                  "Lattice parameter b");
-  declareProperty("c", 1.0, latticeParameterEdgeValidator->clone(),
-                  "Lattice parameter c");
+  declareProperty("a", 1.0, latticeParameterEdgeValidator, "Lattice parameter a");
+  declareProperty("b", 1.0, latticeParameterEdgeValidator->clone(), "Lattice parameter b");
+  declareProperty("c", 1.0, latticeParameterEdgeValidator->clone(), "Lattice parameter c");
 
   std::shared_ptr<BoundedValidator<double>> latticeParameterAngleValidator =
       std::make_shared<BoundedValidator<double>>(0.0, 180.0);
-  declareProperty("alpha", 90.0, latticeParameterAngleValidator,
-                  "Lattice parameter alpha");
-  declareProperty("beta", 90.0, latticeParameterAngleValidator->clone(),
-                  "Lattice parameter beta");
-  declareProperty("gamma", 90.0, latticeParameterAngleValidator->clone(),
-                  "Lattice parameter gamma");
+  declareProperty("alpha", 90.0, latticeParameterAngleValidator, "Lattice parameter alpha");
+  declareProperty("beta", 90.0, latticeParameterAngleValidator->clone(), "Lattice parameter beta");
+  declareProperty("gamma", 90.0, latticeParameterAngleValidator->clone(), "Lattice parameter gamma");
 
-  std::shared_ptr<BoundedValidator<double>> dValidator =
-      std::make_shared<BoundedValidator<double>>(0.01, 0.0);
+  std::shared_ptr<BoundedValidator<double>> dValidator = std::make_shared<BoundedValidator<double>>(0.01, 0.0);
   dValidator->clearUpper();
 
-  declareProperty("LatticeSpacingMin", 0.5, dValidator,
-                  "Smallest allowed lattice spacing.");
+  declareProperty("LatticeSpacingMin", 0.5, dValidator, "Smallest allowed lattice spacing.");
   declareProperty("LatticeSpacingMax", 0.0, "Largest allowed lattice spacing.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "List with calculated peaks.");
 }
 
@@ -210,17 +189,14 @@ void PoldiCreatePeaksFromCell::init() {
 void PoldiCreatePeaksFromCell::exec() {
   // Get all user input regarding the unit cell
   SpaceGroup_const_sptr spaceGroup = getSpaceGroup(getProperty("SpaceGroup"));
-  PointGroup_sptr pointGroup =
-      PointGroupFactory::Instance().createPointGroupFromSpaceGroup(spaceGroup);
-  UnitCell unitCell = getConstrainedUnitCell(getUnitCellFromProperties(),
-                                             pointGroup->crystalSystem(),
+  PointGroup_sptr pointGroup = PointGroupFactory::Instance().createPointGroupFromSpaceGroup(spaceGroup);
+  UnitCell unitCell = getConstrainedUnitCell(getUnitCellFromProperties(), pointGroup->crystalSystem(),
                                              pointGroup->getCoordinateSystem());
 
-  g_log.information() << "Constrained unit cell is: " << unitCellToStr(unitCell)
-                      << '\n';
+  g_log.information() << "Constrained unit cell is: " << unitCellToStr(unitCell) << '\n';
 
-  CompositeBraggScatterer_sptr scatterers = CompositeBraggScatterer::create(
-      IsotropicAtomBraggScattererParser(getProperty("Atoms"))());
+  CompositeBraggScatterer_sptr scatterers =
+      CompositeBraggScatterer::create(IsotropicAtomBraggScattererParser(getProperty("Atoms"))());
 
   // Create a CrystalStructure-object for use with PoldiPeakCollection
   CrystalStructure crystalStructure(unitCell, spaceGroup, scatterers);
@@ -229,8 +205,7 @@ void PoldiCreatePeaksFromCell::exec() {
   double dMax = getDMaxValue(unitCell);
 
   // Create PoldiPeakCollection using given parameters, set output workspace
-  PoldiPeakCollection_sptr peaks =
-      std::make_shared<PoldiPeakCollection>(crystalStructure, dMin, dMax);
+  PoldiPeakCollection_sptr peaks = std::make_shared<PoldiPeakCollection>(crystalStructure, dMin, dMax);
 
   setProperty("OutputWorkspace", peaks->asTableWorkspace());
 }

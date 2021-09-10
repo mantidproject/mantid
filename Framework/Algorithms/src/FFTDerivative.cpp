@@ -29,11 +29,9 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::HistogramData;
 
 void FFTDerivative::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
                   "Input workspace for differentiation");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "Workspace with result derivatives");
   auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(1);
@@ -61,16 +59,14 @@ void FFTDerivative::execComplexFFT() {
   builder.setX(nx + ny);
   builder.setY(ny + ny);
   builder.setDistribution(inWS->isDistribution());
-  MatrixWorkspace_sptr copyWS =
-      create<MatrixWorkspace>(*inWS, 1, builder.build());
+  MatrixWorkspace_sptr copyWS = create<MatrixWorkspace>(*inWS, 1, builder.build());
 
   for (size_t spec = 0; spec < n; ++spec) {
-    symmetriseSpectrum(inWS->histogram(spec), copyWS->mutableX(0),
-                       copyWS->mutableY(0), nx, ny);
+    symmetriseSpectrum(inWS->histogram(spec), copyWS->mutableX(0), copyWS->mutableY(0), nx, ny);
 
     // Transform symmetrized spectrum
     const bool isHisto = copyWS->isHistogramData();
-    IAlgorithm_sptr fft = createChildAlgorithm("FFT");
+    auto fft = createChildAlgorithm("FFT");
     fft->setProperty("InputWorkspace", copyWS);
     fft->setProperty("Real", 0);
     fft->setProperty("Transform", "Forward");
@@ -78,8 +74,7 @@ void FFTDerivative::execComplexFFT() {
 
     MatrixWorkspace_sptr transWS = fft->getProperty("OutputWorkspace");
 
-    multiplyTransform(transWS->mutableX(3), transWS->mutableY(3),
-                      transWS->mutableY(4));
+    multiplyTransform(transWS->mutableX(3), transWS->mutableY(3), transWS->mutableY(4));
 
     // Inverse transform
     fft = createChildAlgorithm("FFT");
@@ -93,7 +88,7 @@ void FFTDerivative::execComplexFFT() {
 
     // If the input was histogram data, convert the output to histogram data too
     if (isHisto) {
-      IAlgorithm_sptr toHisto = createChildAlgorithm("ConvertToHistogram");
+      auto toHisto = createChildAlgorithm("ConvertToHistogram");
       toHisto->setProperty("InputWorkspace", transWS);
       toHisto->execute();
       transWS = toHisto->getProperty("OutputWorkspace");
@@ -107,11 +102,9 @@ void FFTDerivative::execComplexFFT() {
     size_t m2 = transWS->y(0).size() / 2;
     double dx = copyWS->x(0)[m2];
 
-    outWS->mutableX(spec).assign(transWS->x(0).cbegin() + m2,
-                                 transWS->x(0).cend());
+    outWS->mutableX(spec).assign(transWS->x(0).cbegin() + m2, transWS->x(0).cend());
     outWS->mutableX(spec) += dx;
-    outWS->mutableY(spec).assign(transWS->y(0).cbegin() + m2,
-                                 transWS->y(0).cend());
+    outWS->mutableY(spec).assign(transWS->y(0).cbegin() + m2, transWS->y(0).cend());
 
     progress.report();
   }
@@ -119,10 +112,8 @@ void FFTDerivative::execComplexFFT() {
   setProperty("OutputWorkspace", outWS);
 }
 
-void FFTDerivative::symmetriseSpectrum(const HistogramData::Histogram &in,
-                                       HistogramData::HistogramX &symX,
-                                       HistogramData::HistogramY &symY,
-                                       const size_t nx, const size_t ny) {
+void FFTDerivative::symmetriseSpectrum(const HistogramData::Histogram &in, HistogramData::HistogramX &symX,
+                                       HistogramData::HistogramY &symY, const size_t nx, const size_t ny) {
   auto &inX = in.x();
   auto &inY = in.y();
 
@@ -157,8 +148,7 @@ void FFTDerivative::symmetriseSpectrum(const HistogramData::Histogram &in,
  * @param &re :: complete real Y  of input histogram
  * @param &im :: complete imaginary Y of input histogram
  */
-void FFTDerivative::multiplyTransform(HistogramX &nu, HistogramY &re,
-                                      HistogramY &im) {
+void FFTDerivative::multiplyTransform(HistogramX &nu, HistogramY &re, HistogramY &im) {
   int dn = getProperty("Order");
   bool swap_re_im = dn % 2 != 0;
   int sign_re = 1;

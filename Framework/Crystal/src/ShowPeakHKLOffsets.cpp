@@ -34,13 +34,11 @@ namespace Crystal {
 DECLARE_ALGORITHM(ShowPeakHKLOffsets)
 
 void ShowPeakHKLOffsets::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
-                      "PeaksWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("PeaksWorkspace", "", Direction::Input),
                   "Workspace of Peaks with UB loaded");
 
   declareProperty(
-      std::make_unique<WorkspaceProperty<ITableWorkspace>>(
-          "HKLIntegerOffsets", "HKLIntegerOffsets", Direction::Output),
+      std::make_unique<WorkspaceProperty<ITableWorkspace>>("HKLIntegerOffsets", "HKLIntegerOffsets", Direction::Output),
       "Workspace with the Results");
 }
 
@@ -59,17 +57,14 @@ void ShowPeakHKLOffsets::exec() {
 
   if (!Peaks->sample().hasOrientedLattice()) {
     g_log.error("The peaks workspace does not have an oriented lattice");
-    throw std::invalid_argument(
-        "The peaks workspace does not have an oriented lattice");
+    throw std::invalid_argument("The peaks workspace does not have an oriented lattice");
   }
 
-  Kernel::Matrix<double> UBinv =
-      Peaks->mutableSample().getOrientedLattice().getUB();
+  Kernel::Matrix<double> UBinv = Peaks->mutableSample().getOrientedLattice().getUB();
   UBinv.Invert();
   UBinv /= 2 * M_PI;
 
-  std::shared_ptr<ITableWorkspace> Res =
-      WorkspaceFactory::Instance().createTable("TableWorkspace");
+  std::shared_ptr<ITableWorkspace> Res = WorkspaceFactory::Instance().createTable("TableWorkspace");
   Res->setTitle("HKL int offsets for " + Peaks->getName());
 
   Res->addColumn("double", "H offset from int");

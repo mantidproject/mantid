@@ -26,31 +26,26 @@ const size_t SaveFITS::g_maxLenHdr = 80;
 
 // TODO: add headers for ToF, time bin, counts, triggers, etc.
 const std::string SaveFITS::g_FITSHdrEnd = "END";
-const std::string SaveFITS::g_FITSHdrFirst =
-    "SIMPLE  =                    T / file does conform to FITS standard";
+const std::string SaveFITS::g_FITSHdrFirst = "SIMPLE  =                    T / file does conform to FITS standard";
 
 // To build something like:
 // "BITPIX  =                   16 / number of bits per data pixel";
 const std::string SaveFITS::g_bitDepthPre = "BITPIX  =                   ";
 const std::string SaveFITS::g_bitDepthPost = " / number of bits per data pixel";
 
-const std::string SaveFITS::g_FITSHdrAxes =
-    "NAXIS   =                    2 / number of data axes";
+const std::string SaveFITS::g_FITSHdrAxes = "NAXIS   =                    2 / number of data axes";
 const std::string SaveFITS::g_FITSHdrExtensions =
     "EXTEND  =                    T / FITS dataset may contain extensions";
-const std::string SaveFITS::g_FITSHdrRefComment1 =
-    "COMMENT   FITS (Flexible Image "
-    "Transport System) format is defined in "
-    "'Astronomy";
-const std::string SaveFITS::g_FITSHdrRefComment2 =
-    "COMMENT   and Astrophysics', volume 376, page 359; bibcode: "
-    "2001A&A...376..359H";
+const std::string SaveFITS::g_FITSHdrRefComment1 = "COMMENT   FITS (Flexible Image "
+                                                   "Transport System) format is defined in "
+                                                   "'Astronomy";
+const std::string SaveFITS::g_FITSHdrRefComment2 = "COMMENT   and Astrophysics', volume 376, page 359; bibcode: "
+                                                   "2001A&A...376..359H";
 
 // extend this if we ever want to support 64 bits pixels
 const size_t SaveFITS::g_maxBitDepth = 32;
 // this has to have int type for the validator and getProperty
-const std::array<int, 3> SaveFITS::g_bitDepths = {
-    {8, 16, static_cast<int>(g_maxBitDepth)}};
+const std::array<int, 3> SaveFITS::g_bitDepths = {{8, 16, static_cast<int>(g_maxBitDepth)}};
 const size_t SaveFITS::g_maxBytesPP = g_maxBitDepth / 8;
 
 using Mantid::API::WorkspaceProperty;
@@ -86,19 +81,15 @@ const std::string PROP_BIT_DEPTH = "BitDepth";
 /** Initialize the algorithm's properties.
  */
 void SaveFITS::init() {
-  declareProperty(
-      std::make_unique<API::WorkspaceProperty<>>(
-          PROP_INPUT_WS, "", Kernel::Direction::Input,
-          std::make_shared<API::WorkspaceUnitValidator>("Label")),
-      "Workspace holding an image (with one spectrum per pixel row).");
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>(PROP_INPUT_WS, "", Kernel::Direction::Input,
+                                                             std::make_shared<API::WorkspaceUnitValidator>("Label")),
+                  "Workspace holding an image (with one spectrum per pixel row).");
 
-  declareProperty(std::make_unique<API::FileProperty>(
-                      PROP_FILENAME, "", API::FileProperty::Save,
-                      std::vector<std::string>(1, ".fits")),
+  declareProperty(std::make_unique<API::FileProperty>(PROP_FILENAME, "", API::FileProperty::Save,
+                                                      std::vector<std::string>(1, ".fits")),
                   "Name of the output file where the image is saved.");
 
-  declareProperty(PROP_BIT_DEPTH, 16,
-                  std::make_shared<Kernel::ListValidator<int>>(g_bitDepths),
+  declareProperty(PROP_BIT_DEPTH, 16, std::make_shared<Kernel::ListValidator<int>>(g_bitDepths),
                   "The bit depth or number of bits per pixel to use for the "
                   "output image(s). Only 16 bits is supported at the "
                   "moment.",
@@ -131,10 +122,8 @@ void SaveFITS::exec() {
   const auto filename = getPropertyValue(PROP_FILENAME);
 
   saveFITSImage(ws, filename);
-  g_log.information() << "Image of size " + std::to_string(ws->blocksize()) +
-                             " columns by " +
-                             std::to_string(ws->getNumberHistograms()) +
-                             " rows saved in '" + filename + "'\n";
+  g_log.information() << "Image of size " + std::to_string(ws->blocksize()) + " columns by " +
+                             std::to_string(ws->getNumberHistograms()) + " rows saved in '" + filename + "'\n";
 }
 
 /**
@@ -143,16 +132,14 @@ void SaveFITS::exec() {
  * @param img matrix workspace (one spectrum per row)
  * @param filename relative or full path, should be already checked
  */
-void SaveFITS::saveFITSImage(const API::MatrixWorkspace_sptr &img,
-                             const std::string &filename) {
+void SaveFITS::saveFITSImage(const API::MatrixWorkspace_sptr &img, const std::string &filename) {
   std::ofstream outfile(filename, std::ofstream::binary);
 
   writeFITSHeaderBlock(img, outfile);
   writeFITSImageMatrix(img, outfile);
 }
 
-void SaveFITS::writeFITSHeaderBlock(const API::MatrixWorkspace_sptr &img,
-                                    std::ofstream &file) {
+void SaveFITS::writeFITSHeaderBlock(const API::MatrixWorkspace_sptr &img, std::ofstream &file) {
   // minimal sequence of standard headers
   writeFITSHeaderEntry(g_FITSHdrFirst, file);
   int depth = getProperty(PROP_BIT_DEPTH);
@@ -169,8 +156,7 @@ void SaveFITS::writeFITSHeaderBlock(const API::MatrixWorkspace_sptr &img,
   writePaddingFITSHeaders(entriesPerHDU - 9, file);
 }
 
-void SaveFITS::writeFITSImageMatrix(const API::MatrixWorkspace_sptr &img,
-                                    std::ofstream &file) {
+void SaveFITS::writeFITSImageMatrix(const API::MatrixWorkspace_sptr &img, std::ofstream &file) {
   const size_t sizeX = img->blocksize();
   const size_t sizeY = img->getNumberHistograms();
 
@@ -201,8 +187,7 @@ void SaveFITS::writeFITSImageMatrix(const API::MatrixWorkspace_sptr &img,
   }
 }
 
-void SaveFITS::writeFITSHeaderEntry(const std::string &hdr,
-                                    std::ofstream &file) {
+void SaveFITS::writeFITSHeaderEntry(const std::string &hdr, std::ofstream &file) {
   static const std::vector<char> blanks(g_maxLenHdr, 32);
 
   auto count = hdr.size();
@@ -213,20 +198,17 @@ void SaveFITS::writeFITSHeaderEntry(const std::string &hdr,
   file.write(blanks.data(), g_maxLenHdr - count);
 }
 
-void SaveFITS::writeFITSHeaderAxesSizes(const API::MatrixWorkspace_sptr &img,
-                                        std::ofstream &file) {
+void SaveFITS::writeFITSHeaderAxesSizes(const API::MatrixWorkspace_sptr &img, std::ofstream &file) {
   const std::string sizeX = std::to_string(img->blocksize());
   const std::string sizeY = std::to_string(img->getNumberHistograms());
 
   const size_t fieldWidth = 20;
   std::stringstream axis1;
-  axis1 << "NAXIS1  = " << std::setw(fieldWidth) << sizeX
-        << " / length of data axis 1";
+  axis1 << "NAXIS1  = " << std::setw(fieldWidth) << sizeX << " / length of data axis 1";
   writeFITSHeaderEntry(axis1.str(), file);
 
   std::stringstream axis2;
-  axis2 << "NAXIS2  = " << std::setw(fieldWidth) << sizeY
-        << " / length of data axis 2";
+  axis2 << "NAXIS2  = " << std::setw(fieldWidth) << sizeY << " / length of data axis 2";
   writeFITSHeaderEntry(axis2.str(), file);
 }
 

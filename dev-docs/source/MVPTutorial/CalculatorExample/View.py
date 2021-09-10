@@ -4,11 +4,11 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import PyQt4.QtGui  as QtGui
-import PyQt4.QtCore as QtCore
+import PyQt5.QtCore as QtCore
+import PyQt5.QtWidgets as QtWidgets
 
 
-class View(QtGui.QDialog):
+class View(QtWidgets.QDialog):
     # In PyQt signals are the first thing to be defined in a class:
     displaySignal = QtCore.pyqtSignal()
     btnSignal = QtCore.pyqtSignal()
@@ -18,12 +18,12 @@ class View(QtGui.QDialog):
         super(View, self).__init__(parent)
 
         # Initialise the widgets for the view (this can also be done from Qt Creator
-        self.table = QtGui.QTableWidget()
+        self.table = QtWidgets.QTableWidget()
         self.table.setWindowTitle("MVP Demo")
         self.table.resize(400, 250)
         self.table.setRowCount(5)
         self.table.setColumnCount(2)
-        self.table.setHorizontalHeaderLabels(QtCore.QString("name;value;").split(";"))
+        self.table.setHorizontalHeaderLabels("name;value;".split(";"))
 
         # Set display values in the widgets
         keys = ['value 1', 'operation', 'value 2', 'display', 'result']
@@ -34,10 +34,10 @@ class View(QtGui.QDialog):
             self.set_names(keys[row], row)
 
         # Initialise layout of the widget and add child widgets to it
-        grid = QtGui.QGridLayout()
+        grid = QtWidgets.QGridLayout()
         grid.addWidget(self.table)
 
-        self.button = QtGui.QPushButton('Calculate', self)
+        self.button = QtWidgets.QPushButton('Calculate', self)
         self.button.setStyleSheet("background-color:lightgrey")
         grid.addWidget(self.button)
 
@@ -59,7 +59,7 @@ class View(QtGui.QDialog):
 
     # Populate view
     def create_combo_table(self, row, col, key):
-        self.combo[key] = QtGui.QComboBox()
+        self.combo[key] = QtWidgets.QComboBox()
         options = ['test']
         self.combo[key].addItems(options)
         self.table.setCellWidget(row, col, self.combo[key])
@@ -71,13 +71,13 @@ class View(QtGui.QDialog):
         self.combo[key].addItems(options)
 
     def set_names(self, name, row):
-        text = QtGui.QTableWidgetItem(name)
+        text = QtWidgets.QTableWidgetItem(name)
         text.setFlags(QtCore.Qt.ItemIsEnabled)
         self.table.setItem(row, 0, text)
 
     # Update the view with the result of a calculation
     def setResult(self, value):
-        self.table.setItem(4, 1, QtGui.QTableWidgetItem(str(value)))
+        self.table.setItem(4, 1, QtWidgets.QTableWidgetItem(str(value)))
 
     def hide_display(self):
         self.table.setRowHidden(4, True)

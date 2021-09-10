@@ -14,7 +14,7 @@ This algorithm is used to fit data from the high-angle bank to data from the low
 Fit Modes
 ##############
 
-There are 4 available fit modes used to scale and shift the high angle bank data so that it matches up with the low angle bank data. Where fitting is required :ref:`algm-Fit` is used with a composite function comprised of a *FlatBackground* and *TabulatedFunction*. In all cases the shift and scale are used to alter the counts and errors for the high angle bank. 
+There are 4 available fit modes used to scale and shift the high angle bank data so that it matches up with the low angle bank data. Where fitting is required :ref:`algm-Fit` is used with a composite function comprised of a *FlatBackground* and *TabulatedFunction*. In all cases the shift and scale are used to alter the counts and errors for the high angle bank.
 
 *None* is the mode for no fit determined scaling or shifting. In this case the *ScaleFactor* and *ShiftFactor* properties must both be provided. With *Both*, fitting is used to establish optimum parameters for both the scaling and shifting of the high angle bank data. *ScaleOnly* mode ties the shift, so *ShiftFactor* must be provided. *ShiftOnly* mode ties the scale so *ScaleFactor* must be provided.
 
@@ -39,12 +39,12 @@ Usage
 	print("{:.1f}".format(shift))
 
 Output:
-   
+
 .. testoutput:: ExSimpleShift
 
 	1.0
 	2.5
-   
+
 .. categories::
 
 .. sourcelink::

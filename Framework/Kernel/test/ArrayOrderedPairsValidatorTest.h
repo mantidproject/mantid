@@ -38,15 +38,12 @@ public:
   void test_array_validation_unordered() {
     std::vector<int> vec{10, 5, 3, 2, 10, 10};
     ArrayOrderedPairsValidator<int> validator;
-    TS_ASSERT_EQUALS(
-        validator.isValid(vec),
-        "Pair (10, 5) is not ordered.\nPair (3, 2) is not ordered.\n");
+    TS_ASSERT_EQUALS(validator.isValid(vec), "Pair (10, 5) is not ordered.\nPair (3, 2) is not ordered.\n");
   }
 
   void test_array_validation_odd() {
     std::vector<int> vec{1, 5, 2, 3, 10};
     ArrayOrderedPairsValidator<int> validator;
-    TS_ASSERT_EQUALS(validator.isValid(vec),
-                     "Array has an odd number of entries (5).");
+    TS_ASSERT_EQUALS(validator.isValid(vec), "Array has an odd number of entries (5).");
   }
 };

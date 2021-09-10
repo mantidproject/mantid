@@ -73,9 +73,8 @@ namespace {
  * @param nBins : Number of bins.
  * @return
  */
-std::string extractFormattedPropertyFromDimension(
-    Mantid::Geometry::IMDDimension_const_sptr &dimension, const double &min,
-    const double &max, const int &nBins) {
+std::string extractFormattedPropertyFromDimension(Mantid::Geometry::IMDDimension_const_sptr &dimension,
+                                                  const double &min, const double &max, const int &nBins) {
   std::string id = dimension->getDimensionId();
   return boost::str(boost::format("%s, %f, %f, %d") % id % min % max % nBins);
 }
@@ -90,36 +89,28 @@ DECLARE_ALGORITHM(IntegratePeaksHybrid)
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string IntegratePeaksHybrid::name() const {
-  return "IntegratePeaksHybrid";
-}
+const std::string IntegratePeaksHybrid::name() const { return "IntegratePeaksHybrid"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int IntegratePeaksHybrid::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string IntegratePeaksHybrid::category() const {
-  return "MDAlgorithms\\Peaks;Crystal\\Integration";
-}
+const std::string IntegratePeaksHybrid::category() const { return "MDAlgorithms\\Peaks;Crystal\\Integration"; }
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void IntegratePeaksHybrid::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>("InputWorkspace", "", Direction::Input),
                   "Input md workspace.");
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
-                      "PeaksWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("PeaksWorkspace", "", Direction::Input),
                   "A PeaksWorkspace containing the peaks to integrate.");
 
   auto positiveIntValidator = std::make_shared<BoundedValidator<int>>();
   positiveIntValidator->setExclusive(true);
   positiveIntValidator->setLower(0);
 
-  declareProperty(std::make_unique<PropertyWithValue<int>>("NumberOfBins", 20,
-                                                           positiveIntValidator,
-                                                           Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<int>>("NumberOfBins", 20, positiveIntValidator, Direction::Input),
                   "Number of bins to use while creating each local image. "
                   "Defaults to 20. Increase to reduce pixelation");
 
@@ -131,16 +122,13 @@ void IntegratePeaksHybrid::init() {
   compositeValidator->add(std::make_shared<MandatoryValidator<double>>());
 
   declareProperty(
-      std::make_unique<PropertyWithValue<double>>(
-          "BackgroundOuterRadius", 0.0, compositeValidator, Direction::Input),
+      std::make_unique<PropertyWithValue<double>>("BackgroundOuterRadius", 0.0, compositeValidator, Direction::Input),
       "Background outer radius estimate. Choose liberal value.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "An output integrated peaks workspace.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
-                      "OutputWorkspaces", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>("OutputWorkspaces", "", Direction::Output),
                   "MDHistoWorkspaces containing the labeled clusters used by "
                   "the algorithm.");
 }
@@ -165,8 +153,7 @@ void IntegratePeaksHybrid::exec() {
   }
 
   {
-    const SpecialCoordinateSystem mdCoordinates =
-        mdWS->getSpecialCoordinateSystem();
+    const SpecialCoordinateSystem mdCoordinates = mdWS->getSpecialCoordinateSystem();
     if (mdCoordinates == None) {
       throw std::invalid_argument("The coordinate system of the input "
                                   "MDWorkspace cannot be established. Create "
@@ -201,14 +188,12 @@ void IntegratePeaksHybrid::exec() {
       double min = center[j] - halfPeakOuterRadius;
       double max = center[j] + halfPeakOuterRadius;
 
-      binMDAlg->setPropertyValue(
-          propertyName.str(),
-          extractFormattedPropertyFromDimension(dimension, min, max, numBins));
+      binMDAlg->setPropertyValue(propertyName.str(),
+                                 extractFormattedPropertyFromDimension(dimension, min, max, numBins));
     }
     binMDAlg->execute();
     Workspace_sptr temp = binMDAlg->getProperty("OutputWorkspace");
-    IMDHistoWorkspace_sptr localImage =
-        std::dynamic_pointer_cast<IMDHistoWorkspace>(temp);
+    IMDHistoWorkspace_sptr localImage = std::dynamic_pointer_cast<IMDHistoWorkspace>(temp);
     API::MDNormalization normalization = NoNormalization;
     auto iterator = localImage->createIterator();
     iterator->setNormalization(normalization);
@@ -222,13 +207,11 @@ void IntegratePeaksHybrid::exec() {
     // CCL. Multi-processor version.
     const size_t startId = 1;
     const size_t nThreads = 1;
-    ConnectedComponentLabeling analysis(
-        startId, nThreads); // CCL executed single threaded.
+    ConnectedComponentLabeling analysis(startId, nThreads); // CCL executed single threaded.
 
     Progress dummyProgress;
     // Perform CCL.
-    ClusterTuple clusters = analysis.executeAndFetchClusters(
-        localImage, &backgroundStrategy, dummyProgress);
+    ClusterTuple clusters = analysis.executeAndFetchClusters(localImage, &backgroundStrategy, dummyProgress);
     // Extract the clusters
     ConnectedComponentMappingTypes::ClusterMap &clusterMap = clusters.get<1>();
     // Extract the labeled image
@@ -236,15 +219,12 @@ void IntegratePeaksHybrid::exec() {
     outImageResults->addWorkspace(outHistoWS);
 
     PeakClusterProjection localProjection(outHistoWS);
-    const Mantid::signal_t signalValue = localProjection.signalAtPeakCenter(
-        peak); // No normalization when extracting label ids!
+    const Mantid::signal_t signalValue =
+        localProjection.signalAtPeakCenter(peak); // No normalization when extracting label ids!
 
     if (std::isnan(signalValue)) {
-      g_log.warning()
-          << "Warning: image for integration is off edge of detector for peak "
-          << i << '\n';
-    } else if (signalValue <
-               static_cast<Mantid::signal_t>(analysis.getStartLabelId())) {
+      g_log.warning() << "Warning: image for integration is off edge of detector for peak " << i << '\n';
+    } else if (signalValue < static_cast<Mantid::signal_t>(analysis.getStartLabelId())) {
       g_log.information() << "Peak: " << i
                           << " Has no corresponding cluster/blob detected on "
                              "the image. This could be down to your Threshold "
@@ -252,8 +232,7 @@ void IntegratePeaksHybrid::exec() {
     } else {
       const auto labelIdAtPeak = static_cast<size_t>(signalValue);
       ICluster *const cluster = clusterMap[labelIdAtPeak].get();
-      ICluster::ClusterIntegratedValues integratedValues =
-          cluster->integrate(localImage);
+      ICluster::ClusterIntegratedValues integratedValues = cluster->integrate(localImage);
       peak.setIntensity(integratedValues.get<0>());
       peak.setSigmaIntensity(std::sqrt(integratedValues.get<1>()));
     }

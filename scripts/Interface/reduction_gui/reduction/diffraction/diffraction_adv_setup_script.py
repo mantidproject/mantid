@@ -82,7 +82,8 @@ class AdvancedSetupScript(BaseScriptElement):
     @property
     def cache_dir(self):
         """Passing all three candidates back as one list"""
-        return [self.cache_dir_scan_save, self.cache_dir_scan_1, self.cache_dir_scan_2]
+        # A comma ',' is used here since it is the default delimiter in mantid
+        return ",".join((self.cache_dir_scan_save, self.cache_dir_scan_1, self.cache_dir_scan_2))
 
     def __init__(self, inst_name):
         """ Initialization
@@ -178,7 +179,7 @@ class AdvancedSetupScript(BaseScriptElement):
         pardict["SampleNumberDensity"] = self.samplenumberdensity
         pardict["ContainerShape"] = self.containershape
         #Caching options
-        pardict['CacheDir'] = ";".join(self.cache_dir)
+        pardict['CacheDir'] = self.cache_dir
         pardict['CleanCache'] = str(int(self.clean_cache))
 
         return pardict
@@ -194,7 +195,7 @@ class AdvancedSetupScript(BaseScriptElement):
                 # special map for bool type
                 value = '1' if value else '0'
             else:
-                value = ";".join(self.cache_dir) if keyname == "CacheDir" else str(value)
+                value = str(value)
 
             xml += f"<{keyname.lower()}>{value}</{keyname.lower()}>\n"
         xml += "</AdvancedSetup>\n"
@@ -287,8 +288,13 @@ class AdvancedSetupScript(BaseScriptElement):
             # Caching options
             # split it into the three cache dirs
             # NOTE: there should only be three entries, if not, let it fail early
-            self.cache_dir_scan_save, self.cache_dir_scan_1, self.cache_dir_scan_2 = BaseScriptElement.getStringElement(
-                instrument_dom, 'cachedir', default=";;").split(";")
+            try:
+                self.cache_dir_scan_save, self.cache_dir_scan_1, self.cache_dir_scan_2 = BaseScriptElement.getStringElement(
+                    instrument_dom, 'cachedir', default=";;").replace(";", ",").split(",")
+            except ValueError:
+                self.cache_dir_scan_save = ''
+                self.cache_dir_scan_1 = ''
+                self.cache_dir_scan_2 = ''
 
             tempbool = BaseScriptElement.getStringElement(instrument_dom,
                                                           "cleancache",

@@ -23,19 +23,14 @@ class TimeAtSampleStrategyDirectTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static TimeAtSampleStrategyDirectTest *createSuite() {
-    return new TimeAtSampleStrategyDirectTest();
-  }
-  static void destroySuite(TimeAtSampleStrategyDirectTest *suite) {
-    delete suite;
-  }
+  static TimeAtSampleStrategyDirectTest *createSuite() { return new TimeAtSampleStrategyDirectTest(); }
+  static void destroySuite(TimeAtSampleStrategyDirectTest *suite) { delete suite; }
 
   void test_L2_detector() {
     using namespace Mantid;
     using namespace Mantid::Geometry;
 
-    auto ws =
-        WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument();
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument();
 
     auto instrument = ws->getInstrument();
 
@@ -53,8 +48,7 @@ public:
 
     const double shift = correction.factor;
 
-    double expectedShift = L1 / std::sqrt(ei * 2. * PhysicalConstants::meV /
-                                          PhysicalConstants::NeutronMass);
+    double expectedShift = L1 / std::sqrt(ei * 2. * PhysicalConstants::meV / PhysicalConstants::NeutronMass);
 
     TSM_ASSERT_DELTA("L1 / (L1 + L2)", expectedShift, shift, 0.0000001);
   }

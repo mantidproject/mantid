@@ -28,12 +28,10 @@ struct ScopedFacilities {
    * @param filename It is assumed it is in the instrument directory
    * @param defFacility
    */
-  ScopedFacilities(const std::string &filename,
-                   const std::string &defFacility) {
+  ScopedFacilities(const std::string &filename, const std::string &defFacility) {
     auto &config = Mantid::Kernel::ConfigService::Instance();
     defFacilityOnStart = config.getFacility().name();
-    Poco::Path testFile =
-        Poco::Path(config.getInstrumentDirectory()).resolve(filename);
+    Poco::Path testFile = Poco::Path(config.getInstrumentDirectory()).resolve(filename);
     // Load the test facilities file
     config.updateFacilities(testFile.toString());
     config.setFacility(defFacility);

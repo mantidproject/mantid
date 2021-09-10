@@ -28,9 +28,7 @@ class PoldiTruncateDataTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static PoldiTruncateDataTest *createSuite() {
-    return new PoldiTruncateDataTest();
-  }
+  static PoldiTruncateDataTest *createSuite() { return new PoldiTruncateDataTest(); }
   static void destroySuite(PoldiTruncateDataTest *suite) { delete suite; }
 
   PoldiTruncateDataTest() { FrameworkManager::Instance(); }
@@ -77,8 +75,7 @@ public:
 
   void testSetTimeBinWidthFromWorkspace() {
     // workspace with delta x = 1.0, 3 bins (= 4 boundaries)
-    MatrixWorkspace_sptr matrixWs =
-        WorkspaceCreationHelper::create2DWorkspaceWhereYIsWorkspaceIndex(1, 3);
+    MatrixWorkspace_sptr matrixWs = WorkspaceCreationHelper::create2DWorkspaceWhereYIsWorkspaceIndex(1, 3);
 
     TestablePoldiTruncateData truncate;
     TS_ASSERT_THROWS_NOTHING(truncate.setTimeBinWidthFromWorkspace(matrixWs));
@@ -86,15 +83,12 @@ public:
     TS_ASSERT_EQUALS(truncate.m_actualBinCount, 4);
 
     MatrixWorkspace_sptr invalidSpectra;
-    TS_ASSERT_THROWS(truncate.setTimeBinWidthFromWorkspace(invalidSpectra),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(truncate.setTimeBinWidthFromWorkspace(invalidSpectra), const std::invalid_argument &);
 
     // matrix workspace with one bin
-    MatrixWorkspace_sptr invalidBins =
-        WorkspaceCreationHelper::create2DWorkspace123(1, 1);
+    MatrixWorkspace_sptr invalidBins = WorkspaceCreationHelper::create2DWorkspace123(1, 1);
 
-    TS_ASSERT_THROWS(truncate.setTimeBinWidthFromWorkspace(invalidBins),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(truncate.setTimeBinWidthFromWorkspace(invalidBins), const std::invalid_argument &);
   }
 
   void testCalculateBinCount() {
@@ -102,26 +96,21 @@ public:
     EXPECT_CALL(*chopper, cycleTime()).Times(1).WillRepeatedly(Return(1500.0));
 
     TestablePoldiTruncateData truncate;
-    TS_ASSERT_THROWS(truncate.getCalculatedBinCount(),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(truncate.getCalculatedBinCount(), const std::invalid_argument &);
 
     truncate.setChopper(chopper);
-    TS_ASSERT_THROWS(truncate.getCalculatedBinCount(),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(truncate.getCalculatedBinCount(), const std::invalid_argument &);
 
     truncate.setTimeBinWidth(-10.0);
-    TS_ASSERT_THROWS(truncate.getCalculatedBinCount(),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(truncate.getCalculatedBinCount(), const std::invalid_argument &);
 
     truncate.setTimeBinWidth(0.0);
-    TS_ASSERT_THROWS(truncate.getCalculatedBinCount(),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(truncate.getCalculatedBinCount(), const std::invalid_argument &);
 
     truncate.setTimeBinWidth(3.0);
 
     size_t calculatedBinCount = 0;
-    TS_ASSERT_THROWS_NOTHING(calculatedBinCount =
-                                 truncate.getCalculatedBinCount());
+    TS_ASSERT_THROWS_NOTHING(calculatedBinCount = truncate.getCalculatedBinCount());
 
     TS_ASSERT_EQUALS(calculatedBinCount, 500);
   }
@@ -137,12 +126,10 @@ public:
     size_t calculatedBinCount = truncate.getCalculatedBinCount();
 
     // throws, because actual bin count is smaller than calculated bin count
-    TS_ASSERT_THROWS(truncate.getMaximumTimeValue(calculatedBinCount),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(truncate.getMaximumTimeValue(calculatedBinCount), const std::invalid_argument &);
 
     truncate.setActualBinCount(500);
-    TS_ASSERT_EQUALS(truncate.getMaximumTimeValue(calculatedBinCount),
-                     499.0 * 3.0);
+    TS_ASSERT_EQUALS(truncate.getMaximumTimeValue(calculatedBinCount), 499.0 * 3.0);
   }
 
   void testGetMinimumExtraTimeValue() {
@@ -156,26 +143,22 @@ public:
     size_t calculatedBinCount = truncate.getCalculatedBinCount();
 
     // throws, because actual bin count is smaller than calculated bin count
-    TS_ASSERT_THROWS(truncate.getMinimumExtraTimeValue(calculatedBinCount),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(truncate.getMinimumExtraTimeValue(calculatedBinCount), const std::invalid_argument &);
 
     // still throws - there are no extra bins.
     truncate.setActualBinCount(500);
-    TS_ASSERT_THROWS(truncate.getMinimumExtraTimeValue(calculatedBinCount),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(truncate.getMinimumExtraTimeValue(calculatedBinCount), const std::invalid_argument &);
 
     // this must work
     truncate.setActualBinCount(550);
-    TS_ASSERT_EQUALS(truncate.getMinimumExtraTimeValue(calculatedBinCount),
-                     500.0 * 3.0);
+    TS_ASSERT_EQUALS(truncate.getMinimumExtraTimeValue(calculatedBinCount), 500.0 * 3.0);
   }
 
   void testGetCroppedWorkspace() {
     std::shared_ptr<MockChopper> chopper = std::make_shared<MockChopper>();
     EXPECT_CALL(*chopper, cycleTime()).Times(2).WillRepeatedly(Return(1500.0));
 
-    MatrixWorkspace_sptr inputWorkspace =
-        getProperWorkspaceWithXValues(1, 600, 3.0);
+    MatrixWorkspace_sptr inputWorkspace = getProperWorkspaceWithXValues(1, 600, 3.0);
 
     TestablePoldiTruncateData truncate;
     truncate.setChopper(chopper);
@@ -191,27 +174,23 @@ public:
     TS_ASSERT_EQUALS(xData.size(), 500);
 
     // workspace which is too small
-    MatrixWorkspace_sptr smallWorkspace =
-        getProperWorkspaceWithXValues(1, 400, 3.0);
+    MatrixWorkspace_sptr smallWorkspace = getProperWorkspaceWithXValues(1, 400, 3.0);
     truncate.setTimeBinWidthFromWorkspace(smallWorkspace);
 
-    TS_ASSERT_THROWS(truncate.getCroppedWorkspace(smallWorkspace),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(truncate.getCroppedWorkspace(smallWorkspace), const std::invalid_argument &);
   }
 
   void testGetExtraCountsWorkspace() {
     std::shared_ptr<MockChopper> chopper = std::make_shared<MockChopper>();
     EXPECT_CALL(*chopper, cycleTime()).Times(2).WillRepeatedly(Return(1500.0));
 
-    MatrixWorkspace_sptr inputWorkspace =
-        getProperWorkspaceWithXValues(10, 600, 3.0);
+    MatrixWorkspace_sptr inputWorkspace = getProperWorkspaceWithXValues(10, 600, 3.0);
 
     TestablePoldiTruncateData truncate;
     truncate.setChopper(chopper);
     truncate.setTimeBinWidthFromWorkspace(inputWorkspace);
 
-    MatrixWorkspace_sptr cropped =
-        truncate.getExtraCountsWorkspace(inputWorkspace);
+    MatrixWorkspace_sptr cropped = truncate.getExtraCountsWorkspace(inputWorkspace);
 
     // number of histograms does not change
     TS_ASSERT_EQUALS(cropped->getNumberHistograms(), 1);
@@ -221,12 +200,10 @@ public:
     TS_ASSERT_EQUALS(xData.size(), 100);
 
     // workspace which is too small
-    MatrixWorkspace_sptr smallWorkspace =
-        getProperWorkspaceWithXValues(1, 400, 3.0);
+    MatrixWorkspace_sptr smallWorkspace = getProperWorkspaceWithXValues(1, 400, 3.0);
     truncate.setTimeBinWidthFromWorkspace(smallWorkspace);
 
-    TS_ASSERT_THROWS(truncate.getExtraCountsWorkspace(smallWorkspace),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(truncate.getExtraCountsWorkspace(smallWorkspace), const std::invalid_argument &);
   }
 
   void testGetWorkspaceBelowX() {
@@ -274,12 +251,10 @@ public:
     TestablePoldiTruncateData truncate;
     TS_ASSERT_THROWS_NOTHING(truncate.getCropAlgorithmForWorkspace(workspace));
 
-    Algorithm_sptr cropAlgorithm =
-        truncate.getCropAlgorithmForWorkspace(workspace);
+    Algorithm_sptr cropAlgorithm = truncate.getCropAlgorithmForWorkspace(workspace);
     TS_ASSERT_EQUALS(cropAlgorithm->name(), "CropWorkspace");
 
-    MatrixWorkspace_sptr inputWorkspace =
-        cropAlgorithm->getProperty("InputWorkspace");
+    MatrixWorkspace_sptr inputWorkspace = cropAlgorithm->getProperty("InputWorkspace");
     TS_ASSERT_EQUALS(inputWorkspace, workspace);
   }
 
@@ -287,22 +262,17 @@ public:
     MatrixWorkspace_sptr workspace = getProperWorkspaceWithXValues(10, 10, 3.0);
 
     TestablePoldiTruncateData truncate;
-    Algorithm_sptr cropAlgorithm =
-        truncate.getCropAlgorithmForWorkspace(workspace);
-    MatrixWorkspace_sptr outputWorkspace =
-        truncate.getOutputWorkspace(cropAlgorithm);
+    Algorithm_sptr cropAlgorithm = truncate.getCropAlgorithmForWorkspace(workspace);
+    MatrixWorkspace_sptr outputWorkspace = truncate.getOutputWorkspace(cropAlgorithm);
 
     TS_ASSERT(outputWorkspace)
   }
 
 private:
-  MatrixWorkspace_sptr getProperWorkspaceWithXValues(size_t histograms,
-                                                     size_t binCount,
-                                                     double spacing) {
+  MatrixWorkspace_sptr getProperWorkspaceWithXValues(size_t histograms, size_t binCount, double spacing) {
     Points xValues(binCount, LinearGenerator(0, spacing));
 
-    MatrixWorkspace_sptr workspace =
-        WorkspaceCreationHelper::create2DWorkspace123(histograms, binCount);
+    MatrixWorkspace_sptr workspace = WorkspaceCreationHelper::create2DWorkspace123(histograms, binCount);
 
     for (size_t i = 0; i < histograms; ++i)
       workspace->setPoints(i, xValues);

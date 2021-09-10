@@ -38,25 +38,21 @@ DECLARE_ALGORITHM(LoadDetectorInfo)
 
 /// Empty default constructor
 LoadDetectorInfo::LoadDetectorInfo()
-    : Algorithm(), m_baseInstrument(), m_samplePos(), m_moveDets(false),
-      m_workspace(), m_instDelta(-1.0), m_instPressure(-1.0),
-      m_instThickness(-1.0) {}
+    : Algorithm(), m_baseInstrument(), m_samplePos(), m_moveDets(false), m_workspace(), m_instDelta(-1.0),
+      m_instPressure(-1.0), m_instThickness(-1.0) {}
 
 void LoadDetectorInfo::init() {
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("Workspace", "", Direction::InOut),
-      "The name of the workspace to that the detector information "
-      "will be loaded into.");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("Workspace", "", Direction::InOut),
+                  "The name of the workspace to that the detector information "
+                  "will be loaded into.");
 
   const std::vector<std::string> exts{".dat", ".raw", ".sca", ".nxs"};
-  declareProperty(
-      std::make_unique<FileProperty>("DataFilename", "", FileProperty::Load,
-                                     exts),
-      "A **raw, dat, nxs** or **sca** file that contains information about the "
-      "detectors in the "
-      "workspace. The description of **dat** and **nxs** file format is "
-      "provided below.");
+  declareProperty(std::make_unique<FileProperty>("DataFilename", "", FileProperty::Load, exts),
+                  "A **raw, dat, nxs** or **sca** file that contains information about the "
+                  "detectors in the "
+                  "workspace. The description of **dat** and **nxs** file format is "
+                  "provided below.");
 
   declareProperty("RelocateDets", false,
                   "If true, the detectors are moved to "
@@ -89,8 +85,7 @@ void LoadDetectorInfo::cacheInputs() {
 
   // Cache base instrument
   m_baseInstrument = m_workspace->getInstrument()->baseInstrument();
-  Geometry::IComponent_const_sptr sample =
-      m_workspace->getInstrument()->getSample();
+  Geometry::IComponent_const_sptr sample = m_workspace->getInstrument()->getSample();
   if (sample)
     m_samplePos = sample->getPos();
 
@@ -156,8 +151,7 @@ void LoadDetectorInfo::loadFromDAT(const std::string &filename) {
       float pressure(0.0), thickness(0.0);
       is >> pressure >> thickness;
 
-      updateParameterMap(wsDetInfo, index, pmap, l2, theta, phi, delta,
-                         pressure, thickness);
+      updateParameterMap(wsDetInfo, index, pmap, l2, theta, phi, delta, pressure, thickness);
     } catch (std::out_of_range &) {
       continue;
     }
@@ -183,9 +177,8 @@ void LoadDetectorInfo::loadFromRAW(const std::string &filename) {
     pressureTabNum = 11;
     thicknessTabNum = 12;
   } else {
-    throw std::invalid_argument(
-        "RAW file contains unexpected number of user tables=" +
-        std::to_string(numUserTables) + ". Expected 10 or 14.");
+    throw std::invalid_argument("RAW file contains unexpected number of user tables=" + std::to_string(numUserTables) +
+                                ". Expected 10 or 14.");
   }
 
   // Is ut01 (=phi) present? Sometimes an array is present but has wrong values
@@ -216,8 +209,7 @@ void LoadDetectorInfo::loadFromRAW(const std::string &filename) {
       float pressure = iraw.ut[i + pressureTabNum * numDets];
       float thickness = iraw.ut[i + thicknessTabNum * numDets];
 
-      updateParameterMap(wsDetInfo, index, pmap, l2, theta, phi, delta,
-                         pressure, thickness);
+      updateParameterMap(wsDetInfo, index, pmap, l2, theta, phi, delta, pressure, thickness);
     } catch (std::out_of_range &) {
       continue;
     }
@@ -279,8 +271,7 @@ void LoadDetectorInfo::loadFromIsisNXS(const std::string &filename) {
       double pressure = detInfo.pressures[i];
       double thickness = detInfo.thicknesses[i];
 
-      updateParameterMap(wsDetInfo, index, pmap, l2, theta, phi, delta,
-                         pressure, thickness);
+      updateParameterMap(wsDetInfo, index, pmap, l2, theta, phi, delta, pressure, thickness);
     } catch (std::out_of_range &) {
       continue;
     }
@@ -294,8 +285,7 @@ void LoadDetectorInfo::loadFromIsisNXS(const std::string &filename) {
  * @param detInfo A reference to the struct that will hold the data from the
  *file
  */
-void LoadDetectorInfo::readLibisisNxs(::NeXus::File &nxsFile,
-                                      DetectorInfo &detInfo) const {
+void LoadDetectorInfo::readLibisisNxs(::NeXus::File &nxsFile, DetectorInfo &detInfo) const {
   nxsFile.readData<int32_t>("det_no", detInfo.ids);
   nxsFile.readData<int32_t>("det_type", detInfo.codes);
   nxsFile.readData<double>("delay_time", detInfo.delays);
@@ -340,8 +330,7 @@ void LoadDetectorInfo::readLibisisNxs(::NeXus::File &nxsFile,
  * @param detInfo A reference to the struct that will hold the data from the
  *file
  */
-void LoadDetectorInfo::readNXSDotDat(::NeXus::File &nxsFile,
-                                     DetectorInfo &detInfo) const {
+void LoadDetectorInfo::readNXSDotDat(::NeXus::File &nxsFile, DetectorInfo &detInfo) const {
   std::vector<int32_t> fileIDs;
   nxsFile.readData<int32_t>("detID", fileIDs); // containts both ids & codes
   std::vector<float> fileOffsets;
@@ -359,8 +348,7 @@ void LoadDetectorInfo::readNXSDotDat(::NeXus::File &nxsFile,
   std::vector<float> pressureAndWall;
   nxsFile.readData<float>("detPressureAndWall", pressureAndWall);
 
-  if (numDets != fileIDs.size() / 2 || numDets != detCoords.size() / 3 ||
-      numDets != pressureAndWall.size() / 2) {
+  if (numDets != fileIDs.size() / 2 || numDets != detCoords.size() / 3 || numDets != pressureAndWall.size() / 2) {
     std::ostringstream os;
     os << "The sizes of NeXus data columns are inconsistent in detectors.dat.\n"
        << "detIDs=" << fileIDs.size() << ", offsets=" << fileOffsets.size()
@@ -404,12 +392,9 @@ void LoadDetectorInfo::readNXSDotDat(::NeXus::File &nxsFile,
  * @param pressure The new pressure value
  * @param thickness The new thickness value
  */
-void LoadDetectorInfo::updateParameterMap(Geometry::DetectorInfo &detectorInfo,
-                                          const size_t detIndex,
-                                          Geometry::ParameterMap &pmap,
-                                          const double l2, const double theta,
-                                          const double phi, const double delay,
-                                          const double pressure,
+void LoadDetectorInfo::updateParameterMap(Geometry::DetectorInfo &detectorInfo, const size_t detIndex,
+                                          Geometry::ParameterMap &pmap, const double l2, const double theta,
+                                          const double phi, const double delay, const double pressure,
                                           const double thickness) const {
 
   const auto detCompID = detectorInfo.detector(detIndex).getComponentID();

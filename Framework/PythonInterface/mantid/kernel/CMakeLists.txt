@@ -62,6 +62,7 @@ set(EXPORT_FILES
     src/Exports/PropertyFactory.cpp
     src/Exports/RebinParamsValidator.cpp
     src/Exports/PhysicalConstants.cpp
+    src/Exports/SpecialCoordinateSystem.cpp
 )
 
 set(MODULE_DEFINITION ${CMAKE_CURRENT_BINARY_DIR}/kernel.cpp)
@@ -134,22 +135,22 @@ add_library(
   PythonKernelModule ${ALL_FILES} ${MODULE_DEFINITION}
                      ${INC_FILES} ${PYTHON_INSTALL_FILES}
 )
+add_library(Mantid::PythonKernelModule ALIAS PythonKernelModule)
+
 set_python_properties(PythonKernelModule _kernel)
 
-target_include_directories(PythonKernelModule PUBLIC inc)
+target_include_directories(PythonKernelModule PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+		$<INSTALL_INTERFACE:include/Mantid>
+
+)
 
 # Add the required dependencies
-target_link_libraries(
-  PythonKernelModule
-  PRIVATE
-          PythonInterfaceCore
-          Types
-          Kernel
-          ${Boost_LIBRARIES}
+target_link_libraries(PythonKernelModule
+          PUBLIC Mantid::Kernel
+          PRIVATE
+          Mantid::PythonInterfaceCore
           ${PYTHON_DEPS}
-          ${POCO_LIBRARIES}
-          ${TBB_LIBRARIES}
-          ${TBB_MALLOC_LIBRARIES}
 )
 
 # Installation settings

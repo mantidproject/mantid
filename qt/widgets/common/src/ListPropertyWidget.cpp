@@ -26,9 +26,7 @@ ListPropertyWidget::~ListPropertyWidget() {}
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-ListPropertyWidget::ListPropertyWidget(Mantid::Kernel::Property *prop,
-                                       QWidget *parent, QGridLayout *layout,
-                                       int row)
+ListPropertyWidget::ListPropertyWidget(Mantid::Kernel::Property *prop, QWidget *parent, QGridLayout *layout, int row)
     : PropertyWidget(prop, parent, layout, row) {
   // Label at column 0
   m_label = new QLabel(QString::fromStdString(prop->name()), m_parent);
@@ -53,8 +51,7 @@ ListPropertyWidget::ListPropertyWidget(Mantid::Kernel::Property *prop,
   this->setValue(QString::fromStdString(m_prop->value()));
 
   // Make sure the connection comes after updating any values
-  connect(m_list, SIGNAL(itemSelectionChanged()), this,
-          SLOT(userEditedProperty()));
+  connect(m_list, SIGNAL(itemSelectionChanged()), this, SLOT(userEditedProperty()));
 
   // Put the combo in column 1
   m_gridLayout->addWidget(m_list, m_row, 1, nullptr);
@@ -79,8 +76,7 @@ QString ListPropertyWidget::getValue() const {
  *
  * @param value :: string representation of the value */
 void ListPropertyWidget::setValueImpl(const QString &value) {
-  const QString temp =
-      value.isEmpty() ? QString::fromStdString(m_prop->getDefault()) : value;
+  const QString temp = value.isEmpty() ? QString::fromStdString(m_prop->getDefault()) : value;
 
   auto items = m_list->findItems(temp, Qt::MatchWildcard);
   for (auto item : items) {

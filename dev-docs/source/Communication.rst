@@ -1,9 +1,6 @@
 .. _Communication:
 
 .. toctree::
-   :hidden:
-   
-   DevelopmentTeam
 
 Communication
 ==============
@@ -11,7 +8,6 @@ Communication
 How to contact people in the development team
 ---------------------------------------------
 
-* :ref:`Development Team <DevelopmentTeam>` Contact Details
 * Developer email list (closed list for developers only) mantid-developers@mantidproject.org
 * `Slack <http://mantid.slack.com/>`__: instant messaging and calls
 
@@ -39,4 +35,3 @@ Face to Face
 ^^^^^^^^^^^^
 
 * Annual Developer Workshop
-

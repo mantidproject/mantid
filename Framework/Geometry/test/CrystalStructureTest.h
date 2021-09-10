@@ -22,39 +22,31 @@ class CrystalStructureTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static CrystalStructureTest *createSuite() {
-    return new CrystalStructureTest();
-  }
+  static CrystalStructureTest *createSuite() { return new CrystalStructureTest(); }
   static void destroySuite(CrystalStructureTest *suite) { delete suite; }
 
   CrystalStructureTest() : m_CsCl(4.126, 4.126, 4.126) {
     m_spaceGroup = SpaceGroupFactory::Instance().createSpaceGroup("I m -3 m");
 
     m_scatterers = CompositeBraggScatterer::create();
-    m_scatterers->addScatterer(
-        BraggScattererFactory::Instance().createScatterer(
-            "IsotropicAtomBraggScatterer",
-            R"({"Element":"Si","Position":"0,0,0"})"));
+    m_scatterers->addScatterer(BraggScattererFactory::Instance().createScatterer(
+        "IsotropicAtomBraggScatterer", R"({"Element":"Si","Position":"0,0,0"})"));
   }
 
   void testConstructionSpaceGroup() {
-    TS_ASSERT_THROWS_NOTHING(
-        CrystalStructure structure(m_CsCl, m_spaceGroup, m_scatterers));
+    TS_ASSERT_THROWS_NOTHING(CrystalStructure structure(m_CsCl, m_spaceGroup, m_scatterers));
 
     CrystalStructure structure(m_CsCl, m_spaceGroup, m_scatterers);
     TS_ASSERT_EQUALS(structure.cell().getG(), m_CsCl.getG());
     TS_ASSERT_EQUALS(structure.spaceGroup(), m_spaceGroup);
-    TS_ASSERT_EQUALS(structure.getScatterers()->nScatterers(),
-                     m_scatterers->nScatterers());
+    TS_ASSERT_EQUALS(structure.getScatterers()->nScatterers(), m_scatterers->nScatterers());
   }
 
   void testSetSpaceGroup() {
     CrystalStructure structure(m_CsCl, m_spaceGroup, m_scatterers);
 
-    TS_ASSERT_EQUALS(structure.spaceGroup()->hmSymbol(),
-                     m_spaceGroup->hmSymbol());
-    TS_ASSERT_THROWS_NOTHING(structure.setSpaceGroup(
-        SpaceGroupFactory::Instance().createSpaceGroup("I a -3 d")));
+    TS_ASSERT_EQUALS(structure.spaceGroup()->hmSymbol(), m_spaceGroup->hmSymbol());
+    TS_ASSERT_THROWS_NOTHING(structure.setSpaceGroup(SpaceGroupFactory::Instance().createSpaceGroup("I a -3 d")));
 
     // Not null anymore
     TS_ASSERT(structure.spaceGroup());
@@ -72,8 +64,7 @@ public:
   }
 
   void testCrystalStructureFromStrings() {
-    CrystalStructure structure("5.431 5.431 5.431", "F d -3 m",
-                               "Si 0 0 0 1.0 0.02");
+    CrystalStructure structure("5.431 5.431 5.431", "F d -3 m", "Si 0 0 0 1.0 0.02");
 
     TS_ASSERT_EQUALS(structure.cell().a(), 5.431);
     TS_ASSERT_EQUALS(structure.cell().b(), 5.431);
@@ -87,10 +78,8 @@ public:
     CrystalStructure one("1.2 2.3 3.4", "F d d d", "Fe 1/8 1/8 1/8 1.0 0.001");
 
     CrystalStructure two(one);
-    TS_ASSERT_EQUALS(two.getScatterers()->nScatterers(),
-                     one.getScatterers()->nScatterers());
-    TS_ASSERT_EQUALS(two.spaceGroup()->hmSymbol(),
-                     one.spaceGroup()->hmSymbol());
+    TS_ASSERT_EQUALS(two.getScatterers()->nScatterers(), one.getScatterers()->nScatterers());
+    TS_ASSERT_EQUALS(two.spaceGroup()->hmSymbol(), one.spaceGroup()->hmSymbol());
     TS_ASSERT_EQUALS(unitCellToStr(two.cell()), unitCellToStr(one.cell()));
   }
 
@@ -99,10 +88,8 @@ public:
 
     CrystalStructure two = one;
 
-    TS_ASSERT_EQUALS(two.getScatterers()->nScatterers(),
-                     one.getScatterers()->nScatterers());
-    TS_ASSERT_EQUALS(two.spaceGroup()->hmSymbol(),
-                     one.spaceGroup()->hmSymbol());
+    TS_ASSERT_EQUALS(two.getScatterers()->nScatterers(), one.getScatterers()->nScatterers());
+    TS_ASSERT_EQUALS(two.spaceGroup()->hmSymbol(), one.spaceGroup()->hmSymbol());
     TS_ASSERT_EQUALS(unitCellToStr(two.cell()), unitCellToStr(one.cell()));
   }
 

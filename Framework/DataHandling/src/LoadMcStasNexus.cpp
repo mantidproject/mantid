@@ -24,7 +24,7 @@ namespace DataHandling {
 using namespace Kernel;
 using namespace API;
 
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMcStasNexus)
+DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadMcStasNexus)
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -34,9 +34,7 @@ const std::string LoadMcStasNexus::name() const { return "LoadMcStasNexus"; }
 int LoadMcStasNexus::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string LoadMcStasNexus::category() const {
-  return "DataHandling\\Nexus";
-}
+const std::string LoadMcStasNexus::category() const { return "DataHandling\\Nexus"; }
 
 /**
  * Return the confidence with with this algorithm can load the file
@@ -44,10 +42,20 @@ const std::string LoadMcStasNexus::category() const {
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadMcStasNexus::confidence(Kernel::NexusDescriptor &descriptor) const {
-  UNUSED_ARG(descriptor)
-  // To ensure that this loader is somewhat hitten return 0
+int LoadMcStasNexus::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
   int confidence(0);
+  const auto &entries = descriptor.getAllEntries();
+  const static auto target_dataset = "information";
+  for (const auto &[nx_class, grouped_entries] : entries) {
+    UNUSED_ARG(nx_class);
+    for (const auto &path : grouped_entries) {
+      // Mccode writes an information dataset so can be reasonably confident if we find it
+      if (boost::ends_with(path, target_dataset)) {
+        confidence = 40;
+        break;
+      }
+    }
+  }
   return confidence;
 }
 
@@ -58,12 +66,10 @@ int LoadMcStasNexus::confidence(Kernel::NexusDescriptor &descriptor) const {
  */
 void LoadMcStasNexus::init() {
   const std::vector<std::string> exts{".h5", ".nxs"};
-  declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
-      "The name of the Nexus file to load");
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
+                  "The name of the Nexus file to load");
 
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
 
@@ -120,8 +126,7 @@ void LoadMcStasNexus::exec() {
 
       const auto axis1Length = axis1Values.size();
       const auto axis2Length = axis2Values.size();
-      g_log.debug() << "Axis lengths=" << axis1Length << " " << axis2Length
-                    << '\n';
+      g_log.debug() << "Axis lengths=" << axis1Length << " " << axis2Length << '\n';
 
       // Require "data" field
       std::vector<double> data;
@@ -132,12 +137,11 @@ void LoadMcStasNexus::exec() {
       try {
         nxFile.readData<double>("errors", errors);
       } catch (::NeXus::Exception &) {
-        g_log.information()
-            << "Field " << dataName << " contains no error information.\n";
+        g_log.information() << "Field " << dataName << " contains no error information.\n";
       }
 
-      MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create(
-          "Workspace2D", axis2Length, axis1Length, axis1Length);
+      MatrixWorkspace_sptr ws =
+          WorkspaceFactory::Instance().create("Workspace2D", axis2Length, axis1Length, axis1Length);
       Axis *axis1 = ws->getAxis(0);
       axis1->title() = axis1Name;
       // Set caption

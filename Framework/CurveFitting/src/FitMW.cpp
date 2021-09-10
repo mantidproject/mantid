@@ -121,11 +121,8 @@ void joinOverlappingRanges(std::vector<double> &exclude) {
  * @param workspacePropertyName :: Name of the workspace property.
  * @param domainType :: Type of the domain: Simple, Sequential, or Parallel.
  */
-FitMW::FitMW(Kernel::IPropertyManager *fit,
-             const std::string &workspacePropertyName,
-             FitMW::DomainType domainType)
-    : IMWDomainCreator(fit, workspacePropertyName, domainType), m_maxSize(0),
-      m_normalise(false) {}
+FitMW::FitMW(Kernel::IPropertyManager *fit, const std::string &workspacePropertyName, FitMW::DomainType domainType)
+    : IMWDomainCreator(fit, workspacePropertyName, domainType), m_maxSize(0), m_normalise(false) {}
 
 /**
  * Constructor. Methods setWorkspace, setWorkspaceIndex and setRange must be
@@ -134,8 +131,7 @@ FitMW::FitMW(Kernel::IPropertyManager *fit,
  * @param domainType :: Type of the domain: Simple, Sequential, or Parallel.
  */
 FitMW::FitMW(FitMW::DomainType domainType)
-    : IMWDomainCreator(nullptr, std::string(), domainType), m_maxSize(10),
-      m_normalise(false) {}
+    : IMWDomainCreator(nullptr, std::string(), domainType), m_maxSize(10), m_normalise(false) {}
 
 /**
  * Set all parameters.
@@ -175,34 +171,28 @@ void FitMW::declareDatasetProperties(const std::string &suffix, bool addProp) {
   m_excludePropertyName = "Exclude" + suffix;
 
   if (addProp) {
-    if (m_domainType != Simple &&
-        !m_manager->existsProperty(m_maxSizePropertyName)) {
+    if (m_domainType != Simple && !m_manager->existsProperty(m_maxSizePropertyName)) {
       auto mustBePositive = std::make_shared<BoundedValidator<int>>();
       mustBePositive->setLower(0);
-      declareProperty(
-          new PropertyWithValue<int>(m_maxSizePropertyName, 1, mustBePositive),
-          "The maximum number of values per a simple domain.");
+      declareProperty(new PropertyWithValue<int>(m_maxSizePropertyName, 1, mustBePositive),
+                      "The maximum number of values per a simple domain.");
     }
     if (!m_manager->existsProperty(m_normalisePropertyName)) {
-      declareProperty(
-          new PropertyWithValue<bool>(m_normalisePropertyName, false),
-          "An option to normalise the histogram data (divide be the bin "
-          "width).");
+      declareProperty(new PropertyWithValue<bool>(m_normalisePropertyName, false),
+                      "An option to normalise the histogram data (divide be the bin "
+                      "width).");
     }
     if (!m_manager->existsProperty(m_excludePropertyName)) {
-      auto mustBeOrderedPairs =
-          std::make_shared<ArrayOrderedPairsValidator<double>>();
-      declareProperty(
-          new ArrayProperty<double>(m_excludePropertyName, mustBeOrderedPairs),
-          "A list of pairs of doubles that specify ranges that "
-          "must be excluded from fit.");
+      auto mustBeOrderedPairs = std::make_shared<ArrayOrderedPairsValidator<double>>();
+      declareProperty(new ArrayProperty<double>(m_excludePropertyName, mustBeOrderedPairs),
+                      "A list of pairs of doubles that specify ranges that "
+                      "must be excluded from fit.");
     }
   }
 }
 
 /// Create a domain from the input workspace
-void FitMW::createDomain(std::shared_ptr<API::FunctionDomain> &domain,
-                         std::shared_ptr<API::FunctionValues> &values,
+void FitMW::createDomain(std::shared_ptr<API::FunctionDomain> &domain, std::shared_ptr<API::FunctionValues> &values,
                          size_t i0) {
   setParameters();
 
@@ -303,8 +293,7 @@ void FitMW::createDomain(std::shared_ptr<API::FunctionDomain> &domain,
       weight = 1.0 / error;
       if (!std::isfinite(weight)) {
         if (!m_ignoreInvalidData)
-          throw std::runtime_error(
-              "Error of a data point is probably too small.");
+          throw std::runtime_error("Error of a data point is probably too small.");
         weight = 0.0;
       }
     }
@@ -324,14 +313,11 @@ void FitMW::createDomain(std::shared_ptr<API::FunctionDomain> &domain,
  * @param values :: A API::FunctionValues instance containing the fitting data
  * @param outputWorkspacePropertyName :: The property name
  */
-std::shared_ptr<API::Workspace>
-FitMW::createOutputWorkspace(const std::string &baseName,
-                             API::IFunction_sptr function,
-                             std::shared_ptr<API::FunctionDomain> domain,
-                             std::shared_ptr<API::FunctionValues> values,
-                             const std::string &outputWorkspacePropertyName) {
-  auto ws = IMWDomainCreator::createOutputWorkspace(
-      baseName, function, domain, values, outputWorkspacePropertyName);
+std::shared_ptr<API::Workspace> FitMW::createOutputWorkspace(const std::string &baseName, API::IFunction_sptr function,
+                                                             std::shared_ptr<API::FunctionDomain> domain,
+                                                             std::shared_ptr<API::FunctionValues> values,
+                                                             const std::string &outputWorkspacePropertyName) {
+  auto ws = IMWDomainCreator::createOutputWorkspace(baseName, function, domain, values, outputWorkspacePropertyName);
   auto &mws = dynamic_cast<MatrixWorkspace &>(*ws);
 
   if (m_normalise && m_matrixWorkspace->isHistogramData()) {
@@ -340,11 +326,9 @@ FitMW::createOutputWorkspace(const std::string &baseName,
     std::adjacent_difference(X.begin(), X.end(), binWidths.begin());
     for (size_t ispec = 1; ispec < mws.getNumberHistograms(); ++ispec) {
       auto &Y = mws.mutableY(ispec);
-      std::transform(binWidths.begin() + 1, binWidths.end(), Y.begin(),
-                     Y.begin(), std::multiplies<double>());
+      std::transform(binWidths.begin() + 1, binWidths.end(), Y.begin(), Y.begin(), std::multiplies<double>());
       auto &E = mws.mutableE(ispec);
-      std::transform(binWidths.begin() + 1, binWidths.end(), E.begin(),
-                     E.begin(), std::multiplies<double>());
+      std::transform(binWidths.begin() + 1, binWidths.end(), E.begin(), E.begin(), std::multiplies<double>());
     }
   }
   return ws;

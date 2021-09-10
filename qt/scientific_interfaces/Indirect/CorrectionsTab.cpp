@@ -19,26 +19,21 @@ namespace CustomInterfaces {
  *
  * @param parent :: the parent widget
  */
-CorrectionsTab::CorrectionsTab(QWidget *parent)
-    : IndirectTab(parent), m_dblEdFac(nullptr), m_blnEdFac(nullptr) {
+CorrectionsTab::CorrectionsTab(QWidget *parent) : IndirectTab(parent), m_dblEdFac(nullptr), m_blnEdFac(nullptr) {
   // Create Editor Factories
   m_dblEdFac = new DoubleEditorFactory(this);
   m_blnEdFac = new QtCheckBoxFactory(this);
 }
 
-void CorrectionsTab::setOutputPlotOptionsPresenter(
-    std::unique_ptr<IndirectPlotOptionsPresenter> presenter) {
+void CorrectionsTab::setOutputPlotOptionsPresenter(std::unique_ptr<IndirectPlotOptionsPresenter> presenter) {
   m_plotOptionsPresenter = std::move(presenter);
 }
 
-void CorrectionsTab::setOutputPlotOptionsWorkspaces(
-    std::vector<std::string> const &outputWorkspaces) {
+void CorrectionsTab::setOutputPlotOptionsWorkspaces(std::vector<std::string> const &outputWorkspaces) {
   m_plotOptionsPresenter->setWorkspaces(outputWorkspaces);
 }
 
-void CorrectionsTab::clearOutputPlotOptionsWorkspaces() {
-  m_plotOptionsPresenter->clearWorkspaces();
-}
+void CorrectionsTab::clearOutputPlotOptionsWorkspaces() { m_plotOptionsPresenter->clearWorkspaces(); }
 
 /**
  * Loads the tab's settings.
@@ -47,18 +42,14 @@ void CorrectionsTab::clearOutputPlotOptionsWorkspaces() {
  *
  * @param settings :: the QSettings object from which to load
  */
-void CorrectionsTab::loadTabSettings(const QSettings &settings) {
-  loadSettings(settings);
-}
+void CorrectionsTab::loadTabSettings(const QSettings &settings) { loadSettings(settings); }
 
 /**
  * Prevents the loading of data with incorrect naming if passed true
  *
  * @param filter :: true if you want to allow filtering
  */
-void CorrectionsTab::filterInputData(bool filter) {
-  setFileExtensionsByName(filter);
-}
+void CorrectionsTab::filterInputData(bool filter) { setFileExtensionsByName(filter); }
 
 /**
  * Slot that can be called when a user edits an input.
@@ -73,15 +64,13 @@ void CorrectionsTab::inputChanged() { validate(); }
  * @return whether the binning matches
  * @throws std::runtime_error if one of the workspaces is an invalid pointer
  */
-bool CorrectionsTab::checkWorkspaceBinningMatches(
-    const MatrixWorkspace_const_sptr &left,
-    const MatrixWorkspace_const_sptr &right) {
+bool CorrectionsTab::checkWorkspaceBinningMatches(const MatrixWorkspace_const_sptr &left,
+                                                  const MatrixWorkspace_const_sptr &right) {
   if (left && right) // check the workspaces actually point to something first
   {
     const auto &leftX = left->x(0);
     const auto &rightX = right->x(0);
-    return leftX.size() == rightX.size() &&
-           std::equal(leftX.begin(), leftX.end(), rightX.begin());
+    return leftX.size() == rightX.size() && std::equal(leftX.begin(), leftX.end(), rightX.begin());
   } else {
     throw std::runtime_error("CorrectionsTab: One of the operands is an "
                              "invalid MatrixWorkspace pointer");
@@ -100,9 +89,9 @@ bool CorrectionsTab::checkWorkspaceBinningMatches(
  * @param eMode Emode to use (if not set will determine based on current X unit)
  * @return Name of output workspace
  */
-boost::optional<std::string> CorrectionsTab::addConvertUnitsStep(
-    const MatrixWorkspace_sptr &ws, std::string const &unitID,
-    std::string const &suffix, std::string eMode, double eFixed) {
+boost::optional<std::string> CorrectionsTab::addConvertUnitsStep(const MatrixWorkspace_sptr &ws,
+                                                                 std::string const &unitID, std::string const &suffix,
+                                                                 std::string eMode, double eFixed) {
   std::string outputName = ws->getName();
 
   if (suffix != "UNIT")
@@ -110,8 +99,7 @@ boost::optional<std::string> CorrectionsTab::addConvertUnitsStep(
   else
     outputName += "_" + unitID;
 
-  IAlgorithm_sptr convertAlg =
-      AlgorithmManager::Instance().create("ConvertUnits");
+  IAlgorithm_sptr convertAlg = AlgorithmManager::Instance().create("ConvertUnits");
   convertAlg->initialize();
 
   convertAlg->setProperty("InputWorkspace", ws->getName());
@@ -147,20 +135,16 @@ boost::optional<std::string> CorrectionsTab::addConvertUnitsStep(
  * @param workspaceName The name of the workspace.
  * @param log           The logger for sending log messages.
  */
-void CorrectionsTab::displayInvalidWorkspaceTypeError(
-    const std::string &workspaceName, Mantid::Kernel::Logger &log) {
-  QString errorMessage =
-      "Invalid workspace loaded, ensure a MatrixWorkspace is "
-      "entered into the field.\n";
+void CorrectionsTab::displayInvalidWorkspaceTypeError(const std::string &workspaceName, Mantid::Kernel::Logger &log) {
+  QString errorMessage = "Invalid workspace loaded, ensure a MatrixWorkspace is "
+                         "entered into the field.\n";
 
-  if (AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-          workspaceName)) {
+  if (AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(workspaceName)) {
     errorMessage += "Consider loading the WorkspaceGroup first into mantid, "
                     "and then choose one of its items here.\n";
     log.error() << "Workspace Groups are currently not allowed.\n";
   } else {
-    log.error() << "Workspace " << workspaceName
-                << " is not a MatrixWorkspace.\n";
+    log.error() << "Workspace " << workspaceName << " is not a MatrixWorkspace.\n";
   }
   emit showMessageBox(errorMessage);
 }

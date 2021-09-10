@@ -35,18 +35,18 @@ class ContextExampleView(QtWidgets.QWidget):
         # row of groups
         table_utils.setRowName(self.table, 0, "Groups")
         group_name = ["a", "b", "c"]
-        self.ws0 = table_utils.addDoubleToTable(
+        self.ws0, _ = table_utils.addDoubleToTable(
             self.table, group_name[0], 0, 1)
-        self.ws1 = table_utils.addDoubleToTable(
+        self.ws1, _  = table_utils.addDoubleToTable(
             self.table, group_name[1], 0, 2)
-        self.ws2 = table_utils.addDoubleToTable(
+        self.ws2, _  = table_utils.addDoubleToTable(
             self.table, group_name[2], 0, 3)
 
         # row to describe a pair
         table_utils.setRowName(self.table, 1, "Pair")
         self.g1 = table_utils.addComboToTable(self.table, 1, group_name, 1)
         self.g2 = table_utils.addComboToTable(self.table, 1, group_name, 2)
-        self.alpha = table_utils.addDoubleToTable(self.table, "2.", 1, 3)
+        self.alpha, _ = table_utils.addDoubleToTable(self.table, "2.", 1, 3)
 
         # explicit update button
         btn = QtWidgets.QPushButton("print context", self)

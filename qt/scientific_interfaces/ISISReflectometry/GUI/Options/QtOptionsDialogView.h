@@ -19,17 +19,13 @@ namespace CustomInterfaces {
 namespace ISISReflectometry {
 
 /// OptionsDialog : Provides a dialog for setting options.
-class MANTIDQT_ISISREFLECTOMETRY_DLL QtOptionsDialogView
-    : public QDialog,
-      public IOptionsDialogView {
+class MANTIDQT_ISISREFLECTOMETRY_DLL QtOptionsDialogView : public QDialog, public IOptionsDialogView {
   Q_OBJECT
 public:
   explicit QtOptionsDialogView(QWidget *parent);
   ~QtOptionsDialogView() override;
-  void getOptions(std::map<std::string, bool> &boolOptions,
-                  std::map<std::string, int> &intOptions) override;
-  void setOptions(std::map<std::string, bool> &boolOptions,
-                  std::map<std::string, int> &intOptions) override;
+  void getOptions(std::map<std::string, bool> &boolOptions, std::map<std::string, int> &intOptions) override;
+  void setOptions(std::map<std::string, bool> &boolOptions, std::map<std::string, int> &intOptions) override;
   void show() override;
   void subscribe(OptionsDialogViewSubscriber *notifyee) override;
 

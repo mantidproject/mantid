@@ -33,7 +33,9 @@ class PlotConfigDialogPresenter:
         legend_tab = None
         # Axes tab
         if len(self.fig.get_axes()) > 0:
-            axes_tab = AxesTabWidgetPresenter(self.fig, parent=self.view)
+            axes_tab = AxesTabWidgetPresenter(self.fig, parent=self.view,
+                                              success_callback=self.success_callback,
+                                              error_callback=self.error_callback)
             self.tab_widget_presenters[1] = axes_tab
             self.tab_widget_views[0] = (axes_tab.view, "Axes")
         # Legend tab
@@ -60,16 +62,25 @@ class PlotConfigDialogPresenter:
         self.view.cancel_button.clicked.connect(self.exit)
         self.view.help_button.clicked.connect(self.open_help_window)
 
+        self.error_state = False
+
     def _add_tab_widget_views(self):
         for tab_view in self.tab_widget_views:
             if tab_view:
                 self.view.add_tab_widget(tab_view)
 
     def apply_properties(self):
+        """Attempts to apply properties. Returns a bool denoting whether
+        there was an error drawing the canvas drawn"""
         for tab in reversed(self.tab_widget_presenters):
             if tab:
                 tab.apply_properties()
-        self.fig.canvas.draw()
+        try:
+            self.fig.canvas.draw()
+        except Exception as exception:
+            self.error_callback(str(exception))
+            return
+
         for tab in reversed(self.tab_widget_presenters):
             if tab == self.tab_widget_presenters[0]:
                 # Do not call update view on the legend tab because the legend config
@@ -79,8 +90,14 @@ class PlotConfigDialogPresenter:
             if tab:
                 tab.update_view()
 
+        self.success_callback()
+
     def apply_properties_and_exit(self):
         self.apply_properties()
+        if self.error_state:
+            # If we did exit with an error, the plot would be 'damaged', as canvas.draw()
+            # did not get to finish drawing, because it raised an exception part way through.
+            return
         self.exit()
 
     def exit(self):
@@ -108,3 +125,37 @@ class PlotConfigDialogPresenter:
             if presenter == tab_presenter:
                 self.tab_widget_presenters[index] = None
                 return
+
+    def configure_curves_tab(self, axes, curve):
+        curves_tab_presenter = self.tab_widget_presenters[2]
+        if not curves_tab_presenter:
+            return
+        curves_tab_widget, _ = self.tab_widget_views[1]
+
+        try:
+            curves_tab_presenter.set_axes_from_object(axes)
+        except ValueError as err:
+            if str(err) == "Axes object does not exist in curves tab":
+                # This can happen when there are no curves on the given axes.
+                return
+            raise err
+
+        self.view.set_current_tab_widget(curves_tab_widget)
+
+        if curve:
+            try:
+                curves_tab_presenter.set_curve_from_object(curve)
+            except ValueError as err:
+                if str(err) == "Curve object does not exist in curves tab":
+                    return
+                raise err
+
+    def error_callback(self, error_message):
+        """To be called by self or a child presenter when there is an error"""
+        self.view.set_error_text(error_message)
+        self.error_state = True
+
+    def success_callback(self):
+        """To be called by self or a child presenter to report a success, clearing the error."""
+        self.view.set_error_text(None)
+        self.error_state = False

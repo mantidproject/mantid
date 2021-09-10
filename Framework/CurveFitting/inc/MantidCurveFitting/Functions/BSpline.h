@@ -33,10 +33,8 @@ public:
   /// overwrite IFunction base class methods
   std::string name() const override { return "BSpline"; }
   const std::string category() const override { return "Background"; }
-  void function1D(double *out, const double *xValues,
-                  const size_t nData) const override;
-  void derivative1D(double *out, const double *xValues, size_t nData,
-                    const size_t order) const override;
+  void function1D(double *out, const double *xValues, const size_t nData) const override;
+  void derivative1D(double *out, const double *xValues, size_t nData, const size_t order) const override;
 
   /// Set a value to attribute attName
   void setAttribute(const std::string &attName, const Attribute &) override;

@@ -32,38 +32,28 @@ DECLARE_ALGORITHM(GenerateIPythonNotebook)
 /** Initialize the algorithm's properties.
  */
 void GenerateIPythonNotebook::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("InputWorkspace", "", Direction::Input),
                   "An input workspace.");
 
   std::vector<std::string> exts{".ipynb"};
 
-  declareProperty(std::make_unique<API::FileProperty>(
-                      "Filename", "", API::FileProperty::OptionalSave, exts),
+  declareProperty(std::make_unique<API::FileProperty>("Filename", "", API::FileProperty::OptionalSave, exts),
                   "The name of the file into which the workspace history will "
                   "be generated.");
-  declareProperty("NotebookText", std::string(""),
-                  "Saves the history of the workspace to a variable.",
+  declareProperty("NotebookText", std::string(""), "Saves the history of the workspace to a variable.",
                   Direction::Output);
   getPointerToProperty("NotebookText")->setAutoTrim(false);
 
-  declareProperty("UnrollAll", false,
-                  "Unroll all algorithms to show just their child algorithms.",
+  declareProperty("UnrollAll", false, "Unroll all algorithms to show just their child algorithms.", Direction::Input);
+
+  declareProperty("StartTimestamp", std::string(""), "The filter start time in the format YYYY-MM-DD HH:mm:ss",
+                  Direction::Input);
+  declareProperty("EndTimestamp", std::string(""), "The filter end time in the format YYYY-MM-DD HH:mm:ss",
                   Direction::Input);
 
-  declareProperty("StartTimestamp", std::string(""),
-                  "The filter start time in the format YYYY-MM-DD HH:mm:ss",
-                  Direction::Input);
-  declareProperty("EndTimestamp", std::string(""),
-                  "The filter end time in the format YYYY-MM-DD HH:mm:ss",
-                  Direction::Input);
-
-  std::vector<std::string> saveVersions{"Specify Old", "Specify All",
-                                        "Specify None"};
-  declareProperty(
-      "SpecifyAlgorithmVersions", "Specify Old",
-      std::make_shared<StringListValidator>(saveVersions),
-      "When to specify which algorithm version was used by Mantid.");
+  std::vector<std::string> saveVersions{"Specify Old", "Specify All", "Specify None"};
+  declareProperty("SpecifyAlgorithmVersions", "Specify Old", std::make_shared<StringListValidator>(saveVersions),
+                  "When to specify which algorithm version was used by Mantid.");
 }
 
 /** Execute the algorithm.
@@ -77,8 +67,7 @@ void GenerateIPythonNotebook::exec() {
 
   // Get the algorithm histories of the workspace.
   const WorkspaceHistory wsHistory = ws->getHistory();
-  g_log.information() << "Number of history items: " << wsHistory.size()
-                      << '\n';
+  g_log.information() << "Number of history items: " << wsHistory.size() << '\n';
 
   auto view = wsHistory.createView();
 
@@ -106,8 +95,7 @@ void GenerateIPythonNotebook::exec() {
 
   NotebookBuilder builder(view, versionSpecificity);
   std::string generatedNotebook;
-  generatedNotebook +=
-      builder.build(ws->getName(), ws->getTitle(), ws->getComment());
+  generatedNotebook += builder.build(ws->getName(), ws->getTitle(), ws->getComment());
 
   setPropertyValue("NotebookText", generatedNotebook);
 

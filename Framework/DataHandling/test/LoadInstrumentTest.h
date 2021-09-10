@@ -57,8 +57,8 @@ public:
     // create a workspace with some sample data
     int histogramNumber = 2584;
     int timechannels = 100;
-    MatrixWorkspace_sptr ws2D = DataObjects::create<Workspace2D>(
-        histogramNumber, HistogramData::Points(timechannels, timechannels));
+    MatrixWorkspace_sptr ws2D =
+        DataObjects::create<Workspace2D>(histogramNumber, HistogramData::Points(timechannels, timechannels));
 
     Points timeChannelsVec(timechannels, LinearGenerator(0.0, 100.0));
     // loop to create data
@@ -82,8 +82,7 @@ public:
     TS_ASSERT_EQUALS(ws2D->getNumberHistograms(), 2584);
 
     const auto &fileFinder = Mantid::API::FileFinder::Instance();
-    const std::string originalFilePath =
-        fileFinder.getFullPath("HET_Definition.xml");
+    const std::string originalFilePath = fileFinder.getFullPath("HET_Definition.xml");
 
     const std::string tmpDir = Poco::Path::temp();
     auto generateFiles = [&tmpDir, &originalFilePath](const std::string &name) {
@@ -96,8 +95,7 @@ public:
       return tmpFile;
     };
 
-    auto runAlg = [&generateFiles, &loader, &ws2D](
-                      const std::string &name, const std::string &expected) {
+    auto runAlg = [&generateFiles, &loader, &ws2D](const std::string &name, const std::string &expected) {
       auto fileHandle = generateFiles(name);
       const std::string path = fileHandle.path();
 
@@ -137,8 +135,8 @@ public:
     // create a workspace with some sample data
     int histogramNumber = 2584;
     int timechannels = 100;
-    MatrixWorkspace_sptr ws2D = DataObjects::create<Workspace2D>(
-        histogramNumber, HistogramData::Points(timechannels, timechannels));
+    MatrixWorkspace_sptr ws2D =
+        DataObjects::create<Workspace2D>(histogramNumber, HistogramData::Points(timechannels, timechannels));
 
     Points timeChannelsVec(timechannels, LinearGenerator(0.0, 100.0));
     // loop to create data
@@ -179,8 +177,7 @@ public:
     // Get back the saved workspace
     MatrixWorkspace_sptr output = loader.getProperty("Workspace");
 
-    std::shared_ptr<const Instrument> i =
-        output->getInstrument()->baseInstrument();
+    std::shared_ptr<const Instrument> i = output->getInstrument()->baseInstrument();
     std::shared_ptr<const IComponent> source = i->getSource();
     TS_ASSERT_EQUALS(source->getName(), "undulator");
     TS_ASSERT_DELTA(source->getPos().Y(), 0.0, 0.01);
@@ -201,8 +198,7 @@ public:
     TS_ASSERT_DELTA(cmpDistance, 2.512, 0.0001);
 
     // test if detector with det_id=603 has been marked as a monitor
-    TS_ASSERT(
-        output->detectorInfo().isMonitor(output->detectorInfo().indexOf(601)));
+    TS_ASSERT(output->detectorInfo().isMonitor(output->detectorInfo().indexOf(601)));
 
     // Spectra mapping has been updated
     TS_ASSERT_EQUALS(output->getAxis(1)->spectraNo(0), 1);
@@ -219,15 +215,13 @@ public:
 
     // also a few tests on the last detector and a test for the one beyond the
     // last
-    const auto &ptrDetLast =
-        detectorInfo.detector(detectorInfo.indexOf(413256));
+    const auto &ptrDetLast = detectorInfo.detector(detectorInfo.indexOf(413256));
     TS_ASSERT_EQUALS(ptrDetLast.getID(), 413256);
     TS_ASSERT_EQUALS(ptrDetLast.getName(), "pixel");
     TS_ASSERT_THROWS(detectorInfo.indexOf(413257), const std::out_of_range &);
 
     // Test input data is unchanged
-    Workspace2D_sptr output2DInst =
-        std::dynamic_pointer_cast<Workspace2D>(output);
+    Workspace2D_sptr output2DInst = std::dynamic_pointer_cast<Workspace2D>(output);
     // Should be 2584
     TS_ASSERT_EQUALS(output2DInst->getNumberHistograms(), histogramNumber);
 
@@ -257,8 +251,7 @@ public:
     loaderSLS.setChild(true);
 
     // create a workspace with some sample data
-    MatrixWorkspace_sptr ws2D =
-        DataObjects::create<Workspace2D>(1, HistogramData::Points(1));
+    MatrixWorkspace_sptr ws2D = DataObjects::create<Workspace2D>(1, HistogramData::Points(1));
 
     const std::string instrFilename = "SANDALS_Definition.xml";
     loaderSLS.setPropertyValue("Filename", instrFilename);
@@ -281,8 +274,7 @@ public:
     TS_ASSERT_EQUALS(source->getName(), "undulator");
     TS_ASSERT_DELTA(source->getPos().Z(), -11.016, 0.01);
 
-    std::shared_ptr<const IComponent> samplepos =
-        std::dynamic_pointer_cast<const IComponent>(i->getSample());
+    std::shared_ptr<const IComponent> samplepos = std::dynamic_pointer_cast<const IComponent>(i->getSample());
     TS_ASSERT_EQUALS(samplepos->getName(), "nickel-holder");
     TS_ASSERT_DELTA(samplepos->getPos().Y(), 0.0, 0.01);
 
@@ -294,10 +286,8 @@ public:
 
     const auto &ptrDetShape = detectorInfo.detector(detectorInfo.indexOf(102));
     TS_ASSERT(ptrDetShape.isValid(V3D(0.0, 0.0, 0.0) + ptrDetShape.getPos()));
-    TS_ASSERT(
-        ptrDetShape.isValid(V3D(0.0, 0.0, 0.000001) + ptrDetShape.getPos()));
-    TS_ASSERT(
-        ptrDetShape.isValid(V3D(0.005, 0.1, 0.000002) + ptrDetShape.getPos()));
+    TS_ASSERT(ptrDetShape.isValid(V3D(0.0, 0.0, 0.000001) + ptrDetShape.getPos()));
+    TS_ASSERT(ptrDetShape.isValid(V3D(0.005, 0.1, 0.000002) + ptrDetShape.getPos()));
   }
 
   void testExecNIMROD() {
@@ -306,8 +296,7 @@ public:
     loaderNIMROD.setChild(true);
 
     // create a workspace with some sample data
-    MatrixWorkspace_sptr ws2D =
-        DataObjects::create<Workspace2D>(1, HistogramData::Points(1));
+    MatrixWorkspace_sptr ws2D = DataObjects::create<Workspace2D>(1, HistogramData::Points(1));
 
     const std::string instrFilename = "NIMROD_Definition.xml";
     loaderNIMROD.setPropertyValue("Filename", instrFilename);
@@ -341,8 +330,7 @@ public:
     loaderNIMROD.setChild(true);
 
     // create a workspace with some sample data
-    MatrixWorkspace_sptr ws2D =
-        DataObjects::create<Workspace2D>(1, HistogramData::Points(1));
+    MatrixWorkspace_sptr ws2D = DataObjects::create<Workspace2D>(1, HistogramData::Points(1));
 
     const std::string instrFilename = "NIMROD_Definition.xml";
     loaderNIMROD.setPropertyValue("Filename", instrFilename);
@@ -359,14 +347,10 @@ public:
     TS_ASSERT_EQUALS(nimrodInst->getName(), "NIMROD");
     TS_ASSERT_EQUALS(nimrodInst->getNumberDetectors(), 2337);
     int a_random_id = 20103001;
-    TS_ASSERT_EQUALS((nimrodInst->getDetector(a_random_id))->getID(),
-                     a_random_id);
-    TS_ASSERT_DELTA((nimrodInst->getDetector(a_random_id))->getPos().X(),
-                    0.0254, 0.0001);
-    TS_ASSERT_DELTA((nimrodInst->getDetector(a_random_id))->getPos().Y(),
-                    -0.2084, 0.0001);
-    TS_ASSERT_DELTA((nimrodInst->getDetector(a_random_id))->getPos().Z(),
-                    5.5258, 0.0001);
+    TS_ASSERT_EQUALS((nimrodInst->getDetector(a_random_id))->getID(), a_random_id);
+    TS_ASSERT_DELTA((nimrodInst->getDetector(a_random_id))->getPos().X(), 0.0254, 0.0001);
+    TS_ASSERT_DELTA((nimrodInst->getDetector(a_random_id))->getPos().Y(), -0.2084, 0.0001);
+    TS_ASSERT_DELTA((nimrodInst->getDetector(a_random_id))->getPos().Z(), 5.5258, 0.0001);
   }
 
   void testExecMARIFromInstrName() {
@@ -375,8 +359,7 @@ public:
     loaderMARI.setChild(true);
 
     // create a workspace with some sample data
-    MatrixWorkspace_sptr ws2D =
-        DataObjects::create<Workspace2D>(1, HistogramData::Points(1));
+    MatrixWorkspace_sptr ws2D = DataObjects::create<Workspace2D>(1, HistogramData::Points(1));
 
     const std::string instrName = "MARI";
     loaderMARI.setPropertyValue("InstrumentName", instrName);
@@ -423,8 +406,7 @@ public:
     // prevents us from then setting `loaderLOKI.setProperty("Workspace", ws)`
     // because the `unique_ptr` will not allow itself to be copied into the
     // `shared_ptr` as a l-value reference.
-    MatrixWorkspace_sptr ws =
-        DataObjects::create<Workspace2D>(1, HistogramData::Points(1));
+    MatrixWorkspace_sptr ws = DataObjects::create<Workspace2D>(1, HistogramData::Points(1));
     nexusLoader.setPropertyValue("Filename", filename);
     nexusLoader.setProperty("Workspace", ws);
     nexusLoader.setProperty("RewriteSpectraMap", OptionalBool(true));
@@ -457,8 +439,7 @@ public:
 
   /// Test the Nexus geometry loader from WISH file
   void testExecNexusWISH() {
-    MatrixWorkspace_sptr outputWs =
-        doLoadNexus("WISH_Definition_10Panels.hdf5");
+    MatrixWorkspace_sptr outputWs = doLoadNexus("WISH_Definition_10Panels.hdf5");
     auto &componentInfo = outputWs->componentInfo();
     auto &detectorInfo = outputWs->detectorInfo();
     TS_ASSERT_EQUALS(componentInfo.name(componentInfo.root()), "WISH");
@@ -475,8 +456,7 @@ public:
     loaderLOKI.initialize();
     loaderLOKI.setChild(true);
     // Create a workspace
-    MatrixWorkspace_sptr ws =
-        DataObjects::create<Workspace2D>(1, HistogramData::Points(1));
+    MatrixWorkspace_sptr ws = DataObjects::create<Workspace2D>(1, HistogramData::Points(1));
     loaderLOKI.setPropertyValue("InstrumentName", "LOKI");
     loaderLOKI.setProperty("Workspace", ws);
     loaderLOKI.setProperty("RewriteSpectraMap", OptionalBool(true));
@@ -516,8 +496,7 @@ public:
   void testExecHRP2() {
     // Test Parameter file in instrument folder is used by an IDF file not in
     // the instrument folder
-    doTestParameterFileSelection("unit_testing/HRPD_Definition.xml",
-                                 "HRPD_Parameters.xml", "S");
+    doTestParameterFileSelection("unit_testing/HRPD_Definition.xml", "HRPD_Parameters.xml", "S");
   }
 
   void testExecHRP3() {
@@ -525,8 +504,7 @@ public:
     // the instrument folder and
     // with an extension of its name after the 'Definition' not present in a
     // parameter file.
-    doTestParameterFileSelection("unit_testing/HRPD_Definition_Test3.xml",
-                                 "HRPD_Parameters.xml", "S");
+    doTestParameterFileSelection("unit_testing/HRPD_Definition_Test3.xml", "HRPD_Parameters.xml", "S");
   }
 
   void testExecHRP4() {
@@ -534,15 +512,14 @@ public:
     // in the same folder and
     // with the same extension ('_Test4') of its name after the 'Definition' or
     // 'Parameter'.
-    doTestParameterFileSelection("unit_testing/HRPD_Definition_Test4.xml",
-                                 "unit_testing/HRPD_Parameters_Test4.xml", "T");
+    doTestParameterFileSelection("unit_testing/HRPD_Definition_Test4.xml", "unit_testing/HRPD_Parameters_Test4.xml",
+                                 "T");
   }
 
   void testExecHRP5() {
     // Test Parameter file outside instrument folder is used by an IDF file in
     // the same folder
-    doTestParameterFileSelection("unit_testing/HRPDTEST_Definition.xml",
-                                 "unit_testing/HRPDTEST_Parameters.xml", "U");
+    doTestParameterFileSelection("unit_testing/HRPDTEST_Definition.xml", "unit_testing/HRPDTEST_Parameters.xml", "U");
   }
 
   void testExecHRP6() {
@@ -553,8 +530,7 @@ public:
     // even though there is a definition file without an extension in the same
     // folder.
     doTestParameterFileSelection("unit_testing/HRPDTEST_Definition_Test6.xml",
-                                 "unit_testing/HRPDTEST_Parameters_Test6.xml",
-                                 "V");
+                                 "unit_testing/HRPDTEST_Parameters_Test6.xml", "V");
   }
 
   void testExecHRP7() {
@@ -562,8 +538,7 @@ public:
     // same instrument folder and
     // with an extension of its name after the 'Definition' not present in a
     // parameter file.
-    doTestParameterFileSelection("unit_testing/HRPDTEST_Definition_Test7.xml",
-                                 "HRPDTEST_Parameters.xml", "U");
+    doTestParameterFileSelection("unit_testing/HRPDTEST_Definition_Test7.xml", "HRPDTEST_Parameters.xml", "U");
   }
 
   void testNeutronicPositions() {
@@ -574,8 +549,7 @@ public:
     LoadInstrument loader;
     loader.initialize();
     loader.setPropertyValue("Filename", "unit_testing/INDIRECT_Definition.xml");
-    MatrixWorkspace_sptr ws =
-        WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
+    MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
     loader.setProperty("Workspace", ws);
     loader.setProperty("RewriteSpectraMap", OptionalBool(true));
     TS_ASSERT(loader.execute());
@@ -609,28 +583,21 @@ public:
     TS_ASSERT_EQUALS(physicalInst->getDetector(1005)->getPos(), V3D(2, 1, 0));
 
     // Check the right instrument ended up on the workspace
-    TS_ASSERT_EQUALS(neutronicInst.get(),
-                     ws->getInstrument()->baseInstrument().get());
+    TS_ASSERT_EQUALS(neutronicInst.get(), ws->getInstrument()->baseInstrument().get());
     // Check the neutronic positions
     const auto &detectorInfo = ws->detectorInfo();
-    TS_ASSERT_EQUALS(detectorInfo.position(detectorInfo.indexOf(1000)),
-                     V3D(2, 2, 0));
-    TS_ASSERT_EQUALS(detectorInfo.position(detectorInfo.indexOf(1001)),
-                     V3D(2, 3, 0));
-    TS_ASSERT_EQUALS(detectorInfo.position(detectorInfo.indexOf(1002)),
-                     V3D(3, 2, 0));
-    TS_ASSERT_EQUALS(detectorInfo.position(detectorInfo.indexOf(1003)),
-                     V3D(3, 3, 0));
+    TS_ASSERT_EQUALS(detectorInfo.position(detectorInfo.indexOf(1000)), V3D(2, 2, 0));
+    TS_ASSERT_EQUALS(detectorInfo.position(detectorInfo.indexOf(1001)), V3D(2, 3, 0));
+    TS_ASSERT_EQUALS(detectorInfo.position(detectorInfo.indexOf(1002)), V3D(3, 2, 0));
+    TS_ASSERT_EQUALS(detectorInfo.position(detectorInfo.indexOf(1003)), V3D(3, 3, 0));
     // Note that one of the physical pixels doesn't exist in the neutronic
     // space
     TS_ASSERT_THROWS(detectorInfo.indexOf(1004), const std::out_of_range &);
-    TS_ASSERT_EQUALS(detectorInfo.position(detectorInfo.indexOf(1005)),
-                     V3D(4, 3, 0));
+    TS_ASSERT_EQUALS(detectorInfo.position(detectorInfo.indexOf(1005)), V3D(4, 3, 0));
 
     // Check that the first 2 detectors share the same shape in the physical
     // instrument...
-    TS_ASSERT_EQUALS(physicalInst->getDetector(1000)->shape(),
-                     physicalInst->getDetector(1001)->shape())
+    TS_ASSERT_EQUALS(physicalInst->getDetector(1000)->shape(), physicalInst->getDetector(1001)->shape())
     // ...but not in the neutronic instrument
     TS_ASSERT_DIFFERS(detectorInfo.detector(detectorInfo.indexOf(1000)).shape(),
                       neutronicInst->getDetector(1001)->shape())
@@ -640,18 +607,15 @@ public:
                      detectorInfo.detector(detectorInfo.indexOf(1000)).shape())
 
     // Check the monitor is in the same place in each instrument
-    TS_ASSERT_EQUALS(physicalInst->getDetector(1)->getPos(),
-                     detectorInfo.position(detectorInfo.indexOf(1)));
+    TS_ASSERT_EQUALS(physicalInst->getDetector(1)->getPos(), detectorInfo.position(detectorInfo.indexOf(1)));
     // ...but is not the same object
-    TS_ASSERT_DIFFERS(physicalInst->getDetector(1).get(),
-                      neutronicInst->getDetector(1).get());
+    TS_ASSERT_DIFFERS(physicalInst->getDetector(1).get(), neutronicInst->getDetector(1).get());
 
     // Physical instrument obtained via workspace: Make sure we do *not* get
     // positions from DetectorInfo.
     auto physInstFromWS = ws->getInstrument()->getPhysicalInstrument();
     TS_ASSERT(physInstFromWS->isParametrized());
-    TS_ASSERT_DIFFERS(physInstFromWS->getDetector(1003)->getPos(),
-                      detectorInfo.position(detectorInfo.indexOf(1003)));
+    TS_ASSERT_DIFFERS(physInstFromWS->getDetector(1003)->getPos(), detectorInfo.position(detectorInfo.indexOf(1003)));
     TS_ASSERT_EQUALS(physInstFromWS->getDetector(1000)->getPos(), V3D(0, 0, 0));
     TS_ASSERT_EQUALS(physInstFromWS->getDetector(1001)->getPos(), V3D(0, 1, 0));
     TS_ASSERT_EQUALS(physInstFromWS->getDetector(1002)->getPos(), V3D(1, 0, 0));
@@ -669,41 +633,38 @@ public:
     IDS.clear();
 
     // Minimal XML instrument, inspired by IDF_for_UNIT_TESTING3.xml
-    const std::string instrumentXML =
-        "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>"
-        "<instrument name=\"xmlInst\" valid-from=\"1900-01-31 23:59:59\" "
-        "valid-to=\"2100-01-31 23:59:59\" "
-        "last-modified=\"2010-10-06T16:21:30\">"
-        "<defaults />"
-        "<component type=\"panel\" idlist=\"idlist_for_bank1\">"
-        "<location r=\"0\" t=\"0\" rot=\"0\" axis-x=\"0\" axis-y=\"1\" "
-        "axis-z=\"0\" name=\"bank1\" xpixels=\"3\" ypixels=\"2\" />"
-        "</component>"
-        "<type is=\"detector\" name=\"panel\">"
-        "<properties/>"
-        "<component type=\"pixel\">"
-        "<location y=\"1\" x=\"1\"/>"
-        "</component>"
-        "</type>"
-        "<type is=\"detector\" name=\"pixel\">"
-        "<cuboid id=\"pixel-shape\" />"
-        "<algebra val=\"pixel-shape\"/>"
-        "</type>"
-        "<idlist idname=\"idlist_for_bank1\">"
-        "<id start=\"1005\" end=\"1005\" />"
-        "</idlist>"
-        "</instrument>";
+    const std::string instrumentXML = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>"
+                                      "<instrument name=\"xmlInst\" valid-from=\"1900-01-31 23:59:59\" "
+                                      "valid-to=\"2100-01-31 23:59:59\" "
+                                      "last-modified=\"2010-10-06T16:21:30\">"
+                                      "<defaults />"
+                                      "<component type=\"panel\" idlist=\"idlist_for_bank1\">"
+                                      "<location r=\"0\" t=\"0\" rot=\"0\" axis-x=\"0\" axis-y=\"1\" "
+                                      "axis-z=\"0\" name=\"bank1\" xpixels=\"3\" ypixels=\"2\" />"
+                                      "</component>"
+                                      "<type is=\"detector\" name=\"panel\">"
+                                      "<properties/>"
+                                      "<component type=\"pixel\">"
+                                      "<location y=\"1\" x=\"1\"/>"
+                                      "</component>"
+                                      "</type>"
+                                      "<type is=\"detector\" name=\"pixel\">"
+                                      "<cuboid id=\"pixel-shape\" />"
+                                      "<algebra val=\"pixel-shape\"/>"
+                                      "</type>"
+                                      "<idlist idname=\"idlist_for_bank1\">"
+                                      "<id start=\"1005\" end=\"1005\" />"
+                                      "</idlist>"
+                                      "</instrument>";
 
     LoadInstrument instLoader;
     instLoader.setRethrows(true);
     instLoader.initialize();
     instLoader.setProperty("RewriteSpectraMap", OptionalBool(true));
-    instLoader.setProperty("Workspace", WorkspaceFactory::Instance().create(
-                                            "EventWorkspace", 1, 1, 1));
+    instLoader.setProperty("Workspace", WorkspaceFactory::Instance().create("EventWorkspace", 1, 1, 1));
     instLoader.setProperty("InstrumentXML", instrumentXML);
-    instLoader.setProperty(
-        "InstrumentName",
-        "Nonsense"); // Want to make sure it doesn't matter what we call it
+    instLoader.setProperty("InstrumentName",
+                           "Nonsense"); // Want to make sure it doesn't matter what we call it
 
     instLoader.execute();
 
@@ -713,8 +674,7 @@ public:
   void test_failure_if_InstrumentXML_property_set_but_not_InstrumentName() {
     LoadInstrument instLoader;
     instLoader.initialize();
-    instLoader.setProperty("Workspace", WorkspaceFactory::Instance().create(
-                                            "EventWorkspace", 1, 1, 1));
+    instLoader.setProperty("Workspace", WorkspaceFactory::Instance().create("EventWorkspace", 1, 1, 1));
     instLoader.setProperty("InstrumentXML", "<doesn't matter what>");
     instLoader.setProperty("RewriteSpectraMap", OptionalBool(true));
     TS_ASSERT(!instLoader.execute())
@@ -723,8 +683,7 @@ public:
   void test_failure_if_InstrumentXML_is_malformed() {
     LoadInstrument instLoader;
     instLoader.initialize();
-    instLoader.setProperty("Workspace", WorkspaceFactory::Instance().create(
-                                            "EventWorkspace", 1, 1, 1));
+    instLoader.setProperty("Workspace", WorkspaceFactory::Instance().create("EventWorkspace", 1, 1, 1));
     instLoader.setProperty("InstrumentXML", "<instrument>");
     instLoader.setProperty("InstrumentName", "Nonsense");
     instLoader.setProperty("RewriteSpectraMap", OptionalBool(true));
@@ -736,15 +695,12 @@ public:
     LoadInstrument instLoader;
     instLoader.initialize();
     instLoader.setChild(true);
-    MatrixWorkspace_sptr ws =
-        DataObjects::create<Workspace2D>(1, HistogramData::Points(1));
+    MatrixWorkspace_sptr ws = DataObjects::create<Workspace2D>(1, HistogramData::Points(1));
     instLoader.setProperty("Workspace", ws);
     instLoader.setProperty("RewriteSpectraMap", OptionalBool(true));
-    TS_ASSERT_THROWS_EQUALS(
-        instLoader.execute(), Kernel::Exception::FileError & e,
-        std::string(e.what()),
-        "Either the InstrumentName or Filename property of LoadInstrument "
-        "must be specified to load an instrument in \"\"");
+    TS_ASSERT_THROWS_EQUALS(instLoader.execute(), Kernel::Exception::FileError & e, std::string(e.what()),
+                            "Either the InstrumentName or Filename property of LoadInstrument "
+                            "must be specified to load an instrument in \"\"");
     TS_ASSERT(!instLoader.isExecuted());
     TS_ASSERT_EQUALS(instLoader.getPropertyValue("Filename"), "");
   }
@@ -753,14 +709,12 @@ public:
     LoadInstrument instLoader;
     instLoader.initialize();
     instLoader.setRethrows(true);
-    MatrixWorkspace_sptr ws =
-        DataObjects::create<Workspace2D>(1, HistogramData::Points(1));
+    MatrixWorkspace_sptr ws = DataObjects::create<Workspace2D>(1, HistogramData::Points(1));
     instLoader.setProperty("Workspace", ws);
     instLoader.setPropertyValue("Filename", "Nonsense");
     instLoader.setProperty("RewriteSpectraMap", OptionalBool(true));
-    TS_ASSERT_THROWS_EQUALS(
-        instLoader.execute(), std::invalid_argument & e, std::string(e.what()),
-        "FileDescriptor() - File 'Nonsense' does not exist");
+    TS_ASSERT_THROWS_EQUALS(instLoader.execute(), std::invalid_argument & e, std::string(e.what()),
+                            "FileDescriptor() - File 'Nonsense' does not exist");
     TS_ASSERT(!instLoader.isExecuted());
     TS_ASSERT_EQUALS(instLoader.getPropertyValue("Filename"), "Nonsense");
   }
@@ -768,8 +722,7 @@ public:
   void test_if_Workspace_not_set() {
     LoadInstrument instLoader;
     instLoader.initialize();
-    instLoader.setPropertyValue("Filename",
-                                "unit_testing/SMALLFAKE_example_geometry.hdf5");
+    instLoader.setPropertyValue("Filename", "unit_testing/SMALLFAKE_example_geometry.hdf5");
     instLoader.setProperty("RewriteSpectraMap", OptionalBool(true));
     instLoader.execute();
     TS_ASSERT(instLoader.isExecuted());
@@ -782,44 +735,41 @@ public:
     IDS.clear();
 
     // Minimal XML instrument
-    const std::string instrumentXML =
-        "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>"
-        "<instrument name=\"xmlInst\" valid-from=\"1900-01-31 23:59:59\" "
-        "valid-to=\"2100-01-31 23:59:59\" "
-        "last-modified=\"2010-10-06T16:21:30\">"
-        "<defaults>"
-        "<!-- view -->"
-        "</defaults>"
+    const std::string instrumentXML = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>"
+                                      "<instrument name=\"xmlInst\" valid-from=\"1900-01-31 23:59:59\" "
+                                      "valid-to=\"2100-01-31 23:59:59\" "
+                                      "last-modified=\"2010-10-06T16:21:30\">"
+                                      "<defaults>"
+                                      "<!-- view -->"
+                                      "</defaults>"
 
-        "<component type=\"panel\" idlist=\"idlist_for_bank1\">"
-        "<location r=\"0\" t=\"0\" rot=\"0\" axis-x=\"0\" axis-y=\"1\" "
-        "axis-z=\"0\" name=\"bank1\" xpixels=\"3\" ypixels=\"2\" />"
-        "</component>"
-        "<type is=\"detector\" name=\"panel\">"
-        "<properties/>"
-        "<component type=\"pixel\">"
-        "<location y=\"1\" x=\"1\"/>"
-        "</component>"
-        "</type>"
-        "<type is=\"detector\" name=\"pixel\">"
-        "<cuboid id=\"pixel-shape\" />"
-        "<algebra val=\"pixel-shape\"/>"
-        "</type>"
-        "<idlist idname=\"idlist_for_bank1\">"
-        "<id start=\"1005\" end=\"1005\" />"
-        "</idlist>"
-        "</instrument>";
+                                      "<component type=\"panel\" idlist=\"idlist_for_bank1\">"
+                                      "<location r=\"0\" t=\"0\" rot=\"0\" axis-x=\"0\" axis-y=\"1\" "
+                                      "axis-z=\"0\" name=\"bank1\" xpixels=\"3\" ypixels=\"2\" />"
+                                      "</component>"
+                                      "<type is=\"detector\" name=\"panel\">"
+                                      "<properties/>"
+                                      "<component type=\"pixel\">"
+                                      "<location y=\"1\" x=\"1\"/>"
+                                      "</component>"
+                                      "</type>"
+                                      "<type is=\"detector\" name=\"pixel\">"
+                                      "<cuboid id=\"pixel-shape\" />"
+                                      "<algebra val=\"pixel-shape\"/>"
+                                      "</type>"
+                                      "<idlist idname=\"idlist_for_bank1\">"
+                                      "<id start=\"1005\" end=\"1005\" />"
+                                      "</idlist>"
+                                      "</instrument>";
 
     LoadInstrument instLoader;
     instLoader.setRethrows(true);
     instLoader.initialize();
-    instLoader.setProperty("Workspace", WorkspaceFactory::Instance().create(
-                                            "EventWorkspace", 1, 1, 1));
+    instLoader.setProperty("Workspace", WorkspaceFactory::Instance().create("EventWorkspace", 1, 1, 1));
     instLoader.setProperty("InstrumentXML", instrumentXML);
     instLoader.setProperty("RewriteSpectraMap", OptionalBool(true));
-    instLoader.setProperty(
-        "InstrumentName",
-        "Nonsense"); // Want to make sure it doesn't matter what we call it
+    instLoader.setProperty("InstrumentName",
+                           "Nonsense"); // Want to make sure it doesn't matter what we call it
 
     instLoader.execute();
 
@@ -830,17 +780,14 @@ public:
     IDS.clear();
 
     // explicitely set the default instrument view
-    const std::string instrumentXMLwithView = Mantid::Kernel::Strings::replace(
-        instrumentXML, "<!-- view -->",
-        "<default-view view=\"cylindrical_y\"/>");
+    const std::string instrumentXMLwithView =
+        Mantid::Kernel::Strings::replace(instrumentXML, "<!-- view -->", "<default-view view=\"cylindrical_y\"/>");
 
-    instLoader.setProperty("Workspace", WorkspaceFactory::Instance().create(
-                                            "EventWorkspace", 1, 1, 1));
+    instLoader.setProperty("Workspace", WorkspaceFactory::Instance().create("EventWorkspace", 1, 1, 1));
     instLoader.setProperty("InstrumentXML", instrumentXMLwithView);
     instLoader.setProperty("RewriteSpectraMap", OptionalBool(true));
-    instLoader.setProperty(
-        "InstrumentName",
-        "Nonsense"); // Want to make sure it doesn't matter what we call it
+    instLoader.setProperty("InstrumentName",
+                           "Nonsense"); // Want to make sure it doesn't matter what we call it
 
     instLoader.execute();
 
@@ -856,8 +803,7 @@ private:
   // @param paramFilename Expected parameter file to be loaded as part of
   // LoadInstrument
   // @param par A specific parameter to check if have been loaded
-  void doTestParameterFileSelection(const std::string &filename,
-                                    const std::string &paramFilename,
+  void doTestParameterFileSelection(const std::string &filename, const std::string &paramFilename,
                                     const std::string &par) {
     InstrumentDataService::Instance().clear();
 
@@ -866,8 +812,7 @@ private:
     loader.setChild(true);
 
     // create a workspace with some sample data
-    MatrixWorkspace_sptr ws2D =
-        DataObjects::create<Workspace2D>(1, HistogramData::Points(1));
+    MatrixWorkspace_sptr ws2D = DataObjects::create<Workspace2D>(1, HistogramData::Points(1));
 
     // load IDF
     loader.setPropertyValue("Filename", filename);
@@ -882,8 +827,7 @@ private:
     std::shared_ptr<const Instrument> i = output->getInstrument();
 
     // test if a dummy parameter has been read in
-    std::shared_ptr<const IComponent> comp =
-        i->getComponentByName("bank_90degnew");
+    std::shared_ptr<const IComponent> comp = i->getComponentByName("bank_90degnew");
     TS_ASSERT_EQUALS(comp->getName(), "bank_90degnew");
 
     const auto &paramMap = output->constInstrumentParameters();
@@ -906,9 +850,7 @@ class LoadInstrumentTestPerformance : public CxxTest::TestSuite {
 public:
   MatrixWorkspace_sptr ws;
 
-  void setUp() override {
-    ws = WorkspaceCreationHelper::create2DWorkspace(1, 2);
-  }
+  void setUp() override { ws = WorkspaceCreationHelper::create2DWorkspace(1, 2); }
 
   void doTest(const std::string &filename, size_t numTimes = 1) {
     for (size_t i = 0; i < numTimes; ++i) {

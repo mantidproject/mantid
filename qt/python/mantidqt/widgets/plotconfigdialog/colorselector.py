@@ -68,7 +68,7 @@ class ColorSelector(QWidget):
         self.prev_color = color
 
     def set_color(self, color_hex):
-        self.line_edit.setText(color_hex)
+        self.line_edit.setText(convert_color_to_hex(color_hex))
 
     def set_line_edit(self, color_hex):
         self.line_edit.setText(color_hex)

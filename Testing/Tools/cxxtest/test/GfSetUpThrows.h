@@ -23,7 +23,7 @@ public:
 // and declare this global variable in the header file.
 //
 static Fixture fixture;
- 
+
 class Suite : public CxxTest::TestSuite
 {
 public:

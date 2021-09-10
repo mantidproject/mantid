@@ -23,14 +23,11 @@ class MagFormFactorCorrectionTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MagFormFactorCorrectionTest *createSuite() {
-    return new MagFormFactorCorrectionTest();
-  }
+  static MagFormFactorCorrectionTest *createSuite() { return new MagFormFactorCorrectionTest(); }
   static void destroySuite(MagFormFactorCorrectionTest *suite) { delete suite; }
 
   MagFormFactorCorrectionTest()
-      : inputWSname("inws"), outputWSname("outws"), ionname("Fe3"),
-        formFactorWSname("ffws") {}
+      : inputWSname("inws"), outputWSname("outws"), ionname("Fe3"), formFactorWSname("ffws") {}
 
   void testInit() {
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -40,18 +37,15 @@ public:
   void testFFdefault() {
     Workspace_sptr outws;
     createWorkspaceMag(true, inputWSname);
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", inputWSname));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outputWSname));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", inputWSname));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outputWSname));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("IonName", ionname));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FormFactorWorkspace", ""));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
     // Test that no form factor work space is created
-    TS_ASSERT_THROWS(
-        outws = AnalysisDataService::Instance().retrieve(formFactorWSname),
-        const Exception::NotFoundError &);
+    TS_ASSERT_THROWS(outws = AnalysisDataService::Instance().retrieve(formFactorWSname),
+                     const Exception::NotFoundError &);
   }
 
   void testExec() {
@@ -59,27 +53,18 @@ public:
     createWorkspaceMag(true, inputWSname);
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", inputWSname));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outputWSname));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", inputWSname));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outputWSname));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("IonName", ionname));
     // Test that this time, the form factor workspace _is_ created
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("FormFactorWorkspace", formFactorWSname));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FormFactorWorkspace", formFactorWSname));
     alg.execute();
-    TS_ASSERT_THROWS_NOTHING(
-        outws = AnalysisDataService::Instance().retrieve(outputWSname));
-    MatrixWorkspace_sptr result =
-        std::dynamic_pointer_cast<MatrixWorkspace>(outws);
-    TS_ASSERT_THROWS_NOTHING(
-        outws = AnalysisDataService::Instance().retrieve(formFactorWSname));
-    MatrixWorkspace_sptr ffout =
-        std::dynamic_pointer_cast<MatrixWorkspace>(outws);
-    TS_ASSERT_THROWS_NOTHING(
-        outws = AnalysisDataService::Instance().retrieve(inputWSname));
-    MatrixWorkspace_sptr input =
-        std::dynamic_pointer_cast<MatrixWorkspace>(outws);
+    TS_ASSERT_THROWS_NOTHING(outws = AnalysisDataService::Instance().retrieve(outputWSname));
+    MatrixWorkspace_sptr result = std::dynamic_pointer_cast<MatrixWorkspace>(outws);
+    TS_ASSERT_THROWS_NOTHING(outws = AnalysisDataService::Instance().retrieve(formFactorWSname));
+    MatrixWorkspace_sptr ffout = std::dynamic_pointer_cast<MatrixWorkspace>(outws);
+    TS_ASSERT_THROWS_NOTHING(outws = AnalysisDataService::Instance().retrieve(inputWSname));
+    MatrixWorkspace_sptr input = std::dynamic_pointer_cast<MatrixWorkspace>(outws);
     TS_ASSERT_LESS_THAN(checkWorkspaces(input, result, ffout), 1.e-8);
   }
 
@@ -104,8 +89,8 @@ private:
     if (isHistogram) {
       X.emplace_back(nbins + 0.5);
     }
-    MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create(
-        "Workspace2D", nspecs, isHistogram ? (nbins + 1) : nbins, nbins);
+    MatrixWorkspace_sptr ws =
+        WorkspaceFactory::Instance().create("Workspace2D", nspecs, isHistogram ? (nbins + 1) : nbins, nbins);
     for (int64_t i = 0; i < nspecs; i++) {
       ws->mutableX(i).assign(X.begin(), X.end());
       ws->mutableY(i).assign(Y.begin(), Y.end());
@@ -116,8 +101,7 @@ private:
   }
 
   // Checks that all the workspaces are consistent (in = out*ff)
-  double checkWorkspaces(const MatrixWorkspace_sptr &in,
-                         const MatrixWorkspace_sptr &out,
+  double checkWorkspaces(const MatrixWorkspace_sptr &in, const MatrixWorkspace_sptr &out,
                          const MatrixWorkspace_sptr &ff) {
     const int64_t nbins = in->blocksize();
     const int64_t nspecs = in->getNumberHistograms();

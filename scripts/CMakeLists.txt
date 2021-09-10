@@ -30,7 +30,7 @@ set(_pth_dirs .
     SANS
     SCD_Reduction
     TemporaryREF_MScripts
-    Vates)
+)
 
 set(_pth_list_dev)
 set(_pth_list_install)

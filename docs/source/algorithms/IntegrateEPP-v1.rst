@@ -28,7 +28,7 @@ Usage
     ws = CreateSampleWorkspace('Histogram', 'User Defined', gaussian)
 
     epps = FindEPP(ws)
-   
+
     integrated = IntegrateEPP(ws, epps, 3)
 
     xs = integrated.readX(0)

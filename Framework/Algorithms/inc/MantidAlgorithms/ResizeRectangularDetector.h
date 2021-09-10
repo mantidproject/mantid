@@ -20,14 +20,10 @@ class MANTID_ALGORITHMS_DLL ResizeRectangularDetector : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Resize a RectangularDetector in X and/or Y.";
-  }
+  const std::string summary() const override { return "Resize a RectangularDetector in X and/or Y."; }
 
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"ModifyDetectorDotDatFile"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"ModifyDetectorDotDatFile"}; }
   const std::string category() const override;
 
 private:

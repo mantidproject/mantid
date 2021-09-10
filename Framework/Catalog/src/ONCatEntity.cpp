@@ -17,13 +17,11 @@ namespace ONCat {
 using Mantid::Catalog::Exception::MalformedRepresentationError;
 using Mantid::Kernel::StringTokenizer;
 
-ONCatEntity::ONCatEntity(const std::string &id, const std::string &type,
-                         Content_uptr content)
+ONCatEntity::ONCatEntity(const std::string &id, const std::string &type, Content_uptr content)
     : m_id(id), m_type(type), m_content(std::move(content)) {}
 
 ONCatEntity::ONCatEntity(const ONCatEntity &other)
-    : m_id(other.m_id), m_type(other.m_type),
-      m_content(std::make_unique<Content>(*other.m_content)) {}
+    : m_id(other.m_id), m_type(other.m_type), m_content(std::make_unique<Content>(*other.m_content)) {}
 
 ONCatEntity::~ONCatEntity() {}
 
@@ -31,9 +29,7 @@ std::string ONCatEntity::id() const { return m_id; }
 
 std::string ONCatEntity::type() const { return m_type; }
 
-std::string ONCatEntity::toString() const {
-  return m_content->toStyledString();
-}
+std::string ONCatEntity::toString() const { return m_content->toStyledString(); }
 
 ONCatEntity ONCatEntity::fromJSONStream(std::istream &streamContent) {
   auto content = std::make_unique<Content>();
@@ -48,16 +44,14 @@ ONCatEntity ONCatEntity::fromJSONStream(std::istream &streamContent) {
   const auto type = content->get("type", "").asString();
 
   if (id == "" || type == "") {
-    throw MalformedRepresentationError(
-        "Expected \"id\" and \"type\" attributes from ONCat API, but these "
-        "were not found.");
+    throw MalformedRepresentationError("Expected \"id\" and \"type\" attributes from ONCat API, but these "
+                                       "were not found.");
   }
 
   return ONCatEntity(id, type, std::move(content));
 }
 
-std::vector<ONCatEntity>
-ONCatEntity::vectorFromJSONStream(std::istream &streamContent) {
+std::vector<ONCatEntity> ONCatEntity::vectorFromJSONStream(std::istream &streamContent) {
   auto content = std::make_unique<Content>();
 
   try {
@@ -67,8 +61,7 @@ ONCatEntity::vectorFromJSONStream(std::istream &streamContent) {
   }
 
   if (!content->isArray()) {
-    throw MalformedRepresentationError(
-        "Expected JSON representation to be an array of entities.");
+    throw MalformedRepresentationError("Expected JSON representation to be an array of entities.");
   }
 
   std::vector<ONCatEntity> entities;
@@ -78,49 +71,35 @@ ONCatEntity::vectorFromJSONStream(std::istream &streamContent) {
     const auto type = subContent.get("type", "").asString();
 
     if (id == "" || type == "") {
-      throw MalformedRepresentationError(
-          "Expected \"id\" and \"type\" attributes from ONCat API, but these "
-          "were not found.");
+      throw MalformedRepresentationError("Expected \"id\" and \"type\" attributes from ONCat API, but these "
+                                         "were not found.");
     }
 
-    entities.emplace_back(
-        ONCatEntity(id, type, std::make_unique<Content>(subContent)));
+    entities.emplace_back(ONCatEntity(id, type, std::make_unique<Content>(subContent)));
   }
 
   return entities;
 }
 
 template <>
-std::string
-ONCatEntity::getNestedContentValueAsType(const Content &content,
-                                         const std::string &path) const {
+std::string ONCatEntity::getNestedContentValueAsType(const Content &content, const std::string &path) const {
   return getNestedContent(content, path).asString();
 }
-template <>
-int ONCatEntity::getNestedContentValueAsType(const Content &content,
-                                             const std::string &path) const {
+template <> int ONCatEntity::getNestedContentValueAsType(const Content &content, const std::string &path) const {
   return getNestedContent(content, path).asInt();
 }
-template <>
-float ONCatEntity::getNestedContentValueAsType(const Content &content,
-                                               const std::string &path) const {
+template <> float ONCatEntity::getNestedContentValueAsType(const Content &content, const std::string &path) const {
   return getNestedContent(content, path).asFloat();
 }
-template <>
-double ONCatEntity::getNestedContentValueAsType(const Content &content,
-                                                const std::string &path) const {
+template <> double ONCatEntity::getNestedContentValueAsType(const Content &content, const std::string &path) const {
   return getNestedContent(content, path).asDouble();
 }
-template <>
-bool ONCatEntity::getNestedContentValueAsType(const Content &content,
-                                              const std::string &path) const {
+template <> bool ONCatEntity::getNestedContentValueAsType(const Content &content, const std::string &path) const {
   return getNestedContent(content, path).asBool();
 }
 
-Content ONCatEntity::getNestedContent(const Content &content,
-                                      const std::string &path) const {
-  const auto pathTokens =
-      StringTokenizer(path, ".", Mantid::Kernel::StringTokenizer::TOK_TRIM);
+Content ONCatEntity::getNestedContent(const Content &content, const std::string &path) const {
+  const auto pathTokens = StringTokenizer(path, ".", Mantid::Kernel::StringTokenizer::TOK_TRIM);
 
   auto currentNode = content;
 

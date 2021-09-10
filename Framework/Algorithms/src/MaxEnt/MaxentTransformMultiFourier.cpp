@@ -14,11 +14,10 @@ namespace Mantid {
 namespace Algorithms {
 
 /** Constructor */
-MaxentTransformMultiFourier::MaxentTransformMultiFourier(
-    const MaxentSpaceComplex_sptr &dataSpace, MaxentSpace_sptr imageSpace,
-    size_t numSpec)
-    : MaxentTransformFourier(dataSpace, std::move(imageSpace)),
-      m_numSpec(numSpec), m_linearAdjustments(), m_constAdjustments() {}
+MaxentTransformMultiFourier::MaxentTransformMultiFourier(const MaxentSpaceComplex_sptr &dataSpace,
+                                                         MaxentSpace_sptr imageSpace, size_t numSpec)
+    : MaxentTransformFourier(dataSpace, std::move(imageSpace)), m_numSpec(numSpec), m_linearAdjustments(),
+      m_constAdjustments() {}
 
 /**
  * Transforms a 1D signal from image space to data space, performing an
@@ -34,8 +33,7 @@ MaxentTransformMultiFourier::MaxentTransformMultiFourier(
  * @param image : [input] Image as a vector
  * @return : The vector in the data space of concatenated spectra
  */
-std::vector<double>
-MaxentTransformMultiFourier::imageToData(const std::vector<double> &image) {
+std::vector<double> MaxentTransformMultiFourier::imageToData(const std::vector<double> &image) {
 
   std::vector<double> dataOneSpec = MaxentTransformFourier::imageToData(image);
 
@@ -54,11 +52,9 @@ MaxentTransformMultiFourier::imageToData(const std::vector<double> &image) {
       if (i % 2 == 0) { // Real part
         dataR = data[i];
         dataI = data[i + 1];
-        data[i] = m_linearAdjustments[i] * dataR -
-                  m_linearAdjustments[i + 1] * dataI + m_constAdjustments[i];
+        data[i] = m_linearAdjustments[i] * dataR - m_linearAdjustments[i + 1] * dataI + m_constAdjustments[i];
       } else { // Imaginary part
-        data[i] = m_linearAdjustments[i] * dataR +
-                  m_linearAdjustments[i - 1] * dataI + m_constAdjustments[i];
+        data[i] = m_linearAdjustments[i] * dataR + m_linearAdjustments[i - 1] * dataI + m_constAdjustments[i];
       }
     }
   } else if (!m_linearAdjustments.empty() && m_constAdjustments.empty()) {
@@ -66,11 +62,9 @@ MaxentTransformMultiFourier::imageToData(const std::vector<double> &image) {
       if (i % 2 == 0) { // Real part
         dataR = data[i];
         dataI = data[i + 1];
-        data[i] =
-            m_linearAdjustments[i] * dataR - m_linearAdjustments[i + 1] * dataI;
+        data[i] = m_linearAdjustments[i] * dataR - m_linearAdjustments[i + 1] * dataI;
       } else { // Imaginary part
-        data[i] =
-            m_linearAdjustments[i] * dataR + m_linearAdjustments[i - 1] * dataI;
+        data[i] = m_linearAdjustments[i] * dataR + m_linearAdjustments[i - 1] * dataI;
       }
     }
   } else if (m_linearAdjustments.empty() && !m_constAdjustments.empty()) {
@@ -94,12 +88,10 @@ MaxentTransformMultiFourier::imageToData(const std::vector<double> &image) {
  * @param data : [input] Data as a vector of concatenated spectra
  * @return : The vector in the image space
  */
-std::vector<double>
-MaxentTransformMultiFourier::dataToImage(const std::vector<double> &data) {
+std::vector<double> MaxentTransformMultiFourier::dataToImage(const std::vector<double> &data) {
 
   if (data.size() % m_numSpec)
-    throw std::invalid_argument(
-        "Size of data vector must be a multiple of number of spectra.");
+    throw std::invalid_argument("Size of data vector must be a multiple of number of spectra.");
 
   // Sum the concatenated spectra in data
   size_t nData = data.size() / (m_numSpec);
@@ -122,8 +114,8 @@ MaxentTransformMultiFourier::dataToImage(const std::vector<double> &data) {
  * @param constAdj: [input] Constant adjustments as complex numbers for all
  * spectra concatenated
  */
-void MaxentTransformMultiFourier::setAdjustments(
-    const std::vector<double> &linAdj, const std::vector<double> &constAdj) {
+void MaxentTransformMultiFourier::setAdjustments(const std::vector<double> &linAdj,
+                                                 const std::vector<double> &constAdj) {
   m_linearAdjustments = linAdj;
   m_constAdjustments = constAdj;
 }

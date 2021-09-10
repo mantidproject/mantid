@@ -30,9 +30,8 @@ VMD_t getItem(VMD &self, const size_t index) {
   if (index < self.getNumDims()) {
     return self[index];
   } else
-    throw std::out_of_range(
-        "VMD index out of range. index=" + std::to_string(index) +
-        ", len=" + std::to_string(self.getNumDims()));
+    throw std::out_of_range("VMD index out of range. index=" + std::to_string(index) +
+                            ", len=" + std::to_string(self.getNumDims()));
 }
 
 /**
@@ -46,37 +45,28 @@ void setItem(VMD &self, const size_t index, const VMD_t value) {
   if (index < self.getNumDims()) {
     self[index] = value;
   } else
-    throw std::out_of_range(
-        "VMD index out of range. index=" + std::to_string(index) +
-        ", len=" + std::to_string(self.getNumDims()));
+    throw std::out_of_range("VMD index out of range. index=" + std::to_string(index) +
+                            ", len=" + std::to_string(self.getNumDims()));
 }
 } // namespace
 
 GNU_DIAG_OFF("self-assign-overloaded")
 void export_VMD() {
-  class_<VMD>("VMD",
-              init<>(arg("self"),
-                     "Default constructor gives an object with 1 dimension"))
-      .def(init<VMD_t, VMD_t>(
-          "Constructs a 2 dimensional vector at the point given",
-          (arg("self"), arg("val0"), arg("val1"))))
-      .def(init<VMD_t, VMD_t, VMD_t>(
-          "Constructs a 3 dimensional vector at the point given",
-          (arg("self"), arg("val0"), arg("val1"), arg("val2"))))
-      .def(init<VMD_t, VMD_t, VMD_t, VMD_t>(
-          "Constructs a 4 dimensional vector at the point given",
-          (arg("self"), arg("val0"), arg("val1"), arg("val2"), arg("val3"))))
+  class_<VMD>("VMD", init<>(arg("self"), "Default constructor gives an object with 1 dimension"))
+      .def(init<VMD_t, VMD_t>("Constructs a 2 dimensional vector at the point given",
+                              (arg("self"), arg("val0"), arg("val1"))))
+      .def(init<VMD_t, VMD_t, VMD_t>("Constructs a 3 dimensional vector at the point given",
+                                     (arg("self"), arg("val0"), arg("val1"), arg("val2"))))
+      .def(init<VMD_t, VMD_t, VMD_t, VMD_t>("Constructs a 4 dimensional vector at the point given",
+                                            (arg("self"), arg("val0"), arg("val1"), arg("val2"), arg("val3"))))
       .def(init<VMD_t, VMD_t, VMD_t, VMD_t, VMD_t>(
           "Constructs a 5 dimensional vector at the point given",
-          (arg("self"), arg("val0"), arg("val1"), arg("val2"), arg("val3"),
-           arg("val4"))))
+          (arg("self"), arg("val0"), arg("val1"), arg("val2"), arg("val3"), arg("val4"))))
       .def(init<VMD_t, VMD_t, VMD_t, VMD_t, VMD_t, VMD_t>(
           "Constructs a 6 dimensional vector at the point given",
-          (arg("self"), arg("val0"), arg("val1"), arg("val2"), arg("val3"),
-           arg("val4"), arg("val5"))))
+          (arg("self"), arg("val0"), arg("val1"), arg("val2"), arg("val3"), arg("val4"), arg("val5"))))
 
-      .def("getNumDims", &VMD::getNumDims, arg("self"),
-           "Returns the number of dimensions the contained in the vector")
+      .def("getNumDims", &VMD::getNumDims, arg("self"), "Returns the number of dimensions the contained in the vector")
 
       .def("scalar_prod", &VMD::scalar_prod, (arg("self"), arg("other")),
            "Returns the scalar product of this vector with another. If the "
@@ -88,8 +78,7 @@ void export_VMD() {
 
       .def("norm", &VMD::norm, arg("self"), "Returns the length of the vector")
 
-      .def("norm2", &VMD::norm2, arg("self"),
-           "Returns the the squared length of the vector")
+      .def("norm2", &VMD::norm2, arg("self"), "Returns the the squared length of the vector")
 
       .def("normalize", &VMD::normalize, arg("self"),
            "Normalizes the length of the vector "
@@ -108,12 +97,10 @@ void export_VMD() {
       .def(self == self)
       .def(self != self) // must define != as Python's default is to compare
                          // object address
-      .def("__add__", &VMD::operator+,(arg("left"), arg("right")))
-      .def("__iadd__", &VMD::operator+=, return_self<>(),
-           (arg("self"), arg("other")))
-      .def("__sub__", &VMD::operator-,(arg("left"), arg("right")))
-      .def("__isub__", &VMD::operator-=, return_self<>(),
-           (arg("self"), arg("other")))
+      .def("__add__", &VMD::operator+, (arg("left"), arg("right")))
+      .def("__iadd__", &VMD::operator+=, return_self<>(), (arg("self"), arg("other")))
+      .def("__sub__", &VMD::operator-, (arg("left"), arg("right")))
+      .def("__isub__", &VMD::operator-=, return_self<>(), (arg("self"), arg("other")))
       .def(self * self)
       .def(self *= self)
       // cppcheck-suppress duplicateExpression

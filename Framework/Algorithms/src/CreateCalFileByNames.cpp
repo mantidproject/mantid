@@ -38,19 +38,15 @@ using Geometry::Instrument_const_sptr;
  *
  */
 void CreateCalFileByNames::init() {
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>(
-          "InstrumentWorkspace", "", Direction::Input,
-          std::make_shared<InstrumentValidator>()),
-      "A workspace that contains a reference to the instrument of interest. "
-      "You can use LoadEmptyInstrument to create such a workspace.");
-  declareProperty(std::make_unique<FileProperty>("GroupingFileName", "",
-                                                 FileProperty::Save, ".cal"),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InstrumentWorkspace", "", Direction::Input,
+                                                        std::make_shared<InstrumentValidator>()),
+                  "A workspace that contains a reference to the instrument of interest. "
+                  "You can use LoadEmptyInstrument to create such a workspace.");
+  declareProperty(std::make_unique<FileProperty>("GroupingFileName", "", FileProperty::Save, ".cal"),
                   "The name of the output CalFile");
-  declareProperty(
-      "GroupNames", "",
-      "A string of the instrument component names to use as separate groups. "
-      "/ or , can be used to separate multiple groups.");
+  declareProperty("GroupNames", "",
+                  "A string of the instrument component names to use as separate groups. "
+                  "/ or , can be used to separate multiple groups.");
 }
 
 /** Executes the algorithm
@@ -73,8 +69,7 @@ void CreateCalFileByNames::exec() {
 
   // Split the names of the group and insert in a vector, throw if group empty
   std::vector<std::string> vgroups;
-  boost::split(vgroups, groupsname,
-               boost::algorithm::detail::is_any_ofF<char>(",/*"));
+  boost::split(vgroups, groupsname, boost::algorithm::detail::is_any_ofF<char>(",/*"));
   if (vgroups.empty()) {
     g_log.error("Could not determine group names. Group names should be "
                 "separated by / or ,");
@@ -98,8 +93,7 @@ void CreateCalFileByNames::exec() {
   using sptr_IComp = std::shared_ptr<const Geometry::IComponent>;
   using sptr_IDet = std::shared_ptr<const Geometry::IDetector>;
   std::queue<std::pair<sptr_ICompAss, int>> assemblies;
-  sptr_ICompAss current =
-      std::dynamic_pointer_cast<const Geometry::ICompAssembly>(inst);
+  sptr_ICompAss current = std::dynamic_pointer_cast<const Geometry::ICompAssembly>(inst);
   sptr_IDet currentDet;
   sptr_IComp currentIComp;
   sptr_ICompAss currentchild;
@@ -127,21 +121,16 @@ void CreateCalFileByNames::exec() {
     if (nchilds != 0) {
       for (int i = 0; i < nchilds; ++i) {
         currentIComp = (*(current.get()))[i]; // Get child
-        currentDet =
-            std::dynamic_pointer_cast<const Geometry::IDetector>(currentIComp);
+        currentDet = std::dynamic_pointer_cast<const Geometry::IDetector>(currentIComp);
         if (currentDet.get()) // Is detector
         {
           if (overwrite) // Map will contains udet as the key
-            instrcalib[currentDet->getID()] =
-                std::make_pair(number++, top_group);
+            instrcalib[currentDet->getID()] = std::make_pair(number++, top_group);
           else // Map will contains the entry number as the key
-            instrcalib[number++] =
-                std::make_pair(currentDet->getID(), top_group);
+            instrcalib[number++] = std::make_pair(currentDet->getID(), top_group);
         } else // Is an assembly, push in the queue
         {
-          currentchild =
-              std::dynamic_pointer_cast<const Geometry::ICompAssembly>(
-                  currentIComp);
+          currentchild = std::dynamic_pointer_cast<const Geometry::ICompAssembly>(currentIComp);
           if (currentchild.get()) {
             child_group = group_map[currentchild->getName()];
             if (child_group == 0)
@@ -158,23 +147,20 @@ void CreateCalFileByNames::exec() {
   progress(0.2);
 }
 
-bool CreateCalFileByNames::groupingFileDoesExist(
-    const std::string &filename) const {
+bool CreateCalFileByNames::groupingFileDoesExist(const std::string &filename) const {
   std::ifstream file(filename.c_str());
   // Check if the file already exists
   if (!file)
     return false;
   file.close();
   std::ostringstream mess;
-  mess << "Calibration file " << filename
-       << " already exist. Only grouping will be modified";
+  mess << "Calibration file " << filename << " already exist. Only grouping will be modified";
   g_log.information(mess.str());
   return true;
 }
 
 /// Creates and saves the output file
-void CreateCalFileByNames::saveGroupingFile(const std::string &filename,
-                                            bool overwrite) const {
+void CreateCalFileByNames::saveGroupingFile(const std::string &filename, bool overwrite) const {
   std::ostringstream message;
   std::fstream outfile;
   std::fstream infile;
@@ -226,8 +212,7 @@ void CreateCalFileByNames::saveGroupingFile(const std::string &filename,
   } else //
   {
     for (const auto &value : instrcalib)
-      writeCalEntry(outfile, value.first, (value.second).first, 0.0, 1,
-                    (value.second).second);
+      writeCalEntry(outfile, value.first, (value.second).first, 0.0, 1, (value.second).second);
   }
 
   // Closing
@@ -237,18 +222,14 @@ void CreateCalFileByNames::saveGroupingFile(const std::string &filename,
 }
 
 /// Writes a single calibration line to the output file
-void CreateCalFileByNames::writeCalEntry(std::ostream &os, int number, int udet,
-                                         double offset, int select, int group) {
-  os << std::fixed << std::setw(9) << number << std::fixed << std::setw(15)
-     << udet << std::fixed << std::setprecision(7) << std::setw(15) << offset
-     << std::fixed << std::setw(8) << select << std::fixed << std::setw(8)
-     << group << "\n";
+void CreateCalFileByNames::writeCalEntry(std::ostream &os, int number, int udet, double offset, int select, int group) {
+  os << std::fixed << std::setw(9) << number << std::fixed << std::setw(15) << udet << std::fixed
+     << std::setprecision(7) << std::setw(15) << offset << std::fixed << std::setw(8) << select << std::fixed
+     << std::setw(8) << group << "\n";
 }
 
 /// Writes out the header to the output file
-void CreateCalFileByNames::writeHeaders(std::ostream &os,
-                                        const std::string &filename,
-                                        bool overwrite) const {
+void CreateCalFileByNames::writeHeaders(std::ostream &os, const std::string &filename, bool overwrite) const {
   os << "# Diffraction focusing calibration file created by Mantid"
      << "\n";
   os << "# Detectors have been grouped using assembly names:" << groups << "\n";

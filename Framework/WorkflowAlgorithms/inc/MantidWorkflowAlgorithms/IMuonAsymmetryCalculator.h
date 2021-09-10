@@ -20,8 +20,7 @@ namespace WorkflowAlgorithms {
 */
 class DLLExport IMuonAsymmetryCalculator {
 public:
-  IMuonAsymmetryCalculator(const API::WorkspaceGroup_sptr &inputWS,
-                           const std::vector<int> &summedPeriods,
+  IMuonAsymmetryCalculator(const API::WorkspaceGroup_sptr &inputWS, const std::vector<int> &summedPeriods,
                            const std::vector<int> &subtractedPeriods);
   virtual ~IMuonAsymmetryCalculator() = default;
   /// Overridden in derived classes to perform asymmetry calculation
@@ -29,17 +28,14 @@ public:
 
 protected:
   /// Sums the specified periods in the input workspace group
-  API::MatrixWorkspace_sptr
-  sumPeriods(const std::vector<int> &periodsToSum) const;
+  API::MatrixWorkspace_sptr sumPeriods(const std::vector<int> &periodsToSum) const;
 
   /// Subtracts one workspace from another (lhs - rhs)
-  API::MatrixWorkspace_sptr
-  subtractWorkspaces(const API::MatrixWorkspace_sptr &lhs,
-                     const API::MatrixWorkspace_sptr &rhs) const;
+  API::MatrixWorkspace_sptr subtractWorkspaces(const API::MatrixWorkspace_sptr &lhs,
+                                               const API::MatrixWorkspace_sptr &rhs) const;
 
   /// Extracts a single spectrum from a workspace
-  API::MatrixWorkspace_sptr extractSpectrum(const API::Workspace_sptr &inputWS,
-                                            const int index) const;
+  API::MatrixWorkspace_sptr extractSpectrum(const API::Workspace_sptr &inputWS, const int index) const;
 
   /// Input workspace
   const API::WorkspaceGroup_sptr m_inputWS;

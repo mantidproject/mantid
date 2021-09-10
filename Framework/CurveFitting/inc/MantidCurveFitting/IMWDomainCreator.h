@@ -34,28 +34,23 @@ workspace.
 class MANTID_CURVEFITTING_DLL IMWDomainCreator : public API::IDomainCreator {
 public:
   /// Constructor
-  IMWDomainCreator(Kernel::IPropertyManager *fit,
-                   const std::string &workspacePropertyName,
+  IMWDomainCreator(Kernel::IPropertyManager *fit, const std::string &workspacePropertyName,
                    DomainType domainType = Simple);
   /// Declare properties that specify the dataset within the workspace to fit
   /// to.
-  void declareDatasetProperties(const std::string &suffix = "",
-                                bool addProp = true) override;
+  void declareDatasetProperties(const std::string &suffix = "", bool addProp = true) override;
   /// Create an output workspace.
-  std::shared_ptr<API::Workspace> createOutputWorkspace(
-      const std::string &baseName, API::IFunction_sptr function,
-      std::shared_ptr<API::FunctionDomain> domain,
-      std::shared_ptr<API::FunctionValues> values,
-      const std::string &outputWorkspacePropertyName) override;
+  std::shared_ptr<API::Workspace> createOutputWorkspace(const std::string &baseName, API::IFunction_sptr function,
+                                                        std::shared_ptr<API::FunctionDomain> domain,
+                                                        std::shared_ptr<API::FunctionValues> values,
+                                                        const std::string &outputWorkspacePropertyName) override;
   /// Return the size of the domain to be created.
   size_t getDomainSize() const override;
   /// Initialize the function
   void initFunction(API::IFunction_sptr function) override;
   /// Set the workspace
   /// @param ws :: workspace to set.
-  void setWorkspace(std::shared_ptr<API::MatrixWorkspace> ws) {
-    m_matrixWorkspace = std::move(ws);
-  }
+  void setWorkspace(std::shared_ptr<API::MatrixWorkspace> ws) { m_matrixWorkspace = std::move(ws); }
   /// Set the workspace index
   /// @param wi :: workspace index to set.
   void setWorkspaceIndex(size_t wi) { m_workspaceIndex = wi; }
@@ -74,26 +69,21 @@ protected:
   virtual void setParameters() const;
 
   /// Creates the blank output workspace of the correct size
-  std::shared_ptr<API::MatrixWorkspace>
-  createEmptyResultWS(const size_t nhistograms, const size_t nyvalues);
+  std::shared_ptr<API::MatrixWorkspace> createEmptyResultWS(const size_t nhistograms, const size_t nyvalues);
   /// Set initial values for parameters with default values.
   void setInitialValues(API::IFunction &function);
   // Unrolls function into its constituent parts if it is a composite and adds
   // it to the list. Note this is recursive
-  void
-  appendCompositeFunctionMembers(std::list<API::IFunction_sptr> &functionList,
-                                 const API::IFunction_sptr &function) const;
+  void appendCompositeFunctionMembers(std::list<API::IFunction_sptr> &functionList,
+                                      const API::IFunction_sptr &function) const;
   // Create separate Convolutions for each component of the model of a
   // convolution
-  void appendConvolvedCompositeFunctionMembers(
-      std::list<API::IFunction_sptr> &functionList,
-      const API::IFunction_sptr &function) const;
+  void appendConvolvedCompositeFunctionMembers(std::list<API::IFunction_sptr> &functionList,
+                                               const API::IFunction_sptr &function) const;
   /// Add the calculated function values to the workspace
-  void addFunctionValuesToWS(
-      const API::IFunction_sptr &function,
-      std::shared_ptr<API::MatrixWorkspace> &ws, const size_t wsIndex,
-      const std::shared_ptr<API::FunctionDomain> &domain,
-      const std::shared_ptr<API::FunctionValues> &resultValues) const;
+  void addFunctionValuesToWS(const API::IFunction_sptr &function, std::shared_ptr<API::MatrixWorkspace> &ws,
+                             const size_t wsIndex, const std::shared_ptr<API::FunctionDomain> &domain,
+                             const std::shared_ptr<API::FunctionValues> &resultValues) const;
 
   /// Store workspace property name
   std::string m_workspacePropertyName;

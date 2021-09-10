@@ -50,7 +50,7 @@ Usage
 **Example: Unwrap sample data**
 
 .. testcode:: ExUnwrapSNS
-          
+
     ws = CreateSampleWorkspace("Event",NumBanks=1,BankPixelWidth=1)
     wsOut = UnwrapSNS(ws,LRef=10)
 

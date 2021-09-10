@@ -1,7 +1,7 @@
 .. _working_with_files:
 
 ==================
-Working With Files 
+Working With Files
 ==================
 
 -  Reading/writing files in Python is made quite simple and both are

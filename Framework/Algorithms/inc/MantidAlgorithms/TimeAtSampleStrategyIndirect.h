@@ -21,11 +21,9 @@ namespace Algorithms {
 /** TimeAtSampleStrategyIndirect : Determine Time At Sample for an indirect
   instrument setup.
 */
-class MANTID_ALGORITHMS_DLL TimeAtSampleStrategyIndirect
-    : public TimeAtSampleStrategy {
+class MANTID_ALGORITHMS_DLL TimeAtSampleStrategyIndirect : public TimeAtSampleStrategy {
 public:
-  TimeAtSampleStrategyIndirect(
-      std::shared_ptr<const Mantid::API::MatrixWorkspace> ws);
+  TimeAtSampleStrategyIndirect(std::shared_ptr<const Mantid::API::MatrixWorkspace> ws);
   Correction calculate(const size_t &workspace_index) const override;
 
 private:

@@ -9,11 +9,11 @@
 Description
 -----------
 
-This workflow algorithm is to export a MatrixWorkspace to a GSAS data file, 
-which is close enough to the GSAS file generated from VULCAN's V-drive. 
+This workflow algorithm is to export a MatrixWorkspace to a GSAS data file,
+which is close enough to the GSAS file generated from VULCAN's V-drive.
 
-V-drive uses a different bin other than Mantid does.  
-Besides, IDL's rebin algorithm is different from Mantid's. 
+V-drive uses a different bin other than Mantid does.
+Besides, IDL's rebin algorithm is different from Mantid's.
 
 
 Usage
@@ -24,15 +24,15 @@ Usage
 .. testcode:: ExSaveVulcanGSAS
 
   import os
- 
+
   # load data and create header
   dataws = Load(Filename="focussed.nxs")
   dataws.setTitle("Test")
   dataws = ConvertUnits(InputWorkspace=dataws, Target="TOF", EMode="Elastic", AlignBins=False)
-  
+
   file_name = "testvulcan.gda"
   path = os.path.join(os.path.expanduser("~"), file_name)
-  
+
   # create binning table
   ref_bin_table = CreateEmptyTableWorkspace(OutputWorkspace='ref_bin_table')
   ref_bin_table.addColumn('str', 'indexes')
@@ -40,9 +40,9 @@ Usage
 
   ref_bin_table.addRow(['0, 2, 4', '1000, -0.001, 20000'])
   ref_bin_table.addRow(['1, 3, 5', '2000, -0.002, 30000'])
-  
+
   gsaws = SaveVulcanGSS(InputWorkspace=dataws, BinningTable="ref_bin_table", GSSFilename=path, IPTS=1234, GSSParmFileName="mock.prm")
-  
+
   gfile = open(path, "r")
   lines = gfile.readlines()
   gfile.close()
@@ -51,15 +51,15 @@ Usage
   for i in range(15):
       print(lines[i].rstrip())
   print("... ...")
-  
+
 .. testcleanup:: ExSaveVulcanGSAS
 
   file_name = "testvulcan.gda"
   path = os.path.join(os.path.expanduser("~"), file_name)
   os.remove(path)
 
-  DeleteWorkspace(Workspace="dataws") 
-  DeleteWorkspace(Workspace="gsaws") 
+  DeleteWorkspace(Workspace="dataws")
+  DeleteWorkspace(Workspace="gsaws")
 
 Output:
 

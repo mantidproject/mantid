@@ -38,13 +38,9 @@ public:
   }
   /// Algorithm's version for identification.
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"CatalogLogin"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"CatalogLogin"}; }
   /// Algorithm's category for identification.
-  const std::string category() const override {
-    return "DataHandling\\Catalog";
-  }
+  const std::string category() const override { return "DataHandling\\Catalog"; }
 
 private:
   /// Override algorithm initialisation method.

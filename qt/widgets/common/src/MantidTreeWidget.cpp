@@ -30,16 +30,13 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 MantidTreeWidget::MantidTreeWidget(MantidDisplayBase *mui, QWidget *parent)
-    : QTreeWidget(parent), m_mantidUI(mui),
-      m_ads(Mantid::API::AnalysisDataService::Instance()), m_sortScheme() {
+    : QTreeWidget(parent), m_mantidUI(mui), m_ads(Mantid::API::AnalysisDataService::Instance()), m_sortScheme() {
   setObjectName("WorkspaceTree");
   setSelectionMode(QAbstractItemView::ExtendedSelection);
   setSortOrder(Qt::AscendingOrder);
   setAcceptDrops(true);
 
-  m_doubleClickAction = [&](const QString &wsName) {
-    m_mantidUI->importWorkspace(wsName, false);
-  };
+  m_doubleClickAction = [&](const QString &wsName) { m_mantidUI->importWorkspace(wsName, false); };
 }
 
 /**
@@ -80,20 +77,14 @@ void MantidTreeWidget::dropEvent(QDropEvent *de) {
       alg->setProperty("OutputWorkspace", basename.toStdString());
       m_mantidUI->executeAlgorithmAsync(alg, true);
     } catch (std::runtime_error &error) {
-      treelog.error() << "Failed to Load the file "
-                      << filenames[i].toStdString()
-                      << " . The reason for failure is: " << error.what()
-                      << '\n';
+      treelog.error() << "Failed to Load the file " << filenames[i].toStdString()
+                      << " . The reason for failure is: " << error.what() << '\n';
     } catch (std::logic_error &error) {
-      treelog.error() << "Failed to Load the file "
-                      << filenames[i].toStdString()
-                      << " . The reason for failure is: " << error.what()
-                      << '\n';
+      treelog.error() << "Failed to Load the file " << filenames[i].toStdString()
+                      << " . The reason for failure is: " << error.what() << '\n';
     } catch (std::exception &error) {
-      treelog.error() << "Failed to Load the file "
-                      << filenames[i].toStdString()
-                      << " . The reason for failure is: " << error.what()
-                      << '\n';
+      treelog.error() << "Failed to Load the file " << filenames[i].toStdString()
+                      << " . The reason for failure is: " << error.what() << '\n';
     }
   }
 }
@@ -111,8 +102,7 @@ void MantidTreeWidget::mousePressEvent(QMouseEvent *e) {
 void MantidTreeWidget::mouseMoveEvent(QMouseEvent *e) {
   if (!(e->buttons() & Qt::LeftButton))
     return;
-  if ((e->pos() - m_dragStartPosition).manhattanLength() <
-      QApplication::startDragDistance())
+  if ((e->pos() - m_dragStartPosition).manhattanLength() < QApplication::startDragDistance())
     return;
 
   QStringList wsNames = getSelectedWorkspaceNames();
@@ -137,8 +127,7 @@ void MantidTreeWidget::mouseDoubleClickEvent(QMouseEvent *e) {
     }
     auto wsName = wsNames.front();
     Mantid::API::WorkspaceGroup_sptr grpWSPstr;
-    grpWSPstr = std::dynamic_pointer_cast<WorkspaceGroup>(
-        m_ads.retrieve(wsName.toStdString()));
+    grpWSPstr = std::dynamic_pointer_cast<WorkspaceGroup>(m_ads.retrieve(wsName.toStdString()));
     if (!grpWSPstr) {
       if (!wsName.isEmpty()) {
         m_doubleClickAction(wsName);
@@ -174,21 +163,18 @@ QStringList MantidTreeWidget::getSelectedWorkspaceNames() const {
  * MatrixWorkspaces) and TableWorkspaces (which are implicitly excluded).
  * We only want workspaces we can actually plot!
  */
-QList<MatrixWorkspace_const_sptr>
-MantidTreeWidget::getSelectedMatrixWorkspaces() const {
+QList<MatrixWorkspace_const_sptr> MantidTreeWidget::getSelectedMatrixWorkspaces() const {
   // Check for any selected WorkspaceGroup names and replace with the names of
   // their children.
   // We preserve the order, but use a set to avoid adding duplicate workspaces.
   std::set<QString> selectedWsNameSet;
   std::vector<QString> selectedWsNameList;
   foreach (const QString wsName, this->getSelectedWorkspaceNames()) {
-    const auto groupWs = std::dynamic_pointer_cast<const WorkspaceGroup>(
-        m_ads.retrieve(wsName.toStdString()));
+    const auto groupWs = std::dynamic_pointer_cast<const WorkspaceGroup>(m_ads.retrieve(wsName.toStdString()));
     if (groupWs) {
       const auto childWsNames = groupWs->getNames();
       for (const auto &childWsName : childWsNames) {
-        if (selectedWsNameSet.find(QString::fromStdString(childWsName)) ==
-            selectedWsNameSet.end()) {
+        if (selectedWsNameSet.find(QString::fromStdString(childWsName)) == selectedWsNameSet.end()) {
           selectedWsNameSet.insert(QString::fromStdString(childWsName));
           selectedWsNameList.emplace_back(QString::fromStdString(childWsName));
         }
@@ -205,8 +191,8 @@ MantidTreeWidget::getSelectedMatrixWorkspaces() const {
   QList<MatrixWorkspace_const_sptr> selectedMatrixWsList;
   QList<QString> selectedMatrixWsNameList;
   foreach (const auto selectedWsName, selectedWsNameList) {
-    const auto matrixWs = std::dynamic_pointer_cast<const MatrixWorkspace>(
-        m_ads.retrieve(selectedWsName.toStdString()));
+    const auto matrixWs =
+        std::dynamic_pointer_cast<const MatrixWorkspace>(m_ads.retrieve(selectedWsName.toStdString()));
     if (matrixWs) {
       selectedMatrixWsList.append(matrixWs);
     }
@@ -228,21 +214,18 @@ MantidTreeWidget::getSelectedMatrixWorkspaces() const {
  * @return :: A MantidWSIndexDialog::UserInput structure listing the selected
  * options
  */
-MantidWSIndexWidget::UserInput MantidTreeWidget::chooseSpectrumFromSelected(
-    bool showWaterfallOpt, bool showPlotAll, bool showTiledOpt,
-    bool isAdvanced) const {
+MantidWSIndexWidget::UserInput MantidTreeWidget::chooseSpectrumFromSelected(bool showWaterfallOpt, bool showPlotAll,
+                                                                            bool showTiledOpt, bool isAdvanced) const {
   auto selectedMatrixWsList = getSelectedMatrixWorkspaces();
   QList<QString> selectedMatrixWsNameList;
   foreach (const auto matrixWs, selectedMatrixWsList) {
-    selectedMatrixWsNameList.append(
-        QString::fromStdString(matrixWs->getName()));
+    selectedMatrixWsNameList.append(QString::fromStdString(matrixWs->getName()));
   }
 
   // Check workspaces to see whether to plot immediately without dialog box
   bool plotImmediately = true;
   if (isAdvanced) {
-    plotImmediately = selectedMatrixWsList.size() == 1 &&
-                      selectedMatrixWsList[0]->getNumberHistograms() == 1;
+    plotImmediately = selectedMatrixWsList.size() == 1 && selectedMatrixWsList[0]->getNumberHistograms() == 1;
   } else {
     foreach (const auto selectedMatrixWs, selectedMatrixWsList) {
       if (selectedMatrixWs->getNumberHistograms() != 1) {
@@ -257,8 +240,7 @@ MantidWSIndexWidget::UserInput MantidTreeWidget::chooseSpectrumFromSelected(
     const std::set<int> SINGLE_SPECTRUM = {0};
     QMultiMap<QString, std::set<int>> spectrumToPlot;
     foreach (const auto selectedMatrixWs, selectedMatrixWsList) {
-      spectrumToPlot.insert(QString::fromStdString(selectedMatrixWs->getName()),
-                            SINGLE_SPECTRUM);
+      spectrumToPlot.insert(QString::fromStdString(selectedMatrixWs->getName()), SINGLE_SPECTRUM);
     }
     // and get simple 1D plot done
     MantidWSIndexWidget::UserInput selections;
@@ -272,26 +254,19 @@ MantidWSIndexWidget::UserInput MantidTreeWidget::chooseSpectrumFromSelected(
   }
 
   // Else, one or more workspaces
-  auto dio = m_mantidUI->createWorkspaceIndexDialog(
-      0, selectedMatrixWsNameList, showWaterfallOpt, showPlotAll, showTiledOpt,
-      isAdvanced);
+  auto dio = m_mantidUI->createWorkspaceIndexDialog(0, selectedMatrixWsNameList, showWaterfallOpt, showPlotAll,
+                                                    showTiledOpt, isAdvanced);
   dio->exec();
   return dio->getSelections();
 }
 
-void MantidTreeWidget::setSortScheme(MantidItemSortScheme sortScheme) {
-  m_sortScheme = sortScheme;
-}
+void MantidTreeWidget::setSortScheme(MantidItemSortScheme sortScheme) { m_sortScheme = sortScheme; }
 
-void MantidTreeWidget::setSortOrder(Qt::SortOrder sortOrder) {
-  m_sortOrder = sortOrder;
-}
+void MantidTreeWidget::setSortOrder(Qt::SortOrder sortOrder) { m_sortOrder = sortOrder; }
 
 Qt::SortOrder MantidTreeWidget::getSortOrder() const { return m_sortOrder; }
 
-MantidItemSortScheme MantidTreeWidget::getSortScheme() const {
-  return m_sortScheme;
-}
+MantidItemSortScheme MantidTreeWidget::getSortScheme() const { return m_sortScheme; }
 
 /**
  * Sort the items according to the current sort scheme and order.
@@ -302,8 +277,6 @@ void MantidTreeWidget::sort() { sortItems(sortColumn(), m_sortOrder); }
  * Log a warning message.
  * @param msg :: A message to log.
  */
-void MantidTreeWidget::logWarningMessage(const std::string &msg) {
-  treelog.warning(msg);
-}
+void MantidTreeWidget::logWarningMessage(const std::string &msg) { treelog.warning(msg); }
 } // namespace MantidWidgets
 } // namespace MantidQt

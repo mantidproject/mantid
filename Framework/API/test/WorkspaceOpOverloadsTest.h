@@ -23,18 +23,15 @@ public:
   void test_matchingBins() {
     auto ws = std::make_shared<WorkspaceTester>();
     ws->initialize(2, 2, 1);
-    TSM_ASSERT("Passing it the same workspace twice had better work!",
-               WorkspaceHelpers::matchingBins(*ws, *ws));
+    TSM_ASSERT("Passing it the same workspace twice had better work!", WorkspaceHelpers::matchingBins(*ws, *ws));
 
     // Different size workspaces fail of course
     auto ws2 = std::make_shared<WorkspaceTester>();
     ws2->initialize(3, 2, 1);
     auto ws3 = std::make_shared<WorkspaceTester>();
     ws3->initialize(2, 3, 2);
-    TSM_ASSERT("Different size workspaces should always fail",
-               !WorkspaceHelpers::matchingBins(*ws, *ws2));
-    TSM_ASSERT("Different size workspaces should always fail",
-               !WorkspaceHelpers::matchingBins(*ws, *ws3));
+    TSM_ASSERT("Different size workspaces should always fail", !WorkspaceHelpers::matchingBins(*ws, *ws2));
+    TSM_ASSERT("Different size workspaces should always fail", !WorkspaceHelpers::matchingBins(*ws, *ws3));
 
     ws2->dataX(1)[0] = 99.0;
     TSM_ASSERT("First-spectrum-only check should pass even when things differ "
@@ -168,7 +165,6 @@ public:
     ws->initialize(2, 2, 2);
     TS_ASSERT(!ws->isDistribution());
 
-    TS_ASSERT_THROWS(WorkspaceHelpers::makeDistribution(ws),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(WorkspaceHelpers::makeDistribution(ws), const std::runtime_error &);
   }
 };

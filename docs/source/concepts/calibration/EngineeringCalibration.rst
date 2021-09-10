@@ -2,7 +2,7 @@
 
 Engineering Calibration
 =======================
-  
+
 .. contents::
   :local:
 
@@ -30,7 +30,7 @@ It is possible to load an existing calibration (as a CSV file) and to
 generate a new calibration file (which becomes the new current
 calibration).
 
-A description of the interface and all of it's controls can be found 
+A description of the interface and all of it's controls can be found
 :ref:`here <ui engineering calibration>`.
 
 Calibrating the entire instrument
@@ -41,14 +41,14 @@ Calibration of every detector/pixel at the same time is done by :ref:`EnggCalibr
 Calibrating individual banks
 ############################
 
-:ref:`EnggCalibrate <algm-EnggCalibrate>` allows calibration of individual bank within the instrument, which is useful if only one bank has moved from a previous calibration, or if the calibration failed for a certain area of the instrument.  
-  
+:ref:`EnggCalibrate <algm-EnggCalibrate>` allows calibration of individual bank within the instrument, which is useful if only one bank has moved from a previous calibration, or if the calibration failed for a certain area of the instrument.
+
 Under the hood
 ##############
 
-All of these approaches use the algorithm :ref:`EnggFitPeaks <algm-EnggFitPeaks>`, :ref:`FindPeaks <algm-FindPeaks>` and  :ref:`EnggVanadiumCorrections <algm-EnggVanadiumCorrections>` to find, and fit the recorded peaks and compare them to the expected values.  
+All of these approaches use the algorithm :ref:`EnggFitPeaks <algm-EnggFitPeaks>`, :ref:`FindPeaks <algm-FindPeaks>` and  :ref:`EnggVanadiumCorrections <algm-EnggVanadiumCorrections>` to find, and fit the recorded peaks and compare them to the expected values.
 
-The peak functions (shapes):  
+The peak functions (shapes):
 
 * :ref:`BackToBackExponential<func-BackToBackExponential>` (used in EnggFitPeaks, to fit the peaks when accuracy is needed)
 * :ref:`Gaussian<func-Gaussian>` (used in FindPeaks when the a quick validation is needed, but fit accuracy is not vital)

@@ -58,13 +58,11 @@ public:
 
   void setFromISO8601(const std::string &str);
   std::string toSimpleString() const;
-  std::string
-  toFormattedString(const std::string &format = "%Y-%b-%d %H:%M:%S") const;
+  std::string toFormattedString(const std::string &format = "%Y-%b-%d %H:%M:%S") const;
   std::string toISO8601String() const;
 
   /// Stream output operator
-  friend MANTID_TYPES_DLL std::ostream &operator<<(std::ostream &stream,
-                                                   const DateAndTime &t);
+  friend MANTID_TYPES_DLL std::ostream &operator<<(std::ostream &stream, const DateAndTime &t);
 
   void setToMaximum();
   void setToMinimum();
@@ -78,14 +76,10 @@ public:
   int nanoseconds() const;
   int64_t totalNanoseconds() const;
 
-  inline bool operator==(const DateAndTime &rhs) const {
-    return _nanoseconds == rhs._nanoseconds;
-  }
+  inline bool operator==(const DateAndTime &rhs) const { return _nanoseconds == rhs._nanoseconds; }
   bool operator==(const boost::posix_time::ptime &rhs) const;
   bool operator!=(const DateAndTime &rhs) const;
-  inline bool operator<(const DateAndTime &rhs) const {
-    return _nanoseconds < rhs._nanoseconds;
-  }
+  inline bool operator<(const DateAndTime &rhs) const { return _nanoseconds < rhs._nanoseconds; }
   bool operator<=(const DateAndTime &rhs) const;
   bool operator>(const DateAndTime &rhs) const;
   bool operator>=(const DateAndTime &rhs) const;
@@ -118,9 +112,7 @@ public:
   static int64_t nanosecondsFromSeconds(double sec);
   static time_duration durationFromNanoseconds(int64_t dur);
   static const DateAndTime &defaultTime();
-  static void createVector(const DateAndTime start,
-                           const std::vector<double> &seconds,
-                           std::vector<DateAndTime> &out);
+  static void createVector(const DateAndTime start, const std::vector<double> &seconds, std::vector<DateAndTime> &out);
 
   /// The difference in seconds between standard unix and gps epochs.
   static const uint32_t EPOCH_DIFF;
@@ -152,8 +144,7 @@ inline DateAndTime::DateAndTime() : _nanoseconds(0) {}
  * @param total_nanoseconds :: nanoseconds since Jan 1, 1990 (our epoch).
  */
 inline DateAndTime::DateAndTime(const int64_t total_nanoseconds)
-    : _nanoseconds{
-          std::clamp(total_nanoseconds, MIN_NANOSECONDS, MAX_NANOSECONDS)} {
+    : _nanoseconds{std::clamp(total_nanoseconds, MIN_NANOSECONDS, MAX_NANOSECONDS)} {
   // Make sure that you cannot construct a date that is beyond the limits...
 }
 
@@ -161,9 +152,7 @@ inline DateAndTime::DateAndTime(const int64_t total_nanoseconds)
  * @param nanosec :: number of nanoseconds to add
  * @return modified DateAndTime.
  */
-inline DateAndTime DateAndTime::operator+(const int64_t nanosec) const {
-  return DateAndTime(_nanoseconds + nanosec);
-}
+inline DateAndTime DateAndTime::operator+(const int64_t nanosec) const { return DateAndTime(_nanoseconds + nanosec); }
 
 /** + operator to add time.
  * @param sec :: duration to add

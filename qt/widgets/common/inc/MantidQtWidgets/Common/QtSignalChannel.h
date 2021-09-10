@@ -22,8 +22,7 @@ class Message;
 Provides a translation layer that takes a Poco::Message and converts it
 to a Qt signal.
 */
-class EXPORT_OPT_MANTIDQT_COMMON QtSignalChannel : public QObject,
-                                                   public Poco::Channel {
+class EXPORT_OPT_MANTIDQT_COMMON QtSignalChannel : public QObject, public Poco::Channel {
   Q_OBJECT
 
 public:

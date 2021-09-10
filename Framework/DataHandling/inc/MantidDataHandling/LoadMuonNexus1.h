@@ -70,9 +70,7 @@ public:
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "DataHandling\\Nexus;Muon\\DataHandling";
-  }
+  const std::string category() const override { return "DataHandling\\Nexus;Muon\\DataHandling"; }
 
   /// Returns a confidence value that this algorithm can load a file
   int confidence(Kernel::NexusDescriptor &descriptor) const override;
@@ -82,34 +80,26 @@ protected:
   void exec() override;
 
 private:
-  void loadData(size_t hist, specnum_t &i, specnum_t specNo,
-                MuonNexusReader &nxload, const int64_t lengthIn,
+  void loadData(size_t hist, specnum_t &i, specnum_t specNo, MuonNexusReader &nxload, const int64_t lengthIn,
                 const DataObjects::Workspace2D_sptr &localWorkspace);
   void runLoadMappingTable(DataObjects::Workspace2D_sptr);
   void runLoadLog(const DataObjects::Workspace2D_sptr &);
   void loadRunDetails(const DataObjects::Workspace2D_sptr &localWorkspace);
-  void addPeriodLog(const DataObjects::Workspace2D_sptr &localWorkspace,
-                    int64_t period);
-  void addGoodFrames(const DataObjects::Workspace2D_sptr &localWorkspace,
-                     int64_t period, int nperiods);
+  void addPeriodLog(const DataObjects::Workspace2D_sptr &localWorkspace, int64_t period);
+  void addGoodFrames(const DataObjects::Workspace2D_sptr &localWorkspace, int64_t period, int nperiods);
 
   /// Loads dead time table for the detector
   void loadDeadTimes(Mantid::NeXus::NXRoot &root);
 
   /// Creates Dead Time Table using all the data between begin and end
-  DataObjects::TableWorkspace_sptr
-  createDeadTimeTable(std::vector<int> specToLoad,
-                      std::vector<double> deadTimes);
+  DataObjects::TableWorkspace_sptr createDeadTimeTable(std::vector<int> specToLoad, std::vector<double> deadTimes);
 
   /// Loads detector grouping information
-  API::Workspace_sptr
-  loadDetectorGrouping(Mantid::NeXus::NXRoot &root,
-                       const Mantid::Geometry::Instrument_const_sptr &inst);
+  API::Workspace_sptr loadDetectorGrouping(Mantid::NeXus::NXRoot &root,
+                                           const Mantid::Geometry::Instrument_const_sptr &inst);
 
   /// Creates Detector Grouping Table using all the data from the range
-  DataObjects::TableWorkspace_sptr
-  createDetectorGroupingTable(std::vector<int> specToLoad,
-                              std::vector<int> grouping);
+  DataObjects::TableWorkspace_sptr createDetectorGroupingTable(std::vector<int> specToLoad, std::vector<int> grouping);
 };
 
 } // namespace DataHandling

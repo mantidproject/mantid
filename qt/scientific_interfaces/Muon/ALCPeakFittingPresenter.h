@@ -22,8 +22,7 @@ class MANTIDQT_MUONINTERFACE_DLL ALCPeakFittingPresenter : public QObject {
   Q_OBJECT
 
 public:
-  ALCPeakFittingPresenter(IALCPeakFittingView *view,
-                          IALCPeakFittingModel *model);
+  ALCPeakFittingPresenter(IALCPeakFittingView *view, IALCPeakFittingModel *model);
 
   void initialize();
 

@@ -55,9 +55,7 @@ public:
 
   ~MockDetector() override {}
 
-  void loadConfiguration(Instrument_const_sptr poldiInstrument) override {
-    UNUSED_ARG(poldiInstrument);
-  }
+  void loadConfiguration(Instrument_const_sptr poldiInstrument) override { UNUSED_ARG(poldiInstrument); }
   GNU_DIAG_OFF_SUGGEST_OVERRIDE
   MOCK_METHOD0(efficiency, double());
   MOCK_METHOD1(twoTheta, double(int elementIndex));
@@ -67,23 +65,18 @@ public:
   MOCK_METHOD2(qLimits, DoublePair(double lambdaMin, double lambdaMax));
   GNU_DIAG_ON_SUGGEST_OVERRIDE
 
-  const std::vector<int> &availableElements() override {
-    return m_availableElements;
-  }
+  const std::vector<int> &availableElements() override { return m_availableElements; }
 };
 
 class ConfiguredHeliumDetector : public PoldiHeliumDetector {
 public:
-  ConfiguredHeliumDetector() : PoldiHeliumDetector() {
-    loadConfiguration(Instrument_const_sptr());
-  }
+  ConfiguredHeliumDetector() : PoldiHeliumDetector() { loadConfiguration(Instrument_const_sptr()); }
 
   void loadConfiguration(Instrument_const_sptr poldiInstrument) override {
     UNUSED_ARG(poldiInstrument);
 
     initializeFixedParameters(3000.0, static_cast<size_t>(400), 2.5, 0.88);
-    initializeCalibratedParameters(Kernel::V2D(-931.47, -860.0),
-                                   Conversions::degToRad(90.41));
+    initializeCalibratedParameters(Kernel::V2D(-931.47, -860.0), Conversions::degToRad(90.41));
   }
 };
 
@@ -94,22 +87,17 @@ protected:
 
 public:
   MockChopper() : PoldiAbstractChopper() {
-    double slits[] = {0.000000, 0.162156, 0.250867, 0.3704,
-                      0.439811, 0.588455, 0.761389, 0.895667};
-    m_slitPositions =
-        std::vector<double>(slits, slits + sizeof(slits) / sizeof(slits[0]));
+    double slits[] = {0.000000, 0.162156, 0.250867, 0.3704, 0.439811, 0.588455, 0.761389, 0.895667};
+    m_slitPositions = std::vector<double>(slits, slits + sizeof(slits) / sizeof(slits[0]));
 
-    double times[] = {0.000000, 243.234, 376.3,   555.6,
-                      659.716,  882.682, 1142.08, 1343.5};
-    m_slitTimes =
-        std::vector<double>(times, times + sizeof(times) / sizeof(times[0]));
+    double times[] = {0.000000, 243.234, 376.3, 555.6, 659.716, 882.682, 1142.08, 1343.5};
+    m_slitTimes = std::vector<double>(times, times + sizeof(times) / sizeof(times[0]));
   }
 
   ~MockChopper() override {}
 
   void loadConfiguration(Instrument_const_sptr poldiInstrument) override{
-      UNUSED_ARG(poldiInstrument)} GNU_DIAG_OFF_SUGGEST_OVERRIDE
-      MOCK_METHOD0(rotationSpeed, double());
+      UNUSED_ARG(poldiInstrument)} GNU_DIAG_OFF_SUGGEST_OVERRIDE MOCK_METHOD0(rotationSpeed, double());
   MOCK_METHOD0(cycleTime, double());
   MOCK_METHOD0(zeroOffset, double());
   MOCK_METHOD0(distanceFromSample, double());
@@ -117,9 +105,7 @@ public:
   MOCK_METHOD1(setRotationSpeed, void(double rotationSpeed));
   GNU_DIAG_ON_SUGGEST_OVERRIDE
 
-  const std::vector<double> &slitPositions() override {
-    return m_slitPositions;
-  }
+  const std::vector<double> &slitPositions() override { return m_slitPositions; }
   const std::vector<double> &slitTimes() override { return m_slitTimes; }
 };
 class PoldiFakeSourceComponent : public ObjComponent {
@@ -131,8 +117,7 @@ class PoldiAbstractFakeInstrument : public Instrument {
 public:
   PoldiAbstractFakeInstrument() {}
 
-  std::shared_ptr<const IComponent>
-  getComponentByName(const std::string &cname, int nlevels = 0) const override {
+  std::shared_ptr<const IComponent> getComponentByName(const std::string &cname, int nlevels = 0) const override {
     UNUSED_ARG(cname);
     UNUSED_ARG(nlevels);
 
@@ -412,8 +397,7 @@ public:
    */
   static DataObjects::TableWorkspace_sptr createPoldiPeakTableWorkspace() {
     DataObjects::TableWorkspace_sptr tableWs =
-        std::dynamic_pointer_cast<DataObjects::TableWorkspace>(
-            API::WorkspaceFactory::Instance().createTable());
+        std::dynamic_pointer_cast<DataObjects::TableWorkspace>(API::WorkspaceFactory::Instance().createTable());
     tableWs->addColumn("str", "HKL");
     tableWs->addColumn("double", "d");
     tableWs->addColumn("double", "delta d");
@@ -425,24 +409,19 @@ public:
     tableWs->addColumn("double", "delta FWHM (rel.)");
 
     tableWs->logs()->addProperty<std::string>("IntensityType", "Maximum");
-    tableWs->logs()->addProperty<std::string>("ProfileFunctionName",
-                                              "Gaussian");
+    tableWs->logs()->addProperty<std::string>("ProfileFunctionName", "Gaussian");
 
     API::TableRow newRow = tableWs->appendRow();
-    newRow << "0 0 0" << 1.108644 << 0.0 << 5.667449 << 0.0 << 3286.152 << 0.0
-           << 0.002475747 << 0.0;
+    newRow << "0 0 0" << 1.108644 << 0.0 << 5.667449 << 0.0 << 3286.152 << 0.0 << 0.002475747 << 0.0;
 
     newRow = tableWs->appendRow();
-    newRow << "0 0 0" << 1.637539 << 0.0 << 3.836968 << 0.0 << 2951.696 << 0.0
-           << 0.002516417 << 0.0;
+    newRow << "0 0 0" << 1.637539 << 0.0 << 3.836968 << 0.0 << 2951.696 << 0.0 << 0.002516417 << 0.0;
 
     newRow = tableWs->appendRow();
-    newRow << "0 0 0" << 1.920200 << 0.0 << 3.272152 << 0.0 << 3238.473 << 0.0
-           << 0.002444439 << 0.0;
+    newRow << "0 0 0" << 1.920200 << 0.0 << 3.272152 << 0.0 << 3238.473 << 0.0 << 0.002444439 << 0.0;
 
     newRow = tableWs->appendRow();
-    newRow << "0 0 0" << 1.245958 << 0.0 << 5.042856 << 0.0 << 2219.592 << 0.0
-           << 0.002696334 << 0.0;
+    newRow << "0 0 0" << 1.245958 << 0.0 << 5.042856 << 0.0 << 2219.592 << 0.0 << 0.002696334 << 0.0;
 
     return tableWs;
   }
@@ -457,18 +436,14 @@ public:
    */
   static PoldiPeakCollection_sptr createPoldiPeakCollectionMaximum() {
     PoldiPeakCollection_sptr peaks(new PoldiPeakCollection);
-    peaks->addPeak(PoldiPeak::create(
-        MillerIndices(0, 0, 0), UncertainValue(1.108644),
-        UncertainValue(3286.152), UncertainValue(0.002475747)));
-    peaks->addPeak(PoldiPeak::create(
-        MillerIndices(0, 0, 0), UncertainValue(1.637539),
-        UncertainValue(2951.696), UncertainValue(0.002516417)));
-    peaks->addPeak(PoldiPeak::create(
-        MillerIndices(0, 0, 0), UncertainValue(1.920200),
-        UncertainValue(3238.473), UncertainValue(0.002444439)));
-    peaks->addPeak(PoldiPeak::create(
-        MillerIndices(0, 0, 0), UncertainValue(1.245958),
-        UncertainValue(2219.592), UncertainValue(0.002696334)));
+    peaks->addPeak(PoldiPeak::create(MillerIndices(0, 0, 0), UncertainValue(1.108644), UncertainValue(3286.152),
+                                     UncertainValue(0.002475747)));
+    peaks->addPeak(PoldiPeak::create(MillerIndices(0, 0, 0), UncertainValue(1.637539), UncertainValue(2951.696),
+                                     UncertainValue(0.002516417)));
+    peaks->addPeak(PoldiPeak::create(MillerIndices(0, 0, 0), UncertainValue(1.920200), UncertainValue(3238.473),
+                                     UncertainValue(0.002444439)));
+    peaks->addPeak(PoldiPeak::create(MillerIndices(0, 0, 0), UncertainValue(1.245958), UncertainValue(2219.592),
+                                     UncertainValue(0.002696334)));
 
     peaks->setProfileFunctionName("Gaussian");
 
@@ -483,20 +458,15 @@ public:
    * @return PoldiPeakCollection with four example peaks.
    */
   static PoldiPeakCollection_sptr createPoldiPeakCollectionIntegral() {
-    PoldiPeakCollection_sptr peaks(
-        new PoldiPeakCollection(PoldiPeakCollection::Integral));
-    peaks->addPeak(PoldiPeak::create(
-        MillerIndices(0, 0, 0), UncertainValue(1.108644),
-        UncertainValue(15835.28906), UncertainValue(0.002475747)));
-    peaks->addPeak(PoldiPeak::create(
-        MillerIndices(0, 0, 0), UncertainValue(1.637539),
-        UncertainValue(21354.32226), UncertainValue(0.002516417)));
-    peaks->addPeak(PoldiPeak::create(
-        MillerIndices(0, 0, 0), UncertainValue(1.920200),
-        UncertainValue(26687.36132), UncertainValue(0.002444439)));
-    peaks->addPeak(PoldiPeak::create(
-        MillerIndices(0, 0, 0), UncertainValue(1.245958),
-        UncertainValue(13091.51855), UncertainValue(0.002696334)));
+    PoldiPeakCollection_sptr peaks(new PoldiPeakCollection(PoldiPeakCollection::Integral));
+    peaks->addPeak(PoldiPeak::create(MillerIndices(0, 0, 0), UncertainValue(1.108644), UncertainValue(15835.28906),
+                                     UncertainValue(0.002475747)));
+    peaks->addPeak(PoldiPeak::create(MillerIndices(0, 0, 0), UncertainValue(1.637539), UncertainValue(21354.32226),
+                                     UncertainValue(0.002516417)));
+    peaks->addPeak(PoldiPeak::create(MillerIndices(0, 0, 0), UncertainValue(1.920200), UncertainValue(26687.36132),
+                                     UncertainValue(0.002444439)));
+    peaks->addPeak(PoldiPeak::create(MillerIndices(0, 0, 0), UncertainValue(1.245958), UncertainValue(13091.51855),
+                                     UncertainValue(0.002696334)));
 
     peaks->setProfileFunctionName("Gaussian");
 
@@ -512,20 +482,15 @@ public:
    * @return PoldiPeakCollection with four example peaks.
    */
   static PoldiPeakCollection_sptr createPoldiPeakCollectionNormalized() {
-    PoldiPeakCollection_sptr peaks(
-        new PoldiPeakCollection(PoldiPeakCollection::Integral));
-    peaks->addPeak(PoldiPeak::create(
-        MillerIndices(4, 2, 2), UncertainValue(1.108644),
-        UncertainValue(1.926395655), UncertainValue(0.002475747)));
-    peaks->addPeak(PoldiPeak::create(
-        MillerIndices(3, 1, 1), UncertainValue(1.637539),
-        UncertainValue(4.773980141), UncertainValue(0.002516417)));
-    peaks->addPeak(PoldiPeak::create(
-        MillerIndices(2, 2, 0), UncertainValue(1.920200),
-        UncertainValue(9.370919228), UncertainValue(0.002444439)));
-    peaks->addPeak(PoldiPeak::create(
-        MillerIndices(3, 3, 1), UncertainValue(1.245958),
-        UncertainValue(1.758037806), UncertainValue(0.002696334)));
+    PoldiPeakCollection_sptr peaks(new PoldiPeakCollection(PoldiPeakCollection::Integral));
+    peaks->addPeak(PoldiPeak::create(MillerIndices(4, 2, 2), UncertainValue(1.108644), UncertainValue(1.926395655),
+                                     UncertainValue(0.002475747)));
+    peaks->addPeak(PoldiPeak::create(MillerIndices(3, 1, 1), UncertainValue(1.637539), UncertainValue(4.773980141),
+                                     UncertainValue(0.002516417)));
+    peaks->addPeak(PoldiPeak::create(MillerIndices(2, 2, 0), UncertainValue(1.920200), UncertainValue(9.370919228),
+                                     UncertainValue(0.002444439)));
+    peaks->addPeak(PoldiPeak::create(MillerIndices(3, 3, 1), UncertainValue(1.245958), UncertainValue(1.758037806),
+                                     UncertainValue(0.002696334)));
 
     peaks->setProfileFunctionName("Gaussian");
 
@@ -533,16 +498,13 @@ public:
   }
 
   static PoldiPeakCollection_sptr createTheoreticalPeakCollectionSilicon() {
-    BraggScatterer_sptr atomSi =
-        BraggScattererFactory::Instance().createScatterer(
-            "IsotropicAtomBraggScatterer",
-            R"({"Element":"Si","Position":"0,0,0","U":"0.005"})");
+    BraggScatterer_sptr atomSi = BraggScattererFactory::Instance().createScatterer(
+        "IsotropicAtomBraggScatterer", R"({"Element":"Si","Position":"0,0,0","U":"0.005"})");
     CompositeBraggScatterer_sptr atoms = CompositeBraggScatterer::create();
     atoms->addScatterer(atomSi);
 
-    CrystalStructure Si(
-        UnitCell(5.43071, 5.43071, 5.43071),
-        SpaceGroupFactory::Instance().createSpaceGroup("P m -3 m"), atoms);
+    CrystalStructure Si(UnitCell(5.43071, 5.43071, 5.43071), SpaceGroupFactory::Instance().createSpaceGroup("P m -3 m"),
+                        atoms);
 
     return PoldiPeakCollection_sptr(new PoldiPeakCollection(Si, 1.1, 1.95));
   }

@@ -35,13 +35,9 @@ public:
 
   /// Algorithm's version
   int version() const override { return (1); }
-  const std::vector<std::string> seeAlso() const override {
-    return {"ConvertMDHistoToMatrixWorkspace"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"ConvertMDHistoToMatrixWorkspace"}; }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "MDAlgorithms\\Transforms";
-  }
+  const std::string category() const override { return "MDAlgorithms\\Transforms"; }
 
 private:
   /// Initialisation code
@@ -52,8 +48,7 @@ private:
   size_t m_rank;
   size_t m_currentSpectra;
   size_t calculateNSpectra(const Mantid::API::IMDHistoWorkspace_sptr &inws);
-  void recurseData(const Mantid::API::IMDHistoWorkspace_sptr &inWS,
-                   const Mantid::DataObjects::Workspace2D_sptr &outWS,
+  void recurseData(const Mantid::API::IMDHistoWorkspace_sptr &inWS, const Mantid::DataObjects::Workspace2D_sptr &outWS,
                    size_t currentDim, Mantid::coord_t *pos);
 
   void checkW2D(const Mantid::DataObjects::Workspace2D_sptr &outWS);

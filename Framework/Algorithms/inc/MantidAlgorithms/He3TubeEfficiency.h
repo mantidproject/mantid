@@ -54,19 +54,13 @@ public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "He3TubeEfficiency"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "He3 tube efficiency correction.";
-  }
+  const std::string summary() const override { return "He3 tube efficiency correction."; }
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"DetectorEfficiencyCor"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"DetectorEfficiencyCor"}; }
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "CorrectionFunctions\\EfficiencyCorrections";
-  }
+  const std::string category() const override { return "CorrectionFunctions\\EfficiencyCorrections"; }
 
 private:
   // Implement abstract Algorithm methods
@@ -75,33 +69,25 @@ private:
   void execEvent();
 
   /// Calculates the efficiency correction from the points
-  void computeEfficiencyCorrection(std::vector<double> &effCorrection,
-                                   const HistogramData::Points &wavelength,
-                                   const double expConstant,
-                                   const double scale) const;
+  void computeEfficiencyCorrection(std::vector<double> &effCorrection, const HistogramData::Points &wavelength,
+                                   const double expConstant, const double scale) const;
   /// Correct the given spectra index for efficiency
-  void correctForEfficiency(std::size_t spectraIndex,
-                            const API::SpectrumInfo &spectrumInfo);
+  void correctForEfficiency(std::size_t spectraIndex, const API::SpectrumInfo &spectrumInfo);
   /// Sets the detector geometry cache if necessary
-  void getDetectorGeometry(const Geometry::IDetector &det, double &detRadius,
-                           Kernel::V3D &detAxis);
+  void getDetectorGeometry(const Geometry::IDetector &det, double &detRadius, Kernel::V3D &detAxis);
   /// Computes the distance to the given shape from a starting point
-  double distToSurface(const Kernel::V3D start,
-                       const Geometry::IObject *shape) const;
+  double distToSurface(const Kernel::V3D start, const Geometry::IObject *shape) const;
   /// Calculate the detector efficiency
-  double detectorEfficiency(const double alpha,
-                            const double scale_factor = 1.0) const;
+  double detectorEfficiency(const double alpha, const double scale_factor = 1.0) const;
   /// Log any errors with spectra that occurred
   void logErrors() const;
   /// Retrieve the detector parameters from workspace or detector properties
-  double getParameter(const std::string &wsPropName, std::size_t currentIndex,
-                      const std::string &detPropName,
+  double getParameter(const std::string &wsPropName, std::size_t currentIndex, const std::string &detPropName,
                       const Geometry::IDetector &idet);
   /// Helper for event handling
   template <class T> void eventHelper(std::vector<T> &events, double expval);
   /// Function to calculate exponential contribution
-  double calculateExponential(std::size_t spectraIndex,
-                              const Geometry::IDetector &idet);
+  double calculateExponential(std::size_t spectraIndex, const Geometry::IDetector &idet);
 
   /// The user selected (input) workspace
   API::MatrixWorkspace_const_sptr m_inputWS;
@@ -111,8 +97,7 @@ private:
   const Geometry::ParameterMap *m_paraMap;
   /// A lookup of previously seen shape objects used to save calculation time as
   /// most detectors have the same shape
-  std::map<const Geometry::IObject *, std::pair<double, Kernel::V3D>>
-      m_shapeCache;
+  std::map<const Geometry::IObject *, std::pair<double, Kernel::V3D>> m_shapeCache;
   /// Sample position
   Kernel::V3D m_samplePos;
   /// The spectra numbers that were skipped

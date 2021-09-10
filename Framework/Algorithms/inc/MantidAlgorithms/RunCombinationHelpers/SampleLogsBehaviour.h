@@ -69,14 +69,11 @@ public:
     std::string sampleLogsFailTolerances;
   };
 
-  SampleLogsBehaviour(const API::MatrixWorkspace_sptr &ws,
-                      Kernel::Logger &logger,
-                      const SampleLogNames &logEntries = {},
-                      const ParameterName &parName = {});
+  SampleLogsBehaviour(const API::MatrixWorkspace_sptr &ws, Kernel::Logger &logger,
+                      const SampleLogNames &logEntries = {}, const ParameterName &parName = {});
 
   /// Create and update sample logs according to instrument parameters
-  void mergeSampleLogs(const API::MatrixWorkspace_sptr &addeeWS,
-                       const API::MatrixWorkspace_sptr &outWS);
+  void mergeSampleLogs(const API::MatrixWorkspace_sptr &addeeWS, const API::MatrixWorkspace_sptr &outWS);
   void setUpdatedSampleLogs(const API::MatrixWorkspace_sptr &outWS);
   void removeSampleLogsFromWorkspace(const API::MatrixWorkspace_sptr &addeeWS);
   void readdSampleLogToWorkspace(const API::MatrixWorkspace_sptr &addeeWS);
@@ -90,49 +87,32 @@ private:
   SampleLogsMap m_logMap;
   std::vector<std::shared_ptr<Kernel::Property>> m_addeeLogMap;
 
-  void createSampleLogsMapsFromInstrumentParams(SampleLogsMap &instrumentMap,
-                                                API::MatrixWorkspace &ws);
+  void createSampleLogsMapsFromInstrumentParams(SampleLogsMap &instrumentMap, API::MatrixWorkspace &ws);
 
-  std::shared_ptr<Kernel::Property>
-  addPropertyForTimeSeries(const std::string &item, const double value,
-                           API::MatrixWorkspace &ws);
-  std::shared_ptr<Kernel::Property>
-  addPropertyForList(const std::string &item, const std::string &value,
-                     API::MatrixWorkspace &ws);
-  bool setNumericValue(const std::string &item, const API::MatrixWorkspace &ws,
-                       double &value);
+  std::shared_ptr<Kernel::Property> addPropertyForTimeSeries(const std::string &item, const double value,
+                                                             API::MatrixWorkspace &ws);
+  std::shared_ptr<Kernel::Property> addPropertyForList(const std::string &item, const std::string &value,
+                                                       API::MatrixWorkspace &ws);
+  bool setNumericValue(const std::string &item, const API::MatrixWorkspace &ws, double &value);
 
-  void setSampleMap(SampleLogsMap &map, const MergeLogType &,
-                    const std::string &params, API::MatrixWorkspace &ws,
-                    const std::string &paramsTolerances = "",
-                    bool skipIfInPrimaryMap = false);
+  void setSampleMap(SampleLogsMap &map, const MergeLogType &, const std::string &params, API::MatrixWorkspace &ws,
+                    const std::string &paramsTolerances = "", bool skipIfInPrimaryMap = false);
 
-  std::vector<double>
-  createTolerancesVector(const size_t numberNames,
-                         const std::vector<std::string> &tolerances);
+  std::vector<double> createTolerancesVector(const size_t numberNames, const std::vector<std::string> &tolerances);
 
-  void updateSumProperty(double addeeWSNumber, double outWSNumber,
-                         API::MatrixWorkspace &outWS, const std::string &name);
-  void updateTimeSeriesProperty(API::MatrixWorkspace &addeeWS,
-                                API::MatrixWorkspace &outWS,
-                                const std::string &name);
-  void updateListProperty(API::MatrixWorkspace &addeeWS,
-                          API::MatrixWorkspace &outWS, const std::string &name);
-  void checkWarnProperty(const API::MatrixWorkspace &addeeWS,
-                         Kernel::Property *addeeWSProperty,
-                         const SampleLogBehaviour &behaviour,
-                         const double addeeWSNumber, const double outWSNumber,
+  void updateSumProperty(double addeeWSNumber, double outWSNumber, API::MatrixWorkspace &outWS,
                          const std::string &name);
-  void checkErrorProperty(const API::MatrixWorkspace &addeeWS,
-                          Kernel::Property *addeeWSProperty,
-                          const SampleLogBehaviour &behaviour,
-                          const double addeeWSNumber, const double outWSNumber,
+  void updateTimeSeriesProperty(API::MatrixWorkspace &addeeWS, API::MatrixWorkspace &outWS, const std::string &name);
+  void updateListProperty(API::MatrixWorkspace &addeeWS, API::MatrixWorkspace &outWS, const std::string &name);
+  void checkWarnProperty(const API::MatrixWorkspace &addeeWS, Kernel::Property *addeeWSProperty,
+                         const SampleLogBehaviour &behaviour, const double addeeWSNumber, const double outWSNumber,
+                         const std::string &name);
+  void checkErrorProperty(const API::MatrixWorkspace &addeeWS, Kernel::Property *addeeWSProperty,
+                          const SampleLogBehaviour &behaviour, const double addeeWSNumber, const double outWSNumber,
                           const std::string &name);
 
-  bool isWithinTolerance(const SampleLogBehaviour &behaviour,
-                         const double addeeWSNumber, const double outWSNumber);
-  bool stringPropertiesMatch(const SampleLogBehaviour &behaviour,
-                             const Kernel::Property *addeeWSProperty);
+  bool isWithinTolerance(const SampleLogBehaviour &behaviour, const double addeeWSNumber, const double outWSNumber);
+  bool stringPropertiesMatch(const SampleLogBehaviour &behaviour, const Kernel::Property *addeeWSProperty);
 };
 
 } // namespace Algorithms

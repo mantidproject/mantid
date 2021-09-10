@@ -22,8 +22,7 @@ namespace ADARA {
 class DLLExport Parser {
 public:
   /// Constructor
-  Parser(uint32_t initial_buffer_size = 1024 * 1024,
-         uint32_t max_pkt_size = 8 * 1024 * 1024);
+  Parser(uint32_t initial_buffer_size = 1024 * 1024, uint32_t max_pkt_size = 8 * 1024 * 1024);
 
   /// Destructor
   virtual ~Parser();
@@ -124,8 +123,8 @@ protected:
   /**@{*/
   virtual bool rxPacket(const Packet &pkt);
   virtual bool rxUnknownPkt(const Packet &pkt);
-  virtual bool rxOversizePkt(const PacketHeader *hdr, const uint8_t *chunk,
-                             unsigned int chunk_offset, unsigned int chunk_len);
+  virtual bool rxOversizePkt(const PacketHeader *hdr, const uint8_t *chunk, unsigned int chunk_offset,
+                             unsigned int chunk_len);
   /**@}*/
 
   /** @name Specific rxPacket Functions

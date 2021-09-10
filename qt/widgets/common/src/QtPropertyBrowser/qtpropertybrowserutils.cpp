@@ -96,11 +96,9 @@
 
 namespace {
 // Translation function for Qt4/Qt5. Qt5 has no encoding option
-QString translateUtf8Encoded(const char *context, const char *key,
-                             const char *disambiguation = nullptr, int n = -1) {
+QString translateUtf8Encoded(const char *context, const char *key, const char *disambiguation = nullptr, int n = -1) {
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  return QApplication::translate(context, key, disambiguation,
-                                 QApplication::UnicodeUTF8, n);
+  return QApplication::translate(context, key, disambiguation, QApplication::UnicodeUTF8, n);
 #else
   return QApplication::translate(context, key, disambiguation, n);
 #endif
@@ -112,95 +110,46 @@ QT_BEGIN_NAMESPACE
 #endif
 
 QtCursorDatabase::QtCursorDatabase() {
-  appendCursor(Qt::ArrowCursor,
-               translateUtf8Encoded("QtCursorDatabase", "Arrow", nullptr),
-               QIcon(QLatin1String(
-                   ":/trolltech/qtpropertybrowser/images/cursor-arrow.png")));
-  appendCursor(Qt::UpArrowCursor,
-               translateUtf8Encoded("QtCursorDatabase", "Up Arrow", nullptr),
-               QIcon(QLatin1String(
-                   ":/trolltech/qtpropertybrowser/images/cursor-uparrow.png")));
-  appendCursor(Qt::CrossCursor,
-               translateUtf8Encoded("QtCursorDatabase", "Cross", nullptr),
-               QIcon(QLatin1String(
-                   ":/trolltech/qtpropertybrowser/images/cursor-cross.png")));
-  appendCursor(Qt::WaitCursor,
-               translateUtf8Encoded("QtCursorDatabase", "Wait", nullptr),
-               QIcon(QLatin1String(
-                   ":/trolltech/qtpropertybrowser/images/cursor-wait.png")));
-  appendCursor(Qt::IBeamCursor,
-               translateUtf8Encoded("QtCursorDatabase", "IBeam", nullptr),
-               QIcon(QLatin1String(
-                   ":/trolltech/qtpropertybrowser/images/cursor-ibeam.png")));
-  appendCursor(
-      Qt::SizeVerCursor,
-      translateUtf8Encoded("QtCursorDatabase", "Size Vertical", nullptr),
-      QIcon(QLatin1String(
-          ":/trolltech/qtpropertybrowser/images/cursor-sizev.png")));
-  appendCursor(
-      Qt::SizeHorCursor,
-      translateUtf8Encoded("QtCursorDatabase", "Size Horizontal", nullptr),
-      QIcon(QLatin1String(
-          ":/trolltech/qtpropertybrowser/images/cursor-sizeh.png")));
-  appendCursor(
-      Qt::SizeFDiagCursor,
-      translateUtf8Encoded("QtCursorDatabase", "Size Backslash", nullptr),
-      QIcon(QLatin1String(
-          ":/trolltech/qtpropertybrowser/images/cursor-sizef.png")));
-  appendCursor(Qt::SizeBDiagCursor,
-               translateUtf8Encoded("QtCursorDatabase", "Size Slash", nullptr),
-               QIcon(QLatin1String(
-                   ":/trolltech/qtpropertybrowser/images/cursor-sizeb.png")));
-  appendCursor(Qt::SizeAllCursor,
-               translateUtf8Encoded("QtCursorDatabase", "Size All", nullptr),
-               QIcon(QLatin1String(
-                   ":/trolltech/qtpropertybrowser/images/cursor-sizeall.png")));
-  appendCursor(Qt::BlankCursor,
-               translateUtf8Encoded("QtCursorDatabase", "Blank", nullptr),
-               QIcon());
-  appendCursor(
-      Qt::SplitVCursor,
-      translateUtf8Encoded("QtCursorDatabase", "Split Vertical", nullptr),
-      QIcon(QLatin1String(
-          ":/trolltech/qtpropertybrowser/images/cursor-vsplit.png")));
-  appendCursor(
-      Qt::SplitHCursor,
-      translateUtf8Encoded("QtCursorDatabase", "Split Horizontal", nullptr),
-      QIcon(QLatin1String(
-          ":/trolltech/qtpropertybrowser/images/cursor-hsplit.png")));
-  appendCursor(
-      Qt::PointingHandCursor,
-      translateUtf8Encoded("QtCursorDatabase", "Pointing Hand", nullptr),
-      QIcon(QLatin1String(
-          ":/trolltech/qtpropertybrowser/images/cursor-hand.png")));
-  appendCursor(
-      Qt::ForbiddenCursor,
-      translateUtf8Encoded("QtCursorDatabase", "Forbidden", nullptr),
-      QIcon(QLatin1String(
-          ":/trolltech/qtpropertybrowser/images/cursor-forbidden.png")));
-  appendCursor(
-      Qt::OpenHandCursor,
-      translateUtf8Encoded("QtCursorDatabase", "Open Hand", nullptr),
-      QIcon(QLatin1String(
-          ":/trolltech/qtpropertybrowser/images/cursor-openhand.png")));
-  appendCursor(
-      Qt::ClosedHandCursor,
-      translateUtf8Encoded("QtCursorDatabase", "Closed Hand", nullptr),
-      QIcon(QLatin1String(
-          ":/trolltech/qtpropertybrowser/images/cursor-closedhand.png")));
-  appendCursor(
-      Qt::WhatsThisCursor,
-      translateUtf8Encoded("QtCursorDatabase", "What's This", nullptr),
-      QIcon(QLatin1String(
-          ":/trolltech/qtpropertybrowser/images/cursor-whatsthis.png")));
-  appendCursor(Qt::BusyCursor,
-               translateUtf8Encoded("QtCursorDatabase", "Busy", nullptr),
-               QIcon(QLatin1String(
-                   ":/trolltech/qtpropertybrowser/images/cursor-busy.png")));
+  appendCursor(Qt::ArrowCursor, translateUtf8Encoded("QtCursorDatabase", "Arrow", nullptr),
+               QIcon(QLatin1String(":/trolltech/qtpropertybrowser/images/cursor-arrow.png")));
+  appendCursor(Qt::UpArrowCursor, translateUtf8Encoded("QtCursorDatabase", "Up Arrow", nullptr),
+               QIcon(QLatin1String(":/trolltech/qtpropertybrowser/images/cursor-uparrow.png")));
+  appendCursor(Qt::CrossCursor, translateUtf8Encoded("QtCursorDatabase", "Cross", nullptr),
+               QIcon(QLatin1String(":/trolltech/qtpropertybrowser/images/cursor-cross.png")));
+  appendCursor(Qt::WaitCursor, translateUtf8Encoded("QtCursorDatabase", "Wait", nullptr),
+               QIcon(QLatin1String(":/trolltech/qtpropertybrowser/images/cursor-wait.png")));
+  appendCursor(Qt::IBeamCursor, translateUtf8Encoded("QtCursorDatabase", "IBeam", nullptr),
+               QIcon(QLatin1String(":/trolltech/qtpropertybrowser/images/cursor-ibeam.png")));
+  appendCursor(Qt::SizeVerCursor, translateUtf8Encoded("QtCursorDatabase", "Size Vertical", nullptr),
+               QIcon(QLatin1String(":/trolltech/qtpropertybrowser/images/cursor-sizev.png")));
+  appendCursor(Qt::SizeHorCursor, translateUtf8Encoded("QtCursorDatabase", "Size Horizontal", nullptr),
+               QIcon(QLatin1String(":/trolltech/qtpropertybrowser/images/cursor-sizeh.png")));
+  appendCursor(Qt::SizeFDiagCursor, translateUtf8Encoded("QtCursorDatabase", "Size Backslash", nullptr),
+               QIcon(QLatin1String(":/trolltech/qtpropertybrowser/images/cursor-sizef.png")));
+  appendCursor(Qt::SizeBDiagCursor, translateUtf8Encoded("QtCursorDatabase", "Size Slash", nullptr),
+               QIcon(QLatin1String(":/trolltech/qtpropertybrowser/images/cursor-sizeb.png")));
+  appendCursor(Qt::SizeAllCursor, translateUtf8Encoded("QtCursorDatabase", "Size All", nullptr),
+               QIcon(QLatin1String(":/trolltech/qtpropertybrowser/images/cursor-sizeall.png")));
+  appendCursor(Qt::BlankCursor, translateUtf8Encoded("QtCursorDatabase", "Blank", nullptr), QIcon());
+  appendCursor(Qt::SplitVCursor, translateUtf8Encoded("QtCursorDatabase", "Split Vertical", nullptr),
+               QIcon(QLatin1String(":/trolltech/qtpropertybrowser/images/cursor-vsplit.png")));
+  appendCursor(Qt::SplitHCursor, translateUtf8Encoded("QtCursorDatabase", "Split Horizontal", nullptr),
+               QIcon(QLatin1String(":/trolltech/qtpropertybrowser/images/cursor-hsplit.png")));
+  appendCursor(Qt::PointingHandCursor, translateUtf8Encoded("QtCursorDatabase", "Pointing Hand", nullptr),
+               QIcon(QLatin1String(":/trolltech/qtpropertybrowser/images/cursor-hand.png")));
+  appendCursor(Qt::ForbiddenCursor, translateUtf8Encoded("QtCursorDatabase", "Forbidden", nullptr),
+               QIcon(QLatin1String(":/trolltech/qtpropertybrowser/images/cursor-forbidden.png")));
+  appendCursor(Qt::OpenHandCursor, translateUtf8Encoded("QtCursorDatabase", "Open Hand", nullptr),
+               QIcon(QLatin1String(":/trolltech/qtpropertybrowser/images/cursor-openhand.png")));
+  appendCursor(Qt::ClosedHandCursor, translateUtf8Encoded("QtCursorDatabase", "Closed Hand", nullptr),
+               QIcon(QLatin1String(":/trolltech/qtpropertybrowser/images/cursor-closedhand.png")));
+  appendCursor(Qt::WhatsThisCursor, translateUtf8Encoded("QtCursorDatabase", "What's This", nullptr),
+               QIcon(QLatin1String(":/trolltech/qtpropertybrowser/images/cursor-whatsthis.png")));
+  appendCursor(Qt::BusyCursor, translateUtf8Encoded("QtCursorDatabase", "Busy", nullptr),
+               QIcon(QLatin1String(":/trolltech/qtpropertybrowser/images/cursor-busy.png")));
 }
 
-void QtCursorDatabase::appendCursor(Qt::CursorShape shape, const QString &name,
-                                    const QIcon &icon) {
+void QtCursorDatabase::appendCursor(Qt::CursorShape shape, const QString &name, const QIcon &icon) {
   if (m_cursorShapeToValue.contains(shape))
     return;
   int value = m_cursorNames.count();
@@ -212,9 +161,7 @@ void QtCursorDatabase::appendCursor(Qt::CursorShape shape, const QString &name,
 
 QStringList QtCursorDatabase::cursorShapeNames() const { return m_cursorNames; }
 
-QMap<int, QIcon> QtCursorDatabase::cursorShapeIcons() const {
-  return m_cursorIcons;
-}
+QMap<int, QIcon> QtCursorDatabase::cursorShapeIcons() const { return m_cursorIcons; }
 
 QString QtCursorDatabase::cursorToShapeName(const QCursor &cursor) const {
   int val = cursorToValue(cursor);
@@ -257,20 +204,16 @@ QPixmap QtPropertyBrowserUtils::brushValuePixmap(const QBrush &b) {
     QBrush opaqueBrush = b;
     color.setAlpha(255);
     opaqueBrush.setColor(color);
-    painter.fillRect(img.width() / 4, img.height() / 4, img.width() / 2,
-                     img.height() / 2, opaqueBrush);
+    painter.fillRect(img.width() / 4, img.height() / 4, img.width() / 2, img.height() / 2, opaqueBrush);
   }
   painter.end();
   return QPixmap::fromImage(img);
 }
 
-QIcon QtPropertyBrowserUtils::brushValueIcon(const QBrush &b) {
-  return QIcon(brushValuePixmap(b));
-}
+QIcon QtPropertyBrowserUtils::brushValueIcon(const QBrush &b) { return QIcon(brushValuePixmap(b)); }
 
 QString QtPropertyBrowserUtils::colorValueText(const QColor &c) {
-  return translateUtf8Encoded("QtPropertyBrowserUtils", "[%1, %2, %3] (%4)",
-                              nullptr)
+  return translateUtf8Encoded("QtPropertyBrowserUtils", "[%1, %2, %3] (%4)", nullptr)
       .arg(QString::number(c.red()))
       .arg(QString::number(c.green()))
       .arg(QString::number(c.blue()))
@@ -292,18 +235,13 @@ QPixmap QtPropertyBrowserUtils::fontValuePixmap(const QFont &font) {
   return QPixmap::fromImage(img);
 }
 
-QIcon QtPropertyBrowserUtils::fontValueIcon(const QFont &f) {
-  return QIcon(fontValuePixmap(f));
-}
+QIcon QtPropertyBrowserUtils::fontValueIcon(const QFont &f) { return QIcon(fontValuePixmap(f)); }
 
 QString QtPropertyBrowserUtils::fontValueText(const QFont &f) {
-  return translateUtf8Encoded("QtPropertyBrowserUtils", "[%1, %2]", nullptr)
-      .arg(f.family())
-      .arg(f.pointSize());
+  return translateUtf8Encoded("QtPropertyBrowserUtils", "[%1, %2]", nullptr).arg(f.family()).arg(f.pointSize());
 }
 
-QtBoolEdit::QtBoolEdit(QWidget *parent)
-    : QWidget(parent), m_checkBox(new QCheckBox(this)), m_textVisible(true) {
+QtBoolEdit::QtBoolEdit(QWidget *parent) : QWidget(parent), m_checkBox(new QCheckBox(this)), m_textVisible(true) {
   auto *lt = new QHBoxLayout;
   if (QApplication::layoutDirection() == Qt::LeftToRight)
     lt->setContentsMargins(4, 0, 0, 0);
@@ -327,13 +265,9 @@ void QtBoolEdit::setTextVisible(bool textVisible) {
     m_checkBox->setText(QString());
 }
 
-Qt::CheckState QtBoolEdit::checkState() const {
-  return m_checkBox->checkState();
-}
+Qt::CheckState QtBoolEdit::checkState() const { return m_checkBox->checkState(); }
 
-void QtBoolEdit::setCheckState(Qt::CheckState state) {
-  m_checkBox->setCheckState(state);
-}
+void QtBoolEdit::setCheckState(Qt::CheckState state) { m_checkBox->setCheckState(state); }
 
 bool QtBoolEdit::isChecked() const { return m_checkBox->isChecked(); }
 
@@ -344,9 +278,7 @@ void QtBoolEdit::setChecked(bool c) {
   m_checkBox->setText(isChecked() ? tr("True") : tr("False"));
 }
 
-bool QtBoolEdit::blockCheckBoxSignals(bool block) {
-  return m_checkBox->blockSignals(block);
-}
+bool QtBoolEdit::blockCheckBoxSignals(bool block) { return m_checkBox->blockSignals(block); }
 
 void QtBoolEdit::mousePressEvent(QMouseEvent *event) {
   if (event->buttons() == Qt::LeftButton) {
@@ -357,8 +289,7 @@ void QtBoolEdit::mousePressEvent(QMouseEvent *event) {
   }
 }
 
-QtKeySequenceEdit::QtKeySequenceEdit(QWidget *parent)
-    : QWidget(parent), m_num(0), m_lineEdit(new QLineEdit(this)) {
+QtKeySequenceEdit::QtKeySequenceEdit(QWidget *parent) : QWidget(parent), m_num(0), m_lineEdit(new QLineEdit(this)) {
   auto *layout = new QHBoxLayout(this);
   layout->addWidget(m_lineEdit);
   layout->setMargin(0);
@@ -410,8 +341,7 @@ void QtKeySequenceEdit::slotClearShortcut() {
 
 void QtKeySequenceEdit::handleKeyEvent(QKeyEvent *e) {
   int nextKey = e->key();
-  if (nextKey == Qt::Key_Control || nextKey == Qt::Key_Shift ||
-      nextKey == Qt::Key_Meta || nextKey == Qt::Key_Alt ||
+  if (nextKey == Qt::Key_Control || nextKey == Qt::Key_Shift || nextKey == Qt::Key_Meta || nextKey == Qt::Key_Alt ||
       nextKey == Qt::Key_Super_L || nextKey == Qt::Key_AltGr)
     return;
 
@@ -461,12 +391,10 @@ void QtKeySequenceEdit::setKeySequence(const QKeySequence &sequence) {
 
 QKeySequence QtKeySequenceEdit::keySequence() const { return m_keySequence; }
 
-int QtKeySequenceEdit::translateModifiers(const Qt::KeyboardModifiers &state,
-                                          const QString &text) const {
+int QtKeySequenceEdit::translateModifiers(const Qt::KeyboardModifiers &state, const QString &text) const {
   int result = 0;
   if ((state & Qt::ShiftModifier) &&
-      (text.size() == 0 || !text.at(0).isPrint() || text.at(0).isLetter() ||
-       text.at(0).isSpace()))
+      (text.size() == 0 || !text.at(0).isPrint() || text.at(0).isLetter() || text.at(0).isSpace()))
     result |= Qt::SHIFT;
   if (state & Qt::ControlModifier)
     result |= Qt::CTRL;
@@ -497,8 +425,7 @@ void QtKeySequenceEdit::keyPressEvent(QKeyEvent *e) {
 void QtKeySequenceEdit::keyReleaseEvent(QKeyEvent *e) { m_lineEdit->event(e); }
 
 bool QtKeySequenceEdit::event(QEvent *e) {
-  if (e->type() == QEvent::Shortcut || e->type() == QEvent::ShortcutOverride ||
-      e->type() == QEvent::KeyRelease) {
+  if (e->type() == QEvent::Shortcut || e->type() == QEvent::ShortcutOverride || e->type() == QEvent::KeyRelease) {
     e->accept();
     return true;
   }

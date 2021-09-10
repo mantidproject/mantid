@@ -37,32 +37,27 @@ class MANTID_CURVEFITTING_DLL PseudoVoigt : public API::IPeakFunction {
 public:
   double centre() const override { return getParameter("PeakCentre"); }
   double intensity() const override { return getParameter("Intensity"); }
+  double intensityError() const override { return getError("Intensity"); }
   double height() const override;
   double fwhm() const override { return getParameter("FWHM"); }
 
   void setCentre(const double c) override { setParameter("PeakCentre", c); }
   void setHeight(const double h) override;
   void setFwhm(const double w) override;
-  void setIntensity(const double newIntensity) override {
-    setParameter("Intensity", newIntensity);
-  }
+  void setIntensity(const double newIntensity) override { setParameter("Intensity", newIntensity); }
 
   std::string name() const override { return "PseudoVoigt"; }
   const std::string category() const override { return "Peak"; }
 
   /// Set i-th parameter
-  void setParameter(size_t i, const double &value,
-                    bool explicitlySet = true) override;
+  void setParameter(size_t i, const double &value, bool explicitlySet = true) override;
   /// set by name
-  void setParameter(const std::string &name, const double &value,
-                    bool explicitlySet = true) override;
+  void setParameter(const std::string &name, const double &value, bool explicitlySet = true) override;
 
 protected:
-  void functionLocal(double *out, const double *xValues,
-                     const size_t nData) const override;
+  void functionLocal(double *out, const double *xValues, const size_t nData) const override;
 
-  void functionDerivLocal(API::Jacobian *out, const double *xValues,
-                          const size_t nData) override;
+  void functionDerivLocal(API::Jacobian *out, const double *xValues, const size_t nData) override;
 
   void init() override;
 

@@ -37,9 +37,7 @@ size_t N_POLY_ORDER = 4;
 double TWOPI = 2.0 * M_PI;
 
 // Avoid typing static_casts everywhere
-template <typename R, typename T> inline R to(const T val) {
-  return static_cast<R>(val);
-}
+template <typename R, typename T> inline R to(const T val) { return static_cast<R>(val); }
 
 //-----------------------------------------------------------------------------
 // Utility functions
@@ -80,18 +78,14 @@ namespace Algorithms {
  * @param inputHist A histogram containing the TOF values corresponding
  * to the values to be corrected.
  */
-MayersSampleCorrectionStrategy::MayersSampleCorrectionStrategy(
-    MayersSampleCorrectionStrategy::Parameters params,
-    HistogramData::Histogram inputHist)
-    : m_pars(params), m_histogram(std::move(inputHist)),
-      m_tofVals(m_histogram.points()), m_histoYSize(m_histogram.size()),
-      m_muRrange(calculateMuRange()),
-      m_rng(std::make_unique<MersenneTwister>(1)) {
+MayersSampleCorrectionStrategy::MayersSampleCorrectionStrategy(MayersSampleCorrectionStrategy::Parameters params,
+                                                               HistogramData::Histogram inputHist)
+    : m_pars(params), m_histogram(std::move(inputHist)), m_tofVals(m_histogram.points()),
+      m_histoYSize(m_histogram.size()), m_muRrange(calculateMuRange()), m_rng(std::make_unique<MersenneTwister>(1)) {
 
   const auto &xVals = m_histogram.x();
   if (!(xVals.front() < xVals.back())) {
-    throw std::invalid_argument(
-        "TOF values are expected to be monotonically increasing");
+    throw std::invalid_argument("TOF values are expected to be monotonically increasing");
   }
 }
 
@@ -107,15 +101,13 @@ MayersSampleCorrectionStrategy::~MayersSampleCorrectionStrategy() = default;
  *
  * @return A histogram containing corrected values
  */
-Mantid::HistogramData::Histogram
-MayersSampleCorrectionStrategy::getCorrectedHisto() {
+Mantid::HistogramData::Histogram MayersSampleCorrectionStrategy::getCorrectedHisto() {
 
   // Temporary storage
-  std::vector<double> xmur(N_MUR_PTS + 1, 0.0),
-      yabs(N_MUR_PTS + 1, 1.0), // absorption signals
-      wabs(N_MUR_PTS + 1, 1.0), // absorption weights
-      yms(0),                   // multiple scattering signals
-      wms(0);                   // multiple scattering weights
+  std::vector<double> xmur(N_MUR_PTS + 1, 0.0), yabs(N_MUR_PTS + 1, 1.0), // absorption signals
+      wabs(N_MUR_PTS + 1, 1.0),                                           // absorption weights
+      yms(0),                                                             // multiple scattering signals
+      wms(0);                                                             // multiple scattering weights
   if (m_pars.mscat) {
     yms.resize(N_MUR_PTS + 1, 0.0);
     wms.resize(N_MUR_PTS + 1, 100.0);
@@ -149,8 +141,7 @@ MayersSampleCorrectionStrategy::getCorrectedHisto() {
     msCoeffs = polyfit(xmur, yms, wms);
 
   // corrections to input
-  const double muMin(xmur.front()), muMax(xmur.back()),
-      flightPath(m_pars.l1 + m_pars.l2),
+  const double muMin(xmur.front()), muMax(xmur.back()), flightPath(m_pars.l1 + m_pars.l2),
       vol(M_PI * m_pars.cylHeight * pow(m_pars.cylRadius, 2));
   //  Oct 2003 discussion with Jerry Mayers:
   //  1E-22 factor in formula for RNS was introduced by Jerry to keep
@@ -193,8 +184,7 @@ MayersSampleCorrectionStrategy::getCorrectedHisto() {
  * @param muR Single mu*r slice value
  * @return The self-attenuation factor for this sample
  */
-double
-MayersSampleCorrectionStrategy::calculateSelfAttenuation(const double muR) {
+double MayersSampleCorrectionStrategy::calculateSelfAttenuation(const double muR) {
   // Integrate over the cylindrical coordinates
   // Constants for calculation
   const double dyr = muR / to<double>(N_RAD - 1);
@@ -219,8 +209,7 @@ MayersSampleCorrectionStrategy::calculateSelfAttenuation(const double muR) {
       double fact2 = muRSq - std::pow(r0 * sin(m_pars.twoTheta - theta), 2);
       if (fact2 < 0.0)
         fact2 = 0.0;
-      const double mul2 =
-          (sqrt(fact2) - r0 * cos(m_pars.twoTheta - theta)) / cosaz;
+      const double mul2 = (sqrt(fact2) - r0 * cos(m_pars.twoTheta - theta)) / cosaz;
       yth[j] = exp(-mul1 - mul2);
     }
 
@@ -237,9 +226,8 @@ MayersSampleCorrectionStrategy::calculateSelfAttenuation(const double muR) {
  * @param abs Absorption and self-attenuation factor (\f$A_s\f$ in Mayers paper)
  * @return A pair of (factor,weight)
  */
-std::pair<double, double>
-MayersSampleCorrectionStrategy::calculateMS(const size_t irp, const double muR,
-                                            const double abs) {
+std::pair<double, double> MayersSampleCorrectionStrategy::calculateMS(const size_t irp, const double muR,
+                                                                      const double abs) {
   // Radial coordinate raised to power 1/3 to ensure uniform density of points
   // across circle following discussion with W.G.Marshall (ISIS)
   const double radDistPower = 1. / 3.;
@@ -268,23 +256,19 @@ MayersSampleCorrectionStrategy::calculateMS(const size_t irp, const double muR,
       if (fact2 < 0.0)
         fact2 = 0.0;
       // Path out from final point
-      const double mul2 =
-          (sqrt(fact2) - r2 * cos(m_pars.twoTheta - th2)) / cosaz;
+      const double mul2 = (sqrt(fact2) - r2 * cos(m_pars.twoTheta - th2)) / cosaz;
       // Path between point 1 & 2
       const double mul12 =
-          sqrt(pow(r1 * cos(th1) - r2 * cos(th2), 2) +
-               pow(r1 * sin(th1) - r2 * sin(th2), 2) + pow(z1 - z2, 2));
+          sqrt(pow(r1 * cos(th1) - r2 * cos(th2), 2) + pow(r1 * sin(th1) - r2 * sin(th2), 2) + pow(z1 - z2, 2));
       if (mul12 < 0.01)
         continue;
       sum += exp(-(mul1 + mul2 + mul12)) / pow(mul12, 2);
     }
-    const double beta =
-        pow(M_PI * muR * muR * muH, 2) * sum / to<double>(m_pars.msNEvents);
+    const double beta = pow(M_PI * muR * muR * muH, 2) * sum / to<double>(m_pars.msNEvents);
     const double delta = 0.25 * beta / (M_PI * abs * muH);
     deltas[j] = delta;
   }
-  auto stats =
-      getStatistics(deltas, StatOptions::Mean | StatOptions::CorrectedStdDev);
+  auto stats = getStatistics(deltas, StatOptions::Mean | StatOptions::CorrectedStdDev);
   return std::make_pair(stats.mean, stats.mean / stats.standard_deviation);
 }
 
@@ -296,8 +280,7 @@ MayersSampleCorrectionStrategy::calculateMS(const size_t irp, const double muR,
  * that the internal parameters have been set.
  * @return A pair of (min,max) values for muR for the given time of flight
  */
-std::pair<double, double>
-MayersSampleCorrectionStrategy::calculateMuRange() const {
+std::pair<double, double> MayersSampleCorrectionStrategy::calculateMuRange() const {
   const double flightPath(m_pars.l1 + m_pars.l2);
   const double tmin(m_tofVals[0]), tmax(m_tofVals[m_histoYSize - 1]);
   return std::make_pair(muR(flightPath, tmin), muR(flightPath, tmax));
@@ -309,8 +292,7 @@ MayersSampleCorrectionStrategy::calculateMuRange() const {
  * @param tof The time of flight in microseconds
  * @return The mu*r value
  */
-double MayersSampleCorrectionStrategy::muR(const double flightPath,
-                                           const double tof) const {
+double MayersSampleCorrectionStrategy::muR(const double flightPath, const double tof) const {
   return muR(sigmaTotal(flightPath, tof));
 }
 
@@ -332,8 +314,7 @@ double MayersSampleCorrectionStrategy::muR(const double sigt) const {
  * @param tof The time of flight in microseconds
  * @return The total scattering cross section in barns
  */
-double MayersSampleCorrectionStrategy::sigmaTotal(const double flightPath,
-                                                  const double tof) const {
+double MayersSampleCorrectionStrategy::sigmaTotal(const double flightPath, const double tof) const {
   // sigabs = sigabs(@2200(m/s)^-1)*2200 * velocity;
   const double sigabs = m_pars.sigmaAbs * 2200.0 * tof * 1e-6 / flightPath;
   return sigabs + m_pars.sigmaSc;
@@ -343,9 +324,7 @@ double MayersSampleCorrectionStrategy::sigmaTotal(const double flightPath,
  * (Re-)seed the random number generator
  * @param seed Seed value for the random number generator
  */
-void MayersSampleCorrectionStrategy::seedRNG(const size_t seed) {
-  m_rng->setSeed(seed);
-}
+void MayersSampleCorrectionStrategy::seedRNG(const size_t seed) { m_rng->setSeed(seed); }
 
 } // namespace Algorithms
 } // namespace Mantid

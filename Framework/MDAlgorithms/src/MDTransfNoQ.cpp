@@ -28,11 +28,9 @@ DECLARE_MD_TRANSFID(MDTransfNoQ, CopyToMD)
 bool MDTransfNoQ::calcGenericVariables(std::vector<coord_t> &Coord, size_t nd) {
   // sanity check. If fails, something went fundamentally wrong
   if (m_NMatrixDim + m_AddDimCoordinates.size() != nd) {
-    std::string ERR =
-        "Number of matrix dimensions: " + std::to_string(m_NMatrixDim) +
-        " plus number of additional dimensions: " +
-        std::to_string(m_AddDimCoordinates.size()) +
-        " not equal to number of workspace dimensions: " + std::to_string(nd);
+    std::string ERR = "Number of matrix dimensions: " + std::to_string(m_NMatrixDim) +
+                      " plus number of additional dimensions: " + std::to_string(m_AddDimCoordinates.size()) +
+                      " not equal to number of workspace dimensions: " + std::to_string(nd);
     throw(std::invalid_argument(ERR));
   }
   // if one axis is numeric, 1  coordinate  came from workspace
@@ -40,8 +38,7 @@ bool MDTransfNoQ::calcGenericVariables(std::vector<coord_t> &Coord, size_t nd) {
   // by properties.
   unsigned int ic(0);
   for (unsigned int i = m_NMatrixDim; i < nd; i++) {
-    if (m_AddDimCoordinates[ic] < m_DimMin[i] ||
-        m_AddDimCoordinates[ic] >= m_DimMax[i])
+    if (m_AddDimCoordinates[ic] < m_DimMin[i] || m_AddDimCoordinates[ic] >= m_DimMax[i])
       return false;
     Coord[i] = m_AddDimCoordinates[ic];
     ic++;
@@ -51,15 +48,13 @@ bool MDTransfNoQ::calcGenericVariables(std::vector<coord_t> &Coord, size_t nd) {
 void MDTransfNoQ::initialize(const MDWSDescription &ConvParams) {
 
   // get pointer to the positions of the detectors
-  std::vector<Kernel::V3D> const &DetDir =
-      ConvParams.m_PreprDetTable->getColVector<Kernel::V3D>("DetDirections");
+  std::vector<Kernel::V3D> const &DetDir = ConvParams.m_PreprDetTable->getColVector<Kernel::V3D>("DetDirections");
   m_Det = &DetDir[0]; //
 
   // get min and max values defined by the algorithm.
   ConvParams.getMinMax(m_DimMin, m_DimMax);
 
-  m_NMatrixDim =
-      getNMatrixDimensions(Kernel::DeltaEMode::Undefined, ConvParams.getInWS());
+  m_NMatrixDim = getNMatrixDimensions(Kernel::DeltaEMode::Undefined, ConvParams.getInWS());
   m_AddDimCoordinates = ConvParams.getAddCoord();
 
   API::NumericAxis *pXAx;
@@ -79,8 +74,8 @@ bool MDTransfNoQ::calcYDepCoordinates(std::vector<coord_t> &Coord, size_t i) {
   }
   return true;
 }
-bool MDTransfNoQ::calcMatrixCoord(const double &X, std::vector<coord_t> &Coord,
-                                  double & /*s*/, double & /*errSq*/) const {
+bool MDTransfNoQ::calcMatrixCoord(const double &X, std::vector<coord_t> &Coord, double & /*s*/,
+                                  double & /*errSq*/) const {
   if (X < m_DimMin[0] || X >= m_DimMax[0])
     return false;
 
@@ -88,9 +83,7 @@ bool MDTransfNoQ::calcMatrixCoord(const double &X, std::vector<coord_t> &Coord,
   return true;
 }
 
-std::vector<double> MDTransfNoQ::getExtremumPoints(const double xMin,
-                                                   const double xMax,
-                                                   size_t det_num) const {
+std::vector<double> MDTransfNoQ::getExtremumPoints(const double xMin, const double xMax, size_t det_num) const {
   UNUSED_ARG(det_num);
 
   std::vector<double> rez(2);
@@ -104,9 +97,8 @@ std::vector<double> MDTransfNoQ::getExtremumPoints(const double xMin,
 workspace.
 Depending on ws axis units, the numebr here is either 1 or 2* and is independent
 on emode*/
-unsigned int
-MDTransfNoQ::getNMatrixDimensions(Kernel::DeltaEMode::Type mode,
-                                  API::MatrixWorkspace_const_sptr inWS) const {
+unsigned int MDTransfNoQ::getNMatrixDimensions(Kernel::DeltaEMode::Type mode,
+                                               API::MatrixWorkspace_const_sptr inWS) const {
   UNUSED_ARG(mode);
 
   API::NumericAxis *pXAx, *pYAx;
@@ -119,15 +111,13 @@ MDTransfNoQ::getNMatrixDimensions(Kernel::DeltaEMode::Type mode,
 }
 // internal helper function which extract one or two axis from input matrix
 // workspace;
-void MDTransfNoQ::getAxes(const API::MatrixWorkspace_const_sptr &inWS,
-                          API::NumericAxis *&pXAxis,
+void MDTransfNoQ::getAxes(const API::MatrixWorkspace_const_sptr &inWS, API::NumericAxis *&pXAxis,
                           API::NumericAxis *&pYAxis) {
   // get the X axis of input workspace, it has to be there; if not axis throws
   // invalid index
   pXAxis = dynamic_cast<API::NumericAxis *>(inWS->getAxis(0));
   if (!pXAxis) {
-    std::string ERR =
-        "Can not retrieve X axis from the source workspace: " + inWS->getName();
+    std::string ERR = "Can not retrieve X axis from the source workspace: " + inWS->getName();
     throw(std::invalid_argument(ERR));
   }
   // get optional Y axis which can be used in NoQ-kind of algorithms
@@ -140,9 +130,8 @@ here it is usually input ws units, which are independent on emode
 * @param  inWS -- input matrix workspace shared pointer
 *
 */
-std::vector<std::string>
-MDTransfNoQ::outputUnitID(Kernel::DeltaEMode::Type mode,
-                          API::MatrixWorkspace_const_sptr inWS) const {
+std::vector<std::string> MDTransfNoQ::outputUnitID(Kernel::DeltaEMode::Type mode,
+                                                   API::MatrixWorkspace_const_sptr inWS) const {
   UNUSED_ARG(mode);
 
   std::vector<std::string> rez;
@@ -160,40 +149,34 @@ MDTransfNoQ::outputUnitID(Kernel::DeltaEMode::Type mode,
   return rez;
 }
 /**the default dimID-s in noQ mode equal to input WS dim-id-s */
-std::vector<std::string>
-MDTransfNoQ::getDefaultDimID(Kernel::DeltaEMode::Type mode,
-                             API::MatrixWorkspace_const_sptr inWS) const {
+std::vector<std::string> MDTransfNoQ::getDefaultDimID(Kernel::DeltaEMode::Type mode,
+                                                      API::MatrixWorkspace_const_sptr inWS) const {
   return this->outputUnitID(mode, inWS);
 }
 /**  returns the units, the input ws is actually in as they coinside with input
  * units for this class */
-const std::string
-MDTransfNoQ::inputUnitID(Kernel::DeltaEMode::Type mode,
-                         API::MatrixWorkspace_const_sptr inWS) const {
+const std::string MDTransfNoQ::inputUnitID(Kernel::DeltaEMode::Type mode, API::MatrixWorkspace_const_sptr inWS) const {
   UNUSED_ARG(mode);
   API::NumericAxis *pXAxis;
   // get the X axis of input workspace, it has to be there; if not axis throws
   // invalid index
   pXAxis = dynamic_cast<API::NumericAxis *>(inWS->getAxis(0));
   if (!pXAxis) {
-    std::string ERR =
-        "Can not retrieve X axis from the source workspace: " + inWS->getName();
+    std::string ERR = "Can not retrieve X axis from the source workspace: " + inWS->getName();
     throw(std::invalid_argument(ERR));
   }
   return pXAxis->unit()->unitID();
 }
 
-MDTransfNoQ::MDTransfNoQ()
-    : m_NMatrixDim(0), m_YAxis(nullptr), m_Det(nullptr) {}
+MDTransfNoQ::MDTransfNoQ() : m_NMatrixDim(0), m_YAxis(nullptr), m_Det(nullptr) {}
 
 /**
  * Set the display normalization for no Q
  * @param mdWorkspace: the md workspace
  * @param underlyingWorkspace: the underlying workspace
  */
-void MDTransfNoQ::setDisplayNormalization(
-    Mantid::API::IMDWorkspace_sptr mdWorkspace,
-    Mantid::API::MatrixWorkspace_sptr underlyingWorkspace) const {
+void MDTransfNoQ::setDisplayNormalization(Mantid::API::IMDWorkspace_sptr mdWorkspace,
+                                          Mantid::API::MatrixWorkspace_sptr underlyingWorkspace) const {
   DisplayNormalizationSetter setter;
   auto isQ = false;
   setter(mdWorkspace, underlyingWorkspace, isQ);

@@ -33,8 +33,7 @@ private:
     const double m_step;
 
   public:
-    LinearIncrementingAssignment(double min, double step)
-        : m_current(min), m_step(step) {}
+    LinearIncrementingAssignment(double min, double step) : m_current(min), m_step(step) {}
     double operator()() {
       double temp = m_current;
       m_current += m_step;
@@ -52,9 +51,7 @@ so simple.
 4) For each point on the domain, compares the outputs of (1) (2) and (3) above
 to check that the results are equal.
 */
-  void do_test_function_calculation(const double &A0, const double &A1,
-                                    const double &Height,
-                                    const double &Lifetime) {
+  void do_test_function_calculation(const double &A0, const double &A1, const double &Height, const double &Lifetime) {
     // Create the Product linear exponential function
     ProductLinearExp func;
     func.setParameter("A0", A0);
@@ -79,8 +76,7 @@ to check that the results are equal.
     const size_t nResults = 10;
     using VecDouble = std::vector<double>;
     VecDouble xValues(nResults);
-    std::generate(xValues.begin(), xValues.end(),
-                  LinearIncrementingAssignment(0, 0.0001));
+    std::generate(xValues.begin(), xValues.end(), LinearIncrementingAssignment(0, 0.0001));
 
     FunctionDomain1DVector domain(xValues);
     FunctionValues valuesBenchmark(domain);
@@ -105,19 +101,15 @@ to check that the results are equal.
       TS_ASSERT_DELTA(valuesBenchmark[i], valuesLinExpDecay[i], 0.0001);
 
       // Verify that the derivates calculated are also the same.
-      TS_ASSERT_DELTA(jacobianLinExpDecay.get(i, 2),
-                      jacobianNumerical.get(i, 2), 0.1); // w.r.t Height
-      TS_ASSERT_DELTA(jacobianLinExpDecay.get(i, 3),
-                      jacobianNumerical.get(i, 3), 0.1); // w.r.t Lifetime
+      TS_ASSERT_DELTA(jacobianLinExpDecay.get(i, 2), jacobianNumerical.get(i, 2), 0.1); // w.r.t Height
+      TS_ASSERT_DELTA(jacobianLinExpDecay.get(i, 3), jacobianNumerical.get(i, 3), 0.1); // w.r.t Lifetime
     }
   }
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ProductLinearExpTest *createSuite() {
-    return new ProductLinearExpTest();
-  }
+  static ProductLinearExpTest *createSuite() { return new ProductLinearExpTest(); }
   static void destroySuite(ProductLinearExpTest *suite) { delete suite; }
 
   void test_name() {
@@ -131,8 +123,7 @@ public:
   }
 
   void test_registered_with_factory() {
-    IFunction_sptr func =
-        FunctionFactory::Instance().createFunction("ProductLinearExp");
+    IFunction_sptr func = FunctionFactory::Instance().createFunction("ProductLinearExp");
     TS_ASSERT(func != nullptr);
     TS_ASSERT_EQUALS(func->name(), "ProductLinearExp");
     TS_ASSERT(std::dynamic_pointer_cast<ProductLinearExp>(func) != nullptr);
@@ -177,8 +168,7 @@ public:
     const size_t nResults = 10;
     using VecDouble = std::vector<double>;
     VecDouble xValues(nResults);
-    std::generate(xValues.begin(), xValues.end(),
-                  LinearIncrementingAssignment(0, 0.1));
+    std::generate(xValues.begin(), xValues.end(), LinearIncrementingAssignment(0, 0.1));
 
     FunctionDomain1DVector domain(xValues);
     FunctionValues valuesExpDecay(domain);
@@ -202,8 +192,7 @@ public:
     const size_t nResults = 10;
     using VecDouble = std::vector<double>;
     VecDouble xValues(nResults);
-    std::generate(xValues.begin(), xValues.end(),
-                  LinearIncrementingAssignment(0, 0.1));
+    std::generate(xValues.begin(), xValues.end(), LinearIncrementingAssignment(0, 0.1));
     FunctionDomain1DVector domain(xValues);
 
     Mantid::CurveFitting::Jacobian jacobian(nResults, 4);

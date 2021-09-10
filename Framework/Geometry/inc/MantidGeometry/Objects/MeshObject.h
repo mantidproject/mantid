@@ -50,12 +50,10 @@ Mesh2DObject
 class MANTID_GEOMETRY_DLL MeshObject : public IObject {
 public:
   /// Constructor
-  MeshObject(const std::vector<uint32_t> &faces,
-             const std::vector<Kernel::V3D> &vertices,
+  MeshObject(const std::vector<uint32_t> &faces, const std::vector<Kernel::V3D> &vertices,
              const Kernel::Material &material);
   /// Constructor
-  MeshObject(std::vector<uint32_t> &&faces, std::vector<Kernel::V3D> &&vertices,
-             const Kernel::Material &&material);
+  MeshObject(std::vector<uint32_t> &&faces, std::vector<Kernel::V3D> &&vertices, const Kernel::Material &&material);
 
   /// Copy constructor
   MeshObject(const MeshObject &) = delete;
@@ -64,9 +62,7 @@ public:
   /// Destructor
   virtual ~MeshObject() = default;
   /// Clone
-  IObject *clone() const override {
-    return new MeshObject(m_triangles, m_vertices, m_material);
-  }
+  IObject *clone() const override { return new MeshObject(m_triangles, m_vertices, m_material); }
   IObject *cloneWithMaterial(const Kernel::Material &material) const override {
     return new MeshObject(m_triangles, m_vertices, material);
   }
@@ -82,8 +78,7 @@ public:
   /// Return whether this object has a valid shape
   bool hasValidShape() const override;
 
-  bool
-  isValid(const Kernel::V3D &) const override; ///< Check if a point is inside
+  bool isValid(const Kernel::V3D &) const override; ///< Check if a point is inside
   bool isOnSide(const Kernel::V3D &) const override;
   int calcValidType(const Kernel::V3D &Pt, const Kernel::V3D &uVec) const;
 
@@ -94,16 +89,15 @@ public:
   // Solid angle - uses triangleSolidAngle unless many (>30000) triangles
   double solidAngle(const Kernel::V3D &observer) const override;
   // Solid angle with a scaling of the object
-  double solidAngle(const Kernel::V3D &observer,
-                    const Kernel::V3D &scaleFactor) const override;
+  double solidAngle(const Kernel::V3D &observer, const Kernel::V3D &scaleFactor) const override;
 
   /// Calculates the volume of this object.
   double volume() const override;
 
   /// Calculate (or return cached value of) Axis Aligned Bounding box
   /// (DEPRECATED)
-  void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin,
-                      double &ymin, double &zmin) const override;
+  void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin,
+                      double &zmin) const override;
 
   /// Return cached value of axis-aligned bounding box
   const BoundingBox &getBoundingBox() const override;
@@ -112,13 +106,10 @@ public:
   int getPointInObject(Kernel::V3D &point) const override;
 
   /// Select a random point within the object
-  boost::optional<Kernel::V3D>
-  generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
-                        const size_t) const override;
-  boost::optional<Kernel::V3D>
-  generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
-                        const BoundingBox &activeRegion,
-                        const size_t) const override;
+  boost::optional<Kernel::V3D> generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                                                     const size_t) const override;
+  boost::optional<Kernel::V3D> generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                                                     const BoundingBox &activeRegion, const size_t) const override;
 
   // Rendering member functions
   void draw() const override;
@@ -132,8 +123,7 @@ public:
   detail::ShapeInfo::GeometryShape shape() const override;
   const detail::ShapeInfo &shapeInfo() const override;
 
-  void GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
-                     std::vector<Kernel::V3D> &vectors, double &innerRadius,
+  void GetObjectGeom(detail::ShapeInfo::GeometryShape &type, std::vector<Kernel::V3D> &vectors, double &innerRadius,
                      double &radius, double &height) const override;
 
   /// Read access to mesh object for rendering
@@ -152,14 +142,12 @@ public:
 private:
   void initialize();
   /// Get intersections
-  void getIntersections(
-      const Kernel::V3D &start, const Kernel::V3D &direction,
-      std::vector<Kernel::V3D> &intersectionPoints,
-      std::vector<Mantid::Geometry::TrackDirection> &entryExitFlags) const;
+  void getIntersections(const Kernel::V3D &start, const Kernel::V3D &direction,
+                        std::vector<Kernel::V3D> &intersectionPoints,
+                        std::vector<Mantid::Geometry::TrackDirection> &entryExitFlags) const;
 
   /// Get triangle
-  bool getTriangle(const size_t index, Kernel::V3D &v1, Kernel::V3D &v2,
-                   Kernel::V3D &v3) const;
+  bool getTriangle(const size_t index, Kernel::V3D &v1, Kernel::V3D &v2, Kernel::V3D &v3) const;
   /// Search object for valid point
   bool searchForObject(Kernel::V3D &point) const;
 

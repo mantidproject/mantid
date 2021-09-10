@@ -22,9 +22,7 @@ class LoadInstrumentFromNexusTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static LoadInstrumentFromNexusTest *createSuite() {
-    return new LoadInstrumentFromNexusTest();
-  }
+  static LoadInstrumentFromNexusTest *createSuite() { return new LoadInstrumentFromNexusTest(); }
   static void destroySuite(LoadInstrumentFromNexusTest *suite) { delete suite; }
 
   void testLoadInstrumentFromNexus() {
@@ -62,8 +60,7 @@ private:
 
   // Initialise the algorithm and set the properties. Creates a fake
   // workspace for the input.
-  const MatrixWorkspace_sptr setupAlgorithm(LoadInstrumentFromNexus &alg,
-                                            const std::string &filename) {
+  const MatrixWorkspace_sptr setupAlgorithm(LoadInstrumentFromNexus &alg, const std::string &filename) {
     // create the workspace
     const MatrixWorkspace_sptr inWS = makeFakeWorkspace();
 

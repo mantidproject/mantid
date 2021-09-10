@@ -27,9 +27,7 @@ public:
   /// Virtual destructor
   ~LoadAndApplyMuonDetectorGrouping() {}
   /// Algorithm's name
-  const std::string name() const override {
-    return "LoadAndApplyMuonDetectorGrouping";
-  }
+  const std::string name() const override { return "LoadAndApplyMuonDetectorGrouping"; }
   /// Algorithm's version
   int version() const override { return (1); }
   /// Algorithm's category for identification
@@ -42,8 +40,7 @@ public:
   }
   /// See also
   const std::vector<std::string> seeAlso() const override {
-    return {"MuonProcess", "ApplyMuonDetectorGrouping",
-            "ApplyMuonDetectorGroupPairing"};
+    return {"MuonProcess", "ApplyMuonDetectorGrouping", "ApplyMuonDetectorGroupPairing"};
   }
   /// Perform validation of inputs to the algorithm
   std::map<std::string, std::string> validateInputs() override;
@@ -60,14 +57,12 @@ private:
 
   /// Add all the supplied groups to the ADS, inside wsGrouped, by
   /// executing the ApplyMuonDetectorGrouping algorithm
-  void addGroupingToADS(const Mantid::Muon::AnalysisOptions &options,
-                        const Mantid::API::Workspace_sptr &ws,
+  void addGroupingToADS(const Mantid::Muon::AnalysisOptions &options, const Mantid::API::Workspace_sptr &ws,
                         const Mantid::API::WorkspaceGroup_sptr &wsGrouped);
 
   /// Add all the supplied pairs to the ADS, inside wsGrouped, by
   /// executing the ApplyMuonDetectorGroupPairing algorithm
-  void addPairingToADS(const Mantid::Muon::AnalysisOptions &options,
-                       const Mantid::API::Workspace_sptr &ws,
+  void addPairingToADS(const Mantid::Muon::AnalysisOptions &options, const Mantid::API::Workspace_sptr &ws,
                        const Mantid::API::WorkspaceGroup_sptr &wsGrouped);
 
   void addGroupingInformationToADS(const Mantid::API::Grouping &grouping);
@@ -76,20 +71,17 @@ private:
   Mantid::Muon::AnalysisOptions setDefaultOptions();
 
   /// If no workspace group supplied, adds one with the correct name
-  Mantid::API::WorkspaceGroup_sptr
-  addGroupedWSWithDefaultName(Mantid::API::Workspace_sptr inputWS);
+  Mantid::API::WorkspaceGroup_sptr addGroupedWSWithDefaultName(Mantid::API::Workspace_sptr inputWS);
 
   /// Throw an error if the detector IDs in grouping are not in workspace
-  void checkDetectorIDsInWorkspace(Mantid::API::Grouping &grouping,
-                                   Mantid::API::Workspace_sptr workspace);
+  void checkDetectorIDsInWorkspace(Mantid::API::Grouping &grouping, Mantid::API::Workspace_sptr workspace);
 
   /// Check if the group/pair names are valid, and if all the groups which
   /// are paired are also included as groups.
   void CheckValidGroupsAndPairs(const Mantid::API::Grouping &grouping);
 
-  void
-  getTimeLimitsFromInputWorkspace(const Mantid::API::Workspace_sptr &inputWS,
-                                  Mantid::Muon::AnalysisOptions &options);
+  void getTimeLimitsFromInputWorkspace(const Mantid::API::Workspace_sptr &inputWS,
+                                       Mantid::Muon::AnalysisOptions &options);
 
   void getTimeLimitsFromInputs(AnalysisOptions &options);
 };

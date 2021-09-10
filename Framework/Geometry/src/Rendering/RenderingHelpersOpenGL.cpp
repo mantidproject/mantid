@@ -179,9 +179,7 @@ void renderCuboid(const detail::ShapeInfo &shapeInfo) {
   // first face
   glBegin(GL_QUADS);
   for (auto &row : faceindex) {
-    const auto normal =
-        normalize((vertex[row[0]] - vertex[row[1]])
-                      .cross_prod((vertex[row[0]] - vertex[row[2]])));
+    const auto normal = normalize((vertex[row[0]] - vertex[row[1]]).cross_prod((vertex[row[0]] - vertex[row[2]])));
     glNormal3d(normal[0], normal[1], normal[2]);
     for (const int ij : row) {
       if (ij == 0)
@@ -258,8 +256,7 @@ void renderCone(const detail::ShapeInfo &shapeInfo) {
   glMultMatrixd(mat);
   auto radius = shapeInfo.radius();
   auto height = shapeInfo.height();
-  gluCylinder(qobj, 0, radius, height, Geometry::Cone::g_NSLICES,
-              Geometry::Cone::g_NSTACKS);
+  gluCylinder(qobj, 0, radius, height, Geometry::Cone::g_NSLICES, Geometry::Cone::g_NSTACKS);
   glTranslated(0.0, 0.0, height);
   gluDisk(qobj, 0, radius, Geometry::Cone::g_NSLICES, 1);
   glPopMatrix();
@@ -281,8 +278,7 @@ void renderCylinder(const detail::ShapeInfo &shapeInfo) {
   glMultMatrixd(mat);
   auto radius = shapeInfo.radius();
   auto height = shapeInfo.height();
-  gluCylinder(qobj, radius, radius, height, Cylinder::g_NSLICES,
-              Cylinder::g_NSTACKS);
+  gluCylinder(qobj, radius, radius, height, Cylinder::g_NSLICES, Cylinder::g_NSTACKS);
   gluQuadricTexture(qobj, false);
   gluDisk(qobj, 0, radius, Cylinder::g_NSLICES, 1);
   glTranslated(0.0, 0.0, height);

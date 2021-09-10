@@ -27,8 +27,8 @@ namespace {
  * @param direction An output/input/inout property
  * @return A pointer to a new AlgorithmProperty object
  */
-AlgorithmProperty *createPropertyWithValidatorAndDirection(
-    const std::string &name, IValidator *validator, unsigned int direction) {
+AlgorithmProperty *createPropertyWithValidatorAndDirection(const std::string &name, IValidator *validator,
+                                                           unsigned int direction) {
   return new AlgorithmProperty(name, validator->clone(), direction);
 }
 
@@ -39,10 +39,8 @@ AlgorithmProperty *createPropertyWithValidatorAndDirection(
  * when passed to the framework
  * @return A pointer to a new AlgorithmProperty object
  */
-AlgorithmProperty *createPropertyWithValidator(const std::string &name,
-                                               IValidator *validator) {
-  return createPropertyWithValidatorAndDirection(
-      name, validator, Mantid::Kernel::Direction::Input);
+AlgorithmProperty *createPropertyWithValidator(const std::string &name, IValidator *validator) {
+  return createPropertyWithValidatorAndDirection(name, validator, Mantid::Kernel::Direction::Input);
 }
 } // namespace
 
@@ -52,15 +50,11 @@ void export_AlgorithmProperty() {
   using HeldType = std::shared_ptr<IAlgorithm>;
   PropertyWithValueExporter<HeldType>::define("AlgorithmPropertyWithValue");
 
-  class_<AlgorithmProperty, bases<PropertyWithValue<HeldType>>,
-         boost::noncopyable>("AlgorithmProperty", no_init)
+  class_<AlgorithmProperty, bases<PropertyWithValue<HeldType>>, boost::noncopyable>("AlgorithmProperty", no_init)
       .def(init<const std::string &>(args("name")))
       // These variants require the validator object to be cloned
       .def("__init__",
-           make_constructor(&createPropertyWithValidator,
-                            default_call_policies(), args("name", "validator")))
-      .def("__init__",
-           make_constructor(&createPropertyWithValidatorAndDirection,
-                            default_call_policies(),
-                            args("name", "validator", "direction")));
+           make_constructor(&createPropertyWithValidator, default_call_policies(), args("name", "validator")))
+      .def("__init__", make_constructor(&createPropertyWithValidatorAndDirection, default_call_policies(),
+                                        args("name", "validator", "direction")));
 }

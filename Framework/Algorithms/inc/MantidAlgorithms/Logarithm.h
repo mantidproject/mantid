@@ -47,9 +47,7 @@ public:
 
   /// Algorithm's version for identification
   int version() const override { return (1); }
-  const std::vector<std::string> seeAlso() const override {
-    return {"Power", "Exponential"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"Power", "Exponential"}; }
   /// Algorithm's category for identification
   const std::string category() const override { return "Arithmetic"; }
 
@@ -65,9 +63,7 @@ private:
   void retrieveProperties() override;
   /// Actually the function, which is run on values when the operation is
   /// performed
-  void performUnaryOperation(const double XIn, const double YIn,
-                             const double EIn, double &YOut,
-                             double &EOut) override;
+  void performUnaryOperation(const double XIn, const double YIn, const double EIn, double &YOut, double &EOut) override;
 };
 
 } // End namespace Algorithms

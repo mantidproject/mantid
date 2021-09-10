@@ -27,19 +27,16 @@ public:
   void testDefaultConstruction() {
 
     auto product = make_cow<MyType<int>>();
-    TSM_ASSERT_EQUALS("We expect default constructor to be called",
-                      product->args, 0);
+    TSM_ASSERT_EQUALS("We expect default constructor to be called", product->args, 0);
   }
 
   void testConstructWithOneArgument() {
     auto product = make_cow<MyType<int>>(7);
-    TSM_ASSERT_EQUALS("We expect one arg constructor to be called",
-                      product->args, 1);
+    TSM_ASSERT_EQUALS("We expect one arg constructor to be called", product->args, 1);
   }
 
   void testConstructWithTwoArgument() {
     auto product = make_cow<MyType<int>>(7, 7);
-    TSM_ASSERT_EQUALS("We expect two arg constructor to be called",
-                      product->args, 2);
+    TSM_ASSERT_EQUALS("We expect two arg constructor to be called", product->args, 2);
   }
 };

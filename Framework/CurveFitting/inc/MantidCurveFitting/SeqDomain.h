@@ -35,23 +35,19 @@ public:
   /// Return the number of parts in the domain
   virtual size_t getNDomains() const;
   /// Create and return i-th domain and i-th values, (i-1)th domain is released.
-  virtual void getDomainAndValues(size_t i, API::FunctionDomain_sptr &domain,
-                                  API::FunctionValues_sptr &values) const;
+  virtual void getDomainAndValues(size_t i, API::FunctionDomain_sptr &domain, API::FunctionValues_sptr &values) const;
   /// Add new domain creator
   void addCreator(const API::IDomainCreator_sptr &creator);
   /// Calculate the value of an additive cost function
-  virtual void
-  additiveCostFunctionVal(const CostFunctions::CostFuncFitting &costFunction);
+  virtual void additiveCostFunctionVal(const CostFunctions::CostFuncFitting &costFunction);
   /// Calculate the value, first and second derivatives of an additive cost
   /// function.
-  virtual void additiveCostFunctionValDerivHessian(
-      const CostFunctions::CostFuncFitting &costFunction, bool evalDeriv,
-      bool evalHessian);
+  virtual void additiveCostFunctionValDerivHessian(const CostFunctions::CostFuncFitting &costFunction, bool evalDeriv,
+                                                   bool evalHessian);
   /// Calculate the value of a Rwp cost function
   void rwpVal(const CostFunctions::CostFuncRwp &rwp);
   /// Calculate the value, first and second derivatives of a RWP cost function
-  void rwpValDerivHessian(const CostFunctions::CostFuncRwp &rwp, bool evalDeriv,
-                          bool evalHessian);
+  void rwpValDerivHessian(const CostFunctions::CostFuncRwp &rwp, bool evalDeriv, bool evalHessian);
 
   /// Create an instance of SeqDomain in one of two forms: either SeqDomain for
   /// sequential domain creation

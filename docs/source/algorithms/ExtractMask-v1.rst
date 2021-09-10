@@ -18,8 +18,8 @@ new MatrixWorkspace with a single X bin where:
 The spectra containing 0 are also marked as masked and the instrument
 link is preserved so that the instrument view functions correctly.
 
-A list of masked detector IDs is also output. Note this contains the detector IDs which 
-are masked rather than the index or spectrum number. 
+A list of masked detector IDs is also output. Note this contains the detector IDs which
+are masked rather than the index or spectrum number.
 
 Usage
 -----
@@ -45,7 +45,7 @@ Usage
     print("n ws    ws2")
     for i in range (ws.getNumberHistograms()):
         print("%i %-5s %s" % (i, ws.getDetector(i).isMasked(), ws2.getDetector(i).isMasked()))
-        
+
     print("\nMasked detector IDs")
     print(maskList)
 
@@ -64,7 +64,7 @@ Output:
     6 True  True
     7 False False
     8 True  True
-    
+
     Masked detector IDs
     [ 9 11 13 15 17]
 

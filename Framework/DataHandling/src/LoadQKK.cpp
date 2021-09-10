@@ -54,14 +54,12 @@ int LoadQKK::confidence(Kernel::NexusDescriptor &descriptor) const {
 void LoadQKK::init() {
   // Declare the Filename algorithm property. Mandatory. Sets the path to the
   // file to load.
-  declareProperty(std::make_unique<API::FileProperty>(
-                      "Filename", "", API::FileProperty::Load, ".nx.hdf"),
+  declareProperty(std::make_unique<API::FileProperty>("Filename", "", API::FileProperty::Load, ".nx.hdf"),
                   "The input filename of the stored data");
   // Declare the OutputWorkspace property. This sets the name of the workspace
   // to be filled with the data
   // from the file.
-  declareProperty(std::make_unique<API::WorkspaceProperty<>>(
-      "OutputWorkspace", "", Kernel::Direction::Output));
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>("OutputWorkspace", "", Kernel::Direction::Output));
 }
 
 /**
@@ -87,8 +85,7 @@ void LoadQKK::exec() {
   hmm.load();
 
   // Get the wavelength spread
-  double wavelength_spread = static_cast<double>(
-      entry.getFloat("instrument/velocity_selector/wavelength_spread"));
+  double wavelength_spread = static_cast<double>(entry.getFloat("instrument/velocity_selector/wavelength_spread"));
   double wavelength0 = wavelength - wavelength_spread / 2;
   double wavelength1 = wavelength + wavelength_spread / 2;
 
@@ -97,30 +94,26 @@ void LoadQKK::exec() {
   size_t nx = hmm.dim2(); // third dimension
   size_t nHist = ny * nx; // number of spectra in the dataset
   if (nHist == 0) {
-    throw std::runtime_error("Error in data dimensions: " + std::to_string(ny) +
-                             " X " + std::to_string(nx));
+    throw std::runtime_error("Error in data dimensions: " + std::to_string(ny) + " X " + std::to_string(nx));
   }
 
   // Build instrument geometry
 
   // Create a new instrument and set its name
   std::string instrumentname = "QUOKKA";
-  Geometry::Instrument_sptr instrument(
-      new Geometry::Instrument(instrumentname));
+  Geometry::Instrument_sptr instrument(new Geometry::Instrument(instrumentname));
 
   // Add dummy source and samplepos to instrument
 
   // Create an instrument component wich will represent the sample position.
-  Geometry::Component *samplepos =
-      new Geometry::Component("Sample", instrument.get());
+  Geometry::Component *samplepos = new Geometry::Component("Sample", instrument.get());
   instrument->add(samplepos);
   instrument->markAsSamplePos(samplepos);
   // Put the sample in the centre of the coordinate system
   samplepos->setPos(0.0, 0.0, 0.0);
 
   // Create a component to represent the source
-  Geometry::ObjComponent *source =
-      new Geometry::ObjComponent("Source", instrument.get());
+  Geometry::ObjComponent *source = new Geometry::ObjComponent("Source", instrument.get());
   instrument->add(source);
   instrument->markAsSource(source);
 
@@ -132,10 +125,8 @@ void LoadQKK::exec() {
 
   // We assumed that these are the dimensions of the detector, and height is in
   // y direction and width is in x direction
-  double height =
-      static_cast<double>(entry.getFloat("instrument/detector/active_height"));
-  double width =
-      static_cast<double>(entry.getFloat("instrument/detector/active_width"));
+  double height = static_cast<double>(entry.getFloat("instrument/detector/active_height"));
+  double width = static_cast<double>(entry.getFloat("instrument/detector/active_width"));
   // Convert them to metres
   height /= 1000;
   width /= 1000;
@@ -145,16 +136,13 @@ void LoadQKK::exec() {
   double pixel_height = height / static_cast<double>(ny);
   double pixel_width = width / static_cast<double>(nx);
   // Create size strings for shape creation
-  std::string pixel_height_str =
-      boost::lexical_cast<std::string>(pixel_height / 2);
-  std::string pixel_width_str =
-      boost::lexical_cast<std::string>(pixel_width / 2);
+  std::string pixel_height_str = boost::lexical_cast<std::string>(pixel_height / 2);
+  std::string pixel_width_str = boost::lexical_cast<std::string>(pixel_width / 2);
   // Set the depth of a pixel to a very small number
   std::string pixel_depth_str = "0.00001";
 
   // Create a RectangularDetector which represents a rectangular array of pixels
-  Geometry::RectangularDetector *bank =
-      new Geometry::RectangularDetector("bank", instrument.get());
+  Geometry::RectangularDetector *bank = new Geometry::RectangularDetector("bank", instrument.get());
   // Define shape of a pixel as an XML string. See
   // http://www.mantidproject.org/HowToDefineGeometricShape for details
   // on shapes in Mantid.
@@ -163,8 +151,7 @@ void LoadQKK::exec() {
                        pixel_width_str + "\" y=\"-" + pixel_height_str +
                        "\" z=\"0\"  />"
                        "<left-front-top-point      x= \"" +
-                       pixel_width_str + "\" y=\"-" + pixel_height_str +
-                       "\" z=\"" + pixel_depth_str +
+                       pixel_width_str + "\" y=\"-" + pixel_height_str + "\" z=\"" + pixel_depth_str +
                        "\"  />"
                        "<left-back-bottom-point    x=\"-" +
                        pixel_width_str + "\" y=\"-" + pixel_height_str +
@@ -176,8 +163,7 @@ void LoadQKK::exec() {
   // Create a shape object which will be shared by all pixels.
   auto shape = Geometry::ShapeFactory().createShape(detXML);
   // Initialise the detector specifying the sizes.
-  bank->initialize(shape, int(nx), 0, pixel_width, int(ny), 0, pixel_height, 1,
-                   true, int(nx));
+  bank->initialize(shape, int(nx), 0, pixel_width, int(ny), 0, pixel_height, 1, true, int(nx));
   for (int i = 0; i < static_cast<int>(ny); ++i)
     for (int j = 0; j < static_cast<int>(nx); ++j) {
       instrument->markAsDetector(bank->getAtXY(j, i).get());
@@ -186,11 +172,10 @@ void LoadQKK::exec() {
   bank->setPos(-width / 2, -height / 2, 0);
 
   // Create a workspace with nHist spectra and a single y bin.
-  auto outputWorkspace = DataObjects::create<DataObjects::Workspace2D>(
-      instrument, Indexing::IndexInfo(nHist), HistogramData::BinEdges(2));
+  auto outputWorkspace =
+      DataObjects::create<DataObjects::Workspace2D>(instrument, Indexing::IndexInfo(nHist), HistogramData::BinEdges(2));
   // Set the units of the x axis as Wavelength
-  outputWorkspace->getAxis(0)->unit() =
-      UnitFactory::Instance().create("Wavelength");
+  outputWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
   // Set the units of the data as Counts
   outputWorkspace->setYUnitLabel("Counts");
 

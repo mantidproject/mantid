@@ -93,18 +93,14 @@ Kernel::V3D Quadratic::surfaceNormal(const Kernel::V3D &Pt) const
   @return normal unit vector
 */
 {
-  Kernel::V3D N(2 * BaseEqn[0] * Pt[0] + BaseEqn[3] * Pt[1] +
-                    BaseEqn[4] * Pt[2] + BaseEqn[6],
-                2 * BaseEqn[1] * Pt[1] + BaseEqn[3] * Pt[0] +
-                    BaseEqn[5] * Pt[2] + BaseEqn[7],
-                2 * BaseEqn[2] * Pt[2] + BaseEqn[4] * Pt[0] +
-                    BaseEqn[5] * Pt[1] + BaseEqn[8]);
+  Kernel::V3D N(2 * BaseEqn[0] * Pt[0] + BaseEqn[3] * Pt[1] + BaseEqn[4] * Pt[2] + BaseEqn[6],
+                2 * BaseEqn[1] * Pt[1] + BaseEqn[3] * Pt[0] + BaseEqn[5] * Pt[2] + BaseEqn[7],
+                2 * BaseEqn[2] * Pt[2] + BaseEqn[4] * Pt[0] + BaseEqn[5] * Pt[1] + BaseEqn[8]);
   N.normalize();
   return N;
 }
 
-void Quadratic::matrixForm(Kernel::Matrix<double> &A, Kernel::V3D &B,
-                           double &C) const
+void Quadratic::matrixForm(Kernel::Matrix<double> &A, Kernel::V3D &B, double &C) const
 /**
   Converts the baseEqn into the matrix form such that
   \f[ x^T A x + B^T x + C =0 \f]
@@ -176,60 +172,39 @@ double Quadratic::distance(const Kernel::V3D &Pt) const
 
   T[0] = aa * ba + ab * bb + ac * bc + cc + aa2 * da + ab2 * db + ac2 * dc;
 
-  T[1] = -ba2 - bb2 - bc2 + 4 * ab * bb * da + 4 * ac * bc * da + 4 * cc * da +
-         4 * aa * ba * db + 4 * ac * bc * db + 4 * cc * db + 4 * aa2 * da * db +
-         4 * ab2 * da * db + 4 * aa * ba * dc + 4 * ab * bb * dc + 4 * cc * dc +
-         4 * aa2 * da * dc + 4 * ac2 * da * dc + 4 * ab2 * db * dc +
-         4 * ac2 * db * dc;
+  T[1] = -ba2 - bb2 - bc2 + 4 * ab * bb * da + 4 * ac * bc * da + 4 * cc * da + 4 * aa * ba * db + 4 * ac * bc * db +
+         4 * cc * db + 4 * aa2 * da * db + 4 * ab2 * da * db + 4 * aa * ba * dc + 4 * ab * bb * dc + 4 * cc * dc +
+         4 * aa2 * da * dc + 4 * ac2 * da * dc + 4 * ab2 * db * dc + 4 * ac2 * db * dc;
 
-  T[2] = -ba2 * da - 4 * bb2 * da - 4 * bc2 * da + 4 * ab * bb * da2 +
-         4 * ac * bc * da2 + 4 * cc * da2 - 4 * ba2 * db - bb2 * db -
-         4 * bc2 * db + 16 * ac * bc * da * db + 16 * cc * da * db +
-         4 * ab2 * da2 * db + 4 * aa * ba * db2 + 4 * ac * bc * db2 +
-         4 * cc * db2 + 4 * aa2 * da * db2 - 4 * ba2 * dc - 4 * bb2 * dc -
-         bc2 * dc + 16 * ab * bb * da * dc + 16 * cc * da * dc +
-         4 * ac2 * da2 * dc + 16 * aa * ba * db * dc + 16 * cc * db * dc +
-         16 * aa2 * da * db * dc + 16 * ab2 * da * db * dc +
-         16 * ac2 * da * db * dc + 4 * ac2 * db2 * dc + 4 * aa * ba * dc2 +
-         4 * ab * bb * dc2 + 4 * cc * dc2 + 4 * aa2 * da * dc2 +
-         4 * ab2 * db * dc2;
+  T[2] = -ba2 * da - 4 * bb2 * da - 4 * bc2 * da + 4 * ab * bb * da2 + 4 * ac * bc * da2 + 4 * cc * da2 - 4 * ba2 * db -
+         bb2 * db - 4 * bc2 * db + 16 * ac * bc * da * db + 16 * cc * da * db + 4 * ab2 * da2 * db + 4 * aa * ba * db2 +
+         4 * ac * bc * db2 + 4 * cc * db2 + 4 * aa2 * da * db2 - 4 * ba2 * dc - 4 * bb2 * dc - bc2 * dc +
+         16 * ab * bb * da * dc + 16 * cc * da * dc + 4 * ac2 * da2 * dc + 16 * aa * ba * db * dc + 16 * cc * db * dc +
+         16 * aa2 * da * db * dc + 16 * ab2 * da * db * dc + 16 * ac2 * da * db * dc + 4 * ac2 * db2 * dc +
+         4 * aa * ba * dc2 + 4 * ab * bb * dc2 + 4 * cc * dc2 + 4 * aa2 * da * dc2 + 4 * ab2 * db * dc2;
 
-  T[3] = -4 * bb2 * da2 - 4 * bc2 * da2 - 4 * ba2 * da * db -
-         4 * bb2 * da * db - 16 * bc2 * da * db + 16 * ac * bc * da2 * db +
-         16 * cc * da2 * db - 4 * ba2 * db2 - 4 * bc2 * db2 +
-         16 * ac * bc * da * db2 + 16 * cc * da * db2 - 4 * ba2 * da * dc -
-         16 * bb2 * da * dc - 4 * bc2 * da * dc + 16 * ab * bb * da2 * dc +
-         16 * cc * da2 * dc - 16 * ba2 * db * dc - 4 * bb2 * db * dc -
-         4 * bc2 * db * dc + 64 * cc * da * db * dc + 16 * ab2 * da2 * db * dc +
-         16 * ac2 * da2 * db * dc + 16 * aa * ba * db2 * dc +
-         16 * cc * db2 * dc + 16 * aa2 * da * db2 * dc +
-         16 * ac2 * da * db2 * dc - 4 * ba2 * dc2 - 4 * bb2 * dc2 +
-         16 * ab * bb * da * dc2 + 16 * cc * da * dc2 +
-         16 * aa * ba * db * dc2 + 16 * cc * db * dc2 +
-         16 * aa2 * da * db * dc2 + 16 * ab2 * da * db * dc2;
+  T[3] = -4 * bb2 * da2 - 4 * bc2 * da2 - 4 * ba2 * da * db - 4 * bb2 * da * db - 16 * bc2 * da * db +
+         16 * ac * bc * da2 * db + 16 * cc * da2 * db - 4 * ba2 * db2 - 4 * bc2 * db2 + 16 * ac * bc * da * db2 +
+         16 * cc * da * db2 - 4 * ba2 * da * dc - 16 * bb2 * da * dc - 4 * bc2 * da * dc + 16 * ab * bb * da2 * dc +
+         16 * cc * da2 * dc - 16 * ba2 * db * dc - 4 * bb2 * db * dc - 4 * bc2 * db * dc + 64 * cc * da * db * dc +
+         16 * ab2 * da2 * db * dc + 16 * ac2 * da2 * db * dc + 16 * aa * ba * db2 * dc + 16 * cc * db2 * dc +
+         16 * aa2 * da * db2 * dc + 16 * ac2 * da * db2 * dc - 4 * ba2 * dc2 - 4 * bb2 * dc2 + 16 * ab * bb * da * dc2 +
+         16 * cc * da * dc2 + 16 * aa * ba * db * dc2 + 16 * cc * db * dc2 + 16 * aa2 * da * db * dc2 +
+         16 * ab2 * da * db * dc2;
 
-  T[4] = -4 * bb2 * da2 * db - 16 * bc2 * da2 * db - 4 * ba2 * da * db2 -
-         16 * bc2 * da * db2 + 16 * ac * bc * da2 * db2 + 16 * cc * da2 * db2 -
-         16 * bb2 * da2 * dc - 4 * bc2 * da2 * dc - 16 * ba2 * da * db * dc -
-         16 * bb2 * da * db * dc - 16 * bc2 * da * db * dc +
-         64 * cc * da2 * db * dc - 16 * ba2 * db2 * dc - 4 * bc2 * db2 * dc +
-         64 * cc * da * db2 * dc + 16 * ac2 * da2 * db2 * dc -
-         4 * ba2 * da * dc2 - 16 * bb2 * da * dc2 + 16 * ab * bb * da2 * dc2 +
-         16 * cc * da2 * dc2 - 16 * ba2 * db * dc2 - 4 * bb2 * db * dc2 +
-         64 * cc * da * db * dc2 + 16 * ab2 * da2 * db * dc2 +
-         16 * aa * ba * db2 * dc2 + 16 * cc * db2 * dc2 +
-         16 * aa2 * da * db2 * dc2;
+  T[4] = -4 * bb2 * da2 * db - 16 * bc2 * da2 * db - 4 * ba2 * da * db2 - 16 * bc2 * da * db2 +
+         16 * ac * bc * da2 * db2 + 16 * cc * da2 * db2 - 16 * bb2 * da2 * dc - 4 * bc2 * da2 * dc -
+         16 * ba2 * da * db * dc - 16 * bb2 * da * db * dc - 16 * bc2 * da * db * dc + 64 * cc * da2 * db * dc -
+         16 * ba2 * db2 * dc - 4 * bc2 * db2 * dc + 64 * cc * da * db2 * dc + 16 * ac2 * da2 * db2 * dc -
+         4 * ba2 * da * dc2 - 16 * bb2 * da * dc2 + 16 * ab * bb * da2 * dc2 + 16 * cc * da2 * dc2 -
+         16 * ba2 * db * dc2 - 4 * bb2 * db * dc2 + 64 * cc * da * db * dc2 + 16 * ab2 * da2 * db * dc2 +
+         16 * aa * ba * db2 * dc2 + 16 * cc * db2 * dc2 + 16 * aa2 * da * db2 * dc2;
 
-  T[5] = -16 * bc2 * da2 * db2 - 16 * bb2 * da2 * db * dc -
-         16 * bc2 * da2 * db * dc - 16 * ba2 * da * db2 * dc -
-         16 * bc2 * da * db2 * dc + 64 * cc * da2 * db2 * dc -
-         16 * bb2 * da2 * dc2 - 16 * ba2 * da * db * dc2 -
-         16 * bb2 * da * db * dc2 + 64 * cc * da2 * db * dc2 -
-         16 * ba2 * db2 * dc2 + 64 * cc * da * db2 * dc2;
+  T[5] = -16 * bc2 * da2 * db2 - 16 * bb2 * da2 * db * dc - 16 * bc2 * da2 * db * dc - 16 * ba2 * da * db2 * dc -
+         16 * bc2 * da * db2 * dc + 64 * cc * da2 * db2 * dc - 16 * bb2 * da2 * dc2 - 16 * ba2 * da * db * dc2 -
+         16 * bb2 * da * db * dc2 + 64 * cc * da2 * db * dc2 - 16 * ba2 * db2 * dc2 + 64 * cc * da * db2 * dc2;
 
-  T[6] =
-      16 * da * db * dc *
-      (-bc2 * da * db - bb2 * da * dc - ba2 * db * dc + 4 * cc * da * db * dc);
+  T[6] = 16 * da * db * dc * (-bc2 * da * db - bb2 * da * dc - ba2 * db * dc + 4 * cc * da * db * dc);
 
   std::vector<double> TRange = T.realRoots(1e-10);
   if (TRange.empty())
@@ -242,8 +217,7 @@ double Quadratic::distance(const Kernel::V3D &Pt) const
     const double daI = 1.0 + 2 * (*vc) * da;
     const double dbI = 1.0 + 2 * (*vc) * db;
     const double dcI = 1.0 + 2 * (*vc) * dc;
-    if ((daI * daI) > Tolerance ||
-        ((dbI * dbI) > Tolerance && (dcI * dcI) < Tolerance)) {
+    if ((daI * daI) > Tolerance || ((dbI * dbI) > Tolerance && (dcI * dcI) < Tolerance)) {
       Kernel::Matrix<double> DI(3, 3);
       DI[0][0] = 1.0 / daI;
       DI[1][1] = 1.0 / dbI;
@@ -275,17 +249,12 @@ void Quadratic::displace(const Kernel::V3D &Pt)
   @param Pt :: Point to add to surface coordinate
 */
 {
-  BaseEqn[9] += Pt[0] * (Pt[0] * BaseEqn[0] - BaseEqn[6]) +
-                Pt[1] * (Pt[1] * BaseEqn[1] - BaseEqn[7]) +
-                Pt[2] * (Pt[2] * BaseEqn[2] - BaseEqn[8]) +
-                BaseEqn[4] * Pt[0] * Pt[1] + BaseEqn[5] * Pt[0] * Pt[2] +
+  BaseEqn[9] += Pt[0] * (Pt[0] * BaseEqn[0] - BaseEqn[6]) + Pt[1] * (Pt[1] * BaseEqn[1] - BaseEqn[7]) +
+                Pt[2] * (Pt[2] * BaseEqn[2] - BaseEqn[8]) + BaseEqn[4] * Pt[0] * Pt[1] + BaseEqn[5] * Pt[0] * Pt[2] +
                 BaseEqn[6] * Pt[1] * Pt[2];
-  BaseEqn[6] +=
-      -2 * BaseEqn[0] * Pt[0] - BaseEqn[3] * Pt[1] - BaseEqn[4] * Pt[2];
-  BaseEqn[7] +=
-      -2 * BaseEqn[1] * Pt[1] - BaseEqn[3] * Pt[0] - BaseEqn[5] * Pt[2];
-  BaseEqn[8] +=
-      -2 * BaseEqn[2] * Pt[2] - BaseEqn[4] * Pt[0] - BaseEqn[5] * Pt[1];
+  BaseEqn[6] += -2 * BaseEqn[0] * Pt[0] - BaseEqn[3] * Pt[1] - BaseEqn[4] * Pt[2];
+  BaseEqn[7] += -2 * BaseEqn[1] * Pt[1] - BaseEqn[3] * Pt[0] - BaseEqn[5] * Pt[2];
+  BaseEqn[8] += -2 * BaseEqn[2] * Pt[2] - BaseEqn[4] * Pt[0] - BaseEqn[5] * Pt[1];
 }
 
 void Quadratic::rotate(const Kernel::Matrix<double> &MX)
@@ -300,26 +269,23 @@ void Quadratic::rotate(const Kernel::Matrix<double> &MX)
   const double d(MA[1][0]), e(MA[1][1]), f(MA[1][2]);
   const double g(MA[2][0]), h(MA[2][1]), j(MA[2][2]);
   double B[9];
-  B[0] = BaseEqn[0] * a * a + BaseEqn[1] * d * d + BaseEqn[2] * g * g +
-         BaseEqn[3] * a * d + BaseEqn[4] * a * g + BaseEqn[5] * d * g;
+  B[0] = BaseEqn[0] * a * a + BaseEqn[1] * d * d + BaseEqn[2] * g * g + BaseEqn[3] * a * d + BaseEqn[4] * a * g +
+         BaseEqn[5] * d * g;
 
-  B[1] = BaseEqn[0] * b * b + BaseEqn[1] * e * e + BaseEqn[2] * h * h +
-         BaseEqn[3] * b * e + BaseEqn[4] * b * h + BaseEqn[5] * e * h;
+  B[1] = BaseEqn[0] * b * b + BaseEqn[1] * e * e + BaseEqn[2] * h * h + BaseEqn[3] * b * e + BaseEqn[4] * b * h +
+         BaseEqn[5] * e * h;
 
-  B[2] = BaseEqn[0] * c * c + BaseEqn[1] * f * f + BaseEqn[2] * j * j +
-         BaseEqn[3] * c * f + BaseEqn[4] * c * j + BaseEqn[5] * f * j;
+  B[2] = BaseEqn[0] * c * c + BaseEqn[1] * f * f + BaseEqn[2] * j * j + BaseEqn[3] * c * f + BaseEqn[4] * c * j +
+         BaseEqn[5] * f * j;
 
-  B[3] = 2.0 * (BaseEqn[0] * a * b + BaseEqn[1] * d * e + BaseEqn[2] * g * h) +
-         BaseEqn[3] * (a * e + b * d) + BaseEqn[4] * (a * h + b * g) +
-         BaseEqn[5] * (d * j + e * g);
+  B[3] = 2.0 * (BaseEqn[0] * a * b + BaseEqn[1] * d * e + BaseEqn[2] * g * h) + BaseEqn[3] * (a * e + b * d) +
+         BaseEqn[4] * (a * h + b * g) + BaseEqn[5] * (d * j + e * g);
 
-  B[4] = 2.0 * (BaseEqn[0] * a * c + BaseEqn[1] * d * f + BaseEqn[2] * g * j) +
-         BaseEqn[3] * (a * f + c * d) + BaseEqn[4] * (a * j + c * h) +
-         BaseEqn[5] * (d * j + f * h);
+  B[4] = 2.0 * (BaseEqn[0] * a * c + BaseEqn[1] * d * f + BaseEqn[2] * g * j) + BaseEqn[3] * (a * f + c * d) +
+         BaseEqn[4] * (a * j + c * h) + BaseEqn[5] * (d * j + f * h);
 
-  B[5] = 2.0 * (BaseEqn[0] * b * c + BaseEqn[1] * e * f + BaseEqn[2] * h * j) +
-         BaseEqn[3] * (b * f + c * e) + BaseEqn[4] * (b * j + c * h) +
-         BaseEqn[5] * (e * j + f * h);
+  B[5] = 2.0 * (BaseEqn[0] * b * c + BaseEqn[1] * e * f + BaseEqn[2] * h * j) + BaseEqn[3] * (b * f + c * e) +
+         BaseEqn[4] * (b * j + c * h) + BaseEqn[5] * (e * j + f * h);
 
   B[6] = BaseEqn[6] * a + BaseEqn[7] * d + BaseEqn[8] * g;
 
@@ -364,9 +330,7 @@ void Quadratic::write(std::ostream &OX) const
   Mantid::Kernel::Strings::writeMCNPX(cx.str(), OX);
 }
 
-std::unique_ptr<Quadratic> Quadratic::clone() const {
-  return std::unique_ptr<Quadratic>(doClone());
-}
+std::unique_ptr<Quadratic> Quadratic::clone() const { return std::unique_ptr<Quadratic>(doClone()); }
 
 } // NAMESPACE Geometry
 

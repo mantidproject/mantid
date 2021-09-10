@@ -31,14 +31,11 @@ const std::string ClearUB::category() const { return "Crystal\\UBMatrix"; }
 /** Initialize the algorithm's properties.
  */
 void ClearUB::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-                      "Workspace", "", Direction::InOut),
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("Workspace", "", Direction::InOut),
                   "Workspace to clear the UB from.");
-  declareProperty(
-      std::make_unique<PropertyWithValue<bool>>("DoesClear", false,
-                                                Direction::Output),
-      "Indicates action performed. DoesClear returns true only if one or more "
-      "OrientedLattices have been removed.");
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("DoesClear", false, Direction::Output),
+                  "Indicates action performed. DoesClear returns true only if one or more "
+                  "OrientedLattices have been removed.");
 }
 
 /**
@@ -48,8 +45,7 @@ void ClearUB::init() {
  * should take place.
  * @return true only if the UB was cleared.
  */
-bool ClearUB::clearSingleExperimentInfo(ExperimentInfo *const experimentInfo,
-                                        const bool dryRun) const {
+bool ClearUB::clearSingleExperimentInfo(ExperimentInfo *const experimentInfo, const bool dryRun) const {
   bool doesClear = false;
   Sample &sampleObject = experimentInfo->mutableSample();
   if (!sampleObject.hasOrientedLattice()) {

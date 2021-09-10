@@ -80,8 +80,7 @@ public:
     }
   }
 
-  void
-  test_that_isRaggedWorkspace_returns_false_for_a_non_ragged_Workspace2D() {
+  void test_that_isRaggedWorkspace_returns_false_for_a_non_ragged_Workspace2D() {
     TS_ASSERT(!ws->isRaggedWorkspace());
     TS_ASSERT_EQUALS(ws->blocksize(), 5);
   }
@@ -94,8 +93,7 @@ public:
     TS_ASSERT_THROWS(cloned->blocksize(), const std::logic_error &);
   }
 
-  void
-  test_that_getNumberBins_returns_the_correct_number_of_bins_for_different_histograms_in_a_ragged_Workspace2D() {
+  void test_that_getNumberBins_returns_the_correct_number_of_bins_for_different_histograms_in_a_ragged_Workspace2D() {
     Workspace2D_sptr cloned(ws->clone());
     cloned->setHistogram(0, Points(0), Counts(0));
 
@@ -104,17 +102,14 @@ public:
     TS_ASSERT_EQUALS(cloned->getNumberBins(1), 5);
   }
 
-  void
-  test_that_getNumberBins_throws_when_provided_an_index_which_is_too_large() {
+  void test_that_getNumberBins_throws_when_provided_an_index_which_is_too_large() {
     const auto numberOfHistograms = ws->getNumberHistograms();
 
     TS_ASSERT_THROWS_NOTHING(ws->getNumberBins(numberOfHistograms - 1));
-    TS_ASSERT_THROWS(ws->getNumberBins(numberOfHistograms),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(ws->getNumberBins(numberOfHistograms), const std::invalid_argument &);
   }
 
-  void
-  test_that_getMaxNumberBins_returns_the_correct_number_for_a_ragged_Workspace2D() {
+  void test_that_getMaxNumberBins_returns_the_correct_number_for_a_ragged_Workspace2D() {
     Workspace2D_sptr cloned(ws->clone());
     cloned->setHistogram(0, Points(0), Counts(0));
 
@@ -140,8 +135,7 @@ public:
 
   void testSetX() {
     double aNumber = 5.3;
-    auto v = std::make_shared<HistogramData::HistogramX>(
-        nbins + 1, LinearGenerator(aNumber, 1.0));
+    auto v = std::make_shared<HistogramData::HistogramX>(nbins + 1, LinearGenerator(aNumber, 1.0));
     TS_ASSERT_THROWS_NOTHING(ws->setX(0, v));
     TS_ASSERT_EQUALS(ws->dataX(0)[0], aNumber);
     TS_ASSERT_THROWS(ws->setX(-1, v), const std::range_error &);
@@ -150,8 +144,7 @@ public:
 
   void testSetX_cowptr() {
     double aNumber = 5.4;
-    auto v = Kernel::make_cow<HistogramData::HistogramX>(
-        nbins + 1, LinearGenerator(aNumber, 1.0));
+    auto v = Kernel::make_cow<HistogramData::HistogramX>(nbins + 1, LinearGenerator(aNumber, 1.0));
     TS_ASSERT_THROWS_NOTHING(ws->setX(0, v));
     TS_ASSERT_EQUALS(ws->dataX(0)[0], aNumber);
     TS_ASSERT_THROWS(ws->setX(-1, v), const std::range_error &);
@@ -246,24 +239,19 @@ public:
   void test_getMemorySizeForXAxes() {
     ws = create2DWorkspaceBinned(nhist, nbins);
     // Here they are shared, so only 1 X axis
-    TS_ASSERT_EQUALS(ws->getMemorySizeForXAxes(),
-                     1 * (nbins + 1) * sizeof(double));
+    TS_ASSERT_EQUALS(ws->getMemorySizeForXAxes(), 1 * (nbins + 1) * sizeof(double));
     for (int i = 0; i < nhist; i++) {
-      ws->dataX(i)[0] +=
-          1; // This modifies the X axis in-place, creatign a copy of it.
+      ws->dataX(i)[0] += 1; // This modifies the X axis in-place, creatign a copy of it.
     }
     // Now there is a different one for each
-    TS_ASSERT_EQUALS(ws->getMemorySizeForXAxes(),
-                     nhist * (nbins + 1) * sizeof(double));
+    TS_ASSERT_EQUALS(ws->getMemorySizeForXAxes(), nhist * (nbins + 1) * sizeof(double));
   }
 
   /** Refs #3003: very odd bug when getting detector in parallel only!
    * This does not reproduce it :( */
   void test_getDetector_parallel() {
     int numpixels = 10000;
-    Workspace2D_sptr ws =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(numpixels,
-                                                                     200);
+    Workspace2D_sptr ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(numpixels, 200);
 
     const auto &spectrumInfo = ws->spectrumInfo();
     PARALLEL_FOR_NO_WSP_CHECK()
@@ -295,11 +283,9 @@ public:
     // Check property can be obtained as const_sptr or sptr
     Workspace2D_const_sptr wsConst;
     Workspace2D_sptr wsNonConst;
-    TS_ASSERT_THROWS_NOTHING(
-        wsConst = manager.getValue<Workspace2D_const_sptr>(wsName));
+    TS_ASSERT_THROWS_NOTHING(wsConst = manager.getValue<Workspace2D_const_sptr>(wsName));
     TS_ASSERT(wsConst != nullptr);
-    TS_ASSERT_THROWS_NOTHING(wsNonConst =
-                                 manager.getValue<Workspace2D_sptr>(wsName));
+    TS_ASSERT_THROWS_NOTHING(wsNonConst = manager.getValue<Workspace2D_sptr>(wsName));
     TS_ASSERT(wsNonConst != nullptr);
     TS_ASSERT_EQUALS(wsConst, wsNonConst);
 
@@ -323,9 +309,7 @@ public:
 
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static Workspace2DTestPerformance *createSuite() {
-    return new Workspace2DTestPerformance();
-  }
+  static Workspace2DTestPerformance *createSuite() { return new Workspace2DTestPerformance(); }
   static void destroySuite(Workspace2DTestPerformance *suite) { delete suite; }
 
   Workspace2DTestPerformance() {
@@ -348,8 +332,7 @@ public:
       detid_t oneDetId = *detIDs.begin();
       UNUSED_ARG(oneDetId)
     }
-    std::cout << tim << " to get detector ID's for " << nhist
-              << " spectra using the ISpectrum method.\n";
+    std::cout << tim << " to get detector ID's for " << nhist << " spectra using the ISpectrum method.\n";
   }
 
   void test_ISpectrum_changeDetectorIDs() {
@@ -358,8 +341,7 @@ public:
       auto &spec = ws1->getSpectrum(i);
       spec.setDetectorID(detid_t(i));
     }
-    std::cout << tim << " to set all detector IDs for " << nhist
-              << " spectra, using the ISpectrum method (serial).\n";
+    std::cout << tim << " to set all detector IDs for " << nhist << " spectra, using the ISpectrum method (serial).\n";
 
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int i = 0; i < (int)ws1->getNumberHistograms(); i++) {

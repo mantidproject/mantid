@@ -48,17 +48,12 @@ namespace Algorithms {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_ALGORITHMS_DLL ApplyTransmissionCorrection
-    : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL ApplyTransmissionCorrection : public API::Algorithm {
 public:
   /// Algorithm's name
-  const std::string name() const override {
-    return "ApplyTransmissionCorrection";
-  }
+  const std::string name() const override { return "ApplyTransmissionCorrection"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Apply a transmission correction to 2D SANS data.";
-  }
+  const std::string summary() const override { return "Apply a transmission correction to 2D SANS data."; }
 
   /// Algorithm's version
   int version() const override { return (1); }
@@ -66,9 +61,7 @@ public:
     return {"CalculateTransmission", "CalculateTransmissionBeamSpreader"};
   }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "SANS;CorrectionFunctions\\TransmissionCorrections";
-  }
+  const std::string category() const override { return "SANS;CorrectionFunctions\\TransmissionCorrections"; }
 
 private:
   /// Initialisation code

@@ -33,13 +33,11 @@ namespace DataObjects {
  * @param nBins The number of bins (or points) for each spectrum
  * @param isPointData If true will use points for the x-axis instead of bins
  */
-ScanningWorkspaceBuilder::ScanningWorkspaceBuilder(
-    const std::shared_ptr<const Geometry::Instrument> &instrument,
-    const size_t nTimeIndexes, const size_t nBins, const bool isPointData)
-    : m_nDetectors(instrument->getNumberDetectors()),
-      m_nTimeIndexes(nTimeIndexes), m_nBins(nBins), m_instrument(instrument),
-      m_histogram(BinEdges(nBins + 1, LinearGenerator(1.0, 1.0)),
-                  Counts(nBins, 0.0)),
+ScanningWorkspaceBuilder::ScanningWorkspaceBuilder(const std::shared_ptr<const Geometry::Instrument> &instrument,
+                                                   const size_t nTimeIndexes, const size_t nBins,
+                                                   const bool isPointData)
+    : m_nDetectors(instrument->getNumberDetectors()), m_nTimeIndexes(nTimeIndexes), m_nBins(nBins),
+      m_instrument(instrument), m_histogram(BinEdges(nBins + 1, LinearGenerator(1.0, 1.0)), Counts(nBins, 0.0)),
       m_indexingType(IndexingType::Default) {
   if (isPointData)
     m_histogram = HistogramData::Histogram(Points(nBins), Counts(nBins, 0.0));
@@ -52,11 +50,9 @@ ScanningWorkspaceBuilder::ScanningWorkspaceBuilder(
  *
  * @param histogram A histogram with bin edges defined
  */
-void ScanningWorkspaceBuilder::setHistogram(
-    HistogramData::Histogram histogram) {
+void ScanningWorkspaceBuilder::setHistogram(HistogramData::Histogram histogram) {
   if (histogram.size() != m_nBins)
-    throw std::logic_error(
-        "Histogram supplied does not have the correct size.");
+    throw std::logic_error("Histogram supplied does not have the correct size.");
 
   m_histogram = std::move(histogram);
 }
@@ -68,8 +64,7 @@ void ScanningWorkspaceBuilder::setHistogram(
  *and end times
  */
 void ScanningWorkspaceBuilder::setTimeRanges(
-    std::vector<std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>>
-        timeRanges) {
+    std::vector<std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>> timeRanges) {
   verifyTimeIndexSize(timeRanges.size(), "start time, end time pairs");
   m_timeRanges = std::move(timeRanges);
 }
@@ -81,22 +76,17 @@ void ScanningWorkspaceBuilder::setTimeRanges(
  *scan
  * @param durations A vector of doubles containing the duration in seconds
  */
-void ScanningWorkspaceBuilder::setTimeRanges(
-    const Types::Core::DateAndTime &startTime,
-    const std::vector<double> &durations) {
+void ScanningWorkspaceBuilder::setTimeRanges(const Types::Core::DateAndTime &startTime,
+                                             const std::vector<double> &durations) {
   verifyTimeIndexSize(durations.size(), "time durations");
 
-  std::vector<std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>>
-      timeRanges = {
-          std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>(
-              startTime, startTime + durations[0])};
+  std::vector<std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>> timeRanges = {
+      std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>(startTime, startTime + durations[0])};
 
   for (size_t i = 1; i < m_nTimeIndexes; ++i) {
     const auto newStartTime = timeRanges[i - 1].second;
     const auto endTime = newStartTime + durations[i];
-    timeRanges.emplace_back(
-        std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>(
-            newStartTime, endTime));
+    timeRanges.emplace_back(std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>(newStartTime, endTime));
   }
 
   setTimeRanges(std::move(timeRanges));
@@ -109,8 +99,7 @@ void ScanningWorkspaceBuilder::setTimeRanges(
  *
  * @param positions A vector of vectors containing positions
  */
-void ScanningWorkspaceBuilder::setPositions(
-    std::vector<std::vector<Kernel::V3D>> positions) {
+void ScanningWorkspaceBuilder::setPositions(std::vector<std::vector<Kernel::V3D>> positions) {
 
   if (!m_positions.empty() || !m_instrumentAngles.empty())
     throw std::logic_error("Can not set positions, as positions or instrument "
@@ -131,8 +120,7 @@ void ScanningWorkspaceBuilder::setPositions(
  *
  * @param rotations A vector of vectors containing rotations
  */
-void ScanningWorkspaceBuilder::setRotations(
-    std::vector<std::vector<Kernel::Quat>> rotations) {
+void ScanningWorkspaceBuilder::setRotations(std::vector<std::vector<Kernel::Quat>> rotations) {
 
   if (!m_rotations.empty() || !m_instrumentAngles.empty())
     throw std::logic_error("Can not set rotations, as rotations or instrument "
@@ -162,9 +150,9 @@ void ScanningWorkspaceBuilder::setRotations(
  * @param rotationAxis the axis to rotate around. e.g. the vertical axis to
  *rotate the instrument in the horizontal plane
  */
-void ScanningWorkspaceBuilder::setRelativeRotationsForScans(
-    std::vector<double> relativeRotations, const Kernel::V3D &rotationPosition,
-    const Kernel::V3D &rotationAxis) {
+void ScanningWorkspaceBuilder::setRelativeRotationsForScans(std::vector<double> relativeRotations,
+                                                            const Kernel::V3D &rotationPosition,
+                                                            const Kernel::V3D &rotationAxis) {
 
   if (!m_positions.empty() || !m_rotations.empty())
     throw std::logic_error("Can not set instrument angles, as positions and/or "
@@ -181,8 +169,7 @@ void ScanningWorkspaceBuilder::setRelativeRotationsForScans(
  *
  * @param indexingType An index type enum
  */
-void ScanningWorkspaceBuilder::setIndexingType(
-    const IndexingType indexingType) {
+void ScanningWorkspaceBuilder::setIndexingType(const IndexingType indexingType) {
   if (m_indexingType != IndexingType::Default)
     throw std::logic_error("Indexing type has been set already.");
 
@@ -197,8 +184,7 @@ void ScanningWorkspaceBuilder::setIndexingType(
 MatrixWorkspace_sptr ScanningWorkspaceBuilder::buildWorkspace() const {
   validateInputs();
 
-  auto outputWorkspace = create<Workspace2D>(
-      m_instrument, m_nDetectors * m_nTimeIndexes, m_histogram);
+  auto outputWorkspace = create<Workspace2D>(m_instrument, m_nDetectors * m_nTimeIndexes, m_histogram);
 
   auto &outputComponentInfo = outputWorkspace->mutableComponentInfo();
   outputComponentInfo.setScanInterval(m_timeRanges[0]);
@@ -218,8 +204,7 @@ MatrixWorkspace_sptr ScanningWorkspaceBuilder::buildWorkspace() const {
 
   switch (m_indexingType) {
   case IndexingType::Default:
-    outputWorkspace->setIndexInfo(
-        Indexing::IndexInfo(m_nDetectors * m_nTimeIndexes));
+    outputWorkspace->setIndexInfo(Indexing::IndexInfo(m_nDetectors * m_nTimeIndexes));
     break;
   case IndexingType::TimeOriented:
     createTimeOrientedIndexInfo(*outputWorkspace);
@@ -232,10 +217,8 @@ MatrixWorkspace_sptr ScanningWorkspaceBuilder::buildWorkspace() const {
   return std::shared_ptr<MatrixWorkspace>(std::move(outputWorkspace));
 }
 
-void ScanningWorkspaceBuilder::buildOutputComponentInfo(
-    Geometry::ComponentInfo &outputComponentInfo) const {
-  auto mergeWorkspace =
-      create<Workspace2D>(m_instrument, m_nDetectors, m_histogram.binEdges());
+void ScanningWorkspaceBuilder::buildOutputComponentInfo(Geometry::ComponentInfo &outputComponentInfo) const {
+  auto mergeWorkspace = create<Workspace2D>(m_instrument, m_nDetectors, m_histogram.binEdges());
   for (size_t i = 1; i < m_nTimeIndexes; ++i) {
     auto &mergeComponentInfo = mergeWorkspace->mutableComponentInfo();
     mergeComponentInfo.setScanInterval(m_timeRanges[i]);
@@ -243,8 +226,7 @@ void ScanningWorkspaceBuilder::buildOutputComponentInfo(
   }
 }
 
-void ScanningWorkspaceBuilder::buildRotations(
-    Geometry::DetectorInfo &outputDetectorInfo) const {
+void ScanningWorkspaceBuilder::buildRotations(Geometry::DetectorInfo &outputDetectorInfo) const {
   for (size_t i = 0; i < m_nDetectors; ++i) {
     for (size_t j = 0; j < m_nTimeIndexes; ++j) {
       outputDetectorInfo.setRotation({i, j}, m_rotations[i][j]);
@@ -252,8 +234,7 @@ void ScanningWorkspaceBuilder::buildRotations(
   }
 }
 
-void ScanningWorkspaceBuilder::buildPositions(
-    Geometry::DetectorInfo &outputDetectorInfo) const {
+void ScanningWorkspaceBuilder::buildPositions(Geometry::DetectorInfo &outputDetectorInfo) const {
   for (size_t i = 0; i < m_nDetectors; ++i) {
     for (size_t j = 0; j < m_nTimeIndexes; ++j) {
       outputDetectorInfo.setPosition({i, j}, m_positions[i][j]);
@@ -261,8 +242,7 @@ void ScanningWorkspaceBuilder::buildPositions(
   }
 }
 
-void ScanningWorkspaceBuilder::buildRelativeRotationsForScans(
-    Geometry::DetectorInfo &outputDetectorInfo) const {
+void ScanningWorkspaceBuilder::buildRelativeRotationsForScans(Geometry::DetectorInfo &outputDetectorInfo) const {
   for (size_t i = 0; i < outputDetectorInfo.size(); ++i) {
     for (size_t j = 0; j < outputDetectorInfo.scanCount(); ++j) {
       if (outputDetectorInfo.isMonitor({i, j}))
@@ -279,16 +259,13 @@ void ScanningWorkspaceBuilder::buildRelativeRotationsForScans(
   }
 }
 
-void ScanningWorkspaceBuilder::createTimeOrientedIndexInfo(
-    MatrixWorkspace &ws) const {
+void ScanningWorkspaceBuilder::createTimeOrientedIndexInfo(MatrixWorkspace &ws) const {
   auto indexInfo = ws.indexInfo();
-  auto spectrumDefinitions =
-      std::vector<SpectrumDefinition>(m_nDetectors * m_nTimeIndexes);
+  auto spectrumDefinitions = std::vector<SpectrumDefinition>(m_nDetectors * m_nTimeIndexes);
 
   for (size_t detIndex = 0; detIndex < m_nDetectors; ++detIndex) {
     for (size_t timeIndex = 0; timeIndex < m_nTimeIndexes; ++timeIndex) {
-      spectrumDefinitions[detIndex * m_nTimeIndexes + timeIndex].add(detIndex,
-                                                                     timeIndex);
+      spectrumDefinitions[detIndex * m_nTimeIndexes + timeIndex].add(detIndex, timeIndex);
     }
   }
 
@@ -296,16 +273,13 @@ void ScanningWorkspaceBuilder::createTimeOrientedIndexInfo(
   ws.setIndexInfo(indexInfo);
 }
 
-void ScanningWorkspaceBuilder::createDetectorOrientedIndexInfo(
-    MatrixWorkspace &ws) const {
+void ScanningWorkspaceBuilder::createDetectorOrientedIndexInfo(MatrixWorkspace &ws) const {
   auto indexInfo = ws.indexInfo();
-  auto spectrumDefinitions =
-      std::vector<SpectrumDefinition>(m_nDetectors * m_nTimeIndexes);
+  auto spectrumDefinitions = std::vector<SpectrumDefinition>(m_nDetectors * m_nTimeIndexes);
 
   for (size_t timeIndex = 0; timeIndex < m_nTimeIndexes; ++timeIndex) {
     for (size_t detIndex = 0; detIndex < m_nDetectors; ++detIndex) {
-      spectrumDefinitions[timeIndex * m_nDetectors + detIndex].add(detIndex,
-                                                                   timeIndex);
+      spectrumDefinitions[timeIndex * m_nDetectors + detIndex].add(detIndex, timeIndex);
     }
   }
 
@@ -313,20 +287,15 @@ void ScanningWorkspaceBuilder::createDetectorOrientedIndexInfo(
   ws.setIndexInfo(indexInfo);
 }
 
-void ScanningWorkspaceBuilder::verifyTimeIndexSize(
-    const size_t timeIndexSize, const std::string &description) const {
+void ScanningWorkspaceBuilder::verifyTimeIndexSize(const size_t timeIndexSize, const std::string &description) const {
   if (timeIndexSize != m_nTimeIndexes) {
-    throw std::logic_error(
-        "Number of " + description +
-        " supplied does not match the number of time indexes.");
+    throw std::logic_error("Number of " + description + " supplied does not match the number of time indexes.");
   }
 }
 
-void ScanningWorkspaceBuilder::verifyDetectorSize(
-    const size_t detectorSize, const std::string &description) const {
+void ScanningWorkspaceBuilder::verifyDetectorSize(const size_t detectorSize, const std::string &description) const {
   if (detectorSize != m_nDetectors) {
-    throw std::logic_error("Number of " + description +
-                           " supplied does not match the number of detectors.");
+    throw std::logic_error("Number of " + description + " supplied does not match the number of detectors.");
   }
 }
 

@@ -20,32 +20,22 @@ Mantid::Kernel::Logger g_log("BatchAlgorithmRunner");
 namespace MantidQt {
 namespace API {
 
-ConfiguredAlgorithm::ConfiguredAlgorithm(Mantid::API::IAlgorithm_sptr algorithm,
-                                         AlgorithmRuntimeProps properties)
+ConfiguredAlgorithm::ConfiguredAlgorithm(Mantid::API::IAlgorithm_sptr algorithm, AlgorithmRuntimeProps properties)
     : m_algorithm(std::move(algorithm)), m_properties(std::move(properties)) {}
 
 ConfiguredAlgorithm::~ConfiguredAlgorithm() {}
 
 IAlgorithm_sptr ConfiguredAlgorithm::algorithm() const { return m_algorithm; }
 
-ConfiguredAlgorithm::AlgorithmRuntimeProps
-ConfiguredAlgorithm::properties() const {
-  return m_properties;
-}
+ConfiguredAlgorithm::AlgorithmRuntimeProps ConfiguredAlgorithm::properties() const { return m_properties; }
 
 BatchAlgorithmRunner::BatchAlgorithmRunner(QObject *parent)
-    : QObject(parent), m_stopOnFailure(true), m_cancelRequested(false),
-      m_notificationCenter(),
-      m_batchCompleteObserver(*this,
-                              &BatchAlgorithmRunner::handleBatchComplete),
-      m_batchCancelledObserver(*this,
-                               &BatchAlgorithmRunner::handleBatchCancelled),
-      m_algorithmStartedObserver(*this,
-                                 &BatchAlgorithmRunner::handleAlgorithmStarted),
-      m_algorithmCompleteObserver(
-          *this, &BatchAlgorithmRunner::handleAlgorithmComplete),
-      m_algorithmErrorObserver(*this,
-                               &BatchAlgorithmRunner::handleAlgorithmError),
+    : QObject(parent), m_stopOnFailure(true), m_cancelRequested(false), m_notificationCenter(),
+      m_batchCompleteObserver(*this, &BatchAlgorithmRunner::handleBatchComplete),
+      m_batchCancelledObserver(*this, &BatchAlgorithmRunner::handleBatchCancelled),
+      m_algorithmStartedObserver(*this, &BatchAlgorithmRunner::handleAlgorithmStarted),
+      m_algorithmCompleteObserver(*this, &BatchAlgorithmRunner::handleAlgorithmComplete),
+      m_algorithmErrorObserver(*this, &BatchAlgorithmRunner::handleAlgorithmError),
       m_executeAsync(this, &BatchAlgorithmRunner::executeBatchAsyncImpl) {}
 
 BatchAlgorithmRunner::~BatchAlgorithmRunner() { removeAllObservers(); }
@@ -73,9 +63,7 @@ void BatchAlgorithmRunner::removeAllObservers() {
  *
  * @param stopOnFailure Flase to continue to tnd of queue on failure
  */
-void BatchAlgorithmRunner::stopOnFailure(bool stopOnFailure) {
-  m_stopOnFailure = stopOnFailure;
-}
+void BatchAlgorithmRunner::stopOnFailure(bool stopOnFailure) { m_stopOnFailure = stopOnFailure; }
 
 /**
  * Adds an algorithm to the end of the queue.
@@ -84,13 +72,10 @@ void BatchAlgorithmRunner::stopOnFailure(bool stopOnFailure) {
  * @param props Optional map of property name to property values to be set just
  *before execution (mainly intended for input and inout workspace names)
  */
-void BatchAlgorithmRunner::addAlgorithm(const IAlgorithm_sptr &algo,
-                                        const AlgorithmRuntimeProps &props) {
+void BatchAlgorithmRunner::addAlgorithm(const IAlgorithm_sptr &algo, const AlgorithmRuntimeProps &props) {
   m_algorithms.emplace_back(std::make_unique<ConfiguredAlgorithm>(algo, props));
 
-  g_log.debug() << "Added algorithm \""
-                << m_algorithms.back()->algorithm()->name()
-                << "\" to batch queue\n";
+  g_log.debug() << "Added algorithm \"" << m_algorithms.back()->algorithm()->name() << "\" to batch queue\n";
 }
 
 /**
@@ -98,8 +83,7 @@ void BatchAlgorithmRunner::addAlgorithm(const IAlgorithm_sptr &algo,
  *
  * @param algorithms The queue of configured algorithms
  */
-void BatchAlgorithmRunner::setQueue(
-    std::deque<IConfiguredAlgorithm_sptr> algorithms) {
+void BatchAlgorithmRunner::setQueue(std::deque<IConfiguredAlgorithm_sptr> algorithms) {
   g_log.debug() << "Set batch queue to algorithm list:\n";
   for (auto &algorithm : algorithms)
     g_log.debug() << algorithm->algorithm()->name() << "\n";
@@ -173,8 +157,7 @@ bool BatchAlgorithmRunner::cancelRequested() {
 /**
  * Implementation of sequential algorithm scheduler.
  */
-bool BatchAlgorithmRunner::executeBatchAsyncImpl(
-    const Poco::Void & /*unused*/) {
+bool BatchAlgorithmRunner::executeBatchAsyncImpl(const Poco::Void & /*unused*/) {
   bool errorFlag = false;
 
   for (auto &it : m_algorithms) {
@@ -185,8 +168,7 @@ bool BatchAlgorithmRunner::executeBatchAsyncImpl(
 
     // Try to execute the algorithm
     if (!executeAlgo(it)) {
-      g_log.warning() << "Got error from algorithm \""
-                      << m_currentAlgorithm->name() << "\"\n";
+      g_log.warning() << "Got error from algorithm \"" << m_currentAlgorithm->name() << "\"\n";
 
       // Stop executing the entire batch if appropriate
       if (m_stopOnFailure) {
@@ -195,8 +177,7 @@ bool BatchAlgorithmRunner::executeBatchAsyncImpl(
         break;
       }
     } else {
-      g_log.information() << "Algorithm \"" << m_currentAlgorithm->name()
-                          << "\" finished\n";
+      g_log.information() << "Algorithm \"" << m_currentAlgorithm->name() << "\" finished\n";
     }
   }
 
@@ -204,8 +185,7 @@ bool BatchAlgorithmRunner::executeBatchAsyncImpl(
   if (cancelRequested())
     m_notificationCenter.postNotification(new BatchCancelledNotification());
   else
-    m_notificationCenter.postNotification(
-        new BatchCompleteNotification(false, errorFlag));
+    m_notificationCenter.postNotification(new BatchCompleteNotification(false, errorFlag));
 
   resetState();
 
@@ -218,8 +198,7 @@ bool BatchAlgorithmRunner::executeBatchAsyncImpl(
  * @param algorithm Algorithm and properties to assign to it
  * @return False if algorithm execution failed
  */
-bool BatchAlgorithmRunner::executeAlgo(
-    const IConfiguredAlgorithm_sptr &algorithm) {
+bool BatchAlgorithmRunner::executeAlgo(const IConfiguredAlgorithm_sptr &algorithm) {
   try {
     m_currentAlgorithm = algorithm->algorithm();
 
@@ -228,22 +207,17 @@ bool BatchAlgorithmRunner::executeAlgo(
       m_currentAlgorithm->setProperty(kvp.first, kvp.second);
     }
 
-    g_log.information() << "Starting next algorithm in queue: "
-                        << m_currentAlgorithm->name() << "\n";
+    g_log.information() << "Starting next algorithm in queue: " << m_currentAlgorithm->name() << "\n";
 
     // Start algorithm running
-    m_notificationCenter.postNotification(
-        new AlgorithmStartedNotification(algorithm));
+    m_notificationCenter.postNotification(new AlgorithmStartedNotification(algorithm));
     auto result = m_currentAlgorithm->execute();
 
     if (!result) {
-      auto message = std::string("Algorithm") + algorithm->algorithm()->name() +
-                     std::string(" execution failed");
-      m_notificationCenter.postNotification(
-          new AlgorithmErrorNotification(algorithm, message));
+      auto message = std::string("Algorithm") + algorithm->algorithm()->name() + std::string(" execution failed");
+      m_notificationCenter.postNotification(new AlgorithmErrorNotification(algorithm, message));
     } else {
-      m_notificationCenter.postNotification(
-          new AlgorithmCompleteNotification(algorithm));
+      m_notificationCenter.postNotification(new AlgorithmCompleteNotification(algorithm));
     }
 
     return result;
@@ -251,10 +225,8 @@ bool BatchAlgorithmRunner::executeAlgo(
   // If a property name was given that does not match a property
   catch (Mantid::Kernel::Exception::NotFoundError &notFoundEx) {
     UNUSED_ARG(notFoundEx);
-    g_log.warning(
-        "Algorithm property does not exist.\nStopping queue execution.");
-    m_notificationCenter.postNotification(
-        new AlgorithmErrorNotification(algorithm, notFoundEx.what()));
+    g_log.warning("Algorithm property does not exist.\nStopping queue execution.");
+    m_notificationCenter.postNotification(new AlgorithmErrorNotification(algorithm, notFoundEx.what()));
     return false;
   }
   // If a property was assigned a value of the wrong type
@@ -262,20 +234,18 @@ bool BatchAlgorithmRunner::executeAlgo(
     UNUSED_ARG(invalidArgEx);
     g_log.warning("Algorithm property given value of incorrect type.\nStopping "
                   "queue execution.");
-    m_notificationCenter.postNotification(
-        new AlgorithmErrorNotification(algorithm, invalidArgEx.what()));
+    m_notificationCenter.postNotification(new AlgorithmErrorNotification(algorithm, invalidArgEx.what()));
     return false;
   }
   // For anything else that could go wrong
   catch (std::exception &ex) {
     g_log.warning("Error starting batch algorithm");
-    m_notificationCenter.postNotification(
-        new AlgorithmErrorNotification(algorithm, ex.what()));
+    m_notificationCenter.postNotification(new AlgorithmErrorNotification(algorithm, ex.what()));
     return false;
   } catch (...) {
     g_log.warning("Unknown error starting next batch algorithm");
-    m_notificationCenter.postNotification(new AlgorithmErrorNotification(
-        algorithm, "Unknown error starting algorithm"));
+    m_notificationCenter.postNotification(
+        new AlgorithmErrorNotification(algorithm, "Unknown error starting algorithm"));
     return false;
   }
 }
@@ -285,8 +255,7 @@ bool BatchAlgorithmRunner::executeAlgo(
  *
  * @param pNf Notification object
  */
-void BatchAlgorithmRunner::handleBatchComplete(
-    const Poco::AutoPtr<BatchCompleteNotification> &pNf) {
+void BatchAlgorithmRunner::handleBatchComplete(const Poco::AutoPtr<BatchCompleteNotification> &pNf) {
   bool inProgress = pNf->isInProgress();
   if (!inProgress) {
     // Notify UI elements
@@ -294,27 +263,23 @@ void BatchAlgorithmRunner::handleBatchComplete(
   }
 }
 
-void BatchAlgorithmRunner::handleBatchCancelled(
-    const Poco::AutoPtr<BatchCancelledNotification> &pNf) {
+void BatchAlgorithmRunner::handleBatchCancelled(const Poco::AutoPtr<BatchCancelledNotification> &pNf) {
   UNUSED_ARG(pNf);
   // Notify UI elements
   emit batchCancelled();
 }
 
-void BatchAlgorithmRunner::handleAlgorithmStarted(
-    const Poco::AutoPtr<AlgorithmStartedNotification> &pNf) {
+void BatchAlgorithmRunner::handleAlgorithmStarted(const Poco::AutoPtr<AlgorithmStartedNotification> &pNf) {
   // Notify UI elements
   emit algorithmStarted(pNf->algorithm());
 }
 
-void BatchAlgorithmRunner::handleAlgorithmComplete(
-    const Poco::AutoPtr<AlgorithmCompleteNotification> &pNf) {
+void BatchAlgorithmRunner::handleAlgorithmComplete(const Poco::AutoPtr<AlgorithmCompleteNotification> &pNf) {
   // Notify UI elements
   emit algorithmComplete(pNf->algorithm());
 }
 
-void BatchAlgorithmRunner::handleAlgorithmError(
-    const Poco::AutoPtr<AlgorithmErrorNotification> &pNf) {
+void BatchAlgorithmRunner::handleAlgorithmError(const Poco::AutoPtr<AlgorithmErrorNotification> &pNf) {
   auto errorMessage = pNf->errorMessage();
   // Notify UI elements
   emit algorithmError(pNf->algorithm(), errorMessage);

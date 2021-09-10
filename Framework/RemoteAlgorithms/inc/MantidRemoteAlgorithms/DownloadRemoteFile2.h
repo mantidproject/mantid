@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 
 namespace Mantid {
 namespace RemoteAlgorithms {
@@ -14,14 +15,12 @@ namespace RemoteAlgorithms {
 /**
 Download a file from a remote compute resource.
 */
-class DLLExport DownloadRemoteFile2 : public Mantid::API::Algorithm {
+class DLLExport DownloadRemoteFile2 : public API::Algorithm, public API::DeprecatedAlgorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "DownloadRemoteFile"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Download a file from a remote compute resource.";
-  }
+  const std::string summary() const override { return "Download a file from a remote compute resource."; }
 
   /// Algorithm's version
   int version() const override { return (2); }

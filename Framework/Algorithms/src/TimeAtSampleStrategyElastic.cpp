@@ -22,27 +22,22 @@ namespace Algorithms {
 
 /** Constructor
  */
-TimeAtSampleStrategyElastic::TimeAtSampleStrategyElastic(
-    Mantid::API::MatrixWorkspace_const_sptr ws)
+TimeAtSampleStrategyElastic::TimeAtSampleStrategyElastic(Mantid::API::MatrixWorkspace_const_sptr ws)
     : m_ws(std::move(ws)), m_spectrumInfo(m_ws->spectrumInfo()),
-      m_beamDir(
-          m_ws->getInstrument()->getReferenceFrame()->vecPointingAlongBeam()) {}
+      m_beamDir(m_ws->getInstrument()->getReferenceFrame()->vecPointingAlongBeam()) {}
 
 /**
  * @brief Calculate correction
  * @param workspace_index
  * @return Correction
  */
-Correction
-TimeAtSampleStrategyElastic::calculate(const size_t &workspace_index) const {
+Correction TimeAtSampleStrategyElastic::calculate(const size_t &workspace_index) const {
 
   // Calculate TOF ratio
   const double L1s = m_spectrumInfo.l1();
   double scale;
   if (m_spectrumInfo.isMonitor(workspace_index)) {
-    double L1m =
-        m_beamDir.scalar_prod(m_spectrumInfo.sourcePosition() -
-                              m_spectrumInfo.position(workspace_index));
+    double L1m = m_beamDir.scalar_prod(m_spectrumInfo.sourcePosition() - m_spectrumInfo.position(workspace_index));
     scale = std::abs(L1s / L1m);
   } else {
     scale = L1s / (L1s + m_spectrumInfo.l2(workspace_index));

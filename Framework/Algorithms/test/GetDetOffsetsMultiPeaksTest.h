@@ -27,9 +27,7 @@ class GetDetOffsetsMultiPeaksTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static GetDetOffsetsMultiPeaksTest *createSuite() {
-    return new GetDetOffsetsMultiPeaksTest();
-  }
+  static GetDetOffsetsMultiPeaksTest *createSuite() { return new GetDetOffsetsMultiPeaksTest(); }
   static void destroySuite(GetDetOffsetsMultiPeaksTest *suite) { delete suite; }
 
   GetDetOffsetsMultiPeaksTest() { Mantid::API::FrameworkManager::Instance(); }
@@ -46,17 +44,13 @@ public:
 
   void testExec() {
     // ---- Create the simple workspace -------
-    MatrixWorkspace_sptr WS =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 200);
+    MatrixWorkspace_sptr WS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 200);
     AnalysisDataService::Instance().addOrReplace("temp_event_ws", WS);
-    WS->getAxis(0)->unit() =
-        Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
+    WS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
 
     auto xvals = WS->points(0);
     std::transform(xvals.cbegin(), xvals.cend(), WS->mutableY(0).begin(),
-                   [](const double x) {
-                     return 5.1 * exp(-0.5 * pow((x - 10) / 1.0, 2));
-                   });
+                   [](const double x) { return 5.1 * exp(-0.5 * pow((x - 10) / 1.0, 2)); });
 
     auto &E = WS->mutableE(0);
     E.assign(E.size(), 0.001);
@@ -64,23 +58,18 @@ public:
     // ---- Run algo -----
     if (!offsets.isInitialized())
       offsets.initialize();
-    TS_ASSERT_THROWS_NOTHING(
-        offsets.setProperty("InputWorkspace", "temp_event_ws"));
+    TS_ASSERT_THROWS_NOTHING(offsets.setProperty("InputWorkspace", "temp_event_ws"));
     std::string outputWS("offsetsped");
     std::string maskWS("masksped");
-    TS_ASSERT_THROWS_NOTHING(
-        offsets.setPropertyValue("OutputWorkspace", outputWS));
+    TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("OutputWorkspace", outputWS));
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("MaskWorkspace", maskWS));
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("DReference", "9.98040"));
-    TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue(
-        "SpectraFitInfoTableWorkspace", "FitInfoTable"));
+    TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("SpectraFitInfoTableWorkspace", "FitInfoTable"));
     TS_ASSERT_THROWS_NOTHING(offsets.execute());
     TS_ASSERT(offsets.isExecuted());
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outputWS));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWS));
     if (!output)
       return;
 
@@ -89,9 +78,7 @@ public:
     AnalysisDataService::Instance().remove(outputWS);
 
     MatrixWorkspace_const_sptr mask;
-    TS_ASSERT_THROWS_NOTHING(
-        mask = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            maskWS));
+    TS_ASSERT_THROWS_NOTHING(mask = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(maskWS));
     if (!mask)
       return;
     TS_ASSERT(!mask->detectorInfo().isMasked(0));
@@ -102,15 +89,12 @@ public:
    */
   void testExecWithGroup() {
     // --------- Workspace with summed spectra -------
-    MatrixWorkspace_sptr WS =
-        WorkspaceCreationHelper::createGroupedWorkspace2D(3, 200, 1.0);
-    WS->getAxis(0)->unit() =
-        Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
+    MatrixWorkspace_sptr WS = WorkspaceCreationHelper::createGroupedWorkspace2D(3, 200, 1.0);
+    WS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
 
     auto xvals = WS->points(0);
-    std::transform(
-        xvals.cbegin(), xvals.cend(), WS->mutableY(0).begin(),
-        [](const double x) { return exp(-0.5 * pow((x - 10) / 1.0, 2)); });
+    std::transform(xvals.cbegin(), xvals.cend(), WS->mutableY(0).begin(),
+                   [](const double x) { return exp(-0.5 * pow((x - 10) / 1.0, 2)); });
 
     auto &E = WS->mutableE(0);
     E.assign(E.size(), 0.001);
@@ -120,16 +104,13 @@ public:
     // ---- Run algo -----
     GetDetOffsetsMultiPeaks offsets;
     offsets.initialize();
-    TS_ASSERT_THROWS_NOTHING(
-        offsets.setProperty("InputWorkspace", "temp_event_ws3"));
+    TS_ASSERT_THROWS_NOTHING(offsets.setProperty("InputWorkspace", "temp_event_ws3"));
     std::string outputWS("offsetsped");
     std::string maskWS("masksped");
-    TS_ASSERT_THROWS_NOTHING(
-        offsets.setPropertyValue("OutputWorkspace", outputWS));
+    TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("OutputWorkspace", outputWS));
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("MaskWorkspace", maskWS));
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("DReference", "9.98040"));
-    TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue(
-        "SpectraFitInfoTableWorkspace", "FitInfoTable"));
+    TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("SpectraFitInfoTableWorkspace", "FitInfoTable"));
     TS_ASSERT_THROWS_NOTHING(offsets.execute());
     TS_ASSERT(offsets.isExecuted());
 
@@ -144,9 +125,7 @@ public:
     AnalysisDataService::Instance().remove(outputWS);
 
     MatrixWorkspace_const_sptr mask;
-    TS_ASSERT_THROWS_NOTHING(
-        mask = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            maskWS));
+    TS_ASSERT_THROWS_NOTHING(mask = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(maskWS));
     if (!mask)
       return;
     TS_ASSERT(!mask->detectorInfo().isMasked(0));
@@ -158,17 +137,13 @@ public:
    */
   void testExecFitWindowTable() {
     // ---- (Re-)Create the simple workspace -------
-    MatrixWorkspace_sptr WS =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 200);
+    MatrixWorkspace_sptr WS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 200);
     AnalysisDataService::Instance().addOrReplace("temp_event_ws", WS);
-    WS->getAxis(0)->unit() =
-        Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
+    WS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
 
     auto xvals = WS->points(0);
     std::transform(xvals.cbegin(), xvals.cend(), WS->mutableY(0).begin(),
-                   [](const double x) {
-                     return 5.1 * exp(-0.5 * pow((x - 10) / 1.0, 2));
-                   });
+                   [](const double x) { return 5.1 * exp(-0.5 * pow((x - 10) / 1.0, 2)); });
 
     auto &E = WS->mutableE(0);
     E.assign(E.size(), 0.001);
@@ -182,32 +157,24 @@ public:
     TableRow newrow = fitWindowWS->appendRow();
     newrow << 0 << 9.9 << 11.0;
 
-    AnalysisDataService::Instance().addOrReplace("PeakFitRangeTableWS",
-                                                 fitWindowWS);
+    AnalysisDataService::Instance().addOrReplace("PeakFitRangeTableWS", fitWindowWS);
 
     // ---- Run algo -----
     offsets.initialize();
-    TS_ASSERT_THROWS_NOTHING(
-        offsets.setProperty("InputWorkspace", "temp_event_ws"));
-    TS_ASSERT_THROWS_NOTHING(
-        offsets.setProperty("FitwindowTableWorkspace", fitWindowWS));
+    TS_ASSERT_THROWS_NOTHING(offsets.setProperty("InputWorkspace", "temp_event_ws"));
+    TS_ASSERT_THROWS_NOTHING(offsets.setProperty("FitwindowTableWorkspace", fitWindowWS));
     std::string outputWS("offsetsped");
     std::string maskWS("masksped");
-    TS_ASSERT_THROWS_NOTHING(
-        offsets.setPropertyValue("OutputWorkspace", outputWS));
+    TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("OutputWorkspace", outputWS));
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("MaskWorkspace", maskWS));
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("MaxOffset", "3.0"));
-    TS_ASSERT_THROWS_NOTHING(
-        offsets.setPropertyValue("DReference", "30.98040"));
-    TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue(
-        "SpectraFitInfoTableWorkspace", "FitInfoTable"));
+    TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("DReference", "30.98040"));
+    TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("SpectraFitInfoTableWorkspace", "FitInfoTable"));
     TS_ASSERT_THROWS_NOTHING(offsets.execute());
     TS_ASSERT(offsets.isExecuted());
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outputWS));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWS));
     if (!output)
       return;
 
@@ -215,9 +182,7 @@ public:
     AnalysisDataService::Instance().remove("PeakFitRangeTableWS");
 
     MatrixWorkspace_const_sptr mask;
-    TS_ASSERT_THROWS_NOTHING(
-        mask = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            maskWS));
+    TS_ASSERT_THROWS_NOTHING(mask = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(maskWS));
     if (!mask)
       return;
     TS_ASSERT(!mask->detectorInfo().isMasked(0));
@@ -229,17 +194,13 @@ public:
    */
   void testExecFitWindowTableUniversal() {
     // ---- (Re-)Create the simple workspace -------
-    MatrixWorkspace_sptr WS =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 200);
+    MatrixWorkspace_sptr WS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 200);
     AnalysisDataService::Instance().addOrReplace("temp_event_ws", WS);
-    WS->getAxis(0)->unit() =
-        Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
+    WS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
 
     auto xvals = WS->points(0);
     std::transform(xvals.cbegin(), xvals.cend(), WS->mutableY(0).begin(),
-                   [](const double x) {
-                     return 5.1 * exp(-0.5 * pow((x - 10) / 1.0, 2));
-                   });
+                   [](const double x) { return 5.1 * exp(-0.5 * pow((x - 10) / 1.0, 2)); });
 
     auto &E = WS->mutableE(0);
     E.assign(E.size(), 0.001);
@@ -253,32 +214,24 @@ public:
     TableRow newrow = fitWindowWS->appendRow();
     newrow << -1 << 9.9 << 11.0;
 
-    AnalysisDataService::Instance().addOrReplace("PeakFitRangeTableWS",
-                                                 fitWindowWS);
+    AnalysisDataService::Instance().addOrReplace("PeakFitRangeTableWS", fitWindowWS);
 
     // ---- Run algo -----
     offsets.initialize();
-    TS_ASSERT_THROWS_NOTHING(
-        offsets.setProperty("InputWorkspace", "temp_event_ws"));
-    TS_ASSERT_THROWS_NOTHING(
-        offsets.setProperty("FitwindowTableWorkspace", fitWindowWS));
+    TS_ASSERT_THROWS_NOTHING(offsets.setProperty("InputWorkspace", "temp_event_ws"));
+    TS_ASSERT_THROWS_NOTHING(offsets.setProperty("FitwindowTableWorkspace", fitWindowWS));
     std::string outputWS("offsetsped");
     std::string maskWS("masksped");
-    TS_ASSERT_THROWS_NOTHING(
-        offsets.setPropertyValue("OutputWorkspace", outputWS));
+    TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("OutputWorkspace", outputWS));
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("MaskWorkspace", maskWS));
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("MaxOffset", "3.0"));
-    TS_ASSERT_THROWS_NOTHING(
-        offsets.setPropertyValue("DReference", "30.98040"));
-    TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue(
-        "SpectraFitInfoTableWorkspace", "FitInfoTable"));
+    TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("DReference", "30.98040"));
+    TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("SpectraFitInfoTableWorkspace", "FitInfoTable"));
     TS_ASSERT_THROWS_NOTHING(offsets.execute());
     TS_ASSERT(offsets.isExecuted());
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outputWS));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWS));
     if (!output)
       return;
 
@@ -286,9 +239,7 @@ public:
     AnalysisDataService::Instance().remove("PeakFitRangeTableWS");
 
     MatrixWorkspace_const_sptr mask;
-    TS_ASSERT_THROWS_NOTHING(
-        mask = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            maskWS));
+    TS_ASSERT_THROWS_NOTHING(mask = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(maskWS));
     if (!mask)
       return;
     TS_ASSERT(!mask->detectorInfo().isMasked(0));
@@ -300,54 +251,41 @@ public:
   void testExecInputResolutionWS() {
     // ---- Create the simple workspace -------
     // Data workspace
-    MatrixWorkspace_sptr WS =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 200);
+    MatrixWorkspace_sptr WS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 200);
     AnalysisDataService::Instance().addOrReplace("temp_event_ws", WS);
-    WS->getAxis(0)->unit() =
-        Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
+    WS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
 
     auto xvals = WS->points(0);
     std::transform(xvals.cbegin(), xvals.cend(), WS->mutableY(0).begin(),
-                   [](const double x) {
-                     return 5.1 * exp(-0.5 * pow((x - 10) / 1.0, 2));
-                   });
+                   [](const double x) { return 5.1 * exp(-0.5 * pow((x - 10) / 1.0, 2)); });
 
     auto &E = WS->mutableE(0);
     E.assign(E.size(), 0.001);
 
     // Resolution workspace
-    MatrixWorkspace_sptr resWS =
-        WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
+    MatrixWorkspace_sptr resWS = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
     resWS->mutableY(0)[0] = 0.2;
     AnalysisDataService::Instance().addOrReplace("temp_res_ws", resWS);
 
     // ---- Run algo -----
     GetDetOffsetsMultiPeaks offsets;
     offsets.initialize();
-    TS_ASSERT_THROWS_NOTHING(
-        offsets.setProperty("InputWorkspace", "temp_event_ws"));
-    TS_ASSERT_THROWS_NOTHING(
-        offsets.setProperty("InputResolutionWorkspace", "temp_res_ws"));
-    TS_ASSERT_THROWS_NOTHING(
-        offsets.setProperty("MinimumResolutionFactor", 0.8));
-    TS_ASSERT_THROWS_NOTHING(
-        offsets.setProperty("MaximumResolutionFactor", 1.2));
+    TS_ASSERT_THROWS_NOTHING(offsets.setProperty("InputWorkspace", "temp_event_ws"));
+    TS_ASSERT_THROWS_NOTHING(offsets.setProperty("InputResolutionWorkspace", "temp_res_ws"));
+    TS_ASSERT_THROWS_NOTHING(offsets.setProperty("MinimumResolutionFactor", 0.8));
+    TS_ASSERT_THROWS_NOTHING(offsets.setProperty("MaximumResolutionFactor", 1.2));
 
     std::string outputWS("offsetsped");
     std::string maskWS("masksped");
-    TS_ASSERT_THROWS_NOTHING(
-        offsets.setPropertyValue("OutputWorkspace", outputWS));
+    TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("OutputWorkspace", outputWS));
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("MaskWorkspace", maskWS));
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("DReference", "9.98040"));
-    TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue(
-        "SpectraFitInfoTableWorkspace", "FitInfoTable"));
+    TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("SpectraFitInfoTableWorkspace", "FitInfoTable"));
     TS_ASSERT_THROWS_NOTHING(offsets.execute());
     TS_ASSERT(offsets.isExecuted());
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outputWS));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWS));
     if (!output)
       return;
 
@@ -356,9 +294,7 @@ public:
     AnalysisDataService::Instance().remove(outputWS);
 
     MatrixWorkspace_const_sptr mask;
-    TS_ASSERT_THROWS_NOTHING(
-        mask = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            maskWS));
+    TS_ASSERT_THROWS_NOTHING(mask = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(maskWS));
     if (!mask)
       return;
     TS_ASSERT(!mask->detectorInfo().isMasked(0));
@@ -371,46 +307,35 @@ public:
   void testFailInputResolutionWS() {
     // ---- Create the simple workspace -------
     // Data workspace
-    MatrixWorkspace_sptr WS =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 200);
+    MatrixWorkspace_sptr WS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 200);
     AnalysisDataService::Instance().addOrReplace("temp_event_ws", WS);
-    WS->getAxis(0)->unit() =
-        Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
+    WS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
     generateNoisyData(WS);
 
     // Resolution workspace
-    MatrixWorkspace_sptr resWS =
-        WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
+    MatrixWorkspace_sptr resWS = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
     resWS->mutableY(0)[0] = 0.2;
     AnalysisDataService::Instance().addOrReplace("temp_res_ws", resWS);
 
     // ---- Run algo -----
     GetDetOffsetsMultiPeaks offsets;
     offsets.initialize();
-    TS_ASSERT_THROWS_NOTHING(
-        offsets.setProperty("InputWorkspace", "temp_event_ws"));
-    TS_ASSERT_THROWS_NOTHING(
-        offsets.setProperty("InputResolutionWorkspace", "temp_res_ws"));
-    TS_ASSERT_THROWS_NOTHING(
-        offsets.setProperty("MinimumResolutionFactor", 0.8));
-    TS_ASSERT_THROWS_NOTHING(
-        offsets.setProperty("MaximumResolutionFactor", 1.2));
+    TS_ASSERT_THROWS_NOTHING(offsets.setProperty("InputWorkspace", "temp_event_ws"));
+    TS_ASSERT_THROWS_NOTHING(offsets.setProperty("InputResolutionWorkspace", "temp_res_ws"));
+    TS_ASSERT_THROWS_NOTHING(offsets.setProperty("MinimumResolutionFactor", 0.8));
+    TS_ASSERT_THROWS_NOTHING(offsets.setProperty("MaximumResolutionFactor", 1.2));
 
     std::string outputWS("offsetsped");
     std::string maskWS("masksped");
-    TS_ASSERT_THROWS_NOTHING(
-        offsets.setPropertyValue("OutputWorkspace", outputWS));
+    TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("OutputWorkspace", outputWS));
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("MaskWorkspace", maskWS));
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("DReference", "9.98040"));
-    TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue(
-        "SpectraFitInfoTableWorkspace", "FitInfoTable"));
+    TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("SpectraFitInfoTableWorkspace", "FitInfoTable"));
     TS_ASSERT_THROWS_NOTHING(offsets.execute());
     TS_ASSERT(offsets.isExecuted());
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outputWS));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWS));
     if (!output)
       return;
 
@@ -419,9 +344,7 @@ public:
     AnalysisDataService::Instance().remove(outputWS);
 
     MatrixWorkspace_const_sptr mask;
-    TS_ASSERT_THROWS_NOTHING(
-        mask = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            maskWS));
+    TS_ASSERT_THROWS_NOTHING(mask = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(maskWS));
     TS_ASSERT(mask->detectorInfo().isMasked(0));
 
     return;
@@ -447,27 +370,20 @@ class GetDetOffsetsMultiPeaksTestPerformance : public CxxTest::TestSuite {
   int numpixels;
 
 public:
-  static GetDetOffsetsMultiPeaksTestPerformance *createSuite() {
-    return new GetDetOffsetsMultiPeaksTestPerformance();
-  }
-  static void destroySuite(GetDetOffsetsMultiPeaksTestPerformance *suite) {
-    delete suite;
-  }
+  static GetDetOffsetsMultiPeaksTestPerformance *createSuite() { return new GetDetOffsetsMultiPeaksTestPerformance(); }
+  static void destroySuite(GetDetOffsetsMultiPeaksTestPerformance *suite) { delete suite; }
 
   GetDetOffsetsMultiPeaksTestPerformance() { FrameworkManager::Instance(); }
 
   void setUp() override {
     numpixels = 10000;
-    WS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-        numpixels, 200, false);
-    WS->getAxis(0)->unit() =
-        Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
+    WS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(numpixels, 200, false);
+    WS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
     for (size_t wi = 0; wi < WS->getNumberHistograms(); wi++) {
 
       auto xvals = WS->points(0);
-      std::transform(
-          xvals.cbegin(), xvals.cend(), WS->mutableY(0).begin(),
-          [](const double x) { return exp(-0.5 * pow((x - 10) / 1.0, 2)); });
+      std::transform(xvals.cbegin(), xvals.cend(), WS->mutableY(0).begin(),
+                     [](const double x) { return exp(-0.5 * pow((x - 10) / 1.0, 2)); });
 
       auto &E = WS->mutableE(0);
       E.assign(E.size(), 0.001);
@@ -480,11 +396,9 @@ public:
     GetDetOffsetsMultiPeaks offsets;
     if (!offsets.isInitialized())
       offsets.initialize();
-    TS_ASSERT_THROWS_NOTHING(
-        offsets.setProperty("InputWorkspace", "temp_event_ws"));
+    TS_ASSERT_THROWS_NOTHING(offsets.setProperty("InputWorkspace", "temp_event_ws"));
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("DReference", "9.98040"));
-    TS_ASSERT_THROWS_NOTHING(
-        offsets.setPropertyValue("OutputWorkspace", "dummyname"));
+    TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("OutputWorkspace", "dummyname"));
     TS_ASSERT_THROWS_NOTHING(offsets.execute());
     TS_ASSERT(offsets.isExecuted());
     OffsetsWorkspace_sptr output;

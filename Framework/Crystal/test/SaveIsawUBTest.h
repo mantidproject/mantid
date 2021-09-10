@@ -47,8 +47,7 @@ public:
 
   void test_exec() {
     // Fake output WS
-    MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::create2DWorkspace(10, 10);
+    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspace(10, 10);
     AnalysisDataService::Instance().addOrReplace("LoadIsawUBTest_ws", ws);
 
     std::string File1, File2;
@@ -57,8 +56,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", "TOPAZ_3007.mat"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", "LoadIsawUBTest_ws"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "LoadIsawUBTest_ws"));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
@@ -72,10 +70,8 @@ public:
     SaveIsawUB Salg;
     TS_ASSERT_THROWS_NOTHING(Salg.initialize())
     TS_ASSERT(Salg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        Salg.setProperty("Filename", "TOPAZ_3007_resaved.mat"));
-    TS_ASSERT_THROWS_NOTHING(
-        Salg.setPropertyValue("InputWorkspace", "LoadIsawUBTest_ws"));
+    TS_ASSERT_THROWS_NOTHING(Salg.setProperty("Filename", "TOPAZ_3007_resaved.mat"));
+    TS_ASSERT_THROWS_NOTHING(Salg.setPropertyValue("InputWorkspace", "LoadIsawUBTest_ws"));
     TS_ASSERT_THROWS_NOTHING(Salg.execute(););
     TS_ASSERT(Salg.isExecuted());
     // Check the results

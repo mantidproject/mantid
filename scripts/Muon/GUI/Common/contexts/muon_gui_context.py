@@ -6,18 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantidqt.utils.observer_pattern import Observable
 
-from enum import Enum
-
-PlotModeStrings = ['Plot Data', 'Plot Fits']
-
-
-class PlotMode(Enum):
-    Data = 0
-    Fitting = 1
-
-    def __str__(self):
-        return PlotModeStrings[self.value]
-
 
 class GuiVariablesNotifier(Observable):
     def __init__(self, outer):
@@ -63,11 +51,3 @@ class MuonGuiContext(dict):
 
     def add_non_calc_subscriber(self, observer):
         self.gui_variable_non_calulation_notifier.add_subscriber(observer)
-
-    def remove_workspace_by_name(self, workspace_name):
-        try:
-            if self['DeadTimeTable'].name() == workspace_name:
-                self.pop('DeadTimeTable')
-                self['DeadTimeSource'] = 'FromFile'
-        except KeyError:
-            pass

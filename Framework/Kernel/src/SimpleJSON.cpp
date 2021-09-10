@@ -28,17 +28,11 @@ JSONValue::JSONValue() : m_type(JSONValue::NULLTYPE) {}
 JSONValue::JSONValue(bool v) : m_type(JSONValue::BOOL), m_bool(v) {}
 JSONValue::JSONValue(double v) : m_type(JSONValue::NUMBER), m_num(v) {}
 
-JSONValue::JSONValue(const string &v) : m_type(JSONValue::STRING) {
-  mp_string = std::make_unique<string>(v);
-}
+JSONValue::JSONValue(const string &v) : m_type(JSONValue::STRING) { mp_string = std::make_unique<string>(v); }
 
-JSONValue::JSONValue(const JSONArray &v) : m_type(JSONValue::ARRAY) {
-  mp_array = std::make_unique<JSONArray>(v);
-}
+JSONValue::JSONValue(const JSONArray &v) : m_type(JSONValue::ARRAY) { mp_array = std::make_unique<JSONArray>(v); }
 
-JSONValue::JSONValue(const JSONObject &v) : m_type(JSONValue::OBJECT) {
-  mp_object = std::make_unique<JSONObject>(v);
-}
+JSONValue::JSONValue(const JSONObject &v) : m_type(JSONValue::OBJECT) { mp_object = std::make_unique<JSONObject>(v); }
 
 JSONValue::JSONValue(const JSONValue &v) {
   m_type = v.getType();
@@ -355,16 +349,14 @@ void initFromStream(JSONObject &obj, istream &istr) {
     // with any
     // following whitespace) to position us for the next key/value pair
     if (nextChar == ']')
-      throw JSONParseException(
-          "Invalid closing bracket while initializing object");
+      throw JSONParseException("Invalid closing bracket while initializing object");
     else if (nextChar == ',') {
       skipWhiteSpace(istr);
       // Check to see if another key/value pair really follows the comma
       // (because if one doesn't, the parser will get screwed up and may not
       // actually detect the problem).
       if (istr.peek() != '"') {
-        throw JSONParseException(
-            "Invalid comma (no key/value pair following it)");
+        throw JSONParseException("Invalid comma (no key/value pair following it)");
       }
     }
   }
@@ -412,16 +404,14 @@ void initArrayFromStream(JSONArray &arr, istream &istr) {
     // with any
     // following whitespace) to position us for the next value
     if (nextChar == '}')
-      throw JSONParseException(
-          "Invalid closing brace while initializing array");
+      throw JSONParseException("Invalid closing brace while initializing array");
     else if (nextChar == ',') {
       skipWhiteSpace(istr);
       // Check to see if another key/value pair really follows the comma
       // (because if one doesn't, the parser will get screwed up and may not
       // actually detect the problem).
       if (istr.peek() == ']') {
-        throw JSONParseException(
-            "Invalid comma (array ended with no further values)");
+        throw JSONParseException("Invalid comma (array ended with no further values)");
       }
     }
   }
@@ -591,8 +581,7 @@ string readString(istream &istr) {
 
     istr.get(next);
     if (istr.eof()) {
-      throw JSONParseException(
-          "Stream unexpectedly ended without a closing quote.");
+      throw JSONParseException("Stream unexpectedly ended without a closing quote.");
     }
   }
   return str;
@@ -608,8 +597,7 @@ string readUntilCloseChar(istream &istr) {
   auto next = static_cast<char>(istr.peek());
   while ((next != ',') && (next != '}') && (next != ']')) {
     if (istr.eof()) {
-      throw JSONParseException(
-          "Stream unexpectedly ended without a closing char.");
+      throw JSONParseException("Stream unexpectedly ended without a closing char.");
     }
     if (!value.empty() || !isspace(next)) {
       // don't add white space to the start of the value string
@@ -627,8 +615,7 @@ string readUntilCloseChar(istream &istr) {
   return value;
 }
 
-void prettyPrint(const JSONObject &obj, std::ostream &ostr,
-                 unsigned indentLevel) {
+void prettyPrint(const JSONObject &obj, std::ostream &ostr, unsigned indentLevel) {
   // Prints keys/value pairs.  One pair per line  (Does not print opening or
   // closing braces...)
   auto it = obj.cbegin();

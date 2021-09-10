@@ -41,9 +41,8 @@ DECLARE_FUNCTION(ThermalNeutronBk2BkExpConvPVoigt)
 /** Constructor
  */
 ThermalNeutronBk2BkExpConvPVoigt::ThermalNeutronBk2BkExpConvPVoigt()
-    : IPowderDiffPeakFunction(), m_Alpha(0.), m_Beta(0.), m_Sigma2(0.),
-      m_Gamma(0.), m_eta(0.), m_N(0.), m_cancel(false),
-      m_parallelException(false), m_dspaceCalculated(false) {
+    : IPowderDiffPeakFunction(), m_Alpha(0.), m_Beta(0.), m_Sigma2(0.), m_Gamma(0.), m_eta(0.), m_N(0.),
+      m_cancel(false), m_parallelException(false), m_dspaceCalculated(false) {
   mHKLSet = false;
 }
 
@@ -57,49 +56,24 @@ void ThermalNeutronBk2BkExpConvPVoigt::init() {
   declareParameter("Height", 1.0, "Intensity of peak");
 
   // Instrument geometry related (1 ~ 8)
-  declareParameter(
-      "Dtt1", 1.0,
-      "coefficient 1 for d-spacing calculation for epithermal neutron part");
-  declareParameter(
-      "Dtt2", 1.0,
-      "coefficient 2 for d-spacing calculation for epithermal neutron part");
-  declareParameter(
-      "Dtt1t", 1.0,
-      "coefficient 1 for d-spacing calculation for thermal neutron part");
-  declareParameter(
-      "Dtt2t", 1.0,
-      "coefficient 2 for d-spacing calculation for thermal neutron part");
+  declareParameter("Dtt1", 1.0, "coefficient 1 for d-spacing calculation for epithermal neutron part");
+  declareParameter("Dtt2", 1.0, "coefficient 2 for d-spacing calculation for epithermal neutron part");
+  declareParameter("Dtt1t", 1.0, "coefficient 1 for d-spacing calculation for thermal neutron part");
+  declareParameter("Dtt2t", 1.0, "coefficient 2 for d-spacing calculation for thermal neutron part");
   declareParameter("Zero", 0.0, "Zero shift for epithermal neutron");
   declareParameter("Zerot", 0.0, "Zero shift for thermal neutron");
   declareParameter("Width", 1.0, "width of the crossover region");
-  declareParameter("Tcross", 1.0,
-                   "position of the centre of the crossover region");
+  declareParameter("Tcross", 1.0, "position of the centre of the crossover region");
 
   // Peak profile related (9 ~ 16) Back to back Expoential
-  declareParameter(
-      "Alph0", 1.6,
-      "exponential constant for rising part of epithermal neutron pulse");
-  declareParameter(
-      "Alph1", 1.5,
-      "exponential constant for rising part of expithermal neutron pulse");
-  declareParameter(
-      "Beta0", 1.6,
-      "exponential constant of decaying part of epithermal neutron pulse");
-  declareParameter(
-      "Beta1", 1.5,
-      "exponential constant of decaying part of epithermal neutron pulse");
-  declareParameter(
-      "Alph0t", 1.6,
-      "exponential constant for rising part of thermal neutron pulse");
-  declareParameter(
-      "Alph1t", 1.5,
-      "exponential constant for rising part of thermal neutron pulse");
-  declareParameter(
-      "Beta0t", 1.6,
-      "exponential constant of decaying part of thermal neutron pulse");
-  declareParameter(
-      "Beta1t", 1.5,
-      "exponential constant of decaying part of thermal neutron pulse");
+  declareParameter("Alph0", 1.6, "exponential constant for rising part of epithermal neutron pulse");
+  declareParameter("Alph1", 1.5, "exponential constant for rising part of expithermal neutron pulse");
+  declareParameter("Beta0", 1.6, "exponential constant of decaying part of epithermal neutron pulse");
+  declareParameter("Beta1", 1.5, "exponential constant of decaying part of epithermal neutron pulse");
+  declareParameter("Alph0t", 1.6, "exponential constant for rising part of thermal neutron pulse");
+  declareParameter("Alph1t", 1.5, "exponential constant for rising part of thermal neutron pulse");
+  declareParameter("Beta0t", 1.6, "exponential constant of decaying part of thermal neutron pulse");
+  declareParameter("Beta1t", 1.5, "exponential constant of decaying part of thermal neutron pulse");
 
   // Pseudo-Voigt (17 ~ 22)
   declareParameter("Sig0", 1.0,
@@ -197,8 +171,7 @@ void ThermalNeutronBk2BkExpConvPVoigt::getMillerIndex(int& h, int &k, int &l)
  * Exception: if the peak profile parameter is not in this peak, then
  *            return an Empty_DBL
  */
-double
-ThermalNeutronBk2BkExpConvPVoigt::getPeakParameter(std::string paramname) {
+double ThermalNeutronBk2BkExpConvPVoigt::getPeakParameter(std::string paramname) {
   // 1. Calculate peak parameters if required
   if (m_hasNewParameterValue) {
     calculateParameters(false);
@@ -225,8 +198,8 @@ ThermalNeutronBk2BkExpConvPVoigt::getPeakParameter(std::string paramname) {
     paramvalue = m_fwhm;
   else {
     stringstream errss;
-    errss << "Parameter " << paramname << " does not exist in peak function "
-          << this->name() << "'s calculated parameters. "
+    errss << "Parameter " << paramname << " does not exist in peak function " << this->name()
+          << "'s calculated parameters. "
           << "Candidates are Alpha, Beta, Sigma2, Gamma d_h and Eta. ";
     throw runtime_error(errss.str());
   }
@@ -239,8 +212,7 @@ ThermalNeutronBk2BkExpConvPVoigt::getPeakParameter(std::string paramname) {
 /** Calculate peak parameters (fundamential Back-to-back PV),including
  * alpha, beta, sigma^2, eta, H
  */
-void ThermalNeutronBk2BkExpConvPVoigt::calculateParameters(
-    bool explicitoutput) const {
+void ThermalNeutronBk2BkExpConvPVoigt::calculateParameters(bool explicitoutput) const {
   // Obtain parameters (class) with pre-set order
   double dtt1 = getParameter(1);
   double dtt1t = getParameter(3);
@@ -272,8 +244,7 @@ void ThermalNeutronBk2BkExpConvPVoigt::calculateParameters(
 
   // Calcualte Peak Position d-spacing and TOF
   if (m_cellParamValueChanged) {
-    m_unitCell.set(latticeconstant, latticeconstant, latticeconstant, 90.0,
-                   90.0, 90.0);
+    m_unitCell.set(latticeconstant, latticeconstant, latticeconstant, 90.0, 90.0, 90.0);
     dh = m_unitCell.d(mH, mK, mL);
     m_dcentre = dh;
     m_cellParamValueChanged = false;
@@ -297,8 +268,7 @@ void ThermalNeutronBk2BkExpConvPVoigt::calculateParameters(
   double Th_t = zerot + dtt1t * dh - dtt2t / dh;
   tof_h = n * Th_e + (1 - n) * Th_t;
 
-  sigma2 = sig0 * sig0 + sig1 * sig1 * std::pow(dh, 2) +
-           sig2 * sig2 * std::pow(dh, 4);
+  sigma2 = sig0 * sig0 + sig1 * sig1 * std::pow(dh, 2) + sig2 * sig2 * std::pow(dh, 4);
   gamma = gam0 + gam1 * dh + gam2 * std::pow(dh, 2);
 
   // - Calcualte H for the peak
@@ -317,8 +287,7 @@ void ThermalNeutronBk2BkExpConvPVoigt::calculateParameters(
   m_eta = eta;
 
   // Check whether all the parameters are physical
-  if (alpha != alpha || beta != beta || sigma2 != sigma2 || gamma != gamma ||
-      H != H || H <= 0.) {
+  if (alpha != alpha || beta != beta || sigma2 != sigma2 || gamma != gamma || H != H || H <= 0.) {
     m_parameterValid = false;
   } else {
     m_parameterValid = true;
@@ -327,17 +296,12 @@ void ThermalNeutronBk2BkExpConvPVoigt::calculateParameters(
   // 5.Debug output
   if (explicitoutput) {
     stringstream errss;
-    errss << "alpha = " << alpha << ", beta = " << beta << ", N = " << N
-          << "\n";
-    errss << "  n = " << n << ", alpha_e = " << alpha_e
-          << ", alpha_t = " << alpha_t << "\n";
-    errss << " dh = " << dh << ", alph0t = " << alph0t
-          << ", alph1t = " << alph1t << ", alph0 = " << alph0
+    errss << "alpha = " << alpha << ", beta = " << beta << ", N = " << N << "\n";
+    errss << "  n = " << n << ", alpha_e = " << alpha_e << ", alpha_t = " << alpha_t << "\n";
+    errss << " dh = " << dh << ", alph0t = " << alph0t << ", alph1t = " << alph1t << ", alph0 = " << alph0
           << ", alph1 = " << alph1 << "\n";
-    errss << "  n = " << n << ", beta_e = " << beta_e << ", beta_t = " << beta_t
-          << "\n";
-    errss << " dh = " << dh << ", beta0t = " << beta0t
-          << ", beta1t = " << beta1t << "\n";
+    errss << "  n = " << n << ", beta_e = " << beta_e << ", beta_t = " << beta_t << "\n";
+    errss << " dh = " << dh << ", beta0t = " << beta0t << ", beta1t = " << beta1t << "\n";
     g_log.information(errss.str());
   }
 
@@ -351,9 +315,7 @@ void ThermalNeutronBk2BkExpConvPVoigt::calculateParameters(
 //----------------------------------------------------------------------------------------------
 /** Override function1D
  */
-void ThermalNeutronBk2BkExpConvPVoigt::functionLocal(double *out,
-                                                     const double *xValues,
-                                                     size_t nData) const {
+void ThermalNeutronBk2BkExpConvPVoigt::functionLocal(double *out, const double *xValues, size_t nData) const {
   // 1. Calculate peak parameters
   double height = getParameter(0);
 
@@ -381,8 +343,7 @@ void ThermalNeutronBk2BkExpConvPVoigt::functionLocal(double *out,
 
     double omega;
     if (fabs(dT) < peakrange) {
-      omega = calOmega(dT, m_eta, m_N, m_Alpha, m_Beta, m_fwhm, m_Sigma2,
-                       invert_sqrt2sigma);
+      omega = calOmega(dT, m_eta, m_N, m_Alpha, m_Beta, m_fwhm, m_Sigma2, invert_sqrt2sigma);
       omega *= height;
     } else {
       omega = 0.0;
@@ -422,8 +383,7 @@ void ThermalNeutronBk2BkExpConvPVoigt::functionLocal(double *out,
  * with a value of zero everywhere.
  * @param xValues: The x-values to evaluate the peak at.
  */
-void ThermalNeutronBk2BkExpConvPVoigt::function(
-    vector<double> &out, const vector<double> &xValues) const {
+void ThermalNeutronBk2BkExpConvPVoigt::function(vector<double> &out, const vector<double> &xValues) const {
   // calculate peak parameters
   const double HEIGHT = getParameter(0);
   const double INVERT_SQRT2SIGMA = 1.0 / sqrt(2.0 * m_Sigma2);
@@ -447,8 +407,7 @@ void ThermalNeutronBk2BkExpConvPVoigt::function(
   // 2. Calcualte
   std::size_t pos(std::distance(xValues.begin(), iter)); // second loop variable
   for (; iter != iter_end; ++iter) {
-    out[pos] = HEIGHT * calOmega(*iter - m_centre, m_eta, m_N, m_Alpha, m_Beta,
-                                 m_fwhm, m_Sigma2, INVERT_SQRT2SIGMA);
+    out[pos] = HEIGHT * calOmega(*iter - m_centre, m_eta, m_N, m_Alpha, m_Beta, m_fwhm, m_Sigma2, INVERT_SQRT2SIGMA);
     pos++;
   } // ENDFOR data points
 }
@@ -456,17 +415,14 @@ void ThermalNeutronBk2BkExpConvPVoigt::function(
 //----------------------------------------------------------------------------------------------
 /** Disabled derivative
  */
-void ThermalNeutronBk2BkExpConvPVoigt::functionDerivLocal(
-    API::Jacobian * /*unused*/, const double * /*unused*/,
-    const size_t /*unused*/) {
-  throw Mantid::Kernel::Exception::NotImplementedError(
-      "functionDerivLocal is not implemented for IkedaCarpenterPV.");
+void ThermalNeutronBk2BkExpConvPVoigt::functionDerivLocal(API::Jacobian * /*unused*/, const double * /*unused*/,
+                                                          const size_t /*unused*/) {
+  throw Mantid::Kernel::Exception::NotImplementedError("functionDerivLocal is not implemented for IkedaCarpenterPV.");
 }
 
 /** Calculate derivative of this peak function
  */
-void ThermalNeutronBk2BkExpConvPVoigt::functionDeriv(
-    const API::FunctionDomain &domain, API::Jacobian &jacobian) {
+void ThermalNeutronBk2BkExpConvPVoigt::functionDeriv(const API::FunctionDomain &domain, API::Jacobian &jacobian) {
   calNumericalDeriv(domain, jacobian);
 }
 
@@ -514,28 +470,22 @@ double ThermalNeutronBk2BkExpConvPVoigt::fwhm() const
 //--------------------------------------------
 /** Calcualte H and eta for the peak
  */
-void ThermalNeutronBk2BkExpConvPVoigt::calHandEta(double sigma2, double gamma,
-                                                  double &H,
-                                                  double &eta) const {
+void ThermalNeutronBk2BkExpConvPVoigt::calHandEta(double sigma2, double gamma, double &H, double &eta) const {
   // 1. Calculate H
   double H_G = sqrt(8.0 * sigma2 * M_LN2);
   double H_L = gamma;
 
-  double temp1 = std::pow(H_L, 5) + 0.07842 * H_G * std::pow(H_L, 4) +
-                 4.47163 * std::pow(H_G, 2) * std::pow(H_L, 3) +
-                 2.42843 * std::pow(H_G, 3) * std::pow(H_L, 2) +
-                 2.69269 * std::pow(H_G, 4) * H_L + std::pow(H_G, 5);
+  double temp1 = std::pow(H_L, 5) + 0.07842 * H_G * std::pow(H_L, 4) + 4.47163 * std::pow(H_G, 2) * std::pow(H_L, 3) +
+                 2.42843 * std::pow(H_G, 3) * std::pow(H_L, 2) + 2.69269 * std::pow(H_G, 4) * H_L + std::pow(H_G, 5);
 
   H = std::pow(temp1, 0.2);
 
   // 2. Calculate eta
   double gam_pv = H_L / H;
-  eta = 1.36603 * gam_pv - 0.47719 * std::pow(gam_pv, 2) +
-        0.11116 * std::pow(gam_pv, 3);
+  eta = 1.36603 * gam_pv - 0.47719 * std::pow(gam_pv, 2) + 0.11116 * std::pow(gam_pv, 3);
 
   if (eta > 1 || eta < 0) {
-    g_log.warning() << "Calculated eta = " << eta
-                    << " is out of range [0, 1].\n";
+    g_log.warning() << "Calculated eta = " << eta << " is out of range [0, 1].\n";
   }
 }
 
@@ -543,10 +493,9 @@ void ThermalNeutronBk2BkExpConvPVoigt::calHandEta(double sigma2, double gamma,
 /** Calculate Omega(x) = ... ...
  * This is the core component to calcualte peak profile
  */
-double ThermalNeutronBk2BkExpConvPVoigt::calOmega(
-    const double x, const double eta, const double N, const double alpha,
-    const double beta, const double H, const double sigma2,
-    const double invert_sqrt2sigma, const bool explicitoutput) const {
+double ThermalNeutronBk2BkExpConvPVoigt::calOmega(const double x, const double eta, const double N, const double alpha,
+                                                  const double beta, const double H, const double sigma2,
+                                                  const double invert_sqrt2sigma, const bool explicitoutput) const {
   const double u = 0.5 * alpha * (alpha * sigma2 + 2. * x);
   const double y = (alpha * sigma2 + x) * invert_sqrt2sigma;
 
@@ -580,13 +529,10 @@ double ThermalNeutronBk2BkExpConvPVoigt::calOmega(
   if (explicitoutput) {
     if (omega <= NEG_DBL_MAX || omega >= DBL_MAX) {
       stringstream errss;
-      errss << "Find omega = " << omega << " is infinity! omega1 = " << omega1
-            << ", omega2 = " << omega2 << "\n";
-      errss << "  u = " << u << ", v = " << v
-            << ", erfc(y) = " << gsl_sf_erfc(y)
-            << ", erfc(z) = " << gsl_sf_erfc(z) << "\n";
-      errss << "  alpha = " << alpha << ", x = " << x << " sigma2 = " << sigma2
-            << ", N = " << N << "\n";
+      errss << "Find omega = " << omega << " is infinity! omega1 = " << omega1 << ", omega2 = " << omega2 << "\n";
+      errss << "  u = " << u << ", v = " << v << ", erfc(y) = " << gsl_sf_erfc(y) << ", erfc(z) = " << gsl_sf_erfc(z)
+            << "\n";
+      errss << "  alpha = " << alpha << ", x = " << x << " sigma2 = " << sigma2 << ", N = " << N << "\n";
       g_log.warning(errss.str());
     }
   }
@@ -598,9 +544,7 @@ double ThermalNeutronBk2BkExpConvPVoigt::calOmega(
 //----------------------------------------------------------------------------------------------
 /** Override setting parameter by parameter index
  */
-void ThermalNeutronBk2BkExpConvPVoigt::setParameter(size_t i,
-                                                    const double &value,
-                                                    bool explicitlySet) {
+void ThermalNeutronBk2BkExpConvPVoigt::setParameter(size_t i, const double &value, bool explicitlySet) {
   if (i == LATTICEINDEX) {
     // Lattice parameter
     if (fabs(m_unitCellSize - value) > 1.0E-8) {
@@ -620,9 +564,7 @@ void ThermalNeutronBk2BkExpConvPVoigt::setParameter(size_t i,
 //----------------------------------------------------------------------------------------------
 /** Overriding setting parameter by parameter name
  */
-void ThermalNeutronBk2BkExpConvPVoigt::setParameter(const std::string &name,
-                                                    const double &value,
-                                                    bool explicitlySet) {
+void ThermalNeutronBk2BkExpConvPVoigt::setParameter(const std::string &name, const double &value, bool explicitlySet) {
   if (name == "LatticeConstant") {
     // Lattice parameter
     if (fabs(m_unitCellSize - value) > 1.0E-8) {
@@ -730,9 +672,7 @@ std::complex<double> E1X(std::complex<double> z)
  * @param xValues :: X values for data points
  * @param nData :: Number of data points
  */
-void ThermalNeutronBk2BkExpConvPVoigt::function1D(double *out,
-                                                  const double *xValues,
-                                                  const size_t nData) const {
+void ThermalNeutronBk2BkExpConvPVoigt::function1D(double *out, const double *xValues, const size_t nData) const {
   double c = centre();
   double dx = fabs(s_peakRadius * this->fwhm());
   int i0 = -1;

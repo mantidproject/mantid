@@ -26,13 +26,10 @@ public:
   static void destroySuite(DetectorGroupTest *suite) { delete suite; }
 
   DetectorGroupTest() : m_origin() {
-    m_detGroup =
-        ComponentCreationHelper::createDetectorGroupWith5CylindricalDetectors();
+    m_detGroup = ComponentCreationHelper::createDetectorGroupWith5CylindricalDetectors();
   }
 
-  void testConstructors() {
-    TS_ASSERT_EQUALS(m_detGroup->getDetectorIDs().size(), 5);
-  }
+  void testConstructors() { TS_ASSERT_EQUALS(m_detGroup->getDetectorIDs().size(), 5); }
 
   void testGetPos() {
     V3D pos;
@@ -62,35 +59,28 @@ public:
     Kernel::V3D center;
     std::shared_ptr<Mantid::Geometry::DetectorGroup> rectGroup =
         ComponentCreationHelper::createDetectorGroupWith5CylindricalDetectors();
-    TSM_ASSERT_EQUALS("should be rectangular shape", rect,
-                      rectGroup->getTopology(center));
+    TSM_ASSERT_EQUALS("should be rectangular shape", rect, rectGroup->getTopology(center));
   }
   void testIdentRectShapeWithGaps() {
     Kernel::V3D center;
     std::shared_ptr<Mantid::Geometry::DetectorGroup> rectGroup =
-        ComponentCreationHelper::
-            createDetectorGroupWithNCylindricalDetectorsWithGaps(4, 0.0);
-    TSM_ASSERT_EQUALS("should be rectangular shape", rect,
-                      rectGroup->getTopology(center));
+        ComponentCreationHelper::createDetectorGroupWithNCylindricalDetectorsWithGaps(4, 0.0);
+    TSM_ASSERT_EQUALS("should be rectangular shape", rect, rectGroup->getTopology(center));
   }
   void testIdentRingShape() {
     Kernel::V3D center;
     std::shared_ptr<Mantid::Geometry::DetectorGroup> rectGroup =
         ComponentCreationHelper::createRingOfCylindricalDetectors();
-    TSM_ASSERT_EQUALS("should be ring shape", cyl,
-                      rectGroup->getTopology(center));
+    TSM_ASSERT_EQUALS("should be ring shape", cyl, rectGroup->getTopology(center));
   }
   void testGetID() { TS_ASSERT_EQUALS(m_detGroup->getID(), 1); }
 
-  void testGetDistance() {
-    TS_ASSERT_DELTA(m_detGroup->getDistance(m_origin), 4.24614987, 1e-08);
-  }
+  void testGetDistance() { TS_ASSERT_DELTA(m_detGroup->getDistance(m_origin), 4.24614987, 1e-08); }
 
   void testBoundingBox() {}
 
   void testAddDetector() {
-    std::shared_ptr<DetectorGroup> detg =
-        ComponentCreationHelper::createDetectorGroupWith5CylindricalDetectors();
+    std::shared_ptr<DetectorGroup> detg = ComponentCreationHelper::createDetectorGroupWith5CylindricalDetectors();
     auto d = std::make_shared<Detector>("d", 6, nullptr);
     d->setPos(6.0, 3.0, 2.0);
     detg->addDetector(d);
@@ -129,8 +119,7 @@ public:
     double signedThetaDetector = det->getSignedTwoTheta(sample, axis, up);
 
     TS_ASSERT_EQUALS(theta, std::abs(signedThetaCluster));
-    TSM_ASSERT_EQUALS("Should be same as for individual detector",
-                      signedThetaCluster, signedThetaDetector);
+    TSM_ASSERT_EQUALS("Should be same as for individual detector", signedThetaCluster, signedThetaDetector);
   }
 
 private:

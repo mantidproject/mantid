@@ -18,9 +18,7 @@ namespace Kernel {
 
 /** ArrayLenghtValidator : Validate length of an array property
  */
-template <typename TYPE>
-class MANTID_KERNEL_DLL ArrayLengthValidator
-    : public TypedValidator<std::vector<TYPE>> {
+template <typename TYPE> class MANTID_KERNEL_DLL ArrayLengthValidator : public TypedValidator<std::vector<TYPE>> {
 public:
   ArrayLengthValidator();
   ArrayLengthValidator(const size_t len);

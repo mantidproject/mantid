@@ -77,6 +77,8 @@
         <xs:complexType>
           <xs:attribute name="val"/>
           <xs:attribute name="units"/>
+          <xs:attribute name="valid-from" type="xs:string"/>
+          <xs:attribute name="valid-to"   type="xs:string"/>
         </xs:complexType>
       </xs:element>
       <xs:element name="description">
@@ -132,6 +134,7 @@
     </xs:choice>
     <xs:attribute name="name" use="required"/>
     <xs:attribute name="type"/>
+    <xs:attribute name="visible"/>
   </xs:complexType>
 
   <!-- Define <component> Type  -->

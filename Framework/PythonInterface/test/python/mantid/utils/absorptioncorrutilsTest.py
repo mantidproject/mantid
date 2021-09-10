@@ -31,7 +31,10 @@ class AbsorptionCorrUtilsTest(unittest.TestCase):
         PropertyManagerDataService.remove('props')
 
     def test_correction_props(self):
-        self.assertRaises(RuntimeError, absorptioncorrutils.create_absorption_input, '', None)
+        # must supply the filename
+        self.assertRaises(ValueError, absorptioncorrutils.create_absorption_input, '', None)
+        # must supply some way of determining wavelength range
+        self.assertRaises(ValueError, absorptioncorrutils.create_absorption_input, 'PG3_46577.nxs.h5', None)
 
         props = PropertyManagerDataService.retrieve("props")
 
@@ -53,9 +56,8 @@ class AbsorptionCorrUtilsTest(unittest.TestCase):
         self.assertIsNone(sample_ws)
         self.assertIsNone(container_ws)
 
-        # with caching
         sample_ws, container_ws = absorptioncorrutils.calculate_absorption_correction(
-            '', "None", None, "V", 1.0, cache_dir=tempfile.gettempdir())
+            '', "None", None, "V", 1.0, cache_dirs=[tempfile.gettempdir()])
 
         self.assertIsNone(sample_ws)
         self.assertIsNone(container_ws)
@@ -64,7 +66,7 @@ class AbsorptionCorrUtilsTest(unittest.TestCase):
         fname = "PG3_46577.nxs.h5"
         props = PropertyManagerDataService.retrieve("props")
 
-        cachedir = tempfile.gettempdir()
+        cachedirs = [tempfile.gettempdir()] * 3
         abs_s, _ = absorptioncorrutils.calculate_absorption_correction(
             fname,
             "SampleOnly",
@@ -72,7 +74,7 @@ class AbsorptionCorrUtilsTest(unittest.TestCase):
             "Si",
             1.165,
             element_size=2,
-            cache_dir=cachedir,
+            cache_dirs=cachedirs,
         )
         self.assertIsNotNone(abs_s)
 
@@ -83,7 +85,7 @@ class AbsorptionCorrUtilsTest(unittest.TestCase):
             "Si",
             1.165,
             element_size=2,
-            cache_dir=cachedir,
+            cache_dirs=cachedirs,
             )
         self.assertIsNotNone(abs_s)
 

@@ -36,27 +36,23 @@ using namespace DataObjects;
  *
  */
 void InterpolatingRebin::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
                   "Workspace containing the input data");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "The name to give the output workspace");
 
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>(
-          "Params", std::make_shared<RebinParamsValidator>()),
-      "A comma separated list of first bin boundary, width, last bin boundary. "
-      "Optionally "
-      "this can be followed by a comma and more widths and last boundary "
-      "pairs. "
-      "Optionally this can also be a single number, which is the bin width. "
-      "In this case, the boundary of binning will be determined by minimum and "
-      "maximum TOF "
-      "values among all events, or previous binning boundary, in case of event "
-      "Workspace, or "
-      "non-event Workspace, respectively. Negative width values indicate "
-      "logarithmic binning. ");
+  declareProperty(std::make_unique<ArrayProperty<double>>("Params", std::make_shared<RebinParamsValidator>()),
+                  "A comma separated list of first bin boundary, width, last bin boundary. "
+                  "Optionally "
+                  "this can be followed by a comma and more widths and last boundary "
+                  "pairs. "
+                  "Optionally this can also be a single number, which is the bin width. "
+                  "In this case, the boundary of binning will be determined by minimum and "
+                  "maximum TOF "
+                  "values among all events, or previous binning boundary, in case of event "
+                  "Workspace, or "
+                  "non-event Workspace, respectively. Negative width values indicate "
+                  "logarithmic binning. ");
 }
 
 /** Executes the rebin algorithm
@@ -69,21 +65,17 @@ void InterpolatingRebin::exec() {
   MatrixWorkspace_sptr inputW = getProperty("InputWorkspace");
 
   // retrieve the properties
-  std::vector<double> rb_params =
-      Rebin::rebinParamsFromInput(getProperty("Params"), *inputW, g_log);
+  std::vector<double> rb_params = Rebin::rebinParamsFromInput(getProperty("Params"), *inputW, g_log);
   HistogramData::BinEdges XValues_new(0);
   // create new output X axis
-  const int ntcnew = VectorHelper::createAxisFromRebinParams(
-      rb_params, XValues_new.mutableRawData());
+  const int ntcnew = VectorHelper::createAxisFromRebinParams(rb_params, XValues_new.mutableRawData());
 
   const auto nHists = static_cast<int>(inputW->getNumberHistograms());
   // make output Workspace the same type as the input but with the new axes
-  MatrixWorkspace_sptr outputW =
-      create<MatrixWorkspace>(*inputW, BinEdges(ntcnew));
+  MatrixWorkspace_sptr outputW = create<MatrixWorkspace>(*inputW, BinEdges(ntcnew));
   // Copy over the 'vertical' axis
   if (inputW->axes() > 1)
-    outputW->replaceAxis(
-        1, std::unique_ptr<Axis>(inputW->getAxis(1)->clone(outputW.get())));
+    outputW->replaceAxis(1, std::unique_ptr<Axis>(inputW->getAxis(1)->clone(outputW.get())));
   outputW->setDistribution(true);
 
   // this calculation requires a distribution workspace but deal with the
@@ -109,8 +101,7 @@ void InterpolatingRebin::exec() {
 
   // check if there was a convert to distribution done previously
   if (distCon) {
-    g_log.debug()
-        << "Converting the input and output workspaces _from_ distributions\n";
+    g_log.debug() << "Converting the input and output workspaces _from_ distributions\n";
     WorkspaceHelpers::makeDistribution(inputW, false);
     // the calculation produces a distribution workspace but if they passed a
     // non-distribution workspace they maybe not expect it, so convert back to
@@ -123,8 +114,7 @@ void InterpolatingRebin::exec() {
   // More efficient to have this in a separate loop because
   // MatrixWorkspace::maskBins blocks multi-threading
   for (int i = 0; i < nHists; ++i) {
-    if (inputW->hasMaskedBins(
-            i)) // Does the current spectrum have any masked bins?
+    if (inputW->hasMaskedBins(i)) // Does the current spectrum have any masked bins?
     {
       this->propagateMasks(inputW, outputW, i);
     }
@@ -143,12 +133,10 @@ void InterpolatingRebin::exec() {
  *  @param[out] outputW this will contain the interpolated data, the lengths of
  * the histograms must corrospond with the number of x-values in XValues_new
  */
-void InterpolatingRebin::outputYandEValues(
-    const API::MatrixWorkspace_const_sptr &inputW,
-    const HistogramData::BinEdges &XValues_new,
-    const API::MatrixWorkspace_sptr &outputW) {
-  g_log.debug()
-      << "Preparing to calculate y-values using splines and estimate errors\n";
+void InterpolatingRebin::outputYandEValues(const API::MatrixWorkspace_const_sptr &inputW,
+                                           const HistogramData::BinEdges &XValues_new,
+                                           const API::MatrixWorkspace_sptr &outputW) {
+  g_log.debug() << "Preparing to calculate y-values using splines and estimate errors\n";
 
   // prepare to use GSL functions but don't let them terminate Mantid
   gsl_error_handler_t *old_handler = gsl_set_error_handler(nullptr);
@@ -159,8 +147,7 @@ void InterpolatingRebin::outputYandEValues(
 
     try {
       // output data arrays are implicitly filled by function
-      outputW->setHistogram(
-          hist, cubicInterpolation(inputW->histogram(hist), XValues_new));
+      outputW->setHistogram(hist, cubicInterpolation(inputW->histogram(hist), XValues_new));
     } catch (std::exception &ex) {
       g_log.error() << "Error in rebin function: " << ex.what() << '\n';
       throw;
@@ -201,8 +188,7 @@ void InterpolatingRebin::outputYandEValues(
  *input
  *x-values
  **/
-Histogram InterpolatingRebin::cubicInterpolation(const Histogram &oldHistogram,
-                                                 const BinEdges &xNew) const {
+Histogram InterpolatingRebin::cubicInterpolation(const Histogram &oldHistogram, const BinEdges &xNew) const {
   const auto &yOld = oldHistogram.y();
 
   const size_t size_old = yOld.size();
@@ -213,35 +199,28 @@ Histogram InterpolatingRebin::cubicInterpolation(const Histogram &oldHistogram,
 
   // get the bin centres of the input data
   auto xCensOld = oldHistogram.points();
-  VectorHelper::convertToBinCentre(oldHistogram.x().rawData(),
-                                   xCensOld.mutableRawData());
+  VectorHelper::convertToBinCentre(oldHistogram.x().rawData(), xCensOld.mutableRawData());
   // the centres of the output data
   Points xCensNew(size_new);
   VectorHelper::convertToBinCentre(xNew.rawData(), xCensNew.mutableRawData());
 
   // find the range of input values whose x-values just suround the output
   // x-values
-  size_t oldIn1 =
-      std::lower_bound(xCensOld.begin(), xCensOld.end(), xCensNew.front()) -
-      xCensOld.begin();
+  size_t oldIn1 = std::lower_bound(xCensOld.begin(), xCensOld.end(), xCensNew.front()) - xCensOld.begin();
   if (oldIn1 == 0) { // the lowest interpolation value might be out of range but
                      // if it is almost on the boundary let it through
-    if (std::abs(xCensOld.front() - xCensNew.front()) <
-        1e-8 * (xCensOld.back() - xCensOld.front())) {
+    if (std::abs(xCensOld.front() - xCensNew.front()) < 1e-8 * (xCensOld.back() - xCensOld.front())) {
       oldIn1 = 1;
       // make what should be a very small correction
       xCensNew.mutableRawData().front() = xCensOld.front();
     }
   }
 
-  size_t oldIn2 =
-      std::lower_bound(xCensOld.begin(), xCensOld.end(), xCensNew.back()) -
-      xCensOld.begin();
+  size_t oldIn2 = std::lower_bound(xCensOld.begin(), xCensOld.end(), xCensNew.back()) - xCensOld.begin();
   if (oldIn2 == size_old) { // the highest point is nearly out of range of the
                             // input data but if it's very near the boundary let
                             // it through
-    if (std::abs(xCensOld.back() - xCensNew.back()) <
-        1e-8 * (xCensOld.back() - xCensOld.front())) {
+    if (std::abs(xCensOld.back() - xCensNew.back()) < 1e-8 * (xCensOld.back() - xCensOld.front())) {
       oldIn2 = size_old - 1;
       // make what should be a very small correction
       xCensNew.mutableRawData().back() = xCensOld.back();
@@ -284,15 +263,12 @@ Histogram InterpolatingRebin::cubicInterpolation(const Histogram &oldHistogram,
       return noInterpolation(oldHistogram, xNew);
     } else { // some points are two close to the edge of the data
 
-      throw std::invalid_argument(
-          std::string("At least one x-value to interpolate to is outside the "
-                      "range of the original data.\n") +
-          "original data range: " +
-          boost::lexical_cast<std::string>(xOld.front()) + " to " +
-          boost::lexical_cast<std::string>(xOld.back()) + "\n" +
-          "range to try to interpolate to " +
-          boost::lexical_cast<std::string>(xNew.front()) + " to " +
-          boost::lexical_cast<std::string>(xNew.back()));
+      throw std::invalid_argument(std::string("At least one x-value to interpolate to is outside the "
+                                              "range of the original data.\n") +
+                                  "original data range: " + boost::lexical_cast<std::string>(xOld.front()) + " to " +
+                                  boost::lexical_cast<std::string>(xOld.back()) + "\n" +
+                                  "range to try to interpolate to " + boost::lexical_cast<std::string>(xNew.front()) +
+                                  " to " + boost::lexical_cast<std::string>(xNew.back()));
     }
   }
 
@@ -356,8 +332,7 @@ Histogram InterpolatingRebin::cubicInterpolation(const Histogram &oldHistogram,
  *  @return Histogram :: A new Histogram containing the BinEdges xNew and
  *the calculated HistogramY and HistogramE
  */
-Histogram InterpolatingRebin::noInterpolation(const Histogram &oldHistogram,
-                                              const BinEdges &xNew) const {
+Histogram InterpolatingRebin::noInterpolation(const Histogram &oldHistogram, const BinEdges &xNew) const {
   Histogram newHistogram{xNew, Frequencies(xNew.size() - 1)};
   auto &yNew = newHistogram.mutableY();
   auto &eNew = newHistogram.mutableE();
@@ -384,15 +359,12 @@ Histogram InterpolatingRebin::noInterpolation(const Histogram &oldHistogram,
  *  @param[in] xNew the value of x for at the point of interest
  *  @return the estimated error at that point
  */
-double InterpolatingRebin::estimateError(const Points &xsOld,
-                                         const HistogramE &esOld,
-                                         const double xNew) const {
+double InterpolatingRebin::estimateError(const Points &xsOld, const HistogramE &esOld, const double xNew) const {
 
   // find the first point in the array that has a higher value of x, we'll base
   // some of the error estimate on the error on this point
 
-  const size_t indAbove =
-      std::lower_bound(xsOld.begin(), xsOld.end(), xNew) - xsOld.begin();
+  const size_t indAbove = std::lower_bound(xsOld.begin(), xsOld.end(), xNew) - xsOld.begin();
 
   // if the point's x-value is out of the range covered by the x-values in the
   // input data return the error value at the end of the range

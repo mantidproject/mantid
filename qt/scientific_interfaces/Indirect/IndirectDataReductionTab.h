@@ -44,16 +44,13 @@ class DLLExport IndirectDataReductionTab : public IndirectTab {
   Q_OBJECT
 
 public:
-  IndirectDataReductionTab(IndirectDataReduction *idrUI,
-                           QObject *parent = nullptr);
+  IndirectDataReductionTab(IndirectDataReduction *idrUI, QObject *parent = nullptr);
   ~IndirectDataReductionTab() override;
 
   /// Set the presenter for the output plotting options
-  void setOutputPlotOptionsPresenter(
-      std::unique_ptr<IndirectPlotOptionsPresenter> presenter);
+  void setOutputPlotOptionsPresenter(std::unique_ptr<IndirectPlotOptionsPresenter> presenter);
   /// Set the active workspaces used in the plotting options
-  void setOutputPlotOptionsWorkspaces(
-      std::vector<std::string> const &outputWorkspaces);
+  void setOutputPlotOptionsWorkspaces(std::vector<std::string> const &outputWorkspaces);
 
   /// Prevent loading of data with incorrect naming
   void filterInputData(bool filter);
@@ -63,8 +60,7 @@ public slots:
 
 signals:
   /// Update the Run button on the IDR main window
-  void updateRunButton(bool enabled = true,
-                       std::string const &enableOutputButtons = "unchanged",
+  void updateRunButton(bool enabled = true, std::string const &enableOutputButtons = "unchanged",
                        QString message = "Run", QString tooltip = "");
   /// Emitted when the instrument setup is changed
   void newInstrumentConfiguration();
@@ -74,20 +70,17 @@ protected:
 
   QMap<QString, QString> getInstrumentDetails() const;
   QString getInstrumentDetail(QString const &key) const;
-  QString getInstrumentDetail(QMap<QString, QString> const &instrumentDetails,
-                              QString const &key) const;
+  QString getInstrumentDetail(QMap<QString, QString> const &instrumentDetails, QString const &key) const;
   void validateInstrumentDetail(QString const &key) const;
   bool hasInstrumentDetail(QString const &key) const;
-  bool hasInstrumentDetail(QMap<QString, QString> const &instrumentDetails,
-                           QString const &key) const;
+  bool hasInstrumentDetail(QMap<QString, QString> const &instrumentDetails, QString const &key) const;
   MantidWidgets::IndirectInstrumentConfig *getInstrumentConfiguration() const;
   QString getInstrumentName() const;
   QString getAnalyserName() const;
   QString getReflectionName() const;
 
-  std::map<std::string, double>
-  getRangesFromInstrument(QString instName = "", QString analyser = "",
-                          QString reflection = "");
+  std::map<std::string, double> getRangesFromInstrument(QString instName = "", QString analyser = "",
+                                                        QString reflection = "");
 
 private slots:
   void tabExecutionComplete(bool error);

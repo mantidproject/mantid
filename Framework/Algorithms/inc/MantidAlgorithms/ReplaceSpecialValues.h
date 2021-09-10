@@ -38,17 +38,13 @@ public:
   /// Algorithm's version for identification
   int version() const override { return 1; }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "CorrectionFunctions\\SpecialCorrections";
-  }
+  const std::string category() const override { return "CorrectionFunctions\\SpecialCorrections"; }
 
 private:
   // Overridden UnaryOperation methods
   void defineProperties() override;
   void retrieveProperties() override;
-  void performUnaryOperation(const double XIn, const double YIn,
-                             const double EIn, double &YOut,
-                             double &EOut) override;
+  void performUnaryOperation(const double XIn, const double YIn, const double EIn, double &YOut, double &EOut) override;
 
   /// returns true if the value is NaN
   bool checkIfNan(const double value) const;
@@ -67,12 +63,11 @@ private:
   double m_InfiniteError; ///< The replacement error value for infinity
   double m_bigThreshold;  ///< The threshold value above which a value is
   /// considered 'big'
-  double m_bigValue; ///< The replacement value for big numbers
-  double m_bigError; ///< The replacement error value for big numbers
-  double
-      m_smallThreshold; ///< The threshold value below which a value is 'small'
-  double m_smallValue;  ///< The replacement value for small numbers
-  double m_smallError;  ///< The replacement error value for small numbers
+  double m_bigValue;       ///< The replacement value for big numbers
+  double m_bigError;       ///< The replacement error value for big numbers
+  double m_smallThreshold; ///< The threshold value below which a value is 'small'
+  double m_smallValue;     ///< The replacement value for small numbers
+  double m_smallError;     ///< The replacement error value for small numbers
 
   bool m_performNaNCheck; ///< Flag to indicate if the NaN check is to be
   /// performed

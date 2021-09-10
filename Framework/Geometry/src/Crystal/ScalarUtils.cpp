@@ -88,15 +88,12 @@ static const std::string BRAVAIS_CENTERING[15] = {
  *          best matching forms for UB and cells related to UB by reflections
  *          of pairs of cell edges.
  */
-std::vector<ConventionalCell> ScalarUtils::GetCells(const DblMatrix &UB,
-                                                    bool best_only,
-                                                    bool allowPermutations) {
+std::vector<ConventionalCell> ScalarUtils::GetCells(const DblMatrix &UB, bool best_only, bool allowPermutations) {
   std::vector<ConventionalCell> result;
 
   size_t num_lattices = 15;
   for (size_t i = 0; i < num_lattices; i++) {
-    std::vector<ConventionalCell> temp =
-        GetCells(UB, BRAVAIS_TYPE[i], BRAVAIS_CENTERING[i], allowPermutations);
+    std::vector<ConventionalCell> temp = GetCells(UB, BRAVAIS_TYPE[i], BRAVAIS_CENTERING[i], allowPermutations);
     if (best_only) {
       ConventionalCell info = GetCellBestError(temp, true);
       temp.clear();
@@ -135,9 +132,8 @@ std::vector<ConventionalCell> ScalarUtils::GetCells(const DblMatrix &UB,
  *          best matching forms for UB and cells related to UB by reflections
  *          of pairs of cell edges.
  */
-std::vector<ConventionalCell>
-ScalarUtils::GetCells(const DblMatrix &UB, const std::string &cell_type,
-                      const std::string &centering, bool allowPermutations) {
+std::vector<ConventionalCell> ScalarUtils::GetCells(const DblMatrix &UB, const std::string &cell_type,
+                                                    const std::string &centering, bool allowPermutations) {
   std::vector<ConventionalCell> result;
 
   std::vector<DblMatrix> UB_list;
@@ -151,8 +147,7 @@ ScalarUtils::GetCells(const DblMatrix &UB, const std::string &cell_type,
   }
 
   for (auto &k : UB_list) {
-    std::vector<ConventionalCell> temp =
-        GetCellsUBOnly(k, cell_type, centering, allowPermutations);
+    std::vector<ConventionalCell> temp = GetCellsUBOnly(k, cell_type, centering, allowPermutations);
 
     for (auto &cell : temp)
       AddIfBest(result, cell);
@@ -184,18 +179,15 @@ ScalarUtils::GetCells(const DblMatrix &UB, const std::string &cell_type,
  *  @return a list of conventional cells for the specified UB, of the
  *          specified type and centering.
  */
-std::vector<ConventionalCell>
-ScalarUtils::GetCellsUBOnly(const DblMatrix &UB, const std::string &cell_type,
-                            const std::string &centering,
-                            bool allowPermutations) {
+std::vector<ConventionalCell> ScalarUtils::GetCellsUBOnly(const DblMatrix &UB, const std::string &cell_type,
+                                                          const std::string &centering, bool allowPermutations) {
   std::vector<ConventionalCell> result;
 
   std::vector<double> lat_par;
   IndexingUtils::GetLatticeParameters(UB, lat_par);
 
   for (size_t i = 0; i <= ReducedCell::NUM_CELL_TYPES; i++) {
-    ReducedCell rcell(i, lat_par[0], lat_par[1], lat_par[2], lat_par[3],
-                      lat_par[4], lat_par[5]);
+    ReducedCell rcell(i, lat_par[0], lat_par[1], lat_par[2], lat_par[3], lat_par[4], lat_par[5]);
 
     if (rcell.GetCentering() == centering && rcell.GetCellType() == cell_type) {
       ConventionalCell cell_info(UB, i, allowPermutations);
@@ -222,9 +214,7 @@ ScalarUtils::GetCellsUBOnly(const DblMatrix &UB, const std::string &cell_type,
  *          form number and UB (or a related matrix) with the smallest
  *          error of any related matrix.
  */
-ConventionalCell ScalarUtils::GetCellForForm(const DblMatrix &UB,
-                                             size_t form_num,
-                                             bool allowPermutations) {
+ConventionalCell ScalarUtils::GetCellForForm(const DblMatrix &UB, size_t form_num, bool allowPermutations) {
   ConventionalCell info(UB);
   ReducedCell form_0;
   ReducedCell form;
@@ -244,11 +234,9 @@ ConventionalCell ScalarUtils::GetCellForForm(const DblMatrix &UB,
   for (auto &UB : UB_list) {
     IndexingUtils::GetLatticeParameters(UB, l_params);
 
-    form_0 = ReducedCell(0, l_params[0], l_params[1], l_params[2], l_params[3],
-                         l_params[4], l_params[5]);
+    form_0 = ReducedCell(0, l_params[0], l_params[1], l_params[2], l_params[3], l_params[4], l_params[5]);
 
-    form = ReducedCell(form_num, l_params[0], l_params[1], l_params[2],
-                       l_params[3], l_params[4], l_params[5]);
+    form = ReducedCell(form_num, l_params[0], l_params[1], l_params[2], l_params[3], l_params[4], l_params[5]);
 
     double error = form_0.WeightedDistance(form);
     if (error < min_error) {
@@ -268,14 +256,11 @@ ConventionalCell ScalarUtils::GetCellForForm(const DblMatrix &UB,
  *  @param level  This specifies the maximum error for cells that will
  *                not be discarded from the list.
  */
-void ScalarUtils::RemoveHighErrorForms(std::vector<ConventionalCell> &list,
-                                       double level) {
+void ScalarUtils::RemoveHighErrorForms(std::vector<ConventionalCell> &list, double level) {
   if (list.empty()) // nothing to do
     return;
   const auto removeRangeBegin =
-      std::remove_if(list.begin(), list.end(), [level](const auto &cell) {
-        return cell.GetError() > level;
-      });
+      std::remove_if(list.begin(), list.end(), [level](const auto &cell) { return cell.GetError() > level; });
   list.erase(removeRangeBegin, list.end());
 }
 
@@ -292,9 +277,7 @@ void ScalarUtils::RemoveHighErrorForms(std::vector<ConventionalCell> &list,
  *
  * @return The entry in the list with the smallest error.
  */
-ConventionalCell
-ScalarUtils::GetCellBestError(const std::vector<ConventionalCell> &list,
-                              bool use_triclinic) {
+ConventionalCell ScalarUtils::GetCellBestError(const std::vector<ConventionalCell> &list, bool use_triclinic) {
   if (list.empty()) {
     throw std::invalid_argument("GetCellBestError(): list is empty");
   }
@@ -306,8 +289,7 @@ ScalarUtils::GetCellBestError(const std::vector<ConventionalCell> &list,
   for (const auto &cell : list) {
     std::string type = cell.GetCellType();
     double error = cell.GetError();
-    if ((use_triclinic || type != ReducedCell::TRICLINIC()) &&
-        error < min_error) {
+    if ((use_triclinic || type != ReducedCell::TRICLINIC()) && error < min_error) {
       info = cell;
       min_error = error;
       min_found = true;
@@ -315,8 +297,7 @@ ScalarUtils::GetCellBestError(const std::vector<ConventionalCell> &list,
   }
 
   if (!min_found) {
-    throw std::invalid_argument(
-        "GetCellBestError(): no allowed form with min error");
+    throw std::invalid_argument("GetCellBestError(): no allowed form with min error");
   }
 
   return info;
@@ -355,9 +336,7 @@ ScalarUtils::GetCellBestError(const std::vector<ConventionalCell> &list,
  *  @return  A vector of UB matrices related to the original UB matrix
  *           by reflections of pairs of the side vectors a, b, c.
  */
-std::vector<DblMatrix> ScalarUtils::GetRelatedUBs(const DblMatrix &UB,
-                                                  double factor,
-                                                  double angle_tolerance) {
+std::vector<DblMatrix> ScalarUtils::GetRelatedUBs(const DblMatrix &UB, double factor, double angle_tolerance) {
   std::vector<DblMatrix> result;
 
   V3D a, b, c, a_vec, b_vec, c_vec, // vectors for generating reflections
@@ -374,10 +353,8 @@ std::vector<DblMatrix> ScalarUtils::GetRelatedUBs(const DblMatrix &UB,
   // make list of reflections of all pairs
   // of sides.  NOTE: These preserve the
   // ordering of magnitudes: |a|<=|b|<=|c|
-  V3D reflections[4][3] = {{a_vec, b_vec, c_vec},
-                           {m_a_vec, m_b_vec, c_vec},
-                           {m_a_vec, b_vec, m_c_vec},
-                           {a_vec, m_b_vec, m_c_vec}};
+  V3D reflections[4][3] = {
+      {a_vec, b_vec, c_vec}, {m_a_vec, m_b_vec, c_vec}, {m_a_vec, b_vec, m_c_vec}, {a_vec, m_b_vec, m_c_vec}};
 
   // make list of the angles that are not
   // changed by each of the reflections.  IF
@@ -405,18 +382,15 @@ std::vector<DblMatrix> ScalarUtils::GetRelatedUBs(const DblMatrix &UB,
       m_b_temp = b_temp * (-1.0);
       m_c_temp = c_temp * (-1.0);
 
-      V3D permutations[6][3] = {
-          {a_temp, b_temp, c_temp}, {m_a_temp, c_temp, b_temp},
-          {b_temp, c_temp, a_temp}, {m_b_temp, a_temp, c_temp},
-          {c_temp, a_temp, b_temp}, {m_c_temp, b_temp, a_temp}};
+      V3D permutations[6][3] = {{a_temp, b_temp, c_temp},   {m_a_temp, c_temp, b_temp}, {b_temp, c_temp, a_temp},
+                                {m_b_temp, a_temp, c_temp}, {c_temp, a_temp, b_temp},   {m_c_temp, b_temp, a_temp}};
 
       for (auto &permutation : permutations) {
         a = permutation[0];
         b = permutation[1];
         c = permutation[2];
-        if (a.norm() <= factor * b.norm() &&
-            b.norm() <= factor * c.norm()) // could be Niggli within
-        {                                  // experimental error
+        if (a.norm() <= factor * b.norm() && b.norm() <= factor * c.norm()) // could be Niggli within
+        {                                                                   // experimental error
           Matrix<double> temp_UB(3, 3, false);
           OrientedLattice::GetUB(temp_UB, a, b, c);
           result.emplace_back(temp_UB);
@@ -441,8 +415,7 @@ std::vector<DblMatrix> ScalarUtils::GetRelatedUBs(const DblMatrix &UB,
  *  @param info   The new ConventionalCell object that might be added to
  *                the list.
  */
-void ScalarUtils::AddIfBest(std::vector<ConventionalCell> &list,
-                            ConventionalCell &info) {
+void ScalarUtils::AddIfBest(std::vector<ConventionalCell> &list, ConventionalCell &info) {
   size_t form_num = info.GetFormNum();
   double new_error = info.GetError();
   bool done = false;

@@ -706,13 +706,6 @@ class ISISReducer(Reducer):
     def Q_string(self):
         return '    Q range: ' + self.to_Q.binning + '\n    QXY range: ' + self.QXY2 + '-' + self.DQXY
 
-    def ViewCurrentMask(self):
-        """
-            In MantidPlot this opens InstrumentView to display the masked
-            detectors in the bank in a different colour
-        """
-        self.mask.view(self.instrument)
-
     def reference(self):
         return self
 

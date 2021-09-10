@@ -34,16 +34,14 @@ private:
   /// Mock Type to act as IDF files.
   class MockIDFObject : public Mantid::Geometry::IDFObject {
   public:
-    MockIDFObject(const std::string &fileName)
-        : Mantid::Geometry::IDFObject(fileName) {}
+    MockIDFObject(const std::string &fileName) : Mantid::Geometry::IDFObject(fileName) {}
     MOCK_CONST_METHOD0(exists, bool());
   };
 
   /// Mock Type to act as IDF files.
   class MockIDFObjectWithParentDirectory : public Mantid::Geometry::IDFObject {
   public:
-    MockIDFObjectWithParentDirectory(const std::string &fileName)
-        : Mantid::Geometry::IDFObject(fileName) {}
+    MockIDFObjectWithParentDirectory(const std::string &fileName) : Mantid::Geometry::IDFObject(fileName) {}
     MOCK_CONST_METHOD0(exists, bool());
     MOCK_CONST_METHOD0(getParentDirectory, const Poco::Path());
   };
@@ -53,8 +51,8 @@ private:
   collection.
   */
   struct IDFEnvironment {
-    IDFEnvironment(const ScopedFile &idf, const ScopedFile &vtp,
-                   const std::string &xmlText, const std::string &instName)
+    IDFEnvironment(const ScopedFile &idf, const ScopedFile &vtp, const std::string &xmlText,
+                   const std::string &instName)
         : _idf(idf), _vtp(vtp), _xmlText(xmlText), _instName(instName){};
 
     ScopedFile _idf;
@@ -70,39 +68,34 @@ private:
   IDFEnvironment create_idf_and_vtp_pair(bool put_vtp_next_to_IDF = true) {
     const std::string instrument_name = "MinimalForTesting";
     const std::string idf_filename = instrument_name + "_Definition.xml";
-    const std::string idf_file_contents =
-        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-        "<instrument name=\"MinimalForTesting\" valid-from   =\"1900-01-31 "
-        "23:59:59\" valid-to=\"2100-01-31 23:59:59\" "
-        "last-modified=\"2012-10-05 11:00:00\">"
-        "<defaults/>"
-        "<component type=\"cylinder-right\" idlist=\"cylinder-right\">"
-        "<location/>"
-        "</component>"
-        "<type name=\"cylinder-right\" is=\"detector\">"
-        "<cylinder id=\"some-shape\">"
-        "  <centre-of-bottom-base r=\"0.0\" t=\"0.0\" p=\"0.0\" />"
-        "  <axis x=\"0.0\" y=\"0.0\" z=\"1.0\" />"
-        "  <radius val=\"0.01\" />"
-        "  <height val=\"0.03\" />"
-        "</cylinder>"
-        "</type>"
-        "<idlist idname=\"cylinder-right\">"
-        "<id val=\"1\" />"
-        "</idlist>"
-        "</instrument>";
+    const std::string idf_file_contents = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+                                          "<instrument name=\"MinimalForTesting\" valid-from   =\"1900-01-31 "
+                                          "23:59:59\" valid-to=\"2100-01-31 23:59:59\" "
+                                          "last-modified=\"2012-10-05 11:00:00\">"
+                                          "<defaults/>"
+                                          "<component type=\"cylinder-right\" idlist=\"cylinder-right\">"
+                                          "<location/>"
+                                          "</component>"
+                                          "<type name=\"cylinder-right\" is=\"detector\">"
+                                          "<cylinder id=\"some-shape\">"
+                                          "  <centre-of-bottom-base r=\"0.0\" t=\"0.0\" p=\"0.0\" />"
+                                          "  <axis x=\"0.0\" y=\"0.0\" z=\"1.0\" />"
+                                          "  <radius val=\"0.01\" />"
+                                          "  <height val=\"0.03\" />"
+                                          "</cylinder>"
+                                          "</type>"
+                                          "<idlist idname=\"cylinder-right\">"
+                                          "<id val=\"1\" />"
+                                          "</idlist>"
+                                          "</instrument>";
 
     // expected name
     const std::string vtp_filename =
-        instrument_name +
-        ChecksumHelper::sha1FromString(Strings::strip(idf_file_contents)) +
-        ".vtp";
-    const std::string vtp_file_contents =
-        "<VTKFile byte_order=\"LittleEndian\" type=\"PolyData\" "
-        "version=\"1.0\"><PolyData/></VTKFile>";
+        instrument_name + ChecksumHelper::sha1FromString(Strings::strip(idf_file_contents)) + ".vtp";
+    const std::string vtp_file_contents = "<VTKFile byte_order=\"LittleEndian\" type=\"PolyData\" "
+                                          "version=\"1.0\"><PolyData/></VTKFile>";
 
-    const std::string instrument_dir =
-        ConfigService::Instance().getInstrumentDirectory() + "/unit_testing/";
+    const std::string instrument_dir = ConfigService::Instance().getInstrumentDirectory() + "/unit_testing/";
     std::string vtp_dir = ConfigService::Instance().getVTPFileDirectory();
     if (!put_vtp_next_to_IDF) {
       vtp_dir = ConfigService::Instance().getTempDir();
@@ -114,10 +107,8 @@ private:
   }
 
   // Helper method to create the IDF File.
-  ScopedFile createIDFFileObject(const std::string &idf_filename,
-                                 const std::string &idf_file_contents) {
-    const std::string instrument_dir =
-        ConfigService::Instance().getInstrumentDirectory() + "/unit_testing/";
+  ScopedFile createIDFFileObject(const std::string &idf_filename, const std::string &idf_file_contents) {
+    const std::string instrument_dir = ConfigService::Instance().getInstrumentDirectory() + "/unit_testing/";
 
     return ScopedFile(idf_file_contents, idf_filename, instrument_dir);
   }
@@ -125,16 +116,12 @@ private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static InstrumentDefinitionParserTest *createSuite() {
-    return new InstrumentDefinitionParserTest();
-  }
-  static void destroySuite(InstrumentDefinitionParserTest *suite) {
-    delete suite;
-  }
+  static InstrumentDefinitionParserTest *createSuite() { return new InstrumentDefinitionParserTest(); }
+  static void destroySuite(InstrumentDefinitionParserTest *suite) { delete suite; }
 
   void test_extract_ref_info() {
-    std::string filename = ConfigService::Instance().getInstrumentDirectory() +
-                           "/unit_testing/IDF_for_UNIT_TESTING.xml";
+    std::string filename =
+        ConfigService::Instance().getInstrumentDirectory() + "/unit_testing/IDF_for_UNIT_TESTING.xml";
     std::string xmlText = Strings::loadFile(filename);
     std::shared_ptr<const Instrument> i;
 
@@ -154,8 +141,8 @@ public:
   }
 
   void test_extract_ref_info_theta_sign() {
-    std::string filename = ConfigService::Instance().getInstrumentDirectory() +
-                           "/unit_testing/IDF_for_UNIT_TESTING6.xml";
+    std::string filename =
+        ConfigService::Instance().getInstrumentDirectory() + "/unit_testing/IDF_for_UNIT_TESTING6.xml";
     std::string xmlText = Strings::loadFile(filename);
     std::shared_ptr<const Instrument> i;
 
@@ -171,12 +158,10 @@ public:
     TS_ASSERT_EQUALS(V3D(1., 0., 0.), frame->vecThetaSign());
   }
 
-  void
-  test_parse_IDF_for_unit_testing() // IDF stands for Instrument Definition File
+  void test_parse_IDF_for_unit_testing() // IDF stands for Instrument Definition File
   {
     std::string filenameNoExt =
-        ConfigService::Instance().getInstrumentDirectory() +
-        "/unit_testing/IDF_for_UNIT_TESTING";
+        ConfigService::Instance().getInstrumentDirectory() + "/unit_testing/IDF_for_UNIT_TESTING";
     std::string filename = filenameNoExt + ".xml";
     std::string xmlText = Strings::loadFile(filename);
     std::shared_ptr<const Instrument> i;
@@ -199,13 +184,11 @@ public:
       TS_FAIL("Cannot find expected .vtp file next to " + filename);
     }
 
-    std::shared_ptr<const IObjComponent> source =
-        std::dynamic_pointer_cast<const IObjComponent>(i->getSource());
+    std::shared_ptr<const IObjComponent> source = std::dynamic_pointer_cast<const IObjComponent>(i->getSource());
     TS_ASSERT_EQUALS(source->getName(), "undulator");
     TS_ASSERT_DELTA(source->getPos().Z(), -17.0, 0.01);
 
-    std::shared_ptr<const IComponent> samplepos =
-        std::dynamic_pointer_cast<const IComponent>(i->getSample());
+    std::shared_ptr<const IComponent> samplepos = std::dynamic_pointer_cast<const IComponent>(i->getSample());
     TS_ASSERT_EQUALS(samplepos->getName(), "nickel-holder");
     TS_ASSERT_DELTA(samplepos->getPos().Y(), 0.0, 0.01);
 
@@ -343,27 +326,18 @@ public:
     TS_ASSERT(ptrDet1000->isValid(V3D(0.0, 0.02, 0.1) + ptrDet1000->getPos()));
     TS_ASSERT(ptrDet1000->isValid(V3D(0.0, 0.02, -0.1) + ptrDet1000->getPos()));
     TS_ASSERT(!ptrDet1000->isValid(V3D(0.0, 0.05, 0.0) + ptrDet1000->getPos()));
-    TS_ASSERT(
-        !ptrDet1000->isValid(V3D(0.0, -0.05, 0.0) + ptrDet1000->getPos()));
-    TS_ASSERT(
-        !ptrDet1000->isValid(V3D(0.0, -0.01, 0.05) + ptrDet1000->getPos()));
-    TS_ASSERT(
-        !ptrDet1000->isValid(V3D(0.0, -0.01, -0.05) + ptrDet1000->getPos()));
+    TS_ASSERT(!ptrDet1000->isValid(V3D(0.0, -0.05, 0.0) + ptrDet1000->getPos()));
+    TS_ASSERT(!ptrDet1000->isValid(V3D(0.0, -0.01, 0.05) + ptrDet1000->getPos()));
+    TS_ASSERT(!ptrDet1000->isValid(V3D(0.0, -0.01, -0.05) + ptrDet1000->getPos()));
     std::shared_ptr<const IDetector> ptrDet1001 = i->getDetector(1001);
-    TS_ASSERT(
-        ptrDet1001->isValid(V3D(-0.07, 0.0, -0.07) + ptrDet1001->getPos()));
+    TS_ASSERT(ptrDet1001->isValid(V3D(-0.07, 0.0, -0.07) + ptrDet1001->getPos()));
     TS_ASSERT(ptrDet1001->isValid(V3D(0.07, 0.0, 0.07) + ptrDet1001->getPos()));
-    TS_ASSERT(
-        ptrDet1001->isValid(V3D(0.07, 0.01, 0.07) + ptrDet1001->getPos()));
-    TS_ASSERT(
-        ptrDet1001->isValid(V3D(-0.07, 0.01, -0.07) + ptrDet1001->getPos()));
+    TS_ASSERT(ptrDet1001->isValid(V3D(0.07, 0.01, 0.07) + ptrDet1001->getPos()));
+    TS_ASSERT(ptrDet1001->isValid(V3D(-0.07, 0.01, -0.07) + ptrDet1001->getPos()));
     TS_ASSERT(!ptrDet1001->isValid(V3D(0.0, 0.05, 0.0) + ptrDet1001->getPos()));
-    TS_ASSERT(
-        !ptrDet1001->isValid(V3D(0.0, -0.05, 0.0) + ptrDet1001->getPos()));
-    TS_ASSERT(
-        !ptrDet1001->isValid(V3D(0.0, -0.01, 0.05) + ptrDet1001->getPos()));
-    TS_ASSERT(
-        !ptrDet1001->isValid(V3D(0.0, -0.01, -0.05) + ptrDet1001->getPos()));
+    TS_ASSERT(!ptrDet1001->isValid(V3D(0.0, -0.05, 0.0) + ptrDet1001->getPos()));
+    TS_ASSERT(!ptrDet1001->isValid(V3D(0.0, -0.01, 0.05) + ptrDet1001->getPos()));
+    TS_ASSERT(!ptrDet1001->isValid(V3D(0.0, -0.01, -0.05) + ptrDet1001->getPos()));
 
     // test for "cuboid-alternate-test".
     std::shared_ptr<const IDetector> ptrDet18 = i->getDetector(18);
@@ -472,8 +446,8 @@ public:
   void test_prase_IDF_for_unit_testing2() // IDF stands for Instrument
                                           // Definition File
   {
-    std::string filename = ConfigService::Instance().getInstrumentDirectory() +
-                           "/unit_testing/IDF_for_UNIT_TESTING2.xml";
+    std::string filename =
+        ConfigService::Instance().getInstrumentDirectory() + "/unit_testing/IDF_for_UNIT_TESTING2.xml";
     std::string xmlText = Strings::loadFile(filename);
     std::shared_ptr<const Instrument> i;
 
@@ -496,45 +470,28 @@ public:
 
     // Test of monitor shape
     std::shared_ptr<const IDetector> ptrMonShape = i->getDetector(1001);
-    TS_ASSERT(
-        ptrMonShape->isValid(V3D(0.002, 0.0, 0.0) + ptrMonShape->getPos()));
-    TS_ASSERT(
-        ptrMonShape->isValid(V3D(-0.002, 0.0, 0.0) + ptrMonShape->getPos()));
-    TS_ASSERT(
-        !ptrMonShape->isValid(V3D(0.003, 0.0, 0.0) + ptrMonShape->getPos()));
-    TS_ASSERT(
-        !ptrMonShape->isValid(V3D(-0.003, 0.0, 0.0) + ptrMonShape->getPos()));
-    TS_ASSERT(ptrMonShape->isValid(V3D(-0.0069, 0.0227, 0.0) +
-                                   ptrMonShape->getPos()));
-    TS_ASSERT(!ptrMonShape->isValid(V3D(-0.0071, 0.0227, 0.0) +
-                                    ptrMonShape->getPos()));
-    TS_ASSERT(ptrMonShape->isValid(V3D(-0.0069, 0.0227, 0.009) +
-                                   ptrMonShape->getPos()));
-    TS_ASSERT(!ptrMonShape->isValid(V3D(-0.0069, 0.0227, 0.011) +
-                                    ptrMonShape->getPos()));
-    TS_ASSERT(
-        ptrMonShape->isValid(V3D(-0.1242, 0.0, 0.0) + ptrMonShape->getPos()));
-    TS_ASSERT(ptrMonShape->isValid(V3D(-0.0621, 0.0621, 0.0) +
-                                   ptrMonShape->getPos()));
-    TS_ASSERT(ptrMonShape->isValid(V3D(-0.0621, -0.0621, 0.0) +
-                                   ptrMonShape->getPos()));
-    TS_ASSERT(ptrMonShape->isValid(V3D(-0.0621, 0.0641, 0.0) +
-                                   ptrMonShape->getPos()));
-    TS_ASSERT(!ptrMonShape->isValid(V3D(-0.0621, 0.0651, 0.0) +
-                                    ptrMonShape->getPos()));
-    TS_ASSERT(!ptrMonShape->isValid(V3D(-0.0621, 0.0595, 0.0) +
-                                    ptrMonShape->getPos()));
-    TS_ASSERT(ptrMonShape->isValid(V3D(-0.0621, 0.0641, 0.01) +
-                                   ptrMonShape->getPos()));
-    TS_ASSERT(!ptrMonShape->isValid(V3D(-0.0621, 0.0641, 0.011) +
-                                    ptrMonShape->getPos()));
-    TS_ASSERT(!ptrMonShape->isValid(V3D(-0.0621, 0.0651, 0.01) +
-                                    ptrMonShape->getPos()));
+    TS_ASSERT(ptrMonShape->isValid(V3D(0.002, 0.0, 0.0) + ptrMonShape->getPos()));
+    TS_ASSERT(ptrMonShape->isValid(V3D(-0.002, 0.0, 0.0) + ptrMonShape->getPos()));
+    TS_ASSERT(!ptrMonShape->isValid(V3D(0.003, 0.0, 0.0) + ptrMonShape->getPos()));
+    TS_ASSERT(!ptrMonShape->isValid(V3D(-0.003, 0.0, 0.0) + ptrMonShape->getPos()));
+    TS_ASSERT(ptrMonShape->isValid(V3D(-0.0069, 0.0227, 0.0) + ptrMonShape->getPos()));
+    TS_ASSERT(!ptrMonShape->isValid(V3D(-0.0071, 0.0227, 0.0) + ptrMonShape->getPos()));
+    TS_ASSERT(ptrMonShape->isValid(V3D(-0.0069, 0.0227, 0.009) + ptrMonShape->getPos()));
+    TS_ASSERT(!ptrMonShape->isValid(V3D(-0.0069, 0.0227, 0.011) + ptrMonShape->getPos()));
+    TS_ASSERT(ptrMonShape->isValid(V3D(-0.1242, 0.0, 0.0) + ptrMonShape->getPos()));
+    TS_ASSERT(ptrMonShape->isValid(V3D(-0.0621, 0.0621, 0.0) + ptrMonShape->getPos()));
+    TS_ASSERT(ptrMonShape->isValid(V3D(-0.0621, -0.0621, 0.0) + ptrMonShape->getPos()));
+    TS_ASSERT(ptrMonShape->isValid(V3D(-0.0621, 0.0641, 0.0) + ptrMonShape->getPos()));
+    TS_ASSERT(!ptrMonShape->isValid(V3D(-0.0621, 0.0651, 0.0) + ptrMonShape->getPos()));
+    TS_ASSERT(!ptrMonShape->isValid(V3D(-0.0621, 0.0595, 0.0) + ptrMonShape->getPos()));
+    TS_ASSERT(ptrMonShape->isValid(V3D(-0.0621, 0.0641, 0.01) + ptrMonShape->getPos()));
+    TS_ASSERT(!ptrMonShape->isValid(V3D(-0.0621, 0.0641, 0.011) + ptrMonShape->getPos()));
+    TS_ASSERT(!ptrMonShape->isValid(V3D(-0.0621, 0.0651, 0.01) + ptrMonShape->getPos()));
   }
 
   void test_parse_RectangularDetector() {
-    std::string filename = ConfigService::Instance().getInstrumentDirectory() +
-                           "/unit_testing/IDF_for_RECTANGULAR_UNIT_TESTING.xml";
+    std::string filename =
+        ConfigService::Instance().getInstrumentDirectory() + "/unit_testing/IDF_for_RECTANGULAR_UNIT_TESTING.xml";
     std::string xmlText = Strings::loadFile(filename);
     std::shared_ptr<const Instrument> i;
 
@@ -544,8 +501,7 @@ public:
 
     // Now the XY detector in bank1
     std::shared_ptr<const RectangularDetector> bank1 =
-        std::dynamic_pointer_cast<const RectangularDetector>(
-            i->getComponentByName("bank1"));
+        std::dynamic_pointer_cast<const RectangularDetector>(i->getComponentByName("bank1"));
     TS_ASSERT(bank1);
     if (!bank1)
       return;
@@ -586,8 +542,8 @@ public:
 
   // testing through Loading IDF_for_UNIT_TESTING5.xml method adjust()
   void testAdjust() {
-    std::string filename = ConfigService::Instance().getInstrumentDirectory() +
-                           "/unit_testing/IDF_for_UNIT_TESTING5.xml";
+    std::string filename =
+        ConfigService::Instance().getInstrumentDirectory() + "/unit_testing/IDF_for_UNIT_TESTING5.xml";
     std::string xmlText = Strings::loadFile(filename);
     std::shared_ptr<const Instrument> i;
 
@@ -668,8 +624,7 @@ public:
 
   void testDefaultCaching() {
     InstrumentDefinitionParser parser;
-    TS_ASSERT_EQUALS(InstrumentDefinitionParser::NoneApplied,
-                     parser.getAppliedCachingOption());
+    TS_ASSERT_EQUALS(InstrumentDefinitionParser::NoneApplied, parser.getAppliedCachingOption());
   }
 
   void testCreateVTPFilename() {
@@ -679,14 +634,12 @@ public:
     const std::string xmlText = Strings::loadFile(idfFileName);
     InstrumentDefinitionParser parser(idfFileName, instrumentName, xmlText);
 
-    TS_ASSERT_EQUALS(instrumentEnv._vtp.getFileName(),
-                     parser.createVTPFileName());
+    TS_ASSERT_EQUALS(instrumentEnv._vtp.getFileName(), parser.createVTPFileName());
   }
 
   void testReadFromCacheInTempDirectory() {
     const bool put_vtp_in_instrument_directory = false;
-    IDFEnvironment instrumentEnv =
-        create_idf_and_vtp_pair(put_vtp_in_instrument_directory);
+    IDFEnvironment instrumentEnv = create_idf_and_vtp_pair(put_vtp_in_instrument_directory);
 
     const std::string idfFileName = instrumentEnv._idf.getFileName();
     const std::string cacheFileName = instrumentEnv._vtp.getFileName();
@@ -695,16 +648,14 @@ public:
     MockIDFObject *mockCache = new MockIDFObject(cacheFileName);
 
     EXPECT_CALL(*mockIDF, exists()).WillRepeatedly(Return(true));
-    EXPECT_CALL(*mockCache, exists())
-        .WillRepeatedly(Return(false)); // Mock expectation set such that
-                                        // geometry Cache file does not exist,
-                                        // so should not be used.
+    EXPECT_CALL(*mockCache, exists()).WillRepeatedly(Return(false)); // Mock expectation set such that
+                                                                     // geometry Cache file does not exist,
+                                                                     // so should not be used.
 
     IDFObject_const_sptr idf(mockIDF);
     IDFObject_const_sptr cache(mockCache);
 
-    InstrumentDefinitionParser parser(idf, cache, instrumentEnv._instName,
-                                      instrumentEnv._xmlText);
+    InstrumentDefinitionParser parser(idf, cache, instrumentEnv._instName, instrumentEnv._xmlText);
 
     TS_ASSERT_THROWS_NOTHING(parser.parseXML(nullptr));
 
@@ -740,17 +691,15 @@ public:
     // make sure the fallback location for the geometry file is deleted
 
     EXPECT_CALL(*mockIDF, exists()).WillRepeatedly(Return(true));
-    EXPECT_CALL(*mockCache, exists())
-        .WillRepeatedly(Return(false)); // Mock expectation set such that Cache
-                                        // file does not exist, so should not be
-                                        // used.
+    EXPECT_CALL(*mockCache, exists()).WillRepeatedly(Return(false)); // Mock expectation set such that Cache
+                                                                     // file does not exist, so should not be
+                                                                     // used.
 
     IDFObject_const_sptr idf(mockIDF);
     IDFObject_const_sptr cache(mockCache);
 
     // remove the fallback file if it exists
-    InstrumentDefinitionParser parser(idf, cache, instrumentEnv._instName,
-                                      instrumentEnv._xmlText);
+    InstrumentDefinitionParser parser(idf, cache, instrumentEnv._instName, instrumentEnv._xmlText);
     RemoveFallbackVTPFile(parser);
 
     TS_ASSERT_THROWS_NOTHING(parser.parseXML(nullptr));
@@ -772,29 +721,23 @@ public:
   void testWriteCacheFileToTempDirectoryIfNoIDF() {
     IDFEnvironment instrumentEnv = create_idf_and_vtp_pair();
 
-    const std::string idfFileName = ""; // We provide no IDF
-    const std::string cacheFileName =
-        instrumentEnv._vtp.getFileName(); // We do provide a cache file, but
-                                          // this shouldn't be used.
+    const std::string idfFileName = "";                                 // We provide no IDF
+    const std::string cacheFileName = instrumentEnv._vtp.getFileName(); // We do provide a cache file, but
+                                                                        // this shouldn't be used.
 
     MockIDFObject *mockIDF = new MockIDFObject(idfFileName);
-    MockIDFObjectWithParentDirectory *mockCache =
-        new MockIDFObjectWithParentDirectory(cacheFileName);
+    MockIDFObjectWithParentDirectory *mockCache = new MockIDFObjectWithParentDirectory(cacheFileName);
 
-    EXPECT_CALL(*mockIDF, exists())
-        .WillRepeatedly(Return(false)); // IDF set not to exist.
-    EXPECT_CALL(*mockCache, exists())
-        .WillRepeatedly(Return(false)); // Mock expectation set such that Cache
-                                        // file does not exist, and location is
-                                        // inaccessible.
-    EXPECT_CALL(*mockCache, getParentDirectory())
-        .WillRepeatedly(Return(Poco::Path("this does not exist")));
+    EXPECT_CALL(*mockIDF, exists()).WillRepeatedly(Return(false));   // IDF set not to exist.
+    EXPECT_CALL(*mockCache, exists()).WillRepeatedly(Return(false)); // Mock expectation set such that Cache
+                                                                     // file does not exist, and location is
+                                                                     // inaccessible.
+    EXPECT_CALL(*mockCache, getParentDirectory()).WillRepeatedly(Return(Poco::Path("this does not exist")));
 
     IDFObject_const_sptr idf(mockIDF);
     IDFObject_const_sptr cache(mockCache);
 
-    InstrumentDefinitionParser parser(idf, cache, instrumentEnv._instName,
-                                      instrumentEnv._xmlText);
+    InstrumentDefinitionParser parser(idf, cache, instrumentEnv._instName, instrumentEnv._xmlText);
 
     TS_ASSERT_THROWS_NOTHING(parser.parseXML(nullptr));
 
@@ -806,8 +749,7 @@ public:
 
     // Have to manually clean-up because this file is not tracked and is
     // generated by the InstrumentDefinitionParser.
-    Poco::Path path(
-        Mantid::Kernel::ConfigService::Instance().getTempDir().c_str());
+    Poco::Path path(Mantid::Kernel::ConfigService::Instance().getTempDir().c_str());
     path.append(parser.getMangledName() + ".vtp");
     remove(path.toString().c_str());
   }
@@ -820,33 +762,31 @@ public:
     const std::string instrumentName = "Minimal_Definition";
     const std::string idfFilename = instrumentName + "_MissingDetectorIDs.xml";
 
-    const std::string idfFileContents =
-        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-        "<instrument name=\"" +
-        instrumentName +
-        "\" valid-from   =\"1900-01-31 23:59:59\" valid-to=\"2100-01-31 "
-        "23:59:59\" last-modified=\"2012-10-05 11:00:00\">"
-        "<defaults/>"
-        "<component type=\"cylinder-right\" >" // Missing idlist here
-        "<location/>"
-        "</component>"
-        "<type name=\"cylinder-right\" is=\"detector\">"
-        "<cylinder id=\"some-shape\">"
-        "  <centre-of-bottom-base r=\"0.0\" t=\"0.0\" p=\"0.0\" />"
-        "  <axis x=\"0.0\" y=\"0.0\" z=\"1.0\" />"
-        "  <radius val=\"0.01\" />"
-        "  <height val=\"0.03\" />"
-        "</cylinder>"
-        "</type>"
-        "<idlist idname=\"cylinder-right\">"
-        "<id val=\"1\" />"
-        "</idlist>"
-        "</instrument>";
+    const std::string idfFileContents = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+                                        "<instrument name=\"" +
+                                        instrumentName +
+                                        "\" valid-from   =\"1900-01-31 23:59:59\" valid-to=\"2100-01-31 "
+                                        "23:59:59\" last-modified=\"2012-10-05 11:00:00\">"
+                                        "<defaults/>"
+                                        "<component type=\"cylinder-right\" >" // Missing idlist here
+                                        "<location/>"
+                                        "</component>"
+                                        "<type name=\"cylinder-right\" is=\"detector\">"
+                                        "<cylinder id=\"some-shape\">"
+                                        "  <centre-of-bottom-base r=\"0.0\" t=\"0.0\" p=\"0.0\" />"
+                                        "  <axis x=\"0.0\" y=\"0.0\" z=\"1.0\" />"
+                                        "  <radius val=\"0.01\" />"
+                                        "  <height val=\"0.03\" />"
+                                        "</cylinder>"
+                                        "</type>"
+                                        "<idlist idname=\"cylinder-right\">"
+                                        "<id val=\"1\" />"
+                                        "</idlist>"
+                                        "</instrument>";
 
     ScopedFile idfFile = createIDFFileObject(idfFilename, idfFileContents);
 
-    InstrumentDefinitionParser parser(idfFilename, "For Unit Testing",
-                                      idfFileContents);
+    InstrumentDefinitionParser parser(idfFilename, "For Unit Testing", idfFileContents);
 
     std::string errorMsg("");
     try {
@@ -860,20 +800,16 @@ public:
     TS_ASSERT_EQUALS(errorMsg.substr(0, 25), "Detector location element");
   }
 
-  Instrument_sptr loadInstrLocations(const std::string &locations,
-                                     detid_t numDetectors,
-                                     bool rethrow = false) {
-    std::string filename = ConfigService::Instance().getInstrumentDirectory() +
-                           "/unit_testing/IDF_for_locations_test.xml";
+  Instrument_sptr loadInstrLocations(const std::string &locations, detid_t numDetectors, bool rethrow = false) {
+    std::string filename =
+        ConfigService::Instance().getInstrumentDirectory() + "/unit_testing/IDF_for_locations_test.xml";
 
     std::string contents = Strings::loadFile(filename);
 
     boost::replace_first(contents, "%LOCATIONS%", locations);
-    boost::replace_first(contents, "%NUM_DETECTORS%",
-                         boost::lexical_cast<std::string>(numDetectors));
+    boost::replace_first(contents, "%NUM_DETECTORS%", boost::lexical_cast<std::string>(numDetectors));
 
-    InstrumentDefinitionParser parser(filename, "LocationsTestInstrument",
-                                      contents);
+    InstrumentDefinitionParser parser(filename, "LocationsTestInstrument", contents);
 
     Instrument_sptr instr;
 
@@ -888,8 +824,7 @@ public:
   }
 
   void testLocationsNaming() {
-    std::string locations =
-        R"(<locations n-elements=" 5" name-count-start=" 10" name="det" />)";
+    std::string locations = R"(<locations n-elements=" 5" name-count-start=" 10" name="det" />)";
     detid_t numDetectors = 5;
 
     Instrument_sptr instr = loadInstrLocations(locations, numDetectors);
@@ -900,8 +835,7 @@ public:
   }
 
   void testLocationsIncrement() {
-    std::string locations =
-        R"(<locations n-elements="3" name-count-start="1" name-count-increment="2" name="det" />)";
+    std::string locations = R"(<locations n-elements="3" name-count-start="1" name-count-increment="2" name="det" />)";
     detid_t numDetectors = 3;
 
     Instrument_sptr instr = loadInstrLocations(locations, numDetectors);
@@ -912,8 +846,7 @@ public:
   }
 
   void testLocationsIncrementDefaultsToOne() {
-    std::string locations =
-        R"(<locations n-elements="3" name-count-start="5" name="det" />)";
+    std::string locations = R"(<locations n-elements="3" name-count-start="5" name="det" />)";
     detid_t numDetectors = 3;
 
     Instrument_sptr instr = loadInstrLocations(locations, numDetectors);
@@ -924,23 +857,18 @@ public:
   }
 
   void testLocationsIncrementFailsAtOrBelowZero() {
-    std::string locations =
-        R"(<locations n-elements="3" name-count-start="5" name-count-increment="0" name="det" />)";
+    std::string locations = R"(<locations n-elements="3" name-count-start="5" name-count-increment="0" name="det" />)";
     detid_t numDetectors = 3;
 
-    TS_ASSERT_THROWS(loadInstrLocations(locations, numDetectors, true),
-                     const Exception::InstrumentDefinitionError &);
+    TS_ASSERT_THROWS(loadInstrLocations(locations, numDetectors, true), const Exception::InstrumentDefinitionError &);
 
-    locations =
-        R"(<locations n-elements="3" name-count-start="5" name-count-increment="-7" name="det" />)";
+    locations = R"(<locations n-elements="3" name-count-start="5" name-count-increment="-7" name="det" />)";
 
-    TS_ASSERT_THROWS(loadInstrLocations(locations, numDetectors, true),
-                     const Exception::InstrumentDefinitionError &);
+    TS_ASSERT_THROWS(loadInstrLocations(locations, numDetectors, true), const Exception::InstrumentDefinitionError &);
   }
 
   void testLocationsStaticValues() {
-    std::string locations =
-        R"(<locations n-elements="5" x=" 1.0" y=" 2.0" z=" 3.0" />)";
+    std::string locations = R"(<locations n-elements="5" x=" 1.0" y=" 2.0" z=" 3.0" />)";
     detid_t numDetectors = 5;
 
     Instrument_sptr instr = loadInstrLocations(locations, numDetectors);
@@ -953,10 +881,9 @@ public:
   }
 
   void testLocationsRanges() {
-    std::string locations =
-        "<locations n-elements=\"5\" x=\"1.0\" x-end=\"5.0\"  "
-        "                            y=\"4.0\" y-end=\"1.0\"  "
-        "                            z=\"3.0\" z-end=\"3.0\"/>";
+    std::string locations = "<locations n-elements=\"5\" x=\"1.0\" x-end=\"5.0\"  "
+                            "                            y=\"4.0\" y-end=\"1.0\"  "
+                            "                            z=\"3.0\" z-end=\"3.0\"/>";
     detid_t numDetectors = 5;
 
     Instrument_sptr instr = loadInstrLocations(locations, numDetectors);
@@ -974,8 +901,7 @@ public:
     TS_ASSERT_DELTA(instr->getDetector(5)->getPos().Z(), 3.0, 1.0E-8);
   }
 
-  void checkDetectorRot(const IDetector_const_sptr &det, double deg,
-                        double axisx, double axisy, double axisz) {
+  void checkDetectorRot(const IDetector_const_sptr &det, double deg, double axisx, double axisy, double axisz) {
     double detDeg, detAxisX, detAxisY, detAxisZ;
     det->getRotation().getAngleAxis(detDeg, detAxisX, detAxisY, detAxisZ);
 
@@ -987,10 +913,9 @@ public:
 
   void testLocationsMixed() {
     // Semicircular placement, like the one for e.g. MERLIN or IN5
-    std::string locations =
-        "<locations n-elements=\"7\" r=\"0.5\" t=\"0.0\" t-end=\"180.0\" "
-        "           rot=\"0.0\" rot-end=\"180.0\" axis-x=\"0.0\" "
-        "           axis-y=\"1.0\" axis-z=\"0.0\"/>";
+    std::string locations = "<locations n-elements=\"7\" r=\"0.5\" t=\"0.0\" t-end=\"180.0\" "
+                            "           rot=\"0.0\" rot-end=\"180.0\" axis-x=\"0.0\" "
+                            "           axis-y=\"1.0\" axis-z=\"0.0\"/>";
     detid_t numDetectors = 7;
 
     Instrument_sptr instr = loadInstrLocations(locations, numDetectors);
@@ -1022,47 +947,38 @@ public:
   }
 
   void testLocationsInvalidNoElements() {
-    std::string locations =
-        R"(<locations n-elements="0" t="0.0" t-end="180.0" />)";
+    std::string locations = R"(<locations n-elements="0" t="0.0" t-end="180.0" />)";
     detid_t numDetectors = 2;
 
-    TS_ASSERT_THROWS(loadInstrLocations(locations, numDetectors, true),
-                     const Exception::InstrumentDefinitionError &);
+    TS_ASSERT_THROWS(loadInstrLocations(locations, numDetectors, true), const Exception::InstrumentDefinitionError &);
 
     locations = R"(<locations n-elements="-1" t="0.0" t-end="180.0" />)";
 
-    TS_ASSERT_THROWS(loadInstrLocations(locations, numDetectors, true),
-                     const Exception::InstrumentDefinitionError &);
+    TS_ASSERT_THROWS(loadInstrLocations(locations, numDetectors, true), const Exception::InstrumentDefinitionError &);
   }
 
   void testLocationsNotANumber() {
-    std::string locations =
-        R"(<locations n-elements="2" t="0.0" t-end="180.x" />)";
+    std::string locations = R"(<locations n-elements="2" t="0.0" t-end="180.x" />)";
     detid_t numDetectors = 2;
 
-    TS_ASSERT_THROWS_ANYTHING(
-        loadInstrLocations(locations, numDetectors, true));
+    TS_ASSERT_THROWS_ANYTHING(loadInstrLocations(locations, numDetectors, true));
 
     locations = R"(<locations n-elements="2" t="0.x" t-end="180.0" />)";
 
-    TS_ASSERT_THROWS_ANYTHING(
-        loadInstrLocations(locations, numDetectors, true));
+    TS_ASSERT_THROWS_ANYTHING(loadInstrLocations(locations, numDetectors, true));
 
     locations = R"(<locations n-elements="x" t="0.0" t-end="180.0" />)";
-    TS_ASSERT_THROWS_ANYTHING(
-        loadInstrLocations(locations, numDetectors, true));
+    TS_ASSERT_THROWS_ANYTHING(loadInstrLocations(locations, numDetectors, true));
 
     locations = R"(<locations n-elements="2" name-count-start="x"/>)";
-    TS_ASSERT_THROWS_ANYTHING(
-        loadInstrLocations(locations, numDetectors, true));
+    TS_ASSERT_THROWS_ANYTHING(loadInstrLocations(locations, numDetectors, true));
   }
 
   void testLocationsNoCorrespondingStartAttr() {
     std::string locations = R"(<locations n-elements="2" t-end="180.0" />)";
     detid_t numDetectors = 2;
 
-    TS_ASSERT_THROWS(loadInstrLocations(locations, numDetectors, true),
-                     const Exception::InstrumentDefinitionError &);
+    TS_ASSERT_THROWS(loadInstrLocations(locations, numDetectors, true), const Exception::InstrumentDefinitionError &);
   }
 };
 
@@ -1073,17 +989,13 @@ public:
   static InstrumentDefinitionParserTestPerformance *createSuite() {
     return new InstrumentDefinitionParserTestPerformance();
   }
-  static void destroySuite(InstrumentDefinitionParserTestPerformance *suite) {
-    delete suite;
-  }
+  static void destroySuite(InstrumentDefinitionParserTestPerformance *suite) { delete suite; }
 
   InstrumentDefinitionParserTestPerformance()
-      : m_instrumentDirectoryPath(
-            ConfigService::Instance().getInstrumentDirectory()) {}
+      : m_instrumentDirectoryPath(ConfigService::Instance().getInstrumentDirectory()) {}
 
   void testLoadingAndParsing() {
-    const std::string filename =
-        m_instrumentDirectoryPath + "/unit_testing/IDF_for_UNIT_TESTING.xml";
+    const std::string filename = m_instrumentDirectoryPath + "/unit_testing/IDF_for_UNIT_TESTING.xml";
     const std::string xmlText = Strings::loadFile(filename);
 
     std::shared_ptr<const Instrument> instrument;
@@ -1098,8 +1010,7 @@ public:
   }
 
   void test_load_wish() {
-    const auto definition =
-        m_instrumentDirectoryPath + "/WISH_Definition_10Panels.xml";
+    const auto definition = m_instrumentDirectoryPath + "/WISH_Definition_10Panels.xml";
     std::string contents = Strings::loadFile(definition);
     InstrumentDefinitionParser parser(definition, "dummy", contents);
     auto wishInstrument = parser.parseXML(nullptr);
@@ -1108,8 +1019,7 @@ public:
   }
 
   void test_load_sans2d() {
-    const auto definition =
-        m_instrumentDirectoryPath + "/SANS2D_Definition_Tubes.xml";
+    const auto definition = m_instrumentDirectoryPath + "/SANS2D_Definition_Tubes.xml";
     std::string contents = Strings::loadFile(definition);
     InstrumentDefinitionParser parser(definition, "dummy", contents);
     auto sansInstrument = parser.parseXML(nullptr);
@@ -1120,8 +1030,7 @@ public:
 private:
   const std::string m_instrumentDirectoryPath;
 
-  std::unique_ptr<Geometry::DetectorInfo>
-  extractDetectorInfo(const Mantid::Geometry::Instrument &instrument) {
+  std::unique_ptr<Geometry::DetectorInfo> extractDetectorInfo(const Mantid::Geometry::Instrument &instrument) {
     Geometry::ParameterMap pmap;
     return std::move(std::get<1>(instrument.makeBeamline(pmap)));
   }

@@ -44,40 +44,31 @@ class MANTID_API_DLL IFunction1D : public virtual IFunction {
 public:
   /* Overidden methods */
 
-  void function(const FunctionDomain &domain,
-                FunctionValues &values) const override;
+  void function(const FunctionDomain &domain, FunctionValues &values) const override;
   void functionDeriv(const FunctionDomain &domain, Jacobian &jacobian) override;
 
-  virtual void derivative(const FunctionDomain &domain, FunctionValues &values,
-                          const size_t order = 1) const;
+  virtual void derivative(const FunctionDomain &domain, FunctionValues &values, const size_t order = 1) const;
 
   /// Function you want to fit to.
-  virtual void function1D(double *out, const double *xValues,
-                          const size_t nData) const = 0;
+  virtual void function1D(double *out, const double *xValues, const size_t nData) const = 0;
 
   /// Function to calculate the derivatives of the data set
-  virtual void derivative1D(double *out, const double *xValues,
-                            const size_t nData, const size_t order) const;
+  virtual void derivative1D(double *out, const double *xValues, const size_t nData, const size_t order) const;
 
   /// Derivatives of function with respect to active parameters
-  virtual void functionDeriv1D(Jacobian *jacobian, const double *xValues,
-                               const size_t nData);
+  virtual void functionDeriv1D(Jacobian *jacobian, const double *xValues, const size_t nData);
 
 protected:
   template <typename FunctionType>
-  using Function1DMethod = void (FunctionType::*)(double *, const double *,
-                                                  const size_t) const;
+  using Function1DMethod = void (FunctionType::*)(double *, const double *, const size_t) const;
   /// Calculate a numerical derivative for the 1D data
   template <typename EvaluationMethod>
-  void calcNumericalDerivative1D(Jacobian *jacobian, EvaluationMethod func1D,
-                                 const double *xValues, const size_t nData);
+  void calcNumericalDerivative1D(Jacobian *jacobian, EvaluationMethod func1D, const double *xValues,
+                                 const size_t nData);
   /// Calculate histogram data for the given bin boundaries.
-  virtual void histogram1D(double *out, double left, const double *right,
-                           const size_t nBins) const;
+  virtual void histogram1D(double *out, double left, const double *right, const size_t nBins) const;
   /// Derivatives of the histogram1D with respect to active parameters.
-  virtual void histogramDerivative1D(Jacobian *jacobian, double left,
-                                     const double *right,
-                                     const size_t nBins) const;
+  virtual void histogramDerivative1D(Jacobian *jacobian, double left, const double *right, const size_t nBins) const;
 
   /// Logger instance
   static Kernel::Logger g_log;

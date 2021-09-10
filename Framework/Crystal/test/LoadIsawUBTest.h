@@ -34,17 +34,14 @@ public:
 
   void test_exec() {
     // Fake output WS
-    MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::create2DWorkspace(10, 10);
+    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspace(10, 10);
     AnalysisDataService::Instance().addOrReplace("LoadIsawUBTest_ws", ws);
 
     LoadIsawUB alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("Filename", "TOPAZ_3007.mat"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", "LoadIsawUBTest_ws"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "TOPAZ_3007.mat"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "LoadIsawUBTest_ws"));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
@@ -65,9 +62,8 @@ public:
     Matrix<double> UB = latt.getUB();
     TS_ASSERT_EQUALS(UB.numRows(), 3);
     TS_ASSERT_EQUALS(UB.numCols(), 3);
-    TS_ASSERT_DELTA(
-        UB[0][0], -0.0453,
-        1e-4); // (Values were taken from the result, for consistency)
+    TS_ASSERT_DELTA(UB[0][0], -0.0453,
+                    1e-4); // (Values were taken from the result, for consistency)
     TS_ASSERT_DELTA(UB[1][0], 0.0013, 1e-4);
     TS_ASSERT_DELTA(UB[2][2], 0.0273, 1e-4);
 
@@ -88,31 +84,25 @@ MaskPeaksWorkspace("TOPAZ_3007", "peaks")
    *
    */
   void test_integration() {
-    Workspace2D_sptr ws =
-        WorkspaceCreationHelper::create2DWorkspaceBinned(10, 20);
+    Workspace2D_sptr ws = WorkspaceCreationHelper::create2DWorkspaceBinned(10, 20);
     PeaksWorkspace_sptr pw;
     AnalysisDataService::Instance().addOrReplace("TOPAZ_3007", ws);
 
-    FrameworkManager::Instance().exec(
-        "LoadInstrument", 6, "Workspace", "TOPAZ_3007", "Filename",
-        "unit_testing/MINITOPAZ_Definition.xml", "RewriteSpectraMap", "True");
+    FrameworkManager::Instance().exec("LoadInstrument", 6, "Workspace", "TOPAZ_3007", "Filename",
+                                      "unit_testing/MINITOPAZ_Definition.xml", "RewriteSpectraMap", "True");
 
     // Match the goniometer angles
     WorkspaceCreationHelper::setGoniometer(ws, 86.92, 135.00, -105.66);
     // WorkspaceCreationHelper::SetGoniometer(ws, 0, 0, 0);
 
     // Load the .mat file into it
-    FrameworkManager::Instance().exec("LoadIsawUB", 4, "Filename",
-                                      "TOPAZ_3007.mat", "InputWorkspace",
-                                      "TOPAZ_3007");
+    FrameworkManager::Instance().exec("LoadIsawUB", 4, "Filename", "TOPAZ_3007.mat", "InputWorkspace", "TOPAZ_3007");
 
     // Load the .mat file into it
-    FrameworkManager::Instance().exec("PredictPeaks", 4, "InputWorkspace",
-                                      "TOPAZ_3007", "OutputWorkspace",
+    FrameworkManager::Instance().exec("PredictPeaks", 4, "InputWorkspace", "TOPAZ_3007", "OutputWorkspace",
                                       "peaks_predicted");
 
-    pw = std::dynamic_pointer_cast<PeaksWorkspace>(
-        AnalysisDataService::Instance().retrieve("peaks_predicted"));
+    pw = std::dynamic_pointer_cast<PeaksWorkspace>(AnalysisDataService::Instance().retrieve("peaks_predicted"));
 
     TS_ASSERT(pw);
     if (!pw)

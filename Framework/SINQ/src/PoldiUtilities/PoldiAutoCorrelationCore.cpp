@@ -27,11 +27,9 @@ using namespace API;
 using namespace std::placeholders;
 
 PoldiAutoCorrelationCore::PoldiAutoCorrelationCore(Kernel::Logger &g_log)
-    : m_detector(), m_chopper(), m_wavelengthRange(), m_deltaT(), m_deltaD(),
-      m_timeBinCount(), m_detectorElements(), m_weightsForD(),
-      m_tofsFor1Angstrom(), m_countData(), m_normCountData(),
-      m_sumOfWeights(0.0), m_correlationBackground(0.0), m_damp(0.0),
-      m_logger(g_log) {}
+    : m_detector(), m_chopper(), m_wavelengthRange(), m_deltaT(), m_deltaD(), m_timeBinCount(), m_detectorElements(),
+      m_weightsForD(), m_tofsFor1Angstrom(), m_countData(), m_normCountData(), m_sumOfWeights(0.0),
+      m_correlationBackground(0.0), m_damp(0.0), m_logger(g_log) {}
 
 /** Sets the components POLDI currently consists of. The detector should
  *probably be one with a DeadWireDecorator so dead wires are taken into account
@@ -40,9 +38,8 @@ PoldiAutoCorrelationCore::PoldiAutoCorrelationCore(Kernel::Logger &g_log)
  * @param detector :: Instance of PoldiAbstractDetector.
  * @param chopper :: Instance of PoldiAbstractChopper.
  */
-void PoldiAutoCorrelationCore::setInstrument(
-    const PoldiAbstractDetector_sptr &detector,
-    const PoldiAbstractChopper_sptr &chopper) {
+void PoldiAutoCorrelationCore::setInstrument(const PoldiAbstractDetector_sptr &detector,
+                                             const PoldiAbstractChopper_sptr &chopper) {
   m_detector = detector;
   m_chopper = chopper;
 
@@ -54,8 +51,7 @@ void PoldiAutoCorrelationCore::setInstrument(
  * @param lambdaMin :: Minimum wavelength in Angstrom.
  * @param lambdaMax :: Maximum wavelength in Angstrom.
  */
-void PoldiAutoCorrelationCore::setWavelengthRange(double lambdaMin,
-                                                  double lambdaMax) {
+void PoldiAutoCorrelationCore::setWavelengthRange(double lambdaMin, double lambdaMax) {
   m_wavelengthRange = std::make_pair(lambdaMin, lambdaMax);
 }
 
@@ -70,9 +66,9 @@ void PoldiAutoCorrelationCore::setWavelengthRange(double lambdaMin,
  * @param dValues :: d-spacings at which the spectrum was calculated.
  * @return A workspace containing the correlation spectrum.
  */
-DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::finalizeCalculation(
-    const std::vector<double> &correctedCorrelatedIntensities,
-    const std::vector<double> &dValues) const {
+DataObjects::Workspace2D_sptr
+PoldiAutoCorrelationCore::finalizeCalculation(const std::vector<double> &correctedCorrelatedIntensities,
+                                              const std::vector<double> &dValues) const {
   /* Finally, the d-Values are converted to q-Values for plotting etc. and
    * inserted into the output workspace. */
   size_t dCount = dValues.size();
@@ -84,10 +80,8 @@ DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::finalizeCalculation(
   }
 
   m_logger.information() << "  Setting result...\n";
-  DataObjects::Workspace2D_sptr outputWorkspace =
-      std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
-          WorkspaceFactory::Instance().create("Workspace2D", 1, dValues.size(),
-                                              dValues.size()));
+  DataObjects::Workspace2D_sptr outputWorkspace = std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
+      WorkspaceFactory::Instance().create("Workspace2D", 1, dValues.size(), dValues.size()));
 
   outputWorkspace->getAxis(0)->setUnit("MomentumTransfer");
 
@@ -104,9 +98,8 @@ DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::finalizeCalculation(
  * @param countData :: Instance of Workspace2D with POLDI data.
  * @return A workspace containing the correlation spectrum.
  */
-DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::calculate(
-    DataObjects::Workspace2D_sptr &countData,
-    const DataObjects::Workspace2D_sptr &normCountData) {
+DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::calculate(DataObjects::Workspace2D_sptr &countData,
+                                                                  const DataObjects::Workspace2D_sptr &normCountData) {
   m_logger.information() << "Starting Autocorrelation method...\n";
 
   if (m_detector && m_chopper) {
@@ -162,10 +155,8 @@ DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::calculate(
      * to the original fortran program,
      * although it simply leads to unit weights.
      */
-    m_logger.information() << "  Calculating weights (" << dValues.size()
-                           << ")...\n";
-    m_weightsForD = calculateDWeights(m_tofsFor1Angstrom, m_deltaT, m_deltaD,
-                                      dValues.size());
+    m_logger.information() << "  Calculating weights (" << dValues.size() << ")...\n";
+    m_weightsForD = calculateDWeights(m_tofsFor1Angstrom, m_deltaT, m_deltaD, dValues.size());
 
     m_sumOfWeights = getNormalizedTOFSum(m_weightsForD);
 
@@ -183,8 +174,7 @@ DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::calculate(
     std::vector<double> rawCorrelatedIntensities(dValues.size());
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int i = 0; i < static_cast<int>(dValues.size()); ++i) {
-      rawCorrelatedIntensities[i] =
-          getRawCorrelatedIntensity(dValues[i], m_weightsForD[i]);
+      rawCorrelatedIntensities[i] = getRawCorrelatedIntensity(dValues[i], m_weightsForD[i]);
     }
 
     /* As detailed in the original POLDI-paper, the sum of all correlation
@@ -199,21 +189,18 @@ DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::calculate(
      *to numerical inaccuracies connected
      * to floating point precision.
      */
-    double sumOfCorrelatedIntensities = std::accumulate(
-        rawCorrelatedIntensities.begin(), rawCorrelatedIntensities.end(), 0.0);
+    double sumOfCorrelatedIntensities =
+        std::accumulate(rawCorrelatedIntensities.begin(), rawCorrelatedIntensities.end(), 0.0);
     double sumOfCounts = getSumOfCounts(m_timeBinCount, m_detectorElements);
-    m_logger.information() << "  Summing intensities (" << sumOfCounts
-                           << ")...\n";
+    m_logger.information() << "  Summing intensities (" << sumOfCounts << ")...\n";
 
-    m_correlationBackground =
-        calculateCorrelationBackground(sumOfCorrelatedIntensities, sumOfCounts);
+    m_correlationBackground = calculateCorrelationBackground(sumOfCorrelatedIntensities, sumOfCounts);
 
     m_logger.information() << "  Correcting intensities...\n";
     std::vector<double> correctedCorrelatedIntensities(dValues.size());
-    std::transform(
-        rawCorrelatedIntensities.begin(), rawCorrelatedIntensities.end(),
-        m_weightsForD.begin(), correctedCorrelatedIntensities.rbegin(),
-        std::bind(&PoldiAutoCorrelationCore::correctedIntensity, this, _1, _2));
+    std::transform(rawCorrelatedIntensities.begin(), rawCorrelatedIntensities.end(), m_weightsForD.begin(),
+                   correctedCorrelatedIntensities.rbegin(),
+                   std::bind(&PoldiAutoCorrelationCore::correctedIntensity, this, _1, _2));
 
     /* The algorithm performs some finalization. In the default case the
      * spectrum is
@@ -236,8 +223,7 @@ DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::calculate(
  *size)).
  * @return Sum over all elements of given vector.
  */
-double PoldiAutoCorrelationCore::getNormalizedTOFSum(
-    const std::vector<double> &normalizedTofs) const {
+double PoldiAutoCorrelationCore::getNormalizedTOFSum(const std::vector<double> &normalizedTofs) const {
   /* Regarding numerical differences to fortran version
    *
    * In the latest version of the fortran software there is a bug that leads to
@@ -262,9 +248,8 @@ double PoldiAutoCorrelationCore::getNormalizedTOFSum(
  * @return Vector with nd elements, each containing the weight for the given
  *d-Value
  */
-std::vector<double> PoldiAutoCorrelationCore::calculateDWeights(
-    const std::vector<double> &tofsFor1Angstrom, double deltaT, double deltaD,
-    size_t nd) const {
+std::vector<double> PoldiAutoCorrelationCore::calculateDWeights(const std::vector<double> &tofsFor1Angstrom,
+                                                                double deltaT, double deltaD, size_t nd) const {
   /* Currently, all d-values get the same weight, so in fact this calculation
    * would is not really necessary. But since there are not too many
    * calculations involved and in order to stay close to the original
@@ -272,9 +257,7 @@ std::vector<double> PoldiAutoCorrelationCore::calculateDWeights(
    */
   const double sum =
       std::accumulate(tofsFor1Angstrom.cbegin(), tofsFor1Angstrom.cend(), 0.0,
-                      [deltaD](auto sum, auto tofFor1Angstrom) {
-                        return sum + tofFor1Angstrom * deltaD;
-                      });
+                      [deltaD](auto sum, auto tofFor1Angstrom) { return sum + tofFor1Angstrom * deltaD; });
 
   return std::vector<double>(nd, sum / deltaT);
 }
@@ -286,9 +269,7 @@ std::vector<double> PoldiAutoCorrelationCore::calculateDWeights(
  *result.
  * @return Correlated intensity, not corrected for correlation background.
  */
-double
-PoldiAutoCorrelationCore::getRawCorrelatedIntensity(double dValue,
-                                                    double weight) const {
+double PoldiAutoCorrelationCore::getRawCorrelatedIntensity(double dValue, double weight) const {
   /* Analysis according to the POLDI paper.
    *
    * For each d-value there is a contribution at each wire of the detector at a
@@ -314,12 +295,10 @@ PoldiAutoCorrelationCore::getRawCorrelatedIntensity(double dValue,
        */
       std::vector<UncertainValue> cmess(m_detector->elementCount());
       std::transform(m_indices.begin(), m_indices.end(), cmess.begin(),
-                     std::bind(&PoldiAutoCorrelationCore::getCMessAndCSigma,
-                               this, dValue, slitOffset, _1));
+                     std::bind(&PoldiAutoCorrelationCore::getCMessAndCSigma, this, dValue, slitOffset, _1));
 
       UncertainValue sum =
-          std::accumulate(cmess.begin(), cmess.end(), UncertainValue(0.0, 0.0),
-                          &UncertainValue::plainAddition);
+          std::accumulate(cmess.begin(), cmess.end(), UncertainValue(0.0, 0.0), &UncertainValue::plainAddition);
 
       current.emplace_back(sum);
     }
@@ -345,8 +324,7 @@ PoldiAutoCorrelationCore::getRawCorrelatedIntensity(double dValue,
  * @param index :: Index of detector element the calculation is performed for.
  * @return Pair of intensity and error for given input.
  */
-UncertainValue PoldiAutoCorrelationCore::getCMessAndCSigma(
-    double dValue, double slitTimeOffset, int index) const {
+UncertainValue PoldiAutoCorrelationCore::getCMessAndCSigma(double dValue, double slitTimeOffset, int index) const {
   /* The "count locator" describes where the counts for a given combination of
    * d, time offset and 2-theta value
    * (corresponding to dValue, slitTimeOffset and index) can be found on the
@@ -389,8 +367,7 @@ UncertainValue PoldiAutoCorrelationCore::getCMessAndCSigma(
                             "intensity and error for d-value: "
                          << boost::lexical_cast<std::string>(dValue)
                          << ", with detector index: " << std::to_string(index)
-                         << ", got middle index: "
-                         << std::to_string(middleIndex) << ", ignoring it.\n";
+                         << ", got middle index: " << std::to_string(middleIndex) << ", ignoring it.\n";
       break;
     }
 
@@ -401,20 +378,14 @@ UncertainValue PoldiAutoCorrelationCore::getCMessAndCSigma(
     error = 1.0 / normCounts;
   }
   case 1: {
-    value += minCounts *
-             (static_cast<double>(locator.icmin) - locator.cmin + 1.0) /
-             normMinCounts;
-    error += (static_cast<double>(locator.icmin) - locator.cmin + 1.0) /
-             normMinCounts;
+    value += minCounts * (static_cast<double>(locator.icmin) - locator.cmin + 1.0) / normMinCounts;
+    error += (static_cast<double>(locator.icmin) - locator.cmin + 1.0) / normMinCounts;
 
     double maxCounts = getCounts(locator.detectorElement, locator.iicmax);
-    double normMaxCounts =
-        getNormCounts(locator.detectorElement, locator.iicmax);
+    double normMaxCounts = getNormCounts(locator.detectorElement, locator.iicmax);
 
-    value += maxCounts * (locator.cmax - static_cast<double>(locator.icmax)) /
-             normMaxCounts;
-    error +=
-        (locator.cmax - static_cast<double>(locator.icmax)) / normMaxCounts;
+    value += maxCounts * (locator.cmax - static_cast<double>(locator.icmax)) / normMaxCounts;
+    error += (locator.cmax - static_cast<double>(locator.icmax)) / normMaxCounts;
     break;
   }
   default:
@@ -438,9 +409,7 @@ UncertainValue PoldiAutoCorrelationCore::getCMessAndCSigma(
  * @return CountLocator object which contains information about the location of
  *counts.
  */
-CountLocator PoldiAutoCorrelationCore::getCountLocator(double dValue,
-                                                       double slitTimeOffset,
-                                                       int index) const {
+CountLocator PoldiAutoCorrelationCore::getCountLocator(double dValue, double slitTimeOffset, int index) const {
   CountLocator locator;
   /* Element index and TOF for 1 Angstrom from current setup. */
   locator.detectorElement = getElementFromIndex(index);
@@ -448,12 +417,9 @@ CountLocator PoldiAutoCorrelationCore::getCountLocator(double dValue,
 
   /* Central time bin for given d-value in this wire, taking into account the
    * offset resulting from chopper slit. */
-  double rawCenter =
-      (m_chopper->zeroOffset() + tofFor1Angstrom * dValue) / m_deltaT;
+  double rawCenter = (m_chopper->zeroOffset() + tofFor1Angstrom * dValue) / m_deltaT;
   locator.arrivalWindowCenter =
-      rawCenter -
-      floor(rawCenter / static_cast<double>(m_timeBinCount)) *
-          static_cast<double>(m_timeBinCount) +
+      rawCenter - floor(rawCenter / static_cast<double>(m_timeBinCount)) * static_cast<double>(m_timeBinCount) +
       slitTimeOffset / m_deltaT;
 
   /* Since resolution in terms of d is limited, dValue is actually dValue +/-
@@ -501,17 +467,13 @@ int PoldiAutoCorrelationCore::cleanIndex(int index, int maximum) const {
  *
  * @param countData :: Workspace containing count data
  */
-void PoldiAutoCorrelationCore::setCountData(
-    const DataObjects::Workspace2D_sptr &countData) {
-  m_countData = countData;
-}
+void PoldiAutoCorrelationCore::setCountData(const DataObjects::Workspace2D_sptr &countData) { m_countData = countData; }
 
 /** Assigns workspace pointer containing norm count data to class member
  *
  * @param countData :: Workspace containing norm count data
  */
-void PoldiAutoCorrelationCore::setNormCountData(
-    const DataObjects::Workspace2D_sptr &normCountData) {
+void PoldiAutoCorrelationCore::setNormCountData(const DataObjects::Workspace2D_sptr &normCountData) {
   m_normCountData = normCountData;
 }
 
@@ -527,13 +489,12 @@ void PoldiAutoCorrelationCore::setNormCountData(
  * @param weight :: Weight as determined in calculateDWeights.
  * @return Corrected correlation intensity.
  */
-double PoldiAutoCorrelationCore::correctedIntensity(double intensity,
-                                                    double weight) const {
+double PoldiAutoCorrelationCore::correctedIntensity(double intensity, double weight) const {
   return intensity - m_correlationBackground * weight / m_sumOfWeights;
 }
 
-double PoldiAutoCorrelationCore::calculateCorrelationBackground(
-    double sumOfCorrelationCounts, double sumOfCounts) const {
+double PoldiAutoCorrelationCore::calculateCorrelationBackground(double sumOfCorrelationCounts,
+                                                                double sumOfCounts) const {
   return sumOfCorrelationCounts - sumOfCounts;
 }
 
@@ -544,16 +505,15 @@ double PoldiAutoCorrelationCore::calculateCorrelationBackground(
  * @param weight :: Dimensionless weight.
  * @return Correlated intensity, multiplied by weight.
  */
-double PoldiAutoCorrelationCore::reduceChopperSlitList(
-    const std::vector<UncertainValue> &valuesWithSigma, double weight) const {
+double PoldiAutoCorrelationCore::reduceChopperSlitList(const std::vector<UncertainValue> &valuesWithSigma,
+                                                       double weight) const {
   try {
     std::vector<double> signalToNoise(valuesWithSigma.size());
-    std::transform(valuesWithSigma.begin(), valuesWithSigma.end(),
-                   signalToNoise.begin(), &UncertainValue::errorToValueRatio);
+    std::transform(valuesWithSigma.begin(), valuesWithSigma.end(), signalToNoise.begin(),
+                   &UncertainValue::errorToValueRatio);
 
     return pow(static_cast<double>(valuesWithSigma.size()), 2.0) /
-           std::accumulate(signalToNoise.begin(), signalToNoise.end(), 0.0) *
-           weight;
+           std::accumulate(signalToNoise.begin(), signalToNoise.end(), 0.0) * weight;
   } catch (const std::domain_error &) {
     return 0.0;
   }
@@ -567,14 +527,12 @@ double PoldiAutoCorrelationCore::reduceChopperSlitList(
  * @param elements :: Vector of element indices.
  * @return Vector of total neutron flight paths in mm.
  */
-std::vector<double>
-PoldiAutoCorrelationCore::getDistances(const std::vector<int> &elements) const {
+std::vector<double> PoldiAutoCorrelationCore::getDistances(const std::vector<int> &elements) const {
   const double chopperDistance = m_chopper->distanceFromSample();
   std::vector<double> distances;
   distances.reserve(elements.size());
   for (const auto element : elements) {
-    distances.emplace_back(chopperDistance +
-                           m_detector->distanceFromSample(element));
+    distances.emplace_back(chopperDistance + m_detector->distanceFromSample(element));
   }
   return distances;
 }
@@ -588,8 +546,7 @@ PoldiAutoCorrelationCore::getDistances(const std::vector<int> &elements) const {
  * @param elements :: Vector of element indices.
  * @return Vector of specific TOFs (microseconds/Angstrom).
  */
-std::vector<double> PoldiAutoCorrelationCore::getTofsFor1Angstrom(
-    const std::vector<int> &elements) const {
+std::vector<double> PoldiAutoCorrelationCore::getTofsFor1Angstrom(const std::vector<int> &elements) const {
   // Map element indices to 2Theta-Values
   std::vector<double> twoThetas(elements.size());
   std::transform(elements.begin(), elements.end(), twoThetas.begin(),
@@ -598,8 +555,7 @@ std::vector<double> PoldiAutoCorrelationCore::getTofsFor1Angstrom(
   // We will need sin(Theta) anyway, so we might just calculate those as well
   std::vector<double> sinThetas;
   sinThetas.reserve(elements.size());
-  for (std::vector<double>::const_iterator twoTheta = twoThetas.begin();
-       twoTheta != twoThetas.end(); ++twoTheta) {
+  for (std::vector<double>::const_iterator twoTheta = twoThetas.begin(); twoTheta != twoThetas.end(); ++twoTheta) {
     sinThetas.emplace_back(sin(*twoTheta / 2.0));
   }
 
@@ -609,8 +565,7 @@ std::vector<double> PoldiAutoCorrelationCore::getTofsFor1Angstrom(
   // Time of flight for neutrons with a wavelength of 1 Angstrom for each
   // element
   std::vector<double> tofFor1Angstrom(elements.size());
-  std::transform(distances.begin(), distances.end(), sinThetas.begin(),
-                 tofFor1Angstrom.begin(),
+  std::transform(distances.begin(), distances.end(), sinThetas.begin(), tofFor1Angstrom.begin(),
                  std::bind(&Conversions::dtoTOF, 1.0, _1, _2));
 
   return tofFor1Angstrom;
@@ -622,9 +577,7 @@ std::vector<double> PoldiAutoCorrelationCore::getTofsFor1Angstrom(
  * @param y :: Time bin index.
  * @return Counts at position.
  */
-double PoldiAutoCorrelationCore::getCounts(int x, int y) const {
-  return m_countData->y(x)[y];
-}
+double PoldiAutoCorrelationCore::getCounts(int x, int y) const { return m_countData->y(x)[y]; }
 
 /** Returns normalized counts for correlation method at given position - these
  *may come from a different source than the counts
@@ -633,9 +586,7 @@ double PoldiAutoCorrelationCore::getCounts(int x, int y) const {
  * @param y :: Time bin index.
  * @return Normalized counts at position.
  */
-double PoldiAutoCorrelationCore::getNormCounts(int x, int y) const {
-  return std::max(1.0, m_normCountData->y(x)[y]);
-}
+double PoldiAutoCorrelationCore::getNormCounts(int x, int y) const { return std::max(1.0, m_normCountData->y(x)[y]); }
 
 /** Returns detector element index for given index
  *
@@ -647,8 +598,7 @@ double PoldiAutoCorrelationCore::getNormCounts(int x, int y) const {
  */
 int PoldiAutoCorrelationCore::getElementFromIndex(int index) const {
   if (index < 0 || index >= static_cast<int>(m_detectorElements.size())) {
-    throw(std::range_error(
-        "Index out of bounds on accessing m_detectorElements."));
+    throw(std::range_error("Index out of bounds on accessing m_detectorElements."));
   }
 
   return m_detectorElements[index];
@@ -661,8 +611,7 @@ int PoldiAutoCorrelationCore::getElementFromIndex(int index) const {
  */
 double PoldiAutoCorrelationCore::getTofFromIndex(int index) const {
   if (index < 0 || index >= static_cast<int>(m_tofsFor1Angstrom.size())) {
-    throw(std::range_error(
-        "Index out of bounds on accessing m_tofsFor1Angstrom."));
+    throw(std::range_error("Index out of bounds on accessing m_tofsFor1Angstrom."));
   }
 
   return m_tofsFor1Angstrom[index];
@@ -675,8 +624,7 @@ double PoldiAutoCorrelationCore::getTofFromIndex(int index) const {
  *considered for the summation.
  * @return Sum of all counts.
  */
-double PoldiAutoCorrelationCore::getSumOfCounts(
-    int timeBinCount, const std::vector<int> &detectorElements) const {
+double PoldiAutoCorrelationCore::getSumOfCounts(int timeBinCount, const std::vector<int> &detectorElements) const {
   double sum = 0.0;
 
   for (int t = 0; t < timeBinCount; ++t) {

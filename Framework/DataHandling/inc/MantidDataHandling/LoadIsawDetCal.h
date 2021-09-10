@@ -40,13 +40,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"SaveIsawDetCal"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"SaveIsawDetCal"}; }
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "Diffraction\\DataHandling;DataHandling\\Isaw";
-  }
+  const std::string category() const override { return "Diffraction\\DataHandling;DataHandling\\Isaw"; }
 
   /// @copydoc Algorithm::validateInputs()
   std::map<std::string, std::string> validateInputs() override;
@@ -65,20 +61,15 @@ private:
   void exec() override;
 
   /// Set the center of the supplied detector name
-  void center(const double x, const double y, const double z,
-              const std::string &detname, const API::Workspace_sptr &ws,
+  void center(const double x, const double y, const double z, const std::string &detname, const API::Workspace_sptr &ws,
               Geometry::ComponentInfo &componentInfo);
 
   Geometry::Instrument_sptr getCheckInst(const API::Workspace_sptr &ws);
   std::vector<std::string> getFilenames();
 
-  void doRotation(Kernel::V3D rX, Kernel::V3D rY,
-                  Geometry::ComponentInfo &componentInfo,
-                  const std::shared_ptr<const Geometry::IComponent> &comp,
-                  bool doWishCorrection = false);
-  void applyScalings(
-      API::Workspace_sptr &ws,
-      const std::vector<ComponentScaling> &rectangularDetectorScalings);
+  void doRotation(Kernel::V3D rX, Kernel::V3D rY, Geometry::ComponentInfo &componentInfo,
+                  const std::shared_ptr<const Geometry::IComponent> &comp, bool doWishCorrection = false);
+  void applyScalings(API::Workspace_sptr &ws, const std::vector<ComponentScaling> &rectangularDetectorScalings);
 };
 
 } // namespace DataHandling

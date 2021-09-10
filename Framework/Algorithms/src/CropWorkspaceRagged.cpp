@@ -12,9 +12,7 @@
 #include "MantidKernel/MandatoryValidator.h"
 
 namespace {
-std::vector<double> getSubVector(Mantid::MantidVec &data,
-                                 const int64_t &lowerIndex,
-                                 const int64_t &upperIndex) {
+std::vector<double> getSubVector(Mantid::MantidVec &data, const int64_t &lowerIndex, const int64_t &upperIndex) {
   auto low = std::next(data.begin(), lowerIndex);
   auto up = std::next(data.begin(), upperIndex);
   // get new vectors
@@ -34,11 +32,9 @@ DECLARE_ALGORITHM(CropWorkspaceRagged)
 
 /// Init function
 void CropWorkspaceRagged::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
                   "The input workspace");
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "Name to be given to the cropped workspace.");
 
   auto required = std::make_shared<MandatoryValidator<std::vector<double>>>();

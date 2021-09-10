@@ -74,31 +74,27 @@ public:
     TS_ASSERT_DELTA(B[0][0], 0.5, 1e-5);
 
     // 2x2 constant along diagonals D>2
-    std::vector<double> data{4, 1, 1, 4},
-        expected{4.0 / 15.0, -1.0 / 15.0, -1.0 / 15.0, 4.0 / 15.0};
+    std::vector<double> data{4, 1, 1, 4}, expected{4.0 / 15.0, -1.0 / 15.0, -1.0 / 15.0, 4.0 / 15.0};
     DblMatrix C(data);
     C.invertTridiagonal();
     DblMatrix expectedInverse(expected);
     TS_ASSERT(C == expectedInverse);
 
     // 2x2 constant along diagonals D=2
-    std::vector<double> data2{2, 1, 1, 2},
-        expected2{2.0 / 3.0, -1.0 / 3.0, -1.0 / 3.0, 2.0 / 3.0};
+    std::vector<double> data2{2, 1, 1, 2}, expected2{2.0 / 3.0, -1.0 / 3.0, -1.0 / 3.0, 2.0 / 3.0};
     DblMatrix C2(data2);
     C2.invertTridiagonal();
     DblMatrix expectedInverse2(expected2);
     TS_ASSERT(C2 == expectedInverse2);
 
     // 2x2 constant along diagonals -2<D<2
-    std::vector<double> data3{1, 2, 2, 1},
-        expected3{-1.0 / 3.0, 2.0 / 3.0, 2.0 / 3.0, -1.0 / 3.0};
+    std::vector<double> data3{1, 2, 2, 1}, expected3{-1.0 / 3.0, 2.0 / 3.0, 2.0 / 3.0, -1.0 / 3.0};
     DblMatrix C3(data3);
     C3.invertTridiagonal();
     DblMatrix expectedInverse3(expected3);
 
     // 2x2 constant along diagonals D<-2
-    std::vector<double> data4{-4, 1, 1, -4},
-        expected4{-4.0 / 15.0, -1.0 / 15.0, -1.0 / 15.0, -4.0 / 15.0};
+    std::vector<double> data4{-4, 1, 1, -4}, expected4{-4.0 / 15.0, -1.0 / 15.0, -1.0 / 15.0, -4.0 / 15.0};
     DblMatrix C4(data4);
     C4.invertTridiagonal();
     DblMatrix expectedInverse4(expected4);
@@ -206,8 +202,7 @@ public:
 
     std::vector<double> out = A * X;
     using std::placeholders::_1;
-    transform(X.begin(), X.end(), X.begin(),
-              std::bind(std::multiplies<double>(), _1, Diag[1][1]));
+    transform(X.begin(), X.end(), X.begin(), std::bind(std::multiplies<double>(), _1, Diag[1][1]));
     TS_ASSERT_DELTA(X[0], out[0], 0.0001);
     TS_ASSERT_DELTA(X[1], out[1], 0.0001);
     TS_ASSERT_DELTA(X[2], out[2], 0.0001);
@@ -253,8 +248,8 @@ public:
 
   void testFromVectorAndDimensions() {
     std::vector<int> data{1, 2, 3, 4, 5, 6};
-    TSM_ASSERT_THROWS("building matrix with worng dimension should fail",
-                      (Matrix<int>(data, 4, 5)), const std::invalid_argument &);
+    TSM_ASSERT_THROWS("building matrix with worng dimension should fail", (Matrix<int>(data, 4, 5)),
+                      const std::invalid_argument &);
     Matrix<int> myMat;
     TSM_ASSERT_THROWS_NOTHING("building matrix by this construcor and data "
                               "with correct number of elements should not "
@@ -388,8 +383,7 @@ public:
     TS_ASSERT_EQUALS(rot.numCols(), 3);
     for (size_t i = 0; i < 3; ++i) {
       for (size_t j = 0; j < 3; ++j) {
-        TS_ASSERT_EQUALS(rot[i][j],
-                         static_cast<double>(i * rot.numRows() + j + 1));
+        TS_ASSERT_EQUALS(rot[i][j], static_cast<double>(i * rot.numRows() + j + 1));
       }
     }
   }
@@ -434,8 +428,7 @@ public:
     DblMatrix rot;
     std::istringstream is;
     is.str("Matrix(3|3)1|2,3|4|5|6|7|8|9");
-    TS_ASSERT_THROWS(Mantid::Kernel::fillFromStream(is, rot, '|'),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(Mantid::Kernel::fillFromStream(is, rot, '|'), const std::invalid_argument &);
   }
 
   void test_Construction_Non_Square_Matrix_From_Output_Stream() {
@@ -492,8 +485,7 @@ public:
 
   /// Tests both V3D and std::vector
   void testMultiplicationWithVector() {
-    DblMatrix M = boost::lexical_cast<DblMatrix>(
-        "Matrix(3,3)-0.23,0.55,5.22,2.96,4.2,0.1,-1.453,3.112,-2.34");
+    DblMatrix M = boost::lexical_cast<DblMatrix>("Matrix(3,3)-0.23,0.55,5.22,2.96,4.2,0.1,-1.453,3.112,-2.34");
 
     V3D v(2.3, 4.5, -0.45);
     std::vector<double> stdvec(v);
@@ -515,15 +507,11 @@ public:
     TS_ASSERT_DELTA(otherStdNewVec[2], 11.715100000000003, 1e-15);
 
     DblMatrix M4(4, 4, true);
-    TS_ASSERT_THROWS(M4.operator*(v),
-                     const Mantid::Kernel::Exception::MisMatch<size_t> &);
-    TS_ASSERT_THROWS(M4.operator*(stdvec),
-                     const Mantid::Kernel::Exception::MisMatch<size_t> &);
-    TS_ASSERT_THROWS(M4.multiplyPoint(stdvec, otherStdNewVec),
-                     const Mantid::Kernel::Exception::MisMatch<size_t> &);
+    TS_ASSERT_THROWS(M4.operator*(v), const Mantid::Kernel::Exception::MisMatch<size_t> &);
+    TS_ASSERT_THROWS(M4.operator*(stdvec), const Mantid::Kernel::Exception::MisMatch<size_t> &);
+    TS_ASSERT_THROWS(M4.multiplyPoint(stdvec, otherStdNewVec), const Mantid::Kernel::Exception::MisMatch<size_t> &);
 
-    DblMatrix M23 = boost::lexical_cast<DblMatrix>(
-        "Matrix(2,3)-0.23,0.55,5.22,2.96,4.2,0.1");
+    DblMatrix M23 = boost::lexical_cast<DblMatrix>("Matrix(2,3)-0.23,0.55,5.22,2.96,4.2,0.1");
     TS_ASSERT_THROWS_NOTHING(M23.operator*(v));
     TS_ASSERT_THROWS_NOTHING(M23.operator*(stdvec));
     TS_ASSERT_THROWS_NOTHING(M23.multiplyPoint(stdvec, otherStdNewVec));
@@ -542,11 +530,10 @@ public:
     TS_ASSERT_DELTA(otherStdNewVec[1], 25.663000000000000, 1e-15);
     TS_ASSERT_EQUALS(otherStdNewVec.size(), 2);
 
-    DblMatrix M43 = boost::lexical_cast<DblMatrix>(
-        "Matrix(4,3)-0.23,0.55,5.22,2.96,4.2,0.1,-0.23,0.55,5.22,2.96,4.2,0.1");
-    TS_ASSERT_THROWS(
-        M43.operator*(v),
-        const Mantid::Kernel::Exception::MisMatch<size_t> &); // V3D only
+    DblMatrix M43 =
+        boost::lexical_cast<DblMatrix>("Matrix(4,3)-0.23,0.55,5.22,2.96,4.2,0.1,-0.23,0.55,5.22,2.96,4.2,0.1");
+    TS_ASSERT_THROWS(M43.operator*(v),
+                     const Mantid::Kernel::Exception::MisMatch<size_t> &); // V3D only
   }
 
   /// Test that the constructor taking preset sizes returns a zero matrix
@@ -589,13 +576,10 @@ public:
   /// Constructor with missing row or column
   void testConstructorMissingRowColumn() {
     constexpr int nRows(4), nCols(4), missingRow(3), missingCol(1);
-    const std::vector<double> data{1, 86,  2, 3, 4,  55,  5,  6,
-                                   7, -25, 8, 9, 42, -33, 15, 0};
+    const std::vector<double> data{1, 86, 2, 3, 4, 55, 5, 6, 7, -25, 8, 9, 42, -33, 15, 0};
     DblMatrix original(data);
-    TS_ASSERT_THROWS(DblMatrix badMat(original, nRows + 1, missingCol),
-                     const Mantid::Kernel::Exception::IndexError &);
-    TS_ASSERT_THROWS(DblMatrix badMat(original, missingRow, nCols + 1),
-                     const Mantid::Kernel::Exception::IndexError &);
+    TS_ASSERT_THROWS(DblMatrix badMat(original, nRows + 1, missingCol), const Mantid::Kernel::Exception::IndexError &);
+    TS_ASSERT_THROWS(DblMatrix badMat(original, missingRow, nCols + 1), const Mantid::Kernel::Exception::IndexError &);
     DblMatrix mat(original, missingRow, missingCol);
     checkMatrixHasExpectedValuesForSquareMatrixTest(mat);
   }
@@ -753,8 +737,7 @@ public:
     const std::vector<double> newCol{2, 5, 8};
     DblMatrix mat(data);
     size_t badCol(3), goodCol(1);
-    TS_ASSERT_THROWS(mat.setColumn(badCol, newCol),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(mat.setColumn(badCol, newCol), const std::invalid_argument &);
     mat.setColumn(goodCol, newCol);
     checkMatrixHasExpectedValuesForSquareMatrixTest(mat);
   }
@@ -790,15 +773,9 @@ public:
     const std::string expected("0.137361 0.549442 0.824163 0.408248 0.408248 "
                                "0.816497 0.57735 0.11547 -0.80829 ");
     TS_ASSERT_EQUALS(mat.str(), expected);
-    TS_ASSERT_DELTA(std::sqrt(mat[0][0] * mat[0][0] + mat[0][1] * mat[0][1] +
-                              mat[0][2] * mat[0][2]),
-                    1.0, 0.001);
-    TS_ASSERT_DELTA(std::sqrt(mat[1][0] * mat[1][0] + mat[1][1] * mat[1][1] +
-                              mat[1][2] * mat[1][2]),
-                    1.0, 0.001);
-    TS_ASSERT_DELTA(std::sqrt(mat[2][0] * mat[2][0] + mat[2][1] * mat[2][1] +
-                              mat[2][2] * mat[2][2]),
-                    1.0, 0.001);
+    TS_ASSERT_DELTA(std::sqrt(mat[0][0] * mat[0][0] + mat[0][1] * mat[0][1] + mat[0][2] * mat[0][2]), 1.0, 0.001);
+    TS_ASSERT_DELTA(std::sqrt(mat[1][0] * mat[1][0] + mat[1][1] * mat[1][1] + mat[1][2] * mat[1][2]), 1.0, 0.001);
+    TS_ASSERT_DELTA(std::sqrt(mat[2][0] * mat[2][0] + mat[2][1] * mat[2][1] + mat[2][2] * mat[2][2]), 1.0, 0.001);
   }
 
   void testTrace() {
@@ -825,11 +802,9 @@ public:
   }
 
   void testPreMultiplyDiagonal() {
-    const std::vector<double> dataA{1, 2, 3, 4}, dataDiag{5, 6},
-        dataBad{5, 6, 7};
+    const std::vector<double> dataA{1, 2, 3, 4}, dataDiag{5, 6}, dataBad{5, 6, 7};
     DblMatrix mat(dataA);
-    TS_ASSERT_THROWS(mat.preMultiplyByDiagonal(dataBad),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(mat.preMultiplyByDiagonal(dataBad), const std::runtime_error &);
     DblMatrix result = mat.preMultiplyByDiagonal(dataDiag);
     TS_ASSERT_EQUALS(result[0][0], 5);
     TS_ASSERT_EQUALS(result[0][1], 10);
@@ -838,11 +813,9 @@ public:
   }
 
   void testPostMultiplyDiagonal() {
-    const std::vector<double> dataA{1, 2, 3, 4}, dataDiag{5, 6},
-        dataBad{5, 6, 7};
+    const std::vector<double> dataA{1, 2, 3, 4}, dataDiag{5, 6}, dataBad{5, 6, 7};
     DblMatrix mat(dataA);
-    TS_ASSERT_THROWS(mat.postMultiplyByDiagonal(dataBad),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(mat.postMultiplyByDiagonal(dataBad), const std::runtime_error &);
     DblMatrix result = mat.postMultiplyByDiagonal(dataDiag);
     TS_ASSERT_EQUALS(result[0][0], 5);
     TS_ASSERT_EQUALS(result[0][1], 12);
@@ -921,8 +894,7 @@ public:
 
   // test orthogonality - rotations and non-rotational matrices
   void testIsOrthogonal() {
-    const std::vector<double> rotationData{0, -1, 1, 0},
-        nonRotationData{0, 1, 1, 0};
+    const std::vector<double> rotationData{0, -1, 1, 0}, nonRotationData{0, 1, 1, 0};
     DblMatrix rotation(rotationData), reflection(nonRotationData);
     TS_ASSERT(rotation.isRotation());
     TS_ASSERT(rotation.isOrthogonal());
@@ -936,8 +908,7 @@ private:
     TS_ASSERT_EQUALS(mat.numCols(), 3);
     for (size_t i = 0; i < 3; ++i) {
       for (size_t j = 0; j < 3; ++j) {
-        TS_ASSERT_EQUALS(mat[i][j],
-                         static_cast<double>(i * mat.numRows() + j + 1));
+        TS_ASSERT_EQUALS(mat[i][j], static_cast<double>(i * mat.numRows() + j + 1));
       }
     }
   }

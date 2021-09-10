@@ -45,17 +45,13 @@ public:
     alg.setProperty("InputWorkspace", inputWorkspace);
 
     // Act + Assert
-    TSM_ASSERT_THROWS_ANYTHING("Should not accept a MatrixWorkspace",
-                               alg.execute());
+    TSM_ASSERT_THROWS_ANYTHING("Should not accept a MatrixWorkspace", alg.execute());
   }
 
   void test_that_accepts_mdevent_and_mdhisto() {
     // Arrange
-    auto eventType =
-        Mantid::DataObjects::MDEventsTestHelper::makeMDEW<2>(3, 0.0, 10.0, 1);
-    auto histoType =
-        Mantid::DataObjects::MDEventsTestHelper::makeFakeMDHistoWorkspace(
-            1.0, 2, 10, 10.0, 1.0, "A");
+    auto eventType = Mantid::DataObjects::MDEventsTestHelper::makeMDEW<2>(3, 0.0, 10.0, 1);
+    auto histoType = Mantid::DataObjects::MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10, 10.0, 1.0, "A");
 
     std::vector<int> axes;
     axes.emplace_back(1);
@@ -70,20 +66,15 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Axes", axes));
     // Act + Assert
     alg.setProperty("InputWorkspace", eventType);
-    TSM_ASSERT_THROWS_NOTHING("Should accept an MDEvent workspace",
-                              alg.execute());
+    TSM_ASSERT_THROWS_NOTHING("Should accept an MDEvent workspace", alg.execute());
     alg.setProperty("InputWorkspace", histoType);
-    TSM_ASSERT_THROWS_NOTHING("Should accept an MDHisto workspace",
-                              alg.execute());
+    TSM_ASSERT_THROWS_NOTHING("Should accept an MDHisto workspace", alg.execute());
   }
 
   void test_that_index_out_of_bounds_is_not_valid() {
     // Arrange
-    auto eventType =
-        Mantid::DataObjects::MDEventsTestHelper::makeMDEW<2>(3, 0.0, 10.0, 1);
-    auto histoType =
-        Mantid::DataObjects::MDEventsTestHelper::makeFakeMDHistoWorkspace(
-            1.0, 1, 10, 10.0, 1.0, "A");
+    auto eventType = Mantid::DataObjects::MDEventsTestHelper::makeMDEW<2>(3, 0.0, 10.0, 1);
+    auto histoType = Mantid::DataObjects::MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 1, 10, 10.0, 1.0, "A");
 
     std::vector<int> axes;
     axes.emplace_back(0);
@@ -100,21 +91,17 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MDFrame", dim0Selection));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Axes", axes));
     alg.setProperty("InputWorkspace", eventType);
-    TSM_ASSERT_THROWS_ANYTHING("Should not accept an index out of bounds",
-                               alg.execute());
+    TSM_ASSERT_THROWS_ANYTHING("Should not accept an index out of bounds", alg.execute());
   }
 
   void test_that_can_set_to_QLab() {
     // Arrange
     const size_t numberOfDimensions = 2;
     std::vector<Mantid::Geometry::MDFrame_sptr> frames;
-    frames.emplace_back(
-        std::make_shared<Mantid::Geometry::UnknownFrame>("test"));
-    frames.emplace_back(
-        std::make_shared<Mantid::Geometry::UnknownFrame>("test"));
+    frames.emplace_back(std::make_shared<Mantid::Geometry::UnknownFrame>("test"));
+    frames.emplace_back(std::make_shared<Mantid::Geometry::UnknownFrame>("test"));
     auto inputWorkspace =
-        Mantid::DataObjects::MDEventsTestHelper::makeMDEWWithIndividualFrames<
-            numberOfDimensions>(5, -2, 2, frames, 3);
+        Mantid::DataObjects::MDEventsTestHelper::makeMDEWWithIndividualFrames<numberOfDimensions>(5, -2, 2, frames, 3);
 
     std::vector<int> axes;
     axes.emplace_back(0);
@@ -131,16 +118,13 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MDFrame", dim0Selection));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Axes", axes));
-    TSM_ASSERT_THROWS_NOTHING("Should accept an MDEvent workspace",
-                              alg.execute());
+    TSM_ASSERT_THROWS_NOTHING("Should accept an MDEvent workspace", alg.execute());
 
     // Assert
     auto dimension0 = inputWorkspace->getDimension(0);
-    TSM_ASSERT_EQUALS("Should be a QLab frame", dimension0->getMDFrame().name(),
-                      dim0Selection);
+    TSM_ASSERT_EQUALS("Should be a QLab frame", dimension0->getMDFrame().name(), dim0Selection);
     auto dimension1 = inputWorkspace->getDimension(1);
-    TSM_ASSERT_EQUALS("Should be an Unknown frame",
-                      dimension1->getMDFrame().name(),
+    TSM_ASSERT_EQUALS("Should be an Unknown frame", dimension1->getMDFrame().name(),
                       Mantid::Geometry::UnknownFrame::UnknownFrameName);
   }
 
@@ -156,13 +140,10 @@ public:
     auto unit0 = unitFactory->create(unitString0);
     auto unit1 = unitFactory->create(unitString1);
 
-    frames.emplace_back(
-        std::make_shared<Mantid::Geometry::UnknownFrame>(std::move(unit0)));
-    frames.emplace_back(
-        std::make_shared<Mantid::Geometry::UnknownFrame>(std::move(unit1)));
+    frames.emplace_back(std::make_shared<Mantid::Geometry::UnknownFrame>(std::move(unit0)));
+    frames.emplace_back(std::make_shared<Mantid::Geometry::UnknownFrame>(std::move(unit1)));
     auto inputWorkspace =
-        Mantid::DataObjects::MDEventsTestHelper::makeMDEWWithIndividualFrames<
-            numberOfDimensions>(5, -2, 2, frames, 3);
+        Mantid::DataObjects::MDEventsTestHelper::makeMDEWWithIndividualFrames<numberOfDimensions>(5, -2, 2, frames, 3);
 
     std::vector<int> axes;
     axes.emplace_back(0);
@@ -180,21 +161,16 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MDFrame", dim0Selection));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Axes", axes));
-    TSM_ASSERT_THROWS_NOTHING("Should accept an MDEvent workspace",
-                              alg.execute());
+    TSM_ASSERT_THROWS_NOTHING("Should accept an MDEvent workspace", alg.execute());
 
     // Assert
     auto dimension0 = inputWorkspace->getDimension(0);
-    TSM_ASSERT_EQUALS("Should be an HKL frame", dimension0->getMDFrame().name(),
-                      dim0Selection);
-    TSM_ASSERT_EQUALS("Should have the original units",
-                      dimension0->getMDFrame().getUnitLabel(), unitString0);
+    TSM_ASSERT_EQUALS("Should be an HKL frame", dimension0->getMDFrame().name(), dim0Selection);
+    TSM_ASSERT_EQUALS("Should have the original units", dimension0->getMDFrame().getUnitLabel(), unitString0);
 
     auto dimension1 = inputWorkspace->getDimension(1);
-    TSM_ASSERT_EQUALS("Should be an HKL frame", dimension1->getMDFrame().name(),
-                      dim0Selection);
-    TSM_ASSERT_EQUALS("Should have the original units",
-                      dimension1->getMDFrame().getUnitLabel(), unitString1);
+    TSM_ASSERT_EQUALS("Should be an HKL frame", dimension1->getMDFrame().name(), dim0Selection);
+    TSM_ASSERT_EQUALS("Should have the original units", dimension1->getMDFrame().getUnitLabel(), unitString1);
   }
 
   void test_that_cannot_set_to_HKL_when_units_are_wrong() {
@@ -209,13 +185,10 @@ public:
     auto unit0 = unitFactory->create(unitString0);
     auto unit1 = unitFactory->create(unitString1);
 
-    frames.emplace_back(
-        std::make_shared<Mantid::Geometry::UnknownFrame>(std::move(unit0)));
-    frames.emplace_back(
-        std::make_shared<Mantid::Geometry::UnknownFrame>(std::move(unit1)));
+    frames.emplace_back(std::make_shared<Mantid::Geometry::UnknownFrame>(std::move(unit0)));
+    frames.emplace_back(std::make_shared<Mantid::Geometry::UnknownFrame>(std::move(unit1)));
     auto inputWorkspace =
-        Mantid::DataObjects::MDEventsTestHelper::makeMDEWWithIndividualFrames<
-            numberOfDimensions>(5, -2, 2, frames, 3);
+        Mantid::DataObjects::MDEventsTestHelper::makeMDEWWithIndividualFrames<numberOfDimensions>(5, -2, 2, frames, 3);
 
     std::vector<int> axes;
     axes.emplace_back(1);
@@ -232,8 +205,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MDFrame", dim0Selection));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Axes", axes));
-    TSM_ASSERT_THROWS_ANYTHING("Should not accept a wrong HKL Units",
-                               alg.execute());
+    TSM_ASSERT_THROWS_ANYTHING("Should not accept a wrong HKL Units", alg.execute());
   }
 
   void test_that_can_convert_to_GeneralFrame() {
@@ -248,13 +220,10 @@ public:
     auto unit0 = unitFactory->create(unitString0);
     auto unit1 = unitFactory->create(unitString1);
 
-    frames.emplace_back(
-        std::make_shared<Mantid::Geometry::UnknownFrame>(std::move(unit0)));
-    frames.emplace_back(
-        std::make_shared<Mantid::Geometry::UnknownFrame>(std::move(unit1)));
+    frames.emplace_back(std::make_shared<Mantid::Geometry::UnknownFrame>(std::move(unit0)));
+    frames.emplace_back(std::make_shared<Mantid::Geometry::UnknownFrame>(std::move(unit1)));
     auto inputWorkspace =
-        Mantid::DataObjects::MDEventsTestHelper::makeMDEWWithIndividualFrames<
-            numberOfDimensions>(5, -2, 2, frames, 3);
+        Mantid::DataObjects::MDEventsTestHelper::makeMDEWWithIndividualFrames<numberOfDimensions>(5, -2, 2, frames, 3);
 
     std::vector<int> axes;
     axes.emplace_back(0);
@@ -272,20 +241,15 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MDFrame", dim0Selection));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Axes", axes));
-    TSM_ASSERT_THROWS_NOTHING("Should accept an MDEvent workspace",
-                              alg.execute());
+    TSM_ASSERT_THROWS_NOTHING("Should accept an MDEvent workspace", alg.execute());
 
     // Assert
     auto dimension0 = inputWorkspace->getDimension(0);
-    TSM_ASSERT_EQUALS("Should be a General frame",
-                      dimension0->getMDFrame().name(), dim0Selection);
-    TSM_ASSERT_EQUALS("Should have the original units",
-                      dimension0->getMDFrame().getUnitLabel(), unitString0);
+    TSM_ASSERT_EQUALS("Should be a General frame", dimension0->getMDFrame().name(), dim0Selection);
+    TSM_ASSERT_EQUALS("Should have the original units", dimension0->getMDFrame().getUnitLabel(), unitString0);
 
     auto dimension1 = inputWorkspace->getDimension(1);
-    TSM_ASSERT_EQUALS("Should be a General frame",
-                      dimension1->getMDFrame().name(), dim0Selection);
-    TSM_ASSERT_EQUALS("Should have the original units",
-                      dimension1->getMDFrame().getUnitLabel(), unitString1);
+    TSM_ASSERT_EQUALS("Should be a General frame", dimension1->getMDFrame().name(), dim0Selection);
+    TSM_ASSERT_EQUALS("Should have the original units", dimension1->getMDFrame().getUnitLabel(), unitString1);
   }
 };

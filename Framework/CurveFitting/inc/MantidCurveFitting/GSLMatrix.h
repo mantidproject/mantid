@@ -35,14 +35,11 @@ struct GSLMatrixMult2 {
   const GSLMatrix &m_2;
   const bool tr1;
   const bool tr2;
-  GSLMatrixMult2(const GSLMatrix &m1, const GSLMatrix &m2)
-      : m_1(m1), m_2(m2), tr1(false), tr2(false) {}
+  GSLMatrixMult2(const GSLMatrix &m1, const GSLMatrix &m2) : m_1(m1), m_2(m2), tr1(false), tr2(false) {}
 
-  GSLMatrixMult2(const Tr<GSLMatrix> &m1, const GSLMatrix &m2)
-      : m_1(m1.matrix), m_2(m2), tr1(true), tr2(false) {}
+  GSLMatrixMult2(const Tr<GSLMatrix> &m1, const GSLMatrix &m2) : m_1(m1.matrix), m_2(m2), tr1(true), tr2(false) {}
 
-  GSLMatrixMult2(const GSLMatrix &m1, const Tr<GSLMatrix> &m2)
-      : m_1(m1), m_2(m2.matrix), tr1(false), tr2(true) {}
+  GSLMatrixMult2(const GSLMatrix &m1, const Tr<GSLMatrix> &m2) : m_1(m1), m_2(m2.matrix), tr1(false), tr2(true) {}
 
   GSLMatrixMult2(const Tr<GSLMatrix> &m1, const Tr<GSLMatrix> &m2)
       : m_1(m1.matrix), m_2(m2.matrix), tr1(true), tr2(true) {}
@@ -57,20 +54,16 @@ struct GSLMatrixMult3 {
   const bool tr2;
   const bool tr3;
   GSLMatrixMult3(const GSLMatrix &m1, const GSLMatrixMult2 &mm)
-      : m_1(m1), m_2(mm.m_1), m_3(mm.m_2), tr1(false), tr2(mm.tr1),
-        tr3(mm.tr2) {}
+      : m_1(m1), m_2(mm.m_1), m_3(mm.m_2), tr1(false), tr2(mm.tr1), tr3(mm.tr2) {}
 
   GSLMatrixMult3(const Tr<GSLMatrix> &m1, const GSLMatrixMult2 &mm)
-      : m_1(m1.matrix), m_2(mm.m_1), m_3(mm.m_2), tr1(true), tr2(mm.tr1),
-        tr3(mm.tr2) {}
+      : m_1(m1.matrix), m_2(mm.m_1), m_3(mm.m_2), tr1(true), tr2(mm.tr1), tr3(mm.tr2) {}
 
   GSLMatrixMult3(const GSLMatrixMult2 &mm, const GSLMatrix &m2)
-      : m_1(mm.m_1), m_2(mm.m_2), m_3(m2), tr1(mm.tr1), tr2(mm.tr2),
-        tr3(false) {}
+      : m_1(mm.m_1), m_2(mm.m_2), m_3(m2), tr1(mm.tr1), tr2(mm.tr2), tr3(false) {}
 
   GSLMatrixMult3(const GSLMatrixMult2 &mm, const Tr<GSLMatrix> &m2)
-      : m_1(mm.m_1), m_2(mm.m_2), m_3(m2.matrix), tr1(mm.tr1), tr2(mm.tr2),
-        tr3(true) {}
+      : m_1(mm.m_1), m_2(mm.m_2), m_3(m2.matrix), tr1(mm.tr1), tr2(mm.tr2), tr3(true) {}
 };
 
 /**
@@ -91,8 +84,7 @@ public:
   /// Copy constructor
   GSLMatrix(const GSLMatrix &M);
   /// Create a submatrix.
-  GSLMatrix(const GSLMatrix &M, size_t row, size_t col, size_t nRows,
-            size_t nCols);
+  GSLMatrix(const GSLMatrix &M, size_t row, size_t col, size_t nRows, size_t nCols);
   /// Constructor
   GSLMatrix(const Kernel::Matrix<double> &M);
   /// Create this matrix from a product of two other matrices
@@ -183,65 +175,46 @@ private:
 /// Overloaded operator for matrix multiplication
 /// @param m1 :: First matrix
 /// @param m2 :: Second matrix
-inline GSLMatrixMult2 operator*(const GSLMatrix &m1, const GSLMatrix &m2) {
-  return GSLMatrixMult2(m1, m2);
-}
+inline GSLMatrixMult2 operator*(const GSLMatrix &m1, const GSLMatrix &m2) { return GSLMatrixMult2(m1, m2); }
 
 /// Overloaded operator for matrix multiplication
 /// @param m1 :: First matrix transposed
 /// @param m2 :: Second matrix
-inline GSLMatrixMult2 operator*(const Tr<GSLMatrix> &m1, const GSLMatrix &m2) {
-  return GSLMatrixMult2(m1, m2);
-}
+inline GSLMatrixMult2 operator*(const Tr<GSLMatrix> &m1, const GSLMatrix &m2) { return GSLMatrixMult2(m1, m2); }
 
 /// Overloaded operator for matrix multiplication
 /// @param m1 :: First matrix
 /// @param m2 :: Second matrix transposed
-inline GSLMatrixMult2 operator*(const GSLMatrix &m1, const Tr<GSLMatrix> &m2) {
-  return GSLMatrixMult2(m1, m2);
-}
+inline GSLMatrixMult2 operator*(const GSLMatrix &m1, const Tr<GSLMatrix> &m2) { return GSLMatrixMult2(m1, m2); }
 
 /// Overloaded operator for matrix multiplication
 /// @param m1 :: First matrix transposed
 /// @param m2 :: Second matrix transposed
-inline GSLMatrixMult2 operator*(const Tr<GSLMatrix> &m1,
-                                const Tr<GSLMatrix> &m2) {
-  return GSLMatrixMult2(m1, m2);
-}
+inline GSLMatrixMult2 operator*(const Tr<GSLMatrix> &m1, const Tr<GSLMatrix> &m2) { return GSLMatrixMult2(m1, m2); }
 
 /// Overloaded operator for matrix multiplication. Multiplies a matrix by a
 /// product of two other matrices.
 /// @param m :: A matrix
 /// @param mm :: Product of two matrices
-inline GSLMatrixMult3 operator*(const GSLMatrix &m, const GSLMatrixMult2 &mm) {
-  return GSLMatrixMult3(m, mm);
-}
+inline GSLMatrixMult3 operator*(const GSLMatrix &m, const GSLMatrixMult2 &mm) { return GSLMatrixMult3(m, mm); }
 
 /// Overloaded operator for matrix multiplication. Multiplies a matrix by a
 /// product of two other matrices.
 /// @param mm :: Product of two matrices
 /// @param m :: A matrix
-inline GSLMatrixMult3 operator*(const GSLMatrixMult2 &mm, const GSLMatrix &m) {
-  return GSLMatrixMult3(mm, m);
-}
+inline GSLMatrixMult3 operator*(const GSLMatrixMult2 &mm, const GSLMatrix &m) { return GSLMatrixMult3(mm, m); }
 
 /// Overloaded operator for matrix multiplication. Multiplies a matrix by a
 /// product of two other matrices.
 /// @param m :: A transposed matrix
 /// @param mm :: Product of two matrices
-inline GSLMatrixMult3 operator*(const Tr<GSLMatrix> &m,
-                                const GSLMatrixMult2 &mm) {
-  return GSLMatrixMult3(m, mm);
-}
+inline GSLMatrixMult3 operator*(const Tr<GSLMatrix> &m, const GSLMatrixMult2 &mm) { return GSLMatrixMult3(m, mm); }
 
 /// Overloaded operator for matrix multiplication. Multiplies a matrix by a
 /// product of two other matrices.
 /// @param mm :: Product of two matrices
 /// @param m :: A transposed matrix
-inline GSLMatrixMult3 operator*(const GSLMatrixMult2 &mm,
-                                const Tr<GSLMatrix> &m) {
-  return GSLMatrixMult3(mm, m);
-}
+inline GSLMatrixMult3 operator*(const GSLMatrixMult2 &mm, const Tr<GSLMatrix> &m) { return GSLMatrixMult3(mm, m); }
 
 /// The << operator. Prints a matrix in rows.
 inline std::ostream &operator<<(std::ostream &ostr, const GSLMatrix &m) {
@@ -258,9 +231,7 @@ inline std::ostream &operator<<(std::ostream &ostr, const GSLMatrix &m) {
 }
 
 /// The "index" operator
-inline double GSLMatrix::operator()(size_t i, size_t j) const {
-  return const_cast<GSLMatrix &>(*this)(i, j);
-}
+inline double GSLMatrix::operator()(size_t i, size_t j) const { return const_cast<GSLMatrix &>(*this)(i, j); }
 
 /// Get the reference to the data element
 inline double &GSLMatrix::operator()(size_t i, size_t j) {

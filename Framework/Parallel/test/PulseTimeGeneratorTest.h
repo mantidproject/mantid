@@ -12,8 +12,7 @@
 
 #include "MantidParallel/IO/PulseTimeGenerator.h"
 
-using PulseTimeGenerator =
-    Mantid::Parallel::IO::PulseTimeGenerator<int32_t, int32_t>;
+using PulseTimeGenerator = Mantid::Parallel::IO::PulseTimeGenerator<int32_t, int32_t>;
 using Mantid::Parallel::IO::detail::IntOrFloat64Bit;
 using Mantid::Parallel::IO::detail::scaleFromUnit;
 
@@ -21,9 +20,7 @@ class PulseTimeGeneratorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static PulseTimeGeneratorTest *createSuite() {
-    return new PulseTimeGeneratorTest();
-  }
+  static PulseTimeGeneratorTest *createSuite() { return new PulseTimeGeneratorTest(); }
   static void destroySuite(PulseTimeGeneratorTest *suite) { delete suite; }
 
   void test_scaleFromUnit_integer_converted_to_nanoseconds() {
@@ -34,10 +31,8 @@ public:
     TS_ASSERT_EQUALS(scaleFromUnit<int64_t>("nanosecond"), 1);
     TS_ASSERT_EQUALS(scaleFromUnit<uint64_t>("nanosecond"), 1);
     // Would supporting anything by `second` make sense for integers?
-    TS_ASSERT_THROWS_EQUALS(
-        scaleFromUnit<int64_t>("second"), const std::runtime_error &e,
-        std::string(e.what()),
-        "PulseTimeGenerator: unsupported unit `second` for event_time_zero");
+    TS_ASSERT_THROWS_EQUALS(scaleFromUnit<int64_t>("second"), const std::runtime_error &e, std::string(e.what()),
+                            "PulseTimeGenerator: unsupported unit `second` for event_time_zero");
   }
 
   void test_scaleFromUnit_float_converted_to_microseconds() {
@@ -50,16 +45,14 @@ public:
     TS_ASSERT_EQUALS(scaleFromUnit<float>("nanosecond"), 1e-9);
     TS_ASSERT_EQUALS(scaleFromUnit<double>("nanosecond"), 1e-9);
     // Currently not supported (but in principle we could).
-    TS_ASSERT_THROWS_EQUALS(scaleFromUnit<float>("millisecond"),
-                            const std::runtime_error &e, std::string(e.what()),
+    TS_ASSERT_THROWS_EQUALS(scaleFromUnit<float>("millisecond"), const std::runtime_error &e, std::string(e.what()),
                             "PulseTimeGenerator: unsupported unit "
                             "`millisecond` for event_time_zero");
   }
 
   void test_scaleFromUnit_does_not_lose_precision() {
     // Return type should be double, even if input is float
-    TS_ASSERT_DIFFERS(scaleFromUnit<float>("nanosecond"),
-                      static_cast<float>(1e-9));
+    TS_ASSERT_DIFFERS(scaleFromUnit<float>("nanosecond"), static_cast<float>(1e-9));
   }
 
   void test_IntOrFloat64Bit() {
@@ -73,8 +66,7 @@ public:
 
   void test_empty() {
     PulseTimeGenerator pulseTimes({}, {}, "nanosecond", 1000);
-    TS_ASSERT_THROWS_EQUALS(pulseTimes.seek(0), const std::runtime_error &e,
-                            std::string(e.what()),
+    TS_ASSERT_THROWS_EQUALS(pulseTimes.seek(0), const std::runtime_error &e, std::string(e.what()),
                             "Empty event index in PulseTimeGenerator");
   }
 
@@ -111,8 +103,7 @@ public:
   }
 
   void test_empty_pulse() {
-    PulseTimeGenerator pulseTimes({0, 2, 2, 3}, {4, 8, 12, 16}, "nanosecond",
-                                  1000);
+    PulseTimeGenerator pulseTimes({0, 2, 2, 3}, {4, 8, 12, 16}, "nanosecond", 1000);
     pulseTimes.seek(0);
     TS_ASSERT_EQUALS(pulseTimes.next().totalNanoseconds(), 1004);
     TS_ASSERT_EQUALS(pulseTimes.next().totalNanoseconds(), 1004);
@@ -145,16 +136,14 @@ public:
   }
 
   void test_seek_with_empty_pulse() {
-    PulseTimeGenerator pulseTimes({0, 2, 2, 3}, {4, 8, 12, 16}, "nanosecond",
-                                  1000);
+    PulseTimeGenerator pulseTimes({0, 2, 2, 3}, {4, 8, 12, 16}, "nanosecond", 1000);
     pulseTimes.seek(2);
     TS_ASSERT_EQUALS(pulseTimes.next().totalNanoseconds(), 1012);
     TS_ASSERT_EQUALS(pulseTimes.next().totalNanoseconds(), 1016);
   }
 
   void test_seek_multiple_times() {
-    PulseTimeGenerator pulseTimes({0, 2, 2, 3}, {4, 8, 12, 16}, "nanosecond",
-                                  1000);
+    PulseTimeGenerator pulseTimes({0, 2, 2, 3}, {4, 8, 12, 16}, "nanosecond", 1000);
     pulseTimes.seek(1);
     TS_ASSERT_EQUALS(pulseTimes.next().totalNanoseconds(), 1004);
     pulseTimes.seek(3);
@@ -162,8 +151,7 @@ public:
   }
 
   void test_seek_backwards() {
-    PulseTimeGenerator pulseTimes({0, 2, 2, 3}, {4, 8, 12, 16}, "nanosecond",
-                                  1000);
+    PulseTimeGenerator pulseTimes({0, 2, 2, 3}, {4, 8, 12, 16}, "nanosecond", 1000);
     pulseTimes.seek(1);
     TS_ASSERT_EQUALS(pulseTimes.next().totalNanoseconds(), 1004);
     TS_ASSERT_EQUALS(pulseTimes.next().totalNanoseconds(), 1012);
@@ -173,8 +161,7 @@ public:
   }
 
   void test_event_time_zero_type_conversion() {
-    Mantid::Parallel::IO::PulseTimeGenerator<int32_t, float> pulseTimes(
-        {0}, {1.5}, "microsecond", 10000);
+    Mantid::Parallel::IO::PulseTimeGenerator<int32_t, float> pulseTimes({0}, {1.5}, "microsecond", 10000);
     pulseTimes.seek(0);
     TS_ASSERT_EQUALS(pulseTimes.next().totalNanoseconds(), 11500);
   }

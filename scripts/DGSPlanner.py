@@ -10,7 +10,13 @@ from DGSPlanner import DGSPlannerGUI
 from mantidqt.gui_helper import get_qapplication
 
 app, within_mantid = get_qapplication()
-planner = DGSPlannerGUI.DGSPlannerGUI()
+if 'workbench' in sys.modules:
+    from workbench.config import get_window_config
+
+    parent, flags = get_window_config()
+else:
+    parent, flags = None, None
+planner = DGSPlannerGUI.DGSPlannerGUI(parent, flags)
 planner.show()
 if not within_mantid:
     sys.exit(app.exec_())

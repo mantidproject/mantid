@@ -44,21 +44,13 @@ public:
 
   void test_works_for_HistogramE() { TS_ASSERT(isValid(HistogramE{1.0, 2.0})); }
 
-  void test_works_for_CountStandardDeviations() {
-    TS_ASSERT(isValid(CountStandardDeviations{1.0, 2.0}));
-  }
+  void test_works_for_CountStandardDeviations() { TS_ASSERT(isValid(CountStandardDeviations{1.0, 2.0})); }
 
-  void test_works_for_CountVariances() {
-    TS_ASSERT(isValid(CountVariances{1.0, 2.0}));
-  }
+  void test_works_for_CountVariances() { TS_ASSERT(isValid(CountVariances{1.0, 2.0})); }
 
-  void test_works_for_FrequencyStandardDeviations() {
-    TS_ASSERT(isValid(FrequencyStandardDeviations{1.0, 2.0}));
-  }
+  void test_works_for_FrequencyStandardDeviations() { TS_ASSERT(isValid(FrequencyStandardDeviations{1.0, 2.0})); }
 
-  void test_works_for_FrequencyVariances() {
-    TS_ASSERT(isValid(FrequencyVariances{1.0, 2.0}));
-  }
+  void test_works_for_FrequencyVariances() { TS_ASSERT(isValid(FrequencyVariances{1.0, 2.0})); }
 
   void test_length_zero() { TS_ASSERT(isValid(HistogramE(0))); }
 

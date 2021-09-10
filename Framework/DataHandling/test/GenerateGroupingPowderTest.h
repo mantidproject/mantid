@@ -33,9 +33,7 @@ class GenerateGroupingPowderTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static GenerateGroupingPowderTest *createSuite() {
-    return new GenerateGroupingPowderTest();
-  }
+  static GenerateGroupingPowderTest *createSuite() { return new GenerateGroupingPowderTest(); }
   static void destroySuite(GenerateGroupingPowderTest *suite) { delete suite; }
 
   GenerateGroupingPowderTest() : CxxTest::TestSuite() {
@@ -63,8 +61,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("InputWorkspace", m_emptyInstrument));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", m_emptyInstrument));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("GroupingFilename", xmlFile));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("AngleStep", step));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
@@ -88,8 +85,7 @@ public:
       TS_ASSERT_EQUALS(phi, 0);
       TS_ASSERT_DELTA(dx, r * step * Geometry::deg2rad, 0.01);
       TS_ASSERT_EQUALS(dy, 0.01);
-      tth = detectorInfo.twoTheta(detectorInfo.indexOf(detID)) *
-            Geometry::rad2deg;
+      tth = detectorInfo.twoTheta(detectorInfo.indexOf(detID)) * Geometry::rad2deg;
       TS_ASSERT_LESS_THAN(tth, static_cast<double>(i + 1) * step);
       TS_ASSERT_LESS_THAN(static_cast<double>(i) * step, tth);
     }
@@ -104,9 +100,8 @@ public:
     load2.execute();
     TS_ASSERT(load2.isExecuted());
 
-    DataObjects::GroupingWorkspace_sptr gws2 =
-        std::dynamic_pointer_cast<DataObjects::GroupingWorkspace>(
-            API::AnalysisDataService::Instance().retrieve("GroupPowder"));
+    DataObjects::GroupingWorkspace_sptr gws2 = std::dynamic_pointer_cast<DataObjects::GroupingWorkspace>(
+        API::AnalysisDataService::Instance().retrieve("GroupPowder"));
 
     TS_ASSERT_DELTA(gws2->dataY(0)[0], 13.0, 1.0E-5);    // 130.6 degrees
     TS_ASSERT_DELTA(gws2->dataY(10000)[0], 9.0, 1.0E-5); // 97.4 degrees
@@ -131,10 +126,8 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("InputWorkspace", m_emptyInstrument))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("GroupingFilename", xmlFilename))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", m_emptyInstrument))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("GroupingFilename", xmlFilename))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("AngleStep", step))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GenerateParFile", false))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
@@ -156,8 +149,7 @@ public:
 
   void test_ignore_detectors_without_spectra() {
     auto histogram = m_emptyInstrument->histogram(0);
-    MatrixWorkspace_sptr ws =
-        create<Workspace2D>(*m_emptyInstrument, 1, histogram);
+    MatrixWorkspace_sptr ws = create<Workspace2D>(*m_emptyInstrument, 1, histogram);
     ws->getSpectrum(0).copyInfoFrom(m_emptyInstrument->getSpectrum(8));
     GenerateGroupingPowder alg;
     alg.setChild(true);
@@ -168,8 +160,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("GroupingFilename", xmlFilename))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("GroupingFilename", xmlFilename))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("AngleStep", step))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GenerateParFile", false))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
@@ -182,8 +173,7 @@ public:
     Poco::XML::DOMParser parser;
     Poco::AutoPtr<Poco::XML::Document> doc{parser.parse(&source)};
     ShowDetIDsOnly filter;
-    Poco::XML::NodeIterator nodeIter{doc, Poco::XML::NodeFilter::SHOW_ELEMENT,
-                                     &filter};
+    Poco::XML::NodeIterator nodeIter{doc, Poco::XML::NodeFilter::SHOW_ELEMENT, &filter};
     auto node = nodeIter.nextNode();
     TS_ASSERT(node)
     TS_ASSERT_EQUALS(node->nodeName(), "detids")

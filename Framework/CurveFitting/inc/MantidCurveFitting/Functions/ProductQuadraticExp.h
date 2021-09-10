@@ -18,8 +18,7 @@ namespace Functions {
 /** ProductQuadraticExp : Function that evauates the product of an exponential
   and quadratic function.
 */
-class MANTID_CURVEFITTING_DLL ProductQuadraticExp : public API::ParamFunction,
-                                                    public API::IFunction1D {
+class MANTID_CURVEFITTING_DLL ProductQuadraticExp : public API::ParamFunction, public API::IFunction1D {
 public:
   ProductQuadraticExp();
 
@@ -28,10 +27,8 @@ public:
   const std::string category() const override { return "Calibrate"; }
 
 protected:
-  void functionDeriv1D(API::Jacobian *out, const double *xValues,
-                       const size_t nData) override;
-  void function1D(double *out, const double *xValues,
-                  const size_t nData) const override;
+  void functionDeriv1D(API::Jacobian *out, const double *xValues, const size_t nData) override;
+  void function1D(double *out, const double *xValues, const size_t nData) const override;
 };
 
 } // namespace Functions

@@ -28,7 +28,7 @@ Usage
 -----
 **Example - move three detectors to specified positions that would be got from calibration**
 
-.. include:: ../usagedata-note.txt 
+.. include:: ../usagedata-note.txt
 
 .. testcode:: ExApplyCalibSimple
 

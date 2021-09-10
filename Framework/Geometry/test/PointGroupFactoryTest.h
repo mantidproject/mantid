@@ -27,18 +27,13 @@ class PointGroupFactoryTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static PointGroupFactoryTest *createSuite() {
-    return new PointGroupFactoryTest();
-  }
+  static PointGroupFactoryTest *createSuite() { return new PointGroupFactoryTest(); }
   static void destroySuite(PointGroupFactoryTest *suite) { delete suite; }
 
   PointGroupFactoryTest() {
-    PointGroupFactory::Instance().subscribePointGroup("monoclinicA", "x,y,-z",
-                                                      "test");
-    PointGroupFactory::Instance().subscribePointGroup("monoclinicB", "x,-y,-z",
-                                                      "test");
-    PointGroupFactory::Instance().subscribePointGroup("triclinic", "-x,-y,-z",
-                                                      "test");
+    PointGroupFactory::Instance().subscribePointGroup("monoclinicA", "x,y,-z", "test");
+    PointGroupFactory::Instance().subscribePointGroup("monoclinicB", "x,-y,-z", "test");
+    PointGroupFactory::Instance().subscribePointGroup("triclinic", "-x,-y,-z", "test");
   }
 
   ~PointGroupFactoryTest() override {
@@ -49,20 +44,15 @@ public:
   }
 
   void testCreatePointGroup() {
-    TS_ASSERT_THROWS_NOTHING(
-        PointGroupFactory::Instance().createPointGroup("monoclinicA"));
-    TS_ASSERT_THROWS_NOTHING(
-        PointGroupFactory::Instance().createPointGroup("monoclinicB"));
-    TS_ASSERT_THROWS_NOTHING(
-        PointGroupFactory::Instance().createPointGroup("triclinic"));
+    TS_ASSERT_THROWS_NOTHING(PointGroupFactory::Instance().createPointGroup("monoclinicA"));
+    TS_ASSERT_THROWS_NOTHING(PointGroupFactory::Instance().createPointGroup("monoclinicB"));
+    TS_ASSERT_THROWS_NOTHING(PointGroupFactory::Instance().createPointGroup("triclinic"));
 
-    TS_ASSERT_THROWS(PointGroupFactory::Instance().createPointGroup("cubicC"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(PointGroupFactory::Instance().createPointGroup("cubicC"), const std::invalid_argument &);
   }
 
   void testGetAllPointGroupSymbols() {
-    std::vector<std::string> symbols =
-        PointGroupFactory::Instance().getAllPointGroupSymbols();
+    std::vector<std::string> symbols = PointGroupFactory::Instance().getAllPointGroupSymbols();
 
     TS_ASSERT_DIFFERS(findString(symbols, "monoclinicA"), symbols.end());
     TS_ASSERT_DIFFERS(findString(symbols, "monoclinicB"), symbols.end());
@@ -71,36 +61,28 @@ public:
 
   void testGetAllPointGroupSymbolsCrystalSystems() {
     std::vector<std::string> cubic =
-        PointGroupFactory::Instance().getPointGroupSymbols(
-            PointGroup::CrystalSystem::Monoclinic);
+        PointGroupFactory::Instance().getPointGroupSymbols(PointGroup::CrystalSystem::Monoclinic);
 
     TS_ASSERT_DIFFERS(findString(cubic, "monoclinicA"), cubic.end());
     TS_ASSERT_DIFFERS(findString(cubic, "monoclinicB"), cubic.end());
 
     std::vector<std::string> triclinic =
-        PointGroupFactory::Instance().getPointGroupSymbols(
-            PointGroup::CrystalSystem::Triclinic);
+        PointGroupFactory::Instance().getPointGroupSymbols(PointGroup::CrystalSystem::Triclinic);
     TS_ASSERT_DIFFERS(findString(triclinic, "triclinic"), triclinic.end());
   }
 
   void testUnsubscribePointGroup() {
-    TS_ASSERT_THROWS_NOTHING(
-        PointGroupFactory::Instance().createPointGroup("monoclinicA"));
+    TS_ASSERT_THROWS_NOTHING(PointGroupFactory::Instance().createPointGroup("monoclinicA"));
 
     PointGroupFactory::Instance().unsubscribePointGroup("monoclinicA");
 
-    std::vector<std::string> allSymbols =
-        PointGroupFactory::Instance().getAllPointGroupSymbols();
+    std::vector<std::string> allSymbols = PointGroupFactory::Instance().getAllPointGroupSymbols();
     TS_ASSERT_EQUALS(findString(allSymbols, "monoclinicA"), allSymbols.end());
 
-    TS_ASSERT_THROWS(
-        PointGroupFactory::Instance().createPointGroup("monoclinicA"),
-        const std::invalid_argument &);
+    TS_ASSERT_THROWS(PointGroupFactory::Instance().createPointGroup("monoclinicA"), const std::invalid_argument &);
 
-    PointGroupFactory::Instance().subscribePointGroup("monoclinicA", "x,y,-z",
-                                                      "test");
-    TS_ASSERT_THROWS_NOTHING(
-        PointGroupFactory::Instance().createPointGroup("monoclinicA"));
+    PointGroupFactory::Instance().subscribePointGroup("monoclinicA", "x,y,-z", "test");
+    TS_ASSERT_THROWS_NOTHING(PointGroupFactory::Instance().createPointGroup("monoclinicA"));
   }
 
   void testPointGroupSymbolCreation() {
@@ -122,27 +104,22 @@ public:
     TS_ASSERT_THROWS_NOTHING(checkSpaceGroupSymbol("R 32"));
 
     PointGroup_sptr pointGroup = checkSpaceGroupSymbol("R 3");
-    TS_ASSERT_EQUALS(pointGroup->getCoordinateSystem(),
-                     Group::CoordinateSystem::Hexagonal);
+    TS_ASSERT_EQUALS(pointGroup->getCoordinateSystem(), Group::CoordinateSystem::Hexagonal);
     TS_ASSERT_EQUALS(pointGroup->getSymbol(), "3");
 
     PointGroup_sptr pointGroupAl2O3 = checkSpaceGroupSymbol("R -3 c");
-    TS_ASSERT_EQUALS(pointGroupAl2O3->getCoordinateSystem(),
-                     Group::CoordinateSystem::Hexagonal);
+    TS_ASSERT_EQUALS(pointGroupAl2O3->getCoordinateSystem(), Group::CoordinateSystem::Hexagonal);
     TS_ASSERT_EQUALS(pointGroupAl2O3->getSymbol(), "-3m");
   }
 
 private:
-  std::vector<std::string>::const_iterator
-  findString(const std::vector<std::string> &vector,
-             const std::string &searchString) {
+  std::vector<std::string>::const_iterator findString(const std::vector<std::string> &vector,
+                                                      const std::string &searchString) {
     return std::find(vector.begin(), vector.end(), searchString);
   }
 
   PointGroup_sptr checkSpaceGroupSymbol(const std::string &symbol) {
-    SpaceGroup_const_sptr spaceGroup =
-        SpaceGroupFactory::Instance().createSpaceGroup(symbol);
-    return PointGroupFactory::Instance().createPointGroupFromSpaceGroup(
-        spaceGroup);
+    SpaceGroup_const_sptr spaceGroup = SpaceGroupFactory::Instance().createSpaceGroup(symbol);
+    return PointGroupFactory::Instance().createPointGroupFromSpaceGroup(spaceGroup);
   }
 };

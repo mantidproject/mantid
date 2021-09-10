@@ -5,10 +5,10 @@
 .. relatedalgorithms::
 
 .. properties::
-  
+
 Description
 -----------
-  
+
 This algorithm calculates the median bin width of each histogram in *InputWorkspace*. The (optionally rounded) mean value of the medians is then placed in the *BinWidth* output property.
 
 Rounding
@@ -23,13 +23,13 @@ The *InputWorkspace* has to contain histogram data. For point data, :ref:`algm-C
 
 Usage
 -----
-  
+
 **Example: rebinning a workspace.**
 
 .. testcode:: Example
 
     import numpy
-    
+
     # For normal python lists: 3 * [0.1] = [0.1, 0.1, 0.1]
     binWidths = 3 * [0.1] + 4 * [1.7] + [10.0]
     # Convert to numpy array.
@@ -40,12 +40,12 @@ Usage
     # There is one less bin than the number of boundaries.
     ys = numpy.zeros(len(xs) - 1)
     ws = CreateWorkspace(DataX=xs, DataY=ys)
-    
+
     newWidth = MedianBinWidth(InputWorkspace=ws)
     print('New bin width: {0}'.format(newWidth))
-    
+
     rebinned = Rebin(InputWorkspace=ws, Params=[newWidth], FullBinsOnly=True)
-    
+
     widths = ws.readX(0)[1:] - ws.readX(0)[:-1]
     print('Bin widths before rebinning: {0}'.format(widths))
     widths = rebinned.readX(0)[1:] - rebinned.readX(0)[:-1]

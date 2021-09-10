@@ -33,8 +33,7 @@ C
 #pragma warning(disable : 4100)
 #endif
 
-int byte_rel_comp(int *data_in, int n_in, char *data_out, int max_out,
-                  int &n_out) {
+int byte_rel_comp(int *data_in, int n_in, char *data_out, int max_out, int &n_out) {
   int i, icurrent, irel;
   union {
     int i;
@@ -53,8 +52,8 @@ int byte_rel_comp(int *data_in, int n_in, char *data_out, int max_out,
     // Trap out ridiculously large numbers. They could cause problems in
     // subtraction,
     // so force them to be stored absolutely
-    if ((data_in[i] > LARGE_NUMBER) || (data_in[i] < -LARGE_NUMBER) ||
-        (icurrent > LARGE_NUMBER) || (icurrent < -LARGE_NUMBER)) {
+    if ((data_in[i] > LARGE_NUMBER) || (data_in[i] < -LARGE_NUMBER) || (icurrent > LARGE_NUMBER) ||
+        (icurrent < -LARGE_NUMBER)) {
       irel = 128; // Force absolute mode
     } else {
       irel = data_in[i] - icurrent; // Calc relative offset
@@ -117,8 +116,7 @@ C                                      =4  NOUT .gt.NIN
 C                                      =6  number of channels lt NOUT
 */
 // n_from is zero based
-int byte_rel_expn(char *data_in, int n_in, int n_from, int *data_out,
-                  int n_out) {
+int byte_rel_expn(char *data_in, int n_in, int n_from, int *data_out, int n_out) {
   int i, j;
   union {
     int i;

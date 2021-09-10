@@ -30,10 +30,8 @@ public:
   ProcessingAlgorithmBase();
 
   // Constructor
-  ProcessingAlgorithmBase(
-      const QString &name,
-      const std::set<QString> &blacklist = std::set<QString>(),
-      const int version = -1);
+  ProcessingAlgorithmBase(const QString &name, const std::set<QString> &blacklist = std::set<QString>(),
+                          const int version = -1);
 
   // Destructor
   ~ProcessingAlgorithmBase();

@@ -36,8 +36,7 @@ public:
     TS_ASSERT(props[0]->isDefault());
   }
 
-  void
-  test_Exec_UnGroup_With_GroupWorkspace_With_Multiple_Members_Removes_Group_Leaving_Members() {
+  void test_Exec_UnGroup_With_GroupWorkspace_With_Multiple_Members_Removes_Group_Leaving_Members() {
     std::vector<std::string> members(2, "test_Exec_UnGroup_With_GroupWorkspace_"
                                         "With_Multiple_Members_Removes_Group_"
                                         "Leaving_Members_1");
@@ -64,8 +63,7 @@ public:
     removeFromADS(members);
   }
 
-  void
-  test_Exec_UnGroup_With_GroupWorkspace_With_Single_Member_Removes_Group_Leaving_Members() {
+  void test_Exec_UnGroup_With_GroupWorkspace_With_Single_Member_Removes_Group_Leaving_Members() {
     std::vector<std::string> members(1, "test_Exec_UnGroup_With_GroupWorkspace_"
                                         "With_Single_Member_Removes_Group_"
                                         "Leaving_Members_1");
@@ -95,15 +93,13 @@ public:
 
     Mantid::Algorithms::UnGroupWorkspace alg;
     alg.initialize();
-    TS_ASSERT_THROWS(alg.setProperty("InputWorkspace", wsName),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg.setProperty("InputWorkspace", wsName), const std::invalid_argument &);
 
     removeFromADS(std::vector<std::string>(1, wsName));
   }
 
 private:
-  void addTestGroupToADS(const std::string &name,
-                         const std::vector<std::string> &inputs) {
+  void addTestGroupToADS(const std::string &name, const std::vector<std::string> &inputs) {
     auto newGroup = std::make_shared<Mantid::API::WorkspaceGroup>();
 
     auto &ads = Mantid::API::AnalysisDataService::Instance();
@@ -114,8 +110,7 @@ private:
     ads.add(name, newGroup);
   }
 
-  Mantid::API::MatrixWorkspace_sptr
-  addTestMatrixWorkspaceToADS(const std::string &name) {
+  Mantid::API::MatrixWorkspace_sptr addTestMatrixWorkspaceToADS(const std::string &name) {
     auto &ads = Mantid::API::AnalysisDataService::Instance();
     auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
     ads.add(name, ws);

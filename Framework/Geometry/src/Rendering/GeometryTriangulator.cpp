@@ -89,14 +89,11 @@ void GeometryTriangulator::triangulate() {
   m_isTriangulated = true;
 }
 
-void GeometryTriangulator::generateMesh() {
-  /* Placeholder function to replace MeshGeometryGenerator::Generate()*/
+void GeometryTriangulator::generateMesh() { /* Placeholder function to replace MeshGeometryGenerator::Generate()*/
 }
 
 #ifdef ENABLE_OPENCASCADE
-bool GeometryTriangulator::hasOCSurface() const {
-  return m_objSurface != nullptr;
-}
+bool GeometryTriangulator::hasOCSurface() const { return m_objSurface != nullptr; }
 /// Return OpenCascade surface.
 const TopoDS_Shape &GeometryTriangulator::getOCSurface() {
   checkTriangulated();
@@ -240,8 +237,7 @@ void GeometryTriangulator::setupFaces() {
 }
 #endif
 
-void GeometryTriangulator::setGeometryCache(size_t nPoints, size_t nFaces,
-                                            std::vector<double> &&points,
+void GeometryTriangulator::setGeometryCache(size_t nPoints, size_t nFaces, std::vector<double> &&points,
                                             std::vector<uint32_t> &&faces) {
   m_nPoints = nPoints;
   m_nFaces = nFaces;

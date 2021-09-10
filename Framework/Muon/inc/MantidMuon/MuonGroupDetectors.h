@@ -19,9 +19,7 @@ class MANTID_MUON_DLL MuonGroupDetectors : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Applies detector grouping to a workspace. (Muon version).";
-  }
+  const std::string summary() const override { return "Applies detector grouping to a workspace. (Muon version)."; }
 
   int version() const override;
   const std::string category() const override;

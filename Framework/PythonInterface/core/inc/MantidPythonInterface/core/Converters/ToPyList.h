@@ -25,8 +25,7 @@ template <typename ElementType> struct ToPyList {
    * @param cdata :: A const reference to a vector
    * @returns A new python list object
    */
-  inline boost::python::list
-  operator()(const std::vector<ElementType> &cdata) const {
+  inline boost::python::list operator()(const std::vector<ElementType> &cdata) const {
     boost::python::list result;
     for (const auto &item : cdata) {
       result.append(item);

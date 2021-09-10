@@ -20,17 +20,14 @@ class PolygonIntersectionTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static PolygonIntersectionTest *createSuite() {
-    return new PolygonIntersectionTest();
-  }
+  static PolygonIntersectionTest *createSuite() { return new PolygonIntersectionTest(); }
   static void destroySuite(PolygonIntersectionTest *suite) { delete suite; }
 
   void test_Intersection_Of_Axis_Aligned_Squares() {
     // Define two squares that partially overlap
     Quadrilateral squareOne(0.0, 2.0, 0.0,
-                            2.0); // 2x2, bottom left-hand corner at origin
-    Quadrilateral squareTwo(
-        1.0, 3.0, 1.0, 3.0); // 2x2, bottom left-hand corner at centre of first
+                            2.0);                // 2x2, bottom left-hand corner at origin
+    Quadrilateral squareTwo(1.0, 3.0, 1.0, 3.0); // 2x2, bottom left-hand corner at centre of first
 
     ConvexPolygon overlap;
     TS_ASSERT(intersection(squareOne, squareTwo, overlap));
@@ -231,9 +228,8 @@ public:
       // intersection
       Quadrilateral squareOne(0.0, 2.0, 0.0,
                               2.0); // 2x2, bottom left-hand corner at origin
-      Quadrilateral squareTwo(
-          1.0, 3.0, 1.0,
-          3.0); // 2x2, bottom left-hand corner at centre of first
+      Quadrilateral squareTwo(1.0, 3.0, 1.0,
+                              3.0); // 2x2, bottom left-hand corner at centre of first
       ConvexPolygon overlap;
       intersection(squareOne, squareTwo, overlap);
     }

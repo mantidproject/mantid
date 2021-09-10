@@ -87,11 +87,9 @@ private:
     TS_ASSERT(alg.isExecuted());
 
     // verify the results
-    Workspace2D_sptr outWorkspace =
-        AnalysisDataService::Instance().retrieveWS<Workspace2D>(out_name);
+    Workspace2D_sptr outWorkspace = AnalysisDataService::Instance().retrieveWS<Workspace2D>(out_name);
     TimeSeriesProperty<double> *newlog =
-        dynamic_cast<TimeSeriesProperty<double> *>(
-            outWorkspace->run().getLogData(logname));
+        dynamic_cast<TimeSeriesProperty<double> *>(outWorkspace->run().getLogData(logname));
     TS_ASSERT(newlog);
     TS_ASSERT(!newlog->units().empty());
     TS_ASSERT_EQUALS(length, newlog->size());

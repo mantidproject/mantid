@@ -34,18 +34,13 @@ include(GoogleTest)
 include(PyUnitTest)
 enable_testing()
 
+# build f2py fortran routines
+if (ENABLE_F2PY_ROUTINES)
+include(f2pylibraries)
+endif()
+
 # We want shared libraries everywhere
 set(BUILD_SHARED_LIBS On)
-
-if(CMAKE_GENERATOR MATCHES "Visual Studio" OR CMAKE_GENERATOR MATCHES "Xcode")
-  set(PVPLUGINS_LIBRARY_OUTPUT_DIRECTORY
-      ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/$<CONFIG>/plugins/paraview
-  )
-else()
-  set(PVPLUGINS_LIBRARY_OUTPUT_DIRECTORY
-      ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/plugins/paraview
-  )
-endif()
 
 # This allows us to group targets logically in Visual Studio
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -79,7 +74,7 @@ find_package(
   Boost ${BOOST_VERSION_REQUIRED} REQUIRED
   COMPONENTS date_time regex serialization filesystem system
 )
-add_definitions(-DBOOST_ALL_DYN_LINK -DBOOST_ALL_NO_LIB)
+add_definitions(-DBOOST_ALL_DYN_LINK -DBOOST_ALL_NO_LIB -DBOOST_BIND_GLOBAL_PLACEHOLDERS)
 # Need this defined globally for our log time values
 add_definitions(-DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG)
 # Silence issues with deprecated allocator methods in boost regex
@@ -104,20 +99,32 @@ endif()
 
 find_package(Doxygen) # optional
 
-if(CMAKE_HOST_WIN32)
+if(CMAKE_HOST_WIN32 AND NOT CONDA_BUILD)
   find_package(ZLIB REQUIRED CONFIGS zlib-config.cmake)
   set(HDF5_DIR "${THIRD_PARTY_DIR}/cmake/hdf5")
   find_package(
     HDF5
-    COMPONENTS CXX HL
+    COMPONENTS C CXX HL
     REQUIRED CONFIGS hdf5-config.cmake
   )
   set(HDF5_LIBRARIES hdf5::hdf5_cpp-shared hdf5::hdf5_hl-shared)
-else()
+elseif(CONDA_BUILD)
+  # We'll use the cmake finder
   find_package(ZLIB REQUIRED)
   find_package(
     HDF5
-    COMPONENTS CXX HL
+    MODULE
+    COMPONENTS C CXX HL
+    REQUIRED
+  )
+  set(HDF5_LIBRARIES hdf5::hdf5_cpp hdf5::hdf5)
+  set(HDF5_HL_LIBRARIES hdf5::hdf5_hl)
+  else()
+  find_package(ZLIB REQUIRED)
+  find_package(
+    HDF5
+    MODULE
+    COMPONENTS C CXX HL
     REQUIRED
   )
 endif()
@@ -217,7 +224,7 @@ if(GIT_FOUND)
     # otherwise the variable is "Unknown"
     if (ENABLE_CONDA)
       execute_process(
-        COMMAND ${GIT_EXECUTABLE} branch --show-current
+        COMMAND ${GIT_EXECUTABLE} name-rev --name-only HEAD
         OUTPUT_VARIABLE MtdVersion_WC_LAST_CHANGED_BRANCHNAME
         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
       )
@@ -240,20 +247,10 @@ if(GIT_FOUND)
     if(WIN32)
       execute_process(
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                ${GIT_TOP_LEVEL}/.githooks/pre-commit
-                ${GIT_TOP_LEVEL}/.git/hooks
-      )
-      execute_process(
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
                 ${GIT_TOP_LEVEL}/.githooks/commit-msg
                 ${GIT_TOP_LEVEL}/.git/hooks
       )
     else()
-      execute_process(
-        COMMAND ${CMAKE_COMMAND} -E create_symlink
-                ${GIT_TOP_LEVEL}/.githooks/pre-commit
-                ${GIT_TOP_LEVEL}/.git/hooks/pre-commit
-      )
       execute_process(
         COMMAND ${CMAKE_COMMAND} -E create_symlink
                 ${GIT_TOP_LEVEL}/.githooks/commit-msg
@@ -420,6 +417,52 @@ endif()
 # ##############################################################################
 if(NOT BUNDLES)
   set(BUNDLES "./")
+endif()
+
+# ##############################################################################
+# Setup pre-commit here as otherwise it will be overwritten by earlier
+# pre-commit hooks being added
+# ##############################################################################
+option(ENABLE_PRECOMMIT "Enable pre-commit framework" ON)
+if (ENABLE_PRECOMMIT)
+  # Windows should use downloaded ThirdParty version of pre-commit.cmd
+  # Everybody else should find one in their PATH
+  find_program(PRE_COMMIT_EXE
+    NAMES
+    pre-commit
+    HINTS
+    ~/.local/bin/
+    "${MSVC_PYTHON_EXECUTABLE_DIR}/Scripts/")
+  if (NOT PRE_COMMIT_EXE)
+    message ( FATAL_ERROR "Failed to find pre-commit see https://developer.mantidproject.org/GettingStarted.html" )
+  endif ()
+
+  if (WIN32)
+    if(CONDA_BUILD)
+    execute_process(COMMAND "${PRE_COMMIT_EXE}" install --overwrite WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} RESULT_VARIABLE PRE_COMMIT_RESULT)
+    else()
+    execute_process(COMMAND "${PRE_COMMIT_EXE}.cmd" install --overwrite WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} RESULT_VARIABLE PRE_COMMIT_RESULT)
+    endif()
+    if(NOT PRE_COMMIT_RESULT EQUAL "0")
+        message(FATAL_ERROR "Pre-commit install failed with ${PRE_COMMIT_RESULT}")
+    endif()
+    # Create pre-commit script wrapper to use mantid third party python for pre-commit
+    if (NOT CONDA_BUILD)
+    file(RENAME "${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit" "${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit-script.py")
+    file(WRITE "${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit" "#!/usr/bin/env sh\n${MSVC_PYTHON_EXECUTABLE_DIR}/python.exe ${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit-script.py")
+    else()
+    file(TO_CMAKE_PATH $ENV{CONDA_PREFIX} CONDA_SHELL_PATH)
+    file(RENAME "${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit" "${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit-script.py")
+    file(WRITE "${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit" "#!/usr/bin/env sh\n${CONDA_SHELL_PATH}/Scripts/wrappers/conda/python.bat ${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit-script.py")
+    endif()
+  else()  # linux as osx
+    execute_process(COMMAND bash -c "${PRE_COMMIT_EXE} install" WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} RESULT_VARIABLE STATUS)
+    if (STATUS AND NOT STATUS EQUAL 0)
+      message(FATAL_ERROR "Pre-commit tried to install itself into your repository, but failed to do so. Is it installed on your system?")
+    endif()
+  endif()
+else()
+  message(AUTHOR_WARNING "Pre-commit not enabled by CMake, please enable manually.")
 endif()
 
 # ##############################################################################

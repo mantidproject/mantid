@@ -68,8 +68,7 @@ public:
   /// Class for named object notifications
   class NamedObjectNotification : public Poco::Notification {
   public:
-    NamedObjectNotification(const std::string &name)
-        : Poco::Notification(), m_name(name) {}
+    NamedObjectNotification(const std::string &name) : Poco::Notification(), m_name(name) {}
 
     /// Returns the name of the object
     const std::string &objectName() const { return m_name; }
@@ -83,8 +82,7 @@ public:
   class DataServiceNotification : public NamedObjectNotification {
   public:
     /// Constructor
-    DataServiceNotification(const std::string &name,
-                            const std::shared_ptr<T> &obj)
+    DataServiceNotification(const std::string &name, const std::shared_ptr<T> &obj)
         : NamedObjectNotification(name), m_object(obj) {}
     /// Returns the const pointer to the object concerned or 0 if it is a
     /// general notification
@@ -115,14 +113,9 @@ public:
         Both old and new objects are guaranteed to exist when an observer
        receives the notification.
     */
-    BeforeReplaceNotification(const std::string &name,
-                              const std::shared_ptr<T> &obj,
-                              const std::shared_ptr<T> &newObj)
-        : DataServiceNotification(name, obj), m_newObject(newObj),
-          m_oldObject(obj) {}
-    const std::shared_ptr<T> &newObject() const {
-      return m_newObject;
-    } ///< Returns the pointer to the new object.
+    BeforeReplaceNotification(const std::string &name, const std::shared_ptr<T> &obj, const std::shared_ptr<T> &newObj)
+        : DataServiceNotification(name, obj), m_newObject(newObj), m_oldObject(obj) {}
+    const std::shared_ptr<T> &newObject() const { return m_newObject; } ///< Returns the pointer to the new object.
     const std::shared_ptr<T> &oldObject() const { return m_oldObject; }
 
   private:
@@ -140,8 +133,7 @@ public:
      *  Only new objects are guaranteed to exist when an observer receives the
      * notification.
      */
-    AfterReplaceNotification(const std::string &name,
-                             const std::shared_ptr<T> &newObj)
+    AfterReplaceNotification(const std::string &name, const std::shared_ptr<T> &newObj)
         : DataServiceNotification(name, newObj) {}
   };
 
@@ -152,8 +144,7 @@ public:
   class PreDeleteNotification : public DataServiceNotification {
   public:
     /// Constructor
-    PreDeleteNotification(const std::string &name,
-                          const std::shared_ptr<T> &obj)
+    PreDeleteNotification(const std::string &name, const std::shared_ptr<T> &obj)
         : DataServiceNotification(name, obj) {}
   };
 
@@ -165,8 +156,7 @@ public:
   class PostDeleteNotification : public NamedObjectNotification {
   public:
     /// Constructor
-    PostDeleteNotification(const std::string &name)
-        : NamedObjectNotification(name) {}
+    PostDeleteNotification(const std::string &name) : NamedObjectNotification(name) {}
   };
 
   /// Clear notification is sent when the service is cleared
@@ -212,8 +202,7 @@ public:
       success = datamap.insert(std::make_pair(name, Tobject)).second;
     }
     if (!success) {
-      std::string error =
-          " add : Unable to insert Data Object : '" + name + "'";
+      std::string error = " add : Unable to insert Data Object : '" + name + "'";
       g_log.error(error);
       throw std::runtime_error(error);
     } else {
@@ -230,8 +219,7 @@ public:
    * @param Tobject :: shared pointer to object to add
    * @throw std::runtime_error if name is empty
    */
-  virtual void addOrReplace(const std::string &name,
-                            const std::shared_ptr<T> &Tobject) {
+  virtual void addOrReplace(const std::string &name, const std::shared_ptr<T> &Tobject) {
     checkForNullPointer(Tobject);
 
     // Make DataService access thread-safe
@@ -243,15 +231,13 @@ public:
       lock.unlock();
       g_log.debug("Data Object '" + name + "' replaced in data service.\n");
 
-      notificationCenter.postNotification(
-          new BeforeReplaceNotification(name, it->second, Tobject));
+      notificationCenter.postNotification(new BeforeReplaceNotification(name, it->second, Tobject));
 
       lock.lock();
       it->second = Tobject;
       lock.unlock();
 
-      notificationCenter.postNotification(
-          new AfterReplaceNotification(name, Tobject));
+      notificationCenter.postNotification(new AfterReplaceNotification(name, Tobject));
     } else {
       // Avoid double-locking
       lock.unlock();
@@ -318,8 +304,7 @@ public:
       auto targetNameObject = targetNameIter->second;
       // As we are renaming the existing name turns into the new name
       lock.unlock();
-      notificationCenter.postNotification(new BeforeReplaceNotification(
-          newName, targetNameObject, existingNameObject));
+      notificationCenter.postNotification(new BeforeReplaceNotification(newName, targetNameObject, existingNameObject));
       lock.lock();
     }
 
@@ -328,14 +313,12 @@ public:
     if (targetNameIter != datamap.end()) {
       targetNameIter->second = std::move(existingNameObject);
       lock.unlock();
-      notificationCenter.postNotification(
-          new AfterReplaceNotification(newName, targetNameIter->second));
+      notificationCenter.postNotification(new AfterReplaceNotification(newName, targetNameIter->second));
     } else {
       if (!(datamap.emplace(newName, std::move(existingNameObject)).second)) {
         // should never happen
         lock.unlock();
-        std::string error =
-            " add : Unable to insert Data Object : '" + newName + "'";
+        std::string error = " add : Unable to insert Data Object : '" + newName + "'";
         g_log.error(error);
         throw std::runtime_error(error);
       } else {
@@ -343,8 +326,7 @@ public:
       }
     }
     g_log.debug("Data Object '" + oldName + "' renamed to '" + newName + "'");
-    notificationCenter.postNotification(
-        new RenameNotification(oldName, newName));
+    notificationCenter.postNotification(new RenameNotification(oldName, newName));
   }
 
   //--------------------------------------------------------------------------
@@ -373,10 +355,8 @@ public:
     if (it != datamap.end()) {
       return it->second;
     } else {
-      throw Kernel::Exception::NotFoundError(
-          "Unable to find Data Object type with name '" + name +
-              "': data service ",
-          name);
+      throw Kernel::Exception::NotFoundError("Unable to find Data Object type with name '" + name + "': data service ",
+                                             name);
     }
   }
 
@@ -422,10 +402,9 @@ public:
    * @param contain Include only object names that contain this string.
    * @return A vector of strings containing object names in the ADS
    */
-  std::vector<std::string>
-  getObjectNames(DataServiceSort sortState = DataServiceSort::Unsorted,
-                 DataServiceHidden hiddenState = DataServiceHidden::Auto,
-                 const std::string &contain = "") const {
+  std::vector<std::string> getObjectNames(DataServiceSort sortState = DataServiceSort::Unsorted,
+                                          DataServiceHidden hiddenState = DataServiceHidden::Auto,
+                                          const std::string &contain = "") const {
 
     std::vector<std::string> foundNames;
 
@@ -476,14 +455,11 @@ public:
   }
 
   /// Get a vector of the pointers to the data objects stored by the service
-  std::vector<std::shared_ptr<T>>
-  getObjects(DataServiceHidden includeHidden = DataServiceHidden::Auto) const {
+  std::vector<std::shared_ptr<T>> getObjects(DataServiceHidden includeHidden = DataServiceHidden::Auto) const {
     std::lock_guard<std::recursive_mutex> _lock(m_mutex);
 
-    const bool alwaysIncludeHidden =
-        includeHidden == DataServiceHidden::Include;
-    const bool usingAuto =
-        includeHidden == DataServiceHidden::Auto && showingHiddenObjects();
+    const bool alwaysIncludeHidden = includeHidden == DataServiceHidden::Include;
+    const bool usingAuto = includeHidden == DataServiceHidden::Auto && showingHiddenObjects();
 
     const bool showingHidden = alwaysIncludeHidden || usingAuto;
 
@@ -504,8 +480,7 @@ public:
   }
 
   static bool showingHiddenObjects() {
-    auto showingHiddenFlag = ConfigService::Instance().getValue<bool>(
-        "MantidOptions.InvisibleWorkspaces");
+    auto showingHiddenFlag = ConfigService::Instance().getValue<bool>("MantidOptions.InvisibleWorkspaces");
     return showingHiddenFlag.get_value_or(false);
   }
 

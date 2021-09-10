@@ -39,10 +39,8 @@ public:
 
     loaderCAL.initialize();
     loaderCAL.isInitialized();
-    loaderCAL.setPropertyValue(
-        "Filename",
-        ConfigService::Instance().getString("instrumentDefinition.directory") +
-            "/INES_Definition.xml");
+    loaderCAL.setPropertyValue("Filename", ConfigService::Instance().getString("instrumentDefinition.directory") +
+                                               "/INES_Definition.xml");
     const std::string wsName = "LoadEmptyInstrumentTestCAL";
     loaderCAL.setPropertyValue("OutputWorkspace", wsName);
     loaderCAL.execute();
@@ -57,9 +55,8 @@ public:
     outputFile = "./INES_CreateCalFileByNamesTest.cal";
     testerCAL.setPropertyValue("GroupingFileName", outputFile);
     outputFile = testerCAL.getPropertyValue("GroupingFileName");
-    TS_ASSERT_THROWS_NOTHING(testerCAL.setPropertyValue(
-        "GroupNames",
-        "bank1A, bank2B,bank3C, bank4D,bank5E,bank6F, bank7G,bank8H,bank9I"));
+    TS_ASSERT_THROWS_NOTHING(
+        testerCAL.setPropertyValue("GroupNames", "bank1A, bank2B,bank3C, bank4D,bank5E,bank6F, bank7G,bank8H,bank9I"));
 
     TS_ASSERT_THROWS_NOTHING(testerCAL.execute());
     TS_ASSERT_THROWS_NOTHING(testerCAL.isExecuted());

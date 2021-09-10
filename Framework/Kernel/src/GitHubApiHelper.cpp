@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/GitHubApiHelper.h"
+#include "MantidJson/Json.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Logger.h"
@@ -40,15 +41,13 @@ const std::string RATE_LIMIT_URL("https://api.github.com/rate_limit");
 // key to retreive api token from ConfigService
 const std::string CONFIG_KEY_GITHUB_TOKEN("network.github.api_token");
 
-std::string formatRateLimit(const int rateLimit, const int remaining,
-                            const int expires) {
+std::string formatRateLimit(const int rateLimit, const int remaining, const int expires) {
   DateAndTime expiresDateAndTime;
   expiresDateAndTime.set_from_time_t(expires);
 
   std::stringstream msg;
-  msg << "GitHub API limited to " << remaining << " of " << rateLimit
-      << " calls left. Resets at " << expiresDateAndTime.toISO8601String()
-      << "Z";
+  msg << "GitHub API limited to " << remaining << " of " << rateLimit << " calls left. Resets at "
+      << expiresDateAndTime.toISO8601String() << "Z";
   return msg.str();
 }
 
@@ -70,8 +69,7 @@ std::string getApiToken() {
     // error check that token is possibly valid - 40 char
     // TODO example: 8ec7afc857540ee60af78cba1cf7779a6ed0b6b9
     if (token.size() != 40) {
-      g_log.notice() << "GitHub API token is not 40 characters (found "
-                     << token.size() << ") with token =\"" << token
+      g_log.notice() << "GitHub API token is not 40 characters (found " << token.size() << ") with token =\"" << token
                      << "\" using unauthenticated connection\n";
       token = "";
     }
@@ -108,8 +106,7 @@ GitHubApiHelper::GitHubApiHelper() : InternetHelper() {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-GitHubApiHelper::GitHubApiHelper(const Kernel::ProxyInfo &proxy)
-    : InternetHelper(proxy) {
+GitHubApiHelper::GitHubApiHelper(const Kernel::ProxyInfo &proxy) : InternetHelper(proxy) {
   // set up the api token so it can be quickly added to the authentication
   m_api_token = getApiToken();
 
@@ -128,38 +125,32 @@ void GitHubApiHelper::addAuthenticationToken() {
   }
 }
 
-bool GitHubApiHelper::isAuthenticated() {
-  return (m_headers.find("Authorization") != m_headers.end());
-}
+bool GitHubApiHelper::isAuthenticated() { return (m_headers.find("Authorization") != m_headers.end()); }
 
-void GitHubApiHelper::processResponseHeaders(
-    const Poco::Net::HTTPResponse &res) {
+void GitHubApiHelper::processResponseHeaders(const Poco::Net::HTTPResponse &res) {
   // get github api rate limit information if available;
   int rateLimitRemaining = 0;
   int rateLimitLimit;
   int rateLimitReset;
   try {
-    rateLimitLimit =
-        boost::lexical_cast<int>(res.get("X-RateLimit-Limit", "-1"));
-    rateLimitRemaining =
-        boost::lexical_cast<int>(res.get("X-RateLimit-Remaining", "-1"));
-    rateLimitReset =
-        boost::lexical_cast<int>(res.get("X-RateLimit-Reset", "0"));
+    rateLimitLimit = boost::lexical_cast<int>(res.get("X-RateLimit-Limit", "-1"));
+    rateLimitRemaining = boost::lexical_cast<int>(res.get("X-RateLimit-Remaining", "-1"));
+    rateLimitReset = boost::lexical_cast<int>(res.get("X-RateLimit-Reset", "0"));
   } catch (boost::bad_lexical_cast const &) {
     rateLimitLimit = -1;
   }
   if (rateLimitLimit > -1) {
-    g_log.debug(
-        formatRateLimit(rateLimitLimit, rateLimitRemaining, rateLimitReset));
+    g_log.debug(formatRateLimit(rateLimitLimit, rateLimitRemaining, rateLimitReset));
   }
 }
 
 std::string GitHubApiHelper::getRateLimitDescription() {
   std::stringstream responseStream;
   this->sendRequest(RATE_LIMIT_URL, responseStream);
-  Json::Reader reader;
+  auto responseString = responseStream.str();
+
   Json::Value root;
-  if (!reader.parse(responseStream, root)) {
+  if (!Mantid::JsonHelpers::parse(responseString, &root, NULL)) {
     return "Failed to parse json document from \"" + RATE_LIMIT_URL + "\"";
   }
 
@@ -174,36 +165,30 @@ std::string GitHubApiHelper::getRateLimitDescription() {
   return formatRateLimit(limit, remaining, expires);
 }
 
-int GitHubApiHelper::processAnonymousRequest(Poco::URI &uri,
-                                             std::ostream &responseStream) {
+int GitHubApiHelper::processAnonymousRequest(Poco::URI &uri, std::ostream &responseStream) {
   g_log.debug("Repeating API call anonymously\n");
   removeHeader("Authorization");
   m_api_token = ""; // all future calls are anonymous
   return this->sendRequest(uri.toString(), responseStream);
 }
 
-int GitHubApiHelper::sendRequestAndProcess(HTTPClientSession &session,
-                                           Poco::URI &uri,
-                                           std::ostream &responseStream) {
+int GitHubApiHelper::sendRequestAndProcess(HTTPClientSession &session, Poco::URI &uri, std::ostream &responseStream) {
   // create a request
   this->createRequest(uri);
   session.sendRequest(*m_request) << m_body;
 
   std::istream &rs = session.receiveResponse(*m_response);
   int retStatus = m_response->getStatus();
-  g_log.debug() << "Answer from web: " << retStatus << " "
-                << m_response->getReason() << "\n";
+  g_log.debug() << "Answer from web: " << retStatus << " " << m_response->getReason() << "\n";
 
-  if (retStatus == HTTP_OK ||
-      (retStatus == HTTP_CREATED && m_method == HTTPRequest::HTTP_POST)) {
+  if (retStatus == HTTP_OK || (retStatus == HTTP_CREATED && m_method == HTTPRequest::HTTP_POST)) {
     Poco::StreamCopier::copyStream(rs, responseStream);
     if (m_response)
       processResponseHeaders(*m_response);
     else
       g_log.warning("Response is null pointer");
     return retStatus;
-  } else if ((retStatus == HTTP_FORBIDDEN && isAuthenticated()) ||
-             (retStatus == HTTP_UNAUTHORIZED) ||
+  } else if ((retStatus == HTTP_FORBIDDEN && isAuthenticated()) || (retStatus == HTTP_UNAUTHORIZED) ||
              (retStatus == HTTP_NOT_FOUND)) {
     // If authentication fails you can get HTTP_UNAUTHORIZED or HTTP_NOT_FOUND
     // If the limit runs out you can get HTTP_FORBIDDEN

@@ -22,10 +22,9 @@ namespace MplCpp {
  */
 class MANTID_MPLCPP_DLL RangeMarker : public Common::Python::InstanceHolder {
 public:
-  explicit RangeMarker(
-      FigureCanvasQt *canvas, QString const &color, double x_minimum,
-      double x_maximum, QString const &rangeType,
-      QHash<QString, QVariant> const &otherKwargs = QHash<QString, QVariant>());
+  explicit RangeMarker(FigureCanvasQt *canvas, QString const &color, double x_minimum, double x_maximum,
+                       QString const &rangeType,
+                       QHash<QString, QVariant> const &otherKwargs = QHash<QString, QVariant>());
 
   void redraw();
   void remove();

@@ -32,8 +32,7 @@ class ParameterMap;
 class ReferenceFrame;
 /// Convenience typedef
 using InstrumentParameterCache =
-    std::map<std::pair<std::string, const IComponent *>,
-             std::shared_ptr<XMLInstrumentParameter>>;
+    std::map<std::pair<std::string, const IComponent *>, std::shared_ptr<XMLInstrumentParameter>>;
 
 /**
 Base Instrument Class.
@@ -48,8 +47,7 @@ public:
   /// String description of the type of component
   std::string type() const override { return "Instrument"; }
 
-  Instrument(const std::shared_ptr<const Instrument> &instr,
-             const std::shared_ptr<ParameterMap> &map);
+  Instrument(const std::shared_ptr<const Instrument> &instr, const std::shared_ptr<ParameterMap> &map);
   Instrument();
   Instrument(const std::string &name);
   Instrument(const Instrument &);
@@ -72,12 +70,10 @@ public:
   IDetector_const_sptr getDetectorG(const std::set<detid_t> &det_ids) const;
 
   /// Returns a list of Detectors for the given detectors ids
-  std::vector<IDetector_const_sptr>
-  getDetectors(const std::vector<detid_t> &det_ids) const;
+  std::vector<IDetector_const_sptr> getDetectors(const std::vector<detid_t> &det_ids) const;
 
   /// Returns a list of Detectors for the given detectors ids
-  std::vector<IDetector_const_sptr>
-  getDetectors(const std::set<detid_t> &det_ids) const;
+  std::vector<IDetector_const_sptr> getDetectors(const std::set<detid_t> &det_ids) const;
 
   /// mark a Component which has already been added to the Instrument (as a
   /// child comp.)
@@ -116,10 +112,8 @@ public:
 
   void getMinMaxDetectorIDs(detid_t &min, detid_t &max) const;
 
-  void getDetectorsInBank(std::vector<IDetector_const_sptr> &dets,
-                          const IComponent &comp) const;
-  void getDetectorsInBank(std::vector<IDetector_const_sptr> &dets,
-                          const std::string &bankName) const;
+  void getDetectorsInBank(std::vector<IDetector_const_sptr> &dets, const IComponent &comp) const;
+  void getDetectorsInBank(std::vector<IDetector_const_sptr> &dets, const std::string &bankName) const;
 
   /// Returns a list containing the detector ids of monitors
   std::vector<detid_t> getMonitors() const;
@@ -128,23 +122,18 @@ public:
   void getBoundingBox(BoundingBox &assemblyBox) const override;
 
   /// Get pointers to plottable components
-  std::shared_ptr<const std::vector<IObjComponent_const_sptr>>
-  getPlottable() const;
+  std::shared_ptr<const std::vector<IObjComponent_const_sptr>> getPlottable() const;
 
   /// Returns a shared pointer to a component
-  std::shared_ptr<const IComponent>
-  getComponentByID(const IComponent *id) const;
+  std::shared_ptr<const IComponent> getComponentByID(const IComponent *id) const;
 
   /// Returns pointers to all components encountered with the given name
-  std::vector<std::shared_ptr<const IComponent>>
-  getAllComponentsWithName(const std::string &cname) const;
+  std::vector<std::shared_ptr<const IComponent>> getAllComponentsWithName(const std::string &cname) const;
 
   /// Get information about the parameters described in the instrument
   /// definition file and associated parameter files
   InstrumentParameterCache &getLogfileCache() { return m_logfileCache; }
-  const InstrumentParameterCache &getLogfileCache() const {
-    return m_logfileCache;
-  }
+  const InstrumentParameterCache &getLogfileCache() const { return m_logfileCache; }
 
   /// Get information about the units used for parameters described in the IDF
   /// and associated parameter files
@@ -193,9 +182,7 @@ public:
   std::shared_ptr<const Instrument> getPhysicalInstrument() const;
   void setPhysicalInstrument(std::unique_ptr<Instrument>);
 
-  void getInstrumentParameters(double &l1, Kernel::V3D &beamline,
-                               double &beamline_norm,
-                               Kernel::V3D &samplePos) const;
+  void getInstrumentParameters(double &l1, Kernel::V3D &beamline, double &beamline_norm, Kernel::V3D &samplePos) const;
 
   void saveNexus(::NeXus::File *file, const std::string &group) const;
   void loadNexus(::NeXus::File *file, const std::string &group);
@@ -232,19 +219,16 @@ public:
 
 private:
   /// Save information about a set of detectors to Nexus
-  void saveDetectorSetInfoToNexus(::NeXus::File *file,
-                                  const std::vector<detid_t> &detIDs) const;
+  void saveDetectorSetInfoToNexus(::NeXus::File *file, const std::vector<detid_t> &detIDs) const;
 
   /// Private copy assignment operator
   Instrument &operator=(const Instrument &);
 
   /// Add a plottable component
-  void appendPlottable(const CompAssembly &ca,
-                       std::vector<IObjComponent_const_sptr> &lst) const;
+  void appendPlottable(const CompAssembly &ca, std::vector<IObjComponent_const_sptr> &lst) const;
 
   std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
-  makeWrappers(ParameterMap &pmap, const ComponentInfo &componentInfo,
-               const DetectorInfo &detectorInfo) const;
+  makeWrappers(ParameterMap &pmap, const ComponentInfo &componentInfo, const DetectorInfo &detectorInfo) const;
 
   /// Map which holds detector-IDs and pointers to detector components, and
   /// monitor flags.
@@ -316,14 +300,12 @@ private:
 };
 namespace Conversion {
 
-MANTID_GEOMETRY_DLL double tofToDSpacingFactor(const double l1, const double l2,
-                                               const double twoTheta,
+MANTID_GEOMETRY_DLL double tofToDSpacingFactor(const double l1, const double l2, const double twoTheta,
                                                const double offset);
 
-double MANTID_GEOMETRY_DLL
-tofToDSpacingFactor(const double l1, const double l2, const double twoTheta,
-                    const std::vector<detid_t> &detectors,
-                    const std::map<detid_t, double> &offsets);
+double MANTID_GEOMETRY_DLL tofToDSpacingFactor(const double l1, const double l2, const double twoTheta,
+                                               const std::vector<detid_t> &detectors,
+                                               const std::map<detid_t, double> &offsets);
 } // namespace Conversion
 
 } // namespace Geometry

@@ -20,10 +20,8 @@ namespace Geometry {
  * @param base: the base (un-parametrized) IComponent
  * @param map: pointer to the ParameterMap
  * */
-GridDetectorPixel::GridDetectorPixel(const GridDetectorPixel *base,
-                                     const ParameterMap *map)
-    : Detector(base, map), m_panel(base->m_panel), m_col(base->m_col),
-      m_row(base->m_row), m_layer(base->m_layer) {}
+GridDetectorPixel::GridDetectorPixel(const GridDetectorPixel *base, const ParameterMap *map)
+    : Detector(base, map), m_panel(base->m_panel), m_col(base->m_col), m_row(base->m_row), m_layer(base->m_layer) {}
 
 /** Constructor
  *
@@ -37,16 +35,12 @@ GridDetectorPixel::GridDetectorPixel(const GridDetectorPixel *base,
  * @param col :: column of the pixel in the panel
  * @param layer :: layer of the pixel in the panel
  */
-GridDetectorPixel::GridDetectorPixel(const std::string &name, int id,
-                                     const std::shared_ptr<IObject> &shape,
-                                     IComponent *parent,
-                                     const GridDetector *panel, size_t col,
-                                     size_t row, size_t layer)
-    : Detector(name, id, std::move(shape), parent), m_panel(panel), m_col(col),
-      m_row(row), m_layer(layer) {
+GridDetectorPixel::GridDetectorPixel(const std::string &name, int id, const std::shared_ptr<IObject> &shape,
+                                     IComponent *parent, const GridDetector *panel, size_t col, size_t row,
+                                     size_t layer)
+    : Detector(name, id, std::move(shape), parent), m_panel(panel), m_col(col), m_row(row), m_layer(layer) {
   if (!m_panel)
-    throw std::runtime_error("GridDetectorPixel::ctor(): pixel " + name +
-                             " has no valid GridDetector parent.");
+    throw std::runtime_error("GridDetectorPixel::ctor(): pixel " + name + " has no valid GridDetector parent.");
 }
 
 //----------------------------------------------------------------------------------------------

@@ -29,8 +29,7 @@ public:
   /// Constructor with just a workspace (reverse order to above so compiler
   /// doesn't convert a
   /// a bool to an size_t and call the wrong thing
-  PlotAxis(const bool plottingDistribution,
-           const Mantid::API::MatrixWorkspace &workspace);
+  PlotAxis(const bool plottingDistribution, const Mantid::API::MatrixWorkspace &workspace);
 
   /// Disable default constructor
   PlotAxis() = delete;
@@ -40,13 +39,11 @@ public:
 
 private:
   /// Creates a title suitable for an axis attached to the given index
-  void titleFromIndex(const Mantid::API::IMDWorkspace &workspace,
-                      const size_t index);
+  void titleFromIndex(const Mantid::API::IMDWorkspace &workspace, const size_t index);
   /// Creates a title suitable for an axis attached to the given dimension
   void titleFromDimension(const Mantid::Geometry::IMDDimension &dim);
   /// Creates a title suitable for the Y data values
-  void titleFromYData(const Mantid::API::MatrixWorkspace &workspace,
-                      const bool plottingDistribution);
+  void titleFromYData(const Mantid::API::MatrixWorkspace &workspace, const bool plottingDistribution);
 
   /// Title
   QString m_title;

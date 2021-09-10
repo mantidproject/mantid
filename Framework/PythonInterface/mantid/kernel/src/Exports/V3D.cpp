@@ -98,8 +98,7 @@ void export_V3D() {
   GNU_DIAG_OFF("self-assign-overloaded")
   class_<V3D>("V3D", init<>("Construct a V3D at the origin"))
       .def_pickle(V3DPickleSuite())
-      .def(init<double, double, double>(
-          "Construct a V3D with X,Y,Z coordinates"))
+      .def(init<double, double, double>("Construct a V3D with X,Y,Z coordinates"))
       .def("X", &V3D::X, arg("self"), "Returns the X coordinate")
       .def("Y", &V3D::Y, arg("self"), "Returns the Y coordinate")
       .def("Z", &V3D::Z, arg("self"), "Returns the Z coordinate")
@@ -111,37 +110,27 @@ void export_V3D() {
            "Returns the Z coordinate") // Traditional name
       .def("distance", &V3D::distance, (arg("self"), arg("other")),
            "Returns the distance between this vector and another")
-      .def("angle", &V3D::angle, (arg("self"), arg("other")),
-           "Returns the angle between this vector and another")
+      .def("angle", &V3D::angle, (arg("self"), arg("other")), "Returns the angle between this vector and another")
       .def("cosAngle", &V3D::cosAngle, (arg("self"), arg("other")),
            "Returns cos(angle) between this vector and another")
-      .def("zenith", &V3D::zenith, (arg("self"), arg("other")),
-           "Returns the zenith between this vector and another")
+      .def("zenith", &V3D::zenith, (arg("self"), arg("other")), "Returns the zenith between this vector and another")
       .def("scalar_prod", &V3D::scalar_prod, (arg("self"), arg("other")),
            "Computes the scalar product between this and another vector")
       .def("cross_prod", &V3D::cross_prod, (arg("self"), arg("other")),
            "Computes the cross product between this and another vector")
-      .def("norm", &V3D::norm, arg("self"),
-           "Calculates the length of the vector")
-      .def("norm2", &V3D::norm2, arg("self"),
-           "Calculates the squared length of the vector")
-      .def("__add__", &V3D::operator+,(arg("left"), arg("right")))
-      .def("__iadd__", &V3D::operator+=, return_self<>(),
-           (arg("self"), arg("other")))
-      .def("__sub__",
-           static_cast<V3D (V3D::*)(const V3D &) const>(&V3D::operator-),
-           (arg("left"), arg("right")))
-      .def("__isub__", &V3D::operator-=, return_self<>(),
-           (arg("self"), arg("other")))
-      .def("__neg__", static_cast<V3D (V3D::*)() const>(&V3D::operator-),
-           (arg("self")))
+      .def("norm", &V3D::norm, arg("self"), "Calculates the length of the vector")
+      .def("norm2", &V3D::norm2, arg("self"), "Calculates the squared length of the vector")
+      .def("__add__", &V3D::operator+, (arg("left"), arg("right")))
+      .def("__iadd__", &V3D::operator+=, return_self<>(), (arg("self"), arg("other")))
+      .def("__sub__", static_cast<V3D (V3D::*)(const V3D &) const>(&V3D::operator-), (arg("left"), arg("right")))
+      .def("__isub__", &V3D::operator-=, return_self<>(), (arg("self"), arg("other")))
+      .def("__neg__", static_cast<V3D (V3D::*)() const>(&V3D::operator-), (arg("self")))
       .def("__len__", &getV3DLength, (arg("self")),
            "Returns the length of the vector for list-like interface. Always "
            "returns 3.")
       .def("__getitem__", &getV3DItem, (arg("self"), arg("index")),
            "Access the V3D-object like a list for getting elements.")
-      .def("__setitem__", &setV3DItem,
-           (arg("self"), arg("index"), arg("value")),
+      .def("__setitem__", &setV3DItem, (arg("self"), arg("index"), arg("value")),
            "Access the V3D-object like a list for setting elements.")
 
       .def(self * self)
@@ -162,8 +151,7 @@ void export_V3D() {
       .def(self_ns::str(self))
       .def(self_ns::repr(self))
       .def("__hash__", &hashV3D)
-      .def("directionAngles", &V3D::directionAngles,
-           (arg("self"), arg("inDegrees")),
+      .def("directionAngles", &V3D::directionAngles, (arg("self"), arg("inDegrees")),
            "Calculate direction angles from direction cosines")
       .def("directionAngles", &directionAnglesDefault, arg("self"),
            "Calculate direction angles from direction cosines");

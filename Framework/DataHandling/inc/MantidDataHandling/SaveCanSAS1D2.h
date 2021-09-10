@@ -63,9 +63,7 @@ stylesheet
 class DLLExport SaveCanSAS1D2 : public SaveCanSAS1D {
 public:
   int version() const override { return 2; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"LoadCanSAS1D"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"LoadCanSAS1D"}; }
 
 protected:
   /// Extends the SaveCanSAS1D init method

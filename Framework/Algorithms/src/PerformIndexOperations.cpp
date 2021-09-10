@@ -26,23 +26,19 @@ public:
 
   virtual MatrixWorkspace_sptr execute(MatrixWorkspace_sptr input) const = 0;
 
-  virtual MatrixWorkspace_sptr
-  executeAndAppend(MatrixWorkspace_sptr inputWS,
-                   MatrixWorkspace_sptr toAppend) const {
+  virtual MatrixWorkspace_sptr executeAndAppend(MatrixWorkspace_sptr inputWS, MatrixWorkspace_sptr toAppend) const {
     if (!this->isValid()) {
       return toAppend;
     } else {
       MatrixWorkspace_sptr current = this->execute(std::move(inputWS));
-      Mantid::API::AlgorithmManagerImpl &factory =
-          Mantid::API::AlgorithmManager::Instance();
+      Mantid::API::AlgorithmManagerImpl &factory = Mantid::API::AlgorithmManager::Instance();
       auto conjoinWorkspaceAlg = factory.create("ConjoinWorkspaces");
       conjoinWorkspaceAlg->setChild(true);
       conjoinWorkspaceAlg->initialize();
       conjoinWorkspaceAlg->setProperty("InputWorkspace1", toAppend);
       conjoinWorkspaceAlg->setProperty("InputWorkspace2", current);
       conjoinWorkspaceAlg->execute();
-      MatrixWorkspace_sptr outWS =
-          conjoinWorkspaceAlg->getProperty("InputWorkspace1");
+      MatrixWorkspace_sptr outWS = conjoinWorkspaceAlg->getProperty("InputWorkspace1");
       return outWS;
     }
   }
@@ -59,8 +55,7 @@ using VecCommands = std::vector<std::shared_ptr<Command>>;
 class NullCommand : public Command {
   bool isValid() const override { return false; }
   MatrixWorkspace_sptr execute(MatrixWorkspace_sptr /*input*/) const override {
-    throw std::runtime_error(
-        "Should not be attempting ::execute on a NullCommand");
+    throw std::runtime_error("Should not be attempting ::execute on a NullCommand");
   }
 };
 
@@ -72,14 +67,12 @@ private:
   std::vector<int> m_indexes;
 
 public:
-  explicit AdditionCommand(const std::vector<int> &indexes)
-      : m_indexes(indexes) {}
+  explicit AdditionCommand(const std::vector<int> &indexes) : m_indexes(indexes) {}
 
   MatrixWorkspace_sptr execute(MatrixWorkspace_sptr inputWS) const override {
     MatrixWorkspace_sptr outWS;
     if (!m_indexes.empty()) {
-      Mantid::API::AlgorithmManagerImpl &factory =
-          Mantid::API::AlgorithmManager::Instance();
+      Mantid::API::AlgorithmManagerImpl &factory = Mantid::API::AlgorithmManager::Instance();
       auto sumSpectraAlg = factory.create("SumSpectra");
       sumSpectraAlg->setChild(true);
       sumSpectraAlg->initialize();
@@ -107,8 +100,7 @@ public:
 
     MatrixWorkspace_sptr outWS;
     for (size_t i = 0; i < m_indexes.size(); ++i) {
-      Mantid::API::AlgorithmManagerImpl &factory =
-          Mantid::API::AlgorithmManager::Instance();
+      Mantid::API::AlgorithmManagerImpl &factory = Mantid::API::AlgorithmManager::Instance();
       auto cropWorkspaceAlg = factory.create("CropWorkspace");
       cropWorkspaceAlg->setChild(true);
       cropWorkspaceAlg->initialize();
@@ -117,8 +109,7 @@ public:
       cropWorkspaceAlg->setProperty("EndWorkspaceIndex", m_indexes[i]);
       cropWorkspaceAlg->setPropertyValue("OutputWorkspace", "outWS");
       cropWorkspaceAlg->execute();
-      MatrixWorkspace_sptr subRange =
-          cropWorkspaceAlg->getProperty("OutputWorkspace");
+      MatrixWorkspace_sptr subRange = cropWorkspaceAlg->getProperty("OutputWorkspace");
       if (i == 0) {
         outWS = subRange;
       } else {
@@ -157,8 +148,7 @@ public:
     Command *command = nullptr;
     boost::regex ex = getRegex();
     if (boost::regex_match(instruction, ex)) {
-      auto indexes =
-          Mantid::Kernel::Strings::parseRange(instruction, ",", getSeparator());
+      auto indexes = Mantid::Kernel::Strings::parseRange(instruction, ",", getSeparator());
       command = new ProductType(indexes);
     } else {
       command = new NullCommand;
@@ -252,17 +242,13 @@ DECLARE_ALGORITHM(PerformIndexOperations)
 
 //------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string PerformIndexOperations::name() const {
-  return "PerformIndexOperations";
-}
+const std::string PerformIndexOperations::name() const { return "PerformIndexOperations"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int PerformIndexOperations::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string PerformIndexOperations::category() const {
-  return "Transforms\\Grouping";
-}
+const std::string PerformIndexOperations::category() const { return "Transforms\\Grouping"; }
 
 //------------------------------------------------------------------------------
 
@@ -270,14 +256,11 @@ const std::string PerformIndexOperations::category() const {
 /** Initialize the algorithm's properties.
  */
 void PerformIndexOperations::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
                   "Input to processes workspace.");
-  declareProperty(std::make_unique<PropertyWithValue<std::string>>(
-                      "ProcessingInstructions", "", Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>("ProcessingInstructions", "", Direction::Input),
                   "Processing instructions. See full instruction list.");
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "Output processed workspace");
 }
 
@@ -291,13 +274,10 @@ void PerformIndexOperations::init() {
  */
 VecCommands interpret(const std::string &processingInstructions) {
   std::vector<std::string> processingInstructionsSplit;
-  boost::split(processingInstructionsSplit, processingInstructions,
-               boost::is_any_of(","));
+  boost::split(processingInstructionsSplit, processingInstructions, boost::is_any_of(","));
 
-  VecCommandParsers commandParsers{std::make_shared<AdditionParserRange>(),
-                                   std::make_shared<CropParserRange>(),
-                                   std::make_shared<CropParserIndex>(),
-                                   std::make_shared<AdditionParser>()};
+  VecCommandParsers commandParsers{std::make_shared<AdditionParserRange>(), std::make_shared<CropParserRange>(),
+                                   std::make_shared<CropParserIndex>(), std::make_shared<AdditionParser>()};
 
   VecCommands commands;
   for (const auto &candidate : processingInstructionsSplit) {
@@ -323,14 +303,11 @@ VecCommands interpret(const std::string &processingInstructions) {
  */
 void PerformIndexOperations::exec() {
   MatrixWorkspace_sptr inputWorkspace = this->getProperty("InputWorkspace");
-  const std::string processingInstructions =
-      this->getProperty("ProcessingInstructions");
+  const std::string processingInstructions = this->getProperty("ProcessingInstructions");
 
-  boost::regex re(
-      R"(^\s*[0-9]+\s*$|^(\s*,*[0-9]+(\s*(,|:|\+|\-)\s*)*[0-9]*)*$)");
+  boost::regex re(R"(^\s*[0-9]+\s*$|^(\s*,*[0-9]+(\s*(,|:|\+|\-)\s*)*[0-9]*)*$)");
   if (!boost::regex_match(processingInstructions, re)) {
-    throw std::invalid_argument("ProcessingInstructions are not well formed: " +
-                                processingInstructions);
+    throw std::invalid_argument("ProcessingInstructions are not well formed: " + processingInstructions);
   }
 
   if (processingInstructions.empty()) {
@@ -339,8 +316,7 @@ void PerformIndexOperations::exec() {
     cloneWS->setProperty("InputWorkspace", inputWorkspace);
     cloneWS->execute();
     Workspace_sptr tmp = cloneWS->getProperty("OutputWorkspace");
-    MatrixWorkspace_sptr outWS =
-        std::dynamic_pointer_cast<MatrixWorkspace>(tmp);
+    MatrixWorkspace_sptr outWS = std::dynamic_pointer_cast<MatrixWorkspace>(tmp);
     this->setProperty("OutputWorkspace", outWS);
   } else {
     // Interpret the instructions.

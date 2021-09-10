@@ -35,9 +35,7 @@ DECLARE_ALGORITHM(CalculateCountRate)
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string CalculateCountRate::name() const {
-  return "CalculateCountRate";
-}
+const std::string CalculateCountRate::name() const { return "CalculateCountRate"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int CalculateCountRate::version() const { return 1; }
@@ -59,91 +57,76 @@ const std::string CalculateCountRate::summary() const {
 void CalculateCountRate::init() {
 
   declareProperty(
-      std::make_unique<API::WorkspaceProperty<DataObjects::EventWorkspace>>(
-          "Workspace", "", Kernel::Direction::InOut),
+      std::make_unique<API::WorkspaceProperty<DataObjects::EventWorkspace>>("Workspace", "", Kernel::Direction::InOut),
       "Name of the event workspace to calculate counting rate for.");
-  declareProperty(std::make_unique<Kernel::PropertyWithValue<double>>(
-                      "XMin", EMPTY_DBL(), Kernel::Direction::Input),
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<double>>("XMin", EMPTY_DBL(), Kernel::Direction::Input),
                   "Minimal value of X-range for the rate calculations. If left "
                   "to default, Workspace X-axis minimal value is used.");
-  declareProperty(std::make_unique<Kernel::PropertyWithValue<double>>(
-                      "XMax", EMPTY_DBL(), Kernel::Direction::Input),
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<double>>("XMax", EMPTY_DBL(), Kernel::Direction::Input),
                   "Maximal value of X-range for the rate calculations. If left "
                   "to default, Workspace X-axis maximal value is used.");
-  declareProperty(
-      std::make_unique<Kernel::PropertyWithValue<std::string>>(
-          "RangeUnits", "Energy",
-          std::make_shared<Kernel::StringListValidator>(
-              Kernel::UnitFactory::Instance().getKeys()),
-          Kernel::Direction::Input),
-      "The units from Mantid Unit factory for calculating the "
-      "counting rate and XMin-XMax ranges are in. If the "
-      "X-axis of the input workspace is not expressed"
-      "in these units, unit conversion will be performed, so the "
-      "workspace should contain all necessary information for this "
-      "conversion. E.g. if *RangeUnits* is *EnergyTransfer*, Ei "
-      "log containing incident energy value should be attached to the "
-      "input workspace. See ConvertUnits algorithm for the details.");
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<std::string>>(
+                      "RangeUnits", "Energy",
+                      std::make_shared<Kernel::StringListValidator>(Kernel::UnitFactory::Instance().getKeys()),
+                      Kernel::Direction::Input),
+                  "The units from Mantid Unit factory for calculating the "
+                  "counting rate and XMin-XMax ranges are in. If the "
+                  "X-axis of the input workspace is not expressed"
+                  "in these units, unit conversion will be performed, so the "
+                  "workspace should contain all necessary information for this "
+                  "conversion. E.g. if *RangeUnits* is *EnergyTransfer*, Ei "
+                  "log containing incident energy value should be attached to the "
+                  "input workspace. See ConvertUnits algorithm for the details.");
   std::vector<std::string> propOptions{"Elastic", "Direct", "Indirect"};
-  declareProperty(
-      "EMode", "Elastic",
-      std::make_shared<Kernel::StringListValidator>(propOptions),
-      "The energy mode for 'RangeUnits' conversion mode (default: elastic)");
+  declareProperty("EMode", "Elastic", std::make_shared<Kernel::StringListValidator>(propOptions),
+                  "The energy mode for 'RangeUnits' conversion mode (default: elastic)");
 
   // Used logs group
   std::string used_logs_mode("Used normalization logs");
-  declareProperty(
-      "NormalizeTheRate", true,
-      "Usually you want to normalize counting rate to some "
-      "rate related to the source beam intensity. Change this to "
-      "'false' if appropriate time series log is broken || not attached to "
-      "the input workspace.");
+  declareProperty("NormalizeTheRate", true,
+                  "Usually you want to normalize counting rate to some "
+                  "rate related to the source beam intensity. Change this to "
+                  "'false' if appropriate time series log is broken || not attached to "
+                  "the input workspace.");
   declareProperty("UseLogDerivative", false,
                   "If the normalization log contains "
                   "cumulative counting, derivative "
                   "of this log is necessary to get "
                   "correct normalization values.");
-  declareProperty(
-      "NormalizationLogName", "proton_charge",
-      "The name of the log, used in the counting rate normalization. ");
+  declareProperty("NormalizationLogName", "proton_charge",
+                  "The name of the log, used in the counting rate normalization. ");
   setPropertyGroup("NormalizeTheRate", used_logs_mode);
   setPropertyGroup("UseLogDerivative", used_logs_mode);
   setPropertyGroup("NormalizationLogName", used_logs_mode);
 
   // Results
-  declareProperty("CountRateLogName", "block_count_rate",
-                  std::make_shared<Kernel::MandatoryValidator<std::string>>(),
+  declareProperty("CountRateLogName", "block_count_rate", std::make_shared<Kernel::MandatoryValidator<std::string>>(),
                   "The name of the processed time series log with instrument "
                   "count rate to be added"
                   " to the source workspace");
-  declareProperty(
-      "UseNormLogGranularity", true,
-      "If true, the count rate log will have the normalization log "
-      "accuracy; If false, the 'NumTimeSteps' in the visualization "
-      "workspace below will be used for the target log granularity too.");
+  declareProperty("UseNormLogGranularity", true,
+                  "If true, the count rate log will have the normalization log "
+                  "accuracy; If false, the 'NumTimeSteps' in the visualization "
+                  "workspace below will be used for the target log granularity too.");
 
   // visualization group
   std::string spur_vis_mode("Spurion visualization");
-  declareProperty(
-      std::make_unique<API::WorkspaceProperty<>>("VisualizationWs", "",
-                                                 Kernel::Direction::Output,
-                                                 API::PropertyMode::Optional),
-      "Optional name to build 2D matrix workspace for spurion visualization. "
-      "If name is provided, a 2D workspace with this name will be created "
-      "containing data to visualize counting rate as function of time in the "
-      "ranges XMin-XMax");
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>("VisualizationWs", "", Kernel::Direction::Output,
+                                                             API::PropertyMode::Optional),
+                  "Optional name to build 2D matrix workspace for spurion visualization. "
+                  "If name is provided, a 2D workspace with this name will be created "
+                  "containing data to visualize counting rate as function of time in the "
+                  "ranges XMin-XMax");
 
   auto mustBeReasonable = std::make_shared<Kernel::BoundedValidator<int>>();
   mustBeReasonable->setLower(3);
   declareProperty(
-      std::make_unique<Kernel::PropertyWithValue<int>>(
-          "NumTimeSteps", 200, mustBeReasonable, Kernel::Direction::Input),
+      std::make_unique<Kernel::PropertyWithValue<int>>("NumTimeSteps", 200, mustBeReasonable, Kernel::Direction::Input),
       "Number of time steps (time accuracy) the visualization workspace has. "
       "Also number of steps in 'CountRateLogName' log if "
       "'UseNormLogGranularity' is set to false. Should be bigger than 3");
   declareProperty(
-      std::make_unique<Kernel::PropertyWithValue<int>>(
-          "XResolution", 100, mustBeReasonable, Kernel::Direction::Input),
+      std::make_unique<Kernel::PropertyWithValue<int>>("XResolution", 100, mustBeReasonable, Kernel::Direction::Input),
       "Number of steps (accuracy) of the visualization workspace has along "
       "X-axis. ");
   setPropertyGroup("VisualizationWs", spur_vis_mode);
@@ -199,9 +182,8 @@ void CalculateCountRate::exec() {
  *with
  *                         counting rate log on output.
  */
-void CalculateCountRate::calcRateLog(
-    DataObjects::EventWorkspace_sptr &InputWorkspace,
-    Kernel::TimeSeriesProperty<double> *const targLog) {
+void CalculateCountRate::calcRateLog(DataObjects::EventWorkspace_sptr &InputWorkspace,
+                                     Kernel::TimeSeriesProperty<double> *const targLog) {
 
   MantidVec countRate(m_numLogSteps);
   std::vector<double> countNormalization;
@@ -238,8 +220,7 @@ void CalculateCountRate::calcRateLog(
 
       // Get a const event list reference. eventInputWS->dataY() doesn't work.
       const DataObjects::EventList &el = InputWorkspace->getSpectrum(i);
-      el.generateCountsHistogramPulseTime(
-          dTRangeMin, dTRangeMax, Buff[loopThread], m_XRangeMin, m_XRangeMax);
+      el.generateCountsHistogramPulseTime(dTRangeMin, dTRangeMax, Buff[loopThread], m_XRangeMin, m_XRangeMax);
       if (this->buildVisWS()) {
         this->histogramEvents(el, pVisWS_locks.get());
       }
@@ -274,8 +255,7 @@ void CalculateCountRate::calcRateLog(
   double dt = (dTRangeMax - dTRangeMin) / static_cast<double>(m_numLogSteps);
   auto t0 = m_TRangeMin.totalNanoseconds();
   for (auto i = 0; i < m_numLogSteps; i++) {
-    times[i] = Types::Core::DateAndTime(
-        t0 + static_cast<int64_t>((0.5 + double(i)) * dt));
+    times[i] = Types::Core::DateAndTime(t0 + static_cast<int64_t>((0.5 + double(i)) * dt));
   }
   // store calculated values within the target log.
   targLog->replaceValues(times, countRate);
@@ -285,8 +265,7 @@ void CalculateCountRate::calcRateLog(
  * @param spectraLocks :: pointer to the array of mutexes to lock modifyed
  *                        visualization workspace spectra for a thread
  */
-void CalculateCountRate::histogramEvents(const DataObjects::EventList &el,
-                                         std::mutex *spectraLocks) {
+void CalculateCountRate::histogramEvents(const DataObjects::EventList &el, std::mutex *spectraLocks) {
 
   if (el.empty())
     return;
@@ -322,14 +301,12 @@ void CalculateCountRate::disableNormalization(const std::string &NormLogError) {
  *
  @param InputWorkspace -- input workspace to analyse logs
  */
-void CalculateCountRate::setOutLogParameters(
-    const DataObjects::EventWorkspace_sptr &InputWorkspace) {
+void CalculateCountRate::setOutLogParameters(const DataObjects::EventWorkspace_sptr &InputWorkspace) {
 
   std::string NormLogName = getProperty("NormalizationLogName");
   std::string TargetLog = getProperty("CountRateLogName");
   if (NormLogName == TargetLog) {
-    throw std::invalid_argument("Target log name: " + TargetLog +
-                                " and normalization log name: " + NormLogName +
+    throw std::invalid_argument("Target log name: " + TargetLog + " and normalization log name: " + NormLogName +
                                 " can not be the same");
   }
 
@@ -340,10 +317,9 @@ void CalculateCountRate::setOutLogParameters(
   bool logPresent = InputWorkspace->run().hasProperty(NormLogName);
   if (!logPresent) {
     if (m_normalizeResult) {
-      this->disableNormalization(
-          "Normalization log '" + NormLogName +
-          "' values requested but the log is not attached to the "
-          "workspace. Normalization disabled");
+      this->disableNormalization("Normalization log '" + NormLogName +
+                                 "' values requested but the log is not attached to the "
+                                 "workspace. Normalization disabled");
     }
     if (useLogDerivative) {
       g_log.warning() << "Normalization by log: '" << NormLogName
@@ -360,8 +336,7 @@ void CalculateCountRate::setOutLogParameters(
       useLogAccuracy = false;
     }
   } else {
-    m_pNormalizationLog =
-        InputWorkspace->run().getTimeSeriesProperty<double>(NormLogName);
+    m_pNormalizationLog = InputWorkspace->run().getTimeSeriesProperty<double>(NormLogName);
   }
 
   // Analyse properties interactions
@@ -391,8 +366,7 @@ void CalculateCountRate::setOutLogParameters(
     Types::Core::DateAndTime tLogMin, tLogMax;
     if (m_useLogDerivative) { // derivative moves events to the bin centre,
                               // but we need initial range
-      auto pSource =
-          InputWorkspace->run().getTimeSeriesProperty<double>(NormLogName);
+      auto pSource = InputWorkspace->run().getTimeSeriesProperty<double>(NormLogName);
       tLogMin = pSource->firstTime();
       tLogMax = pSource->lastTime();
     } else {
@@ -401,18 +375,15 @@ void CalculateCountRate::setOutLogParameters(
     }
     //
     if (tLogMin < runTMin || tLogMax > runTMax) {
-      if (tLogMin > runTMax ||
-          tLogMax < runTMin) { // log time is outside of the experiment time.
-                               // Log normalization is impossible
-        this->disableNormalization(
-            "Normalization log " + m_pNormalizationLog->name() +
-            " time lies outside of the the whole experiment time. "
-            "Log normalization impossible.");
+      if (tLogMin > runTMax || tLogMax < runTMin) { // log time is outside of the experiment time.
+                                                    // Log normalization is impossible
+        this->disableNormalization("Normalization log " + m_pNormalizationLog->name() +
+                                   " time lies outside of the the whole experiment time. "
+                                   "Log normalization impossible.");
         useLogAccuracy = false;
       } else {
         if (!m_tmpLogHolder) {
-          m_tmpLogHolder = std::unique_ptr<Kernel::TimeSeriesProperty<double>>(
-              m_pNormalizationLog->clone());
+          m_tmpLogHolder = std::unique_ptr<Kernel::TimeSeriesProperty<double>>(m_pNormalizationLog->clone());
         }
         m_tmpLogHolder->filterByTime(runTMin, runTMax);
         m_pNormalizationLog = m_tmpLogHolder.get();
@@ -420,10 +391,9 @@ void CalculateCountRate::setOutLogParameters(
       }
     } else {
       if (tLogMin > runTMin || tLogMax < runTMax) {
-        this->disableNormalization(
-            "Normalization log " + m_pNormalizationLog->name() +
-            " time does not cover the whole experiment time. "
-            "Log normalization impossible.");
+        this->disableNormalization("Normalization log " + m_pNormalizationLog->name() +
+                                   " time does not cover the whole experiment time. "
+                                   "Log normalization impossible.");
         useLogAccuracy = false;
       }
     }
@@ -433,10 +403,8 @@ void CalculateCountRate::setOutLogParameters(
     m_numLogSteps = m_pNormalizationLog->realSize();
     if (m_numLogSteps < 2) { // should not ever happen but...
 
-      this->disableNormalization(
-          "Number of points in the Normalization log " +
-          m_pNormalizationLog->name() +
-          " smaller then 2. Can not normalize using this log.");
+      this->disableNormalization("Number of points in the Normalization log " + m_pNormalizationLog->name() +
+                                 " smaller then 2. Can not normalize using this log.");
       m_numLogSteps = getProperty("NumTimeSteps"); // Always > 2
       useLogAccuracy = false;
     }
@@ -444,10 +412,8 @@ void CalculateCountRate::setOutLogParameters(
     m_numLogSteps = getProperty("NumTimeSteps");
   }
   // identify epsilon to use with current time
-  double t_epsilon = double(runTMax.totalNanoseconds()) *
-                     (1 + std::numeric_limits<double>::epsilon());
-  auto eps_increment =
-      static_cast<int64_t>(t_epsilon - double(runTMax.totalNanoseconds()));
+  double t_epsilon = double(runTMax.totalNanoseconds()) * (1 + std::numeric_limits<double>::epsilon());
+  auto eps_increment = static_cast<int64_t>(t_epsilon - double(runTMax.totalNanoseconds()));
 
   m_TRangeMin = runTMin - eps_increment;
   if (useLogAccuracy) {
@@ -461,8 +427,7 @@ void CalculateCountRate::setOutLogParameters(
     if (provDT < 1) { // something is fundamentally wrong. This can only happen
                       // if the log is very short and the distance between log
                       // boundaries is smaller than dt
-      this->disableNormalization("Time step of the log " +
-                                 m_pNormalizationLog->name() +
+      this->disableNormalization("Time step of the log " + m_pNormalizationLog->name() +
                                  " is not consistent with number of log steps. "
                                  "Can not use this log normalization");
       useLogAccuracy = false;
@@ -494,8 +459,7 @@ void CalculateCountRate::setOutLogParameters(
  *           requested by the user
  *
  */
-void CalculateCountRate::setSourceWSandXRanges(
-    DataObjects::EventWorkspace_sptr &InputWorkspace) {
+void CalculateCountRate::setSourceWSandXRanges(DataObjects::EventWorkspace_sptr &InputWorkspace) {
 
   std::string RangeUnits = getProperty("RangeUnits");
   auto axis = InputWorkspace->getAxis(0);
@@ -556,29 +520,24 @@ void CalculateCountRate::setSourceWSandXRanges(
     m_XRangeMax = realMax * (1. + std::numeric_limits<double>::epsilon());
   }
   if (m_XRangeMin < realMin) {
-    g_log.debug() << "Workspace constrain min range changed from: "
-                  << m_XRangeMin << " To: " << realMin << std::endl;
+    g_log.debug() << "Workspace constrain min range changed from: " << m_XRangeMin << " To: " << realMin << std::endl;
     m_XRangeMin = realMin;
   }
   if (m_XRangeMax > realMax) {
-    g_log.debug() << "Workspace constrain max range changed from: "
-                  << m_XRangeMax << " To: " << realMax << std::endl;
+    g_log.debug() << "Workspace constrain max range changed from: " << m_XRangeMax << " To: " << realMax << std::endl;
     m_XRangeMax = realMax * (1. + std::numeric_limits<double>::epsilon());
   }
   // check final ranges valid
   if (m_XRangeMax < realMin || m_XRangeMin > realMax) {
-    throw std::invalid_argument(
-        " Spurion data search range: [" + std::to_string(m_XRangeMin) + "," +
-        std::to_string(m_XRangeMin) +
-        "] lies outside of the workspace's real data range: [" +
-        std::to_string(realMin) + "," + std::to_string(realMax) + "]");
+    throw std::invalid_argument(" Spurion data search range: [" + std::to_string(m_XRangeMin) + "," +
+                                std::to_string(m_XRangeMin) + "] lies outside of the workspace's real data range: [" +
+                                std::to_string(realMin) + "," + std::to_string(realMax) + "]");
   }
 
   if (m_XRangeMin > m_XRangeMax) {
     throw std::invalid_argument(" Minimal spurion search data limit is bigger "
                                 "than the maximal limit. ( Min: " +
-                                std::to_string(m_XRangeMin) +
-                                "> Max: " + std::to_string(m_XRangeMax) + ")");
+                                std::to_string(m_XRangeMin) + "> Max: " + std::to_string(m_XRangeMax) + ")");
   }
 }
 
@@ -643,8 +602,7 @@ void CalculateCountRate::checkAndInitVisWorkspace() {
   m_visWs->replaceAxis(0, std::move(ax0));
 
   // define Y axis (in seconds);
-  double dt = (static_cast<double>(m_TRangeMax.totalNanoseconds() -
-                                   m_TRangeMin.totalNanoseconds()) /
+  double dt = (static_cast<double>(m_TRangeMax.totalNanoseconds() - m_TRangeMin.totalNanoseconds()) /
                static_cast<double>(numTBins)) *
               1.e-9;
   xx.resize(numTBins);
@@ -652,8 +610,7 @@ void CalculateCountRate::checkAndInitVisWorkspace() {
     xx[i] = (0.5 + static_cast<double>(i)) * dt;
   }
   auto ax1 = std::make_unique<API::NumericAxis>(xx);
-  auto labelY = std::dynamic_pointer_cast<Kernel::Units::Label>(
-      Kernel::UnitFactory::Instance().create("Label"));
+  auto labelY = std::dynamic_pointer_cast<Kernel::Units::Label>(Kernel::UnitFactory::Instance().create("Label"));
   labelY->setLabel("sec");
   ax1->unit() = labelY;
   m_visWs->replaceAxis(1, std::move(ax1));
@@ -678,9 +635,7 @@ bool CalculateCountRate::buildVisWS() const { return m_doVis; }
 /** Helper function, mainly for testing
  * @return  true if count rate should be normalized and false
  * otherwise */
-bool CalculateCountRate::normalizeCountRate() const {
-  return m_normalizeResult;
-}
+bool CalculateCountRate::normalizeCountRate() const { return m_normalizeResult; }
 /** Helper function, mainly for testing
  * @return  true if log derivative is used instead of log itself */
 bool CalculateCountRate::useLogDerivative() const { return m_useLogDerivative; }
@@ -693,8 +648,7 @@ bool CalculateCountRate::useLogDerivative() const { return m_useLogDerivative; }
 @param normalization -- on output, the vector containing normalization
 *                       coefficients for the visualization workspace spectra
 */
-void CalculateCountRate::buildVisWSNormalization(
-    std::vector<double> &normalization) {
+void CalculateCountRate::buildVisWSNormalization(std::vector<double> &normalization) {
   if (!m_pNormalizationLog) {
     m_normalizeResult = false;
     g_log.warning() << "CalculateCountRate::buildVisWSNormalization: No source "
@@ -705,8 +659,7 @@ void CalculateCountRate::buildVisWSNormalization(
   // visualization workspace should be present and initialized at this stage:
   auto ax = dynamic_cast<API::NumericAxis *>(m_visWs->getAxis(1));
   if (!ax)
-    throw std::runtime_error(
-        "Can not retrieve Y-axis from visualization workspace");
+    throw std::runtime_error("Can not retrieve Y-axis from visualization workspace");
 
   normalization.assign(ax->length(), 0.);
   // For more accurate logging (in a future, if necessary:)

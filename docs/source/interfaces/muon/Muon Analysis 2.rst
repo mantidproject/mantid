@@ -1,4 +1,4 @@
-.. _MuonAnalysis_2-ref:
+.. _Muon_Analysis-ref:
 
 Muon Analysis
 =============
@@ -14,8 +14,8 @@ Interface Overview
 ------------------
 
 This interface is used to analyse the time domain data collected on Muon instruments. The interface can be
-accessed from the main menu of MantidPlot, in *Interfaces → Muon → Muon Analysis*. For sample
-datasets, please visit `Muon - Downloads <http://sourceforge.net/projects/mantid/files/Sample%20Data/SampleData-Muon.zip/download>`_.
+accessed from the main menu of MantidWorkbench, in *Interfaces → Muon → Muon Analysis*. For sample
+datasets, please visit `Muon - Downloads <https://sourceforge.net/projects/mantid/files/Sample%20Data/SampleData-Muon.zip/download>`_.
 
 Loading
 -------
@@ -25,7 +25,7 @@ The loading section is used to load data as well as to specify what the current 
 **Load Current Run** This will load the latest run for the selected instrument. You must be connected to the
  data archive. It also currently only works on windows.
 
-**Run selection box** This takes a comma seperated list of run numbers for the GUI to load. A range 
+**Run selection box** This takes a comma seperated list of run numbers for the GUI to load. A range
 be specified with a dash. For example ``62260, 62270-3`` will load ``62260, 62270, 62271, 62273``. This specifies
 the runs that are used in the rest of the GUI.
 
@@ -33,7 +33,7 @@ the runs that are used in the rest of the GUI.
 
 **Clear All** This clears all the data from the current GUI.
 
-**Co-Add** If selected the runs are added together for improved statistics. 
+**Co-Add** If selected the runs are added together for improved statistics.
 
 Tabs
 ----
@@ -43,10 +43,12 @@ All these tabs can be dragged away from the interface into their own window.
 * :ref:`Plotting Window <muon_plotting_window-ref>`
 * :ref:`Home Tab <muon_home_tab-ref>`
 * :ref:`Grouping Tab <muon_grouping_tab-ref>`
+* :ref:`Corrections Tab <muon_corrections_tab-ref>`
 * :ref:`Phase Table Tab <muon_phase_table_tab-ref>`
 * :ref:`Fitting Tab <muon_fitting_tab-ref>`
 * :ref:`Sequential Fitting Tab <muon_sequential_fitting_tab-ref>`
-* :ref:`Results Table Tab <muon_results_tab-ref>`
+* :ref:`Results Tab <muon_results_tab-ref>`
+* :ref:`Model Fitting Tab <muon_model_fitting_tab-ref>`
 
 Feedback & Comments
 -------------------

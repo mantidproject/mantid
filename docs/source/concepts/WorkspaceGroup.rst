@@ -12,7 +12,7 @@ A WorkspaceGroup is a group of workspaces. The WorkspaceGroup object does not ho
 
 Most algorithms can be passed a WorkspaceGroup in place of a normal workspace input, and will simply execute the algorithm on each workspace contained within the group.
 
-Working with Event Workspaces in Python
+Working with Group Workspaces in Python
 ----------------------------------------
 
 Creating and splitting groups
@@ -34,7 +34,7 @@ Workspace groups can be created in a more flexible way in the Python script wind
     # Create a group workpace
     wsList = [ws1,ws2,ws3]
     wsGroup = GroupWorkspaces(wsList)
-    # or 
+    # or
     wsGroup = GroupWorkspaces("ws1,ws2,ws3")
 
     print(wsGroup.getNames())
@@ -129,7 +129,7 @@ when adding the group to the ADS, the workspaces will also be added, and given d
 Accessing Workspace Groups
 ##########################
 
-The methods for getting a variable to an EventWorkspace is the same as shown in the :ref:`Workspace <Workspace-Accessing_Workspaces>` help page.
+The methods for getting a variable to a WorkspaceGroup is the same as shown in the :ref:`Workspace <Workspace-Accessing_Workspaces>` help page.
 
 If you want to check if a variable points to something that is a Workspace Group you can use this:
 
@@ -166,7 +166,7 @@ Looping over all of the members of a group
     # Get the member workspaces in a loop
     for i in range(wsGroup.getNumberOfEntries()):
         wsLoop = wsGroup.getItem(i)
-        print("Member {0} {1}".format(i, wsLoop.getName()))
+        print("Member {0} {1}".format(i, wsLoop.name()))
 
 
 Output:
@@ -227,7 +227,7 @@ otherwise indexing will be confused by each deletion.
     ws1 = CreateSampleWorkspace()
     ws2 = CreateSampleWorkspace()
     wsGroup = GroupWorkspaces("ws1,ws2")
-    
+
     DeleteWorkspace(wsGroup)
 
 .. include:: WorkspaceNavigation.txt

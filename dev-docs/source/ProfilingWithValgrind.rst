@@ -24,7 +24,7 @@ Ubuntu
 
 ::
 
-    >> apt-get install valgrind kcachegrind 
+    >> apt-get install valgrind kcachegrind
 
 Red Hat/Fedora
 ~~~~~~~~~~~~~~

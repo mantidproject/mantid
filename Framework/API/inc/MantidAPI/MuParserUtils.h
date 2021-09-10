@@ -27,8 +27,7 @@ extern const MANTID_API_DLL std::map<double, std::string> MUPARSER_CONSTANTS;
 void MANTID_API_DLL addDefaultConstants(mu::Parser &parser);
 
 using oneVarFun = double (*)(double); // pointer to a function of one variable
-extern const MANTID_API_DLL std::map<std::string, oneVarFun>
-    MUPARSER_ONEVAR_FUNCTIONS;
+extern const MANTID_API_DLL std::map<std::string, oneVarFun> MUPARSER_ONEVAR_FUNCTIONS;
 
 void MANTID_API_DLL extraOneVarFunctions(mu::Parser &parser);
 

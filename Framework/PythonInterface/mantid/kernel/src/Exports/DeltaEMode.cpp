@@ -23,12 +23,10 @@ void export_DeltaEMode() {
       .export_values();
 
   class_<DeltaEMode, boost::noncopyable>("DeltaEMode", no_init)
-      .def("asString", &DeltaEMode::asString, arg("self"),
-           "Returns the given type translated to a string")
+      .def("asString", &DeltaEMode::asString, arg("self"), "Returns the given type translated to a string")
       .def("fromString", &DeltaEMode::fromString, arg("modeStr"),
            "Returns the enumerated type translated from a string")
-      .def("availableTypes", &DeltaEMode::availableTypes,
-           return_value_policy<Policies::VectorToNumpy>(),
+      .def("availableTypes", &DeltaEMode::availableTypes, return_value_policy<Policies::VectorToNumpy>(),
            "Returns a list of known delta E Modes as strings")
       .staticmethod("availableTypes");
 }

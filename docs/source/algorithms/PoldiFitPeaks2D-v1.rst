@@ -36,7 +36,7 @@ PoldiFitPeaks2D operates on a MatrixWorkspace with a valid POLDI instrument defi
 
     # Load data file with Si spectrum and instrument definition
     truncated = PoldiLoadRuns(2013, 6904)
-    
+
     # Perform correlation, peak search and fit
     correlated_6904 = PoldiAutoCorrelation("truncated_data_6904")
     peaks_6904 = PoldiPeakSearch(correlated_6904)
@@ -45,21 +45,21 @@ PoldiFitPeaks2D operates on a MatrixWorkspace with a valid POLDI instrument defi
                     PeakFunction = "Gaussian", PoldiPeakTable = peaks_6904,
                     OutputWorkspace = "peaks_refined_6904",
                     FitPlotsWorkspace = "fit_plots_6904")
-                    
+
     # Calculate a 2D spectrum using the refined peaks
     PoldiFitPeaks2D(InputWorkspace="truncated_data_6904",
                                 PoldiPeakWorkspace="peaks_refined_6904",
                                 RefinedPoldiPeakWorkspace="peaks_fit_2d_6904",
                                 Calculated1DSpectrum="simulated_1d_6904",
                                 OutputWorkspace="simulated_6904")
-    
+
 After this step, there is a new workspace containing the simulated spectrum. It should look similar to the one in the following figure:
 
 .. figure:: /images/PoldiAutoCorrelation_Si_2D.png
    :figwidth: 15 cm
    :align: center
    :alt: Raw POLDI data for Silicon powder standard (simulated).
-   
+
    Simulated 2D-spectrum of silicon powder.
 
 In general, there is a background in POLDI data that depends on :math:`2\theta`. The following script, which is almost identical to the above one introduces this parameter.
@@ -92,7 +92,7 @@ Now the spectrum looks different, like in the example below.
    :figwidth: 15 cm
    :align: center
    :alt: Raw POLDI data for Silicon powder standard with background (simulated).
-   
+
    Simulated 2D-spectrum of silicon powder with background.
 
 Furthermore, a 1D diffractogram is also calculated, which shows all peaks that were used to calculate the 2D spectrum as well.
@@ -114,7 +114,7 @@ The following example shows an example for refinement of lattice parameters usin
 
     # Load and merge 2 data files for better statistics.
     truncated = PoldiLoadRuns(2013, 6903, 6904, 2)
-    
+
     # Perform correlation, peak search and fit
     correlated_6904 = PoldiAutoCorrelation("truncated_data_6904")
     peaks_6904 = PoldiPeakSearch(correlated_6904)

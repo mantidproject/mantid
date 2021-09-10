@@ -53,16 +53,12 @@ public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "CalculateEfficiency"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Calculates the detector efficiency for a SANS instrument.";
-  }
+  const std::string summary() const override { return "Calculates the detector efficiency for a SANS instrument."; }
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return (1); }
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "SANS;CorrectionFunctions\\EfficiencyCorrections";
-  }
+  const std::string category() const override { return "SANS;CorrectionFunctions\\EfficiencyCorrections"; }
 
 private:
   // Overridden Algorithm methods
@@ -70,19 +66,15 @@ private:
   void exec() override;
 
   /// Sum all detectors, excluding monitors and masked detectors
-  void sumUnmaskedDetectors(const API::MatrixWorkspace_sptr &rebinnedWS,
-                            double &sum, double &error, int &nPixels);
+  void sumUnmaskedDetectors(const API::MatrixWorkspace_sptr &rebinnedWS, double &sum, double &error, int &nPixels);
 
   /// Normalize all detectors to get the relative efficiency
-  void normalizeDetectors(const API::MatrixWorkspace_sptr &rebinnedWS,
-                          const API::MatrixWorkspace_sptr &outputWS, double sum,
-                          double error, int nPixels, double min_eff,
-                          double max_eff);
+  void normalizeDetectors(const API::MatrixWorkspace_sptr &rebinnedWS, const API::MatrixWorkspace_sptr &outputWS,
+                          double sum, double error, int nPixels, double min_eff, double max_eff);
 
-  void maskComponent(API::MatrixWorkspace &ws,
-                     const std::string &componentName);
-  void maskEdges(const API::MatrixWorkspace_sptr &ws, int high, int low,
-                 int left, int right, const std::string &componentName);
+  void maskComponent(API::MatrixWorkspace &ws, const std::string &componentName);
+  void maskEdges(const API::MatrixWorkspace_sptr &ws, int high, int low, int left, int right,
+                 const std::string &componentName);
 };
 
 } // namespace Algorithms

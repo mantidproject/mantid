@@ -37,18 +37,15 @@ factory is implemented as a singleton class. Typical usages:
 Mantid::API::IRemoteJob|Manager_sptr jobManager =
     Mantid::API::RemoteJobManagerFactory::Instance().create("Fermi");
 */
-class MANTID_API_DLL RemoteJobManagerFactoryImpl
-    : public Kernel::DynamicFactory<IRemoteJobManager> {
+class MANTID_API_DLL RemoteJobManagerFactoryImpl : public Kernel::DynamicFactory<IRemoteJobManager> {
 public:
   /// Create a remote job manager that will know how to use the
   /// underlying mechanism that suits the compute resource passed
-  IRemoteJobManager_sptr
-  create(const std::string &computeResourceName) const override;
+  IRemoteJobManager_sptr create(const std::string &computeResourceName) const override;
 
   /// alternative (lower level) create where the specific type of
   /// manager and base URL are directly given
-  IRemoteJobManager_sptr create(const std::string &baseURL,
-                                const std::string &jobManagerType) const;
+  IRemoteJobManager_sptr create(const std::string &baseURL, const std::string &jobManagerType) const;
 
 private:
   /// So that the singleton can be created (cons/destructor are private)
@@ -67,8 +64,7 @@ private:
 };
 
 // The factory is just a specialisation of SingletonHolder
-using RemoteJobManagerFactory =
-    Mantid::Kernel::SingletonHolder<RemoteJobManagerFactoryImpl>;
+using RemoteJobManagerFactory = Mantid::Kernel::SingletonHolder<RemoteJobManagerFactoryImpl>;
 
 } // namespace API
 } // namespace Mantid
@@ -90,10 +86,8 @@ EXTERN_MANTID_API template class MANTID_API_DLL
  * You need to use this in every remote job manager. For example:
  * DECLARE_REMOTEJOBMANAGER(MantidWebServiceAPI)
  */
-#define DECLARE_REMOTEJOBMANAGER(classname)                                    \
-  namespace {                                                                  \
-  Mantid::Kernel::RegistrationHelper register_job_manager_##classname(         \
-      ((Mantid::API::RemoteJobManagerFactory::Instance().subscribe<classname>( \
-           #classname)),                                                       \
-       0));                                                                    \
+#define DECLARE_REMOTEJOBMANAGER(classname)                                                                            \
+  namespace {                                                                                                          \
+  Mantid::Kernel::RegistrationHelper register_job_manager_##classname(                                                 \
+      ((Mantid::API::RemoteJobManagerFactory::Instance().subscribe<classname>(#classname)), 0));                       \
   }

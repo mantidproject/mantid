@@ -162,8 +162,8 @@ CurveFitting
   is a histogram with large bins it can improve accuracy of the fit.
 - The concept page for :ref:`Comparing fit minimizers <FittingMinimizers>` has been updated to include the new
   minimizer and a comparison against neutron data examples.
-  
-The work on benchmarking fitting has received funding from the Horizon 2020 Framework Programme of the European Union under the SINE2020 project Grant No 654000.  
+
+The work on benchmarking fitting has received funding from the Horizon 2020 Framework Programme of the European Union under the SINE2020 project Grant No 654000.
 
 Others
 ------

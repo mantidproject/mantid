@@ -44,8 +44,7 @@ public:
   Colormap cmap() const { return m_mappable.cmap(); }
 
   QRgb rgb(double vmin, double vmax, double value) const;
-  std::vector<QRgb> rgb(double vmin, double vmax,
-                        const std::vector<double> &values) const;
+  std::vector<QRgb> rgb(double vmin, double vmax, const std::vector<double> &values) const;
 
 private:
   mutable ScalarMappable m_mappable;

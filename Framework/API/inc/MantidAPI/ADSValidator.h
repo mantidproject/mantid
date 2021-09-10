@@ -18,12 +18,10 @@ namespace API {
 /** ADSValidator : a validator that requires the value of a property to be
     present in the ADS.  The  type must be std::string
 */
-class MANTID_API_DLL ADSValidator
-    : public Kernel::TypedValidator<std::vector<std::string>> {
+class MANTID_API_DLL ADSValidator : public Kernel::TypedValidator<std::vector<std::string>> {
 public:
   /// Default constructor. Sets up an empty list of valid values.
-  ADSValidator(const bool allowMultiSelection = true,
-               const bool isOptional = false);
+  ADSValidator(const bool allowMultiSelection = true, const bool isOptional = false);
 
   /// Clone the validator
   Kernel::IValidator_sptr clone() const override;
@@ -45,8 +43,7 @@ protected:
    *  @return "" if the value is on the list, or "The workspace is not in the
    * workspace list"
    */
-  std::string
-  checkValidity(const std::vector<std::string> &value) const override;
+  std::string checkValidity(const std::vector<std::string> &value) const override;
 
 private:
   /// if the validator should allow multiple selection

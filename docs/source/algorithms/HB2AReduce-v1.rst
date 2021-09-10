@@ -69,7 +69,7 @@ The output workspace can be saved to ``XYE``, ``Maud`` and ``TOPAS`` format usin
 You can also save the reduced data as ``GSAS`` or ``XYE`` format by adding additional arguments to the reduction call
 
 .. code-block:: python
-   
+
    ws = HB2AReduce(
       '/HFIR/HB2A/IPTS-21073/exp666/Datafiles/HB2A_exp0666_scan0024.dat',
       SaveData=True,

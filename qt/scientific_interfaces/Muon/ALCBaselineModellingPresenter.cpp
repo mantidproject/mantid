@@ -14,8 +14,8 @@ using namespace Mantid::API;
 namespace MantidQt {
 namespace CustomInterfaces {
 
-ALCBaselineModellingPresenter::ALCBaselineModellingPresenter(
-    IALCBaselineModellingView *view, IALCBaselineModellingModel *model)
+ALCBaselineModellingPresenter::ALCBaselineModellingPresenter(IALCBaselineModellingView *view,
+                                                             IALCBaselineModellingModel *model)
     : m_view(view), m_model(model) {}
 
 void ALCBaselineModellingPresenter::initialize() {
@@ -24,22 +24,17 @@ void ALCBaselineModellingPresenter::initialize() {
   // View actions
   connect(m_view, SIGNAL(fitRequested()), SLOT(fit()));
   connect(m_view, SIGNAL(addSectionRequested()), SLOT(addSection()));
-  connect(m_view, SIGNAL(removeSectionRequested(int)),
-          SLOT(removeSection(int)));
+  connect(m_view, SIGNAL(removeSectionRequested(int)), SLOT(removeSection(int)));
 
   // View events (sync)
-  connect(m_view, SIGNAL(sectionRowModified(int)),
-          SLOT(onSectionRowModified(int)));
-  connect(m_view, SIGNAL(sectionSelectorModified(int)),
-          SLOT(onSectionSelectorModified(int)));
+  connect(m_view, SIGNAL(sectionRowModified(int)), SLOT(onSectionRowModified(int)));
+  connect(m_view, SIGNAL(sectionSelectorModified(int)), SLOT(onSectionSelectorModified(int)));
 
   // Model updates
   connect(m_model, SIGNAL(dataChanged()), SLOT(updateDataCurve()));
-  connect(m_model, SIGNAL(correctedDataChanged()),
-          SLOT(updateCorrectedCurve()));
+  connect(m_model, SIGNAL(correctedDataChanged()), SLOT(updateCorrectedCurve()));
   connect(m_model, SIGNAL(fittedFunctionChanged()), SLOT(updateFunction()));
-  connect(m_model, SIGNAL(fittedFunctionChanged()),
-          SLOT(updateBaselineCurve()));
+  connect(m_model, SIGNAL(fittedFunctionChanged()), SLOT(updateBaselineCurve()));
 }
 
 /**
@@ -67,8 +62,7 @@ void ALCBaselineModellingPresenter::fit() {
     m_view->displayError("No sections to fit");
   } else {
     try {
-      IFunction_sptr funcToFit =
-          FunctionFactory::Instance().createInitialized(funcStr);
+      IFunction_sptr funcToFit = FunctionFactory::Instance().createInitialized(funcStr);
       m_model->fit(funcToFit, parsedSections);
     } catch (std::exception &e) {
       m_view->displayError(QString::fromStdString(e.what()));
@@ -88,8 +82,7 @@ void ALCBaselineModellingPresenter::addSection() {
 
     m_view->setNoOfSectionRows(noOfSections + 1);
 
-    m_view->setSectionRow(noOfSections, std::make_pair(QString::number(xMin),
-                                                       QString::number(xMax)));
+    m_view->setSectionRow(noOfSections, std::make_pair(QString::number(xMin), QString::number(xMax)));
 
     m_view->addSectionSelector(noOfSections, std::make_pair(xMin, xMax));
   } else {
@@ -181,8 +174,7 @@ void ALCBaselineModellingPresenter::updateCorrectedCurve() {
 void ALCBaselineModellingPresenter::updateBaselineCurve() {
   if (const auto fitFunction = m_model->fittedFunction()) {
     const auto &xValues = m_model->data()->x(0);
-    const auto baslineWorkspace =
-        m_model->baselineData(fitFunction, xValues.rawData());
+    const auto baslineWorkspace = m_model->baselineData(fitFunction, xValues.rawData());
     m_view->setBaselineCurve(baslineWorkspace);
   } else {
     m_view->removePlot("Baseline");

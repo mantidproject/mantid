@@ -51,16 +51,13 @@ TMDE_CLASS
 class DLLExport MDBoxBase : public Mantid::API::IMDNode {
 public:
   //-----------------------------------------------------------------------------------------------
-  MDBoxBase(Mantid::API::BoxController *const boxController = nullptr,
-            const uint32_t depth = 0, const size_t boxID = UNDEF_SIZET);
+  MDBoxBase(Mantid::API::BoxController *const boxController = nullptr, const uint32_t depth = 0,
+            const size_t boxID = UNDEF_SIZET);
 
-  MDBoxBase(Mantid::API::BoxController *const boxController,
-            const uint32_t depth, const size_t boxID,
-            const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
-                &extentsVector);
+  MDBoxBase(Mantid::API::BoxController *const boxController, const uint32_t depth, const size_t boxID,
+            const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> &extentsVector);
 
-  MDBoxBase(const MDBoxBase<MDE, nd> &box,
-            Mantid::API::BoxController *const otherBC);
+  MDBoxBase(const MDBoxBase<MDE, nd> &box, Mantid::API::BoxController *const otherBC);
 
   ///@return the type of the event this box contains
   std::string getEventType() const override { return MDE::getTypeName(); }
@@ -88,19 +85,14 @@ public:
   const IMDNode *getParent() const override { return m_parent; }
 
   /// Returns the lowest-level box at the given coordinates
-  const IMDNode *getBoxAtCoord(const coord_t * /*coords*/) override {
-    return this;
-  }
+  const IMDNode *getBoxAtCoord(const coord_t * /*coords*/) override { return this; }
 
   // -------------------------------- Events-Related
   // -------------------------------------------
   /** The method to convert events in a box into a table of
    * coodrinates/signal/errors casted into coord_t type
    *   Used to conver events into plain data array. Does nothing for GridBox */
-  void getEventsData(std::vector<coord_t> & /*coordTable*/,
-                     size_t &nColumns) const override {
-    nColumns = 0;
-  }
+  void getEventsData(std::vector<coord_t> & /*coordTable*/, size_t &nColumns) const override { nColumns = 0; }
   /** The method to convert the table of data into vector of events
    *   Used to convert from a vector of values (2D table in Fortran
    representation (by rows) into box events.
@@ -125,53 +117,39 @@ public:
    * @param fullyContained :: optional bool array sized [nd] of which dimensions
    * are known to be fully contained (for MDSplitBox)
    */
-  virtual void centerpointBin(MDBin<MDE, nd> &bin,
-                              bool *fullyContained) const = 0;
+  virtual void centerpointBin(MDBin<MDE, nd> &bin, bool *fullyContained) const = 0;
 
   /// General binning method for any shape.
-  virtual void
-  generalBin(MDBin<MDE, nd> &bin,
-             Mantid::Geometry::MDImplicitFunction &function) const = 0;
+  virtual void generalBin(MDBin<MDE, nd> &bin, Mantid::Geometry::MDImplicitFunction &function) const = 0;
 
   /** Sphere (peak) integration */
-  void integrateSphere(
-      Mantid::API::CoordTransform &radiusTransform, const coord_t radiusSquared,
-      signal_t &signal, signal_t &errorSquared,
-      const coord_t innerRadiusSquared = 0.0,
-      const bool useOnePercentBackgroundCorrection = true) const override = 0;
+  void integrateSphere(Mantid::API::CoordTransform &radiusTransform, const coord_t radiusSquared, signal_t &signal,
+                       signal_t &errorSquared, const coord_t innerRadiusSquared = 0.0,
+                       const bool useOnePercentBackgroundCorrection = true) const override = 0;
 
   /** Find the centroid around a sphere */
-  void centroidSphere(Mantid::API::CoordTransform &radiusTransform,
-                      const coord_t radiusSquared, coord_t *centroid,
+  void centroidSphere(Mantid::API::CoordTransform &radiusTransform, const coord_t radiusSquared, coord_t *centroid,
                       signal_t &signal) const override = 0;
 
   /** Cylinder (peak) integration */
-  void integrateCylinder(Mantid::API::CoordTransform &radiusTransform,
-                         const coord_t radius, const coord_t length,
+  void integrateCylinder(Mantid::API::CoordTransform &radiusTransform, const coord_t radius, const coord_t length,
                          signal_t &signal, signal_t &errorSquared,
                          std::vector<signal_t> &signal_fit) const override = 0;
 
   // -------------------------------------------------------------------------------------------
   /// @return the const box controller for this box.
-  Mantid::API::BoxController *getBoxController() const override {
-    return m_BoxController;
-  }
+  Mantid::API::BoxController *getBoxController() const override { return m_BoxController; }
   /// @return the box controller for this box.
-  Mantid::API::BoxController *getBoxController() override {
-    return m_BoxController;
-  }
+  Mantid::API::BoxController *getBoxController() override { return m_BoxController; }
 
   // -------------------------------- Geometry/vertexes-Related
   // -------------------------------------------
 
   std::vector<Mantid::Kernel::VMD> getVertexes() const override;
-  std::unique_ptr<coord_t[]>
-  getVertexesArray(size_t &numVertices) const override;
-  std::unique_ptr<coord_t[]>
-  getVertexesArray(size_t &numVertices, const size_t outDimensions,
-                   const bool *maskDim) const override;
-  void transformDimensions(std::vector<double> &scaling,
-                           std::vector<double> &offset) override;
+  std::unique_ptr<coord_t[]> getVertexesArray(size_t &numVertices) const override;
+  std::unique_ptr<coord_t[]> getVertexesArray(size_t &numVertices, const size_t outDimensions,
+                                              const bool *maskDim) const override;
+  void transformDimensions(std::vector<double> &scaling, std::vector<double> &offset) override;
 
   //-----------------------------------------------------------------------------------------------
   /** Set the extents of this box.
@@ -185,8 +163,7 @@ public:
    */
   void setExtents(size_t dim, double min, double max) {
     if (dim >= nd)
-      throw std::invalid_argument(
-          "Invalid dimension passed to MDBox::setExtents");
+      throw std::invalid_argument("Invalid dimension passed to MDBox::setExtents");
 
     extents[dim].setExtents(min, max);
     // volume has to be recalculated as extents have changed;
@@ -205,10 +182,7 @@ public:
 
   //-----------------------------------------------------------------------------------------------
   /** Get the extents for this box */
-  Mantid::Geometry::MDDimensionExtents<coord_t> &
-  getExtents(size_t dim) override {
-    return extents[dim];
-  }
+  Mantid::Geometry::MDDimensionExtents<coord_t> &getExtents(size_t dim) override { return extents[dim]; }
 
   //-----------------------------------------------------------------------------------------------
   /** Returns the extents as a string, for convenience */
@@ -286,9 +260,7 @@ public:
    * testing)
    * @param ErrorSquared :: new squared error.
    */
-  void setErrorSquared(const signal_t ErrorSquared) override {
-    m_errorSquared = ErrorSquared;
-  }
+  void setErrorSquared(const signal_t ErrorSquared) override { m_errorSquared = ErrorSquared; }
 
   //-----------------------------------------------------------------------------------------------
   /** Sets the total weight from all points within  (mostly used for testing)
@@ -300,17 +272,13 @@ public:
   /** Returns the integrated signal from all points within, normalized for the
    * cell volume
    */
-  signal_t getSignalNormalized() const override {
-    return m_signal * m_inverseVolume;
-  }
+  signal_t getSignalNormalized() const override { return m_signal * m_inverseVolume; }
 
   //-----------------------------------------------------------------------------------------------
   /** Returns the integrated error squared from all points within, normalized
    * for the cell volume
    */
-  virtual signal_t getErrorSquaredNormalized() const {
-    return m_errorSquared * m_inverseVolume;
-  }
+  virtual signal_t getErrorSquaredNormalized() const { return m_errorSquared * m_inverseVolume; }
 
   //-----------------------------------------------------------------------------------------------
   /** For testing, mostly: return the recursion depth of this box.
@@ -335,9 +303,7 @@ public:
   //-----------------------------------------------------------------------------------------------
   /** Sets the inverse of the volume of the cell
    * @param invVolume :: value to set. */
-  void setInverseVolume(const coord_t invVolume) override {
-    m_inverseVolume = invVolume;
-  }
+  void setInverseVolume(const coord_t invVolume) override { m_inverseVolume = invVolume; }
 
   virtual void calculateGridCaches() {}
 
@@ -348,8 +314,7 @@ protected:
    * @param begin :: iterator to start
    * @param end :: iterator before end (not included)
    */
-  template <typename EventIterator>
-  void calcCaches(const EventIterator &begin, const EventIterator &end);
+  template <typename EventIterator> void calcCaches(const EventIterator &begin, const EventIterator &end);
   /** Array of MDDimensionStats giving the extents and
    * other stats on the box dimensions.
    */
@@ -401,8 +366,7 @@ public:
 
 template <typename MDE, size_t nd>
 template <typename EventIterator>
-void MDBoxBase<MDE, nd>::calcCaches(const EventIterator &begin,
-                                    const EventIterator &end) {
+void MDBoxBase<MDE, nd>::calcCaches(const EventIterator &begin, const EventIterator &end) {
   m_signal = 0;
   m_errorSquared = 0;
   m_totalWeight = 0;

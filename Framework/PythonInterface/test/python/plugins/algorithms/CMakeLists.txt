@@ -46,12 +46,15 @@ set(TEST_PY_FILES
     FitGaussianTest.py
     FitIncidentSpectrumTest.py
     FractionalIndexingTest.py
+    GenerateLogbookTest.py
     GetEiT0atSNSTest.py
     HB2AReduceTest.py
     HB3AAdjustSampleNormTest.py
     HB3AFindPeaksTest.py
+    HB3AIntegrateDetectorPeaksTest.py
     HB3AIntegratePeaksTest.py
     HB3APredictPeaksTest.py
+    HFIRCalculateGoniometerTest.py
     HFIRSANS2WavelengthTest.py
     IndirectTransmissionTest.py
     IndexSatellitePeaksTest.py
@@ -83,10 +86,12 @@ set(TEST_PY_FILES
     MuscatSofQWTest.py
     MuonMaxEntTest.py
     NMoldyn4InterpolationTest.py
+    NOMADMedianDetectorTestTest.py
     NormaliseSpectraTest.py
     OptimizeCrystalPlacementByRunTest.py
     PDConvertRealSpaceTest.py
     PDConvertReciprocalSpaceTest.py
+    PeakMatchingTest.py
     RebinRaggedTest.py
     ReflectometryReductionOneLiveDataTest.py
     ReflectometrySliceEventWorkspaceTest.py
@@ -100,6 +105,7 @@ set(TEST_PY_FILES
     SaveReflectionsTest.py
     ExtractMonitorsTest.py
     SetDetScaleTest.py
+    SetSampleFromLogsTest.py
     SortByQVectorsTest.py
     SortDetectorsTest.py
     StatisticsOfTableWorkspaceTest.py

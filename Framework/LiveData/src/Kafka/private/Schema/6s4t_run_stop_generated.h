@@ -8,62 +8,36 @@
 struct RunStop;
 
 struct RunStop FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  static FLATBUFFERS_CONSTEXPR const char *GetFullyQualifiedName() {
-    return "RunStop";
-  }
+  static FLATBUFFERS_CONSTEXPR const char *GetFullyQualifiedName() { return "RunStop"; }
   enum { VT_STOP_TIME = 4, VT_RUN_NAME = 6, VT_JOB_ID = 8, VT_SERVICE_ID = 10 };
   uint64_t stop_time() const { return GetField<uint64_t>(VT_STOP_TIME, 0); }
-  bool mutate_stop_time(uint64_t _stop_time) {
-    return SetField<uint64_t>(VT_STOP_TIME, _stop_time, 0);
-  }
-  const flatbuffers::String *run_name() const {
-    return GetPointer<const flatbuffers::String *>(VT_RUN_NAME);
-  }
-  flatbuffers::String *mutable_run_name() {
-    return GetPointer<flatbuffers::String *>(VT_RUN_NAME);
-  }
-  const flatbuffers::String *job_id() const {
-    return GetPointer<const flatbuffers::String *>(VT_JOB_ID);
-  }
-  flatbuffers::String *mutable_job_id() {
-    return GetPointer<flatbuffers::String *>(VT_JOB_ID);
-  }
-  const flatbuffers::String *service_id() const {
-    return GetPointer<const flatbuffers::String *>(VT_SERVICE_ID);
-  }
-  flatbuffers::String *mutable_service_id() {
-    return GetPointer<flatbuffers::String *>(VT_SERVICE_ID);
-  }
+  bool mutate_stop_time(uint64_t _stop_time) { return SetField<uint64_t>(VT_STOP_TIME, _stop_time, 0); }
+  const flatbuffers::String *run_name() const { return GetPointer<const flatbuffers::String *>(VT_RUN_NAME); }
+  flatbuffers::String *mutable_run_name() { return GetPointer<flatbuffers::String *>(VT_RUN_NAME); }
+  const flatbuffers::String *job_id() const { return GetPointer<const flatbuffers::String *>(VT_JOB_ID); }
+  flatbuffers::String *mutable_job_id() { return GetPointer<flatbuffers::String *>(VT_JOB_ID); }
+  const flatbuffers::String *service_id() const { return GetPointer<const flatbuffers::String *>(VT_SERVICE_ID); }
+  flatbuffers::String *mutable_service_id() { return GetPointer<flatbuffers::String *>(VT_SERVICE_ID); }
   bool Verify(flatbuffers::Verifier &verifier) const {
-    return VerifyTableStart(verifier) &&
-           VerifyField<uint64_t>(verifier, VT_STOP_TIME) &&
-           VerifyOffset(verifier, VT_RUN_NAME) &&
-           verifier.VerifyString(run_name()) &&
-           VerifyOffset(verifier, VT_JOB_ID) &&
-           verifier.VerifyString(job_id()) &&
-           VerifyOffset(verifier, VT_SERVICE_ID) &&
-           verifier.VerifyString(service_id()) && verifier.EndTable();
+    return VerifyTableStart(verifier) && VerifyField<uint64_t>(verifier, VT_STOP_TIME) &&
+           VerifyOffset(verifier, VT_RUN_NAME) && verifier.VerifyString(run_name()) &&
+           VerifyOffset(verifier, VT_JOB_ID) && verifier.VerifyString(job_id()) &&
+           VerifyOffset(verifier, VT_SERVICE_ID) && verifier.VerifyString(service_id()) && verifier.EndTable();
   }
 };
 
 struct RunStopBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
-  void add_stop_time(uint64_t stop_time) {
-    fbb_.AddElement<uint64_t>(RunStop::VT_STOP_TIME, stop_time, 0);
-  }
+  void add_stop_time(uint64_t stop_time) { fbb_.AddElement<uint64_t>(RunStop::VT_STOP_TIME, stop_time, 0); }
   void add_run_name(flatbuffers::Offset<flatbuffers::String> run_name) {
     fbb_.AddOffset(RunStop::VT_RUN_NAME, run_name);
   }
-  void add_job_id(flatbuffers::Offset<flatbuffers::String> job_id) {
-    fbb_.AddOffset(RunStop::VT_JOB_ID, job_id);
-  }
+  void add_job_id(flatbuffers::Offset<flatbuffers::String> job_id) { fbb_.AddOffset(RunStop::VT_JOB_ID, job_id); }
   void add_service_id(flatbuffers::Offset<flatbuffers::String> service_id) {
     fbb_.AddOffset(RunStop::VT_SERVICE_ID, service_id);
   }
-  explicit RunStopBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) {
-    start_ = fbb_.StartTable();
-  }
+  explicit RunStopBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
   RunStopBuilder &operator=(const RunStopBuilder &);
   flatbuffers::Offset<RunStop> Finish() {
     const auto end = fbb_.EndTable(start_);
@@ -72,11 +46,10 @@ struct RunStopBuilder {
   }
 };
 
-inline flatbuffers::Offset<RunStop>
-CreateRunStop(flatbuffers::FlatBufferBuilder &_fbb, uint64_t stop_time = 0,
-              flatbuffers::Offset<flatbuffers::String> run_name = 0,
-              flatbuffers::Offset<flatbuffers::String> job_id = 0,
-              flatbuffers::Offset<flatbuffers::String> service_id = 0) {
+inline flatbuffers::Offset<RunStop> CreateRunStop(flatbuffers::FlatBufferBuilder &_fbb, uint64_t stop_time = 0,
+                                                  flatbuffers::Offset<flatbuffers::String> run_name = 0,
+                                                  flatbuffers::Offset<flatbuffers::String> job_id = 0,
+                                                  flatbuffers::Offset<flatbuffers::String> service_id = 0) {
   RunStopBuilder builder_(_fbb);
   builder_.add_stop_time(stop_time);
   builder_.add_service_id(service_id);
@@ -85,28 +58,18 @@ CreateRunStop(flatbuffers::FlatBufferBuilder &_fbb, uint64_t stop_time = 0,
   return builder_.Finish();
 }
 
-inline flatbuffers::Offset<RunStop>
-CreateRunStopDirect(flatbuffers::FlatBufferBuilder &_fbb,
-                    uint64_t stop_time = 0, const char *run_name = nullptr,
-                    const char *job_id = nullptr,
-                    const char *service_id = nullptr) {
-  return CreateRunStop(_fbb, stop_time,
-                       run_name ? _fbb.CreateString(run_name) : 0,
-                       job_id ? _fbb.CreateString(job_id) : 0,
-                       service_id ? _fbb.CreateString(service_id) : 0);
+inline flatbuffers::Offset<RunStop> CreateRunStopDirect(flatbuffers::FlatBufferBuilder &_fbb, uint64_t stop_time = 0,
+                                                        const char *run_name = nullptr, const char *job_id = nullptr,
+                                                        const char *service_id = nullptr) {
+  return CreateRunStop(_fbb, stop_time, run_name ? _fbb.CreateString(run_name) : 0,
+                       job_id ? _fbb.CreateString(job_id) : 0, service_id ? _fbb.CreateString(service_id) : 0);
 }
 
-inline const RunStop *GetRunStop(const void *buf) {
-  return flatbuffers::GetRoot<RunStop>(buf);
-}
+inline const RunStop *GetRunStop(const void *buf) { return flatbuffers::GetRoot<RunStop>(buf); }
 
-inline const RunStop *GetSizePrefixedRunStop(const void *buf) {
-  return flatbuffers::GetSizePrefixedRoot<RunStop>(buf);
-}
+inline const RunStop *GetSizePrefixedRunStop(const void *buf) { return flatbuffers::GetSizePrefixedRoot<RunStop>(buf); }
 
-inline RunStop *GetMutableRunStop(void *buf) {
-  return flatbuffers::GetMutableRoot<RunStop>(buf);
-}
+inline RunStop *GetMutableRunStop(void *buf) { return flatbuffers::GetMutableRoot<RunStop>(buf); }
 
 inline const char *RunStopIdentifier() { return "6s4t"; }
 
@@ -122,13 +85,11 @@ inline bool VerifySizePrefixedRunStopBuffer(flatbuffers::Verifier &verifier) {
   return verifier.VerifySizePrefixedBuffer<RunStop>(RunStopIdentifier());
 }
 
-inline void FinishRunStopBuffer(flatbuffers::FlatBufferBuilder &fbb,
-                                flatbuffers::Offset<RunStop> root) {
+inline void FinishRunStopBuffer(flatbuffers::FlatBufferBuilder &fbb, flatbuffers::Offset<RunStop> root) {
   fbb.Finish(root, RunStopIdentifier());
 }
 
-inline void FinishSizePrefixedRunStopBuffer(flatbuffers::FlatBufferBuilder &fbb,
-                                            flatbuffers::Offset<RunStop> root) {
+inline void FinishSizePrefixedRunStopBuffer(flatbuffers::FlatBufferBuilder &fbb, flatbuffers::Offset<RunStop> root) {
   fbb.FinishSizePrefixed(root, RunStopIdentifier());
 }
 

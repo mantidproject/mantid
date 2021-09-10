@@ -14,21 +14,15 @@ InvalidDefaultsError::InvalidDefaultsError( // cppcheck-suppress passedByValue
     int row, std::vector<int> invalidColumns)
     : m_invalidColumns(std::move(invalidColumns)), m_row(row) {}
 
-std::vector<int> const &InvalidDefaultsError::invalidColumns() const {
-  return m_invalidColumns;
-}
+std::vector<int> const &InvalidDefaultsError::invalidColumns() const { return m_invalidColumns; }
 
 int InvalidDefaultsError::row() const { return m_row; }
 
-bool operator==(InvalidDefaultsError const &lhs,
-                InvalidDefaultsError const &rhs) {
+bool operator==(InvalidDefaultsError const &lhs, InvalidDefaultsError const &rhs) {
   return lhs.row() == rhs.row() && lhs.invalidColumns() == rhs.invalidColumns();
 }
 
-bool operator!=(InvalidDefaultsError const &lhs,
-                InvalidDefaultsError const &rhs) {
-  return !(lhs == rhs);
-}
+bool operator!=(InvalidDefaultsError const &lhs, InvalidDefaultsError const &rhs) { return !(lhs == rhs); }
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

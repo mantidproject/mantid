@@ -69,8 +69,7 @@ public:
 //		for building the tree.
 //----------------------------------------------------------------------
 
-using ANNkd_splitter = void (*)(ANNpointArray, ANNidxArray, const ANNorthRect &,
-                                int, int, int &, ANNcoord &,
+using ANNkd_splitter = void (*)(ANNpointArray, ANNidxArray, const ANNorthRect &, int, int, int &, ANNcoord &,
                                 int &); // num of points on low side (returned)
 
 //----------------------------------------------------------------------

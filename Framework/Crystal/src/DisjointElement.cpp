@@ -18,8 +18,7 @@ DisjointElement::DisjointElement() : m_parent(this), m_rank(0), m_id(-1) {}
  * Constructor
  * @param id : Element id
  */
-DisjointElement::DisjointElement(const int id)
-    : m_parent(this), m_rank(0), m_id(id) {}
+DisjointElement::DisjointElement(const int id) : m_parent(this), m_rank(0), m_id(id) {}
 
 /**
  * Copy constructor

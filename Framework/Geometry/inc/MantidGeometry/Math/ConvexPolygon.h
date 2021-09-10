@@ -115,8 +115,7 @@ private:
   /// Setup the meta-data
   void setup();
   /// Compute the area of a triangle given by 3 points
-  double triangleArea(const Kernel::V2D &a, const Kernel::V2D &b,
-                      const Kernel::V2D &c) const;
+  double triangleArea(const Kernel::V2D &a, const Kernel::V2D &b, const Kernel::V2D &c) const;
   /// Lowest X value
   double m_minX;
   /// Highest X value
@@ -130,8 +129,7 @@ private:
 };
 
 /// Print a polygon to a stream
-MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &os,
-                                             const ConvexPolygon &polygon);
+MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &os, const ConvexPolygon &polygon);
 
 } // namespace Geometry
 } // namespace Mantid

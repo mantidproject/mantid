@@ -17,17 +17,12 @@ namespace MantidQt {
 namespace MantidWidgets {
 namespace Batch {
 
-enum CellUserRoles {
-  BorderColor = Qt::UserRole + 1,
-  BorderThickness,
-  IconFilePath
-};
+enum CellUserRoles { BorderColor = Qt::UserRole + 1, BorderThickness, IconFilePath };
 
 void setBorderThickness(QStandardItem &item, int borderThickness);
 int getBorderThickness(QStandardItem const &item);
 
-void setBorderColor(QStandardItem &item, std::string const &borderColor,
-                    int alpha);
+void setBorderColor(QStandardItem &item, std::string const &borderColor, int alpha);
 QColor getBorderColor(QStandardItem const &item);
 
 std::string getIconFilePath(QStandardItem const &item);
@@ -35,11 +30,9 @@ void setIcon(QStandardItem &item, std::string const &iconFilePath);
 void setIconFilePath(QStandardItem &item, QString const &iconFilePath);
 
 std::string getBackgroundColor(QStandardItem const &item);
-void setBackgroundColor(QStandardItem &item,
-                        std::string const &backgroundColor);
+void setBackgroundColor(QStandardItem &item, std::string const &backgroundColor);
 std::string getForegroundColor(QStandardItem const &item);
-void setForegroundColor(QStandardItem &item,
-                        std::string const &foregroundColor);
+void setForegroundColor(QStandardItem &item, std::string const &foregroundColor);
 
 void applyCellPropertiesToItem(Cell const &cell, QStandardItem &item);
 Cell extractCellPropertiesFromItem(QStandardItem const &item);

@@ -20,21 +20,16 @@ namespace Algorithms {
 DECLARE_ALGORITHM(MergeLogs)
 
 void MergeLogs::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "Workspace", "Anonymous", Direction::InOut),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("Workspace", "Anonymous", Direction::InOut),
                   "Workspace to have logs merged");
-  declareProperty("LogName1", "",
-                  std::make_shared<MandatoryValidator<std::string>>(),
+  declareProperty("LogName1", "", std::make_shared<MandatoryValidator<std::string>>(),
                   "The name of the first log to be merged.");
-  declareProperty("LogName2", "",
-                  std::make_shared<MandatoryValidator<std::string>>(),
+  declareProperty("LogName2", "", std::make_shared<MandatoryValidator<std::string>>(),
                   "The name of the second log to be merged.");
-  declareProperty("MergedLogName", "",
-                  std::make_shared<MandatoryValidator<std::string>>(),
+  declareProperty("MergedLogName", "", std::make_shared<MandatoryValidator<std::string>>(),
                   "The name of the new log as the result "
                   "of log 1 being merged with log 2.");
-  declareProperty("ResetLogValue", false,
-                  "Reset both logs' values to unity for each one.");
+  declareProperty("ResetLogValue", false, "Reset both logs' values to unity for each one.");
   declareProperty("LogValue1", 0.0, "Unity value of log 1.");
   declareProperty("LogValue2", 1.0, "Unity value of log 2.");
 }
@@ -46,8 +41,7 @@ void MergeLogs::init() {
 std::string MergeLogs::validateTSP(std::string const &propertyName) {
   std::string const logName = this->getProperty(propertyName);
   MatrixWorkspace_const_sptr ws = this->getProperty("Workspace");
-  if (!this->getPointerToProperty(propertyName)->isDefault() &&
-      ws->run().hasProperty(logName)) {
+  if (!this->getPointerToProperty(propertyName)->isDefault() && ws->run().hasProperty(logName)) {
     try {
       ws->run().getTimeSeriesProperty<double>(logName);
     } catch (std::invalid_argument &) {
@@ -67,8 +61,7 @@ std::map<std::string, std::string> MergeLogs::validateInputs(void) {
   std::string const logName1 = this->getProperty("LogName1");
   std::string const logName2 = this->getProperty("LogName2");
   MatrixWorkspace_const_sptr ws = this->getProperty("Workspace");
-  if ((mlogname == logName1) || (mlogname == logName2) ||
-      ws->run().hasProperty(mlogname))
+  if ((mlogname == logName1) || (mlogname == logName2) || ws->run().hasProperty(mlogname))
     issues["MergedLogName"] = "TimeSeriesLog name must be unique.";
   else {
     std::string const &issueLog1 = this->validateTSP("LogName1");
@@ -87,10 +80,8 @@ void MergeLogs::exec() {
   const std::string log2name = this->getProperty("LogName2");
   const std::string mlogname = this->getProperty("MergedLogName");
   const bool resetlogvalue = this->getProperty("ResetLogValue");
-  TimeSeriesProperty<double> *log1(
-      ws->run().getTimeSeriesProperty<double>(log1name));
-  TimeSeriesProperty<double> *log2(
-      ws->run().getTimeSeriesProperty<double>(log2name));
+  TimeSeriesProperty<double> *log1(ws->run().getTimeSeriesProperty<double>(log1name));
+  TimeSeriesProperty<double> *log2(ws->run().getTimeSeriesProperty<double>(log2name));
   std::unique_ptr<TimeSeriesProperty<double>> mlog1(log1->clone());
   std::unique_ptr<TimeSeriesProperty<double>> mlog2(log2->clone());
   mlog1->setName(mlogname);

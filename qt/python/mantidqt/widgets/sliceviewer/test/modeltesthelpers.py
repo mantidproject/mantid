@@ -9,8 +9,8 @@
 from unittest.mock import MagicMock
 
 # 3rd party imports
-from mantid.api import (MatrixWorkspace, IMDEventWorkspace, IMDHistoWorkspace,
-                        SpecialCoordinateSystem)
+from mantid.api import MatrixWorkspace, IMDEventWorkspace, IMDHistoWorkspace
+from mantid.kernel import SpecialCoordinateSystem
 from mantid.geometry import IMDDimension
 import numpy as np
 

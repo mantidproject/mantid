@@ -29,20 +29,15 @@ are populated by loading an empty instrument.
 @author Dan Nixon
 */
 
-class MANTIDQT_INDIRECT_DLL IndirectInstrumentConfig
-    : public API::MantidWidget {
+class MANTIDQT_INDIRECT_DLL IndirectInstrumentConfig : public API::MantidWidget {
   Q_OBJECT
 
   Q_PROPERTY(QStringList techniques READ getTechniques WRITE setTechniques)
-  Q_PROPERTY(QStringList disabledInstruments READ getDisabledInstruments WRITE
-                 setDisabledInstruments)
+  Q_PROPERTY(QStringList disabledInstruments READ getDisabledInstruments WRITE setDisabledInstruments)
   Q_PROPERTY(QString facility READ getFacility WRITE setFacility)
-  Q_PROPERTY(
-      bool enableDiffraction READ isDiffractionEnabled WRITE enableDiffraction)
-  Q_PROPERTY(
-      bool forceDiffraction READ isDiffractionForced WRITE forceDiffraction)
-  Q_PROPERTY(bool showInstrumentLabel READ isInstrumentLabelShown WRITE
-                 setShowInstrumentLabel)
+  Q_PROPERTY(bool enableDiffraction READ isDiffractionEnabled WRITE enableDiffraction)
+  Q_PROPERTY(bool forceDiffraction READ isDiffractionForced WRITE forceDiffraction)
+  Q_PROPERTY(bool showInstrumentLabel READ isInstrumentLabelShown WRITE setShowInstrumentLabel)
 
 public:
   IndirectInstrumentConfig(QWidget *parent = nullptr);
@@ -90,8 +85,7 @@ public slots:
 
 signals:
   /// Emitted when the instrument configuration is changed
-  void instrumentConfigurationUpdated(const QString &instrumentName,
-                                      const QString &analyserName,
+  void instrumentConfigurationUpdated(const QString &instrumentName, const QString &analyserName,
                                       const QString &reflectionName);
 
 private slots:

@@ -15,9 +15,11 @@ def _add_workspace_to_group(group_name, workspace_name):
         workspaces_to_group = AnalysisDataService.retrieve(group_name).getNames()
     else:
         workspaces_to_group = []
-    workspaces_to_group.append(workspace_name)
-    WorkspaceGroupDefinition().add_workspaces_to_group(group_name, workspaces_to_group)
-    WorkspaceGroupDefinition().execute_grouping()
+
+    if workspace_name not in workspaces_to_group:
+        workspaces_to_group.append(workspace_name)
+        WorkspaceGroupDefinition().add_workspaces_to_group(group_name, workspaces_to_group)
+        WorkspaceGroupDefinition().execute_grouping()
 
 
 class MuonWorkspaceWrapper(object):

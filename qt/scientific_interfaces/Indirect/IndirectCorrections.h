@@ -23,12 +23,7 @@ namespace CustomInterfaces {
 // The assumption is made elsewhere that the ordering of these enums matches the
 // ordering of the
 // tabs as they appear in the interface itself.
-enum CorrectionTabChoice {
-  CONTAINER_SUBTRACTION,
-  CALC_CORR,
-  ABSORPTION_CORRECTIONS,
-  APPLY_CORR
-};
+enum CorrectionTabChoice { CONTAINER_SUBTRACTION, CALC_CORR, ABSORPTION_CORRECTIONS, APPLY_CORR };
 
 // Forward Declaration
 class CorrectionsTab;
@@ -65,8 +60,7 @@ private:
   /// Called upon a close event.
   void closeEvent(QCloseEvent * /*unused*/) override;
   /// handle POCO event
-  void
-  handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf);
+  void handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf);
 
 private slots:
   /// Called when the user clicks the Py button
@@ -81,9 +75,7 @@ private:
   Ui::IndirectCorrections m_uiForm;
 
   /// Change Observer for ConfigService (monitors user directories)
-  Poco::NObserver<IndirectCorrections,
-                  Mantid::Kernel::ConfigValChangeNotification>
-      m_changeObserver;
+  Poco::NObserver<IndirectCorrections, Mantid::Kernel::ConfigValChangeNotification> m_changeObserver;
 
   /// Map of unsigned int (TabChoice enum values) to tabs.
   std::map<unsigned int, CorrectionsTab *> m_tabs;

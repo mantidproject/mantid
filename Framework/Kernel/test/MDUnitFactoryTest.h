@@ -50,9 +50,7 @@ public:
     // We say that the string is interpretable
     EXPECT_CALL(factory, canInterpret(_)).WillOnce(Return(true));
     // So we expect to then be asked to create an instance of the product
-    EXPECT_CALL(factory, createRaw(_))
-        .Times(1)
-        .WillOnce(Return(new MockMDUnit));
+    EXPECT_CALL(factory, createRaw(_)).Times(1).WillOnce(Return(new MockMDUnit));
 
     factory.create("");
 
@@ -71,12 +69,9 @@ public:
     // We say that the string is interpretable
     EXPECT_CALL(*factorySecondary, canInterpret(_)).WillOnce(Return(true));
     // So we expect to then be asked to create an instance of the product
-    EXPECT_CALL(*factorySecondary, createRaw(_))
-        .Times(1)
-        .WillOnce(Return(new MockMDUnit));
+    EXPECT_CALL(*factorySecondary, createRaw(_)).Times(1).WillOnce(Return(new MockMDUnit));
 
-    factoryPrimary.setSuccessor(
-        std::unique_ptr<MDUnitFactory>(factorySecondary));
+    factoryPrimary.setSuccessor(std::unique_ptr<MDUnitFactory>(factorySecondary));
     factoryPrimary.create("");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&factoryPrimary));
@@ -91,8 +86,7 @@ public:
     // So we DONT expect to then be asked to create an instance of THAT product
     EXPECT_CALL(factoryPrimary, createRaw(_)).Times(0);
 
-    TSM_ASSERT_THROWS("No successor. This has to throw",
-                      factoryPrimary.create(""), std::invalid_argument &);
+    TSM_ASSERT_THROWS("No successor. This has to throw", factoryPrimary.create(""), std::invalid_argument &);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&factoryPrimary));
   }
@@ -132,10 +126,8 @@ public:
   void test_make_standard_chain() {
     MDUnitFactory_uptr chain = makeMDUnitFactoryChain();
     // Now lets try the chain of factories out
-    TS_ASSERT(dynamic_cast<InverseAngstromsUnit *>(
-        chain->create(Units::Symbol::InverseAngstrom).get()));
-    TS_ASSERT(dynamic_cast<ReciprocalLatticeUnit *>(
-        chain->create(Units::Symbol::RLU).get()));
+    TS_ASSERT(dynamic_cast<InverseAngstromsUnit *>(chain->create(Units::Symbol::InverseAngstrom).get()));
+    TS_ASSERT(dynamic_cast<ReciprocalLatticeUnit *>(chain->create(Units::Symbol::RLU).get()));
     TS_ASSERT(dynamic_cast<LabelUnit *>(chain->create("Anything else").get()));
   }
 };

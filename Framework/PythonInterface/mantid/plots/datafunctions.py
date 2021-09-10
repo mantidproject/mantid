@@ -35,10 +35,11 @@ from mantid.plots.utility import MantidAxType
 
 
 def validate_args(*args, **kwargs):
-    return len(args) > 0 and (isinstance(args[0], EventWorkspace) or
-                              isinstance(args[0], Workspace2D) or
-                              isinstance(args[0], MDHistoWorkspace) or
-                              isinstance(args[0], MultipleExperimentInfos) and "LogName" in kwargs)
+    return len(args) > 0 and (isinstance(args[0], EventWorkspace)
+                              or isinstance(args[0], Workspace2D)
+                              or isinstance(args[0], MDHistoWorkspace)
+                              or isinstance(args[0], MultipleExperimentInfos)
+                              and "LogName" in kwargs)
 
 
 # ====================================================
@@ -137,8 +138,8 @@ def get_indices(md_workspace, **kwargs):
     if indices and 'label' not in kwargs:
         ws_name = md_workspace.name()
         labels = '; '.join('{0}={1:.4}'.format(md_workspace.getDimension(n).name,
-                                               (md_workspace.getDimension(n).getX(indices[n]) +
-                                                md_workspace.getDimension(n).getX(indices[n] + 1)) / 2)
+                                               (md_workspace.getDimension(n).getX(indices[n])
+                                                + md_workspace.getDimension(n).getX(indices[n] + 1)) / 2)
                            for n in range(md_workspace.getNumDims()) if indices[n] != slice(None))
         if ws_name:
             kwargs['label'] = '{0}: {1}'.format(ws_name, labels)
@@ -545,7 +546,7 @@ def _workspace_indices(y_bins, workspace):
             workspace_index = workspace.getAxis(1).indexOfValue(y)
             workspace_indices.append(workspace_index)
         except IndexError:
-            continue
+            workspace_indices.append(-1)
     return workspace_indices
 
 
@@ -555,12 +556,18 @@ def _workspace_indices_maxpooling(y_bins, workspace):
     workspace_indices = []
     for y_range in pairwise(y_bins):
         try:
-            workspace_range = range(workspace.getAxis(1).indexOfValue(np.math.floor(y_range[0])),
-                                    workspace.getAxis(1).indexOfValue(np.math.ceil(y_range[1])))
-            workspace_index = workspace_range[np.argmax(summed_spectra[workspace_range])]
+            workspace_range = [workspace.getAxis(1).indexOfValue(y_range[0]),
+                               workspace.getAxis(1).indexOfValue(y_range[1])]
+            # if the range doesn't span more than one spectra just grab the first element
+            # else we need to pick the spectra which has the highest intensity
+            if np.diff(workspace_range)[0] > 1:
+                workspace_range = range(workspace_range[0], workspace_range[1])
+                workspace_index = workspace_range[np.argmax(summed_spectra[workspace_range])]
+            else:
+                workspace_index = workspace_range[0]
             workspace_indices.append(workspace_index)
         except IndexError:
-            continue
+            workspace_indices.append(-1)
     return workspace_indices
 
 
@@ -585,6 +592,9 @@ def interpolate_y_data(workspace, x, y, normalize_by_bin_width, spectrum_info=No
     index = -1
     for workspace_index in workspace_indices:
         index += 1
+        # if workspace axis is beyond limits carry on
+        if workspace_index == -1:
+            continue
         # avoid repeating calculations
         if previous_index == workspace_index:
             counts[index, :] = counts[index - 1]
@@ -598,8 +608,7 @@ def interpolate_y_data(workspace, x, y, normalize_by_bin_width, spectrum_info=No
             interpolation_function = interp1d(centers, ztmp, kind='nearest', bounds_error=False,
                                               fill_value="extrapolate")
             # only set values in the range of workspace
-            x_range = np.where((x >= workspace.readX(workspace_index)[0]) &
-                               (x <= workspace.readX(workspace_index)[-1]))
+            x_range = np.where((x >= workspace.readX(workspace_index)[0]) & (x <= workspace.readX(workspace_index)[-1]))
             # set values outside x data to nan
             counts[index, x_range] = interpolation_function(x[x_range])
     counts = np.ma.masked_invalid(counts, copy=False)

@@ -26,13 +26,10 @@ public:
 
   void test_Init() {
     CompactMD alg;
-    TSM_ASSERT_THROWS_NOTHING("Instance of CompactMD threw: ",
-                              alg.initialize());
-    TSM_ASSERT("Instance of CompactMD was not initialised: ",
-               alg.isInitialized());
+    TSM_ASSERT_THROWS_NOTHING("Instance of CompactMD threw: ", alg.initialize());
+    TSM_ASSERT("Instance of CompactMD was not initialised: ", alg.isInitialized());
   }
-  void
-  test_all_non_zero_signals_are_kept_with_data_concentrated_in_the_centre() {
+  void test_all_non_zero_signals_are_kept_with_data_concentrated_in_the_centre() {
     /*
      *testing the effectiveness of CompactMD when the data looks like this:
      *------------------
@@ -60,8 +57,8 @@ public:
     Mantid::coord_t min[static_cast<int>(numDims)] = {-5};
     Mantid::coord_t max[static_cast<int>(numDims)] = {5};
     const std::string name("test");
-    auto inWS = MDEventsTestHelper::makeFakeMDHistoWorkspaceGeneral(
-        numDims, signal, errorSquared, numBins, min, max, name);
+    auto inWS =
+        MDEventsTestHelper::makeFakeMDHistoWorkspaceGeneral(numDims, signal, errorSquared, numBins, min, max, name);
     inWS->setSignalAt(2, 1.0); // set middle bin signal to one
     CompactMD alg;
     alg.setChild(true);
@@ -72,16 +69,11 @@ public:
     alg.execute();
     // output workspace should be cropped so extents ~ [-1,1]
     IMDHistoWorkspace_sptr outputWorkspace = alg.getProperty("OutputWorkspace");
-    TSM_ASSERT_EQUALS(
-        "Should have a signal of 1.0: ", outputWorkspace->getSignalAt(0), 1);
-    TSM_ASSERT_EQUALS("Minimum should be cropped to -1: ",
-                      outputWorkspace->getDimension(0)->getMinimum(), -1.0);
-    TSM_ASSERT_EQUALS("Maximum should be cropped to 1: ",
-                      outputWorkspace->getDimension(0)->getMaximum(), 1.0);
-    TSM_ASSERT_EQUALS("Number of Bins should be 1 : ",
-                      outputWorkspace->getDimension(0)->getNBins(), 1.0);
-    TSM_ASSERT_EQUALS("Bin width should be consistent: ",
-                      outputWorkspace->getDimension(0)->getBinWidth(),
+    TSM_ASSERT_EQUALS("Should have a signal of 1.0: ", outputWorkspace->getSignalAt(0), 1);
+    TSM_ASSERT_EQUALS("Minimum should be cropped to -1: ", outputWorkspace->getDimension(0)->getMinimum(), -1.0);
+    TSM_ASSERT_EQUALS("Maximum should be cropped to 1: ", outputWorkspace->getDimension(0)->getMaximum(), 1.0);
+    TSM_ASSERT_EQUALS("Number of Bins should be 1 : ", outputWorkspace->getDimension(0)->getNBins(), 1.0);
+    TSM_ASSERT_EQUALS("Bin width should be consistent: ", outputWorkspace->getDimension(0)->getBinWidth(),
                       inWS->getDimension(0)->getBinWidth());
   }
   void test_all_non_zero_signals_are_kept_with_data_in_each_corner() {
@@ -119,8 +111,8 @@ public:
     Mantid::coord_t min[static_cast<int>(numDims)] = {-3, -3};
     Mantid::coord_t max[static_cast<int>(numDims)] = {3, 3};
     const std::string name("test");
-    auto inWS = MDEventsTestHelper::makeFakeMDHistoWorkspaceGeneral(
-        numDims, signal, errorSquared, numBins, min, max, name);
+    auto inWS =
+        MDEventsTestHelper::makeFakeMDHistoWorkspaceGeneral(numDims, signal, errorSquared, numBins, min, max, name);
     inWS->setSignalAt(0, 1.0); // cell a
     inWS->setSignalAt(2, 1.0); // cell b
     inWS->setSignalAt(6, 1.0); // cell c
@@ -134,42 +126,29 @@ public:
     alg.setProperty("OutputWorkspace", "out");
     alg.execute();
     IMDHistoWorkspace_sptr outputWorkspace = alg.getProperty("OutputWorkspace");
-    TSM_ASSERT_EQUALS(
-        "Should have a signal of 1.0: ", outputWorkspace->getSignalAt(0), 1);
-    TSM_ASSERT_EQUALS(
-        "Should have a signal of 1.0: ", outputWorkspace->getSignalAt(2), 1);
-    TSM_ASSERT_EQUALS(
-        "Should have a signal of 1.0: ", outputWorkspace->getSignalAt(6), 1);
-    TSM_ASSERT_EQUALS(
-        "Should have a signal of 1.0: ", outputWorkspace->getSignalAt(8), 1);
-    TSM_ASSERT_EQUALS("Minimum for dim 0 should be consistent: ",
-                      outputWorkspace->getDimension(0)->getMinimum(),
+    TSM_ASSERT_EQUALS("Should have a signal of 1.0: ", outputWorkspace->getSignalAt(0), 1);
+    TSM_ASSERT_EQUALS("Should have a signal of 1.0: ", outputWorkspace->getSignalAt(2), 1);
+    TSM_ASSERT_EQUALS("Should have a signal of 1.0: ", outputWorkspace->getSignalAt(6), 1);
+    TSM_ASSERT_EQUALS("Should have a signal of 1.0: ", outputWorkspace->getSignalAt(8), 1);
+    TSM_ASSERT_EQUALS("Minimum for dim 0 should be consistent: ", outputWorkspace->getDimension(0)->getMinimum(),
                       inWS->getDimension(0)->getMinimum());
-    TSM_ASSERT_EQUALS("Maximum for dim 0 should be consistent: ",
-                      outputWorkspace->getDimension(0)->getMaximum(),
+    TSM_ASSERT_EQUALS("Maximum for dim 0 should be consistent: ", outputWorkspace->getDimension(0)->getMaximum(),
                       inWS->getDimension(0)->getMaximum());
-    TSM_ASSERT_EQUALS("Minimum for dim 1 should be consistent:",
-                      outputWorkspace->getDimension(1)->getMinimum(),
+    TSM_ASSERT_EQUALS("Minimum for dim 1 should be consistent:", outputWorkspace->getDimension(1)->getMinimum(),
                       inWS->getDimension(1)->getMinimum());
-    TSM_ASSERT_EQUALS("Maximum for dim 1 should be consistent: ",
-                      outputWorkspace->getDimension(1)->getMaximum(),
+    TSM_ASSERT_EQUALS("Maximum for dim 1 should be consistent: ", outputWorkspace->getDimension(1)->getMaximum(),
                       inWS->getDimension(1)->getMaximum());
-    TSM_ASSERT_EQUALS("Number of Bins for dim 0 should be consistent : ",
-                      outputWorkspace->getDimension(0)->getNBins(),
+    TSM_ASSERT_EQUALS("Number of Bins for dim 0 should be consistent : ", outputWorkspace->getDimension(0)->getNBins(),
                       inWS->getDimension(0)->getNBins());
-    TSM_ASSERT_EQUALS("Number of Bins for dim 1 should be consistent : ",
-                      outputWorkspace->getDimension(1)->getNBins(),
+    TSM_ASSERT_EQUALS("Number of Bins for dim 1 should be consistent : ", outputWorkspace->getDimension(1)->getNBins(),
                       inWS->getDimension(1)->getNBins());
-    TSM_ASSERT_EQUALS("Bin width for dim 0 should be consistent: ",
-                      outputWorkspace->getDimension(0)->getBinWidth(),
+    TSM_ASSERT_EQUALS("Bin width for dim 0 should be consistent: ", outputWorkspace->getDimension(0)->getBinWidth(),
                       inWS->getDimension(0)->getBinWidth());
-    TSM_ASSERT_EQUALS("Bin width for dim 1 should be consistent: ",
-                      outputWorkspace->getDimension(1)->getBinWidth(),
+    TSM_ASSERT_EQUALS("Bin width for dim 1 should be consistent: ", outputWorkspace->getDimension(1)->getBinWidth(),
                       inWS->getDimension(1)->getBinWidth());
   }
 
-  void
-  test_all_non_zero_signals_are_kept_when_data_is_concentrated_in_one_half_of_the_workspace() {
+  void test_all_non_zero_signals_are_kept_when_data_is_concentrated_in_one_half_of_the_workspace() {
     /*
      *testing the effectiveness of CompactMD when the data looks like this:
      *------------------
@@ -197,8 +176,8 @@ public:
     Mantid::coord_t min[static_cast<int>(numDims)] = {-3};
     Mantid::coord_t max[static_cast<int>(numDims)] = {3};
     const std::string name("test");
-    auto inWS = MDEventsTestHelper::makeFakeMDHistoWorkspaceGeneral(
-        numDims, signal, errorSquared, numBins, min, max, name);
+    auto inWS =
+        MDEventsTestHelper::makeFakeMDHistoWorkspaceGeneral(numDims, signal, errorSquared, numBins, min, max, name);
     inWS->setSignalAt(0, 1.0); // set right-most bin signal to one
     CompactMD alg;
     alg.setChild(true);
@@ -209,16 +188,11 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     IMDHistoWorkspace_sptr outputWorkspace = alg.getProperty("OutputWorkspace");
     TS_ASSERT(outputWorkspace);
-    TSM_ASSERT_EQUALS(
-        "Should have a signal of 1.0: ", outputWorkspace->getSignalAt(0), 1);
-    TSM_ASSERT_EQUALS("Minimum should be cut to 1: ",
-                      outputWorkspace->getDimension(0)->getMinimum(), -3.0);
-    TSM_ASSERT_EQUALS("Maximum should still be 3: ",
-                      outputWorkspace->getDimension(0)->getMaximum(), -1.0);
-    TSM_ASSERT_EQUALS("Number of Bins should be 1 : ",
-                      outputWorkspace->getDimension(0)->getNBins(), 1);
-    TSM_ASSERT_EQUALS("Bin width should be consistent: ",
-                      outputWorkspace->getDimension(0)->getBinWidth(),
+    TSM_ASSERT_EQUALS("Should have a signal of 1.0: ", outputWorkspace->getSignalAt(0), 1);
+    TSM_ASSERT_EQUALS("Minimum should be cut to 1: ", outputWorkspace->getDimension(0)->getMinimum(), -3.0);
+    TSM_ASSERT_EQUALS("Maximum should still be 3: ", outputWorkspace->getDimension(0)->getMaximum(), -1.0);
+    TSM_ASSERT_EQUALS("Number of Bins should be 1 : ", outputWorkspace->getDimension(0)->getNBins(), 1);
+    TSM_ASSERT_EQUALS("Bin width should be consistent: ", outputWorkspace->getDimension(0)->getBinWidth(),
                       inWS->getDimension(0)->getBinWidth());
   }
 
@@ -231,8 +205,8 @@ public:
     Mantid::coord_t min[static_cast<int>(numDims)] = {-3};
     Mantid::coord_t max[static_cast<int>(numDims)] = {3};
     const std::string name("test");
-    auto inWS = MDEventsTestHelper::makeFakeMDHistoWorkspaceGeneral(
-        numDims, signal, errorSquared, numBins, min, max, name);
+    auto inWS =
+        MDEventsTestHelper::makeFakeMDHistoWorkspaceGeneral(numDims, signal, errorSquared, numBins, min, max, name);
     CompactMD alg;
     alg.setChild(true);
     alg.setRethrows(true);
@@ -255,9 +229,7 @@ private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static CompactMDTestPerformance *createSuite() {
-    return new CompactMDTestPerformance();
-  }
+  static CompactMDTestPerformance *createSuite() { return new CompactMDTestPerformance(); }
   static void destroySuite(CompactMDTestPerformance *suite) { delete suite; }
   void setUp() override {
     // Create a 4D workspace.
@@ -268,8 +240,7 @@ public:
     Mantid::coord_t min[static_cast<int>(numDims)] = {-5, -10, -5, -10};
     Mantid::coord_t max[static_cast<int>(numDims)] = {5, 10, 5, 10};
     const std::string name("test");
-    m_ws = MDEventsTestHelper::makeFakeMDHistoWorkspaceGeneral(
-        numDims, signal, errorSquared, numBins, min, max, name);
+    m_ws = MDEventsTestHelper::makeFakeMDHistoWorkspaceGeneral(numDims, signal, errorSquared, numBins, min, max, name);
     // setting signals like this for variety
     auto iter = m_ws->createIterator();
     do {

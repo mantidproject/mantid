@@ -29,14 +29,6 @@ from sans.gui_logic.models.RowEntries import RowEntries
 from sans.sans_batch import SANSBatchReduction, SANSCentreFinder
 
 
-# Disable plotting if running outside Mantidplot
-try:
-    import mantidplot
-except (Exception, Warning):
-    mantidplot = None
-    # this should happen when this is called from outside Mantidplot and only then,
-    # the result is that attempting to plot will raise an exception
-
 # ----------------------------------------------------------------------------------------------------------------------
 # Globals
 # ----------------------------------------------------------------------------------------------------------------------
@@ -47,6 +39,8 @@ DefaultTrans = True
 # CommandInterfaceStateDirector global instance
 # ----------------------------------------------------------------------------------------------------------------------
 director = CommandInterfaceStateDirector(SANSFacility.ISIS)
+_plot_missing_str = "Plotting is not implemented for workbench yet, please contact us via the forum:\n" \
+                    "https://forum.mantidproject.org/"
 
 
 def deprecated(obj):
@@ -807,11 +801,12 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
     # -----------------------------------------------------------
     reduction_mode = state.reduction.reduction_mode
     is_group = is_part_of_reduced_output_workspace_group(state)
+    wav_range = state.wavelength.wavelength_interval.wavelength_full_range
     if reduction_mode != ReductionMode.ALL:
-        _, output_workspace_base_name = get_output_name(state, reduction_mode, is_group)
+        _, output_workspace_base_name = get_output_name(state, reduction_mode, is_group, wav_range)
     else:
-        _, output_workspace_base_name_hab = get_output_name(state, ReductionMode.HAB, is_group)
-        _, output_workspace_base_name_lab = get_output_name(state, ReductionMode.LAB, is_group)
+        _, output_workspace_base_name_hab = get_output_name(state, ReductionMode.HAB, is_group, wav_range)
+        _, output_workspace_base_name_lab = get_output_name(state, ReductionMode.LAB, is_group, wav_range)
         output_workspace_base_name = [output_workspace_base_name_lab, output_workspace_base_name_hab]
     return output_workspace_base_name
 
@@ -821,7 +816,7 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs=None, verbose=Fals
     """
         @param filename: the CSV file with the list of runs to analyse
         @param format: type of file to load, nxs for Nexus, etc.
-        @param plotresults: if true and this function is run from Mantidplot a graph will be created for the results of each reduction
+        @param plotresults: if true and this function is run from mantid a graph will be created for the results of each reduction
         @param saveAlgs: this named algorithm will be passed the name of the results workspace and filename (default = 'SaveRKH').
             Pass a tuple of strings to save to multiple file formats
         @param verbose: set to true to write more information to the log (default=False)
@@ -992,8 +987,8 @@ def CompWavRanges(wavelens, plot=True, combineDet=None, resetSetup=True):
                                                    combineDet=combineDet, resetSetup=False)
         reduced_workspace_names.append(reduced_workspace_name)
 
-    if plot and mantidplot:
-        mantidplot.plotSpectrum(reduced_workspace_names, 0)
+    if plot:
+        raise NotImplementedError(_plot_missing_str)
 
     # Return just the workspace name of the full range
     return reduced_workspace_names[0]
@@ -1019,8 +1014,8 @@ def PhiRanges(phis, plot=True):
         reduced_workspace_name = WavRangeReduction()
         reduced_workspace_names.append(reduced_workspace_name)
 
-    if plot and mantidplot:
-        mantidplot.plotSpectrum(reduced_workspace_names, 0)
+    if plot:
+        raise NotImplementedError(_plot_missing_str)
 
     # Return just the workspace name of the full range
     return reduced_workspace_names[0]
@@ -1075,6 +1070,8 @@ def PlotResult(workspace, canvas=None):
         @param canvas: optional handle to an existing graph to write the plot to
         @return: a handle to the graph that was written to
     """
+    raise NotImplementedError(_plot_missing_str)
+
     try:
         import mantidplot
         workspace = AnalysisDataService.retrieve(str(workspace))

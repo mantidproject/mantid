@@ -17,12 +17,9 @@ IMessageHandler is an interface for passing messages to the user
 class IMessageHandler {
 public:
   virtual ~IMessageHandler(){};
-  virtual void giveUserCritical(const std::string &prompt,
-                                const std::string &title) = 0;
-  virtual void giveUserInfo(const std::string &prompt,
-                            const std::string &title) = 0;
-  virtual bool askUserOkCancel(const std::string &prompt,
-                               const std::string &title) = 0;
+  virtual void giveUserCritical(const std::string &prompt, const std::string &title) = 0;
+  virtual void giveUserInfo(const std::string &prompt, const std::string &title) = 0;
+  virtual bool askUserOkCancel(const std::string &prompt, const std::string &title) = 0;
   virtual std::string askUserForSaveFileName(std::string const &filter) = 0;
   virtual std::string askUserForLoadFileName(std::string const &filter) = 0;
 };

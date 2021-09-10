@@ -42,14 +42,11 @@ DECLARE_ALGORITHM(ExportTimeSeriesLog)
  */
 void ExportTimeSeriesLog::init() {
   declareProperty(
-      std::make_unique<API::WorkspaceProperty<MatrixWorkspace>>(
-          "InputWorkspace", "Anonymous", Direction::InOut),
+      std::make_unique<API::WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "Anonymous", Direction::InOut),
       "Name of input Matrix workspace containing the log to export. ");
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "OutputWorkspace", "Dummy", Direction::Output),
-      "Name of the workspace containing the log events in Export. ");
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "Dummy", Direction::Output),
+                  "Name of the workspace containing the log events in Export. ");
 
   declareProperty("CalculateFirstDerivative", false,
                   "If specified then the first derivative of exported data "
@@ -58,12 +55,10 @@ void ExportTimeSeriesLog::init() {
   declareProperty("LogName", "", "Log's name to filter events.");
 
   std::vector<std::string> units{"Seconds", "Nano Seconds"};
-  declareProperty(
-      "UnitOfTime", "Seconds",
-      std::make_shared<Kernel::StringListValidator>(units),
-      "StartTime, StopTime and DeltaTime can be given in various unit."
-      "The unit can be 'Seconds' or 'Nanoseconds' from run start time."
-      "They can also be defined as 'Percentage' of total run time.");
+  declareProperty("UnitOfTime", "Seconds", std::make_shared<Kernel::StringListValidator>(units),
+                  "StartTime, StopTime and DeltaTime can be given in various unit."
+                  "The unit can be 'Seconds' or 'Nanoseconds' from run start time."
+                  "They can also be defined as 'Percentage' of total run time.");
 
   declareProperty("StartTime", EMPTY_DBL(),
                   "Relative starting time of the output series. "
@@ -73,13 +68,10 @@ void ExportTimeSeriesLog::init() {
                   "Relative stopping time of the output series."
                   "Its unit is determined by property UnitOfTime.");
 
-  declareProperty(
-      "OutputAbsoluteTime", false,
-      "If true, the output times will be absolute time to 1990.01.01.");
+  declareProperty("OutputAbsoluteTime", false, "If true, the output times will be absolute time to 1990.01.01.");
 
-  declareProperty(
-      "NumberEntriesExport", EMPTY_INT(),
-      "Number of entries of the log to be exported.  Default is all entries.");
+  declareProperty("NumberEntriesExport", EMPTY_INT(),
+                  "Number of entries of the log to be exported.  Default is all entries.");
 
   declareProperty("IsEventWorkspace", true,
                   "If set to true, output workspace "
@@ -105,8 +97,8 @@ void ExportTimeSeriesLog::exec() {
   bool cal1stderiv = getProperty("CalculateFirstDerivative");
 
   // Call the main
-  exportLog(logname, time_unit, start_time, stop_time, exportEpochTime,
-            outputeventworkspace, numberoutputentries, cal1stderiv);
+  exportLog(logname, time_unit, start_time, stop_time, exportEpochTime, outputeventworkspace, numberoutputentries,
+            cal1stderiv);
 
   // calcualte first derivative
   if (cal1stderiv)
@@ -130,12 +122,9 @@ void ExportTimeSeriesLog::exec() {
  * @param numentries :: number of log entries to export
  * @param cal_first_deriv :: flag to calcualte the first derivative
  */
-void ExportTimeSeriesLog::exportLog(const std::string &logname,
-                                    const std::string &timeunit,
-                                    const double &starttime,
-                                    const double &stoptime,
-                                    const bool exportepoch, bool outputeventws,
-                                    int numentries, bool cal_first_deriv) {
+void ExportTimeSeriesLog::exportLog(const std::string &logname, const std::string &timeunit, const double &starttime,
+                                    const double &stoptime, const bool exportepoch, bool outputeventws, int numentries,
+                                    bool cal_first_deriv) {
 
   // Get log, time, and etc.
   std::vector<Types::Core::DateAndTime> times;
@@ -143,12 +132,10 @@ void ExportTimeSeriesLog::exportLog(const std::string &logname,
 
   if (!logname.empty()) {
     // Log
-    auto *tlog = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
-        m_inputWS->run().getProperty(logname));
+    auto *tlog = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(m_inputWS->run().getProperty(logname));
     if (!tlog) {
       std::stringstream errmsg;
-      errmsg << "TimeSeriesProperty Log " << logname
-             << " does not exist in workspace " << m_inputWS->getName();
+      errmsg << "TimeSeriesProperty Log " << logname << " does not exist in workspace " << m_inputWS->getName();
       g_log.error(errmsg.str());
       throw std::invalid_argument(errmsg.str());
     }
@@ -169,11 +156,9 @@ void ExportTimeSeriesLog::exportLog(const std::string &logname,
   // Rule out the case that start time is behind last log entry
   bool i_start_cal = false;
   if (starttime != EMPTY_DBL()) {
-    int64_t timerangens =
-        times.back().totalNanoseconds() - times.front().totalNanoseconds();
+    int64_t timerangens = times.back().totalNanoseconds() - times.front().totalNanoseconds();
     double timerange = static_cast<double>(timerangens) * timeunitfactor;
-    g_log.debug() << "Time range is " << timerange << ", Start time is "
-                  << starttime << "\n";
+    g_log.debug() << "Time range is " << timerange << ", Start time is " << starttime << "\n";
     if (timerange < starttime) {
       i_start = times.size() - 1;
       i_start_cal = true;
@@ -181,12 +166,10 @@ void ExportTimeSeriesLog::exportLog(const std::string &logname,
   }
 
   if ((!i_start_cal) && (starttime != EMPTY_DBL() || stoptime != EMPTY_DBL())) {
-    bool export_partial = calculateTimeSeriesRangeByTime(
-        times, starttime, i_start, stoptime, i_stop, timeunitfactor);
+    bool export_partial = calculateTimeSeriesRangeByTime(times, starttime, i_start, stoptime, i_stop, timeunitfactor);
     if (!export_partial)
-      throw std::runtime_error(
-          "Unable to find proton_charge for run start time. "
-          "Failed to get partial time series.");
+      throw std::runtime_error("Unable to find proton_charge for run start time. "
+                               "Failed to get partial time series.");
   }
 
   // Determine number of export log
@@ -205,14 +188,12 @@ void ExportTimeSeriesLog::exportLog(const std::string &logname,
 
   // Create otuput workspace
   if (outputeventws) {
-    setupEventWorkspace(i_start, i_stop, numentries, times, values,
-                        exportepoch);
+    setupEventWorkspace(i_start, i_stop, numentries, times, values, exportepoch);
   } else {
     size_t nspec(1);
     if (cal_first_deriv)
       nspec = 2;
-    setupWorkspace2D(i_start, i_stop, numentries, times, values, exportepoch,
-                     timeunitfactor, nspec);
+    setupWorkspace2D(i_start, i_stop, numentries, times, values, exportepoch, timeunitfactor, nspec);
   }
 }
 
@@ -228,16 +209,14 @@ void ExportTimeSeriesLog::exportLog(const std::string &logname,
  * @param nspec :: number of spectra of the workspace to create
  * output
  */
-void ExportTimeSeriesLog::setupWorkspace2D(
-    const size_t &start_index, const size_t &stop_index, int numentries,
-    vector<DateAndTime> &times, vector<double> values, const bool &epochtime,
-    const double &timeunitfactor, size_t nspec) {
+void ExportTimeSeriesLog::setupWorkspace2D(const size_t &start_index, const size_t &stop_index, int numentries,
+                                           vector<DateAndTime> &times, vector<double> values, const bool &epochtime,
+                                           const double &timeunitfactor, size_t nspec) {
   // Determine time shift
   int64_t timeshift(0);
   if (!epochtime) {
     // relative time
-    Types::Core::DateAndTime runstart(
-        m_inputWS->run().getProperty("run_start")->value());
+    Types::Core::DateAndTime runstart(m_inputWS->run().getProperty("run_start")->value());
     timeshift = runstart.totalNanoseconds();
   }
 
@@ -259,8 +238,7 @@ void ExportTimeSeriesLog::setupWorkspace2D(
     if (i_time >= times.size()) {
       std::stringstream errss;
       errss << "It shouldn't happen that the index is out of boundary."
-            << "start index = " << start_index << ", output size = " << outsize
-            << ", index = " << index << "\n";
+            << "start index = " << start_index << ", output size = " << outsize << ", index = " << index << "\n";
       throw std::runtime_error(errss.str());
     }
 
@@ -283,11 +261,10 @@ void ExportTimeSeriesLog::setupWorkspace2D(
  * @param values :: vector of log value in double
  * @param epochtime :: boolean flag for output time is absolute time/epoch time.
  */
-void ExportTimeSeriesLog::setupEventWorkspace(
-    const size_t &start_index, const size_t &stop_index, int numentries,
-    vector<DateAndTime> &times, vector<double> values, const bool &epochtime) {
-  Types::Core::DateAndTime runstart(
-      m_inputWS->run().getProperty("run_start")->value());
+void ExportTimeSeriesLog::setupEventWorkspace(const size_t &start_index, const size_t &stop_index, int numentries,
+                                              vector<DateAndTime> &times, vector<double> values,
+                                              const bool &epochtime) {
+  Types::Core::DateAndTime runstart(m_inputWS->run().getProperty("run_start")->value());
 
   // Get some stuff from the input workspace
   const size_t numberOfSpectra = 1;
@@ -296,8 +273,8 @@ void ExportTimeSeriesLog::setupEventWorkspace(
   if (outsize > static_cast<size_t>(numentries))
     outsize = static_cast<size_t>(numentries);
 
-  std::shared_ptr<EventWorkspace> outEventWS = create<EventWorkspace>(
-      *m_inputWS, numberOfSpectra, HistogramData::BinEdges(2));
+  std::shared_ptr<EventWorkspace> outEventWS =
+      create<EventWorkspace>(*m_inputWS, numberOfSpectra, HistogramData::BinEdges(2));
   m_outWS = outEventWS;
 
   // Create the output event list (empty)
@@ -320,16 +297,14 @@ void ExportTimeSeriesLog::setupEventWorkspace(
 
     // convert to microseconds
     double dtmsec = static_cast<double>(dt) / 1000.0;
-    outEL.addEventQuickly(WeightedEventNoTime(dtmsec, values[i + start_index],
-                                              values[i + start_index]));
+    outEL.addEventQuickly(WeightedEventNoTime(dtmsec, values[i + start_index], values[i + start_index]));
   }
   // Ensure thread-safety
   outEventWS->sortAll(TOF_SORT, nullptr);
 
   // Now, create a default X-vector for histogramming, with just 2 bins.
   std::vector<WeightedEventNoTime> &events = outEL.getWeightedEventsNoTime();
-  outEventWS->setBinEdges(0, HistogramData::BinEdges{events.begin()->tof(),
-                                                     events.rbegin()->tof()});
+  outEventWS->setBinEdges(0, HistogramData::BinEdges{events.begin()->tof(), events.rbegin()->tof()});
 }
 
 /** Calculate the range of time vector by start time and stop time
@@ -342,10 +317,10 @@ void ExportTimeSeriesLog::setupEventWorkspace(
  * @param time_factor :: factor of time unit. for example, nanosecond is 1,
  * second is 1E-9
  */
-bool ExportTimeSeriesLog::calculateTimeSeriesRangeByTime(
-    std::vector<Types::Core::DateAndTime> &vec_times,
-    const double &rel_start_time, size_t &i_start, const double &rel_stop_time,
-    size_t &i_stop, const double &time_factor) {
+bool ExportTimeSeriesLog::calculateTimeSeriesRangeByTime(std::vector<Types::Core::DateAndTime> &vec_times,
+                                                         const double &rel_start_time, size_t &i_start,
+                                                         const double &rel_stop_time, size_t &i_stop,
+                                                         const double &time_factor) {
   // Initialize if there is something wrong.
   i_start = 0;
   i_stop = vec_times.size() - 1;
@@ -353,12 +328,10 @@ bool ExportTimeSeriesLog::calculateTimeSeriesRangeByTime(
   // Check existence of proton_charge as run start
   Types::Core::DateAndTime run_start(0);
   if (m_inputWS->run().hasProperty("proton_charge")) {
-    auto ts = dynamic_cast<TimeSeriesProperty<double> *>(
-        m_inputWS->run().getProperty("proton_charge"));
+    auto ts = dynamic_cast<TimeSeriesProperty<double> *>(m_inputWS->run().getProperty("proton_charge"));
     if (nullptr == ts) {
-      throw std::runtime_error(
-          "Found the run property proton_charge but failed to interpret it "
-          "as a time series property of double values (failed dynamic cast).");
+      throw std::runtime_error("Found the run property proton_charge but failed to interpret it "
+                               "as a time series property of double values (failed dynamic cast).");
     }
     run_start = ts->nthTime(0);
   } else {
@@ -371,12 +344,9 @@ bool ExportTimeSeriesLog::calculateTimeSeriesRangeByTime(
 
   // Get time 0
   if (rel_start_time != EMPTY_DBL()) {
-    int64_t start_time_ns = run_start.totalNanoseconds() +
-                            static_cast<int64_t>(rel_start_time / time_factor);
+    int64_t start_time_ns = run_start.totalNanoseconds() + static_cast<int64_t>(rel_start_time / time_factor);
     Types::Core::DateAndTime start_time(start_time_ns);
-    i_start = static_cast<size_t>(
-        std::lower_bound(vec_times.begin(), vec_times.end(), start_time) -
-        vec_times.begin());
+    i_start = static_cast<size_t>(std::lower_bound(vec_times.begin(), vec_times.end(), start_time) - vec_times.begin());
 
     // try to record the log value before starting time
     if (i_start >= 1)
@@ -384,12 +354,9 @@ bool ExportTimeSeriesLog::calculateTimeSeriesRangeByTime(
   }
 
   if (rel_stop_time != EMPTY_DBL()) {
-    int64_t stop_time_ns = run_start.totalNanoseconds() +
-                           static_cast<int64_t>(rel_stop_time / time_factor);
+    int64_t stop_time_ns = run_start.totalNanoseconds() + static_cast<int64_t>(rel_stop_time / time_factor);
     Types::Core::DateAndTime stop_time(stop_time_ns);
-    i_stop = static_cast<size_t>(
-        std::lower_bound(vec_times.begin(), vec_times.end(), stop_time) -
-        vec_times.begin());
+    i_stop = static_cast<size_t>(std::lower_bound(vec_times.begin(), vec_times.end(), stop_time) - vec_times.begin());
   }
 
   return true;
@@ -419,8 +386,7 @@ void ExportTimeSeriesLog::calculateFirstDerivative(bool is_event_ws) {
     // set up Y
     double dx = vecX[i + 1] - vecX[i];
     if (dx <= 0) {
-      errmsg_ss << "Entry " << i << ": " << vecX[i] << " >= " << vecX[i + 1]
-                << "\n";
+      errmsg_ss << "Entry " << i << ": " << vecX[i] << " >= " << vecX[i + 1] << "\n";
       derivY[i] = 1.;
     } else {
       derivY[i] = (vecY[i + 1] - vecY[i]) / dx;
@@ -447,8 +413,7 @@ void ExportTimeSeriesLog::calculateFirstDerivative(bool is_event_ws) {
  * @param time_unit
  * @param export_epoch
  */
-void ExportTimeSeriesLog::setupMetaData(const std::string &log_name,
-                                        const std::string &time_unit,
+void ExportTimeSeriesLog::setupMetaData(const std::string &log_name, const std::string &time_unit,
                                         const bool &export_epoch) {
 
   m_outWS->mutableRun().addProperty("SampleLogName", log_name, true);

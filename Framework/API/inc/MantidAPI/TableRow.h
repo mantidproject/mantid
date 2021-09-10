@@ -61,15 +61,13 @@ public:
   template <class T> TableRow &operator<<(const T &t) {
     if (m_col >= m_columns.size()) {
       std::stringstream errss;
-      errss << "Column index " << m_col << " is out of range "
-            << m_columns.size() << " of operator << ";
+      errss << "Column index " << m_col << " is out of range " << m_columns.size() << " of operator << ";
       throw std::range_error(errss.str());
     }
     Column_sptr c = m_columns[m_col];
     if (!c->isType<T>()) {
       std::ostringstream err;
-      err << "Type mismatch: " << typeid(T).name() << " (expected "
-          << c->get_type_info().name() << ")";
+      err << "Type mismatch: " << typeid(T).name() << " (expected " << c->get_type_info().name() << ")";
       throw std::runtime_error(err.str());
     }
     c->cell<T>(m_row) = t;
@@ -94,8 +92,7 @@ public:
   template <class T> const TableRow &operator>>(T &t) const {
     if (m_col >= m_columns.size()) {
       std::stringstream errss;
-      errss << "Column index " << m_col << " is out of range "
-            << m_columns.size() << " of operator >> ";
+      errss << "Column index " << m_col << " is out of range " << m_columns.size() << " of operator >> ";
       throw std::range_error(errss.str());
     }
     Column_sptr c = m_columns[m_col];
@@ -118,8 +115,7 @@ public:
   template <class T> T &cell(size_t col) {
     if (col >= m_columns.size()) {
       std::stringstream errss;
-      errss << "Column index " << m_col << " is out of range "
-            << m_columns.size() << " of method cell(). ";
+      errss << "Column index " << m_col << " is out of range " << m_columns.size() << " of method cell(). ";
       throw std::range_error(errss.str());
     }
     m_col = col;
@@ -154,15 +150,12 @@ public:
   std::string &String(size_t col) { return cell<std::string>(col); }
 
 private:
-  friend MANTID_API_DLL std::ostream &operator<<(std::ostream &s,
-                                                 const TableRow &row);
-  std::vector<Column_sptr>
-      m_columns;        ///< Pointers to the columns in the ITableWorkspace
-  size_t m_row;         ///< Row number in the TableWorkspace
-  mutable size_t m_col; ///< Current column number (for streaming operations)
-  size_t m_nrows;       ///< Number of rows in the TableWorkspace
-  std::string
-      m_sep; ///< Separator character(s) between elements in a text output
+  friend MANTID_API_DLL std::ostream &operator<<(std::ostream &s, const TableRow &row);
+  std::vector<Column_sptr> m_columns; ///< Pointers to the columns in the ITableWorkspace
+  size_t m_row;                       ///< Row number in the TableWorkspace
+  mutable size_t m_col;               ///< Current column number (for streaming operations)
+  size_t m_nrows;                     ///< Number of rows in the TableWorkspace
+  std::string m_sep;                  ///< Separator character(s) between elements in a text output
 };
 
 MANTID_API_DLL std::ostream &operator<<(std::ostream &s, const TableRow &row);

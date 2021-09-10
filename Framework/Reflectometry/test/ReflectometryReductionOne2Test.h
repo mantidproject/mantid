@@ -49,31 +49,23 @@ private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ReflectometryReductionOne2Test *createSuite() {
-    return new ReflectometryReductionOne2Test();
-  }
-  static void destroySuite(ReflectometryReductionOne2Test *suite) {
-    delete suite;
-  }
+  static ReflectometryReductionOne2Test *createSuite() { return new ReflectometryReductionOne2Test(); }
+  static void destroySuite(ReflectometryReductionOne2Test *suite) { delete suite; }
 
   ReflectometryReductionOne2Test() {
     FrameworkManager::Instance();
     // A single detector ws
     m_singleDetectorWS = create2DWorkspaceWithReflectometryInstrument(0);
     // A multi detector ws
-    m_multiDetectorWS =
-        create2DWorkspaceWithReflectometryInstrumentMultiDetector(
-            0, m_detSize, V3D(0, 0, 0), V3D(0, 0, 1), 0.5, 1.0, V3D(0, 0, 0),
-            V3D(14, 0, 0), V3D(15, 0, 0), V3D(20, 5, 0), 6);
-    m_multiDetectorWS->mutableRun().addProperty<std::string>("run_number",
-                                                             "1234");
+    m_multiDetectorWS = create2DWorkspaceWithReflectometryInstrumentMultiDetector(
+        0, m_detSize, V3D(0, 0, 0), V3D(0, 0, 1), 0.5, 1.0, V3D(0, 0, 0), V3D(14, 0, 0), V3D(15, 0, 0), V3D(20, 5, 0),
+        6);
+    m_multiDetectorWS->mutableRun().addProperty<std::string>("run_number", "1234");
     // A transmission ws with different spectrum numbers to the run
-    m_transmissionWS =
-        create2DWorkspaceWithReflectometryInstrumentMultiDetector(
-            0, m_detSize, V3D(0, 0, 0), V3D(0, 0, 1), 0.5, 1.0, V3D(0, 0, 0),
-            V3D(14, 0, 0), V3D(15, 0, 0), V3D(20, 5, 0), 6);
-    m_transmissionWS->mutableRun().addProperty<std::string>("run_number",
-                                                            "4321");
+    m_transmissionWS = create2DWorkspaceWithReflectometryInstrumentMultiDetector(
+        0, m_detSize, V3D(0, 0, 0), V3D(0, 0, 1), 0.5, 1.0, V3D(0, 0, 0), V3D(14, 0, 0), V3D(15, 0, 0), V3D(20, 5, 0),
+        6);
+    m_transmissionWS->mutableRun().addProperty<std::string>("run_number", "4321");
     m_transmissionWS->getSpectrum(0).setSpectrumNo(2);
     m_transmissionWS->getSpectrum(1).setSpectrumNo(3);
     m_transmissionWS->getSpectrum(2).setSpectrumNo(4);
@@ -297,8 +289,7 @@ public:
     // Transmission run is the same as input run
 
     ReflectometryReductionOne2 alg;
-    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "3", m_multiDetectorWS,
-                                         false);
+    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "3", m_multiDetectorWS, false);
     MatrixWorkspace_sptr outLam = runAlgorithmLam(alg);
 
     // Expected values are 1 = m_wavelength / m_wavelength
@@ -310,8 +301,7 @@ public:
     // Transmission run is the same as input run
 
     ReflectometryReductionOne2 alg;
-    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "3", m_multiDetectorWS,
-                                         true);
+    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "3", m_multiDetectorWS, true);
     MatrixWorkspace_sptr outLam = runAlgorithmLam(alg);
 
     // Expected values are 1 = m_wavelength / m_wavelength
@@ -325,8 +315,7 @@ public:
     // Spectra with numbers 4-5 exist in both the run and transmission
     // workspaces.
     ReflectometryReductionOne2 alg;
-    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "4-5",
-                                         m_transmissionWS, true);
+    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "4-5", m_transmissionWS, true);
     MatrixWorkspace_sptr outLam = runAlgorithmLam(alg);
 
     TS_ASSERT_DELTA(outLam->y(0)[0], 0.0807, 0.0001);
@@ -339,15 +328,13 @@ public:
     // Spectrum 1 exists in the run workspace but not in the transmission
     // workspace.
     ReflectometryReductionOne2 alg;
-    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "1", m_transmissionWS,
-                                         true);
+    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "1", m_transmissionWS, true);
     TS_ASSERT_THROWS_ANYTHING(alg.execute());
   }
 
   void test_transmission_processing_instructions() {
     ReflectometryReductionOne2 alg;
-    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "4-5",
-                                         m_transmissionWS, false);
+    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "4-5", m_transmissionWS, false);
     alg.setPropertyValue("TransmissionProcessingInstructions", "4-5");
     MatrixWorkspace_sptr outLam = runAlgorithmLam(alg);
 
@@ -357,16 +344,14 @@ public:
 
   void test_transmission_processing_instructions_with_bad_instructions() {
     ReflectometryReductionOne2 alg;
-    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "2-3",
-                                         m_transmissionWS, false);
+    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "2-3", m_transmissionWS, false);
     alg.setPropertyValue("TransmissionProcessingInstructions", "1");
     TS_ASSERT_THROWS_ANYTHING(alg.execute());
   }
 
   void test_transmission_processing_instructions_that_are_different() {
     ReflectometryReductionOne2 alg;
-    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "4-5",
-                                         m_transmissionWS, false);
+    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "4-5", m_transmissionWS, false);
     alg.setPropertyValue("TransmissionProcessingInstructions", "4");
     MatrixWorkspace_sptr outLam = runAlgorithmLam(alg);
 
@@ -376,8 +361,7 @@ public:
 
   void test_transmission_processing_instructions_two_runs() {
     ReflectometryReductionOne2 alg;
-    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "4", m_transmissionWS,
-                                         true);
+    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "4", m_transmissionWS, true);
     alg.setPropertyValue("TransmissionProcessingInstructions", "4");
     MatrixWorkspace_sptr outLam = runAlgorithmLam(alg);
 
@@ -563,8 +547,7 @@ public:
     // Transmission run is the same as input run
 
     ReflectometryReductionOne2 alg;
-    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "3", m_multiDetectorWS,
-                                         false);
+    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "3", m_multiDetectorWS, false);
     alg.setProperty("SummationType", "SumInQ");
     alg.setProperty("ReductionType", "DivergentBeam");
     alg.setProperty("ThetaIn", 25.0);
@@ -696,8 +679,7 @@ public:
     checkDetector3And4SummedInLambda(outLam, outQ);
   }
 
-  void
-  test_angle_correction_is_not_done_for_sum_in_lambda_when_theta_not_provided() {
+  void test_angle_correction_is_not_done_for_sum_in_lambda_when_theta_not_provided() {
     ReflectometryReductionOne2 alg;
     setupAlgorithm(alg, 1.5, 15.0, "3+4");
 
@@ -714,8 +696,7 @@ public:
     checkDetector3And4SummedInLambda(outLam, outQ);
   }
 
-  void
-  test_angle_correction_not_done_for_single_detector_when_theta_provided() {
+  void test_angle_correction_not_done_for_single_detector_when_theta_provided() {
     ReflectometryReductionOne2 alg;
     setupAlgorithm(alg, 1.5, 15.0, "4");
 
@@ -734,8 +715,7 @@ public:
     checkDetector4SummedInLambda(outLam, outQ);
   }
 
-  void
-  test_angle_correction_not_done_for_single_detector_when_theta_not_provided() {
+  void test_angle_correction_not_done_for_single_detector_when_theta_not_provided() {
     ReflectometryReductionOne2 alg;
     setupAlgorithm(alg, 1.5, 15.0, "4");
 
@@ -752,8 +732,7 @@ public:
     checkDetector4SummedInLambda(outLam, outQ);
   }
 
-  void
-  test_requesting_angle_correction_for_sum_in_lambda_throws_for_multiple_groups() {
+  void test_requesting_angle_correction_for_sum_in_lambda_throws_for_multiple_groups() {
     ReflectometryReductionOne2 alg;
     setupAlgorithm(alg, 1.5, 15.0, "3+4, 5");
     alg.setProperty("ThetaIn", 22.0);
@@ -831,8 +810,7 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
-  void
-  test_outputs_with_default_names_when_debug_is_false_and_run_number_not_set() {
+  void test_outputs_with_default_names_when_debug_is_false_and_run_number_not_set() {
     ReflectometryReductionOne2 alg;
     auto inputWS = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
     inputWS->mutableRun().removeProperty("run_number");
@@ -852,8 +830,7 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
-  void
-  test_outputs_with_default_names_when_debug_is_true_and_run_number_not_set() {
+  void test_outputs_with_default_names_when_debug_is_true_and_run_number_not_set() {
     ReflectometryReductionOne2 alg;
     auto inputWS = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
     inputWS->mutableRun().removeProperty("run_number");
@@ -873,8 +850,7 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
-  void
-  test_outputs_with_default_names_when_debug_is_true_and_run_number_is_set() {
+  void test_outputs_with_default_names_when_debug_is_true_and_run_number_is_set() {
     ReflectometryReductionOne2 alg;
     alg.initialize();
     alg.setRethrows(true);
@@ -893,25 +869,21 @@ public:
 
   void test_transmission_output_is_stored_when_one_transmission_input() {
     ReflectometryReductionOne2 alg;
-    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "3", m_multiDetectorWS,
-                                         false);
+    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "3", m_multiDetectorWS, false);
     runAlgorithmLam(alg);
 
-    TS_ASSERT_EQUALS(alg.getPropertyValue("OutputWorkspaceTransmission"),
-                     "TRANS_LAM_1234");
+    TS_ASSERT_EQUALS(alg.getPropertyValue("OutputWorkspaceTransmission"), "TRANS_LAM_1234");
 
     AnalysisDataService::Instance().clear();
   }
 
   void test_transmission_output_is_stored_when_two_transmission_inputs() {
     ReflectometryReductionOne2 alg;
-    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "3", m_multiDetectorWS,
-                                         true);
+    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "3", m_multiDetectorWS, true);
     runAlgorithmLam(alg);
 
     // stitched transmission output is set
-    TS_ASSERT_EQUALS(alg.getPropertyValue("OutputWorkspaceTransmission"),
-                     "TRANS_LAM_1234_1234");
+    TS_ASSERT_EQUALS(alg.getPropertyValue("OutputWorkspaceTransmission"), "TRANS_LAM_1234_1234");
     // interim transmission outputs are not set
     TS_ASSERT(alg.isDefault("OutputWorkspaceFirstTransmission"));
     TS_ASSERT(alg.isDefault("OutputWorkspaceSecondTransmission"));
@@ -920,81 +892,61 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
-  void
-  test_background_subtraction_not_done_if_not_enabled_even_if_background_properties_set() {
+  void test_background_subtraction_not_done_if_not_enabled_even_if_background_properties_set() {
     ReflectometryReductionOne2 alg;
-    setupAlgorithmForBackgroundSubtraction(
-        alg, createWorkspaceWithFlatBackground("test_ws"));
+    setupAlgorithmForBackgroundSubtraction(alg, createWorkspaceWithFlatBackground("test_ws"));
     alg.setProperty("SubtractBackground", false);
     alg.setProperty("BackgroundProcessingInstructions", "2");
     alg.setProperty("BackgroundCalculationMethod", "PerDetectorAverage");
     alg.execute();
-    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve("IvsQ"));
+    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("IvsQ"));
     checkWorkspaceHistory(outputWS,
-                          {"ExtractSpectra", "GroupDetectors", "ConvertUnits",
-                           "CropWorkspace", "ConvertUnits"});
+                          {"ExtractSpectra", "GroupDetectors", "ConvertUnits", "CropWorkspace", "ConvertUnits"});
   }
 
   void test_background_subtraction_with_default_properties() {
     ReflectometryReductionOne2 alg;
-    setupAlgorithmForBackgroundSubtraction(
-        alg, createWorkspaceWithFlatBackground("test_ws"));
+    setupAlgorithmForBackgroundSubtraction(alg, createWorkspaceWithFlatBackground("test_ws"));
     alg.execute();
-    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve("IvsQ"));
+    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("IvsQ"));
     // Note that ExtractSpectra is not called because the whole workspace is
     // used for the background subtraction
-    checkWorkspaceHistory(outputWS, {"ReflectometryBackgroundSubtraction",
-                                     "GroupDetectors", "ConvertUnits",
+    checkWorkspaceHistory(outputWS, {"ReflectometryBackgroundSubtraction", "GroupDetectors", "ConvertUnits",
                                      "CropWorkspace", "ConvertUnits"});
     checkHistoryAlgorithmProperties(
-        outputWS, 1, 0,
-        {{"ProcessingInstructions", ""},
-         {"BackgroundCalculationMethod", "PerDetectorAverage"}});
+        outputWS, 1, 0, {{"ProcessingInstructions", ""}, {"BackgroundCalculationMethod", "PerDetectorAverage"}});
   }
 
   void test_subtract_flat_background() {
     ReflectometryReductionOne2 alg;
-    setupAlgorithmForBackgroundSubtraction(
-        alg, createWorkspaceWithFlatBackground("test_ws"));
+    setupAlgorithmForBackgroundSubtraction(alg, createWorkspaceWithFlatBackground("test_ws"));
     alg.setProperty("BackgroundProcessingInstructions", "1, 2, 4, 5");
     alg.setProperty("BackgroundCalculationMethod", "PerDetectorAverage");
     alg.execute();
     TS_ASSERT(alg.isExecuted());
     if (!alg.isExecuted())
       return;
-    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve("IvsQ"));
-    checkWorkspaceHistory(outputWS, {"ExtractSpectra",
-                                     "ReflectometryBackgroundSubtraction",
-                                     "GroupDetectors", "ConvertUnits",
-                                     "CropWorkspace", "ConvertUnits"});
+    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("IvsQ"));
+    checkWorkspaceHistory(outputWS, {"ExtractSpectra", "ReflectometryBackgroundSubtraction", "GroupDetectors",
+                                     "ConvertUnits", "CropWorkspace", "ConvertUnits"});
     checkHistoryAlgorithmProperties(
-        outputWS, 1, 1,
-        {{"ProcessingInstructions", "1-2,4-5"},
-         {"BackgroundCalculationMethod", "PerDetectorAverage"}});
+        outputWS, 1, 1, {{"ProcessingInstructions", "1-2,4-5"}, {"BackgroundCalculationMethod", "PerDetectorAverage"}});
   }
 
   void test_subtract_polynomial_background() {
     ReflectometryReductionOne2 alg;
-    setupAlgorithmForBackgroundSubtraction(
-        alg, createWorkspaceWithPolynomialBackground("test_ws"));
+    setupAlgorithmForBackgroundSubtraction(alg, createWorkspaceWithPolynomialBackground("test_ws"));
     alg.setProperty("BackgroundProcessingInstructions", "2-5, 7-9");
     alg.setProperty("BackgroundCalculationMethod", "Polynomial");
     alg.setProperty("DegreeOfPolynomial", "2");
     alg.execute();
-    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve("IvsQ"));
-    checkWorkspaceHistory(outputWS, {"ExtractSpectra",
-                                     "ReflectometryBackgroundSubtraction",
-                                     "GroupDetectors", "ConvertUnits",
-                                     "CropWorkspace", "ConvertUnits"});
-    checkHistoryAlgorithmProperties(
-        outputWS, 1, 1,
-        {{"ProcessingInstructions", "2-5,7-9"},
-         {"BackgroundCalculationMethod", "Polynomial"},
-         {"DegreeOfPolynomial", "2"}});
+    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("IvsQ"));
+    checkWorkspaceHistory(outputWS, {"ExtractSpectra", "ReflectometryBackgroundSubtraction", "GroupDetectors",
+                                     "ConvertUnits", "CropWorkspace", "ConvertUnits"});
+    checkHistoryAlgorithmProperties(outputWS, 1, 1,
+                                    {{"ProcessingInstructions", "2-5,7-9"},
+                                     {"BackgroundCalculationMethod", "Polynomial"},
+                                     {"DegreeOfPolynomial", "2"}});
   }
 
   void test_history_for_sum_in_lambda() {
@@ -1002,10 +954,8 @@ public:
     setupAlgorithm(alg, 1.5, 15.0, "3+4");
     alg.setChild(false); // required to get history
     alg.execute();
-    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve("IvsQ"));
-    checkWorkspaceHistory(outputWS, {"GroupDetectors", "ConvertUnits",
-                                     "CropWorkspace", "ConvertUnits"});
+    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("IvsQ"));
+    checkWorkspaceHistory(outputWS, {"GroupDetectors", "ConvertUnits", "CropWorkspace", "ConvertUnits"});
   }
 
   void test_history_for_sum_in_lambda_with_angle_correction() {
@@ -1014,40 +964,30 @@ public:
     alg.setProperty("ThetaIn", 22.0);
     alg.setChild(false); // required to get history
     alg.execute();
-    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve("IvsQ"));
+    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("IvsQ"));
     // Uses RefRoi instead of ConvertUnits
-    checkWorkspaceHistory(outputWS, {"GroupDetectors", "ConvertUnits",
-                                     "CropWorkspace", "RefRoi"});
+    checkWorkspaceHistory(outputWS, {"GroupDetectors", "ConvertUnits", "CropWorkspace", "RefRoi"});
   }
 
   void test_history_for_sum_in_lambda_with_monitor_normalisation() {
     ReflectometryReductionOne2 alg;
-    setupAlgorithmMonitorCorrection(alg, 1.5, 15.0, "3+4", m_multiDetectorWS,
-                                    false);
+    setupAlgorithmMonitorCorrection(alg, 1.5, 15.0, "3+4", m_multiDetectorWS, false);
     alg.setChild(false); // required to get history
     alg.execute();
-    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve("IvsQ"));
+    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("IvsQ"));
     checkWorkspaceHistory(outputWS,
-                          {"GroupDetectors", "ConvertUnits", "CropWorkspace",
-                           "ConvertUnits", "CalculateFlatBackground",
-                           "RebinToWorkspace", "Divide", "CropWorkspace",
-                           "ConvertUnits"});
+                          {"GroupDetectors", "ConvertUnits", "CropWorkspace", "ConvertUnits", "CalculateFlatBackground",
+                           "RebinToWorkspace", "Divide", "CropWorkspace", "ConvertUnits"});
   }
 
   void test_history_for_sum_in_lambda_with_transmission_normalisation() {
     ReflectometryReductionOne2 alg;
-    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "3+4",
-                                         m_multiDetectorWS, false);
+    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "3+4", m_multiDetectorWS, false);
     alg.setChild(false); // required to get history
     alg.execute();
-    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve("IvsQ"));
-    checkWorkspaceHistory(outputWS,
-                          {"GroupDetectors", "ConvertUnits", "CropWorkspace",
-                           "CreateTransmissionWorkspace", "RebinToWorkspace",
-                           "Divide", "ConvertUnits"});
+    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("IvsQ"));
+    checkWorkspaceHistory(outputWS, {"GroupDetectors", "ConvertUnits", "CropWorkspace", "CreateTransmissionWorkspace",
+                                     "RebinToWorkspace", "Divide", "ConvertUnits"});
   }
 
   void test_history_for_sum_in_q() {
@@ -1058,43 +998,34 @@ public:
     alg.setProperty("ThetaIn", 22.0);
     alg.setChild(false); // required to get history
     alg.execute();
-    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve("IvsQ"));
-    checkWorkspaceHistory(outputWS,
-                          {"ConvertUnits", "CropWorkspace", "RefRoi"});
+    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("IvsQ"));
+    checkWorkspaceHistory(outputWS, {"ConvertUnits", "CropWorkspace", "RefRoi"});
   }
 
   void test_history_for_sum_in_q_with_monitor_normalisation() {
     ReflectometryReductionOne2 alg;
-    setupAlgorithmMonitorCorrection(alg, 1.5, 15.0, "3+4", m_multiDetectorWS,
-                                    false);
+    setupAlgorithmMonitorCorrection(alg, 1.5, 15.0, "3+4", m_multiDetectorWS, false);
     alg.setProperty("SummationType", "SumInQ");
     alg.setProperty("ReductionType", "DivergentBeam");
     alg.setProperty("ThetaIn", 22.0);
     alg.setChild(false); // required to get history
     alg.execute();
-    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve("IvsQ"));
-    checkWorkspaceHistory(outputWS,
-                          {"ConvertUnits", "CropWorkspace", "ConvertUnits",
-                           "CalculateFlatBackground", "RebinToWorkspace",
-                           "Divide", "CropWorkspace", "RefRoi"});
+    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("IvsQ"));
+    checkWorkspaceHistory(outputWS, {"ConvertUnits", "CropWorkspace", "ConvertUnits", "CalculateFlatBackground",
+                                     "RebinToWorkspace", "Divide", "CropWorkspace", "RefRoi"});
   }
 
   void test_history_for_sum_in_q_with_transmission_normalisation() {
     ReflectometryReductionOne2 alg;
-    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "3+4",
-                                         m_multiDetectorWS, false);
+    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "3+4", m_multiDetectorWS, false);
     alg.setProperty("SummationType", "SumInQ");
     alg.setProperty("ReductionType", "DivergentBeam");
     alg.setProperty("ThetaIn", 22.0);
     alg.setChild(false); // required to get history
     alg.execute();
-    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve("IvsQ"));
-    checkWorkspaceHistory(
-        outputWS, {"ConvertUnits", "CreateTransmissionWorkspace",
-                   "RebinToWorkspace", "Divide", "CropWorkspace", "RefRoi"});
+    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("IvsQ"));
+    checkWorkspaceHistory(outputWS, {"ConvertUnits", "CreateTransmissionWorkspace", "RebinToWorkspace", "Divide",
+                                     "CropWorkspace", "RefRoi"});
   }
 
   void test_IvsQ_is_not_distribution_data() {
@@ -1135,8 +1066,7 @@ public:
     // Monitor correction causes the divided workspace to become
     // distribution data therefore the output is also distribution
     ReflectometryReductionOne2 alg;
-    setupAlgorithmMonitorCorrection(alg, 1.5, 15.0, "3+4", m_multiDetectorWS,
-                                    false);
+    setupAlgorithmMonitorCorrection(alg, 1.5, 15.0, "3+4", m_multiDetectorWS, false);
     alg.execute();
     MatrixWorkspace_sptr outQ = alg.getProperty("OutputWorkspace");
     TS_ASSERT_EQUALS(outQ->isDistribution(), true);
@@ -1146,8 +1076,7 @@ public:
     // Transmission correction causes the divided workspace to become
     // distribution data therefore the output is also distribution
     ReflectometryReductionOne2 alg;
-    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "3+4",
-                                         m_multiDetectorWS, false);
+    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "3+4", m_multiDetectorWS, false);
     alg.execute();
     MatrixWorkspace_sptr outQ = alg.getProperty("OutputWorkspace");
     TS_ASSERT_EQUALS(outQ->isDistribution(), true);
@@ -1159,17 +1088,13 @@ public:
     alg.setProperty("SummationType", "SumInQ");
     alg.setProperty("ReductionType", "DivergentBeam");
     alg.execute();
-    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve("IvsQ"));
-    checkWorkspaceHistory(outputWS,
-                          {"ReflectometryBackgroundSubtraction", "ConvertUnits",
-                           "CropWorkspace", "RefRoi"});
+    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("IvsQ"));
+    checkWorkspaceHistory(outputWS, {"ReflectometryBackgroundSubtraction", "ConvertUnits", "CropWorkspace", "RefRoi"});
   }
 
 private:
   // Do standard algorithm setup
-  void setupAlgorithm(ReflectometryReductionOne2 &alg,
-                      const double wavelengthMin, const double wavelengthMax,
+  void setupAlgorithm(ReflectometryReductionOne2 &alg, const double wavelengthMin, const double wavelengthMax,
                       const std::string &procInstr) {
     alg.setChild(true);
     alg.initialize();
@@ -1183,12 +1108,9 @@ private:
   }
 
   // Do standard algorithm setup for transmission correction
-  void setupAlgorithmTransmissionCorrection(ReflectometryReductionOne2 &alg,
-                                            const double wavelengthMin,
-                                            const double wavelengthMax,
-                                            const std::string &procInstr,
-                                            const MatrixWorkspace_sptr &transWS,
-                                            const bool multiple_runs) {
+  void setupAlgorithmTransmissionCorrection(ReflectometryReductionOne2 &alg, const double wavelengthMin,
+                                            const double wavelengthMax, const std::string &procInstr,
+                                            const MatrixWorkspace_sptr &transWS, const bool multiple_runs) {
     setupAlgorithm(alg, wavelengthMin, wavelengthMax, procInstr);
     alg.setProperty("FirstTransmissionRun", transWS);
     if (multiple_runs) {
@@ -1200,12 +1122,9 @@ private:
   }
 
   // Do standard algorithm setup for monitor correction
-  void setupAlgorithmMonitorCorrection(ReflectometryReductionOne2 &alg,
-                                       const double wavelengthMin,
-                                       const double wavelengthMax,
-                                       const std::string &procInstr,
-                                       const MatrixWorkspace_sptr &inputWS,
-                                       const bool integrate) {
+  void setupAlgorithmMonitorCorrection(ReflectometryReductionOne2 &alg, const double wavelengthMin,
+                                       const double wavelengthMax, const std::string &procInstr,
+                                       const MatrixWorkspace_sptr &inputWS, const bool integrate) {
     setupAlgorithm(alg, wavelengthMin, wavelengthMax, procInstr);
     alg.setProperty("InputWorkspace", inputWS);
     alg.setProperty("I0MonitorIndex", "0");
@@ -1220,9 +1139,7 @@ private:
     }
   }
 
-  void
-  setupAlgorithmForBackgroundSubtraction(ReflectometryReductionOne2 &alg,
-                                         const MatrixWorkspace_sptr &inputWS) {
+  void setupAlgorithmForBackgroundSubtraction(ReflectometryReductionOne2 &alg, const MatrixWorkspace_sptr &inputWS) {
     setupAlgorithm(alg, 0, 5, "4");
     alg.setChild(false); // required to get history
     alg.setProperty("InputWorkspace", inputWS);
@@ -1232,8 +1149,7 @@ private:
   }
 
   // Do standard algorithm execution and checks and return IvsLam
-  MatrixWorkspace_sptr runAlgorithmLam(ReflectometryReductionOne2 &alg,
-                                       const size_t blocksize = 14,
+  MatrixWorkspace_sptr runAlgorithmLam(ReflectometryReductionOne2 &alg, const size_t blocksize = 14,
                                        const size_t nHist = 1) {
     alg.execute();
 
@@ -1246,8 +1162,7 @@ private:
   }
 
   // Do standard algorithm execution and checks and return IvsQ
-  MatrixWorkspace_sptr runAlgorithmQ(ReflectometryReductionOne2 &alg,
-                                     const size_t blocksize = 14,
+  MatrixWorkspace_sptr runAlgorithmQ(ReflectometryReductionOne2 &alg, const size_t blocksize = 14,
                                      const size_t nHist = 1) {
     alg.execute();
 
@@ -1267,8 +1182,7 @@ private:
    * @param checkCounts : if true, also check the counts in the bins are the
    * same
    */
-  void checkConversionToQ(ReflectometryReductionOne2 &alg, const double theta,
-                          const bool checkCounts = true) {
+  void checkConversionToQ(ReflectometryReductionOne2 &alg, const double theta, const bool checkCounts = true) {
     // Extract arrays for convenience
     MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspaceWavelength");
     MatrixWorkspace_sptr outQ = alg.getProperty("OutputWorkspace");
@@ -1305,8 +1219,7 @@ private:
     }
   }
 
-  MatrixWorkspace_sptr
-  createWorkspaceWithFlatBackground(std::string const &name) {
+  MatrixWorkspace_sptr createWorkspaceWithFlatBackground(std::string const &name) {
     // Create a workspace with a background of 2 and a peak of 5 in the 2nd
     // index
     auto const nspec = 4;
@@ -1327,8 +1240,7 @@ private:
     alg.setPropertyValue("OutputWorkspace", name);
     alg.execute();
 
-    auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve(name));
+    auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(name));
     ws->setCounts(0, background);
     ws->setCounts(1, background);
     ws->setCounts(2, peak);
@@ -1337,8 +1249,7 @@ private:
     return ws;
   }
 
-  MatrixWorkspace_sptr
-  createWorkspaceWithPolynomialBackground(std::string const &name) {
+  MatrixWorkspace_sptr createWorkspaceWithPolynomialBackground(std::string const &name) {
     // Create a workspace with a polynomial background of degree 2 and a peak
     // of 5 in the 5th spectra
     auto const nspec = 9;
@@ -1359,8 +1270,7 @@ private:
     alg.setProperty("OutputWorkspace", name);
     alg.execute();
 
-    auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve(name));
+    auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(name));
     for (auto spec = 0; spec < nspec; ++spec)
       ws->setCounts(spec, Counts(1, polynomial[spec] + peak[spec]));
     return ws;
@@ -1382,12 +1292,9 @@ private:
   // m_multiDetectorWS, in degrees. This is the same as the twoTheta that
   // DetectorInfo will return if these detectors are grouped/summed into a
   // single spectrum.
-  double twoThetaForDetector3And4() {
-    return (twoThetaForDetector4() + twoThetaForDetector3()) / 2.0;
-  }
+  double twoThetaForDetector3And4() { return (twoThetaForDetector4() + twoThetaForDetector3()) / 2.0; }
 
-  void checkWorkspaceHistory(const MatrixWorkspace_sptr &ws,
-                             std::vector<std::string> const &expected,
+  void checkWorkspaceHistory(const MatrixWorkspace_sptr &ws, std::vector<std::string> const &expected,
                              bool const unroll = true) {
     auto wsHistory = ws->getHistory();
     auto algHistories = wsHistory.getAlgorithmHistories();
@@ -1395,23 +1302,17 @@ private:
     if (unroll && algHistories.size() > 0) {
       auto lastAlgHistory = algHistories.back();
       auto childHistories = lastAlgHistory->getChildHistories();
-      std::transform(childHistories.cbegin(), childHistories.cend(),
-                     std::back_inserter(algNames),
-                     [](const AlgorithmHistory_const_sptr &childAlg) {
-                       return childAlg->name();
-                     });
+      std::transform(childHistories.cbegin(), childHistories.cend(), std::back_inserter(algNames),
+                     [](const AlgorithmHistory_const_sptr &childAlg) { return childAlg->name(); });
     } else if (!unroll) {
-      std::transform(
-          algHistories.cbegin(), algHistories.cend(),
-          std::back_inserter(algNames),
-          [](const AlgorithmHistory_sptr &alg) { return alg->name(); });
+      std::transform(algHistories.cbegin(), algHistories.cend(), std::back_inserter(algNames),
+                     [](const AlgorithmHistory_sptr &alg) { return alg->name(); });
     }
     TS_ASSERT_EQUALS(algNames, expected);
   }
 
-  void checkHistoryAlgorithmProperties(
-      const MatrixWorkspace_sptr &ws, size_t toplevelIdx, size_t childIdx,
-      std::map<std::string, std::string> const &expected) {
+  void checkHistoryAlgorithmProperties(const MatrixWorkspace_sptr &ws, size_t toplevelIdx, size_t childIdx,
+                                       std::map<std::string, std::string> const &expected) {
     auto parentHist = ws->getHistory().getAlgorithmHistory(toplevelIdx);
     auto childHistories = parentHist->getChildHistories();
     TS_ASSERT(childHistories.size() > childIdx);
@@ -1422,8 +1323,7 @@ private:
       TS_ASSERT_EQUALS(childHist->getPropertyValue(kvp.first), kvp.second);
   }
 
-  void checkAngleCorrection(MatrixWorkspace_sptr outLam,
-                            MatrixWorkspace_sptr outQ, double const theta) {
+  void checkAngleCorrection(MatrixWorkspace_sptr outLam, MatrixWorkspace_sptr outQ, double const theta) {
     auto const &qX = outQ->x(0);
     auto const &lamX = outLam->x(0);
 
@@ -1436,9 +1336,7 @@ private:
     }
   }
 
-  void checkDetector3And4SummedInLambda(MatrixWorkspace_sptr outLam,
-                                        MatrixWorkspace_sptr outQ,
-                                        int const wsIdx = 0) {
+  void checkDetector3And4SummedInLambda(MatrixWorkspace_sptr outLam, MatrixWorkspace_sptr outQ, int const wsIdx = 0) {
     auto const &lamY = outLam->y(wsIdx);
     TS_ASSERT_EQUALS(lamY.size(), 14);
     TS_ASSERT_DELTA(lamY[0], 19, 1e-2);
@@ -1452,9 +1350,7 @@ private:
     TS_ASSERT_DELTA(qY[13], 19, 1e-2);
   }
 
-  void checkDetector4SummedInLambda(MatrixWorkspace_sptr outLam,
-                                    MatrixWorkspace_sptr outQ,
-                                    int const wsIdx = 0) {
+  void checkDetector4SummedInLambda(MatrixWorkspace_sptr outLam, MatrixWorkspace_sptr outQ, int const wsIdx = 0) {
     auto const &lamY = outLam->y(wsIdx);
     TS_ASSERT_EQUALS(lamY.size(), 14);
     TS_ASSERT_DELTA(lamY[0], 11, 1e-2);
@@ -1468,8 +1364,7 @@ private:
     TS_ASSERT_DELTA(qY[13], 11, 1e-2);
   }
 
-  void checkDetector4SummedInQ(MatrixWorkspace_sptr outLam,
-                               MatrixWorkspace_sptr outQ, int const wsIdx = 0) {
+  void checkDetector4SummedInQ(MatrixWorkspace_sptr outLam, MatrixWorkspace_sptr outQ, int const wsIdx = 0) {
     auto const &lamY = outLam->y(wsIdx);
     TS_ASSERT_EQUALS(lamY.size(), 10);
     TS_ASSERT_DELTA(lamY[0], 13.954514, 1e-6);
@@ -1483,10 +1378,8 @@ private:
     TS_ASSERT_DELTA(qY[9], 13.954514, 1e-6);
   }
 
-  void
-  checkDetector4SummedInQCroppedToDetector3And4(MatrixWorkspace_sptr outLam,
-                                                MatrixWorkspace_sptr outQ,
-                                                int const wsIdx = 0) {
+  void checkDetector4SummedInQCroppedToDetector3And4(MatrixWorkspace_sptr outLam, MatrixWorkspace_sptr outQ,
+                                                     int const wsIdx = 0) {
     auto const &lamY = outLam->y(wsIdx);
     TS_ASSERT_EQUALS(lamY.size(), 10);
     TS_ASSERT_DELTA(lamY[0], 13.906629, 1e-6);
@@ -1500,9 +1393,7 @@ private:
     TS_ASSERT_DELTA(qY[9], 13.9066291140, 1e-6);
   }
 
-  void checkDetector3And4SummedInQ(MatrixWorkspace_sptr outLam,
-                                   MatrixWorkspace_sptr outQ,
-                                   int const wsIdx = 0) {
+  void checkDetector3And4SummedInQ(MatrixWorkspace_sptr outLam, MatrixWorkspace_sptr outQ, int const wsIdx = 0) {
     auto const &lamY = outLam->y(wsIdx);
     TS_ASSERT_EQUALS(lamY.size(), 10);
     TS_ASSERT_DELTA(lamY[0], 24.275146, 1e-6);

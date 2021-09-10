@@ -23,8 +23,7 @@ namespace FuncMinimisers {
     @author Anders Markvardsen, ISIS, RAL
     @date 11/12/2009
 */
-class MANTID_CURVEFITTING_DLL LevenbergMarquardtMinimizer
-    : public API::IFuncMinimizer {
+class MANTID_CURVEFITTING_DLL LevenbergMarquardtMinimizer : public API::IFuncMinimizer {
 public:
   /// constructor and destructor
   ~LevenbergMarquardtMinimizer() override;
@@ -35,8 +34,7 @@ public:
   std::string name() const override { return "Levenberg-Marquardt"; }
 
   /// Initialize minimizer, i.e. pass a function to minimize.
-  void initialize(API::ICostFunction_sptr costFunction,
-                  size_t maxIterations = 0) override;
+  void initialize(API::ICostFunction_sptr costFunction, size_t maxIterations = 0) override;
   /// Do one iteration.
   bool iterate(size_t) override;
   /// Return current value of the cost function

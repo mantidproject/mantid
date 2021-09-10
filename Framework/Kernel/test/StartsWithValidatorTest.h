@@ -35,19 +35,13 @@ public:
     StartsWithValidator v;
     TS_ASSERT_EQUALS(v.isValid(""), "Select a value")
 
-    TS_ASSERT_EQUALS(
-        v.isValid("b"),
-        "The value \"b\" does not start with any of the allowed values")
+    TS_ASSERT_EQUALS(v.isValid("b"), "The value \"b\" does not start with any of the allowed values")
 
     v.addAllowedValue("a");
     TS_ASSERT_EQUALS(v.isValid(""), "Select a value")
     TS_ASSERT_EQUALS(v.isValid("alpha"), "")
-    TS_ASSERT_EQUALS(
-        v.isValid("beta"),
-        "The value \"beta\" does not start with any of the allowed values")
-    TS_ASSERT_EQUALS(
-        v.isValid("ALPHA"),
-        "The value \"ALPHA\" does not start with any of the allowed values")
+    TS_ASSERT_EQUALS(v.isValid("beta"), "The value \"beta\" does not start with any of the allowed values")
+    TS_ASSERT_EQUALS(v.isValid("ALPHA"), "The value \"ALPHA\" does not start with any of the allowed values")
   }
 
   void testAllowedValues() {
@@ -69,12 +63,8 @@ public:
     TS_ASSERT_EQUALS(v.isValid("one"), "")
     TS_ASSERT_EQUALS(v.isValid("two"), "")
     TS_ASSERT_EQUALS(v.isValid("two and a half"), "")
-    TS_ASSERT_EQUALS(
-        v.isValid("on"),
-        "The value \"on\" does not start with any of the allowed values")
-    TS_ASSERT_EQUALS(
-        v.isValid(" one"),
-        "The value \" one\" does not start with any of the allowed values")
+    TS_ASSERT_EQUALS(v.isValid("on"), "The value \"on\" does not start with any of the allowed values")
+    TS_ASSERT_EQUALS(v.isValid(" one"), "The value \" one\" does not start with any of the allowed values")
     TS_ASSERT_EQUALS(v.isValid("twenty-one"), "The value \"twenty-one\" does "
                                               "not start with any of the "
                                               "allowed values")

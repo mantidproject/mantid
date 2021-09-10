@@ -49,7 +49,7 @@ namespace CxxTest
             _first->enterSuite( d );
             _second->enterSuite( d );
         }
-        
+
         void enterTest( const TestDescription &d )
         {
             _first->enterTest( d );
@@ -61,31 +61,31 @@ namespace CxxTest
             _first->enterRun( d );
             _second->enterRun( d );
         }
-        
+
         void trace( const char *file, unsigned line, const char *expression )
         {
             _first->trace( file, line, expression );
             _second->trace( file, line, expression );
         }
-        
+
         void warning( const char *file, unsigned line, const char *expression )
         {
             _first->warning( file, line, expression );
             _second->warning( file, line, expression );
         }
-        
+
         void failedTest( const char *file, unsigned line, const char *expression )
         {
             _first->failedTest( file, line, expression );
             _second->failedTest( file, line, expression );
         }
-        
+
         void failedAssert( const char *file, unsigned line, const char *expression )
         {
             _first->failedAssert( file, line, expression );
             _second->failedAssert( file, line, expression );
         }
-        
+
         void failedAssertEquals( const char *file, unsigned line,
                                  const char *xStr, const char *yStr,
                                  const char *x, const char *y )
@@ -102,7 +102,7 @@ namespace CxxTest
             _first->failedAssertSameData( file, line, xStr, yStr, sizeStr, x, y, size );
             _second->failedAssertSameData( file, line, xStr, yStr, sizeStr, x, y, size );
         }
-        
+
         void failedAssertSameFiles( const char* file, unsigned line, const char* file1, const char* file2, const char* explanation)
         {
             _first->failedAssertSameFiles( file, line, file1, file2, explanation );
@@ -116,7 +116,7 @@ namespace CxxTest
             _first->failedAssertDelta( file, line, xStr, yStr, dStr, x, y, d );
             _second->failedAssertDelta( file, line, xStr, yStr, dStr, x, y, d );
         }
-        
+
         void failedAssertDiffers( const char *file, unsigned line,
                                   const char *xStr, const char *yStr,
                                   const char *value )
@@ -124,7 +124,7 @@ namespace CxxTest
             _first->failedAssertDiffers( file, line, xStr, yStr, value );
             _second->failedAssertDiffers( file, line, xStr, yStr, value );
         }
-        
+
         void failedAssertLessThan( const char *file, unsigned line,
                                    const char *xStr, const char *yStr,
                                    const char *x, const char *y )
@@ -132,7 +132,7 @@ namespace CxxTest
             _first->failedAssertLessThan( file, line, xStr, yStr, x, y );
             _second->failedAssertLessThan( file, line, xStr, yStr, x, y );
         }
-        
+
         void failedAssertLessThanEquals( const char *file, unsigned line,
                                          const char *xStr, const char *yStr,
                                          const char *x, const char *y )
@@ -140,14 +140,14 @@ namespace CxxTest
             _first->failedAssertLessThanEquals( file, line, xStr, yStr, x, y );
             _second->failedAssertLessThanEquals( file, line, xStr, yStr, x, y );
         }
-        
+
         void failedAssertPredicate( const char *file, unsigned line,
                                     const char *predicate, const char *xStr, const char *x )
         {
             _first->failedAssertPredicate( file, line, predicate, xStr, x );
             _second->failedAssertPredicate( file, line, predicate, xStr, x );
         }
-        
+
         void failedAssertRelation( const char *file, unsigned line,
                                    const char *relation, const char *xStr, const char *yStr,
                                    const char *x, const char *y )
@@ -155,7 +155,7 @@ namespace CxxTest
             _first->failedAssertRelation( file, line, relation, xStr, yStr, x, y );
             _second->failedAssertRelation( file, line, relation, xStr, yStr, x, y );
         }
-        
+
         void failedAssertThrows( const char *file, unsigned line,
                                  const char *expression, const char *type,
                                  bool otherThrown )
@@ -163,14 +163,14 @@ namespace CxxTest
             _first->failedAssertThrows( file, line, expression, type, otherThrown );
             _second->failedAssertThrows( file, line, expression, type, otherThrown );
         }
-        
+
         void failedAssertThrowsNot( const char *file, unsigned line,
                                     const char *expression )
         {
             _first->failedAssertThrowsNot( file, line, expression );
             _second->failedAssertThrowsNot( file, line, expression );
         }
-        
+
         void leaveRun( const TestDescription &d )
         {
             _first->leaveRun(d);
@@ -182,13 +182,13 @@ namespace CxxTest
             _first->leaveTest(d);
             _second->leaveTest(d);
         }
-        
+
         void leaveSuite( const SuiteDescription &d )
         {
             _first->leaveSuite(d);
             _second->leaveSuite(d);
         }
-        
+
         void leaveWorld( const WorldDescription &d )
         {
             _first->leaveWorld(d);

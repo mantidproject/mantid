@@ -16,8 +16,7 @@ namespace Reflectometry {
 /** SpecularReflectionCorrectTheta : Calculates a theta value based on the
   specular reflection condition. Version 2.
 */
-class MANTID_REFLECTOMETRY_DLL SpecularReflectionCalculateTheta2
-    : public SpecularReflectionAlgorithm {
+class MANTID_REFLECTOMETRY_DLL SpecularReflectionCalculateTheta2 : public SpecularReflectionAlgorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
@@ -27,9 +26,7 @@ public:
   }
 
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"SpecularReflectionPositionCorrect"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"SpecularReflectionPositionCorrect"}; }
   const std::string category() const override;
 
 private:

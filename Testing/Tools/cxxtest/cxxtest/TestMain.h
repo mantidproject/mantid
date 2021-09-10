@@ -34,7 +34,7 @@ inline void print_help(const char* name)
 
 template <class TesterT>
 int Main(TesterT& tmp, int argc, char* argv[])
-{ 
+{
 //
 // Parse the command-line arguments. The default behavior is to run all tests
 //

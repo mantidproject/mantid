@@ -22,8 +22,7 @@ using namespace Mantid::CurveFitting::Functions;
 class ConvolutionExpression {
 public:
   double operator()(double x) {
-    return 1 + 0.3 * x + exp(-0.5 * (x - 4) * (x - 4) * 2) +
-           2 * exp(-0.5 * (x - 6) * (x - 6) * 3);
+    return 1 + 0.3 * x + exp(-0.5 * (x - 4) * (x - 4) * 2) + 2 * exp(-0.5 * (x - 6) * (x - 6) * 3);
   }
 };
 
@@ -42,8 +41,7 @@ public:
 
   std::string name() const override { return "ConvolutionTest_Gauss"; }
 
-  void functionLocal(double *out, const double *xValues,
-                     const size_t nData) const override {
+  void functionLocal(double *out, const double *xValues, const size_t nData) const override {
     double c = getParameter("c");
     double h = getParameter("h");
     double w = getParameter("s");
@@ -52,8 +50,7 @@ public:
       out[i] = h * exp(-x * x * w);
     }
   }
-  void functionDerivLocal(Jacobian *out, const double *xValues,
-                          const size_t nData) override {
+  void functionDerivLocal(Jacobian *out, const double *xValues, const size_t nData) override {
     // throw Mantid::Kernel::Exception::NotImplementedError("");
     double c = getParameter("c");
     double h = getParameter("h");
@@ -89,8 +86,7 @@ public:
 
   std::string name() const override { return "ConvolutionTest_Lorentz"; }
 
-  void functionLocal(double *out, const double *xValues,
-                     const size_t nData) const override {
+  void functionLocal(double *out, const double *xValues, const size_t nData) const override {
     const double height = getParameter("h");
     const double peakCentre = getParameter("c");
     const double hwhm = getParameter("w");
@@ -101,8 +97,7 @@ public:
     }
   }
 
-  void functionDerivLocal(Jacobian *out, const double *xValues,
-                          const size_t nData) override {
+  void functionDerivLocal(Jacobian *out, const double *xValues, const size_t nData) override {
     const double height = getParameter("h");
     const double peakCentre = getParameter("c");
     const double hwhm = getParameter("w");
@@ -111,12 +106,8 @@ public:
       double diff = xValues[i] - peakCentre;
       double invDenominator = 1 / ((diff * diff + hwhm * hwhm));
       out->set(i, 0, hwhm * hwhm * invDenominator);
-      out->set(i, 1,
-               2.0 * height * diff * hwhm * hwhm * invDenominator *
-                   invDenominator);
-      out->set(i, 2,
-               height * (-hwhm * hwhm * invDenominator + 1) * 2.0 * hwhm *
-                   invDenominator);
+      out->set(i, 1, 2.0 * height * diff * hwhm * hwhm * invDenominator * invDenominator);
+      out->set(i, 2, height * (-hwhm * hwhm * invDenominator + 1) * 2.0 * hwhm * invDenominator);
     }
   }
 
@@ -137,16 +128,14 @@ public:
 
   std::string name() const override { return "ConvolutionTest_Linear"; }
 
-  void function1D(double *out, const double *xValues,
-                  const size_t nData) const override {
+  void function1D(double *out, const double *xValues, const size_t nData) const override {
     double a = getParameter("a");
     double b = getParameter("b");
     for (size_t i = 0; i < nData; i++) {
       out[i] = a + b * xValues[i];
     }
   }
-  void functionDeriv1D(Jacobian *out, const double *xValues,
-                       const size_t nData) override {
+  void functionDeriv1D(Jacobian *out, const double *xValues, const size_t nData) override {
     // throw Mantid::Kernel::Exception::NotImplementedError("");
     for (size_t i = 0; i < nData; i++) {
       out->set(i, 0, 1.);
@@ -155,8 +144,7 @@ public:
   }
 };
 
-class ConvolutionTest_LinearWithAttributes : public ParamFunction,
-                                             public IFunction1D {
+class ConvolutionTest_LinearWithAttributes : public ParamFunction, public IFunction1D {
 public:
   ConvolutionTest_LinearWithAttributes() {
     declareParameter("a");
@@ -164,20 +152,16 @@ public:
     declareAttribute("TestAttribute", Attribute(""));
   }
 
-  std::string name() const override {
-    return "ConvolutionTest_LinearWithAttributes";
-  }
+  std::string name() const override { return "ConvolutionTest_LinearWithAttributes"; }
 
-  void function1D(double *out, const double *xValues,
-                  const size_t nData) const override {
+  void function1D(double *out, const double *xValues, const size_t nData) const override {
     double a = getParameter("a");
     double b = getParameter("b");
     for (size_t i = 0; i < nData; i++) {
       out[i] = a + b * xValues[i];
     }
   }
-  void functionDeriv1D(Jacobian *out, const double *xValues,
-                       const size_t nData) override {
+  void functionDeriv1D(Jacobian *out, const double *xValues, const size_t nData) override {
     for (size_t i = 0; i < nData; i++) {
       out->set(i, 0, 1.);
       out->set(i, 1, xValues[i]);
@@ -222,8 +206,7 @@ public:
     TS_ASSERT_EQUALS(conv.nFunctions(), 2);
     TS_ASSERT_EQUALS(conv.name(), "Convolution");
 
-    CompositeFunction *cf =
-        dynamic_cast<CompositeFunction *>(conv.getFunction(1).get());
+    CompositeFunction *cf = dynamic_cast<CompositeFunction *>(conv.getFunction(1).get());
     TS_ASSERT(cf);
     TS_ASSERT_EQUALS(conv.nParams(), 11);
     TS_ASSERT_EQUALS(conv.parameterName(0), "f0.a");
@@ -247,8 +230,7 @@ public:
     TS_ASSERT_EQUALS(conv.parameterLocalName(6), "f1.h");
     TS_ASSERT_EQUALS(conv.parameterLocalName(10), "f2.s");
 
-    IFunction_sptr fun =
-        FunctionFactory::Instance().createInitialized(conv.asString());
+    IFunction_sptr fun = FunctionFactory::Instance().createInitialized(conv.asString());
     TS_ASSERT(fun);
 
     Convolution *conv1 = dynamic_cast<Convolution *>(fun.get());
@@ -257,8 +239,7 @@ public:
     TS_ASSERT_EQUALS(conv1->nFunctions(), 2);
     TS_ASSERT_EQUALS(conv1->name(), "Convolution");
 
-    CompositeFunction *cf1 =
-        dynamic_cast<CompositeFunction *>(conv1->getFunction(1).get());
+    CompositeFunction *cf1 = dynamic_cast<CompositeFunction *>(conv1->getFunction(1).get());
     TS_ASSERT(cf1);
     TS_ASSERT_EQUALS(conv1->nParams(), 11);
     TS_ASSERT_EQUALS(conv1->parameterName(0), "f0.a");
@@ -288,8 +269,7 @@ public:
 
     double a = 1.3;
     double h = 3.;
-    std::shared_ptr<ConvolutionTest_Gauss> res =
-        std::make_shared<ConvolutionTest_Gauss>();
+    std::shared_ptr<ConvolutionTest_Gauss> res = std::make_shared<ConvolutionTest_Gauss>();
     res->setParameter("c", 0);
     res->setParameter("h", h);
     res->setParameter("s", a);
@@ -318,8 +298,7 @@ public:
     double pi = acos(0.) * 2;
     double cc = pi * pi * df * df / a;
     for (size_t i = 0; i < hout.size(); i++) {
-      TS_ASSERT_DELTA(hout.real(i), h * sqrt(pi / a) * exp(-cc * double(i * i)),
-                      1e-7);
+      TS_ASSERT_DELTA(hout.real(i), h * sqrt(pi / a) * exp(-cc * double(i * i)), 1e-7);
     }
 
     // std::ofstream fres("fres.txt");
@@ -338,8 +317,7 @@ public:
     double c1 = 0.;     // center of the gaussian
     double h1 = 3;      // intensity
     double s1 = pi / 2; // standard deviation
-    std::shared_ptr<ConvolutionTest_Gauss> res =
-        std::make_shared<ConvolutionTest_Gauss>();
+    std::shared_ptr<ConvolutionTest_Gauss> res = std::make_shared<ConvolutionTest_Gauss>();
     res->setParameter("c", c1);
     res->setParameter("h", h1);
     res->setParameter("s", s1);
@@ -356,8 +334,7 @@ public:
     double c2 = x0 + Dx / 2;
     double h2 = 10.;
     double s2 = pi / 3;
-    std::shared_ptr<ConvolutionTest_Gauss> fun =
-        std::make_shared<ConvolutionTest_Gauss>();
+    std::shared_ptr<ConvolutionTest_Gauss> fun = std::make_shared<ConvolutionTest_Gauss>();
     fun->setParameter("c", c2);
     fun->setParameter("h", h2);
     fun->setParameter("s", s2);
@@ -435,10 +412,8 @@ public:
     conv.function(da, outa);
     // Check output is the original resolution function
     for (int i = 0; i < N; i++) {
-      TS_ASSERT_DELTA(outs.getCalculated(i), h1 * h2 * exp(-s1 * xs[i] * xs[i]),
-                      1e-10);
-      TS_ASSERT_DELTA(outa.getCalculated(i), h1 * h2 * exp(-s1 * xa[i] * xa[i]),
-                      1e-10);
+      TS_ASSERT_DELTA(outs.getCalculated(i), h1 * h2 * exp(-s1 * xs[i] * xs[i]), 1e-10);
+      TS_ASSERT_DELTA(outa.getCalculated(i), h1 * h2 * exp(-s1 * xa[i] * xa[i]), 1e-10);
     }
   }
 
@@ -447,17 +422,13 @@ public:
     auto compositeFunction1 = std::make_shared<CompositeFunction>();
     auto compositeFunction2 = std::make_shared<CompositeFunction>();
     auto deltaFunction1 =
-        Mantid::API::FunctionFactory::Instance().createInitialized(
-            "name=DeltaFunction, Centre=0.0, Height=3");
+        Mantid::API::FunctionFactory::Instance().createInitialized("name=DeltaFunction, Centre=0.0, Height=3");
     auto deltaFunction2 =
-        Mantid::API::FunctionFactory::Instance().createInitialized(
-            "name=DeltaFunction, Centre=1.0, Height=5");
+        Mantid::API::FunctionFactory::Instance().createInitialized("name=DeltaFunction, Centre=1.0, Height=5");
     auto background1 =
-        Mantid::API::FunctionFactory::Instance().createInitialized(
-            "name=LinearBackground, A0=0.0, A1=1.0");
+        Mantid::API::FunctionFactory::Instance().createInitialized("name=LinearBackground, A0=0.0, A1=1.0");
     auto background2 =
-        Mantid::API::FunctionFactory::Instance().createInitialized(
-            "name=LinearBackground, A0=1.0, A1=2.0");
+        Mantid::API::FunctionFactory::Instance().createInitialized("name=LinearBackground, A0=1.0, A1=2.0");
 
     compositeFunction1->addFunction(deltaFunction1);
     compositeFunction1->addFunction(deltaFunction2);

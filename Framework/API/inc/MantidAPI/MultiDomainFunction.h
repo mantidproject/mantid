@@ -36,8 +36,7 @@ public:
   /// @param domain :: The input domain over which the function is to be
   /// calculated
   /// @param values :: A storage object for the calculated values
-  void function(const FunctionDomain &domain,
-                FunctionValues &values) const override;
+  void function(const FunctionDomain &domain, FunctionValues &values) const override;
   /// Derivatives of function with respect to active parameters
   void functionDeriv(const FunctionDomain &domain, Jacobian &jacobian) override;
   /// Called at the start of each iteration
@@ -48,15 +47,13 @@ public:
   /// Associate a function and a domain
   void setDomainIndex(size_t funIndex, size_t domainIndex);
   /// Associate a function and a list of domains
-  void setDomainIndices(size_t funIndex,
-                        const std::vector<size_t> &domainIndices);
+  void setDomainIndices(size_t funIndex, const std::vector<size_t> &domainIndices);
   /// Clear all domain indices
   void clearDomainIndices();
   /// Get the largest domain index
   size_t getMaxIndex() const { return m_maxIndex; }
   /// Get domain indices for a member function
-  void getDomainIndices(size_t i, size_t nDomains,
-                        std::vector<size_t> &domains) const;
+  void getDomainIndices(size_t i, size_t nDomains, std::vector<size_t> &domains) const;
   /// Get number of domains required by this function
   size_t getNumberDomains() const override;
   /// Create a list of equivalent functions
@@ -68,19 +65,13 @@ public:
   /// of individual member functions.
   size_t nLocalAttributes() const override { return 1; }
   /// Returns a list of attribute names
-  std::vector<std::string> getLocalAttributeNames() const override {
-    return std::vector<std::string>(1, "domains");
-  }
+  std::vector<std::string> getLocalAttributeNames() const override { return std::vector<std::string>(1, "domains"); }
   /// Return a value of attribute attName
-  Attribute getLocalAttribute(size_t i,
-                              const std::string &attName) const override;
+  Attribute getLocalAttribute(size_t i, const std::string &attName) const override;
   /// Set a value to attribute attName
-  void setLocalAttribute(size_t i, const std::string &attName,
-                         const Attribute &) override;
+  void setLocalAttribute(size_t i, const std::string &attName, const Attribute &) override;
   /// Check if attribute attName exists
-  bool hasLocalAttribute(const std::string &attName) const override {
-    return attName == "domains";
-  }
+  bool hasLocalAttribute(const std::string &attName) const override { return attName == "domains"; }
 
 protected:
   /// Counts number of the domains

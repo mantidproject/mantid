@@ -104,9 +104,7 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 2; };
-  const std::vector<std::string> seeAlso() const override {
-    return {"SpatialGrouping"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"SpatialGrouping"}; }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Transforms\\Grouping"; }
 
@@ -127,8 +125,7 @@ private:
     /// give an enum from poco a better name here
     enum {
       IGNORE_SPACES =
-          Mantid::Kernel::StringTokenizer::TOK_TRIM |
-          Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY ///< equal to
+          Mantid::Kernel::StringTokenizer::TOK_TRIM | Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY ///< equal to
       /// Mantid::Kernel::StringTokenizer::TOK_TRIM but
       /// saves some typing
     };
@@ -151,63 +148,48 @@ private:
   void execEvent();
 
   /// read in the input parameters and see what findout what will be to grouped
-  void getGroups(const API::MatrixWorkspace_const_sptr &workspace,
-                 std::vector<int64_t> &unUsedSpec);
+  void getGroups(const API::MatrixWorkspace_const_sptr &workspace, std::vector<int64_t> &unUsedSpec);
   /// gets the list of spectra _index_ _numbers_ from a file of _spectra_
   /// _numbers_
-  void processFile(const std::string &fname,
-                   const API::MatrixWorkspace_const_sptr &workspace,
+  void processFile(const std::string &fname, const API::MatrixWorkspace_const_sptr &workspace,
                    std::vector<int64_t> &unUsedSpec);
   /// gets groupings from XML file
-  void processXMLFile(const std::string &fname,
-                      const API::MatrixWorkspace_const_sptr &workspace,
+  void processXMLFile(const std::string &fname, const API::MatrixWorkspace_const_sptr &workspace,
                       std::vector<int64_t> &unUsedSpec);
-  void processGroupingWorkspace(
-      const DataObjects::GroupingWorkspace_const_sptr &groupWS,
-      const API::MatrixWorkspace_const_sptr &workspace,
-      std::vector<int64_t> &unUsedSpec);
+  void processGroupingWorkspace(const DataObjects::GroupingWorkspace_const_sptr &groupWS,
+                                const API::MatrixWorkspace_const_sptr &workspace, std::vector<int64_t> &unUsedSpec);
   void processMatrixWorkspace(const API::MatrixWorkspace_const_sptr &groupWS,
-                              const API::MatrixWorkspace_const_sptr &workspace,
-                              std::vector<int64_t> &unUsedSpec);
+                              const API::MatrixWorkspace_const_sptr &workspace, std::vector<int64_t> &unUsedSpec);
   /// used while reading the file turns the string into an integer number (if
   /// possible), white space and # comments ignored
   int readInt(const std::string &line);
 
-  void readFile(const spec2index_map &specs2index, std::istream &File,
-                size_t &lineNum, std::vector<int64_t> &unUsedSpec,
-                const bool ignoreGroupNumber);
+  void readFile(const spec2index_map &specs2index, std::istream &File, size_t &lineNum,
+                std::vector<int64_t> &unUsedSpec, const bool ignoreGroupNumber);
 
   /// used while reading the file reads reads spectra numbers from the string
   /// and returns spectra indexes
-  void readSpectraIndexes(const std::string &line,
-                          const spec2index_map &specs2index,
-                          std::vector<size_t> &output,
-                          std::vector<int64_t> &unUsedSpec,
-                          const std::string &seperator = "#");
+  void readSpectraIndexes(const std::string &line, const spec2index_map &specs2index, std::vector<size_t> &output,
+                          std::vector<int64_t> &unUsedSpec, const std::string &seperator = "#");
 
   /// Estimate how much what has been read from the input file constitutes
   /// progress for the algorithm
-  double fileReadProg(
-      DataHandling::GroupDetectors2::storage_map::size_type numGroupsRead,
-      DataHandling::GroupDetectors2::storage_map::size_type numInHists);
+  double fileReadProg(DataHandling::GroupDetectors2::storage_map::size_type numGroupsRead,
+                      DataHandling::GroupDetectors2::storage_map::size_type numInHists);
 
   /// Copy the and combine the histograms that the user requested from the input
   /// into the output workspace
-  size_t formGroups(const API::MatrixWorkspace_const_sptr &inputWS,
-                    const API::MatrixWorkspace_sptr &outputWS,
-                    const double prog4Copy, const bool keepAll,
-                    const std::set<int64_t> &unGroupedSet,
+  size_t formGroups(const API::MatrixWorkspace_const_sptr &inputWS, const API::MatrixWorkspace_sptr &outputWS,
+                    const double prog4Copy, const bool keepAll, const std::set<int64_t> &unGroupedSet,
                     Indexing::IndexInfo &indexInfo);
   /// Copy the and combine the event lists that the user requested from the
   /// input into the output workspace
   size_t formGroupsEvent(const DataObjects::EventWorkspace_const_sptr &inputWS,
-                         const DataObjects::EventWorkspace_sptr &outputWS,
-                         const double prog4Copy);
+                         const DataObjects::EventWorkspace_sptr &outputWS, const double prog4Copy);
 
   /// Copy the ungrouped spectra from the input workspace to the output
   template <class TIn, class TOut>
-  void moveOthers(const std::set<int64_t> &unGroupedSet, const TIn &inputWS,
-                  TOut &outputWS, size_t outIndex);
+  void moveOthers(const std::set<int64_t> &unGroupedSet, const TIn &inputWS, TOut &outputWS, size_t outIndex);
 
   /// flag values
   enum {
@@ -227,9 +209,8 @@ private:
   /// required to check that the X bin boundaries
   /// are the same as a percentage of total
   /// algorithm run time
-  static const double
-      OPENINGFILE; ///< gives the progress bar a nudge when the file opens
-  static const double READFILE; ///< if a file must be read in estimate that
+  static const double OPENINGFILE; ///< gives the progress bar a nudge when the file opens
+  static const double READFILE;    ///< if a file must be read in estimate that
   /// reading it will take this percentage of the
   /// algorithm execution time
   static const int INTERVAL = 128; ///< copy this many histograms and then check
@@ -248,12 +229,10 @@ private:
  * spectra
  */
 template <class TIn, class TOut>
-void GroupDetectors2::moveOthers(const std::set<int64_t> &unGroupedSet,
-                                 const TIn &inputWS, TOut &outputWS,
+void GroupDetectors2::moveOthers(const std::set<int64_t> &unGroupedSet, const TIn &inputWS, TOut &outputWS,
                                  size_t outIndex) {
   g_log.debug() << "Starting to copy the ungrouped spectra\n";
-  double prog4Copy = (1. - 1. * static_cast<double>(m_FracCompl)) /
-                     static_cast<double>(unGroupedSet.size());
+  double prog4Copy = (1. - 1. * static_cast<double>(m_FracCompl)) / static_cast<double>(unGroupedSet.size());
 
   // go thorugh all the spectra in the input workspace
   for (auto copyFrIt : unGroupedSet) {
@@ -276,8 +255,7 @@ void GroupDetectors2::moveOthers(const std::set<int64_t> &unGroupedSet,
     }
   }
 
-  g_log.debug() << name() << " copied " << unGroupedSet.size() - 1
-                << " ungrouped spectra\n";
+  g_log.debug() << name() << " copied " << unGroupedSet.size() - 1 << " ungrouped spectra\n";
 }
 
 } // namespace DataHandling

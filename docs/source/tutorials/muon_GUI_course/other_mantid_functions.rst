@@ -1,7 +1,7 @@
 .. _other_mantid_functions:
 
 ==================================================
-Other Mantid Functions and Basic Data Manipulation 
+Other Mantid Functions and Basic Data Manipulation
 ==================================================
 
 .. index:: Other Mantid Functions
@@ -30,26 +30,26 @@ algorithms which take a Matrix Workspace as input.
 In addition to data, workspaces hold a workspace history, which details the algorithms
 which have been run on this workspace.
 
-The `Analysis Data Service` (ADS), by default is found on the left-hand side of the main MantidWorkbench window. 
+The `Analysis Data Service` (ADS), by default is found on the left-hand side of the main MantidWorkbench window.
 When a muon data set is loaded via the GUI, the Matrix Workspaces are created automatically.
 
-*   **NAME12345 MA** which contains all the Muon Analysis data for run `12345` on the `NAME` instrument. 
+*   **NAME12345 MA** which contains all the Muon Analysis data for run `12345` on the `NAME` instrument.
     This data is further separated into more sub-workspaces, these are listed below.
 *   **NAME12345 Raw Data MA**, holds within it raw positron counts for each individual detector.
     To examine the data collected in a single detector, right click on workspace and select Plot Spectrum.
     There is one spectrum per detector. In the window that opens up, the number of the spectrum/detector
     to plot, or a range of spectra, can be selected.
-*   **NAME12345 Groups MA** contains data in raw counts and asymmetry, collated 
-    into the groups specified in the Grouping tab of the interface (see the Grouping section in :ref:`the_tabs_grouping` for more). 
+*   **NAME12345 Groups MA** contains data in raw counts and asymmetry, collated
+    into the groups specified in the Grouping tab of the interface (see the Grouping section in :ref:`the_tabs_grouping` for more).
     Each workspace's name contains the name of the group it holds data for.
 *   **NAME12345 Pairs MA** these workspaces contain the Pairs (such as 'long' which is created by default) specified in the *Grouping Options* tab of the interface (see the Grouping section in :ref:`the_tabs_grouping` for more).
-    Each workspace's name contains the name of the pair it holds data for. 
+    Each workspace's name contains the name of the pair it holds data for.
 
-*   **Fitting Results MA** contains the workspaces produced when data is fitted, the spectra and tables within are named with the convention `NAME12345; Group/Pair Asym; Asymmetry; MA; Fitted; FunctionName`. 
-    In order, the parts of these names correspond to: the data run, the group or pair fitted, the fact the data is asymmetry, that it is from Muon Analysis, that it has been 
+*   **Fitting Results MA** contains the workspaces produced when data is fitted, the spectra and tables within are named with the convention `NAME12345; Group/Pair Asym; Asymmetry; MA; Fitted; FunctionName`.
+    In order, the parts of these names correspond to: the data run, the group or pair fitted, the fact the data is asymmetry, that it is from Muon Analysis, that it has been
     fitted, and what function(s) were used. Data in Fitting Results MA is split into the following sub-workspaces:
 
-*   **Fitting Results_workspaces MA** contains the spectra of fitted asymmetry data. These workspaces contain three spectra - the original data, the fit, and the difference between the two, 
+*   **Fitting Results_workspaces MA** contains the spectra of fitted asymmetry data. These workspaces contain three spectra - the original data, the fit, and the difference between the two,
     which are assigned spectrum numbers 1, 2, and 3 respectively.
 *   **Fitting Results_parameter_tables MA** contains tables of the parameters of the function used for a fit, along with their values and errors for that fit.
 
@@ -68,8 +68,8 @@ option on the analysis menu for subsequent data processing.
 Loading Data
 ------------
 
-Matrix Workspaces are typically created by executing one of Mantid's 'Load' algorithms or are 
-the output of algorithms which take a Matrix Workspace as input. In addition to data, workspaces 
+Matrix Workspaces are typically created by executing one of Mantid's 'Load' algorithms or are
+the output of algorithms which take a Matrix Workspace as input. In addition to data, workspaces
 hold a workspace history which lists the algorithms that have been applied to the data.
 
 To load a raw data file *without using* the Mantid Analysis GUI, and examine its content:
@@ -96,7 +96,7 @@ It can be seen that a workspace called `HIFI00062798` has been created. It
 * It contains 64 spectra (or histograms i.e. one for each HiFi detector)
 * there are 2048 time channels, or bins, per plot
 
-However, the NeXuS format allows a lot more information be stored in a data file than that listed above. As an example 
+However, the NeXuS format allows a lot more information be stored in a data file than that listed above. As an example
 right click on the file name and select `Show Sample Logs`. A list of experiment and
 instrument parameters that have been logged during a measurement, from
 magnetic fields to sample temperatures, appears.
@@ -118,7 +118,7 @@ data collected in a single detector, right click on HIFI00062798 and select "Plo
 On HiFi, as way of example, there are 64 detectors hence ID numbers: 1-64 (1-32 =
 upstream detectors, 33-64 = downstream detectors.
 
-Enter a detector (ID) number of choice and click OK to plot the associated raw data. 
+Enter a detector (ID) number of choice and click OK to plot the associated raw data.
 This process is illustrated below.
 
 .. figure:: /images/plot_spectrum2.gif
@@ -135,8 +135,8 @@ For information:
 Exporting Data
 ==============
 
-To export the data contained within any listed workspace, the Algorithms tab at the 
-bottom of the workspace list pane can be used. 
+To export the data contained within any listed workspace, the Algorithms tab at the
+bottom of the workspace list pane can be used.
 
 .. figure:: /images/AlgorithmsOptions.PNG
     :align: center
@@ -153,8 +153,8 @@ Follow the instructions below to try this
 
     Figure 8: Where to find the `SaveAscii` Algorithm.
 
-3. The `SaveAscii` Input Dialog box - shown in Figure 8 should appear. Select a directory (for the written data file) and specify a file name. 
-4. Note the workspace to be exported can be selected from the uppermost dropdown list, next to `InputWorkspace`, in this case let us leave it as `HIFI00062798`. 
+3. The `SaveAscii` Input Dialog box - shown in Figure 8 should appear. Select a directory (for the written data file) and specify a file name.
+4. Note the workspace to be exported can be selected from the uppermost dropdown list, next to `InputWorkspace`, in this case let us leave it as `HIFI00062798`.
 5. Define which workspace spectra to export using the `WorkspaceIndexMin` and `WorkspaceIndexMax` inputs. Use these to save spectra `10` and `11`.
 6. Choose the type of data separator used in the file (CSV is usually a reliable option), add comments and uncheck the `WriteXError` box.
 7. Export the spectra.
@@ -162,7 +162,7 @@ Follow the instructions below to try this
 Overlaying and Styling Plots
 ============================
 
-Overlaying data plots can be useful when trying to compare two different sets of data simultaneously by having them on one individual plot. 
+Overlaying data plots can be useful when trying to compare two different sets of data simultaneously by having them on one individual plot.
 Overlaying data can be done by simply clicking and dragging a workspace onto an existing plot, or can be done via the Overlaying Data option
 from the workspace pane.
 
@@ -181,7 +181,7 @@ To try this follow these instructions:
 Plot Styles
 -----------
 
-The plot style a data set can be selected 
+The plot style a data set can be selected
 using the gear icon at the top of the plot window, this will open the Figure options menu.
 
 To demonstrate changing a plot's markers and curve colour follow these instructions:
@@ -200,7 +200,7 @@ To demonstrate changing a plot's markers and curve colour follow these instructi
 Editing Axes
 ------------
 
-One can also change the axis settings, such as the maximum and minimum values, and plotting against a logarithmic scale. 
+One can also change the axis settings, such as the maximum and minimum values, and plotting against a logarithmic scale.
 The axis limits can be changed either through the Figure options menu, or by double clicking on the relevant axis, while other .
 See the instructions below for an example on how to change the X-Axis limits and set the Y-Scale to logarithmic.
 
@@ -210,18 +210,18 @@ See the instructions below for an example on how to change the X-Axis limits and
 4. In the Axes tab of the Figure options, set the value in the box labelled `Upper Limit` to `16` **or** do the same for the box labelled `Max` in the Edit axis dialog.
 5. Press `Apply`, **or** click the `OK` button.
 6. In the `Axis` tab of the figure options, click the `y` button. Then use the `Scale` drop-down menu and change the setting to `log`. **Or** double click on the Y axis of the plot and tick the box labelled 'Log'.
-7. Click `OK` and observe the changes to the plot, this process is shown for the Figure options and Edit axis in Figures 11 and 12 respectively. 
+7. Click `OK` and observe the changes to the plot, this process is shown for the Figure options and Edit axis in Figures 11 and 12 respectively.
 
 .. figure:: /images/othermantidfunctionsfig11.gif
     :align: center
 
     Figure 11: Changing the X-Axis scale limits and setting the Y-Axis to logarithmic settings using the Figure options menu.
-		
+
 
 .. figure:: /images/othermantidfunctionsfig12.gif
     :align: center
 
-    Figure 12:  Changing the X-Axis scale limits and setting the Y-Axis to logarithmic using the Edit axis dialog. 
-    Note that if the scale limits include negative values when doing this, Mantid 
+    Figure 12:  Changing the X-Axis scale limits and setting the Y-Axis to logarithmic using the Edit axis dialog.
+    Note that if the scale limits include negative values when doing this, Mantid
     will automatically use a 'symmetrical log' scale, which allows for negative values by having a range around 0 where
     the scale is linear not logarithmic.

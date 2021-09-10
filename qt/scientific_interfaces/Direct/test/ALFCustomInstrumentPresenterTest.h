@@ -41,21 +41,16 @@ class ALFCustomInstrumentPresenterTest : public CxxTest::TestSuite {
 public:
   ALFCustomInstrumentPresenterTest() { FrameworkManager::Instance(); }
 
-  static ALFCustomInstrumentPresenterTest *createSuite() {
-    return new ALFCustomInstrumentPresenterTest();
-  }
+  static ALFCustomInstrumentPresenterTest *createSuite() { return new ALFCustomInstrumentPresenterTest(); }
 
-  static void destroySuite(ALFCustomInstrumentPresenterTest *suite) {
-    delete suite;
-  }
+  static void destroySuite(ALFCustomInstrumentPresenterTest *suite) { delete suite; }
 
   void setUp() override {
     m_model = new NiceMock<MockALFCustomInstrumentModel>();
     m_view = new NiceMock<MockALFCustomInstrumentView>("ALF");
     m_paneView = new NiceMock<MockPlotFitAnalysisPaneView>();
     m_paneModel = new NiceMock<MockPlotFitAnalysisPaneModel>();
-    m_pane =
-        new NiceMock<MockPlotFitAnalysisPanePresenter>(m_paneView, m_paneModel);
+    m_pane = new NiceMock<MockPlotFitAnalysisPanePresenter>(m_paneView, m_paneModel);
     m_presenter = new ALFCustomInstrumentPresenter(m_view, m_model, m_pane);
   }
 
@@ -70,18 +65,13 @@ public:
   }
 
   void test_setUpInstrumentAnalysisSplitter() {
-    CompositeFunction_sptr composite =
-        std::dynamic_pointer_cast<Mantid::API::CompositeFunction>(
-            Mantid::API::FunctionFactory::Instance().createFunction(
-                "CompositeFunction"));
+    CompositeFunction_sptr composite = std::dynamic_pointer_cast<Mantid::API::CompositeFunction>(
+        Mantid::API::FunctionFactory::Instance().createFunction("CompositeFunction"));
 
-    auto func = Mantid::API::FunctionFactory::Instance().createInitialized(
-        "name = FlatBackground");
+    auto func = Mantid::API::FunctionFactory::Instance().createInitialized("name = FlatBackground");
     composite->addFunction(func);
 
-    EXPECT_CALL(*m_model, getDefaultFunction())
-        .Times(1)
-        .WillOnce(Return(composite));
+    EXPECT_CALL(*m_model, getDefaultFunction()).Times(1).WillOnce(Return(composite));
     EXPECT_CALL(*m_view, setupAnalysisPane(m_pane->getView())).Times(1);
     // this function is called at start up -> count is 1
     TS_ASSERT_EQUALS(m_pane->getAddCount(), 1);
@@ -110,19 +100,16 @@ public:
     auto tmp = setup.first;
     TS_ASSERT_EQUALS(tmp.first, "ALF");
     std::function<bool(std::map<std::string, bool>)> func1 =
-        std::bind(&IALFCustomInstrumentModel::extractTubeCondition, m_model,
-                  std::placeholders::_1);
+        std::bind(&IALFCustomInstrumentModel::extractTubeCondition, m_model, std::placeholders::_1);
     std::function<bool(std::map<std::string, bool>)> func2 =
-        std::bind(&IALFCustomInstrumentModel::averageTubeCondition, m_model,
-                  std::placeholders::_1);
+        std::bind(&IALFCustomInstrumentModel::averageTubeCondition, m_model, std::placeholders::_1);
     // cannot compare std::function directly
     // check behaviour instead
     int run = 6113;
     auto data = mockALFData("CURVES", "ALF", run, false);
     m_model->setCurrentRun(run);
 
-    std::map<std::string, bool> conditions = {
-        {"plotStored", true}, {"hasCurve", true}, {"isTube", true}};
+    std::map<std::string, bool> conditions = {{"plotStored", true}, {"hasCurve", true}, {"isTube", true}};
     TS_ASSERT_EQUALS(tmp.second[0](conditions), func1(conditions));
     TS_ASSERT_EQUALS(tmp.second[1](conditions), func2(conditions));
 

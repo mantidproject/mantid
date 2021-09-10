@@ -152,12 +152,6 @@ This needs to be manually set for each agent. Ensure the script is marked execut
 Also ensure the entry in the crontab has the correct ``PATH`` setting (by default cron uses a reduced ``PATH`` entry).
 On macOS ``latex`` and ``sysctl`` should be available.
 
-Post-Connection Setup - All Systems
------------------------------------
-
-Ensure the new machine is added to the relevant `ParaView build job <https://builds.mantidproject.org/view/ParaView/>`__ and build ParaView.
-Set the ``PARAVIEW_DIR`` & ``PARAVIEW_NEXT_DIR`` variables (it's easiest to just look at the configuration for one of the other nodes of a similar type.
-
 Misc Groovy Scripts
 ###################
 
@@ -175,7 +169,7 @@ Print the Value of an Environment Variable on All Nodes
     import hudson.model.*
     import hudson.slaves.*
 
-    VARIABLE_NAME = "PARAVIEW_DIR"
+    VARIABLE_NAME = "ENV_VARIABLE_NAME"
 
     nodes = Jenkins.instance.getNodes()
     println("Displaying values of " + VARIABLE_NAME + " on all nodes")
@@ -183,85 +177,15 @@ Print the Value of an Environment Variable on All Nodes
     for(node in nodes) {
       node_props = node.nodeProperties.getAll(hudson.slaves.EnvironmentVariablesNodeProperty.class)
       if(node_props.size() == 1) {
-      env_vars = node_props[0].getEnvVars()
+        env_vars = node_props[0].getEnvVars()
       if(env_vars.containsKey(VARIABLE_NAME)) {
-      pv_dir = env_vars.get(VARIABLE_NAME, "")
+        pv_dir = env_vars.get(VARIABLE_NAME, "")
       } else {
-      pv_dir = VARIABLE_NAME + " not set."
+        pv_dir = VARIABLE_NAME + " not set."
       }
       println(node.getDisplayName() + ": " + pv_dir)
       } else {
-      pv_dir = VARIABLE_NAME + " not set."
-      }
-    }
-
-Update ParaView variables on nodes
-----------------------------------
-
-**After running this script the variables look like they are updated but are in fact cached on the agents so the new values don't take effect without disconnecting and forcing each agent to reconnect**
-
-.. code-block:: groovy
-
-    import jenkins.model.*
-    import hudson.model.*
-    import hudson.slaves.*
-
-    VARIABLE_NAME = "PARAVIEW_NEXT_DIR"
-    VERSION = "ParaView-5.1.2"
-
-    jenkins = Jenkins.instance
-    nodes = jenkins.getNodes()
-    println("Displaying values of " + VARIABLE_NAME + " on all nodes")
-    println()
-    for(node in nodes) {
-      node_props = node.nodeProperties.getAll(hudson.slaves.EnvironmentVariablesNodeProperty.class)
-      if(node_props.size() == 1) {
-      env_vars = node_props[0].getEnvVars()
-      if(env_vars.containsKey(VARIABLE_NAME)) {
-        def pv_dir = node.createPath(env_vars.get(VARIABLE_NAME, ""));
-        if(pv_dir) {
-          def pv_build_dir = pv_dir.getParent();
-          def pv_dir_new = pv_build_dir.child(VERSION);
-          println(node.getDisplayName() + ": Updating $VARIABLE_NAME from '" + pv_dir.toString() + "' to '" + pv_dir_new.toString() + "'");
-          env_vars.put(VARIABLE_NAME, pv_dir_new.toString());
-        }
-        else {
-          println(node.getDisplayName() + " has variable set but " + env_vars.get(VARIABLE_NAME, "") + " does not exist");
-        }
-      } else {
-        println(node.getDisplayName() + ": $VARIABLE_NAME " +  "not set.")
-      }
-      } else {
-        println(node.getDisplayName() + ": $VARIABLE_NAME " +  "not set.")
-      }
-    }
-    jenkins.save();
-
-Check existence of ParaView builds
-----------------------------------
-
-.. code-block:: groovy
-
-    import hudson.model.*
-
-    nodes = Jenkins.instance.slaves
-
-    PV_VERSION = "5.1.2"
-
-    for (node in nodes) {
-      FilePath root = node.getRootPath();
-      if(root) {
-        FilePath fp = root.getParent();
-        // assume this is $HOME on osx/linux & drive: on Windows
-        if(fp.toString().startsWith("C:")) {
-          fp = fp.child("Builds")
-        } else {
-          fp = fp.child("build");
-        }
-        fp = fp.child("ParaView-$PV_VERSION");
-        if(!fp.exists()) {
-          println(node.getDisplayName() + " does not have PV 5.1.2")
-        }
+        pv_dir = VARIABLE_NAME + " not set."
       }
     }
 

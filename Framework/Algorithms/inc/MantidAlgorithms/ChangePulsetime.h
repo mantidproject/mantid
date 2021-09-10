@@ -29,13 +29,9 @@ public:
 
   /// Algorithm's version for identification
   int version() const override { return 1; };
-  const std::vector<std::string> seeAlso() const override {
-    return {"CreateLogTimeCorrection", "CalculateCountRate"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"CreateLogTimeCorrection", "CalculateCountRate"}; }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "Events;Transforms\\Axes";
-  }
+  const std::string category() const override { return "Events;Transforms\\Axes"; }
 
 private:
   /// Initialise the properties

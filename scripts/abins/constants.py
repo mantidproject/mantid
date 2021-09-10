@@ -5,6 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import math
+import warnings
+
 import numpy as np
 from scipy import constants
 
@@ -15,6 +17,7 @@ from scipy import constants
 # power expansion in terms of FUNDAMENTALS and overtones
 # S(Q, n * omega) \simeq (Q^2 * U^2)^n / n! exp(-Q^2 * U^2)
 # n = 1, 2, 3.....
+from scipy.constants import ConstantWarning
 
 FUNDAMENTALS = 1  # value of fundamental parameter  (n = 1)
 FIRST_OVERTONE = 1 + FUNDAMENTALS  # value of first overtone (n = 2)
@@ -48,8 +51,6 @@ ATOMIC_LENGTH_2_ANGSTROM = constants.codata.value(
 
 M_2_HARTREE = constants.codata.value("atomic mass unit-hartree relationship")  # amu * m2_hartree =  Hartree
 
-ALL_INSTRUMENTS = ["TOSCA"]  # supported instruments
-
 # ALL_SAMPLE_FORMS = ["SingleCrystal", "Powder"]  # valid forms of samples
 ALL_SAMPLE_FORMS = ["Powder"]  # valid forms of samples
 
@@ -73,8 +74,8 @@ ATOM_PREFIX = "atom"
 FLOAT_ID = np.dtype(np.float64).num
 FLOAT_TYPE = np.dtype(np.float64)
 
-COMPLEX_ID = np.dtype(np.complex).num
-COMPLEX_TYPE = np.dtype(np.complex)
+COMPLEX_ID = np.dtype(complex).num
+COMPLEX_TYPE = np.dtype(complex)
 
 INT_ID = np.dtype(np.uint32).num
 INT_TYPE = np.dtype(np.uint32)
@@ -87,7 +88,12 @@ HIGHER_ORDER_QUANTUM_EVENTS_DIM = HIGHER_ORDER_QUANTUM_EVENTS
 S_LAST_INDEX = 1
 
 # construction of aCLIMAX constant which is used to evaluate mean square displacement (u)
-H_BAR = constants.codata.value("Planck constant over 2 pi")  # H_BAR =  1.0545718e-34 [J s] = [kg m^2 / s ]
+with warnings.catch_warnings(record=True) as warning_list:
+    warnings.simplefilter("always")
+    H_BAR = constants.codata.value("Planck constant over 2 pi")  # H_BAR =  1.0545718e-34 [J s] = [kg m^2 / s ]
+    if len(warning_list) >= 1 and isinstance(warning_list[0].message, ConstantWarning):
+        H_BAR = constants.hbar  # H_BAR =  1.0545718e-34 [J s] = [kg m^2 / s ]
+
 H_BAR_DECOMPOSITION = math.frexp(H_BAR)
 
 M2_TO_ANGSTROM2 = 1.0 / constants.angstrom ** 2  # m^2 = 10^20 A^2
@@ -102,6 +108,9 @@ HZ2INV_CM_DECOMPOSITION = math.frexp(HZ2INV_CM)
 
 # Conversion factor from VASP internal units
 VASP_FREQ_TO_THZ = 15.633302
+
+# Energy units
+MILLI_EV_TO_WAVENUMBER = 8.06554465
 
 #
 # u = H_BAR [J s ]/ ( 2 m [kg] omega [s^-1]) = CONSTANT / ( m [amu] nu [cm^-1])
@@ -143,7 +152,10 @@ MAX_ORDER = 4  # max quantum order event
 ALL_SUPPORTED_AB_INITIO_PROGRAMS = ["CRYSTAL", "CASTEP", "DMOL3", "GAUSSIAN", "VASP"]
 AB_INITIO_FILE_EXTENSIONS = ["phonon", "out", "outmol", "log", "LOG", "xml"]
 
-ONE_DIMENSIONAL_INSTRUMENTS = ["TOSCA"]
+ONE_DIMENSIONAL_INSTRUMENTS = ["TOSCA", "Lagrange"]
+TWO_DIMENSIONAL_INSTRUMENTS = []
+ALL_INSTRUMENTS = ONE_DIMENSIONAL_INSTRUMENTS + TWO_DIMENSIONAL_INSTRUMENTS
+
 ONE_DIMENSIONAL_SPECTRUM = 1
 
 FIRST_BIN_INDEX = 1
@@ -152,6 +164,10 @@ GAMMA_POINT = 0
 BUF = 65536
 
 CRYSTAL = False
+
+# Bin limits for q rebinning during semi-empirical powder sum
+Q_BEGIN = 0.7
+Q_END = 30.0
 
 # definition of momentum transfer range
 ACOUSTIC_PHONON_THRESHOLD = 10.0  # acoustic threshold in cm^-1
@@ -192,3 +208,9 @@ MASS_EPS = 1e-2  # in amu units.
 # this constant is used to check if in a system for the given symbol of an element all atoms with this symbol have
 # the same mass
 ONLY_ONE_MASS = 1
+
+DIGITS_NUM = 5
+S_PLOT_SPACING = 4.0
+ENERGY_PLOT_STEP = 500.0
+Q_PLOT_STEP = 6.0
+S_PLOT_THRESHOLD = 1e-7

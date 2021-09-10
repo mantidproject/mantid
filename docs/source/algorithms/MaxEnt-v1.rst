@@ -20,7 +20,7 @@ More specifically, the algorithm maximizes the entropy :math:`S\left(x\right)` s
 .. math:: \chi^2 = \frac{1}{N'}\sum_m \frac{\left(d_m - d_m^c\right)^2}{\sigma_m^2} \leq \chi^2_{target}
 
 where :math:`d_m` are the experimental data, :math:`\sigma_m` the associated errors, :math:`d_m^c`
-the calculated or reconstructed data, :math:`\chi^2_{target}` is value of the input algorithm 
+the calculated or reconstructed data, :math:`\chi^2_{target}` is value of the input algorithm
 property ChiTargetOverN and :math:`N'` the number of measured data point. The image is a set of numbers
 :math:`\{x_0, x_1, \dots, x_{N-1}\}` related to the measured data via a 1D Fourier transform:
 
@@ -32,8 +32,8 @@ is controlled by the input algorithm property ResolutionFactor, see examples fur
 Note that even for real input data the reconstructed image can be complex, which means that both the real and
 imaginary parts will be taken into account for the calculations. This is the default behaviour, which can be
 changed by setting the input property *ComplexImage* to *False*. Note that the algorithm will fail to converge
-if the image is complex (i.e. the data does not satisfy Friedel's law) and this option is set to *False*. 
-For this reason, it is recommended to use the default when no prior knowledge is available. 
+if the image is complex (i.e. the data does not satisfy Friedel's law) and this option is set to *False*.
+For this reason, it is recommended to use the default when no prior knowledge is available.
 
 The entropy is defined on the image :math:`\{x_j\}` as:
 
@@ -67,7 +67,7 @@ one step closer to the solution:
 
 .. math:: \mathbf{x} = \mathbf{x} + \delta \mathbf{x}
 
-If *DataLinearAdj* :math:`l_m` and *DataConstAdj* :math:`c_m` are set 
+If *DataLinearAdj* :math:`l_m` and *DataConstAdj* :math:`c_m` are set
 then the reconstructed data is adjusted to
 
 .. math:: d_m = \frac{l_m}{N} \sum_{j=0}^{N-1} x_j e^{i 2\pi m j / N} + c_m
@@ -199,7 +199,7 @@ Output:
 
 .. figure:: ../images/MaxEntFourierCoefficients.png
    :align: center
-   
+
 
 **Example - Reconstruct a real muon dataset**
 
@@ -231,11 +231,11 @@ and :ref:`algm-FFT` (right).
               yData.append(originalY[j]**2)
               xData.append(originalX[j])
       return np.trapz(x=xData,y=np.sqrt(yData))
-   # Do not change these numbers - they test if noise has been added to the alg    
+   # Do not change these numbers - they test if noise has been added to the alg
    print("Negative background {:.6f}".format(getInt(image.readX(0), image.readY(0),-30,-2 )))
    print("Positive background {:.6f}".format(getInt(image.readX(0), image.readY(0),2,30 )))
    print ("Number of iterations: "+str( len(evolAngle.readX(0))))
-   
+
 Output:
 
 .. testoutput:: ExMUSR00022725
@@ -374,7 +374,7 @@ image in order to obtain smooth results).
    print("Image at {:.3f}: {:.3f} (PositiveImage=False), {:.3f} (PositiveImage=True)".format(image.readX(0)[104], image.readY(0)[104], imageP.readY(0)[102]))
    print ("Number of iterations: "+str( len(evolAngle.readX(0))))
    print ("Number of iterations: "+str( len(evolAngleP.readX(0))))
-   
+
 Output:
 
 .. testoutput:: ExRealPosImage
@@ -442,7 +442,7 @@ shows how to combine two workspaces with complex data.
        YIm2.append(sin(w2*x)+(random()-0.5)*0.3)
        E2.append(0.5)
 
-   # Create two workspaces of one spectrum each    
+   # Create two workspaces of one spectrum each
    CreateWorkspace(OutputWorkspace='ws1',DataX=X+X,DataY=YRe+YIm,DataE=E+E,NSpec=2)
    evolChiP, evolAngleP, imageP, dataP = MaxEnt(InputWorkspace='ws1', ComplexData=True, A=0.001, PositiveImage=True)
 
@@ -509,7 +509,7 @@ Output:
 
 .. figure:: ../images/MaxEntResolutionFactor.png
    :align: center
-   
+
 In the next example, we increased the density of points by factors of 10, 20 and 40. We show the reconstructed image (left) and
 a zoom into the region :math:`0.82 < x < 1.44` and :math:`-0.187 < y < 0.004`.
 
@@ -541,11 +541,11 @@ Output:
 
 .. figure:: ../images/MaxEntResolutionFactor2.png
    :align: center
-   
+
 Adjusting the Reconstructed Data
 --------------------------------
-The reconstructed data can be adjusted by multiplying by the *DataLinearAdj* property and then adding the *DataConstAdj* property. 
-Each of these properties is a workspace with complex Y values, just like complex input workspaces. Each Y value is then applied to 
+The reconstructed data can be adjusted by multiplying by the *DataLinearAdj* property and then adding the *DataConstAdj* property.
+Each of these properties is a workspace with complex Y values, just like complex input workspaces. Each Y value is then applied to
 the corresponding Y values in the reconstructed data at each iteration.
 
 These usage examples merely demonstrate how to use the adjustments and are not realistic use cases.
@@ -568,7 +568,7 @@ These usage examples merely demonstrate how to use the adjustments and are not r
            X.append(x)
            Y.append(cos(w*x)+(random()-0.5)*0.3)
            E.append(0.2)
-        
+
    CreateWorkspace(OutputWorkspace='inputws',DataX=X,DataY=Y,DataE=E,NSpec=3)
 
    # Construct linear adjustment workspace (real = 1, imaginary linear)
@@ -581,14 +581,14 @@ These usage examples merely demonstrate how to use the adjustments and are not r
        for i in range(0,N):
            Ylin.append(1.0)
            Zeroes.append(0)
-        
+
    # Imaginary values
    for s in range(0,3):
        for i in range(0,N):
            X.append(X[i])
            Ylin.append(s*Magnitude*X[i])
            Zeroes.append(0)
-        
+
    CreateWorkspace(OutputWorkspace='linadj', DataX=X, DataY=Ylin, DataE=Zeroes, NSpec=6)
 
    # Construct constant adjustment workspace (real = 0, imaginary linear)
@@ -599,16 +599,16 @@ These usage examples merely demonstrate how to use the adjustments and are not r
    for s in range(0,3):
        for i in range(0,N):
            Yconst.append(0)
-        
+
    # Imaginary values
    for s in range(0,3):
        for i in range(0,N):
            Yconst.append(s*Magnitude*X[i])
-        
+
    CreateWorkspace(OutputWorkspace='constadj',DataX=X, DataY=Yconst, DataE=Zeroes, NSpec=6)
 
    evolChi, evolAngle, image, data = MaxEnt(InputWorkspace='inputws', DataLinearAdj='linadj', DataConstAdj='constadj',A=0.001)
-    
+
    print("Reconstruction at 05 of first spectrum: {:.3f}".format(data.readY(0)[5]))
    print("Reconstruction at 10 of first spectrum: {:.3f}".format(data.readY(0)[10]))
    print("Reconstruction at 15 of first spectrum: {:.3f}".format(data.readY(0)[15]))
@@ -622,7 +622,7 @@ These usage examples merely demonstrate how to use the adjustments and are not r
 Output:
 
 .. testoutput:: ExAdjustment
-   
+
    Reconstruction at 05 of first spectrum: 0.657
    Reconstruction at 10 of first spectrum: 0.433
    Reconstruction at 15 of first spectrum: 0.115
@@ -632,14 +632,14 @@ Output:
    Number of iterations of first spectrum: 5
    Number of iterations of second spectrum: 37
    Number of iterations of third spectrum: 70
-   
+
 .. figure:: ../images/MaxEntAdjust.png
    :align: center
-   
+
    The first plot shows the reconstructed data and the second plot the corresponding image.
    The first three spectra plotted are the real parts of the 3 spectra
    and the other three spectra are the imaginary parts.
-   
+
 This can also be done with the spectra of the data effectively concatenated and converted into a single image.
 The reconstructed data is then obtained by converting the image back to data, copying for each spectrum and applying the adjustments.
 
@@ -664,7 +664,7 @@ This is done by setting the *PerSpectrumImage* property to *false*.
         X.append(x)
         Y.append(cos(w*x)+(random()-0.5)*0.3)
         E.append(0.27)
-     
+
    for s in range(0,3):
       # Imaginary values
       for i in range(0,N):
@@ -722,7 +722,7 @@ This is done by setting the *PerSpectrumImage* property to *false*.
    print("Reconstruction at 05 of third spectrum: {:.3f}".format(data.readY(2)[5]))
    print("Reconstruction at 10 of third spectrum: {:.3f}".format(data.readY(2)[10]))
    print("Reconstruction at 15 of third spectrum: {:.3f}".format(data.readY(2)[15]))
-   
+
 Output:
 
 .. testoutput:: ExAdjustmentTogether
@@ -733,10 +733,10 @@ Output:
    Reconstruction at 05 of third spectrum: 0.687
    Reconstruction at 10 of third spectrum: 0.481
    Reconstruction at 15 of third spectrum: 0.163
-     
+
 .. figure:: ../images/MaxEntAdjustTogether.png
    :align: center
-   
+
    The first plot shows the reconstructed data and the second plot the corresponding image.
    In the data, the first three spectra plotted are the real parts of the 3 spectra
    and the other three spectra are the imaginary parts.

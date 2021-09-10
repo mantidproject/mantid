@@ -1,7 +1,7 @@
 .. _04_algorithm_histories:
 
 ===================
-Algorithm Histories 
+Algorithm Histories
 ===================
 
 Algorithm History
@@ -13,7 +13,7 @@ it also provides the means to extract a re-executable python script from
 the GUI.
 
 #. Right click on the Workspace *Rebin300* and select 'Show History'. This will
-   open up the Algorithm History window. In the list of Algorithms, 
+   open up the Algorithm History window. In the list of Algorithms,
    click on Rebin v.1 and you should see the following:
 
 .. figure:: /images/HistoryRebinOfHYS_11388_event.png

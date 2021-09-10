@@ -31,9 +31,7 @@ public:
   /// Algorithm's name
   const std::string name() const override { return "ConvolveWorkspaces"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Convolution of two workspaces.";
-  }
+  const std::string summary() const override { return "Convolution of two workspaces."; }
 
   /// Algorithm's version
   int version() const override { return (1); }
@@ -45,8 +43,7 @@ private:
   void init() override;
   /// Execution code
   void exec() override;
-  void convolve(MantidVec &xValues, const MantidVec &Y1, const MantidVec &Y2,
-                MantidVec &out) const;
+  void convolve(MantidVec &xValues, const MantidVec &Y1, const MantidVec &Y2, MantidVec &out) const;
   std::unique_ptr<API::Progress> m_progress = nullptr;
 };
 

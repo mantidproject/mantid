@@ -52,29 +52,22 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return (1); }
-  const std::vector<std::string> seeAlso() const override {
-    return {"IntegrateByComponent", "Rebin"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"IntegrateByComponent", "Rebin"}; }
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "Arithmetic;Transforms\\Rebin";
-  }
+  const std::string category() const override { return "Arithmetic;Transforms\\Rebin"; }
 
 private:
   // Overridden Algorithm methods
   void init() override;
   void exec() override;
 
-  API::MatrixWorkspace_sptr
-  rangeFilterEventWorkspace(const API::MatrixWorkspace_sptr &workspace,
-                            double minRange, double maxRange);
+  API::MatrixWorkspace_sptr rangeFilterEventWorkspace(const API::MatrixWorkspace_sptr &workspace, double minRange,
+                                                      double maxRange);
 
   /// Get the input workspace
   API::MatrixWorkspace_sptr getInputWorkspace();
   /// Create the outputworkspace
-  API::MatrixWorkspace_sptr getOutputWorkspace(API::MatrixWorkspace_sptr inWS,
-                                               const int minSpec,
-                                               const int maxSpec);
+  API::MatrixWorkspace_sptr getOutputWorkspace(API::MatrixWorkspace_sptr inWS, const int minSpec, const int maxSpec);
   std::map<std::string, std::string> validateInputs() override;
 };
 

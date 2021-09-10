@@ -29,9 +29,7 @@ DECLARE_ALGORITHM(HyspecScharpfCorrection)
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string HyspecScharpfCorrection::name() const {
-  return "HyspecScharpfCorrection";
-}
+const std::string HyspecScharpfCorrection::name() const { return "HyspecScharpfCorrection"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int HyspecScharpfCorrection::version() const { return 1; }
@@ -54,28 +52,24 @@ void HyspecScharpfCorrection::init() {
   auto wsValidator = std::make_shared<Mantid::Kernel::CompositeValidator>();
   wsValidator->add<Mantid::API::WorkspaceUnitValidator>("DeltaE");
   wsValidator->add<Mantid::API::InstrumentValidator>();
-  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input, wsValidator),
-                  "An input workspace in units of energy transfer.");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>("InputWorkspace", "", Direction::Input, wsValidator),
+      "An input workspace in units of energy transfer.");
 
-  auto angleValidator =
-      std::make_shared<Mantid::Kernel::BoundedValidator<double>>();
+  auto angleValidator = std::make_shared<Mantid::Kernel::BoundedValidator<double>>();
   angleValidator->setLower(-180.0);
   angleValidator->setUpper(180.0);
   declareProperty("PolarizationAngle", EMPTY_DBL(), angleValidator,
                   "In plane angle between polatrization and incident beam"
                   "Must be between -180 and +180 degrees");
-  auto precisionValidator =
-      std::make_shared<Mantid::Kernel::BoundedValidator<double>>();
+  auto precisionValidator = std::make_shared<Mantid::Kernel::BoundedValidator<double>>();
   precisionValidator->setLower(0.0);
   precisionValidator->setUpper(1.0);
-  declareProperty(
-      "Precision", 0.1, precisionValidator,
-      "If cosine of twice the "
-      "Scharpf angle is closer to 0 than the precision, the intensities "
-      "and errors will be set to 0");
-  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty("Precision", 0.1, precisionValidator,
+                  "If cosine of twice the "
+                  "Scharpf angle is closer to 0 than the precision, the intensities "
+                  "and errors will be set to 0");
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
 
@@ -92,13 +86,11 @@ void HyspecScharpfCorrection::exec() {
   if (m_inputWS->run().hasProperty("Ei")) {
     m_Ei = m_inputWS->run().getPropertyValueAsType<double>("Ei");
   } else {
-    throw std::invalid_argument(
-        "No Ei value has been set or stored within the run information.");
+    throw std::invalid_argument("No Ei value has been set or stored within the run information.");
   }
 
   // Check if it is an event workspace
-  if (dynamic_cast<const Mantid::DataObjects::EventWorkspace *>(
-          m_inputWS.get()) != nullptr) {
+  if (dynamic_cast<const Mantid::DataObjects::EventWorkspace *>(m_inputWS.get()) != nullptr) {
     this->execEvent();
     return;
   }
@@ -112,8 +104,7 @@ void HyspecScharpfCorrection::exec() {
   const auto &spectrumInfo = m_inputWS->spectrumInfo();
 
   // Get number of spectra in this workspace
-  const auto numberOfSpectra =
-      static_cast<int64_t>(m_inputWS->getNumberHistograms());
+  const auto numberOfSpectra = static_cast<int64_t>(m_inputWS->getNumberHistograms());
   Mantid::Kernel::V3D samplePos = spectrumInfo.samplePosition();
   const auto refFrame = m_inputWS->getInstrument()->getReferenceFrame();
   API::Progress prog(this, 0.0, 1.0, numberOfSpectra);
@@ -131,15 +122,13 @@ void HyspecScharpfCorrection::exec() {
 
     prog.report();
     // continue if no detectors, if monitor, or is masked
-    if ((!spectrumInfo.hasDetectors(i)) || spectrumInfo.isMonitor(i) ||
-        spectrumInfo.isMasked(i)) {
+    if ((!spectrumInfo.hasDetectors(i)) || spectrumInfo.isMonitor(i) || spectrumInfo.isMasked(i)) {
       continue;
     }
     // get detector info and calculate the in plane angle
     Mantid::Kernel::V3D detPos = spectrumInfo.position(i);
     const auto l2 = detPos - samplePos;
-    const double thPlane = std::atan2(l2[refFrame->pointingHorizontal()],
-                                      l2[refFrame->pointingAlongBeam()]);
+    const double thPlane = std::atan2(l2[refFrame->pointingHorizontal()], l2[refFrame->pointingAlongBeam()]);
     size_t spectrumSize = xIn.size();
     for (size_t j = 0; j < spectrumSize; ++j) {
       double factor = 0.;
@@ -169,14 +158,12 @@ void HyspecScharpfCorrection::execEvent() {
   }
 
   Mantid::DataObjects::EventWorkspace_sptr eventWS =
-      std::dynamic_pointer_cast<Mantid::DataObjects::EventWorkspace>(
-          m_outputWS);
+      std::dynamic_pointer_cast<Mantid::DataObjects::EventWorkspace>(m_outputWS);
 
   const auto &spectrumInfo = m_inputWS->spectrumInfo();
 
   // Get number of spectra in this workspace
-  const auto numberOfSpectra =
-      static_cast<int64_t>(m_inputWS->getNumberHistograms());
+  const auto numberOfSpectra = static_cast<int64_t>(m_inputWS->getNumberHistograms());
   Mantid::Kernel::V3D samplePos = spectrumInfo.samplePosition();
   const auto refFrame = m_inputWS->getInstrument()->getReferenceFrame();
   API::Progress prog(this, 0.0, 1.0, numberOfSpectra);
@@ -185,14 +172,12 @@ void HyspecScharpfCorrection::execEvent() {
     PARALLEL_START_INTERUPT_REGION
     prog.report();
     // continue if no detectors, if monitor, or is masked
-    if ((!spectrumInfo.hasDetectors(i)) || spectrumInfo.isMonitor(i) ||
-        spectrumInfo.isMasked(i)) {
+    if ((!spectrumInfo.hasDetectors(i)) || spectrumInfo.isMonitor(i) || spectrumInfo.isMasked(i)) {
       continue;
     }
     Mantid::Kernel::V3D detPos = spectrumInfo.position(i);
     const auto l2 = detPos - samplePos;
-    const double thPlane = std::atan2(l2[refFrame->pointingHorizontal()],
-                                      l2[refFrame->pointingAlongBeam()]);
+    const double thPlane = std::atan2(l2[refFrame->pointingHorizontal()], l2[refFrame->pointingAlongBeam()]);
     // Do the correction
     auto &evlist = eventWS->getSpectrum(i);
     switch (evlist.getEventType()) {
@@ -215,9 +200,7 @@ void HyspecScharpfCorrection::execEvent() {
   PARALLEL_CHECK_INTERUPT_REGION
 }
 
-template <class T>
-void HyspecScharpfCorrection::ScharpfEventHelper(std::vector<T> &wevector,
-                                                 double thPlane) {
+template <class T> void HyspecScharpfCorrection::ScharpfEventHelper(std::vector<T> &wevector, double thPlane) {
   for (auto it = wevector.begin(); it < wevector.end();) {
     double Ef = m_Ei - it->tof();
     if (Ef <= 0) {
@@ -234,11 +217,9 @@ void HyspecScharpfCorrection::ScharpfEventHelper(std::vector<T> &wevector,
   }
 }
 
-float HyspecScharpfCorrection::calculateFactor(const double kfki,
-                                               const double thPlane) {
+float HyspecScharpfCorrection::calculateFactor(const double kfki, const double thPlane) {
   // angle between in plane Q and z axis
-  const double angleQ =
-      std::atan2(-kfki * std::sin(thPlane), 1. - kfki * std::cos(thPlane));
+  const double angleQ = std::atan2(-kfki * std::sin(thPlane), 1. - kfki * std::cos(thPlane));
   // Scarpf agle = angle - angleQ
   auto factor = static_cast<float>(std::cos(2. * (m_angle - angleQ)));
   // set intensity to 0 if the Scarpf angle is close to 45 degrees

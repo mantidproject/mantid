@@ -26,11 +26,11 @@ The following example script loads a data file obtained at the FOCUS instrument 
 
     # Load FOCUS data
     focus_2906 = LoadSINQFocus('focus2014n002906.hdf')
-    
+
     # Print out some information
     print("Sample title: {}".format(focus_2906.getTitle()))
     print("Number of spectra: {}".format(focus_2906.getNumberHistograms()))
-    
+
 Output:
 
 .. testoutput:: ExFocus
@@ -45,7 +45,7 @@ Creating a color fill plot of the resulting workspace should result in an image 
    :figwidth: 15 cm
    :align: center
    :alt: FOCUS data of water at 320 K.
-   
+
    FOCUS data of water at 320 K.
 
 .. categories::

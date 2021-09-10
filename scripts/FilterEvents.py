@@ -12,7 +12,13 @@ from FilterEvents import eventFilterGUI  # noqa
 
 app, within_mantid = get_qapplication()
 
-reducer = eventFilterGUI.MainWindow() #the main ui class in this file is called MainWindow
+if 'workbench' in sys.modules:
+    from workbench.config import get_window_config
+
+    parent, flags = get_window_config()
+else:
+    parent, flags = None, None
+reducer = eventFilterGUI.MainWindow(parent, flags) #the main ui class in this file is called MainWindow
 reducer.show()
 if not within_mantid:
     sys.exit(app.exec_())

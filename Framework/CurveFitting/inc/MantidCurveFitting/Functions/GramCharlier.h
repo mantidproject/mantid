@@ -17,8 +17,7 @@ namespace Functions {
 /**
   Implements a Gram-Charlier A series expansion.
 */
-class MANTID_CURVEFITTING_DLL GramCharlier : public API::ParamFunction,
-                                             public API::IFunction1D {
+class MANTID_CURVEFITTING_DLL GramCharlier : public API::ParamFunction, public API::IFunction1D {
 protected:
   /// overwrite IFunction base class method, which declare function parameters
   void init() override;

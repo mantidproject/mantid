@@ -115,7 +115,7 @@ The following parameters may also be optionally set:
 
 - :ref:`file_ext_pearl_isis-powder-diffraction-ref`
 - :ref:`suffix_pearl_isis-powder-diffraction-ref`
-  
+
 Example
 =======
 
@@ -150,8 +150,8 @@ Example
 
   # Notice how the filename ends with .yaml
   cal_mapping_file = r"C:\path\to\cal_mapping.yaml"
-  
-  pearl_example.create_cal(run_number=95671, 
+
+  pearl_example.create_cal(run_number=95671,
                            tt_mode="tt70",
                            long_mode=True,
                            calibration_mapping_file=cal_mapping_file)
@@ -344,6 +344,17 @@ Example Input:
   # Notice the filename always ends in .yaml
   pearl_example = Pearl(config_file=r"C:\path\to\file\configuration.yaml", ...)
 
+.. _custom_grouping_filename_pearl_isis-powder-diffraction-ref:
+
+custom_grouping_filename
+^^^^^^^^^^^^^^^^^^^^^^^^
+The name of a custom grouping cal file to use. The file needs to be located
+within top level of the :ref:`calibration_directory_pearl_isis-powder-diffraction-ref`
+
+..  code-block:: python
+
+  custom_grouping_filename: "DAC_group.cal"
+
 .. _do_absorb_corrections_pearl_isis-powder-diffraction-ref:
 
 do_absorb_corrections
@@ -459,7 +470,7 @@ When *long_mode* is **False** the TOF window processed is
 between 0-20,000 μs
 
 When *long_mode* is **True** the TOF window processed is
-between 0-40,000 μs
+between 20,000-40,000 μs
 
 This also affects the :ref:`advanced_parameters_pearl_isis-powder-diffraction-ref`
 used. More detail can be found for each individual parameter
@@ -604,12 +615,15 @@ see the following:
 - :ref:`tt35_grouping_filename_pearl_isis-powder-diffraction-ref`
 - :ref:`tt70_grouping_filename_pearl_isis-powder-diffraction-ref`
 - :ref:`tt88_grouping_filename_pearl_isis-powder-diffraction-ref`
+- :ref:`custom_grouping_filename_pearl_isis-powder-diffraction-ref`
 
-Accepted values are: **tt35**, **tt70** and **tt80**
+Accepted values are: **tt35**, **tt70**, **tt80** and custom
 
 When calling :ref:`create_vanadium_pearl_isis-powder-diffraction-ref`
-**all** can be used to implicitly process all of the supported
+**all** can be used to implicitly process all of the ttXX
 values indicated above.
+
+When the custom tt_mode is used a focus mode of "Mods" is always used
 
 Example Input:
 
@@ -684,11 +698,11 @@ set to the following:
 
   # Long mode OFF:
         create_cal_rebin_1_params: "100,-0.0006,19950"
-	
+
   # Long mode ON:
         create_cal_rebin_1_params: "20300,-0.0006,39990"
 
-	
+
 .. _create_cal_rebin_2_params_pearl_isis-powder-diffraction-ref:
 
 create_cal_rebin_2_params
@@ -715,7 +729,7 @@ set to the following:
 
   cross_corr_reference_spectra: 20
 
-  
+
 .. _cross_corr_ws_index_max_pearl_isis-powder-diffraction-ref:
 
 cross_corr_ws_index_max
@@ -729,7 +743,7 @@ set to the following:
 
   cross_corr_ws_index_max: 1063
 
-  
+
 .. _cross_corr_ws_index_min_pearl_isis-powder-diffraction-ref:
 
 cross_corr_ws_index_min
@@ -743,7 +757,7 @@ set to the following:
 
   cross_corr_ws_index_min: 9
 
-  
+
 .. _cros_cor_x_max_pearl_isis-powder-diffraction-ref:
 
 cross_cor_x_max
@@ -769,6 +783,29 @@ set to the following:
 
   cross_corr_x_min: 1.8
 
+.. _custom_focused_bin_widths_pearl_isis-powder-diffraction-ref:
+
+custom_focused_bin_widths
+^^^^^^^^^^^^^^^^^^^^^^^^^
+The dt-upon-t binning for the focused data when using tt_mode=custom
+
+On PEARL this is set to -0.0006 for all banks in the custom grouping file
+
+.. _custom_focused_cropping_values_pearl_isis-powder-diffraction-ref:
+
+custom_focused_cropping_values
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Indicates a list of TOF values to crop the focused workspace
+which was created by :ref:`focus_pearl_isis-powder-diffraction-ref`
+on a bank by bank basis when using tt_mode=custom
+
+.. _focused_bin_widths_pearl_isis-powder-diffraction-ref:
+
+focused_bin_widths
+^^^^^^^^^^^^^^^^^^
+The dt-upon-t binning for the focused data.
+
+On PEARL this is set to -0.0006 for all 14 banks
 
 .. _focused_cropping_values_pearl_isis-powder-diffraction-ref:
 
@@ -879,7 +916,7 @@ is set to the following:
 
   get_det_offsets_x_max: -200
 
-  
+
 .. _get_det_offsets_x_min_pearl_isis-powder-diffraction-ref:
 
 get_det_offsets_x_min
@@ -891,7 +928,7 @@ is set to the following:
 .. code-block:: python
 
   get_det_offsets_x_min: -200
-		
+
 
 .. _monitor_lambda_crop_range_pearl_isis-powder-diffraction-ref:
 
@@ -952,7 +989,7 @@ On PEARL this is set to the following:
 
   monitor_mask_regions: [[3.45, 2.96, 2.1,  1.73],
                          [3.7,  3.2,  2.26, 1.98]]
-					
+
 .. _monitor_spectrum_number_pearl_isis-powder-diffraction-ref:
 
 monitor_spectrum_number
@@ -1028,7 +1065,7 @@ On PEARL this is set to the following:
 
   # Long mode OFF:
     spline_coefficient: 60
-    
+
   # Long mode ON:
     spline_coefficient: 5
 

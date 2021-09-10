@@ -37,27 +37,21 @@ namespace {
  * @param binning : binning
  * @return : true if binning is empty
  */
-bool emptyBinning(const std::vector<double> &binning) {
-  return binning.empty();
-}
+bool emptyBinning(const std::vector<double> &binning) { return binning.empty(); }
 
 /**
  * Check for integration binning
  * @param binning : binning
  * @return : true if binning is min, max integration style
  */
-bool integrationBinning(const std::vector<double> &binning) {
-  return binning.size() == 2 && binning[0] < binning[1];
-}
+bool integrationBinning(const std::vector<double> &binning) { return binning.size() == 2 && binning[0] < binning[1]; }
 
 /**
  * Check for similar binning
  * @param binning : binning
  * @return : true if binning similar, with limits but same bin width
  */
-bool similarBinning(const std::vector<double> &binning) {
-  return binning.size() == 3 && binning[1] == 0.0;
-}
+bool similarBinning(const std::vector<double> &binning) { return binning.size() == 3 && binning[1] == 0.0; }
 
 /**
  * Determine whether the binning provided is any good.
@@ -98,8 +92,7 @@ std::string checkBinning(const std::vector<double> &binning) {
  * @param position: a position
  * @returns: a precision corrected position or the original position
  */
-Mantid::coord_t getPrecisionCorrectedCoordinate(Mantid::coord_t position,
-                                                Mantid::coord_t binWidth) {
+Mantid::coord_t getPrecisionCorrectedCoordinate(Mantid::coord_t position, Mantid::coord_t binWidth) {
   // Find the closest integer value
   const auto up = std::ceil(position);
   const auto down = std::floor(position);
@@ -125,8 +118,7 @@ Mantid::coord_t getPrecisionCorrectedCoordinate(Mantid::coord_t position,
  * @param dimension: the dimension information
  * @param logger: a logger object
  */
-void setMinMaxBins(Mantid::coord_t &pMin, Mantid::coord_t &pMax,
-                   size_t &numberOfBins,
+void setMinMaxBins(Mantid::coord_t &pMin, Mantid::coord_t &pMax, size_t &numberOfBins,
                    const IMDDimension_const_sptr &dimension, Logger &logger) {
   // Get workspace extents
   const Mantid::coord_t width = dimension->getBinWidth();
@@ -156,8 +148,7 @@ void setMinMaxBins(Mantid::coord_t &pMin, Mantid::coord_t &pMax,
     snappedPMin = dimension->getMinimum();
   } else if (pMin != snappedPMin) {
     std::stringstream buffer;
-    buffer << "Rounding min from: " << pMin
-           << " to the nearest whole width at: " << snappedPMin;
+    buffer << "Rounding min from: " << pMin << " to the nearest whole width at: " << snappedPMin;
     logger.warning(buffer.str());
   }
 
@@ -165,8 +156,7 @@ void setMinMaxBins(Mantid::coord_t &pMin, Mantid::coord_t &pMax,
     snappedPMax = dimension->getMaximum();
   } else if (pMax != snappedPMax) {
     std::stringstream buffer;
-    buffer << "Rounding max from: " << pMax
-           << " to the nearest whole width at: " << snappedPMax;
+    buffer << "Rounding max from: " << pMax << " to the nearest whole width at: " << snappedPMax;
     logger.warning(buffer.str());
   }
 
@@ -174,8 +164,7 @@ void setMinMaxBins(Mantid::coord_t &pMin, Mantid::coord_t &pMax,
   pMax = snappedPMax;
 
   // Bins
-  numberOfBins =
-      std::lround((pMax - pMin) / width); // round up to a whole number of bins.
+  numberOfBins = std::lround((pMax - pMin) / width); // round up to a whole number of bins.
 }
 } // namespace
 
@@ -186,8 +175,7 @@ void setMinMaxBins(Mantid::coord_t &pMin, Mantid::coord_t &pMax,
  * @param logger : Logging object
  * @return
  */
-MDHistoWorkspace_sptr createShapedOutput(IMDHistoWorkspace const *const inWS,
-                                         std::vector<std::vector<double>> pbins,
+MDHistoWorkspace_sptr createShapedOutput(IMDHistoWorkspace const *const inWS, std::vector<std::vector<double>> pbins,
                                          Logger &logger) {
   const size_t nDims = inWS->getNumDims();
   std::vector<Mantid::Geometry::IMDDimension_sptr> dimensions(nDims);
@@ -198,11 +186,8 @@ MDHistoWorkspace_sptr createShapedOutput(IMDHistoWorkspace const *const inWS,
     // Apply dimensions as inputs.
     if (i < pbins.size() && integrationBinning(pbins[i])) {
       auto binning = pbins[i];
-      outDim->setRange(
-          1 /*single bin*/,
-          static_cast<Mantid::coord_t>(binning.front()) /*min*/,
-          static_cast<Mantid::coord_t>(
-              binning.back()) /*max*/); // Set custom min, max and nbins.
+      outDim->setRange(1 /*single bin*/, static_cast<Mantid::coord_t>(binning.front()) /*min*/,
+                       static_cast<Mantid::coord_t>(binning.back()) /*max*/); // Set custom min, max and nbins.
     } else if (i < pbins.size() && similarBinning(pbins[i])) {
       auto binning = pbins[i];
 
@@ -213,8 +198,7 @@ MDHistoWorkspace_sptr createShapedOutput(IMDHistoWorkspace const *const inWS,
       setMinMaxBins(pMin, pMax, numberOfBins, inDim, logger);
 
       outDim->setRange(numberOfBins, static_cast<Mantid::coord_t>(pMin) /*min*/,
-                       static_cast<Mantid::coord_t>(
-                           pMax) /*max*/); // Set custom min, max and nbins.
+                       static_cast<Mantid::coord_t>(pMax) /*max*/); // Set custom min, max and nbins.
     }
     dimensions[i] = outDim;
   }
@@ -230,8 +214,7 @@ MDHistoWorkspace_sptr createShapedOutput(IMDHistoWorkspace const *const inWS,
  * @param sumSQErrors : Accumulation error in/out ref. Squared value.
  * @param sumNEvents : Accumulation n_event in/out ref.
  */
-void performWeightedSum(MDHistoWorkspaceIterator const *const iterator,
-                        MDBoxImplicitFunction &box, double &sumSignal,
+void performWeightedSum(MDHistoWorkspaceIterator const *const iterator, MDBoxImplicitFunction &box, double &sumSignal,
                         double &sumSQErrors, double &sumNEvents) {
   if (!iterator->getIsMasked()) {
     const double weight = box.fraction(iterator->getBoxExtents());
@@ -256,17 +239,13 @@ DECLARE_ALGORITHM(IntegrateMDHistoWorkspace)
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string IntegrateMDHistoWorkspace::name() const {
-  return "IntegrateMDHistoWorkspace";
-}
+const std::string IntegrateMDHistoWorkspace::name() const { return "IntegrateMDHistoWorkspace"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int IntegrateMDHistoWorkspace::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string IntegrateMDHistoWorkspace::category() const {
-  return "MDAlgorithms\\Slicing";
-}
+const std::string IntegrateMDHistoWorkspace::category() const { return "MDAlgorithms\\Slicing"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string IntegrateMDHistoWorkspace::summary() const {
@@ -277,29 +256,17 @@ const std::string IntegrateMDHistoWorkspace::summary() const {
 /** Initialize the algorithm's properties.
  */
 void IntegrateMDHistoWorkspace::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>("InputWorkspace", "", Direction::Input),
                   "An input workspace.");
 
   const std::vector<double> defaultBinning;
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>("P1Bin", defaultBinning),
-      "Projection 1 binning.");
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>("P2Bin", defaultBinning),
-      "Projection 2 binning.");
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>("P3Bin", defaultBinning),
-      "Projection 3 binning.");
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>("P4Bin", defaultBinning),
-      "Projection 4 binning.");
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>("P5Bin", defaultBinning),
-      "Projection 5 binning.");
+  declareProperty(std::make_unique<ArrayProperty<double>>("P1Bin", defaultBinning), "Projection 1 binning.");
+  declareProperty(std::make_unique<ArrayProperty<double>>("P2Bin", defaultBinning), "Projection 2 binning.");
+  declareProperty(std::make_unique<ArrayProperty<double>>("P3Bin", defaultBinning), "Projection 3 binning.");
+  declareProperty(std::make_unique<ArrayProperty<double>>("P4Bin", defaultBinning), "Projection 4 binning.");
+  declareProperty(std::make_unique<ArrayProperty<double>>("P5Bin", defaultBinning), "Projection 5 binning.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
 
@@ -316,13 +283,11 @@ void IntegrateMDHistoWorkspace::exec() {
   pbins[3] = this->getProperty("P4Bin");
   pbins[4] = this->getProperty("P5Bin");
 
-  const size_t emptyCount =
-      std::count_if(pbins.begin(), pbins.end(), emptyBinning);
+  const size_t emptyCount = std::count_if(pbins.begin(), pbins.end(), emptyBinning);
   if (emptyCount == pbins.size()) {
     // No work to do.
     g_log.information(this->name() + " Direct clone of input.");
-    this->setProperty("OutputWorkspace",
-                      std::shared_ptr<IMDHistoWorkspace>(inWS->clone()));
+    this->setProperty("OutputWorkspace", std::shared_ptr<IMDHistoWorkspace>(inWS->clone()));
   } else {
 
     /* Create the output workspace in the right shape. This allows us to iterate
@@ -348,9 +313,7 @@ void IntegrateMDHistoWorkspace::exec() {
          For example, 8/4 = 2, but thats only 1 pixel on each side of the
          center, we need 2 * that to give the correct answer of 4.
       */
-      widthVector[i] =
-          2 * static_cast<int>(std::ceil(binWidthsOut[i] /
-                                         inWS->getDimension(i)->getBinWidth()));
+      widthVector[i] = 2 * static_cast<int>(std::ceil(binWidthsOut[i] / inWS->getDimension(i)->getBinWidth()));
 
       if (widthVector[i] % 2 == 0) {
         widthVector[i] += 1; // make it odd if not already.
@@ -358,19 +321,16 @@ void IntegrateMDHistoWorkspace::exec() {
     }
 
     // Outer loop over the output workspace iterator poistions.
-    const int nThreads = Mantid::API::FrameworkManager::Instance()
-                             .getNumOMPThreads(); // NThreads to Request
+    const int nThreads = Mantid::API::FrameworkManager::Instance().getNumOMPThreads(); // NThreads to Request
 
     auto outIterators = outWS->createIterators(nThreads, nullptr);
 
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int i = 0; i < int(outIterators.size()); ++i) { // NOLINT
       PARALLEL_START_INTERUPT_REGION
-      auto outIterator =
-          dynamic_cast<MDHistoWorkspaceIterator *>(outIterators[i].get());
+      auto outIterator = dynamic_cast<MDHistoWorkspaceIterator *>(outIterators[i].get());
       if (!outIterator) {
-        throw std::logic_error(
-            "Failed to cast iterator to MDHistoWorkspaceIterator");
+        throw std::logic_error("Failed to cast iterator to MDHistoWorkspaceIterator");
       }
 
       do {
@@ -394,11 +354,9 @@ void IntegrateMDHistoWorkspace::exec() {
         // Create a thread-local input iterator.
 
         auto iterator = inWS->createIterator();
-        auto inIterator =
-            dynamic_cast<MDHistoWorkspaceIterator *>(iterator.get());
+        auto inIterator = dynamic_cast<MDHistoWorkspaceIterator *>(iterator.get());
         if (!inIterator) {
-          throw std::runtime_error(
-              "Could not convert IMDIterator to a MDHistoWorkspaceIterator");
+          throw std::runtime_error("Could not convert IMDIterator to a MDHistoWorkspaceIterator");
         }
 
         /*
@@ -414,12 +372,10 @@ void IntegrateMDHistoWorkspace::exec() {
                                         // below exclude the current position.
         // Look at all of the neighbours of our position. We previously
         // calculated what the width vector would need to be.
-        auto neighbourIndexes =
-            inIterator->findNeighbourIndexesByWidth(widthVector);
+        auto neighbourIndexes = inIterator->findNeighbourIndexesByWidth(widthVector);
         for (auto neighbourIndex : neighbourIndexes) {
           inIterator->jumpTo(neighbourIndex); // Go to that neighbour
-          performWeightedSum(inIterator, box, sumSignal, sumSQErrors,
-                             sumNEvents);
+          performWeightedSum(inIterator, box, sumSignal, sumSQErrors, sumNEvents);
         }
 
         const size_t iteratorIndex = outIterator->getLinearIndex();
@@ -441,8 +397,7 @@ void IntegrateMDHistoWorkspace::exec() {
  * Overriden validate inputs
  * @return map of property names to problems for bad inputs
  */
-std::map<std::string, std::string>
-Mantid::MDAlgorithms::IntegrateMDHistoWorkspace::validateInputs() {
+std::map<std::string, std::string> Mantid::MDAlgorithms::IntegrateMDHistoWorkspace::validateInputs() {
   // Check binning parameters
   std::map<std::string, std::string> errors;
 

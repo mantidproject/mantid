@@ -30,9 +30,7 @@ public:
   /// Algorithm's version for identification
   int version() const override { return 1; }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "MDAlgorithms\\Utility\\Workspace";
-  }
+  const std::string category() const override { return "MDAlgorithms\\Utility\\Workspace"; }
 
 private:
   /// Initialise the properties
@@ -40,8 +38,7 @@ private:
   /// Run the algorithm
   void exec() override;
 
-  template <typename MDE, size_t nd>
-  void getBoxData(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
+  template <typename MDE, size_t nd> void getBoxData(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
 };
 
 } // namespace MDAlgorithms

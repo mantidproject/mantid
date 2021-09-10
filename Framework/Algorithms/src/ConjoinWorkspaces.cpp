@@ -26,20 +26,15 @@ DECLARE_ALGORITHM(ConjoinWorkspaces)
 //----------------------------------------------------------------------------------------------
 /** Initialize the properties */
 void ConjoinWorkspaces::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace1", "",
-                                                        Direction::InOut),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace1", "", Direction::InOut),
                   "The name of the first input workspace");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace2", "",
-                                                        Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace2", "", Direction::Input),
                   "The name of the second input workspace");
-  declareProperty(std::make_unique<PropertyWithValue<bool>>(
-                      "CheckOverlapping", true, Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("CheckOverlapping", true, Direction::Input),
                   "Verify that the supplied data do not overlap");
-  declareProperty(std::make_unique<PropertyWithValue<std::string>>(
-                      "YAxisLabel", "", Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>("YAxisLabel", "", Direction::Input),
                   "The label to set the Y axis to");
-  declareProperty(std::make_unique<PropertyWithValue<std::string>>(
-                      "YAxisUnit", "", Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>("YAxisUnit", "", Direction::Input),
                   "The unit to set the Y axis to");
 }
 
@@ -52,10 +47,8 @@ void ConjoinWorkspaces::exec() {
   // Retrieve the input workspaces
   MatrixWorkspace_const_sptr ws1 = getProperty("InputWorkspace1");
   MatrixWorkspace_const_sptr ws2 = getProperty("InputWorkspace2");
-  DataObjects::EventWorkspace_const_sptr eventWs1 =
-      std::dynamic_pointer_cast<const EventWorkspace>(ws1);
-  DataObjects::EventWorkspace_const_sptr eventWs2 =
-      std::dynamic_pointer_cast<const EventWorkspace>(ws2);
+  DataObjects::EventWorkspace_const_sptr eventWs1 = std::dynamic_pointer_cast<const EventWorkspace>(ws1);
+  DataObjects::EventWorkspace_const_sptr eventWs2 = std::dynamic_pointer_cast<const EventWorkspace>(ws2);
 
   // Make sure that we are not mis-matching EventWorkspaces and other types of
   // workspaces
@@ -94,8 +87,7 @@ void ConjoinWorkspaces::exec() {
  * (non-sensical for event workspaces)
  *  @throw std::invalid_argument If there is some overlap
  */
-void ConjoinWorkspaces::checkForOverlap(const MatrixWorkspace &ws1,
-                                        const MatrixWorkspace &ws2,
+void ConjoinWorkspaces::checkForOverlap(const MatrixWorkspace &ws1, const MatrixWorkspace &ws2,
                                         bool checkSpectra) const {
   // Loop through the first workspace adding all the spectrum numbers & UDETS to
   // a set
@@ -120,20 +112,15 @@ void ConjoinWorkspaces::checkForOverlap(const MatrixWorkspace &ws1,
     const specnum_t spectrum = spec.getSpectrumNo();
     if (checkSpectra) {
       if (spectrum > 0 && spectra.find(spectrum) != spectra.end()) {
-        g_log.error()
-            << "The input workspaces have overlapping spectrum numbers "
-            << spectrum << "\n";
-        throw std::invalid_argument(
-            "The input workspaces have overlapping spectrum numbers");
+        g_log.error() << "The input workspaces have overlapping spectrum numbers " << spectrum << "\n";
+        throw std::invalid_argument("The input workspaces have overlapping spectrum numbers");
       }
     }
     const auto &dets = spec.getDetectorIDs();
     for (const auto &det : dets) {
       if (detectors.find(det) != detectors.end()) {
-        g_log.error() << "The input workspaces have common detectors: " << (det)
-                      << "\n";
-        throw std::invalid_argument(
-            "The input workspaces have common detectors");
+        g_log.error() << "The input workspaces have common detectors: " << (det) << "\n";
+        throw std::invalid_argument("The input workspaces have common detectors");
       }
     }
   }
@@ -146,9 +133,8 @@ void ConjoinWorkspaces::checkForOverlap(const MatrixWorkspace &ws1,
  * @param ws2:: The second workspace
  * @return :: A new workspace containing the conjoined workspaces
  */
-API::MatrixWorkspace_sptr
-ConjoinWorkspaces::conjoinEvents(const DataObjects::EventWorkspace &ws1,
-                                 const DataObjects::EventWorkspace &ws2) {
+API::MatrixWorkspace_sptr ConjoinWorkspaces::conjoinEvents(const DataObjects::EventWorkspace &ws1,
+                                                           const DataObjects::EventWorkspace &ws2) {
   this->checkCompatibility(ws1, ws2);
 
   // Check there is no overlap
@@ -172,9 +158,8 @@ ConjoinWorkspaces::conjoinEvents(const DataObjects::EventWorkspace &ws1,
  * @param ws2:: The second workspace
  * @return :: A new workspace containing the conjoined workspaces
  */
-API::MatrixWorkspace_sptr
-ConjoinWorkspaces::conjoinHistograms(const API::MatrixWorkspace &ws1,
-                                     const API::MatrixWorkspace &ws2) {
+API::MatrixWorkspace_sptr ConjoinWorkspaces::conjoinHistograms(const API::MatrixWorkspace &ws1,
+                                                               const API::MatrixWorkspace &ws2) {
   // Check that the input workspaces meet the requirements for this algorithm
   this->checkCompatibility(ws1, ws2);
 
@@ -198,8 +183,7 @@ ConjoinWorkspaces::conjoinHistograms(const API::MatrixWorkspace &ws1,
  * @param ws2 The second workspace supplied to the algorithm.
  * @param output The workspace that is going to be returned by the algorithm.
  */
-void ConjoinWorkspaces::fixSpectrumNumbers(const MatrixWorkspace &ws1,
-                                           const MatrixWorkspace &ws2,
+void ConjoinWorkspaces::fixSpectrumNumbers(const MatrixWorkspace &ws1, const MatrixWorkspace &ws2,
                                            MatrixWorkspace &output) {
 
   if (this->getProperty("CheckOverlapping")) {
@@ -217,8 +201,7 @@ void ConjoinWorkspaces::fixSpectrumNumbers(const MatrixWorkspace &ws1,
   specnum_t min = -1;
   specnum_t max = -1;
   getMinMax(output, min, max);
-  if (max - min >= static_cast<specnum_t>(
-                       output.getNumberHistograms())) // nothing to do then
+  if (max - min >= static_cast<specnum_t>(output.getNumberHistograms())) // nothing to do then
     return;
 
   // information for remapping the spectra numbers
@@ -228,8 +211,7 @@ void ConjoinWorkspaces::fixSpectrumNumbers(const MatrixWorkspace &ws1,
 
   // change the axis by adding the maximum existing spectrum number to the
   // current value
-  for (size_t i = ws1.getNumberHistograms(); i < output.getNumberHistograms();
-       i++) {
+  for (size_t i = ws1.getNumberHistograms(); i < output.getNumberHistograms(); i++) {
     specnum_t origid = output.getSpectrum(i).getSpectrumNo();
     output.getSpectrum(i).setSpectrumNo(origid + ws1max);
   }

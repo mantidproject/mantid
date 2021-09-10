@@ -29,12 +29,11 @@ public:
   }
 
   void test_do_integration() {
-    IMDHistoWorkspace_sptr inWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(
-        1, 1, 6); // Makes a 1 by 6 md ws with identical signal values.
+    IMDHistoWorkspace_sptr inWS =
+        MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 1, 6); // Makes a 1 by 6 md ws with identical signal values.
     Cluster cluster(1);
     for (size_t i = 0; i < inWS->getNPoints(); ++i) {
-      cluster.addIndex(
-          i); // Register all indexes from the workspace to the cluster.
+      cluster.addIndex(i); // Register all indexes from the workspace to the cluster.
     }
     auto result = cluster.integrate(inWS);
     TS_ASSERT_EQUALS(6 * 1, result.get<0>());
@@ -65,12 +64,11 @@ public:
   }
 
   void test_integrate() {
-    IMDHistoWorkspace_sptr inWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(
-        1, 1, 6); // Makes a 1 by 6 md ws with identical signal values.
+    IMDHistoWorkspace_sptr inWS =
+        MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 1, 6); // Makes a 1 by 6 md ws with identical signal values.
     Cluster clusterA(1);
     for (size_t i = 0; i < inWS->getNPoints(); ++i) {
-      clusterA.addIndex(
-          i); // Register all indexes from the workspace to the cluster.
+      clusterA.addIndex(i); // Register all indexes from the workspace to the cluster.
     }
     auto resultA = clusterA.integrate(inWS);
     TS_ASSERT_EQUALS(6 * 1, resultA.get<0>());

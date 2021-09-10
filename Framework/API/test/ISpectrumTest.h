@@ -75,8 +75,7 @@ public:
     TS_ASSERT(s.hasDetectorID(60));
     s.addDetectorIDs(std::set<detid_t>());
     TS_ASSERT_EQUALS(s.getDetectorIDs().size(), 6);
-    s.addDetectorIDs(std::vector<detid_t>(
-        detids + 4, detids + 9)); // N.B. check unique elements
+    s.addDetectorIDs(std::vector<detid_t>(detids + 4, detids + 9)); // N.B. check unique elements
     TS_ASSERT_EQUALS(s.getDetectorIDs().size(), 9);
     TS_ASSERT(s.hasDetectorID(10));
     TS_ASSERT(s.hasDetectorID(70));
@@ -99,8 +98,7 @@ public:
 
     // setDX vesion 2
     SpectrumTester s4(Histogram::XMode::Points, Histogram::YMode::Counts);
-    auto Dx_vec_ptr_type =
-        std::make_shared<Mantid::HistogramData::HistogramDx>(0);
+    auto Dx_vec_ptr_type = std::make_shared<Mantid::HistogramData::HistogramDx>(0);
     s4.setSharedDx(Dx_vec_ptr_type);
     TS_ASSERT(s4.hasDx());
 

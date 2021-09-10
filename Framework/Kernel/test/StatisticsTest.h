@@ -45,8 +45,7 @@ public:
     data.emplace_back(12.6);
     sort(data.begin(), data.end());
 
-    Statistics stats =
-        getStatistics(data, (StatOptions::Median | StatOptions::SortedData));
+    Statistics stats = getStatistics(data, (StatOptions::Median | StatOptions::SortedData));
 
     TS_ASSERT(std::isnan(stats.mean));
     TS_ASSERT(std::isnan(stats.standard_deviation));
@@ -55,8 +54,7 @@ public:
     TS_ASSERT_EQUALS(stats.median, 17.2);
   }
 
-  void
-  test_Unsorted_Data_With_Sorted_Flag_Gives_Expected_Incorrect_Result_For_Median() {
+  void test_Unsorted_Data_With_Sorted_Flag_Gives_Expected_Incorrect_Result_For_Median() {
     vector<double> data;
     data.emplace_back(17.2);
     data.emplace_back(18.1);
@@ -64,8 +62,7 @@ public:
     data.emplace_back(18.3);
     data.emplace_back(12.6);
 
-    Statistics stats =
-        getStatistics(data, (StatOptions::Median | StatOptions::SortedData));
+    Statistics stats = getStatistics(data, (StatOptions::Median | StatOptions::SortedData));
 
     TS_ASSERT(std::isnan(stats.mean));
     TS_ASSERT(std::isnan(stats.standard_deviation));
@@ -282,8 +279,7 @@ public:
 
     // Now a gaussian function as a histogram
     y.clear();
-    for (size_t i = 0; i < numX - 1;
-         ++i) // one less y than x makes it a histogram
+    for (size_t i = 0; i < numX - 1; ++i) // one less y than x makes it a histogram
     {
       double templeft = (x[i] - mean) / sigma;
       templeft = exp(-.5 * templeft * templeft) / (sigma * sqrt(2. * M_PI));

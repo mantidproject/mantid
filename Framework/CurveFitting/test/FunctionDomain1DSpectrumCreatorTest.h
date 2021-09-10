@@ -22,16 +22,10 @@ class FunctionDomain1DSpectrumCreatorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static FunctionDomain1DSpectrumCreatorTest *createSuite() {
-    return new FunctionDomain1DSpectrumCreatorTest();
-  }
-  static void destroySuite(FunctionDomain1DSpectrumCreatorTest *suite) {
-    delete suite;
-  }
+  static FunctionDomain1DSpectrumCreatorTest *createSuite() { return new FunctionDomain1DSpectrumCreatorTest(); }
+  static void destroySuite(FunctionDomain1DSpectrumCreatorTest *suite) { delete suite; }
 
-  void testInstantiation() {
-    TS_ASSERT_THROWS_NOTHING(FunctionDomain1DSpectrumCreator creator;)
-  }
+  void testInstantiation() { TS_ASSERT_THROWS_NOTHING(FunctionDomain1DSpectrumCreator creator;) }
 
   void testDefaultConstructor() {
     TestableFunctionDomain1DSpectrumCreator creator;
@@ -42,8 +36,7 @@ public:
 
     FunctionDomain_sptr domain;
     FunctionValues_sptr values;
-    TS_ASSERT_THROWS(creator.createDomain(domain, values),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(creator.createDomain(domain, values), const std::invalid_argument &);
   }
 
   void testSetWorkspaceIndex() {
@@ -58,8 +51,7 @@ public:
   void testSetMatrixWorkspace() {
     TestableFunctionDomain1DSpectrumCreator creator;
 
-    MatrixWorkspace_sptr matrixWs =
-        WorkspaceCreationHelper::create2DWorkspace123(10, 15);
+    MatrixWorkspace_sptr matrixWs = WorkspaceCreationHelper::create2DWorkspace123(10, 15);
     creator.setMatrixWorkspace(matrixWs);
 
     TS_ASSERT_EQUALS(creator.m_matrixWorkspace->getNumberHistograms(), 10);
@@ -72,42 +64,35 @@ public:
     TestableFunctionDomain1DSpectrumCreator creator;
 
     // throws, because workspace and index are not set.
-    TS_ASSERT_THROWS(creator.throwIfWorkspaceInvalid(),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(creator.throwIfWorkspaceInvalid(), const std::invalid_argument &);
 
-    creator.setMatrixWorkspace(
-        WorkspaceCreationHelper::create2DWorkspace123(10, 15));
+    creator.setMatrixWorkspace(WorkspaceCreationHelper::create2DWorkspace123(10, 15));
     // still throws, since workspace index has not been set explicitly.
-    TS_ASSERT_THROWS(creator.throwIfWorkspaceInvalid(),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(creator.throwIfWorkspaceInvalid(), const std::invalid_argument &);
 
     creator.setWorkspaceIndex(4);
     TS_ASSERT_THROWS_NOTHING(creator.throwIfWorkspaceInvalid());
 
     creator.setWorkspaceIndex(34);
     // throws also, because index is invalid
-    TS_ASSERT_THROWS(creator.throwIfWorkspaceInvalid(),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(creator.throwIfWorkspaceInvalid(), const std::invalid_argument &);
   }
 
   void testGetDomainSize() {
     FunctionDomain1DSpectrumCreator creator;
-    creator.setMatrixWorkspace(
-        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 5, 0.0, 1.0));
+    creator.setMatrixWorkspace(WorkspaceCreationHelper::create2DWorkspaceBinned(1, 5, 0.0, 1.0));
     creator.setWorkspaceIndex(0);
 
     TS_ASSERT_EQUALS(creator.getDomainSize(), 5);
 
-    creator.setMatrixWorkspace(
-        WorkspaceCreationHelper::create2DWorkspace123(1, 15));
+    creator.setMatrixWorkspace(WorkspaceCreationHelper::create2DWorkspace123(1, 15));
 
     TS_ASSERT_EQUALS(creator.getDomainSize(), 15);
   }
 
   void testCreateDomain() {
     TestableFunctionDomain1DSpectrumCreator creator;
-    creator.setMatrixWorkspace(
-        WorkspaceCreationHelper::create2DWorkspace123(1, 5));
+    creator.setMatrixWorkspace(WorkspaceCreationHelper::create2DWorkspace123(1, 5));
     creator.setWorkspaceIndex(0);
 
     FunctionDomain_sptr domain;
@@ -118,8 +103,7 @@ public:
     TS_ASSERT(domain);
     TS_ASSERT(values);
 
-    std::shared_ptr<FunctionDomain1DSpectrum> spectrum =
-        std::dynamic_pointer_cast<FunctionDomain1DSpectrum>(domain);
+    std::shared_ptr<FunctionDomain1DSpectrum> spectrum = std::dynamic_pointer_cast<FunctionDomain1DSpectrum>(domain);
 
     TS_ASSERT(spectrum);
     TS_ASSERT_EQUALS(spectrum->getWorkspaceIndex(), 0);
@@ -127,13 +111,11 @@ public:
   }
 
 private:
-  class TestableFunctionDomain1DSpectrumCreator
-      : public FunctionDomain1DSpectrumCreator {
+  class TestableFunctionDomain1DSpectrumCreator : public FunctionDomain1DSpectrumCreator {
     friend class FunctionDomain1DSpectrumCreatorTest;
 
   public:
-    TestableFunctionDomain1DSpectrumCreator()
-        : FunctionDomain1DSpectrumCreator() {}
+    TestableFunctionDomain1DSpectrumCreator() : FunctionDomain1DSpectrumCreator() {}
     ~TestableFunctionDomain1DSpectrumCreator() override {}
   };
 };

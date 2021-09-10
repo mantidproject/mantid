@@ -53,28 +53,20 @@ private:
   };
   GNU_DIAG_ON_SUGGEST_OVERRIDE
   // Helper class. Builds mock implicit functions.
-  class MockImplicitFunctionBuilder
-      : public Mantid::API::ImplicitFunctionBuilder {
+  class MockImplicitFunctionBuilder : public Mantid::API::ImplicitFunctionBuilder {
   public:
-    Mantid::Geometry::MDImplicitFunction *create() const override {
-      return new MockImplicitFunction;
-    }
+    Mantid::Geometry::MDImplicitFunction *create() const override { return new MockImplicitFunction; }
   };
 
   // Helper class. Parses mock Implicit Functions.
-  class MockImplicitFunctionParser
-      : public Mantid::API::ImplicitFunctionParser {
+  class MockImplicitFunctionParser : public Mantid::API::ImplicitFunctionParser {
   public:
-    MockImplicitFunctionParser()
-        : Mantid::API::ImplicitFunctionParser(nullptr) {}
-    Mantid::API::ImplicitFunctionBuilder *
-    createFunctionBuilder(Poco::XML::Element * /*functionElement*/) override {
+    MockImplicitFunctionParser() : Mantid::API::ImplicitFunctionParser(nullptr) {}
+    Mantid::API::ImplicitFunctionBuilder *createFunctionBuilder(Poco::XML::Element * /*functionElement*/) override {
       return new MockImplicitFunctionBuilder;
     }
-    void setSuccessorParser(
-        Mantid::API::ImplicitFunctionParser * /*successor*/) override {}
-    void setParameterParser(
-        Mantid::API::ImplicitFunctionParameterParser * /*parser*/) override {}
+    void setSuccessorParser(Mantid::API::ImplicitFunctionParser * /*successor*/) override {}
+    void setParameterParser(Mantid::API::ImplicitFunctionParameterParser * /*parser*/) override {}
   };
   // helper ws creator
   Mantid::API::Workspace_sptr createSimple3DWorkspace() {
@@ -96,11 +88,10 @@ private:
 public:
   void testSetup() {
     using namespace Mantid::Kernel;
-    Mantid::API::ImplicitFunctionFactory::Instance()
-        .subscribe<testing::NiceMock<MockImplicitFunction>>(
-            "MockImplicitFunction");
-    Mantid::API::ImplicitFunctionParserFactory::Instance()
-        .subscribe<MockImplicitFunctionParser>("MockImplicitFunctionParser");
+    Mantid::API::ImplicitFunctionFactory::Instance().subscribe<testing::NiceMock<MockImplicitFunction>>(
+        "MockImplicitFunction");
+    Mantid::API::ImplicitFunctionParserFactory::Instance().subscribe<MockImplicitFunctionParser>(
+        "MockImplicitFunctionParser");
   }
 
   void test_Init() {
@@ -114,17 +105,13 @@ public:
    * @param expected_signal :: how many events in each resulting bin
    * @param expected_numBins :: how many points/bins in the output
    */
-  void do_test_exec(const std::string &functionXML, const std::string &name1,
-                    const std::string &name2, const std::string &name3,
-                    const std::string &name4, const double expected_signal,
-                    const size_t expected_numBins, bool IterateEvents = true,
-                    size_t numEventsPerBox = 1, VMD expectBasisX = VMD(1, 0, 0),
-                    VMD expectBasisY = VMD(0, 1, 0),
-                    VMD expectBasisZ = VMD(0, 0, 1)) {
+  void do_test_exec(const std::string &functionXML, const std::string &name1, const std::string &name2,
+                    const std::string &name3, const std::string &name4, const double expected_signal,
+                    const size_t expected_numBins, bool IterateEvents = true, size_t numEventsPerBox = 1,
+                    VMD expectBasisX = VMD(1, 0, 0), VMD expectBasisY = VMD(0, 1, 0), VMD expectBasisZ = VMD(0, 0, 1)) {
     Mantid::Geometry::QSample frame;
     IMDEventWorkspace_sptr in_ws =
-        MDEventsTestHelper::makeAnyMDEWWithFrames<MDLeanEvent<3>, 3>(
-            10, 0.0, 10.0, frame, numEventsPerBox);
+        MDEventsTestHelper::makeAnyMDEWWithFrames<MDLeanEvent<3>, 3>(10, 0.0, 10.0, frame, numEventsPerBox);
 
     auto eventNorm = Mantid::API::MDNormalization::VolumeNormalization;
     auto histoNorm = Mantid::API::MDNormalization::NumEventsNormalization;
@@ -132,42 +119,34 @@ public:
     in_ws->setDisplayNormalizationHisto(histoNorm);
     AnalysisDataService::Instance().addOrReplace("BinMDTest_ws", in_ws);
 
-    execute_bin(functionXML, name1, name2, name3, name4, expected_signal,
-                expected_numBins, IterateEvents, numEventsPerBox,
-                std::move(expectBasisX), std::move(expectBasisY),
-                std::move(expectBasisZ), in_ws);
+    execute_bin(functionXML, name1, name2, name3, name4, expected_signal, expected_numBins, IterateEvents,
+                numEventsPerBox, std::move(expectBasisX), std::move(expectBasisY), std::move(expectBasisZ), in_ws);
   }
 
-  MDHistoWorkspace_sptr
-  execute_bin(const std::string &functionXML, const std::string &name1,
-              const std::string &name2, const std::string &name3,
-              const std::string &name4, const double expected_signal,
-              const size_t expected_numBins, bool IterateEvents,
-              size_t numEventsPerBox, VMD expectBasisX, VMD expectBasisY,
-              VMD expectBasisZ, const IMDEventWorkspace_sptr &in_ws) {
+  MDHistoWorkspace_sptr execute_bin(const std::string &functionXML, const std::string &name1, const std::string &name2,
+                                    const std::string &name3, const std::string &name4, const double expected_signal,
+                                    const size_t expected_numBins, bool IterateEvents, size_t numEventsPerBox,
+                                    VMD expectBasisX, VMD expectBasisY, VMD expectBasisZ,
+                                    const IMDEventWorkspace_sptr &in_ws) {
     BinMD alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    Mantid::Kernel::SpecialCoordinateSystem appliedCoord =
-        Mantid::Kernel::QSample;
+    Mantid::Kernel::SpecialCoordinateSystem appliedCoord = Mantid::Kernel::QSample;
     auto histoNorm = Mantid::API::MDNormalization::NumEventsNormalization;
 
     // 1000 boxes with 1 event each
     TS_ASSERT_EQUALS(in_ws->getNPoints(), 1000 * numEventsPerBox);
 
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", "BinMDTest_ws"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "BinMDTest_ws"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDim0", name1));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDim1", name2));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDim2", name3));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDim3", name4));
     if (functionXML != "NO_FUNCTION") {
-      TS_ASSERT_THROWS_NOTHING(
-          alg.setPropertyValue("ImplicitFunctionXML", functionXML));
+      TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ImplicitFunctionXML", functionXML));
     }
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("IterateEvents", IterateEvents));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "BinMDTest_ws"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "BinMDTest_ws"));
 
     TS_ASSERT_THROWS_NOTHING(alg.execute();)
 
@@ -175,8 +154,7 @@ public:
 
     MDHistoWorkspace_sptr out;
     TS_ASSERT_THROWS_NOTHING(
-        out = std::dynamic_pointer_cast<MDHistoWorkspace>(
-            AnalysisDataService::Instance().retrieve("BinMDTest_ws"));)
+        out = std::dynamic_pointer_cast<MDHistoWorkspace>(AnalysisDataService::Instance().retrieve("BinMDTest_ws"));)
     TS_ASSERT(out);
     if (!out)
       return out;
@@ -211,10 +189,8 @@ public:
     CoordTransform const *ctFrom = out->getTransformFromOriginal();
     TS_ASSERT(ctFrom);
     // Experiment Infos were copied
-    TS_ASSERT_EQUALS(out->getNumExperimentInfo(),
-                     in_ws->getNumExperimentInfo());
-    TSM_ASSERT_EQUALS("Should have num events normalization",
-                      out->displayNormalization(), histoNorm);
+    TS_ASSERT_EQUALS(out->getNumExperimentInfo(), in_ws->getNumExperimentInfo());
+    TSM_ASSERT_EQUALS("Should have num events normalization", out->displayNormalization(), histoNorm);
     AnalysisDataService::Instance().remove("BinMDTest_ws");
 
     return out;
@@ -223,79 +199,64 @@ public:
   void test_exec_with_masked_ws() {
     Mantid::Geometry::QSample frame;
     IMDEventWorkspace_sptr in_ws =
-        MDEventsTestHelper::makeAnyMDEWWithFrames<MDLeanEvent<3>, 3>(
-            10, 0.0, 10.0, frame, 1);
+        MDEventsTestHelper::makeAnyMDEWWithFrames<MDLeanEvent<3>, 3>(10, 0.0, 10.0, frame, 1);
 
     auto eventNorm = Mantid::API::MDNormalization::VolumeNormalization;
     auto histoNorm = Mantid::API::MDNormalization::NumEventsNormalization;
     in_ws->setDisplayNormalization(eventNorm);
     in_ws->setDisplayNormalizationHisto(histoNorm);
 
-    Mantid::Kernel::SpecialCoordinateSystem appliedCoord =
-        Mantid::Kernel::QSample;
+    Mantid::Kernel::SpecialCoordinateSystem appliedCoord = Mantid::Kernel::QSample;
     in_ws->setCoordinateSystem(appliedCoord);
     AnalysisDataService::Instance().addOrReplace("BinMDTest_ws", in_ws);
 
-    FrameworkManager::Instance().exec("MaskMD", 6, "Workspace", "BinMDTest_ws",
-                                      "Dimensions", "Axis0,Axis1,Axis2",
+    FrameworkManager::Instance().exec("MaskMD", 6, "Workspace", "BinMDTest_ws", "Dimensions", "Axis0,Axis1,Axis2",
                                       "Extents", "0,2,0,10,0,10");
 
-    auto out_ws =
-        execute_bin("NO_FUNCTION", "Axis0,0.0,8.0, 8", "Axis1,0.0,8.0, 8",
-                    "Axis2,0.0,8.0, 8", "", 1.0, 8 * 8 * 8, true, 1,
-                    VMD(1, 0, 0), VMD(0, 1, 0), VMD(0, 0, 1), in_ws);
+    auto out_ws = execute_bin("NO_FUNCTION", "Axis0,0.0,8.0, 8", "Axis1,0.0,8.0, 8", "Axis2,0.0,8.0, 8", "", 1.0,
+                              8 * 8 * 8, true, 1, VMD(1, 0, 0), VMD(0, 1, 0), VMD(0, 0, 1), in_ws);
 
-    TSM_ASSERT_DELTA("Data was masked bin should have a signal of 0",
-                     out_ws->getSignalAt(0), 0.0, 1e-5);
-    TSM_ASSERT_DELTA("Data was unmasked bin should have a signal of 1",
-                     out_ws->getSignalAt(3), 1.0, 1e-5);
+    TSM_ASSERT_DELTA("Data was masked bin should have a signal of 0", out_ws->getSignalAt(0), 0.0, 1e-5);
+    TSM_ASSERT_DELTA("Data was unmasked bin should have a signal of 1", out_ws->getSignalAt(3), 1.0, 1e-5);
   }
 
   void test_exec_3D() {
-    do_test_exec("", "Axis0,2.0,8.0, 6", "Axis1,2.0,8.0, 6", "Axis2,2.0,8.0, 6",
-                 "", 1.0 /*signal*/, 6 * 6 * 6 /*# of bins*/,
-                 true /*IterateEvents*/);
+    do_test_exec("", "Axis0,2.0,8.0, 6", "Axis1,2.0,8.0, 6", "Axis2,2.0,8.0, 6", "", 1.0 /*signal*/,
+                 6 * 6 * 6 /*# of bins*/, true /*IterateEvents*/);
   }
 
   void test_exec_3D_scrambled_order() {
-    do_test_exec("", "Axis1,2.0,8.0, 6", "Axis0,2.0,8.0, 6", "Axis2,2.0,8.0, 6",
-                 "", 1.0 /*signal*/, 6 * 6 * 6 /*# of bins*/,
-                 true /*IterateEvents*/, 1, VMD(0, 1, 0), VMD(1, 0, 0),
-                 VMD(0, 0, 1));
+    do_test_exec("", "Axis1,2.0,8.0, 6", "Axis0,2.0,8.0, 6", "Axis2,2.0,8.0, 6", "", 1.0 /*signal*/,
+                 6 * 6 * 6 /*# of bins*/, true /*IterateEvents*/, 1, VMD(0, 1, 0), VMD(1, 0, 0), VMD(0, 0, 1));
   }
 
   void test_exec_3D_unevenSizes() {
-    do_test_exec("", "Axis0,2.0,8.0, 3", "Axis1,2.0,8.0, 6", "Axis2,2.0,8.0, 6",
-                 "", 2.0 /*signal*/, 6 * 6 * 3 /*# of bins*/,
-                 true /*IterateEvents*/);
+    do_test_exec("", "Axis0,2.0,8.0, 3", "Axis1,2.0,8.0, 6", "Axis2,2.0,8.0, 6", "", 2.0 /*signal*/,
+                 6 * 6 * 3 /*# of bins*/, true /*IterateEvents*/);
   }
 
   void test_exec_2D() { // Integrate over the 3rd dimension
-    do_test_exec("", "Axis0,2.0,8.0, 6", "Axis1,2.0,8.0, 6", "", "",
-                 1.0 * 10.0 /*signal*/, 6 * 6 /*# of bins*/,
+    do_test_exec("", "Axis0,2.0,8.0, 6", "Axis1,2.0,8.0, 6", "", "", 1.0 * 10.0 /*signal*/, 6 * 6 /*# of bins*/,
                  true /*IterateEvents*/);
   }
 
   void test_exec_2D_largeBins() {
-    do_test_exec("", "Axis0,2.0,8.0, 3", "Axis1,2.0,8.0, 3", "", "",
-                 4.0 * 10.0 /*signal*/, 3 * 3 /*# of bins*/,
+    do_test_exec("", "Axis0,2.0,8.0, 3", "Axis1,2.0,8.0, 3", "", "", 4.0 * 10.0 /*signal*/, 3 * 3 /*# of bins*/,
                  true /*IterateEvents*/);
   }
 
   void test_exec_2D_scrambledAndUnevent() {
-    do_test_exec("", "Axis0,2.0,8.0, 3", "Axis2,2.0,8.0, 6", "", "",
-                 2.0 * 10.0 /*signal*/, 3 * 6 /*# of bins*/,
+    do_test_exec("", "Axis0,2.0,8.0, 3", "Axis2,2.0,8.0, 6", "", "", 2.0 * 10.0 /*signal*/, 3 * 6 /*# of bins*/,
                  true /*IterateEvents*/, 1, VMD(1, 0, 0), VMD(0, 0, 1));
   }
 
   void test_exec_1D() {
-    do_test_exec("", "Axis2,2.0,8.0, 6", "", "", "", 1.0 * 100.0 /*signal*/,
-                 6 /*# of bins*/, true /*IterateEvents*/, 1, VMD(0, 0, 1));
+    do_test_exec("", "Axis2,2.0,8.0, 6", "", "", "", 1.0 * 100.0 /*signal*/, 6 /*# of bins*/, true /*IterateEvents*/, 1,
+                 VMD(0, 0, 1));
   }
 
   void test_exec_1D_boxCompletelyContained() {
-    do_test_exec("", "Axis2,2.0,8.0, 1", "", "", "",
-                 20 * 6.0 * 100.0 /*signal*/, 1 /*# of bins*/,
+    do_test_exec("", "Axis2,2.0,8.0, 1", "", "", "", 20 * 6.0 * 100.0 /*signal*/, 1 /*# of bins*/,
                  true /*IterateEvents*/, 20 /*numEventsPerBox*/, VMD(0, 0, 1));
   }
 
@@ -317,20 +278,16 @@ public:
     // MDEventWorkspace3Lean::sptr in_ws = MDEventsTestHelper::makeMDEW<3>(3,
     // 0.0, 10.0, 0);
     auto a_ws = createSimple3DWorkspace();
-    MDEventWorkspace3Lean::sptr in_ws =
-        std::dynamic_pointer_cast<MDEventWorkspace3Lean>(a_ws);
+    MDEventWorkspace3Lean::sptr in_ws = std::dynamic_pointer_cast<MDEventWorkspace3Lean>(a_ws);
     TS_ASSERT(in_ws);
     if (!in_ws)
       return;
 
-    AnalysisDataService::Instance().addOrReplace("FakeMDEventDataTest_ws",
-                                                 in_ws);
+    AnalysisDataService::Instance().addOrReplace("FakeMDEventDataTest_ws", in_ws);
 
-    TS_ASSERT_THROWS_NOTHING(
-        FakeDat.setPropertyValue("InputWorkspace", "FakeMDEventDataTest_ws"));
+    TS_ASSERT_THROWS_NOTHING(FakeDat.setPropertyValue("InputWorkspace", "FakeMDEventDataTest_ws"));
     TS_ASSERT_THROWS_NOTHING(FakeDat.setPropertyValue("PeakParams", ""));
-    TS_ASSERT_THROWS_NOTHING(FakeDat.setPropertyValue(
-        "UniformParams", "-1000,0.50001,1,0.50001,1,0.50001,1"));
+    TS_ASSERT_THROWS_NOTHING(FakeDat.setPropertyValue("UniformParams", "-1000,0.50001,1,0.50001,1,0.50001,1"));
 
     TS_ASSERT_THROWS_NOTHING(FakeDat.execute();)
     TS_ASSERT(FakeDat.isExecuted());
@@ -344,17 +301,12 @@ public:
     TS_ASSERT_THROWS_NOTHING(BinAlg.initialize())
     TS_ASSERT(BinAlg.isInitialized())
 
-    TS_ASSERT_THROWS_NOTHING(
-        BinAlg.setPropertyValue("InputWorkspace", "FakeMDEventDataTest_ws"));
-    TS_ASSERT_THROWS_NOTHING(
-        BinAlg.setPropertyValue("AlignedDim0", "x,0,10,40"));
-    TS_ASSERT_THROWS_NOTHING(
-        BinAlg.setPropertyValue("AlignedDim1", "y,0,10,5"));
-    TS_ASSERT_THROWS_NOTHING(
-        BinAlg.setPropertyValue("AlignedDim2", "z,0,10,20"));
+    TS_ASSERT_THROWS_NOTHING(BinAlg.setPropertyValue("InputWorkspace", "FakeMDEventDataTest_ws"));
+    TS_ASSERT_THROWS_NOTHING(BinAlg.setPropertyValue("AlignedDim0", "x,0,10,40"));
+    TS_ASSERT_THROWS_NOTHING(BinAlg.setPropertyValue("AlignedDim1", "y,0,10,5"));
+    TS_ASSERT_THROWS_NOTHING(BinAlg.setPropertyValue("AlignedDim2", "z,0,10,20"));
 
-    TS_ASSERT_THROWS_NOTHING(
-        BinAlg.setPropertyValue("OutputWorkspace", "BinMDTest_ws"));
+    TS_ASSERT_THROWS_NOTHING(BinAlg.setPropertyValue("OutputWorkspace", "BinMDTest_ws"));
 
     TS_ASSERT_THROWS_NOTHING(BinAlg.execute();)
 
@@ -362,10 +314,8 @@ public:
 
     MDHistoWorkspace_sptr out;
     TS_ASSERT_THROWS_NOTHING(
-        out = std::dynamic_pointer_cast<MDHistoWorkspace>(
-            AnalysisDataService::Instance().retrieve("BinMDTest_ws"));)
-    TSM_ASSERT("can not retrieve binned workspace from analysis data service",
-               out);
+        out = std::dynamic_pointer_cast<MDHistoWorkspace>(AnalysisDataService::Instance().retrieve("BinMDTest_ws"));)
+    TSM_ASSERT("can not retrieve binned workspace from analysis data service", out);
     if (!out)
       return;
 
@@ -397,11 +347,9 @@ public:
   void test_exec_with_impfunction() {
     // This describes the local implicit function that will always reject bins.
     // so output workspace should have zero.
-    std::string functionXML =
-        std::string("<Function>") + "<Type>MockImplicitFunction</Type>" +
-        "<ParameterList>" + "</ParameterList>" + "</Function>";
-    do_test_exec(functionXML, "Axis0,2.0,8.0, 6", "Axis1,2.0,8.0, 6",
-                 "Axis2,2.0,8.0, 6", "", 1.0 /*signal*/,
+    std::string functionXML = std::string("<Function>") + "<Type>MockImplicitFunction</Type>" + "<ParameterList>" +
+                              "</ParameterList>" + "</Function>";
+    do_test_exec(functionXML, "Axis0,2.0,8.0, 6", "Axis1,2.0,8.0, 6", "Axis2,2.0,8.0, 6", "", 1.0 /*signal*/,
                  6 * 6 * 6 /*# of bins*/, false /*IterateEvents*/);
   }
   void test_exec_with_impfunction_IterateEvents() { // This describes the local
@@ -409,11 +357,9 @@ public:
                                                     // will always reject bins.
                                                     // so output workspace
                                                     // should have zero.
-    std::string functionXML =
-        std::string("<Function>") + "<Type>MockImplicitFunction</Type>" +
-        "<ParameterList>" + "</ParameterList>" + "</Function>";
-    do_test_exec(functionXML, "Axis0,2.0,8.0, 6", "Axis1,2.0,8.0, 6",
-                 "Axis2,2.0,8.0, 6", "", 1.0 /*signal*/,
+    std::string functionXML = std::string("<Function>") + "<Type>MockImplicitFunction</Type>" + "<ParameterList>" +
+                              "</ParameterList>" + "</Function>";
+    do_test_exec(functionXML, "Axis0,2.0,8.0, 6", "Axis1,2.0,8.0, 6", "Axis2,2.0,8.0, 6", "", 1.0 /*signal*/,
                  6 * 6 * 6 /*# of bins*/, true /*IterateEvents*/);
   }
 
@@ -424,18 +370,15 @@ public:
    * @param expected_numBins :: how many points/bins in the output
    * @param FlipYBasis :: flip the Y basis vector
    */
-  void do_test_transform(int binsX, int binsY, int binsZ,
-                         double expected_signal, size_t expected_numBins,
-                         bool IterateEvents, bool ForceOrthogonal,
-                         bool FlipYBasis = false) {
+  void do_test_transform(int binsX, int binsY, int binsZ, double expected_signal, size_t expected_numBins,
+                         bool IterateEvents, bool ForceOrthogonal, bool FlipYBasis = false) {
     BinMD alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
 
     // Make a workspace with events along a regular grid that is rotated and
     // offset along x,y
-    MDEventWorkspace3Lean::sptr in_ws =
-        MDEventsTestHelper::makeMDEW<3>(10, -10.0, 20.0, 0);
+    MDEventWorkspace3Lean::sptr in_ws = MDEventsTestHelper::makeMDEW<3>(10, -10.0, 20.0, 0);
     in_ws->splitBox();
     double theta = 0.1;
     VMD origin(-2.0, -3.0, -4.0);
@@ -474,38 +417,29 @@ public:
     AnalysisDataService::Instance().addOrReplace("BinMDTest_ws", in_ws);
     if (false) {
       // Save to NXS file for testing
-      FrameworkManager::Instance().exec("SaveMD", 4, "InputWorkspace",
-                                        "BinMDTest_ws", "Filename",
+      FrameworkManager::Instance().exec("SaveMD", 4, "InputWorkspace", "BinMDTest_ws", "Filename",
                                         "BinMDTest_ws_rotated.nxs");
     }
 
     // 1000 boxes with 1 event each
     TS_ASSERT_EQUALS(in_ws->getNPoints(), 1000);
 
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", "BinMDTest_ws"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "BinMDTest_ws"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("AxisAligned", false));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("BasisVector0", "OutX,m," + baseX.toString(",")));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("BasisVector1", "OutY,m," + baseY.toString(",")));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("BasisVector2", "OutZ,m," + baseZ.toString(",")));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BasisVector0", "OutX,m," + baseX.toString(",")));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BasisVector1", "OutY,m," + baseY.toString(",")));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BasisVector2", "OutZ,m," + baseZ.toString(",")));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BasisVector3", ""));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("Translation", origin.toString(",")));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("ForceOrthogonal", ForceOrthogonal));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Translation", origin.toString(",")));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("ForceOrthogonal", ForceOrthogonal));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ImplicitFunctionXML", ""));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("IterateEvents", IterateEvents));
 
     std::vector<int> OutputBins{binsX, binsY, binsZ};
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputBins", OutputBins));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("OutputExtents", "0,10, 0,10, 0,10"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputExtents", "0,10, 0,10, 0,10"));
 
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "BinMDTest_ws"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "BinMDTest_ws"));
 
     TS_ASSERT_THROWS_NOTHING(alg.execute();)
 
@@ -513,8 +447,7 @@ public:
 
     MDHistoWorkspace_sptr out;
     TS_ASSERT_THROWS_NOTHING(
-        out = std::dynamic_pointer_cast<MDHistoWorkspace>(
-            AnalysisDataService::Instance().retrieve("BinMDTest_ws"));)
+        out = std::dynamic_pointer_cast<MDHistoWorkspace>(AnalysisDataService::Instance().retrieve("BinMDTest_ws"));)
     TS_ASSERT(out);
     if (!out)
       return;
@@ -555,27 +488,24 @@ public:
   }
 
   void test_exec_with_transform() {
-    do_test_transform(10, 10, 10, 1.0 /*signal*/, 1000 /*# of bins*/,
-                      true /*IterateEvents*/,
+    do_test_transform(10, 10, 10, 1.0 /*signal*/, 1000 /*# of bins*/, true /*IterateEvents*/,
                       false /* Dont force orthogonal */);
   }
 
   void test_exec_with_transform_unevenSizes() {
-    do_test_transform(5, 10, 2, 10 * 1.0 /*signal*/, 100 /*# of bins*/,
-                      true /*IterateEvents*/,
+    do_test_transform(5, 10, 2, 10 * 1.0 /*signal*/, 100 /*# of bins*/, true /*IterateEvents*/,
                       false /* Dont force orthogonal */);
   }
 
   void test_exec_with_transform_ForceOrthogonal() {
-    do_test_transform(5, 10, 2, 10 * 1.0 /*signal*/, 100 /*# of bins*/,
-                      true /*IterateEvents*/, true /* Do force orthogonal */);
+    do_test_transform(5, 10, 2, 10 * 1.0 /*signal*/, 100 /*# of bins*/, true /*IterateEvents*/,
+                      true /* Do force orthogonal */);
   }
 
   /** Change the handedness of the basis vectors by flipping the Y vector */
   void test_exec_with_transform_flipping_Y_basis() {
-    do_test_transform(10, 10, 10, 1.0 /*signal*/, 1000 /*# of bins*/,
-                      true /*IterateEvents*/, false /* Dont force orthogonal */,
-                      true /* Flip sign of Y basis vector*/);
+    do_test_transform(10, 10, 10, 1.0 /*signal*/, 1000 /*# of bins*/, true /*IterateEvents*/,
+                      false /* Dont force orthogonal */, true /* Flip sign of Y basis vector*/);
   }
 
   //---------------------------------------------------------------------------------------------
@@ -586,15 +516,10 @@ public:
    * @param origWS :: both should have this as its originalWorkspace
    * @return binned2 shared pointer
    */
-  MDHistoWorkspace_sptr do_compare_histo(const std::string &binned1Name,
-                                         const std::string &binned2Name,
+  MDHistoWorkspace_sptr do_compare_histo(const std::string &binned1Name, const std::string &binned2Name,
                                          const std::string &origWS) {
-    MDHistoWorkspace_sptr binned1 =
-        AnalysisDataService::Instance().retrieveWS<MDHistoWorkspace>(
-            binned1Name);
-    MDHistoWorkspace_sptr binned2 =
-        AnalysisDataService::Instance().retrieveWS<MDHistoWorkspace>(
-            binned2Name);
+    MDHistoWorkspace_sptr binned1 = AnalysisDataService::Instance().retrieveWS<MDHistoWorkspace>(binned1Name);
+    MDHistoWorkspace_sptr binned2 = AnalysisDataService::Instance().retrieveWS<MDHistoWorkspace>(binned2Name);
     TS_ASSERT_EQUALS(binned1->getOriginalWorkspace()->getName(), origWS);
     TS_ASSERT_EQUALS(binned2->getOriginalWorkspace()->getName(), origWS);
     TS_ASSERT(binned2);
@@ -617,14 +542,12 @@ public:
     AnalysisDataService::Instance().remove("binned2");
 
     // ---- Start with empty MDEW ----
-    FrameworkManager::Instance().exec(
-        "CreateMDWorkspace", 16, "Dimensions", "2", "Extents", "-10,10,-10,10",
-        "Names", "x,y", "Units", "m,m", "SplitInto", "4", "SplitThreshold",
-        "100", "MaxRecursionDepth", "20", "OutputWorkspace", "mdew");
+    FrameworkManager::Instance().exec("CreateMDWorkspace", 16, "Dimensions", "2", "Extents", "-10,10,-10,10", "Names",
+                                      "x,y", "Units", "m,m", "SplitInto", "4", "SplitThreshold", "100",
+                                      "MaxRecursionDepth", "20", "OutputWorkspace", "mdew");
 
     // Give fake uniform data
-    FrameworkManager::Instance().exec("FakeMDEventData", 6, "InputWorkspace",
-                                      "mdew", "UniformParams", "1000",
+    FrameworkManager::Instance().exec("FakeMDEventData", 6, "InputWorkspace", "mdew", "UniformParams", "1000",
                                       "RandomSeed", "1234");
   }
 
@@ -633,28 +556,24 @@ public:
   void test_exec_Aligned_then_nonAligned() {
     do_prepare_comparison();
     // Bin aligned to original. Coordinates remain the same
-    FrameworkManager::Instance().exec(
-        "BinMD", 10, "InputWorkspace", "mdew", "OutputWorkspace", "binned0",
-        "AxisAligned", "1", "AlignedDim0", "x, -10, 10, 10", "AlignedDim1",
-        "y, -10, 10, 10");
+    FrameworkManager::Instance().exec("BinMD", 10, "InputWorkspace", "mdew", "OutputWorkspace", "binned0",
+                                      "AxisAligned", "1", "AlignedDim0", "x, -10, 10, 10", "AlignedDim1",
+                                      "y, -10, 10, 10");
 
     // Bin, non-axis-aligned, with translation
-    FrameworkManager::Instance().exec(
-        "BinMD", 18, "InputWorkspace", "binned0", "OutputWorkspace", "binned1",
-        "AxisAligned", "0", "BasisVector0", "rx,m, 1.0,0.0", "BasisVector1",
-        "ry,m, 0.0,1.0", "ForceOrthogonal", "1", "Translation", "-10, -10",
-        "OutputExtents", "0,20, 0,20", "OutputBins", "10,10");
+    FrameworkManager::Instance().exec("BinMD", 18, "InputWorkspace", "binned0", "OutputWorkspace", "binned1",
+                                      "AxisAligned", "0", "BasisVector0", "rx,m, 1.0,0.0", "BasisVector1",
+                                      "ry,m, 0.0,1.0", "ForceOrthogonal", "1", "Translation", "-10, -10",
+                                      "OutputExtents", "0,20, 0,20", "OutputBins", "10,10");
 
-    MDHistoWorkspace_sptr binned1 =
-        do_compare_histo("binned0", "binned1", "mdew");
+    MDHistoWorkspace_sptr binned1 = do_compare_histo("binned0", "binned1", "mdew");
 
     // Intermediate workspace (the MDHisto)
     TS_ASSERT_EQUALS(binned1->numOriginalWorkspaces(), 2);
     TS_ASSERT_EQUALS(binned1->getOriginalWorkspace(1)->getName(), "binned0");
     // Transforms to/from the INTERMEDIATE workspace exist
     CoordTransform const *toIntermediate = binned1->getTransformToOriginal(1);
-    CoordTransform const *fromIntermediate =
-        binned1->getTransformFromOriginal(1);
+    CoordTransform const *fromIntermediate = binned1->getTransformFromOriginal(1);
     TS_ASSERT(toIntermediate);
     TS_ASSERT(fromIntermediate);
 
@@ -671,31 +590,27 @@ public:
   void test_exec_AlignedSwappingAxes_then_nonAligned() {
     do_prepare_comparison();
     // Bin aligned to original.
-    FrameworkManager::Instance().exec(
-        "BinMD", 10, "InputWorkspace", "mdew", "OutputWorkspace", "binned0",
-        "AxisAligned", "1", "AlignedDim0", "y, -10, 10, 10", "AlignedDim1",
-        "x, -10, 10, 10");
+    FrameworkManager::Instance().exec("BinMD", 10, "InputWorkspace", "mdew", "OutputWorkspace", "binned0",
+                                      "AxisAligned", "1", "AlignedDim0", "y, -10, 10, 10", "AlignedDim1",
+                                      "x, -10, 10, 10");
 
     // binned0.x is mdew.y
     // binned0.y is mdew.x
     // Bin, non-axis-aligned, with translation
-    FrameworkManager::Instance().exec(
-        "BinMD", 18, "InputWorkspace", "binned0", "OutputWorkspace", "binned1",
-        "AxisAligned", "0", "BasisVector0", "rx,m, 1.0,0.0", "BasisVector1",
-        "ry,m, 0.0,1.0", "ForceOrthogonal", "1", "Translation", "-10, -5",
-        "OutputExtents", "0,20, 0,20", "OutputBins", "10,10");
+    FrameworkManager::Instance().exec("BinMD", 18, "InputWorkspace", "binned0", "OutputWorkspace", "binned1",
+                                      "AxisAligned", "0", "BasisVector0", "rx,m, 1.0,0.0", "BasisVector1",
+                                      "ry,m, 0.0,1.0", "ForceOrthogonal", "1", "Translation", "-10, -5",
+                                      "OutputExtents", "0,20, 0,20", "OutputBins", "10,10");
 
     // Get the final binned workspace
-    MDHistoWorkspace_sptr binned1 =
-        AnalysisDataService::Instance().retrieveWS<MDHistoWorkspace>("binned1");
+    MDHistoWorkspace_sptr binned1 = AnalysisDataService::Instance().retrieveWS<MDHistoWorkspace>("binned1");
 
     // Intermediate workspace (the MDHisto) is binned0
     TS_ASSERT_EQUALS(binned1->numOriginalWorkspaces(), 2);
     TS_ASSERT_EQUALS(binned1->getOriginalWorkspace(1)->getName(), "binned0");
     // Transforms to/from the INTERMEDIATE workspace exist
     CoordTransform const *toIntermediate = binned1->getTransformToOriginal(1);
-    CoordTransform const *fromIntermediate =
-        binned1->getTransformFromOriginal(1);
+    CoordTransform const *fromIntermediate = binned1->getTransformFromOriginal(1);
     TS_ASSERT(toIntermediate);
     TS_ASSERT(fromIntermediate);
 
@@ -733,35 +648,29 @@ public:
   void test_exec_AlignedSwappingAxes_then_nonAligned_3D() {
     AnalysisDataService::Instance().remove("mdew3d");
 
-    FrameworkManager::Instance().exec(
-        "CreateMDWorkspace", 16, "Dimensions", "3", "Extents",
-        "-10,10,-10,10,-10,10", "Names", "A,B,C", "Units", "m,m,m", "SplitInto",
-        "4", "SplitThreshold", "100", "MaxRecursionDepth", "20",
-        "OutputWorkspace", "mdew3d");
+    FrameworkManager::Instance().exec("CreateMDWorkspace", 16, "Dimensions", "3", "Extents", "-10,10,-10,10,-10,10",
+                                      "Names", "A,B,C", "Units", "m,m,m", "SplitInto", "4", "SplitThreshold", "100",
+                                      "MaxRecursionDepth", "20", "OutputWorkspace", "mdew3d");
 
-    FrameworkManager::Instance().exec(
-        "BinMD", 12, "InputWorkspace", "mdew3d", "OutputWorkspace", "binned0",
-        "AxisAligned", "1", "AlignedDim0", "B, -10, 10, 10", "AlignedDim1",
-        "C, -10, 10, 10", "AlignedDim2", "A, -10, 10, 10");
+    FrameworkManager::Instance().exec("BinMD", 12, "InputWorkspace", "mdew3d", "OutputWorkspace", "binned0",
+                                      "AxisAligned", "1", "AlignedDim0", "B, -10, 10, 10", "AlignedDim1",
+                                      "C, -10, 10, 10", "AlignedDim2", "A, -10, 10, 10");
 
-    FrameworkManager::Instance().exec(
-        "BinMD", 20, "InputWorkspace", "binned0", "OutputWorkspace", "binned1",
-        "AxisAligned", "0", "BasisVector0", "rx,m, 1.0,0.0,0.0", "BasisVector1",
-        "ry,m, 0.0,1.0,0.0", "BasisVector2", "rz,m, 0.0,0.0,1.0",
-        "ForceOrthogonal", "1", "Translation", "-10, -5, -3", "OutputExtents",
-        "0,20, 0,20, 0,20", "OutputBins", "10,10,10");
+    FrameworkManager::Instance().exec("BinMD", 20, "InputWorkspace", "binned0", "OutputWorkspace", "binned1",
+                                      "AxisAligned", "0", "BasisVector0", "rx,m, 1.0,0.0,0.0", "BasisVector1",
+                                      "ry,m, 0.0,1.0,0.0", "BasisVector2", "rz,m, 0.0,0.0,1.0", "ForceOrthogonal", "1",
+                                      "Translation", "-10, -5, -3", "OutputExtents", "0,20, 0,20, 0,20", "OutputBins",
+                                      "10,10,10");
 
     // Get the final binned workspace
-    MDHistoWorkspace_sptr binned1 =
-        AnalysisDataService::Instance().retrieveWS<MDHistoWorkspace>("binned1");
+    MDHistoWorkspace_sptr binned1 = AnalysisDataService::Instance().retrieveWS<MDHistoWorkspace>("binned1");
 
     // Intermediate workspace (the MDHisto) is binned0
     TS_ASSERT_EQUALS(binned1->numOriginalWorkspaces(), 2);
     TS_ASSERT_EQUALS(binned1->getOriginalWorkspace(1)->getName(), "binned0");
     // Transforms to/from the INTERMEDIATE workspace exist
     CoordTransform const *toIntermediate = binned1->getTransformToOriginal(1);
-    CoordTransform const *fromIntermediate =
-        binned1->getTransformFromOriginal(1);
+    CoordTransform const *fromIntermediate = binned1->getTransformFromOriginal(1);
     TS_ASSERT(toIntermediate);
     TS_ASSERT(fromIntermediate);
 
@@ -804,27 +713,23 @@ public:
     do_prepare_comparison();
 
     // Bin NOT aligned to original, with translation
-    FrameworkManager::Instance().exec(
-        "BinMD", 18, "InputWorkspace", "mdew", "OutputWorkspace", "binned0",
-        "AxisAligned", "0", "BasisVector0", "rx,m, 1.0, 0.0", "BasisVector1",
-        "ry,m, 0.0, 1.0", "ForceOrthogonal", "1", "Translation", "-10, -10",
-        "OutputExtents", "0,20, 0,20", "OutputBins", "10,10");
+    FrameworkManager::Instance().exec("BinMD", 18, "InputWorkspace", "mdew", "OutputWorkspace", "binned0",
+                                      "AxisAligned", "0", "BasisVector0", "rx,m, 1.0, 0.0", "BasisVector1",
+                                      "ry,m, 0.0, 1.0", "ForceOrthogonal", "1", "Translation", "-10, -10",
+                                      "OutputExtents", "0,20, 0,20", "OutputBins", "10,10");
 
     // Bin with some rotation (10 degrees)
-    FrameworkManager::Instance().exec(
-        "BinMD", 18, "InputWorkspace", "mdew", "OutputWorkspace", "binned1",
-        "AxisAligned", "0", "BasisVector0", "rx,m, 0.98, 0.17", "BasisVector1",
-        "ry,m, -.17, 0.98", "ForceOrthogonal", "1", "Translation", "-10, -10",
-        "OutputExtents", "0,20, 0,20", "OutputBins", "10,10");
+    FrameworkManager::Instance().exec("BinMD", 18, "InputWorkspace", "mdew", "OutputWorkspace", "binned1",
+                                      "AxisAligned", "0", "BasisVector0", "rx,m, 0.98, 0.17", "BasisVector1",
+                                      "ry,m, -.17, 0.98", "ForceOrthogonal", "1", "Translation", "-10, -10",
+                                      "OutputExtents", "0,20, 0,20", "OutputBins", "10,10");
     // Bin the binned output with the opposite rotation
-    FrameworkManager::Instance().exec(
-        "BinMD", 18, "InputWorkspace", "binned1", "OutputWorkspace", "binned2",
-        "AxisAligned", "0", "BasisVector0", "rrx,m, 0.98, -.17", "BasisVector1",
-        "rry,m, 0.17, 0.98", "ForceOrthogonal", "1", "Translation", "0, 0",
-        "OutputExtents", "0,20, 0,20", "OutputBins", "10,10");
+    FrameworkManager::Instance().exec("BinMD", 18, "InputWorkspace", "binned1", "OutputWorkspace", "binned2",
+                                      "AxisAligned", "0", "BasisVector0", "rrx,m, 0.98, -.17", "BasisVector1",
+                                      "rry,m, 0.17, 0.98", "ForceOrthogonal", "1", "Translation", "0, 0",
+                                      "OutputExtents", "0,20, 0,20", "OutputBins", "10,10");
     // Check they are the same
-    MDHistoWorkspace_sptr binned2 =
-        do_compare_histo("binned0", "binned2", "mdew");
+    MDHistoWorkspace_sptr binned2 = do_compare_histo("binned0", "binned2", "mdew");
 
     // Intermediate workspace (the MDHisto)
     TS_ASSERT_EQUALS(binned2->numOriginalWorkspaces(), 2);
@@ -841,25 +746,22 @@ public:
     do_prepare_comparison();
 
     // Bin aligned to original
-    FrameworkManager::Instance().exec(
-        "BinMD", 18, "InputWorkspace", "mdew", "OutputWorkspace", "binned0",
-        "AxisAligned", "0", "BasisVector0", "rx,m, 1.0, 0.0", "BasisVector1",
-        "ry,m, 0.0, 1.0", "ForceOrthogonal", "1", "Translation", "-10, -10",
-        "OutputExtents", "0,20, 0,20", "OutputBins", "10,10");
+    FrameworkManager::Instance().exec("BinMD", 18, "InputWorkspace", "mdew", "OutputWorkspace", "binned0",
+                                      "AxisAligned", "0", "BasisVector0", "rx,m, 1.0, 0.0", "BasisVector1",
+                                      "ry,m, 0.0, 1.0", "ForceOrthogonal", "1", "Translation", "-10, -10",
+                                      "OutputExtents", "0,20, 0,20", "OutputBins", "10,10");
 
     // Bin with a translation. -10,-10 in MDEW becomes 0,0 in binned1
-    FrameworkManager::Instance().exec(
-        "BinMD", 18, "InputWorkspace", "mdew", "OutputWorkspace", "binned1",
-        "AxisAligned", "0", "BasisVector0", "rx,m, 1.0, 0.0", "BasisVector1",
-        "ry,m, 0.0, 1.0", "ForceOrthogonal", "1", "Translation", "-10, -10",
-        "OutputExtents", "0,20, 0,20", "OutputBins", "10,10");
+    FrameworkManager::Instance().exec("BinMD", 18, "InputWorkspace", "mdew", "OutputWorkspace", "binned1",
+                                      "AxisAligned", "0", "BasisVector0", "rx,m, 1.0, 0.0", "BasisVector1",
+                                      "ry,m, 0.0, 1.0", "ForceOrthogonal", "1", "Translation", "-10, -10",
+                                      "OutputExtents", "0,20, 0,20", "OutputBins", "10,10");
 
     // Bin the binned output with the opposite translation
-    FrameworkManager::Instance().exec(
-        "BinMD", 18, "InputWorkspace", "binned1", "OutputWorkspace", "binned2",
-        "AxisAligned", "0", "BasisVector0", "rrx,m, 1.0, 0.0", "BasisVector1",
-        "rry,m, 0.0, 1.0", "ForceOrthogonal", "1", "Translation", "0, 0",
-        "OutputExtents", "0,20, 0,20", "OutputBins", "10,10");
+    FrameworkManager::Instance().exec("BinMD", 18, "InputWorkspace", "binned1", "OutputWorkspace", "binned2",
+                                      "AxisAligned", "0", "BasisVector0", "rrx,m, 1.0, 0.0", "BasisVector1",
+                                      "rry,m, 0.0, 1.0", "ForceOrthogonal", "1", "Translation", "0, 0", "OutputExtents",
+                                      "0,20, 0,20", "OutputBins", "10,10");
 
     // Check they are the same
     do_compare_histo("binned0", "binned2", "mdew");
@@ -872,17 +774,15 @@ public:
     do_prepare_comparison();
 
     // Bin NOT aligned to original, translated. Coordinates change.
-    FrameworkManager::Instance().exec(
-        "BinMD", 18, "InputWorkspace", "mdew", "OutputWorkspace", "binned0",
-        "AxisAligned", "0", "BasisVector0", "rx,m, 1.0, 0.0", "BasisVector1",
-        "ry,m, 0.0, 1.0", "ForceOrthogonal", "1", "Translation", "-10, -10",
-        "OutputExtents", "0,20, 0,20", "OutputBins", "10,10");
+    FrameworkManager::Instance().exec("BinMD", 18, "InputWorkspace", "mdew", "OutputWorkspace", "binned0",
+                                      "AxisAligned", "0", "BasisVector0", "rx,m, 1.0, 0.0", "BasisVector1",
+                                      "ry,m, 0.0, 1.0", "ForceOrthogonal", "1", "Translation", "-10, -10",
+                                      "OutputExtents", "0,20, 0,20", "OutputBins", "10,10");
 
     // Bin aligned to binned0. This is not allowed!
-    IAlgorithm_sptr alg = FrameworkManager::Instance().exec(
-        "BinMD", 10, "InputWorkspace", "binned0", "OutputWorkspace", "binned1",
-        "AxisAligned", "1", "AlignedDim0", "rx, 0, 20, 10", "AlignedDim1",
-        "ry, 0, 20, 10");
+    IAlgorithm_sptr alg = FrameworkManager::Instance().exec("BinMD", 10, "InputWorkspace", "binned0", "OutputWorkspace",
+                                                            "binned1", "AxisAligned", "1", "AlignedDim0",
+                                                            "rx, 0, 20, 10", "AlignedDim1", "ry, 0, 20, 10");
     TS_ASSERT(!alg->isExecuted());
   }
 
@@ -895,20 +795,16 @@ public:
     do_prepare_comparison();
 
     // Make the reference bin, which is all space (-10 to 10) with 10 bins
-    FrameworkManager::Instance().exec(
-        "BinMD", 20, "InputWorkspace", "mdew", "OutputWorkspace", "reference",
-        "AxisAligned", "0", "BasisVector0", "tx,m, 1.0, 0.0", "BasisVector1",
-        "ty,m, 0.0, 1.0", "NormalizeBasisVectors", "0", "ForceOrthogonal", "0",
-        "Translation", "-10, -10", "OutputExtents", "0,20, 0,20", "OutputBins",
-        "10,10");
+    FrameworkManager::Instance().exec("BinMD", 20, "InputWorkspace", "mdew", "OutputWorkspace", "reference",
+                                      "AxisAligned", "0", "BasisVector0", "tx,m, 1.0, 0.0", "BasisVector1",
+                                      "ty,m, 0.0, 1.0", "NormalizeBasisVectors", "0", "ForceOrthogonal", "0",
+                                      "Translation", "-10, -10", "OutputExtents", "0,20, 0,20", "OutputBins", "10,10");
 
     // Bin to workspace B. Have translation and scaling
     FrameworkManager::Instance().exec(
-        "BinMD", 20, "InputWorkspace", "mdew", "OutputWorkspace", "B",
-        "AxisAligned", "0", "BasisVector0", "tx, m, 2.0, 0.0", "BasisVector1",
-        "ty, m, 0.0, 2.0", "NormalizeBasisVectors", "0", "ForceOrthogonal", "0",
-        "Translation", "-2, -2", "OutputExtents",
-        "-4,6, -4,6", /* The extents are in the scaled OUTPUT dimensions */
+        "BinMD", 20, "InputWorkspace", "mdew", "OutputWorkspace", "B", "AxisAligned", "0", "BasisVector0",
+        "tx, m, 2.0, 0.0", "BasisVector1", "ty, m, 0.0, 2.0", "NormalizeBasisVectors", "0", "ForceOrthogonal", "0",
+        "Translation", "-2, -2", "OutputExtents", "-4,6, -4,6", /* The extents are in the scaled OUTPUT dimensions */
         "OutputBins", "10,10");
 
     // Check that B turns out to be the same as "Reference"
@@ -916,22 +812,18 @@ public:
 
     // Bin the binned output with more translation and scaling,
     // but it still ends up binning A from (-10 to 10) with 10 bins.
-    FrameworkManager::Instance().exec(
-        "BinMD", 20, "InputWorkspace", "B", "OutputWorkspace", "C",
-        "AxisAligned", "0", "BasisVector0",
-        "ttx,m, 2.0, 0.0", /* size 2 in B = size 4 in A */
-        "BasisVector1", "tty,m, 0.0, 2.0", "NormalizeBasisVectors", "0",
-        "ForceOrthogonal", "0", "Translation",
-        "-1, -1", /* coords in B = (-4,-4) in A */
-        "OutputExtents", "-1.5, 3.5, -1.5, 3.5", /* size of 5 in C = size of 10
-                                                    in B = size of 20 in A */
-        "OutputBins", "10,10");
+    FrameworkManager::Instance().exec("BinMD", 20, "InputWorkspace", "B", "OutputWorkspace", "C", "AxisAligned", "0",
+                                      "BasisVector0", "ttx,m, 2.0, 0.0", /* size 2 in B = size 4 in A */
+                                      "BasisVector1", "tty,m, 0.0, 2.0", "NormalizeBasisVectors", "0",
+                                      "ForceOrthogonal", "0", "Translation", "-1, -1", /* coords in B = (-4,-4) in A */
+                                      "OutputExtents", "-1.5, 3.5, -1.5, 3.5",         /* size of 5 in C = size of 10
+                                                                                          in B = size of 20 in A */
+                                      "OutputBins", "10,10");
 
     // Finally, C maps back onto A (mdew) binned as reference
     do_compare_histo("reference", "C", "mdew");
 
-    IMDWorkspace_sptr C =
-        AnalysisDataService::Instance().retrieveWS<IMDWorkspace>("C");
+    IMDWorkspace_sptr C = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>("C");
     TS_ASSERT(C);
 
     VMD out;
@@ -950,20 +842,17 @@ public:
   /** Modify a MDHistoWorkspace with a binary operation.
    *  */
   void test_FailsIfYouModify_a_MDHistoWorkspace() {
-    FrameworkManager::Instance().exec(
-        "BinMD", 18, "InputWorkspace", "mdew", "OutputWorkspace", "binned0",
-        "AxisAligned", "0", "BasisVector0", "rx,m, 1.0, 0.0", "BasisVector1",
-        "ry,m, 0.0, 1.0", "ForceOrthogonal", "1", "Translation", "-10, -10",
-        "OutputExtents", "0,20, 0,20", "OutputBins", "10,10");
+    FrameworkManager::Instance().exec("BinMD", 18, "InputWorkspace", "mdew", "OutputWorkspace", "binned0",
+                                      "AxisAligned", "0", "BasisVector0", "rx,m, 1.0, 0.0", "BasisVector1",
+                                      "ry,m, 0.0, 1.0", "ForceOrthogonal", "1", "Translation", "-10, -10",
+                                      "OutputExtents", "0,20, 0,20", "OutputBins", "10,10");
 
-    FrameworkManager::Instance().exec("PlusMD", 6, "LHSWorkspace", "binned0",
-                                      "RHSWorkspace", "binned0",
+    FrameworkManager::Instance().exec("PlusMD", 6, "LHSWorkspace", "binned0", "RHSWorkspace", "binned0",
                                       "OutputWorkspace", "binned0");
 
     IAlgorithm_sptr alg = FrameworkManager::Instance().exec(
-        "BinMD", 18, "InputWorkspace", "binned0", "OutputWorkspace", "binned1",
-        "AxisAligned", "0", "BasisVector0", "rx,m, 1.0, 0.0", "BasisVector1",
-        "ry,m, 0.0, 1.0", "ForceOrthogonal", "1", "Translation", "-10, -10",
+        "BinMD", 18, "InputWorkspace", "binned0", "OutputWorkspace", "binned1", "AxisAligned", "0", "BasisVector0",
+        "rx,m, 1.0, 0.0", "BasisVector1", "ry,m, 0.0, 1.0", "ForceOrthogonal", "1", "Translation", "-10, -10",
         "OutputExtents", "0,20, 0,20", "OutputBins", "10,10");
     TSM_ASSERT("Algorithm threw an error, as expected", !alg->isExecuted())
   }
@@ -974,8 +863,8 @@ public:
     alg.setRethrows(true);
     alg.initialize();
     // Histoworkspace with no original workspace or transforms
-    IMDHistoWorkspace_sptr inWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(
-        1 /*signal*/, 2 /*numDims*/, 10 /*numBins*/);
+    IMDHistoWorkspace_sptr inWS =
+        MDEventsTestHelper::makeFakeMDHistoWorkspace(1 /*signal*/, 2 /*numDims*/, 10 /*numBins*/);
 
     alg.setProperty("InputWorkspace", inWS); // Input workspace - Pure histogram
     alg.setProperty("AlignedDim0",
@@ -983,30 +872,24 @@ public:
     alg.setProperty("AlignedDim1",
                     "y,0,10,10"); // Values not relevant to this test
     alg.setPropertyValue("OutputWorkspace", "dummy");
-    TSM_ASSERT_THROWS(
-        "Cannot allow BinMD on a pure MDHistoWorkspace. Should throw.",
-        alg.execute(), std::runtime_error &);
+    TSM_ASSERT_THROWS("Cannot allow BinMD on a pure MDHistoWorkspace. Should throw.", alg.execute(),
+                      std::runtime_error &);
   }
 
   void test_normalization() {
 
-    FrameworkManager::Instance().exec(
-        "CreateMDWorkspace", 16, "Dimensions", "2", "Extents", "-10,10,-10,10",
-        "Names", "x,y", "Units", "m,m", "SplitInto", "4", "SplitThreshold",
-        "100", "MaxRecursionDepth", "20", "OutputWorkspace", "mdew");
+    FrameworkManager::Instance().exec("CreateMDWorkspace", 16, "Dimensions", "2", "Extents", "-10,10,-10,10", "Names",
+                                      "x,y", "Units", "m,m", "SplitInto", "4", "SplitThreshold", "100",
+                                      "MaxRecursionDepth", "20", "OutputWorkspace", "mdew");
 
     FrameworkManager::Instance().exec(
-        "BinMD", 20, "InputWorkspace", "mdew", "OutputWorkspace", "binned",
-        "AxisAligned", "0", "BasisVector0", "tx, m, 2.0, 0.0", "BasisVector1",
-        "ty, m, 0.0, 2.0", "NormalizeBasisVectors", "1", "ForceOrthogonal", "0",
-        "Translation", "-2, -2", "OutputExtents",
-        "-4,6, -4,6", /* The extents are in the scaled OUTPUT dimensions */
+        "BinMD", 20, "InputWorkspace", "mdew", "OutputWorkspace", "binned", "AxisAligned", "0", "BasisVector0",
+        "tx, m, 2.0, 0.0", "BasisVector1", "ty, m, 0.0, 2.0", "NormalizeBasisVectors", "1", "ForceOrthogonal", "0",
+        "Translation", "-2, -2", "OutputExtents", "-4,6, -4,6", /* The extents are in the scaled OUTPUT dimensions */
         "OutputBins", "10,10");
 
-    auto binned =
-        AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>("binned");
-    TSM_ASSERT("All basis vectors should have been normalized",
-               binned->allBasisNormalized());
+    auto binned = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>("binned");
+    TSM_ASSERT("All basis vectors should have been normalized", binned->allBasisNormalized());
   }
 
   void test_filebackend_and_unrecognised_instrument() {
@@ -1016,8 +899,7 @@ public:
     // Create workspace with non-existent instrument
     Mantid::Geometry::QSample frame;
     IMDEventWorkspace_sptr in_ws =
-        MDEventsTestHelper::makeAnyMDEWWithFrames<MDLeanEvent<3>, 3>(
-            10, 0.0, 10.0, frame, 10);
+        MDEventsTestHelper::makeAnyMDEWWithFrames<MDLeanEvent<3>, 3>(10, 0.0, 10.0, frame, 10);
 
     auto eventNorm = Mantid::API::MDNormalization::VolumeNormalization;
     auto histoNorm = Mantid::API::MDNormalization::NumEventsNormalization;
@@ -1043,15 +925,12 @@ public:
     alg.setRethrows(true);
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", outWSName));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("AlignedDim0", "Axis0,2.0,8.0, 6"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("AlignedDim1", "Axis1,2.0,8.0, 6"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDim0", "Axis0,2.0,8.0, 6"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDim1", "Axis1,2.0,8.0, 6"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDim2", ""));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDim3", ""));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("IterateEvents", true));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "BinMDTest_ws_binned"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "BinMDTest_ws_binned"));
 
     TSM_ASSERT_THROWS_NOTHING("Instrument name in experiment info will not be "
                               "recognised, but the algorithm should "
@@ -1070,8 +949,7 @@ public:
     TS_ASSERT(loader.isInitialized())
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", filename));
     TS_ASSERT_THROWS_NOTHING(loader.setProperty("FileBackEnd", true));
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(loader.setProperty("MetadataOnly", false));
     TS_ASSERT_THROWS_NOTHING(loader.setProperty("BoxStructureOnly", false));
     TS_ASSERT_THROWS_NOTHING(loader.execute(););
@@ -1087,8 +965,7 @@ public:
     saver.initialize();
     TS_ASSERT(saver.isInitialized())
     TS_ASSERT_THROWS_NOTHING(saver.setProperty("InputWorkspace", in_ws));
-    TS_ASSERT_THROWS_NOTHING(
-        saver.setPropertyValue("Filename", "BinMDTestFileBack.nxs"));
+    TS_ASSERT_THROWS_NOTHING(saver.setPropertyValue("Filename", "BinMDTestFileBack.nxs"));
 
     // Retrieve the full path; delete any pre-existing file
     std::string filename = saver.getPropertyValue("Filename");
@@ -1108,9 +985,7 @@ public:
 
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static BinMDTestPerformance *createSuite() {
-    return new BinMDTestPerformance();
-  }
+  static BinMDTestPerformance *createSuite() { return new BinMDTestPerformance(); }
   static void destroySuite(BinMDTestPerformance *suite) { delete suite; }
 
   BinMDTestPerformance() {
@@ -1118,34 +993,26 @@ public:
     in_ws->getBoxController()->setSplitThreshold(2000);
     in_ws->splitAllIfNeeded(nullptr);
     AnalysisDataService::Instance().addOrReplace("BinMDTest_ws", in_ws);
-    FrameworkManager::Instance().exec("FakeMDEventData", 4, "InputWorkspace",
-                                      "BinMDTest_ws", "UniformParams",
+    FrameworkManager::Instance().exec("FakeMDEventData", 4, "InputWorkspace", "BinMDTest_ws", "UniformParams",
                                       "1000000");
     // 1 million random points
     TS_ASSERT_EQUALS(in_ws->getNPoints(), 1000 * 1000);
     TS_ASSERT_EQUALS(in_ws->getBoxController()->getMaxId(), 1001);
   }
 
-  ~BinMDTestPerformance() override {
-    AnalysisDataService::Instance().remove("BinMDTest_ws");
-  }
+  ~BinMDTestPerformance() override { AnalysisDataService::Instance().remove("BinMDTest_ws"); }
 
   void do_test(const std::string &binParams, bool IterateEvents) {
     BinMD alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", "BinMDTest_ws"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("AlignedDim0", "Axis0," + binParams));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("AlignedDim1", "Axis1," + binParams));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("AlignedDim2", "Axis2," + binParams));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "BinMDTest_ws"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDim0", "Axis0," + binParams));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDim1", "Axis1," + binParams));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDim2", "Axis2," + binParams));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDim3", ""));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("IterateEvents", IterateEvents));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "BinMDTest_ws_histo"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "BinMDTest_ws_histo"));
     TS_ASSERT_THROWS_NOTHING(alg.execute();)
     TS_ASSERT(alg.isExecuted());
   }

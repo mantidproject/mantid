@@ -55,13 +55,11 @@ Mantid::API::MatrixWorkspace_sptr reload(const std::string &filename) {
   loader.setPropertyValue("OutputWorkspace", "dummy");
   loader.execute();
   Workspace_sptr out = loader.getProperty("OutputWorkspace");
-  auto matrixWSOut =
-      std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(out);
+  auto matrixWSOut = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(out);
   return matrixWSOut;
 }
 
-Mantid::API::MatrixWorkspace_sptr
-from_instrument_file(const std::string &filename) {
+Mantid::API::MatrixWorkspace_sptr from_instrument_file(const std::string &filename) {
   LoadEmptyInstrument loader;
   loader.setChild(true);
   loader.initialize();
@@ -71,8 +69,7 @@ from_instrument_file(const std::string &filename) {
   MatrixWorkspace_sptr ws = loader.getProperty("OutputWorkspace");
   return ws;
 }
-Mantid::API::MatrixWorkspace_sptr
-from_instrument_name(const std::string &name) {
+Mantid::API::MatrixWorkspace_sptr from_instrument_name(const std::string &name) {
   LoadEmptyInstrument loader;
   loader.setChild(true);
   loader.initialize();
@@ -82,9 +79,7 @@ from_instrument_name(const std::string &name) {
   MatrixWorkspace_sptr ws = loader.getProperty("OutputWorkspace");
   return ws;
 }
-Mantid::API::MatrixWorkspace_sptr load(const std::string &name) {
-  return reload(name);
-}
+Mantid::API::MatrixWorkspace_sptr load(const std::string &name) { return reload(name); }
 } // namespace test_utility
 } // namespace
 class SaveNexusESSTest : public CxxTest::TestSuite {
@@ -103,9 +98,8 @@ public:
   void test_exec_rectangular_instrument_details() {
     using namespace Mantid::NexusGeometry;
     FileResource fileInfo("test_rectangular_instrument.nxs");
-    auto ws =
-        WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
-            1 /*numBanks*/, 10 /*numPixels*/, 10 /*numBins*/);
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(1 /*numBanks*/, 10 /*numPixels*/,
+                                                                                  10 /*numBins*/);
 
     const auto &inDetInfo = ws->detectorInfo();
     const auto &inCompInfo = ws->componentInfo();
@@ -114,8 +108,7 @@ public:
 
     // Load and check instrument geometry
     Mantid::Kernel::Logger logger("test_logger");
-    auto instr = NexusGeometryParser::createInstrument(fileInfo.fullPath(),
-                                                       makeLogger(&logger));
+    auto instr = NexusGeometryParser::createInstrument(fileInfo.fullPath(), makeLogger(&logger));
     Mantid::Geometry::ParameterMap pmap;
     auto beamline = instr->makeBeamline(pmap);
     const auto &outDetInfo = beamline.second;
@@ -130,9 +123,8 @@ public:
 
   void test_exec_rectangular_data() {
     FileResource fileInfo("test_rectangular_data.nxs");
-    auto wsIn =
-        WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
-            1 /*numBanks*/, 10 /*numPixels*/, 12 /*numBins*/);
+    auto wsIn = WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(1 /*numBanks*/, 10 /*numPixels*/,
+                                                                                    12 /*numBins*/);
 
     do_execute(fileInfo.fullPath(), wsIn);
 
@@ -149,8 +141,7 @@ public:
 
     FileResource fileInfo("test_ess_instrument.nxs");
 
-    auto wsIn = test_utility::from_instrument_file(
-        "V20_4-tubes_90deg_Definition_v01.xml");
+    auto wsIn = test_utility::from_instrument_file("V20_4-tubes_90deg_Definition_v01.xml");
     for (size_t i = 0; i < wsIn->getNumberHistograms(); ++i) {
       wsIn->setCounts(i, Counts{double(i)});
     }
@@ -171,9 +162,8 @@ public:
 
     using namespace Mantid::Indexing;
     FileResource fileInfo("test_spectra_mapping.nxs");
-    auto wsIn =
-        WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
-            2 /*numBanks*/, 10 /*numPixels*/, 12 /*numBins*/);
+    auto wsIn = WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(2 /*numBanks*/, 10 /*numPixels*/,
+                                                                                    12 /*numBins*/);
 
     std::vector<SpectrumDefinition> specDefinitions;
     std::vector<SpectrumNumber> spectrumNumbers;
@@ -188,26 +178,17 @@ public:
     do_execute(fileInfo.fullPath(), wsIn);
 
     {
-      const auto rootName =
-          wsIn->componentInfo().name(wsIn->componentInfo().root());
+      const auto rootName = wsIn->componentInfo().name(wsIn->componentInfo().root());
       // Check that mapping datasets are written
       Mantid::NexusGeometry::NexusFileReader validator(fileInfo.fullPath());
-      TS_ASSERT(validator.hasDataset(
-          "spectra", {"mantid_workspace_1", rootName, "bank1"}));
-      TS_ASSERT(validator.hasDataset(
-          "detector_list", {"mantid_workspace_1", rootName, "bank1"}));
-      TS_ASSERT(validator.hasDataset(
-          "detector_index", {"mantid_workspace_1", rootName, "bank1"}));
-      TS_ASSERT(validator.hasDataset(
-          "detector_count", {"mantid_workspace_1", rootName, "bank1"}));
-      TS_ASSERT(validator.hasDataset(
-          "spectra", {"mantid_workspace_1", rootName, "bank2"}));
-      TS_ASSERT(validator.hasDataset(
-          "detector_list", {"mantid_workspace_1", rootName, "bank2"}));
-      TS_ASSERT(validator.hasDataset(
-          "detector_index", {"mantid_workspace_1", rootName, "bank2"}));
-      TS_ASSERT(validator.hasDataset(
-          "detector_count", {"mantid_workspace_1", rootName, "bank2"}));
+      TS_ASSERT(validator.hasDataset("spectra", {"mantid_workspace_1", rootName, "bank1"}));
+      TS_ASSERT(validator.hasDataset("detector_list", {"mantid_workspace_1", rootName, "bank1"}));
+      TS_ASSERT(validator.hasDataset("detector_index", {"mantid_workspace_1", rootName, "bank1"}));
+      TS_ASSERT(validator.hasDataset("detector_count", {"mantid_workspace_1", rootName, "bank1"}));
+      TS_ASSERT(validator.hasDataset("spectra", {"mantid_workspace_1", rootName, "bank2"}));
+      TS_ASSERT(validator.hasDataset("detector_list", {"mantid_workspace_1", rootName, "bank2"}));
+      TS_ASSERT(validator.hasDataset("detector_index", {"mantid_workspace_1", rootName, "bank2"}));
+      TS_ASSERT(validator.hasDataset("detector_count", {"mantid_workspace_1", rootName, "bank2"}));
     }
   }
 
@@ -218,13 +199,10 @@ public:
     // this.
     FileResource fileResource("test_with_full_workspace.hdf5");
     std::string destinationFile = fileResource.fullPath();
-    auto ws =
-        WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
-            2, 10, 20);
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(2, 10, 20);
     Mantid::Kernel::Logger logger("logger");
     Mantid::NexusGeometry::LogAdapter<Mantid::Kernel::Logger> adapter(&logger);
-    Mantid::NexusGeometry::NexusGeometrySave::saveInstrument(
-        *ws, destinationFile, "entry", adapter);
+    Mantid::NexusGeometry::NexusGeometrySave::saveInstrument(*ws, destinationFile, "entry", adapter);
   }
 
   void test_regression_iris() {
@@ -240,22 +218,19 @@ public:
     TS_ASSERT_EQUALS(indexInfo.size(), indexInfoReload.size());
   }
   void test_not_all_detectors_mapped_to_spectrum() {
-    FileResource handle(
-        "test_regression_iris_with_mappings.nxs"); // IRIS does not include all
-                                                   // detectors in it's
-                                                   // mappings.
+    FileResource handle("test_regression_iris_with_mappings.nxs"); // IRIS does not include all
+                                                                   // detectors in it's
+                                                                   // mappings.
     auto ws = test_utility::load("irs26176_graphite002_red.nxs");
     Mantid::Kernel::Logger logger("logger");
     Mantid::NexusGeometry::LogAdapter<Mantid::Kernel::Logger> adapter(&logger);
     TS_ASSERT_THROWS_NOTHING(
-        Mantid::NexusGeometry::NexusGeometrySave::saveInstrument(
-            *ws, handle.fullPath(), "entry", adapter));
+        Mantid::NexusGeometry::NexusGeometrySave::saveInstrument(*ws, handle.fullPath(), "entry", adapter));
   }
   void test_not_all_detectors_mapped_to_spectrum_and_reloaded() {
-    FileResource handle(
-        "test_regression_iris_with_mappings.nxs"); // IRIS does not include all
-                                                   // detectors in it's
-                                                   // mappings.
+    FileResource handle("test_regression_iris_with_mappings.nxs"); // IRIS does not include all
+                                                                   // detectors in it's
+                                                                   // mappings.
     auto ws = test_utility::load("irs26176_graphite002_red.nxs");
     do_execute(handle.fullPath(), ws);
     auto ws_out = test_utility::reload(handle.fullPath());

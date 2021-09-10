@@ -28,10 +28,8 @@ class EXPORT_OPT_MANTIDQT_PLOTTING RangeSelector : public QwtPlotPicker {
 public:
   enum SelectType { XMINMAX, XSINGLE, YMINMAX, YSINGLE };
 
-  RangeSelector(QwtPlot *plot, SelectType type = XMINMAX, bool visible = true,
-                bool infoOnly = false);
-  RangeSelector(PreviewPlot *plot, SelectType type = XMINMAX,
-                bool visible = true, bool infoOnly = false);
+  RangeSelector(QwtPlot *plot, SelectType type = XMINMAX, bool visible = true, bool infoOnly = false);
+  RangeSelector(PreviewPlot *plot, SelectType type = XMINMAX, bool visible = true, bool infoOnly = false);
   ~RangeSelector() override{};
 
   void setRange(const std::pair<double, double> &range);
@@ -55,7 +53,7 @@ public slots:
   void setMinimum(double /*val*/); ///< outside setting of value
   void setMaximum(double /*val*/); ///< outside setting of value
   void reapply();                  ///< re-apply the range selector lines
-  void detach(); ///< Detach range selector lines from the plot
+  void detach();                   ///< Detach range selector lines from the plot
   void setColour(const QColor &colour);
   void setInfoOnly(bool state);
   void setVisible(bool state);
@@ -105,9 +103,8 @@ private:
 
   /** Strictly UI options and settings below this point **/
 
-  QPen *m_pen; ///< pen object used to define line style, colour, etc
-  QCursor
-      m_movCursor; ///< the cursor object to display when an item is being moved
+  QPen *m_pen;         ///< pen object used to define line style, colour, etc
+  QCursor m_movCursor; ///< the cursor object to display when an item is being moved
 };
 
 } // namespace MantidWidgets

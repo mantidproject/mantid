@@ -110,7 +110,7 @@ Usage
    tested for correctness on our servers, due to the requirement to
    have GSAS-II installed. Please contact the Mantid developers if
    something is awry.
-   
+
 **Example - Pawley refinement of lattice parameters from a diffraction spectrum**
 
 .. code-block:: python

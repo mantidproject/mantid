@@ -13,13 +13,11 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class MANTIDQT_INDIRECT_DLL IIndirectFitOutputOptionsView
-    : public API::MantidWidget {
+class MANTIDQT_INDIRECT_DLL IIndirectFitOutputOptionsView : public API::MantidWidget {
   Q_OBJECT
 
 public:
-  IIndirectFitOutputOptionsView(QWidget *parent = nullptr)
-      : API::MantidWidget(parent){};
+  IIndirectFitOutputOptionsView(QWidget *parent = nullptr) : API::MantidWidget(parent){};
   virtual ~IIndirectFitOutputOptionsView(){};
 
   virtual void setGroupWorkspaceComboBoxVisible(bool visible) = 0;
@@ -27,10 +25,8 @@ public:
 
   virtual void clearPlotWorkspaces() = 0;
   virtual void clearPlotTypes() = 0;
-  virtual void setAvailablePlotWorkspaces(
-      std::vector<std::string> const &workspaceNames) = 0;
-  virtual void
-  setAvailablePlotTypes(std::vector<std::string> const &parameterNames) = 0;
+  virtual void setAvailablePlotWorkspaces(std::vector<std::string> const &workspaceNames) = 0;
+  virtual void setAvailablePlotTypes(std::vector<std::string> const &parameterNames) = 0;
 
   virtual void setPlotGroupWorkspaceIndex(int index) = 0;
   virtual void setPlotWorkspacesIndex(int index) = 0;

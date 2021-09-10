@@ -20,9 +20,7 @@ class ArrayLengthValidatorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ArrayLengthValidatorTest *createSuite() {
-    return new ArrayLengthValidatorTest();
-  }
+  static ArrayLengthValidatorTest *createSuite() { return new ArrayLengthValidatorTest(); }
   static void destroySuite(ArrayLengthValidatorTest *suite) { delete suite; }
 
   /// test constructors, both empty and with length, also hasLength and
@@ -45,8 +43,7 @@ public:
 
   /// test the clone function
   void testClone() {
-    std::shared_ptr<ArrayLengthValidator<int>> vi(
-        new ArrayLengthValidator<int>);
+    std::shared_ptr<ArrayLengthValidator<int>> vi(new ArrayLengthValidator<int>);
     IValidator_sptr vvi = vi->clone();
     TS_ASSERT_DIFFERS(vi, vvi);
   }

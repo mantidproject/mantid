@@ -31,12 +31,8 @@ class JoinISISPolarizationEfficienciesTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static JoinISISPolarizationEfficienciesTest *createSuite() {
-    return new JoinISISPolarizationEfficienciesTest();
-  }
-  static void destroySuite(JoinISISPolarizationEfficienciesTest *suite) {
-    delete suite;
-  }
+  static JoinISISPolarizationEfficienciesTest *createSuite() { return new JoinISISPolarizationEfficienciesTest(); }
+  static void destroySuite(JoinISISPolarizationEfficienciesTest *suite) { delete suite; }
 
   void test_initialization() {
     JoinISISPolarizationEfficiencies alg;
@@ -577,8 +573,7 @@ public:
   }
 
 private:
-  MatrixWorkspace_sptr createHistoWS(size_t size, double startX,
-                                     double endX) const {
+  MatrixWorkspace_sptr createHistoWS(size_t size, double startX, double endX) const {
     double const dX = (endX - startX) / double(size);
     BinEdges xVals(size + 1, LinearGenerator(startX, dX));
     Counts yVals(size, 1.0);
@@ -587,8 +582,7 @@ private:
     return retVal;
   }
 
-  MatrixWorkspace_sptr createPointWS(size_t size, double startX,
-                                     double endX) const {
+  MatrixWorkspace_sptr createPointWS(size_t size, double startX, double endX) const {
     double const dX = (endX - startX) / double(size - 1);
     Points xVals(size, LinearGenerator(startX, dX));
     Counts yVals(size, 1.0);

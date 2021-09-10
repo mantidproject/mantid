@@ -28,10 +28,7 @@ public:
   static std::unique_ptr<SaveSampleEnvironmentAndShapeTest> createSuite() {
     return std::make_unique<SaveSampleEnvironmentAndShapeTest>();
   }
-  static void
-  destroySuite(std::unique_ptr<SaveSampleEnvironmentAndShapeTest> suite) {
-    suite.reset(nullptr);
-  }
+  static void destroySuite(std::unique_ptr<SaveSampleEnvironmentAndShapeTest> suite) { suite.reset(nullptr); }
 
   void testInit() {
 
@@ -39,8 +36,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
     auto props = alg.getProperties();
-    TSM_ASSERT_EQUALS("should be 3 properties here", 3,
-                      (size_t)(alg.getProperties().size()));
+    TSM_ASSERT_EQUALS("should be 3 properties here", 3, (size_t)(alg.getProperties().size()));
   }
 
   void testSimpleShape() {
@@ -168,9 +164,7 @@ public:
   MatrixWorkspace_sptr setup(SaveSampleEnvironmentAndShape &alg) {
 
     const int nvectors(2), nbins(10);
-    MatrixWorkspace_sptr inputWS =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(nvectors,
-                                                                     nbins);
+    MatrixWorkspace_sptr inputWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(nvectors, nbins);
     alg.initialize();
     alg.setChild(true);
     alg.setProperty("InputWorkspace", inputWS);
@@ -200,16 +194,13 @@ public:
 
   // create a cube mesh object
   std::shared_ptr<MeshObject> createCube() {
-    const std::vector<uint32_t> faces{0, 1, 2, 0, 3, 1, 0, 2, 4, 2, 1, 5,
-                                      2, 5, 4, 6, 1, 3, 6, 5, 1, 4, 5, 6,
-                                      7, 3, 0, 0, 4, 7, 7, 6, 3, 4, 6, 7};
-    const std::vector<Mantid::Kernel::V3D> vertices{
-        Mantid::Kernel::V3D(-5, -5, -15), Mantid::Kernel::V3D(5, 5, -15),
-        Mantid::Kernel::V3D(5, -5, -15),  Mantid::Kernel::V3D(-5, 5, -15),
-        Mantid::Kernel::V3D(5, -5, 15),   Mantid::Kernel::V3D(5, 5, 15),
-        Mantid::Kernel::V3D(-5, 5, 15),   Mantid::Kernel::V3D(-5, -5, 15)};
-    auto cube = std::make_shared<MeshObject>(faces, vertices,
-                                             Mantid::Kernel::Material());
+    const std::vector<uint32_t> faces{0, 1, 2, 0, 3, 1, 0, 2, 4, 2, 1, 5, 2, 5, 4, 6, 1, 3,
+                                      6, 5, 1, 4, 5, 6, 7, 3, 0, 0, 4, 7, 7, 6, 3, 4, 6, 7};
+    const std::vector<Mantid::Kernel::V3D> vertices{Mantid::Kernel::V3D(-5, -5, -15), Mantid::Kernel::V3D(5, 5, -15),
+                                                    Mantid::Kernel::V3D(5, -5, -15),  Mantid::Kernel::V3D(-5, 5, -15),
+                                                    Mantid::Kernel::V3D(5, -5, 15),   Mantid::Kernel::V3D(5, 5, 15),
+                                                    Mantid::Kernel::V3D(-5, 5, 15),   Mantid::Kernel::V3D(-5, -5, 15)};
+    auto cube = std::make_shared<MeshObject>(faces, vertices, Mantid::Kernel::Material());
     return cube;
   }
   // create a mesh of cubes for comparison
@@ -220,37 +211,24 @@ public:
     std::vector<Mantid::Kernel::V3D> vertices;
     for (int i = 0; i < num; ++i) {
       faces.insert(std::end(faces),
-                   {0 + offset, 1 + offset, 2 + offset, 0 + offset, 3 + offset,
-                    1 + offset, 0 + offset, 2 + offset, 4 + offset, 2 + offset,
-                    1 + offset, 5 + offset, 2 + offset, 5 + offset, 4 + offset,
-                    6 + offset, 1 + offset, 3 + offset, 6 + offset, 5 + offset,
-                    1 + offset, 4 + offset, 5 + offset, 6 + offset, 7 + offset,
-                    3 + offset, 0 + offset, 0 + offset, 4 + offset, 7 + offset,
-                    7 + offset, 6 + offset, 3 + offset, 4 + offset, 6 + offset,
-                    7 + offset});
-      vertices.insert(
-          std::end(vertices),
-          {Mantid::Kernel::V3D(-5 + actualTranslation, -5 + actualTranslation,
-                               -15 + actualTranslation),
-           Mantid::Kernel::V3D(5 + actualTranslation, 5 + actualTranslation,
-                               -15 + actualTranslation),
-           Mantid::Kernel::V3D(5 + actualTranslation, -5 + actualTranslation,
-                               -15 + actualTranslation),
-           Mantid::Kernel::V3D(-5 + actualTranslation, 5 + actualTranslation,
-                               -15 + actualTranslation),
-           Mantid::Kernel::V3D(5 + actualTranslation, -5 + actualTranslation,
-                               15 + actualTranslation),
-           Mantid::Kernel::V3D(5 + actualTranslation, 5 + actualTranslation,
-                               15 + actualTranslation),
-           Mantid::Kernel::V3D(-5 + actualTranslation, 5 + actualTranslation,
-                               15 + actualTranslation),
-           Mantid::Kernel::V3D(-5 + actualTranslation, -5 + actualTranslation,
-                               15 + actualTranslation)});
+                   {0 + offset, 1 + offset, 2 + offset, 0 + offset, 3 + offset, 1 + offset, 0 + offset, 2 + offset,
+                    4 + offset, 2 + offset, 1 + offset, 5 + offset, 2 + offset, 5 + offset, 4 + offset, 6 + offset,
+                    1 + offset, 3 + offset, 6 + offset, 5 + offset, 1 + offset, 4 + offset, 5 + offset, 6 + offset,
+                    7 + offset, 3 + offset, 0 + offset, 0 + offset, 4 + offset, 7 + offset, 7 + offset, 6 + offset,
+                    3 + offset, 4 + offset, 6 + offset, 7 + offset});
+      vertices.insert(std::end(vertices),
+                      {Mantid::Kernel::V3D(-5 + actualTranslation, -5 + actualTranslation, -15 + actualTranslation),
+                       Mantid::Kernel::V3D(5 + actualTranslation, 5 + actualTranslation, -15 + actualTranslation),
+                       Mantid::Kernel::V3D(5 + actualTranslation, -5 + actualTranslation, -15 + actualTranslation),
+                       Mantid::Kernel::V3D(-5 + actualTranslation, 5 + actualTranslation, -15 + actualTranslation),
+                       Mantid::Kernel::V3D(5 + actualTranslation, -5 + actualTranslation, 15 + actualTranslation),
+                       Mantid::Kernel::V3D(5 + actualTranslation, 5 + actualTranslation, 15 + actualTranslation),
+                       Mantid::Kernel::V3D(-5 + actualTranslation, 5 + actualTranslation, 15 + actualTranslation),
+                       Mantid::Kernel::V3D(-5 + actualTranslation, -5 + actualTranslation, 15 + actualTranslation)});
       actualTranslation += translation;
       offset += 8;
     }
-    auto cube = std::make_shared<MeshObject>(faces, vertices,
-                                             Mantid::Kernel::Material());
+    auto cube = std::make_shared<MeshObject>(faces, vertices, Mantid::Kernel::Material());
     return cube;
   }
 

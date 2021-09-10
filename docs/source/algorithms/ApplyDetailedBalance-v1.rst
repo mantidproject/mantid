@@ -40,7 +40,7 @@ Usage
    print("The Y values in the Output Workspace are")
    print(ows.readY(0)[0:5])
    print(ows.readY(0)[5:10])
-   
+
 Output:
 
 .. testoutput:: ExApplyDetailedBalanceSimple

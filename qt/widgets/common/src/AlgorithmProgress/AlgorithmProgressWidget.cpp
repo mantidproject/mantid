@@ -15,17 +15,15 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 AlgorithmProgressWidget::AlgorithmProgressWidget(QWidget *parent)
-    : QWidget(parent),
-      m_progressBar{new QProgressBar(this)}, m_layout{new QHBoxLayout(this)},
-      m_detailsButton{new QPushButton("Details")},
-      m_presenter{std::make_unique<AlgorithmProgressPresenter>(parent, this)} {
+    : QWidget(parent), m_progressBar{new QProgressBar(this)}, m_layout{new QHBoxLayout(this)},
+      m_detailsButton{new QPushButton("Details")}, m_presenter{
+                                                       std::make_unique<AlgorithmProgressPresenter>(parent, this)} {
   m_progressBar->setAlignment(Qt::AlignHCenter);
   m_layout->addWidget(m_progressBar);
   m_layout->addWidget(m_detailsButton);
   this->setLayout(m_layout);
 
-  connect(m_detailsButton, &QPushButton::clicked, this,
-          &AlgorithmProgressWidget::showDetailsDialog);
+  connect(m_detailsButton, &QPushButton::clicked, this, &AlgorithmProgressWidget::showDetailsDialog);
 }
 
 void AlgorithmProgressWidget::algorithmStarted() {
@@ -55,17 +53,12 @@ void AlgorithmProgressWidget::showDetailsDialog() {
   }
 }
 
-void AlgorithmProgressWidget::updateProgress(const double progress,
-                                             const QString &message,
-                                             const double estimatedTime,
+void AlgorithmProgressWidget::updateProgress(const double progress, const QString &message, const double estimatedTime,
                                              const int progressPrecision) {
-  m_presenter->setProgressBar(m_progressBar, progress, message, estimatedTime,
-                              progressPrecision);
+  m_presenter->setProgressBar(m_progressBar, progress, message, estimatedTime, progressPrecision);
 }
 
-void AlgorithmProgressWidget::blockUpdates(bool block) {
-  m_presenter->blockSignals(block);
-}
+void AlgorithmProgressWidget::blockUpdates(bool block) { m_presenter->blockSignals(block); }
 
 } // namespace MantidWidgets
 } // namespace MantidQt

@@ -280,7 +280,10 @@ class CurvesTabWidgetPresenter:
         # Then update the rest of the view to reflect the selected combo items.
         curve_props = CurveProperties.from_curve(self.get_current_curve())
         self.view.update_fields(curve_props)
-        self.set_errorbars_tab_enabled()
+        # only enable error bar tabs if we do not have multiple curves selected
+        if not len(self.view.select_curve_list.selectedItems()) > 1:
+            self.set_errorbars_tab_enabled()
+
         self.current_view_properties = curve_props
 
     # Private methods
@@ -421,3 +424,36 @@ class CurvesTabWidgetPresenter:
         else:
             self.view.enable_curve_config(True)
             self.set_errorbars_tab_enabled()
+
+    def set_axes_from_object(self, axes_to_set):
+        """
+        Given the axes object, sets the selected index of the axes combo
+        to be the index corresponding to this object.
+        """
+        index_to_set = None
+        for index, axes in enumerate(self.axes_names_dict.values()):
+            if axes_to_set == axes:
+                index_to_set = index
+                break
+
+        if index_to_set is None:  # could be 0, incorrectly raising error.
+            raise ValueError("Axes object does not exist in curves tab")
+
+        self.view.select_axes_combo_box.setCurrentIndex(index_to_set)
+
+    def set_curve_from_object(self, curve_to_set):
+        """
+        Given the curve object, sets the selected index of the curves list
+        to be the index corresponding to this object.
+        """
+        index_to_set = None
+        for index, curve in enumerate(self.curve_names_dict.values()):
+            if curve_to_set == curve:
+                index_to_set = index
+                break
+
+        if index_to_set is None:
+            raise ValueError("Curve object does not exist in curves tab")
+
+        self.view.select_curve_list.setCurrentRow(index_to_set)
+        self.view.select_curve_list.item(index_to_set).setSelected(True)

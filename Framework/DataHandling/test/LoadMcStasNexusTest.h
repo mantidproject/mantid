@@ -16,6 +16,7 @@
 // These includes seem to make the difference between initialization of the
 // workspace names (workspace2D/1D etc), instrument classes and not for this
 // test case.
+#include "MantidDataHandling/Load.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include <Poco/Path.h>
@@ -47,29 +48,48 @@ public:
 
     // Now set it...
     // specify name of file to load workspace from
-    inputFile = "mcstas.n5";
+    inputFile = "mcstas.h5";
     algToBeTested.setPropertyValue("Filename", inputFile);
 
     TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
     TS_ASSERT(algToBeTested.isExecuted());
     //
     //  test workspace created by LoadMcStasNexus
-    WorkspaceGroup_sptr output =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outputSpace);
+    WorkspaceGroup_sptr output = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outputSpace);
     TS_ASSERT_EQUALS(output->getNumberOfEntries(), 4);
     // int ii;
     // std::cin >> ii;
-    MatrixWorkspace_sptr outputItem1 =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outputSpace + "_1");
+    MatrixWorkspace_sptr outputItem1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace + "_1");
     TS_ASSERT_EQUALS(outputItem1->getNumberHistograms(), 1);
-    MatrixWorkspace_sptr outputItem2 =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outputSpace + "_2");
+    MatrixWorkspace_sptr outputItem2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace + "_2");
     TS_ASSERT_EQUALS(outputItem2->getNumberHistograms(), 128);
 
     AnalysisDataService::Instance().remove(outputSpace + "_1");
     AnalysisDataService::Instance().remove(outputSpace + "_2");
+  }
+
+  void test_run_via_load() {
+    // We are verifying that the confidence information provided by the loader is good
+    std::string inputFile = "mcstas.h5";
+    Load loader;
+    loader.initialize();
+    loader.setChild(true);
+    loader.setProperty("Filename", inputFile);
+    loader.setPropertyValue("OutputWorkspace", "dummy");
+    TS_ASSERT_EQUALS(loader.getPropertyValue("LoaderName"), "LoadMcStasNexus");
+    loader.execute();
+    Workspace_sptr out = loader.getProperty("OutputWorkspace");
+    auto asMatrixOut = std::dynamic_pointer_cast<MatrixWorkspace>(out);
+  }
+
+  void test_cannot_run_via_load() {
+    // We are verifying that the confidence information provided by the loader is idenfiying unsuitable files
+    std::string inputFile = "POLREF00014966.nxs";
+    Load loader;
+    loader.initialize();
+    loader.setChild(true);
+    loader.setProperty("Filename", inputFile);
+    TS_ASSERT_DIFFERS(loader.getPropertyValue("LoaderName"), "LoadMcStasNexus");
   }
 
 private:
@@ -80,13 +100,9 @@ private:
 
 class LoadMcStasNexusTestPerformance : public CxxTest::TestSuite {
 public:
-  static LoadMcStasNexusTestPerformance *createSuite() {
-    return new LoadMcStasNexusTestPerformance();
-  }
+  static LoadMcStasNexusTestPerformance *createSuite() { return new LoadMcStasNexusTestPerformance(); }
 
-  static void destroySuite(LoadMcStasNexusTestPerformance *suite) {
-    delete suite;
-  }
+  static void destroySuite(LoadMcStasNexusTestPerformance *suite) { delete suite; }
 
   void setUp() override {
     if (!loadMcStasNexusAlg.isInitialized())
@@ -95,7 +111,7 @@ public:
     outputSpace = "LoadMcStasNexusTest";
     loadMcStasNexusAlg.setPropertyValue("OutputWorkspace", outputSpace);
 
-    inputFile = "mcstas.n5";
+    inputFile = "mcstas.h5";
     loadMcStasNexusAlg.setPropertyValue("Filename", inputFile);
   }
 

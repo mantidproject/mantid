@@ -13,7 +13,7 @@ A pair of frequencies for aligned Anti-ferrormagnetic magnetism in Longitudinal 
 
 .. math:: A(t)  = \frac{A_0}{2}((1-a_1)+a_1\cos(\omega_1t+\phi))+(1-a_2)+a_2\cos(\omega_2t+\phi))
 
-where, 
+where,
 
 .. math:: a_1 =\frac{(f_a\sin\theta)^2}{(f_b+f_a\cos\theta)^2+(f_a\sin\theta)^2} ,
 
@@ -32,7 +32,7 @@ where,
 and :math:`\phi` is the phase.
 
 .. plot::
-	
+
    from mantid.simpleapi import FunctionWrapper
    import matplotlib.pyplot as plt
    import numpy as np

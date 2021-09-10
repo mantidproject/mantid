@@ -35,19 +35,15 @@ namespace API {
  @date 21/07/2011
  */
 template <class VectorValueParameterType>
-class DLLExport VectorParameterParser
-    : public Mantid::API::ImplicitFunctionParameterParser {
+class DLLExport VectorParameterParser : public Mantid::API::ImplicitFunctionParameterParser {
 public:
   VectorValueParameterType *parseVectorParameter(std::string sValue);
 
-  Mantid::API::ImplicitFunctionParameter *
-  createParameter(Poco::XML::Element *parameterElement) override;
+  Mantid::API::ImplicitFunctionParameter *createParameter(Poco::XML::Element *parameterElement) override;
 
-  VectorValueParameterType *
-  createWithoutDelegation(Poco::XML::Element *parameterElement);
+  VectorValueParameterType *createWithoutDelegation(Poco::XML::Element *parameterElement);
 
-  void setSuccessorParser(
-      Mantid::API::ImplicitFunctionParameterParser *paramParser) override;
+  void setSuccessorParser(Mantid::API::ImplicitFunctionParameterParser *paramParser) override;
 };
 
 ////////////////////////////////////////////////////////////////////
@@ -58,9 +54,7 @@ public:
 @return new parameter object.
 */
 template <typename VectorValueParameterType>
-VectorValueParameterType *
-VectorParameterParser<VectorValueParameterType>::parseVectorParameter(
-    std::string sValue) {
+VectorValueParameterType *VectorParameterParser<VectorValueParameterType>::parseVectorParameter(std::string sValue) {
   std::vector<std::string> strs;
   boost::split(strs, sValue, boost::is_any_of(","));
 
@@ -83,8 +77,7 @@ VectorParameterParser<VectorValueParameterType>::parseVectorParameter(
 */
 template <typename VectorValueParameterType>
 Mantid::API::ImplicitFunctionParameter *
-VectorParameterParser<VectorValueParameterType>::createParameter(
-    Poco::XML::Element *parameterElement) {
+VectorParameterParser<VectorValueParameterType>::createParameter(Poco::XML::Element *parameterElement) {
   std::string typeName = parameterElement->getChildElement("Type")->innerText();
   if (VectorValueParameterType::parameterName() != typeName) {
     if (!m_successor) {
@@ -92,8 +85,7 @@ VectorParameterParser<VectorValueParameterType>::createParameter(
     }
     return m_successor->createParameter(parameterElement);
   } else {
-    std::string sParameterValue =
-        parameterElement->getChildElement("Value")->innerText();
+    std::string sParameterValue = parameterElement->getChildElement("Value")->innerText();
     return parseVectorParameter(sParameterValue);
   }
 }
@@ -106,15 +98,13 @@ to successor if it fails!.
 */
 template <class VectorValueParameterType>
 VectorValueParameterType *
-VectorParameterParser<VectorValueParameterType>::createWithoutDelegation(
-    Poco::XML::Element *parameterElement) {
+VectorParameterParser<VectorValueParameterType>::createWithoutDelegation(Poco::XML::Element *parameterElement) {
   std::string typeName = parameterElement->getChildElement("Type")->innerText();
   if (VectorValueParameterType::parameterName() != typeName) {
     throw std::runtime_error("The attempted ::createWithoutDelegation failed. "
                              "The type provided does not match this parser.");
   } else {
-    std::string sParameterValue =
-        parameterElement->getChildElement("Value")->innerText();
+    std::string sParameterValue = parameterElement->getChildElement("Value")->innerText();
     return parseVectorParameter(sParameterValue);
   }
 }

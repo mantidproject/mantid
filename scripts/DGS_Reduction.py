@@ -9,8 +9,16 @@
     Script used to start the DGS reduction GUI from MantidPlot
 """
 from reduction_application import ReductionGUI
+import sys
 
-reducer = ReductionGUI(instrument_list=["ARCS", "CNCS", "HYSPEC", "MAPS",
-                                        "MARI", "MERLIN", "SEQUOIA", "TOFTOF"])
+if 'workbench' in sys.modules:
+    from workbench.config import get_window_config
+
+    parent, flags = get_window_config()
+else:
+    parent, flags = None, None
+
+reducer = ReductionGUI(parent, flags, instrument_list=["ARCS", "CNCS", "HYSPEC", "MAPS",
+                                                       "MARI", "MERLIN", "SEQUOIA", "TOFTOF"])
 if reducer.setup_layout(load_last=True):
     reducer.show()

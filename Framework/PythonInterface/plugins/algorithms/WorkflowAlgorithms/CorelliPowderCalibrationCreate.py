@@ -13,6 +13,7 @@ from mantid.api import (
     AlgorithmFactory, AnalysisDataService, DataProcessorAlgorithm, WorkspaceProperty, mtd, Progress, TextAxis,
     Workspace, WorkspaceGroup, WorkspaceUnitValidator)
 from mantid.dataobjects import TableWorkspace, Workspace2D
+from mantid.kernel import StringListValidator
 from mantid.simpleapi import (
     CalculateDIFC, CloneWorkspace, CopyInstrumentParameters, ConvertUnits, CreateEmptyTableWorkspace,
     CreateGroupingWorkspace, CreateWorkspace, DeleteWorkspace, GroupDetectors, GroupWorkspaces, Multiply,
@@ -116,10 +117,7 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
         )
         self.declareProperty(name='OutputWorkspacesPrefix', defaultValue='pdcal_', direction=Direction.Input,
                              doc="Prefix to be added to output workspaces")
-        # Tube Calibration properties
-        self.declareProperty(name='TubeDatabaseDir',
-                             defaultValue='/SNS/CORELLI/shared/calibration/tube', direction=Direction.Input,
-                             doc='path to database containing detector heights')
+
         # PDCalibration properties exposed, grouped
         property_names = ['TofBinning', 'PeakFunction', 'PeakPositions']
         self.copyProperties('PDCalibration', property_names)
@@ -139,17 +137,30 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
         self.setPropertySettings("SourceMaxTranslation",
                                  EnabledWhenProperty("AdjustSource", PropertyCriterion.IsNotDefault))
         property_names = ['FixSource', 'SourceToSampleDistance', 'AdjustSource', 'SourceMaxTranslation']
-        [self.setPropertyGroup(name, 'Source Position') for name in property_names]
+        [self.setPropertyGroup(name, 'Source Calibration') for name in property_names]
 
         # AlignComponents properties
+        self.declareProperty(name='FixY', defaultValue=True, doc="Vertical bank position is left unchanged")
         self.declareProperty(StringArrayProperty('ComponentList', values=self._banks, direction=Direction.Input),
                              doc='Comma separated list on banks to refine')
         self.declareProperty(name='ComponentMaxTranslation', defaultValue=0.02,
                              doc='Maximum translation of each component along either of the X, Y, Z axes (m)')
+        self.declareProperty(name='FixYaw', defaultValue=True, doc="Prevent rotations around the axis normal to the bank")
         self.declareProperty(name='ComponentMaxRotation', defaultValue=3.0,
                              doc='Maximum rotation of each component along either of the X, Y, Z axes (deg)')
-        property_names = ['ComponentList', 'ComponentMaxTranslation', 'ComponentMaxRotation']
-        [self.setPropertyGroup(name, 'AlignComponents') for name in property_names]
+        property_names = ['FixY', 'ComponentList', 'ComponentMaxTranslation', 'FixYaw', 'ComponentMaxRotation']
+        [self.setPropertyGroup(name, 'Banks Calibration') for name in property_names]
+
+        #
+        # Minimization Properties
+        self.declareProperty(name='Minimizer', defaultValue='L-BFGS-B', direction=Direction.Input,
+                             validator=StringListValidator(['L-BFGS-B', 'differential_evolution']),
+                             doc='Minimizer to use, differential_evolution is more accurate and slower.')
+        self.declareProperty(name='MaxIterations', defaultValue=20, direction=Direction.Input,
+                             doc='Maximum number of iterations for minimizer differential_evolution')
+
+        properties = ['Minimizer', 'MaxIterations']
+        [self.setPropertyGroup(name, "Minimization") for name in properties]
 
     def PyExec(self):
         temporary_workspaces = []
@@ -229,35 +240,48 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
                           PeakCentersTofTable=peak_centers_in_tof,
                           PeakPositions=self.getProperty('PeakPositions').value,
                           MaskWorkspace=f'{difc_table}_mask',
-                          AdjustmentsTable=adjustments_table_name,
                           FitSourcePosition=True,
                           FitSamplePosition=False,
-                          Zposition=True, MinZPosition=-dz, MaxZPosition=dz)
+                          Zposition=True, MinZPosition=-dz, MaxZPosition=dz,
+                          Minimizer='L-BFGS-B')
             self.run_algorithm('AlignComponents', 0.1, 0.2, **kwargs)
         else:
             # Impose the fixed position of the source and save into the adjustments table
             self._fixed_source_set_and_table(adjustments_table_name)
         # Translate and rotate the each bank, only after the source has been adjusted
         # The instrument in `input_workspace` is adjusted in-place
+
+        # Translation options to AlignComponents
         dt = self.getProperty('ComponentMaxTranslation').value  # maximum translation along either axis
+        move_y = False if self.getProperty('FixY').value is True else True
+        kwargs_transl = dict(Xposition=True, MinXPosition=-dt, MaxXPosition=dt,
+                             Yposition=move_y, MinYPosition=-dt, MaxYPosition=dt,
+                             Zposition=True, MinZPosition=-dt, MaxZPosition=dt)
+
+        # Rotation options for AlignComponents
         dr = self.getProperty('ComponentMaxRotation').value  # maximum rotation along either axis
+        rot_z = False if self.getProperty('FixYaw').value is True else True
+        kwargs_rotat = dict(AlphaRotation=True, MinAlphaRotation=-dr, MaxAlphaRotation=dr,
+                            BetaRotation=True, MinBetaRotation=-dr, MaxBetaRotation=dr,
+                            GammaRotation=rot_z, MinGammaRotation=-dr, MaxGammaRotation=dr,
+                            EulerConvention='YXZ')
+
+        # Remaining options for AlignComponents
+        displacements_table_name = f'{prefix_output}displacements'
         kwargs = dict(InputWorkspace=input_workspace,
                       OutputWorkspace=input_workspace,
                       PeakCentersTofTable=peak_centers_in_tof,
                       PeakPositions=self.getProperty('PeakPositions').value,
                       MaskWorkspace=f'{difc_table}_mask',
                       AdjustmentsTable=adjustments_table_name + '_banks',
+                      DisplacementsTable=displacements_table_name,
                       FitSourcePosition=False,
                       FitSamplePosition=False,
                       ComponentList=self.getProperty('ComponentList').value,
-                      Xposition=True, MinXPosition=-dt, MaxXPosition=dt,
-                      Yposition=True, MinYPosition=-dt, MaxYPosition=dt,
-                      Zposition=True, MinZPosition=-dt, MaxZPosition=dt,
-                      AlphaRotation=True, MinAlphaRotation=-dr, MaxAlphaRotation=dr,
-                      BetaRotation=True, MinBetaRotation=-dr, MaxBetaRotation=dr,
-                      GammaRotation=True, MinGammaRotation=-dr, MaxGammaRotation=dr,
-                      EulerConvention='YXZ')
-        self.run_algorithm('AlignComponents', 0.2, 0.97, **kwargs)
+                      Minimizer=self.getProperty('Minimizer').value,
+                      MaxIterations=self.getProperty('MaxIterations').value)
+
+        self.run_algorithm('AlignComponents', 0.2, 0.97, **kwargs, **kwargs_transl, **kwargs_rotat)
         progress.report('AlignComponents has been applied')
 
         # AlignComponents produces two unwanted workspaces
@@ -265,7 +289,6 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
 
         # Append the banks table to the source table, then delete the banks table.
         self._append_second_to_first(adjustments_table_name, adjustments_table_name + '_banks')
-
         # Create one spectra in d-spacing for each bank using the adjusted instrument geometry.
         # The spectra can be compare to those of prefix_output + 'PDCalibration_peaks_original'
         self.fitted_in_dspacing(fitted_in_tof=prefix_output + 'PDCalibration_diagnostics_fitted',

@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantidqt.utils.observer_pattern import Observer, Observable, GenericObservable,GenericObserver
+from mantidqt.widgets.muonperiodinfo import MuonPeriodInfo
 import Muon.GUI.Common.utilities.muon_file_utils as file_utils
 import Muon.GUI.Common.utilities.xml_utils as xml_utils
 import Muon.GUI.Common.utilities.algorithm_utils as algorithm_utils
@@ -27,13 +28,15 @@ class GroupingTabPresenter(object):
     def __init__(self, view, model,
                  grouping_table_widget=None,
                  pairing_table_widget=None,
-                 diff_table = None):
+                 diff_table=None,
+                 parent=None):
         self._view = view
         self._model = model
 
         self.grouping_table_widget = grouping_table_widget
         self.pairing_table_widget = pairing_table_widget
         self.diff_table = diff_table
+        self.period_info_widget = MuonPeriodInfo()
 
         self._view.set_description_text('')
         self._view.on_add_pair_requested(self.add_pair_from_grouping_table)
@@ -41,6 +44,7 @@ class GroupingTabPresenter(object):
         self._view.on_load_grouping_button_clicked(self.handle_load_grouping_from_file)
         self._view.on_save_grouping_button_clicked(self.handle_save_grouping_file)
         self._view.on_default_grouping_button_clicked(self.handle_default_grouping_button_clicked)
+        self._view.on_period_information_button_clicked(self.handle_period_information_button_clicked)
 
         # monitors for loaded data changing
         self.loadObserver = GroupingTabPresenter.LoadObserver(self)
@@ -53,7 +57,7 @@ class GroupingTabPresenter(object):
         self.pairing_table_widget.on_data_changed(self.pair_table_changed)
         self.enable_editing_notifier = GroupingTabPresenter.EnableEditingNotifier(self)
         self.disable_editing_notifier = GroupingTabPresenter.DisableEditingNotifier(self)
-        self.calculation_finished_notifier = GenericObservable()
+        self.counts_calculation_finished_notifier = GenericObservable()
 
         self.guessAlphaObserver = GroupingTabPresenter.GuessAlphaObserver(self)
         self.pairing_table_widget.guessAlphaNotifier.add_subscriber(self.guessAlphaObserver)
@@ -159,9 +163,9 @@ class GroupingTabPresenter(object):
                 self._view.display_warning_box(str(error))
         for diff in diffs:
             try:
-                if diff.forward_group in self._model.group_names and diff.backward_group in self._model.group_names:
+                if diff.positive in self._model.group_names and diff.negative in self._model.group_names:
                     self._model.add_diff(diff)
-                elif diff.forward_group in self._model.pair_names and diff.backward_group in self._model.pair_names:
+                elif diff.positive in self._model.pair_names and diff.negative in self._model.pair_names:
                     self._model.add_diff(diff)
             except ValueError as error:
                 self._view.display_warning_box(str(error))
@@ -174,8 +178,8 @@ class GroupingTabPresenter(object):
                 self._model.add_pair_to_analysis(default)
 
         self.grouping_table_widget.update_view_from_model()
-        self.diff_table.update_view_from_model()
         self.pairing_table_widget.update_view_from_model()
+        self.diff_table.update_view_from_model()
         self.update_description_text(description)
         self._model._context.group_pair_context.selected = default
         self.plot_default_groups_or_pairs()
@@ -210,7 +214,7 @@ class GroupingTabPresenter(object):
         self.pairing_table_widget.enable_editing()
 
     def calculate_all_data(self):
-        self._model.show_all_groups_and_pairs()
+        self._model.calculate_all_data()
 
     def handle_update_all_clicked(self):
         self.update_thread = self.create_update_thread()
@@ -226,7 +230,7 @@ class GroupingTabPresenter(object):
     def handle_update_finished(self):
         self.enable_editing()
         self.groupingNotifier.notify_subscribers()
-        self.calculation_finished_notifier.notify_subscribers()
+        self.counts_calculation_finished_notifier.notify_subscribers()
 
     def handle_default_grouping_button_clicked(self):
         status = self._model.reset_groups_and_pairs_to_default()
@@ -248,14 +252,18 @@ class GroupingTabPresenter(object):
         self.diff_table.update_view_from_model()
         self.pairing_table_widget.update_view_from_model()
         self.update_description_text_to_empty()
+        self.groupingNotifier.notify_subscribers()
 
     def handle_new_data_loaded(self):
+        self.period_info_widget.clear()
         if self._model.is_data_loaded():
             self._model._context.show_raw_data()
             self.update_view_from_model()
             self.update_description_text()
             self.handle_update_all_clicked()
             self.plot_default_groups_or_pairs()
+            if self.period_info_widget.isVisible():
+                self._add_period_info_to_widget()
         else:
             self.on_clear_requested()
 
@@ -276,6 +284,29 @@ class GroupingTabPresenter(object):
                 self.pairing_table_widget.plot_default_case()
             else:  # else plot groups
                 self.grouping_table_widget.plot_default_case()
+
+    def handle_period_information_button_clicked(self):
+        if self._model.is_data_loaded() and self.period_info_widget.isEmpty():
+            self._add_period_info_to_widget()
+        self.period_info_widget.show()
+        self.period_info_widget.raise_()
+
+    def closePeriodInfoWidget(self):
+        self.period_info_widget.close()
+
+    def _add_period_info_to_widget(self):
+        try:
+            self.period_info_widget.addInfo(self._model._data.current_workspace)
+            runs = self._model._data.current_runs
+            runs_string = ""
+            for run_list in runs:
+                for run in run_list:
+                    if runs_string:
+                        runs_string += ", "
+                    runs_string += str(run)
+            self.period_info_widget.setWidgetTitleRuns(self._model.instrument + runs_string)
+        except RuntimeError:
+            self._view.display_warning_box("Could not read period info from the current workspace")
 
     # ------------------------------------------------------------------------------------------------------------------
     # Observer / Observable

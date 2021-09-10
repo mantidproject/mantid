@@ -8,7 +8,7 @@ This is a Python binding to the C++ class Mantid::Kernel::NullValidator.
 
 .. module:`mantid.kernel`
 
-.. autoclass:: mantid.kernel.NullValidator 
+.. autoclass:: mantid.kernel.NullValidator
     :members:
     :undoc-members:
     :inherited-members:

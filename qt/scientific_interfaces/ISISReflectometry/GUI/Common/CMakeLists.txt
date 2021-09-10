@@ -1,4 +1,4 @@
-set(COMMON_SRC_FILES 
+set(COMMON_SRC_FILES
   Plotter.cpp
   Encoder.cpp
   Decoder.cpp

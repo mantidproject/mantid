@@ -30,8 +30,8 @@ namespace API {
 class MANTID_API_DLL IFunctionMW : public virtual IFunction {
 public:
   /// Set MatrixWorkspace
-  void setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> workspace,
-                          size_t wi, double startX, double endX) override;
+  void setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> workspace, size_t wi, double startX,
+                          double endX) override;
   /// Get shared pointer to the workspace
   std::shared_ptr<const API::MatrixWorkspace> getMatrixWorkspace() const;
   /// Get the workspace index

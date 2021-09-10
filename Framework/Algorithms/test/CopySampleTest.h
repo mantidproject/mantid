@@ -44,18 +44,13 @@ public:
     Sample sample;
     sample.setName("test");
     const std::string envName("TestKit");
-    auto canShape = ComponentCreationHelper::cappedCylinderXML(
-        0.5, 1.5, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.), "tube");
-    auto kit = std::make_unique<SampleEnvironment>(
-        envName,
-        std::make_shared<Container>(ShapeFactory().createShape(canShape)));
+    auto canShape = ComponentCreationHelper::cappedCylinderXML(0.5, 1.5, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.), "tube");
+    auto kit =
+        std::make_unique<SampleEnvironment>(envName, std::make_shared<Container>(ShapeFactory().createShape(canShape)));
     sample.setEnvironment(std::move(kit));
-    sample.setOrientedLattice(
-        std::make_unique<OrientedLattice>(1.0, 2.0, 3.0, 90, 90, 90));
-    auto shape_sptr = ComponentCreationHelper::createCappedCylinder(
-        0.0127, 1.0, V3D(), V3D(0.0, 1.0, 0.0), "cyl");
-    shape_sptr->setMaterial(Material(
-        "vanBlock", Mantid::PhysicalConstants::getNeutronAtom(23, 0), 0.072));
+    sample.setOrientedLattice(std::make_unique<OrientedLattice>(1.0, 2.0, 3.0, 90, 90, 90));
+    auto shape_sptr = ComponentCreationHelper::createCappedCylinder(0.0127, 1.0, V3D(), V3D(0.0, 1.0, 0.0), "cyl");
+    shape_sptr->setMaterial(Material("vanBlock", Mantid::PhysicalConstants::getNeutronAtom(23, 0), 0.072));
     sample.setShape(shape_sptr);
     return sample;
   }
@@ -76,8 +71,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", inWSName));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("CopyName", "1"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("CopyMaterial", "1"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("CopyEnvironment", "1"));
@@ -89,9 +83,7 @@ public:
 
     // Retrieve the workspace from data service.
     MatrixWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName));
     TS_ASSERT(ws);
     if (!ws)
       return;
@@ -126,8 +118,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", inWSName));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("CopyName", "0"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("CopyMaterial", "1"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("CopyEnvironment", "1"));
@@ -139,9 +130,7 @@ public:
 
     // Retrieve the workspace from data service.
     MatrixWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName));
     TS_ASSERT(ws);
     if (!ws)
       return;
@@ -176,8 +165,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", inWSName));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("CopyName", "0"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("CopyMaterial", "0"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("CopyEnvironment", "0"));
@@ -190,9 +178,7 @@ public:
 
     // Retrieve the workspace from data service.
     MatrixWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName));
     TS_ASSERT(ws);
     if (!ws)
       return;
@@ -200,8 +186,7 @@ public:
     // Check the results
     Sample copy = ws->mutableSample();
     TS_ASSERT(copy.hasOrientedLattice());
-    TS_ASSERT_EQUALS(copy.getOrientedLattice().getUB(),
-                     s.getOrientedLattice().getUB());
+    TS_ASSERT_EQUALS(copy.getOrientedLattice().getUB(), s.getOrientedLattice().getUB());
 
     // modify the first unit cell, both U and B
     s.getOrientedLattice().setUFromVectors(V3D(1, 1, 0), V3D(1, -1, 0));
@@ -210,9 +195,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
     // Retrieve the workspace from data service.
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName));
     TS_ASSERT(ws);
     if (!ws)
       return;
@@ -236,8 +219,7 @@ public:
     ExperimentInfo_sptr ei1(new ExperimentInfo);
     Sample s = createsample();
     Sample s1;
-    s1.setOrientedLattice(
-        std::make_unique<OrientedLattice>(6.0, 7.0, 8.0, 90, 90, 90));
+    s1.setOrientedLattice(std::make_unique<OrientedLattice>(6.0, 7.0, 8.0, 90, 90, 90));
     s1.setName("newsample");
     ei->mutableSample() = s;
     TS_ASSERT_EQUALS(ew->addExperimentInfo(ei), 0);
@@ -245,10 +227,8 @@ public:
     ei1->mutableSample() = s1;
     TS_ASSERT_EQUALS(ew->addExperimentInfo(ei1), 2);
     TS_ASSERT_EQUALS(ew->getNumExperimentInfo(), 3);
-    TS_ASSERT_EQUALS(
-        ew->getExperimentInfo(1)->sample().getOrientedLattice().c(), 3);
-    TS_ASSERT_EQUALS(
-        ew->getExperimentInfo(2)->sample().getOrientedLattice().c(), 8);
+    TS_ASSERT_EQUALS(ew->getExperimentInfo(1)->sample().getOrientedLattice().c(), 3);
+    TS_ASSERT_EQUALS(ew->getExperimentInfo(2)->sample().getOrientedLattice().c(), 8);
 
     IMDEventWorkspace_sptr ewout(new MDEventWorkspace<MDEvent<3>, 3>());
     ExperimentInfo_sptr eiout0(new ExperimentInfo);
@@ -275,40 +255,34 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", inWSName));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("CopyName", "1"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("CopyMaterial", "0"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("CopyEnvironment", "0"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("CopyShape", "0"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("CopyLattice", "1"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("MDInputSampleNumber", "2"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("MDOutputSampleNumber", "-1"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("MDOutputSampleNumber", "-1"));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     TS_ASSERT_THROWS_NOTHING(alg1.initialize())
     TS_ASSERT(alg1.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg1.setPropertyValue("InputWorkspace", inWSName));
-    TS_ASSERT_THROWS_NOTHING(
-        alg1.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg1.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg1.setPropertyValue("CopyName", "1"));
     TS_ASSERT_THROWS_NOTHING(alg1.setPropertyValue("CopyMaterial", "0"));
     TS_ASSERT_THROWS_NOTHING(alg1.setPropertyValue("CopyEnvironment", "0"));
     TS_ASSERT_THROWS_NOTHING(alg1.setPropertyValue("CopyShape", "0"));
     TS_ASSERT_THROWS_NOTHING(alg1.setPropertyValue("CopyLattice", "1"));
     TS_ASSERT_THROWS_NOTHING(alg1.setPropertyValue("MDInputSampleNumber", "0"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg1.setPropertyValue("MDOutputSampleNumber", "3"));
+    TS_ASSERT_THROWS_NOTHING(alg1.setPropertyValue("MDOutputSampleNumber", "3"));
     TS_ASSERT_THROWS_NOTHING(alg1.execute(););
     TS_ASSERT(alg1.isExecuted());
 
     // Retrieve the workspace from data service.
     IMDEventWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(outWSName));
     TS_ASSERT(ws);
     if (!ws)
       return;
@@ -318,14 +292,10 @@ public:
     TS_ASSERT(ws->getExperimentInfo(1)->sample().hasOrientedLattice());
     TS_ASSERT(ws->getExperimentInfo(2)->sample().hasOrientedLattice());
     TS_ASSERT(ws->getExperimentInfo(3)->sample().hasOrientedLattice());
-    TS_ASSERT_EQUALS(
-        ws->getExperimentInfo(0)->sample().getOrientedLattice().a(), 6);
-    TS_ASSERT_EQUALS(
-        ws->getExperimentInfo(1)->sample().getOrientedLattice().c(), 8);
-    TS_ASSERT_EQUALS(
-        ws->getExperimentInfo(2)->sample().getOrientedLattice().c(), 8);
-    TS_ASSERT_EQUALS(
-        ws->getExperimentInfo(3)->sample().getOrientedLattice().c(), 3);
+    TS_ASSERT_EQUALS(ws->getExperimentInfo(0)->sample().getOrientedLattice().a(), 6);
+    TS_ASSERT_EQUALS(ws->getExperimentInfo(1)->sample().getOrientedLattice().c(), 8);
+    TS_ASSERT_EQUALS(ws->getExperimentInfo(2)->sample().getOrientedLattice().c(), 8);
+    TS_ASSERT_EQUALS(ws->getExperimentInfo(3)->sample().getOrientedLattice().c(), 3);
     TS_ASSERT_EQUALS(ws->getExperimentInfo(0)->sample().getName(), "newsample");
     TS_ASSERT_EQUALS(ws->getExperimentInfo(1)->sample().getName(), "newsample");
     TS_ASSERT_EQUALS(ws->getExperimentInfo(2)->sample().getName(), "newsample");

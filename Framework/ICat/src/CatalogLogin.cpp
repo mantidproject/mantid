@@ -29,9 +29,7 @@ std::vector<std::string> namesOfFacilitiesWithICAT() {
   };
 
   auto result = Kernel::ConfigService::Instance().getFacilityNames();
-  result.erase(
-      std::remove_if(result.begin(), result.end(), facilityDoesNotHaveICAT),
-      result.end());
+  result.erase(std::remove_if(result.begin(), result.end(), facilityDoesNotHaveICAT), result.end());
 
   return result;
 }
@@ -43,8 +41,7 @@ std::string defaultFacility() {
   // empty string.
   const auto facility = Kernel::ConfigService::Instance().getFacility().name();
   const auto facilitiesWithICAT = namesOfFacilitiesWithICAT();
-  if (std::find(facilitiesWithICAT.begin(), facilitiesWithICAT.end(),
-                facility) != facilitiesWithICAT.end()) {
+  if (std::find(facilitiesWithICAT.begin(), facilitiesWithICAT.end(), facility) != facilitiesWithICAT.end()) {
     return facility;
   }
 
@@ -58,53 +55,40 @@ std::string defaultFacility() {
 
 /// Init method to declare algorithm properties
 void CatalogLogin::init() {
-  auto requireValue =
-      std::make_shared<Kernel::MandatoryValidator<std::string>>();
-  declareProperty("Username", "", requireValue,
-                  "The username to log into the catalog.");
-  declareProperty(std::make_unique<Kernel::MaskedProperty<std::string>>(
-                      "Password", "", requireValue),
+  auto requireValue = std::make_shared<Kernel::MandatoryValidator<std::string>>();
+  declareProperty("Username", "", requireValue, "The username to log into the catalog.");
+  declareProperty(std::make_unique<Kernel::MaskedProperty<std::string>>("Password", "", requireValue),
                   "The password of the related username to use.");
   declareProperty("FacilityName", defaultFacility(),
-                  std::make_shared<Kernel::StringListValidator>(
-                      namesOfFacilitiesWithICAT()),
+                  std::make_shared<Kernel::StringListValidator>(namesOfFacilitiesWithICAT()),
                   "Select a facility to log in to.");
-  declareProperty(
-      "KeepSessionAlive", true,
-      "Keeps the session of the catalog alive if login was successful.");
-  declareProperty(std::make_unique<API::AlgorithmProperty>(
-                      "KeepAlive", std::make_shared<Kernel::NullValidator>(),
-                      Kernel::Direction::Output),
+  declareProperty("KeepSessionAlive", true, "Keeps the session of the catalog alive if login was successful.");
+  declareProperty(std::make_unique<API::AlgorithmProperty>("KeepAlive", std::make_shared<Kernel::NullValidator>(),
+                                                           Kernel::Direction::Output),
                   "A handle to the KeepAlive algorithm instance that continues "
                   "to keep the catalog alive after this algorithm completes.");
 }
 
 /// execute the algorithm
 void CatalogLogin::exec() {
-  auto catalogInfo = Kernel::ConfigService::Instance()
-                         .getFacility(getProperty("FacilityName"))
-                         .catalogInfo();
+  auto catalogInfo = Kernel::ConfigService::Instance().getFacility(getProperty("FacilityName")).catalogInfo();
   if (catalogInfo.soapEndPoint().empty())
-    throw std::runtime_error(
-        "There is no soap end-point for the facility you have selected.");
+    throw std::runtime_error("There is no soap end-point for the facility you have selected.");
 
-  g_log.notice() << "Attempting to verify user credentials against "
-                 << catalogInfo.catalogName() << '\n';
+  g_log.notice() << "Attempting to verify user credentials against " << catalogInfo.catalogName() << '\n';
   progress(0.5, "Verifying user credentials...");
 
   // Creates a new catalog and related session if the authentication is a
   // success.
   // This allows us to easily manage sessions alongside catalogs in the
   // catalogmanager.
-  auto session = API::CatalogManager::Instance().login(
-      getProperty("Username"), getProperty("Password"),
-      catalogInfo.soapEndPoint(), getProperty("FacilityName"));
+  auto session = API::CatalogManager::Instance().login(getProperty("Username"), getProperty("Password"),
+                                                       catalogInfo.soapEndPoint(), getProperty("FacilityName"));
 
   progress(0, "Keeping current sessions alive.");
 
   if (getProperty("KeepSessionAlive") && session) {
-    auto keepAliveAlgorithm =
-        API::AlgorithmManager::Instance().create("CatalogKeepAlive");
+    auto keepAliveAlgorithm = API::AlgorithmManager::Instance().create("CatalogKeepAlive");
     keepAliveAlgorithm->initialize();
     keepAliveAlgorithm->setPropertyValue("Session", session->getSessionId());
     keepAliveAlgorithm->executeAsync();

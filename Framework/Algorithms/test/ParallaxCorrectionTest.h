@@ -39,8 +39,7 @@ bool compare(const MatrixWorkspace_sptr &w1, const MatrixWorkspace_sptr &w2) {
   return result;
 }
 
-MatrixWorkspace_sptr createWorkspace(const int nPixelsPerBank = 3,
-                                     const int nBins = 2,
+MatrixWorkspace_sptr createWorkspace(const int nPixelsPerBank = 3, const int nBins = 2,
                                      const bool withParameter = true) {
   CreateSampleWorkspace creator;
   creator.initialize();
@@ -87,9 +86,7 @@ class ParallaxCorrectionTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ParallaxCorrectionTest *createSuite() {
-    return new ParallaxCorrectionTest();
-  }
+  static ParallaxCorrectionTest *createSuite() { return new ParallaxCorrectionTest(); }
   static void destroySuite(ParallaxCorrectionTest *suite) { delete suite; }
 
   ParallaxCorrectionTest() { FrameworkManager::Instance(); }
@@ -112,8 +109,7 @@ public:
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", in));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("ComponentNames", components));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "__unused"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "__unused"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
@@ -135,8 +131,7 @@ public:
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", in));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("ComponentNames", components));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "__unused"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "__unused"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
@@ -178,8 +173,7 @@ public:
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", in));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("ComponentNames", components));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "__unused"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "__unused"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
@@ -202,8 +196,7 @@ public:
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", in));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("ComponentNames", components));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "__unused"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "__unused"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
@@ -215,8 +208,7 @@ public:
     auto &detectorInfo = in->detectorInfo();
     for (size_t index = 0; index < in->getNumberHistograms(); ++index) {
       const V3D pos = detectorInfo.position(index);
-      const double expectation =
-          1. + 0.1 * std::abs(std::atan2(pos.X(), pos.Z()));
+      const double expectation = 1. + 0.1 * std::abs(std::atan2(pos.X(), pos.Z()));
       const double reality = in->y(index)[0];
       TS_ASSERT_DELTA(expectation, reality, 1E-10);
     }
@@ -225,12 +217,8 @@ public:
 
 class ParallaxCorrectionTestPerformance : public CxxTest::TestSuite {
 public:
-  static ParallaxCorrectionTestPerformance *createSuite() {
-    return new ParallaxCorrectionTestPerformance();
-  }
-  static void destroySuite(ParallaxCorrectionTestPerformance *suite) {
-    delete suite;
-  }
+  static ParallaxCorrectionTestPerformance *createSuite() { return new ParallaxCorrectionTestPerformance(); }
+  static void destroySuite(ParallaxCorrectionTestPerformance *suite) { delete suite; }
 
   void setUp() override {
     FrameworkManager::Instance();

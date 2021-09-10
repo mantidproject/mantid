@@ -10,22 +10,17 @@
 namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
-PostprocessingStep::PostprocessingStep(const QString &options)
-    : m_options(std::move(options)) {}
-PostprocessingStep::PostprocessingStep(const QString &options,
-                                       const PostprocessingAlgorithm &algorithm,
+PostprocessingStep::PostprocessingStep(const QString &options) : m_options(std::move(options)) {}
+PostprocessingStep::PostprocessingStep(const QString &options, const PostprocessingAlgorithm &algorithm,
                                        std::map<QString, QString> map)
-    : m_options(std::move(options)), m_algorithm(std::move(algorithm)),
-      m_map(std::move(map)) {}
+    : m_options(std::move(options)), m_algorithm(std::move(algorithm)), m_map(std::move(map)) {}
 
 bool PostprocessingStep::workspaceExists(QString const &workspaceName) {
-  return Mantid::API::AnalysisDataService::Instance().doesExist(
-      workspaceName.toStdString());
+  return Mantid::API::AnalysisDataService::Instance().doesExist(workspaceName.toStdString());
 }
 
 void PostprocessingStep::removeWorkspace(QString const &workspaceName) {
-  Mantid::API::AnalysisDataService::Instance().remove(
-      workspaceName.toStdString());
+  Mantid::API::AnalysisDataService::Instance().remove(workspaceName.toStdString());
 }
 
 void PostprocessingStep::removeIfExists(QString const &workspaceName) {
@@ -33,14 +28,13 @@ void PostprocessingStep::removeIfExists(QString const &workspaceName) {
     removeWorkspace(workspaceName);
 }
 
-void PostprocessingStep::ensureRowSizeMatchesColumnCount(
-    const WhiteList &columns, const QStringList &row) {
+void PostprocessingStep::ensureRowSizeMatchesColumnCount(const WhiteList &columns, const QStringList &row) {
   if (row.size() != static_cast<int>(columns.size()))
     throw std::invalid_argument("Can't find reduced workspace name");
 }
 
-QString PostprocessingStep::getPostprocessedWorkspaceName(
-    const GroupData &groupData, boost::optional<size_t> sliceIndex) const {
+QString PostprocessingStep::getPostprocessedWorkspaceName(const GroupData &groupData,
+                                                          boost::optional<size_t> sliceIndex) const {
   /* This method calculates, for a given set of rows, the name of the output
    * (post-processed) workspace for a given slice */
 
@@ -69,9 +63,8 @@ QString PostprocessingStep::getPostprocessedWorkspaceName(
   @param groupData : the data in a given group as received from the tree
   manager
  */
-void PostprocessingStep::postProcessGroup(
-    const QString &outputWSName, const QString &rowOutputWSPropertyName,
-    const WhiteList &whitelist, const GroupData &groupData) {
+void PostprocessingStep::postProcessGroup(const QString &outputWSName, const QString &rowOutputWSPropertyName,
+                                          const WhiteList &whitelist, const GroupData &groupData) {
   // Go through each row and get the input ws names for postprocessing
   // (i.e. the output workspace of each row)
   QStringList inputNames;
@@ -79,13 +72,11 @@ void PostprocessingStep::postProcessGroup(
     // The name of the reduced workspace for this row from the given property
     // value. Note that we need the preprocessed names as these correspond to
     // the real output workspace names.
-    auto const inputWSName =
-        row.second->preprocessedOptionValue(rowOutputWSPropertyName);
+    auto const inputWSName = row.second->preprocessedOptionValue(rowOutputWSPropertyName);
 
     // Only postprocess if all workspaces exist
     if (!workspaceExists(inputWSName))
-      throw std::runtime_error(
-          "Some workspaces in the group could not be found");
+      throw std::runtime_error("Some workspaces in the group could not be found");
 
     inputNames.append(inputWSName);
   }
@@ -97,45 +88,38 @@ void PostprocessingStep::postProcessGroup(
   // name
   removeIfExists(outputWSName);
 
-  auto alg = Mantid::API::AlgorithmManager::Instance().create(
-      m_algorithm.name().toStdString());
+  auto alg = Mantid::API::AlgorithmManager::Instance().create(m_algorithm.name().toStdString());
 
   alg->initialize();
-  alg->setProperty(m_algorithm.inputProperty().toStdString(),
-                   inputWSNames.toStdString());
-  alg->setProperty(m_algorithm.outputProperty().toStdString(),
-                   outputWSName.toStdString());
+  alg->setProperty(m_algorithm.inputProperty().toStdString(), inputWSNames.toStdString());
+  alg->setProperty(m_algorithm.outputProperty().toStdString(), outputWSName.toStdString());
 
   auto optionsMap = parseKeyValueString(m_options.toStdString());
   for (auto const &kvp : optionsMap) {
     try {
       alg->setProperty(kvp.first, kvp.second);
     } catch (Mantid::Kernel::Exception::NotFoundError &) {
-      throw std::runtime_error("Invalid property in options column: " +
-                               kvp.first);
+      throw std::runtime_error("Invalid property in options column: " + kvp.first);
     }
   }
 
   // Options specified via post-process map
   for (auto const &prop : m_map) {
     auto const &propName = prop.second;
-    auto const &propValueStr =
-        (*groupData.begin()->second)[whitelist.indexFromName(prop.first)];
+    auto const &propValueStr = (*groupData.begin()->second)[whitelist.indexFromName(prop.first)];
     if (!propValueStr.isEmpty()) {
       // Warning: we take minus the value of the properties because in
       // Reflectometry this property refers to the rebin step, and they want a
       // logarithmic binning. If other technique areas need to use a
       // post-process map we'll need to re-think how to do this.
-      alg->setPropertyValue(propName.toStdString(),
-                            ("-" + propValueStr).toStdString());
+      alg->setPropertyValue(propName.toStdString(), ("-" + propValueStr).toStdString());
     }
   }
 
   alg->execute();
 
   if (!alg->isExecuted()) {
-    throw std::runtime_error("Failed to execute algorithm " +
-                             m_algorithm.name().toStdString());
+    throw std::runtime_error("Failed to execute algorithm " + m_algorithm.name().toStdString());
   }
 }
 } // namespace DataProcessor

@@ -8,8 +8,16 @@
 from Muon.GUI.MuonAnalysis.muon_analysis_2 import MuonAnalysisGui
 from qtpy import QtCore
 from Muon.GUI.Common.usage_report import report_interface_startup
+import sys
 
 Name = "Muon_Analysis_2"
+
+if 'workbench' in sys.modules:
+    from workbench.config import get_window_config
+
+    parent, flags = get_window_config()
+else:
+    parent, flags = None, None
 
 if 'muon_analysis' in globals():
     muon_analysis = globals()['muon_analysis']
@@ -25,12 +33,12 @@ if 'muon_analysis' in globals():
             ) & ~QtCore.Qt.WindowMinimized | QtCore.Qt.WindowActive)
         muon_analysis.activateWindow()
     else:
-        muon_analysis = MuonAnalysisGui()
+        muon_analysis = MuonAnalysisGui(parent, flags)
         report_interface_startup(Name)
-        muon_analysis.resize(700, 700)
+        muon_analysis.resize(750, 750)
         muon_analysis.show()
 else:
-    muon_analysis = MuonAnalysisGui()
+    muon_analysis = MuonAnalysisGui(parent, flags)
     report_interface_startup(Name)
-    muon_analysis.resize(700, 700)
+    muon_analysis.resize(800, 800)
     muon_analysis.show()

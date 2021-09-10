@@ -21,19 +21,13 @@ public:
   /// Algorithm's name for identification
   const std::string name() const override { return "SaveMD"; };
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Save a MDEventWorkspace or MDHistoWorkspace to a .nxs file.";
-  }
+  const std::string summary() const override { return "Save a MDEventWorkspace or MDHistoWorkspace to a .nxs file."; }
 
   /// Algorithm's version for identification
   int version() const override { return 2; };
-  const std::vector<std::string> seeAlso() const override {
-    return {"LoadMD", "SaveZODS"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"LoadMD", "SaveZODS"}; }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "MDAlgorithms\\DataHandling";
-  }
+  const std::string category() const override { return "MDAlgorithms\\DataHandling"; }
 
 private:
   /// Initialise the properties
@@ -46,8 +40,7 @@ private:
 
   /// Save a generic matrix
   template <typename T>
-  void saveMatrix(::NeXus::File *const file, std::string name,
-                  Kernel::Matrix<T> &m, ::NeXus::NXnumtype type,
+  void saveMatrix(::NeXus::File *const file, std::string name, Kernel::Matrix<T> &m, ::NeXus::NXnumtype type,
                   std::string tag = "");
 };
 

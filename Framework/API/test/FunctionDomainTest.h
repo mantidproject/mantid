@@ -68,8 +68,7 @@ public:
   }
 
 private:
-  void checkDomainVector(const FunctionDomain1D &domain, size_t start = 0,
-                         size_t end = 0) {
+  void checkDomainVector(const FunctionDomain1D &domain, size_t start = 0, size_t end = 0) {
     if (end == 0)
       end = data.size();
     TS_ASSERT_EQUALS(domain.size(), end - start);

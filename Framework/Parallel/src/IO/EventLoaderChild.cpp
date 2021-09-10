@@ -32,9 +32,8 @@ int main(int argc, char **argv) {
 
   EventsListsShmemStorage storage(segmentName, storageName, size, 1, numPixels);
   try {
-    MultiProcessEventLoader::fillFromFile(storage, fileName, groupName,
-                                          bankNames, bankOffsets, firstEvent,
-                                          upperEvent, precalcEvents);
+    MultiProcessEventLoader::fillFromFile(storage, fileName, groupName, bankNames, bankOffsets, firstEvent, upperEvent,
+                                          precalcEvents);
   } catch (...) {
     return 1;
   }

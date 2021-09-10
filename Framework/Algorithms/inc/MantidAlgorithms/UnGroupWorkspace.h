@@ -29,19 +29,13 @@ public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "UnGroupWorkspace"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Takes a group workspace as input and ungroups the workspace.";
-  }
+  const std::string summary() const override { return "Takes a group workspace as input and ungroups the workspace."; }
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"GroupWorkspaces"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"GroupWorkspaces"}; }
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "Transforms\\Grouping;Utility\\Workspaces";
-  }
+  const std::string category() const override { return "Transforms\\Grouping;Utility\\Workspaces"; }
 
 private:
   /// Overridden Init method

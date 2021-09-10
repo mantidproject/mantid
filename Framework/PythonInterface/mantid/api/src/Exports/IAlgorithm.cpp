@@ -67,9 +67,7 @@ ThreadIDObjectMap &threadIDMap() {
  * @param threadID The current Python thread ID
  * @param alg A Python reference to the algorithm object
  */
-void _trackAlgorithm(long threadID, const object &alg) {
-  threadIDMap()[threadID] = alg;
-}
+void _trackAlgorithm(long threadID, const object &alg) { threadIDMap()[threadID] = alg; }
 
 /**
  * Private method to remove an algorithm reference from the thread id map.
@@ -117,8 +115,7 @@ using PropertyVector = std::vector<Property *>;
  * @return A list of Property pointers ordered by for the function API
  */
 PropertyVector apiOrderedProperties(const IAlgorithm &propMgr) {
-  PropertyVector properties(
-      propMgr.getProperties()); // Makes a copy so that it can be sorted
+  PropertyVector properties(propMgr.getProperties()); // Makes a copy so that it can be sorted
   std::stable_sort(properties.begin(), properties.end(), MandatoryFirst());
   return properties;
 }
@@ -225,8 +222,7 @@ std::string createDocString(IAlgorithm &self) {
   // write the actual property descriptions
   for (size_t i = 0; i < numProps; ++i) {
     Mantid::Kernel::Property *prop = properties[i];
-    buffer << prop->name() << "("
-           << Mantid::Kernel::Direction::asText(prop->direction());
+    buffer << prop->name() << "(" << Mantid::Kernel::Direction::asText(prop->direction());
     if (!prop->isValid().empty())
       buffer << ":req";
     buffer << ") *" << prop->type() << "* ";
@@ -234,9 +230,7 @@ std::string createDocString(IAlgorithm &self) {
     if (!prop->documentation().empty() || !allowed.empty()) {
       buffer << "      " << prop->documentation();
       if (!allowed.empty()) {
-        buffer << "["
-               << Mantid::Kernel::Strings::join(allowed.begin(), allowed.end(),
-                                                ", ");
+        buffer << "[" << Mantid::Kernel::Strings::join(allowed.begin(), allowed.end(), ", ");
         buffer << "]";
       }
       buffer << EOL;
@@ -256,8 +250,7 @@ std::string createDocString(IAlgorithm &self) {
  */
 struct AllowCThreads {
   explicit AllowCThreads(const object &algm)
-      : m_tracefunc(nullptr), m_tracearg(nullptr), m_saved(nullptr),
-        m_tracking(false) {
+      : m_tracefunc(nullptr), m_tracearg(nullptr), m_saved(nullptr), m_tracking(false) {
     PyThreadState *curThreadState = PyThreadState_GET();
     m_tracefunc = curThreadState->c_tracefunc;
     m_tracearg = curThreadState->c_traceobj;
@@ -334,8 +327,7 @@ PyObject *getAlgorithmID(IAlgorithm &self) {
  * @return Algorithm summary
  */
 std::string getOptionalMessage(IAlgorithm &self) {
-  PyErr_Warn(PyExc_DeprecationWarning,
-             ".getOptionalMessage() is deprecated. Use .summary() instead.");
+  PyErr_Warn(PyExc_DeprecationWarning, ".getOptionalMessage() is deprecated. Use .summary() instead.");
   return self.summary();
 }
 
@@ -344,8 +336,7 @@ std::string getOptionalMessage(IAlgorithm &self) {
  * @return Algorithm summary
  */
 std::string getWikiSummary(IAlgorithm &self) {
-  PyErr_Warn(PyExc_DeprecationWarning,
-             ".getWikiSummary() is deprecated. Use .summary() instead.");
+  PyErr_Warn(PyExc_DeprecationWarning, ".getWikiSummary() is deprecated. Use .summary() instead.");
   return self.summary();
 }
 
@@ -355,15 +346,12 @@ std::string getWikiSummary(IAlgorithm &self) {
  */
 boost::python::dict validateInputs(IAlgorithm &self) {
   auto map = self.validateInputs();
-  using MapToPyDictionary =
-      Mantid::PythonInterface::Converters::MapToPyDictionary<std::string,
-                                                             std::string>;
+  using MapToPyDictionary = Mantid::PythonInterface::Converters::MapToPyDictionary<std::string, std::string>;
   return MapToPyDictionary(map)();
 }
 
 void initializeProxy(IAlgorithm &self) {
-  Mantid::PythonInterface::ReleaseGlobalInterpreterLock
-      releaseGlobalInterpreterLock;
+  Mantid::PythonInterface::ReleaseGlobalInterpreterLock releaseGlobalInterpreterLock;
   self.initialize();
 }
 
@@ -374,28 +362,18 @@ void export_ialgorithm() {
 
   register_ptr_to_python<std::shared_ptr<IAlgorithm>>();
 
-  class_<IAlgorithm, bases<IPropertyManager>, boost::noncopyable>(
-      "IAlgorithm", "Interface for all algorithms", no_init)
-      .def("name", &IAlgorithm::name, arg("self"),
-           "Returns the name of the algorithm")
-      .def("alias", &IAlgorithm::alias, arg("self"),
-           "Return the aliases for the algorithm")
-      .def("version", &IAlgorithm::version, arg("self"),
-           "Returns the version number of the algorithm")
-      .def("cancel", &IAlgorithm::cancel, arg("self"),
-           "Request that the algorithm stop running")
-      .def("category", &IAlgorithm::category, arg("self"),
-           "Returns the category containing the algorithm")
-      .def("categories", &IAlgorithm::categories, arg("self"),
-           return_value_policy<VectorToNumpy>(),
+  class_<IAlgorithm, bases<IPropertyManager>, boost::noncopyable>("IAlgorithm", "Interface for all algorithms", no_init)
+      .def("name", &IAlgorithm::name, arg("self"), "Returns the name of the algorithm")
+      .def("alias", &IAlgorithm::alias, arg("self"), "Return the aliases for the algorithm")
+      .def("version", &IAlgorithm::version, arg("self"), "Returns the version number of the algorithm")
+      .def("cancel", &IAlgorithm::cancel, arg("self"), "Request that the algorithm stop running")
+      .def("category", &IAlgorithm::category, arg("self"), "Returns the category containing the algorithm")
+      .def("categories", &IAlgorithm::categories, arg("self"), return_value_policy<VectorToNumpy>(),
            "Returns the list of categories this algorithm belongs to")
-      .def("seeAlso", &IAlgorithm::seeAlso, arg("self"),
-           return_value_policy<VectorToNumpy>(),
+      .def("seeAlso", &IAlgorithm::seeAlso, arg("self"), return_value_policy<VectorToNumpy>(),
            "Returns the list of similar algorithms")
-      .def("summary", &IAlgorithm::summary, arg("self"),
-           "Returns a summary message describing the algorithm")
-      .def("helpURL", &IAlgorithm::helpURL, arg("self"),
-           "Returns optional URL for algorithm documentation")
+      .def("summary", &IAlgorithm::summary, arg("self"), "Returns a summary message describing the algorithm")
+      .def("helpURL", &IAlgorithm::helpURL, arg("self"), "Returns optional URL for algorithm documentation")
       .def("workspaceMethodName", &IAlgorithm::workspaceMethodName, arg("self"),
            "Returns a name that will be used when attached as a workspace "
            "method. Empty string indicates do not attach")
@@ -403,16 +381,12 @@ void export_ialgorithm() {
            return_value_policy<VectorToNumpy>(), // creates a list for strings
            "Returns a set of class names that will have the method attached. "
            "Empty list indicates all types")
-      .def("workspaceMethodInputProperty",
-           &IAlgorithm::workspaceMethodInputProperty, arg("self"),
+      .def("workspaceMethodInputProperty", &IAlgorithm::workspaceMethodInputProperty, arg("self"),
            "Returns the name of the input workspace property used by the "
            "calling object")
-      .def("getAlgorithmID", &getAlgorithmID, arg("self"),
-           "Returns a unique identifier for this algorithm object")
-      .def("docString", &createDocString, arg("self"),
-           "Returns a doc string for the algorithm")
-      .def("mandatoryProperties", &getInputPropertiesWithMandatoryFirst,
-           arg("self"),
+      .def("getAlgorithmID", &getAlgorithmID, arg("self"), "Returns a unique identifier for this algorithm object")
+      .def("docString", &createDocString, arg("self"), "Returns a doc string for the algorithm")
+      .def("mandatoryProperties", &getInputPropertiesWithMandatoryFirst, arg("self"),
            "Returns a list of input and in/out property names that is ordered "
            "such that the mandatory properties are first followed by the "
            "optional ones.")
@@ -440,18 +414,14 @@ void export_ialgorithm() {
       .def("setChild", &IAlgorithm::setChild, (arg("self"), arg("is_child")),
            "If true this algorithm is run as a child algorithm. There will be "
            "no logging and nothing is stored in the Analysis Data Service")
-      .def("enableHistoryRecordingForChild",
-           &IAlgorithm::enableHistoryRecordingForChild,
-           (arg("self"), arg("on")),
+      .def("enableHistoryRecordingForChild", &IAlgorithm::enableHistoryRecordingForChild, (arg("self"), arg("on")),
            "If true then history will be recorded regardless of the child "
            "status")
-      .def("setAlgStartupLogging", &IAlgorithm::setAlgStartupLogging,
-           (arg("self"), arg("enabled")),
+      .def("setAlgStartupLogging", &IAlgorithm::setAlgStartupLogging, (arg("self"), arg("enabled")),
            "If true then allow logging of start and end messages")
-      .def("getAlgStartupLogging", &IAlgorithm::getAlgStartupLogging,
-           arg("self"), "Returns true if logging of start and end messages")
-      .def("setAlwaysStoreInADS", &IAlgorithm::setAlwaysStoreInADS,
-           (arg("self"), arg("do_store")),
+      .def("getAlgStartupLogging", &IAlgorithm::getAlgStartupLogging, arg("self"),
+           "Returns true if logging of start and end messages")
+      .def("setAlwaysStoreInADS", &IAlgorithm::setAlwaysStoreInADS, (arg("self"), arg("do_store")),
            "If true then even child algorithms will have their workspaces "
            "stored in the ADS.")
       .def("isChild", &IAlgorithm::isChild, arg("self"),
@@ -459,19 +429,15 @@ void export_ialgorithm() {
            "If True then Output workspaces "
            "are NOT stored in the Analysis Data Service but must be retrieved "
            "from the property.")
-      .def("setLogging", &IAlgorithm::setLogging, (arg("self"), arg("value")),
-           "Toggle logging on/off.")
-      .def("setRethrows", &IAlgorithm::setRethrows,
-           (arg("self"), arg("rethrow")),
+      .def("setLogging", &IAlgorithm::setLogging, (arg("self"), arg("value")), "Toggle logging on/off.")
+      .def("setRethrows", &IAlgorithm::setRethrows, (arg("self"), arg("rethrow")),
            "To query whether an algorithm "
            "should rethrow exceptions when "
            "executing.")
-      .def("initialize", &initializeProxy, arg("self"),
-           "Initializes the algorithm")
+      .def("initialize", &initializeProxy, arg("self"), "Initializes the algorithm")
       .def("validateInputs", &validateInputs, arg("self"),
            "Cross-check all inputs and return any errors as a dictionary")
-      .def("execute", &executeProxy, arg("self"),
-           "Runs the algorithm and returns whether it has been successful")
+      .def("execute", &executeProxy, arg("self"), "Runs the algorithm and returns whether it has been successful")
       .def("executeAsync", &executeAsync, arg("self"),
            "Starts the algorithm in a separate thread and returns immediately")
       // 'Private' static methods
@@ -483,6 +449,5 @@ void export_ialgorithm() {
       // deprecated methods
       .def("getOptionalMessage", &getOptionalMessage, arg("self"),
            "Returns the optional user message attached to the algorithm")
-      .def("getWikiSummary", &getWikiSummary, arg("self"),
-           "Returns the summary found on the wiki page");
+      .def("getWikiSummary", &getWikiSummary, arg("self"), "Returns the summary found on the wiki page");
 }

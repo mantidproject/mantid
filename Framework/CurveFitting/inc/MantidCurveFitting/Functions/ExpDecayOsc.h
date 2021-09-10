@@ -24,8 +24,7 @@ h*exp(-lambda.x)*(cos(2pi*f*x+phi))
  @date 06/01/2012
  */
 
-class MANTID_CURVEFITTING_DLL ExpDecayOsc : public API::ParamFunction,
-                                            public API::IFunction1D {
+class MANTID_CURVEFITTING_DLL ExpDecayOsc : public API::ParamFunction, public API::IFunction1D {
 public:
   /// overwrite IFunction base class methods
   std::string name() const override { return "ExpDecayOsc"; }
@@ -35,10 +34,8 @@ public:
 
 protected:
   void setActiveParameter(size_t i, double value) override;
-  void function1D(double *out, const double *xValues,
-                  const size_t nData) const override;
-  void functionDeriv1D(API::Jacobian *out, const double *xValues,
-                       const size_t nData) override;
+  void function1D(double *out, const double *xValues, const size_t nData) const override;
+  void functionDeriv1D(API::Jacobian *out, const double *xValues, const size_t nData) override;
 
   /// overwrite IFunction base class method that declares function parameters
   void init() override;

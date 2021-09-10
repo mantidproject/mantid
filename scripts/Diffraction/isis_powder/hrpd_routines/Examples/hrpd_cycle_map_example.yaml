@@ -1,6 +1,6 @@
 66027-66828 :
     "coupled":
-        "10-110" : 
+        "10-110" :
             empty_run_numbers : 66028
             vanadium_run_numbers : 66031
         "100-200":
@@ -10,7 +10,7 @@
             empty_run_numbers : 66029
             vanadium_run_numbers : 66032
     "decoupled":
-        "10-110" : 
+        "10-110" :
             empty_run_numbers : 6602
             vanadium_run_numbers : 6031
         "100-200":
@@ -21,7 +21,7 @@
             vanadium_run_numbers : 6032
     label : "16_5"
     offset_file_name : "hrpd_new_072_01_corr.cal"
-    
+
 66829-68194:
     "coupled":
         "10-110":
@@ -32,4 +32,3 @@
             vanadium_run_numbers : 66834
     label: "17_1"
     offset_file_name : "hrpd_new_072_01_corr.cal"
-    

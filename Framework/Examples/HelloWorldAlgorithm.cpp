@@ -11,9 +11,7 @@ namespace Algorithms {
 
 DECLARE_ALGORITHM(HelloWorldAlgorithm)
 
-void HelloWorldAlgorithm::init() {
-  declareProperty("WhatKindOfWorld", "Mantid");
-}
+void HelloWorldAlgorithm::init() { declareProperty("WhatKindOfWorld", "Mantid"); }
 
 void HelloWorldAlgorithm::exec() {
   // g_log is a reference to the logger. It is used to print out information,

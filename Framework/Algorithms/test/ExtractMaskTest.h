@@ -34,12 +34,10 @@ public:
 
   // Commenting out test because I am not sure that this is indeed the correct
   // behaviour.
-  void
-  test_That_Input_Masked_Spectra_Are_Assigned_Zero_And_Remain_Masked_On_Output() {
+  void test_That_Input_Masked_Spectra_Are_Assigned_Zero_And_Remain_Masked_On_Output() {
     // Create a simple test workspace
     const int nvectors(50), nbins(10);
-    Workspace2D_sptr inputWS =
-        WorkspaceCreationHelper::create2DWorkspace(nvectors, nbins);
+    Workspace2D_sptr inputWS = WorkspaceCreationHelper::create2DWorkspace(nvectors, nbins);
     // Mask every 10th spectra
     std::set<int64_t> maskedIndices;
     for (int i = 0; i < 50; i += 10) {
@@ -67,8 +65,7 @@ public:
   void test_That_Masked_Detector_List_Populated_When_Passed_A_Mask_Workspace() {
     // Create a simple test workspace
     const int nvectors(50), nbins(10);
-    Workspace2D_sptr inputWS =
-        WorkspaceCreationHelper::create2DWorkspace(nvectors, nbins);
+    Workspace2D_sptr inputWS = WorkspaceCreationHelper::create2DWorkspace(nvectors, nbins);
     // Mask every 10th spectra
     std::set<int64_t> maskedIndices;
     for (int i = 0; i < 50; i += 10) {
@@ -82,13 +79,11 @@ public:
     const std::string inputName("inputWSMask");
     AnalysisDataService::Instance().add(inputName, inputWS);
     MaskWorkspace_sptr inputWSMask = runExtractMask(inputName);
-    std::vector<Mantid::detid_t> expectedDetectorList = {1,  6,  11, 21,
-                                                         24, 31, 38, 41};
+    std::vector<Mantid::detid_t> expectedDetectorList = {1, 6, 11, 21, 24, 31, 38, 41};
 
     std::vector<Mantid::detid_t> detectorList;
 
-    TS_ASSERT_THROWS_NOTHING(
-        detectorList = runExtractMaskReturnList(inputWSMask->getName()));
+    TS_ASSERT_THROWS_NOTHING(detectorList = runExtractMaskReturnList(inputWSMask->getName()));
     TS_ASSERT_EQUALS(detectorList, expectedDetectorList)
 
     AnalysisDataService::Instance().remove(inputName);
@@ -98,8 +93,7 @@ public:
   void test_That_Masked_Detector_List_Populated_When_Passed_A_Workspace() {
     // Create a simple test workspace
     const int nvectors(50), nbins(10);
-    Workspace2D_sptr inputWS =
-        WorkspaceCreationHelper::create2DWorkspace(nvectors, nbins);
+    Workspace2D_sptr inputWS = WorkspaceCreationHelper::create2DWorkspace(nvectors, nbins);
     // Mask every 10th spectra
     std::set<int64_t> maskedIndices;
     for (int i = 0; i < 50; i += 10) {
@@ -113,13 +107,11 @@ public:
     const std::string inputName("inputWS");
     AnalysisDataService::Instance().add(inputName, inputWS);
 
-    std::vector<Mantid::detid_t> expectedDetectorList = {1,  6,  11, 21,
-                                                         24, 31, 38, 41};
+    std::vector<Mantid::detid_t> expectedDetectorList = {1, 6, 11, 21, 24, 31, 38, 41};
 
     std::vector<Mantid::detid_t> detectorList;
 
-    TS_ASSERT_THROWS_NOTHING(detectorList =
-                                 runExtractMaskReturnList(inputName));
+    TS_ASSERT_THROWS_NOTHING(detectorList = runExtractMaskReturnList(inputName));
     TS_ASSERT_EQUALS(detectorList, expectedDetectorList)
 
     AnalysisDataService::Instance().remove(inputName);
@@ -136,20 +128,17 @@ private:
     maskExtractor.setRethrows(true);
     maskExtractor.execute();
 
-    Workspace_sptr workspace =
-        AnalysisDataService::Instance().retrieve(outputName);
+    Workspace_sptr workspace = AnalysisDataService::Instance().retrieve(outputName);
     if (workspace) {
       // output should be a MaskWorkspace
-      MaskWorkspace_sptr outputWS =
-          std::dynamic_pointer_cast<MaskWorkspace>(workspace);
+      MaskWorkspace_sptr outputWS = std::dynamic_pointer_cast<MaskWorkspace>(workspace);
       return outputWS;
     } else {
       return MaskWorkspace_sptr();
     }
   }
 
-  std::vector<Mantid::detid_t>
-  runExtractMaskReturnList(const std::string &inputName) {
+  std::vector<Mantid::detid_t> runExtractMaskReturnList(const std::string &inputName) {
     ExtractMask maskExtractor;
     maskExtractor.initialize();
     maskExtractor.setPropertyValue("InputWorkspace", inputName);
@@ -157,14 +146,12 @@ private:
     maskExtractor.setPropertyValue("OutputWorkspace", outputName);
     maskExtractor.setRethrows(true);
     maskExtractor.execute();
-    std::vector<Mantid::detid_t> detectorList =
-        maskExtractor.getProperty("DetectorList");
+    std::vector<Mantid::detid_t> detectorList = maskExtractor.getProperty("DetectorList");
     AnalysisDataService::Instance().remove(outputName);
     return detectorList;
   }
 
-  void doTest(const MatrixWorkspace_const_sptr &inputWS,
-              const MaskWorkspace_const_sptr &outputWS) {
+  void doTest(const MatrixWorkspace_const_sptr &inputWS, const MaskWorkspace_const_sptr &outputWS) {
     TS_ASSERT_EQUALS(outputWS->blocksize(), 1);
     size_t nOutputHists(outputWS->getNumberHistograms());
     TS_ASSERT_EQUALS(nOutputHists, inputWS->getNumberHistograms());

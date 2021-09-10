@@ -17,8 +17,7 @@ std::string -> std::string map.
 namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
-std::map<std::string, std::string> EXPORT_OPT_MANTIDQT_COMMON
-toStdStringMap(std::map<QString, QString> const &inMap);
+std::map<std::string, std::string> EXPORT_OPT_MANTIDQT_COMMON toStdStringMap(std::map<QString, QString> const &inMap);
 }
 } // namespace MantidWidgets
 } // namespace MantidQt

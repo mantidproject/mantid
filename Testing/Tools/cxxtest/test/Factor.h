@@ -55,7 +55,7 @@ public:
     class NotShorterThan
     {
         ShorterThan _shorterThan;
-        
+
     public:
         bool operator()( const char *s, unsigned n ) const { return !_shorterThan( s, n ); }
     };

@@ -31,14 +31,13 @@ public:
   Mantid::API::MatrixWorkspace_sptr getGuessWorkspace() const;
   MantidWidgets::FunctionModelSpectra getSpectra() const;
 
-  Mantid::API::MatrixWorkspace_sptr appendGuessToInput(
-      const Mantid::API::MatrixWorkspace_sptr &guessWorkspace) const;
+  Mantid::API::MatrixWorkspace_sptr appendGuessToInput(const Mantid::API::MatrixWorkspace_sptr &guessWorkspace) const;
 
-  TableDatasetIndex getActiveDataIndex() const;
+  WorkspaceID getActiveWorkspaceIndex() const;
   WorkspaceIndex getActiveSpectrum() const;
-  TableDatasetIndex numberOfWorkspaces() const;
+  WorkspaceID numberOfWorkspaces() const;
   FitDomainIndex getActiveDomainIndex() const;
-  std::string getFitDataName(TableDatasetIndex index) const;
+  std::string getFitDataName(WorkspaceID workspaceID) const;
   std::string getFitDataName() const;
   std::string getLastFitDataName() const;
   std::pair<double, double> getRange() const;
@@ -50,9 +49,8 @@ public:
   double calculateHWHMMaximum(double minimum) const;
   double calculateHWHMMinimum(double maximum) const;
   bool canCalculateGuess() const;
-  bool isResolutionLoaded() const;
 
-  void setActiveIndex(TableDatasetIndex index);
+  void setActiveIndex(WorkspaceID workspaceID);
   void setActiveSpectrum(WorkspaceIndex spectrum);
   void setStartX(double startX);
   void setEndX(double endX);
@@ -64,43 +62,37 @@ public:
 private:
   std::pair<double, double> getGuessRange() const;
 
-  Mantid::API::MatrixWorkspace_sptr createInputAndGuessWorkspace(
-      const Mantid::API::MatrixWorkspace_sptr &inputWS,
-      const Mantid::API::MatrixWorkspace_sptr &guessWorkspace, int spectrum,
-      double startX, double endX) const;
-
   Mantid::API::MatrixWorkspace_sptr
-  createGuessWorkspace(const Mantid::API::MatrixWorkspace_sptr &inputWorkspace,
-                       const Mantid::API::IFunction_const_sptr &func,
-                       double startX, double endX) const;
+  createInputAndGuessWorkspace(const Mantid::API::MatrixWorkspace_sptr &inputWS,
+                               const Mantid::API::MatrixWorkspace_sptr &guessWorkspace, int spectrum, double startX,
+                               double endX) const;
 
-  std::vector<double>
-  computeOutput(const Mantid::API::IFunction_const_sptr &func,
-                const std::vector<double> &dataX) const;
+  Mantid::API::MatrixWorkspace_sptr createGuessWorkspace(const Mantid::API::MatrixWorkspace_sptr &inputWorkspace,
+                                                         const Mantid::API::IFunction_const_sptr &func, double startX,
+                                                         double endX) const;
 
-  Mantid::API::IAlgorithm_sptr
-  createWorkspaceAlgorithm(std::size_t numberOfSpectra,
-                           const std::vector<double> &dataX,
-                           const std::vector<double> &dataY) const;
+  std::vector<double> computeOutput(const Mantid::API::IFunction_const_sptr &func,
+                                    const std::vector<double> &dataX) const;
 
-  Mantid::API::MatrixWorkspace_sptr
-  extractSpectra(const Mantid::API::MatrixWorkspace_sptr &inputWS,
-                 int startIndex, int endIndex, double startX,
-                 double endX) const;
+  Mantid::API::IAlgorithm_sptr createWorkspaceAlgorithm(std::size_t numberOfSpectra, const std::vector<double> &dataX,
+                                                        const std::vector<double> &dataY) const;
 
-  Mantid::API::MatrixWorkspace_sptr
-  appendSpectra(const Mantid::API::MatrixWorkspace_sptr &inputWS,
-                const Mantid::API::MatrixWorkspace_sptr &spectraWS) const;
+  Mantid::API::MatrixWorkspace_sptr extractSpectra(const Mantid::API::MatrixWorkspace_sptr &inputWS, int startIndex,
+                                                   int endIndex, double startX, double endX) const;
 
-  Mantid::API::MatrixWorkspace_sptr
-  cropWorkspace(const Mantid::API::MatrixWorkspace_sptr &inputWS, double startX,
-                double endX, int startIndex, int endIndex) const;
+  Mantid::API::MatrixWorkspace_sptr appendSpectra(const Mantid::API::MatrixWorkspace_sptr &inputWS,
+                                                  const Mantid::API::MatrixWorkspace_sptr &spectraWS) const;
+
+  Mantid::API::MatrixWorkspace_sptr cropWorkspace(const Mantid::API::MatrixWorkspace_sptr &inputWS, double startX,
+                                                  double endX, int startIndex, int endIndex) const;
 
   void deleteWorkspace(const std::string &name) const;
 
+  bool isResolutionLoaded() const;
+
   IndirectFittingModel *m_fittingModel;
-  TableDatasetIndex m_activeIndex;
-  WorkspaceIndex m_activeSpectrum;
+  WorkspaceID m_activeWorkspaceID;
+  WorkspaceIndex m_activeWorkspaceIndex;
 };
 
 } // namespace IDA

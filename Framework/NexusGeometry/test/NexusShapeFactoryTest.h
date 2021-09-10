@@ -18,9 +18,7 @@ class NexusShapeFactoryTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static NexusShapeFactoryTest *createSuite() {
-    return new NexusShapeFactoryTest();
-  }
+  static NexusShapeFactoryTest *createSuite() { return new NexusShapeFactoryTest(); }
   static void destroySuite(NexusShapeFactoryTest *suite) { delete suite; }
 
   void test_make_2D_mesh() {
@@ -33,9 +31,8 @@ public:
     triangles.insert(triangles.end(), {0, 1, 2});
 
     auto obj = createMesh(std::move(triangles), std::move(vertices));
-    auto mesh2d =
-        dynamic_cast<const Mantid::Geometry::MeshObject2D *>(obj.get());
-    TS_ASSERT(mesh2d); // Check right dynamic type
+    auto mesh2d = dynamic_cast<const Mantid::Geometry::MeshObject2D *>(obj.get());
+    TS_ASSERT(mesh2d);                                // Check right dynamic type
     TS_ASSERT_EQUALS(mesh2d->numberOfTriangles(), 1); // 3 vertices (1 triangle)
   }
 
@@ -62,20 +59,15 @@ private:
   std::vector<uint32_t> m_facesIndices;
   std::vector<uint32_t> m_windingOrder;
 
-  template <typename T>
-  void appendTo(std::vector<T> &destination, unsigned int value) {
+  template <typename T> void appendTo(std::vector<T> &destination, unsigned int value) {
     destination.emplace_back(static_cast<T>(value));
   }
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static NexusShapeFactoryTestPerformance *createSuite() {
-    return new NexusShapeFactoryTestPerformance();
-  }
-  static void destroySuite(NexusShapeFactoryTestPerformance *suite) {
-    delete suite;
-  }
+  static NexusShapeFactoryTestPerformance *createSuite() { return new NexusShapeFactoryTestPerformance(); }
+  static void destroySuite(NexusShapeFactoryTestPerformance *suite) { delete suite; }
 
   NexusShapeFactoryTestPerformance() {
     // Make inputs. Repeated squares

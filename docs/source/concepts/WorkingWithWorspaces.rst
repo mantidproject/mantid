@@ -8,7 +8,7 @@ Working with Workspaces in Python
 Accessing Workspaces
 ####################
 
-In ``mantid.simpleapi``, you can access existing workspaces as a dictionary using the ``mtd["worskpace_name"]`` command for a specific workspace name key.  More explanation can be found in `Accessing Workspaces From Python <http://www.mantidproject.org/Accessing_Workspaces_From_Python>`_.
+In ``mantid.simpleapi``, you can access existing workspaces as a dictionary using the ``mtd["worskpace_name"]`` command for a specific workspace name key.  More explanation can be found in :ref:`Accessing Workspaces From Python <01_access_ws>`.
 
 .. testcode:: AccessingWorkspaces
 
@@ -102,7 +102,7 @@ Output:
         InputWorkspace = myWS
         OutputWorkspace = myWS
         Params = 200
-        
+
 The full documentation for workspace history can be found at the :class:`~mantid.api.WorkspaceHistory` api.
 
 .. categories:: Concepts

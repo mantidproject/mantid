@@ -22,13 +22,11 @@ public:
     TOFSANSResolutionByPixelCalculator calc;
 
     // Act
-    auto result =
-        calc.getWavelengthIndependentFactor(r1, r2, deltaR, lCollim, l2);
+    auto result = calc.getWavelengthIndependentFactor(r1, r2, deltaR, lCollim, l2);
 
     // Assert
     double expectedResult = 21;
-    TSM_ASSERT_EQUALS("Prefactor should have a value of 21*pi^2",
-                      result / M_PI / M_PI, expectedResult);
+    TSM_ASSERT_EQUALS("Prefactor should have a value of 21*pi^2", result / M_PI / M_PI, expectedResult);
   }
 
   void test_that_correct_q_uncertainty_is_calculated() {
@@ -43,8 +41,7 @@ public:
     TOFSANSResolutionByPixelCalculator calc;
 
     // Act
-    auto result = calc.getSigmaQValue(moderatorValue, prefactor, q, wavelength,
-                                      deltaWavelength, lCollim, l2);
+    auto result = calc.getSigmaQValue(moderatorValue, prefactor, q, wavelength, deltaWavelength, lCollim, l2);
 
     // Assert
     double expectedResult = 5;

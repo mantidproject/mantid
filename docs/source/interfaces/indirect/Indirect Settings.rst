@@ -10,7 +10,7 @@ Overview
 --------
 
 Provides options which allow you to customise and save the behaviour of features on the
-Indirect interfaces. 
+Indirect interfaces.
 
 .. interface:: Settings
   :width: 450
@@ -55,7 +55,7 @@ Restrict allowed input files by name
   the restrictions on data when this option is ticked.
 
 Plot error bars for external plots
-  If ticked, this will ensure that error bars are plotted on any plots which are plotted 
+  If ticked, this will ensure that error bars are plotted on any plots which are plotted
   externally (i.e. in a separate window) from the indirect interfaces.
 
 
@@ -75,13 +75,13 @@ Glossary of Allowed Suffixes
 +--------------+------------------------------+------------------------------------------------+--------------------------------------------------------------------------------------------------------------------+
 | _Corrections | EnergyTransfer (:math:`meV`) | Spectrum Number                                | :ref:`Data Corrections <interface-indirect-corrections>` in CalculatePaalmanPings or CalculateMonteCarloAbsorption |
 +--------------+------------------------------+------------------------------------------------+--------------------------------------------------------------------------------------------------------------------+
-| _eq          | Q (:math:`A^-1`)             | Sample Environment variable (e.g. Temperature) | :ref:`Data Analysis <interface-indirect-data-analysis>` in Elwin                                                   |
+| _eq          | Q (:math:`A^-1`)             | Sample Environment variable (e.g. Temperature) | :ref:`Data Analysis <interface-inelastic-data-analysis>` in Elwin                                                  |
 +--------------+------------------------------+------------------------------------------------+--------------------------------------------------------------------------------------------------------------------+
-| _elf         | Intensity                    | Q (:math:`A^-1`)                               | :ref:`Data Analysis <interface-indirect-data-analysis>` in Elwin                                                   |
+| _elf         | Intensity                    | Q (:math:`A^-1`)                               | :ref:`Data Analysis <interface-inelastic-data-analysis>` in Elwin                                                  |
 +--------------+------------------------------+------------------------------------------------+--------------------------------------------------------------------------------------------------------------------+
-| _iqt         | Time (:math:`ns`)            | Spectrum Number or Q (:math:`A^-1`)            | :ref:`Data Analysis <interface-indirect-data-analysis>` in I(Q,t)                                                  |
+| _iqt         | Time (:math:`ns`)            | Spectrum Number or Q (:math:`A^-1`)            | :ref:`Data Analysis <interface-inelastic-data-analysis>` in I(Q,t)                                                 |
 +--------------+------------------------------+------------------------------------------------+--------------------------------------------------------------------------------------------------------------------+
-| _Result      | Q (:math:`A^-1`)             | Fit Parameter Name                             | :ref:`Data Analysis <interface-indirect-data-analysis>` in MSDFit, IqtFit, ConvFit or F(Q)Fit                      |
+| _Result      | Q (:math:`A^-1`)             | Fit Parameter Name                             | :ref:`Data Analysis <interface-inelastic-data-analysis>` in MSDFit, IqtFit, ConvFit or F(Q)Fit                     |
 +--------------+------------------------------+------------------------------------------------+--------------------------------------------------------------------------------------------------------------------+
 
 When **Restrict allowed input files by name** is ticked, the input data is restricted by name

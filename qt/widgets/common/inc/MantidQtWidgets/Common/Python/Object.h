@@ -37,9 +37,7 @@ template <typename T = PyObject> using Handle = boost::python::handle<T>;
 template <typename T> using ToPythonValue = boost::python::to_python_value<T>;
 
 // Helper to forward to boost python
-inline ssize_t Len(const Python::Object &obj) {
-  return boost::python::len(obj);
-}
+inline ssize_t Len(const Python::Object &obj) { return boost::python::len(obj); }
 
 // Helper to create an Object from a new reference to a raw PyObject*
 inline Python::Object NewRef(PyObject *obj) {
@@ -81,8 +79,7 @@ public:
   InstanceHolder(Object obj, const char *attr) : m_instance(std::move(obj)) {
     Mantid::PythonInterface::GlobalInterpreterLock lock;
     if (PyObject_HasAttrString(pyobj().ptr(), attr) == 0) {
-      throw std::invalid_argument(std::string(pyobj().ptr()->ob_type->tp_name) +
-                                  " has no attribute " + attr);
+      throw std::invalid_argument(std::string(pyobj().ptr()->ob_type->tp_name) + " has no attribute " + attr);
     }
   }
 

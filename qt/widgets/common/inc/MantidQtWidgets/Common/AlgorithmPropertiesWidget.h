@@ -40,8 +40,7 @@ public:
   AlgorithmPropertiesWidget(QWidget *parent = nullptr);
   ~AlgorithmPropertiesWidget() override;
 
-  void
-  setInputHistory(MantidQt::API::AbstractAlgorithmInputHistory *inputHistory);
+  void setInputHistory(MantidQt::API::AbstractAlgorithmInputHistory *inputHistory);
 
   void initLayout();
 
@@ -51,10 +50,9 @@ public:
   QString getAlgorithmName() const;
   void setAlgorithmName(QString name);
 
-  void addEnabledAndDisableLists(const QStringList &enabled,
-                                 const QStringList &disabled);
+  void addEnabledAndDisableLists(const QStringList &enabled, const QStringList &disabled);
 
-  void hideOrDisableProperties();
+  void hideOrDisableProperties(const QString &changedPropName = "");
 
   void saveInput();
 
@@ -72,14 +70,13 @@ public:
 
 public slots:
   /// Any property changed
-  void propertyChanged(const QString &pName);
+  void propertyChanged(const QString &changedPropName);
 
   /// Replace WS button was clicked
   void replaceWSClicked(const QString &propName);
 
 private:
-  bool isWidgetEnabled(Mantid::Kernel::Property *property,
-                       const QString &propName) const;
+  bool isWidgetEnabled(Mantid::Kernel::Property *property, const QString &propName) const;
 
   /// Chosen algorithm name
   QString m_algoName;

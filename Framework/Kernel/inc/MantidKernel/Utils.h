@@ -43,9 +43,7 @@ inline long round(double x) { return long(x + (x < 0 ? -0.5 : +0.5)); }
  * @param r :: floating point value to round
  * @return closest integer as a double (positive or negative)
  */
-inline double rounddbl(double r) {
-  return (r > 0.0) ? std::floor(r + 0.5) : std::ceil(r - 0.5);
-}
+inline double rounddbl(double r) { return (r > 0.0) ? std::floor(r + 0.5) : std::ceil(r - 0.5); }
 
 //------------------------------------------------------------------------------------------------
 /** Custom rounding method for a double->double because none is
@@ -103,8 +101,7 @@ inline void SetUp(const size_t numDims, size_t *out, const size_t value = 0) {
  *index in each dimension.
  *        The minimum must be 0 in each dimension for the algorithm to work
  */
-inline void SetUpIndexMaker(const size_t numDims, size_t *out,
-                            const size_t *index_max) {
+inline void SetUpIndexMaker(const size_t numDims, size_t *out, const size_t *index_max) {
   // Allocate and start at 1
   for (size_t d = 0; d < numDims; d++)
     out[d] = 1;
@@ -125,8 +122,7 @@ inline void SetUpIndexMaker(const size_t numDims, size_t *out,
  * @param index_maker :: result of SetUpIndexMaker()
  * @return the linear index into the array
  */
-inline size_t GetLinearIndex(const size_t numDims, size_t *index,
-                             size_t *index_maker) {
+inline size_t GetLinearIndex(const size_t numDims, size_t *index, size_t *index_maker) {
   size_t out = 0;
   for (size_t d = 0; d < numDims; d++)
     out += index[d] * index_maker[d];
@@ -145,11 +141,8 @@ inline size_t GetLinearIndex(const size_t numDims, size_t *index,
  * @param[out] out_indices :: an array, sized numDims, which will be
  *             filled with the index for each dimension, given the linear index
  */
-inline void GetIndicesFromLinearIndex(const size_t numDims,
-                                      const size_t linear_index,
-                                      const size_t *index_maker,
-                                      const size_t *index_max,
-                                      size_t *out_indices) {
+inline void GetIndicesFromLinearIndex(const size_t numDims, const size_t linear_index, const size_t *index_maker,
+                                      const size_t *index_max, size_t *out_indices) {
   for (size_t d = 0; d < numDims; d++) {
     out_indices[d] = (linear_index / index_maker[d]) % index_max[d];
   }
@@ -169,8 +162,7 @@ inline void GetIndicesFromLinearIndex(const size_t numDims,
  *each dimension.
  * @return true if the end of the loop was reached; false otherwise.
  */
-inline bool Increment(const size_t numDims, size_t *index, size_t *index_max,
-                      size_t *index_min) {
+inline bool Increment(const size_t numDims, size_t *index, size_t *index_max, size_t *index_min) {
   size_t d = 0;
   while (d < numDims) {
     // Add one to the index in this dimension
@@ -233,9 +225,7 @@ inline bool Increment(const size_t numDims, size_t *index, size_t *index_max) {
  * @param[out] out_indices :: an array, sized numDims, which will be
  *             filled with the index for each dimension, given the linear index
  */
-inline void getIndicesFromLinearIndex(const size_t linear_index,
-                                      size_t const *const numBins,
-                                      const size_t numDims,
+inline void getIndicesFromLinearIndex(const size_t linear_index, size_t const *const numBins, const size_t numDims,
                                       size_t *const out_indices) {
   // number of bins in first dimension
   size_t nBins = *(numBins + 0);
@@ -262,15 +252,12 @@ inline void getIndicesFromLinearIndex(const size_t linear_index,
  * @returns :: a vector, sized numDims, which will be
  *             filled with the index for each dimension, given the linear index
  */
-inline std::vector<size_t>
-getIndicesFromLinearIndex(const size_t linear_index,
-                          const std::vector<size_t> &num_bins) {
+inline std::vector<size_t> getIndicesFromLinearIndex(const size_t linear_index, const std::vector<size_t> &num_bins) {
   std::vector<size_t> out_indices;
   if (!num_bins.empty()) {
     size_t nBins = num_bins.size();
     out_indices.resize(nBins);
-    getIndicesFromLinearIndex(linear_index, &num_bins[0], nBins,
-                              &out_indices[0]);
+    getIndicesFromLinearIndex(linear_index, &num_bins[0], nBins, &out_indices[0]);
   }
   return out_indices;
 }
@@ -293,13 +280,10 @@ getIndicesFromLinearIndex(const size_t linear_index,
  * @param widths : width in pixels per dimension
  * @return True if the are neighbours, otherwise false.
  */
-inline bool
-isNeighbourOfSubject(const size_t ndims, const size_t neighbour_linear_index,
-                     const size_t *subject_indices, const size_t *num_bins,
-                     const size_t *index_max, const std::vector<int> &widths) {
+inline bool isNeighbourOfSubject(const size_t ndims, const size_t neighbour_linear_index, const size_t *subject_indices,
+                                 const size_t *num_bins, const size_t *index_max, const std::vector<int> &widths) {
   for (size_t ind = 0; ind < ndims; ++ind) {
-    size_t neigh_index =
-        (neighbour_linear_index / num_bins[ind]) % index_max[ind];
+    size_t neigh_index = (neighbour_linear_index / num_bins[ind]) % index_max[ind];
     const long double subj = static_cast<long double>(subject_indices[ind]);
     const long double neigh = static_cast<long double>(neigh_index);
     const long double diff = std::abs(subj - neigh);

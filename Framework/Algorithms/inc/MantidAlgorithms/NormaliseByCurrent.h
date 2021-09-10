@@ -32,32 +32,25 @@ namespace Algorithms {
     @author Russell Taylor, Tessella Support Services plc
     @date 25/08/2008
 */
-class MANTID_ALGORITHMS_DLL NormaliseByCurrent
-    : public API::DistributedAlgorithm {
+class MANTID_ALGORITHMS_DLL NormaliseByCurrent : public API::DistributedAlgorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "NormaliseByCurrent"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Normalises a workspace by the proton charge.";
-  }
+  const std::string summary() const override { return "Normalises a workspace by the proton charge."; }
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
   const std::vector<std::string> seeAlso() const override { return {"Divide"}; }
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "CorrectionFunctions\\NormalisationCorrections";
-  }
+  const std::string category() const override { return "CorrectionFunctions\\NormalisationCorrections"; }
 
 private:
   // Overridden Algorithm methods
   void init() override;
   void exec() override;
   // Extract the charge value from the logs.
-  double
-  extractCharge(const std::shared_ptr<Mantid::API::MatrixWorkspace> &inputWS,
-                const bool integratePCharge) const;
+  double extractCharge(const std::shared_ptr<Mantid::API::MatrixWorkspace> &inputWS, const bool integratePCharge) const;
 };
 
 } // namespace Algorithms

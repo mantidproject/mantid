@@ -50,8 +50,7 @@ Non-member method to interpret an normalisation option.
 @param strNormalisation: string normalisation property value.
 @return MDNormalisation option.
 */
-Mantid::API::MDNormalization
-whichNormalisation(const std::string &strNormalisation) {
+Mantid::API::MDNormalization whichNormalisation(const std::string &strNormalisation) {
   Mantid::API::MDNormalization requestedNormalisation;
   if (strNormalisation == noNormalisationOption()) {
     requestedNormalisation = Mantid::API::NoNormalization;
@@ -66,48 +65,37 @@ whichNormalisation(const std::string &strNormalisation) {
 
 /// Initialise the properties
 void QueryMDWorkspace::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>("InputWorkspace", "", Direction::Input),
                   "An input MDWorkspace.");
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<ITableWorkspace>>(
-          "OutputWorkspace", "", Direction::Output),
-      "The output Tableworkspace "
-      "with columns containing key summary information about the MDWorkspace.");
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>("OutputWorkspace", "", Direction::Output),
+                  "The output Tableworkspace "
+                  "with columns containing key summary information about the MDWorkspace.");
 
-  declareProperty("LimitRows", true,
-                  "Limit the report output to a maximum number of rows");
+  declareProperty("LimitRows", true, "Limit the report output to a maximum number of rows");
 
-  declareProperty(std::make_unique<PropertyWithValue<int>>(
-                      "MaximumRows", 100000,
-                      std::make_shared<BoundedValidator<int>>(),
-                      Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<int>>("MaximumRows", 100000,
+                                                           std::make_shared<BoundedValidator<int>>(), Direction::Input),
                   "The number of neighbours to utilise. Defaults to 100000.");
-  setPropertySettings("MaximumRows", std::make_unique<EnabledWhenProperty>(
-                                         "LimitRows", IS_DEFAULT));
+  setPropertySettings("MaximumRows", std::make_unique<EnabledWhenProperty>("LimitRows", IS_DEFAULT));
 
   std::vector<std::string> propOptions;
   propOptions.emplace_back(noNormalisationOption());
   propOptions.emplace_back(volumeNormalisationOption());
   propOptions.emplace_back(numberOfEventsNormalisationOption());
 
-  declareProperty("Normalisation", "none",
-                  std::make_shared<StringListValidator>(propOptions),
+  declareProperty("Normalisation", "none", std::make_shared<StringListValidator>(propOptions),
                   "What normalisation do you wish to apply"
                   "  none: No normalisation.\n"
                   "  volume: Normalise by the volume.\n"
                   "  number of events: Normalise by the number of events.");
 
-  declareProperty(
-      "TransformCoordsToOriginal", true,
-      "Output box coordinates in terms of original workspace coordinates");
+  declareProperty("TransformCoordsToOriginal", true,
+                  "Output box coordinates in terms of original workspace coordinates");
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<ITableWorkspace>>(
-          "BoxDataTable", "", Direction::Output,
-          Mantid::API::PropertyMode::Optional),
-      "Optional output data table with MDEventWorkspace-specific box data.");
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>("BoxDataTable", "", Direction::Output,
+                                                                       Mantid::API::PropertyMode::Optional),
+                  "Optional output data table with MDEventWorkspace-specific box data.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -115,8 +103,7 @@ void QueryMDWorkspace::init() {
  * @param ws ::  MDEventWorkspace being added to
  */
 template <typename MDE, size_t nd>
-void QueryMDWorkspace::getBoxData(
-    typename Mantid::DataObjects::MDEventWorkspace<MDE, nd>::sptr ws) {
+void QueryMDWorkspace::getBoxData(typename Mantid::DataObjects::MDEventWorkspace<MDE, nd>::sptr ws) {
   if (this->getPropertyValue("BoxDataTable").empty())
     return;
 
@@ -167,11 +154,9 @@ void QueryMDWorkspace::getBoxData(
     output->cell<int>(rowCounter, col++) = int(d);
     output->cell<int>(rowCounter, col++) = NumBoxes[d];
     output->cell<int>(rowCounter, col++) = NumWithEvents[d];
-    output->cell<double>(rowCounter, col++) =
-        100.0 * double(NumWithEvents[d]) / double(NumBoxes[d]);
+    output->cell<double>(rowCounter, col++) = 100.0 * double(NumWithEvents[d]) / double(NumBoxes[d]);
     output->cell<int>(rowCounter, col++) = TotalEvents[d];
-    output->cell<double>(rowCounter, col++) =
-        double(TotalEvents[d]) / double(NumBoxes[d]);
+    output->cell<double>(rowCounter, col++) = double(TotalEvents[d]) / double(NumBoxes[d]);
     output->cell<double>(rowCounter, col++) = TotalWeight[d];
     output->cell<double>(rowCounter, col++) = TotalSignal[d];
     output->cell<double>(rowCounter, col++) = TotalErrorSquared[d];
@@ -192,8 +177,7 @@ void QueryMDWorkspace::exec() {
 
   IMDWorkspace_sptr input = getProperty("InputWorkspace");
 
-  const bool transformCoordsToOriginal =
-      getProperty("TransformCoordsToOriginal");
+  const bool transformCoordsToOriginal = getProperty("TransformCoordsToOriginal");
 
   // Define a table workspace with a specific column schema.
   ITableWorkspace_sptr output = WorkspaceFactory::Instance().createTable();

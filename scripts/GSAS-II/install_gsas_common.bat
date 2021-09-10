@@ -23,7 +23,7 @@ if not "!PATH_PYTHON_EXE!" == "" (
     @echo Cannot find python executable
     exit /b 1
   )
-) 
+)
 
 @echo Using '!PYTHON_EXE!' to install GSAS
 !PYTHON_EXE! %~dp0install_gsas_proxy.py %*

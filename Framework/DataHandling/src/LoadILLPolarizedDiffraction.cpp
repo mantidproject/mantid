@@ -60,17 +60,13 @@ int LoadILLPolarizedDiffraction::confidence(NexusDescriptor &descriptor) const {
 }
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string LoadILLPolarizedDiffraction::name() const {
-  return "LoadILLPolarizedDiffraction";
-}
+const std::string LoadILLPolarizedDiffraction::name() const { return "LoadILLPolarizedDiffraction"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int LoadILLPolarizedDiffraction::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string LoadILLPolarizedDiffraction::category() const {
-  return "DataHandling\\Nexus;ILL\\Diffraction";
-}
+const std::string LoadILLPolarizedDiffraction::category() const { return "DataHandling\\Nexus;ILL\\Diffraction"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string LoadILLPolarizedDiffraction::summary() const {
@@ -80,56 +76,40 @@ const std::string LoadILLPolarizedDiffraction::summary() const {
 /**
  * Constructor
  */
-LoadILLPolarizedDiffraction::LoadILLPolarizedDiffraction()
-    : IFileLoader<NexusDescriptor>() {}
+LoadILLPolarizedDiffraction::LoadILLPolarizedDiffraction() : IFileLoader<NexusDescriptor>() {}
 
 /**
  * Initialize the algorithm's properties.
  */
 void LoadILLPolarizedDiffraction::init() {
-  declareProperty(std::make_unique<FileProperty>("Filename", "",
-                                                 FileProperty::Load, ".nxs"),
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Load, ".nxs"),
                   "File path of the data file to load");
-  declareProperty(std::make_unique<WorkspaceProperty<API::WorkspaceGroup>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<API::WorkspaceGroup>>("OutputWorkspace", "", Direction::Output),
                   "The output workspace.");
-  const std::vector<std::string> positionCalibrationOptions{"None", "Nexus",
-                                                            "YIGFile"};
-  declareProperty(
-      "PositionCalibration", "None",
-      std::make_shared<StringListValidator>(positionCalibrationOptions),
-      "Select the type of pixel position calibration. If None, the pixel "
-      "positions are read from IDF file. If Nexus, the positions are read from "
-      "Nexus file. If YIGFile, then the calibration twotheta data is loaded "
-      "from a user-defined calibration file.");
+  const std::vector<std::string> positionCalibrationOptions{"None", "Nexus", "YIGFile"};
+  declareProperty("PositionCalibration", "None", std::make_shared<StringListValidator>(positionCalibrationOptions),
+                  "Select the type of pixel position calibration. If None, the pixel "
+                  "positions are read from IDF file. If Nexus, the positions are read from "
+                  "Nexus file. If YIGFile, then the calibration twotheta data is loaded "
+                  "from a user-defined calibration file.");
 
-  declareProperty(std::make_unique<FileProperty>(
-                      "YIGFilename", "", FileProperty::OptionalLoad, ".xml"),
+  declareProperty(std::make_unique<FileProperty>("YIGFilename", "", FileProperty::OptionalLoad, ".xml"),
                   "File path of the YIG calibration data file to load.");
   setPropertySettings("YIGFilename",
-                      std::make_unique<Kernel::EnabledWhenProperty>(
-                          "PositionCalibration", IS_EQUAL_TO, "YIGFile"));
-  declareProperty("ConvertToScatteringAngle", false,
-                  "Convert the bin edges to scattering angle.",
+                      std::make_unique<Kernel::EnabledWhenProperty>("PositionCalibration", IS_EQUAL_TO, "YIGFile"));
+  declareProperty("ConvertToScatteringAngle", false, "Convert the bin edges to scattering angle.", Direction::Input);
+  declareProperty("TransposeMonochromatic", false, "Transpose the 2D workspace with monochromatic data",
                   Direction::Input);
-  declareProperty("TransposeMonochromatic", false,
-                  "Transpose the 2D workspace with monochromatic data",
-                  Direction::Input);
-  const std::vector<std::string> TOFUnitOptions{"UncalibratedTime",
-                                                "TimeChannels"};
-  declareProperty("TOFUnits", TOFUnitOptions[0],
-                  std::make_shared<StringListValidator>(TOFUnitOptions),
+  const std::vector<std::string> TOFUnitOptions{"UncalibratedTime", "TimeChannels"};
+  declareProperty("TOFUnits", TOFUnitOptions[0], std::make_shared<StringListValidator>(TOFUnitOptions),
                   "The choice of X-axis units for Time-Of-Flight data.");
 }
 
-std::map<std::string, std::string>
-LoadILLPolarizedDiffraction::validateInputs() {
+std::map<std::string, std::string> LoadILLPolarizedDiffraction::validateInputs() {
   std::map<std::string, std::string> issues;
-  if (getPropertyValue("PositionCalibration") == "YIGFile" &&
-      getPropertyValue("YIGFilename") == "") {
-    issues["PositionCalibration"] =
-        "YIG-based position calibration of detectors requested but "
-        "the file was not provided.";
+  if (getPropertyValue("PositionCalibration") == "YIGFile" && getPropertyValue("YIGFilename") == "") {
+    issues["PositionCalibration"] = "YIG-based position calibration of detectors requested but "
+                                    "the file was not provided.";
   }
   return issues;
 }
@@ -139,7 +119,7 @@ LoadILLPolarizedDiffraction::validateInputs() {
  */
 void LoadILLPolarizedDiffraction::exec() {
 
-  Progress progress(this, 0, 1, 2);
+  Progress progress(this, 0, 1, 3);
 
   m_fileName = getPropertyValue("Filename");
   m_outputWorkspaceGroup = std::make_shared<API::WorkspaceGroup>();
@@ -150,6 +130,9 @@ void LoadILLPolarizedDiffraction::exec() {
 
   progress.report("Loading the metadata");
   loadMetaData();
+
+  progress.report("Sorting polarisations");
+  sortPolarisations();
 
   setProperty("OutputWorkspace", m_outputWorkspaceGroup);
 }
@@ -164,9 +147,7 @@ void LoadILLPolarizedDiffraction::loadData() {
   NXRoot dataRoot(m_fileName);
 
   // read each entry
-  for (auto entryNumber = 0;
-       entryNumber < static_cast<int>((dataRoot.groups().size()));
-       entryNumber++) {
+  for (auto entryNumber = 0; entryNumber < static_cast<int>((dataRoot.groups().size())); entryNumber++) {
     NXEntry entry = dataRoot.openEntry("entry" + std::to_string(entryNumber));
     m_instName = entry.getString("D7/name");
 
@@ -193,12 +174,10 @@ void LoadILLPolarizedDiffraction::loadData() {
 
     // Assign detector counts
     PARALLEL_FOR_IF(Kernel::threadSafe(*workspace))
-    for (auto pixel_no = 0; pixel_no < static_cast<int>(D7_NUMBER_PIXELS);
-         ++pixel_no) {
+    for (auto pixel_no = 0; pixel_no < static_cast<int>(D7_NUMBER_PIXELS); ++pixel_no) {
       auto &spectrum = workspace->mutableY(pixel_no);
       auto &errors = workspace->mutableE(pixel_no);
-      for (auto channel_no = 0;
-           channel_no < static_cast<int>(m_numberOfChannels); ++channel_no) {
+      for (auto channel_no = 0; channel_no < static_cast<int>(m_numberOfChannels); ++channel_no) {
         unsigned int counts = data(pixel_no, 0, channel_no);
         spectrum[channel_no] = counts;
         errors[channel_no] = std::sqrt(counts);
@@ -208,17 +187,13 @@ void LoadILLPolarizedDiffraction::loadData() {
 
     // load and assign monitor data
     for (auto monitor_no = static_cast<int>(D7_NUMBER_PIXELS);
-         monitor_no < static_cast<int>(D7_NUMBER_PIXELS + NUMBER_MONITORS);
-         ++monitor_no) {
+         monitor_no < static_cast<int>(D7_NUMBER_PIXELS + NUMBER_MONITORS); ++monitor_no) {
       NXUInt monitorData = entry.openNXDataSet<unsigned int>(
-          "monitor" +
-          std::to_string(monitor_no + 1 - static_cast<int>(D7_NUMBER_PIXELS)) +
-          "/data");
+          "monitor" + std::to_string(monitor_no + 1 - static_cast<int>(D7_NUMBER_PIXELS)) + "/data");
       monitorData.load();
       auto &spectrum = workspace->mutableY(monitor_no);
       auto &errors = workspace->mutableE(monitor_no);
-      for (auto channel_no = 0;
-           channel_no < static_cast<int>(m_numberOfChannels); channel_no++) {
+      for (auto channel_no = 0; channel_no < static_cast<int>(m_numberOfChannels); channel_no++) {
         unsigned int counts = monitorData(0, 0, channel_no);
         spectrum[channel_no] = counts;
         errors[channel_no] = std::sqrt(counts);
@@ -231,8 +206,7 @@ void LoadILLPolarizedDiffraction::loadData() {
       workspace = convertSpectrumAxis(workspace);
     }
     // transpose monochromatic data distribution
-    if (getProperty("TransposeMonochromatic") &&
-        m_acquisitionMode != TOF_MODE_ON) {
+    if (getProperty("TransposeMonochromatic") && m_acquisitionMode != TOF_MODE_ON) {
       workspace = transposeMonochromatic(workspace);
     }
 
@@ -253,18 +227,13 @@ void LoadILLPolarizedDiffraction::loadMetaData() {
   NXstatus nxStat = NXopen(m_fileName.c_str(), NXACC_READ, &nxHandle);
 
   if (nxStat != NX_ERROR) {
-    for (auto workspaceId = 0;
-         workspaceId < m_outputWorkspaceGroup->getNumberOfEntries();
-         ++workspaceId) {
+    for (auto workspaceId = 0; workspaceId < m_outputWorkspaceGroup->getNumberOfEntries(); ++workspaceId) {
       MatrixWorkspace_sptr workspace =
-          std::static_pointer_cast<API::MatrixWorkspace>(
-              m_outputWorkspaceGroup->getItem(workspaceId));
+          std::static_pointer_cast<API::MatrixWorkspace>(m_outputWorkspaceGroup->getItem(workspaceId));
       auto const entryName = std::string("entry" + std::to_string(workspaceId));
-      m_loadHelper.addNexusFieldsToWsRun(nxHandle, workspace->mutableRun(),
-                                         entryName);
+      m_loadHelper.addNexusFieldsToWsRun(nxHandle, workspace->mutableRun(), entryName);
       if (m_wavelength != 0) {
-        workspace->mutableRun().addProperty("monochromator.wavelength",
-                                            m_wavelength, true);
+        workspace->mutableRun().addProperty("monochromator.wavelength", m_wavelength, true);
       }
     }
     NXclose(&nxHandle);
@@ -279,9 +248,7 @@ void LoadILLPolarizedDiffraction::loadMetaData() {
  * @param entry : entry linked with the returned workspace
  * @return : workspace with the correct data dimensions
  */
-API::MatrixWorkspace_sptr
-LoadILLPolarizedDiffraction::initStaticWorkspace(const NXEntry &entry) {
-
+API::MatrixWorkspace_sptr LoadILLPolarizedDiffraction::initStaticWorkspace(const NXEntry &entry) {
   const size_t nSpectra = D7_NUMBER_PIXELS + NUMBER_MONITORS;
 
   // Set number of channels
@@ -296,22 +263,20 @@ LoadILLPolarizedDiffraction::initStaticWorkspace(const NXEntry &entry) {
     m_numberOfChannels = 1;
   }
 
-  API::MatrixWorkspace_sptr workspace = WorkspaceFactory::Instance().create(
-      "Workspace2D", nSpectra, m_numberOfChannels + 1, m_numberOfChannels);
+  API::MatrixWorkspace_sptr workspace =
+      WorkspaceFactory::Instance().create("Workspace2D", nSpectra, m_numberOfChannels + 1, m_numberOfChannels);
 
   // Set x axis units
   if (m_acquisitionMode == TOF_MODE_ON) {
     if (getPropertyValue("TOFUnits") == "TimeChannels") {
-      auto lblUnit = std::dynamic_pointer_cast<Kernel::Units::Label>(
-          UnitFactory::Instance().create("Label"));
+      auto lblUnit = std::dynamic_pointer_cast<Kernel::Units::Label>(UnitFactory::Instance().create("Label"));
       lblUnit->setLabel("Time channel", Units::Symbol::EmptyLabel);
       workspace->getAxis(0)->unit() = lblUnit;
     } else {
       workspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
     }
   } else {
-    workspace->getAxis(0)->unit() =
-        UnitFactory::Instance().create("Wavelength");
+    workspace->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
   }
   // Set y axis unit
   workspace->setYUnit("Counts");
@@ -327,13 +292,12 @@ LoadILLPolarizedDiffraction::initStaticWorkspace(const NXEntry &entry) {
  * @param workspace : workspace with data from the first entry
  * @param startTime :: the date the run started, in ISO compliant format
  */
-void LoadILLPolarizedDiffraction::loadInstrument(
-    API::MatrixWorkspace_sptr workspace, const std::string &startTime) {
+void LoadILLPolarizedDiffraction::loadInstrument(API::MatrixWorkspace_sptr workspace, const std::string &startTime) {
 
   // the start time is needed in the workspace when loading the parameter file
   workspace->mutableRun().addProperty("start_time", startTime);
 
-  IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
+  auto loadInst = createChildAlgorithm("LoadInstrument");
   loadInst->setPropertyValue("Filename", m_instName + "_Definition.xml");
   loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", workspace);
   loadInst->setProperty("RewriteSpectraMap", OptionalBool(true));
@@ -348,37 +312,31 @@ void LoadILLPolarizedDiffraction::loadInstrument(
  * @param bankId : bank ID for which 2theta positions will be read
  * @return : vector of pixel 2theta positions in the chosen bank
  */
-std::vector<double> LoadILLPolarizedDiffraction::loadTwoThetaDetectors(
-    const API::MatrixWorkspace_sptr workspace, const NXEntry &entry,
-    const int bankId) {
+std::vector<double> LoadILLPolarizedDiffraction::loadTwoThetaDetectors(const API::MatrixWorkspace_sptr workspace,
+                                                                       const NXEntry &entry, const int bankId) {
 
-  auto const nPixelsPerBank =
-      workspace->getInstrument()->getIntParameter("number_pixels_per_bank")[0];
+  auto const nPixelsPerBank = workspace->getInstrument()->getIntParameter("number_pixels_per_bank")[0];
   std::vector<double> twoTheta(static_cast<int>(nPixelsPerBank));
 
   if (getPropertyValue("PositionCalibration") == "Nexus") {
-    NXFloat twoThetaPixels = entry.openNXFloat(
-        "D7/Detector/bank" + std::to_string(bankId) + "_offset");
+    NXFloat twoThetaPixels = entry.openNXFloat("D7/Detector/bank" + std::to_string(bankId) + "_offset");
     twoThetaPixels.load();
     float *twoThetaDataStart = twoThetaPixels();
     float *twoThetaDataEnd = twoThetaDataStart + nPixelsPerBank;
     twoTheta.assign(twoThetaDataStart, twoThetaDataEnd);
   } else {
-    IAlgorithm_sptr loadIpf = createChildAlgorithm("LoadParameterFile");
+    auto loadIpf = createChildAlgorithm("LoadParameterFile");
     loadIpf->setPropertyValue("Filename", getPropertyValue("YIGFilename"));
     loadIpf->setProperty("Workspace", workspace);
     loadIpf->execute();
 
     Instrument_const_sptr instrument = workspace->getInstrument();
-    IComponent_const_sptr currentBank = instrument->getComponentByName(
-        std::string("bank" + std::to_string(bankId)));
+    IComponent_const_sptr currentBank = instrument->getComponentByName(std::string("bank" + std::to_string(bankId)));
 
     m_wavelength = currentBank->getNumberParameter("wavelength")[0];
 
-    for (auto pixel_no = 0; pixel_no < static_cast<int>(nPixelsPerBank);
-         pixel_no++) {
-      twoTheta[pixel_no] = currentBank->getNumberParameter(
-          "twoTheta_pixel_" + std::to_string(pixel_no + 1))[0];
+    for (auto pixel_no = 0; pixel_no < static_cast<int>(nPixelsPerBank); pixel_no++) {
+      twoTheta[pixel_no] = currentBank->getNumberParameter("twoTheta_pixel_" + std::to_string(pixel_no + 1))[0];
     }
   }
   return twoTheta;
@@ -390,13 +348,12 @@ std::vector<double> LoadILLPolarizedDiffraction::loadTwoThetaDetectors(
  * @param bankId : bank ID of the relevant bank
  * @return : vector of the bank slope and offset
  */
-std::vector<double> LoadILLPolarizedDiffraction::loadBankParameters(
-    const API::MatrixWorkspace_sptr workspace, const int bankId) {
+std::vector<double> LoadILLPolarizedDiffraction::loadBankParameters(const API::MatrixWorkspace_sptr workspace,
+                                                                    const int bankId) {
   std::vector<double> bankParameters;
 
   Instrument_const_sptr instrument = workspace->getInstrument();
-  IComponent_const_sptr currentBank = instrument->getComponentByName(
-      std::string("bank" + std::to_string(bankId)));
+  IComponent_const_sptr currentBank = instrument->getComponentByName(std::string("bank" + std::to_string(bankId)));
 
   auto slope = currentBank->getNumberParameter("gradient")[0];
   bankParameters.push_back(slope);
@@ -411,44 +368,36 @@ std::vector<double> LoadILLPolarizedDiffraction::loadBankParameters(
  * @param entry : entry from which the 2theta positions will be read
  * @param workspace : workspace containing the instrument being moved
  */
-void LoadILLPolarizedDiffraction::moveTwoTheta(
-    const NXEntry &entry, API::MatrixWorkspace_sptr workspace) {
+void LoadILLPolarizedDiffraction::moveTwoTheta(const NXEntry &entry, API::MatrixWorkspace_sptr workspace) {
+
   Instrument_const_sptr instrument = workspace->getInstrument();
   auto const nBanks = instrument->getIntParameter("number_banks")[0];
-  auto const nPixelsPerBank =
-      instrument->getIntParameter("number_pixels_per_bank")[0];
+  auto const nPixelsPerBank = instrument->getIntParameter("number_pixels_per_bank")[0];
 
   auto &componentInfo = workspace->mutableComponentInfo();
   for (auto bank_no = 0; bank_no < static_cast<int>(nBanks); ++bank_no) {
-    NXFloat twoThetaBank = entry.openNXFloat(
-        "D7/2theta/actual_bank" +
-        std::to_string(bank_no + 2)); // detector bank IDs start at 2
+    NXFloat twoThetaBank =
+        entry.openNXFloat("D7/2theta/actual_bank" + std::to_string(bank_no + 2)); // detector bank IDs start at 2
     twoThetaBank.load();
     if (getPropertyValue("PositionCalibration") == "None") {
       Quat rotation(-twoThetaBank[0], V3D(0, 1, 0));
-      IComponent_const_sptr currentBank = instrument->getComponentByName(
-          std::string("bank" + std::to_string(bank_no + 2)));
-      const auto componentIndex =
-          componentInfo.indexOf(currentBank->getComponentID());
+      IComponent_const_sptr currentBank =
+          instrument->getComponentByName(std::string("bank" + std::to_string(bank_no + 2)));
+      const auto componentIndex = componentInfo.indexOf(currentBank->getComponentID());
       componentInfo.setRotation(componentIndex, rotation);
     } else {
-      std::vector<double> twoThetaPixels =
-          loadTwoThetaDetectors(workspace, entry, bank_no + 2);
+      std::vector<double> twoThetaPixels = loadTwoThetaDetectors(workspace, entry, bank_no + 2);
       std::vector<double> bankParameters{1, 0}; // slope, offset
       if (getPropertyValue("PositionCalibration") == "YIGFile") {
         bankParameters = loadBankParameters(workspace, bank_no + 2);
       }
-      for (auto pixel_no = 0; pixel_no < static_cast<int>(nPixelsPerBank);
-           ++pixel_no) {
-        auto const pixelIndex =
-            bank_no * static_cast<int>(nPixelsPerBank) + pixel_no;
+      for (auto pixel_no = 0; pixel_no < static_cast<int>(nPixelsPerBank); ++pixel_no) {
+        auto const pixelIndex = bank_no * static_cast<int>(nPixelsPerBank) + pixel_no;
         auto const pixel = componentInfo.componentID(pixelIndex);
         V3D position = pixel->getPos();
         double radius, theta, phi;
         position.getSpherical(radius, theta, phi);
-        position.spherical(radius,
-                           bankParameters[0] * twoThetaBank[0] -
-                               bankParameters[1] - twoThetaPixels[pixel_no],
+        position.spherical(radius, bankParameters[0] * twoThetaBank[0] - bankParameters[1] - twoThetaPixels[pixel_no],
                            phi);
         componentInfo.setPosition(pixelIndex, position);
       }
@@ -462,8 +411,7 @@ void LoadILLPolarizedDiffraction::moveTwoTheta(
  * will be read
  * @return : returns vector with bin edges
  */
-std::vector<double>
-LoadILLPolarizedDiffraction::prepareAxes(const NXEntry &entry) {
+std::vector<double> LoadILLPolarizedDiffraction::prepareAxes(const NXEntry &entry) {
   // check the mode of measurement and prepare axes for data
   std::vector<double> axes;
 
@@ -473,8 +421,7 @@ LoadILLPolarizedDiffraction::prepareAxes(const NXEntry &entry) {
     auto channelWidth = static_cast<double>(timeOfFlightInfo[0]);
     m_numberOfChannels = size_t(timeOfFlightInfo[1]);
     auto tofDelay = timeOfFlightInfo[2];
-    for (auto channel_no = 0;
-         channel_no <= static_cast<int>(m_numberOfChannels); channel_no++) {
+    for (auto channel_no = 0; channel_no <= static_cast<int>(m_numberOfChannels); channel_no++) {
       if (getPropertyValue("TOFUnits") == "UncalibratedTime") {
         axes.push_back(tofDelay + channel_no * channelWidth);
       } else {
@@ -486,8 +433,7 @@ LoadILLPolarizedDiffraction::prepareAxes(const NXEntry &entry) {
     if (m_wavelength != 0) {
       wavelength = m_wavelength;
     } else {
-      NXFloat wavelengthNexus =
-          entry.openNXFloat("D7/monochromator/wavelength");
+      NXFloat wavelengthNexus = entry.openNXFloat("D7/monochromator/wavelength");
       wavelengthNexus.load();
       wavelength = wavelengthNexus[0];
     }
@@ -501,10 +447,8 @@ LoadILLPolarizedDiffraction::prepareAxes(const NXEntry &entry) {
  * Converts the spectrum axis to scattering angle
  * @param workspace : workspace to change the
  */
-API::MatrixWorkspace_sptr LoadILLPolarizedDiffraction::convertSpectrumAxis(
-    API::MatrixWorkspace_sptr workspace) {
-  IAlgorithm_sptr convertSpectrumAxis =
-      createChildAlgorithm("ConvertSpectrumAxis");
+API::MatrixWorkspace_sptr LoadILLPolarizedDiffraction::convertSpectrumAxis(API::MatrixWorkspace_sptr workspace) {
+  auto convertSpectrumAxis = createChildAlgorithm("ConvertSpectrumAxis");
   convertSpectrumAxis->initialize();
   convertSpectrumAxis->setProperty("InputWorkspace", workspace);
   convertSpectrumAxis->setProperty("OutputWorkspace", "__unused_for_child");
@@ -514,7 +458,7 @@ API::MatrixWorkspace_sptr LoadILLPolarizedDiffraction::convertSpectrumAxis(
   convertSpectrumAxis->execute();
   workspace = convertSpectrumAxis->getProperty("OutputWorkspace");
 
-  IAlgorithm_sptr changeSign = createChildAlgorithm("ConvertAxisByFormula");
+  auto changeSign = createChildAlgorithm("ConvertAxisByFormula");
   changeSign->initialize();
   changeSign->setProperty("InputWorkspace", workspace);
   changeSign->setProperty("OutputWorkspace", "__unused_for_child");
@@ -528,14 +472,38 @@ API::MatrixWorkspace_sptr LoadILLPolarizedDiffraction::convertSpectrumAxis(
  * Transposes given 2D workspace with monochromatic data
  * @param workspace : workspace to be transposed
  */
-API::MatrixWorkspace_sptr LoadILLPolarizedDiffraction::transposeMonochromatic(
-    API::MatrixWorkspace_sptr workspace) {
-  IAlgorithm_sptr transpose = createChildAlgorithm("Transpose");
+API::MatrixWorkspace_sptr LoadILLPolarizedDiffraction::transposeMonochromatic(API::MatrixWorkspace_sptr workspace) {
+  auto transpose = createChildAlgorithm("Transpose");
   transpose->initialize();
   transpose->setProperty("InputWorkspace", workspace);
   transpose->setProperty("OutputWorkspace", "__unused_for_child");
   transpose->execute();
   return transpose->getProperty("OutputWorkspace");
+}
+
+/**
+ * Ensures that the order of flipper state values is 'ON' and then 'OFF' for each polarisation orientation
+ */
+void LoadILLPolarizedDiffraction::sortPolarisations() {
+  if (m_outputWorkspaceGroup->getNumberOfEntries() < 2) {
+    return;
+  }
+  auto sortedGroup = std::make_shared<API::WorkspaceGroup>();
+  for (auto workspaceId = 0; workspaceId < (m_outputWorkspaceGroup->getNumberOfEntries() - 1); workspaceId += 2) {
+    MatrixWorkspace_sptr ws1 =
+        std::static_pointer_cast<API::MatrixWorkspace>(m_outputWorkspaceGroup->getItem(workspaceId));
+    auto polarisation = ws1->mutableRun().getLogData("POL.actual_stateB1B2")->value();
+    MatrixWorkspace_sptr ws2 =
+        std::static_pointer_cast<API::MatrixWorkspace>(m_outputWorkspaceGroup->getItem(workspaceId + 1));
+    if (polarisation != "ON") { // need to reverse order of SF ("ON") and NSF ("OFF")
+      sortedGroup->addWorkspace(ws2);
+      sortedGroup->addWorkspace(ws1);
+    } else {
+      sortedGroup->addWorkspace(ws1);
+      sortedGroup->addWorkspace(ws2);
+    }
+  }
+  m_outputWorkspaceGroup = sortedGroup;
 }
 
 } // namespace DataHandling

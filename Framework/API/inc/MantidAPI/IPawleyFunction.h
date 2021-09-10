@@ -36,8 +36,7 @@ public:
   virtual void setUnitCell(const std::string &unitCellString) = 0;
 
   /// Assign several peaks with the same fwhm/height parameters.
-  virtual void setPeaks(const std::vector<Kernel::V3D> &hkls, double fwhm,
-                        double height) = 0;
+  virtual void setPeaks(const std::vector<Kernel::V3D> &hkls, double fwhm, double height) = 0;
 
   /// Removes all peaks from the function.
   virtual void clearPeaks() = 0;

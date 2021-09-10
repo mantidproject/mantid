@@ -51,8 +51,7 @@ public:
   /// Algorithm's version for identification
   int version() const override { return 1; }
   const std::vector<std::string> seeAlso() const override {
-    return {"MagFormFactorCorrection", "PowerLawCorrection",
-            "OneMinusExponentialCor", "PolynomialCorrection"};
+    return {"MagFormFactorCorrection", "PowerLawCorrection", "OneMinusExponentialCor", "PolynomialCorrection"};
   }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "CorrectionFunctions"; }
@@ -61,9 +60,7 @@ private:
   // Overridden UnaryOperation methods
   void defineProperties() override;
   void retrieveProperties() override;
-  void performUnaryOperation(const double XIn, const double YIn,
-                             const double EIn, double &YOut,
-                             double &EOut) override;
+  void performUnaryOperation(const double XIn, const double YIn, const double EIn, double &YOut, double &EOut) override;
 
   double m_c0,   ///< The constant by which to multiply the exponential
       m_c1;      ///< The constant term in the exponent

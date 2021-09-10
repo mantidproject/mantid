@@ -11,7 +11,7 @@ Description
 
 .. warning::
 
-   This algorithm is being developed for a specific instrument. It might get changed or even 
+   This algorithm is being developed for a specific instrument. It might get changed or even
    removed without a notification, should instrument scientists decide to do so.
 
 This algorithm merges given matrix workspaces to a :ref:`Workspace2D <Workspace2D>`. The purpose of this algorithm is to merge the DNS diffraction mode data measured at different detector bank positions. The algorithm is not suitable to merge DNS single crystal diffraction data measured at different sample rotation angles.
@@ -104,9 +104,9 @@ Usage
 Output:
 
    First 5 2Theta values: [ 7.5  8.   8.5  9.   9.5]
-   
+
    First 5 Q values: [ 0.249  0.266  0.282  0.299  0.315]
-   
+
    First 5 d values: [ 1.844  1.848  1.852  1.856  1.86 ]
 
 .. categories::

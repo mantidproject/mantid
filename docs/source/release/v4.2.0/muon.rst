@@ -42,7 +42,7 @@ New
        - :ref:`ZFdipole <func-ZFdipole>`
        - :ref:`ZFelectronDipole <func-ZFelectronDipole>`
        - :ref:`ZFMuonium <func-ZFMuonium>`
-       - :ref:`ZFprotonDipole <func-ZFprotonDipole>` 
+       - :ref:`ZFprotonDipole <func-ZFprotonDipole>`
 
 Improvements
 ############
@@ -72,8 +72,8 @@ Muon Analysis 2 and Frequency Domain Interfaces
 - When switching between Data Sets, Groups selected to fit are remembered.
 - The Frequency Domain>Transform>FFT tab now uses Group Pair Selection to guess at the User's selection for workspaces.
 - Can now plot FFT's of PhaseQuad data.
-- Both interfaces work with Project Recovery. 
-- The original Muon Analysis GUI has been renamed "Muon Analysis Old" and has been deprecated. 
+- Both interfaces work with Project Recovery.
+- The original Muon Analysis GUI has been renamed "Muon Analysis Old" and has been deprecated.
 - \* **The new Muon Analysis GUI has been renamed Muon Analysis.** \*
 
 Bug Fixes

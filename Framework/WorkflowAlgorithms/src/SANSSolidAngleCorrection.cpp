@@ -53,10 +53,8 @@ void SANSSolidAngleCorrection::init() {
   auto wsValidator = std::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   wsValidator->add<HistogramValidator>();
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-      "InputWorkspace", "", Direction::Input, wsValidator));
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output));
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, wsValidator));
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output));
   declareProperty("DetectorTubes", false,
                   "If true, the algorithm will assume "
                   "that the detectors are tubes in the "
@@ -66,8 +64,7 @@ void SANSSolidAngleCorrection::init() {
                   "that the detector is curved around the sample. E.g. BIOSANS "
                   "Wing detector.");
   declareProperty("OutputMessage", "", Direction::Output);
-  declareProperty("ReductionProperties", "__sans_reduction_properties",
-                  Direction::Input);
+  declareProperty("ReductionProperties", "__sans_reduction_properties", Direction::Input);
 }
 
 void SANSSolidAngleCorrection::exec() {
@@ -75,25 +72,21 @@ void SANSSolidAngleCorrection::exec() {
   const std::string reductionManagerName = getProperty("ReductionProperties");
   std::shared_ptr<PropertyManager> reductionManager;
   if (PropertyManagerDataService::Instance().doesExist(reductionManagerName)) {
-    reductionManager =
-        PropertyManagerDataService::Instance().retrieve(reductionManagerName);
+    reductionManager = PropertyManagerDataService::Instance().retrieve(reductionManagerName);
   } else {
     reductionManager = std::make_shared<PropertyManager>();
-    PropertyManagerDataService::Instance().addOrReplace(reductionManagerName,
-                                                        reductionManager);
+    PropertyManagerDataService::Instance().addOrReplace(reductionManagerName, reductionManager);
   }
 
   // If the solid angle algorithm isn't in the reduction properties, add it
   if (!reductionManager->existsProperty("SANSSolidAngleCorrection")) {
-    auto algProp =
-        std::make_unique<AlgorithmProperty>("SANSSolidAngleCorrection");
+    auto algProp = std::make_unique<AlgorithmProperty>("SANSSolidAngleCorrection");
     algProp->setValue(toString());
     reductionManager->declareProperty(std::move(algProp));
   }
 
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-  DataObjects::EventWorkspace_const_sptr inputEventWS =
-      std::dynamic_pointer_cast<const EventWorkspace>(inputWS);
+  DataObjects::EventWorkspace_const_sptr inputEventWS = std::dynamic_pointer_cast<const EventWorkspace>(inputWS);
   if (inputEventWS)
     return execEvent();
 
@@ -120,8 +113,7 @@ void SANSSolidAngleCorrection::exec() {
     outputWS->setSharedX(i, inputWS->sharedX(i));
 
     if (!spectrumInfo.hasDetectors(i)) {
-      g_log.warning() << "Workspace index " << i
-                      << " has no detector assigned to it - discarding\n";
+      g_log.warning() << "Workspace index " << i << " has no detector assigned to it - discarding\n";
       continue;
     }
 
@@ -177,8 +169,7 @@ void SANSSolidAngleCorrection::execEvent() {
   }
   auto outputEventWS = std::dynamic_pointer_cast<EventWorkspace>(outputWS);
 
-  const auto numberOfSpectra =
-      static_cast<int>(outputEventWS->getNumberHistograms());
+  const auto numberOfSpectra = static_cast<int>(outputEventWS->getNumberHistograms());
   Progress progress(this, 0.0, 1.0, numberOfSpectra);
   progress.report("Solid Angle Correction");
 
@@ -188,8 +179,7 @@ void SANSSolidAngleCorrection::execEvent() {
     PARALLEL_START_INTERUPT_REGION
 
     if (!spectrumInfo.hasDetectors(i)) {
-      g_log.warning() << "Workspace index " << i
-                      << " has no detector assigned to it - discarding\n";
+      g_log.warning() << "Workspace index " << i << " has no detector assigned to it - discarding\n";
       continue;
     }
 

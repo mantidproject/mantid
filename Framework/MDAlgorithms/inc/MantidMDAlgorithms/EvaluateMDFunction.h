@@ -15,16 +15,13 @@ namespace MDAlgorithms {
 
 /** EvaluateMDFunction : TODO: DESCRIPTION
  */
-class DLLExport EvaluateMDFunction : public API::Algorithm,
-                                     public API::DeprecatedAlgorithm {
+class DLLExport EvaluateMDFunction : public API::Algorithm, public API::DeprecatedAlgorithm {
 public:
   EvaluateMDFunction();
 
   const std::string name() const override { return "EvaluateMDFunction"; }
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"CreateMDWorkspace", "FakeMDEventData"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"CreateMDWorkspace", "FakeMDEventData"}; }
   const std::string category() const override;
   const std::string summary() const override;
 

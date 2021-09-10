@@ -20,7 +20,7 @@ Usage
 
 
 .. testcode:: RecordPythonScript
-    
+
     from threading import Thread
     import os, time
 
@@ -47,7 +47,7 @@ Usage
     wsOut=RebinToWorkspace(wsOut,ws,PreserveEvents=True)
 
     # This will cancel the rocording algorithm
-    # you can do the same in the GUI 
+    # you can do the same in the GUI
     # by clicking on the details button on the bottom right
     AlgorithmManager.cancelAll()
     thread.join()
@@ -66,7 +66,7 @@ Output:
     :options: +NORMALIZE_WHITESPACE
 
     The result file has the following python recorded
-    CreateSampleWorkspace(OutputWorkspace='ws',WorkspaceType='Event',Function='Multiple Peaks',UserDefinedFunction='',NumBanks='2',NumMonitors='0',BankPixelWidth='10',NumEvents='1000',Random='0',XUnit='TOF',XMin='0',XMax='20000',BinWidth='200',PixelSpacing='0.0080000000000000002',BankDistanceFromSample='5',SourceDistanceFromSample='10',NumScanPoints='1')
+    CreateSampleWorkspace(OutputWorkspace='ws',WorkspaceType='Event',Function='Multiple Peaks',UserDefinedFunction='',XUnit='TOF',XMin='0',XMax='20000',BinWidth='200',NumEvents='1000',Random='0',NumScanPoints='1',InstrumentName='basic_rect',NumBanks='2',NumMonitors='0',BankPixelWidth='10',PixelDiameter='0.0080000000000000002',PixelHeight='0.00020000000000000001',PixelSpacing='0.0080000000000000002',BankDistanceFromSample='5',SourceDistanceFromSample='10')
     CreateFlatEventWorkspace(InputWorkspace='ws',RangeStart='15000',RangeEnd='18000',OutputWorkspace='wsOut')
     RebinToWorkspace(WorkspaceToRebin='wsOut',WorkspaceToMatch='ws',OutputWorkspace='wsOut',PreserveEvents='1')
 

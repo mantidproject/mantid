@@ -66,7 +66,6 @@ Usage
 
 .. testcode:: Ex
 
-    from __future__ import print_function
     ws = LoadSassena("loadSassenaExample.h5", TimeUnit=1.0)
     SassenaFFT(ws, FFTonlyRealPart=1, Temp=1000, DetailedBalance=1)
 
@@ -79,7 +78,7 @@ Usage
     center = 0.0
     sigma = 0.01    #in meV
     startX = -0.1   #in meV
-    endX = 0.1 
+    endX = 0.1
     myFunc = 'name=Gaussian,Height={0},PeakCentre={1},Sigma={2}'.format(intensity,center,sigma)
 
     # Call the Fit algorithm and perform the fit

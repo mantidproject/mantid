@@ -1,5 +1,5 @@
 Name:           mantid-developer
-Version:        2.2
+Version:        2.3
 Release:        1%{?dist}
 Summary:        Meta Package to install dependencies for Mantid Development
 
@@ -14,6 +14,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 %{?rhel:Requires: cmake3-gui}
 Requires: boost169-devel
 Requires: boost169-python3-devel
+Requires: ccache
 Requires: clang
 Requires: doxygen
 Requires: dvipng
@@ -42,10 +43,8 @@ Requires: python%{python3_pkgversion}-h5py
 Requires: python%{python3_pkgversion}-ipython
 Requires: python%{python3_pkgversion}-ipython-gui
 Requires: python%{python3_pkgversion}-matplotlib-qt5
-Requires: python%{python3_pkgversion}-matplotlib-qt4
 Requires: python%{python3_pkgversion}-numpy
 Requires: python%{python3_pkgversion}-psutil
-%{?fedora:Requires: python%{python3_pkgversion}-PyQt4-devel}
 Requires: python%{python3_pkgversion}-PyYAML
 Requires: python%{python3_pkgversion}-qt5-devel
 %{?fedora:Requires: python%{python3_pkgversion}-qtconsole}
@@ -58,7 +57,6 @@ Requires: python%{python3_pkgversion}-sphinx-bootstrap-theme
 Requires: python%{python3_pkgversion}-toml
 Requires: python%{python3_pkgversion}-PyCifRW
 Requires: poco-devel >= 1.4.6
-Requires: qscintilla-devel
 Requires: qscintilla-qt5-devel
 Requires: qt5-qtbase-devel
 Requires: qt5-qtbase-gui
@@ -69,10 +67,6 @@ Requires: qt5-qttools-libs-designer
 Requires: qt5-qtwebkit-devel
 Requires: qt5-qtx11extras
 Requires: qt5-qtx11extras-devel
-Requires: qt-devel >= 4.6
-Requires: qtwebkit-devel
-Requires: qwt5-qt4-devel
-Requires: qwtplot3d-qt4-devel
 Requires: redhat-lsb
 Requires: rpmdevtools
 Requires: scipy
@@ -106,10 +100,14 @@ required for Mantid development.
 %files
 
 %changelog
+* Mon Jul 12 2021 Peter Peterson <petersonpf@ornl.gov>
+- Removed qt4 dependencies
+- Added ccache
+
 * Mon Mar 16 2020 Martyn Gigg <martyn.gigg@stfc.ac.uk>
 - Remove Python 2 dependencies
 
-* Mon Jan 28 2020 David Fairbrother <david.fairbrother@stfc.ac.uk>
+* Tue Jan 28 2020 David Fairbrother <david.fairbrother@stfc.ac.uk>
 - Added Python TOML library
 
 * Fri Jan 24 2020 Martyn Gigg <martyn.gigg@stfc.ac.uk>
@@ -143,7 +141,7 @@ required for Mantid development.
 * Thu Apr 25 2019 Samuel Jones <samuel.jones@stfc.ac.uk>
 - Removed qtawesome
 
-* Thu Nov 18 2018 Martyn Gigg <martyn.gigg@stfc.ac.uk>
+* Mon Nov 19 2018 Martyn Gigg <martyn.gigg@stfc.ac.uk>
 - Added python-requests
 
 * Wed Jul 18 2018 Martyn Gigg <martyn.gigg@stfc.ac.uk>

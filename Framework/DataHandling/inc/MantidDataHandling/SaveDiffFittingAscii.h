@@ -16,8 +16,7 @@
 namespace Mantid {
 namespace DataHandling {
 
-class DLLExport SaveDiffFittingAscii : public Mantid::API::Algorithm,
-                                       public API::DeprecatedAlgorithm {
+class DLLExport SaveDiffFittingAscii : public Mantid::API::Algorithm, public API::DeprecatedAlgorithm {
 public:
   /// (Empty) Constructor
   SaveDiffFittingAscii();
@@ -35,9 +34,7 @@ public:
 
   /// Algorithm's version
   int version() const override { return (1); }
-  const std::vector<std::string> seeAlso() const override {
-    return {"EnggFitPeaks", "SaveAscii"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"EnggFitPeaks", "SaveAscii"}; }
 
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "DataHandling\\Text"; }
@@ -61,17 +58,13 @@ private:
 
   std::vector<std::string> splitList(std::string strList);
 
-  void writeInfo(const std::string &runNumber, const std::string &bank,
-                 std::ofstream &file);
+  void writeInfo(const std::string &runNumber, const std::string &bank, std::ofstream &file);
 
-  void writeHeader(const std::vector<std::string> &columnHeadings,
-                   std::ofstream &file);
+  void writeHeader(const std::vector<std::string> &columnHeadings, std::ofstream &file);
 
-  void writeData(const API::ITableWorkspace_sptr &workspace,
-                 std::ofstream &file, const size_t columnSize);
+  void writeData(const API::ITableWorkspace_sptr &workspace, std::ofstream &file, const size_t columnSize);
 
-  void writeVal(const std::string &val, std::ofstream &file,
-                const bool endline);
+  void writeVal(const std::string &val, std::ofstream &file, const bool endline);
 
   /// the separator
   const char m_sep;

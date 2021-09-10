@@ -16,9 +16,11 @@ from .ValidateOL import ValidateOL
 import matplotlib
 from mantidqt.gui_helper import show_interface_help
 from mantidqt.MPLwidgets import *
+from mantidqt.plotting.mantid_navigation_toolbar import MantidNavigationToolbar
 from matplotlib.figure import Figure
 from mpl_toolkits.axisartist.grid_helper_curvelinear import GridHelperCurveLinear
 from mpl_toolkits.axisartist import Subplot
+from mantid.kernel import UnitConversion, Elastic
 import numpy
 import copy
 import os
@@ -34,14 +36,12 @@ def float2Input(x):
 # pylint: disable=too-many-instance-attributes
 
 
-class CustomNavigationToolbar(NavigationToolbar2QT):
-    toolitems = [t for t in NavigationToolbar2QT.toolitems if t[0] in ('Home', 'Pan', 'Zoom')]
-
-
 class DGSPlannerGUI(QtWidgets.QWidget):
-    def __init__(self, ol=None, parent=None):
+    def __init__(self, parent=None, window_flags=None, ol=None):
         # pylint: disable=unused-argument,super-on-old-class
         super(DGSPlannerGUI, self).__init__(parent)
+        if window_flags:
+            self.setWindowFlags(window_flags)
         # OrientedLattice
         if ValidateOL(ol):
             self.ol = ol
@@ -49,6 +49,7 @@ class DGSPlannerGUI(QtWidgets.QWidget):
             self.ol = mantid.geometry.OrientedLattice()
         self.masterDict = dict()  # holds info about instrument and ranges
         self.updatedInstrument = False
+        self.instrumentWAND = False
         self.updatedOL = False
         self.wg = None  # workspace group
         self.instrumentWidget = InstrumentSetupWidget.InstrumentSetupWidget(self)
@@ -104,7 +105,7 @@ class DGSPlannerGUI(QtWidgets.QWidget):
         if matplotlib.compare_versions('2.1.0', matplotlib.__version__):
             self.trajfig.hold(True)  # hold is deprecated since 2.1.0, true by default
         self.figure.add_subplot(self.trajfig)
-        self.toolbar = CustomNavigationToolbar(self.canvas, self)
+        self.toolbar = MantidNavigationToolbar(self.canvas, self)
         figureLayout = QtWidgets.QVBoxLayout()
         figureLayout.addWidget(self.toolbar, 0)
         figureLayout.addWidget(self.canvas, 1)
@@ -118,6 +119,8 @@ class DGSPlannerGUI(QtWidgets.QWidget):
         self.classic.changed.connect(self.matrix.UBmodel.updateOL)
         self.classic.changed.connect(self.updateUB)
         self.instrumentWidget.changed.connect(self.updateParams)
+        self.instrumentWidget.getInstrumentComboBox().activated[str].connect(self.instrumentUpdateEvent)
+        self.instrumentWidget.getEditEi().textChanged.connect(self.eiWavelengthUpdateEvent)
         self.dimensionWidget.changed.connect(self.updateParams)
         self.plotButton.clicked.connect(self.updateFigure)
         self.oplotButton.clicked.connect(self.updateFigure)
@@ -130,10 +133,6 @@ class DGSPlannerGUI(QtWidgets.QWidget):
         self.assistant_process = QtCore.QProcess(self)
         # pylint: disable=protected-access
         self.mantidplot_name = 'DGS Planner'
-        self.collection_file = os.path.join(mantid._bindir, '../docs/qthelp/MantidProject.qhc')
-        version = ".".join(mantid.__version__.split(".")[:2])
-        self.qt_url = 'qthelp://org.sphinx.mantidproject.' + version + '/doc/interfaces/DGS Planner.html'
-        self.external_url = 'http://docs.mantidproject.org/nightly/interfaces/DGS Planner.html'
         # control for cancel button
         self.iterations = 0
         self.progress_canceled = False
@@ -147,6 +146,41 @@ class DGSPlannerGUI(QtWidgets.QWidget):
         self.updatedOL = True
         self.trajfig.clear()
 
+    def eiWavelengthUpdateEvent(self):
+        if self.masterDict['instrument'] == 'WAND\u00B2':
+            ei = UnitConversion.run('Wavelength', 'Energy', self.masterDict['Ei'], 0, 0, 0, Elastic, 0)
+            offset = ei * 0.01
+            lowerBound = - offset
+            upperBound = offset
+            self.dimensionWidget.set_editMin4(lowerBound)
+            self.dimensionWidget.set_editMax4(upperBound)
+
+    def instrumentUpdateEvent(self):
+        if self.masterDict['instrument'] == 'WAND\u00B2':
+            self.instrumentWAND = True
+            # change the ui accordingly
+            self.dimensionWidget.toggleDeltaE(False)
+            self.instrumentWidget.setLabelEi('Input Wavelength')
+            self.instrumentWidget.setEiVal(str(1.488))
+
+            self.instrumentWidget.setGoniometerNames(['s1', 'sgl', 'sgu'])
+            self.instrumentWidget.setGoniometerDirections(['0,1,0', '1,0,0', '0,0,1'])
+            self.instrumentWidget.setGoniometerRotationSense([1, -1, -1])
+            self.instrumentWidget.updateAll()
+
+            self.eiWavelengthUpdateEvent()
+        else:
+            if self.instrumentWAND:
+                self.instrumentWAND = False
+                self.dimensionWidget.toggleDeltaE(True)
+                self.instrumentWidget.setLabelEi('Incident Energy')
+                self.instrumentWidget.setEiVal(str(10.0))
+
+                self.instrumentWidget.setGoniometerNames(['psi', 'gl', 'gs'])
+                self.instrumentWidget.setGoniometerDirections(['0,1,0', '0,0,1', '1,0,0'])
+                self.instrumentWidget.setGoniometerRotationSense([1, 1, 1])
+                self.instrumentWidget.updateAll()
+
     @QtCore.Slot(dict)
     def updateParams(self, d):
         if self.sender() is self.instrumentWidget:
@@ -158,11 +192,7 @@ class DGSPlannerGUI(QtWidgets.QWidget):
         self.masterDict.update(copy.deepcopy(d))
 
     def help(self):
-        show_interface_help(self.mantidplot_name,
-                            self.assistant_process,
-                            self.collection_file,
-                            self.qt_url,
-                            self.external_url)
+        show_interface_help(self.mantidplot_name, self.assistant_process, area='direct')
 
     def closeEvent(self, event):
         self.assistant_process.close()
@@ -197,7 +227,7 @@ class DGSPlannerGUI(QtWidgets.QWidget):
         return groupingStrings
 
     # pylint: disable=too-many-locals
-    def updateFigure(self):
+    def updateFigure(self):  # noqa: C901
         # pylint: disable=too-many-branches
         if self.updatedInstrument or self.progress_canceled:
             self.progress_canceled = False
@@ -224,9 +254,14 @@ class DGSPlannerGUI(QtWidgets.QWidget):
             if self.wg is not None:
                 mantid.simpleapi.DeleteWorkspace(self.wg)
 
+            instrumentName = self.masterDict['instrument']
+            if instrumentName == 'WAND\u00B2':
+                instrumentName = 'WAND'
+
             mantid.simpleapi.LoadEmptyInstrument(
-                mantid.api.ExperimentInfo.getInstrumentFilename(self.masterDict['instrument']),
-                OutputWorkspace="__temp_instrument")
+                mantid.api.ExperimentInfo.getInstrumentFilename(instrumentName),
+                OutputWorkspace="__temp_instrument"
+                )
             if self.masterDict['instrument'] == 'HYSPEC':
                 mantid.simpleapi.AddSampleLog(Workspace="__temp_instrument", LogName='msd', LogText='1798.5',
                                               LogType='Number Series')
@@ -240,6 +275,13 @@ class DGSPlannerGUI(QtWidgets.QWidget):
                                                            Y=1,
                                                            Angle=str(self.masterDict['S2']),
                                                            RelativeRotation=False)
+            elif instrumentName == 'WAND':
+                mantid.simpleapi.AddSampleLog(Workspace="__temp_instrument", LogName='HB2C:Mot:s2.RBV',
+                                              LogText=str(self.masterDict['S2']), LogType='Number Series')
+                mantid.simpleapi.AddSampleLog(Workspace="__temp_instrument", LogName='HB2C:Mot:detz.RBV',
+                                              LogText=str(self.masterDict['DetZ']), LogType='Number Series')
+                mantid.simpleapi.LoadInstrument(Workspace="__temp_instrument", RewriteSpectraMap=True,
+                                                InstrumentName="WAND")
             # masking
             if 'maskFilename' in self.masterDict and len(self.masterDict['maskFilename'].strip()) > 0:
                 try:
@@ -284,6 +326,12 @@ class DGSPlannerGUI(QtWidgets.QWidget):
         progressDialog.setCancelButtonText("&Cancel")
         progressDialog.setRange(0, self.iterations)
         progressDialog.setWindowTitle("DGSPlanner progress")
+
+        if self.masterDict['instrument'] == 'WAND\u00B2':
+            ei = UnitConversion.run('Wavelength', 'Energy', self.masterDict['Ei'], 0, 0, 0, Elastic, 0)
+        else:
+            ei = self.masterDict['Ei']
+
         for i in range(self.iterations):
             progressDialog.setValue(i)
             progressDialog.setLabelText("Calculating orientation %d of %d..." % (i, self.iterations))
@@ -297,7 +345,7 @@ class DGSPlannerGUI(QtWidgets.QWidget):
                                                            Q1Basis=self.masterDict['dimBasis'][0],
                                                            Q2Basis=self.masterDict['dimBasis'][1],
                                                            Q3Basis=self.masterDict['dimBasis'][2],
-                                                           IncidentEnergy=self.masterDict['Ei'],
+                                                           IncidentEnergy=ei,
                                                            Dimension1=dimensions[self.masterDict['dimIndex'][0]],
                                                            Dimension1Min=float2Input(self.masterDict['dimMin'][0]),
                                                            Dimension1Max=float2Input(self.masterDict['dimMax'][0]),

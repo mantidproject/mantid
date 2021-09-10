@@ -82,8 +82,8 @@ double DegreesToRadians(double angle) { return angle * M_PI / 180; }
  * @param istr A reference to a stream
  * @return A new SampleEnvironmentSpec object
  */
-SampleEnvironmentSpec_uptr SampleEnvironmentSpecParser::parse(
-    const std::string &name, const std::string &filename, std::istream &istr) {
+SampleEnvironmentSpec_uptr SampleEnvironmentSpecParser::parse(const std::string &name, const std::string &filename,
+                                                              std::istream &istr) {
   using DocumentPtr = AutoPtr<Document>;
 
   InputSource src(istr);
@@ -112,9 +112,7 @@ SampleEnvironmentSpec_uptr SampleEnvironmentSpecParser::parse(
  * @param element A pointer to an Element node that is a "environmentspec" tag
  * @return A new SampleEnvironmentSpec object
  */
-SampleEnvironmentSpec_uptr
-SampleEnvironmentSpecParser::parse(const std::string &name,
-                                   Poco::XML::Element *element) {
+SampleEnvironmentSpec_uptr SampleEnvironmentSpecParser::parse(const std::string &name, Poco::XML::Element *element) {
   validateRootElement(element);
 
   // Iterating is apparently much faster than getElementsByTagName
@@ -143,8 +141,7 @@ SampleEnvironmentSpecParser::parse(const std::string &name,
  * Validate that the element points to the expected root element
  * @param element A pointer to the root element
  */
-void SampleEnvironmentSpecParser::validateRootElement(
-    Poco::XML::Element *element) const {
+void SampleEnvironmentSpecParser::validateRootElement(Poco::XML::Element *element) const {
   if (element->nodeName() != ROOT_TAG) {
     std::ostringstream msg;
     msg << "SampleEnvironmentSpecParser::validateRootElement() - Element tag "
@@ -169,8 +166,7 @@ void SampleEnvironmentSpecParser::parseMaterials(Poco::XML::Element *element) {
   Node *node = nodeIter.nextNode();
   MaterialXMLParser parser;
   while (node) {
-    auto material =
-        parser.parse(static_cast<Poco::XML::Element *>(node), m_filepath);
+    auto material = parser.parse(static_cast<Poco::XML::Element *>(node), m_filepath);
     m_materials.emplace(material.name(), material);
     node = nodeIter.nextNode();
   }
@@ -182,8 +178,7 @@ void SampleEnvironmentSpecParser::parseMaterials(Poco::XML::Element *element) {
  * @param spec A pointer to a SampleEnvironmentSpec to update
  * @param element A pointer to a components element
  */
-void SampleEnvironmentSpecParser::parseAndAddComponents(
-    SampleEnvironmentSpec *spec, Element *element) const {
+void SampleEnvironmentSpecParser::parseAndAddComponents(SampleEnvironmentSpec *spec, Element *element) const {
   if (m_materials.empty()) {
     throw std::runtime_error("SampleEnvironmentSpecParser::parseComponents() - "
                              "Trying to parse list of components but no "
@@ -207,8 +202,7 @@ void SampleEnvironmentSpecParser::parseAndAddComponents(
   }
 }
 
-void SampleEnvironmentSpecParser::loadFullSpecification(
-    SampleEnvironmentSpec *spec, Poco::XML::Element *element) {
+void SampleEnvironmentSpecParser::loadFullSpecification(SampleEnvironmentSpec *spec, Poco::XML::Element *element) {
   using Mantid::Geometry::Container;
   auto filename = element->getAttribute("filename");
   if (!filename.empty()) {
@@ -249,8 +243,7 @@ void SampleEnvironmentSpecParser::loadFullSpecification(
       throw std::runtime_error("Full specification must be a .3mf file");
     }
   } else {
-    throw std::runtime_error(
-        "fullspecification element supplied without a filename");
+    throw std::runtime_error("fullspecification element supplied without a filename");
   }
 }
 
@@ -260,8 +253,7 @@ void SampleEnvironmentSpecParser::loadFullSpecification(
  * @param spec A pointer to a SampleEnvironmentSpec to update
  * @param element A pointer to a cans element
  */
-void SampleEnvironmentSpecParser::parseAndAddContainers(
-    SampleEnvironmentSpec *spec, Element *element) const {
+void SampleEnvironmentSpecParser::parseAndAddContainers(SampleEnvironmentSpec *spec, Element *element) const {
   NodeIterator nodeIter(element, NodeFilter::SHOW_ELEMENT);
   nodeIter.nextNode();
   Node *node = nodeIter.nextNode();
@@ -279,8 +271,7 @@ void SampleEnvironmentSpecParser::parseAndAddContainers(
  * @param element A pointer to an XML \<container\> element
  * @return A new Can instance
  */
-Geometry::Container_const_sptr
-SampleEnvironmentSpecParser::parseContainer(Element *element) const {
+Geometry::Container_const_sptr SampleEnvironmentSpecParser::parseContainer(Element *element) const {
   using Mantid::Geometry::Container;
   auto can = std::make_shared<Container>(parseComponent(element));
   auto sampleGeometry = element->getChildElement(SAMPLEGEOMETRY_TAG);
@@ -289,8 +280,7 @@ SampleEnvironmentSpecParser::parseContainer(Element *element) const {
   if ((sampleGeometry) && (sampleSTLFile)) {
     throw std::runtime_error("SampleEnvironmentSpecParser::parseComponent() - "
                              "Cannot define sample using both a" +
-                             SAMPLEGEOMETRY_TAG + " and a " +
-                             SAMPLESTLFILE_TAG + " child tag.");
+                             SAMPLEGEOMETRY_TAG + " and a " + SAMPLESTLFILE_TAG + " child tag.");
   }
 
   if (sampleGeometry) {
@@ -311,18 +301,16 @@ SampleEnvironmentSpecParser::parseContainer(Element *element) const {
  * @param attributeName Attribute that double should be loaded from
  * @param targetVariable Value read from element attribute
  */
-void SampleEnvironmentSpecParser::LoadOptionalDoubleFromXML(
-    Poco::XML::Element *componentElement, const std::string &attributeName,
-    double &targetVariable) const {
+void SampleEnvironmentSpecParser::LoadOptionalDoubleFromXML(Poco::XML::Element *componentElement,
+                                                            const std::string &attributeName,
+                                                            double &targetVariable) const {
 
   auto attributeText = componentElement->getAttribute(attributeName);
   if (!attributeText.empty()) {
     try {
       targetVariable = std::stod(attributeText);
     } catch (std::invalid_argument &ex) {
-      throw std::invalid_argument(
-          std::string("Invalid string supplied for " + attributeName + " ") +
-          ex.what());
+      throw std::invalid_argument(std::string("Invalid string supplied for " + attributeName + " ") + ex.what());
     }
   }
 }
@@ -332,22 +320,19 @@ void SampleEnvironmentSpecParser::LoadOptionalDoubleFromXML(
  * @param translationVectorStr Translation vector string
  * @return vector containing translations
  */
-std::vector<double> SampleEnvironmentSpecParser::parseTranslationVector(
-    const std::string &translationVectorStr) const {
+std::vector<double> SampleEnvironmentSpecParser::parseTranslationVector(const std::string &translationVectorStr) const {
 
   std::vector<double> translationVector;
 
   // Split up comma-separated properties
   using tokenizer = Mantid::Kernel::StringTokenizer;
-  tokenizer values(translationVectorStr, ",",
-                   tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
+  tokenizer values(translationVectorStr, ",", tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
 
   translationVector.clear();
   translationVector.reserve(values.count());
 
-  std::transform(
-      values.cbegin(), values.cend(), std::back_inserter(translationVector),
-      [](const std::string &str) { return boost::lexical_cast<double>(str); });
+  std::transform(values.cbegin(), values.cend(), std::back_inserter(translationVector),
+                 [](const std::string &str) { return boost::lexical_cast<double>(str); });
   return translationVector;
 }
 
@@ -367,8 +352,7 @@ std::string SampleEnvironmentSpecParser::findFile(std::string filename) const {
 
     if (useSearchDirectories) {
       // ... and if that doesn't work look in the search directories
-      std::string foundFile =
-          Mantid::API::FileFinder::Instance().getFullPath(filename);
+      std::string foundFile = Mantid::API::FileFinder::Instance().getFullPath(filename);
       if (!foundFile.empty()) {
         stlFileName = Poco::Path(foundFile);
       } else {
@@ -387,8 +371,7 @@ std::string SampleEnvironmentSpecParser::findFile(std::string filename) const {
  * @param stlFileElement A pointer to an XML \<stlfile\> element
  * @return A new Object instance of the given type
  */
-std::shared_ptr<Geometry::MeshObject>
-SampleEnvironmentSpecParser::loadMeshFromSTL(Element *stlFileElement) const {
+std::shared_ptr<Geometry::MeshObject> SampleEnvironmentSpecParser::loadMeshFromSTL(Element *stlFileElement) const {
   std::string filename = stlFileElement->getAttribute("filename");
   if (!filename.empty()) {
 
@@ -398,13 +381,11 @@ SampleEnvironmentSpecParser::loadMeshFromSTL(Element *stlFileElement) const {
 
       std::string scaleStr = stlFileElement->getAttribute("scale");
       if (scaleStr.empty()) {
-        throw std::runtime_error("Scale must be supplied for stl file:" +
-                                 filename);
+        throw std::runtime_error("Scale must be supplied for stl file:" + filename);
       }
       const ScaleUnits scaleType = getScaleTypeFromStr(scaleStr);
 
-      std::unique_ptr<LoadStl> reader =
-          LoadStlFactory::createReader(stlFileName, scaleType);
+      std::unique_ptr<LoadStl> reader = LoadStlFactory::createReader(stlFileName, scaleType);
 
       std::shared_ptr<Geometry::MeshObject> comp = reader->readShape();
 
@@ -424,8 +405,7 @@ SampleEnvironmentSpecParser::loadMeshFromSTL(Element *stlFileElement) const {
       Element *translation = stlFileElement->getChildElement("translation");
       if (translation) {
         std::string translationVectorStr = translation->getAttribute("vector");
-        const std::vector<double> translationVector =
-            parseTranslationVector(translationVectorStr);
+        const std::vector<double> translationVector = parseTranslationVector(translationVectorStr);
         comp = reader->translate(comp, translationVector);
       }
       return comp;
@@ -443,21 +423,17 @@ SampleEnvironmentSpecParser::loadMeshFromSTL(Element *stlFileElement) const {
  * @param element A pointer to an XML \<container\> element
  * @return A new Object instance of the given type
  */
-std::shared_ptr<Geometry::IObject>
-SampleEnvironmentSpecParser::parseComponent(Element *element) const {
+std::shared_ptr<Geometry::IObject> SampleEnvironmentSpecParser::parseComponent(Element *element) const {
   Element *geometry = element->getChildElement(COMPONENTGEOMETRY_TAG);
   Element *stlfile = element->getChildElement(COMPONENTSTLFILE_TAG);
   if ((!geometry) && (!stlfile)) {
-    throw std::runtime_error(
-        "SampleEnvironmentSpecParser::parseComponent() - Expected a " +
-        COMPONENTGEOMETRY_TAG + " or " + COMPONENTSTLFILE_TAG +
-        " child tag. None found.");
+    throw std::runtime_error("SampleEnvironmentSpecParser::parseComponent() - Expected a " + COMPONENTGEOMETRY_TAG +
+                             " or " + COMPONENTSTLFILE_TAG + " child tag. None found.");
   }
   if ((geometry) && (stlfile)) {
     throw std::runtime_error("SampleEnvironmentSpecParser::parseComponent() - "
                              "Cannot define container using both a" +
-                             COMPONENTGEOMETRY_TAG + " and a " +
-                             COMPONENTSTLFILE_TAG + " child tag.");
+                             COMPONENTGEOMETRY_TAG + " and a " + COMPONENTSTLFILE_TAG + " child tag.");
   }
 
   std::shared_ptr<Geometry::IObject> comp;

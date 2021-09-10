@@ -30,14 +30,12 @@ IndexSet::IndexSet(int64_t min, int64_t max, size_t fullRange) {
 
 /// Constructor for a set containing all specified indices. Range is verified at
 /// construction time and duplicates are removed.
-IndexSet::IndexSet(const std::vector<size_t> &indices, size_t fullRange)
-    : m_isRange(false) {
+IndexSet::IndexSet(const std::vector<size_t> &indices, size_t fullRange) : m_isRange(false) {
   // We use a set to create unique and ordered indices.
   std::set<size_t> index_set;
   for (const auto &index : indices) {
     if (index >= fullRange)
-      throw Exception::IndexError(index, fullRange - 1,
-                                  "IndexSet - index vector entry");
+      throw Exception::IndexError(index, fullRange - 1, "IndexSet - index vector entry");
     index_set.insert(index);
   }
   m_indices = std::vector<size_t>(begin(index_set), end(index_set));

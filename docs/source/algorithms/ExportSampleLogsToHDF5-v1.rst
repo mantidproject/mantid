@@ -46,7 +46,7 @@ Usage
 
    with h5py.File(output_filename, "r") as f:
        sample_logs_group = f["Sample Logs"]
-       
+
        print("Proton charge saved to file: {}".format("tot_prtn_chrg" in sample_logs_group))
        print(format_run_number(sample_logs_group["run_number"][0]))
        print("nspectra (blacklisted) saved to file: {}".format("nspectra" in sample_logs_group))

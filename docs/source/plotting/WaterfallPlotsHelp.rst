@@ -14,6 +14,7 @@ Waterfall Plots
 * :ref:`Basic_1D_Plots`
 * :ref:`Colorfill_Plots`
 * :ref:`3D_Plots`
+* :ref:`Mesh_Plots`
 
 **General Plot Help**
 
@@ -57,7 +58,7 @@ Click Menus
 |
 |
 
-|FigureOptionsGear.png| ptions Menu
+|O| ptions Menu
 -----------------------------------
 
 Waterfall plots are very similar to :ref:`1D plots<Basic_1D_Plots>` of multiple spectra. They are simply offset, as controlled from the Waterfall Toolbar menus above.
@@ -67,7 +68,7 @@ Waterfall plots are very similar to :ref:`1D plots<Basic_1D_Plots>` of multiple 
    :align: center
 
 
-| **TIP**: Change a Legend entry by editing `Set curve label` on the Curves tab. 
+| **TIP**: Change a Legend entry by editing `Set curve label` on the Curves tab.
   Then on the Legend tab there are Color and Font options.
 |
 |
@@ -167,5 +168,5 @@ File > Settings
 * :ref:`plotting`
 * `Matplotlib Keyboard Shortcuts <https://matplotlib.org/3.1.1/users/navigation_toolbar.html#navigation-keyboard-shortcuts>`_
 
-.. |FigureOptionsGear.png| image:: /images/FigureOptionsGear.png
+.. |O| image:: /images/FigureOptionsGear.png
    :width: 150px

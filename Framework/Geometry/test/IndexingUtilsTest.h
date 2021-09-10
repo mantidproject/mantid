@@ -24,12 +24,10 @@ class IndexingUtilsTest : public CxxTest::TestSuite {
 public:
   static std::vector<V3D> getNatroliteQs() {
     std::vector<V3D> q_vectors{
-        {-0.57582, -0.35322, -0.19974}, {-1.41754, -0.78704, -0.75974},
-        {-1.12030, -0.53578, -0.27559}, {-0.68911, -0.59397, -0.12716},
-        {-1.06863, -0.43255, 0.01688},  {-1.82007, -0.49671, -0.06266},
-        {-1.10465, -0.73708, -0.01939}, {-0.12747, -0.32380, 0.00821},
-        {-0.84210, -0.37038, 0.15403},  {-0.54099, -0.46900, 0.11535},
-        {-0.90478, -0.50667, 0.51072},  {-0.50387, -0.58561, 0.43502}};
+        {-0.57582, -0.35322, -0.19974}, {-1.41754, -0.78704, -0.75974}, {-1.12030, -0.53578, -0.27559},
+        {-0.68911, -0.59397, -0.12716}, {-1.06863, -0.43255, 0.01688},  {-1.82007, -0.49671, -0.06266},
+        {-1.10465, -0.73708, -0.01939}, {-0.12747, -0.32380, 0.00821},  {-0.84210, -0.37038, 0.15403},
+        {-0.54099, -0.46900, 0.11535},  {-0.90478, -0.50667, 0.51072},  {-0.50387, -0.58561, 0.43502}};
     // Dec 2011: Change convention for Q = 2 pi / wavelength
     for (auto &q_vector : q_vectors)
       q_vector *= (2.0 * M_PI);
@@ -37,10 +35,9 @@ public:
   }
 
   static std::vector<V3D> getNatroliteIndices() {
-    std::vector<V3D> correct_indices{{1, 9, -9},   {4, 20, -24}, {2, 18, -14},
-                                     {0, 12, -12}, {1, 19, -9},  {3, 31, -13},
-                                     {0, 20, -14}, {-1, 3, -5},  {0, 16, -6},
-                                     {-1, 11, -7}, {-2, 20, -4}, {-3, 13, -5}};
+    std::vector<V3D> correct_indices{{1, 9, -9},  {4, 20, -24}, {2, 18, -14}, {0, 12, -12},
+                                     {1, 19, -9}, {3, 31, -13}, {0, 20, -14}, {-1, 3, -5},
+                                     {0, 16, -6}, {-1, 11, -7}, {-2, 20, -4}, {-3, 13, -5}};
     return correct_indices;
   }
 
@@ -75,14 +72,12 @@ public:
     std::cout << "-------------------------------------------\n";
   }
 
-  static void ShowIndexingStats(const Matrix<double> &UB,
-                                const std::vector<V3D> &q_vectors,
+  static void ShowIndexingStats(const Matrix<double> &UB, const std::vector<V3D> &q_vectors,
                                 double required_tolerance) {
     std::vector<V3D> miller_indices;
     std::vector<V3D> indexed_qs;
     double ave_error;
-    IndexingUtils::GetIndexedPeaks(UB, q_vectors, required_tolerance,
-                                   miller_indices, indexed_qs, ave_error);
+    IndexingUtils::GetIndexedPeaks(UB, q_vectors, required_tolerance, miller_indices, indexed_qs, ave_error);
 
     std::cout << "-------------------------------------------\n";
     std::cout << "UB = " << UB << '\n';
@@ -92,17 +87,15 @@ public:
 
     std::cout << "Indexed Qs\n";
     for (size_t i = 0; i < indexed_qs.size(); i++)
-      std::cout << "Q = " << indexed_qs[i] << " HKL = " << miller_indices[i]
-                << '\n';
+      std::cout << "Q = " << indexed_qs[i] << " HKL = " << miller_indices[i] << '\n';
     std::cout << "-------------------------------------------\n";
   }
 
   void test_Find_UB_given_lattice_parameters() {
     Matrix<double> UB(3, 3, false);
 
-    double correct_UB[] = {-0.1015550, 0.0992964,  -0.0155078,
-                           0.1274830,  0.0150210,  -0.0839671,
-                           -0.0507717, -0.0432269, -0.0645173};
+    double correct_UB[] = {-0.1015550, 0.0992964,  -0.0155078, 0.1274830, 0.0150210,
+                           -0.0839671, -0.0507717, -0.0432269, -0.0645173};
 
     std::vector<V3D> q_vectors = getNatroliteQs();
 
@@ -115,8 +108,7 @@ public:
       double degrees_per_step = 3;
 
       double error =
-          IndexingUtils::Find_UB(UB, q_vectors, lattice, required_tolerance,
-                                 base_index, num_initial, degrees_per_step);
+          IndexingUtils::Find_UB(UB, q_vectors, lattice, required_tolerance, base_index, num_initial, degrees_per_step);
 
       //      std::cout << std::endl << "USING LATTICE PARAMETERS\n";
       //      ShowIndexingStats( UB, q_vectors, required_tolerance );
@@ -129,8 +121,7 @@ public:
         TS_ASSERT_DELTA(UB_returned[i], correct_UB[i], 1e-5);
       }
 
-      int num_indexed =
-          IndexingUtils::NumberIndexed(UB, q_vectors, required_tolerance);
+      int num_indexed = IndexingUtils::NumberIndexed(UB, q_vectors, required_tolerance);
       TS_ASSERT_EQUALS(num_indexed, 12);
     }
   }
@@ -138,9 +129,8 @@ public:
   void test_Find_UB_given_d_min_d_max() {
     Matrix<double> UB(3, 3, false);
 
-    double correct_UB[] = {-0.0177661, -0.0992964, 0.0155078,
-                           0.0585369,  -0.0150210, 0.0839671,
-                           -0.1585160, 0.0432269,  0.0645173};
+    double correct_UB[] = {-0.0177661, -0.0992964, 0.0155078, 0.0585369, -0.0150210,
+                           0.0839671,  -0.1585160, 0.0432269, 0.0645173};
 
     std::vector<V3D> q_vectors = getNatroliteQs();
 
@@ -153,12 +143,10 @@ public:
     // case with specified base index(4)
     for (int base_index = -1; base_index < 5; base_index += 5) {
 
-      double error = IndexingUtils::Find_UB(UB, q_vectors, d_min, d_max,
-                                            required_tolerance, base_index,
-                                            num_initial, degrees_per_step);
+      double error = IndexingUtils::Find_UB(UB, q_vectors, d_min, d_max, required_tolerance, base_index, num_initial,
+                                            degrees_per_step);
 
-      int num_indexed =
-          IndexingUtils::NumberIndexed(UB, q_vectors, required_tolerance);
+      int num_indexed = IndexingUtils::NumberIndexed(UB, q_vectors, required_tolerance);
 
       //      std::cout << std::endl << "USING MIN-MAX-D\n";
       //      ShowIndexingStats( UB, q_vectors, required_tolerance );
@@ -178,9 +166,8 @@ public:
   void test_Find_UB_using_FFT() {
     Matrix<double> UB(3, 3, false);
 
-    double correct_UB[] = {-0.0177661, -0.0992964, 0.0155078,
-                           0.0585369,  -0.0150210, 0.0839671,
-                           -0.1585160, 0.0432269,  0.0645173};
+    double correct_UB[] = {-0.0177661, -0.0992964, 0.0155078, 0.0585369, -0.0150210,
+                           0.0839671,  -0.1585160, 0.0432269, 0.0645173};
 
     std::vector<V3D> q_vectors = getNatroliteQs();
 
@@ -189,11 +176,9 @@ public:
     double required_tolerance = 0.08;
     double degrees_per_step = 1;
 
-    double error = IndexingUtils::Find_UB(UB, q_vectors, d_min, d_max,
-                                          required_tolerance, degrees_per_step);
+    double error = IndexingUtils::Find_UB(UB, q_vectors, d_min, d_max, required_tolerance, degrees_per_step);
 
-    int num_indexed =
-        IndexingUtils::NumberIndexed(UB, q_vectors, required_tolerance);
+    int num_indexed = IndexingUtils::NumberIndexed(UB, q_vectors, required_tolerance);
 
     //  std::cout << std::endl << "USING FFT\n";
     //  ShowIndexingStats( UB, q_vectors, required_tolerance );
@@ -234,8 +219,7 @@ public:
     std::vector<V3D> q_vectors = getNatroliteQs();
 
     V3D best_vec;
-    double error =
-        IndexingUtils::Optimize_Direction(best_vec, index_values, q_vectors);
+    double error = IndexingUtils::Optimize_Direction(best_vec, index_values, q_vectors);
     TS_ASSERT_DELTA(error, 0.00218606, 1e-5);
     TS_ASSERT_DELTA(best_vec[0], -2.58222, 1e-4);
     TS_ASSERT_DELTA(best_vec[1], 3.97345, 1e-4);
@@ -243,9 +227,8 @@ public:
   }
 
   void test_ScanFor_UB() {
-    double correct_UB[] = {-0.102577, 0.0999725,  -0.0136353,
-                           0.123290,  0.0146148,  -0.0851386,
-                           -0.055154, -0.0427632, -0.0630785};
+    double correct_UB[] = {-0.102577,  0.0999725, -0.0136353, 0.123290,  0.0146148,
+                           -0.0851386, -0.055154, -0.0427632, -0.0630785};
 
     Matrix<double> UB(3, 3, false);
     int degrees_per_step = 3;
@@ -254,8 +237,7 @@ public:
     UnitCell cell(6.6f, 9.7f, 9.9f, 84, 71, 70);
     std::vector<V3D> q_vectors = getNatroliteQs();
 
-    double error = IndexingUtils::ScanFor_UB(
-        UB, q_vectors, cell, degrees_per_step, required_tolerance);
+    double error = IndexingUtils::ScanFor_UB(UB, q_vectors, cell, degrees_per_step, required_tolerance);
 
     TS_ASSERT_DELTA(error, 0.147397, 1.e-5);
 
@@ -279,8 +261,7 @@ public:
     double degrees_per_step = 1.0;
     double required_tolerance = 0.12;
 
-    IndexingUtils::ScanFor_Directions(directions, q_vectors, d_min, d_max,
-                                      required_tolerance, degrees_per_step);
+    IndexingUtils::ScanFor_Directions(directions, q_vectors, d_min, d_max, required_tolerance, degrees_per_step);
 
     TS_ASSERT_EQUALS(5, directions.size());
 
@@ -306,8 +287,7 @@ public:
     double degrees_per_step = 1.0;
     double required_tolerance = 0.12;
 
-    IndexingUtils::FFTScanFor_Directions(directions, q_vectors, d_min, d_max,
-                                         required_tolerance, degrees_per_step);
+    IndexingUtils::FFTScanFor_Directions(directions, q_vectors, d_min, d_max, required_tolerance, degrees_per_step);
 
     TS_ASSERT_EQUALS(8, directions.size());
 
@@ -340,8 +320,7 @@ public:
     double index_factor = ((double)N_FFT_STEPS) / max_q_magnitude;
 
     double max_mag_fft =
-        IndexingUtils::GetMagFFT(q_vectors, current_dir, N_FFT_STEPS,
-                                 projections, index_factor, magnitude_fft);
+        IndexingUtils::GetMagFFT(q_vectors, current_dir, N_FFT_STEPS, projections, index_factor, magnitude_fft);
 
     TS_ASSERT_DELTA(max_mag_fft, 16.0, 1e-5);
 
@@ -356,9 +335,8 @@ public:
 
   void test_FormUB_From_abc_Vectors_with_min_angle() {
     Matrix<double> UB(3, 3, false);
-    double UB_array[] = {-0.0177703, -0.0993001, 0.0155008,
-                         0.0585436,  -0.0150158, 0.0839775,
-                         -0.158519,  0.0432281,  0.0645189};
+    double UB_array[] = {-0.0177703, -0.0993001, 0.0155008, 0.0585436, -0.0150158,
+                         0.0839775,  -0.158519,  0.0432281, 0.0645189};
 
     double vectors[5][3] = {{-2.58222370, 3.97345330, -4.5514464},
                             {-9.59519700, 0.73589927, 1.3474168},
@@ -375,12 +353,10 @@ public:
     double min_d = 6;
     double max_d = 10;
 
-    IndexingUtils::FormUB_From_abc_Vectors(UB, directions, a_index, min_d,
-                                           max_d);
+    IndexingUtils::FormUB_From_abc_Vectors(UB, directions, a_index, min_d, max_d);
 
     std::vector<V3D> q_vectors = getNatroliteQs();
-    int num_indexed =
-        IndexingUtils::NumberIndexed(UB, q_vectors, required_tolerance);
+    int num_indexed = IndexingUtils::NumberIndexed(UB, q_vectors, required_tolerance);
     TS_ASSERT_EQUALS(num_indexed, 12);
 
     size_t index = 0;
@@ -394,9 +370,8 @@ public:
 
   void test_FormUB_From_abc_Vectors_with_min_volume() {
     Matrix<double> UB(3, 3, false);
-    double UB_array[] = {-0.0177703, -0.0993001, 0.0155008,
-                         0.0585436,  -0.0150158, 0.0839775,
-                         -0.158519,  0.0432281,  0.0645189};
+    double UB_array[] = {-0.0177703, -0.0993001, 0.0155008, 0.0585436, -0.0150158,
+                         0.0839775,  -0.158519,  0.0432281, 0.0645189};
 
     double vectors[5][3] = {{-2.58222370, 3.97345330, -4.5514464},
                             {-9.59519700, 0.73589927, 1.3474168},
@@ -412,11 +387,9 @@ public:
     double required_tolerance = 0.12;
     double min_vol = 6.0 * 6.0 * 6.0 / 4.0;
 
-    IndexingUtils::FormUB_From_abc_Vectors(UB, directions, q_vectors,
-                                           required_tolerance, min_vol);
+    IndexingUtils::FormUB_From_abc_Vectors(UB, directions, q_vectors, required_tolerance, min_vol);
 
-    int num_indexed =
-        IndexingUtils::NumberIndexed(UB, q_vectors, required_tolerance);
+    int num_indexed = IndexingUtils::NumberIndexed(UB, q_vectors, required_tolerance);
     TS_ASSERT_EQUALS(num_indexed, 12);
 
     size_t index = 0;
@@ -442,8 +415,7 @@ public:
     const double cosGamma = std::cos(gamma * M_PI / 180);
     const double sinGamma = std::sin(gamma * M_PI / 180);
 
-    V3D result = IndexingUtils::makeCDir(a_dir, b_dir, c_length, cosAlpha,
-                                         cosBeta, cosGamma, sinGamma);
+    V3D result = IndexingUtils::makeCDir(a_dir, b_dir, c_length, cosAlpha, cosBeta, cosGamma, sinGamma);
 
     double alpha_calc = result.angle(b_dir) * 180 / M_PI;
     double beta_calc = result.angle(a_dir) * 180 / M_PI;
@@ -485,8 +457,7 @@ public:
     directions.emplace_back(v5c);
     directions.emplace_back(v5d);
 
-    IndexingUtils::DiscardDuplicates(new_list, directions, q_vectors,
-                                     required_tolerance, length_tol, angle_tol);
+    IndexingUtils::DiscardDuplicates(new_list, directions, q_vectors, required_tolerance, length_tol, angle_tol);
 
     TS_ASSERT_EQUALS(new_list.size(), 5);
     TS_ASSERT_DELTA(new_list[0].norm(), 6.57053, 1e-4);
@@ -503,8 +474,7 @@ public:
   }
 
   void test_RoundHKLs() {
-    std::vector<V3D> hkls{V3D(-1.234, 0.345, 7.5765),
-                          V3D(3.5345, -1.346, 0.2347)};
+    std::vector<V3D> hkls{V3D(-1.234, 0.345, 7.5765), V3D(3.5345, -1.346, 0.2347)};
     IndexingUtils::RoundHKLs(hkls);
     TS_ASSERT_EQUALS(V3D(-1, 0, 8), hkls[0])
     TS_ASSERT_EQUALS(V3D(4, -1, 0), hkls[1])
@@ -603,16 +573,13 @@ public:
 
     int num_indexed;
 
-    num_indexed =
-        IndexingUtils::NumberIndexed_3D(a_dir, b_dir, c_dir, q_list, 0.10);
+    num_indexed = IndexingUtils::NumberIndexed_3D(a_dir, b_dir, c_dir, q_list, 0.10);
     TS_ASSERT_EQUALS(num_indexed, 12);
 
-    num_indexed =
-        IndexingUtils::NumberIndexed_3D(a_dir, b_dir, c_dir, q_list, 0.05);
+    num_indexed = IndexingUtils::NumberIndexed_3D(a_dir, b_dir, c_dir, q_list, 0.05);
     TS_ASSERT_EQUALS(num_indexed, 10);
 
-    num_indexed =
-        IndexingUtils::NumberIndexed_3D(a_dir, b_dir, c_dir, q_list, 0.01);
+    num_indexed = IndexingUtils::NumberIndexed_3D(a_dir, b_dir, c_dir, q_list, 0.01);
     TS_ASSERT_EQUALS(num_indexed, 4);
   }
 
@@ -625,8 +592,7 @@ public:
     std::vector<V3D> miller_indices;
     double average_error;
 
-    int num_indexed = IndexingUtils::CalculateMillerIndices(
-        UB, q_vectors, tolerance, miller_indices, average_error);
+    int num_indexed = IndexingUtils::CalculateMillerIndices(UB, q_vectors, tolerance, miller_indices, average_error);
     TS_ASSERT_EQUALS(num_indexed, 12);
 
     TS_ASSERT_DELTA(average_error, 0.0185, 1e-3);
@@ -648,8 +614,7 @@ public:
     const double tolerance = 0.1;
     V3D miller_indices;
 
-    const bool success = IndexingUtils::CalculateMillerIndices(
-        UB, q_vectors[0], tolerance, miller_indices);
+    const bool success = IndexingUtils::CalculateMillerIndices(UB, q_vectors[0], tolerance, miller_indices);
     TS_ASSERT(success);
     const auto diff = (indices[0] - miller_indices).norm();
     TS_ASSERT_DELTA(diff, 0, 0.1);
@@ -661,8 +626,7 @@ public:
     auto UB = getNatroliteUB();
     UB.Invert();
 
-    const V3D millerIndices =
-        IndexingUtils::CalculateMillerIndices(UB, q_vectors[0]);
+    const V3D millerIndices = IndexingUtils::CalculateMillerIndices(UB, q_vectors[0]);
     const auto diff = (indices[0] - millerIndices).norm();
     TS_ASSERT_DELTA(diff, 0, 0.1);
   }
@@ -679,9 +643,8 @@ public:
     std::vector<int> index_vals;
     std::vector<V3D> indexed_qs;
 
-    int num_indexed = IndexingUtils::GetIndexedPeaks_1D(
-        direction, q_vectors, required_tolerance, index_vals, indexed_qs,
-        fit_error);
+    int num_indexed =
+        IndexingUtils::GetIndexedPeaks_1D(direction, q_vectors, required_tolerance, index_vals, indexed_qs, fit_error);
     TS_ASSERT_EQUALS(num_indexed, 12);
     TS_ASSERT_EQUALS(index_vals.size(), 12);
     TS_ASSERT_EQUALS(indexed_qs.size(), 12);
@@ -706,9 +669,8 @@ public:
     std::vector<V3D> index_vals;
     std::vector<V3D> indexed_qs;
 
-    int num_indexed = IndexingUtils::GetIndexedPeaks_3D(
-        direction_1, direction_2, direction_3, q_vectors, required_tolerance,
-        index_vals, indexed_qs, fit_error);
+    int num_indexed = IndexingUtils::GetIndexedPeaks_3D(direction_1, direction_2, direction_3, q_vectors,
+                                                        required_tolerance, index_vals, indexed_qs, fit_error);
     TS_ASSERT_EQUALS(num_indexed, 12);
     TS_ASSERT_EQUALS(index_vals.size(), 12);
     TS_ASSERT_EQUALS(indexed_qs.size(), 12);
@@ -732,8 +694,8 @@ public:
     std::vector<V3D> index_vals;
     std::vector<V3D> indexed_qs;
 
-    int num_indexed = IndexingUtils::GetIndexedPeaks(
-        UB, q_vectors, required_tolerance, index_vals, indexed_qs, fit_error);
+    int num_indexed =
+        IndexingUtils::GetIndexedPeaks(UB, q_vectors, required_tolerance, index_vals, indexed_qs, fit_error);
     TS_ASSERT_EQUALS(num_indexed, 12);
     TS_ASSERT_EQUALS(index_vals.size(), 12);
     TS_ASSERT_EQUALS(indexed_qs.size(), 12);
@@ -747,8 +709,7 @@ public:
   }
 
   void test_MakeHemisphereDirections() {
-    std::vector<V3D> direction_list =
-        IndexingUtils::MakeHemisphereDirections(5);
+    std::vector<V3D> direction_list = IndexingUtils::MakeHemisphereDirections(5);
 
     TS_ASSERT_EQUALS(direction_list.size(), 64);
 
@@ -775,8 +736,7 @@ public:
     V3D axis(1, 1, 1);
     double angle_degrees = 90;
 
-    std::vector<V3D> direction_list =
-        IndexingUtils::MakeCircleDirections(num_steps, axis, angle_degrees);
+    std::vector<V3D> direction_list = IndexingUtils::MakeCircleDirections(num_steps, axis, angle_degrees);
 
     TS_ASSERT_EQUALS(direction_list.size(), 8);
 
@@ -810,8 +770,7 @@ public:
     double required_tolerance = 0.1;
 
     int num_indexed =
-        IndexingUtils::SelectDirection(best_direction, q_vectors, directions,
-                                       plane_spacing, required_tolerance);
+        IndexingUtils::SelectDirection(best_direction, q_vectors, directions, plane_spacing, required_tolerance);
 
     TS_ASSERT_DELTA(best_direction[0], -0.399027, 1e-5);
     TS_ASSERT_DELTA(best_direction[1], 0.615661, 1e-5);
@@ -855,8 +814,7 @@ public:
   }
 
   void test_GetLatticeParameters() {
-    double correct_value[7] = {6.5711,  18.2925, 18.6886,  89.9399,
-                               90.4687, 90.0127, 2246.3452};
+    double correct_value[7] = {6.5711, 18.2925, 18.6886, 89.9399, 90.4687, 90.0127, 2246.3452};
 
     Matrix<double> natrolite_UB = getNatroliteUB();
 

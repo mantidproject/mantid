@@ -12,7 +12,9 @@ import copy
 from distutils.version import LooseVersion
 import io
 import sys
+import re
 from functools import wraps
+
 import matplotlib
 from matplotlib._pylab_helpers import Gcf
 from matplotlib.axes import Axes
@@ -31,6 +33,7 @@ from mantidqt.io import open_a_file_dialog
 from mantidqt.utils.qt.qappthreadcall import QAppThreadCall, force_method_calls_to_qapp_thread
 from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowser
 from mantidqt.widgets.plotconfigdialog.presenter import PlotConfigDialogPresenter
+from mantidqt.widgets.superplot import Superplot
 from mantidqt.widgets.waterfallplotfillareadialog.presenter import WaterfallPlotFillAreaDialogPresenter
 from mantidqt.widgets.waterfallplotoffsetdialog.presenter import WaterfallPlotOffsetDialogPresenter
 from workbench.config import get_window_config
@@ -41,6 +44,10 @@ from workbench.plotting.figurewindow import FigureWindow
 from workbench.plotting.plotscriptgenerator import generate_script
 from workbench.plotting.toolbar import WorkbenchNavigationToolbar, ToolbarStateManager
 from workbench.plotting.plothelppages import PlotHelpPages
+
+
+def _replace_workspace_name_in_string(old_name, new_name, string):
+    return re.sub(rf'\b{old_name}\b', new_name, string)
 
 
 def _catch_exceptions(func):
@@ -133,21 +140,23 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
     def renameHandle(self, oldName, newName):
         """
         Called when the ADS has renamed a workspace.
-        If this workspace is attached to this figure then the figure name is updated
+        If this workspace is attached to this figure then the figure name is updated, as are the artists names and
+        axis creation arguments
         :param oldName: The old name of the workspace.
         :param newName: The new name of the workspace
         """
-
         for ax in self.canvas.figure.axes:
             if isinstance(ax, MantidAxes):
                 ws = AnalysisDataService.retrieve(newName)
                 if isinstance(ws, MatrixWorkspace):
-                    for ws_name in list(ax.tracked_workspaces.keys()):
-                        # loop over list as items is iterable of object that is changed (throws error)
-                        if ws_name == oldName:
-                            ax.tracked_workspaces[newName] = ax.tracked_workspaces.pop(oldName)
+                    ax.rename_workspace(newName, oldName)
                 elif isinstance(ws, ITableWorkspace):
                     ax.wsName = newName
+                ax.make_legend()
+            ax.set_title(_replace_workspace_name_in_string(oldName, newName, ax.get_title()))
+        self.canvas.set_window_title(
+            _replace_workspace_name_in_string(oldName, newName, self.canvas.get_window_title()))
+        self.canvas.draw()
 
 
 class FigureManagerWorkbench(FigureManagerBase, QObject):
@@ -169,7 +178,6 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         assert QAppThreadCall.is_qapp_thread(
         ), "FigureManagerWorkbench cannot be created outside of the QApplication thread"
         QObject.__init__(self)
-        FigureManagerBase.__init__(self, canvas, num)
 
         parent, flags = get_window_config()
         self.window = FigureWindow(canvas, parent=parent, window_flags=flags)
@@ -181,6 +189,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         self.window.setWindowTitle("Figure %d" % num)
         canvas.figure.set_label("Figure %d" % num)
 
+        FigureManagerBase.__init__(self, canvas, num)
         # Give the keyboard focus to the figure instead of the
         # manager; StrongFocus accepts both tab and click to focus and
         # will enable the canvas to process event w/o clicking.
@@ -204,6 +213,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             self.toolbar.message.connect(self.statusbar_label.setText)
             self.toolbar.sig_grid_toggle_triggered.connect(self.grid_toggle)
             self.toolbar.sig_toggle_fit_triggered.connect(self.fit_toggle)
+            self.toolbar.sig_toggle_superplot_triggered.connect(self.superplot_toggle)
             self.toolbar.sig_copy_to_clipboard_triggered.connect(self.copy_to_clipboard)
             self.toolbar.sig_plot_options_triggered.connect(self.launch_plot_options)
             self.toolbar.sig_plot_help_triggered.connect(self.launch_plot_help)
@@ -238,6 +248,9 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         self.fit_browser.closing.connect(self.handle_fit_browser_close)
         self.window.setCentralWidget(canvas)
         self.window.addDockWidget(Qt.LeftDockWidgetArea, self.fit_browser)
+
+        self.superplot = None
+
         # Need this line to stop the bug where the dock window snaps back to its original size after resizing.
         # 0 argument is arbitrary and has no effect on fit widget size
         # This is a qt bug reported at (https://bugreports.qt.io/browse/QTBUG-65592)
@@ -297,7 +310,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         self.canvas.draw_idle()
 
         if self.toolbar:
-            self.toolbar.set_buttons_visiblity(self.canvas.figure)
+            self.toolbar.set_buttons_visibility(self.canvas.figure)
 
     def destroy(self, *args):
         # check for qApp first, as PySide deletes it in its atexit handler
@@ -310,8 +323,9 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
         if self.toolbar:
             self.toolbar.destroy()
+
         self._ads_observer.observeAll(False)
-        del self._ads_observer
+        self._ads_observer = None
         # disconnect window events before calling Gcf.destroy. window.close is not guaranteed to
         # delete the object and do this for us. On macOS it was observed that closing the figure window
         # would produce an extraneous activated event that would add a new figure to the plots list
@@ -319,6 +333,8 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         self.window.disconnect()
         self._fig_interaction.disconnect()
         self.window.close()
+        if self.superplot:
+            self.superplot.close()
 
         try:
             Gcf.destroy(self.num)
@@ -330,6 +346,10 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
     def launch_plot_options(self):
         self.plot_options_dialog = PlotConfigDialogPresenter(self.canvas.figure, parent=self.window)
+
+    def launch_plot_options_on_curves_tab(self, axes, curve):
+        self.plot_options_dialog = PlotConfigDialogPresenter(self.canvas.figure, parent=self.window)
+        self.plot_options_dialog.configure_curves_tab(axes, curve)
 
     def launch_plot_help(self):
         PlotHelpPages.show_help_page_for_figure(self.canvas.figure)
@@ -366,8 +386,46 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         """Toggle fit browser and tool on/off"""
         if self.fit_browser.isVisible():
             self.fit_browser.hide()
+            self.toolbar._actions["toggle_fit"].setChecked(False)
         else:
+            if self.toolbar._actions["toggle_superplot"].isChecked():
+                self._superplot_hide()
             self.fit_browser.show()
+
+    def _superplot_show(self):
+        """Show the superplot"""
+        self.superplot = Superplot(self.canvas, self.window)
+        if not self.superplot.is_valid():
+            logger.warning("Superplot cannot be opened on data not linked "
+                           "to a workspace.")
+            self.superplot = None
+            self.toolbar._actions["toggle_superplot"].setChecked(False)
+        else:
+            self.window.addDockWidget(Qt.LeftDockWidgetArea,
+                                      self.superplot.get_side_view())
+            self.window.addDockWidget(Qt.BottomDockWidgetArea,
+                                      self.superplot.get_bottom_view())
+            self.toolbar._actions["toggle_superplot"].setChecked(True)
+            self.superplot.get_bottom_view().setFocus()
+
+    def _superplot_hide(self):
+        """Hide the superplot"""
+        if self.superplot is None:
+            return
+        self.window.removeDockWidget(self.superplot.get_side_view())
+        self.window.removeDockWidget(self.superplot.get_bottom_view())
+        self.superplot.close()
+        self.superplot = None
+        self.toolbar._actions["toggle_superplot"].setChecked(False)
+
+    def superplot_toggle(self):
+        """Toggle superplot dockwidgets on/off"""
+        if self.superplot:
+            self._superplot_hide()
+        else:
+            if self.toolbar._actions["toggle_fit"].isChecked():
+                self.fit_toggle()
+            self._superplot_show()
 
     def handle_fit_browser_close(self):
         """
@@ -500,7 +558,7 @@ def new_figure_manager(num, *args, **kwargs):
 def new_figure_manager_given_figure(num, figure):
     """Create a new manager from a num & figure """
 
-    def _new_figure_manager_given_figure_impl(num, figure):
+    def _new_figure_manager_given_figure_impl(num: int, figure):
         """Create a new figure manager instance for the given figure.
         Forces all public and non-dunder method calls onto the QApplication thread.
         """
@@ -508,4 +566,4 @@ def new_figure_manager_given_figure(num, figure):
         return force_method_calls_to_qapp_thread(FigureManagerWorkbench(canvas, num))
 
     # figure manager & canvas must be created on the QApplication thread
-    return QAppThreadCall(_new_figure_manager_given_figure_impl)(num, figure)
+    return QAppThreadCall(_new_figure_manager_given_figure_impl)(int(num), figure)

@@ -55,9 +55,7 @@ inline std::string absolutePath(const char *path, const fs::path &base) {
  * Return the absolute path to the Python executable
  * @param base Directory to serve as base for absolute paths
  */
-inline std::string pythonExecutable(const fs::path &dirOfExe) {
-  return absolutePath(PYTHON_EXECUTABLE_PATH, dirOfExe);
-}
+inline std::string pythonExecutable(const fs::path &dirOfExe) { return absolutePath(PYTHON_EXECUTABLE_PATH, dirOfExe); }
 
 /**
  * Given a list of existing executable/arguments append those
@@ -85,12 +83,10 @@ void appendArguments(ExeArgs *exeArgs, int argc, char **argv) {
   };
   const auto nargs = std::count_if(argv + 1, argv + argc, acceptedArg);
   exeArgs->resize(startupArgsSize + nargs);
-  std::copy_if(argv + 1, argv + argc,
-               std::next(exeArgs->begin(), startupArgsSize), acceptedArg);
+  std::copy_if(argv + 1, argv + argc, std::next(exeArgs->begin(), startupArgsSize), acceptedArg);
 #else
   exeArgs->resize(startupArgsSize + argc - 1);
-  std::copy(argv + 1, argv + argc,
-            std::next(exeArgs->begin(), startupArgsSize));
+  std::copy(argv + 1, argv + argc, std::next(exeArgs->begin(), startupArgsSize));
 #endif
 }
 
@@ -100,8 +96,7 @@ void appendArguments(ExeArgs *exeArgs, int argc, char **argv) {
  * @return A boost::process::environment type to pass to
  * boost::process::system
  */
-decltype(boost::this_process::environment())
-childEnvironment(const fs::path &dirOfExe) {
+decltype(boost::this_process::environment()) childEnvironment(const fs::path &dirOfExe) {
   auto env = boost::this_process::environment();
 
   auto insertAtFront = [&env](const auto &name, const auto &value) {
@@ -134,8 +129,7 @@ childEnvironment(const fs::path &dirOfExe) {
 int startWorkbench(const fs::path &dirOfExe, int argc, char **argv) {
   ExeArgs startupWorkbench{"-m", WORKBENCH_MAIN};
   appendArguments(&startupWorkbench, argc, argv);
-  return bp::system(pythonExecutable(dirOfExe), startupWorkbench,
-                    childEnvironment(dirOfExe));
+  return bp::system(pythonExecutable(dirOfExe), startupWorkbench, childEnvironment(dirOfExe));
 }
 
 /**
@@ -180,9 +174,7 @@ void showErrorReporter(const fs::path &dirOfExe, const int workbenchExitCode) {
  * @param argv The array of command line arguments
  */
 int main(int argc, char **argv) {
-  const auto dirOfExe = [&argv]() {
-    return fs::absolute(fs::path(argv[0]).remove_filename());
-  }();
+  const auto dirOfExe = [&argv]() { return fs::absolute(fs::path(argv[0]).remove_filename()); }();
   const auto workbenchExitCode = startWorkbench(dirOfExe, argc, argv);
   if (workbenchExitCode != 0) {
     showErrorReporter(dirOfExe, workbenchExitCode);

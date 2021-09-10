@@ -79,30 +79,24 @@ private:
   /// second is file prefix - zero padding pair
   using ZeroPaddingMap = std::map<unsigned int, std::pair<std::string, int>>;
   /// get the zeropadding part
-  int getZeroPadding(ZeroPaddingMap::const_iterator it) const {
-    return it->second.second;
-  }
+  int getZeroPadding(ZeroPaddingMap::const_iterator it) const { return it->second.second; }
   /// get the prefix part
-  const std::string &getPrefix(ZeroPaddingMap::const_iterator it) const {
-    return it->second.first;
-  }
+  const std::string &getPrefix(ZeroPaddingMap::const_iterator it) const { return it->second.first; }
 
-  const FacilityInfo *m_facility; ///< Facility
-  std::string m_name;             ///< Instrument name
-  std::string m_shortName;        ///< Instrument short name
-  ZeroPaddingMap m_zeroPadding;   ///< Run number-dependent zero padding
-  std::string m_delimiter; ///< Delimiter between instrument name and run number
-  std::set<std::string>
-      m_technique; ///< List of techniques the instrument can do
+  const FacilityInfo *m_facility;    ///< Facility
+  std::string m_name;                ///< Instrument name
+  std::string m_shortName;           ///< Instrument short name
+  ZeroPaddingMap m_zeroPadding;      ///< Run number-dependent zero padding
+  std::string m_delimiter;           ///< Delimiter between instrument name and run number
+  std::set<std::string> m_technique; ///< List of techniques the instrument can do
 
   std::vector<LiveListenerInfo> m_listeners; ///< LiveListener connections
   std::vector<TopicInfo> m_kafkaTopics;      ///< Kafka topics
-  std::string m_defaultListener; ///< Default LiveListener connection to use
+  std::string m_defaultListener;             ///< Default LiveListener connection to use
 };
 
 /// Allow this object to be printed to a stream
-MANTID_KERNEL_DLL std::ostream &
-operator<<(std::ostream &buffer, const InstrumentInfo &instrumentDescriptor);
+MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &buffer, const InstrumentInfo &instrumentDescriptor);
 
 } // namespace Kernel
 } // namespace Mantid

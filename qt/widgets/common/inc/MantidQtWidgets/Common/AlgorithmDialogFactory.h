@@ -34,15 +34,13 @@ class UserSubWindow;
     @author Martyn Gigg, Tessella plc
     @date 24/02/2009
 */
-class EXPORT_OPT_MANTIDQT_COMMON AlgorithmDialogFactoryImpl
-    : public Mantid::Kernel::DynamicFactory<AlgorithmDialog> {
+class EXPORT_OPT_MANTIDQT_COMMON AlgorithmDialogFactoryImpl : public Mantid::Kernel::DynamicFactory<AlgorithmDialog> {
 
 public:
   // Unhide the inherited create method
   using Mantid::Kernel::DynamicFactory<AlgorithmDialog>::createUnwrapped;
   AlgorithmDialogFactoryImpl(const AlgorithmDialogFactoryImpl &) = delete;
-  AlgorithmDialogFactoryImpl &
-  operator=(const AlgorithmDialogFactoryImpl &) = delete;
+  AlgorithmDialogFactoryImpl &operator=(const AlgorithmDialogFactoryImpl &) = delete;
 
 private:
   friend struct Mantid::Kernel::CreateUsingNew<AlgorithmDialogFactoryImpl>;
@@ -55,8 +53,7 @@ private:
 };
 
 /// The specific instantiation of the templated type
-using AlgorithmDialogFactory =
-    Mantid::Kernel::SingletonHolder<AlgorithmDialogFactoryImpl>;
+using AlgorithmDialogFactory = Mantid::Kernel::SingletonHolder<AlgorithmDialogFactoryImpl>;
 } // namespace API
 } // namespace MantidQt
 

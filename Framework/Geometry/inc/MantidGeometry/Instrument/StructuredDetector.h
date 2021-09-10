@@ -29,8 +29,7 @@ geometrical irregularity
 * @author Lamar Moore, ISIS
 * @date 07-March-2016
 */
-class MANTID_GEOMETRY_DLL StructuredDetector : public CompAssembly,
-                                               public IObjComponent {
+class MANTID_GEOMETRY_DLL StructuredDetector : public CompAssembly, public IObjComponent {
 public:
   /// String description of the type of component
   std::string type() const override { return "StructuredDetector"; }
@@ -48,9 +47,8 @@ public:
   StructuredDetector(const StructuredDetector *base, const ParameterMap *map);
 
   /// Create all the detector pixels of this rectangular detector.
-  void initialize(size_t xPixels, size_t yPixels, std::vector<double> &&x,
-                  std::vector<double> &&y, bool isZBeam, detid_t idStart,
-                  bool idFillByFirstY, int idStepByRow, int idStep = 1);
+  void initialize(size_t xPixels, size_t yPixels, std::vector<double> &&x, std::vector<double> &&y, bool isZBeam,
+                  detid_t idStart, bool idFillByFirstY, int idStepByRow, int idStep = 1);
 
   //! Make a clone of the present component
   IComponent *clone() const override;
@@ -63,8 +61,7 @@ public:
   std::vector<double> const &getXValues() const;
   std::vector<double> const &getYValues() const;
 
-  void setColors(const std::vector<int> &r, const std::vector<int> &g,
-                 const std::vector<int> &b) const;
+  void setColors(const std::vector<int> &r, const std::vector<int> &g, const std::vector<int> &b) const;
 
   std::vector<int> const &getR() const;
   std::vector<int> const &getG() const;
@@ -82,8 +79,7 @@ public:
   /// maximum detector id
   detid_t maxDetectorID();
 
-  std::shared_ptr<const IComponent>
-  getComponentByName(const std::string &cname, int nlevels = 0) const override;
+  std::shared_ptr<const IComponent> getComponentByName(const std::string &cname, int nlevels = 0) const override;
 
   // This should inherit the getBoundingBox implementation from  CompAssembly
   // but
@@ -128,8 +124,7 @@ public:
   const Kernel::Material material() const override;
 
   /// Register the structured detector for Instrument 2.0 usage
-  virtual size_t
-  registerContents(class ComponentVisitor &componentVisitor) const override;
+  virtual size_t registerContents(class ComponentVisitor &componentVisitor) const override;
 
   // ------------ End of IObjComponent methods ----------------
 private:
@@ -138,8 +133,7 @@ private:
 
   void createDetectors();
 
-  Detector *addDetector(CompAssembly *parent, const std::string &name, size_t x,
-                        size_t y, detid_t id);
+  Detector *addDetector(CompAssembly *parent, const std::string &name, size_t x, size_t y, detid_t id);
   /// Pointer to the base RectangularDetector, for parametrized
   /// instruments
   const StructuredDetector *m_base;
@@ -173,8 +167,7 @@ private:
   mutable std::vector<int> b;
 };
 
-MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &,
-                                             const StructuredDetector &);
+MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &, const StructuredDetector &);
 
 using StructuredDetector_sptr = std::shared_ptr<StructuredDetector>;
 using StructuredDetector_const_sptr = std::shared_ptr<const StructuredDetector>;

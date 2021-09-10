@@ -41,20 +41,16 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
     // Setting properties to input workspaces that don't exist throws
-    TS_ASSERT_THROWS(alg.setPropertyValue(inputProp1, "test_in21"),
-                     const std::invalid_argument &);
-    TS_ASSERT_THROWS(alg.setPropertyValue(inputProp2, "test_in22"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg.setPropertyValue(inputProp1, "test_in21"), const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg.setPropertyValue(inputProp2, "test_in22"), const std::invalid_argument &);
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(outputProp, "test_out2"));
   }
 
   void testExec1D1D() {
     int nBins = 10;
     // Register the workspace in the data service
-    MatrixWorkspace_sptr work_in1 =
-        WorkspaceCreationHelper::create1DWorkspaceFib(nBins, true);
-    MatrixWorkspace_sptr work_in2 =
-        WorkspaceCreationHelper::create1DWorkspaceFib(nBins, true);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::create1DWorkspaceFib(nBins, true);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::create1DWorkspaceFib(nBins, true);
     AnalysisDataService::Instance().add("test_in11", work_in1);
     AnalysisDataService::Instance().add("test_in12", work_in2);
 
@@ -67,9 +63,7 @@ public:
     alg.execute();
 
     MatrixWorkspace_sptr work_out1;
-    TS_ASSERT_THROWS_NOTHING(
-        work_out1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "test_out1"));
+    TS_ASSERT_THROWS_NOTHING(work_out1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out1"));
 
     checkData(work_in1, work_in2, work_out1);
 
@@ -81,10 +75,8 @@ public:
   void testExec1D1DRand() {
     int nBins = 10;
     // Register the workspace in the data service
-    MatrixWorkspace_sptr work_in1 =
-        WorkspaceCreationHelper::create1DWorkspaceFib(nBins, true);
-    MatrixWorkspace_sptr work_in2 =
-        WorkspaceCreationHelper::create1DWorkspaceRand(nBins, true);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::create1DWorkspaceFib(nBins, true);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::create1DWorkspaceRand(nBins, true);
     AnalysisDataService::Instance().add("test_in11", work_in1);
     AnalysisDataService::Instance().add("test_in12", work_in2);
 
@@ -97,9 +89,7 @@ public:
     alg.execute();
 
     MatrixWorkspace_sptr work_out1;
-    TS_ASSERT_THROWS_NOTHING(
-        work_out1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "test_out1"));
+    TS_ASSERT_THROWS_NOTHING(work_out1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out1"));
 
     checkData(work_in1, work_in2, work_out1);
 
@@ -111,10 +101,8 @@ public:
   void testExec2D2D() {
     int nHist = 10, nBins = 20;
     // Register the workspace in the data service
-    MatrixWorkspace_sptr work_in1 =
-        WorkspaceCreationHelper::create2DWorkspace154(nHist, nBins);
-    MatrixWorkspace_sptr work_in2 =
-        WorkspaceCreationHelper::create2DWorkspace123(nHist, nBins);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::create2DWorkspace154(nHist, nBins);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::create2DWorkspace123(nHist, nBins);
 
     PoissonErrors alg;
 
@@ -127,9 +115,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
     MatrixWorkspace_sptr work_out1;
-    TS_ASSERT_THROWS_NOTHING(
-        work_out1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "test_out2"));
+    TS_ASSERT_THROWS_NOTHING(work_out1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out2"));
 
     checkData(work_in1, work_in2, work_out1);
 
@@ -141,10 +127,8 @@ public:
   void testExec1D2D() {
     int nHist = 10, nBins = 20;
     // Register the workspace in the data service
-    MatrixWorkspace_sptr work_in1 =
-        WorkspaceCreationHelper::create2DWorkspace154(nHist, nBins, true);
-    MatrixWorkspace_sptr work_in2 =
-        WorkspaceCreationHelper::create1DWorkspaceFib(nBins, true);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::create2DWorkspace154(nHist, nBins, true);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::create1DWorkspaceFib(nBins, true);
 
     PoissonErrors alg;
 
@@ -165,10 +149,8 @@ public:
   void testExec1DRand2DVertical() {
     int nHist = 10, nBins = 20;
     // Register the workspace in the data service
-    MatrixWorkspace_sptr work_in2 =
-        WorkspaceCreationHelper::create1DWorkspaceRand(nBins, true);
-    MatrixWorkspace_sptr work_in1 =
-        WorkspaceCreationHelper::create2DWorkspace154(nHist, nBins, true);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::create1DWorkspaceRand(nBins, true);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::create2DWorkspace154(nHist, nBins, true);
 
     PoissonErrors alg;
 
@@ -190,10 +172,8 @@ public:
     int nBins = 10;
     // Register the workspace in the data service
 
-    MatrixWorkspace_sptr work_in1 =
-        WorkspaceCreationHelper::create1DWorkspaceFib(nBins, true);
-    MatrixWorkspace_sptr work_in2 =
-        WorkspaceCreationHelper::createWorkspaceSingleValue(2.2);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::create1DWorkspaceFib(nBins, true);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::createWorkspaceSingleValue(2.2);
     AnalysisDataService::Instance().add("test_in11", work_in1);
     AnalysisDataService::Instance().add("test_in12", work_in2);
 
@@ -214,10 +194,8 @@ public:
   void testExec2DSingleValue() {
     int nBins = 300;
     // Register the workspace in the data service
-    MatrixWorkspace_sptr work_in1 =
-        WorkspaceCreationHelper::create1DWorkspaceFib(nBins, true);
-    MatrixWorkspace_sptr work_in2 =
-        WorkspaceCreationHelper::createWorkspaceSingleValue(4.455);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::create1DWorkspaceFib(nBins, true);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::createWorkspaceSingleValue(4.455);
 
     PoissonErrors alg;
 
@@ -240,17 +218,14 @@ public:
   }
 
 private:
-  void checkData(const MatrixWorkspace_sptr &work_in1,
-                 const MatrixWorkspace_sptr &work_in2,
+  void checkData(const MatrixWorkspace_sptr &work_in1, const MatrixWorkspace_sptr &work_in2,
                  const MatrixWorkspace_sptr &work_out1) {
     // default to a horizontal loop orientation
-    checkData(std::move(work_in1), std::move(work_in2), std::move(work_out1),
-              0);
+    checkData(std::move(work_in1), std::move(work_in2), std::move(work_out1), 0);
   }
 
   // loopOrientation 0=Horizontal, 1=Vertical
-  void checkData(const MatrixWorkspace_sptr &work_in1,
-                 const MatrixWorkspace_sptr &work_in2,
+  void checkData(const MatrixWorkspace_sptr &work_in1, const MatrixWorkspace_sptr &work_in2,
                  const MatrixWorkspace_sptr &work_out1, int loopOrientation) {
     size_t ws2LoopCount = 0;
     if (work_in2->size() > 0) {
@@ -272,33 +247,22 @@ private:
     }
   }
 
-  void checkDataItem(const MatrixWorkspace_sptr &work_in1,
-                     const MatrixWorkspace_sptr &work_in2,
-                     const MatrixWorkspace_sptr &work_out1, size_t i,
-                     size_t ws2Index) {
+  void checkDataItem(const MatrixWorkspace_sptr &work_in1, const MatrixWorkspace_sptr &work_in2,
+                     const MatrixWorkspace_sptr &work_out1, size_t i, size_t ws2Index) {
     // printf("I=%d\tws2Index=%d\n",i,ws2Index);
-    double sig1 =
-        work_in1->y(i / work_in1->blocksize())[i % work_in1->blocksize()];
-    double sig2 = work_in2->y(
-        ws2Index / work_in2->blocksize())[ws2Index % work_in2->blocksize()];
-    double sig2e = work_in2->e(
-        ws2Index / work_in2->blocksize())[ws2Index % work_in2->blocksize()];
-    double sig3 =
-        work_out1->y(i / work_in1->blocksize())[i % work_in1->blocksize()];
-    TS_ASSERT_DELTA(
-        work_in1->x(i / work_in1->blocksize())[i % work_in1->blocksize()],
-        work_out1->x(i / work_in1->blocksize())[i % work_in1->blocksize()],
-        0.0001);
+    double sig1 = work_in1->y(i / work_in1->blocksize())[i % work_in1->blocksize()];
+    double sig2 = work_in2->y(ws2Index / work_in2->blocksize())[ws2Index % work_in2->blocksize()];
+    double sig2e = work_in2->e(ws2Index / work_in2->blocksize())[ws2Index % work_in2->blocksize()];
+    double sig3 = work_out1->y(i / work_in1->blocksize())[i % work_in1->blocksize()];
+    TS_ASSERT_DELTA(work_in1->x(i / work_in1->blocksize())[i % work_in1->blocksize()],
+                    work_out1->x(i / work_in1->blocksize())[i % work_in1->blocksize()], 0.0001);
     TS_ASSERT_DELTA(sig1, sig3, 0.0001);
     // double err1 =
     // work_in1->e(i/work_in1->blocksize())[i%work_in1->blocksize()];
     // double err2 =
     // work_in2->e(ws2Index/work_in2->blocksize())[ws2Index%work_in2->blocksize()];
     double err3((sig2e / sig2) * sig3);
-    TS_ASSERT_DELTA(
-        err3,
-        work_out1->e(i / work_in1->blocksize())[i % work_in1->blocksize()],
-        0.0001);
+    TS_ASSERT_DELTA(err3, work_out1->e(i / work_in1->blocksize())[i % work_in1->blocksize()], 0.0001);
   }
 
 private:

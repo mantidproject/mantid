@@ -36,7 +36,7 @@ class InstrumentView(QWidget, ObservingView):
 
     close_signal = Signal()
 
-    def __init__(self, parent, presenter, name):
+    def __init__(self, parent, presenter, name, window_flags=Qt.Window):
         super(InstrumentView, self).__init__(parent)
 
         self.widget = InstrumentWidget(name)
@@ -45,8 +45,8 @@ class InstrumentView(QWidget, ObservingView):
         self.presenter = presenter
 
         self.setWindowTitle(name)
-        self.setWindowFlags(Qt.Window)
         self.setAttribute(Qt.WA_DeleteOnClose, True)
+        self.setWindowFlags(window_flags)
 
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)

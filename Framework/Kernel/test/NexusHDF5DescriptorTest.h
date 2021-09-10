@@ -42,20 +42,16 @@ public:
 
     TS_ASSERT_EQUALS(filename, nexusHDF5Descriptor.getFilename());
 
-    TS_ASSERT_EQUALS(nexusHDF5Descriptor.isEntry(
-                         "/entry/instrument/bank39/total_counts", "SDS"),
-                     true);
+    TS_ASSERT_EQUALS(nexusHDF5Descriptor.isEntry("/entry/instrument/bank39/total_counts", "SDS"), true);
 
     TS_ASSERT_EQUALS(nexusHDF5Descriptor.isEntry("/entry/DASlogs"), true);
 
-    const std::map<std::string, std::set<std::string>> &allEntries =
-        nexusHDF5Descriptor.getAllEntries();
+    const std::map<std::string, std::set<std::string>> &allEntries = nexusHDF5Descriptor.getAllEntries();
 
     TS_ASSERT_EQUALS(allEntries.size(), 12);
 
     // confirms existence of groupClass key and expectedSize for value set
-    auto lf_TestSet = [&](const std::string &groupClass,
-                          const std::size_t expectedSize) -> std::size_t {
+    auto lf_TestSet = [&](const std::string &groupClass, const std::size_t expectedSize) -> std::size_t {
       auto itClass = allEntries.find(groupClass);
       TS_ASSERT_DIFFERS(itClass, allEntries.end());
       TS_ASSERT_EQUALS(itClass->second.size(), expectedSize);

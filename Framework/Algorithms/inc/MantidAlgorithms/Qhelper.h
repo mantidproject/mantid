@@ -19,22 +19,17 @@ namespace Algorithms {
 */
 class Qhelper {
 public:
-  void examineInput(const API::MatrixWorkspace_const_sptr &dataWS,
-                    const API::MatrixWorkspace_const_sptr &binAdj,
+  void examineInput(const API::MatrixWorkspace_const_sptr &dataWS, const API::MatrixWorkspace_const_sptr &binAdj,
                     const API::MatrixWorkspace_const_sptr &detectAdj,
                     const API::MatrixWorkspace_const_sptr &qResolution);
 
-  void examineInput(const API::MatrixWorkspace_const_sptr &dataWS,
-                    const API::MatrixWorkspace_const_sptr &binAdj,
+  void examineInput(const API::MatrixWorkspace_const_sptr &dataWS, const API::MatrixWorkspace_const_sptr &binAdj,
                     const API::MatrixWorkspace_const_sptr &detectAdj);
 
-  size_t waveLengthCutOff(const API::MatrixWorkspace_const_sptr &dataWS,
-                          const API::SpectrumInfo &spectrumInfo,
-                          const double RCut, const double WCut,
-                          const size_t wsInd) const;
+  size_t waveLengthCutOff(const API::MatrixWorkspace_const_sptr &dataWS, const API::SpectrumInfo &spectrumInfo,
+                          const double RCut, const double WCut, const size_t wsInd) const;
 
-  void outputParts(API::Algorithm *alg,
-                   const API::MatrixWorkspace_sptr &sumOfCounts,
+  void outputParts(API::Algorithm *alg, const API::MatrixWorkspace_sptr &sumOfCounts,
                    const API::MatrixWorkspace_sptr &sumOfNormFactors);
 
 private:

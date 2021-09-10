@@ -34,17 +34,14 @@ namespace FileDialogHandler {
  * @param options :: The options argument holds various options about how
  * to run the dialog
  */
-DLLExport QString
-getSaveFileName(QWidget *parent = nullptr,
-                const Mantid::Kernel::Property *baseProp = nullptr,
-                const QFileDialog::Options &options = nullptr);
+DLLExport QString getSaveFileName(QWidget *parent = nullptr, const Mantid::Kernel::Property *baseProp = nullptr,
+                                  const QFileDialog::Options &options = nullptr);
 
 /**
  * For file dialogs. This will add the selected extension if an extension
  * doesn't already exist.
  */
-DLLExport QString addExtension(const QString &filename,
-                               const QString &selectedFilter);
+DLLExport QString addExtension(const QString &filename, const QString &selectedFilter);
 
 DLLExport QString getFilter(const Mantid::Kernel::Property *baseProp);
 
@@ -62,8 +59,7 @@ DLLExport QString getFilter(const std::vector<std::string> &exts);
  */
 DLLExport QString formatExtension(const std::string &extension);
 
-DLLExport QString getCaption(const std::string &dialogName,
-                             const Mantid::Kernel::Property *prop);
+DLLExport QString getCaption(const std::string &dialogName, const Mantid::Kernel::Property *prop);
 } // namespace FileDialogHandler
 } // namespace API
 } // namespace MantidQt

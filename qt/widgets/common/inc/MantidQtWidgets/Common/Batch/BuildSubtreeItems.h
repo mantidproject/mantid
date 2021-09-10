@@ -23,15 +23,12 @@ namespace Batch {
 class EXPORT_OPT_MANTIDQT_COMMON BuildSubtreeItems {
 public:
   using SubtreeConstIterator = typename Subtree::const_iterator;
-  BuildSubtreeItems(QtStandardItemTreeModelAdapter &adaptedModel,
-                    RowLocationAdapter const &rowLocationAdapter);
+  BuildSubtreeItems(QtStandardItemTreeModelAdapter &adaptedModel, RowLocationAdapter const &rowLocationAdapter);
   QModelIndexForMainModel modelIndexAt(RowLocation const &parent) const;
 
-  void operator()(RowLocation const &parentOfSubtreeRoot, int index,
-                  Subtree const &subtree);
+  void operator()(RowLocation const &parentOfSubtreeRoot, int index, Subtree const &subtree);
 
-  SubtreeConstIterator buildRecursively(int index, RowLocation const &parent,
-                                        SubtreeConstIterator current,
+  SubtreeConstIterator buildRecursively(int index, RowLocation const &parent, SubtreeConstIterator current,
                                         SubtreeConstIterator end);
 
 private:

@@ -169,7 +169,7 @@ Output:
 
     X values are : [ 0.  1.  2.  3.  4.  5.]
     Y values are : [ 100.3  201.2  302.8  201.2  100.3]
-	
+
 **Example - Applying only a time zero correction**
 
 .. testcode:: ExampleTimeZero
@@ -177,15 +177,15 @@ Output:
     dataX = [0, 1, 2, 3, 4, 5] * 4
     dataY = [100, 200, 300, 200, 100] * 4
     input_workspace = CreateWorkspace(dataX, dataY, NSpec=4)
-    
+
     # Create a time zero table
     time_zero_table = CreateEmptyTableWorkspace()
     time_zero_table.addColumn("double", "time zero")
     [time_zero_table.addRow([i+2]) for i in range(4)]
-    
-    output_workspace = MuonPreProcess(InputWorkspace=input_workspace, 
+
+    output_workspace = MuonPreProcess(InputWorkspace=input_workspace,
                                       TimeZeroTable=time_zero_table)
-    
+
     print("X values are : [{:.0f}, {:.0f}, {:.0f}, {:.0f}, {:.0f}, {:.0f}]".format(
         output_workspace[0].readX(0)[0],output_workspace[0].readX(0)[1],
         output_workspace[0].readX(0)[2],output_workspace[0].readX(0)[3],
@@ -194,14 +194,14 @@ Output:
         output_workspace[0].readY(0)[0],output_workspace[0].readY(0)[1],
         output_workspace[0].readY(0)[2],output_workspace[0].readY(0)[3],
         output_workspace[0].readY(0)[4]))
-	
+
 Output:
 
 .. testoutput:: ExampleTimeZero
 
     X values are : [-2, -1, 0, 1, 2, 3]
     Y values are : [100, 200, 300, 200, 100]
-	
+
 .. categories::
 
 .. sourcelink::

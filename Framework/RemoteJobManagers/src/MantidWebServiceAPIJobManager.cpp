@@ -54,8 +54,7 @@ void MantidWebServiceAPIJobManager::abortRemoteJob(const std::string &jobID) {
  * @throws std::runtime_error if there are issues in the communication with the
  * (remote) compute resource.
  */
-void MantidWebServiceAPIJobManager::authenticate(const std::string &username,
-                                                 const std::string &password) {
+void MantidWebServiceAPIJobManager::authenticate(const std::string &username, const std::string &password) {
   MantidWebServiceAPIHelper helper;
 
   std::istream &respStream = httpGet("/authenticate", "", username, password);
@@ -102,13 +101,11 @@ void MantidWebServiceAPIJobManager::logout(const std::string &username) {
  * @throws std::runtime_error if there are file I/O issues or any
  * issues in the communication with the (remote) compute resource.
  */
-void MantidWebServiceAPIJobManager::downloadRemoteFile(
-    const std::string &transactionID, const std::string &remoteFileName,
-    const std::string &localFileName) {
+void MantidWebServiceAPIJobManager::downloadRemoteFile(const std::string &transactionID,
+                                                       const std::string &remoteFileName,
+                                                       const std::string &localFileName) {
 
-  std::istream &respStream =
-      httpGet("/download", std::string("TransID=") + transactionID +
-                               "&File=" + remoteFileName);
+  std::istream &respStream = httpGet("/download", std::string("TransID=") + transactionID + "&File=" + remoteFileName);
 
   if (lastStatus() == Poco::Net::HTTPResponse::HTTP_OK) {
 
@@ -116,8 +113,7 @@ void MantidWebServiceAPIJobManager::downloadRemoteFile(
     if (outfile.good()) {
       outfile << respStream.rdbuf();
       outfile.close();
-      g_log.information() << "Downloaded '" << remoteFileName << "' to '"
-                          << localFileName << "'\n";
+      g_log.information() << "Downloaded '" << remoteFileName << "' to '" << localFileName << "'\n";
     } else {
       throw(std::runtime_error(std::string("Failed to open " + localFileName)));
     }
@@ -140,8 +136,7 @@ void MantidWebServiceAPIJobManager::downloadRemoteFile(
  * @throws std::runtime_error if there are issues in the communication with the
  * (remote) compute resource.
  */
-std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo>
-MantidWebServiceAPIJobManager::queryAllRemoteJobs() const {
+std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> MantidWebServiceAPIJobManager::queryAllRemoteJobs() const {
 
   std::istream &respStream = httpGet(std::string("/query"));
   JSONObject resp;
@@ -249,11 +244,9 @@ MantidWebServiceAPIJobManager::queryAllRemoteJobs() const {
  * @throws std::runtime_error if there are issues in the communication with the
  * (remote) compute resource.
  */
-std::vector<std::string> MantidWebServiceAPIJobManager::queryRemoteFile(
-    const std::string &transactionID) const {
+std::vector<std::string> MantidWebServiceAPIJobManager::queryRemoteFile(const std::string &transactionID) const {
 
-  std::istream &respStream =
-      httpGet("/files", std::string("TransID=") + transactionID);
+  std::istream &respStream = httpGet("/files", std::string("TransID=") + transactionID);
   JSONObject resp;
   initFromStream(resp, respStream);
   std::vector<std::string> filenames;
@@ -375,10 +368,8 @@ std::string MantidWebServiceAPIJobManager::startRemoteTransaction() {
  * @throws std::runtime_error if there are issues in the communication with the
  * (remote) compute resource.
  */
-void MantidWebServiceAPIJobManager::stopRemoteTransaction(
-    const std::string &transId) {
-  std::istream &respStream =
-      httpGet("/transaction", std::string("Action=Stop&TransID=") + transId);
+void MantidWebServiceAPIJobManager::stopRemoteTransaction(const std::string &transId) {
+  std::istream &respStream = httpGet("/transaction", std::string("Action=Stop&TransID=") + transId);
 
   if (lastStatus() == Poco::Net::HTTPResponse::HTTP_OK) {
     g_log.information() << "Transaction ID " << transId << " stopped.\n";
@@ -411,10 +402,10 @@ void MantidWebServiceAPIJobManager::stopRemoteTransaction(
  * @throws std::runtime_error if there are issues in the communication with the
  * (remote) compute resource.
  */
-std::string MantidWebServiceAPIJobManager::submitRemoteJob(
-    const std::string &transactionID, const std::string &runnable,
-    const std::string &param, const std::string &taskName, const int numNodes,
-    const int coresPerNode) {
+std::string MantidWebServiceAPIJobManager::submitRemoteJob(const std::string &transactionID,
+                                                           const std::string &runnable, const std::string &param,
+                                                           const std::string &taskName, const int numNodes,
+                                                           const int coresPerNode) {
 
   MantidWebServiceAPIHelper::PostDataMap postData;
 
@@ -461,9 +452,9 @@ std::string MantidWebServiceAPIJobManager::submitRemoteJob(
  * @throws std::runtime_error if there are issues in the communication with the
  * (remote) compute resource, or file I/O issues.
  */
-void MantidWebServiceAPIJobManager::uploadRemoteFile(
-    const std::string &transactionID, const std::string &remoteFileName,
-    const std::string &localFileName) {
+void MantidWebServiceAPIJobManager::uploadRemoteFile(const std::string &transactionID,
+                                                     const std::string &remoteFileName,
+                                                     const std::string &localFileName) {
   MantidWebServiceAPIHelper::PostDataMap postData;
   postData["TransID"] = transactionID;
 
@@ -472,18 +463,14 @@ void MantidWebServiceAPIJobManager::uploadRemoteFile(
     // Yes, we're reading the entire file into memory.  Obviously, this is only
     // feasible for fairly small files...
     MantidWebServiceAPIHelper::PostDataMap fileData;
-    fileData[remoteFileName] =
-        std::string(std::istreambuf_iterator<char>(infile),
-                    std::istreambuf_iterator<char>());
+    fileData[remoteFileName] = std::string(std::istreambuf_iterator<char>(infile), std::istreambuf_iterator<char>());
     infile.close();
 
     std::istream &respStream = httpPost("/upload", postData, fileData);
-    if (lastStatus() ==
-        Poco::Net::HTTPResponse::HTTP_CREATED) // Upload returns a "201 -
-                                               // Created" code on success
+    if (lastStatus() == Poco::Net::HTTPResponse::HTTP_CREATED) // Upload returns a "201 -
+                                                               // Created" code on success
     {
-      g_log.information() << "Uploaded '" << remoteFileName << "' to '"
-                          << localFileName << "'\n";
+      g_log.information() << "Uploaded '" << remoteFileName << "' to '" << localFileName << "'\n";
     } else {
       JSONObject resp;
       initFromStream(resp, respStream);

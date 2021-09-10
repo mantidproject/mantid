@@ -36,11 +36,8 @@ void export_IPreview() {
 
   class_<IPreview, boost::noncopyable>("IPreview", no_init)
       .def("name", &IPreview::name, arg("self"), "Get the name of the preview.")
-      .def("facility", &IPreview::facility, arg("self"),
-           "Get the facility of the preview")
-      .def("technique", &IPreview::technique, arg("self"),
-           "Get the technique of the preview.")
+      .def("facility", &IPreview::facility, arg("self"), "Get the facility of the preview")
+      .def("technique", &IPreview::technique, arg("self"), "Get the technique of the preview.")
       .def("type", &IPreview::type, arg("self"), "Get the type of the preview.")
-      .def("view", view, (arg("self"), arg("ws")),
-           "Perform the preview operation on the workspace.");
+      .def("view", view, (arg("self"), arg("ws")), "Perform the preview operation on the workspace.");
 }

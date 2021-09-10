@@ -26,10 +26,10 @@ public:
 // and declare this global variable in the header file.
 //
 static PrintingFixture printingFixture;
- 
+
 //
 // Now define some tests
-// 
+//
 
 class FirstSuite : public CxxTest::TestSuite
 {

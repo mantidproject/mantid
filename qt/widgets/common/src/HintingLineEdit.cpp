@@ -18,9 +18,7 @@ namespace MantidWidgets {
 HintingLineEdit::HintingLineEdit(QWidget *parent, std::vector<Hint> hints)
     : QLineEdit(parent), m_hints(std::move(hints)), m_dontComplete(false) {
   m_hintLabel = new QLabel(this, Qt::ToolTip);
-  m_hintLabel->setMargin(1 +
-                         style()->pixelMetric(QStyle::PM_ToolTipLabelFrameWidth,
-                                              nullptr, m_hintLabel));
+  m_hintLabel->setMargin(1 + style()->pixelMetric(QStyle::PM_ToolTipLabelFrameWidth, nullptr, m_hintLabel));
   m_hintLabel->setFrameStyle(QFrame::StyledPanel);
   m_hintLabel->setAlignment(Qt::AlignLeft);
   m_hintLabel->setWordWrap(true);
@@ -30,8 +28,7 @@ HintingLineEdit::HintingLineEdit(QWidget *parent, std::vector<Hint> hints)
   m_hintLabel->setBackgroundRole(QPalette::ToolTipBase);
   m_hintLabel->ensurePolished();
 
-  connect(this, SIGNAL(textEdited(const QString &)), this,
-          SLOT(updateHints(const QString &)));
+  connect(this, SIGNAL(textEdited(const QString &)), this, SLOT(updateHints(const QString &)));
   connect(this, SIGNAL(editingFinished()), this, SLOT(hideHints()));
 }
 
@@ -42,8 +39,7 @@ HintingLineEdit::~HintingLineEdit() {}
     @param e : A pointer to the event
  */
 void HintingLineEdit::keyPressEvent(QKeyEvent *e) {
-  m_dontComplete = (e->key() == Qt::Key_Backspace ||
-                    e->key() == Qt::Key_Delete || e->key() == Qt::Key_Space);
+  m_dontComplete = (e->key() == Qt::Key_Backspace || e->key() == Qt::Key_Delete || e->key() == Qt::Key_Space);
 
   if (e->key() == Qt::Key_Up) {
     prevSuggestion();
@@ -96,13 +92,11 @@ void HintingLineEdit::hideHints() { m_hintLabel->hide(); }
 /** Updates the list of hints matching the user's current input */
 void HintingLineEdit::updateMatches() {
   m_matches.clear();
-  std::copy_if(m_hints.cbegin(), m_hints.cend(), std::back_inserter(m_matches),
-               [this](Hint const &hint) -> bool {
-                 auto &hintWord = hint.word();
-                 return hintWord.length() >= m_currentPrefix.length() &&
-                        hintWord.substr(0, m_currentPrefix.length()) ==
-                            m_currentPrefix;
-               });
+  std::copy_if(m_hints.cbegin(), m_hints.cend(), std::back_inserter(m_matches), [this](Hint const &hint) -> bool {
+    auto &hintWord = hint.word();
+    return hintWord.length() >= m_currentPrefix.length() &&
+           hintWord.substr(0, m_currentPrefix.length()) == m_currentPrefix;
+  });
   m_match = m_matches.cbegin();
 }
 
@@ -128,8 +122,7 @@ void HintingLineEdit::showToolTip() {
 /** Insert an auto completion suggestion beneath the user's cursor and select it
  */
 void HintingLineEdit::insertSuggestion() {
-  if (m_currentPrefix.empty() || m_matches.empty() ||
-      m_match == m_matches.cend() || m_dontComplete)
+  if (m_currentPrefix.empty() || m_matches.empty() || m_match == m_matches.cend() || m_dontComplete)
     return;
 
   QString line = text();
@@ -140,9 +133,7 @@ void HintingLineEdit::insertSuggestion() {
     return;
 
   // Insert a suggestion under the cursor, then select it
-  line = line.left(curPos) +
-         QString::fromStdString((*m_match).word())
-             .mid(static_cast<int>(m_currentPrefix.size())) +
+  line = line.left(curPos) + QString::fromStdString((*m_match).word()).mid(static_cast<int>(m_currentPrefix.size())) +
          line.mid(curPos);
 
   setText(line);
@@ -156,8 +147,7 @@ void HintingLineEdit::clearSuggestion() {
 
   // Carefully cut out the selected text
   QString line = text();
-  line = line.left(selectionStart()) +
-         line.mid(selectionStart() + selectedText().length());
+  line = line.left(selectionStart()) + line.mid(selectionStart() + selectedText().length());
   setText(line);
 }
 

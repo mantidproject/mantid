@@ -20,9 +20,7 @@ namespace MantidWidgets {
  * Constructs a blank message with notice priority
  * (here to satisfy Qt meta-type system)
  */
-Message::Message()
-    : QObject(), m_text(), m_priority(Priority::PRIO_NOTICE), m_scriptPath("") {
-}
+Message::Message() : QObject(), m_text(), m_priority(Priority::PRIO_NOTICE), m_scriptPath("") {}
 
 /**
  * @param text A QString containing the message text
@@ -30,10 +28,8 @@ Message::Message()
  * @param scriptPath The path of the script the message originated from. Empty
  * string if no script applicable
  */
-Message::Message(const QString &text, Priority priority,
-                 const QString &scriptPath)
-    : QObject(), m_text(text), m_priority(priority),
-      m_scriptPath(std::move(scriptPath)) {}
+Message::Message(const QString &text, Priority priority, const QString &scriptPath)
+    : QObject(), m_text(text), m_priority(priority), m_scriptPath(std::move(scriptPath)) {}
 
 /**
  * @param text A std::string containing the message text
@@ -41,10 +37,8 @@ Message::Message(const QString &text, Priority priority,
  * @param scriptPath The path of the script the message originated from. Empty
  * string if no script applicable
  */
-Message::Message(const std::string &text, Priority priority,
-                 const QString &scriptPath)
-    : QObject(), m_text(QString::fromStdString(text)), m_priority(priority),
-      m_scriptPath(std::move(scriptPath)) {}
+Message::Message(const std::string &text, Priority priority, const QString &scriptPath)
+    : QObject(), m_text(QString::fromStdString(text)), m_priority(priority), m_scriptPath(std::move(scriptPath)) {}
 
 /**
  * @param text A c-style string containing the message text
@@ -53,15 +47,13 @@ Message::Message(const std::string &text, Priority priority,
  * string if no script applicable
  */
 Message::Message(const char *text, Priority priority, const QString &scriptPath)
-    : QObject(), m_text(text), m_priority(priority),
-      m_scriptPath(std::move(scriptPath)) {}
+    : QObject(), m_text(text), m_priority(priority), m_scriptPath(std::move(scriptPath)) {}
 
 /**
  * Construct a message from another object
  */
 Message::Message(const Message &msg)
-    : QObject(), m_text(msg.text()), m_priority(msg.priority()),
-      m_scriptPath(msg.scriptPath()) {}
+    : QObject(), m_text(msg.text()), m_priority(msg.priority()), m_scriptPath(msg.scriptPath()) {}
 
 /**
  * Construct a message from another object through assignment

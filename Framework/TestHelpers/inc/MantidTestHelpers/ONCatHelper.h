@@ -28,8 +28,7 @@ namespace TestHelpers {
 
 using MockResponseMap = std::map<std::string, std::pair<int, std::string>>;
 using MockResponseCallCounts = std::map<std::string, unsigned int>;
-using MockResponseCallMapping =
-    std::pair<const std::basic_string<char>, unsigned int>;
+using MockResponseCallMapping = std::pair<const std::basic_string<char>, unsigned int>;
 
 class MockONCatAPI : public Mantid::Kernel::InternetHelper {
 public:
@@ -41,21 +40,17 @@ public:
   bool allResponsesCalled() const;
 
 protected:
-  int sendHTTPRequest(const std::string &url,
-                      std::ostream &responseStream) override;
-  int sendHTTPSRequest(const std::string &url,
-                       std::ostream &responseStream) override;
+  int sendHTTPRequest(const std::string &url, std::ostream &responseStream) override;
+  int sendHTTPSRequest(const std::string &url, std::ostream &responseStream) override;
 
 private:
   MockResponseMap m_responseMap;
   MockResponseCallCounts m_responseCallCounts;
 };
 
-std::shared_ptr<MockONCatAPI>
-make_mock_oncat_api(const MockResponseMap &responseMap);
+std::shared_ptr<MockONCatAPI> make_mock_oncat_api(const MockResponseMap &responseMap);
 
-std::unique_ptr<ONCat>
-make_oncat_with_mock_api(const std::shared_ptr<MockONCatAPI> &mockAPI);
+std::unique_ptr<ONCat> make_oncat_with_mock_api(const std::shared_ptr<MockONCatAPI> &mockAPI);
 
 class MockTokenStore : public IOAuthTokenStore {
 public:

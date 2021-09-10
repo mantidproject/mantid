@@ -19,9 +19,7 @@ class ConvexPolygonIteratorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ConvexPolygonIteratorTest *createSuite() {
-    return new ConvexPolygonIteratorTest();
-  }
+  static ConvexPolygonIteratorTest *createSuite() { return new ConvexPolygonIteratorTest(); }
   static void destroySuite(ConvexPolygonIteratorTest *suite) { delete suite; }
 
   // --------------------- Success cases --------------------------------------
@@ -75,8 +73,7 @@ public:
     // TS_ASSERT_THROWS cannot be used if there is no default constructor
     // so use a pointer instead
     ConvexPolygon::Iterator *iter(nullptr);
-    TS_ASSERT_THROWS(iter = new ConvexPolygon::Iterator(invalid),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(iter = new ConvexPolygon::Iterator(invalid), const std::invalid_argument &);
     delete iter;
   }
 

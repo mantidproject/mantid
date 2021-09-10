@@ -23,6 +23,7 @@
 #include <QApplication>
 #include <QDir>
 #include <QFileInfo>
+#include <algorithm>
 #include <sstream>
 
 namespace {
@@ -31,32 +32,28 @@ const int RUNS_WARNING_LIMIT = 200;
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-
 using namespace MantidQt::API;
+using namespace MantidQt::MantidWidgets;
 
 namespace MantidQt {
 namespace CustomInterfaces {
 ALCDataLoadingPresenter::ALCDataLoadingPresenter(IALCDataLoadingView *view)
-    : m_view(view), m_numDetectors(0), m_loadingData(false),
-      m_directoryChanged(false), m_timerID(), m_lastRunLoadedAuto(-2),
-      m_filesLoaded(), m_wasLastAutoRange(false), m_previousFirstRun("") {}
+    : m_view(view), m_periodInfo(std::make_unique<MuonPeriodInfo>()), m_numDetectors(0), m_loadingData(false),
+      m_directoryChanged(false), m_timerID(), m_lastRunLoadedAuto(-2), m_filesLoaded(), m_wasLastAutoRange(false),
+      m_previousFirstRun("") {}
 
 void ALCDataLoadingPresenter::initialize() {
   m_view->initialize();
 
   connect(m_view, SIGNAL(loadRequested()), SLOT(handleLoadRequested()));
-  connect(m_view, SIGNAL(instrumentChangedSignal(std::string)),
-          SLOT(handleInstrumentChanged(std::string)));
+  connect(m_view, SIGNAL(instrumentChangedSignal(std::string)), SLOT(handleInstrumentChanged(std::string)));
   connect(m_view, SIGNAL(runsEditingSignal()), SLOT(handleRunsEditing()));
-  connect(m_view, SIGNAL(runsEditingFinishedSignal()),
-          SLOT(handleRunsEditingFinished()));
-  connect(m_view, SIGNAL(manageDirectoriesClicked()),
-          SLOT(handleManageDirectories()));
+  connect(m_view, SIGNAL(runsEditingFinishedSignal()), SLOT(handleRunsEditingFinished()));
+  connect(m_view, SIGNAL(manageDirectoriesClicked()), SLOT(handleManageDirectories()));
   connect(m_view, SIGNAL(runsFoundSignal()), SLOT(handleRunsFound()));
-  connect(m_view, SIGNAL(autoAddToggledSignal(bool)),
-          SLOT(startWatching(bool)));
-  connect(&m_watcher, SIGNAL(directoryChanged(const QString &)),
-          SLOT(updateDirectoryChangedFlag(const QString &)));
+  connect(m_view, SIGNAL(autoAddToggledSignal(bool)), SLOT(startWatching(bool)));
+  connect(m_view, SIGNAL(periodInfoClicked()), SLOT(handlePeriodInfoClicked()));
+  connect(&m_watcher, SIGNAL(directoryChanged(const QString &)), SLOT(updateDirectoryChangedFlag(const QString &)));
 }
 
 void ALCDataLoadingPresenter::handleRunsEditing() {
@@ -68,12 +65,7 @@ void ALCDataLoadingPresenter::handleRunsEditingFinished() {
   // Make sure everything is reset
   m_view->enableRunsAutoAdd(false);
 
-  if (m_previousFirstRun !=
-      m_view->getInstrument() + m_view->getRunsFirstRunText())
-    m_view->setAvailableInfoToEmpty();
-
-  m_view->setLoadStatus(
-      "Finding " + m_view->getInstrument() + m_view->getRunsText(), "orange");
+  m_view->setLoadStatus("Finding " + m_view->getInstrument() + m_view->getRunsText(), "orange");
   m_view->enableAlpha(false);
   m_view->setAlphaValue("");
   m_view->showAlphaMessage(false);
@@ -86,7 +78,7 @@ void ALCDataLoadingPresenter::handleRunsFound() {
     return;
   }
 
-  // Check for errors as files might not have been found
+  // Check for errors
   if (!m_view->getRunsError().empty()) {
     m_view->setLoadStatus("Error", "red");
     m_view->displayError(m_view->getRunsError());
@@ -97,14 +89,12 @@ void ALCDataLoadingPresenter::handleRunsFound() {
   try {
     updateAvailableInfo();
     m_view->enableLoad(true);
-    m_view->setLoadStatus("Successfully found " + m_view->getInstrument() +
-                              m_view->getRunsText(),
-                          "green");
-    m_previousFirstRun =
-        m_view->getInstrument() + m_view->getRunsFirstRunText();
-  } catch (const std::runtime_error &errroUpdateInfo) {
+    m_view->setLoadStatus("Successfully found " + m_view->getInstrument() + m_view->getRunsText(), "green");
+    m_previousFirstRun = m_view->getInstrument() + m_view->getRunsFirstRunText();
+  } catch (const std::runtime_error &errorUpdateInfo) {
     m_view->setLoadStatus("Error", "red");
-    m_view->displayError(errroUpdateInfo.what());
+    m_view->displayError(errorUpdateInfo.what());
+    m_periodInfo->clear();
   }
 }
 
@@ -126,21 +116,17 @@ void ALCDataLoadingPresenter::handleLoadRequested() {
 
   // Warning message if trying to load excessive number of files
   if (files.size() > RUNS_WARNING_LIMIT) {
-    auto continueLoad = m_view->displayWarning(
-        "You are attempting to load " + std::to_string(files.size()) +
-        " runs, are you sure you want to do this?");
+    auto continueLoad = m_view->displayWarning("You are attempting to load " + std::to_string(files.size()) +
+                                               " runs, are you sure you want to do this?");
     if (!continueLoad)
       return;
   }
 
-  m_view->setLoadStatus(
-      "Loading " + m_view->getInstrument() + m_view->getRunsText(), "orange");
+  m_view->setLoadStatus("Loading " + m_view->getInstrument() + m_view->getRunsText(), "orange");
   try {
     load(files);
     m_filesLoaded = files;
-    m_view->setLoadStatus("Successfully loaded " + m_view->getInstrument() +
-                              m_view->getRunsText(),
-                          "green");
+    m_view->setLoadStatus("Successfully loaded " + m_view->getInstrument() + m_view->getRunsText(), "green");
     m_view->enableRunsAutoAdd(true);
 
     // If alpha empty, default used is 1 so update interface
@@ -170,8 +156,7 @@ int ALCDataLoadingPresenter::extractRunNumber(const std::string &file) {
   returnVal = returnVal.substr(found + 1);
 
   // Remove all non-digits
-  returnVal.erase(std::remove_if(returnVal.begin(), returnVal.end(),
-                                 [](auto c) { return !std::isdigit(c); }),
+  returnVal.erase(std::remove_if(returnVal.begin(), returnVal.end(), [](auto c) { return !std::isdigit(c); }),
                   returnVal.end());
 
   // Return run number as int (removes leading 0's)
@@ -189,14 +174,12 @@ void ALCDataLoadingPresenter::load(const std::vector<std::string> &files) {
   // Before loading, check custom grouping (if used) is sensible
   const bool groupingOK = checkCustomGrouping();
   if (!groupingOK) {
-    throw std::runtime_error(
-        "Custom grouping not valid (bad format or detector numbers)");
+    throw std::runtime_error("Custom grouping not valid (bad format or detector numbers)");
   }
 
   try {
-    IAlgorithm_sptr alg =
-        AlgorithmManager::Instance().create("PlotAsymmetryByLogValue");
-    alg->setChild(true); // Don't want workspaces in the ADS
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("PlotAsymmetryByLogValue");
+    alg->setAlwaysStoreInADS(false); // Don't want workspaces in the ADS
 
     // Change first last run to WorkspaceNames
     alg->setProperty("WorkspaceNames", files);
@@ -251,7 +234,7 @@ void ALCDataLoadingPresenter::load(const std::vector<std::string> &files) {
 
     MatrixWorkspace_sptr tmp = alg->getProperty("OutputWorkspace");
     IAlgorithm_sptr sortAlg = AlgorithmManager::Instance().create("SortXAxis");
-    sortAlg->setChild(true); // Don't want workspaces in the ADS
+    sortAlg->setAlwaysStoreInADS(false); // Don't want workspaces in the ADS
     sortAlg->setProperty("InputWorkspace", tmp);
     sortAlg->setProperty("Ordering", "Ascending");
     sortAlg->setProperty("OutputWorkspace", "__NotUsed__");
@@ -289,8 +272,7 @@ void ALCDataLoadingPresenter::updateAvailableInfo() {
 
   try //... to load the first run
   {
-    IAlgorithm_sptr loadAlg =
-        AlgorithmManager::Instance().create("LoadMuonNexus");
+    IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("LoadMuonNexus");
     loadAlg->setChild(true); // Don't want workspaces in the ADS
 
     // We need logs only but we have to use LoadMuonNexus
@@ -305,18 +287,17 @@ void ALCDataLoadingPresenter::updateAvailableInfo() {
     loadedWs = loadAlg->getProperty("OutputWorkspace");
     firstGoodData = loadAlg->getProperty("FirstGoodData");
     timeZero = loadAlg->getProperty("TimeZero");
-
-    // Get actual file path and set on view
-    auto path = loadAlg->getPropertyValue("Filename");
-    path = path.substr(0, path.find_last_of("/\\"));
-    m_view->setPath(path);
-  } catch (const std::exception &error) {
+  }
+  catch (const std::exception &error) {
     m_view->setAvailableInfoToEmpty();
     throw std::runtime_error(error.what());
   }
 
+  // Set path
+  m_view->setPath(getPathFromFiles());
+
   // Set logs
-  MatrixWorkspace_const_sptr ws = MuonAnalysisHelper::firstPeriod(loadedWs);
+  const MatrixWorkspace_sptr ws = MuonAnalysisHelper::firstPeriod(loadedWs);
   std::vector<std::string> logs;
 
   const auto &properties = ws->run().getProperties();
@@ -325,8 +306,16 @@ void ALCDataLoadingPresenter::updateAvailableInfo() {
   }
 
   // sort alphabetically
-  std::sort(logs.begin(), logs.end(), [](std::string &logA, std::string &logB) {
-    return std::tolower(logA[0]) < std::tolower(logB[0]);
+  // cannot use standard sort alone as some logs are capitalised and some are
+  // not
+  std::sort(logs.begin(), logs.end(), [](const auto &log1, const auto &log2) {
+    // compare logs char by char and return pair of non-equal elements
+    const auto result =
+        std::mismatch(log1.cbegin(), log1.cend(), log2.cbegin(), log2.cend(),
+                      [](const auto &lhs, const auto &rhs) { return std::tolower(lhs) == std::tolower(rhs); });
+    // compare the two elements to decide which log should go first
+    return result.second != log2.cend() &&
+           (result.first == log1.cend() || std::tolower(*result.first) < std::tolower(*result.second));
   });
 
   m_view->setAvailableLogs(logs);
@@ -351,16 +340,31 @@ void ALCDataLoadingPresenter::updateAvailableInfo() {
     m_view->showAlphaMessage(true);
   }
 
+  // Update available period info
+  updateAvailablePeriodInfo(ws);
+
   // Set time limits if this is the first data loaded (will both be zero)
   if (auto timeLimits = m_view->timeRange()) {
-    if (std::abs(timeLimits->first) < 0.0001 &&
-        std::abs(timeLimits->second) < 0.0001) {
+    if (std::abs(timeLimits->first) < 0.0001 && std::abs(timeLimits->second) < 0.0001) {
       m_view->setTimeLimits(firstGoodData - timeZero, ws->x(0).back());
     }
   }
 
   // Update number of detectors for this new first run
   m_numDetectors = ws->getInstrument()->getNumberDetectors();
+}
+
+std::string ALCDataLoadingPresenter::getPathFromFiles() const {
+  const auto files = m_view->getFiles();
+  if (files.empty())
+    return "";
+  const auto firstDirectory = files[0u].substr(0u, files[0u].find_last_of("/\\"));
+  // Lambda to compare directories from a path
+  const auto hasSameDirectory = [&firstDirectory](const auto &path) {
+    return path.substr(0u, path.find_last_of("/\\")) == firstDirectory;
+  };
+  const auto sameDirectory = std::all_of(files.cbegin(), files.cend(), hasSameDirectory);
+  return sameDirectory ? firstDirectory : "Multiple Directories";
 }
 
 MatrixWorkspace_sptr ALCDataLoadingPresenter::exportWorkspace() {
@@ -389,18 +393,16 @@ void ALCDataLoadingPresenter::setData(const MatrixWorkspace_sptr &data) {
 bool ALCDataLoadingPresenter::checkCustomGrouping() {
   bool groupingOK = true;
   if (m_view->detectorGroupingType() == "Custom") {
-    auto detectors = Mantid::Kernel::Strings::parseRange(
-        isCustomGroupingValid(m_view->getForwardGrouping(), groupingOK));
-    const auto backward = Mantid::Kernel::Strings::parseRange(
-        isCustomGroupingValid(m_view->getBackwardGrouping(), groupingOK));
+    auto detectors =
+        Mantid::Kernel::Strings::parseRange(isCustomGroupingValid(m_view->getForwardGrouping(), groupingOK));
+    const auto backward =
+        Mantid::Kernel::Strings::parseRange(isCustomGroupingValid(m_view->getBackwardGrouping(), groupingOK));
     if (!groupingOK) {
       return false;
     }
     detectors.insert(detectors.end(), backward.begin(), backward.end());
     if (std::any_of(detectors.cbegin(), detectors.cend(),
-                    [this](const auto det) {
-                      return det < 0 || det > static_cast<int>(m_numDetectors);
-                    })) {
+                    [this](const auto det) { return det < 0 || det > static_cast<int>(m_numDetectors); })) {
       groupingOK = false;
     }
   }
@@ -413,11 +415,8 @@ bool ALCDataLoadingPresenter::checkCustomGrouping() {
  * @param isValid :: bool to say if the string is valid
  * @returns :: True if grouping OK, false if bad
  */
-std::string
-ALCDataLoadingPresenter::isCustomGroupingValid(const std::string &group,
-                                               bool &isValid) {
-  if (!std::isdigit(group[0]) ||
-      std::any_of(std::begin(group), std::end(group), ::isalpha)) {
+std::string ALCDataLoadingPresenter::isCustomGroupingValid(const std::string &group, bool &isValid) {
+  if (!std::isdigit(group[0]) || std::any_of(std::begin(group), std::end(group), ::isalpha)) {
     isValid = false;
     return "";
   }
@@ -507,8 +506,7 @@ void ALCDataLoadingPresenter::timerEvent(QTimerEvent *timeup) {
     if (!isLoading()) {
       // add to list set text with search
       const auto oldRuns = m_view->getFiles();
-      if (std::find(oldRuns.begin(), oldRuns.end(), latestFile) ==
-          oldRuns.end()) {
+      if (std::find(oldRuns.begin(), oldRuns.end(), latestFile) == oldRuns.end()) {
         // Get old text
         auto newText = m_view->getRunsText();
 
@@ -554,6 +552,29 @@ void ALCDataLoadingPresenter::timerEvent(QTimerEvent *timeup) {
       m_directoryChanged = false;
     }
   }
+}
+
+/**
+ * Called when a user presses the Period Info button
+ * Shows the widget, if the widget is already on show raise to the top
+ */
+void ALCDataLoadingPresenter::handlePeriodInfoClicked() {
+  m_periodInfo->show();
+  m_periodInfo->raise();
+}
+
+/**
+ * Update the Muon Period Info widget with the latest period info from the given workspace
+ * @param ws :: The workspace to read the period info from
+ */
+void ALCDataLoadingPresenter::updateAvailablePeriodInfo(const MatrixWorkspace_sptr &ws) {
+
+  // Clear any current information
+  m_periodInfo->clear();
+
+  // Read in all logs and add to widget
+  m_periodInfo->addInfo(ws);
+  m_periodInfo->setWidgetTitleRuns(m_view->getInstrument() + m_view->getRunsText());
 }
 
 } // namespace CustomInterfaces

@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "TestGroupDataListener.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
@@ -45,8 +44,7 @@ int TestGroupDataListener::runNumber() const { return 0; }
 
 void TestGroupDataListener::setSpectra(const std::vector<specnum_t> &) {}
 
-void TestGroupDataListener::start(
-    Types::Core::DateAndTime /*startTime*/) // Ignore the start time
+void TestGroupDataListener::start(Types::Core::DateAndTime /*startTime*/) // Ignore the start time
 {}
 
 /** Create the default empty event workspace */

@@ -8,6 +8,11 @@
 
 #include "DllOption.h"
 #include "IFitScriptGeneratorView.h"
+#include "MantidQtWidgets/Common/FittingGlobals.h"
+#include "MantidQtWidgets/Common/FittingMode.h"
+
+#include <string>
+#include <vector>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -18,9 +23,15 @@ class EXPORT_OPT_MANTIDQT_COMMON IFitScriptGeneratorPresenter {
 public:
   virtual ~IFitScriptGeneratorPresenter() = default;
 
-  virtual void notifyPresenter(ViewEvent const &event) = 0;
+  virtual void notifyPresenter(ViewEvent const &event, [[maybe_unused]] std::string const &arg1 = "",
+                               [[maybe_unused]] std::string const &arg2 = "") = 0;
+  virtual void notifyPresenter(ViewEvent const &event, std::vector<std::string> const &vec) = 0;
+  virtual void notifyPresenter(ViewEvent const &event, FittingMode fittingMode) = 0;
 
   virtual void openFitScriptGenerator() = 0;
+
+  virtual void setGlobalTies(std::vector<MantidQt::MantidWidgets::GlobalTie> const &globalTies) = 0;
+  virtual void setGlobalParameters(std::vector<MantidQt::MantidWidgets::GlobalParameter> const &globalParameters) = 0;
 };
 
 } // namespace MantidWidgets

@@ -16,6 +16,7 @@
 #include "MantidCrystal/FindUBUsingLatticeParameters.h"
 #include "MantidCrystal/LoadIsawUB.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"
+#include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 
@@ -28,12 +29,8 @@ using namespace Mantid::Kernel;
 
 class FindUBUsingLatticeParametersTest : public CxxTest::TestSuite {
 public:
-  static FindUBUsingLatticeParametersTest *createSuite() {
-    return new FindUBUsingLatticeParametersTest();
-  }
-  static void destroySuite(FindUBUsingLatticeParametersTest *suite) {
-    delete suite;
-  }
+  static FindUBUsingLatticeParametersTest *createSuite() { return new FindUBUsingLatticeParametersTest(); }
+  static void destroySuite(FindUBUsingLatticeParametersTest *suite) { delete suite; }
 
   FindUBUsingLatticeParametersTest() { m_ws = loadPeaksWorkspace(); }
 
@@ -53,8 +50,7 @@ public:
     FindUBUsingLatticeParameters alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("PeaksWorkspace", m_ws->getName()));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PeaksWorkspace", m_ws->getName()));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("a", "14.131"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("b", "19.247"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("c", "8.606"));
@@ -71,9 +67,63 @@ public:
     // Check that the UB matrix is the same as in TOPAZ_3007.mat
     OrientedLattice latt = m_ws->mutableSample().getOrientedLattice();
 
-    double correct_UB[] = {0.04542050,  0.040619900, 0.0122354,
-                           -0.00140347, -0.00318493, -0.1165450,
-                           -0.05749760, 0.03223800,  -0.0273738};
+    double correct_UB[] = {0.04542050, 0.040619900, 0.0122354,  -0.00140347, -0.00318493,
+                           -0.1165450, -0.05749760, 0.03223800, -0.0273738};
+
+    std::vector<double> UB_calculated = latt.getUB().getVector();
+
+    for (size_t i = 0; i < 9; i++) {
+      TS_ASSERT_DELTA(correct_UB[i], UB_calculated[i], 5e-4);
+    }
+
+    TS_ASSERT_DELTA(latt.a(), 14.131, 5e-4);
+    TS_ASSERT_DELTA(latt.b(), 19.247, 5e-4);
+    TS_ASSERT_DELTA(latt.c(), 8.606, 5e-4);
+
+    TS_ASSERT_DELTA(latt.alpha(), 90.0, 5e-1);
+    TS_ASSERT_DELTA(latt.beta(), 105.071, 5e-1);
+    TS_ASSERT_DELTA(latt.gamma(), 90.0, 5e-1);
+
+    // Check errors
+    TS_ASSERT_DELTA(latt.errora(), 0.0134, 5e-4);
+    TS_ASSERT_DELTA(latt.errorb(), 0.0243, 5e-4);
+    TS_ASSERT_DELTA(latt.errorc(), 0.0101, 5e-4);
+
+    TS_ASSERT_DELTA(latt.erroralpha(), 0.0994, 5e-4);
+    TS_ASSERT_DELTA(latt.errorbeta(), 0.0773, 5e-4);
+    TS_ASSERT_DELTA(latt.errorgamma(), 0.0906, 5e-4);
+  }
+
+  void test_exec_LeanElasticPeak() {
+
+    // Convert PeaksWorkspace to LeanElasticPeaksWorkspace
+    auto lpw = std::make_shared<LeanElasticPeaksWorkspace>();
+    for (auto peak : m_ws->getPeaks())
+      lpw->addPeak(peak);
+    AnalysisDataService::Instance().addOrReplace("leanpeaksWS", lpw);
+
+    FindUBUsingLatticeParameters alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PeaksWorkspace", lpw->getName()));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("a", "14.131"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("b", "19.247"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("c", "8.606"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("alpha", "90.0"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("beta", "105.071"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("gamma", "90.0"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("NumInitial", "15"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Tolerance", "0.12"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted());
+
+    // Check that we set an oriented lattice
+    TS_ASSERT(lpw->mutableSample().hasOrientedLattice());
+    // Check that the UB matrix is the same as in TOPAZ_3007.mat
+    OrientedLattice latt = lpw->mutableSample().getOrientedLattice();
+
+    double correct_UB[] = {0.04542050, 0.040619900, 0.0122354,  -0.00140347, -0.00318493,
+                           -0.1165450, -0.05749760, 0.03223800, -0.0273738};
 
     std::vector<double> UB_calculated = latt.getUB().getVector();
 
@@ -103,8 +153,7 @@ public:
     FindUBUsingLatticeParameters alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("PeaksWorkspace", m_ws->getName()));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PeaksWorkspace", m_ws->getName()));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("a", "14.131"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("b", "19.247"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("c", "8.606"));
@@ -122,9 +171,8 @@ public:
     // Check that the UB matrix is the same as in TOPAZ_3007.mat
     OrientedLattice latt = m_ws->mutableSample().getOrientedLattice();
 
-    double correct_UB[] = {0.04542050,  0.040619900, 0.0127661,
-                           -0.00198382, -0.00264404, -0.1165450,
-                           -0.05749760, 0.03223800,  -0.0257623};
+    double correct_UB[] = {0.04542050, 0.040619900, 0.0127661,  -0.00198382, -0.00264404,
+                           -0.1165450, -0.05749760, 0.03223800, -0.0257623};
 
     std::vector<double> UB_calculated = latt.getUB().getVector();
 
@@ -159,8 +207,7 @@ public:
     FindUBUsingLatticeParameters alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("PeaksWorkspace", m_ws->getName()));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PeaksWorkspace", m_ws->getName()));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("a", "14.131"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("b", "19.247"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("c", "8.606"));
@@ -178,8 +225,7 @@ public:
     // Check that the UB matrix is the same as in TOPAZ_3007.mat
     OrientedLattice latt = m_ws->mutableSample().getOrientedLattice();
 
-    double correct_UB[] = {0.0450,  0.0407,  0.0127, -0.0008, -0.0044,
-                           -0.1158, -0.0584, 0.0307, -0.0242};
+    double correct_UB[] = {0.0450, 0.0407, 0.0127, -0.0008, -0.0044, -0.1158, -0.0584, 0.0307, -0.0242};
 
     std::vector<double> UB_calculated = latt.getUB().getVector();
 
@@ -211,8 +257,7 @@ private:
 
     PeaksWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(
-        ws = std::dynamic_pointer_cast<PeaksWorkspace>(
-            AnalysisDataService::Instance().retrieve(WSName)));
+        ws = std::dynamic_pointer_cast<PeaksWorkspace>(AnalysisDataService::Instance().retrieve(WSName)));
     TS_ASSERT(ws);
     return ws;
   }

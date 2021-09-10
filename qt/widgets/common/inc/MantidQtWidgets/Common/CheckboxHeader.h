@@ -27,8 +27,7 @@ class EXPORT_OPT_MANTIDQT_COMMON CheckboxHeader : public QHeaderView {
 
 public:
   /// Override QHeaderView constructor.
-  explicit CheckboxHeader(Qt::Orientation orientation,
-                          QWidget *parent = nullptr);
+  explicit CheckboxHeader(Qt::Orientation orientation, QWidget *parent = nullptr);
   void setChecked(bool checked);
 
 signals:
@@ -37,8 +36,7 @@ signals:
 protected:
   /// Overrides QHeaderView allowing checkbox functionality in the first column
   /// of the table.
-  void paintSection(QPainter *painter, const QRect &rect,
-                    int logicalIndex) const override;
+  void paintSection(QPainter *painter, const QRect &rect, int logicalIndex) const override;
   /// Set the checkbox to checked when it is clicked.
   void mousePressEvent(QMouseEvent *event) override;
 

@@ -14,8 +14,7 @@ namespace API {
 /// Returns a clone of the workspace
 /// @param colNames :: Names of the column to clone. If empty clone
 ///   all columns.
-ITableWorkspace_uptr
-ITableWorkspace::cloneColumns(const std::vector<std::string> &colNames) const {
+ITableWorkspace_uptr ITableWorkspace::cloneColumns(const std::vector<std::string> &colNames) const {
   return ITableWorkspace_uptr(doCloneColumns(colNames));
 }
 
@@ -34,8 +33,7 @@ const std::string ITableWorkspace::toString() const {
  * @param n :: The number of columns to create
  * @return True if the column was successfully added
  */
-bool ITableWorkspace::addColumns(const std::string &type,
-                                 const std::string &name, size_t n) {
+bool ITableWorkspace::addColumns(const std::string &type, const std::string &name, size_t n) {
   bool ok = true;
   for (size_t i = 0; i < n; i++) {
     std::ostringstream ostr;
@@ -56,17 +54,14 @@ TableRowHelper ITableWorkspace::appendRow() {
  * @param name :: The name of the column
  * @returns The named column
  */
-TableColumnHelper ITableWorkspace::getVector(const std::string &name) {
-  return TableColumnHelper(this, name);
-}
+TableColumnHelper ITableWorkspace::getVector(const std::string &name) { return TableColumnHelper(this, name); }
 
 /**
  * Access the column with name \c name trough a ColumnVector object (const)
  * @param name :: The name of the column
  * @returns The named column
  */
-TableConstColumnHelper
-ITableWorkspace::getVector(const std::string &name) const {
+TableConstColumnHelper ITableWorkspace::getVector(const std::string &name) const {
   return TableConstColumnHelper(this, name);
 }
 
@@ -83,8 +78,7 @@ void ITableWorkspace::modified() {
   if (!tws)
     return;
   AnalysisDataService::Instance().notificationCenter.postNotification(
-      new Kernel::DataService<API::Workspace>::AfterReplaceNotification(
-          this->getName(), tws));
+      new Kernel::DataService<API::Workspace>::AfterReplaceNotification(this->getName(), tws));
 }
 
 /** Overridable method to custom-sort the workspace
@@ -95,8 +89,7 @@ void ITableWorkspace::modified() {
  *equal, etc.
  * @throw std::runtime_error unless overridden
  */
-void ITableWorkspace::sort(
-    std::vector<std::pair<std::string, bool>> &criteria) {
+void ITableWorkspace::sort(std::vector<std::pair<std::string, bool>> &criteria) {
   UNUSED_ARG(criteria);
   throw std::runtime_error("This type of ITableWorkspace (" + this->id() +
                            ") has not implemented sort() yet customSort() "
@@ -111,32 +104,26 @@ namespace Mantid {
 namespace Kernel {
 template <>
 MANTID_API_DLL API::ITableWorkspace_sptr
-IPropertyManager::getValue<API::ITableWorkspace_sptr>(
-    const std::string &name) const {
-  auto *prop = dynamic_cast<PropertyWithValue<API::ITableWorkspace_sptr> *>(
-      getPointerToProperty(name));
+IPropertyManager::getValue<API::ITableWorkspace_sptr>(const std::string &name) const {
+  auto *prop = dynamic_cast<PropertyWithValue<API::ITableWorkspace_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return *prop;
   } else {
     std::string message =
-        "Attempt to assign property " + name +
-        " to incorrect type. Expected shared_ptr<ITableWorkspace>";
+        "Attempt to assign property " + name + " to incorrect type. Expected shared_ptr<ITableWorkspace>";
     throw std::runtime_error(message);
   }
 }
 
 template <>
 MANTID_API_DLL API::ITableWorkspace_const_sptr
-IPropertyManager::getValue<API::ITableWorkspace_const_sptr>(
-    const std::string &name) const {
-  auto *prop = dynamic_cast<PropertyWithValue<API::ITableWorkspace_sptr> *>(
-      getPointerToProperty(name));
+IPropertyManager::getValue<API::ITableWorkspace_const_sptr>(const std::string &name) const {
+  auto *prop = dynamic_cast<PropertyWithValue<API::ITableWorkspace_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return prop->operator()();
   } else {
     std::string message =
-        "Attempt to assign property " + name +
-        " to incorrect type. Expected const shared_ptr<ITableWorkspace>";
+        "Attempt to assign property " + name + " to incorrect type. Expected const shared_ptr<ITableWorkspace>";
     throw std::runtime_error(message);
   }
 }

@@ -44,25 +44,21 @@ const double KSquaredToE = 2.07212466; // units of meV Angstrom^-2
 const short NUMCOEFS = 25;
 // series expansion coefficients copied from a fortran source code file
 const double c_eff_f[] = {
-    0.7648360390553052,      -0.3700950778935237,     0.1582704090813516,
-    -6.0170218669705407E-02, 2.0465515957968953E-02,  -6.2690181465706840E-03,
-    1.7408667184745830E-03,  -4.4101378999425122E-04, 1.0252117967127217E-04,
-    -2.1988904738111659E-05, 4.3729347905629990E-06,  -8.0998753944849788E-07,
-    1.4031240949230472E-07,  -2.2815971698619819E-08, 3.4943984983382137E-09,
-    -5.0562696807254781E-10, 6.9315483353094009E-11,  -9.0261598195695569E-12,
-    1.1192324844699897E-12,  -1.3204992654891612E-13, 1.4100387524251801E-14,
-    -8.6430862467068437E-16, -1.1129985821867194E-16, -4.5505266221823604E-16,
+    0.7648360390553052,     -0.3700950778935237,     0.1582704090813516,      -6.0170218669705407E-02,
+    2.0465515957968953E-02, -6.2690181465706840E-03, 1.7408667184745830E-03,  -4.4101378999425122E-04,
+    1.0252117967127217E-04, -2.1988904738111659E-05, 4.3729347905629990E-06,  -8.0998753944849788E-07,
+    1.4031240949230472E-07, -2.2815971698619819E-08, 3.4943984983382137E-09,  -5.0562696807254781E-10,
+    6.9315483353094009E-11, -9.0261598195695569E-12, 1.1192324844699897E-12,  -1.3204992654891612E-13,
+    1.4100387524251801E-14, -8.6430862467068437E-16, -1.1129985821867194E-16, -4.5505266221823604E-16,
     3.8885561437496108E-16};
 
 const double c_eff_g[] = {
-    2.033429926215546,       -2.3123407369310212E-02, 7.0671915734894875E-03,
-    -7.5970017538257162E-04, 7.4848652541832373E-05,  4.5642679186460588E-05,
-    -2.3097291253000307E-05, 1.9697221715275770E-06,  2.4115259271262346E-06,
-    -7.1302220919333692E-07, -2.5124427621592282E-07, 1.3246884875139919E-07,
-    3.4364196805913849E-08,  -2.2891359549026546E-08, -6.7281240212491156E-09,
-    3.8292458615085678E-09,  1.6451021034313840E-09,  -5.5868962123284405E-10,
-    -4.2052310689211225E-10, 4.3217612266666094E-11,  9.9547699528024225E-11,
-    1.2882834243832519E-11,  -1.9103066351000564E-11, -7.6805495297094239E-12,
+    2.033429926215546,      -2.3123407369310212E-02, 7.0671915734894875E-03,  -7.5970017538257162E-04,
+    7.4848652541832373E-05, 4.5642679186460588E-05,  -2.3097291253000307E-05, 1.9697221715275770E-06,
+    2.4115259271262346E-06, -7.1302220919333692E-07, -2.5124427621592282E-07, 1.3246884875139919E-07,
+    3.4364196805913849E-08, -2.2891359549026546E-08, -6.7281240212491156E-09, 3.8292458615085678E-09,
+    1.6451021034313840E-09, -5.5868962123284405E-10, -4.2052310689211225E-10, 4.3217612266666094E-11,
+    9.9547699528024225E-11, 1.2882834243832519E-11,  -1.9103066351000564E-11, -7.6805495297094239E-12,
     1.8568853399347773E-12};
 
 // constants from the fortran code multiplied together sigref=143.23d0,
@@ -81,8 +77,8 @@ const std::string THICKNESS_PARAM = "TubeThickness";
 // this default constructor calls default constructors and sets other member
 // data to impossible (flag) values
 DetectorEfficiencyCor::DetectorEfficiencyCor()
-    : Algorithm(), m_inputWS(), m_outputWS(), m_paraMap(nullptr), m_Ei(-1.0),
-      m_ki(-1.0), m_shapeCache(), m_samplePos(), m_spectraSkipped() {
+    : Algorithm(), m_inputWS(), m_outputWS(), m_paraMap(nullptr), m_Ei(-1.0), m_ki(-1.0), m_shapeCache(), m_samplePos(),
+      m_spectraSkipped() {
   m_shapeCache.clear();
 }
 
@@ -94,15 +90,12 @@ void DetectorEfficiencyCor::init() {
   val->add<WorkspaceUnitValidator>("DeltaE");
   val->add<HistogramValidator>();
   val->add<InstrumentValidator>();
-  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                        Direction::Input, val),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, val),
                   "The workspace to correct for detector efficiency");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                            Direction::Output),
-      "The name of the workspace in which to store the result. Each histogram "
-      "from the input workspace maps to a histogram in this workspace that has "
-      "just one value which indicates if there was a bad detector.");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
+                  "The name of the workspace in which to store the result. Each histogram "
+                  "from the input workspace maps to a histogram in this workspace that has "
+                  "just one value which indicates if there was a bad detector.");
   auto checkEi = std::make_shared<BoundedValidator<double>>();
   checkEi->setLower(0.0);
   declareProperty("IncidentEnergy", EMPTY_DBL(), checkEi,
@@ -144,8 +137,7 @@ void DetectorEfficiencyCor::exec() {
       // zero the Y data that can't be corrected
       m_outputWS->mutableY(i) *= 0.0;
       PARALLEL_CRITICAL(deteff_invalid) {
-        m_spectraSkipped.insert(m_spectraSkipped.end(),
-                                m_inputWS->getAxis(1)->spectraNo(i));
+        m_spectraSkipped.insert(m_spectraSkipped.end(), m_inputWS->getAxis(1)->spectraNo(i));
       }
     }
     // make regular progress reports and check for canceling the algorithm
@@ -178,8 +170,7 @@ void DetectorEfficiencyCor::retrieveProperties() {
       m_Ei = m_inputWS->run().getPropertyValueAsType<double>("Ei");
       g_log.debug() << "Using stored Ei value " << m_Ei << "\n";
     } else {
-      throw std::invalid_argument(
-          "No Ei value has been set or stored within the run information.");
+      throw std::invalid_argument("No Ei value has been set or stored within the run information.");
     }
   }
 
@@ -202,8 +193,7 @@ void DetectorEfficiencyCor::retrieveProperties() {
  *  @throw NotFoundError if the detector or its gas pressure or wall thickness
  * were not found
  */
-void DetectorEfficiencyCor::correctForEfficiency(
-    int64_t spectraIn, const SpectrumInfo &spectrumInfo) {
+void DetectorEfficiencyCor::correctForEfficiency(int64_t spectraIn, const SpectrumInfo &spectrumInfo) {
   if (!spectrumInfo.hasDetectors(spectraIn))
     throw Exception::NotFoundError("No detectors found", spectraIn);
 
@@ -226,8 +216,7 @@ void DetectorEfficiencyCor::correctForEfficiency(
   for (const auto &index : spectrumDefinition) {
     const auto detIndex = index.first;
     const auto &det_member = detectorInfo.detector(detIndex);
-    Parameter_sptr par =
-        m_paraMap->getRecursive(det_member.getComponentID(), PRESSURE_PARAM);
+    Parameter_sptr par = m_paraMap->getRecursive(det_member.getComponentID(), PRESSURE_PARAM);
     if (!par) {
       throw Exception::NotFoundError(PRESSURE_PARAM, spectraIn);
     }
@@ -254,8 +243,7 @@ void DetectorEfficiencyCor::correctForEfficiency(
     double cosTheta = detAxis.scalar_prod(vectorFromSample);
     double sinTheta = std::sqrt(1.0 - cosTheta * cosTheta);
     // Detector constant
-    const double det_const =
-        g_helium_prefactor * (detRadius - wallThickness) * atms / sinTheta;
+    const double det_const = g_helium_prefactor * (detRadius - wallThickness) * atms / sinTheta;
 
     auto yinItr = yValues.cbegin();
     auto einItr = eValues.cbegin();
@@ -272,8 +260,7 @@ void DetectorEfficiencyCor::correctForEfficiency(
       }
       const double oneOverWave = *wavItr;
       const auto nDets(static_cast<double>(spectrumDefinition.size()));
-      const double factor =
-          1.0 / nDets / detectorEfficiency(det_const * oneOverWave);
+      const double factor = 1.0 / nDets / detectorEfficiency(det_const * oneOverWave);
       *youtItr += (*yinItr) * factor;
       *eoutItr += (*einItr) * factor;
       ++yinItr;
@@ -293,8 +280,7 @@ void DetectorEfficiencyCor::correctForEfficiency(
  * histogram
  * @return The value of 1/K for this energy bin
  */
-double DetectorEfficiencyCor::calculateOneOverK(double loBinBound,
-                                                double uppBinBound) const {
+double DetectorEfficiencyCor::calculateOneOverK(double loBinBound, double uppBinBound) const {
   double energy = m_Ei - 0.5 * (uppBinBound + loBinBound);
   double oneOverKSquared = KSquaredToE / energy;
   return std::sqrt(oneOverKSquared);
@@ -305,42 +291,34 @@ double DetectorEfficiencyCor::calculateOneOverK(double loBinBound,
  * @param detRadius :: An output parameter that contains the detector radius
  * @param detAxis :: An output parameter that contains the detector axis vector
  */
-void DetectorEfficiencyCor::getDetectorGeometry(const Geometry::IDetector &det,
-                                                double &detRadius,
-                                                V3D &detAxis) {
+void DetectorEfficiencyCor::getDetectorGeometry(const Geometry::IDetector &det, double &detRadius, V3D &detAxis) {
   std::shared_ptr<const IObject> shape_sptr = det.shape();
   if (!shape_sptr->hasValidShape()) {
     throw Exception::NotFoundError("Shape", "Detector has no shape");
   }
 
-  std::map<const Geometry::IObject *,
-           std::pair<double, Kernel::V3D>>::const_iterator it =
+  std::map<const Geometry::IObject *, std::pair<double, Kernel::V3D>>::const_iterator it =
       m_shapeCache.find(shape_sptr.get());
   if (it == m_shapeCache.end()) {
-    double xDist =
-        distToSurface(V3D(DIST_TO_UNIVERSE_EDGE, 0, 0), shape_sptr.get());
-    double zDist =
-        distToSurface(V3D(0, 0, DIST_TO_UNIVERSE_EDGE), shape_sptr.get());
+    double xDist = distToSurface(V3D(DIST_TO_UNIVERSE_EDGE, 0, 0), shape_sptr.get());
+    double zDist = distToSurface(V3D(0, 0, DIST_TO_UNIVERSE_EDGE), shape_sptr.get());
     if (std::abs(zDist - xDist) < 1e-8) {
       detRadius = zDist / 2.0;
       detAxis = V3D(0, 1, 0);
       // assume radi in z and x and the axis is in the y
       PARALLEL_CRITICAL(deteff_shapecachea) {
-        m_shapeCache.emplace(shape_sptr.get(),
-                             std::make_pair(detRadius, detAxis));
+        m_shapeCache.emplace(shape_sptr.get(), std::make_pair(detRadius, detAxis));
       }
       return;
     }
-    double yDist =
-        distToSurface(V3D(0, DIST_TO_UNIVERSE_EDGE, 0), shape_sptr.get());
+    double yDist = distToSurface(V3D(0, DIST_TO_UNIVERSE_EDGE, 0), shape_sptr.get());
     if (std::abs(yDist - zDist) < 1e-8) {
       detRadius = yDist / 2.0;
       detAxis = V3D(1, 0, 0);
       // assume that y and z are radi of the cylinder's circular cross-section
       // and the axis is perpendicular, in the x direction
       PARALLEL_CRITICAL(deteff_shapecacheb) {
-        m_shapeCache.emplace(shape_sptr.get(),
-                             std::make_pair(detRadius, detAxis));
+        m_shapeCache.emplace(shape_sptr.get(), std::make_pair(detRadius, detAxis));
       }
       return;
     }
@@ -349,8 +327,7 @@ void DetectorEfficiencyCor::getDetectorGeometry(const Geometry::IDetector &det,
       detRadius = xDist / 2.0;
       detAxis = V3D(0, 0, 1);
       PARALLEL_CRITICAL(deteff_shapecachec) {
-        m_shapeCache.emplace(shape_sptr.get(),
-                             std::make_pair(detRadius, detAxis));
+        m_shapeCache.emplace(shape_sptr.get(), std::make_pair(detRadius, detAxis));
       }
       return;
     }
@@ -372,8 +349,7 @@ void DetectorEfficiencyCor::getDetectorGeometry(const Geometry::IDetector &det,
  *  @throw invalid_argument if there is any error finding the distance
  * @returns The distance to the surface in meters
  */
-double DetectorEfficiencyCor::distToSurface(const V3D &start,
-                                            const IObject *shape) const {
+double DetectorEfficiencyCor::distToSurface(const V3D &start, const IObject *shape) const {
   // get a vector from the point that was passed to the origin
   const V3D direction = normalize(-start);
   // put the point and the vector (direction) together to get a line, here
@@ -385,8 +361,7 @@ double DetectorEfficiencyCor::distToSurface(const V3D &start,
 
   if (track.count() != 1) { // the track missed the shape, probably the shape is
                             // not centered on the origin
-    throw std::invalid_argument(
-        "Fatal error interpreting the shape of a detector");
+    throw std::invalid_argument("Fatal error interpreting the shape of a detector");
   }
   // the first part of the track will be the part inside the shape, return its
   // length
@@ -424,9 +399,7 @@ double DetectorEfficiencyCor::detectorEfficiency(const double alpha) const {
  * @param x :: a fit parameter
  * @return a numerical approximation provided by the expansion
  */
-double DetectorEfficiencyCor::chebevApprox(double a, double b,
-                                           const double exspansionCoefs[],
-                                           double x) const {
+double DetectorEfficiencyCor::chebevApprox(double a, double b, const double exspansionCoefs[], double x) const {
   double d = 0.0;
   double dd = 0.0;
   double y = (2.0 * x - a - b) / (b - a);
@@ -448,8 +421,7 @@ void DetectorEfficiencyCor::logErrors(size_t totalNDetectors) const {
   std::vector<int>::size_type nspecs = m_spectraSkipped.size();
   if (!m_spectraSkipped.empty()) {
     g_log.warning() << "There were " << nspecs
-                    << " spectra that could not be corrected out of total: "
-                    << totalNDetectors << '\n';
+                    << " spectra that could not be corrected out of total: " << totalNDetectors << '\n';
     g_log.warning() << "Their spectra were nullified\n";
     g_log.debug() << " Nullified spectra numbers: ";
     auto itend = m_spectraSkipped.end();

@@ -20,8 +20,7 @@ namespace ISISReflectometry {
 */
 enum class DetectorCorrectionType { VerticalShift, RotateAroundSample };
 
-inline std::string
-detectorCorrectionTypeToString(DetectorCorrectionType correctionType) {
+inline std::string detectorCorrectionTypeToString(DetectorCorrectionType correctionType) {
   switch (correctionType) {
   case DetectorCorrectionType::VerticalShift:
     return "VerticalShift";
@@ -31,8 +30,7 @@ detectorCorrectionTypeToString(DetectorCorrectionType correctionType) {
   throw std::invalid_argument("Unexpected detector correction type");
 }
 
-inline DetectorCorrectionType
-detectorCorrectionTypeFromString(std::string const &correctionType) {
+inline DetectorCorrectionType detectorCorrectionTypeFromString(std::string const &correctionType) {
   if (correctionType == "VerticalShift")
     return DetectorCorrectionType::VerticalShift;
   if (correctionType == "RotateAroundSample")
@@ -46,8 +44,7 @@ detectorCorrectionTypeFromString(std::string const &correctionType) {
  */
 class MANTIDQT_ISISREFLECTOMETRY_DLL DetectorCorrections {
 public:
-  DetectorCorrections(bool correctPositions,
-                      DetectorCorrectionType correctionType);
+  DetectorCorrections(bool correctPositions, DetectorCorrectionType correctionType);
   bool correctPositions() const;
   DetectorCorrectionType correctionType() const;
 
@@ -56,10 +53,8 @@ private:
   DetectorCorrectionType m_correctionType;
 };
 
-MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(DetectorCorrections const &lhs,
-                                               DetectorCorrections const &rhs);
-MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(DetectorCorrections const &lhs,
-                                               DetectorCorrections const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(DetectorCorrections const &lhs, DetectorCorrections const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(DetectorCorrections const &lhs, DetectorCorrections const &rhs);
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

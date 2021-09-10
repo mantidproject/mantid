@@ -40,13 +40,10 @@ public:
 
 private:
   /// Replace the content of a string using regex.
-  std::string replacePrefix(const std::string &path, const std::string &regex,
-                            const std::string &prefix) const;
+  std::string replacePrefix(const std::string &path, const std::string &regex, const std::string &prefix) const;
   /// Replace all occurrences of the search string in the input with the format
   /// string.
-  std::string replaceAllOccurences(const std::string &path,
-                                   const std::string &search,
-                                   const std::string &format) const;
+  std::string replaceAllOccurences(const std::string &path, const std::string &search, const std::string &format) const;
 };
 
 } // namespace Kernel

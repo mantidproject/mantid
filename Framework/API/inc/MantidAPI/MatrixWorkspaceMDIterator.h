@@ -23,8 +23,7 @@ namespace API {
 */
 class MANTID_API_DLL MatrixWorkspaceMDIterator : public IMDIterator {
 public:
-  MatrixWorkspaceMDIterator(const MatrixWorkspace *workspace,
-                            Mantid::Geometry::MDImplicitFunction *function,
+  MatrixWorkspaceMDIterator(const MatrixWorkspace *workspace, Mantid::Geometry::MDImplicitFunction *function,
                             size_t beginWI = 0, size_t endWI = size_t(-1));
   size_t getDataSize() const override;
 
@@ -44,18 +43,18 @@ public:
 
   signal_t getError() const override;
 
-  std::unique_ptr<coord_t[]>
-  getVertexesArray(size_t &numVertices) const override;
+  std::unique_ptr<coord_t[]> getVertexesArray(size_t &numVertices) const override;
 
-  std::unique_ptr<coord_t[]>
-  getVertexesArray(size_t &numVertices, const size_t outDimensions,
-                   const bool *maskDim) const override;
+  std::unique_ptr<coord_t[]> getVertexesArray(size_t &numVertices, const size_t outDimensions,
+                                              const bool *maskDim) const override;
 
   Mantid::Kernel::VMD getCenter() const override;
 
   size_t getNumEvents() const override;
 
-  uint16_t getInnerRunIndex(size_t index) const override;
+  uint16_t getInnerExpInfoIndex(size_t index) const override;
+
+  uint16_t getInnerGoniometerIndex(size_t index) const override;
 
   int32_t getInnerDetectorID(size_t index) const override;
 

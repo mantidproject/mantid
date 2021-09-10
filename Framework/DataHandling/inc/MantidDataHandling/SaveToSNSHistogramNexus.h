@@ -46,9 +46,7 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; };
-  const std::vector<std::string> seeAlso() const override {
-    return {"SaveNexus"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"SaveNexus"}; }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "DataHandling\\Nexus"; }
 
@@ -92,14 +90,11 @@ private:
 
   int WriteGroup(int is_definition);
   int WriteAttributes(int is_definition);
-  int copy_file(const char *inFile, int nx_read_access, const char *outFile,
-                int nx_write_access);
+  int copy_file(const char *inFile, int nx_read_access, const char *outFile, int nx_write_access);
 
-  int WriteOutDataOrErrors(const Geometry::RectangularDetector_const_sptr &det,
-                           int x_pixel_slab, const char *field_name,
-                           const char *errors_field_name, bool doErrors,
-                           bool doBoth, int is_definition,
-                           const std::string &bank);
+  int WriteOutDataOrErrors(const Geometry::RectangularDetector_const_sptr &det, int x_pixel_slab,
+                           const char *field_name, const char *errors_field_name, bool doErrors, bool doBoth,
+                           int is_definition, const std::string &bank);
 
   int WriteDataGroup(const std::string &bank, int is_definition);
 

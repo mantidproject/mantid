@@ -27,22 +27,17 @@ void Logout2::init() {
   auto requireValue = std::make_shared<MandatoryValidator<std::string>>();
 
   // Compute Resources
-  std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance()
-                                          .getFacility()
-                                          .computeResources();
-  declareProperty("ComputeResource", "",
-                  std::make_shared<StringListValidator>(computes),
+  std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance().getFacility().computeResources();
+  declareProperty("ComputeResource", "", std::make_shared<StringListValidator>(computes),
                   "The remote computer to log out from", Direction::Input);
 
-  declareProperty("UserName", "", requireValue,
-                  "Name of the user to authenticate as", Direction::Input);
+  declareProperty("UserName", "", requireValue, "Name of the user to authenticate as", Direction::Input);
 }
 
 void Logout2::exec() {
 
   const std::string comp = getPropertyValue("ComputeResource");
-  Mantid::API::IRemoteJobManager_sptr jobManager =
-      Mantid::API::RemoteJobManagerFactory::Instance().create(comp);
+  Mantid::API::IRemoteJobManager_sptr jobManager = Mantid::API::RemoteJobManagerFactory::Instance().create(comp);
 
   const std::string user = getPropertyValue("UserName");
   jobManager->logout(user);

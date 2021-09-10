@@ -39,10 +39,8 @@ void FindDetectorsPar::init() {
   wsValidator->add<API::InstrumentValidator>();
   wsValidator->add<API::CommonBinsValidator>();
   // input workspace
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                            Direction::Input, wsValidator),
-      "The name of the workspace that will be used as input for the algorithm");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, wsValidator),
+                  "The name of the workspace that will be used as input for the algorithm");
   //
   declareProperty("ReturnLinearRanges", false,
                   "if set to true, the algorithm would return linear "
@@ -51,19 +49,16 @@ void FindDetectorsPar::init() {
   // optional par or phx file
   const std::vector<std::string> fileExts{".par", ".phx"};
 
-  declareProperty(std::make_unique<FileProperty>("ParFile", "not_used.par",
-                                                 FileProperty::OptionalLoad,
-                                                 fileExts),
+  declareProperty(std::make_unique<FileProperty>("ParFile", "not_used.par", FileProperty::OptionalLoad, fileExts),
                   "An optional file that contains of the list of angular "
                   "parameters for the detectors and detectors groups;\n"
                   "If specified, will use data from file instead of the data, "
                   "calculated from the instument description");
 
   //
-  declareProperty(
-      "OutputParTable", "",
-      "If not empty, a name of a table workspace which "
-      " will contain the calculated par or phx values for the detectors");
+  declareProperty("OutputParTable", "",
+                  "If not empty, a name of a table workspace which "
+                  " will contain the calculated par or phx values for the detectors");
 }
 
 void FindDetectorsPar::exec() {
@@ -77,8 +72,7 @@ void FindDetectorsPar::exec() {
   std::string fileName = this->getProperty("ParFile");
   if (!(fileName.empty() || fileName == "not_used.par")) {
     if (!Poco::File(fileName).exists()) {
-      g_log.error() << " FindDetectorsPar: attempting to load par file: "
-                    << fileName << " but it does not exist\n";
+      g_log.error() << " FindDetectorsPar: attempting to load par file: " << fileName << " but it does not exist\n";
       throw(Kernel::Exception::FileError(" file not exist", fileName));
     }
     size_t nPars = loadParFile(fileName);
@@ -87,10 +81,8 @@ void FindDetectorsPar::exec() {
       this->setOutputTable();
       return;
     } else {
-      g_log.warning()
-          << " number of parameters in the file: " << fileName
-          << "  not equal to the number of histograms in the workspace"
-          << inputWS->getName() << '\n';
+      g_log.warning() << " number of parameters in the file: " << fileName
+                      << "  not equal to the number of histograms in the workspace" << inputWS->getName() << '\n';
       g_log.warning() << " calculating detector parameters algorithmically\n";
     }
   }
@@ -142,20 +134,18 @@ void FindDetectorsPar::setOutputTable() {
     return;
   // Store the result in a table workspace
   try {
-    declareProperty(std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
-        "OutputParTableWS", "", Direction::Output));
+    declareProperty(
+        std::make_unique<WorkspaceProperty<API::ITableWorkspace>>("OutputParTableWS", "", Direction::Output));
   } catch (std::exception &err) {
     g_log.information() << " findDetecotorsPar: unsuccessfully declaring "
                            "property: OutputParTableWS\n";
-    g_log.information() << " findDetecotorsPar: the reason is: " << err.what()
-                        << '\n';
+    g_log.information() << " findDetecotorsPar: the reason is: " << err.what() << '\n';
   }
 
   // Set the name of the new workspace
   setPropertyValue("OutputParTableWS", output);
 
-  Mantid::API::ITableWorkspace_sptr m_result =
-      Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+  Mantid::API::ITableWorkspace_sptr m_result = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
   m_result->addColumn("double", "twoTheta");
   m_result->addColumn("double", "azimuthal");
   m_result->addColumn("double", "secondary_flightpath");
@@ -170,8 +160,8 @@ void FindDetectorsPar::setOutputTable() {
 
   for (size_t i = 0; i < m_nDetectors; i++) {
     Mantid::API::TableRow row = m_result->appendRow();
-    row << polar[i] << azimuthal[i] << secondaryFlightpath[i] << polarWidth[i]
-        << azimuthalWidth[i] << int64_t(detID[i]);
+    row << polar[i] << azimuthal[i] << secondaryFlightpath[i] << polarWidth[i] << azimuthalWidth[i]
+        << int64_t(detID[i]);
   }
   setProperty("OutputParTableWS", m_result);
   API::AnalysisDataService::Instance().addOrReplace(output, m_result);
@@ -204,8 +194,7 @@ double AvrgDetector::nearAngle(const double &baseAngle, const double &anAngle) {
  *@param Observer -- sample position or the centre of the polar system of
  *coordinates to calculate detector's parameters.
  */
-void AvrgDetector::addDetInfo(const Geometry::IDetector &det,
-                              const Kernel::V3D &Observer) {
+void AvrgDetector::addDetInfo(const Geometry::IDetector &det, const Kernel::V3D &Observer) {
   m_nComponents++;
   Kernel::V3D detPos = det.getPos();
   Kernel::V3D toDet = (detPos - Observer);
@@ -271,8 +260,7 @@ void AvrgDetector::addDetInfo(const Geometry::IDetector &det,
       dist2Det = 1;
 
     // convert to angular units
-    double polarHalfSize =
-        rad2deg * atan2(0.5 * (polarMax - polarMin), dist2Det);
+    double polarHalfSize = rad2deg * atan2(0.5 * (polarMax - polarMin), dist2Det);
     double azimHalfSize = rad2deg * atan2(0.5 * (azimMax - azimMin), dist2Det);
 
     polarMin = ringPolar - polarHalfSize;
@@ -318,8 +306,7 @@ coordinates to calculate detector's parameters.
 of the detector or detector's group in
                      spherical coordinate system with centre at Observer
 */
-void FindDetectorsPar::calcDetPar(const Geometry::IDetector &det,
-                                  const Kernel::V3D &Observer,
+void FindDetectorsPar::calcDetPar(const Geometry::IDetector &det, const Kernel::V3D &Observer,
                                   DetParameters &Detector) {
 
   // get number of basic detectors within the composit detector
@@ -350,8 +337,7 @@ void FindDetectorsPar::calcDetPar(const Geometry::IDetector &det,
 /**Method to convert vector of Detector's classes into vectors of doubles with
    all correspondent information
    also drops non-existent detectors and monitors */
-void FindDetectorsPar::extractAndLinearize(
-    const std::vector<DetParameters> &detPar) {
+void FindDetectorsPar::extractAndLinearize(const std::vector<DetParameters> &detPar) {
   size_t nDetectors;
 
   // provisional number
@@ -413,8 +399,7 @@ size_t FindDetectorsPar::loadParFile(const std::string &fileName) {
     shift = 0;
     azimuthalWidth.resize(m_nDetectors);
     polarWidth.resize(m_nDetectors);
-    secondaryFlightpath.resize(m_nDetectors,
-                               std::numeric_limits<double>::quiet_NaN());
+    secondaryFlightpath.resize(m_nDetectors, std::numeric_limits<double>::quiet_NaN());
 
     for (size_t i = 0; i < m_nDetectors; i++) {
       azimuthal[i] = result[shift + 2 + i * Block_size];
@@ -439,24 +424,21 @@ size_t FindDetectorsPar::loadParFile(const std::string &fileName) {
       detID[i] = i + 1;
     }
   } else {
-    g_log.error() << " unsupported type of ASCII parameter file: " << fileName
-                  << '\n';
+    g_log.error() << " unsupported type of ASCII parameter file: " << fileName << '\n';
     throw(std::invalid_argument("unsupported ASCII file type"));
   }
 
   return m_nDetectors;
 }
 //
-void FindDetectorsPar::populate_values_from_file(
-    const API::MatrixWorkspace_sptr &inputWS) {
+void FindDetectorsPar::populate_values_from_file(const API::MatrixWorkspace_sptr &inputWS) {
   size_t nHist = inputWS->getNumberHistograms();
 
   if (this->current_ASCII_file.Type == PAR_type) {
     // in this case data in azimuthal width and polar width are in fact real
     // sizes in meters; have to transform it in into angular values
     for (size_t i = 0; i < nHist; i++) {
-      azimuthalWidth[i] =
-          atan2(azimuthalWidth[i], secondaryFlightpath[i]) * rad2deg;
+      azimuthalWidth[i] = atan2(azimuthalWidth[i], secondaryFlightpath[i]) * rad2deg;
       polarWidth[i] = atan2(polarWidth[i], secondaryFlightpath[i]) * rad2deg;
     }
     m_SizesAreLinear = false;
@@ -515,8 +497,7 @@ int FindDetectorsPar::count_changes(const char *const Buf, size_t buf_size) {
  *   It behaves like std::ifstream getline but the getline reads additional
  * symbol from a row in a Unix-formatted file under windows;
  */
-size_t FindDetectorsPar::get_my_line(std::ifstream &in, char *buf,
-                                     size_t buf_size, const char DELIM) {
+size_t FindDetectorsPar::get_my_line(std::ifstream &in, char *buf, size_t buf_size, const char DELIM) {
   size_t i;
   for (i = 0; i < buf_size; i++) {
     in.get(buf[i]);
@@ -526,8 +507,7 @@ size_t FindDetectorsPar::get_my_line(std::ifstream &in, char *buf,
     }
   }
   buf[buf_size - 1] = 0;
-  g_log.information() << " data obtained from ASCII data file trunkated to "
-                      << buf_size << " characters\n";
+  g_log.information() << " data obtained from ASCII data file trunkated to " << buf_size << " characters\n";
   return buf_size;
 }
 /**!
@@ -541,19 +521,15 @@ size_t FindDetectorsPar::get_my_line(std::ifstream &in, char *buf,
  *data in correcponding ASCII file
  *  plus characteristics of the data extracted from correspondent data header.
  */
-FileTypeDescriptor
-FindDetectorsPar::get_ASCII_header(std::string const &fileName,
-                                   std::ifstream &data_stream) {
+FileTypeDescriptor FindDetectorsPar::get_ASCII_header(std::string const &fileName, std::ifstream &data_stream) {
   std::vector<char> buffer(1024);
   FileTypeDescriptor file_descriptor;
   file_descriptor.Type = NumFileTypes; // set the autotype to invalid
 
   data_stream.open(fileName.c_str(), std::ios_base::in | std::ios_base::binary);
   if (!data_stream.is_open()) {
-    g_log.error() << " can not open existing ASCII data file: " << fileName
-                  << '\n';
-    throw(Kernel::Exception::FileError(" Can not open existing input data file",
-                                       fileName));
+    g_log.error() << " can not open existing ASCII data file: " << fileName << '\n';
+    throw(Kernel::Exception::FileError(" Can not open existing input data file", fileName));
   }
   // let's identify the EOL symbol; As the file may have been prepared on
   // different OS, from where you are reading it
@@ -575,9 +551,8 @@ FindDetectorsPar::get_ASCII_header(std::string const &fileName,
   } else if (symbol == 0x0A) { // unix file.
     EOL = 0x0A;
   } else {
-    g_log.error()
-        << " Error reading the first row of the input ASCII data file: "
-        << fileName << " as it contains unprintable characters\n";
+    g_log.error() << " Error reading the first row of the input ASCII data file: " << fileName
+                  << " as it contains unprintable characters\n";
     throw(Kernel::Exception::FileError(" Error reading the first row of the "
                                        "input ASCII data file, as it contains "
                                        "unprintable characters",
@@ -589,8 +564,8 @@ FindDetectorsPar::get_ASCII_header(std::string const &fileName,
 
   get_my_line(data_stream, buffer.data(), buffer.size(), EOL);
   if (!data_stream.good()) {
-    g_log.error() << " Error reading the first row of the input data file "
-                  << fileName << ", It may be bigger then 1024 symbols\n";
+    g_log.error() << " Error reading the first row of the input data file " << fileName
+                  << ", It may be bigger then 1024 symbols\n";
     throw(Kernel::Exception::FileError(" Error reading the first row of the "
                                        "input data file, It may be bigger then "
                                        "1024 symbols",
@@ -599,12 +574,10 @@ FindDetectorsPar::get_ASCII_header(std::string const &fileName,
 
   // let's find if there is one or more groups of symbols inside of the buffer;
   int space_to_symbol_change = count_changes(buffer.data(), buffer.size());
-  if (space_to_symbol_change >
-      1) { // more then one group of symbols in the string, spe file
+  if (space_to_symbol_change > 1) { // more then one group of symbols in the string, spe file
     int nData_records(0), nData_blocks(0);
 
-    int nDatas =
-        sscanf(buffer.data(), " %d %d ", &nData_records, &nData_blocks);
+    int nDatas = sscanf(buffer.data(), " %d %d ", &nData_records, &nData_blocks);
     file_descriptor.nData_records = static_cast<size_t>(nData_records);
     file_descriptor.nData_blocks = static_cast<size_t>(nData_blocks);
     if (nDatas != 2) {
@@ -619,20 +592,14 @@ FindDetectorsPar::get_ASCII_header(std::string const &fileName,
     file_descriptor.Type = SPE_type;
     get_my_line(data_stream, buffer.data(), buffer.size(), EOL);
     if (buffer.front() != '#') {
-      g_log.error()
-          << " File " << fileName
-          << "iterpreted as SPE does not have symbol # in the second row\n";
-      throw(Kernel::Exception::FileError(
-          " File iterpreted as SPE does not have symbol # in the second row",
-          fileName));
+      g_log.error() << " File " << fileName << "iterpreted as SPE does not have symbol # in the second row\n";
+      throw(Kernel::Exception::FileError(" File iterpreted as SPE does not have symbol # in the second row", fileName));
     }
-    file_descriptor.data_start_position =
-        data_stream.tellg(); // if it is SPE file then the data begin after the
-                             // second line;
+    file_descriptor.data_start_position = data_stream.tellg(); // if it is SPE file then the data begin after the
+                                                               // second line;
   } else {
-    file_descriptor.data_start_position =
-        data_stream.tellg(); // if it is PHX or PAR file then the data begin
-                             // after the first line;
+    file_descriptor.data_start_position = data_stream.tellg(); // if it is PHX or PAR file then the data begin
+                                                               // after the first line;
     file_descriptor.nData_records = std::stoi(buffer.data());
     file_descriptor.nData_blocks = 0;
 
@@ -640,18 +607,15 @@ FindDetectorsPar::get_ASCII_header(std::string const &fileName,
     data_stream.getline(buffer.data(), buffer.size(), EOL);
 
     space_to_symbol_change = count_changes(buffer.data(), buffer.size());
-    if (space_to_symbol_change == 6 ||
-        space_to_symbol_change == 5) { // PAR file
+    if (space_to_symbol_change == 6 || space_to_symbol_change == 5) { // PAR file
       file_descriptor.Type = PAR_type;
       file_descriptor.nData_blocks = space_to_symbol_change;
     } else if (space_to_symbol_change == 7) { // PHX file
       file_descriptor.Type = PHX_type;
       file_descriptor.nData_blocks = space_to_symbol_change;
     } else { // something unclear or damaged
-      g_log.error() << " can not identify format of the input data file "
-                    << fileName << '\n';
-      throw(Kernel::Exception::FileError(
-          " can not identify format of the input data file", fileName));
+      g_log.error() << " can not identify format of the input data file " << fileName << '\n';
+      throw(Kernel::Exception::FileError(" can not identify format of the input data file", fileName));
     }
   }
   return file_descriptor;
@@ -662,8 +626,7 @@ FindDetectorsPar::get_ASCII_header(std::string const &fileName,
  *  the file should be already opened and the FILE_TYPE structure properly
  *  defined using get_ASCII_header function
  */
-void FindDetectorsPar::load_plain(std::ifstream &stream,
-                                  std::vector<double> &Data,
+void FindDetectorsPar::load_plain(std::ifstream &stream, std::vector<double> &Data,
                                   FileTypeDescriptor const &FILE_TYPE) {
   std::vector<char> BUF(1024, 0);
   char par_format[] = " %g %g %g %g %g";
@@ -687,8 +650,7 @@ void FindDetectorsPar::load_plain(std::ifstream &stream,
   default: {
     g_log.error() << " trying to load data in FindDetectorsPar::load_plain but "
                      "the data type is not recognized\n";
-    throw(std::invalid_argument(
-        " trying to load data but the data type is not recognized"));
+    throw(std::invalid_argument(" trying to load data but the data type is not recognized"));
   }
   }
   Data.resize(BlockSize * FILE_TYPE.nData_records);
@@ -711,27 +673,22 @@ void FindDetectorsPar::load_plain(std::ifstream &stream,
 
     switch (FILE_TYPE.Type) {
     case (PAR_type): {
-      nRead_Data = sscanf(BUF.data(), format, data_buf, data_buf + 1,
-                          data_buf + 2, data_buf + 3, data_buf + 4);
+      nRead_Data = sscanf(BUF.data(), format, data_buf, data_buf + 1, data_buf + 2, data_buf + 3, data_buf + 4);
       break;
     }
     case (PHX_type): {
       nRead_Data =
-          sscanf(BUF.data(), format, data_buf, data_buf + 1, data_buf + 2,
-                 data_buf + 3, data_buf + 4, data_buf + 5);
+          sscanf(BUF.data(), format, data_buf, data_buf + 1, data_buf + 2, data_buf + 3, data_buf + 4, data_buf + 5);
       break;
     }
     default: {
-      g_log.error() << " unsupported value of FILE_TYPE.Type: "
-                    << FILE_TYPE.Type << '\n';
+      g_log.error() << " unsupported value of FILE_TYPE.Type: " << FILE_TYPE.Type << '\n';
       throw(std::invalid_argument(" unsupported value of FILE_TYPE.Type"));
     }
     }
     if (nRead_Data != BlockSize) {
-      g_log.error() << " Error reading data at file, row " << i + 1
-                    << " column " << nRead_Data << " from total "
-                    << FILE_TYPE.nData_records << " rows, " << BlockSize
-                    << " columns\n";
+      g_log.error() << " Error reading data at file, row " << i + 1 << " column " << nRead_Data << " from total "
+                    << FILE_TYPE.nData_records << " rows, " << BlockSize << " columns\n";
       throw(std::invalid_argument("error while interpreting data "));
     }
     for (int j = 0; j < nRead_Data; j++) {

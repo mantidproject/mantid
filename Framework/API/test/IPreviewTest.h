@@ -30,9 +30,7 @@ public:
   std::string technique() const override { return "SANS"; }
 
 private:
-  Workspace_sptr preview(Workspace_sptr ws) const override {
-    return ws->clone();
-  }
+  Workspace_sptr preview(Workspace_sptr ws) const override { return ws->clone(); }
 };
 
 IPreview *createBasicPreview() { return new BasicPreview(); }

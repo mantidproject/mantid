@@ -57,9 +57,7 @@ void FunctionValues::expand(size_t n) {
 /** Set all calculated values to same number.
  * @param value :: A new value.
  */
-void FunctionValues::setCalculated(double value) {
-  std::fill(m_calculated.begin(), m_calculated.end(), value);
-}
+void FunctionValues::setCalculated(double value) { std::fill(m_calculated.begin(), m_calculated.end(), value); }
 
 /**
  * Get a pointer to calculated data at index i
@@ -79,16 +77,13 @@ void FunctionValues::zeroCalculated() { setCalculated(0.0); }
  * Copy calculated values to a buffer
  * @param to :: Pointer to the buffer
  */
-void FunctionValues::copyTo(double *to) const {
-  std::copy(m_calculated.begin(), m_calculated.end(), to);
-}
+void FunctionValues::copyTo(double *to) const { std::copy(m_calculated.begin(), m_calculated.end(), to); }
 
 /** Add calculated values to values in a buffer and save result to the buffer
  * @param to :: Pointer to the buffer, it must be large enough
  */
 void FunctionValues::add(double *to) const {
-  std::transform(m_calculated.begin(), m_calculated.end(), to, to,
-                 std::plus<double>());
+  std::transform(m_calculated.begin(), m_calculated.end(), to, to, std::plus<double>());
 }
 
 /** Multiply calculated values by values in a buffer and save result to the
@@ -96,8 +91,7 @@ void FunctionValues::add(double *to) const {
  * @param to :: Pointer to the buffer, it must be large enough
  */
 void FunctionValues::multiply(double *to) const {
-  std::transform(m_calculated.begin(), m_calculated.end(), to, to,
-                 std::multiplies<double>());
+  std::transform(m_calculated.begin(), m_calculated.end(), to, to, std::multiplies<double>());
 }
 
 /**
@@ -136,8 +130,7 @@ FunctionValues &FunctionValues::operator*=(const FunctionValues &values) {
  *   values in this from start to the end.
  * @return A reference to this values.
  */
-void FunctionValues::addToCalculated(size_t start,
-                                     const FunctionValues &values) {
+void FunctionValues::addToCalculated(size_t start, const FunctionValues &values) {
   if (start + size() < values.size()) {
     throw std::runtime_error("Cannot add values: sizes do not match");
   }
@@ -207,9 +200,7 @@ void FunctionValues::setFitWeights(const std::vector<double> &values) {
  * Set all weights to the same value.
  * @param value :: The value to set.
  */
-void FunctionValues::setFitWeights(const double &value) {
-  m_weights.resize(m_calculated.size(), value);
-}
+void FunctionValues::setFitWeights(const double &value) { m_weights.resize(m_calculated.size(), value); }
 
 /**
  * Get a fitting weight.

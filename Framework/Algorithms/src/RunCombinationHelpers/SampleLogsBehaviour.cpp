@@ -20,16 +20,11 @@ using namespace Kernel;
 using namespace API;
 
 namespace {
-std::string generateDifferenceMessage(const std::string &item,
-                                      const std::string &wsName,
-                                      const std::string &wsValue,
+std::string generateDifferenceMessage(const std::string &item, const std::string &wsName, const std::string &wsValue,
                                       const std::string &firstValue) {
   std::stringstream stringstream;
-  stringstream << "Item \"" << item
-               << "\" has different values in workspaces! Found: " << wsValue
-               << " in workspace " << wsName
-               << " but the value in the first workspace was: " << firstValue
-               << "." << std::endl;
+  stringstream << "Item \"" << item << "\" has different values in workspaces! Found: " << wsValue << " in workspace "
+               << wsName << " but the value in the first workspace was: " << firstValue << "." << std::endl;
   return stringstream.str();
 }
 } // namespace
@@ -37,47 +32,37 @@ std::string generateDifferenceMessage(const std::string &item,
 // Names and docs from the properties allowing to override the default (IPF
 // controlled) merging behaviour.
 // These are common between e.g. MergeRuns and ConjoinXRuns.
-const std::string SampleLogsBehaviour::TIME_SERIES_PROP =
-    "SampleLogsTimeSeries";
-const std::string SampleLogsBehaviour::TIME_SERIES_DOC =
-    "A comma separated list of the sample logs to merge into a "
-    "time series. The initial times are taken as the start times "
-    "for the run. Sample logs must be numeric.";
+const std::string SampleLogsBehaviour::TIME_SERIES_PROP = "SampleLogsTimeSeries";
+const std::string SampleLogsBehaviour::TIME_SERIES_DOC = "A comma separated list of the sample logs to merge into a "
+                                                         "time series. The initial times are taken as the start times "
+                                                         "for the run. Sample logs must be numeric.";
 const std::string SampleLogsBehaviour::LIST_PROP = "SampleLogsList";
-const std::string SampleLogsBehaviour::LIST_DOC =
-    "A comma separated list of the sample logs to merge into a "
-    "list.";
+const std::string SampleLogsBehaviour::LIST_DOC = "A comma separated list of the sample logs to merge into a "
+                                                  "list.";
 const std::string SampleLogsBehaviour::WARN_PROP = "SampleLogsWarn";
-const std::string SampleLogsBehaviour::WARN_DOC =
-    "A comma separated list of the sample "
-    "logs to generate a warning if "
-    "different when merging.";
-const std::string SampleLogsBehaviour::WARN_TOL_PROP =
-    "SampleLogsWarnTolerances";
-const std::string SampleLogsBehaviour::WARN_TOL_DOC =
-    "The tolerances for warning if sample logs are different. "
-    "Can either be empty for a comparison of the strings, a "
-    "single value for all warn sample logs, or a comma "
-    "separated list of values (must be the same length as "
-    "SampleLogsWarn).";
+const std::string SampleLogsBehaviour::WARN_DOC = "A comma separated list of the sample "
+                                                  "logs to generate a warning if "
+                                                  "different when merging.";
+const std::string SampleLogsBehaviour::WARN_TOL_PROP = "SampleLogsWarnTolerances";
+const std::string SampleLogsBehaviour::WARN_TOL_DOC = "The tolerances for warning if sample logs are different. "
+                                                      "Can either be empty for a comparison of the strings, a "
+                                                      "single value for all warn sample logs, or a comma "
+                                                      "separated list of values (must be the same length as "
+                                                      "SampleLogsWarn).";
 const std::string SampleLogsBehaviour::FAIL_PROP = "SampleLogsFail";
-const std::string SampleLogsBehaviour::FAIL_DOC =
-    "The sample logs to fail if different "
-    "when merging. If there is a "
-    "difference the run is skipped.";
-const std::string SampleLogsBehaviour::FAIL_TOL_PROP =
-    "SampleLogsFailTolerances";
-const std::string SampleLogsBehaviour::FAIL_TOL_DOC =
-    "The tolerances for failing if sample logs are different. "
-    "Can either be empty for a comparison of the strings, a "
-    "single value for all fail sample logs, or a comma "
-    "separated list of values (must be the same length as "
-    "SampleLogsFail).";
+const std::string SampleLogsBehaviour::FAIL_DOC = "The sample logs to fail if different "
+                                                  "when merging. If there is a "
+                                                  "difference the run is skipped.";
+const std::string SampleLogsBehaviour::FAIL_TOL_PROP = "SampleLogsFailTolerances";
+const std::string SampleLogsBehaviour::FAIL_TOL_DOC = "The tolerances for failing if sample logs are different. "
+                                                      "Can either be empty for a comparison of the strings, a "
+                                                      "single value for all fail sample logs, or a comma "
+                                                      "separated list of values (must be the same length as "
+                                                      "SampleLogsFail).";
 const std::string SampleLogsBehaviour::SUM_PROP = "SampleLogsSum";
-const std::string SampleLogsBehaviour::SUM_DOC =
-    "A comma separated list of the sample "
-    "logs to sum into a single entry.  "
-    "Sample logs must be numeric.";
+const std::string SampleLogsBehaviour::SUM_DOC = "A comma separated list of the sample "
+                                                 "logs to sum into a single entry.  "
+                                                 "Sample logs must be numeric.";
 
 /**
  * Create and initialise an object that is responsbile for keeping track of the
@@ -91,19 +76,14 @@ const std::string SampleLogsBehaviour::SUM_DOC =
  * @param parName the parameter names which specify the sample log sames to
  * merge given be the IPF
  */
-SampleLogsBehaviour::SampleLogsBehaviour(const MatrixWorkspace_sptr &ws,
-                                         Logger &logger,
-                                         const SampleLogNames &logEntries,
-                                         const ParameterName &parName)
+SampleLogsBehaviour::SampleLogsBehaviour(const MatrixWorkspace_sptr &ws, Logger &logger,
+                                         const SampleLogNames &logEntries, const ParameterName &parName)
     : parameterNames(parName), m_logger(logger) {
   setSampleMap(m_logMap, MergeLogType::Sum, logEntries.sampleLogsSum, *ws);
-  setSampleMap(m_logMap, MergeLogType::TimeSeries,
-               logEntries.sampleLogsTimeSeries, *ws);
+  setSampleMap(m_logMap, MergeLogType::TimeSeries, logEntries.sampleLogsTimeSeries, *ws);
   setSampleMap(m_logMap, MergeLogType::List, logEntries.sampleLogsList, *ws);
-  setSampleMap(m_logMap, MergeLogType::Warn, logEntries.sampleLogsWarn, *ws,
-               logEntries.sampleLogsWarnTolerances);
-  setSampleMap(m_logMap, MergeLogType::Fail, logEntries.sampleLogsFail, *ws,
-               logEntries.sampleLogsFailTolerances);
+  setSampleMap(m_logMap, MergeLogType::Warn, logEntries.sampleLogsWarn, *ws, logEntries.sampleLogsWarnTolerances);
+  setSampleMap(m_logMap, MergeLogType::Fail, logEntries.sampleLogsFail, *ws, logEntries.sampleLogsFailTolerances);
 
   SampleLogsMap instrumentMap;
   this->createSampleLogsMapsFromInstrumentParams(instrumentMap, *ws);
@@ -120,31 +100,23 @@ SampleLogsBehaviour::SampleLogsBehaviour(const MatrixWorkspace_sptr &ws,
  * @param map the map to add the merge behaviours to
  * @param ws the workspace with the instrument and initial map
  */
-void SampleLogsBehaviour::createSampleLogsMapsFromInstrumentParams(
-    SampleLogsMap &map, MatrixWorkspace &ws) {
-  std::string params =
-      ws.getInstrument()->getParameterAsString(parameterNames.SUM_MERGE, false);
+void SampleLogsBehaviour::createSampleLogsMapsFromInstrumentParams(SampleLogsMap &map, MatrixWorkspace &ws) {
+  std::string params = ws.getInstrument()->getParameterAsString(parameterNames.SUM_MERGE, false);
   setSampleMap(map, MergeLogType::Sum, params, ws, "", true);
 
-  params = ws.getInstrument()->getParameterAsString(
-      parameterNames.TIME_SERIES_MERGE, false);
+  params = ws.getInstrument()->getParameterAsString(parameterNames.TIME_SERIES_MERGE, false);
   setSampleMap(map, MergeLogType::TimeSeries, params, ws, "", true);
 
-  params = ws.getInstrument()->getParameterAsString(parameterNames.LIST_MERGE,
-                                                    false);
+  params = ws.getInstrument()->getParameterAsString(parameterNames.LIST_MERGE, false);
   setSampleMap(map, MergeLogType::List, params, ws, "", true);
 
-  params = ws.getInstrument()->getParameterAsString(parameterNames.WARN_MERGE,
-                                                    false);
+  params = ws.getInstrument()->getParameterAsString(parameterNames.WARN_MERGE, false);
   std::string paramsTolerances;
-  paramsTolerances = ws.getInstrument()->getParameterAsString(
-      parameterNames.WARN_MERGE_TOLERANCES, false);
+  paramsTolerances = ws.getInstrument()->getParameterAsString(parameterNames.WARN_MERGE_TOLERANCES, false);
   setSampleMap(map, MergeLogType::Warn, params, ws, paramsTolerances, true);
 
-  params = ws.getInstrument()->getParameterAsString(parameterNames.FAIL_MERGE,
-                                                    false);
-  paramsTolerances = ws.getInstrument()->getParameterAsString(
-      parameterNames.FAIL_MERGE_TOLERANCES, false);
+  params = ws.getInstrument()->getParameterAsString(parameterNames.FAIL_MERGE, false);
+  paramsTolerances = ws.getInstrument()->getParameterAsString(parameterNames.FAIL_MERGE_TOLERANCES, false);
   setSampleMap(map, MergeLogType::Fail, params, ws, paramsTolerances, true);
 }
 
@@ -164,24 +136,17 @@ void SampleLogsBehaviour::createSampleLogsMapsFromInstrumentParams(
  * @param skipIfInPrimaryMap whether to skip if in the member variable map
  * (optional, default false)
  */
-void SampleLogsBehaviour::setSampleMap(SampleLogsMap &map,
-                                       const MergeLogType &mergeType,
-                                       const std::string &params,
-                                       MatrixWorkspace &ws,
-                                       const std::string &paramsTolerances,
+void SampleLogsBehaviour::setSampleMap(SampleLogsMap &map, const MergeLogType &mergeType, const std::string &params,
+                                       MatrixWorkspace &ws, const std::string &paramsTolerances,
                                        bool skipIfInPrimaryMap) {
 
-  StringTokenizer tokenizer(params, ",",
-                            StringTokenizer::TOK_TRIM |
-                                StringTokenizer::TOK_IGNORE_EMPTY);
+  StringTokenizer tokenizer(params, ",", StringTokenizer::TOK_TRIM | StringTokenizer::TOK_IGNORE_EMPTY);
   StringTokenizer tokenizerTolerances(paramsTolerances, ",",
-                                      StringTokenizer::TOK_TRIM |
-                                          StringTokenizer::TOK_IGNORE_EMPTY);
+                                      StringTokenizer::TOK_TRIM | StringTokenizer::TOK_IGNORE_EMPTY);
 
   auto tolerancesStringVector = tokenizerTolerances.asVector();
 
-  std::vector<double> tolerancesVector = createTolerancesVector(
-      tokenizer.asVector().size(), tolerancesStringVector);
+  std::vector<double> tolerancesVector = createTolerancesVector(tokenizer.asVector().size(), tolerancesStringVector);
 
   auto i = tokenizer.begin();
   auto j = tolerancesVector.begin();
@@ -192,34 +157,29 @@ void SampleLogsBehaviour::setSampleMap(SampleLogsMap &map,
 
     // Check 1: Does the key exist in the primary map? If so ignore it and
     // continue.
-    if (skipIfInPrimaryMap &&
-        (m_logMap.count(SampleLogsKey(item, mergeType)) != 0)) {
+    if (skipIfInPrimaryMap && (m_logMap.count(SampleLogsKey(item, mergeType)) != 0)) {
       continue;
     }
 
     // Check 2: If the key (sample log name) already exists in this map throw an
     // error.
     if (map.count(SampleLogsKey(item, mergeType)) != 0) {
-      throw std::invalid_argument(
-          "Error when making list of merge items, sample log \"" + item +
-          "\" defined more than once!");
+      throw std::invalid_argument("Error when making list of merge items, sample log \"" + item +
+                                  "\" defined more than once!");
     }
 
     // Check 3: If the sample log is one that should not be combined with
     // others, check other incompatible sample logs do not exist too.
-    std::set<MergeLogType> uncombinableLogs = {
-        MergeLogType::Sum, MergeLogType::TimeSeries, MergeLogType::List};
+    std::set<MergeLogType> uncombinableLogs = {MergeLogType::Sum, MergeLogType::TimeSeries, MergeLogType::List};
     if (uncombinableLogs.count(mergeType) != 0) {
       bool skipLog = false;
 
       uncombinableLogs.erase(mergeType);
       for (auto &logType : uncombinableLogs) {
         if (map.count(SampleLogsKey(item, logType)) > 0)
-          throw std::invalid_argument(
-              "Error when making list of merge items, sample log " + item +
-              " being used for two incompatible merge types!");
-        if (skipIfInPrimaryMap &&
-            m_logMap.count(SampleLogsKey(item, logType)) > 0)
+          throw std::invalid_argument("Error when making list of merge items, sample log " + item +
+                                      " being used for two incompatible merge types!");
+        if (skipIfInPrimaryMap && m_logMap.count(SampleLogsKey(item, logType)) > 0)
           skipLog = true;
       }
 
@@ -232,10 +192,8 @@ void SampleLogsBehaviour::setSampleMap(SampleLogsMap &map,
     try {
       prop = std::shared_ptr<Property>(ws.getLog(item)->clone());
     } catch (std::invalid_argument &) {
-      m_logger.error()
-          << "Could not merge sample log \"" << item
-          << "\", does not exist in workspace! This sample log will be ignored."
-          << std::endl;
+      m_logger.error() << "Could not merge sample log \"" << item
+                       << "\", does not exist in workspace! This sample log will be ignored." << std::endl;
       continue;
     }
 
@@ -244,8 +202,7 @@ void SampleLogsBehaviour::setSampleMap(SampleLogsMap &map,
     bool isNumeric;
     double value = 0.0;
     isNumeric = setNumericValue(item, ws, value);
-    if (!isNumeric && (mergeType == MergeLogType::Sum ||
-                       mergeType == MergeLogType::TimeSeries)) {
+    if (!isNumeric && (mergeType == MergeLogType::Sum || mergeType == MergeLogType::TimeSeries)) {
       m_logger.error() << item
                        << " could not be converted to a numeric type. "
                           "This sample log will be ignored.\n"
@@ -276,16 +233,15 @@ void SampleLogsBehaviour::setSampleMap(SampleLogsMap &map,
  * @param tolerances a vector containing strings with the tolerances
  * @return a vector of doubles of size numberNames
  */
-std::vector<double> SampleLogsBehaviour::createTolerancesVector(
-    size_t numberNames, const std::vector<std::string> &tolerances) {
+std::vector<double> SampleLogsBehaviour::createTolerancesVector(size_t numberNames,
+                                                                const std::vector<std::string> &tolerances) {
   size_t numberTolerances = tolerances.size();
 
   std::vector<double> tolerancesVector(numberNames);
 
   if (numberNames == numberTolerances && numberTolerances > 1) {
     try {
-      std::transform(tolerances.begin(), tolerances.end(),
-                     tolerancesVector.begin(),
+      std::transform(tolerances.begin(), tolerances.end(), tolerancesVector.begin(),
                      [](const std::string &val) { return std::stod(val); });
     } catch (std::invalid_argument &) {
       throw std::invalid_argument("Error when creating tolerances vector. "
@@ -296,8 +252,7 @@ std::vector<double> SampleLogsBehaviour::createTolerancesVector(
                               "ensure each comma separated value is within "
                               "double precision range.");
     }
-    if (std::any_of(tolerancesVector.cbegin(), tolerancesVector.cend(),
-                    [](const auto value) { return value < 0.; })) {
+    if (std::any_of(tolerancesVector.cbegin(), tolerancesVector.cend(), [](const auto value) { return value < 0.; })) {
       throw std::out_of_range("Error when creating tolerances vector. Please "
                               "ensure all tolerance values are positive.");
     }
@@ -322,10 +277,8 @@ std::vector<double> SampleLogsBehaviour::createTolerancesVector(
       throw std::out_of_range("The single tolerance value requested is "
                               "negative. Please ensure it is positive.");
   } else {
-    throw std::invalid_argument("Invalid length of tolerances, found " +
-                                std::to_string(numberTolerances) +
-                                " tolerance values but " +
-                                std::to_string(numberNames) + " names.");
+    throw std::invalid_argument("Invalid length of tolerances, found " + std::to_string(numberTolerances) +
+                                " tolerance values but " + std::to_string(numberNames) + " names.");
   }
 
   return tolerancesVector;
@@ -339,8 +292,8 @@ std::vector<double> SampleLogsBehaviour::createTolerancesVector(
  * @param ws the first workspace in the merge
  * @return a shared pointer to the added property
  */
-std::shared_ptr<Property> SampleLogsBehaviour::addPropertyForTimeSeries(
-    const std::string &item, const double value, MatrixWorkspace &ws) {
+std::shared_ptr<Property> SampleLogsBehaviour::addPropertyForTimeSeries(const std::string &item, const double value,
+                                                                        MatrixWorkspace &ws) {
   std::shared_ptr<Property> returnProp;
   const std::string originalUnit = ws.getLog(item)->units();
   try {
@@ -350,8 +303,7 @@ std::shared_ptr<Property> SampleLogsBehaviour::addPropertyForTimeSeries(
     returnProp.reset(ws.getLog(item)->clone());
   } catch (std::invalid_argument &) {
     // Property does not already exist, so add it setting the first entry
-    std::unique_ptr<Kernel::TimeSeriesProperty<double>> timeSeriesProp(
-        new TimeSeriesProperty<double>(item));
+    std::unique_ptr<Kernel::TimeSeriesProperty<double>> timeSeriesProp(new TimeSeriesProperty<double>(item));
     std::string startTime = ws.run().startTime().toISO8601String();
 
     timeSeriesProp->addValue(startTime, value);
@@ -371,8 +323,8 @@ std::shared_ptr<Property> SampleLogsBehaviour::addPropertyForTimeSeries(
  * @param ws the first workspace in the merge
  * @return a shared pointer to the added property
  */
-std::shared_ptr<Property> SampleLogsBehaviour::addPropertyForList(
-    const std::string &item, const std::string &value, MatrixWorkspace &ws) {
+std::shared_ptr<Property> SampleLogsBehaviour::addPropertyForList(const std::string &item, const std::string &value,
+                                                                  MatrixWorkspace &ws) {
   std::shared_ptr<Property> returnProp;
 
   const std::string originalUnit = ws.getLog(item)->units();
@@ -395,9 +347,7 @@ std::shared_ptr<Property> SampleLogsBehaviour::addPropertyForList(
  * @return true if the sample log could be converted to a double, false
  * otherwise
  */
-bool SampleLogsBehaviour::setNumericValue(const std::string &item,
-                                          const MatrixWorkspace &ws,
-                                          double &value) {
+bool SampleLogsBehaviour::setNumericValue(const std::string &item, const MatrixWorkspace &ws, double &value) {
   bool isNumeric;
 
   try {
@@ -416,8 +366,7 @@ bool SampleLogsBehaviour::setNumericValue(const std::string &item,
  * @param addeeWS the workspace being merged
  * @param outWS the workspace the others are merged into
  */
-void SampleLogsBehaviour::mergeSampleLogs(const MatrixWorkspace_sptr &addeeWS,
-                                          const MatrixWorkspace_sptr &outWS) {
+void SampleLogsBehaviour::mergeSampleLogs(const MatrixWorkspace_sptr &addeeWS, const MatrixWorkspace_sptr &outWS) {
   for (const auto &item : m_logMap) {
     const std::string &logName = item.first.first;
 
@@ -432,15 +381,13 @@ void SampleLogsBehaviour::mergeSampleLogs(const MatrixWorkspace_sptr &addeeWS,
       outWSNumericValue = outWS->getLogAsSingleValue(logName);
     } catch (std::invalid_argument &) {
       if (item.second.isNumeric) {
-        throw std::invalid_argument(
-            logName + " could not be converted to a numeric type");
+        throw std::invalid_argument(logName + " could not be converted to a numeric type");
       }
     }
 
     switch (item.first.second) {
     case MergeLogType::Sum: {
-      this->updateSumProperty(addeeWSNumericValue, outWSNumericValue, *outWS,
-                              logName);
+      this->updateSumProperty(addeeWSNumericValue, outWSNumericValue, *outWS, logName);
       break;
     }
     case MergeLogType::TimeSeries: {
@@ -452,12 +399,10 @@ void SampleLogsBehaviour::mergeSampleLogs(const MatrixWorkspace_sptr &addeeWS,
       break;
     }
     case MergeLogType::Warn:
-      this->checkWarnProperty(*addeeWS, addeeWSProperty, item.second,
-                              addeeWSNumericValue, outWSNumericValue, logName);
+      this->checkWarnProperty(*addeeWS, addeeWSProperty, item.second, addeeWSNumericValue, outWSNumericValue, logName);
       break;
     case MergeLogType::Fail:
-      this->checkErrorProperty(*addeeWS, addeeWSProperty, item.second,
-                               addeeWSNumericValue, outWSNumericValue, logName);
+      this->checkErrorProperty(*addeeWS, addeeWSProperty, item.second, addeeWSNumericValue, outWSNumericValue, logName);
       break;
     }
     outWS->getLog(logName)->setUnits(originalUnit);
@@ -474,12 +419,9 @@ void SampleLogsBehaviour::mergeSampleLogs(const MatrixWorkspace_sptr &addeeWS,
  * @param outWS the workspace the others are merged into
  * @param name the name of the property
  */
-void SampleLogsBehaviour::updateSumProperty(double addeeWSNumericValue,
-                                            double outWSNumericValue,
-                                            MatrixWorkspace &outWS,
-                                            const std::string &name) {
-  outWS.mutableRun().addProperty(name, addeeWSNumericValue + outWSNumericValue,
-                                 true);
+void SampleLogsBehaviour::updateSumProperty(double addeeWSNumericValue, double outWSNumericValue,
+                                            MatrixWorkspace &outWS, const std::string &name) {
+  outWS.mutableRun().addProperty(name, addeeWSNumericValue + outWSNumericValue, true);
 }
 
 /**
@@ -490,13 +432,11 @@ void SampleLogsBehaviour::updateSumProperty(double addeeWSNumericValue,
  * @param outWS the workspace the others are merged into
  * @param name the name of the property
  */
-void SampleLogsBehaviour::updateTimeSeriesProperty(MatrixWorkspace &addeeWS,
-                                                   MatrixWorkspace &outWS,
+void SampleLogsBehaviour::updateTimeSeriesProperty(MatrixWorkspace &addeeWS, MatrixWorkspace &outWS,
                                                    const std::string &name) {
   auto timeSeriesProp = outWS.run().getTimeSeriesProperty<double>(name);
   try {
-    const auto addeeTimeSeries =
-        addeeWS.run().getTimeSeriesProperty<double>(name);
+    const auto addeeTimeSeries = addeeWS.run().getTimeSeriesProperty<double>(name);
     timeSeriesProp->merge(addeeTimeSeries);
   } catch (std::invalid_argument &) {
     Types::Core::DateAndTime startTime = addeeWS.run().startTime();
@@ -506,8 +446,7 @@ void SampleLogsBehaviour::updateTimeSeriesProperty(MatrixWorkspace &addeeWS,
   // Remove this to supress a warning, we will put it back after adding the
   // workspaces in MergeRuns
   const Property *addeeWSProperty = addeeWS.run().getProperty(name);
-  m_addeeLogMap.emplace_back(
-      std::shared_ptr<Property>(addeeWSProperty->clone()));
+  m_addeeLogMap.emplace_back(std::shared_ptr<Property>(addeeWSProperty->clone()));
 }
 
 /**
@@ -519,8 +458,7 @@ void SampleLogsBehaviour::updateTimeSeriesProperty(MatrixWorkspace &addeeWS,
  * @param outWS the workspace the others are merged into
  * @param name the name of the property
  */
-void SampleLogsBehaviour::updateListProperty(MatrixWorkspace &addeeWS,
-                                             MatrixWorkspace &outWS,
+void SampleLogsBehaviour::updateListProperty(MatrixWorkspace &addeeWS, MatrixWorkspace &outWS,
                                              const std::string &name) {
   const std::string addeeWSVal = addeeWS.getLog(name)->value();
   const std::string outWSVal = outWS.run().getProperty(name)->value();
@@ -542,18 +480,14 @@ void SampleLogsBehaviour::updateListProperty(MatrixWorkspace &addeeWS,
  *numeric)
  * @param name the name of the sample log to check
  */
-void SampleLogsBehaviour::checkWarnProperty(const MatrixWorkspace &addeeWS,
-                                            Property *addeeWSProperty,
-                                            const SampleLogBehaviour &behaviour,
-                                            const double addeeWSNumericValue,
-                                            const double outWSNumericValue,
-                                            const std::string &name) {
+void SampleLogsBehaviour::checkWarnProperty(const MatrixWorkspace &addeeWS, Property *addeeWSProperty,
+                                            const SampleLogBehaviour &behaviour, const double addeeWSNumericValue,
+                                            const double outWSNumericValue, const std::string &name) {
 
   if (!isWithinTolerance(behaviour, addeeWSNumericValue, outWSNumericValue) &&
       !stringPropertiesMatch(behaviour, addeeWSProperty)) {
-    m_logger.warning() << generateDifferenceMessage(
-        name, addeeWS.getName(), addeeWSProperty->value(),
-        behaviour.property->value());
+    m_logger.warning() << generateDifferenceMessage(name, addeeWS.getName(), addeeWSProperty->value(),
+                                                    behaviour.property->value());
   }
 }
 
@@ -572,16 +506,14 @@ void SampleLogsBehaviour::checkWarnProperty(const MatrixWorkspace &addeeWS,
  *numeric)
  * @param name the name of the sample log to check
  */
-void SampleLogsBehaviour::checkErrorProperty(
-    const MatrixWorkspace &addeeWS, Property *addeeWSProperty,
-    const SampleLogBehaviour &behaviour, const double addeeWSNumericValue,
-    const double outWSNumericValue, const std::string &name) {
+void SampleLogsBehaviour::checkErrorProperty(const MatrixWorkspace &addeeWS, Property *addeeWSProperty,
+                                             const SampleLogBehaviour &behaviour, const double addeeWSNumericValue,
+                                             const double outWSNumericValue, const std::string &name) {
 
   if (!isWithinTolerance(behaviour, addeeWSNumericValue, outWSNumericValue) &&
       !stringPropertiesMatch(behaviour, addeeWSProperty)) {
-    throw std::invalid_argument(generateDifferenceMessage(
-        name, addeeWS.getName(), addeeWSProperty->value(),
-        behaviour.property->value()));
+    throw std::invalid_argument(
+        generateDifferenceMessage(name, addeeWS.getName(), addeeWSProperty->value(), behaviour.property->value()));
   }
 }
 
@@ -595,12 +527,10 @@ void SampleLogsBehaviour::checkErrorProperty(
  * @return true if the sample log is numeric and within any tolerance set, or if
  * strings match, false otherwise
  */
-bool SampleLogsBehaviour::isWithinTolerance(const SampleLogBehaviour &behaviour,
-                                            const double addeeWSNumericValue,
+bool SampleLogsBehaviour::isWithinTolerance(const SampleLogBehaviour &behaviour, const double addeeWSNumericValue,
                                             const double outWSNumericValue) {
   if (behaviour.isNumeric && behaviour.tolerance > 0.0) {
-    return std::abs(addeeWSNumericValue - outWSNumericValue) <
-           behaviour.tolerance;
+    return std::abs(addeeWSNumericValue - outWSNumericValue) < behaviour.tolerance;
   }
 
   return false;
@@ -614,8 +544,7 @@ bool SampleLogsBehaviour::isWithinTolerance(const SampleLogBehaviour &behaviour,
  * @param addeeWSProperty a pointer to the property in the workspace being added
  * @return true if the sample logs match, false otherwise
  */
-bool SampleLogsBehaviour::stringPropertiesMatch(
-    const SampleLogBehaviour &behaviour, const Property *addeeWSProperty) {
+bool SampleLogsBehaviour::stringPropertiesMatch(const SampleLogBehaviour &behaviour, const Property *addeeWSProperty) {
   return behaviour.property->value() == addeeWSProperty->value();
 }
 
@@ -624,13 +553,11 @@ bool SampleLogsBehaviour::stringPropertiesMatch(
  *
  * @param outWS the merged workspace
  */
-void SampleLogsBehaviour::setUpdatedSampleLogs(
-    const MatrixWorkspace_sptr &outWS) {
+void SampleLogsBehaviour::setUpdatedSampleLogs(const MatrixWorkspace_sptr &outWS) {
   for (auto &item : m_logMap) {
     std::string propertyToReset = item.first.first;
 
-    if (item.first.second == MergeLogType::Warn ||
-        item.first.second == MergeLogType::Fail) {
+    if (item.first.second == MergeLogType::Warn || item.first.second == MergeLogType::Fail) {
       continue;
     }
 
@@ -646,8 +573,7 @@ void SampleLogsBehaviour::setUpdatedSampleLogs(
  *
  * @param addeeWS the workspace being merged
  */
-void SampleLogsBehaviour::removeSampleLogsFromWorkspace(
-    const MatrixWorkspace_sptr &addeeWS) {
+void SampleLogsBehaviour::removeSampleLogsFromWorkspace(const MatrixWorkspace_sptr &addeeWS) {
   for (const auto &prop : m_addeeLogMap) {
     const auto &propName = prop->name();
     addeeWS->mutableRun().removeProperty(propName);
@@ -662,8 +588,7 @@ void SampleLogsBehaviour::removeSampleLogsFromWorkspace(
  *
  * @param addeeWS the workspace being merged
  */
-void SampleLogsBehaviour::readdSampleLogToWorkspace(
-    const MatrixWorkspace_sptr &addeeWS) {
+void SampleLogsBehaviour::readdSampleLogToWorkspace(const MatrixWorkspace_sptr &addeeWS) {
   for (const auto &item : m_addeeLogMap) {
     auto property = std::unique_ptr<Kernel::Property>(item->clone());
     addeeWS->mutableRun().addProperty(std::move(property));
@@ -681,14 +606,10 @@ void SampleLogsBehaviour::resetSampleLogs(const MatrixWorkspace_sptr &ws) {
     std::string const &propertyToReset = item.first.first;
 
     if (item.first.second == MergeLogType::TimeSeries) {
-      auto property =
-          std::unique_ptr<Kernel::Property>(item.second.property->clone());
+      auto property = std::unique_ptr<Kernel::Property>(item.second.property->clone());
       ws->mutableRun().addProperty(std::move(property), true);
-    } else if (item.first.second == MergeLogType::Sum ||
-               item.first.second == MergeLogType::List) {
-      ws->mutableRun()
-          .getProperty(propertyToReset)
-          ->setValue(item.second.property->value());
+    } else if (item.first.second == MergeLogType::Sum || item.first.second == MergeLogType::List) {
+      ws->mutableRun().getProperty(propertyToReset)->setValue(item.second.property->value());
     }
   }
 }

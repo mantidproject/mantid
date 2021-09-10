@@ -73,7 +73,7 @@ Deprecated
 - :ref:`ConvertUnitsUsingDetectorTable	 <algm-ConvertUnitsUsingDetectorTable>`.
 - :ref:`DownloadRemoteFile	 <algm-DownloadRemoteFile>` is deprecated in favour of v2.
 - :ref:`FFTSmooth	 <algm-FFTSmooth>` is deprecated in favour of v2.
-- :ref:`OneStepMDEW	 <algm-OneStepMDEW>`.
+- OneStepMDEW.
 - :ref:`QueryAllRemoteJobs	 <algm-QueryAllRemoteJobs>` is deprecated in favour of v2.
 - :ref:`RefinePowderInstrumentParameters	 <algm-RefinePowderInstrumentParameters>` is deprecated in favour of v2.
 - :ref:`StartRemoteTransaction	 <algm-StartRemoteTransaction>` is deprecated in favour of v2.

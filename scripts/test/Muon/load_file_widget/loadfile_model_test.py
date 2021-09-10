@@ -42,7 +42,10 @@ class LoadFileWidgetModelTest(unittest.TestCase):
 
         self.model.execute()
 
-        self.assertCountEqual([os.path.split(filename)[-1] for filename in self.model.loaded_filenames], files)
+        # We make the filename all uppercase to deal with some os's capitalising the instrument and some not.
+        # We just need to check the right files were added to the model.
+        expected_files = ['EMU00019489.NXS', 'EMU00006473.NXS', 'EMU00006475.NXS']
+        self.assertCountEqual([os.path.split(filename.upper())[-1] for filename in self.model.loaded_filenames], expected_files)
         self.assertCountEqual(self.model.loaded_runs, [[19489], [6473], [6475]])
 
     def test_model_is_cleared_correctly(self):
@@ -62,8 +65,10 @@ class LoadFileWidgetModelTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.model.execute()
 
-        self.assertCountEqual([os.path.split(filename)[-1] for filename in self.model.loaded_filenames],
-                              ['EMU00019489.nxs', 'emu00006473.nxs'])
+        # We make the filename all uppercase to deal with some os's capitalising the instrument and some not.
+        # We just need to check the right files were added to the model.
+        self.assertCountEqual([os.path.split(filename.upper())[-1] for filename in self.model.loaded_filenames],
+                              ['EMU00019489.NXS', 'EMU00006473.NXS'])
         self.assertCountEqual(self.model.loaded_runs, [[19489], [6473]])
 
 

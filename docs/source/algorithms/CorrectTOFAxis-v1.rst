@@ -30,7 +30,7 @@ where :math:`m_n` is the neutron mass. The shift :math:`\Delta t` is then added 
 
 The algorithm assumes micro seconds as units of time and meV as units of energy.
 
-Whether the *ReferenceSpectra* input property refers to workspace indices, spectrum numbers or detector IDs is specified by *IndexType*. 
+Whether the *ReferenceSpectra* input property refers to workspace indices, spectrum numbers or detector IDs is specified by *IndexType*.
 
 Usage
 -----
@@ -40,15 +40,15 @@ Usage
 .. testcode:: ExElasticBinWithL2
 
     from mantid.kernel import DeltaEModeType, UnitConversion
-    
+
     L1 = 2.0 # in metres.
     L2 = 2.0
     Ei = 55.0 # in meV
-    elasticTOF = UnitConversion.run(src='Energy', dest='TOF', 
+    elasticTOF = UnitConversion.run(src='Energy', dest='TOF',
                                     srcValue=Ei,
-                                    l1=L1, l2=L2, 
+                                    l1=L1, l2=L2,
                                     theta=0, emode=DeltaEModeType.Direct, efixed=Ei)
-    
+
     # Make a workspace with wrong TOF axis.
     TOFMin = 0.0
     TOFMax = 100.0
@@ -69,19 +69,19 @@ Usage
         XMin=TOFMin,
         XMax=TOFMax,
         BinWidth=binWidth)
-    
+
     # Do the correction.
     correctedWs = CorrectTOFAxis(ws,
         IndexType='Workspace Index',
         ElasticBinIndex=elasticBinIndex,
         EFixed=Ei,
         L2=L2)
-    
+
     # Convert TOF to energy transfer.
     convertedWs = ConvertUnits(correctedWs,
         Target='DeltaE',
         EMode='Direct')
-    
+
     # Check results
     # Zero energy transfer should be around elasticBinIndex.
     for index in range(elasticBinIndex-1, elasticBinIndex+2):
@@ -101,15 +101,15 @@ Output:
 .. testcode:: ExElasticBinWithRef
 
     from mantid.kernel import DeltaEModeType, UnitConversion
-    
+
     L1 = 2.0 # in metres.
     L2 = 2.0
     Ei = 55.0 # in meV
-    elasticTOF = UnitConversion.run(src='Energy', dest='TOF', 
+    elasticTOF = UnitConversion.run(src='Energy', dest='TOF',
                                     srcValue=Ei,
-                                    l1=L1, l2=L2, 
+                                    l1=L1, l2=L2,
                                     theta=0, emode=DeltaEModeType.Direct, efixed=Ei)
-    
+
     # Make a workspace with wrong TOF axis.
     TOFMin = 0.0
     TOFMax = 100.0
@@ -130,19 +130,19 @@ Output:
         XMin=TOFMin,
         XMax=TOFMax,
         BinWidth=binWidth)
-    
+
     # Do the correction.
     correctedWs = CorrectTOFAxis(ws,
         IndexType='Workspace Index',
         ReferenceSpectra='0',
         ElasticBinIndex=elasticBinIndex,
         EFixed=Ei)
-    
+
     # Convert TOF to energy transfer.
     convertedWs = ConvertUnits(correctedWs,
         Target='DeltaE',
         EMode='Direct')
-    
+
     # Check results
     # Zero energy transfer should be around elasticBinIndex.
     for index in range(elasticBinIndex-1, elasticBinIndex+2):
@@ -163,15 +163,15 @@ Output:
 
     from mantid.kernel import DeltaEModeType, UnitConversion
     import numpy
-    
+
     L1 = 2.0 # in metres
     L2 = 2.0
     Ei = 55.0 # in meV
-    elasticTOF = UnitConversion.run(src='Energy', dest='TOF', 
+    elasticTOF = UnitConversion.run(src='Energy', dest='TOF',
                                     srcValue=Ei,
-                                    l1=L1, l2=L2, 
+                                    l1=L1, l2=L2,
                                     theta=0, emode=DeltaEModeType.Direct, efixed=Ei)
-    
+
     # Make a workspace with wrong TOF axis.
     TOFMin = 0.0
     TOFMax = 100.0
@@ -189,17 +189,17 @@ Output:
            XMin=TOFMin,
            XMax=TOFMax,
            BinWidth=0.5)
-    
+
     # Prepare for the correction.
     EPPTable = FindEPP(ws)
-    
+
     # Do the correction.
     correctedWs = CorrectTOFAxis(ws,
         EPPTable=EPPTable,
         IndexType='Workspace Index',
         ReferenceSpectra='0',
         EFixed=Ei)
-    
+
     # Check results.
     print('Original TOF for the elastic peak: {0:0.1f}'.format(
         ws.readX(0)[numpy.argmax(ws.readY(0))]))
@@ -221,15 +221,15 @@ Output:
 
     from mantid.kernel import DeltaEModeType, UnitConversion
     import numpy
-    
+
     L1 = 2.0
     L2 = 2.0
     Ei = 55.0 # in meV
-    elasticTOF = UnitConversion.run(src='Energy', dest='TOF', 
+    elasticTOF = UnitConversion.run(src='Energy', dest='TOF',
                                     srcValue=Ei,
-                                    l1=L1, l2=L2, 
+                                    l1=L1, l2=L2,
                                     theta=0, emode=DeltaEModeType.Direct, efixed=Ei)
-    
+
     # Make two workspaces with wrong TOF axis.
     TOFMin = 0.0
     TOFMax = 100.0
@@ -260,21 +260,21 @@ Output:
     XMin=TOFMin,
     XMax=TOFMax,
     BinWidth=0.5)
-    
+
     # Correct the first workspace using the EPP table method.
     EPPTable = FindEPP(ws1)
-    
+
     # Do the correction.
     correctedWs1 = CorrectTOFAxis(ws1,
         EPPTable=EPPTable,
         IndexType='Workspace Index',
         ReferenceSpectra='0',
         EFixed=Ei)
-    
+
     # Correct the second workspace by using the first as a reference.
     correctedWs2 = CorrectTOFAxis(ws2,
         ReferenceWorkspace=correctedWs1)
-    
+
     # Check results
     print('First workspace original TOF for the elastic peak: {0:0.1f}'.format(
         ws1.readX(0)[numpy.argmax(ws1.readY(0))]))

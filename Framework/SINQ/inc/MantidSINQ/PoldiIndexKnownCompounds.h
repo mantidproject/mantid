@@ -22,17 +22,12 @@ namespace Poldi {
   */
 struct MANTID_SINQ_DLL IndexCandidatePair {
   /// Default constructor
-  IndexCandidatePair()
-      : observed(), candidate(), positionMatch(0.0),
-        candidateCollectionIndex(0) {}
+  IndexCandidatePair() : observed(), candidate(), positionMatch(0.0), candidateCollectionIndex(0) {}
 
-  IndexCandidatePair(const PoldiPeak_sptr &measuredPeak,
-                     const PoldiPeak_sptr &candidatePeak, size_t index);
+  IndexCandidatePair(const PoldiPeak_sptr &measuredPeak, const PoldiPeak_sptr &candidatePeak, size_t index);
 
   /// Comparison operator, position matches are compared.
-  bool operator<(const IndexCandidatePair &other) const {
-    return positionMatch < other.positionMatch;
-  }
+  bool operator<(const IndexCandidatePair &other) const { return positionMatch < other.positionMatch; }
 
   PoldiPeak_sptr observed;
   PoldiPeak_sptr candidate;
@@ -58,84 +53,65 @@ public:
   std::map<std::string, std::string> validateInputs() override;
 
   void setMeasuredPeaks(const PoldiPeakCollection_sptr &measuredPeaks);
-  void setExpectedPhases(
-      const std::vector<PoldiPeakCollection_sptr> &expectedPhases);
+  void setExpectedPhases(const std::vector<PoldiPeakCollection_sptr> &expectedPhases);
   void setExpectedPhaseNames(const std::vector<std::string> &phaseNames);
 
   void initializeUnindexedPeaks();
-  void initializeIndexedPeaks(
-      const std::vector<PoldiPeakCollection_sptr> &expectedPhases);
+  void initializeIndexedPeaks(const std::vector<PoldiPeakCollection_sptr> &expectedPhases);
 
   static double fwhmToSigma(double fwhm);
   static double sigmaToFwhm(double sigma);
 
 protected:
   // Workspace and name-handling
-  std::vector<API::Workspace_sptr>
-  getWorkspaces(const std::vector<std::string> &workspaceNames) const;
-  std::vector<PoldiPeakCollection_sptr>
-  getPeakCollections(const std::vector<API::Workspace_sptr> &workspaces) const;
+  std::vector<API::Workspace_sptr> getWorkspaces(const std::vector<std::string> &workspaceNames) const;
+  std::vector<PoldiPeakCollection_sptr> getPeakCollections(const std::vector<API::Workspace_sptr> &workspaces) const;
 
-  std::vector<std::string>
-  getWorkspaceNames(const std::vector<API::Workspace_sptr> &workspaces) const;
+  std::vector<std::string> getWorkspaceNames(const std::vector<API::Workspace_sptr> &workspaces) const;
 
   // Input vector checks
-  std::vector<double> reshapeVector(const std::vector<double> &vector,
-                                    size_t size) const;
+  std::vector<double> reshapeVector(const std::vector<double> &vector, size_t size) const;
 
   std::vector<double> getContributions(size_t size) const;
-  std::vector<double>
-  getNormalizedContributions(const std::vector<double> &contributions) const;
+  std::vector<double> getNormalizedContributions(const std::vector<double> &contributions) const;
 
-  void scaleIntensityEstimates(
-      const std::vector<PoldiPeakCollection_sptr> &peakCollections,
-      const std::vector<double> &normalizedContributions) const;
-  void scaleIntensityEstimates(const PoldiPeakCollection_sptr &peakCollection,
-                               double contribution) const;
+  void scaleIntensityEstimates(const std::vector<PoldiPeakCollection_sptr> &peakCollections,
+                               const std::vector<double> &normalizedContributions) const;
+  void scaleIntensityEstimates(const PoldiPeakCollection_sptr &peakCollection, double contribution) const;
 
-  void scaleToExperimentalValues(
-      const std::vector<PoldiPeakCollection_sptr> &peakCollections,
-      const PoldiPeakCollection_sptr &measuredPeaks) const;
+  void scaleToExperimentalValues(const std::vector<PoldiPeakCollection_sptr> &peakCollections,
+                                 const PoldiPeakCollection_sptr &measuredPeaks) const;
 
-  double
-  getMaximumIntensity(const PoldiPeakCollection_sptr &peakCollection) const;
-  size_t getMaximumIntensityPeakIndex(
-      const PoldiPeakCollection_sptr &peakCollection) const;
+  double getMaximumIntensity(const PoldiPeakCollection_sptr &peakCollection) const;
+  size_t getMaximumIntensityPeakIndex(const PoldiPeakCollection_sptr &peakCollection) const;
 
   std::vector<double> getTolerances(size_t size) const;
-  void assignFwhmEstimates(
-      const std::vector<PoldiPeakCollection_sptr> &peakCollections,
-      const std::vector<double> &tolerances) const;
-  void assignFwhmEstimates(const PoldiPeakCollection_sptr &peakCollection,
-                           double tolerance) const;
+  void assignFwhmEstimates(const std::vector<PoldiPeakCollection_sptr> &peakCollections,
+                           const std::vector<double> &tolerances) const;
+  void assignFwhmEstimates(const PoldiPeakCollection_sptr &peakCollection, double tolerance) const;
 
   // Indexing algorithm
-  void
-  indexPeaks(const PoldiPeakCollection_sptr &measured,
-             const std::vector<PoldiPeakCollection_sptr> &knownCompoundPeaks);
+  void indexPeaks(const PoldiPeakCollection_sptr &measured,
+                  const std::vector<PoldiPeakCollection_sptr> &knownCompoundPeaks);
 
-  std::vector<IndexCandidatePair> getAllIndexCandidatePairs(
-      const PoldiPeakCollection_sptr &measured,
-      const std::vector<PoldiPeakCollection_sptr> &knownCompoundPeaks);
-  std::vector<IndexCandidatePair> getIndexCandidatePairs(
-      const PoldiPeak_sptr &peak,
-      const std::vector<PoldiPeakCollection_sptr> &candidateCollections) const;
-  bool isCandidate(const PoldiPeak_sptr &measuredPeak,
-                   const PoldiPeak_sptr &possibleCandidate) const;
+  std::vector<IndexCandidatePair>
+  getAllIndexCandidatePairs(const PoldiPeakCollection_sptr &measured,
+                            const std::vector<PoldiPeakCollection_sptr> &knownCompoundPeaks);
+  std::vector<IndexCandidatePair>
+  getIndexCandidatePairs(const PoldiPeak_sptr &peak,
+                         const std::vector<PoldiPeakCollection_sptr> &candidateCollections) const;
+  bool isCandidate(const PoldiPeak_sptr &measuredPeak, const PoldiPeak_sptr &possibleCandidate) const;
   void collectUnindexedPeak(const PoldiPeak_sptr &unindexedPeak);
 
   void assignCandidates(const std::vector<IndexCandidatePair> &candidates);
-  bool inPeakSet(const std::set<PoldiPeak_sptr> &peakSet,
-                 const PoldiPeak_sptr &peak) const;
+  bool inPeakSet(const std::set<PoldiPeak_sptr> &peakSet, const PoldiPeak_sptr &peak) const;
   void assignPeakIndex(const IndexCandidatePair &candidate);
 
   // Finalization
-  PoldiPeakCollection_sptr
-  getIntensitySortedPeakCollection(const PoldiPeakCollection_sptr &peaks) const;
+  PoldiPeakCollection_sptr getIntensitySortedPeakCollection(const PoldiPeakCollection_sptr &peaks) const;
 
-  void assignCrystalStructureParameters(
-      PoldiPeakCollection_sptr &indexedPeaks,
-      const PoldiPeakCollection_sptr &phasePeaks) const;
+  void assignCrystalStructureParameters(PoldiPeakCollection_sptr &indexedPeaks,
+                                        const PoldiPeakCollection_sptr &phasePeaks) const;
 
   PoldiPeakCollection_sptr m_measuredPeaks;
   std::vector<PoldiPeakCollection_sptr> m_expectedPhases;

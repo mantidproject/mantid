@@ -22,7 +22,7 @@ from matplotlib.container import ErrorbarContainer
 from matplotlib.contour import QuadContourSet
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QCursor
-from qtpy.QtWidgets import QActionGroup, QMenu, QApplication
+from qtpy.QtWidgets import QActionGroup, QMenu, QApplication, QAction
 from matplotlib.colors import LogNorm, Normalize
 from matplotlib.collections import Collection
 from mpl_toolkits.mplot3d.axes3d import Axes3D
@@ -75,11 +75,12 @@ class FigureInteraction(object):
         :param fig_manager: A reference to the figure manager containing the
         canvas that receives the events
         """
+        self.fig_manager = fig_manager
         # Check it looks like a FigureCanvasQT
-        if not hasattr(fig_manager.canvas, "buttond"):
+        if not hasattr(self.fig_manager.canvas, "buttond"):
             raise RuntimeError("Figure canvas does not look like a Qt canvas.")
 
-        canvas = fig_manager.canvas
+        canvas = self.fig_manager.canvas
         self._cids = []
         self._cids.append(canvas.mpl_connect('button_press_event', self.on_mouse_button_press))
         self._cids.append(canvas.mpl_connect('button_release_event', self.on_mouse_button_release))
@@ -93,7 +94,7 @@ class FigureInteraction(object):
         self.canvas = canvas
         self.toolbar_manager = ToolbarStateManager(self.canvas.toolbar)
         self.toolbar_manager.home_button_connect(self.redraw_annotations)
-        self.fit_browser = fig_manager.fit_browser
+        self.fit_browser = self.fig_manager.fit_browser
         self.errors_manager = FigureErrorsManager(self.canvas)
         self.markers = []
         self.valid_lines = VALID_LINE_STYLE
@@ -155,7 +156,8 @@ class FigureInteraction(object):
                 self._show_markers_menu(marker_selected, event)
         elif event.dblclick and event.button == canvas.buttond.get(Qt.LeftButton):
             if not marker_selected:
-                self._show_axis_editor(event)
+                if not self._show_axis_editor(event):
+                    self._show_plot_options(event)
             elif len(marker_selected) == 1:
                 self._edit_marker(marker_selected[0])
         elif event.button == canvas.buttond.get(Qt.MiddleButton):
@@ -223,13 +225,22 @@ class FigureInteraction(object):
             marker.mouse_move_stop()
 
     def _show_axis_editor(self, event):
+        """
+        Decides whether to show a dialog to edit axis information based on the contents of the
+        event. Shows a dialog if necessary.
+        @param event: the object representing the event
+        @return: a flag to denote whether an action was taken e.g. opening a dialog.
+        """
         # We assume this is used for editing axis information e.g. labels
         # which are outside of the axes so event.inaxes is no use.
         canvas = self.canvas
         figure = canvas.figure
         axes = figure.get_axes()
+        action_taken = False
 
         def move_and_show(editor):
+            nonlocal action_taken
+            action_taken = True
             editor.move(QCursor.pos())
             editor.exec_()
 
@@ -261,10 +272,35 @@ class FigureInteraction(object):
                 legend_set_draggable(ax.get_legend(), False)
                 legend_texts = ax.get_legend().get_texts()
                 active_lines = datafunctions.get_legend_handles(ax)
+
+                remove_legend_flag = True  # remove the legend if no curve texts were clicked
                 for legend_text, curve in zip(legend_texts, active_lines):
                     if legend_text.contains(event)[0]:
+                        remove_legend_flag = False
                         move_and_show(LegendEditor(canvas, legend_text, curve))
                 legend_set_draggable(ax.get_legend(), True)
+
+                if remove_legend_flag:
+                    action_taken = True
+                    legend = ax.get_legend()
+                    legend.set_visible(False)
+                    canvas.draw()
+
+        return action_taken
+
+    def _show_plot_options(self, event):
+        if not event.inaxes:
+            return
+
+        axes = event.inaxes
+        clicked_curve = None
+        for curve in axes.lines:
+            if curve.contains(event)[0]:
+                clicked_curve = curve
+                break
+
+        # Launch with the first curve that contains the event
+        self.fig_manager.launch_plot_options_on_curves_tab(axes, clicked_curve)
 
     def _show_markers_menu(self, markers, event):
         """
@@ -338,6 +374,7 @@ class FigureInteraction(object):
             self.add_error_bars_menu(menu, event.inaxes)
             self._add_marker_option_menu(menu, event)
             self._add_plot_type_option_menu(menu, event.inaxes)
+            self._add_legend_toggle_action(menu, event)
 
         menu.exec_(QCursor.pos())
 
@@ -472,6 +509,13 @@ class FigureInteraction(object):
             marker_action_group.addAction(action)
 
         menu.addMenu(marker_menu)
+
+    def _add_legend_toggle_action(self, menu, event):
+        legend = event.inaxes.axes.get_legend()
+        legend_action = QAction("Show legend", menu, checkable=True)
+        legend_action.setChecked(legend is not None and legend.get_visible())
+        legend_action.toggled.connect(lambda: self._toggle_legend_and_redraw(event.inaxes.axes))
+        menu.addAction(legend_action)
 
     def _add_plot_type_option_menu(self, menu, ax):
         with errorbar_caps_removed(ax):
@@ -850,3 +894,11 @@ class FigureInteraction(object):
                                                         image.norm.vmax)
 
         self.canvas.draw_idle()
+
+    def _toggle_legend_and_redraw(self, ax):
+        legend = ax.get_legend()
+        if not legend:
+            ax.legend()
+        else:
+            legend.set_visible(not legend.get_visible())
+        self.canvas.draw()

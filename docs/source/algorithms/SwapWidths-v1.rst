@@ -10,7 +10,7 @@ Description
 -----------
 
 This algorithm is used mainly in tandem with the output of BayesQuasi when the data contains multiple peaks.
-Quasi Lines 
+Quasi Lines
 
 
 Usage
@@ -34,9 +34,9 @@ Output:
 
 .. testoutput:: SwapWidthsExample
     :options: +NORMALIZE_WHITESPACE
-	
+
     The resulting workspace has 16 bins and 2 histograms.
-	
+
 
 .. categories::
 

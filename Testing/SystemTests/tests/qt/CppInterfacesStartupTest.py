@@ -11,6 +11,10 @@ from mantidqt.usersubwindowfactory import UserSubWindowFactory
 from mantidqt.utils.qt.testing import get_application
 
 from qtpy.QtCore import Qt
+# Import sip after Qt. Modern versions of PyQt ship an internal sip module
+# located at PyQt5X.sip. Importing PyQt first sets a shim sip module to point
+# to the correct place
+import sip
 
 
 class CppInterfacesStartupTest(systemtesting.MantidSystemTest):
@@ -37,5 +41,11 @@ class CppInterfacesStartupTest(systemtesting.MantidSystemTest):
             interface.setAttribute(Qt.WA_DeleteOnClose, True)
             interface.show()
             interface.close()
+
+            # Delete the interface manually because the destructor is not being called as expected on close (even with
+            # Qt.WA_DeleteOnClose set to True).
+            sip.delete(interface)
+            self.assertTrue(sip.isdeleted(interface))
+
         except Exception as ex:
             self.fail(f"Exception thrown when attempting to open the {interface_name} interface: {ex}.")

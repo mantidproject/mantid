@@ -21,15 +21,13 @@ It inherits from the BinaryOperation class.
 @author Nick Draper
 @date 23/01/2008
 */
-class MANTID_ALGORITHMS_DLL CommutativeBinaryOperation
-    : public BinaryOperation {
+class MANTID_ALGORITHMS_DLL CommutativeBinaryOperation : public BinaryOperation {
 public:
 protected:
   // Overridden BinaryOperation method
   /// Checks the overall size compatability of two workspaces
-  std::string checkSizeCompatibility(
-      const API::MatrixWorkspace_const_sptr lhs,
-      const API::MatrixWorkspace_const_sptr rhs) const override;
+  std::string checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,
+                                     const API::MatrixWorkspace_const_sptr rhs) const override;
 };
 
 } // namespace Algorithms

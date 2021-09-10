@@ -29,8 +29,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
 /// Default constructor
-SofQWPolygon::SofQWPolygon()
-    : Rebin2D(), m_Qout(), m_thetaPts(), m_thetaWidth(0.0) {}
+SofQWPolygon::SofQWPolygon() : Rebin2D(), m_Qout(), m_thetaPts(), m_thetaWidth(0.0) {}
 
 /**
  * Initialize the algorithm
@@ -45,16 +44,13 @@ void SofQWPolygon::exec() {
 
   // Progress reports & cancellation
   const auto blocksize = inputWS->blocksize();
-  const auto nreports(
-      static_cast<size_t>(inputWS->getNumberHistograms() * blocksize));
+  const auto nreports(static_cast<size_t>(inputWS->getNumberHistograms() * blocksize));
   m_progress = std::make_unique<API::Progress>(this, 0.0, 1.0, nreports);
   // Compute input caches
   this->initCachedValues(inputWS);
 
-  MatrixWorkspace_sptr outputWS =
-      SofQW::setUpOutputWorkspace<DataObjects::Workspace2D>(
-          *inputWS, getProperty("QAxisBinning"), m_Qout,
-          getProperty("EAxisBinning"), m_EmodeProperties);
+  MatrixWorkspace_sptr outputWS = SofQW::setUpOutputWorkspace<DataObjects::Workspace2D>(
+      *inputWS, getProperty("QAxisBinning"), m_Qout, getProperty("EAxisBinning"), m_EmodeProperties);
   setProperty("OutputWorkspace", outputWS);
   const size_t nenergyBins = blocksize;
 
@@ -65,8 +61,7 @@ void SofQWPolygon::exec() {
   std::vector<SpectrumDefinition> detIDMapping(outputWS->getNumberHistograms());
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
-  for (int64_t i = 0; i < static_cast<int64_t>(nTheta);
-       ++i) // signed for openmp
+  for (int64_t i = 0; i < static_cast<int64_t>(nTheta); ++i) // signed for openmp
   {
     PARALLEL_START_INTERUPT_REGION
 
@@ -77,8 +72,7 @@ void SofQWPolygon::exec() {
     }
 
     const auto &spectrumInfo = inputWS->spectrumInfo();
-    const auto *det =
-        m_EmodeProperties.m_emode == 1 ? nullptr : &spectrumInfo.detector(i);
+    const auto *det = m_EmodeProperties.m_emode == 1 ? nullptr : &spectrumInfo.detector(i);
     const double halfWidth(0.5 * m_thetaWidth);
     const double thetaLower = theta - halfWidth;
     const double thetaUpper = theta + halfWidth;
@@ -98,20 +92,17 @@ void SofQWPolygon::exec() {
       const V2D ul(dE_j, m_EmodeProperties.q(dE_j, thetaUpper, det));
       Quadrilateral inputQ = Quadrilateral(ll, lr, ur, ul);
 
-      DataObjects::FractionalRebinning::rebinToOutput(inputQ, inputWS, i, j,
-                                                      *outputWS, m_Qout);
+      DataObjects::FractionalRebinning::rebinToOutput(inputQ, inputWS, i, j, *outputWS, m_Qout);
 
       // Find which q bin this point lies in
-      const MantidVec::difference_type qIndex =
-          std::upper_bound(m_Qout.begin(), m_Qout.end(), lrQ) - m_Qout.begin();
+      const MantidVec::difference_type qIndex = std::upper_bound(m_Qout.begin(), m_Qout.end(), lrQ) - m_Qout.begin();
       if (qIndex != 0 && qIndex < static_cast<int>(m_Qout.size())) {
         // Add this spectra-detector pair to the mapping
         PARALLEL_CRITICAL(SofQWPolygon_spectramap) {
           // Could do a more complete merge of spectrum definitions here, but
           // historically only the ID of the first detector in the spectrum is
           // used, so I am keeping that for now.
-          detIDMapping[qIndex - 1].add(
-              spectrumInfo.spectrumDefinition(i)[0].first);
+          detIDMapping[qIndex - 1].add(spectrumInfo.spectrumDefinition(i)[0].first);
         }
       }
     }
@@ -120,8 +111,7 @@ void SofQWPolygon::exec() {
   }
   PARALLEL_CHECK_INTERUPT_REGION
 
-  DataObjects::FractionalRebinning::normaliseOutput(outputWS, inputWS,
-                                                    m_progress.get());
+  DataObjects::FractionalRebinning::normaliseOutput(outputWS, inputWS, m_progress.get());
 
   // Set the output spectrum-detector mapping
   auto outputIndices = outputWS->indexInfo();
@@ -146,8 +136,7 @@ void SofQWPolygon::exec() {
  * Init variables caches
  * @param workspace :: Workspace pointer
  */
-void SofQWPolygon::initCachedValues(
-    const API::MatrixWorkspace_const_sptr &workspace) {
+void SofQWPolygon::initCachedValues(const API::MatrixWorkspace_const_sptr &workspace) {
   m_EmodeProperties.initCachedValues(*workspace, this);
   // Index theta cache
   initThetaCache(*workspace);
@@ -187,13 +176,11 @@ void SofQWPolygon::initThetaCache(const API::MatrixWorkspace &workspace) {
   }
 
   if (0 == ndets)
-    throw std::runtime_error(
-        "Unexpected inconsistency found. The number of detectors is 0"
-        ", and the theta width parameter cannot be calculated.");
+    throw std::runtime_error("Unexpected inconsistency found. The number of detectors is 0"
+                             ", and the theta width parameter cannot be calculated.");
 
   m_thetaWidth = (maxTheta - minTheta) / static_cast<double>(ndets);
-  g_log.information() << "Calculated detector width in theta="
-                      << (m_thetaWidth * 180.0 / M_PI) << " degrees.\n";
+  g_log.information() << "Calculated detector width in theta=" << (m_thetaWidth * 180.0 / M_PI) << " degrees.\n";
 }
 
 } // namespace Algorithms

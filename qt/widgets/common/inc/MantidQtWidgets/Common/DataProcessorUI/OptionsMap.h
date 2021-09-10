@@ -28,8 +28,7 @@ using ColumnOptionsMap = std::map<QString, OptionsMap>;
 /// Convert a QMap of options to a std::map of options
 OptionsMap DLLExport convertOptionsFromQMap(const OptionsQMap &src);
 /// Convert a QMap of column options to a std::map of column options
-ColumnOptionsMap DLLExport
-convertColumnOptionsFromQMap(const ColumnOptionsQMap &src);
+ColumnOptionsMap DLLExport convertColumnOptionsFromQMap(const ColumnOptionsQMap &src);
 } // namespace DataProcessor
 } // namespace MantidWidgets
 } // namespace MantidQt

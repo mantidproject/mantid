@@ -22,9 +22,7 @@ class SampleShapeValidatorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static SampleShapeValidatorTest *createSuite() {
-    return new SampleShapeValidatorTest();
-  }
+  static SampleShapeValidatorTest *createSuite() { return new SampleShapeValidatorTest(); }
   static void destroySuite(SampleShapeValidatorTest *suite) { delete suite; }
 
   void test_validator_passes_for_workspace_with_defined_sample_shape() {
@@ -41,7 +39,6 @@ public:
     auto fakeWS = std::make_shared<WorkspaceTester>();
 
     auto sampleValidator = std::make_shared<SampleShapeValidator>();
-    TS_ASSERT_EQUALS(sampleValidator->isValid(fakeWS),
-                     "Invalid or no shape defined for sample");
+    TS_ASSERT_EQUALS(sampleValidator->isValid(fakeWS), "Invalid or no shape defined for sample");
   }
 };

@@ -28,8 +28,8 @@ DECLARE_ALGORITHM(RingProfile)
 /** Constructor
  */
 RingProfile::RingProfile()
-    : min_radius(-1.), max_radius(-1), start_angle(-1), clockwise(false),
-      num_bins(-1), centre_x(-1.), centre_y(-1.), centre_z(-1), bin_size(-1) {}
+    : min_radius(-1.), max_radius(-1), start_angle(-1), clockwise(false), num_bins(-1), centre_x(-1.), centre_y(-1.),
+      centre_z(-1), bin_size(-1) {}
 
 /** Initialize the algorithm's properties.
     It configures the algorithm to accept the following inputs:
@@ -45,43 +45,34 @@ RingProfile::RingProfile()
  */
 void RingProfile::init() {
   declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-          "InputWorkspace", "", Kernel::Direction::Input),
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>("InputWorkspace", "", Kernel::Direction::Input),
       "An input workspace.");
-  declareProperty(std::make_unique<API::WorkspaceProperty<>>(
-                      "OutputWorkspace", "", Kernel::Direction::Output),
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>("OutputWorkspace", "", Kernel::Direction::Output),
                   "An output workspace.");
 
-  auto twoOrThree =
-      std::make_shared<Kernel::ArrayLengthValidator<double>>(2, 3);
+  auto twoOrThree = std::make_shared<Kernel::ArrayLengthValidator<double>>(2, 3);
   std::vector<double> myInput(3, 0);
-  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
-                      "Centre", std::move(myInput), std::move(twoOrThree)),
+  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>("Centre", std::move(myInput), std::move(twoOrThree)),
                   "Coordinate of the centre of the ring");
   auto nonNegative = std::make_shared<Kernel::BoundedValidator<double>>();
   nonNegative->setLower(0);
 
-  declareProperty<double>("MinRadius", 0, nonNegative->clone(),
-                          "Radius of the inner ring(m)");
-  declareProperty(std::make_unique<Kernel::PropertyWithValue<double>>(
-                      "MaxRadius", std::numeric_limits<double>::max(),
-                      std::move(nonNegative)),
+  declareProperty<double>("MinRadius", 0, nonNegative->clone(), "Radius of the inner ring(m)");
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<double>>("MaxRadius", std::numeric_limits<double>::max(),
+                                                                      std::move(nonNegative)),
                   "Radius of the outer ring(m)");
   auto nonNegativeInt = std::make_shared<Kernel::BoundedValidator<int>>();
   nonNegativeInt->setLower(1);
-  declareProperty<int>("NumBins", 100, std::move(nonNegativeInt),
-                       "Number of slice bins for the output");
+  declareProperty<int>("NumBins", 100, std::move(nonNegativeInt), "Number of slice bins for the output");
   auto degreesLimits = std::make_shared<Kernel::BoundedValidator<double>>();
   degreesLimits->setLower(-360);
   degreesLimits->setUpper(360);
-  declareProperty<double>("StartAngle", 0, degreesLimits,
-                          "The angle to start from.");
+  declareProperty<double>("StartAngle", 0, degreesLimits, "The angle to start from.");
 
   std::vector<std::string> op(2);
   op[0] = "ClockWise";
   op[1] = "Anti-ClockWise";
-  declareProperty("Sense", "Anti-ClockWise",
-                  std::make_shared<Kernel::StringListValidator>(op),
+  declareProperty("Sense", "Anti-ClockWise", std::make_shared<Kernel::StringListValidator>(op),
                   "The direction of the integration around the ring");
 }
 
@@ -115,8 +106,7 @@ void RingProfile::exec() {
   // the RingProfile does not support eventworkspace
   auto checkEvent = std::dynamic_pointer_cast<API::IEventWorkspace>(inputWS);
   if (checkEvent) {
-    throw std::invalid_argument(
-        "RingProfile is not defined for EventWorkspaces.");
+    throw std::invalid_argument("RingProfile is not defined for EventWorkspaces.");
   }
   g_log.debug() << "Get the input parameters \n";
   // get the algorithm parameters
@@ -140,8 +130,7 @@ void RingProfile::exec() {
     checkInputsForNumericWorkspace(inputWS);
   }
 
-  m_progress = std::shared_ptr<API::Progress>(
-      new API::Progress(this, 0.0, 1.0, inputWS->getNumberHistograms() + 1));
+  m_progress = std::shared_ptr<API::Progress>(new API::Progress(this, 0.0, 1.0, inputWS->getNumberHistograms() + 1));
 
   // prepare the vector to hold the output
   std::vector<double> output_bins(num_bins, 0);
@@ -157,8 +146,8 @@ void RingProfile::exec() {
 
   g_log.debug() << "Prepare the output\n";
   // create the output
-  API::MatrixWorkspace_sptr outputWS = API::WorkspaceFactory::Instance().create(
-      inputWS, 1, output_bins.size() + 1, output_bins.size());
+  API::MatrixWorkspace_sptr outputWS =
+      API::WorkspaceFactory::Instance().create(inputWS, 1, output_bins.size() + 1, output_bins.size());
   m_progress->report("Preparing the output");
   // populate Y data getting the values from the output_bins
   MantidVec &refY = outputWS->dataY(0);
@@ -214,8 +203,7 @@ void RingProfile::exec() {
  *
  * @param inputWS: the input workspace
  */
-void RingProfile::checkInputsForSpectraWorkspace(
-    const API::MatrixWorkspace_sptr &inputWS) {
+void RingProfile::checkInputsForSpectraWorkspace(const API::MatrixWorkspace_sptr &inputWS) {
   try {
     // finding the limits of the instrument
     const auto &spectrumInfo = inputWS->spectrumInfo();
@@ -224,8 +212,7 @@ void RingProfile::checkInputsForSpectraWorkspace(
     while (true) {
       i++;
       if (i >= inputWS->getNumberHistograms())
-        throw std::invalid_argument(
-            "Did not find any non monitor detector position");
+        throw std::invalid_argument("Did not find any non monitor detector position");
 
       if (spectrumInfo.isMonitor(i))
         continue;
@@ -241,8 +228,7 @@ void RingProfile::checkInputsForSpectraWorkspace(
     while (true) {
       i--;
       if (i == 0)
-        throw std::invalid_argument(
-            "There is no region defined for the instrument of this workspace");
+        throw std::invalid_argument("There is no region defined for the instrument of this workspace");
 
       if (spectrumInfo.isMonitor(i))
         continue;
@@ -263,10 +249,9 @@ void RingProfile::checkInputsForSpectraWorkspace(
     zMin = std::min(first_z, last_z);
 
     std::stringstream limits_s;
-    limits_s << "([" << xMin << ", " << xMax << "], [" << yMin << ", " << yMax
-             << "], [" << zMin << ", " << zMax << "])";
-    g_log.debug() << "The limits for the instrument is : " << limits_s.str()
-                  << '\n';
+    limits_s << "([" << xMin << ", " << xMax << "], [" << yMin << ", " << yMax << "], [" << zMin << ", " << zMax
+             << "])";
+    g_log.debug() << "The limits for the instrument is : " << limits_s.str() << '\n';
     int xOutside = 0, yOutside = 0, zOutside = 0;
     if (centre_x < xMin || centre_x > xMax)
       xOutside = 1;
@@ -278,10 +263,8 @@ void RingProfile::checkInputsForSpectraWorkspace(
     // if at least 2 are outside, the centre is considered outside the box.
     if (summed >= 2) {
       std::stringstream s;
-      s << "The defined centre (" << centre_x << ", " << centre_y << ", "
-        << centre_z
-        << ") is outside the limits of the detectors inside this instrument: "
-        << limits_s.str();
+      s << "The defined centre (" << centre_x << ", " << centre_y << ", " << centre_z
+        << ") is outside the limits of the detectors inside this instrument: " << limits_s.str();
       throw std::invalid_argument(s.str());
     }
 
@@ -324,8 +307,7 @@ void RingProfile::checkInputsForSpectraWorkspace(
  *  - The minimum ring is smaller than the limits of the image to allow
  * @param inputWS: pointer to the input workspace
  */
-void RingProfile::checkInputsForNumericWorkspace(
-    const API::MatrixWorkspace_sptr &inputWS) {
+void RingProfile::checkInputsForNumericWorkspace(const API::MatrixWorkspace_sptr &inputWS) {
   g_log.notice() << "CheckingInputs For Numeric Workspace\n";
 
   // The Axis0 is defined by the values of readX inside the spectra of the
@@ -344,9 +326,8 @@ void RingProfile::checkInputsForNumericWorkspace(
   // check centre is inside the X domain
   if (centre_x < min_v_x || centre_x > max_v_x) {
     std::stringstream s;
-    s << "The input value for centre (X=" << centre_x
-      << ") is outside the limits of the instrument [" << min_v_x << ", "
-      << max_v_x << "]";
+    s << "The input value for centre (X=" << centre_x << ") is outside the limits of the instrument [" << min_v_x
+      << ", " << max_v_x << "]";
     throw std::invalid_argument(s.str());
   }
 
@@ -355,8 +336,7 @@ void RingProfile::checkInputsForNumericWorkspace(
   // ws->getAxis(1)
 
   // get the limits of the axis1 (Y)
-  API::NumericAxis *oldAxis2 =
-      dynamic_cast<API::NumericAxis *>(inputWS->getAxis(1));
+  API::NumericAxis *oldAxis2 = dynamic_cast<API::NumericAxis *>(inputWS->getAxis(1));
   // we cannot have the positions in Y direction without a NumericAxis
   if (!oldAxis2)
     throw std::invalid_argument("Vertical axis is not a numeric axis. If it is "
@@ -368,17 +348,15 @@ void RingProfile::checkInputsForNumericWorkspace(
   // check centre is inside the Y domain
   if (centre_y < min_v_y || centre_y > max_v_y) {
     std::stringstream s;
-    s << "The input value for centre (Y=" << centre_y
-      << ") is outside the limits of the instrument [" << min_v_y << ", "
-      << max_v_y << "]";
+    s << "The input value for centre (Y=" << centre_y << ") is outside the limits of the instrument [" << min_v_y
+      << ", " << max_v_y << "]";
     throw std::invalid_argument(s.str());
   }
   g_log.notice() << "Centre: " << centre_x << "  " << centre_y << '\n';
   // check minradius is inside the limits of the region of the instrument
-  if (centre_x - min_radius > max_v_x || centre_x + min_radius < min_v_x ||
-      centre_y - min_radius > max_v_y || centre_y + min_radius < min_v_y)
-    throw std::invalid_argument(
-        "The minimun radius is outside the region of the instrument");
+  if (centre_x - min_radius > max_v_x || centre_x + min_radius < min_v_x || centre_y - min_radius > max_v_y ||
+      centre_y + min_radius < min_v_y)
+    throw std::invalid_argument("The minimun radius is outside the region of the instrument");
 }
 
 /**
@@ -395,9 +373,8 @@ void RingProfile::checkInputsForNumericWorkspace(
  * @param output_bins: the reference to the vector to be filled with the
  *integration values
  */
-void RingProfile::processInstrumentRingProfile(
-    const API::MatrixWorkspace_sptr &inputWS,
-    std::vector<double> &output_bins) {
+void RingProfile::processInstrumentRingProfile(const API::MatrixWorkspace_sptr &inputWS,
+                                               std::vector<double> &output_bins) {
 
   const auto &spectrumInfo = inputWS->spectrumInfo();
   for (int i = 0; i < static_cast<int>(inputWS->getNumberHistograms()); i++) {
@@ -421,8 +398,7 @@ void RingProfile::processInstrumentRingProfile(
                    // ring being integrated
       continue;
 
-    g_log.debug() << "Bin for the index " << i << " = " << bin_n
-                  << " Pos = " << spectrumInfo.position(i) << '\n';
+    g_log.debug() << "Bin for the index " << i << " = " << bin_n << " Pos = " << spectrumInfo.position(i) << '\n';
 
     const MantidVec &refY = inputWS->getSpectrum(i).dataY();
     // accumulate the values of this spectrum inside this bin
@@ -464,8 +440,7 @@ int RingProfile::getBinForPixel(const Kernel::V3D &position) {
   //    g_log.debug() << "effect Distance = " << effect_distance << '\n';
 
   // check if it is inside the ring defined by min_radius, max_radius
-  if (effect_distance < min_radius || effect_distance > max_radius ||
-      effect_distance == 0)
+  if (effect_distance < min_radius || effect_distance > max_radius || effect_distance == 0)
     return -1;
 
   // get the angle
@@ -485,9 +460,8 @@ int RingProfile::getBinForPixel(const Kernel::V3D &position) {
  * @param output_bins: the reference to the vector to be filled with the
  *integration values
  */
-void RingProfile::processNumericImageRingProfile(
-    const API::MatrixWorkspace_sptr &inputWS,
-    std::vector<double> &output_bins) {
+void RingProfile::processNumericImageRingProfile(const API::MatrixWorkspace_sptr &inputWS,
+                                                 std::vector<double> &output_bins) {
   // allocate the bin positions vector
   std::vector<int> bin_n(inputWS->dataY(0).size(), -1);
 
@@ -540,9 +514,7 @@ void RingProfile::processNumericImageRingProfile(
  * @param bins_pos: bin positions (for each column inside the spectrum, the
  *correspondent bin_pos)
  */
-void RingProfile::getBinForPixel(const API::MatrixWorkspace_sptr &ws,
-                                 int spectrum_index,
-                                 std::vector<int> &bins_pos) {
+void RingProfile::getBinForPixel(const API::MatrixWorkspace_sptr &ws, int spectrum_index, std::vector<int> &bins_pos) {
 
   if (bins_pos.size() != ws->dataY(spectrum_index).size())
     throw std::runtime_error("Invalid bin positions vector");
@@ -566,8 +538,7 @@ void RingProfile::getBinForPixel(const API::MatrixWorkspace_sptr &ws,
   // for each pixel inside this row
   for (size_t i = 0; i < xvec.size() - 1; i++) {
 
-    double xpos = (xvec[i] + xvec[i + 1]) /
-                  2.0; // the x position is the centre of the bins boundaries
+    double xpos = (xvec[i] + xvec[i + 1]) / 2.0; // the x position is the centre of the bins boundaries
     double diffx = xpos - centre_x;
     // calculate the distance => norm of pixel position - centre
     double distance = sqrt(pow(diffx, 2.0) + diffy_quad);

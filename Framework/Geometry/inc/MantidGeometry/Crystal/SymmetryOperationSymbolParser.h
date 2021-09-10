@@ -51,12 +51,9 @@ namespace Geometry {
 
 class MANTID_GEOMETRY_DLL SymmetryOperationSymbolParser {
 public:
-  static MatrixVectorPair<int, V3R>
-  parseIdentifier(const std::string &identifier);
-  static std::string
-  getNormalizedIdentifier(const MatrixVectorPair<int, V3R> &data);
-  static std::string getNormalizedIdentifier(const Kernel::IntMatrix &matrix,
-                                             const V3R &vector);
+  static MatrixVectorPair<int, V3R> parseIdentifier(const std::string &identifier);
+  static std::string getNormalizedIdentifier(const MatrixVectorPair<int, V3R> &data);
+  static std::string getNormalizedIdentifier(const Kernel::IntMatrix &matrix, const V3R &vector);
 
 protected:
   SymmetryOperationSymbolParser() = default;

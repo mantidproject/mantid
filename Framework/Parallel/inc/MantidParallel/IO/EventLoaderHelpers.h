@@ -24,12 +24,9 @@ namespace IO {
 */
 namespace EventLoader {
 /// Read number of events in given banks from file.
-std::vector<size_t> readBankSizes(const H5::Group &group,
-                                  const std::vector<std::string> &bankNames);
+std::vector<size_t> readBankSizes(const H5::Group &group, const std::vector<std::string> &bankNames);
 
-H5::DataType readDataType(const H5::Group &group,
-                          const std::vector<std::string> &bankNames,
-                          const std::string &name);
+H5::DataType readDataType(const H5::Group &group, const std::vector<std::string> &bankNames, const std::string &name);
 
 template <class T> class ThreadWaiter {
 public:
@@ -58,10 +55,8 @@ void load(const Chunker &chunker, NXEventDataSource<TimeOffsetType> &dataSource,
     if (static_cast<int64_t>(range.bankIndex) != previousBank) {
       partitioner = dataSource.setBankIndex(range.bankIndex);
     }
-    dataSource.readEventID(event_id.data() + bufferOffset, range.eventOffset,
-                           range.eventCount);
-    dataSource.readEventTimeOffset(event_time_offset.data() + bufferOffset,
-                                   range.eventOffset, range.eventCount);
+    dataSource.readEventID(event_id.data() + bufferOffset, range.eventOffset, range.eventCount);
+    dataSource.readEventTimeOffset(event_time_offset.data() + bufferOffset, range.eventOffset, range.eventCount);
     if (previousBank != -1)
       dataSink.wait();
     if (static_cast<int64_t>(range.bankIndex) != previousBank) {
@@ -69,18 +64,15 @@ void load(const Chunker &chunker, NXEventDataSource<TimeOffsetType> &dataSource,
       dataSink.setEventTimeOffsetUnit(dataSource.readEventTimeOffsetUnit());
       previousBank = range.bankIndex;
     }
-    dataSink.startAsync(event_id.data() + bufferOffset,
-                        event_time_offset.data() + bufferOffset, range);
+    dataSink.startAsync(event_id.data() + bufferOffset, event_time_offset.data() + bufferOffset, range);
     bufferOffset = (bufferOffset + chunkSize) % (2 * chunkSize);
   }
 }
 
 template <class TimeOffsetType>
-void load(
-    const Communicator &comm, const H5::Group &group,
-    const std::vector<std::string> &bankNames,
-    const std::vector<int32_t> &bankOffsets,
-    const std::vector<std::vector<Types::Event::TofEvent> *> &eventLists) {
+void load(const Communicator &comm, const H5::Group &group, const std::vector<std::string> &bankNames,
+          const std::vector<int32_t> &bankOffsets,
+          const std::vector<std::vector<Types::Event::TofEvent> *> &eventLists) {
   // In tests loading from a single SSD this chunk size seems close to the
   // optimum. May need to be adjusted in the future (potentially dynamically)
   // when loading from parallel file systems and running on a cluster.
@@ -89,16 +81,14 @@ void load(
   // processes for loading than for processing. This may be different in larger
   // MPI runs on a cluster where limiting the number of IO processes may be
   // required when accessing the parallel file system.
-  const Chunker chunker(comm.size(), comm.rank(),
-                        readBankSizes(group, bankNames), chunkSize);
+  const Chunker chunker(comm.size(), comm.rank(), readBankSizes(group, bankNames), chunkSize);
   NXEventDataLoader<TimeOffsetType> loader(comm.size(), group, bankNames);
-  EventParser<TimeOffsetType> consumer(comm, chunker.makeWorkerGroups(),
-                                       bankOffsets, eventLists);
+  EventParser<TimeOffsetType> consumer(comm, chunker.makeWorkerGroups(), bankOffsets, eventLists);
   load<TimeOffsetType>(chunker, loader, consumer);
 }
 
 /// Translate from H5::DataType to actual type, forward to load implementation.
-template <class... T> void load(const H5::DataType &type, T &&... args) {
+template <class... T> void load(const H5::DataType &type, T &&...args) {
   if (type == H5::PredType::NATIVE_INT32)
     return load<int32_t>(args...);
   if (type == H5::PredType::NATIVE_INT64)
@@ -111,8 +101,7 @@ template <class... T> void load(const H5::DataType &type, T &&... args) {
     return load<float>(args...);
   if (type == H5::PredType::NATIVE_DOUBLE)
     return load<double>(args...);
-  throw std::runtime_error(
-      "Unsupported H5::DataType for event_time_offset in NXevent_data");
+  throw std::runtime_error("Unsupported H5::DataType for event_time_offset in NXevent_data");
 }
 } // namespace EventLoader
 

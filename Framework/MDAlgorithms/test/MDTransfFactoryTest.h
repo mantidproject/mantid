@@ -22,9 +22,7 @@ using namespace Mantid::MDAlgorithms;
 //
 class MDTransfFactoryTest : public CxxTest::TestSuite {
 public:
-  static MDTransfFactoryTest *createSuite() {
-    return new MDTransfFactoryTest();
-  }
+  static MDTransfFactoryTest *createSuite() { return new MDTransfFactoryTest(); }
   static void destroySuite(MDTransfFactoryTest *suite) { delete suite; }
 
   void testInit() {
@@ -37,24 +35,20 @@ public:
   }
 
   void testWrongAlgThrows() {
-    TS_ASSERT_THROWS(
-        MDTransfFactory::Instance().create("Non_existing_ChildAlgorithm"),
-        const Kernel::Exception::NotFoundError &);
+    TS_ASSERT_THROWS(MDTransfFactory::Instance().create("Non_existing_ChildAlgorithm"),
+                     const Kernel::Exception::NotFoundError &);
   }
 
   void testGetAlg() {
     MDTransf_sptr transf;
 
-    TS_ASSERT_THROWS_NOTHING(
-        transf = MDTransfFactory::Instance().create("CopyToMD"));
+    TS_ASSERT_THROWS_NOTHING(transf = MDTransfFactory::Instance().create("CopyToMD"));
     TS_ASSERT(dynamic_cast<MDTransfNoQ *>(transf.get()));
 
-    TS_ASSERT_THROWS_NOTHING(transf =
-                                 MDTransfFactory::Instance().create("|Q|"));
+    TS_ASSERT_THROWS_NOTHING(transf = MDTransfFactory::Instance().create("|Q|"));
     TS_ASSERT(dynamic_cast<MDTransfModQ *>(transf.get()));
 
-    TS_ASSERT_THROWS_NOTHING(transf =
-                                 MDTransfFactory::Instance().create("Q3D"));
+    TS_ASSERT_THROWS_NOTHING(transf = MDTransfFactory::Instance().create("Q3D"));
     TS_ASSERT(dynamic_cast<MDTransfQ3D *>(transf.get()));
   }
 

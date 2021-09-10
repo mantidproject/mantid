@@ -6,22 +6,18 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from os import path
 
-from mantid.simpleapi import Load, logger, EnggEstimateFocussedBackground, ConvertUnits, Plus, Minus, AverageLogData, \
+from mantid.simpleapi import Load, logger, EnggEstimateFocussedBackground, Minus, AverageLogData, SetUncertainties, \
     CreateEmptyTableWorkspace, GroupWorkspaces, DeleteWorkspace, DeleteTableRows, RenameWorkspace, CreateWorkspace
 from Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
-from Engineering.gui.engineering_diffraction.tabs.common import path_handling
+from Engineering.gui.engineering_diffraction.tabs.common import output_settings
 from mantid.api import AnalysisDataService as ADS
 from mantid.api import TextAxis
+from mantid.kernel import UnitConversion, DeltaEModeType, UnitParams
 from matplotlib.pyplot import subplots
 from numpy import full, nan, max, array, vstack, argsort
 from itertools import chain
 from collections import defaultdict
 from re import findall, sub
-from scipy import constants
-from math import sin
-
-pi = constants.pi
-m_over_h = 252.816
 
 
 class FittingDataModel(object):
@@ -30,29 +26,50 @@ class FittingDataModel(object):
         self._log_workspaces = None
         self._log_values = dict()  # {ws_name: {log_name: [avg, er]} }
         self._loaded_workspaces = {}  # Map stores using {WorkspaceName: Workspace}
-        self._background_workspaces = {}
+        self._bg_sub_workspaces = {}  # Map as above, this contains the workspaces with the background sub applied
         self._fit_results = {}  # {WorkspaceName: fit_result_dict}
         self._fit_workspaces = None
         self._last_added = []  # List of workspace names loaded in the last load action.
         self._bg_params = dict()  # {ws_name: [isSub, niter, xwindow, doSG]}
 
-    def load_files(self, filenames_string, xunit):
+    def restore_files(self, ws_names):
+        for ws_name in ws_names:
+            try:
+                ws = ADS.retrieve(ws_name)
+                if ws.getNumberHistograms() == 1:
+                    self._loaded_workspaces[ws_name] = ws
+                    if self._bg_params[ws_name]:
+                        self._bg_sub_workspaces[ws_name] = ADS.retrieve(ws_name + "_bgsub")
+                    else:
+                        self._bg_sub_workspaces[ws_name] = None
+                    if ws_name not in self._bg_params:
+                        self._bg_params[ws_name] = []
+                    self._last_added.append(ws_name)
+                else:
+                    logger.warning(
+                        f"Invalid number of spectra in workspace {ws_name}. Skipping restoration of workspace.")
+            except RuntimeError as e:
+                logger.error(
+                    f"Failed to restore workspace: {ws_name}. Error: {e}. \n Continuing loading of other files.")
+        self.update_log_workspace_group()
+
+    def load_files(self, filenames_string):
         self._last_added = []
         filenames = [name.strip() for name in filenames_string.split(",")]
         for filename in filenames:
-            ws_name = self._generate_workspace_name(filename, xunit)
+            ws_name = self._generate_workspace_name(filename)
             if ws_name not in self._loaded_workspaces:
                 try:
                     if not ADS.doesExist(ws_name):
                         ws = Load(filename, OutputWorkspace=ws_name)
-                        if xunit != "TOF":
-                            ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws_name, Target=xunit)
                     else:
                         ws = ADS.retrieve(ws_name)
                     if ws.getNumberHistograms() == 1:
                         self._loaded_workspaces[ws_name] = ws
-                        if ws_name not in self._background_workspaces:
-                            self._background_workspaces[ws_name] = None
+                        if ws_name not in self._bg_sub_workspaces:
+                            self._bg_sub_workspaces[ws_name] = None
+                        if ws_name not in self._bg_params:
+                            self._bg_params[ws_name] = []
                         self._last_added.append(ws_name)
                     else:
                         logger.warning(
@@ -69,7 +86,7 @@ class FittingDataModel(object):
         run_info = self.make_runinfo_table()
         self._log_workspaces = GroupWorkspaces([run_info], OutputWorkspace='logs')
         # a table per logs
-        logs = get_setting(path_handling.INTERFACES_SETTINGS_GROUP, path_handling.ENGINEERING_PREFIX, "logs")
+        logs = get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, "logs")
         if logs:
             self._log_names = logs.split(',')
             for log in self._log_names:
@@ -118,22 +135,24 @@ class FittingDataModel(object):
                run.getProtonCharge(), ws.getTitle()]
         self.write_table_row(ADS.retrieve("run_info"), row, irow)
         # add log data - loop over existing log workspaces not logs in settings as these might have changed
-        for log in self._log_names:
-            if log in self._log_values[ws_name]:
-                avg, stdev = self._log_values[ws_name][log]
-            else:
-                avg, stdev = full(2, nan)  # default unless value can be calculated
-                if log in [l.name for l in run.getLogData()]:
-                    try:
-                        avg, stdev = AverageLogData(ws_name, LogName=log, FixZero=False)
-                    except RuntimeError:
-                        # sometimes happens in old data if proton_charge log called something different
-                        logger.warning(
-                            f"Average value of log {log} could not be calculated for file {ws.name()}")
+        currentRunLogs = [l.name for l in run.getLogData()]
+        nullLogValue = full(2, nan)  # default nan if can't read/average log data
+        if run.getProtonCharge() > 0 and "proton_charge" in currentRunLogs:
+            for log in self._log_names:
+                if log in self._log_values[ws_name]:
+                    avg, stdev = self._log_values[ws_name][log]  # already averaged
+                elif log in currentRunLogs:
+                    avg, stdev = AverageLogData(ws_name, LogName=log, FixZero=False)
                 else:
-                    logger.warning(f"File {ws.name()} does not contain log {log}")
-                self._log_values[ws_name][log] = [avg, stdev]
-            self.write_table_row(ADS.retrieve(log), [avg, stdev], irow)
+                    avg, stdev = nullLogValue
+                self._log_values[ws_name][log] = [avg, stdev]  # update model dict (even if nan)
+        else:
+            self._log_values[ws_name] = {log: nullLogValue for log in self._log_names}
+            logger.warning(f"{ws.name()} does not contain a proton charge log - log values cannot be averaged.")
+
+        # write log values to table (nan if log could not be averaged)
+        for log, avg_and_stdev in self._log_values[ws_name].items():
+            self.write_table_row(ADS.retrieve(log), avg_and_stdev, irow)
         self.update_log_group_name()
 
     def remove_log_rows(self, row_numbers):
@@ -156,13 +175,16 @@ class FittingDataModel(object):
         else:
             self.clear_logs()
 
+    def get_ws_list(self):
+        return list(self._loaded_workspaces.keys())
+
     def get_ws_sorted_by_primary_log(self):
-        ws_list = list(self._loaded_workspaces.keys())
+        ws_list = self.get_ws_list()
         tof_ws_inds = [ind for ind, ws in enumerate(ws_list) if
                        self._loaded_workspaces[ws].getAxis(0).getUnit().caption() == 'Time-of-flight']
-        primary_log = get_setting(path_handling.INTERFACES_SETTINGS_GROUP, path_handling.ENGINEERING_PREFIX,
+        primary_log = get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX,
                                   "primary_log")
-        sort_ascending = get_setting(path_handling.INTERFACES_SETTINGS_GROUP, path_handling.ENGINEERING_PREFIX,
+        sort_ascending = get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX,
                                      "sort_ascending")
         if primary_log:
             log_table = ADS.retrieve(primary_log)
@@ -175,19 +197,12 @@ class FittingDataModel(object):
             ws_list_tof = ws_list_tof[::-1]
         return ws_list_tof
 
-    def update_fit(self, args):
-        fit_props, peak_centre_params = ([],) * 2
-        for arg in args:
-            if isinstance(arg, dict):
-                fit_props.append(arg)
-            elif isinstance(arg, list):
-                peak_centre_params = arg
+    def update_fit(self, fit_props):
         for fit_prop in fit_props:
             wsname = fit_prop['properties']['InputWorkspace']
-            difc = self.estimate_difc(wsname)
-            self._fit_results[wsname] = {'model': fit_prop['properties']['Function']}
+            self._fit_results[wsname] = {'model': fit_prop['properties']['Function'],
+                                         'status': fit_prop['status']}
             self._fit_results[wsname]['results'] = defaultdict(list)  # {function_param: [[Y1, E1], [Y2,E2],...] }
-            self._fit_results[wsname]['dpeaks'] = defaultdict(list)
             fnames = [x.split('=')[-1] for x in findall('name=[^,]*', fit_prop['properties']['Function'])]
             # get num params for each function (first elem empty as str begins with 'name=')
             # need to remove ties and constraints which are enclosed in ()
@@ -202,48 +217,21 @@ class FittingDataModel(object):
                     key = '_'.join([fname, params_dict['Name'][irow].split('.')[-1]])  # funcname_param
                     self._fit_results[wsname]['results'][key].append([
                         params_dict['Value'][irow], params_dict['Error'][irow]])
-                    if key in peak_centre_params:
-                        # division by difc is a temporary estimation of conversion to dspacing, working on the
-                        # assumption that difa = tzero = 0 until we're able to get these values from the ws
-                        self._fit_results[wsname]['dpeaks'][key].append([
-                            params_dict['Value'][irow], params_dict['Error'][irow]])
+                    if key in fit_prop['peak_centre_params']:
+                        # param corresponds to a peak centre in TOF which we also need in dspacing
+                        # add another entry into the results dictionary
+                        key_d = key + "_dSpacing"
+                        dcen = self._convert_TOF_to_d(params_dict['Value'][irow], wsname)
+                        dcen_er = self._convert_TOFerror_to_derror(params_dict['Error'][irow], dcen, wsname)
+                        self._fit_results[wsname]['results'][key_d].append([dcen, dcen_er])
                 istart += nparams[ifunc]
             # append the cost function value (in this case always chisq/DOF) as don't let user change cost func
             # always last row in parameters table
             self._fit_results[wsname]['costFunction'] = params_dict['Value'][-1]
-            self.convert_tof_peaks_to_dspacing(wsname, difc)
-        self.create_fit_tables(peak_centre_params)
+        self.create_fit_tables()
 
-    # this function is an estimation assuming that difa = tzero = 0, and should be updated once functionality exists to
-    # obtain these values from the workspace
-    def convert_tof_peaks_to_dspacing(self, wsname, difc):
-        if not self._fit_results[wsname]['dpeaks']:
-            return
-        for peak_name in self._fit_results[wsname]['dpeaks']:
-            # may be multiple peaks with same name
-            for peakno, peakvals in enumerate(self._fit_results[wsname]['dpeaks'][peak_name]):
-                newpeak = [0, 0]
-                newpeak[0] = peakvals[0] / difc
-                newpeak[1] = peakvals[1] / difc
-                self._fit_results[wsname]['dpeaks'][peak_name][peakno] = newpeak
-
-    def estimate_difc(self, ws_name):
-        ws = ADS.retrieve(ws_name)
-        instrument = ws.getInstrument()
-        detector = ws.getDetector(0)
-        sample = instrument.getSample()
-        source = instrument.getSource()
-        sample_pos = sample.getPos()
-        source_pos = source.getPos()
-        l_tot = source.getDistance(sample) + sample.getDistance(detector)
-        theta = detector.getTwoTheta(sample_pos, (sample_pos - source_pos)) / 2
-
-        difc = 2 * m_over_h * l_tot * sin(theta)
-        return difc
-
-    def create_fit_tables(self, peak_centre_params=None):
+    def create_fit_tables(self):
         wslist = []  # ws to be grouped
-        dp_wslist = []  # ws containing peaks converted to dspacing
         # extract fit parameters and errors
         nruns = len(self._loaded_workspaces.keys())  # num of rows of output workspace
         # get unique set of function parameters across all workspaces
@@ -254,24 +242,15 @@ class FittingDataModel(object):
             # make output workspace
             ipeak = list(range(1, nfuncs + 1)) * nruns
             ws = CreateWorkspace(OutputWorkspace=param, DataX=ipeak, DataY=ipeak, NSpec=nruns)
-            tabulate_dspacing = False
-            if param in peak_centre_params:
-                tabulate_dspacing = True
-                ws_dspacing = CreateEmptyTableWorkspace(OutputWorkspace=(param + '_dSpacing'))
-                ws_dspacing.addColumn(type="str", name="PeakFunction")
-                ws_dspacing.addColumn(type="float", name="Value")
-                ws_dspacing.addColumn(type="float", name="Error")
             # axis for labels in workspace
             axis = TextAxis.create(nruns)
             for iws, wsname in enumerate(self._loaded_workspaces.keys()):
+                wsname_bgsub = wsname + "_bgsub"
+                if wsname_bgsub in self._fit_results:
+                    wsname = wsname_bgsub
                 if wsname in self._fit_results and param in self._fit_results[wsname]['results']:
                     fitvals = array(self._fit_results[wsname]['results'][param])
-                    # pad to max length (with nans)
                     data = vstack((fitvals, full((nfuncs - fitvals.shape[0], 2), nan)))
-                    if tabulate_dspacing:
-                        for peakno, peakvals in enumerate(self._fit_results[wsname]['dpeaks'][param]):
-                            row = [param + '.' + str(peakno), peakvals[0], peakvals[1]]
-                            ws_dspacing.addRow(row)
                 else:
                     data = full((nfuncs, 2), nan)
                 ws.setY(iws, data[:, 0])
@@ -280,17 +259,16 @@ class FittingDataModel(object):
                 axis.setLabel(iws, wsname)
             ws.replaceAxis(1, axis)
             wslist += [ws]
-            if tabulate_dspacing:
-                dp_wslist += [ws_dspacing]
-        wslist.extend(dp_wslist)
         # table for model summary/info
         model = CreateEmptyTableWorkspace(OutputWorkspace='model')
         model.addColumn(type="str", name="Workspace")
         model.addColumn(type="float", name="chisq/DOF")  # always is for LM minimiser (users can't change)
+        model.addColumn(type="str", name="status")
         model.addColumn(type="str", name="Model")
         for iws, wsname in enumerate(self._loaded_workspaces.keys()):
             if wsname in self._fit_results:
-                row = [wsname, self._fit_results[wsname]['costFunction'], self._fit_results[wsname]['model']]
+                row = [wsname, self._fit_results[wsname]['costFunction'],
+                       self._fit_results[wsname]['status'], self._fit_results[wsname]['model']]
                 self.write_table_row(model, row, iws)
             else:
                 self.write_table_row(model, ['', nan, ''], iws)
@@ -301,8 +279,8 @@ class FittingDataModel(object):
     def update_workspace_name(self, old_name, new_name):
         if new_name not in self._loaded_workspaces:
             self._loaded_workspaces[new_name] = self._loaded_workspaces.pop(old_name)
-            if old_name in self._background_workspaces:
-                self._background_workspaces[new_name] = self._background_workspaces.pop(old_name)
+            if old_name in self._bg_sub_workspaces:
+                self._bg_sub_workspaces[new_name] = self._bg_sub_workspaces.pop(old_name)
             if old_name in self._bg_params:
                 self._bg_params[new_name] = self._bg_params.pop(old_name)
             if old_name in self._log_values:
@@ -316,49 +294,53 @@ class FittingDataModel(object):
     def get_log_workspaces_name(self):
         return [ws.name() for ws in self._log_workspaces] if self._log_workspaces else ''
 
-    def get_background_workspaces(self):
-        return self._background_workspaces
+    def get_bgsub_workspaces(self):
+        return self._bg_sub_workspaces
 
     def get_bg_params(self):
         return self._bg_params
 
-    def do_background_subtraction(self, ws_name, bg_params):
-        ws = self._loaded_workspaces[ws_name]
-        ws_bg = self._background_workspaces[ws_name]
-        bg_changed = False
-        if ws_bg and bg_params[1:] != self._bg_params[ws_name][1:]:
-            # add bg back on to data (but don't change bgsub status)
-            self.undo_background_subtraction(ws_name, isBGsub=bg_params[0])
-            bg_changed = True
-        if bg_changed or not ws_bg:
-            # re-evaluate background (or evaluate for first time)
-            self._bg_params[ws_name] = bg_params
-            ws_bg = self.estimate_background(ws_name, *bg_params[1:])
-        # update bg sub status before Minus (updates plot which repopulates table)
-        self._bg_params[ws_name][0] = bg_params[0]
-        Minus(LHSWorkspace=ws, RHSWorkspace=ws_bg, OutputWorkspace=ws_name)
+    def get_fit_results(self):
+        return self._fit_results
 
-    def undo_background_subtraction(self, ws_name, isBGsub=False):
-        self._bg_params[ws_name][0] = isBGsub  # must do this before plotting which refreshes table
-        Plus(LHSWorkspace=ws_name, RHSWorkspace=self.get_background_workspaces()[ws_name],
-             OutputWorkspace=ws_name)
+    def create_or_update_bgsub_ws(self, ws_name, bg_params):
+        ws = self._loaded_workspaces[ws_name]
+        ws_bg = self._bg_sub_workspaces[ws_name]
+        if not ws_bg or self._bg_params[ws_name] == [] or bg_params[1:] != self._bg_params[ws_name][1:]:
+            background = self.estimate_background(ws_name, *bg_params[1:])
+            self._bg_params[ws_name] = bg_params
+            bgsub_ws_name = ws_name + "_bgsub"
+            bgsub_ws = Minus(LHSWorkspace=ws, RHSWorkspace=background, OutputWorkspace=bgsub_ws_name)
+            self._bg_sub_workspaces[ws_name] = bgsub_ws
+            DeleteWorkspace(background)
+        else:
+            logger.notice("Background workspace already calculated")
+
+    def update_bgsub_status(self, ws_name, status):
+        if self._bg_params[ws_name]:
+            self._bg_params[ws_name][0] = status
 
     def estimate_background(self, ws_name, niter, xwindow, doSGfilter):
-        ws_bg = EnggEstimateFocussedBackground(InputWorkspace=ws_name, OutputWorkspace=ws_name + "_bg",
-                                               NIterations=niter, XWindow=xwindow, ApplyFilterSG=doSGfilter)
-        self._background_workspaces[ws_name] = ws_bg
+        try:
+            ws_bg = EnggEstimateFocussedBackground(InputWorkspace=ws_name, OutputWorkspace=ws_name + "_bg",
+                                                   NIterations=niter, XWindow=xwindow, ApplyFilterSG=doSGfilter)
+        except (ValueError, RuntimeError) as e:
+            # ValueError when Niter not positive integer, RuntimeError when Window too small
+            logger.error("Error on arguments supplied to EnggEstimateFocusedBackground: " + str(e))
+            ws_bg = SetUncertainties(InputWorkspace=ws_name)  # copy data and zero errors
+            ws_bg = Minus(LHSWorkspace=ws_bg, RHSWorkspace=ws_bg)  # workspace of zeros with same num spectra
         return ws_bg
 
     def plot_background_figure(self, ws_name):
         ws = self._loaded_workspaces[ws_name]
-        ws_bg = self._background_workspaces[ws_name]
-        if ws_bg:
+        ws_bgsub = self._bg_sub_workspaces[ws_name]
+        if ws_bgsub:
             fig, ax = subplots(2, 1, sharex=True, gridspec_kw={'height_ratios': [2, 1]},
                                subplot_kw={'projection': 'mantid'})
-            tmp = Plus(LHSWorkspace=ws_name, RHSWorkspace=ws_bg, StoreInADS=False)
-            ax[0].plot(tmp, 'x')
-            ax[0].plot(ws_bg, '-r')
-            ax[1].plot(ws, 'x')
+            bg = Minus(LHSWorkspace=ws_name, RHSWorkspace=ws_bgsub, StoreInADS=False)
+            ax[0].plot(ws, 'x')
+            ax[1].plot(ws_bgsub, 'x')
+            ax[0].plot(bg, '-r')
             fig.show()
 
     def get_last_added(self):
@@ -367,6 +349,30 @@ class FittingDataModel(object):
     def get_sample_log_from_ws(self, ws_name, log_name):
         return self._loaded_workspaces[ws_name].getSampleDetails().getLogData(log_name).value
 
+    def set_log_workspaces_none(self):
+        # to be used in the event of Ads clear, as trying to reference the deleted grp ws results in an error
+        self._log_workspaces = None
+
+    def _convert_TOF_to_d(self, tof, ws_name):
+        diff_consts = self._get_diff_constants(ws_name)
+        return UnitConversion.run("TOF", "dSpacing", tof, 0, DeltaEModeType.Elastic, diff_consts)  # L1=0 (ignored)
+
+    def _convert_TOFerror_to_derror(self, tof_error, d, ws_name):
+        diff_consts = self._get_diff_constants(ws_name)
+        difc = diff_consts[UnitParams.difc]
+        difa = diff_consts[UnitParams.difa] if UnitParams.difa in diff_consts else 0
+        return tof_error / (2 * difa * d + difc)
+
+    def _get_diff_constants(self, ws_name):
+        """
+        Get diffractometer constants from workspace
+        TOF = difc*d + difa*(d^2) + tzero
+        """
+        ws = ADS.retrieve(ws_name)
+        si = ws.spectrumInfo()
+        diff_consts = si.diffractometerConstants(0)  # output is a UnitParametersMap
+        return diff_consts
+
     @staticmethod
     def write_table_row(ws_table, row, irow):
         if irow > ws_table.rowCount() - 1:
@@ -374,5 +380,6 @@ class FittingDataModel(object):
         [ws_table.setCell(irow, icol, row[icol]) for icol in range(0, len(row))]
 
     @staticmethod
-    def _generate_workspace_name(filepath, xunit):
-        return path.splitext(path.split(filepath)[1])[0] + '_' + xunit
+    def _generate_workspace_name(filepath):
+        wsname = path.splitext(path.split(filepath)[1])[0]
+        return wsname

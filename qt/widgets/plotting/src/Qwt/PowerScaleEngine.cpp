@@ -47,8 +47,7 @@ PowerScaleEngine::~PowerScaleEngine() {}
    \param x2 Second limit of the interval (In/Out)
    \param stepSize Step size (Out)
 */
-void PowerScaleEngine::autoScale(int maxNumSteps, double &x1, double &x2,
-                                 double &stepSize) const {
+void PowerScaleEngine::autoScale(int maxNumSteps, double &x1, double &x2, double &stepSize) const {
   QwtDoubleInterval interval(x1, x2);
   interval = interval.normalized();
 
@@ -90,8 +89,7 @@ void PowerScaleEngine::autoScale(int maxNumSteps, double &x1, double &x2,
 
    \sa QwtScaleEngine::stepSize(), QwtScaleEngine::subDivide()
 */
-QwtScaleDiv PowerScaleEngine::divideScale(double x1, double x2, int maxMajSteps,
-                                          int maxMinSteps,
+QwtScaleDiv PowerScaleEngine::divideScale(double x1, double x2, int maxMajSteps, int maxMinSteps,
                                           double stepSize) const {
   QwtDoubleInterval interval = QwtDoubleInterval(x1, x2).normalized();
   if (interval.width() <= 0)
@@ -120,16 +118,14 @@ QwtScaleDiv PowerScaleEngine::divideScale(double x1, double x2, int maxMajSteps,
   return scaleDiv;
 }
 
-void PowerScaleEngine::buildTicks(
-    const QwtDoubleInterval &interval, double stepSize, int maxMinSteps,
-    QwtValueList ticks[QwtScaleDiv::NTickTypes]) const {
+void PowerScaleEngine::buildTicks(const QwtDoubleInterval &interval, double stepSize, int maxMinSteps,
+                                  QwtValueList ticks[QwtScaleDiv::NTickTypes]) const {
   const QwtDoubleInterval boundingInterval = align(interval, stepSize);
 
   ticks[QwtScaleDiv::MajorTick] = buildMajorTicks(boundingInterval, stepSize);
 
   if (maxMinSteps > 0) {
-    buildMinorTicks(ticks[QwtScaleDiv::MajorTick], maxMinSteps, stepSize,
-                    ticks[QwtScaleDiv::MinorTick],
+    buildMinorTicks(ticks[QwtScaleDiv::MajorTick], maxMinSteps, stepSize, ticks[QwtScaleDiv::MinorTick],
                     ticks[QwtScaleDiv::MediumTick]);
   }
 
@@ -146,9 +142,7 @@ void PowerScaleEngine::buildTicks(
   }
 }
 
-QwtValueList
-PowerScaleEngine::buildMajorTicks(const QwtDoubleInterval &interval,
-                                  double stepSize) const {
+QwtValueList PowerScaleEngine::buildMajorTicks(const QwtDoubleInterval &interval, double stepSize) const {
   int numTicks = qRound(interval.width() / stepSize) + 1;
   if (numTicks > 10000)
     numTicks = 10000;
@@ -163,10 +157,8 @@ PowerScaleEngine::buildMajorTicks(const QwtDoubleInterval &interval,
   return ticks;
 }
 
-void PowerScaleEngine::buildMinorTicks(const QwtValueList &majorTicks,
-                                       int maxMinSteps, double stepSize,
-                                       QwtValueList &minorTicks,
-                                       QwtValueList &mediumTicks) const {
+void PowerScaleEngine::buildMinorTicks(const QwtValueList &majorTicks, int maxMinSteps, double stepSize,
+                                       QwtValueList &minorTicks, QwtValueList &mediumTicks) const {
   double minStep = divideInterval(stepSize, maxMinSteps);
   if (minStep == 0.0)
     return;
@@ -175,8 +167,7 @@ void PowerScaleEngine::buildMinorTicks(const QwtValueList &majorTicks,
   int numTicks = (int)::ceil(qwtAbs(stepSize / minStep)) - 1;
 
   // Do the minor steps fit into the interval?
-  if (QwtScaleArithmetic::compareEps((numTicks + 1) * qwtAbs(minStep),
-                                     qwtAbs(stepSize), stepSize) > 0) {
+  if (QwtScaleArithmetic::compareEps((numTicks + 1) * qwtAbs(minStep), qwtAbs(stepSize), stepSize) > 0) {
     numTicks = 1;
     minStep = stepSize * 0.5;
   }
@@ -215,8 +206,7 @@ void PowerScaleEngine::buildMinorTicks(const QwtValueList &majorTicks,
 
   \return Aligned interval
 */
-QwtDoubleInterval PowerScaleEngine::align(const QwtDoubleInterval &interval,
-                                          double stepSize) const {
+QwtDoubleInterval PowerScaleEngine::align(const QwtDoubleInterval &interval, double stepSize) const {
   const double x1 = QwtScaleArithmetic::floorEps(interval.minValue(), stepSize);
   const double x2 = QwtScaleArithmetic::ceilEps(interval.maxValue(), stepSize);
 
@@ -224,9 +214,7 @@ QwtDoubleInterval PowerScaleEngine::align(const QwtDoubleInterval &interval,
 }
 
 //! Create a clone of the transformation
-QwtScaleTransformation *PowerScaleTransformation::copy() const {
-  return new PowerScaleTransformation(d_engine);
-}
+QwtScaleTransformation *PowerScaleTransformation::copy() const { return new PowerScaleTransformation(d_engine); }
 
 PowerScaleTransformation::~PowerScaleTransformation() {}
 
@@ -239,10 +227,8 @@ PowerScaleTransformation::~PowerScaleTransformation() {}
  * \param p1 first border of target interval
  * \param p2 second border of target interval
  */
-double PowerScaleTransformation::xForm(double s, double s1, double s2,
-                                       double p1, double p2) const {
-  return p1 + (p2 - p1) / (pow(s2, nth_power) - pow(s1, nth_power)) *
-                  (pow(s, nth_power) - pow(s1, nth_power));
+double PowerScaleTransformation::xForm(double s, double s1, double s2, double p1, double p2) const {
+  return p1 + (p2 - p1) / (pow(s2, nth_power) - pow(s1, nth_power)) * (pow(s, nth_power) - pow(s1, nth_power));
 }
 
 /*
@@ -254,9 +240,6 @@ double PowerScaleTransformation::xForm(double s, double s1, double s2,
  * \param s1 first border of logarithmic interval
  * \param s2 second border of logarithmic interval
  */
-double PowerScaleTransformation::invXForm(double p, double p1, double p2,
-                                          double s1, double s2) const {
-  return pow((p - p1) / (p2 - p1) * (pow(s2, nth_power) - pow(s1, nth_power)),
-             1.0 / nth_power) +
-         s1;
+double PowerScaleTransformation::invXForm(double p, double p1, double p2, double s1, double s2) const {
+  return pow((p - p1) / (p2 - p1) * (pow(s2, nth_power) - pow(s1, nth_power)), 1.0 / nth_power) + s1;
 }

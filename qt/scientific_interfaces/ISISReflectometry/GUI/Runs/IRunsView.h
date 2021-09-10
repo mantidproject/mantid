@@ -60,8 +60,7 @@ IRunsView is the base view class for the Reflectometry Interface. It
 contains no QT specific functionality as that should be handled by a subclass.
 */
 
-class MANTIDQT_ISISREFLECTOMETRY_DLL IRunsView
-    : public MantidQt::MantidWidgets::ProgressableView {
+class MANTIDQT_ISISREFLECTOMETRY_DLL IRunsView : public MantidQt::MantidWidgets::ProgressableView {
 public:
   virtual ~IRunsView() = default;
 
@@ -83,8 +82,7 @@ public:
   virtual ISearchModel &mutableSearchResults() = 0;
 
   // Setter methods
-  virtual void
-  setInstrumentList(const std::vector<std::string> &instruments) = 0;
+  virtual void setInstrumentList(const std::vector<std::string> &instruments) = 0;
   virtual void updateMenuEnabledState(bool isProcessing) = 0;
   virtual void setAutoreduceButtonEnabled(bool enabled) = 0;
   virtual void setAutoreducePauseButtonEnabled(bool enabled) = 0;
@@ -106,10 +104,8 @@ public:
   virtual std::string getSearchCycle() const = 0;
   virtual int getLiveDataUpdateInterval() const = 0;
 
-  virtual std::shared_ptr<MantidQt::API::AlgorithmRunner>
-  getAlgorithmRunner() const = 0;
-  virtual std::shared_ptr<MantidQt::API::AlgorithmRunner>
-  getMonitorAlgorithmRunner() const = 0;
+  virtual std::shared_ptr<MantidQt::API::AlgorithmRunner> getAlgorithmRunner() const = 0;
+  virtual std::shared_ptr<MantidQt::API::AlgorithmRunner> getMonitorAlgorithmRunner() const = 0;
 
   // Start live data monitoring
   virtual void startMonitor() = 0;

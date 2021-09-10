@@ -25,11 +25,9 @@ using namespace Geometry;
 /// using namespace DataObjects;
 
 void CopyInstrumentParameters::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
                   "Name of the workspace giving the instrument");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::InOut),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::InOut),
                   "Name of the workspace receiving the instrument");
 }
 
@@ -69,21 +67,17 @@ void CopyInstrumentParameters::exec() {
         detid_t detID = pOldDet->getID();
         targComp = inst2->getBaseDetector(detID);
         if (!targComp) {
-          g_log.warning() << "Target instrument does not have detector with ID "
-                          << detID << '\n';
+          g_log.warning() << "Target instrument does not have detector with ID " << detID << '\n';
           continue;
         }
       } else {
         std::string source_name = oldComponent->getFullName();
         size_t nameStart = source_name.find(Name1);
-        std::string targ_name =
-            source_name.replace(nameStart, nameStart + Name1.size(), Name2);
+        std::string targ_name = source_name.replace(nameStart, nameStart + Name1.size(), Name2);
         // existingComponents.
         auto spTargComp = inst2->getComponentByName(targ_name);
         if (!spTargComp) {
-          g_log.warning()
-              << "Target instrument does not have component with full name: "
-              << targ_name << '\n';
+          g_log.warning() << "Target instrument does not have component with full name: " << targ_name << '\n';
           continue;
         }
         targComp = spTargComp->getBaseComponent();

@@ -35,11 +35,8 @@ public:
   void test_cannotConvertTo_unit() {
     Mantid::Geometry::QSample frame;
     ReciprocalLatticeUnit unit;
-    TSM_ASSERT("Not same unit type as is used for QLab",
-               !frame.canConvertTo(unit));
-    TSM_ASSERT_EQUALS(
-        "The equivalent special coordinate system should be QSample",
-        frame.equivalientSpecialCoordinateSystem(),
-        Mantid::Kernel::SpecialCoordinateSystem::QSample);
+    TSM_ASSERT("Not same unit type as is used for QLab", !frame.canConvertTo(unit));
+    TSM_ASSERT_EQUALS("The equivalent special coordinate system should be QSample",
+                      frame.equivalientSpecialCoordinateSystem(), Mantid::Kernel::SpecialCoordinateSystem::QSample);
   }
 };

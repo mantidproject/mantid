@@ -19,9 +19,7 @@ namespace Geometry {
 class ConvexPolygon;
 
 /// Compute the instersection of two convex polygons.
-bool MANTID_GEOMETRY_DLL intersection(const ConvexPolygon &P,
-                                      const ConvexPolygon &Q,
-                                      ConvexPolygon &out);
+bool MANTID_GEOMETRY_DLL intersection(const ConvexPolygon &P, const ConvexPolygon &Q, ConvexPolygon &out);
 
 } // namespace Geometry
 } // namespace Mantid

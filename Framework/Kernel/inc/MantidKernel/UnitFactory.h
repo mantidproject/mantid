@@ -14,16 +14,12 @@
  * The second operation that this macro performs is to provide the definition
  * of the unitID method for the concrete unit.
  */
-#define DECLARE_UNIT(classname)                                                \
-  namespace {                                                                  \
-  Mantid::Kernel::RegistrationHelper                                           \
-      register_unit_##classname(((Mantid::Kernel::UnitFactory::Instance()      \
-                                      .subscribe<classname>(#classname)),      \
-                                 0));                                          \
-  }                                                                            \
-  const std::string Mantid::Kernel::Units::classname::unitID() const {         \
-    return #classname;                                                         \
-  }
+#define DECLARE_UNIT(classname)                                                                                        \
+  namespace {                                                                                                          \
+  Mantid::Kernel::RegistrationHelper                                                                                   \
+      register_unit_##classname(((Mantid::Kernel::UnitFactory::Instance().subscribe<classname>(#classname)), 0));      \
+  }                                                                                                                    \
+  const std::string Mantid::Kernel::Units::classname::unitID() const { return #classname; }
 
 //----------------------------------------------------------------------
 // Includes
@@ -78,8 +74,7 @@ private:
   ~UnitFactoryImpl() override = default;
 };
 
-EXTERN_MANTID_KERNEL template class MANTID_KERNEL_DLL
-    Mantid::Kernel::SingletonHolder<UnitFactoryImpl>;
+EXTERN_MANTID_KERNEL template class MANTID_KERNEL_DLL Mantid::Kernel::SingletonHolder<UnitFactoryImpl>;
 
 using UnitFactory = SingletonHolder<UnitFactoryImpl>;
 

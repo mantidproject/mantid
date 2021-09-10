@@ -33,24 +33,19 @@ QUrl fixupURL(const QUrl &url) {
   QString localFileQString = url.toLocalFile();
   // Compile on OSX only.
   if (localFileQString.startsWith("/.file/id=")) {
-    CFStringRef relCFStringRef = CFStringCreateWithCString(
-        kCFAllocatorDefault, localFileQString.toUtf8().constData(),
-        kCFStringEncodingUTF8);
-    CFURLRef relCFURL = CFURLCreateWithFileSystemPath(
-        kCFAllocatorDefault, relCFStringRef, kCFURLPOSIXPathStyle,
-        false // isDirectory
+    CFStringRef relCFStringRef =
+        CFStringCreateWithCString(kCFAllocatorDefault, localFileQString.toUtf8().constData(), kCFStringEncodingUTF8);
+    CFURLRef relCFURL = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, relCFStringRef, kCFURLPOSIXPathStyle,
+                                                      false // isDirectory
     );
     CFErrorRef error = nullptr;
-    CFURLRef absCFURL =
-        CFURLCreateFilePathURL(kCFAllocatorDefault, relCFURL, &error);
+    CFURLRef absCFURL = CFURLCreateFilePathURL(kCFAllocatorDefault, relCFURL, &error);
     if (!error) {
       static const CFIndex maxAbsPathCStrBufLen = 4096;
       char absPathCStr[maxAbsPathCStrBufLen];
-      if (CFURLGetFileSystemRepresentation(
-              absCFURL,
-              true, // resolveAgainstBase
-              reinterpret_cast<UInt8 *>(&absPathCStr[0]),
-              maxAbsPathCStrBufLen)) {
+      if (CFURLGetFileSystemRepresentation(absCFURL,
+                                           true, // resolveAgainstBase
+                                           reinterpret_cast<UInt8 *>(&absPathCStr[0]), maxAbsPathCStrBufLen)) {
         localFileQString = QString(absPathCStr);
       }
     }

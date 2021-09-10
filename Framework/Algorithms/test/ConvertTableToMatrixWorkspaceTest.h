@@ -23,9 +23,7 @@ using namespace Mantid::Kernel;
 
 class ConvertTableToMatrixWorkspaceTest : public CxxTest::TestSuite {
 public:
-  void testName() {
-    TS_ASSERT_EQUALS(m_converter->name(), "ConvertTableToMatrixWorkspace")
-  }
+  void testName() { TS_ASSERT_EQUALS(m_converter->name(), "ConvertTableToMatrixWorkspace") }
 
   void testVersion() { TS_ASSERT_EQUALS(m_converter->version(), 1) }
 
@@ -51,16 +49,15 @@ public:
     }
 
     TS_ASSERT_THROWS_NOTHING(m_converter->setProperty("InputWorkspace", tws));
-    TS_ASSERT_THROWS_NOTHING(
-        m_converter->setPropertyValue("OutputWorkspace", "out"));
+    TS_ASSERT_THROWS_NOTHING(m_converter->setPropertyValue("OutputWorkspace", "out"));
     TS_ASSERT_THROWS_NOTHING(m_converter->setPropertyValue("ColumnX", "A"));
     TS_ASSERT_THROWS_NOTHING(m_converter->setPropertyValue("ColumnY", "B"));
     TS_ASSERT_THROWS_NOTHING(m_converter->setPropertyValue("ColumnE", "C"));
 
     TS_ASSERT(m_converter->execute());
 
-    MatrixWorkspace_sptr mws = std::dynamic_pointer_cast<MatrixWorkspace>(
-        API::AnalysisDataService::Instance().retrieve("out"));
+    MatrixWorkspace_sptr mws =
+        std::dynamic_pointer_cast<MatrixWorkspace>(API::AnalysisDataService::Instance().retrieve("out"));
 
     TS_ASSERT(mws);
     TS_ASSERT_EQUALS(mws->getNumberHistograms(), 1);
@@ -81,8 +78,7 @@ public:
       TS_ASSERT_EQUALS(e, E[i]);
     }
 
-    std::shared_ptr<Units::Label> label =
-        std::dynamic_pointer_cast<Units::Label>(mws->getAxis(0)->unit());
+    std::shared_ptr<Units::Label> label = std::dynamic_pointer_cast<Units::Label>(mws->getAxis(0)->unit());
     TS_ASSERT(label);
     TS_ASSERT_EQUALS(label->caption(), "A");
     TS_ASSERT_EQUALS(mws->YUnitLabel(), "B");
@@ -101,8 +97,7 @@ public:
 
     TS_ASSERT(m_converter->execute());
 
-    MatrixWorkspace_sptr mws =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
+    MatrixWorkspace_sptr mws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
 
     TS_ASSERT(mws);
     TS_ASSERT_EQUALS(mws->getNumberHistograms(), 1);
@@ -125,22 +120,18 @@ public:
     API::AnalysisDataService::Instance().remove("out");
   }
 
-  void test_fail_on_empty_table() {
-    TS_ASSERT_THROWS(m_converter->execute(), const std::runtime_error &);
-  }
+  void test_fail_on_empty_table() { TS_ASSERT_THROWS(m_converter->execute(), const std::runtime_error &); }
 
   void setUp() override {
     tws = WorkspaceFactory::Instance().createTable();
     tws->addColumn("double", "A");
     tws->addColumn("double", "B");
 
-    m_converter =
-        std::make_shared<Mantid::Algorithms::ConvertTableToMatrixWorkspace>();
+    m_converter = std::make_shared<Mantid::Algorithms::ConvertTableToMatrixWorkspace>();
     m_converter->setRethrows(true);
     m_converter->initialize();
     TS_ASSERT_THROWS_NOTHING(m_converter->setProperty("InputWorkspace", tws));
-    TS_ASSERT_THROWS_NOTHING(
-        m_converter->setPropertyValue("OutputWorkspace", "out"));
+    TS_ASSERT_THROWS_NOTHING(m_converter->setPropertyValue("OutputWorkspace", "out"));
     TS_ASSERT_THROWS_NOTHING(m_converter->setPropertyValue("ColumnX", "A"));
     TS_ASSERT_THROWS_NOTHING(m_converter->setPropertyValue("ColumnY", "B"));
   }
@@ -162,16 +153,15 @@ public:
     }
 
     TS_ASSERT_THROWS_NOTHING(m_converter->setProperty("InputWorkspace", tws));
-    TS_ASSERT_THROWS_NOTHING(
-        m_converter->setPropertyValue("OutputWorkspace", "out"));
+    TS_ASSERT_THROWS_NOTHING(m_converter->setPropertyValue("OutputWorkspace", "out"));
     TS_ASSERT_THROWS_NOTHING(m_converter->setPropertyValue("ColumnX", "A"));
     TS_ASSERT_THROWS_NOTHING(m_converter->setPropertyValue("ColumnY", "B"));
     TS_ASSERT_THROWS_NOTHING(m_converter->setPropertyValue("ColumnE", "C"));
 
     TS_ASSERT(m_converter->execute());
 
-    MatrixWorkspace_sptr mws = std::dynamic_pointer_cast<MatrixWorkspace>(
-        API::AnalysisDataService::Instance().retrieve("out"));
+    MatrixWorkspace_sptr mws =
+        std::dynamic_pointer_cast<MatrixWorkspace>(API::AnalysisDataService::Instance().retrieve("out"));
 
     TS_ASSERT(mws);
     TS_ASSERT_EQUALS(mws->getNumberHistograms(), 1);
@@ -192,8 +182,7 @@ public:
       TS_ASSERT_EQUALS(e, E[i]);
     }
 
-    auto label =
-        std::dynamic_pointer_cast<Units::Label>(mws->getAxis(0)->unit());
+    auto label = std::dynamic_pointer_cast<Units::Label>(mws->getAxis(0)->unit());
     TS_ASSERT(label);
     TS_ASSERT_EQUALS(label->caption(), "A");
     TS_ASSERT_EQUALS(mws->YUnitLabel(), "B");
@@ -217,8 +206,7 @@ public:
     }
 
     TS_ASSERT_THROWS_NOTHING(m_converter->setProperty("InputWorkspace", tws));
-    TS_ASSERT_THROWS_NOTHING(
-        m_converter->setPropertyValue("OutputWorkspace", "out"));
+    TS_ASSERT_THROWS_NOTHING(m_converter->setPropertyValue("OutputWorkspace", "out"));
     TS_ASSERT_THROWS_NOTHING(m_converter->setPropertyValue("ColumnX", "A"));
     TS_ASSERT_THROWS_NOTHING(m_converter->setPropertyValue("ColumnY", "B"));
     TS_ASSERT_THROWS_NOTHING(m_converter->setPropertyValue("ColumnE", "C"));

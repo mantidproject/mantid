@@ -22,15 +22,13 @@ namespace Geometry {
       @author Michael Wedel, ESS
       @date 05/09/2015
 */
-class MANTID_GEOMETRY_DLL StructureFactorCalculatorSummation
-    : public StructureFactorCalculator {
+class MANTID_GEOMETRY_DLL StructureFactorCalculatorSummation : public StructureFactorCalculator {
 public:
   StructureFactorCalculatorSummation();
   StructureFactor getF(const Kernel::V3D &hkl) const override;
 
 protected:
-  void
-  crystalStructureSetHook(const CrystalStructure &crystalStructure) override;
+  void crystalStructureSetHook(const CrystalStructure &crystalStructure) override;
 
   void updateUnitCellScatterers(const CrystalStructure &crystalStructure);
   std::string getV3DasString(const Kernel::V3D &point) const;
@@ -38,8 +36,7 @@ protected:
   CompositeBraggScatterer_sptr m_unitCellScatterers;
 };
 
-using StructureFactorSummation_sptr =
-    std::shared_ptr<StructureFactorCalculatorSummation>;
+using StructureFactorSummation_sptr = std::shared_ptr<StructureFactorCalculatorSummation>;
 
 } // namespace Geometry
 } // namespace Mantid

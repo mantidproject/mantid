@@ -35,16 +35,14 @@ API::IAlgorithm interface.
 @author Martyn Gigg, Tessella Plc
 @date 24/03/2011
 */
-class MANTID_API_DLL AlgorithmProperty
-    : public Kernel::PropertyWithValue<std::shared_ptr<IAlgorithm>> {
+class MANTID_API_DLL AlgorithmProperty : public Kernel::PropertyWithValue<std::shared_ptr<IAlgorithm>> {
 public:
   /// Typedef the held type
   using HeldType = std::shared_ptr<IAlgorithm>;
 
   /// Constructor
   AlgorithmProperty(const std::string &propName,
-                    Kernel::IValidator_sptr validator =
-                        Kernel::IValidator_sptr(new Kernel::NullValidator),
+                    Kernel::IValidator_sptr validator = Kernel::IValidator_sptr(new Kernel::NullValidator),
                     unsigned int direction = Kernel::Direction::Input);
 
   AlgorithmProperty(const AlgorithmProperty &) = default;
@@ -53,14 +51,11 @@ public:
   using Kernel::PropertyWithValue<HeldType>::operator=;
 
   /// 'Virtual copy constructor'
-  inline AlgorithmProperty *clone() const override {
-    return new AlgorithmProperty(*this);
-  }
+  inline AlgorithmProperty *clone() const override { return new AlgorithmProperty(*this); }
 
   /// Add the value of another property. Doesn't make sense here.
   AlgorithmProperty &operator+=(Kernel::Property const *) override {
-    throw Kernel::Exception::NotImplementedError(
-        "+= operator is not implemented for AlgorithmProperty.");
+    throw Kernel::Exception::NotImplementedError("+= operator is not implemented for AlgorithmProperty.");
     return *this;
   }
   /// Return the algorithm as string
@@ -82,8 +77,7 @@ private:
 };
 
 #ifdef _WIN32
-#pragma warning(                                                               \
-    pop) // Re-enable the warning about multiple assignment operators
+#pragma warning(pop) // Re-enable the warning about multiple assignment operators
 #endif
 
 } // namespace API

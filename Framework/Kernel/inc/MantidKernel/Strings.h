@@ -50,8 +50,7 @@ namespace Strings {
  * @return
  */
 template <typename ITERATOR_TYPE>
-DLLExport std::string simpleJoin(ITERATOR_TYPE begin, ITERATOR_TYPE end,
-                                 const std::string &separator) {
+DLLExport std::string simpleJoin(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string &separator) {
   std::ostringstream output;
   ITERATOR_TYPE it;
   for (it = begin; it != end;) {
@@ -83,10 +82,8 @@ DLLExport std::string simpleJoin(ITERATOR_TYPE begin, ITERATOR_TYPE end,
 template <typename ITERATOR_TYPE>
 DLLExport std::string
 join(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string &separator,
-     typename std::enable_if<
-         !(std::is_same<
-             typename std::iterator_traits<ITERATOR_TYPE>::iterator_category,
-             std::random_access_iterator_tag>::value)>::type * = nullptr) {
+     typename std::enable_if<!(std::is_same<typename std::iterator_traits<ITERATOR_TYPE>::iterator_category,
+                                            std::random_access_iterator_tag>::value)>::type * = nullptr) {
   return simpleJoin(begin, end, separator);
 }
 
@@ -112,10 +109,8 @@ join(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string &separator,
 template <typename ITERATOR_TYPE>
 DLLExport std::string
 join(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string &separator,
-     typename std::enable_if<
-         (std::is_same<
-             typename std::iterator_traits<ITERATOR_TYPE>::iterator_category,
-             std::random_access_iterator_tag>::value)>::type * = nullptr) {
+     typename std::enable_if<(std::is_same<typename std::iterator_traits<ITERATOR_TYPE>::iterator_category,
+                                           std::random_access_iterator_tag>::value)>::type * = nullptr) {
 
   // Get max number of threads
   int nmaxThreads = static_cast<int>(PARALLEL_GET_MAX_THREADS);
@@ -198,8 +193,7 @@ join(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string &separator,
  * @return A string with contiguous values compressed using the list syntax
  */
 template <typename ITERATOR_TYPE>
-DLLExport std::string joinCompress(ITERATOR_TYPE begin, ITERATOR_TYPE end,
-                                   const std::string &separator = ",",
+DLLExport std::string joinCompress(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string &separator = ",",
                                    const std::string &listSeparator = "-") {
 
   if (begin == end) {
@@ -240,17 +234,14 @@ DLLExport std::string joinCompress(ITERATOR_TYPE begin, ITERATOR_TYPE end,
   return result.str();
 }
 /// Converts long strings into "start ... end"
-MANTID_KERNEL_DLL std::string shorten(const std::string &input,
-                                      const size_t max_length);
+MANTID_KERNEL_DLL std::string shorten(const std::string &input, const size_t max_length);
 
 /// Return a string with all matching occurence-strings
-MANTID_KERNEL_DLL std::string replace(const std::string &input,
-                                      const std::string &find_what,
+MANTID_KERNEL_DLL std::string replace(const std::string &input, const std::string &find_what,
                                       const std::string &replace_with);
 /// Return a string with all occurrences of the characters in the input replaced
 /// by the replace string
-MANTID_KERNEL_DLL std::string replaceAll(const std::string &input,
-                                         const std::string &charStr,
+MANTID_KERNEL_DLL std::string replaceAll(const std::string &input, const std::string &charStr,
                                          const std::string &substitute);
 
 /// Converts string to all lowercase
@@ -260,11 +251,9 @@ MANTID_KERNEL_DLL std::string toLower(const std::string &input);
 MANTID_KERNEL_DLL std::string toUpper(const std::string &input);
 
 /// determine if a character group exists in a string
-MANTID_KERNEL_DLL int confirmStr(const std::string &S,
-                                 const std::string &fullPhrase);
+MANTID_KERNEL_DLL int confirmStr(const std::string &S, const std::string &fullPhrase);
 /// Get a word from a string
-MANTID_KERNEL_DLL int extractWord(std::string &Line, const std::string &Word,
-                                  const int cnt = 4);
+MANTID_KERNEL_DLL int extractWord(std::string &Line, const std::string &Word, const int cnt = 4);
 /// Get an int from the end of a word
 MANTID_KERNEL_DLL int endsWithInt(const std::string &word);
 
@@ -289,8 +278,7 @@ MANTID_KERNEL_DLL void getLine(std::istream &fh, std::string &Line);
 /// Peek at a line without extracting it from the stream
 MANTID_KERNEL_DLL std::string peekLine(std::istream &fh);
 /// get a part of a long line
-MANTID_KERNEL_DLL int getPartLine(std::istream &fh, std::string &Out,
-                                  std::string &Excess, const int spc = 256);
+MANTID_KERNEL_DLL int getPartLine(std::istream &fh, std::string &Out, std::string &Excess, const int spc = 256);
 
 /// Takes a character string and evaluates the first [typename T] object
 template <typename T> int convPartNum(const std::string &A, T &out);
@@ -309,9 +297,7 @@ template <typename T> std::string toString(const std::vector<T> &value);
 /// Convert a set to a string
 template <typename T> std::string toString(const std::set<T> &value);
 
-template <typename T>
-int setValues(const std::string &Line, const std::vector<int> &Index,
-              std::vector<T> &Out);
+template <typename T> int setValues(const std::string &Line, const std::vector<int> &Index, std::vector<T> &Out);
 
 /// Convert and cut a string
 template <typename T> int sectPartNum(std::string &A, T &out);
@@ -332,8 +318,7 @@ MANTID_KERNEL_DLL std::vector<std::string> StrParts(const std::string &Ln);
 
 /// Splits a string into key value pairs
 MANTID_KERNEL_DLL std::map<std::string, std::string>
-splitToKeyValues(const std::string &input, const std::string &keyValSep = "=",
-                 const std::string &listSep = ",");
+splitToKeyValues(const std::string &input, const std::string &keyValSep = "=", const std::string &listSep = ",");
 
 /// Write a set of containers to a file
 template <template <typename T, typename A> class V, typename T, typename A>
@@ -341,8 +326,7 @@ int writeFile(const std::string &Fname, const T &step, const V<T, A> &Y);
 template <template <typename T, typename A> class V, typename T, typename A>
 int writeFile(const std::string &Fname, const V<T, A> &X, const V<T, A> &Y);
 template <template <typename T, typename A> class V, typename T, typename A>
-int writeFile(const std::string &Fname, const V<T, A> &X, const V<T, A> &Y,
-              const V<T, A> &Err);
+int writeFile(const std::string &Fname, const V<T, A> &X, const V<T, A> &Y, const V<T, A> &Err);
 
 /// Convert a VAX number to x86 little eindien
 float getVAXnum(const float A);
@@ -353,34 +337,28 @@ MANTID_KERNEL_DLL void readToEndOfLine(std::istream &in, bool ConsumeEOL);
 MANTID_KERNEL_DLL std::string getWord(std::istream &in, bool consumeEOL);
 ///  function parses a path, found in input string "path" and returns vector of
 ///  the folders contributed into the path */
-MANTID_KERNEL_DLL size_t split_path(const std::string &path,
-                                    std::vector<std::string> &path_components);
+MANTID_KERNEL_DLL size_t split_path(const std::string &path, std::vector<std::string> &path_components);
 
 /// Loads the entire contents of a text file into a string
 MANTID_KERNEL_DLL std::string loadFile(const std::string &filename);
 
 /// checks if the candidate is the member of the group
-MANTID_KERNEL_DLL int isMember(const std::vector<std::string> &group,
-                               const std::string &candidate);
+MANTID_KERNEL_DLL int isMember(const std::vector<std::string> &group, const std::string &candidate);
 
 /// Parses a number range, e.g. "1,4-9,54-111,3,10", to the vector containing
 /// all the elements within the range
-MANTID_KERNEL_DLL std::vector<int>
-parseRange(const std::string &str, const std::string &elemSep = ",",
-           const std::string &rangeSep = "-");
+MANTID_KERNEL_DLL std::vector<int> parseRange(const std::string &str, const std::string &elemSep = ",",
+                                              const std::string &rangeSep = "-");
 
 /// Parses unsigned integer groups, e.g. "1+2,4-7,9,11" to a nested vector
 /// structure.
-template <typename Integer>
-std::vector<std::vector<Integer>> parseGroups(const std::string &str) {
+template <typename Integer> std::vector<std::vector<Integer>> parseGroups(const std::string &str) {
   std::vector<std::vector<Integer>> groups;
 
   // Local helper functions.
   auto translateAdd = [&groups](const std::string &str) {
-    const auto tokens =
-        Kernel::StringTokenizer(str, "+",
-                                Kernel::StringTokenizer::TOK_TRIM |
-                                    Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+    const auto tokens = Kernel::StringTokenizer(
+        str, "+", Kernel::StringTokenizer::TOK_TRIM | Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
     std::vector<Integer> group;
     group.reserve(tokens.count());
     for (const auto &t : tokens) {
@@ -392,10 +370,8 @@ std::vector<std::vector<Integer>> parseGroups(const std::string &str) {
 
   auto translateSumRange = [&groups](const std::string &str) {
     // add a group with the numbers in the range
-    const auto tokens =
-        Kernel::StringTokenizer(str, "-",
-                                Kernel::StringTokenizer::TOK_TRIM |
-                                    Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+    const auto tokens = Kernel::StringTokenizer(
+        str, "-", Kernel::StringTokenizer::TOK_TRIM | Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
     if (tokens.count() != 2)
       throw std::runtime_error("Malformed range (-) operation.");
     Integer first = boost::lexical_cast<Integer>(tokens[0]);
@@ -413,10 +389,8 @@ std::vector<std::vector<Integer>> parseGroups(const std::string &str) {
 
   auto translateRange = [&groups](const std::string &str) {
     // add a group per number
-    const auto tokens =
-        Kernel::StringTokenizer(str, ":",
-                                Kernel::StringTokenizer::TOK_TRIM |
-                                    Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+    const auto tokens = Kernel::StringTokenizer(
+        str, ":", Kernel::StringTokenizer::TOK_TRIM | Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
     if (tokens.count() != 2)
       throw std::runtime_error("Malformed range (:) operation.");
     Integer first = boost::lexical_cast<Integer>(tokens[0]);
@@ -432,9 +406,7 @@ std::vector<std::vector<Integer>> parseGroups(const std::string &str) {
   try {
     // split into comma separated groups, each group potentially containing
     // an operation (+-:) that produces even more groups.
-    const auto tokens = StringTokenizer(str, ",",
-                                        StringTokenizer::TOK_TRIM |
-                                            StringTokenizer::TOK_IGNORE_EMPTY);
+    const auto tokens = StringTokenizer(str, ",", StringTokenizer::TOK_TRIM | StringTokenizer::TOK_IGNORE_EMPTY);
     for (const auto &token : tokens) {
       // Look for the various operators in the string. If one is found then
       // do the necessary translation into groupings.
@@ -457,8 +429,7 @@ std::vector<std::vector<Integer>> parseGroups(const std::string &str) {
 }
 
 /// Extract a line from input stream, discarding any EOL characters encountered
-MANTID_KERNEL_DLL std::istream &extractToEOL(std::istream &is,
-                                             std::string &str);
+MANTID_KERNEL_DLL std::istream &extractToEOL(std::istream &is, std::string &str);
 
 } // NAMESPACE Strings
 

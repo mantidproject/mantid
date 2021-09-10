@@ -68,21 +68,17 @@ public:
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; };
   const std::vector<std::string> seeAlso() const override {
-    return {"LoadInstrumentFromNexus", "LoadInstrumentFromRaw",
-            "ExportGeometry", "Load"};
+    return {"LoadInstrumentFromNexus", "LoadInstrumentFromRaw", "ExportGeometry", "Load"};
   }
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "DataHandling\\Instrument";
-  }
+  const std::string category() const override { return "DataHandling\\Instrument"; }
 
 private:
   void init() override;
   void exec() override;
 
   /// Run the Child Algorithm LoadParameters
-  void runLoadParameterFile(const std::shared_ptr<API::MatrixWorkspace> &ws,
-                            const std::string &filename);
+  void runLoadParameterFile(const std::shared_ptr<API::MatrixWorkspace> &ws, const std::string &filename);
 
   /// Mutex to avoid simultaneous access
   static std::recursive_mutex m_mutex;

@@ -22,13 +22,11 @@ using namespace Mantid::API;
 // Anonymous namespace to share methods with Performance test
 namespace {
 void setupWorkspaces(int N, double dX) {
-  Mantid::DataObjects::Workspace2D_sptr ws =
-      std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
-          WorkspaceFactory::Instance().create("Workspace2D", 1, N, N));
+  Mantid::DataObjects::Workspace2D_sptr ws = std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
+      WorkspaceFactory::Instance().create("Workspace2D", 1, N, N));
 
-  Mantid::DataObjects::Workspace2D_sptr ws1 =
-      std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
-          WorkspaceFactory::Instance().create("Workspace2D", 1, N + 1, N));
+  Mantid::DataObjects::Workspace2D_sptr ws1 = std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
+      WorkspaceFactory::Instance().create("Workspace2D", 1, N + 1, N));
 
   auto &X = ws->mutableX(0);
   auto &Y = ws->mutableY(0);
@@ -77,8 +75,8 @@ void doTestForward(const int N, const double XX, bool performance = false) {
   fft->execute();
 
   if (!performance) {
-    MatrixWorkspace_sptr fWS = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve("RealFFT_WS_forward"));
+    MatrixWorkspace_sptr fWS =
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("RealFFT_WS_forward"));
 
     const auto &X = fWS->x(0);
     const auto &Yr = fWS->y(0);
@@ -108,11 +106,11 @@ void doTestBackward(const int N, const double dX, bool performance = false) {
   fft->execute();
 
   if (!performance) {
-    MatrixWorkspace_sptr WS = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve("RealFFT_WS"));
+    MatrixWorkspace_sptr WS =
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("RealFFT_WS"));
 
-    MatrixWorkspace_sptr fWS = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve("RealFFT_WS_backward"));
+    MatrixWorkspace_sptr fWS =
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("RealFFT_WS_backward"));
 
     const auto &Y0 = WS->y(0);
 
@@ -126,8 +124,7 @@ void doTestBackward(const int N, const double dX, bool performance = false) {
   }
 }
 
-void doTestForwardHistogram(const int N, const double XX,
-                            bool performance = false) {
+void doTestForwardHistogram(const int N, const double XX, bool performance = false) {
   auto fft = Mantid::API::AlgorithmManager::Instance().create("RealFFT");
   fft->initialize();
   fft->setPropertyValue("InputWorkspace", "RealFFT_WS_hist");
@@ -135,8 +132,8 @@ void doTestForwardHistogram(const int N, const double XX,
   fft->setPropertyValue("WorkspaceIndex", "0");
   fft->execute();
 
-  MatrixWorkspace_sptr fWS = std::dynamic_pointer_cast<MatrixWorkspace>(
-      AnalysisDataService::Instance().retrieve("RealFFT_WS_forward_hist"));
+  MatrixWorkspace_sptr fWS =
+      std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("RealFFT_WS_forward_hist"));
 
   if (!performance) {
     const auto &X = fWS->x(0);
@@ -158,8 +155,7 @@ void doTestForwardHistogram(const int N, const double XX,
   }
 }
 
-void doTestBackwardHistogram(const int N, const double dX,
-                             bool performance = false) {
+void doTestBackwardHistogram(const int N, const double dX, bool performance = false) {
   auto fft = Mantid::API::AlgorithmManager::Instance().create("RealFFT");
   fft->initialize();
   fft->setPropertyValue("InputWorkspace", "RealFFT_WS_forward_hist");
@@ -167,11 +163,11 @@ void doTestBackwardHistogram(const int N, const double dX,
   fft->setPropertyValue("Transform", "Backward");
   fft->execute();
 
-  MatrixWorkspace_sptr WS = std::dynamic_pointer_cast<MatrixWorkspace>(
-      AnalysisDataService::Instance().retrieve("RealFFT_WS"));
+  MatrixWorkspace_sptr WS =
+      std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("RealFFT_WS"));
 
-  MatrixWorkspace_sptr fWS = std::dynamic_pointer_cast<MatrixWorkspace>(
-      AnalysisDataService::Instance().retrieve("RealFFT_WS_backward_hist"));
+  MatrixWorkspace_sptr fWS =
+      std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("RealFFT_WS_backward_hist"));
 
   if (!performance) {
     const auto &Y0 = WS->y(0);
@@ -206,14 +202,10 @@ private:
 
 class RealFFTTestPerformance : public CxxTest::TestSuite {
 public:
-  static RealFFTTestPerformance *createSuite() {
-    return new RealFFTTestPerformance();
-  }
+  static RealFFTTestPerformance *createSuite() { return new RealFFTTestPerformance(); }
   static void destroySuite(RealFFTTestPerformance *suite) { delete suite; }
 
-  RealFFTTestPerformance() : N(116), dX(0.3), XX(N * dX) {
-    setupWorkspaces(N, dX);
-  }
+  RealFFTTestPerformance() : N(116), dX(0.3), XX(N * dX) { setupWorkspaces(N, dX); }
   ~RealFFTTestPerformance() override { deleteWorkspacesFromADS(); }
 
   void testForward() { doTestForward(N, XX, performance); }

@@ -22,12 +22,8 @@ class SNSLiveEventDataListenerTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static SNSLiveEventDataListenerTest *createSuite() {
-    return new SNSLiveEventDataListenerTest();
-  }
-  static void destroySuite(SNSLiveEventDataListenerTest *suite) {
-    delete suite;
-  }
+  static SNSLiveEventDataListenerTest *createSuite() { return new SNSLiveEventDataListenerTest(); }
+  static void destroySuite(SNSLiveEventDataListenerTest *suite) { delete suite; }
 
   SNSLiveEventDataListenerTest() {
     // Create the listener. Remember: this will call connect()
@@ -56,8 +52,7 @@ public:
     // Check this is the only surviving reference to it
     TS_ASSERT_EQUALS(buffer.use_count(), 1)
     // Check it's an event workspace
-    EventWorkspace_const_sptr evbuf =
-        std::dynamic_pointer_cast<const EventWorkspace>(buffer);
+    EventWorkspace_const_sptr evbuf = std::dynamic_pointer_cast<const EventWorkspace>(buffer);
     TS_ASSERT(evbuf)
     // Check the workspace has the correct dimension
     TS_ASSERT_EQUALS(evbuf->getNumberHistograms(), 2)
@@ -97,8 +92,7 @@ public:
       // Check it's a valid workspace
       TS_ASSERT(buffer)
     }
-    std::cout << tim << " to call extactData() " << num << " times"
-              << std::endl;
+    std::cout << tim << " to call extactData() " << num << " times" << std::endl;
   }
 
 private:

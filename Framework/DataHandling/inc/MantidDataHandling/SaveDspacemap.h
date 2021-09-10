@@ -39,9 +39,8 @@ private:
   /// Run the algorithm
   void exec() override;
 
-  void CalculateDspaceFromCal(
-      const Mantid::DataObjects::OffsetsWorkspace_sptr &offsetsWS,
-      const std::string &DFileName);
+  void CalculateDspaceFromCal(const Mantid::DataObjects::OffsetsWorkspace_sptr &offsetsWS,
+                              const std::string &DFileName);
 };
 
 } // namespace DataHandling

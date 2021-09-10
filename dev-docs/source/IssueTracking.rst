@@ -94,10 +94,10 @@ to refer to either an issue or a PR on this page*)
     right away, for instance if it relates to a bug which affects a
     large number of users. If you are unsure about an issue that could
     be high priority, discuss with a senior developer. Issues marked
-    high priority must also have a justification for the priority 
+    high priority must also have a justification for the priority
     stated in the ticket
   - **No priority set** - use this for tickets of intermediate priority
-    this will probably be your default setting, most issues will fall 
+    this will probably be your default setting, most issues will fall
     into this category
   - **Priority: Low** - use this for the "nice to have" tickets
     this means that they are not necessarily urgent but can be
@@ -119,10 +119,10 @@ to refer to either an issue or a PR on this page*)
 ZenHub
 ^^^^^^
 
-Using the ZenHub browser extension set an estimate, this should be the number of 
+Using the ZenHub browser extension set an estimate, this should be the number of
 days you expect to take from begining to work on an issue, to opening a pull-request about it.
-Once you actually begin working on the issue change the pipeline to In Progress, 
-then again to Review/QA when you open a pull-request for it. This will be used to to aid with 
+Once you actually begin working on the issue change the pipeline to In Progress,
+then again to Review/QA when you open a pull-request for it. This will be used to to aid with
 future estimations of time for an issue.
 
 

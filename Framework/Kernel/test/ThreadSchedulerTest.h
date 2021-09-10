@@ -51,17 +51,11 @@ public:
     TS_ASSERT_EQUALS(ThreadSchedulerTest_numDestructed, 2);
   }
 
-  void test_basic_ThreadSchedulerFIFO() {
-    do_basic_test(std::make_unique<ThreadSchedulerFIFO>());
-  }
+  void test_basic_ThreadSchedulerFIFO() { do_basic_test(std::make_unique<ThreadSchedulerFIFO>()); }
 
-  void test_basic_ThreadSchedulerLIFO() {
-    do_basic_test(std::make_unique<ThreadSchedulerLIFO>());
-  }
+  void test_basic_ThreadSchedulerLIFO() { do_basic_test(std::make_unique<ThreadSchedulerLIFO>()); }
 
-  void test_basic_ThreadSchedulerLargestCost() {
-    do_basic_test(std::make_unique<ThreadSchedulerLargestCost>());
-  }
+  void test_basic_ThreadSchedulerLargestCost() { do_basic_test(std::make_unique<ThreadSchedulerLargestCost>()); }
 
   //==================================================================================================
 
@@ -96,24 +90,21 @@ public:
   }
 
   void test_ThreadSchedulerFIFO() {
-    std::unique_ptr<ThreadScheduler> sc =
-        std::make_unique<ThreadSchedulerFIFO>();
+    std::unique_ptr<ThreadScheduler> sc = std::make_unique<ThreadSchedulerFIFO>();
     double costs[4] = {0, 1, 2, 3};
     size_t poppedIndices[4] = {0, 1, 2, 3};
     do_test(sc.get(), costs, poppedIndices);
   }
 
   void test_ThreadSchedulerLIFO() {
-    std::unique_ptr<ThreadScheduler> sc =
-        std::make_unique<ThreadSchedulerLIFO>();
+    std::unique_ptr<ThreadScheduler> sc = std::make_unique<ThreadSchedulerLIFO>();
     double costs[4] = {0, 1, 2, 3};
     size_t poppedIndices[4] = {3, 2, 1, 0};
     do_test(sc.get(), costs, poppedIndices);
   }
 
   void test_ThreadSchedulerLargestCost() {
-    std::unique_ptr<ThreadScheduler> sc =
-        std::make_unique<ThreadSchedulerLargestCost>();
+    std::unique_ptr<ThreadScheduler> sc = std::make_unique<ThreadSchedulerLargestCost>();
     double costs[4] = {1, 5, 2, -3};
     size_t poppedIndices[4] = {1, 2, 0, 3};
     do_test(sc.get(), costs, poppedIndices);

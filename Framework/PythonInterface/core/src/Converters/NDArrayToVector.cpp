@@ -30,8 +30,8 @@ namespace Converters {
 
 /// Macro to declare template instantiations as extern; those are defined in
 /// NDArrayTypeIndex.cpp
-#define DECLARE_EXTERN(HeldType)                                               \
-  extern template int NDArrayTypeIndex<HeldType>::typenum;                     \
+#define DECLARE_EXTERN(HeldType)                                                                                       \
+  extern template int NDArrayTypeIndex<HeldType>::typenum;                                                             \
   extern template char NDArrayTypeIndex<HeldType>::typecode;
 
 DECLARE_EXTERN(bool)
@@ -58,8 +58,7 @@ namespace {
  * number of elements in the array and that the array is not emtpy
  */
 template <typename DestElementType> struct CopyToImpl {
-  void operator()(typename Converters::NDArrayToVector<
-                      DestElementType>::TypedVectorIterator first,
+  void operator()(typename Converters::NDArrayToVector<DestElementType>::TypedVectorIterator first,
                   PyArrayObject *arr) {
     // Use the iterator API to iterate through the array
     // and assign each value to the corresponding vector
@@ -77,8 +76,7 @@ template <typename DestElementType> struct CopyToImpl {
  * to the string representation
  */
 template <> struct CopyToImpl<std::string> {
-  void operator()(typename std::vector<std::string>::iterator first,
-                  PyArrayObject *arr) {
+  void operator()(typename std::vector<std::string>::iterator first, PyArrayObject *arr) {
     object flattened(handle<>(PyArray_Ravel(arr, NPY_CORDER)));
     const Py_ssize_t nelements = PyArray_Size(flattened.ptr());
     for (Py_ssize_t i = 0; i < nelements; ++i) {
@@ -94,8 +92,7 @@ template <> struct CopyToImpl<std::string> {
  */
 template <typename DestElementType> struct CoerceType {
   NDArray operator()(const NDArray &x) {
-    return x.astype(Converters::NDArrayTypeIndex<DestElementType>::typecode,
-                    false);
+    return x.astype(Converters::NDArrayTypeIndex<DestElementType>::typecode, false);
   }
 };
 
@@ -118,8 +115,7 @@ namespace Converters {
  * @param value :: A boost python object wrapping a numpy.ndarray
  */
 template <typename DestElementType>
-NDArrayToVector<DestElementType>::NDArrayToVector(const NDArray &value)
-    : m_arr(CoerceType<DestElementType>()(value)) {}
+NDArrayToVector<DestElementType>::NDArrayToVector(const NDArray &value) : m_arr(CoerceType<DestElementType>()(value)) {}
 
 /**
  * Creates a vector of the DestElementType from the numpy array of
@@ -127,10 +123,8 @@ NDArrayToVector<DestElementType>::NDArrayToVector(const NDArray &value)
  * @return A vector of the DestElementType created from the numpy array
  */
 template <typename DestElementType>
-typename NDArrayToVector<DestElementType>::TypedVector
-NDArrayToVector<DestElementType>::operator()() {
-  std::vector<DestElementType> cvector(
-      PyArray_SIZE((PyArrayObject *)m_arr.ptr()));
+typename NDArrayToVector<DestElementType>::TypedVector NDArrayToVector<DestElementType>::operator()() {
+  std::vector<DestElementType> cvector(PyArray_SIZE((PyArrayObject *)m_arr.ptr()));
   copyTo(cvector);
   return cvector;
 }
@@ -140,12 +134,10 @@ NDArrayToVector<DestElementType>::operator()() {
  * array.
  * It's size is checked against the array size.
  */
-template <typename DestElementType>
-void NDArrayToVector<DestElementType>::copyTo(TypedVector &dest) const {
+template <typename DestElementType> void NDArrayToVector<DestElementType>::copyTo(TypedVector &dest) const {
   if (PyArray_SIZE((PyArrayObject *)m_arr.ptr()) > 0) {
     throwIfSizeMismatched(dest);
-    CopyToImpl<DestElementType>()(std::begin(dest),
-                                  (PyArrayObject *)m_arr.ptr());
+    CopyToImpl<DestElementType>()(std::begin(dest), (PyArrayObject *)m_arr.ptr());
   }
 }
 
@@ -156,25 +148,21 @@ void NDArrayToVector<DestElementType>::copyTo(TypedVector &dest) const {
  * array is not 1D
  */
 template <typename DestElementType>
-void NDArrayToVector<DestElementType>::throwIfSizeMismatched(
-    const TypedVector &dest) const {
-  if (PyArray_SIZE((PyArrayObject *)m_arr.ptr()) ==
-      static_cast<ssize_t>(dest.size())) {
+void NDArrayToVector<DestElementType>::throwIfSizeMismatched(const TypedVector &dest) const {
+  if (PyArray_SIZE((PyArrayObject *)m_arr.ptr()) == static_cast<ssize_t>(dest.size())) {
     return;
   } else {
-    throw std::invalid_argument(
-        "Invalid number of elements while copying from ndarray. "
-        "ndarray=" +
-        std::to_string(PyArray_SIZE((PyArrayObject *)m_arr.ptr())) +
-        " destination=(" + std::to_string(dest.size()) + ",)");
+    throw std::invalid_argument("Invalid number of elements while copying from ndarray. "
+                                "ndarray=" +
+                                std::to_string(PyArray_SIZE((PyArrayObject *)m_arr.ptr())) + " destination=(" +
+                                std::to_string(dest.size()) + ",)");
   }
 }
 
 //------------------------------------------------------------------------
 // Explicit instantiations
 //------------------------------------------------------------------------
-#define INSTANTIATE_TOVECTOR(ElementType)                                      \
-  template struct DLLExport NDArrayToVector<ElementType>;
+#define INSTANTIATE_TOVECTOR(ElementType) template struct DLLExport NDArrayToVector<ElementType>;
 
 ///@cond Doxygen doesn't seem to like this...
 INSTANTIATE_TOVECTOR(int)

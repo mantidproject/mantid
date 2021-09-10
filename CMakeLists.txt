@@ -1,6 +1,5 @@
-# CMake version check. 3.14 mimimum available from EPEL.
-# 3.15 is required on Windows, but is not available in EPEL yet.
-cmake_minimum_required(VERSION 3.14)
+# CMake version check.
+cmake_minimum_required(VERSION 3.16)
 
 # Define the project name.
 project(Mantid)
@@ -30,13 +29,12 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/buildconfig/CMake")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 
-option(ENABLE_MANTIDPLOT "Enable Qt4-based gui & components" OFF)
 option(ENABLE_WORKBENCH "Enable Qt5-based gui & components" ON)
-if(ENABLE_MANTIDPLOT)
-  message( FATAL_ERROR "MantidPlot has been removed from the source code")
-endif()
 
 set(CPACK_INSTALL_CMAKE_PROJECTS "${CMAKE_BINARY_DIR}" "Mantid" "ALL" "/")
+
+# Conda build variable
+set(CONDA_BUILD FALSE CACHE BOOL "If True, proceed with a Conda build. Only relevant on Windows")
 
 # Ensure that if we are running any sanitizers the compiler options are
 # known in sub targets
@@ -75,12 +73,7 @@ include(Bootstrap)
 
 # Configure Eigen early
 include(Eigen)
-
 include(Span)
-
-# Set ParaView information since later items depend on it
-# VATES flag. Requires ParaView
-option(MAKE_VATES "Switch for compiling the Vates project" Off)
 
 if( MSVC )
   include ( MSVCSetup )
@@ -103,11 +96,11 @@ endif()
 find_package(TBB REQUIRED)
 
 # We probably don't want this to run on every build.
-option(COVERALLS "Generate coveralls data" OFF)
+option(COVERAGE "Generate coverage data" OFF)
 
-if(COVERALLS)
-  include(Coveralls)
-  coveralls_turn_on_coverage()
+if(COVERAGE)
+  include(Coverage)
+  coverage_turn_on()
 endif()
 
 if(ENABLE_WORKBENCH)
@@ -137,11 +130,12 @@ set(DOCS_BUILDDIR ${CMAKE_BINARY_DIR}/docs)
 
 # Framework Build options
 option(CXXTEST_ADD_PERFORMANCE
-       "Switch to add Performance tests to the list of tests run by ctest?")
+       "Switch to add performance tests to the list of tests run by ctest?")
 
 add_subdirectory(Framework)
 
 include_directories(Framework/Kernel/inc)
+include_directories(Framework/Json/inc)
 include_directories(Framework/HistogramData/inc)
 include_directories(Framework/Indexing/inc)
 include_directories(Framework/Parallel/inc)
@@ -204,7 +198,7 @@ endif()
 # System test data target
 add_subdirectory(Testing/SystemTests/scripts)
 
-if(COVERALLS)
+if(COVERAGE)
   get_property(ALL_SRCS GLOBAL PROPERTY COVERAGE_SRCS)
   set(SRCS_FILE "")
   foreach(SRC ${ALL_SRCS})
@@ -217,7 +211,7 @@ if(COVERALLS)
                    SRCS_FILE)
   set(SRCS_FILENAME "${CMAKE_CURRENT_BINARY_DIR}/sources.txt")
   file(WRITE ${SRCS_FILENAME} ${SRCS_FILE})
-  coveralls_setup(${SRCS_FILENAME} OFF "${CMAKE_SOURCE_DIR}/buildconfig/CMake")
+  coverage_setup(${SRCS_FILENAME} OFF "${CMAKE_SOURCE_DIR}/buildconfig/CMake")
 endif()
 
 # Installation settings

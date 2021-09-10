@@ -45,9 +45,7 @@ const std::string IntegrateFlux::name() const { return "IntegrateFlux"; }
 int IntegrateFlux::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string IntegrateFlux::category() const {
-  return "MDAlgorithms\\Normalisation";
-}
+const std::string IntegrateFlux::category() const { return "MDAlgorithms\\Normalisation"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string IntegrateFlux::summary() const {
@@ -60,15 +58,12 @@ const std::string IntegrateFlux::summary() const {
 void IntegrateFlux::init() {
   declareProperty(
       std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
-          "InputWorkspace", "", Direction::Input,
-          std::make_shared<API::WorkspaceUnitValidator>("Momentum")),
+          "InputWorkspace", "", Direction::Input, std::make_shared<API::WorkspaceUnitValidator>("Momentum")),
       "An input workspace. Must have units of Momentum");
   auto validator = std::make_shared<Kernel::BoundedValidator<int>>();
   validator->setLower(2);
-  declareProperty("NPoints", 1000, validator,
-                  "Number of points per output spectrum.");
-  declareProperty(std::make_unique<WorkspaceProperty<API::Workspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty("NPoints", 1000, validator, "Number of points per output spectrum.");
+  declareProperty(std::make_unique<WorkspaceProperty<API::Workspace>>("OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
 
@@ -93,9 +88,8 @@ void IntegrateFlux::exec() {
  * @param nX :: Suggested size of the output spectra. It can change in the
  * actual output.
  */
-std::shared_ptr<API::MatrixWorkspace>
-IntegrateFlux::createOutputWorkspace(const API::MatrixWorkspace &inputWS,
-                                     size_t nX) const {
+std::shared_ptr<API::MatrixWorkspace> IntegrateFlux::createOutputWorkspace(const API::MatrixWorkspace &inputWS,
+                                                                           size_t nX) const {
   size_t nSpec = inputWS.getNumberHistograms();
 
   if (nSpec == 0) {
@@ -116,9 +110,7 @@ IntegrateFlux::createOutputWorkspace(const API::MatrixWorkspace &inputWS,
 
   // crate empty output workspace
   API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
-      std::shared_ptr<const API::MatrixWorkspace>(&inputWS,
-                                                  NoEventWorkspaceDeleting()),
-      nSpec, nX, nX);
+      std::shared_ptr<const API::MatrixWorkspace>(&inputWS, NoEventWorkspaceDeleting()), nSpec, nX, nX);
 
   // claculate the integration points and save them in the x-vactors of
   // integrFlux
@@ -141,16 +133,14 @@ IntegrateFlux::createOutputWorkspace(const API::MatrixWorkspace &inputWS,
  * weighted-no-time.
  * @param integrWS :: A workspace to store the results.
  */
-void IntegrateFlux::integrateSpectra(const API::MatrixWorkspace &inputWS,
-                                     API::MatrixWorkspace &integrWS) const {
+void IntegrateFlux::integrateSpectra(const API::MatrixWorkspace &inputWS, API::MatrixWorkspace &integrWS) const {
   auto eventWS = dynamic_cast<const DataObjects::EventWorkspace *>(&inputWS);
 
   if (eventWS) {
     auto eventType = eventWS->getEventType();
     switch (eventType) {
     case (API::WEIGHTED_NOTIME):
-      integrateSpectraEvents<DataObjects::WeightedEventNoTime>(*eventWS,
-                                                               integrWS);
+      integrateSpectraEvents<DataObjects::WeightedEventNoTime>(*eventWS, integrWS);
       return;
     case (API::WEIGHTED):
       integrateSpectraEvents<DataObjects::WeightedEvent>(*eventWS, integrWS);
@@ -171,9 +161,8 @@ void IntegrateFlux::integrateSpectra(const API::MatrixWorkspace &inputWS,
  * @param integrWS :: A workspace to store the results.
  */
 template <class EventType>
-void IntegrateFlux::integrateSpectraEvents(
-    const DataObjects::EventWorkspace &inputWS,
-    API::MatrixWorkspace &integrWS) const {
+void IntegrateFlux::integrateSpectraEvents(const DataObjects::EventWorkspace &inputWS,
+                                           API::MatrixWorkspace &integrWS) const {
   inputWS.sortAll(DataObjects::TOF_SORT, nullptr);
   size_t nSpec = inputWS.getNumberHistograms();
   assert(nSpec == integrWS.getNumberHistograms());
@@ -216,8 +205,7 @@ void IntegrateFlux::integrateSpectraEvents(
  * @param inputWS :: A 2d workspace to integrate.
  * @param integrWS :: A workspace to store the results.
  */
-void IntegrateFlux::integrateSpectraMatrix(
-    const API::MatrixWorkspace &inputWS, API::MatrixWorkspace &integrWS) const {
+void IntegrateFlux::integrateSpectraMatrix(const API::MatrixWorkspace &inputWS, API::MatrixWorkspace &integrWS) const {
   bool isHistogram = inputWS.isHistogramData();
 
   if (isHistogram) {
@@ -233,8 +221,8 @@ void IntegrateFlux::integrateSpectraMatrix(
  * @param inputWS :: A 2d workspace to integrate.
  * @param integrWS :: A workspace to store the results.
  */
-void IntegrateFlux::integrateSpectraHistograms(
-    const API::MatrixWorkspace &inputWS, API::MatrixWorkspace &integrWS) const {
+void IntegrateFlux::integrateSpectraHistograms(const API::MatrixWorkspace &inputWS,
+                                               API::MatrixWorkspace &integrWS) const {
   size_t nSpec = inputWS.getNumberHistograms();
   assert(nSpec == integrWS.getNumberHistograms());
 
@@ -350,8 +338,8 @@ void IntegrateFlux::integrateSpectraHistograms(
  * @param inputWS :: A 2d workspace to integrate.
  * @param integrWS :: A workspace to store the results.
  */
-void IntegrateFlux::integrateSpectraPointData(
-    const API::MatrixWorkspace &inputWS, API::MatrixWorkspace &integrWS) const {
+void IntegrateFlux::integrateSpectraPointData(const API::MatrixWorkspace &inputWS,
+                                              API::MatrixWorkspace &integrWS) const {
   size_t nSpec = inputWS.getNumberHistograms();
   assert(nSpec == integrWS.getNumberHistograms());
 
@@ -417,8 +405,7 @@ void IntegrateFlux::integrateSpectraPointData(
         double dy_dx = (inY[i + 1] - inY[i]) / (*(x0 + 1) - *x0);
 
         // add the area under the line between leftX and rightX
-        sum += (inY[i] + 0.5 * dy_dx * (leftX + rightX - 2 * (*(x0)))) *
-               (rightX - leftX);
+        sum += (inY[i] + 0.5 * dy_dx * (leftX + rightX - 2 * (*(x0)))) * (rightX - leftX);
 
         // if rightX == upperBound there is nothing left to integrate, move to
         // the next integration point
@@ -455,8 +442,7 @@ void IntegrateFlux::integrateSpectraPointData(
         double dy_dx = (inY[i] - inY[i - 1]) / (*x1 - *(x1 - 1));
 
         // add the area under the line between leftX and rightX
-        sum += (inY[i - 1] + 0.5 * dy_dx * (rightX - *(x1 - 1))) *
-               (rightX - leftX);
+        sum += (inY[i - 1] + 0.5 * dy_dx * (rightX - *(x1 - 1))) * (rightX - leftX);
 
         // advance in the input workspace
         x0 = x1 - 1;
@@ -475,8 +461,7 @@ void IntegrateFlux::integrateSpectraPointData(
  * Calculate the maximun number of points in the integration grid.
  * @param inputWS :: An input workspace.
  */
-size_t
-IntegrateFlux::getMaxNumberOfPoints(const API::MatrixWorkspace &inputWS) const {
+size_t IntegrateFlux::getMaxNumberOfPoints(const API::MatrixWorkspace &inputWS) const {
   // if it's events we shouldn't care about binning
   auto eventWS = dynamic_cast<const DataObjects::EventWorkspace *>(&inputWS);
   if (eventWS) {

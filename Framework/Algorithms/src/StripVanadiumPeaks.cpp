@@ -28,18 +28,14 @@ using namespace Kernel::VectorHelper;
 StripVanadiumPeaks::StripVanadiumPeaks() : API::Algorithm() {}
 
 void StripVanadiumPeaks::init() {
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                            Direction::Input),
-      "Name of the input workspace. If you use the default vanadium peak "
-      "positions are used, the workspace must be in units of d-spacing.");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                            Direction::Output),
-      "The name of the workspace to be created as the output of the "
-      "algorithm.\n"
-      "If the input workspace is an EventWorkspace, then the output must be "
-      "different (and will be made into a Workspace2D).");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
+                  "Name of the input workspace. If you use the default vanadium peak "
+                  "positions are used, the workspace must be in units of d-spacing.");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
+                  "The name of the workspace to be created as the output of the "
+                  "algorithm.\n"
+                  "If the input workspace is an EventWorkspace, then the output must be "
+                  "different (and will be made into a Workspace2D).");
 
   auto min = std::make_shared<BoundedValidator<double>>();
   min->setLower(1e-3);
@@ -49,12 +45,11 @@ void StripVanadiumPeaks::init() {
                   "percentage of the d-spacing "
                   "of the center of the peak.");
 
-  declareProperty(
-      "AlternativePeakPositions", "",
-      "Optional: enter a comma-separated list of the expected X-position of "
-      "the centre of the peaks. \n"
-      "Only peaks near these positions will be fitted.\n"
-      "If not entered, the default vanadium peak positions will be used.");
+  declareProperty("AlternativePeakPositions", "",
+                  "Optional: enter a comma-separated list of the expected X-position of "
+                  "the centre of the peaks. \n"
+                  "Only peaks near these positions will be fitted.\n"
+                  "If not entered, the default vanadium peak positions will be used.");
 
   auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
@@ -68,27 +63,22 @@ void StripVanadiumPeaks::exec() {
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
 
   // Check for trying to rewrite an EventWorkspace
-  EventWorkspace_sptr inputEvent =
-      std::dynamic_pointer_cast<EventWorkspace>(inputWS);
+  EventWorkspace_sptr inputEvent = std::dynamic_pointer_cast<EventWorkspace>(inputWS);
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
   if (inputEvent && (inputWS == outputWS)) {
-    throw std::invalid_argument(
-        "Cannot strip vanadium peaks in-place for an EventWorkspace. Please "
-        "specify a different output workspace name, which will be a "
-        "Workspace2D copy of the input EventWorkspace.");
+    throw std::invalid_argument("Cannot strip vanadium peaks in-place for an EventWorkspace. Please "
+                                "specify a different output workspace name, which will be a "
+                                "Workspace2D copy of the input EventWorkspace.");
   }
 
   // If WorkspaceIndex has been set it must be valid
   int singleIndex = getProperty("WorkspaceIndex");
   bool singleSpectrum = !isEmpty(singleIndex);
-  if (singleSpectrum &&
-      singleIndex >= static_cast<int>(inputWS->getNumberHistograms())) {
+  if (singleSpectrum && singleIndex >= static_cast<int>(inputWS->getNumberHistograms())) {
     g_log.error() << "The value of WorkspaceIndex provided (" << singleIndex
-                  << ") is larger than the size of this workspace ("
-                  << inputWS->getNumberHistograms() << ")\n";
-    throw Kernel::Exception::IndexError(
-        singleIndex, inputWS->getNumberHistograms() - 1,
-        "StripVanadiumPeaks WorkspaceIndex property");
+                  << ") is larger than the size of this workspace (" << inputWS->getNumberHistograms() << ")\n";
+    throw Kernel::Exception::IndexError(singleIndex, inputWS->getNumberHistograms() - 1,
+                                        "StripVanadiumPeaks WorkspaceIndex property");
   }
 
   // Create an output workspace - same size as input one
@@ -111,13 +101,11 @@ void StripVanadiumPeaks::exec() {
                     "1401";
     // Check for units
     if (inputWS->getAxis(0)->unit()->unitID() != "dSpacing")
-      throw std::invalid_argument(
-          "Cannot strip using default Vanadium peak positions for an input "
-          "workspace whose units are not d-spacing. Convert to d-spacing or "
-          "specify your own alternative peak positions.");
+      throw std::invalid_argument("Cannot strip using default Vanadium peak positions for an input "
+                                  "workspace whose units are not d-spacing. Convert to d-spacing or "
+                                  "specify your own alternative peak positions.");
   }
-  std::vector<double> centers =
-      Kernel::VectorHelper::splitStringIntoVector<double>(peakPositions);
+  std::vector<double> centers = Kernel::VectorHelper::splitStringIntoVector<double>(peakPositions);
 
   // Get the width percentage
   double widthPercent = getProperty("PeakWidthPercent");

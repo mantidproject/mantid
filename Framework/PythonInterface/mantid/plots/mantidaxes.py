@@ -5,13 +5,10 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid package
-try:
-   from collections.abc import Iterable
-except ImportError:
-   # check Python 2 location
-   from collections import Iterable
+from collections.abc import Iterable
 import copy
 import numpy as np
+import re
 
 from matplotlib.axes import Axes
 from matplotlib.cbook import safe_masked_invalid
@@ -447,6 +444,22 @@ class MantidAxes(Axes):
 
         return True
 
+    def rename_workspace(self, new_name, old_name):
+        """
+        Rename a workspace, and update the artists, creation arguments and tracked workspaces accordingly
+        :param new_name : the new name of workspace
+        :param old_name : the old name of workspace
+        """
+        for cargs in self.creation_args:
+            if cargs['workspaces'] == old_name:
+                cargs['workspaces'] = new_name
+        for ws_name, ws_artist_list in list(self.tracked_workspaces.items()):
+            for ws_artist in ws_artist_list:
+                if ws_artist.workspace_name == old_name:
+                    ws_artist.rename_data(new_name)
+            if ws_name == old_name:
+                self.tracked_workspaces[new_name] = self.tracked_workspaces.pop(old_name)
+
     def replot_artist(self, artist, errorbars=False, **kwargs):
         """
         Replot an artist with a new set of kwargs via 'plot' or 'errorbar'
@@ -653,7 +666,8 @@ class MantidAxes(Axes):
             workspace = args[0]
             spec_num = self.get_spec_number_or_bin(workspace, kwargs)
             normalize_by_bin_width, kwargs = get_normalize_by_bin_width(workspace, self, **kwargs)
-            is_normalized = normalize_by_bin_width or workspace.isDistribution()
+            is_normalized = normalize_by_bin_width or \
+                            (hasattr(workspace, 'isDistribution') and workspace.isDistribution())
 
             with autoscale_on_update(self, autoscale_on):
                 artist = self.track_workspace_artist(workspace,
@@ -773,7 +787,8 @@ class MantidAxes(Axes):
             workspace = args[0]
             spec_num = self.get_spec_number_or_bin(workspace, kwargs)
             normalize_by_bin_width, kwargs = get_normalize_by_bin_width(workspace, self, **kwargs)
-            is_normalized = normalize_by_bin_width or workspace.isDistribution()
+            is_normalized = normalize_by_bin_width or \
+                            (hasattr(workspace, 'isDistribution') and workspace.isDistribution())
 
             with autoscale_on_update(self, autoscale_on):
                 artist = self.track_workspace_artist(workspace,
@@ -1209,6 +1224,9 @@ class MantidAxes(Axes):
         else:
             self.minorticks_off()
 
+    def grid_on(self):
+        return self.xaxis._major_tick_kw.get('gridOn', False) and self.yaxis._major_tick_kw.get('gridOn', False)
+
     # ------------------ Private api --------------------------------------------------------
 
     def _attach_colorbar(self, mappable, colorbar):
@@ -1298,6 +1316,9 @@ class MantidAxes3D(Axes3D):
     def autoscale(self, *args, **kwargs):
         super().autoscale(*args, **kwargs)
         self._set_overflowing_data_to_nan()
+
+    def grid_on(self):
+        return self._draw_grid
 
     def _set_overflowing_data_to_nan(self, axis_index=None):
         """
@@ -1497,6 +1518,27 @@ class MantidAxes3D(Axes3D):
         else:
             return Axes3D.contourf(self, *args, **kwargs)
 
+    def set_mesh_axes_equal(self, mesh):
+        """Set the 3D axes centred on the provided mesh and with the aspect ratio equal"""
+
+        ax_limits = mesh.flatten()
+        self.auto_scale_xyz(ax_limits[0::3], ax_limits[1::3], ax_limits[2::3])
+        x_limits = self.get_xlim3d()
+        y_limits = self.get_ylim3d()
+        z_limits = self.get_zlim3d()
+
+        x_range = abs(x_limits[1] - x_limits[0])
+        x_middle = np.mean(x_limits)
+        y_range = abs(y_limits[1] - y_limits[0])
+        y_middle = np.mean(y_limits)
+        z_range = abs(z_limits[1] - z_limits[0])
+        z_middle = np.mean(z_limits)
+        plot_radius = 0.5 * max([x_range, y_range, z_range])
+
+        self.set_xlim3d([x_middle - plot_radius, x_middle + plot_radius])
+        self.set_ylim3d([y_middle - plot_radius, y_middle + plot_radius])
+        self.set_zlim3d([z_middle - plot_radius, z_middle + plot_radius])
+
 
 class _WorkspaceArtists(object):
     """Captures information regarding an artist that has been plotted
@@ -1604,9 +1646,22 @@ class _WorkspaceArtists(object):
         self._set_artists(new_artists)
         return len(self._artists) == 0
 
+    def rename_data(self, new_name):
+        """
+        Rename a workspace and update the artists label
+        """
+        self._update_artist_label_with_new_workspace_name(new_name)
+        self.workspace_name = new_name
+
     def _set_artists(self, artists):
         """Ensure the stored artists is an iterable"""
         if isinstance(artists, Container) or not isinstance(artists, Iterable):
             self._artists = [artists]
         else:
             self._artists = artists
+
+    def _update_artist_label_with_new_workspace_name(self, new_workspace_name):
+        for artist in self._artists:
+            old_workspace_name = self.workspace_name
+            prev_label = artist.get_label()
+            artist.set_label(re.sub(rf'\b{old_workspace_name}\b', new_workspace_name, prev_label))

@@ -27,14 +27,12 @@ namespace {
  */
 class MockedInternetHelper : public InternetHelper {
 protected:
-  int sendHTTPSRequest(const std::string &url,
-                       std::ostream &responseStream) override {
+  int sendHTTPSRequest(const std::string &url, std::ostream &responseStream) override {
     UNUSED_ARG(url);
     responseStream << "HTTPS request succeeded";
     return 200;
   }
-  int sendHTTPRequest(const std::string &url,
-                      std::ostream &responseStream) override {
+  int sendHTTPRequest(const std::string &url, std::ostream &responseStream) override {
     UNUSED_ARG(url);
     responseStream << "HTTP request succeeded";
     return 200;
@@ -73,8 +71,7 @@ public:
     exec_alg(url, tmpFile.path(), "http://" + url);
   }
 
-  void exec_alg(const std::string &address, const std::string &filename,
-                const std::string &newAddress = "") {
+  void exec_alg(const std::string &address, const std::string &filename, const std::string &newAddress = "") {
     MockedDownloadFile alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
@@ -108,8 +105,7 @@ public:
 
   void test_DownloadFile_HTTPS() {
     MockedInternetHelper internetHelper;
-    std::string httpsUrl =
-        "https://api.github.com/repos/mantidproject/mantid/contents";
+    std::string httpsUrl = "https://api.github.com/repos/mantidproject/mantid/contents";
     Poco::TemporaryFile tmpFile;
     exec_alg(httpsUrl, tmpFile.path());
     TSM_ASSERT("File has not been created.", tmpFile.exists());

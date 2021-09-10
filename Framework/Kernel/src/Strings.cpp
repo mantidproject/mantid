@@ -57,13 +57,11 @@ std::string shorten(const std::string &input, const size_t max_length) {
   const std::string ellipsis = " ... ";
   const size_t ellipsisSize = ellipsis.size();
   // limit too small or input too small, return input string
-  if ((max_length == 0) || (input.size() < ellipsisSize + 2) ||
-      (input.size() <= max_length))
+  if ((max_length == 0) || (input.size() < ellipsisSize + 2) || (input.size() <= max_length))
     return input;
 
   const size_t end_length = (max_length - ellipsisSize) / 2;
-  std::string retVal = input.substr(0, end_length) + ellipsis +
-                       input.substr(input.size() - end_length, end_length);
+  std::string retVal = input.substr(0, end_length) + ellipsis + input.substr(input.size() - end_length, end_length);
   return retVal;
 }
 
@@ -75,8 +73,7 @@ std::string shorten(const std::string &input, const size_t max_length) {
  * @param replace_with :: ... and replace them with this.
  * @return the modified string.
  */
-std::string replace(const std::string &input, const std::string &find_what,
-                    const std::string &replace_with) {
+std::string replace(const std::string &input, const std::string &find_what, const std::string &replace_with) {
   std::string output = input;
   std::string::size_type pos = 0;
   while ((pos = output.find(find_what, pos)) != std::string::npos) {
@@ -96,8 +93,7 @@ std::string replace(const std::string &input, const std::string &find_what,
  * @param substitute :: A substitute string
  * @return A new string with the characters replaced
  */
-MANTID_KERNEL_DLL std::string replaceAll(const std::string &input,
-                                         const std::string &charStr,
+MANTID_KERNEL_DLL std::string replaceAll(const std::string &input, const std::string &charStr,
                                          const std::string &substitute) {
   std::string replaced;
   replaced.reserve(input.size());
@@ -162,8 +158,7 @@ std::string stripMultSpc(const std::string &Line) {
   int spc(1);
   int lastReal(-1);
   for (unsigned int i = 0; i < Line.length(); i++) {
-    if (Line[i] != ' ' && Line[i] != '\t' && Line[i] != '\r' &&
-        Line[i] != '\n') {
+    if (Line[i] != ' ' && Line[i] != '\t' && Line[i] != '\r' && Line[i] != '\n') {
       lastReal = i;
       spc = 0;
       Out += Line[i];
@@ -200,9 +195,7 @@ int extractWord(std::string &Line, const std::string &Word, const int cnt) {
     return 0;
   // Pos == Start of find
   size_t LinePt = minSize + pos;
-  for (; minSize < Word.size() && LinePt < Line.size() &&
-         Word[minSize] == Line[LinePt];
-       LinePt++, minSize++) {
+  for (; minSize < Word.size() && LinePt < Line.size() && Word[minSize] == Line[LinePt]; LinePt++, minSize++) {
   }
 
   Line.erase(pos, LinePt - (pos - 1));
@@ -268,8 +261,7 @@ int confirmStr(const std::string &S, const std::string &fullPhrase) {
  *  @retval -1 :: Error with file
  *  @retval 0  :: line finished.
  */
-int getPartLine(std::istream &fh, std::string &Out, std::string &Excess,
-                const int spc) {
+int getPartLine(std::istream &fh, std::string &Out, std::string &Excess, const int spc) {
   // std::string Line;
   if (fh.good()) {
     auto ss = new char[spc + 1];
@@ -434,8 +426,7 @@ void writeMCNPX(const std::string &Line, std::ostream &OX) {
   std::string X = Line.substr(0, MaxLine);
   std::string::size_type posB = X.find_last_of(" ,");
   int spc(0);
-  while (posB != std::string::npos &&
-         static_cast<int>(X.length()) >= MaxLine - spc) {
+  while (posB != std::string::npos && static_cast<int>(X.length()) >= MaxLine - spc) {
     pos += posB + 1;
     if (!isspace(X[posB]))
       posB++;
@@ -464,9 +455,7 @@ void writeMCNPX(const std::string &Line, std::ostream &OX) {
  */
 std::vector<std::string> StrParts(const std::string &Ln) {
   auto tokenizer = Mantid::Kernel::StringTokenizer(
-      Ln, " ",
-      Mantid::Kernel::StringTokenizer::TOK_TRIM |
-          Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+      Ln, " ", Mantid::Kernel::StringTokenizer::TOK_TRIM | Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
   return tokenizer.asVector();
 }
 
@@ -479,16 +468,14 @@ std::vector<std::string> StrParts(const std::string &Ln) {
  * ","]
  * @returns A map of keys->values
  */
-std::map<std::string, std::string>
-splitToKeyValues(const std::string &input, const std::string &keyValSep,
-                 const std::string &listSep) {
+std::map<std::string, std::string> splitToKeyValues(const std::string &input, const std::string &keyValSep,
+                                                    const std::string &listSep) {
   std::map<std::string, std::string> keyValues;
-  const int splitOptions = Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY +
-                           Mantid::Kernel::StringTokenizer::TOK_TRIM;
+  const int splitOptions =
+      Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY + Mantid::Kernel::StringTokenizer::TOK_TRIM;
   Mantid::Kernel::StringTokenizer listSplitter(input, listSep);
   for (const auto &iter : listSplitter) {
-    Mantid::Kernel::StringTokenizer keyValSplitter(iter, keyValSep,
-                                                   splitOptions);
+    Mantid::Kernel::StringTokenizer keyValSplitter(iter, keyValSep, splitOptions);
     if (keyValSplitter.count() == 2) {
       keyValues[keyValSplitter[0]] = keyValSplitter[1];
     }
@@ -757,15 +744,12 @@ template <typename T> std::string toString(const std::set<T> &value) {
   return toString(std::vector<T>(value.begin(), value.end()));
 }
 
-template <> MANTID_KERNEL_DLL std::string toString(const UnitLabel &value) {
-  return value;
-}
+template <> MANTID_KERNEL_DLL std::string toString(const UnitLabel &value) { return value; }
 
 /// Template overload for a vector of strings.
 /// @param value :: A value to convert to a string.
 /// @return :: A string with comma separated items of the value vector.
-template <>
-MANTID_KERNEL_DLL std::string toString(const std::vector<std::string> &value) {
+template <> MANTID_KERNEL_DLL std::string toString(const std::vector<std::string> &value) {
   return join(value.begin(), value.end(), ",");
 }
 
@@ -814,8 +798,7 @@ int writeFile(const std::string &Fname, const V<T, A> &X, const V<T, A> &Y) {
  *  @return 0 on success and -ve on failure
  */
 template <template <typename T, typename A> class V, typename T, typename A>
-int writeFile(const std::string &Fname, const V<T, A> &X, const V<T, A> &Y,
-              const V<T, A> &Err) {
+int writeFile(const std::string &Fname, const V<T, A> &X, const V<T, A> &Y, const V<T, A> &Err) {
   const size_t Npts(X.size() > Y.size() ? Y.size() : X.size());
   const size_t Epts(Npts > Err.size() ? Err.size() : Npts);
 
@@ -860,9 +843,7 @@ int writeFile(const std::string &Fname, const V<T, A> &X, const V<T, A> &Y,
  *  @retval 0 :: success
  *  @retval -ve on failure.
  */
-template <typename T>
-int setValues(const std::string &Line, const std::vector<int> &Index,
-              std::vector<T> &Out) {
+template <typename T> int setValues(const std::string &Line, const std::vector<int> &Index, std::vector<T> &Out) {
   if (Index.empty())
     return 0;
 
@@ -893,8 +874,7 @@ int setValues(const std::string &Line, const std::vector<int> &Index,
   while (sc != sIndex.end()) {
     if (*sc == cnt) {
       if (!section(modLine, value))
-        return static_cast<int>(
-            -1 - distance(static_cast<iVecIter>(sIndex.begin()), sc));
+        return static_cast<int>(-1 - distance(static_cast<iVecIter>(sIndex.begin()), sc));
       // this loop handles repeat units
       do {
         Out[*oc] = value;
@@ -903,8 +883,7 @@ int setValues(const std::string &Line, const std::vector<int> &Index,
       } while (sc != sIndex.end() && *sc == cnt);
     } else {
       if (!section(modLine, dump))
-        return static_cast<int>(
-            -1 - distance(static_cast<iVecIter>(sIndex.begin()), sc));
+        return static_cast<int>(-1 - distance(static_cast<iVecIter>(sIndex.begin()), sc));
     }
     cnt++; // Add only to cnt [sc/oc in while loop]
   }
@@ -933,8 +912,7 @@ std::string getWord(std::istream &in, bool consumeEOL) {
   if (nextch == '\n' || nextch == '\r') {
     if (!consumeEOL) {
       in.unget();
-    } else if ((nextch == '\n' && in.peek() == '\r') ||
-               (nextch == '\r' && in.peek() == '\n')) {
+    } else if ((nextch == '\n' && in.peek() == '\r') || (nextch == '\r' && in.peek() == '\n')) {
       // Handle CRLF and LFCR on Unix by consuming both
       in.ignore();
     }
@@ -954,8 +932,7 @@ std::string getWord(std::istream &in, bool consumeEOL) {
 
     // Handle CRLF and LFCR on Unix by consuming both
     if (nextch == '\n' || nextch == '\r') {
-      if ((nextch == '\n' && in.peek() == '\r') ||
-          (nextch == '\r' && in.peek() == '\n')) {
+      if ((nextch == '\n' && in.peek() == '\r') || (nextch == '\r' && in.peek() == '\n')) {
         in.ignore();
       }
     } else {
@@ -992,8 +969,7 @@ void readToEndOfLine(std::istream &in, bool ConsumeEOL) {
  *  used to generate path in hdf file, so the resulting path has to obey hdf
  * constrains;
  */
-size_t split_path(const std::string &path,
-                  std::vector<std::string> &path_components) {
+size_t split_path(const std::string &path, std::vector<std::string> &path_components) {
   if (path.empty()) {
     path_components.resize(0);
     return 0;
@@ -1040,9 +1016,7 @@ size_t split_path(const std::string &path,
   int64_t ic(0);
   for (; it2 != split_pos.end(); ++it2) {
     std::string folder = working_path.substr(*it1 + 1, *it2 - *it1 - 1);
-    if (folder.empty() ||
-        (folder.size() == 1 &&
-         folder == ".")) { // skip self-references and double slashes;
+    if (folder.empty() || (folder.size() == 1 && folder == ".")) { // skip self-references and double slashes;
       it1 = it2;
       continue;
     }
@@ -1075,8 +1049,7 @@ size_t split_path(const std::string &path,
                Returns the number of the first maching entry in the group if
  there are duplicated entries in the group
  */
-int isMember(const std::vector<std::string> &group,
-             const std::string &candidate) {
+int isMember(const std::vector<std::string> &group, const std::string &candidate) {
   int num(-1);
   for (size_t i = 0; i < group.size(); i++) {
     if (candidate == group[i]) {
@@ -1097,8 +1070,7 @@ int isMember(const std::vector<std::string> &group,
  * ('-')
  * @return A vector with all the elements from the range
  */
-std::vector<int> parseRange(const std::string &str, const std::string &elemSep,
-                            const std::string &rangeSep) {
+std::vector<int> parseRange(const std::string &str, const std::string &elemSep, const std::string &rangeSep) {
   using Tokenizer = Mantid::Kernel::StringTokenizer;
 
   Tokenizer elements;
@@ -1109,13 +1081,10 @@ std::vector<int> parseRange(const std::string &str, const std::string &elemSep,
     // it is allowed to have element separator inside a range, e.g. "4 - 5", but
     // not "4,-5"
     Tokenizer ranges(str, rangeSep, Tokenizer::TOK_TRIM);
-    std::string new_str =
-        join(ranges.begin(), ranges.end(), rangeSep.substr(0, 1));
-    elements = Tokenizer(new_str, elemSep,
-                         Tokenizer::TOK_IGNORE_EMPTY | Tokenizer::TOK_TRIM);
+    std::string new_str = join(ranges.begin(), ranges.end(), rangeSep.substr(0, 1));
+    elements = Tokenizer(new_str, elemSep, Tokenizer::TOK_IGNORE_EMPTY | Tokenizer::TOK_TRIM);
   } else {
-    elements = Tokenizer(str, elemSep,
-                         Tokenizer::TOK_IGNORE_EMPTY | Tokenizer::TOK_TRIM);
+    elements = Tokenizer(str, elemSep, Tokenizer::TOK_IGNORE_EMPTY | Tokenizer::TOK_TRIM);
   }
 
   std::vector<int> result;
@@ -1140,21 +1109,18 @@ std::vector<int> parseRange(const std::string &str, const std::string &elemSep,
     else if (noOfRangeElements == 2) {
       int start, end;
 
-      if (convert(rangeElements[0], start) != 1 ||
-          convert(rangeElements[1], end) != 1)
+      if (convert(rangeElements[0], start) != 1 || convert(rangeElements[1], end) != 1)
         throw std::invalid_argument("Invalid range: " + elementString);
 
       if (start >= end)
-        throw std::invalid_argument("Range boundaries are reversed: " +
-                                    elementString);
+        throw std::invalid_argument("Range boundaries are reversed: " + elementString);
 
       for (int i = start; i <= end; i++)
         result.emplace_back(i);
     }
     // Error - e.g. "--""
     else {
-      throw std::invalid_argument("Multiple range separators: " +
-                                  elementString);
+      throw std::invalid_argument("Multiple range separators: " + elementString);
     }
   }
 
@@ -1218,50 +1184,36 @@ template MANTID_KERNEL_DLL std::string toString(const double &value);
 template MANTID_KERNEL_DLL std::string toString(const float &value);
 template MANTID_KERNEL_DLL std::string toString(const int &value);
 template MANTID_KERNEL_DLL std::string toString(const uint16_t &value);
-template MANTID_KERNEL_DLL std::string
-toString(const size_t &value); // Matches uint64_t on Linux 64 & Win 64
-#if defined(__APPLE__) || (defined(_WIN32) && !defined(_WIN64)) ||             \
+template MANTID_KERNEL_DLL std::string toString(const size_t &value); // Matches uint64_t on Linux 64 & Win 64
+#if defined(__APPLE__) || (defined(_WIN32) && !defined(_WIN64)) ||                                                     \
     (defined(__GNUC__) && !defined(__LP64__)) // Mac or 32-bit compiler
 template MANTID_KERNEL_DLL std::string toString(const uint64_t &value);
 #endif
 template MANTID_KERNEL_DLL std::string toString(const std::string &value);
 
 template MANTID_KERNEL_DLL std::string toString(const std::vector<int> &value);
-template MANTID_KERNEL_DLL std::string
-toString(const std::vector<size_t> &value);
+template MANTID_KERNEL_DLL std::string toString(const std::vector<size_t> &value);
 
 // this block should generate the vector ones as well
 template MANTID_KERNEL_DLL std::string toString(const std::set<int> &value);
 template MANTID_KERNEL_DLL std::string toString(const std::set<int16_t> &value);
-template MANTID_KERNEL_DLL std::string toString(
-    const std::set<size_t> &value); // Matches uint64_t on Linux 64 & Win 64
-#if defined(__APPLE__) || (defined(_WIN32) && !defined(_WIN64)) ||             \
+template MANTID_KERNEL_DLL std::string toString(const std::set<size_t> &value); // Matches uint64_t on Linux 64 & Win 64
+#if defined(__APPLE__) || (defined(_WIN32) && !defined(_WIN64)) ||                                                     \
     (defined(__GNUC__) && !defined(__LP64__)) // Mac or 32-bit compiler
-template MANTID_KERNEL_DLL std::string
-toString(const std::set<uint64_t> &value);
+template MANTID_KERNEL_DLL std::string toString(const std::set<uint64_t> &value);
 #endif
 
 template MANTID_KERNEL_DLL int convPartNum(const std::string &, double &);
 template MANTID_KERNEL_DLL int convPartNum(const std::string &, int &);
 
-template MANTID_KERNEL_DLL int
-setValues(const std::string &, const std::vector<int> &, std::vector<double> &);
+template MANTID_KERNEL_DLL int setValues(const std::string &, const std::vector<int> &, std::vector<double> &);
 
-template MANTID_KERNEL_DLL int writeFile(const std::string &, const double &,
+template MANTID_KERNEL_DLL int writeFile(const std::string &, const double &, const std::vector<double> &);
+template MANTID_KERNEL_DLL int writeFile(const std::string &, const std::vector<double> &, const std::vector<double> &,
                                          const std::vector<double> &);
-template MANTID_KERNEL_DLL int writeFile(const std::string &,
-                                         const std::vector<double> &,
-                                         const std::vector<double> &,
-                                         const std::vector<double> &);
-template MANTID_KERNEL_DLL int writeFile(const std::string &,
-                                         const std::vector<double> &,
-                                         const std::vector<double> &);
-template MANTID_KERNEL_DLL int writeFile(const std::string &,
-                                         const std::vector<float> &,
-                                         const std::vector<float> &);
-template MANTID_KERNEL_DLL int writeFile(const std::string &,
-                                         const std::vector<float> &,
-                                         const std::vector<float> &,
+template MANTID_KERNEL_DLL int writeFile(const std::string &, const std::vector<double> &, const std::vector<double> &);
+template MANTID_KERNEL_DLL int writeFile(const std::string &, const std::vector<float> &, const std::vector<float> &);
+template MANTID_KERNEL_DLL int writeFile(const std::string &, const std::vector<float> &, const std::vector<float> &,
                                          const std::vector<float> &);
 /// \endcond TEMPLATE
 

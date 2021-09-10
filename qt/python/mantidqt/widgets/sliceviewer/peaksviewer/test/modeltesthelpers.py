@@ -10,8 +10,9 @@
 from unittest.mock import MagicMock, create_autospec
 
 # 3rd party imports
-from mantid.api import SpecialCoordinateSystem
+from mantid.kernel import SpecialCoordinateSystem
 from mantid.dataobjects import PeaksWorkspace
+from mantid.kernel import V3D
 
 # local imports
 from mantidqt.widgets.sliceviewer.peaksviewer.model import PeaksViewerModel
@@ -37,20 +38,30 @@ def create_peaks_viewer_model(centers, fg_color, name=None):
     def get_peak(index):
         return peaks[index]
 
+    def column(name: str):
+        if name in ('QLab', 'QSample'):
+            return centers
+
+    def remove_peak(peak_number: int):
+        return peak_number
+
     model = PeaksViewerModel(create_autospec(PeaksWorkspace), fg_color, 'unused')
     if name is not None:
         model.ws.name.return_value = name
     model.ws.__iter__.return_value = peaks
     model.ws.getPeak.side_effect = get_peak
+    model.ws.column.side_effect = column
+    model.ws.removePeak.side_effect = remove_peak
+
     return model
 
 
 def create_mock_peak(center):
     peak = MagicMock()
     # set all 3 methods to return the same thing. Check appropriate method called in test
-    peak.getQLabFrame.return_value = center
-    peak.getQSampleFrame.return_value = center
-    peak.getHKL.return_value = center
+    peak.getQLabFrame.return_value = V3D(*center)
+    peak.getQSampleFrame.return_value = V3D(*center)
+    peak.getHKL.return_value = V3D(*center)
     shape = MagicMock()
     shape.shapeName.return_value = 'none'
     peak.getPeakShape.return_value = shape

@@ -29,10 +29,8 @@ using namespace Mantid::API;
  * @param saver :: The model to use to save the files
  * @param view :: The view we are handling
  */
-SavePresenter::SavePresenter(ISaveView *view,
-                             std::unique_ptr<IAsciiSaver> saver)
-    : m_mainPresenter(nullptr), m_view(view), m_saver(std::move(saver)),
-      m_shouldAutosave(false) {
+SavePresenter::SavePresenter(ISaveView *view, std::unique_ptr<IAsciiSaver> saver)
+    : m_mainPresenter(nullptr), m_view(view), m_saver(std::move(saver)), m_shouldAutosave(false) {
 
   m_view->subscribe(this);
   populateWorkspaceList();
@@ -42,9 +40,7 @@ SavePresenter::SavePresenter(ISaveView *view,
   m_view->connectSaveSettingsWidgets();
 }
 
-void SavePresenter::acceptMainPresenter(IBatchPresenter *mainPresenter) {
-  m_mainPresenter = mainPresenter;
-}
+void SavePresenter::acceptMainPresenter(IBatchPresenter *mainPresenter) { m_mainPresenter = mainPresenter; }
 
 void SavePresenter::notifySettingsChanged() {
   m_mainPresenter->setBatchUnsaved();
@@ -65,13 +61,9 @@ void SavePresenter::notifyAutosaveEnabled() { enableAutosave(); }
 
 void SavePresenter::notifySavePathChanged() { onSavePathChanged(); }
 
-bool SavePresenter::isProcessing() const {
-  return m_mainPresenter->isProcessing();
-}
+bool SavePresenter::isProcessing() const { return m_mainPresenter->isProcessing(); }
 
-bool SavePresenter::isAutoreducing() const {
-  return m_mainPresenter->isAutoreducing();
-}
+bool SavePresenter::isAutoreducing() const { return m_mainPresenter->isAutoreducing(); }
 
 /** Tells the view to enable/disable certain widgets based on the
  * selected file format
@@ -81,8 +73,7 @@ void SavePresenter::updateWidgetStateBasedOnFileFormat() const {
   // Enable/disable the log list for formats that include the header.
   // Note that at the moment the log list is used in SaveReflectometryAscii for
   // ILLCosmos (MFT) but I'm not sure if it should be.
-  if ((fileFormat == NamedFormat::Custom && m_view->getHeaderCheck()) ||
-      fileFormat == NamedFormat::ILLCosmos)
+  if ((fileFormat == NamedFormat::Custom && m_view->getHeaderCheck()) || fileFormat == NamedFormat::ILLCosmos)
     m_view->enableLogList();
   else
     m_view->disableLogList();
@@ -174,9 +165,8 @@ void SavePresenter::filterWorkspaceNames() {
     // Use regex search to find names that contain the filter sequence
     try {
       boost::regex rgx(filter);
-      it = std::copy_if(
-          wsNames.begin(), wsNames.end(), validNames.begin(),
-          [rgx](const std::string &s) { return boost::regex_search(s, rgx); });
+      it = std::copy_if(wsNames.begin(), wsNames.end(), validNames.begin(),
+                        [rgx](const std::string &s) { return boost::regex_search(s, rgx); });
       m_view->showFilterEditValid();
     } catch (boost::regex_error &) {
       m_view->showFilterEditInvalid();
@@ -184,9 +174,7 @@ void SavePresenter::filterWorkspaceNames() {
   } else {
     // Otherwise simply add names where the filter string is found in
     it = std::copy_if(wsNames.begin(), wsNames.end(), validNames.begin(),
-                      [filter](const std::string &s) {
-                        return s.find(filter) != std::string::npos;
-                      });
+                      [filter](const std::string &s) { return s.find(filter) != std::string::npos; });
   }
 
   validNames.resize(std::distance(validNames.begin(), it));
@@ -201,10 +189,7 @@ void SavePresenter::populateParametersList() {
 
   std::string wsName = m_view->getCurrentWorkspaceName();
   std::vector<std::string> logs;
-  const auto &properties = AnalysisDataService::Instance()
-                               .retrieveWS<MatrixWorkspace>(wsName)
-                               ->run()
-                               .getProperties();
+  const auto &properties = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName)->run().getProperties();
   for (auto it = properties.begin(); it != properties.end(); it++) {
     logs.emplace_back((*it)->name());
   }
@@ -215,13 +200,9 @@ bool SavePresenter::isValidSaveDirectory(std::string const &directory) {
   return m_saver->isValidSaveDirectory(directory);
 }
 
-void SavePresenter::warnInvalidSaveDirectory() {
-  m_view->warnInvalidSaveDirectory();
-}
+void SavePresenter::warnInvalidSaveDirectory() { m_view->warnInvalidSaveDirectory(); }
 
-void SavePresenter::errorInvalidSaveDirectory() {
-  m_view->errorInvalidSaveDirectory();
-}
+void SavePresenter::errorInvalidSaveDirectory() { m_view->errorInvalidSaveDirectory(); }
 
 NamedFormat SavePresenter::formatFromIndex(int formatIndex) const {
   switch (formatIndex) {
@@ -247,20 +228,17 @@ FileFormatOptions SavePresenter::getSaveParametersFromView() const {
       /*includeQResolution=*/m_view->getQResolutionCheck());
 }
 
-void SavePresenter::saveWorkspaces(
-    std::vector<std::string> const &workspaceNames,
-    std::vector<std::string> const &logParameters) {
+void SavePresenter::saveWorkspaces(std::vector<std::string> const &workspaceNames,
+                                   std::vector<std::string> const &logParameters) {
   auto savePath = m_view->getSavePath();
   if (m_saver->isValidSaveDirectory(savePath))
-    m_saver->save(savePath, workspaceNames, logParameters,
-                  getSaveParametersFromView());
+    m_saver->save(savePath, workspaceNames, logParameters, getSaveParametersFromView());
   else
     errorInvalidSaveDirectory();
 }
 
 /** Saves workspaces with the names specified. */
-void SavePresenter::saveWorkspaces(
-    std::vector<std::string> const &workspaceNames) {
+void SavePresenter::saveWorkspaces(std::vector<std::string> const &workspaceNames) {
   auto selectedLogParameters = m_view->getSelectedParameters();
   saveWorkspaces(workspaceNames, selectedLogParameters);
 }
@@ -285,8 +263,7 @@ void SavePresenter::saveSelectedWorkspaces() {
 /** Suggests a save directory and sets it in the 'Save path' text field
  */
 void SavePresenter::suggestSaveDir() {
-  std::string path = Mantid::Kernel::ConfigService::Instance().getString(
-      "defaultsave.directory");
+  std::string path = Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory");
   m_view->setSavePath(path);
 }
 
@@ -298,14 +275,10 @@ std::vector<std::string> SavePresenter::getAvailableWorkspaceNames() {
   // Exclude workspace groups and table workspaces as they cannot be saved to
   // ascii
   std::vector<std::string> validNames;
-  std::remove_copy_if(
-      allNames.begin(), allNames.end(), std::back_inserter(validNames),
-      [](const std::string &wsName) {
-        return AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-                   wsName) ||
-               AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-                   wsName);
-      });
+  std::remove_copy_if(allNames.begin(), allNames.end(), std::back_inserter(validNames), [](const std::string &wsName) {
+    return AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(wsName) ||
+           AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(wsName);
+  });
 
   return validNames;
 }

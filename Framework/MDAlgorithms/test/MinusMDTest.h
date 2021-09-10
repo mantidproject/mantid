@@ -30,39 +30,32 @@ public:
 
   void mask_workspace(const int mask_workspace) {
     if (mask_workspace == 1) {
-      FrameworkManager::Instance().exec(
-          "MaskMD", 6, "Workspace", "MinusMDTest_lhs", "Dimensions",
-          "Axis0,Axis1,Axis2", "Extents", "0,10,0,10,0,10");
+      FrameworkManager::Instance().exec("MaskMD", 6, "Workspace", "MinusMDTest_lhs", "Dimensions", "Axis0,Axis1,Axis2",
+                                        "Extents", "0,10,0,10,0,10");
     } else if (mask_workspace == 2) {
-      FrameworkManager::Instance().exec(
-          "MaskMD", 6, "Workspace", "MinusMDTest_rhs", "Dimensions",
-          "Axis0,Axis1,Axis2", "Extents", "0,10,0,10,0,10");
+      FrameworkManager::Instance().exec("MaskMD", 6, "Workspace", "MinusMDTest_rhs", "Dimensions", "Axis0,Axis1,Axis2",
+                                        "Extents", "0,10,0,10,0,10");
     }
   }
 
   void test_histo_histo() {
     MDHistoWorkspace_sptr out;
-    out = BinaryOperationMDTestHelper::doTest("MinusMD", "histo_A", "histo_B",
-                                              "out");
+    out = BinaryOperationMDTestHelper::doTest("MinusMD", "histo_A", "histo_B", "out");
     TS_ASSERT_DELTA(out->getSignalAt(0), -1.0, 1e-5);
   }
 
   void test_histo_scalar() {
     MDHistoWorkspace_sptr out;
-    out = BinaryOperationMDTestHelper::doTest("MinusMD", "histo_A", "scalar",
-                                              "out");
+    out = BinaryOperationMDTestHelper::doTest("MinusMD", "histo_A", "scalar", "out");
     TS_ASSERT_DELTA(out->getSignalAt(0), -1.0, 1e-5);
-    BinaryOperationMDTestHelper::doTest("MinusMD", "scalar", "histo_A", "out",
-                                        false /*fails*/);
+    BinaryOperationMDTestHelper::doTest("MinusMD", "scalar", "histo_A", "out", false /*fails*/);
   }
 
   void do_test(bool lhs_file, bool rhs_file, int inPlace, int mask_ws_num = 0) {
     AnalysisDataService::Instance().clear();
     // Make two input workspaces
-    MDEventWorkspace3Lean::sptr lhs =
-        MDAlgorithmsTestHelper::makeFileBackedMDEW("MinusMDTest_lhs", lhs_file);
-    MDEventWorkspace3Lean::sptr rhs =
-        MDAlgorithmsTestHelper::makeFileBackedMDEW("MinusMDTest_rhs", rhs_file);
+    MDEventWorkspace3Lean::sptr lhs = MDAlgorithmsTestHelper::makeFileBackedMDEW("MinusMDTest_lhs", lhs_file);
+    MDEventWorkspace3Lean::sptr rhs = MDAlgorithmsTestHelper::makeFileBackedMDEW("MinusMDTest_rhs", rhs_file);
     std::string outWSName = "MinusMDTest_out";
     if (inPlace == 1)
       outWSName = "MinusMDTest_lhs";
@@ -74,20 +67,15 @@ public:
     MinusMD alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("LHSWorkspace", "MinusMDTest_lhs"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("RHSWorkspace", "MinusMDTest_rhs"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("LHSWorkspace", "MinusMDTest_lhs"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("RHSWorkspace", "MinusMDTest_rhs"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     // Retrieve the workspace from data service.
     MDEventWorkspace3Lean::sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3Lean>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3Lean>(outWSName));
     TS_ASSERT(ws);
     if (!ws)
       return;
@@ -100,9 +88,8 @@ public:
     }
 
     if ((lhs_file || rhs_file) && !((inPlace == 1) && !lhs_file && rhs_file)) {
-      TSM_ASSERT(
-          "If either input WS is file backed, then the output should be too.",
-          ws->getBoxController()->isFileBacked());
+      TSM_ASSERT("If either input WS is file backed, then the output should be too.",
+                 ws->getBoxController()->isFileBacked());
     }
     if (mask_ws_num == 0) {
       TS_ASSERT_EQUALS(ws->getNPoints(), 20000);
@@ -136,8 +123,7 @@ public:
     }
 
     if (mask_ws_num == 0) {
-      TSM_ASSERT("If the workspace is file-backed, then it needs updating.",
-                 ws->fileNeedsUpdating());
+      TSM_ASSERT("If the workspace is file-backed, then it needs updating.", ws->fileNeedsUpdating());
     }
     // cleanup
     std::string realFile;

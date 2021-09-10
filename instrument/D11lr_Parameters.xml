@@ -7,11 +7,11 @@
         <value val="0.00000042" />
       </parameter>
       <!-- Logs to sum when merging the runs -->
-      <parameter name="sample_logs_sum" type="string">
+      <parameter name="sample_logs_sum" type="string" visible="false">
         <value val="timer" />
       </parameter>
       <!-- GroupingPattern for DeadTimeCorrection, groups the entire detector-->
-      <parameter name="grouping" type="string">
+      <parameter name="grouping" type="string" visible="false">
         <value val="0-16383"/>
       </parameter>
       <!-- The pixel sizes [mm] used by SolidAngle, resolution and default Q binning calculations.

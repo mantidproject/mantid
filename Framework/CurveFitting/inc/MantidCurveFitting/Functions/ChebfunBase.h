@@ -98,30 +98,24 @@ public:
   /// Evaluate a function
   double eval(double x, const std::vector<double> &p) const;
   /// Evaluate a function
-  void evalVector(const std::vector<double> &x, const std::vector<double> &p,
-                  std::vector<double> &res) const;
+  void evalVector(const std::vector<double> &x, const std::vector<double> &p, std::vector<double> &res) const;
   /// Evaluate a function
-  std::vector<double> evalVector(const std::vector<double> &x,
-                                 const std::vector<double> &p) const;
+  std::vector<double> evalVector(const std::vector<double> &x, const std::vector<double> &p) const;
   /// Calculate the derivative
-  void derivative(const std::vector<double> &a,
-                  std::vector<double> &aout) const;
+  void derivative(const std::vector<double> &a, std::vector<double> &aout) const;
   /// Calculate the integral
-  std::shared_ptr<ChebfunBase> integral(const std::vector<double> &a,
-                                        std::vector<double> &aout) const;
+  std::shared_ptr<ChebfunBase> integral(const std::vector<double> &a, std::vector<double> &aout) const;
   /// Find all roots of a function on this interval
   std::vector<double> roots(const std::vector<double> &a) const;
 
   /// Fit a function until full convergence
-  static std::shared_ptr<ChebfunBase>
-  bestFit(double start, double end, ChebfunFunctionType, std::vector<double> &p,
-          std::vector<double> &a, double maxA = 0.0, double tolerance = 0.0,
-          size_t maxSize = 0);
+  static std::shared_ptr<ChebfunBase> bestFit(double start, double end, ChebfunFunctionType, std::vector<double> &p,
+                                              std::vector<double> &a, double maxA = 0.0, double tolerance = 0.0,
+                                              size_t maxSize = 0);
   /// Fit a function until full convergence
-  static std::shared_ptr<ChebfunBase>
-  bestFit(double start, double end, const API::IFunction &,
-          std::vector<double> &p, std::vector<double> &a, double maxA = 0.0,
-          double tolerance = 0.0, size_t maxSize = 0);
+  static std::shared_ptr<ChebfunBase> bestFit(double start, double end, const API::IFunction &, std::vector<double> &p,
+                                              std::vector<double> &a, double maxA = 0.0, double tolerance = 0.0,
+                                              size_t maxSize = 0);
   /// Tolerance for comparing doubles
   double tolerance() { return m_tolerance; }
 
@@ -129,15 +123,12 @@ public:
   /// data).
   template <class FunctionType>
   static std::shared_ptr<ChebfunBase>
-  bestFitAnyTolerance(double start, double end, FunctionType f,
-                      std::vector<double> &p, std::vector<double> &a,
-                      double maxA = 0.0, double tolerance = 0.0,
-                      size_t maxSize = 0);
+  bestFitAnyTolerance(double start, double end, FunctionType f, std::vector<double> &p, std::vector<double> &a,
+                      double maxA = 0.0, double tolerance = 0.0, size_t maxSize = 0);
 
   /// Create a vector of x values linearly spaced on the approximation interval
   std::vector<double> linspace(size_t n) const;
-  std::vector<double> smooth(const std::vector<double> &xvalues,
-                             const std::vector<double> &yvalues) const;
+  std::vector<double> smooth(const std::vector<double> &xvalues, const std::vector<double> &yvalues) const;
 
 private:
   /// Private assingment operator to stress the immutability of ChebfunBase.
@@ -149,20 +140,16 @@ private:
   void calcIntegrationWeights() const;
 
   /// Calculate function values at odd-valued indices of the base x-points
-  std::vector<double> fitOdd(const ChebfunFunctionType &f,
-                             std::vector<double> &p) const;
+  std::vector<double> fitOdd(const ChebfunFunctionType &f, std::vector<double> &p) const;
   /// Calculate function values at odd-valued indices of the base x-points
-  std::vector<double> fitOdd(const API::IFunction &f,
-                             std::vector<double> &pEven) const;
+  std::vector<double> fitOdd(const API::IFunction &f, std::vector<double> &pEven) const;
   /// Test an array of Chebyshev coefficients for convergence
-  static bool hasConverged(const std::vector<double> &a, double maxA,
-                           double tolerance, size_t shift = 0);
+  static bool hasConverged(const std::vector<double> &a, double maxA, double tolerance, size_t shift = 0);
   /// Templated implementation of bestFit method
   template <class FunctionType>
-  static std::shared_ptr<ChebfunBase>
-  bestFitTempl(double start, double end, FunctionType f, std::vector<double> &p,
-               std::vector<double> &a, double maxA, double tolerance,
-               size_t maxSize);
+  static std::shared_ptr<ChebfunBase> bestFitTempl(double start, double end, FunctionType f, std::vector<double> &p,
+                                                   std::vector<double> &a, double maxA, double tolerance,
+                                                   size_t maxSize);
 
   /// Actual tolerance in comparing doubles
   const double m_tolerance;
@@ -188,9 +175,9 @@ using ChebfunBase_sptr = std::shared_ptr<ChebfunBase>;
 
 /// Find best fit with highest possible tolerance (to be used with noisy data).
 template <class FunctionType>
-std::shared_ptr<ChebfunBase> ChebfunBase::bestFitAnyTolerance(
-    double start, double end, FunctionType f, std::vector<double> &p,
-    std::vector<double> &a, double maxA, double tolerance, size_t maxSize) {
+std::shared_ptr<ChebfunBase> ChebfunBase::bestFitAnyTolerance(double start, double end, FunctionType f,
+                                                              std::vector<double> &p, std::vector<double> &a,
+                                                              double maxA, double tolerance, size_t maxSize) {
   if (tolerance == 0.0)
     tolerance = g_tolerance;
 

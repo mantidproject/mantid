@@ -25,12 +25,8 @@ class LoadILLPolarizationFactorsTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static LoadILLPolarizationFactorsTest *createSuite() {
-    return new LoadILLPolarizationFactorsTest();
-  }
-  static void destroySuite(LoadILLPolarizationFactorsTest *suite) {
-    delete suite;
-  }
+  static LoadILLPolarizationFactorsTest *createSuite() { return new LoadILLPolarizationFactorsTest(); }
+  static void destroySuite(LoadILLPolarizationFactorsTest *suite) { delete suite; }
 
   void test_initialization() {
     LoadILLPolarizationFactors alg;
@@ -53,16 +49,13 @@ public:
     alg.setChild(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("Filename", "ILL/D17/PolarizationFactors.txt"))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("OutputWorkspace", "LoadILLPolarizationFactorsTest"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", "ILL/D17/PolarizationFactors.txt"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "LoadILLPolarizationFactorsTest"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("WavelengthReference", refWS))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     std::set<std::string> factorTags{"F1", "F2", "P1", "P2", "Phi"};
-    Mantid::API::MatrixWorkspace_sptr outWS =
-        alg.getProperty("OutputWorkspace");
+    Mantid::API::MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(), factorTags.size())
     const auto vertAxis = outWS->getAxis(1);
     TS_ASSERT(vertAxis)
@@ -157,8 +150,7 @@ private:
     return {{0.0114, -0.0005, 0.0007, 0.0019, 0.0027, 0.0120}};
   }
 
-  static std::vector<double> factors(const std::vector<double> &wavelength,
-                                     const std::array<double, 4> &limits,
+  static std::vector<double> factors(const std::vector<double> &wavelength, const std::array<double, 4> &limits,
                                      const std::array<double, 6> &K) {
     // Adaptation of the IDL code from the LAMP/COSMOS software.
     std::array<double, 5> A;
@@ -168,8 +160,7 @@ private:
     A[3] = A[2] + K[3] * (limits[2] - limits[1]);
     A[4] = A[3] + K[4] * (limits[3] - limits[2]);
     std::vector<double> L(wavelength.size());
-    auto l1 =
-        std::upper_bound(wavelength.cbegin(), wavelength.cend(), limits[0]);
+    auto l1 = std::upper_bound(wavelength.cbegin(), wavelength.cend(), limits[0]);
     size_t b = 0;
     size_t e = std::distance(wavelength.cbegin(), l1);
     for (size_t i = b; i != e; ++i) {
@@ -214,8 +205,7 @@ public:
     std::iota(x.begin(), x.end(), 0.0);
     const Mantid::HistogramData::BinEdges edges(x);
     const Mantid::HistogramData::Histogram h(edges, counts);
-    Mantid::API::MatrixWorkspace_sptr ws =
-        Mantid::DataObjects::create<Mantid::DataObjects::Workspace2D>(1, h);
+    Mantid::API::MatrixWorkspace_sptr ws = Mantid::DataObjects::create<Mantid::DataObjects::Workspace2D>(1, h);
     for (size_t i = 0; i < 100; ++i) {
       LoadILLPolarizationFactors alg;
       alg.setRethrows(true);

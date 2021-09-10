@@ -7,20 +7,13 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 """ Utility for deleting a class file """
 import argparse
-import datetime
-import os
-import re
-import sys
 from cmakelists_utils import *
 
 
-#======================================================================
 def delete_one(oldfilename):
     cmd = "git rm " + oldfilename
     print("Running:", cmd)
     os.system(cmd)
-
-#======================================================================
 
 
 def delete_all(subproject, classname, args):
@@ -47,8 +40,6 @@ def delete_all(subproject, classname, args):
     print()
 
 
-
-#======================================================================
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Utility to delete a Mantid class from a project. '
                                      'Please note, you may still have more fixes to do to get compilation!')
@@ -72,8 +63,8 @@ if __name__ == "__main__":
                         help="Don't delete the cpp file")
 
     parser.add_argument('--project', dest='project',
-                    default="Framework",
-                    help='The project in which this goes. Default: Framework. Can be MantidQt, Vates')
+                        default="Framework",
+                        help='The project in which this goes. Default: Framework. Can be MantidQt')
 
     args = parser.parse_args()
     subproject = args.subproject

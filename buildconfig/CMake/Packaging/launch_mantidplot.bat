@@ -25,7 +25,6 @@ set _EXTRA_PATH_DIRS=%_INSTALL_DIR%\bin;%_INSTALL_DIR%\plugins\qt4
 :: Required environment variables for Mantid
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 set PATH=%_EXTRA_PATH_DIRS%;%PATH%
-set PV_PLUGIN_PATH=%_INSTALL_DIR%\plugins\paraview\qt4
 :: Matplotlib backend should default to Qt if not set (requires matplotlib >= 1.5)
 if "%MPLBACKEND%"=="" (
   set MPLBACKEND=qt4agg

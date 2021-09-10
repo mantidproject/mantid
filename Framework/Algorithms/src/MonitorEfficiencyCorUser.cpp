@@ -34,12 +34,10 @@ DECLARE_ALGORITHM(MonitorEfficiencyCorUser)
  */
 
 void MonitorEfficiencyCorUser::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-                      "InputWorkspace", "", Direction::Input,
-                      std::make_shared<InstrumentValidator>()),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
+                                                        std::make_shared<InstrumentValidator>()),
                   "The workspace to correct for monitor efficiency");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "The name of the workspace in which to store the result.");
 }
 
@@ -66,8 +64,7 @@ void MonitorEfficiencyCorUser::exec() {
     mon_counts_log = "monitor_counts";
   }
 
-  m_monitorCounts =
-      m_inputWS->run().getPropertyValueAsType<double>(mon_counts_log);
+  m_monitorCounts = m_inputWS->run().getPropertyValueAsType<double>(mon_counts_log);
 
   // get Efficiency formula from the IDF - Parameters file
   const std::string effFormula = getValFromInstrumentDef("formula_mon_eff");
@@ -76,11 +73,9 @@ void MonitorEfficiencyCorUser::exec() {
   const double eff0 = m_monitorCounts * calculateFormulaValue(effFormula, m_Ei);
 
   // Calculate the number of spectra in this workspace
-  const auto numberOfSpectra =
-      static_cast<int>(this->m_inputWS->getNumberHistograms());
+  const auto numberOfSpectra = static_cast<int>(this->m_inputWS->getNumberHistograms());
   API::Progress prog(this, 0.0, 1.0, numberOfSpectra);
-  auto numberOfSpectra_i =
-      static_cast<int64_t>(numberOfSpectra); // cast to make openmp happy
+  auto numberOfSpectra_i = static_cast<int64_t>(numberOfSpectra); // cast to make openmp happy
 
   // Loop over the histograms (detector spectra)
   double factor = 1 / eff0;
@@ -103,22 +98,18 @@ void MonitorEfficiencyCorUser::exec() {
  * @param energy :: value of the energy to use in the formula
  * @return calculated corrected value of the monitor count
  */
-double
-MonitorEfficiencyCorUser::calculateFormulaValue(const std::string &formula,
-                                                double energy) {
+double MonitorEfficiencyCorUser::calculateFormulaValue(const std::string &formula, double energy) {
   try {
     mu::Parser p;
     p.DefineVar("e", &energy);
     p.SetExpr(formula);
     double eff = p.Eval();
-    g_log.debug() << "Formula: " << formula << " with: " << energy
-                  << "evaluated to: " << eff << '\n';
+    g_log.debug() << "Formula: " << formula << " with: " << energy << "evaluated to: " << eff << '\n';
     return eff;
 
   } catch (mu::Parser::exception_type &e) {
     throw Kernel::Exception::InstrumentDefinitionError(
-        "Error calculating formula from string. Muparser error message is: " +
-        e.GetMsg());
+        "Error calculating formula from string. Muparser error message is: " + e.GetMsg());
   }
 }
 
@@ -127,21 +118,18 @@ MonitorEfficiencyCorUser::calculateFormulaValue(const std::string &formula,
  * @param parameterName :: parameter name in the IDF
  * @return the value associated to the parameter name
  */
-std::string MonitorEfficiencyCorUser::getValFromInstrumentDef(
-    const std::string &parameterName) {
+std::string MonitorEfficiencyCorUser::getValFromInstrumentDef(const std::string &parameterName) {
 
   const ParameterMap &pmap = m_inputWS->constInstrumentParameters();
   Instrument_const_sptr instrument = m_inputWS->getInstrument();
-  Parameter_sptr par =
-      pmap.getRecursive(instrument->getChild(0).get(), parameterName);
+  Parameter_sptr par = pmap.getRecursive(instrument->getChild(0).get(), parameterName);
   if (par) {
     std::string ret = par->asString();
-    g_log.debug() << "Parsed parameter " << parameterName << ": " << ret
-                  << "\n";
+    g_log.debug() << "Parsed parameter " << parameterName << ": " << ret << "\n";
     return ret;
   } else {
-    throw Kernel::Exception::InstrumentDefinitionError(
-        "There is no <" + parameterName + "> in the instrument definition!");
+    throw Kernel::Exception::InstrumentDefinitionError("There is no <" + parameterName +
+                                                       "> in the instrument definition!");
   }
 }
 

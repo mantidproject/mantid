@@ -1,7 +1,7 @@
 .. _type_conversions:
 
 ================
-Type Conversions 
+Type Conversions
 ================
 
 -  In many circumstances we want to be able to perform operations on
@@ -17,7 +17,7 @@ Type Conversions
    answer = 42
    y = x + str(answer)  # This converts the number 42 to a string and joins
                         # it with the first string and then assigns y to a
-                        # new string containing the concatenated string 
+                        # new string containing the concatenated string
 
 Printing
 ========
@@ -108,12 +108,12 @@ Converting Between Types
 .. testcode:: types3
 
    x = 1.0/2.0
-   print(x)    
+   print(x)
 
-   # or using the float function float() 
+   # or using the float function float()
    x = 1
    y = 2
-   print(float(x)/float(y))   
+   print(float(x)/float(y))
 
 Gives the output:
 

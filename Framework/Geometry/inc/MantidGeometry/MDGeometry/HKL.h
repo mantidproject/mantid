@@ -35,8 +35,7 @@ public:
   bool isSameType(const MDFrame &frame) const override;
   std::string name() const override;
   HKL *clone() const override;
-  Mantid::Kernel::SpecialCoordinateSystem
-  equivalientSpecialCoordinateSystem() const override;
+  Mantid::Kernel::SpecialCoordinateSystem equivalientSpecialCoordinateSystem() const override;
 
 private:
   std::unique_ptr<Kernel::MDUnit> m_unit;

@@ -59,8 +59,7 @@ void SofQW::init() {
   const char *methodOptions[] = {"Centre", "Polygon", "NormalisedPolygon"};
   this->declareProperty(
       "Method", "Centre",
-      std::make_shared<StringListValidator>(
-          std::vector<std::string>(methodOptions, methodOptions + 3)),
+      std::make_shared<StringListValidator>(std::vector<std::string>(methodOptions, methodOptions + 3)),
       "Defines the method used to compute the output.");
 }
 
@@ -75,23 +74,18 @@ void SofQW::createCommonInputProperties(API::Algorithm &alg) {
   wsValidator->add<CommonBinsValidator>();
   wsValidator->add<HistogramValidator>();
   wsValidator->add<InstrumentValidator>();
-  alg.declareProperty(std::make_unique<WorkspaceProperty<>>(
-                          "InputWorkspace", "", Direction::Input, wsValidator),
+  alg.declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, wsValidator),
                       "Reduced data in units of energy transfer DeltaE.\nThe "
                       "workspace must contain histogram data and have common "
                       "bins across all spectra.");
-  alg.declareProperty(std::make_unique<WorkspaceProperty<>>(
-                          "OutputWorkspace", "", Direction::Output),
+  alg.declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                       "The name to use for the q-omega workspace.");
-  alg.declareProperty(
-      std::make_unique<ArrayProperty<double>>(
-          "QAxisBinning", std::make_shared<RebinParamsValidator>()),
-      "The bin parameters to use for the q axis (in the format used by the "
-      ":ref:`algm-Rebin` algorithm).");
+  alg.declareProperty(std::make_unique<ArrayProperty<double>>("QAxisBinning", std::make_shared<RebinParamsValidator>()),
+                      "The bin parameters to use for the q axis (in the format used by the "
+                      ":ref:`algm-Rebin` algorithm).");
 
   const std::vector<std::string> propOptions{"Direct", "Indirect"};
-  alg.declareProperty("EMode", "",
-                      std::make_shared<StringListValidator>(propOptions),
+  alg.declareProperty("EMode", "", std::make_shared<StringListValidator>(propOptions),
                       "The energy transfer analysis mode (Direct/Indirect)");
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
@@ -104,17 +98,14 @@ void SofQW::createCommonInputProperties(API::Algorithm &alg) {
                       "replaced using the ReplaceSpecialValues algorithm.",
                       Direction::Input);
   alg.declareProperty(
-      std::make_unique<ArrayProperty<double>>(
-          "EAxisBinning", std::make_shared<RebinParamsValidator>(true)),
+      std::make_unique<ArrayProperty<double>>("EAxisBinning", std::make_shared<RebinParamsValidator>(true)),
       "The bin parameters to use for the E axis (optional, in the format "
       "used by the :ref:`algm-Rebin` algorithm).");
-  alg.declareProperty(
-      std::make_unique<WorkspaceProperty<TableWorkspace>>(
-          "DetectorTwoThetaRanges", "", Direction::Input,
-          PropertyMode::Optional),
-      "A table workspace use by SofQWNormalisedPolygon containing a 'Detector "
-      "ID' column as well as 'Min two theta' and 'Max two theta' columns "
-      "listing the detector's min and max scattering angles in radians.");
+  alg.declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>("DetectorTwoThetaRanges", "",
+                                                                          Direction::Input, PropertyMode::Optional),
+                      "A table workspace use by SofQWNormalisedPolygon containing a 'Detector "
+                      "ID' column as well as 'Min two theta' and 'Max two theta' columns "
+                      "listing the detector's min and max scattering angles in radians.");
 }
 
 void SofQW::exec() {
@@ -123,8 +114,7 @@ void SofQW::exec() {
   std::string child = "SofQW" + method;
 
   // Setup and run
-  Algorithm_sptr childAlg = std::dynamic_pointer_cast<Algorithm>(
-      createChildAlgorithm(child, 0.0, 1.0));
+  Algorithm_sptr childAlg = std::dynamic_pointer_cast<Algorithm>(createChildAlgorithm(child, 0.0, 1.0));
   // This will add the Method property to the child algorithm but it will be
   // ignored anyway...
   childAlg->copyPropertiesFrom(*this);

@@ -73,7 +73,7 @@ DEFAULTS = {
         'position': (10, 10),
     },
     'AdditionalWindows': {
-        'ontop': True
+        'behaviour': "On top"
     },
     'project': {
         'prompt_save_on_close': True,
@@ -82,6 +82,10 @@ DEFAULTS = {
         'save_altered_workspaces_only': False
     }
 }
+
+# State encodes widget layout (among other things).
+# Increment this when the state of the next version is incompatible with the previous.
+SAVE_STATE_VERSION = 2
 
 # 'Singleton' instance
 QSettings.setDefaultFormat(QSettings.IniFormat)
@@ -94,10 +98,10 @@ def get_window_config():
     :return: A WindowConfig object describing the desired window configuration based on the current settings
     """
     try:
-        windows_on_top = CONF.get("AdditionalWindows", "ontop", type=bool)
+        windows_behaviour = CONF.get("AdditionalWindows", "behaviour", type=str)
+        windows_on_top = True if windows_behaviour == "On top" else False
     except KeyError:
         windows_on_top = False
-
     if windows_on_top:
         parent = _ADDITIONAL_MAINWINDOWS_PARENT
         flags = WINDOW_ONTOP_FLAGS

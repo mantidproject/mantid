@@ -23,9 +23,7 @@ public:
   int version() const override;
   const std::string category() const override;
   /// Algorithm's summary
-  const std::string summary() const override {
-    return "Computes the proton charge averaged value of a given log.";
-  }
+  const std::string summary() const override { return "Computes the proton charge averaged value of a given log."; }
 
 private:
   void init() override;

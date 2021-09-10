@@ -49,8 +49,7 @@ using namespace Mantid::API;
 /**
  * Default Constructor
  */
-GenericDialog::GenericDialog(QWidget *parent)
-    : AlgorithmDialog(parent), m_algoPropertiesWidget(nullptr) {}
+GenericDialog::GenericDialog(QWidget *parent) : AlgorithmDialog(parent), m_algoPropertiesWidget(nullptr) {}
 
 /**
  * Destructor
@@ -121,8 +120,8 @@ void GenericDialog::initLayout() {
   }
 
   // Set all previous values (from history, etc.)
-  for (auto it = m_algoPropertiesWidget->m_propWidgets.begin();
-       it != m_algoPropertiesWidget->m_propWidgets.end(); it++) {
+  for (auto it = m_algoPropertiesWidget->m_propWidgets.begin(); it != m_algoPropertiesWidget->m_propWidgets.end();
+       it++) {
     this->setPreviousValue(it.value(), it.key());
   }
 
@@ -167,12 +166,10 @@ void GenericDialog::accept() {
       // if these assert is encounted, the property and validate keys may not
       // match (check case)
       assert(m_algoPropertiesWidget->m_propWidgets[it.key()]);
-      m_algoPropertiesWidget->m_propWidgets[it.key()]->updateIconVisibility(
-          it.value());
+      m_algoPropertiesWidget->m_propWidgets[it.key()]->updateIconVisibility(it.value());
     }
-    QMessageBox::critical(
-        this, "",
-        "One or more properties are invalid. The invalid properties are\n"
-        "marked with a *, hold your mouse over the * for more information.");
+    QMessageBox::critical(this, "",
+                          "One or more properties are invalid. The invalid properties are\n"
+                          "marked with a *, hold your mouse over the * for more information.");
   }
 }

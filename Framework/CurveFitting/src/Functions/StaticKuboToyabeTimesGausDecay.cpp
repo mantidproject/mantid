@@ -26,9 +26,7 @@ void StaticKuboToyabeTimesGausDecay::init() {
   declareParameter("Sigma", 0.2, "Gaus decay rate");
 }
 
-void StaticKuboToyabeTimesGausDecay::function1D(double *out,
-                                                const double *xValues,
-                                                const size_t nData) const {
+void StaticKuboToyabeTimesGausDecay::function1D(double *out, const double *xValues, const size_t nData) const {
   const double A = getParameter("A");
   const double D = getParameter("Delta");
   const double S = getParameter("Sigma");
@@ -43,8 +41,7 @@ void StaticKuboToyabeTimesGausDecay::function1D(double *out,
 
   for (size_t i = 0; i < nData; i++) {
     double x2 = pow(xValues[i], 2);
-    out[i] =
-        A * (exp(-(x2 * D2) / 2) * (1 - x2 * D2) * C1 + C2) * exp(-S2 * x2);
+    out[i] = A * (exp(-(x2 * D2) / 2) * (1 - x2 * D2) * C1 + C2) * exp(-S2 * x2);
   }
 }
 } // namespace Functions

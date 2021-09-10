@@ -9,7 +9,6 @@ main.py
 
 .. code-block:: python
 
-    from __future__ import (absolute_import,division,print_function)
 
     from qtpy import QtWidgets
 
@@ -48,7 +47,6 @@ view.py
 
 .. code-block:: python
 
-    from __future__ import (absolute_import,division,print_function)
     from qtpy import QtWidgets, QtCore, QtGui
 
 
@@ -62,7 +60,7 @@ view.py
             self.table = QtWidgets.QTableWidget(self)
             self.table.setRowCount(4)
             self.table.setColumnCount(2)
-            grid.addWidget(self.table)           
+            grid.addWidget(self.table)
 
             self.colours = QtWidgets.QComboBox()
             options = ["Blue", "Green", "Red"]
@@ -83,7 +81,7 @@ view.py
             self.plot = QtWidgets.QPushButton('Add', self)
             self.plot.setStyleSheet("background-color:lightgrey")
 
-            grid.addWidget(self.plot)           
+            grid.addWidget(self.plot)
 
             self.setLayout(grid)
 

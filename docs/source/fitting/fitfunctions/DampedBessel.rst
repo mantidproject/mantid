@@ -14,7 +14,7 @@ A bessel function with damped oscillation that could apply to incommensurate mag
 .. math:: A(t)= A_0e^{-\lambda_\text{L}t}\left( (1-f_L)e^{-\lambda_\text{T}t}J_0(\omega_\mu t + \phi) + f_L\right)
 
 where,
- 
+
 :math:`A_0` is the amplitude of asymmetry,
 
 :math:`J_0(x)` is the Bessel function of the first kind,
@@ -28,7 +28,7 @@ where,
 and :math:`\phi` is the phase.
 
 .. plot::
-	
+
    from mantid.simpleapi import FunctionWrapper
    import matplotlib.pyplot as plt
    import numpy as np

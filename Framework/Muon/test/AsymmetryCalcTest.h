@@ -29,9 +29,7 @@ using namespace Mantid::API;
  */
 class TestAsymmetryCalc : public Mantid::Algorithms::AsymmetryCalc {
 public:
-  std::map<std::string, std::string> wrapValidateInputs() {
-    return this->validateInputs();
-  }
+  std::map<std::string, std::string> wrapValidateInputs() { return this->validateInputs(); }
 };
 
 class AsymmetryCalcTest : public CxxTest::TestSuite {
@@ -70,18 +68,15 @@ public:
       asymCalc.setProperty("InputWorkspace", data);
       asymCalc.setPropertyValue("OutputWorkspace", "__Unused");
       asymCalc.setPropertyValue("Alpha", "1.0");
-      asymCalc.setPropertyValue("ForwardSpectra",
-                                "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16");
-      asymCalc.setPropertyValue(
-          "BackwardSpectra", "17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32");
+      asymCalc.setPropertyValue("ForwardSpectra", "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16");
+      asymCalc.setPropertyValue("BackwardSpectra", "17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32");
       TS_ASSERT_EQUALS(asymCalc.execute(), true);
     } catch (std::runtime_error &err) {
       TS_FAIL(err.what());
     }
 
     // Check the result
-    MatrixWorkspace_const_sptr outputWS =
-        asymCalc.getProperty("OutputWorkspace");
+    MatrixWorkspace_const_sptr outputWS = asymCalc.getProperty("OutputWorkspace");
     TS_ASSERT_DELTA(outputWS->y(0)[100], 0.2965, 0.005);
     TS_ASSERT(!outputWS->isHistogramData());
   }
@@ -151,10 +146,8 @@ public:
    * We have to use the ADS to test WorkspaceGroups
    */
   void testValidateInputsWithWSGroup() {
-    auto ws1 = std::static_pointer_cast<Workspace>(
-        WorkspaceCreationHelper::create2DWorkspace(2, 1));
-    auto ws2 = std::static_pointer_cast<Workspace>(
-        WorkspaceCreationHelper::create2DWorkspace(2, 1));
+    auto ws1 = std::static_pointer_cast<Workspace>(WorkspaceCreationHelper::create2DWorkspace(2, 1));
+    auto ws2 = std::static_pointer_cast<Workspace>(WorkspaceCreationHelper::create2DWorkspace(2, 1));
     AnalysisDataService::Instance().add("workspace1", ws1);
     AnalysisDataService::Instance().add("workspace2", ws2);
     auto group = std::make_shared<WorkspaceGroup>();

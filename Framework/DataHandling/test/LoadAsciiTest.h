@@ -232,9 +232,7 @@ private:
     file.close();
   }
 
-  Mantid::API::MatrixWorkspace_sptr runTest(const std::string &filename,
-                                            const std::string &sep,
-                                            const bool threeColumn,
+  Mantid::API::MatrixWorkspace_sptr runTest(const std::string &filename, const std::string &sep, const bool threeColumn,
                                             const bool dataCheck = true) {
     using Mantid::DataHandling::LoadAscii;
     using namespace Mantid::API;
@@ -243,8 +241,7 @@ private:
     loader.initialize();
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", filename));
     const std::string outputName(filename);
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setPropertyValue("OutputWorkspace", outputName));
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("OutputWorkspace", outputName));
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Separator", sep));
     loader.setRethrows(true);
     loader.execute();
@@ -256,8 +253,7 @@ private:
     TS_ASSERT_EQUALS(dataStore.doesExist(outputName), true);
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = dataStore.retrieve(outputName));
-    MatrixWorkspace_sptr outputWS =
-        std::dynamic_pointer_cast<MatrixWorkspace>(output);
+    MatrixWorkspace_sptr outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(output);
     if (outputWS) {
       if (dataCheck) {
         checkData(outputWS, threeColumn);
@@ -267,16 +263,14 @@ private:
         dataStore.remove(outputName);
       }
       // Check if filename is saved
-      TS_ASSERT_EQUALS(loader.getPropertyValue("Filename"),
-                       outputWS->run().getProperty("Filename")->value());
+      TS_ASSERT_EQUALS(loader.getPropertyValue("Filename"), outputWS->run().getProperty("Filename")->value());
     } else {
       TS_FAIL("Cannot retrieve output workspace");
     }
     return outputWS;
   }
 
-  void checkData(const Mantid::API::MatrixWorkspace_sptr &outputWS,
-                 const bool threeColumn) {
+  void checkData(const Mantid::API::MatrixWorkspace_sptr &outputWS, const bool threeColumn) {
     if (threeColumn) {
       TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1);
       TS_ASSERT_EQUALS(outputWS->blocksize(), 30);

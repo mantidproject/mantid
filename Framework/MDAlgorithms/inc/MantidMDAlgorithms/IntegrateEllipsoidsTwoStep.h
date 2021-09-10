@@ -29,9 +29,7 @@ public:
   const std::string name() const override;
   /// Get the version of this algorithm
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"IntegrateEllipsoids"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"IntegrateEllipsoids"}; }
   /// Get the category of this algorithm
   const std::string category() const override;
   /// Summary of algorithms purpose
@@ -43,24 +41,19 @@ public:
 private:
   void init() override;
   void exec() override;
-  IntegrationParameters
-  makeIntegrationParameters(const Kernel::V3D &peak_q) const;
+  IntegrationParameters makeIntegrationParameters(const Kernel::V3D &peak_q) const;
 
-  void qListFromHistoWS(Integrate3DEvents &integrator, API::Progress &prog,
-                        DataObjects::Workspace2D_sptr &wksp,
+  void qListFromHistoWS(Integrate3DEvents &integrator, API::Progress &prog, DataObjects::Workspace2D_sptr &wksp,
                         const Kernel::DblMatrix &UBinv, bool hkl_integ);
-  void qListFromEventWS(Integrate3DEvents &integrator, API::Progress &prog,
-                        DataObjects::EventWorkspace_sptr &wksp,
+  void qListFromEventWS(Integrate3DEvents &integrator, API::Progress &prog, DataObjects::EventWorkspace_sptr &wksp,
                         const Kernel::DblMatrix &UBinv, bool hkl_integ);
   /// Calculate if this Q is on a detector
   void calculateE1(const Geometry::DetectorInfo &detectorInfo);
-  void runMaskDetectors(const Mantid::DataObjects::PeaksWorkspace_sptr &peakWS,
-                        const std::string &property, const std::string &values);
+  void runMaskDetectors(const Mantid::DataObjects::PeaksWorkspace_sptr &peakWS, const std::string &property,
+                        const std::string &values);
 
   /// integrate a collection of strong peaks
-  DataObjects::PeaksWorkspace_sptr
-  integratePeaks(DataObjects::PeaksWorkspace_sptr peaks,
-                 API::MatrixWorkspace_sptr ws);
+  DataObjects::PeaksWorkspace_sptr integratePeaks(DataObjects::PeaksWorkspace_sptr peaks, API::MatrixWorkspace_sptr ws);
   /// save all detector pixels
   std::vector<Kernel::V3D> E1Vec;
 };

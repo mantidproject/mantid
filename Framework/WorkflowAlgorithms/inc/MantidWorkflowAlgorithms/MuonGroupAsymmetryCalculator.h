@@ -16,21 +16,16 @@ namespace WorkflowAlgorithms {
 */
 class DLLExport MuonGroupAsymmetryCalculator : public MuonGroupCalculator {
 public:
-  MuonGroupAsymmetryCalculator(const API::WorkspaceGroup_sptr &inputWS,
-                               const std::vector<int> &summedPeriods,
-                               const std::vector<int> &subtractedPeriods,
-                               const int groupIndex, const double start = 0.0,
-                               const double end = 30.0,
-                               const std::string &wsName = "");
+  MuonGroupAsymmetryCalculator(const API::WorkspaceGroup_sptr &inputWS, const std::vector<int> &summedPeriods,
+                               const std::vector<int> &subtractedPeriods, const int groupIndex,
+                               const double start = 0.0, const double end = 30.0, const std::string &wsName = "");
   /// Performs group asymmetry calculation
   API::MatrixWorkspace_sptr calculate() const override;
 
 private:
   /// Removes exponential decay from the workspace
-  API::MatrixWorkspace_sptr removeExpDecay(const API::Workspace_sptr &inputWS,
-                                           const int index) const;
-  API::MatrixWorkspace_sptr
-  estimateAsymmetry(const API::Workspace_sptr &inputWS, const int index) const;
+  API::MatrixWorkspace_sptr removeExpDecay(const API::Workspace_sptr &inputWS, const int index) const;
+  API::MatrixWorkspace_sptr estimateAsymmetry(const API::Workspace_sptr &inputWS, const int index) const;
 };
 double getStoredNorm();
 } // namespace WorkflowAlgorithms

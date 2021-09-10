@@ -27,22 +27,17 @@ private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static PreprocessingAlgorithmTest *createSuite() {
-    return new PreprocessingAlgorithmTest();
-  }
+  static PreprocessingAlgorithmTest *createSuite() { return new PreprocessingAlgorithmTest(); }
   static void destroySuite(PreprocessingAlgorithmTest *suite) { delete suite; }
   PreprocessingAlgorithmTest() { FrameworkManager::Instance(); };
 
   void test_invalid_algorithms() {
     // Algorithm with a single input ws property
-    TS_ASSERT_THROWS(PreprocessingAlgorithm("Rebin"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(PreprocessingAlgorithm("Rebin"), const std::invalid_argument &);
     // Algorithm with more than two input ws properties
-    TS_ASSERT_THROWS(PreprocessingAlgorithm("ReflectometryReductionOneAuto"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(PreprocessingAlgorithm("ReflectometryReductionOneAuto"), const std::invalid_argument &);
     // Algorithm with two input ws properties but no output ws properties
-    TS_ASSERT_THROWS(PreprocessingAlgorithm("ConjoinWorkspaces"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(PreprocessingAlgorithm("ConjoinWorkspaces"), const std::invalid_argument &);
   }
 
   void test_valid_algorithms() {
@@ -74,8 +69,7 @@ public:
   void test_WeightedMean() {
 
     // WeightedMean
-    std::set<QString> blacklist = {"InputWorkspace1", "InputWorkspace2",
-                                   "OutputWorkspace"};
+    std::set<QString> blacklist = {"InputWorkspace1", "InputWorkspace2", "OutputWorkspace"};
     auto mean = PreprocessingAlgorithm("WeightedMean", "", "+", blacklist);
     TS_ASSERT_EQUALS(mean.lhsProperty(), "InputWorkspace1");
     TS_ASSERT_EQUALS(mean.rhsProperty(), "InputWorkspace2");

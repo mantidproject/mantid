@@ -9,10 +9,10 @@
 Description
 -----------
 
-This algorithm calibrates panels of Rectangular Detectors 
+This algorithm calibrates panels of Rectangular Detectors
 or packs of tubes in an instrument.  The initial path,
 panel centers and orientations are adjusted so the error in Q
-positions from the theoretical Q positions is minimized. 
+positions from the theoretical Q positions is minimized.
 Given a set of peaks indexed by :math:`(h_i, k_i, l_i)`, we
 modify the instrument parameters, p, and then find  Q in the sample frame,
 :math:`\rm Q_{sample}` that mininizes the following:
@@ -28,10 +28,10 @@ modify the instrument parameters, p, and then find  Q in the sample frame,
                              \right) - \rm Q_{sample,i}(p) \right\vert ^2
 
 NINT is the nearest integer function.
-B is fixed from the input lattice parameters, but U is modified by :ref:`CalculateUMatrix <algm-CalculateUMatrix>` 
+B is fixed from the input lattice parameters, but U is modified by :ref:`CalculateUMatrix <algm-CalculateUMatrix>`
 for all peaks before and after optimization.
-When the peaks are indexed, sample offsets are adjusted to better index the peaks. 
-The initial time-of-flight, T0, is optimized for all peaks before any parameters are optimized. 
+When the peaks are indexed, sample offsets are adjusted to better index the peaks.
+The initial time-of-flight, T0, is optimized for all peaks before any parameters are optimized.
 The initial path, L1, is optimized for all peaks before and after all panels or packs' parameters are optimized.
 The panels and packs' parameters are optimized in parallel.
 An option is available to adjust the panel widths and heights for Rectangular Detectors in a second iteration with all the other parameters fixed.
@@ -96,7 +96,7 @@ Usage
    DeleteWorkspace('peaks')
    DeleteWorkspace('MANDI_801_event_xml')
    DeleteWorkspace('MANDI_801_event_DetCal')
-   import os,mantid   
+   import os,mantid
    filename=mantid.config.getString("defaultsave.directory")+"mandi_801.xml"
    os.remove(filename)
    filename=mantid.config.getString("defaultsave.directory")+"mandi_801.DetCal"

@@ -33,8 +33,7 @@ private:
    * @param thPlane the in-plane angle for the detector corresponding to the
    * event list
    */
-  template <class T>
-  void ScharpfEventHelper(std::vector<T> &wevector, double thPlane);
+  template <class T> void ScharpfEventHelper(std::vector<T> &wevector, double thPlane);
   /**
    * @brief calculate the Scharph angle correction factor
    * @param kfki kf/ki

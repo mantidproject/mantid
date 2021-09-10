@@ -32,17 +32,14 @@ DECLARE_ALGORITHM(CreateLogTimeCorrection)
 /** Declare properties
  */
 void CreateLogTimeCorrection::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input,
-                      std::make_shared<InstrumentValidator>()),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input,
+                                                                       std::make_shared<InstrumentValidator>()),
                   "Name of the input workspace to generate log correct from.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace containing the corrections.");
 
-  declareProperty(std::make_unique<FileProperty>("OutputFilename", "",
-                                                 FileProperty::OptionalSave),
+  declareProperty(std::make_unique<FileProperty>("OutputFilename", "", FileProperty::OptionalSave),
                   "Name of the output time correction file.");
 }
 
@@ -72,8 +69,7 @@ void CreateLogTimeCorrection::exec() {
   auto corrections = calculateCorrections(detectorInfo);
 
   // 4. Output
-  TableWorkspace_sptr outWS =
-      generateCorrectionTable(detectorInfo, corrections);
+  TableWorkspace_sptr outWS = generateCorrectionTable(detectorInfo, corrections);
   setProperty("OutputWorkspace", outWS);
 
   string filename = getProperty("OutputFilename");
@@ -86,15 +82,11 @@ void CreateLogTimeCorrection::exec() {
 //----------------------------------------------------------------------------------------------
 /** Get instrument geometry setup including L2 for each detector and L1
  */
-void CreateLogTimeCorrection::logGeometryInformation(
-    const Geometry::DetectorInfo &detectorInfo) const {
+void CreateLogTimeCorrection::logGeometryInformation(const Geometry::DetectorInfo &detectorInfo) const {
 
-  g_log.information() << "Sample position = " << detectorInfo.samplePosition()
-                      << "; "
-                      << "Source position = " << detectorInfo.sourcePosition()
-                      << ", L1 = " << detectorInfo.l1() << "; "
-                      << "Number of detector/pixels = " << detectorInfo.size()
-                      << ".\n";
+  g_log.information() << "Sample position = " << detectorInfo.samplePosition() << "; "
+                      << "Source position = " << detectorInfo.sourcePosition() << ", L1 = " << detectorInfo.l1() << "; "
+                      << "Number of detector/pixels = " << detectorInfo.size() << ".\n";
 }
 
 //----------------------------------------------------------------------------------------------
@@ -102,13 +94,11 @@ void CreateLogTimeCorrection::logGeometryInformation(
  * time at detector
  * to time at sample
  */
-std::vector<double> CreateLogTimeCorrection::calculateCorrections(
-    const Geometry::DetectorInfo &detectorInfo) const {
+std::vector<double> CreateLogTimeCorrection::calculateCorrections(const Geometry::DetectorInfo &detectorInfo) const {
 
   std::vector<double> corrections(detectorInfo.size());
   const double l1 = detectorInfo.l1();
-  for (size_t detectorIndex = 0; detectorIndex < detectorInfo.size();
-       ++detectorIndex) {
+  for (size_t detectorIndex = 0; detectorIndex < detectorInfo.size(); ++detectorIndex) {
 
     double corrfactor = l1 / (l1 + detectorInfo.l2(detectorIndex));
     corrections[detectorIndex] = corrfactor;
@@ -119,9 +109,8 @@ std::vector<double> CreateLogTimeCorrection::calculateCorrections(
 //----------------------------------------------------------------------------------------------
 /** Write L2 map and correction map to a TableWorkspace
  */
-TableWorkspace_sptr CreateLogTimeCorrection::generateCorrectionTable(
-    const Geometry::DetectorInfo &detectorInfo,
-    const std::vector<double> &corrections) const {
+TableWorkspace_sptr CreateLogTimeCorrection::generateCorrectionTable(const Geometry::DetectorInfo &detectorInfo,
+                                                                     const std::vector<double> &corrections) const {
   auto tablews = std::make_shared<TableWorkspace>();
 
   tablews->addColumn("int", "DetectorID");
@@ -130,8 +119,7 @@ TableWorkspace_sptr CreateLogTimeCorrection::generateCorrectionTable(
 
   const auto &detectorIds = detectorInfo.detectorIDs();
 
-  for (size_t detectorIndex = 0; detectorIndex < detectorInfo.size();
-       ++detectorIndex) {
+  for (size_t detectorIndex = 0; detectorIndex < detectorInfo.size(); ++detectorIndex) {
 
     if (!detectorInfo.isMonitor(detectorIndex)) {
       const detid_t detid = detectorIds[detectorIndex];
@@ -148,20 +136,18 @@ TableWorkspace_sptr CreateLogTimeCorrection::generateCorrectionTable(
 //----------------------------------------------------------------------------------------------
 /** Write correction map to a text file
  */
-void CreateLogTimeCorrection::writeCorrectionToFile(
-    const string &filename, const Geometry::DetectorInfo &detectorInfo,
-    const std::vector<double> &corrections) const {
+void CreateLogTimeCorrection::writeCorrectionToFile(const string &filename, const Geometry::DetectorInfo &detectorInfo,
+                                                    const std::vector<double> &corrections) const {
   ofstream ofile;
   ofile.open(filename.c_str());
 
   if (ofile.is_open()) {
 
     const auto &detectorIds = detectorInfo.detectorIDs();
-    for (size_t detectorIndex = 0; detectorIndex < corrections.size();
-         ++detectorIndex) {
+    for (size_t detectorIndex = 0; detectorIndex < corrections.size(); ++detectorIndex) {
       if (!detectorInfo.isMonitor(detectorIndex)) {
-        ofile << detectorIds[detectorIndex] << "\t" << setw(20)
-              << setprecision(5) << corrections[detectorIndex] << "\n";
+        ofile << detectorIds[detectorIndex] << "\t" << setw(20) << setprecision(5) << corrections[detectorIndex]
+              << "\n";
       }
     }
     ofile.close();

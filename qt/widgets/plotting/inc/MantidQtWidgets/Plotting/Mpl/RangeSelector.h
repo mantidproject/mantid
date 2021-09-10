@@ -24,8 +24,7 @@ class EXPORT_OPT_MANTIDQT_PLOTTING RangeSelector : public QObject {
 public:
   enum SelectType { XMINMAX, YMINMAX };
 
-  RangeSelector(PreviewPlot *plot, SelectType type = XMINMAX,
-                bool visible = true, bool infoOnly = false,
+  RangeSelector(PreviewPlot *plot, SelectType type = XMINMAX, bool visible = true, bool infoOnly = false,
                 const QColor &colour = Qt::black);
 
   void setColour(const QColor &colour);

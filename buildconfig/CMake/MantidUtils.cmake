@@ -4,7 +4,7 @@
 #######################################################################
 
 # NAME: SET_TARGET_OUTPUT_DIRECTORY
-# Change the output directory of a library target. Handles the incorrect 
+# Change the output directory of a library target. Handles the incorrect
 # behaviour of MSVC
 #   Parameters:
 #      TARGET - The name of the target
@@ -22,22 +22,22 @@ function( SET_TARGET_OUTPUT_DIRECTORY TARGET OUTPUT_DIR )
         set ( LIB_EXT .dll )
       endif()
       set ( SRC_DIR ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} )
-      add_custom_command( TARGET ${TARGET} POST_BUILD 
+      add_custom_command( TARGET ${TARGET} POST_BUILD
                           COMMAND ${CMAKE_COMMAND} ARGS -E make_directory
                           ${OUTPUT_DIR} )
       add_custom_command ( TARGET ${TARGET} POST_BUILD
-                           COMMAND ${CMAKE_COMMAND} ARGS -E echo 
+                           COMMAND ${CMAKE_COMMAND} ARGS -E echo
                            "Copying \"$(TargetName)${LIB_EXT}\" to ${OUTPUT_DIR}/$(TargetName)${LIB_EXT}"
                            COMMAND ${CMAKE_COMMAND} ARGS -E copy
                            ${SRC_DIR}/$(TargetName)${LIB_EXT}
                            ${OUTPUT_DIR}/$(TargetName)${LIB_EXT} )
       # Clean up
       set ( LIB_EXT )
-      set ( SRC_DIR )    
+      set ( SRC_DIR )
   elseif(CMAKE_GENERATOR STREQUAL Xcode)
-      # Because at the moment Xcode does something similar to MSVC and creates 
-      # Debug/Release directory for the output libraries, we need to copy the 
-      # library up a level (usually) in order for it to be in the correct place 
+      # Because at the moment Xcode does something similar to MSVC and creates
+      # Debug/Release directory for the output libraries, we need to copy the
+      # library up a level (usually) in order for it to be in the correct place
       # for python to find it.
 
       # Lets get the location of the output for the given target
@@ -45,8 +45,8 @@ function( SET_TARGET_OUTPUT_DIRECTORY TARGET OUTPUT_DIR )
       add_custom_command( TARGET ${TARGET} POST_BUILD
                           COMMAND ${CMAKE_COMMAND} ARGS -E make_directory
                           ${OUTPUT_DIR})
-      add_custom_command (TARGET ${TARGET} POST_BUILD 
-                          COMMAND ${CMAKE_COMMAND} ARGS -E echo 
+      add_custom_command (TARGET ${TARGET} POST_BUILD
+                          COMMAND ${CMAKE_COMMAND} ARGS -E echo
                           "Copying \"$<TARGET_FILE:${TARGET}>\" to \"${OUTPUT_DIR}/\" "
                           COMMAND ${CMAKE_COMMAND} ARGS -E copy
                           $<TARGET_FILE:${TARGET}>

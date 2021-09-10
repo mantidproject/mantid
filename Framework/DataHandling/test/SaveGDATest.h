@@ -24,14 +24,10 @@ namespace { // helpers
 double computeAverageDeltaTByT(const std::vector<double> &TOF) {
   std::vector<double> deltaTByT;
   deltaTByT.reserve(TOF.size() - 1);
-  std::adjacent_difference(TOF.begin(), TOF.end(),
-                           std::back_inserter(deltaTByT),
-                           [](const double prev, const double curr) {
-                             return (prev - curr) / curr;
-                           });
+  std::adjacent_difference(TOF.begin(), TOF.end(), std::back_inserter(deltaTByT),
+                           [](const double prev, const double curr) { return (prev - curr) / curr; });
   deltaTByT.erase(deltaTByT.begin());
-  return std::accumulate(deltaTByT.begin(), deltaTByT.end(), 0.0) /
-         static_cast<double>(deltaTByT.size());
+  return std::accumulate(deltaTByT.begin(), deltaTByT.end(), 0.0) / static_cast<double>(deltaTByT.size());
 }
 
 } // anonymous namespace
@@ -51,8 +47,7 @@ public:
     const auto &paramsFilePath = m_paramsFile.path();
     std::ofstream paramsFile(paramsFilePath);
     if (!paramsFile) {
-      throw std::runtime_error("Could not create GSAS params file: " +
-                               paramsFilePath);
+      throw std::runtime_error("Could not create GSAS params file: " + paramsFilePath);
     }
     paramsFile << PARAMS_FILE_TEXT;
 
@@ -88,8 +83,7 @@ public:
 
     SaveGDA testAlg;
     testAlg.initialize();
-    TS_ASSERT_THROWS(testAlg.setProperty("InputWorkspace", "ws"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(testAlg.setProperty("InputWorkspace", "ws"), const std::invalid_argument &);
 
     ADS.remove("ws");
   }
@@ -105,8 +99,7 @@ public:
 
     Poco::TemporaryFile tempFile;
     const std::string &tempFileName = tempFile.path();
-    TS_ASSERT_THROWS_NOTHING(
-        testAlg.setProperty("OutputFilename", tempFileName));
+    TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("OutputFilename", tempFileName));
 
     TS_ASSERT_THROWS_ANYTHING(testAlg.execute());
   }
@@ -115,17 +108,13 @@ public:
     SaveGDA testAlg;
 
     testAlg.initialize();
-    TS_ASSERT_THROWS_NOTHING(
-        testAlg.setProperty("InputWorkspace", INPUT_GROUP_NAME));
-    TS_ASSERT_THROWS_NOTHING(
-        testAlg.setProperty("GSASParamFile", m_paramsFile.path()));
-    TS_ASSERT_THROWS_NOTHING(
-        testAlg.setProperty("GroupingScheme", std::vector<int>{1, 2}));
+    TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("InputWorkspace", INPUT_GROUP_NAME));
+    TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("GSASParamFile", m_paramsFile.path()));
+    TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("GroupingScheme", std::vector<int>{1, 2}));
 
     Poco::TemporaryFile tempFile;
     const std::string &tempFileName = tempFile.path();
-    TS_ASSERT_THROWS_NOTHING(
-        testAlg.setProperty("OutputFilename", tempFileName));
+    TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("OutputFilename", tempFileName));
 
     TS_ASSERT_THROWS_NOTHING(testAlg.execute());
     TS_ASSERT(testAlg.isExecuted());
@@ -153,8 +142,7 @@ public:
     std::getline(file, line);
     TS_ASSERT(boost::starts_with(line, "BANK 1"));
     std::vector<std::string> headerItems;
-    boost::split(headerItems, line, boost::is_any_of(" "),
-                 boost::token_compress_on);
+    boost::split(headerItems, line, boost::is_any_of(" "), boost::token_compress_on);
 
     int numPoints = 0;
     int numLines = 0;
@@ -162,8 +150,7 @@ public:
     while (std::getline(file, line) && !boost::starts_with(line, "BANK")) {
       std::vector<std::string> lineItems;
       boost::trim(line);
-      boost::split(lineItems, line, boost::is_any_of(" "),
-                   boost::token_compress_on);
+      boost::split(lineItems, line, boost::is_any_of(" "), boost::token_compress_on);
 
       // each point has 3 space-separated items on a line
       numPoints += static_cast<int>(lineItems.size()) / 3;
@@ -219,14 +206,11 @@ public:
     while (std::getline(file, line) && !boost::starts_with(line, "BANK")) {
       std::vector<std::string> lineItems;
       boost::trim(line);
-      boost::split(lineItems, line, boost::is_any_of(" "),
-                   boost::token_compress_on);
+      boost::split(lineItems, line, boost::is_any_of(" "), boost::token_compress_on);
       for (size_t i = 0; i < lineItems.size(); i += 3) {
         TS_ASSERT_THROWS_NOTHING(tof.emplace_back(std::stoi(lineItems[i])));
-        TS_ASSERT_THROWS_NOTHING(
-            intensity.emplace_back(std::stoi(lineItems[i + 1])));
-        TS_ASSERT_THROWS_NOTHING(
-            error.emplace_back(std::stoi(lineItems[i + 2])));
+        TS_ASSERT_THROWS_NOTHING(intensity.emplace_back(std::stoi(lineItems[i + 1])));
+        TS_ASSERT_THROWS_NOTHING(error.emplace_back(std::stoi(lineItems[i + 2])));
       }
     }
 
@@ -257,8 +241,7 @@ private:
 
   Poco::TemporaryFile m_paramsFile;
 
-  void createSampleWorkspace(const std::string &function,
-                             const std::string &outputWSName) const {
+  void createSampleWorkspace(const std::string &function, const std::string &outputWSName) const {
     auto &algorithmManager = API::AlgorithmManager::Instance();
     const auto createAlg = algorithmManager.create("CreateSampleWorkspace");
     createAlg->setProperty("Function", "User Defined");
@@ -278,10 +261,8 @@ private:
     extractAlg->execute();
   }
 
-  void groupWorkspaces(const std::vector<std::string> &workspaceNames,
-                       const std::string &outputWSName) const {
-    const auto groupAlg =
-        API::AlgorithmManager::Instance().create("GroupWorkspaces");
+  void groupWorkspaces(const std::vector<std::string> &workspaceNames, const std::string &outputWSName) const {
+    const auto groupAlg = API::AlgorithmManager::Instance().create("GroupWorkspaces");
     groupAlg->setProperty("InputWorkspaces", workspaceNames);
     groupAlg->setProperty("OutputWorkspace", outputWSName);
     groupAlg->execute();

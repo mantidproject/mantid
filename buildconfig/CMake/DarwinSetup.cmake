@@ -57,8 +57,16 @@ message(
 # headers
 set(CMAKE_INCLUDE_SYSTEM_FLAG_CXX "-isystem ")
 
-# Set Qt5 dir according to homebrew location
-set(Qt5_DIR /usr/local/opt/qt/lib/cmake/Qt5)
+# Guess at Qt5 dir according to homebrew locations, unless already specified
+if(NOT Qt5_DIR)
+  message(STATUS "No Qt5 directory specified, guessing in default Homebrew locations")
+  foreach(_qtdir /usr/local/opt/qt@5/lib/cmake/Qt5 /usr/local/opt/qt/lib/cmake/Qt5)
+    if(EXISTS ${_qtdir})
+      set(Qt5_DIR ${_qtdir})
+      break()
+    endif()
+  endforeach()
+endif()
 
 # Python flags
 set(PY_VER "${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}")
@@ -79,8 +87,7 @@ set(DL_ORIGIN_TAG @loader_path)
 
 # Generate a target to put a mantidpython wrapper in the appropriate directory
 if(NOT TARGET mantidpython)
-  # TODO path needs to be removed from appropriate scripts
-  set(PARAVIEW_PYTHON_PATHS "")
+  # TODO path needs to be removed from appropriate script
   configure_file(
     ${CMAKE_MODULE_PATH}/Packaging/osx/mantidpython.in
     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/mantidpython @ONLY
@@ -95,8 +102,6 @@ if(NOT TARGET mantidpython)
   )
   # Configure install script at the same time. Doing it later causes a warning
   # from ninja.
-  set(PARAVIEW_PYTHON_PATHS "")
-
   set(PYTHONHOME
       "\${INSTALLDIR}/Frameworks/Python.framework/Versions/${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}"
   )
@@ -119,9 +124,9 @@ set(PLUGINS_DIR plugins)
 # Mac-specific installation setup
 # ##############################################################################
 # use homebrew OpenSSL package
-if(NOT OPENSSL_ROOT_DIR)
-  set(OPENSSL_ROOT_DIR /usr/local/opt/openssl)
-endif(NOT OPENSSL_ROOT_DIR)
+if(NOT OpenSSL_ROOT)
+  set(OpenSSL_ROOT /usr/local/opt/openssl)
+endif()
 
 if(NOT HDF5_ROOT)
     set(HDF5_ROOT /usr/local/opt/hdf5) # Only for homebrew!

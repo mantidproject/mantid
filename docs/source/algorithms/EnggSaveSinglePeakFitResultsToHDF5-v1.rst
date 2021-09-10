@@ -62,7 +62,7 @@ we just mock one up here. See :ref:`EnggFitPeaks documentation
 
    for i in range(3):
        peaks.addRow([(i + 1.0) / (j + 1) for j in range(len(fit_param_headers))])
- 
+
    output_filename = os.path.join(config["defaultsave.directory"],
                                   "EnggSaveSinglePeakFitResultsToHDF5DocTest.hdf5")
 
@@ -76,7 +76,7 @@ we just mock one up here. See :ref:`EnggFitPeaks documentation
        print("Peaks dataset has {} rows, for our 3 peaks".format(len(peaks_dataset)))
        print("First peak is at D spacing {}".format(peaks_dataset[0]["dSpacing"]))
        print("Third peak X0 = {}".format(peaks_dataset[2]["X0"]))
-   
+
 .. testcleanup:: EnggSaveSinglePeakFitResultsToHDF5
 
    os.remove(output_filename)

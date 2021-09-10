@@ -18,12 +18,8 @@ class GramCharlierComptonProfileTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static GramCharlierComptonProfileTest *createSuite() {
-    return new GramCharlierComptonProfileTest();
-  }
-  static void destroySuite(GramCharlierComptonProfileTest *suite) {
-    delete suite;
-  }
+  static GramCharlierComptonProfileTest *createSuite() { return new GramCharlierComptonProfileTest(); }
+  static void destroySuite(GramCharlierComptonProfileTest *suite) { delete suite; }
 
   void test_Name_Is_As_Expected() {
     // These are used in scripts so should not change!
@@ -36,8 +32,7 @@ public:
     checkDefaultAttrsExist(*profile);
   }
 
-  void
-  test_Default_Initialized_Function_Has_Expected_Parameters_In_Right_Order() {
+  void test_Default_Initialized_Function_Has_Expected_Parameters_In_Right_Order() {
     Mantid::API::IFunction_sptr profile = createFunction();
     checkDefaultAttrsExist(*profile);
   }
@@ -53,18 +48,14 @@ public:
     TS_ASSERT_EQUALS(npars, profile->nParams());
 
     if (npars == profile->nParams()) {
-      TSM_ASSERT_THROWS_NOTHING("Function should have a C_0 parameter",
-                                profile->getParameter("C_0"));
-      TSM_ASSERT_THROWS("Function should not have a C_2 parameter",
-                        profile->getParameter("C_2"),
+      TSM_ASSERT_THROWS_NOTHING("Function should have a C_0 parameter", profile->getParameter("C_0"));
+      TSM_ASSERT_THROWS("Function should not have a C_2 parameter", profile->getParameter("C_2"),
                         const std::invalid_argument &);
-      TSM_ASSERT_THROWS_NOTHING("Function should have a C_4 parameter",
-                                profile->getParameter("C_4"));
+      TSM_ASSERT_THROWS_NOTHING("Function should have a C_4 parameter", profile->getParameter("C_4"));
     }
   }
 
-  void
-  test_Function_Returns_Same_Number_Intensity_Coefficents_As_Active_Hermite_Coefficients_If_KFSE_Is_Fixed() {
+  void test_Function_Returns_Same_Number_Intensity_Coefficents_As_Active_Hermite_Coefficients_If_KFSE_Is_Fixed() {
     std::shared_ptr<ComptonProfile> profile = createFunction();
     profile->setAttributeValue("HermiteCoeffs", "1 0 1"); // turn on C_0 & C_4
     profile->fix(profile->parameterIndex("FSECoeff"));
@@ -88,13 +79,12 @@ public:
     auto func = createFunctionWithParamsSet();
     double x0(165.0), x1(166.0),
         dx(0.5); // chosen to give put us near the peak for this mass & spectrum
-    auto testWS = ComptonProfileTestHelpers::createTestWorkspace(
-        1, x0, x1, dx, ComptonProfileTestHelpers::NoiseType::None);
+    auto testWS =
+        ComptonProfileTestHelpers::createTestWorkspace(1, x0, x1, dx, ComptonProfileTestHelpers::NoiseType::None);
     auto &dataX = testWS->dataX(0);
     using std::placeholders::_1;
-    std::transform(
-        dataX.begin(), dataX.end(), dataX.begin(),
-        std::bind(std::multiplies<double>(), _1, 1e-06)); // to seconds
+    std::transform(dataX.begin(), dataX.end(), dataX.begin(),
+                   std::bind(std::multiplies<double>(), _1, 1e-06)); // to seconds
     func->setMatrixWorkspace(testWS, 0, dataX.front(), dataX.back());
     FunctionDomain1DView domain(dataX.data(), dataX.size());
     FunctionValues values(domain);
@@ -137,15 +127,13 @@ private:
     // Test names as they are used in scripts
     if (nattrs <= profile.nAttributes()) {
       const char *attrAarr[nattrs] = {"HermiteCoeffs"};
-      std::unordered_set<std::string> expectedAttrs(attrAarr,
-                                                    attrAarr + nattrs);
+      std::unordered_set<std::string> expectedAttrs(attrAarr, attrAarr + nattrs);
       std::vector<std::string> actualNames = profile.getAttributeNames();
 
       for (size_t i = 0; i < nattrs; ++i) {
         const std::string &name = actualNames[i];
         size_t keyCount = expectedAttrs.count(name);
-        TSM_ASSERT_EQUALS("Attribute" + name + " was found but not expected.",
-                          1, keyCount);
+        TSM_ASSERT_EQUALS("Attribute" + name + " was found but not expected.", 1, keyCount);
       }
     }
   }

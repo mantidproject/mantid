@@ -21,11 +21,13 @@ add_definitions(-D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING)
 # Suppress warnings about std::iterator as a base. TBB emits this warning
 # and it is not yet fixed.
 add_definitions(-D_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING)
+add_definitions(-D_SILENCE_CXX17_SHARED_PTR_UNIQUE_DEPRECATION_WARNING)
 
 # ##############################################################################
 # Additional compiler flags
 # ##############################################################################
 # Replace "/" with "\" for use in command prompt
+if (NOT CONDA_BUILD)
 string(REGEX REPLACE "/" "\\\\" THIRD_PARTY_INCLUDE_DIR
                      "${THIRD_PARTY_DIR}/include/"
 )
@@ -34,9 +36,14 @@ string(REGEX REPLACE "/" "\\\\" THIRD_PARTY_LIB_DIR "${THIRD_PARTY_DIR}/lib/")
 # 3 (This is also the default) /external:I    - Ignore third party library
 # warnings (similar to "isystem" in GCC)
 set(CMAKE_CXX_FLAGS
+    "${CMAKE_CXX_FLAGS} /external:I ${THIRD_PARTY_INCLUDE_DIR} /external:I ${THIRD_PARTY_LIB_DIR}\\python${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}\\ "
+)
+endif()
+
+set(CMAKE_CXX_FLAGS
     "${CMAKE_CXX_FLAGS} \
   /MP /W3 \
-  /experimental:external /external:W0 /external:I ${THIRD_PARTY_INCLUDE_DIR} /external:I ${THIRD_PARTY_LIB_DIR}\\python${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}\\ "
+  /experimental:external /external:W0 "
 )
 
 # Set PCH heap limit, the default does not work when running msbuild from the
@@ -63,7 +70,10 @@ find_package (Threads)
 # ##############################################################################
 # Qt5 is always in the same place
 # ##############################################################################
+if (NOT CONDA_BUILD)
 set(Qt5_DIR ${THIRD_PARTY_DIR}/lib/qt5/lib/cmake/Qt5)
+endif()
+
 
 option(CONSOLE "Switch for enabling/disabling the console" ON)
 
@@ -76,10 +86,18 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 # Configure IDE/commandline startup scripts
 # ##############################################################################
 set(WINDOWS_BUILDCONFIG ${PROJECT_SOURCE_DIR}/buildconfig/windows)
+if (NOT CONDA_BUILD)
 configure_file(
   ${WINDOWS_BUILDCONFIG}/thirdpartypaths.bat.in
   ${PROJECT_BINARY_DIR}/thirdpartypaths.bat @ONLY
 )
+else()
+set(CONDA_BASE_DIR $ENV{CONDA_PREFIX})
+configure_file(
+  ${WINDOWS_BUILDCONFIG}/thirdpartypaths_conda.bat.in
+  ${PROJECT_BINARY_DIR}/thirdpartypaths.bat @ONLY
+)
+endif()
 
 if(MSVC_VERSION LESS 1911)
   get_filename_component(
@@ -98,11 +116,19 @@ else()
 endif()
 
 # Setup debugger environment to launch in VS without setting paths
+if (NOT CONDA_BUILD)
+  set(MSVC_PATHS "${THIRD_PARTY_DIR}/bin$<SEMICOLON>${THIRD_PARTY_DIR}/lib/qt5/bin$<SEMICOLON>%PATH%")
+else()
+  set(MSVC_PATHS "$ENV{CONDA_PREFIX}/Library/bin$<SEMICOLON>$ENV{CONDA_PREFIX}/Library/lib$<SEMICOLON>%PATH%")
+endif()
+
+file(TO_CMAKE_PATH ${MSVC_PATHS} MSVC_PATHS)
+
 set(MSVC_BIN_DIR ${PROJECT_BINARY_DIR}/bin/$<CONFIG>)
 set(MSVC_IDE_ENV "\
 PYTHONPATH=${MSVC_BIN_DIR}\n\
 PYTHONHOME=${MSVC_PYTHON_EXECUTABLE_DIR}\n\
-PATH=${THIRD_PARTY_DIR}/bin$<SEMICOLON>${THIRD_PARTY_DIR}/lib/qt5/bin$<SEMICOLON>%PATH%")
+PATH=${MSVC_PATHS}")
 
 configure_file(
   ${WINDOWS_BUILDCONFIG}/command-prompt.bat.in
@@ -114,14 +140,27 @@ configure_file(
 
 # The IDE may not be installed as we could be just using the build tools
 if(EXISTS ${MSVC_IDE_LOCATION}/devenv.exe)
+  if (CONDA_BUILD)
+  configure_file(
+    ${WINDOWS_BUILDCONFIG}/visual-studio_conda.bat.in
+    ${PROJECT_BINARY_DIR}/visual-studio.bat @ONLY
+  )
+  else()
   configure_file(
     ${WINDOWS_BUILDCONFIG}/visual-studio.bat.in
     ${PROJECT_BINARY_DIR}/visual-studio.bat @ONLY
   )
+  endif()
 endif()
+if (CONDA_BUILD)
+configure_file(
+  ${WINDOWS_BUILDCONFIG}/pycharm_conda.bat.in ${PROJECT_BINARY_DIR}/pycharm.bat @ONLY
+)
+else()
 configure_file(
   ${WINDOWS_BUILDCONFIG}/pycharm.bat.in ${PROJECT_BINARY_DIR}/pycharm.bat @ONLY
 )
+endif()
 
 # ##############################################################################
 # Configure Mantid startup scripts
@@ -129,10 +168,8 @@ configure_file(
 set(PACKAGING_DIR ${PROJECT_SOURCE_DIR}/buildconfig/CMake/Packaging)
 # build version
 set(MANTIDPYTHON_PREAMBLE
-    "set PYTHONHOME=${MSVC_PYTHON_EXECUTABLE_DIR}\nset PATH=%_BIN_DIR%;%_BIN_DIR%\\PVPlugins\\PVPlugins;%PATH%"
+    "set PYTHONHOME=${MSVC_PYTHON_EXECUTABLE_DIR}\nset PATH=%_BIN_DIR%;%PATH%"
 )
-
-set(PARAVIEW_PYTHON_PATHS "")
 
 configure_file(
   ${PACKAGING_DIR}/mantidpython.bat.in
@@ -146,10 +183,8 @@ file(
 )
 # install version
 set(MANTIDPYTHON_PREAMBLE
-    "set PYTHONHOME=%_BIN_DIR%\nset PATH=%_BIN_DIR%;%_BIN_DIR%\\..\\plugins;%_BIN_DIR%\\..\\PVPlugins;%PATH%"
+    "set PYTHONHOME=%_BIN_DIR%\nset PATH=%_BIN_DIR%;%_BIN_DIR%\\..\\plugins;%PATH%"
 )
-
-set(PARAVIEW_PYTHON_PATHS "")
 
 configure_file(
   ${PACKAGING_DIR}/mantidpython.bat.in
@@ -185,8 +220,3 @@ set(WORKBENCH_BIN_DIR ${BIN_DIR})
 set(WORKBENCH_LIB_DIR ${LIB_DIR})
 set(WORKBENCH_SITE_PACKAGES ${LIB_DIR})
 set(WORKBENCH_PLUGINS_DIR ${PLUGINS_DIR})
-
-# Separate directory of plugins to be discovered by the ParaView framework These
-# cannot be mixed with our other plugins. Further sub-directories based on the
-# Qt version will also be created by the installation targets
-set(PVPLUGINS_SUBDIR paraview) # Need to tidy these things up!

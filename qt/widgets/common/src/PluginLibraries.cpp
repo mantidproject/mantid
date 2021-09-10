@@ -32,8 +32,7 @@ std::string qtPluginPathFromCfg(const std::string &key) {
     qtMajorVersion = std::string(QT_VERSION_STR, 0, 1);
   }
   using Mantid::Kernel::Strings::replace;
-  return replace(ConfigService::Instance().getString(key), qtTag,
-                 qtMajorVersion);
+  return replace(ConfigService::Instance().getString(key), qtTag, qtMajorVersion);
 }
 
 /**
@@ -42,9 +41,7 @@ std::string qtPluginPathFromCfg(const std::string &key) {
  * %V to specify the Qt version
  * @return The number of libraries successfully loaded
  */
-int loadPluginsFromCfgPath(const std::string &key) {
-  return loadPluginsFromPath(qtPluginPathFromCfg(std::move(key)));
-}
+int loadPluginsFromCfgPath(const std::string &key) { return loadPluginsFromPath(qtPluginPathFromCfg(std::move(key))); }
 
 /**
  * Load all plugins from the path specified.
@@ -58,8 +55,7 @@ int loadPluginsFromPath(const std::string &path) {
 #else
   static std::vector<std::string> excludes{"Qt4"};
 #endif
-  return LibraryManager::Instance().openLibraries(
-      path, LibraryManagerImpl::NonRecursive, excludes);
+  return LibraryManager::Instance().openLibraries(path, LibraryManagerImpl::NonRecursive, excludes);
 }
 } // namespace API
 } // namespace MantidQt

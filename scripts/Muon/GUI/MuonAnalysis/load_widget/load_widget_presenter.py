@@ -150,7 +150,6 @@ class LoadWidgetPresenter(object):
             self.outer = outer
 
         def update(self, observable, arg):
-            print("update called : ", arg)
             self.outer.update_new_instrument(arg)
 
     class EnableObserver(Observer):

@@ -24,5 +24,5 @@ This uses the three algorithms:
 The workspaces are saved into the directory specified using the following naming scheme:
 
 * If a filename is input and one workspace is selected to be saved this name will be used.
-* If a filename is input and multiple workspaces are selected the filename will be appended to the workspace name. 
+* If a filename is input and multiple workspaces are selected the filename will be appended to the workspace name.
 * If no filename is input the workspaces will be saved out using the names they have in Mantid.

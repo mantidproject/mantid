@@ -23,13 +23,10 @@ namespace Algorithms {
  * @param width Width of beam
  * @param height Height of beam
  */
-RectangularBeamProfile::RectangularBeamProfile(
-    const Geometry::ReferenceFrame &frame, const Kernel::V3D &center,
-    double width, double height)
-    : IBeamProfile(), m_upIdx(frame.pointingUp()),
-      m_beamIdx(frame.pointingAlongBeam()),
-      m_horIdx(frame.pointingHorizontal()), m_width(width), m_height(height),
-      m_min(), m_beamDir() {
+RectangularBeamProfile::RectangularBeamProfile(const Geometry::ReferenceFrame &frame, const Kernel::V3D &center,
+                                               double width, double height)
+    : IBeamProfile(), m_upIdx(frame.pointingUp()), m_beamIdx(frame.pointingAlongBeam()),
+      m_horIdx(frame.pointingHorizontal()), m_width(width), m_height(height), m_min(), m_beamDir() {
   m_min[m_upIdx] = center[m_upIdx] - 0.5 * height;
   m_min[m_horIdx] = center[m_horIdx] - 0.5 * width;
   m_min[m_beamIdx] = center[m_beamIdx];
@@ -42,8 +39,7 @@ RectangularBeamProfile::RectangularBeamProfile(
  * @param rng A reference to a random number generator
  * @return An IBeamProfile::Ray describing the start and direction
  */
-IBeamProfile::Ray RectangularBeamProfile::generatePoint(
-    Kernel::PseudoRandomNumberGenerator &rng) const {
+IBeamProfile::Ray RectangularBeamProfile::generatePoint(Kernel::PseudoRandomNumberGenerator &rng) const {
   V3D pt;
   pt[m_upIdx] = m_min[m_upIdx] + rng.nextValue() * m_height;
   pt[m_horIdx] = m_min[m_horIdx] + rng.nextValue() * m_width;
@@ -60,9 +56,8 @@ IBeamProfile::Ray RectangularBeamProfile::generatePoint(
  * allowed region for the generated point.
  * @return An IBeamProfile::Ray describing the start and direction
  */
-IBeamProfile::Ray RectangularBeamProfile::generatePoint(
-    Kernel::PseudoRandomNumberGenerator &rng,
-    const Geometry::BoundingBox &bounds) const {
+IBeamProfile::Ray RectangularBeamProfile::generatePoint(Kernel::PseudoRandomNumberGenerator &rng,
+                                                        const Geometry::BoundingBox &bounds) const {
   auto rngRay = generatePoint(rng);
   auto &rngPt = rngRay.startPos;
   const V3D minBound(bounds.minPoint()), maxBound(bounds.maxPoint());
@@ -83,8 +78,7 @@ IBeamProfile::Ray RectangularBeamProfile::generatePoint(
  * @param sampleBox A reference to the bounding box of the sample
  * @return A BoundingBox defining the active region
  */
-Geometry::BoundingBox RectangularBeamProfile::defineActiveRegion(
-    const Geometry::BoundingBox &sampleBox) const {
+Geometry::BoundingBox RectangularBeamProfile::defineActiveRegion(const Geometry::BoundingBox &sampleBox) const {
   // In the beam direction use the maximum sample extent other wise restrict
   // the active region to the width/height of beam
   const auto &sampleMin(sampleBox.minPoint());
@@ -97,8 +91,7 @@ Geometry::BoundingBox RectangularBeamProfile::defineActiveRegion(
   minPoint[m_beamIdx] = sampleMin[m_beamIdx];
   maxPoint[m_beamIdx] = sampleMax[m_beamIdx];
 
-  return Geometry::BoundingBox(maxPoint.X(), maxPoint.Y(), maxPoint.Z(),
-                               minPoint.X(), minPoint.Y(), minPoint.Z());
+  return Geometry::BoundingBox(maxPoint.X(), maxPoint.Y(), maxPoint.Z(), minPoint.X(), minPoint.Y(), minPoint.Z());
 }
 
 } // namespace Algorithms

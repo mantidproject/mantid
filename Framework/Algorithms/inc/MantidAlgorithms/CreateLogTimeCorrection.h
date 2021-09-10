@@ -38,12 +38,8 @@ public:
   }
 
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"ChangePulsetime", "ShiftLogTime"};
-  }
-  const std::string category() const override {
-    return "Events\\EventFiltering";
-  }
+  const std::vector<std::string> seeAlso() const override { return {"ChangePulsetime", "ShiftLogTime"}; }
+  const std::string category() const override { return "Events\\EventFiltering"; }
 
 private:
   /// Implement abstract Algorithm methods
@@ -56,17 +52,14 @@ private:
 
   /// Calculate the log time correction for each pixel, i.e., correcton from
   /// event time at detector to time at sample
-  std::vector<double>
-  calculateCorrections(const Geometry::DetectorInfo &detectorInfo) const;
+  std::vector<double> calculateCorrections(const Geometry::DetectorInfo &detectorInfo) const;
 
   /// Write L2 map and correction map to a TableWorkspace
-  DataObjects::TableWorkspace_sptr
-  generateCorrectionTable(const Geometry::DetectorInfo &detectorInfo,
-                          const std::vector<double> &corrections) const;
+  DataObjects::TableWorkspace_sptr generateCorrectionTable(const Geometry::DetectorInfo &detectorInfo,
+                                                           const std::vector<double> &corrections) const;
 
   /// Write correction map to a text file
-  void writeCorrectionToFile(const std::string &filename,
-                             const Geometry::DetectorInfo &detectorInfo,
+  void writeCorrectionToFile(const std::string &filename, const Geometry::DetectorInfo &detectorInfo,
                              const std::vector<double> &corrections) const;
 };
 

@@ -25,9 +25,7 @@ class ConvertEmptyToTofTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ConvertEmptyToTofTest *createSuite() {
-    return new ConvertEmptyToTofTest();
-  }
+  static ConvertEmptyToTofTest *createSuite() { return new ConvertEmptyToTofTest(); }
   static void destroySuite(ConvertEmptyToTofTest *suite) { delete suite; }
 
   ConvertEmptyToTofTest() { FrameworkManager::Instance(); }
@@ -50,17 +48,13 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", inWSName));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ListOfSpectraIndices", "5"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("ListOfChannelIndices", "40-60"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ListOfChannelIndices", "40-60"));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
-    auto outWS =
-        AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(
-            outWSName);
+    auto outWS = AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(outWSName);
 
     TS_ASSERT(outWS);
     if (!outWS)
@@ -90,18 +84,13 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", inWSName));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("ListOfSpectraIndices", "5,6"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("ListOfChannelIndices", "40-60"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ListOfSpectraIndices", "5,6"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ListOfChannelIndices", "40-60"));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
-    auto outWS =
-        AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(
-            outWSName);
+    auto outWS = AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(outWSName);
 
     TS_ASSERT(outWS);
     if (!outWS)
@@ -127,18 +116,14 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", inWSName));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
 
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("ElasticPeakPositionSpectrum", "5"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ElasticPeakPositionSpectrum", "5"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ElasticPeakPosition", "50"));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
-    auto outWS =
-        AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(
-            outWSName);
+    auto outWS = AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(outWSName);
 
     TS_ASSERT(outWS);
     if (!outWS)
@@ -162,9 +147,8 @@ private:
     // create test ws
     const size_t nHist = 10;  // or testWS->getNumberHistograms();
     const size_t nBins = 101; // or testWS->blocksize();
-    DataObjects::Workspace2D_sptr testWS =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-            nHist, nBins, false, false, true, std::string("testInstEmpty"));
+    DataObjects::Workspace2D_sptr testWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+        nHist, nBins, false, false, true, std::string("testInstEmpty"));
     testWS->getAxis(0)->setUnit("Empty");
     API::Run &run = testWS->mutableRun();
     run.addProperty<double>("wavelength", 5.0, true);     // overwrite
@@ -173,9 +157,7 @@ private:
     for (size_t i = 0; i < nHist; ++i) {
       for (size_t j = 0; j < nBins - 1; ++j) {
         // gaussian peak centred at 50,and h=10
-        testWS->mutableY(i)[j] =
-            10 *
-            exp(-pow((static_cast<double>(j) - 50), 2) / (2 * pow(1.5, 2)));
+        testWS->mutableY(i)[j] = 10 * exp(-pow((static_cast<double>(j) - 50), 2) / (2 * pow(1.5, 2)));
       }
     }
     return testWS;

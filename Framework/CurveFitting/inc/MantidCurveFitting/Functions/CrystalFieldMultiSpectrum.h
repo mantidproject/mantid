@@ -17,8 +17,7 @@ namespace Functions {
 /**
 Calculates crystal field spectra.
 */
-class MANTID_CURVEFITTING_DLL CrystalFieldMultiSpectrum
-    : public API::FunctionGenerator {
+class MANTID_CURVEFITTING_DLL CrystalFieldMultiSpectrum : public API::FunctionGenerator {
 public:
   CrystalFieldMultiSpectrum();
 
@@ -41,23 +40,15 @@ protected:
 
 private:
   /// Build a function for a single spectrum.
-  API::IFunction_sptr buildSpectrum(int nre, const DoubleFortranVector &en,
-                                    const ComplexFortranMatrix &wf,
-                                    double temperature, double fwhm,
-                                    size_t i) const;
-  API::IFunction_sptr buildPhysprop(int nre, const DoubleFortranVector &en,
-                                    const ComplexFortranMatrix &wf,
-                                    const ComplexFortranMatrix &ham,
-                                    double temperature, size_t iSpec) const;
+  API::IFunction_sptr buildSpectrum(int nre, const DoubleFortranVector &en, const ComplexFortranMatrix &wf,
+                                    double temperature, double fwhm, size_t i) const;
+  API::IFunction_sptr buildPhysprop(int nre, const DoubleFortranVector &en, const ComplexFortranMatrix &wf,
+                                    const ComplexFortranMatrix &ham, double temperature, size_t iSpec) const;
   /// Update a function for a single spectrum.
-  void updateSpectrum(API::IFunction &spectrum, int nre,
-                      const DoubleFortranVector &en,
-                      const ComplexFortranMatrix &wf,
-                      const ComplexFortranMatrix &ham, double temperature,
-                      double fwhm, size_t i) const;
+  void updateSpectrum(API::IFunction &spectrum, int nre, const DoubleFortranVector &en, const ComplexFortranMatrix &wf,
+                      const ComplexFortranMatrix &ham, double temperature, double fwhm, size_t i) const;
   /// Calculate excitations at given temperature
-  void calcExcitations(int nre, const DoubleFortranVector &en,
-                       const ComplexFortranMatrix &wf, double temperature,
+  void calcExcitations(int nre, const DoubleFortranVector &en, const ComplexFortranMatrix &wf, double temperature,
                        API::FunctionValues &values, size_t iSpec) const;
   /// Cache number of fitted peaks
   mutable std::vector<size_t> m_nPeaks;

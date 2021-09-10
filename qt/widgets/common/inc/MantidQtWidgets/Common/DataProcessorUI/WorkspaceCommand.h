@@ -19,8 +19,7 @@ class WorkspaceCommand : public CommandBase {
 public:
   WorkspaceCommand(DataProcessorPresenter *tablePresenter, const QString &name)
       : CommandBase(tablePresenter), m_name(name){};
-  WorkspaceCommand(const QDataProcessorWidget &widget, const QString &name)
-      : CommandBase(widget), m_name(name){};
+  WorkspaceCommand(const QDataProcessorWidget &widget, const QString &name) : CommandBase(widget), m_name(name){};
   virtual ~WorkspaceCommand(){};
 
   void execute() override {

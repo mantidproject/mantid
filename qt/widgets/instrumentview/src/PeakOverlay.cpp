@@ -7,6 +7,7 @@
 #include "MantidQtWidgets/InstrumentView/PeakOverlay.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidDataObjects/Peak.h"
 #include "MantidQtWidgets/InstrumentView/UnwrappedSurface.h"
 
 #include <QList>
@@ -14,6 +15,10 @@
 #include <algorithm>
 #include <cmath>
 #include <stdexcept>
+
+namespace {
+Mantid::Kernel::Logger g_log("PeakOverlay");
+}
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -243,7 +248,14 @@ void PeakOverlay::createMarkers(const PeakMarker2D::Style &style) {
   this->clear();
   for (int i = 0; i < nPeaks; ++i) {
     Mantid::Geometry::IPeak &peak = getPeak(i);
-    const Mantid::Kernel::V3D &pos = peak.getDetPos();
+    Mantid::Kernel::V3D pos;
+    try {
+      auto peakFull = dynamic_cast<Mantid::DataObjects::Peak &>(peak);
+      pos = peakFull.getDetPos();
+    } catch (std::bad_cast &) {
+      g_log.error("Cannot create markers for this type of peak");
+      return;
+    }
     // Project the peak (detector) position onto u,v coords
     double u, v, uscale, vscale;
     m_surface->project(pos, u, v, uscale, vscale);

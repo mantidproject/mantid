@@ -59,19 +59,15 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FilenameData", filename));
     std::string metadataFilename = getMetadataFile();
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("FilenameMetaData", metadataFilename));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "Output_ws_name"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FilenameMetaData", metadataFilename));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "Output_ws_name"));
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
-    Mantid::DataObjects::EventWorkspace_sptr outputWS =
-        alg.getProperty("OutputWorkspace");
+    Mantid::DataObjects::EventWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
 
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 16384);
     TS_ASSERT_EQUALS(outputWS->getNumberEvents(), 2505292);
-    TS_ASSERT_EQUALS(
-        outputWS->run().getPropertyValueAsType<double>("wavelength"), 3.5);
+    TS_ASSERT_EQUALS(outputWS->run().getPropertyValueAsType<double>("wavelength"), 3.5);
   }
 };

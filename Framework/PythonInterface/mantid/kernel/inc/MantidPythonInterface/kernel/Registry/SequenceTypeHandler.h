@@ -16,19 +16,15 @@ namespace Registry {
  * value into a C++ sequence/array property. The template type ContainerType
  * should contain a type called value_type indicating the element type.
  */
-template <typename ContainerType>
-struct DLLExport SequenceTypeHandler
-    : TypedPropertyValueHandler<ContainerType> {
+template <typename ContainerType> struct DLLExport SequenceTypeHandler : TypedPropertyValueHandler<ContainerType> {
 
   /// Call to set a named property where the value is some container type
-  void set(Kernel::IPropertyManager *alg, const std::string &name,
-           const boost::python::object &value) const override;
+  void set(Kernel::IPropertyManager *alg, const std::string &name, const boost::python::object &value) const override;
 
   /// Call to create a name property where the value is some container type
-  std::unique_ptr<Kernel::Property>
-  create(const std::string &name, const boost::python::object &defaultValue,
-         const boost::python::object &validator,
-         const unsigned int direction) const override;
+  std::unique_ptr<Kernel::Property> create(const std::string &name, const boost::python::object &defaultValue,
+                                           const boost::python::object &validator,
+                                           const unsigned int direction) const override;
 };
 } // namespace Registry
 } // namespace PythonInterface

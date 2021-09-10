@@ -17,7 +17,7 @@ The ``interface`` Directive
 
 This directive allows you to insert a screenshot of the interface into the documentation. It has one required argument: the name of the interface, as given by the interface's ``name()`` method. Several options, detailed below, may also be provided to further control the behaviour of this directive.
 
-The inserted screenshots are generated automatically when the documentation is being compiled. This is preferable to screenshots taken manually as these will automatically stay up to date. 
+The inserted screenshots are generated automatically when the documentation is being compiled. This is preferable to screenshots taken manually as these will automatically stay up to date.
 
 Options
 -------

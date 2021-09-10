@@ -27,12 +27,9 @@ public:
   ComplexOpTest() : Algorithm() {}
   ~ComplexOpTest() override {}
   void init() override {
-    declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-        "InputWorkspace_1", "", Direction::Input));
-    declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-        "InputWorkspace_2", "", Direction::Input));
-    declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-        "OutputWorkspace", "", Direction::Output));
+    declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace_1", "", Direction::Input));
+    declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace_2", "", Direction::Input));
+    declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output));
   }
   void exec() override {
     MatrixWorkspace_sptr in_work1 = getProperty("InputWorkspace_1");
@@ -51,10 +48,8 @@ public:
   void testChainedOperator() {
     int nHist = 10, nBins = 20;
     // Register the workspace in the data service
-    MatrixWorkspace_sptr work_in1 =
-        WorkspaceCreationHelper::create2DWorkspace123(nHist, nBins);
-    MatrixWorkspace_sptr work_in2 =
-        WorkspaceCreationHelper::create2DWorkspace154(nHist, nBins);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::create2DWorkspace123(nHist, nBins);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::create2DWorkspace154(nHist, nBins);
 
     performTest(work_in1, work_in2);
   }
@@ -62,16 +57,13 @@ public:
   void testChainedOperatorEventWS() {
     int nHist = 10, nBins = 20;
     // Register the workspace in the data service
-    MatrixWorkspace_sptr work_in1 =
-        WorkspaceCreationHelper::createEventWorkspace(nHist, nBins);
-    MatrixWorkspace_sptr work_in2 =
-        WorkspaceCreationHelper::createEventWorkspace(nHist, nBins);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::createEventWorkspace(nHist, nBins);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::createEventWorkspace(nHist, nBins);
 
     performTest(work_in1, work_in2);
   }
 
-  void performTest(const MatrixWorkspace_sptr &work_in1,
-                   const MatrixWorkspace_sptr &work_in2) {
+  void performTest(const MatrixWorkspace_sptr &work_in1, const MatrixWorkspace_sptr &work_in2) {
     ComplexOpTest alg;
 
     std::string wsNameIn1 = "testChainedOperator_in21";
@@ -86,9 +78,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
     MatrixWorkspace_sptr work_out1;
-    TS_ASSERT_THROWS_NOTHING(
-        work_out1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            wsNameOut));
+    TS_ASSERT_THROWS_NOTHING(work_out1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsNameOut));
 
     checkData(work_in1, work_in2, work_out1);
 
@@ -98,8 +88,7 @@ public:
   }
 
 private:
-  void checkData(const MatrixWorkspace_sptr &work_in1,
-                 const MatrixWorkspace_sptr &work_in2,
+  void checkData(const MatrixWorkspace_sptr &work_in1, const MatrixWorkspace_sptr &work_in2,
                  const MatrixWorkspace_sptr &work_out1) {
     size_t ws2LoopCount = 0;
     if (work_in2->size() > 0) {
@@ -112,16 +101,11 @@ private:
     }
   }
 
-  void checkDataItem(const MatrixWorkspace_sptr &work_in1,
-                     const MatrixWorkspace_sptr &work_in2,
-                     const MatrixWorkspace_sptr &work_out1, size_t i,
-                     size_t ws2Index) {
-    double sig1 =
-        work_in1->readY(i / work_in1->blocksize())[i % work_in1->blocksize()];
-    double sig2 = work_in2->readY(
-        ws2Index / work_in1->blocksize())[ws2Index % work_in1->blocksize()];
-    double sig3 =
-        work_out1->readY(i / work_in1->blocksize())[i % work_in1->blocksize()];
+  void checkDataItem(const MatrixWorkspace_sptr &work_in1, const MatrixWorkspace_sptr &work_in2,
+                     const MatrixWorkspace_sptr &work_out1, size_t i, size_t ws2Index) {
+    double sig1 = work_in1->readY(i / work_in1->blocksize())[i % work_in1->blocksize()];
+    double sig2 = work_in2->readY(ws2Index / work_in1->blocksize())[ws2Index % work_in1->blocksize()];
+    double sig3 = work_out1->readY(i / work_in1->blocksize())[i % work_in1->blocksize()];
     TS_ASSERT_DELTA((sig1 + sig2) / 3 + 5, sig3, 0.0001);
     // Note err calculation not checked due to complexity.
   }

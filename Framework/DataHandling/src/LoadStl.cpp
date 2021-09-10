@@ -13,8 +13,7 @@
 namespace Mantid {
 namespace DataHandling {
 
-bool LoadStl::areEqualVertices(Kernel::V3D const &v1,
-                               Kernel::V3D const &v2) const {
+bool LoadStl::areEqualVertices(Kernel::V3D const &v1, Kernel::V3D const &v2) const {
   const Kernel::V3D diff = v1 - v2;
   const double nanoMetre = 1e-9;
   return diff.norm() < nanoMetre; // This is 1 nanometre for a unit of a metre.

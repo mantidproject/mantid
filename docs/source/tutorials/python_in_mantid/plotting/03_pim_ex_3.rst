@@ -51,7 +51,7 @@ C - 2D and 3D Plot ILL Data
 #. Overlay contour lines on the second subplot (axes[1]), colored white and with alpha = 0.5
 #. Set the title to 'Colorfill' for axes[0] and 'Contour' for axes[1]
 #. Add a colorbar to this figure
-#. Set the colorbar label to 'Counts ($\mu s$)$^{-1}$' 
+#. Set the colorbar label to 'Counts ($\mu s$)$^{-1}$'
 
 #. Get another figure and axes for subplots with ncols=2, nrows=1, using the mantid3d projection and also set figsize = (8,3)
 #. Add a Surface and Wireframe plot to the subplot axes respectively (indexed as axes[0] and axes[1])

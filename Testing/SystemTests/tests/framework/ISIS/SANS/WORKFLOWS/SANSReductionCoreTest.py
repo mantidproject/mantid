@@ -82,10 +82,10 @@ class SANSReductionCoreTest(unittest.TestCase):
         reduction_core_alg.setProperty("Component", detector_type.value)
         reduction_core_alg.setProperty("DataType", component.value)
 
-        reduction_core_alg.setProperty("OutputWorkspace", EMPTY_NAME)
+        reduction_core_alg.setProperty("OutputWorkspaces", EMPTY_NAME)
 
-        reduction_core_alg.setProperty("CalculatedTransmissionWorkspace", EMPTY_NAME)
-        reduction_core_alg.setProperty("UnfittedTransmissionWorkspace", EMPTY_NAME)
+        reduction_core_alg.setProperty("CalculatedTransmissionWorkspaces", EMPTY_NAME)
+        reduction_core_alg.setProperty("UnfittedTransmissionWorkspaces", EMPTY_NAME)
 
         # Act
         reduction_core_alg.execute()
@@ -169,9 +169,9 @@ class SANSReductionCoreTest(unittest.TestCase):
         # Act
         reduction_core_alg = self._run_reduction_core(state, workspace, workspace_monitor,
                                                       transmission_workspace, direct_workspace)
-        output_workspace = reduction_core_alg.getProperty("OutputWorkspace").value
-        calculated_transmission = reduction_core_alg.getProperty("CalculatedTransmissionWorkspace").value
-        unfitted_transmission = reduction_core_alg.getProperty("UnfittedTransmissionWorkspace").value
+        output_workspace = reduction_core_alg.getProperty("OutputWorkspaces").value
+        calculated_transmission = reduction_core_alg.getProperty("CalculatedTransmissionWorkspaces").value
+        unfitted_transmission = reduction_core_alg.getProperty("UnfittedTransmissionWorkspaces").value
 
         # Evaluate it up to a defined point
         reference_file_name = "SANS2D_ws_D20_reference.nxs"
@@ -212,7 +212,7 @@ class SANSReductionCoreTest(unittest.TestCase):
         # Act
         reduction_core_alg = self._run_reduction_core(state, workspace, workspace_monitor,
                                                       transmission_workspace, direct_workspace)
-        compatibility_output_workspace = reduction_core_alg.getProperty("OutputWorkspace").value
+        compatibility_output_workspace = reduction_core_alg.getProperty("OutputWorkspaces").value
 
         ################################################################################################################
         # Non-compatibility mode
@@ -230,14 +230,14 @@ class SANSReductionCoreTest(unittest.TestCase):
         # Act
         reduction_core_alg = self._run_reduction_core(state, workspace, workspace_monitor,
                                                       transmission_workspace, direct_workspace)
-        non_compatibility_output_workspace = reduction_core_alg.getProperty("OutputWorkspace").value
+        non_compatibility_output_workspace = reduction_core_alg.getProperty("OutputWorkspaces").value
 
         ################################################################################################################
         # Compare workspaces
         ################################################################################################################
         compare_name = "CompareWorkspaces"
-        compare_options = {"Workspace1": non_compatibility_output_workspace,
-                           "Workspace2": compatibility_output_workspace,
+        compare_options = {"Workspace1": non_compatibility_output_workspace.getItem(0),
+                           "Workspace2": compatibility_output_workspace.getItem(0),
                            "Tolerance": 1,
                            "CheckInstrument": False,
                            "CheckSample": False,

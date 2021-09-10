@@ -48,8 +48,7 @@ std::vector<double> getVertices(const std::vector<Kernel::V3D> &vertices) {
  * This duplicates code in CSGOjbect both need a place to be merged.
  * To aid this, this function has been defined as a non-member.
  */
-double getTriangleSolidAngle(const Kernel::V3D &a, const Kernel::V3D &b,
-                             const Kernel::V3D &c,
+double getTriangleSolidAngle(const Kernel::V3D &a, const Kernel::V3D &b, const Kernel::V3D &c,
                              const Kernel::V3D &observer) {
   const Kernel::V3D ao = a - observer;
   const Kernel::V3D bo = b - observer;
@@ -61,8 +60,7 @@ double getTriangleSolidAngle(const Kernel::V3D &a, const Kernel::V3D &b,
   const double aoco = ao.scalar_prod(co);
   const double boco = bo.scalar_prod(co);
   const double scalTripProd = ao.scalar_prod(bo.cross_prod(co));
-  const double denom =
-      modao * modbo * modco + modco * aobo + modbo * aoco + modao * boco;
+  const double denom = modao * modbo * modco + modco * aobo + modbo * aoco + modao * boco;
   if (denom != 0.0)
     return 2.0 * atan2(scalTripProd, denom);
   else
@@ -77,8 +75,7 @@ double getTriangleSolidAngle(const Kernel::V3D &a, const Kernel::V3D &b,
  * @param v3 : thrid vertex of triangle
  * @return True only point if is on triangle
  */
-bool isOnTriangle(const Kernel::V3D &point, const Kernel::V3D &v1,
-                  const Kernel::V3D &v2, const Kernel::V3D &v3) {
+bool isOnTriangle(const Kernel::V3D &point, const Kernel::V3D &v1, const Kernel::V3D &v2, const Kernel::V3D &v3) {
 
   // p = w*p0 + u*p1 + v*p2, where numbered p refers to vertices of triangle
   // w+u+v == 1, so w = 1-u-v
@@ -133,10 +130,8 @@ bool isOnTriangle(const Kernel::V3D &point, const Kernel::V3D &v1,
  * intersection
  * @returns true if there is an intersection
  */
-bool rayIntersectsTriangle(const Kernel::V3D &start,
-                           const Kernel::V3D &direction, const Kernel::V3D &v1,
-                           const Kernel::V3D &v2, const Kernel::V3D &v3,
-                           Kernel::V3D &intersection,
+bool rayIntersectsTriangle(const Kernel::V3D &start, const Kernel::V3D &direction, const Kernel::V3D &v1,
+                           const Kernel::V3D &v2, const Kernel::V3D &v3, Kernel::V3D &intersection,
                            TrackDirection &entryExit) {
   // Implements Moller Trumbore intersection algorithm
 
@@ -201,9 +196,8 @@ bool rayIntersectsTriangle(const Kernel::V3D &start,
 
 void checkVertexLimit(size_t nVertices) {
   if (nVertices >= std::numeric_limits<uint32_t>::max()) {
-    throw std::invalid_argument(
-        "Too many vertices (" + std::to_string(nVertices) +
-        "). MeshObject cannot have more than 2^32 vertices.");
+    throw std::invalid_argument("Too many vertices (" + std::to_string(nVertices) +
+                                "). MeshObject cannot have more than 2^32 vertices.");
   }
 }
 
@@ -213,8 +207,7 @@ void checkVertexLimit(size_t nVertices) {
  * @param vertices :: vertices to create BB from
  * @param cacheBB :: mutable BB object to write to.
  */
-const BoundingBox &getBoundingBox(const std::vector<Kernel::V3D> &vertices,
-                                  BoundingBox &cacheBB) {
+const BoundingBox &getBoundingBox(const std::vector<Kernel::V3D> &vertices, BoundingBox &cacheBB) {
 
   if (cacheBB.isNull()) {
     static const double MinThickness = 0.001;
@@ -262,8 +255,7 @@ const BoundingBox &getBoundingBox(const std::vector<Kernel::V3D> &vertices,
  * @param ymin :: Minimum value for the bounding box in y direction
  * @param zmin :: Minimum value for the bounding box in z direction
  */
-void getBoundingBox(const std::vector<Kernel::V3D> &vertices,
-                    BoundingBox &cacheBB, double &xmax, double &ymax,
+void getBoundingBox(const std::vector<Kernel::V3D> &vertices, BoundingBox &cacheBB, double &xmax, double &ymax,
                     double &zmax, double &xmin, double &ymin, double &zmin) {
   auto bb = getBoundingBox(vertices, cacheBB);
   xmax = bb.xMax();

@@ -52,8 +52,7 @@ void IsoRotDiff::trickleDownAttribute(const std::string &name) {
 /**
  * @brief Overwrite attributes of member functions with same name
  */
-void IsoRotDiff::declareAttribute(const std::string &name,
-                                  const Attribute &defaultValue) {
+void IsoRotDiff::declareAttribute(const std::string &name, const Attribute &defaultValue) {
   ImmutableCompositeFunction::declareAttribute(name, defaultValue);
   this->trickleDownAttribute(name);
 }
@@ -82,15 +81,8 @@ void IsoRotDiff::init() {
   this->declareAttribute("Q", API::IFunction::Attribute(0.3));
   this->declareAttribute("N", API::IFunction::Attribute(25));
 
-  // Set the aliases
-  this->setAlias("f1.Height", "Height");
-  this->setAlias("f1.Radius", "Radius");
-  this->setAlias("f1.Tau", "Tau");
-  this->setAlias("f1.Centre", "Centre");
-
   // Set the ties between Elastic and Inelastic parameters
-  this->addDefaultTies(
-      "f1.Height=f0.Height,f1.Radius=f0.Radius,f1.Centre=f0.Centre");
+  this->addDefaultTies("f1.Height=f0.Height,f1.Radius=f0.Radius,f1.Centre=f0.Centre");
   this->applyTies();
 }
 

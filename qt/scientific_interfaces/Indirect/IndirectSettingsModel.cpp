@@ -22,9 +22,7 @@ void IndirectSettingsModel::setFacility(std::string const &facility) {
     ConfigService::Instance().setFacility(facility);
 }
 
-std::string IndirectSettingsModel::getFacility() const {
-  return ConfigService::Instance().getFacility().name();
-}
+std::string IndirectSettingsModel::getFacility() const { return ConfigService::Instance().getFacility().name(); }
 
 } // namespace CustomInterfaces
 } // namespace MantidQt

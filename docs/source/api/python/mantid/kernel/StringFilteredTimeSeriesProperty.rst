@@ -8,7 +8,7 @@ This is a Python binding to the C++ class Mantid::Kernel::FilteredTimeSeriesProp
 
 .. module:`mantid.kernel`
 
-.. autoclass:: mantid.kernel.StringFilteredTimeSeriesProperty 
+.. autoclass:: mantid.kernel.StringFilteredTimeSeriesProperty
     :members:
     :undoc-members:
     :inherited-members:

@@ -18,8 +18,7 @@ namespace API {
   */
 class MANTID_API_DLL FileBackedExperimentInfo : public ExperimentInfo {
 public:
-  FileBackedExperimentInfo(const std::string &filename,
-                           const std::string &nxpath);
+  FileBackedExperimentInfo(const std::string &filename, const std::string &nxpath);
   ExperimentInfo *cloneExperimentInfo() const override;
 
 private:

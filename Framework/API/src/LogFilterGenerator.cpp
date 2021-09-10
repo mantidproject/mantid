@@ -26,9 +26,8 @@ namespace API {
  * @param filterType :: [input] Filter by status, period, both or neither
  * @param workspace :: [input] Workspace containing log data
  */
-LogFilterGenerator::LogFilterGenerator(
-    const LogFilterGenerator::FilterType filterType,
-    const Mantid::API::MatrixWorkspace_const_sptr &workspace)
+LogFilterGenerator::LogFilterGenerator(const LogFilterGenerator::FilterType filterType,
+                                       const Mantid::API::MatrixWorkspace_const_sptr &workspace)
     : m_filterType(filterType), m_run(workspace->run()) {}
 
 /**
@@ -36,9 +35,7 @@ LogFilterGenerator::LogFilterGenerator(
  * @param filterType :: [input] Filter by status, period, both or neither
  * @param run :: [input] Run containing log data
  */
-LogFilterGenerator::LogFilterGenerator(
-    const LogFilterGenerator::FilterType filterType,
-    const Mantid::API::Run &run)
+LogFilterGenerator::LogFilterGenerator(const LogFilterGenerator::FilterType filterType, const Mantid::API::Run &run)
     : m_filterType(filterType), m_run(run) {}
 
 /**
@@ -46,8 +43,7 @@ LogFilterGenerator::LogFilterGenerator(
  * @param logName :: [input] Name of log to generate filter for
  * @returns :: LogFilter with selected options
  */
-std::unique_ptr<LogFilter>
-LogFilterGenerator::generateFilter(const std::string &logName) const {
+std::unique_ptr<LogFilter> LogFilterGenerator::generateFilter(const std::string &logName) const {
   const auto *logData = getLogData(logName);
   if (!logData) {
     throw std::invalid_argument("Workspace does not contain log " + logName);
@@ -86,8 +82,7 @@ LogFilterGenerator::generateFilter(const std::string &logName) const {
  * @param filter :: [input, output] LogFilter to which filter will be added
  */
 void LogFilterGenerator::filterByStatus(LogFilter *filter) const {
-  const auto status = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<bool> *>(
-      getLogData("running", false));
+  const auto status = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<bool> *>(getLogData("running", false));
   if (!status) {
     return;
   }
@@ -116,8 +111,7 @@ void LogFilterGenerator::filterByPeriod(LogFilter *filter) const {
   for (const auto &log : logs) {
     if (log->name().find("period ") == 0) {
       try {
-        const auto periodLog =
-            dynamic_cast<Mantid::Kernel::TimeSeriesProperty<bool> *>(log);
+        const auto periodLog = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<bool> *>(log);
         if (periodLog) {
           filter->addFilter(*periodLog);
         } else {
@@ -140,8 +134,7 @@ void LogFilterGenerator::filterByPeriod(LogFilter *filter) const {
  * found, otherwise do not log a warning
  * @returns :: Pointer to log, or null if log does not exist in workspace
  */
-Property *LogFilterGenerator::getLogData(const std::string &logName,
-                                         bool warnIfNotFound) const {
+Property *LogFilterGenerator::getLogData(const std::string &logName, bool warnIfNotFound) const {
   try {
     const auto logData = m_run.getLogData(logName);
     return logData;

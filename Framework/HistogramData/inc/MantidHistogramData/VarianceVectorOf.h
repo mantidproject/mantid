@@ -67,8 +67,7 @@ VarianceVectorOf<T, CowType, Sigmas>::VarianceVectorOf(const Sigmas &sigmas) {
     return;
   auto &derived = static_cast<T &>(*this);
   derived.operator=(sigmas.cowData());
-  std::transform(derived.cbegin(), derived.cend(), derived.begin(),
-                 [](const double &x) { return x * x; });
+  std::transform(derived.cbegin(), derived.cend(), derived.begin(), [](const double &x) { return x * x; });
 }
 
 template <class T, class CowType, class Sigmas>
@@ -82,13 +81,11 @@ VarianceVectorOf<T, CowType, Sigmas>::VarianceVectorOf(Sigmas &&sigmas) {
   // cannot directly null the cow_ptr in sigmas, since it is of a different type
   // and we do not have access to its private members.
   sigmas = Kernel::cow_ptr<CowType>(nullptr);
-  std::transform(derived.cbegin(), derived.cend(), derived.begin(),
-                 [](const double &x) { return x * x; });
+  std::transform(derived.cbegin(), derived.cend(), derived.begin(), [](const double &x) { return x * x; });
 }
 
 template <class T, class CowType, class Sigmas>
-VarianceVectorOf<T, CowType, Sigmas> &VarianceVectorOf<T, CowType, Sigmas>::
-operator=(const Sigmas &sigmas) & {
+VarianceVectorOf<T, CowType, Sigmas> &VarianceVectorOf<T, CowType, Sigmas>::operator=(const Sigmas &sigmas) & {
   VarianceVectorOf<T, CowType, Sigmas> tmp(sigmas);
   auto &derived = static_cast<T &>(*this);
   derived.operator=(tmp.cowData());
@@ -96,8 +93,7 @@ operator=(const Sigmas &sigmas) & {
 }
 
 template <class T, class CowType, class Sigmas>
-VarianceVectorOf<T, CowType, Sigmas> &VarianceVectorOf<T, CowType, Sigmas>::
-operator=(Sigmas &&sigmas) & {
+VarianceVectorOf<T, CowType, Sigmas> &VarianceVectorOf<T, CowType, Sigmas>::operator=(Sigmas &&sigmas) & {
   VarianceVectorOf<T, CowType, Sigmas> tmp(std::move(sigmas));
   auto &derived = static_cast<T &>(*this);
   derived.operator=(tmp.cowData());

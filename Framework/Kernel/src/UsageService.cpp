@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/UsageService.h"
+#include "MantidJson/Json.h"
 #include "MantidKernel/ChecksumHelper.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
@@ -34,10 +35,8 @@ Kernel::Logger g_log("UsageServiceImpl");
 //----------------------------------------------------------------------------------------------
 /** FeatureUsage
  */
-FeatureUsage::FeatureUsage(const FeatureType &type, std::string name,
-                           const bool internal, std::string application)
-    : type(type), name(std::move(name)), internal(internal),
-      application(std::move(application)) {}
+FeatureUsage::FeatureUsage(const FeatureType &type, std::string name, const bool internal, std::string application)
+    : type(type), name(std::move(name)), internal(internal), application(std::move(application)) {}
 
 // Better brute force.
 bool FeatureUsage::operator<(const FeatureUsage &r) const {
@@ -69,6 +68,8 @@ std::string FeatureUsage::featureTypeToString() const {
     return "Feature";
   case FeatureType::Interface:
     return "Interface";
+  case FeatureType::Function:
+    return "Function";
   }
   return "Unknown";
 }
@@ -88,15 +89,12 @@ std::string FeatureUsage::featureTypeToString() const {
 /** Constructor for UsageServiceImpl
  */
 UsageServiceImpl::UsageServiceImpl()
-    : m_timer(), m_timerTicks(0), m_timerTicksTarget(0), m_FeatureQueue(),
-      m_FeatureQueueSizeThreshold(50), m_isEnabled(false), m_mutex(),
-      m_application("python"),
-      m_startTime(Types::Core::DateAndTime::getCurrentTime()),
+    : m_timer(), m_timerTicks(0), m_timerTicksTarget(0), m_FeatureQueue(), m_FeatureQueueSizeThreshold(50),
+      m_isEnabled(false), m_mutex(), m_application("python"), m_startTime(Types::Core::DateAndTime::getCurrentTime()),
       m_startupActiveMethod(this, &UsageServiceImpl::sendStartupAsyncImpl),
       m_featureActiveMethod(this, &UsageServiceImpl::sendFeatureAsyncImpl) {
   setInterval(60);
-  auto url = Mantid::Kernel::ConfigService::Instance().getValue<std::string>(
-      "usagereports.rooturl");
+  auto url = Mantid::Kernel::ConfigService::Instance().getValue<std::string>("usagereports.rooturl");
   if (!url.is_initialized()) {
     g_log.debug() << "Failed to load usage report url\n";
   } else {
@@ -105,13 +103,9 @@ UsageServiceImpl::UsageServiceImpl()
   };
 }
 
-void UsageServiceImpl::setApplicationName(const std::string &name) {
-  m_application = name;
-}
+void UsageServiceImpl::setApplicationName(const std::string &name) { m_application = name; }
 
-std::string UsageServiceImpl::getApplicationName() const {
-  return m_application;
-}
+std::string UsageServiceImpl::getApplicationName() const { return m_application; }
 
 void UsageServiceImpl::setInterval(const uint32_t seconds) {
   // set the ticks target to by 24 hours / interval
@@ -129,31 +123,25 @@ void UsageServiceImpl::registerStartup() {
 
 /** registerFeatureUsage
  */
-void UsageServiceImpl::registerFeatureUsage(
-    const FeatureType &type, const std::vector<std::string> &name,
-    const bool internal) {
+void UsageServiceImpl::registerFeatureUsage(const FeatureType &type, const std::vector<std::string> &name,
+                                            const bool internal) {
   if (isEnabled()) {
     std::lock_guard<std::mutex> _lock(m_mutex);
 
     using boost::algorithm::join;
-    m_FeatureQueue.push(FeatureUsage(type, join(name, SEPARATOR), internal,
-                                     getApplicationName()));
+    m_FeatureQueue.push(FeatureUsage(type, join(name, SEPARATOR), internal, getApplicationName()));
   }
 }
 
-void UsageServiceImpl::registerFeatureUsage(const FeatureType &type,
-                                            const std::string &name,
-                                            const bool internal) {
+void UsageServiceImpl::registerFeatureUsage(const FeatureType &type, const std::string &name, const bool internal) {
   if (isEnabled()) {
     std::lock_guard<std::mutex> _lock(m_mutex);
-    m_FeatureQueue.push(
-        FeatureUsage(type, name, internal, getApplicationName()));
+    m_FeatureQueue.push(FeatureUsage(type, name, internal, getApplicationName()));
   }
 }
 
-void UsageServiceImpl::registerFeatureUsage(
-    const FeatureType &type, std::initializer_list<std::string> name,
-    const bool internal) {
+void UsageServiceImpl::registerFeatureUsage(const FeatureType &type, std::initializer_list<std::string> name,
+                                            const bool internal) {
 
   registerFeatureUsage(type, std::vector<std::string>(name), internal);
 }
@@ -163,8 +151,7 @@ bool UsageServiceImpl::isEnabled() const { return m_isEnabled; }
 void UsageServiceImpl::setEnabled(const bool enabled) {
   if (m_isEnabled != enabled) {
     if (enabled) {
-      m_timer.start(Poco::TimerCallback<UsageServiceImpl>(
-          *this, &UsageServiceImpl::timerCallback));
+      m_timer.start(Poco::TimerCallback<UsageServiceImpl>(*this, &UsageServiceImpl::timerCallback));
     } else {
       m_timer.stop();
     }
@@ -197,8 +184,7 @@ void UsageServiceImpl::shutdown() {
     // send any remaining feature usage records
     sendFeatureUsageReport(true);
   } catch (std::exception &ex) {
-    g_log.error() << "Error during the shutdown of the UsageService. "
-                  << ex.what();
+    g_log.error() << "Error during the shutdown of the UsageService. " << ex.what();
   }
 }
 
@@ -261,11 +247,9 @@ std::string UsageServiceImpl::generateStartupMessage() {
   ::Json::Value message;
 
   // username
-  message["uid"] = Kernel::ChecksumHelper::md5FromString(
-      ConfigService::Instance().getUsername());
+  message["uid"] = Kernel::ChecksumHelper::md5FromString(ConfigService::Instance().getUsername());
   // hostname
-  message["host"] = Kernel::ChecksumHelper::md5FromString(
-      ConfigService::Instance().getComputerName());
+  message["host"] = Kernel::ChecksumHelper::md5FromString(ConfigService::Instance().getComputerName());
 
   // os name, version, and architecture
   message["osName"] = ConfigService::Instance().getOSName();
@@ -273,7 +257,7 @@ std::string UsageServiceImpl::generateStartupMessage() {
   message["osVersion"] = ConfigService::Instance().getOSVersion();
   message["osReadable"] = ConfigService::Instance().getOSVersionReadable();
 
-  // legacy interface requires paraview version
+  // legacy interface requires paraview version DON'T REMOVE
   message["ParaView"] = 0;
 
   // mantid version and sha1
@@ -285,8 +269,7 @@ std::string UsageServiceImpl::generateStartupMessage() {
 
   message["application"] = m_application;
 
-  ::Json::FastWriter writer;
-  return writer.write(message);
+  return Mantid::JsonHelpers::jsonToString(message);
 }
 
 std::string UsageServiceImpl::generateFeatureUsageMessage() {
@@ -309,7 +292,6 @@ std::string UsageServiceImpl::generateFeatureUsageMessage() {
   }
 
   if (!featureCountMap.empty()) {
-    ::Json::FastWriter writer;
     ::Json::Value features;
     auto message = this->generateFeatureHeader();
     for (auto const &featureItem : featureCountMap) {
@@ -319,7 +301,7 @@ std::string UsageServiceImpl::generateFeatureUsageMessage() {
     }
     if (!features.empty()) {
       message["features"] = features;
-      return writer.write(message);
+      return Mantid::JsonHelpers::jsonToString(message);
     }
   }
   return "";
@@ -342,8 +324,7 @@ int UsageServiceImpl::sendFeatureAsyncImpl(const std::string &message) {
   return this->sendReport(message, m_url + "/api/feature");
 }
 
-int UsageServiceImpl::sendReport(const std::string &message,
-                                 const std::string &url) {
+int UsageServiceImpl::sendReport(const std::string &message, const std::string &url) {
   int status = -1;
   try {
     Kernel::InternetHelper helper;
@@ -353,9 +334,7 @@ int UsageServiceImpl::sendReport(const std::string &message,
     status = helper.sendRequest(url, responseStream);
   } catch (Mantid::Kernel::Exception::InternetError &e) {
     status = e.errorCode();
-    g_log.information() << "Call to \"" << url << "\" responded with " << status
-                        << "\n"
-                        << e.what() << "\n";
+    g_log.information() << "Call to \"" << url << "\" responded with " << status << "\n" << e.what() << "\n";
   }
 
   return status;

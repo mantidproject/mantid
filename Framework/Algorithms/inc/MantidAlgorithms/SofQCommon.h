@@ -27,30 +27,22 @@ struct MANTID_ALGORITHMS_DLL SofQCommon {
   // Constructor
   SofQCommon() : m_emode(0), m_efixedGiven(false), m_efixed(0.0) {}
   // init the class parameters, defined above
-  void initCachedValues(const API::MatrixWorkspace &workspace,
-                        API::Algorithm *const hostAlgorithm);
+  void initCachedValues(const API::MatrixWorkspace &workspace, API::Algorithm *const hostAlgorithm);
 
   /// Get the efixed value for the given detector
   double getEFixed(const Geometry::IDetector &det) const;
 
   /// Calculate the Q value
-  double q(const double deltaE, const double twoTheta,
-           const Geometry::IDetector *det) const;
+  double q(const double deltaE, const double twoTheta, const Geometry::IDetector *det) const;
 
   /// Estimate minimum and maximum momentum transfer.
-  std::pair<double, double> qBinHints(const API::MatrixWorkspace &ws,
-                                      const double minE,
-                                      const double maxE) const;
+  std::pair<double, double> qBinHints(const API::MatrixWorkspace &ws, const double minE, const double maxE) const;
 
 private:
   double directQ(const double deltaE, const double twoTheta) const;
-  double indirectQ(const double deltaE, const double twoTheta,
-                   const Geometry::IDetector *det) const;
-  std::pair<double, double> qBinHintsDirect(const API::MatrixWorkspace &ws,
-                                            const double minE,
-                                            const double maxE) const;
-  std::pair<double, double> qBinHintsIndirect(const API::MatrixWorkspace &ws,
-                                              const double minE,
+  double indirectQ(const double deltaE, const double twoTheta, const Geometry::IDetector *det) const;
+  std::pair<double, double> qBinHintsDirect(const API::MatrixWorkspace &ws, const double minE, const double maxE) const;
+  std::pair<double, double> qBinHintsIndirect(const API::MatrixWorkspace &ws, const double minE,
                                               const double maxE) const;
 };
 } // namespace Algorithms

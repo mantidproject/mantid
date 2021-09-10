@@ -15,8 +15,7 @@ namespace HistogramData {
  */
 class LogarithmicGenerator {
 public:
-  LogarithmicGenerator(double start, double increment)
-      : current(start), increment(1.0 + increment) {}
+  LogarithmicGenerator(double start, double increment) : current(start), increment(1.0 + increment) {}
 
   double operator()() {
     double old = current;

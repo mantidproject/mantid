@@ -26,8 +26,7 @@ DECLARE_FUNCMINIMIZER(TrustRegionMinimizer, Trust Region)
 // clang-format on
 
 TrustRegionMinimizer::TrustRegionMinimizer() : m_function() {
-  declareProperty("InitialRadius", 100.0,
-                  "Initial radius of the trust region.");
+  declareProperty("InitialRadius", 100.0, "Initial radius of the trust region.");
 }
 
 /** Name of the minimizer.
@@ -40,15 +39,11 @@ std::string TrustRegionMinimizer::name() const { return "Trust Region"; }
  *  @param maxIterations :: Maximum number of iterations that the minimiser will
  *  do.
  */
-void TrustRegionMinimizer::initialize(API::ICostFunction_sptr costFunction,
-                                      size_t maxIterations) {
-  m_leastSquares =
-      std::dynamic_pointer_cast<CostFunctions::CostFuncLeastSquares>(
-          costFunction);
+void TrustRegionMinimizer::initialize(API::ICostFunction_sptr costFunction, size_t maxIterations) {
+  m_leastSquares = std::dynamic_pointer_cast<CostFunctions::CostFuncLeastSquares>(costFunction);
   if (!m_leastSquares) {
-    throw std::runtime_error(
-        "Trust-region minimizer can only be used with Least "
-        "squares cost function.");
+    throw std::runtime_error("Trust-region minimizer can only be used with Least "
+                             "squares cost function.");
   }
 
   m_function = m_leastSquares->getFittingFunction();
@@ -77,8 +72,7 @@ void TrustRegionMinimizer::initialize(API::ICostFunction_sptr costFunction,
  *  @param x :: The fitting parameters as a fortran 1d array.
  *  @param f :: The output fortran vector with the weighted residuals.
  */
-void TrustRegionMinimizer::evalF(const DoubleFortranVector &x,
-                                 DoubleFortranVector &f) const {
+void TrustRegionMinimizer::evalF(const DoubleFortranVector &x, DoubleFortranVector &f) const {
   m_leastSquares->setParameters(x);
   auto &domain = *m_leastSquares->getDomain();
   auto &values = *m_leastSquares->getValues();
@@ -88,8 +82,7 @@ void TrustRegionMinimizer::evalF(const DoubleFortranVector &x,
     f.allocate(m);
   }
   for (size_t i = 0; i < values.size(); ++i) {
-    f.set(i, (values.getCalculated(i) - values.getFitData(i)) *
-                 values.getFitWeight(i));
+    f.set(i, (values.getCalculated(i) - values.getFitData(i)) * values.getFitWeight(i));
   }
 }
 
@@ -97,8 +90,7 @@ void TrustRegionMinimizer::evalF(const DoubleFortranVector &x,
  *  @param x :: The fitting parameters as a fortran 1d array.
  *  @param J :: The output fortran matrix with the weighted Jacobian.
  */
-void TrustRegionMinimizer::evalJ(const DoubleFortranVector &x,
-                                 DoubleFortranMatrix &J) const {
+void TrustRegionMinimizer::evalJ(const DoubleFortranVector &x, DoubleFortranMatrix &J) const {
   m_leastSquares->setParameters(x);
   auto &domain = *m_leastSquares->getDomain();
   auto &values = *m_leastSquares->getValues();
@@ -122,8 +114,7 @@ void TrustRegionMinimizer::evalJ(const DoubleFortranVector &x,
  *  @param f :: The fortran vector with the weighted residuals.
  *  @param h :: The fortran matrix with the Hessian.
  */
-void TrustRegionMinimizer::evalHF(const DoubleFortranVector &x,
-                                  const DoubleFortranVector &f,
+void TrustRegionMinimizer::evalHF(const DoubleFortranVector &x, const DoubleFortranVector &f,
                                   DoubleFortranMatrix &h) const {
   UNUSED_ARG(x);
   UNUSED_ARG(f);
@@ -228,8 +219,7 @@ bool TrustRegionMinimizer::iterate(size_t /*iteration*/) {
     case 3: // hybrid (MNT)
     {
       // set the tolerance :: make this relative
-      w.hybrid_tol =
-          options.hybrid_tol * (w.normJF / (0.5 * (pow(w.normF, 2))));
+      w.hybrid_tol = options.hybrid_tol * (w.normJF / (0.5 * (pow(w.normF, 2))));
       // use first-order method initially
       w.hf.zero();
       w.use_second_derivatives = false;
@@ -269,8 +259,7 @@ bool TrustRegionMinimizer::iterate(size_t /*iteration*/) {
     // Get the value of the model
     //      md :=   m_k(d)
     // evaluated at the new step
-    double md =
-        evaluateModel(w.f, w.J, w.hf, w.d, options, w.evaluate_model_ws);
+    double md = evaluateModel(w.f, w.J, w.hf, w.d, options, w.evaluate_model_ws);
 
     // Calculate the quantity
     //   rho = 0.5||f||^2 - 0.5||fnew||^2 =   actual_reduction
@@ -280,12 +269,10 @@ bool TrustRegionMinimizer::iterate(size_t /*iteration*/) {
     // if model is good, rho should be close to one
     auto rho = calculateRho(w.normF, normFnew, md, options);
     if (!std::isfinite(rho) || rho <= options.eta_successful) {
-      if ((w.use_second_derivatives) && (options.model == 3) &&
-          (no_reductions == 1)) {
+      if ((w.use_second_derivatives) && (options.model == 3) && (no_reductions == 1)) {
         // recalculate rho based on the approx GN model
         // (i.e. the Gauss-Newton model evaluated at the Quasi-Newton step)
-        double rho_gn =
-            calculateRho(w.normF, normFnew, w.evaluate_model_ws.md_gn, options);
+        double rho_gn = calculateRho(w.normF, normFnew, w.evaluate_model_ws.md_gn, options);
         if (rho_gn > options.eta_successful) {
           // switch back to gauss-newton
           w.use_second_derivatives = false;
@@ -302,8 +289,7 @@ bool TrustRegionMinimizer::iterate(size_t /*iteration*/) {
 
     if (!success) {
       // finally, check d makes progress
-      if (NLLS::norm2(w.d) <
-          std::numeric_limits<double>::epsilon() * NLLS::norm2(w.Xnew)) {
+      if (NLLS::norm2(w.d) < std::numeric_limits<double>::epsilon() * NLLS::norm2(w.Xnew)) {
         m_errorString = "Failed to make progress.";
         return false;
       }
@@ -526,18 +512,14 @@ struct inform_type {
  *  @param c :: Value number 3.
  *  @param d :: Value number 4.
  */
-double biggest(double a, double b, double c, double d) {
-  return std::max(std::max(a, b), std::max(c, d));
-}
+double biggest(double a, double b, double c, double d) { return std::max(std::max(a, b), std::max(c, d)); }
 
 /** Get the largest of the three values.
  *  @param a :: Value number 1.
  *  @param b :: Value number 2.
  *  @param c :: Value number 3.
  */
-double biggest(double a, double b, double c) {
-  return std::max(std::max(a, b), c);
-}
+double biggest(double a, double b, double c) { return std::max(std::max(a, b), c); }
 
 /** Find the largest by absolute value element of a vector.
  *  @param v :: The searched vector.
@@ -571,10 +553,7 @@ double twoNorm(const DoubleFortranVector &v) {
  *  @param v1 :: The first vector.
  *  @param v2 :: The second vector.
  */
-double dotProduct(const DoubleFortranVector &v1,
-                  const DoubleFortranVector &v2) {
-  return v1.dot(v2);
-}
+double dotProduct(const DoubleFortranVector &v1, const DoubleFortranVector &v2) { return v1.dot(v2); }
 
 /** Find the maximum element in the first n elements of a vector.
  *  @param v :: The vector.
@@ -604,8 +583,7 @@ double maxVal(const DoubleFortranVector &v, int n) {
  *  @param root1 :: The first real root if nroots > 0.
  *  @param root2 :: The second real root if nroots = 2.
  */
-void rootsQuadratic(double a0, double a1, double a2, double tol, int &nroots,
-                    double &root1, double &root2) {
+void rootsQuadratic(double a0, double a1, double a2, double tol, int &nroots, double &root1, double &root2) {
 
   auto rhs = tol * a1 * a1;
   if (fabs(a0 * a2) > rhs) { // really is quadratic
@@ -689,8 +667,8 @@ void rootsQuadratic(double a0, double a1, double a2, double tol, int &nroots,
  *  @param root2 :: The second real root if nroots > 1.
  *  @param root3 :: The third real root if nroots == 3.
  */
-void rootsCubic(double a0, double a1, double a2, double a3, double tol,
-                int &nroots, double &root1, double &root2, double &root3) {
+void rootsCubic(double a0, double a1, double a2, double a3, double tol, int &nroots, double &root1, double &root2,
+                double &root3) {
 
   //  Check to see if the cubic is actually a quadratic
   if (a3 == ZERO) {
@@ -828,22 +806,19 @@ void rootsCubic(double a0, double a1, double a2, double a3, double tol,
  *  @param pi_beta :: (0) value of ||x||^beta,
  *                    (i) ith derivative of ||x||^beta, i = 1, max_order
  */
-void PiBetaDerivs(int max_order, double beta,
-                  const DoubleFortranVector &x_norm2,
-                  DoubleFortranVector &pi_beta) {
+void PiBetaDerivs(int max_order, double beta, const DoubleFortranVector &x_norm2, DoubleFortranVector &pi_beta) {
   double hbeta = HALF * beta;
   pi_beta(0) = pow(x_norm2(0), hbeta);
   pi_beta(1) = hbeta * (pow(x_norm2(0), (hbeta - ONE))) * x_norm2(1);
   if (max_order == 1)
     return;
-  pi_beta(2) = hbeta * (pow(x_norm2(0), (hbeta - TWO))) *
-               ((hbeta - ONE) * pow(x_norm2(1), 2) + x_norm2(0) * x_norm2(2));
+  pi_beta(2) =
+      hbeta * (pow(x_norm2(0), (hbeta - TWO))) * ((hbeta - ONE) * pow(x_norm2(1), 2) + x_norm2(0) * x_norm2(2));
   if (max_order == 2)
     return;
   pi_beta(3) = hbeta * (pow(x_norm2(0), (hbeta - THREE))) *
                (x_norm2(3) * pow(x_norm2(0), 2) +
-                (hbeta - ONE) * (THREE * x_norm2(0) * x_norm2(1) * x_norm2(2) +
-                                 (hbeta - TWO) * pow(x_norm2(1), 3)));
+                (hbeta - ONE) * (THREE * x_norm2(0) * x_norm2(1) * x_norm2(2) + (hbeta - TWO) * pow(x_norm2(1), 3)));
 }
 
 /**  Set initial values for the TRS control parameters
@@ -871,10 +846,8 @@ void intitializeControl(control_type &control) {
  *  @param control :: A structure containing control information.
  *  @param inform :: A structure containing information.
  */
-void solveSubproblemMain(int n, double radius, double f,
-                         const DoubleFortranVector &c,
-                         const DoubleFortranVector &h, DoubleFortranVector &x,
-                         const control_type &control, inform_type &inform) {
+void solveSubproblemMain(int n, double radius, double f, const DoubleFortranVector &c, const DoubleFortranVector &h,
+                         DoubleFortranVector &x, const control_type &control, inform_type &inform) {
 
   //  set initial values
 
@@ -888,12 +861,10 @@ void solveSubproblemMain(int n, double radius, double f,
 
   //  Check that arguments are OK
   if (n < 0) {
-    throw std::runtime_error(
-        "Number of unknowns for trust-region subproblem is negative.");
+    throw std::runtime_error("Number of unknowns for trust-region subproblem is negative.");
   }
   if (radius < 0) {
-    throw std::runtime_error(
-        "Trust-region radius for trust-region subproblem is negative");
+    throw std::runtime_error("Trust-region radius for trust-region subproblem is negative");
   }
 
   DoubleFortranVector x_norm2(0, MAX_DEGREE), pi_beta(0, MAX_DEGREE);
@@ -931,14 +902,11 @@ void solveSubproblemMain(int n, double radius, double f,
   double c_norm_over_radius = c_norm / radius;
   double lambda_l = 0.0, lambda_u = 0.0;
   if (control.equality_problem) {
-    lambda_l =
-        biggest(control.lower, -lambda_min, c_norm_over_radius - lambda_max);
+    lambda_l = biggest(control.lower, -lambda_min, c_norm_over_radius - lambda_max);
     lambda_u = std::min(control.upper, c_norm_over_radius - lambda_min);
   } else {
-    lambda_l = biggest(control.lower, ZERO, -lambda_min,
-                       c_norm_over_radius - lambda_max);
-    lambda_u = std::min(control.upper,
-                        std::max(ZERO, c_norm_over_radius - lambda_min));
+    lambda_l = biggest(control.lower, ZERO, -lambda_min, c_norm_over_radius - lambda_max);
+    lambda_u = std::min(control.upper, std::max(ZERO, c_norm_over_radius - lambda_min));
   }
   lambda = lambda_l;
 
@@ -979,10 +947,8 @@ void solveSubproblemMain(int n, double radius, double f,
           //  boundary and gives the smaller value of q
 
           auto utx = x(i_hard) / radius;
-          auto distx =
-              (radius - inform.x_norm) * ((radius + inform.x_norm) / radius);
-          auto alpha = sign(
-              distx / (fabs(utx) + sqrt(pow(utx, 2) + distx / radius)), utx);
+          auto distx = (radius - inform.x_norm) * ((radius + inform.x_norm) / radius);
+          auto alpha = sign(distx / (fabs(utx) + sqrt(pow(utx, 2) + distx / radius)), utx);
 
           //  record the optimal values
 
@@ -1044,8 +1010,7 @@ void solveSubproblemMain(int n, double radius, double f,
     //!  the current estimate gives a good approximation to the required
     //!  root
 
-    if (fabs(inform.x_norm - radius) <=
-        std::max(control.stop_normal * radius, control.stop_absolute_normal)) {
+    if (fabs(inform.x_norm - radius) <= std::max(control.stop_normal * radius, control.stop_absolute_normal)) {
       break;
     }
 
@@ -1066,8 +1031,7 @@ void solveSubproblemMain(int n, double radius, double f,
     //  precaution against rounding producing lambda outside L
 
     if (lambda > lambda_u) {
-      throw std::runtime_error(
-          "Lambda for trust-region subproblem is ill conditioned");
+      throw std::runtime_error("Lambda for trust-region subproblem is ill conditioned");
     }
 
     //  compute first derivatives of x^T M x
@@ -1180,8 +1144,7 @@ void solveSubproblemMain(int n, double radius, double f,
 
     //  check that the best Taylor improvement is significant
 
-    if (std::abs(delta_lambda) <
-        EPSILON_MCH * std::max(ONE, std::abs(lambda))) {
+    if (std::abs(delta_lambda) < EPSILON_MCH * std::max(ONE, std::abs(lambda))) {
       break;
     }
 
@@ -1204,10 +1167,8 @@ void solveSubproblemMain(int n, double radius, double f,
  *  @param control :: A structure containing control information.
  *  @param inform :: A structure containing information.
  */
-void solveSubproblem(int n, double radius, double f,
-                     const DoubleFortranVector &c, const DoubleFortranVector &h,
-                     DoubleFortranVector &x, const control_type &control,
-                     inform_type &inform) {
+void solveSubproblem(int n, double radius, double f, const DoubleFortranVector &c, const DoubleFortranVector &h,
+                     DoubleFortranVector &x, const control_type &control, inform_type &inform) {
   //  scale the problem to solve instead
   //      minimize    q_s(x_s) = 1/2 <x_s, H_s x_s> + <c_s, x_s> + f_s
   //      subject to    ||x_s||_2 <= radius_s  or ||x_s||_2 = radius_s
@@ -1269,8 +1230,7 @@ void solveSubproblem(int n, double radius, double f,
 
   //  solve the scaled problem
 
-  solveSubproblemMain(n, radius_scale, f_scale, c_scale, h_scale, x,
-                      control_scale, inform);
+  solveSubproblemMain(n, radius_scale, f_scale, c_scale, h_scale, x, control_scale, inform);
 
   //  unscale the solution, function value, multiplier and related values
 
@@ -1279,8 +1239,7 @@ void solveSubproblem(int n, double radius, double f,
   inform.obj *= pow(scale_c, 2) / scale_h;
   inform.multiplier *= scale_h;
   inform.pole *= scale_h;
-  for (auto &history_item :
-       inform.history) { //      do i = 1, inform.len_history
+  for (auto &history_item : inform.history) { //      do i = 1, inform.len_history
     history_item.lambda *= scale_h;
     history_item.x_norm *= scale_c / scale_h;
   }
@@ -1304,12 +1263,9 @@ void solveSubproblem(int n, double radius, double f,
  *  @param normd :: The 2-norm of d.
  *  @param options :: The options.
  */
-void TrustRegionMinimizer::calculateStep(const DoubleFortranMatrix &J,
-                                         const DoubleFortranVector &f,
-                                         const DoubleFortranMatrix &hf,
-                                         double Delta, DoubleFortranVector &d,
-                                         double &normd,
-                                         const NLLS::nlls_options &options) {
+void TrustRegionMinimizer::calculateStep(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
+                                         const DoubleFortranMatrix &hf, double Delta, DoubleFortranVector &d,
+                                         double &normd, const NLLS::nlls_options &options) {
 
   control_type controlOptions;
   inform_type inform;
@@ -1372,8 +1328,7 @@ void TrustRegionMinimizer::calculateStep(const DoubleFortranMatrix &J,
     }
   }
 
-  solveSubproblem(n, Delta, ZERO, m_v_trans, m_ew, m_d_trans, controlOptions,
-                  inform);
+  solveSubproblem(n, Delta, ZERO, m_v_trans, m_ew, m_d_trans, controlOptions, inform);
 
   // and return the un-transformed vector
   NLLS::multJ(m_ev, m_d_trans, d);

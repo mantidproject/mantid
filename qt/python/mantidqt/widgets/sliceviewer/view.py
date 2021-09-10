@@ -11,14 +11,15 @@ import sys
 # 3rd party imports
 
 import mantid.api
+from mantid.plots.resampling_image import samplingimage
 from mantid.plots.axesfunctions import _pcolormesh_nonortho as pcolormesh_nonorthogonal
 from mantid.plots.datafunctions import get_normalize_by_bin_width
 from matplotlib.figure import Figure
 from mpl_toolkits.axisartist import Subplot as CurveLinearSubPlot
 from mpl_toolkits.axisartist.grid_helper_curvelinear import GridHelperCurveLinear
-from qtpy.QtCore import Qt, QTimer, Signal
-from qtpy.QtWidgets import (QCheckBox, QComboBox, QGridLayout, QLabel, QHBoxLayout, QSplitter,
-                            QStatusBar, QVBoxLayout, QWidget)
+from qtpy.QtCore import Qt, Signal
+from qtpy.QtWidgets import (QCheckBox, QComboBox, QGridLayout, QLabel, QHBoxLayout, QSplitter, QStatusBar, QToolButton, QVBoxLayout,
+                            QWidget)
 
 # local imports
 from workbench.plotting.mantidfigurecanvas import MantidFigureCanvas
@@ -63,6 +64,8 @@ class SliceViewerDataView(QWidget):
 
         self._line_plots = None
         self._image_info_tracker = None
+        self._region_selection_on = False
+        self._orig_lims = None
 
         # Dimension widget
         self.dimensions_layout = QGridLayout()
@@ -76,18 +79,14 @@ class SliceViewerDataView(QWidget):
         self.colorbar_layout.setSpacing(0)
 
         self.image_info_widget = ImageInfoWidget(self)
+        self.image_info_widget.setToolTip("Information about the selected pixel")
         self.track_cursor = QCheckBox("Track Cursor", self)
         self.track_cursor.setToolTip(
             "Update the image readout table when the cursor is over the plot. "
             "If unticked the table will update only when the plot is clicked")
-        md_type = dims_info[0]['type'].startswith('MD')
-        if md_type:
-            self.colorbar_layout.addWidget(self.image_info_widget, alignment=Qt.AlignCenter)
-            self.colorbar_layout.addWidget(self.track_cursor)
-        else:
-            self.dimensions_layout.setHorizontalSpacing(10)
-            self.dimensions_layout.addWidget(self.track_cursor, 0, 1, Qt.AlignRight)
-            self.dimensions_layout.addWidget(self.image_info_widget, 1, 1)
+        self.dimensions_layout.setHorizontalSpacing(10)
+        self.dimensions_layout.addWidget(self.track_cursor, 0, 1, Qt.AlignRight)
+        self.dimensions_layout.addWidget(self.image_info_widget, 1, 1)
         self.track_cursor.setChecked(True)
         self.track_cursor.stateChanged.connect(self.on_track_cursor_state_change)
 
@@ -108,17 +107,24 @@ class SliceViewerDataView(QWidget):
         self.fig.set_facecolor(self.palette().window().color().getRgbF())
         self.canvas = SliceViewerCanvas(self.fig)
         self.canvas.mpl_connect('button_release_event', self.mouse_release)
+        self.canvas.mpl_connect('button_press_event', self.presenter.add_delete_peak)
 
         self.colorbar_label = QLabel("Colormap")
         self.colorbar_layout.addWidget(self.colorbar_label)
         norm_scale = self.get_default_scale_norm()
         self.colorbar = ColorbarWidget(self, norm_scale)
+        self.colorbar.cmap.setToolTip("Colormap options")
+        self.colorbar.crev.setToolTip("Reverse colormap")
+        self.colorbar.norm.setToolTip("Colormap normalisation options")
+        self.colorbar.powerscale.setToolTip("Power colormap scale")
+        self.colorbar.cmax.setToolTip("Colormap maximum limit")
+        self.colorbar.cmin.setToolTip("Colormap minimum limit")
+        self.colorbar.autoscale.setToolTip("Automatically changes colormap limits when zooming on the plot")
         self.colorbar_layout.addWidget(self.colorbar)
         self.colorbar.colorbarChanged.connect(self.update_data_clim)
         self.colorbar.scaleNormChanged.connect(self.scale_norm_changed)
         # make width larger to fit image readout table
-        if md_type:
-            self.colorbar.setMaximumWidth(155)
+        self.colorbar.setMaximumWidth(200)
 
         # MPL toolbar
         self.toolbar_layout = QHBoxLayout()
@@ -128,12 +134,17 @@ class SliceViewerDataView(QWidget):
         self.mpl_toolbar.regionSelectionClicked.connect(self.on_region_selection_toggle)
         self.mpl_toolbar.homeClicked.connect(self.on_home_clicked)
         self.mpl_toolbar.nonOrthogonalClicked.connect(self.on_non_orthogonal_axes_toggle)
+        self.mpl_toolbar.zoomPanClicked.connect(self.presenter.deactivate_peak_adding)
         self.mpl_toolbar.zoomPanFinished.connect(self.on_data_limits_changed)
         self.toolbar_layout.addWidget(self.mpl_toolbar)
 
         # Status bar
         self.status_bar = QStatusBar(parent=self)
+        self.status_bar.setStyleSheet('QStatusBar::item {border: None;}')  # Hide spacers between button and label
         self.status_bar_label = QLabel()
+        self.help_button = QToolButton()
+        self.help_button.setText("?")
+        self.status_bar.addWidget(self.help_button)
         self.status_bar.addWidget(self.status_bar_label)
 
         # layout
@@ -255,8 +266,6 @@ class SliceViewerDataView(QWidget):
                                     transpose=self.dimensions.transpose,
                                     norm=self.colorbar.get_norm(),
                                     **kwargs)
-        self.on_track_cursor_state_change(self.track_cursor.isChecked())
-
         # ensure the axes data limits are updated to match the
         # image. For example if the axes were zoomed and the
         # swap dimensions was clicked we need to restore the
@@ -264,6 +273,11 @@ class SliceViewerDataView(QWidget):
         extent = self.image.get_extent()
         self.ax.set_xlim(extent[0], extent[1])
         self.ax.set_ylim(extent[2], extent[3])
+        # Set the original data limits which get passed to the ImageInfoWidget so that
+        # the mouse projection to data space is correct for MDH workspaces when zoomed/changing slices
+        self._orig_lims = self.get_axes_limits()
+
+        self.on_track_cursor_state_change(self.track_cursor_checked())
 
         self.draw_plot()
 
@@ -275,7 +289,7 @@ class SliceViewerDataView(QWidget):
                                               transpose=self.dimensions.transpose,
                                               norm=self.colorbar.get_norm(),
                                               **kwargs)
-        self.on_track_cursor_state_change(self.track_cursor.isChecked())
+        self.on_track_cursor_state_change(self.track_cursor_checked())
 
         # swapping dimensions in nonorthogonal mode currently resets back to the
         # full data limits as the whole axes has been recreated so we don't have
@@ -308,7 +322,7 @@ class SliceViewerDataView(QWidget):
                                     norm=self.colorbar.get_norm(),
                                     extent=old_extent,
                                     **kwargs)
-        self.on_track_cursor_state_change(self.track_cursor.isChecked())
+        self.on_track_cursor_state_change(self.track_cursor_checked())
 
         self.draw_plot()
 
@@ -335,14 +349,15 @@ class SliceViewerDataView(QWidget):
 
     def draw_plot(self):
         self.ax.set_title('')
-        self.colorbar.set_mappable(self.image)
-        self.colorbar.update_clim()
+        if self.image:
+            self.colorbar.set_mappable(self.image)
+            self.colorbar.update_clim()
         self.mpl_toolbar.update()  # clear nav stack
         if self.line_plots_active:
             self._line_plots.plotter.delete_line_plot_lines()
             self._line_plots.plotter.update_line_plot_labels()
 
-        self.canvas.draw_idle()
+        self.canvas.draw()
 
     def export_region(self, limits, cut):
         """
@@ -352,7 +367,7 @@ class SliceViewerDataView(QWidget):
         """
         self.presenter.export_region(limits, cut)
 
-    def update_plot_data(self, data, transposed=False):
+    def update_plot_data(self, data):
         """
         This just updates the plot data without creating a new plot. The extents
         can change if the data has been rebinned.
@@ -360,15 +375,11 @@ class SliceViewerDataView(QWidget):
         if self.nonortho_transform:
             self.image.set_array(data.T.ravel())
         else:
-            # need to update extent and limits of orthog axes when transposed (non orthog limits reset anyway)
-            extent = self.image.get_extent()
             self.image.set_data(data.T)
-            if transposed:
-                extent = (extent[2], extent[3], extent[0], extent[1])
-                self.image.set_extent(extent)
-                self.ax.set_xlim((extent[0], extent[1]))
-                self.ax.set_ylim((extent[2], extent[3]))
         self.colorbar.update_clim()
+
+    def track_cursor_checked(self):
+        return self.track_cursor.isChecked() if self.track_cursor else False
 
     def on_track_cursor_state_change(self, state):
         """
@@ -376,15 +387,23 @@ class SliceViewerDataView(QWidget):
         """
         if self._image_info_tracker is not None:
             self._image_info_tracker.disconnect()
+        if self._line_plots is not None and not self._region_selection_on:
+            self._line_plots.disconnect()
 
         self._image_info_tracker = ImageInfoTracker(image=self.image,
-                                                    transpose_xy=self.dimensions.transpose,
-                                                    widget=self.image_info_widget)
+                                                    transform=self.nonortho_transform,
+                                                    do_transform=self.nonorthogonal_mode,
+                                                    widget=self.image_info_widget,
+                                                    cursor_transform=self._orig_lims)
 
         if state:
             self._image_info_tracker.connect()
+            if self._line_plots and not self._region_selection_on:
+                self._line_plots.connect()
         else:
             self._image_info_tracker.disconnect()
+            if self._line_plots and not self._region_selection_on:
+                self._line_plots.disconnect()
 
     def on_home_clicked(self):
         """Reset the view to encompass all of the data"""
@@ -397,6 +416,11 @@ class SliceViewerDataView(QWidget):
     def on_region_selection_toggle(self, state):
         """Switch state of the region selection"""
         self.presenter.region_selection(state)
+        self._region_selection_on = state
+        # If state is off and track cursor is on, make sure line plots are re-connected to move cursor
+        if not state and self.track_cursor_checked():
+            if self._line_plots:
+                self._line_plots.connect()
 
     def on_non_orthogonal_axes_toggle(self, state):
         """
@@ -433,12 +457,28 @@ class SliceViewerDataView(QWidget):
 
     def get_axes_limits(self):
         """
-        Return the limits on the image axes in the orthogonal frame
+        Return the limits on the image axes transformed into the nonorthogonal frame if appropriate
         """
         if self.image is None:
             return None
         else:
-            return self.ax.get_xlim(), self.ax.get_ylim()
+            xlim, ylim = self.ax.get_xlim(), self.ax.get_ylim()
+            if self.nonorthogonal_mode:
+                inv_tr = self.nonortho_transform.inv_tr
+                # viewing axis y not aligned with plot axis
+                xmin_p, ymax_p = inv_tr(xlim[0], ylim[1])
+                xmax_p, ymin_p = inv_tr(xlim[1], ylim[0])
+                xlim, ylim = (xmin_p, xmax_p), (ymin_p, ymax_p)
+            return xlim, ylim
+
+    def get_full_extent(self):
+        """
+        Return the full extent of image - only applicable for plots of matrix workspaces
+        """
+        if self.image and isinstance(self.image, samplingimage.SamplingImage):
+            return self.image.get_full_extent()
+        else:
+            return None
 
     def set_axes_limits(self, xlim, ylim):
         """
@@ -489,8 +529,14 @@ class SliceViewerDataView(QWidget):
         self.canvas.setFocus()
         if event.button == 1:
             self._image_info_tracker.on_cursor_at(event.xdata, event.ydata)
+            if self.line_plots_active and not self._region_selection_on:
+                self._line_plots.on_cursor_at(event.xdata, event.ydata)
         if event.button == 3:
             self.on_home_clicked()
+
+    def deactivate_zoom_pan(self):
+        self.deactivate_tool(ToolItemText.PAN)
+        self.deactivate_tool(ToolItemText.ZOOM)
 
     def update_data_clim(self):
         self.image.set_clim(self.colorbar.colorbar.mappable.get_clim())
@@ -519,6 +565,7 @@ class SliceViewerDataView(QWidget):
             exponent = self.conf.get(POWERSCALE)
             scale = (scale, exponent)
 
+        scale = "SymmetricLog10" if scale == 'Log' else scale
         return scale
 
     def scale_norm_changed(self):
@@ -538,12 +585,12 @@ class SliceViewerView(QWidget, ObservingView):
     close_signal = Signal()
     rename_signal = Signal(str)
 
-    def __init__(self, presenter, dims_info, can_normalise, parent=None, conf=None):
+    def __init__(self, presenter, dims_info, can_normalise, parent=None, window_flags=Qt.Window, conf=None):
         super().__init__(parent)
 
         self.presenter = presenter
 
-        self.setWindowFlags(Qt.Window)
+        self.setWindowFlags(window_flags)
         self.setAttribute(Qt.WA_DeleteOnClose, True)
 
         self._splitter = QSplitter(self)
@@ -551,6 +598,15 @@ class SliceViewerView(QWidget, ObservingView):
         self._splitter.addWidget(self._data_view)
         #  peaks viewer off by default
         self._peaks_view = None
+
+        # config the splitter appearance
+        splitterStyleStr = """QSplitter::handle{
+            border: 1px dotted gray;
+            min-height: 10px;
+            max-height: 20px;
+            }"""
+        self._splitter.setStyleSheet(splitterStyleStr)
+        self._splitter.setHandleWidth(1)
 
         layout = QHBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -571,21 +627,13 @@ class SliceViewerView(QWidget, ObservingView):
         return self._data_view.dimensions
 
     @property
-    def peaks_view(self):
+    def peaks_view(self) -> PeaksViewerCollectionView:
         """Lazily instantiates PeaksViewer and returns it"""
         if self._peaks_view is None:
             self._peaks_view = PeaksViewerCollectionView(MplPainter(self.data_view), self.presenter)
             self._splitter.addWidget(self._peaks_view)
 
         return self._peaks_view
-
-    def delayed_refresh(self):
-        """Post an event to the event loop that causes the view to
-        update on the next cycle
-
-        A 1 msec delay is added to appease RHEL7 where in some cases
-        it fails"""
-        QTimer.singleShot(1, self.presenter.refresh_view)
 
     def peaks_overlay_clicked(self):
         """Peaks overlay button has been toggled
@@ -605,7 +653,7 @@ class SliceViewerView(QWidget, ObservingView):
 
     def set_peaks_viewer_visible(self, on):
         """
-        Set the visiblity of the PeaksViewer.
+        Set the visibility of the PeaksViewer.
         :param on: If True make the view visible, else make it invisible
         :return: The PeaksViewerCollectionView
         """

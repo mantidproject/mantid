@@ -21,7 +21,7 @@ public:
     {
         i = 0;
     }
-    
+
     void testAssertEqualsWithSideEffects()
     {
         TS_ASSERT_EQUALS( increment(), 3 );

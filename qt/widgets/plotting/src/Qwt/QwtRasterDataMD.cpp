@@ -22,9 +22,8 @@ using Mantid::Geometry::IMDDimension_const_sptr;
 //-------------------------------------------------------------------------
 /// Constructor
 QwtRasterDataMD::QwtRasterDataMD()
-    : m_ws(), m_overlayWS(), m_slicePoint(nullptr), m_overlayXMin(0.0),
-      m_overlayXMax(0.0), m_overlayYMin(0.0), m_overlayYMax(0.0),
-      m_overlayInSlice(false), m_fast(true), m_zerosAsNan(true),
+    : m_ws(), m_overlayWS(), m_slicePoint(nullptr), m_overlayXMin(0.0), m_overlayXMax(0.0), m_overlayYMin(0.0),
+      m_overlayYMax(0.0), m_overlayInSlice(false), m_fast(true), m_zerosAsNan(true),
       m_normalization(Mantid::API::VolumeNormalization) {
   m_range = QwtDoubleInterval(0.0, 1.0);
   m_nd = 0;
@@ -47,9 +46,7 @@ QwtRasterDataMD *QwtRasterDataMD::copy() const {
 
 //-------------------------------------------------------------------------
 /** Set the data range (min/max) to display */
-void QwtRasterDataMD::setRange(const QwtDoubleInterval &range) {
-  m_range = range;
-}
+void QwtRasterDataMD::setRange(const QwtDoubleInterval &range) { m_range = range; }
 
 //-------------------------------------------------------------------------
 /** Return the data value to plot at the given position
@@ -77,8 +74,8 @@ double QwtRasterDataMD::value(double x, double y) const {
   signal_t value = 0;
 
   // Check if the overlay WS is within range of being viewed
-  if (m_overlayWS && m_overlayInSlice && (x >= m_overlayXMin) &&
-      (x < m_overlayXMax) && (y >= m_overlayYMin) && (y < m_overlayYMax)) {
+  if (m_overlayWS && m_overlayInSlice && (x >= m_overlayXMin) && (x < m_overlayXMax) && (y >= m_overlayYMin) &&
+      (y < m_overlayYMax)) {
     // Point is in the overlaid workspace
     value = m_overlayWS->getSignalWithMaskAtCoord(lookPoint, m_normalization);
   } else {
@@ -122,15 +119,10 @@ bool QwtRasterDataMD::isZerosAsNan() const { return this->m_zerosAsNan; }
  *
  * @param normalization :: option from MDNormalization enum.
  */
-void QwtRasterDataMD::setNormalization(
-    Mantid::API::MDNormalization normalization) {
-  m_normalization = normalization;
-}
+void QwtRasterDataMD::setNormalization(Mantid::API::MDNormalization normalization) { m_normalization = normalization; }
 
 /** @return how the signal is normalized */
-Mantid::API::MDNormalization QwtRasterDataMD::getNormalization() const {
-  return m_normalization;
-}
+Mantid::API::MDNormalization QwtRasterDataMD::getNormalization() const { return m_normalization; }
 
 //------------------------------------------------------------------------------------------------------
 /** Return how many pixels this area should be rendered as
@@ -176,8 +168,7 @@ QSize QwtRasterDataMD::rasterHint(const QwtDoubleRect &area) const {
  */
 void QwtRasterDataMD::setWorkspace(IMDWorkspace_const_sptr ws) {
   if (!ws)
-    throw std::runtime_error(
-        "QwtRasterDataMD::setWorkspace(): NULL workspace passed.");
+    throw std::runtime_error("QwtRasterDataMD::setWorkspace(): NULL workspace passed.");
   m_ws = ws;
   m_nd = m_ws->getNumDims();
   m_dimX = 0;
@@ -189,9 +180,7 @@ void QwtRasterDataMD::setWorkspace(IMDWorkspace_const_sptr ws) {
 //------------------------------------------------------------------------------------------------------
 /** Gets the workspace being displayed
  */
-Mantid::API::IMDWorkspace_const_sptr QwtRasterDataMD::getWorkspace() const {
-  return m_ws;
-}
+Mantid::API::IMDWorkspace_const_sptr QwtRasterDataMD::getWorkspace() const { return m_ws; }
 
 //------------------------------------------------------------------------------------------------------
 /** Sets the workspace that will be displayed ON TOP of the original workspace.
@@ -199,8 +188,7 @@ Mantid::API::IMDWorkspace_const_sptr QwtRasterDataMD::getWorkspace() const {
  *
  * @param ws :: IMDWorkspace to show
  */
-void QwtRasterDataMD::setOverlayWorkspace(
-    const Mantid::API::IMDWorkspace_const_sptr &ws) {
+void QwtRasterDataMD::setOverlayWorkspace(const Mantid::API::IMDWorkspace_const_sptr &ws) {
   if (!ws) {
     m_overlayWS.reset();
     return;
@@ -221,10 +209,9 @@ void QwtRasterDataMD::setOverlayWorkspace(
  * @param Y : Y Dimension
  * @param slicePoint :: vector of slice points
  */
-void QwtRasterDataMD::setSliceParams(
-    size_t dimX, size_t dimY, Mantid::Geometry::IMDDimension_const_sptr X,
-    Mantid::Geometry::IMDDimension_const_sptr Y,
-    std::vector<Mantid::coord_t> &slicePoint) {
+void QwtRasterDataMD::setSliceParams(size_t dimX, size_t dimY, Mantid::Geometry::IMDDimension_const_sptr X,
+                                     Mantid::Geometry::IMDDimension_const_sptr Y,
+                                     std::vector<Mantid::coord_t> &slicePoint) {
   if (slicePoint.size() != m_nd)
     throw std::runtime_error("QwtRasterDataMD::setSliceParams(): inconsistent "
                              "vector/number of dimensions size.");
@@ -256,9 +243,7 @@ void QwtRasterDataMD::setSliceParams(
   }
 }
 
-void QwtRasterDataMD::transferSettingsTo(QwtRasterDataMD *dest) const {
-  this->copyFrom(*this, *dest);
-}
+void QwtRasterDataMD::transferSettingsTo(QwtRasterDataMD *dest) const { this->copyFrom(*this, *dest); }
 
 //-----------------------------------------------------------------------------
 // Protected members
@@ -269,8 +254,7 @@ void QwtRasterDataMD::transferSettingsTo(QwtRasterDataMD *dest) const {
  * @param source A source object to copy from
  * @param dest The destination object that receives the contents
  */
-void QwtRasterDataMD::copyFrom(const QwtRasterDataMD &source,
-                               QwtRasterDataMD &dest) const {
+void QwtRasterDataMD::copyFrom(const QwtRasterDataMD &source, QwtRasterDataMD &dest) const {
   // base bounding box
   dest.setBoundingRect(source.boundingRect());
 

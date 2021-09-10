@@ -38,23 +38,20 @@ SetScalingPSD::SetScalingPSD() : Algorithm(), m_scalingOption(0) {}
  */
 void SetScalingPSD::init() {
   // Declare required input parameters for algorithm
-  declareProperty(
-      std::make_unique<FileProperty>("ScalingFilename", "", FileProperty::Load,
-                                     std::vector<std::string>{".sca", ".raw"}),
-      "The name of the scaling calibrations file to read, including its\n"
-      "full or relative path. The file extension must be either .sca or\n"
-      ".raw (filenames are case sensitive on linux)");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("Workspace", "", Direction::InOut),
-      "The name of the workspace to apply the scaling to. This must be\n"
-      "associated with an instrument appropriate for the scaling file");
+  declareProperty(std::make_unique<FileProperty>("ScalingFilename", "", FileProperty::Load,
+                                                 std::vector<std::string>{".sca", ".raw"}),
+                  "The name of the scaling calibrations file to read, including its\n"
+                  "full or relative path. The file extension must be either .sca or\n"
+                  ".raw (filenames are case sensitive on linux)");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("Workspace", "", Direction::InOut),
+                  "The name of the workspace to apply the scaling to. This must be\n"
+                  "associated with an instrument appropriate for the scaling file");
 
   auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
-  declareProperty(
-      "ScalingOption", 0, mustBePositive,
-      "Control scaling calculation - 0 => use average of left and right\n"
-      "scaling (default). 1 => use maximum scaling. 2 => maximum + 5%");
+  declareProperty("ScalingOption", 0, mustBePositive,
+                  "Control scaling calculation - 0 => use average of left and right\n"
+                  "scaling (default). 1 => use maximum scaling. 2 => maximum + 5%");
 }
 
 /** Executes the algorithm.
@@ -77,8 +74,7 @@ void SetScalingPSD::exec() {
  *  @param truepos :: V3D vector of actual positions as read from the file
  *  @return False if unable to open file, True otherwise
  */
-bool SetScalingPSD::processScalingFile(const std::string &scalingFile,
-                                       std::vector<Kernel::V3D> &truepos) {
+bool SetScalingPSD::processScalingFile(const std::string &scalingFile, std::vector<Kernel::V3D> &truepos) {
   // Read the scaling information from a text file (.sca extension) or from a
   // raw file (.raw)
   // This is really corrected positions as (r,theta,phi) for each detector
@@ -91,8 +87,7 @@ bool SetScalingPSD::processScalingFile(const std::string &scalingFile,
   std::map<int, double>::iterator its;
 
   const auto &detectorInfo = m_workspace->detectorInfo();
-  if (scalingFile.find(".sca") != std::string::npos ||
-      scalingFile.find(".SCA") != std::string::npos) {
+  if (scalingFile.find(".sca") != std::string::npos || scalingFile.find(".SCA") != std::string::npos) {
     // read a .sca text format file
     // format consists of a short header followed by one line per detector
 
@@ -136,8 +131,7 @@ bool SetScalingPSD::processScalingFile(const std::string &scalingFile,
       // on monitors
       if (theta > 181.0 || theta < -1 || phi < -181 || phi > 181) {
         g_log.error("Position angle data out of range in .sca file");
-        throw std::runtime_error(
-            "Position angle data out of range in .sca file");
+        throw std::runtime_error("Position angle data out of range in .sca file");
       }
       Kernel::V3D truPos;
       // use abs as correction file has -ve l2 for first few detectors
@@ -173,8 +167,7 @@ bool SetScalingPSD::processScalingFile(const std::string &scalingFile,
         continue;
       }
     }
-  } else if (scalingFile.find(".raw") != std::string::npos ||
-             scalingFile.find(".RAW") != std::string::npos) {
+  } else if (scalingFile.find(".raw") != std::string::npos || scalingFile.find(".RAW") != std::string::npos) {
     std::vector<int> detID;
     std::vector<Kernel::V3D> truepos;
     getDetPositionsFromRaw(scalingFile, detID, truepos);
@@ -238,8 +231,7 @@ bool SetScalingPSD::processScalingFile(const std::string &scalingFile,
  * @param posMap :: A map of integer detector ID to position shift
  * @param scaleMap :: A map of integer detectorID to scaling (in Y)
  */
-void SetScalingPSD::movePos(API::MatrixWorkspace_sptr &WS,
-                            std::map<int, Kernel::V3D> &posMap,
+void SetScalingPSD::movePos(API::MatrixWorkspace_sptr &WS, std::map<int, Kernel::V3D> &posMap,
                             std::map<int, double> &scaleMap) {
 
   auto &detectorInfo = WS->mutableDetectorInfo();
@@ -275,11 +267,9 @@ void SetScalingPSD::movePos(API::MatrixWorkspace_sptr &WS,
     }
     prog.report();
   }
-  g_log.debug() << "Range of scaling factors is " << minScale << " to "
-                << maxScale << "\n";
+  g_log.debug() << "Range of scaling factors is " << minScale << " to " << maxScale << "\n";
   if (0 != scaleCount) {
-    g_log.debug() << "Average abs scaling fraction is " << aveScale / scaleCount
-                  << "\n";
+    g_log.debug() << "Average abs scaling fraction is " << aveScale / scaleCount << "\n";
   } else {
     g_log.debug() << "Average abs scaling fraction cannot ba calculated "
                      "because the scale count is 0! Its value before dividing "
@@ -293,8 +283,7 @@ void SetScalingPSD::movePos(API::MatrixWorkspace_sptr &WS,
  * @param detID :: Vector of detector numbers
  * @param pos :: V3D of detector positions corresponding to detID
  */
-void SetScalingPSD::getDetPositionsFromRaw(const std::string &rawfile,
-                                           std::vector<int> &detID,
+void SetScalingPSD::getDetPositionsFromRaw(const std::string &rawfile, std::vector<int> &detID,
                                            std::vector<Kernel::V3D> &pos) {
   (void)rawfile; // Avoid compiler warning
 

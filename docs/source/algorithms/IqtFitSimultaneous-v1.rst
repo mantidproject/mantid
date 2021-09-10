@@ -24,7 +24,7 @@ Usage
 **Example - Running IqtFitSimultaneous on an reduced workspace.**
 
 .. code-block:: python
-    
+
     #Load in iqt data
     input_ws = Load(Filename='iris26176_graphite002_iqt.nxs')
     function = r'name=LinearBackground,A0=0.027668,A1=0,ties=(A1=0);
@@ -32,7 +32,7 @@ Usage
                  ties=(f1.Intensity=1-f0.A0)'
 
     #run IqtFitSimultaneous
-    result, params, fit_group = IqtFitSimultaneous(Function=function, InputWorkspace=input_ws, 
+    result, params, fit_group = IqtFitSimultaneous(Function=function, InputWorkspace=input_ws,
                                                    WorkspaceIndex=0, StartX=0, EndX=0.2)
 
 

@@ -23,24 +23,31 @@ public:
   /**
    Constructor
    */
-  CalculateReflectometryKiKf() : m_sin_theta_i(0.0), m_sin_theta_f(0.0) {}
+  CalculateReflectometryKiKf(int version) : CalculateReflectometry(version), m_sin_theta_i(0.0), m_sin_theta_f(0.0) {}
 
   /**
    Setter for the incident theta value require for the calculation. Internally
    pre-calculates and caches to cos theta for speed.
    @param thetaIncident: incident theta value in degrees
    */
-  void setThetaIncident(double thetaIncident) override {
-    m_sin_theta_i = sin(to_radians_factor * thetaIncident);
-  }
+  void updateThetaIncident(double thetaIncident) override { m_sin_theta_i = sin(to_radians_factor * thetaIncident); }
 
   /**
-    Setter for the final theta value require for the calculation. Internally
-    pre-calculates and caches to cos theta for speed.
-    @param thetaFinal: final theta value in degrees
+   Setter for the final theta value require for the calculation. Internally
+    pre-calculates and caches to cos theta_f for speed.
+   @param thetaFinal: final theta value in degrees
+   */
+  void setThetaFinal(double thetaFinal) override { m_sin_theta_f = sin(to_radians_factor * thetaFinal); }
+
+  /**
+    Set the final theta value from the detector twoTheta angle.
+    @param twoTheta: detector twoTheta value in degrees
     */
-  void setThetaFinal(double thetaFinal) override {
-    m_sin_theta_f = sin(to_radians_factor * thetaFinal);
+  void setTwoTheta(double twoTheta) override {
+    if (m_version == 1)
+      setThetaFinal(twoTheta);
+    else
+      setThetaFinal(twoTheta - m_theta_i);
   }
 
   /**
@@ -60,29 +67,24 @@ public:
     double wavenumber = 2 * M_PI / wavelength;
     return wavenumber * m_sin_theta_f;
   }
-  Mantid::Geometry::Quadrilateral createQuad(double lamUpper, double lamLower,
-                                             double thetaUpper,
+  Mantid::Geometry::Quadrilateral createQuad(double lamUpper, double lamLower, double thetaUpper,
                                              double thetaLower) override {
-    setThetaFinal(thetaLower);
+    setTwoTheta(thetaLower);
     const Mantid::Kernel::V2D firstVertex(calculateDim0(lamLower), // highest qx
                                           calculateDim1(lamLower));
-    const Mantid::Kernel::V2D secondVertex(
-        calculateDim0(lamUpper),
-        calculateDim1(lamUpper)); // lowest qz
-    setThetaFinal(thetaUpper);
-    const Mantid::Kernel::V2D thirdVertex(
-        calculateDim0(lamLower),
-        calculateDim1(lamLower)); // highest qz
+    const Mantid::Kernel::V2D secondVertex(calculateDim0(lamUpper),
+                                           calculateDim1(lamUpper)); // lowest qz
+    setTwoTheta(thetaUpper);
+    const Mantid::Kernel::V2D thirdVertex(calculateDim0(lamLower),
+                                          calculateDim1(lamLower)); // highest qz
     const Mantid::Kernel::V2D fourthVertex(calculateDim0(lamUpper), // lowest qx
                                            calculateDim1(lamUpper));
 
-    Mantid::Geometry::Quadrilateral quad(fourthVertex, secondVertex,
-                                         firstVertex, thirdVertex);
+    Mantid::Geometry::Quadrilateral quad(fourthVertex, secondVertex, firstVertex, thirdVertex);
     // Our lower-left vertex may not be in the right position
     // we keep shifting the vertices around in a clock-wise fashion
     // until the lower-left vertex is in the correct place.
-    while ((quad.at(0).X() > quad.at(3).X()) ||
-           (quad.at(0).Y() > quad.at(1).Y())) {
+    while ((quad.at(0).X() > quad.at(3).X()) || (quad.at(0).Y() > quad.at(1).Y())) {
       quad.shiftVertexesClockwise();
     }
 

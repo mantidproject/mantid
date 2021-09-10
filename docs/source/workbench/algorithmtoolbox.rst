@@ -9,8 +9,7 @@ Algorithm Toolbox
     :align: right
 
 The algorithm toolbox offers access to all of Mantid's algorithms.
-If you are familiar with MantidPlot it functions similarly. The algorithms are
-listed in categories and there is also a search bar.
+The algorithms are listed in categories and there is also a search bar.
 
 Execute Button
 --------------

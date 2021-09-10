@@ -16,8 +16,7 @@ Kernel::IValidator_sptr WorkspaceHasDxValidator::clone() const {
 
 /// Return an error string if not all histograms in ws have Dx, otherwise an
 /// empty string.
-std::string
-WorkspaceHasDxValidator::checkValidity(MatrixWorkspace_sptr const &ws) const {
+std::string WorkspaceHasDxValidator::checkValidity(MatrixWorkspace_sptr const &ws) const {
   for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
     if (!ws->hasDx(i)) {
       return "The workspace must have Dx values set";

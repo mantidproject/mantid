@@ -57,7 +57,7 @@ Usage
     # acc_ws should have double the number of events that md_ws has
     print("There are {} events in each of the two data workspaces.".format(md_ws.getNEvents()))
     print("The accumulated data workspace contains {} events.".format(acc_ws.getNEvents()))
-  
+
 Output:
 
 .. testoutput:: ExSimpleAccumulate

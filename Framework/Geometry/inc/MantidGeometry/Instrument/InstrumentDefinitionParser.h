@@ -44,44 +44,29 @@ class ShapeFactory;
 class DLLExport InstrumentDefinitionParser {
 public:
   InstrumentDefinitionParser();
-  InstrumentDefinitionParser(const std::string &filename,
-                             const std::string &instName,
-                             const std::string &xmlText);
-  InstrumentDefinitionParser(const IDFObject_const_sptr &xmlFile,
-                             const IDFObject_const_sptr &expectedCacheFile,
-                             const std::string &instName,
-                             const std::string &xmlText);
+  InstrumentDefinitionParser(const std::string &filename, const std::string &instName, const std::string &xmlText);
+  InstrumentDefinitionParser(const IDFObject_const_sptr &xmlFile, const IDFObject_const_sptr &expectedCacheFile,
+                             const std::string &instName, const std::string &xmlText);
   ~InstrumentDefinitionParser() = default;
 
   /// Caching
-  enum CachingOption {
-    NoneApplied,
-    ReadGeomCache,
-    ReadFallBack,
-    WroteGeomCache,
-    WroteCacheTemp
-  };
+  enum CachingOption { NoneApplied, ReadGeomCache, ReadFallBack, WroteGeomCache, WroteCacheTemp };
 
   /// Parse XML contents
   std::shared_ptr<Instrument> parseXML(Kernel::ProgressBase *progressReporter);
 
   /// Add/overwrite any parameters specified in instrument with param values
   /// specified in <component-link> XML elements
-  void setComponentLinks(std::shared_ptr<Geometry::Instrument> &instrument,
-                         Poco::XML::Element *pRootElem,
-                         Kernel::ProgressBase *progress = nullptr,
-                         std::string requestedDate = std::string());
+  void setComponentLinks(std::shared_ptr<Geometry::Instrument> &instrument, Poco::XML::Element *pRootElem,
+                         Kernel::ProgressBase *progress = nullptr, std::string requestedDate = std::string());
 
   std::string getMangledName();
 
   /// Get parent component element of location element
-  static Poco::XML::Element *
-  getParentComponent(const Poco::XML::Element *pLocElem);
+  static Poco::XML::Element *getParentComponent(const Poco::XML::Element *pLocElem);
 
   /// get name of location element
-  static std::string
-  getNameOfLocationElement(const Poco::XML::Element *pElem,
-                           const Poco::XML::Element *pCompElem);
+  static std::string getNameOfLocationElement(const Poco::XML::Element *pElem, const Poco::XML::Element *pCompElem);
 
   /// Save DOM tree to xml file
   void saveDOM_Tree(std::string &outFilename);
@@ -94,23 +79,20 @@ public:
 
 private:
   /// shared Constructor logic
-  void initialise(const std::string &filename, const std::string &instName,
-                  const std::string &xmlText, const std::string &vtpFilename);
+  void initialise(const std::string &filename, const std::string &instName, const std::string &xmlText,
+                  const std::string &vtpFilename);
 
   /// lazy loads the document and returns a pointer
   Poco::AutoPtr<Poco::XML::Document> getDocument();
 
   /// Set location (position) of comp as specified in XML location element
-  void setLocation(Geometry::IComponent *comp, const Poco::XML::Element *pElem,
-                   const double angleConvertConst,
+  void setLocation(Geometry::IComponent *comp, const Poco::XML::Element *pElem, const double angleConvertConst,
                    const bool deltaOffsets = false);
 
   /// Calculate the position of comp relative to its parent from info provided
   /// by \<location\> element
-  Kernel::V3D getRelativeTranslation(const Geometry::IComponent *comp,
-                                     const Poco::XML::Element *pElem,
-                                     const double angleConvertConst,
-                                     const bool deltaOffsets = false);
+  Kernel::V3D getRelativeTranslation(const Geometry::IComponent *comp, const Poco::XML::Element *pElem,
+                                     const double angleConvertConst, const bool deltaOffsets = false);
 
   /// Check the validity range and add it to the instrument object
   void setValidityRange(const Poco::XML::Element *pRootElem);
@@ -143,13 +125,11 @@ private:
   /// Method for populating IdList
   void populateIdList(Poco::XML::Element *pE, IdList &idList);
 
-  std::vector<std::string>
-  buildExcludeList(const Poco::XML::Element *const location);
+  std::vector<std::string> buildExcludeList(const Poco::XML::Element *const location);
 
   /// Add XML element to parent assuming the element contains other component
   /// elements
-  void appendAssembly(Geometry::ICompAssembly *parent,
-                      const Poco::XML::Element *pLocElem,
+  void appendAssembly(Geometry::ICompAssembly *parent, const Poco::XML::Element *pLocElem,
                       const Poco::XML::Element *pCompElem, IdList &idList);
   /// Return true if assembly, false if not assembly and throws exception if
   /// string not in assembly
@@ -157,44 +137,32 @@ private:
 
   /// Add XML element to parent assuming the element contains no other component
   /// elements
-  void appendLeaf(Geometry::ICompAssembly *parent,
-                  const Poco::XML::Element *pLocElem,
+  void appendLeaf(Geometry::ICompAssembly *parent, const Poco::XML::Element *pLocElem,
                   const Poco::XML::Element *pCompElem, IdList &idList);
 
-  void createDetectorOrMonitor(Geometry::ICompAssembly *parent,
-                               const Poco::XML::Element *pLocElem,
-                               const Poco::XML::Element *pCompElem,
-                               const std::string &filename, IdList &idList,
+  void createDetectorOrMonitor(Geometry::ICompAssembly *parent, const Poco::XML::Element *pLocElem,
+                               const Poco::XML::Element *pCompElem, const std::string &filename, IdList &idList,
                                const std::string &category);
 
-  void createGridDetector(Geometry::ICompAssembly *parent,
-                          const Poco::XML::Element *pLocElem,
-                          const Poco::XML::Element *pCompElem,
-                          const std::string &filename,
+  void createGridDetector(Geometry::ICompAssembly *parent, const Poco::XML::Element *pLocElem,
+                          const Poco::XML::Element *pCompElem, const std::string &filename,
                           const Poco::XML::Element *pType);
 
-  void createRectangularDetector(Geometry::ICompAssembly *parent,
-                                 const Poco::XML::Element *pLocElem,
-                                 const Poco::XML::Element *pCompElem,
-                                 const std::string &filename,
+  void createRectangularDetector(Geometry::ICompAssembly *parent, const Poco::XML::Element *pLocElem,
+                                 const Poco::XML::Element *pCompElem, const std::string &filename,
                                  const Poco::XML::Element *pType);
 
-  void createStructuredDetector(Geometry::ICompAssembly *parent,
-                                const Poco::XML::Element *pLocElem,
-                                const Poco::XML::Element *pCompElem,
-                                const std::string &filename,
+  void createStructuredDetector(Geometry::ICompAssembly *parent, const Poco::XML::Element *pLocElem,
+                                const Poco::XML::Element *pCompElem, const std::string &filename,
                                 const Poco::XML::Element *pType);
 
   /// Append \<locations\> in a locations element
-  void appendLocations(Geometry::ICompAssembly *parent,
-                       const Poco::XML::Element *pLocElems,
+  void appendLocations(Geometry::ICompAssembly *parent, const Poco::XML::Element *pLocElems,
                        const Poco::XML::Element *pCompElem, IdList &idList);
 
   /// Set parameter/logfile info (if any) associated with component
-  void setLogfile(const Geometry::IComponent *comp,
-                  const Poco::XML::Element *pElem,
-                  InstrumentParameterCache &logfileCache,
-                  std::string requestedDate = std::string());
+  void setLogfile(const Geometry::IComponent *comp, const Poco::XML::Element *pElem,
+                  InstrumentParameterCache &logfileCache, std::string requestedDate = std::string());
 
   /// Parse position of facing element to V3D
   Kernel::V3D parseFacingElementToV3D(Poco::XML::Element *pElem);
@@ -202,12 +170,10 @@ private:
   void setFacing(Geometry::IComponent *comp, const Poco::XML::Element *pElem);
   /// Make the shape defined in 1st argument face the component in the second
   /// argument
-  void makeXYplaneFaceComponent(Geometry::IComponent *&in,
-                                const Geometry::ObjComponent *facing);
+  void makeXYplaneFaceComponent(Geometry::IComponent *&in, const Geometry::ObjComponent *facing);
   /// Make the shape defined in 1st argument face the position in the second
   /// argument
-  void makeXYplaneFaceComponent(Geometry::IComponent *&in,
-                                const Kernel::V3D &facingPoint);
+  void makeXYplaneFaceComponent(Geometry::IComponent *&in, const Kernel::V3D &facingPoint);
 
   /// Reads in or creates the geometry cache ('vtp') file
   CachingOption setupGeometryCache();
@@ -222,100 +188,81 @@ private:
   /// elements with \<cuboid\>'s
   /// (note for now this will only work for \<cuboid\>'s and when necessary this
   /// can be extended).
-  void adjust(Poco::XML::Element *pElem,
-              std::map<std::string, bool> &isTypeAssembly,
+  void adjust(Poco::XML::Element *pElem, std::map<std::string, bool> &isTypeAssembly,
               std::map<std::string, Poco::XML::Element *> &getTypeElement);
 
   /// Take as input a \<locations\> element. Such an element is a short-hand
   /// notation for a sequence of \<location\> elements.
   /// This method return this sequence as a xml string
-  Poco::AutoPtr<Poco::XML::Document>
-  convertLocationsElement(const Poco::XML::Element *pElem);
+  Poco::AutoPtr<Poco::XML::Document> convertLocationsElement(const Poco::XML::Element *pElem);
 
   /// return 0 if the attribute doesn't exist. This is to follow the
   /// behavior of atof which always returns 0 if there is a problem.
   double attrToDouble(const Poco::XML::Element *pElem, const std::string &name);
 
   /// Populate vectors of pointers to type and component xml elements
-  void getTypeAndComponentPointers(
-      const Poco::XML::Element *pRootElem,
-      std::vector<Poco::XML::Element *> &typeElems,
-      std::vector<Poco::XML::Element *> &compElems) const;
+  void getTypeAndComponentPointers(const Poco::XML::Element *pRootElem, std::vector<Poco::XML::Element *> &typeElems,
+                                   std::vector<Poco::XML::Element *> &compElems) const;
 
   /// Throw exception if type name is not unique in the IDF
-  void throwIfTypeNameNotUnique(const std::string &filename,
-                                const std::string &typeName) const;
+  void throwIfTypeNameNotUnique(const std::string &filename, const std::string &typeName) const;
 
   /// Record type as an assembly if it contains a component, otherwise create a
   /// shape for it
-  void
-  createShapeIfTypeIsNotAnAssembly(Mantid::Geometry::ShapeFactory &shapeCreator,
-                                   size_t iType, Poco::XML::Element *pTypeElem,
-                                   const std::string &typeName);
+  void createShapeIfTypeIsNotAnAssembly(Mantid::Geometry::ShapeFactory &shapeCreator, size_t iType,
+                                        Poco::XML::Element *pTypeElem, const std::string &typeName);
 
   /// Adjust each type which contains a \<combine-components-into-one-shape\>
   /// element
-  void adjustTypesContainingCombineComponentsElement(
-      ShapeFactory &shapeCreator, const std::string &filename,
-      const std::vector<Poco::XML::Element *> &typeElems, size_t numberOfTypes);
+  void adjustTypesContainingCombineComponentsElement(ShapeFactory &shapeCreator, const std::string &filename,
+                                                     const std::vector<Poco::XML::Element *> &typeElems,
+                                                     size_t numberOfTypes);
 
   /// Create a vector of elements which contain a \<parameter\>
-  void createVectorOfElementsContainingAParameterElement(
-      Poco::XML::Element *pRootElem);
+  void createVectorOfElementsContainingAParameterElement(Poco::XML::Element *pRootElem);
 
   /// Check IdList
-  void checkIdListExistsAndDefinesEnoughIDs(const IdList &idList,
-                                            Poco::XML::Element *pElem,
+  void checkIdListExistsAndDefinesEnoughIDs(const IdList &idList, Poco::XML::Element *pElem,
                                             const std::string &filename) const;
 
   /// Check component has a \<location\> or \<locations\> element
-  void checkComponentContainsLocationElement(Poco::XML::Element *pElem,
-                                             const std::string &filename) const;
+  void checkComponentContainsLocationElement(Poco::XML::Element *pElem, const std::string &filename) const;
 
   /// Aggregate locations and IDs for components
-  void parseLocationsForEachTopLevelComponent(
-      Kernel::ProgressBase *progressReporter, const std::string &filename,
-      const std::vector<Poco::XML::Element *> &compElems);
+  void parseLocationsForEachTopLevelComponent(Kernel::ProgressBase *progressReporter, const std::string &filename,
+                                              const std::vector<Poco::XML::Element *> &compElems);
 
   /// Collect some information about types for later use
-  void
-  collateTypeInformation(const std::string &filename,
-                         const std::vector<Poco::XML::Element *> &typeElems,
-                         ShapeFactory &shapeCreator);
+  void collateTypeInformation(const std::string &filename, const std::vector<Poco::XML::Element *> &typeElems,
+                              ShapeFactory &shapeCreator);
 
 public: // for testing
   /// return absolute position of point which is set relative to the
   /// coordinate system of the input component
-  Kernel::V3D getAbsolutPositionInCompCoorSys(Geometry::ICompAssembly *comp,
-                                              Kernel::V3D);
+  Kernel::V3D getAbsolutPositionInCompCoorSys(Geometry::ICompAssembly *comp, Kernel::V3D);
 
 private:
   /// Reads from a cache file.
   void applyCache(const IDFObject_const_sptr &cacheToApply);
 
   /// Write out a cache file.
-  CachingOption writeAndApplyCache(IDFObject_const_sptr firstChoiceCache,
-                                   IDFObject_const_sptr fallBackCache);
+  CachingOption writeAndApplyCache(IDFObject_const_sptr firstChoiceCache, IDFObject_const_sptr fallBackCache);
 
   /// This method returns the parent appended which its child components and
   /// also name of type of the last child component
-  std::string getShapeCoorSysComp(
-      Geometry::ICompAssembly *parent, Poco::XML::Element *pLocElem,
-      std::map<std::string, Poco::XML::Element *> &getTypeElement,
-      Geometry::ICompAssembly *&endAssembly);
+  std::string getShapeCoorSysComp(Geometry::ICompAssembly *parent, Poco::XML::Element *pLocElem,
+                                  std::map<std::string, Poco::XML::Element *> &getTypeElement,
+                                  Geometry::ICompAssembly *&endAssembly);
 
   /// Returns a translated and rotated \<cuboid\> element
-  std::string translateRotateXMLcuboid(Geometry::ICompAssembly *comp,
-                                       const Poco::XML::Element *cuboidEle,
+  std::string translateRotateXMLcuboid(Geometry::ICompAssembly *comp, const Poco::XML::Element *cuboidEle,
                                        const std::string &cuboidName);
   /// Returns a translated and rotated \<cuboid\> element
-  std::string translateRotateXMLcuboid(Geometry::ICompAssembly *comp,
-                                       const std::string &cuboidXML,
+  std::string translateRotateXMLcuboid(Geometry::ICompAssembly *comp, const std::string &cuboidXML,
                                        const std::string &cuboidName);
 
   /// Return a subelement of an XML element
-  Poco::XML::Element *getShapeElement(const Poco::XML::Element *pElem,
-                                      const std::string &name);
+  Poco::XML::Element *getShapeElement(const Poco::XML::Element *pElem, const std::string &name);
 
   /// Get position coordinates from XML element
   Kernel::V3D parsePosition(Poco::XML::Element *pElem);
@@ -393,8 +340,7 @@ private:
     ///@cond Exclude from doxygen documentation
     double r, theta, phi;
     SphVec() : r(0.0), theta(0.0), phi(0.0) {}
-    SphVec(const double &r, const double &theta, const double &phi)
-        : r(r), theta(theta), phi(phi) {}
+    SphVec(const double &r, const double &theta, const double &phi) : r(r), theta(theta), phi(phi) {}
     ///@endcond
   };
 

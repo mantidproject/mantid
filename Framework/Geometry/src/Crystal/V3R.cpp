@@ -12,15 +12,12 @@ namespace Geometry {
 V3R::V3R() : m_x(0), m_y(0), m_z(0) {}
 
 /// Constructor from three RationalNumbers, which may also be integers
-V3R::V3R(const RationalNumber &x, const RationalNumber &y,
-         const RationalNumber &z)
-    : m_x(x), m_y(y), m_z(z) {}
+V3R::V3R(const RationalNumber &x, const RationalNumber &y, const RationalNumber &z) : m_x(x), m_y(y), m_z(z) {}
 
 /// Constructor from an appropriately sized integer vector
 V3R::V3R(const std::vector<int> &vector) {
   if (vector.size() != 3) {
-    throw Kernel::Exception::MisMatch<size_t>(
-        vector.size(), 3, "V3R(const std::vector<int> &vector)");
+    throw Kernel::Exception::MisMatch<size_t>(vector.size(), 3, "V3R(const std::vector<int> &vector)");
   }
 
   m_x = vector[0];
@@ -57,8 +54,7 @@ RationalNumber &V3R::operator[](size_t index) {
   case 2:
     return m_z;
   default:
-    throw Kernel::Exception::IndexError(index, 2,
-                                        "V3R::operator [] index out of range.");
+    throw Kernel::Exception::IndexError(index, 2, "V3R::operator [] index out of range.");
   }
 }
 
@@ -73,8 +69,7 @@ const RationalNumber &V3R::operator[](size_t index) const {
   case 2:
     return m_z;
   default:
-    throw Kernel::Exception::IndexError(index, 2,
-                                        "V3R::operator [] index out of range.");
+    throw Kernel::Exception::IndexError(index, 2, "V3R::operator [] index out of range.");
   }
 }
 
@@ -255,33 +250,24 @@ V3R &V3R::operator/=(const RationalNumber &other) {
 /// Returns an instance of Kernel::V3D with floating point approximations of the
 /// components.
 V3R::operator Kernel::V3D() const {
-  return Kernel::V3D(boost::rational_cast<double>(m_x),
-                     boost::rational_cast<double>(m_y),
+  return Kernel::V3D(boost::rational_cast<double>(m_x), boost::rational_cast<double>(m_y),
                      boost::rational_cast<double>(m_z));
 }
 
 /// Returns the result of the operation d3' = r3 + d3, which is again a
 /// Kernel::V3D.
-Kernel::V3D V3R::operator+(const Kernel::V3D &other) const {
-  return other + static_cast<Kernel::V3D>(*this);
-}
+Kernel::V3D V3R::operator+(const Kernel::V3D &other) const { return other + static_cast<Kernel::V3D>(*this); }
 
 /// Returns the result of the operation d3' = r3 - d3, which is again a
 /// Kernel::V3D.
-Kernel::V3D V3R::operator-(const Kernel::V3D &other) const {
-  return static_cast<Kernel::V3D>(*this) - other;
-}
+Kernel::V3D V3R::operator-(const Kernel::V3D &other) const { return static_cast<Kernel::V3D>(*this) - other; }
 
 /// Returns true if all components of the compared vectors are equal, false
 /// otherwise.
-bool V3R::operator==(const V3R &other) const {
-  return m_x == other.m_x && m_y == other.m_y && m_z == other.m_z;
-}
+bool V3R::operator==(const V3R &other) const { return m_x == other.m_x && m_y == other.m_y && m_z == other.m_z; }
 
 /// Returns true if the compared vectors are not equal.
-bool V3R::operator!=(const V3R &other) const {
-  return !(this->operator==(other));
-}
+bool V3R::operator!=(const V3R &other) const { return !(this->operator==(other)); }
 
 /// Compares x of both vectors first, if those are equal the function compares y
 /// and finally z.
@@ -299,17 +285,13 @@ bool V3R::operator<(const V3R &other) const {
 
 /// Returns true if all components are equal to the integer used for comparison.
 /// Useful for checking against 0.
-bool V3R::operator==(int other) const {
-  return m_x == other && m_y == other && m_z == other;
-}
+bool V3R::operator==(int other) const { return m_x == other && m_y == other && m_z == other; }
 
 /// Returns true if any component is different from the integer.
 bool V3R::operator!=(int other) const { return !(this->operator==(other)); }
 
 /// Returns a V3R with absolute components.
-V3R V3R::getPositiveVector() const {
-  return V3R(boost::abs(m_x), boost::abs(m_y), boost::abs(m_z));
-}
+V3R V3R::getPositiveVector() const { return V3R(boost::abs(m_x), boost::abs(m_y), boost::abs(m_z)); }
 
 /// Returns an std::vector<double> with approximations of the components.
 V3R::operator std::vector<double>() const {

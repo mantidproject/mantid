@@ -44,52 +44,32 @@ class SearchResult;
 class TransmissionRunPair;
 class QtEventView;
 
-class MANTIDQT_ISISREFLECTOMETRY_DLL Encoder
-    : public MantidQt::API::BaseEncoder,
-      public IEncoder {
+class MANTIDQT_ISISREFLECTOMETRY_DLL Encoder : public MantidQt::API::BaseEncoder, public IEncoder {
 public:
-  QMap<QString, QVariant> encode(const QWidget *window,
-                                 const std::string &directory) override;
+  QMap<QString, QVariant> encode(const QWidget *window, const std::string &directory) override;
   QList<QString> tags() override;
-  QMap<QString, QVariant> encodeBatch(const IMainWindowView *mwv,
-                                      int batchIndex,
-                                      bool projectSave = false) override;
+  QMap<QString, QVariant> encodeBatch(const IMainWindowView *mwv, int batchIndex, bool projectSave = false) override;
 
 private:
-  BatchPresenter *findBatchPresenter(const QtBatchView *gui,
-                                     const IMainWindowView *mwv);
+  BatchPresenter *findBatchPresenter(const QtBatchView *gui, const IMainWindowView *mwv);
   QMap<QString, QVariant> encodeExperiment(const QtExperimentView *gui);
   QMap<QString, QVariant> encodePerAngleDefaults(const QTableWidget *tab);
-  QList<QVariant> encodePerAngleDefaultsRow(const QTableWidget *tab,
-                                            int rowIndex, int columnsNum);
-  QList<QVariant> encodePerAngleDefaultsRows(const QTableWidget *tab,
-                                             int rowsNum, int columnsNum);
+  QList<QVariant> encodePerAngleDefaultsRow(const QTableWidget *tab, int rowIndex, int columnsNum);
+  QList<QVariant> encodePerAngleDefaultsRows(const QTableWidget *tab, int rowsNum, int columnsNum);
   QMap<QString, QVariant> encodeInstrument(const QtInstrumentView *gui);
-  QMap<QString, QVariant> encodeRuns(const QtRunsView *gui, bool projectSave,
-                                     const ReductionJobs *redJobs,
+  QMap<QString, QVariant> encodeRuns(const QtRunsView *gui, bool projectSave, const ReductionJobs *redJobs,
                                      QtCatalogSearcher *searcher);
-  QMap<QString, QVariant> encodeRunsTable(const QtRunsTableView *gui,
-                                          bool projectSave,
-                                          const ReductionJobs *redJobs);
+  QMap<QString, QVariant> encodeRunsTable(const QtRunsTableView *gui, bool projectSave, const ReductionJobs *redJobs);
   QList<QVariant> encodeRunsTableModel(const ReductionJobs *redJobs);
-  QMap<QString, QVariant> encodeGroup(
-      const MantidQt::CustomInterfaces::ISISReflectometry::Group &group);
-  QList<QVariant>
-  encodeRows(const MantidQt::CustomInterfaces::ISISReflectometry::Group &group);
+  QMap<QString, QVariant> encodeGroup(const MantidQt::CustomInterfaces::ISISReflectometry::Group &group);
+  QList<QVariant> encodeRows(const MantidQt::CustomInterfaces::ISISReflectometry::Group &group);
   QMap<QString, QVariant> encodeRangeInQ(const RangeInQ &rangeInQ);
-  QMap<QString, QVariant>
-  encodeTransmissionRunPair(const TransmissionRunPair &transRunPair);
-  QMap<QString, QVariant>
-  encodeReductionWorkspace(const ReductionWorkspaces &redWs);
-  QMap<QString, QVariant>
-  encodeReductionOptions(const ReductionOptionsMap &rom);
-  QMap<QString, QVariant>
-  encodeRow(const MantidQt::CustomInterfaces::ISISReflectometry::Row &row);
-  QList<QVariant> encodeSearchModel(
-      const MantidQt::CustomInterfaces::ISISReflectometry::ISearchModel
-          &searchModel);
-  QMap<QString, QVariant> encodeSearchResult(
-      const MantidQt::CustomInterfaces::ISISReflectometry::SearchResult &row);
+  QMap<QString, QVariant> encodeTransmissionRunPair(const TransmissionRunPair &transRunPair);
+  QMap<QString, QVariant> encodeReductionWorkspace(const ReductionWorkspaces &redWs);
+  QMap<QString, QVariant> encodeReductionOptions(const ReductionOptionsMap &rom);
+  QMap<QString, QVariant> encodeRow(const MantidQt::CustomInterfaces::ISISReflectometry::Row &row);
+  QList<QVariant> encodeSearchModel(const MantidQt::CustomInterfaces::ISISReflectometry::ISearchModel &searchModel);
+  QMap<QString, QVariant> encodeSearchResult(const MantidQt::CustomInterfaces::ISISReflectometry::SearchResult &row);
   QMap<QString, QVariant> encodeSave(const QtSaveView *gui);
   QMap<QString, QVariant> encodeEvent(const QtEventView *gui);
 };

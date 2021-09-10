@@ -23,27 +23,19 @@ using namespace Kernel;
 using namespace API;
 
 void ElasticWindow::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-                      "InputWorkspace", "", Direction::Input,
-                      std::make_shared<WorkspaceUnitValidator>("DeltaE")),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
+                                                        std::make_shared<WorkspaceUnitValidator>("DeltaE")),
                   "The input workspace.");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("OutputInQ", "", Direction::Output),
-      "The name for output workspace with the X axis in units of Q");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("OutputInQSquared", "",
-                                            Direction::Output),
-      "The name for output workspace with the X axis in units of Q^2.");
-  declareProperty("IntegrationRangeStart", EMPTY_DBL(),
-                  std::make_shared<MandatoryValidator<double>>(),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputInQ", "", Direction::Output),
+                  "The name for output workspace with the X axis in units of Q");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputInQSquared", "", Direction::Output),
+                  "The name for output workspace with the X axis in units of Q^2.");
+  declareProperty("IntegrationRangeStart", EMPTY_DBL(), std::make_shared<MandatoryValidator<double>>(),
                   "Start Point of Range 1");
-  declareProperty("IntegrationRangeEnd", EMPTY_DBL(),
-                  std::make_shared<MandatoryValidator<double>>(),
+  declareProperty("IntegrationRangeEnd", EMPTY_DBL(), std::make_shared<MandatoryValidator<double>>(),
                   "End Point of Range 1");
-  declareProperty("BackgroundRangeStart", EMPTY_DBL(), "Start Point of Range 2",
-                  Direction::Input);
-  declareProperty("BackgroundRangeEnd", EMPTY_DBL(), "End Point of Range 2.",
-                  Direction::Input);
+  declareProperty("BackgroundRangeStart", EMPTY_DBL(), "Start Point of Range 2", Direction::Input);
+  declareProperty("BackgroundRangeEnd", EMPTY_DBL(), "End Point of Range 2.", Direction::Input);
 }
 
 void ElasticWindow::exec() {
@@ -65,14 +57,11 @@ void ElasticWindow::exec() {
 
   // Determine if we are converting from spectra number (red) or Q (Sqw)
   const bool axisIsSpectrumNumber = inputWorkspace->getAxis(1)->isSpectra();
-  g_log.information() << "Axis is spectrum number: " << axisIsSpectrumNumber
-                      << '\n';
+  g_log.information() << "Axis is spectrum number: " << axisIsSpectrumNumber << '\n';
 
   // Determine if we need to use the second time range...
-  const bool backgroundSubtraction =
-      !((bgRangeStart == bgRangeEnd) && (bgRangeStart == EMPTY_DBL()));
-  g_log.information() << "Use background subtraction: " << backgroundSubtraction
-                      << '\n';
+  const bool backgroundSubtraction = !((bgRangeStart == bgRangeEnd) && (bgRangeStart == EMPTY_DBL()));
+  g_log.information() << "Use background subtraction: " << backgroundSubtraction << '\n';
 
   // Calculate number of steps
   size_t numSteps = 4;
@@ -85,8 +74,7 @@ void ElasticWindow::exec() {
 
   if (backgroundSubtraction) {
     // ... CalculateFlatBackground, Minus, Integration...
-    IAlgorithm_sptr flatBG = createChildAlgorithm(
-        "CalculateFlatBackground", startProgress, endProgress, childAlgLogging);
+    auto flatBG = createChildAlgorithm("CalculateFlatBackground", startProgress, endProgress, childAlgLogging);
     flatBG->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWorkspace);
     flatBG->setProperty<double>("StartX", bgRangeStart);
     flatBG->setProperty<double>("EndX", bgRangeEnd);
@@ -98,8 +86,7 @@ void ElasticWindow::exec() {
 
     MatrixWorkspace_sptr flatBGws = flatBG->getProperty("OutputWorkspace");
 
-    IAlgorithm_sptr integ = createChildAlgorithm("Integration", startProgress,
-                                                 endProgress, childAlgLogging);
+    auto integ = createChildAlgorithm("Integration", startProgress, endProgress, childAlgLogging);
     integ->setProperty<MatrixWorkspace_sptr>("InputWorkspace", flatBGws);
     integ->setProperty<double>("RangeLower", intRangeStart);
     integ->setProperty<double>("RangeUpper", intRangeEnd);
@@ -109,8 +96,7 @@ void ElasticWindow::exec() {
     integWS = integ->getProperty("OutputWorkspace");
   } else {
     // ... Just Integration ...
-    IAlgorithm_sptr integ = createChildAlgorithm("Integration", startProgress,
-                                                 endProgress, childAlgLogging);
+    auto integ = createChildAlgorithm("Integration", startProgress, endProgress, childAlgLogging);
     integ->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWorkspace);
     integ->setProperty<double>("RangeLower", intRangeStart);
     integ->setProperty<double>("RangeUpper", intRangeEnd);
@@ -127,9 +113,7 @@ void ElasticWindow::exec() {
     const int version = 2;
 
     // ... ConvertSpectrumAxis (Q) ...
-    IAlgorithm_sptr csaQ =
-        createChildAlgorithm("ConvertSpectrumAxis", startProgress, endProgress,
-                             childAlgLogging, version);
+    auto csaQ = createChildAlgorithm("ConvertSpectrumAxis", startProgress, endProgress, childAlgLogging, version);
     csaQ->setProperty<MatrixWorkspace_sptr>("InputWorkspace", integWS);
     csaQ->setPropertyValue("Target", "ElasticQ");
     csaQ->setPropertyValue("EMode", "Indirect");
@@ -140,9 +124,7 @@ void ElasticWindow::exec() {
     endProgress += stepProgress;
 
     // ... ConvertSpectrumAxis (Q2) ...
-    IAlgorithm_sptr csaQ2 =
-        createChildAlgorithm("ConvertSpectrumAxis", startProgress, endProgress,
-                             childAlgLogging, version);
+    auto csaQ2 = createChildAlgorithm("ConvertSpectrumAxis", startProgress, endProgress, childAlgLogging, version);
     csaQ2->setProperty<MatrixWorkspace_sptr>("InputWorkspace", integWS);
     csaQ2->setPropertyValue("Target", "ElasticQSquared");
     csaQ2->setPropertyValue("EMode", "Indirect");
@@ -153,8 +135,7 @@ void ElasticWindow::exec() {
     endProgress += stepProgress;
 
     // ... Transpose (Q) ...
-    IAlgorithm_sptr tranQ = createChildAlgorithm("Transpose", startProgress,
-                                                 endProgress, childAlgLogging);
+    auto tranQ = createChildAlgorithm("Transpose", startProgress, endProgress, childAlgLogging);
     tranQ->setProperty<MatrixWorkspace_sptr>("InputWorkspace", csaQws);
     tranQ->setPropertyValue("OutputWorkspace", "outQ");
     tranQ->execute();
@@ -163,8 +144,7 @@ void ElasticWindow::exec() {
     endProgress += stepProgress;
 
     // ... Transpose (Q2) ...
-    IAlgorithm_sptr tranQ2 = createChildAlgorithm("Transpose", startProgress,
-                                                  endProgress, childAlgLogging);
+    auto tranQ2 = createChildAlgorithm("Transpose", startProgress, endProgress, childAlgLogging);
     tranQ2->setProperty<MatrixWorkspace_sptr>("InputWorkspace", csaQ2ws);
     tranQ2->setPropertyValue("OutputWorkspace", "outQSquared");
     tranQ2->execute();
@@ -173,8 +153,7 @@ void ElasticWindow::exec() {
     endProgress += stepProgress;
   } else {
     // ... Transpose (Q) ...
-    IAlgorithm_sptr tranQ = createChildAlgorithm("Transpose", startProgress,
-                                                 endProgress, childAlgLogging);
+    auto tranQ = createChildAlgorithm("Transpose", startProgress, endProgress, childAlgLogging);
     tranQ->setProperty<MatrixWorkspace_sptr>("InputWorkspace", integWS);
     tranQ->setPropertyValue("OutputWorkspace", "outQ");
     tranQ->execute();
@@ -183,8 +162,7 @@ void ElasticWindow::exec() {
     endProgress += stepProgress;
 
     // ... Convert to Histogram (Q2) ...
-    IAlgorithm_sptr histQ2 = createChildAlgorithm(
-        "ConvertToHistogram", startProgress, endProgress, childAlgLogging);
+    auto histQ2 = createChildAlgorithm("ConvertToHistogram", startProgress, endProgress, childAlgLogging);
     histQ2->setProperty<MatrixWorkspace_sptr>("InputWorkspace", outputQ);
     histQ2->setPropertyValue("OutputWorkspace", "outQ");
     histQ2->execute();
@@ -193,8 +171,7 @@ void ElasticWindow::exec() {
     endProgress += stepProgress;
 
     // ... Convert Units (Q2) ...
-    IAlgorithm_sptr convUnitQ2 = createChildAlgorithm(
-        "ConvertUnits", startProgress, endProgress, childAlgLogging);
+    auto convUnitQ2 = createChildAlgorithm("ConvertUnits", startProgress, endProgress, childAlgLogging);
     convUnitQ2->setProperty<MatrixWorkspace_sptr>("InputWorkspace", qHistWS);
     convUnitQ2->setPropertyValue("Target", "QSquared");
     convUnitQ2->setPropertyValue("EMode", "Indirect");

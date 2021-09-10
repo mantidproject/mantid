@@ -50,43 +50,35 @@ public:
     TS_ASSERT(m_alg.isExecuted());
 
     // Test the last stored value for each of the workspaces
-    API::WorkspaceGroup_sptr gws =
-        API::AnalysisDataService::Instance().retrieveWS<API::WorkspaceGroup>(
-            "outGWS");
+    API::WorkspaceGroup_sptr gws = API::AnalysisDataService::Instance().retrieveWS<API::WorkspaceGroup>("outGWS");
 
     // Test qvectors
     DataObjects::Workspace2D_sptr ws =
-        std::dynamic_pointer_cast<DataObjects::Workspace2D>(
-            gws->getItem("outGWS_qvectors"));
+        std::dynamic_pointer_cast<DataObjects::Workspace2D>(gws->getItem("outGWS_qvectors"));
     TS_ASSERT_DELTA(ws->y(2)[0], 0.012, 1e-03);
 
     // Test fq
-    ws = std::dynamic_pointer_cast<DataObjects::Workspace2D>(
-        gws->getItem("outGWS_fq"));
+    ws = std::dynamic_pointer_cast<DataObjects::Workspace2D>(gws->getItem("outGWS_fq"));
     TS_ASSERT_DELTA(ws->y(0)[4], 1070.7009, 1e-04);
     TS_ASSERT_DELTA(ws->y(1)[4], 674.67703, 1e-05);
 
     // Test fq0
-    ws = std::dynamic_pointer_cast<DataObjects::Workspace2D>(
-        gws->getItem("outGWS_fq0"));
+    ws = std::dynamic_pointer_cast<DataObjects::Workspace2D>(gws->getItem("outGWS_fq0"));
     TS_ASSERT_DELTA(ws->y(0)[4], 1094.1314, 1e-04);
     TS_ASSERT_DELTA(ws->y(1)[4], 652.75902, 1e-05);
 
     // Test fq2
-    ws = std::dynamic_pointer_cast<DataObjects::Workspace2D>(
-        gws->getItem("outGWS_fq2"));
+    ws = std::dynamic_pointer_cast<DataObjects::Workspace2D>(gws->getItem("outGWS_fq2"));
     TS_ASSERT_DELTA(ws->y(0)[4], 358926.16, 1e-02);
     TS_ASSERT_EQUALS(ws->y(1)[4], 0.0);
 
     // Test fq Real part
-    ws = std::dynamic_pointer_cast<DataObjects::Workspace2D>(
-        gws->getItem("outGWS_fqt.Re"));
+    ws = std::dynamic_pointer_cast<DataObjects::Workspace2D>(gws->getItem("outGWS_fqt.Re"));
     TS_ASSERT_DELTA(ws->y(4)[0], 1918.2156, 1e-04);
     TS_ASSERT_DELTA(ws->y(4)[14], 1918.2156, 1e-04);
 
     // Test fq Imaginary part
-    ws = std::dynamic_pointer_cast<DataObjects::Workspace2D>(
-        gws->getItem("outGWS_fqt.Im"));
+    ws = std::dynamic_pointer_cast<DataObjects::Workspace2D>(gws->getItem("outGWS_fqt.Im"));
     TS_ASSERT_DELTA(ws->y(4)[0], -656.82368, 1e-05);
     TS_ASSERT_DELTA(ws->y(4)[14], 656.82368, 1e-05);
 

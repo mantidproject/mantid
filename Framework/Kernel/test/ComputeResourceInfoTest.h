@@ -21,16 +21,14 @@ class ComputeResourceInfoTest : public CxxTest::TestSuite {
 public:
   void test_allMissing() {
     std::shared_ptr<FacilityInfo> fac;
-    TS_ASSERT_THROWS_NOTHING(fac =
-                                 createCRInfoInMinimalFacility(simpleInstStr));
+    TS_ASSERT_THROWS_NOTHING(fac = createCRInfoInMinimalFacility(simpleInstStr));
     TS_ASSERT(fac);
     std::vector<ComputeResourceInfo> cri;
     TS_ASSERT_THROWS_NOTHING(cri = fac->computeResInfos());
     TS_ASSERT_EQUALS(cri.size(), 0);
 
     std::shared_ptr<FacilityInfo> another;
-    TS_ASSERT_THROWS(another = createCRInfoInMinimalFacility(
-                         "<computeResource fooAtt=\"barVal\"/>"),
+    TS_ASSERT_THROWS(another = createCRInfoInMinimalFacility("<computeResource fooAtt=\"barVal\"/>"),
                      const std::runtime_error &);
     TS_ASSERT(!another);
   }
@@ -42,8 +40,7 @@ public:
                               "</u>"
                               "</computeResource>";
     std::shared_ptr<FacilityInfo> fac;
-    TS_ASSERT_THROWS(fac = createCRInfoInMinimalFacility(crTxt),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(fac = createCRInfoInMinimalFacility(crTxt), const std::runtime_error &);
     TS_ASSERT(!fac);
   }
 
@@ -54,8 +51,7 @@ public:
                               "</u_bar>"
                               "</compResource>";
     std::shared_ptr<FacilityInfo> fac;
-    TS_ASSERT_THROWS(fac = createCRInfoInMinimalFacility(crTxt),
-                     const Poco::XML::XMLException &);
+    TS_ASSERT_THROWS(fac = createCRInfoInMinimalFacility(crTxt), const Poco::XML::XMLException &);
     TS_ASSERT(!fac);
   }
 
@@ -101,8 +97,7 @@ public:
                               "</computeResource>";
 
     std::shared_ptr<FacilityInfo> fac;
-    TS_ASSERT_THROWS(fac = createCRInfoInMinimalFacility(fermi),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(fac = createCRInfoInMinimalFacility(fermi), const std::runtime_error &);
 
     TS_ASSERT(!fac);
   }
@@ -163,25 +158,19 @@ public:
     TS_ASSERT(fac->computeResInfos()[0] == fac->computeResInfos()[3]);
 
     // compare comp resource info retrieved by names
-    TS_ASSERT(
-        !(fac->computeResource(fermiName) == fac->computeResource(otherName)));
-    TS_ASSERT(
-        !(fac->computeResource(fermiName) == fac->computeResource(thirdName)));
-    TS_ASSERT(
-        !(fac->computeResource(otherName) == fac->computeResource(thirdName)));
+    TS_ASSERT(!(fac->computeResource(fermiName) == fac->computeResource(otherName)));
+    TS_ASSERT(!(fac->computeResource(fermiName) == fac->computeResource(thirdName)));
+    TS_ASSERT(!(fac->computeResource(otherName) == fac->computeResource(thirdName)));
   }
 
 private:
   /// make a minimal facilities file/xml string includin the compute resource
   /// passed
-  std::shared_ptr<FacilityInfo>
-  createCRInfoInMinimalFacility(const std::string &crStr) {
+  std::shared_ptr<FacilityInfo> createCRInfoInMinimalFacility(const std::string &crStr) {
     const std::string xmlStr = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
                                "<facilities>"
                                "  <facility name=\"" +
-                               testFacilityName +
-                               R"(" FileExtensions=".xyz">)" + simpleInstStr +
-                               crStr +
+                               testFacilityName + R"(" FileExtensions=".xyz">)" + simpleInstStr + crStr +
                                "  </facility>"
                                "</facilities>";
 
@@ -210,16 +199,13 @@ private:
   static const std::string fermiURL;
 };
 
-const std::string ComputeResourceInfoTest::simpleInstStr =
-    "<instrument name=\"AnInst\">"
-    "  <technique>Measuring Stuff</technique>"
-    "</instrument>";
+const std::string ComputeResourceInfoTest::simpleInstStr = "<instrument name=\"AnInst\">"
+                                                           "  <technique>Measuring Stuff</technique>"
+                                                           "</instrument>";
 
-const std::string ComputeResourceInfoTest::defaultType =
-    "MantidWebServiceAPIJobManager";
+const std::string ComputeResourceInfoTest::defaultType = "MantidWebServiceAPIJobManager";
 
 const std::string ComputeResourceInfoTest::testFacilityName = "ATestFacility";
 
-const std::string ComputeResourceInfoTest::fermiURL =
-    "https://fermi.ornl.gov/MantidRemote";
+const std::string ComputeResourceInfoTest::fermiURL = "https://fermi.ornl.gov/MantidRemote";
 const std::string ComputeResourceInfoTest::fermiName = "Fermi";

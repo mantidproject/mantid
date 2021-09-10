@@ -13,8 +13,7 @@ namespace CustomInterfaces {
 namespace ISISReflectometry {
 enum class FloodCorrectionType { Workspace, ParameterFile };
 
-inline FloodCorrectionType
-floodCorrectionTypeFromString(std::string const &correctionType) {
+inline FloodCorrectionType floodCorrectionTypeFromString(std::string const &correctionType) {
   if (correctionType == "Workspace")
     return FloodCorrectionType::Workspace;
   else if (correctionType == "ParameterFile")
@@ -23,8 +22,7 @@ floodCorrectionTypeFromString(std::string const &correctionType) {
     throw std::invalid_argument("Unexpected flood correction type.");
 }
 
-inline std::string
-floodCorrectionTypeToString(FloodCorrectionType correctionType) {
+inline std::string floodCorrectionTypeToString(FloodCorrectionType correctionType) {
   switch (correctionType) {
   case FloodCorrectionType::Workspace:
     return "Workspace";
@@ -45,8 +43,7 @@ inline bool floodCorrectionRequiresInputs(FloodCorrectionType correctionType) {
  */
 class MANTIDQT_ISISREFLECTOMETRY_DLL FloodCorrections {
 public:
-  FloodCorrections(FloodCorrectionType correctionType,
-                   boost::optional<std::string> workspace = boost::none);
+  FloodCorrections(FloodCorrectionType correctionType, boost::optional<std::string> workspace = boost::none);
 
   FloodCorrectionType correctionType() const;
   boost::optional<std::string> workspace() const;
@@ -56,10 +53,8 @@ private:
   boost::optional<std::string> m_workspace;
 };
 
-MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(FloodCorrections const &lhs,
-                                               FloodCorrections const &rhs);
-MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(FloodCorrections const &lhs,
-                                               FloodCorrections const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(FloodCorrections const &lhs, FloodCorrections const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(FloodCorrections const &lhs, FloodCorrections const &rhs);
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

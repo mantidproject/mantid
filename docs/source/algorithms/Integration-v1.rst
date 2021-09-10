@@ -50,14 +50,14 @@ output will be a :ref:`MatrixWorkspace <MatrixWorkspace>`.
 :ref:`algm-Rebin` is recommended if you want to keep the workspace as an
 EventWorkspace.
 
-**Integration for event workspaces refers to internal binning, provided by** 
-:ref:`algm-Rebin` **or load algorithm and may ignore limits, provided as algorithm 
-input.**  For example, attempt to integrate loaded ISIS event workspace in the 
+**Integration for event workspaces refers to internal binning, provided by**
+:ref:`algm-Rebin` **or load algorithm and may ignore limits, provided as algorithm
+input.**  For example, attempt to integrate loaded ISIS event workspace in the
 range [18000,20000] yields workspace integrated in the range [0,200000],
 assuming the data were collected in the time range [0,20000]. This happens because
 the event data would have single histogram workspace bin in range [0,20000].
-To obtain integral in the desired range, user have to :ref:`algm-Rebin` first, 
-and one of the binning intervals have to start from 18000 and another (or the same) 
+To obtain integral in the desired range, user have to :ref:`algm-Rebin` first,
+and one of the binning intervals have to start from 18000 and another (or the same)
 end at 20000.
 
 
@@ -65,7 +65,7 @@ end at 20000.
 Usage
 -----
 
-**Example - Integration over limited number of histograms:**  
+**Example - Integration over limited number of histograms:**
 
 .. testcode:: ExWsIndices
 
@@ -73,7 +73,7 @@ Usage
     ws=CreateSampleWorkspace('Histogram','Flat background')
     # Integrate 10 spectra over all X values
     intg=Integration(ws,StartWorkspaceIndex=11,EndWorkspaceIndex=20)
-    
+
     # Check the result
     print('The result workspace has {0} spectra'.format(intg.getNumberHistograms()))
     print('Integral of spectrum 11 is {0}'.format(intg.readY(0)[0]))
@@ -91,7 +91,7 @@ Output:
     Integral of spectrum 13 is 100.0
     Integration range is [ 0.0, 20000.0 ]
 
-**Example - Total peak intensity:**  
+**Example - Total peak intensity:**
 
 .. testcode:: ExRangeLists
 
@@ -103,15 +103,15 @@ Output:
         XMax=12000,
         BinWidth=20)
     nHisto = ws.getNumberHistograms()
-    
+
     # Add elastic peaks to 'ws'. They will be at different TOFs
     # since the detector banks will be 5 and 10 metres from the sample.
-    
+
     # First, a helper function for the peak shape
     def peak(shift, xs):
         xs = (xs[:-1] + xs[1:]) / 2.0  # Convert to bin centres.
         return 50 * numpy.exp(-numpy.square(xs - shift) / 1200)
-    
+
     # Now, generate the elastic peaks.
     Ei = 23.0  # Incident energy, meV
     L1 = 10.0 # Source-sample distance, m
@@ -122,11 +122,11 @@ Output:
         tof = UnitConversion.run('Energy', 'TOF', Ei, L1, L2, 0.0, DeltaEModeType.Direct, Ei)
         ys = ws.dataY(i)
         ys += peak(tof, ws.readX(i))
-    
+
     # Fit Gaussians to the workspace.
     # Fit results will be put into a table workspace 'epps'.
     epps = FindEPP(ws)
-    
+
     # Integrate the peaks over +/- 3*sigma
     lowerLimits = numpy.empty(nHisto)
     upperLimits = numpy.empty(nHisto)
@@ -135,11 +135,11 @@ Output:
         sigma = epps.cell('Sigma', i)
         lowerLimits[i] = peakCentre - 3 * sigma
         upperLimits[i] = peakCentre + 3 * sigma
-    
+
     totalIntensity = Integration(ws,
         RangeLowerList=lowerLimits,
         RangeUpperList=upperLimits)
-    
+
     print('Intensity of the first peak: {:.5}'.format(totalIntensity.dataY(0)[0]))
     print('Intensity of the last peak: {:.5}'.format(totalIntensity.dataY(nHisto-1)[0]))
 

@@ -8,7 +8,7 @@ This is a Python binding to the C++ class Mantid::Kernel::LongLongPropertyWithVa
 
 .. module:`mantid.kernel`
 
-.. autoclass:: mantid.kernel.LongLongPropertyWithValue 
+.. autoclass:: mantid.kernel.LongLongPropertyWithValue
     :members:
     :undoc-members:
     :inherited-members:

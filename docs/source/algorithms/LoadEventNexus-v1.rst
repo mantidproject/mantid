@@ -27,15 +27,15 @@ also loaded using :ref:`LoadNexusLogs <algm-LoadNexusLogs>`.
 
 **Instrument geometry**
 
-There are a series of approaches for extracting the instrument geometry. 
+There are a series of approaches for extracting the instrument geometry.
 These follow the escalation path as follows:
 
-- Tries to load embedded instrument_xml from the NXinstrument if present 
+- Tries to load embedded instrument_xml from the NXinstrument if present
   using :ref:`LoadIDFFromNexus <algm-LoadIDFFromNexus>`.
 - Else tries to load embedded nexus geometry from the NXinstrument if present
-- Else tries to load the instrument using the name extracted from NXinstrument 
+- Else tries to load the instrument using the name extracted from NXinstrument
 
-The latter two possibilities are achieved via 
+The latter two possibilities are achieved via
 :ref:`LoadInstrument <algm-LoadInstrument>`
 
 Optional properties
@@ -77,6 +77,10 @@ Veto pulses can be filtered out in a separate step using
 
 Data Loaded from Nexus File
 ###########################
+
+If `LoadAllLogs` is checked, all the logs in the Nexus files will be loaded directly in the sample logs as they are.
+The `LoadLogs` flag will be ignored.
+If only `LoadLogs` is checked, only a subset of the logs will be processed and loaded, in the manner described afterward.
 
 The nexus file must have ``/raw_data_1`` or ``/entry`` as its main group and
 that group be of type ``NXentry``. It also needs a group of type ``NXevent_data``.

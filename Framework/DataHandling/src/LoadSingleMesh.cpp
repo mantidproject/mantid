@@ -9,9 +9,7 @@
 namespace Mantid {
 namespace DataHandling {
 
-LoadSingleMesh::LoadSingleMesh(const std::string &filename,
-                               std::ios_base::openmode mode,
-                               ScaleUnits scaleType)
+LoadSingleMesh::LoadSingleMesh(const std::string &filename, std::ios_base::openmode mode, ScaleUnits scaleType)
     : MeshFileIO(scaleType), m_filename(filename) {
   m_file = std::ifstream(filename.c_str(), mode);
   if (!m_file) {

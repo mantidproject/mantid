@@ -35,8 +35,7 @@ BinEdges::BinEdges(const Points &points) {
   }
   // Now deal with the end points
   data[0] = points[0] - (data[1] - points[0]);
-  data[numPoints] =
-      points[numPoints - 1] + (points[numPoints - 1] - data[numEdges - 2]);
+  data[numPoints] = points[numPoints - 1] + (points[numPoints - 1] - data[numEdges - 2]);
   m_data = Kernel::make_cow<HistogramX>(std::move(data));
 }
 

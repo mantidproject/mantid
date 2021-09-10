@@ -13,7 +13,8 @@ from mantid.api import mtd, AlgorithmFactory, AnalysisDataService, DistributedDa
     ITableWorkspace, MatrixWorkspace
 from mantid.kernel import (
     ConfigService, Direction, EnabledWhenProperty, FloatArrayProperty, FloatBoundedValidator, IntArrayBoundedValidator,
-    IntArrayProperty, Property, PropertyCriterion, PropertyManagerDataService, StringListValidator, StringTimeSeriesProperty)
+    IntArrayProperty, MaterialBuilder, Property, PropertyCriterion, PropertyManagerDataService, StringListValidator,
+    StringTimeSeriesProperty)
 from mantid.dataobjects import SplittersWorkspace  # SplittersWorkspace
 from mantid.utils import absorptioncorrutils
 if AlgorithmFactory.exists('GatherWorkspaces'):
@@ -219,7 +220,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         self.declareProperty(FileProperty(name="OutputDirectory", defaultValue="",action=FileAction.Directory))
 
         # Caching options
-        self.copyProperties('AlignAndFocusPowderFromFiles', 'CacheDir')
+        self.declareProperty( 'CacheDir', "", 'comma-delimited ascii string representation of a list of candidate cache directories')
         self.declareProperty('CleanCache', False, 'Remove all cache files within CacheDir')
         self.setPropertySettings('CleanCache', EnabledWhenProperty('CacheDir', PropertyCriterion.IsNotDefault))
         property_names = ('CacheDir', 'CleanCache')
@@ -271,17 +272,25 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
 
         # If doing absorption correction, make sure the sample formula is correct
         if self.getProperty("TypeOfCorrection").value != "None":
-            if self.getProperty("SampleFormula").value == '':
-                issues['SampleFormula'] = "A sample formula must be provided."
+            if self.getProperty("SampleFormula").value.strip() != '':
+                try:
+                    MaterialBuilder().setFormula(self.getProperty("SampleFormula").value.strip())
+                except ValueError as ex:
+                    issues['SampleFormula'] = "Invalid SampleFormula: '{}'".format(str(ex))
 
         # The provided cache directory does not exist
-        cache_dir = self.getProperty('CacheDir').value  # absolute or relative path, as a string
-        if bool(cache_dir) and Path(cache_dir).exists() is False:
-            issues['CacheDir'] = f'Directory {cache_dir} does not exist'
+        cache_dir_string = self.getProperty('CacheDir').value  # comma-delimited string representation of list
+        if bool(cache_dir_string):
+
+            cache_dirs = [candidate.strip() for candidate in cache_dir_string.split(',')]
+
+            for cache_dir in cache_dirs:
+                if bool(cache_dir) and Path(cache_dir).exists() is False:
+                    issues['CacheDir'] = f'Directory {cache_dir} does not exist'
 
         # We cannot clear the cache if property "CacheDir" has not been set
         if self.getProperty('CleanCache').value and not bool(self.getProperty('CacheDir').value):
-            issues['CleanCache'] = f'Property "CacheDir" must be set in order to clean the cache'
+            issues['CleanCache'] = 'Property "CacheDir" must be set in order to clean the cache'
 
         return issues
 
@@ -317,7 +326,9 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         self._offsetFactor = self.getProperty("OffsetData").value
         self._outDir = self.getProperty("OutputDirectory").value
         # Caching options
-        self._cache_dir = self.getProperty("CacheDir").value
+        self._cache_dirs = [os.path.abspath(me.strip()) for me in self.getProperty("CacheDir").value.split(',')
+                            if me.strip()]  # filter out empty elements
+        self._cache_dir = self._cache_dirs[0] if self._cache_dirs else ""
         self._clean_cache = self.getProperty("CleanCache").value
 
         self._outPrefix = self.getProperty("OutputFilePrefix").value.strip()
@@ -404,6 +415,15 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             api.Load(Filename=samRuns[0], OutputWorkspace=absName, MetaDataOnly=True)
             self._info = self._getinfo(absName)
             metaws = absName
+            if self._sampleFormula == '' and "SampleFormula" in mtd[metaws].run():
+                # Do a quick check to see if the sample formula in the logs is correct
+                try:
+                    MaterialBuilder().setFormula(mtd[metaws].run()["SampleFormula"].lastValue().strip())
+                except ValueError:
+                    self.log().warning(
+                        "Sample formula '{}' found in sample logs does not have a valid format - specify manually in "
+                        "algorithm input.".format(mtd[metaws].run()["SampleFormula"].lastValue().strip()))
+
         # NOTE: inconsistent naming among different methods
         #       -> adding more comments to help clarify
         a_sample, a_container = absorptioncorrutils.calculate_absorption_correction(
@@ -417,7 +437,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             self._num_wl_bins,  # Number of bins: len(ws.readX(0))-1
             self._elementSize,  # Size of one side of the integration element cube in mm
             metaws,  # Optional workspace containing metadata
-            self.getProperty("CacheDir").value,  # Cache dir for absoption correction workspace
+            self._cache_dirs,  # Cache dir for absorption correction workspace
         )
 
         if self.getProperty("Sum").value and len(samRuns) > 1:
@@ -1327,7 +1347,6 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             can_run_numbers, samRunIndex)
 
         if can_run_ws_name is not None:
-            self.log().notice('Processing empty container {}'.format(can_run_ws_name))
             if self.does_workspace_exist(can_run_ws_name):
                 # container run exists to get reference from mantid
                 api.ConvertUnits(InputWorkspace=can_run_ws_name,
@@ -1419,7 +1438,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
                 absWksp,
                 "SampleOnly",
                 element_size=self._elementSize,
-                cache_dir=self.getProperty('CacheDir').value,
+                cache_dirs=self._cache_dirs,
             )
             api.RenameWorkspace(abs_v_wsn, '__V_corr_abs')
 

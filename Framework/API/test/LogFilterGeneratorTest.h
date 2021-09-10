@@ -27,23 +27,19 @@ class LogFilterGeneratorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static LogFilterGeneratorTest *createSuite() {
-    return new LogFilterGeneratorTest();
-  }
+  static LogFilterGeneratorTest *createSuite() { return new LogFilterGeneratorTest(); }
   static void destroySuite(LogFilterGeneratorTest *suite) { delete suite; }
 
   void test_logDoesNotExist_throws() {
     auto ws = createTestWorkspace();
     LogFilterGenerator generator(LogFilterGenerator::FilterType::Status, ws);
-    TS_ASSERT_THROWS(generator.generateFilter("NonExistentLog"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(generator.generateFilter("NonExistentLog"), const std::invalid_argument &);
   }
 
   void test_logExistsButIsNotNumericTimeSeries_throws() {
     auto ws = createTestWorkspace();
     LogFilterGenerator generator(LogFilterGenerator::FilterType::Status, ws);
-    TS_ASSERT_THROWS(generator.generateFilter("BadLog"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(generator.generateFilter("BadLog"), const std::invalid_argument &);
   }
 
   void test_typeIsNone_noFilterReturned() {
@@ -101,8 +97,7 @@ public:
 
   void test_typeIsStatusAndPeriod() {
     auto ws = createTestWorkspace();
-    LogFilterGenerator generator(
-        LogFilterGenerator::FilterType::StatusAndPeriod, ws);
+    LogFilterGenerator generator(LogFilterGenerator::FilterType::StatusAndPeriod, ws);
     std::unique_ptr<LogFilter> filter;
     TS_ASSERT_THROWS_NOTHING(filter = generator.generateFilter("TestLog"));
     TS_ASSERT(filter->filter());
@@ -133,9 +128,7 @@ private:
    * TSP
    * @returns :: Test workspace with required logs
    */
-  MatrixWorkspace_sptr createTestWorkspace(bool hasStatusLog = true,
-                                           bool hasPeriodLog = true,
-                                           bool hasBadLog = true) {
+  MatrixWorkspace_sptr createTestWorkspace(bool hasStatusLog = true, bool hasPeriodLog = true, bool hasBadLog = true) {
     MatrixWorkspace_sptr ws = std::make_shared<WorkspaceTester>();
     const std::vector<double> xData{0.0, 1.0}, yCounts{25.0}, errors{5.0};
     ws->initialize(1, xData.size(), yCounts.size());

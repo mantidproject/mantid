@@ -43,8 +43,7 @@ public:
     ld.execute();
     TS_ASSERT(ld.isExecuted());
 
-    MatrixWorkspace_sptr WS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outws_name);
+    MatrixWorkspace_sptr WS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outws_name);
     // Valid WS and it is an MatrixWorkspace
     TS_ASSERT(WS);
     // Correct number of monitors found
@@ -69,11 +68,9 @@ public:
     const auto &specInfo = WS->spectrumInfo();
     TS_ASSERT(specInfo.isMonitor(2));
     TS_ASSERT_EQUALS(specInfo.detector(2).getID(), -3);
-    TS_ASSERT_DELTA(specInfo.samplePosition().distance(specInfo.position(2)),
-                    1.426, 1e-6);
+    TS_ASSERT_DELTA(specInfo.samplePosition().distance(specInfo.position(2)), 1.426, 1e-6);
     // Check if filename is saved
-    TS_ASSERT_EQUALS(ld.getPropertyValue("Filename"),
-                     WS->run().getProperty("Filename")->value());
+    TS_ASSERT_EQUALS(ld.getPropertyValue("Filename"), WS->run().getProperty("Filename")->value());
   }
 
   void test_with_custom_top_level_entry_name() {
@@ -82,9 +79,8 @@ public:
     alg.setChild(true);
     alg.setRethrows(true);
     alg.setProperty("Filename", "LARMOR00003368.nxs");
-    alg.setProperty(
-        "NXentryName",
-        "raw_data_1"); // Actual entry name, provided as custom entry
+    alg.setProperty("NXentryName",
+                    "raw_data_1"); // Actual entry name, provided as custom entry
     alg.setPropertyValue("OutputWorkspace", "dummy");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
@@ -100,8 +96,7 @@ public:
 
     ld.execute();
     TS_ASSERT(ld.isExecuted());
-    EventWorkspace_sptr WS =
-        AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws_name);
+    EventWorkspace_sptr WS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws_name);
     // Valid WS and it is an MatrixWorkspace
     TS_ASSERT(WS);
     // Correct number of monitors found
@@ -134,8 +129,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(ld.execute());
     TS_ASSERT(ld.isExecuted());
 
-    MatrixWorkspace_sptr WS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outws_name);
+    MatrixWorkspace_sptr WS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outws_name);
     // Valid WS and it is an MatrixWorkspace
     TS_ASSERT(WS);
     // Correct number of monitors found
@@ -153,8 +147,7 @@ public:
     std::string histoWSname("testLET_hist_mon");
     std::string eventWSname("testLET_event_mon");
 
-    const std::vector<size_t> spec_num{40961, 40962, 40963, 40964,
-                                       40965, 40966, 40967, 40968};
+    const std::vector<size_t> spec_num{40961, 40962, 40963, 40964, 40965, 40966, 40967, 40968};
     const std::vector<int> det_num{11, 21, 31, 41, 51, 61, 71, 81};
 
     // these tests read from the same file
@@ -166,9 +159,7 @@ public:
     load.setPropertyValue("OutputWorkspace", histoWSname);
     load.execute();
     TS_ASSERT(load.isExecuted());
-    MatrixWorkspace_sptr histo =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            histoWSname);
+    MatrixWorkspace_sptr histo = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(histoWSname);
     TS_ASSERT_EQUALS(histo->getNumberHistograms(), spec_num.size());
     for (size_t wi = 0; wi < histo->getNumberHistograms(); ++wi) {
       const auto &histoSpec = histo->getSpectrum(wi);
@@ -181,8 +172,7 @@ public:
     load.setPropertyValue("OutputWorkspace", eventWSname);
     load.execute();
     TS_ASSERT(load.isExecuted());
-    EventWorkspace_sptr event =
-        AnalysisDataService::Instance().retrieveWS<EventWorkspace>(eventWSname);
+    EventWorkspace_sptr event = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(eventWSname);
     TS_ASSERT_EQUALS(event->getNumberHistograms(), spec_num.size());
     for (size_t wi = 0; wi < histo->getNumberHistograms(); ++wi) {
       const auto &eventSpec = event->getSpectrum(wi);
@@ -206,8 +196,7 @@ public:
     ld.execute();
     TS_ASSERT(ld.isExecuted());
 
-    MatrixWorkspace_sptr WS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outws_name);
+    MatrixWorkspace_sptr WS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outws_name);
     // Valid WS and it is an MatrixWorkspace
     TS_ASSERT(WS);
     // Correct number of monitors found
@@ -275,8 +264,7 @@ public:
     TS_ASSERT_EQUALS(ws_count, 1);
 
     // Child workspace names also have proper output workspace name prefix
-    WorkspaceGroup_sptr ws_group =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outws_name);
+    WorkspaceGroup_sptr ws_group = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outws_name);
     TS_ASSERT(ws_group->contains(outws_name + "_1"));
   }
 
@@ -317,13 +305,9 @@ public:
 
 class LoadNexusMonitorsTestPerformance : public CxxTest::TestSuite {
 public:
-  static LoadNexusMonitorsTestPerformance *createSuite() {
-    return new LoadNexusMonitorsTestPerformance();
-  }
+  static LoadNexusMonitorsTestPerformance *createSuite() { return new LoadNexusMonitorsTestPerformance(); }
 
-  static void destroySuite(LoadNexusMonitorsTestPerformance *suite) {
-    delete suite;
-  }
+  static void destroySuite(LoadNexusMonitorsTestPerformance *suite) { delete suite; }
 
   void setUp() override {
     ld.initialize();

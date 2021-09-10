@@ -13,7 +13,7 @@ INSTALLDIR=$(dirname $INSTALLDIR) # root install directory
 
 @VIRTUAL_GL_WRAPPER@
 
-# Define where python libraries are. ParaView paths are added by MantidPlot itself
+# Define where python libraries are.
 LOCAL_PYTHONPATH=@LOCAL_PYPATH@
 if [ -n "${PYTHONPATH}" ]; then
     LOCAL_PYTHONPATH=${LOCAL_PYTHONPATH}:${PYTHONPATH}

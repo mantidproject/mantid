@@ -3,8 +3,8 @@ set(EXPERIMENT_SRC_FILES
     ExperimentPresenter.cpp
     ExperimentOptionDefaults.cpp
     InvalidDefaultsError.cpp
-    PerThetaDefaultsTableValidationError.cpp
-    PerThetaDefaultsTableValidator.cpp
+    LookupTableValidationError.cpp
+    LookupTableValidator.cpp
     ExperimentOptionDefaults.h)
 
 # Include files aren't required, but this makes them appear in Visual Studio

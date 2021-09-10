@@ -20,8 +20,7 @@ namespace Indexing {
   @author Simon Heybrock
   @date 2017
 */
-MANTID_INDEXING_DLL std::vector<SpectrumNumber>
-makeSpectrumNumberVector(const std::vector<int32_t> &data);
+MANTID_INDEXING_DLL std::vector<SpectrumNumber> makeSpectrumNumberVector(const std::vector<int32_t> &data);
 
 } // namespace Indexing
 } // namespace Mantid

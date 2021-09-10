@@ -28,6 +28,8 @@ set(SRC_FILES
     src/NoShape.cpp
     src/OffsetsWorkspace.cpp
     src/Peak.cpp
+    src/LeanElasticPeak.cpp
+    src/BasePeak.cpp
     src/PeakColumn.cpp
     src/PeakNoShapeFactory.cpp
     src/PeakShapeBase.cpp
@@ -36,6 +38,7 @@ set(SRC_FILES
     src/PeakShapeSpherical.cpp
     src/PeakShapeSphericalFactory.cpp
     src/PeaksWorkspace.cpp
+    src/LeanElasticPeaksWorkspace.cpp
     src/PropertyWithValue.cpp
     src/RebinnedOutput.cpp
     src/ReflectometryTransform.cpp
@@ -108,6 +111,8 @@ set(INC_FILES
     inc/MantidDataObjects/NoShape.h
     inc/MantidDataObjects/OffsetsWorkspace.h
     inc/MantidDataObjects/Peak.h
+    inc/MantidDataObjects/LeanElasticPeak.h
+    inc/MantidDataObjects/BasePeak.h
     inc/MantidDataObjects/PeakColumn.h
     inc/MantidDataObjects/PeakNoShapeFactory.h
     inc/MantidDataObjects/PeakShapeBase.h
@@ -117,6 +122,7 @@ set(INC_FILES
     inc/MantidDataObjects/PeakShapeSpherical.h
     inc/MantidDataObjects/PeakShapeSphericalFactory.h
     inc/MantidDataObjects/PeaksWorkspace.h
+    inc/MantidDataObjects/LeanElasticPeaksWorkspace.h
     inc/MantidDataObjects/RebinnedOutput.h
     inc/MantidDataObjects/ReflectometryTransform.h
     inc/MantidDataObjects/ScanningWorkspaceBuilder.h
@@ -175,7 +181,9 @@ set(TEST_FILES
     PeakShapeSphericalFactoryTest.h
     PeakShapeSphericalTest.h
     PeakTest.h
+    LeanElasticPeakTest.h
     PeaksWorkspaceTest.h
+    LeanElasticPeaksWorkspaceTest.h
     RebinnedOutputTest.h
     RefAxisTest.h
     ReflectometryTransformTest.h
@@ -200,7 +208,7 @@ if(UNITY_BUILD)
   enable_unity_build(DataObjects SRC_FILES SRC_UNITY_IGNORE_FILES 10)
 endif(UNITY_BUILD)
 
-if(COVERALLS)
+if(COVERAGE)
   foreach(loop_var ${SRC_FILES} ${INC_FILES})
     set_property(GLOBAL APPEND
                  PROPERTY COVERAGE_SRCS
@@ -212,14 +220,19 @@ endif()
 enable_precompiled_headers(inc/MantidDataObjects/PrecompiledHeader.h SRC_FILES)
 # Add the target for this directory
 add_library(DataObjects ${SRC_FILES} ${INC_FILES})
+add_library(Mantid::DataObjects ALIAS DataObjects)
+
+target_include_directories(DataObjects PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+		$<INSTALL_INTERFACE:include/Mantid>
+)
+
 # Set the name of the generated library
 set_target_properties(DataObjects PROPERTIES
                       OUTPUT_NAME
                         MantidDataObjects
                       COMPILE_DEFINITIONS
-                        IN_MANTID_DATAOBJECTS
-                      INTERFACE_INCLUDE_DIRECTORIES
-                        ${CMAKE_CURRENT_LIST_DIR}/inc)
+                        IN_MANTID_DATAOBJECTS)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(DataObjects
@@ -238,19 +251,19 @@ endif()
 # Add to the 'Framework' group in VS
 set_property(TARGET DataObjects PROPERTY FOLDER "MantidFramework")
 
-target_link_libraries(DataObjects
-                      LINK_PRIVATE
-                      ${MANTIDLIBS}
-                      ${JSONCPP_LIBRARIES}
-                      ${NEXUS_LIBRARIES})
+target_link_libraries(DataObjects PUBLIC Mantid::API Mantid::Geometry Mantid::HistogramData Mantid::Kernel PRIVATE Mantid::Json Mantid::Indexing)
 
 # Add the unit tests directory
 add_subdirectory(test)
 
 # Installation settings
-
+if (CONDA_BUILD)
+set(TARGET_EXPORT_NAME "MantidDataObjectsTargets")
+mtd_install_framework_lib(TARGETS DataObjects EXPORT_NAME ${TARGET_EXPORT_NAME})
+else()
 mtd_install_targets(TARGETS
                     DataObjects
                     INSTALL_DIRS
                     ${LIB_DIR}
                     ${WORKBENCH_LIB_DIR})
+endif()

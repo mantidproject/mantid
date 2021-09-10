@@ -11,8 +11,7 @@ namespace Parallel {
 namespace IO {
 namespace EventLoader {
 
-std::vector<size_t> readBankSizes(const H5::Group &group,
-                                  const std::vector<std::string> &bankNames) {
+std::vector<size_t> readBankSizes(const H5::Group &group, const std::vector<std::string> &bankNames) {
   std::vector<size_t> bankSizes;
   for (const auto &bankName : bankNames) {
     const H5::DataSet dataset = group.openDataSet(bankName + "/event_id");
@@ -22,9 +21,7 @@ std::vector<size_t> readBankSizes(const H5::Group &group,
   return bankSizes;
 }
 
-H5::DataType readDataType(const H5::Group &group,
-                          const std::vector<std::string> &bankNames,
-                          const std::string &name) {
+H5::DataType readDataType(const H5::Group &group, const std::vector<std::string> &bankNames, const std::string &name) {
   return group.openDataSet(bankNames.front() + "/" + name).getDataType();
 }
 

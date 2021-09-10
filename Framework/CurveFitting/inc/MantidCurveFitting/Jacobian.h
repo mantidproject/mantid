@@ -30,9 +30,7 @@ public:
   /// Constructor.
   /// @param ny :: Number of data points
   /// @param np :: Number of parameters
-  Jacobian(size_t ny, size_t np) : m_ny(ny), m_np(np) {
-    m_data.resize(ny * np, 0.0);
-  }
+  Jacobian(size_t ny, size_t np) : m_ny(ny), m_np(np) { m_data.resize(ny * np, 0.0); }
   /// overwrite base method
   /// @param value :: the value
   /// @param iP :: the index of the parameter

@@ -24,23 +24,15 @@ namespace Parallel {
 namespace IO {
 
 /// Constructor
-MultiProcessEventLoader::MultiProcessEventLoader(uint32_t numPixels,
-                                                 uint32_t numProcesses,
-                                                 uint32_t numThreads,
-                                                 const std::string &binary,
-                                                 bool precalc)
-    : m_precalculateEvents(precalc), m_numPixels(numPixels),
-      m_numProcesses(numProcesses), m_numThreads(numThreads),
-      m_binaryToLaunch(binary),
-      m_segmentNames(generateSegmentsName(numProcesses)),
+MultiProcessEventLoader::MultiProcessEventLoader(uint32_t numPixels, uint32_t numProcesses, uint32_t numThreads,
+                                                 const std::string &binary, bool precalc)
+    : m_precalculateEvents(precalc), m_numPixels(numPixels), m_numProcesses(numProcesses), m_numThreads(numThreads),
+      m_binaryToLaunch(binary), m_segmentNames(generateSegmentsName(numProcesses)),
       m_storageName(generateStoragename()) {}
 
 /// Generates "unique" shared memory segment name
-std::vector<std::string>
-MultiProcessEventLoader::generateSegmentsName(uint32_t procNum) {
-  std::vector<std::string> res(procNum,
-                               generateTimeBasedPrefix() +
-                                   "_mantid_multiprocess_NXloader_segment_");
+std::vector<std::string> MultiProcessEventLoader::generateSegmentsName(uint32_t procNum) {
+  std::vector<std::string> res(procNum, generateTimeBasedPrefix() + "_mantid_multiprocess_NXloader_segment_");
   unsigned short i{0};
   for (auto &name : res)
     name += std::to_string(i++);
@@ -64,11 +56,9 @@ std::string MultiProcessEventLoader::generateTimeBasedPrefix() {
 
 /**Main API function for loading data from given file, group list of banks,
  * launches child processes for hdf5 parallel reading*/
-void MultiProcessEventLoader::load(
-    const std::string &filename, const std::string &groupname,
-    const std::vector<std::string> &bankNames,
-    const std::vector<int32_t> &bankOffsets,
-    std::vector<std::vector<Types::Event::TofEvent> *> eventLists) const {
+void MultiProcessEventLoader::load(const std::string &filename, const std::string &groupname,
+                                   const std::vector<std::string> &bankNames, const std::vector<int32_t> &bankOffsets,
+                                   std::vector<std::vector<Types::Event::TofEvent> *> eventLists) const {
 
   try {
     H5::H5File file(filename.c_str(), H5F_ACC_RDONLY);
@@ -122,8 +112,7 @@ void MultiProcessEventLoader::load(
     // to cleanup shared memory in this function
     struct SharedMemoryDestroyer {
       const std::vector<std::string> &segments;
-      explicit SharedMemoryDestroyer(const std::vector<std::string> &sm)
-          : segments(sm) {}
+      explicit SharedMemoryDestroyer(const std::vector<std::string> &sm) : segments(sm) {}
       ~SharedMemoryDestroyer() {
         for (const auto &name : segments)
           ip::shared_memory_object::remove(name.c_str());
@@ -132,24 +121,19 @@ void MultiProcessEventLoader::load(
 
     std::vector<Poco::ProcessHandle> vChilds;
     for (unsigned i = 0; i < m_numProcesses; ++i) {
-      std::size_t upperBound =
-          i < m_numProcesses - 1 ? evPerPr * (i + 1) : numEvents;
+      std::size_t upperBound = i < m_numProcesses - 1 ? evPerPr * (i + 1) : numEvents;
       std::vector<std::string> processArgs;
 
-      processArgs.emplace_back(m_segmentNames[i]); // segment name
-      processArgs.emplace_back(m_storageName);     // storage name
-      processArgs.emplace_back(std::to_string(i)); // proc id
-      processArgs.emplace_back(
-          std::to_string(evPerPr * i)); // first event to load
-      processArgs.emplace_back(
-          std::to_string(upperBound)); // upper bound to load
-      processArgs.emplace_back(std::to_string(m_numPixels)); // pixel count
-      processArgs.emplace_back(std::to_string(storageSize)); // memory size
-      processArgs.emplace_back(filename);                    // nexus file name
-      processArgs.emplace_back(groupname); // instrument group name
-      processArgs.emplace_back(
-          m_precalculateEvents ? "1 "
-                               : "0 "); // variant of algorithm used for loading
+      processArgs.emplace_back(m_segmentNames[i]);                  // segment name
+      processArgs.emplace_back(m_storageName);                      // storage name
+      processArgs.emplace_back(std::to_string(i));                  // proc id
+      processArgs.emplace_back(std::to_string(evPerPr * i));        // first event to load
+      processArgs.emplace_back(std::to_string(upperBound));         // upper bound to load
+      processArgs.emplace_back(std::to_string(m_numPixels));        // pixel count
+      processArgs.emplace_back(std::to_string(storageSize));        // memory size
+      processArgs.emplace_back(filename);                           // nexus file name
+      processArgs.emplace_back(groupname);                          // instrument group name
+      processArgs.emplace_back(m_precalculateEvents ? "1 " : "0 "); // variant of algorithm used for loading
       for (unsigned j = 0; j < bankNames.size(); ++j) {
         processArgs.emplace_back(bankNames[j]);                   // bank name
         processArgs.emplace_back(std::to_string(bankOffsets[j])); // bank size
@@ -157,11 +141,9 @@ void MultiProcessEventLoader::load(
 
       try {
         // launch child processes
-        vChilds.emplace_back(
-            Poco::Process::launch(m_binaryToLaunch, processArgs));
+        vChilds.emplace_back(Poco::Process::launch(m_binaryToLaunch, processArgs));
       } catch (...) {
-        std::throw_with_nested(
-            std::runtime_error("MultiProcessEventLoader::load()"));
+        std::throw_with_nested(std::runtime_error("MultiProcessEventLoader::load()"));
       }
     }
 
@@ -181,8 +163,7 @@ void MultiProcessEventLoader::load(
     // waiting for child processes
     for (auto &c : vChilds)
       if (c.wait())
-        throw std::runtime_error(
-            "Error while waiting processes in  multiprocess loading.");
+        throw std::runtime_error("Error while waiting processes in  multiprocess loading.");
 
     // Assemble multiprocess data from shared memory
     assembleFromShared(eventLists);
@@ -207,14 +188,11 @@ void MultiProcessEventLoader::assembleFromShared(
   for (unsigned i = 0; i < m_numThreads; ++i) {
     workers.emplace_back([&]() {
       for (std::size_t segId = 0; segId < m_segmentNames.size(); ++segId) {
-        ip::managed_shared_memory segment{ip::open_read_only,
-                                          m_segmentNames[segId].c_str()};
-        auto chunks =
-            segment.find<Mantid::Parallel::IO::Chunks>(m_storageName.c_str())
-                .first;
+        ip::managed_shared_memory segment{ip::open_read_only, m_segmentNames[segId].c_str()};
+        auto chunks = segment.find<Mantid::Parallel::IO::Chunks>(m_storageName.c_str()).first;
         auto &cnt = cnts[segId];
-        for (uint32_t startPixel = cnt.fetch_add(portion);
-             startPixel < m_numPixels; startPixel = cnt.fetch_add(portion)) {
+        for (uint32_t startPixel = cnt.fetch_add(portion); startPixel < m_numPixels;
+             startPixel = cnt.fetch_add(portion)) {
           auto toPixel = std::min(startPixel + portion, m_numPixels);
           for (uint32_t pixel = startPixel; pixel < toPixel; ++pixel) {
             auto &res = result[pixel];
@@ -239,23 +217,21 @@ void MultiProcessEventLoader::assembleFromShared(
 
 /**Wrapper for loading the PART of ("from" event "to" event) data
  * from nexus file with different strategies*/
-void MultiProcessEventLoader::fillFromFile(
-    EventsListsShmemStorage &storage, const std::string &filename,
-    const std::string &groupname, const std::vector<std::string> &bankNames,
-    const std::vector<int32_t> &bankOffsets, const std::size_t from,
-    const std::size_t to, bool precalc) {
+void MultiProcessEventLoader::fillFromFile(EventsListsShmemStorage &storage, const std::string &filename,
+                                           const std::string &groupname, const std::vector<std::string> &bankNames,
+                                           const std::vector<int32_t> &bankOffsets, const std::size_t from,
+                                           const std::size_t to, bool precalc) {
   H5::H5File file(filename.c_str(), H5F_ACC_RDONLY);
   auto instrument = file.openGroup(groupname);
 
-  auto type =
-      EventLoader::readDataType(instrument, bankNames, "event_time_offset");
+  auto type = EventLoader::readDataType(instrument, bankNames, "event_time_offset");
 
   if (precalc)
-    return GroupLoader<LoadType::preCalcEvents>::loadFromGroupWrapper(
-        type, storage, instrument, bankNames, bankOffsets, from, to);
+    return GroupLoader<LoadType::preCalcEvents>::loadFromGroupWrapper(type, storage, instrument, bankNames, bankOffsets,
+                                                                      from, to);
   else
-    return GroupLoader<LoadType::producerConsumer>::loadFromGroupWrapper(
-        type, storage, instrument, bankNames, bankOffsets, from, to);
+    return GroupLoader<LoadType::producerConsumer>::loadFromGroupWrapper(type, storage, instrument, bankNames,
+                                                                         bankOffsets, from, to);
 }
 
 // Estimates the memory amount for shared memory segments
@@ -264,10 +240,8 @@ void MultiProcessEventLoader::fillFromFile(
 size_t MultiProcessEventLoader::estimateShmemAmount(size_t eventCount) const {
   // 8 bytes pointer to allocator + 8 bytes pointer to metadata
   auto allocationFee = 8 + 8 + generateStoragename().length();
-  std::size_t len{(eventCount / m_numProcesses + eventCount % m_numProcesses) *
-                      sizeof(TofEvent) +
-                  m_numPixels * (sizeof(EventLists) + allocationFee) +
-                  sizeof(Chunks) + allocationFee};
+  std::size_t len{(eventCount / m_numProcesses + eventCount % m_numProcesses) * sizeof(TofEvent) +
+                  m_numPixels * (sizeof(EventLists) + allocationFee) + sizeof(Chunks) + allocationFee};
   return len;
 }
 

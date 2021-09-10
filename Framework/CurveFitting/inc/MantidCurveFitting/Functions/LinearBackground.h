@@ -31,10 +31,8 @@ class MANTID_CURVEFITTING_DLL LinearBackground : public BackgroundFunction {
 public:
   /// overwrite IFunction base class methods
   std::string name() const override { return "LinearBackground"; }
-  void function1D(double *out, const double *xValues,
-                  const size_t nData) const override;
-  void functionDeriv1D(API::Jacobian *out, const double *xValues,
-                       const size_t nData) override;
+  void function1D(double *out, const double *xValues, const size_t nData) const override;
+  void functionDeriv1D(API::Jacobian *out, const double *xValues, const size_t nData) override;
 
   void fit(const std::vector<double> &X, const std::vector<double> &Y) override;
 
@@ -42,11 +40,9 @@ protected:
   /// overwrite IFunction base class method, which declare function parameters
   void init() override;
   /// Calculate histogram data.
-  void histogram1D(double *out, double left, const double *right,
-                   const size_t nBins) const override;
+  void histogram1D(double *out, double left, const double *right, const size_t nBins) const override;
   /// Devivatives of the histogram.
-  void histogramDerivative1D(API::Jacobian *jacobian, double left,
-                             const double *right,
+  void histogramDerivative1D(API::Jacobian *jacobian, double left, const double *right,
                              const size_t nBins) const override;
 };
 

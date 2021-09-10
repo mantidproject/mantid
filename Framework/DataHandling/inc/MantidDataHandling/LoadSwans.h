@@ -18,8 +18,7 @@ namespace DataHandling {
 
 /** LoadSwans : Test Loader to read data from the LDRD new SWANS detector
  */
-class DLLExport LoadSwans final
-    : public API::IFileLoader<Kernel::FileDescriptor> {
+class DLLExport LoadSwans final : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
   LoadSwans();
   const std::string name() const override;
@@ -35,8 +34,7 @@ private:
   std::map<uint32_t, std::vector<uint32_t>> loadData();
   std::vector<double> loadMetaData();
   void setMetaDataAsWorkspaceProperties(const std::vector<double> &metadata);
-  void loadDataIntoTheWorkspace(
-      const std::map<uint32_t, std::vector<uint32_t>> &eventMap);
+  void loadDataIntoTheWorkspace(const std::map<uint32_t, std::vector<uint32_t>> &eventMap);
   void setTimeAxis();
   void loadInstrument();
   void placeDetectorInSpace();

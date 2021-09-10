@@ -35,10 +35,10 @@ class PreciseDoubleFactory(QItemEditorFactory):
 class TableWorkspaceDisplayView(QTableView):
     repaint_signal = Signal()
 
-    def __init__(self, presenter=None, parent=None):
+    def __init__(self, presenter=None, parent=None, window_flags=Qt.Window, table_model=None):
         super().__init__(parent)
-        self.data_model = QStandardItemModel(self)
-        self.setModel(self.data_model)
+        self.table_model = table_model if table_model else QStandardItemModel(parent)
+        self.setModel(self.table_model)
 
         self.presenter = presenter
         self.COPY_ICON = mantidqt.icons.get_icon("mdi.content-copy")
@@ -55,11 +55,13 @@ class TableWorkspaceDisplayView(QTableView):
         header = self.horizontalHeader()
         header.sectionDoubleClicked.connect(self.handle_double_click)
 
+        self.setWindowFlags(window_flags)
+
     def columnCount(self):
-        return self.data_model.columnCount()
+        return self.table_model.columnCount()
 
     def rowCount(self):
-        return self.data_model.rowCount()
+        return self.table_model.rowCount()
 
     def subscribe(self, presenter):
         """

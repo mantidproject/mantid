@@ -52,9 +52,7 @@ public:
     loader.setPropertyValue("OutputWorkspace", outputSpace);
     TS_ASSERT_THROWS_NOTHING(loader.execute());
 
-    MatrixWorkspace_sptr output =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outputSpace);
+    MatrixWorkspace_sptr output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace);
 
     TS_ASSERT_EQUALS(output->getNumberHistograms(), 1006);
 
@@ -79,9 +77,7 @@ class LoadMLZTestPerformance : public CxxTest::TestSuite {
 public:
   LoadMLZTestPerformance() : m_dataFile("TOFTOFTestdata.nxs") {}
 
-  static LoadMLZTestPerformance *createSuite() {
-    return new LoadMLZTestPerformance();
-  }
+  static LoadMLZTestPerformance *createSuite() { return new LoadMLZTestPerformance(); }
 
   static void destroySuite(LoadMLZTestPerformance *suite) { delete suite; }
 

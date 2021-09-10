@@ -23,9 +23,7 @@ class LoadSQWTestHelper {
 
   LoadSQWHelper::dataPositions cdp;
   // helper function
-  std::string conv2str(std::streamoff val) {
-    return boost::lexical_cast<std::string>(int(val));
-  }
+  std::string conv2str(std::streamoff val) { return boost::lexical_cast<std::string>(int(val)); }
 
 public:
   // Constructor with fills in the data corresponding to the test file
@@ -43,41 +41,31 @@ public:
 
   void checkPosCorrect(const LoadSQWHelper::dataPositions &pos) {
     if (cdp.if_sqw_start != pos.if_sqw_start) {
-      throw(std::invalid_argument(" pixels location differs from expected" +
-                                  conv2str(pos.if_sqw_start) +
+      throw(std::invalid_argument(" pixels location differs from expected" + conv2str(pos.if_sqw_start) +
                                   " expected: " + conv2str(cdp.if_sqw_start)));
     }
     if (cdp.n_dims_start != pos.n_dims_start) {
-      throw(std::invalid_argument(" n_dims location differs from expected" +
-                                  conv2str(pos.n_dims_start) +
+      throw(std::invalid_argument(" n_dims location differs from expected" + conv2str(pos.n_dims_start) +
                                   " expected: " + conv2str(cdp.n_dims_start)));
     }
     if (cdp.sqw_header_start != pos.sqw_header_start) {
-      throw(std::invalid_argument(
-          " sqw_header location differs from expected" +
-          conv2str(pos.sqw_header_start) +
-          " expected: " + conv2str(cdp.sqw_header_start)));
+      throw(std::invalid_argument(" sqw_header location differs from expected" + conv2str(pos.sqw_header_start) +
+                                  " expected: " + conv2str(cdp.sqw_header_start)));
     }
     if (cdp.detectors_start != pos.detectors_start) {
-      throw(
-          std::invalid_argument(" detectors location differs from expected" +
-                                conv2str(pos.detectors_start) +
-                                " expected: " + conv2str(cdp.detectors_start)));
+      throw(std::invalid_argument(" detectors location differs from expected" + conv2str(pos.detectors_start) +
+                                  " expected: " + conv2str(cdp.detectors_start)));
     }
     if (cdp.data_start != pos.data_start) {
-      throw(std::invalid_argument(" data location differs from expected" +
-                                  conv2str(pos.data_start) +
+      throw(std::invalid_argument(" data location differs from expected" + conv2str(pos.data_start) +
                                   " expected: " + conv2str(cdp.data_start)));
     }
     if (cdp.n_cell_pix_start != pos.n_cell_pix_start) {
-      throw(std::invalid_argument(
-          " cells pixels location differs from expected" +
-          conv2str(pos.n_cell_pix_start) +
-          " expected: " + conv2str(cdp.n_cell_pix_start)));
+      throw(std::invalid_argument(" cells pixels location differs from expected" + conv2str(pos.n_cell_pix_start) +
+                                  " expected: " + conv2str(cdp.n_cell_pix_start)));
     }
     if (cdp.pix_start != pos.pix_start) {
-      throw(std::invalid_argument(" pixels location differs from expected" +
-                                  conv2str(pos.pix_start) +
+      throw(std::invalid_argument(" pixels location differs from expected" + conv2str(pos.pix_start) +
                                   " expected: " + conv2str(cdp.pix_start)));
     }
   }
@@ -104,9 +92,8 @@ public:
     LoadSQWTestHelper tester;
     tester.checkPosCorrect(this->m_dataPositions);
     if (this->m_nDataPoints != 580)
-      throw(std::invalid_argument(
-          "incorrect number of data points in the file, expected 580, got " +
-          boost::lexical_cast<std::string>(int(m_nDataPoints))));
+      throw(std::invalid_argument("incorrect number of data points in the file, expected 580, got " +
+                                  boost::lexical_cast<std::string>(int(m_nDataPoints))));
   }
   void readEvents(MDEventWorkspace4 *ws) override { LoadSQW::readEvents(ws); };
   void readDNDDimensions(MDEventWorkspace4 *ws) {
@@ -133,8 +120,7 @@ public:
   void testOpenInValidFile() {
     LoadSQW alg;
     alg.initialize();
-    TS_ASSERT_THROWS(alg.setPropertyValue("Filename", "x.sqw"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg.setPropertyValue("Filename", "x.sqw"), const std::invalid_argument &);
   }
 
   void testAddDimensions() {
@@ -166,8 +152,7 @@ public:
     TS_ASSERT_EQUALS("en", d->getDimensionId());
 
     // Check Units
-    auto expectedUnit =
-        Mantid::Kernel::InverseAngstromsUnit().getUnitLabel().ascii();
+    auto expectedUnit = Mantid::Kernel::InverseAngstromsUnit().getUnitLabel().ascii();
     TS_ASSERT_EQUALS(expectedUnit, a->getUnits().ascii());
     TS_ASSERT_EQUALS(expectedUnit, b->getUnits().ascii());
     TS_ASSERT_EQUALS(expectedUnit, c->getUnits().ascii());
@@ -204,8 +189,7 @@ public:
     ws.initialize();
     alg.readEvents(&ws);
 
-    TSM_ASSERT_EQUALS("Wrong number of events in workspace", 580,
-                      ws.getNPoints());
+    TSM_ASSERT_EQUALS("Wrong number of events in workspace", 580, ws.getNPoints());
   }
 
   void testCreateWithoutEvents() {
@@ -219,8 +203,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     MDEventWorkspace4::sptr ws = std::dynamic_pointer_cast<MDEventWorkspace4>(
-        Mantid::API::AnalysisDataService::Instance().retrieve(
-            "wsWithoutEvents"));
+        Mantid::API::AnalysisDataService::Instance().retrieve("wsWithoutEvents"));
 
     // Check the product
     TSM_ASSERT_EQUALS("Should have no events!", 0, ws->getNPoints());
@@ -257,8 +240,7 @@ public:
     MDEventWorkspace4 ws;
     alg.addLattice(&ws);
 
-    const Mantid::Geometry::OrientedLattice &lattice =
-        ws.getExperimentInfo(0)->sample().getOrientedLattice();
+    const Mantid::Geometry::OrientedLattice &lattice = ws.getExperimentInfo(0)->sample().getOrientedLattice();
     TS_ASSERT_DELTA(2.8699, lattice.a1(), 0.0001);
     TS_ASSERT_DELTA(2.8699, lattice.a2(), 0.0001);
     TS_ASSERT_DELTA(2.8699, lattice.a3(), 0.0001);

@@ -31,8 +31,7 @@ void Abragam::init() {
   declareParameter("Tau", 1, "?");
 }
 
-void Abragam::function1D(double *out, const double *xValues,
-                         const size_t nData) const {
+void Abragam::function1D(double *out, const double *xValues, const size_t nData) const {
   const double A = getParameter("A");
   const double w = getParameter("Omega");
   const double phi = getParameter("Phi");
@@ -41,16 +40,14 @@ void Abragam::function1D(double *out, const double *xValues,
 
   for (size_t i = 0; i < nData; i++) {
     double A1 = A * cos(w * xValues[i] + phi);
-    double A2 =
-        -(sig * sig * t * t) * (expm1(-xValues[i] / t) + (xValues[i] / t));
+    double A2 = -(sig * sig * t * t) * (expm1(-xValues[i] / t) + (xValues[i] / t));
     double A3 = exp(A2);
 
     out[i] = A1 * A3;
   }
 }
 
-void Abragam::functionDeriv(const API::FunctionDomain &domain,
-                            API::Jacobian &jacobian) {
+void Abragam::functionDeriv(const API::FunctionDomain &domain, API::Jacobian &jacobian) {
   calNumericalDeriv(domain, jacobian);
 }
 

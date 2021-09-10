@@ -66,8 +66,7 @@ namespace {
  * @param numSpectra
  * @return
  */
-std::shared_ptr<MatrixWorkspace> makeWorkspaceWithDetectors(size_t numSpectra,
-                                                            size_t numBins) {
+std::shared_ptr<MatrixWorkspace> makeWorkspaceWithDetectors(size_t numSpectra, size_t numBins) {
   std::shared_ptr<MatrixWorkspace> ws2 = std::make_shared<WorkspaceTester>();
   ws2->initialize(numSpectra, numBins, numBins);
 
@@ -77,8 +76,7 @@ std::shared_ptr<MatrixWorkspace> makeWorkspaceWithDetectors(size_t numSpectra,
   for (size_t i = 0; i < ws2->getNumberHistograms(); ++i) {
     // Create a detector for each spectra
     Detector *det = new Detector("pixel", static_cast<detid_t>(i), inst.get());
-    det->setShape(
-        ComponentCreationHelper::createSphere(0.01, V3D(0, 0, 0), "1"));
+    det->setShape(ComponentCreationHelper::createSphere(0.01, V3D(0, 0, 0), "1"));
     inst->add(det);
     inst->markAsDetector(det);
     ws2->getSpectrum(i).addDetectorID(static_cast<detid_t>(i));
@@ -87,20 +85,16 @@ std::shared_ptr<MatrixWorkspace> makeWorkspaceWithDetectors(size_t numSpectra,
   return ws2;
 }
 
-void run_legacy_setting_spectrum_numbers_with_MPI(
-    const Parallel::Communicator &comm) {
+void run_legacy_setting_spectrum_numbers_with_MPI(const Parallel::Communicator &comm) {
   using namespace Parallel;
-  for (const auto storageMode : {StorageMode::MasterOnly, StorageMode::Cloned,
-                                 StorageMode::Distributed}) {
+  for (const auto storageMode : {StorageMode::MasterOnly, StorageMode::Cloned, StorageMode::Distributed}) {
     WorkspaceTester ws;
     if (comm.rank() == 0 || storageMode != StorageMode::MasterOnly) {
       Indexing::IndexInfo indexInfo(1000, storageMode, comm);
-      ws.initialize(indexInfo,
-                    HistogramData::Histogram(HistogramData::Points(1)));
+      ws.initialize(indexInfo, HistogramData::Histogram(HistogramData::Points(1)));
     }
     if (storageMode == StorageMode::Distributed && comm.size() > 1) {
-      TS_ASSERT_THROWS_EQUALS(ws.getSpectrum(0).setSpectrumNo(42),
-                              const std::logic_error &e, std::string(e.what()),
+      TS_ASSERT_THROWS_EQUALS(ws.getSpectrum(0).setSpectrumNo(42), const std::logic_error &e, std::string(e.what()),
                               "Setting spectrum numbers in MatrixWorkspace via "
                               "ISpectrum::setSpectrumNo is not possible in MPI "
                               "runs for distributed workspaces. Use "
@@ -118,14 +112,10 @@ class MatrixWorkspaceTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MatrixWorkspaceTest *createSuite() {
-    return new MatrixWorkspaceTest();
-  }
+  static MatrixWorkspaceTest *createSuite() { return new MatrixWorkspaceTest(); }
   static void destroySuite(MatrixWorkspaceTest *suite) { delete suite; }
 
-  MatrixWorkspaceTest() : ws(std::make_shared<WorkspaceTester>()) {
-    ws->initialize(1, 1, 1);
-  }
+  MatrixWorkspaceTest() : ws(std::make_shared<WorkspaceTester>()) { ws->initialize(1, 1, 1); }
 
   void test_indexInfo() {
     WorkspaceTester ws;
@@ -140,12 +130,9 @@ public:
     TS_ASSERT_EQUALS(ws.getSpectrum(1).getDetectorIDs().size(), 1);
     TS_ASSERT_EQUALS(ws.getSpectrum(2).getDetectorIDs().size(), 1);
     // ... but spectrum definitions in IndexInfo are empty...
-    TS_ASSERT_EQUALS((*indexInfo.spectrumDefinitions())[0],
-                     SpectrumDefinition{});
-    TS_ASSERT_EQUALS((*indexInfo.spectrumDefinitions())[1],
-                     SpectrumDefinition{});
-    TS_ASSERT_EQUALS((*indexInfo.spectrumDefinitions())[2],
-                     SpectrumDefinition{});
+    TS_ASSERT_EQUALS((*indexInfo.spectrumDefinitions())[0], SpectrumDefinition{});
+    TS_ASSERT_EQUALS((*indexInfo.spectrumDefinitions())[1], SpectrumDefinition{});
+    TS_ASSERT_EQUALS((*indexInfo.spectrumDefinitions())[2], SpectrumDefinition{});
     // ... since there is no instrument, i.e., all detector IDs are invalid.
     TS_ASSERT_EQUALS(ws.detectorInfo().size(), 0);
   }
@@ -154,9 +141,7 @@ public:
     WorkspaceTester ws;
     ws.initialize(3, 1, 1);
     IndexInfo bad(2);
-    TS_ASSERT_THROWS_EQUALS(ws.setIndexInfo(std::move(bad)),
-                            const std::invalid_argument &e,
-                            std::string(e.what()),
+    TS_ASSERT_THROWS_EQUALS(ws.setIndexInfo(std::move(bad)), const std::invalid_argument &e, std::string(e.what()),
                             "MatrixWorkspace::setIndexInfo: IndexInfo size "
                             "does not match number of histograms in workspace");
   }
@@ -169,9 +154,7 @@ public:
     std::vector<SpectrumDefinition> specDefs(1);
     specDefs[0].add(0);
     indices.setSpectrumDefinitions(specDefs);
-    TS_ASSERT_THROWS_EQUALS(ws.setIndexInfo(std::move(indices)),
-                            const std::invalid_argument &e,
-                            std::string(e.what()),
+    TS_ASSERT_THROWS_EQUALS(ws.setIndexInfo(std::move(indices)), const std::invalid_argument &e, std::string(e.what()),
                             "MatrixWorkspace: SpectrumDefinition contains an "
                             "out-of-range detector index, i.e., the spectrum "
                             "definition does not match the instrument in the "
@@ -181,16 +164,13 @@ public:
   void test_setIndexInfo_bad_detector_time_index() {
     WorkspaceTester ws;
     ws.initialize(1, 1, 1);
-    ws.setInstrument(
-        ComponentCreationHelper::createTestInstrumentRectangular(1, 1));
+    ws.setInstrument(ComponentCreationHelper::createTestInstrumentRectangular(1, 1));
     IndexInfo indices(1);
     indices.setSpectrumNumbers({2});
     std::vector<SpectrumDefinition> specDefs(1);
     specDefs[0].add(0, 1);
     indices.setSpectrumDefinitions(specDefs);
-    TS_ASSERT_THROWS_EQUALS(ws.setIndexInfo(std::move(indices)),
-                            const std::invalid_argument &e,
-                            std::string(e.what()),
+    TS_ASSERT_THROWS_EQUALS(ws.setIndexInfo(std::move(indices)), const std::invalid_argument &e, std::string(e.what()),
                             "MatrixWorkspace: SpectrumDefinition contains an "
                             "out-of-range time index for a detector, i.e., the "
                             "spectrum definition does not match the instrument "
@@ -201,12 +181,9 @@ public:
     WorkspaceTester ws;
     ws.initialize(3, 1, 1);
     // 2x2 = 4 pixels
-    ws.setInstrument(
-        ComponentCreationHelper::createTestInstrumentRectangular(1, 2));
+    ws.setInstrument(ComponentCreationHelper::createTestInstrumentRectangular(1, 2));
     IndexInfo indices(3);
-    TS_ASSERT_THROWS_EQUALS(ws.setIndexInfo(std::move(indices)),
-                            const std::invalid_argument &e,
-                            std::string(e.what()),
+    TS_ASSERT_THROWS_EQUALS(ws.setIndexInfo(std::move(indices)), const std::invalid_argument &e, std::string(e.what()),
                             "MatrixWorkspace: IndexInfo does not contain "
                             "spectrum definitions so building a 1:1 mapping "
                             "from spectra to detectors was attempted, but the "
@@ -218,8 +195,7 @@ public:
     WorkspaceTester ws;
     ws.initialize(4, 1, 1);
     // 2x2 = 4 pixels
-    ws.setInstrument(
-        ComponentCreationHelper::createTestInstrumentRectangular(1, 2));
+    ws.setInstrument(ComponentCreationHelper::createTestInstrumentRectangular(1, 2));
     IndexInfo indices(4);
 
     TS_ASSERT_THROWS_NOTHING(ws.setIndexInfo(std::move(indices)));
@@ -236,14 +212,10 @@ public:
     TS_ASSERT_EQUALS(ws.getSpectrum(1).getSpectrumNo(), 2);
     TS_ASSERT_EQUALS(ws.getSpectrum(2).getSpectrumNo(), 3);
     TS_ASSERT_EQUALS(ws.getSpectrum(3).getSpectrumNo(), 4);
-    TS_ASSERT_EQUALS(ws.getSpectrum(0).getDetectorIDs(),
-                     (std::set<detid_t>{4}));
-    TS_ASSERT_EQUALS(ws.getSpectrum(1).getDetectorIDs(),
-                     (std::set<detid_t>{5}));
-    TS_ASSERT_EQUALS(ws.getSpectrum(2).getDetectorIDs(),
-                     (std::set<detid_t>{6}));
-    TS_ASSERT_EQUALS(ws.getSpectrum(3).getDetectorIDs(),
-                     (std::set<detid_t>{7}));
+    TS_ASSERT_EQUALS(ws.getSpectrum(0).getDetectorIDs(), (std::set<detid_t>{4}));
+    TS_ASSERT_EQUALS(ws.getSpectrum(1).getDetectorIDs(), (std::set<detid_t>{5}));
+    TS_ASSERT_EQUALS(ws.getSpectrum(2).getDetectorIDs(), (std::set<detid_t>{6}));
+    TS_ASSERT_EQUALS(ws.getSpectrum(3).getDetectorIDs(), (std::set<detid_t>{7}));
   }
 
   void test_setIndexInfo_updates_ISpectrum() {
@@ -253,8 +225,7 @@ public:
     // INTERFACE IS BEING REMOVED.
     WorkspaceTester ws;
     ws.initialize(3, 1, 1);
-    ws.setInstrument(
-        ComponentCreationHelper::createTestInstrumentRectangular(1, 2));
+    ws.setInstrument(ComponentCreationHelper::createTestInstrumentRectangular(1, 2));
     TS_ASSERT_EQUALS(ws.detectorInfo().size(), 4);
     IndexInfo indices(3);
     indices.setSpectrumNumbers({2, 4, 6});
@@ -268,12 +239,9 @@ public:
     TS_ASSERT_EQUALS(ws.getSpectrum(0).getSpectrumNo(), 2);
     TS_ASSERT_EQUALS(ws.getSpectrum(1).getSpectrumNo(), 4);
     TS_ASSERT_EQUALS(ws.getSpectrum(2).getSpectrumNo(), 6);
-    TS_ASSERT_EQUALS(ws.getSpectrum(0).getDetectorIDs(),
-                     (std::set<detid_t>{4}));
-    TS_ASSERT_EQUALS(ws.getSpectrum(1).getDetectorIDs(),
-                     (std::set<detid_t>{5}));
-    TS_ASSERT_EQUALS(ws.getSpectrum(2).getDetectorIDs(),
-                     (std::set<detid_t>{6, 7}));
+    TS_ASSERT_EQUALS(ws.getSpectrum(0).getDetectorIDs(), (std::set<detid_t>{4}));
+    TS_ASSERT_EQUALS(ws.getSpectrum(1).getDetectorIDs(), (std::set<detid_t>{5}));
+    TS_ASSERT_EQUALS(ws.getSpectrum(2).getDetectorIDs(), (std::set<detid_t>{6, 7}));
   }
 
   void test_indexInfo_legacy_compatibility() {
@@ -283,18 +251,15 @@ public:
     // IS BEING REMOVED.
     WorkspaceTester ws;
     ws.initialize(1, 1, 1);
-    ws.setInstrument(
-        ComponentCreationHelper::createTestInstrumentRectangular(1, 2));
+    ws.setInstrument(ComponentCreationHelper::createTestInstrumentRectangular(1, 2));
     const auto &indexInfo = ws.indexInfo();
     TS_ASSERT_EQUALS(indexInfo.spectrumNumber(0), 1);
-    TS_ASSERT_EQUALS((*indexInfo.spectrumDefinitions())[0],
-                     SpectrumDefinition{});
+    TS_ASSERT_EQUALS((*indexInfo.spectrumDefinitions())[0], SpectrumDefinition{});
     ws.getSpectrum(0).setSpectrumNo(7);
     ws.getSpectrum(0).setDetectorID(7);
     // No changes -- old and new interface should not be mixed!
     TS_ASSERT_EQUALS(indexInfo.spectrumNumber(0), 1);
-    TS_ASSERT_EQUALS((*indexInfo.spectrumDefinitions())[0],
-                     SpectrumDefinition{});
+    TS_ASSERT_EQUALS((*indexInfo.spectrumDefinitions())[0], SpectrumDefinition{});
     // After getting a new reference we should see the changes.
     const auto &indexInfo2 = ws.indexInfo();
     TS_ASSERT_EQUALS(indexInfo2.spectrumNumber(0), 7);
@@ -306,8 +271,7 @@ public:
   void test_IndexInfo_copy() {
     WorkspaceTester ws;
     ws.initialize(3, 1, 1);
-    ws.setInstrument(
-        ComponentCreationHelper::createTestInstrumentRectangular(1, 2));
+    ws.setInstrument(ComponentCreationHelper::createTestInstrumentRectangular(1, 2));
     IndexInfo indices(3);
     indices.setSpectrumNumbers({2, 4, 6});
     std::vector<SpectrumDefinition> specDefs(3);
@@ -344,8 +308,7 @@ public:
   void test_setIndexInfo_shares_spectrumDefinition() {
     WorkspaceTester ws;
     ws.initialize(3, 1, 1);
-    ws.setInstrument(
-        ComponentCreationHelper::createTestInstrumentRectangular(1, 2));
+    ws.setInstrument(ComponentCreationHelper::createTestInstrumentRectangular(1, 2));
     IndexInfo indices(3);
     indices.setSpectrumNumbers({2, 4, 6});
 
@@ -358,8 +321,7 @@ public:
   void test_clone_shares_data_in_IndexInfo() {
     WorkspaceTester ws;
     ws.initialize(3, 1, 1);
-    ws.setInstrument(
-        ComponentCreationHelper::createTestInstrumentRectangular(1, 2));
+    ws.setInstrument(ComponentCreationHelper::createTestInstrumentRectangular(1, 2));
     const auto clone = ws.clone();
     const auto &info1 = ws.indexInfo();
     const auto &info2 = clone->indexInfo();
@@ -371,10 +333,8 @@ public:
   }
 
   void test_WorkspaceFactory_shares_data_in_IndexInfo() {
-    const auto ws =
-        WorkspaceFactory::Instance().create("WorkspaceTester", 3, 1, 1);
-    ws->setInstrument(
-        ComponentCreationHelper::createTestInstrumentRectangular(1, 2));
+    const auto ws = WorkspaceFactory::Instance().create("WorkspaceTester", 3, 1, 1);
+    ws->setInstrument(ComponentCreationHelper::createTestInstrumentRectangular(1, 2));
     const auto copy = WorkspaceFactory::Instance().create(ws);
     const auto &info1 = ws->indexInfo();
     const auto &info2 = copy->indexInfo();
@@ -410,8 +370,7 @@ public:
   void test_initialize_with_IndexInfo_does_not_set_default_detectorIDs() {
     WorkspaceTester ws;
     Indexing::IndexInfo indexInfo(1);
-    ws.initialize(indexInfo,
-                  HistogramData::Histogram(HistogramData::Points(1)));
+    ws.initialize(indexInfo, HistogramData::Histogram(HistogramData::Points(1)));
     TS_ASSERT_EQUALS(ws.getSpectrum(0).getDetectorIDs().size(), 0);
   }
 
@@ -456,8 +415,7 @@ public:
     TS_ASSERT_EQUALS(indices[2], 9);
   }
 
-  void
-  test_That_A_Workspace_Gets_SpectraMap_When_Initialized_With_NVector_Elements() {
+  void test_That_A_Workspace_Gets_SpectraMap_When_Initialized_With_NVector_Elements() {
     WorkspaceTester testWS;
     const size_t nhist(10);
     testWS.initialize(nhist, 1, 1);
@@ -495,15 +453,15 @@ public:
     ws.initialize(10, 10, 10);
     TS_ASSERT_EQUALS(ws.isCommonLogBins(), false);
 
-    auto logAxis = Kernel::make_cow<Mantid::HistogramData::HistogramX>(
-        10, Mantid::HistogramData::LogarithmicGenerator(1., 0.1));
+    auto logAxis =
+        Kernel::make_cow<Mantid::HistogramData::HistogramX>(10, Mantid::HistogramData::LogarithmicGenerator(1., 0.1));
     for (size_t i = 0; i < ws.getNumberHistograms(); ++i) {
       ws.setSharedX(i, logAxis);
     }
     TS_ASSERT_EQUALS(ws.isCommonLogBins(), true);
 
-    auto linearAxis = Kernel::make_cow<Mantid::HistogramData::HistogramX>(
-        10, Mantid::HistogramData::LinearGenerator(1., 0.1));
+    auto linearAxis =
+        Kernel::make_cow<Mantid::HistogramData::HistogramX>(10, Mantid::HistogramData::LinearGenerator(1., 0.1));
     for (size_t i = 0; i < ws.getNumberHistograms(); ++i) {
       ws.setSharedX(i, linearAxis);
     }
@@ -516,8 +474,7 @@ public:
 
     specnum_t specs[] = {1, 2, 2, 3};
     detid_t detids[] = {10, 99, 20, 30};
-    TS_ASSERT_THROWS_NOTHING(
-        testWS.updateSpectraUsing(SpectrumDetectorMapping(specs, detids, 4)));
+    TS_ASSERT_THROWS_NOTHING(testWS.updateSpectraUsing(SpectrumDetectorMapping(specs, detids, 4)));
 
     TS_ASSERT(testWS.getSpectrum(0).hasDetectorID(10));
     TS_ASSERT(testWS.getSpectrum(1).hasDetectorID(20));
@@ -526,8 +483,7 @@ public:
   }
 
   void testDetectorMappingCopiedWhenAWorkspaceIsCopied() {
-    std::shared_ptr<MatrixWorkspace> parent =
-        std::make_shared<WorkspaceTester>();
+    std::shared_ptr<MatrixWorkspace> parent = std::make_shared<WorkspaceTester>();
     parent->initialize(1, 1, 1);
     parent->getSpectrum(0).setSpectrumNo(99);
     parent->getSpectrum(0).setDetectorID(999);
@@ -555,8 +511,7 @@ public:
   void testReplaceAxis() {
     auto ax = std::make_unique<SpectraAxis>(ws.get());
     auto ax1 = std::make_unique<SpectraAxis>(ws.get());
-    TS_ASSERT_THROWS(ws->replaceAxis(2, std::move(ax)),
-                     const Exception::IndexError &);
+    TS_ASSERT_THROWS(ws->replaceAxis(2, std::move(ax)), const Exception::IndexError &);
     TS_ASSERT_THROWS_NOTHING(ws->replaceAxis(0, std::move(ax1)));
     TS_ASSERT(ws->getAxis(0)->isSpectra());
   }
@@ -584,8 +539,7 @@ public:
   void testGetDetector() {
     // Workspace has 3 spectra, each 1 in length
     const int numHist(3);
-    std::shared_ptr<MatrixWorkspace> workspace(
-        makeWorkspaceWithDetectors(3, 1));
+    std::shared_ptr<MatrixWorkspace> workspace(makeWorkspaceWithDetectors(3, 1));
 
     // Initially un masked
     for (int i = 0; i < numHist; ++i) {
@@ -617,8 +571,7 @@ public:
   void testWholeSpectraMasking() {
     // Workspace has 3 spectra, each 1 in length
     const int numHist(3);
-    std::shared_ptr<MatrixWorkspace> workspace(
-        makeWorkspaceWithDetectors(3, 1));
+    std::shared_ptr<MatrixWorkspace> workspace(makeWorkspaceWithDetectors(3, 1));
 
     // Initially un masked
     const auto &spectrumInfo = workspace->spectrumInfo();
@@ -738,18 +691,13 @@ public:
     TS_ASSERT(!ws2->hasMaskedBins(-1));
 
     // Will throw if nothing masked for spectrum
-    TS_ASSERT_THROWS(ws2->maskedBins(0),
-                     const Mantid::Kernel::Exception::IndexError &);
+    TS_ASSERT_THROWS(ws2->maskedBins(0), const Mantid::Kernel::Exception::IndexError &);
     // Will throw if attempting to mask invalid spectrum
-    TS_ASSERT_THROWS(ws2->maskBin(-1, 1),
-                     const Mantid::Kernel::Exception::IndexError &);
-    TS_ASSERT_THROWS(ws2->maskBin(1, 1),
-                     const Mantid::Kernel::Exception::IndexError &);
+    TS_ASSERT_THROWS(ws2->maskBin(-1, 1), const Mantid::Kernel::Exception::IndexError &);
+    TS_ASSERT_THROWS(ws2->maskBin(1, 1), const Mantid::Kernel::Exception::IndexError &);
     // ...or an invalid bin
-    TS_ASSERT_THROWS(ws2->maskBin(0, -1),
-                     const Mantid::Kernel::Exception::IndexError &);
-    TS_ASSERT_THROWS(ws2->maskBin(0, 2),
-                     const Mantid::Kernel::Exception::IndexError &);
+    TS_ASSERT_THROWS(ws2->maskBin(0, -1), const Mantid::Kernel::Exception::IndexError &);
+    TS_ASSERT_THROWS(ws2->maskBin(0, 2), const Mantid::Kernel::Exception::IndexError &);
 
     // Now do a valid masking
     TS_ASSERT_THROWS_NOTHING(ws2->maskBin(0, 1, 0.5));
@@ -832,8 +780,7 @@ public:
 
     // Check it throws for non-spectra axis
     ws.replaceAxis(1, std::make_unique<NumericAxis>(1));
-    TS_ASSERT_THROWS(ws.getSpectrumToWorkspaceIndexMap(),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(ws.getSpectrumToWorkspaceIndexMap(), const std::runtime_error &);
   }
 
   void test_getDetectorIDToWorkspaceIndexMap() {
@@ -848,8 +795,7 @@ public:
     }
 
     ws->getSpectrum(2).addDetectorID(99); // Set a second ID on one spectrum
-    TS_ASSERT_THROWS(ws->getDetectorIDToWorkspaceIndexMap(true),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(ws->getDetectorIDToWorkspaceIndexMap(true), const std::runtime_error &);
     detid2index_map idmap2 = ws->getDetectorIDToWorkspaceIndexMap();
     TS_ASSERT_EQUALS(idmap2.size(), 6);
   }
@@ -858,8 +804,7 @@ public:
     auto ws = makeWorkspaceWithDetectors(100, 10);
     std::vector<size_t> out;
     detid_t offset = -1234;
-    TS_ASSERT_THROWS_NOTHING(
-        out = ws->getDetectorIDToWorkspaceIndexVector(offset));
+    TS_ASSERT_THROWS_NOTHING(out = ws->getDetectorIDToWorkspaceIndexVector(offset));
     TS_ASSERT_EQUALS(offset, 0);
     TS_ASSERT_EQUALS(out.size(), 100);
     TS_ASSERT_EQUALS(out[0], 0);
@@ -887,8 +832,7 @@ public:
     ws->setInstrument(inst);
     ws->getSpectrum(66).clearDetectorIDs();
 
-    TS_ASSERT_THROWS_NOTHING(
-        out = ws->getDetectorIDToWorkspaceIndexVector(offset));
+    TS_ASSERT_THROWS_NOTHING(out = ws->getDetectorIDToWorkspaceIndexVector(offset));
     TS_ASSERT_EQUALS(offset, 1);
     TS_ASSERT_EQUALS(out.size(), 112);
     TS_ASSERT_EQUALS(out[66 + offset], std::numeric_limits<size_t>::max());
@@ -901,8 +845,7 @@ public:
     auto ws = makeWorkspaceWithDetectors(100, 10);
     std::vector<size_t> out;
     detid_t offset = -1234;
-    TS_ASSERT_THROWS_NOTHING(out =
-                                 ws->getSpectrumToWorkspaceIndexVector(offset));
+    TS_ASSERT_THROWS_NOTHING(out = ws->getSpectrumToWorkspaceIndexVector(offset));
     TS_ASSERT_EQUALS(offset, -1);
     TS_ASSERT_EQUALS(out.size(), 100);
     TS_ASSERT_EQUALS(out[0], 0);
@@ -916,13 +859,9 @@ public:
 
     // Get signal at coordinates
     std::vector<coord_t> coords = {0.5, 1.0};
-    TS_ASSERT_DELTA(
-        ws.getSignalAtCoord(coords.data(), Mantid::API::NoNormalization), 0.0,
-        1e-5);
+    TS_ASSERT_DELTA(ws.getSignalAtCoord(coords.data(), Mantid::API::NoNormalization), 0.0, 1e-5);
     coords[0] = 1.5;
-    TS_ASSERT_DELTA(
-        ws.getSignalAtCoord(coords.data(), Mantid::API::NoNormalization), 1.0,
-        1e-5);
+    TS_ASSERT_DELTA(ws.getSignalAtCoord(coords.data(), Mantid::API::NoNormalization), 1.0, 1e-5);
   }
 
   void test_getSignalAtCoord_pointData() {
@@ -978,37 +917,33 @@ public:
     // signal values by volume should always be 1.
 
     // Test at the top right.
-    coord_t coord_top_right[2] = {static_cast<float>(ws.readX(0).back()),
-                                  float(0)};
+    coord_t coord_top_right[2] = {static_cast<float>(ws.readX(0).back()), float(0)};
     signal_t value = 0;
-    TS_ASSERT_THROWS_NOTHING(
-        value = ws.getSignalAtCoord(coord_top_right, VolumeNormalization));
+    TS_ASSERT_THROWS_NOTHING(value = ws.getSignalAtCoord(coord_top_right, VolumeNormalization));
     TS_ASSERT_EQUALS(1.0, value);
 
     // Test at another location just to be sure.
-    coord_t coord_bottom_left[2] = {
-        static_cast<float>(ws.readX(nVertical - 1)[1]), float(nVertical - 1)};
-    TS_ASSERT_THROWS_NOTHING(
-        value = ws.getSignalAtCoord(coord_bottom_left, VolumeNormalization));
+    coord_t coord_bottom_left[2] = {static_cast<float>(ws.readX(nVertical - 1)[1]), float(nVertical - 1)};
+    TS_ASSERT_THROWS_NOTHING(value = ws.getSignalAtCoord(coord_bottom_left, VolumeNormalization));
     TS_ASSERT_EQUALS(1.0, value);
   }
 
   void test_setMDMasking() {
     WorkspaceTester ws;
-    TSM_ASSERT_THROWS("Characterisation test. This is not implemented.",
-                      ws.setMDMasking(nullptr), const std::runtime_error &);
+    TSM_ASSERT_THROWS("Characterisation test. This is not implemented.", ws.setMDMasking(nullptr),
+                      const std::runtime_error &);
   }
 
   void test_clearMDMasking() {
     WorkspaceTester ws;
-    TSM_ASSERT_THROWS("Characterisation test. This is not implemented.",
-                      ws.clearMDMasking(), const std::runtime_error &);
+    TSM_ASSERT_THROWS("Characterisation test. This is not implemented.", ws.clearMDMasking(),
+                      const std::runtime_error &);
   }
 
   void test_getSpecialCoordinateSystem_default() {
     WorkspaceTester ws;
-    TSM_ASSERT_EQUALS("Should default to no special coordinate system.",
-                      Mantid::Kernel::None, ws.getSpecialCoordinateSystem());
+    TSM_ASSERT_EQUALS("Should default to no special coordinate system.", Mantid::Kernel::None,
+                      ws.getSpecialCoordinateSystem());
   }
 
   void test_getFirstPulseTime_getLastPulseTime() {
@@ -1040,12 +975,10 @@ public:
     for (int i = 2; i < 62; ++i) {
       proton_charge->addValue(startTime + static_cast<double>(i), 1.0E-7);
     }
-    TS_ASSERT_EQUALS(ws.getFirstPulseTime(),
-                     DateAndTime("1991-01-01T00:00:00"));
+    TS_ASSERT_EQUALS(ws.getFirstPulseTime(), DateAndTime("1991-01-01T00:00:00"));
   }
 
-  void
-  test_getFirstPulseTime_getLastPulseTime_throws_if_protoncharge_missing_or_empty() {
+  void test_getFirstPulseTime_getLastPulseTime_throws_if_protoncharge_missing_or_empty() {
     WorkspaceTester ws;
     TS_ASSERT_THROWS(ws.getFirstPulseTime(), const std::runtime_error &);
     TS_ASSERT_THROWS(ws.getLastPulseTime(), const std::runtime_error &);
@@ -1054,8 +987,7 @@ public:
     TS_ASSERT_THROWS(ws.getLastPulseTime(), const std::runtime_error &);
   }
 
-  void
-  test_getFirstPulseTime_getLastPulseTime_throws_if_protoncharge_wrong_type() {
+  void test_getFirstPulseTime_getLastPulseTime_throws_if_protoncharge_wrong_type() {
     WorkspaceTester ws;
     auto proton_charge = new TimeSeriesProperty<int>("proton_charge");
     proton_charge->addValue("2013-04-21T10:19:10", 1);
@@ -1064,8 +996,7 @@ public:
     TS_ASSERT_THROWS(ws.getFirstPulseTime(), const std::invalid_argument &);
     TS_ASSERT_THROWS(ws.getLastPulseTime(), const std::invalid_argument &);
 
-    ws.mutableRun().addProperty(
-        new PropertyWithValue<double>("proton_charge", 99.0), true);
+    ws.mutableRun().addProperty(new PropertyWithValue<double>("proton_charge", 99.0), true);
     TS_ASSERT_THROWS(ws.getFirstPulseTime(), const std::invalid_argument &);
     TS_ASSERT_THROWS(ws.getLastPulseTime(), const std::invalid_argument &);
   }
@@ -1081,17 +1012,14 @@ public:
 
   void test_monitorWorkspace() {
     auto ws = std::make_shared<WorkspaceTester>();
-    TSM_ASSERT("There should be no monitor workspace by default",
-               !ws->monitorWorkspace())
+    TSM_ASSERT("There should be no monitor workspace by default", !ws->monitorWorkspace())
 
     auto ws2 = std::make_shared<WorkspaceTester>();
     ws->setMonitorWorkspace(ws2);
-    TSM_ASSERT_EQUALS("Monitor workspace not successfully set",
-                      ws->monitorWorkspace(), ws2)
+    TSM_ASSERT_EQUALS("Monitor workspace not successfully set", ws->monitorWorkspace(), ws2)
 
     ws->setMonitorWorkspace(std::shared_ptr<MatrixWorkspace>());
-    TSM_ASSERT("Monitor workspace not successfully reset",
-               !ws->monitorWorkspace())
+    TSM_ASSERT("Monitor workspace not successfully reset", !ws->monitorWorkspace())
   }
 
   void test_getXIndex() {
@@ -1217,8 +1145,7 @@ public:
     const size_t start = 0;
     const size_t stop = 8;
     size_t width = 0;
-    TS_ASSERT_THROWS(ws.getImageY(start, stop, width),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(ws.getImageY(start, stop, width), const std::runtime_error &);
     width = 3;
     TS_ASSERT_THROWS_NOTHING(ws.getImageY(start, stop, width));
   }
@@ -1232,11 +1159,9 @@ public:
     size_t start = 10;
     size_t stop = 8;
     size_t width = 3;
-    TS_ASSERT_THROWS(ws.getImageY(start, stop, width),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(ws.getImageY(start, stop, width), const std::runtime_error &);
     start = 9;
-    TS_ASSERT_THROWS(ws.getImageY(start, stop, width),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(ws.getImageY(start, stop, width), const std::runtime_error &);
     start = 0;
     TS_ASSERT_THROWS_NOTHING(ws.getImageY(start, stop, width));
   }
@@ -1250,11 +1175,9 @@ public:
     size_t start = 0;
     size_t stop = 18;
     size_t width = 3;
-    TS_ASSERT_THROWS(ws.getImageY(start, stop, width),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(ws.getImageY(start, stop, width), const std::runtime_error &);
     stop = 9;
-    TS_ASSERT_THROWS(ws.getImageY(start, stop, width),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(ws.getImageY(start, stop, width), const std::runtime_error &);
     stop = 8;
     TS_ASSERT_THROWS_NOTHING(ws.getImageY(start, stop, width));
   }
@@ -1268,8 +1191,7 @@ public:
     size_t start = 1;
     size_t stop = 0;
     size_t width = 1;
-    TS_ASSERT_THROWS(ws.getImageY(start, stop, width),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(ws.getImageY(start, stop, width), const std::runtime_error &);
     stop = 1;
     TS_ASSERT_THROWS_NOTHING(ws.getImageY(start, stop, width));
   }
@@ -1283,8 +1205,7 @@ public:
     size_t start = 0;
     size_t stop = 7;
     size_t width = 3;
-    TS_ASSERT_THROWS(ws.getImageY(start, stop, width),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(ws.getImageY(start, stop, width), const std::runtime_error &);
   }
 
   void test_getImage_wrong_indexStart() {
@@ -1298,15 +1219,13 @@ public:
     const size_t width = 3;
     double startX = 3;
     double endX = 4;
-    TS_ASSERT_THROWS(ws.getImageY(start, stop, width, startX, endX),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(ws.getImageY(start, stop, width, startX, endX), const std::runtime_error &);
 
     WorkspaceTester wsh;
     wsh.initialize(9, 1, 1);
     startX = 2;
     endX = 2;
-    TS_ASSERT_THROWS(wsh.getImageY(start, stop, width, startX, endX),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(wsh.getImageY(start, stop, width, startX, endX), const std::runtime_error &);
   }
 
   void test_getImage_wrong_indexEnd() {
@@ -1320,8 +1239,7 @@ public:
     const size_t width = 3;
     double startX = 1.0;
     double endX = 0.0;
-    TS_ASSERT_THROWS(ws.getImageY(start, stop, width, startX, endX),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(ws.getImageY(start, stop, width, startX, endX), const std::runtime_error &);
 
     WorkspaceTester wsh;
     wsh.initialize(9, 2, 2);
@@ -1330,8 +1248,7 @@ public:
     X1[1] = 2.0;
     startX = 1.0;
     endX = 0.0;
-    TS_ASSERT_THROWS(wsh.getImageY(start, stop, width, startX, endX),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(wsh.getImageY(start, stop, width, startX, endX), const std::runtime_error &);
   }
 
   void test_getImage_single_bin_histo() {
@@ -1349,8 +1266,7 @@ public:
     double startX = 0;
     double endX = 3;
     Mantid::API::MantidImage_sptr image;
-    TS_ASSERT_THROWS_NOTHING(
-        image = ws.getImageY(start, stop, width, startX, endX));
+    TS_ASSERT_THROWS_NOTHING(image = ws.getImageY(start, stop, width, startX, endX));
     if (!image)
       return;
     TS_ASSERT_EQUALS(image->size(), 3);
@@ -1383,8 +1299,7 @@ public:
     double startX = 1;
     double endX = 1;
     Mantid::API::MantidImage_sptr image;
-    TS_ASSERT_THROWS_NOTHING(
-        image = ws.getImageY(start, stop, width, startX, endX));
+    TS_ASSERT_THROWS_NOTHING(image = ws.getImageY(start, stop, width, startX, endX));
     if (!image)
       return;
     TS_ASSERT_EQUALS(image->size(), 3);
@@ -1552,11 +1467,9 @@ public:
     // Check property can be obtained as const_sptr or sptr
     MatrixWorkspace_const_sptr wsConst;
     MatrixWorkspace_sptr wsNonConst;
-    TS_ASSERT_THROWS_NOTHING(
-        wsConst = manager.getValue<MatrixWorkspace_const_sptr>(wsName));
+    TS_ASSERT_THROWS_NOTHING(wsConst = manager.getValue<MatrixWorkspace_const_sptr>(wsName));
     TS_ASSERT(wsConst != nullptr);
-    TS_ASSERT_THROWS_NOTHING(
-        wsNonConst = manager.getValue<MatrixWorkspace_sptr>(wsName));
+    TS_ASSERT_THROWS_NOTHING(wsNonConst = manager.getValue<MatrixWorkspace_sptr>(wsName));
     TS_ASSERT(wsNonConst != nullptr);
     TS_ASSERT_EQUALS(wsConst, wsNonConst);
 
@@ -1583,10 +1496,8 @@ public:
     size_t workspaceIndexWithDx[3] = {0, 1, 2};
 
     Mantid::MantidVec dxSpec0(j, values[0]);
-    auto dxSpec1 =
-        Kernel::make_cow<Mantid::HistogramData::HistogramDx>(j, values[1]);
-    auto dxSpec2 = std::make_shared<Mantid::HistogramData::HistogramDx>(
-        Mantid::MantidVec(j, values[2]));
+    auto dxSpec1 = Kernel::make_cow<Mantid::HistogramData::HistogramDx>(j, values[1]);
+    auto dxSpec2 = std::make_shared<Mantid::HistogramData::HistogramDx>(Mantid::MantidVec(j, values[2]));
 
     // Act
     for (size_t spec = 0; spec < numspec; ++spec) {
@@ -1597,30 +1508,23 @@ public:
     ws.setSharedDx(workspaceIndexWithDx[2], dxSpec2);
 
     // Assert
-    auto compareValue = [&values](double data, size_t index) {
-      return data == values[index];
-    };
+    auto compareValue = [&values](double data, size_t index) { return data == values[index]; };
     for (auto &index : workspaceIndexWithDx) {
       TSM_ASSERT("Should have x resolution values", ws.hasDx(index));
-      TSM_ASSERT_EQUALS("Should have a length of 3", ws.dataDx(index).size(),
-                        j);
-      auto compareValueForSpecificWorkspaceIndex =
-          std::bind(compareValue, std::placeholders::_1, index);
+      TSM_ASSERT_EQUALS("Should have a length of 3", ws.dataDx(index).size(), j);
+      auto compareValueForSpecificWorkspaceIndex = std::bind(compareValue, std::placeholders::_1, index);
 
       auto &dataDx = ws.dataDx(index);
       TSM_ASSERT("dataDx should allow access to the spectrum",
-                 std::all_of(std::begin(dataDx), std::end(dataDx),
-                             compareValueForSpecificWorkspaceIndex));
+                 std::all_of(std::begin(dataDx), std::end(dataDx), compareValueForSpecificWorkspaceIndex));
 
       auto &readDx = ws.readDx(index);
       TSM_ASSERT("readDx should allow access to the spectrum",
-                 std::all_of(std::begin(readDx), std::end(readDx),
-                             compareValueForSpecificWorkspaceIndex));
+                 std::all_of(std::begin(readDx), std::end(readDx), compareValueForSpecificWorkspaceIndex));
 
       auto refDx = ws.sharedDx(index);
       TSM_ASSERT("readDx should allow access to the spectrum",
-                 std::all_of(std::begin(*refDx), std::end(*refDx),
-                             compareValueForSpecificWorkspaceIndex));
+                 std::all_of(std::begin(*refDx), std::end(*refDx), compareValueForSpecificWorkspaceIndex));
     }
 
     TSM_ASSERT("Should not have any x resolution values", !ws.hasDx(3));
@@ -1675,20 +1579,15 @@ public:
     auto &compInfo = merged->mutableComponentInfo();
 
     // Try to move the parent
-    TS_ASSERT_THROWS(compInfo.setPosition(compInfo.parent(compInfo.indexOf(
-                                              det.getComponentID())),
-                                          V3D(1, 2, 3)),
+    TS_ASSERT_THROWS(compInfo.setPosition(compInfo.parent(compInfo.indexOf(det.getComponentID())), V3D(1, 2, 3)),
                      const std::runtime_error &);
     // Try to rotate the parent
-    TS_ASSERT_THROWS(compInfo.setRotation(compInfo.parent(compInfo.indexOf(
-                                              det.getComponentID())),
-                                          Quat(1, 2, 3, 4)),
+    TS_ASSERT_THROWS(compInfo.setRotation(compInfo.parent(compInfo.indexOf(det.getComponentID())), Quat(1, 2, 3, 4)),
                      const std::runtime_error &);
   }
 
   void test_legacy_setting_spectrum_numbers_with_MPI() {
-    ParallelTestHelpers::runParallel(
-        run_legacy_setting_spectrum_numbers_with_MPI);
+    ParallelTestHelpers::runParallel(run_legacy_setting_spectrum_numbers_with_MPI);
   }
 
   void test_detectorSignedTwoTheta() {
@@ -1744,8 +1643,7 @@ public:
     TS_ASSERT_EQUALS(workspace.yIndexOfX(4.0), 2);
   }
 
-  void
-  test_that_yIndexOfX_throws_when_provided_an_index_which_is_out_of_range_for_ascending_x_values() {
+  void test_that_yIndexOfX_throws_when_provided_an_index_which_is_out_of_range_for_ascending_x_values() {
     std::vector<double> const xValues{1.0, 2.0, 3.0, 4.0};
     auto const workspace = getWorkspaceWithPopulatedX(1, 4, 3, xValues);
 
@@ -1754,8 +1652,7 @@ public:
     TS_ASSERT_THROWS(workspace.yIndexOfX(2.5, -1), const std::out_of_range &);
   }
 
-  void
-  test_that_yIndexOfX_throws_when_provided_x_values_which_are_out_of_range_for_ascending_x_values() {
+  void test_that_yIndexOfX_throws_when_provided_x_values_which_are_out_of_range_for_ascending_x_values() {
     std::vector<double> const xValues{1.0, 2.0, 3.0, 4.0};
     auto const workspace = getWorkspaceWithPopulatedX(1, 4, 3, xValues);
 
@@ -1819,8 +1716,7 @@ public:
     TS_ASSERT_EQUALS(workspace.yIndexOfX(2.3), 2);
   }
 
-  void
-  test_that_yIndexOfX_throws_when_provided_an_index_which_is_out_of_range_for_descending_x_values() {
+  void test_that_yIndexOfX_throws_when_provided_an_index_which_is_out_of_range_for_descending_x_values() {
     std::vector<double> const xValues{5.3, 4.3, 3.3, 2.3};
     auto const workspace = getWorkspaceWithPopulatedX(1, 4, 3, xValues);
 
@@ -1829,16 +1725,13 @@ public:
     TS_ASSERT_THROWS(workspace.yIndexOfX(2.5, -1), const std::out_of_range &);
   }
 
-  void
-  test_that_yIndexOfX_throws_when_provided_x_values_which_are_out_of_range_for_descending_x_values() {
+  void test_that_yIndexOfX_throws_when_provided_x_values_which_are_out_of_range_for_descending_x_values() {
     std::vector<double> const xValues{5.3, 4.3, 3.3, 2.3};
     auto const workspace = getWorkspaceWithPopulatedX(1, 4, 3, xValues);
 
-    TS_ASSERT_THROWS(workspace.yIndexOfX(std::nextafter(5.3, 10.0)),
-                     const std::out_of_range &);
+    TS_ASSERT_THROWS(workspace.yIndexOfX(std::nextafter(5.3, 10.0)), const std::out_of_range &);
     TS_ASSERT_THROWS(workspace.yIndexOfX(5.4), const std::out_of_range &);
-    TS_ASSERT_THROWS(workspace.yIndexOfX(std::nextafter(2.3, 0.0)),
-                     const std::out_of_range &);
+    TS_ASSERT_THROWS(workspace.yIndexOfX(std::nextafter(2.3, 0.0)), const std::out_of_range &);
     TS_ASSERT_THROWS(workspace.yIndexOfX(0.), const std::out_of_range &);
   }
 
@@ -1898,22 +1791,18 @@ public:
     TS_ASSERT_EQUALS(workspace.yIndexOfX(1.9997), 1);
   }
 
-  void
-  test_that_yIndexOfX_throws_for_a_nonHistogram_workspace_when_passed_an_x_value_just_outside_a_tolerance() {
+  void test_that_yIndexOfX_throws_for_a_nonHistogram_workspace_when_passed_an_x_value_just_outside_a_tolerance() {
     std::vector<double> const xValues{1.0, 1.9997, 3.0, 4.0};
     auto const workspace = getWorkspaceWithPopulatedX(1, 4, 4, xValues);
 
-    TS_ASSERT_THROWS(workspace.yIndexOfX(2.0, 0, 0.0002),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(workspace.yIndexOfX(2.0, 0, 0.0002), const std::invalid_argument &);
   }
 
-  void
-  test_that_yIndexOfX_throws_for_a_nonHistogram_workspace_when_passed_an_x_value_just_outside_a_tolerance2() {
+  void test_that_yIndexOfX_throws_for_a_nonHistogram_workspace_when_passed_an_x_value_just_outside_a_tolerance2() {
     std::vector<double> const xValues{1.0, 1.9997, 3.0, 4.0};
     auto const workspace = getWorkspaceWithPopulatedX(1, 4, 4, xValues);
 
-    TS_ASSERT_THROWS(workspace.yIndexOfX(1.9992, 0, 0.0002),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(workspace.yIndexOfX(1.9992, 0, 0.0002), const std::invalid_argument &);
   }
 
   void
@@ -1953,8 +1842,7 @@ public:
     std::vector<double> const xValues{4.0, 3.0, 1.9997, 1.0};
     auto const workspace = getWorkspaceWithPopulatedX(1, 4, 4, xValues);
 
-    TS_ASSERT_THROWS(workspace.yIndexOfX(1.9994, 0, 0.0002),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(workspace.yIndexOfX(1.9994, 0, 0.0002), const std::invalid_argument &);
   }
 
   void
@@ -1962,8 +1850,7 @@ public:
     std::vector<double> const xValues{4.0, 3.0, 1.9997, 1.0};
     auto const workspace = getWorkspaceWithPopulatedX(1, 4, 4, xValues);
 
-    TS_ASSERT_THROWS(workspace.yIndexOfX(2.0, 0, 0.0002),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(workspace.yIndexOfX(2.0, 0, 0.0002), const std::invalid_argument &);
   }
 
   void
@@ -1974,48 +1861,36 @@ public:
     TS_ASSERT_THROWS(workspace.yIndexOfX(3.5), const std::invalid_argument &);
   }
 
-  void
-  test_YUnitLabel_Correct_For_Distribution_Workspace_Custom_m_YUnitLabel_Not_Set() {
+  void test_YUnitLabel_Correct_For_Distribution_Workspace_Custom_m_YUnitLabel_Not_Set() {
     auto testWS = generateTestWorkspaceWithDistributionAndLabelSet(true, "");
-    TS_ASSERT_EQUALS(testWS->YUnitLabel(false, false),
-                     "Counts per microsecond");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(false, false), "Counts per microsecond");
     TS_ASSERT_EQUALS(testWS->YUnitLabel(false, true), "Counts per microsecond");
-    TS_ASSERT_EQUALS(testWS->YUnitLabel(true, false),
-                     "Counts ($\\mu s$)$^{-1}$");
-    TS_ASSERT_EQUALS(testWS->YUnitLabel(true, true),
-                     "Counts ($\\mu s$)$^{-1}$");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(true, false), "Counts ($\\mu s$)$^{-1}$");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(true, true), "Counts ($\\mu s$)$^{-1}$");
   }
 
-  void
-  test_YUnitLabel_Correct_For_Distribution_Workspace_Custom_m_YUnitLabel_Set() {
-    auto testWS =
-        generateTestWorkspaceWithDistributionAndLabelSet(true, "Custom Label");
+  void test_YUnitLabel_Correct_For_Distribution_Workspace_Custom_m_YUnitLabel_Set() {
+    auto testWS = generateTestWorkspaceWithDistributionAndLabelSet(true, "Custom Label");
     TS_ASSERT_EQUALS(testWS->YUnitLabel(false, false), "Custom Label");
     TS_ASSERT_EQUALS(testWS->YUnitLabel(false, true), "Custom Label");
     TS_ASSERT_EQUALS(testWS->YUnitLabel(true, false), "Custom Label");
     TS_ASSERT_EQUALS(testWS->YUnitLabel(true, true), "Custom Label");
   }
 
-  void
-  test_YUnitLabel_Correct_For_Non_Distribution_Workspace_Custom_m_YUnitLabel_Not_Set() {
+  void test_YUnitLabel_Correct_For_Non_Distribution_Workspace_Custom_m_YUnitLabel_Not_Set() {
     auto testWS = generateTestWorkspaceWithDistributionAndLabelSet(false, "");
     TS_ASSERT_EQUALS(testWS->YUnitLabel(false, false), "Counts");
     TS_ASSERT_EQUALS(testWS->YUnitLabel(false, true), "Counts per microsecond");
     TS_ASSERT_EQUALS(testWS->YUnitLabel(true, false), "Counts");
-    TS_ASSERT_EQUALS(testWS->YUnitLabel(true, true),
-                     "Counts ($\\mu s$)$^{-1}$");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(true, true), "Counts ($\\mu s$)$^{-1}$");
   }
 
-  void
-  test_YUnitLabel_Correct_For_Non_Distribution_Workspace_Custom_m_YUnitLabel_Set() {
-    auto testWS =
-        generateTestWorkspaceWithDistributionAndLabelSet(false, "Custom Label");
+  void test_YUnitLabel_Correct_For_Non_Distribution_Workspace_Custom_m_YUnitLabel_Set() {
+    auto testWS = generateTestWorkspaceWithDistributionAndLabelSet(false, "Custom Label");
     TS_ASSERT_EQUALS(testWS->YUnitLabel(false, false), "Custom Label");
-    TS_ASSERT_EQUALS(testWS->YUnitLabel(false, true),
-                     "Custom Label per microsecond");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(false, true), "Custom Label per microsecond");
     TS_ASSERT_EQUALS(testWS->YUnitLabel(true, false), "Custom Label");
-    TS_ASSERT_EQUALS(testWS->YUnitLabel(true, true),
-                     "Custom Label ($\\mu s$)$^{-1}$");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(true, true), "Custom Label ($\\mu s$)$^{-1}$");
   }
 
   void test_YUnitLabel_Correct_For_Empty_Y_Labels() {
@@ -2069,8 +1944,7 @@ public:
     workspace.initialize(5, 5, 4);
     MantidVec xValues = {1., 2., 3., 4., 5.};
     // set some values
-    for (size_t wsIndex = 0; wsIndex < workspace.getNumberHistograms();
-         wsIndex++) {
+    for (size_t wsIndex = 0; wsIndex < workspace.getNumberHistograms(); wsIndex++) {
       for (size_t binIndex = 0; binIndex < workspace.blocksize(); binIndex++) {
         // incrementing numbers
         double fillValue = static_cast<double>(binIndex + 1);
@@ -2091,8 +1965,7 @@ public:
         workspace.mutableY(wsIndex)[binIndex] = fillValue;
       }
       // set the x values
-      std::copy(xValues.begin(), xValues.end(),
-                workspace.mutableX(wsIndex).begin());
+      std::copy(xValues.begin(), xValues.end(), workspace.mutableX(wsIndex).begin());
     }
     MantidVec integratedValues;
     // the enitre range
@@ -2114,9 +1987,8 @@ public:
   }
 
 private:
-  std::shared_ptr<WorkspaceTester>
-  generateTestWorkspaceWithDistributionAndLabelSet(const bool distribution,
-                                                   const std::string &yLabel) {
+  std::shared_ptr<WorkspaceTester> generateTestWorkspaceWithDistributionAndLabelSet(const bool distribution,
+                                                                                    const std::string &yLabel) {
     auto testWS = std::make_shared<WorkspaceTester>();
     testWS->initialize(1, 2, 1);
     testWS->setDistribution(distribution);
@@ -2127,9 +1999,8 @@ private:
     return testWS;
   }
 
-  WorkspaceTester getWorkspaceWithPopulatedX(
-      std::size_t const &nVectors, std::size_t const &xLength,
-      std::size_t const &yLength, std::vector<double> const &xValues) {
+  WorkspaceTester getWorkspaceWithPopulatedX(std::size_t const &nVectors, std::size_t const &xLength,
+                                             std::size_t const &yLength, std::vector<double> const &xValues) {
     WorkspaceTester workspace;
     workspace.initialize(nVectors, xLength, yLength);
     auto &X = workspace.dataX(0);
@@ -2138,8 +2009,7 @@ private:
     return workspace;
   }
 
-  void checkDetectorSignedTwoTheta(const Geometry::PointingAlong thetaSignAxis,
-                                   const std::array<double, 4> &signs) {
+  void checkDetectorSignedTwoTheta(const Geometry::PointingAlong thetaSignAxis, const std::array<double, 4> &signs) {
     constexpr size_t numDets{4};
     constexpr size_t numBins{1};
     const auto frameUp = Geometry::Y;
@@ -2148,8 +2018,8 @@ private:
     const auto frameThetaSign = thetaSignAxis;
     const auto frameHandedness = Geometry::Right;
     const std::string frameOrigin{"source"};
-    auto refFrame = std::make_shared<ReferenceFrame>(
-        frameUp, frameAlongBeam, frameThetaSign, frameHandedness, frameOrigin);
+    auto refFrame =
+        std::make_shared<ReferenceFrame>(frameUp, frameAlongBeam, frameThetaSign, frameHandedness, frameOrigin);
     std::shared_ptr<MatrixWorkspace> ws = std::make_shared<WorkspaceTester>();
     ws->initialize(numDets, numBins, numBins);
     // Create instrument with four detectors to play with.
@@ -2157,11 +2027,9 @@ private:
     instrument->setReferenceFrame(refFrame);
     constexpr double twoTheta{4.2 / 180. * M_PI};
     for (size_t i = 0; i < numDets; ++i) {
-      Detector *det =
-          new Detector("pixel", static_cast<detid_t>(i), instrument.get());
+      Detector *det = new Detector("pixel", static_cast<detid_t>(i), instrument.get());
       constexpr double r{1.};
-      const double rotation =
-          (45. + 90. * static_cast<double>(i)) / 180. * M_PI;
+      const double rotation = (45. + 90. * static_cast<double>(i)) / 180. * M_PI;
       const double x = r * std::sin(twoTheta) * std::cos(rotation);
       const double y = r * std::sin(twoTheta) * std::sin(rotation);
       const double z = r * std::cos(twoTheta);
@@ -2187,10 +2055,8 @@ private:
     }
   }
 
-  Mantid::API::MantidImage_sptr createImage(const size_t width,
-                                            const size_t height) {
-    auto image =
-        std::make_shared<Mantid::API::MantidImage>(height, MantidVec(width));
+  Mantid::API::MantidImage_sptr createImage(const size_t width, const size_t height) {
+    auto image = std::make_shared<Mantid::API::MantidImage>(height, MantidVec(width));
     double startingValue = 1.0;
     for (auto &row : *image) {
       std::iota(row.begin(), row.end(), startingValue);
@@ -2206,8 +2072,7 @@ private:
    * @param yLength :: [input] Length of Y, E vectors
    * @returns :: workspace
    */
-  WorkspaceTester createTestWorkspace(size_t nVectors, size_t xLength,
-                                      size_t yLength) {
+  WorkspaceTester createTestWorkspace(size_t nVectors, size_t xLength, size_t yLength) {
     WorkspaceTester ws;
     ws.initialize(nVectors, xLength, yLength);
     // X data
@@ -2224,9 +2089,7 @@ private:
     // E data
     const auto errors = [&yLength](size_t wi) {
       std::vector<double> v(yLength);
-      std::generate(v.begin(), v.end(), [&wi]() {
-        return std::sqrt(static_cast<double>(wi) * 10.0);
-      });
+      std::generate(v.begin(), v.end(), [&wi]() { return std::sqrt(static_cast<double>(wi) * 10.0); });
       return v;
     };
 
@@ -2236,8 +2099,7 @@ private:
       } else if (xLength == yLength + 1) {
         ws.setBinEdges(wi, xData);
       } else {
-        throw std::invalid_argument(
-            "yLength must either be equal to xLength or xLength - 1");
+        throw std::invalid_argument("yLength must either be equal to xLength or xLength - 1");
       }
       ws.setCounts(wi, yCounts(wi));
       ws.setCountStandardDeviations(wi, errors(wi));
@@ -2251,12 +2113,8 @@ private:
 class MatrixWorkspaceTestPerformance : public CxxTest::TestSuite {
 
 public:
-  static MatrixWorkspaceTestPerformance *createSuite() {
-    return new MatrixWorkspaceTestPerformance();
-  }
-  static void destroySuite(MatrixWorkspaceTestPerformance *suite) {
-    delete suite;
-  }
+  static MatrixWorkspaceTestPerformance *createSuite() { return new MatrixWorkspaceTestPerformance(); }
+  static void destroySuite(MatrixWorkspaceTestPerformance *suite) { delete suite; }
 
   MatrixWorkspaceTestPerformance() : m_workspace() {
     using namespace Mantid::Geometry;
@@ -2267,8 +2125,8 @@ public:
     bool includeMonitors = false;
     bool startYNegative = true;
     const std::string instrumentName("SimpleFakeInstrument");
-    InstrumentCreationHelper::addFullInstrumentToWorkspace(
-        m_workspace, includeMonitors, startYNegative, instrumentName);
+    InstrumentCreationHelper::addFullInstrumentToWorkspace(m_workspace, includeMonitors, startYNegative,
+                                                           instrumentName);
 
     Mantid::Kernel::V3D sourcePos(0, 0, 0);
     Mantid::Kernel::V3D samplePos(0, 0, 1);
@@ -2276,24 +2134,20 @@ public:
     Mantid::Kernel::V3D trolley2Pos(0, 0, 6);
     m_paramMap = std::make_shared<Mantid::Geometry::ParameterMap>();
 
-    auto baseInstrument = ComponentCreationHelper::sansInstrument(
-        sourcePos, samplePos, trolley1Pos, trolley2Pos);
+    auto baseInstrument = ComponentCreationHelper::sansInstrument(sourcePos, samplePos, trolley1Pos, trolley2Pos);
 
-    auto sansInstrument =
-        std::make_shared<Instrument>(baseInstrument, m_paramMap);
+    auto sansInstrument = std::make_shared<Instrument>(baseInstrument, m_paramMap);
 
     // See component creation helper for instrument definition
     m_sansBank = sansInstrument->getComponentByName("Bank1");
 
     numberOfHistograms = sansInstrument->getNumberDetectors();
-    m_workspaceSans.initialize(numberOfHistograms, numberOfBins + 1,
-                               numberOfBins);
+    m_workspaceSans.initialize(numberOfHistograms, numberOfBins + 1, numberOfBins);
     m_workspaceSans.setInstrument(sansInstrument);
     m_workspaceSans.getAxis(0)->setUnit("TOF");
     m_workspaceSans.rebuildSpectraMapping();
 
-    m_zRotation =
-        Mantid::Kernel::Quat(180, V3D(0, 0, 1)); // rotate 180 degrees around z
+    m_zRotation = Mantid::Kernel::Quat(180, V3D(0, 0, 1)); // rotate 180 degrees around z
 
     m_pos = Mantid::Kernel::V3D(1, 1, 1);
   }
@@ -2368,8 +2222,7 @@ public:
     while (count < 10) {
       // Rotate the bank
       auto &compInfo = m_workspaceSans.mutableComponentInfo();
-      compInfo.setRotation(compInfo.indexOf(m_sansBank->getComponentID()),
-                           m_zRotation);
+      compInfo.setRotation(compInfo.indexOf(m_sansBank->getComponentID()), m_zRotation);
 
       V3D pos;
       for (size_t i = 1; i < m_workspaceSans.getNumberHistograms(); ++i) {
@@ -2394,8 +2247,7 @@ public:
     while (count < 10) {
       // move the bank
       auto &compInfo = m_workspaceSans.mutableComponentInfo();
-      compInfo.setPosition(compInfo.indexOf(m_sansBank->getComponentID()),
-                           m_pos);
+      compInfo.setPosition(compInfo.indexOf(m_sansBank->getComponentID()), m_pos);
 
       V3D pos;
       for (size_t i = 1; i < m_workspaceSans.getNumberHistograms(); ++i) {
@@ -2411,8 +2263,7 @@ public:
     while (count < 10) {
       // Rotate the bank
       auto &compInfo = m_workspaceSans.mutableComponentInfo();
-      compInfo.setRotation(compInfo.indexOf(m_sansBank->getComponentID()),
-                           m_zRotation);
+      compInfo.setRotation(compInfo.indexOf(m_sansBank->getComponentID()), m_zRotation);
 
       V3D pos;
       const auto &spectrumInfo = m_workspaceSans.spectrumInfo();
@@ -2429,8 +2280,7 @@ public:
     while (count < 10) {
       // move the bank
       auto &compInfo = m_workspaceSans.mutableComponentInfo();
-      compInfo.setPosition(compInfo.indexOf(m_sansBank->getComponentID()),
-                           m_pos);
+      compInfo.setPosition(compInfo.indexOf(m_sansBank->getComponentID()), m_pos);
 
       V3D pos;
       const auto &spectrumInfo = m_workspaceSans.spectrumInfo();
@@ -2444,21 +2294,16 @@ public:
   void test_hasOrientedLattice() {
     // create a workspace without an oriented lattice (or sample)
     std::shared_ptr<MatrixWorkspace> ws(makeWorkspaceWithDetectors(3, 1));
-    TSM_ASSERT_EQUALS(
-        "A newly created workspace should not have an oriented lattice",
-        ws->hasOrientedLattice(), false);
+    TSM_ASSERT_EQUALS("A newly created workspace should not have an oriented lattice", ws->hasOrientedLattice(), false);
 
     // add an oriented lattice
-    ws->mutableSample().setOrientedLattice(
-        std::make_unique<OrientedLattice>(1.0, 2.0, 3.0, 90, 90, 90));
-    TSM_ASSERT_EQUALS("A workspace with an oriented lattice should report true",
-                      ws->hasOrientedLattice(), true);
+    ws->mutableSample().setOrientedLattice(std::make_unique<OrientedLattice>(1.0, 2.0, 3.0, 90, 90, 90));
+    TSM_ASSERT_EQUALS("A workspace with an oriented lattice should report true", ws->hasOrientedLattice(), true);
 
     // remove it again
     ws->mutableSample().clearOrientedLattice();
-    TSM_ASSERT_EQUALS(
-        "workspace with it's oriented lattice cleared should report false",
-        ws->hasOrientedLattice(), false);
+    TSM_ASSERT_EQUALS("workspace with it's oriented lattice cleared should report false", ws->hasOrientedLattice(),
+                      false);
   }
 
   void test_isGroup() {

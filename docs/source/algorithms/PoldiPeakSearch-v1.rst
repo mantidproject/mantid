@@ -18,12 +18,12 @@ The algorithm
    last to the sum of its value and its neighbor's values:
 
     :math:`y'_i = y_{i-1} + y_{i} + y_{i+1}`
-    
+
    The new spectrum :math:`y'` contains :math:`n-2` points when :math:`y` contains :math:`n`.
 
 #. Identify peak positions in :math:`y'`, which is done with a recursive
    algorithm, consisting of these steps:
-   
+
    a. Find the position of the maximum, :math:`i_{max}` in the list,
       store in peak-list.
    #. Split the list in two parts,
@@ -60,18 +60,18 @@ Usage
 A typical peak search procedure would be performed on correlation data, so this analysis is performed first, followed by a peak search with default parameters.
 
 .. testcode:: ExSiliconPeakSearch
-    
+
     # Load data file and instrument, perform correlation analysis
     raw_6904 = LoadSINQFile(Filename = "poldi2013n006904.hdf", Instrument = "POLDI")
     LoadInstrument(raw_6904, RewriteSpectraMap=True, InstrumentName = "POLDI")
     correlated_6904 = PoldiAutoCorrelation(raw_6904)
-    
+
     # Run peak search algorithm, store peaks in TableWorkspace
     peaks_6904 = PoldiPeakSearch(correlated_6904)
-    
+
     # The tableworkspace should contain 14 peaks.
     print("The correlation spectrum of sample 6904 contains {} peaks.".format(peaks_6904.rowCount()))
-    
+
 Output:
 
 .. testoutput:: ExSiliconPeakSearch

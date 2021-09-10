@@ -30,13 +30,9 @@ class ConcreteProperty : public Property {
 public:
   ConcreteProperty() : Property("Test", typeid(int)) {}
   ConcreteProperty(std::string name) : Property(name, typeid(int)) {}
-  ConcreteProperty *clone() const override {
-    return new ConcreteProperty(*this);
-  }
+  ConcreteProperty *clone() const override { return new ConcreteProperty(*this); }
   bool isDefault() const override { return true; }
-  std::string getDefault() const override {
-    return "getDefault() is not implemented in this class";
-  }
+  std::string getDefault() const override { return "getDefault() is not implemented in this class"; }
   std::string value() const override { return m_value; }
   Json::Value valueAsJson() const override { return Json::Value(); }
   std::string setValue(const std::string &value) override {
@@ -45,9 +41,7 @@ public:
   }
   std::string setValueFromJson(const Json::Value &) override { return ""; }
   std::string setValueFromProperty(const Property &) override { return ""; }
-  std::string setDataItem(const std::shared_ptr<DataItem> &) override {
-    return "";
-  }
+  std::string setDataItem(const std::shared_ptr<DataItem> &) override { return ""; }
   Property &operator+=(Property const *) override { return *this; }
 
 private:
@@ -69,8 +63,7 @@ void addTestTimeSeriesFilter(LogManager &run, const std::string &name) {
   run.addProperty(timeSeries);
 }
 
-template <typename T>
-void addTestTimeSeries(LogManager &run, const std::string &name) {
+template <typename T> void addTestTimeSeries(LogManager &run, const std::string &name) {
   auto timeSeries = new TimeSeriesProperty<T>(name);
   timeSeries->addValue("2012-07-19T16:17:00", 2);
   timeSeries->addValue("2012-07-19T16:17:10", 3);
@@ -86,8 +79,7 @@ void addTestTimeSeries(LogManager &run, const std::string &name) {
 }
 } // namespace
 
-void addTimeSeriesEntry(LogManager &runInfo, const std::string &name,
-                        double val) {
+void addTimeSeriesEntry(LogManager &runInfo, const std::string &name, double val) {
   TimeSeriesProperty<double> *tsp;
   tsp = new TimeSeriesProperty<double>(name);
   tsp->addValue("2011-05-24T00:00:00", val);
@@ -107,8 +99,7 @@ public:
     TS_ASSERT_EQUALS(p, pp);
     TS_ASSERT(!pp->name().compare("Test"));
     TS_ASSERT(dynamic_cast<ConcreteProperty *>(pp));
-    TS_ASSERT_THROWS(pp = runInfo.getProperty("NotThere"),
-                     const Exception::NotFoundError &);
+    TS_ASSERT_THROWS(pp = runInfo.getProperty("NotThere"), const Exception::NotFoundError &);
 
     std::vector<Property *> props = runInfo.getProperties();
     TS_ASSERT(!props.empty());
@@ -132,14 +123,12 @@ public:
     TS_ASSERT_THROWS(runInfo.startTime(), const std::runtime_error &);
     // Add run_start and see that get picked up
     const std::string run_start("2013-12-19T13:38:00");
-    auto run_start_prop =
-        new PropertyWithValue<std::string>("run_start", run_start);
+    auto run_start_prop = new PropertyWithValue<std::string>("run_start", run_start);
     runInfo.addProperty(run_start_prop);
     TS_ASSERT_EQUALS(runInfo.startTime(), DateAndTime(run_start));
     // Add start_time and see that get picked up in preference
     const std::string start_time("2013-12-19T13:40:00");
-    auto start_time_prop =
-        new PropertyWithValue<std::string>("start_time", start_time);
+    auto start_time_prop = new PropertyWithValue<std::string>("start_time", start_time);
     runInfo.addProperty(start_time_prop);
     TS_ASSERT_EQUALS(runInfo.startTime(), DateAndTime(start_time));
     // But get back run_start again if start_time is equal to the epoch
@@ -178,8 +167,7 @@ public:
     TS_ASSERT_EQUALS(runInfo.endTime(), DateAndTime(run_end));
     // Add end_time and see that get picked up in preference
     const std::string end_time("2013-12-19T13:40:00");
-    auto end_time_prop =
-        new PropertyWithValue<std::string>("end_time", end_time);
+    auto end_time_prop = new PropertyWithValue<std::string>("end_time", end_time);
     runInfo.addProperty(end_time_prop);
     TS_ASSERT_EQUALS(runInfo.endTime(), DateAndTime(end_time));
 
@@ -207,8 +195,7 @@ public:
     Property *p = new ConcreteProperty();
     runInfo.addProperty(p);
 
-    TS_ASSERT_EQUALS(runInfo.getMemorySize(),
-                     p->getMemorySize() + sizeof(Property *));
+    TS_ASSERT_EQUALS(runInfo.getMemorySize(), p->getMemorySize() + sizeof(Property *));
   }
 
   void test_GetTimeSeriesProperty_Returns_TSP_When_Log_Exists() {
@@ -224,24 +211,20 @@ public:
 
   void test_GetTimeSeriesProperty_Throws_When_Log_Does_Not_Exist() {
     LogManager runInfo;
-    TS_ASSERT_THROWS(runInfo.getTimeSeriesProperty<double>("not_a_log"),
-                     const Exception::NotFoundError &);
+    TS_ASSERT_THROWS(runInfo.getTimeSeriesProperty<double>("not_a_log"), const Exception::NotFoundError &);
   }
 
-  void
-  test_GetTimeSeriesProperty_Throws_When_Log_Exists_But_Is_Not_Correct_Type() {
+  void test_GetTimeSeriesProperty_Throws_When_Log_Exists_But_Is_Not_Correct_Type() {
     LogManager runInfo;
     const std::string &name = "double_prop";
     runInfo.addProperty(name, 5.6); // Standard double property
 
-    TS_ASSERT_THROWS(runInfo.getTimeSeriesProperty<double>(name),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(runInfo.getTimeSeriesProperty<double>(name), const std::invalid_argument &);
   }
 
   void test_GetPropertyAsType_Throws_When_Property_Does_Not_Exist() {
     LogManager runInfo;
-    TS_ASSERT_THROWS(runInfo.getPropertyValueAsType<double>("not_a_log"),
-                     const Exception::NotFoundError &);
+    TS_ASSERT_THROWS(runInfo.getPropertyValueAsType<double>("not_a_log"), const Exception::NotFoundError &);
   }
 
   void test_GetPropertyAsType_Returns_Expected_Value_When_Type_Is_Correct() {
@@ -251,8 +234,7 @@ public:
     runInfo.addProperty(name, value); // Standard double property
 
     double retrieved(0.0);
-    TS_ASSERT_THROWS_NOTHING(retrieved =
-                                 runInfo.getPropertyValueAsType<double>(name));
+    TS_ASSERT_THROWS_NOTHING(retrieved = runInfo.getPropertyValueAsType<double>(name));
     TS_ASSERT_DELTA(retrieved, value, 1e-12);
   }
 
@@ -260,8 +242,7 @@ public:
     LogManager runInfo;
     runInfo.addProperty("double_prop", 6.7); // Standard double property
 
-    TS_ASSERT_THROWS(runInfo.getPropertyValueAsType<int>("double_prop"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(runInfo.getPropertyValueAsType<int>("double_prop"), const std::invalid_argument &);
   }
 
   void test_GetPropertyAsSingleValue_SingleValue_DoubleType() {
@@ -272,9 +253,7 @@ public:
     doTest_GetPropertyAsSingleValue_SingleType<float>(1.0F);
   }
 
-  void test_GetPropertyAsSingleValue_SingleValue_Int32Type() {
-    doTest_GetPropertyAsSingleValue_SingleType<int32_t>(1);
-  }
+  void test_GetPropertyAsSingleValue_SingleValue_Int32Type() { doTest_GetPropertyAsSingleValue_SingleType<int32_t>(1); }
 
   void test_GetPropertyAsSingleValue_SingleValue_Int64Type() {
     doTest_GetPropertyAsSingleValue_SingleType<int64_t>(1L);
@@ -297,43 +276,31 @@ public:
     TS_ASSERT_DELTA(1.0, result, 1e-12);
   }
 
-  void test_GetPropertyAsIntegerValue_SingleValue_Int32Type() {
-    doTest_GetPropertyAsIntegerValue<int32_t>(1);
-  }
+  void test_GetPropertyAsIntegerValue_SingleValue_Int32Type() { doTest_GetPropertyAsIntegerValue<int32_t>(1); }
 
-  void test_GetPropertyAsIntegerValue_SingleValue_Int64Type() {
-    doTest_GetPropertyAsIntegerValue<int64_t>(1L);
-  }
+  void test_GetPropertyAsIntegerValue_SingleValue_Int64Type() { doTest_GetPropertyAsIntegerValue<int64_t>(1L); }
 
-  void test_GetPropertyAsIntegerValue_SingleValue_Uint32Type() {
-    doTest_GetPropertyAsIntegerValue<uint32_t>(1U);
-  }
+  void test_GetPropertyAsIntegerValue_SingleValue_Uint32Type() { doTest_GetPropertyAsIntegerValue<uint32_t>(1U); }
 
-  void test_GetPropertyAsIntegerValue_SingleValue_Uint64Type() {
-    doTest_GetPropertyAsIntegerValue<uint64_t>(1UL);
-  }
+  void test_GetPropertyAsIntegerValue_SingleValue_Uint64Type() { doTest_GetPropertyAsIntegerValue<uint64_t>(1UL); }
 
   void test_GetPropertyAsSingleInteger_DoubleType_Throws() {
     LogManager runInfo;
     const std::string name = "T_prop";
     runInfo.addProperty<double>(name, 1.0);
-    TS_ASSERT_THROWS(runInfo.getPropertyAsIntegerValue(name),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(runInfo.getPropertyAsIntegerValue(name), const std::invalid_argument &);
   }
 
   void test_GetPropertyAsSingleInteger_Throws_for_nonexistant_property() {
     LogManager runInfo;
-    TS_ASSERT_THROWS(runInfo.getPropertyAsIntegerValue("T_prop"),
-                     const Exception::NotFoundError &);
+    TS_ASSERT_THROWS(runInfo.getPropertyAsIntegerValue("T_prop"), const Exception::NotFoundError &);
   }
 
   void test_GetPropertyAsSingleValue_TimeSeries_DoubleType() {
     doTest_GetPropertyAsSingleValue_TimeSeriesType<double>();
   }
 
-  void test_GetPropertyAsSingleValue_TimeSeries_FloatType() {
-    doTest_GetPropertyAsSingleValue_TimeSeriesType<float>();
-  }
+  void test_GetPropertyAsSingleValue_TimeSeries_FloatType() { doTest_GetPropertyAsSingleValue_TimeSeriesType<float>(); }
 
   void test_GetPropertyAsSingleValue_TimeSeries_Int32Type() {
     doTest_GetPropertyAsSingleValue_TimeSeriesType<int32_t>();
@@ -356,54 +323,41 @@ public:
     const std::string name = "string_prop";
     runInfo.addProperty<std::string>(name, "hello"); // not a number
 
-    TS_ASSERT_THROWS(runInfo.getPropertyAsSingleValue(name),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(runInfo.getPropertyAsSingleValue(name), const std::invalid_argument &);
   }
 
-  void
-  test_GetPropertyAsSingleValue_Throws_If_Type_Is_Not_Numeric_Or_TimeSeries_Numeric_Or_Valid_String() {
+  void test_GetPropertyAsSingleValue_Throws_If_Type_Is_Not_Numeric_Or_TimeSeries_Numeric_Or_Valid_String() {
     LogManager runInfo;
     const std::string name = "bool_prop";
     const bool value(false);
     runInfo.addProperty<bool>(name, value); // Adds a bool property
 
-    TS_ASSERT_THROWS(runInfo.getPropertyAsSingleValue(name),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(runInfo.getPropertyAsSingleValue(name), const std::invalid_argument &);
   }
 
-  void
-  test_GetPropertyAsSingleValue_Returns_Simple_Mean_By_Default_For_Time_Series() {
+  void test_GetPropertyAsSingleValue_Returns_Simple_Mean_By_Default_For_Time_Series() {
     LogManager runInfo;
     const std::string name = "series";
     addTestTimeSeries<double>(runInfo, name);
 
     const double expectedValue(13.0);
-    TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name), expectedValue,
-                    1e-12);
+    TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name), expectedValue, 1e-12);
   }
 
-  void
-  test_GetPropertyAsSingleValue_Returns_Correct_SingleValue_For_Each_StatisticType() {
+  void test_GetPropertyAsSingleValue_Returns_Correct_SingleValue_For_Each_StatisticType() {
     LogManager runInfo;
     const std::string name = "series";
     addTestTimeSeries<double>(runInfo, name);
 
-    TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::Mean), 13.0,
-                    1e-12);
-    TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::Minimum), 2.0,
-                    1e-12);
-    TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::Maximum), 24.0,
-                    1e-12);
-    TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::FirstValue),
-                    2.0, 1e-12);
-    TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::LastValue),
-                    24.0, 1e-12);
-    TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::Median), 13.0,
-                    1e-12);
+    TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::Mean), 13.0, 1e-12);
+    TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::Minimum), 2.0, 1e-12);
+    TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::Maximum), 24.0, 1e-12);
+    TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::FirstValue), 2.0, 1e-12);
+    TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::LastValue), 24.0, 1e-12);
+    TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::Median), 13.0, 1e-12);
   }
 
-  void
-  test_GetPropertyAsSingleValue_Returns_Expected_Single_Value_On_Successive_Calls_With_Different_Stat_Types() {
+  void test_GetPropertyAsSingleValue_Returns_Expected_Single_Value_On_Successive_Calls_With_Different_Stat_Types() {
     LogManager run;
     const std::string name = "series";
     addTestTimeSeries<double>(run, name);
@@ -414,8 +368,7 @@ public:
     TS_ASSERT_EQUALS(run.getPropertyAsSingleValue(name, Math::Minimum), 2.0);
   }
 
-  void
-  test_GetPropertyAsSingleValue_Returns_Correct_Value_On_Second_Call_When_Log_Has_Been_Replaced() {
+  void test_GetPropertyAsSingleValue_Returns_Correct_Value_On_Second_Call_When_Log_Has_Been_Replaced() {
     LogManager runInfo;
     const std::string name = "double";
     double value(5.1);
@@ -461,8 +414,7 @@ public:
     // Check the time-series property is empty, but not the others
     TS_ASSERT_EQUALS(runInfo.getProperties().size(), 3);
     TS_ASSERT_EQUALS(tsp->realSize(), 0)
-    TS_ASSERT_EQUALS(runInfo.getPropertyValueAsType<std::string>(stringProp),
-                     stringVal);
+    TS_ASSERT_EQUALS(runInfo.getPropertyValueAsType<std::string>(stringProp), stringVal);
     TS_ASSERT_EQUALS(runInfo.getPropertyValueAsType<int>(intProp), 99);
   }
 
@@ -494,8 +446,7 @@ public:
     TS_ASSERT_EQUALS(tsp->realSize(), 1);
     TS_ASSERT_EQUALS(tsp->firstTime(), lastTime);
     TS_ASSERT_EQUALS(tsp->firstValue(), lastValue);
-    TS_ASSERT_EQUALS(runInfo.getPropertyValueAsType<std::string>(stringProp),
-                     stringVal);
+    TS_ASSERT_EQUALS(runInfo.getPropertyValueAsType<std::string>(stringProp), stringVal);
     TS_ASSERT_EQUALS(runInfo.getPropertyValueAsType<int>(intProp), 99);
   }
 
@@ -507,8 +458,7 @@ public:
     LogManager run1;
     addTimeSeriesEntry(run1, "double_series", 45.0);
     run1.addProperty(new PropertyWithValue<int>("int_val", 1234));
-    run1.addProperty(new PropertyWithValue<std::string>(
-        "string_val", "help_im_stuck_in_a_log_file"));
+    run1.addProperty(new PropertyWithValue<std::string>("string_val", "help_im_stuck_in_a_log_file"));
     run1.addProperty(new PropertyWithValue<double>("double_val", 5678.9));
     addTimeSeriesEntry(run1, "phi", 12.3);
     addTimeSeriesEntry(run1, "chi", 45.6);
@@ -599,8 +549,7 @@ public:
     LogManager runInfo;
     const std::string name = "test_has_invalid_values_filter";
     const std::string filterName = runInfo.getInvalidValuesFilterLogName(name);
-    TSM_ASSERT("The filter name should start with the log name",
-               filterName.rfind(name, 0) == 0);
+    TSM_ASSERT("The filter name should start with the log name", filterName.rfind(name, 0) == 0);
     addTestTimeSeries<double>(runInfo, name);
 
     TS_ASSERT_EQUALS(runInfo.hasInvalidValuesFilter(name), false);
@@ -615,8 +564,7 @@ public:
     const std::string filterName = runInfo.getInvalidValuesFilterLogName(name);
     addTestTimeSeries<double>(runInfo, name);
     auto *filterfail = runInfo.getInvalidValuesFilter(name);
-    TSM_ASSERT("The filter was returned correrctly as NULL",
-               filterfail == nullptr);
+    TSM_ASSERT("The filter was returned correrctly as NULL", filterfail == nullptr);
     addTestTimeSeriesFilter(runInfo, filterName);
 
     auto *filter = runInfo.getInvalidValuesFilter(name);
@@ -628,8 +576,7 @@ public:
     auto *tsLog = dynamic_cast<TimeSeriesProperty<double> *>(log);
     TS_ASSERT(tsLog);
     if (tsLog) {
-      auto filtered =
-          std::make_unique<FilteredTimeSeriesProperty<double>>(tsLog, *filter);
+      auto filtered = std::make_unique<FilteredTimeSeriesProperty<double>>(tsLog, *filter);
       TS_ASSERT_DELTA(filtered->nthValue(0), 2, 1e-5);
       TS_ASSERT_DELTA(filtered->nthValue(1), 3, 1e-5);
       TS_ASSERT_DELTA(filtered->nthValue(2), 4, 1e-5);
@@ -640,8 +587,7 @@ public:
   }
 
 private:
-  template <typename T>
-  void doTest_GetPropertyAsSingleValue_SingleType(const T value) {
+  template <typename T> void doTest_GetPropertyAsSingleValue_SingleType(const T value) {
     LogManager runInfo;
     const std::string name = "T_prop";
     runInfo.addProperty<T>(name, value);
@@ -655,9 +601,7 @@ private:
     const std::string name = "T_series";
     addTestTimeSeries<T>(runInfo, name);
     const double expectedValue(13.0);
-    TS_ASSERT_DELTA(
-        runInfo.getPropertyAsSingleValue(name, Mantid::Kernel::Math::Mean),
-        expectedValue, 1e-12);
+    TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Mantid::Kernel::Math::Mean), expectedValue, 1e-12);
   }
 
   template <typename T> void doTest_GetPropertyAsIntegerValue(const T value) {
@@ -678,14 +622,10 @@ class LogManagerTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static LogManagerTestPerformance *createSuite() {
-    return new LogManagerTestPerformance();
-  }
+  static LogManagerTestPerformance *createSuite() { return new LogManagerTestPerformance(); }
   static void destroySuite(LogManagerTestPerformance *suite) { delete suite; }
 
-  LogManagerTestPerformance() : m_testRun(), m_propName("test") {
-    addTestTimeSeries<double>(m_testRun, m_propName);
-  }
+  LogManagerTestPerformance() : m_testRun(), m_propName("test") { addTestTimeSeries<double>(m_testRun, m_propName); }
 
   void test_Accessing_Single_Value_From_Times_Series_A_Large_Number_Of_Times() {
     for (size_t i = 0; i < 20000; ++i) {
