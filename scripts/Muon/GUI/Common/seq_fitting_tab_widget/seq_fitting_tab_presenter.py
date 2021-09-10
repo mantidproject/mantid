@@ -68,7 +68,8 @@ class SeqFittingTabPresenter(object):
 
     def handle_fit_function_parameter_changed(self):
         self.view.fit_table.reset_fit_quality()
-        for row, fit_function in enumerate(self.model.get_all_fit_functions()):
+        display_type = self.view.selected_data_type()
+        for row, fit_function in enumerate(self.model.get_all_fit_functions_for(display_type)):
             parameter_values = self.model.get_all_fit_function_parameter_values_for(fit_function)
             self.view.fit_table.set_parameter_values_for_row(row, parameter_values)
 
