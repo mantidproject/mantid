@@ -513,9 +513,6 @@ void Run::loadNexus(::NeXus::File *file, const std::string &group,
   const auto &allEntries = fileInfo->getAllEntries();
   // loop through nxClass sets
   for (const auto &nxClassPair : allEntries) {
-    // DEBUG
-    const std::string &nxClass = nxClassPair.first;
-
     const std::set<std::string> &nxClassEntries = nxClassPair.second;
 
     // since std::set is ordered, just find the iterators

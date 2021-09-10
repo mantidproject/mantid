@@ -107,6 +107,107 @@ std::unique_ptr<Property> makeStringProperty(::NeXus::File *file, const std::str
 
 //----------------------------------------------------------------------------------------------
 /** Opens a NXlog group in a nexus file and
+ * creates the correct Property object from it. Overlead that
+ *
+ * @param file :: NXS file handle
+ * @param group :: name of NXlog group to open
+ * @param fileDescriptor :: HDF5 Nexus file descriptor (metadata)
+ * @param prefix :: current absolute target prefix
+ * @return Property pointer
+ */
+std::unique_ptr<Property> loadProperty(::NeXus::File *file, const std::string &group,
+                                       const std::shared_ptr<Mantid::Kernel::NexusHDF5Descriptor> &fileInfo,
+                                       const std::string &prefix) {
+  file->openGroup(group, "NXlog");
+
+  // Times in second offsets
+  std::vector<double> timeSec;
+  std::string startStr;
+  std::string unitsStr;
+
+  // Check if the "time" field is present
+  if (fileInfo->isEntry(prefix + "/" + group + "/time")) {
+    file->openData("time");
+    file->getData(timeSec);
+    // Optionally get a start
+    try {
+      file->getAttr("start", startStr);
+    } catch (::NeXus::Exception &) {
+    }
+    file->closeData();
+  }
+
+  // Check the type. Boolean stored as UINT8
+  bool typeIsBool(false);
+  // Check for boolean attribute
+  if (file->hasAttr("boolean")) {
+    typeIsBool = true;
+  }
+
+  std::vector<Types::Core::DateAndTime> times;
+  if (!timeSec.empty()) {
+    // Use a default start time
+    if (startStr.empty())
+      startStr = "2000-01-01T00:00:00";
+    // Convert time in seconds to DateAndTime
+    Types::Core::DateAndTime start(startStr);
+    times.reserve(timeSec.size());
+    std::transform(timeSec.cbegin(), timeSec.cend(), std::back_inserter(times),
+                   [&start](const auto &time) { return start + time; });
+  }
+
+  file->openData("value");
+  std::unique_ptr<Property> retVal = nullptr;
+  switch (file->getInfo().type) {
+  case ::NeXus::FLOAT32:
+    retVal = makeProperty<float>(file, group, times);
+    break;
+  case ::NeXus::FLOAT64:
+    retVal = makeProperty<double>(file, group, times);
+    break;
+  case ::NeXus::INT32:
+    retVal = makeProperty<int32_t>(file, group, times);
+    break;
+  case ::NeXus::UINT32:
+    retVal = makeProperty<uint32_t>(file, group, times);
+    break;
+  case ::NeXus::INT64:
+    retVal = makeProperty<int64_t>(file, group, times);
+    break;
+  case ::NeXus::UINT64:
+    retVal = makeProperty<uint64_t>(file, group, times);
+    break;
+  case ::NeXus::CHAR:
+    retVal = makeStringProperty(file, group, times);
+    break;
+  case ::NeXus::UINT8:
+    if (typeIsBool)
+      retVal = makeTimeSeriesBoolProperty(file, group, times);
+    break;
+  case ::NeXus::INT8:
+  case ::NeXus::INT16:
+  case ::NeXus::UINT16:
+    retVal = nullptr;
+    break;
+  }
+
+  if (file->hasAttr("units")) {
+    try {
+      file->getAttr("units", unitsStr);
+    } catch (::NeXus::Exception &) {
+    }
+  }
+  file->closeData();
+  file->closeGroup();
+  // add units
+  if (retVal)
+    retVal->setUnits(unitsStr);
+
+  return retVal;
+}
+
+//----------------------------------------------------------------------------------------------
+/** Opens a NXlog group in a nexus file and
  * creates the correct Property object from it.
  *
  * @param file :: NXS file handle

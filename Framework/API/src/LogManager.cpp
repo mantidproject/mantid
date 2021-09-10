@@ -460,7 +460,7 @@ void LogManager::saveNexus(::NeXus::File *file, const std::string &group, bool k
 }
 
 //--------------------------------------------------------------------------------------------
-/** Load the object from an open NeXus file.
+/** Load the object from an open NeXus file. Not used.
  * @param file :: open NeXus file
  * @param group :: name of the group to open. Pass an empty string to NOT open a
  * group
@@ -468,32 +468,9 @@ void LogManager::saveNexus(::NeXus::File *file, const std::string &group, bool k
  * classes reading from the same group
  * load any NXlog in the current open group.
  */
-void LogManager::loadNexus(::NeXus::File *file, const std::string &group,
+void LogManager::loadNexus(::NeXus::File * /*file*/, const std::string & /*group*/,
                            const std::shared_ptr<Mantid::Kernel::NexusHDF5Descriptor> & /*fileInfo*/,
-                           const std::string & /*prefix*/, bool keepOpen) {
-  if (!group.empty()) {
-    file->openGroup(group, "NXgroup");
-  }
-  // TODO
-  std::map<std::string, std::string> entries;
-  file->getEntries(entries);
-  for (const auto &name_class : entries) {
-    // NXLog types are the main one.
-    if (name_class.second == "NXlog") {
-      auto prop = PropertyNexus::loadProperty(file, name_class.first);
-      if (prop) {
-        if (m_manager->existsProperty(prop->name())) {
-          m_manager->removeProperty(prop->name());
-        }
-        m_manager->declareProperty(std::move(prop));
-      }
-    }
-  }
-
-  if (!(group.empty() || keepOpen)) {
-    file->closeGroup();
-  }
-}
+                           const std::string & /*prefix*/, bool /*keepOpen*/) {}
 
 //--------------------------------------------------------------------------------------------
 /** Load the object from an open NeXus file.
@@ -545,7 +522,7 @@ void LogManager::loadNexus(::NeXus::File *file, const std::shared_ptr<Mantid::Ke
     }
     const std::string nameClass = absoluteEntryName.substr(absoluteEntryName.find_last_of('/') + 1);
 
-    auto prop = PropertyNexus::loadProperty(file, nameClass);
+    auto prop = PropertyNexus::loadProperty(file, nameClass, fileInfo, prefix);
     if (prop) {
       if (m_manager->existsProperty(prop->name())) {
         m_manager->removeProperty(prop->name());

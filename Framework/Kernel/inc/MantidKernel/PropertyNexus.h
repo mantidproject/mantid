@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidKernel/NexusHDF5Descriptor.h"
 #include "MantidKernel/System.h"
 #include <memory>
 #include <string>
@@ -28,8 +29,13 @@ class Property;
 */
 namespace PropertyNexus {
 
+DLLExport std::unique_ptr<Property> loadProperty(::NeXus::File *file, const std::string &group,
+                                                 const std::shared_ptr<Mantid::Kernel::NexusHDF5Descriptor> &fileInfo,
+                                                 const std::string &prefix);
+
 DLLExport std::unique_ptr<Property> loadProperty(::NeXus::File *file, const std::string &group);
-}
+
+} // namespace PropertyNexus
 
 } // namespace Kernel
 } // namespace Mantid

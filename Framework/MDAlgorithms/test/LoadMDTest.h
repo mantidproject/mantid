@@ -41,7 +41,8 @@ public:
     // std::string filename("/dev/null");
     // std::string filename("/home/wfg/data/mantid/SrMnSb2_T2K_H0T_Ei50meV_dmb_80runs.nxs");
     // std::string filename("/home/wgodoy/hdd_home/mantid_data/MDhistograms/SrMnSb2_T2K_H0T_Ei50meV_dmb_20runs.nxs");
-    std::string filename("/home/wgodoy/tmp/MDhistograms/SrMnSb2_T2K_H0T_Ei50meV_dmb_40runs.nxs");
+    // std::string filename("/home/wgodoy/tmp/MDhistograms/SrMnSb2_T2K_H0T_Ei50meV_dmb_40runs.nxs");
+    std::string filename("/home/wgodoy/tmp/MDhistograms/SrMnSb2_T2K_H0T_Ei50meV_dmb_5runs.nxs");
     std::string outWSName("outWS");
     bool fileBackEnd(false);
     // double memory(0.0); // don't allocate in-cache memory for the file backend
