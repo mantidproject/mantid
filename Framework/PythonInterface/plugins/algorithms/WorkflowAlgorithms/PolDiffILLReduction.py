@@ -753,7 +753,7 @@ class PolDiffILLReduction(PythonAlgorithm):
          such as the beam size and calculates derived parameters."""
         self._sampleAndEnvironmentProperties = self.getProperty('SampleAndEnvironmentProperties').value
         if 'InitialEnergy' not in self._sampleAndEnvironmentProperties:
-            h = physical_constants['Planck constant'][0]  # in m^2 kg^2 / s^2
+            h = physical_constants['Planck constant'][0]  # in m^2 kg / s
             neutron_mass = physical_constants['neutron mass'][0]  # in kg
             wavelength = mtd[ws][0].getRun().getLogData('monochromator.wavelength').value * 1e-10  # in m
             joules_to_mev = 1e3 / physical_constants['electron volt'][0]
