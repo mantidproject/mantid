@@ -12,7 +12,7 @@ Diffraction Changes
 Powder Diffraction
 ------------------
 
-- CalibrateRectangularDetectors is deprecated.
+- Existing :ref:`CalibrateRectangularDetectors <algm-CalibrateRectangularDetectors>` is deprecated.
 
 Engineering Diffraction
 -----------------------
