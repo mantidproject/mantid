@@ -54,7 +54,6 @@ New Features
 
 - It is now possible to exclude a single range from a fit range when doing a fit on the :ref:`Fitting Tab <muon_fitting_tab-ref>`.
 - Added a ``Covariance Matrix`` button to the :ref:`Fitting Tab <muon_fitting_tab-ref>` that can be used to open and inspect the normalised covariance parameters of a fit.
-- It is now possible to plot the raw count data in the GUI.
 - **It is now possible to perform an Automatic or Manual background correction in the new** :ref:`Corrections Tab <muon_corrections_tab-ref>`.
 
 .. image::  ../../images/muon_corrections_tab.PNG
