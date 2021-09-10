@@ -392,7 +392,6 @@ void StartLiveDataDialog::accept() {
 /**
  * Update the Listener Properties group box for the current LiveListener.
  *
- * @param listener Name of the LiveListener class that is selected
  */
 void StartLiveDataDialog::initListenerPropLayout() {
   // remove previous listener's properties
