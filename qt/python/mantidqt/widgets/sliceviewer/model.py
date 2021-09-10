@@ -496,15 +496,25 @@ class SliceViewerModel:
         Calculate angles between all combination of display axes
         """
         if self.can_support_nonorthogonal_axes():
-            # find projection matrix for axes
             expt_info = self._get_ws().getExperimentInfo(0)
             lattice = expt_info.sample().getOrientedLattice()
-            try:
-                proj_matrix = np.array(expt_info.run().get(PROJ_MATRIX_LOG_NAME).value, dtype=float)
-                proj_matrix = proj_matrix.reshape(3, 3)
-            except (AttributeError, KeyError):  # run can be None so no .get()
-                # assume orthogonal projection
-                proj_matrix = np.eye(3)
+            if self.get_ws_type() == WS_TYPE.MDH:
+                ws = self._get_ws()
+                proj_matrix = np.zeros((3, 3))
+                icol = 0
+                for ivec in range(ws.getNumDims()):
+                    Qvec = list(ws.getBasisVector(ivec))[0:3] # first 3 components of basis vector always Q
+                    if any(Qvec):
+                        proj_matrix[:, icol] = Qvec
+                        icol += 1
+            else:
+                # for event try to find axes from log
+                try:
+                    proj_matrix = np.array(expt_info.run().get(PROJ_MATRIX_LOG_NAME).value, dtype=float)
+                    proj_matrix = proj_matrix.reshape(3, 3)
+                except (AttributeError, KeyError):  # run can be None so no .get()
+                    # assume orthogonal projection if no log exists
+                    proj_matrix = np.eye(3)
 
             # calculate angles for all combinations of axes
             angles_matrix = np.zeros((3, 3))
