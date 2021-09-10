@@ -12,6 +12,7 @@ from unittest.mock import create_autospec, patch, ANY, MagicMock
 
 # 3rdparty imports
 from mantid.dataobjects import PeaksWorkspace
+from mantid.kernel import SpecialCoordinateSystem
 from mantidqt.widgets.sliceviewer.peaksviewer import PeaksViewerModel
 from mantidqt.widgets.sliceviewer.peaksviewer.presenter \
     import PeaksViewerPresenter, PeaksWorkspaceDataPresenter
@@ -74,7 +75,7 @@ class PeaksViewerPresenterTest(unittest.TestCase):
         painter, axes = MagicMock(), MagicMock()
         axes.get_xlim.return_value = (-1, 1)
         painter.axes = axes
-        test_model.draw_peaks(slice_info, painter)
+        test_model.draw_peaks(slice_info, painter, SpecialCoordinateSystem.QSample)
         self.mock_view.painter = painter
         presenter = PeaksViewerPresenter(test_model, self.mock_view)
 
@@ -92,7 +93,7 @@ class PeaksViewerPresenterTest(unittest.TestCase):
         axes.get_xlim.return_value = (-1, 1)
         painter.axes = axes
 
-        test_model.draw_peaks(slice_info, painter)
+        test_model.draw_peaks(slice_info, painter, SpecialCoordinateSystem.QSample)
         # clear draw calls
         painter.cross.reset_mock()
         self.mock_view.painter = painter
@@ -120,7 +121,7 @@ class PeaksViewerPresenterTest(unittest.TestCase):
     def test_add_delete_peaks(self, mock_peaks_list_presenter):
         name = 'ws1'
         mock_model = create_mock_model(name)
-        self.mock_view.sliceinfo.frame = 'Frame'
+        self.mock_view.frame = 'Frame'
         presenter = PeaksViewerPresenter(mock_model, self.mock_view)
         presenter.add_peak([1, 2, 3])
         mock_model.add_peak.assert_called_once_with([1, 2, 3], 'Frame')
