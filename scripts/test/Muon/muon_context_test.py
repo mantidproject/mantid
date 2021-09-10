@@ -15,6 +15,7 @@ from mantid import ConfigService
 from collections import Counter
 from Muon.GUI.Common.utilities.load_utils import load_workspace_from_filename
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
+from Muon.GUI.Common.muon_base_pair import MuonBasePair
 from Muon.GUI.Common.muon_diff import MuonDiff
 from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.muon_pair import MuonPair
@@ -378,6 +379,14 @@ class MuonContextTest(unittest.TestCase):
         diffs = self.context.find_pairs_containing_groups(groups)
 
         self.assertEqual(len(diffs), 0)
+
+    def test_that_find_pairs_containing_groups_does_not_raise_if_one_of_the_pairs_is_a_MuonBasePair(self):
+        self.group_pair_context.add_pair(MuonBasePair("PhaseQuad_Re_"))
+        groups = ["bwd"]
+        pairs = self.context.find_pairs_containing_groups(groups)
+
+        self.assertEqual(len(pairs), 1)
+        self.assertEqual(pairs[0].name, "long")
 
     def test_that_find_diffs_containing_groups_or_pairs_will_return_diffs_containing_the_provided_pair(self):
         pair_diff = self.add_pair_diff()
