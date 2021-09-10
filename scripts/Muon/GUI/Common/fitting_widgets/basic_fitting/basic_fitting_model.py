@@ -427,6 +427,11 @@ class BasicFittingModel:
         if self.current_single_fit_function is not None:
             self.current_single_fit_function.setParameter(full_parameter, value)
 
+    def update_attribute_value(self, full_attribute: str, value: float) -> None:
+        """Update the value of an attribute in the fit function."""
+        if self.current_single_fit_function is not None:
+            self.current_single_fit_function.setAttributeValue(full_attribute, value)
+
     @property
     def do_rebin(self) -> bool:
         """Returns true if rebin is selected within the context."""
