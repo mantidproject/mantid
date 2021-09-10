@@ -33,8 +33,7 @@ using Mantid::Types::Core::DateAndTime;
 
 using namespace std;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 DECLARE_ALGORITHM(ExportTimeSeriesLog)
 
@@ -425,5 +424,4 @@ void ExportTimeSeriesLog::setupMetaData(const std::string &log_name, const std::
   m_outWS->mutableRun().addProperty("IsEpochTime", is_epoch, true);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

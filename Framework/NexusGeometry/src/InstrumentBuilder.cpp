@@ -16,8 +16,7 @@
 #include <memory>
 #include <utility>
 
-namespace Mantid {
-namespace NexusGeometry {
+namespace Mantid::NexusGeometry {
 
 /// Constructor
 InstrumentBuilder::InstrumentBuilder(const std::string &instrumentName)
@@ -156,5 +155,4 @@ std::unique_ptr<const Geometry::Instrument> InstrumentBuilder::createInstrument(
   // std::unique_ptr<const T>(const std::ptr<T>&)
   return std::unique_ptr<const Geometry::Instrument>(product);
 }
-} // namespace NexusGeometry
-} // namespace Mantid
+} // namespace Mantid::NexusGeometry

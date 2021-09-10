@@ -8,8 +8,7 @@
 #include "MantidKernel/DataItem.h"
 #include <Poco/RWLock.h>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -27,5 +26,4 @@ WriteLock::~WriteLock() {
   m_item.m_lock->unlock();
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

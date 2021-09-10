@@ -6,8 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidPythonInterface/core/ReleaseGlobalInterpreterLock.h"
 
-namespace Mantid {
-namespace PythonInterface {
+namespace Mantid::PythonInterface {
 
 /**
  * Ensures this thread releases the Python GIL also save trace information
@@ -32,5 +31,4 @@ ReleaseGlobalInterpreterLock::~ReleaseGlobalInterpreterLock() {
   Py_XDECREF(m_tracearg);
 }
 
-} // namespace PythonInterface
-} // namespace Mantid
+} // namespace Mantid::PythonInterface

@@ -16,8 +16,7 @@
 #include "MantidGeometry/Instrument/StructuredDetector.h"
 #include <memory>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 /**
  * Create a parameterized detector from the given base detector and
@@ -102,5 +101,4 @@ IComponent_sptr ParComponentFactory::create(const std::shared_ptr<const ICompone
 
   return IComponent_sptr();
 }
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

@@ -10,8 +10,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(GreaterThanMD)
@@ -37,5 +36,4 @@ void GreaterThanMD::execHistoScalar(Mantid::DataObjects::MDHistoWorkspace_sptr o
   out->greaterThan(scalar->y(0)[0]);
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

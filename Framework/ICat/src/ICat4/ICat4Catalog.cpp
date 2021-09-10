@@ -15,8 +15,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 
-namespace Mantid {
-namespace ICat {
+namespace Mantid::ICat {
 using namespace Kernel;
 using namespace ICat4;
 using Types::Core::DateAndTime;
@@ -891,5 +890,4 @@ template <class T> bool ICat4Catalog::isAccessAllowed(ns1__accessType accessType
     throwErrorMessage(icat);
   return false;
 }
-} // namespace ICat
-} // namespace Mantid
+} // namespace Mantid::ICat

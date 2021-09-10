@@ -35,8 +35,7 @@ using std::size_t;
 using std::string;
 using std::vector;
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 DECLARE_FILELOADER_ALGORITHM(LoadPreNexus)
 
@@ -321,5 +320,4 @@ void LoadPreNexus::runLoadMonitors(const double prog_start, const double prog_st
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

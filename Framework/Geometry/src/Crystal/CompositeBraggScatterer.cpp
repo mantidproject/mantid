@@ -8,8 +8,7 @@
 #include "MantidGeometry/Crystal/BraggScattererFactory.h"
 #include <stdexcept>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 using namespace Kernel;
 
@@ -201,5 +200,4 @@ std::map<std::string, size_t> CompositeBraggScatterer::getPropertyCountMap() con
 
 DECLARE_BRAGGSCATTERER(CompositeBraggScatterer)
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

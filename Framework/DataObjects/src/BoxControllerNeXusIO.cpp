@@ -17,8 +17,7 @@
 #include <H5Cpp.h>
 #include <string>
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 // Default headers(attributes) describing the contents of the data, written by
 // this class
 const char *EventHeaders[] = {"signal, errorSquared, center (each dim.)",
@@ -586,5 +585,4 @@ void BoxControllerNeXusIO::closeFile() {
 }
 
 BoxControllerNeXusIO::~BoxControllerNeXusIO() { this->closeFile(); }
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects

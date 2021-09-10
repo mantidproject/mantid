@@ -33,8 +33,7 @@
 #include <fstream>
 #include <gsl/gsl_integration.h>
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(IntegratePeaksMD)
@@ -622,5 +621,4 @@ double f_eval(double x, void *params) {
   return yval[0];
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

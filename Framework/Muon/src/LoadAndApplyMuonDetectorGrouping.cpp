@@ -58,8 +58,7 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using namespace Mantid::MuonAlgorithmHelper;
 
-namespace Mantid {
-namespace Muon {
+namespace Mantid::Muon {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(LoadAndApplyMuonDetectorGrouping)
@@ -420,5 +419,4 @@ void LoadAndApplyMuonDetectorGrouping::addPairingToADS(const Mantid::Muon::Analy
 // Allow WorkspaceGroup property to function correctly.
 bool LoadAndApplyMuonDetectorGrouping::checkGroups() { return false; }
 
-} // namespace Muon
-} // namespace Mantid
+} // namespace Mantid::Muon

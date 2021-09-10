@@ -10,8 +10,7 @@
 #include <gsl/gsl_eigen.h>
 #include <stdexcept>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 /// Generates an instance of SymmetryElementIdentity.
 SymmetryElement_sptr SymmetryElementIdentityGenerator::generateElement(const SymmetryOperation &operation) const {
@@ -367,5 +366,4 @@ DECLARE_SYMMETRY_ELEMENT_GENERATOR(SymmetryElementInversionGenerator)
 DECLARE_SYMMETRY_ELEMENT_GENERATOR(SymmetryElementRotationGenerator)
 DECLARE_SYMMETRY_ELEMENT_GENERATOR(SymmetryElementMirrorGenerator)
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

@@ -71,8 +71,7 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace MantidQt::API;
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 namespace {
 /**
  * An object to correctly set the flag marking workspace replacement
@@ -1605,5 +1604,4 @@ void InstrumentWidget::loadFromProject(const std::string &lines) {
 #endif
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

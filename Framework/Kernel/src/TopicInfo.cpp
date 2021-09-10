@@ -11,8 +11,7 @@
 
 #include <utility>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 namespace {
 // static logger object
@@ -74,5 +73,4 @@ std::ostream &operator<<(std::ostream &buffer, const TopicInfo &topic) {
          << ")";
   return buffer;
 }
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

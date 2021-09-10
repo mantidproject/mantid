@@ -160,8 +160,7 @@ Mantid::Reflectometry::ReflectometrySumInQ::MinMax twoThetaWidth(const size_t ws
 }
 } // namespace
 
-namespace Mantid {
-namespace Reflectometry {
+namespace Mantid::Reflectometry {
 
 using namespace API;
 /**
@@ -530,5 +529,4 @@ API::MatrixWorkspace_sptr ReflectometrySumInQ::sumInQ(const API::MatrixWorkspace
   return IvsLam;
 }
 
-} // namespace Reflectometry
-} // namespace Mantid
+} // namespace Mantid::Reflectometry

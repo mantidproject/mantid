@@ -19,8 +19,7 @@
 
 #include <utility>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 using Kernel::Quat;
 using Kernel::V3D;
@@ -661,6 +660,4 @@ size_t Component::registerContents(class ComponentVisitor &componentVisitor) con
   return componentVisitor.registerGenericComponent(*this);
 }
 
-} // Namespace Geometry
-
-} // Namespace Mantid
+} // namespace Mantid::Geometry

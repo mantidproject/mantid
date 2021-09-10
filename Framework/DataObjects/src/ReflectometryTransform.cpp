@@ -85,8 +85,7 @@ void addColumnHeadings(Mantid::DataObjects::TableWorkspace &vertexes, const std:
   }
 }
 } // namespace
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 
 /**
  * Constructor
@@ -488,5 +487,4 @@ ReflectometryTransform::executeNormPoly(const MatrixWorkspace_const_sptr &inputW
 
   return outWS;
 }
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects

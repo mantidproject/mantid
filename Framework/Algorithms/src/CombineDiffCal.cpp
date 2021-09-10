@@ -12,8 +12,7 @@
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 using Mantid::API::WorkspaceProperty;
 using Mantid::Kernel::Direction;
 
@@ -193,5 +192,4 @@ void CombineDiffCal::exec() {
   setProperty("OutputWorkspace", outputWorkspace);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

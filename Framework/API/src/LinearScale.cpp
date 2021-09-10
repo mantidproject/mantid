@@ -11,8 +11,7 @@
 #include "MantidAPI/LinearScale.h"
 #include "MantidAPI/TransformScaleFactory.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 DECLARE_TRANSFORMSCALE(LinearScale)
 
@@ -33,5 +32,4 @@ void LinearScale::transform(std::vector<double> &gd) {
   }
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

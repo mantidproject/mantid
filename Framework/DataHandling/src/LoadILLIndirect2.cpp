@@ -24,8 +24,7 @@
 #include <cmath>
 #include <nexus/napi.h>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using namespace Kernel;
 using namespace API;
@@ -457,5 +456,4 @@ void LoadILLIndirect2::rotateTubes() {
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

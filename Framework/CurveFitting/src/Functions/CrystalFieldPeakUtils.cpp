@@ -14,10 +14,7 @@
 #include <algorithm>
 #include <cmath>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
-namespace CrystalFieldUtils {
+namespace Mantid::CurveFitting::Functions::CrystalFieldUtils {
 
 using namespace CurveFitting;
 using namespace Kernel;
@@ -302,7 +299,4 @@ size_t updateSpectrumFunction(API::CompositeFunction &spectrum, const std::strin
   return nGoodPeaks;
 }
 
-} // namespace CrystalFieldUtils
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions::CrystalFieldUtils

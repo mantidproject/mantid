@@ -16,8 +16,7 @@
 
 using Mantid::Kernel::VMD;
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 //-----------------------------------------------------------------------------------------------
 /** Default constructor */
 IMDWorkspace::IMDWorkspace(const Parallel::StorageMode storageMode)
@@ -182,11 +181,9 @@ MDNormalization IMDWorkspace::displayNormalization() const { return NoNormalizat
 none for the generic case, but overriden elsewhere.
 */
 MDNormalization IMDWorkspace::displayNormalizationHisto() const { return NoNormalization; }
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 /** In order to be able to cast PropertyWithValue classes correctly a definition
  * for the PropertyWithValue<IMDEventWorkspace> is required */
 template <>
@@ -217,5 +214,4 @@ IPropertyManager::getValue<Mantid::API::IMDWorkspace_const_sptr>(const std::stri
   }
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

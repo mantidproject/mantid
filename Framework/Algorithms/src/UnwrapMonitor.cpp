@@ -19,8 +19,7 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 DECLARE_ALGORITHM(UnwrapMonitor)
 
@@ -353,5 +352,4 @@ API::MatrixWorkspace_sptr UnwrapMonitor::rebin(const API::MatrixWorkspace_sptr &
   return childAlg->getProperty("OutputWorkspace");
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

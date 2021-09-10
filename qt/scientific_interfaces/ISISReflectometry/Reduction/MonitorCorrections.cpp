@@ -8,9 +8,7 @@
 
 #include <utility>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 MonitorCorrections::MonitorCorrections(size_t monitorIndex, bool integrate,
                                        boost::optional<RangeInLambda> backgroundRange,
@@ -32,6 +30,4 @@ bool operator==(MonitorCorrections const &lhs, MonitorCorrections const &rhs) {
   return lhs.monitorIndex() == rhs.monitorIndex() && lhs.integrate() == rhs.integrate() &&
          lhs.backgroundRange() == rhs.backgroundRange() && lhs.integralRange() == rhs.integralRange();
 }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

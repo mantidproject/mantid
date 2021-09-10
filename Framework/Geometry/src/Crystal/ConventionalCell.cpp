@@ -15,8 +15,7 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/V3D.h"
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 using Mantid::Kernel::DblMatrix;
 using Mantid::Kernel::V3D;
 
@@ -257,5 +256,4 @@ void ConventionalCell::StandardizeHexagonal(Kernel::DblMatrix &UB) {
   }
 }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

@@ -27,8 +27,7 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(PolarizationAngleCorrectionMD)
@@ -314,5 +313,4 @@ std::string PolarizationAngleCorrectionMD::checkEi(const API::IMDEventWorkspace_
   return ei_error;
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

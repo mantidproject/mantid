@@ -211,8 +211,7 @@ void saveAclimax(std::string const &workspaceName, std::string const &outputName
 
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
@@ -987,5 +986,4 @@ void ISISEnergyTransfer::setButtonsEnabled(bool enable) {
   setSaveEnabled(enable);
 }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

@@ -9,8 +9,7 @@
 #include "MantidGeometry/Crystal/CyclicGroup.h"
 #include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 /// String constructor with semicolon-separated symmetry operations
 ProductOfCyclicGroups::ProductOfCyclicGroups(const std::string &generators) : Group(*(getGeneratedGroup(generators))) {}
@@ -52,5 +51,4 @@ ProductOfCyclicGroups::getProductOfCyclicGroups(const std::vector<Group_const_sp
   return productGroup;
 }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

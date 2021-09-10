@@ -14,8 +14,7 @@
 
 #include <cmath>
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 SlitCalculator::SlitCalculator(QWidget *parent) {
   Q_UNUSED(parent);
   ui.setupUi(this);
@@ -117,5 +116,4 @@ void SlitCalculator::on_recalculate_triggered() {
   ui.slit1Text->setText(QString::number(s1, 'f', 3));
   ui.slit2Text->setText(QString::number(s2, 'f', 3));
 }
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

@@ -18,8 +18,7 @@
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeList.h>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 /// Helper unary comparison type for finding IMDDimensions by a specified id.
 struct findID {
   const std::string m_id;
@@ -360,5 +359,4 @@ bool MDGeometryXMLParser::isTDimension(const Mantid::Geometry::IMDDimension_sptr
   }
   return bResult;
 }
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

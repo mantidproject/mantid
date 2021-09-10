@@ -13,8 +13,7 @@
 #include <memory>
 #include <sstream>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 namespace {
 // Initialize the static logger
@@ -140,5 +139,4 @@ bool FileValidator::endswith(const std::string &value) const {
   return false;
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

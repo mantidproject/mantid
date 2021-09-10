@@ -19,22 +19,7 @@
 #define NO_IMPORT_ARRAY
 #include <numpy/arrayobject.h>
 
-namespace Mantid {
-namespace PythonInterface {
-namespace Converters {
-
-extern template int NDArrayTypeIndex<bool>::typenum;
-extern template int NDArrayTypeIndex<int>::typenum;
-extern template int NDArrayTypeIndex<long>::typenum;
-extern template int NDArrayTypeIndex<long long>::typenum;
-extern template int NDArrayTypeIndex<unsigned int>::typenum;
-extern template int NDArrayTypeIndex<unsigned long>::typenum;
-extern template int NDArrayTypeIndex<unsigned long long>::typenum;
-extern template int NDArrayTypeIndex<float>::typenum;
-extern template int NDArrayTypeIndex<double>::typenum;
-extern template int NDArrayTypeIndex<Mantid::Types::Core::DateAndTime>::typenum;
-
-namespace Impl {
+namespace Mantid::PythonInterface::Converters::Impl {
 /**
  * Returns a new numpy array with the a copy of the data from 1D vector with the
  * exception of string elements where a Python list is produced
@@ -166,7 +151,4 @@ INSTANTIATE_CLONEND(Types::Core::DateAndTime)
 // Need further ND specialisation for bool
 INSTANTIATE_CLONEND(bool)
 ///@endcond
-} // namespace Impl
-} // namespace Converters
-} // namespace PythonInterface
-} // namespace Mantid
+} // namespace Mantid::PythonInterface::Converters::Impl

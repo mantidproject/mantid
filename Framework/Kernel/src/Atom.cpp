@@ -14,8 +14,7 @@
 #include <sstream>
 #include <utility>
 
-namespace Mantid {
-namespace PhysicalConstants {
+namespace Mantid::PhysicalConstants {
 
 using std::string;
 
@@ -3213,5 +3212,4 @@ const Atom &getAtom(const std::string &symbol, const uint16_t a_number) {
   throw std::runtime_error(msg.str());
 }
 
-} // namespace PhysicalConstants
-} // namespace Mantid
+} // namespace Mantid::PhysicalConstants

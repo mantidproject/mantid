@@ -11,8 +11,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using namespace API;
 using namespace NeXus;
@@ -113,5 +112,4 @@ void SinglePeriodLoadMuonStrategy::applyTimeZeroCorrection() {
 std::vector<detid_t> SinglePeriodLoadMuonStrategy::getLoadedDetectors() {
   return getLoadedDetectorsFromWorkspace(m_workspace);
 }
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

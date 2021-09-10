@@ -25,8 +25,7 @@
 #include "MantidKernel/Unit.h"
 #include "MantidParallel/Communicator.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -1330,5 +1329,4 @@ void CompareWorkspaces::execMasterOnly() {
     setProperty("Result", true);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

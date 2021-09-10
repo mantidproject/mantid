@@ -12,8 +12,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
 
-namespace MantidQt {
-namespace API {
+namespace MantidQt::API {
 
 //---------------------------------------------------------------------------
 // Observer callback
@@ -180,5 +179,4 @@ void WorkspaceObserver::observeADSClear(bool turnOn) {
   m_clr_observed = turnOn;
 }
 
-} // namespace API
-} // namespace MantidQt
+} // namespace MantidQt::API

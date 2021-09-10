@@ -27,8 +27,7 @@ using Mantid::Kernel::Strings::getWord;
 using Mantid::Kernel::Strings::readToEndOfLine;
 using Mantid::Kernel::Units::Wavelength;
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 DECLARE_FILELOADER_ALGORITHM(LoadIsawPeaks)
 
@@ -583,5 +582,4 @@ LoadIsawPeaks::getCachedBankByName(const std::string &bankname,
   return m_banks[bankname];
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

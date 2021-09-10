@@ -8,8 +8,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidGeometry/Crystal/UnitCell.h"
 
-namespace Mantid {
-namespace CurveFitting {
+namespace Mantid::CurveFitting {
 
 using namespace API;
 using namespace Geometry;
@@ -74,5 +73,4 @@ void LatticeFunction::beforeDecoratedFunctionSet(const IFunction_sptr &fn) {
   m_cellParameters = paramFn;
 }
 
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting

@@ -23,8 +23,7 @@
 #include <numeric>
 #include <vector>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Mantid::DataObjects;
 using namespace Kernel;
@@ -213,5 +212,4 @@ void EstimateMuonAsymmetryFromCounts::exec() {
 
   setProperty("OutputWorkspace", outputWS);
 }
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

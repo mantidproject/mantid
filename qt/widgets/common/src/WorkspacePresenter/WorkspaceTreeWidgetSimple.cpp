@@ -29,8 +29,7 @@ namespace {
 bool singleValued(const MatrixWorkspace &ws) { return (ws.getNumberHistograms() == 1 && ws.blocksize() == 1); }
 } // namespace
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(bool viewOnly, QWidget *parent)
     : WorkspaceTreeWidget(new MantidTreeModel(), viewOnly, parent), m_plotSpectrum(new QAction("Spectrum...", this)),
@@ -363,5 +362,4 @@ void WorkspaceTreeWidgetSimple::onSuperplotBinsWithErrsClicked() {
   emit superplotBinsWithErrsClicked(getSelectedWorkspaceNamesAsQList());
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

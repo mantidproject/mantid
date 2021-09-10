@@ -10,9 +10,7 @@
 using Mantid::PythonInterface::GlobalInterpreterLock;
 using namespace MantidQt::Widgets::Common;
 
-namespace MantidQt {
-namespace Widgets {
-namespace MplCpp {
+namespace MantidQt::Widgets::MplCpp {
 
 namespace {
 Python::Object cyclerModule() { return Python::NewRef(PyImport_ImportModule("cycler")); }
@@ -60,6 +58,4 @@ Cycler cycler(const char *label, const char *iterable) {
   return cyclerModule().attr("cycler")(label, iterable);
 }
 
-} // namespace MplCpp
-} // namespace Widgets
-} // namespace MantidQt
+} // namespace MantidQt::Widgets::MplCpp

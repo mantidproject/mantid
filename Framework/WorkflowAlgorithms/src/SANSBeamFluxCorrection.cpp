@@ -12,8 +12,7 @@
 #include "MantidKernel/PropertyManager.h"
 #include "Poco/Path.h"
 
-namespace Mantid {
-namespace WorkflowAlgorithms {
+namespace Mantid::WorkflowAlgorithms {
 
 using namespace Kernel;
 using namespace API;
@@ -133,5 +132,4 @@ MatrixWorkspace_sptr SANSBeamFluxCorrection::loadReference() {
   return fluxRefWS;
 }
 
-} // namespace WorkflowAlgorithms
-} // namespace Mantid
+} // namespace Mantid::WorkflowAlgorithms

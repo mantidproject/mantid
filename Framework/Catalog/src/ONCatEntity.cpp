@@ -11,9 +11,7 @@
 #include <sstream>
 #include <utility>
 
-namespace Mantid {
-namespace Catalog {
-namespace ONCat {
+namespace Mantid::Catalog::ONCat {
 
 using Mantid::Catalog::Exception::MalformedRepresentationError;
 using Mantid::Kernel::StringTokenizer;
@@ -115,6 +113,4 @@ Content ONCatEntity::getNestedContent(const Content &content, const std::string 
   return currentNode;
 }
 
-} // namespace ONCat
-} // namespace Catalog
-} // namespace Mantid
+} // namespace Mantid::Catalog::ONCat

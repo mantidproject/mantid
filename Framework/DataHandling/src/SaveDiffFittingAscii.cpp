@@ -16,8 +16,7 @@
 #include <boost/tokenizer.hpp>
 #include <fstream>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using namespace Kernel;
 using namespace Mantid::API;
@@ -288,5 +287,4 @@ std::map<std::string, std::string> SaveDiffFittingAscii::validateInputs() {
   return errors;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

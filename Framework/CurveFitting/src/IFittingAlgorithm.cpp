@@ -25,8 +25,7 @@
 
 #include "MantidKernel/ListValidator.h"
 
-namespace Mantid {
-namespace CurveFitting {
+namespace Mantid::CurveFitting {
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -330,5 +329,4 @@ void IFittingAlgorithm::exec() {
   this->execConcrete();
 }
 
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting

@@ -10,8 +10,7 @@
 #include "MantidKernel/DataItem.h"
 #include <Poco/RWLock.h>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 /** Default constructor
  */
@@ -39,5 +38,4 @@ void DataItem::unlock() { getLock()->unlock(); }
  */
 Poco::RWLock *DataItem::getLock() const { return m_lock.get(); }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

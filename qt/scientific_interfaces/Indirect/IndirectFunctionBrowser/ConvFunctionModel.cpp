@@ -11,9 +11,7 @@
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidQtWidgets/Common/FunctionBrowser/FunctionBrowserUtils.h"
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 using namespace MantidWidgets;
 using namespace Mantid::API;
@@ -699,6 +697,4 @@ boost::optional<QString> ConvFunctionModel::getDeltaPrefix() const { return m_mo
 
 boost::optional<QString> ConvFunctionModel::getBackgroundPrefix() const { return m_model.backgroundPrefix(); }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

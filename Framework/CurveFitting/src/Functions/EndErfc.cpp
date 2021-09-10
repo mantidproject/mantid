@@ -12,9 +12,7 @@
 #include <cmath>
 #include <gsl/gsl_sf_erf.h>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
 
@@ -58,6 +56,4 @@ void EndErfc::setActiveParameter(size_t i, double value) {
     setParameter(j, value, false);
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

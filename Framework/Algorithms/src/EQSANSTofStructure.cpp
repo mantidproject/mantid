@@ -16,8 +16,7 @@
 
 #include <vector>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(EQSANSTofStructure)
@@ -423,5 +422,4 @@ double EQSANSTofStructure::getTofOffset(const EventWorkspace_const_sptr &inputWS
   return frame_tof0;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

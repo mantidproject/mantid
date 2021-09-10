@@ -20,8 +20,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(GetDetectorOffsets)
@@ -307,5 +306,4 @@ IFunction_sptr GetDetectorOffsets::createFunction(const double peakHeight, const
   return std::shared_ptr<IFunction>(fitFunc);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

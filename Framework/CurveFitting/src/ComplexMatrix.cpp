@@ -10,8 +10,7 @@
 #include "MantidCurveFitting/ComplexMatrix.h"
 #include <gsl/gsl_eigen.h>
 
-namespace Mantid {
-namespace CurveFitting {
+namespace Mantid::CurveFitting {
 
 /// Constructor
 ComplexMatrix::ComplexMatrix() : m_matrix(nullptr) {}
@@ -361,5 +360,4 @@ void ComplexMatrix::unpackFromStdVector(const std::vector<double> &packed) {
   }
 }
 
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting

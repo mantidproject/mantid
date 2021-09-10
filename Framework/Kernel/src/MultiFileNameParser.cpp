@@ -20,9 +20,7 @@
 #include <boost/regex.hpp>
 #include <utility>
 
-namespace Mantid {
-namespace Kernel {
-namespace MultiFileNameParsing {
+namespace Mantid::Kernel::MultiFileNameParsing {
 /////////////////////////////////////////////////////////////////////////////
 // Static constants.
 /////////////////////////////////////////////////////////////////////////////
@@ -764,7 +762,4 @@ std::string toString(const RunRangeList &runRangeList) {
 
 } // anonymous namespace
 
-} // namespace MultiFileNameParsing
-
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel::MultiFileNameParsing

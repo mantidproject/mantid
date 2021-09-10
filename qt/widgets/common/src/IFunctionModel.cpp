@@ -8,8 +8,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 using namespace Mantid::API;
 
@@ -58,5 +57,4 @@ void IFunctionModel::copyParametersAndErrorsToAllLocalFunctions(const IFunction 
   }
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

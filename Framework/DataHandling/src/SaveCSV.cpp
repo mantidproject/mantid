@@ -17,8 +17,7 @@
  @date 15/10/2007
  */
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(SaveCSV)
@@ -195,5 +194,4 @@ void SaveCSV::saveXerrors(std::ofstream &stream, const Mantid::DataObjects::Work
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

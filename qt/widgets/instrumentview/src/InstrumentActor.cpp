@@ -44,8 +44,7 @@ using namespace Mantid::Geometry;
 using namespace Mantid::API;
 using namespace Mantid;
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 namespace {
 bool isPhysicalView() {
   std::string view = Mantid::Kernel::ConfigService::Instance().getString("instrument.view.geometry");
@@ -1191,5 +1190,4 @@ const Mantid::Geometry::DetectorInfo &InstrumentActor::detectorInfo() const {
   else
     return getWorkspace()->detectorInfo();
 }
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

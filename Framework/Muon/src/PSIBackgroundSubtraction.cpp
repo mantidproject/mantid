@@ -20,8 +20,7 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 
-namespace Mantid {
-namespace Muon {
+namespace Mantid::Muon {
 
 namespace {
 constexpr char *MINIMISER = "Levenberg-Marquardt";
@@ -240,5 +239,4 @@ std::pair<double, double> PSIBackgroundSubtraction::getRange(MatrixWorkspace con
   return std::make_pair(startX, endX);
 }
 
-} // namespace Muon
-} // namespace Mantid
+} // namespace Mantid::Muon

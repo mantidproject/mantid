@@ -17,8 +17,7 @@
 #include <memory>
 #include <utility>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 MeshObject::MeshObject(std::vector<uint32_t> faces, std::vector<Kernel::V3D> vertices, const Kernel::Material &material)
     : m_boundingBox(), m_id("MeshObject"), m_triangles(std::move(faces)), m_vertices(std::move(vertices)),
@@ -579,5 +578,4 @@ void MeshObject::GetObjectGeom(detail::ShapeInfo::GeometryShape &type, std::vect
   m_handler->GetObjectGeom(type, vectors, innerRadius, radius, height);
 }
 
-} // NAMESPACE Geometry
-} // NAMESPACE Mantid
+} // namespace Mantid::Geometry

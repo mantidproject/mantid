@@ -44,8 +44,7 @@ std::string BANKNAME(const Mantid::Geometry::IPeak &p) {
 } // namespace
 
 // namespace
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(FilterPeaks)
 
@@ -183,5 +182,4 @@ FilterPeaks::FilterFunction FilterPeaks::getFilterVariableFunction(const std::st
   return filterFunction;
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

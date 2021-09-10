@@ -22,9 +22,7 @@
 #include <numeric>
 #include <random>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Algorithms {
+namespace Mantid::CurveFitting::Algorithms {
 
 using namespace Kernel;
 using namespace API;
@@ -426,6 +424,4 @@ void EstimateFitParameters::execConcrete() {
   }
 }
 
-} // namespace Algorithms
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Algorithms

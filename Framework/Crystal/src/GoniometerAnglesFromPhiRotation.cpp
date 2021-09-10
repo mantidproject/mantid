@@ -17,8 +17,7 @@
 
 using Mantid::Kernel::Direction;
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(GoniometerAnglesFromPhiRotation)
@@ -381,5 +380,4 @@ Kernel::Matrix<double> GoniometerAnglesFromPhiRotation::getUBRaw(const Kernel::M
   return GoniometerMatrix * UB;
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

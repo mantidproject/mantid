@@ -11,8 +11,7 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/PropertyWithValue.tcc"
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 /** Constructor  for Maskedproperty class
  * @param name :: name of the property
@@ -82,5 +81,4 @@ template <typename TYPE> void MaskedProperty<TYPE>::doMasking() const {
 template class MANTID_KERNEL_DLL Mantid::Kernel::MaskedProperty<std::string>;
 ///@endcond TEMPLATE
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

@@ -9,8 +9,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/ListValidator.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(Scale)
@@ -106,5 +105,4 @@ void Scale::exec() {
   setProperty(PropertyNames::OUTPUT_WORKSPACE, outputWS);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

@@ -29,8 +29,7 @@
 using namespace Mantid::DataObjects;
 using namespace Mantid::HistogramData;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(IQTransform)
@@ -366,5 +365,4 @@ void IQTransform::general(const API::MatrixWorkspace_sptr &ws) {
 
 //@}
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

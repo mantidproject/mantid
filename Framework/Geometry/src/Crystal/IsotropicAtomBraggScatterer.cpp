@@ -20,8 +20,7 @@
 
 #include <json/json.h>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 using namespace Kernel;
 
@@ -209,5 +208,4 @@ std::string getIsotropicAtomBraggScattererString(const BraggScatterer_sptr &scat
   return outStream.str();
 }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

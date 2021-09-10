@@ -25,8 +25,7 @@
 #include <iterator>
 #include <sstream>
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 using namespace Geometry;
 
 /// Virtual copy constructor
@@ -125,8 +124,7 @@ void IFunctionMD::useAllDimensions(IMDWorkspace_const_sptr workspace) {
   this->initDimensions();
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API
 
 //#include "MantidAPI/ParamFunction.h"
 //#include "MantidKernel/VMD.h"

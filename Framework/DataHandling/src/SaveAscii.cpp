@@ -20,8 +20,7 @@
 #include <fstream>
 #include <set>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(SaveAscii)
 
@@ -213,5 +212,4 @@ void SaveAscii::exec() {
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

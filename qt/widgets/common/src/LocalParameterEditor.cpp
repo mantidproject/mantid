@@ -18,8 +18,7 @@
 #include <QPushButton>
 #include <utility>
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 /// Constructor
 /// @param parent :: Parent widget.
@@ -330,5 +329,4 @@ void LocalParameterEditor::setLogOptionsEnabled(bool enabled) {
   m_setToLogAction->setEnabled(enabled);
   m_setAllToLogAction->setEnabled(enabled);
 }
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

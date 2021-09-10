@@ -16,9 +16,7 @@
 #include <cmath>
 #include <mutex>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace ParameterEstimator {
+namespace Mantid::CurveFitting::ParameterEstimator {
 
 using namespace Functions;
 
@@ -404,6 +402,4 @@ void estimate(API::IFunction &function, const API::FunctionDomain1D &domain, con
   setValues(function, fun, der1, der2);
 }
 
-} // namespace ParameterEstimator
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::ParameterEstimator

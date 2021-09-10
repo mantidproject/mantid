@@ -31,8 +31,7 @@
 #include <sstream>
 #include <string>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Kernel;
 using namespace API;
@@ -710,5 +709,4 @@ std::vector<std::string> CorelliCalibrationDatabase::retrieveInstrumentComponent
   return componentnames;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

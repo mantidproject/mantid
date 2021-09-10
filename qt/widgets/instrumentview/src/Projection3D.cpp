@@ -45,8 +45,7 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 Projection3D::Projection3D(const InstrumentActor *rootActor, QSize viewportSize)
     : ProjectionSurface(rootActor), m_drawAxes(true), m_wireframe(false), m_viewport(viewportSize) {
   V3D minBounds, maxBounds;
@@ -492,5 +491,4 @@ void Projection3D::saveShapesToTableWorkspace() {
   row << std::to_string(-1) << viewPortStr;
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

@@ -9,8 +9,7 @@
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidMDAlgorithms/MDEventWSWrapper.h"
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 /** internal helper function to create empty MDEventWorkspace with nd dimensions
  and set up internal pointer to this workspace
@@ -259,5 +258,4 @@ MDEventWSWrapper::MDEventWSWrapper() : m_NDimensions(0), m_needSplitting(false) 
   LOOP<MAX_N_DIM>::EXEC(this);
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

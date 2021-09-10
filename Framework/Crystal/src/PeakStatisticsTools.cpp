@@ -15,9 +15,7 @@
 #include <numeric>
 #include <utility>
 
-namespace Mantid {
-namespace Crystal {
-namespace PeakStatisticsTools {
+namespace Mantid::Crystal::PeakStatisticsTools {
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
@@ -319,6 +317,4 @@ std::pair<double, double> PeaksStatistics::getDSpacingLimits(const std::vector<P
                         (*(dspacingLimitIterators.second)).getDSpacing());
 }
 
-} // namespace PeakStatisticsTools
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal::PeakStatisticsTools

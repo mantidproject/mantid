@@ -12,8 +12,7 @@
 
 #include <algorithm>
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 using std::size_t;
 
@@ -135,5 +134,4 @@ void ImmutableCompositeFunction::addDefaultConstraints(const std::string &constr
   CompositeFunction::addConstraints(constraints, true);
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

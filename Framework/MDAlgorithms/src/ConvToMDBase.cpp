@@ -10,8 +10,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidMDAlgorithms/ConvToMDBase.h"
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 // logger for conversion
 Kernel::Logger ConvToMDBase::g_Log("MD-Algorithms");
@@ -118,5 +117,4 @@ void ConvToMDBase::setDisplayNormalization(Mantid::API::IMDEventWorkspace_sptr m
   }
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

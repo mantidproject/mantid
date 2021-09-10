@@ -10,8 +10,7 @@
 
 #include <Poco/File.h>
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 namespace {
 //----------------------------------------------------------------------------------------------
 // Anonymous namespace helpers
@@ -222,5 +221,4 @@ void FileLoaderRegistryImpl::removeAlgorithm(const std::string &name, const int 
   }
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

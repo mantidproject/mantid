@@ -54,8 +54,7 @@ using Poco::XML::NodeFilter;
 using Poco::XML::NodeIterator;
 using Poco::XML::NodeList;
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 namespace {
 // initialize the static logger
 Kernel::Logger g_log("InstrumentDefinitionParser");
@@ -3069,5 +3068,4 @@ std::string InstrumentDefinitionParser::getShapeCoorSysComp(Geometry::ICompAssem
   }
 }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

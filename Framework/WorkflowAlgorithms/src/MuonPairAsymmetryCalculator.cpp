@@ -11,8 +11,7 @@ using Mantid::API::IAlgorithm_sptr;
 using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::API::Workspace_sptr;
 
-namespace Mantid {
-namespace WorkflowAlgorithms {
+namespace Mantid::WorkflowAlgorithms {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -94,5 +93,4 @@ MatrixWorkspace_sptr MuonPairAsymmetryCalculator::asymmetryCalc(const Workspace_
   return outWS;
 }
 
-} // namespace WorkflowAlgorithms
-} // namespace Mantid
+} // namespace Mantid::WorkflowAlgorithms

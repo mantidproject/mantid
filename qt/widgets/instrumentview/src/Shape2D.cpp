@@ -21,8 +21,7 @@
 #include <stdexcept>
 #include <utility>
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 // number of control points common for all shapes
 const size_t Shape2D::NCommonCP = 4;
@@ -1315,5 +1314,4 @@ std::string Shape2DFree::saveToProject() const {
 
 Shape2DFree::Shape2DFree(QPolygonF polygon) : m_polygon(std::move(polygon)) { resetBoundingRect(); }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

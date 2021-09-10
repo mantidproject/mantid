@@ -6,9 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "RegexRowFilter.h"
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 using MantidQt::MantidWidgets::Batch::IJobTreeView;
 using MantidQt::MantidWidgets::Batch::RowLocation;
@@ -34,6 +32,4 @@ std::unique_ptr<RegexFilter> filterFromRegexString(std::string const &regex, IJo
                                                    ReductionJobs const &jobs) {
   return std::make_unique<RegexFilter>(boost::regex(regex), view, jobs);
 }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

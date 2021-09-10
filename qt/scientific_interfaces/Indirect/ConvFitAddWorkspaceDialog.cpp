@@ -65,9 +65,7 @@ const QString SPECTRA_LIST = "(" + NATURAL_OR_RANGE + "(" + COMMA + NATURAL_OR_R
 } // namespace Regexes
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 ConvFitAddWorkspaceDialog::ConvFitAddWorkspaceDialog(QWidget *parent) : IAddWorkspaceDialog(parent) {
   m_uiForm.setupUi(this);
@@ -143,6 +141,4 @@ void ConvFitAddWorkspaceDialog::setAllSpectraSelectionEnabled(bool doEnable) {
   m_uiForm.ckAllSpectra->setEnabled(doEnable);
 }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

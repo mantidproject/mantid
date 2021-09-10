@@ -12,8 +12,7 @@
 
 #include <stdexcept>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 //----------------------------------------------------------------------------------------------
 // Public static methods
 //----------------------------------------------------------------------------------------------
@@ -187,5 +186,4 @@ void FileDescriptor::initialize(const std::string &filename) {
   m_ascii = FileDescriptor::isAscii(m_file);
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

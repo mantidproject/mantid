@@ -44,8 +44,7 @@
 #include <string>
 #include <vector>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 // Register the algorithm into the algorithm factory
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadNexusProcessed)
@@ -2390,5 +2389,4 @@ void LoadNexusProcessed::applyLogFiltering(const Mantid::API::Workspace_sptr &lo
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

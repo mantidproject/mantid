@@ -6,8 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/HKLGenerator.h"
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 using namespace Kernel;
 
@@ -92,5 +91,4 @@ void HKLGenerator::const_iterator::increment() {
   m_hkl = V3D(m_h, m_k, m_l);
 }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

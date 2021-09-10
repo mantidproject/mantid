@@ -6,9 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectDockWidgetArea.h"
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 IndirectDockWidgetArea::IndirectDockWidgetArea(QWidget *parent) : QMainWindow(parent) {
   QMainWindow::setWindowFlags(Qt::Widget);
@@ -37,6 +35,4 @@ void IndirectDockWidgetArea::setFitDataView(IIndirectFitDataView *fitDataView) {
   addDockWidget(Qt::TopDockWidgetArea, dataViewArea);
 }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

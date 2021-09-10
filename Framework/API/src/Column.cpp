@@ -11,8 +11,7 @@
 #include "MantidAPI/Column.h"
 #include "MantidKernel/Logger.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 namespace {
 /// static logger object
@@ -71,5 +70,4 @@ std::istream &operator>>(std::istream &istr, API::Boolean &b) {
   return istr;
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

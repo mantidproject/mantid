@@ -15,10 +15,7 @@
 #include <H5Cpp.h>
 #include <thread>
 
-namespace Mantid {
-namespace Parallel {
-namespace IO {
-namespace EventLoader {
+namespace Mantid::Parallel::IO::EventLoader {
 
 /** Return a map from any one event ID in a bank to the bank index.
  *
@@ -65,8 +62,4 @@ void load(const std::string &filename, const std::string &groupname, const std::
   loader.load(filename, groupname, bankNames, bankOffsets, eventLists);
 }
 
-} // namespace EventLoader
-
-} // namespace IO
-} // namespace Parallel
-} // namespace Mantid
+} // namespace Mantid::Parallel::IO::EventLoader

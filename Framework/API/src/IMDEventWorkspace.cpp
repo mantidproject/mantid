@@ -13,8 +13,7 @@
 using Mantid::coord_t;
 using namespace Mantid::Geometry;
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 //-----------------------------------------------------------------------------------------------
 /** Empty constructor */
@@ -60,12 +59,9 @@ const std::string IMDEventWorkspace::toString() const {
 
 //-----------------------------------------------------------------------------------------------
 
-} // namespace API
+} // namespace Mantid::API
 
-} // namespace Mantid
-
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 /** In order to be able to cast PropertyWithValue classes correctly a definition
  * for the PropertyWithValue<IMDEventWorkspace> is required */
 template <>
@@ -105,5 +101,4 @@ IPropertyManager::getValue<Mantid::API::IMDEventWorkspace_const_sptr>(const std:
   }
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

@@ -25,8 +25,7 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 /// Register the workspace as a type
 DECLARE_WORKSPACE(LeanElasticPeaksWorkspace)
 
@@ -662,13 +661,11 @@ API::LogManager_const_sptr LeanElasticPeaksWorkspace::getLogs() const {
 ITableWorkspace *LeanElasticPeaksWorkspace::doCloneColumns(const std::vector<std::string> & /*colNames*/) const {
   throw Kernel::Exception::NotImplementedError("LeanElasticPeaksWorkspace cannot clone columns.");
 }
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects
 
 ///\cond TEMPLATE
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 template <>
 DLLExport Mantid::DataObjects::LeanElasticPeaksWorkspace_sptr
@@ -699,7 +696,6 @@ IPropertyManager::getValue<Mantid::DataObjects::LeanElasticPeaksWorkspace_const_
   }
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel
 
 ///\endcond TEMPLATE

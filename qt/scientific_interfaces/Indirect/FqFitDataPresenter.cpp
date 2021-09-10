@@ -196,9 +196,7 @@ boost::optional<std::vector<std::size_t>> getParameterSpectrum(const FqFitParame
 
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 FqFitDataPresenter::FqFitDataPresenter(IIndirectFitDataModel *model, IIndirectFitDataView *view,
                                        IFQFitObserver *SingleFunctionTemplateBrowser)
@@ -373,6 +371,4 @@ void FqFitDataPresenter::addTableEntry(FitDomainIndex row) {
 
   m_view->addTableEntry(row.value, newRow);
 }
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

@@ -12,8 +12,7 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/MaskedProperty.h"
 
-namespace Mantid {
-namespace RemoteAlgorithms {
+namespace Mantid::RemoteAlgorithms {
 
 // Register the algorithm into the Algorithm Factory
 DECLARE_ALGORITHM(Authenticate2)
@@ -53,5 +52,4 @@ void Authenticate2::exec() {
   g_log.information() << "Authenticate as user " << user << " in the compute resource " << comp << '\n';
 }
 
-} // end namespace RemoteAlgorithms
-} // end namespace Mantid
+} // namespace Mantid::RemoteAlgorithms

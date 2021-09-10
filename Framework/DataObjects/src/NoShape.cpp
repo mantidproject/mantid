@@ -9,8 +9,7 @@
 #include <json/json.h>
 #include <stdexcept>
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 
 /**
  * @brief Serialize to JSON object
@@ -45,5 +44,4 @@ Kernel::SpecialCoordinateSystem NoShape::frame() const { return Kernel::None; }
 
 const std::string NoShape::noShapeName() { return "none"; }
 
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects

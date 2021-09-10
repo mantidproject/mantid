@@ -27,9 +27,7 @@ namespace {
 Mantid::Kernel::Logger g_log("FunctionQDepends");
 }
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 /* ===========
    Public
@@ -156,6 +154,4 @@ std::vector<double> FunctionQDepends::extractQValues(const Mantid::API::MatrixWo
   return qs;
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

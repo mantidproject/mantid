@@ -20,8 +20,7 @@ using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 using Mantid::API::CoordTransform;
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor.
@@ -372,5 +371,4 @@ CoordTransformAffine *CoordTransformAffine::combineTransformations(CoordTransfor
   return out;
 }
 
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects

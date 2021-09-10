@@ -45,9 +45,7 @@ constexpr auto SHOWALLERRORS = "Show all errors";
 constexpr auto HIDEALLERRORS = "Hide all errors";
 } // namespace
 
-namespace MantidQt {
-
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 /**
  * Construct a plot object
@@ -759,5 +757,4 @@ void PreviewPlot::tickLabelFormat(char *axis, char *style, bool useOffset) {
   }
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

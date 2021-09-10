@@ -7,8 +7,7 @@
 #include "MantidGeometry/Crystal/PeakTransformSelector.h"
 #include <stdexcept>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 /// Constructor
 PeakTransformSelector::PeakTransformSelector() {}
 
@@ -105,5 +104,4 @@ bool PeakTransformSelector::hasFactoryForTransform(const std::string &labelX, co
   }
   return hasFactoryForTransform;
 }
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

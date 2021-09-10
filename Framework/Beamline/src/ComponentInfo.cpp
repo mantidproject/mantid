@@ -15,8 +15,7 @@
 #include <sstream>
 #include <utility>
 
-namespace Mantid {
-namespace Beamline {
+namespace Mantid::Beamline {
 
 namespace {
 void failMerge(const std::string &what) {
@@ -688,5 +687,4 @@ size_t ComponentInfo::nonDetectorSize() const {
     return 0;
 }
 
-} // namespace Beamline
-} // namespace Mantid
+} // namespace Mantid::Beamline

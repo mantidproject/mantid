@@ -10,9 +10,7 @@
 #include "MantidParallel/Communicator.h"
 #include "MantidParallel/IO/Chunker.h"
 
-namespace Mantid {
-namespace Parallel {
-namespace IO {
+namespace Mantid::Parallel::IO {
 
 namespace {
 /** Helper to build partition (subgroup of workers with subgroup of banks).
@@ -230,6 +228,4 @@ std::vector<std::pair<int, std::vector<size_t>>> Chunker::makeBalancedPartitioni
   return partitioning;
 }
 
-} // namespace IO
-} // namespace Parallel
-} // namespace Mantid
+} // namespace Mantid::Parallel::IO

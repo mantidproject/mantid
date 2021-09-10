@@ -10,8 +10,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(XorMD)
@@ -30,5 +29,4 @@ void XorMD::execHistoHisto(Mantid::DataObjects::MDHistoWorkspace_sptr out,
   out->operator^=(*operand);
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

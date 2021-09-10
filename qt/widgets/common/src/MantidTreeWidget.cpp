@@ -26,8 +26,7 @@ namespace {
 Mantid::Kernel::Logger treelog("MantidTreeWidget");
 }
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 MantidTreeWidget::MantidTreeWidget(MantidDisplayBase *mui, QWidget *parent)
     : QTreeWidget(parent), m_mantidUI(mui), m_ads(Mantid::API::AnalysisDataService::Instance()), m_sortScheme() {
@@ -278,5 +277,4 @@ void MantidTreeWidget::sort() { sortItems(sortColumn(), m_sortOrder); }
  * @param msg :: A message to log.
  */
 void MantidTreeWidget::logWarningMessage(const std::string &msg) { treelog.warning(msg); }
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

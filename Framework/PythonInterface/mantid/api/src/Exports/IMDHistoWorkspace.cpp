@@ -25,14 +25,10 @@ using namespace boost::python;
 
 GET_POINTER_SPECIALIZATION(IMDHistoWorkspace)
 
-namespace Mantid {
-namespace PythonInterface {
-namespace Converters {
+namespace Mantid::PythonInterface::Converters {
 extern template int NDArrayTypeIndex<float>::typenum;
 extern template int NDArrayTypeIndex<double>::typenum;
-} // namespace Converters
-} // namespace PythonInterface
-} // namespace Mantid
+} // namespace Mantid::PythonInterface::Converters
 
 namespace {
 /**

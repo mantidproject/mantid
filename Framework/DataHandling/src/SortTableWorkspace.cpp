@@ -8,8 +8,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using Mantid::API::WorkspaceProperty;
 using Mantid::Kernel::Direction;
@@ -81,5 +80,4 @@ void SortTableWorkspace::exec() {
   setProperty("OutputWorkspace", outputWS);
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

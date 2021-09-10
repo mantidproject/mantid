@@ -25,8 +25,7 @@
 
 using Poco::XML::Element;
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 namespace {
 /// static logger
@@ -308,5 +307,4 @@ std::shared_ptr<RemoteJobManager> FacilityInfo::getRemoteJobManager(const std::s
   return (*it).second;
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

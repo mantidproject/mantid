@@ -7,8 +7,7 @@
 #include "MantidICat/ICat3/ICat3ErrorHandling.h"
 #include "MantidICat/ICat3/GSoapGenerated/ICat3ICATPortBindingProxy.h"
 
-namespace Mantid {
-namespace ICat {
+namespace Mantid::ICat {
 
 /**This method throws the error string returned by gsoap to mantid upper layer
  *@param icat :: -ICat proxy object
@@ -35,5 +34,4 @@ void CErrorHandling::throwErrorMessages(ICat3::ICATPortBindingProxy &icat) {
 SessionException::SessionException(const std::string &error) : std::runtime_error(error), m_error(error) {}
 
 const char *SessionException::what() const noexcept { return m_error.c_str(); }
-} // namespace ICat
-} // namespace Mantid
+} // namespace Mantid::ICat

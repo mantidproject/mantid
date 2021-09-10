@@ -19,8 +19,7 @@
 #include <sstream>
 #include <utility>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 namespace {
 // static logger object
@@ -236,5 +235,4 @@ Poco::Net::NameValueCollection RemoteJobManager::getCookies() {
   return nvc;
 }
 
-} // end of namespace Kernel
-} // end of namespace Mantid
+} // namespace Mantid::Kernel

@@ -8,8 +8,7 @@
 
 #include "MantidQtWidgets/Common/HelpWindow.h"
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 
 IndirectSettingsView::IndirectSettingsView(QWidget *parent)
     : IIndirectSettingsView(parent), m_uiForm(std::make_unique<Ui::IndirectInterfaceSettings>()) {
@@ -59,5 +58,4 @@ void IndirectSettingsView::setOkEnabled(bool enable) { m_uiForm->pbOk->setEnable
 
 void IndirectSettingsView::setCancelEnabled(bool enable) { m_uiForm->pbCancel->setEnabled(enable); }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

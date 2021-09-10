@@ -86,8 +86,7 @@ std::vector<std::string> flattenVecOfVec(std::vector<std::vector<std::string>> v
 }
 } // namespace
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(Load)
 
@@ -745,5 +744,4 @@ Load::getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode
   return Parallel::ExecutionMode::Distributed;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

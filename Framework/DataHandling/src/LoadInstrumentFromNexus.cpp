@@ -18,8 +18,7 @@
 
 #include <fstream>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 DECLARE_ALGORITHM(LoadInstrumentFromNexus)
 
@@ -86,5 +85,4 @@ void LoadInstrumentFromNexus::exec() {
   progress(1.0);
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

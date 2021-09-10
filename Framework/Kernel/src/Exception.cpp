@@ -8,9 +8,7 @@
 #include <sstream>
 #include <utility>
 
-namespace Mantid {
-namespace Kernel {
-namespace Exception {
+namespace Mantid::Kernel::Exception {
 //-------------------------
 // FileError
 //-------------------------
@@ -346,6 +344,4 @@ FitSizeWarning::FitSizeWarning(size_t oldSize, size_t newSize)
 /// Get the warning message.
 const char *FitSizeWarning::what() const noexcept { return m_message.c_str(); }
 
-} // namespace Exception
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel::Exception

@@ -10,8 +10,7 @@
 #include "MantidAPI/ScopedWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 const size_t ScopedWorkspace::NAME_LENGTH = 16;
 
@@ -119,5 +118,4 @@ std::string ScopedWorkspace::randomString(size_t len) {
   return result;
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

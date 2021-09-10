@@ -54,8 +54,7 @@ auto accumulate_if_finite = [](const double accumulator, const double newValue) 
 };
 } // namespace
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 using std::size_t;
 using namespace Geometry;
 using Kernel::V3D;
@@ -2112,12 +2111,10 @@ void MatrixWorkspace::rebuildDetectorIDGroupings() {
   }
 }
 
-} // namespace API
-} // Namespace Mantid
+} // namespace Mantid::API
 
 ///\cond TEMPLATE
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 template <>
 MANTID_API_DLL Mantid::API::MatrixWorkspace_sptr
@@ -2145,7 +2142,6 @@ IPropertyManager::getValue<Mantid::API::MatrixWorkspace_const_sptr>(const std::s
   }
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel
 
 ///\endcond TEMPLATE

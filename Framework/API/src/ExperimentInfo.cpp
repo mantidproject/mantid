@@ -56,9 +56,7 @@ using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 using namespace Mantid::Types::Core;
 
-namespace Mantid {
-
-namespace API {
+namespace Mantid::API {
 namespace {
 /// static logger object
 Kernel::Logger g_log("ExperimentInfo");
@@ -1292,11 +1290,9 @@ void ExperimentInfo::populateIfNotLoaded() const {
   // (FileBackedExperimentInfo) to load content from files upon access.
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 template <>
 MANTID_API_DLL Mantid::API::ExperimentInfo_sptr
@@ -1324,5 +1320,4 @@ IPropertyManager::getValue<Mantid::API::ExperimentInfo_const_sptr>(const std::st
   }
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

@@ -15,8 +15,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 DECLARE_ALGORITHM(ISISJournalGetExperimentRuns)
 
 using Mantid::API::IJournal;
@@ -131,5 +130,4 @@ std::unique_ptr<IJournal> ISISJournalGetExperimentRuns::makeJournal(std::string 
                                                                     std::string const &cycle) {
   return std::make_unique<ISISJournal>(instrument, cycle);
 }
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

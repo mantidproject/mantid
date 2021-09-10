@@ -17,9 +17,7 @@ using Mantid::PythonInterface::Converters::WrapReadOnly;
 using MantidQt::Widgets::MplCpp::ColorConverter;
 using namespace MantidQt::Widgets::Common;
 
-namespace MantidQt {
-namespace Widgets {
-namespace MplCpp {
+namespace MantidQt::Widgets::MplCpp {
 
 /**
  * Contruct a wrapper around an existing matplotlib Line2D instance.
@@ -128,6 +126,4 @@ void Line2D::setData(Line2D::Data &&lineDataOwner) {
   m_dataOwner = std::move(lineDataOwner);
 }
 
-} // namespace MplCpp
-} // namespace Widgets
-} // namespace MantidQt
+} // namespace MantidQt::Widgets::MplCpp

@@ -14,8 +14,7 @@
 using Mantid::API::AnalysisDataService;
 using Mantid::API::MatrixWorkspace;
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 /**
  * Constructor
  * @param wsNames :: [input] Workspace names
@@ -89,5 +88,4 @@ double LogValueFinder::getLogValue(const QString &logName, const Mantid::Kernel:
   }
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

@@ -8,8 +8,7 @@
 
 #include "MantidGeometry/Crystal/PeakTransform.h"
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 PeakTransform::PeakTransform(std::string xPlotLabel, std::string yPlotLabel, const boost::regex &regexOne,
                              const boost::regex &regexTwo, const boost::regex &regexThree)
     : m_xPlotLabel(std::move(xPlotLabel)), m_yPlotLabel(std::move(yPlotLabel)), m_indexOfPlotX(0), m_indexOfPlotY(1),
@@ -109,5 +108,4 @@ Mantid::Kernel::V3D PeakTransform::transformBack(const Mantid::Kernel::V3D &tran
   originalPeakPosition.setZ(transformed[m_indexOfPeakZ]);
   return originalPeakPosition;
 }
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

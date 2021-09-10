@@ -21,8 +21,7 @@
 
 #include <cmath>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using API::MatrixWorkspace_sptr;
 using Geometry::IDetector_const_sptr;
@@ -179,5 +178,4 @@ Kernel::IValidator_sptr MayersSampleCorrection::createInputWSValidator() const {
   return validator;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

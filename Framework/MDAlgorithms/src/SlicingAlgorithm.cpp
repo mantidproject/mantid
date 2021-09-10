@@ -26,8 +26,7 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using Mantid::Kernel::Strings::strip;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 /** Constructor
  */
@@ -941,5 +940,4 @@ void SlicingAlgorithm::setTargetUnits(Mantid::Geometry::MDFrame_uptr &mdFrame, c
   // else leave the unit the same as the input workspace
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

@@ -30,8 +30,7 @@ using namespace Mantid::Kernel;
 
 namespace {} // namespace
 
-namespace Mantid {
-namespace Muon {
+namespace Mantid::Muon {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(MuonPreProcess)
@@ -364,5 +363,4 @@ void MuonPreProcess::addPreProcessSampleLogs(const WorkspaceGroup_sptr &group) {
 // Allow WorkspaceGroup property to function correctly.
 bool MuonPreProcess::checkGroups() { return false; }
 
-} // namespace Muon
-} // namespace Mantid
+} // namespace Mantid::Muon

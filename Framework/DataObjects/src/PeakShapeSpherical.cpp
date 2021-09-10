@@ -10,8 +10,7 @@
 #include <stdexcept>
 #include <utility>
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 
 /**
  * @brief Constructor
@@ -116,5 +115,4 @@ boost::optional<double> PeakShapeSpherical::backgroundInnerRadius() const { retu
  */
 const std::string PeakShapeSpherical::sphereShapeName() { return "spherical"; }
 
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects

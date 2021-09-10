@@ -151,8 +151,7 @@ MatrixWorkspace_sptr initScaleFactorsWorkspace(const size_t nSpectra, const size
 
 } // namespace
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(Stitch)
@@ -479,5 +478,4 @@ void Stitch::scaleManual(const std::vector<std::string> &inputs, const std::vect
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

@@ -9,8 +9,7 @@
 #include <stdexcept>
 #include <utility>
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 FunctionModelDataset::FunctionModelDataset(QString workspaceName, FunctionModelSpectra spectra)
     : m_workspaceName(std::move(workspaceName)), m_spectra(std::move(spectra)) {}
@@ -35,5 +34,4 @@ QStringList FunctionModelDataset::domainNames() const {
   }
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

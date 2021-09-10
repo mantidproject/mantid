@@ -20,8 +20,7 @@
 #include "MantidKernel/OptionalBool.h"
 #include "MantidNexusGeometry/NexusGeometryParser.h"
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 // Register the algorithm into the algorithm factory as a file loading algorithm
 DECLARE_FILELOADER_ALGORITHM(LoadEmptyInstrument)
 
@@ -162,5 +161,4 @@ API::MatrixWorkspace_sptr LoadEmptyInstrument::runLoadInstrument(const std::stri
   return ws;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

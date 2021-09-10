@@ -8,9 +8,7 @@
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include <cmath>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 Experiment::Experiment()
     : m_analysisMode(AnalysisMode::PointDetector), m_reductionType(ReductionType::Normal),
@@ -97,6 +95,4 @@ bool operator==(Experiment const &lhs, Experiment const &rhs) {
          lhs.transmissionStitchOptions() == rhs.transmissionStitchOptions() &&
          lhs.stitchParameters() == rhs.stitchParameters() && lhs.lookupTable() == rhs.lookupTable();
 }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

@@ -16,8 +16,7 @@
 
 #include <fstream> // used to get ofstream
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveNISTDAT)
@@ -78,5 +77,4 @@ void SaveNISTDAT::exec() {
   progress.report("Save I(Qx,Qy)");
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

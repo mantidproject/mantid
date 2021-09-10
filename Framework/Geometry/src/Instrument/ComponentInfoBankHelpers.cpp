@@ -12,9 +12,7 @@
 
 using Mantid::Beamline::ComponentType;
 
-namespace Mantid {
-namespace Geometry {
-namespace ComponentInfoBankHelpers {
+namespace Mantid::Geometry::ComponentInfoBankHelpers {
 /** Tests whether or not the detector is within a fixed bank. If detIndex does
 not point to a detector, this will return false. This method only returns true
 if the bank which houses the detector is rectangular, a grid or structured.
@@ -124,6 +122,4 @@ Eigen::Vector3d offsetFromAncestor(const Mantid::Geometry::ComponentInfo &compIn
   }
 }
 
-} // namespace ComponentInfoBankHelpers
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry::ComponentInfoBankHelpers

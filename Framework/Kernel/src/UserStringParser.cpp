@@ -11,8 +11,7 @@
 #include "MantidKernel/StringTokenizer.h"
 #include <boost/lexical_cast.hpp>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 /**This method parses a given string of numbers and returns a vector of vector
  *of numbers.
@@ -214,5 +213,4 @@ unsigned int UserStringParser::toUInt(const std::string &input) {
     throw std::runtime_error("Error when parsing the input  string " + input);
   }
 }
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

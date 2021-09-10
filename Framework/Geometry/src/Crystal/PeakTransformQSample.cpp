@@ -9,8 +9,7 @@
 
 using boost::regex;
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 PeakTransformQSample::PeakTransformQSample()
     : PeakTransform("Q_sample_x", "Q_sample_y", regex("^Q_sample_x.*$"), regex("^Q_sample_y.*$"),
@@ -39,5 +38,4 @@ Mantid::Kernel::V3D PeakTransformQSample::transformPeak(const Mantid::Geometry::
 Mantid::Kernel::SpecialCoordinateSystem PeakTransformQSample::getCoordinateSystem() const {
   return Mantid::Kernel::QSample;
 }
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

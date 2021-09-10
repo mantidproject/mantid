@@ -92,8 +92,7 @@ bool containsOneOf(std::string const &str, std::string const &delimiters) {
 const std::vector<QString> REQUIRESRECONSTRUCTIONATTRIBUTES = {QString("n")};
 } // namespace
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 /**
  * Constructor
@@ -2173,5 +2172,4 @@ QtTreePropertyBrowser *FunctionTreeView::treeBrowser() { return m_browser; }
 
 DoubleDialogEditorFactory *FunctionTreeView::doubleEditorFactory() { return m_doubleEditorFactory; }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

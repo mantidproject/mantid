@@ -7,8 +7,7 @@
 #include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidKernel/PropertyManager.h"
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 /**
  * Default constructor
@@ -16,5 +15,4 @@ namespace Kernel {
 PropertyManagerDataServiceImpl::PropertyManagerDataServiceImpl()
     : DataService<PropertyManager>("PropertyManagerDataService") {}
 
-} // Namespace Kernel
-} // Namespace Mantid
+} // namespace Mantid::Kernel

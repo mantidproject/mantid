@@ -32,8 +32,7 @@ std::string const WORKSPACE_INDICES = "(" + NATURAL_OR_RANGE + "(" + COMMA + NAT
 } // namespace Regexes
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 
 IndirectPlotOptionsPresenter::IndirectPlotOptionsPresenter(
     IndirectPlotOptionsView *view, PlotWidget const &plotType, std::string const &fixedIndices,
@@ -205,5 +204,4 @@ bool IndirectPlotOptionsPresenter::validateWorkspaceSize(MantidAxis const &axisT
   return true;
 }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

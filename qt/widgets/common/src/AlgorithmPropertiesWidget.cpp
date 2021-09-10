@@ -32,8 +32,7 @@ using Mantid::API::AlgorithmManager;
 using Mantid::API::FrameworkManager;
 using Mantid::API::IWorkspaceProperty;
 
-namespace MantidQt {
-namespace API {
+namespace MantidQt::API {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -450,5 +449,4 @@ void AlgorithmPropertiesWidget::saveInput() {
   }
 }
 
-} // namespace API
-} // namespace MantidQt
+} // namespace MantidQt::API

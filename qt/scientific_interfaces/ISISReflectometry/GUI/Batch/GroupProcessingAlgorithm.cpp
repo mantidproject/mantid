@@ -16,9 +16,7 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 using API::IConfiguredAlgorithm_sptr;
 using Mantid::API::IAlgorithm_sptr;
@@ -137,6 +135,4 @@ AlgorithmRuntimeProps createAlgorithmRuntimeProps(Batch const &model, Group cons
   updateStitchProperties(properties, model.experiment().stitchParameters());
   return properties;
 }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

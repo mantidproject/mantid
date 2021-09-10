@@ -37,8 +37,7 @@
 
 using Mantid::Kernel::V3D;
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 /**
  * The constructor.
@@ -1001,5 +1000,4 @@ std::string ProjectionSurface::saveToProject() const {
 #endif
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

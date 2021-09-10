@@ -36,8 +36,7 @@ constexpr int DEFAULT_LATITUDINAL_DETS = 5;
 constexpr int DEFAULT_LONGITUDINAL_DETS = 10;
 } // namespace
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CalculateMultipleScattering)
@@ -815,5 +814,4 @@ void CalculateMultipleScattering::setWorkspaceName(const API::MatrixWorkspace_sp
   API::AnalysisDataService::Instance().addOrReplace(wsName, ws);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

@@ -15,8 +15,7 @@
 #include <Poco/Path.h>
 #include <boost/scoped_ptr.hpp>
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 Mantid::Geometry::MDImplicitFunction_sptr ImplicitFunctionFactoryImpl::create(const std::string &className) const {
   UNUSED_ARG(className);
@@ -47,5 +46,4 @@ ImplicitFunctionFactoryImpl::createUnwrapped(const std::string &processXML) cons
   boost::scoped_ptr<ImplicitFunctionBuilder> functionBuilder(funcParser->createFunctionBuilder(pInstructionsXML));
   return functionBuilder->create();
 }
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

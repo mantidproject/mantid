@@ -173,8 +173,7 @@ template <typename StringFilter> ColumnNameFilter<StringFilter> makeColumnNameFi
 }
 } // namespace
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace API;
 using namespace Kernel;
@@ -268,5 +267,4 @@ std::size_t ProcessIndirectFitParameters::getEndRow(std::size_t maximum) const {
   return endRow == EMPTY_INT() ? maximum : static_cast<std::size_t>(endRow);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

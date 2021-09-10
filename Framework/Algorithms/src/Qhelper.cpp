@@ -10,8 +10,7 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/Qhelper.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Kernel;
 using namespace API;
@@ -200,5 +199,4 @@ void Qhelper::outputParts(API::Algorithm *alg, const API::MatrixWorkspace_sptr &
   alg->setProperty("sumOfNormFactors", sumOfNormFactors);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

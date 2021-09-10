@@ -27,8 +27,7 @@
 
 #include <fstream>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 DECLARE_ALGORITHM(UpdateInstrumentFromFile)
 
@@ -423,5 +422,4 @@ void UpdateInstrumentFromFile::setDetectorPosition(Geometry::DetectorInfo &detec
   detectorInfo.setPosition(index, pos);
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

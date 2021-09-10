@@ -12,8 +12,7 @@
 
 #include "MantidAPI/MatrixWorkspace.h"
 
-namespace Mantid {
-namespace CurveFitting {
+namespace Mantid::CurveFitting {
 
 using namespace API;
 using namespace HistogramData;
@@ -114,5 +113,4 @@ void FunctionDomain1DSpectrumCreator::throwIfWorkspaceInvalid() const {
   }
 }
 
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting

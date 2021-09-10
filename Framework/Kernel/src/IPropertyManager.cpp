@@ -28,8 +28,7 @@ DEFINE_IPROPERTYMANAGER_GETVALUE(std::vector<double>)
 DEFINE_IPROPERTYMANAGER_GETVALUE(std::vector<std::string>)
 DEFINE_IPROPERTYMANAGER_GETVALUE(std::vector<std::vector<std::string>>)
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 // This template implementation has been left in because although you can't
 // assign to an existing string
 // via the getProperty() method, you can construct a local variable by saying,
@@ -132,7 +131,6 @@ IPropertyManager::TypedValue::operator unsigned long() { return pm.getValue<unsi
 } // namespace Mantid
 
 #else
-} // namespace Kernel
 } // namespace Mantid
 #endif
 

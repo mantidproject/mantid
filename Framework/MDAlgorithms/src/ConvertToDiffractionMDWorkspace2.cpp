@@ -28,8 +28,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertToDiffractionMDWorkspace2)
@@ -77,5 +76,4 @@ void ConvertToDiffractionMDWorkspace2::convertExtents(const std::vector<double> 
     throw std::invalid_argument("You must specify either 2 or 6 extents (min,max).");
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

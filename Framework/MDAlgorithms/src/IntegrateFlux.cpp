@@ -15,8 +15,7 @@
 #include <memory>
 #include <numeric>
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 using Mantid::API::WorkspaceProperty;
 using Mantid::Kernel::Direction;
@@ -471,5 +470,4 @@ size_t IntegrateFlux::getMaxNumberOfPoints(const API::MatrixWorkspace &inputWS) 
   return inputWS.blocksize();
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

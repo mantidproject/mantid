@@ -42,8 +42,7 @@ MinMaxTuple calculateXIntersection(MatrixWorkspace_const_sptr &lhsWS, MatrixWork
 bool isNonzero(double i) { return (0 != i); }
 } // namespace
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 /** Range tolerance
  * This is required for machine precision reasons. Used to adjust StartOverlap
@@ -614,5 +613,4 @@ void Stitch1D::reinsertSpecialValues(const MatrixWorkspace_sptr &ws) {
   PARALLEL_CHECK_INTERUPT_REGION
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

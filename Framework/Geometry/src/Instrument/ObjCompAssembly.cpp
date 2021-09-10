@@ -22,8 +22,7 @@ namespace {
 Mantid::Kernel::Logger g_log("ObjCompAssembly");
 }
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 using Kernel::DblMatrix;
 using Kernel::Quat;
 using Kernel::V3D;
@@ -606,5 +605,4 @@ std::ostream &operator<<(std::ostream &os, const ObjCompAssembly &ass) {
   return os;
 }
 
-} // Namespace Geometry
-} // Namespace Mantid
+} // namespace Mantid::Geometry

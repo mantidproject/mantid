@@ -280,9 +280,7 @@ WorkspaceGroup_sptr runParameterProcessingWithGrouping(IAlgorithm &processingAlg
 }
 } // namespace
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Algorithms {
+namespace Mantid::CurveFitting::Algorithms {
 
 using namespace API;
 using namespace Kernel;
@@ -667,6 +665,4 @@ void QENSFitSimultaneous::renameWorkspaces(const API::WorkspaceGroup_sptr &outpu
   return renameWorkspacesInQENSFit(this, rename, outputGroup, outputBaseName, endOfSuffix + "s", getNameSuffix);
 }
 
-} // namespace Algorithms
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Algorithms
