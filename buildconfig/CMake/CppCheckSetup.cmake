@@ -10,6 +10,7 @@ if ( CPPCHECK_EXECUTABLE )
   # setup the standard arguments
   # --inline-suppr appears to be ignored if --suppresions-list is specified
   set ( CPPCHECK_ARGS --enable=all --inline-suppr --max-configs=120
+  --std=c++${CMAKE_CXX_STANDARD}  # use the standard from cmake
   --suppressions-list=${CMAKE_BINARY_DIR}/CppCheck_Suppressions.txt
   --project=${CMAKE_BINARY_DIR}/compile_commands.json
   # Force cppcheck to check when we use project-wide macros
