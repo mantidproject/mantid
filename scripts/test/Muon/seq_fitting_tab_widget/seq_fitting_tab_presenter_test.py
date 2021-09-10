@@ -80,6 +80,20 @@ class SeqFittingTabPresenterTest(unittest.TestCase):
 
         self.view.fit_table.set_parameters_and_values.assert_called_once_with(parameters, [fit_values, fit_values])
 
+    def test_handle_fit_function_parameter_changed_correctly_updates_fit_table_parameters(self):
+        parameters = ['A', 'Sigma', 'Frequency', 'Phi']
+        fit_values = [0.2, 0.2, 0.1, 0]
+        self.model.get_fit_function_parameters = mock.Mock(return_value=parameters)
+        self.model.get_all_fit_functions = mock.Mock(return_value=[None, None, None])
+        self.model.get_all_fit_function_parameter_values_for = mock.Mock(return_value=fit_values)
+        self.model.get_all_fit_functions_for = mock.Mock(return_value=[None])
+        self.view.selected_data_type = mock.Mock(return_value="FD_Re")
+
+        self._setup_test_fit_function(fit_values)
+
+        self.presenter.handle_fit_function_parameter_changed()
+        self.view.fit_table.set_parameter_values_for_row.assert_called_once_with(0, fit_values)
+
     def test_handle_fit_started_updates_view(self):
         self.presenter.handle_fit_started()
 
