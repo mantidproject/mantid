@@ -43,6 +43,15 @@ void setDataSearchDirs(ConfigServiceImpl &self, const object &paths) {
 /// Forward call from __getitem__ to getString with use_cache_true
 std::string getStringUsingCache(ConfigServiceImpl &self, const std::string &key) { return self.getString(key, true); }
 
+/// duck typing emulating dict.get method
+std::string getStringUsingCacheElseDefault(ConfigServiceImpl &self, const std::string &key,
+                                           const std::string &defaultValue) {
+  std::string value = self.getString(key, true);
+  if (value.empty())
+    return defaultValue;
+  return value;
+}
+
 const InstrumentInfo &getInstrument(ConfigServiceImpl &self, const object &name = object()) {
   if (name.is_none())
     return self.getInstrument();
@@ -134,6 +143,8 @@ void export_ConfigService() {
       .def("keys", &ConfigServiceImpl::keys, arg("self"))
 
       // Treat this as a dictionary
+      .def("get", &getStringUsingCacheElseDefault, (arg("self"), arg("key")), arg("default"),
+           "get the value of a property; return a default value if the property is not found in the configuration")
       .def("__getitem__", &getStringUsingCache, (arg("self"), arg("key")))
       .def("__setitem__", &ConfigServiceImpl::setString, (arg("self"), arg("key"), arg("value")))
       .def("__contains__", &ConfigServiceImpl::hasProperty, (arg("self"), arg("key")))
