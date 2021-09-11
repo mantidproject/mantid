@@ -10,7 +10,7 @@ New and Improved
 
 Bugfixes
 --------
-- Fixed an issue to set up "Start Time" in `StartLiveDataDialog`.
+- Fixed arbitrary values not being accepted as the "Start Time" in StartLiveDataDialog.
 
 
 :ref:`Release 6.3.0 <v6.3.0>`
