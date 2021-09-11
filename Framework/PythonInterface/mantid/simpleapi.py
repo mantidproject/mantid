@@ -37,6 +37,7 @@ import mantid
 from mantid import api as _api, kernel as _kernel
 from mantid import apiVersion  # noqa: F401
 from mantid.kernel import plugins as _plugin_helper
+from mantid.kernel import ConfigService
 from mantid.kernel.funcinspect import customise_func as _customise_func, lhs_info as _lhs_info, \
     replace_signature as _replace_signature, LazyFunctionSignature
 
@@ -1044,12 +1045,36 @@ def _create_algorithm_function(name, version, algm_object):
     globals()[name] = algm_wrapper
     # Register aliases - split on whitespace
     for alias in algm_object.alias().strip().split():
-        globals()[alias] = algm_wrapper
+        try:
+            algm_object.aliasExpired()  # raises if algm_object is not an instance of DeprecatedAlias
+            globals()[alias] = _alias_deprecator(algm_wrapper, algm_object)
+        except AttributeError:
+            globals()[alias] = algm_wrapper
     # endfor
     return algm_wrapper
 
 
 # -------------------------------------------------------------------------------------------------------------
+
+def _alias_deprecator(algorithm_wrapper, algorithm_object):
+    r"""
+    @brief Decorator for deprecated aliases. Upon use of the alias, either raises or warns depending on whether
+    the alias has expired and user configuration 'ExpiredAlias' is set to 'raise'
+
+    @param algorithm_wrapper
+    @param algorithm_object
+
+    @return the decorated algorithm wrapper function
+
+    @:except RuntimeError: the alias has expired and configuratin 'ExpiredAlias' is set to 'raise'
+    """
+    def _inner(*args, **kwargs):
+        if algorithm_object.aliasExpired() and\
+                ConfigService.Instance().get('algorithms.alias.deprecation', 'Warn') == 'Raise':
+            raise RuntimeError(f'Use of the algorithm alias is not allowed')
+        logger.warning(algorithm_object.deprecationMessage())
+        algorithm_wrapper(*args, **kwargs)
+    return _inner
 
 
 def _create_algorithm_object(name, version=-1, startProgress=None, endProgress=None):
