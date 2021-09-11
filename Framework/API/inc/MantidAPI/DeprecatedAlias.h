@@ -27,17 +27,16 @@ namespace API {
  *
  * The recommended algorithm naming pattern should be
  * [Technique][Facility/Instrument]ActionTarget
- * For example: the caliration routine of panel detector for single crystal diffraction
- *              beamline can be named as
- *                  SCDCalibratePanels
+ * For example: the calibration routine of panel detector for single crystal diffraction
+ *              beamline can be named as SCDCalibratePanels
  */
 class MANTID_API_DLL DeprecatedAlias {
 public:
   DeprecatedAlias();
   virtual ~DeprecatedAlias();
   std::string deprecationMessage(const IAlgorithm *);
-
   void setDeprecationDate(const std::string &date);
+  bool aliasExpired() const;
 
 private:
   /// Replacement version, -1 indicate latest

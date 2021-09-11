@@ -51,5 +51,19 @@ std::string DeprecatedAlias::deprecationMessage(const IAlgorithm *algo) {
   return msg.str();
 }
 
+/**
+ * @brief determine if the grace period for use of the deprecated alias has expired
+ * @return bool
+ */
+bool DeprecatedAlias::aliasExpired() const {
+
+  // return false if m_deprecationDate is empty
+
+  // return true if today's date is later than m_deprecationDate  plus the grace period
+  // the grace period could be a static variable
+
+  return false;
+}
+
 } // namespace API
 } // namespace Mantid
