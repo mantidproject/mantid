@@ -36,7 +36,6 @@ public:
   virtual ~DeprecatedAlias();
   std::string deprecationMessage(const IAlgorithm *);
   void setDeprecationDate(const std::string &date);
-  bool aliasExpired() const;
 
 private:
   /// Replacement version, -1 indicate latest

@@ -71,6 +71,9 @@ public:
   /// function to return any aliases of the algorithm.
   virtual const std::string alias() const = 0;
 
+  /// Expiration date (in ISO8601 format) for the algorithm aliases. Empty if no expiration date
+  virtual const std::string aliasExpiration() const = 0;
+
   /// function to return an optional URL for documentation.
   /// Override if the algorithm is not part of the Mantid distribution
   virtual const std::string helpURL() const = 0;

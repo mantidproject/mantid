@@ -29,6 +29,8 @@ Importing this module starts the FrameworkManager instance.
 # std libs
 from collections import OrderedDict, namedtuple
 from contextlib import contextmanager
+import datetime
+from dateutil.parser import parse as parse_date
 import os
 import sys
 
@@ -1045,10 +1047,9 @@ def _create_algorithm_function(name, version, algm_object):
     globals()[name] = algm_wrapper
     # Register aliases - split on whitespace
     for alias in algm_object.alias().strip().split():
-        try:
-            algm_object.aliasExpired()  # raises if algm_object is not an instance of DeprecatedAlias
-            globals()[alias] = _alias_deprecator(algm_wrapper, algm_object)
-        except AttributeError:
+        if algm_object.aliasExpiration():
+            globals()[alias] = _alias_deprecator(algm_wrapper, algm_object, alias)
+        else:
             globals()[alias] = algm_wrapper
     # endfor
     return algm_wrapper
@@ -1056,24 +1057,31 @@ def _create_algorithm_function(name, version, algm_object):
 
 # -------------------------------------------------------------------------------------------------------------
 
-def _alias_deprecator(algorithm_wrapper, algorithm_object):
+def _alias_deprecator(algorithm_wrapper, algorithm_object, algm_alias):
     r"""
     @brief Decorator for deprecated aliases. Upon use of the alias, either raises or warns depending on whether
-    the alias has expired and user configuration 'ExpiredAlias' is set to 'raise'
+    the alias has expired and user setting 'algorithms.alias.expired' is set to 'Raise'
 
-    @param algorithm_wrapper
-    @param algorithm_object
+    @param Wrapper algorithm_wrapper: object wrapping the algorithm and mimicking a function
+    @param mantid.api.IAlgorithm algorithm_object
+    @param str algm_alias: one of the algorithm aliases
 
-    @return the decorated algorithm wrapper function
+    @return Wrapper: the decorated algorithm wrapper object
 
-    @:except RuntimeError: the alias has expired and configuratin 'ExpiredAlias' is set to 'raise'
+    @except RuntimeError: the alias has expired and setting 'algorithms.alias.expired' is set to 'Raise'
     """
     def _inner(*args, **kwargs):
-        if algorithm_object.aliasExpired() and\
-                ConfigService.Instance().get('algorithms.alias.deprecation', 'Warn') == 'Raise':
-            raise RuntimeError(f'Use of the algorithm alias is not allowed')
-        logger.warning(algorithm_object.deprecationMessage())
+        try:
+            expired = True if parse_date(algorithm_object.aliasExpiration()) > datetime.datetime.today() else False
+        except ValueError:
+            expired = False
+            logger.error(f'Alias expiration date {algorithm_object.aliasExpiration()} must be in ISO8601 format')
+        raise_on_expired = ConfigService.Instance().get('algorithms.alias.expired', 'Warn').lower() == 'raise'
+        algm_name = algorithm_object.name()
+        if expired and raise_on_expired:
+            raise RuntimeError(f'Use of algorithm alias {algm_alias} not allowed. Use {algm_name} instead')
         algorithm_wrapper(*args, **kwargs)
+        logger.warning(f'Algorithm alias {algm_alias} is deprecated. Use {algm_name} instead')
     return _inner
 
 

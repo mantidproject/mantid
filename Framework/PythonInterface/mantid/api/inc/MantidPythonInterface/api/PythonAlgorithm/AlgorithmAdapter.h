@@ -53,6 +53,10 @@ public:
   const std::string category() const override;
   /// Returns seeAlso related algorithms.
   const std::vector<std::string> seeAlso() const override;
+  /// Allow the method returning the algorithm aliases to be overridden
+  const std::string alias() const override;
+  /// Allow the method returning the expiration date (in ISO8601 format) for the algorithm aliases to be overridden
+  const std::string aliasExpiration() const override;
   /// Returns optional documentation URL of the algorithm
   const std::string helpURL() const override;
   /// Allow the isRunning method to be overridden

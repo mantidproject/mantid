@@ -210,7 +210,7 @@ const std::vector<std::string> AlgorithmFactoryImpl::getKeys(bool includeHidden)
 
 /**
  * @param alias The name of the algorithm to look up in the alias map
- * @return Real name of algroithm if found
+ * @return Real name of algorithm if found
  */
 boost::optional<std::string> AlgorithmFactoryImpl::getRealNameFromAlias(const std::string &alias) const noexcept {
   auto a_it = m_amap.find(alias);

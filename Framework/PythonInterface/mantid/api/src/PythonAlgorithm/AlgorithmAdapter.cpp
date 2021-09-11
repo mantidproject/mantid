@@ -108,6 +108,29 @@ template <typename BaseAlgorithm> const std::vector<std::string> AlgorithmAdapte
 }
 
 /**
+ * Returns the aliases of the algorithm. If not overridden returns the base algorithm implementation
+ */
+template <typename BaseAlgorithm> const std::string AlgorithmAdapter<BaseAlgorithm>::alias() const {
+  try {
+    return callMethod<std::string>(getSelf(), "alias");
+  } catch (UndefinedAttributeError &) {
+    return BaseAlgorithm::alias();
+  }
+}
+
+/**
+ * Returns the expiration date (in ISO8601 format) of algorithm aliases. If not overridden, returns the
+ * base algorithm implementation
+ */
+template <typename BaseAlgorithm> const std::string AlgorithmAdapter<BaseAlgorithm>::aliasExpiration() const {
+  try {
+    return callMethod<std::string>(getSelf(), "aliasExpiration");
+  } catch (UndefinedAttributeError &) {
+    return BaseAlgorithm::alias();
+  }
+}
+
+/**
  * Returns the summary of the algorithm. If not overridden
  * it returns defaultSummary
  */
