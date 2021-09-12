@@ -1048,7 +1048,7 @@ def _create_algorithm_function(name, version, algm_object):
     # Register aliases - split on whitespace
     for alias in algm_object.alias().strip().split():
         if algm_object.aliasExpiration():
-            globals()[alias] = _alias_deprecator(algm_wrapper, algm_object, alias)
+            globals()[alias] = algm_wrapper
         else:
             globals()[alias] = algm_wrapper
     # endfor
