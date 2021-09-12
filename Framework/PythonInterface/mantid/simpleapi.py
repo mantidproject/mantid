@@ -959,27 +959,38 @@ def _create_algorithm_function(name, version, algm_object):  # noqa: C901
         :param algm_object: the created algorithm object.
     """
 
-    def algorithm_wrapper(alias=''):
+    def algorithm_wrapper(alias=None):
         r"""
         @brief Creates a wrapper object around the algorithm functions.
 
-        @param str alias: Non-empty when the algorithm is to be invoked with this alias
+        @param str alias: Non-empty when the algorithm is to be invoked with this alias instead of its name.
+                          Default `None` indicates an alias is not bein used.
         """
+
         class Wrapper:
-            __slots__ = ["__name__", "__signature__"]
+            __slots__ = ["__name__", "__signature__", "_alias"]
 
-            def __init__(self):
-                self.alias = alias  # non-empty string when the algorithm is being invoked via its alias
-
-                self.alias_expiration = algm_object.aliasExpiration()  # non-empty string when alias set to expire
+            @staticmethod
+            def _init_alias(self, algm_alias):
+                r"""
+                @brief Encapsulate alias features on a namedtuple
+                @param str algm_alias
+                """
+                expiration = algm_object.aliasExpiration()  # non-empty string when alias set to expire
                 try:
                     # should evaluate to False when algm_object.aliasExpiration() returns empty string (no expiration)
-                    expired = parse_date(self.alias_expiration) > datetime.datetime.today()
+                    expired = parse_date(expiration) > datetime.datetime.today()
                 except ValueError:
                     expired = False
-                    logger.error(f'Alias expiration date {self.alias_expiration} must be in ISO8601 format')
+                    logger.error(f'Alias expiration date {expiration} must be in ISO8601 format')
                 expired_action = ConfigService.Instance().get('algorithms.alias.expired', 'Warn').lower()
-                self.raise_on_expired_alias = expired and expired_action == 'raise'
+                raise_on_expired_alias = expired and expired_action == 'raise'
+
+                AlgorithmAlias = namedtuple('AlgorithmAlias', 'name, expiration, do_raise')
+                return AlgorithmAlias(algm_alias, expiration, raise_on_expired_alias)
+
+            def __init__(self, algm_alias=None):
+                self._alias = self._init_alias(algm_alias) if algm_alias else None
 
             def __getattribute__(self, item):
                 obj = object.__getattribute__(self, item)
@@ -1002,8 +1013,8 @@ def _create_algorithm_function(name, version, algm_object):  # noqa: C901
                 be used.
                 """
 
-                if self.alias and self.raise_on_expired_alias:
-                    raise RuntimeError(f'Use of algorithm alias {self.alias} not allowed. Use {name} instead')
+                if self._alias and self._alias.do_raise:
+                    raise RuntimeError(f'Use of algorithm alias {self._alias.name} not allowed. Use {name} instead')
 
                 _version = version
                 if "Version" in kwargs:
@@ -1052,23 +1063,23 @@ def _create_algorithm_function(name, version, algm_object):  # noqa: C901
                     else:
                         msg = '{}-v{}: {}'.format(algm.name(), algm.version(), str(e))
                         raise RuntimeError(msg) from e
-                if self.alias and self.alias_expiration:
-                    logger.error(f'Algorithm alias {self.alias} is deprecated. Use {name} instead')
+                if self._alias and self._alias.expiration:
+                    logger.error(f'Algorithm alias {self._alias.name} is deprecated. Use {name} instead')
 
                 return _gather_returns(name, lhs, algm)
         # Set the signature of the callable to be one that is only generated on request.
         Wrapper.__call__.__signature__ = LazyFunctionSignature(alg_name=name)
-        wrapper = Wrapper()
+
+        wrapper = Wrapper(algm_alias=alias)
         wrapper.__name__ = name
         return wrapper
-
-    algm_wrapper = algorithm_wrapper()
-    globals()[name] = algorithm_wrapper()  # Insert definition in to global dict
 
     # Register aliases - split on whitespace
     for alias in algm_object.alias().strip().split():
         globals()[alias] = algorithm_wrapper(alias=alias)
 
+    algm_wrapper = algorithm_wrapper()
+    globals()[name] = algorithm_wrapper()  # Insert definition in to global dict
     return algm_wrapper
 
 
