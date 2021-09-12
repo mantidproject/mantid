@@ -964,14 +964,14 @@ def _create_algorithm_function(name, version, algm_object):  # noqa: C901
         @brief Creates a wrapper object around the algorithm functions.
 
         @param str alias: Non-empty when the algorithm is to be invoked with this alias instead of its name.
-                          Default `None` indicates an alias is not bein used.
+                          Default `None` indicates an alias is not being used.
         """
 
         class Wrapper:
             __slots__ = ["__name__", "__signature__", "_alias"]
 
             @staticmethod
-            def _init_alias(self, algm_alias):
+            def _init_alias(algm_alias):
                 r"""
                 @brief Encapsulate alias features on a namedtuple
                 @param str algm_alias
