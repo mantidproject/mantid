@@ -950,7 +950,7 @@ def set_properties(alg_object, *args, **kwargs):
         do_set_property(key, value)
 
 
-def _create_algorithm_function(name, version, algm_object):
+def _create_algorithm_function(name, version, algm_object):  # noqa: C901
     """
         Create a function that will set up and execute an algorithm.
         The help that will be displayed is that of the most recent version.
@@ -959,12 +959,27 @@ def _create_algorithm_function(name, version, algm_object):
         :param algm_object: the created algorithm object.
     """
 
-    def algorithm_wrapper():
-        """
-        Creates a wrapper object around the algorithm functions.
+    def algorithm_wrapper(alias=''):
+        r"""
+        @brief Creates a wrapper object around the algorithm functions.
+
+        @param str alias: Non-empty when the algorithm is to be invoked with this alias
         """
         class Wrapper:
             __slots__ = ["__name__", "__signature__"]
+
+            def __init__(self):
+                self.alias = alias  # non-empty string when the algorithm is being invoked via its alias
+
+                self.alias_expiration = algm_object.aliasExpiration()  # non-empty string when alias set to expire
+                try:
+                    # should evaluate to False when algm_object.aliasExpiration() returns empty string (no expiration)
+                    expired = parse_date(self.alias_expiration) > datetime.datetime.today()
+                except ValueError:
+                    expired = False
+                    logger.error(f'Alias expiration date {self.alias_expiration} must be in ISO8601 format')
+                expired_action = ConfigService.Instance().get('algorithms.alias.expired', 'Warn').lower()
+                self.raise_on_expired_alias = expired and expired_action == 'raise'
 
             def __getattribute__(self, item):
                 obj = object.__getattribute__(self, item)
@@ -986,6 +1001,10 @@ def _create_algorithm_function(name, version, algm_object):
                 If both startProgress and endProgress are supplied they will
                 be used.
                 """
+
+                if self.alias and self.raise_on_expired_alias:
+                    raise RuntimeError(f'Use of algorithm alias {self.alias} not allowed. Use {name} instead')
+
                 _version = version
                 if "Version" in kwargs:
                     _version = kwargs["Version"]
@@ -1033,57 +1052,27 @@ def _create_algorithm_function(name, version, algm_object):
                     else:
                         msg = '{}-v{}: {}'.format(algm.name(), algm.version(), str(e))
                         raise RuntimeError(msg) from e
+                if self.alias and self.alias_expiration:
+                    logger.error(f'Algorithm alias {self.alias} is deprecated. Use {name} instead')
 
                 return _gather_returns(name, lhs, algm)
         # Set the signature of the callable to be one that is only generated on request.
         Wrapper.__call__.__signature__ = LazyFunctionSignature(alg_name=name)
-        return Wrapper()
+        wrapper = Wrapper()
+        wrapper.__name__ = name
+        return wrapper
 
-    # enddef
-    # Insert definition in to global dict
     algm_wrapper = algorithm_wrapper()
-    algm_wrapper.__name__ = name
+    globals()[name] = algorithm_wrapper()  # Insert definition in to global dict
 
-    globals()[name] = algm_wrapper
     # Register aliases - split on whitespace
     for alias in algm_object.alias().strip().split():
-        if algm_object.aliasExpiration():
-            globals()[alias] = algm_wrapper
-        else:
-            globals()[alias] = algm_wrapper
-    # endfor
+        globals()[alias] = algorithm_wrapper(alias=alias)
+
     return algm_wrapper
 
 
 # -------------------------------------------------------------------------------------------------------------
-
-def _alias_deprecator(algorithm_wrapper, algorithm_object, algm_alias):
-    r"""
-    @brief Decorator for deprecated aliases. Upon use of the alias, either raises or warns depending on whether
-    the alias has expired and user setting 'algorithms.alias.expired' is set to 'Raise'
-
-    @param Wrapper algorithm_wrapper: object wrapping the algorithm and mimicking a function
-    @param mantid.api.IAlgorithm algorithm_object
-    @param str algm_alias: one of the algorithm aliases
-
-    @return Wrapper: the decorated algorithm wrapper object
-
-    @except RuntimeError: the alias has expired and setting 'algorithms.alias.expired' is set to 'Raise'
-    """
-    def _inner(*args, **kwargs):
-        try:
-            expired = True if parse_date(algorithm_object.aliasExpiration()) > datetime.datetime.today() else False
-        except ValueError:
-            expired = False
-            logger.error(f'Alias expiration date {algorithm_object.aliasExpiration()} must be in ISO8601 format')
-        raise_on_expired = ConfigService.Instance().get('algorithms.alias.expired', 'Warn').lower() == 'raise'
-        algm_name = algorithm_object.name()
-        if expired and raise_on_expired:
-            raise RuntimeError(f'Use of algorithm alias {algm_alias} not allowed. Use {algm_name} instead')
-        algorithm_wrapper(*args, **kwargs)
-        logger.warning(f'Algorithm alias {algm_alias} is deprecated. Use {algm_name} instead')
-    return _inner
-
 
 def _create_algorithm_object(name, version=-1, startProgress=None, endProgress=None):
     """
