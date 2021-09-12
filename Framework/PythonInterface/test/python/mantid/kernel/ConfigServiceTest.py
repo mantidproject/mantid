@@ -136,22 +136,26 @@ class ConfigServiceTest(unittest.TestCase):
         doc_filename = os.path.abspath(doc_filename)
 
         # read in the user documentation
-        print ('Parsing', doc_filename)
+        print('Parsing', doc_filename)
         documented_keys = []
         with open(doc_filename) as handle:
             text = handle.read()
 
         # these will be ignored - the list should get shorter over time
         hidden_prefixes = ['CheckMantidVersion.DownloadURL',  # shouldn't be changed by users
-                           'CheckMantidVersion.GitHubReleaseURL', # shouldn't be changed by users
-                           'UpdateInstrumentDefinitions.URL', # shouldn't be changed by users
-                           'docs.html.root', # shouldn't be changed by users
-                           'errorreports.rooturl', # shouldn't be changed by users
-                           'usagereports.rooturl', # shouldn't be changed by users
-                           'workspace.sendto.SansView.arguments', 'workspace.sendto.SansView.saveusing', # related to SASview in menu
-                           'workspace.sendto.SansView.target', 'workspace.sendto.SansView.visible', # related to SASview in menu
-                           'workspace.sendto.name.SansView', # related to SASview in menu
-                           'catalog.oncat.token.accessToken', 'catalog.oncat.token.expiresIn', 'catalog.oncat.token.refreshToken', 'catalog.oncat.token.scope', 'catalog.oncat.token.tokenType', # Shouldn't be changed by users.
+                           'CheckMantidVersion.GitHubReleaseURL',  # shouldn't be changed by users
+                           'UpdateInstrumentDefinitions.URL',  # shouldn't be changed by users
+                           'docs.html.root',  # shouldn't be changed by users
+                           'errorreports.rooturl',  # shouldn't be changed by users
+                           'usagereports.rooturl',  # shouldn't be changed by users
+                           'workspace.sendto.SansView.arguments', 'workspace.sendto.SansView.saveusing',  # SASview in menu
+                           'workspace.sendto.SansView.target', 'workspace.sendto.SansView.visible',  # SASview in menu
+                           'workspace.sendto.name.SansView',  # related to SASview in menu
+                           'catalog.oncat.token.accessToken',  # shouldn't be changed by users.
+                           'catalog.oncat.token.expiresIn',  # shouldn't be changed by users.
+                           'catalog.oncat.token.refreshToken',  # shouldn't be changed by users.
+                           'catalog.oncat.token.scope',  # shouldn't be changed by users.
+                           'catalog.oncat.token.tokenType',  # shouldn't be changed by users.
 
                            ########## TODO should be documented!
                            'filefinder.casesensitive',
@@ -166,10 +170,20 @@ class ConfigServiceTest(unittest.TestCase):
                            'sliceviewer.nonorthogonal',
 
                            ########## TODO should these be documented?
-                           'curvefitting.defaultPeak', 'curvefitting.findPeaksFWHM', 'curvefitting.findPeaksTolerance', 'curvefitting.guiExclude',
-                           'logging.channels.consoleChannel.class', 'logging.channels.consoleChannel.formatter', 'logging.formatters.f1.class', 'logging.formatters.f1.pattern', 'logging.formatters.f1.times', 'logging.loggers.root.channel.channel1', 'logging.loggers.root.channel.class',
+                           'curvefitting.defaultPeak',
+                           'curvefitting.findPeaksFWHM',
+                           'curvefitting.findPeaksTolerance',
+                           'curvefitting.guiExclude',
+                           'logging.channels.consoleChannel.class',
+                           'logging.channels.consoleChannel.formatter',
+                           'logging.formatters.f1.class',
+                           'logging.formatters.f1.pattern',
+                           'logging.formatters.f1.times',
+                           'logging.loggers.root.channel.channel1',
+                           'logging.loggers.root.channel.class',
                            'MantidOptions.ReusePlotInstances',
-                           'mantidqt.python_interfaces', 'mantidqt.python_interfaces_directory'
+                           'mantidqt.python_interfaces',
+                           'mantidqt.python_interfaces_directory'
                            ]
 
         # create the list of things
