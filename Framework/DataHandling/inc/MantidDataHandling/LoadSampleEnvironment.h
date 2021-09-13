@@ -55,7 +55,7 @@ private:
 
   void loadEnvironmentFrom3MF([[maybe_unused]] const API::MatrixWorkspace_const_sptr &inputWS,
                               [[maybe_unused]] const std::string &filename, [[maybe_unused]] API::Sample &sample,
-                              [[maybe_unused]] const bool add, const std::string &debugString);
+                              [[maybe_unused]] const bool add, std::string &debugString);
 };
 
 } // end namespace DataHandling
