@@ -977,17 +977,14 @@ def _create_algorithm_function(name, version, algm_object):  # noqa: C901
                 @param str algm_alias
                 """
                 expiration = algm_object.aliasExpiration()  # non-empty string when alias set to expire
-                try:
-                    # should evaluate to False when algm_object.aliasExpiration() returns empty string (no expiration)
-                    expired = parse_date(expiration) > datetime.datetime.today()
-                except ValueError:
-                    expired = False
-                    logger.error(f'Alias expiration date {expiration} must be in ISO8601 format')
-                expired_action = ConfigService.Instance().get('algorithms.alias.expired', 'Warn').lower()
-                raise_on_expired_alias = expired and expired_action == 'raise'
-
-                AlgorithmAlias = namedtuple('AlgorithmAlias', 'name, expiration, do_raise')
-                return AlgorithmAlias(algm_alias, expiration, raise_on_expired_alias)
+                if expiration:
+                    try:
+                        parse_date(expiration)
+                    except ValueError:
+                        expiration = ''
+                        logger.error(f'Alias expiration date {expiration} must be in ISO8601 format')
+                AlgorithmAlias = namedtuple('AlgorithmAlias', 'name, expiration')
+                return AlgorithmAlias(algm_alias, expiration)
 
             def __init__(self, algm_alias=None):
                 self._alias = self._init_alias(algm_alias) if algm_alias else None
@@ -1013,8 +1010,12 @@ def _create_algorithm_function(name, version, algm_object):  # noqa: C901
                 be used.
                 """
 
-                if self._alias and self._alias.do_raise:
-                    raise RuntimeError(f'Use of algorithm alias {self._alias.name} not allowed. Use {name} instead')
+                # Check at runtime whether to throw upon alias expiration.
+                if self._alias and self._alias.expiration:
+                    expired = parse_date(self._alias.expiration) < datetime.datetime.today()
+                    expired_action = ConfigService.Instance().get('algorithms.alias.expired', 'Warn').lower()
+                    if expired and expired_action == 'raise':
+                        raise RuntimeError(f'Use of algorithm alias {self._alias.name} not allowed. Use {name} instead')
 
                 _version = version
                 if "Version" in kwargs:
