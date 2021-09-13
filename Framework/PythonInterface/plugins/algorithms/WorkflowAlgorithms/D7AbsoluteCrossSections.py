@@ -281,6 +281,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         CreateWorkspace(OutputWorkspace=cos2_m_sin2_alpha_name, DataX=np.arange(1),
                         DataY=np.subtract(cos2_alpha_arr, sin2_alpha_arr),
                         NSpec=len(alpha))
+        DeleteWorkspace(Workspace=angle_ws)
         return cos2_m_sin2_alpha_name
 
     @staticmethod
