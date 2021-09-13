@@ -18,12 +18,18 @@ Mantid data search paths that contains the sample environment information the
 ELF workspace can also be normalised to the lowest temperature run in the range
 of input files.
 
-.. interface:: Data Analysis
+.. image:: ../../images/Inelastic_Data_Analysis_GUI.png
   :width: 450
-  :widget: tabElwin
 
 Elwin Options
 ~~~~~~~~~~~~~
+
+File or Workspace
+  Choose to download data from a file or a workspace by using this dropdown menu. See image below for demonstration of how to load files using either option.
+
+.. figure:: ../../images/ElwinLoad.gif
+   :width: 600px
+   :align: center
 
 Input File
   Specify a range of input files that are either reduced (*_red.nxs*) or
