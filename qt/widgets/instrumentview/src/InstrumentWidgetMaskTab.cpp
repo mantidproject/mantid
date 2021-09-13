@@ -676,6 +676,7 @@ void InstrumentWidgetMaskTab::clearProperties() {
   m_top = nullptr;
   m_right = nullptr;
   m_bottom = nullptr;
+  m_rotation = nullptr;
 }
 
 void InstrumentWidgetMaskTab::setProperties() {
@@ -689,10 +690,12 @@ void InstrumentWidgetMaskTab::setProperties() {
   m_top = addDoubleProperty("top");
   m_right = addDoubleProperty("right");
   m_bottom = addDoubleProperty("bottom");
+  m_rotation = addDoubleProperty("rotation");
   boundingRectGroup->addSubProperty(m_left);
   boundingRectGroup->addSubProperty(m_top);
   boundingRectGroup->addSubProperty(m_right);
   boundingRectGroup->addSubProperty(m_bottom);
+  boundingRectGroup->addSubProperty(m_rotation);
 
   // point properties
   QStringList pointProperties =
@@ -732,7 +735,7 @@ void InstrumentWidgetMaskTab::doubleChanged(QtProperty *prop) {
   if (!m_userEditing)
     return;
 
-  if (prop == m_left || prop == m_top || prop == m_right || prop == m_bottom) {
+  if (prop == m_left || prop == m_top || prop == m_right || prop == m_bottom || prop == m_rotation) {
     m_userEditing = false;
     double x0 = std::min(m_doubleManager->value(m_left),
                          m_doubleManager->value(m_right));
