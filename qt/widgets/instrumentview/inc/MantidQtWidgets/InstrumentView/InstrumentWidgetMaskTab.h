@@ -208,6 +208,7 @@ protected:
   QtProperty *m_top;
   QtProperty *m_right;
   QtProperty *m_bottom;
+  QtProperty *m_rotation;
 
   QMap<QtProperty *, QString> m_doublePropertyMap;
   QMap<QString, QtProperty *> m_pointPropertyMap;
