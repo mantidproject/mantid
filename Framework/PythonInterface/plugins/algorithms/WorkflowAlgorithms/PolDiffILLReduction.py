@@ -844,8 +844,8 @@ class PolDiffILLReduction(PythonAlgorithm):
         CreateWorkspace(OutputWorkspace=mock_geometry_ws, DataX=xAxis_range, DataY=[0.0] * n_spec, NSpec=n_spec,
                         UnitX="Wavelength", YUnitLabel="Counts")
         instrument = mtd[sample_ws][0].getInstrument().getComponentByName('detector')
-        sample_distance_odd =  instrument.getNumberParameter('sample_distance_odd')[0] # distance from odd detectors to sample
-        sample_distance_even =  instrument.getNumberParameter('sample_distance_even')[0] # same, but for even detectors
+        sample_distance_odd = instrument.getNumberParameter('sample_distance_odd')[0] # distance from odd detectors to sample
+        sample_distance_even = instrument.getNumberParameter('sample_distance_even')[0] # same, but for even detectors
         average_distance = 0.5 * (sample_distance_odd + sample_distance_even)
         EditInstrumentGeometry(Workspace=mock_geometry_ws,
                                PrimaryFlightPath=instrument.getNumberParameter('sample_distance_chopper')[0],
@@ -954,13 +954,34 @@ class PolDiffILLReduction(PythonAlgorithm):
 
         return nMeasurements
 
-    def _elastic_channel_calibration(self, ws):
+    def _find_elastic_peak_channels(self, ws):
         """Finds elastic peaks and puts them in a WorkspaceGroup with the set name."""
         self._elastic_channels_ws = "{}_elastic".format(ws[2:])
         tmp_ws = "{}_tmp".format(ws)
         MergeRuns(InputWorkspaces=ws, OutputWorkspace=tmp_ws)
         FindEPP(InputWorkspace=tmp_ws, OutputWorkspace=self._elastic_channels_ws)
         DeleteWorkspace(Workspace=tmp_ws)
+
+    def _calibrate_elastic_peak_position(self, ws):
+        """Calibrates the elastic peak position in TOF units to fall at deltaE = 0."""
+        neutron_mass = physical_constants['neutron mass energy equivalent in MeV'][0] * 1e6  # in eV/c^2
+        light_speed = physical_constants['speed of light in vacuum'][0]  # in m/s
+        mev_to_ev = 1e-3  # conversion factor
+        Ei = self._sampleAndEnvironmentProperties['InitialEnergy'].value * mev_to_ev  # in eV
+        instrument = mtd[ws][0].getInstrument()
+        L1 = instrument.getNumberParameter('sample_distance_chopper')[0]  # in m
+        L2_odd = instrument.getNumberParameter('sample_distance_odd')[0]  # in m
+        L2_even = instrument.getNumberParameter('sample_distance_even')[0]  # in m
+        neutron_velocity = np.sqrt(2.0 * Ei / neutron_mass) * light_speed  # in m / s, light_speed to go back to SI
+        tof_deltaE_0_odd = 1e6 * (L1 + L2_odd) / neutron_velocity  # in us
+        tof_deltaE_0_even = 1e6 * (L1 + L2_even) / neutron_velocity # in us
+        peak_positions = mtd[self._elastic_channels_ws].column('PeakCentre')
+        for entry in mtd[ws]:
+            for pixel_no in range(entry.getNumberHistograms()):
+                tof_deltaE_0 = tof_deltaE_0_odd if pixel_no % 2 == 0 else tof_deltaE_0_even
+                tof_correction = peak_positions[pixel_no] - tof_deltaE_0
+                time_axis = entry.dataX(pixel_no)
+                time_axis -= tof_correction
 
     def _normalise_vanadium(self, ws):
         """Performs normalisation of the vanadium data to the expected cross-section."""
@@ -1080,7 +1101,7 @@ class PolDiffILLReduction(PythonAlgorithm):
             if measurement_technique == 'TOF':
                 if process == 'Vanadium':
                     progress.report('Calibrating the elastic peak energy')
-                    self._elastic_channel_calibration(ws)
+                    self._find_elastic_peak_channels(ws)
                 else:
                     self._elastic_channels_ws = self.getPropertyValue('ElasticChannelsWorkspace')
             # Subtracts background if the transmission and either empty container or cadmium are provided
@@ -1103,6 +1124,7 @@ class PolDiffILLReduction(PythonAlgorithm):
                     progress.report('Applying self-attenuation correction')
                     self._apply_self_attenuation_correction(ws, empty_ws)
                 if measurement_technique == 'TOF':
+                    self._calibrate_elastic_peak_position(ws)
                     progress.report('Correcting detector-analyser efficiency')
                     self._detector_analyser_energy_efficiency(ws)
                 if process == 'Vanadium':
