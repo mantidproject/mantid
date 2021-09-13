@@ -14,4 +14,5 @@ setup(
     version=os.environ['MANTID_VERSION_STR'],
     packages=find_packages(exclude=['*.test']),
     package_data={'': ['*.ui', '*.yaml', '*.json']},
+    include_package_data=True,
 )
