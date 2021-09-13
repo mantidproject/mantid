@@ -1798,8 +1798,12 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root, const std::strin
 
   progress(progressStart + 0.2 * progressRange, "Reading the workspace history...");
 
-  if (local_workspace->getTitle().empty())
-    local_workspace->setTitle(mtd_entry.getString("title"));
+  try {
+    if (local_workspace->getTitle().empty())
+      local_workspace->setTitle(mtd_entry.getString("title"));
+  } catch (std::runtime_error &) {
+    g_log.debug() << "No title was found in the input file, " << getPropertyValue("Filename") << '\n';
+  }
 
   return std::static_pointer_cast<API::Workspace>(local_workspace);
 }
