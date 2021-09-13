@@ -267,4 +267,3 @@ mtd_install_targets(TARGETS
                     INSTALL_DIRS
                     ${LIB_DIR}
                     ${WORKBENCH_LIB_DIR})
-endif()
