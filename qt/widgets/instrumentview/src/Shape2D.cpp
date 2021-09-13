@@ -392,13 +392,19 @@ bool Shape2DRectangle::selectAt(const QPointF &p) const {
 }
 
 void Shape2DRectangle::drawShape(QPainter &painter) const {
-  QRectF drawRect = m_boundingRect.toQRectF();
+  auto center = m_boundingRect.center();
+  QRectF drawRect = m_boundingRect.translated(-center).toQRectF();
+  painter.save();
+  double rotation = 20;
+  painter.rotate(rotation);
+  painter.translate(QTransform().rotate(-rotation).map(center));
   painter.drawRect(drawRect);
   if (m_fill_color != QColor()) {
     QPainterPath path;
     path.addRect(drawRect);
     painter.fillPath(path, m_fill_color);
   }
+  painter.restore();
 }
 
 void Shape2DRectangle::addToPath(QPainterPath &path) const { path.addRect(m_boundingRect.toQRectF()); }
