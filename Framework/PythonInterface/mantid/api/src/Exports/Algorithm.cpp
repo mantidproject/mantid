@@ -98,9 +98,15 @@ template <typename T> boost::optional<T> extractArg(ssize_t index, const tuple &
 }
 
 template <typename T> void extractKwargs(const dict &kwargs, const std::string &keyName, boost::optional<T> &out) {
-  if (kwargs.has_key(keyName)) {
-    out = boost::optional<T>(extract<T>(kwargs.get(keyName)));
+  if (!kwargs.has_key(keyName)) {
+    return;
   }
+  if (out != boost::none) {
+    throw std::invalid_argument("Parameter called '" + keyName +
+                                "' was specified twice."
+                                " This must be either positional or a kwarg, but not both.");
+  }
+  out = boost::optional<T>(extract<T>(kwargs.get(keyName)));
 }
 
 class SetPropertyVisitor final : public Mantid::PythonInterface::IPyTypeVisitor {

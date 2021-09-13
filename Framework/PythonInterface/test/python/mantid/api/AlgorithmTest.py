@@ -267,6 +267,17 @@ class AlgorithmTest(unittest.TestCase):
         child_alg = parent_alg.createChildAlgorithm("_ParamTester", **args)
         self.assertIsNotNone(child_alg)
 
+    def test_name_provided_as_arg_and_kwarg_throws(self):
+        parent_alg = AlgorithmManager.createUnmanaged('Load')
+        args = {"name": "CreateSampleWorkspace"}
+        with self.assertRaisesRegex(ValueError, "was specified twice"):
+            parent_alg.createChildAlgorithm("_ParamTester", **args)
+
+    def test_name_provided_as_kwarg_twice_throws(self):
+        parent_alg = AlgorithmManager.createUnmanaged('Load')
+        args = {"name": "CreateSampleWorkspace"}
+        with self.assertRaises(TypeError):
+            parent_alg.createChildAlgorithm(name="_ParamTester", **args)
 
 if __name__ == '__main__':
     unittest.main()
