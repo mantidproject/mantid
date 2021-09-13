@@ -9,7 +9,8 @@ import unittest
 import json
 from mantid.kernel import Direction, FloatArrayProperty, IntArrayProperty, StringArrayProperty, \
     IntArrayMandatoryValidator, FloatArrayMandatoryValidator, StringArrayMandatoryValidator
-from mantid.api import AlgorithmID, AlgorithmManager, AlgorithmFactory, FrameworkManagerImpl, PythonAlgorithm
+from mantid.simpleapi import CreateSampleWorkspace
+from mantid.api import AlgorithmID, AlgorithmManager, AlgorithmFactory, FrameworkManagerImpl, PythonAlgorithm, Workspace
 from testhelpers import run_algorithm
 
 
@@ -133,7 +134,7 @@ class AlgorithmTest(unittest.TestCase):
         parent_alg = AlgorithmManager.createUnmanaged('Load')
         try:
             parent_alg.createChildAlgorithm(name='Rebin', version=1, startProgress=0.5,
-                                                        endProgress=0.9, enableLogging=True)
+                                            endProgress=0.9, enableLogging=True)
         except Exception as exc:
             self.fail("Expected createChildAlgorithm not to throw but it did: %s" % (str(exc)))
 
@@ -181,6 +182,24 @@ class AlgorithmTest(unittest.TestCase):
         ws = child_alg.getProperty("OutputWorkspace").value
 
         self.assertEqual("Wavelength", ws.getAxis(0).getUnit().unitID())
+
+    def test_with_workspace_types(self):
+        ws = CreateSampleWorkspace(Function="User Defined",
+                                   UserDefinedFunction="name=LinearBackground, A0=0.3;name=Gaussian, "
+                                                       "PeakCentre=5, Height=10, Sigma=0.7",
+                                   NumBanks=1, BankPixelWidth=1, XMin=0, XMax=10, BinWidth=0.1)
+
+        # Setup the model, here a Gaussian, to fit to data
+        tryCentre = '4'  # A start guess on peak centre
+        sigma = '1'  # A start guess on peak width
+        height = '8'  # A start guess on peak height
+        myFunc = 'name=Gaussian, Height=' + height + ', PeakCentre=' + tryCentre + ', Sigma=' + sigma
+        args = {"Function": myFunc, "InputWorkspace": ws, "Output": 'fit'}
+        parent_alg = AlgorithmManager.createUnmanaged('Load')
+        child_alg = parent_alg.createChildAlgorithm('Fit', 0, 0, True, version=1, **args)
+        child_alg.execute()
+        out_ws = child_alg.getProperty("OutputWorkspace").value
+        self.assertIsInstance(out_ws, Workspace)
 
     def test_createChildAlgorithm_without_name(self):
         parent_alg = AlgorithmManager.createUnmanaged('Load')
