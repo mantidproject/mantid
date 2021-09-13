@@ -685,39 +685,46 @@ double dSpacing::singleFromTOF(const double tof) const {
   // force the assumption that difc is positive in debug builds
   assert(difc > 0.);
 
-  // handle special cases first...
-
-  // don't need to solve a quadratic when difa==0
-  if (difa == 0.)
-    return (tof - tzero) / difc;
+  // non-physical result
+  if (tzero > tof) {
+    if (difa > 0.) {
+      throw std::runtime_error("Cannot convert to imaginary d spacing because tzero > time-of-flight and difa is "
+                               "positive. Quadratic doesn't have a positive root");
+    } else if (difa == 0.) {
+      throw std::runtime_error("Cannot convert to d spacing because tzero > time-of-flight");
+    }
+  }
 
   // citardauq formula hides non-zero root if tof==tzero
+  // wich means that the constantTerm == 0
   if (tof == tzero) {
     if (difa < 0.)
       return -difc / difa;
     else
       return 0.;
   }
-  // non-physical result
-  if ((difa > 0.) && (tzero > tof)) {
-    throw std::runtime_error("Cannot convert to d spacing. Quadratic doesn't "
-                             "have a positive root");
-  }
 
-  // general equation
-  const double linearTerm = tzero - tof;
-  const double sqrtTerm = 1 - 4 * difa * linearTerm / (difc * difc);
+  // this is with the opposite sign from the equation above
+  // as it reduces number of individual flops
+  const double negativeConstantTerm = tof - tzero;
+
+  // don't need to solve a quadratic when difa==0
+  if (difa == 0.)
+    return negativeConstantTerm / difc;
+
+  // general citarqauq equation
+  const double sqrtTerm = 1 + 4 * difa * negativeConstantTerm / (difc * difc);
   if (sqrtTerm < 0.) {
     throw std::runtime_error("Cannot convert to d spacing. Quadratic doesn't have real roots");
   }
-  // pick smallest positive root. Since difc is positive it just depends on sign of c
-  // Note - c is generally negative
-  if (linearTerm > 0)
+  // pick smallest positive root. Since difc is positive it just depends on sign of constantTerm
+  // Note - constantTerm is generally negative
+  if (negativeConstantTerm < 0)
     // single positive root
-    return linearTerm / (0.5 * difc * (-1 + sqrt(sqrtTerm)));
+    return negativeConstantTerm / (0.5 * difc * (1 - sqrt(sqrtTerm)));
   else
     // two positive roots. pick most negative denominator to get smallest root
-    return linearTerm / (0.5 * difc * (-1 - sqrt(sqrtTerm)));
+    return negativeConstantTerm / (0.5 * difc * (1 + sqrt(sqrtTerm)));
 }
 
 double dSpacing::conversionTOFMin() const {
