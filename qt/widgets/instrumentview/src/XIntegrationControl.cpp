@@ -32,6 +32,7 @@ XIntegrationScrollBar::XIntegrationScrollBar(QWidget *parent)
   setFrameShape(StyledPanel);
   m_slider = new QPushButton(this);
   m_slider->setMouseTracking(true);
+  m_slider->setFocusPolicy(Qt::StrongFocus);
   m_slider->move(0, 0);
   m_slider->installEventFilter(this);
   m_slider->setToolTip("Resize to change integration range");
