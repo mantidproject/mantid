@@ -284,7 +284,7 @@ void LoadSampleEnvironment::loadEnvironmentFromSTL(const std::string &filename, 
 void LoadSampleEnvironment::loadEnvironmentFrom3MF([[maybe_unused]] const MatrixWorkspace_const_sptr &inputWS,
                                                    [[maybe_unused]] const std::string &filename,
                                                    [[maybe_unused]] Sample &sample, [[maybe_unused]] const bool add,
-                                                   [[maybe_unused]] const std::string &debugString) {
+                                                   [[maybe_unused]] std::string &debugString) {
 #ifdef ENABLE_LIB3MF
   std::unique_ptr<Geometry::SampleEnvironment> environment = nullptr;
   Mantid3MFFileIO MeshLoader;
