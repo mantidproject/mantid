@@ -135,6 +135,7 @@ set(PYTHON_PLUGINS
     algorithms/MergeCalFiles.py
     algorithms/MuonMaxent.py
     algorithms/MuscatSofQW.py
+    algorithms/MyNamePython.py
     algorithms/NMoldyn4Interpolation.py
     algorithms/NOMADMedianDetectorTest.py
     algorithms/NormaliseSpectra.py

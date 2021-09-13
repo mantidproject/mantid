@@ -218,6 +218,7 @@ set(SRC_FILES
     src/MultipleScatteringCorrectionDistGraber.cpp
     src/Multiply.cpp
     src/MultiplyRange.cpp
+    src/MyNameCpp.cpp
     src/NormaliseByCurrent.cpp
     src/NormaliseByDetector.cpp
     src/NormaliseToMonitor.cpp
@@ -564,6 +565,7 @@ set(INC_FILES
     inc/MantidAlgorithms/MultipleScatteringCorrectionDistGraber.h
     inc/MantidAlgorithms/Multiply.h
     inc/MantidAlgorithms/MultiplyRange.h
+    inc/MantidAlgorithms/MyNameCpp.h
     inc/MantidAlgorithms/NormaliseByCurrent.h
     inc/MantidAlgorithms/NormaliseByDetector.h
     inc/MantidAlgorithms/NormaliseToMonitor.h
