@@ -31,7 +31,19 @@ template <typename T> void capsule_cleanup(PyObject *capsule) {
 
 } // namespace
 
-namespace Mantid::PythonInterface::Converters::Impl {
+namespace Mantid::PythonInterface::Converters {
+#ifdef __APPLE__
+extern template int NDArrayTypeIndex<bool>::typenum;
+extern template int NDArrayTypeIndex<int>::typenum;
+extern template int NDArrayTypeIndex<long>::typenum;
+extern template int NDArrayTypeIndex<long long>::typenum;
+extern template int NDArrayTypeIndex<unsigned int>::typenum;
+extern template int NDArrayTypeIndex<unsigned long>::typenum;
+extern template int NDArrayTypeIndex<unsigned long long>::typenum;
+extern template int NDArrayTypeIndex<float>::typenum;
+extern template int NDArrayTypeIndex<double>::typenum;
+#endif
+
 namespace {
 /**
  * Flip the writable flag to ensure the array is read only
@@ -47,6 +59,8 @@ void markReadOnly(PyArrayObject *arr) {
 #endif
 }
 } // namespace
+
+namespace Impl {
 
 /**
  * Defines the wrapWithNDArray specialization for C array types
@@ -95,4 +109,5 @@ INSTANTIATE_WRAPNUMPY(unsigned long long)
 INSTANTIATE_WRAPNUMPY(double)
 INSTANTIATE_WRAPNUMPY(float)
 ///@endcond
-} // namespace Mantid::PythonInterface::Converters::Impl
+} // namespace Impl
+} // namespace Mantid::PythonInterface::Converters
