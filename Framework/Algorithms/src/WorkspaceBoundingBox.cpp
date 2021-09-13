@@ -45,7 +45,7 @@ bool WorkspaceBoundingBox::isValidWs(int index) {
     return false;
 
   // Get the current spectrum
-  auto &YIn = this->workspace->y(index);
+  const auto &YIn = this->workspace->y(index);
   // Skip if NaN of inf
   if (std::isnan(YIn[m_specID]) || std::isinf(YIn[m_specID]))
     return false;
@@ -58,7 +58,6 @@ bool WorkspaceBoundingBox::isValidWs(int index) {
  *  @return index of first valid spectrum
  */
 int WorkspaceBoundingBox::findFirstValidWs(const int numSpec) {
-  const auto spectrumInfo = this->workspace->spectrumInfo();
   int i;
   for (i = 0; i < numSpec; ++i) {
     if (isValidWs(i))
@@ -75,7 +74,7 @@ int WorkspaceBoundingBox::findFirstValidWs(const int numSpec) {
  */
 double WorkspaceBoundingBox::updatePositionAndReturnCount(int index) {
   const auto spectrumInfo = this->workspace->spectrumInfo();
-  auto &YIn = this->workspace->y(index);
+  const auto &YIn = this->workspace->y(index);
   double x = spectrumInfo.position(index).X();
   double y = spectrumInfo.position(index).Y();
   this->x += YIn[m_specID] * x;
