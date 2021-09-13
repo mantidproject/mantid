@@ -69,9 +69,13 @@ bool isPhysicalView() {
  * @param scaleMax :: Maximum value of the colormap scale. Used to assign
  * detector colours. Ignored if autoscaling == true.
  */
-InstrumentActor::InstrumentActor(const QString &wsName, bool autoscaling, double scaleMin, double scaleMax)
-    : m_workspace(AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName.toStdString())), m_ragged(true),
-      m_autoscaling(autoscaling), m_defaultPos(), m_isPhysicalInstrument(false) {
+InstrumentActor::InstrumentActor(const std::string &wsName, bool autoscaling, double scaleMin, double scaleMax)
+    : InstrumentActor(AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName), autoscaling, scaleMin,
+                      scaleMax) {}
+
+InstrumentActor::InstrumentActor(MatrixWorkspace_sptr workspace, bool autoscaling, double scaleMin, double scaleMax)
+    : m_workspace(workspace), m_ragged(true), m_autoscaling(autoscaling), m_defaultPos(),
+      m_isPhysicalInstrument(false) {
   // settings
   loadSettings();
 

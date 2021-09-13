@@ -143,7 +143,7 @@ InstrumentWidget::InstrumentWidget(QString wsName, QWidget *parent, bool resetGe
 
   m_mainLayout->addWidget(controlPanelLayout);
 
-  m_instrumentActor.reset(new InstrumentActor(m_workspaceName, autoscaling, scaleMin, scaleMax));
+  m_instrumentActor = std::make_unique<InstrumentActor>(m_workspaceName.toStdString(), autoscaling, scaleMin, scaleMax);
 
   m_xIntegration = new XIntegrationControl(this);
   m_mainLayout->addWidget(m_xIntegration);
@@ -271,7 +271,8 @@ Mantid::Kernel::V3D InstrumentWidget::getSurfaceAxis(const int surfaceType) cons
 void InstrumentWidget::init(bool resetGeometry, bool autoscaling, double scaleMin, double scaleMax, bool setDefaultView,
                             bool resetActor) {
   if (resetActor) {
-    m_instrumentActor.reset(new InstrumentActor(m_workspaceName, autoscaling, scaleMin, scaleMax));
+    m_instrumentActor =
+        std::make_unique<InstrumentActor>(m_workspaceName.toStdString(), autoscaling, scaleMin, scaleMax);
   }
 
   auto surface = getSurface();
@@ -578,7 +579,7 @@ void InstrumentWidget::setSurfaceType(const QString &typeStr) {
 void InstrumentWidget::replaceWorkspace(const std::string &newWs, const std::string &newInstrumentWindowName) {
   // change inside objects
   renameWorkspace(newWs);
-  m_instrumentActor.reset(new InstrumentActor(QString::fromStdString(newWs)));
+  m_instrumentActor = std::make_unique<InstrumentActor>(newWs);
 
   // update the view and colormap
   auto surface = getSurface();

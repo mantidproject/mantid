@@ -23,4 +23,20 @@ void QtPreviewView::connectSignals() const {
 void QtPreviewView::onLoadWorkspaceRequested() const { m_notifyee->notifyLoadWorkspaceRequested(); }
 
 std::string QtPreviewView::getWorkspaceName() const { return m_ui.workspace_line_edit->text().toStdString(); }
+
+// void QtRoiView::plot3D(MatrixWorkspace_sptr ws) {
+//  bool autoscaling = true;
+//  auto scaleMin = 0.0;
+//  auto scaleMax = 1.0;
+// std::make_unique<InstrumentActor>(QString::fromStdString(ws->getName()), autoscaling, scaleMin, scaleMax);
+
+//  const auto &componentInfo = m_instActor->componentInfo();
+//  auto sample_pos = componentInfo.samplePosition();
+//  auto axis = Mantid::Kernel::V3D(0, 1, 0); // CYLINDRICAL_Y
+//
+// m_instDisplay->setSurface(std::make_shared<UnwrappedCylinder>(m_instActor.get(), sample_pos, axis));
+
+//  connect(m_instDisplay->getSurface().get(), SIGNAL(shapeChangeFinished()), this, SLOT(onShapeChanged()));
+//}
+
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

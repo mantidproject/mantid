@@ -20,6 +20,7 @@
 
 #include <limits>
 #include <memory>
+#include <string>
 #include <vector>
 
 //------------------------------------------------------------------
@@ -63,7 +64,9 @@ public:
   static constexpr double INVALID_VALUE = std::numeric_limits<double>::lowest();
 
   /// Constructor
-  InstrumentActor(const QString &wsName, bool autoscaling = true, double scaleMin = 0.0, double scaleMax = 0.0);
+  InstrumentActor(const std::string &wsName, bool autoscaling = true, double scaleMin = 0.0, double scaleMax = 0.0);
+  InstrumentActor(Mantid::API::MatrixWorkspace_sptr workspace, bool autoscaling = true, double scaleMin = 0.0,
+                  double scaleMax = 0.0);
   ///< Destructor
   ~InstrumentActor();
   /// Draw the instrument in 3D
