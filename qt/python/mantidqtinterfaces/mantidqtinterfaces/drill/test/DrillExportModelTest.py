@@ -8,7 +8,7 @@
 import unittest
 from unittest import mock
 
-from Interface.ui.drill.model.DrillExportModel import DrillExportModel
+from mantidqtinterfaces.drill.model.DrillExportModel import DrillExportModel
 
 
 class DrillExportModelTest(unittest.TestCase):
@@ -29,43 +29,43 @@ class DrillExportModelTest(unittest.TestCase):
             }
 
     def setUp(self):
-        patch = mock.patch("Interface.ui.drill.model.DrillExportModel.mtd")
+        patch = mock.patch("mantidqtinterfaces.drill.model.DrillExportModel.mtd")
         self.mMtd = patch.start()
         self.addCleanup(patch.stop)
 
-        patch = mock.patch('Interface.ui.drill.model.DrillExportModel.logger')
+        patch = mock.patch('mantidqtinterfaces.drill.model.DrillExportModel.logger')
         self.mLogger = patch.start()
         self.addCleanup(patch.stop)
 
-        patch = mock.patch('Interface.ui.drill.model.DrillExportModel.config')
+        patch = mock.patch('mantidqtinterfaces.drill.model.DrillExportModel.config')
         self.mConfig = patch.start()
         self.addCleanup(patch.stop)
 
-        patch = mock.patch.dict("Interface.ui.drill.model.DrillExportModel"
+        patch = mock.patch.dict("mantidqtinterfaces.drill.model.DrillExportModel"
                                 ".RundexSettings.EXPORT_ALGORITHMS",
                                 self.EXPORT_ALGORITHMS, clear=True)
         self.mAlgo = patch.start()
         self.addCleanup(patch.stop)
 
-        patch = mock.patch.dict("Interface.ui.drill.model.DrillExportModel"
+        patch = mock.patch.dict("mantidqtinterfaces.drill.model.DrillExportModel"
                                 ".RundexSettings.EXPORT_ALGO_CRITERIA",
                                 self.EXPORT_ALGO_CRITERIA, clear=True)
         self.mAlgoCriteria = patch.start()
         self.addCleanup(patch.stop)
 
-        patch = mock.patch.dict("Interface.ui.drill.model.DrillExportModel"
+        patch = mock.patch.dict("mantidqtinterfaces.drill.model.DrillExportModel"
                                 ".RundexSettings.EXPORT_ALGO_EXTENSION",
                                 self.EXPORT_ALGO_EXTENSION, clear=True)
         self.mAlgoExtension = patch.start()
         self.addCleanup(patch.stop)
 
-        patch = mock.patch("Interface.ui.drill.model.DrillExportModel"
+        patch = mock.patch("mantidqtinterfaces.drill.model.DrillExportModel"
                            ".DrillAlgorithmPool")
         self.mTasksPool = patch.start()
         self.mTasksPool = self.mTasksPool.return_value
         self.addCleanup(patch.stop)
 
-        patch = mock.patch("Interface.ui.drill.model.DrillExportModel"
+        patch = mock.patch("mantidqtinterfaces.drill.model.DrillExportModel"
                            ".DrillTask")
         self.mTask = patch.start()
         self.addCleanup(patch.stop)

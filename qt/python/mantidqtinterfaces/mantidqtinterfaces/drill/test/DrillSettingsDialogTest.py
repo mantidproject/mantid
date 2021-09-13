@@ -11,7 +11,7 @@ import sys
 
 from qtpy.QtWidgets import QApplication
 
-from Interface.ui.drill.view.DrillSettingsDialog import DrillSettingsDialog
+from mantidqtinterfaces.drill.view.DrillSettingsDialog import DrillSettingsDialog
 
 
 app = QApplication(sys.argv)
@@ -21,7 +21,7 @@ class DrillSettingsDialogTest(unittest.TestCase):
 
     def setUp(self):
         patch = mock.patch(
-                'Interface.ui.drill.view.DrillSettingsDialog.DrillSetting')
+                'mantidqtinterfaces.drill.view.DrillSettingsDialog.DrillSetting')
         self.mSetting = patch.start()
         self.addCleanup(patch.stop)
 

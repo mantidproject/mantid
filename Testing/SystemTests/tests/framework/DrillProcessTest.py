@@ -17,8 +17,8 @@ from qtpy.QtCore import Qt, QPoint
 
 from mantid.kernel import config
 from mantid.simpleapi import mtd, GroupWorkspaces
-from Interface.ui.drill.view.DrillView import *
-from Interface.ui.drill.view.DrillSettingsDialog import *
+from mantidqtinterfaces.drill.view.DrillView import *
+from mantidqtinterfaces.drill.view.DrillSettingsDialog import *
 
 
 app = QApplication(sys.argv)

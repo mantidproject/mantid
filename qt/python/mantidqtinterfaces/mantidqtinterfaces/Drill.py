@@ -19,7 +19,7 @@ else:
         logger.error('Drill is enabled only if the facility is set to ILL.')
     else:
         from mantidqt.gui_helper import get_qapplication
-        from Interface.ui.drill.view.DrillView import DrillView
+        from mantidqtinterfaces.drill.view.DrillView import DrillView
 
         app, within_mantid = get_qapplication()
         if 'drillInterface' not in globals():
