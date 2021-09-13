@@ -13,5 +13,7 @@ setup(
     install_requires=['mantid'],
     version=os.environ['MANTID_VERSION_STR'],
     packages=find_packages(exclude=['*.test']),
-    package_data={'': ['*.ui']},
-)
+    package_data={
+        '': ['*.ui'],
+        'widgets': ['*.map'],
+        },)

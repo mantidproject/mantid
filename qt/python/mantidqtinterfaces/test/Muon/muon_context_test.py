@@ -14,6 +14,7 @@ from mantidqt.utils.qt.testing import start_qapplication
 from mantidqtinterfaces.Muon.GUI.Common.calculate_pair_and_group import run_pre_processing
 from mantidqtinterfaces.Muon.GUI.Common.utilities.load_utils import load_workspace_from_filename
 from mantidqtinterfaces.Muon.GUI.Common.test_helpers.context_setup import setup_context
+from mantidqtinterfaces.Muon.GUI.Common.muon_base_pair import MuonBasePair
 from mantidqtinterfaces.Muon.GUI.Common.muon_diff import MuonDiff
 from mantidqtinterfaces.Muon.GUI.Common.muon_group import MuonGroup
 from mantidqtinterfaces.Muon.GUI.Common.muon_pair import MuonPair

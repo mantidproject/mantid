@@ -14,7 +14,7 @@ from mantidqtinterfaces.Muon.GUI.Common.corrections_tab_widget.corrections_model
 from mantidqtinterfaces.Muon.GUI.Common.corrections_tab_widget.background_corrections_model import (BackgroundCorrectionsModel,
                                                                                                     DEFAULT_USE_RAW)
 from mantidqtinterfaces.Muon.GUI.Common.test_helpers.context_setup import setup_context
-from mantidqtinterfaces.Muon.GUI.Common.utilities.workspace_data_utils import DEFAULT_X_LOWER, DEFAULT_X_UPPER
+from mantidqtinterfaces.Muon.GUI.Common.utilities.workspace_data_utils import DEFAULT_X_LOWER, DEFAULT_X_UPPER, X_OFFSET
 
 
 class BackgroundCorrectionsModelTest(unittest.TestCase):
@@ -203,8 +203,8 @@ class BackgroundCorrectionsModelTest(unittest.TestCase):
 
         x_lower, x_upper = self.model.x_limits_of_workspace(run, group)
 
-        self.assertEqual(x_lower, 0.0)
-        self.assertEqual(x_upper, 20000.0)
+        self.assertEqual(x_lower, 0.0 - X_OFFSET)
+        self.assertEqual(x_upper, 20000.0 + X_OFFSET)
 
     def test_that_x_limits_of_workspace_will_return_the_default_x_values_if_there_are_no_workspaces_loaded(self):
         run, group = "84447", "top"

@@ -14,6 +14,7 @@ from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitt
 from mantidqtinterfaces.Muon.GUI.Common.muon_pair import MuonPair
 from mantidqtinterfaces.Muon.GUI.Common.muon_base_pair import MuonBasePair
 from mantidqtinterfaces.Muon.GUI.Common.test_helpers.context_setup import setup_context
+from mantidqtinterfaces.Muon.GUI.Common.utilities.workspace_data_utils import X_OFFSET
 from mantidqtinterfaces.Muon.GUI.Common.utilities.workspace_utils import StaticWorkspaceWrapper
 
 
@@ -653,8 +654,8 @@ class BasicFittingModelTest(unittest.TestCase):
 
         x_lower, x_upper = self.model.x_limits_of_workspace(self.model.current_dataset_name)
 
-        self.assertEqual(x_lower, 0.0)
-        self.assertEqual(x_upper, 20000.0)
+        self.assertEqual(x_lower, 0.0 - X_OFFSET)
+        self.assertEqual(x_upper, 20000.0 + X_OFFSET)
 
     def test_that_x_limits_of_current_dataset_will_return_the_default_x_values_if_there_are_no_workspaces_loaded(self):
         x_lower, x_upper = self.model.x_limits_of_workspace(self.model.current_dataset_name)
