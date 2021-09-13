@@ -25,10 +25,6 @@ void QtPreviewView::onLoadWorkspaceRequested() const { m_notifyee->notifyLoadWor
 std::string QtPreviewView::getWorkspaceName() const { return m_ui.workspace_line_edit->text().toStdString(); }
 
 // void QtRoiView::plot3D(MatrixWorkspace_sptr ws) {
-//  bool autoscaling = true;
-//  auto scaleMin = 0.0;
-//  auto scaleMax = 1.0;
-// std::make_unique<InstrumentActor>(QString::fromStdString(ws->getName()), autoscaling, scaleMin, scaleMax);
 
 //  const auto &componentInfo = m_instActor->componentInfo();
 //  auto sample_pos = componentInfo.samplePosition();

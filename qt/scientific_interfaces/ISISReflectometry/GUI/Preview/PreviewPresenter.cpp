@@ -30,9 +30,13 @@ void PreviewPresenter::notifyLoadWorkspaceRequested() {
 
 void PreviewPresenter::notifyLoadWorkspaceCompleted() {
   auto workspace = m_model->getLoadedWs();
-  // TODO handle case where load failed and workspace may be null?
   assert(workspace);
+
   // TODO plot the result
+
+  // m_instViewModel->notifyWorkspaceUpdated(m_model->getLoadedWs()); (update inst actor and create surface)
+  // surface = m_instViewModel->getSurface();
+  // m_view->plotInstView(surface);
   g_log.notice("Loaded ws pointer");
 }
 

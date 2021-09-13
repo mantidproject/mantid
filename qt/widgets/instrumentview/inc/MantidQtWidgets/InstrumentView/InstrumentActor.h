@@ -69,6 +69,7 @@ public:
                   double scaleMax = 0.0);
   ///< Destructor
   ~InstrumentActor();
+
   /// Draw the instrument in 3D
   void draw(bool picking = false) const;
   /// Return the bounding box in 3D
