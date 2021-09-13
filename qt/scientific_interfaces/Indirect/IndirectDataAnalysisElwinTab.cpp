@@ -954,7 +954,7 @@ size_t IndirectDataAnalysisElwinTab::findWorkspaceID() {
 
 void IndirectDataAnalysisElwinTab::checkLoadedFiles() {
   UserInputValidator uiv;
-  auto noOfFiles = m_uiForm.dsInputFiles->getFilenames().size();
+  size_t noOfFiles = m_uiForm.dsInputFiles->getFilenames().size();
   auto const suffixes = getFilteredSuffixes(m_uiForm.dsInputFiles->getFilenames());
   if (suffixes.size() != noOfFiles) {
     uiv.addErrorMessage("The input files must be all _red or all _sqw.");
