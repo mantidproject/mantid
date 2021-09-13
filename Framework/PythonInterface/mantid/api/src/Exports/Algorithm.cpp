@@ -112,6 +112,7 @@ public:
   void operator()(long value) const override { setProp(static_cast<int>(value)); }
   void operator()(double value) const override { setProp(value); }
   void operator()(std::string value) const override { m_alg->setPropertyValue(m_propName, value); }
+  void operator()(Mantid::API::Workspace_sptr ws) const override { m_alg->setProperty(m_propName, std::move(ws)); }
 
   void operator()(std::vector<bool> value) const override { setProp(value); }
   void operator()(std::vector<long> value) const override { setProp(value); }
@@ -147,7 +148,6 @@ object createChildWithProps(tuple args, dict kwargs) {
   if (!name.is_initialized()) {
     throw std::invalid_argument("Please specify the algorithm name");
   }
-
   auto childAlg = parentAlg->createChildAlgorithm(name.value(), startProgress.value_or(-1), endProgress.value_or(-1),
                                                   enableLogging.value_or(true), version.value_or(-1));
 

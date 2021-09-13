@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
+#include "MantidAPI/Workspace.h"
 #include "MantidKernel/Logger.h"
 
 #include <boost/python/extract.hpp>
@@ -24,8 +25,8 @@ Mantid::Kernel::Logger g_log("Python Type Extractor");
 namespace Mantid::PythonInterface {
 
 struct PyNativeTypeExtractor {
-  using PythonOutputT =
-      boost::make_recursive_variant<bool, long, double, std::string, std::vector<boost::recursive_variant_>>::type;
+  using PythonOutputT = boost::make_recursive_variant<bool, long, double, std::string, Mantid::API::Workspace_sptr,
+                                                      std::vector<boost::recursive_variant_>>::type;
 
   static PythonOutputT convert(const boost::python::object &obj) {
     using namespace boost::python;
@@ -42,6 +43,8 @@ struct PyNativeTypeExtractor {
       out = extract<long>(obj);
     } else if (PyUnicode_Check(rawptr)) {
       out = extract<std::string>(obj);
+    } else if (auto extractor = extract<Mantid::API::Workspace_sptr>(obj); extractor.check()) {
+      out = extractor();
     } else {
       throw std::invalid_argument("Unrecognised Python type");
     }
@@ -79,6 +82,7 @@ public:
   virtual void operator()(long value) const = 0;
   virtual void operator()(double value) const = 0;
   virtual void operator()(std::string) const = 0;
+  virtual void operator()(Mantid::API::Workspace_sptr) const = 0;
 
   virtual void operator()(std::vector<bool>) const = 0;
   virtual void operator()(std::vector<long>) const = 0;

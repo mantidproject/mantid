@@ -35,6 +35,7 @@ public:
   void operator()(long value) const override { m_attr.setValue(static_cast<int>(value)); }
   void operator()(double value) const override { m_attr.setValue(value); }
   void operator()(std::string value) const override { m_attr.setValue(std::move(value)); }
+  void operator()(Mantid::API::Workspace_sptr) const override { throw std::invalid_argument(m_errorMsg); }
 
   void operator()(std::vector<bool>) const override { throw std::invalid_argument(m_errorMsg); }
   void operator()(std::vector<long> value) const override {
