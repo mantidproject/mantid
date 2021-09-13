@@ -15,8 +15,8 @@ from qtpy.QtCore import Qt, QPoint
 
 from mantid.kernel import config
 
-from Interface.ui.drill.view.DrillView import DrillView
-from Interface.ui.drill.model.configurations import RundexSettings
+from mantidqtinterfaces.drill.view.DrillView import DrillView
+from mantidqtinterfaces.drill.model.configurations import RundexSettings
 
 app = QApplication(sys.argv)
 
@@ -105,7 +105,7 @@ class DrillTest(unittest.TestCase):
         """
         self.view.table.setCellContents(row, column, contents)
 
-    @mock.patch("Interface.ui.drill.presenter.DrillParametersPresenter"
+    @mock.patch("mantidqtinterfaces.drill.presenter.DrillParametersPresenter"
                 ".QMessageBox")
     def fillTable(self, nrows, mMessageBox):
         """
@@ -139,21 +139,21 @@ class DrillTest(unittest.TestCase):
 
     def setUp(self):
         # avoid popup messages
-        patch = mock.patch('Interface.ui.drill.view.DrillView.QMessageBox')
+        patch = mock.patch('mantidqtinterfaces.drill.view.DrillView.QMessageBox')
         self.mMessageBox = patch.start()
         self.addCleanup(patch.stop)
-        patch = mock.patch("Interface.ui.drill.presenter.DrillPresenter"
+        patch = mock.patch("mantidqtinterfaces.drill.presenter.DrillPresenter"
                            ".QMessageBox")
         self.mMessageBoxP = patch.start()
         self.addCleanup(patch.stop)
         # mock the controller
         patch = mock.patch(
-                'Interface.ui.drill.model.DrillModel.DrillParameterController')
+                'mantidqtinterfaces.drill.model.DrillModel.DrillParameterController')
         self.mController = patch.start()
         self.addCleanup(patch.stop)
         # mock logger
         patch = mock.patch(
-                'Interface.ui.drill.model.DrillModel.logger')
+                'mantidqtinterfaces.drill.model.DrillModel.logger')
         self.mLogger = patch.start()
         self.addCleanup(patch.stop)
 
@@ -235,7 +235,7 @@ class DrillTest(unittest.TestCase):
         self.assertEqual(self.model.cycleNumber, "test2")
         self.assertEqual(self.model.experimentId, "test1")
 
-    @mock.patch('Interface.ui.drill.view.DrillView.manageuserdirectories')
+    @mock.patch('mantidqtinterfaces.drill.view.DrillView.manageuserdirectories')
     def test_userDirectories(self, mDirectoriesManager):
         QTest.mouseClick(self.view.datadirs, Qt.LeftButton)
         mDirectoriesManager.ManageUserDirectories.assert_called_once()
@@ -243,7 +243,7 @@ class DrillTest(unittest.TestCase):
         self.view.actionManageDirectories.trigger()
         mDirectoriesManager.ManageUserDirectories.assert_called_once()
 
-    @mock.patch("Interface.ui.drill.presenter.DrillPresenter"
+    @mock.patch("mantidqtinterfaces.drill.presenter.DrillPresenter"
                 ".DrillSettingsPresenter")
     def test_settingsWindow(self, mSettings):
         QTest.mouseClick(self.view.settings, Qt.LeftButton)
@@ -252,9 +252,9 @@ class DrillTest(unittest.TestCase):
         self.view.actionSettings.trigger()
         mSettings.assert_called_once()
 
-    @mock.patch('Interface.ui.drill.presenter.DrillPresenter.QFileDialog')
-    @mock.patch('Interface.ui.drill.model.DrillRundexIO.json')
-    @mock.patch('Interface.ui.drill.model.DrillRundexIO.open')
+    @mock.patch('mantidqtinterfaces.drill.presenter.DrillPresenter.QFileDialog')
+    @mock.patch('mantidqtinterfaces.drill.model.DrillRundexIO.json')
+    @mock.patch('mantidqtinterfaces.drill.model.DrillRundexIO.open')
     def test_loadRundex(self, mOpen, mJson, mFileDialog):
         mFileDialog.getOpenFileName.return_value = ["test", "test"]
         mJson.load.return_value = {
@@ -272,9 +272,9 @@ class DrillTest(unittest.TestCase):
         self.assertEqual(self.view.table.columnCount(),
                          len(RundexSettings.COLUMNS['SANS']))
 
-    @mock.patch('Interface.ui.drill.presenter.DrillPresenter.QFileDialog')
-    @mock.patch('Interface.ui.drill.model.DrillRundexIO.json')
-    @mock.patch('Interface.ui.drill.model.DrillRundexIO.open')
+    @mock.patch('mantidqtinterfaces.drill.presenter.DrillPresenter.QFileDialog')
+    @mock.patch('mantidqtinterfaces.drill.model.DrillRundexIO.json')
+    @mock.patch('mantidqtinterfaces.drill.model.DrillRundexIO.open')
     def test_saveRundex(self, mOpen, mJson, mFileDialog):
         self.model.setInstrument("D11")
         mFileDialog.getSaveFileName.return_value = ["test", "test"]
@@ -444,7 +444,7 @@ class DrillTest(unittest.TestCase):
             self.assertEqual(self.model._samples[i].getParameterValues(),
                              data[i])
 
-    @mock.patch("Interface.ui.drill.presenter.DrillParametersPresenter"
+    @mock.patch("mantidqtinterfaces.drill.presenter.DrillParametersPresenter"
                 ".QMessageBox")
     def test_paste(self, mMessageBox):
         data = self.fillTable(8)

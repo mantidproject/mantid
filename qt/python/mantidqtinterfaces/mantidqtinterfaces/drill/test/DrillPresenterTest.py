@@ -8,14 +8,14 @@
 import unittest
 from unittest import mock
 
-from Interface.ui.drill.presenter.DrillPresenter import DrillPresenter
+from mantidqtinterfaces.drill.presenter.DrillPresenter import DrillPresenter
 
 
 class DrillPresenterTest(unittest.TestCase):
 
     def setUp(self):
         patch = mock.patch(
-                'Interface.ui.drill.presenter.DrillPresenter.DrillModel')
+                'mantidqtinterfaces.drill.presenter.DrillPresenter.DrillModel')
         self.mModel = patch.start()
         self.mModel.return_value.getColumnHeaderData.return_value = [], []
         self.mModel.return_value.getCycleAndExperiment.return_value = "", ""
@@ -32,7 +32,7 @@ class DrillPresenterTest(unittest.TestCase):
         self.model.addSample.assert_called_once_with(10)
         self.view.setWindowModified.assert_called_once_with(True)
 
-    @mock.patch("Interface.ui.drill.presenter.DrillPresenter.DrillSamplePresenter")
+    @mock.patch("mantidqtinterfaces.drill.presenter.DrillPresenter.DrillSamplePresenter")
     def test_onNewSample(self, mSamplePresenter):
         sample = mock.Mock()
         sample.getIndex.return_value = 10
@@ -175,7 +175,7 @@ class DrillPresenterTest(unittest.TestCase):
         self.presenter._saveDataQuestion.return_value = False
         self.model.setAcquisitionMode.assert_not_called()
 
-    @mock.patch("Interface.ui.drill.presenter.DrillPresenter.QFileDialog")
+    @mock.patch("mantidqtinterfaces.drill.presenter.DrillPresenter.QFileDialog")
     def test_onLoad(self, mDialog):
         mDialog.getOpenFileName.return_value = ("test", "test")
         self.presenter.onLoad()
@@ -193,7 +193,7 @@ class DrillPresenterTest(unittest.TestCase):
         self.presenter.onSave()
         self.presenter.onSaveAs.assert_called_once()
 
-    @mock.patch("Interface.ui.drill.presenter.DrillPresenter.QFileDialog")
+    @mock.patch("mantidqtinterfaces.drill.presenter.DrillPresenter.QFileDialog")
     def test_onSaveAs(self, mDialog):
         mDialog.getSaveFileName.return_value = ("test", "test")
         self.presenter.onSaveAs()
@@ -201,8 +201,8 @@ class DrillPresenterTest(unittest.TestCase):
         self.model.exportRundexData.assert_called_once()
         self.view.setWindowModified.assert_called()
 
-    @mock.patch("Interface.ui.drill.presenter.DrillPresenter.RundexSettings")
-    @mock.patch("Interface.ui.drill.presenter.DrillPresenter"
+    @mock.patch("mantidqtinterfaces.drill.presenter.DrillPresenter.RundexSettings")
+    @mock.patch("mantidqtinterfaces.drill.presenter.DrillPresenter"
                 ".DrillSettingsPresenter")
     def test_settingsWindow(self, mSettingsPresenter, mRundexSettings):
         mRundexSettings.SETTINGS = {"a1": ["param1", "param2"],
@@ -220,7 +220,7 @@ class DrillPresenterTest(unittest.TestCase):
         self.presenter.settingsWindow()
         mSettingsPresenter.assert_called_once_with(self.view, [p1, p2])
 
-    @mock.patch("Interface.ui.drill.presenter.DrillPresenter.DrillExportPresenter")
+    @mock.patch("mantidqtinterfaces.drill.presenter.DrillPresenter.DrillExportPresenter")
     def test_onShowExportDialog(self, mExportPresenter):
         dialog = mock.Mock()
         exportModel = mock.Mock()
@@ -228,7 +228,7 @@ class DrillPresenterTest(unittest.TestCase):
         self.presenter.onShowExportDialog(dialog)
         mExportPresenter.assert_called_once_with(dialog, exportModel)
 
-    @mock.patch("Interface.ui.drill.presenter.DrillPresenter.DrillContextMenuPresenter")
+    @mock.patch("mantidqtinterfaces.drill.presenter.DrillPresenter.DrillContextMenuPresenter")
     def test_onShowContextMenu(self, mContextMenuPresenter):
         menu = mock.Mock()
         self.presenter.onShowContextMenu(menu)
@@ -256,7 +256,7 @@ class DrillPresenterTest(unittest.TestCase):
         self.model.resetIOFile.assert_called_once()
         self.presenter._syncViewHeader.assert_called_once()
 
-    @mock.patch("Interface.ui.drill.presenter.DrillPresenter.QMessageBox")
+    @mock.patch("mantidqtinterfaces.drill.presenter.DrillPresenter.QMessageBox")
     def test_saveDataQuestion(self, mQMessageBox):
         mQMessageBox.Yes = "yes"
         mQMessageBox.question.return_value = "yes"
@@ -283,7 +283,7 @@ class DrillPresenterTest(unittest.TestCase):
         self.view.set_acquisition_mode.assert_called_once_with("a1")
         self.view.setCycleAndExperiment.assert_called_once_with("c1", "exp1")
 
-    @mock.patch("Interface.ui.drill.presenter.DrillPresenter.RundexSettings")
+    @mock.patch("mantidqtinterfaces.drill.presenter.DrillPresenter.RundexSettings")
     def test_resetTable(self, mSettings):
         self.view.reset_mock()
         mSettings.COLUMNS = {"a1": ["c1", "c2"]}

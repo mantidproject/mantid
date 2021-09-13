@@ -13,7 +13,7 @@ from mantid.kernel import StringPropertyWithValue, BoolPropertyWithValue, \
 from mantid.api import FileProperty, MultipleFileProperty, \
                        WorkspaceGroupProperty, MatrixWorkspaceProperty
 
-from Interface.ui.drill.model.DrillParameter import DrillParameter
+from mantidqtinterfaces.drill.model.DrillParameter import DrillParameter
 
 
 class DrillParameterTest(unittest.TestCase):

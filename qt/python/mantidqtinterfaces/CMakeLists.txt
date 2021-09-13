@@ -30,3 +30,4 @@ add_dependencies(mantidqtinterfaces PythonInterface)
 
 add_subdirectory(test)
 add_subdirectory(mantidqtinterfaces/Engineering/gui)
+add_subdirectory(mantidqtinterfaces/drill)

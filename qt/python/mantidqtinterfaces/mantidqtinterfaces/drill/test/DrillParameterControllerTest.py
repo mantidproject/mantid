@@ -8,7 +8,7 @@
 import unittest
 from unittest import mock
 
-from Interface.ui.drill.model.DrillParameterController \
+from mantidqtinterfaces.drill.model.DrillParameterController \
         import DrillParameterController, DrillControllerSignals
 
 
@@ -17,13 +17,13 @@ class DrillParameterControllerTest(unittest.TestCase):
     def setUp(self):
         #mock queue
         patch = mock.patch(
-                "Interface.ui.drill.model.DrillParameterController.queue")
+                "mantidqtinterfaces.drill.model.DrillParameterController.queue")
         self.mQueue = patch.start()
         self.addCleanup(patch.stop)
         self.mQueue = self.mQueue.Queue.return_value
         # mock sapi
         patch = mock.patch(
-                'Interface.ui.drill.model.DrillParameterController.sapi')
+                'mantidqtinterfaces.drill.model.DrillParameterController.sapi')
         self.mSapi = patch.start()
         self.addCleanup(patch.stop)
 

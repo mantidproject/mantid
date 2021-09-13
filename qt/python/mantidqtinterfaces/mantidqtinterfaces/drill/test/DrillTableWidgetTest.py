@@ -11,10 +11,10 @@ import sys
 
 from qtpy.QtWidgets import QApplication
 
-from Interface.ui.drill.view.DrillTableWidget import DrillTableWidget
-from Interface.ui.drill.view.DrillHeaderView import DrillHeaderView
-from Interface.ui.drill.view.DrillItemDelegate import DrillItemDelegate
-from Interface.ui.drill.view.DrillTableItem import DrillTableItem
+from mantidqtinterfaces.drill.view.DrillTableWidget import DrillTableWidget
+from mantidqtinterfaces.drill.view.DrillHeaderView import DrillHeaderView
+from mantidqtinterfaces.drill.view.DrillItemDelegate import DrillItemDelegate
+from mantidqtinterfaces.drill.view.DrillTableItem import DrillTableItem
 
 
 app = QApplication(sys.argv)
@@ -249,8 +249,8 @@ class DrillTableWidgetTest(unittest.TestCase):
             .setData.assert_called_once_with(2, "test")
         self.table.setItem.assert_called_once()
 
-    @mock.patch("Interface.ui.drill.view.DrillTableWidget.QBrush")
-    @mock.patch("Interface.ui.drill.view.DrillTableWidget.QColor")
+    @mock.patch("mantidqtinterfaces.drill.view.DrillTableWidget.QBrush")
+    @mock.patch("mantidqtinterfaces.drill.view.DrillTableWidget.QColor")
     def test_setRowBackground(self, mColor, mBrush):
         self.table.rowCount = mock.Mock()
         self.table.rowCount.return_value = 5
@@ -326,7 +326,7 @@ class DrillTableWidgetTest(unittest.TestCase):
         self.table.setHiddenColumns(["test1"])
         mHeader.hideSection.assert_called_with(0)
 
-    @mock.patch("Interface.ui.drill.view.DrillTableWidget.QMessageBox")
+    @mock.patch("mantidqtinterfaces.drill.view.DrillTableWidget.QMessageBox")
     def test_toggleColumnVisibility(self, mDialog):
         self.table._columns = ["test1", "test2", "test3"]
         self.table.horizontalHeader = mock.Mock()

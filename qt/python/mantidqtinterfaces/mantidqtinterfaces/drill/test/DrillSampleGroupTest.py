@@ -8,7 +8,7 @@
 import unittest
 from unittest import mock
 
-from Interface.ui.drill.model.DrillSampleGroup import DrillSampleGroup
+from mantidqtinterfaces.drill.model.DrillSampleGroup import DrillSampleGroup
 
 
 class DrillSampleGroupTest(unittest.TestCase):

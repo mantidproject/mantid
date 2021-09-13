@@ -8,20 +8,20 @@
 import unittest
 from unittest import mock
 
-from Interface.ui.drill.model.DrillModel import DrillModel
+from mantidqtinterfaces.drill.model.DrillModel import DrillModel
 
 
 class DrillModelTest(unittest.TestCase):
 
     def setUp(self):
         patch = mock.patch(
-                'Interface.ui.drill.model.DrillModel.DrillAlgorithmPool'
+                'mantidqtinterfaces.drill.model.DrillModel.DrillAlgorithmPool'
                 )
         self.mTasksPool = patch.start()
         self.addCleanup(patch.stop)
         self.mTasksPool = self.mTasksPool.return_value
 
-        patch = mock.patch("Interface.ui.drill.model.DrillModel.config")
+        patch = mock.patch("mantidqtinterfaces.drill.model.DrillModel.config")
         self.mConfig = patch.start()
         config = {"default.facility": "ILL"}
         self.addCleanup(patch.stop)
@@ -30,7 +30,7 @@ class DrillModelTest(unittest.TestCase):
 
         self.model = DrillModel()
 
-    @mock.patch("Interface.ui.drill.model.DrillModel.RundexSettings")
+    @mock.patch("mantidqtinterfaces.drill.model.DrillModel.RundexSettings")
     def test_setInstrument(self, mSettings):
         mSettings.ACQUISITION_MODES = {"i1": ["a1", "a2"]}
         self.model.setAcquisitionMode = mock.Mock()
@@ -48,8 +48,8 @@ class DrillModelTest(unittest.TestCase):
     def test_getInstrument(self):
         self.assertEqual(self.model.getInstrument(), self.model.instrument)
 
-    @mock.patch("Interface.ui.drill.model.DrillModel.RundexSettings")
-    @mock.patch("Interface.ui.drill.model.DrillModel.DrillExportModel")
+    @mock.patch("mantidqtinterfaces.drill.model.DrillModel.RundexSettings")
+    @mock.patch("mantidqtinterfaces.drill.model.DrillModel.DrillExportModel")
     def test_setAcquisitionMode(self, mExport, mSettings):
         mSettings.ACQUISITION_MODES = {"i1": ["a1", "a2"]}
         mSettings.THREADS_NUMBER = {"a1": 10, "a2": 20}
@@ -72,7 +72,7 @@ class DrillModelTest(unittest.TestCase):
         acquisitionMode = self.model.getAcquisitionMode()
         self.assertEqual(acquisitionMode, "test")
 
-    @mock.patch("Interface.ui.drill.model.DrillModel.RundexSettings")
+    @mock.patch("mantidqtinterfaces.drill.model.DrillModel.RundexSettings")
     def test_getAvailableAcquisitionModes(self, mSettings):
         mSettings.ACQUISITION_MODES = {"i1": ["a1", "a2"]}
         self.model.instrument = "i1"
@@ -86,9 +86,9 @@ class DrillModelTest(unittest.TestCase):
         exportModel = self.model.getExportModel()
         self.assertEqual(exportModel, self.model.exportModel)
 
-    @mock.patch("Interface.ui.drill.model.DrillModel.ConfigService")
-    @mock.patch("Interface.ui.drill.model.DrillModel.sys")
-    @mock.patch("Interface.ui.drill.model.DrillModel.os.path")
+    @mock.patch("mantidqtinterfaces.drill.model.DrillModel.ConfigService")
+    @mock.patch("mantidqtinterfaces.drill.model.DrillModel.sys")
+    @mock.patch("mantidqtinterfaces.drill.model.DrillModel.os.path")
     def test_setCycleAndExperiment(self, mPath, mSys, mConfig):
         self.model.instrument = "i1"
         mSys.platform = "linux"
@@ -105,7 +105,7 @@ class DrillModelTest(unittest.TestCase):
         self.assertEqual(c, "test1")
         self.assertEqual(e, "test2")
 
-    @mock.patch("Interface.ui.drill.model.DrillModel.DrillParameterController")
+    @mock.patch("mantidqtinterfaces.drill.model.DrillModel.DrillParameterController")
     def test_initController(self, mController):
         self.model.algorithm = None
         self.model._initController()
@@ -114,8 +114,8 @@ class DrillModelTest(unittest.TestCase):
         self.model._initController()
         mController.assert_called_once_with("a1")
 
-    @mock.patch("Interface.ui.drill.model.DrillModel.DrillParameter")
-    @mock.patch("Interface.ui.drill.model.DrillModel.sapi")
+    @mock.patch("mantidqtinterfaces.drill.model.DrillModel.DrillParameter")
+    @mock.patch("mantidqtinterfaces.drill.model.DrillModel.sapi")
     def test_initProcessingParameters(self, mSapi, mParam):
         p1 = mock.Mock()
         p1.name = "p1"
@@ -140,7 +140,7 @@ class DrillModelTest(unittest.TestCase):
         params = self.model.getParameters()
         self.assertEqual(params, ["p1", "p2"])
 
-    @mock.patch("Interface.ui.drill.model.DrillModel.DrillSampleGroup")
+    @mock.patch("mantidqtinterfaces.drill.model.DrillModel.DrillSampleGroup")
     def test_groupSamples(self, mGroup):
         s0 = mock.Mock()
         s0.getGroup.return_value = None
@@ -239,7 +239,7 @@ class DrillModelTest(unittest.TestCase):
         params["OutputWorkspace"] = "sample_1"
         self.assertDictEqual(self.model.getProcessingParameters(0), params)
 
-    @mock.patch("Interface.ui.drill.model.DrillModel.DrillTask")
+    @mock.patch("mantidqtinterfaces.drill.model.DrillModel.DrillTask")
     def test_process(self, mTask):
         self.model.getProcessingParameters = mock.Mock()
         self.model.getProcessingParameters.return_value = {}
@@ -289,7 +289,7 @@ class DrillModelTest(unittest.TestCase):
         self.model.stopProcess()
         self.model.tasksPool.abortProcessing.assert_called_once()
 
-    @mock.patch("Interface.ui.drill.model.DrillModel.DrillRundexIO")
+    @mock.patch("mantidqtinterfaces.drill.model.DrillModel.DrillRundexIO")
     def test_setIOFile(self, mRundexIO):
         self.model.setIOFile("test")
         mRundexIO.assert_called_once_with("test", self.model)
@@ -328,7 +328,7 @@ class DrillModelTest(unittest.TestCase):
         self.model.visualSettings = {"test": "test"}
         self.assertEqual(self.model.getVisualSettings(), {"test": "test"})
 
-    @mock.patch("Interface.ui.drill.model.DrillModel.DrillSample")
+    @mock.patch("mantidqtinterfaces.drill.model.DrillModel.DrillSample")
     def test_addSample(self, mSample):
         self.model.newSample = mock.Mock()
         self.assertEqual(self.model._samples, [])

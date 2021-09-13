@@ -8,7 +8,7 @@
 import unittest
 from unittest import mock
 
-from Interface.ui.drill.model.DrillSample import DrillSample
+from mantidqtinterfaces.drill.model.DrillSample import DrillSample
 
 
 class DrillSampleTest(unittest.TestCase):
@@ -70,7 +70,7 @@ class DrillSampleTest(unittest.TestCase):
         self.sample._group = group
         self.assertEqual(self.sample.getGroup(), group)
 
-    @mock.patch("Interface.ui.drill.model.DrillSample.DrillParameter")
+    @mock.patch("mantidqtinterfaces.drill.model.DrillSample.DrillParameter")
     def test_addParameter(self, mParam):
         self.assertDictEqual(self.sample._parameters, {})
         self.sample.newParameter = mock.Mock()
@@ -104,21 +104,21 @@ class DrillSampleTest(unittest.TestCase):
         self.assertDictEqual(self.sample.getParameterValues(),
                              {"p1": "v1", "p2": "v2"})
 
-    @mock.patch("Interface.ui.drill.model.DrillSample.logger")
+    @mock.patch("mantidqtinterfaces.drill.model.DrillSample.logger")
     def test_onProcessStarted(self, mLogger):
         self.sample.statusChanged = mock.Mock()
         self.sample.onProcessStarted()
         mLogger.information.assert_called_once()
         self.sample.statusChanged.emit.assert_called_once()
 
-    @mock.patch("Interface.ui.drill.model.DrillSample.logger")
+    @mock.patch("mantidqtinterfaces.drill.model.DrillSample.logger")
     def test_onProcessSuccess(self, mLogger):
         self.sample.statusChanged = mock.Mock()
         self.sample.onProcessSuccess()
         mLogger.information.assert_called_once()
         self.sample.statusChanged.emit.assert_called_once_with()
 
-    @mock.patch("Interface.ui.drill.model.DrillSample.logger")
+    @mock.patch("mantidqtinterfaces.drill.model.DrillSample.logger")
     def test_onProcessError(self, mLogger):
         self.sample.statusChanged = mock.Mock()
         self.sample.onProcessError("test")

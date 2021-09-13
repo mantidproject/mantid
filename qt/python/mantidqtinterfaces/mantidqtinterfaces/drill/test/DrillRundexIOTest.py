@@ -8,19 +8,19 @@
 import unittest
 from unittest import mock
 
-from Interface.ui.drill.model.DrillRundexIO import DrillRundexIO
+from mantidqtinterfaces.drill.model.DrillRundexIO import DrillRundexIO
 
 
 class DrillRundexIOTest(unittest.TestCase):
 
     def setUp(self):
         # mock open
-        patch = mock.patch('Interface.ui.drill.model.DrillRundexIO.open')
+        patch = mock.patch('mantidqtinterfaces.drill.model.DrillRundexIO.open')
         self.mOpen = patch.start()
         self.addCleanup(patch.stop)
 
         # mock json
-        patch = mock.patch('Interface.ui.drill.model.DrillRundexIO.json')
+        patch = mock.patch('mantidqtinterfaces.drill.model.DrillRundexIO.json')
         self.mJson = patch.start()
         self.addCleanup(patch.stop)
 
