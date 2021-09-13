@@ -1175,9 +1175,11 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
   Mantid::Kernel::StringTokenizer splitter(parameterStr, "|", options);
 
   auto iend = splitter.end();
+
+  Mantid::Kernel::StringTokenizer tokens;
   // std::string prev_name;
   for (auto itr = splitter.begin(); itr != iend; ++itr) {
-    Mantid::Kernel::StringTokenizer tokens(*itr, ";");
+    tokens = Mantid::Kernel::StringTokenizer(*itr, ";");
     if (tokens.count() < 4)
       continue;
     std::string comp_name = tokens[0];
