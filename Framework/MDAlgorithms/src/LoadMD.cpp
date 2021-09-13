@@ -542,6 +542,7 @@ template <typename MDE, size_t nd> void LoadMD::doLoad(typename MDEventWorkspace
 
     const std::vector<uint64_t> &BoxEventIndex = FlatBoxTree.getEventIndex();
     prog->setNumSteps(numBoxes);
+    std::vector<coord_t> boxTemp;
 
     for (size_t i = 0; i < numBoxes; i++) {
       prog->report();
@@ -552,7 +553,8 @@ template <typename MDE, size_t nd> void LoadMD::doLoad(typename MDEventWorkspace
       if (BoxEventIndex[2 * i + 1] > 0) // Load in memory NOT using the file as the back-end,
       {
         boxTree[i]->reserveMemoryForLoad(BoxEventIndex[2 * i + 1]);
-        boxTree[i]->loadAndAddFrom(loader.get(), BoxEventIndex[2 * i], static_cast<size_t>(BoxEventIndex[2 * i + 1]));
+        boxTree[i]->loadAndAddFrom(loader.get(), BoxEventIndex[2 * i], static_cast<size_t>(BoxEventIndex[2 * i + 1]),
+                                   boxTemp);
       }
     }
     loader->closeFile();
