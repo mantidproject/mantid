@@ -180,6 +180,12 @@ void Run::setProtonCharge(const double charge) {
  */
 double Run::getProtonCharge() const {
   double charge = 0.0;
+
+  if (!m_manager->existsProperty(PROTON_CHARGE_LOG_NAME) && !this->hasProperty("proton_charge")) {
+    g_log.notice() << "There is no proton charge associated with this workspace" << std::endl;
+    return charge;
+  }
+
   if (!m_manager->existsProperty(PROTON_CHARGE_LOG_NAME)) {
     integrateProtonCharge();
   }

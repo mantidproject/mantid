@@ -282,5 +282,5 @@ Exercise 5
    print('-'*column_width*2)
    print('File'.center(column_width) + '|' + 'Average'.center(column_width))
    print('-'*column_width*2)
-   for key, value in average_store.iteritems():
+   for key, value in average_store.items():
        print(key.center(column_width) + '|' + str(value).center(column_width))

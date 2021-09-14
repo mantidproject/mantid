@@ -29,7 +29,9 @@ set(SRC_FILES
     src/CalculateFlatBackground.cpp
     src/CalculateIqt.cpp
     src/CalculateMultipleScattering.cpp
+    src/CalculatePlaczek.cpp
     src/CalculatePlaczekSelfScattering.cpp
+    src/CalculatePlaczekSelfScattering2.cpp
     src/CalculatePolynomialBackground.cpp
     src/CalculateTransmission.cpp
     src/CalculateTransmissionBeamSpreader.cpp
@@ -334,6 +336,7 @@ set(SRC_FILES
     src/WeightingStrategy.cpp
     src/WienerSmooth.cpp
     src/WorkflowAlgorithmRunner.cpp
+    src/WorkspaceBoundingBox.cpp
     src/WorkspaceJoiners.cpp
     src/XDataConverter.cpp
     src/XrayAbsorptionCorrection.cpp)
@@ -369,7 +372,9 @@ set(INC_FILES
     inc/MantidAlgorithms/CalculateFlatBackground.h
     inc/MantidAlgorithms/CalculateIqt.h
     inc/MantidAlgorithms/CalculateMultipleScattering.h
+    inc/MantidAlgorithms/CalculatePlaczek.h
     inc/MantidAlgorithms/CalculatePlaczekSelfScattering.h
+    inc/MantidAlgorithms/CalculatePlaczekSelfScattering2.h
     inc/MantidAlgorithms/CalculatePolynomialBackground.h
     inc/MantidAlgorithms/CalculateTransmission.h
     inc/MantidAlgorithms/CalculateTransmissionBeamSpreader.h
@@ -682,6 +687,7 @@ set(INC_FILES
     inc/MantidAlgorithms/WeightingStrategy.h
     inc/MantidAlgorithms/WienerSmooth.h
     inc/MantidAlgorithms/WorkflowAlgorithmRunner.h
+    inc/MantidAlgorithms/WorkspaceBoundingBox.h
     inc/MantidAlgorithms/WorkspaceJoiners.h
     inc/MantidAlgorithms/XDataConverter.h
     inc/MantidAlgorithms/XrayAbsorptionCorrection.h)
@@ -727,7 +733,9 @@ set(TEST_FILES
     CalculateFlatBackgroundTest.h
     CalculateIqtTest.h
     CalculateMultipleScatteringTest.h
+    CalculatePlaczekSelfScattering2Test.h
     CalculatePlaczekSelfScatteringTest.h
+    CalculatePlaczekTest.h
     CalculatePolynomialBackgroundTest.h
     CalculateTransmissionBeamSpreaderTest.h
     CalculateTransmissionTest.h

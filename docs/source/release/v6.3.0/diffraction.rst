@@ -17,5 +17,6 @@ Engineering Diffraction
 
 Single Crystal Diffraction
 --------------------------
+- Existing :ref:`PolDiffILLReduction <algm-PolDiffILLReduction>` and :ref:`D7AbsoluteCrossSections <algm-D7AbsoluteCrossSections>` can now reduce and properly normalise single-crystal data for the D7 ILL instrument.
 
 :ref:`Release 6.3.0 <v6.3.0>`

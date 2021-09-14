@@ -139,6 +139,13 @@ class SuperplotViewSide(QDockWidget):
     """
     resized = Signal()
 
+    """
+    Sent when a drop event is received.
+    Args:
+        str: the event mime type text (assumed to be a workspace name)
+    """
+    drop = Signal(str)
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.here = os.path.dirname(os.path.realpath(__file__))
@@ -155,6 +162,19 @@ class SuperplotViewSide(QDockWidget):
         self.workspaceSelector.setWorkspaceTypes(["Workspace2D",
                                                   "WorkspaceGroup",
                                                   "EventWorkspace"])
+        self.setAcceptDrops(True)
+
+    def dragEnterEvent(self, event):
+        """
+        Override QDockWidget::dragEnterEvent.
+        """
+        event.acceptProposedAction()
+
+    def dropEvent(self, event):
+        """
+        Override QDockWidget::dropEvent. Emit the drop signal.
+        """
+        self.drop.emit(event.mimeData().text())
 
     def resizeEvent(self, event):
         """
@@ -220,6 +240,7 @@ class SuperplotView(QWidget):
         side.workspacesList.itemSelectionChanged.connect(
                 self._presenter.on_workspace_selection_changed)
         side.resized.connect(self._presenter.on_resize)
+        side.drop.connect(self._presenter.on_drop)
         bottom = self._bottom_view
         bottom.holdButton.clicked.connect(
                 self._presenter.on_hold_button_clicked)

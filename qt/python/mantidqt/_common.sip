@@ -472,6 +472,7 @@ public:
   InstrumentSelector(QWidget *parent /TransferThis/ = nullptr);
   void setTechniques(const QStringList &techniques);
   void setCurrentIndex(int);
+  void setCurrentText(QString);
   QString currentText();
   int count();
 };
@@ -978,6 +979,7 @@ public:
 signals:
     void functionStructureChanged();
     void parameterChanged(const QString &funcIndex, const QString &paramName);
+    void attributeChanged(const QString &attributeName);
 };
 
 // ---------------------------------

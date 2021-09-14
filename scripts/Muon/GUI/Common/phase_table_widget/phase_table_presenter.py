@@ -236,7 +236,7 @@ class PhaseTablePresenter(object):
 
         # Update the table stored in each phasequad
         self.context.group_pair_context.update_phase_tables(new_table)
-        self.context.calculate_all_pairs()  # Updates phasequads
+        self.context.update_phasequads()  # Updates phasequads
         self.calculation_finished_notifier.notify_subscribers()
         self.view.enable_widget()
         self.enable_editing_notifier.notify_subscribers()
@@ -246,7 +246,7 @@ class PhaseTablePresenter(object):
     def calculate_phasequad(self):
         self.context.group_pair_context.add_phasequad(self._phasequad_obj)
         self.context.calculate_phasequads(
-            self._phasequad_obj.name, self._phasequad_obj)
+             self._phasequad_obj)
 
         self.phasequad_calculation_complete_notifier.notify_subscribers(
             self._phasequad_obj.Re.name)

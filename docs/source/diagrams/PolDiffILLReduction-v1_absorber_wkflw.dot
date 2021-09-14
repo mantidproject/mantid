@@ -13,11 +13,11 @@ digraph Absorber {
 
   subgraph algorithms {
     $algorithm_style
-    Load
-    Divide [label="Normalize to monitor"]
+    LoadAndMerge
+    Divide [label="Normalize to monitor/time"]
   }
 
-  Run -> Load
-  Load -> Divide
+  Run -> LoadAndMerge
+  LoadAndMerge -> Divide
   Divide -> OutputWorkspace
 }

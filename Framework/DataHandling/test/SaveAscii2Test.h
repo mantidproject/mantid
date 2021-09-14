@@ -7,7 +7,9 @@
 #pragma once
 
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -18,6 +20,7 @@
 #include <Poco/File.h>
 #include <cxxtest/TestSuite.h>
 #include <fstream>
+#include <iostream>
 
 using namespace Mantid::API;
 using namespace Mantid::DataHandling;
@@ -95,6 +98,74 @@ public:
 
     Poco::File(filename).remove();
     AnalysisDataService::Instance().remove(m_name);
+  }
+
+  void test_one_spectrum_per_file() {
+    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspace(3, 5);
+    ws->getAxis(0)->setUnit("MomentumTransfer");
+    AnalysisDataService::Instance().addOrReplace("test_ws_one_per_file", ws);
+    std::string filename = "saveascii2test.txt";
+    SaveAscii2 savealg;
+    TS_ASSERT_THROWS_NOTHING(savealg.initialize());
+    savealg.setPropertyValue("InputWorkspace", "test_ws_one_per_file");
+    savealg.setPropertyValue("Filename", filename);
+    savealg.setProperty("OneSpectrumPerFile", true);
+    filename = savealg.getPropertyValue("Filename");
+    const size_t extPos = filename.find(".txt");
+
+    // spectrum axis
+    TS_ASSERT_THROWS_NOTHING(savealg.execute());
+    for (int spec = 0; spec < 3; ++spec) {
+      std::ostringstream ss;
+      ss << std::string(filename, 0, extPos) << "_" << spec << std::string(filename, extPos);
+      TS_ASSERT(Poco::File(ss.str()).exists());
+      Poco::File(ss.str()).remove();
+    }
+
+    // numeric axis
+    std::unique_ptr<Axis> numericAxis = std::make_unique<NumericAxis>(3);
+    for (int i = 0; i < 3; ++i) {
+      numericAxis->setValue(i, i * i);
+    }
+    ws->replaceAxis(1, std::move(numericAxis));
+    savealg.setPropertyValue("InputWorkspace", "test_ws_one_per_file");
+    TS_ASSERT_THROWS_NOTHING(savealg.execute());
+    for (int spec = 0; spec < 3; ++spec) {
+      std::ostringstream ss;
+      ss << std::string(filename, 0, extPos) << "_" << spec << "_" << spec * spec << std::string(filename, extPos);
+      std::cout << ss.str() << std::endl;
+      TS_ASSERT(Poco::File(ss.str()).exists());
+      Poco::File(ss.str()).remove();
+    }
+
+    // bin edge axis
+    std::unique_ptr<Axis> binEdgeAxis = std::make_unique<BinEdgeAxis>(4);
+    for (int i = 0; i < 4; ++i) {
+      binEdgeAxis->setValue(i, i * i);
+    }
+    ws->replaceAxis(1, std::move(binEdgeAxis));
+    TS_ASSERT_THROWS_NOTHING(savealg.execute());
+    for (int spec = 0; spec < 3; ++spec) {
+      std::ostringstream ss;
+      ss << std::string(filename, 0, extPos) << "_" << spec << "_" << 0.5 * (spec * spec + (spec + 1) * (spec + 1))
+         << std::string(filename, extPos);
+      TS_ASSERT(Poco::File(ss.str()).exists());
+      Poco::File(ss.str()).remove();
+    }
+
+    // text axis
+    std::unique_ptr<TextAxis> textAxis = std::make_unique<TextAxis>(3);
+    for (int i = 0; i < 3; ++i) {
+      textAxis->setLabel(i, std::string("ax_") + std::to_string(i));
+    }
+    ws->replaceAxis(1, std::unique_ptr<Axis>(std::move(textAxis)));
+    TS_ASSERT_THROWS_NOTHING(savealg.execute());
+    for (int spec = 0; spec < 3; ++spec) {
+      std::ostringstream ss;
+      ss << std::string(filename, 0, extPos) << "_" << spec << "_ax_" << spec << std::string(filename, extPos);
+      TS_ASSERT(Poco::File(ss.str()).exists());
+      Poco::File(ss.str()).remove();
+    }
   }
 
   void testExec_DXNoData() {
@@ -916,6 +987,23 @@ public:
 
     Poco::File(filename).remove();
     AnalysisDataService::Instance().remove(m_name);
+  }
+
+  void test_OnSpectrumPerFile() {
+    Mantid::DataObjects::Workspace2D_sptr wsToSave;
+    writeSampleWS(wsToSave);
+
+    SaveAscii2 save;
+    std::string filename = initSaveAscii2(save);
+    save.setProperty("OneSpectrumPerFile", true);
+
+    TS_ASSERT_THROWS_NOTHING(save.execute());
+    size_t extPos = filename.find(".dat");
+    std::ostringstream ss0, ss1;
+    ss0 << std::string(filename, 0, extPos) << "_0" << std::string(filename, extPos);
+    ss1 << std::string(filename, 0, extPos) << "_1" << std::string(filename, extPos);
+    TS_ASSERT(Poco::File(ss0.str()).exists());
+    TS_ASSERT(Poco::File(ss1.str()).exists());
   }
 
   // public as it is used in LoadAsciiTest as well.

@@ -10,8 +10,8 @@ import systemtesting
 from mantid.simpleapi import CompareWorkspaces, LoadMask, LoadNexusProcessed, NOMADMedianDetectorTest
 
 # standard imports
-import os
 import tempfile
+from pathlib import Path
 
 
 class MedianDetectorTestTest(systemtesting.MantidSystemTest):
@@ -20,20 +20,30 @@ class MedianDetectorTestTest(systemtesting.MantidSystemTest):
         return ['NOM_144974_SingleBin.nxs', 'NOMAD_mask_gen_config.yml', 'NOM_144974_mask.xml']
 
     def runTest(self):
-        _, file_xml_mask = tempfile.mkstemp(suffix='.xml')
-        _, file_txt_mask = tempfile.mkstemp(suffix='.txt')
+        # TemporaryFile will rather unhelpfully open a handle to our temporary object
+        # On POSIX this is fine as "two" writers (Python and the save step) is a-okay
+        # but on Windows this will throw. So instead create a temp directory and manage the lifetime
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            self._test_impl(Path(tmp_dir))
+
+    def _test_impl(self, tmp_dir: Path):
+        file_xml_mask = (tmp_dir / "NOMADTEST.xml").resolve()
+        file_txt_mask = (tmp_dir / "NOMADTEST.txt").resolve()
         LoadNexusProcessed(Filename='NOM_144974_SingleBin.nxs', OutputWorkspace='NOM_144974')
         NOMADMedianDetectorTest(InputWorkspace='NOM_144974',
                                 ConfigurationFile='NOMAD_mask_gen_config.yml',
                                 SolidAngleNorm=False,
-                                OutputMaskXML=file_xml_mask,
-                                OutputMaskASCII=file_txt_mask)
-        os.remove(file_txt_mask)
-        for file_name, workspace_name in [(file_xml_mask, 'mask_test'), ('NOM_144974_mask.xml', 'mask_reference')]:
-            LoadMask(Instrument='NOMAD',
-                     InputFile=file_name,
-                     RefWorkspace='NOM_144974',
-                     OutputWorkspace=workspace_name)
-        os.remove(file_xml_mask)
-        success = CompareWorkspaces(Workspace1='mask_test', Workspace2='mask_reference', CheckMasking=True).Result
-        self.assertTrue(success)
+                                OutputMaskXML=str(file_xml_mask),
+                                OutputMaskASCII=str(file_txt_mask))
+
+        self.loaded_ws = LoadMask(Instrument='NOMAD',
+                                  InputFile=str(file_xml_mask),
+                                  RefWorkspace='NOM_144974',
+                                  StoreInADS=False)
+
+    def validate(self):
+        ref = LoadMask(Instrument='NOMAD',
+                       InputFile="NOM_144974_mask.xml",
+                       RefWorkspace='NOM_144974',
+                       StoreInADS=False)
+        return CompareWorkspaces(Workspace1=self.loaded_ws, Workspace2=ref, CheckMasking=True).Result

@@ -13,76 +13,7 @@ from qtpy.QtCore import QObject, Signal
 
 import mantid.simpleapi as sapi
 
-
-class DrillParameter:
-    """
-    Class that defines a parameter to be checked.
-    """
-
-    def __init__(self, name, value, sample):
-        """
-        Create a parameter by giving its name, value and the sample to which it
-        is associated.
-
-        Args:
-            name (str): parameter name
-            value (str): parameter value
-            sample (int): associated sample
-        """
-        self._name = name
-        self._value = value
-        self._sample = sample
-        self._errorMsg = str()
-
-    @property
-    def name(self):
-        """
-        Get the parameter name
-
-        Returns:
-            str: parameter name
-        """
-        return self._name
-
-    @property
-    def value(self):
-        """
-        Get the parameter value
-
-        Returns:
-            str: parameter value
-        """
-        return self._value
-
-    @property
-    def sample(self):
-        """
-        Get the sample number assiociated with this parameter.
-
-        Returns:
-            int: sample number
-        """
-        return self._sample
-
-    @property
-    def errorMsg(self):
-        """
-        Get the error message of the parameter if its validation failed.
-
-        Returns:
-            str: error message
-        """
-        return self._errorMsg
-
-    @errorMsg.setter
-    def errorMsg(self, msg):
-        """
-        Set the error message.
-
-        Args:
-            msg (str): error message
-        """
-        self._errorMsg = msg
+from .DrillParameter import DrillParameter
 
 
 class DrillControllerSignals(QObject):
@@ -119,7 +50,7 @@ class DrillParameterController(threading.Thread):
     def signals(self):
         return self._signals
 
-    def addParameter(self, parameter):
+    def check(self, parameter):
         """
         Add a parameter for validation.
 
@@ -145,17 +76,18 @@ class DrillParameterController(threading.Thread):
         while self._running:
             try:
                 p = self._paramQueue.get(timeout=0.1)
-                time.sleep(0.001)
+                time.sleep(0.01)
                 try:
-                    defaultValue = self._alg.getProperty(p.name).getDefault
-                    self._alg.setProperty(p.name, p.value)
+                    pName = p.getName()
+                    pValue = p.getValue()
+                    defaultValue = self._alg.getProperty(pName).getDefault
+                    self._alg.setProperty(pName, pValue)
                     try:
-                        self._alg.setProperty(p.name, defaultValue)
+                        self._alg.setProperty(pName, defaultValue)
                     except:
                         pass # in case of mandatory parameter
-                    self._signals.okParam.emit(p)
+                    p.setValidationState(True)
                 except Exception as e:
-                    p.errorMsg = str(e)
-                    self._signals.wrongParam.emit(p)
-            except:
+                    p.setValidationState(False, str(e))
+            except Exception:
                 pass
