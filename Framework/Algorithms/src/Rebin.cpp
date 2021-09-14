@@ -67,7 +67,7 @@ std::vector<double> Rebin::rebinParamsFromInput(const std::vector<double> &inPar
     rbParams[2] = xmax;
     if ((rbParams[1] < 0.) && (xmin < 0.) && (xmax > 0.)) {
       std::stringstream msg;
-      msg << "Cannot create logorithmic binning that changes sign (xmin=" << xmin << ", xmax=" << xmax << ")";
+      msg << "Cannot create logarithmic binning that changes sign (xmin=" << xmin << ", xmax=" << xmax << ")";
       throw std::runtime_error(msg.str());
     }
   }
@@ -77,6 +77,56 @@ std::vector<double> Rebin::rebinParamsFromInput(const std::vector<double> &inPar
 //---------------------------------------------------------------------------------------------
 // Public methods
 //---------------------------------------------------------------------------------------------
+
+/// Validate that the input properties are sane.
+std::map<std::string, std::string> Rebin::validateInputs() {
+  std::map<std::string, std::string> helpMessages;
+  if (existsProperty("Power") && !isDefault("Power")) {
+    const double power = getProperty("Power");
+    if (power < 0) {
+      helpMessages["Power"] = "Power cannot be negative";
+      return helpMessages;
+    }
+    if (power > 1) {
+      helpMessages["Power"] = "Power cannot be more than one.";
+      return helpMessages;
+    }
+
+    // attempt to roughly guess how many bins these parameters imply
+    double roughEstimate = 0;
+
+    if (!isDefault("Params")) {
+      const std::vector<double> params = getProperty("Params");
+
+      // Five significant places of the Euler-Mascheroni constant is probably more than enough for our needs
+      double eulerMascheroni = 0.57721;
+
+      // Params is check by the validator first, so we can assume it is in a correct format
+      for (size_t i = 0; i < params.size() - 2; i += 2) {
+        double upperLimit = params[i + 2];
+        double lowerLimit = params[i];
+        double factor = params[i + 1];
+
+        if (factor <= 0) {
+          helpMessages["Params"] = "Provided width value cannot be negative for inverse power binning.";
+          return helpMessages;
+        }
+
+        if (power == 1) {
+          roughEstimate += std::exp((upperLimit - lowerLimit) / factor - eulerMascheroni);
+        } else {
+          roughEstimate += std::pow(((upperLimit - lowerLimit) / factor) * (1 - power) + 1, 1 / (1 - power));
+        }
+      }
+    }
+
+    // Prevent the user form creating too many bins
+    if (roughEstimate > 10000) {
+      helpMessages["Power"] = "This binning is expected to give more than 1000 bins.";
+    }
+  }
+  return helpMessages;
+}
 
 /** Initialisation method. Declares properties to be used in algorithm.
  *
@@ -89,31 +139,30 @@ void Rebin::init() {
 
   declareProperty(std::make_unique<ArrayProperty<double>>("Params", std::make_shared<RebinParamsValidator>()),
                   "A comma separated list of first bin boundary, width, last bin boundary. "
-                  "Optionally "
-                  "this can be followed by a comma and more widths and last boundary "
-                  "pairs. "
-                  "Optionally this can also be a single number, which is the bin width. "
-                  "In this case, the boundary of binning will be determined by minimum and "
-                  "maximum TOF "
-                  "values among all events, or previous binning boundary, in case of event "
-                  "Workspace, or "
-                  "non-event Workspace, respectively. Negative width values indicate "
-                  "logarithmic binning. ");
+                  "Optionally this can be followed by a comma and more widths and last boundary pairs. "
+                  "Optionally this can also be a single number, which is the bin width. In this case, the boundary of "
+                  "binning will be determined by minimum and maximum TOF values among all events, or previous binning "
+                  "boundary, in case of event Workspace, or non-event Workspace, respectively. "
+                  "Negative width values indicate logarithmic binning.");
 
   declareProperty("PreserveEvents", true,
-                  "Keep the output workspace as an EventWorkspace, "
-                  "if the input has events. If the input and output EventWorkspace "
-                  "names are the same, only the X bins are set, which is very quick. If "
-                  "false, "
-                  "then the workspace gets converted to a Workspace2D histogram.");
+                  "Keep the output workspace as an EventWorkspace, if the input has events. If the input and output "
+                  "EventWorkspace names are the same, only the X bins are set, which is very quick. If false, then the "
+                  "workspace gets converted to a Workspace2D histogram.");
 
-  declareProperty("FullBinsOnly", false, "Omit the final bin if it's width is smaller than the step size");
+  declareProperty("FullBinsOnly", false, "Omit the final bin if its width is smaller than the step size");
 
   declareProperty("IgnoreBinErrors", false,
-                  "Ignore errors related to "
-                  "zero/negative bin widths in "
-                  "input/output workspaces. When ignored, the signal and "
-                  "errors are set to zero");
+                  "Ignore errors related to zero/negative bin widths in input/output workspaces. When ignored, the "
+                  "signal and errors are set to zero");
+
+  declareProperty("UseReverseLogarithmic", false,
+                  "For logarithmic intervals, the splitting starts from the end and go back to the start, ie the bins "
+                  "are bigger at the start and exponentially reduces until they reach the end. For these bins, the "
+                  "FullBinsOnly flag is ignored.");
+
+  declareProperty("Power", EMPTY_DBL(),
+                  "Splits the interval in bins whose width is width / (i ^ power). Power must be between 0 and 1.");
 }
 
 /** Executes the rebin algorithm
@@ -141,11 +190,17 @@ void Rebin::exec() {
   const auto histnumber = static_cast<int>(inputWS->getNumberHistograms());
 
   bool fullBinsOnly = getProperty("FullBinsOnly");
+  bool useReverseLog = getProperty("UseReverseLogarithmic");
+  double power = getProperty("Power");
+
+  double xmin = 0.;
+  double xmax = 0.;
+  inputWS->getXMinMax(xmin, xmax);
 
   HistogramData::BinEdges XValues_new(0);
   // create new output X axis
-  static_cast<void>(
-      VectorHelper::createAxisFromRebinParams(rbParams, XValues_new.mutableRawData(), true, fullBinsOnly));
+  static_cast<void>(VectorHelper::createAxisFromRebinParams(rbParams, XValues_new.mutableRawData(), true, fullBinsOnly,
+                                                            xmin, xmax, useReverseLog, power));
 
   // Now, determine if the input workspace is actually an EventWorkspace
   EventWorkspace_const_sptr eventInputWS = std::dynamic_pointer_cast<const EventWorkspace>(inputWS);
