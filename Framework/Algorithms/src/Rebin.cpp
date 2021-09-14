@@ -15,6 +15,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/VectorHelper.h"
 
@@ -50,8 +51,7 @@ using HistogramData::Exception::InvalidBinEdgesError;
 std::vector<double> Rebin::rebinParamsFromInput(const std::vector<double> &inParams,
                                                 const API::MatrixWorkspace &inputWS, Kernel::Logger &logger) {
   std::vector<double> rbParams;
-  // The validator only passes parameters with size 1, or 3xn.  No need to check
-  // again here
+  // The validator only passes parameters with size 1, or 3xn. No need to check again here
   if (inParams.size() >= 3) {
     // Input are min, delta, max
     rbParams = inParams;
@@ -83,14 +83,6 @@ std::map<std::string, std::string> Rebin::validateInputs() {
   std::map<std::string, std::string> helpMessages;
   if (existsProperty("Power") && !isDefault("Power")) {
     const double power = getProperty("Power");
-    if (power < 0) {
-      helpMessages["Power"] = "Power cannot be negative";
-      return helpMessages;
-    }
-    if (power > 1) {
-      helpMessages["Power"] = "Power cannot be more than one.";
-      return helpMessages;
-    }
 
     // attempt to roughly guess how many bins these parameters imply
     double roughEstimate = 0;
@@ -122,7 +114,7 @@ std::map<std::string, std::string> Rebin::validateInputs() {
 
     // Prevent the user form creating too many bins
     if (roughEstimate > 10000) {
-      helpMessages["Power"] = "This binning is expected to give more than 1000 bins.";
+      helpMessages["Power"] = "This binning is expected to give more than 10000 bins.";
     }
   }
   return helpMessages;
@@ -156,13 +148,18 @@ void Rebin::init() {
                   "Ignore errors related to zero/negative bin widths in input/output workspaces. When ignored, the "
                   "signal and errors are set to zero");
 
-  declareProperty("UseReverseLogarithmic", false,
-                  "For logarithmic intervals, the splitting starts from the end and go back to the start, ie the bins "
-                  "are bigger at the start and exponentially reduces until they reach the end. For these bins, the "
-                  "FullBinsOnly flag is ignored.");
+  declareProperty(
+      "UseReverseLogarithmic", false,
+      "For logarithmic intervals, the splitting starts from the end and goes back to the start, ie the bins are bigger "
+      "at the start getting exponentially smaller until they reach the end. For these bins, the FullBinsOnly flag is "
+      "ignored.");
 
-  declareProperty("Power", EMPTY_DBL(),
-                  "Splits the interval in bins whose width is width / (i ^ power). Power must be between 0 and 1.");
+  auto powerValidator = std::make_shared<Mantid::Kernel::BoundedValidator<double>>();
+  powerValidator->setLower(0);
+  powerValidator->setUpper(1);
+  declareProperty("Power", 0., powerValidator,
+                  "Splits the interval in bins which actual width is equal to requested width / (i ^ power); default "
+                  "is linear. Power must be between 0 and 1.");
 }
 
 /** Executes the rebin algorithm
