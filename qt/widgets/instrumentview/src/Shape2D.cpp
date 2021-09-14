@@ -48,11 +48,10 @@ void Shape2D::draw(QPainter &painter) const {
   painter.setPen(QPen(m_color, 0));
   this->drawShape(painter);
   if (m_editing || m_selected) {
-    auto center = m_boundingRect.center();
-    QRectF drawRect = m_boundingRect.translated(-center).toQRectF();
+    QRectF drawRect = m_boundingRect.translated(-m_boundingRect.center()).toQRectF();
     painter.save();
     painter.rotate(m_boundingRotation);
-    painter.translate(QTransform().rotate(-m_boundingRotation).map(center));
+    painter.translate(QTransform().rotate(-m_boundingRotation).map(m_boundingRect.center()));
     painter.setPen(QPen(QColor(255, 255, 255, 100), 0));
     painter.drawRect(drawRect);
     painter.restore();
@@ -94,12 +93,8 @@ QPointF Shape2D::getControlPoint(size_t i) const {
     throw std::range_error("Control point index is out of range");
   }
 
-  if (i < 4) {
-    auto center = m_boundingRect.center();
-    QPointF vertex = m_boundingRect.vertex(i);
-    vertex = QTransform().rotate(m_boundingRotation).map(vertex-center)+center;
-    return vertex;
-  }
+  if (i < 4)
+    return QTransform().rotate(m_boundingRotation).map(m_boundingRect.vertex(i)-m_boundingRect.center())+m_boundingRect.center();
 
   return getShapeControlPoint(i - NCommonCP);
 }
@@ -110,8 +105,7 @@ void Shape2D::setControlPoint(size_t i, const QPointF &pos) {
   }
 
   if (i < 4) {
-    auto center = m_boundingRect.center();
-    m_boundingRect.setVertex(i, QTransform().rotate(-m_boundingRotation).map(pos-center)+center);
+    m_boundingRect.setVertex(i, QTransform().rotate(-m_boundingRotation).map(pos-m_boundingRect.center())+m_boundingRect.center());
 
     refit();
   }
@@ -166,7 +160,9 @@ void Shape2D::setBoundingRect(const RectF &rect) {
  *
  * @param p :: Point to check.
  */
-bool Shape2D::isMasked(const QPointF &p) const { return m_fill_color != QColor() && contains(p); }
+bool Shape2D::isMasked(const QPointF &p) const {
+  return m_fill_color != QColor() && contains(QTransform().rotate(-m_boundingRotation).map(p-m_boundingRect.center())+m_boundingRect.center());
+}
 
 /** Load shape 2D state from a Mantid project file
  * @param lines :: lines from the project file to load state from
