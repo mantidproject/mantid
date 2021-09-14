@@ -189,8 +189,9 @@ class SANSILLIntegration(PythonAlgorithm):
         self._resolution = self.getPropertyValue('CalculateResolution')
         self._output_ws = self.getPropertyValue('OutputWorkspace')
         self._lambda_range = self.getProperty('WavelengthRange').value
-        self._is_tof = mtd[self._input_ws].getRun().getLogData('tof_mode').value == 'TOF' and \
-                       mtd[self._input_ws].getInstrument().getName() == 'D33' # D33 only
+        instrument = mtd[self._input_ws].getInstrument()
+        run = mtd[self._input_ws].getRun()
+        self._is_tof = instrument.getName() == 'D33' and 'tof_mode' in run and run['tof_mode'].value == 'TOF'
         if self._is_tof:
             cut_input_ws = self._input_ws+'_cut'
             CropWorkspaceRagged(InputWorkspace=self._input_ws,

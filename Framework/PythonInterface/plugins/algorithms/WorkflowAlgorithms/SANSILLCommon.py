@@ -106,11 +106,15 @@ def needs_loading(property_value, loading_reduction_type):
 def create_name(ws):
     DISTANCE_LOG = "L2" # the distance of the main detector
     COLLIMATION_LOG = "collimation.actual_position"
-    WAVELENGTH_LOG = "wavelength"
+    WAVELENGTH_LOG1 = "wavelength"
+    WAVELENGTH_LOG2 = "selector.wavelength"
     logs = mtd[ws].run()
     distance = logs[DISTANCE_LOG].value
     collimation = logs[COLLIMATION_LOG].value
-    wavelength =logs[WAVELENGTH_LOG].value
+    if WAVELENGTH_LOG1 in logs:
+        wavelength =logs[WAVELENGTH_LOG1].value
+    elif WAVELENGTH_LOG2 in logs:
+        wavelength =logs[WAVELENGTH_LOG2].value
     return "d{:.1f}m_c{:.1f}m_w{:.1f}A".format(distance, collimation, wavelength)
 
 
@@ -193,6 +197,29 @@ def blank_monitor_ws_neg_index(instrument):
         return -1
     else:
         return -2
+
+
+def real_monitor_ws_neg_index(instrument):
+    '''Returns the negative index of the spectra corresponding to the non-empty monitor'''
+    if instrument != 'D16':
+        return -2
+    else:
+        return -1
+
+
+def main_detector_distance(run, instrument):
+    '''
+    Returns the main detector distance from the sample, based on the instrument
+    TODO: these can be moved to the IPFs
+    '''
+    if instrument == 'D11' or instrument == 'D11lr' or instrument == 'D22' or instrument == 'D22lr':
+        return run['detector.det_calc'].value
+    if instrument == 'D11B':
+        return run['Detector 1.det_calc'].value
+    if instrument == 'D22B':
+        return run['Detector 1.det1_calc'].value
+    if instrument == 'D33':
+        return run['Detector.det2_calc'].value
 
 
 def get_vertical_grouping_pattern(ws):

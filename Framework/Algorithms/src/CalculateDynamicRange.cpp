@@ -90,7 +90,8 @@ void CalculateDynamicRange::calculateQMinMax(const MatrixWorkspace_sptr &workspa
   // block
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int64_t index = 0; index < static_cast<int64_t>(indices.size()); ++index) { // NOLINT (modernize-for-loop)
-    if (!spectrumInfo.isMonitor(indices[index]) && !spectrumInfo.isMasked(indices[index])) {
+    if (spectrumInfo.hasDetectors(indices[index]) && !spectrumInfo.isMonitor(indices[index]) &&
+        !spectrumInfo.isMasked(indices[index])) {
       const auto &spectrum = workspace->histogram(indices[index]);
       const Kernel::V3D detPos = spectrumInfo.position(indices[index]);
       double r, theta, phi;

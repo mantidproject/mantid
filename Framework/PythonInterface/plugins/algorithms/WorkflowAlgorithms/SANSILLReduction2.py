@@ -267,24 +267,26 @@ class SANSILLReduction(PythonAlgorithm):
     def apply_normalisation(self, ws):
         '''Normalizes the workspace by monitor (default) or acquisition time'''
         normalise_by = self.getPropertyValue('NormaliseBy')
-        monitor_ids = monitor_id(self.instrument)
         if self.mode != AcqMode.TOF:
             if normalise_by == 'Monitor':
                 mon = ws + '_mon'
-                ExtractSpectra(InputWorkspace=ws, DetectorList=monitor_ids[0], OutputWorkspace=mon)
+                mon_ws_index = mtd[ws].getNumberHistograms() + real_monitor_ws_neg_index(self.instrument)
+                ExtractSpectra(InputWorkspace=ws, WorkspaceIndexList=mon_ws_index, OutputWorkspace=mon)
                 Divide(LHSWorkspace=ws, RHSWorkspace=mon, OutputWorkspace=ws, WarnOnZeroDivide=False)
                 DeleteWorkspace(mon)
             elif normalise_by == 'Time':
                 # the durations are stored in the second monitor
                 mon = ws + '_duration'
-                ExtractSpectra(InputWorkspace=ws, DetectorList=monitor_ids[1], OutputWorkspace=mon)
+                mon_ws_index = mtd[ws].getNumberHistograms() + blank_monitor_ws_neg_index(self.instrument)
+                ExtractSpectra(InputWorkspace=ws, WorkspaceIndexList=mon_ws_index, OutputWorkspace=mon)
                 Divide(LHSWorkspace=ws, RHSWorkspace=mon, OutputWorkspace=ws, WarnOnZeroDivide=False)
                 self.apply_dead_time(ws)
                 DeleteWorkspace(mon)
         else:
             if normalise_by == 'Monitor':
                 mon = ws + '_mon'
-                ExtractSpectra(InputWorkspace=ws, DetectorList=monitor_ids[0], OutputWorkspace=mon)
+                mon_ws_index = mtd[ws].getNumberHistograms() + real_monitor_ws_neg_index(self.instrument)
+                ExtractSpectra(InputWorkspace=ws, WorkspaceIndexList=mon_ws_index, OutputWorkspace=mon)
                 self.broadcast_tof(ws, mon)
                 RebinToWorkspace(WorkspaceToMatch=ws, WorkspaceToRebin=mon, OutputWorkspace=mon)
                 Divide(LHSWorkspace=ws, RHSWorkspace=mon, OutputWorkspace=ws, WarnOnZeroDivide=False)
@@ -294,7 +296,7 @@ class SANSILLReduction(PythonAlgorithm):
                 self.apply_dead_time(ws)
         # regardless on normalisation mask out the monitors not to skew the scale in the instrument viewer
         # but do not extract them, since extracting by ID is slow, so just leave them masked
-        MaskDetectors(Workspace=ws, DetectorList=monitor_ids)
+        MaskDetectors(Workspace=ws, DetectorList=monitor_id(self.instrument))
 
     def apply_dead_time(self, ws):
         '''Performs the dead time correction'''
@@ -815,12 +817,16 @@ class SANSILLReduction(PythonAlgorithm):
     def preprocess(self, ws):
         '''
         Prepares the loaded workspace based on the acq mode
-        TODO: all these must be done in v2 of the loader directly.
-        Hence, this should be removed once v2 of the loader is plugged in.
         '''
         if self.mode != AcqMode.TOF:
             mtd[ws].getAxis(0).setUnit('Empty')
-        if self.mode == AcqMode.MONO or self.mode == AcqMode.REVENT:
+            run = mtd[ws].getRun()
+            if 'selector.wavelength' in run and 'wavelength' not in run:
+                AddSampleLog(Workspace=ws, LogName='wavelength',
+                             LogText=str(run['selector.wavelength'].value),
+                             LogUnit='Angstrom', LogType='Number')
+        if self.mode == AcqMode.MONO:
+            # TODO: all these must be done in v2 of the loader directly, so remove once it's in.
             ConvertToPointData(InputWorkspace=ws, OutputWorkspace=ws)
             blank_mon = mtd[ws].getNumberHistograms() + blank_monitor_ws_neg_index(self.instrument)
             run = mtd[ws].getRun()
@@ -828,10 +834,24 @@ class SANSILLReduction(PythonAlgorithm):
             if self.mode == AcqMode.MONO:
                 mtd[ws].setY(blank_mon, np.array([time]))
                 mtd[ws].setE(blank_mon, np.array([0.]))
-            else:
-                bsize = mtd[ws].blocksize()
-                mtd[ws].setY(blank_mon, np.full(bsize, time))
-                mtd[ws].setE(blank_mon, np.full(bsize, 0.))
+        if self.mode == AcqMode.REVENT:
+            # if a workspace is a rebinned event, it is loaded by LoadNexusProcess and not by LoadILLSANS,
+            # hence we have to prepare it similarly
+            durations = np.diff(mtd[ws].readX(0)) * 1E-6
+            ConvertToPointData(InputWorkspace=ws, OutputWorkspace=ws)
+            # note that, currently for event workspaces monitors are loaded to a separate workspace,
+            # so monitor normalisation is not possible
+            tmp_mon_spectra = '__tmp_mon_'+ws
+            bsize = mtd[ws].blocksize()
+            run = mtd[ws].getRun()
+            CreateWorkspace(NSpec=2, DataX=np.tile(mtd[ws].readX(0),2), DataY=np.ones(2*bsize),
+                            DataE=np.zeros(2*bsize), OutputWorkspace=tmp_mon_spectra)
+            AppendSpectra(InputWorkspace1=ws, InputWorkspace2=tmp_mon_spectra, OutputWorkspace=ws, ValidateInputs=False)
+            blank_mon = mtd[ws].getNumberHistograms() + blank_monitor_ws_neg_index(self.instrument)
+            mtd[ws].setY(blank_mon, durations)
+            DeleteWorkspace(tmp_mon_spectra)
+            l2 = main_detector_distance(run, self.instrument)
+            AddSampleLog(Workspace=ws, LogName='L2', LogType='Number', LogText=str(l2), LogUnit='meters')
 
     def reduce(self):
         '''
