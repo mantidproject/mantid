@@ -28,12 +28,6 @@ Improvements
 Bugfixes
 ########
 
-<<<<<<< HEAD
-- Fix rare divide-by zero error when running :ref:`GetEi <algm-GetEi>` on noisy data.
-- Fix crash when running :ref:`IntegrateEPP <algm-IntegrateEPP>` on a workspace group via the algorithm dialog.
-- Fixed bug in :ref:`FitGaussianPeaks <algm-FitGaussianPeaks>` algorithm in which a peak at the end of range would cause an error due to not enough data point being available to fit parameters
-
-=======
 - Fix bug in :ref:`CalculateMultipleScattering <algm-CalculateMultipleScattering>` where detector position was incorrectly determined on a workspace where the workspace index didn't match the detector
   index e.g. if the workspace was loaded with ``SpectrumMin`` specified to exclude some monitors.
 - Fixed bug in :ref:`algm-ConvertToMDMinMaxLocal` where wrong min max calculated if the workspace includes monitor spectra or spectra without any detectors.
@@ -44,7 +38,6 @@ Bugfixes
 - :ref:`LoadNexusLogs <algm-LoadNexusLogs>` now creates a warning message for logs that are poorly formed and the other logs are loaded. Previously it stopped loading logs at that point.
 - Fixed a bug where :ref:`LoadRaw <algm-LoadRaw>` would not load all log files for raw files with an alternate data stream.
 - Fixed a problem calculating default beam size in :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` when sample is offset from origin.
->>>>>>> master
 
 Fit Functions
 -------------
