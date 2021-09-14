@@ -15,7 +15,7 @@ from mantid.kernel import Direction
 COMPRESS_TOL_TOF = .01
 EXTENSIONS_NXS = ["_event.nxs", ".nxs.h5"]
 
-DEPRECATION_NOTICE = """CalibrateRectangularDetectors is deprecated from v6.3.0.
+DEPRECATION_NOTICE = """CalibrateRectangularDetectors is deprecated from v6.2.0.
 Instead, use PDCalibration."""
 
 
