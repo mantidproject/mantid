@@ -113,7 +113,7 @@ class PolDiffILLReduction(PythonAlgorithm):
                      or self.getProperty('AbsoluteNormalisation').value)):
             issues.update(self._validate_self_attenuation_arguments())
 
-        if process == 'Sample' and self.getProperty('MeasurementTechnique') == 'TOF' \
+        if process == 'Sample' and self.getPropertyValue('MeasurementTechnique') == 'TOF' \
                 and self.getProperty('ElasticChannelsWorkspace').isDefault:
             issues['ElasticChannelsWorkspace'] = 'Elastic peak information must be provided.'
 
