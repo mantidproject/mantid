@@ -1177,6 +1177,7 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
   auto iend = splitter.end();
 
   Mantid::Kernel::StringTokenizer tokens;
+  const std::string visibilityKey = "visible:"; // if visibility is defined, the value will follow this key
   // std::string prev_name;
   for (auto itr = splitter.begin(); itr != iend; ++itr) {
     tokens = Mantid::Kernel::StringTokenizer(*itr, ";");
@@ -1210,8 +1211,7 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
       paramValue += ";" + tokens[i];
     const auto &paramType = tokens[1];
     const auto &paramName = tokens[2];
-    auto &paramVisibility = tokens[size - 1];           // parameter visibility, if defined, is the last token
-    auto const visibilityKey = std::string("visible:"); // if visibility is defined, the value will follow this key
+    auto &paramVisibility = tokens[size - 1]; // parameter visibility, if defined, is the last token
     if (paramVisibility.find(visibilityKey) > paramVisibility.size())
       paramVisibility = "true"; // visibility not defined: default to visible
     else {                      // defined, the paramValue has one too many entries, -1 to remove also the semicolon
