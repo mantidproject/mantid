@@ -24,7 +24,8 @@ The other two tabs in the interface perform transformations on data and are docu
 These interfaces do not support GroupWorkspaces as input.
 
 .. image:: ../../images/Inelastic_Data_Analysis_GUI.png
-  :width: 650
+  :width: 750
+  :align: center
 
 Action Buttons
 ~~~~~~~~~~~~~~

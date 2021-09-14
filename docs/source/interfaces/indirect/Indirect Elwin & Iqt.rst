@@ -19,13 +19,14 @@ ELF workspace can also be normalised to the lowest temperature run in the range
 of input files.
 
 .. image:: ../../images/Inelastic_Data_Analysis_GUI.png
-  :width: 450
+  :width: 750
+  :align: center
 
 Elwin Options
 ~~~~~~~~~~~~~
 
 File or Workspace
-  Choose to download data from a file or a workspace by using this dropdown menu. See image below for demonstration of how to load files using either option.
+  Choose to load data from a file or a workspace by using this dropdown menu. See image below for demonstration of how to load files using either option.
 
 .. figure:: ../../images/ElwinLoad.gif
    :width: 600px
