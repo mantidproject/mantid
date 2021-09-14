@@ -116,10 +116,9 @@ void ProcessBankData::run() { // override {
   // Will we need to compress?
   const bool compress = (alg->compressTolerance >= 0);
 
-  // Which detector IDs were touched? - only matters if compress is on
+  // Which detector IDs were touched?
   std::vector<bool> usedDetIds;
-  if (compress)
-    usedDetIds.assign(m_max_id - m_min_id + 1, false);
+  usedDetIds.assign(m_max_id - m_min_id + 1, false);
 
   const double TOF_MIN = alg->filter_tof_min;
   const double TOF_MAX = alg->filter_tof_max;
@@ -190,10 +189,8 @@ void ProcessBankData::run() { // override {
           } else
             badTofs++;
 
-          // Track all the touched wi (only necessary when compressing events,
-          // for thread safety)
-          if (compress)
-            usedDetIds[detId - m_min_id] = true;
+          // Track all the touched wi
+          usedDetIds[detId - m_min_id] = true;
         } // valid time-of-flight
 
       } // valid detector IDs
@@ -210,20 +207,18 @@ void ProcessBankData::run() { // override {
 
   //------------ Compress Events (or set sort order) ------------------
   // Do it on all the detector IDs we touched
-  if (compress) {
-    for (detid_t pixID = m_min_id; pixID <= m_max_id; ++pixID) {
-      if (usedDetIds[pixID - m_min_id]) {
-        // Find the the workspace index corresponding to that pixel ID
-        size_t wi = getWorkspaceIndexFromPixelID(pixID);
-        auto &el = outputWS.getSpectrum(wi);
-        if (compress)
-          el.compressEvents(alg->compressTolerance, &el);
-        else {
-          if (pulsetimesincreasing)
-            el.setSortOrder(DataObjects::PULSETIME_SORT);
-          else
-            el.setSortOrder(DataObjects::UNSORTED);
-        }
+  for (detid_t pixID = m_min_id; pixID <= m_max_id; ++pixID) {
+    if (usedDetIds[pixID - m_min_id]) {
+      // Find the the workspace index corresponding to that pixel ID
+      size_t wi = getWorkspaceIndexFromPixelID(pixID);
+      auto &el = outputWS.getSpectrum(wi);
+      if (compress)
+        el.compressEvents(alg->compressTolerance, &el);
+      else {
+        if (pulsetimesincreasing)
+          el.setSortOrder(DataObjects::PULSETIME_SORT);
+        else
+          el.setSortOrder(DataObjects::UNSORTED);
       }
     }
   }
