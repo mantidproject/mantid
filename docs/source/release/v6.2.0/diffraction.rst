@@ -52,6 +52,7 @@ Bugfixes
 - Fixed the issue with :ref:`SNSPowderReduction <algm-SNSPowderReduction>` - when an invalid height unit is encountered while reading sample log the geometry is ignored and it relies purely on user input.
 - Fixed a bug when converting TOF to d-spacing using diffractometer constants with non-zero DIFA when a parabolic model is selected.
 - Corrected the equation for pseudo-voigt FWHM and mixing parameter in peak profile function :ref:`Bk2BkExpConvPV <func-Bk2BkExpConvPV>`.
+- Fixed a bug when filtering events in :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder-v1>` based on time-of-flight. The code now allows setting the minimum time-of-flight to zero (inclusive).
 
 Engineering Diffraction
 -----------------------
@@ -90,6 +91,8 @@ Bugfixes
 - The help button on the :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>` points to the correct page, having been broken in the last release.
 - Using the Clear button on the Workspace widget while using the :ref:`Fitting tab <ui engineering fitting>` no longer causes errors when you try to load runs back in.
 - On the :ref:`Fitting tab <ui engineering fitting>` of the :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>` the background can be inspected whether the background subtraction box is checked or not.
+- Prevent crash when invalid arguments passed to background subtraction algorithm (:ref:`EnggEstimateFocussedBackground <algm-EnggEstimateFocussedBackground>`) in the :ref:`Fitting tab <ui engineering fitting>` of the :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>`.
+
 
 Single Crystal Diffraction
 --------------------------

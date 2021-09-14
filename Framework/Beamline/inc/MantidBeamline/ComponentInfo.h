@@ -90,6 +90,7 @@ public:
   bool isDetector(const size_t componentIndex) const {
     return componentIndex < m_assemblySortedDetectorIndices->size();
   }
+  bool isMonitor(const size_t componentIndex) const;
   size_t compOffsetIndex(const size_t componentIndex) const {
     return componentIndex - m_assemblySortedDetectorIndices->size();
   }

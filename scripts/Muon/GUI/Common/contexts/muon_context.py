@@ -229,7 +229,7 @@ class MuonContext(object):
         """Returns a list of MuonPair's that are formed from one or more groups contained in the provided list."""
         pairs = []
         for pair in self._group_pair_context.pairs:
-            if pair.forward_group in groups or pair.backward_group in groups:
+            if isinstance(pair, MuonPair) and (pair.forward_group in groups or pair.backward_group in groups):
                 pairs.append(pair)
         return pairs
 

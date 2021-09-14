@@ -221,9 +221,10 @@ MatrixWorkspace_const_sptr InstrumentActor::getWorkspace() const {
   return sharedWorkspace;
 }
 
-void InstrumentActor::getBoundingBox(Mantid::Kernel::V3D &minBound, Mantid::Kernel::V3D &maxBound) const {
+void InstrumentActor::getBoundingBox(Mantid::Kernel::V3D &minBound, Mantid::Kernel::V3D &maxBound,
+                                     const bool excludeMonitors) const {
   const auto &compInfo = componentInfo();
-  auto bb = compInfo.boundingBox(compInfo.root());
+  auto bb = compInfo.boundingBox(compInfo.root(), nullptr, excludeMonitors);
   minBound = bb.minPoint();
   maxBound = bb.maxPoint();
 }

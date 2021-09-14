@@ -289,7 +289,7 @@ class BasicFittingModel:
         """Clears the undo fit functions and other data for the currently selected index."""
         current_dataset_index = self.fitting_context.current_dataset_index
         for i, dataset_index in reversed(list(enumerate(self.fitting_context.dataset_indices_for_undo))):
-            if dataset_index == current_dataset_index:
+            if dataset_index == current_dataset_index and i < len(self.fitting_context.active_fit_history):
                 del self.fitting_context.active_fit_history[i]
                 del self.fitting_context.dataset_indices_for_undo[i]
                 del self.fitting_context.single_fit_functions_for_undo[i]
@@ -426,6 +426,11 @@ class BasicFittingModel:
         """Update the value of a parameter in the fit function."""
         if self.current_single_fit_function is not None:
             self.current_single_fit_function.setParameter(full_parameter, value)
+
+    def update_attribute_value(self, full_attribute: str, value: float) -> None:
+        """Update the value of an attribute in the fit function."""
+        if self.current_single_fit_function is not None:
+            self.current_single_fit_function.setAttributeValue(full_attribute, value)
 
     @property
     def do_rebin(self) -> bool:
