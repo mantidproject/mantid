@@ -588,6 +588,13 @@ void Shape2DCollection::clear() {
   emit shapesDeselected();
 }
 
+std::string Shape2DCollection::getCurrentShapeType() const {
+  if (m_currentShape) {
+    return m_currentShape->type();
+  }
+  return "none";
+}
+
 QStringList Shape2DCollection::getCurrentDoubleNames() const {
   if (m_currentShape) {
     return m_currentShape->getDoubleNames();
