@@ -631,7 +631,11 @@ void InstrumentWidget::updateIntegrationWidget(bool init) {
   if (!init) {
     // setRange needs the initialization of the instrument viewer to run, but is only needed when replacing a workspace,
     // hence the check
-    m_xIntegration->setRange(minRange, maxRange);
+    if (!isDiscrete) {
+      m_xIntegration->setRange(minRange, maxRange);
+    } else {
+      m_xIntegration->setRange(0, 0);
+    }
   }
 
   m_xIntegration->setUnits(QString::fromStdString(m_instrumentActor->getWorkspace()->getAxis(0)->unit()->caption()));
