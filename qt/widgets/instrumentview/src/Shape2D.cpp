@@ -94,7 +94,8 @@ QPointF Shape2D::getControlPoint(size_t i) const {
   }
 
   if (i < 4)
-    return QTransform().rotate(m_boundingRotation).map(m_boundingRect.vertex(i)-m_boundingRect.center())+m_boundingRect.center();
+    return QTransform().rotate(m_boundingRotation).map(m_boundingRect.vertex(i) - m_boundingRect.center()) +
+           m_boundingRect.center();
 
   return getShapeControlPoint(i - NCommonCP);
 }
@@ -105,7 +106,8 @@ void Shape2D::setControlPoint(size_t i, const QPointF &pos) {
   }
 
   if (i < 4) {
-    m_boundingRect.setVertex(i, QTransform().rotate(-m_boundingRotation).map(pos-m_boundingRect.center())+m_boundingRect.center());
+    m_boundingRect.setVertex(i, QTransform().rotate(-m_boundingRotation).map(pos - m_boundingRect.center()) +
+                                    m_boundingRect.center());
 
     refit();
   }
@@ -161,7 +163,8 @@ void Shape2D::setBoundingRect(const RectF &rect) {
  * @param p :: Point to check.
  */
 bool Shape2D::isMasked(const QPointF &p) const {
-  return m_fill_color != QColor() && contains(QTransform().rotate(-m_boundingRotation).map(p-m_boundingRect.center())+m_boundingRect.center());
+  return m_fill_color != QColor() &&
+         contains(QTransform().rotate(-m_boundingRotation).map(p - m_boundingRect.center()) + m_boundingRect.center());
 }
 
 /** Load shape 2D state from a Mantid project file
@@ -261,13 +264,17 @@ Shape2DEllipse::Shape2DEllipse(const QPointF &center, double radius1, double rad
 }
 
 void Shape2DEllipse::drawShape(QPainter &painter) const {
-  QRectF drawRect = m_boundingRect.toQRectF();
+  QRectF drawRect = m_boundingRect.translated(-m_boundingRect.center()).toQRectF();
+  painter.save();
+  painter.rotate(m_boundingRotation);
+  painter.translate(QTransform().rotate(-m_boundingRotation).map(m_boundingRect.center()));
   painter.drawEllipse(drawRect);
   if (m_fill_color != QColor()) {
     QPainterPath path;
     path.addEllipse(drawRect);
     painter.fillPath(path, m_fill_color);
   }
+  painter.restore();
 }
 
 void Shape2DEllipse::addToPath(QPainterPath &path) const { path.addEllipse(m_boundingRect.toQRectF()); }
@@ -388,8 +395,8 @@ Shape2DRectangle::Shape2DRectangle(const QPointF &p0, const QSizeF &size) { m_bo
 
 bool Shape2DRectangle::selectAt(const QPointF &p) const {
   if (m_fill_color != QColor()) { // filled rectangle
-    auto center = m_boundingRect.center();
-    return contains(QTransform().rotate(-m_boundingRotation).map(p-center)+center);
+    return contains(QTransform().rotate(-m_boundingRotation).map(p - m_boundingRect.center()) +
+                    m_boundingRect.center());
   }
 
   RectF outer(m_boundingRect);
@@ -400,11 +407,10 @@ bool Shape2DRectangle::selectAt(const QPointF &p) const {
 }
 
 void Shape2DRectangle::drawShape(QPainter &painter) const {
-  auto center = m_boundingRect.center();
-  QRectF drawRect = m_boundingRect.translated(-center).toQRectF();
+  QRectF drawRect = m_boundingRect.translated(-m_boundingRect.center()).toQRectF();
   painter.save();
   painter.rotate(m_boundingRotation);
-  painter.translate(QTransform().rotate(-m_boundingRotation).map(center));
+  painter.translate(QTransform().rotate(-m_boundingRotation).map(m_boundingRect.center()));
   painter.drawRect(drawRect);
   if (m_fill_color != QColor()) {
     QPainterPath path;
