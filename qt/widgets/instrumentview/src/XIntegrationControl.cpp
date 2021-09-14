@@ -40,7 +40,11 @@ XIntegrationScrollBar::XIntegrationScrollBar(QWidget *parent)
 
 void XIntegrationScrollBar::resizeEvent(QResizeEvent * /*unused*/) {
   if (!m_init) {
-    m_slider->resize(width(), height());
+    if (!m_isDiscrete) {
+      m_slider->resize(width(), height());
+    } else {
+      m_slider->resize(2 * m_resizeMargin + 1, height());
+    }
     m_init = true;
   } else {
     set(m_minimum, m_maximum);
@@ -380,14 +384,14 @@ double XIntegrationScrollBar::getWidth() const { return m_maximum - m_minimum; }
 /**
  * @brief XIntegrationScrollBar::setStepsTotal
  * Set the total number of steps and reset the current scroll bar internal variables to match these new values.
- * @param steps the new total number of step for the discrete bar.b
+ * @param steps the new total number of step for the discrete bar.
  */
 void XIntegrationScrollBar::setStepsTotal(int steps) {
   m_stepsTotal = steps;
   m_currentStepMin = 0;
-  m_currentStepMax = steps - 1;
+  m_currentStepMax = 0;
   m_minimum = 0;
-  m_maximum = 1;
+  m_maximum = 0;
 }
 
 /**
@@ -511,10 +515,11 @@ void XIntegrationControl::setTotalRange(double minimum, double maximum) {
   if (m_isDiscrete) {
     discretize();
     m_scrollBar->setStepsTotal(static_cast<int>(m_totalMaximum - m_totalMinimum + 1));
+    setRange(0, 0);
+  } else {
+    // we reset the slider to max range, since its size has been changed
+    setWholeRange();
   }
-
-  // we reset the slider to max range, since its size has been changed
-  setWholeRange();
 }
 
 void XIntegrationControl::setRange(double minimum, double maximum) {
