@@ -276,8 +276,6 @@ void InstrumentWidget::init(bool resetGeometry, bool autoscaling, double scaleMi
     m_instrumentActor.reset(new InstrumentActor(m_workspaceName, autoscaling, scaleMin, scaleMax));
   }
 
-  updateIntegrationWidget(true);
-
   auto surface = getSurface();
   if (resetGeometry || !surface) {
     if (setDefaultView) {
@@ -299,6 +297,7 @@ void InstrumentWidget::init(bool resetGeometry, bool autoscaling, double scaleMi
     surface->resetInstrumentActor(m_instrumentActor.get());
     updateInfoText();
   }
+  updateIntegrationWidget(true);
 }
 
 /**
@@ -614,15 +613,29 @@ void InstrumentWidget::replaceWorkspace(const std::string &newWs, const std::str
 
 /**
  * @brief InstrumentWidget::updateIntegrationWidget
- * Update the range of the integration widget, and show or hide it is needed
- * @param init : boolean set to true if the integration widget is still being
- * initialized
+ * Update the range of the integration widget, and show or hide it if needed
+ * @param init : boolean set to true if the integration widget is still being initialized
  */
 void InstrumentWidget::updateIntegrationWidget(bool init) {
-  m_xIntegration->setTotalRange(m_instrumentActor->minBinValue(), m_instrumentActor->maxBinValue());
+  // discrete integration range is only used if all the bins are common and integers, as a convention
+  bool isDiscrete =
+      m_instrumentActor->getWorkspace()->isCommonBins() && m_instrumentActor->getWorkspace()->isIntegerBins();
+
+  m_xIntegration->setDiscrete(isDiscrete);
+  double minRange = isDiscrete ? 0 : m_instrumentActor->minBinValue();
+  double maxRange = isDiscrete ? static_cast<int>(m_instrumentActor->getWorkspace()->blocksize()) - 1
+                               : m_instrumentActor->maxBinValue();
+
+  m_xIntegration->setTotalRange(minRange, maxRange);
 
   if (!init) {
-    m_xIntegration->setRange(m_instrumentActor->minBinValue(), m_instrumentActor->maxBinValue());
+    // setRange needs the initialization of the instrument viewer to run, but is only needed when replacing a workspace,
+    // hence the check
+    if (!isDiscrete) {
+      m_xIntegration->setRange(minRange, maxRange);
+    } else {
+      m_xIntegration->setRange(0, 0);
+    }
   }
 
   m_xIntegration->setUnits(QString::fromStdString(m_instrumentActor->getWorkspace()->getAxis(0)->unit()->caption()));
@@ -936,6 +949,14 @@ void InstrumentWidget::setWireframe(bool on) {
  * control calls this slot)
  */
 void InstrumentWidget::setIntegrationRange(double xmin, double xmax) {
+  auto workspace = m_instrumentActor->getWorkspace();
+  bool isDiscrete = workspace->isCommonBins() && workspace->isIntegerBins();
+
+  if (isDiscrete) {
+    xmin = workspace->binEdges(0)[static_cast<int>(xmin)];
+    xmax = workspace->binEdges(0)[static_cast<int>(xmax) + 1];
+  }
+
   m_instrumentActor->setIntegrationRange(xmin, xmax);
   setupColorMap();
   updateInstrumentDetectors();

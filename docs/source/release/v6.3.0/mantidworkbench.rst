@@ -8,6 +8,8 @@ Mantid Workbench Changes
 New and Improved
 ----------------
 
+- The integration slider in the instrument viewer now support discrete steps when the axis has discrete values.
+
 Bugfixes
 --------
 - Fixed arbitrary values not being accepted as the "Start Time" in StartLiveDataDialog.
