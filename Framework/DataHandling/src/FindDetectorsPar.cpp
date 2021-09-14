@@ -298,40 +298,40 @@ void AvrgDetector::returnAvrgDetPar(DetParameters &avrgDet) {
 /** Method calculates averaged polar coordinates of the detector's group
 (which may consist of one detector)
 *@param det    -- reference to the Mantid Detector
-*@param Observer -- sample position or the centre of the polar system of
+*@param observer -- sample position or the centre of the polar system of
 coordinates to calculate detector's parameters.
 
 *@param Detector  -- return Detector class containing averaged polar coordinates
 of the detector or detector's group in
                      spherical coordinate system with centre at Observer
 */
-void FindDetectorsPar::calcDetPar(const Geometry::IDetector &det, const Kernel::V3D &Observer,
-                                  DetParameters &Detector) {
+void FindDetectorsPar::calcDetPar(const Geometry::IDetector &detector, const Kernel::V3D &observer,
+                                  DetParameters &detParameters) {
 
   // get number of basic detectors within the composit detector
-  size_t nDetectors = det.nDets();
+  size_t nDetectors = detector.nDets();
   // define summator
   AvrgDetector detSum;
   // do we want spherical or linear box sizes?
   detSum.setUseSpherical(!m_SizesAreLinear);
 
   if (nDetectors == 1) {
-    detSum.addDetInfo(det, Observer);
+    detSum.addDetInfo(detector, observer);
   } else {
     // access contributing detectors;
-    auto detGroup = dynamic_cast<const Geometry::DetectorGroup *>(&det);
+    auto detGroup = dynamic_cast<const Geometry::DetectorGroup *>(&detector);
     if (!detGroup) {
       g_log.error() << "calc_cylDetPar: can not downcast IDetector_sptr to "
-                       "detector group for det->ID: "
-                    << det.getID() << '\n';
+                       "detector group for detector->ID: "
+                    << detector.getID() << '\n';
       throw(std::bad_cast());
     }
     for (const auto &det : detGroup->getDetectors()) {
-      detSum.addDetInfo(*det, Observer);
+      detSum.addDetInfo(*det, observer);
     }
   }
   // calculate averages and return the detector parameters
-  detSum.returnAvrgDetPar(Detector);
+  detSum.returnAvrgDetPar(detParameters);
 }
 /**Method to convert vector of Detector's classes into vectors of doubles with
    all correspondent information

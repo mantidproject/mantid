@@ -380,7 +380,7 @@ void CorrectTOFAxis::correctManually(const API::MatrixWorkspace_sptr &outputWs) 
  *  @param epp An output parameter for the average position
  *         of the detectors' elastic peak
  */
-void CorrectTOFAxis::averageL2AndEPP(const API::SpectrumInfo &spectrumInfo, double &l2, double &epp) {
+void CorrectTOFAxis::averageL2AndEPP(const API::SpectrumInfo &spectrumInfo, double &l2Average, double &eppAverage) {
   auto peakPositionColumn = m_eppTable->getColumn(EPPTableLiterals::PEAK_CENTRE_COLUMN);
   auto fitStatusColumn = m_eppTable->getColumn(EPPTableLiterals::FIT_STATUS_COLUMN);
   double l2Sum = 0;
@@ -414,10 +414,10 @@ void CorrectTOFAxis::averageL2AndEPP(const API::SpectrumInfo &spectrumInfo, doub
   if (n == 0) {
     throw std::runtime_error("No successful detector fits found in " + PropertyNames::EPP_TABLE);
   }
-  l2 = l2Sum / static_cast<double>(n);
-  g_log.information() << "Average L2 distance: " << l2 << ".\n";
-  epp = eppSum / static_cast<double>(n);
-  g_log.information() << "Average EPP: " << epp << ".\n";
+  l2Average = l2Sum / static_cast<double>(n);
+  g_log.information() << "Average L2 distance: " << l2Average << ".\n";
+  eppAverage = eppSum / static_cast<double>(n);
+  g_log.information() << "Average EPP: " << eppAverage << ".\n";
 }
 
 double CorrectTOFAxis::averageL2(const API::SpectrumInfo &spectrumInfo) {

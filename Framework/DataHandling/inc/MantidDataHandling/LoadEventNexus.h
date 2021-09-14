@@ -401,10 +401,10 @@ void adjustTimeOfFlightISISLegacy(::NeXus::File &file, T localWorkspace, const s
   if (classType == "NXmonitor") {
     std::vector<std::string> bankNames;
     for (string_map_t::const_iterator it = entries.begin(); it != entries.end(); ++it) {
-      std::string entry_name(it->first);
+      std::string entryName(it->first);
       std::string entry_class(it->second);
       if (entry_class == classType) {
-        bankNames.emplace_back(entry_name);
+        bankNames.emplace_back(entryName);
       }
     }
     for (size_t i = 0; i < bankNames.size(); ++i) {
