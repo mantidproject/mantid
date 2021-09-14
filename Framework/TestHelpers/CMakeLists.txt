@@ -101,6 +101,7 @@ target_link_libraries(FrameworkTestHelpers
                         Mantid::MDAlgorithms
                         Mantid::Muon
                         Mantid::NexusGeometry
+			gmock
 )
 
 target_include_directories(FrameworkTestHelpers PRIVATE
