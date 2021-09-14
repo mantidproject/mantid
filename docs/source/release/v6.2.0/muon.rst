@@ -39,12 +39,6 @@ New Features
 ############
 
 - Users can now copy sequential fitting parameters to all other runs using the ``Copy fit parameters to all`` checkbox.
-- **The** :ref:`Model Fitting Tab <muon_model_fitting_tab-ref>` **allows you to perform fits across the sample logs and fit parameters stored in your results table.**
-
-.. image::  ../../images/muon_model_fitting_tab.PNG
-   :align: center
-   :height: 800px
-
 
 Muon Analysis and Frequency Domain Analysis
 -------------------------------------------
