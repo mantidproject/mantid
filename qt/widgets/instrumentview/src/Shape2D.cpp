@@ -51,9 +51,8 @@ void Shape2D::draw(QPainter &painter) const {
     auto center = m_boundingRect.center();
     QRectF drawRect = m_boundingRect.translated(-center).toQRectF();
     painter.save();
-    double rotation = 20;
-    painter.rotate(rotation);
-    painter.translate(QTransform().rotate(-rotation).map(center));
+    painter.rotate(m_boundingRotation);
+    painter.translate(QTransform().rotate(-m_boundingRotation).map(center));
     painter.setPen(QPen(QColor(255, 255, 255, 100), 0));
     painter.drawRect(drawRect);
     painter.restore();
@@ -98,8 +97,7 @@ QPointF Shape2D::getControlPoint(size_t i) const {
   if (i < 4) {
     auto center = m_boundingRect.center();
     QPointF vertex = m_boundingRect.vertex(i);
-    double rotation = 20;
-    vertex = QTransform().rotate(rotation).map(vertex-center)+center;
+    vertex = QTransform().rotate(m_boundingRotation).map(vertex-center)+center;
     return vertex;
   }
 
@@ -113,8 +111,7 @@ void Shape2D::setControlPoint(size_t i, const QPointF &pos) {
 
   if (i < 4) {
     auto center = m_boundingRect.center();
-    double rotation = 20;
-    m_boundingRect.setVertex(i, QTransform().rotate(-rotation).map(pos-center)+center);
+    m_boundingRect.setVertex(i, QTransform().rotate(-m_boundingRotation).map(pos-center)+center);
 
     refit();
   }
@@ -396,8 +393,7 @@ Shape2DRectangle::Shape2DRectangle(const QPointF &p0, const QSizeF &size) { m_bo
 bool Shape2DRectangle::selectAt(const QPointF &p) const {
   if (m_fill_color != QColor()) { // filled rectangle
     auto center = m_boundingRect.center();
-    double rotation = 20;
-    return contains(QTransform().rotate(-rotation).map(p-center)+center);
+    return contains(QTransform().rotate(-m_boundingRotation).map(p-center)+center);
   }
 
   RectF outer(m_boundingRect);
@@ -411,9 +407,8 @@ void Shape2DRectangle::drawShape(QPainter &painter) const {
   auto center = m_boundingRect.center();
   QRectF drawRect = m_boundingRect.translated(-center).toQRectF();
   painter.save();
-  double rotation = 20;
-  painter.rotate(rotation);
-  painter.translate(QTransform().rotate(-rotation).map(center));
+  painter.rotate(m_boundingRotation);
+  painter.translate(QTransform().rotate(-m_boundingRotation).map(center));
   painter.drawRect(drawRect);
   if (m_fill_color != QColor()) {
     QPainterPath path;
