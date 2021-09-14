@@ -8,8 +8,9 @@
 from mantid.api import AlgorithmFactory, FileAction, FileProperty, \
     MultipleFileProperty, ITableWorkspaceProperty, PropertyMode, \
     Progress, PythonAlgorithm, WorkspaceGroupProperty
-from mantid.kernel import Direction, EnabledWhenProperty, FloatBoundedValidator, \
-    LogicOperator, PropertyCriterion, PropertyManagerProperty, StringListValidator
+from mantid.kernel import Direction, EnabledWhenProperty, FloatArrayProperty, \
+    FloatBoundedValidator, LogicOperator, PropertyCriterion, PropertyManagerProperty, \
+    RebinParamsValidator, StringListValidator
 from mantid.simpleapi import *
 
 from scipy.constants import physical_constants
@@ -120,6 +121,8 @@ class PolDiffILLReduction(PythonAlgorithm):
         return issues
 
     def PyInit(self):
+
+        validRebinParams = RebinParamsValidator(AllowEmpty=True)
 
         self.declareProperty(MultipleFileProperty('Run', extensions=['nxs']),
                              doc='File path of run(s).')
@@ -286,6 +289,11 @@ class PolDiffILLReduction(PythonAlgorithm):
 
         self.setPropertySettings('ElasticChannelsWorkspace', tofMeasurement)
 
+        self.declareProperty(FloatArrayProperty(name="EnergyBinning", validator=validRebinParams),
+                             doc='Manual energy exchange binning parameters.')
+
+        self.setPropertySettings('EnergyBinning', tofMeasurement)
+
     @staticmethod
     def _calculate_transmission(ws, beam_ws):
         """Calculates transmission based on the measurement of the current sample and empty beam."""
@@ -388,6 +396,43 @@ class PolDiffILLReduction(PythonAlgorithm):
             flipper_state = entry.getRun().getLogData("POL.actual_stateB1B2").value
             new_name = "{0}_{1}_{2}".format(numor, direction, flipper_state)
             RenameWorkspace(InputWorkspace=entry, OutputWorkspace=new_name)
+
+    @staticmethod
+    def _set_default_energy_binning(ws):
+        """Create common (but nonequidistant) binning for a DeltaE workspace in the TOF mode."""
+        for entry in mtd[ws]:
+            xs = entry.extractX()
+            minXIndex = np.nanargmin(xs[:, 0])
+            dx = BinWidthAtX(InputWorkspace=entry,
+                             X=0.0)
+            lastX = np.max(xs[:, -1])
+            binCount = entry.blocksize()
+            borders = list()
+            templateXs = xs[minXIndex, :]
+            currentX = np.nan
+            for i in range(binCount):
+                currentX = templateXs[i]
+                borders.append(currentX)
+                if currentX > 0:
+                    break
+            i = 1
+            equalBinStart = borders[-1]
+            while currentX < lastX:
+                currentX = equalBinStart + i * dx
+                borders.append(currentX)
+                i += 1
+            borders[-1] = lastX
+            borders = np.array(borders)
+            params = list()
+            binWidths = np.diff(borders)
+            for start, width in zip(borders[:-1], binWidths):
+                params.append(start)
+                params.append(width)
+            params.append(borders[-1])
+            Rebin(InputWorkspace=entry,
+                  OutputWorkspace=entry,
+                  Params=params)
+        return ws
 
     def _load_and_prepare_data(self, measurement_technique, process, progress):
         """Loads the data, sets the instrument, and runs function to check the measurement method. In the case
@@ -1035,6 +1080,13 @@ class PolDiffILLReduction(PythonAlgorithm):
             entry.setYUnitLabel("{} ({})".format(unit, unit_symbol))
         return ws
 
+    def _rebin_in_energy(self, ws):
+        """Rebins TOF data in energy exchange."""
+        if not self.getProperty('EnergyBinning').isDefault:
+            Rebin(InputWorkspace=ws, OutputWorkspace=ws, Params=self.getProperty('EnergyBinning').value)
+        else:
+            self._set_default_energy_binning(ws)
+
     def _finalize(self, ws, process):
         """Finalizes the reduction step by removing special values, calling merging functions and setting unique names
          to the output workspaces."""
@@ -1051,9 +1103,10 @@ class PolDiffILLReduction(PythonAlgorithm):
         if output_treatment == 'IndividualXY':
             self._merge_all_inputs(ws)
         RenameWorkspace(InputWorkspace=ws, OutputWorkspace=ws[2:])  # renames group as a whole
+        ws = ws[2:]
         output_ws = self.getPropertyValue("OutputWorkspace")
-        if mtd[ws[2:]].getNumberOfEntries() > 1:
-            for entry in mtd[ws[2:]]:  # renames individual ws to contain the output name
+        if mtd[ws].getNumberOfEntries() > 1:
+            for entry in mtd[ws]:  # renames individual ws to contain the output name
                 entry_name = entry.name()
                 if entry_name[:2] == "__":
                     entry_name = entry_name[2:]
@@ -1063,7 +1116,9 @@ class PolDiffILLReduction(PythonAlgorithm):
                     output_name = entry_name
                 if output_name != entry.name():
                     RenameWorkspace(InputWorkspace=entry, OutputWorkspace=output_name)
-        self.setProperty('OutputWorkspace', mtd[ws[2:]])
+        if self.getPropertyValue('MeasurementTechnique') == 'TOF':
+            self._rebin_in_energy(ws)
+        self.setProperty('OutputWorkspace', mtd[ws])
 
     def PyExec(self):
         process = self.getPropertyValue('ProcessAs')
