@@ -661,7 +661,7 @@ double dSpacing::singleToTOF(const double x) const {
 /**
  * DIFA * d^2 + DIFC * d + T0 - TOF = 0
  *
- * Use the citardauq formula to solve quadratic in order to minimise loss of precision. citarqauq (quadratic spelled
+ * Use the citardauq formula to solve quadratic in order to minimise loss of precision. citardauq (quadratic spelled
  * backwards) is an alternate formulation of the quadratic formula. DIFC and sqrt term are often similar and the
  * "classic" quadratic formula involves calculating their difference in the numerator
  *
@@ -688,8 +688,8 @@ double dSpacing::singleFromTOF(const double tof) const {
   // non-physical result
   if (tzero > tof) {
     if (difa > 0.) {
-      throw std::runtime_error("Cannot convert to imaginary d spacing because tzero > time-of-flight and difa is "
-                               "positive. Quadratic doesn't have a positive root");
+      throw std::runtime_error("Cannot convert to d spacing because tzero > time-of-flight and difa is positive. "
+                               "Quadratic doesn't have a positive root");
     } else if (difa == 0.) {
       throw std::runtime_error("Cannot convert to d spacing because tzero > time-of-flight");
     }
