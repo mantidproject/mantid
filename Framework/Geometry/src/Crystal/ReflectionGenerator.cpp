@@ -42,7 +42,7 @@ HKLFilter_const_sptr ReflectionGenerator::getDRangeFilter(double dMin, double dM
 }
 
 /// Returns a reflection condition HKLFilter based on the supplied enum.
-HKLFilter_const_sptr ReflectionGenerator::getReflectionConditionFilter(ReflectionConditionFilter filter) {
+HKLFilter_const_sptr ReflectionGenerator::getReflectionConditionFilter(ReflectionConditionFilter filter) const {
   switch (filter) {
   case ReflectionConditionFilter::Centering:
     return std::make_shared<const HKLFilterCentering>(m_crystalStructure.centering());

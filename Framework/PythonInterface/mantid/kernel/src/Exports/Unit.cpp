@@ -23,7 +23,7 @@ namespace {
  * Returns the full name of the unit & raises a deprecation warning
  * @param self A reference to calling object
  */
-const std::string deprecatedName(Unit &self) {
+const std::string deprecatedName(const Unit &self) {
   PyErr_Warn(PyExc_DeprecationWarning, "'name' is deprecated, use 'caption' instead.");
   return self.caption();
 }
@@ -32,12 +32,12 @@ const std::string deprecatedName(Unit &self) {
  * Returns the label of the unit as a std::string & raises a deprecation warning
  * @param self A reference to calling object
  */
-const std::string deprecatedLabel(Unit &self) {
+const std::string deprecatedLabel(const Unit &self) {
   PyErr_Warn(PyExc_DeprecationWarning, "'unit.label()' is deprecated, use 'str(unit.symbol())' instead.");
   return self.label().ascii();
 }
 
-template <class T> tuple quickConversionWrapper(Unit &self, const T &destUnitName) {
+template <class T> tuple quickConversionWrapper(const Unit &self, const T &destUnitName) {
   double wavelengthFactor = 0;
   double wavelengthPower = 0;
   bool converted = self.quickConversion(destUnitName, wavelengthFactor, wavelengthPower);

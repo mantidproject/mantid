@@ -19,13 +19,13 @@ namespace PythonInterface {
 //** @name Numpy clones of data*/
 ///{
 /// Create a numpy array from the X values of the given workspace reference
-PyObject *cloneX(API::MatrixWorkspace &self);
+PyObject *cloneX(const API::MatrixWorkspace &self);
 /// Create a numpy array from the Y values of the given workspace reference
-PyObject *cloneY(API::MatrixWorkspace &self);
+PyObject *cloneY(const API::MatrixWorkspace &self);
 /// Create a numpy array from the E values of the given workspace reference
-PyObject *cloneE(API::MatrixWorkspace &self);
+PyObject *cloneE(const API::MatrixWorkspace &self);
 /// Create a numpy array from the E values of the given workspace reference
-PyObject *cloneDx(API::MatrixWorkspace &self);
+PyObject *cloneDx(const API::MatrixWorkspace &self);
 ///@}
 } // namespace PythonInterface
 } // namespace Mantid

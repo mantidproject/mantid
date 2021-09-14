@@ -43,10 +43,10 @@ namespace {
  *  @throw  std::out_of_range If invalid (0 or less) size arguments are given
  *  @throw  NotFoundException If the class is not registered in the factory
  **/
-Workspace_sptr createFromParentPtr(WorkspaceFactoryImpl &self, const MatrixWorkspace_sptr &parent,
+Workspace_sptr createFromParentPtr(WorkspaceFactoryImpl const *const self, const MatrixWorkspace_sptr &parent,
                                    size_t NVectors = size_t(-1), size_t XLength = size_t(-1),
                                    size_t YLength = size_t(-1)) {
-  return self.create(parent, NVectors, XLength, YLength);
+  return self->create(parent, NVectors, XLength, YLength);
 }
 
 /// Overload generator for create

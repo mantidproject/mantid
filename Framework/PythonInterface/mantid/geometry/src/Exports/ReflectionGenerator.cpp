@@ -24,31 +24,31 @@ boost::python::list getListFromV3DVector(const std::vector<V3D> &hkls) {
   return hklList;
 }
 
-boost::python::list getHKLsDefaultFilter(ReflectionGenerator &self, double dMin, double dMax) {
+boost::python::list getHKLsDefaultFilter(const ReflectionGenerator &self, double dMin, double dMax) {
   return getListFromV3DVector(self.getHKLs(dMin, dMax));
 }
 
-boost::python::list getHKLsUsingFilter(ReflectionGenerator &self, double dMin, double dMax,
+boost::python::list getHKLsUsingFilter(const ReflectionGenerator &self, double dMin, double dMax,
                                        ReflectionConditionFilter filter) {
-  return getListFromV3DVector(self.getHKLs(dMin, dMax, self.getReflectionConditionFilter(filter)));
+  return getListFromV3DVector(self.getHKLs(dMin, dMax, self.getReflectionConditionFilter(std::move(filter))));
 }
 
-boost::python::list getUniqueHKLsDefaultFilter(ReflectionGenerator &self, double dMin, double dMax) {
+boost::python::list getUniqueHKLsDefaultFilter(const ReflectionGenerator &self, double dMin, double dMax) {
   return getListFromV3DVector(self.getUniqueHKLs(dMin, dMax));
 }
 
 boost::python::list getUniqueHKLsUsingFilter(ReflectionGenerator &self, double dMin, double dMax,
                                              ReflectionConditionFilter filter) {
-  return getListFromV3DVector(self.getUniqueHKLs(dMin, dMax, self.getReflectionConditionFilter(filter)));
+  return getListFromV3DVector(self.getUniqueHKLs(dMin, dMax, self.getReflectionConditionFilter(std::move(filter))));
 }
 
-std::vector<double> getDValues(ReflectionGenerator &self, const boost::python::object &hkls) {
+std::vector<double> getDValues(const ReflectionGenerator &self, const boost::python::object &hkls) {
   Converters::PySequenceToVector<V3D> converter(hkls);
 
   return self.getDValues(converter());
 }
 
-std::vector<double> getFsSquared(ReflectionGenerator &self, const boost::python::object &hkls) {
+std::vector<double> getFsSquared(const ReflectionGenerator &self, const boost::python::object &hkls) {
   Converters::PySequenceToVector<V3D> converter(hkls);
 
   return self.getFsSquared(converter());

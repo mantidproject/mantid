@@ -44,12 +44,11 @@ namespace {
  * AlgorithmFactory class
  * @param includeHidden :: If true hidden algorithms are included
  */
-dict getRegisteredAlgorithms(AlgorithmFactoryImpl &self, bool includeHidden) {
-  std::vector<std::string> keys = self.getKeys(includeHidden);
-  const size_t nkeys = keys.size();
+dict getRegisteredAlgorithms(AlgorithmFactoryImpl const *const self, bool includeHidden) {
+  const auto keys = self->getKeys(includeHidden);
   dict inventory;
-  for (size_t i = 0; i < nkeys; ++i) {
-    auto algInfo = self.decodeName(keys[i]);
+  for (const auto &key : keys) {
+    auto algInfo = self->decodeName(key);
     object name(handle<>(to_python_value<const std::string &>()(algInfo.first)));
     object ver(handle<>(to_python_value<const int &>()(algInfo.second)));
     // There seems to be no way to "promote" the return of .get to a list
@@ -71,12 +70,11 @@ dict getRegisteredAlgorithms(AlgorithmFactoryImpl &self, bool includeHidden) {
  * @param self :: An instance of AlgorithmFactory.
  * @param includeHidden :: If true hidden algorithms are included.
  */
-list getDescriptors(AlgorithmFactoryImpl &self, bool includeHidden = false, bool includeAlias = false) {
-  auto descriptors = self.getDescriptors(includeHidden, includeAlias);
+list getDescriptors(AlgorithmFactoryImpl const *const self, bool includeHidden = false, bool includeAlias = false) {
+  const auto descriptors = self->getDescriptors(includeHidden, includeAlias);
   list pyDescriptors;
-  for (auto &descr : descriptors) {
-    boost::python::object d(descr);
-    pyDescriptors.append(d);
+  for (const auto &descr : descriptors) {
+    pyDescriptors.append(boost::python::object(descr));
   }
   return pyDescriptors;
 }
@@ -90,8 +88,8 @@ list getDescriptors(AlgorithmFactoryImpl &self, bool includeHidden = false, bool
  * @returns The map of the categories, together with a true false value
  * defining if they are hidden
  */
-dict getCategoriesandState(AlgorithmFactoryImpl &self) {
-  std::map<std::string, bool> categories = self.getCategoriesWithState();
+dict getCategoriesandState(AlgorithmFactoryImpl const *const self) {
+  const auto categories = self->getCategoriesWithState();
   dict pythonCategories;
   for (auto &it : categories) {
     object categoryName(handle<>(to_python_value<const std::string &>()(it.first)));
