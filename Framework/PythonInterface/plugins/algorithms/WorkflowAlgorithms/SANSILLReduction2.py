@@ -836,7 +836,7 @@ class SANSILLReduction(PythonAlgorithm):
                 mtd[ws].setE(blank_mon, np.array([0.]))
         if self.mode == AcqMode.REVENT:
             # if a workspace is a rebinned event, it is loaded by LoadNexusProcess and not by LoadILLSANS,
-            # hence we have to prepare it similarly
+            # hence we have to prepare it similarly, including the placement of the detector
             durations = np.diff(mtd[ws].readX(0)) * 1E-6
             ConvertToPointData(InputWorkspace=ws, OutputWorkspace=ws)
             # note that, currently for event workspaces monitors are loaded to a separate workspace,
@@ -852,6 +852,36 @@ class SANSILLReduction(PythonAlgorithm):
             DeleteWorkspace(tmp_mon_spectra)
             l2 = main_detector_distance(run, self.instrument)
             AddSampleLog(Workspace=ws, LogName='L2', LogType='Number', LogText=str(l2), LogUnit='meters')
+            self.place_detector(ws)
+
+    def place_detector(self, ws):
+        '''
+        Places the detector just as the LoadILLSANS would do.
+        This is because rebinned events are loaded by LoadNexusProcesses, so there is no detector placement at all.
+        TODO: this is not good to repeat that logic, investigate how to avoid this
+        '''
+        instr = mtd[ws].getInstrument()
+        run = mtd[ws].getRun()
+        if instr.getName() == 'D22B':
+            back_pos = instr.getComponentByName('detector_back').getPos()
+            MoveInstrumentComponent(Workspace=ws,
+                                    ComponentName='detector_back',
+                                    RelativePosition=False,
+                                    X=-run['Detector 1.dtr1_actual'].value/1000.,
+                                    Y=back_pos[1],
+                                    Z=run['Detector 1.det1_calc'].value)
+            front_pos = instr.getComponentByName('detector_front').getPos()
+            MoveInstrumentComponent(Workspace=ws,
+                                    ComponentName='detector_front',
+                                    RelativePosition=False,
+                                    X=-run['Detector 2.dtr2_actual'].value/1000.,
+                                    Y=front_pos[1],
+                                    Z=run['Detector 2.det2_calc'].value)
+            RotateInstrumentComponent(Workspace=ws,
+                                      ComponentName='detector_front',
+                                      RelativeRotation=False,
+                                      Angle=-run['Detector 2.dan2_actual'].value,
+                                      X=0, Y=1, Z=0)
 
     def reduce(self):
         '''
