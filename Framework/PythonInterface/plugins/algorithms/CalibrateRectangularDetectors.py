@@ -57,7 +57,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
     _binning = None
 
     def category(self):
-        return "Diffraction\\Calibration"
+        return "Diffraction\\Calibration;Deprecated"
 
     def seeAlso(self):
         return [ "GetDetectorOffsets" ]
