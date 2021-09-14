@@ -181,6 +181,10 @@ public:
     m_maskShapes.setCurrentBoundingRotation(rotation);
   }
 
+  std::string getCurrentShapeType() const {
+    return m_maskShapes.getCurrentShapeType();
+  }
+
   /// Initialize interactive shape creation.
   /// @param type :: Type of the shape. For available types see code of
   /// Shape2DCollection::createShape(const QString& type,int x,int y) const
