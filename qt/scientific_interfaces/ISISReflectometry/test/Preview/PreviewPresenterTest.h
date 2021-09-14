@@ -10,6 +10,7 @@
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MockInstViewModel.h"
 #include "MockPreviewModel.h"
 #include "MockPreviewView.h"
 #include "PreviewPresenter.h"
@@ -20,7 +21,6 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include <array>
 #include <memory>
 
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
@@ -35,9 +35,10 @@ using ::testing::Return;
 using ::testing::ReturnRef;
 
 class PreviewPresenterTest : public CxxTest::TestSuite {
-  using MockViewT = std::unique_ptr<MockPreviewView>;
-  using MockModelT = std::unique_ptr<MockPreviewModel>;
+  using MockInstViewModelT = std::unique_ptr<MockInstViewModel>;
   using MockJobManagerT = std::unique_ptr<IJobManager>;
+  using MockModelT = std::unique_ptr<MockPreviewModel>;
+  using MockViewT = std::unique_ptr<MockPreviewView>;
 
 public:
   void test_notify_load_workspace_requested() {
@@ -85,7 +86,10 @@ private:
     return mockJobManager;
   }
 
-  PreviewPresenter::Dependencies packDeps(MockPreviewView *view, MockModelT model, MockJobManagerT jobManager) {
-    return PreviewPresenter::Dependencies{view, std::move(model), std::move(jobManager)};
+  PreviewPresenter::Dependencies packDeps(MockPreviewView *view,
+                                          MockModelT model = std::make_unique<MockPreviewModel>(),
+                                          MockJobManagerT jobManager = std::make_unique<MockJobManager>(),
+                                          MockInstViewModelT instView = std::make_unique<MockInstViewModel>()) {
+    return PreviewPresenter::Dependencies{view, std::move(model), std::move(jobManager), std::move(instView)};
   }
 };

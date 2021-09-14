@@ -18,7 +18,7 @@ Mantid::Kernel::Logger g_log("Reflectometry Preview Presenter");
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 PreviewPresenter::PreviewPresenter(Dependencies dependencies)
     : m_view(dependencies.view), m_model(std::move(dependencies.model)),
-      m_jobManager(std::move(dependencies.jobManager)) {
+      m_jobManager(std::move(dependencies.jobManager)), m_instViewModel(std::move(dependencies.instViewModel)) {
   m_view->subscribe(this);
   m_jobManager->subscribe(this);
 }
