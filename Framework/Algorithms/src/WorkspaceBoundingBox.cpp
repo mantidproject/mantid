@@ -1,15 +1,34 @@
 #include "MantidAlgorithms/WorkspaceBoundingBox.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/SpectrumInfo.h"
 
 namespace Mantid {
 namespace Algorithms {
 
-WorkspaceBoundingBox::WorkspaceBoundingBox(API::MatrixWorkspace_sptr workspace) : workspace(workspace) {}
+WorkspaceBoundingBox::WorkspaceBoundingBox(API::MatrixWorkspace_sptr workspace) {
+  this->workspace = workspace;
+  this->spectrumInfo = &workspace->spectrumInfo();
+}
 
 WorkspaceBoundingBox::WorkspaceBoundingBox() {}
 
 WorkspaceBoundingBox::~WorkspaceBoundingBox() {}
+
+Kernel::V3D &WorkspaceBoundingBox::position(int index) {
+  if (m_cachedPositionIndex == -1 || m_cachedPositionIndex != index) {
+    m_cachedPosition = this->spectrumInfo->position(index);
+    m_cachedPositionIndex = index;
+  }
+  return m_cachedPosition;
+}
+
+const HistogramData::HistogramY &WorkspaceBoundingBox::histogramY(int index) {
+  if (m_cachedHistogramYIndex == -1 || m_cachedHistogramYIndex != index) {
+    auto &YIn = this->workspace->y(index);
+    m_cachedHistogramY = &YIn;
+    m_cachedHistogramYIndex = index;
+  }
+  return *m_cachedHistogramY;
+}
 
 void WorkspaceBoundingBox::setPosition(double x, double y) {
   this->x = x;
@@ -35,17 +54,16 @@ void WorkspaceBoundingBox::setBounds(double xMin, double xMax, double yMin, doub
  *  @return true/false if its valid
  */
 bool WorkspaceBoundingBox::isValidWs(int index) {
-  const auto spectrumInfo = this->workspace->spectrumInfo();
-  if (!spectrumInfo.hasDetectors(index)) {
+  if (!this->spectrumInfo->hasDetectors(index)) {
     g_log.warning() << "Workspace index " << index << " has no detector assigned to it - discarding\n";
     return false;
   }
   // Skip if we have a monitor or if the detector is masked.
-  if (spectrumInfo.isMonitor(index) || spectrumInfo.isMasked(index))
+  if (this->spectrumInfo->isMonitor(index) || this->spectrumInfo->isMasked(index))
     return false;
 
   // Get the current spectrum
-  const auto &YIn = this->workspace->y(index);
+  auto &YIn = this->histogramY(index);
   // Skip if NaN of inf
   if (std::isnan(YIn[m_specID]) || std::isinf(YIn[m_specID]))
     return false;
@@ -73,10 +91,9 @@ int WorkspaceBoundingBox::findFirstValidWs(const int numSpec) {
  *  @return number of points of histogram data at index
  */
 double WorkspaceBoundingBox::updatePositionAndReturnCount(int index) {
-  const auto spectrumInfo = this->workspace->spectrumInfo();
-  const auto &YIn = this->workspace->y(index);
-  double x = spectrumInfo.position(index).X();
-  double y = spectrumInfo.position(index).Y();
+  auto &YIn = this->histogramY(index);
+  double x = this->position(index).X();
+  double y = this->position(index).Y();
   this->x += YIn[m_specID] * x;
   this->y += YIn[m_specID] * y;
   return YIn[m_specID];
@@ -88,9 +105,8 @@ double WorkspaceBoundingBox::updatePositionAndReturnCount(int index) {
  *  @param index :: index of spectrum data
  */
 void WorkspaceBoundingBox::updateMinMax(int index) {
-  const auto spectrumInfo = this->workspace->spectrumInfo();
-  double x = spectrumInfo.position(index).X();
-  double y = spectrumInfo.position(index).Y();
+  double x = this->position(index).X();
+  double y = this->position(index).Y();
   this->xMin = std::min(x, this->xMin);
   this->xMax = std::max(x, this->xMax);
   this->yMin = std::min(y, this->yMin);
@@ -105,9 +121,8 @@ void WorkspaceBoundingBox::updateMinMax(int index) {
  *  @return number of points of histogram data at index
  */
 bool WorkspaceBoundingBox::isOutOfBoundsOfNonDirectBeam(const double beamRadius, int index, const bool directBeam) {
-  const auto spectrumInfo = this->workspace->spectrumInfo();
-  double x = spectrumInfo.position(index).X();
-  double y = spectrumInfo.position(index).Y();
+  double x = this->position(index).X();
+  double y = this->position(index).Y();
   if (!directBeam) {
     double dx = x - this->centerX;
     double dy = y - this->centerY;

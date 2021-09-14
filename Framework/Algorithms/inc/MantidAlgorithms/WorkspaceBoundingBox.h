@@ -7,7 +7,10 @@
 #pragma once
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/SpectrumInfo.h"
+#include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/V3D.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -52,7 +55,10 @@ public:
   void updateMinMax(int index);
 
 private:
+  Kernel::V3D &position(int index);
+  const HistogramData::HistogramY &histogramY(int index);
   API::MatrixWorkspace_sptr workspace;
+  const API::SpectrumInfo *spectrumInfo;
   double x = 0;
   double y = 0;
   double centerX;
@@ -62,6 +68,10 @@ private:
   double yMin = 0;
   double yMax = 0;
   const int m_specID = 0;
+  int m_cachedPositionIndex = -1;
+  int m_cachedHistogramYIndex = -1;
+  Kernel::V3D m_cachedPosition;
+  const HistogramData::HistogramY *m_cachedHistogramY;
 };
 
 } // namespace Algorithms
