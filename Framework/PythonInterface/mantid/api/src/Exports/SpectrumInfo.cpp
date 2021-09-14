@@ -29,7 +29,7 @@ SpectrumInfoPythonIterator make_pyiterator(SpectrumInfo &spectrumInfo) {
   return SpectrumInfoPythonIterator(spectrumInfo);
 }
 
-PyObject *geographicalAngles(SpectrumInfo &spectrumInfo, const size_t index) {
+PyObject *geographicalAngles(const SpectrumInfo &spectrumInfo, const size_t index) {
   const auto angles = spectrumInfo.geographicalAngles(index);
   return incref(make_tuple(angles.first, angles.second).ptr());
 }

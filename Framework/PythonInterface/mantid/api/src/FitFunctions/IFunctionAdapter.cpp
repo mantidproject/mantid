@@ -125,7 +125,7 @@ void IFunctionAdapter::declareAttribute(const std::string &name, const object &d
  * @param name :: The name of the new attribute.
  * @returns The value of the attribute
  */
-PyObject *IFunctionAdapter::getAttributeValue(IFunction &self, const std::string &name) {
+PyObject *IFunctionAdapter::getAttributeValue(const IFunction &self, const std::string &name) {
   auto attr = self.getAttribute(name);
   return getAttributeValue(self, attr);
 }
@@ -136,7 +136,7 @@ PyObject *IFunctionAdapter::getAttributeValue(IFunction &self, const std::string
  * @param attr An attribute object
  * @returns The value of the attribute
  */
-PyObject *IFunctionAdapter::getAttributeValue(IFunction &self, const API::IFunction::Attribute &attr) {
+PyObject *IFunctionAdapter::getAttributeValue(const IFunction &self, const API::IFunction::Attribute &attr) {
   UNUSED_ARG(self);
   std::string type = attr.type();
   PyObject *result(nullptr);
@@ -189,7 +189,7 @@ void IFunctionAdapter::setAttribute(const std::string &attName, const Attribute 
  *    For a single domain function it should have a single element (self).
  * @return A python list of IFunction_sprs.
  */
-boost::python::list IFunctionAdapter::createPythonEquivalentFunctions(IFunction &self) {
+boost::python::list IFunctionAdapter::createPythonEquivalentFunctions(const IFunction &self) {
   auto functions = self.createEquivalentFunctions();
   boost::python::list list;
   for (const auto &fun : functions) {
