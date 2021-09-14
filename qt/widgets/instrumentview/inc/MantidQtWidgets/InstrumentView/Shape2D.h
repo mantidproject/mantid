@@ -88,6 +88,10 @@ public:
                                   double dy2);
   /// Set new bounding rect.
   virtual void setBoundingRect(const RectF &rect);
+  /// Return the bounding rotation of the shape.
+  virtual double getBoundingRotation() const { return m_boundingRotation; }
+  /// Set new bounding rotation
+  virtual void setBoundingRotation(const double rotation) { m_boundingRotation = rotation; };
   /// will the shape be selected if clicked at a point? By default return false.
   virtual bool selectAt(const QPointF & /*unused*/) const { return false; }
   /// is a point inside the shape (closed line)? By default return false.
@@ -179,6 +183,7 @@ protected:
   static const size_t NCommonCP;
   static const qreal sizeCP;
   RectF m_boundingRect;
+  double m_boundingRotation = 0.0;
   QColor m_color;
   QColor m_fill_color;
   bool m_scalable; ///< shape can be scaled when zoomed

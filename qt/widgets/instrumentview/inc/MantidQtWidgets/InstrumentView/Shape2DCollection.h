@@ -71,6 +71,8 @@ public:
 
   RectF getCurrentBoundingRect() const;
   void setCurrentBoundingRect(const RectF &rect);
+  double getCurrentBoundingRotation() const;
+  void setCurrentBoundingRotation(const double rotation);
   // double properties
   QStringList getCurrentDoubleNames() const;
   double getCurrentDouble(const QString &prop) const;
