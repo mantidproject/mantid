@@ -19,6 +19,7 @@ Improvements
 ------------
 - Single input has been removed from the :ref:`Inelastic Data Analysis <interface-inelastic-data-analysis>` Fit tabs. All data input is now done via the multiple input dialog.
 - The data input widgets in the :ref:`Inelastic Data Analysis <interface-inelastic-data-analysis>` Fit tabs has been made dockable and can be resized once undocked.
+- Updated :ref:`Inelastic Data Analysis <interface-inelastic-data-analysis>` and :ref:`Elwin and I(Q,t) <Elwin-iqt-ref>` documentation with up to date screenshots.
 
 Bugfixes
 --------
