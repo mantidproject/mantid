@@ -289,7 +289,8 @@ void Shape2DEllipse::addToPath(QPainterPath &path) const {
 
 bool Shape2DEllipse::selectAt(const QPointF &p) const {
   if (m_fill_color != QColor()) { // filled ellipse
-    return contains(p);
+    return contains(QTransform().rotate(-m_boundingRotation).map(p - m_boundingRect.center()) +
+                    m_boundingRect.center());
   }
 
   double a = m_boundingRect.xSpan() / 2;

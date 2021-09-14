@@ -307,8 +307,11 @@ InstrumentWidgetDecoder::decodeEllipse(const QMap<QString, QVariant> &map) {
   const auto radius2 = map[QString("radius2")].toDouble();
   const auto x = map[QString("x")].toDouble();
   const auto y = map[QString("y")].toDouble();
+  const auto rot = map[QString("rotation")].toDouble();
 
-  return new Shape2DEllipse(QPointF(x, y), radius1, radius2);
+  auto shape = new Shape2DEllipse(QPointF(x, y), radius1, radius2);
+  shape->setBoundingRotation(rot);
+  return shape;
 }
 
 Shape2D *
@@ -317,10 +320,13 @@ InstrumentWidgetDecoder::decodeRectangle(const QMap<QString, QVariant> &map) {
   const auto y0 = map[QString("y0")].toDouble();
   const auto x1 = map[QString("x1")].toDouble();
   const auto y1 = map[QString("y1")].toDouble();
+  const auto rot = map[QString("rotation")].toDouble();
 
   const QPointF point1(x0, y0);
   const QPointF point2(x1, y1);
-  return new Shape2DRectangle(point1, point2);
+  auto shape = new Shape2DRectangle(point1, point2);
+  shape->setBoundingRotation(rot);
+  return shape;
 }
 
 Shape2D *

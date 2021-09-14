@@ -74,11 +74,9 @@ using Mantid::API::AlgorithmManager;
 namespace MantidQt {
 namespace MantidWidgets {
 InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
-    : InstrumentWidgetTab(instrWidget), m_activity(Select),
-      m_hasMaskToApply(false), m_maskBins(false), m_userEditing(true),
-      m_groupManager(nullptr), m_stringManager(nullptr),
-      m_doubleManager(nullptr), m_browser(nullptr), m_left(nullptr),
-      m_top(nullptr), m_right(nullptr), m_bottom(nullptr) {
+    : InstrumentWidgetTab(instrWidget), m_activity(Select), m_hasMaskToApply(false), m_maskBins(false),
+      m_userEditing(true), m_groupManager(nullptr), m_stringManager(nullptr), m_doubleManager(nullptr),
+      m_browser(nullptr), m_left(nullptr), m_top(nullptr), m_right(nullptr), m_bottom(nullptr), m_rotation(nullptr) {
 
   // main layout
   QVBoxLayout *layout = new QVBoxLayout(this);
@@ -628,10 +626,9 @@ void InstrumentWidgetMaskTab::shapeChanged() {
   m_doubleManager->setValue(m_top, std::max(rect.y0(), rect.y1()));
   m_doubleManager->setValue(m_right, std::max(rect.x0(), rect.x1()));
   m_doubleManager->setValue(m_bottom, std::min(rect.y0(), rect.y1()));
-  for (QMap<QtProperty *, QString>::iterator it = m_doublePropertyMap.begin();
-       it != m_doublePropertyMap.end(); ++it) {
-    m_doubleManager->setValue(
-        it.key(), m_instrWidget->getSurface()->getCurrentDouble(it.value()));
+
+  for (QMap<QtProperty *, QString>::iterator it = m_doublePropertyMap.begin(); it != m_doublePropertyMap.end(); ++it) {
+    m_doubleManager->setValue(it.key(), m_instrWidget->getSurface()->getCurrentDouble(it.value()));
   }
   for (QMap<QString, QtProperty *>::iterator it = m_pointPropertyMap.begin();
        it != m_pointPropertyMap.end(); ++it) {
@@ -695,8 +692,8 @@ void InstrumentWidgetMaskTab::setProperties() {
   boundingRectGroup->addSubProperty(m_top);
   boundingRectGroup->addSubProperty(m_right);
   boundingRectGroup->addSubProperty(m_bottom);
-  
-  if(isRotationSupported()) {
+
+  if (isRotationSupported()) {
     m_rotation = addDoubleProperty("rotation");
     boundingRectGroup->addSubProperty(m_rotation);
   }
@@ -725,8 +722,8 @@ void InstrumentWidgetMaskTab::setProperties() {
     m_doublePropertyMap[prop] = name;
   }
 
-  //rotation property
-  if(isRotationSupported())
+  // rotation property
+  if (isRotationSupported())
     m_doubleManager->setValue(m_rotation, m_instrWidget->getSurface()->getCurrentBoundingRotation());
 
   shapeChanged();
@@ -757,8 +754,8 @@ void InstrumentWidgetMaskTab::doubleChanged(QtProperty *prop) {
     QRectF rect(QPointF(x0, y0), QPointF(x1, y1));
     m_instrWidget->getSurface()->setCurrentBoundingRect(RectF(rect));
 
-    if(isRotationSupported())
-        m_instrWidget->getSurface()->setCurrentBoundingRotation(m_doubleManager->value(m_rotation));
+    if (isRotationSupported())
+      m_instrWidget->getSurface()->setCurrentBoundingRotation(m_doubleManager->value(m_rotation));
 
   } else {
     QString name = m_doublePropertyMap[prop];
@@ -1562,8 +1559,7 @@ bool InstrumentWidgetMaskTab::saveMaskViewToProject(
   return true;
 }
 
-
-bool InstrumentWidgetMaskTab::isRotationSupported(){
+bool InstrumentWidgetMaskTab::isRotationSupported() {
   const auto shapeType = m_instrWidget->getSurface()->getCurrentShapeType();
   return shapeType == "rectangle" || shapeType == "ellipse";
 }

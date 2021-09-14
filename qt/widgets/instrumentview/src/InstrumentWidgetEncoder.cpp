@@ -368,6 +368,7 @@ InstrumentWidgetEncoder::encodeEllipse(const Shape2DEllipse *obj) {
   const double radius1 = obj->getDouble("radius1");
   const double radius2 = obj->getDouble("radius2");
   const auto centre = obj->getPoint("centre");
+  const auto rot = obj->getBoundingRotation();
 
   QMap<QString, QVariant> map;
 
@@ -375,6 +376,7 @@ InstrumentWidgetEncoder::encodeEllipse(const Shape2DEllipse *obj) {
   map.insert(QString("radius2"), QVariant(radius2));
   map.insert(QString("x"), QVariant(centre.x()));
   map.insert(QString("y"), QVariant(centre.y()));
+  map.insert(QString("rotation"), QVariant(rot));
 
   return map;
 }
@@ -385,6 +387,7 @@ InstrumentWidgetEncoder::encodeRectangle(const Shape2DRectangle *obj) {
   const auto x1 = obj->m_boundingRect.x1();
   const auto y0 = obj->m_boundingRect.y0();
   const auto y1 = obj->m_boundingRect.y1();
+  const auto rot = obj->getBoundingRotation();
 
   QMap<QString, QVariant> map;
 
@@ -392,6 +395,7 @@ InstrumentWidgetEncoder::encodeRectangle(const Shape2DRectangle *obj) {
   map.insert(QString("y0"), QVariant(y0));
   map.insert(QString("x1"), QVariant(x1));
   map.insert(QString("y1"), QVariant(y1));
+  map.insert(QString("rotation"), QVariant(rot));
 
   return map;
 }
