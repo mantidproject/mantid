@@ -37,6 +37,7 @@ using ::testing::ReturnRef;
 class PreviewPresenterTest : public CxxTest::TestSuite {
   using MockViewT = std::unique_ptr<MockPreviewView>;
   using MockModelT = std::unique_ptr<MockPreviewModel>;
+  using MockJobManagerT = std::unique_ptr<IJobManager>;
 
 public:
   void test_notify_load_workspace_requested() {
@@ -48,11 +49,11 @@ public:
     EXPECT_CALL(*mockView, getWorkspaceName()).Times(1).WillOnce(Return(workspaceName));
     EXPECT_CALL(*mockModel, loadWorkspace(Eq(workspaceName), Ref(*mockJobManager))).Times(1);
 
-    auto presenter = PreviewPresenter(mockView.get(), std::move(mockModel), std::move(mockJobManager));
+    auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager)));
     presenter.notifyLoadWorkspaceRequested();
   }
 
-  void test_notify_load_workspace_complete() {
+  void test_notify_load_workspace_complete_reloads_inst_view() {
     auto mockModel = makeModel();
     auto mockView = makeView();
     auto mockJobManager = makeJobManager();
@@ -62,7 +63,7 @@ public:
     auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
     EXPECT_CALL(*mockModel, getLoadedWs).Times(1).WillOnce(Return(ws));
 
-    auto presenter = PreviewPresenter(mockView.get(), std::move(mockModel), std::move(mockJobManager));
+    auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager)));
     presenter.notifyLoadWorkspaceCompleted();
   }
 
@@ -82,5 +83,9 @@ private:
     auto mockJobManager = std::make_unique<MockJobManager>();
     EXPECT_CALL(*mockJobManager, subscribe(NotNull())).Times(1);
     return mockJobManager;
+  }
+
+  PreviewPresenter::Dependencies packDeps(MockPreviewView *view, MockModelT model, MockJobManagerT jobManager) {
+    return PreviewPresenter::Dependencies{view, std::move(model), std::move(jobManager)};
   }
 };

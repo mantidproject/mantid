@@ -21,7 +21,13 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL PreviewPresenter : public IPreviewPresenter
                                                         public PreviewViewSubscriber,
                                                         public JobManagerSubscriber {
 public:
-  PreviewPresenter(IPreviewView *view, std::unique_ptr<IPreviewModel> model, std::unique_ptr<IJobManager> jobManager);
+  struct Dependencies {
+    IPreviewView *view{nullptr};
+    std::unique_ptr<IPreviewModel> model;
+    std::unique_ptr<IJobManager> jobManager;
+  };
+
+  PreviewPresenter(Dependencies dependencies);
   virtual ~PreviewPresenter() = default;
 
   // PreviewViewSubscriber overrides
