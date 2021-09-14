@@ -634,6 +634,20 @@ void Shape2DCollection::setCurrentBoundingRect(const RectF &rect) {
   }
 }
 
+double Shape2DCollection::getCurrentBoundingRotation() const {
+  if (m_currentShape) {
+    return m_currentShape->getBoundingRotation();
+  }
+  return 0.0;
+}
+
+void Shape2DCollection::setCurrentBoundingRotation(const double rotation) {
+  if (m_currentShape) {
+    m_currentShape->setBoundingRotation(rotation);
+    emit shapeChanged();
+  }
+}
+
 bool Shape2DCollection::isMasked(double x, double y) const {
   QPointF p(x, y);
   foreach (Shape2D *shape, m_shapes) {

@@ -652,6 +652,9 @@ void InstrumentWidgetMaskTab::setProperties() {
     m_doublePropertyMap[prop] = name;
   }
 
+  //rotation property
+  m_doubleManager->setValue(m_rotation, m_instrWidget->getSurface()->getCurrentBoundingRotation());
+
   shapeChanged();
 }
 
@@ -673,6 +676,7 @@ void InstrumentWidgetMaskTab::doubleChanged(QtProperty *prop) {
 
     QRectF rect(QPointF(x0, y0), QPointF(x1, y1));
     m_instrWidget->getSurface()->setCurrentBoundingRect(RectF(rect));
+    m_instrWidget->getSurface()->setCurrentBoundingRotation(m_doubleManager->value(m_rotation));
 
   } else {
     QString name = m_doublePropertyMap[prop];
