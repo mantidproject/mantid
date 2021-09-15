@@ -38,3 +38,17 @@ include(FindPackageHandleStandardArgs)
 
 find_package_handle_standard_args(Sphinx REQUIRED_VARS SPHINX_PACKAGE_DIR SPHINX_VERSION
                                   VERSION_VAR SPHINX_VERSION)
+
+#=============================================================
+# determine arguments for running sphinx
+#=============================================================
+
+# sphinx.__main__ was introduced in version 1.3.
+# Prior to this we need to pass sphinx.__init__ to -m
+if(SPHINX_VERSION VERSION_GREATER_EQUAL "1.3")
+  set(SPHINX_MAIN "sphinx")
+  set(SPHINX_NOCOLOR "--no-color")
+else()
+  set(SPHINX_MAIN "sphinx.__init__")
+  set(SPHINX_NOCOLOR "")
+endif()
