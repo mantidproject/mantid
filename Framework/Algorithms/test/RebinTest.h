@@ -194,6 +194,9 @@ public:
 
     bool dist = rebindata->isDistribution();
     TS_ASSERT(dist);
+
+    TS_ASSERT(checkBinWidthMonotonic(rebindata, false));
+
     AnalysisDataService::Instance().remove("test_in1D");
     AnalysisDataService::Instance().remove("test_out");
   }
@@ -514,6 +517,9 @@ public:
     TS_ASSERT_DELTA(outX[3], 34, 1e-5);
     TS_ASSERT_DELTA(outX[4], 36, 1e-5);
     TS_ASSERT_DELTA(outX[5], 37, 1e-5);
+
+    TS_ASSERT(checkBinWidthMonotonic(out, true));
+
     AnalysisDataService::Instance().remove("test_Rebin_revLog");
   }
 
@@ -539,6 +545,9 @@ public:
     TS_ASSERT_DELTA(outX[1], 34, 1e-5);
     TS_ASSERT_DELTA(outX[2], 40, 1e-5);
     TS_ASSERT_DELTA(outX[3], 42, 1e-5);
+
+    TS_ASSERT(checkBinWidthMonotonic(out, true));
+
     AnalysisDataService::Instance().remove("test_Rebin_revLog");
   }
 
@@ -566,6 +575,9 @@ public:
     TS_ASSERT_DELTA(outX[2], 13, 1e-5);
     TS_ASSERT_DELTA(outX[3], 15, 1e-5);
     TS_ASSERT_DELTA(outX[4], 16, 1e-5);
+
+    TS_ASSERT(checkBinWidthMonotonic(out, true));
+
     AnalysisDataService::Instance().remove("test_Rebin_revLog");
   }
 
@@ -594,6 +606,7 @@ public:
     TS_ASSERT_DELTA(outX[4], 85, 1e-5);
     TS_ASSERT_DELTA(outX[5], 95, 1e-5);
     TS_ASSERT_DELTA(outX[6], 100, 1e-5);
+
     AnalysisDataService::Instance().remove("test_Rebin_revLog");
   }
 
@@ -656,6 +669,8 @@ public:
     TS_ASSERT_DELTA(outX[4], 36, 1e-5);
     TS_ASSERT_DELTA(outX[5], 37, 1e-5);
 
+    TS_ASSERT(checkBinWidthMonotonic(out, true));
+
     AnalysisDataService::Instance().remove("test_Rebin_revLog");
   }
 
@@ -686,6 +701,8 @@ public:
     TS_ASSERT_DELTA(outX[5], 59, 1e-5);
     TS_ASSERT_DELTA(outX[6], 60, 1e-5);
 
+    TS_ASSERT(checkBinWidthMonotonic(out, true));
+
     AnalysisDataService::Instance().remove("test_Rebin_revLog");
   }
 
@@ -713,6 +730,8 @@ public:
     TS_ASSERT_DELTA(outX[3], 3.28445705, 1e-5);
     TS_ASSERT_DELTA(outX[27], 10, 1e-5);
 
+    TS_ASSERT(checkBinWidthMonotonic(out, true));
+
     AnalysisDataService::Instance().remove("test_Rebin_revLog");
   }
 
@@ -739,6 +758,8 @@ public:
     TS_ASSERT_DELTA(outX[2], 2.5, 1e-5);
     TS_ASSERT_DELTA(outX[3], 2.8333333, 1e-5);
     TS_ASSERT_DELTA(outX[30], 5, 1e-5);
+
+    TS_ASSERT(checkBinWidthMonotonic(out, true, true));
 
     AnalysisDataService::Instance().remove("test_Rebin_revLog");
   }
@@ -859,6 +880,24 @@ private:
 
     auto &yValues = ws->y(0);
     TS_ASSERT_DELTA(yValues.rawData(), yExpected, 0.001);
+  }
+
+  bool checkBinWidthMonotonic(MatrixWorkspace_sptr ws, bool reverse = false, bool ignoreLastBin = false) {
+    size_t binEdgesTotal = ws->blocksize();
+    if (ignoreLastBin)
+      binEdgesTotal--;
+    auto binEdges = ws->binEdges(0);
+    double lastBinSize = binEdges[1] - binEdges[0];
+    for (size_t i = 1; i < binEdgesTotal; ++i) {
+      double currentBinSize = binEdges[i + 1] - binEdges[i];
+
+      if (((lastBinSize < currentBinSize) && reverse) || ((lastBinSize > currentBinSize) && !reverse)) {
+        return false;
+      }
+
+      lastBinSize = currentBinSize;
+    }
+    return true;
   }
 };
 
