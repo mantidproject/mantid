@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidDataHandling/AppendGeometryToSNSNexus.h"
+#include "MantidDataHandling/SNSAppendGeometryToNexus.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentFileFinder.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -29,37 +29,40 @@ using namespace ::NeXus;
 namespace Mantid::DataHandling {
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(AppendGeometryToSNSNexus)
+DECLARE_ALGORITHM(SNSAppendGeometryToNexus)
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-AppendGeometryToSNSNexus::AppendGeometryToSNSNexus()
-    : m_makeNexusCopy(false), m_instrumentLoadedCorrectly(false), m_logsLoadedCorrectly(false) {}
+SNSAppendGeometryToNexus::SNSAppendGeometryToNexus()
+    : m_makeNexusCopy(false), m_instrumentLoadedCorrectly(false), m_logsLoadedCorrectly(false) {
+  // inform deprecation alias status
+  setDeprecationDate("2021-09-14");
+}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-AppendGeometryToSNSNexus::~AppendGeometryToSNSNexus() {
+SNSAppendGeometryToNexus::~SNSAppendGeometryToNexus() {
   // delete workspace
 }
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string AppendGeometryToSNSNexus::name() const { return "AppendGeometryToSNSNexus"; }
+const std::string SNSAppendGeometryToNexus::name() const { return "SNSAppendGeometryToNexus"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int AppendGeometryToSNSNexus::version() const { return 1; }
+int SNSAppendGeometryToNexus::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string AppendGeometryToSNSNexus::category() const { return "DataHandling\\DataAcquisition"; }
+const std::string SNSAppendGeometryToNexus::category() const { return "DataHandling\\DataAcquisition"; }
 
 //----------------------------------------------------------------------------------------------
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
-void AppendGeometryToSNSNexus::init() {
+void SNSAppendGeometryToNexus::init() {
   // Declare potential extensions for input NeXus file
   std::vector<std::string> extensions{".nxs", ".h5"};
 
@@ -75,7 +78,7 @@ void AppendGeometryToSNSNexus::init() {
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
-void AppendGeometryToSNSNexus::exec() {
+void SNSAppendGeometryToNexus::exec() {
   // TODO: rename the created arrays before moving to production
   g_log.warning() << "This is intended as a proof of principle and not a long "
                      "term implementation.\n";
@@ -292,7 +295,7 @@ void AppendGeometryToSNSNexus::exec() {
  * @param nxfilename :: Input NeXus file.
  * @return the instrument name, empty string if failed.
  */
-std::string AppendGeometryToSNSNexus::getInstrumentName(const std::string &nxfilename) {
+std::string SNSAppendGeometryToNexus::getInstrumentName(const std::string &nxfilename) {
   std::string instrument;
 
   // Open the NeXus file
@@ -330,7 +333,7 @@ std::string AppendGeometryToSNSNexus::getInstrumentName(const std::string &nxfil
  * @return true if successful
  */
 
-bool AppendGeometryToSNSNexus::runLoadInstrument(const std::string &idf_filename,
+bool SNSAppendGeometryToNexus::runLoadInstrument(const std::string &idf_filename,
                                                  const API::MatrixWorkspace_sptr &localWorkspace, Algorithm *alg) {
   auto loadInst = createChildAlgorithm("LoadInstrument", 0, 1, true);
 
@@ -366,7 +369,7 @@ bool AppendGeometryToSNSNexus::runLoadInstrument(const std::string &idf_filename
  * @param alg :: Handle of an algorithm for logging access.
  * @return true if successful.
  */
-bool AppendGeometryToSNSNexus::runLoadNexusLogs(const std::string &nexusFileName,
+bool SNSAppendGeometryToNexus::runLoadNexusLogs(const std::string &nexusFileName,
                                                 const API::MatrixWorkspace_sptr &localWorkspace, Algorithm *alg) {
   auto loadLogs = alg->createChildAlgorithm("LoadNexusLogs", 0, 1, true);
 
