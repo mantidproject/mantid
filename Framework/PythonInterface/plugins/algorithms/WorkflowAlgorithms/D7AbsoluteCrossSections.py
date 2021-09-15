@@ -7,8 +7,9 @@
 
 from mantid.api import AlgorithmFactory, NumericAxis, PropertyMode, Progress, PythonAlgorithm, \
     WorkspaceGroupProperty, WorkspaceGroup
-from mantid.kernel import Direction, EnabledWhenProperty, FloatBoundedValidator, \
-    PropertyCriterion, PropertyManagerProperty, StringListValidator
+from mantid.kernel import Direction, EnabledWhenProperty, FloatArrayProperty, \
+    FloatBoundedValidator, PropertyCriterion, PropertyManagerProperty, \
+    RebinParamsValidator, StringListValidator
 
 from mantid.simpleapi import *
 
@@ -163,10 +164,11 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
 
         self.declareProperty(name="OutputUnits",
                              defaultValue="TwoTheta",
-                             validator=StringListValidator(["TwoTheta", "Q", "Qxy"]),
+                             validator=StringListValidator(["TwoTheta", "Q", "Qxy", "Qw"]),
                              direction=Direction.Input,
-                             doc="The choice to display the output either as a function of detector twoTheta,"
-                                 +" or the momentum exchange.")
+                             doc="The choice to display the output as a function of detector twoTheta,"
+                                 " the momentum exchange, the 2D momentum exchange, or as a function of momentum"
+                                 " and energy exchange.")
 
         self.declareProperty(name="NormalisationMethod",
                              defaultValue="None",
@@ -206,6 +208,13 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
 
         self.setPropertySettings('VanadiumInputWorkspace', EnabledWhenProperty('NormalisationMethod',
                                                                                PropertyCriterion.IsEqualTo, 'Vanadium'))
+
+        validRebinParams = RebinParamsValidator(AllowEmpty=True)
+        self.declareProperty(FloatArrayProperty(name="QBinning", validator=validRebinParams),
+                             doc='Manual Q-binning parameters.')
+
+        self.setPropertySettings('QBinning', EnabledWhenProperty('MeasurementTechnique',
+                                                                      PropertyCriterion.IsEqualTo, 'TOF'))
 
         self.declareProperty('AbsoluteUnitsNormalisation', True,
                              doc='Whether or not express the output in absolute units.')
