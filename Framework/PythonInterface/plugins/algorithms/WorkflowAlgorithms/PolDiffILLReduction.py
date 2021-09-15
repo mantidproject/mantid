@@ -434,6 +434,26 @@ class PolDiffILLReduction(PythonAlgorithm):
                   Params=params)
         return ws
 
+    @staticmethod
+    def _correct_frame_overlap(ws):
+        """Corrects for the frame-overlap using data from the final 10 time channels,
+        assumes fourth power for the time ratio."""
+        nfit = 10
+        nchannels = int(mtd[ws][0].getRun().getLogData('Detector.time_of_flight_1').value)
+        ifit1 = nchannels - nfit
+        ifit2 = nchannels
+        chopper_rps = mtd[ws][0].getRun().getLogData('Chopper.rotation_speed').value / 60.0  # rotations / s
+        period = 1e6 / chopper_rps  # in us
+        for entry in mtd[ws]:
+            TOF = entry.extractX()
+            dataY = entry.extractY()
+            time_average = np.sum(TOF[:, ifit1:ifit2], axis=1) / nfit  # average time in the final nfit channels
+            counts_average = np.sum(dataY[:, ifit1:ifit2], axis=1) / nfit  # average counts in the final nfit channels
+            t1 = time_average + period  # time of the next period
+            frame_overlap = np.power(time_average / t1, 4)
+            correction = np.expand_dims(frame_overlap * counts_average, axis=1)  # expands so the shape is (132, 1)
+            dataY -= correction
+
     def _load_and_prepare_data(self, measurement_technique, process, progress):
         """Loads the data, sets the instrument, and runs function to check the measurement method. In the case
         of a single crystal measurement, it also merges the omega scan data into one workspace per polarisation
@@ -743,9 +763,6 @@ class PolDiffILLReduction(PythonAlgorithm):
         DetectorEfficiencyCorUser(InputWorkspace=ws, OutputWorkspace=ws,
                                   IncidentEnergy=self._sampleAndEnvironmentProperties['InitialEnergy'].value)
         return ws
-
-    def _frame_overlap_correction(self, ws):
-        pass
 
     def _apply_polarisation_corrections(self, ws, pol_eff_ws):
         """Applies the polarisation correction based on the output from quartz reduction."""
@@ -1171,6 +1188,8 @@ class PolDiffILLReduction(PythonAlgorithm):
                 self._calculate_polarising_efficiencies(ws)
 
             if process in ['Vanadium', 'Sample']:
+                if measurement_technique == 'TOF':
+                    self._correct_frame_overlap(ws)
                 pol_eff_ws = self.getPropertyValue('QuartzWorkspace')
                 if pol_eff_ws:
                     progress.report('Applying polarisation corrections')
