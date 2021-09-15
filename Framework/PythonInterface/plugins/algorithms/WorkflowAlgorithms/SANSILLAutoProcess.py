@@ -538,7 +538,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                     self.log().warning("Unable to stitch automatically, consider "
                                        "stitching manually: " + str(re))
 
-        self.set_distribution(group_name)
+        self.set_distribution([group_name])
 
     def outputSensitivity(self, sensitivity_outputs):
         if len(sensitivity_outputs) > 1:
