@@ -48,7 +48,7 @@ QSplitter::handle
      <property name="handleWidth">
       <number>2</number>
      </property>
-     <widget class="QWidget" name="">
+     <widget class="QWidget" name="inputToolLayoutWidget">
       <layout class="QHBoxLayout" name="input_tool_layout">
        <property name="spacing">
         <number>6</number>
@@ -121,7 +121,7 @@ QSplitter::handle
       <property name="handleWidth">
        <number>3</number>
       </property>
-      <widget class="QWidget" name="verticalLayoutWidget">
+      <widget class="QWidget" name="instViewLayoutWidget">
        <layout class="QVBoxLayout" name="inst_view_layout">
         <item>
          <widget class="QPushButton" name="inst_view_toolbar_placeholder">
@@ -131,7 +131,7 @@ QSplitter::handle
          </widget>
         </item>
         <item>
-         <widget class="QTableView" name="tableView"/>
+         <widget class="QWidget" name="inst_view_placeholder" native="true"/>
         </item>
        </layout>
       </widget>
@@ -142,7 +142,7 @@ QSplitter::handle
        <property name="handleWidth">
         <number>2</number>
        </property>
-       <widget class="QWidget" name="">
+       <widget class="QWidget" name="contourPlotLayoutWidget">
         <layout class="QVBoxLayout" name="contour_plot_layout">
          <item>
           <widget class="QPushButton" name="plot_2d_tool_placeholders">
@@ -156,7 +156,7 @@ QSplitter::handle
          </item>
         </layout>
        </widget>
-       <widget class="QWidget" name="">
+       <widget class="QWidget" name="linePlotLayoutWidget">
         <layout class="QVBoxLayout" name="line_plot_layout">
          <item>
           <widget class="QPushButton" name="plot_1d_toolbar_placeholder">
@@ -172,7 +172,7 @@ QSplitter::handle
        </widget>
       </widget>
      </widget>
-     <widget class="QWidget" name="">
+     <widget class="QWidget" name="outputToolLayoutWidget">
       <layout class="QHBoxLayout" name="output_tool_layout">
        <property name="sizeConstraint">
         <enum>QLayout::SetMinimumSize</enum>
@@ -196,7 +196,6 @@ QSplitter::handle
  <tabstops>
   <tabstop>workspace_line_edit</tabstop>
   <tabstop>inst_view_toolbar_placeholder</tabstop>
-  <tabstop>tableView</tabstop>
   <tabstop>plot_2d_tool_placeholders</tabstop>
   <tabstop>treeView_2</tabstop>
   <tabstop>plot_1d_toolbar_placeholder</tabstop>

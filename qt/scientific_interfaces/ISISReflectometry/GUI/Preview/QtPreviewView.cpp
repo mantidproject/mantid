@@ -9,8 +9,9 @@
 #include <string>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
-QtPreviewView::QtPreviewView(QWidget *parent) : QWidget(parent), m_notifyee(nullptr) {
+QtPreviewView::QtPreviewView(QWidget *parent) : QWidget(parent) {
   m_ui.setupUi(this);
+  m_instDisplay = std::make_unique<MantidWidgets::InstrumentDisplay>(m_ui.inst_view_placeholder);
   connectSignals();
 }
 
@@ -24,8 +25,8 @@ void QtPreviewView::onLoadWorkspaceRequested() const { m_notifyee->notifyLoadWor
 
 std::string QtPreviewView::getWorkspaceName() const { return m_ui.workspace_line_edit->text().toStdString(); }
 
-void QtPreviewView::plotInstView(std::shared_ptr<MantidWidgets::RotationSurface> &) {
-  assert(false); // Not implemented yet
+void QtPreviewView::plotInstView(std::shared_ptr<MantidWidgets::RotationSurface> &surface) {
+  m_instDisplay->setSurface(surface);
 }
 
 // void QtRoiView::plot3D(MatrixWorkspace_sptr ws) {
