@@ -610,8 +610,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
     def _normalise_sample_data(self, sample_ws, det_efficiency_ws, nMeasurements, nComponents):
         """Normalises the sample data using the detector efficiency calibration workspace."""
         normalisation_method = self.getPropertyValue('NormalisationMethod')
-        is_single_crystal = self._mode == 'SingleCrystal'
-        if is_single_crystal and normalisation_method == 'Vanadium' \
+        if normalisation_method == 'Vanadium' and self._mode == 'SingleCrystal' \
                 and mtd[sample_ws][0].getNumberHistograms() == 2 * mtd[det_efficiency_ws][0].getNumberHistograms():
             # the length of the spectrum axis is twice the size of Vanadium, as data comes from two omega scans
             AppendSpectra(InputWorkspace1=det_efficiency_ws, InputWorkspace2=det_efficiency_ws,
@@ -642,6 +641,9 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             elif det_eff_no >= eff_entries:
                 det_eff_no = det_eff_no % eff_entries
             ws_name = entry.name() + '_normalised'
+            if normalisation_method == 'Vanadium' and self._mode == 'TOF':
+                RebinToWorkspace(WorkspaceToRebin=entry, WorkspaceToMatch=mtd[det_efficiency_ws][det_eff_no],
+                                 OutputWorkspace=entry)
             tmp_names.append(ws_name)
             Divide(LHSWorkspace=entry,
                    RHSWorkspace=mtd[det_efficiency_ws][det_eff_no],
