@@ -12,7 +12,7 @@
 #include <Poco/Path.h>
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/AppendGeometryToSNSNexus.h"
+#include "MantidDataHandling/SNSAppendGeometryToNexus.h"
 
 using namespace Mantid;
 using namespace Mantid::DataHandling;
@@ -22,24 +22,24 @@ namespace {
 constexpr auto NXS_FILENAME = "HYS_11092_event.nxs";
 }
 
-class AppendGeometryToSNSNexusTest : public CxxTest::TestSuite {
+class SNSAppendGeometryToNexusTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static AppendGeometryToSNSNexusTest *createSuite() { return new AppendGeometryToSNSNexusTest(); }
-  static void destroySuite(AppendGeometryToSNSNexusTest *suite) { delete suite; }
+  static SNSAppendGeometryToNexusTest *createSuite() { return new SNSAppendGeometryToNexusTest(); }
+  static void destroySuite(SNSAppendGeometryToNexusTest *suite) { delete suite; }
 
   void test_Init() {
-    AppendGeometryToSNSNexus alg;
+    SNSAppendGeometryToNexus alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
   }
 
   void test_exec() {
     //    // Name of the output workspace.
-    //    std::string outWSName("AppendGeometryToSNSNexusTest_OutputWS");
+    //    std::string outWSName("SNSAppendGeometryToNexusTest_OutputWS");
 
-    AppendGeometryToSNSNexus alg;
+    SNSAppendGeometryToNexus alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     // TODO: Get a better test file.
