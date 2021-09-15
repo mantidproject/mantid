@@ -10,6 +10,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include <QComboBox>
 #include <QStringList>
+#include <mutex>
 
 #include <Poco/AutoPtr.h>
 #include <Poco/NObserver.h>
@@ -81,9 +82,13 @@ public:
   void setValidatingAlgorithm(const QString &algName);
   bool isValid() const;
   void refresh();
+  void disconnectObservers();
+  void connectObservers();
+  bool isConnected() const;
 
 signals:
   void emptied();
+  void focussed();
 
 private:
   void handleAddEvent(Mantid::API::WorkspaceAddNotification_ptr pNf);
@@ -101,6 +106,8 @@ protected:
   void dropEvent(QDropEvent * /*unused*/) override;
   // called when a drag event enters the class
   void dragEnterEvent(QDragEnterEvent * /*unused*/) override;
+  // Method for handling focus in events
+  void focusInEvent(QFocusEvent * /*unused*/) override;
 
 private:
   /// Poco Observers for ADS Notifications
@@ -111,6 +118,7 @@ private:
   Poco::NObserver<WorkspaceSelector, Mantid::API::WorkspaceAfterReplaceNotification> m_replaceObserver;
 
   bool m_init;
+  bool m_connected;
 
   /// A list of workspace types that should be shown in the ComboBox
   QStringList m_workspaceTypes;
@@ -130,6 +138,9 @@ private:
 
   // Algorithm to validate against
   std::shared_ptr<Mantid::API::Algorithm> m_algorithm;
+
+  // Mutex for synchronized event handling
+  std::mutex m_adsMutex;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

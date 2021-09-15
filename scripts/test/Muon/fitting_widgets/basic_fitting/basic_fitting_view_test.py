@@ -11,7 +11,11 @@ from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 
 from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_view import BasicFittingView
-from Muon.GUI.Common.fitting_widgets.basic_fitting.fit_function_options_view import RAW_DATA_TABLE_ROW
+from Muon.GUI.Common.fitting_widgets.basic_fitting.fit_function_options_view import (EVALUATE_AS_TABLE_ROW,
+                                                                                     EXCLUDE_RANGE_TABLE_ROW,
+                                                                                     EXCLUDE_START_X_TABLE_ROW,
+                                                                                     EXCLUDE_END_X_TABLE_ROW,
+                                                                                     RAW_DATA_TABLE_ROW)
 
 from qtpy.QtWidgets import QApplication
 
@@ -24,6 +28,7 @@ class BasicFittingViewTest(unittest.TestCase, QtWidgetFinder):
         FrameworkManager.Instance()
 
     def setUp(self):
+        self.dataset_names = ["MUSR62260; Group; fwd; Asymmetry; MA", "MUSR62260; Group; bwd; Asymmetry; MA"]
         self.view = BasicFittingView()
         self.view.show()
         self.assert_widget_created()
@@ -36,7 +41,17 @@ class BasicFittingViewTest(unittest.TestCase, QtWidgetFinder):
         self.view.plot_guess = True
         self.assertTrue(self.view.plot_guess)
 
+    def test_that_enable_view_does_not_enable_the_tab_if_there_are_no_datasets_loaded(self):
+        self.view.enable_view()
+        self.assertTrue(not self.view.isEnabled())
+
+    def test_that_enable_view_does_enable_the_tab_if_there_are_datasets_loaded(self):
+        self.view.update_dataset_name_combo_box(self.dataset_names)
+        self.view.enable_view()
+        self.assertTrue(self.view.isEnabled())
+
     def test_that_the_undo_fit_button_can_be_enabled_as_expected_when_the_number_of_undos_is_above_zero(self):
+        self.view.update_dataset_name_combo_box(self.dataset_names)
         self.view.enable_view()
         self.view.set_number_of_undos(2)
         self.assertTrue(self.view.fit_controls.undo_fit_button.isEnabled())
@@ -74,6 +89,27 @@ class BasicFittingViewTest(unittest.TestCase, QtWidgetFinder):
         self.view.show()
 
         self.assertTrue(self.view.fit_function_options.fit_options_table.isRowHidden(RAW_DATA_TABLE_ROW))
+
+    def test_that_the_view_has_been_initialized_with_the_exclude_range_start_and_end_x_options_not_visible(self):
+        self.view = BasicFittingView()
+        self.view.show()
+
+        self.assertTrue(self.view.fit_function_options.fit_options_table.isRowHidden(EXCLUDE_START_X_TABLE_ROW))
+        self.assertTrue(self.view.fit_function_options.fit_options_table.isRowHidden(EXCLUDE_END_X_TABLE_ROW))
+
+    def test_that_hide_exclude_range_checkbox_will_hide_the_exclude_range_table_row(self):
+        self.view = BasicFittingView()
+        self.view.hide_exclude_range_checkbox()
+        self.view.show()
+
+        self.assertTrue(self.view.fit_function_options.fit_options_table.isRowHidden(EXCLUDE_RANGE_TABLE_ROW))
+
+    def test_that_hide_evaluate_function_as_checkbox_will_hide_the_evaluate_function_table_row(self):
+        self.view = BasicFittingView()
+        self.view.hide_evaluate_function_as_checkbox()
+        self.view.show()
+
+        self.assertTrue(self.view.fit_function_options.fit_options_table.isRowHidden(EVALUATE_AS_TABLE_ROW))
 
     def test_that_update_fit_status_labels_will_display_no_fit_if_the_success_list_is_empty(self):
         fit_status, chi_squared = "success", 1.1

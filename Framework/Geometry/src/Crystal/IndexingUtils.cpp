@@ -1890,11 +1890,11 @@ V3D IndexingUtils::makeCDir(const V3D &a_dir, const V3D &b_dir, const double c, 
       sqrt(1 - cosAlpha * cosAlpha - cosBeta * cosBeta - cosGamma * cosGamma + 2 * cosAlpha * cosBeta * cosGamma);
   double c3 = c * V / sinGamma;
 
-  auto basis_1 = Kernel::toVector3d(a_dir).normalized();
-  auto basis_3 = Kernel::toVector3d(a_dir).cross(Kernel::toVector3d(b_dir)).normalized();
+  auto basis_1 = Mantid::Kernel::toVector3d(a_dir).normalized();
+  auto basis_3 = Mantid::Kernel::toVector3d(a_dir).cross(Mantid::Kernel::toVector3d(b_dir)).normalized();
   auto basis_2 = basis_3.cross(basis_1).normalized();
 
-  return Kernel::toV3D(basis_1 * c1 + basis_2 * c2 + basis_3 * c3);
+  return Mantid::Kernel::toV3D(basis_1 * c1 + basis_2 * c2 + basis_3 * c3);
 }
 
 /**
@@ -2642,7 +2642,8 @@ std::vector<V3D> IndexingUtils::MakeHemisphereDirections(int n_steps) {
   @throws std::invalid_argument exception if the number of steps is <= 0, or
                                 if the axix length is 0.
  */
-std::vector<V3D> IndexingUtils::MakeCircleDirections(int n_steps, const V3D axis, double angle_degrees) {
+std::vector<V3D> IndexingUtils::MakeCircleDirections(int n_steps, const Mantid::Kernel::V3D &axis,
+                                                     double angle_degrees) {
   if (n_steps <= 0) {
     throw std::invalid_argument("MakeCircleDirections(): n_steps must be greater than 0");
   }

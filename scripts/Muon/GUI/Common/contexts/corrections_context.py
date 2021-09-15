@@ -10,6 +10,16 @@ from Muon.GUI.Common.muon_load_data import MuonLoadData
 DEAD_TIME_FROM_FILE = "FromFile"
 DEAD_TIME_FROM_ADS = "FromADS"
 
+BACKGROUND_MODE_NONE = "None"
+BACKGROUND_MODE_AUTO = "Auto"
+BACKGROUND_MODE_MANUAL = "Manual"
+
+FLAT_BACKGROUND = "Flat Background"
+FLAT_BACKGROUND_AND_EXP_DECAY = "Flat Background + Exp Decay"
+
+RUNS_ALL = "All"
+GROUPS_ALL = "All"
+
 
 @dataclass
 class CorrectionsContext:
@@ -19,8 +29,18 @@ class CorrectionsContext:
     current_run_string: str = None
 
     # The 'dead_time_source' can be "FromFile", "FromADS" or None.
-    dead_time_source: str = None
+    dead_time_source: str = DEAD_TIME_FROM_FILE
     dead_time_table_name_from_ads: str = None
+
+    # The background corrections mode can be 'None', 'Auto' or 'Manual'
+    background_corrections_mode: str = BACKGROUND_MODE_NONE
+    selected_function: str = FLAT_BACKGROUND_AND_EXP_DECAY
+    selected_group: str = GROUPS_ALL
+    show_all_runs: bool = False
+
+    # The background corrections data in each row of the table is mapped to its corresponding Run and Group
+    # i.e. dict(tuple(run, group): BackgroundCorrectionData)
+    background_correction_data = {}
 
     def __init__(self, load_data: MuonLoadData):
         """Initialize the CorrectionsContext and pass in MuonLoadData so that we can access dead time tables."""

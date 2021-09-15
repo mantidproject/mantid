@@ -8,13 +8,14 @@
 #
 #
 import sys
-
+import glob
+import os
 from mantid.kernel import ConfigService
 from mantid.plots.utility import mpl_version_info, get_current_cmap
 from mantidqt.MPLwidgets import FigureCanvas
 from matplotlib.colorbar import Colorbar
 from matplotlib.figure import Figure
-from matplotlib.colors import Normalize, SymLogNorm, PowerNorm, LogNorm
+from matplotlib.colors import ListedColormap, Normalize, SymLogNorm, PowerNorm, LogNorm
 from matplotlib import cm
 import numpy as np
 from qtpy.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QComboBox, QCheckBox, QLabel
@@ -25,14 +26,31 @@ NORM_OPTS = ["Linear", "Log", "SymmetricLog10", "Power"]
 MIN_LOG_VALUE = 1e-4
 
 
+def register_customized_colormaps():
+    """register customized colormaps to matplotlib runtime"""
+    cmap_path = os.path.dirname(os.path.realpath(__file__))
+    cmap_files = glob.glob(os.path.join(cmap_path, "*.map"))
+    for cmap_file in cmap_files:
+        cmap_name = os.path.basename(cmap_file).split(".")[0]
+        cmap_data = np.loadtxt(cmap_file)/255.0
+        cmap = ListedColormap(cmap_data, name=cmap_name)
+        cm.register_cmap(name=cmap_name, cmap=cmap)
+        cmap_data_r = np.flipud(cmap_data)
+        cmap_r = ListedColormap(cmap_data_r, name=f"{cmap_name}_r")
+        cm.register_cmap(name=f"{cmap_name}_r", cmap=cmap_r)
+
+
 class ColorbarWidget(QWidget):
     colorbarChanged = Signal()  # The parent should simply redraw their canvas
     scaleNormChanged = Signal()
+    # register additional color maps from file
+    register_customized_colormaps()
+    # create the list
     cmap_list = sorted([cmap for cmap in cm.cmap_d.keys() if not cmap.endswith('_r')])
 
     def __init__(self, parent=None, default_norm_scale=None):
         """
-        :param default_scale: None uses linear, else either a string or tuple(string, other arguuments), e.g. tuple('Power', exponent)
+        :param default_scale: None uses linear, else either a string or tuple(string, other arguments), e.g. tuple('Power', exponent)
         """
 
         super(ColorbarWidget, self).__init__(parent)
@@ -282,7 +300,9 @@ class ColorbarWidget(QWidget):
         try:
             try:
                 masked_data = data[~data.mask]
-                masked_data = masked_data[np.nonzero(data)] if norm == "Log" else masked_data
+                # use the smallest positive value as vmin when using log scale,
+                # matplotlib will take care of the data skipping part.
+                masked_data = masked_data[data > 0] if norm == "Log" else masked_data
                 self.cmin_value = masked_data.min()
                 self.cmax_value = masked_data.max()
             except (AttributeError, IndexError):
@@ -319,9 +339,10 @@ class ColorbarWidget(QWidget):
         return Normalize(vmin=cmin, vmax=cmax)
 
     def _validate_mappable(self, mappable):
+        """Disable the Log option if no positive value can be found from given data (image)"""
         index = NORM_OPTS.index("Log")
         if mappable.get_array() is not None:
-            if np.any(mappable.get_array() <= 0):
+            if np.all(mappable.get_array() <= 0):
                 self.norm.model().item(index, 0).setEnabled(False)
                 self.norm.setItemData(index, "Log scale is disabled for non-positive data",
                                       Qt.ToolTipRole)

@@ -48,9 +48,110 @@ class PlottingCanvasPresenterTest(unittest.TestCase):
         self.context = PlottingContext()
         self.context.set_defaults(DEFAULT_X_LIMITS, DEFAULT_Y_LIMITS)
         self.presenter = PlottingCanvasPresenter(self.view, self.model, self.options, self.context)
+        self._mock_y_min = 2
 
     def tearDown(self):
         AnalysisDataService.Instance().clear()
+
+    def get_mock_y_limits(self, axis_number):
+        self._mock_y_min += 1.
+        return axis_number, axis_number, self._mock_y_min, self._mock_y_min+5.
+
+    def test_force_autoscale(self):
+        subplots = ["fwd", "bwd"]
+        axes = [0, 1]
+        self.view.get_axis_limits = mock.Mock(side_effect = self.get_mock_y_limits)
+        self.presenter.update_y_limits_of_subplots = mock.Mock()
+        self.presenter._get_selected_subplots_from_quick_edit_widget = mock.Mock(return_value=(subplots, axes))
+
+        self.presenter.force_autoscale()
+
+        expected_dict = {"fwd": [3., 8.], "bwd": [4,9]}
+        self.presenter.update_y_limits_of_subplots.assert_called_once_with(expected_dict, subplots, axes)
+
+    def test_update_y_limits_of_subplots(self):
+        subplots = ["fwd", "bwd", "top"]
+        y_limits = {"fwd": [3., 8.], "bwd": [4,9], "top":[-1,5]}
+        axes = [0, 1, 2]
+        self.context.settings.set_condensed(False)
+        self.view.set_axis_ylimits = mock.Mock()
+        self.presenter._options_presenter.set_plot_y_range = mock.Mock()
+        self.view.redraw_figure = mock.Mock()
+        self.context.update_ylim = mock.Mock()
+        self.context.update_ylim_all = mock.Mock()
+        self.presenter.should_update_all = mock.Mock(return_value = True)
+
+        self.presenter.update_y_limits_of_subplots(y_limits, subplots, axes)
+        self.assertEqual(self.view.set_axis_ylimits.call_count, len(subplots))
+        self.view.set_axis_ylimits.assert_any_call(0, [3,8])
+        self.view.set_axis_ylimits.assert_any_call(1, [4,9])
+        self.view.set_axis_ylimits.assert_any_call(2, [-1,5])
+
+        self.assertEqual(self.context.update_ylim.call_count, len(subplots))
+        for plot in y_limits.keys():
+            self.context.update_ylim.assert_any_call(plot, y_limits[plot])
+
+        # the smallest and largest y values from any subplot
+        global_limits = [-1, 9]
+        self.context.update_ylim_all.assert_called_once_with(global_limits)
+        self.presenter._options_presenter.set_plot_y_range.assert_called_once_with(global_limits)
+        self.view.redraw_figure.assert_called_once_with()
+
+    def test_update_y_limits_of_subplots_condensed(self):
+        subplots = ["fwd", "bwd", "top"]
+        y_limits = {"fwd": [3., 8.], "bwd": [4,9], "top":[-1,5]}
+        # max and min y values from any plot
+        global_limits = [-1, 9]
+        axes = [0, 1, 2]
+        # want everything on the exact same scale
+        self.context.settings.set_condensed(True)
+        self.view.set_axis_ylimits = mock.Mock()
+        self.presenter._options_presenter.set_plot_y_range = mock.Mock()
+        self.view.redraw_figure = mock.Mock()
+        self.context.update_ylim = mock.Mock()
+        self.context.update_ylim_all = mock.Mock()
+        self.presenter.should_update_all = mock.Mock(return_value = True)
+
+        self.presenter.update_y_limits_of_subplots(y_limits, subplots, axes)
+        self.assertEqual(self.view.set_axis_ylimits.call_count, len(subplots))
+        self.view.set_axis_ylimits.assert_any_call(0, global_limits)
+        self.view.set_axis_ylimits.assert_any_call(1, global_limits)
+        self.view.set_axis_ylimits.assert_any_call(2, global_limits)
+
+        self.assertEqual(self.context.update_ylim.call_count, len(subplots))
+        for plot in y_limits.keys():
+            self.context.update_ylim.assert_any_call(plot, global_limits)
+
+        self.context.update_ylim_all.assert_called_once_with(global_limits)
+        self.presenter._options_presenter.set_plot_y_range.assert_called_once_with(global_limits)
+        self.view.redraw_figure.assert_called_once_with()
+
+    def test_update_y_limits_of_subplots_bad_inputs(self):
+        subplots = ["fwd", "bwd", "top"]
+        y_limits = {"fwd": [3., 8.], "bwd": [4,9], "top":[-1,5]}
+        axes = [0, 1, 2]
+        self.context.settings.set_condensed(False)
+        self.view.set_axis_ylimits = mock.Mock()
+        self.presenter._options_presenter.set_plot_y_range = mock.Mock()
+        self.view.redraw_figure = mock.Mock()
+        self.context.update_ylim = mock.Mock()
+        self.context.update_ylim_all = mock.Mock()
+        self.presenter.should_update_all = mock.Mock(return_value = True)
+
+        no_limits = [[], subplots, axes]
+        no_subplots = [y_limits, [], axes]
+        no_axes = [y_limits, subplots, []]
+        all_empty = [[], [], []]
+
+        args_list = [no_limits, no_subplots, no_axes, all_empty]
+        for args in args_list:
+            self.presenter.update_y_limits_of_subplots(args[0], args[1], args[2])
+
+            self.view.set_axis_ylimits.assert_not_called()
+            self.context.update_ylim.assert_not_called()
+            self.context.update_ylim_all.assert_not_called()
+            self.presenter._options_presenter.set_plot_y_range.assert_not_called()
+            self.view.redraw_figure.assert_not_called()
 
     def test_set_quickedit_from_context(self):
         state = True

@@ -11,6 +11,10 @@ from qtpy import QtWidgets, QtCore
 from Muon.GUI.Common.plot_widget.plotting_canvas.plot_toolbar import PlotToolbar
 from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_model import WorkspacePlotInformation
 from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_view_interface import PlottingCanvasViewInterface
+from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_utils import (_do_single_plot,
+                                                                               get_y_min_max_between_x_range,
+                                                                               get_num_row_and_col,
+                                                                               convert_index_to_row_and_col)
 from Muon.GUI.Common.plot_widget.plotting_canvas.plot_color_queue import ColorQueue
 from mantid import AnalysisDataService
 from mantid.plots import legend_set_draggable
@@ -18,42 +22,25 @@ from mantid.plots.plotfunctions import get_plot_fig
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 import numpy as np
+from textwrap import wrap
 
-from matplotlib.backends.qt_compat import is_pyqt5
-
-if is_pyqt5():
-    from matplotlib.backends.backend_qt5agg import FigureCanvas
-else:
-    from matplotlib.backends.backend_qt4agg import FigureCanvas
-
+from mantidqt.MPLwidgets import FigureCanvas
 
 # Default color cycle using Matplotlib color codes C0, C1...ect
 NUMBER_OF_COLOURS = 10
 DEFAULT_COLOR_CYCLE = ["C" + str(index) for index in range(NUMBER_OF_COLOURS)]
 
 
-def _do_single_plot(ax, workspace, index, errors, plot_kwargs):
-    plot_fn = ax.errorbar if errors else ax.plot
-    plot_kwargs['wkspIndex'] = index
-    plot_fn(workspace, **plot_kwargs)
-
-
-def get_y_min_max_between_x_range(line, x_min, x_max, y_min, y_max):
-    x, y = line.get_data()
-    for i in range(len(x)):
-        if x_min <= x[i] <= x_max:
-            y_min = min(y_min, y[i])
-            y_max = max(y_max, y[i])
-    return y_min, y_max
-
-
 class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
 
-    def __init__(self, quick_edit, min_y_range, y_axis_margin, parent=None):
+    def __init__(self, quick_edit, settings, parent=None):
         super().__init__(parent)
         # later we will allow these to be changed in the settings
-        self._min_y_range = min_y_range
-        self._y_axis_margin = y_axis_margin
+        self._settings = settings
+        self._min_y_range = settings.min_y_range
+        self._y_axis_margin = settings.y_axis_margin
+        self._x_tick_labels = None
+        self._y_tick_labels = None
         # create the figure
         self.fig = Figure()
         self.fig.canvas = FigureCanvas(self.fig)
@@ -106,6 +93,12 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
     def number_of_axes(self):
         return self._number_of_axes
 
+    def set_x_ticks(self, x_ticks=None):
+        self._x_tick_labels = x_ticks
+
+    def set_y_ticks(self, y_ticks=None):
+        self._y_tick_labels = y_ticks
+
     def create_new_plot_canvas(self, num_axes):
         """Creates a new blank plotting canvas"""
         self.toolBar.reset_gridline_flags()
@@ -115,7 +108,10 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
         self.fig.clf()
         self.fig, axes = get_plot_fig(overplot=False, ax_properties=None, axes_num=num_axes,
                                       fig=self.fig)
-        self.fig.tight_layout()
+        if self._settings.is_condensed:
+            self.fig.subplots_adjust(wspace=0, hspace=0)
+        else:
+            self.fig.tight_layout()
         self.fig.canvas.draw()
 
     def clear_all_workspaces_from_plot(self):
@@ -130,24 +126,68 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
 
         self._plot_information_list = []
 
+    def _make_plot(self, workspace_plot_info: WorkspacePlotInformation):
+        workspace_name = workspace_plot_info.workspace_name
+        try:
+            workspace = AnalysisDataService.Instance().retrieve(workspace_name)
+        except (RuntimeError, KeyError):
+            return -1
+        self._plot_information_list.append(workspace_plot_info)
+        errors = workspace_plot_info.errors
+        ws_index = workspace_plot_info.index
+        axis_number = workspace_plot_info.axis
+        ax = self.fig.axes[axis_number]
+        plot_kwargs = self._get_plot_kwargs(workspace_plot_info)
+        plot_kwargs['color'] = self._color_queue[axis_number]()
+        _do_single_plot(ax, workspace, ws_index, errors=errors,
+                        plot_kwargs=plot_kwargs)
+        return axis_number
+
     def add_workspaces_to_plot(self, workspace_plot_info_list: List[WorkspacePlotInformation]):
         """Add a list of workspaces to the plot - The workspaces are contained in a list PlotInformation
         The PlotInformation contains the workspace name, workspace index and target axis."""
+        nrows, ncols = get_num_row_and_col(self._number_of_axes)
         for workspace_plot_info in workspace_plot_info_list:
-            workspace_name = workspace_plot_info.workspace_name
-            try:
-                workspace = AnalysisDataService.Instance().retrieve(workspace_name)
-            except (RuntimeError, KeyError):
+            axis_number = self._make_plot(workspace_plot_info)
+            if axis_number < 0:
                 continue
-            self._plot_information_list.append(workspace_plot_info)
-            errors = workspace_plot_info.errors
-            ws_index = workspace_plot_info.index
-            axis_number = workspace_plot_info.axis
-            ax = self.fig.axes[axis_number]
-            plot_kwargs = self._get_plot_kwargs(workspace_plot_info)
-            plot_kwargs['color'] = self._color_queue[axis_number]()
-            _do_single_plot(ax, workspace, ws_index, errors=errors,
-                            plot_kwargs=plot_kwargs)
+            self._set_text_tick_labels(axis_number)
+            if self._settings.is_condensed:
+                self.hide_axis(axis_number, nrows, ncols)
+        #remove labels from empty plots
+        if self._settings.is_condensed:
+            for axis_number in range(int(self._number_of_axes), int(nrows*ncols)):
+                self.hide_axis(axis_number, nrows, ncols)
+
+    def _wrap_labels(self, labels: list) -> list:
+        """Wraps a list of labels so that every line is at most self._settings.wrap_width characters long."""
+        return ["\n".join(wrap(label, self._settings.wrap_width)) for label in labels]
+
+    def _set_text_tick_labels(self, axis_number):
+        ax = self.fig.axes[axis_number]
+        if self._x_tick_labels:
+            ax.set_xticks(range(len(self._x_tick_labels)))
+            labels = self._wrap_labels(self._x_tick_labels)
+            ax.set_xticklabels(labels, fontsize = self._settings.font_size, rotation = self._settings.rotation, ha = "right")
+        if self._y_tick_labels:
+            ax.set_yticks(range(len(self._y_tick_labels)))
+            labels = self._wrap_labels(self._y_tick_labels)
+            ax.set_yticklabels(labels, fontsize = self._settings.font_size)
+
+    def hide_axis(self, axis_number, nrows, ncols):
+        row, col = convert_index_to_row_and_col(axis_number,  nrows, ncols)
+        ax = self.fig.axes[axis_number]
+        if row != nrows-1:
+            labels = ["" for item in ax.get_xticks().tolist()]
+            ax.set_xticklabels(labels)
+            ax.xaxis.label.set_visible(False)
+        if col != 0 and col != ncols-1:
+            labels = ["" for item in ax.get_yticks().tolist()]
+            ax.set_yticklabels(labels)
+            ax.yaxis.label.set_visible(False)
+        elif col == ncols-1 and ncols>1:
+            ax.yaxis.set_label_position('right')
+            ax.yaxis.tick_right()
 
     def remove_workspace_info_from_plot(self, workspace_plot_info_list: List[WorkspacePlotInformation]):
         # We reverse the workspace info list so that we can maintain a unique color queue
@@ -278,7 +318,7 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
         axis.set_ylim(bottom, top)
 
     def set_title(self, axis_number, title):
-        if axis_number >= self.number_of_axes:
+        if axis_number >= self.number_of_axes or self._settings.is_condensed:
             return
         axis = self.fig.axes[axis_number]
         axis.set_title(title)
@@ -292,7 +332,8 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
     def redraw_figure(self):
         self.fig.canvas.toolbar.update()
         self._redraw_legend()
-        self.fig.tight_layout()
+        if not self._settings.is_condensed:
+            self.fig.tight_layout()
         self.fig.canvas.draw()
 
     def _redraw_legend(self):
@@ -304,6 +345,8 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
     def _get_plot_kwargs(self, workspace_info: WorkspacePlotInformation):
         label = workspace_info.label
         plot_kwargs = {'distribution': True, 'autoscale_on_update': False, 'label': label}
+        plot_kwargs["marker"] = self._settings.get_marker(workspace_info.workspace_name)
+        plot_kwargs["linestyle"] = self._settings.get_linestyle(workspace_info.workspace_name)
         return plot_kwargs
 
     def _get_y_axis_autoscale_limits(self, axis):
@@ -328,6 +371,8 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
             ax.tracked_workspaces.clear()
 
     def resizeEvent(self, event):
+        if self._settings.is_condensed:
+            return
         self.fig.tight_layout()
 
     def add_uncheck_autoscale_subscriber(self, observer):

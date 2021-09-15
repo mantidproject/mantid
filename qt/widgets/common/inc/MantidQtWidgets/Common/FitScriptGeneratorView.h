@@ -9,10 +9,11 @@
 #include "DllOption.h"
 #include "ui_FitScriptGenerator.h"
 
+#include "MantidAPI/AnalysisDataServiceObserver.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/AddWorkspaceDialog.h"
-#include "MantidQtWidgets/Common/BasicFitOptionsBrowser.h"
+#include "MantidQtWidgets/Common/FitScriptOptionsBrowser.h"
 #include "MantidQtWidgets/Common/FittingMode.h"
 #include "MantidQtWidgets/Common/FunctionTreeView.h"
 #include "MantidQtWidgets/Common/IFitScriptGeneratorView.h"
@@ -23,6 +24,7 @@
 #include <tuple>
 #include <vector>
 
+#include <QCloseEvent>
 #include <QMap>
 #include <QString>
 #include <QStringList>
@@ -37,7 +39,8 @@ class IFitScriptGeneratorPresenter;
 struct GlobalParameter;
 struct GlobalTie;
 
-class EXPORT_OPT_MANTIDQT_COMMON FitScriptGeneratorView : public IFitScriptGeneratorView {
+class EXPORT_OPT_MANTIDQT_COMMON FitScriptGeneratorView : public IFitScriptGeneratorView,
+                                                          public Mantid::API::AnalysisDataServiceObserver {
   Q_OBJECT
 
 public:
@@ -46,6 +49,10 @@ public:
   ~FitScriptGeneratorView() override;
 
   void subscribePresenter(IFitScriptGeneratorPresenter *presenter) override;
+
+  void deleteHandle(std::string const &wsName, [[maybe_unused]] Workspace_sptr const &ws) override;
+  void clearHandle() override;
+  void renameHandle(std::string const &wsName, std::string const &newName) override;
 
   [[nodiscard]] std::string workspaceName(FitDomainIndex index) const override;
   [[nodiscard]] WorkspaceIndex workspaceIndex(FitDomainIndex index) const override;
@@ -61,11 +68,13 @@ public:
   [[nodiscard]] double parameterValue(std::string const &parameter) const override;
   [[nodiscard]] Mantid::API::IFunction::Attribute attributeValue(std::string const &attribute) const override;
 
-  void removeWorkspaceDomain(std::string const &workspaceName, WorkspaceIndex workspaceIndex) override;
+  void renameWorkspace(std::string const &workspaceName, std::string const &newName) override;
+
+  void removeDomain(FitDomainIndex domainIndex) override;
   void addWorkspaceDomain(std::string const &workspaceName, WorkspaceIndex workspaceIndex, double startX,
                           double endX) override;
 
-  [[nodiscard]] bool openAddWorkspaceDialog() override;
+  void openAddWorkspaceDialog() override;
   [[nodiscard]] std::vector<Mantid::API::MatrixWorkspace_const_sptr> getDialogWorkspaces() override;
   [[nodiscard]] std::vector<WorkspaceIndex> getDialogWorkspaceIndices() const override;
 
@@ -76,7 +85,8 @@ public:
   std::tuple<std::string, std::vector<double>, std::vector<bool>, std::vector<std::string>, std::vector<std::string>>
   getEditLocalParameterResults() const override;
 
-  [[nodiscard]] std::tuple<std::string, std::string, std::string, std::string> fitOptions() const override;
+  [[nodiscard]] std::tuple<std::string, std::string, std::string, std::string, std::string, bool>
+  fitOptions() const override;
   [[nodiscard]] std::string filepath() const override;
 
   void resetSelection() override;
@@ -101,11 +111,21 @@ public:
   FitScriptGeneratorDataTable *tableWidget() const override { return m_dataTable.get(); }
   QPushButton *removeButton() const override { return m_ui.pbRemoveDomain; }
   QPushButton *addWorkspaceButton() const override { return m_ui.pbAddDomain; }
-  AddWorkspaceDialog *addWorkspaceDialog() const override { return m_dialog.get(); }
+  AddWorkspaceDialog *addWorkspaceDialog() const override { return m_addWorkspaceDialog.get(); }
   QPushButton *generateScriptToFileButton() const override { return m_ui.pbGenerateScriptToFile; }
   QPushButton *generateScriptToClipboardButton() const override { return m_ui.pbGenerateScriptToClipboard; }
 
+public slots:
+  void closeEvent(QCloseEvent *event) override;
+
 private slots:
+  void notifyADSDeleteEvent(std::string const &workspaceName);
+  void notifyADSClearEvent();
+  void notifyADSRenameEvent(std::string const &workspaceName, std::string const &newName);
+
+  void closeAddWorkspaceDialog();
+  void addWorkspaceDialogAccepted(bool close);
+
   void onRemoveDomainClicked();
   void onAddDomainClicked();
   void onCellChanged(int row, int column);
@@ -121,11 +141,13 @@ private slots:
   void onGlobalParametersChanged(QStringList const &globalParameters);
   void onCopyFunctionToClipboard();
   void onFunctionHelpRequested();
+  void onOutputBaseNameChanged(std::string const &outputBaseName);
   void onFittingModeChanged(FittingMode fittingMode);
   void onEditLocalParameterClicked(QString const &parameter);
   void onEditLocalParameterFinished(int result);
   void onGenerateScriptToFileClicked();
   void onGenerateScriptToClipboardClicked();
+  void onHelpClicked();
 
 private:
   void connectUiSignals();
@@ -134,10 +156,10 @@ private:
   void setFittingMode(FittingMode fittingMode);
 
   IFitScriptGeneratorPresenter *m_presenter;
-  std::unique_ptr<AddWorkspaceDialog> m_dialog;
+  std::unique_ptr<AddWorkspaceDialog> m_addWorkspaceDialog;
   std::unique_ptr<FitScriptGeneratorDataTable> m_dataTable;
   std::unique_ptr<FunctionTreeView> m_functionTreeView;
-  std::unique_ptr<BasicFitOptionsBrowser> m_fitOptionsBrowser;
+  std::unique_ptr<FitScriptOptionsBrowser> m_fitOptionsBrowser;
   EditLocalParameterDialog *m_editLocalParameterDialog;
   Ui::FitScriptGenerator m_ui;
 };

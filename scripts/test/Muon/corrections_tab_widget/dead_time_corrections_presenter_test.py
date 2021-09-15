@@ -54,9 +54,10 @@ class DeadTimeCorrectionsPresenterTest(unittest.TestCase):
     def test_that_handle_instrument_changed_will_reset_the_dead_time_source_and_attempt_a_recalculation(self):
         self.presenter.handle_instrument_changed()
 
-        self.model.set_dead_time_source_to_from_file.assert_called_with()
-        self.presenter._notify_perform_dead_time_corrections.assert_called_once_with()
         self.view.set_dead_time_from_data_file_selected.assert_called_once_with()
+        self.model.set_dead_time_source_to_from_file.assert_called_with()
+        # calling this will cause a crash
+        self.presenter._notify_perform_dead_time_corrections.assert_not_called()
 
     def test_that_handle_run_selector_changed_will_update_the_run_string_in_the_model(self):
         self.presenter.update_dead_time_info_text_in_view = mock.Mock()
@@ -189,10 +190,10 @@ class DeadTimeCorrectionsPresenterTest(unittest.TestCase):
         self.assertEqual(self.view.populate_dead_time_workspace_selector.call_count, 1)
         self.view.switch_to_using_a_dead_time_table_workspace.assert_called_once_with(filename)
 
-    def test_that_handle_corrections_complete_will_update_the_dead_time_label_in_the_view(self):
+    def test_that_handle_pre_process_and_counts_calculated_will_update_the_dead_time_label_in_the_view(self):
         self.presenter.update_dead_time_info_text_in_view = mock.Mock()
 
-        self.presenter.handle_corrections_complete()
+        self.presenter.handle_pre_process_and_counts_calculated()
 
         self.presenter.update_dead_time_info_text_in_view.assert_called_once_with()
 

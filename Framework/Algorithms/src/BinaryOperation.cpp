@@ -159,10 +159,6 @@ void BinaryOperation::exec() {
     }
   }
 
-  // Get the output workspace
-  m_out = getProperty(outputPropName());
-  m_eout = std::dynamic_pointer_cast<EventWorkspace>(m_out);
-
   // Make a check of what will be needed to setup the workspaces, based on the
   // input types.
   this->checkRequirements();
@@ -180,6 +176,12 @@ void BinaryOperation::exec() {
     ostr << "The two workspaces are not compatible for algorithm " << this->name();
     g_log.error() << ostr.str() << '\n';
     throw std::invalid_argument(ostr.str());
+  }
+
+  // Get the output workspace
+  m_out = getProperty(outputPropName());
+  if (m_elhs) {
+    m_eout = std::dynamic_pointer_cast<EventWorkspace>(m_out);
   }
 
   // Is the output going to be an EventWorkspace?

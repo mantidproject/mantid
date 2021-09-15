@@ -7,7 +7,6 @@
 # pylint: disable=invalid-name
 from qtpy import QtCore, QtWidgets
 from mantidqt.icons import get_icon
-from mantid.kernel import ConfigService
 from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing
 from mantidqt.utils.qt import load_ui
 from Engineering.gui.engineering_diffraction.presenter import EngineeringDiffractionPresenter
@@ -28,9 +27,6 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
             super(EngineeringDiffractionGui, self).__init__(parent, window_flags)
         else:
             super(EngineeringDiffractionGui, self).__init__(parent)
-
-        # save initial default peak function so can reset on closing UI
-        self._initial_peak_fun = ConfigService.getString("curvefitting.defaultPeak")
 
         # Main Window
         self.setupUi(self)
@@ -59,6 +55,9 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         self.set_on_rb_num_changed(self.presenter.calibration_presenter.set_rb_num)
         self.set_on_instrument_changed(self.presenter.focus_presenter.set_instrument_override)
         self.set_on_rb_num_changed(self.presenter.focus_presenter.set_rb_num)
+
+        # load most recent calibration, if one saved
+        self.presenter.calibration_presenter.load_last_calibration()
 
         # load previous rb number if saved, create mechanism to save
         self.set_rb_no(self.presenter.get_saved_rb_number())
@@ -102,7 +101,6 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         self.savedir_label.setText(savedir_text)
 
     def closeEvent(self, event):
-        ConfigService.setString("curvefitting.defaultPeak", self._initial_peak_fun)  # reset peak function
         self.presenter.handle_close()
         self.setParent(None)
         event.accept()

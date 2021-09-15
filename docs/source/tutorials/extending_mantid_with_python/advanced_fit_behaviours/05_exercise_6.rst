@@ -12,9 +12,9 @@ The peak can be fairly well approximated using a Lorentz function:
 
 .. math::
 
-    \LARGE \frac{A}{π}(\frac{\frac{Γ}{2}}{(x-c)^2 + (\frac{Γ}{2})^2})
+    \frac{A}{\pi}(\frac{\frac{\Gamma}{2}}{(x-c)^2 + (\frac{\Gamma}{2})^2})
 
-where ``A`` is the amplitude, ``Γ`` is the full width at half maximum and
+where ``A`` is the amplitude, ``\Gamma`` is the full width at half maximum and
 ``c`` is the peak centre. We will first define this as a simple 1D function
 and then improve it to use the peak function capabilities.
 
@@ -51,11 +51,11 @@ are as follows:
 
 .. math::
 
-    \LARGE A \longrightarrow \frac{2}{π}\frac{Γ}{Γ^2 + 4(x - c)^2}
+    A \longrightarrow \frac{2}{\pi}\frac{\Gamma}{\Gamma^2 + 4(x - c)^2}
 
-    \LARGE c \longrightarrow \frac{A}{π}\frac{Γ(x - c)}{[\{\frac{Γ}{2}\}^2 + (x - c)^2]^2}
+    c \longrightarrow \frac{A}{\pi}\frac{\Gamma(x - c)}{[\{\frac{\Gamma}{2}\}^2 + (x - c)^2]^2}
 
-    \LARGE Γ \longrightarrow - \frac{2A}{π}\frac{Γ^2 - 4(x - c)^2}{[Γ^2 + 4(x - c)^2]^2}
+    \Gamma \longrightarrow - \frac{2A}{\pi}\frac{\Gamma^2 - 4(x - c)^2}{[\Gamma^2 + 4(x - c)^2]^2}
 
 Re-run the fit using the above steps.
 

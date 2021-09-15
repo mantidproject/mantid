@@ -6,16 +6,15 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IIndirectFitDataTableModel.h"
+#include "IIndirectFitDataModel.h"
 #include "IndirectDataAnalysisTab.h"
+#include "IndirectFitDataModel.h"
 #include "IndirectFitDataPresenter.h"
-#include "IndirectFitDataTableModel.h"
 #include "IndirectFitOutputOptionsPresenter.h"
 #include "IndirectFitOutputOptionsView.h"
 #include "IndirectFitPlotPresenter.h"
 #include "IndirectFitPropertyBrowser.h"
 #include "IndirectFittingModel.h"
-#include "IndirectSpectrumSelectionView.h"
 
 #include "MantidQtWidgets/Common/FunctionModelDataset.h"
 
@@ -47,9 +46,9 @@ public:
   void setPlotView(IIndirectFitPlotView *view);
   void setOutputOptionsView(IIndirectFitOutputOptionsView *view);
   void setFitPropertyBrowser(IndirectFitPropertyBrowser *browser);
-  TableDatasetIndex getSelectedDataIndex() const;
+  WorkspaceID getSelectedDataIndex() const;
   WorkspaceIndex getSelectedSpectrum() const;
-  bool isRangeCurrentlySelected(TableDatasetIndex dataIndex, WorkspaceIndex spectrum) const;
+  bool isRangeCurrentlySelected(WorkspaceID workspaceID, WorkspaceIndex spectrum) const;
   size_t getNumberOfCustomFunctions(const std::string &functionName) const;
   void setConvolveMembers(bool convolveMembers);
 
@@ -81,6 +80,8 @@ protected:
   std::unique_ptr<IndirectFitDataPresenter> m_dataPresenter;
   std::unique_ptr<IndirectFitPlotPresenter> m_plotPresenter;
   IndirectFitPropertyBrowser *m_fitPropertyBrowser{nullptr};
+  WorkspaceID m_activeWorkspaceID;
+  WorkspaceIndex m_activeSpectrumIndex;
 
 private:
   void setup() override;
@@ -100,27 +101,26 @@ private:
   void enableOutputOptions(bool enable);
   void setPDFWorkspace(std::string const &workspaceName);
   void updateParameterEstimationData();
+  virtual void addDataToModel(IAddWorkspaceDialog const *dialog) = 0;
 
   std::unique_ptr<IndirectFittingModel> m_fittingModel;
   std::unique_ptr<IndirectFitOutputOptionsPresenter> m_outOptionsPresenter;
   Mantid::API::IAlgorithm_sptr m_fittingAlgorithm;
-  TableDatasetIndex m_currentTableDatasetIndex;
-  WorkspaceIndex m_singleFitWorkspaceIndex;
 
 protected slots:
   void setModelFitFunction();
   void setModelStartX(double startX);
   void setModelEndX(double endX);
   void updateDataInTable();
-  void tableStartXChanged(double startX, TableDatasetIndex dataIndex, WorkspaceIndex spectrum);
-  void tableEndXChanged(double endX, TableDatasetIndex dataIndex, WorkspaceIndex spectrum);
+  void tableStartXChanged(double startX, WorkspaceID workspaceID, WorkspaceIndex spectrum);
+  void tableEndXChanged(double endX, WorkspaceID workspaceID, WorkspaceIndex spectrum);
   void startXChanged(double startX);
   void endXChanged(double endX);
   void updateFitOutput(bool error);
   void updateSingleFitOutput(bool error);
   void fitAlgorithmComplete(bool error);
   void singleFit();
-  void singleFit(TableDatasetIndex dataIndex, WorkspaceIndex spectrum);
+  void singleFit(WorkspaceID workspaceID, WorkspaceIndex spectrum);
   void executeFit();
   void updateParameterValues();
   void updateParameterValues(const std::unordered_map<std::string, ParameterValue> &parameters);
@@ -136,9 +136,9 @@ private slots:
   void plotSelectedSpectra();
   void respondToSingleResolutionLoaded();
   void respondToDataChanged();
-  void respondToDataAdded();
+  void respondToDataAdded(IAddWorkspaceDialog const *dialog);
   void respondToDataRemoved();
-  void respondToPlotSpectrumChanged(WorkspaceIndex);
+  void respondToPlotSpectrumChanged();
   void respondToFwhmChanged(double);
   void respondToBackgroundChanged(double value);
 

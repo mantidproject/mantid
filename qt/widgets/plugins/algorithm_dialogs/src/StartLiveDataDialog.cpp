@@ -185,7 +185,7 @@ void StartLiveDataDialog::initLayout() {
   updateConnectionChoices(ui.cmbInstrument->currentText());
   updateConnectionDetails(ui.cmbConnection->currentText());
   setDefaultAccumulationMethod(ui.cmbConnListener->currentText());
-  initListenerPropLayout(ui.cmbConnListener->currentText());
+  initListenerPropLayout();
 
   //=========== SLOTS =============
   connect(ui.processingAlgo, SIGNAL(changedAlgorithm()), this, SLOT(changeProcessingAlgorithm()));
@@ -378,17 +378,22 @@ void StartLiveDataDialog::updateUiElements(const QString &inst) {
 void StartLiveDataDialog::accept() {
   // Now manually set the StartTime property as there's a computation needed
   DateAndTime startTime = DateAndTime::getCurrentTime() - ui.dateTimeEdit->value() * 60.0;
-  m_algorithm->setPropertyValue("StartTime", startTime.toISO8601String());
+  std::string starttime = startTime.toISO8601String();
+  // Store the value to property value map: property value can be only set from the map to m_algorithm
+  // as the last step before executing
+  QString propertyname = QString::fromStdString("StartTime");
+  QString propertyvalue = QString::fromStdString(starttime);
+  this->storePropertyValue(propertyname, propertyvalue);
 
+  // Call base class
   AlgorithmDialog::accept(); // accept executes the algorithm
 }
 
 /**
  * Update the Listener Properties group box for the current LiveListener.
  *
- * @param listener Name of the LiveListener class that is selected
  */
-void StartLiveDataDialog::initListenerPropLayout(const QString &listener) {
+void StartLiveDataDialog::initListenerPropLayout() {
   // remove previous listener's properties
   auto props = m_algorithm->getPropertiesInGroup("ListenerProperties");
   for (auto &prop : props) {
@@ -400,8 +405,6 @@ void StartLiveDataDialog::initListenerPropLayout(const QString &listener) {
 
   // update algorithm's properties
   if (ui.cmbInstrument->currentText().toStdString() != "") {
-    m_algorithm->setPropertyValue("Instrument", ui.cmbInstrument->currentText().toStdString());
-    m_algorithm->setPropertyValue("Listener", listener.toStdString());
     // create or clear the layout
     QLayout *layout = ui.listenerProps->layout();
     if (!layout) {

@@ -12,7 +12,7 @@
 		<parameter name="l2" type="string">
 			<value val="2.0" />
 		</parameter>
-		<parameter name="components-for-backgrounds" type="string">
+		<parameter name="components-for-backgrounds" type="string" visible="false">
 			<value val="top_bank/box_1, top_bank/box_2, top_bank/box_3, top_bank/box_4, top_bank/box_5, top_bank/box_6, top_bank/box_7, top_bank/box_8, top_bank/box_9, top_bank/box_10, top_bank/box_11, middle_bank/box_1, middle_bank/box_2, middle_bank/box_3, middle_bank/box_4, middle_bank/box_5, middle_bank/box_6, middle_bank/box_7, middle_bank/box_8, middle_bank/box_9, bottom_bank/box_1, bottom_bank/box_2, bottom_bank/box_3, bottom_bank/box_4, bottom_bank/box_5, bottom_bank/box_6, bottom_bank/box_7, bottom_bank/box_8, bottom_bank/box_9, bottom_bank/box_10, bottom_bank/box_11, rosace/sector_0, rosace/sector_1, rosace/sector_2, rosace/sector_3, rosace/sector_4, rosace/sector_5, rosace/sector_6, rosace/sector_7" />
 		</parameter>
 		<!-- Default monitor spectrum number for monitor normalisation. -->
@@ -23,52 +23,55 @@
 		<parameter name="scaling_after_monitor_normalisation">
 			<value val="1000" />
 		</parameter>
-		<parameter name="enable_flat_background_subtraction" type="bool">
+		<parameter name="enable_flat_background_subtraction" type="bool" visible="false">
 			<value val="true" />
 		</parameter>
-		<parameter name="enable_background_diagnostics" type="bool">
+		<parameter name="enable_background_diagnostics" type="bool" visible="false">
 			<value val="true" />
 		</parameter>
-		<parameter name="enable_elastic_peak_diagnostics" type="bool">
+		<parameter name="enable_elastic_peak_diagnostics" type="bool" visible="false">
 			<value val="true" />
 		</parameter>
-		<parameter name="enable_incident_energy_calibration" type="bool">
+		<parameter name="enable_incident_energy_calibration" type="bool" visible="false">
 			<value val="true" />
 		</parameter>
-		<parameter name="enable_elastic_peak_fitting" type="bool">
+		<parameter name="enable_elastic_peak_fitting" type="bool" visible="false">
 			<value val="true" />
 		</parameter>
-		<parameter name="enable_elastic_channel_fitting" type="bool">
+		<parameter name="enable_elastic_channel_fitting" type="bool" visible="false">
 			<value val="true" />
 		</parameter>
-		<parameter name="Ei_calibration_detectors" type="string">
+		<parameter name="Ei_calibration_detectors" type="string" visible="false">
 			<value val="0-299" />
 		</parameter>
 		<!-- MergeRuns behavior when merging sample logs. -->
-		<parameter name="sample_logs_sum" type="string">
+		<parameter name="sample_logs_sum" type="string" visible="false">
 			<value val="actual_time, Detector.detsum, Detector_Rosace.detsum, duration, monitor.monsum" />
 		</parameter>
-		<parameter name="sample_logs_time_series" type="string">
+		<parameter name="sample_logs_time_series" type="string" visible="false">
 			<value val="sample.temperature" />
 		</parameter>
-		<parameter name="sample_logs_warn" type="string">
+		<parameter name="sample_logs_warn" type="string" visible="false">
 			<value val="sample.temperature" />
 		</parameter>
-		<parameter name="sample_logs_warn_tolerances" type="string">
+		<parameter name="sample_logs_warn_tolerances" type="string" visible="false">
 			<value val="1.0" />
 		</parameter>
-		<parameter name="sample_logs_fail" type="string">
+		<parameter name="sample_logs_fail" type="string" visible="false">
 			<value val="monitor.time_of_flight_0, monitor.time_of_flight_1, monitor.time_of_flight_2, wavelength, FC.rotation_speed, BC1.rotation_speed" />
 		</parameter>
-		<parameter name="sample_logs_fail_tolerances" type="string">
+		<parameter name="sample_logs_fail_tolerances" type="string" visible="false">
 			<value val="0, 0, 0, 0.02, 5, 5" />
 		</parameter>
-		<parameter name="temperature_sample_log" type="string">
+		<parameter name="temperature_sample_log" type="string" visible="false">
 			<value val="sample.temperature" />
+		</parameter>
+		<parameter name="sample_logs_list" type="string">
+		        <value val="run_list" />
 		</parameter>
 
 		<!-- These parameters are used to define headers and entries for GenerateLogbook algorithm -->
-		<parameter name="logbook_default_parameters" type="string">
+		<parameter name="logbook_default_parameters" type="string" visible="false">
 		  <value val="acq_mode:/entry0/mode:s,
 			      start_time:/entry0/start_time:s,
 			      end_time:/entry0/end_time:s,
@@ -82,7 +85,7 @@
 			      Tsamp:/entry0/sample/temperature:f,
 			      subtitle:/entry0/experiment_identifier:s" />
 		</parameter>
-		<parameter name="logbook_optional_parameters" type="string">
+		<parameter name="logbook_optional_parameters" type="string" visible="false">
 		  <value val="lambda:/entry0/wavelength:f,
 			      NCH:/entry0/monitor/time_of_flight/1:d,
 			      CHW:/entry0/monitor/time_of_flight/0:f,
@@ -113,7 +116,7 @@
 		<!-- formula for Detector efficiency calculation. Algorithm: DetectorEfficiencyCorUser
 			See http://muparser.sourceforge.net/mup_features.html#idDef2 for available
 			operators -->
-		<parameter name="formula_eff" type="string">
+		<parameter name="formula_eff" type="string" visible="false">
 			<value val="0.951*exp(-0.0887/sqrt(e))*(1-exp(-5.597/sqrt(e)))" />
 		</parameter>
 	</component-link>
@@ -122,7 +125,7 @@
 		<!-- formula for Detector efficiency calculation. Algorithm: DetectorEfficiencyCorUser
 			See http://muparser.sourceforge.net/mup_features.html#idDef2 for available
 			operators -->
-		<parameter name="formula_eff" type="string">
+		<parameter name="formula_eff" type="string" visible="false">
 			<value val="1-exp(-6.1343/sqrt(e))" />
 		</parameter>
 	</component-link>
@@ -131,7 +134,7 @@
 		<!-- formula for Detector efficiency calculation. Algorithm: DetectorEfficiencyCorUser
 			See http://muparser.sourceforge.net/mup_features.html#idDef2 for available
 			operators -->
-		<parameter name="formula_eff" type="string">
+		<parameter name="formula_eff" type="string" visible="false">
 			<value val="1" />
 		</parameter>
 	</component-link>

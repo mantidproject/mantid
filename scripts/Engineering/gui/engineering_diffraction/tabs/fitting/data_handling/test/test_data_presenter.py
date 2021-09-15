@@ -49,10 +49,10 @@ class FittingDataPresenterTest(unittest.TestCase):
         self.view.get_filenames_to_load.return_value = "/a/file/to/load.txt, /another/one.nxs"
         self.model.load_files = "mocked model method"
 
-        self.presenter.on_load_clicked(xunit="TOF")
+        self.presenter.on_load_clicked()
 
         mock_worker.assert_called_with("mocked model method",
-                                       ("/a/file/to/load.txt, /another/one.nxs", "TOF"),
+                                       ("/a/file/to/load.txt, /another/one.nxs",),
                                        error_cb=self.presenter._on_worker_error,
                                        finished_cb=self.presenter._emit_enable_load_button_signal,
                                        success_cb=self.presenter._on_worker_success)
@@ -63,7 +63,7 @@ class FittingDataPresenterTest(unittest.TestCase):
         self.view.is_searching.return_value = True
         self.view.get_filenames_valid.return_value = True
 
-        self.presenter.on_load_clicked(xunit="TOF")
+        self.presenter.on_load_clicked()
 
         self.assertEqual(0, mock_worker.call_count)
         self.assertEqual(0, self.view.get_filenames_to_load.call_count)
@@ -75,7 +75,7 @@ class FittingDataPresenterTest(unittest.TestCase):
         self.view.is_searching.return_value = False
         self.view.get_filenames_valid.return_value = False
 
-        self.presenter.on_load_clicked(xunit="TOF")
+        self.presenter.on_load_clicked()
 
         self.assertEqual(0, mock_worker.call_count)
         self.assertEqual(0, self.view.get_filenames_to_load.call_count)
@@ -342,10 +342,10 @@ class FittingDataPresenterTest(unittest.TestCase):
         self.presenter.row_numbers["name2"] = 1
         self.view.get_selected_rows.return_value = self.presenter.row_numbers
         self.presenter._handle_selection_changed()
-        self.view.set_inspect_bg_button_enabled.assert_called_with(False)
-        self.view.get_item_checked.return_value = True
-        self.presenter._handle_selection_changed()
         self.view.set_inspect_bg_button_enabled.assert_called_with(True)
+        self.view.get_selected_rows.return_value = {}
+        self.presenter._handle_selection_changed()
+        self.view.set_inspect_bg_button_enabled.assert_called_with(False)
 
     def _setup_bgsub_test(self):
         mocked_table_item = mock.MagicMock()

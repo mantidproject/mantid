@@ -9,13 +9,19 @@ from mantid.api import CompositeFunction, IAlgorithm, IFunction
 from mantid.simpleapi import CopyLogs, EvaluateFunction
 
 from Muon.GUI.Common.ADSHandler.ADS_calls import check_if_workspace_exist, retrieve_ws
-from Muon.GUI.Common.ADSHandler.workspace_naming import (create_covariance_matrix_name, create_fitted_workspace_name,
-                                                         create_parameter_table_name)
+from Muon.GUI.Common.ADSHandler.workspace_naming import (check_phasequad_name, create_covariance_matrix_name,
+                                                         create_fitted_workspace_name, create_parameter_table_name,
+                                                         get_diff_asymmetry_name, get_group_asymmetry_name,
+                                                         get_group_or_pair_from_name, get_pair_asymmetry_name,
+                                                         get_pair_phasequad_name,
+                                                         get_run_numbers_as_string_from_workspace_name)
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 from Muon.GUI.Common.contexts.fitting_contexts.basic_fitting_context import BasicFittingContext
 from Muon.GUI.Common.contexts.fitting_contexts.fitting_context import FitInformation
 from Muon.GUI.Common.contexts.muon_context import MuonContext
 from Muon.GUI.Common.utilities.algorithm_utils import run_Fit
+from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
+from Muon.GUI.Common.utilities.workspace_data_utils import check_exclude_start_and_end_x_is_valid, x_limits_of_workspace
 from Muon.GUI.Common.utilities.workspace_utils import StaticWorkspaceWrapper
 
 import math
@@ -26,7 +32,6 @@ DEFAULT_CHI_SQUARED = 0.0
 DEFAULT_FIT_STATUS = None
 DEFAULT_SINGLE_FIT_FUNCTION = None
 DEFAULT_START_X = 0.0
-X_OFFSET = 0.001
 
 
 def get_function_name_for_composite(composite: CompositeFunction) -> str:
@@ -83,6 +88,10 @@ class BasicFittingModel:
         self.fitting_context.start_xs = start_xs
         self.fitting_context.end_xs = end_xs
 
+        exclude_start_xs, exclude_end_xs = self._get_new_exclude_start_xs_and_end_xs_using_existing_data()
+        self.fitting_context.exclude_start_xs = exclude_start_xs
+        self.fitting_context.exclude_end_xs = exclude_end_xs
+
         self.reset_fit_functions(functions)
         self.reset_current_dataset_index()
         self.reset_fit_statuses_and_chi_squared()
@@ -101,6 +110,15 @@ class BasicFittingModel:
     def current_dataset_name(self, name: str) -> None:
         """Sets the currently selected dataset name to have a different name."""
         self.fitting_context.dataset_names[self.fitting_context.current_dataset_index] = name
+
+    def current_normalised_covariance_matrix(self) -> StaticWorkspaceWrapper:
+        """Returns the Normalised Covariance matrix for the currently selected data."""
+        return self._get_normalised_covariance_matrix_for(self.get_active_workspace_names(),
+                                                          self.fitting_context.function_name)
+
+    def has_normalised_covariance_matrix(self) -> bool:
+        """Returns true if a Normalised Covariance matrix exists for the currently selected dataset."""
+        return self.current_normalised_covariance_matrix() is not None
 
     @property
     def number_of_datasets(self) -> int:
@@ -156,6 +174,46 @@ class BasicFittingModel:
         """Sets the value of the currently selected end X."""
         if value > self.current_start_x:
             self.fitting_context.end_xs[self.fitting_context.current_dataset_index] = value
+
+    @property
+    def exclude_range(self) -> bool:
+        """Returns true if the Exclude Range option is on in the context."""
+        return self.fitting_context.exclude_range
+
+    @exclude_range.setter
+    def exclude_range(self, exclude_range_state: bool) -> None:
+        """Sets whether the Exclude Range option is on in the context."""
+        self.fitting_context.exclude_range = exclude_range_state
+
+    @property
+    def current_exclude_start_x(self) -> float:
+        """Returns the currently selected exclude start X, or the default exclude start X if nothing is selected."""
+        current_dataset_index = self.fitting_context.current_dataset_index
+        if current_dataset_index is not None:
+            return self.fitting_context.exclude_start_xs[current_dataset_index]
+        else:
+            return self.current_end_x
+
+    @current_exclude_start_x.setter
+    def current_exclude_start_x(self, value: float) -> None:
+        """Sets the value of the currently selected exclude start X."""
+        if value < self.current_exclude_end_x:
+            self.fitting_context.exclude_start_xs[self.fitting_context.current_dataset_index] = value
+
+    @property
+    def current_exclude_end_x(self) -> float:
+        """Returns the currently selected exclude start X, or the default exclude start X if nothing is selected."""
+        current_dataset_index = self.fitting_context.current_dataset_index
+        if current_dataset_index is not None:
+            return self.fitting_context.exclude_end_xs[current_dataset_index]
+        else:
+            return self.current_end_x
+
+    @current_exclude_end_x.setter
+    def current_exclude_end_x(self, value: float) -> None:
+        """Sets the value of the currently selected exclude end X."""
+        if value > self.current_exclude_start_x:
+            self.fitting_context.exclude_end_xs[self.fitting_context.current_dataset_index] = value
 
     def clear_single_fit_functions(self) -> None:
         """Clears the single fit functions corresponding to each dataset."""
@@ -231,7 +289,7 @@ class BasicFittingModel:
         """Clears the undo fit functions and other data for the currently selected index."""
         current_dataset_index = self.fitting_context.current_dataset_index
         for i, dataset_index in reversed(list(enumerate(self.fitting_context.dataset_indices_for_undo))):
-            if dataset_index == current_dataset_index:
+            if dataset_index == current_dataset_index and i < len(self.fitting_context.active_fit_history):
                 del self.fitting_context.active_fit_history[i]
                 del self.fitting_context.dataset_indices_for_undo[i]
                 del self.fitting_context.single_fit_functions_for_undo[i]
@@ -369,6 +427,11 @@ class BasicFittingModel:
         if self.current_single_fit_function is not None:
             self.current_single_fit_function.setParameter(full_parameter, value)
 
+    def update_attribute_value(self, full_attribute: str, value: float) -> None:
+        """Update the value of an attribute in the fit function."""
+        if self.current_single_fit_function is not None:
+            self.current_single_fit_function.setAttributeValue(full_attribute, value)
+
     @property
     def do_rebin(self) -> bool:
         """Returns true if rebin is selected within the context."""
@@ -376,15 +439,7 @@ class BasicFittingModel:
 
     def x_limits_of_workspace(self, workspace_name: str) -> tuple:
         """Returns the x data limits of a provided workspace or the current dataset."""
-        if workspace_name is not None and check_if_workspace_exist(workspace_name):
-            x_data = retrieve_ws(workspace_name).dataX(0)
-            if len(x_data) > 0:
-                x_data.sort()
-                x_lower, x_higher = x_data[0], x_data[-1]
-                if x_lower == x_higher:
-                    return x_lower - X_OFFSET, x_higher + X_OFFSET
-                return x_lower, x_higher
-        return self.current_start_x, self.current_end_x
+        return x_limits_of_workspace(workspace_name, (self.current_start_x, self.current_end_x))
 
     def update_plot_guess(self) -> None:
         """Updates the guess plot using the current dataset and function."""
@@ -406,6 +461,7 @@ class BasicFittingModel:
         """Resets the start and end Xs stored by the context."""
         self._reset_start_xs()
         self._reset_end_xs()
+        self._reset_exclude_start_and_end_xs()
 
     def reset_fit_statuses_and_chi_squared(self) -> None:
         """Reset the fit statuses and chi squared stored by the context."""
@@ -441,6 +497,11 @@ class BasicFittingModel:
         """Resets the end Xs stored by the context."""
         self.fitting_context.end_xs = [self.current_end_x] * self.fitting_context.number_of_datasets
 
+    def _reset_exclude_start_and_end_xs(self) -> None:
+        """Resets the exclude start and end Xs. Default exclude range is to have exclude_start_x == exclude_end_x."""
+        self.fitting_context.exclude_start_xs = [self.current_end_x] * self.fitting_context.number_of_datasets
+        self.fitting_context.exclude_end_xs = [self.current_end_x] * self.fitting_context.number_of_datasets
+
     def _get_new_start_xs_and_end_xs_using_existing_datasets(self, new_dataset_names: list) -> tuple:
         """Returns the start and end Xs to use for the new datasets. It tries to use existing ranges if possible."""
         if len(self.fitting_context.dataset_names) == len(new_dataset_names):
@@ -468,6 +529,25 @@ class BasicFittingModel:
         else:
             x_lower, x_upper = self.x_limits_of_workspace(new_dataset_name)
             return self.current_end_x if x_lower < self.current_end_x < x_upper else x_upper
+
+    def _get_new_exclude_start_xs_and_end_xs_using_existing_data(self) -> tuple:
+        """Returns the exclude start and end Xs to use for the new data. It tries to use existing ranges if possible."""
+        exclude_start_xs, exclude_end_xs = [], []
+        for dataset_index in range(self.fitting_context.number_of_datasets):
+            exclude_start_x, exclude_end_x = self._get_new_exclude_start_and_end_x_for(dataset_index)
+            exclude_start_xs.append(exclude_start_x)
+            exclude_end_xs.append(exclude_end_x)
+        return exclude_start_xs, exclude_end_xs
+
+    def _get_new_exclude_start_and_end_x_for(self, dataset_index: int) -> tuple:
+        """Gets the new exclude start and end X to use for a specific dataset. It tries to use the current data."""
+        start_x, end_x = self.fitting_context.start_xs[dataset_index], self.fitting_context.end_xs[dataset_index]
+        exclude_start_xs, exclude_end_xs = self.fitting_context.exclude_start_xs, self.fitting_context.exclude_end_xs
+
+        new_exclude_start_x = exclude_start_xs[dataset_index] if dataset_index < len(exclude_start_xs) else end_x
+        new_exclude_end_x = exclude_end_xs[dataset_index] if dataset_index < len(exclude_end_xs) else end_x
+
+        return check_exclude_start_and_end_x_is_valid(start_x, end_x, new_exclude_start_x, new_exclude_end_x)
 
     def _get_new_functions_using_existing_datasets(self, new_dataset_names: list) -> list:
         """Returns the functions to use for the new datasets. It tries to use the existing functions if possible."""
@@ -502,10 +582,6 @@ class BasicFittingModel:
                 return [fit_function.parameterName(i) for i in range(fit_function.nParams())]
         return []
 
-    def get_all_fit_functions(self) -> list:
-        """Returns all the fit functions for the current fitting mode."""
-        return self.fitting_context.single_fit_functions
-
     def get_active_fit_function(self) -> IFunction:
         """Returns the fit function that is active and will be used for a fit."""
         return self.current_single_fit_function
@@ -533,11 +609,6 @@ class BasicFittingModel:
     def _check_data_exists(workspace_names: list) -> list:
         """Returns only the workspace names that exist in the ADS."""
         return [workspace_name for workspace_name in workspace_names if check_if_workspace_exist(workspace_name)]
-
-    @staticmethod
-    def is_equal_to_n_decimals(value1: float, value2: float, n_decimals: int) -> bool:
-        """Checks that two floats are equal up to n decimal places."""
-        return f"{value1:.{n_decimals}f}" == f"{value2:.{n_decimals}f}"
 
     def get_selected_runs_groups_and_pairs(self) -> tuple:
         """Returns the runs, groups and pairs to use for single fit mode."""
@@ -576,6 +647,8 @@ class BasicFittingModel:
         params["InputWorkspace"] = dataset_name
         params["StartX"] = self.current_start_x
         params["EndX"] = self.current_end_x
+        if self.fitting_context.exclude_range:
+            params["Exclude"] = [self.current_exclude_start_x, self.current_exclude_end_x]
         return params
 
     def _get_common_parameters(self) -> dict:
@@ -643,6 +716,11 @@ class BasicFittingModel:
         """Creates the FitPlotInformation storing fit data to be plotted in the plot widget."""
         return [FitPlotInformation(input_workspaces=workspace_names,
                                    fit=self._get_fit_results_from_context(workspace_names, function_name))]
+
+    def _get_normalised_covariance_matrix_for(self, workspace_names: list, function_name: str) -> StaticWorkspaceWrapper:
+        """Returns the Normalised Covariance Matrix associated with some input workspaces and a function name."""
+        fit = self._get_fit_results_from_context(workspace_names, function_name)
+        return fit.covariance_workspace if fit is not None else None
 
     def _get_fit_results_from_context(self, workspace_names: list, function_name: str) -> FitInformation:
         """Gets the fit results from the context using the workspace names and function name."""
@@ -729,3 +807,184 @@ class BasicFittingModel:
         workspace_wrapper.show(directory + name)
         self.context.ads_observer.observeRename(True)
         return workspace_wrapper
+
+    @staticmethod
+    def get_fit_function_parameter_values(fit_function: IFunction) -> list:
+        """Get all the parameter values within a given fit function."""
+        parameters, errors = [], []
+        if fit_function is not None:
+            for i in range(fit_function.nParams()):
+                parameters.append(fit_function.getParameterValue(i))
+                errors.append(fit_function.getError(i))
+        return parameters, errors
+
+    """
+    Methods used by the Sequential Fitting Tab
+    """
+
+    def validate_sequential_fit(self, workspace_names: list) -> str:
+        if self.get_active_fit_function() is None or len(workspace_names) == 0:
+            return "No data or fit function selected for fitting."
+        else:
+            return ""
+
+    def get_runs_groups_and_pairs_for_fits(self, display_type: str) -> tuple:
+        """Returns the runs and group/pairs corresponding to the selected dataset names."""
+        runs, groups_and_pairs = [], []
+        for name in self.fitting_context.dataset_names:
+            runs.append(get_run_numbers_as_string_from_workspace_name(name, self.context.data_context.instrument))
+            groups_and_pairs.append(get_group_or_pair_from_name(name))
+        return self._get_datasets_containing_string(display_type, self.fitting_context.dataset_names, runs,
+                                                    groups_and_pairs)
+
+    @staticmethod
+    def _get_datasets_containing_string(display_type: str, dataset_names: list, *corresponding_dataset_args) -> tuple:
+        """Returns the dataset names that contain a string and returns its associated runs/groups/pairs."""
+        if display_type == "All":
+            return (dataset_names, *corresponding_dataset_args)
+
+        # Filter the data based on a name in the dataset_names containing a string
+        filtered_data = list(zip(*filter(lambda x: display_type in x[0], zip(dataset_names, *corresponding_dataset_args))))
+
+        # Return a tuple of empty lists if the filtered data is empty
+        return tuple(filtered_data) if len(filtered_data) != 0 else ([] for _ in range(len(corresponding_dataset_args) + 1))
+
+    def get_all_fit_function_parameter_values_for(self, fit_function: IFunction) -> list:
+        """Returns the values of the fit function parameters."""
+        parameter_values, _ = self.get_fit_function_parameter_values(fit_function)
+        return parameter_values
+
+    @staticmethod
+    def _set_fit_function_parameter_values(fit_function: IFunction, parameter_values: list, errors: list = None) -> None:
+        """Set the parameter values within a fit function."""
+        for i in range(fit_function.nParams()):
+            fit_function.setParameter(i, parameter_values[i])
+            if errors is not None:
+                fit_function.setError(i, errors[i])
+
+    def get_all_fit_functions(self) -> list:
+        """Returns all the fit functions for the current fitting mode."""
+        return self.fitting_context.single_fit_functions
+
+    def get_all_fit_functions_for(self, display_type: str) -> list:
+        """Returns all the fit functions for datasets with a name containing a string."""
+        return self._filter_functions_by_dataset_string(display_type, self.single_fit_functions)
+
+    def _filter_functions_by_dataset_string(self, display_type: str, fit_functions: list) -> list:
+        """Filters out the fit functions corresponding to dataset names that do not contain a string."""
+        if display_type == "All":
+            return self.get_all_fit_functions()
+        else:
+            _, filtered_functions = self._get_datasets_containing_string(display_type, self.dataset_names, fit_functions)
+            return filtered_functions
+
+    def get_fit_workspace_names_from_groups_and_runs(self, runs: list, groups_and_pairs: list) -> list:
+        """Returns the workspace names to use for the given runs and groups/pairs."""
+        workspace_names = []
+        for run in runs:
+            for group_or_pair in groups_and_pairs:
+                workspace_names += self._get_workspace_name_from_run_and_group_or_pair(run, group_or_pair)
+        return workspace_names
+
+    def _get_workspace_name_from_run_and_group_or_pair(self, run: str, group_or_pair: str) -> list:
+        """Returns the workspace name to use for the given run and group/pair."""
+        fit_to_raw = self.fitting_context.fit_to_raw
+        if check_phasequad_name(group_or_pair) and group_or_pair in self.context.group_pair_context.selected_pairs:
+            return [get_pair_phasequad_name(self.context, group_or_pair, run, not fit_to_raw)]
+        elif group_or_pair in self.context.group_pair_context.selected_pairs:
+            return [get_pair_asymmetry_name(self.context, group_or_pair, run, not fit_to_raw)]
+        elif group_or_pair in self.context.group_pair_context.selected_diffs:
+            return [get_diff_asymmetry_name(self.context, group_or_pair, run, not fit_to_raw)]
+        elif group_or_pair in self.context.group_pair_context.selected_groups:
+            period_string = run_list_to_string(self.context.group_pair_context[group_or_pair].periods)
+            return [get_group_asymmetry_name(self.context, group_or_pair, run, period_string, not fit_to_raw)]
+        else:
+            return []
+
+    def update_ws_fit_function_parameters(self, dataset_names: list, parameter_values: list) -> None:
+        """Updates the function parameter values for the given dataset names."""
+        self._update_fit_function_parameters_for_single_fit(dataset_names, parameter_values)
+
+    def _update_fit_function_parameters_for_single_fit(self, dataset_names: list, parameter_values: list) -> None:
+        """Updates the function parameters for the given dataset names if in single fit mode."""
+        for name in dataset_names:
+            fit_function = self.get_single_fit_function_for(name)
+            if fit_function is not None:
+                self._set_fit_function_parameter_values(fit_function, parameter_values)
+
+    def perform_sequential_fit(self, workspaces: list, parameter_values: list, use_initial_values: bool = False) -> tuple:
+        """Performs a sequential fit of the workspace names provided for single fitting mode.
+
+        :param workspaces: A list of lists of workspace names e.g. [[Row 1 workspaces], [Row 2 workspaces], etc...]
+        :param parameter_values: A list of lists of parameter values e.g. [[Row 1 params], [Row 2 params], etc...]
+        :param use_initial_values: If false the parameters at the end of each fit are passed on to the next fit.
+        """
+        workspaces = self._flatten_workspace_names(workspaces)
+        return self._perform_sequential_fit_using_func(self._do_sequential_fit, workspaces, parameter_values,
+                                                       use_initial_values)
+
+    def _perform_sequential_fit_using_func(self, fitting_func, workspaces: list, parameter_values: list,
+                                           use_initial_values: bool = False) -> tuple:
+        """Performs a sequential fit of the workspace names provided for the current fitting mode."""
+        functions, fit_statuses, chi_squared_list = self._evaluate_sequential_fit(
+            fitting_func, workspaces, parameter_values, use_initial_values)
+
+        self._update_fit_functions_after_sequential_fit(workspaces, functions)
+        self._update_fit_statuses_and_chi_squared_after_sequential_fit(workspaces, fit_statuses, chi_squared_list)
+        return functions, fit_statuses, chi_squared_list
+
+    def _do_sequential_fit(self, row_index: int, workspace_name: str, parameter_values: list, functions: list,
+                           use_initial_values: bool = False):
+        """Performs a sequential fit of the single fit data."""
+        single_function = functions[row_index - 1].clone() if not use_initial_values and row_index >= 1 else \
+            self._get_single_function_with_parameters(parameter_values)
+
+        params = self._get_parameters_for_single_fit(workspace_name, single_function)
+
+        return self._do_single_fit(params)
+
+    def _get_single_function_with_parameters(self, parameter_values: list) -> IFunction:
+        """Returns the current single fit function but with the parameter values provided."""
+        single_fit_function = self.current_single_fit_function.clone()
+        self._set_fit_function_parameter_values(single_fit_function, parameter_values)
+        return single_fit_function
+
+    @staticmethod
+    def _evaluate_sequential_fit(fitting_func, workspace_names: list, parameter_values: list,
+                                 use_initial_values: bool = False):
+        """Evaluates a sequential fit using the provided fitting func. The workspace_names is either a 1D or 2D list."""
+        functions, fit_statuses, chi_squared_list = [], [], []
+
+        for row_index, row_workspaces in enumerate(workspace_names):
+            function, fit_status, chi_squared = fitting_func(row_index, row_workspaces, parameter_values[row_index],
+                                                             functions, use_initial_values)
+
+            functions.append(function)
+            fit_statuses.append(fit_status)
+            chi_squared_list.append(chi_squared)
+
+        return functions, fit_statuses, chi_squared_list
+
+    def _update_fit_functions_after_sequential_fit(self, workspaces: list, functions: list) -> None:
+        """Updates the fit functions after a sequential fit has been run on the Sequential fitting tab."""
+        dataset_names = self.fitting_context.dataset_names
+
+        for workspace_index, workspace_name in enumerate(workspaces):
+            if workspace_name in dataset_names:
+                dataset_index = dataset_names.index(workspace_name)
+                self.fitting_context.single_fit_functions[dataset_index] = functions[workspace_index]
+
+    def _update_fit_statuses_and_chi_squared_after_sequential_fit(self, workspaces, fit_statuses, chi_squared_list):
+        """Updates the fit statuses and chi squared after a sequential fit."""
+        dataset_names = self.fitting_context.dataset_names
+
+        for workspace_index, workspace_name in enumerate(workspaces):
+            if workspace_name in dataset_names:
+                dataset_index = dataset_names.index(workspace_name)
+                self.fitting_context.fit_statuses[dataset_index] = fit_statuses[workspace_index]
+                self.fitting_context.chi_squared[dataset_index] = chi_squared_list[workspace_index]
+
+    @staticmethod
+    def _flatten_workspace_names(workspaces: list) -> list:
+        """Provides a workspace name list of lists to be flattened if in single fitting mode."""
+        return [workspace for fit_workspaces in workspaces for workspace in fit_workspaces]

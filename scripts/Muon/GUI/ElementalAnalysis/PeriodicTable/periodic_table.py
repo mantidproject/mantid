@@ -630,6 +630,9 @@ class PeriodicTable(QtWidgets.QWidget):
         b.setSelected(not b.isSelected())
         self.sigSelectionChanged.emit(self.getSelection())
 
+    def elements_list(self):
+        return self._eltButtons.keys()
+
 
 class PeriodicCombo(QtWidgets.QComboBox):
     """

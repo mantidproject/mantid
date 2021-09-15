@@ -9,6 +9,7 @@
 import collections
 from contextlib import contextmanager
 from enum import Enum
+from distutils.version import LooseVersion
 
 # 3rd party imports
 from matplotlib.legend import Legend
@@ -155,6 +156,28 @@ def get_current_cmap(object):
 def mpl_version_info():
     """Returns a namedtuple of (major,minor,patch)"""
     return MATPLOTLIB_VERSION_INFO
+
+
+def row_num(ax):
+    """
+    Returns the row number of an input axes with relation to a gridspec
+    Version check to avoid calling depreciated method in matplotlib > 3.2
+    """
+    if LooseVersion(mpl_version_str) >= LooseVersion("3.2.0"):
+        return ax.get_subplotspec().rowspan.start
+    else:
+        return ax.rowNum
+
+
+def col_num(ax):
+    """
+    Returns the column number of an input axes with relation to a gridspec
+    Version check to avoid calling depreciated method in matplotlib > 3.2
+    """
+    if LooseVersion(mpl_version_str) >= LooseVersion("3.2.0"):
+        return ax.get_subplotspec().colspan.start
+    else:
+        return ax.colNum
 
 
 def zoom_axis(ax, coord, x_or_y, factor):

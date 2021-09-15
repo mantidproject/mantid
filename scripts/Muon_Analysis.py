@@ -40,5 +40,5 @@ if 'muon_analysis' in globals():
 else:
     muon_analysis = MuonAnalysisGui(parent, flags)
     report_interface_startup(Name)
-    muon_analysis.resize(750, 750)
+    muon_analysis.resize(800, 800)
     muon_analysis.show()

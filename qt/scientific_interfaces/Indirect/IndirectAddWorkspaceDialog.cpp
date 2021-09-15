@@ -131,6 +131,10 @@ void IndirectAddWorkspaceDialog::setAllSpectraSelectionEnabled(bool doEnable) {
   m_uiForm.ckAllSpectra->setEnabled(doEnable);
 }
 
+std::string IndirectAddWorkspaceDialog::getFileName() const {
+  return m_uiForm.dsWorkspace->getFullFilePath().toStdString();
+}
+
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt

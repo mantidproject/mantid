@@ -72,8 +72,6 @@ void IndirectDataAnalysis::initLayout() {
   // Set up all tabs
   for (auto &tab : m_tabs) {
     tab.second->setupTab();
-    connect(tab.second, SIGNAL(runAsPythonScript(const QString &, bool)), this,
-            SIGNAL(runAsPythonScript(const QString &, bool)));
     connect(tab.second, SIGNAL(showMessageBox(const QString &)), this, SLOT(showMessageBox(const QString &)));
   }
 
@@ -118,7 +116,7 @@ void IndirectDataAnalysis::loadSettings() {
  */
 void IndirectDataAnalysis::tabChanged(int) {}
 
-std::string IndirectDataAnalysis::documentationPage() const { return "Indirect Data Analysis"; }
+std::string IndirectDataAnalysis::documentationPage() const { return "Inelastic Data Analysis"; }
 
 /**
  * Handles exporting a Python script for the current tab.

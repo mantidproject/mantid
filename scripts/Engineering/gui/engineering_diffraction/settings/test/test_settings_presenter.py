@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 import unittest
+from os import path
 
 from unittest import mock
 from Engineering.gui.engineering_diffraction.settings import settings_model, settings_view, settings_presenter
@@ -19,7 +20,6 @@ class SettingsPresenterTest(unittest.TestCase):
         self.presenter.settings = {}
         self.settings = {"save_location": "save",
                          "full_calibration": "cal",
-                         "recalc_vanadium": False,
                          "logs": "some,logs",
                          "primary_log": "some",
                          "sort_ascending": True,
@@ -43,10 +43,11 @@ class SettingsPresenterTest(unittest.TestCase):
         self.assertEqual(1, self.view.find_save.call_count)
 
     def test_load_invalid_settings(self):
-        self.model.get_settings_dict.return_value = {
-            "foo": "dud",
-            "bar": "result"
-        }
+
+        def return_value(self):
+            return {"foo": "dud", "bar": "result"}
+
+        self.model.get_settings_dict.side_effect = return_value
         self.presenter.savedir_notifier = mock.MagicMock()
 
         self.presenter.load_settings_from_file_or_default()
@@ -54,10 +55,29 @@ class SettingsPresenterTest(unittest.TestCase):
         self.assertEqual(self.presenter.settings, settings_presenter.DEFAULT_SETTINGS)
         self.model.set_settings_dict.assert_called_once()  # called to replace invalid settings
 
+    def test_load_invalid_settings_correct_keys(self):
+        def return_value(self):
+            return {"save_location": "save",
+                    "full_calibration": "", # invalid
+                    "logs": "some,logs",
+                    "primary_log": "some",
+                    "sort_ascending": True,
+                    "default_peak": "BackToBackExponential"
+                    }
+
+        self.model.get_settings_dict.side_effect = return_value
+        self.presenter.savedir_notifier = mock.MagicMock()
+
+        self.presenter.load_settings_from_file_or_default()
+
+        expected_dict = return_value(self)
+        expected_dict["full_calibration"] = settings_presenter.DEFAULT_SETTINGS["full_calibration"]
+        self.assertEqual(self.presenter.settings, expected_dict)
+        self.model.set_settings_dict.assert_called_once()  # called to replace invalid settings
+
     def test_save_new_settings(self):
         self.view.get_save_location.return_value = self.settings['save_location'][:]
         self.view.get_full_calibration.return_value = self.settings['full_calibration'][:]
-        self.view.get_van_recalc.return_value = self.settings['recalc_vanadium']
         self.view.get_checked_logs.return_value = self.settings['logs'][:]
         self.view.get_primary_log.return_value = self.settings['primary_log'][:]
         self.view.get_ascending_checked.return_value = self.settings['sort_ascending']
@@ -79,7 +99,6 @@ class SettingsPresenterTest(unittest.TestCase):
         # check that view is updated before being shown
         self.view.set_save_location.assert_called_with(self.settings["save_location"])
         self.view.set_full_calibration.assert_called_with(self.settings["full_calibration"])
-        self.view.set_van_recalc.assert_called_with(self.settings["recalc_vanadium"])
         self.view.set_checked_logs.assert_called_with(self.settings["logs"])
         self.view.set_primary_log_combobox.assert_called_with(self.settings["primary_log"])
         self.view.set_ascending_checked.assert_called_with(self.settings["sort_ascending"])
@@ -88,7 +107,6 @@ class SettingsPresenterTest(unittest.TestCase):
     def test_save_settings_and_close(self):
         self.view.get_save_location.return_value = self.settings['save_location'][:]
         self.view.get_full_calibration.return_value = self.settings['full_calibration'][:]
-        self.view.get_van_recalc.return_value = self.settings['recalc_vanadium']
         self.view.get_checked_logs.return_value = self.settings['logs'][:]
         self.view.get_primary_log.return_value = self.settings['primary_log'][:]
         self.view.get_ascending_checked.return_value = self.settings['sort_ascending']
@@ -105,6 +123,9 @@ class SettingsPresenterTest(unittest.TestCase):
     def test_settings_not_changed_when_cancelled(self):
         self.presenter.close_dialog()
         self.model.set_settings_dict.assert_not_called()
+
+    def test_default_calib_file_correct_location(self):
+        self.assertTrue(path.exists(settings_presenter.DEFAULT_SETTINGS["full_calibration"]))
 
 
 if __name__ == '__main__':

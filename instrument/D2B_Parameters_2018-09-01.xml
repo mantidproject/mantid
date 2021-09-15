@@ -3,12 +3,12 @@
 	<component-link name="D2B">
 
 		<!-- The detector name for the height axis used in SumOverlappingTubes -->
-		<parameter name="detector_for_height_axis" type="string">
+		<parameter name="detector_for_height_axis" type="string" visible="false">
 			<value val="tube_1" />
 		</parameter>
 
 		<!-- The flag for mirroring the angles in SumOverlappingTubes -->
-		<parameter name="mirror_scattering_angles" type="bool">
+		<parameter name="mirror_scattering_angles" type="bool" visible="false">
 			<value val="True" />
 	  </parameter>
 
@@ -25,7 +25,7 @@
 	  </parameter>
 
 		<!-- The central pixel indices of the tubes; these must be rounded!-->
-		<parameter name="tube_centers" type="string">
+		<parameter name="tube_centers" type="string" visible="false">
 			<value val="70,63,65,69,67,67,67,68,66,71,69,66,70,68,66,71,
 									67,68,65,70,66,69,66,67,66,68,67,66,67,67,69,68,
 									64,66,65,67,66,67,66,66,66,69,67,68,65,66,66,65,
@@ -37,7 +37,7 @@
 		</parameter>
 
 		<!-- Relative 2theta positions of the tubes wrt the last tube -->
-		<parameter name="tube_angles" type="string">
+		<parameter name="tube_angles" type="string" visible="false">
 			<value val="-158.750,-157.500,-156.250,-155.000,-153.750,-152.500,
 								 -151.250,-150.000,-148.750,-147.500,-146.250,-145.000,
 								 -143.750,-142.500,-141.250,-140.000,-138.750,-137.500,

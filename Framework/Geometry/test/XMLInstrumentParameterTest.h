@@ -43,9 +43,9 @@ private:
     const Geometry::IComponent *comp = nullptr;
     double angleConvertConst = 0.0;
 
-    return std::shared_ptr<XMLInstrumentParameter>(
-        new XMLInstrumentParameter(logfileID, value, interpolation, formula, formulaUnit, resultUnit, paramName, type,
-                                   tie, constraint, penaltyFactor, fitFunc, filterBy, eq, comp, angleConvertConst, ""));
+    return std::shared_ptr<XMLInstrumentParameter>(new XMLInstrumentParameter(
+        logfileID, value, interpolation, formula, formulaUnit, resultUnit, paramName, type, tie, constraint,
+        penaltyFactor, fitFunc, filterBy, eq, comp, angleConvertConst, "", "true"));
   }
 
 public:
@@ -166,8 +166,18 @@ public:
     std::string penaltyFactor;
     XMLInstrumentParameter testPar("logfileID", "value", std::make_shared<Interpolation>(), "formula", "sourceFU",
                                    "resultFU", "testPar", "aType", "noTie", constr, penaltyFactor, "aFitFunc",
-                                   "FilterBy", "eqTo", nullptr, 0.0, "test string.     Long test string.");
+                                   "FilterBy", "eqTo", nullptr, 0.0, "test string.     Long test string.", "true");
 
     TS_ASSERT_EQUALS(testPar.m_description, "test string. Long test string.");
+  }
+
+  void test_parameter_not_visible() {
+    std::vector<std::string> constr;
+    std::string penaltyFactor;
+    XMLInstrumentParameter testPar("logfileID", "value", std::make_shared<Interpolation>(), "formula", "sourceFU",
+                                   "resultFU", "testPar", "aType", "noTie", constr, penaltyFactor, "aFitFunc",
+                                   "FilterBy", "eqTo", nullptr, 0.0, "test string.     Long test string.", "false");
+
+    TS_ASSERT_EQUALS(testPar.m_visible, "false");
   }
 };

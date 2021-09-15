@@ -13,11 +13,13 @@ from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_view import Plo
 
 class PlottingCanvasWidget(object):
 
-    def __init__(self, parent, context, plot_model):
+    def __init__(self, parent, context, plot_model, figure_options=None):
 
-        self._figure_options = QuickEditWidget(context, parent)
-        self._plotting_view = PlottingCanvasView(self._figure_options.widget, context.min_y_range,
-                                                 context.y_axis_margin, parent)
+        if figure_options:
+            self._figure_options = figure_options
+        else:
+            self._figure_options = QuickEditWidget(context, parent)
+        self._plotting_view = PlottingCanvasView(self._figure_options.widget, context.settings, parent)
         self._model = PlottingCanvasModel(plot_model)
         self._presenter = PlottingCanvasPresenter(self._plotting_view, self._model, self._figure_options,
                                                   context)
@@ -29,6 +31,9 @@ class PlottingCanvasWidget(object):
             selection = "ALL"
         return (selection, self._figure_options.get_plot_x_range(), self._figure_options.autoscale,
                 self._figure_options.get_plot_y_range(), self._figure_options.get_errors())
+
+    def disable_plot_selection(self):
+        self._figure_options.disable_plot_selection()
 
     def set_quick_edit_info(self, selection, x_range, auto, y_range, errors):
         self._presenter.set_subplot_selection(selection)

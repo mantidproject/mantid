@@ -9,7 +9,7 @@
 import os.path
 
 from mantid.api import AnalysisDataService as ADS, IMDEventWorkspace
-from mantid.dataobjects import MDHistoWorkspace
+from mantid.dataobjects import MDHistoWorkspace, GroupingWorkspace
 from mantid import logger
 
 
@@ -45,13 +45,16 @@ class WorkspaceSaver(object):
                 if isinstance(workspace, MDHistoWorkspace) or isinstance(workspace, IMDEventWorkspace):
                     # Save normally using SaveMD
                     SaveMD(InputWorkspace=workspace_name, Filename=place_to_save_workspace + ".nxs")
+                elif isinstance(workspace, GroupingWorkspace):
+                    # catch this rather than leave SaveNexusProcessed to raise error to avoid message of type error
+                    # being logged
+                    raise RuntimeError("Grouping Workspaces not supported by SaveNexusProcessed")
                 else:
                     # Save normally using SaveNexusProcessed
                     SaveNexusProcessed(InputWorkspace=workspace_name, Filename=place_to_save_workspace + ".nxs")
+                self.output_list.append(workspace_name)
             except Exception as exc:
                 logger.warning("Couldn't save workspace in project: \"" + workspace_name + "\" because " + str(exc))
-
-            self.output_list.append(workspace_name)
 
     def get_output_list(self):
         """

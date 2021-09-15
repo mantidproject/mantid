@@ -3,7 +3,7 @@
 
     <component-link name="D22B">
       <!-- The name of the panels for separate I(Q) calculations, the names are from the IDF -->
-      <parameter name="detector_panels" type="string">
+      <parameter name="detector_panels" type="string" visible="false">
         <value val="detector_back,detector_front"/>
       </parameter>
       <!-- Tau coefficient for DeadTimeCorrection, to be applied tube by tube -->
@@ -11,11 +11,11 @@
         <value val="0.0000015" />
       </parameter>
       <!-- Logs to sum when merging the runs -->
-      <parameter name="sample_logs_sum" type="string">
+      <parameter name="sample_logs_sum" type="string" visible="false">
         <value val="time, timer, duration" />
       </parameter>
       <!-- GroupingPattern for DeadTimeCorrection, groups ws indices tube by tube -->
-      <parameter name="grouping" type="string">
+      <parameter name="grouping" type="string" visible="false">
         <value val="0-255,256-511,512-767,768-1023,1024-1279,1280-1535,1536-1791,1792-2047,2048-2303,2304-2559,2560-2815,2816-3071,3072-3327,3328-3583,3584-3839,3840-4095,4096-4351,4352-4607,4608-4863,4864-5119,5120-5375,5376-5631,5632-5887,5888-6143,6144-6399,6400-6655,6656-6911,6912-7167,7168-7423,7424-7679,7680-7935,7936-8191,8192-8447,8448-8703,8704-8959,8960-9215,9216-9471,9472-9727,9728-9983,9984-10239,10240-10495,10496-10751,10752-11007,11008-11263,11264-11519,11520-11775,11776-12031,12032-12287,12288-12543,12544-12799,12800-13055,13056-13311,13312-13567,13568-13823,13824-14079,14080-14335,14336-14591,14592-14847,14848-15103,15104-15359,15360-15615,15616-15871,15872-16127,16128-16383,16384-16639,16640-16895,16896-17151,17152-17407,17408-17663,17664-17919,17920-18175,18176-18431,18432-18687,18688-18943,18944-19199,19200-19455,19456-19711,19712-19967,19968-20223,20224-20479,20480-20735,20736-20991,20992-21247,21248-21503,21504-21759,21760-22015,22016-22271,22272-22527,22528-22783,22784-23039,23040-23295,23296-23551,23552-23807,23808-24063,24064-24319,24320-24575,24576-24831,24832-25087,25088-25343,25344-25599,25600-25855,25856-26111,26112-26367,26368-26623,26624-26879,26880-27135,27136-27391,27392-27647,27648-27903,27904-28159,28160-28415,28416-28671,28672-28927,28928-29183,29184-29439,29440-29695,29696-29951,29952-30207,30208-30463,30464-30719,30720-30975,30976-31231,31232-31487,31488-31743,31744-31999,32000-32255,32256-32511,32512-32767,32768-33023,33024-33279,33280-33535,33536-33791,33792-34047,34048-34303,34304-34559,34560-34815,34816-35071,35072-35327,35328-35583,35584-35839,35840-36095,36096-36351,36352-36607,36608-36863,36864-37119,37120-37375,37376-37631,37632-37887,37888-38143,38144-38399,38400-38655,38656-38911,38912-39167,39168-39423,39424-39679,39680-39935,39936-40191,40192-40447,40448-40703,40704-40959,40960-41215,41216-41471,41472-41727,41728-41983,41984-42239,42240-42495,42496-42751,42752-43007,43008-43263,43264-43519,43520-43775,43776-44031,44032-44287,44288-44543,44544-44799,44800-45055,45056-45311,45312-45567,45568-45823,45824-46079,46080-46335,46336-46591,46592-46847,46848-47103,47104-47359,47360-47615,47616-47871,47872-48127,48128-48383,48384-48639,48640-48895,48896-49151,49152-49407,49408-49663,49664-49919,49920-50175,50176-50431,50432-50687,50688-50943,50944-51199,51200-51455,51456-51711,51712-51967,51968-52223,52224-52479,52480-52735,52736-52991,52992-53247,53248-53503,53504-53759,53760-54015,54016-54271,54272-54527,54528-54783,54784-55039,55040-55295,55296-55551,55552-55807,55808-56063,56064-56319,56320-56575,56576-56831,56832-57087,57088-57343" />
       </parameter>
       <!-- The pixel sizes [mm] used by SolidAngle, resolution and default Q binning calculations.
@@ -28,8 +28,20 @@
         <value val="4"/>
       </parameter>
 
+      <!-- During the 1st cycle of 2021, back detector was 2, front detector was 1
+        Starting from the 2nd cycle, back detector is 1, front detector is 2-->
+      <parameter name="back_detector_index" type="string">
+          <value val="2" valid-from="2021-01-01T00:00:00" valid-to="2021-04-30T23:59:59"/>
+          <value val="1" valid-from="2021-05-01T00:00:00"/>
+      </parameter>
+
+      <parameter name="front_detector_index" type="string">
+          <value val="1" valid-from="2021-01-01T00:00:00" valid-to="2021-04-30T23:59:59"/>
+          <value val="2" valid-from="2021-05-01T00:00:00"/>
+      </parameter>
+
       <!-- These parameters are used to define headers and entries for GenerateLogbook algorithm -->
-      <parameter name="logbook_default_parameters" type="string">
+      <parameter name="logbook_default_parameters" type="string" visible="false">
 	<value val="SampleDescription:/entry0/sample_description:s,
 		    TotalTime:/entry0/duration:d,
 		    RateMonitor1:/entry0/monitor1/monrate:f,
@@ -45,7 +57,7 @@
 		    SD2:/entry0/D22/Detector 2/det2_actual:f,
 		    BeamStopY:/entry0/D22/beamstop/by1_actual:f" />
       </parameter>
-      <parameter name="logbook_optional_parameters" type="string">
+      <parameter name="logbook_optional_parameters" type="string" visible="false">
 	<value val="AcquisitionMode:/entry0/acquisition_mode:d,
 		    TotalCountsDetAll:/entry0/D22/Detector 1/det1_sum+/entry0/D22/Detector 2/det2_sum:d,
 		    Beamstop:/entry0/D22/beamstop/actual_beamstop_number:f,
@@ -93,7 +105,7 @@
 		    SampleApertureWidth:/entry0/D22/Beam/sample_ap_x_or_diam:f,
 		    SampleApertureHeight:/entry0/D22/Beam/sample_ap_y:f" />
       </parameter>
-      <parameter name="log_list_to_save" type="string">
+      <parameter name="log_list_to_save" type="string" visible="false">
 	<value val="facility,instrument_name,experiment_identifier,
 		    experiment_title,start_time,end_time,numor_list,
 		    processedAs,wavelength,sample_transmission_numors,
@@ -102,18 +114,18 @@
     </component-link>
     <!-- These parameters are used in ParallaxCorrection algorithm -->
     <component-link name="detector_back">
-        <parameter name="parallax" type="string">
+        <parameter name="parallax" type="string" visible="false">
             <value val="1+0.14*exp(-4*ln(2.)*((t-0.588)/0.414)^2)"/>
         </parameter>
-        <parameter name="direction" type="string">
+        <parameter name="direction" type="string" visible="false">
             <value val="y"/>
         </parameter>
     </component-link>
     <component-link name="detector_front">
-        <parameter name="parallax" type="string">
+        <parameter name="parallax" type="string" visible="false">
             <value val="1+0.14*exp(-4*ln(2.)*((t-0.588)/0.414)^2)"/>
         </parameter>
-        <parameter name="direction" type="string">
+        <parameter name="direction" type="string" visible="false">
             <value val="y"/>
         </parameter>
     </component-link>

@@ -102,7 +102,10 @@ class ModelFittingPresenter(BasicFittingPresenter):
         self.model.current_dataset_index = self.view.current_dataset_index
         self.automatically_update_function_name()
 
+        self.model.create_x_and_y_parameter_combination_workspace(self.view.x_parameter(), self.view.y_parameter())
+
         self.update_fit_statuses_and_chi_squared_in_view_from_model()
+        self.update_covariance_matrix_button()
         self.update_fit_function_in_view_from_model()
         self.update_start_and_end_x_in_view_from_model()
 
@@ -177,7 +180,7 @@ class ModelFittingPresenter(BasicFittingPresenter):
         """Creates a matrix workspace for each possible parameter combination to be used for fitting."""
         try:
             self.parameter_combination_thread = self._create_parameter_combinations_thread(
-                self.model.create_x_and_y_parameter_combination_workspaces)
+                self.model.create_x_and_y_parameter_combinations)
             self.parameter_combination_thread.threadWrapperSetUp(self.handle_parameter_combinations_started,
                                                                  finished_callback,
                                                                  self.handle_parameter_combinations_error)

@@ -58,11 +58,11 @@ terminate_xvfb_sessions
 # System discovery
 ###############################################################################
 USE_CORE_DUMPS=true
-if [[ ${NODE_LABELS} == *rhel7* ]] || [[ ${NODE_LABELS} == *centos7* ]] || [[ ${NODE_LABELS} == *scilin7* ]]; then
+if [[ ${NODE_LABELS} == *rhel7* ]] || [[ ${NODE_LABELS} == *centos7* ]] || [[ ${NODE_LABELS} == *scilin7* ]] || [[ ${NODE_LABELS} == *coverity* ]]; then
     ON_RHEL7=true
-    elif [[ ${NODE_LABELS} == *ubuntu* ]]; then
+elif [[ ${NODE_LABELS} == *ubuntu* ]]; then
     ON_UBUNTU=true
-    elif [[ ${NODE_LABELS} == *osx* ]]; then
+elif [[ ${NODE_LABELS} == *osx* ]]; then
     ON_MACOS=true
     USE_CORE_DUMPS=false
 fi
@@ -354,7 +354,7 @@ rm -f -- *.dmg *.rpm *.deb *.tar.gz *.tar.xz
 ###############################################################################
 # CMake configuration
 ###############################################################################
-$SCL_ENABLE "${CMAKE_EXE} ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_PRECOMMIT=OFF -DCOVERAGE=${COVERAGE} -DENABLE_CPACK=ON -DENABLE_MANTIDPLOT=OFF -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDOCS_HTML=ON -DENABLE_CONDA=ON -DCOLORED_COMPILER_OUTPUT=OFF ${DIST_FLAGS} ${PACKAGINGVARS} ${CLANGTIDYVAR} ${SANITIZER_FLAGS} .."
+$SCL_ENABLE "${CMAKE_EXE} ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_PRECOMMIT=OFF -DCOVERAGE=${COVERAGE} -DENABLE_CPACK=ON -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDOCS_HTML=ON -DENABLE_CONDA=ON -DCOLORED_COMPILER_OUTPUT=OFF ${DIST_FLAGS} ${PACKAGINGVARS} ${CLANGTIDYVAR} ${SANITIZER_FLAGS} .."
 
 ###############################################################################
 # Coverity build should exit early
@@ -442,12 +442,11 @@ fi
 # Developer Documentation
 ###############################################################################
 # Uncomment this when the dev-docs are ready to build without warnings
-# if [[ ${DO_BUILD_DEVDOCS} == true ]]; then
-#   if [ -d $BUILD_DIR/dev-docs/doctree ]; then
-#     rm -fr $BUILD_DIR/dev-docs/doctree/*
-#   fi
-#   ${CMAKE_EXE} --build . --target dev-docs-html
-# fi
+if [[ ${DO_BUILD_DEVDOCS} == true ]]; then
+  rm -fr $BUILD_DIR/dev-docs/doctree/*
+  rm -f $BUILD_DIR/dev-docs/dev_docs_warnings.txt
+  ${CMAKE_EXE} --build . --target dev-docs-html
+fi
 
 ###############################################################################
 # Create the install kit if required. This includes building the Qt help

@@ -5,18 +5,17 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
-from os import path, getcwd
+from os import path
 from mantidqt.utils.observer_pattern import Observable
 
-CALIB_FOLDER = path.join(path.dirname(path.dirname(path.dirname(getcwd()))), "calib")
+CALIB_FOLDER = path.join(path.dirname(path.dirname(path.dirname(path.dirname(path.realpath(__file__))))), "calib")
 DEFAULT_FULL_INST_CALIB = "ENGINX_full_instrument_calibration_193749.nxs"
-SETTINGS_DICT = {"save_location": str, "full_calibration": str, "recalc_vanadium": bool, "logs": str,
+SETTINGS_DICT = {"save_location": str, "full_calibration": str, "logs": str,
                  "primary_log": str, "sort_ascending": bool, "default_peak": str}
 
 DEFAULT_SETTINGS = {
     "full_calibration": path.join(CALIB_FOLDER, DEFAULT_FULL_INST_CALIB),
     "save_location": path.join(path.expanduser("~"), "Engineering_Mantid"),
-    "recalc_vanadium": False,
     "logs": ','.join(
         ['Temp_1', 'W_position', 'X_position', 'Y_position', 'Z_position', 'stress', 'strain', 'stressrig_go']),
     "primary_log": 'strain',
@@ -83,23 +82,22 @@ class SettingsPresenter(object):
         self._save_settings_to_file()
 
     def _collect_new_settings_from_view(self):
+        self._validate_settings()
         self.settings["save_location"] = self.view.get_save_location()
         self.settings["full_calibration"] = self.view.get_full_calibration()
-        self.settings["recalc_vanadium"] = self.view.get_van_recalc()
         self.settings["logs"] = self.view.get_checked_logs()
         self.settings["primary_log"] = self.view.get_primary_log()
         self.settings["sort_ascending"] = self.view.get_ascending_checked()
         self.settings["default_peak"] = self.view.get_peak_function()
 
     def _show_settings_in_view(self):
-        if self._validate_settings(self.settings):
-            self.view.set_save_location(self.settings["save_location"])
-            self.view.set_full_calibration(self.settings["full_calibration"])
-            self.view.set_van_recalc(self.settings["recalc_vanadium"])
-            self.view.set_checked_logs(self.settings["logs"])
-            self.view.set_primary_log_combobox(self.settings["primary_log"])
-            self.view.set_ascending_checked(self.settings["sort_ascending"])
-            self.view.set_peak_function(self.settings["default_peak"])
+        self._validate_settings()
+        self.view.set_save_location(self.settings["save_location"])
+        self.view.set_full_calibration(self.settings["full_calibration"])
+        self.view.set_checked_logs(self.settings["logs"])
+        self.view.set_primary_log_combobox(self.settings["primary_log"])
+        self.view.set_ascending_checked(self.settings["sort_ascending"])
+        self.view.set_peak_function(self.settings["default_peak"])
         self._find_files()
 
     def _find_files(self):
@@ -107,30 +105,35 @@ class SettingsPresenter(object):
         self.view.find_save()
 
     def _save_settings_to_file(self):
-        if self._validate_settings(self.settings):
-            self.model.set_settings_dict(self.settings)
-            self.savedir_notifier.notify_subscribers(self.settings["save_location"])
+        self._validate_settings()
+        self.model.set_settings_dict(self.settings)
+        self.savedir_notifier.notify_subscribers(self.settings["save_location"])
 
     def load_settings_from_file_or_default(self):
         self.settings = self.model.get_settings_dict(SETTINGS_DICT)
-        if not self._validate_settings(self.settings):
-            self.settings = DEFAULT_SETTINGS.copy()
+
+        self._validate_settings()
+
+        if self.settings != self.model.get_settings_dict(SETTINGS_DICT):
             self._save_settings_to_file()
         self._find_files()
 
-    @staticmethod
-    def _validate_settings(settings):
-        try:
-            all_keys = settings.keys() == SETTINGS_DICT.keys()
-            not_none = all([val is not None for val in settings.values()])
-            save_location = str(settings["save_location"])
-            save_valid = save_location != ""
-            log_valid = settings["logs"] != ""
-            ascending_valid = settings["sort_ascending"] != ""
-            peak_valid = settings["default_peak"] in ALL_PEAKS
-            return all_keys and not_none and save_valid and log_valid and ascending_valid and peak_valid
-        except KeyError:  # Settings contained invalid key.
-            return False
+    def check_and_populate_with_default(self, name):
+        if name not in self.settings or self.settings[name] == "":
+            self.settings[name] = DEFAULT_SETTINGS[name]
+
+    def _validate_settings(self):
+        for key in list(self.settings):
+            if key not in DEFAULT_SETTINGS.keys():
+                del self.settings[key]
+        if "default_peak" not in self.settings or not self.settings["default_peak"] in ALL_PEAKS:
+            self.settings["default_peak"] = DEFAULT_SETTINGS["default_peak"]
+        self.check_and_populate_with_default("save_location")
+        self.check_and_populate_with_default("logs")
+        self.check_and_populate_with_default("full_calibration")
+        self.check_and_populate_with_default("primary_log")
+        # boolean values already checked to be "" or True or False in settings_helper
+        self.check_and_populate_with_default("sort_ascending")
 
     # -----------------------
     # Observers / Observables

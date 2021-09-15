@@ -32,5 +32,7 @@ std::string GlobalTie::toNonCompositeParameter(std ::string const &fullParameter
   return fullParameter;
 }
 
+std::string GlobalTie::asString() const { return m_parameter + "=" + m_tie; }
+
 } // namespace MantidWidgets
 } // namespace MantidQt

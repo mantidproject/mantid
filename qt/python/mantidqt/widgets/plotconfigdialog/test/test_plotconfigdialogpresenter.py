@@ -257,6 +257,89 @@ class PlotConfigDialogPresenterTest(unittest.TestCase):
         mock_view.set_current_tab_widget.assert_called_with(mock_curves_view)
         mock_view.set_current_tab_widget.assert_called()
 
+    def test_apply_properties_calls_error_callback_when_exception_raised_in_canvas_draw(self):
+        canvas_draw_exception = Exception("Exception in canvas.draw")
+
+        def raise_():
+            raise canvas_draw_exception
+
+        fig = figure()
+        fig.canvas.draw = Mock(side_effect=lambda: raise_())
+        mock_view = Mock()
+        presenter = PlotConfigDialogPresenter(fig, mock_view)
+        presenter.success_callback = Mock()
+        presenter.error_callback = Mock()
+        mock_presenters = [Mock(), Mock(), Mock(), Mock()]
+        presenter.tab_widget_presenters = mock_presenters
+
+        presenter.apply_properties()
+
+        presenter.error_callback.assert_called_with(str(canvas_draw_exception))
+        presenter.success_callback.assert_not_called()
+        for mock in presenter.tab_widget_presenters:
+            mock.update_view.assert_not_called()
+
+    def test_apply_properties_calls_success_callback_on_canvas_draw_success(self):
+        fig = figure()
+        fig.canvas.draw = Mock()
+        mock_view = Mock()
+        presenter = PlotConfigDialogPresenter(fig, mock_view)
+        presenter.success_callback = Mock()
+        presenter.error_callback = Mock()
+
+        presenter.apply_properties()
+
+        presenter.success_callback.assert_called()
+        presenter.error_callback.assert_not_called()
+
+    def test_apply_all_properties_and_exist_doesnt_exit_if_error_state_true(self):
+        fig = figure()
+        fig.canvas.draw = Mock()
+        mock_view = Mock()
+        presenter = PlotConfigDialogPresenter(fig, mock_view)
+        presenter.apply_properties = Mock()
+        presenter.error_state = True
+
+        presenter.apply_properties_and_exit()
+
+        mock_view.close.assert_not_called()
+
+    def test_apply_all_properties_and_exist_does_exit_if_error_state_false(self):
+        fig = figure()
+        fig.canvas.draw = Mock()
+        mock_view = Mock()
+        presenter = PlotConfigDialogPresenter(fig, mock_view)
+        presenter.apply_properties = Mock()
+        presenter.error_state = False
+
+        presenter.apply_properties_and_exit()
+
+        mock_view.close.assert_called()
+
+    def test_error_callback(self):
+        exception_string = "test string"
+
+        fig = figure()
+        fig.canvas.draw = Mock()
+        mock_view = Mock()
+        presenter = PlotConfigDialogPresenter(fig, mock_view)
+
+        presenter.error_callback(exception_string)
+
+        mock_view.set_error_text.assert_called_with(exception_string)
+        self.assertTrue(presenter.error_state)
+
+    def test_success_callback(self):
+        fig = figure()
+        fig.canvas.draw = Mock()
+        mock_view = Mock()
+        presenter = PlotConfigDialogPresenter(fig, mock_view)
+
+        presenter.success_callback()
+
+        mock_view.set_error_text.assert_called_with(None)
+        self.assertFalse(presenter.error_state)
+
 
 if __name__ == '__main__':
     unittest.main()

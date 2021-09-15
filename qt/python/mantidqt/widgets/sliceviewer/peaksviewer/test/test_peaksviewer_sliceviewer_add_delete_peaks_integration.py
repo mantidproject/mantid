@@ -16,6 +16,7 @@ from mantidqt.widgets.sliceviewer.presenter import SliceViewer  # noqa: E402
 from mantidqt.utils.qt.testing import start_qapplication  # noqa: E402
 from mantid.simpleapi import CreatePeaksWorkspace, CreateMDWorkspace, SetUB, mtd  # noqa: E402
 import numpy as np  # noqa: E402
+from qtpy.QtWidgets import QApplication  # noqa: E402
 
 
 @start_qapplication
@@ -25,6 +26,13 @@ class AddDeletePeaksTest(unittest.TestCase):
     in the attached peaksworkspace.
 
     """
+    def tearDown(self):
+        # Close windows after each test to ensure none windows remain before program destruction
+        for widget in QApplication.topLevelWidgets():
+            widget.close()
+        QApplication.sendPostedEvents()
+        QApplication.sendPostedEvents()
+
     def test_Q_Sample(self):
         md = CreateMDWorkspace(Dimensions=3,
                                Extents='0,10,0,10,0,10',

@@ -16,7 +16,7 @@ class MainPlotWidgetPresenter(HomeTabSubWidget):
         """
         self._view = view
 
-        self._plot_modes={}
+        self._plot_modes = {}
         for mode in plot_modes:
             self._plot_modes[mode.name] = mode
             self._plot_modes[mode.name].hide()
@@ -35,6 +35,10 @@ class MainPlotWidgetPresenter(HomeTabSubWidget):
     @property
     def data_changed_observers(self):
         return [self._plot_modes[mode].data_changed_observer for mode in list(self._plot_modes.keys())]
+
+    @property
+    def clear_plot_observers(self):
+        return [self._plot_modes[mode].clear_plot_observer for mode in list(self._plot_modes.keys())]
 
     @property
     def rebin_options_set_observers(self):

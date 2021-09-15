@@ -482,6 +482,7 @@ endif(UNITY_BUILD)
 enable_precompiled_headers(inc/MantidKernel/PrecompiledHeader.h SRC_FILES)
 # Add the target for this directory
 add_library(Kernel ${SRC_FILES} ${INC_FILES})
+add_library(Mantid::Kernel ALIAS Kernel)
 # Set the name of the generated library
 set_target_properties(Kernel
                       PROPERTIES OUTPUT_NAME
@@ -489,11 +490,10 @@ set_target_properties(Kernel
                                  COMPILE_DEFINITIONS
                                  "IN_MANTID_KERNEL;PSAPI_VERSION=1")
 
-target_include_directories(Kernel SYSTEM
-                           PUBLIC ${Boost_INCLUDE_DIRS} ${POCO_INCLUDE_DIRS}
-                                  ${JSONCPP_INCLUDE_DIR} ${NEXUS_INCLUDE_DIR}
-                           PRIVATE ${GSL_INCLUDE_DIR}
-			   ${OPENSSL_INCLUDE_DIR} ${HDF5_INCLUDE_DIRS})
+target_include_directories(Kernel PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+		$<INSTALL_INTERFACE:include/Mantid>
+)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(Kernel PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Frameworks")
@@ -504,26 +504,42 @@ endif()
 
 # Add to the 'Framework' group in VS
 set_property(TARGET Kernel PROPERTY FOLDER "MantidFramework")
+target_compile_features(Kernel PUBLIC cxx_std_17)
+
+# if we are not on conda build ${HDF5_LIBRARIES} are full paths
+# to the libs and not cmake targets, therefore we need
+# to include the headers
+if(NOT CONDA_BUILD)
+target_include_directories(Kernel SYSTEM PUBLIC ${HDF5_INCLUDE_DIRS})
+endif()
 
 target_link_libraries(Kernel
                       PUBLIC
-                      ${NEXUS_LIBRARIES}
+                      Mantid::Types
+                      Mantid::Json
+                      Nexus::nexuscpp
                       Eigen3::Eigen
-                      ${JSONCPP_LIBRARIES}
-                      ${TBB_LIBRARIES}
-                      ${TBB_MALLOC_LIBRARIES}
+                      TBB::tbb
+                      Poco::Foundation
+                      Poco::Net
+                      Poco::XML
+                      Poco::Util
+                      Poco::NetSSL
+                      GSL::gsl
+                      OpenSSL::SSL
+                      ${HDF5_LIBRARIES}
+                      ${HDF5_HL_LIBRARIES}
                       PRIVATE
-                      ${GSL_LIBRARIES}
-                      ${MANTIDLIBS}
                       ${NETWORK_LIBRARIES}
                       span
-                      ${HDF5_LIBRARIES}
-                      Json
                       )
 if(WIN32)
-  target_link_libraries(Kernel LINK_PRIVATE Psapi.lib) # For memory usage
-                                                       # queries
+  target_link_libraries(Kernel PRIVATE Psapi.lib) # For memory usage
+                                                  # queries
 endif()
+
+# H5_BUILT_AS_DYNAMIC_LIB required https://github.com/conda-forge/hdf5-feedstock/issues/58
+target_compile_definitions(Kernel PUBLIC -DH5_BUILT_AS_DYNAMIC_LIB)
 
 # Add the unit tests directory
 add_subdirectory(test)
@@ -605,9 +621,6 @@ else()
        ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.config)
 endif()
 
-# Installation settings
-
-mtd_install_targets(TARGETS Kernel INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
 
 # Create the properties file for the installer
 set(MANTID_ROOT_BUILD ${MANTID_ROOT})
@@ -647,3 +660,10 @@ mtd_install_files(FILES ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.install
                   INSTALL_DIRS ${BIN_DIR} ${WORKBENCH_BIN_DIR}
                   RENAME Mantid.properties)
 
+# Installation settings
+if(CONDA_BUILD)
+set(TARGET_EXPORT_NAME "MantidKernelTargets")
+mtd_install_framework_lib(TARGETS Kernel EXPORT_NAME ${TARGET_EXPORT_NAME})
+else()
+mtd_install_targets(TARGETS Kernel INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
+endif()

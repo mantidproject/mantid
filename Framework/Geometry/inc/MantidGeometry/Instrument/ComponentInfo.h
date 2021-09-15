@@ -49,14 +49,15 @@ private:
   /// Shapes for each component
   std::shared_ptr<std::vector<std::shared_ptr<const Geometry::IObject>>> m_shapes;
 
-  BoundingBox componentBoundingBox(const size_t index, const BoundingBox *reference) const;
+  BoundingBox componentBoundingBox(const size_t index, const BoundingBox *reference,
+                                   const bool excludeMonitors = false) const;
 
   /// Private copy constructor. Do not make public.
   ComponentInfo(const ComponentInfo &other);
   void growBoundingBoxAsRectuangularBank(size_t index, const Geometry::BoundingBox *reference,
-                                         Geometry::BoundingBox &mutableBB) const;
-  void growBoundingBoxAsOutline(size_t index, const Geometry::BoundingBox *reference,
-                                Geometry::BoundingBox &mutableBB) const;
+                                         Geometry::BoundingBox &mutableBB, const bool excludeMonitors = false) const;
+  void growBoundingBoxAsOutline(size_t index, const Geometry::BoundingBox *reference, Geometry::BoundingBox &mutableBB,
+                                const bool excludeMonitors = false) const;
 
 public:
   struct QuadrilateralComponent {
@@ -86,15 +87,15 @@ public:
   bool uniqueName(const std::string &name) const;
   bool isDetector(const size_t componentIndex) const;
   Kernel::V3D position(const size_t componentIndex) const;
-  Kernel::V3D position(const std::pair<size_t, size_t> index) const;
+  Kernel::V3D position(const std::pair<size_t, size_t> &index) const;
   Kernel::Quat rotation(const size_t componentIndex) const;
-  Kernel::Quat rotation(const std::pair<size_t, size_t> index) const;
+  Kernel::Quat rotation(const std::pair<size_t, size_t> &index) const;
   Kernel::V3D relativePosition(const size_t componentIndex) const;
   Kernel::Quat relativeRotation(const size_t componentIndex) const;
   void setPosition(size_t componentIndex, const Kernel::V3D &newPosition);
   void setRotation(size_t componentIndex, const Kernel::Quat &newRotation);
-  void setPosition(const std::pair<size_t, size_t> index, const Kernel::V3D &newPosition);
-  void setRotation(const std::pair<size_t, size_t> index, const Kernel::Quat &newRotation);
+  void setPosition(const std::pair<size_t, size_t> &index, const Kernel::V3D &newPosition);
+  void setRotation(const std::pair<size_t, size_t> &index, const Kernel::Quat &newRotation);
   size_t parent(const size_t componentIndex) const;
   bool hasParent(const size_t componentIndex) const;
   bool hasDetectorInfo() const;
@@ -121,7 +122,8 @@ public:
   const Geometry::IObject &shape(const size_t componentIndex) const;
 
   double solidAngle(const size_t componentIndex, const Kernel::V3D &observer) const;
-  BoundingBox boundingBox(const size_t componentIndex, const BoundingBox *reference = nullptr) const;
+  BoundingBox boundingBox(const size_t componentIndex, const BoundingBox *reference = nullptr,
+                          const bool excludeMonitors = false) const;
   Beamline::ComponentType componentType(const size_t componentIndex) const;
   void setScanInterval(const std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime> &interval);
   size_t scanCount() const;

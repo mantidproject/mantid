@@ -37,7 +37,7 @@ class DeadTimeCorrectionsPresenter:
 
     def handle_instrument_changed(self) -> None:
         """User changes the selected instrument."""
-        self.set_dead_time_source_to_from_file()
+        self.model.set_dead_time_source_to_from_file()
         self.view.set_dead_time_from_data_file_selected()
 
     def handle_run_selector_changed(self) -> None:
@@ -106,8 +106,8 @@ class DeadTimeCorrectionsPresenter:
                 else:
                     self._corrections_presenter.warning_popup(error)
 
-    def handle_corrections_complete(self) -> None:
-        """When the corrections have been calculated, update the displayed dead time averages."""
+    def handle_pre_process_and_counts_calculated(self) -> None:
+        """Handles when MuonPreProcess and counts workspaces have been calculated."""
         self.update_dead_time_info_text_in_view()
 
     def update_dead_time_info_text_in_view(self) -> None:

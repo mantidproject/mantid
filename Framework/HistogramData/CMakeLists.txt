@@ -112,6 +112,8 @@ endif(UNITY_BUILD)
 
 # Add the target for this directory
 add_library(HistogramData ${SRC_FILES} ${INC_FILES})
+add_library(Mantid::HistogramData ALIAS HistogramData)
+
 # Set the name of the generated library
 set_target_properties(HistogramData
                       PROPERTIES OUTPUT_NAME
@@ -130,23 +132,32 @@ endif()
 # Add to the 'Framework' group in VS
 set_property(TARGET HistogramData PROPERTY FOLDER "MantidFramework")
 
-target_include_directories (HistogramData SYSTEM PUBLIC ${Boost_INCLUDE_DIRS})
-target_link_libraries(HistogramData
-                      LINK_PRIVATE
-                      ${GSL_LIBRARIES}
-                      Kernel
-                      ${MANTIDLIBS})
+target_include_directories(HistogramData PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+		$<INSTALL_INTERFACE:include/Mantid>
+)
+
+target_link_libraries(HistogramData PUBLIC Kernel)
 
 # Add the unit tests directory
 add_subdirectory(test)
 
 # Auto-generate exports header
-target_include_directories(HistogramData PUBLIC ${CMAKE_BINARY_DIR}/Framework/HistogramData)
+target_include_directories(HistogramData PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/HistogramData>
+  $<INSTALL_INTERFACE:include/Mantid>
+)
 generate_mantid_export_header(HistogramData FALSE)
 
 # Installation settings
+if (CONDA_BUILD)
+set(TARGET_EXPORT_NAME "MantidHistogramDataTargets")
+mtd_install_framework_lib(TARGETS HistogramData INSTALL_EXPORT_FILE EXPORT_NAME ${TARGET_EXPORT_NAME})
+else()
 mtd_install_targets(TARGETS
                     HistogramData
                     INSTALL_DIRS
                     ${LIB_DIR}
                     ${WORKBENCH_LIB_DIR})
+endif()
+

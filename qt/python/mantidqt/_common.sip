@@ -472,6 +472,7 @@ public:
   InstrumentSelector(QWidget *parent /TransferThis/ = nullptr);
   void setTechniques(const QStringList &techniques);
   void setCurrentIndex(int);
+  void setCurrentText(QString);
   QString currentText();
   int count();
 };
@@ -978,6 +979,7 @@ public:
 signals:
     void functionStructureChanged();
     void parameterChanged(const QString &funcIndex, const QString &paramName);
+    void attributeChanged(const QString &attributeName);
 };
 
 // ---------------------------------
@@ -1031,6 +1033,10 @@ public:
     void findFiles(bool isModified);
     void isOptional(bool);
     void setLastDirectory(const QString &lastDir);
+    void setUseNativeWidget(bool native);
+    void setProxyModel(QAbstractProxyModel* /Transfer/);
+    void readSettings(const QString &group);
+    void saveSettings(const QString &group);
 
 signals:
     void fileTextChanged(const QString & /*_t1*/);
@@ -1109,6 +1115,10 @@ public:
     WorkspaceSelector(QWidget *parent = nullptr, bool init = true) /KeywordArgs="All"/;
     void setWorkspaceTypes(const QStringList &types);
     void setOptional(bool optional);
+    void setSorted(bool sorted);
+    bool isConnected();
+    void disconnectObservers();
+    void connectObservers();
 };
 
 // ----------------------------------------------------------------------------

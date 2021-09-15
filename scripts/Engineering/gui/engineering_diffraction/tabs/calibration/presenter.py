@@ -6,10 +6,12 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 
-from Engineering.gui.engineering_diffraction.tabs.common import INSTRUMENT_DICT, create_error_message
+from Engineering.gui.engineering_diffraction.tabs.common import INSTRUMENT_DICT, create_error_message, output_settings
 from Engineering.gui.engineering_diffraction.tabs.common.calibration_info import CalibrationInfo
 from Engineering.gui.engineering_diffraction.tabs.common.cropping.cropping_presenter import CroppingPresenter
 from Engineering.EnggUtils import GROUP
+from Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting, set_setting
+
 
 from mantidqt.utils.asynchronous import AsyncTask
 from mantid.simpleapi import logger
@@ -38,7 +40,7 @@ class CalibrationPresenter(object):
     def connect_view_signals(self):
         self.view.set_on_calibrate_clicked(self.on_calibrate_clicked)
         self.view.set_enable_controls_connection(self.set_calibrate_controls_enabled)
-        self.view.set_update_fields_connection(self.set_field_values)
+        self.view.set_update_field_connection(self.set_field_value)
         self.view.set_on_radio_new_toggled(self.set_create_new_enabled)
         self.view.set_on_radio_existing_toggled(self.set_load_existing_enabled)
         self.view.set_on_check_cropping_state_changed(self.show_cropping)
@@ -50,9 +52,8 @@ class CalibrationPresenter(object):
             self.current_calibration.set_calibration_from_prm_fname(self.view.get_path_filename())
         else:
             # make a new calibration
-            vanadium_file = self.view.get_vanadium_filename()
             sample_file = self.view.get_sample_filename()
-            self.current_calibration.set_calibration_paths(vanadium_file, sample_file, self.instrument)
+            self.current_calibration.set_calibration_paths(sample_file, self.instrument)
             # set group and any additional parameters needed
             if self.view.get_crop_checked():
                 self.current_calibration.set_group(self.cropping_widget.get_group())
@@ -71,6 +72,8 @@ class CalibrationPresenter(object):
         elif self.view.get_load_checked() and self.validate_path():
             self.model.load_existing_calibration_files(self.current_calibration)
             self.set_current_calibration()
+        set_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX,
+                    "last_calibration_path", self.view.get_path_filename())
 
     def start_calibration_worker(self, plot_output):
         """
@@ -95,11 +98,20 @@ class CalibrationPresenter(object):
         if success_info:
             logger.information("Thread executed in " + str(success_info.elapsed_time) + " seconds.")
         self.calibration_notifier.notify_subscribers(self.current_calibration)
-        self.emit_update_fields_signal()
 
-    def set_field_values(self):
-        self.view.set_sample_text(self.current_calibration.get_sample_runno())
-        self.view.set_vanadium_text(self.current_calibration.get_vanadium_runno())
+    def set_field_value(self):
+        self.view.set_sample_text(self.current_calibration.get_sample())
+
+    def load_last_calibration(self) -> None:
+        """
+        Loads the most recently created or loaded calibration into the interface instance. To be used on interface
+        startup.
+        """
+        last_cal_path = get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX,
+                                    "last_calibration_path")
+        if last_cal_path:
+            self.view.set_load_checked(True)
+            self.view.set_file_text_with_search(last_cal_path)
 
     def set_instrument_override(self, instrument):
         instrument = INSTRUMENT_DICT[instrument]
@@ -114,7 +126,7 @@ class CalibrationPresenter(object):
         if self.view.is_searching():
             create_error_message(self.view, "Mantid is searching for data files. Please wait.")
             return False
-        if not self.validate_run_numbers():
+        if not self.view.get_sample_valid():
             create_error_message(self.view, "Check run numbers/path is valid.")
             return False
         if self.view.get_crop_checked():
@@ -126,24 +138,16 @@ class CalibrationPresenter(object):
                 return False
         return True
 
-    def validate_run_numbers(self):
-        return self.view.get_sample_valid() and self.view.get_vanadium_valid()
-
     def validate_path(self):
         return self.view.get_path_valid()
 
     def emit_enable_button_signal(self):
         self.view.sig_enable_controls.emit(True)
 
-    def emit_update_fields_signal(self):
-        self.view.sig_update_fields.emit()
-
     def set_calibrate_controls_enabled(self, enabled):
         self.view.set_calibrate_button_enabled(enabled)
-        self.view.set_check_plot_output_enabled(enabled)
 
     def set_create_new_enabled(self, enabled):
-        self.view.set_vanadium_enabled(enabled)
         self.view.set_sample_enabled(enabled)
         if enabled:
             self.set_calibrate_button_text("Calibrate")
@@ -164,7 +168,6 @@ class CalibrationPresenter(object):
 
     def find_files(self):
         self.view.find_sample_files()
-        self.view.find_vanadium_files()
 
     def show_cropping(self, show):
         self.view.set_cropping_widget_visibility(show)

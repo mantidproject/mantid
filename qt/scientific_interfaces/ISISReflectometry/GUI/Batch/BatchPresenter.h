@@ -10,6 +10,7 @@
 #include "GUI/Event/IEventPresenter.h"
 #include "GUI/Experiment/IExperimentPresenter.h"
 #include "GUI/Instrument/IInstrumentPresenter.h"
+#include "GUI/Preview/IPreviewPresenter.h"
 #include "GUI/Runs/IRunsPresenter.h"
 #include "GUI/Save/ISavePresenter.h"
 #include "IBatchJobRunner.h"
@@ -38,7 +39,7 @@ public:
                  std::unique_ptr<IEventPresenter> eventPresenter,
                  std::unique_ptr<IExperimentPresenter> experimentPresenter,
                  std::unique_ptr<IInstrumentPresenter> instrumentPresenter,
-                 std::unique_ptr<ISavePresenter> savePresenter);
+                 std::unique_ptr<ISavePresenter> savePresenter, std::unique_ptr<IPreviewPresenter> previewPresenter);
   BatchPresenter(BatchPresenter const &rhs) = delete;
   BatchPresenter(BatchPresenter &&rhs) = delete;
   BatchPresenter const &operator=(BatchPresenter const &rhs) = delete;
@@ -109,6 +110,7 @@ private:
   std::unique_ptr<IExperimentPresenter> m_experimentPresenter;
   std::unique_ptr<IInstrumentPresenter> m_instrumentPresenter;
   std::unique_ptr<ISavePresenter> m_savePresenter;
+  std::unique_ptr<IPreviewPresenter> m_previewPresenter;
   bool m_unsavedBatchFlag;
 
   friend class Encoder;

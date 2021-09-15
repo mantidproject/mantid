@@ -169,6 +169,7 @@ void ReflectometryBackgroundSubtraction::calculatePixelBackground(const MatrixWo
   // will need to change if ISIS reflectometry get a 2D detector
   LRBgd->setProperty("LowResolutionRange", "0,0");
   LRBgd->setProperty("TypeOfDetector", "LinearDetector");
+  LRBgd->setProperty("ErrorWeighting", true);
   LRBgd->execute();
 
   Workspace_sptr outputWS = LRBgd->getProperty("OutputWorkspace");
@@ -186,8 +187,9 @@ void ReflectometryBackgroundSubtraction::init() {
   const auto &inputWSPropRef = *inputWSProp;
   declareProperty(std::move(inputWSProp), "An input workspace.");
 
-  auto inputIndexType = std::make_unique<IndexTypeProperty>("InputWorkspaceIndexType",
-                                                            IndexType::SpectrumNum | IndexType::WorkspaceIndex);
+  auto inputIndexType =
+      std::make_unique<IndexTypeProperty>("InputWorkspaceIndexType", static_cast<int>(IndexType::SpectrumNum) |
+                                                                         static_cast<int>(IndexType::WorkspaceIndex));
   const auto &inputIndexTypeRef = *inputIndexType;
   declareProperty(std::move(inputIndexType), "The type of indices in the optional index set; For optimal "
                                              "performance WorkspaceIndex should be preferred;");

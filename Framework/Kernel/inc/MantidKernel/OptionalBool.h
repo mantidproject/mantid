@@ -7,6 +7,8 @@
 #pragma once
 
 #include "MantidKernel/DllConfig.h"
+#include "MantidKernel/PropertyWithValueJSON.h"
+
 #include <iosfwd>
 #include <map>
 #include <string>
@@ -50,6 +52,12 @@ MANTID_KERNEL_DLL std::istream &operator>>(std::istream &istream, OptionalBool &
 
 /// Encode an OptionalBool as a Json::Value.
 MANTID_KERNEL_DLL ::Json::Value encodeAsJson(const OptionalBool &);
+
+namespace pwvjdetail {
+
+template <> struct ToCpp<OptionalBool> { bool operator()(const Json::Value &value); };
+
+} // namespace pwvjdetail
 
 } // namespace Kernel
 } // namespace Mantid

@@ -12,6 +12,7 @@
 #include "../ReflMockObjects.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MockBatchView.h"
+#include "MockPreviewPresenter.h"
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -468,6 +469,7 @@ private:
   NiceMock<MockExperimentPresenter> *m_experimentPresenter;
   NiceMock<MockInstrumentPresenter> *m_instrumentPresenter;
   NiceMock<MockSavePresenter> *m_savePresenter;
+  NiceMock<MockPreviewPresenter> *m_previewPresenter;
   std::vector<std::string> m_instruments;
   double m_tolerance;
   Experiment m_experiment;
@@ -484,9 +486,11 @@ private:
                          std::unique_ptr<IEventPresenter> eventPresenter,
                          std::unique_ptr<IExperimentPresenter> experimentPresenter,
                          std::unique_ptr<IInstrumentPresenter> instrumentPresenter,
-                         std::unique_ptr<ISavePresenter> savePresenter)
+                         std::unique_ptr<ISavePresenter> savePresenter,
+                         std::unique_ptr<IPreviewPresenter> previewPresenter)
         : BatchPresenter(view, std::move(model), std::move(runsPresenter), std::move(eventPresenter),
-                         std::move(experimentPresenter), std::move(instrumentPresenter), std::move(savePresenter)) {}
+                         std::move(experimentPresenter), std::move(instrumentPresenter), std::move(savePresenter),
+                         std::move(previewPresenter)) {}
   };
 
   RunsTable makeRunsTable() { return RunsTable(m_instruments, m_tolerance, ReductionJobs()); }
@@ -503,15 +507,17 @@ private:
     auto experimentPresenter = std::make_unique<NiceMock<MockExperimentPresenter>>();
     auto instrumentPresenter = std::make_unique<NiceMock<MockInstrumentPresenter>>();
     auto savePresenter = std::make_unique<NiceMock<MockSavePresenter>>();
+    auto previewPresenter = std::make_unique<NiceMock<MockPreviewPresenter>>();
     m_runsPresenter = runsPresenter.get();
     m_eventPresenter = eventPresenter.get();
     m_experimentPresenter = experimentPresenter.get();
     m_instrumentPresenter = instrumentPresenter.get();
     m_savePresenter = savePresenter.get();
+    m_previewPresenter = previewPresenter.get();
     // Create the batch presenter
-    auto presenter = std::make_unique<BatchPresenterFriend>(&m_view, makeModel(), std::move(runsPresenter),
-                                                            std::move(eventPresenter), std::move(experimentPresenter),
-                                                            std::move(instrumentPresenter), std::move(savePresenter));
+    auto presenter = std::make_unique<BatchPresenterFriend>(
+        &m_view, makeModel(), std::move(runsPresenter), std::move(eventPresenter), std::move(experimentPresenter),
+        std::move(instrumentPresenter), std::move(savePresenter), std::move(previewPresenter));
     presenter->acceptMainPresenter(&m_mainPresenter);
     // Replace the constructed job runner with a mock
     m_jobRunner = new NiceMock<MockBatchJobRunner>();
@@ -533,6 +539,7 @@ private:
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_experimentPresenter));
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_instrumentPresenter));
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_savePresenter));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_previewPresenter));
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_jobRunner));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_mainPresenter));
   }

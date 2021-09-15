@@ -342,6 +342,9 @@ public:
 
   /// Removes the property from management
   void removeProperty(const std::string &name, const bool delproperty = true) override;
+  /// Removes the property from management and returns a pointer to it
+  std::unique_ptr<Kernel::Property> takeProperty(const size_t index) override;
+
   /// Clears all properties under management
   void clear() override;
   /// Override this method to perform a custom action right after a property was
@@ -449,7 +452,8 @@ protected:
   /// versions
   bool m_usingBaseProcessGroups = false;
 
-  template <typename T, const int AllowedIndexTypes = IndexType::WorkspaceIndex, typename... WSPropArgs,
+  template <typename T, const int AllowedIndexTypes = static_cast<int>(IndexType::WorkspaceIndex),
+            typename... WSPropArgs,
             typename = typename std::enable_if<std::is_convertible<T *, MatrixWorkspace *>::value>::type>
   void declareWorkspaceInputProperties(const std::string &propertyName, const std::string &doc,
                                        WSPropArgs &&...wsPropArgs);

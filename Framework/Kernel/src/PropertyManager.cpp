@@ -699,6 +699,24 @@ void PropertyManager::removeProperty(const std::string &name, const bool delprop
   }
 }
 
+/**
+ * Removes a property from the properties map by index and return a pointer to it
+ * @param index :: index of the property to be removed
+ * @returns :: pointer to the removed property if found, NULL otherwise
+ */
+std::unique_ptr<Property> PropertyManager::takeProperty(const size_t index) {
+  try {
+    auto property = m_orderedProperties[index];
+    const std::string key = createKey(property->name());
+    auto propertyPtr = std::move(m_properties[key]);
+    m_properties.erase(key);
+    m_orderedProperties.erase(m_orderedProperties.cbegin() + index);
+    return propertyPtr;
+  } catch (const std::out_of_range &) {
+    return NULL;
+  }
+}
+
 //-----------------------------------------------------------------------------------------------
 /**
  * Clears the whole property map

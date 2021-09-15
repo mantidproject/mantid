@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import IFunction
+from mantid.api import IFunction, ITableWorkspace
 from mantidqt.utils.observer_pattern import GenericObserver
 from mantidqt.utils.qt import load_ui
 
@@ -61,6 +61,10 @@ class BasicFittingView(ui_form, base_widget):
         """Connect the slot for the display workspace combo box being changed."""
         self.workspace_selector.set_slot_for_dataset_changed(slot)
 
+    def set_slot_for_covariance_matrix_clicked(self, slot) -> None:
+        """Connect the slot for the Covariance Matrix button being clicked."""
+        self.fit_function_options.set_slot_for_covariance_matrix_clicked(slot)
+
     def set_slot_for_fit_name_changed(self, slot) -> None:
         """Connect the slot for the fit name being changed by the user."""
         self.fit_function_options.set_slot_for_fit_name_changed(slot)
@@ -73,6 +77,10 @@ class BasicFittingView(ui_form, base_widget):
         """Connect the slot for a function parameter changing."""
         self.fit_function_options.set_slot_for_function_parameter_changed(slot)
 
+    def set_slot_for_function_attribute_changed(self, slot) -> None:
+        """Connect the slot for a function attribute changing."""
+        self.fit_function_options.set_slot_for_function_attribute_changed(slot)
+
     def set_slot_for_start_x_updated(self, slot) -> None:
         """Connect the slot for the start x option."""
         self.fit_function_options.set_slot_for_start_x_updated(slot)
@@ -80,6 +88,18 @@ class BasicFittingView(ui_form, base_widget):
     def set_slot_for_end_x_updated(self, slot) -> None:
         """Connect the slot for the end x option."""
         self.fit_function_options.set_slot_for_end_x_updated(slot)
+
+    def set_slot_for_exclude_range_state_changed(self, slot) -> None:
+        """Connect the slot for the exclude range checkbox."""
+        self.fit_function_options.set_slot_for_exclude_range_state_changed(slot)
+
+    def set_slot_for_exclude_start_x_updated(self, slot) -> None:
+        """Connect the slot for the exclude start x option."""
+        self.fit_function_options.set_slot_for_exclude_start_x_updated(slot)
+
+    def set_slot_for_exclude_end_x_updated(self, slot) -> None:
+        """Connect the slot for the exclude end x option."""
+        self.fit_function_options.set_slot_for_exclude_end_x_updated(slot)
 
     def set_slot_for_minimizer_changed(self, slot) -> None:
         """Connect the slot for changing the Minimizer."""
@@ -183,6 +203,31 @@ class BasicFittingView(ui_form, base_widget):
         self.fit_function_options.end_x = value
 
     @property
+    def exclude_range(self) -> bool:
+        """Returns true if the Exclude Range option is ticked."""
+        return self.fit_function_options.exclude_range
+
+    @property
+    def exclude_start_x(self) -> float:
+        """Returns the start X for the excluded region."""
+        return self.fit_function_options.exclude_start_x
+
+    @exclude_start_x.setter
+    def exclude_start_x(self, value: float) -> None:
+        """Sets the selected exclude start X."""
+        self.fit_function_options.exclude_start_x = value
+
+    @property
+    def exclude_end_x(self) -> float:
+        """Returns the end X for the excluded region."""
+        return self.fit_function_options.exclude_end_x
+
+    @exclude_end_x.setter
+    def exclude_end_x(self, value: float) -> None:
+        """Sets the selected exclude end X."""
+        self.fit_function_options.exclude_end_x = value
+
+    @property
     def evaluation_type(self) -> str:
         """Returns the selected evaluation type."""
         return self.fit_function_options.evaluation_type
@@ -230,6 +275,10 @@ class BasicFittingView(ui_form, base_widget):
         """Returns the value of the specified parameter."""
         return self.fit_function_options.parameter_value(full_parameter)
 
+    def attribute_value(self, full_attribute: str):
+        """Returns the value of the specified attribute."""
+        return self.fit_function_options.attribute_value(full_attribute)
+
     def switch_to_simultaneous(self) -> None:
         """Switches the view to simultaneous fit mode."""
         self.fit_function_options.switch_to_simultaneous()
@@ -238,13 +287,33 @@ class BasicFittingView(ui_form, base_widget):
         """Switches the view to single fit mode."""
         self.fit_function_options.switch_to_single()
 
+    def hide_exclude_range_checkbox(self) -> None:
+        """Hides the Exclude Range checkbox in the fitting options."""
+        self.fit_function_options.hide_exclude_range_checkbox()
+
     def hide_fit_raw_checkbox(self) -> None:
         """Hides the Fit Raw checkbox in the fitting options."""
         self.fit_function_options.hide_fit_raw_checkbox()
 
+    def hide_evaluate_function_as_checkbox(self) -> None:
+        """Hides the Evaluate Function as checkbox in the fitting options."""
+        self.fit_function_options.hide_evaluate_function_as_checkbox()
+
     def set_start_and_end_x_labels(self, start_x_label: str, end_x_label: str) -> None:
         """Sets the labels to use for the start and end X labels in the fit options table."""
         self.fit_function_options.set_start_and_end_x_labels(start_x_label, end_x_label)
+
+    def set_exclude_start_and_end_x_visible(self, visible: bool) -> None:
+        """Sets whether the exclude start and end x options are visible."""
+        self.fit_function_options.set_exclude_start_and_end_x_visible(visible)
+
+    def set_covariance_button_enabled(self, enabled: bool) -> None:
+        """Sets whether the Covariance Matrix button is enabled or not."""
+        self.fit_function_options.set_covariance_button_enabled(enabled)
+
+    def show_normalised_covariance_matrix(self, covariance_ws: ITableWorkspace, workspace_name: str) -> None:
+        """Shows the normalised covariance matrix in a separate table display window."""
+        self.fit_function_options.show_normalised_covariance_matrix(covariance_ws, workspace_name)
 
     def disable_view(self) -> None:
         """Disable all widgets in this fitting widget."""
@@ -252,4 +321,4 @@ class BasicFittingView(ui_form, base_widget):
 
     def enable_view(self) -> None:
         """Enable all widgets in this fitting widget."""
-        self.setEnabled(True)
+        self.setEnabled(self.workspace_selector.number_of_datasets() != 0)

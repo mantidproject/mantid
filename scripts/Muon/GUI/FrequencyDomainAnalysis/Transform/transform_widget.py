@@ -14,15 +14,15 @@ from qtpy import QtWidgets
 
 class TransformWidget(QtWidgets.QWidget):
 
-    def __init__(self, load, fft_widget, maxent_widget, parent=None):
+    def __init__(self, context, fft_widget, maxent_widget, parent=None):
         super(TransformWidget, self).__init__(parent)
-        self._fft = fft_widget(load=load, parent=self)
-        self._maxent = maxent_widget(load=load, parent=self)
+        self._fft = fft_widget(load=context, parent=self)
+        self._maxent = maxent_widget(context=context, parent=self)
         self._selector = TransformSelectionWidget(parent=self)
-        self.LoadObserver = LoadObserver(self)
-        self.load = load
+        self.load_observer = LoadObserver(self)
+        self.context = context
         self.instrumentObserver = instrumentObserver(self)
-        self.GroupPairObserver = GroupPairObserver(self)
+        self.GroupPairObserver = GenericObserver(self.handle_new_group_pair)
         self.enable_observer = EnableObserver(self)
         self.disable_observer = DisableObserver(self)
         self.phase_quad_observer = PhaseQuadObserver(self)
@@ -38,7 +38,7 @@ class TransformWidget(QtWidgets.QWidget):
         self.disable_view()
         # to make it compatable with the old GUI
         try:
-            self.load.update_view_from_model_notifier.add_subscriber(
+            self.context.update_view_from_model_notifier.add_subscriber(
                 self.update_view_from_model_observer)
         except:
             pass
@@ -83,6 +83,7 @@ class TransformWidget(QtWidgets.QWidget):
     def handle_new_group_pair(self):
         # may have new groups/pairs for multiple runs
         self._fft.runChanged()
+        self._maxent.presenter.update_phase_table_options()
 
     def disable_view(self):
         self._view.setEnabled(False)
@@ -123,16 +124,6 @@ class instrumentObserver(Observer):
 
     def update(self, observable, arg):
         self.outer.handle_new_instrument()
-
-
-class GroupPairObserver(Observer):
-
-    def __init__(self, outer):
-        Observer.__init__(self)
-        self.outer = outer
-
-    def update(self, observable, arg):
-        self.outer.handle_new_group_pair()
 
 
 class EnableObserver(Observer):
