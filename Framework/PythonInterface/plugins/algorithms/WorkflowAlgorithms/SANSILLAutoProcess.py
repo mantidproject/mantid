@@ -410,7 +410,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
 
     def PyExec(self):
         self.setUp()
-        self.log().warning('SANSILLAutoProcess is deprecated for monochromatic measurements, use SANSILLMultiProcess instead.')
+        self.log().warning('SANSILLAutoProcess is deprecated, use SANSILLMultiProcess instead.')
         outputSamples = []
         outputWedges = []
         outputPanels = []
@@ -472,6 +472,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
 
         GroupWorkspaces(InputWorkspaces=outputSamples,
                         OutputWorkspace=self.output)
+        self.set_distribution(outputSamples)
         self.setProperty('OutputWorkspace', mtd[self.output])
 
         if outputWedges:
@@ -481,7 +482,16 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
             self.outputSensitivity(outputSens)
 
         if outputPanels:
+            self.set_distribution(outputPanels)
             self.outputPanels(outputPanels)
+
+    def set_distribution(self, wslist):
+        for ws in wslist:
+            if isinstance(mtd[ws], WorkspaceGroup):
+                for wsi in mtd[ws]:
+                    wsi.setDistribution(True)
+            else:
+                mtd[ws].setDistribution(True)
 
     def outputWedges(self, outputWedges):
         # ungroup and regroup wedge outputs per wedge
@@ -527,6 +537,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 except RuntimeError as re:
                     self.log().warning("Unable to stitch automatically, consider "
                                        "stitching manually: " + str(re))
+
+        self.set_distribution(group_name)
 
     def outputSensitivity(self, sensitivity_outputs):
         if len(sensitivity_outputs) > 1:
@@ -943,6 +955,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
             self.n_wedges = mtd[output_wedges].getNumberOfEntries()
 
         ConvertToPointData(InputWorkspace=output_sample, OutputWorkspace=output_sample)
+        # Set to histogram to enable stitching
+        mtd[output_sample].setDistribution(False)
 
         if self.cleanup:
             DeleteWorkspace(sample_name)
