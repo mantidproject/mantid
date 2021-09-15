@@ -22,6 +22,7 @@ class SphinxWarnings(systemtesting.MantidSystemTest):
                                 'CorrectionFunctions',
                                 'Crystal',
                                 'DataHandling',
+                                'Deprecated',
                                 'Diagnostics',
                                 'Diffraction',
                                 'Events',
