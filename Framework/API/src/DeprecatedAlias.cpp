@@ -45,8 +45,15 @@ void DeprecatedAlias::setDeprecationDate(const std::string &date) {
  */
 std::string DeprecatedAlias::deprecationMessage(const IAlgorithm *algo) {
   std::stringstream msg;
-  // TODO: proper deprecation message
-  msg << "The algorithm '" << algo->name() << "' has been deprecated. ";
+
+  auto alias = algo->alias();
+
+  if (alias.empty()) {
+    throw std::runtime_error("Cannot find the deprecated alias for this algorithm.");
+  } else {
+    msg << "The algorithm '" << alias << "' is deprecated on " << m_deprecationDate << "."
+        << "Please use '" << algo->name() << "' instead.";
+  }
 
   return msg.str();
 }
