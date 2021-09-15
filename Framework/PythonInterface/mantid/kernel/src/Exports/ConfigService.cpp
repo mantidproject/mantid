@@ -54,7 +54,7 @@ const InstrumentInfo &getInstrument(ConfigServiceImpl &self, const object &name 
 std::string getStringUsingCacheElseDefault(ConfigServiceImpl &self, const std::string &key,
                                            const std::string &defaultValue) {
   std::vector<std::string> keys = self.keys();
-  if (std::find(keys.begin(), keys.end(), key) != keys.end())
+  if (self.hasProperty(key))
     return self.getString(key, true);
   else
     return defaultValue;
@@ -144,9 +144,12 @@ void export_ConfigService() {
       .def("keys", &ConfigServiceImpl::keys, arg("self"))
 
       // Treat this as a dictionary
-      .def("get", &getStringUsingCache, (arg("self"), arg("key")))
+      .def("get", &getStringUsingCache, (arg("self"), arg("key")),
+           "get the string value of a property; return empty string value if the property "
+           "is not found in the configuration")
       .def("get", &getStringUsingCacheElseDefault, (arg("self"), arg("key")), arg("default"),
-           "get the value of a property; return a default value if the property is not found in the configuration")
+           "get the string value of a property; return a default string value if the property "
+           "is not found in the configuration")
       .def("__getitem__", &getStringUsingCache, (arg("self"), arg("key")))
       .def("__setitem__", &ConfigServiceImpl::setString, (arg("self"), arg("key"), arg("value")))
       .def("__contains__", &ConfigServiceImpl::hasProperty, (arg("self"), arg("key")))
