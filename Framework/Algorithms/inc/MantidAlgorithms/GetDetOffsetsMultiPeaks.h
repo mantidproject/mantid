@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -46,7 +47,7 @@ struct FitPeakOffsetResult {
  @author Vickie Lynch, SNS
  @date 12/12/2011
  */
-class MANTID_ALGORITHMS_DLL GetDetOffsetsMultiPeaks : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL GetDetOffsetsMultiPeaks : public API::Algorithm, public API::DeprecatedAlgorithm {
 public:
   /// Default constructorMatrix
   GetDetOffsetsMultiPeaks();
