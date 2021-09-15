@@ -19,6 +19,7 @@ from mantidqtinterfaces.Muon.GUI.MuonAnalysis.plot_widget.plot_time_fit_pane_mod
 #from mantidqtinterfaces.Muon.GUI.Common.plot_widget.raw_pane.raw_pane_model import RawPaneModel
 #from mantidqtinterfaces.Muon.GUI.Common.plot_widget.raw_pane.raw_pane_view import RawPaneView
 
+
 class MuonAnalysisPlotWidget(object):
     def __init__(self, context=None, get_active_fit_results=lambda: [], parent=None):
 
@@ -38,8 +39,8 @@ class MuonAnalysisPlotWidget(object):
 
         for model in models:
             self.plotting_canvas_widgets[model.name] = PlottingCanvasWidget(parent, context=
-                                                                                 context.plot_panes_context[model.name],
-                                                                                 plot_model=model)
+                                                                            context.plot_panes_context[model.name],
+                                                                            plot_model=model)
             #if model == self.raw_model:
             #    self._views[model.name] = RawPaneView(parent)
             #else:
@@ -67,10 +68,9 @@ class MuonAnalysisPlotWidget(object):
         #self.raw_mode = RawPanePresenter(self._views[name], self.raw_model,
         #                                         context,self.plotting_canvas_widgets[name].presenter)
 
-
         self.presenter = MainPlotWidgetPresenter(self.view,
-                                                   [self.data_mode, self.raw_mode, self.fit_mode])#, self.model_fit_mode])
-
+                                                 [self.data_mode, self.fit_mode])
+                                                #[self.data_mode, self.raw_mode, self.fit_mode, self.model_fit_mode])
 
         self._current_plot_mode = self.presenter.get_plot_mode
         self.presenter.set_plot_mode_changed_slot(self.handle_plot_mode_changed_by_user)

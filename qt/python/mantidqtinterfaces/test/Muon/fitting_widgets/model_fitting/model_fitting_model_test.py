@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from mantid.api import FrameworkManager, FunctionFactory, WorkspaceFactory
+from mantid.api import AnalysisDataService, FrameworkManager, FunctionFactory, WorkspaceFactory
 
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.ADS_calls import add_ws_to_ads, check_if_workspace_exist
 from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.model_fitting.model_fitting_model import ModelFittingModel
@@ -42,6 +42,7 @@ class ModelFittingModelTest(unittest.TestCase):
 
     def tearDown(self):
         self.model = None
+        AnalysisDataService.clear()
 
     def test_that_the_model_has_been_instantiated_with_empty_fit_data(self):
         self.assertEqual(self.model.result_table_names, [])
@@ -131,14 +132,14 @@ class ModelFittingModelTest(unittest.TestCase):
 
         self.assertEqual(self.model.get_workspace_names_to_display_from_context(), ["Result1"])
 
-    def test_that_create_x_and_y_parameter_combination_workspaces_will_create_the_expected_parameter_data(self):
+    def test_that_create_x_and_y_parameter_combinations_will_create_the_expected_parameter_data(self):
         self.model.result_table_names = self.result_table_names
         self.model.current_result_table_index = 0
 
         table = create_results_table()
         add_ws_to_ads("Result1", table)
 
-        self.model.create_x_and_y_parameter_combination_workspaces()
+        self.model.create_x_and_y_parameter_combinations()
         x_parameters = self.model.x_parameters()
         y_parameters = self.model.y_parameters()
 
@@ -156,23 +157,49 @@ class ModelFittingModelTest(unittest.TestCase):
                          ["MUSR62260; Group; bottom; Asymmetry; MA", "MUSR62260; Group; top; Asymmetry; MA",
                           "MUSR62260; Group; fwd; Asymmetry; MA"])
 
-    def test_that_create_x_and_y_parameter_combination_workspaces_will_create_the_expected_parameter_workspaces(self):
+    def test_that_create_x_and_y_parameter_combinations_will_not_create_the_parameter_workspaces(self):
         self.model.result_table_names = self.result_table_names
         self.model.current_result_table_index = 0
 
         table = create_results_table()
         add_ws_to_ads("Result1", table)
 
-        self.model.create_x_and_y_parameter_combination_workspaces()
+        self.model.create_x_and_y_parameter_combinations()
+
+        self.assertTrue(not check_if_workspace_exist("Result1; Parameter Combinations"))
+
+        self.assertTrue(not check_if_workspace_exist("Result1; workspace_name vs A0"))
+        self.assertTrue(not check_if_workspace_exist("Result1; workspace_name vs A1"))
+        self.assertTrue(not check_if_workspace_exist("Result1; A0 vs workspace_name"))
+        self.assertTrue(not check_if_workspace_exist("Result1; A0 vs A1"))
+        self.assertTrue(not check_if_workspace_exist("Result1; A1 vs workspace_name"))
+        self.assertTrue(not check_if_workspace_exist("Result1; A1 vs A0"))
+
+        self.assertTrue(not check_if_workspace_exist("Result1; workspace_name vs workspace_name"))
+        self.assertTrue(not check_if_workspace_exist("Result1; A0 vs A0"))
+        self.assertTrue(not check_if_workspace_exist("Result1; A1 vs A1"))
+
+    def test_that_create_x_and_y_parameter_combination_workspace_will_create_the_expected_parameter_workspaces(self):
+        self.model.result_table_names = self.result_table_names
+        self.model.current_result_table_index = 0
+
+        table = create_results_table()
+        add_ws_to_ads("Result1", table)
+
+        self.model.create_x_and_y_parameter_combinations()
+        self.model.create_x_and_y_parameter_combination_workspace("workspace_name", "A0")
+        self.model.create_x_and_y_parameter_combination_workspace("A1", "A0")
+        self.model.create_x_and_y_parameter_combination_workspace("workspace_name", "A1")
 
         self.assertTrue(check_if_workspace_exist("Result1; Parameter Combinations"))
 
-        self.assertTrue(check_if_workspace_exist("Result1; workspace_name vs A0"))
-        self.assertTrue(check_if_workspace_exist("Result1; workspace_name vs A1"))
         self.assertTrue(check_if_workspace_exist("Result1; A0 vs workspace_name"))
-        self.assertTrue(check_if_workspace_exist("Result1; A0 vs A1"))
         self.assertTrue(check_if_workspace_exist("Result1; A1 vs workspace_name"))
-        self.assertTrue(check_if_workspace_exist("Result1; A1 vs A0"))
+        self.assertTrue(check_if_workspace_exist("Result1; A0 vs A1"))
+
+        self.assertTrue(not check_if_workspace_exist("Result1; workspace_name vs A0"))
+        self.assertTrue(not check_if_workspace_exist("Result1; workspace_name vs A1"))
+        self.assertTrue(not check_if_workspace_exist("Result1; A1 vs A0"))
 
         self.assertTrue(not check_if_workspace_exist("Result1; workspace_name vs workspace_name"))
         self.assertTrue(not check_if_workspace_exist("Result1; A0 vs A0"))
