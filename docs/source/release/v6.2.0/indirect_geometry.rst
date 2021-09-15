@@ -26,6 +26,7 @@ Bugfixes
 - A bug has been fixed in :ref:`Inelastic Data Analysis <interface-inelastic-data-analysis>` on the :ref:`F(Q)Fit <fqfit>` tab, Multiple Input tab that allowed duplicate spectra to be added.
 - A bug has been fixed that stopped additional spectra being added to :ref:`Inelastic Data Analysis <interface-inelastic-data-analysis>` if spectra from that workspace had already been added.
 - A bug has been fixed in :ref:`Inelastic Data Analysis <interface-inelastic-data-analysis>` that limited the integration range on the tabs to between -1 and 1.
+- A bug has been fixed in :ref:`Elwin <Elwin-iqt-ref>` tab that caused Mantid to crash if a file of the wrong format was loaded.
 
 Algorithms
 ----------
