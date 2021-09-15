@@ -148,7 +148,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                                                     direction=Direction.Input,
                                                     optional=PropertyMode.Optional),
                              doc='The workspace used in 10p method when data is taken as two XYZ'
-                                 +' measurements rotated by 45 degress.')
+                                 ' measurements rotated by 45 degress.')
 
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
                                                     direction=Direction.Output,
@@ -193,9 +193,11 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                              defaultValue=0.5,
                              validator=FloatBoundedValidator(lower=0),
                              direction=Direction.Input,
-                             doc="Scattering angle bin size in degrees used for expressing scan data on a single TwoTheta axis.")
+                             doc="Scattering angle bin size in degrees used for expressing scan data on a single "
+                                 "TwoTheta axis.")
 
-        self.setPropertySettings("ScatteringAngleBinSize", EnabledWhenProperty('OutputTreatment', PropertyCriterion.IsEqualTo, 'Merge'))
+        self.setPropertySettings("ScatteringAngleBinSize", EnabledWhenProperty('OutputTreatment',
+                                                                               PropertyCriterion.IsEqualTo, 'Merge'))
 
         self.declareProperty(WorkspaceGroupProperty('VanadiumInputWorkspace', '',
                                                     direction=Direction.Input,
@@ -246,7 +248,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
          such as the beam size and calculates derived parameters."""
         self._sampleAndEnvironmentProperties = self.getProperty('SampleAndEnvironmentProperties').value
         if 'InitialEnergy' not in self._sampleAndEnvironmentProperties:
-            h = physical_constants['Planck constant'][0]  # in m^2 kg^2 / s^2
+            h = physical_constants['Planck constant'][0]  # in m^2 kg / s
             neutron_mass = physical_constants['neutron mass'][0]  # in0 kg
             wavelength = mtd[ws][0].getRun().getLogData('monochromator.wavelength').value * 1e-10  # in m
             joules_to_mev = 1e3 / physical_constants['electron volt'][0]
