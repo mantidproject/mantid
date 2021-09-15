@@ -14,6 +14,7 @@ from contextlib import contextmanager
 import numpy.core.setup_common as numpy_cfg
 import platform
 import os
+import importlib
 import sys
 from mantid import logger
 
@@ -49,13 +50,26 @@ def _os_env():
     return platform.system() + platform.architecture()[0]
 
 
-def _lib_suffix():
-    if platform.system() == "Windows":
-        suffix = "win"
-    elif platform.system() == "Linux":
-        suffix = "lnx"
+def is_pip_version_of_libs():
+    name = 'Quest'
+    if name in sys.modules:
+        return True
+    elif (spec := importlib.util.find_spec(name)) is not None:
+        return True
     else:
+        return False
+
+
+def _lib_suffix():
+    if is_pip_version_of_libs():
         return ""
+    else:
+        if platform.system() == "Windows":
+            suffix = "win"
+        elif platform.system() == "Linux":
+            suffix = "lnx"
+        else:
+            return ""
     return "_" + suffix + platform.architecture()[0][0:2]
 
 
@@ -85,6 +99,10 @@ def is_supported_f2py_platform():
             and _numpy_abi_ver() == F2PY_MODULES_REQUIRED_C_ABI
             and "python_d" not in sys.executable):
         return True
+    # check if we have pip installed the fortran libraries
+    # first check the numpy abi is correct
+    if _numpy_abi_ver() == F2PY_MODULES_REQUIRED_C_ABI:
+        return is_pip_version_of_libs()
     return False
 
 
