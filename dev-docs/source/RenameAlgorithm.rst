@@ -138,6 +138,8 @@ Renaming a C++ algorithm can be achieved via the following steps:
 
     Unit test and system tests should be the place to start with the renaming update.
 
+  * Update documentation page and corresponding examples
+
 * Update calls within Mantid to use the new Algorithm name
 
 * Make sure list the name change in the release notes
