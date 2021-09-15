@@ -457,7 +457,7 @@ class PolDiffILLReduction(PythonAlgorithm):
             RenameWorkspace(InputWorkspace=input_ws, OutputWorkspace=ws)
         if process in ['Vanadium', 'Sample']:
             self._read_experiment_properties(ws)
-        return ws
+        return ws, progress
 
     def _normalise(self, ws):
         """Normalises the provided WorkspaceGroup to the monitor 1 or time and simultaneously removes monitors.
@@ -1129,7 +1129,7 @@ class PolDiffILLReduction(PythonAlgorithm):
             nReports += 2
         progress = Progress(self, start=0.0, end=1.0, nreports=int(nReports[processes.index(process)]))
 
-        ws = self._load_and_prepare_data(measurement_technique, process, progress)
+        ws, progress = self._load_and_prepare_data(measurement_technique, process, progress)
         if process in ['EmptyBeam', 'BeamWithCadmium', 'Transmission']:
             if mtd[ws].getNumberOfEntries() > 1:
                 tmp_ws = ws + '_tmp'
@@ -1149,7 +1149,8 @@ class PolDiffILLReduction(PythonAlgorithm):
                 self._calculate_transmission(ws, beam_ws)
         else:
             self._rename_input_with_polarisation_info(ws)
-            progress.report('Normalising to monitor/time')
+            report_no = 7 if measurement_technique != 'SingleCrystal' else 8
+            progress.report(report_no, 'Normalising to monitor/time')
             self._normalise(ws)
 
         if process in ['Quartz', 'Vanadium', 'Sample']:
