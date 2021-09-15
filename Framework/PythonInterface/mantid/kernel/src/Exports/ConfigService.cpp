@@ -53,10 +53,11 @@ const InstrumentInfo &getInstrument(ConfigServiceImpl &self, const object &name 
 /// duck typing emulating dict.get method
 std::string getStringUsingCacheElseDefault(ConfigServiceImpl &self, const std::string &key,
                                            const std::string &defaultValue) {
-  std::string value = self.getString(key, true);
-  if (value.empty())
+  std::vector<std::string> keys = self.keys();
+  if (std::find(keys.begin(), keys.end(), key) != keys.end())
+    return self.getString(key, true);
+  else
     return defaultValue;
-  return value;
 }
 
 GNU_DIAG_OFF("unused-local-typedef")
@@ -143,6 +144,7 @@ void export_ConfigService() {
       .def("keys", &ConfigServiceImpl::keys, arg("self"))
 
       // Treat this as a dictionary
+      .def("get", &getStringUsingCache, (arg("self"), arg("key")))
       .def("get", &getStringUsingCacheElseDefault, (arg("self"), arg("key")), arg("default"),
            "get the value of a property; return a default value if the property is not found in the configuration")
       .def("__getitem__", &getStringUsingCache, (arg("self"), arg("key")))

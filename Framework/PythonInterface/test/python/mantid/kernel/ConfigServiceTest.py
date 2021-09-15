@@ -64,6 +64,9 @@ class ConfigServiceTest(unittest.TestCase):
         self.assertRaises(RuntimeError, config.getInstrument, "MadeUpInstrument")
 
     def test_service_acts_like_dictionary(self):
+        dictcall = config.get("property_not_found")
+        self.assertEqual(dictcall, "")
+
         test_prop = "projectRecovery.secondsBetween"
         self.assertTrue(config.hasProperty(test_prop))
         dictcall = config[test_prop]
