@@ -31,7 +31,9 @@
 #include <cmath>
 
 #include <QMessageBox>
+#include <QMetaObject>
 #include <QSettings>
+#include <QThread>
 
 #include <utility>
 
@@ -72,9 +74,22 @@ InstrumentActor::InstrumentActor(const std::string &wsName, MantidWidgets::IMess
 
 InstrumentActor::InstrumentActor(MatrixWorkspace_sptr workspace, MantidWidgets::IMessageHandler &messageHandler,
                                  bool autoscaling, double scaleMin, double scaleMax)
-    : m_workspace(workspace), m_ragged(true), m_autoscaling(autoscaling), m_defaultPos(), m_isPhysicalInstrument(false),
-      m_messageHandler(messageHandler) {
-  // settings
+    : m_workspace(workspace), m_ragged(true), m_autoscaling(autoscaling), m_defaultPos(), m_initialized(false),
+      m_isPhysicalInstrument(false), m_messageHandler(messageHandler) {
+
+  m_scaleMin = scaleMin;
+  m_scaleMax = scaleMax;
+
+  QThread *thread = QThread::create([this] { initialize(); });
+  thread->start();
+
+  m_isCompVisible.assign(componentInfo().size(), true);
+
+  // m_renderer.reset(new InstrumentRenderer(*this));
+  // m_renderer->changeScaleType(m_scaleType);
+}
+
+void InstrumentActor::initialize() {
   loadSettings();
 
   auto sharedWorkspace = m_workspace;
@@ -107,12 +122,16 @@ InstrumentActor::InstrumentActor(MatrixWorkspace_sptr workspace, MantidWidgets::
   }
 
   // set up data ranges and colours
-  setUpWorkspace(sharedWorkspace, scaleMin, scaleMax);
+  setUpWorkspace(sharedWorkspace, m_scaleMin, m_scaleMax);
 
   // If the instrument is empty, maybe only having the sample and source
   if (detectorInfo().size() == 0) {
     m_messageHandler.giveUserWarning("This instrument appears to contain no detectors", "Mantid - Warning");
   }
+
+  // enable drawing now that everything is ready
+  m_initialized = true;
+  emit colorMapChanged();
 }
 
 /**
@@ -604,7 +623,12 @@ void InstrumentActor::showGuides(bool on) {
 
 GLColor InstrumentActor::getColor(size_t index) const { return m_renderer->getColor(index); }
 
-void InstrumentActor::draw(bool picking) const { m_renderer->renderInstrument(m_isCompVisible, m_showGuides, picking); }
+void InstrumentActor::draw(bool picking) const {
+  if (!m_initialized) {
+    return;
+  }
+  m_renderer->renderInstrument(m_isCompVisible, m_showGuides, picking);
+}
 
 /**
  * @param fname :: A color map file name.

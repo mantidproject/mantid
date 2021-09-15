@@ -106,6 +106,8 @@ public:
   /// Remove the bin masking data.
   void clearMasks();
 
+  bool isInitialized() const { return m_initialized; }
+
   /// Get the color map.
   const ColorMap &getColorMap() const;
   /// Load a new color map from a file
@@ -217,6 +219,9 @@ public:
 signals:
   void colorMapChanged() const;
 
+public slots:
+  void initialize();
+
 private:
   static constexpr double TOLERANCE = 0.00001;
 
@@ -270,6 +275,10 @@ private:
   bool m_hasGrid;
   /// Stores the number of grid Layers
   size_t m_numGridLayers;
+
+  bool m_initialized;
+  double m_scaleMin;
+  double m_scaleMax;
 
   /// Colors in order of component info
   std::vector<size_t> m_monitors;

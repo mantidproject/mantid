@@ -340,6 +340,10 @@ void InstrumentWidgetRenderTab::enable3DSurface(bool on) {
 void InstrumentWidgetRenderTab::forceLayers(bool on) {
   auto &actor = m_instrWidget->getInstrumentActor();
 
+  if (!actor.isInitialized()) {
+    return;
+  }
+
   if (!actor.hasGridBank())
     return;
 
@@ -734,6 +738,9 @@ void InstrumentWidgetRenderTab::surfaceTypeChanged(int index) {
  */
 void InstrumentWidgetRenderTab::colorMapChanged() {
   const auto &instrumentActor = m_instrWidget->getInstrumentActor();
+  if (!instrumentActor.isInitialized()) {
+    return;
+  }
   setupColorBar(instrumentActor.getColorMap(), instrumentActor.minValue(), instrumentActor.maxValue(),
                 instrumentActor.minPositiveValue(), instrumentActor.autoscaling());
 }
