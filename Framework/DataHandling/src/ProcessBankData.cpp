@@ -207,18 +207,21 @@ void ProcessBankData::run() { // override {
 
   //------------ Compress Events (or set sort order) ------------------
   // Do it on all the detector IDs we touched
+  const size_t numEventLists = outputWS.getNumberHistograms();
   for (detid_t pixID = m_min_id; pixID <= m_max_id; ++pixID) {
     if (usedDetIds[pixID - m_min_id]) {
       // Find the the workspace index corresponding to that pixel ID
       size_t wi = getWorkspaceIndexFromPixelID(pixID);
-      auto &el = outputWS.getSpectrum(wi);
-      if (compress)
-        el.compressEvents(alg->compressTolerance, &el);
-      else {
-        if (pulsetimesincreasing)
-          el.setSortOrder(DataObjects::PULSETIME_SORT);
-        else
-          el.setSortOrder(DataObjects::UNSORTED);
+      if (wi < numEventLists) {
+        auto &el = outputWS.getSpectrum(wi);
+        if (compress)
+          el.compressEvents(alg->compressTolerance, &el);
+        else {
+          if (pulsetimesincreasing)
+            el.setSortOrder(DataObjects::PULSETIME_SORT);
+          else
+            el.setSortOrder(DataObjects::UNSORTED);
+        }
       }
     }
   }
