@@ -24,6 +24,10 @@ void QtPreviewView::onLoadWorkspaceRequested() const { m_notifyee->notifyLoadWor
 
 std::string QtPreviewView::getWorkspaceName() const { return m_ui.workspace_line_edit->text().toStdString(); }
 
+void QtPreviewView::plotInstView(std::shared_ptr<MantidWidgets::RotationSurface> &) {
+  assert(false); // Not implemented yet
+}
+
 // void QtRoiView::plot3D(MatrixWorkspace_sptr ws) {
 
 //  const auto &componentInfo = m_instActor->componentInfo();

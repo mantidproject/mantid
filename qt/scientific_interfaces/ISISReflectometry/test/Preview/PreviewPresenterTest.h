@@ -29,6 +29,7 @@ using namespace MantidQt::API;
 
 using ::testing::ByRef;
 using ::testing::Eq;
+using ::testing::NiceMock;
 using ::testing::NotNull;
 using ::testing::Ref;
 using ::testing::Return;
@@ -58,13 +59,18 @@ public:
     auto mockModel = makeModel();
     auto mockView = makeView();
     auto mockJobManager = makeJobManager();
+    auto mockInstViewModel = makeInstViewModel();
 
     auto row = PreviewRow({"12345"});
-
     auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
-    EXPECT_CALL(*mockModel, getLoadedWs).Times(1).WillOnce(Return(ws));
 
-    auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager)));
+    EXPECT_CALL(*mockModel, getLoadedWs).Times(1).WillOnce(Return(ws));
+    EXPECT_CALL(*mockInstViewModel, notifyWorkspaceUpdated(Eq(ws))).Times(1);
+    EXPECT_CALL(*mockInstViewModel, getInstrumentViewSurface()).Times(1).WillOnce(Return(nullptr));
+    EXPECT_CALL(*mockView, plotInstView(Eq(nullptr)));
+
+    auto deps = packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager), std::move(mockInstViewModel));
+    auto presenter = PreviewPresenter(std::move(deps));
     presenter.notifyLoadWorkspaceCompleted();
   }
 
@@ -75,10 +81,7 @@ private:
     return mockView;
   }
 
-  MockModelT makeModel() {
-    auto mockModel = std::make_unique<MockPreviewModel>();
-    return mockModel;
-  }
+  MockModelT makeModel() { return std::make_unique<MockPreviewModel>(); }
 
   std::unique_ptr<IJobManager> makeJobManager() {
     auto mockJobManager = std::make_unique<MockJobManager>();
@@ -86,9 +89,11 @@ private:
     return mockJobManager;
   }
 
+  MockInstViewModelT makeInstViewModel() { return std::make_unique<MockInstViewModel>(); }
+
   PreviewPresenter::Dependencies packDeps(MockPreviewView *view,
                                           MockModelT model = std::make_unique<MockPreviewModel>(),
-                                          MockJobManagerT jobManager = std::make_unique<MockJobManager>(),
+                                          MockJobManagerT jobManager = std::make_unique<NiceMock<MockJobManager>>(),
                                           MockInstViewModelT instView = std::make_unique<MockInstViewModel>()) {
     return PreviewPresenter::Dependencies{view, std::move(model), std::move(jobManager), std::move(instView)};
   }

@@ -6,9 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "PreviewPresenter.h"
-#include "GUI/Common/IJobManager.h"
-#include "IPreviewModel.h"
-
 #include <memory>
 
 namespace {
@@ -29,14 +26,12 @@ void PreviewPresenter::notifyLoadWorkspaceRequested() {
 }
 
 void PreviewPresenter::notifyLoadWorkspaceCompleted() {
-  auto workspace = m_model->getLoadedWs();
-  assert(workspace);
+  auto ws = m_model->getLoadedWs();
+  assert(ws); // This method should never be called for the failure path
+  m_instViewModel->notifyWorkspaceUpdated(ws);
 
-  // TODO plot the result
-
-  // m_instViewModel->notifyWorkspaceUpdated(m_model->getLoadedWs()); (update inst actor and create surface)
-  // surface = m_instViewModel->getSurface();
-  // m_view->plotInstView(surface);
+  auto surface = m_instViewModel->getInstrumentViewSurface();
+  m_view->plotInstView(surface);
   g_log.notice("Loaded ws pointer");
 }
 

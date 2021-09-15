@@ -8,6 +8,7 @@
 
 #include "Common/DllConfig.h"
 #include "IPreviewView.h"
+#include "MantidQtWidgets/InstrumentView/RotationSurface.h"
 #include "ui_PreviewWidget.h"
 
 #include <QObject>
@@ -21,7 +22,7 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 /** QtInstrumentView : Provides an interface for the "Preview" tab in the
 ISIS Reflectometry interface.
 */
-class MANTIDQT_ISISREFLECTOMETRY_DLL QtPreviewView : public QWidget, public IPreviewView {
+class MANTIDQT_ISISREFLECTOMETRY_DLL QtPreviewView final : public QWidget, public IPreviewView {
   Q_OBJECT
 public:
   QtPreviewView(QWidget *parent = nullptr);
@@ -29,6 +30,7 @@ public:
   void subscribe(PreviewViewSubscriber *notifyee) noexcept override;
 
   std::string getWorkspaceName() const override;
+  void plotInstView(std::shared_ptr<MantidWidgets::RotationSurface> &) override;
 
 private:
   Ui::PreviewWidget m_ui;
