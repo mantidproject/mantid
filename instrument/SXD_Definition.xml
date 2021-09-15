@@ -42,10 +42,10 @@
     </component>
   </type>
 
-<component type="panel1346" idstart="1" idfillbyfirst="y" idstepbyrow="64">
+<component type="panel" idstart="1" idfillbyfirst="y" idstepbyrow="64">
 <location x="0.1369713215" y="0.000" z="-0.1785045016" name="bank1" >
   <rot val="142.50000" axis-x="0" axis-y="1" axis-z="0">
-    <rot val="0.00000" axis-x="1" axis-y="0" axis-z="0" />
+    <rot val="-90.00000" axis-x="0" axis-y="0" axis-z="1" />
   </rot>
 </location>
 </component> 
