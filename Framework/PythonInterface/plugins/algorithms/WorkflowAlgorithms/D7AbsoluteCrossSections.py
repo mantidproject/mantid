@@ -83,6 +83,49 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                 break
         return matched_no
 
+    @staticmethod
+    def _calculate_uniaxial_separation(cr_section):
+        """Separates measured uniaxial (Z-only) cross-sections into total, nuclear coherent/isotope-incoherent,
+        and spin-incoherent components and returns them separately. Based on DOI:10.1063/1.4819739, Eq. 9,
+        where magnetic contribution is assumed to be 0.
+        Keyword arguments:
+        cr_section -- dictionary with measured cross-sections
+        """
+        total = cr_section['z_nsf'] + cr_section['z_sf']
+        nuclear = cr_section['z_nsf'] - 0.5 * cr_section['z_sf']
+        incoherent = 1.5 * cr_section['z_sf']
+        return total, nuclear, incoherent
+
+    @staticmethod
+    def _find_min_max_q(ws):
+        """Estimate the start and end q bins for a S(Q, w) workspace."""
+        h = physical_constants['Planck constant'][0]  # in m^2 kg / s
+        hbar = h / (2.0 * np.pi)  # in m^2 kg / s
+        neutron_mass = physical_constants['neutron mass'][0]  # in0 kg
+        wavelength = ws.getRun().getLogData('monochromator.wavelength').value * 1e-10  # in m
+        Ei = math.pow(h / wavelength, 2) / (2 * neutron_mass)  # in Joules
+        minW = ws.readX(0)[0] * 1e-3 * physical_constants['elementary charge'][0]  # in Joules
+        maxEf = Ei - minW
+        # In Ångströms
+        maxQ = 1e-10 * np.sqrt((2.0 * neutron_mass / (hbar ** 2))
+                               * (Ei + maxEf - 2 * np.sqrt(Ei * maxEf) * -1.0))
+        minQ = 0.0
+        return minQ, maxQ
+
+    @staticmethod
+    def _median_delta_two_theta(ws):
+        """Calculate the median theta spacing for a S(Q, w) workspace."""
+        tmp_ws = '{}_tmp'.format(ws.name())
+        ConvertSpectrumAxis(InputWorkspace=ws,
+                            OutputWorkspace=tmp_ws,
+                            Target='SignedTheta',
+                            OrderAxis=False)
+        Transpose(InputWorkspace=tmp_ws, OutputWorkspace=tmp_ws)
+        thetas = mtd[tmp_ws].getAxis(0).extractValues() * np.pi / 180.0  # in rad
+        dThetas = np.abs(np.diff(thetas))
+        DeleteWorkspace(Workspace=tmp_ws)
+        return np.median(dThetas)
+
     def category(self):
         return 'ILL\\Diffraction'
 
@@ -294,19 +337,6 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                         NSpec=len(alpha))
         DeleteWorkspace(Workspace=angle_ws)
         return cos2_m_sin2_alpha_name
-
-    @staticmethod
-    def _calculate_uniaxial_separation(cr_section):
-        """Separates measured uniaxial (Z-only) cross-sections into total, nuclear coherent/isotope-incoherent,
-        and spin-incoherent components and returns them separately. Based on DOI:10.1063/1.4819739, Eq. 9,
-        where magnetic contribution is assumed to be 0.
-        Keyword arguments:
-        cr_section -- dictionary with measured cross-sections
-        """
-        total = cr_section['z_nsf'] + cr_section['z_sf']
-        nuclear = cr_section['z_nsf'] - 0.5 * cr_section['z_sf']
-        incoherent = 1.5 * cr_section['z_sf']
-        return total, nuclear, incoherent
 
     def _calculate_XYZ_separation(self, cr_section, cos2_m_sin2_alpha):
         """Separates measured 6-point (XYZ) cross-sections into total, nuclear coherent/isotope-incoherent,
@@ -663,7 +693,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         GroupWorkspaces(InputWorkspaces=tmp_names, Outputworkspace=output_ws)
         return output_ws
 
-    def _q_rebin(self, ws):
+    def _qxy_rebin(self, ws):
         """
         Rebins the single crystal omega scan measurement output onto 2D Qx-Qy grid.
         :param ws: Output of the cross-section separation and/or normalisation.
@@ -731,6 +761,26 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         GroupWorkspaces(InputWorkspaces=output_names, OutputWorkspace=ws)
         return ws
 
+    def _delta_q(self, ws):
+        """Estimate a q bin width for a S(Q, w) workspace."""
+        deltaTheta = self._median_delta_two_theta(ws)
+        wavelength = ws.run().getLogData('monochromator.wavelength').value
+        return 2.0 * np.pi / wavelength * deltaTheta
+
+    def _get_q_binning(self, ws):
+        if self.getProperty('QBinning').isDefault:
+            qMin, qMax = self._find_min_max_q(mtd[ws][0])
+            dq = self._delta_q(mtd[ws][0])
+            e = np.ceil(-np.log10(dq)) + 1
+            dq = (5. * ((dq * 10 ** e) // 5 + 1.)) * 10 ** -e
+            q_binning = [qMin, dq, qMax]
+        else:
+            q_binning = self.getProperty('QBinning').value
+            if len(q_binning) == 1:
+                qMin, qMax = self._find_min_max_q(mtd[ws][0])
+                q_binning = [qMin, q_binning[0], qMax]
+        return q_binning
+
     def _set_units(self, ws, nMeasurements):
         """Sets units for the output workspace."""
         output_unit = self.getPropertyValue('OutputUnits')
@@ -761,7 +811,12 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                                     OrderAxis=False)
                 Transpose(InputWorkspace=ws, OutputWorkspace=ws)
         elif output_unit == 'Qxy':
-            ws = self._q_rebin(ws)
+            ws = self._qxy_rebin(ws)
+        elif output_unit == 'Qw':
+            q_binning = self._get_q_binning(ws)
+            SofQWCentre(InputWorkspace=ws, OutputWorkspace=ws,
+                        EMode='Direct', EFixed=self._sampleAndEnvironmentProperties['InitialEnergy'].value,
+                        QAxisBinning=q_binning)
 
         if self.getPropertyValue('NormalisationMethod') in ['Incoherent', 'Paramagnetic']:
             unit = 'Normalized intensity'
