@@ -51,16 +51,37 @@ def _os_env():
 
 
 def is_pip_version_of_libs():
+    """
+    If we are using a pip version of the libs they are importable with:
+    import Quest
+    import QLdata
+    ...
+    Which will import the binaries from the python path,
+    most likely the site-packages folder
+    """
+    # Test if one of the fortran libs is already imported
     name = 'Quest'
     if name in sys.modules:
         return True
-    elif (spec := importlib.util.find_spec(name)) is not None:
+    elif importlib.util.find_spec(name) is not None:
         return True
     else:
         return False
 
 
 def _lib_suffix():
+    """
+    If we are using a pip version of the libs they are NOT suffixed.
+    They are imported with
+    import Quest
+    import QLdata
+    ..
+    If we are using the internally shipped libraries, we HAVE a suffix
+    This means we import the quest library with:
+    import Quest_win64
+    import QLdata_win64
+    Thefore, if we are using the pip versions we don't add a suffix.
+    """
     if is_pip_version_of_libs():
         return ""
     else:
