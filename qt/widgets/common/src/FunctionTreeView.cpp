@@ -1903,22 +1903,28 @@ void FunctionTreeView::attributeChanged(QtProperty *prop) {
   // Some attributes require the function to be fully reconstructed, in this
   // case we'd need to emit a function replaced signal. If its not one of these
   // attributes emit an attributeValueChanged signal.
-  if (std::find(REQUIRESRECONSTRUCTIONATTRIBUTES.begin(), REQUIRESRECONSTRUCTIONATTRIBUTES.end(),
-                removePrefix(attributeName)) != REQUIRESRECONSTRUCTIONATTRIBUTES.end()) {
-    auto funProp = m_properties[prop].parent;
-    if (!funProp)
-      return;
-    auto fun = getFunction(funProp, true);
+  try {
+    if (std::find(REQUIRESRECONSTRUCTIONATTRIBUTES.begin(), REQUIRESRECONSTRUCTIONATTRIBUTES.end(),
+                  removePrefix(attributeName)) != REQUIRESRECONSTRUCTIONATTRIBUTES.end()) {
+      auto funProp = m_properties[prop].parent;
+      if (!funProp)
+        return;
+      auto fun = getFunction(funProp, true);
 
-    // delete and recreate all function's properties (attributes, parameters,
-    // etc)
-    setFunction(funProp, fun);
-    updateFunctionIndices();
-    if (m_emitAttributeValueChange)
-      emit functionReplaced(QString::fromStdString(getFunction()->asString()));
-  } else {
-    if (m_emitAttributeValueChange)
-      emit attributePropertyChanged(attributeName);
+      // delete and recreate all function's properties (attributes, parameters,
+      // etc)
+      setFunction(funProp, fun);
+      updateFunctionIndices();
+      if (m_emitAttributeValueChange) {
+        emit functionReplaced(QString::fromStdString(getFunction()->asString()));
+      }
+    } else {
+      if (m_emitAttributeValueChange) {
+        emit attributePropertyChanged(attributeName);
+      }
+    }
+  } catch (std::exception &expt) {
+    QMessageBox::critical(this, "Mantid - Error", QString::fromStdString(expt.what()));
   }
 }
 
