@@ -32,6 +32,7 @@ Bugfixes
 - In frequency domain analysis the phasetables calculated from :ref:`MuonMaxent <algm-MuonMaxent>` can be used for
   :ref:`PhaseQuad <algm-PhaseQuad>` calculations on the phase tab.
 - A bug has been fixed in ALC that caused mantid to crash when a user changed the PeakPicker in the PeakFitting plot.
+- A bug has been fixed in ALC where setting an invalid function would cause a crash.
 
 Muon Analysis
 -------------
