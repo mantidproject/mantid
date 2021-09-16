@@ -89,7 +89,7 @@ double initBoundingBox(WorkspaceBoundingBox &boundingBox, const int numSpec, con
 double updateBoundingBox(WorkspaceBoundingBox &boundingBox, WorkspaceBoundingBox &previousBoundingBox,
                          const int numSpec, const double beamRadius, const bool directBeam) {
   double totalCount = 0;
-  const auto spectrumInfo = boundingBox.getWorkspace()->spectrumInfo();
+  const auto &spectrumInfo = boundingBox.getWorkspace()->spectrumInfo();
   for (int i = 0; i < numSpec; i++) {
     if (!boundingBox.isValidWs(i))
       continue;
