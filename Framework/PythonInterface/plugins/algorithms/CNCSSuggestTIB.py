@@ -10,6 +10,7 @@
 from mantid.api import PythonAlgorithm, AlgorithmFactory
 from mantid.kernel import FloatBoundedValidator,Direction
 from mantid.utils.deprecator import deprecated_alias
+
 # third party imports
 import numpy as np
 
@@ -53,7 +54,7 @@ class CNCSSuggestTIB(PythonAlgorithm):
         return "Inelastic\\Utility"
 
     def seeAlso(self):
-        return ["SuggestTibHYSPEC"]
+        return ["HYSPECSuggestTIB"]
 
     def name(self):
         """ Return name

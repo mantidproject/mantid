@@ -111,7 +111,7 @@ set(TEST_PY_FILES
     StatisticsOfTableWorkspaceTest.py
     StringToPngTest.py
     CNCSSuggestTIBTest.py
-    SuggestTibHYSPECTest.py
+    HYSPECSuggestTIBTest.py
     SymmetriseTest.py
     UpdatePeakParameterTableValueTest.py
     SANSSubtractTest.py
