@@ -280,7 +280,7 @@ void WorkspaceHistory::loadNexus(::NeXus::File *file) {
  *loaded histories are added to
  * the workspace history.
  */
-void WorkspaceHistory::loadNestedHistory(::NeXus::File *file, AlgorithmHistory_sptr parent) {
+void WorkspaceHistory::loadNestedHistory(::NeXus::File *file, const AlgorithmHistory_sptr &parent) {
   // historyNumbers should be sorted by number
   std::set<int> historyNumbers = findHistoryEntries(file);
   for (auto historyNumber : historyNumbers) {

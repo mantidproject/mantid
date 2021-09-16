@@ -53,7 +53,7 @@ public:
 
 public:
   ScriptEditor(const QString &lexerName, const QFont &font = QFont(), QWidget *parent = nullptr);
-  ScriptEditor(QWidget *parent = nullptr, QsciLexer *lexer = nullptr, const QString &settingsGroup = "");
+  ScriptEditor(QWidget *parent = nullptr, QsciLexer *lexer = nullptr, QString settingsGroup = "");
   /// Destructor
   ~ScriptEditor() override;
 

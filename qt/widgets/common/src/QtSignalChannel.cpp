@@ -10,6 +10,8 @@
 
 #include <Poco/Message.h>
 
+#include <utility>
+
 namespace MantidQt {
 namespace MantidWidgets {
 
@@ -20,7 +22,7 @@ namespace MantidWidgets {
  * source are emitted.
  * @param source A string specifying a source for the message
  */
-QtSignalChannel::QtSignalChannel(const QString &source) : QObject(), Poco::Channel(), m_source(source) {}
+QtSignalChannel::QtSignalChannel(QString source) : QObject(), Poco::Channel(), m_source(std::move(source)) {}
 
 QtSignalChannel::~QtSignalChannel() {}
 

@@ -297,7 +297,8 @@ API::MatrixWorkspace_sptr LoadILLPolarizedDiffraction::initStaticWorkspace(const
  * @param workspace : workspace with data from the first entry
  * @param startTime :: the date the run started, in ISO compliant format
  */
-void LoadILLPolarizedDiffraction::loadInstrument(API::MatrixWorkspace_sptr workspace, const std::string &startTime) {
+void LoadILLPolarizedDiffraction::loadInstrument(const API::MatrixWorkspace_sptr &workspace,
+                                                 const std::string &startTime) {
 
   // the start time is needed in the workspace when loading the parameter file
   workspace->mutableRun().addProperty("start_time", startTime);
@@ -317,7 +318,7 @@ void LoadILLPolarizedDiffraction::loadInstrument(API::MatrixWorkspace_sptr works
  * @param bankId : bank ID for which 2theta positions will be read
  * @return : vector of pixel 2theta positions in the chosen bank
  */
-std::vector<double> LoadILLPolarizedDiffraction::loadTwoThetaDetectors(const API::MatrixWorkspace_sptr workspace,
+std::vector<double> LoadILLPolarizedDiffraction::loadTwoThetaDetectors(const API::MatrixWorkspace_sptr &workspace,
                                                                        const NXEntry &entry, const int bankId) {
 
   std::vector<double> twoTheta(static_cast<int>(D7_NUMBER_PIXELS_BANK));
@@ -352,7 +353,7 @@ std::vector<double> LoadILLPolarizedDiffraction::loadTwoThetaDetectors(const API
  * @param bankId : bank ID of the relevant bank
  * @return : vector of the bank slope and offset
  */
-std::vector<double> LoadILLPolarizedDiffraction::loadBankParameters(const API::MatrixWorkspace_sptr workspace,
+std::vector<double> LoadILLPolarizedDiffraction::loadBankParameters(const API::MatrixWorkspace_sptr &workspace,
                                                                     const int bankId) {
   std::vector<double> bankParameters;
 
@@ -372,7 +373,7 @@ std::vector<double> LoadILLPolarizedDiffraction::loadBankParameters(const API::M
  * @param entry : entry from which the 2theta positions will be read
  * @param workspace : workspace containing the instrument being moved
  */
-void LoadILLPolarizedDiffraction::moveTwoTheta(const NXEntry &entry, API::MatrixWorkspace_sptr workspace) {
+void LoadILLPolarizedDiffraction::moveTwoTheta(const NXEntry &entry, const API::MatrixWorkspace_sptr &workspace) {
 
   Instrument_const_sptr instrument = workspace->getInstrument();
 
@@ -474,7 +475,8 @@ API::MatrixWorkspace_sptr LoadILLPolarizedDiffraction::convertSpectrumAxis(API::
  * Transposes given 2D workspace with monochromatic data
  * @param workspace : workspace to be transposed
  */
-API::MatrixWorkspace_sptr LoadILLPolarizedDiffraction::transposeMonochromatic(API::MatrixWorkspace_sptr workspace) {
+API::MatrixWorkspace_sptr
+LoadILLPolarizedDiffraction::transposeMonochromatic(const API::MatrixWorkspace_sptr &workspace) {
   auto transpose = createChildAlgorithm("Transpose");
   transpose->initialize();
   transpose->setProperty("InputWorkspace", workspace);

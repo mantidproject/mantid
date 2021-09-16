@@ -59,7 +59,7 @@ boost::optional<std::string> parseRunNumberOrWhitespace(std::string const &runNu
 }
 
 boost::optional<double> parseTheta(std::string const &theta) {
-  auto maybeTheta = parseNonNegativeDouble(std::move(theta));
+  auto maybeTheta = parseNonNegativeDouble(theta);
   if (maybeTheta.is_initialized() && maybeTheta.get() > 0.0)
     return maybeTheta;
   else

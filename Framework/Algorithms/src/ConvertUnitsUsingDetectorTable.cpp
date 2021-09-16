@@ -215,7 +215,7 @@ MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::convertViaTOF(Kernel::Unit_
         // Convert from time-of-flight to the desired unit
         localOutputUnit->fromTOF(values, emptyVec, l1, emode, pmap);
 
-        outputWS->mutableX(wsid) = std::move(values);
+        outputWS->mutableX(wsid) = values;
 
         // EventWorkspace part, modifying the EventLists.
         if (m_inputEvents) {

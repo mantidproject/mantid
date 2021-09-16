@@ -157,7 +157,7 @@ ComplexVector &ComplexVector::operator*=(const ComplexType d) {
 
 /// Create a new ComplexVector and move all data to it.
 /// Destroys this vector.
-ComplexVector ComplexVector::move() { return ComplexVector(std::move(m_vector)); }
+ComplexVector ComplexVector::move() { return ComplexVector(m_vector); }
 
 /// The << operator.
 std::ostream &operator<<(std::ostream &ostr, const ComplexVector &v) {

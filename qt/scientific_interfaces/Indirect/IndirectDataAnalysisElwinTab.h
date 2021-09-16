@@ -93,8 +93,8 @@ private:
 
   void setHorizontalHeaders(const QStringList &headers);
 
-  void newPreviewFileSelected(const QString workspaceName, const QString filename);
-  void newPreviewWorkspaceSelected(const QString workspaceName);
+  void newPreviewFileSelected(const QString &workspaceName, const QString &filename);
+  void newPreviewWorkspaceSelected(const QString &workspaceName);
   size_t findWorkspaceID();
   void newInputFiles();
   void checkNewPreviewSelected(int index);

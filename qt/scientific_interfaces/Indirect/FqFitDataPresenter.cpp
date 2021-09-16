@@ -48,7 +48,7 @@ std::pair<std::vector<std::string>, std::vector<std::size_t>> findAxisLabels(Tex
 }
 
 template <typename Predicate>
-std::pair<std::vector<std::string>, std::vector<std::size_t>> findAxisLabels(MatrixWorkspace_sptr const workspace,
+std::pair<std::vector<std::string>, std::vector<std::size_t>> findAxisLabels(MatrixWorkspace_sptr const &workspace,
                                                                              Predicate const &predicate) {
   auto axis = dynamic_cast<TextAxis *>(workspace->getAxis(1));
   if (axis)
@@ -56,7 +56,7 @@ std::pair<std::vector<std::string>, std::vector<std::size_t>> findAxisLabels(Mat
   return std::make_pair(std::vector<std::string>(), std::vector<std::size_t>());
 }
 
-FqFitParameters createFqFitParameters(MatrixWorkspace_sptr workspace) {
+FqFitParameters createFqFitParameters(const MatrixWorkspace_sptr &workspace) {
   auto foundWidths = findAxisLabels(workspace, ContainsOneOrMore({".Width", ".FWHM"}));
   auto foundEISF = findAxisLabels(workspace, ContainsOneOrMore({".EISF"}));
 
@@ -122,7 +122,7 @@ std::string extractSpectrum(const MatrixWorkspace_sptr &workspace, int index, st
 std::string extractHWHMSpectrum(const MatrixWorkspace_sptr &workspace, int index) {
   auto const scaledName = "__scaled_" + std::to_string(index);
   auto const extractedName = "__extracted_" + std::to_string(index);
-  auto const outputName = scaleWorkspace(extractSpectrum(std::move(workspace), index, extractedName), scaledName, 0.5);
+  auto const outputName = scaleWorkspace(extractSpectrum(workspace, index, extractedName), scaledName, 0.5);
   deleteTemporaryWorkspaces({extractedName});
   return outputName;
 }
@@ -261,7 +261,7 @@ void FqFitDataPresenter::dialogParameterTypeUpdated(FqFitAddWorkspaceDialog *dia
   updateParameterOptions(dialog, parameter);
 }
 
-void FqFitDataPresenter::updateParameterOptions(FqFitAddWorkspaceDialog *dialog, FqFitParameters parameter) {
+void FqFitDataPresenter::updateParameterOptions(FqFitAddWorkspaceDialog *dialog, const FqFitParameters &parameter) {
   setActiveWorkspaceIDToCurrentWorkspace(dialog);
   setActiveParameterType(dialog->parameterType());
   if (m_activeParameterType == "Width")

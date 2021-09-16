@@ -31,10 +31,10 @@ void showAsValid(QDoubleSpinBox &spinBox) { spinBox.setStyleSheet(""); }
  * used to find tooltips for the input properties
  * @param parent :: [input] The parent of this widget
  */
-QtInstrumentView::QtInstrumentView(Mantid::API::IAlgorithm_sptr algorithmForTooltips, QWidget *parent)
+QtInstrumentView::QtInstrumentView(const Mantid::API::IAlgorithm_sptr &algorithmForTooltips, QWidget *parent)
     : QWidget(parent) {
   initLayout();
-  registerSettingsWidgets(std::move(algorithmForTooltips));
+  registerSettingsWidgets(algorithmForTooltips);
 }
 
 void QtInstrumentView::subscribe(InstrumentViewSubscriber *notifyee) { m_notifyee = notifyee; }
@@ -110,7 +110,7 @@ void QtInstrumentView::enableDetectorCorrectionType() { m_ui.detectorCorrectionT
 void QtInstrumentView::disableDetectorCorrectionType() { m_ui.detectorCorrectionTypeComboBox->setEnabled(false); }
 
 void QtInstrumentView::registerSettingsWidgets(const Mantid::API::IAlgorithm_sptr &alg) {
-  registerInstrumentSettingsWidgets(std::move(alg));
+  registerInstrumentSettingsWidgets(alg);
 }
 
 void QtInstrumentView::registerInstrumentSettingsWidgets(const Mantid::API::IAlgorithm_sptr &alg) {

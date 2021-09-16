@@ -103,7 +103,7 @@ private:
   std::string outMessage;
 
 public:
-  FileError(const std::string &Desc, const std::string &FName);
+  FileError(const std::string &Desc, std::string FName);
   FileError(const FileError &A);
   /// Assignment operator
   FileError &operator=(const FileError &A);
@@ -150,7 +150,7 @@ private:
   std::string outMessage;
 
 public:
-  NotFoundError(const std::string &, const std::string &);
+  NotFoundError(const std::string &, std::string);
   NotFoundError(const std::string &, const int &);
   NotFoundError(const std::string &, const int64_t &);
   NotFoundError(const std::string &, const std::size_t &);
@@ -169,7 +169,7 @@ private:
   std::string outMessage;
 
 public:
-  ExistsError(const std::string &, const std::string &);
+  ExistsError(const std::string &, std::string);
   ExistsError(const ExistsError &A);
   /// Assignment operator
   ExistsError &operator=(const ExistsError &A);
@@ -207,7 +207,7 @@ private:
   std::string outMessage;
 
 public:
-  AbsObjMethod(const std::string &);
+  AbsObjMethod(std::string);
   AbsObjMethod(const AbsObjMethod &A);
   /// Assignment operator
   AbsObjMethod &operator=(const AbsObjMethod &A);
@@ -225,7 +225,7 @@ private:
   std::string outMessage;
 
 public:
-  InstrumentDefinitionError(const std::string &, const std::string &);
+  InstrumentDefinitionError(const std::string &, std::string);
   InstrumentDefinitionError(const std::string &);
   InstrumentDefinitionError(const InstrumentDefinitionError &A);
   /// Assignment operator
@@ -245,7 +245,7 @@ private:
   std::string outMessage;
 
 public:
-  OpenGLError(const std::string &, const std::string &);
+  OpenGLError(const std::string &, std::string);
   OpenGLError(const std::string &);
   OpenGLError(const OpenGLError &A);
   /// Assignment operator

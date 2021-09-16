@@ -246,7 +246,7 @@ void FindPeaksMD::checkWorkspaceDims(const IMDWorkspace_sptr &ws) {
     throw std::runtime_error("Unexpected dimensions: need either Q_lab_x or Q_sample_x.");
 }
 
-void FindPeaksMD::determineOutputType(const std::string peakType, const uint16_t numExperimentInfo) {
+void FindPeaksMD::determineOutputType(const std::string &peakType, const uint16_t numExperimentInfo) {
   // This method will be expanded later to check a property on the
   // input workspace which can specify a default peak type for that
   // instrument.

@@ -7,6 +7,8 @@
 #ifdef _WIN32
 #include <windows.h>
 #endif
+#include <utility>
+
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/InstrumentView/GLObject.h"
@@ -15,8 +17,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 int icount;
 
-GLObject::GLObject(bool withDisplayList, const std::string &name)
-    : mName(name), mChanged(true) {
+GLObject::GLObject(bool withDisplayList, std::string name) : mName(std::move(name)), mChanged(true) {
   if (withDisplayList) {
     mDisplayListId = glGenLists(1);
   } else {

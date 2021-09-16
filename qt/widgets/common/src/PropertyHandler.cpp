@@ -131,8 +131,8 @@ void PropertyHandler::init() {
  */
 class CreateAttributeProperty : public Mantid::API::IFunction::ConstAttributeVisitor<QtProperty *> {
 public:
-  CreateAttributeProperty(FitPropertyBrowser *browser, PropertyHandler *handler, const QString &name)
-      : m_browser(browser), m_handler(handler), m_name(name) {}
+  CreateAttributeProperty(FitPropertyBrowser *browser, PropertyHandler *handler, QString name)
+      : m_browser(browser), m_handler(handler), m_name(std::move(name)) {}
 
 protected:
   /// Create string property

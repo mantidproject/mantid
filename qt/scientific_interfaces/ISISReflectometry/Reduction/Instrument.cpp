@@ -17,7 +17,7 @@ Instrument::Instrument()
 Instrument::Instrument(boost::optional<RangeInLambda> wavelengthRange, MonitorCorrections monitorCorrections,
                        DetectorCorrections detectorCorrections)
     : m_wavelengthRange(std::move(wavelengthRange)), m_monitorCorrections(std::move(monitorCorrections)),
-      m_detectorCorrections(std::move(detectorCorrections)) {}
+      m_detectorCorrections(detectorCorrections) {}
 
 boost::optional<RangeInLambda> const &Instrument::wavelengthRange() const { return m_wavelengthRange; }
 

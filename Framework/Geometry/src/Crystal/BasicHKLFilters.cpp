@@ -4,6 +4,8 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+#include <utility>
+
 #include "MantidGeometry/Crystal/BasicHKLFilters.h"
 
 namespace Mantid {
@@ -53,7 +55,7 @@ void HKLFilterDRange::checkProperDRangeValues() {
 }
 
 /// Constructor, throws exception if the supplied pointer is invalid.
-HKLFilterSpaceGroup::HKLFilterSpaceGroup(const SpaceGroup_const_sptr &spaceGroup) : m_spaceGroup(spaceGroup) {
+HKLFilterSpaceGroup::HKLFilterSpaceGroup(SpaceGroup_const_sptr spaceGroup) : m_spaceGroup(std::move(spaceGroup)) {
   if (!m_spaceGroup) {
     throw std::runtime_error("Cannot construct HKLFilterSpaceGroup from null space group.");
   }
@@ -71,8 +73,8 @@ bool HKLFilterSpaceGroup::isAllowed(const Kernel::V3D &hkl) const noexcept {
 }
 
 /// Constructor, throws exception if the calculator pointer is invalid.
-HKLFilterStructureFactor::HKLFilterStructureFactor(const StructureFactorCalculator_sptr &calculator, double fSquaredMin)
-    : m_calculator(calculator), m_fSquaredMin(fSquaredMin) {
+HKLFilterStructureFactor::HKLFilterStructureFactor(StructureFactorCalculator_sptr calculator, double fSquaredMin)
+    : m_calculator(std::move(calculator)), m_fSquaredMin(fSquaredMin) {
   if (!m_calculator) {
     throw std::runtime_error("Cannot construct HKLFilterStructureFactor from null calculator.");
   }
@@ -92,7 +94,7 @@ bool HKLFilterStructureFactor::isAllowed(const Kernel::V3D &hkl) const noexcept 
 }
 
 /// Constructor, throws exception if pointer is null.
-HKLFilterCentering::HKLFilterCentering(const ReflectionCondition_sptr &centering) : m_centering(centering) {
+HKLFilterCentering::HKLFilterCentering(ReflectionCondition_sptr centering) : m_centering(std::move(centering)) {
   if (!m_centering) {
     throw std::runtime_error("Cannot construct HKLFilterCentering from null centering.");
   }

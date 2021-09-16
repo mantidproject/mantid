@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/Exception.h"
 #include <sstream>
+#include <utility>
 
 namespace Mantid {
 namespace Kernel {
@@ -17,7 +18,8 @@ namespace Exception {
         @param Desc :: Function description
         @param FName :: Filename
 */
-FileError::FileError(const std::string &Desc, const std::string &FName) : std::runtime_error(Desc), fileName(FName) {
+FileError::FileError(const std::string &Desc, std::string FName)
+    : std::runtime_error(Desc), fileName(std::move(FName)) {
   outMessage = std::string(std::runtime_error::what()) + " in \"" + fileName + "\"";
 }
 
@@ -63,8 +65,8 @@ const char *NotImplementedError::what() const noexcept { return std::logic_error
         @param Desc :: Function description
         @param ObjectName :: The name of the search object
 */
-NotFoundError::NotFoundError(const std::string &Desc, const std::string &ObjectName)
-    : std::runtime_error(Desc), objectName(ObjectName) {
+NotFoundError::NotFoundError(const std::string &Desc, std::string ObjectName)
+    : std::runtime_error(Desc), objectName(std::move(ObjectName)) {
   outMessage = std::string(std::runtime_error::what()) + " search object " + objectName;
 }
 
@@ -111,8 +113,8 @@ const char *NotFoundError::what() const noexcept { return outMessage.c_str(); }
         @param Desc :: Function description
         @param ObjectName :: The name of the search object
 */
-ExistsError::ExistsError(const std::string &Desc, const std::string &ObjectName)
-    : std::runtime_error(Desc), objectName(ObjectName) {
+ExistsError::ExistsError(const std::string &Desc, std::string ObjectName)
+    : std::runtime_error(Desc), objectName(std::move(ObjectName)) {
   outMessage = std::string(std::runtime_error::what()) + " search object " + objectName;
 }
 
@@ -130,7 +132,7 @@ const char *ExistsError::what() const noexcept { return outMessage.c_str(); }
 /** Constructor
         @param ObjectName :: The name of the search object
 */
-AbsObjMethod::AbsObjMethod(const std::string &ObjectName) : std::runtime_error(""), objectName(ObjectName) {
+AbsObjMethod::AbsObjMethod(std::string ObjectName) : std::runtime_error(""), objectName(std::move(ObjectName)) {
   outMessage = std::string("AbsObjMethod object: ") + objectName;
 }
 
@@ -149,8 +151,8 @@ const char *AbsObjMethod::what() const noexcept { return outMessage.c_str(); }
         @param Desc :: Function description
         @param ObjectName :: The name of the search object
 */
-InstrumentDefinitionError::InstrumentDefinitionError(const std::string &Desc, const std::string &ObjectName)
-    : std::runtime_error(Desc), objectName(ObjectName) {
+InstrumentDefinitionError::InstrumentDefinitionError(const std::string &Desc, std::string ObjectName)
+    : std::runtime_error(Desc), objectName(std::move(ObjectName)) {
   outMessage = std::string(std::runtime_error::what()) + " search object " + objectName +
                ". See http://www.mantidproject.org/IDF for IDF syntax.";
 }
@@ -178,8 +180,8 @@ const char *InstrumentDefinitionError::what() const noexcept { return outMessage
         @param Desc :: Function description
         @param ObjectName :: The name of the search object
 */
-OpenGLError::OpenGLError(const std::string &Desc, const std::string &ObjectName)
-    : std::runtime_error(Desc), objectName(ObjectName) {
+OpenGLError::OpenGLError(const std::string &Desc, std::string ObjectName)
+    : std::runtime_error(Desc), objectName(std::move(ObjectName)) {
   outMessage = std::string(std::runtime_error::what()) + " rendering " + objectName;
 }
 

@@ -66,7 +66,7 @@ void DisplayNormalizationSetter::setNormalizationMDEvent(const Mantid::API::IMDW
     displayNormalizationHisto = Mantid::API::MDNormalization::NumEventsNormalization;
   }
 
-  applyNormalizationMDEvent(std::move(mdWorkspace), displayNormalization, displayNormalizationHisto);
+  applyNormalizationMDEvent(mdWorkspace, displayNormalization, displayNormalizationHisto);
 }
 
 /**

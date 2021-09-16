@@ -4,9 +4,11 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidGeometry/Crystal/ReflectionGenerator.h"
+#include <utility>
+
 #include "MantidGeometry/Crystal/BasicHKLFilters.h"
 #include "MantidGeometry/Crystal/HKLGenerator.h"
+#include "MantidGeometry/Crystal/ReflectionGenerator.h"
 #include "MantidGeometry/Crystal/StructureFactorCalculatorSummation.h"
 
 namespace Mantid {
@@ -26,9 +28,8 @@ private:
 };
 
 /// Constructor
-ReflectionGenerator::ReflectionGenerator(const CrystalStructure &crystalStructure,
-                                         ReflectionConditionFilter defaultFilter)
-    : m_crystalStructure(crystalStructure),
+ReflectionGenerator::ReflectionGenerator(CrystalStructure crystalStructure, ReflectionConditionFilter defaultFilter)
+    : m_crystalStructure(std::move(crystalStructure)),
       m_sfCalculator(StructureFactorCalculatorFactory::create<StructureFactorCalculatorSummation>(m_crystalStructure)),
       m_defaultHKLFilter(getReflectionConditionFilter(defaultFilter)) {}
 

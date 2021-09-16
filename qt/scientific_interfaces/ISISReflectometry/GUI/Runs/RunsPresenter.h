@@ -56,7 +56,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL RunsPresenter : public IRunsPresenter,
 public:
   RunsPresenter(IRunsView *mainView, ProgressableView *progressView,
                 const RunsTablePresenterFactory &makeRunsTablePresenter, double thetaTolerance,
-                std::vector<std::string> const &instruments, IMessageHandler *messageHandler);
+                std::vector<std::string> instruments, IMessageHandler *messageHandler);
   RunsPresenter(RunsPresenter const &) = delete;
   ~RunsPresenter() override;
   RunsPresenter const &operator=(RunsPresenter const &) = delete;

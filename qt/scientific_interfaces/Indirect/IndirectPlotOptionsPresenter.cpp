@@ -49,8 +49,7 @@ IndirectPlotOptionsPresenter::IndirectPlotOptionsPresenter(IndirectPlotOptionsVi
                                                            IndirectPlotOptionsModel *model, PlotWidget const &plotType,
                                                            std::string const &fixedIndices)
     : QObject(nullptr), m_wsRemovedObserver(*this, &IndirectPlotOptionsPresenter::onWorkspaceRemoved),
-      m_wsReplacedObserver(*this, &IndirectPlotOptionsPresenter::onWorkspaceReplaced), m_view(view),
-      m_model(std::move(model)) {
+      m_wsReplacedObserver(*this, &IndirectPlotOptionsPresenter::onWorkspaceReplaced), m_view(view), m_model(model) {
   setupPresenter(plotType, fixedIndices);
 }
 

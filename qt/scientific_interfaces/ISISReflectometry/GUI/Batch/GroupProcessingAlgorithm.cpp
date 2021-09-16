@@ -59,7 +59,7 @@ void updateWorkspaceProperties(AlgorithmRuntimeProps &properties, Group const &g
 }
 
 void updateGroupFromOutputProperties(const IAlgorithm_sptr &algorithm, Item &group) {
-  auto const stitched = AlgorithmProperties::getOutputWorkspace(std::move(algorithm), "OutputWorkspace");
+  auto const stitched = AlgorithmProperties::getOutputWorkspace(algorithm, "OutputWorkspace");
   group.setOutputNames(std::vector<std::string>{stitched});
 }
 

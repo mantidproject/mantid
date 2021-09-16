@@ -93,7 +93,7 @@ Mantid::API::IAlgorithm_sptr AsciiSaver::setUpSaveAlgorithm(std::string const &s
 
 void AsciiSaver::save(const Mantid::API::Workspace_sptr &workspace, std::string const &saveDirectory,
                       std::vector<std::string> const &logParameters, FileFormatOptions const &fileFormat) const {
-  auto alg = setUpSaveAlgorithm(saveDirectory, std::move(workspace), logParameters, fileFormat);
+  auto alg = setUpSaveAlgorithm(saveDirectory, workspace, logParameters, fileFormat);
   alg->execute();
 }
 

@@ -52,7 +52,7 @@ private:
                                                             int pixels, double pixelDiameter, double pixelHeight,
                                                             double pixelSpacing, const double bankDistanceFromSample,
                                                             const double sourceSampleDistance,
-                                                            const std::string instrName);
+                                                            const std::string &instrName);
   Geometry::IObject_sptr createCappedCylinder(double radius, double height, const Kernel::V3D &baseCentre,
                                               const Kernel::V3D &axis, const std::string &id);
   Geometry::IObject_sptr createSphere(double radius, const Kernel::V3D &centre, const std::string &id);

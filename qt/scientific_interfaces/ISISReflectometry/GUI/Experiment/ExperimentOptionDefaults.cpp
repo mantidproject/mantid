@@ -94,10 +94,9 @@ Experiment getExperimentDefaults(Mantid::Geometry::Instrument_const_sptr instrum
   if (!lookupTableValidationResult.isValid())
     throw std::invalid_argument("Errors were found in the lookup table values");
 
-  return Experiment(analysisMode, reductionType, summationType, includePartialBins, debug,
-                    std::move(backgroundSubtraction), std::move(polarizationCorrections), std::move(floodCorrections),
-                    std::move(transmissionStitchOptions), std::move(stitchParameters),
-                    std::move(lookupTableValidationResult.assertValid()));
+  return Experiment(analysisMode, reductionType, summationType, includePartialBins, debug, backgroundSubtraction,
+                    polarizationCorrections, std::move(floodCorrections), std::move(transmissionStitchOptions),
+                    std::move(stitchParameters), lookupTableValidationResult.assertValid());
 }
 } // unnamed namespace
 

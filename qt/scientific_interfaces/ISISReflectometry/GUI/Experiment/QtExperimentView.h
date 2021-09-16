@@ -135,7 +135,7 @@ private:
   QString messageFor(const InstrumentParameterTypeMissmatch &typeError) const;
 
   /// Initialise the interface
-  void initLayout(Mantid::API::IAlgorithm_sptr algorithmForTooltips);
+  void initLayout(const Mantid::API::IAlgorithm_sptr &algorithmForTooltips);
   void initOptionsTable(const Mantid::API::IAlgorithm_sptr &algorithmForTooltips);
   void initFloodControls();
   void registerSettingsWidgets(const Mantid::API::IAlgorithm_sptr &alg);

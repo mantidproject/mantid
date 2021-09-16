@@ -500,7 +500,7 @@ template <typename MDE, size_t nd> void IntegratePeaksMD::integrate(typename MDE
         fun->function(domain, yy);
         auto funcValues = yy.toVector();
 
-        wsFit2D->mutableY(i) = std::move(funcValues);
+        wsFit2D->mutableY(i) = funcValues;
         wsDiff2D->setSharedY(i, wsProfile2D->sharedY(i));
         wsDiff2D->mutableY(i) -= wsFit2D->y(i);
 

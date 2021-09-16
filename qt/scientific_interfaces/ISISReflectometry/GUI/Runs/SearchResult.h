@@ -21,10 +21,9 @@ title.
  */
 class MANTIDQT_ISISREFLECTOMETRY_DLL SearchResult {
 public:
-  SearchResult(const std::string &runNumber, const std::string &title);
-  SearchResult(const std::string &runNumber, const std::string &title, const std::string &groupName,
-               const std::string &theta, const std::string &error, const std::string &excludeReason,
-               const std::string &comment);
+  SearchResult(const std::string &runNumber, std::string title);
+  SearchResult(std::string runNumber, std::string title, std::string groupName, std::string theta, std::string error,
+               std::string excludeReason, std::string comment);
 
   const std::string &runNumber() const;
   const std::string &title() const;

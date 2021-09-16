@@ -15,6 +15,7 @@
 #include <Poco/DOM/Element.h>
 
 #include <ostream>
+#include <utility>
 
 namespace Mantid {
 namespace Kernel {
@@ -54,8 +55,8 @@ LiveListenerInfo::LiveListenerInfo(InstrumentInfo *inst, const Poco::XML::Elemen
  * @param address Address which listener should use to connect
  * @param name Name designator for this listener connection info
  */
-LiveListenerInfo::LiveListenerInfo(const std::string &listener, const std::string &address, const std::string &name)
-    : m_name(name), m_address(address), m_listener(listener) {}
+LiveListenerInfo::LiveListenerInfo(std::string listener, std::string address, std::string name)
+    : m_name(std::move(name)), m_address(std::move(address)), m_listener(std::move(listener)) {}
 
 bool LiveListenerInfo::operator==(const LiveListenerInfo &rhs) const {
   return (this->address() == rhs.address() && this->listener() == rhs.listener());

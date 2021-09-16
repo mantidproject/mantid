@@ -82,7 +82,7 @@ std::pair<double, double> cuboidTwoThetaRange(const Mantid::Geometry::DetectorIn
       if (width != 0) {
         point += offset;
       }
-      const auto current = twoThetaFromLocalPoint(detInfo, detInfoIndex, samplePos, beamDir, std::move(point));
+      const auto current = twoThetaFromLocalPoint(detInfo, detInfoIndex, samplePos, beamDir, point);
       minTwoTheta = std::min(minTwoTheta, current);
       maxTwoTheta = std::max(maxTwoTheta, current);
     }
@@ -90,7 +90,7 @@ std::pair<double, double> cuboidTwoThetaRange(const Mantid::Geometry::DetectorIn
   const auto beltOffset = right * 0.5;
   for (size_t beltIndex = 0; beltIndex < capRing.size(); beltIndex += 2) {
     const auto point = capRing[beltIndex] + beltOffset;
-    const auto current = twoThetaFromLocalPoint(detInfo, detInfoIndex, samplePos, beamDir, std::move(point));
+    const auto current = twoThetaFromLocalPoint(detInfo, detInfoIndex, samplePos, beamDir, point);
     minTwoTheta = std::min(minTwoTheta, current);
     maxTwoTheta = std::max(maxTwoTheta, current);
   }
@@ -128,7 +128,7 @@ std::pair<double, double> cylinderTwoThetaRange(const Mantid::Geometry::Detector
         geometry.centreOfBottomBase + (basis1 * std::cos(angle) + basis2 * std::sin(angle)) * geometry.radius;
     for (int i = 0; i < 3; ++i) {
       const auto point = basePoint + geometry.axis * (0.5 * geometry.height * static_cast<double>(i));
-      const auto current = twoThetaFromLocalPoint(detInfo, detInfoIndex, samplePos, beamDir, std::move(point));
+      const auto current = twoThetaFromLocalPoint(detInfo, detInfoIndex, samplePos, beamDir, point);
       minTwoTheta = std::min(minTwoTheta, current);
       maxTwoTheta = std::max(maxTwoTheta, current);
     }

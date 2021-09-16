@@ -111,7 +111,7 @@ void BoxControllerSettingsAlgorithm::setBoxController(const BoxController_sptr &
                                                       const Mantid::Geometry::Instrument_const_sptr &instrument) {
   size_t nd = bc->getNDims();
 
-  takeDefaultsFromInstrument(std::move(instrument), nd);
+  takeDefaultsFromInstrument(instrument, nd);
 
   setBoxController(bc);
 }

@@ -102,9 +102,9 @@ namespace MantidWidgets {
  * @param categories :: Function categories to be included to the Add Function
  * dialog. An empty vector means include all available categories.
  */
-FunctionTreeView::FunctionTreeView(QWidget *parent, bool multi, const std::vector<std::string> &categories)
-    : IFunctionView(parent), m_multiDataset(multi), m_multiDomainFunctionPrefix(), m_allowedCategories(categories),
-      m_selectFunctionDialog(nullptr)
+FunctionTreeView::FunctionTreeView(QWidget *parent, bool multi, std::vector<std::string> categories)
+    : IFunctionView(parent), m_multiDataset(multi), m_multiDomainFunctionPrefix(),
+      m_allowedCategories(std::move(categories)), m_selectFunctionDialog(nullptr)
 
 {
   // create m_browser
@@ -429,7 +429,7 @@ void FunctionTreeView::setFunction(QtProperty *prop, const Mantid::API::IFunctio
   // m_localParameterValues.clear();
   if (!m_multiDomainFunctionPrefix.isEmpty())
     addMultiDomainIndexProperty(prop);
-  addAttributeAndParameterProperties(prop, std::move(fun));
+  addAttributeAndParameterProperties(prop, fun);
 }
 
 /**
@@ -471,7 +471,7 @@ class CreateAttributePropertyForFunctionTreeView
     : public Mantid::API::IFunction::ConstAttributeVisitor<FunctionTreeView::AProperty> {
 public:
   CreateAttributePropertyForFunctionTreeView(FunctionTreeView *browser, QtProperty *parent, const QString &attName)
-      : m_browser(browser), m_parent(parent), m_attName(std::move(attName)) {
+      : m_browser(browser), m_parent(parent), m_attName(attName) {
     // check that parent is a function property
     if (!m_parent ||
         dynamic_cast<QtAbstractPropertyManager *>(m_browser->m_functionManager) != m_parent->propertyManager()) {
@@ -619,7 +619,7 @@ private:
  */
 FunctionTreeView::AProperty FunctionTreeView::addAttributeProperty(QtProperty *parent, const QString &attName,
                                                                    const Mantid::API::IFunction::Attribute &att) {
-  CreateAttributePropertyForFunctionTreeView cap(this, parent, std::move(attName));
+  CreateAttributePropertyForFunctionTreeView cap(this, parent, attName);
   return att.apply(cap);
 }
 

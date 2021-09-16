@@ -219,7 +219,7 @@ void AlignDetectors::getCalibrationWS(const MatrixWorkspace_sptr &inputWS) {
   const std::string calFileName = getPropertyValue("CalibrationFile");
   if (!calFileName.empty()) {
     progress(0.0, "Reading calibration file");
-    loadCalFile(std::move(inputWS), calFileName);
+    loadCalFile(inputWS, calFileName);
     return;
   }
 

@@ -68,9 +68,9 @@ private:
   std::string activeSessionId() const;
   ISearchModel &results() const;
   void searchAsync();
-  SearchResults convertResultsTableToSearchResults(Mantid::API::ITableWorkspace_sptr resultsTable);
-  SearchResults convertICatResultsTableToSearchResults(Mantid::API::ITableWorkspace_sptr tableWorkspace);
-  SearchResults convertJournalResultsTableToSearchResults(Mantid::API::ITableWorkspace_sptr tableWorkspace);
+  SearchResults convertResultsTableToSearchResults(const Mantid::API::ITableWorkspace_sptr &resultsTable);
+  SearchResults convertICatResultsTableToSearchResults(const Mantid::API::ITableWorkspace_sptr &tableWorkspace);
+  SearchResults convertJournalResultsTableToSearchResults(const Mantid::API::ITableWorkspace_sptr &tableWorkspace);
 
   friend class Encoder;
   friend class Decoder;

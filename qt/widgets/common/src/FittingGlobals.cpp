@@ -4,14 +4,17 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+#include <utility>
+
 #include "MantidQtWidgets/Common/FittingGlobals.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
 
-GlobalParameter::GlobalParameter(std::string const &parameter) : m_parameter(parameter) {}
+GlobalParameter::GlobalParameter(std::string parameter) : m_parameter(std::move(parameter)) {}
 
-GlobalTie::GlobalTie(std::string const &parameter, std::string const &tie) : m_parameter(parameter), m_tie(tie) {}
+GlobalTie::GlobalTie(std::string parameter, std::string tie)
+    : m_parameter(std::move(parameter)), m_tie(std::move(tie)) {}
 
 std::string GlobalTie::toCompositeParameter(std ::string const &fullParameter) const {
   auto const dotIndex = fullParameter.find(".");

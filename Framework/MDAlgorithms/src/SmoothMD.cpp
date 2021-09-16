@@ -161,8 +161,8 @@ const std::string SmoothMD::summary() const { return "Smooth an MDHistoWorkspace
  * @param weightingWS : Weighting workspace (optional)
  * @return Smoothed MDHistoWorkspace
  */
-IMDHistoWorkspace_sptr SmoothMD::hatSmooth(IMDHistoWorkspace_const_sptr toSmooth, const WidthVector &widthVector,
-                                           IMDHistoWorkspace_sptr weightingWS) {
+IMDHistoWorkspace_sptr SmoothMD::hatSmooth(const IMDHistoWorkspace_const_sptr &toSmooth, const WidthVector &widthVector,
+                                           const IMDHistoWorkspace_sptr &weightingWS) {
 
   const bool useWeights = (weightingWS != nullptr);
   uint64_t nPoints = toSmooth->getNPoints();
@@ -254,7 +254,8 @@ IMDHistoWorkspace_sptr SmoothMD::hatSmooth(IMDHistoWorkspace_const_sptr toSmooth
  * @return Smoothed MDHistoWorkspace
  */
 IMDHistoWorkspace_sptr SmoothMD::gaussianSmooth(const IMDHistoWorkspace_const_sptr &toSmooth,
-                                                const WidthVector &widthVector, IMDHistoWorkspace_sptr weightingWS) {
+                                                const WidthVector &widthVector,
+                                                const IMDHistoWorkspace_sptr &weightingWS) {
   const bool useWeights = weightingWS.get() != 0;
   uint64_t nPoints = toSmooth->getNPoints();
   Progress progress(this, 0.0, 1.0, size_t(double(nPoints) * 1.1));

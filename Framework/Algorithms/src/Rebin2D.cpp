@@ -128,10 +128,9 @@ void Rebin2D::exec() {
       const double x_jp1 = oldXEdges[j + 1];
       Quadrilateral inputQ(x_j, x_jp1, vlo, vhi);
       if (!useFractionalArea) {
-        FractionalRebinning::rebinToOutput(std::move(inputQ), inputWS, i, j, *outputWS, newYBins.rawData());
+        FractionalRebinning::rebinToOutput(inputQ, inputWS, i, j, *outputWS, newYBins.rawData());
       } else {
-        FractionalRebinning::rebinToFractionalOutput(std::move(inputQ), inputWS, i, j, *outputRB, newYBins.rawData(),
-                                                     inputHasFA);
+        FractionalRebinning::rebinToFractionalOutput(inputQ, inputWS, i, j, *outputRB, newYBins.rawData(), inputHasFA);
       }
     }
 

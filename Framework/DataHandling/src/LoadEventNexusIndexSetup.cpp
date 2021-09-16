@@ -42,10 +42,10 @@ void setupConsistentSpectrumNumbers(IndexInfo &filtered, const std::vector<detid
 } // namespace
 
 LoadEventNexusIndexSetup::LoadEventNexusIndexSetup(MatrixWorkspace_const_sptr instrumentWorkspace, const int32_t min,
-                                                   const int32_t max, const std::vector<int32_t> &range,
-                                                   const Parallel::Communicator &communicator)
-    : m_instrumentWorkspace(std::move(instrumentWorkspace)), m_min(min), m_max(max), m_range(range),
-      m_communicator(communicator) {}
+                                                   const int32_t max, std::vector<int32_t> range,
+                                                   Parallel::Communicator communicator)
+    : m_instrumentWorkspace(std::move(instrumentWorkspace)), m_min(min), m_max(max), m_range(std::move(range)),
+      m_communicator(std::move(communicator)) {}
 
 std::pair<int32_t, int32_t> LoadEventNexusIndexSetup::eventIDLimits() const { return {m_min, m_max}; }
 

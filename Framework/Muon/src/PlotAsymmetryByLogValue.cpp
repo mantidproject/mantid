@@ -633,9 +633,9 @@ int PlotAsymmetryByLogValue::extractRunNumberFromRunName(std::string runName) {
  *   @param loadedWs :: [input/output] Workspace to apply corrections to
  *   @param deadTimes :: [input] Corrections to apply
  */
-void PlotAsymmetryByLogValue::applyDeadtimeCorr(Workspace_sptr &loadedWs, Workspace_sptr deadTimes) {
+void PlotAsymmetryByLogValue::applyDeadtimeCorr(Workspace_sptr &loadedWs, const Workspace_sptr &deadTimes) {
   ScopedWorkspace ws(loadedWs);
-  ScopedWorkspace dt(std::move(deadTimes));
+  ScopedWorkspace dt(deadTimes);
 
   auto applyCorr = AlgorithmManager::Instance().createUnmanaged("ApplyDeadTimeCorr");
   applyCorr->initialize();
@@ -672,11 +672,11 @@ Workspace_sptr PlotAsymmetryByLogValue::createCustomGrouping(const std::vector<i
  *   @param loadedWs :: [input/output] Workspace to apply grouping to
  *   @param grouping :: [input] Workspace containing grouping to apply
  */
-void PlotAsymmetryByLogValue::groupDetectors(Workspace_sptr &loadedWs, Workspace_sptr grouping) {
+void PlotAsymmetryByLogValue::groupDetectors(Workspace_sptr &loadedWs, const Workspace_sptr &grouping) {
 
   // Could be groups of workspaces, so need to work with ADS
   ScopedWorkspace inWS(loadedWs);
-  ScopedWorkspace grWS(std::move(grouping));
+  ScopedWorkspace grWS(grouping);
   ScopedWorkspace outWS;
 
   auto alg = AlgorithmManager::Instance().createUnmanaged("MuonGroupDetectors");

@@ -9,6 +9,7 @@
 #include "MantidKernel/StringTokenizer.h"
 
 #include <sstream>
+#include <utility>
 
 namespace Mantid {
 namespace Catalog {
@@ -17,8 +18,8 @@ namespace ONCat {
 using Mantid::Catalog::Exception::MalformedRepresentationError;
 using Mantid::Kernel::StringTokenizer;
 
-ONCatEntity::ONCatEntity(const std::string &id, const std::string &type, Content_uptr content)
-    : m_id(id), m_type(type), m_content(std::move(content)) {}
+ONCatEntity::ONCatEntity(std::string id, std::string type, Content_uptr content)
+    : m_id(std::move(id)), m_type(std::move(type)), m_content(std::move(content)) {}
 
 ONCatEntity::ONCatEntity(const ONCatEntity &other)
     : m_id(other.m_id), m_type(other.m_type), m_content(std::make_unique<Content>(*other.m_content)) {}

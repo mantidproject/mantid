@@ -13,6 +13,7 @@
 
 #include <memory>
 #include <numeric>
+#include <utility>
 
 namespace Mantid {
 namespace Crystal {
@@ -112,9 +113,9 @@ void UniqueReflection::setPeaksIntensityAndSigma(double intensity, double sigma)
  * @param centering :: Lattice centering.
  */
 UniqueReflectionCollection::UniqueReflectionCollection(const UnitCell &cell, const std::pair<double, double> &dLimits,
-                                                       const PointGroup_sptr &pointGroup,
+                                                       PointGroup_sptr pointGroup,
                                                        const ReflectionCondition_sptr &centering)
-    : m_reflections(), m_pointgroup(pointGroup) {
+    : m_reflections(), m_pointgroup(std::move(pointGroup)) {
   HKLGenerator generator(cell, dLimits.first);
   auto dFilter = std::make_shared<const HKLFilterDRange>(cell, dLimits.first, dLimits.second);
   auto centeringFilter = std::make_shared<const HKLFilterCentering>(centering);

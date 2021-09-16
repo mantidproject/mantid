@@ -336,7 +336,7 @@ std::vector<double> SampleEnvironmentSpecParser::parseTranslationVector(const st
   return translationVector;
 }
 
-std::string SampleEnvironmentSpecParser::findFile(std::string filename) const {
+std::string SampleEnvironmentSpecParser::findFile(const std::string &filename) const {
   Poco::Path suppliedStlFileName(filename);
   Poco::Path stlFileName;
   if (suppliedStlFileName.isRelative()) {

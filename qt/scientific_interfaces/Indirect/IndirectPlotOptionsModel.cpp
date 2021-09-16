@@ -122,7 +122,7 @@ IndirectPlotOptionsModel::IndirectPlotOptionsModel(
 IndirectPlotOptionsModel::IndirectPlotOptionsModel(
     ExternalPlotter *plotter, boost::optional<std::map<std::string, std::string>> const &availableActions)
     : m_actions(constructActions(availableActions)), m_fixedIndices(false), m_workspaceIndices(boost::none),
-      m_workspaceName(boost::none), m_plotter(std::move(plotter)) {}
+      m_workspaceName(boost::none), m_plotter(plotter) {}
 
 IndirectPlotOptionsModel::~IndirectPlotOptionsModel() {}
 
