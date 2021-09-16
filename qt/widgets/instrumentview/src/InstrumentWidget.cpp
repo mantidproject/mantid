@@ -23,6 +23,7 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/Unit.h"
 #include "MantidQtWidgets/InstrumentView/PanelsSurface.h"
 #include "MantidQtWidgets/InstrumentView/Projection3D.h"
@@ -616,14 +617,18 @@ void InstrumentWidget::replaceWorkspace(const std::string &newWs, const std::str
  * @param init : boolean set to true if the integration widget is still being initialized
  */
 void InstrumentWidget::updateIntegrationWidget(bool init) {
-  // discrete integration range is only used if all the bins are common and integers, as a convention
-  bool isDiscrete =
-      m_instrumentActor->getWorkspace()->isCommonBins() && m_instrumentActor->getWorkspace()->isIntegerBins();
+  // discrete integration range is only used if all the bins are common and integers and not an event workspace, as a
+  // convention
+  auto ws = m_instrumentActor->getWorkspace();
+
+  // differentiating behaviour by subclass is not really recommended, but we have to chek if there are events.
+  bool isNotEventWs = dynamic_cast<const Mantid::DataObjects::EventWorkspace *>(ws.get()) == nullptr;
+
+  bool isDiscrete = ws->isCommonBins() && ws->isIntegerBins() && isNotEventWs;
 
   m_xIntegration->setDiscrete(isDiscrete);
   double minRange = isDiscrete ? 0 : m_instrumentActor->minBinValue();
-  double maxRange = isDiscrete ? static_cast<int>(m_instrumentActor->getWorkspace()->blocksize()) - 1
-                               : m_instrumentActor->maxBinValue();
+  double maxRange = isDiscrete ? static_cast<int>(ws->blocksize()) - 1 : m_instrumentActor->maxBinValue();
 
   m_xIntegration->setTotalRange(minRange, maxRange);
 
@@ -637,7 +642,7 @@ void InstrumentWidget::updateIntegrationWidget(bool init) {
     }
   }
 
-  m_xIntegration->setUnits(QString::fromStdString(m_instrumentActor->getWorkspace()->getAxis(0)->unit()->caption()));
+  m_xIntegration->setUnits(QString::fromStdString(ws->getAxis(0)->unit()->caption()));
 
   bool integrable = isIntegrable();
 
@@ -949,7 +954,8 @@ void InstrumentWidget::setWireframe(bool on) {
  */
 void InstrumentWidget::setIntegrationRange(double xmin, double xmax) {
   auto workspace = m_instrumentActor->getWorkspace();
-  bool isDiscrete = workspace->isCommonBins() && workspace->isIntegerBins();
+  bool isNotEventWorkspace = dynamic_cast<const Mantid::DataObjects::EventWorkspace *>(workspace.get()) == nullptr;
+  bool isDiscrete = workspace->isCommonBins() && workspace->isIntegerBins() && isNotEventWorkspace;
 
   if (isDiscrete) {
     xmin = workspace->binEdges(0)[static_cast<int>(xmin)];
