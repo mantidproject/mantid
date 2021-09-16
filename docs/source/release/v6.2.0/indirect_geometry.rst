@@ -48,7 +48,7 @@ Improvements
 
 Bugfixes
 ########
-- :ref:`IndirectILLEnertyTransfer <algm-IndirectILLEnertyTransfer>` will now perform the monitor normalisation correctly; that is, in wavelength instead of energy. It will also provide the monitor workspace as a diagnostic output, if requested.
+- :ref:`IndirectILLEnergyTransfer <algm-IndirectILLEnergyTransfer>` will now perform the monitor normalisation correctly; that is, in wavelength instead of energy. It will also provide the monitor workspace as a diagnostic output, if requested.
 
 
 :ref:`Release 6.2.0 <v6.2.0>`
