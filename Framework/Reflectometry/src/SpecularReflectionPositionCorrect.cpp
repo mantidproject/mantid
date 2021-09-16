@@ -146,8 +146,8 @@ void SpecularReflectionPositionCorrect::moveDetectors(const API::MatrixWorkspace
       /*
        * We have to move individual components.
        */
-      for (const auto &detector : detectors) {
-        moveDetectors(toCorrect, detector, sample, upOffset, acrossOffset,
+      for (const auto &det : detectors) {
+        moveDetectors(toCorrect, det, sample, upOffset, acrossOffset,
                       detectorPosition); // Recursive call
       }
     }

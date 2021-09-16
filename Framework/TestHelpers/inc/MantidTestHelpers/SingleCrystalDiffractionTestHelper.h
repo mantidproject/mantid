@@ -59,7 +59,7 @@ private:
   /// Create a single HKL peak in the event workspace
   void createPeak(const HKLPeakDescriptor &descriptor);
   /// Create a flat background for the workspace
-  void createBackground(const int index);
+  void createBackground(const int peakIndex);
   /// Rebin the event workspace to a histogram workspace
   void rebinWorkspace();
 
