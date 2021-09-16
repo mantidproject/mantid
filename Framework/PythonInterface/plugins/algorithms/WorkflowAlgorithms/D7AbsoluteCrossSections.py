@@ -682,9 +682,6 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             elif det_eff_no >= eff_entries:
                 det_eff_no = det_eff_no % eff_entries
             ws_name = entry.name() + '_normalised'
-            if normalisation_method == 'Vanadium' and self._mode == 'TOF':
-                RebinToWorkspace(WorkspaceToRebin=entry, WorkspaceToMatch=mtd[det_efficiency_ws][det_eff_no],
-                                 OutputWorkspace=entry)
             tmp_names.append(ws_name)
             Divide(LHSWorkspace=entry,
                    RHSWorkspace=mtd[det_efficiency_ws][det_eff_no],

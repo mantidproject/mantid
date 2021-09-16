@@ -403,8 +403,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         for entry in mtd[ws]:
             xs = entry.extractX()
             minXIndex = np.nanargmin(xs[:, 0])
-            dx = BinWidthAtX(InputWorkspace=entry,
-                             X=0.0)
+            dx = BinWidthAtX(InputWorkspace=entry, X=0.0)
             lastX = np.max(xs[:, -1])
             binCount = entry.blocksize()
             borders = list()
@@ -1060,8 +1059,33 @@ class PolDiffILLReduction(PythonAlgorithm):
                 time_axis = entry.dataX(pixel_no)
                 time_axis -= tof_correction
 
+    def _integrate_elastic_peak(self, ws):
+        """Integrates bins around the elastic peak for vanadium in energy exchange units."""
+        to_clean = []
+        for entry in mtd[ws]:
+            epp_delta_e = "{}_epp_table_e".format(entry.name())
+            to_clean.append(epp_delta_e)
+            FindEPP(InputWorkspace=entry, OutputWorkspace=epp_delta_e)
+            ep_centres_e = np.array(mtd[epp_delta_e].column('PeakCentre'))  # in delta E (meV)
+            ep_sigmas_e = np.array(mtd[epp_delta_e].column('Sigma'))  # in delta E (meV)
+            average_sigma_e = np.mean(ep_sigmas_e[ep_sigmas_e > 0])  # mean for all properly fitted elastic peaks
+            ep_sigmas_e[ep_sigmas_e == 0] = average_sigma_e  # padding narrow-peak sigmas (=0) with average peak width
+            min_energies = ep_centres_e - 3.0 * ep_sigmas_e
+            max_energies = ep_centres_e + 3.0 * ep_sigmas_e
+            Integration(InputWorkspace=entry, OutputWorkspace=entry,
+                        RangeLowerList=min_energies, RangeUpperList=max_energies)
+            min_energy = np.min(min_energies)
+            max_energy = np.max(max_energies)
+            bin_width = np.abs(max_energy-min_energy)
+            Rebin(InputWorkspace=entry, OutputWorkspace=entry,
+                  Params='{},{},{}'.format(min_energy, bin_width, max_energy))  # rebins vanadium to a common bin
+        if len(to_clean) > 0 and self.getProperty("ClearCache").value:
+            DeleteWorkspaces(WorkspaceList=to_clean)
+        return ws
+
     def _normalise_vanadium(self, ws):
         """Performs normalisation of the vanadium data to the expected cross-section."""
+        measurement_technique = self.getPropertyValue('MeasurementTechnique')
         vanadium_expected_cross_section = 0.404  # barns
         norm_name = ws + "_norm"
         polarisation_directions = 0.5 * self._data_structure_helper()
@@ -1085,15 +1109,17 @@ class PolDiffILLReduction(PythonAlgorithm):
                 ws_name = mtd[ws][entry_no].name()
                 Plus(LHSWorkspace=tmp_name, RHSWorkspace=ws_name, OutputWorkspace=tmp_name)
                 to_remove.append(ws_name)
-            Divide(LHSWorkspace=tmp_name, RHSWorkspace=norm_name, OutputWorkspace=tmp_name)
             GroupWorkspaces(InputWorkspaces=tmp_name, OutputWorkspace=ws)
+            if measurement_technique == 'TOF':
+                self._integrate_elastic_peak(ws)
         else:
             if output_treatment == 'AveragePol':
                 self._merge_polarisations(ws, average_detectors=True)
             elif output_treatment == 'AverageTwoTheta':
                 self._merge_twoTheta_positions(ws)
-            if absolute_normalisation:
-                Divide(LHSWorkspace=ws, RHSWorkspace=norm_name, OutputWorkspace=ws)
+            if measurement_technique == 'TOF':
+                self._integrate_elastic_peak(ws)
+        Divide(LHSWorkspace=ws, RHSWorkspace=norm_name, OutputWorkspace=ws)
         DeleteWorkspaces(WorkspaceList=to_remove)
         return ws
 
