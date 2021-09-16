@@ -1,13 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <parameter-file instrument="D20" valid-from="1900-01-31 23:59:59">
 	<component-link name="D20">
-	        <parameter name="number_dead_pixels" type="int">
-			<value val="32" />
-		</parameter>
-	        <parameter name="pixel_size" type="number">
-			<value val="0.1" />
-		</parameter>
-
 		<!-- The detector name for the height axis used in SumOverlappingTubes -->
 		<parameter name="detector_for_height_axis" type="string" visible="false">
 			<value val="panel_1" />

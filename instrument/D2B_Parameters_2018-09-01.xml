@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <parameter-file instrument="D2B" valid-from="2018-09-01 00:00:00">
 	<component-link name="D2B">
-	        <parameter name="number_pixels_in_tubes" type="int">
-			<value val="128" />
-		</parameter>
 
 		<!-- The detector name for the height axis used in SumOverlappingTubes -->
 		<parameter name="detector_for_height_axis" type="string" visible="false">
