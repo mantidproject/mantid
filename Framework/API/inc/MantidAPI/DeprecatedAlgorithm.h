@@ -33,8 +33,6 @@ public:
 private:
   /// The algorithm to use instead of this one.
   std::string m_replacementAlgorithm;
-  /// Replacement version, -1 indicates latest
-  int m_replacementVersion;
   /// The date that the algorithm was first deprecated.
   std::string m_deprecatedDate;
 };
