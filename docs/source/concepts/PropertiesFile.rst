@@ -36,7 +36,7 @@ General properties
 | ``algorithms.categories.hidden`` | A comma separated list of any categories of      | ``Muons,Testing``      |
 |                                  | algorithms that should be hidden in Mantid.      |                        |
 +----------------------------------+--------------------------------------------------+------------------------+
-| ``algorithms.alias.expired``     | Action upon invoking the algorithm via one of    | ``Warn`` or ``Raise``  |
+| ``algorithms.alias.deprecated``  | Action upon invoking the algorithm via one of    | ``Warn`` or ``Raise``  |
 |                                  | its alias when the grace period for use of the   |                        |
 |                                  | aliases has already expired.                     |                        |
 |                                  | ``Raise`` will cause a ``RuntimError``.          |                        |
