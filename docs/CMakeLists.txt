@@ -49,8 +49,8 @@ function (add_sphinx_build_target builder math_renderer)
     set(conf_builder ${SPHINX_CONF_DIR}/conf-${builder}.py)
   endif()
 
-  # -W turns warnings into errors
-  set(sphinx_options -W ${SPHINX_NOCOLOR} ${SPHINX_KEEPGOING} -b ${builder} -d ${DOCTREES_DIR})
+  # -W turns warnings into errors, but there is an issue with getting the numpy intersphinx
+  set(sphinx_options ${SPHINX_NOCOLOR} ${SPHINX_KEEPGOING} -b ${builder} -d ${DOCTREES_DIR})
   # add a tag to differentiate between html/qthelp in conf
   if(ARGC GREATER 3)
     set(sphinx_options ${sphinx_options} -t ${ARGV3})
