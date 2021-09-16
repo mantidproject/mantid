@@ -376,8 +376,8 @@ void CorrectTOFAxis::correctManually(const API::MatrixWorkspace_sptr &outputWs) 
 /** Calculates the average L2 distance between the sample and given
  *  detectors.
  *  @param spectrumInfo A spectrum info for the input workspace
- *  @param l2 An output parameter for the average L2 distance
- *  @param epp An output parameter for the average position
+ *  @param l2Average An output parameter for the average L2 distance
+ *  @param eppAverage An output parameter for the average position
  *         of the detectors' elastic peak
  */
 void CorrectTOFAxis::averageL2AndEPP(const API::SpectrumInfo &spectrumInfo, double &l2Average, double &eppAverage) {

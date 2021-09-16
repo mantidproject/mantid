@@ -297,11 +297,11 @@ void AvrgDetector::returnAvrgDetPar(DetParameters &avrgDet) {
 }
 /** Method calculates averaged polar coordinates of the detector's group
 (which may consist of one detector)
-*@param det    -- reference to the Mantid Detector
+*@param detector -- reference to the Mantid Detector
 *@param observer -- sample position or the centre of the polar system of
 coordinates to calculate detector's parameters.
 
-*@param Detector  -- return Detector class containing averaged polar coordinates
+*@param detParameters -- return Detector class containing averaged polar coordinates
 of the detector or detector's group in
                      spherical coordinate system with centre at Observer
 */
