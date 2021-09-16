@@ -18,7 +18,7 @@ Kernel::Logger g_log("DeprecatedAlias");
 } // namespace
 
 /// Constructor to ensure the compiler is happy
-DeprecatedAlias::DeprecatedAlias() : m_replacementVersion(-1), m_deprecationDate() {}
+DeprecatedAlias::DeprecatedAlias() : m_deprecationDate() {}
 
 /// Destructor to ensure the compiler is happy
 DeprecatedAlias::~DeprecatedAlias() = default;
