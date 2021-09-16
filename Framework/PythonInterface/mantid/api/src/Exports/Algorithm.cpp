@@ -26,7 +26,17 @@
 #include <boost/python/dict.hpp>
 #include <boost/python/exception_translator.hpp>
 #include <boost/python/overloads.hpp>
+// As of boost 1.67 raw_function.hpp tries to pass
+// through size_t types through to make_function
+// which accepts int type, emitting a warning
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4267)
+#endif
 #include <boost/python/raw_function.hpp>
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 #include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/scope.hpp>
 #include <boost/variant.hpp>
@@ -190,17 +200,9 @@ void export_leaf_classes() {
       "Algorithm", "Base class for all algorithms")
       .def("fromString", &Algorithm::fromString, "Initialize the algorithm from a string representation")
       .staticmethod("fromString")
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4267) // Disable warning regarding conversion of size_t
-                                // to int within raw_function, which we can do nothing about
-#endif
       .def("createChildAlgorithm", raw_function(&createChildWithProps, std::size_t(1)),
            "Creates and intializes a named child algorithm. Output workspaces "
            "are given a dummy name.")
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
       .def("declareProperty", (declarePropertyType1)&PythonAlgorithm::declarePyAlgProperty,
            declarePropertyType1_Overload((arg("self"), arg("prop"), arg("doc") = "")))
       .def("enableHistoryRecordingForChild", &Algorithm::enableHistoryRecordingForChild, (arg("self"), arg("on")),
