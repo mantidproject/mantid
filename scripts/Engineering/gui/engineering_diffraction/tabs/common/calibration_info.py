@@ -31,8 +31,8 @@ class CalibrationInfo(EnggUtils.GroupingInfo):
         self.instrument = instrument
 
     def set_calibration_from_prm_fname(self, file_path):
-        inst, van, ceria = self.set_group_from_prm_fname(file_path)  # ceria and van are run numbers
-        self.set_calibration_paths(van, ceria, inst)
+        inst, ceria = self.set_group_from_prm_fname(file_path)  # ceria and van are run numbers
+        self.set_calibration_paths(ceria, inst)
 
     def generate_output_file_name(self, ext='.prm'):
         return super().generate_output_file_name(self.get_sample_path(),

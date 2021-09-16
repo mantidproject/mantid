@@ -103,23 +103,23 @@ class GroupingInfo:
         :return: [instrument, van_run, ceria_run]
         """
         basepath, fname = path.split(file_path)
-        # fname has form INSTRUMENT_VanadiumRunNo_ceriaRunNo_BANKS
+        # fname has form INSTRUMENT_ceriaRunNo_BANKS
         # BANKS can be "all_banks, "bank_1", "bank_2", "Cropped", "Custom"
         fname_words = fname.split('_')
-        suffix = fname_words[-1].split('.')[0] # take last element and remove extension
+        suffix = fname_words[-1].split('.')[0]  # take last element and remove extension
         if any(grp.value == suffix for grp in GROUP):
             self.group = GROUP(suffix)
             self.prm_filepath = file_path
         else:
             raise ValueError("Group not set: region of interest not recognised from .prm file name")
-        return fname_words[0:3]
+        return fname_words[0:2]
 
     # functional
     def load_relevant_calibration_files(self, output_prefix="engggui"):
         """Output cal table from second step (e.g. bank-wise) run of PDCalibration"""
         basepath, fname = path.split(self.prm_filepath)
         fname_words = fname.split('_')
-        prefix = '_'.join(fname_words[0:3])
+        prefix = '_'.join(fname_words[0:2])
         if self.group.banks:
             for bank in self.group.banks:
                 suffix = f"_bank_{bank}"
@@ -129,6 +129,8 @@ class GroupingInfo:
             suffix = f"_{self.group.value}"  # custom or cropped (.prm suffix)
             path_to_load = path.join(basepath, prefix + suffix + ".nxs")
             mantid.Load(Filename=path_to_load, OutputWorkspace=output_prefix + "_calibration" + suffix)
+            # load in custom grouping
+            self.load_custom_grouping_workspace()
 
     def load_custom_grouping_workspace(self):
         """
@@ -138,7 +140,7 @@ class GroupingInfo:
         if not self.group.banks:
             # no need to load grp ws for bank grouping
             ws_name = self._group_ws_names[self.group]
-            filepath_no_ext, _ = path.splittext(self.prm_filepath)
+            filepath_no_ext, _ = path.splitext(self.prm_filepath)
             mantid.LoadDetectorsGroupingFile(InputFile=filepath_no_ext + ".xml", OutputWorkspace=ws_name)
             self.group_ws = ws_name
 
