@@ -36,10 +36,11 @@ General properties
 | ``algorithms.categories.hidden`` | A comma separated list of any categories of      | ``Muons,Testing``      |
 |                                  | algorithms that should be hidden in Mantid.      |                        |
 +----------------------------------+--------------------------------------------------+------------------------+
-| ``algorithms.alias.deprecated``  | Action upon invoking the algorithm via one of    | ``Warn`` or ``Raise``  |
+| ``algorithms.alias.deprecated``  | Action upon invoking the algorithm via one of    | ``Error`` or ``Raise`` |
 |                                  | its alias when the grace period for use of the   |                        |
 |                                  | aliases has already expired.                     |                        |
-|                                  | ``Raise`` will cause a ``RuntimError``.          |                        |
+|                                  | ``Error`` causes a log message at error level.   |                        |
+|                                  |``Raise`` causes a ``RuntimError``.               |                        |
 +----------------------------------+--------------------------------------------------+------------------------+
 | ``curvefitting.guiExclude``      | A semicolon separated list of function names     | ``ExpDecay;Gaussian;`` |
 |                                  | that should be hidden in Mantid.                 |                        |
