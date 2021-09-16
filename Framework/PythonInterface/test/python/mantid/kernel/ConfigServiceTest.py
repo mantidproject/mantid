@@ -64,17 +64,29 @@ class ConfigServiceTest(unittest.TestCase):
         self.assertRaises(RuntimeError, config.getInstrument, "MadeUpInstrument")
 
     def test_service_acts_like_dictionary(self):
+        dictcall = config.get("property_not_found")
+        self.assertEqual(dictcall, "")
+
         test_prop = "projectRecovery.secondsBetween"
         self.assertTrue(config.hasProperty(test_prop))
         dictcall = config[test_prop]
         fncall = config.getString(test_prop)
+
+        # Use brackets to retrieve a value
+        dictcall = config[test_prop]
         self.assertEqual(dictcall, fncall)
         self.assertNotEqual(config[test_prop], "")
+
+        # Use "get" to retrieve a value or a default
+        dictcall = config.get(test_prop, "other")
+        self.assertEqual(dictcall, fncall)
+        dictcall = config.get("property_not_found", "default_alternative")
+        self.assertEqual(dictcall, "default_alternative")
 
         old_value = fncall
         config.setString(test_prop, "1")
         self.assertEqual(config.getString(test_prop), "1")
-        config[test_prop] =  "2"
+        config[test_prop] = "2"
         self.assertEqual(config.getString(test_prop), "2")
 
         config.setString(test_prop, old_value)
