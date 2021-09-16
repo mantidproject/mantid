@@ -365,6 +365,9 @@ void export_ialgorithm() {
   class_<IAlgorithm, bases<IPropertyManager>, boost::noncopyable>("IAlgorithm", "Interface for all algorithms", no_init)
       .def("name", &IAlgorithm::name, arg("self"), "Returns the name of the algorithm")
       .def("alias", &IAlgorithm::alias, arg("self"), "Return the aliases for the algorithm")
+      .def("aliasDeprecated", &IAlgorithm::aliasDeprecated, arg("self"),
+           "Deprecation date (in ISO8601 format) for the algorithm aliases. "
+           "Returns empty string if no deprecation date")
       .def("version", &IAlgorithm::version, arg("self"), "Returns the version number of the algorithm")
       .def("cancel", &IAlgorithm::cancel, arg("self"), "Request that the algorithm stop running")
       .def("category", &IAlgorithm::category, arg("self"), "Returns the category containing the algorithm")
