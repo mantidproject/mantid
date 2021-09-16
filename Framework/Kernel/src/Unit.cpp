@@ -644,8 +644,6 @@ void dSpacing::init() {
       }
     }
   }
-  // force the assumption that difc is positive in debug builds
-  assert(difc > 0.);
 }
 
 double dSpacing::singleToTOF(const double x) const {
@@ -681,9 +679,6 @@ double dSpacing::singleFromTOF(const double tof) const {
                              "has been initialized.");
   if (!toDSpacingError.empty())
     throw std::runtime_error(toDSpacingError);
-
-  // force the assumption that difc is positive in debug builds
-  assert(difc > 0.);
 
   // non-physical result
   if (tzero > tof) {
