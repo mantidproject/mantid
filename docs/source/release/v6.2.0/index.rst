@@ -80,6 +80,6 @@ For a full list of all issues addressed during this release please see the `GitH
 
 .. _forum: https://forum.mantidproject.org
 
-.. _GitHub milestone: https://github.com/mantidproject/mantid/pulls?utf8=%E2%9C%93&q=is%3Apr+milestone%3A"Release 6.2"+is%3Amerged
+.. _GitHub milestone: https://github.com/mantidproject/mantid/pulls?utf8=%E2%9C%93&q=is%3Apr+is%3Amerged+milestone%3A%22Release+6.2%22
 
 .. _GitHub release page: https://github.com/mantidproject/mantid/releases/tag/v6.2.0
