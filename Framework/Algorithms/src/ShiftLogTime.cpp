@@ -19,8 +19,7 @@ using std::string;
 using std::stringstream;
 using std::vector;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ShiftLogTime)
@@ -111,5 +110,4 @@ void ShiftLogTime::exec() {
   outputWS->mutableRun().addProperty(newlog, true);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

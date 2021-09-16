@@ -84,8 +84,7 @@ int getWorkspaceNumberOfHistograms(const MatrixWorkspace_sptr &workspace) {
 
 } // namespace
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 DECLARE_ALGORITHM(CalculateIqt)
 
@@ -307,5 +306,4 @@ MatrixWorkspace_sptr CalculateIqt::setErrorsToZero(const std::vector<MatrixWorks
   return outputWorkspace;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

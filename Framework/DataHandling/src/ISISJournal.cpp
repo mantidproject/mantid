@@ -19,8 +19,7 @@
 #include <boost/regex.hpp>
 #include <sstream>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using Kernel::InternetHelper;
 using Poco::XML::Document;
@@ -308,5 +307,4 @@ std::string ISISJournal::getURLContents(std::string const &url) {
   }
   return serverReply.str();
 }
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

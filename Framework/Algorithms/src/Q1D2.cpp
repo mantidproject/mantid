@@ -32,8 +32,7 @@
 #include "MantidParallel/Communicator.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(Q1D2)
@@ -685,5 +684,4 @@ Q1D2::getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode
   return Parallel::getCorrespondingExecutionMode(storageModes.at("DetBankWorkspace"));
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

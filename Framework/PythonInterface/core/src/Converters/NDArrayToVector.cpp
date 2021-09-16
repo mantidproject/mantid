@@ -24,8 +24,7 @@ using boost::python::handle;
 using boost::python::object;
 using boost::python::str;
 
-namespace Mantid {
-namespace PythonInterface {
+namespace Mantid::PythonInterface {
 namespace Converters {
 
 /// Macro to declare template instantiations as extern; those are defined in
@@ -177,5 +176,4 @@ INSTANTIATE_TOVECTOR(bool)
 INSTANTIATE_TOVECTOR(std::string)
 ///@endcond
 } // namespace Converters
-} // namespace PythonInterface
-} // namespace Mantid
+} // namespace Mantid::PythonInterface

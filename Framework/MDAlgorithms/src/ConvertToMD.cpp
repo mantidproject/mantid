@@ -40,8 +40,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 using Mantid::Geometry::MDHistoDimensionBuilder;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 //
 // Register the algorithm into the AlgorithmFactory
@@ -729,5 +728,4 @@ void ConvertToMD::setupFileBackend(const std::string &filebackPath,
   boxControllerMem->getFileIO()->setWriteBufferSize(1000000);
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

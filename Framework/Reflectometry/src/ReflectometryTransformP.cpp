@@ -7,8 +7,7 @@
 #include "MantidReflectometry/ReflectometryTransformP.h"
 using namespace Mantid::DataObjects;
 
-namespace Mantid {
-namespace Reflectometry {
+namespace Mantid::Reflectometry {
 /*
 Constructor
 @param pSumMin: p sum min value (extent)
@@ -30,5 +29,4 @@ ReflectometryTransformP::ReflectometryTransformP(double pSumMin, double pSumMax,
   m_calculator->setThetaIncident(incidentTheta);
 }
 
-} // namespace Reflectometry
-} // namespace Mantid
+} // namespace Mantid::Reflectometry

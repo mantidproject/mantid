@@ -8,8 +8,7 @@
 #include "MantidNexusGeometry/NexusGeometrySave.h"
 #include <H5Cpp.h>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 using Mantid::API::WorkspaceProperty;
 using Mantid::Kernel::Direction;
 
@@ -89,5 +88,4 @@ void SaveNexusESS::exec() {
   // Now write spectrum to detector maps;
   return;
 }
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

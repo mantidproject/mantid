@@ -15,9 +15,7 @@
 
 #include <cmath>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace CostFunctions {
+namespace Mantid::CurveFitting::CostFunctions {
 
 DECLARE_COSTFUNCTION(CostFuncRwp, Rwp)
 
@@ -67,6 +65,4 @@ double CostFuncRwp::calSqrtW(const API::FunctionValues_sptr &values) const {
   return sqrt(weight);
 }
 
-} // namespace CostFunctions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::CostFunctions

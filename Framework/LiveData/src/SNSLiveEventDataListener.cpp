@@ -71,8 +71,7 @@ Mantid::Types::Core::DateAndTime timeFromPacket(const ADARA::PacketHeader &hdr) 
 
 } // anonymous namespace
 
-namespace Mantid {
-namespace LiveData {
+namespace Mantid::LiveData {
 DECLARE_LISTENER(SNSLiveEventDataListener)
 
 namespace {
@@ -1548,5 +1547,4 @@ void SNSLiveEventDataListener::replayVariableCache() {
   m_variableMap.clear(); // empty the map to save a little ram
 }
 
-} // namespace LiveData
-} // namespace Mantid
+} // namespace Mantid::LiveData

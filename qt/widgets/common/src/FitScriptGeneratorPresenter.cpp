@@ -20,8 +20,7 @@
 
 using namespace Mantid::API;
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 FitScriptGeneratorPresenter::FitScriptGeneratorPresenter(IFitScriptGeneratorView *view, IFitScriptGeneratorModel *model,
                                                          QStringList const &workspaceNames, double startX, double endX)
@@ -545,5 +544,4 @@ void FitScriptGeneratorPresenter::generateScriptToClipboard() const {
   }
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

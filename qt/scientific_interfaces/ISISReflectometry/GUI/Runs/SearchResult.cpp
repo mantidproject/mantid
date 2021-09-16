@@ -9,9 +9,7 @@
 #include <boost/regex.hpp>
 #include <utility>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 SearchResult::SearchResult(const std::string &runNumber, std::string title) : m_title(std::move(title)) {
   parseRun(runNumber);
@@ -96,6 +94,4 @@ bool operator==(SearchResult const &lhs, SearchResult const &rhs) {
 }
 
 bool operator!=(SearchResult const &lhs, SearchResult const &rhs) { return !(lhs == rhs); }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

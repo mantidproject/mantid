@@ -277,8 +277,7 @@ predictFractionalPeaks(Algorithm *const alg, const bool requirePeaksOnDetector, 
 
 } // namespace
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 DECLARE_ALGORITHM(PredictFractionalPeaks)
 
@@ -457,5 +456,4 @@ ModulationProperties PredictFractionalPeaks::getModulationInfo() {
   }
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

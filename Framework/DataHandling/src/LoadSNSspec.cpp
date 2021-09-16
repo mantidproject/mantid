@@ -19,8 +19,7 @@
 #include <cstring>
 #include <fstream>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 DECLARE_FILELOADER_ALGORITHM(LoadSNSspec)
 
 /**
@@ -111,5 +110,4 @@ void LoadSNSspec::exec() {
   setProperty("OutputWorkspace", ws);
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

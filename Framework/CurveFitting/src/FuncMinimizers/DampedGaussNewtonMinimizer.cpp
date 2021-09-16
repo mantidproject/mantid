@@ -19,9 +19,7 @@
 #include <cmath>
 #include <gsl/gsl_blas.h>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace FuncMinimisers {
+namespace Mantid::CurveFitting::FuncMinimisers {
 
 namespace {
 /// static logger
@@ -134,6 +132,4 @@ double DampedGaussNewtonMinimizer::costFunctionVal() {
   return m_leastSquares->val();
 }
 
-} // namespace FuncMinimisers
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::FuncMinimisers

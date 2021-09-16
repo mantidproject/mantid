@@ -9,8 +9,7 @@
 #include <stdexcept>
 #include <utility>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 using namespace Kernel;
 
@@ -47,5 +46,4 @@ void HKLFilterWavelength::checkProperLambdaRangeValues() const {
   }
 }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

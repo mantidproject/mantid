@@ -17,8 +17,7 @@
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/Strings.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Kernel;
 using namespace API;
@@ -184,6 +183,4 @@ void DetectorEfficiencyCorUser::retrieveProperties() {
     g_log.debug() << "Using user input Ei value: " << m_Ei << "\n";
   }
 }
-} // namespace Algorithms
-// namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

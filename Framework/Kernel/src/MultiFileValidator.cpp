@@ -8,8 +8,7 @@
 #include "MantidKernel/Logger.h"
 #include <memory>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 namespace {
 // static logger
 Logger g_log("MultiFileValidator");
@@ -70,5 +69,4 @@ std::string MultiFileValidator::checkValidity(const std::vector<std::vector<std:
   return accumulatedErrors;
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

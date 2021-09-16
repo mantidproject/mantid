@@ -6,8 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/QtPropertyBrowser/WorkspaceEditorFactory.h"
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 QWidget *WorkspaceEditorFactory::createEditorForManager(QtStringPropertyManager *manager, QtProperty *property,
                                                         QWidget *parent) {
@@ -23,5 +22,4 @@ WorkspaceEditor::WorkspaceEditor(QtProperty *property, QtStringPropertyManager *
 }
 
 void WorkspaceEditor::updateProperty(const QString &text) { m_manager->setValue(m_property, text); }
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

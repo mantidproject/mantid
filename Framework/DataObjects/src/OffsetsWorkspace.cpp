@@ -12,8 +12,7 @@
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/System.h"
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 // Register the workspace
 DECLARE_WORKSPACE(OffsetsWorkspace)
 
@@ -25,13 +24,11 @@ DECLARE_WORKSPACE(OffsetsWorkspace)
  */
 OffsetsWorkspace::OffsetsWorkspace(const Geometry::Instrument_const_sptr &inst) : SpecialWorkspace2D(inst) {}
 
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects
 
 /// @cond TEMPLATE
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 template <>
 DLLExport Mantid::DataObjects::OffsetsWorkspace_sptr
@@ -61,7 +58,6 @@ IPropertyManager::getValue<Mantid::DataObjects::OffsetsWorkspace_const_sptr>(con
   }
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel
 
 /// @endcond TEMPLATE

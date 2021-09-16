@@ -23,8 +23,7 @@
 #include <cmath>
 #include <sstream>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using std::string;
 using namespace HistogramData;
@@ -383,5 +382,4 @@ void PDFFourierTransform::exec() {
   setProperty("OutputWorkspace", outputWS);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

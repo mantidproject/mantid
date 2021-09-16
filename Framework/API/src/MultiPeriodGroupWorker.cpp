@@ -18,8 +18,7 @@
 
 using namespace Mantid::Kernel;
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 /**
  * Constructor
@@ -278,5 +277,4 @@ void MultiPeriodGroupWorker::validateMultiPeriodGroupInputs(const VecWSGroupType
   }
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

@@ -15,9 +15,7 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Algorithms {
+namespace Mantid::CurveFitting::Algorithms {
 using namespace API;
 using namespace Kernel;
 using namespace std;
@@ -162,6 +160,4 @@ void EstimatePeakErrors::exec() {
   setProperty("OutputWorkspace", results);
 }
 
-} // namespace Algorithms
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Algorithms

@@ -24,8 +24,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using Mantid::Types::Core::DateAndTime;
 
-namespace Mantid {
-namespace LiveData {
+namespace Mantid::LiveData {
 
 namespace {
 
@@ -596,5 +595,4 @@ void LoadLiveData::exec() {
   }
 }
 
-} // namespace LiveData
-} // namespace Mantid
+} // namespace Mantid::LiveData

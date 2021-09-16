@@ -19,8 +19,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include <vector>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(CalculateEfficiency)
@@ -368,5 +367,4 @@ void CalculateEfficiency::maskEdges(const MatrixWorkspace_sptr &ws, int left, in
   maskAlg->execute();
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

@@ -11,8 +11,7 @@
 
 using Mantid::API::MatrixWorkspace;
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 /**
  * Constructor
@@ -44,5 +43,4 @@ void ImageInfoPresenter::setWorkspace(const Mantid::API::Workspace_sptr &workspa
   cursorAt(ImageInfoModel::UnsetValue, ImageInfoModel::UnsetValue, ImageInfoModel::UnsetValue);
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

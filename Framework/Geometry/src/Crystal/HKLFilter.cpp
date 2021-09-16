@@ -9,8 +9,7 @@
 #include <stdexcept>
 #include <utility>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 /**
  * Returns a function object that wraps HKLFilter::isAllowed
@@ -110,5 +109,4 @@ const HKLFilter_const_sptr operator|(const HKLFilter_const_sptr &lhs, const HKLF
   return std::make_shared<HKLFilterOr>(lhs, rhs);
 }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

@@ -10,11 +10,9 @@
 #include "IndirectSassena.h"
 #include "MantidKernel/ConfigService.h"
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 DECLARE_SUBWINDOW(IndirectSimulation)
-}
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces
 
 using namespace MantidQt::CustomInterfaces;
 

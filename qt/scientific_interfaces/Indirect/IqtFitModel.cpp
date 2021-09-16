@@ -85,9 +85,7 @@ double computeHeightApproximation(IFunction_sptr function) {
 }
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 IqtFitModel::IqtFitModel() : IndirectFittingModel(), m_constrainIntensities(false) { m_fitType = IQTFIT_STRING; }
 
@@ -122,6 +120,4 @@ std::unordered_map<std::string, ParameterValue> IqtFitModel::createDefaultParame
   return parameters;
 }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

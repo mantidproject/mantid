@@ -10,9 +10,7 @@
 #include "MantidCurveFitting/Functions/ProductFunction.h"
 #include "MantidAPI/FunctionFactory.h"
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
 
@@ -41,6 +39,4 @@ void ProductFunction::functionDeriv(const API::FunctionDomain &domain, API::Jaco
   calNumericalDeriv(domain, jacobian);
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

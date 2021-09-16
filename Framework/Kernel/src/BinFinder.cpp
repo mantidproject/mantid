@@ -11,8 +11,7 @@
 
 using std::size_t;
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 /** Constructor. Sets up the calculation for later.
  *
@@ -166,5 +165,4 @@ int BinFinder::bin(double x) {
     return index;
   }
 }
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

@@ -8,8 +8,7 @@
 
 #include "MantidGeometry/Crystal/BasicHKLFilters.h"
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 /// Constructor, dMax is set to the largest lattice parameter.
 HKLFilterDRange::HKLFilterDRange(const UnitCell &cell, double dMin) : m_cell(cell), m_dmin(dMin) {
@@ -110,5 +109,4 @@ bool HKLFilterCentering::isAllowed(const Kernel::V3D &hkl) const noexcept {
   return m_centering->isAllowed(static_cast<int>(hkl.X()), static_cast<int>(hkl.Y()), static_cast<int>(hkl.Z()));
 }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

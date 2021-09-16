@@ -33,8 +33,7 @@
 #include <nexus/NeXusException.hpp>
 // clang-format on
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using namespace Kernel;
 using namespace API;
@@ -215,5 +214,4 @@ void LoadMuonNexus::addToSampleLog(const std::string &logName, const std::string
   alg->setProperty("LogText", logString);
   alg->executeAsChildAlg();
 }
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

@@ -71,8 +71,7 @@ bool convertLogToDouble(const Mantid::Kernel::Property *property, double &value,
 
 } // namespace
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Kernel;
 using namespace API;
@@ -930,5 +929,4 @@ double PlotAsymmetryByLogValue::getLogValue(MatrixWorkspace &ws) {
   throw std::invalid_argument("Log " + m_logName + " cannot be converted to a double type.");
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

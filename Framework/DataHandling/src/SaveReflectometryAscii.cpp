@@ -27,8 +27,7 @@
 #include <memory>
 #include <stdexcept>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using namespace Kernel;
 using namespace API;
@@ -312,5 +311,4 @@ bool SaveReflectometryAscii::processGroups() {
   return true;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

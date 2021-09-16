@@ -17,8 +17,7 @@
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 
 namespace {
 Mantid::Kernel::Logger g_log("IndirectDiffractionReduction");
@@ -825,5 +824,4 @@ void IndirectDiffractionReduction::setSaveEnabled(bool enabled) {
   m_uiForm.ckNexus->setEnabled(enabled);
 }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

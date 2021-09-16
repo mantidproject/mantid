@@ -30,8 +30,7 @@ public:
   std::string getMessage() const { return this->what(); }
 };
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 class SimpleMDEvent {
 
@@ -531,5 +530,4 @@ void CompareMDWorkspaces::exec() {
   setProperty("Result", m_result);
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

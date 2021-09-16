@@ -22,8 +22,7 @@
 #include <numeric>
 #include <vector>
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -146,5 +145,4 @@ void TransposeMD::exec() {
   this->setProperty("OutputWorkspace", outWS);
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

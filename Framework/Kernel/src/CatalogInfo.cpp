@@ -15,8 +15,7 @@
 #include <Poco/DOM/NodeList.h>
 #include <Poco/XML/XMLString.h>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 /**
  * Constructor
  * @param element :: "Catalog" element from Facilities.xml
@@ -100,5 +99,4 @@ std::string CatalogInfo::getAttribute(const Poco::XML::Element *element, const s
   return ("");
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

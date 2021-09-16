@@ -6,7 +6,3 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/MDLeanEvent.h"
 #include "MantidKernel/System.h"
-
-namespace Mantid {
-namespace DataObjects {} // namespace DataObjects
-} // namespace Mantid

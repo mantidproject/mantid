@@ -24,8 +24,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string ConvertToMDParent::category() const { return "MDAlgorithms\\Creation"; }
@@ -341,5 +340,4 @@ DataObjects::TableWorkspace_sptr ConvertToMDParent::runPreprocessDetectorsToMDCh
   return TargTableWS;
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

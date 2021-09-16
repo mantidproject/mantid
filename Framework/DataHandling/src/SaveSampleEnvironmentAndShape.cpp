@@ -21,8 +21,7 @@
 
 #include <Poco/Path.h>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(SaveSampleEnvironmentAndShape)
 
@@ -192,5 +191,4 @@ const Geometry::MeshObject &toMeshObject(const Geometry::IObject &object) {
     throw std::invalid_argument("Attempted to Save out non mesh based Sample or Environment");
   }
 }
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

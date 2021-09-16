@@ -32,8 +32,7 @@
 #include <boost/lexical_cast.hpp>
 #include <iostream>
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -1817,5 +1816,4 @@ void MDNorm::calcIntegralsForIntersections(const std::vector<double> &xValues, c
   }
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

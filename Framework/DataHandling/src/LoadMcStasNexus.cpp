@@ -19,8 +19,7 @@
 
 #include <boost/algorithm/string.hpp>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 using namespace Kernel;
 using namespace API;
 
@@ -189,5 +188,4 @@ void LoadMcStasNexus::exec() {
   setProperty("OutputWorkspace", outputGroup);
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

@@ -15,8 +15,7 @@
 
 using namespace Mantid::Kernel;
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 //----------------------------------------------------------------------------------------------
 /** Add Box-controller-specific properties to this algorithm
@@ -145,5 +144,4 @@ void BoxControllerSettingsAlgorithm::setBoxController(const BoxController_sptr &
   bc->resetNumBoxes();
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

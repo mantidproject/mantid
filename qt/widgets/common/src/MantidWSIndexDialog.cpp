@@ -22,8 +22,7 @@
 #include <exception>
 #include <utility>
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 /// The string "Workspace index"
 const QString MantidWSIndexWidget::WORKSPACE_NAME = "Workspace name";
 const QString MantidWSIndexWidget::WORKSPACE_INDEX = "Workspace index";
@@ -1263,5 +1262,4 @@ void MantidWSIndexWidget::QLineEditWithErrorMark::setError(const QString &error)
     m_validLbl->setToolTip(error.trimmed());
   }
 }
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

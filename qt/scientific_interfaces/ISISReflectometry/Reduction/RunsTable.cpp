@@ -7,9 +7,7 @@
 #include "RunsTable.h"
 #include "RowLocation.h"
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 using MantidWidgets::Batch::RowLocation;
 
@@ -66,6 +64,4 @@ std::vector<Row> RunsTable::selectedRows() const {
   }
   return rows;
 }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

@@ -8,8 +8,7 @@
 #include "MantidKernel/ChecksumHelper.h"
 #include <Poco/String.h>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 //----------------------------------------------------------------------------------------------
 /**
  * Returns the expected extension of an IDF file
@@ -75,5 +74,4 @@ Check that the file exists.
 */
 bool IDFObject::exists() const { return m_hasFileName && m_defFile.exists(); }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

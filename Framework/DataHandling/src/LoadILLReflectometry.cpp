@@ -138,8 +138,7 @@ Mantid::Kernel::Quat detectorFaceRotation(const RotationPlane plane, const doubl
 }
 } // anonymous namespace
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using namespace Kernel;
 using namespace API;
@@ -869,5 +868,4 @@ double LoadILLReflectometry::sourceSampleDistance() const {
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

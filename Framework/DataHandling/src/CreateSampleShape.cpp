@@ -15,8 +15,7 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/Material.h"
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CreateSampleShape)
 
@@ -70,5 +69,4 @@ void CreateSampleShape::exec() {
   // Done!
   progress(1);
 }
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

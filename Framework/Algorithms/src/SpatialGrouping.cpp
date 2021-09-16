@@ -37,8 +37,7 @@ static bool compareIDPair(const std::pair<int64_t, Mantid::Kernel::V3D> &left,
 }
 } // namespace
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SpatialGrouping)
 
@@ -336,5 +335,4 @@ void SpatialGrouping::growBox(double &min, double &max, const double factor) {
   max = mid + (factor * halfwid);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

@@ -23,9 +23,7 @@ using boost::python::object;
 
 GNU_DIAG_OFF("strict-aliasing")
 
-namespace Mantid {
-namespace PythonInterface {
-namespace Converters {
+namespace Mantid::PythonInterface::Converters {
 /**
  * Construct the converter object with the given Python object
  * @param p :: A boost::python object that should support
@@ -72,6 +70,4 @@ Kernel::VMD PyObjectToVMD::operator()() {
   }
   return ret;
 }
-} // namespace Converters
-} // namespace PythonInterface
-} // namespace Mantid
+} // namespace Mantid::PythonInterface::Converters

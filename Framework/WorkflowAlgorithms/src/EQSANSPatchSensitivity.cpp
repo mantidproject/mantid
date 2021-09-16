@@ -10,8 +10,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/cow_ptr.h"
 
-namespace Mantid {
-namespace WorkflowAlgorithms {
+namespace Mantid::WorkflowAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(EQSANSPatchSensitivity)
@@ -133,5 +132,4 @@ void EQSANSPatchSensitivity::exec() {
   setProperty("OutputMessage", "Applied wavelength-dependent sensitivity correction");
 }
 
-} // namespace WorkflowAlgorithms
-} // namespace Mantid
+} // namespace Mantid::WorkflowAlgorithms

@@ -7,8 +7,7 @@
 #include "MantidAPI/NullCoordTransform.h"
 #include "MantidAPI/CoordTransform.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 /** Constructor
 @param ndims : Number of dimensions
@@ -38,5 +37,4 @@ void NullCoordTransform::apply(const Mantid::coord_t *inputVector, Mantid::coord
     outVector[i] = inputVector[i];
   }
 }
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

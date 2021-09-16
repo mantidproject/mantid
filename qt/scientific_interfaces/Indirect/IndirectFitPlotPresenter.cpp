@@ -14,9 +14,7 @@
 
 using namespace MantidQt::Widgets::MplCpp;
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 struct HoldRedrawing {
   IIndirectFitPlotView *m_view;
@@ -355,6 +353,4 @@ void IndirectFitPlotPresenter::emitSelectedFitDataChanged() {
   emit selectedFitDataChanged(index);
 }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

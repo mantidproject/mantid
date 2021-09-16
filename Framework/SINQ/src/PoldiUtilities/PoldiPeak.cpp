@@ -10,8 +10,7 @@
 #include <stdexcept>
 #include <utility>
 
-namespace Mantid {
-namespace Poldi {
+namespace Mantid::Poldi {
 
 PoldiPeak_sptr PoldiPeak::clone() const { return PoldiPeak_sptr(new PoldiPeak(*this)); }
 
@@ -131,5 +130,4 @@ PoldiPeak::PoldiPeak(UncertainValue d, UncertainValue intensity, UncertainValue 
   setD(d);
   setFwhm(fwhm, Relative);
 }
-} // namespace Poldi
-} // namespace Mantid
+} // namespace Mantid::Poldi

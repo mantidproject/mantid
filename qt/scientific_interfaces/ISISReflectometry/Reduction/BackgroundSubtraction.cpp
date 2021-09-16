@@ -5,9 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "BackgroundSubtraction.h"
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 BackgroundSubtraction::BackgroundSubtraction()
     : m_subtractBackground(false), m_subtractionType(BackgroundSubtractionType::PerDetectorAverage),
@@ -32,6 +30,4 @@ bool operator==(BackgroundSubtraction const &lhs, BackgroundSubtraction const &r
   return lhs.subtractBackground() == rhs.subtractBackground() && lhs.subtractionType() == rhs.subtractionType() &&
          lhs.degreeOfPolynomial() == rhs.degreeOfPolynomial() && lhs.costFunction() == rhs.costFunction();
 }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

@@ -37,8 +37,7 @@
 #include <limits>
 #include <utility>
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 // QSettings entry names
 const char *EntryManualUCorrection = "ManualUCorrection";
 const char *EntryUCorrectionMin = "UCorrectionMin";
@@ -927,5 +926,4 @@ void InstrumentWidgetRenderTab::loadFromProject(const std::string &lines) {
 #endif
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

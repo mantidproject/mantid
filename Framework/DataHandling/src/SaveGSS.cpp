@@ -26,8 +26,7 @@
 
 #include <fstream>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using namespace Mantid::API;
 using namespace Mantid::HistogramData;
@@ -919,5 +918,4 @@ void SaveGSS::writeSLOGdata(const size_t ws_index, const int bank, const bool Mu
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

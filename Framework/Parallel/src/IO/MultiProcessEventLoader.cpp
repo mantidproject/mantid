@@ -20,9 +20,7 @@
 
 // namespace bp = boost::process;
 
-namespace Mantid {
-namespace Parallel {
-namespace IO {
+namespace Mantid::Parallel::IO {
 
 /// Constructor
 MultiProcessEventLoader::MultiProcessEventLoader(uint32_t numPixels, uint32_t numProcesses, uint32_t numThreads,
@@ -246,6 +244,4 @@ size_t MultiProcessEventLoader::estimateShmemAmount(size_t eventCount) const {
   return len;
 }
 
-} // namespace IO
-} // namespace Parallel
-} // namespace Mantid
+} // namespace Mantid::Parallel::IO

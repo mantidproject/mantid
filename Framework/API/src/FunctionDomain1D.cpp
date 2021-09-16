@@ -9,8 +9,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/FunctionDomain1D.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 /// The constructor
 FunctionDomain1D::FunctionDomain1D(const double *x, size_t n) : m_data(x), m_n(n), m_peakRadius(0) {}
@@ -173,5 +172,4 @@ FunctionDomain1DHistogram::FunctionDomain1DHistogram(std::vector<double>::const_
 /// Get the leftmost boundary
 double FunctionDomain1DHistogram::leftBoundary() const { return m_bins.front(); }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

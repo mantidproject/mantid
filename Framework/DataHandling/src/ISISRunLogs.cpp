@@ -10,8 +10,7 @@
 #include "MantidKernel/LogFilter.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 namespace {
 /// static logger
 Kernel::Logger g_log("ISISRunLogs");
@@ -145,5 +144,4 @@ std::vector<std::string> ISISRunLogs::getLogNamesExcludedFromFiltering(const API
   return retVal;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

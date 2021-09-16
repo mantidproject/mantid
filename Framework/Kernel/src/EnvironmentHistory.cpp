@@ -12,8 +12,7 @@
 #include "MantidKernel/MantidVersion.h"
 #include <ostream>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 /**
  * Returns the framework version
@@ -52,5 +51,4 @@ std::ostream &operator<<(std::ostream &os, const EnvironmentHistory &EH) {
   return os;
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

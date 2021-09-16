@@ -16,9 +16,7 @@
 #include <nexus/NeXusException.hpp>
 #include <utility>
 
-namespace Mantid {
-
-namespace API {
+namespace Mantid::API {
 using namespace Mantid::Kernel;
 using Geometry::IObject;
 using Geometry::IObject_sptr;
@@ -427,5 +425,4 @@ bool Sample::operator==(const Sample &other) const {
 }
 
 bool Sample::operator!=(const Sample &other) const { return !this->operator==(other); }
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

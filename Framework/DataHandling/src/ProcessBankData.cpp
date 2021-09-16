@@ -12,8 +12,7 @@
 
 using namespace Mantid::DataObjects;
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 ProcessBankData::ProcessBankData(DefaultEventLoader &m_loader, std::string entry_name, API::Progress *prog,
                                  std::shared_ptr<std::vector<uint32_t>> event_id,
@@ -284,5 +283,4 @@ size_t ProcessBankData::getWorkspaceIndexFromPixelID(const detid_t pixID) {
   }
   return pixelID_to_wi_vector[offset_pixID];
 }
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

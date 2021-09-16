@@ -14,9 +14,7 @@
 #include <numeric>
 #include <utility>
 
-namespace Mantid {
-
-namespace Kernel {
+namespace Mantid::Kernel {
 using tokenizer = Mantid::Kernel::StringTokenizer;
 using str_pair = std::pair<std::string, std::string>;
 
@@ -673,5 +671,4 @@ Material::ChemicalFormula Material::parseChemicalFormula(const std::string &chem
 
   return CF;
 }
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

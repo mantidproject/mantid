@@ -32,8 +32,7 @@
 #include <boost/algorithm/string.hpp>
 #include <fstream>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 namespace {
 double DegreesToRadians(double angle) { return angle * M_PI / 180; }
@@ -369,5 +368,4 @@ void LoadSampleEnvironment::exec() {
   g_log.debug(debugString);
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

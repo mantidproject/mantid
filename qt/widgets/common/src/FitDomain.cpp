@@ -49,8 +49,7 @@ bool isValueWithinConstraint(std::string const &constraint, double value) {
 
 } // namespace
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 FitDomain::FitDomain(std::string workspaceName, WorkspaceIndex workspaceIndex, double startX, double endX)
     : m_workspaceName(std::move(workspaceName)), m_workspaceIndex(workspaceIndex), m_startX(startX), m_endX(endX),
@@ -372,5 +371,4 @@ std::pair<double, double> FitDomain::xLimits(MatrixWorkspace_const_sptr const &w
   throw std::invalid_argument("The workspace '" + m_workspaceName + "' is not a matrix workspace.");
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

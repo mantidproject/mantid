@@ -21,9 +21,7 @@
 #include <Poco/Net/HTMLForm.h>
 #include <Poco/Net/HTTPResponse.h>
 
-namespace Mantid {
-namespace Catalog {
-namespace ONCat {
+namespace Mantid::Catalog::ONCat {
 
 using Poco::Net::HTTPResponse;
 
@@ -437,6 +435,4 @@ void ONCat::sendAPIRequest(const std::string &uri, const QueryParameters &queryP
   }
 }
 
-} // namespace ONCat
-} // namespace Catalog
-} // namespace Mantid
+} // namespace Mantid::Catalog::ONCat

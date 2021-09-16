@@ -23,8 +23,7 @@ namespace {
 Mantid::Kernel::Logger g_log("FunctionMultiDomain");
 }
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -398,5 +397,4 @@ void FunctionMultiDomainPresenter::showGlobals() {
   }
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

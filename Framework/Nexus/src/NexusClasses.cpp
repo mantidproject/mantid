@@ -11,8 +11,7 @@
 #include <memory>
 #include <utility>
 
-namespace Mantid {
-namespace NeXus {
+namespace Mantid::NeXus {
 
 std::vector<std::string> NXAttributes::names() const {
   std::vector<std::string> out;
@@ -638,5 +637,4 @@ Kernel::Property *NXLog::createTimeSeries(const std::string &start_time, const s
   return nullptr;
 }
 
-} // namespace NeXus
-} // namespace Mantid
+} // namespace Mantid::NeXus

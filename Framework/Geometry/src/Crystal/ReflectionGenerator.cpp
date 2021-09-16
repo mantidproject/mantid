@@ -11,8 +11,7 @@
 #include "MantidGeometry/Crystal/ReflectionGenerator.h"
 #include "MantidGeometry/Crystal/StructureFactorCalculatorSummation.h"
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 using namespace Kernel;
 
@@ -134,5 +133,4 @@ std::vector<double> ReflectionGenerator::getFsSquared(const std::vector<V3D> &hk
   return m_sfCalculator->getFsSquared(hkls);
 }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

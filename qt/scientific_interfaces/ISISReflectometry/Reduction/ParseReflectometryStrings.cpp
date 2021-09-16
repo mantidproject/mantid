@@ -11,9 +11,7 @@
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include <boost/algorithm/string.hpp>
 #include <set>
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 namespace { // unnamed
 boost::optional<std::vector<std::string>> parseRunNumbersOrWhitespace(std::string const &runNumberString) {
@@ -180,6 +178,4 @@ boost::variant<TransmissionRunPair, std::vector<int>> parseTransmissionRuns(std:
   }
 }
 
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

@@ -35,8 +35,7 @@ private:
 };
 } // namespace
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 //------------------------------------------------------------------------------
 // public members
@@ -188,5 +187,4 @@ const std::vector<double> &NumericAxis::getValues() const { return m_values; }
  */
 NumericAxis::NumericAxis() {}
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

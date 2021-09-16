@@ -30,9 +30,7 @@ using Mantid::Geometry::IComponent_const_sptr;
 using Mantid::Geometry::IObjComponent_const_sptr;
 using Mantid::Geometry::IPeak;
 
-namespace Mantid {
-
-namespace Crystal {
+namespace Mantid::Crystal {
 namespace {
 /// static logger
 Kernel::Logger g_log("PeakHKLErrors");
@@ -630,5 +628,4 @@ Peak PeakHKLErrors::createNewPeak(const DataObjects::Peak &peak_old, const Geome
   //!!!peak.setDetectorID(ID);
   return peak;
 }
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

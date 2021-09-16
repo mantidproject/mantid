@@ -11,8 +11,7 @@
 #include "MantidKernel/V3D.h"
 #include "MantidSINQ/PoldiUtilities/PoldiConversions.h"
 
-namespace Mantid {
-namespace Poldi {
+namespace Mantid::Poldi {
 
 using namespace Geometry;
 
@@ -96,5 +95,4 @@ void PoldiHeliumDetector::initializeCalibratedParameters(Kernel::V2D position, d
   m_phiCenter = phi(m_calibratedCenterTwoTheta);
   m_phiStart = m_phiCenter - m_totalOpeningAngle / 2.0;
 }
-} // namespace Poldi
-} // namespace Mantid
+} // namespace Mantid::Poldi

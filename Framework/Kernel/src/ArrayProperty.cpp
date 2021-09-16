@@ -10,8 +10,7 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/PropertyWithValue.tcc"
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 /** Constructor
  *  @param name ::      The name to assign to the property
  *  @param vec ::       The initial vector of values to assign to the
@@ -126,5 +125,4 @@ template class DLLExport ArrayProperty<std::vector<unsigned long>>;
 
 template <> MANTID_KERNEL_DLL void ArrayProperty<int>::visualStudioC4661Workaround() {}
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

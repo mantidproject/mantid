@@ -21,8 +21,7 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitConversion.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using Mantid::API::WorkspaceProperty;
 using Mantid::Kernel::Direction;
@@ -460,5 +459,4 @@ std::vector<size_t> CorrectTOFAxis::referenceWorkspaceIndices() const {
   return workspaceIndices;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

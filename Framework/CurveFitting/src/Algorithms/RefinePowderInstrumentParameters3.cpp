@@ -22,9 +22,7 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using namespace std;
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Algorithms {
+namespace Mantid::CurveFitting::Algorithms {
 
 DECLARE_ALGORITHM(RefinePowderInstrumentParameters3)
 
@@ -1314,6 +1312,4 @@ void restoreFunctionParameterValue(map<string, pair<double, double>> parvaluemap
   }
 }
 
-} // namespace Algorithms
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Algorithms

@@ -15,8 +15,7 @@
 #include <utility>
 // clang-format on
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 namespace {
 /// static logger object
@@ -70,5 +69,4 @@ void FileBackedExperimentInfo::populateFromFile() const {
   }
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

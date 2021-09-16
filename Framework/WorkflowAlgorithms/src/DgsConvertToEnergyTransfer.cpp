@@ -25,8 +25,7 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace WorkflowAlgorithmHelpers;
 
-namespace Mantid {
-namespace WorkflowAlgorithms {
+namespace Mantid::WorkflowAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(DgsConvertToEnergyTransfer)
@@ -537,5 +536,4 @@ void DgsConvertToEnergyTransfer::exec() {
   this->setProperty("OutputWorkspace", outputWS);
 }
 
-} // namespace WorkflowAlgorithms
-} // namespace Mantid
+} // namespace Mantid::WorkflowAlgorithms

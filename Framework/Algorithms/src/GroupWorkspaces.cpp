@@ -13,8 +13,7 @@
 
 #include "Poco/Glob.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 DECLARE_ALGORITHM(GroupWorkspaces)
 
@@ -159,5 +158,4 @@ GroupWorkspaces::getParallelExecutionMode(const std::map<std::string, Parallel::
   const auto ws = AnalysisDataService::Instance().retrieve(names.front());
   return Parallel::getCorrespondingExecutionMode(ws->storageMode());
 }
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

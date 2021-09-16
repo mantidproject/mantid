@@ -9,9 +9,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/variant.hpp>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 Row::Row( // cppcheck-suppress passedByValue
     std::vector<std::string> runNumbers, double theta,
@@ -96,6 +94,4 @@ bool operator==(Row const &lhs, Row const &rhs) {
          lhs.transmissionWorkspaceNames() == rhs.transmissionWorkspaceNames() &&
          lhs.reducedWorkspaceNames() == rhs.reducedWorkspaceNames() && lhs.reductionOptions() == rhs.reductionOptions();
 }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

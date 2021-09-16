@@ -11,8 +11,7 @@
 
 using namespace Mantid::Kernel;
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 /// Default constructor
 CompositeValidator::CompositeValidator(const CompositeRelation &relation)
     : IValidator(), m_children(), m_relation(relation) {}
@@ -138,5 +137,4 @@ std::string CompositeValidator::buildErrorMessage(const bool valid, const std::s
   }
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

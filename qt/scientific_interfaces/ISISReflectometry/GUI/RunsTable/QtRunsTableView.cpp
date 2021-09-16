@@ -13,9 +13,7 @@
 #include <QString>
 #include <utility>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 QtRunsTableView::QtRunsTableView(std::vector<std::string> instruments)
     : m_jobs(), m_instruments(std::move(instruments)) {
@@ -247,6 +245,4 @@ QtRunsTableView *RunsTableViewFactory::operator()() const { return new QtRunsTab
 int RunsTableViewFactory::indexOfElseFirst(std::string const &instrument) const {
   return indexOf(m_instruments, [&instrument](std::string const &inst) { return instrument == inst; }).get_value_or(0);
 }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

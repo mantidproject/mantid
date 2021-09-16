@@ -8,12 +8,7 @@
 #include <QtGlobal>
 #include <sip.h>
 
-namespace MantidQt {
-namespace Widgets {
-namespace Common {
-namespace Python {
-
-namespace Detail {
+namespace MantidQt::Widgets::Common::Python::Detail {
 /**
  * @return A pointer to the C++ sip api object
  */
@@ -39,9 +34,4 @@ const sipAPIDef *sipAPI() {
   assert(sip_API);
   return sip_API;
 }
-} // namespace Detail
-
-} // namespace Python
-} // namespace Common
-} // namespace Widgets
-} // namespace MantidQt
+} // namespace MantidQt::Widgets::Common::Python::Detail

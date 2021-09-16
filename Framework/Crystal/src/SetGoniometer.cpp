@@ -19,8 +19,7 @@
 using Mantid::Geometry::Goniometer;
 using namespace Mantid::Geometry;
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SetGoniometer)
@@ -155,5 +154,4 @@ void SetGoniometer::exec() {
   }
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

@@ -30,8 +30,7 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::HistogramData;
 using std::size_t;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 /** Initialisation method.
  *  Defines input and output workspaces
  *
@@ -1001,5 +1000,4 @@ BinaryOperation::getParallelExecutionMode(const std::map<std::string, Parallel::
   return Parallel::ExecutionMode::Invalid;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

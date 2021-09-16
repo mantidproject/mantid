@@ -12,9 +12,7 @@
 #include <iostream>
 #include <numeric>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 namespace {
 Group &findOrMakeGroupWithName(ReductionJobs &jobs, std::string const &groupName) {
@@ -288,6 +286,4 @@ Item const &ReductionJobs::getItemFromPath(const MantidWidgets::Batch::RowLocati
 bool operator!=(ReductionJobs const &lhs, ReductionJobs const &rhs) { return !(lhs == rhs); }
 
 bool operator==(ReductionJobs const &lhs, ReductionJobs const &rhs) { return lhs.groups() == rhs.groups(); }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

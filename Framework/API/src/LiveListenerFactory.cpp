@@ -12,8 +12,7 @@
 
 using std::shared_ptr;
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 namespace {
 /// static logger
 Kernel::Logger g_log("LiveListenerFactory");
@@ -121,5 +120,4 @@ ILiveListener *LiveListenerFactoryImpl::createUnwrapped(const std::string &class
   throw Kernel::Exception::NotImplementedError("Don't use this method - use the safe one!!!");
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

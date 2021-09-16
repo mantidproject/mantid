@@ -47,8 +47,7 @@ std::string validateFormula(const std::string &parallax, const std::string &dire
 }
 } // namespace
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ParallaxCorrection)
@@ -174,5 +173,4 @@ void ParallaxCorrection::exec() {
   setProperty("OutputWorkspace", outputWorkspace);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

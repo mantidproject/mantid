@@ -38,9 +38,7 @@ using namespace HistogramData;
 
 using namespace std;
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
 
@@ -945,6 +943,4 @@ size_t RemovePeaks::excludePeaks(vector<double> v_inX, vector<bool> &v_useX, vec
   return std::count(v_useX.cbegin(), v_useX.cend(), true);
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

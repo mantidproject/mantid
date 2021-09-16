@@ -38,8 +38,7 @@ mu::Parser makeParser(double &y, double &e, double &x, double &dx, double &s, co
 }
 } // namespace
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace API;
 using namespace Kernel;
@@ -120,5 +119,4 @@ void MaskBinsIf::exec() {
   setProperty("OutputWorkspace", outputWorkspace);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

@@ -8,8 +8,7 @@
 
 #include <algorithm>
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 Parallel::ExecutionMode
 ParallelAlgorithm::getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const {
@@ -28,5 +27,4 @@ ParallelAlgorithm::getParallelExecutionMode(const std::map<std::string, Parallel
   return ExecutionMode::Invalid;
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

@@ -8,8 +8,7 @@
 
 #include "MantidGeometry/MDGeometry/GeneralFrame.h"
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 const std::string GeneralFrame::GeneralFrameDistance = "Distance";
 const std::string GeneralFrame::GeneralFrameTOF = "Time of Flight";
@@ -55,5 +54,4 @@ bool GeneralFrame::isSameType(const MDFrame &frame) const {
   return isSameType;
 }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

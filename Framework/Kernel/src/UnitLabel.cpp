@@ -10,8 +10,7 @@
 #include <locale>
 #include <utility>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 /**
  * @param ascii A plain-text label containing only ascii characters
@@ -120,5 +119,4 @@ const UnitLabel::AsciiString &UnitLabel::latex() const { return m_latex; }
  */
 UnitLabel::operator std::string() const { return this->ascii(); }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

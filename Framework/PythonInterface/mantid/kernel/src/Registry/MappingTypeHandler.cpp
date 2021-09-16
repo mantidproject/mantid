@@ -22,8 +22,7 @@ namespace Mantid {
 using Kernel::PropertyManager;
 using Kernel::PropertyManager_sptr;
 
-namespace PythonInterface {
-namespace Registry {
+namespace PythonInterface::Registry {
 
 /**
  * Sets the named property in the PropertyManager by extracting a new
@@ -60,6 +59,5 @@ std::unique_ptr<Kernel::Property> MappingTypeHandler::create(const std::string &
       std::make_unique<Kernel::PropertyManagerProperty>(name, createPropertyManager(dict(defaultValue)), direction);
   return valueProp;
 }
-} // namespace Registry
-} // namespace PythonInterface
+} // namespace PythonInterface::Registry
 } // namespace Mantid

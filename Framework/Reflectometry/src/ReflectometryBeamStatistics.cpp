@@ -36,8 +36,7 @@ const std::string SECOND_SLIT_SIZE_LOG{"SecondSlitSizeSampleLog"};
 constexpr double FWHM_GAUSSIAN_EQUIVALENT{0.68};
 } // namespace
 
-namespace Mantid {
-namespace Reflectometry {
+namespace Mantid::Reflectometry {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ReflectometryBeamStatistics)
@@ -401,5 +400,4 @@ void ReflectometryBeamStatistics::statisticsToLogs(API::MatrixWorkspace &ws, con
   run.addProperty(LogEntry::SECOND_SLIT_ANGULAR_SPREAD, statistics.secondSlitAngularSpread, radians, overwrite);
 }
 
-} // namespace Reflectometry
-} // namespace Mantid
+} // namespace Mantid::Reflectometry

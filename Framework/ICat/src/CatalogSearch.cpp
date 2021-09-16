@@ -23,8 +23,7 @@ GNU_DIAG_ON("literal-suffix")
 #include <boost/algorithm/string/regex.hpp>
 #include <limits>
 
-namespace Mantid {
-namespace ICat {
+namespace Mantid::ICat {
 DECLARE_ALGORITHM(CatalogSearch)
 
 /// Initialisation method.
@@ -167,5 +166,4 @@ void CatalogSearch::setRunRanges(std::string &runRange, CatalogSearchParam &para
   params.setRunStart(startRange);
   params.setRunEnd(endRange);
 }
-} // namespace ICat
-} // namespace Mantid
+} // namespace Mantid::ICat

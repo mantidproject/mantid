@@ -30,8 +30,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(GetEi2)
@@ -724,5 +723,4 @@ void GetEi2::storeEi(const double ei) const {
   Property *incident_energy = new PropertyWithValue<double>("Ei", ei, Direction::Input);
   m_input_ws->mutableRun().addProperty(incident_energy, true);
 }
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

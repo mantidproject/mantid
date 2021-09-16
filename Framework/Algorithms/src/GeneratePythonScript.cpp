@@ -24,8 +24,7 @@ namespace {
 Mantid::Kernel::Logger g_log("GeneratePythonScript");
 }
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(GeneratePythonScript)
@@ -137,5 +136,4 @@ void GeneratePythonScript::exec() {
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

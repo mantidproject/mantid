@@ -13,8 +13,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ElasticWindow)
@@ -186,5 +185,4 @@ void ElasticWindow::exec() {
   setProperty("OutputInQSquared", outputQSquared);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

@@ -28,9 +28,7 @@ namespace {
 Mantid::Kernel::Logger g_log("InelasticDiffDiffRotDiscreteCircle");
 }
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 DECLARE_FUNCTION(InelasticDiffRotDiscreteCircle)
 
@@ -167,6 +165,4 @@ void InelasticDiffRotDiscreteCircle::setWorkspace(std::shared_ptr<const API::Wor
   }
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

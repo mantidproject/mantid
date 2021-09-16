@@ -27,8 +27,7 @@
 
 #include <Poco/Path.h>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 namespace {
 static constexpr size_t N_MONITORS = 2;
@@ -943,5 +942,4 @@ std::vector<double> LoadILLSANS::getVariableTimeBinning(const NXEntry &entry, co
   return binEdges;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

@@ -17,8 +17,7 @@
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
-namespace Mantid {
-namespace Reflectometry {
+namespace Mantid::Reflectometry {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ReflectometryBackgroundSubtraction)
@@ -317,5 +316,4 @@ std::map<std::string, std::string> ReflectometryBackgroundSubtraction::validateI
   }
   return errors;
 }
-} // namespace Reflectometry
-} // namespace Mantid
+} // namespace Mantid::Reflectometry

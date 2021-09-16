@@ -14,8 +14,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Unit.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Kernel;
 using namespace API;
@@ -201,5 +200,4 @@ void WorkspaceJoiners::getMinMax(const MatrixWorkspace &ws, specnum_t &min, spec
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

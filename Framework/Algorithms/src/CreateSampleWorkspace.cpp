@@ -31,8 +31,7 @@
 #include <numeric>
 #include <stdexcept>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
@@ -605,5 +604,4 @@ IObject_sptr CreateSampleWorkspace::createSphere(double radius, const V3D &centr
   return shapeMaker.createShape(xml.str());
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

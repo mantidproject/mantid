@@ -38,8 +38,7 @@
 #include <string>
 #include <vector>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadNXSPE)
 
@@ -408,5 +407,4 @@ std::shared_ptr<Geometry::CSGObject> LoadNXSPE::createCuboid(double dx, double d
   return retVal;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

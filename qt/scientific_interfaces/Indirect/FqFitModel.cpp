@@ -20,9 +20,7 @@ Mantid::Kernel::Logger logger("FqFitModel");
 
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 FqFitModel::FqFitModel() { m_fitType = FQFIT_STRING; }
 
@@ -30,6 +28,4 @@ std::string FqFitModel::getResultXAxisUnit() const { return ""; }
 
 std::string FqFitModel::getResultLogName() const { return "SourceName"; }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

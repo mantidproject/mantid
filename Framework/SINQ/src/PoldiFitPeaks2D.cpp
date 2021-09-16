@@ -33,8 +33,7 @@
 
 #include "boost/make_shared.hpp"
 
-namespace Mantid {
-namespace Poldi {
+namespace Mantid::Poldi {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(PoldiFitPeaks2D)
 
@@ -1222,5 +1221,4 @@ void PoldiFitPeaks2D::exec() {
   }
 }
 
-} // namespace Poldi
-} // namespace Mantid
+} // namespace Mantid::Poldi

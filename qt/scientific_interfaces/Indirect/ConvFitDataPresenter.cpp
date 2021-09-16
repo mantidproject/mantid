@@ -9,9 +9,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 ConvFitDataPresenter::ConvFitDataPresenter(IIndirectFitDataModel *model, IIndirectFitDataView *view)
     : IndirectFitDataPresenter(model, view) {}
@@ -42,6 +40,4 @@ void ConvFitDataPresenter::addTableEntry(FitDomainIndex row) {
   m_view->addTableEntry(row.value, newRow);
 }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

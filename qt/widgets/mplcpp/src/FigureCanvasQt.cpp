@@ -19,9 +19,7 @@ using Mantid::PythonInterface::GlobalInterpreterLock;
 using Mantid::PythonInterface::NDArray;
 using namespace MantidQt::Widgets::Common;
 
-namespace MantidQt {
-namespace Widgets {
-namespace MplCpp {
+namespace MantidQt::Widgets::MplCpp {
 namespace {
 
 const char *DEFAULT_FACECOLOR = "w";
@@ -147,6 +145,4 @@ QPointF FigureCanvasQt::toDataCoords(QPoint pos) const {
   return dataCoords;
 }
 
-} // namespace MplCpp
-} // namespace Widgets
-} // namespace MantidQt
+} // namespace MantidQt::Widgets::MplCpp

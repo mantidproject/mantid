@@ -16,9 +16,7 @@
 
 #include <json/json.h>
 
-namespace Mantid {
-namespace Catalog {
-namespace OAuth {
+namespace Mantid::Catalog::OAuth {
 
 using Mantid::Catalog::Exception::TokenParsingError;
 
@@ -143,6 +141,4 @@ boost::optional<OAuthToken> ConfigServiceTokenStore::getToken() {
   return boost::none;
 }
 
-} // namespace OAuth
-} // namespace Catalog
-} // namespace Mantid
+} // namespace Mantid::Catalog::OAuth

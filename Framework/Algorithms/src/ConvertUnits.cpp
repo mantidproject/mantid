@@ -24,8 +24,7 @@
 
 #include <numeric>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register with the algorithm factory
 DECLARE_ALGORITHM(ConvertUnits)
@@ -687,5 +686,4 @@ void ConvertUnits::putBackBinWidth(const API::MatrixWorkspace_sptr &outputWS) {
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

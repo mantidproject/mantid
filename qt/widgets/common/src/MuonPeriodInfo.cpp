@@ -13,8 +13,7 @@
 #include <QString>
 #include <bitset>
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 namespace {
 const std::string PERIOD_INFO_NOT_FOUND = "Not found";
@@ -251,5 +250,4 @@ QTableWidgetItem *MuonPeriodInfo::createNewItem(const std::string &value) const 
   return item;
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

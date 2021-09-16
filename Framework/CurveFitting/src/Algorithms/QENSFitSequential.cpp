@@ -291,9 +291,7 @@ WorkspaceGroup_sptr runParameterProcessingWithGrouping(Algorithm &processingAlgo
 
 } // namespace
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Algorithms {
+namespace Mantid::CurveFitting::Algorithms {
 
 using namespace API;
 using namespace Kernel;
@@ -844,6 +842,4 @@ IAlgorithm_sptr QENSFitSequential::extractMembersAlgorithm(const WorkspaceGroup_
 
 std::string QENSFitSequential::getTemporaryName() const { return "__" + name() + "_ws"; }
 
-} // namespace Algorithms
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Algorithms

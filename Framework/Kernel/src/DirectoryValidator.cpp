@@ -11,8 +11,7 @@
 #include <Poco/Path.h>
 #include <memory>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 /** Constructor
  *  @param testDirectoryExists :: Flag indicating whether to test for existence
@@ -59,5 +58,4 @@ std::string DirectoryValidator::checkValidity(const std::string &value) const {
   return "";
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

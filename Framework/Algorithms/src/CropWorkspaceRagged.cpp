@@ -22,8 +22,7 @@ std::vector<double> getSubVector(Mantid::MantidVec &data, const int64_t &lowerIn
 
 } // namespace
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Kernel;
 using namespace API;
@@ -158,5 +157,4 @@ void CropWorkspaceRagged::exec() {
   setProperty("OutputWorkspace", outputWS);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

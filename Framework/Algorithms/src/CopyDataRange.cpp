@@ -43,8 +43,7 @@ void copyDataRange(const MatrixWorkspace_const_sptr &inputWorkspace, const Matri
 
 } // namespace
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 DECLARE_ALGORITHM(CopyDataRange)
 
@@ -163,5 +162,4 @@ void CopyDataRange::exec() {
   setProperty("OutputWorkspace", outputWorkspace);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

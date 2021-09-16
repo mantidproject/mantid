@@ -23,8 +23,7 @@ using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 
 //----------------------------------------------------------------------------------------------
 /** Default constructor */
@@ -256,5 +255,4 @@ LeanElasticPeak &LeanElasticPeak::operator=(const LeanElasticPeak &other) {
 
 Mantid::Kernel::Logger LeanElasticPeak::g_log("PeakLogger");
 
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects

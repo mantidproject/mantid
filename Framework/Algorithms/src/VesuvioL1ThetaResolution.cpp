@@ -26,8 +26,7 @@
 #include <fstream>
 #include <random>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -421,5 +420,4 @@ MatrixWorkspace_sptr VesuvioL1ThetaResolution::processDistribution(MatrixWorkspa
   return ws;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

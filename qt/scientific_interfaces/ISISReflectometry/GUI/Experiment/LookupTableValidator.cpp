@@ -9,9 +9,7 @@
 
 #include <cmath>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 auto LookupTableValidator::operator()(ContentType const &lookupTableContent, double thetaTolerance) const
     -> ResultType {
@@ -103,6 +101,4 @@ void LookupTableValidator::appendThetaErrorForAllRows(std::vector<InvalidDefault
   for (auto row = 0u; row < rowCount; ++row)
     validationErrors.emplace_back(row, std::vector<int>({0}));
 }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

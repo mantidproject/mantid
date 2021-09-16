@@ -21,8 +21,7 @@
 
 #include <boost/lexical_cast.hpp>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(InterpolatingRebin)
@@ -404,5 +403,4 @@ double InterpolatingRebin::estimateError(const Points &xsOld, const HistogramE &
   return (weight1 * error1 + weight2 * error2) / (weight1 + weight2);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

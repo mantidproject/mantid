@@ -38,8 +38,7 @@ using namespace Poco::XML;
 using Geometry::Instrument_const_sptr;
 using Geometry::Instrument_sptr;
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 DECLARE_ALGORITHM(LoadFullprofResolution)
 
@@ -969,5 +968,4 @@ void LoadFullprofResolution::getTableRowNumbers(const API::ITableWorkspace_sptr 
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

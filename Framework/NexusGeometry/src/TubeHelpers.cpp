@@ -11,9 +11,7 @@
 #include <tuple>
 #include <vector>
 
-namespace Mantid {
-namespace NexusGeometry {
-namespace TubeHelpers {
+namespace Mantid::NexusGeometry::TubeHelpers {
 
 /**
  * Discover tubes based on pixel positions. Sort detector ids on the basis of
@@ -75,6 +73,4 @@ std::vector<Mantid::detid_t> notInTubes(const std::vector<detail::TubeBuilder> &
   std::set_difference(detIDs.begin(), detIDs.end(), used.begin(), used.end(), std::inserter(diff, diff.begin()));
   return diff;
 }
-} // namespace TubeHelpers
-} // namespace NexusGeometry
-} // namespace Mantid
+} // namespace Mantid::NexusGeometry::TubeHelpers

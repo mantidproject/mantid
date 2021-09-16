@@ -20,10 +20,7 @@
 
 using boost::python::extract;
 
-namespace Mantid {
-namespace PythonInterface {
-
-namespace Converters {
+namespace Mantid::PythonInterface::Converters {
 /**
  * Construct the converter object with the given Python object
  * @param p :: A boost::python object is either a wrapped Kernel::Matrix
@@ -77,6 +74,4 @@ Kernel::Matrix<double> PyObjectToMatrix::operator()() {
   }
   return matrix;
 }
-} // namespace Converters
-} // namespace PythonInterface
-} // namespace Mantid
+} // namespace Mantid::PythonInterface::Converters

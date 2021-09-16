@@ -53,12 +53,10 @@ QPushButton *createHomeButton() {
  * @param y A reference to the Y data vector
  * @return True if a warning was produced, false otherwise
  */
-bool warnDataInvalid(const std::vector<double> &x,
-                     const std::vector<double> &y) {
+bool warnDataInvalid(const std::vector<double> &x, const std::vector<double> &y) {
   if (x.size() != y.size()) {
-    g_log.warning(std::string(
-        "setData(): X/Y size mismatch! X=" + std::to_string(x.size()) +
-        ", Y=" + std::to_string(y.size())));
+    g_log.warning(
+        std::string("setData(): X/Y size mismatch! X=" + std::to_string(x.size()) + ", Y=" + std::to_string(y.size())));
     return true;
   }
   if (x.empty()) {
@@ -70,19 +68,16 @@ bool warnDataInvalid(const std::vector<double> &x,
 
 } // namespace
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 /**
  * Construct a blank miniplot with a single subplot
  * @param parent A pointer to its parent widget
  */
 MiniPlotMpl::MiniPlotMpl(QWidget *parent)
-    : QWidget(parent), m_canvas(new FigureCanvasQt(111)),
-      m_homeBtn(createHomeButton()), m_lines(), m_peakLabels(),
-      m_colorCycler(cycler("color", STORED_LINE_COLOR_CYCLE)), m_xunit(),
-      m_activeCurveLabel(), m_storedCurveLabels(), m_zoomTool(m_canvas),
-      m_mousePressPt() {
+    : QWidget(parent), m_canvas(new FigureCanvasQt(111)), m_homeBtn(createHomeButton()), m_lines(), m_peakLabels(),
+      m_colorCycler(cycler("color", STORED_LINE_COLOR_CYCLE)), m_xunit(), m_activeCurveLabel(), m_storedCurveLabels(),
+      m_zoomTool(m_canvas), m_mousePressPt() {
   auto plotLayout = new QGridLayout(this);
   plotLayout->setContentsMargins(0, 0, 0, 0);
   plotLayout->setSpacing(0);
@@ -107,16 +102,14 @@ MiniPlotMpl::MiniPlotMpl(QWidget *parent)
  * @param xunit The X unit a label
  * @param curveLabel A label for the curve data
  */
-void MiniPlotMpl::setData(std::vector<double> x, std::vector<double> y,
-                          QString xunit, QString curveLabel) {
+void MiniPlotMpl::setData(std::vector<double> x, std::vector<double> y, QString xunit, QString curveLabel) {
   if (warnDataInvalid(x, y))
     return;
 
   clearCurve();
   auto axes = m_canvas->gca();
   // plot automatically calls "scalex=True, scaley=True"
-  m_lines.emplace_back(
-      axes.plot(std::move(x), std::move(y), ACTIVE_CURVE_FORMAT));
+  m_lines.emplace_back(axes.plot(std::move(x), std::move(y), ACTIVE_CURVE_FORMAT));
   m_activeCurveLabel = std::move(curveLabel);
   setXLabel(std::move(xunit));
   // If the current axis limits can fit the data then matplotlib
@@ -159,8 +152,7 @@ void MiniPlotMpl::addPeakLabel(const PeakMarker2D *peakMarker) {
   // arbitrarily place the label at 85% of the y-axis height
   const double peakY = 0.85 * ymax;
   const QString label(peakMarker->getLabel());
-  m_peakLabels.emplace_back(
-      m_canvas->gca().text(peakX, peakY, label, "center"));
+  m_peakLabels.emplace_back(m_canvas->gca().text(peakX, peakY, label, "center"));
 }
 
 /**
@@ -227,9 +219,7 @@ QColor MiniPlotMpl::getCurveColor(const QString &label) const {
 /**
  * @return True if the Y scale is logarithmic
  */
-bool MiniPlotMpl::isYLogScale() const {
-  return m_canvas->gca().getYScale() == LOG_SCALE_NAME;
-}
+bool MiniPlotMpl::isYLogScale() const { return m_canvas->gca().getYScale() == LOG_SCALE_NAME; }
 
 /**
  * Redraws the canvas
@@ -256,9 +246,7 @@ void MiniPlotMpl::setYLogScale() { m_canvas->gca().setYScale(LOG_SCALE_NAME); }
 /**
  * Set the Y scale to linear
  */
-void MiniPlotMpl::setYLinearScale() {
-  m_canvas->gca().setYScale(LIN_SCALE_NAME);
-}
+void MiniPlotMpl::setYLinearScale() { m_canvas->gca().setYScale(LIN_SCALE_NAME); }
 
 /**
  * Clear all artists from the canvas
@@ -345,5 +333,4 @@ bool MiniPlotMpl::handleMouseReleaseEvent(QMouseEvent *evt) {
  */
 void MiniPlotMpl::zoomOutOnPlot() { m_zoomTool.zoomOut(); }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

@@ -32,8 +32,7 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::HistogramData;
 using Mantid::DataObjects::OffsetsWorkspace;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(AlignDetectors)
 
@@ -321,5 +320,4 @@ AlignDetectors::getParallelExecutionMode(const std::map<std::string, Parallel::S
   return getCorrespondingExecutionMode(inputMode);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

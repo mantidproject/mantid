@@ -7,9 +7,8 @@
 #include "Batch.h"
 
 #include <utility>
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 Batch::Batch(Experiment const &experiment, Instrument const &instrument, RunsTable &runsTable, Slicing const &slicing)
     : m_experiment(experiment), m_instrument(instrument), m_runsTable(runsTable), m_slicing(slicing) {}
@@ -41,6 +40,4 @@ void Batch::resetSkippedItems() { m_runsTable.resetSkippedItems(); }
 boost::optional<Item &> Batch::getItemWithOutputWorkspaceOrNone(std::string const &wsName) {
   return m_runsTable.getItemWithOutputWorkspaceOrNone(wsName);
 }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

@@ -19,8 +19,7 @@
 
 #include <boost/algorithm/string.hpp>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(SumNeighbours)
@@ -103,5 +102,4 @@ void SumNeighbours::exec() {
   this->setProperty("OutputWorkspace", outWS);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

@@ -33,8 +33,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
-namespace Mantid {
-namespace WorkflowAlgorithms {
+namespace Mantid::WorkflowAlgorithms {
 using namespace Kernel;
 using API::FileProperty;
 using API::MatrixWorkspace;
@@ -1228,5 +1227,4 @@ void AlignAndFocusPowder::doSortEvents(const Mantid::API::Workspace_sptr &ws) {
   alg->executeAsChildAlg();
 }
 
-} // namespace WorkflowAlgorithms
-} // namespace Mantid
+} // namespace Mantid::WorkflowAlgorithms

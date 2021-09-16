@@ -53,8 +53,7 @@ std::unique_ptr<RdKafka::Conf> createGlobalConfiguration(const std::string &brok
 }
 } // namespace
 
-namespace Mantid {
-namespace LiveData {
+namespace Mantid::LiveData {
 
 // -----------------------------------------------------------------------------
 // Public members
@@ -471,5 +470,4 @@ std::unordered_map<std::string, std::vector<int64_t>> KafkaTopicSubscriber::getO
 
   return partitionOffsetMap;
 }
-} // namespace LiveData
-} // namespace Mantid
+} // namespace Mantid::LiveData

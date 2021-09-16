@@ -40,9 +40,7 @@ double getDiff(const Mantid::API::IFunction &fun, size_t nParams, const Mantid::
 
 } // namespace
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Algorithms {
+namespace Mantid::CurveFitting::Algorithms {
 
 DECLARE_ALGORITHM(ProfileChiSquared1D)
 
@@ -462,6 +460,4 @@ std::tuple<double, double> ProfileChiSquared1D::getChiSquaredRoots(const Functio
   return {roots[0], roots[1]};
 }
 
-} // namespace Algorithms
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Algorithms

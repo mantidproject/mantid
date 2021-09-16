@@ -15,9 +15,7 @@
 #include <boost/lexical_cast.hpp>
 #include <sstream>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Constraints {
+namespace Mantid::CurveFitting::Constraints {
 namespace {
 /// static logger
 Kernel::Logger g_log("BoundaryConstraint");
@@ -253,6 +251,4 @@ std::string BoundaryConstraint::asString() const {
   return ostr.str();
 }
 
-} // namespace Constraints
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Constraints

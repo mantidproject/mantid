@@ -10,8 +10,7 @@
 #include <memory>
 #include <utility>
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 /// Constructor
 AlgorithmHasProperty::AlgorithmHasProperty(std::string propName) : m_propName(std::move(propName)) {}
@@ -46,5 +45,4 @@ std::string AlgorithmHasProperty::checkValidity(const std::shared_ptr<IAlgorithm
   return message;
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

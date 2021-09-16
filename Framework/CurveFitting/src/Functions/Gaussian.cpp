@@ -13,9 +13,7 @@
 #include <cmath>
 #include <numeric>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
 using namespace Kernel;
@@ -179,6 +177,4 @@ void Gaussian::histogramDerivative1D(Jacobian *jacobian, double left, const doub
   }
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

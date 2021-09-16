@@ -11,8 +11,7 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
 #include <cmath>
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(Logarithm)
 
@@ -51,5 +50,4 @@ void Logarithm::performUnaryOperation(const double XIn, const double YIn, const 
   }
 }
 
-} // End Namespace Algorithms
-} // End Namespace Mantid
+} // namespace Mantid::Algorithms

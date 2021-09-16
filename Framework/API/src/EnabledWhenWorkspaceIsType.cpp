@@ -9,7 +9,3 @@
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-
-namespace Mantid {
-namespace API {} // namespace API
-} // namespace Mantid

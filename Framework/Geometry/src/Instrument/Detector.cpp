@@ -13,8 +13,7 @@
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/Logger.h"
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 namespace {
 // static logger object
 Kernel::Logger g_log("Detector");
@@ -147,5 +146,4 @@ bool Detector::hasDetectorInfo() const {
   return m_map->hasDetectorInfo(instrument);
 }
 
-} // Namespace Geometry
-} // Namespace Mantid
+} // namespace Mantid::Geometry

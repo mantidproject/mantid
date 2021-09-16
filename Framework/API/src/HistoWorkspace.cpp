@@ -5,7 +5,3 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/HistoWorkspace.h"
-
-namespace Mantid {
-namespace API {}
-} // namespace Mantid

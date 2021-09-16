@@ -12,8 +12,7 @@
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/System.h"
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 using std::set;
 using std::size_t;
 
@@ -275,13 +274,11 @@ bool MaskWorkspace::hasInstrument() const {
   return hasinst;
 }
 
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects
 
 ///\cond TEMPLATE
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 template <>
 DLLExport Mantid::DataObjects::MaskWorkspace_sptr
@@ -309,7 +306,6 @@ IPropertyManager::getValue<Mantid::DataObjects::MaskWorkspace_const_sptr>(const 
   }
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel
 
 ///\endcond TEMPLATE

@@ -20,8 +20,7 @@
 #include <cmath>
 #include <numeric>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(GetEi)
@@ -469,5 +468,4 @@ void GetEi::advanceProgress(double toAdd) {
   interruption_point();
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

@@ -15,8 +15,7 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using VectorDoubleProperty = Kernel::PropertyWithValue<std::vector<double>>;
@@ -337,5 +336,4 @@ void RecalculateTrajectoriesExtents::exec() {
   setProperty("OutputWorkspace", outWS);
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

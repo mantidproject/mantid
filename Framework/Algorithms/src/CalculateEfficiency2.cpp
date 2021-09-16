@@ -13,8 +13,7 @@
 #include <limits>
 #include <vector>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(CalculateEfficiency2)
@@ -350,5 +349,4 @@ API::MatrixWorkspace_sptr CalculateEfficiency2::mergeGroup(API::WorkspaceGroup &
   return mergedNormalisedWs;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

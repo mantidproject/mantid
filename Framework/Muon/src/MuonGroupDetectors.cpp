@@ -10,8 +10,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidHistogramData/HistogramMath.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Kernel;
 using namespace API;
@@ -115,5 +114,4 @@ void MuonGroupDetectors::exec() {
   setProperty("OutputWorkspace", outWS);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

@@ -27,8 +27,7 @@
 #include <fstream> // used to get ifstream
 #include <sstream>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(RemoveLogs)
@@ -78,5 +77,4 @@ void RemoveLogs::exec() {
   return;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

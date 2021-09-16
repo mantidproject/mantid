@@ -13,8 +13,7 @@
 
 using namespace Mantid::Kernel;
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 /** Constructor for a parametrized Detector
  * @param base: the base (un-parametrized) IComponent
@@ -72,5 +71,4 @@ Kernel::V3D GridDetectorPixel::getRelativePos() const {
   return V3D(x, y, z);
 }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

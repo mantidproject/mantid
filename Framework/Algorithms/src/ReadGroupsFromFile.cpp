@@ -28,8 +28,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(ReadGroupsFromFile)
@@ -236,5 +235,4 @@ void ReadGroupsFromFile::readXMLGroupingFile(const std::string &filename) {
   progress(0.7);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

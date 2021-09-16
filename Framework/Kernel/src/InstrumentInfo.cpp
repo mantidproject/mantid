@@ -22,8 +22,7 @@
 #include <Poco/DOM/NodeList.h>
 #include <Poco/DOM/Text.h>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 namespace {
 // static logger object
 Logger g_log("InstrumentInfo");
@@ -303,5 +302,4 @@ std::ostream &operator<<(std::ostream &buffer, const InstrumentInfo &instrumentD
   return buffer;
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

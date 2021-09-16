@@ -8,8 +8,7 @@
 
 #include "MantidQtWidgets/Common/FittingGlobals.h"
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 GlobalParameter::GlobalParameter(std::string parameter) : m_parameter(std::move(parameter)) {}
 
@@ -37,5 +36,4 @@ std::string GlobalTie::toNonCompositeParameter(std ::string const &fullParameter
 
 std::string GlobalTie::asString() const { return m_parameter + "=" + m_tie; }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

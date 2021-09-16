@@ -10,8 +10,7 @@
 //-----------------------------------------------------------------------------
 // IPeakFunction definition
 //-----------------------------------------------------------------------------
-namespace Mantid {
-namespace PythonInterface {
+namespace Mantid::PythonInterface {
 using namespace boost::python;
 
 /**
@@ -94,5 +93,4 @@ void IPeakFunctionAdapter::functionDerivLocal(API::Jacobian *jacobian, const dou
 void IPeakFunctionAdapter::functionDerivLocal(const boost::python::object &xvals, boost::python::object &jacobian) {
   callMethodNoCheck<void, object, object>(getSelf(), "functionDerivLocal", xvals, jacobian);
 }
-} // namespace PythonInterface
-} // namespace Mantid
+} // namespace Mantid::PythonInterface

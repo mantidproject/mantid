@@ -20,8 +20,7 @@
 
 #include <atomic>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register with the algorithm factory
 DECLARE_ALGORITHM(SolidAngle)
@@ -302,5 +301,4 @@ void SolidAngle::initSpectrum(const MatrixWorkspace &inputWS, MatrixWorkspace &o
   outputWS.mutableY(wsIndex) = 0.; // default value for not calculated
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

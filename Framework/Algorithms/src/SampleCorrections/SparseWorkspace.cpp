@@ -44,8 +44,7 @@ constexpr double R = 1.0; // This will be the default L2 distance.
 Mantid::Kernel::Logger g_log("SparseWorkspace");
 } // namespace
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 SparseWorkspace::SparseWorkspace(const API::MatrixWorkspace &modelWS, const size_t wavelengthPoints, const size_t rows,
                                  const size_t columns)
@@ -434,5 +433,4 @@ HistogramData::Histogram SparseWorkspace::bilinearInterpolateFromDetectorGrid(co
 
 SparseWorkspace *SparseWorkspace::doClone() const { return new SparseWorkspace(*this); }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

@@ -28,8 +28,7 @@
 #include <fstream>
 #include <utility>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using namespace Kernel;
 
@@ -907,5 +906,4 @@ void LoadPLN::exec() {
 // register the algorithms into the AlgorithmFactory
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadPLN)
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

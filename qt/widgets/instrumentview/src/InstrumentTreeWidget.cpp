@@ -20,13 +20,10 @@
 #include <cfloat>
 #include <queue>
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
-InstrumentTreeWidget::InstrumentTreeWidget(QWidget *w)
-    : QTreeView(w), m_instrWidget(nullptr), m_treeModel(nullptr) {
-  connect(this, SIGNAL(clicked(const QModelIndex)), this,
-          SLOT(sendComponentSelectedSignal(const QModelIndex)));
+InstrumentTreeWidget::InstrumentTreeWidget(QWidget *w) : QTreeView(w), m_instrWidget(nullptr), m_treeModel(nullptr) {
+  connect(this, SIGNAL(clicked(const QModelIndex)), this, SLOT(sendComponentSelectedSignal(const QModelIndex)));
 }
 
 void InstrumentTreeWidget::setInstrumentWidget(InstrumentWidget *w) {
@@ -37,12 +34,9 @@ void InstrumentTreeWidget::setInstrumentWidget(InstrumentWidget *w) {
   setSelectionBehavior(SelectRows);
 }
 
-void InstrumentTreeWidget::getSelectedBoundingBox(const QModelIndex &index,
-                                                  double &xmax, double &ymax,
-                                                  double &zmax, double &xmin,
-                                                  double &ymin, double &zmin) {
-  const auto &componentInfo =
-      m_instrWidget->getInstrumentActor().componentInfo();
+void InstrumentTreeWidget::getSelectedBoundingBox(const QModelIndex &index, double &xmax, double &ymax, double &zmax,
+                                                  double &xmin, double &ymin, double &zmin) {
+  const auto &componentInfo = m_instrWidget->getInstrumentActor().componentInfo();
   auto compIndex = InstrumentTreeModel::extractIndex(index);
   auto bb = componentInfo.boundingBox(compIndex);
 
@@ -54,23 +48,20 @@ void InstrumentTreeWidget::getSelectedBoundingBox(const QModelIndex &index,
   zmin = bb.zMin();
 }
 
-QModelIndex
-InstrumentTreeWidget::findComponentByName(const QString &name) const {
+QModelIndex InstrumentTreeWidget::findComponentByName(const QString &name) const {
   if (!m_treeModel)
     return QModelIndex();
   // The data is in a tree model so recursively search until we find the string
   // we want. Note the match is NOT
   // case sensitive
-  QModelIndexList matches = m_treeModel->match(
-      m_treeModel->index(0, 0, QModelIndex()), Qt::DisplayRole, name, 1,
-      Qt::MatchFixedString | Qt::MatchRecursive);
+  QModelIndexList matches = m_treeModel->match(m_treeModel->index(0, 0, QModelIndex()), Qt::DisplayRole, name, 1,
+                                               Qt::MatchFixedString | Qt::MatchRecursive);
   if (matches.isEmpty())
     return QModelIndex();
   return matches.first();
 }
 
-void InstrumentTreeWidget::sendComponentSelectedSignal(
-    const QModelIndex &index) {
+void InstrumentTreeWidget::sendComponentSelectedSignal(const QModelIndex &index) {
   auto selectedIndex = InstrumentTreeModel::extractIndex(index);
   m_instrWidget->getInstrumentActor().setComponentVisible(selectedIndex);
   emit componentSelected(selectedIndex);
@@ -80,8 +71,7 @@ void InstrumentTreeWidget::sendComponentSelectedSignal(
  * @param parent :: the parent index to start searching from
  * @return a list of component names as strings
  */
-QStringList
-InstrumentTreeWidget::findExpandedComponents(const QModelIndex &parent) const {
+QStringList InstrumentTreeWidget::findExpandedComponents(const QModelIndex &parent) const {
   QStringList retval;
   int rowCount = model()->rowCount(parent);
 
@@ -96,5 +86,4 @@ InstrumentTreeWidget::findExpandedComponents(const QModelIndex &parent) const {
   return retval;
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

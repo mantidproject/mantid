@@ -21,9 +21,7 @@
 #include <memory>
 #include <utility>
 
-namespace Mantid {
-namespace WorkflowAlgorithms {
-namespace HFIRInstrument {
+namespace Mantid::WorkflowAlgorithms::HFIRInstrument {
 /**
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
@@ -122,6 +120,4 @@ double getSourceToSampleDistance(const API::MatrixWorkspace_sptr &dataWS) {
   return sourceToSampleDistance;
 }
 
-} // namespace HFIRInstrument
-} // namespace WorkflowAlgorithms
-} // namespace Mantid
+} // namespace Mantid::WorkflowAlgorithms::HFIRInstrument

@@ -7,8 +7,7 @@
 #include "IndirectToolsTab.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -20,5 +19,4 @@ IndirectToolsTab::IndirectToolsTab(QWidget *parent) : IndirectTab(parent) {}
  */
 IndirectToolsTab::~IndirectToolsTab() {}
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

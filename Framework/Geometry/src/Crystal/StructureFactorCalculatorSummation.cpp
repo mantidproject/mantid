@@ -9,8 +9,7 @@
 
 #include <iomanip>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 using namespace Kernel;
 
@@ -75,5 +74,4 @@ std::string StructureFactorCalculatorSummation::getV3DasString(const V3D &point)
   return posStream.str();
 }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

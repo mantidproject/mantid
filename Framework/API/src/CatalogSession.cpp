@@ -9,8 +9,7 @@
 #include "MantidAPI/CatalogSession.h"
 #include "MantidKernel/Logger.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 /**
  * Initialise the related catalog session variables.
  * @param sessionID :: The session ID generated from logging into the catalog.
@@ -43,5 +42,4 @@ const std::string &CatalogSession::getSoapEndpoint() const { return m_endpoint; 
  * @return The facility used to create the catalog.
  */
 const std::string &CatalogSession::getFacility() const { return m_facility; }
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API
