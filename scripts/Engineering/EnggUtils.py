@@ -117,20 +117,11 @@ class GroupingInfo:
     # functional
     def load_relevant_calibration_files(self, output_prefix="engggui"):
         """Output cal table from second step (e.g. bank-wise) run of PDCalibration"""
-        basepath, fname = path.split(self.prm_filepath)
-        fname_words = fname.split('_')
-        prefix = '_'.join(fname_words[0:2])
-        if self.group.banks:
-            for bank in self.group.banks:
-                suffix = f"_bank_{bank}"
-                path_to_load = path.join(basepath, prefix + suffix + ".nxs")
-                mantid.Load(Filename=path_to_load, OutputWorkspace=output_prefix + "_calibration" + suffix)
-        else:
-            suffix = f"_{self.group.value}"  # custom or cropped (.prm suffix)
-            path_to_load = path.join(basepath, prefix + suffix + ".nxs")
-            mantid.Load(Filename=path_to_load, OutputWorkspace=output_prefix + "_calibration" + suffix)
-            # load in custom grouping
-            self.load_custom_grouping_workspace()
+        filepath = path.splitext(self.prm_filepath)[0] + '.nxs'  # change extension to .nxs
+        ws_name = output_prefix + "_calibration_" + self.get_group_suffix()
+        mantid.Load(Filename=filepath, OutputWorkspace=ws_name)
+        # load in custom grouping - checks if applicable inside method
+        self.load_custom_grouping_workspace()
 
     def load_custom_grouping_workspace(self):
         """
