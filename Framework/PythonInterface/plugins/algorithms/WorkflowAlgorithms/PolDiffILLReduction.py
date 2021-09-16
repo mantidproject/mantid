@@ -454,6 +454,21 @@ class PolDiffILLReduction(PythonAlgorithm):
             correction = np.expand_dims(frame_overlap * counts_average, axis=1)  # expands so the shape is (132, 1)
             dataY -= correction
 
+    @staticmethod
+    def _set_final_naming_scheme(ws, output_ws):
+        """Renames individual workspaces to contain the proper output name."""
+        for entry in mtd[ws]:
+            entry_name = entry.name()
+            if entry_name[:2] == "__":
+                entry_name = entry_name[2:]
+            if output_ws not in entry_name:
+                output_name = "{}_{}".format(output_ws, entry_name)
+            else:
+                output_name = entry_name
+            if output_name != entry.name():
+                RenameWorkspace(InputWorkspace=entry, OutputWorkspace=output_name)
+        return ws
+
     def _load_and_prepare_data(self, measurement_technique, process, progress):
         """Loads the data, sets the instrument, and runs function to check the measurement method. In the case
         of a single crystal measurement, it also merges the omega scan data into one workspace per polarisation
@@ -1114,6 +1129,8 @@ class PolDiffILLReduction(PythonAlgorithm):
             if self.getPropertyValue('OutputTreatment') in ['AveragePol', 'Sum']:
                 self._merge_polarisations(ws, average_detectors=(self.getPropertyValue('OutputTreatment')
                                                                  == 'AveragePol'))
+            if self.getPropertyValue('MeasurementTechnique') == 'TOF':
+                self._rebin_in_energy(ws)
         ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws, NaNValue=0,
                              NaNError=0, InfinityValue=0, InfinityError=0)
         mtd[ws][0].getRun().addProperty('ProcessedAs', process, True)
@@ -1122,19 +1139,9 @@ class PolDiffILLReduction(PythonAlgorithm):
         RenameWorkspace(InputWorkspace=ws, OutputWorkspace=ws[2:])  # renames group as a whole
         ws = ws[2:]
         output_ws = self.getPropertyValue("OutputWorkspace")
+
         if mtd[ws].getNumberOfEntries() > 1:
-            for entry in mtd[ws]:  # renames individual ws to contain the output name
-                entry_name = entry.name()
-                if entry_name[:2] == "__":
-                    entry_name = entry_name[2:]
-                if output_ws not in entry_name:
-                    output_name = "{}_{}".format(output_ws, entry_name)
-                else:
-                    output_name = entry_name
-                if output_name != entry.name():
-                    RenameWorkspace(InputWorkspace=entry, OutputWorkspace=output_name)
-        if self.getPropertyValue('MeasurementTechnique') == 'TOF':
-            self._rebin_in_energy(ws)
+            self._set_final_naming_scheme(ws, output_ws)
         self.setProperty('OutputWorkspace', mtd[ws])
 
     def PyExec(self):
