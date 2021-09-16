@@ -21,19 +21,19 @@ Usage
 
 **Example:**
 
-.. testcode:: ExSuggestTibCNCS
+.. testcode:: ExCNCSSuggestTIB
 
     incidentEnergy = 3
-    (tibMin,tibMax) = SuggestTibCNCS(incidentEnergy)
+    (tibMin,tibMax) = CNCSSuggestTIB(incidentEnergy)
     print("Incident Energy = %i, tibMin = %.2f, tibMax = %.2f" % (incidentEnergy,tibMin,tibMax))
 
     incidentEnergy = 1
-    (tibMin,tibMax) = SuggestTibCNCS(incidentEnergy)
+    (tibMin,tibMax) = CNCSSuggestTIB(incidentEnergy)
     print("Incident Energy = %i, tibMin = %.2f, tibMax = %.2f" % (incidentEnergy,tibMin,tibMax))
 
 Output:
 
-.. testoutput:: ExSuggestTibCNCS
+.. testoutput:: ExCNCSSuggestTIB
 
     Incident Energy = 3, tibMin = 44914.92, tibMax = 47314.92
     Incident Energy = 1, tibMin = 95621.15, tibMax = 99021.15
