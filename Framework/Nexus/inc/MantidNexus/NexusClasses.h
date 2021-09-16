@@ -584,6 +584,17 @@ public:
    */
   int getInt(const std::string &name) const;
 
+  /**
+   * Returns a typed value (int, float, double or string)
+   * @param name :: The name of the entry
+   * @return the typed value
+   */
+  template <typename T> T getTyped(const std::string &name) const { return getString(name); };
+  template <> int getTyped(const std::string &name) const { return getInt(name); }
+  template <> float getTyped(const std::string &name) const { return getFloat(name); }
+  template <> double getTyped(const std::string &name) const { return getDouble(name); }
+  template <> std::string getTyped(const std::string &name) const { return getString(name); }
+
   /// Returns a list of all classes (or groups) in this NXClass
   std::vector<NXClassInfo> &groups() const { return *m_groups; }
   /// Returns whether an individual group (or group) is present
