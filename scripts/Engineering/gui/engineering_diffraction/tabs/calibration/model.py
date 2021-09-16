@@ -34,16 +34,7 @@ class CalibrationModel(object):
         ceria_workspace = path_handling.load_workspace(ceria_path)
 
         # load whole instrument calibration
-        if Ads.doesExist("full_inst_calib"):
-            full_calib = Ads.retrieve("full_inst_calib")
-        else:
-            full_calib_path = get_setting(output_settings.INTERFACES_SETTINGS_GROUP,
-                                          output_settings.ENGINEERING_PREFIX, "full_calibration")
-            try:
-                full_calib = Load(full_calib_path, OutputWorkspace="full_inst_calib")
-            except ValueError:
-                logger.error("Error loading Full instrument calibration - this is set in the interface settings.")
-                return
+        full_calib = self.load_full_instrument_calibration()
 
         # run PDCalibration
         focused_ceria, cal_table, diag_ws, mask = self.run_calibration(ceria_workspace, calibration, full_calib)
@@ -90,6 +81,7 @@ class CalibrationModel(object):
         return [params_north, params_south]
 
     def load_existing_calibration_files(self, calibration):
+        self.load_full_instrument_calibration()
         # load prm
         prm_filepath = calibration.prm_filepath
         if not path.exists(prm_filepath):
@@ -164,6 +156,19 @@ class CalibrationModel(object):
         # store cal_table in calibration
         calibration.set_calibration_table(cal_table)
         return Ads.retrieve(foc_name), cal_table, diag_ws, mask
+
+    def load_full_instrument_calibration(self):
+        if Ads.doesExist("full_inst_calib"):
+            full_calib = Ads.retrieve("full_inst_calib")
+        else:
+            full_calib_path = get_setting(output_settings.INTERFACES_SETTINGS_GROUP,
+                                          output_settings.ENGINEERING_PREFIX, "full_calibration")
+            try:
+                full_calib = Load(full_calib_path, OutputWorkspace="full_inst_calib")
+            except ValueError:
+                logger.error("Error loading Full instrument calibration - this is set in the interface settings.")
+                return
+        return full_calib
 
     def extract_diff_consts_from_ws(self, ws_foc, mask_ws):
         si = ws_foc.spectrumInfo()
