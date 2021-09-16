@@ -27,16 +27,40 @@ public:
       try {
         return m_nxroot.getTyped<T>(entryName);
       } catch (std::runtime_error &) {
-        std::ostringstream ss;
-        ss << "Unable to retrieve a mandatory entry " << entryName << "\n";
-        ss << "Please contact support to get the root cause fixed.\n";
-        ss << "In the meantime, consider overriding the value for the missing key.";
-        throw std::runtime_error(ss.str());
+        throwMissingKeyError(entryName);
       }
     }
-  };
+  }
+  void isValid(const std::vector<std::string> &mandatoryKeys) {
+    std::vector<std::string> missingKeys = missingMandatoryKeys(mandatoryKeys);
+    for (const auto &key : missingKeys) {
+      if (!m_entriesToPatch.existsProperty(key)) {
+        throwMissingKeyError(key);
+      }
+    }
+  }
 
 private:
+  void throwMissingKeyError(const std::string &key) {
+    std::ostringstream ss;
+    ss << "Unable to retrieve a mandatory entry " << key << " from the file\n";
+    ss << "Please contact support to get the root cause fixed.\n";
+    ss << "In the meantime, consider providing the value for the missing key.";
+    throw std::runtime_error(ss.str());
+  }
+
+  bool keyExists(const std::string &entryName) { return m_nxroot.isValid(entryName); }
+
+  std::vector<std::string> missingMandatoryKeys(const std::vector<std::string> &mandatoryKeys) {
+    std::vector<std::string> missingKeys;
+    for (const auto &key : mandatoryKeys) {
+      if (!keyExists(key)) {
+        missingKeys.emplace_back(key);
+      }
+    }
+    return missingKeys;
+  }
+
   NeXus::NXRoot &m_nxroot;
   Kernel::PropertyManager &m_entriesToPatch;
 };
