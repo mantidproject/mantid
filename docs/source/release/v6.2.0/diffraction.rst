@@ -53,6 +53,13 @@ Bugfixes
 - Fixed a bug when converting TOF to d-spacing using diffractometer constants with non-zero DIFA when a parabolic model is selected.
 - Corrected the equation for pseudo-voigt FWHM and mixing parameter in peak profile function :ref:`Bk2BkExpConvPV <func-Bk2BkExpConvPV>`.
 
+
+Deprecation
+###########
+- Existing :ref:`CalibrateRectangularDetectors <algm-CalibrateRectangularDetectors>` is deprecated.
+- Existing :ref:`GetDetOffsetsMultiPeaks <algm-GetDetOffsetsMultiPeaks>` is deprecated.
+
+
 Engineering Diffraction
 -----------------------
 New features
