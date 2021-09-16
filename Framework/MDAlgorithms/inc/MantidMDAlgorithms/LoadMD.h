@@ -8,8 +8,8 @@
 
 #include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/IFileLoader.h"
-#include "MantidAPI/NexusFileLoader.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
+#include "MantidAPI/NexusFileLoader.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidKernel/NexusDescriptor.h"
 #include "MantidKernel/System.h"
@@ -41,7 +41,6 @@ public:
   const std::string category() const override { return "MDAlgorithms\\DataHandling"; }
 
   /// Returns a confidence value that this algorithm can load a file
-  //int confidence(Kernel::NexusDescriptor &descriptor) const override;
   int confidence(Kernel::NexusHDF5Descriptor &descriptor) const override;
 
 private:
