@@ -20,7 +20,7 @@ class SuggestTibHYSPEC(PythonAlgorithm):
         return "Inelastic\\Utility"
 
     def seeAlso(self):
-        return [ "SuggestTibCNCS" ]
+        return [ "CNCSSuggestTIB" ]
 
     def name(self):
         """ Return name
