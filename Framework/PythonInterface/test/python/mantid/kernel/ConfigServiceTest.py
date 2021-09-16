@@ -118,7 +118,6 @@ class ConfigServiceTest(unittest.TestCase):
         # test with single string
         do_test(';'.join(new_path_list))
 
-
     def test_appending_paths(self):
         new_path_list = self._setup_test_areas()
         try:
@@ -155,7 +154,8 @@ class ConfigServiceTest(unittest.TestCase):
                            'workspace.sendto.SansView.arguments', 'workspace.sendto.SansView.saveusing', # related to SASview in menu
                            'workspace.sendto.SansView.target', 'workspace.sendto.SansView.visible', # related to SASview in menu
                            'workspace.sendto.name.SansView', # related to SASview in menu
-                           'catalog.oncat.token.accessToken', 'catalog.oncat.token.expiresIn', 'catalog.oncat.token.refreshToken', 'catalog.oncat.token.scope', 'catalog.oncat.token.tokenType', # Shouldn't be changed by users.
+                           # Shouldn't be changed by users.
+                           'catalog.oncat.token.accessToken', 'catalog.oncat.token.expiresIn', 'catalog.oncat.token.refreshToken', 'catalog.oncat.token.scope', 'catalog.oncat.token.tokenType',
 
                            ########## TODO should be documented!
                            'filefinder.casesensitive',
@@ -173,8 +173,7 @@ class ConfigServiceTest(unittest.TestCase):
                            'curvefitting.defaultPeak', 'curvefitting.findPeaksFWHM', 'curvefitting.findPeaksTolerance', 'curvefitting.guiExclude',
                            'logging.channels.consoleChannel.class', 'logging.channels.consoleChannel.formatter', 'logging.formatters.f1.class', 'logging.formatters.f1.pattern', 'logging.formatters.f1.times', 'logging.loggers.root.channel.channel1', 'logging.loggers.root.channel.class',
                            'MantidOptions.ReusePlotInstances',
-                           'mantidqt.python_interfaces', 'mantidqt.python_interfaces_directory'
-                           ]
+                           'mantidqt.python_interfaces']
 
         # create the list of things
         undocumented = []
@@ -192,7 +191,6 @@ class ConfigServiceTest(unittest.TestCase):
         # everything should be documented
         if len(undocumented) > 0:
             raise AssertionError('{} undocumented properties: {}'.format(len(undocumented), undocumented))
-
 
     def _setup_test_areas(self):
         """Create a new data search path string
@@ -224,6 +222,7 @@ class ConfigServiceTest(unittest.TestCase):
                 os.rmdir(p)
             except OSError:
                 pass
+
 
 if __name__ == '__main__':
     unittest.main()
