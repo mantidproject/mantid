@@ -35,6 +35,13 @@ using namespace NeXus;
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLIndirect2)
 
 //----------------------------------------------------------------------------------------------
+/** Constructor
+ */
+LoadILLIndirect2::LoadILLIndirect2()
+    : m_numberOfTubes{16}, m_numberOfChannels{1024}, m_numberOfSimpleDetectors{8}, m_numberOfMonitors{1}, m_bats{false},
+      m_firstTubeAngleRounded{251}, m_supportedInstruments{"IN16B"} {}
+
+//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string LoadILLIndirect2::name() const { return "LoadILLIndirect"; }
 
