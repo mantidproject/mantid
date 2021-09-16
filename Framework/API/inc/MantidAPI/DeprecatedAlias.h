@@ -38,8 +38,6 @@ public:
   void setDeprecationDate(const std::string &date);
 
 private:
-  /// Replacement version, -1 indicate latest
-  int m_replacementVersion;
   /// Deprecation date
   std::string m_deprecationDate;
 };
