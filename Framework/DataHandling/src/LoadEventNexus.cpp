@@ -992,7 +992,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
   filter_time_start = Types::Core::DateAndTime::minimum();
   filter_time_stop = Types::Core::DateAndTime::maximum();
 
-  if (m_allBanksPulseTimes->numPulses > 0) {
+  if (m_allBanksPulseTimes->pulseTimes.size() > 0) {
     // If not specified, use the limits of doubles. Otherwise, convert from
     // seconds to absolute PulseTime
     if (filter_time_start_sec != EMPTY_DBL()) {

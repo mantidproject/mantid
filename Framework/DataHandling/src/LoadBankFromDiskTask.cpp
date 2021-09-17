@@ -55,7 +55,7 @@ void LoadBankFromDiskTask::loadPulseTimes(::NeXus::File &file) {
     return;
   }
   std::string thisStartTime;
-  size_t thisNumPulses = 0;
+  size_t thispulseTimes = 0;
   // If the offset is not present, use Unix epoch
   if (!file.hasAttr("offset")) {
     thisStartTime = "1970-01-01T00:00:00Z";
@@ -66,13 +66,13 @@ void LoadBankFromDiskTask::loadPulseTimes(::NeXus::File &file) {
   }
 
   if (!file.getInfo().dims.empty())
-    thisNumPulses = file.getInfo().dims[0];
+    thispulseTimes = file.getInfo().dims[0];
   file.closeData();
 
   // Now, we look through existing ones to see if it is already loaded
   // thisBankPulseTimes = NULL;
   for (auto &bankPulseTime : m_loader.m_bankPulseTimes) {
-    if (bankPulseTime->equals(thisNumPulses, thisStartTime)) {
+    if (bankPulseTime->equals(thispulseTimes, thisStartTime)) {
       thisBankPulseTimes = bankPulseTime;
       return;
     }
@@ -130,6 +130,33 @@ void LoadBankFromDiskTask::prepareEventId(::NeXus::File &file, int64_t &start_ev
   int64_t dim0 = recalculateDataSize(id_info.dims[0]);
   stop_event = dim0;
 
+  // Handle the time filtering by changing the start/end offsets.
+  for (size_t i = 0; i < thisBankPulseTimes->pulseTimes.size(); i++) {
+    if (thisBankPulseTimes->pulseTimes[i] >= m_loader.alg->filter_time_start) {
+      start_event = static_cast<int64_t>(event_index[i]);
+      break; // stop looking
+    }
+  }
+
+  if (start_event > dim0) {
+    // If the frame indexes are bad then we can't construct the times of the
+    // events properly and filtering by time
+    // will not work on this data
+    m_loader.alg->getLogger().warning() << this->entry_name
+                                        << "'s field 'event_index' seems to be invalid (start_index > than "
+                                           "the number of events in the bank)."
+                                        << "All events will appear in the same frame and filtering by time "
+                                           "will not be possible on this data.\n";
+    start_event = 0;
+    stop_event = dim0;
+  } else {
+    for (size_t i = 0; i < thisBankPulseTimes->pulseTimes.size(); i++) {
+      if (thisBankPulseTimes->pulseTimes[i] > m_loader.alg->filter_time_stop) {
+        stop_event = event_index[i];
+        break;
+      }
+    }
+  }
   // We are loading part - work out the event number range
   if (m_loader.chunk != EMPTY_INT()) {
     start_event = static_cast<int64_t>(m_loader.chunk - m_loader.firstChunkForBank) *
@@ -326,7 +353,7 @@ void LoadBankFromDiskTask::run() {
 
       // The event_index should be the same length as the pulse times from DAS
       // logs.
-      if (event_index.size() != thisBankPulseTimes->numPulses)
+      if (event_index.size() != thisBankPulseTimes->pulseTimes.size())
         m_loader.alg->getLogger().warning() << "Bank " << entry_name
                                             << " has a mismatch between the number of event_index entries "
                                                "and the number of pulse times in event_time_zero.\n";

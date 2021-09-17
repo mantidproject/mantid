@@ -154,7 +154,7 @@ void EventAssignerFixedWavelength::addEventImpl(size_t id, int64_t pulse, double
   m_eventVectors[id]->emplace_back(m_wavelength);
 }
 
-// FastReadOnlyFile
+// ISISRawOnlyFile
 #ifdef _WIN32
 FastReadOnlyFile::FastReadOnlyFile(const char *filename) {
   m_handle = CreateFileA(filename, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
