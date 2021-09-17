@@ -103,9 +103,7 @@ void export_VMD() {
       .def("__isub__", &VMD::operator-=, return_self<>(), (arg("self"), arg("other")))
       .def(self * self)
       .def(self *= self)
-      // cppcheck-suppress duplicateExpression
       .def(self / self)
-      // cppcheck-suppress duplicateExpression
       .def(self /= self);
 }
 

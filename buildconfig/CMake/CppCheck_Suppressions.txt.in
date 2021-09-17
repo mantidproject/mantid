@@ -24,21 +24,11 @@ noConstructor
 // Pre-processor Directives, such as #error, which are upstream anyway
 preprocessorErrorDirective
 
-// If-init not supported
-syntaxError:${CMAKE_SOURCE_DIR}/Framework/API/src/MatrixWorkspace.cpp
-
 // Cppcheck struggles with some inheritance chains, some of these might be true though
 unusedPrivateFunction
 // ---------- Individual suppressions -----------------
 
-pureVirtualCall:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectBayesTab.cpp
 pureVirtualCall:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectBayesTab.h
-
-// Macro expansion means this is incorrectly flagged on Unix
-redundantAssignment:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/isisraw.cpp
-
-// Ref binding means Cppcheck can't see these are used
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/MaskBinsIf.cpp
 
 // the mru-list is intentionally not altered
 operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:309
@@ -80,8 +70,3 @@ noCopyConstructor:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Rend
 
 // All ANN files as they are upstream anyway
 *:*${CMAKE_SOURCE_DIR}/Framework/Kernel/src/ANN/*
-
-// Libs we have in-source
-*:${CMAKE_SOURCE_DIR}/Framework/ICat/src/GSoap/*
-*:${CMAKE_SOURCE_DIR}/Framework/ICat/src/ICat3/GSoapGenerated/*
-*:${CMAKE_SOURCE_DIR}/Framework/ICat/src/ICat4/GSoapGenerated/*

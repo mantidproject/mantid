@@ -65,7 +65,6 @@ typedef struct {
   int ver_minor;
   int pid;
   int access_type; /* 0 =dae, 1 = crpt */
-                   // cppcheck-suppress unusedStructMember
   int pad[1];
   char user[32];
   char host[64];

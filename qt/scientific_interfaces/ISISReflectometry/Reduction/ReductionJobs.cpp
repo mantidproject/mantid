@@ -32,9 +32,7 @@ int countItems(ReductionJobs const &jobs, Item::ItemCountFunction countFunction)
 }
 } // namespace
 
-ReductionJobs::ReductionJobs( // cppcheck-suppress passedByValue
-    std::vector<Group> groups)
-    : m_groups(std::move(groups)), m_groupNameSuffix(1) {}
+ReductionJobs::ReductionJobs(std::vector<Group> groups) : m_groups(std::move(groups)), m_groupNameSuffix(1) {}
 
 ReductionJobs::ReductionJobs() : m_groupNameSuffix(1) {}
 

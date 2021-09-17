@@ -111,7 +111,7 @@ void RotationSurface::createUnwrappedDetectors() {
   auto detectors = retrieveSurfaceDetectors();
   bool exceptionThrown = false;
   // For each detector in the order of actors
-  // cppcheck-suppress syntaxError
+
   PRAGMA_OMP(parallel for)
   for (int ii = 0; ii < int(detectors.size()); ++ii) {
     if (!exceptionThrown) {

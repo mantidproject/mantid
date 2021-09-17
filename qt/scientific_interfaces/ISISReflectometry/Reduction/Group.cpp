@@ -13,12 +13,11 @@
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
-Group::Group( // cppcheck-suppress passedByValue
-    std::string name, std::vector<boost::optional<Row>> rows)
+Group::Group(std::string name, std::vector<boost::optional<Row>> rows)
     : m_name(std::move(name)), m_postprocessedWorkspaceName(), m_rows(std::move(rows)) {}
 
 Group::Group(
-    // cppcheck-suppress passedByValue
+
     std::string name)
     : m_name(std::move(name)), m_rows() {}
 

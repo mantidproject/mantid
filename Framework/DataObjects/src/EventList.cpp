@@ -946,13 +946,13 @@ void EventList::setSortOrder(const EventSortType order) const { this->order = or
 /** Sort events by TOF in one thread */
 void EventList::sortTof() const {
   // nothing to do
-  if (this->order == TOF_SORT) // cppcheck-suppress identicalConditionAfterEarlyExit
+  if (this->order == TOF_SORT)
     return;
 
   // Avoid sorting from multiple threads
   std::lock_guard<std::mutex> _lock(m_sortMutex);
   // If the list was sorted while waiting for the lock, return.
-  if (this->order == TOF_SORT) // cppcheck-suppress identicalConditionAfterEarlyExit
+  if (this->order == TOF_SORT)
     return;
 
   switch (eventType) {
@@ -1012,13 +1012,13 @@ void EventList::sortTimeAtSample(const double &tofFactor, const double &tofShift
 // --------------------------------------------------------------------------
 /** Sort events by Frame */
 void EventList::sortPulseTime() const {
-  if (this->order == PULSETIME_SORT) // cppcheck-suppress identicalConditionAfterEarlyExit
-    return;                          // nothing to do
+  if (this->order == PULSETIME_SORT)
+    return; // nothing to do
 
   // Avoid sorting from multiple threads
   std::lock_guard<std::mutex> _lock(m_sortMutex);
   // If the list was sorted while waiting for the lock, return.
-  if (this->order == PULSETIME_SORT) // cppcheck-suppress identicalConditionAfterEarlyExit
+  if (this->order == PULSETIME_SORT)
     return;
 
   // Perform sort.
@@ -1042,13 +1042,13 @@ void EventList::sortPulseTime() const {
  * (the absolute time)
  */
 void EventList::sortPulseTimeTOF() const {
-  if (this->order == PULSETIMETOF_SORT) // cppcheck-suppress identicalConditionAfterEarlyExit
-    return;                             // already ordered
+  if (this->order == PULSETIMETOF_SORT)
+    return; // already ordered
 
   // Avoid sorting from multiple threads
   std::lock_guard<std::mutex> _lock(m_sortMutex);
   // If the list was sorted while waiting for the lock, return.
-  if (this->order == PULSETIMETOF_SORT) // cppcheck-suppress identicalConditionAfterEarlyExit
+  if (this->order == PULSETIMETOF_SORT)
     return;
 
   switch (eventType) {

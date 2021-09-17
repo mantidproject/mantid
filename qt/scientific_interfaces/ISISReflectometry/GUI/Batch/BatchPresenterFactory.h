@@ -25,7 +25,7 @@ namespace ISISReflectometry {
 class BatchPresenterFactory : public IBatchPresenterFactory {
 public:
   BatchPresenterFactory(
-      // cppcheck-suppress passedByValue
+
       RunsPresenterFactory runsPresenterFactory, EventPresenterFactory eventPresenterFactory,
       ExperimentPresenterFactory experimentPresenterFactory, InstrumentPresenterFactory instrumentPresenterFactory,
       PreviewPresenterFactory previewPresenterFactory, SavePresenterFactory savePresenterFactory)
