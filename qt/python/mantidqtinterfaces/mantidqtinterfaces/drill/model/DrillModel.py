@@ -505,7 +505,6 @@ class DrillModel(QObject):
             ref (int): sample index
         """
         self._samples[int(ref)].onProcessSuccess()
-        self.exportModel.run(self._samples[int(ref)])
 
     def _onTaskError(self, ref, msg):
         """
@@ -616,6 +615,7 @@ class DrillModel(QObject):
                 self._samples[i].setIndex(i)
                 i += 1
         sample.setController(self.controller)
+        sample.setExporter(self.exportModel)
         self.newSample.emit(sample)
         return sample
 

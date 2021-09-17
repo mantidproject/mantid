@@ -267,7 +267,6 @@ class DrillModelTest(unittest.TestCase):
         self.model._samples = [s0]
         self.model._onTaskSuccess(0)
         s0.onProcessSuccess.assert_called_once()
-        self.model.exportModel.run.assert_called_once_with(s0)
 
     def test_onTaskError(self):
         s0 = mock.Mock()
