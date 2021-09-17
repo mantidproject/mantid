@@ -213,7 +213,7 @@ protected:
 
 private:
   friend class ObserverCallback;
-  ObserverCallback *m_proxy;
+  std::unique_ptr<ObserverCallback> m_proxy;
 
   bool m_predel_observed, m_postdel_observed, m_add_observed, m_repl_observed, m_rename_observed, m_clr_observed;
 };

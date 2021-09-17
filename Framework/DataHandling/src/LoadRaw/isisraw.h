@@ -353,6 +353,11 @@ public:
   virtual ~ISISRAW();
   explicit ISISRAW(ISISCRPT_STRUCT *crpt);
   ISISRAW(ISISCRPT_STRUCT *crpt, bool doUpdateFromCRPT);
+
+  // Explicitly prevent copying with all the dynamic allocations
+  ISISRAW(const ISISRAW &) = delete;
+  ISISRAW &operator=(ISISRAW) = delete;
+
   int updateFromCRPT();
 
   virtual int ioRAW(FILE *file, bool from_file, bool read_data = true);
