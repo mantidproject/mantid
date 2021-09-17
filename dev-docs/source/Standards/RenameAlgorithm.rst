@@ -13,10 +13,6 @@ to ensure the name of the algorithm faithfully represent the functionality of gi
 This document provides a recommended process to rename the algorithm while avoiding introducing
 breaking changes for the general users.
 
-
-Algorithm Naming Convention
-###########################
-
 Rename C++ Algorithm
 ####################
 
