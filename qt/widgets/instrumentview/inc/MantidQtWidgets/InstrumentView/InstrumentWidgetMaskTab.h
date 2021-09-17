@@ -150,8 +150,8 @@ private:
   /// Load masks applied to the view but not to the workspace
   void loadMaskViewFromProject(const std::string &name);
   /// Run the LoadMask algorithm to get a MaskWorkspace
-  std::shared_ptr<Mantid::API::MatrixWorkspace>
-  loadMask(const std::string &fileName);
+  std::shared_ptr<Mantid::API::MatrixWorkspace> loadMask(const std::string &fileName);
+  bool isRotationSupported();
 
 protected:
   /// Is it used?
@@ -214,6 +214,7 @@ protected:
   QtProperty *m_top;
   QtProperty *m_right;
   QtProperty *m_bottom;
+  QtProperty *m_rotation;
 
   QMap<QtProperty *, QString> m_doublePropertyMap;
   QMap<QString, QtProperty *> m_pointPropertyMap;
