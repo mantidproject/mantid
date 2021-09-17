@@ -55,7 +55,8 @@ private:
   std::map<std::string, std::string> validateInputs() override;
 
   void parseInputs();
-  void setupOutput();
+  void calculateSampleOnly();
+  void calculateSampleAndContainer();
   void calculateL2Ds(const MultipleScatteringCorrectionDistGraber &distGraber, const IDetector &detector,
                      std::vector<double> &sample_L2Ds) const;
   void pairWiseSum(double &A1, double &A2, const double linearCoefAbs,
