@@ -152,7 +152,6 @@ class SetSampleFromLogs(DistributedDataProcessorAlgorithm):
         wksp = self.getProperty("InputWorkspace").value
         # these items are not grabbed from the logs
         geometryContainer = self.getProperty("ContainerGeometry").value
-        
         materialContainer = self.getProperty("ContainerMaterial").value
 
         # get a convenient handle to the logs
