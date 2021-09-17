@@ -10,6 +10,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
+#include "MantidAPI/DeprecatedAlias.h"
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceHistory.h"
@@ -511,10 +512,19 @@ bool Algorithm::executeInternal() {
   Timer timer;
   bool algIsExecuted = false;
   AlgorithmManager::Instance().notifyAlgorithmStarting(this->getAlgorithmID());
+
+  // runtime check for deprecation warning
   {
     auto *depo = dynamic_cast<DeprecatedAlgorithm *>(this);
     if (depo != nullptr)
       getLogger().error(depo->deprecationMsg(this));
+  }
+
+  // runtime check for deprecated alias warning
+  {
+    auto *da_alg = dynamic_cast<DeprecatedAlias *>(this);
+    if ((da_alg != nullptr) && (this->calledByAlias))
+      getLogger().warning(da_alg->deprecationMessage(this));
   }
 
   // Register clean up tasks that should happen regardless of the route
