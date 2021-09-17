@@ -92,7 +92,7 @@ class SetSampleFromLogs(DistributedDataProcessorAlgorithm):
                         beamline = 'BL11A'
                     else:
                         warningMsg = 'Do not know how to create lognames for "{}"'.format(instrEnum.name())
-                        self.log().warn(warningMsg)
+                        self.log().warning(warningMsg)
                     if beamline:
                         # "internal" log names at SNS are templated from the beamline number
                         heightInContainerUnitsNames.append('{}:CS:ITEMS:HeightInContainerUnits'.format(beamline))
@@ -115,14 +115,16 @@ class SetSampleFromLogs(DistributedDataProcessorAlgorithm):
                     warningMsg = "HeightInContainerUnits expects cm or mm;" + \
                                 " specified units not recognized: {:s};".format(units) + \
                                 " we will reply on user input for sample density information."
-                    self.log().warn(warningMsg)
+                    self.log().warning(warningMsg)
 
                 # set the height
                 heightKey = _findKey(runObject, *heightInContainerNames)
                 if heightKey:
                     geometry['Height'] = conversion * _getLogValue(runObject, heightKey)
                 else:
-                    raise RuntimeError("Failed to determine the height from the logs")
+                    warningMsg = "No valid height found in sample logs;" + \
+                                 "we will reply on user input for sample density information."
+                    self.log().warning(warningMsg)
 
         # log the results and return
         self.log().information('GEOMETRY (in cm): ' + str(geometry))
@@ -150,6 +152,7 @@ class SetSampleFromLogs(DistributedDataProcessorAlgorithm):
         wksp = self.getProperty("InputWorkspace").value
         # these items are not grabbed from the logs
         geometryContainer = self.getProperty("ContainerGeometry").value
+        
         materialContainer = self.getProperty("ContainerMaterial").value
 
         # get a convenient handle to the logs
