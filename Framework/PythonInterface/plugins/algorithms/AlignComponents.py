@@ -52,7 +52,7 @@ class AlignComponents(PythonAlgorithm):
         return "Diffraction"
 
     def seeAlso(self):
-        return ["GetDetOffsetsMultiPeaks", "CalibrateRectangularDetectors"]
+        return []
 
     def name(self):
         """

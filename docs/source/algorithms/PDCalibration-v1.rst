@@ -13,7 +13,7 @@ Description
 This algorithm calibrates the detector pixels and creates a
 :ref:`diffraction calibration workspace
 <DiffractionCalibrationWorkspace>`. Unlike
-:ref:`algm-CalibrateRectangularDetectors` the peak fitting and
+`CalibrateRectangularDetectors` the peak fitting and
 calibration is done in TOF not d spacing. The peak d values are
 converted to TOF based on either the old calibration or the instrument
 geometry. The ``InputWorkspace`` contains the data from a standard
