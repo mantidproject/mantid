@@ -24,6 +24,16 @@ MultiFileValidator::MultiFileValidator()
 MultiFileValidator::MultiFileValidator(const MultiFileValidator &mfv)
     : TypedValidator<std::vector<std::vector<std::string>>>(), m_fileValidator(mfv.m_fileValidator) {}
 
+void swap(MultiFileValidator &obj1, MultiFileValidator &obj2) {
+  using std::swap;
+  swap(obj1.m_fileValidator, obj2.m_fileValidator);
+}
+
+MultiFileValidator &MultiFileValidator::operator=(MultiFileValidator tmp) {
+  swap(*this, tmp);
+  return *this;
+}
+
 /** Constructor
  *  @param extensions :: The permitted file extensions (e.g. .RAW)
  *  @param testFilesExist :: If to check if files exist
