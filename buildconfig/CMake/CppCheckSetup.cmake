@@ -6,13 +6,14 @@ if ( CPPCHECK_EXECUTABLE )
   # everything correctly
   set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
   set ( CPPCHECK_BUILD_DIR "${CMAKE_BINARY_DIR}/cppcheck" )
-  file(MAKE_DIRECTORY "${CPPCHECK_BUILD_DIR}" )
+  file(MAKE_DIRECTORY "${CPPCHECK_BUILD_DIR}" "${CPPCHECK_BUILD_DIR}/cache")
   configure_file(${CMAKE_SOURCE_DIR}/buildconfig/CMake/CppCheck_Suppressions.txt.in "${CPPCHECK_BUILD_DIR}/CppCheck_Suppressions.txt")
 
   # setup the standard arguments
   # --inline-suppr appears to be ignored if --suppresions-list is specified
   set ( CPPCHECK_ARGS --enable=all --inline-suppr --max-configs=120
   --std=c++${CMAKE_CXX_STANDARD}  # use the standard from cmake
+  --cppcheck-build-dir="${CPPCHECK_BUILD_DIR}/cache"
   --suppressions-list="${CPPCHECK_BUILD_DIR}/CppCheck_Suppressions.txt"
   --project=${CMAKE_BINARY_DIR}/compile_commands.json
   # Force cppcheck to check when we use project-wide macros
