@@ -56,7 +56,9 @@ class GroupingInfo:
                                     GROUP.SOUTH: "SouthBank_grouping", GROUP.CROPPED: "Cropped_spectra_grouping",
                                     GROUP.CUSTOM: "Custom_calfile_grouping", GROUP.TEXTURE: "Texture"}
         self._group_suffix = {GROUP.BOTH: "all_banks", GROUP.NORTH: "bank_1", GROUP.SOUTH: "bank_2",
-                              GROUP.CROPPED: "Cropped", GROUP.CUSTOM: "Custom", GROUP.TEXTURE: "Texture"}
+                              GROUP.CROPPED: "Cropped", GROUP.CUSTOM: "Custom", GROUP.TEXTURE: "Texture"} # prm suffix
+        self._group_foc_ws_suffix = {GROUP.BOTH: "bank", GROUP.NORTH: "bank 1", GROUP.SOUTH: "bank 2",
+                                     GROUP.CROPPED: "Cropped", GROUP.CUSTOM: "Custom", GROUP.TEXTURE: "grouping"}
         self._prm_templates = {GROUP.NORTH: "template_ENGINX_241391_North_bank.prm",
                                GROUP.SOUTH: "template_ENGINX_241391_South_bank.prm",
                                GROUP.BOTH: "template_ENGINX_241391_North_and_South_banks.prm",
@@ -71,6 +73,10 @@ class GroupingInfo:
         self.spectra_list = None
 
     # getters
+    def get_foc_ws_suffix(self):
+        if self.group:
+            return self._group_foc_ws_suffix[self.group]
+
     def get_group_suffix(self):
         if self.group:
             return self._group_suffix[self.group]

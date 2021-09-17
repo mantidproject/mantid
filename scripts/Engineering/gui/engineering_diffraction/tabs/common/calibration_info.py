@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import Engineering.EnggUtils as EnggUtils
 from Engineering.common import path_handling
+from mantid.api import AnalysisDataService as ADS
 
 
 class CalibrationInfo(EnggUtils.GroupingInfo):
@@ -63,4 +64,5 @@ class CalibrationInfo(EnggUtils.GroupingInfo):
         self.calibration_table = None
 
     def is_valid(self):
-        return self.sample_path and self.instrument
+        return self.sample_path and self.instrument and self.calibration_table and \
+               ADS.doesExist(self.calibration_table.name()) and self.group_ws and ADS.doesExist(self.group_ws.name())
