@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 # package imports
-from mantid.kernel import ConfigService, logger
+from mantid.kernel import logger
 
 # third-party imports
 from dateutil.parser import parse as parse_date
