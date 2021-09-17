@@ -278,20 +278,26 @@ class MuonContext(object):
                                                               self.last_good_data(runs[0]))
 
         phase_quad = run_PhaseQuad(parameters, ws_name)
-        tmp = retrieve_ws(phase_quad)
-        dt = tmp.readX(0)[1]-tmp.readX(0)[0]
-
-        phase_quad = self._run_rebin(phase_quad, rebin)
-        phase_quad = self._average_by_bin_widths(phase_quad, dt)
+        if rebin:
+            dt = self._get_bin_width(phase_quad)
+            phase_quad = self._run_rebin(phase_quad, True)
+            phase_quad = self._average_by_bin_widths(phase_quad, dt)
 
         workspaces = split_phasequad(phase_quad)
         return workspaces
 
+    def _get_bin_width(self, name):
+        tmp = self._get_x_data(name)
+        return tmp[1]-tmp[0]
+
+    def _get_x_data(self, name):
+        tmp = retrieve_ws(name)
+        return tmp.readX(0)
+
     def _average_by_bin_widths(self, ws_name, dt):
         #convert to Histogram to get bin widths and divide by how much bin widths have changed
         ws_name= run_convert_to_histogram(ws_name)
-        data = retrieve_ws(ws_name)
-        ws_x = data.readX(0)
+        ws_x = self._get_x_data(ws_name)
 
         # assume constant binning in raw data
         dx = [ (ws_x[j+1]-ws_x[j])/(dt) for j in range(len(ws_x)-1)]
