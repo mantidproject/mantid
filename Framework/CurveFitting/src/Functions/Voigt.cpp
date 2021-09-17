@@ -14,9 +14,7 @@
 #include <cmath>
 #include <limits>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
 DECLARE_FUNCTION(Voigt)
@@ -220,6 +218,4 @@ void Voigt::setIntensity(const double value) {
   setParameter(LORENTZ_AMP, 2.0 * value / (M_PI * lorentzFWHM));
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

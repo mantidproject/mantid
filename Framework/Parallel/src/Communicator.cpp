@@ -12,8 +12,7 @@
 #include <boost/mpi/environment.hpp>
 #endif
 
-namespace Mantid {
-namespace Parallel {
+namespace Mantid::Parallel {
 
 #ifdef MPI_EXPERIMENTAL
 boost::mpi::environment environment;
@@ -68,5 +67,4 @@ detail::ThreadingBackend &Communicator::backend() const {
   return *m_backend;
 }
 
-} // namespace Parallel
-} // namespace Mantid
+} // namespace Mantid::Parallel

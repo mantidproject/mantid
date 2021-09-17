@@ -12,8 +12,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/StringTokenizer.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 using tokenizer = Mantid::Kernel::StringTokenizer;
 
@@ -575,5 +574,4 @@ void Expression::toList(const std::string &sep) {
   setFunct(sep);
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

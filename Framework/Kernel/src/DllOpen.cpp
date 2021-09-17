@@ -17,8 +17,7 @@
 
 #include <string>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 namespace {
 // Static logger object
@@ -113,5 +112,4 @@ void DllOpen::closeDll(void *handle) {
 
 #endif /* _WIN32 */
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

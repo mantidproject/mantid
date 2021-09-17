@@ -9,8 +9,7 @@
 #include <ctime>
 #include <memory>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 namespace {
 //
@@ -127,5 +126,4 @@ std::string DateValidator::checkValidity(const std::string &value) const {
   }
   return "";
 }
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

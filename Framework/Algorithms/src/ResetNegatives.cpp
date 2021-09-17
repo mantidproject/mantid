@@ -14,8 +14,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using std::size_t;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ResetNegatives)
@@ -179,5 +178,4 @@ void ResetNegatives::changeNegatives(const MatrixWorkspace_const_sptr &minWS, co
   PARALLEL_CHECK_INTERUPT_REGION
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

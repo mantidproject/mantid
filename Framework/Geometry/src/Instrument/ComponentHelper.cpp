@@ -14,9 +14,7 @@
 
 #include <memory>
 
-namespace Mantid {
-namespace Geometry {
-namespace ComponentHelper {
+namespace Mantid::Geometry::ComponentHelper {
 using Kernel::V3D;
 
 /**
@@ -116,6 +114,4 @@ std::string sphereXML(double radius, const Kernel::V3D &centre, const std::strin
   return xml.str();
 }
 
-} // namespace ComponentHelper
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry::ComponentHelper

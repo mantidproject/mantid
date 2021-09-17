@@ -26,9 +26,7 @@
 #include <gsl/gsl_sf_erf.h>
 #include <limits>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
 
@@ -402,6 +400,4 @@ void IkedaCarpenterPV::setMatrixWorkspace(std::shared_ptr<const API::MatrixWorks
   IFunctionMW::setMatrixWorkspace(workspace, wi, startX, endX);
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

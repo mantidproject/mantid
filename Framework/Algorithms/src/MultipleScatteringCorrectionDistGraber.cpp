@@ -21,8 +21,7 @@
 // - L_s1: source to first voxel in sample
 // - L_2d: second voxel in sample to detector
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Geometry;
 using namespace Kernel;
@@ -60,5 +59,4 @@ void MultipleScatteringCorrectionDistGraber::cacheLS1(const V3D &beamDirection) 
   m_elementVolumes = std::move(raster.volume);
   m_totalVolume = raster.totalvolume;
 }
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

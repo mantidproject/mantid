@@ -18,8 +18,7 @@
 
 #include <boost/math/special_functions/round.hpp>
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(MaskPeaksWorkspace)
@@ -318,5 +317,4 @@ int MaskPeaksWorkspace::findPixelID(const std::string &bankName, int col, int ro
     return pixel->getID();
   }
 }
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

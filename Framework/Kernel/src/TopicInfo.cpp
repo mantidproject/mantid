@@ -9,8 +9,9 @@
 #include "MantidKernel/Logger.h"
 #include <Poco/DOM/Element.h>
 
-namespace Mantid {
-namespace Kernel {
+#include <utility>
+
+namespace Mantid::Kernel {
 
 namespace {
 // static logger object
@@ -58,7 +59,7 @@ TopicInfo::TopicInfo(InstrumentInfo *inst, const Poco::XML::Element *elem) {
                     << ". No attempts will be made to connect to this topic." << std::endl;
 }
 
-TopicInfo::TopicInfo(const std::string &name, TopicType type) : m_name(name), m_type(type) {}
+TopicInfo::TopicInfo(std::string name, TopicType type) : m_name(std::move(name)), m_type(type) {}
 
 /**
  * Prints the listener to the stream.
@@ -72,5 +73,4 @@ std::ostream &operator<<(std::ostream &buffer, const TopicInfo &topic) {
          << ")";
   return buffer;
 }
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

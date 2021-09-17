@@ -7,8 +7,7 @@
 #include "MantidAPI/LiveListener.h"
 #include "MantidAPI/IAlgorithm.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 /// @copydoc ILiveListener::dataReset
 bool LiveListener::dataReset() {
@@ -30,5 +29,4 @@ void LiveListener::setSpectra(const std::vector<specnum_t> &specList) { UNUSED_A
  */
 void LiveListener::setAlgorithm(const IAlgorithm &callingAlgorithm) { this->updatePropertyValues(callingAlgorithm); }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

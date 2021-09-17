@@ -18,8 +18,7 @@ namespace {
 Mantid::Kernel::Logger g_log("ExtractQENSMembers");
 }
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace API;
 using namespace Kernel;
@@ -303,5 +302,4 @@ ExtractQENSMembers::addMembersToADS(const std::vector<std::string> &members,
   return workspaceNames;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

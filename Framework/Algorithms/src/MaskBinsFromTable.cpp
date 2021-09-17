@@ -22,8 +22,7 @@ using namespace Mantid::Geometry;
 
 using namespace std;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 DECLARE_ALGORITHM(MaskBinsFromTable)
 
@@ -270,5 +269,4 @@ std::string MaskBinsFromTable::convertToSpectraList(const API::MatrixWorkspace_s
   return spectraliststr;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

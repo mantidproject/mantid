@@ -6,9 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "TransmissionStitchOptions.h"
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 TransmissionStitchOptions::TransmissionStitchOptions()
     : m_overlapRange(boost::none), m_rebinParameters(), m_scaleRHS(false) {}
@@ -29,6 +27,4 @@ bool operator==(TransmissionStitchOptions const &lhs, TransmissionStitchOptions 
 }
 
 bool operator!=(TransmissionStitchOptions const &lhs, TransmissionStitchOptions const &rhs) { return !(lhs == rhs); }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

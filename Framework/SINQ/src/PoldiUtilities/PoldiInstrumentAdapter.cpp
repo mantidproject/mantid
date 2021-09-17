@@ -13,8 +13,7 @@
 
 #include "boost/make_shared.hpp"
 
-namespace Mantid {
-namespace Poldi {
+namespace Mantid::Poldi {
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
 
@@ -279,5 +278,4 @@ void PoldiInstrumentAdapter::setSpectrum(const Instrument_const_sptr &mantidInst
   m_spectrum = std::make_shared<PoldiSourceSpectrum>(mantidInstrument);
 }
 
-} // namespace Poldi
-} // namespace Mantid
+} // namespace Mantid::Poldi

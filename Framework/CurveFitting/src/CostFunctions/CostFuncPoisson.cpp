@@ -34,9 +34,7 @@ double calculatePoissonLoss(double observedCounts, double predicted) {
 
 } // namespace
 
-namespace Mantid {
-namespace CurveFitting {
-namespace CostFunctions {
+namespace Mantid::CurveFitting::CostFunctions {
 
 DECLARE_COSTFUNCTION(CostFuncPoisson, Poisson)
 //----------------------------------------------------------------------------------------------
@@ -231,6 +229,4 @@ void CostFuncPoisson::calculateHessian(API::IFunction &function, API::FunctionDo
   }
 }
 
-} // namespace CostFunctions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::CostFunctions

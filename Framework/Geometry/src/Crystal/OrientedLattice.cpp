@@ -7,8 +7,7 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/Exception.h"
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 using Mantid::Kernel::DblMatrix;
 using Mantid::Kernel::V3D;
 
@@ -341,5 +340,4 @@ void OrientedLattice::recalculate() {
 }
 bool OrientedLattice::operator==(const OrientedLattice &other) const { return UB == other.UB; }
 bool OrientedLattice::operator!=(const OrientedLattice &other) const { return UB != other.UB; }
-} // Namespace Geometry
-} // Namespace Mantid
+} // namespace Mantid::Geometry

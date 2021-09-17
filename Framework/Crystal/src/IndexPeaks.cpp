@@ -20,8 +20,7 @@
 
 #include <algorithm>
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(IndexPeaks)
 
@@ -518,5 +517,4 @@ void IndexPeaks::exec() {
   g_log.notice() << args.workspace->sample().getOrientedLattice() << "\n";
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

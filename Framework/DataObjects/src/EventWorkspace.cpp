@@ -32,8 +32,7 @@
 using namespace boost::posix_time;
 using Mantid::Types::Core::DateAndTime;
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 namespace {
 // static logger
 Kernel::Logger g_log("EventWorkspace");
@@ -711,11 +710,9 @@ void EventWorkspace::getIntegratedSpectra(std::vector<double> &out, const double
   }
 }
 
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 template <>
 DLLExport Mantid::DataObjects::EventWorkspace_sptr
 IPropertyManager::getValue<Mantid::DataObjects::EventWorkspace_sptr>(const std::string &name) const {
@@ -741,7 +738,6 @@ IPropertyManager::getValue<Mantid::DataObjects::EventWorkspace_const_sptr>(const
     throw std::runtime_error(message);
   }
 }
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel
 
 ///\endcond TEMPLATE

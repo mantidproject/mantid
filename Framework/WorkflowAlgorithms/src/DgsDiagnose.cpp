@@ -18,8 +18,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace WorkflowAlgorithmHelpers;
 
-namespace Mantid {
-namespace WorkflowAlgorithms {
+namespace Mantid::WorkflowAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(DgsDiagnose)
@@ -306,5 +305,4 @@ void DgsDiagnose::exec() {
   this->setProperty("OutputWorkspace", maskWS);
 }
 
-} // namespace WorkflowAlgorithms
-} // namespace Mantid
+} // namespace Mantid::WorkflowAlgorithms

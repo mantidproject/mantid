@@ -41,8 +41,7 @@ Mantid::Kernel::Logger g_log("PanelsSurface");
  * @param yaxis :: An output arbitrary vector perpendicular to both zaxis and
  * xaxis.
  */
-void setupBasisAxes(const Mantid::Kernel::V3D &zaxis,
-                    Mantid::Kernel::V3D &xaxis, Mantid::Kernel::V3D &yaxis) {
+void setupBasisAxes(const Mantid::Kernel::V3D &zaxis, Mantid::Kernel::V3D &xaxis, Mantid::Kernel::V3D &yaxis) {
   double R, theta, phi;
   zaxis.getSpherical(R, theta, phi);
   if (theta <= 45.0) {
@@ -57,9 +56,8 @@ void setupBasisAxes(const Mantid::Kernel::V3D &zaxis,
   xaxis = yaxis.cross_prod(zaxis);
 }
 
-std::vector<Mantid::Kernel::V3D>
-retrievePanelCorners(const Mantid::Geometry::ComponentInfo &componentInfo,
-                     size_t rootIndex) {
+std::vector<Mantid::Kernel::V3D> retrievePanelCorners(const Mantid::Geometry::ComponentInfo &componentInfo,
+                                                      size_t rootIndex) {
   auto panel = componentInfo.quadrilateralComponent(rootIndex);
   auto child = rootIndex;
 
@@ -86,10 +84,8 @@ retrievePanelCorners(const Mantid::Geometry::ComponentInfo &componentInfo,
   }
 
   std::vector<Mantid::Kernel::V3D> corners{
-      componentInfo.position(panel.bottomLeft),
-      componentInfo.position(panel.bottomRight),
-      componentInfo.position(panel.topRight),
-      componentInfo.position(panel.topLeft)};
+      componentInfo.position(panel.bottomLeft), componentInfo.position(panel.bottomRight),
+      componentInfo.position(panel.topRight), componentInfo.position(panel.topLeft)};
 
   // Find xmin, xmax, ymin and ymax
   double xmin = corners[0].X();
@@ -115,8 +111,7 @@ retrievePanelCorners(const Mantid::Geometry::ComponentInfo &componentInfo,
   return corners;
 }
 
-Mantid::Kernel::V3D
-calculatePanelNormal(const std::vector<Mantid::Kernel::V3D> &panelCorners) {
+Mantid::Kernel::V3D calculatePanelNormal(const std::vector<Mantid::Kernel::V3D> &panelCorners) {
   // find the normal
   auto xaxis = panelCorners[1] - panelCorners[0];
   auto yaxis = panelCorners[3] - panelCorners[0];
@@ -124,24 +119,20 @@ calculatePanelNormal(const std::vector<Mantid::Kernel::V3D> &panelCorners) {
   return normal;
 }
 
-bool isBankFlat(const ComponentInfo &componentInfo, size_t bankIndex,
-                const std::vector<size_t> &tubes,
+bool isBankFlat(const ComponentInfo &componentInfo, size_t bankIndex, const std::vector<size_t> &tubes,
                 const Mantid::Kernel::V3D &normal) {
   for (auto tube : tubes) {
     const auto &children = componentInfo.children(tube);
-    const auto vector = normalize(componentInfo.position(children[0]) -
-                                  componentInfo.position(children[1]));
+    const auto vector = normalize(componentInfo.position(children[0]) - componentInfo.position(children[1]));
     if (fabs(vector.scalar_prod(normal)) > Mantid::Kernel::Tolerance) {
-      g_log.warning() << "Assembly " << componentInfo.name(bankIndex)
-                      << " isn't flat.\n";
+      g_log.warning() << "Assembly " << componentInfo.name(bankIndex) << " isn't flat.\n";
       return false;
     }
   }
   return true;
 }
 
-Mantid::Kernel::V3D calculateBankNormal(const ComponentInfo &componentInfo,
-                                        const std::vector<size_t> &tubes) {
+Mantid::Kernel::V3D calculateBankNormal(const ComponentInfo &componentInfo, const std::vector<size_t> &tubes) {
   // calculate normal from first two tubes in bank as before
   const auto &tube0 = componentInfo.children(tubes[0]);
   const auto &tube1 = componentInfo.children(tubes[1]);
@@ -168,8 +159,7 @@ Mantid::Kernel::V3D calculateBankNormal(const ComponentInfo &componentInfo,
 }
 
 // Recursively set all detectors and subcomponents of a bank as visited
-void setBankVisited(const ComponentInfo &componentInfo, size_t bankIndex,
-                    std::vector<bool> &visitedComponents) {
+void setBankVisited(const ComponentInfo &componentInfo, size_t bankIndex, std::vector<bool> &visitedComponents) {
   const auto &children = componentInfo.children(bankIndex);
   visitedComponents[bankIndex] = true;
   for (auto child : children) {
@@ -181,8 +171,7 @@ void setBankVisited(const ComponentInfo &componentInfo, size_t bankIndex,
   }
 }
 
-size_t findNumDetectors(const ComponentInfo &componentInfo,
-                        const std::vector<size_t> &components) {
+size_t findNumDetectors(const ComponentInfo &componentInfo, const std::vector<size_t> &components) {
   size_t numDets = 0;
   for (auto comp : components) {
     if (componentInfo.isDetector(comp))
@@ -191,10 +180,9 @@ size_t findNumDetectors(const ComponentInfo &componentInfo,
   return numDets;
 }
 
-void initialisePolygonWithTransformedBoundingBoxPoints(
-    QPolygonF &panelPolygon, const ComponentInfo &componentInfo,
-    size_t detectorIndex, const V3D &refPos, const Quat &rotation,
-    const V3D &xaxis, const V3D &yaxis) {
+void initialisePolygonWithTransformedBoundingBoxPoints(QPolygonF &panelPolygon, const ComponentInfo &componentInfo,
+                                                       size_t detectorIndex, const V3D &refPos, const Quat &rotation,
+                                                       const V3D &xaxis, const V3D &yaxis) {
   auto bb = componentInfo.boundingBox(detectorIndex);
   auto bbMinPoint = bb.minPoint() - refPos;
   auto bbMaxPoint = bb.maxPoint() - refPos;
@@ -210,15 +198,13 @@ void initialisePolygonWithTransformedBoundingBoxPoints(
 
 } // namespace
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 /** Constructor
  * @param s The surface of the panel
  */
 FlatBankInfo::FlatBankInfo(PanelsSurface *s)
-    : rotation(), startDetectorIndex(0), endDetectorIndex(0), polygon(),
-      surface(s) {}
+    : rotation(), startDetectorIndex(0), endDetectorIndex(0), polygon(), surface(s) {}
 
 /**
  * Translate the bank by a vector.
@@ -235,8 +221,7 @@ void FlatBankInfo::translate(const QPointF &shift) {
   }
 }
 
-PanelsSurface::PanelsSurface(const InstrumentActor *rootActor,
-                             const Mantid::Kernel::V3D &origin,
+PanelsSurface::PanelsSurface(const InstrumentActor *rootActor, const Mantid::Kernel::V3D &origin,
                              const Mantid::Kernel::V3D &axis)
     : UnwrappedSurface(rootActor), m_pos(origin), m_zaxis(axis) {
   setupAxes();
@@ -281,15 +266,12 @@ void PanelsSurface::init() {
   m_v_max = m_viewRect.y1();
 }
 
-void PanelsSurface::project(const Mantid::Kernel::V3D & /*pos*/, double & /*u*/,
-                            double & /*v*/, double & /*uscale*/,
+void PanelsSurface::project(const Mantid::Kernel::V3D & /*pos*/, double & /*u*/, double & /*v*/, double & /*uscale*/,
                             double & /*vscale*/) const {
-  throw std::runtime_error(
-      "Cannot project an arbitrary point to this surface.");
+  throw std::runtime_error("Cannot project an arbitrary point to this surface.");
 }
 
-void PanelsSurface::rotate(const UnwrappedDetector &udet,
-                           Mantid::Kernel::Quat &R) const {
+void PanelsSurface::rotate(const UnwrappedDetector &udet, Mantid::Kernel::Quat &R) const {
   const auto &detectorInfo = m_instrActor->detectorInfo();
   int index = m_detector2bankMap[udet.detIndex];
   FlatBankInfo &info = *m_flatBanks[index];
@@ -312,8 +294,7 @@ void PanelsSurface::setupAxes() {
  * @param normal :: Normal vector to the bank's plane.
  * @param detectors :: List of detectorIndices.
  */
-void PanelsSurface::addFlatBankOfDetectors(
-    const Mantid::Kernel::V3D &normal, const std::vector<size_t> &detectors) {
+void PanelsSurface::addFlatBankOfDetectors(const Mantid::Kernel::V3D &normal, const std::vector<size_t> &detectors) {
   int index = m_flatBanks.size();
   // save bank info
   auto *info = new FlatBankInfo(this);
@@ -337,9 +318,8 @@ void PanelsSurface::addFlatBankOfDetectors(
   info->polygon = QPolygonF(vert);
 
   // initialise bank polygon with sensible bounding box points
-  initialisePolygonWithTransformedBoundingBoxPoints(
-      info->polygon, m_instrActor->componentInfo(), detectors[0], pos0,
-      info->rotation, m_xaxis, m_yaxis);
+  initialisePolygonWithTransformedBoundingBoxPoints(info->polygon, m_instrActor->componentInfo(), detectors[0], pos0,
+                                                    info->rotation, m_xaxis, m_yaxis);
 
 #pragma omp parallel for ordered
   for (int i = 0; i < static_cast<int>(detectors.size()); ++i) { // NOLINT
@@ -419,15 +399,13 @@ boost::optional<size_t> PanelsSurface::processTubes(size_t rootIndex) {
     bankChildren = &componentInfo.children(bankIndex);
   }
 
-  auto tubes =
-      (bankIndex == bankIndex0) ? *bankChildren : std::vector<size_t>();
+  auto tubes = (bankIndex == bankIndex0) ? *bankChildren : std::vector<size_t>();
   if (tubes.empty()) {
     // If tubes is empty then the flat assembly includes the tubes as grand
     // children. Go down the tree to find all these tubes.
     for (auto index : *bankChildren) {
       boost::optional<size_t> tubeIndex = index;
-      while (componentInfo.componentType(tubeIndex.get()) !=
-             ComponentType::OutlineComposite) {
+      while (componentInfo.componentType(tubeIndex.get()) != ComponentType::OutlineComposite) {
         auto &children = componentInfo.children(tubeIndex.get());
         if (children.empty()) {
           tubeIndex = boost::none;
@@ -445,13 +423,11 @@ boost::optional<size_t> PanelsSurface::processTubes(size_t rootIndex) {
 
   // Now we found all the tubes that may form a flat struture.
   // Use two of the tubes to calculate the normal to the plain of that structure
-  auto normal =
-      tubes.size() > 1 ? calculateBankNormal(componentInfo, tubes) : V3D();
+  auto normal = tubes.size() > 1 ? calculateBankNormal(componentInfo, tubes) : V3D();
 
   // If some of the tubes are not perpendicular to the normal the structure
   // isn't flat
-  if (normal.nullVector() ||
-      !isBankFlat(componentInfo, bankIndex, tubes, normal))
+  if (normal.nullVector() || !isBankFlat(componentInfo, bankIndex, tubes, normal))
     return boost::none;
 
   // save bank info
@@ -464,10 +440,8 @@ boost::optional<size_t> PanelsSurface::processTubes(size_t rootIndex) {
 
   // Now go over all detectors in the tubes and put them onto the unwrapped
   // surfeace.
-  auto pos0 =
-      componentInfo.position(componentInfo.children(tubes.front()).front());
-  auto pos1 =
-      componentInfo.position(componentInfo.children(tubes.front()).back());
+  auto pos0 = componentInfo.position(componentInfo.children(tubes.front()).front());
+  auto pos1 = componentInfo.position(componentInfo.children(tubes.front()).back());
 
   info->rotation = calcBankRotation(pos0, normal);
   pos1 -= pos0;
@@ -503,9 +477,8 @@ boost::optional<size_t> PanelsSurface::processTubes(size_t rootIndex) {
   return bankIndex;
 }
 
-std::pair<std::vector<size_t>, Mantid::Kernel::V3D>
-PanelsSurface::processUnstructured(size_t rootIndex,
-                                   std::vector<bool> &visited) {
+std::pair<std::vector<size_t>, Mantid::Kernel::V3D> PanelsSurface::processUnstructured(size_t rootIndex,
+                                                                                       std::vector<bool> &visited) {
   Mantid::Kernel::V3D normal;
   const auto &detectorInfo = m_instrActor->detectorInfo();
   Mantid::Kernel::V3D pos0;
@@ -533,8 +506,7 @@ PanelsSurface::processUnstructured(size_t rootIndex,
       // the line between the first two detectors
       y = normalize(pos - pos0);
       setupBasisAxes(y, normal, x);
-    } else if (fabs(normal.scalar_prod(pos - pos0)) >
-               Mantid::Kernel::Tolerance) {
+    } else if (fabs(normal.scalar_prod(pos - pos0)) > Mantid::Kernel::Tolerance) {
       if (!normalFound) {
         // when first non-colinear detector is found set the normal
         x = normalize(pos - pos0);
@@ -542,8 +514,7 @@ PanelsSurface::processUnstructured(size_t rootIndex,
         x = y.cross_prod(normal);
         normalFound = true;
       } else {
-        g_log.warning() << "Assembly " << componentInfo.name(rootIndex)
-                        << " isn't flat.\n";
+        g_log.warning() << "Assembly " << componentInfo.name(rootIndex) << " isn't flat.\n";
         break;
       }
     }
@@ -557,15 +528,13 @@ PanelsSurface::findFlatPanels(size_t rootIndex, std::vector<bool> &visited) {
   const auto &componentInfo = m_instrActor->componentInfo();
   auto parentIndex = componentInfo.parent(rootIndex);
   auto componentType = componentInfo.componentType(parentIndex);
-  if (componentType == ComponentType::Rectangular ||
-      componentType == ComponentType::Structured) {
+  if (componentType == ComponentType::Rectangular || componentType == ComponentType::Structured) {
     /* Do nothing until the root index of the structured bank. */
     return boost::none;
   }
 
   componentType = componentInfo.componentType(rootIndex);
-  if (componentType == ComponentType::Rectangular ||
-      componentType == ComponentType::Structured) {
+  if (componentType == ComponentType::Rectangular || componentType == ComponentType::Structured) {
     processStructured(rootIndex);
     setBankVisited(componentInfo, rootIndex, visited);
     return boost::none;
@@ -607,8 +576,7 @@ void PanelsSurface::constructFromComponentInfo() {
         if (detectors.size() > 1)
           addFlatBankOfDetectors(normal, detectors);
       }
-    } else if (children.size() == 0 &&
-               componentInfo.parent(i) == componentInfo.root()) {
+    } else if (children.size() == 0 && componentInfo.parent(i) == componentInfo.root()) {
       visited[i] = true;
     }
   }
@@ -620,9 +588,8 @@ void PanelsSurface::constructFromComponentInfo() {
  * @param detPos :: Position of a detector of the bank.
  * @param normal :: Normal to the bank's plane.
  */
-Mantid::Kernel::Quat
-PanelsSurface::calcBankRotation(const Mantid::Kernel::V3D &detPos,
-                                Mantid::Kernel::V3D normal) const {
+Mantid::Kernel::Quat PanelsSurface::calcBankRotation(const Mantid::Kernel::V3D &detPos,
+                                                     Mantid::Kernel::V3D normal) const {
   if (normal.cross_prod(m_zaxis).nullVector()) {
     return Mantid::Kernel::Quat();
   }
@@ -640,9 +607,7 @@ PanelsSurface::calcBankRotation(const Mantid::Kernel::V3D &detPos,
   return Mantid::Kernel::Quat(normal, m_zaxis);
 }
 
-void PanelsSurface::addDetector(size_t detIndex,
-                                const Mantid::Kernel::V3D &refPos,
-                                int bankIndex,
+void PanelsSurface::addDetector(size_t detIndex, const Mantid::Kernel::V3D &refPos, int bankIndex,
                                 const Mantid::Kernel::Quat &rotation) {
   const auto &detectorInfo = m_instrActor->detectorInfo();
 
@@ -684,8 +649,7 @@ void PanelsSurface::spreadBanks() {
     } else {
       dir /= length;
     }
-    qreal step =
-        (fabs(rect.width() * dir.x()) + fabs(rect.height() * dir.y())) / 4;
+    qreal step = (fabs(rect.width() * dir.x()) + fabs(rect.height() * dir.y())) / 4;
     dir *= step;
     if (step == 0.0)
       continue;
@@ -753,5 +717,4 @@ void PanelsSurface::clearBanks() {
   m_flatBanks.clear();
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

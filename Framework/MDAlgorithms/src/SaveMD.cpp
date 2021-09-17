@@ -42,8 +42,7 @@ void prepareUpdate(MDBoxFlatTree &BoxFlatStruct, BoxController *bc, typename MDE
 }
 } // namespace
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveMD)
@@ -318,5 +317,4 @@ void SaveMD::exec() {
                              "type.");
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

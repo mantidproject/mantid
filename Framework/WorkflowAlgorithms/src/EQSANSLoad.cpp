@@ -26,8 +26,7 @@
 
 #include <fstream>
 
-namespace Mantid {
-namespace WorkflowAlgorithms {
+namespace Mantid::WorkflowAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(EQSANSLoad)
@@ -775,5 +774,4 @@ void EQSANSLoad::exec() {
   setPropertyValue("OutputMessage", m_output_message);
 }
 
-} // namespace WorkflowAlgorithms
-} // namespace Mantid
+} // namespace Mantid::WorkflowAlgorithms

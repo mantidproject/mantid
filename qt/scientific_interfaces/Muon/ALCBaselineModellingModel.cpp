@@ -46,8 +46,7 @@ MatrixWorkspace_sptr evaluateFunction(const IFunction_const_sptr &function,
 
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 
 void ALCBaselineModellingModel::fit(IFunction_const_sptr function, const std::vector<Section> &sections) {
   // Create a copy of the data
@@ -231,5 +230,4 @@ MatrixWorkspace_sptr ALCBaselineModellingModel::baselineData(IFunction_const_spt
   return extractSpectrum(evaluateFunction(function, inputWorkspace), 1);
 }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

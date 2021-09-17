@@ -23,9 +23,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 
-namespace Mantid {
-
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace API;
 using namespace Geometry;
@@ -420,5 +418,4 @@ void MultipleScatteringCorrection::pairWiseSum(double &A1, double &A2, const dou
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

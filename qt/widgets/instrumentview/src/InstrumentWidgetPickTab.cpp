@@ -56,8 +56,7 @@
 
 using Mantid::API::AlgorithmManager;
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 using namespace boost::math;
 
@@ -1871,5 +1870,4 @@ void DetectorPlotController::zoomOutOnPlot() {
   m_plot->zoomOutOnPlot();
 #endif
 }
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

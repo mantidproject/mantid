@@ -58,8 +58,7 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using namespace Mantid::MuonAlgorithmHelper;
 
-namespace Mantid {
-namespace Muon {
+namespace Mantid::Muon {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(LoadAndApplyMuonDetectorGrouping)
@@ -234,8 +233,9 @@ void LoadAndApplyMuonDetectorGrouping::exec() {
 }
 
 // Checks that the detector IDs in grouping are in the workspace
-void LoadAndApplyMuonDetectorGrouping::checkDetectorIDsInWorkspace(API::Grouping &grouping, Workspace_sptr workspace) {
-  bool check = MuonAlgorithmHelper::checkGroupDetectorsInWorkspace(grouping, std::move(workspace));
+void LoadAndApplyMuonDetectorGrouping::checkDetectorIDsInWorkspace(API::Grouping &grouping,
+                                                                   const Workspace_sptr &workspace) {
+  bool check = MuonAlgorithmHelper::checkGroupDetectorsInWorkspace(grouping, workspace);
   if (!check) {
     g_log.error("One or more detector IDs specified in the groups is not "
                 "contained in the InputWorkspace");
@@ -419,5 +419,4 @@ void LoadAndApplyMuonDetectorGrouping::addPairingToADS(const Mantid::Muon::Analy
 // Allow WorkspaceGroup property to function correctly.
 bool LoadAndApplyMuonDetectorGrouping::checkGroups() { return false; }
 
-} // namespace Muon
-} // namespace Mantid
+} // namespace Mantid::Muon

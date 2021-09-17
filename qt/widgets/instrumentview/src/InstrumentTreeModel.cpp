@@ -15,16 +15,13 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/Exception.h"
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 /**
  * Constructor for tree model to display instrument tree
  */
-InstrumentTreeModel::InstrumentTreeModel(const InstrumentWidget *instrWidget,
-                                         QObject *parent)
+InstrumentTreeModel::InstrumentTreeModel(const InstrumentWidget *instrWidget, QObject *parent)
     : QAbstractItemModel(parent), m_instrWidget(instrWidget) {
-  const auto &componentInfo =
-      m_instrWidget->getInstrumentActor().componentInfo();
+  const auto &componentInfo = m_instrWidget->getInstrumentActor().componentInfo();
   m_componentIndices.resize(componentInfo.size());
   std::iota(m_componentIndices.begin(), m_componentIndices.end(), 0);
 }
@@ -44,8 +41,7 @@ int InstrumentTreeModel::columnCount(const QModelIndex &parent) const {
   if (!parent.isValid())
     return 1;
 
-  const auto &componentInfo =
-      m_instrWidget->getInstrumentActor().componentInfo();
+  const auto &componentInfo = m_instrWidget->getInstrumentActor().componentInfo();
   auto index = extractIndex(parent);
   if (componentInfo.children(index).size() > 0)
     return 1;
@@ -61,8 +57,7 @@ QVariant InstrumentTreeModel::data(const QModelIndex &index, int role) const {
   if (role != Qt::DisplayRole)
     return QVariant();
 
-  const auto &componentInfo =
-      m_instrWidget->getInstrumentActor().componentInfo();
+  const auto &componentInfo = m_instrWidget->getInstrumentActor().componentInfo();
 
   if (!index.isValid()) // not valid has to return the root node
     return QString::fromStdString(componentInfo.name(componentInfo.root()));
@@ -83,9 +78,7 @@ Qt::ItemFlags InstrumentTreeModel::flags(const QModelIndex &index) const {
 /**
  * Instrument header. returns nothing. no header for tree
  */
-QVariant InstrumentTreeModel::headerData(int section,
-                                         Qt::Orientation orientation,
-                                         int role) const {
+QVariant InstrumentTreeModel::headerData(int section, Qt::Orientation orientation, int role) const {
   (void)section;     // avoid compiler warning
   (void)orientation; // avoid compiler warning
   (void)role;        // avoid compiler warning
@@ -95,10 +88,8 @@ QVariant InstrumentTreeModel::headerData(int section,
 /**
  * Returns the ModelIndex at a give row and column and the parent.
  */
-QModelIndex InstrumentTreeModel::index(int row, int column,
-                                       const QModelIndex &parent) const {
-  const auto &componentInfo =
-      m_instrWidget->getInstrumentActor().componentInfo();
+QModelIndex InstrumentTreeModel::index(int row, int column, const QModelIndex &parent) const {
+  const auto &componentInfo = m_instrWidget->getInstrumentActor().componentInfo();
   if (!parent.isValid()) { // invalid parent, has to be the root node i.e
                            // instrument
     return createIndex(row, column, &m_componentIndices[componentInfo.root()]);
@@ -106,8 +97,7 @@ QModelIndex InstrumentTreeModel::index(int row, int column,
   auto index = extractIndex(parent);
   const auto &children = componentInfo.children(index);
 
-  if (index == componentInfo.source() || index == componentInfo.sample() ||
-      static_cast<int>(children.size()) <= row)
+  if (index == componentInfo.source() || index == componentInfo.sample() || static_cast<int>(children.size()) <= row)
     return QModelIndex();
 
   return createIndex(row, column, &m_componentIndices[children[row]]);
@@ -121,8 +111,7 @@ QModelIndex InstrumentTreeModel::parent(const QModelIndex &index) const {
                         // for root return empty.
     return QModelIndex();
 
-  const auto &componentInfo =
-      m_instrWidget->getInstrumentActor().componentInfo();
+  const auto &componentInfo = m_instrWidget->getInstrumentActor().componentInfo();
   auto compIndex = extractIndex(index);
 
   if (compIndex == componentInfo.root())
@@ -153,8 +142,7 @@ int InstrumentTreeModel::rowCount(const QModelIndex &parent) const {
   if (!parent.isValid()) // Root node row count is one.
     return 1;
 
-  const auto &componentInfo =
-      m_instrWidget->getInstrumentActor().componentInfo();
+  const auto &componentInfo = m_instrWidget->getInstrumentActor().componentInfo();
   auto index = extractIndex(parent);
   const auto &children = componentInfo.children(index);
   if (children.size() > 0)
@@ -167,5 +155,4 @@ size_t InstrumentTreeModel::extractIndex(const QModelIndex &index) {
   auto indexPtr = static_cast<size_t *>(index.internalPointer());
   return *indexPtr;
 }
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

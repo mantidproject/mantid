@@ -6,9 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/Batch/QtBasicNavigation.h"
 
-namespace MantidQt {
-namespace MantidWidgets {
-namespace Batch {
+namespace MantidQt::MantidWidgets::Batch {
 
 QModelIndex below(QModelIndex const &index) { return index.sibling(index.row() + 1, index.column()); }
 
@@ -31,6 +29,4 @@ QModelIndex firstCellOnRowOf(QModelIndex const &index) { return index.sibling(in
 bool areOnSameRow(QModelIndex const &a, QModelIndex const &b) {
   return a.parent() == b.parent() && a.row() == b.row() && a.model() == b.model();
 }
-} // namespace Batch
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets::Batch

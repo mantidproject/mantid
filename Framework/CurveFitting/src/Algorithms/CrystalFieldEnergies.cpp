@@ -13,8 +13,7 @@
 
 #include <sstream>
 
-namespace Mantid {
-namespace CurveFitting {
+namespace Mantid::CurveFitting {
 
 using Mantid::CurveFitting::ComplexFortranMatrix;
 using Mantid::CurveFitting::DoubleFortranMatrix;
@@ -186,5 +185,4 @@ void CrystalFieldEnergies::exec() {
   setProperty("Hamiltonian", ham.packToStdVector());
 }
 
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting

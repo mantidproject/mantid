@@ -9,10 +9,8 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/ArchiveSearchFactory.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 /// Default constructor
 ArchiveSearchFactoryImpl::ArchiveSearchFactoryImpl() {}
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

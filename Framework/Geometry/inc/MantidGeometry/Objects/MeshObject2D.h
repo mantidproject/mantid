@@ -30,8 +30,7 @@ class GeometryHandler;
 class MANTID_GEOMETRY_DLL MeshObject2D : public IObject {
 public:
   /// Constructor
-  MeshObject2D(const std::vector<uint32_t> &faces, const std::vector<Kernel::V3D> &vertices,
-               const Kernel::Material &material);
+  MeshObject2D(std::vector<uint32_t> faces, std::vector<Kernel::V3D> vertices, const Kernel::Material &material);
   /// Constructor
   MeshObject2D(std::vector<uint32_t> &&faces, std::vector<Kernel::V3D> &&vertices, const Kernel::Material &&material);
 

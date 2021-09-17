@@ -26,9 +26,7 @@ using namespace std;
 
 const double NEG_DBL_MAX(-1. * DBL_MAX);
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Algorithms {
+namespace Mantid::CurveFitting::Algorithms {
 namespace {
 const double PEAKRANGECONSTANT = 5.0;
 
@@ -977,7 +975,7 @@ double LeBailFunction::getPeakParameter(std::vector<int> hkl, const std::string 
 
   IPowderDiffPeakFunction_sptr peak = fiter->second;
 
-  double parvalue = getPeakParameterValue(peak, std::move(parname));
+  double parvalue = getPeakParameterValue(peak, parname);
 
   return parvalue;
 }
@@ -995,7 +993,7 @@ double LeBailFunction::getPeakParameter(size_t index, const std::string &parname
   }
 
   IPowderDiffPeakFunction_sptr peak = m_vecPeaks[index];
-  double value = getPeakParameterValue(peak, std::move(parname));
+  double value = getPeakParameterValue(peak, parname);
 
   return value;
 }
@@ -1056,6 +1054,4 @@ double LeBailFunction::getPeakMaximumValue(std::vector<int> hkl, const std::vect
   return maxvalue;
 }
 
-} // namespace Algorithms
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Algorithms

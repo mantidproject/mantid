@@ -29,8 +29,7 @@
 
 using Mantid::HistogramData::HistogramX;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register with the algorithm factory
 DECLARE_ALGORITHM(MergeRuns)
@@ -691,5 +690,4 @@ std::vector<SpectrumDefinition> MergeRuns::buildScanIntervals(const std::vector<
   return newAddeeSpecDefs;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

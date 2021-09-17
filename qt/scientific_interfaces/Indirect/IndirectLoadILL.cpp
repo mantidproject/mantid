@@ -77,8 +77,7 @@ void loadILLData(std::string const &filename, std::string const &outputName) {
 
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 IndirectLoadILL::IndirectLoadILL(QWidget *parent) : IndirectToolsTab(parent) {
   m_uiForm.setupUi(parent);
 
@@ -199,5 +198,4 @@ void IndirectLoadILL::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(e
 
 void IndirectLoadILL::setPlotOptionsEnabled(bool enabled) { m_uiForm.cbPlot->setEnabled(enabled); }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

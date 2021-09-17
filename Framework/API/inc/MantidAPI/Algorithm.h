@@ -111,7 +111,7 @@ public:
   class MANTID_API_DLL ProgressNotification : public AlgorithmNotification {
   public:
     /// Constructor
-    ProgressNotification(const Algorithm *const alg, double p, const std::string &msg, double estimatedTime,
+    ProgressNotification(const Algorithm *const alg, double p, std::string msg, double estimatedTime,
                          int progressPrecision);
     std::string name() const override;
     double progress;       ///< Current progress. Value must be between 0 and 1.
@@ -126,7 +126,7 @@ public:
   class MANTID_API_DLL ErrorNotification : public AlgorithmNotification {
   public:
     /// Constructor
-    ErrorNotification(const Algorithm *const alg, const std::string &str);
+    ErrorNotification(const Algorithm *const alg, std::string str);
     std::string name() const override;
     std::string what; ///< message string
   };
@@ -171,8 +171,7 @@ public:
   /// Function to return all of the seeAlso (these are not validated) algorithms
   /// related to this algorithm.A default implementation is provided.
   const std::vector<std::string> seeAlso() const override { return {}; };
-  /// function to return any aliases to the algorithm;  A default implementation
-  /// is provided
+  /// function to return any aliases to the algorithm;  A default implementation is provided
   const std::string alias() const override { return ""; }
 
   /// function to return URL for algorithm documentation; A default

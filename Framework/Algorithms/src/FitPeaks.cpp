@@ -49,8 +49,7 @@ using namespace Mantid::Geometry;
 using Mantid::HistogramData::Histogram;
 using namespace std;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 namespace {
 namespace PropertyNames {
@@ -1575,7 +1574,7 @@ double FitPeaks::fitFunctionMD(API::IFunction_sptr fit_function, const API::Matr
   std::shared_ptr<MultiDomainFunction> md_function = std::make_shared<MultiDomainFunction>();
 
   // Set function first
-  md_function->addFunction(fit_function);
+  md_function->addFunction(std::move(fit_function));
 
   //  set domain for function with index 0 covering both sides
   md_function->clearDomainIndices();
@@ -1660,8 +1659,8 @@ API::MatrixWorkspace_sptr FitPeaks::createMatrixWorkspace(const std::vector<doub
   size_t ysize = vec_y.size();
 
   HistogramBuilder builder;
-  builder.setX(std::move(size));
-  builder.setY(std::move(ysize));
+  builder.setX(size);
+  builder.setY(ysize);
   MatrixWorkspace_sptr matrix_ws = create<Workspace2D>(1, builder.build());
 
   auto &dataX = matrix_ws->mutableX(0);
@@ -2100,5 +2099,4 @@ std::string FitPeaks::getPeakHeightParameterName(const API::IPeakFunction_const_
 
 DECLARE_ALGORITHM(FitPeaks)
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

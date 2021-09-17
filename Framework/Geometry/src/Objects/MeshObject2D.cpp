@@ -14,9 +14,9 @@
 #include <cmath>
 #include <memory>
 #include <numeric>
+#include <utility>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 namespace CoplanarChecks {
 bool sufficientPoints(const std::vector<Kernel::V3D> &vertices) {
@@ -142,9 +142,9 @@ bool MeshObject2D::pointsCoplanar(const std::vector<Kernel::V3D> &vertices) {
 /**
  * Constructor
  */
-MeshObject2D::MeshObject2D(const std::vector<uint32_t> &faces, const std::vector<Kernel::V3D> &vertices,
+MeshObject2D::MeshObject2D(std::vector<uint32_t> faces, std::vector<Kernel::V3D> vertices,
                            const Kernel::Material &material)
-    : m_triangles(faces), m_vertices(vertices), m_material(material) {
+    : m_triangles(std::move(faces)), m_vertices(std::move(vertices)), m_material(material) {
   initialize();
 }
 
@@ -153,7 +153,7 @@ MeshObject2D::MeshObject2D(const std::vector<uint32_t> &faces, const std::vector
  */
 MeshObject2D::MeshObject2D(std::vector<uint32_t> &&faces, std::vector<Kernel::V3D> &&vertices,
                            const Kernel::Material &&material)
-    : m_triangles(std::move(faces)), m_vertices(std::move(vertices)), m_material(std::move(material)) {
+    : m_triangles(std::move(faces)), m_vertices(std::move(vertices)), m_material(material) {
   initialize();
 }
 
@@ -423,5 +423,4 @@ void MeshObject2D::initDraw() const {
   m_handler->initialize();
 }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

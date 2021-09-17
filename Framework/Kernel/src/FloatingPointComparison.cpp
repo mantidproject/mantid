@@ -13,8 +13,7 @@
 #include <cmath>
 #include <limits>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 /**
  * Compare floating point numbers for equality to within
@@ -57,5 +56,4 @@ template DLLExport bool ltEquals<float>(const float, const float);
 template DLLExport bool gtEquals<double>(const double, const double);
 template DLLExport bool gtEquals<float>(const float, const float);
 ///@endcond
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

@@ -14,8 +14,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 //-----------------------------------------------------------------------
 void FilterByTime2::init() {
@@ -140,5 +139,4 @@ void FilterByTime2::exec() {
   this->setProperty("OutputWorkspace", optws);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

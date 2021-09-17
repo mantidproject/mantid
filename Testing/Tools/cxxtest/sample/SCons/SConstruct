@@ -6,8 +6,8 @@ cxxtest_path = '../..'
 # without having to copy it into a particular path.
 # for nicer examples you *should* use, see the cxxtest builder tests in the
 # build_tools/SCons/test directory.
-import imp
-cxxtest = imp.load_source('cxxtest', cxxtestbuilder_path)
+from importlib.machinery import SourceFileLoader
+cxxtest = SourceFileLoader('cxxtest', cxxtestbuilder_path).load_module()
 
 # First build the 'real' library, when working on an embedded system
 # this may involve a cross compiler.
@@ -37,4 +37,3 @@ lib_to_test = env_test.StaticLibrary('build/dev_platform/tested',
                                      env.Glob('build/dev_platform/*.c'))
 env_test.Append(LIBS=lib_to_test)
 env_test.CxxTest(env_test.Glob('tests/*.h'))
-

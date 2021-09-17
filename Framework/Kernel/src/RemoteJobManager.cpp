@@ -19,8 +19,7 @@
 #include <sstream>
 #include <utility>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 namespace {
 // static logger object
@@ -175,11 +174,11 @@ std::istream &RemoteJobManager::httpPost(const std::string &path, const PostData
 // POST
 void RemoteJobManager::initGetRequest(Poco::Net::HTTPRequest &req, const std::string &extraPath,
                                       const std::string &queryString) {
-  return initHTTPRequest(req, Poco::Net::HTTPRequest::HTTP_GET, std::move(extraPath), std::move(queryString));
+  return initHTTPRequest(req, Poco::Net::HTTPRequest::HTTP_GET, extraPath, queryString);
 }
 
 void RemoteJobManager::initPostRequest(Poco::Net::HTTPRequest &req, const std::string &extraPath) {
-  return initHTTPRequest(req, Poco::Net::HTTPRequest::HTTP_POST, std::move(extraPath));
+  return initHTTPRequest(req, Poco::Net::HTTPRequest::HTTP_POST, extraPath);
 }
 
 void RemoteJobManager::initHTTPRequest(Poco::Net::HTTPRequest &req, const std::string &method,
@@ -236,5 +235,4 @@ Poco::Net::NameValueCollection RemoteJobManager::getCookies() {
   return nvc;
 }
 
-} // end of namespace Kernel
-} // end of namespace Mantid
+} // namespace Mantid::Kernel

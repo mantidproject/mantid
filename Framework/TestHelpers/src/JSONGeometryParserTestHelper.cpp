@@ -170,8 +170,7 @@ void addStream(Json::Value &parent, const std::string &name, const std::string &
 }
 } // namespace
 
-namespace Mantid {
-namespace TestHelpers {
+namespace Mantid::TestHelpers {
 namespace JSONTestInstrumentBuilder {
 
 void initialiseRoot(Json::Value &root, const std::string &name) { root[name]; }
@@ -856,5 +855,4 @@ std::string getFullJSONInstrumentSimpleWithZPixelOffset() {
   return JSONTestInstrumentBuilder::convertToString(root);
 }
 
-} // namespace TestHelpers
-} // namespace Mantid
+} // namespace Mantid::TestHelpers

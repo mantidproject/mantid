@@ -8,8 +8,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 /// Clone the current state
 Kernel::IValidator_sptr IncreasingAxisValidator::clone() const {
@@ -40,5 +39,4 @@ std::string IncreasingAxisValidator::checkValidity(const MatrixWorkspace_sptr &v
     return "";
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

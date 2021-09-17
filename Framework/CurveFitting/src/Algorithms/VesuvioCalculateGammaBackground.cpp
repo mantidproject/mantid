@@ -24,9 +24,7 @@
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Algorithms {
+namespace Mantid::CurveFitting::Algorithms {
 using namespace API;
 using namespace Kernel;
 using namespace CurveFitting;
@@ -559,6 +557,4 @@ VesuvioCalculateGammaBackground::calculateThetaRange(const Geometry::IComponent_
   return std::make_pair(theta - dtheta, theta + dtheta);
 }
 
-} // namespace Algorithms
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Algorithms

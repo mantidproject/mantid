@@ -17,8 +17,7 @@
 #include <boost/tokenizer.hpp>
 #include <fstream>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(SaveTBL)
 
@@ -131,5 +130,4 @@ template <class T> void SaveTBL::writeVal(const T &val, std::ofstream &file, boo
     file << '\n';
   }
 }
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

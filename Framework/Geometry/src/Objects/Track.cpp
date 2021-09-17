@@ -15,8 +15,7 @@
 #include <algorithm>
 #include <cmath>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 using Kernel::Tolerance;
 using Kernel::V3D;
 
@@ -284,6 +283,4 @@ double Track::calculateAttenuation(double lambda) const {
   return factor;
 }
 
-} // NAMESPACE Geometry
-
-} // NAMESPACE Mantid
+} // namespace Mantid::Geometry

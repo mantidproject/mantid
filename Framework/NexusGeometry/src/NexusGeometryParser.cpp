@@ -27,8 +27,7 @@
 #include <tuple>
 #include <type_traits>
 
-namespace Mantid {
-namespace NexusGeometry {
+namespace Mantid::NexusGeometry {
 using namespace H5;
 
 // Anonymous namespace
@@ -821,5 +820,4 @@ std::string NexusGeometryParser::getMangledName(const std::string &fileName, con
   }
   return mangledName;
 }
-} // namespace NexusGeometry
-} // namespace Mantid
+} // namespace Mantid::NexusGeometry

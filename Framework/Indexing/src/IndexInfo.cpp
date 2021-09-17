@@ -17,8 +17,7 @@
 #include <functional>
 #include <numeric>
 
-namespace Mantid {
-namespace Indexing {
+namespace Mantid::Indexing {
 
 /// Construct a default IndexInfo, with contiguous spectrum numbers starting at
 /// 1 and no spectrum definitions.
@@ -374,5 +373,4 @@ void IndexInfo::makeSpectrumNumberTranslator(std::vector<SpectrumNumber> &&spect
 template MANTID_INDEXING_DLL IndexInfo::IndexInfo(std::vector<SpectrumNumber>, const IndexInfo &);
 template MANTID_INDEXING_DLL IndexInfo::IndexInfo(std::vector<GlobalSpectrumIndex>, const IndexInfo &);
 
-} // namespace Indexing
-} // namespace Mantid
+} // namespace Mantid::Indexing

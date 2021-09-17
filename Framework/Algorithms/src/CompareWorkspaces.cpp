@@ -25,8 +25,7 @@
 #include "MantidKernel/Unit.h"
 #include "MantidParallel/Communicator.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -1082,8 +1081,8 @@ void CompareWorkspaces::doPeaksComparison(PeaksWorkspace_sptr tws1, PeaksWorkspa
 }
 
 //------------------------------------------------------------------------------------------------
-void CompareWorkspaces::doLeanElasticPeaksComparison(LeanElasticPeaksWorkspace_sptr tws1,
-                                                     LeanElasticPeaksWorkspace_sptr tws2) {
+void CompareWorkspaces::doLeanElasticPeaksComparison(const LeanElasticPeaksWorkspace_sptr &tws1,
+                                                     const LeanElasticPeaksWorkspace_sptr &tws2) {
   // Check some table-based stuff
   if (tws1->getNumberPeaks() != tws2->getNumberPeaks()) {
     recordMismatch("Mismatched number of rows.");
@@ -1330,5 +1329,4 @@ void CompareWorkspaces::execMasterOnly() {
     setProperty("Result", true);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

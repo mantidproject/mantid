@@ -11,8 +11,7 @@
 #include <QProgressBar>
 #include <QString>
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 AlgorithmProgressWidget::AlgorithmProgressWidget(QWidget *parent)
     : QWidget(parent), m_progressBar{new QProgressBar(this)}, m_layout{new QHBoxLayout(this)},
@@ -60,5 +59,4 @@ void AlgorithmProgressWidget::updateProgress(const double progress, const QStrin
 
 void AlgorithmProgressWidget::blockUpdates(bool block) { m_presenter->blockSignals(block); }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

@@ -21,9 +21,7 @@ using boost::python::handle;
 using boost::python::len;
 using boost::python::object;
 
-namespace Mantid {
-namespace PythonInterface {
-namespace Converters {
+namespace Mantid::PythonInterface::Converters {
 /**
  * Construct the converter object with the given Python object
  * @param p :: A boost::python object that should support
@@ -65,6 +63,4 @@ Kernel::V3D PyObjectToV3D::operator()() {
   auto toDouble = [](const object &obj) { return extract<double>(object(handle<>(PyNumber_Float(obj.ptr()))))(); };
   return Kernel::V3D(toDouble(m_obj[0]), toDouble(m_obj[1]), toDouble(m_obj[2]));
 }
-} // namespace Converters
-} // namespace PythonInterface
-} // namespace Mantid
+} // namespace Mantid::PythonInterface::Converters

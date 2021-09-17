@@ -86,8 +86,7 @@ public:
   };
 
   /// Constructor
-  FunctionTreeView(QWidget *parent, bool multi,
-                   const std::vector<std::string> &categories = std::vector<std::string>());
+  FunctionTreeView(QWidget *parent, bool multi, std::vector<std::string> categories = std::vector<std::string>());
   /// Destructor
   ~FunctionTreeView() override;
   /// Clear the contents

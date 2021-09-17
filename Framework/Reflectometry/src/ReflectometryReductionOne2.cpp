@@ -33,8 +33,7 @@ using namespace Mantid::Geometry;
 using namespace Mantid::HistogramData;
 using namespace Mantid::Indexing;
 
-namespace Mantid {
-namespace Reflectometry {
+namespace Mantid::Reflectometry {
 
 /*Anonomous namespace */
 namespace {
@@ -1072,8 +1071,7 @@ void ReflectometryReductionOne2::sumInQProcessValue(const int inputIdx, const do
   double lambdaVMax = 0.0;
   getProjectedLambdaRange(lambda, twoTheta, bLambda, bTwoTheta, detectors, lambdaVMin, lambdaVMax);
   // Share the input counts into the output array
-  sumInQShareCounts(inputCounts, inputE[inputIdx], bLambda, lambdaVMin, lambdaVMax, outSpecIdx, std::move(IvsLam),
-                    outputE);
+  sumInQShareCounts(inputCounts, inputE[inputIdx], bLambda, lambdaVMin, lambdaVMax, outSpecIdx, IvsLam, outputE);
 }
 
 /**
@@ -1228,5 +1226,4 @@ void ReflectometryReductionOne2::verifySpectrumMaps(const MatrixWorkspace_const_
     g_log.warning(message);
   }
 }
-} // namespace Reflectometry
-} // namespace Mantid
+} // namespace Mantid::Reflectometry

@@ -21,9 +21,7 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/python/extract.hpp>
 
-namespace Mantid {
-namespace PythonInterface {
-namespace Registry {
+namespace Mantid::PythonInterface::Registry {
 namespace {
 template <typename HeldType> struct StdVectorExtractor {
   static std::vector<HeldType> extract(const boost::python::object &value) {
@@ -125,6 +123,4 @@ INSTANTIATE(double)
 INSTANTIATE(std::string)
 INSTANTIATE(bool)
 ///@endcond
-} // namespace Registry
-} // namespace PythonInterface
-} // namespace Mantid
+} // namespace Mantid::PythonInterface::Registry

@@ -28,8 +28,7 @@
 
 #include "MantidHistogramData/LinearGenerator.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(RealFFT)
@@ -188,5 +187,4 @@ void RealFFT::exec() {
   setProperty("OutputWorkspace", outWS);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

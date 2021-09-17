@@ -101,9 +101,7 @@ boost::optional<Python::Object> workbenchPlot(QStringList const &workspaceNames,
 
 } // namespace
 
-namespace MantidQt {
-namespace Widgets {
-namespace MplCpp {
+namespace MantidQt::Widgets::MplCpp {
 
 ExternalPlotter::ExternalPlotter() {}
 
@@ -282,6 +280,4 @@ bool ExternalPlotter::validateBins(const MatrixWorkspace_const_sptr &workspace, 
   auto const lastIndex = std::stoul(splitStringBy(binIndices, ",-").back());
   return lastIndex < numberOfBins;
 }
-} // namespace MplCpp
-} // namespace Widgets
-} // namespace MantidQt
+} // namespace MantidQt::Widgets::MplCpp

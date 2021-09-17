@@ -38,8 +38,7 @@ double calculatePolynomial(std::vector<double> const &coefficients, double x) {
 
 } // namespace
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 DECLARE_ALGORITHM(CreatePolarizationEfficiencies)
 
@@ -127,5 +126,4 @@ MatrixWorkspace_sptr CreatePolarizationEfficiencies::createEfficiencies(std::vec
   return outWS;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

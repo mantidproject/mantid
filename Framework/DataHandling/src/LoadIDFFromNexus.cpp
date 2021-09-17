@@ -25,8 +25,7 @@ using Poco::XML::DOMParser;
 using Poco::XML::Element;
 using Poco::XML::NodeList;
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 DECLARE_ALGORITHM(LoadIDFFromNexus)
 
@@ -300,5 +299,4 @@ bool LoadIDFFromNexus::loadParameterFile(const std::string &fullPathName, const 
   return false;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

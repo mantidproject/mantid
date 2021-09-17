@@ -108,7 +108,7 @@ IntegrateQLabEvents::ellipseIntegrateEvents(const std::vector<V3D> &E1Vec, V3D c
   if (invalid_peak)
     return std::make_shared<NoShape>();
 
-  return ellipseIntegrateEvents(std::move(E1Vec), peak_q, some_events, eigen_vectors, sigmas, specify_size, peak_radius,
+  return ellipseIntegrateEvents(E1Vec, peak_q, some_events, eigen_vectors, sigmas, specify_size, peak_radius,
                                 back_inner_radius, back_outer_radius, axes_radii, inti, sigi, backi);
 }
 

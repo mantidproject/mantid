@@ -30,8 +30,7 @@
 #include <algorithm>
 #include <boost/math/distributions/students_t.hpp>
 
-namespace Mantid {
-namespace CurveFitting {
+namespace Mantid::CurveFitting {
 
 namespace {
 bool greaterIsLess(double x1, double x2) { return x1 > x2; }
@@ -474,5 +473,4 @@ void IMWDomainCreator::addFunctionValuesToWS(const API::IFunction_sptr &function
   }
 }
 
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting

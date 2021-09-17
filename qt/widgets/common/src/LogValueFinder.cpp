@@ -9,17 +9,17 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include <ostream>
+#include <utility>
 
 using Mantid::API::AnalysisDataService;
 using Mantid::API::MatrixWorkspace;
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 /**
  * Constructor
  * @param wsNames :: [input] Workspace names
  */
-LogValueFinder::LogValueFinder(const QStringList &wsNames) : m_wsNames(wsNames) {}
+LogValueFinder::LogValueFinder(QStringList wsNames) : m_wsNames(std::move(wsNames)) {}
 
 /**
  * Get names of all logs from the first workspace
@@ -88,5 +88,4 @@ double LogValueFinder::getLogValue(const QString &logName, const Mantid::Kernel:
   }
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

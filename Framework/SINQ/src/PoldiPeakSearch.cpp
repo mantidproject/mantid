@@ -30,8 +30,7 @@
 
 #include "MantidKernel/MultiThreaded.h"
 
-namespace Mantid {
-namespace Poldi {
+namespace Mantid::Poldi {
 
 DECLARE_ALGORITHM(PoldiPeakSearch)
 
@@ -342,7 +341,7 @@ MantidVec PoldiPeakSearch::getBackground(const std::list<MantidVec::const_iterat
  */
 UncertainValue PoldiPeakSearch::getBackgroundWithSigma(const std::list<MantidVec::const_iterator> &peakPositions,
                                                        const MantidVec &correlationCounts) const {
-  MantidVec background = getBackground(std::move(peakPositions), correlationCounts);
+  MantidVec background = getBackground(peakPositions, correlationCounts);
 
   /* Instead of using Mean and Standard deviation, which are appropriate
    * for data originating from a normal distribution (which is not the case
@@ -601,5 +600,4 @@ void PoldiPeakSearch::exec() {
   setProperty("OutputWorkspace", m_peaks->asTableWorkspace());
 }
 
-} // namespace Poldi
-} // namespace Mantid
+} // namespace Mantid::Poldi

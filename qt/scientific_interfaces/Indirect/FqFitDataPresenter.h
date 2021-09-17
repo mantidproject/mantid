@@ -54,7 +54,7 @@ protected:
 
 private:
   std::unique_ptr<IAddWorkspaceDialog> getAddWorkspaceDialog(QWidget *parent) const override;
-  void updateParameterOptions(FqFitAddWorkspaceDialog *dialog, FqFitParameters parameters);
+  void updateParameterOptions(FqFitAddWorkspaceDialog *dialog, const FqFitParameters &parameters);
   void updateParameterTypes(FqFitAddWorkspaceDialog *dialog, FqFitParameters &parameters);
   std::vector<std::string> getParameterTypes(FqFitParameters &parameters) const;
   void setActiveWorkspaceIDToCurrentWorkspace(IAddWorkspaceDialog const *dialog);

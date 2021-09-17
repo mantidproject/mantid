@@ -60,7 +60,7 @@ Calibration
     :width: 900px
 
 11. Check that in your save location there is a Calibration folder containing three .prm files
-   `ENGINX_305738` with the suffixes `_all_banks`, `_bank_1`, `_bank_2`.
+    `ENGINX_305738` with the suffixes `_all_banks`, `_bank_1`, `_bank_2`.
 
 12. Close down the Engineering Diffraction gui and reopen it. The Load Existing Calibration radio
     button should be checked on the Calibration tab and the path should be populated with the
@@ -207,4 +207,3 @@ This tests the serial fitting capability of the UI (where all loaded workspaces 
 2. The `Serial Fit` button should now be enabled. Click it and the  group of fit workspaces should appear in the ADS, each with a row for each of the runs in the table. All the runs should have been fitted.
 
 3. The order of the runs in the serial fit should be obtainable from the log at notice level - check that this corresponds to the order of the runs in the table.
-

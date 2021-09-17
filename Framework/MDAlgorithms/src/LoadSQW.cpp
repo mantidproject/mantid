@@ -31,8 +31,7 @@ using namespace Mantid::API;
 using Mantid::Geometry::OrientedLattice;
 using namespace Mantid::DataObjects;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 namespace {
 /** Helper function allowing to typecast sequence of bytes into proper expected
@@ -922,5 +921,4 @@ void dataPositions::parse_data_locations(std::ifstream &dataStream, std::streamo
 EndRegion:
 ==================================================================================*/
 } // namespace LoadSQWHelper
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

@@ -24,9 +24,7 @@ public:
 };
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 IndirectFitDataPresenter::IndirectFitDataPresenter(IIndirectFitDataModel *model, IIndirectFitDataView *view)
     : m_model(model), m_view(view) {
@@ -185,6 +183,4 @@ void IndirectFitDataPresenter::removeSelectedData() {
   updateTableFromModel();
 }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

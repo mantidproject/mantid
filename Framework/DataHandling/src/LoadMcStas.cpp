@@ -25,8 +25,7 @@
 #include <nexus/NeXusException.hpp>
 // clang-format on
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
@@ -591,5 +590,4 @@ int LoadMcStas::confidence(Kernel::NexusDescriptor &descriptor) const {
   return confidence;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

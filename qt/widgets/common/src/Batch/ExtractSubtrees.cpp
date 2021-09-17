@@ -8,9 +8,7 @@
 #include <boost/iterator/transform_iterator.hpp>
 #include <tuple>
 
-namespace MantidQt {
-namespace MantidWidgets {
-namespace Batch {
+namespace MantidQt::MantidWidgets::Batch {
 
 auto ExtractSubtrees::findEndOfSubtree(RandomAccessConstRowIterator subtreeBegin,
                                        RandomAccessConstRowIterator regionEnd, int subtreeRootDepth) const
@@ -61,6 +59,4 @@ auto ExtractSubtrees::operator()(std::vector<Row> region) const -> boost::option
   }
 }
 
-} // namespace Batch
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets::Batch

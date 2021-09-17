@@ -18,8 +18,7 @@
 
 #include <fstream>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
@@ -416,5 +415,4 @@ void LoadDetectorInfo::updateParameterMap(Geometry::DetectorInfo &detectorInfo, 
     detectorInfo.setPosition(detIndex, newPos);
   }
 }
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

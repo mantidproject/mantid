@@ -33,8 +33,7 @@ ITableWorkspace_sptr getADSTableWorkspace(std::string const &workspaceName) {
 
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 ResNorm::ResNorm(QWidget *parent) : IndirectBayesTab(parent), m_previewSpec(0) {
   m_uiForm.setupUi(parent);
 
@@ -515,5 +514,4 @@ void ResNorm::setPlotResultIsPlotting(bool plotting) {
   setButtonsEnabled(!plotting);
 }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

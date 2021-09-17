@@ -10,8 +10,7 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/Exception.h"
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(RotateInstrumentComponent)
@@ -130,5 +129,4 @@ void RotateInstrumentComponent::exec() {
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

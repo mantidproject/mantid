@@ -42,9 +42,7 @@ GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("cast-qual")
 #endif
 
-namespace Mantid {
-
-namespace Geometry {
+namespace Mantid::Geometry {
 namespace {
 Kernel::Logger logger("Surface");
 }
@@ -93,6 +91,4 @@ void Surface::write(std::ostream &out) const
 #ifdef ENABLE_OPENCASCADE
 TopoDS_Shape Surface::createShape() { return TopoDS_Shape(); }
 #endif
-} // NAMESPACE Geometry
-
-} // NAMESPACE Mantid
+} // namespace Mantid::Geometry

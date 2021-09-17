@@ -51,7 +51,7 @@ public:
   ~AlgorithmHistory();
   AlgorithmHistory &operator=(const AlgorithmHistory &);
   AlgorithmHistory(const AlgorithmHistory &);
-  AlgorithmHistory(const std::string &name, int vers, std::string uuid,
+  AlgorithmHistory(std::string name, int vers, std::string uuid,
                    const Types::Core::DateAndTime &start = Types::Core::DateAndTime::getCurrentTime(),
                    const double &duration = -1.0, std::size_t uexeccount = 0);
   void addExecutionInfo(const Types::Core::DateAndTime &start, const double &duration);

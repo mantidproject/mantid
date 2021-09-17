@@ -26,8 +26,7 @@
 using namespace Mantid::DataObjects;
 using namespace Mantid::HistogramData;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CalculateCountRate)
@@ -669,5 +668,4 @@ void CalculateCountRate::buildVisWSNormalization(std::vector<double> &normalizat
   m_pNormalizationLog->histogramData(m_TRangeMin, m_TRangeMax, normalization);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

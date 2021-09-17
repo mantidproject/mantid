@@ -13,9 +13,7 @@
 #include <boost/python/type_id.hpp>
 #include <map>
 
-namespace Mantid {
-namespace PythonInterface {
-namespace Registry {
+namespace Mantid::PythonInterface::Registry {
 namespace // <anonymous>
 {
 /// Typedef the map of type_info -> handler objects. We store
@@ -99,6 +97,4 @@ const PropertyValueHandler &TypeRegistry::retrieve(const std::type_info &typeObj
                                 boost::python::type_info(typeObject).name() + "'");
   }
 }
-} // namespace Registry
-} // namespace PythonInterface
-} // namespace Mantid
+} // namespace Mantid::PythonInterface::Registry

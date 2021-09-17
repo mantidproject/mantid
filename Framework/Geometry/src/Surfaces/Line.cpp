@@ -18,8 +18,7 @@
 namespace {
 Mantid::Kernel::Logger logger("Line");
 }
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 using Kernel::Tolerance;
 using Kernel::V3D;
@@ -276,6 +275,4 @@ Print statement for debugging
   logger.debug() << "Line == " << m_origin << " :: " << m_direction << '\n';
 }
 
-} // namespace Geometry
-
-} // NAMESPACE Mantid
+} // namespace Mantid::Geometry

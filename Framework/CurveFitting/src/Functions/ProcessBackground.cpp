@@ -38,9 +38,7 @@ using namespace HistogramData;
 
 using namespace std;
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
 
@@ -799,7 +797,7 @@ void ProcessBackground::removePeaks() {
  */
 void RemovePeaks::setup(const TableWorkspace_sptr &peaktablews) {
   // Parse table workspace
-  parsePeakTableWorkspace(std::move(peaktablews), m_vecPeakCentre, m_vecPeakFWHM);
+  parsePeakTableWorkspace(peaktablews, m_vecPeakCentre, m_vecPeakFWHM);
 
   // Check
   if (m_vecPeakCentre.size() != m_vecPeakFWHM.size())
@@ -945,6 +943,4 @@ size_t RemovePeaks::excludePeaks(vector<double> v_inX, vector<bool> &v_useX, vec
   return std::count(v_useX.cbegin(), v_useX.cend(), true);
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

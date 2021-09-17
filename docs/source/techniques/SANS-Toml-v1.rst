@@ -94,6 +94,10 @@ For converting existing files I recommend the following process:
 BACK/MON/TIMES
 --------------
 
+Note: This command subtracts the *same* background level from *all* monitors.
+The continued use of this method of monitor correction is now deprecated.
+See BACK/M[n]/TIMES.
+
 ..  code-block:: none
 
     [normalisation]
@@ -119,6 +123,8 @@ BACK/MON/TIMES
 
 BACK/M[n]/TIMES x y
 -------------------
+
+Note: This command subtracts the specified background level from the specified monitor.
 
 ..  code-block:: none
 

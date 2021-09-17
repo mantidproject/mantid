@@ -31,6 +31,8 @@ Bugfixes
 
 - In frequency domain analysis the phasetables calculated from :ref:`MuonMaxent <algm-MuonMaxent>` can be used for
   :ref:`PhaseQuad <algm-PhaseQuad>` calculations on the phase tab.
+- A bug has been fixed in ALC that caused mantid to crash when a user changed the PeakPicker in the PeakFitting plot.
+- A bug has been fixed in ALC where setting an invalid function would cause a crash.
 
 Muon Analysis
 -------------
@@ -39,12 +41,6 @@ New Features
 ############
 
 - Users can now copy sequential fitting parameters to all other runs using the ``Copy fit parameters to all`` checkbox.
-- **The** :ref:`Model Fitting Tab <muon_model_fitting_tab-ref>` **allows you to perform fits across the sample logs and fit parameters stored in your results table.**
-
-.. image::  ../../images/muon_model_fitting_tab.PNG
-   :align: center
-   :height: 800px
-
 
 Muon Analysis and Frequency Domain Analysis
 -------------------------------------------
@@ -54,7 +50,6 @@ New Features
 
 - It is now possible to exclude a single range from a fit range when doing a fit on the :ref:`Fitting Tab <muon_fitting_tab-ref>`.
 - Added a ``Covariance Matrix`` button to the :ref:`Fitting Tab <muon_fitting_tab-ref>` that can be used to open and inspect the normalised covariance parameters of a fit.
-- It is now possible to plot the raw count data in the GUI.
 - **It is now possible to perform an Automatic or Manual background correction in the new** :ref:`Corrections Tab <muon_corrections_tab-ref>`.
 
 .. image::  ../../images/muon_corrections_tab.PNG
@@ -75,6 +70,7 @@ Improvements
 
 Bugfixes
 ########
+- The fit ranges will now always allow you to encompass the entire x range of the loaded data.
 - The GUIs will no longer crash if there are any whitespaces in the run range (e.g. 6010- 3).
 - The GUIs will now cope with a range of runs that span between two different decades where the second number
   in the range is smaller than the final digit of the first number in the range (e.g. 6018-3 can be used for the range 6018-6023).
@@ -83,6 +79,7 @@ Bugfixes
   any information about why the value was invalid. It will now revert to last viable BinWidth used and explain why.
 - The autoscale option when ``All`` is selected will now show the largest and smallest y value for all of the plots.
 - The global parameters in a results table will no longer be given a zero error arbitrarily if one with an error exists.
+- The attribute values in a Chebyshev function will no longer get reset after performing a simultaneous fit.
 
 ALC
 ---

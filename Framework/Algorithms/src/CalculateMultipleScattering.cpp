@@ -36,8 +36,7 @@ constexpr int DEFAULT_LATITUDINAL_DETS = 5;
 constexpr int DEFAULT_LONGITUDINAL_DETS = 10;
 } // namespace
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CalculateMultipleScattering)
@@ -392,7 +391,7 @@ void CalculateMultipleScattering::exec() {
  * scatter calculation should be performed
  * @return The total cross section
  */
-double CalculateMultipleScattering::new_vector(const MatrixWorkspace_sptr sigmaSSWS, const Material &material,
+double CalculateMultipleScattering::new_vector(const MatrixWorkspace_sptr &sigmaSSWS, const Material &material,
                                                double kinc, bool specialSingleScatterCalc) {
   double scatteringXSection, absorbXsection;
   if (specialSingleScatterCalc) {
@@ -476,7 +475,7 @@ double CalculateMultipleScattering::interpolateGaussian(const HistogramData::His
 double CalculateMultipleScattering::simulatePaths(const int nPaths, const int nScatters, const Sample &sample,
                                                   const Geometry::Instrument &instrument,
                                                   Kernel::PseudoRandomNumberGenerator &rng,
-                                                  const MatrixWorkspace_sptr sigmaSSWS,
+                                                  const MatrixWorkspace_sptr &sigmaSSWS,
                                                   const HistogramData::Histogram &SOfQ, const double kinc,
                                                   Kernel::V3D detPos, bool specialSingleScatterCalc) {
   double sumOfWeights = 0, sumOfQSS = 0.;
@@ -642,7 +641,7 @@ void CalculateMultipleScattering::updateTrackDirection(Geometry::Track &track, c
  * @return a track intercepting the sample
  */
 Geometry::Track CalculateMultipleScattering::start_point(const Geometry::IObject &shape,
-                                                         std::shared_ptr<const Geometry::ReferenceFrame> frame,
+                                                         const std::shared_ptr<const Geometry::ReferenceFrame> &frame,
                                                          const V3D sourcePos,
                                                          Kernel::PseudoRandomNumberGenerator &rng) {
   const int MAX_ATTEMPTS = 100;
@@ -684,10 +683,10 @@ void CalculateMultipleScattering::updateWeightAndPosition(Geometry::Track &track
  * @param rng Random number generator
  * @return a track
  */
-Geometry::Track CalculateMultipleScattering::generateInitialTrack(const Geometry::IObject &shape,
-                                                                  std::shared_ptr<const Geometry::ReferenceFrame> frame,
-                                                                  const V3D &sourcePos,
-                                                                  Kernel::PseudoRandomNumberGenerator &rng) {
+Geometry::Track
+CalculateMultipleScattering::generateInitialTrack(const Geometry::IObject &shape,
+                                                  const std::shared_ptr<const Geometry::ReferenceFrame> &frame,
+                                                  const V3D &sourcePos, Kernel::PseudoRandomNumberGenerator &rng) {
   auto sampleBox = shape.getBoundingBox();
   // generate random point on front surface of sample bounding box
   // I'm not 100% sure this sampling is correct because for a sample with
@@ -815,5 +814,4 @@ void CalculateMultipleScattering::setWorkspaceName(const API::MatrixWorkspace_sp
   API::AnalysisDataService::Instance().addOrReplace(wsName, ws);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

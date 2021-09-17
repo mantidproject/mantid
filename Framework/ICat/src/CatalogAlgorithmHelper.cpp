@@ -10,8 +10,7 @@
 #include <json/value.h>
 #include <set>
 
-namespace Mantid {
-namespace ICat {
+namespace Mantid::ICat {
 
 using Poco::Net::HTTPResponse;
 
@@ -48,5 +47,4 @@ const std::string CatalogAlgorithmHelper::getIDSError(HTTPResponse::HTTPStatus &
   return "";
 }
 
-} // namespace ICat
-} // namespace Mantid
+} // namespace Mantid::ICat

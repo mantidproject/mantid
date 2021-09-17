@@ -31,8 +31,7 @@ MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
 
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 Stretch::Stretch(QWidget *parent) : IndirectBayesTab(parent), m_previewSpec(0), m_save(false) {
   m_uiForm.setupUi(parent);
 
@@ -440,5 +439,4 @@ void Stretch::setPlotContourIsPlotting(bool plotting) {
   setButtonsEnabled(!plotting);
 }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

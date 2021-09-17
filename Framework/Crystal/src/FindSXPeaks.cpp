@@ -24,8 +24,7 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::Crystal::FindSXPeaksHelper;
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 const std::string FindSXPeaks::strongestPeakStrategy = "StrongestPeakOnly";
 const std::string FindSXPeaks::allPeaksStrategy = "AllPeaks";
@@ -398,5 +397,4 @@ std::unique_ptr<FindSXPeaksHelper::CompareStrategy> FindSXPeaks::getCompareStrat
   }
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

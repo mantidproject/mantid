@@ -30,8 +30,7 @@ using namespace Mantid::Kernel;
 
 namespace {} // namespace
 
-namespace Mantid {
-namespace Muon {
+namespace Mantid::Muon {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(MuonPreProcess)
@@ -224,7 +223,7 @@ MatrixWorkspace_sptr MuonPreProcess::applyTimeOffset(MatrixWorkspace_sptr ws, co
   }
 }
 
-MatrixWorkspace_sptr MuonPreProcess::applyTimeZeroTable(MatrixWorkspace_sptr ws,
+MatrixWorkspace_sptr MuonPreProcess::applyTimeZeroTable(const MatrixWorkspace_sptr &ws,
                                                         const TableWorkspace_sptr &timeZeroTable) {
   auto cloneWs = cloneWorkspace(ws);
   if (!timeZeroTable) {
@@ -251,7 +250,7 @@ MatrixWorkspace_sptr MuonPreProcess::applyCropping(MatrixWorkspace_sptr ws, cons
     return cropWithVectors(ws, xMin, xMax);
 }
 
-MatrixWorkspace_sptr MuonPreProcess::cropWithSingleValues(MatrixWorkspace_sptr ws, const double xMin,
+MatrixWorkspace_sptr MuonPreProcess::cropWithSingleValues(const MatrixWorkspace_sptr &ws, const double xMin,
                                                           const double xMax) {
   auto crop = createChildAlgorithm("CropWorkspace");
   crop->setProperty("InputWorkspace", ws);
@@ -263,7 +262,8 @@ MatrixWorkspace_sptr MuonPreProcess::cropWithSingleValues(MatrixWorkspace_sptr w
   return crop->getProperty("OutputWorkspace");
 }
 
-MatrixWorkspace_sptr MuonPreProcess::cropWithVectors(MatrixWorkspace_sptr ws, const double xMin, const double xMax) {
+MatrixWorkspace_sptr MuonPreProcess::cropWithVectors(const MatrixWorkspace_sptr &ws, const double xMin,
+                                                     const double xMax) {
   std::vector<double> xMinVec;
   std::vector<double> xMaxVec;
 
@@ -363,5 +363,4 @@ void MuonPreProcess::addPreProcessSampleLogs(const WorkspaceGroup_sptr &group) {
 // Allow WorkspaceGroup property to function correctly.
 bool MuonPreProcess::checkGroups() { return false; }
 
-} // namespace Muon
-} // namespace Mantid
+} // namespace Mantid::Muon

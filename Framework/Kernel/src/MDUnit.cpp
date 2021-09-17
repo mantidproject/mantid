@@ -7,9 +7,9 @@
 #include "MantidKernel/MDUnit.h"
 #include "MantidKernel/UnitLabelTypes.h"
 #include <boost/regex.hpp>
+#include <utility>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 bool MDUnit::operator==(const MDUnit &other) const {
   return typeid(*this) == typeid(other) && this->canConvertTo(other);
@@ -30,7 +30,7 @@ bool QUnit::isQUnit() const { return true; }
 //----------------------------------------------------------------------------------------------
 ReciprocalLatticeUnit::ReciprocalLatticeUnit() : m_unitLabel(UnitLabel("")) {}
 
-ReciprocalLatticeUnit::ReciprocalLatticeUnit(const UnitLabel &unitLabel) : m_unitLabel(unitLabel) {}
+ReciprocalLatticeUnit::ReciprocalLatticeUnit(UnitLabel unitLabel) : m_unitLabel(std::move(unitLabel)) {}
 
 UnitLabel ReciprocalLatticeUnit::getUnitLabel() const {
   if (isSpecialRLUUnitLabel()) {
@@ -77,7 +77,7 @@ InverseAngstromsUnit *InverseAngstromsUnit::clone() const { return new InverseAn
 //  LabelUnit
 //----------------------------------------------------------------------------------------------
 
-LabelUnit::LabelUnit(const UnitLabel &unitLabel) : m_unitLabel(unitLabel) {}
+LabelUnit::LabelUnit(UnitLabel unitLabel) : m_unitLabel(std::move(unitLabel)) {}
 
 UnitLabel LabelUnit::getUnitLabel() const { return m_unitLabel; }
 
@@ -95,5 +95,4 @@ LabelUnit *LabelUnit::clone() const { return new LabelUnit(m_unitLabel); }
 // End RLU
 //----------------------------------------------------------------------------------------------
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

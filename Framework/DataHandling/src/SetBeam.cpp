@@ -26,8 +26,7 @@ constexpr const char *RADIUS_PARAM_NAME = "beam-radius";
 constexpr const char *SHAPE_PARAM_NAME = "beam-shape";
 } // namespace
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SetBeam)
@@ -127,5 +126,4 @@ void SetBeam::exec() {
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

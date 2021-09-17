@@ -6,9 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "InvalidDefaultsError.h"
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 InvalidDefaultsError::InvalidDefaultsError( // cppcheck-suppress passedByValue
     int row, std::vector<int> invalidColumns)
@@ -23,6 +21,4 @@ bool operator==(InvalidDefaultsError const &lhs, InvalidDefaultsError const &rhs
 }
 
 bool operator!=(InvalidDefaultsError const &lhs, InvalidDefaultsError const &rhs) { return !(lhs == rhs); }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

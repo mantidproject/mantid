@@ -28,8 +28,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
 using Mantid::Types::Core::DateAndTime;
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 // DECLARE_FILELOADER_ALGORITHM(LoadSpiceAscii)
 DECLARE_ALGORITHM(LoadSpiceAscii)
@@ -551,5 +550,4 @@ void LoadSpiceAscii::addProperty(const API::MatrixWorkspace_sptr &ws, const std:
   ws->mutableRun().addLogData(new PropertyWithValue<T>(pname, pvalue));
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

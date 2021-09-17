@@ -28,8 +28,7 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace API;
 using namespace Geometry;
@@ -459,5 +458,4 @@ double AbsorptionCorrection::doIntegration(const double linearCoefAbsL1, const d
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

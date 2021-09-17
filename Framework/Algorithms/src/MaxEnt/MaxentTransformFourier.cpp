@@ -13,8 +13,7 @@
 
 #include <stdexcept>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 /** Constructor */
 MaxentTransformFourier::MaxentTransformFourier(MaxentSpace_sptr dataSpace, MaxentSpace_sptr imageSpace)
@@ -88,5 +87,4 @@ std::vector<double> MaxentTransformFourier::dataToImage(const std::vector<double
   return m_imageSpace->fromComplex(complexData);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

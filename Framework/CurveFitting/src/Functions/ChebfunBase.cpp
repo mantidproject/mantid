@@ -24,9 +24,7 @@
 #include <sstream>
 #include <utility>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
 
@@ -887,6 +885,4 @@ std::vector<double> ChebfunBase::smooth(const std::vector<double> &xvalues, cons
   return y;
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

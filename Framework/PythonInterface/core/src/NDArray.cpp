@@ -13,8 +13,7 @@
 
 using namespace boost::python;
 
-namespace Mantid {
-namespace PythonInterface {
+namespace Mantid::PythonInterface {
 
 /**
  * Initialize the numpy array api for this DLL.
@@ -94,15 +93,12 @@ NDArray NDArray::astype(char dtype, bool copy) const {
   return NDArray(boost::python::detail::new_reference(PyObject_Call(callable.ptr(), args.ptr(), kwargs.ptr())));
 }
 
-} // namespace PythonInterface
-} // namespace Mantid
+} // namespace Mantid::PythonInterface
 
 // -----------------------------------------------------------------------------
 // object_manager_traits specialisation for NDArray
 // -----------------------------------------------------------------------------
-namespace boost {
-namespace python {
-namespace converter {
+namespace boost::python::converter {
 
 using Mantid::PythonInterface::ndarrayType;
 
@@ -131,6 +127,4 @@ python::detail::new_reference object_manager_traits<Mantid::PythonInterface::NDA
  * @return A pointer to the PyTypeObject defining the Python type
  */
 PyTypeObject const *object_manager_traits<Mantid::PythonInterface::NDArray>::get_pytype() { return ndarrayType(); }
-} // namespace converter
-} // namespace python
-} // namespace boost
+} // namespace boost::python::converter

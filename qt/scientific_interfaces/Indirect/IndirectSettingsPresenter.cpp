@@ -7,8 +7,7 @@
 #include "IndirectSettingsPresenter.h"
 #include "IndirectSettingsHelper.h"
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 using namespace IndirectSettingsHelper;
 
 IndirectSettingsPresenter::IndirectSettingsPresenter(QWidget *parent)
@@ -77,5 +76,4 @@ void IndirectSettingsPresenter::setApplyingChanges(bool applyingChanges) {
   m_view->setCancelEnabled(!applyingChanges);
 }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

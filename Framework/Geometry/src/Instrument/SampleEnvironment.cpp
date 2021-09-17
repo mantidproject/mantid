@@ -12,8 +12,7 @@
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 using Geometry::BoundingBox;
 using Geometry::Track;
 using Kernel::V3D;
@@ -76,5 +75,4 @@ int SampleEnvironment::interceptSurfaces(Track &track) const {
  * @param component An object defining some component of the environment
  */
 void SampleEnvironment::add(const IObject_const_sptr &component) { m_components.emplace_back(component); }
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

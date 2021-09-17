@@ -32,8 +32,7 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::HistogramData;
 using Mantid::DataObjects::OffsetsWorkspace;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(AlignDetectors)
 
@@ -219,7 +218,7 @@ void AlignDetectors::getCalibrationWS(const MatrixWorkspace_sptr &inputWS) {
   const std::string calFileName = getPropertyValue("CalibrationFile");
   if (!calFileName.empty()) {
     progress(0.0, "Reading calibration file");
-    loadCalFile(std::move(inputWS), calFileName);
+    loadCalFile(inputWS, calFileName);
     return;
   }
 
@@ -321,5 +320,4 @@ AlignDetectors::getParallelExecutionMode(const std::map<std::string, Parallel::S
   return getCorrespondingExecutionMode(inputMode);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

@@ -34,8 +34,7 @@
 using namespace Mantid::DataObjects;
 using namespace Mantid::HistogramData;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 namespace {
 /// Factor to convert full width half max to sigma for calculations of I/sigma.
 const double FWHM_TO_SIGMA = 2.0 * sqrt(2.0 * M_LN2);
@@ -1246,5 +1245,4 @@ void GetDetOffsetsMultiPeaks::makeFitSummary() {
                  << "Weighted avg. chi-sq = " << wtavgchi2 << "\n";
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

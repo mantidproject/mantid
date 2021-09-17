@@ -12,8 +12,7 @@
 #include <Poco/String.h>
 #include <Poco/TemporaryFile.h>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 // register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(PatchBBY)
@@ -300,5 +299,4 @@ void PatchBBY::exec() {
     throw std::runtime_error("unable to patch");
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

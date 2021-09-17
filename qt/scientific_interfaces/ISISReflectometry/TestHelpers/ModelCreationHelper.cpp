@@ -10,10 +10,7 @@
 
 #include "../../ISISReflectometry/Reduction/Batch.h"
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
-namespace ModelCreationHelper {
+namespace MantidQt::CustomInterfaces::ISISReflectometry::ModelCreationHelper {
 
 namespace { // unnamed
 Row makeRowWithOutputNames(std::vector<std::string> const &outputNames) {
@@ -436,7 +433,4 @@ Instrument makeEmptyInstrument() {
                     MonitorCorrections(0, true, RangeInLambda(0.0, 0.0), RangeInLambda(0.0, 0.0)),
                     DetectorCorrections(false, DetectorCorrectionType::VerticalShift));
 }
-} // namespace ModelCreationHelper
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry::ModelCreationHelper

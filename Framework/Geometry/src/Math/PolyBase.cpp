@@ -15,9 +15,7 @@
 #include "MantidGeometry/Math/PolyBase.h"
 #include "MantidKernel/Exception.h"
 
-namespace Mantid {
-
-namespace mathLevel {
+namespace Mantid::mathLevel {
 
 std::ostream &operator<<(std::ostream &OX, const PolyBase &A)
 /**
@@ -582,6 +580,4 @@ void PolyBase::write(std::ostream &OX) const
   copy(afCoeff.begin(), afCoeff.end(), std::ostream_iterator<double>(OX, " "));
 }
 
-} // NAMESPACE  mathLevel
-
-} // NAMESPACE Mantid
+} // namespace Mantid::mathLevel

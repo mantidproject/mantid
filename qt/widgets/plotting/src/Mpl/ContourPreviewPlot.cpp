@@ -19,8 +19,7 @@ Mantid::Kernel::Logger g_log("ContourPreviewPlot");
 constexpr auto MANTID_PROJECTION = "mantid";
 } // namespace
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 ContourPreviewPlot::ContourPreviewPlot(QWidget *parent, bool observeADS)
     : QWidget(parent), m_canvas(new FigureCanvasQt(111, MANTID_PROJECTION, parent)),
@@ -127,5 +126,4 @@ std::tuple<double, double> ContourPreviewPlot::getAxisRange(AxisID axisID) const
   throw std::runtime_error("Incorrect AxisID provided. Axis types are XBottom and YLeft");
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

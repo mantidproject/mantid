@@ -84,8 +84,7 @@ int getWorkspaceNumberOfHistograms(const MatrixWorkspace_sptr &workspace) {
 
 } // namespace
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 DECLARE_ALGORITHM(CalculateIqt)
 
@@ -273,13 +272,13 @@ MatrixWorkspace_sptr CalculateIqt::calculateIqt(MatrixWorkspace_sptr workspace,
                                                 const MatrixWorkspace_sptr &resolutionWorkspace,
                                                 const std::string &rebinParams) {
   workspace = normalizedFourierTransform(workspace, rebinParams);
-  return divide(workspace, std::move(resolutionWorkspace));
+  return divide(workspace, resolutionWorkspace);
 }
 
-MatrixWorkspace_sptr CalculateIqt::doSimulation(MatrixWorkspace_sptr sample, MatrixWorkspace_sptr resolution,
+MatrixWorkspace_sptr CalculateIqt::doSimulation(MatrixWorkspace_sptr sample, const MatrixWorkspace_sptr &resolution,
                                                 const std::string &rebinParams, MersenneTwister &mTwister) {
   auto simulatedWorkspace = randomizeWorkspaceWithinError(std::move(sample), mTwister);
-  return calculateIqt(simulatedWorkspace, std::move(resolution), rebinParams);
+  return calculateIqt(simulatedWorkspace, resolution, rebinParams);
 }
 
 MatrixWorkspace_sptr
@@ -307,5 +306,4 @@ MatrixWorkspace_sptr CalculateIqt::setErrorsToZero(const std::vector<MatrixWorks
   return outputWorkspace;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

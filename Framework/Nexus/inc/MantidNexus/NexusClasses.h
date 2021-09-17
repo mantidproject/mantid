@@ -921,9 +921,9 @@ public:
 class DLLExport NXRoot : public NXClass {
 public:
   // Constructor
-  NXRoot(const std::string &fname);
+  NXRoot(std::string fname);
   // Constructor
-  NXRoot(const std::string &fname, const std::string &entry);
+  NXRoot(std::string fname, const std::string &entry);
   /// Destructor
   ~NXRoot() override;
   /// Return the NX class for a class (HDF group) or "SDS" for a data set;

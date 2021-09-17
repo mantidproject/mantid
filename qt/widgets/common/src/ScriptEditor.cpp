@@ -38,6 +38,7 @@
 // std
 #include <cmath>
 #include <stdexcept>
+#include <utility>
 
 namespace {
 
@@ -84,10 +85,10 @@ ScriptEditor::ScriptEditor(const QString &lexerName, const QFont &font, QWidget 
  * @param codelexer define the syntax highlighting and code completion.
  * @param settingsGroup Used when saving settings to persistent store
  */
-ScriptEditor::ScriptEditor(QWidget *parent, QsciLexer *codelexer, const QString &settingsGroup)
+ScriptEditor::ScriptEditor(QWidget *parent, QsciLexer *codelexer, QString settingsGroup)
     : QsciScintilla(parent), m_filename(""), m_progressArrowKey(markerDefine(QsciScintilla::RightArrow)),
       m_currentExecLine(0), m_completer(nullptr), m_previousKey(0), m_findDialog(new FindReplaceDialog(this)),
-      m_settingsGroup(settingsGroup) {
+      m_settingsGroup(std::move(settingsGroup)) {
 // Older versions of QScintilla still use just CR as the line ending, which is
 // pre-OSX.
 // New versions just use unix-style for everything but Windows.

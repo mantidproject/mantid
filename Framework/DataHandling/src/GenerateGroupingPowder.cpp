@@ -29,8 +29,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Poco::XML;
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(GenerateGroupingPowder)
@@ -184,5 +183,4 @@ void GenerateGroupingPowder::exec() {
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

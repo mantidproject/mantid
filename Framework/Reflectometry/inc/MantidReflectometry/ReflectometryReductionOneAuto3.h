@@ -93,7 +93,7 @@ private:
   void applyFloodCorrection(const API::MatrixWorkspace_sptr &flood, const std::string &propertyName);
   void applyFloodCorrections();
   double getPropertyOrDefault(const std::string &propertyName, const double defaultValue, bool &isDefault);
-  void setTransmissionProperties(Algorithm_sptr alg, std::string const &propertyName);
+  void setTransmissionProperties(const Algorithm_sptr &alg, std::string const &propertyName);
   WorkspaceNames getOutputNamesForGroupMember(const std::vector<std::string> &inputNames, const std::string &runNumber,
                                               const size_t wsGroupNumber);
   void getTransmissionRun(std::map<std::string, std::string> &results, WorkspaceGroup_sptr &workspaceGroup,
@@ -102,11 +102,11 @@ private:
                                                bool recalculateIvsQ = false);
   void setOutputGroupedWorkspaces(std::vector<WorkspaceNames> const &outputNames,
                                   WorkspaceNames const &outputGroupNames);
-  void setOutputPropertyFromChild(Algorithm_sptr alg, std::string const &name);
-  void setOutputPropertiesFromChild(Algorithm_sptr alg);
+  void setOutputPropertyFromChild(const Algorithm_sptr &alg, std::string const &name);
+  void setOutputPropertiesFromChild(const Algorithm_sptr &alg);
   auto processGroupMembers(std::vector<std::string> const &inputNames, std::vector<std::string> const &originalNames,
                            std::string const &runNumber, bool recalculateIvsQ = false);
-  void groupWorkspaces(std::vector<std::string> workspaceNames, std::string const &outputName);
+  void groupWorkspaces(const std::vector<std::string> &workspaceNames, std::string const &outputName);
 };
 } // namespace Reflectometry
 } // namespace Mantid

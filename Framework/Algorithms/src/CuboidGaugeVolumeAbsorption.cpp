@@ -9,8 +9,7 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/CuboidGaugeVolumeAbsorption.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CuboidGaugeVolumeAbsorption)
@@ -39,5 +38,4 @@ void CuboidGaugeVolumeAbsorption::initialiseCachedDistances() {
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

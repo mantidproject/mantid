@@ -50,7 +50,7 @@ protected:
   static std::tuple<double, double> extremeWavelengths(const API::MatrixWorkspace &ws);
   static std::tuple<double, double, double, double> extremeAngles(const API::MatrixWorkspace &ws);
   HistogramData::HistogramY secondDerivative(const std::array<size_t, 3> indices, const double distanceStep) const;
-  HistogramData::HistogramE esq(HistogramData::HistogramE e) const;
+  HistogramData::HistogramE esq(const HistogramData::HistogramE &e) const;
   HistogramData::HistogramE esqrt(HistogramData::HistogramE e) const;
 
 private:

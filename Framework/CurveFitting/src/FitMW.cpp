@@ -32,8 +32,7 @@
 #include <cmath>
 #include <numeric>
 
-namespace Mantid {
-namespace CurveFitting {
+namespace Mantid::CurveFitting {
 
 using namespace Kernel;
 using API::MatrixWorkspace;
@@ -334,5 +333,4 @@ std::shared_ptr<API::Workspace> FitMW::createOutputWorkspace(const std::string &
   return ws;
 }
 
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting

@@ -9,9 +9,7 @@
 #include <utility>
 
 #include "ThetaValuesValidationError.h"
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 LookupTableValidationError::LookupTableValidationError(
     // cppcheck-suppress passedByValue
@@ -23,6 +21,4 @@ std::vector<InvalidDefaultsError> const &LookupTableValidationError::errors() co
 boost::optional<ThetaValuesValidationError> LookupTableValidationError::fullTableError() const {
   return m_fullTableError;
 }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

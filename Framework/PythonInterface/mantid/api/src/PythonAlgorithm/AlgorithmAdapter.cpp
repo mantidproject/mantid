@@ -22,8 +22,7 @@
 //-----------------------------------------------------------------------------
 // AlgorithmAdapter definition
 //-----------------------------------------------------------------------------
-namespace Mantid {
-namespace PythonInterface {
+namespace Mantid::PythonInterface {
 using namespace boost::python;
 
 /**
@@ -104,6 +103,17 @@ template <typename BaseAlgorithm> const std::vector<std::string> AlgorithmAdapte
     return Converters::PySequenceToVector<std::string>(callMethod<list>(getSelf(), "seeAlso"))();
   } catch (UndefinedAttributeError &) {
     return {};
+  }
+}
+
+/**
+ * Returns the aliases of the algorithm. If not overridden returns the base algorithm implementation
+ */
+template <typename BaseAlgorithm> const std::string AlgorithmAdapter<BaseAlgorithm>::alias() const {
+  try {
+    return callMethod<std::string>(getSelf(), "alias");
+  } catch (UndefinedAttributeError &) {
+    return BaseAlgorithm::alias();
   }
 }
 
@@ -330,5 +340,4 @@ template class AlgorithmAdapter<API::DataProcessorAlgorithm>;
 template class AlgorithmAdapter<API::SerialDataProcessorAlgorithm>;
 template class AlgorithmAdapter<API::ParallelDataProcessorAlgorithm>;
 template class AlgorithmAdapter<API::DistributedDataProcessorAlgorithm>;
-} // namespace PythonInterface
-} // namespace Mantid
+} // namespace Mantid::PythonInterface

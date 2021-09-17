@@ -19,9 +19,7 @@
 #include <boost/algorithm/string.hpp>
 #include <memory>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
 using namespace Constraints;
@@ -554,6 +552,4 @@ void PawleyFunction::beforeDecoratedFunctionSet(const API::IFunction_sptr &fn) {
   }
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

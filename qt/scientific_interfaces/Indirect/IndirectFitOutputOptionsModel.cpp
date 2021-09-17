@@ -78,7 +78,7 @@ std::vector<std::string> extractParameterNames(const MatrixWorkspace_sptr &works
 }
 
 std::vector<std::string> extractParameterNames(const Workspace_sptr &workspace) {
-  return extractParameterNames(convertToMatrixWorkspace(std::move(workspace)));
+  return extractParameterNames(convertToMatrixWorkspace(workspace));
 }
 
 IAlgorithm_sptr saveNexusProcessedAlgorithm(const Workspace_sptr &workspace, std::string const &filename) {
@@ -166,9 +166,7 @@ std::string findGroupWorkspaceContaining(MatrixWorkspace_sptr workspace) {
 
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 IndirectFitOutputOptionsModel::IndirectFitOutputOptionsModel() : m_resultGroup(), m_pdfGroup(), m_spectraToPlot() {}
 
@@ -310,7 +308,7 @@ void IndirectFitOutputOptionsModel::replaceFitResult(std::string const &inputNam
 void IndirectFitOutputOptionsModel::replaceFitResult(const MatrixWorkspace_sptr &inputWorkspace,
                                                      const MatrixWorkspace_sptr &singleFitWorkspace,
                                                      std::string const &outputName) {
-  auto const replaceAlg = replaceAlgorithm(std::move(inputWorkspace), std::move(singleFitWorkspace), outputName);
+  auto const replaceAlg = replaceAlgorithm(inputWorkspace, singleFitWorkspace, outputName);
   replaceAlg->execute();
   setOutputAsResultWorkspace(replaceAlg);
 }
@@ -328,6 +326,4 @@ void IndirectFitOutputOptionsModel::setResultWorkspace(std::string const &groupN
     throw std::runtime_error("The result group could not be found in the ADS.");
 }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

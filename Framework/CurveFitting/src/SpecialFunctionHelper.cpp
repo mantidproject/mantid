@@ -8,9 +8,7 @@
 #include <gsl/gsl_math.h>
 #include <limits>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace SpecialFunctionSupport {
+namespace Mantid::CurveFitting::SpecialFunctionSupport {
 
 using std::complex;
 
@@ -55,6 +53,4 @@ complex<double> exponentialIntegral(const complex<double> &z) {
   }
 }
 
-} // End namespace SpecialFunctionSupport
-} // End namespace CurveFitting
-} // End namespace Mantid
+} // namespace Mantid::CurveFitting::SpecialFunctionSupport

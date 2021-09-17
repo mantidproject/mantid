@@ -11,8 +11,7 @@
 #include "MantidKernel/Exception.h"
 #include <algorithm>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 using Kernel::V2D;
 
 /** Constructor
@@ -74,5 +73,4 @@ void Quadrilateral::shiftVertexesClockwise() {
   m_vertices[3] = temp;
 }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

@@ -6,8 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/SingleCountValidator.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 /** Constructor
  *
@@ -44,5 +43,4 @@ std::string SingleCountValidator::checkValidity(const MatrixWorkspace_sptr &ws) 
   }
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

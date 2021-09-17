@@ -8,8 +8,7 @@
 
 using namespace Mantid::DataObjects;
 
-namespace Mantid {
-namespace Reflectometry {
+namespace Mantid::Reflectometry {
 
 /*
  Constructor
@@ -31,5 +30,4 @@ ReflectometryTransformQxQz::ReflectometryTransformQxQz(double qxMin, double qxMa
   }
   m_calculator->setThetaIncident(incidentTheta);
 }
-} // namespace Reflectometry
-} // namespace Mantid
+} // namespace Mantid::Reflectometry

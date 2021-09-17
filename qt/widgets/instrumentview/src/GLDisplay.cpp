@@ -25,8 +25,7 @@
 #include <typeinfo>
 #include <utility>
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 //#ifndef GL_MULTISAMPLE
 //#define GL_MULTISAMPLE  0x809D
 //#endif
@@ -328,5 +327,4 @@ void GLDisplay::leaveEvent(QEvent *ev) {
   update();
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

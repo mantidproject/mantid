@@ -24,9 +24,7 @@
 #include "MantidKernel/Logger.h"
 #include <boost/regex.hpp>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
 using namespace Kernel;
@@ -473,6 +471,4 @@ void CrystalFieldMultiSpectrum::updateSpectrum(API::IFunction &spectrum, int nre
   }
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

@@ -23,8 +23,7 @@
 #include "boost/make_shared.hpp"
 #include <algorithm>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using Mantid::API::Axis;
 using Mantid::API::BinEdgeAxis;
@@ -438,5 +437,4 @@ std::map<std::string, std::string> LineProfile::validateInputs() {
   return issues;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

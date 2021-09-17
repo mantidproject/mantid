@@ -12,8 +12,7 @@
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using std::size_t;
 using namespace Kernel;
@@ -243,5 +242,4 @@ void ConjoinWorkspaces::setYUnitAndLabel(API::MatrixWorkspace &ws) const {
     ws.setYUnitLabel(yLabel);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

@@ -11,8 +11,7 @@
 #include <memory>
 #include <stdexcept>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 using namespace DateAndTimeHelpers;
 /**
@@ -50,5 +49,4 @@ std::string DateTimeValidator::checkValidity(const std::string &value) const {
     return error;
   }
 }
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

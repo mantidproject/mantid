@@ -34,8 +34,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(IntegrateEllipsoidsTwoStep)
@@ -516,5 +515,4 @@ void IntegrateEllipsoidsTwoStep::runMaskDetectors(const Mantid::DataObjects::Pea
   if (!alg->execute())
     throw std::runtime_error("MaskDetectors Child Algorithm has not executed successfully");
 }
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

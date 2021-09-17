@@ -8,9 +8,7 @@
 #include "OptionsDialogModel.h"
 #include "MantidQtWidgets/Common/QSettingsHelper.h"
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 using namespace MantidQt::MantidWidgets::QSettingsHelper;
 
@@ -60,6 +58,4 @@ void OptionsDialogModel::saveSettings(const std::map<std::string, bool> &boolOpt
     setSetting(REFLECTOMETRY_SETTINGS_GROUP, intOption.first, intOption.second);
 }
 
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

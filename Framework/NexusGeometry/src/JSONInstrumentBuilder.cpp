@@ -88,8 +88,7 @@ void addMonitors(const JSONGeometryParser &parser, InstrumentBuilder &builder) {
 
 } // namespace
 
-namespace Mantid {
-namespace NexusGeometry {
+namespace Mantid::NexusGeometry {
 JSONInstrumentBuilder::JSONInstrumentBuilder(const std::string &jsonGeometry)
     : m_parser(std::make_unique<JSONGeometryParser>(jsonGeometry)) {}
 
@@ -122,5 +121,4 @@ Geometry::Instrument_const_uptr JSONInstrumentBuilder::buildGeometry() const {
   return builder.createInstrument();
 }
 
-} // namespace NexusGeometry
-} // namespace Mantid
+} // namespace Mantid::NexusGeometry

@@ -31,8 +31,7 @@ using namespace Mantid::Kernel;
 using Mantid::Kernel::Exception::InstrumentDefinitionError;
 using Mantid::Kernel::Exception::NotFoundError;
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 namespace {
 Kernel::Logger g_log("Instrument");
@@ -1294,5 +1293,4 @@ double tofToDSpacingFactor(const double l1, const double l2, const double twoThe
 }
 
 } // namespace Conversion
-} // namespace Geometry
-} // Namespace Mantid
+} // namespace Mantid::Geometry
