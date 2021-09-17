@@ -14,6 +14,7 @@ Concepts
 
 Algorithms
 ----------
+- Introducing a naming convention for algorithms, and *deprecated aliases* as the preferred method for renaming a C++ or Python algorithm.
 
 Improvements
 ############
