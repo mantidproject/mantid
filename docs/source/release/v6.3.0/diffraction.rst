@@ -11,8 +11,8 @@ Diffraction Changes
 
 Powder Diffraction
 ------------------
-- :ref:`GetDetOffsetsMultiPeaks`, which is deprecate since v6.2.0, is removed.
-- :ref:`CalibrateRectangularDetectors`, which is deprecate since v6.2.0, is removed. And system test CalibrateRectangularDetectors_Test is removed.
+- `GetDetOffsetsMultiPeaks`, which is deprecate since v6.2.0, is removed.
+- `CalibrateRectangularDetectors`, which is deprecate since v6.2.0, is removed. And system test CalibrateRectangularDetectors_Test is removed.
 
 Engineering Diffraction
 -----------------------
