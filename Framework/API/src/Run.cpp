@@ -536,49 +536,7 @@ void Run::loadNexus(::NeXus::File *file, const std::string &group, const Mantid:
         continue;
       }
       const std::string nameClass = absoluteEntryName.substr(absoluteEntryName.find_last_of('/') + 1);
-
-      if (nameClass == GONIOMETER_LOG_NAME) {
-        // Goniometer class
-        m_goniometers[0]->loadNexus(file, nameClass);
-      } else if (nameClass == GONIOMETERS_LOG_NAME) {
-        file->openGroup(nameClass, "NXcollection");
-        int num_goniometer;
-        file->readData("num_goniometer", num_goniometer);
-        m_goniometers.clear();
-        m_goniometers.reserve(num_goniometer);
-        for (int i = 0; i < num_goniometer; i++) {
-          m_goniometers.emplace_back(std::make_unique<Geometry::Goniometer>());
-          m_goniometers[i]->loadNexus(file, "goniometer" + std::to_string(i));
-        }
-        file->closeGroup();
-      } else if (nameClass == HISTO_BINS_LOG_NAME) {
-        file->openGroup(nameClass, "NXdata");
-        file->readData("value", m_histoBins);
-        file->closeGroup();
-      } else if (nameClass == PEAK_RADIUS_GROUP) {
-        file->openGroup(nameClass, "NXdata");
-        std::vector<double> values;
-        file->readData("value", values);
-        file->closeGroup();
-        this->addProperty("PeakRadius", values, true);
-      } else if (nameClass == INNER_BKG_RADIUS_GROUP) {
-        file->openGroup(nameClass, "NXdata");
-        std::vector<double> values;
-        file->readData("value", values);
-        file->closeGroup();
-        this->addProperty("BackgroundInnerRadius", values, true);
-      } else if (nameClass == OUTER_BKG_RADIUS_GROUP) {
-        file->openGroup(nameClass, "NXdata");
-        std::vector<double> values;
-        file->readData("value", values);
-        file->closeGroup();
-        this->addProperty("BackgroundOuterRadius", values, true);
-      } else if (nameClass == "proton_charge" && !this->hasProperty("proton_charge")) {
-        // Old files may have a proton_charge field, single value (not even NXlog)
-        double charge;
-        file->readData("proton_charge", charge);
-        this->setProtonCharge(charge);
-      }
+      loadNexusCommon(file, nameClass);
     }
   }
 
@@ -613,48 +571,7 @@ void Run::loadNexus(::NeXus::File *file, const std::string &group, bool keepOpen
   file->getEntries(entries);
   LogManager::loadNexus(file, entries);
   for (const auto &name_class : entries) {
-    if (name_class.first == GONIOMETER_LOG_NAME) {
-      // Goniometer class
-      m_goniometers[0]->loadNexus(file, name_class.first);
-    } else if (name_class.first == GONIOMETERS_LOG_NAME) {
-      file->openGroup(name_class.first, "NXcollection");
-      int num_goniometer;
-      file->readData("num_goniometer", num_goniometer);
-      m_goniometers.clear();
-      m_goniometers.reserve(num_goniometer);
-      for (int i = 0; i < num_goniometer; i++) {
-        m_goniometers.emplace_back(std::make_unique<Geometry::Goniometer>());
-        m_goniometers[i]->loadNexus(file, "goniometer" + std::to_string(i));
-      }
-      file->closeGroup();
-    } else if (name_class.first == HISTO_BINS_LOG_NAME) {
-      file->openGroup(name_class.first, "NXdata");
-      file->readData("value", m_histoBins);
-      file->closeGroup();
-    } else if (name_class.first == PEAK_RADIUS_GROUP) {
-      file->openGroup(name_class.first, "NXdata");
-      std::vector<double> values;
-      file->readData("value", values);
-      file->closeGroup();
-      this->addProperty("PeakRadius", values, true);
-    } else if (name_class.first == INNER_BKG_RADIUS_GROUP) {
-      file->openGroup(name_class.first, "NXdata");
-      std::vector<double> values;
-      file->readData("value", values);
-      file->closeGroup();
-      this->addProperty("BackgroundInnerRadius", values, true);
-    } else if (name_class.first == OUTER_BKG_RADIUS_GROUP) {
-      file->openGroup(name_class.first, "NXdata");
-      std::vector<double> values;
-      file->readData("value", values);
-      file->closeGroup();
-      this->addProperty("BackgroundOuterRadius", values, true);
-    } else if (name_class.first == "proton_charge" && !this->hasProperty("proton_charge")) {
-      // Old files may have a proton_charge field, single value (not even NXlog)
-      double charge;
-      file->readData("proton_charge", charge);
-      this->setProtonCharge(charge);
-    }
+    loadNexusCommon(file, name_class.first);
   }
   if (!(group.empty() || keepOpen))
     file->closeGroup();
@@ -773,4 +690,50 @@ void Run::copyGoniometers(const Run &other) {
     m_goniometers.emplace_back(std::move(new_goniometer));
   }
 }
+
+void Run::loadNexusCommon(::NeXus::File *file, const std::string &nameClass) {
+  if (nameClass == GONIOMETER_LOG_NAME) {
+    // Goniometer class
+    m_goniometers[0]->loadNexus(file, nameClass);
+  } else if (nameClass == GONIOMETERS_LOG_NAME) {
+    file->openGroup(nameClass, "NXcollection");
+    int num_goniometer;
+    file->readData("num_goniometer", num_goniometer);
+    m_goniometers.clear();
+    m_goniometers.reserve(num_goniometer);
+    for (int i = 0; i < num_goniometer; i++) {
+      m_goniometers.emplace_back(std::make_unique<Geometry::Goniometer>());
+      m_goniometers[i]->loadNexus(file, "goniometer" + std::to_string(i));
+    }
+    file->closeGroup();
+  } else if (nameClass == HISTO_BINS_LOG_NAME) {
+    file->openGroup(nameClass, "NXdata");
+    file->readData("value", m_histoBins);
+    file->closeGroup();
+  } else if (nameClass == PEAK_RADIUS_GROUP) {
+    file->openGroup(nameClass, "NXdata");
+    std::vector<double> values;
+    file->readData("value", values);
+    file->closeGroup();
+    this->addProperty("PeakRadius", values, true);
+  } else if (nameClass == INNER_BKG_RADIUS_GROUP) {
+    file->openGroup(nameClass, "NXdata");
+    std::vector<double> values;
+    file->readData("value", values);
+    file->closeGroup();
+    this->addProperty("BackgroundInnerRadius", values, true);
+  } else if (nameClass == OUTER_BKG_RADIUS_GROUP) {
+    file->openGroup(nameClass, "NXdata");
+    std::vector<double> values;
+    file->readData("value", values);
+    file->closeGroup();
+    this->addProperty("BackgroundOuterRadius", values, true);
+  } else if (nameClass == "proton_charge" && !this->hasProperty("proton_charge")) {
+    // Old files may have a proton_charge field, single value (not even NXlog)
+    double charge;
+    file->readData("proton_charge", charge);
+    this->setProtonCharge(charge);
+  }
+}
+
 } // namespace Mantid::API

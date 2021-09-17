@@ -124,6 +124,9 @@ private:
   /// Adds all the time series in from one property manager into another
   void mergeMergables(Mantid::Kernel::PropertyManager &sum, const Mantid::Kernel::PropertyManager &toAdd);
   void copyGoniometers(const Run &other);
+
+  // Function common to loadNexus overloads populating relevant members
+  void loadNexusCommon(::NeXus::File *file, const std::string &nameClass);
 };
 } // namespace API
 } // namespace Mantid
