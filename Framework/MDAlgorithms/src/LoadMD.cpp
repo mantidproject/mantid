@@ -140,7 +140,6 @@ void LoadMD::execLoader() {
 
   // The main entry
   const std::shared_ptr<Mantid::Kernel::NexusHDF5Descriptor> fileInfo = getFileInfo();
-  auto allEntries = fileInfo->getAllEntries();
 
   std::string entryName;
   if (fileInfo->isEntry("/MDEventWorkspace", "NXentry")) {
