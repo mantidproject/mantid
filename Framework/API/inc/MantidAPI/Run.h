@@ -105,9 +105,8 @@ public:
   /// Save the run to a NeXus file with a given group name
   void saveNexus(::NeXus::File *file, const std::string &group, bool keepOpen = false) const override;
 
-  void loadNexus(::NeXus::File *file, const std::string &group,
-                 const std::shared_ptr<Mantid::Kernel::NexusHDF5Descriptor> &fileInfo, const std::string &prefix,
-                 bool keepOpen = false) override;
+  void loadNexus(::NeXus::File *file, const std::string &group, const Mantid::Kernel::NexusHDF5Descriptor &fileInfo,
+                 const std::string &prefix, bool keepOpen = false) override;
   /// Load the run from a NeXus file with a given group name
   void loadNexus(::NeXus::File *file, const std::string &group, bool keepOpen = false) override;
 

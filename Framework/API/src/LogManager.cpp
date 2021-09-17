@@ -469,8 +469,8 @@ void LogManager::saveNexus(::NeXus::File *file, const std::string &group, bool k
  * load any NXlog in the current open group.
  */
 void LogManager::loadNexus(::NeXus::File * /*file*/, const std::string & /*group*/,
-                           const std::shared_ptr<Mantid::Kernel::NexusHDF5Descriptor> & /*fileInfo*/,
-                           const std::string & /*prefix*/, bool /*keepOpen*/) {}
+                           const Mantid::Kernel::NexusHDF5Descriptor & /*fileInfo*/, const std::string & /*prefix*/,
+                           bool /*keepOpen*/) {}
 
 //--------------------------------------------------------------------------------------------
 /** Load the object from an open NeXus file.
@@ -494,11 +494,11 @@ void LogManager::loadNexus(::NeXus::File *file, const std::string &group, bool k
   }
 }
 
-void LogManager::loadNexus(::NeXus::File *file, const std::shared_ptr<Mantid::Kernel::NexusHDF5Descriptor> &fileInfo,
+void LogManager::loadNexus(::NeXus::File *file, const Mantid::Kernel::NexusHDF5Descriptor &fileInfo,
                            const std::string &prefix) {
 
   // Only load from NXlog entries
-  const auto &allEntries = fileInfo->getAllEntries();
+  const auto &allEntries = fileInfo.getAllEntries();
   auto itNxLogEntries = allEntries.find("NXlog");
   const std::set<std::string> &nxLogEntries =
       (itNxLogEntries != allEntries.end()) ? itNxLogEntries->second : std::set<std::string>{};

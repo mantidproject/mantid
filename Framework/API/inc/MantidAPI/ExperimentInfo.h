@@ -123,8 +123,7 @@ public:
   void saveExperimentInfoNexus(::NeXus::File *file, bool saveInstrument, bool saveSample, bool saveLogs) const;
 
   void loadExperimentInfoNexus(const std::string &nxFilename, ::NeXus::File *file, std::string &parameterStr,
-                               const std::shared_ptr<Mantid::Kernel::NexusHDF5Descriptor> &fileInfo,
-                               const std::string &prefix);
+                               const Mantid::Kernel::NexusHDF5Descriptor &fileInfo, const std::string &prefix);
 
   /// Loads an experiment description from the open NeXus file
   void loadExperimentInfoNexus(const std::string &nxFilename, ::NeXus::File *file, std::string &parameterStr);
@@ -136,8 +135,9 @@ public:
   /// found there
   void loadInstrumentParametersNexus(::NeXus::File *file, std::string &parameterStr);
 
-  void loadSampleAndLogInfoNexus(::NeXus::File *file,
-                                 const std::shared_ptr<Mantid::Kernel::NexusHDF5Descriptor> &fileInfo,
+  /// Load the sample and log info from an open NeXus file. Overload that uses NexusHDF5Descriptor for faster metadata
+  /// lookup
+  void loadSampleAndLogInfoNexus(::NeXus::File *file, const Mantid::Kernel::NexusHDF5Descriptor &fileInfo,
                                  const std::string &prefix);
   /// Load the sample and log info from an open NeXus file.
   void loadSampleAndLogInfoNexus(::NeXus::File *file);

@@ -116,8 +116,7 @@ std::unique_ptr<Property> makeStringProperty(::NeXus::File *file, const std::str
  * @return Property pointer
  */
 std::unique_ptr<Property> loadProperty(::NeXus::File *file, const std::string &group,
-                                       const std::shared_ptr<Mantid::Kernel::NexusHDF5Descriptor> &fileInfo,
-                                       const std::string &prefix) {
+                                       const Mantid::Kernel::NexusHDF5Descriptor &fileInfo, const std::string &prefix) {
   file->openGroup(group, "NXlog");
 
   // Times in second offsets
@@ -126,7 +125,7 @@ std::unique_ptr<Property> loadProperty(::NeXus::File *file, const std::string &g
   std::string unitsStr;
 
   // Check if the "time" field is present
-  if (fileInfo->isEntry(prefix + "/" + group + "/time")) {
+  if (fileInfo.isEntry(prefix + "/" + group + "/time")) {
     file->openData("time");
     file->getData(timeSec);
     // Optionally get a start

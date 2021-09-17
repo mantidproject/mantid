@@ -380,11 +380,11 @@ void MDBoxFlatTree::saveExperimentInfos(::NeXus::File *const file, const API::IM
 
 void MDBoxFlatTree::loadExperimentInfos(::NeXus::File *const file, const std::string &filename,
                                         std::shared_ptr<Mantid::API::MultipleExperimentInfos> mei,
-                                        const std::shared_ptr<Mantid::Kernel::NexusHDF5Descriptor> &fileInfo,
+                                        const Mantid::Kernel::NexusHDF5Descriptor &fileInfo,
                                         const std::string &currentGroup, bool lazy) {
 
   // First, find how many experimentX blocks there are
-  const auto &allEntries = fileInfo->getAllEntries();
+  const auto &allEntries = fileInfo.getAllEntries();
   auto itNXgroup = allEntries.find("NXgroup");
   const std::set<std::string> &nxGroupEntries =
       (itNXgroup != allEntries.end()) ? itNXgroup->second : std::set<std::string>{};

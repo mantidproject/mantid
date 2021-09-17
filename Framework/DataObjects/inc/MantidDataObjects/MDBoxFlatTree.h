@@ -117,8 +117,8 @@ public:
   // function. Overload version that usese NexusHDF5Descriptor for LoadMD
   static void loadExperimentInfos(::NeXus::File *const file, const std::string &filename,
                                   std::shared_ptr<API::MultipleExperimentInfos> mei,
-                                  const std::shared_ptr<Mantid::Kernel::NexusHDF5Descriptor> &fileInfo,
-                                  const std::string &currentGroup, bool lazy = false);
+                                  const Mantid::Kernel::NexusHDF5Descriptor &fileInfo, const std::string &currentGroup,
+                                  bool lazy = false);
 
   // load experiment infos, previously saved through the the saveExperimentInfo
   // function

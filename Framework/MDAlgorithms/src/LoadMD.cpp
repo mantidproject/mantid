@@ -207,7 +207,7 @@ void LoadMD::execLoader() {
 
     // Now the ExperimentInfo
     bool lazyLoadExpt = fileBacked;
-    MDBoxFlatTree::loadExperimentInfos(m_file.get(), m_filename, ws, fileInfo, "MDEventWorkspace", lazyLoadExpt);
+    MDBoxFlatTree::loadExperimentInfos(m_file.get(), m_filename, ws, *fileInfo.get(), "MDEventWorkspace", lazyLoadExpt);
 
     // Wrapper to cast to MDEventWorkspace then call the function
     CALL_MDEVENT_FUNCTION(this->doLoad, ws);

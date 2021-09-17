@@ -495,9 +495,8 @@ void Run::saveNexus(::NeXus::File *file, const std::string &group, bool keepOpen
  * load any NXlog in the current open group.
  * @param keepOpen :: If true, then the file is left open after doing to load
  */
-void Run::loadNexus(::NeXus::File *file, const std::string &group,
-                    const std::shared_ptr<Mantid::Kernel::NexusHDF5Descriptor> &fileInfo, const std::string &prefix,
-                    bool keepOpen) {
+void Run::loadNexus(::NeXus::File *file, const std::string &group, const Mantid::Kernel::NexusHDF5Descriptor &fileInfo,
+                    const std::string &prefix, bool keepOpen) {
 
   if (!group.empty()) {
     file->openGroup(group, "NXgroup");
@@ -510,7 +509,7 @@ void Run::loadNexus(::NeXus::File *file, const std::string &group,
   // group hierarchy levels
   const auto levels = std::count(absoluteGroupName.begin(), absoluteGroupName.end(), '/');
 
-  const auto &allEntries = fileInfo->getAllEntries();
+  const auto &allEntries = fileInfo.getAllEntries();
   // loop through nxClass sets
   for (const auto &nxClassPair : allEntries) {
     const std::set<std::string> &nxClassEntries = nxClassPair.second;
