@@ -10,32 +10,6 @@ from qtpy.QtCore import QObject, Signal, QThreadPool
 
 class DrillAlgorithmPoolSignals(QObject):
     """
-    Signals that the pool could send.
-    """
-
-    """
-    Sent when a task starts.
-    Args:
-        str: the name of the task.
-    """
-    taskStarted = Signal(str)
-
-    """
-    Sent when a task ends with success.
-    Args:
-        str: the name of the task
-    """
-    taskSuccess = Signal(str)
-
-    """
-    Sent when a task ends with an error.
-    Args:
-        str: the name of the task
-        str: the error message
-    """
-    taskError = Signal(str, str)
-
-    """
     Sent when the global progress of the pool is updated.
     Args:
         int: progress in percent
@@ -81,7 +55,6 @@ class DrillAlgorithmPool(QThreadPool):
         for task in tasks:
             self._tasks.add(task)
             self._progresses[task] = 0.0
-            task.signals.started.connect(self.onTaskStarted)
             task.signals.finished.connect(self.onTaskFinished)
             task.signals.progress.connect(self.onProgress)
             self.start(task)
@@ -100,23 +73,12 @@ class DrillAlgorithmPool(QThreadPool):
         self._progresses.clear()
         self.signals.processingDone.emit()
 
-    def onTaskStarted(self, task):
-        """
-        Called when a task is started.
-
-        Args:
-            task (DrillTask): the task
-        """
-        self.signals.taskStarted.emit(task.getName())
-
-    def onTaskFinished(self, task, ret, msg):
+    def onTaskFinished(self, task):
         """
         Called each time a task in the pool is ending.
 
         Args:
             task (DrillTask): the task
-            ret (int): return code. (0 for success)
-            msf (str): error msg if needed
         """
         if task in self._tasks:
             self._tasks.remove(task)
@@ -126,10 +88,6 @@ class DrillAlgorithmPool(QThreadPool):
             return
 
         self._tasksDone += 1
-        if ret:
-            self.signals.taskError.emit(task.getName(), msg)
-        else:
-            self.signals.taskSuccess.emit(task.getName())
 
         if self._running:
             if not self._tasks:

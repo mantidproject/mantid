@@ -107,9 +107,6 @@ class DrillModel(QObject):
         self.tasksPool = DrillAlgorithmPool()
 
         # setup the thread pool
-        self.tasksPool.signals.taskStarted.connect(self._onTaskStarted)
-        self.tasksPool.signals.taskSuccess.connect(self._onTaskSuccess)
-        self.tasksPool.signals.taskError.connect(self._onTaskError)
         self.tasksPool.signals.progressUpdate.connect(self._onProcessingProgress)
         self.tasksPool.signals.processingDone.connect(self._onProcessingDone)
 
@@ -464,7 +461,11 @@ class DrillModel(QObject):
             if not self._samples[e].isValid():
                 return False
             kwargs = self.getProcessingParameters(e)
-            tasks.append(DrillTask(str(e), self.algorithm, **kwargs))
+            task = DrillTask(str(e), self.algorithm, **kwargs)
+            task.addStartedCallback(self._samples[e].onProcessStarted)
+            task.addSuccessCallback(self._samples[e].onProcessSuccess)
+            task.addErrorCallback(self._samples[e].onProcessError)
+            tasks.append(task)
         self.tasksPool.addProcesses(tasks)
         return True
 
@@ -487,35 +488,6 @@ class DrillModel(QObject):
                 sampleIndexes += [sample.getIndex()
                                   for sample in group.getSamples()]
         return self.process(sampleIndexes)
-
-    def _onTaskStarted(self, ref):
-        """
-        Called each time a task starts.
-
-        Args:
-            ref (int): sample index
-        """
-        self._samples[int(ref)].onProcessStarted()
-
-    def _onTaskSuccess(self, ref):
-        """
-        Called when a task finished with success.
-
-        Args:
-            ref (int): sample index
-        """
-        self._samples[int(ref)].onProcessSuccess()
-
-    def _onTaskError(self, ref, msg):
-        """
-        Called when a processing fails. This method logs a message and fires the
-        corresponding signal.
-
-        Args:
-            ref (int): sample index
-            msg (str): error msg
-        """
-        self._samples[int(ref)].onProcessError(msg)
 
     def _onProcessingProgress(self, progress):
         """
