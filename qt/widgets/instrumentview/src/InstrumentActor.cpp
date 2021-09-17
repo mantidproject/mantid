@@ -77,16 +77,21 @@ InstrumentActor::InstrumentActor(MatrixWorkspace_sptr workspace, MantidWidgets::
     : m_workspace(workspace), m_ragged(true), m_autoscaling(autoscaling), m_defaultPos(), m_initialized(false),
       m_isPhysicalInstrument(false), m_messageHandler(messageHandler) {
 
+  // settings
+  loadSettings();
+
   m_scaleMin = scaleMin;
   m_scaleMax = scaleMax;
 
-  QThread *thread = QThread::create([this] { initialize(); });
-  thread->start();
-
   m_isCompVisible.assign(componentInfo().size(), true);
 
-  // m_renderer.reset(new InstrumentRenderer(*this));
-  // m_renderer->changeScaleType(m_scaleType);
+  m_renderer.reset(new InstrumentRenderer(*this));
+  m_renderer->changeScaleType(m_scaleType);
+
+  // set up the color map
+  if (!m_currentCMap.isEmpty()) {
+    loadColorMap(m_currentCMap, false);
+  }
 }
 
 void InstrumentActor::initialize() {
@@ -131,7 +136,12 @@ void InstrumentActor::initialize() {
 
   // enable drawing now that everything is ready
   m_initialized = true;
+
+  updateColors();
+
   emit colorMapChanged();
+  emit initWidget();
+  emit refreshView();
 }
 
 /**
@@ -607,6 +617,9 @@ void InstrumentActor::sumDetectorsRagged(const std::vector<size_t> &dets, std::v
  * the masking information in ....
  */
 void InstrumentActor::resetColors() {
+  if (!m_initialized) {
+    return;
+  }
   m_renderer->reset();
   emit colorMapChanged();
 }

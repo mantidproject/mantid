@@ -571,6 +571,11 @@ void InstrumentWidgetRenderTab::enableGL(bool on) {
 }
 
 void InstrumentWidgetRenderTab::showEvent(QShowEvent * /*unused*/) {
+  auto &actor = m_instrWidget->getInstrumentActor();
+  if (!actor.isInitialized()) {
+    return;
+  }
+
   auto surface = getSurface();
   if (surface) {
     surface->setInteractionMode(ProjectionSurface::MoveMode);

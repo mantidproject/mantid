@@ -218,6 +218,8 @@ public:
 
 signals:
   void colorMapChanged() const;
+  void refreshView() const;
+  void initWidget() const;
 
 public slots:
   void initialize();
@@ -294,6 +296,7 @@ private:
 
   friend class InstrumentWidgetEncoder;
   friend class InstrumentWidgetDecoder;
+  friend class InstrumentWidgetRenderTab;
 };
 
 } // namespace MantidWidgets

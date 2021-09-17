@@ -57,6 +57,7 @@
 #include <QStackedLayout>
 #include <QString>
 #include <QTemporaryFile>
+#include <QThread>
 #include <QUrl>
 #include <QVBoxLayout>
 #include <QWidget>
@@ -147,6 +148,8 @@ InstrumentWidget::InstrumentWidget(QString wsName, QWidget *parent, bool resetGe
 
   m_instrumentActor = std::make_unique<InstrumentActor>(m_workspaceName.toStdString(), *m_messageHandler, autoscaling,
                                                         scaleMin, scaleMax);
+  m_instrumentActor->moveToThread(&m_thread);
+  connect(m_instrumentActor.get(), SIGNAL(initWidget()), this, SLOT(initWidget()));
 
   m_xIntegration = new XIntegrationControl(this);
   m_mainLayout->addWidget(m_xIntegration);
@@ -211,14 +214,23 @@ InstrumentWidget::InstrumentWidget(QString wsName, QWidget *parent, bool resetGe
 
   setWindowTitle(QString("Instrument - ") + m_workspaceName);
 
+  m_thread.start();
+  QMetaObject::invokeMethod(m_instrumentActor.get(), "initialize", Qt::QueuedConnection);
+
   const bool resetActor(false);
-  init(resetGeometry, autoscaling, scaleMin, scaleMax, setDefaultView, resetActor);
+  m_autoscaling = autoscaling;
+  m_scaleMin = scaleMin;
+  m_scaleMax = scaleMax;
+  m_setDefaultView = setDefaultView;
+  m_resetGeometry = resetGeometry;
 }
 
 /**
  * Destructor
  */
 InstrumentWidget::~InstrumentWidget() {
+  m_thread.quit();
+  m_thread.wait();
   if (m_instrumentActor) {
     saveSettings();
   }
@@ -300,6 +312,10 @@ void InstrumentWidget::init(bool resetGeometry, bool autoscaling, double scaleMi
     updateInfoText();
   }
   updateIntegrationWidget(resetGeometry);
+}
+
+void InstrumentWidget::initWidget() {
+  init(m_resetGeometry, m_autoscaling, m_scaleMin, m_scaleMax, m_setDefaultView, false);
 }
 
 /**

@@ -26,6 +26,8 @@
 
 #include <memory>
 
+#include <QThread>
+
 namespace Mantid {
 namespace API {
 class IPeaksWorkspace;
@@ -249,6 +251,8 @@ public slots:
   void enableGL(bool on);
   void updateInfoText(const QString &text = QString());
 
+  void initWidget();
+
 private slots:
   void helpClicked();
 
@@ -329,6 +333,12 @@ protected:
   /// dict of selected tabs
   std::vector<std::pair<std::string, bool>> m_stateOfTabs;
 
+  bool m_autoscaling;
+  double m_scaleMin;
+  double m_scaleMax;
+  bool m_setDefaultView;
+  bool m_resetGeometry;
+
 private:
   /// ADS notification handlers
   void preDeleteHandle(const std::string &ws_name,
@@ -360,6 +370,8 @@ private:
   std::unique_ptr<QtConnect> m_qtConnect;
 
   std::unique_ptr<IMessageHandler> m_messageHandler;
+
+  QThread m_thread;
 };
 
 } // namespace MantidWidgets
