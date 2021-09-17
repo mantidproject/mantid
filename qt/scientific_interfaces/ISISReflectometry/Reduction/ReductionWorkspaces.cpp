@@ -12,9 +12,9 @@
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 ReductionWorkspaces::ReductionWorkspaces(
-    // cppcheck-suppress passedByValue
+
     std::vector<std::string> inputRunNumbers,
-    // cppcheck-suppress passedByValue
+
     TransmissionRunPair transmissionRuns)
     : m_inputRunNumbers(std::move(inputRunNumbers)), m_transmissionRuns(std::move(transmissionRuns)), m_iVsLambda(),
       m_iVsQ(), m_iVsQBinned() {}
