@@ -22,6 +22,7 @@
 #include "MantidHistogramData/Interpolate.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/ListValidator.h"
 
 namespace Mantid {
 
@@ -80,6 +81,10 @@ void MultipleScatteringCorrection::init() {
   moreThanZero->setLower(0.001);
   declareProperty("ElementSize", 1.0, moreThanZero, "The size of one side of an integration element cube in mm");
 
+  std::vector<std::string> methodOptions{"SampleOnly", "SampleAndContainer"};
+  declareProperty("Method", "SampleOnly", std::make_shared<StringListValidator>(methodOptions),
+                  "Correction method, use either SampleOnly or SampleAndContainer.");
+
   declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>("OutputWorkspace", "", Direction::Output),
                   "Output workspace name. "
                   "A Workspace2D containing the correction matrix that can be directly applied to the corresponding "
@@ -118,12 +123,80 @@ std::map<std::string, std::string> MultipleScatteringCorrection::validateInputs(
  *
  */
 void MultipleScatteringCorrection::exec() {
-  // parse input properties and assign corresponding values to the member
+  // Parse input properties and assign corresponding values to the member
   // variables
   parseInputs();
-  setupOutput();
 
-  // prepare the cached distances
+  std::string method = getProperty("Method");
+  if (method == "SampleOnly") {
+    // set the OutputWorkspace to a workspace group with one workspace:
+    //          ${OutputWorkspace}_sampleOnly
+    calculateSampleOnly();
+  } else if (method == "SampleAndContainer") {
+    // set the OutputWorkspace to a workspace group with two workspaces:
+    //          ${OutputWorkspace}_containerOnly
+    //          ${OutputWorkspace}_sampleAndContainer
+    calculateSampleAndContainer();
+  } else {
+    // With validator guarding the gate, this should never happen. However, just incase it
+    // does, we should throw an exception.
+    throw std::invalid_argument("Invalid method: " + method);
+  }
+}
+
+/**
+ * @brief parse and assign corresponding values from input properties
+ *
+ */
+void MultipleScatteringCorrection::parseInputs() {
+  // Get input workspace
+  m_inputWS = getProperty("InputWorkspace");
+
+  // Get the beam direction
+  m_beamDirection = m_inputWS->getInstrument()->getBeamDirection();
+
+  // Get the total number of wavelength points, default to use all if not specified
+  m_num_lambda = isDefault("NumberOfWavelengthPoints") ? static_cast<int64_t>(m_inputWS->blocksize())
+                                                       : getProperty("NumberOfWavelengthPoints");
+  // -- while we're here, compute the step in bin number between two adjacent points
+  const auto specSize = static_cast<int64_t>(m_inputWS->blocksize());
+  m_xStep = std::max(int64_t(1), specSize / m_num_lambda); // Bin step between points to calculate
+  // -- notify the user of the bin step
+  std::ostringstream msg;
+  msg << "Numerical integration performed every " << m_xStep << " wavelength points";
+  g_log.information() << msg.str();
+
+  // Get the element size
+  m_elementSize = getProperty("ElementSize"); // in mm
+  m_elementSize = m_elementSize * 1e-3;       // convert to m
+
+  // Get the material
+  const auto &sample = m_inputWS->sample();
+  // -- process the sample
+  m_material = sample.getShape().material();
+
+  // Get total scattering cross-section
+  // NOTE: the angstrom^-2 to barns and the angstrom^-1 to cm^-1
+  // will cancel for mu to give units: cm^-1
+  // -- sample
+  m_sampleLinearCoefTotScatt = -m_material.totalScatterXSection() * m_material.numberDensityEffective() * 100;
+
+  // NOTE:
+  // container related properties are retrieved at the beginning of calculateSampleAndContainer()
+}
+
+/**
+ * @brief calculate the correction factor per detector for sample only case
+ *
+ */
+void MultipleScatteringCorrection::calculateSampleOnly() {
+  // Setup output workspace
+  API::MatrixWorkspace_sptr outws = create<HistoWorkspace>(*m_inputWS);
+  outws->setYUnit("");          // Need to explicitly set YUnit to nothing
+  outws->setDistribution(true); // The output of this is a distribution
+  outws->setYUnitLabel("Multiple Scattering Correction factor");
+
+  // Cache distances
   // NOTE: cannot use IObject_sprt for sample shape as the getShape() method dereferenced
   //       the shared pointer upon returning.
   MultipleScatteringCorrectionDistGraber distGraber(m_inputWS->sample().getShape(), m_elementSize);
@@ -142,7 +215,7 @@ void MultipleScatteringCorrection::exec() {
   //       to parallelize the calculation
   const int64_t len_l12 = numVolumeElements * (numVolumeElements - 1) / 2;
   std::vector<double> sample_L12s(len_l12, 0.0);
-  PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *m_outputWS))
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS))
   for (int64_t i = 0; i < numVolumeElements; ++i) {
     PARALLEL_START_INTERUPT_REGION
     for (int64_t j = i + 1; j < numVolumeElements; ++j) {
@@ -175,18 +248,15 @@ void MultipleScatteringCorrection::exec() {
   g_log.notice(msg.str());
 #endif
 
+  // Calculate one detector at a time
   const auto &spectrumInfo = m_inputWS->spectrumInfo();
   const auto numHists = static_cast<int64_t>(m_inputWS->getNumberHistograms());
   const auto specSize = static_cast<int64_t>(m_inputWS->blocksize());
   Progress prog(this, 0.0, 1.0, numHists);
   // -- loop over the spectra/detectors
-  PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *m_outputWS))
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *outws))
   for (int64_t workspaceIndex = 0; workspaceIndex < numHists; ++workspaceIndex) {
     PARALLEL_START_INTERUPT_REGION
-
-    // copy bins from input workspace to output workspace
-    // m_outputWS->setSharedX(workspaceIndex, m_inputWS->sharedX(workspaceIndex));
-
     // locate the spectrum and its detector
     if (!spectrumInfo.hasDetectors(workspaceIndex)) {
       g_log.information() << "Spectrum " << workspaceIndex << " does not have a detector defined for it\n";
@@ -201,10 +271,8 @@ void MultipleScatteringCorrection::exec() {
     const auto wavelengths = m_inputWS->points(workspaceIndex);
     // these need to have the minus sign applied still
     const auto sampleLinearCoefAbs = m_material.linearAbsorpCoef(wavelengths.cbegin(), wavelengths.cend());
-    // TODO:
-    // - implement the multiple scattering correction for heterogenous media (container)
 
-    auto &output = m_outputWS->mutableY(workspaceIndex);
+    auto &output = outws->mutableY(workspaceIndex);
     // -- loop over the wavelength points every m_xStep
     for (int64_t wvBinsIndex = 0; wvBinsIndex < specSize; wvBinsIndex += m_xStep) {
       double A1 = 0.0;
@@ -242,9 +310,9 @@ void MultipleScatteringCorrection::exec() {
     // Interpolate linearly between points separated by m_xStep,
     // last point required
     if (m_xStep > 1) {
-      auto histNew = m_outputWS->histogram(workspaceIndex);
+      auto histNew = outws->histogram(workspaceIndex);
       interpolateLinearInplace(histNew, m_xStep);
-      m_outputWS->setHistogram(workspaceIndex, histNew);
+      outws->setHistogram(workspaceIndex, histNew);
     }
 
     prog.report();
@@ -255,13 +323,11 @@ void MultipleScatteringCorrection::exec() {
 
   g_log.notice() << "finished integration.\n";
 
-  // set the output workspace group
-  // TODO: additional workspace will be added in as we are gradually implementing
-  //       support for container-sample scattering correction
+  // Packaging output to workspace group
   const std::string outWSName = getProperty("OutputWorkspace");
   std::vector<std::string> names;
   names.emplace_back(outWSName + "_sampleOnly");
-  API::AnalysisDataService::Instance().addOrReplace(names.back(), m_outputWS);
+  API::AnalysisDataService::Instance().addOrReplace(names.back(), outws);
   // group
   auto group = createChildAlgorithm("GroupWorkspaces");
   group->initialize();
@@ -273,65 +339,17 @@ void MultipleScatteringCorrection::exec() {
   setProperty("OutputWorkspace", outWS);
 }
 
-/**
- * @brief parse and assign corresponding values from input properties
- *
- */
-void MultipleScatteringCorrection::parseInputs() {
-  // Get input workspace
-  m_inputWS = getProperty("InputWorkspace");
-
-  // Get the beam direction
-  m_beamDirection = m_inputWS->getInstrument()->getBeamDirection();
-
-  // Get the total number of wavelength points, default to use all if not specified
-  m_num_lambda = isDefault("NumberOfWavelengthPoints") ? static_cast<int64_t>(m_inputWS->blocksize())
-                                                       : getProperty("NumberOfWavelengthPoints");
-  // -- while we're here, compute the step in bin number between two adjacent points
-  const auto specSize = static_cast<int64_t>(m_inputWS->blocksize());
-  m_xStep = std::max(int64_t(1), specSize / m_num_lambda); // Bin step between points to calculate
-  // -- notify the user of the bin step
-  std::ostringstream msg;
-  msg << "Numerical integration performed every " << m_xStep << " wavelength points";
-  g_log.information() << msg.str();
-
-  // Get the element size
-  m_elementSize = getProperty("ElementSize"); // in mm
-  m_elementSize = m_elementSize * 1e-3;       // convert to m
-
-  // Get the material
+void MultipleScatteringCorrection::calculateSampleAndContainer() {
+  // retrieve container related properties as they are relevant now
   const auto &sample = m_inputWS->sample();
-  // -- process the sample
-  m_material = sample.getShape().material();
-  // -- process the sample environment (container)
-  // TODO:
-
-  // Get total scattering cross-section
+  const auto &containerMaterial = sample.getEnvironment().getContainer().material();
+  // total scattering cross-section of the container
   // NOTE: the angstrom^-2 to barns and the angstrom^-1 to cm^-1
   // will cancel for mu to give units: cm^-1
-  // -- sample
-  m_sampleLinearCoefTotScatt = -m_material.totalScatterXSection() * m_material.numberDensityEffective() * 100;
-  // -- container
-  // TODO:
-}
+  double containerLinearCoefTotScatt =
+      -containerMaterial.totalScatterXSection() * containerMaterial.numberDensityEffective() * 100;
 
-/**
- * @brief use input workspace as a template to initalize output workspace
- *
- */
-void MultipleScatteringCorrection::setupOutput() {
-  // Create output workspace
-  // NOTE: this output workspace is just a Workspace2D of factor that can be applied to the
-  // corresponding EventWorkspace.
-  // Therefore, it is inherently unitless.
-  m_outputWS = create<HistoWorkspace>(*m_inputWS);
-  m_outputWS->setYUnit("");          // Need to explicitly set YUnit to nothing
-  m_outputWS->setDistribution(true); // The output of this is a distribution
-  m_outputWS->setYUnitLabel("Multiple Scattering Correction factor");
-  // TODO:
-  // We will have to prepare additional output workspace holder for interaction between
-  // the sample and the sample environment.
-  //
+  // TODO: a lot to do here
 }
 
 /**
@@ -342,7 +360,7 @@ void MultipleScatteringCorrection::setupOutput() {
  * @param sample_L2Ds
  */
 void MultipleScatteringCorrection::calculateL2Ds(const MultipleScatteringCorrectionDistGraber &distGraber,
-                                                 const IDetector &detector, std::vector<double> &sample_L2Ds) const {
+                                                 const IDetector &detector, std::vector<double> &L2Ds) const {
   V3D detectorPos(detector.getPos());
   if (detector.nDets() > 1) {
     // We need to make sure this is right for grouped detectors - should use
@@ -354,19 +372,20 @@ void MultipleScatteringCorrection::calculateL2Ds(const MultipleScatteringCorrect
   // calculate the distance between the detector and the sample
   const auto &sample = m_inputWS->sample();
   const auto &sampleShape = sample.getShape();
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS))
   for (size_t i = 0; i < distGraber.m_elementPositions.size(); ++i) {
+    PARALLEL_START_INTERUPT_REGION
     const auto &elementPos = distGraber.m_elementPositions[i];
     const V3D direction = normalize(detectorPos - elementPos);
     Track TwoToDetector(elementPos, direction);
 
-    // find distance in sample
+    // find distance within the object
     sampleShape.interceptSurface(TwoToDetector);
-    sample_L2Ds[i] = TwoToDetector.totalDistInsideObject();
+    L2Ds[i] = TwoToDetector.totalDistInsideObject();
     TwoToDetector.clearIntersectionResults();
-
-    // find distance in container
-    // TODO:
+    PARALLEL_END_INTERUPT_REGION
   }
+  PARALLEL_CHECK_INTERUPT_REGION
 }
 
 /**
