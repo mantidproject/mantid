@@ -65,13 +65,13 @@ Using known peak positions
 
 These techniques require knowing the precise location, in d-space, of
 diffraction peaks and benefit from knowing
-more. :ref:`GetDetOffsetsMultiPeaks <algm-GetDetOffsetsMultiPeaks>`
+more. `GetDetOffsetsMultiPeaks` (deprecated)
 and :ref:`PDCalibration <algm-PDCalibration>` are the main choices for
 this. Both algorithms fit individual peak positions and use those fits
 to generate the calibration information.
 
-The workflow for :ref:`GetDetOffsetsMultiPeaks
-<algm-GetDetOffsetsMultiPeaks>` is identical to that of
+The workflow for `GetDetOffsetsMultiPeaks` (deprecated)
+is identical to that of
 :ref:`GetDetectorOffsets <algm-GetDetectorOffsets>` without the
 cross-correlation step (5). The main difference in the operation of
 the algorithm is that it essentially calculates an offset from each
@@ -98,13 +98,12 @@ using this are
 Workflow algorithms
 ###################
 
-:ref:`CalibrateRectangularDetectors <algm-CalibrateRectangularDetectors>`
+`CalibrateRectangularDetectors` (deprecated)
 will do most of the workflow for you, including applying the
 calibration to the data. While its name suggests it is only for a
 particular subset of detector types, it is not. It has many options
 for selecting between :ref:`GetDetectorOffsets
-<algm-GetDetectorOffsets>` and :ref:`GetDetOffsetsMultiPeaks
-<algm-GetDetOffsetsMultiPeaks>`.
+<algm-GetDetectorOffsets>` and `GetDetOffsetsMultiPeaks` (deprecated).
 
 
 .. _calibration_tofpd_group_calibration-ref:
@@ -630,9 +629,11 @@ alternative is to generate a grouping file to load with
 Adjusting the Instrument Definition
 -----------------------------------
 
+`This section is out of date!`
+
 This approach attempts to correct the instrument component positions based on the calibration data. It can be more involved than applying the correction during focussing.
 
-1. Perform a calibration using :ref:`CalibrateRectangularDetectors <algm-CalibrateRectangularDetectors>` or :ref:`GetDetOffsetsMultiPeaks <algm-GetDetOffsetsMultiPeaks>`.  Only these algorithms can export the :ref:`Diffraction Calibration Workspace <DiffractionCalibrationWorkspace>` required.
+1. Perform a calibration using `CalibrateRectangularDetectors` (deprecated) or `GetDetOffsetsMultiPeaks` (deprecated).  Only these algorithms can export the :ref:`Diffraction Calibration Workspace <DiffractionCalibrationWorkspace>` required.
 2. Run :ref:`AlignComponents <algm-AlignComponents>` this will move aspects of the instrument to optimize the offsets.  It can move any named aspect of the instrument including the sample and source positions.  You will likely need to run this several times, perhaps focussing on a single bank at a time, and then the source and sample positions in order to  get a good alignment.
 3. Then either:
 

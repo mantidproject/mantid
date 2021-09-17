@@ -57,15 +57,8 @@ Bugfixes
 
 Deprecation
 ###########
-- Existing :ref:`CalibrateRectangularDetectors <algm-CalibrateRectangularDetectors>` is deprecated.
-- Existing :ref:`GetDetOffsetsMultiPeaks <algm-GetDetOffsetsMultiPeaks>` is deprecated.
-
-
-
-Deprecation
-###########
-- Existing :ref:`CalibrateRectangularDetectors <algm-CalibrateRectangularDetectors>` is deprecated.
-- Existing :ref:`GetDetOffsetsMultiPeaks <algm-GetDetOffsetsMultiPeaks>` is deprecated.
+- Existing `CalibrateRectangularDetectors` is deprecated.
+- Existing `GetDetOffsetsMultiPeaks` is deprecated.
 
 
 Engineering Diffraction
