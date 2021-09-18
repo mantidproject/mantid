@@ -179,5 +179,6 @@ class SetSampleFromLogs(DistributedDataProcessorAlgorithm):
                       Material=material,
                       Geometry=geometry)
 
+
 # Register algorithm with Mantid.
 AlgorithmFactory.subscribe(SetSampleFromLogs)
