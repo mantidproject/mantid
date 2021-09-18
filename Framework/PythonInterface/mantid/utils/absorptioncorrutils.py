@@ -538,6 +538,14 @@ def create_absorption_input(   # noqa: C901
 
     # Make sure one is set before calling SetSample
     if material or geometry or environment:
-        mantid.simpleapi.SetSampleFromLogs(InputWorkspace=absName, Material=material, Geometry=geometry, Environment=environment)
+        if environment:
+            mantid.simpleapi.SetSampleFromLogs(InputWorkspace=absName,
+                                               Material=material,
+                                               Geometry=geometry,
+                                               Environment=environment)
+        else:
+            mantid.simpleapi.SetSample(InputWorkspace=absName,
+                                       Material=material,
+                                       Geometry=geometry)
 
     return absName
