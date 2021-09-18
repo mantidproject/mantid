@@ -408,6 +408,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
 
         self.copyProperties('SANSILLIntegration', ['ShapeTable'])
 
+        self.copyProperties('SANSILLReduction', 'Wavelength')
+
     def PyExec(self):
         self.setUp()
         outputSamples = []
@@ -721,11 +723,34 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                              NormaliseBy=self.normalise)
         return container_name
 
+    def getWavelength(self, logs):
+        """Returns wavelength from the property Wavelength, if defined, otherwise attempts to obtain it from
+        the logs."""
+        WAVELENGTH_LOG1 = "wavelength"
+        WAVELENGTH_LOG2 = "selector.wavelength"
+        wavelength = None
+        if not self.getProperty('Wavelength').isDefault:
+            wavelength = self.getProperty('Wavelength').value
+        else:
+            try:
+                wavelength = float(logs[WAVELENGTH_LOG1])
+                if wavelength < 0.0:
+                    wavelength = None
+                    raise ValueError
+            except:
+                try:
+                    wavelength = float(logs[WAVELENGTH_LOG2])
+                    if wavelength < 0.0:
+                        wavelength = None
+                        raise ValueError
+                except:
+                    logger.notice("Unable to get a valid wavelength from the "
+                                  "sample logs.")
+        return wavelength
+
     def createCustomSuffix(self, ws):
         DISTANCE_LOG = "L2"
         COLLIMATION_LOG = "collimation.actual_position"
-        WAVELENGTH_LOG1 = "wavelength"
-        WAVELENGTH_LOG2 = "selector.wavelength"
 
         logs = mtd[ws].run().getProperties()
         logs = {log.name:log.value for log in logs}
@@ -757,21 +782,9 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         except:
             logger.notice("Unable to get a valid collimation distance from "
                           "the sample logs.")
-        wavelength = None
-        try:
-            wavelength = float(logs[WAVELENGTH_LOG1])
-            if wavelength < 0.0:
-                wavelength = None
-                raise ValueError
-        except:
-            try:
-                wavelength = float(logs[WAVELENGTH_LOG2])
-                if wavelength < 0.0:
-                    wavelength = None
-                    raise ValueError
-            except:
-                logger.notice("Unable to get a valid wavelength from the "
-                              "sample logs.")
+
+        wavelength = self.getWavelength(logs)
+
         suffix = ""
         if distance:
             suffix += "_d{:.1f}m".format(distance)
@@ -879,6 +892,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 self.getProperty('SampleThickness').value,
                 WaterCrossSection=
                 self.getProperty('WaterCrossSection').value,
+                Wavelength=self.getProperty('Wavelength').value
                 )
 
         output_sample = self.output + '_#' + str(i + 1)
