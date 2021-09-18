@@ -166,13 +166,18 @@ class SetSampleFromLogs(DistributedDataProcessorAlgorithm):
         environment = self._createEnvironment(runObject, instrEnum)
 
         # let SetSample generate errors if anything is wrong
-        SetSample(InputWorkspace=wksp,
-                  Material=material,
-                  Geometry=geometry,
-                  Environment=environment,
-                  ContainerGeometry=geometryContainer,
-                  ContainerMaterial=materialContainer)
-
+        try:
+            SetSample(InputWorkspace=wksp,
+                      Material=material,
+                      Geometry=geometry,
+                      Environment=environment,
+                      ContainerGeometry=geometryContainer,
+                      ContainerMaterial=materialContainer)
+        except Exception as inst:
+            self.log().warning(inst.args[0])
+            SetSample(InputWorkspace=wksp,
+                      Material=material,
+                      Geometry=geometry)
 
 # Register algorithm with Mantid.
 AlgorithmFactory.subscribe(SetSampleFromLogs)
