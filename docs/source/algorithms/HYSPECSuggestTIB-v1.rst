@@ -17,19 +17,19 @@ Usage
 
 **Example:**
 
-.. testcode:: ExSuggestTibHYSPEC
+.. testcode:: ExHYSPECSuggestTIB
 
     incidentEnergy = 5
-    (tibMin,tibMax) = SuggestTibHYSPEC(incidentEnergy)
+    (tibMin,tibMax) = HYSPECSuggestTIB(incidentEnergy)
     print("Incident Energy = %i, tibMin = %.2f, tibMax = %.2f" % (incidentEnergy,tibMin,tibMax))
 
     incidentEnergy = 40
-    (tibMin,tibMax) = SuggestTibHYSPEC(incidentEnergy)
+    (tibMin,tibMax) = HYSPECSuggestTIB(incidentEnergy)
     print("Incident Energy = %i, tibMin = %.2f, tibMax = %.2f" % (incidentEnergy,tibMin,tibMax))
 
 Output:
 
-.. testoutput:: ExSuggestTibHYSPEC
+.. testoutput:: ExHYSPECSuggestTIB
 
     Incident Energy = 5, tibMin = 39515.88, tibMax = 41515.88
     Incident Energy = 40, tibMin = 11898.11, tibMax = 13898.11

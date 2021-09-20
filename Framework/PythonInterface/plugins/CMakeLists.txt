@@ -176,8 +176,8 @@ set(PYTHON_PLUGINS
     algorithms/SortDetectors.py
     algorithms/StatisticsOfTableWorkspace.py
     algorithms/StringToPng.py
-    algorithms/SuggestTibCNCS.py
-    algorithms/SuggestTibHYSPEC.py
+    algorithms/CNCSSuggestTIB.py
+    algorithms/HYSPECSuggestTIB.py
     algorithms/Symmetrise.py
     algorithms/TOFTOFCropWorkspace.py
     algorithms/TOFTOFMergeRuns.py
