@@ -169,14 +169,14 @@ class SetSampleFromLogs(DistributedDataProcessorAlgorithm):
         if self.getProperty("Environment").value.values():
             SetSample(InputWorkspace=wksp,
                       Material=material,
-                      Geometry=geometry)
-        else:
-            SetSample(InputWorkspace=wksp,
-                      Material=material,
                       Geometry=geometry,
                       Environment=environment,
                       ContainerGeometry=geometryContainer,
                       ContainerMaterial=materialContainer)
+        else:
+            SetSample(InputWorkspace=wksp,
+                      Material=material,
+                      Geometry=geometry)
 
 
 # Register algorithm with Mantid.
