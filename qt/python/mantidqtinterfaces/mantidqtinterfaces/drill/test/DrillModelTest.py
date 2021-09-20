@@ -255,25 +255,6 @@ class DrillModelTest(unittest.TestCase):
         mTask.assert_not_called()
         self.model.tasksPool.addProcesses.assert_called_once_with([])
 
-    def test_onTaskStated(self):
-        s0 = mock.Mock()
-        self.model._samples = [s0]
-        self.model._onTaskStarted(0)
-        s0.onProcessStarted.assert_called_once()
-
-    def test_onTaskSuccess(self):
-        self.model.exportModel = mock.Mock()
-        s0 = mock.Mock()
-        self.model._samples = [s0]
-        self.model._onTaskSuccess(0)
-        s0.onProcessSuccess.assert_called_once()
-
-    def test_onTaskError(self):
-        s0 = mock.Mock()
-        self.model._samples = [s0]
-        self.model._onTaskError(0, "test")
-        s0.onProcessError.assert_called_once_with("test")
-
     def test_onProcessingProgress(self):
         self.model.progressUpdate = mock.Mock()
         self.model._onProcessingProgress(0)
