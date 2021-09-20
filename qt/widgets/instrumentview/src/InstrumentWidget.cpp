@@ -1101,6 +1101,15 @@ bool InstrumentWidget::eventFilter(QObject *obj, QEvent *ev) {
   return QWidget::eventFilter(obj, ev);
 }
 
+void InstrumentWidget::closeEvent(QCloseEvent *e) {
+  // stop the background thread if it is running
+  std::cout << "InstrumentWidget::closeEvent()" << std::endl;
+  if (m_thread.isRunning()) {
+    m_thread.quit();
+  }
+  e->accept();
+}
+
 /**
  * Disable colormap autoscaling
  */
@@ -1445,6 +1454,10 @@ void InstrumentWidget::handleWorkspaceReplacement(const std::string &wsName,
  * @param workspace_ptr :: Pointer to the workspace to be deleted
  */
 void InstrumentWidget::preDeleteHandle(const std::string &ws_name, const std::shared_ptr<Workspace> &workspace_ptr) {
+  // stop the background loading thread
+  if (m_thread.isRunning()) {
+    m_thread.quit();
+  }
   if (hasWorkspace(ws_name)) {
     emit preDeletingHandle();
     close();

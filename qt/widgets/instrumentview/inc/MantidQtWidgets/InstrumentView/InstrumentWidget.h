@@ -208,6 +208,7 @@ protected:
   void dragEnterEvent(QDragEnterEvent *e) override;
   void dropEvent(QDropEvent *e) override;
   bool eventFilter(QObject *obj, QEvent *ev) override;
+  void closeEvent(QCloseEvent *e) override;
 
 public slots:
   void tabChanged(int /*unused*/);
