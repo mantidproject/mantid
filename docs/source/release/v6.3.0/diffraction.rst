@@ -12,6 +12,10 @@ Diffraction Changes
 Powder Diffraction
 ------------------
 
+Bugfixes
+########
+- For processing vanadium run, we don't want to find environment automatically in :ref:`SetSampleFromLogs <algm-SetSampleFromLogs>`.
+
 Engineering Diffraction
 -----------------------
 
