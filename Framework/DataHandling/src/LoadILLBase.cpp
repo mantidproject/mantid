@@ -7,11 +7,14 @@
 
 #include "MantidDataHandling/LoadILLBase.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/NexusEntryProvider.h"
 #include "MantidKernel/PropertyManagerProperty.h"
 
 #include <Poco/Path.h>
+#include <boost/algorithm/string.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -44,29 +47,75 @@ void LoadILLBase::bootstrap() {
   PropertyManager_sptr pmp = getProperty("PatchNexusMetadataEntries");
   m_nep = std::make_unique<NexusEntryProvider>(filename, *pmp);
   m_helper = std::make_unique<LoadHelper>();
+  m_acqMode = resolveAcqMode();
 }
 
-void LoadILLBase::addSampleLogs() {}
+void LoadILLBase::addSampleLogs() {
+  NXhandle nxHandle;
+  NXstatus nxStat = NXopen(getPropertyValue("Filename").c_str(), NXACC_READ, &nxHandle);
+  if (nxStat != NX_ERROR) {
+    if (isOutputGroup()) {
+      WorkspaceGroup_sptr wsg = std::dynamic_pointer_cast<WorkspaceGroup>(m_workspace);
+      for (int i = 0; i < wsg->getNumberOfEntries(); ++i) {
+        MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(wsg->getItem(i));
+        auto const entryName = std::string("entry" + std::to_string(i));
+        m_helper->addNexusFieldsToWsRun(nxHandle, ws->mutableRun(), entryName);
+      }
+    } else {
+      MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(m_workspace);
+      m_helper->addNexusFieldsToWsRun(nxHandle, ws->mutableRun());
+    }
+    NXclose(&nxHandle);
+  }
+}
 
-void LoadILLBase::patchSampleLogs() {}
+void LoadILLBase::patchSampleLogs() {
+  const PropertyManager_sptr logsToPatch = getProperty("PatchWorkspaceSampleLogs");
+  const auto properties = logsToPatch->getProperties();
+  if (isOutputGroup()) {
+    WorkspaceGroup_sptr wsg = std::dynamic_pointer_cast<WorkspaceGroup>(m_workspace);
+    for (int i = 0; i < wsg->getNumberOfEntries(); ++i) {
+      MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(wsg->getItem(i));
+      for (const auto &prop : properties) {
+        ws->mutableRun().addProperty(prop, true);
+      }
+    }
+  } else {
+    MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(m_workspace);
+    for (const auto &prop : properties) {
+      ws->mutableRun().addProperty(prop, true);
+    }
+  }
+}
 
-void LoadILLBase::loadInstrument() {}
+void LoadILLBase::loadInstrument() {
+  const std::string idf = getInstrumentDefinitionFilePath();
+  auto loadInst = createChildAlgorithm("LoadInstrument");
+  loadInst->setPropertyValue("Filename", idf);
+  loadInst->setProperty("Workspace", m_workspace);
+  loadInst->setProperty("RewriteSpectraMap", true);
+  loadInst->execute();
+}
 
 void LoadILLBase::resolveStartTime() {}
 
-void LoadILLBase::resolveInstrument() {}
+void LoadILLBase::resolveInstrument() {
+  NXEntry firstEntry = m_nxroot->openFirstEntry();
+  const std::string instrumentPath = m_helper->findInstrumentNexusPath(firstEntry);
+  m_instrumentName = m_helper->getStringFromNexusPath(firstEntry, instrumentPath + "/name");
+  boost::to_upper(m_instrumentName);
+  m_instrumentName += resolveVariant();
+}
 
 void LoadILLBase::exec() {
   bootstrap();
   validateMetadata();
   resolveInstrument();
-  resolveVariant();
-  resolveAcqMode();
   buildWorkspace();
-  loadAndfillData();
   resolveStartTime();
   loadInstrument();
-  placeInstrument();
+  configureBeamline();
+  loadAndFillData();
   addSampleLogs();
   patchSampleLogs();
   setOutputWorkspace();

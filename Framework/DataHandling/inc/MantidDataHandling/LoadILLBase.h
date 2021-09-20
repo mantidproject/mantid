@@ -22,15 +22,15 @@ class DLLExport LoadILLBase : public API::IFileLoader<Kernel::NexusDescriptor> {
 private:
   // pure virtual methods
   virtual void buildWorkspace() = 0;
-  virtual void loadAndfillData() = 0;
+  virtual void loadAndFillData() = 0;
 
   // virtual methods
   virtual void declareExtraProperties() {}
-  virtual void placeInstrument();
+  virtual void configureBeamline() {}
   virtual std::vector<std::string> mandatoryKeys() { return std::vector<std::string>(); }
   virtual bool isOutputGroup() { return false; }
-  virtual std::string resolveVariant() { return std::string(); }
-  virtual void resolveAcqMode();
+  virtual std::string resolveVariant() { return ""; }
+  virtual std::string resolveAcqMode() { return ""; }
 
   // non-virtual methods
   void init() override;
