@@ -271,9 +271,11 @@ MatrixWorkspace_sptr IndirectFitPlotModel::appendGuessToInput(const MatrixWorksp
 
 std::pair<double, double> IndirectFitPlotModel::getGuessRange() const {
   std::pair<double, double> range;
-  if (getResultWorkspace())
+  if (getResultWorkspace()) {
     range = getResultRange();
-  range = getRange();
+  } else {
+    range = getRange();
+  }
   adjustRange(range);
   return range;
 }
