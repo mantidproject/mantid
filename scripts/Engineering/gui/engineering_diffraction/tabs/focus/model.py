@@ -64,6 +64,7 @@ class FocusModel(object):
             full_calib = Ads.retrieve("full_inst_calib")
 
         # 1) load, focus and process vanadium
+        # check for vanadium in ADS
         ws_van = self._load_run_and_convert_to_dSpacing(vanadium_path, calibration.get_instrument(), full_calib)
         van_foc_name = CURVES_PREFIX + calibration.get_group_suffix()
         ws_van_foc = self._focus_run_and_apply_roi_calibration(ws_van, calibration, ws_foc_name=van_foc_name,
@@ -136,6 +137,8 @@ class FocusModel(object):
 
     def _save_output_files(self, sample_ws_foc, calibration, van_run, rb_num = None):
         focus_dir = path.join(output_settings.get_output_path(), "Focus")
+        if not path.exists(focus_dir):
+            makedirs(focus_dir)
         # set bankid for use in fit tab
         foc_suffix = calibration.get_foc_ws_suffix()
         # if nspec = 1 - just use suffix
@@ -155,6 +158,8 @@ class FocusModel(object):
             # copy file to rb folder if present
             if rb_num:
                 rb_focus_dir = path.join(output_settings.get_output_path(), "User", rb_num, "Focus")
+                if not path.exists(rb_focus_dir):
+                    makedirs(rb_focus_dir)
                 for ext in [".nxs", ".gss", ".abc"]:
                     copy2(path.join(focus_dir, filename + ext),
                           path.join(rb_focus_dir, filename + ext))
