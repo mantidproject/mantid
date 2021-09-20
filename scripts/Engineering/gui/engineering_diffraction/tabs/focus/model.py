@@ -64,17 +64,20 @@ class FocusModel(object):
             full_calib = Ads.retrieve("full_inst_calib")
 
         # 1) load, focus and process vanadium
+        van_run = path_handling.get_run_number_from_path(vanadium_path, calibration.get_instrument())
         van_foc_name = CURVES_PREFIX + calibration.get_group_suffix()
         if Ads.doesExist(van_foc_name):
             ws_van_foc = Ads.retrieve(van_foc_name)
         else:
-            ws_van = self._load_run_and_convert_to_dSpacing(vanadium_path, calibration.get_instrument(), full_calib)
+            if Ads.doesExist(van_run):
+                ws_van = Ads.retrieve(van_run) # will exist if have only changed the ROI
+            else:
+                ws_van = self._load_run_and_convert_to_dSpacing(vanadium_path, calibration.get_instrument(), full_calib)
             ws_van_foc = self._focus_run_and_apply_roi_calibration(ws_van, calibration, ws_foc_name=van_foc_name,
                                                                    applyCal=False)
             ws_van_foc = self._smooth_vanadium(ws_van_foc)
 
         # 2) Loop over runs
-        van_run = path_handling.get_run_number_from_path(vanadium_path, calibration.get_instrument())
         output_workspaces = []  # List of collated workspaces to plot.
         for sample_path in sample_paths:
             ws_sample = self._load_run_and_convert_to_dSpacing(sample_path, calibration.get_instrument(), full_calib)
