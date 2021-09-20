@@ -7,19 +7,20 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlias.h"
 #include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace DataHandling {
 
-/** AppendGeometryToSNSNexus : Appends geometry information to a NeXus file.
+/** SNSAppendGeometryToNexus : Appends geometry information to a NeXus file.
 
   @date 2012-06-01
 */
-class DLLExport AppendGeometryToSNSNexus : public API::Algorithm {
+class DLLExport SNSAppendGeometryToNexus : public API::Algorithm, public API::DeprecatedAlias {
 public:
-  AppendGeometryToSNSNexus();
-  ~AppendGeometryToSNSNexus() override;
+  SNSAppendGeometryToNexus();
+  ~SNSAppendGeometryToNexus() override;
 
   const std::string name() const override;
   /// Summary of algorithms purpose
@@ -30,6 +31,7 @@ public:
 
   int version() const override;
   const std::string category() const override;
+  const std::string alias() const override { return "AppendGeometryToSNSNexus"; };
 
 private:
   void init() override;
