@@ -36,19 +36,19 @@ void LoadILLBase::init() {
 
 std::string LoadILLBase::getInstrumentDefinitionFilePath() {
   Poco::Path directory(ConfigService::Instance().getInstrumentDirectory());
-  Poco::Path file(m_instrumentName + "_Definition.xml");
+  Poco::Path file(m_instrument + "_Definition.xml");
   Poco::Path fullPath(directory, file);
   return fullPath.toString();
 }
 
 void LoadILLBase::bootstrap() {
   const std::string filename = getPropertyValue("Filename");
-  m_nxroot = std::make_unique<NXRoot>(filename);
   PropertyManager_sptr pmp = getProperty("PatchNexusMetadataEntries");
+  m_nxroot = std::make_unique<NXRoot>(filename);
   m_nep = std::make_unique<NexusEntryProvider>(filename, *pmp);
   m_helper = std::make_unique<LoadHelper>();
-  m_acqMode = resolveAcqMode();
-  m_instrumentName = resolveInstrument();
+  m_mode = resolveAcqMode();
+  m_instrument = resolveInstrument();
 }
 
 void LoadILLBase::addSampleLogs() {
@@ -98,7 +98,20 @@ void LoadILLBase::loadInstrument() {
   loadInst->execute();
 }
 
-void LoadILLBase::resolveStartTime() {}
+void LoadILLBase::resolveStartTime() {
+  const std::string startTime = "start_time";
+  m_timestamp = m_helper->dateTimeInIsoFormat(m_nxroot->openFirstEntry().getString(startTime));
+  if (isOutputGroup()) {
+    WorkspaceGroup_sptr wsg = std::dynamic_pointer_cast<WorkspaceGroup>(m_workspace);
+    for (int i = 0; i < wsg->getNumberOfEntries(); ++i) {
+      MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(wsg->getItem(i));
+      ws->mutableRun().addProperty(startTime, m_timestamp, true);
+    }
+  } else {
+    MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(m_workspace);
+    ws->mutableRun().addProperty(startTime, m_timestamp, true);
+  }
+}
 
 std::string LoadILLBase::resolveInstrument() {
   NXEntry firstEntry = m_nxroot->openFirstEntry();

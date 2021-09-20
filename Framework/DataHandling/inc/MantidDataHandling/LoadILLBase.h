@@ -50,15 +50,16 @@ private:
   std::shared_ptr<NexusEntryProvider> getNep() { return m_nep; }
   std::shared_ptr<LoadHelper> getHelper() { return m_helper; }
   std::shared_ptr<API::Workspace> getOutput() { return m_workspace; }
-  std::string getAcqMode() { return m_acqMode; }
-  std::string getInstrument() { return m_instrumentName; }
+  std::string getAcqMode() { return m_mode; }
+  std::string getInstrument() { return m_instrument; }
 
   // member variables
   std::shared_ptr<NeXus::NXRoot> m_nxroot;
   std::shared_ptr<NexusEntryProvider> m_nep;
   std::shared_ptr<LoadHelper> m_helper;
   std::shared_ptr<API::Workspace> m_workspace;
-  std::string m_acqMode;
-  std::string m_instrumentName;
+  std::string m_mode;
+  std::string m_instrument;
+  std::string m_timestamp;
 };
 } // namespace Mantid::DataHandling
