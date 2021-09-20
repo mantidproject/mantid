@@ -425,6 +425,7 @@ def create_absorption_input(
     material={},
     geometry={},
     environment={},
+    find_environment=True,
     opt_wl_min=0,
     opt_wl_max=Property.EMPTY_DBL,
     metaws=None,
@@ -438,6 +439,7 @@ def create_absorption_input(
     :param material: Optional material to use in SetSample
     :param geometry: Optional geometry to use in SetSample
     :param environment: Optional environment to use in SetSample
+    :param find_environment: Optional find_environment to control whether to figure out environment automatically.
     :param opt_wl_min: Optional minimum wavelength. If specified, this is used instead of from the props
     :param opt_wl_max: Optional maximum wavelength. If specified, this is used instead of from the props
     :param metaws: Optional workspace name with metadata to use for donor workspace instead of reading from filename
@@ -538,6 +540,10 @@ def create_absorption_input(
 
     # Make sure one is set before calling SetSample
     if material or geometry or environment:
-        mantid.simpleapi.SetSampleFromLogs(InputWorkspace=absName, Material=material, Geometry=geometry, Environment=environment)
+        mantid.simpleapi.SetSampleFromLogs(InputWorkspace=absName,
+                                           Material=material,
+                                           Geometry=geometry,
+                                           Environment=environment,
+                                           FindEnvironment=find_environment)
 
     return absName
