@@ -381,6 +381,8 @@ void MultipleScatteringCorrection::calculateSampleAndContainer(API::MatrixWorksp
       -containerMaterial.totalScatterXSection() * containerMaterial.numberDensityEffective() * 100;
 
   // get the sample and container shapes
+  const auto &sampleShape = sample.getShape();
+  const auto &containerShape = sample.getEnvironment().getContainer();
 
   // cache Ls1 for both sample and container
 
