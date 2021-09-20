@@ -616,14 +616,27 @@ class PolDiffILLReduction(PythonAlgorithm):
             for pixel_no in range(mtd[background].getNumberHistograms()):
                 time_channels = mtd[background].readX(pixel_no)
                 counts = mtd[background].dataY(pixel_no)
+                errors = mtd[background].dataE(pixel_no)
                 ep_index = np.abs(time_channels - elastic_peaks[pixel_no]).argmin()
                 lower_peak_edge = ep_index - peak_width
                 upper_peak_edge = ep_index + peak_width
+                n_time_channels = lower_peak_edge + (np.size(counts) - upper_peak_edge + 1)
+                # first, the time independent contribution (outside elastic peak) to background is calculated
                 time_indep_component = np.mean(np.concatenate((counts[:lower_peak_edge], counts[upper_peak_edge+1:])))
+                # and its error, from error propagation:
+                time_inded_err = np.sum(np.concatenate((np.power(errors[:lower_peak_edge], 2),
+                                                        np.power(errors[upper_peak_edge+1:], 2)))) / n_time_channels
                 counts[:lower_peak_edge] = time_indep_component
                 counts[upper_peak_edge+1:] = time_indep_component
+                errors[:lower_peak_edge] = time_inded_err
+                errors[upper_peak_edge+1:] = time_inded_err
+                # then, background in the elastic peak region can be calculated:
                 counts[lower_peak_edge+1:upper_peak_edge] -= time_indep_component
                 counts[lower_peak_edge+1:upper_peak_edge] *= transmission
+                errors[lower_peak_edge+1:upper_peak_edge] = \
+                    transmission * np.sqrt(np.power(errors[lower_peak_edge+1:upper_peak_edge], 2)
+                                           + np.power(time_indep_component, 2))
+
         background_ws = 'background_ws'
         GroupWorkspaces(InputWorkspaces=bckg_list, OutputWorkspace=background_ws)
         return background_ws
