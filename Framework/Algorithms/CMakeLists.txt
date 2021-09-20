@@ -161,7 +161,6 @@ set(SRC_FILES
     src/GeneratePythonFitScript.cpp
     src/GeneratePythonScript.cpp
     src/GetAllEi.cpp
-    src/GetDetOffsetsMultiPeaks.cpp
     src/GetDetectorOffsets.cpp
     src/GetEi.cpp
     src/GetEi2.cpp
@@ -504,7 +503,6 @@ set(INC_FILES
     inc/MantidAlgorithms/GeneratePythonFitScript.h
     inc/MantidAlgorithms/GeneratePythonScript.h
     inc/MantidAlgorithms/GetAllEi.h
-    inc/MantidAlgorithms/GetDetOffsetsMultiPeaks.h
     inc/MantidAlgorithms/GetDetectorOffsets.h
     inc/MantidAlgorithms/GetEi.h
     inc/MantidAlgorithms/GetEi2.h
@@ -861,7 +859,6 @@ set(TEST_FILES
     GeneratePythonFitScriptTest.h
     GeneratePythonScriptTest.h
     GetAllEiTest.h
-    GetDetOffsetsMultiPeaksTest.h
     GetDetectorOffsetsTest.h
     GetEiMonDet3Test.h
     GetEiTest.h

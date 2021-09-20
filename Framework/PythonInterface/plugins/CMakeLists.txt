@@ -20,7 +20,6 @@ set(PYTHON_PLUGINS
     algorithms/CalculateEfficiencyCorrection.py
     algorithms/CalculateFlux.py
     algorithms/CalculateSampleTransmission.py
-    algorithms/CalibrateRectangularDetectors.py
     algorithms/CheckForSampleLogs.py
     algorithms/CleanFileCache.py
     algorithms/ClipPeaks.py
