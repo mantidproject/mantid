@@ -43,7 +43,13 @@ class CalibrationInfo(EnggUtils.GroupingInfo):
         filename = self.generate_output_file_name(ext='.xml')
         super().save_grouping_workspace(directory, filename)
 
+    def load_relevant_calibration_files(self, output_prefix="engggui"):
+        self.calibration_table = super().load_relevant_calibration_files(output_prefix)
+
     # getters
+    def get_group_ws(self):
+        return super().get_group_ws(self.get_instrument())
+
     def get_calibration_table(self):
         return self.calibration_table
 

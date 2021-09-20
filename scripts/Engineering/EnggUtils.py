@@ -125,9 +125,13 @@ class GroupingInfo:
         """Output cal table from second step (e.g. bank-wise) run of PDCalibration"""
         filepath = path.splitext(self.prm_filepath)[0] + '.nxs'  # change extension to .nxs
         ws_name = output_prefix + "_calibration_" + self.get_group_suffix()
-        mantid.Load(Filename=filepath, OutputWorkspace=ws_name)
+        cal_table = mantid.Load(Filename=filepath, OutputWorkspace=ws_name)
         # load in custom grouping - checks if applicable inside method
-        self.load_custom_grouping_workspace()
+        if not self.group.banks:
+            self.load_custom_grouping_workspace()
+        else:
+            self.get_group_ws()  # creates group workspace
+        return cal_table
 
     def load_custom_grouping_workspace(self):
         """
@@ -137,9 +141,8 @@ class GroupingInfo:
         if not self.group.banks:
             # no need to load grp ws for bank grouping
             ws_name = self._group_ws_names[self.group]
-            filepath_no_ext, _ = path.splitext(self.prm_filepath)
-            mantid.LoadDetectorsGroupingFile(InputFile=filepath_no_ext + ".xml", OutputWorkspace=ws_name)
-            self.group_ws = ws_name
+            grouping_filepath = path.splitext(self.prm_filepath)[0] + ".xml"
+            self.group_ws = mantid.LoadDetectorsGroupingFile(InputFile=grouping_filepath, OutputWorkspace=ws_name)
 
     def save_grouping_workspace(self, directory: str, filename: str) -> None:
         if self.group and not self.group.banks:
@@ -161,17 +164,17 @@ class GroupingInfo:
         filename = "_".join([instrument, ceria_no, self.get_group_suffix()])
         return filename + ext
 
-    def get_group_ws(self, sample_ws):
+    def get_group_ws(self, instrument='ENGINX'):
         if not self.group_ws or not ADS.doesExist(self.group_ws.name()):
             if self.group.banks:
-                self.create_bank_grouping_workspace(sample_ws)
+                self.create_bank_grouping_workspace(instrument)
             elif self.group == GROUP.CROPPED:
-                self.create_grouping_workspace_from_spectra_list(sample_ws)
+                self.create_grouping_workspace_from_spectra_list(instrument)
             elif self.group == GROUP.CUSTOM:
-                self.create_grouping_workspace_from_calfile(sample_ws)
+                self.create_grouping_workspace_from_calfile(instrument)
         return self.group_ws
 
-    def create_bank_grouping_workspace(self, sample_raw):  # -> GroupingWorkspace
+    def create_bank_grouping_workspace(self, instrument):  # -> GroupingWorkspace
         """
         Retrieve the grouping workspace for the North/South bank from the user directories, or create a new one from the
         sample workspace instrument data if not found
@@ -187,7 +190,7 @@ class GroupingInfo:
         except ValueError:
             logger.notice("Grouping file not found in user directories - creating one")
             if self.group.banks and self.group != GROUP.TEXTURE:
-                grp_ws, _, _ = mantid.CreateGroupingWorkspace(InputWorkspace=sample_raw, OutputWorkspace=ws_name,
+                grp_ws, _, _ = mantid.CreateGroupingWorkspace(InstrumentName=instrument, OutputWorkspace=ws_name,
                                                               GroupNames=self._group_bank_args[self.group])
         if grp_ws:
             self.group_ws = grp_ws
@@ -195,13 +198,13 @@ class GroupingInfo:
             raise ValueError("Could not find or create grouping requested - make sure the directory of the grouping.xml"
                              " files is on the path")
 
-    def create_grouping_workspace_from_calfile(self, sample_raw):  # -> GroupingWorkspace
-        grp_ws, _, _ = mantid.CreateGroupingWorkspace(InputWorkspace=sample_raw, OldCalFilename=self.cal_filepath,
+    def create_grouping_workspace_from_calfile(self, instrument):  # -> GroupingWorkspace
+        grp_ws, _, _ = mantid.CreateGroupingWorkspace(InstrumentName=instrument, OldCalFilename=self.cal_filepath,
                                                       OutputWorkspace="Custom_calfile_grouping")
         self.group_ws = grp_ws
 
-    def create_grouping_workspace_from_spectra_list(self, sample_raw):
-        grp_ws, _, _ = mantid.CreateGroupingWorkspace(InputWorkspace=sample_raw,
+    def create_grouping_workspace_from_spectra_list(self, instrument):
+        grp_ws, _, _ = mantid.CreateGroupingWorkspace(InstrumentName=instrument,
                                                       OutputWorkspace="Custom_spectra_grouping")
         for spec in self.spectra_list:
             det_ids = grp_ws.getDetectorIDs(spec - 1)

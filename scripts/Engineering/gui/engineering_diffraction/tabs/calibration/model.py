@@ -134,7 +134,7 @@ class CalibrationModel(object):
         ConvertUnits(InputWorkspace=ceria_ws, OutputWorkspace=ceria_ws, Target='dSpacing')
 
         # get grouping workspace and focus
-        grp_ws = calibration.get_group_ws(ceria_ws)  # (creates if doesn't exist)
+        grp_ws = calibration.get_group_ws()  # (creates if doesn't exist)
         focused_ceria = DiffractionFocussing(InputWorkspace=ceria_ws, GroupingWorkspace=grp_ws)
         ApplyDiffCal(InstrumentWorkspace=focused_ceria, ClearCalibration=True)  # DIFC of detector in middle of bank
         focused_ceria = ConvertUnits(InputWorkspace=focused_ceria, Target='TOF')
