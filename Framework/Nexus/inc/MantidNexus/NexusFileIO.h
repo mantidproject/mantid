@@ -349,7 +349,7 @@ template <class T> void NexusFileIO::writeNumericTimeLog(const Kernel::TimeSerie
   if (status == NX_ERROR)
     return;
 
-  status = NXopengroup(fileID, logName.c_str(), "NXlog");
+  NXopengroup(fileID, logName.c_str(), "NXlog");
   // write log data
   std::vector<std::string> attributes, avalues;
   attributes.emplace_back("type");
@@ -362,7 +362,7 @@ template <class T> void NexusFileIO::writeNumericTimeLog(const Kernel::TimeSerie
   avalues.emplace_back(t0.toISO8601String());
 
   writeNxFloatArray("time", times, attributes, avalues);
-  status = NXclosegroup(fileID);
+  NXclosegroup(fileID);
 }
 
 /// Helper typedef for a shared pointer of a NexusFileIO.
