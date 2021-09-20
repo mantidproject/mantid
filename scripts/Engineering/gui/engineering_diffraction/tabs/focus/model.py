@@ -94,9 +94,10 @@ class FocusModel(object):
     def _plot_focused_workspaces(ws_names):
         for ws_name in ws_names:
             ws_foc = Ads.retrieve(ws_name)
+            ws_label = '_'.join([ws_foc.getInstrument().getName(), ws_foc.run().get('run_number').value])
             fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
             for ispec in range(ws_foc.getNumberHistograms()):
-                ax.plot(ws_foc, label='193749_foc: spec 1', marker='.', wkspIndex=ispec)
+                ax.plot(ws_foc, label=f'{ws_label} focused: spec {ispec+1}', marker='.', wkspIndex=ispec)
             ax.legend()
             fig.show()
 
