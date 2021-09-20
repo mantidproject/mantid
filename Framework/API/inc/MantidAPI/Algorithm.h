@@ -171,11 +171,13 @@ public:
   /// Function to return all of the seeAlso (these are not validated) algorithms
   /// related to this algorithm.A default implementation is provided.
   const std::vector<std::string> seeAlso() const override { return {}; };
-  /// Function to return any aliases to the algorithm;  A default implementation
-  /// is provided
+  /// function to return any aliases to the algorithm;  A default implementation is provided
   const std::string alias() const override { return ""; }
   /// Flag to indicate if the algorithm is called by its alias.
   bool calledByAlias = false;
+
+  /// Expiration date (in ISO8601 format) for the algorithm aliases; default implementation for no expiration date
+  const std::string aliasDeprecated() const override { return ""; }
 
   /// function to return URL for algorithm documentation; A default
   /// implementation is provided.
