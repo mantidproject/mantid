@@ -129,14 +129,67 @@ void MultipleScatteringCorrection::exec() {
 
   std::string method = getProperty("Method");
   if (method == "SampleOnly") {
+    //-- Setup output workspace
     // set the OutputWorkspace to a workspace group with one workspace:
-    //          ${OutputWorkspace}_sampleOnly
-    calculateSampleOnly();
+    //                 ${OutputWorkspace}_sampleOnly
+    API::MatrixWorkspace_sptr ws_sampleOnly = create<HistoWorkspace>(*m_inputWS);
+    ws_sampleOnly->setYUnit("");          // Need to explicitly set YUnit to nothing
+    ws_sampleOnly->setDistribution(true); // The output of this is a distribution
+    ws_sampleOnly->setYUnitLabel("Multiple Scattering Correction factor");
+    //-- Fill the workspace with sample only correction factors
+    const auto &sampleShape = m_inputWS->sample().getShape();
+    calculateSingleComponent(ws_sampleOnly, sampleShape);
+    //-- Package output to workspace group
+    const std::string outWSName = getProperty("OutputWorkspace");
+    std::vector<std::string> names;
+    names.emplace_back(outWSName + "_sampleOnly");
+    API::AnalysisDataService::Instance().addOrReplace(names.back(), ws_sampleOnly);
+    // group
+    auto group = createChildAlgorithm("GroupWorkspaces");
+    group->initialize();
+    group->setProperty("InputWorkspaces", names);
+    group->setProperty("OutputWorkspace", outWSName);
+    group->execute();
+    API::WorkspaceGroup_sptr outWS = group->getProperty("OutputWorkspace");
+    // NOTE:
+    //   The output here is a workspace group of one, and it is an intended design as
+    //   the MantidTotalScattering would like to have consistent output type regardless
+    //   of the correction method.
+    setProperty("OutputWorkspace", outWS);
   } else if (method == "SampleAndContainer") {
+    //-- Setup output workspace
     // set the OutputWorkspace to a workspace group with two workspaces:
     //          ${OutputWorkspace}_containerOnly
     //          ${OutputWorkspace}_sampleAndContainer
-    calculateSampleAndContainer();
+    // 1. container only
+    API::MatrixWorkspace_sptr ws_containerOnly = create<HistoWorkspace>(*m_inputWS);
+    ws_containerOnly->setYUnit("");          // Need to explicitly set YUnit to nothing
+    ws_containerOnly->setDistribution(true); // The output of this is a distribution
+    ws_containerOnly->setYUnitLabel("Multiple Scattering Correction factor");
+    const auto &containerShape = m_inputWS->sample().getEnvironment().getContainer();
+    calculateSingleComponent(ws_containerOnly, containerShape);
+    // 2. sample and container
+    API::MatrixWorkspace_sptr ws_sampleAndContainer = create<HistoWorkspace>(*m_inputWS);
+    ws_sampleAndContainer->setYUnit("");          // Need to explicitly set YUnit to nothing
+    ws_sampleAndContainer->setDistribution(true); // The output of this is a distribution
+    ws_sampleAndContainer->setYUnitLabel("Multiple Scattering Correction factor");
+    calculateSampleAndContainer(ws_sampleAndContainer);
+    //-- Package output to workspace group
+    const std::string outWSName = getProperty("OutputWorkspace");
+    std::vector<std::string> names;
+    names.emplace_back(outWSName + "_containerOnly");
+    API::AnalysisDataService::Instance().addOrReplace(names.back(), ws_containerOnly);
+    names.emplace_back(outWSName + "_sampleAndContainer");
+    API::AnalysisDataService::Instance().addOrReplace(names.back(), ws_sampleAndContainer);
+    // group
+    auto group = createChildAlgorithm("GroupWorkspaces");
+    group->initialize();
+    group->setProperty("InputWorkspaces", names);
+    group->setProperty("OutputWorkspace", outWSName);
+    group->execute();
+    API::WorkspaceGroup_sptr outWS = group->getProperty("OutputWorkspace");
+    //
+    setProperty("OutputWorkspace", outWS);
   } else {
     // With validator guarding the gate, this should never happen. However, just incase it
     // does, we should throw an exception.
@@ -189,17 +242,12 @@ void MultipleScatteringCorrection::parseInputs() {
  * @brief calculate the correction factor per detector for sample only case
  *
  */
-void MultipleScatteringCorrection::calculateSampleOnly() {
-  // Setup output workspace
-  API::MatrixWorkspace_sptr outws = create<HistoWorkspace>(*m_inputWS);
-  outws->setYUnit("");          // Need to explicitly set YUnit to nothing
-  outws->setDistribution(true); // The output of this is a distribution
-  outws->setYUnitLabel("Multiple Scattering Correction factor");
-
+void MultipleScatteringCorrection::calculateSingleComponent(API::MatrixWorkspace_sptr outws,
+                                                            const Geometry::IObject &shape) {
   // Cache distances
   // NOTE: cannot use IObject_sprt for sample shape as the getShape() method dereferenced
   //       the shared pointer upon returning.
-  MultipleScatteringCorrectionDistGraber distGraber(m_inputWS->sample().getShape(), m_elementSize);
+  MultipleScatteringCorrectionDistGraber distGraber(shape, m_elementSize);
   distGraber.cacheLS1(m_beamDirection);
   // NOTE: the following data is now cached in the distGraber object
   // std::vector<double> distGraber.m_LS1 : Cached L1 distances
@@ -322,24 +370,9 @@ void MultipleScatteringCorrection::calculateSampleOnly() {
   PARALLEL_CHECK_INTERUPT_REGION
 
   g_log.notice() << "finished integration.\n";
-
-  // Packaging output to workspace group
-  const std::string outWSName = getProperty("OutputWorkspace");
-  std::vector<std::string> names;
-  names.emplace_back(outWSName + "_sampleOnly");
-  API::AnalysisDataService::Instance().addOrReplace(names.back(), outws);
-  // group
-  auto group = createChildAlgorithm("GroupWorkspaces");
-  group->initialize();
-  group->setProperty("InputWorkspaces", names);
-  group->setProperty("OutputWorkspace", outWSName);
-  group->execute();
-  API::WorkspaceGroup_sptr outWS = group->getProperty("OutputWorkspace");
-
-  setProperty("OutputWorkspace", outWS);
 }
 
-void MultipleScatteringCorrection::calculateSampleAndContainer() {
+void MultipleScatteringCorrection::calculateSampleAndContainer(API::MatrixWorkspace_sptr outws) {
   // retrieve container related properties as they are relevant now
   const auto &sample = m_inputWS->sample();
   const auto &containerMaterial = sample.getEnvironment().getContainer().material();
@@ -349,7 +382,13 @@ void MultipleScatteringCorrection::calculateSampleAndContainer() {
   double containerLinearCoefTotScatt =
       -containerMaterial.totalScatterXSection() * containerMaterial.numberDensityEffective() * 100;
 
-  // TODO: a lot to do here
+  // get the sample and container shapes
+
+  // cache Ls1 for both sample and container
+
+  // cache L12 for both sample and container
+
+  // perform the calculation
 }
 
 /**
@@ -372,9 +411,7 @@ void MultipleScatteringCorrection::calculateL2Ds(const MultipleScatteringCorrect
   // calculate the distance between the detector and the sample
   const auto &sample = m_inputWS->sample();
   const auto &sampleShape = sample.getShape();
-  PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS))
   for (size_t i = 0; i < distGraber.m_elementPositions.size(); ++i) {
-    PARALLEL_START_INTERUPT_REGION
     const auto &elementPos = distGraber.m_elementPositions[i];
     const V3D direction = normalize(detectorPos - elementPos);
     Track TwoToDetector(elementPos, direction);
@@ -383,9 +420,7 @@ void MultipleScatteringCorrection::calculateL2Ds(const MultipleScatteringCorrect
     sampleShape.interceptSurface(TwoToDetector);
     L2Ds[i] = TwoToDetector.totalDistInsideObject();
     TwoToDetector.clearIntersectionResults();
-    PARALLEL_END_INTERUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
 }
 
 /**
