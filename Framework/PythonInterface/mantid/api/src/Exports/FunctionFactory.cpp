@@ -38,8 +38,7 @@ using namespace boost::python;
 
 GET_POINTER_SPECIALIZATION(FunctionFactoryImpl)
 
-namespace Mantid {
-namespace PythonInterface {
+namespace Mantid::PythonInterface {
 
 /// Specialization for IFunction. Fit functions defined in
 /// python need to be wrapped in FunctionWrapper without
@@ -69,8 +68,7 @@ template <> std::shared_ptr<IFunction> PythonObjectInstantiator<IFunction>::crea
   return instancePtr;
 }
 
-} // namespace PythonInterface
-} // namespace Mantid
+} // namespace Mantid::PythonInterface
 
 namespace {
 ///@cond

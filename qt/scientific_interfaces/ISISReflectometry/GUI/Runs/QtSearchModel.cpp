@@ -9,9 +9,7 @@
 #include <QColor>
 #include <QSize>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 using namespace Mantid::API;
 
 QtSearchModel::QtSearchModel() : m_runDetails(), m_hasUnsavedChanges{false} {}
@@ -220,6 +218,4 @@ void QtSearchModel::setSaved() { m_hasUnsavedChanges = false; }
 SearchResult const &QtSearchModel::getRowData(int index) const { return m_runDetails[index]; }
 
 SearchResults const &QtSearchModel::getRows() const { return m_runDetails; }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

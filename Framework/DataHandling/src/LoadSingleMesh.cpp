@@ -6,8 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadSingleMesh.h"
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 LoadSingleMesh::LoadSingleMesh(const std::string &filename, std::ios_base::openmode mode, ScaleUnits scaleType)
     : MeshFileIO(scaleType), m_filename(filename) {
@@ -20,5 +19,4 @@ LoadSingleMesh::LoadSingleMesh(const std::string &filename, std::ios_base::openm
 
 LoadSingleMesh::~LoadSingleMesh() { m_file.close(); }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

@@ -13,8 +13,7 @@
 #include <QString>
 #include <bitset>
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 namespace {
 const std::string PERIOD_INFO_NOT_FOUND = "Not found";
@@ -37,7 +36,7 @@ using namespace Mantid::API;
  * @param logName :: The name of the sample log to read
  * @returns :: String value of the sample log, or empty string if log cannot be found
  */
-std::string MuonPeriodInfo::readSampleLog(MatrixWorkspace_sptr ws, const std::string &logName) {
+std::string MuonPeriodInfo::readSampleLog(const MatrixWorkspace_sptr &ws, const std::string &logName) {
   try {
     return ws->run().getLogData(logName)->value();
   } catch (const std::runtime_error &) {
@@ -105,7 +104,7 @@ MuonPeriodInfo::MuonPeriodInfo(QWidget *parent) : QWidget(parent), m_numberOfSeq
  * @param ws :: Workspace to read sample logs from
  * @return :: A vector containing vectors for each period info read
  */
-std::vector<std::vector<std::string>> MuonPeriodInfo::getInfo(MatrixWorkspace_sptr ws) {
+std::vector<std::vector<std::string>> MuonPeriodInfo::getInfo(const MatrixWorkspace_sptr &ws) {
   auto names = parseSampleLog(readSampleLog(ws, "period_labels"), ";");
   auto types = parseSampleLog(readSampleLog(ws, "period_type"), ";");
   auto frames = parseSampleLog(readSampleLog(ws, "frames_period_requested"), ";");
@@ -120,7 +119,7 @@ std::vector<std::vector<std::string>> MuonPeriodInfo::getInfo(MatrixWorkspace_sp
  * Adds all period information from the workspace provided to the widgets table in a readable format
  * @param ws :: The workspace to read the period information from
  */
-void MuonPeriodInfo::addInfo(const Mantid::API::Workspace_sptr ws) {
+void MuonPeriodInfo::addInfo(const Mantid::API::Workspace_sptr &ws) {
   if (auto matrixWS = std::dynamic_pointer_cast<MatrixWorkspace>(ws)) {
     // Read in period sequences
     const auto numSeq = readSampleLog(matrixWS, "period_sequences");
@@ -251,5 +250,4 @@ QTableWidgetItem *MuonPeriodInfo::createNewItem(const std::string &value) const 
   return item;
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

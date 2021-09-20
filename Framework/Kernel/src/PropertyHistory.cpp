@@ -16,14 +16,15 @@
 #include <boost/lexical_cast.hpp>
 #include <cstdint>
 #include <ostream>
+#include <utility>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 /// Constructor
-PropertyHistory::PropertyHistory(const std::string &name, const std::string &value, const std::string &type,
-                                 const bool isdefault, const unsigned int direction)
-    : m_name(name), m_value(value), m_type(type), m_isDefault(isdefault), m_direction(direction) {}
+PropertyHistory::PropertyHistory(std::string name, std::string value, std::string type, const bool isdefault,
+                                 const unsigned int direction)
+    : m_name(std::move(name)), m_value(std::move(value)), m_type(std::move(type)), m_isDefault(isdefault),
+      m_direction(direction) {}
 
 PropertyHistory::PropertyHistory(Property const *const prop)
     : m_name(prop->name()), m_value(prop->valueAsPrettyStr(0, true)), m_type(prop->type()),
@@ -89,5 +90,4 @@ bool PropertyHistory::isEmptyDefault() const {
   return emptyDefault;
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

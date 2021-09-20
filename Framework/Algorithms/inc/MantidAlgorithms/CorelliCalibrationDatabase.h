@@ -52,7 +52,7 @@ public:
 
   /// Check whether a TableWorkspace is a valid Corelli geometry calibration
   /// table for all components
-  static bool isValidCalibrationTableWorkspace(DataObjects::TableWorkspace_sptr calibws, std::string &errormsg);
+  static bool isValidCalibrationTableWorkspace(const DataObjects::TableWorkspace_sptr &calibws, std::string &errormsg);
 
   /// Create a calibration TableWorkspace from scratch for either single
   /// component or full set of components
@@ -62,21 +62,22 @@ public:
   ComponentPosition getComponentCalibratedPosition(const std::string &component);
 
   /// Append a new row to single component calibration table
-  static void appendCalibration(DataObjects::TableWorkspace_sptr tablews, const std::string &datestamp,
+  static void appendCalibration(const DataObjects::TableWorkspace_sptr &tablews, const std::string &datestamp,
                                 ComponentPosition &pos);
 
   /// Get the last entry (latest update) of a compoent calibrated position
-  static ComponentPosition getLatestCalibratedPosition(DataObjects::TableWorkspace_sptr componentcaltable);
+  static ComponentPosition getLatestCalibratedPosition(const DataObjects::TableWorkspace_sptr &componentcaltable);
 
   /// Get the calibration position in the table (component table or full
   /// calibration table)
-  static ComponentPosition getCalibratedPosition(DataObjects::TableWorkspace_sptr componentcaltable, size_t rownumber);
+  static ComponentPosition getCalibratedPosition(const DataObjects::TableWorkspace_sptr &componentcaltable,
+                                                 size_t rownumber);
 
   /// Constructor
   CalibrationTableHandler();
 
   /// Set calibration table file
-  void setCalibrationTable(DataObjects::TableWorkspace_sptr calibws);
+  void setCalibrationTable(const DataObjects::TableWorkspace_sptr &calibws);
 
   /// Get component name from the table
   std::vector<std::string> getComponentNames();
@@ -120,16 +121,16 @@ public:
   /// get standard date-base calibration database (CSV) file name
   static inline std::string corelliCalibrationDatabaseName(const std::string &datestamp, const std::string &directory);
 
-  static std::string convertTimeStamp(std::string run_start_time);
+  static std::string convertTimeStamp(const std::string &run_start_time);
 
   /// Check whether a given file does exist
   static inline bool isFileExist(const std::string &filepath);
 
   /// Join two string for a new path
-  static inline std::string joinPath(const std::string directory, const std::string basename);
+  static inline std::string joinPath(const std::string &directory, const std::string &basename);
 
   /// Retrieve the bank level components names in order
-  static std::vector<std::string> retrieveInstrumentComponents(API::MatrixWorkspace_sptr ws);
+  static std::vector<std::string> retrieveInstrumentComponents(const API::MatrixWorkspace_sptr &ws);
 
 private:
   std::map<std::string, std::string> validateInputs() override;
@@ -144,12 +145,12 @@ private:
                                           std::map<std::string, DataObjects::TableWorkspace_sptr> &calibwsmap);
   /// Create output full set calibration workspace
   void createOutputCalibrationTable(std::map<std::string, DataObjects::TableWorkspace_sptr> &calibwsmap,
-                                    std::vector<std::string> orderedcomponents);
+                                    const std::vector<std::string> &orderedcomponents);
   // Create the summary CSV file
   void saveCalibrationTable(const std::string &calibdbdir);
   /// Set up a component name - TableWorkspace map for single component
   /// calibration
-  void setComponentMap(std::vector<std::string> componentnames,
+  void setComponentMap(const std::vector<std::string> &componentnames,
                        std::map<std::string, DataObjects::TableWorkspace_sptr> &compmap);
 
   /// Input workspace where the calibration is from

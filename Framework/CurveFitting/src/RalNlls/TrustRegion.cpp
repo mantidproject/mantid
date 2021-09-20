@@ -20,9 +20,7 @@
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_linalg.h>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace NLLS {
+namespace Mantid::CurveFitting::NLLS {
 
 /** Too small values don't work well with numerical derivatives. */
 const double EPSILON_MCH = std::numeric_limits<double>::epsilon();
@@ -380,6 +378,4 @@ void allEigSymm(const DoubleFortranMatrix &A, DoubleFortranVector &ew, DoubleFor
 //  }
 //}
 
-} // namespace NLLS
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::NLLS

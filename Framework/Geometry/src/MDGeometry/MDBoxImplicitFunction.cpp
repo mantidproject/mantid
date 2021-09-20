@@ -11,8 +11,7 @@
 
 using Mantid::Kernel::VMD;
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor with min/max dimensions.
@@ -128,5 +127,4 @@ MDBoxImplicitFunction::fraction(const std::vector<boost::tuple<Mantid::coord_t, 
   return frac;
 }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

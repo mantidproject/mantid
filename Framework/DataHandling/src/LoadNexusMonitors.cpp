@@ -14,8 +14,7 @@
 using Mantid::API::Workspace_sptr;
 using Mantid::API::WorkspaceGroup;
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 DECLARE_ALGORITHM(LoadNexusMonitors)
 
@@ -75,5 +74,4 @@ void LoadNexusMonitors::exec() {
   setProperty("OutputWorkspace", ws);
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

@@ -64,9 +64,7 @@ int findName(const std::vector<std::string> &colNames, const char *name) {
   return -1;
 }
 } // namespace
-namespace Mantid {
-
-namespace Muon {
+namespace Mantid::Muon {
 
 using namespace Kernel;
 using namespace API;
@@ -377,5 +375,4 @@ ConvertFitFunctionForMuonTFAsymmetry::getTFAsymmFitFunction(const Mantid::API::I
 
   return std::dynamic_pointer_cast<IFunction>(multi);
 }
-} // namespace Muon
-} // namespace Mantid
+} // namespace Mantid::Muon

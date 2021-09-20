@@ -63,8 +63,7 @@ void export_BinaryOperations() {
   def("performBinaryOp", (binary_fn_gp_db)&performBinaryOpWithDouble, ReturnWorkspaceSptr());
 }
 
-namespace Mantid {
-namespace PythonInterface {
+namespace Mantid::PythonInterface {
 using namespace Mantid::API;
 
 /** Binary operation for two workspaces. Generic for IMDWorkspaces or
@@ -203,5 +202,4 @@ template IMDHistoWorkspace_sptr performBinaryOpWithDouble(const IMDHistoWorkspac
                                                           const std::string &op, const std::string &, bool, bool);
 template WorkspaceGroup_sptr performBinaryOpWithDouble(const WorkspaceGroup_sptr, const double, const std::string &op,
                                                        const std::string &, bool, bool);
-} // namespace PythonInterface
-} // namespace Mantid
+} // namespace Mantid::PythonInterface

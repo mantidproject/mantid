@@ -34,8 +34,7 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::HistogramData;
 using namespace std;
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 DECLARE_ALGORITHM(IntegratePeakTimeSlices)
 
@@ -1377,7 +1376,7 @@ void IntegratePeakTimeSlices::SetUpData(MatrixWorkspace_sptr &Data, MatrixWorksp
     m_NeighborIDs[1] = 2;
     neighborRadius = NeighborhoodRadiusDivPeakRadius * NewRadius;
     CentNghbr = CentPos;
-    getNeighborPixIDs(std::move(comp), CentPos, neighborRadius, m_NeighborIDs);
+    getNeighborPixIDs(comp, CentPos, neighborRadius, m_NeighborIDs);
 
   } else // big enough neighborhood so
     neighborRadius -= DD;
@@ -2511,6 +2510,5 @@ double DataModeHandler::CalcSampleIntensityMultiplier(const double *params) cons
   return r;
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal
 // Attr indicies

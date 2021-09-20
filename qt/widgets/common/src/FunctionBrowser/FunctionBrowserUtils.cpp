@@ -11,8 +11,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 using namespace Mantid::API;
 
@@ -151,5 +150,4 @@ std::size_t getFunctionIndexAt(std::string const &parameter, std::size_t const &
   throw std::invalid_argument("No function index was found.");
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

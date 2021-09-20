@@ -12,6 +12,7 @@
 #include <iomanip>
 #include <numeric>
 #include <thread>
+#include <utility>
 
 #include "MantidParallel/IO/MultiProcessEventLoader.h"
 #include "MantidParallel/IO/NXEventDataLoader.h"
@@ -19,15 +20,13 @@
 
 // namespace bp = boost::process;
 
-namespace Mantid {
-namespace Parallel {
-namespace IO {
+namespace Mantid::Parallel::IO {
 
 /// Constructor
 MultiProcessEventLoader::MultiProcessEventLoader(uint32_t numPixels, uint32_t numProcesses, uint32_t numThreads,
-                                                 const std::string &binary, bool precalc)
+                                                 std::string binary, bool precalc)
     : m_precalculateEvents(precalc), m_numPixels(numPixels), m_numProcesses(numProcesses), m_numThreads(numThreads),
-      m_binaryToLaunch(binary), m_segmentNames(generateSegmentsName(numProcesses)),
+      m_binaryToLaunch(std::move(binary)), m_segmentNames(generateSegmentsName(numProcesses)),
       m_storageName(generateStoragename()) {}
 
 /// Generates "unique" shared memory segment name
@@ -245,6 +244,4 @@ size_t MultiProcessEventLoader::estimateShmemAmount(size_t eventCount) const {
   return len;
 }
 
-} // namespace IO
-} // namespace Parallel
-} // namespace Mantid
+} // namespace Mantid::Parallel::IO

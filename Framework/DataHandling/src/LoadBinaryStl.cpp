@@ -9,8 +9,7 @@
 #include "MantidKernel/BinaryStreamReader.h"
 #include <Poco/File.h>
 #include <fstream>
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 namespace {
 uint32_t getNumberTriangles(Kernel::BinaryStreamReader streamReader, const int header) {
@@ -106,5 +105,4 @@ void LoadBinaryStl::readTriangle(Kernel::BinaryStreamReader streamReader, uint32
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

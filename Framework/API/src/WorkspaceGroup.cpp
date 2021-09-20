@@ -12,8 +12,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 namespace {
 /// initialize depth parameter
 size_t MAXIMUM_DEPTH = 100;
@@ -495,13 +494,11 @@ size_t WorkspaceGroup::getMemorySize() const {
   return total;
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API
 
 /// @cond TEMPLATE
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 template <>
 MANTID_API_DLL Mantid::API::WorkspaceGroup_sptr
@@ -529,7 +526,6 @@ IPropertyManager::getValue<Mantid::API::WorkspaceGroup_const_sptr>(const std::st
   }
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel
 
 /// @endcond TEMPLATE

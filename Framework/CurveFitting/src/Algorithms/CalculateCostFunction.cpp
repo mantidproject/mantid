@@ -10,9 +10,7 @@
 #include "MantidCurveFitting/CostFunctions/CostFuncFitting.h"
 #include "MantidKernel/ListValidator.h"
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Algorithms {
+namespace Mantid::CurveFitting::Algorithms {
 
 using namespace Kernel;
 using namespace API;
@@ -55,6 +53,4 @@ void CalculateCostFunction::execConcrete() {
   setProperty("Value", value);
 }
 
-} // namespace Algorithms
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Algorithms

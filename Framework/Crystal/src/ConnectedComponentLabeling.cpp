@@ -21,8 +21,7 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Crystal::ConnectedComponentMappingTypes;
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 namespace {
 /**
  * Perform integer power to determine the maximum number of face and edge
@@ -213,8 +212,8 @@ void memoryCheck(size_t nPoints) {
  * @param startId : Start Id to use for labeling
  * @param nThreads : Optional argument of number of threads to use.
  */
-ConnectedComponentLabeling::ConnectedComponentLabeling(const size_t &startId, const boost::optional<int> &nThreads)
-    : m_startId(startId), m_nThreads(nThreads) {
+ConnectedComponentLabeling::ConnectedComponentLabeling(const size_t &startId, boost::optional<int> nThreads)
+    : m_startId(startId), m_nThreads(std::move(nThreads)) {
   if (m_nThreads.is_initialized() && m_nThreads.get() < 0) {
     throw std::invalid_argument("Cannot request that CCL runs with less than one thread!");
   }
@@ -421,5 +420,4 @@ ClusterTuple ConnectedComponentLabeling::executeAndFetchClusters(IMDHistoWorkspa
   return ClusterTuple(outWS, clusters);
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

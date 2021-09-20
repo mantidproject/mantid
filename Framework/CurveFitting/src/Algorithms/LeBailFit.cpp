@@ -49,9 +49,7 @@ using Mantid::HistogramData::HistogramY;
 
 using namespace std;
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Algorithms {
+namespace Mantid::CurveFitting::Algorithms {
 
 const Rfactor badR(DBL_MAX, DBL_MAX);
 
@@ -414,7 +412,7 @@ void LeBailFit::execPatternCalculation() {
   vector<double> emptyvec;
   bool resultphysical =
       calculateDiffractionPattern(m_dataWS->x(m_wsIndex), m_dataWS->y(m_wsIndex), true, true, emptyvec, vecY, rfactor);
-  m_outputWS->mutableY(CALDATAINDEX) = std::move(vecY);
+  m_outputWS->mutableY(CALDATAINDEX) = vecY;
 
   // Calculate background
   m_outputWS->mutableY(INPUTBKGDINDEX) = m_lebailFunction->function(vecX, false, true);
@@ -577,8 +575,8 @@ void LeBailFit::execRefineBackground() {
 
   //   (3: peak without background, 4: input background)
   // m_backgroundFunction->function(domain, values);
-  m_outputWS->mutableY(CALBKGDINDEX) = std::move(backgroundvalues);
-  m_outputWS->mutableY(CALPUREPEAKINDEX) = std::move(valueVec);
+  m_outputWS->mutableY(CALBKGDINDEX) = backgroundvalues;
+  m_outputWS->mutableY(CALPUREPEAKINDEX) = valueVec;
 
   // 5. Output background to table workspace
   auto outtablews = std::make_shared<TableWorkspace>();
@@ -2235,6 +2233,4 @@ void writeRfactorsToFile(vector<double> vecX, vector<Rfactor> vecR, const string
   ofile.close();
 }
 
-} // namespace Algorithms
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Algorithms

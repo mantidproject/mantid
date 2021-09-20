@@ -19,8 +19,7 @@ using namespace Mantid::API;
 
 using namespace std;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 DECLARE_ALGORITHM(EditInstrumentGeometry)
 
@@ -326,5 +325,4 @@ void EditInstrumentGeometry::exec() {
   workspace->setInstrument(instrument);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

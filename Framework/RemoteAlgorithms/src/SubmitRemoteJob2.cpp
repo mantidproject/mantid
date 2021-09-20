@@ -12,8 +12,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 
-namespace Mantid {
-namespace RemoteAlgorithms {
+namespace Mantid::RemoteAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SubmitRemoteJob2)
@@ -93,5 +92,4 @@ void SubmitRemoteJob2::exec() {
   g_log.information() << "Job submitted.  Job ID =  " << jid << " on (remote) compute resource " << comp << '\n';
 }
 
-} // end namespace RemoteAlgorithms
-} // end namespace Mantid
+} // namespace Mantid::RemoteAlgorithms

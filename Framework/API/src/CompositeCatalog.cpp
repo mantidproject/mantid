@@ -8,8 +8,7 @@
 
 #include <stdexcept>
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 CompositeCatalog::CompositeCatalog() : m_catalogs() {}
 
 /**
@@ -134,5 +133,4 @@ void CompositeCatalog::keepAlive() {
     catalog->keepAlive();
   }
 }
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

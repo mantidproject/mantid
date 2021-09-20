@@ -20,8 +20,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -51,5 +50,4 @@ Correction Mantid::Algorithms::TimeAtSampleStrategyDirect::calculate(const size_
   // required.
   return Correction(0, m_constShift);
 }
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

@@ -30,8 +30,7 @@ using Types::Core::time_duration;
 
 using namespace std;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 DECLARE_ALGORITHM(GenerateEventsFilter)
 
 /** Constructor
@@ -1875,5 +1874,4 @@ DateAndTime GenerateEventsFilter::findRunEnd() {
   return runendtime;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

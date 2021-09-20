@@ -21,9 +21,7 @@
 #include "../RunsTable/RunsTablePresenter.h"
 #include "../Save/QtSaveView.h"
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 BatchPresenter *Encoder::findBatchPresenter(const QtBatchView *gui, const IMainWindowView *view) {
   auto mwv = dynamic_cast<const QtMainWindowView *>(view);
@@ -324,6 +322,4 @@ QMap<QString, QVariant> Encoder::encodeSave(const QtSaveView *gui) {
   map.insert(QString("saveReductionResultsCheckBox"), QVariant(gui->m_ui.saveReductionResultsCheckBox->isChecked()));
   return map;
 }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

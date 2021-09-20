@@ -38,6 +38,7 @@
 #include <cmath>
 #include <functional>
 #include <numeric>
+#include <utility>
 
 using Mantid::Kernel::TimeSeriesProperty;
 using Mantid::Types::Core::DateAndTime;
@@ -53,8 +54,7 @@ auto accumulate_if_finite = [](const double accumulator, const double newValue) 
 };
 } // namespace
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 using std::size_t;
 using namespace Geometry;
 using Kernel::V3D;
@@ -1402,8 +1402,9 @@ std::string MatrixWorkspace::getDimensionIdFromAxis(const int &axisIndex) const 
 //===============================================================================
 class MWDimension : public Mantid::Geometry::IMDDimension {
 public:
-  MWDimension(const Axis *axis, const std::string &dimensionId)
-      : m_axis(*axis), m_dimensionId(dimensionId), m_haveEdges(dynamic_cast<const BinEdgeAxis *>(&m_axis) != nullptr),
+  MWDimension(const Axis *axis, std::string dimensionId)
+      : m_axis(*axis), m_dimensionId(std::move(dimensionId)),
+        m_haveEdges(dynamic_cast<const BinEdgeAxis *>(&m_axis) != nullptr),
         m_frame(std::make_unique<Geometry::GeneralFrame>(m_axis.unit()->label(), m_axis.unit()->label())) {}
 
   /// the name of the dimennlsion as can be displayed along the axis
@@ -1481,8 +1482,8 @@ private:
  */
 class MWXDimension : public Mantid::Geometry::IMDDimension {
 public:
-  MWXDimension(const MatrixWorkspace *ws, const std::string &dimensionId)
-      : m_ws(ws), m_X(ws->readX(0)), m_dimensionId(dimensionId),
+  MWXDimension(const MatrixWorkspace *ws, std::string dimensionId)
+      : m_ws(ws), m_X(ws->readX(0)), m_dimensionId(std::move(dimensionId)),
         m_frame(std::make_unique<Geometry::GeneralFrame>(m_ws->getAxis(0)->unit()->label(),
                                                          m_ws->getAxis(0)->unit()->label())) {}
 
@@ -2110,12 +2111,10 @@ void MatrixWorkspace::rebuildDetectorIDGroupings() {
   }
 }
 
-} // namespace API
-} // Namespace Mantid
+} // namespace Mantid::API
 
 ///\cond TEMPLATE
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 template <>
 MANTID_API_DLL Mantid::API::MatrixWorkspace_sptr
@@ -2143,7 +2142,6 @@ IPropertyManager::getValue<Mantid::API::MatrixWorkspace_const_sptr>(const std::s
   }
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel
 
 ///\endcond TEMPLATE

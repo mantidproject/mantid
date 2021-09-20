@@ -11,8 +11,7 @@
 
 #include <fstream>
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 /**
  * Create a grouping file to extract all detectors in detector_list excluding
  * those in exclude.
@@ -21,8 +20,7 @@ namespace MantidWidgets {
  * excluded from grouping.
  * @param fname :: Name of the file to save the grouping to.
  */
-DetXMLFile::DetXMLFile(const std::vector<int> &detector_list,
-                       const QList<int> &exclude, const QString &fname) {
+DetXMLFile::DetXMLFile(const std::vector<int> &detector_list, const QList<int> &exclude, const QString &fname) {
   m_fileName = fname;
   m_delete = false;
   std::ofstream out(m_fileName.toStdString().c_str());
@@ -42,8 +40,7 @@ DetXMLFile::DetXMLFile(const std::vector<int> &detector_list,
  * - one detector, Option Sum - one group which is a sum of the detectors If
  * fname is empty create a temporary file
  */
-DetXMLFile::DetXMLFile(const QList<int> &dets, Option opt,
-                       const QString &fname) {
+DetXMLFile::DetXMLFile(const QList<int> &dets, Option opt, const QString &fname) {
   if (dets.empty()) {
     m_fileName = "";
     m_delete = false;
@@ -75,10 +72,7 @@ DetXMLFile::DetXMLFile(const QList<int> &dets, Option opt,
 void DetXMLFile::makeListFile(const QList<int> &dets) {
   std::ofstream out(m_fileName.toStdString().c_str());
   out << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?> \n<detector-grouping> \n";
-  foreach (int det, dets) {
-    out << "<group name=\"" << det << "\"> <detids val=\"" << det
-        << "\"/> </group> \n";
-  }
+  foreach (int det, dets) { out << "<group name=\"" << det << "\"> <detids val=\"" << det << "\"/> </group> \n"; }
   out << "</detector-grouping>\n";
 }
 
@@ -102,5 +96,4 @@ DetXMLFile::~DetXMLFile() {
   }
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

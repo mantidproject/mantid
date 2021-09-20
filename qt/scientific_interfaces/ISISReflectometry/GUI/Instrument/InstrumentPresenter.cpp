@@ -10,9 +10,7 @@
 #include "MantidGeometry/Instrument_fwd.h"
 #include <ostream>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 namespace {
 Mantid::Kernel::Logger g_log("Reflectometry GUI");
@@ -211,6 +209,4 @@ void InstrumentPresenter::updateViewFromModel() {
   // Reconnect settings change notifications
   m_view->connectInstrumentSettingsWidgets();
 }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

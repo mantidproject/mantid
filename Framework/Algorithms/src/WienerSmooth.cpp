@@ -15,8 +15,7 @@
 
 #include <numeric>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using Mantid::API::WorkspaceProperty;
 using Mantid::Kernel::Direction;
@@ -408,5 +407,4 @@ API::MatrixWorkspace_sptr WienerSmooth::copyInput(const API::MatrixWorkspace_spt
   return ws;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

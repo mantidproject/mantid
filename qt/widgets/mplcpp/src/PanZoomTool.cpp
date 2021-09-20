@@ -12,8 +12,7 @@
 using Mantid::PythonInterface::callMethodNoCheck;
 using Mantid::PythonInterface::GlobalInterpreterLock;
 
-namespace MantidQt {
-namespace Widgets {
+namespace MantidQt::Widgets {
 namespace Python = Common::Python;
 namespace MplCpp {
 
@@ -103,5 +102,4 @@ void PanZoomTool::enablePan(const bool on) {
 }
 
 } // namespace MplCpp
-} // namespace Widgets
-} // namespace MantidQt
+} // namespace MantidQt::Widgets

@@ -11,8 +11,7 @@
 using namespace Mantid::Kernel;
 using VecDouble = std::vector<double>;
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(PeaksOnSurface)
@@ -219,5 +218,4 @@ void PeaksOnSurface::exec() {
   executePeaksIntersection();
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

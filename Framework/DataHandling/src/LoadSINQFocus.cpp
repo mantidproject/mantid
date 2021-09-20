@@ -21,8 +21,7 @@
 #include <limits>
 #include <vector>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using namespace Kernel;
 using namespace API;
@@ -246,5 +245,4 @@ void LoadSINQFocus::runLoadInstrument() {
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

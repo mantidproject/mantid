@@ -8,8 +8,7 @@
 
 using Mantid::API::MatrixWorkspace_sptr;
 
-namespace Mantid {
-namespace WorkflowAlgorithms {
+namespace Mantid::WorkflowAlgorithms {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -47,5 +46,4 @@ MatrixWorkspace_sptr MuonGroupCountsCalculator::calculate() const {
   return outWS;
 }
 
-} // namespace WorkflowAlgorithms
-} // namespace Mantid
+} // namespace Mantid::WorkflowAlgorithms

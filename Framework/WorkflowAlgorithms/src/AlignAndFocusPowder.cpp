@@ -33,8 +33,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
-namespace Mantid {
-namespace WorkflowAlgorithms {
+namespace Mantid::WorkflowAlgorithms {
 using namespace Kernel;
 using API::FileProperty;
 using API::MatrixWorkspace;
@@ -502,7 +501,8 @@ void AlignAndFocusPowder::exec() {
   }
   m_progress->report();
 
-  if (xmin > 0. || xmax > 0.) {
+  // crop the workspace in time-of-flight
+  if (xmin >= 0. || xmax > 0.) {
     double tempmin;
     double tempmax;
     m_outputW->getXMinMax(tempmin, tempmax);
@@ -512,7 +512,7 @@ void AlignAndFocusPowder::exec() {
     API::IAlgorithm_sptr cropAlg = createChildAlgorithm("CropWorkspace");
     cropAlg->setProperty("InputWorkspace", m_outputW);
     cropAlg->setProperty("OutputWorkspace", m_outputW);
-    if ((xmin > 0.) && (xmin > tempmin))
+    if ((xmin >= 0.) && (xmin > tempmin))
       cropAlg->setProperty("Xmin", xmin);
     if ((xmax > 0.) && (xmax < tempmax))
       cropAlg->setProperty("Xmax", xmax);
@@ -1227,5 +1227,4 @@ void AlignAndFocusPowder::doSortEvents(const Mantid::API::Workspace_sptr &ws) {
   alg->executeAsChildAlg();
 }
 
-} // namespace WorkflowAlgorithms
-} // namespace Mantid
+} // namespace Mantid::WorkflowAlgorithms

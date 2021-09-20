@@ -80,8 +80,7 @@ std::string extractFormattedPropertyFromDimension(Mantid::Geometry::IMDDimension
 }
 } // namespace
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 using namespace ConnectedComponentMappingTypes;
 
 // Register the algorithm into the AlgorithmFactory
@@ -245,5 +244,4 @@ void IntegratePeaksHybrid::exec() {
   setProperty("OutputWorkspaces", outImageResults);
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

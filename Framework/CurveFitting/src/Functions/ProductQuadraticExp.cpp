@@ -10,9 +10,7 @@
 #include "MantidCurveFitting/Functions/ProductFunction.h"
 #include "MantidCurveFitting/Functions/Quadratic.h"
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
 
@@ -73,6 +71,4 @@ void ProductQuadraticExp::function1D(double *out, const double *xValues, const s
   }
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

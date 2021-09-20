@@ -62,21 +62,21 @@ private:
   void exec() override;
   std::map<std::string, std::string> validateInputs() override;
   API::MatrixWorkspace_sptr createOutputWorkspace(const API::MatrixWorkspace &inputWS) const;
-  double new_vector(const API::MatrixWorkspace_sptr sigmaSSWS, const Kernel::Material &material, double kinc,
+  double new_vector(const API::MatrixWorkspace_sptr &sigmaSSWS, const Kernel::Material &material, double kinc,
                     bool specialSingleScatterCalc);
   double simulatePaths(const int nEvents, const int nScatters, const API::Sample &sample,
                        const Geometry::Instrument &instrument, Kernel::PseudoRandomNumberGenerator &rng,
-                       const API::MatrixWorkspace_sptr sigmaSSWS, const HistogramData::Histogram &SOfQ,
+                       const API::MatrixWorkspace_sptr &sigmaSSWS, const HistogramData::Histogram &SOfQ,
                        const double kinc, Kernel::V3D detPos, bool specialSingleScatterCalc);
   std::tuple<bool, double, double> scatter(const int nScatters, const API::Sample &sample,
                                            const Geometry::Instrument &instrument, Kernel::V3D sourcePos,
                                            Kernel::PseudoRandomNumberGenerator &rng, const double sigma_total,
                                            double scatteringXSection, const HistogramData::Histogram &SOfQ,
                                            const double kinc, Kernel::V3D detPos, bool specialSingleScatterCalc);
-  Geometry::Track start_point(const Geometry::IObject &shape, std::shared_ptr<const Geometry::ReferenceFrame>,
+  Geometry::Track start_point(const Geometry::IObject &shape, const std::shared_ptr<const Geometry::ReferenceFrame> &,
                               Kernel::V3D sourcePos, Kernel::PseudoRandomNumberGenerator &rng);
   Geometry::Track generateInitialTrack(const Geometry::IObject &shape,
-                                       std::shared_ptr<const Geometry::ReferenceFrame> frame,
+                                       const std::shared_ptr<const Geometry::ReferenceFrame> &frame,
                                        const Kernel::V3D &sourcePos, Kernel::PseudoRandomNumberGenerator &rng);
   void inc_xyz(Geometry::Track &track, double vl);
   void updateWeightAndPosition(Geometry::Track &track, double &weight, const double vmfp, const double sigma_total,

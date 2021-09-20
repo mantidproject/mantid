@@ -14,8 +14,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 
-namespace Mantid {
-namespace WorkflowAlgorithms {
+namespace Mantid::WorkflowAlgorithms {
 
 using std::size_t;
 using std::string;
@@ -255,5 +254,4 @@ LoadEventAndCompress::getParallelExecutionMode(const std::map<std::string, Paral
   return Parallel::ExecutionMode::Distributed;
 }
 
-} // namespace WorkflowAlgorithms
-} // namespace Mantid
+} // namespace Mantid::WorkflowAlgorithms

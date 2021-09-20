@@ -333,8 +333,7 @@ Histogram compactInputsAndCallInterpolate(const Histogram &input, const size_t s
 
 } // end anonymous namespace
 
-namespace Mantid {
-namespace HistogramData {
+namespace Mantid::HistogramData {
 
 /**
  * Return the minimum size of input points for cpline interpolation.
@@ -444,5 +443,4 @@ void interpolateCSplineInplace(const Histogram &input, Histogram &output, const 
   interpolateYCSplineInplace(input, interpPoints, output, calculateErrors, independentErrors);
 }
 
-} // namespace HistogramData
-} // namespace Mantid
+} // namespace Mantid::HistogramData

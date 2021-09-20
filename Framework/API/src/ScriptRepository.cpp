@@ -6,8 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/ScriptRepository.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 ScriptRepoException::ScriptRepoException(const std::string &info, const std::string &system, const std::string &file,
                                          int line) {
@@ -26,5 +25,4 @@ ScriptRepoException::ScriptRepoException(const std::string &info, const std::str
 
 const char *ScriptRepoException::what() const noexcept { return _user_info.c_str(); }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

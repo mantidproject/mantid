@@ -16,8 +16,7 @@
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/UnitConversion.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using Mantid::API::WorkspaceProperty;
 using Mantid::Kernel::Direction;
@@ -152,5 +151,4 @@ std::map<std::string, std::string> CreateEPP::validateInputs(void) {
   return issues;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

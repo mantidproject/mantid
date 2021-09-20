@@ -254,7 +254,7 @@ exec(compile(open(html_theme_cfg).read(), html_theme_cfg, 'exec'))
 intersphinx_mapping = {
     'h5py': ('https://h5py.readthedocs.io/en/stable/', None),
     'matplotlib': ('https://matplotlib.org', None),
-    'numpy': ('https://docs.scipy.org/doc/numpy/', None),
+    'numpy': ('https://numpy.org/doc/stable/', None),
     'python': ('https://docs.python.org/3/', None),
     'SciPy': ('https://docs.scipy.org/doc/scipy/reference', None),
     'pandas': ('https://pandas.pydata.org/pandas-docs/stable', None),

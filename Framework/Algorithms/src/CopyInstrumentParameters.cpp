@@ -11,8 +11,7 @@
 
 #include <algorithm>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using std::size_t;
 
@@ -145,5 +144,4 @@ Parallel::ExecutionMode CopyInstrumentParameters::getParallelExecutionMode(
   return Parallel::getCorrespondingExecutionMode(out);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

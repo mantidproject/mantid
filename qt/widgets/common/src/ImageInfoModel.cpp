@@ -12,8 +12,7 @@
 
 namespace {}
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 // ImageInfo
 
@@ -25,5 +24,4 @@ ImageInfoModel::ImageInfo::ImageInfo(ImageInfoModel::ImageInfo::StringItems name
   m_values.resize(m_names.size(), MissingValue);
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

@@ -17,8 +17,7 @@
 using namespace IndirectDataValidationHelper;
 using namespace Mantid::API;
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -246,5 +245,4 @@ void IndirectMoments::updateRunButton(bool enabled, std::string const &enableOut
     setSaveEnabled(enableOutputButtons == "enable");
 }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

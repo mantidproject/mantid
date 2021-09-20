@@ -1,0 +1,276 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+# SPDX - License - Identifier: GPL - 3.0 +
+#pylint: disable=invalid-name
+from qtpy.QtWidgets import (QFrame)  # noqa
+from qtpy.QtGui import (QDoubleValidator)  # noqa
+import mantidqtinterfaces.reduction_gui.widgets.util as util
+from reduction_gui.reduction.sans.hfir_background_script import Background
+from mantidqtinterfaces.reduction_gui.widgets.base_widget import BaseWidget
+from mantidqtinterfaces.reduction_gui.widgets.sans.hfir_sample_data import BeamSpreader, DirectBeam
+try:
+    from mantidqt.utils.qt import load_ui
+except ImportError:
+    from mantid.kernel import Logger
+    Logger("BckDirectBeam").information('Using legacy ui importer')
+    from mantidplot import load_ui
+
+
+class BckDirectBeam(DirectBeam):
+
+    def __init__(self, parent=None, state=None, settings=None, data_type=None, data_proxy=None):
+        super(BckDirectBeam, self).__init__(parent, state, settings, data_type, data_proxy=data_proxy)
+
+        if state is None:
+            self.set_state(Background.DirectBeam())
+
+    def get_state(self):
+        direct_beam = super(BckDirectBeam, self).get_state()
+        m = Background.DirectBeam(direct_beam)
+        return m
+
+    def set_state(self, state):
+        super(BckDirectBeam, self).set_state(state)
+
+
+class BckBeamSpreader(BeamSpreader):
+
+    def __init__(self, parent=None, state=None, settings=None, data_type=None, data_proxy=None):
+        super(BckBeamSpreader, self).__init__(parent, state, settings, data_type, data_proxy=data_proxy)
+
+        if state is None:
+            self.set_state(Background.BeamSpreader())
+
+    def get_state(self):
+        direct_beam = super(BckBeamSpreader, self).get_state()
+        m = Background.BeamSpreader(direct_beam)
+        return m
+
+    def set_state(self, state):
+        super(BckBeamSpreader, self).set_state(state)
+
+
+class BackgroundWidget(BaseWidget):
+    """
+        Widget that presents the transmission options to the user
+    """
+    _method_box = None
+
+    ## Widget name
+    name = "Background"
+
+    def __init__(self, parent=None, state=None, settings=None, show_transmission=True, data_type=None, data_proxy=None):
+        super(BackgroundWidget, self).__init__(parent, state, settings, data_type, data_proxy=data_proxy)
+
+        class BckFrame(QFrame):
+            def __init__(self, parent=None):
+                QFrame.__init__(self, parent)
+                self.ui = load_ui(__file__, '../../../ui/sans/hfir_background.ui', baseinstance=self)
+
+        self._content = BckFrame(self)
+        self._layout.addWidget(self._content)
+
+        # Flag to show transmission options or not
+        self.show_transmission = show_transmission
+
+        self.initialize_content()
+
+        if state is not None:
+            self.set_state(state)
+        else:
+            m = Background()
+            self.set_state(m)
+
+        self._last_direct_state = None
+        self._last_spreader_state = None
+
+    def initialize_content(self):
+        """
+            Declare the validators and event connections for the
+            widgets loaded through the .ui file.
+        """
+        # Validators
+        self._content.transmission_edit.setValidator(QDoubleValidator(self._content.transmission_edit))
+        self._content.dtransmission_edit.setValidator(QDoubleValidator(self._content.dtransmission_edit))
+        #self._content.thickness_edit.setValidator(QDoubleValidator(self._content.thickness_edit))
+
+        # Connections
+        self._content.calculate_trans_chk.clicked.connect(self._calculate_clicked)
+        self._content.trans_direct_chk.clicked.connect(self._direct_beam)
+        self._content.trans_spreader_chk.clicked.connect(self._beam_spreader)
+        self._content.background_chk.clicked.connect(self._background_clicked)
+        self._content.background_browse.clicked.connect(self._background_browse)
+        self._content.trans_dark_current_button.clicked.connect(self._trans_dark_current_browse)
+
+        self._content.background_plot_button.clicked.connect(self._background_plot_clicked)
+        self._content.trans_dark_current_plot_button.clicked.connect(self._trans_dark_current_plot_clicked)
+
+        # Process transmission option
+        if not self.show_transmission:
+            self._content.calculate_trans_chk.hide()
+            self._content.bck_trans_label.hide()
+            self._content.bck_trans_err_label.hide()
+            self._content.transmission_edit.hide()
+            self._content.dtransmission_edit.hide()
+            self._content.calculate_trans_chk.hide()
+            self._content.theta_dep_chk.hide()
+            self._content.trans_direct_chk.hide()
+            self._content.trans_spreader_chk.hide()
+            self._content.trans_dark_current_label.hide()
+            self._content.trans_dark_current_edit.hide()
+            self._content.trans_dark_current_button.hide()
+
+        if not self._has_instrument_view:
+            self._content.background_plot_button.hide()
+            self._content.trans_dark_current_plot_button.hide()
+
+    def _background_plot_clicked(self):
+        self.show_instrument(file_name=self._content.background_edit.text)
+
+    def _trans_dark_current_plot_clicked(self):
+        self.show_instrument(file_name=self._content.trans_dark_current_edit.text)
+
+    def set_state(self, state):
+        """
+            Populate the UI elements with the data from the given state.
+            @param state: Transmission object
+        """
+        bck_file = str(self._content.background_edit.text()).strip()
+        self._content.background_chk.setChecked(state.background_corr)
+        self._content.background_edit.setText(state.background_file)
+        if state.background_file.strip() != bck_file:
+            self.get_data_info()
+        self._background_clicked(state.background_corr)
+
+        if self.show_transmission:
+            self._content.transmission_edit.setText(str("%6.4f" % state.bck_transmission))
+            self._content.dtransmission_edit.setText(str("%6.4f" % state.bck_transmission_spread))
+            #self._content.thickness_edit.setText("%6.4f" % state.sample_thickness)
+
+            if isinstance(state.trans_calculation_method, state.DirectBeam):
+                self._content.trans_direct_chk.setChecked(True)
+                self._direct_beam(state=state.trans_calculation_method)
+            else:
+                self._content.trans_spreader_chk.setChecked(True)
+                self._beam_spreader(state=state.trans_calculation_method)
+
+            self._content.calculate_trans_chk.setChecked(state.calculate_transmission)
+            self._content.theta_dep_chk.setChecked(state.theta_dependent)
+            self._content.trans_dark_current_edit.setText(str(state.trans_dark_current))
+            self._calculate_clicked(state.calculate_transmission)
+
+    def get_state(self):
+        """
+            Returns an object with the state of the interface
+        """
+        m = Background()
+        m.background_corr = self._content.background_chk.isChecked()
+        m.background_file = str(self._content.background_edit.text())
+
+        m.bck_transmission_enabled = self.show_transmission
+        if self.show_transmission:
+            #m.sample_thickness = util._check_and_get_float_line_edit(self._content.thickness_edit)
+            m.bck_transmission = util._check_and_get_float_line_edit(self._content.transmission_edit)
+            m.bck_transmission_spread = util._check_and_get_float_line_edit(self._content.dtransmission_edit)
+            m.calculate_transmission = self._content.calculate_trans_chk.isChecked()
+            m.theta_dependent = self._content.theta_dep_chk.isChecked()
+            m.trans_dark_current = self._content.trans_dark_current_edit.text()
+
+            if self._method_box is not None:
+                m.trans_calculation_method=self._method_box.get_state()
+        return m
+
+    def _trans_dark_current_browse(self):
+        fname = self.data_browse_dialog()
+        if fname:
+            self._content.trans_dark_current_edit.setText(fname)
+
+    def _direct_beam(self, state=None):
+        if state is None:
+            state = self._last_direct_state
+        if isinstance(self._method_box, BckBeamSpreader):
+            self._last_spreader_state = self._method_box.get_state()
+        if self.show_transmission:
+            self._replace_method(BckDirectBeam(self, state=state, settings=self._settings,
+                                               data_type=self._data_type, data_proxy=self._data_proxy))
+
+    def _beam_spreader(self, state=None):
+        if state is None:
+            state = self._last_spreader_state
+        if isinstance(self._method_box, BckDirectBeam):
+            self._last_direct_state = self._method_box.get_state()
+        if self.show_transmission:
+            self._replace_method(BckBeamSpreader(self, state=state, settings=self._settings,
+                                                 data_type=self._data_type, data_proxy=self._data_proxy))
+
+    def _replace_method(self, widget):
+        if self._method_box is not None:
+            for i in range(0, self._content.widget_placeholder.count()):
+                item = self._content.widget_placeholder.itemAt(i)
+                self._content.widget_placeholder.removeItem(self._content.widget_placeholder.itemAt(i))
+                item.widget().deleteLater()
+        self._method_box = widget
+        self._content.widget_placeholder.addWidget(self._method_box)
+
+    def _background_clicked(self, is_checked):
+        self._content.background_edit.setEnabled(is_checked)
+        #self._content.thickness_edit.setEnabled(is_checked)
+        #self._content.thickness_label.setEnabled(is_checked)
+        self._content.geometry_options_groupbox.setEnabled(is_checked)
+        self._content.background_browse.setEnabled(is_checked)
+        self._content.background_plot_button.setEnabled(is_checked)
+        self._content.calculate_trans_chk.setEnabled(is_checked)
+        self._content.theta_dep_chk.setEnabled(is_checked)
+        self._content.bck_trans_label.setEnabled(is_checked)
+        self._content.bck_trans_err_label.setEnabled(is_checked)
+        self._content.transmission_grpbox.setEnabled(is_checked)
+
+        self._calculate_clicked(is_checked and self._content.calculate_trans_chk.isChecked())
+
+    def _background_browse(self):
+        fname = self.data_browse_dialog()
+        if fname:
+            bck_file = str(self._content.background_edit.text()).strip()
+            self._content.background_edit.setText(fname)
+            if str(fname).strip() != bck_file:
+                self.get_data_info()
+
+    def _calculate_clicked(self, is_checked):
+        self._content.trans_direct_chk.setEnabled(is_checked)
+        self._content.trans_spreader_chk.setEnabled(is_checked)
+        if self._method_box is not None:
+            self._method_box.setEnabled(is_checked)
+
+        self._content.transmission_edit.setEnabled(not is_checked and self._content.background_chk.isChecked())
+        self._content.dtransmission_edit.setEnabled(not is_checked and self._content.background_chk.isChecked())
+
+        self._content.trans_dark_current_label.setEnabled(is_checked)
+        self._content.trans_dark_current_edit.setEnabled(is_checked)
+        self._content.trans_dark_current_button.setEnabled(is_checked)
+        self._content.trans_dark_current_plot_button.setEnabled(is_checked)
+
+    def get_data_info(self):
+        """
+            Retrieve information from the data file and update the display
+        """
+        if self._data_proxy is None:
+            return
+
+        fname = str(self._content.background_edit.text())
+        if len(str(fname).strip())>0:
+            dataproxy = self._data_proxy(fname, "__background_raw")
+            if len(dataproxy.errors)>0:
+                return
+
+            self._settings.last_data_ws = dataproxy.data_ws
+            if dataproxy.sample_detector_distance is not None:
+                self._content.sample_dist_edit.setText(str(dataproxy.sample_detector_distance))
+                util._check_and_get_float_line_edit(self._content.sample_dist_edit, min=0.0)
+            if dataproxy.wavelength is not None:
+                self._content.wavelength_edit.setText(str(dataproxy.wavelength))
+                util._check_and_get_float_line_edit(self._content.wavelength_edit, min=0.0)
+            if dataproxy.wavelength_spread is not None:
+                self._content.wavelength_spread_edit.setText(str(dataproxy.wavelength_spread))

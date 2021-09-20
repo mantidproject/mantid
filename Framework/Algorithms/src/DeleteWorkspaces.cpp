@@ -9,8 +9,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/ArrayProperty.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm
 DECLARE_ALGORITHM(DeleteWorkspaces)
@@ -47,5 +46,4 @@ void DeleteWorkspaces::exec() {
     prog.report();
   }
 }
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

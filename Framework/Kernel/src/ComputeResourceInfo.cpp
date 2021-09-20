@@ -16,8 +16,7 @@
 #include <ostream>
 #include <stdexcept>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 namespace {
 // static logger object
 Logger g_log("ComputeResourceInfo");
@@ -108,5 +107,4 @@ std::ostream &operator<<(std::ostream &buffer, const ComputeResourceInfo &cr) {
   return buffer;
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

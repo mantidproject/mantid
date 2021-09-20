@@ -50,8 +50,7 @@ bool isASCII(const std::string &str) {
 
 } // namespace
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 using std::string;
 
 // this allowed string could be made into an array of allowed, currently used
@@ -765,5 +764,4 @@ std::string FileFinderImpl::toUpper(const std::string &src) const {
   return result;
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

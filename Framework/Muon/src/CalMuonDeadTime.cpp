@@ -18,8 +18,7 @@
 #include <cmath>
 #include <vector>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Kernel;
 using namespace DataObjects;
@@ -219,5 +218,4 @@ void CalMuonDeadTime::exec() {
   setProperty("DeadTimeTable", outTable);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

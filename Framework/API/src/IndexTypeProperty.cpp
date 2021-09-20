@@ -6,8 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/IndexTypeProperty.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 IndexTypeProperty::IndexTypeProperty(const std::string &name, const int indexType)
     : PropertyWithValue<std::string>(name, "", Kernel::Direction::Input) {
   if (indexType & static_cast<int>(IndexType::WorkspaceIndex))
@@ -71,5 +70,4 @@ IndexTypeProperty &IndexTypeProperty::operator=(API::IndexType type) {
 
 std::string IndexTypeProperty::generatePropertyName(const std::string &name) { return name + "IndexType"; }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

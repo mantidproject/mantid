@@ -16,9 +16,7 @@
 #include <boost/range/iterator_range_core.hpp>
 #include <boost/regex.hpp>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 namespace Colour {
 constexpr const char *DEFAULT = "#ffffff"; // white
 constexpr const char *INVALID = "#dddddd"; // very pale grey
@@ -823,6 +821,4 @@ void RunsTablePresenter::notifyPlotSelectedStitchedOutputPressed() {
 
   m_plotter.reflectometryPlot(workspaces);
 }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

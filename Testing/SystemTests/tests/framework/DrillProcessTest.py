@@ -17,8 +17,8 @@ from qtpy.QtCore import Qt, QPoint
 
 from mantid.kernel import config
 from mantid.simpleapi import mtd, GroupWorkspaces
-from Interface.ui.drill.view.DrillView import *
-from Interface.ui.drill.view.DrillSettingsDialog import *
+from mantidqtinterfaces.drill.view.DrillView import *
+from mantidqtinterfaces.drill.view.DrillSettingsDialog import *
 
 
 app = QApplication(sys.argv)
@@ -49,7 +49,7 @@ class DrillProcessSANSTest(systemtesting.MantidSystemTest):
             column (int): column index
             text (str): string to be written in the cell
         """
-        columnIndex = self.drill.table.columns.index(column)
+        columnIndex = self.drill.table._columns.index(column)
         y = self.drill.table.rowViewportPosition(row) + 5
         x = self.drill.table.columnViewportPosition(columnIndex) + 5
         QTest.mouseClick(self.drill.table.viewport(),

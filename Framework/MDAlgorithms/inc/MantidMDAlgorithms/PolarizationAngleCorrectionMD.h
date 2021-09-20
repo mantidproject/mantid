@@ -44,7 +44,7 @@ private:
   std::string checkInputMDDimension();
 
   /// Get Ei
-  std::string checkEi(API::IMDEventWorkspace_sptr mdws);
+  std::string checkEi(const API::IMDEventWorkspace_sptr &mdws);
 
   /// coordinate system
   bool mIsQSample;

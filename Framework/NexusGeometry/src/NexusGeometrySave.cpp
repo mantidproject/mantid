@@ -33,9 +33,7 @@
 #include <memory>
 #include <string>
 
-namespace Mantid {
-namespace NexusGeometry {
-namespace NexusGeometrySave {
+namespace Mantid::NexusGeometry::NexusGeometrySave {
 using namespace Geometry::ComponentInfoBankHelpers;
 /*
  * Helper container for spectrum mapping information info
@@ -1105,6 +1103,4 @@ void saveInstrument(const Mantid::API::MatrixWorkspace &ws, const std::string &f
 
 // saveInstrument
 
-} // namespace NexusGeometrySave
-} // namespace NexusGeometry
-} // namespace Mantid
+} // namespace Mantid::NexusGeometry::NexusGeometrySave

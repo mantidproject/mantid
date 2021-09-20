@@ -91,8 +91,7 @@ WorkspaceGroup_sptr workspaceToWorkspaceGroup(const Workspace_sptr &workspace) {
 
 } // namespace
 
-namespace Mantid {
-namespace Muon {
+namespace Mantid::Muon {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(MuonPairingAsymmetry)
@@ -412,5 +411,4 @@ void MuonPairingAsymmetry::validatePeriods(const WorkspaceGroup_sptr &inputWS,
   }
 }
 
-} // namespace Muon
-} // namespace Mantid
+} // namespace Mantid::Muon

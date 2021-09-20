@@ -10,8 +10,7 @@
 #include <memory>
 #include <sstream>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 /**
  * Create a clone of the current ArrayOrderedPairsValidator.
@@ -53,5 +52,4 @@ template class ArrayOrderedPairsValidator<int64_t>;
 template class ArrayOrderedPairsValidator<long>;
 #endif
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

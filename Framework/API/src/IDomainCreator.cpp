@@ -7,11 +7,12 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include <utility>
+
 #include "MantidAPI/IDomainCreator.h"
 #include "MantidAPI/Workspace.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 /**
  * @param manager :: A property manager which has information about the data
@@ -22,9 +23,9 @@ namespace API {
  * @param domainType :: Type of domain to create: Simple, Sequential, or
  * Parallel.
  */
-IDomainCreator::IDomainCreator(Kernel::IPropertyManager *manager,
-                               const std::vector<std::string> &workspacePropertyNames, DomainType domainType)
-    : m_manager(manager), m_workspacePropertyNames(workspacePropertyNames), m_domainType(domainType),
+IDomainCreator::IDomainCreator(Kernel::IPropertyManager *manager, std::vector<std::string> workspacePropertyNames,
+                               DomainType domainType)
+    : m_manager(manager), m_workspacePropertyNames(std::move(workspacePropertyNames)), m_domainType(domainType),
       m_outputCompositeMembers(false), m_convolutionCompositeMembers(false), m_ignoreInvalidData(false) {}
 
 /**
@@ -74,5 +75,4 @@ void IDomainCreator::initFunction(API::IFunction_sptr function) {
   }
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

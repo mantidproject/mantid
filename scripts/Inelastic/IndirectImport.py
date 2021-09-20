@@ -14,6 +14,7 @@ from contextlib import contextmanager
 import numpy.core.setup_common as numpy_cfg
 import platform
 import os
+import importlib
 import sys
 from mantid import logger
 
@@ -49,13 +50,47 @@ def _os_env():
     return platform.system() + platform.architecture()[0]
 
 
-def _lib_suffix():
-    if platform.system() == "Windows":
-        suffix = "win"
-    elif platform.system() == "Linux":
-        suffix = "lnx"
+def is_pip_version_of_libs():
+    """
+    If we are using a pip version of the libs they are importable with:
+    import Quest
+    import QLdata
+    ...
+    Which will import the binaries from the python path,
+    most likely the site-packages folder
+    """
+    # Test if one of the fortran libs is already imported
+    name = 'Quest'
+    if name in sys.modules:
+        return True
+    elif importlib.util.find_spec(name) is not None:
+        return True
     else:
+        return False
+
+
+def _lib_suffix():
+    """
+    If we are using a pip version of the libs they are NOT suffixed.
+    They are imported with
+    import Quest
+    import QLdata
+    ..
+    If we are using the internally shipped libraries, we HAVE a suffix
+    This means we import the quest library with:
+    import Quest_win64
+    import QLdata_win64
+    Thefore, if we are using the pip versions we don't add a suffix.
+    """
+    if is_pip_version_of_libs():
         return ""
+    else:
+        if platform.system() == "Windows":
+            suffix = "win"
+        elif platform.system() == "Linux":
+            suffix = "lnx"
+        else:
+            return ""
     return "_" + suffix + platform.architecture()[0][0:2]
 
 
@@ -85,6 +120,10 @@ def is_supported_f2py_platform():
             and _numpy_abi_ver() == F2PY_MODULES_REQUIRED_C_ABI
             and "python_d" not in sys.executable):
         return True
+    # check if we have pip installed the fortran libraries
+    # first check the numpy abi is correct
+    if _numpy_abi_ver() == F2PY_MODULES_REQUIRED_C_ABI:
+        return is_pip_version_of_libs()
     return False
 
 

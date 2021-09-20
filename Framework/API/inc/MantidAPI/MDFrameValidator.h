@@ -18,7 +18,7 @@ namespace Mantid {
 namespace API {
 class MANTID_API_DLL MDFrameValidator : public Kernel::TypedValidator<IMDWorkspace_sptr> {
 public:
-  explicit MDFrameValidator(const std::string &frameName);
+  explicit MDFrameValidator(std::string frameName);
   /// Gets the type of the validator
   std::string getType() const { return "mdframe"; }
   /// Clone the current state

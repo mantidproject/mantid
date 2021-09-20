@@ -10,8 +10,7 @@
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidSINQ/PoldiUtilities/PoldiSourceSpectrum.h"
 
-namespace Mantid {
-namespace Poldi {
+namespace Mantid::Poldi {
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -19,7 +18,7 @@ using namespace Mantid::Geometry;
 PoldiSourceSpectrum::PoldiSourceSpectrum(const Interpolation &spectrum) : m_spectrum(spectrum) {}
 
 PoldiSourceSpectrum::PoldiSourceSpectrum(const Instrument_const_sptr &poldiInstrument) : m_spectrum() {
-  setSpectrumFromInstrument(std::move(poldiInstrument));
+  setSpectrumFromInstrument(poldiInstrument);
 }
 
 /** Returns the interpolated intensity at the given wavelength
@@ -113,5 +112,4 @@ void PoldiSourceSpectrum::setSpectrum(const Parameter_sptr &spectrumParameter) {
     throw std::runtime_error("PoldiSourceSpectrum could not be initialized properly.");
   }
 }
-} // namespace Poldi
-} // namespace Mantid
+} // namespace Mantid::Poldi

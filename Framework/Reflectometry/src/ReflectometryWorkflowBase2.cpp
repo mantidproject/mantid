@@ -85,8 +85,7 @@ std::vector<size_t> getProcessingInstructionsAsIndices(std::string const &instru
 }
 } // namespace
 
-namespace Mantid {
-namespace Reflectometry {
+namespace Mantid::Reflectometry {
 
 /** Initialize properties related to the type of reduction
  */
@@ -816,7 +815,7 @@ void ReflectometryWorkflowBase2::convertProcessingInstructions(const Instrument_
     m_processingInstructionsWorkspaceIndex =
         convertProcessingInstructionsToWorkspaceIndices(m_processingInstructions, inputWS);
   } else {
-    m_processingInstructionsWorkspaceIndex = findProcessingInstructions(std::move(instrument), inputWS);
+    m_processingInstructionsWorkspaceIndex = findProcessingInstructions(instrument, inputWS);
     m_processingInstructions =
         convertProcessingInstructionsToSpectrumNumbers(m_processingInstructionsWorkspaceIndex, inputWS);
   }
@@ -842,5 +841,4 @@ void ReflectometryWorkflowBase2::setWorkspacePropertyFromChild(const Algorithm_s
   MatrixWorkspace_sptr workspace = alg->getProperty(propertyName);
   setProperty(propertyName, workspace);
 }
-} // namespace Reflectometry
-} // namespace Mantid
+} // namespace Mantid::Reflectometry

@@ -9,8 +9,7 @@
 #include <cmath>
 #include <memory>
 
-namespace Mantid {
-namespace Reflectometry {
+namespace Mantid::Reflectometry {
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -124,5 +123,4 @@ void CalculateSlits::exec() {
   setProperty("Slit2", s2);
 }
 
-} // namespace Reflectometry
-} // namespace Mantid
+} // namespace Mantid::Reflectometry

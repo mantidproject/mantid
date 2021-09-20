@@ -23,8 +23,7 @@
 #include <cmath>
 #include <numeric>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(Integration)
@@ -403,5 +402,4 @@ std::map<std::string, std::string> Integration::validateInputs() {
   return issues;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

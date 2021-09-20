@@ -13,8 +13,7 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/BoundedValidator.h"
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(FindUBUsingIndexedPeaks)
 
@@ -220,5 +219,4 @@ bool FindUBUsingIndexedPeaks::isPeakIndexed(const IPeak &peak) {
   const V3D mnp(peak.getIntMNP());
   return (IndexingUtils::ValidIndex(hkl, 1.0) || IndexingUtils::ValidIndex(mnp, 1.0));
 }
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

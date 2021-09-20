@@ -18,8 +18,7 @@
 #include <iterator>
 #include <string>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 namespace {
 /**
@@ -279,15 +278,17 @@ double ComponentInfo::solidAngle(const size_t componentIndex, const Kernel::V3D 
  * @param index : Index of the component to get the bounding box for
  * @param reference : Reference bounding box (optional)
  * @param mutableBB : Output bounding box. This will be grown.
+ * @param excludeMonitors : Optional flag to exclude monitors and choppers
  */
 void ComponentInfo::growBoundingBoxAsRectuangularBank(size_t index, const Geometry::BoundingBox *reference,
-                                                      Geometry::BoundingBox &mutableBB) const {
+                                                      Geometry::BoundingBox &mutableBB,
+                                                      const bool excludeMonitors) const {
 
   auto panel = quadrilateralComponent(index);
-  mutableBB.grow(componentBoundingBox(panel.bottomLeft, reference));
-  mutableBB.grow(componentBoundingBox(panel.topRight, reference));
-  mutableBB.grow(componentBoundingBox(panel.topLeft, reference));
-  mutableBB.grow(componentBoundingBox(panel.bottomRight, reference));
+  mutableBB.grow(componentBoundingBox(panel.bottomLeft, reference, excludeMonitors));
+  mutableBB.grow(componentBoundingBox(panel.topRight, reference, excludeMonitors));
+  mutableBB.grow(componentBoundingBox(panel.topLeft, reference, excludeMonitors));
+  mutableBB.grow(componentBoundingBox(panel.bottomRight, reference, excludeMonitors));
 }
 
 /**
@@ -298,9 +299,11 @@ void ComponentInfo::growBoundingBoxAsRectuangularBank(size_t index, const Geomet
  * @param index : Index of the component to get the bounding box for
  * @param reference : Reference bounding box (optional)
  * @param mutableBB : Output bounding box. This will be grown.
+ * @param excludeMonitors : Optional flag to exclude monitors and choppers
  */
-void ComponentInfo::growBoundingBoxAsOutline(size_t index, const BoundingBox *reference, BoundingBox &mutableBB) const {
-  mutableBB.grow(componentBoundingBox(index, reference));
+void ComponentInfo::growBoundingBoxAsOutline(size_t index, const BoundingBox *reference, BoundingBox &mutableBB,
+                                             const bool excludeMonitors) const {
+  mutableBB.grow(componentBoundingBox(index, reference, excludeMonitors));
 }
 
 /**
@@ -309,12 +312,24 @@ void ComponentInfo::growBoundingBoxAsOutline(size_t index, const BoundingBox *re
  * @param index : Component index
  * @param reference : Optional reference for coordinate system for non-axis
  *aligned bounding boxes
+ * @param excludeMonitors : Optional flag to exclude monitor and choppers
  * @return Absolute bounding box.
  */
-BoundingBox ComponentInfo::componentBoundingBox(const size_t index, const BoundingBox *reference) const {
+BoundingBox ComponentInfo::componentBoundingBox(const size_t index, const BoundingBox *reference,
+                                                const bool excludeMonitors) const {
   // Check that we have a valid shape here
   if (componentType(index) == Beamline::ComponentType::Infinite) {
     return BoundingBox(); // Return null bounding box
+  }
+  if (excludeMonitors) {
+    // skip monitors
+    if (isDetector(index) && m_componentInfo->isMonitor(index)) {
+      return BoundingBox();
+    }
+    // skip other components such as choppers, etc
+    if (componentType(index) == Beamline::ComponentType::Generic) {
+      return BoundingBox();
+    }
   }
   if (!hasValidShape(index)) {
     return BoundingBox(this->position(index).X(), this->position(index).Y(), this->position(index).Z(),
@@ -366,11 +381,13 @@ BoundingBox ComponentInfo::componentBoundingBox(const size_t index, const Boundi
  * @param componentIndex : Component index to get the bounding box for
  * @param reference : Optional reference for coordinate system for non-axis
  *aligned bounding boxes
+ * @param excludeMonitors : Optional flag to exclude monitors and choppers
  * @return Absolute bounding box
  */
-BoundingBox ComponentInfo::boundingBox(const size_t componentIndex, const BoundingBox *reference) const {
+BoundingBox ComponentInfo::boundingBox(const size_t componentIndex, const BoundingBox *reference,
+                                       const bool excludeMonitors) const {
   if (isDetector(componentIndex) || componentType(componentIndex) == Beamline::ComponentType::Infinite) {
-    return componentBoundingBox(componentIndex, reference);
+    return componentBoundingBox(componentIndex, reference, excludeMonitors);
   }
 
   BoundingBox absoluteBB;
@@ -385,20 +402,20 @@ BoundingBox ComponentInfo::boundingBox(const size_t componentIndex, const Boundi
     // box calculations.
   } else if (compFlag == Beamline::ComponentType::Unstructured) {
     for (const auto &childIndex : this->children(componentIndex)) {
-      absoluteBB.grow(boundingBox(childIndex, reference));
+      absoluteBB.grow(boundingBox(childIndex, reference, excludeMonitors));
     }
   } else if (compFlag == Beamline::ComponentType::Grid) {
     for (const auto &childIndex : this->children(componentIndex)) {
-      growBoundingBoxAsRectuangularBank(childIndex, reference, absoluteBB);
+      growBoundingBoxAsRectuangularBank(childIndex, reference, absoluteBB, excludeMonitors);
     }
   } else if (compFlag == Beamline::ComponentType::Rectangular || compFlag == Beamline::ComponentType::Structured ||
              parentFlag == Beamline::ComponentType::Grid) {
-    growBoundingBoxAsRectuangularBank(componentIndex, reference, absoluteBB);
+    growBoundingBoxAsRectuangularBank(componentIndex, reference, absoluteBB, excludeMonitors);
   } else if (compFlag == Beamline::ComponentType::OutlineComposite) {
-    growBoundingBoxAsOutline(componentIndex, reference, absoluteBB);
+    growBoundingBoxAsOutline(componentIndex, reference, absoluteBB, excludeMonitors);
   } else {
     // General case
-    absoluteBB.grow(componentBoundingBox(componentIndex, reference));
+    absoluteBB.grow(componentBoundingBox(componentIndex, reference, excludeMonitors));
   }
   return absoluteBB;
 }
@@ -423,5 +440,4 @@ const ComponentInfoConstIt ComponentInfo::cbegin() { return ComponentInfoConstIt
 
 const ComponentInfoConstIt ComponentInfo::cend() { return ComponentInfoConstIt(*this, size(), size()); }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

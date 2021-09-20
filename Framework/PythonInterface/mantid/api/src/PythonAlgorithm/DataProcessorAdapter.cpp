@@ -9,8 +9,7 @@
 //-----------------------------------------------------------------------------
 // AlgorithmAdapter definition
 //-----------------------------------------------------------------------------
-namespace Mantid {
-namespace PythonInterface {
+namespace Mantid::PythonInterface {
 
 /**
  * Construct the "wrapper" and stores the reference to the PyObject
@@ -24,5 +23,4 @@ template class DataProcessorAdapter<API::Algorithm>;
 template class DataProcessorAdapter<API::SerialAlgorithm>;
 template class DataProcessorAdapter<API::ParallelAlgorithm>;
 template class DataProcessorAdapter<API::DistributedAlgorithm>;
-} // namespace PythonInterface
-} // namespace Mantid
+} // namespace Mantid::PythonInterface

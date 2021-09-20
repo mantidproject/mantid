@@ -8,8 +8,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include <exception>
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 /** Constructor that fills the map from the spectrum-detector relationships in
  * the given workspace.
  *  @throws std::invalid_argument if a null workspace pointer is passed in
@@ -113,5 +112,4 @@ const SpectrumDetectorMapping::sdmap &SpectrumDetectorMapping::getMapping() cons
 
 bool SpectrumDetectorMapping::indexIsSpecNumber() const { return m_indexIsSpecNo; }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

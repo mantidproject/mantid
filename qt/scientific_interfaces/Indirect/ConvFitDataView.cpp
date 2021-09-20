@@ -23,9 +23,7 @@ QStringList convFitHeaders() {
 }
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 ConvFitDataView::ConvFitDataView(QWidget *parent) : ConvFitDataView(convFitHeaders(), parent) {}
 
@@ -52,6 +50,4 @@ void ConvFitDataView::addTableEntry(size_t row, FitDataRow newRow) {
   setCell(std::move(cell), row, 1);
 }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

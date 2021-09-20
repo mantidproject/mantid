@@ -8,8 +8,7 @@
 #include "MantidAPI/ICostFunction.h"
 #include "MantidKernel/LibraryManager.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 CostFunctionFactoryImpl::CostFunctionFactoryImpl() : Kernel::DynamicFactory<ICostFunction>() {
   // we need to make sure the library manager has been loaded before we
@@ -18,5 +17,4 @@ CostFunctionFactoryImpl::CostFunctionFactoryImpl() : Kernel::DynamicFactory<ICos
   Mantid::Kernel::LibraryManager::Instance();
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

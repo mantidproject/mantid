@@ -8,9 +8,7 @@
 #include "Common/Map.h"
 #include <algorithm>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 template <typename T> void sortAndRemoveDuplicatesInplace(std::vector<T> &items) {
   std::sort(items.begin(), items.end());
@@ -50,6 +48,4 @@ bool containsPath(std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const
       locations.cbegin(), locations.cend(),
       [&path](MantidQt::MantidWidgets::Batch::RowLocation const &location) -> bool { return location.path() == path; });
 }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

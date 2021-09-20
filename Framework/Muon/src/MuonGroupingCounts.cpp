@@ -57,8 +57,7 @@ MatrixWorkspace_sptr groupDetectors(const MatrixWorkspace_sptr &workspace, const
 
 } // namespace
 
-namespace Mantid {
-namespace Muon {
+namespace Mantid::Muon {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(MuonGroupingCounts)
@@ -185,5 +184,4 @@ void MuonGroupingCounts::setGroupingSampleLogs(const MatrixWorkspace_sptr &works
   MuonAlgorithmHelper::addSampleLog(workspace, "analysis_periods_subtracted", getPropertyValue("SubtractedPeriods"));
 }
 
-} // namespace Muon
-} // namespace Mantid
+} // namespace Mantid::Muon

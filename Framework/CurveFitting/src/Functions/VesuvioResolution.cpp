@@ -14,9 +14,7 @@
 
 #include <gsl/gsl_poly.h>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace Mantid;
 using namespace Mantid::CurveFitting;
@@ -221,6 +219,4 @@ void VesuvioResolution::voigtApprox(std::vector<double> &voigt, const std::vecto
   std::transform(voigt.begin(), voigt.end(), voigt.begin(), std::bind(std::multiplies<double>(), _1, norm));
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

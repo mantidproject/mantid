@@ -25,8 +25,7 @@
 #include <sstream>
 #include <utility>
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 using namespace CurveFitting;
 
@@ -344,5 +343,4 @@ void SCDPanelErrors::setupData() const {
   m_setupFinished = true;
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

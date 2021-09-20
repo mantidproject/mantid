@@ -17,8 +17,7 @@ namespace {
 Mantid::Kernel::Logger g_log("Quasi");
 }
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 
 Quasi::Quasi(QWidget *parent) : IndirectBayesTab(parent), m_previewSpec(0) {
   m_uiForm.setupUi(parent);
@@ -569,5 +568,4 @@ void Quasi::setPlotResultIsPlotting(bool plotting) {
   setButtonsEnabled(!plotting);
 }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

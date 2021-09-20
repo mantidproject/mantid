@@ -147,9 +147,7 @@ QStringList getSampleFBSuffices() {
 
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 IndirectDataAnalysisElwinTab::IndirectDataAnalysisElwinTab(QWidget *parent)
     : IndirectDataAnalysisTab(parent), m_elwTree(nullptr), m_dataModel(std::make_unique<IndirectFitDataModel>()) {
   m_uiForm.setupUi(parent);
@@ -219,13 +217,13 @@ void IndirectDataAnalysisElwinTab::setup() {
   // We always want one range selector... the second one can be controlled from
   // within the elwinTwoRanges(bool state) function
   auto integrationRangeSelector = m_uiForm.ppPlot->addRangeSelector("ElwinIntegrationRange");
-  integrationRangeSelector->setBounds(-1.0, 1.0);
+  integrationRangeSelector->setBounds(-DBL_MAX, DBL_MAX);
   connect(integrationRangeSelector, SIGNAL(minValueChanged(double)), this, SLOT(minChanged(double)));
   connect(integrationRangeSelector, SIGNAL(maxValueChanged(double)), this, SLOT(maxChanged(double)));
   // create the second range
   auto backgroundRangeSelector = m_uiForm.ppPlot->addRangeSelector("ElwinBackgroundRange");
   backgroundRangeSelector->setColour(Qt::darkGreen); // dark green for background
-  backgroundRangeSelector->setBounds(-1.0, 1.0);
+  backgroundRangeSelector->setBounds(-DBL_MAX, DBL_MAX);
   connect(integrationRangeSelector, SIGNAL(selectionChanged(double, double)), backgroundRangeSelector,
           SLOT(setRange(double, double)));
   connect(backgroundRangeSelector, SIGNAL(minValueChanged(double)), this, SLOT(minChanged(double)));
@@ -235,9 +233,7 @@ void IndirectDataAnalysisElwinTab::setup() {
   connect(m_blnManager, SIGNAL(valueChanged(QtProperty *, bool)), this, SLOT(twoRanges(QtProperty *, bool)));
   twoRanges(m_properties["BackgroundSubtraction"], false);
 
-  connect(m_uiForm.dsInputFiles, SIGNAL(filesFound()), this, SLOT(newInputFiles()));
-  connect(m_uiForm.dsInputFiles, SIGNAL(filesFound()), this, SLOT(plotInput()));
-  connect(m_uiForm.dsInputFiles, SIGNAL(filesFound()), this, SLOT(updateIntegrationRange()));
+  connect(m_uiForm.dsInputFiles, SIGNAL(filesFound()), this, SLOT(checkLoadedFiles()));
   connect(m_uiForm.cbPreviewFile, SIGNAL(currentIndexChanged(int)), this, SLOT(checkNewPreviewSelected(int)));
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this, SLOT(setSelectedSpectrum(int)));
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this, SLOT(handlePreviewSpectrumChanged()));
@@ -616,7 +612,7 @@ void IndirectDataAnalysisElwinTab::checkNewPreviewSelected(int index) {
   }
 }
 
-void IndirectDataAnalysisElwinTab::newPreviewFileSelected(const QString workspaceName, const QString filename) {
+void IndirectDataAnalysisElwinTab::newPreviewFileSelected(const QString &workspaceName, const QString &filename) {
   auto const loadHistory = m_uiForm.ckLoadHistory->isChecked();
   if (loadFile(filename, workspaceName, -1, -1, loadHistory)) {
     auto const workspace = getADSMatrixWorkspace(workspaceName.toStdString());
@@ -634,7 +630,7 @@ void IndirectDataAnalysisElwinTab::newPreviewFileSelected(const QString workspac
   }
 }
 
-void IndirectDataAnalysisElwinTab::newPreviewWorkspaceSelected(const QString workspaceName) {
+void IndirectDataAnalysisElwinTab::newPreviewWorkspaceSelected(const QString &workspaceName) {
   if (m_uiForm.inputChoice->currentIndex() == 1) {
     auto const workspace = getADSMatrixWorkspace(workspaceName.toStdString());
     setInputWorkspace(workspace);
@@ -797,12 +793,27 @@ void IndirectDataAnalysisElwinTab::addData() { addData(m_addWorkspaceDialog.get(
 
 void IndirectDataAnalysisElwinTab::addData(IAddWorkspaceDialog const *dialog) {
   try {
-    addDataToModel(dialog);
-    updateTableFromModel();
-    emit dataAdded();
-    emit dataChanged();
-    newInputFilesFromDialog(dialog);
-    plotInput();
+    UserInputValidator uiv;
+    const auto indirectDialog = dynamic_cast<IndirectAddWorkspaceDialog const *>(dialog);
+    QList<QString> allFiles;
+    allFiles.append(QString::fromStdString(indirectDialog->getFileName()));
+    auto const suffixes = getFilteredSuffixes(allFiles);
+    if (suffixes.size() < 1) {
+      uiv.addErrorMessage("The input files must be all _red or all _sqw.");
+      m_uiForm.dsInputFiles->clear();
+      closeDialog();
+    }
+    QString error = uiv.generateErrorMessage();
+    showMessageBox(error);
+
+    if (error.isEmpty()) {
+      addDataToModel(dialog);
+      updateTableFromModel();
+      emit dataAdded();
+      emit dataChanged();
+      newInputFilesFromDialog(dialog);
+      plotInput();
+    }
   } catch (const std::runtime_error &ex) {
     displayWarning(ex.what());
   }
@@ -939,6 +950,22 @@ size_t IndirectDataAnalysisElwinTab::findWorkspaceID() {
   return workspaceID;
 }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+void IndirectDataAnalysisElwinTab::checkLoadedFiles() {
+  UserInputValidator uiv;
+  size_t noOfFiles = m_uiForm.dsInputFiles->getFilenames().size();
+  auto const suffixes = getFilteredSuffixes(m_uiForm.dsInputFiles->getFilenames());
+  if (suffixes.size() != noOfFiles) {
+    uiv.addErrorMessage("The input files must be all _red or all _sqw.");
+    m_uiForm.dsInputFiles->clear();
+  }
+  QString error = uiv.generateErrorMessage();
+  showMessageBox(error);
+
+  if (error.isEmpty()) {
+    newInputFiles();
+    plotInput();
+    updateIntegrationRange();
+  }
+}
+
+} // namespace MantidQt::CustomInterfaces::IDA

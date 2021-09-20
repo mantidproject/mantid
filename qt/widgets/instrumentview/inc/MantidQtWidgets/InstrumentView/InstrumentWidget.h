@@ -108,7 +108,7 @@ public:
   };
   enum Tab { RENDER = 0, PICK, MASK, TREE };
 
-  explicit InstrumentWidget(const QString &wsName, QWidget *parent = nullptr, bool resetGeometry = true,
+  explicit InstrumentWidget(QString wsName, QWidget *parent = nullptr, bool resetGeometry = true,
                             bool autoscaling = true, double scaleMin = 0.0, double scaleMax = 0.0,
                             bool setDefaultView = true, Dependencies deps = Dependencies());
   ~InstrumentWidget() override;

@@ -12,8 +12,7 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/SimpleJSON.h"
 
-namespace Mantid {
-namespace RemoteAlgorithms {
+namespace Mantid::RemoteAlgorithms {
 
 // Register the algorithm into the Algorithm Factory
 DECLARE_ALGORITHM(StopRemoteTransaction2)
@@ -46,5 +45,4 @@ void StopRemoteTransaction2::exec() {
   g_log.information() << "Transaction with ID " << tid << " stopped on the compute resource " << comp << '\n';
 }
 
-} // end namespace RemoteAlgorithms
-} // end namespace Mantid
+} // namespace Mantid::RemoteAlgorithms

@@ -9,8 +9,7 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidKernel/BoundedValidator.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(DetectorEfficiencyVariation)
@@ -244,5 +243,4 @@ int DetectorEfficiencyVariation::doDetectorTests(const API::MatrixWorkspace_cons
   return numFailed;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

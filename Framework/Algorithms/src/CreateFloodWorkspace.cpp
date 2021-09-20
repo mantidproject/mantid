@@ -40,8 +40,7 @@ std::map<std::string, std::string> const funMap{{"Linear", "name=LinearBackgroun
 
 } // namespace
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CreateFloodWorkspace)
@@ -276,5 +275,4 @@ void CreateFloodWorkspace::exec() {
   setProperty(Prop::OUTPUT_WORKSPACE, ws);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

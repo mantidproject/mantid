@@ -7,8 +7,7 @@
 #include "MantidMDAlgorithms/MDTransfModQ.h"
 #include "MantidKernel/RegistrationHelper.h"
 #include "MantidMDAlgorithms/DisplayNormalizationSetter.h"
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 // register the class, whith conversion factory under ModQ name
 // clang-format off
 DECLARE_MD_TRANSFID(MDTransfModQ, |Q|)
@@ -403,5 +402,4 @@ void MDTransfModQ::setDisplayNormalization(Mantid::API::IMDWorkspace_sptr mdWork
   setter(mdWorkspace, underlyingWorkspace, isQ, m_Emode);
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

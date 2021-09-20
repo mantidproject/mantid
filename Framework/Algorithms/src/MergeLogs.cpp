@@ -14,8 +14,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 DECLARE_ALGORITHM(MergeLogs)
 
@@ -99,5 +98,4 @@ void MergeLogs::exec() {
   setProperty("Workspace", ws);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

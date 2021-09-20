@@ -29,8 +29,7 @@
 using namespace Mantid::DataObjects;
 using namespace Mantid::HistogramData;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(IQTransform)
@@ -151,7 +150,7 @@ void IQTransform::exec() {
 API::MatrixWorkspace_sptr IQTransform::subtractBackgroundWS(const API::MatrixWorkspace_sptr &ws,
                                                             const API::MatrixWorkspace_sptr &background) {
   g_log.debug() << "Subtracting the workspace " << background->getName() << " from the input workspace.\n";
-  return std::move(ws) - background;
+  return ws - background;
 }
 
 /** @name Available transformation functions */
@@ -366,5 +365,4 @@ void IQTransform::general(const API::MatrixWorkspace_sptr &ws) {
 
 //@}
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

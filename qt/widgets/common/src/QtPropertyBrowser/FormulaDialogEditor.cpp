@@ -9,8 +9,7 @@
 
 #include <QSettings>
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 /**
  * Open a UserFunctionDialog. Update the property if a file was selected.
@@ -22,5 +21,4 @@ void FormulaDialogEditor::runDialog() {
     updateProperty();
   }
 }
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

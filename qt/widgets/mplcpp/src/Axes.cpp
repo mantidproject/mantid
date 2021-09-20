@@ -11,9 +11,7 @@
 #include "MantidPythonInterface/core/ErrorHandling.h"
 #include "MantidPythonInterface/core/VersionCompat.h"
 
-namespace MantidQt {
-namespace Widgets {
-namespace MplCpp {
+namespace MantidQt::Widgets::MplCpp {
 
 using Mantid::PythonInterface::callMethodNoCheck;
 using Mantid::PythonInterface::GlobalInterpreterLock;
@@ -341,6 +339,4 @@ void Axes::autoscaleView(bool tight, bool scaleX, bool scaleY) {
   callMethodNoCheck<void, bool, bool, bool>(pyobj(), "autoscale_view", tight, scaleX, scaleY);
 }
 
-} // namespace MplCpp
-} // namespace Widgets
-} // namespace MantidQt
+} // namespace MantidQt::Widgets::MplCpp

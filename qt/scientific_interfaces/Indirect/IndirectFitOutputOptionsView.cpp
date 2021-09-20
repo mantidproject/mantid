@@ -8,9 +8,7 @@
 
 #include <QMessageBox>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 IndirectFitOutputOptionsView::IndirectFitOutputOptionsView(QWidget *parent)
     : IIndirectFitOutputOptionsView(parent), m_outputOptions(std::make_unique<Ui::IndirectFitOutputOptions>()) {
@@ -109,6 +107,4 @@ void IndirectFitOutputOptionsView::displayWarning(std::string const &message) {
   QMessageBox::warning(parentWidget(), "MantidPlot - Warning", QString::fromStdString(message));
 }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

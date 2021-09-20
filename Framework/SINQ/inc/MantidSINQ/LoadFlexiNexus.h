@@ -79,6 +79,6 @@ private:
                    const Mantid::API::ExperimentInfo_sptr &info);
 
   int safeOpenpath(NeXus::File *fin, const std::string &path);
-  int calculateCAddress(int *pos, int *dim, int rank);
+  int calculateCAddress(const int *pos, const int *dim, int rank);
   int calculateF77Address(int *pos, int rank);
 };

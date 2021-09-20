@@ -7,9 +7,7 @@
 #include "MantidKernel/UnitLabelTypes.h"
 #include "MantidKernel/UnitLabel.h"
 
-namespace Mantid {
-namespace Kernel {
-namespace Units {
+namespace Mantid::Kernel::Units {
 // Empty label
 const UnitLabel Symbol::EmptyLabel("");
 // Second
@@ -37,6 +35,4 @@ const UnitLabel Symbol::InverseCM("cm^-1", L"cm\u207b\u00b9", "cm^{-1}");
 /// Reciprocal lattice (dimensionless)
 const UnitLabel Symbol::RLU("r.l.u.");
 
-} // namespace Units
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel::Units

@@ -26,8 +26,7 @@
 #include <Poco/File.h>
 #include <limits>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(FindDetectorsPar)
 
@@ -697,5 +696,4 @@ void FindDetectorsPar::load_plain(std::ifstream &stream, std::vector<double> &Da
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

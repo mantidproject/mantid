@@ -45,14 +45,18 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 Projection3D::Projection3D(const InstrumentActor *rootActor, QSize viewportSize)
-    : ProjectionSurface(rootActor), m_drawAxes(true), m_wireframe(false), m_viewport(std::move(viewportSize)) {
+    : ProjectionSurface(rootActor), m_drawAxes(true), m_wireframe(false), m_viewport(viewportSize) {
   V3D minBounds, maxBounds;
-  m_instrActor->getBoundingBox(minBounds, maxBounds);
+  // exclude monitors and choppers from bounding box to set tighter view bounds
+  m_instrActor->getBoundingBox(minBounds, maxBounds, true);
 
   m_viewport.setProjection(minBounds, maxBounds);
+
+  // use the full bounding box to get the Z bounds for the clipping plane
+  m_instrActor->getBoundingBox(minBounds, maxBounds, false);
+  m_viewport.setProjectionZPlane(minBounds, maxBounds);
 
   changeColorMap();
 
@@ -487,5 +491,4 @@ void Projection3D::saveShapesToTableWorkspace() {
   row << std::to_string(-1) << viewPortStr;
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

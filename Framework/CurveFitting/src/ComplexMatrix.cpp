@@ -10,8 +10,7 @@
 #include "MantidCurveFitting/ComplexMatrix.h"
 #include <gsl/gsl_eigen.h>
 
-namespace Mantid {
-namespace CurveFitting {
+namespace Mantid::CurveFitting {
 
 /// Constructor
 ComplexMatrix::ComplexMatrix() : m_matrix(nullptr) {}
@@ -324,9 +323,6 @@ void ComplexMatrix::sortColumns(const std::vector<size_t> &indices) {
   gsl_matrix_complex_free(matrix);
 }
 
-/// Create a new matrix and move the data to it.
-ComplexMatrix ComplexMatrix::move() { return ComplexMatrix(std::move(m_matrix)); }
-
 /// Pack the matrix into a single std vector of doubles (for passing in and out
 /// of algorithms)
 std::vector<double> ComplexMatrix::packToStdVector() const {
@@ -364,5 +360,4 @@ void ComplexMatrix::unpackFromStdVector(const std::vector<double> &packed) {
   }
 }
 
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting

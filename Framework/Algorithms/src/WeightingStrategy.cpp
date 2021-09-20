@@ -10,8 +10,7 @@
 #include <cmath>
 #include <stdexcept>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 //----------------------------------------------------------------------------
 // Weighting Implementations
@@ -185,5 +184,4 @@ inline double GaussianWeightingnD::calculateGaussian(const double normalisedDist
   return std::exp(-normalisedDistanceSq / m_twiceSigmaSquared);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

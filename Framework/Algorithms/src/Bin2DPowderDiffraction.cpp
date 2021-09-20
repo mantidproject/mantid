@@ -25,8 +25,7 @@
 #include <fstream>
 #include <stdexcept>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Kernel;
 using namespace API;
@@ -357,5 +356,4 @@ double calcD(double wavelength, double sintheta) { return wavelength * 0.5 / sin
 
 double calcDPerp(double wavelength, double logcostheta) { return sqrt(wavelength * wavelength - 2.0 * logcostheta); }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

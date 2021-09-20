@@ -20,9 +20,7 @@
 #include "MantidQtWidgets/Common/ISlitCalculator.h"
 #include "Reduction/Batch.h"
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 using Mantid::API::AlgorithmManager;
 using Mantid::API::MatrixWorkspace_sptr;
@@ -369,6 +367,4 @@ void MainWindowPresenter::onInstrumentChanged() {
   m_slitCalculator->setCurrentInstrumentName(instrumentName());
   m_slitCalculator->processInstrumentHasBeenChanged();
 }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

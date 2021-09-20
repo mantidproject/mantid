@@ -18,8 +18,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using Mantid::Types::Core::DateAndTime;
 
-namespace Mantid {
-namespace LiveData {
+namespace Mantid::LiveData {
 DECLARE_LISTENER(FakeEventDataListener)
 
 /// Constructor
@@ -140,5 +139,4 @@ void FakeEventDataListener::generateEvents(Poco::Timer & /*unused*/) {
     m_buffer->getSpectrum(1).addEventQuickly(Types::Event::TofEvent(m_rand->nextValue()));
   }
 }
-} // namespace LiveData
-} // namespace Mantid
+} // namespace Mantid::LiveData

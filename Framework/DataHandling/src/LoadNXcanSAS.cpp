@@ -441,8 +441,7 @@ void loadTransmissionData(H5::Group &transmission, const Mantid::API::MatrixWork
 }
 } // namespace
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadNXcanSAS)
@@ -577,5 +576,4 @@ void LoadNXcanSAS::loadTransmission(H5::Group &entry, const std::string &name) {
   setProperty(propertyName, workspace);
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

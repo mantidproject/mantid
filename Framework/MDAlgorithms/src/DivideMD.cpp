@@ -15,8 +15,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(DivideMD)
@@ -123,5 +122,4 @@ void DivideMD::execHistoScalar(Mantid::DataObjects::MDHistoWorkspace_sptr out,
   out->divide(scalar->y(0)[0], scalar->e(0)[0]);
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

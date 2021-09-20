@@ -59,8 +59,7 @@ std::vector<boost::optional<QHash<QString, QVariant>>> createPointAndLineKwargs(
 
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 DECLARE_SUBWINDOW(ALCInterface)
 
 const QStringList ALCInterface::STEP_NAMES = {"Data loading", "Baseline modelling", "Peak fitting"};
@@ -397,5 +396,4 @@ void ALCInterface::externalPlotPeakFitting() {
   }
 }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

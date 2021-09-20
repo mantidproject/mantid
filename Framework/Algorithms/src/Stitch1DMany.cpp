@@ -19,8 +19,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 DECLARE_ALGORITHM(Stitch1DMany)
 
 /// Initialize the algorithm's properties.
@@ -370,5 +369,4 @@ void Stitch1DMany::doStitch1DMany(const size_t period, const bool useManualScale
   outScaleFactors = alg->getProperty("OutScaleFactors");
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

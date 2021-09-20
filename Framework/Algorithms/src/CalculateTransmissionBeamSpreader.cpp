@@ -21,8 +21,7 @@
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CalculateTransmissionBeamSpreader)
@@ -276,5 +275,4 @@ API::MatrixWorkspace_sptr CalculateTransmissionBeamSpreader::fitToData(const API
   return result;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

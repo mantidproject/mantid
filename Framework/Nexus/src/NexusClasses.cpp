@@ -9,9 +9,9 @@
 //----------------------------------------------------------------------
 #include "MantidNexus/NexusClasses.h"
 #include <memory>
+#include <utility>
 
-namespace Mantid {
-namespace NeXus {
+namespace Mantid::NeXus {
 
 std::vector<std::string> NXAttributes::names() const {
   std::vector<std::string> out;
@@ -376,7 +376,7 @@ std::vector<char> &NXBinary::binary() {
 /**  Constructor. On creation opens the Nexus file for reading only.
  *   @param fname :: The file name to open
  */
-NXRoot::NXRoot(const std::string &fname) : m_filename(fname) {
+NXRoot::NXRoot(std::string fname) : m_filename(std::move(fname)) {
   // Open NeXus file
   NXstatus stat = NXopen(m_filename.c_str(), NXACC_READ, &m_fileID);
   if (stat == NX_ERROR) {
@@ -391,7 +391,7 @@ NXRoot::NXRoot(const std::string &fname) : m_filename(fname) {
  *   @param fname :: The file name to create
  *   @param entry :: The name of the first entry in the new file
  */
-NXRoot::NXRoot(const std::string &fname, const std::string &entry) : m_filename(fname) {
+NXRoot::NXRoot(std::string fname, const std::string &entry) : m_filename(std::move(fname)) {
   (void)entry;
   // Open NeXus file
   NXstatus stat = NXopen(m_filename.c_str(), NXACC_CREATE5, &m_fileID);
@@ -637,5 +637,4 @@ Kernel::Property *NXLog::createTimeSeries(const std::string &start_time, const s
   return nullptr;
 }
 
-} // namespace NeXus
-} // namespace Mantid
+} // namespace Mantid::NeXus

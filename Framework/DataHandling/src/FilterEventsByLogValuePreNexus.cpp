@@ -52,8 +52,7 @@
 
 // #define DBOUT
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 DECLARE_FILELOADER_ALGORITHM(FilterEventsByLogValuePreNexus)
 
@@ -2237,5 +2236,4 @@ void FilterEventsByLogValuePreNexus::readPulseidFile(const std::string &filename
   this->m_protonChargeTot = this->m_protonChargeTot * CURRENT_CONVERSION;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

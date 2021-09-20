@@ -14,8 +14,7 @@
 //-----------------------------------------------------------------------------
 // IFunction1D definition
 //-----------------------------------------------------------------------------
-namespace Mantid {
-namespace PythonInterface {
+namespace Mantid::PythonInterface {
 using namespace boost::python;
 
 /**
@@ -58,5 +57,4 @@ void IFunction1DAdapter::functionDeriv1D(API::Jacobian *out, const double *xValu
     Base::functionDeriv1D(out, xValues, nData);
   }
 }
-} // namespace PythonInterface
-} // namespace Mantid
+} // namespace Mantid::PythonInterface

@@ -32,8 +32,7 @@
 
 constexpr double deg2rad = M_PI / 180.0;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(Q1DWeighted)
@@ -611,5 +610,4 @@ MatrixWorkspace_sptr Q1DWeighted::createOutputWorkspace(const MatrixWorkspace_co
   return outputWS;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

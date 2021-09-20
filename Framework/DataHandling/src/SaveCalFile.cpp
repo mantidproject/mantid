@@ -17,8 +17,7 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using Mantid::Types::Core::DateAndTime;
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveCalFile)
@@ -146,5 +145,4 @@ void SaveCalFile::saveCalFile(const std::string &calFileName, const GroupingWork
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

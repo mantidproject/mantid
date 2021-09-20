@@ -17,8 +17,7 @@
 
 #include "MantidKernel/StringTokenizer.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 namespace {
 /// static logger instance
 Kernel::Logger g_log("AlgorithmFactory");
@@ -35,8 +34,8 @@ AlgorithmFactoryImpl::AlgorithmFactoryImpl() : Kernel::DynamicFactory<Algorithm>
 AlgorithmFactoryImpl::~AlgorithmFactoryImpl() = default;
 
 /** Creates an instance of an algorithm
- * @param name :: the name of the Algrorithm to create
- * @param version :: the version of the algroithm to create
+ * @param name :: the name of the Algorithm to create
+ * @param version :: the version of the algorithm to create
  * @returns a shared pointer to the created algorithm
  */
 std::shared_ptr<Algorithm> AlgorithmFactoryImpl::create(const std::string &name, const int &version) const {
@@ -58,7 +57,9 @@ std::shared_ptr<Algorithm> AlgorithmFactoryImpl::create(const std::string &name,
   if (realName) {
     // Try create algorithm again with real name
     try {
-      return this->createAlgorithm(realName.get(), local_version);
+      auto alg = this->createAlgorithm(realName.get(), local_version);
+      alg->calledByAlias = true;
+      return alg;
     } catch (Kernel::Exception::NotFoundError &) {
       // Get highest registered version
       const auto hVersion = highestVersion(realName.get()); // Throws if not found
@@ -210,7 +211,7 @@ const std::vector<std::string> AlgorithmFactoryImpl::getKeys(bool includeHidden)
 
 /**
  * @param alias The name of the algorithm to look up in the alias map
- * @return Real name of algroithm if found
+ * @return Real name of algorithm if found
  */
 boost::optional<std::string> AlgorithmFactoryImpl::getRealNameFromAlias(const std::string &alias) const noexcept {
   auto a_it = m_amap.find(alias);
@@ -441,5 +442,4 @@ std::shared_ptr<Algorithm> AlgorithmFactoryImpl::createAlgorithm(const std::stri
   return Kernel::DynamicFactory<Algorithm>::create(createName(name, version));
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

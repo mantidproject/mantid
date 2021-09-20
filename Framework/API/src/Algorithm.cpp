@@ -10,6 +10,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
+#include "MantidAPI/DeprecatedAlias.h"
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceHistory.h"
@@ -512,10 +513,19 @@ bool Algorithm::executeInternal() {
   Timer timer;
   bool algIsExecuted = false;
   AlgorithmManager::Instance().notifyAlgorithmStarting(this->getAlgorithmID());
+
+  // runtime check for deprecation warning
   {
     auto *depo = dynamic_cast<DeprecatedAlgorithm *>(this);
     if (depo != nullptr)
       getLogger().error(depo->deprecationMsg(this));
+  }
+
+  // runtime check for deprecated alias warning
+  {
+    auto *da_alg = dynamic_cast<DeprecatedAlias *>(this);
+    if ((da_alg != nullptr) && (this->calledByAlias))
+      getLogger().warning(da_alg->deprecationMessage(this));
   }
 
   // Register clean up tasks that should happen regardless of the route
@@ -1879,15 +1889,15 @@ Algorithm::FinishedNotification::FinishedNotification(const Algorithm *const alg
     : AlgorithmNotification(alg), success(res) {}
 std::string Algorithm::FinishedNotification::name() const { return "FinishedNotification"; }
 
-Algorithm::ProgressNotification::ProgressNotification(const Algorithm *const alg, double p, const std::string &msg,
+Algorithm::ProgressNotification::ProgressNotification(const Algorithm *const alg, double p, std::string msg,
                                                       double estimatedTime, int progressPrecision)
-    : AlgorithmNotification(alg), progress(p), message(msg), estimatedTime(estimatedTime),
+    : AlgorithmNotification(alg), progress(p), message(std::move(msg)), estimatedTime(estimatedTime),
       progressPrecision(progressPrecision) {}
 
 std::string Algorithm::ProgressNotification::name() const { return "ProgressNotification"; }
 
-Algorithm::ErrorNotification::ErrorNotification(const Algorithm *const alg, const std::string &str)
-    : AlgorithmNotification(alg), what(str) {}
+Algorithm::ErrorNotification::ErrorNotification(const Algorithm *const alg, std::string str)
+    : AlgorithmNotification(alg), what(std::move(str)) {}
 
 std::string Algorithm::ErrorNotification::name() const { return "ErrorNotification"; }
 

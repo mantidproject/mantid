@@ -16,8 +16,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 //----------------------------------------------------------------------------------------------
 
@@ -29,11 +28,9 @@ const std::string IMDHistoWorkspace::toString() const {
 
   return os.str();
 }
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 /** In order to be able to cast PropertyWithValue classes correctly a definition
  * for the PropertyWithValue<IMDEventWorkspace> is required */
 template <>
@@ -64,5 +61,4 @@ IPropertyManager::getValue<Mantid::API::IMDHistoWorkspace_const_sptr>(const std:
   }
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

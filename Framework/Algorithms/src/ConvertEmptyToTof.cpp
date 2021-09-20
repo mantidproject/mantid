@@ -24,8 +24,7 @@
 #include <numeric> // std::accumulate
 #include <utility> // std::pair
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Kernel;
 using namespace API;
@@ -455,5 +454,4 @@ void ConvertEmptyToTof::setTofInWS(const std::vector<double> &tofAxis, const API
   outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

@@ -9,13 +9,12 @@
 #include "MantidSINQ/PoldiUtilities/PoldiConversions.h"
 #include "MantidSINQ/PoldiUtilities/PoldiDGrid.h"
 
-namespace Mantid {
-namespace Poldi {
+namespace Mantid::Poldi {
 
 PoldiDGrid::PoldiDGrid(std::shared_ptr<PoldiAbstractDetector> detector, std::shared_ptr<PoldiAbstractChopper> chopper,
                        double deltaT, std::pair<double, double> wavelengthRange)
     : m_detector(std::move(detector)), m_chopper(std::move(chopper)), m_deltaT(deltaT),
-      m_wavelengthRange(wavelengthRange), m_dRangeAsMultiples(), m_deltaD(0.0), m_dgrid(),
+      m_wavelengthRange(std::move(wavelengthRange)), m_dRangeAsMultiples(), m_deltaD(0.0), m_dgrid(),
       m_hasCachedCalculation(false) {}
 
 void PoldiDGrid::setDetector(std::shared_ptr<PoldiAbstractDetector> newDetector) {
@@ -111,5 +110,4 @@ void PoldiDGrid::createGrid() {
 
   m_hasCachedCalculation = true;
 }
-} // namespace Poldi
-} // namespace Mantid
+} // namespace Mantid::Poldi

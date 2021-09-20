@@ -16,8 +16,7 @@
 #include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidWorkflowAlgorithms/EQSANSInstrument.h"
 
-namespace Mantid {
-namespace WorkflowAlgorithms {
+namespace Mantid::WorkflowAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ComputeSensitivity)
@@ -91,5 +90,4 @@ void ComputeSensitivity::exec() {
   }
 }
 
-} // namespace WorkflowAlgorithms
-} // namespace Mantid
+} // namespace Mantid::WorkflowAlgorithms

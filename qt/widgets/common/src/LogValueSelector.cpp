@@ -8,8 +8,7 @@
 
 using Mantid::Kernel::Math::StatisticType;
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 // Convert strings to enum values
 const std::map<std::string, StatisticType> LogValueSelector::STRING_TO_FUNC = {{"Mean", StatisticType::Mean},
@@ -91,5 +90,4 @@ void LogValueSelector::setEnabled(int checkstate) {
  */
 bool LogValueSelector::isCheckboxTicked() const { return m_ui.chkUseLog->isChecked(); }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

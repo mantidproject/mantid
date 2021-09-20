@@ -106,8 +106,7 @@ QStringList convertToQStringList(std::string const &str, std::string const &deli
 }
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 
 IndirectTab::IndirectTab(QObject *parent)
     : QObject(parent), m_properties(), m_dblManager(new QtDoublePropertyManager()),
@@ -607,5 +606,4 @@ QVector<QString> IndirectTab::convertStdStringVector(const std::vector<std::stri
   return resultVec;
 }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

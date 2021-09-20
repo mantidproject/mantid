@@ -7,8 +7,7 @@
 #include "MantidAlgorithms/MaxEnt/MaxentSpaceReal.h"
 #include <stdexcept>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 /**
  * Converts a vector of real values to a vector of complex numbers
@@ -46,5 +45,4 @@ std::vector<double> MaxentSpaceReal::fromComplex(const std::vector<double> &valu
   return result;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

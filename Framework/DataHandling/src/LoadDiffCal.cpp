@@ -24,8 +24,7 @@
 #include <H5Cpp.h>
 #include <cmath>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using Mantid::API::FileProperty;
 using Mantid::API::ITableWorkspace;
@@ -511,5 +510,4 @@ LoadDiffCal::getParallelExecutionMode(const std::map<std::string, Parallel::Stor
   return Parallel::ExecutionMode::Identical;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

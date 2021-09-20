@@ -13,8 +13,7 @@
 #include <limits>
 #include <vector>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(CalculateEfficiency2)
@@ -139,7 +138,7 @@ void CalculateEfficiency2::exec() {
   progress(1.0, "Done!");
 }
 
-API::MatrixWorkspace_sptr CalculateEfficiency2::calculateEfficiency(MatrixWorkspace_sptr inputWorkspace,
+API::MatrixWorkspace_sptr CalculateEfficiency2::calculateEfficiency(const MatrixWorkspace_sptr &inputWorkspace,
                                                                     double startProgress, double stepProgress) {
 
   // create the output workspace from the input, while NOT preserving events
@@ -350,5 +349,4 @@ API::MatrixWorkspace_sptr CalculateEfficiency2::mergeGroup(API::WorkspaceGroup &
   return mergedNormalisedWs;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

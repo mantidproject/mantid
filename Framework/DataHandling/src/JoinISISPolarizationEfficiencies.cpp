@@ -21,8 +21,7 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::HistogramData;
 using namespace Mantid::Kernel;
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(JoinISISPolarizationEfficiencies)
@@ -214,5 +213,4 @@ MatrixWorkspace_sptr JoinISISPolarizationEfficiencies::interpolateHistogramWorks
   return interpolatedWS;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

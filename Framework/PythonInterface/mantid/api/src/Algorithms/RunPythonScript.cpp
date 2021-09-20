@@ -21,8 +21,7 @@
 #include <boost/regex.hpp>
 #include <fstream>
 
-namespace Mantid {
-namespace PythonInterface {
+namespace Mantid::PythonInterface {
 
 using namespace API;
 using namespace Kernel;
@@ -254,5 +253,4 @@ std::shared_ptr<API::Workspace> RunPythonScript::extractOutputWorkspace(const bo
   }
 }
 
-} // namespace PythonInterface
-} // namespace Mantid
+} // namespace Mantid::PythonInterface

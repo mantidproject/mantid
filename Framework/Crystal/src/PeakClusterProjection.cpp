@@ -60,8 +60,7 @@ void validate(IMDWorkspace const *const mdWS) {
 }
 } // namespace
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 /**
  Constructor
@@ -123,5 +122,4 @@ Mantid::signal_t PeakClusterProjection::signalAtPeakCenter(const IPeak &peak, MD
   return m_mdWS->getSignalAtVMD(center, normalization);
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

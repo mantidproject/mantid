@@ -38,7 +38,8 @@ nspec number of 0 means no spec average
 @param lVal :: A pointer to the item
 @return 0 on success
 */
-template <typename T> int item_struct<T>::getItem(const std::string &item_name, long *spec_array, int nspec, T *lVal) {
+template <typename T>
+int item_struct<T>::getItem(const std::string &item_name, const long *spec_array, int nspec, T *lVal) {
   int i, j, n;
   const T *pVal = NULL;
   const item_t *item;

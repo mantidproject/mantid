@@ -9,9 +9,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/variant.hpp>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 Row::Row( // cppcheck-suppress passedByValue
     std::vector<std::string> runNumbers, double theta,
@@ -20,8 +18,8 @@ Row::Row( // cppcheck-suppress passedByValue
     ReductionOptionsMap reductionOptions,
     // cppcheck-suppress passedByValue
     ReductionWorkspaces reducedWorkspaceNames)
-    : Item(), m_runNumbers(std::move(runNumbers)), m_theta(std::move(theta)), m_qRange(std::move(qRange)),
-      m_qRangeOutput(), m_scaleFactor(std::move(scaleFactor)), m_transmissionRuns(std::move(transmissionRuns)),
+    : Item(), m_runNumbers(std::move(runNumbers)), m_theta(theta), m_qRange(std::move(qRange)), m_qRangeOutput(),
+      m_scaleFactor(std::move(scaleFactor)), m_transmissionRuns(std::move(transmissionRuns)),
       m_reducedWorkspaceNames(std::move(reducedWorkspaceNames)), m_reductionOptions(std::move(reductionOptions)) {
   std::sort(m_runNumbers.begin(), m_runNumbers.end());
 }
@@ -96,6 +94,4 @@ bool operator==(Row const &lhs, Row const &rhs) {
          lhs.transmissionWorkspaceNames() == rhs.transmissionWorkspaceNames() &&
          lhs.reducedWorkspaceNames() == rhs.reducedWorkspaceNames() && lhs.reductionOptions() == rhs.reductionOptions();
 }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

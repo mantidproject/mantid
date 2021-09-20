@@ -161,7 +161,6 @@ set(SRC_FILES
     src/GeneratePythonFitScript.cpp
     src/GeneratePythonScript.cpp
     src/GetAllEi.cpp
-    src/GetDetOffsetsMultiPeaks.cpp
     src/GetDetectorOffsets.cpp
     src/GetEi.cpp
     src/GetEi2.cpp
@@ -336,6 +335,7 @@ set(SRC_FILES
     src/WeightingStrategy.cpp
     src/WienerSmooth.cpp
     src/WorkflowAlgorithmRunner.cpp
+    src/WorkspaceBoundingBox.cpp
     src/WorkspaceJoiners.cpp
     src/XDataConverter.cpp
     src/XrayAbsorptionCorrection.cpp)
@@ -504,7 +504,6 @@ set(INC_FILES
     inc/MantidAlgorithms/GeneratePythonFitScript.h
     inc/MantidAlgorithms/GeneratePythonScript.h
     inc/MantidAlgorithms/GetAllEi.h
-    inc/MantidAlgorithms/GetDetOffsetsMultiPeaks.h
     inc/MantidAlgorithms/GetDetectorOffsets.h
     inc/MantidAlgorithms/GetEi.h
     inc/MantidAlgorithms/GetEi2.h
@@ -686,6 +685,7 @@ set(INC_FILES
     inc/MantidAlgorithms/WeightingStrategy.h
     inc/MantidAlgorithms/WienerSmooth.h
     inc/MantidAlgorithms/WorkflowAlgorithmRunner.h
+    inc/MantidAlgorithms/WorkspaceBoundingBox.h
     inc/MantidAlgorithms/WorkspaceJoiners.h
     inc/MantidAlgorithms/XDataConverter.h
     inc/MantidAlgorithms/XrayAbsorptionCorrection.h)
@@ -861,7 +861,6 @@ set(TEST_FILES
     GeneratePythonFitScriptTest.h
     GeneratePythonScriptTest.h
     GetAllEiTest.h
-    GetDetOffsetsMultiPeaksTest.h
     GetDetectorOffsetsTest.h
     GetEiMonDet3Test.h
     GetEiTest.h

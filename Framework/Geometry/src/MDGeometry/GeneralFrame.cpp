@@ -4,20 +4,21 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+#include <utility>
+
 #include "MantidGeometry/MDGeometry/GeneralFrame.h"
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 const std::string GeneralFrame::GeneralFrameDistance = "Distance";
 const std::string GeneralFrame::GeneralFrameTOF = "Time of Flight";
 const std::string GeneralFrame::GeneralFrameName = "General Frame";
 
-GeneralFrame::GeneralFrame(const std::string &frameName, std::unique_ptr<Kernel::MDUnit> unit)
-    : m_unit(unit.release()), m_frameName(frameName) {}
+GeneralFrame::GeneralFrame(std::string frameName, std::unique_ptr<Kernel::MDUnit> unit)
+    : m_unit(unit.release()), m_frameName(std::move(frameName)) {}
 
-GeneralFrame::GeneralFrame(const std::string &frameName, const Kernel::UnitLabel &unit)
-    : m_unit(new Mantid::Kernel::LabelUnit(unit)), m_frameName(frameName) {}
+GeneralFrame::GeneralFrame(std::string frameName, const Kernel::UnitLabel &unit)
+    : m_unit(new Mantid::Kernel::LabelUnit(unit)), m_frameName(std::move(frameName)) {}
 
 Kernel::UnitLabel GeneralFrame::getUnitLabel() const { return m_unit->getUnitLabel(); }
 
@@ -53,5 +54,4 @@ bool GeneralFrame::isSameType(const MDFrame &frame) const {
   return isSameType;
 }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

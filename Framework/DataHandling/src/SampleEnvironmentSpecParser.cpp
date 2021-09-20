@@ -50,8 +50,7 @@ std::string COMPONENTSTLFILE_TAG = "stlfile";
 std::string SAMPLESTLFILE_TAG = "samplestlfile";
 } // namespace
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 namespace {
 
@@ -336,7 +335,7 @@ std::vector<double> SampleEnvironmentSpecParser::parseTranslationVector(const st
   return translationVector;
 }
 
-std::string SampleEnvironmentSpecParser::findFile(std::string filename) const {
+std::string SampleEnvironmentSpecParser::findFile(const std::string &filename) const {
   Poco::Path suppliedStlFileName(filename);
   Poco::Path stlFileName;
   if (suppliedStlFileName.isRelative()) {
@@ -458,5 +457,4 @@ std::shared_ptr<Geometry::IObject> SampleEnvironmentSpecParser::parseComponent(E
   return comp;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

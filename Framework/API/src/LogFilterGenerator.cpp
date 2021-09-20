@@ -18,8 +18,7 @@ namespace {
 Mantid::Kernel::Logger g_log("LogFilterGenerator");
 } // namespace
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 /**
  * Constructor
@@ -145,5 +144,4 @@ Property *LogFilterGenerator::getLogData(const std::string &logName, bool warnIf
   }
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

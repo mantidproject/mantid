@@ -98,8 +98,7 @@ struct quadratic {
 };
 } // anonymous namespace
 
-namespace Mantid {
-namespace HistogramData {
+namespace Mantid::HistogramData {
 
 void estimate(const size_t order, const Points &X, const HistogramY &Y, const size_t i_min, const size_t i_max,
               const size_t p_min, const size_t p_max, bool haveGap, double &out_bg0, double &out_bg1, double &out_bg2,
@@ -236,5 +235,4 @@ void estimatePolynomial(const size_t order, const Histogram &histo, const size_t
   estimate(order, X, Y, i_min, i_max, 0, 0, false, out_bg0, out_bg1, out_bg2, out_chisq_red);
 }
 
-} // namespace HistogramData
-} // namespace Mantid
+} // namespace Mantid::HistogramData

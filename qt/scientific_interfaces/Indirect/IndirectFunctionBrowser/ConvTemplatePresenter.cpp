@@ -12,9 +12,7 @@
 #include <cmath>
 #include <float.h>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 namespace {
 class ScopedDisable {
@@ -290,6 +288,4 @@ void ConvTemplatePresenter::viewChangedParameterValue(const QString &parName, do
   emit functionStructureChanged();
 }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

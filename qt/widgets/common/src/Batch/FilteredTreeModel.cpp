@@ -6,9 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/Batch/FilteredTreeModel.h"
 #include "MantidQtWidgets/Common/Batch/StrictQModelIndices.h"
-namespace MantidQt {
-namespace MantidWidgets {
-namespace Batch {
+namespace MantidQt::MantidWidgets::Batch {
 
 FilteredTreeModel::FilteredTreeModel(RowLocationAdapter rowLocationAdapter, QObject *parent)
     : QSortFilterProxyModel(parent), m_rowLocation(rowLocationAdapter) {
@@ -47,6 +45,4 @@ bool FilteredTreeModel::filterAcceptsRow(int row, const QModelIndex &parent) con
     return false;
   }
 }
-} // namespace Batch
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets::Batch

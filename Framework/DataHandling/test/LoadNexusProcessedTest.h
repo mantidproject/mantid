@@ -1168,6 +1168,53 @@ public:
       Poco::File(filename).remove();
   }
 
+  void test_ws_run_title_failover_to_title() {
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("CreateWorkspace");
+    TS_ASSERT_THROWS_NOTHING(alg->initialize());
+    const std::string testTitle = "TestTitle";
+    const std::string filename = "TestTitleFailoverNexusProcessed.nxs";
+    std::vector<double> dataEYX{0.0, 1.234, 2.468};
+
+    // Set no workspace title
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty<std::vector<double>>("DataX", dataEYX));
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty<std::vector<double>>("DataY", dataEYX));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspace", "test_CreateWorkspace"));
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+
+    TS_ASSERT(alg->isExecuted());
+    MatrixWorkspace_const_sptr ws;
+
+    TS_ASSERT_THROWS_NOTHING(ws = std::dynamic_pointer_cast<MatrixWorkspace>(
+                                 AnalysisDataService::Instance().retrieve("test_CreateWorkspace")));
+
+    // Save workspace
+    IAlgorithm_sptr save = AlgorithmManager::Instance().create("SaveNexusProcessed");
+    save->initialize();
+    TS_ASSERT(save->isInitialized());
+    TS_ASSERT_THROWS_NOTHING(save->setProperty("InputWorkspace", "test_CreateWorkspace"));
+    TS_ASSERT_THROWS_NOTHING(save->setPropertyValue("Filename", filename));
+    TS_ASSERT_THROWS_NOTHING(save->setPropertyValue("Title", testTitle));
+    TS_ASSERT_THROWS_NOTHING(save->execute());
+
+    // Load workspace
+    IAlgorithm_sptr load = AlgorithmManager::Instance().create("LoadNexusProcessed");
+    load->initialize();
+    TS_ASSERT(load->isInitialized());
+    TS_ASSERT_THROWS_NOTHING(load->setPropertyValue("Filename", filename));
+    TS_ASSERT_THROWS_NOTHING(load->setPropertyValue("OutputWorkspace", "test_failoverOutput"));
+    TS_ASSERT_THROWS_NOTHING(load->execute());
+
+    // Assert it failsover to the title supplied at save
+    MatrixWorkspace_sptr outputWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_failoverOutput");
+    TS_ASSERT_EQUALS(testTitle, outputWs->getTitle());
+
+    // Remove workspace and saved nexus file
+    AnalysisDataService::Instance().remove("test_failoverOutput");
+    if (Poco::File(filename).exists())
+      Poco::File(filename).remove();
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().remove("test_CreateWorkspace"));
+  }
+
 private:
   template <typename TYPE>
   void check_log(Mantid::API::MatrixWorkspace_sptr &workspace, const std::string &logName, const int noOfEntries,
@@ -1354,7 +1401,7 @@ private:
   void doTestLoadAndSaveHistogramWS(bool useXErrors = false, bool numericAxis = false, bool legacyXErrors = false) {
     // Test SaveNexusProcessed/LoadNexusProcessed on a histogram workspace with
     // x errors
-
+    const std::string filename = "TestSaveAndLoadNexusProcessed.nxs";
     // Create histogram workspace with two spectra and 4 points
     std::vector<double> x1{1, 2, 3};
     std::vector<double> dx1{3, 2};
@@ -1387,14 +1434,14 @@ private:
     save->initialize();
     TS_ASSERT(save->isInitialized());
     TS_ASSERT_THROWS_NOTHING(save->setProperty("InputWorkspace", inputWs));
-    TS_ASSERT_THROWS_NOTHING(save->setPropertyValue("Filename", "TestSaveAndLoadNexusProcessed.nxs"));
+    TS_ASSERT_THROWS_NOTHING(save->setPropertyValue("Filename", filename));
     TS_ASSERT_THROWS_NOTHING(save->execute());
 
     // Load workspace
     auto load = AlgorithmManager::Instance().create("LoadNexusProcessed");
     load->initialize();
     TS_ASSERT(load->isInitialized());
-    TS_ASSERT_THROWS_NOTHING(load->setPropertyValue("Filename", "TestSaveAndLoadNexusProcessed.nxs"));
+    TS_ASSERT_THROWS_NOTHING(load->setPropertyValue("Filename", filename));
     TS_ASSERT_THROWS_NOTHING(load->setPropertyValue("OutputWorkspace", "output"));
     TS_ASSERT_THROWS_NOTHING(load->execute());
 
@@ -1428,12 +1475,13 @@ private:
 
     // Remove workspace and saved nexus file
     AnalysisDataService::Instance().remove("output");
-    Poco::File("TestSaveAndLoadNexusProcessed.nxs").remove();
+    if (Poco::File(filename).exists())
+      Poco::File(filename).remove();
   }
 
   void doTestLoadAndSavePointWS(bool useXErrors = false) {
     // Test SaveNexusProcessed/LoadNexusProcessed on a point-like workspace
-
+    const std::string filename = "TestSaveAndLoadNexusProcessed.nxs";
     // Create histogram workspace with two spectra and 4 points
     std::vector<double> x1{1, 2, 3};
     std::vector<double> dx1{3, 2, 1};
@@ -1456,14 +1504,14 @@ private:
     save->initialize();
     TS_ASSERT(save->isInitialized());
     TS_ASSERT_THROWS_NOTHING(save->setProperty("InputWorkspace", inputWs));
-    TS_ASSERT_THROWS_NOTHING(save->setPropertyValue("Filename", "TestSaveAndLoadNexusProcessed.nxs"));
+    TS_ASSERT_THROWS_NOTHING(save->setPropertyValue("Filename", filename));
     TS_ASSERT_THROWS_NOTHING(save->execute());
 
     // Load workspace
     auto load = AlgorithmManager::Instance().create("LoadNexusProcessed");
     load->initialize();
     TS_ASSERT(load->isInitialized());
-    TS_ASSERT_THROWS_NOTHING(load->setPropertyValue("Filename", "TestSaveAndLoadNexusProcessed.nxs"));
+    TS_ASSERT_THROWS_NOTHING(load->setPropertyValue("Filename", filename));
     TS_ASSERT_THROWS_NOTHING(load->setPropertyValue("OutputWorkspace", "output"));
     TS_ASSERT_THROWS_NOTHING(load->execute());
 
@@ -1483,7 +1531,8 @@ private:
 
     // Remove workspace and saved nexus file
     AnalysisDataService::Instance().remove("output");
-    Poco::File("TestSaveAndLoadNexusProcessed.nxs").remove();
+    if (Poco::File(filename).exists())
+      Poco::File(filename).remove();
   }
 
   std::string testFile, output_ws;

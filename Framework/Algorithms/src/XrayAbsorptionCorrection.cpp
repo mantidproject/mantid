@@ -29,8 +29,7 @@ constexpr double ConversionFrom_cm_to_m = 0.01;
 
 } // namespace
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 DECLARE_ALGORITHM(XrayAbsorptionCorrection)
 
@@ -127,7 +126,7 @@ std::vector<double> XrayAbsorptionCorrection::normaliseMuonIntensity(MantidVec m
  * @return A vector of V3D objects that represent the position of muons
  */
 std::vector<Kernel::V3D> XrayAbsorptionCorrection::calculateMuonPos(API::MatrixWorkspace_sptr &muonProfile,
-                                                                    API::MatrixWorkspace_sptr inputWS,
+                                                                    const API::MatrixWorkspace_sptr &inputWS,
                                                                     double detectorDistance) {
   const MantidVec muonDepth = muonProfile->readX(0);
   Kernel::V3D const muonPoint = {0.0, 0.0, detectorDistance};
@@ -195,8 +194,7 @@ void XrayAbsorptionCorrection::exec() {
       yData[i] = totalFactor;
     }
   }
-  setProperty("OutputWorkspace", std::move(outputWS));
+  setProperty("OutputWorkspace", outputWS);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

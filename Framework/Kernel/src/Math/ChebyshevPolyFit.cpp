@@ -12,8 +12,7 @@
 #include <cassert>
 #include <gsl/gsl_multifit.h>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 //-----------------------------------------------------------------------------
 // ChebyshevPolyFitImpl - Keeps the gsl stuff out of the headers
@@ -104,5 +103,4 @@ std::vector<double> ChebyshevPolyFit::operator()(const std::vector<double> &xs, 
   return m_impl->fit(xs, ys, wgts);
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

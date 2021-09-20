@@ -24,8 +24,7 @@ namespace {
 const double xBoundaryTolerance = 1.0e-15;
 } // namespace
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Kernel;
 using namespace API;
@@ -385,5 +384,4 @@ void ExtractSpectra::cropRagged(MatrixWorkspace &workspace, int index) {
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

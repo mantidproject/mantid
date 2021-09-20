@@ -10,8 +10,7 @@
 #include <cmath>
 #include <stdexcept>
 
-namespace MantidQt {
-namespace Icons {
+namespace MantidQt::Icons {
 
 namespace {
 const QString DEFAULT_COLOR("black");
@@ -72,5 +71,4 @@ void CharIconPainter::paintIcon(IconicFont *iconic, QPainter *painter, QRect rec
   painter->restore();
 }
 
-} // namespace Icons
-} // namespace MantidQt
+} // namespace MantidQt::Icons

@@ -8,8 +8,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
-namespace Mantid {
-namespace Poldi {
+namespace Mantid::Poldi {
 
 using namespace CurveFitting;
 using namespace API;
@@ -87,5 +86,4 @@ void PoldiSpectrumConstantBackground::init() {
   declareParameter("A0");
 }
 
-} // namespace Poldi
-} // namespace Mantid
+} // namespace Mantid::Poldi

@@ -123,7 +123,9 @@ typename FortranMatrix<MatrixClass>::ElementRefType FortranMatrix<MatrixClass>::
 }
 
 /// Move the data to a new matrix of MatrixClass
-template <class MatrixClass> MatrixClass FortranMatrix<MatrixClass>::moveToBaseMatrix() { return this->move(); }
+template <class MatrixClass> MatrixClass FortranMatrix<MatrixClass>::moveToBaseMatrix() {
+  return MatrixClass(std::move(*this));
+}
 
 /// Get the size along the first dimension as an int.
 template <class MatrixClass> int FortranMatrix<MatrixClass>::len1() const { return static_cast<int>(this->size1()); }

@@ -24,7 +24,7 @@ namespace MantidWidgets {
  */
 struct EXPORT_OPT_MANTIDQT_COMMON GlobalParameter {
 
-  GlobalParameter(std::string const &parameter);
+  GlobalParameter(std::string parameter);
 
   std::string m_parameter;
 };
@@ -36,7 +36,7 @@ struct EXPORT_OPT_MANTIDQT_COMMON GlobalParameter {
  */
 struct EXPORT_OPT_MANTIDQT_COMMON GlobalTie {
 
-  GlobalTie(std::string const &parameter, std::string const &tie);
+  GlobalTie(std::string parameter, std::string tie);
 
   std::string toCompositeParameter(std ::string const &fullParameter) const;
   std::string toNonCompositeParameter(std ::string const &fullParameter) const;

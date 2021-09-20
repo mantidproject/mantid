@@ -7,8 +7,7 @@
 #include "MantidKernel/NetworkProxy.h"
 #include <Poco/URI.h>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -28,5 +27,4 @@ ProxyInfo NetworkProxy::getHttpProxy(const std::string & /*unused*/) {
   return proxyInfo;
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel
