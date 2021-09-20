@@ -139,6 +139,7 @@ Improvements
 
 Bugfixes
 ########
+- For processing vanadium run, we don't want to find environment automatically in :ref:`SetSampleFromLogs <algm-SetSampleFromLogs>`.
 - :ref:`IndexPeaks <algm-IndexPeaks>` can now index peaks in a PeaksWorkspace with only a single run without optimising the UB (i.e. it is now possible to set CommonUBForAll=True in this instance).
 - Expanded the Q space search radius in DetectorSearcher to avoid missing peaks when using :ref:`PredictPeaks <algm-PredictPeaks>`.
 
