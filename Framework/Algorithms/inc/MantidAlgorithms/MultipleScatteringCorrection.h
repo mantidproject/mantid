@@ -31,7 +31,6 @@ public:
   const std::string category() const override { return "CorrectionFunctions"; };
 
   /// Algorithm's summary
-  /// TODO: the summary needs to be updated as we add more features
   const std::string summary() const override {
     return "Calculate Multiple Scattering Correction using numerical integration with the assumption of"
            "elastic scattering only, and isotropic scattering within the sample.";
