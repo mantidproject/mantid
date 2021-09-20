@@ -38,7 +38,11 @@ Bugfixes
 - :ref:`LoadNexusLogs <algm-LoadNexusLogs>` now creates a warning message for logs that are poorly formed and the other logs are loaded. Previously it stopped loading logs at that point.
 - Fixed a bug where :ref:`LoadRaw <algm-LoadRaw>` would not load all log files for raw files with an alternate data stream.
 - Fixed a problem calculating default beam size in :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` when sample is offset from origin.
-- Fixed a problem with sorting of events in :ref:`LoadEventNexus <algm-LoadEventNexus>` that was causing :ref:`FilterByTime <algm-FilterByTime>` to give incorrect results
+- Fix problem with filtering of events based on pulse time in :ref:`LoadEventNexus <algm-LoadEventNexus>`. There are two ways of filtering events by pulse time using this algorithm and both
+  were giving incorrect results if the events in the input Nexus file were unsorted:
+
+  - events can be filtered as part of the load by using the FilterByTimeStart and FilterByTimeStop parameters
+  - if the full event file is loaded, the filtering can be applied as a post process using the algorithm :ref:`FilterByTime <algm-FilterByTime>`
 
 Fit Functions
 -------------
