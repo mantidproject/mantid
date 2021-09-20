@@ -344,3 +344,41 @@ def run_clone_workspace(parameter_dict):
     alg.setProperties(parameter_dict)
     alg.execute()
     return alg.getProperty("OutputWorkspace").valueAsStr
+
+
+def run_convert_to_points(name):
+    alg = mantid.AlgorithmManager.create("ConvertToPointData")
+    alg.initialize()
+    alg.setProperty("InputWorkspace", name)
+    alg.setProperty("OutputWorkspace", name)
+    alg.execute()
+    return alg.getProperty("OutputWorkspace").valueAsStr
+
+
+def run_convert_to_histogram(name):
+    alg = mantid.AlgorithmManager.create("ConvertToHistogram")
+    alg.initialize()
+    alg.setProperty("InputWorkspace", name)
+    alg.setProperty("OutputWorkspace", name)
+    alg.execute()
+    return alg.getProperty("OutputWorkspace").valueAsStr
+
+
+def run_divide(LHS, RHS, name):
+    alg = mantid.AlgorithmManager.create("Divide")
+    alg.initialize()
+    alg.setProperty("LHSWorkspace", LHS)
+    alg.setProperty("RHSWorkspace", RHS)
+    alg.setProperty("OutputWorkspace", name)
+    alg.execute()
+    return alg.getProperty("OutputWorkspace").valueAsStr
+
+
+def run_create_workspace(x_data, y_data, name):
+    alg = mantid.AlgorithmManager.create("CreateWorkspace")
+    alg.initialize()
+    alg.setProperty("DataX", x_data)
+    alg.setProperty("DataY", y_data)
+    alg.setProperty("OutputWorkspace", name)
+    alg.execute()
+    return alg.getProperty("OutputWorkspace").valueAsStr
