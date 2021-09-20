@@ -123,7 +123,7 @@ class SetSampleFromLogs(DistributedDataProcessorAlgorithm):
                     geometry['Height'] = conversion * _getLogValue(runObject, heightKey)
                 else:
                     warningMsg = "No valid height found in sample logs;" + \
-                                 "we will reply on user input for sample density information."
+                                 "we will rely on user input for sample density information."
                     self.log().warning(warningMsg)
 
         # log the results and return
