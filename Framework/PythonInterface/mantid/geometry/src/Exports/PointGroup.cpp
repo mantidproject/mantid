@@ -28,12 +28,12 @@ namespace //<unnamed>
 {
 using namespace Mantid::PythonInterface;
 
-bool isEquivalent(PointGroup &self, const object &hkl1, const object &hkl2) {
+bool isEquivalent(const PointGroup &self, const object &hkl1, const object &hkl2) {
   return self.isEquivalent(Converters::PyObjectToV3D(hkl1)(), Converters::PyObjectToV3D(hkl2)());
 }
 
-boost::python::list getEquivalents(PointGroup &self, const object &hkl) {
-  const std::vector<Mantid::Kernel::V3D> &equivalents = self.getEquivalents(Converters::PyObjectToV3D(hkl)());
+boost::python::list getEquivalents(const PointGroup &self, const object &hkl) {
+  const auto &equivalents = self.getEquivalents(Converters::PyObjectToV3D(hkl)());
 
   boost::python::list pythonEquivalents;
   for (const auto &equivalent : equivalents) {
@@ -43,7 +43,7 @@ boost::python::list getEquivalents(PointGroup &self, const object &hkl) {
   return pythonEquivalents;
 }
 
-Mantid::Kernel::V3D getReflectionFamily(PointGroup &self, const object &hkl) {
+Mantid::Kernel::V3D getReflectionFamily(const PointGroup &self, const object &hkl) {
   return self.getReflectionFamily(Converters::PyObjectToV3D(hkl)());
 }
 

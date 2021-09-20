@@ -25,7 +25,7 @@ GET_POINTER_SPECIALIZATION(IPeak)
 
 namespace {
 using namespace Mantid::PythonInterface;
-Mantid::Geometry::PeakShape_sptr getPeakShape(IPeak &peak) {
+Mantid::Geometry::PeakShape_sptr getPeakShape(const IPeak &peak) {
   // Use clone to make a copy of the PeakShape.
   return Mantid::Geometry::PeakShape_sptr(peak.getPeakShape().clone());
 }

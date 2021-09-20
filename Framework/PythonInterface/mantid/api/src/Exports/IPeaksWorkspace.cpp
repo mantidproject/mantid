@@ -32,28 +32,28 @@ GET_POINTER_SPECIALIZATION(IPeaksWorkspace)
 namespace {
 
 /// Create a peak via it's HKL value from a list or numpy array
-IPeak *createPeakHKL(IPeaksWorkspace &self, const object &data) {
+IPeak *createPeakHKL(const IPeaksWorkspace &self, const object &data) {
   auto peak = self.createPeakHKL(Mantid::PythonInterface::Converters::PyObjectToV3D(data)());
   // Python will manage it
   return peak.release();
 }
 
 /// Create a peak via it's QLab value from a list or numpy array
-IPeak *createPeakQLab(IPeaksWorkspace &self, const object &data) {
+IPeak *createPeakQLab(const IPeaksWorkspace &self, const object &data) {
   auto peak = self.createPeak(Mantid::PythonInterface::Converters::PyObjectToV3D(data)(), boost::none);
   // Python will manage it
   return peak.release();
 }
 
 /// Create a peak via it's QLab value from a list or numpy array
-IPeak *createPeakQLabWithDistance(IPeaksWorkspace &self, const object &data, double detectorDistance) {
+IPeak *createPeakQLabWithDistance(const IPeaksWorkspace &self, const object &data, double detectorDistance) {
   auto peak = self.createPeak(Mantid::PythonInterface::Converters::PyObjectToV3D(data)(), detectorDistance);
   // Python will manage the object
   return peak.release();
 }
 
 /// Create a peak via it's QSample value from a list or numpy array
-IPeak *createPeakQSample(IPeaksWorkspace &self, const object &data) {
+IPeak *createPeakQSample(const IPeaksWorkspace &self, const object &data) {
   auto peak = self.createPeakQSample(Mantid::PythonInterface::Converters::PyObjectToV3D(data)());
   // Python will manage it
   return peak.release();

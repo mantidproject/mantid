@@ -41,7 +41,7 @@ GNU_DIAG_ON("unused-local-typedef")
  * @param self Reference to the calling object
  * @return name of the workspace.
  */
-std::string getName(Workspace &self) {
+std::string getName(const Workspace &self) {
   PyErr_Warn(PyExc_DeprecationWarning, ".getName() is deprecated. Use .name() instead.");
   return self.getName();
 }
