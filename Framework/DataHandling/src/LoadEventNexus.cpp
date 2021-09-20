@@ -343,7 +343,36 @@ void LoadEventNexus::filterDuringPause<EventWorkspaceCollection_sptr>(EventWorks
   // We provide a function pointer to the filter method of the object
   using std::placeholders::_1;
   auto func = std::bind(&LoadEventNexus::filterDuringPause<MatrixWorkspace_sptr>, this, _1);
+  workspace->applyFilterInPlace(func);
+}
+
+//-----------------------------------------------------------------------------
+/**
+ * Filter the events by pulse time - no in place version so have to return workspace
+ *
+ */
+template <typename T> T LoadEventNexus::filterByTime(T workspace) {
+
+  auto filterByTime = createChildAlgorithm("FilterByTime");
+  g_log.information("Filtering events by time...");
+  filterByTime->setProperty("InputWorkspace", workspace);
+  filterByTime->setProperty("OutputWorkspace", workspace);
+  // sample log already filtered by time so use absolute times to be safe
+  filterByTime->setProperty("AbsoluteStartTime", filter_time_start.toISO8601String());
+  filterByTime->setProperty("AbsoluteStopTime", filter_time_stop.toISO8601String());
+  filterByTime->execute();
+  T resultWorkspace = filterByTime->getProperty("OutputWorkspace");
+  return resultWorkspace;
+}
+
+template <>
+EventWorkspaceCollection_sptr
+LoadEventNexus::filterByTime<EventWorkspaceCollection_sptr>(EventWorkspaceCollection_sptr workspace) {
+  // We provide a function pointer to the filter method of the object
+  using std::placeholders::_1;
+  auto func = std::bind(&LoadEventNexus::filterByTime<EventWorkspace_sptr>, this, _1);
   workspace->applyFilter(func);
+  return workspace;
 }
 
 //------------------------------------------------------------------------------------------------
@@ -1157,6 +1186,10 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
 
   // if there is time_of_flight load it
   adjustTimeOfFlightISISLegacy(*m_file, m_ws, m_top_entry_name, classType, descriptor.get());
+
+  if (is_time_filtered) {
+    filterByTime(m_ws);
+  }
 }
 
 //-----------------------------------------------------------------------------

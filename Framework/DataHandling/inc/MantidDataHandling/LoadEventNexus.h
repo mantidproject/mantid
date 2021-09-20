@@ -220,6 +220,7 @@ private:
   void runLoadMonitors();
   /// Set the filters on TOF.
   void setTimeFilters(const bool monitors);
+  template <typename T> T filterByTime(T workspace);
 
   /// Load a spectra mapping from the given file
   std::unique_ptr<std::pair<std::vector<int32_t>, std::vector<int32_t>>>
