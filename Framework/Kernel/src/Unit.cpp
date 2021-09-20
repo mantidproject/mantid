@@ -595,12 +595,7 @@ Unit *dSpacing::clone() const { return new dSpacing(*this); }
 
 void dSpacing::validateUnitParams(const int, const UnitParametersMap &params) {
   double difc = 0.;
-  if (!ParamPresentAndSet(&params, UnitParams::difc, difc)) {
-    if (!ParamPresent(params, UnitParams::twoTheta) || (!ParamPresent(params, UnitParams::l2)))
-      throw std::runtime_error("A difc value or L2/two theta must be supplied "
-                               "in the extra parameters when initialising " +
-                               this->unitID() + " for conversion via TOF");
-  } else {
+  if (ParamPresentAndSet(&params, UnitParams::difc, difc)) {
     // check validations only applicable to fromTOF
     toDSpacingError = "";
     double difa = 0.;
@@ -613,6 +608,12 @@ void dSpacing::validateUnitParams(const int, const UnitParametersMap &params) {
       toDSpacingError = "A positive difc value must be supplied in the extra parameters when "
                         "initialising " +
                         this->unitID() + " for conversion via TOF";
+    }
+  } else {
+    if (!ParamPresent(params, UnitParams::twoTheta) || (!ParamPresent(params, UnitParams::l2))) {
+      throw std::runtime_error("A difc value or L2/two theta must be supplied "
+                               "in the extra parameters when initialising " +
+                               this->unitID() + " for conversion via TOF");
     }
   }
 }
@@ -643,8 +644,6 @@ void dSpacing::init() {
       }
     }
   }
-  // force the assumption that difc is positive in debug builds
-  assert(difc > 0.);
 }
 
 double dSpacing::singleToTOF(const double x) const {
@@ -680,9 +679,6 @@ double dSpacing::singleFromTOF(const double tof) const {
                              "has been initialized.");
   if (!toDSpacingError.empty())
     throw std::runtime_error(toDSpacingError);
-
-  // force the assumption that difc is positive in debug builds
-  assert(difc > 0.);
 
   // non-physical result
   if (tzero > tof) {

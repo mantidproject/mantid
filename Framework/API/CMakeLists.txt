@@ -30,6 +30,7 @@ set(SRC_FILES
     src/CostFunctionFactory.cpp
     src/DataProcessorAlgorithm.cpp
     src/DeprecatedAlgorithm.cpp
+    src/DeprecatedAlias.cpp
     src/DetectorSearcher.cpp
     src/DistributedAlgorithm.cpp
     src/DomainCreatorFactory.cpp
@@ -202,6 +203,7 @@ set(INC_FILES
     inc/MantidAPI/DataProcessorAlgorithm.h
     inc/MantidAPI/DeclareUserAlg.h
     inc/MantidAPI/DeprecatedAlgorithm.h
+    inc/MantidAPI/DeprecatedAlias.h
     inc/MantidAPI/DetectorSearcher.h
     inc/MantidAPI/DistributedAlgorithm.h
     inc/MantidAPI/DomainCreatorFactory.h

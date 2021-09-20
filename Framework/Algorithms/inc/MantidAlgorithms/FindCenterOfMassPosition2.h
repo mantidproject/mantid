@@ -68,8 +68,6 @@ private:
   /// Helper functions
   void findCenterOfMass(API::MatrixWorkspace_sptr inputWS, double &centerX, double &centerY, const int numSpec,
                         API::Progress &progress);
-  API::MatrixWorkspace_sptr sumUsingSpectra(DataObjects::EventWorkspace_const_sptr inputEventWS, const int numSpec,
-                                            API::Progress &progress);
   void storeOutputWorkspace(double centerX, double centerY);
   // Iteration cutoff
   const int m_maxIteration = 200;

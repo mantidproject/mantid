@@ -71,6 +71,9 @@ public:
 
   RectF getCurrentBoundingRect() const;
   void setCurrentBoundingRect(const RectF &rect);
+  double getCurrentBoundingRotation() const;
+  void setCurrentBoundingRotation(const double rotation);
+  std::string getCurrentShapeType() const;
   // double properties
   QStringList getCurrentDoubleNames() const;
   double getCurrentDouble(const QString &prop) const;
@@ -96,8 +99,7 @@ public:
   /// Save shape collection to a Table workspace
   void saveToTableWorkspace();
   /// Load shape collectio from a Table workspace
-  void
-  loadFromTableWorkspace(const Mantid::API::ITableWorkspace_const_sptr &ws);
+  void loadFromTableWorkspace(const Mantid::API::ITableWorkspace_const_sptr &ws);
   /// Load settings for the shape 2D collection from a project file
   virtual void loadFromProject(const std::string &lines);
   /// Save settings for the shape 2D collection to a project file
@@ -114,10 +116,8 @@ signals:
   void cleared();
 
 public slots:
-  void addShape(const QString &type, int x, int y, const QColor &borderColor,
-                const QColor &fillColor);
-  void addFreeShape(const QPolygonF & /*poly*/, const QColor &borderColor,
-                    const QColor &fillColor);
+  void addShape(const QString &type, int x, int y, const QColor &borderColor, const QColor &fillColor);
+  void addFreeShape(const QPolygonF & /*poly*/, const QColor &borderColor, const QColor &fillColor);
   void deselectAll();
   void moveRightBottomTo(int /*x*/, int /*y*/);
   void selectShapeOrControlPointAt(int x, int y);
@@ -149,19 +149,16 @@ protected:
   QList<Shape2D *> getSelectedShapes() const { return m_selectedShapes; }
 
   QList<Shape2D *> m_shapes;
-  mutable RectF
-      m_surfaceRect; ///< original surface window in "real" coordinates
+  mutable RectF m_surfaceRect; ///< original surface window in "real" coordinates
   mutable double m_wx, m_wy;
   mutable int m_h;                ///< original screen viewport height
   mutable QRect m_viewport;       ///< current screen viewport
   mutable QTransform m_transform; ///< current transform
 
-  Shape2D *m_currentShape; ///< shape selected to edit (change size/shape)
-  size_t m_currentCP;      ///< control point of m_currentShape selected to edit
-  QList<Shape2D *>
-      m_selectedShapes; ///< A list of selected shapes (can be moved or deleted)
-  QList<Shape2D *>
-      m_copiedShapes; ///< A list of shapes to be pasted if requiered
+  Shape2D *m_currentShape;           ///< shape selected to edit (change size/shape)
+  size_t m_currentCP;                ///< control point of m_currentShape selected to edit
+  QList<Shape2D *> m_selectedShapes; ///< A list of selected shapes (can be moved or deleted)
+  QList<Shape2D *> m_copiedShapes;   ///< A list of shapes to be pasted if requiered
   bool m_overridingCursor;
   friend class InstrumentWidgetEncoder;
   friend class InstrumentWidgetDecoder;
