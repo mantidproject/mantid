@@ -224,6 +224,32 @@ class GeneralFittingModelTest(unittest.TestCase):
                                                                     "name=FlatBackground,A0=0,$domains=i;"
                                                                     "name=FlatBackground,A0=5,$domains=i")
 
+    def test_that_update_attribute_value_will_update_the_value_of_a_parameter_in_single_fit_mode(self):
+        self.model.dataset_names = self.dataset_names
+        self.model.single_fit_functions = [FunctionFactory.createFunction("Chebyshev"), None]
+
+        self.model.update_attribute_value("StartX", 0.0)
+        self.model.update_attribute_value("EndX", 15.0)
+
+        self.assertEqual(str(self.model.current_single_fit_function), "name=Chebyshev,EndX=15,StartX=0,n=0,A0=0")
+
+    def test_that_update_attribute_value_will_update_the_value_of_a_parameter_in_simultaneous_fit_mode(self):
+        self.model.dataset_names = self.dataset_names
+
+        self.fit_function = FunctionFactory.createFunction("Chebyshev")
+        self.model.simultaneous_fit_function = FunctionFactory.createInitializedMultiDomainFunction(
+            str(self.fit_function), len(self.dataset_names))
+
+        self.model.simultaneous_fitting_mode = True
+        self.model.current_dataset_index = 1
+
+        self.model.update_attribute_value("StartX", 0.0)
+        self.model.update_attribute_value("EndX", 15.0)
+
+        self.assertEqual(str(self.model.simultaneous_fit_function), "composite=MultiDomainFunction,NumDeriv=true;"
+                                                                    "name=Chebyshev,EndX=1,StartX=-1,n=0,A0=0,$domains=i;"
+                                                                    "name=Chebyshev,EndX=15,StartX=0,n=0,A0=0,$domains=i")
+
     def test_that_setting_new_dataset_names_will_reset_the_fit_functions_but_attempt_to_use_the_previous_function(self):
         self.model.dataset_names = self.dataset_names
         self.model.single_fit_functions = self.single_fit_functions

@@ -18,9 +18,10 @@ def x_limits_of_workspace(workspace_name: str, default_limits: tuple = (DEFAULT_
         if len(x_data) > 0:
             x_data.sort()
             x_lower, x_higher = x_data[0], x_data[-1]
-            if x_lower == x_higher:
-                return x_lower - X_OFFSET, x_higher + X_OFFSET
-            return x_lower, x_higher
+            # An offset is applied because if the x_lower is rounded up due to the precision of the Muon GUI, then some
+            # data points could be missed out unintentionally. A similar issue could happen if the x_higher were rounded
+            # down due to the GUI precision.
+            return x_lower - X_OFFSET, x_higher + X_OFFSET
     return default_limits
 
 

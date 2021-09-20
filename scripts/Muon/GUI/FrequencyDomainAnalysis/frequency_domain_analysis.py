@@ -293,8 +293,8 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.load_widget.load_widget.loadNotifier.add_subscriber(
             self.fitting_tab.fitting_tab_view.disable_tab_observer)
 
-        self.load_widget.load_widget.loadNotifier.add_subscriber(
-            self.plot_widget.raw_mode.new_data_observer)
+        #self.load_widget.load_widget.loadNotifier.add_subscriber(
+        #    self.plot_widget.raw_mode.new_data_observer)
 
         self.load_widget.load_widget.loadNotifier.add_subscriber(
             self.seq_fitting_tab.seq_fitting_tab_presenter.disable_tab_observer)

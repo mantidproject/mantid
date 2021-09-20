@@ -52,6 +52,14 @@ Bugfixes
 - Fixed the issue with :ref:`SNSPowderReduction <algm-SNSPowderReduction>` - when an invalid height unit is encountered while reading sample log the geometry is ignored and it relies purely on user input.
 - Fixed a bug when converting TOF to d-spacing using diffractometer constants with non-zero DIFA when a parabolic model is selected.
 - Corrected the equation for pseudo-voigt FWHM and mixing parameter in peak profile function :ref:`Bk2BkExpConvPV <func-Bk2BkExpConvPV>`.
+- Fixed a bug when filtering events in :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder-v1>` based on time-of-flight. The code now allows setting the minimum time-of-flight to zero (inclusive).
+
+
+Deprecation
+###########
+- Existing :ref:`CalibrateRectangularDetectors <algm-CalibrateRectangularDetectors>` is deprecated.
+- Existing :ref:`GetDetOffsetsMultiPeaks <algm-GetDetOffsetsMultiPeaks>` is deprecated.
+
 
 Engineering Diffraction
 -----------------------
