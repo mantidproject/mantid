@@ -93,7 +93,7 @@ class FocusModel(object):
             ws_foc = Ads.retrieve(ws_name)
             fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
             for ispec in range(ws_foc.getNumberHistograms()):
-                ax.plot(ws_foc, color='#1f77b4', label='193749_foc: spec 1', marker='.', wkspIndex=ispec)
+                ax.plot(ws_foc, label='193749_foc: spec 1', marker='.', wkspIndex=ispec)
             ax.legend()
             fig.show()
 
