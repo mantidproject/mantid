@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidDataHandling/DllConfig.h"
+#include "MantidKernel/NexusDescriptor.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidNexus/NexusClasses.h"
 
@@ -17,8 +18,8 @@ namespace Mantid::DataHandling {
  */
 class MANTID_DATAHANDLING_DLL NexusEntryProvider {
 public:
-  NexusEntryProvider(NeXus::NXRoot &entry, Kernel::PropertyManager &entriesToPatch)
-      : m_nxroot(entry), m_entriesToPatch(entriesToPatch){};
+  NexusEntryProvider(const std::string &filename, const Kernel::PropertyManager &entriesToPatch)
+      : m_nxroot(filename), m_entriesToPatch(entriesToPatch) {}
 
   template <typename T> T getNexusEntryValue(const std::string &entryName) {
     if (m_entriesToPatch.existsProperty(entryName)) {
@@ -31,38 +32,29 @@ public:
       }
     }
   }
-  void isValid(const std::vector<std::string> &mandatoryKeys) {
-    std::vector<std::string> missingKeys = missingMandatoryKeys(mandatoryKeys);
-    for (const auto &key : missingKeys) {
-      if (!m_entriesToPatch.existsProperty(key)) {
+  bool isValid(const std::vector<std::string> &mandatoryKeys) {
+    for (const auto &key : mandatoryKeys) {
+      if (!keyExists(key)) {
         throwMissingKeyError(key);
       }
     }
+    return true;
   }
 
 private:
   void throwMissingKeyError(const std::string &key) {
     std::ostringstream ss;
+    ss << "Numor does not conform to the protocols.\n";
     ss << "Unable to retrieve a mandatory entry " << key << " from the file\n";
-    ss << "Please contact support to get the root cause fixed.\n";
+    ss << "Please contact instrument control service to get the root cause fixed.\n";
     ss << "In the meantime, consider providing the value for the missing key.";
     throw std::runtime_error(ss.str());
   }
 
-  bool keyExists(const std::string &entryName) { return m_nxroot.isValid(entryName); }
+  bool keyExists(const std::string &key) { return m_nxroot.isValid(key) || m_entriesToPatch.existsProperty(key); }
 
-  std::vector<std::string> missingMandatoryKeys(const std::vector<std::string> &mandatoryKeys) {
-    std::vector<std::string> missingKeys;
-    for (const auto &key : mandatoryKeys) {
-      if (!keyExists(key)) {
-        missingKeys.emplace_back(key);
-      }
-    }
-    return missingKeys;
-  }
-
-  NeXus::NXRoot &m_nxroot;
-  Kernel::PropertyManager &m_entriesToPatch;
+  NeXus::NXRoot m_nxroot;
+  Kernel::PropertyManager m_entriesToPatch;
 };
 
 } // namespace Mantid::DataHandling

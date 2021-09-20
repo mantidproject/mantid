@@ -589,7 +589,7 @@ public:
    * @param name :: The name of the entry
    * @return the typed value
    */
-  template <typename T> T getTyped(const std::string &name) const { return getString(name); };
+  template <typename T> T getTyped(const std::string &name) const { return reinterpret_cast<T>(getString(name)); }
   template <> int getTyped(const std::string &name) const { return getInt(name); }
   template <> float getTyped(const std::string &name) const { return getFloat(name); }
   template <> double getTyped(const std::string &name) const { return getDouble(name); }
