@@ -33,7 +33,7 @@ public:
   /// Algorithm's summary
   /// TODO: the summary needs to be updated as we add more features
   const std::string summary() const override {
-    return "Calculate Multiple Scattering Correction using numerical integration with the assumption of sample only, "
+    return "Calculate Multiple Scattering Correction using numerical integration with the assumption of"
            "elastic scattering only, and isotropic scattering within the sample.";
   };
 
@@ -43,11 +43,10 @@ public:
   };
 
 protected:
-  API::MatrixWorkspace_sptr m_inputWS;  ///< A pointer to the input workspace
-  API::MatrixWorkspace_sptr m_outputWS; ///< A pointer to the output workspace
-  Kernel::V3D m_beamDirection;          ///< The direction of the beam.
-  int64_t m_num_lambda;                 ///< The number of points in wavelength, the rest is interpolated linearly
-  double m_elementSize;                 ///< The size of the sample in meters
+  API::MatrixWorkspace_sptr m_inputWS; ///< A pointer to the input workspace
+  Kernel::V3D m_beamDirection;         ///< The direction of the beam.
+  int64_t m_num_lambda;                ///< The number of points in wavelength, the rest is interpolated linearly
+  double m_elementSize;                ///< The size of the sample in meters
 
 private:
   void init() override;
@@ -55,8 +54,8 @@ private:
   std::map<std::string, std::string> validateInputs() override;
 
   void parseInputs();
-  void calculateSampleOnly();
-  void calculateSampleAndContainer();
+  void calculateSingleComponent(API::MatrixWorkspace_sptr outws, const Geometry::IObject &shape);
+  void calculateSampleAndContainer(API::MatrixWorkspace_sptr outws);
   void calculateL2Ds(const MultipleScatteringCorrectionDistGraber &distGraber, const IDetector &detector,
                      std::vector<double> &sample_L2Ds) const;
   void pairWiseSum(double &A1, double &A2, const double linearCoefAbs,
