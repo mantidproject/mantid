@@ -33,22 +33,30 @@ private:
   virtual std::string resolveAcqMode() { return ""; }
 
   // non-virtual methods
-  void init() override;
-  void exec() override;
+  void init() override final;
+  void exec() override final;
   void bootstrap();
   void loadInstrument();
   void resolveStartTime();
-  void resolveInstrument();
+  std::string resolveInstrument();
   void addSampleLogs();
   void patchSampleLogs();
   std::string getInstrumentDefinitionFilePath();
   void validateMetadata() { m_nep->isValid(mandatoryKeys()); }
   void setOutputWorkspace() { setProperty<API::Workspace_sptr>("OutputWorkspace", m_workspace); }
 
+  // private getters
+  std::shared_ptr<NeXus::NXRoot> getNXRoot() { return m_nxroot; }
+  std::shared_ptr<NexusEntryProvider> getNep() { return m_nep; }
+  std::shared_ptr<LoadHelper> getHelper() { return m_helper; }
+  std::shared_ptr<API::Workspace> getOutput() { return m_workspace; }
+  std::string getAcqMode() { return m_acqMode; }
+  std::string getInstrument() { return m_instrumentName; }
+
   // member variables
-  std::unique_ptr<NeXus::NXRoot> m_nxroot;
-  std::unique_ptr<NexusEntryProvider> m_nep;
-  std::unique_ptr<LoadHelper> m_helper;
+  std::shared_ptr<NeXus::NXRoot> m_nxroot;
+  std::shared_ptr<NexusEntryProvider> m_nep;
+  std::shared_ptr<LoadHelper> m_helper;
   std::shared_ptr<API::Workspace> m_workspace;
   std::string m_acqMode;
   std::string m_instrumentName;

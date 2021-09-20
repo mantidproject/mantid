@@ -48,6 +48,7 @@ void LoadILLBase::bootstrap() {
   m_nep = std::make_unique<NexusEntryProvider>(filename, *pmp);
   m_helper = std::make_unique<LoadHelper>();
   m_acqMode = resolveAcqMode();
+  m_instrumentName = resolveInstrument();
 }
 
 void LoadILLBase::addSampleLogs() {
@@ -99,18 +100,17 @@ void LoadILLBase::loadInstrument() {
 
 void LoadILLBase::resolveStartTime() {}
 
-void LoadILLBase::resolveInstrument() {
+std::string LoadILLBase::resolveInstrument() {
   NXEntry firstEntry = m_nxroot->openFirstEntry();
   const std::string instrumentPath = m_helper->findInstrumentNexusPath(firstEntry);
-  m_instrumentName = m_helper->getStringFromNexusPath(firstEntry, instrumentPath + "/name");
-  boost::to_upper(m_instrumentName);
-  m_instrumentName += resolveVariant();
+  std::string instrumentName = m_helper->getStringFromNexusPath(firstEntry, instrumentPath + "/name");
+  boost::to_upper(instrumentName);
+  return instrumentName + resolveVariant();
 }
 
 void LoadILLBase::exec() {
   bootstrap();
   validateMetadata();
-  resolveInstrument();
   buildWorkspace();
   resolveStartTime();
   loadInstrument();
