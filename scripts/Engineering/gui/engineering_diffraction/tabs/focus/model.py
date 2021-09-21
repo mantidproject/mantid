@@ -4,7 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import csv
 from os import path, makedirs
 import matplotlib.pyplot as plt
 from shutil import copy2
@@ -170,36 +169,6 @@ class FocusModel(object):
                     copy2(path.join(focus_dir, filename + ext),
                           path.join(rb_focus_dir, filename + ext))
         DeleteWorkspace(ws_spec.name())
-
-    @staticmethod
-    def _output_sample_logs(instrument, run_number, van_run_number, workspace, rb_num):
-        def write_to_file():
-            with open(output_path, "w", newline="") as logfile:
-                writer = csv.writer(logfile, ["Sample Log", "Avg Value"])
-                for log in output_dict:
-                    writer.writerow([log, output_dict[log]])
-
-        output_dict = {}
-        sample_run = workspace.getRun()
-        log_names = sample_run.keys()
-        # Collect numerical sample logs.
-        for name in log_names:
-            try:
-                output_dict[name] = sample_run.getPropertyAsSingleValue(name)
-            except ValueError:
-                logger.information(f"Could not convert {name} to a numerical value. It will not be included in the "
-                                   f"sample logs output file.")
-        focus_dir = path.join(output_settings.get_output_path(), "Focus")
-        if not path.exists(focus_dir):
-            makedirs(focus_dir)
-        output_path = path.join(focus_dir, (instrument + "_" + run_number + "_" + van_run_number + "_sample_logs.csv"))
-        write_to_file()
-        if rb_num:
-            focus_user_dir = path.join(output_settings.get_output_path(), "User", rb_num, "Focus")
-            if not path.exists(focus_user_dir):
-                makedirs(focus_user_dir)
-            output_path = path.join(focus_user_dir, (instrument + "_" + run_number + "_" + van_run_number + "_sample_logs.csv"))
-            write_to_file()
 
     @staticmethod
     def _generate_output_file_name(calibration, van_run_no, suffix, ext=""):
