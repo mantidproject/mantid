@@ -31,6 +31,8 @@ public:
         throwMissingKeyError(entryName);
       }
     }
+    // shouldn't reach here
+    return T();
   }
 
   template <typename T> std::vector<T> getVectorMetadata(const std::string &entryName) {
@@ -43,6 +45,8 @@ public:
         throwMissingKeyError(entryName);
       }
     }
+    // shouldn't reach here
+    return std::vector<T>();
   }
 
   bool isValid(const std::vector<std::string> &mandatoryKeys) {
@@ -55,7 +59,7 @@ public:
   }
 
 private:
-  void throwMissingKeyError(const std::string &key) {
+  [[noreturn]] void throwMissingKeyError(const std::string &key) {
     std::ostringstream ss;
     ss << "Numor does not conform to the protocols.\n";
     ss << "Unable to retrieve a mandatory entry " << key << " from the file.\n";

@@ -19,7 +19,15 @@ namespace Mantid::DataHandling {
  */
 
 class DLLExport LoadILLBase : public API::IFileLoader<Kernel::NexusDescriptor> {
-private:
+protected:
+  // protected getters
+  std::shared_ptr<NeXus::NXRoot> getNXRoot() { return m_nxroot; }
+  std::shared_ptr<NexusEntryProvider> getNep() { return m_nep; }
+  std::shared_ptr<LoadHelper> getHelper() { return m_helper; }
+  std::shared_ptr<API::Workspace> getOutput() { return m_workspace; }
+  std::string getAcqMode() { return m_mode; }
+  std::string getInstrument() { return m_instrument; }
+
   // pure virtual methods
   virtual API::Workspace_sptr buildWorkspace() = 0;
   virtual void loadAndFillData() = 0;
@@ -32,6 +40,7 @@ private:
   virtual std::string resolveVariant() { return ""; }
   virtual std::string resolveAcqMode() { return ""; }
 
+private:
   // non-virtual methods
   void init() override final;
   void exec() override final;
@@ -44,14 +53,6 @@ private:
   std::string getInstrumentDefinitionFilePath();
   void validateMetadata() { m_nep->isValid(mandatoryKeys()); }
   void setOutputWorkspace();
-
-  // private getters
-  std::shared_ptr<NeXus::NXRoot> getNXRoot() { return m_nxroot; }
-  std::shared_ptr<NexusEntryProvider> getNep() { return m_nep; }
-  std::shared_ptr<LoadHelper> getHelper() { return m_helper; }
-  std::shared_ptr<API::Workspace> getOutput() { return m_workspace; }
-  std::string getAcqMode() { return m_mode; }
-  std::string getInstrument() { return m_instrument; }
 
   // member variables
   std::shared_ptr<NeXus::NXRoot> m_nxroot;

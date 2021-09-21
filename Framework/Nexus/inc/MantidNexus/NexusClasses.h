@@ -590,7 +590,7 @@ public:
    * @return the typed value
    */
   template <typename T> T getTypedScalar(const std::string &name) const {
-    auto number = openNXDataSet<T>(name);
+    NXDataSetTyped<T> number = openNXDataSet<T>(name);
     number.load();
     return *number();
   }

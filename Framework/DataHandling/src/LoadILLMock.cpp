@@ -45,7 +45,7 @@ Workspace_sptr LoadILLMock::buildWorkspace() {
   return std::dynamic_pointer_cast<Workspace>(WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1));
 }
 
-void LoadILLMock::loadAndFillData(){};
+void LoadILLMock::loadAndFillData() { g_log.warning() << getNep()->getScalarMetadata<int>("myawesomemissingentry"); };
 
 void LoadILLMock::configureBeamline(){};
 

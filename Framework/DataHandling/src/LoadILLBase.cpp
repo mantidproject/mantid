@@ -27,7 +27,7 @@ namespace Mantid::DataHandling {
 void LoadILLBase::init() {
   declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Load, ".nxs"),
                   "The run number of the path of the data file to load.");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "", Direction::Output),
                   "The output workspace.");
   declareProperty(std::make_unique<PropertyManagerProperty>("PatchNexusMetadataEntries", Direction::Input),
                   "JSON formatted key-value pairs to add/override nexus entries.");
