@@ -89,6 +89,9 @@ class FocusModel(object):
         if plot_output:
             self._plot_focused_workspaces(output_workspaces)
 
+        # delete temporary workspaces
+        DeleteWorkspace("van_ws_foc_rb")
+
     @staticmethod
     def _plot_focused_workspaces(ws_names):
         for ws_name in ws_names:
@@ -131,13 +134,12 @@ class FocusModel(object):
     @staticmethod
     def _apply_vanadium_norm(sample_ws_foc, van_ws_foc):
         # divide by curves - automatically corrects for solid angle, det efficiency and lambda dep. flux
-        van_ws_foc = RebinToWorkspace(WorkspaceToRebin=van_ws_foc, WorkspaceToMatch=sample_ws_foc,
-                                      OutputWorkspace=van_ws_foc)  # do this in-place
-        sample_ws_foc = Divide(LHSWorkspace=sample_ws_foc, RHSWorkspace=van_ws_foc,
+        van_ws_foc_rb = RebinToWorkspace(WorkspaceToRebin=van_ws_foc,
+                                         WorkspaceToMatch=sample_ws_foc)  # copy so as not to lose data at end
+        sample_ws_foc = Divide(LHSWorkspace=sample_ws_foc, RHSWorkspace=van_ws_foc_rb,
                                OutputWorkspace=sample_ws_foc.name(), AllowDifferentNumberSpectra=False)
         sample_ws_foc = ReplaceSpecialValues(InputWorkspace=sample_ws_foc, OutputWorkspace=sample_ws_foc.name(),
                                              NaNValue=0, NaNError=0.0, InfinityValue=0, InfinityError=0.0)
-        # convert to TOF after this
         return sample_ws_foc
 
     def _save_output_files(self, sample_ws_foc, calibration, van_run, rb_num = None):
