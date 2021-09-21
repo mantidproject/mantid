@@ -62,7 +62,7 @@ class FFTView(QtWidgets.QWidget):
         self.FFTTable.hideRow(3)
 
         table_utils.setRowName(self.FFTTable, 4, "Shift")
-        self.shift, _ = table_utils.addDoubleToTable(self.FFTTable, 0.0, 4)
+        self.shift, _ = table_utils.addDoubleToTable(self.FFTTable, 0.0, 4, minimum=0.0)
         self.FFTTable.hideRow(4)
 
         table_utils.setRowName(self.FFTTable, 5, "Use Raw data")
@@ -91,7 +91,7 @@ class FFTView(QtWidgets.QWidget):
             self.FFTTableA,
             1,
             "Decay Constant (micro seconds)")
-        self.decay, _ = table_utils.addDoubleToTable(self.FFTTableA, 4.4, 1)
+        self.decay, _ = table_utils.addDoubleToTable(self.FFTTableA, 4.4, 1, minimum=0.0)
 
         table_utils.setRowName(self.FFTTableA, 2, "Negative Padding")
         self.negativePadding = table_utils.addCheckBoxToTable(
