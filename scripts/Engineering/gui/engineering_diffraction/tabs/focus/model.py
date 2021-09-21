@@ -150,6 +150,7 @@ class FocusModel(object):
         foc_suffix = calibration.get_foc_ws_suffix()
         xunit = sample_ws_foc.getDimension(0).getName()
         xunit_suffix = XUNIT_SUFFIXES[xunit]
+        sample_run_no = sample_ws_foc.run().get('run_number').value
         for ispec in range(sample_ws_foc.getNumberHistograms()):
             ws_spec = ExtractSingleSpectrum(InputWorkspace=sample_ws_foc, WorkspaceIndex=ispec)
             # add a bankid and vanadium to log that is read by fitting model
@@ -158,7 +159,8 @@ class FocusModel(object):
             AddSampleLog(Workspace=ws_spec, LogName="Vanadium Run", LogText=van_run)
             ws_spec.getRun().addProperty("bankid", bankid, True) # overwrites previous if exists
             # save spectrum as nexus
-            filename = self._generate_output_file_name(calibration, van_run, bankid, xunit_suffix)
+            filename = self._generate_output_file_name(calibration.get_instrument(), sample_run_no, van_run, bankid,
+                                                       xunit_suffix)
             nxs_path = path.join(focus_dir, filename + ".nxs")
             SaveNexus(InputWorkspace=ws_spec, Filename=nxs_path)
             if xunit == "Time-of-flight":
@@ -178,6 +180,5 @@ class FocusModel(object):
         DeleteWorkspace(ws_spec.name())
 
     @staticmethod
-    def _generate_output_file_name(calibration, van_run_no, suffix, ext=""):
-        return "_".join([calibration.get_instrument(),  calibration.get_sample_runno(), van_run_no,
-                         suffix]) + ext
+    def _generate_output_file_name(inst, sample_run_no, van_run_no, suffix, ext=""):
+        return "_".join([inst,  sample_run_no, van_run_no, suffix]) + ext
