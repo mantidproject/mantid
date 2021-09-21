@@ -578,6 +578,13 @@ void Shape2DCollection::clear() {
   emit shapesDeselected();
 }
 
+std::string Shape2DCollection::getCurrentShapeType() const {
+  if (m_currentShape) {
+    return m_currentShape->type();
+  }
+  return "none";
+}
+
 QStringList Shape2DCollection::getCurrentDoubleNames() const {
   if (m_currentShape) {
     return m_currentShape->getDoubleNames();
@@ -630,6 +637,20 @@ RectF Shape2DCollection::getCurrentBoundingRect() const {
 void Shape2DCollection::setCurrentBoundingRect(const RectF &rect) {
   if (m_currentShape) {
     m_currentShape->setBoundingRect(rect);
+    emit shapeChanged();
+  }
+}
+
+double Shape2DCollection::getCurrentBoundingRotation() const {
+  if (m_currentShape) {
+    return m_currentShape->getBoundingRotation();
+  }
+  return 0.0;
+}
+
+void Shape2DCollection::setCurrentBoundingRotation(const double rotation) {
+  if (m_currentShape) {
+    m_currentShape->setBoundingRotation(rotation);
     emit shapeChanged();
   }
 }
