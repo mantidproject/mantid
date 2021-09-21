@@ -606,6 +606,7 @@ class PolDiffILLReduction(PythonAlgorithm):
             if 'EPWidth' in self._sampleAndEnvironmentProperties else 15
         epp_table = mtd[self._elastic_channels_ws]
         bckg_list = []
+        to_clean = []
         transmission = mtd[transmission_ws].readY(0)[0]
         for empty in mtd[empty_ws]:
             # calculate the background in the region around the elastic peaks separately to the rest of TOF channels
@@ -639,6 +640,8 @@ class PolDiffILLReduction(PythonAlgorithm):
 
         background_ws = 'background_ws'
         GroupWorkspaces(InputWorkspaces=bckg_list, OutputWorkspace=background_ws)
+        if len(to_clean) > 1 and self.getProperty('ClearCache'):
+            DeleteWorkspaces(WorkspaceList=to_clean)
         return background_ws
 
     def _get_background(self, empty_ws, cadmium_ws, transmission_ws, transmission_corr, max_empty_entry,
