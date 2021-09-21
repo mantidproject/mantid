@@ -21,7 +21,7 @@ namespace Mantid::DataHandling {
 class DLLExport LoadILLBase : public API::IFileLoader<Kernel::NexusDescriptor> {
 private:
   // pure virtual methods
-  virtual void buildWorkspace() = 0;
+  virtual API::Workspace_sptr buildWorkspace() = 0;
   virtual void loadAndFillData() = 0;
 
   // virtual methods
@@ -43,7 +43,7 @@ private:
   void patchSampleLogs();
   std::string getInstrumentDefinitionFilePath();
   void validateMetadata() { m_nep->isValid(mandatoryKeys()); }
-  void setOutputWorkspace() { setProperty<API::Workspace_sptr>("OutputWorkspace", m_workspace); }
+  void setOutputWorkspace();
 
   // private getters
   std::shared_ptr<NeXus::NXRoot> getNXRoot() { return m_nxroot; }

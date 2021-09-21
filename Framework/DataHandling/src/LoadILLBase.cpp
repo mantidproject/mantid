@@ -12,6 +12,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/LoadHelper.h"
 #include "MantidDataHandling/NexusEntryProvider.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/PropertyManagerProperty.h"
 
 #include <Poco/Path.h>
@@ -35,6 +36,8 @@ void LoadILLBase::init() {
   declareExtraProperties();
 }
 
+void LoadILLBase::setOutputWorkspace() { setProperty<API::Workspace_sptr>("OutputWorkspace", m_workspace); }
+
 std::string LoadILLBase::getInstrumentDefinitionFilePath() {
   Poco::Path directory(ConfigService::Instance().getInstrumentDirectory());
   Poco::Path file(m_instrument + "_Definition.xml");
@@ -50,6 +53,10 @@ void LoadILLBase::bootstrap() {
   m_helper = std::make_unique<LoadHelper>();
   m_mode = resolveAcqMode();
   m_instrument = resolveInstrument();
+  validateMetadata();
+  m_workspace = buildWorkspace();
+  resolveStartTime();
+  loadInstrument();
 }
 
 void LoadILLBase::addSampleLogs() {
@@ -95,7 +102,7 @@ void LoadILLBase::loadInstrument() {
   auto loadInst = createChildAlgorithm("LoadInstrument");
   loadInst->setPropertyValue("Filename", idf);
   loadInst->setProperty("Workspace", m_workspace);
-  loadInst->setProperty("RewriteSpectraMap", true);
+  loadInst->setProperty("RewriteSpectraMap", OptionalBool(true));
   loadInst->execute();
 }
 
@@ -124,10 +131,6 @@ std::string LoadILLBase::resolveInstrument() {
 
 void LoadILLBase::exec() {
   bootstrap();
-  validateMetadata();
-  buildWorkspace();
-  resolveStartTime();
-  loadInstrument();
   configureBeamline();
   loadAndFillData();
   addSampleLogs();

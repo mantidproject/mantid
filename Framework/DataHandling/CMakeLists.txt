@@ -65,6 +65,7 @@ set(SRC_FILES
     src/LoadILLBase.cpp
     src/LoadILLDiffraction.cpp
     src/LoadILLIndirect2.cpp
+    src/LoadILLMock.cpp
     src/LoadILLPolarizationFactors.cpp
     src/LoadILLPolarizedDiffraction.cpp
     src/LoadILLReflectometry.cpp
@@ -155,6 +156,7 @@ set(SRC_FILES
     src/RenameLog.cpp
     src/RotateInstrumentComponent.cpp
     src/RotateSource.cpp
+    src/SNSAppendGeometryToNexus.cpp
     src/SampleEnvironmentFactory.cpp
     src/SampleEnvironmentSpec.cpp
     src/SampleEnvironmentSpecParser.cpp
@@ -207,7 +209,6 @@ set(SRC_FILES
     src/SetSampleMaterial.cpp
     src/SetScalingPSD.cpp
     src/SinglePeriodLoadMuonStrategy.cpp
-    src/SNSAppendGeometryToNexus.cpp
     src/SortTableWorkspace.cpp
     src/StartAndEndTimeFromNexusFileExtractor.cpp
     src/UpdateInstrumentFromFile.cpp
@@ -282,6 +283,7 @@ set(INC_FILES
     inc/MantidDataHandling/LoadILLBase.h
     inc/MantidDataHandling/LoadILLDiffraction.h
     inc/MantidDataHandling/LoadILLIndirect2.h
+    inc/MantidDataHandling/LoadILLMock.h
     inc/MantidDataHandling/LoadILLPolarizationFactors.h
     inc/MantidDataHandling/LoadILLPolarizedDiffraction.h
     inc/MantidDataHandling/LoadILLReflectometry.h
@@ -369,6 +371,7 @@ set(INC_FILES
     inc/MantidDataHandling/RenameLog.h
     inc/MantidDataHandling/RotateInstrumentComponent.h
     inc/MantidDataHandling/RotateSource.h
+    inc/MantidDataHandling/SNSAppendGeometryToNexus.h
     inc/MantidDataHandling/SampleEnvironmentFactory.h
     inc/MantidDataHandling/SampleEnvironmentSpec.h
     inc/MantidDataHandling/SampleEnvironmentSpecParser.h
@@ -421,7 +424,6 @@ set(INC_FILES
     inc/MantidDataHandling/SetSampleMaterial.h
     inc/MantidDataHandling/SetScalingPSD.h
     inc/MantidDataHandling/SinglePeriodLoadMuonStrategy.h
-    inc/MantidDataHandling/SNSAppendGeometryToNexus.h
     inc/MantidDataHandling/SortTableWorkspace.h
     inc/MantidDataHandling/StartAndEndTimeFromNexusFileExtractor.h
     inc/MantidDataHandling/UpdateInstrumentFromFile.h
@@ -490,6 +492,7 @@ set(TEST_FILES
     LoadILLBaseTest.h
     LoadILLDiffractionTest.h
     LoadILLIndirect2Test.h
+    LoadILLMockTest.h
     LoadILLPolarizationFactorsTest.h
     LoadILLPolarizedDiffractionTest.h
     LoadILLReflectometryTest.h
@@ -567,6 +570,7 @@ set(TEST_FILES
     RenameLogTest.h
     RotateInstrumentComponentTest.h
     RotateSourceTest.h
+    SNSAppendGeometryToNexusTest.h
     SampleEnvironmentFactoryTest.h
     SampleEnvironmentSpecFileFinderTest.h
     SampleEnvironmentSpecParserTest.h
@@ -616,7 +620,6 @@ set(TEST_FILES
     SetSampleMaterialTest.h
     SetSampleTest.h
     SetScalingPSDTest.h
-    SNSAppendGeometryToNexusTest.h
     SortTableWorkspaceTest.h
     StartAndEndTimeFromNexusFileExtractorTest.h
     UpdateInstrumentFromFileTest.h

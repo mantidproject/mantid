@@ -58,9 +58,9 @@ private:
   void throwMissingKeyError(const std::string &key) {
     std::ostringstream ss;
     ss << "Numor does not conform to the protocols.\n";
-    ss << "Unable to retrieve a mandatory entry " << key << " from the file\n";
+    ss << "Unable to retrieve a mandatory entry " << key << " from the file.\n";
     ss << "Please contact instrument control service to get the root cause fixed.\n";
-    ss << "In the meantime, consider providing the value for the missing key.";
+    ss << "In the meantime, consider providing the value for the missing key.\n";
     throw std::runtime_error(ss.str());
   }
 
