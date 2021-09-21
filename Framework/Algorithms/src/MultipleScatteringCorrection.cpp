@@ -37,12 +37,12 @@ DECLARE_ALGORITHM(MultipleScatteringCorrection)
 
 namespace {
 // the maximum number of elements to combine at once in the pairwise summation
-constexpr size_t MAX_INTEGRATION_LENGTH{1000};
+constexpr int64_t MAX_INTEGRATION_LENGTH{1000};
 
 static constexpr double RAD2DEG = 180.0 / M_PI; // save some flops??
 
-inline size_t findMiddle(const size_t start, const size_t stop) {
-  auto half = static_cast<size_t>(floor(.5 * (static_cast<double>(stop - start))));
+inline int64_t findMiddle(const int64_t start, const int64_t stop) {
+  auto half = static_cast<int64_t>(floor(.5 * (static_cast<double>(stop - start))));
   return start + half;
 }
 
@@ -229,20 +229,6 @@ void MultipleScatteringCorrection::parseInputs() {
   // Get the element size
   m_elementSize = getProperty("ElementSize"); // in mm
   m_elementSize = m_elementSize * 1e-3;       // convert to m
-
-  // Get the material
-  const auto &sample = m_inputWS->sample();
-  // -- process the sample
-  m_material = sample.getShape().material();
-
-  // Get total scattering cross-section
-  // NOTE: the angstrom^-2 to barns and the angstrom^-1 to cm^-1
-  // will cancel for mu to give units: cm^-1
-  // -- sample
-  m_sampleLinearCoefTotScatt = -m_material.totalScatterXSection() * m_material.numberDensityEffective() * 100;
-
-  // NOTE:
-  // container related properties are retrieved at the beginning of calculateSampleAndContainer()
 }
 
 /**
@@ -253,6 +239,7 @@ void MultipleScatteringCorrection::parseInputs() {
  */
 void MultipleScatteringCorrection::calculateSingleComponent(API::MatrixWorkspace_sptr outws,
                                                             const Geometry::IObject &shape) {
+  const auto material = shape.material();
   // Cache distances
   // NOTE: cannot use IObject_sprt for sample shape as the getShape() method dereferenced
   //       the shared pointer upon returning.
@@ -324,6 +311,17 @@ void MultipleScatteringCorrection::calculateSingleComponent(API::MatrixWorkspace
   g_log.notice(msg.str());
 #endif
 
+  // compute the prefactor for multiple scattering correction factor Delta
+  // Delta = totScatterCoeff * A2/A1
+  //  NOTE: Unit is important
+  // rho in 1/A^3, and sigma_s in 1/barns (1e-8 A^(-2))
+  // so rho * sigma_s = 1e-8 A^(-1) = 100 meters
+  // A2/A1 gives length in meters
+  const double rho = material.numberDensityEffective();
+  const double sigma_s = material.totalScatterXSection();
+  const double unit_scaling = 1e2;
+  const double totScatterCoeff = rho * sigma_s * unit_scaling;
+
   // Calculate one detector at a time
   const auto &spectrumInfo = m_inputWS->spectrumInfo();
   const auto numHists = static_cast<int64_t>(m_inputWS->getNumberHistograms());
@@ -346,7 +344,8 @@ void MultipleScatteringCorrection::calculateSingleComponent(API::MatrixWorkspace
 
     const auto wavelengths = m_inputWS->points(workspaceIndex);
     // these need to have the minus sign applied still
-    const auto sampleLinearCoefAbs = m_material.linearAbsorpCoef(wavelengths.cbegin(), wavelengths.cend());
+
+    const auto sampleLinearCoefAbs = material.linearAbsorpCoef(wavelengths.cbegin(), wavelengths.cend());
 
     auto &output = outws->mutableY(workspaceIndex);
     // -- loop over the wavelength points every m_xStep
@@ -356,15 +355,10 @@ void MultipleScatteringCorrection::calculateSingleComponent(API::MatrixWorkspace
 
       pairWiseSumSingleComponent(A1, A2, -sampleLinearCoefAbs[wvBinsIndex], distGraber, sample_L2Ds, sample_L12s, 0,
                                  numVolumeElements);
+
       // compute the correction factor
-      const double rho = m_material.numberDensityEffective();
-      const double sigma_s = m_material.totalScatterXSection();
-      // NOTE: Unit is important
-      // rho in 1/A^3, and sigma_s in 1/barns (1e-8 A^(-2))
-      // so rho * sigma_s = 1e-8 A^(-1) = 100 meters
-      // A2/A1 gives length in meters
-      const double unit_scaling = 1e2;
-      output[wvBinsIndex] = unit_scaling * rho * sigma_s * A2 / (4 * M_PI * A1);
+      // NOTE: prefactor, totScatterCoeff, is pre-calculated outside the loop (see above)
+      output[wvBinsIndex] = totScatterCoeff / (4 * M_PI) * (A2 / A1);
 
       // debug output
 #ifndef NDEBUG
@@ -408,12 +402,8 @@ void MultipleScatteringCorrection::calculateSingleComponent(API::MatrixWorkspace
 void MultipleScatteringCorrection::calculateSampleAndContainer(API::MatrixWorkspace_sptr outws) {
   // retrieve container related properties as they are relevant now
   const auto &sample = m_inputWS->sample();
+  const auto &sampleMaterial = sample.getShape().material();
   const auto &containerMaterial = sample.getEnvironment().getContainer().material();
-  // total scattering cross-section of the container
-  // NOTE: the angstrom^-2 to barns and the angstrom^-1 to cm^-1
-  // will cancel for mu to give units: cm^-1
-  double containerLinearCoefTotScatt =
-      -containerMaterial.totalScatterXSection() * containerMaterial.numberDensityEffective() * 100;
 
   // get the sample and container shapes
   const auto &sampleShape = sample.getShape();
@@ -512,6 +502,95 @@ void MultipleScatteringCorrection::calculateSampleAndContainer(API::MatrixWorksp
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
+
+  // cache the elementsVolumes
+  std::vector<double> elementVolumes = distGraberContainer.m_elementVolumes;
+  elementVolumes.insert(elementVolumes.end(), distGraberSample.m_elementVolumes.begin(),
+                        distGraberSample.m_elementVolumes.end());
+
+  // compute prefactor rho*sigma_s/(4pi) for sample and container
+  // Delta = Delta_sample + Delta_container
+  //       = pf_sample * A2/A1 (sampleElements) + pf_container * A2/A1 (containerElements)
+  // NOTE: Unit is important
+  // rho in 1/A^3, and sigma_s in 1/barns (1e-8 A^(-2))
+  // so rho * sigma_s = 1e-8 A^(-1) = 100 meters
+  // A2/A1 gives length in meters
+  const double unit_scaling = 1e2;
+  const double rho_sample = sampleMaterial.numberDensityEffective();
+  const double sigma_s_sample = sampleMaterial.totalScatterXSection();
+  const double rho_container = containerMaterial.numberDensityEffective();
+  const double sigma_s_container = containerMaterial.totalScatterXSection();
+  const double totScatterCoef_container = rho_container * sigma_s_container * unit_scaling;
+  const double totScatterCoef_sample = rho_sample * sigma_s_sample * unit_scaling;
+
+  // Compute the multiple scattering factor: one detector at a time
+  const auto &spectrumInfo = m_inputWS->spectrumInfo();
+  const auto numHists = static_cast<int64_t>(m_inputWS->getNumberHistograms());
+  const auto specSize = static_cast<int64_t>(m_inputWS->blocksize());
+  Progress prog(this, 0.0, 1.0, numHists);
+  // -- loop over the spectra/detectors
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *outws))
+  for (int64_t workspaceIndex = 0; workspaceIndex < numHists; ++workspaceIndex) {
+    PARALLEL_START_INTERUPT_REGION
+    // locate the spectrum and its detector
+    if (!spectrumInfo.hasDetectors(workspaceIndex)) {
+      g_log.information() << "Spectrum " << workspaceIndex << " does not have a detector defined for it\n";
+      continue;
+    }
+    const auto &det = spectrumInfo.detector(workspaceIndex);
+
+    // calculate L2D (2_element -> detector)
+    // L2D_container = [container_1, container_2, ..., 0, 0, ...]
+    // L2D_sample = [0, 0, ..., sample_1, sample_2, ...]
+    // 1. container
+    std::vector<double> L2D_container(numVolumeElements, 0.0);
+    calculateL2Ds(distGraberContainer, det, L2D_container, containerShape);
+    // 2. sample
+    std::vector<double> L2D_sample(numVolumeElements, 0.0);
+    std::vector<double> L2D_sample_temp(numVolumeElementsSample, 0.0);
+    calculateL2Ds(distGraberSample, det, L2D_sample_temp, sampleShape);
+    std::copy(L2D_sample_temp.begin(), L2D_sample_temp.end(), L2D_sample.begin() + numVolumeElementsContainer);
+
+    // prepare material wise linear coefficient
+    const auto wavelengths = m_inputWS->points(workspaceIndex);
+    const auto sampleLinearCoefAbs = sampleMaterial.linearAbsorpCoef(wavelengths.cbegin(), wavelengths.cend());
+    const auto containerLinearCoefAbs = containerMaterial.linearAbsorpCoef(wavelengths.cbegin(), wavelengths.cend());
+
+    auto &output = outws->mutableY(workspaceIndex);
+    for (int64_t wvBinsIndex = 0; wvBinsIndex < specSize; wvBinsIndex += m_xStep) {
+      double A1 = 0.0;
+      double A2 = 0.0;
+
+      // compute the multiple scattering correction factor Delta
+      pairWiseSumSampleAndContainer(A1, A2,                                                                  //
+                                    -containerLinearCoefAbs[wvBinsIndex], -sampleLinearCoefAbs[wvBinsIndex], //
+                                    numVolumeElementsContainer, numVolumeElements,                           //
+                                    totScatterCoef_container, totScatterCoef_sample,                         //
+                                    elementVolumes,                                                          //
+                                    LS1_container, LS1_sample,                                               //
+                                    L12_container, L12_sample,                                               //
+                                    L2D_container, L2D_sample,                                               //
+                                    0, numVolumeElements);
+
+      output[wvBinsIndex] = (A2 / A1) / (4.0 * M_PI);
+
+      // Make certain that last point is calculated
+      if (m_xStep > 1 && wvBinsIndex + m_xStep >= specSize && wvBinsIndex + 1 != specSize) {
+        wvBinsIndex = specSize - m_xStep - 1;
+      }
+    }
+    // Interpolate linearly between points separated by m_xStep,
+    // last point required
+    if (m_xStep > 1) {
+      auto histNew = outws->histogram(workspaceIndex);
+      interpolateLinearInplace(histNew, m_xStep);
+      outws->setHistogram(workspaceIndex, histNew);
+    }
+    prog.report();
+    PARALLEL_END_INTERUPT_REGION
+  }
+  PARALLEL_CHECK_INTERUPT_REGION
+  g_log.notice() << "finished integration.\n";
 }
 
 /**
@@ -559,10 +638,10 @@ void MultipleScatteringCorrection::calculateL2Ds(const MultipleScatteringCorrect
 void MultipleScatteringCorrection::pairWiseSumSingleComponent(double &A1, double &A2, const double linearCoefAbs,
                                                               const MultipleScatteringCorrectionDistGraber &distGraber,
                                                               const std::vector<double> &L2Ds,
-                                                              const std::vector<double> &L12s, const size_t startIndex,
-                                                              const size_t endIndex) const {
+                                                              const std::vector<double> &L12s, const int64_t startIndex,
+                                                              const int64_t endIndex) const {
   if (endIndex - startIndex > MAX_INTEGRATION_LENGTH) {
-    size_t middle = findMiddle(startIndex, endIndex);
+    int64_t middle = findMiddle(startIndex, endIndex);
 
     // recursive to process upper and lower part
     pairWiseSumSingleComponent(A1, A2, linearCoefAbs, distGraber, L2Ds, L12s, startIndex, middle);
@@ -572,13 +651,13 @@ void MultipleScatteringCorrection::pairWiseSumSingleComponent(double &A1, double
     const auto &Ls1s = distGraber.m_LS1;
     const auto &elementVolumes = distGraber.m_elementVolumes;
     const auto nElements = distGraber.m_numVolumeElements;
-    for (size_t i = startIndex; i < endIndex; ++i) {
+    for (int64_t i = startIndex; i < endIndex; ++i) {
       // compute A1
       double exponent = (Ls1s[i] + L2Ds[i]) * linearCoefAbs;
       A1 += exp(exponent) * elementVolumes[i];
       // compute A2
       double a2 = 0.0;
-      for (size_t j = 0; j < nElements; ++j) {
+      for (int64_t j = 0; j < int64_t(nElements); ++j) {
         if (i == j) {
           // skip self (second order scattering must happen in a different element)
           continue;
@@ -587,10 +666,82 @@ void MultipleScatteringCorrection::pairWiseSumSingleComponent(double &A1, double
         size_t idx_l12 = i < j ? calcLinearIdxFromUpperTriangular(nElements, i, j)
                                : calcLinearIdxFromUpperTriangular(nElements, j, i);
         // compute a2 component
-        exponent = (Ls1s[j] + L12s[idx_l12] + L2Ds[i]) * linearCoefAbs;
+        exponent = (Ls1s[i] + L12s[idx_l12] + L2Ds[j]) * linearCoefAbs;
         a2 += exp(exponent) * elementVolumes[j] / (L12s[idx_l12] * L12s[idx_l12]);
       }
       A2 += a2 * elementVolumes[i];
+    }
+  }
+}
+
+/**
+ * @brief Integrate for A1 and A2 using pair-wise summation for multi component case
+ *
+ * @param A1
+ * @param A2
+ * @param linearCoefAbsContainer
+ * @param linearCoefAbsSample
+ * @param numVolumeElementsContainer
+ * @param numVolumeElementsTotal
+ * @param totScatterCoefContainer
+ * @param totScatterCoefSample
+ * @param elementVolumes
+ * @param LS1sContainer
+ * @param LS1sSample
+ * @param L12sContainer
+ * @param L12sSample
+ * @param L2DsContainer
+ * @param L2DsSample
+ * @param startIndex
+ * @param endIndex
+ */
+void MultipleScatteringCorrection::pairWiseSumSampleAndContainer(
+    double &A1, double &A2,                                                          //
+    const double linearCoefAbsContainer, const double linearCoefAbsSample,           //
+    const int64_t numVolumeElementsContainer, const int64_t numVolumeElementsTotal,  //
+    const double totScatterCoefContainer,                                            // rho * sigma_s * unit_scaling
+    const double totScatterCoefSample,                                               // unit_scaling = 100
+    const std::vector<double> &elementVolumes,                                       //
+    const std::vector<double> &LS1sContainer, const std::vector<double> &LS1sSample, // source    -> 1_element
+    const std::vector<double> &L12sContainer, const std::vector<double> &L12sSample, // 1_element -> 2_element
+    const std::vector<double> &L2DsContainer, const std::vector<double> &L2DsSample, // 2_element -> detector
+    const int64_t startIndex, const int64_t endIndex) const {
+  if (endIndex - startIndex > MAX_INTEGRATION_LENGTH) {
+    int64_t middle = findMiddle(startIndex, endIndex);
+    // recursive to process upper and lower part
+    pairWiseSumSampleAndContainer(A1, A2, linearCoefAbsContainer, linearCoefAbsSample, numVolumeElementsContainer,
+                                  numVolumeElementsTotal, totScatterCoefContainer, totScatterCoefSample, elementVolumes,
+                                  LS1sContainer, LS1sSample, L12sContainer, L12sSample, L2DsContainer, L2DsSample,
+                                  startIndex, middle);
+    pairWiseSumSampleAndContainer(A1, A2, linearCoefAbsContainer, linearCoefAbsSample, numVolumeElementsContainer,
+                                  numVolumeElementsTotal, totScatterCoefContainer, totScatterCoefSample, elementVolumes,
+                                  LS1sContainer, LS1sSample, L12sContainer, L12sSample, L2DsContainer, L2DsSample,
+                                  middle, endIndex);
+  } else {
+    // perform the integration
+    for (int64_t i = startIndex; i < endIndex; ++i) {
+      const double factor_i = i > numVolumeElementsContainer ? totScatterCoefSample : totScatterCoefContainer;
+      // compute A1
+      double exponent = (LS1sContainer[i] + L2DsContainer[i]) * linearCoefAbsContainer +
+                        (LS1sSample[i] + L2DsSample[i]) * linearCoefAbsSample;
+      A1 += exp(exponent) * factor_i;
+      // compute A2
+      double a2 = 0.0;
+      for (int64_t j = 0; j < numVolumeElementsTotal; ++j) {
+        if (i == j) {
+          // skip self (second order scattering must happen in a different element)
+          continue;
+        }
+        const double factor_j = j > numVolumeElementsContainer ? totScatterCoefSample : totScatterCoefContainer;
+        // L12 is a pre-computed vector, therefore we can use the index directly
+        size_t idx_l12 = i < j ? calcLinearIdxFromUpperTriangular(numVolumeElementsTotal, i, j)
+                               : calcLinearIdxFromUpperTriangular(numVolumeElementsTotal, j, i);
+        const double l12 = L12sContainer[idx_l12] + L12sSample[idx_l12];
+        exponent = (LS1sContainer[i] + L12sContainer[idx_l12] + L2DsContainer[j]) * linearCoefAbsContainer + //
+                   (LS1sSample[i] + L12sSample[idx_l12] + L2DsSample[j]) * linearCoefAbsSample;
+        a2 += exp(exponent) * factor_j / (l12 * l12);
+      }
+      A2 += a2 * factor_i;
     }
   }
 }
