@@ -187,7 +187,7 @@ algorithms.categories.hidden=Workflow\\Inelastic\\UsesPropertyManager;Workflow\\
 # Allowed values are:
 #   "Log": log a warning indicating the alias is deprecated, along with the name to be used
 #   "Raise": raise a RuntimeError if the deprecated deadline has been met
-algorithms.alias.deprecated = Log
+algorithms.alias.deprecated = @ALIASDEPRECATED@
 
 # All interface categories are shown by default.
 interfaces.categories.hidden =
