@@ -1076,28 +1076,40 @@ class PolDiffILLReduction(PythonAlgorithm):
                 time_axis = entry.dataX(pixel_no)
                 time_axis -= tof_correction
 
+    def _calculate_epp_energy_width(self, ws):
+        """Calculates elastic peak width in energy exchange units based on known widths in time-of-flight."""
+        epp_table = mtd[self._elastic_channels_ws]
+        ep_centres_tof = np.array(epp_table.column('PeakCentre'))  # in delta E (meV)
+        if 'EPWidth' in self._sampleAndEnvironmentProperties:
+            ep_sigmas_tof = np.full(np.size(ep_centres_tof), self._sampleAndEnvironmentProperties['EPWidth'].value)
+        else:
+            ep_sigmas_tof = np.array(epp_table.column('Sigma'))
+            ep_sigmas_tof[ep_sigmas_tof == 0] = np.mean(ep_sigmas_tof[ep_sigmas_tof != 0])
+        # pad narrow peak fits with average peak width:
+        instrument = mtd[ws][0].getInstrument()
+        m_n = physical_constants['neutron mass energy equivalent in MeV'][0] * 1e9  # in meV / c^2
+        light_speed = physical_constants['speed of light in vacuum'][0]  # in m/s
+        L2_odd = instrument.getNumberParameter('sample_distance_odd')[0]  # in m
+        L2_even = instrument.getNumberParameter('sample_distance_even')[0]  # in m
+        L2 = min(L2_odd, L2_even)  # in this case we care only about the range and want to maximise it
+        neutron_speed = self._sampleAndEnvironmentProperties['NeutronSpeed'].value  # in m / s
+        Ei = self._sampleAndEnvironmentProperties['InitialEnergy'].value  # in meV
+        c1 = 0.5 * np.power(L2, 2) * m_n / light_speed ** 2  # in meV * m^2
+        n_sigmas = 2.0  # number of peak widths to take
+        us_2_s = 1e-6  # microseconds to seconds conversion
+
+        return Ei - c1 / np.power((L2 / neutron_speed) + n_sigmas * ep_sigmas_tof * us_2_s, 2)
+
     def _integrate_elastic_peak(self, ws):
         """Integrates bins around the elastic peak for vanadium in energy exchange units."""
-        to_clean = []
+        sigmaE = self._calculate_epp_energy_width(ws)
+        max_energy = np.max(sigmaE)
+        bin_width = max_energy * 2.0
         for entry in mtd[ws]:
-            epp_delta_e = "{}_epp_table_e".format(entry.name())
-            to_clean.append(epp_delta_e)
-            FindEPP(InputWorkspace=entry, OutputWorkspace=epp_delta_e)
-            ep_centres_e = np.array(mtd[epp_delta_e].column('PeakCentre'))  # in delta E (meV)
-            ep_sigmas_e = np.array(mtd[epp_delta_e].column('Sigma'))  # in delta E (meV)
-            average_sigma_e = np.mean(ep_sigmas_e[ep_sigmas_e > 0])  # mean for all properly fitted elastic peaks
-            ep_sigmas_e[ep_sigmas_e == 0] = average_sigma_e  # padding narrow-peak sigmas (=0) with average peak width
-            min_energies = ep_centres_e - 3.0 * ep_sigmas_e
-            max_energies = ep_centres_e + 3.0 * ep_sigmas_e
             Integration(InputWorkspace=entry, OutputWorkspace=entry,
-                        RangeLowerList=min_energies, RangeUpperList=max_energies)
-            min_energy = np.min(min_energies)
-            max_energy = np.max(max_energies)
-            bin_width = np.abs(max_energy-min_energy)
+                        RangeLowerList=-sigmaE, RangeUpperList=sigmaE)
             Rebin(InputWorkspace=entry, OutputWorkspace=entry,
-                  Params='{},{},{}'.format(min_energy, bin_width, max_energy))  # rebins vanadium to a common bin
-        if len(to_clean) > 0 and self.getProperty("ClearCache").value:
-            DeleteWorkspaces(WorkspaceList=to_clean)
+                  Params='{},{},{}'.format(-max_energy, bin_width, max_energy))  # rebins vanadium to a common bin
         return ws
 
     def _normalise_vanadium(self, ws):
