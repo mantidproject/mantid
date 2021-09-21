@@ -192,7 +192,9 @@ if(ENABLE_WORKBENCH OR MANTID_QT_LIB STREQUAL "BUILD")
   add_subdirectory(qt)
 endif()
 
+if (MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
 add_subdirectory(scripts)
+endif()
 
 
 # Docs requirements
