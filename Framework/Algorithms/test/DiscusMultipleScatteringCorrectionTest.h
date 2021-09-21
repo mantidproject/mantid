@@ -9,7 +9,7 @@
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAlgorithms/CalculateMonteCarloMultipleScattering.h"
+#include "MantidAlgorithms/DiscusMultipleScatteringCorrection.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -24,26 +24,24 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
-class CalculateMonteCarloMultipleScatteringHelper : public Mantid::Algorithms::CalculateMonteCarloMultipleScattering {
+class DiscusMultipleScatteringCorrectionHelper : public Mantid::Algorithms::DiscusMultipleScatteringCorrection {
 public:
   double interpolateGaussian(const Mantid::HistogramData::Histogram &histToInterpolate, double x) {
-    return CalculateMonteCarloMultipleScattering::interpolateGaussian(histToInterpolate, x);
+    return DiscusMultipleScatteringCorrection::interpolateGaussian(histToInterpolate, x);
   }
   void updateTrackDirection(Mantid::Geometry::Track &track, const double cosT, const double phi) {
-    CalculateMonteCarloMultipleScattering::updateTrackDirection(track, cosT, phi);
+    DiscusMultipleScatteringCorrection::updateTrackDirection(track, cosT, phi);
   }
 };
 
-class CalculateMonteCarloMultipleScatteringTest : public CxxTest::TestSuite {
+class DiscusMultipleScatteringCorrectionTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static CalculateMonteCarloMultipleScatteringTest *createSuite() {
-    return new CalculateMonteCarloMultipleScatteringTest();
-  }
-  static void destroySuite(CalculateMonteCarloMultipleScatteringTest *suite) { delete suite; }
+  static DiscusMultipleScatteringCorrectionTest *createSuite() { return new DiscusMultipleScatteringCorrectionTest(); }
+  static void destroySuite(DiscusMultipleScatteringCorrectionTest *suite) { delete suite; }
 
-  CalculateMonteCarloMultipleScatteringTest() {
+  DiscusMultipleScatteringCorrectionTest() {
     SofQWorkspace = WorkspaceCreationHelper::create2DWorkspace(1, 1);
     SofQWorkspace->mutableY(0)[0] = 1.;
     SofQWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("MomentumTransfer");
@@ -230,7 +228,7 @@ public:
   }
 
   void test_interpolateGaussian() {
-    CalculateMonteCarloMultipleScatteringHelper alg;
+    DiscusMultipleScatteringCorrectionHelper alg;
     const int NBINS = 10;
 
     auto ws2 = WorkspaceCreationHelper::create2DWorkspacePoints(1, NBINS, 0.5);
@@ -246,7 +244,7 @@ public:
   }
 
   void test_updateTrackDirection() {
-    CalculateMonteCarloMultipleScatteringHelper alg;
+    DiscusMultipleScatteringCorrectionHelper alg;
     const double twoTheta = M_PI * 60. / 180.;
     const double cosTwoTheta = cos(twoTheta);
     const double sinTwoTheta = sin(twoTheta);
@@ -264,7 +262,7 @@ public:
   //---------------------------------------------------------------------------
 
   void test_invalidSOfQ() {
-    CalculateMonteCarloMultipleScatteringHelper alg;
+    DiscusMultipleScatteringCorrectionHelper alg;
     const double THICKNESS = 0.001; // metres
     auto inputWorkspace = SetupFlatPlateWorkspace(5, 2, 1, THICKNESS);
     auto SofQWorkspaceTwoSp = WorkspaceCreationHelper::create2DWorkspace(2, 1);
@@ -295,7 +293,7 @@ public:
 
   void test_cant_run_withAlwaysStoreInADS_false() {
     const double THICKNESS = 0.001; // metres
-    CalculateMonteCarloMultipleScatteringHelper alg;
+    DiscusMultipleScatteringCorrectionHelper alg;
     alg.setAlwaysStoreInADS(false);
     alg.setRethrows(true);
     alg.initialize();
@@ -308,9 +306,9 @@ public:
 
 private:
   Mantid::API::IAlgorithm_sptr createAlgorithm() {
-    using Mantid::Algorithms::CalculateMonteCarloMultipleScattering;
+    using Mantid::Algorithms::DiscusMultipleScatteringCorrection;
     using Mantid::API::IAlgorithm;
-    auto alg = std::make_shared<CalculateMonteCarloMultipleScattering>();
+    auto alg = std::make_shared<DiscusMultipleScatteringCorrection>();
     alg->initialize();
     alg->setRethrows(true);
     TS_ASSERT(alg->isInitialized());

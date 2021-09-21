@@ -28,7 +28,7 @@ set(SRC_FILES
     src/CalculateEfficiency2.cpp
     src/CalculateFlatBackground.cpp
     src/CalculateIqt.cpp
-    src/CalculateMonteCarloMultipleScattering.cpp
+    src/DiscusMultipleScatteringCorrection.cpp
     src/CalculatePlaczek.cpp
     src/CalculatePlaczekSelfScattering.cpp
     src/CalculatePlaczekSelfScattering2.cpp
@@ -371,7 +371,7 @@ set(INC_FILES
     inc/MantidAlgorithms/CalculateEfficiency2.h
     inc/MantidAlgorithms/CalculateFlatBackground.h
     inc/MantidAlgorithms/CalculateIqt.h
-    inc/MantidAlgorithms/CalculateMonteCarloMultipleScattering.h
+    inc/MantidAlgorithms/DiscusMultipleScatteringCorrection.h
     inc/MantidAlgorithms/CalculatePlaczek.h
     inc/MantidAlgorithms/CalculatePlaczekSelfScattering.h
     inc/MantidAlgorithms/CalculatePlaczekSelfScattering2.h
@@ -732,7 +732,7 @@ set(TEST_FILES
     CalculateEfficiencyTest.h
     CalculateFlatBackgroundTest.h
     CalculateIqtTest.h
-    CalculateMonteCarloMultipleScatteringTest.h
+    DiscusMultipleScatteringCorrectionTest.h
     CalculatePlaczekSelfScattering2Test.h
     CalculatePlaczekSelfScatteringTest.h
     CalculatePlaczekTest.h

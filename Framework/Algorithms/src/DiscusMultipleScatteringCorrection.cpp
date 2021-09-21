@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidAlgorithms/CalculateMonteCarloMultipleScattering.h"
+#include "MantidAlgorithms/DiscusMultipleScatteringCorrection.h"
 #include "MantidAPI/EqualBinSizesValidator.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/InstrumentValidator.h"
@@ -40,12 +40,12 @@ namespace Mantid {
 namespace Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(CalculateMonteCarloMultipleScattering)
+DECLARE_ALGORITHM(DiscusMultipleScatteringCorrection)
 
 /**
  * Initialize the algorithm
  */
-void CalculateMonteCarloMultipleScattering::init() {
+void DiscusMultipleScatteringCorrection::init() {
   // The input workspace must have an instrument and units of wavelength
   auto wsValidator = std::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
@@ -123,7 +123,7 @@ void CalculateMonteCarloMultipleScattering::init() {
  * Validate the input properties.
  * @return a map where keys are property names and values the found issues
  */
-std::map<std::string, std::string> CalculateMonteCarloMultipleScattering::validateInputs() {
+std::map<std::string, std::string> DiscusMultipleScatteringCorrection::validateInputs() {
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   std::map<std::string, std::string> issues;
   Geometry::IComponent_const_sptr sample = inputWS->getInstrument()->getSample();
@@ -170,9 +170,9 @@ std::map<std::string, std::string> CalculateMonteCarloMultipleScattering::valida
 /**
  * Execution code
  */
-void CalculateMonteCarloMultipleScattering::exec() {
+void DiscusMultipleScatteringCorrection::exec() {
   g_log.warning(
-      "CalculateMonteCarloMultipleScattering is in the beta stage of development. Its name, properties and behaviour "
+      "DiscusMultipleScatteringCorrection is in the beta stage of development. Its name, properties and behaviour "
       "may change without warning.");
   if (!getAlwaysStoreInADS())
     throw std::runtime_error("This algorithm explicitly stores named output workspaces in the ADS so must be run with "
@@ -393,8 +393,8 @@ void CalculateMonteCarloMultipleScattering::exec() {
  * scatter calculation should be performed
  * @return The total cross section
  */
-double CalculateMonteCarloMultipleScattering::new_vector(const MatrixWorkspace_sptr sigmaSSWS, const Material &material,
-                                                         double kinc, bool specialSingleScatterCalc) {
+double DiscusMultipleScatteringCorrection::new_vector(const MatrixWorkspace_sptr sigmaSSWS, const Material &material,
+                                                      double kinc, bool specialSingleScatterCalc) {
   double scatteringXSection, absorbXsection;
   if (specialSingleScatterCalc) {
     absorbXsection = 0;
@@ -419,8 +419,8 @@ double CalculateMonteCarloMultipleScattering::new_vector(const MatrixWorkspace_s
  * @param x The x value to interpolate at
  * @return The exponential of the interpolated value
  */
-double CalculateMonteCarloMultipleScattering::interpolateGaussian(const HistogramData::Histogram &histToInterpolate,
-                                                                  double x) {
+double DiscusMultipleScatteringCorrection::interpolateGaussian(const HistogramData::Histogram &histToInterpolate,
+                                                               double x) {
   // could have written using points() method so it also worked on histogram data but found that the points
   // method was bottleneck on multithreaded code due to cow_ptr atomic_load
   assert(histToInterpolate.xMode() == HistogramData::Histogram::XMode::Points);
@@ -475,12 +475,12 @@ double CalculateMonteCarloMultipleScattering::interpolateGaussian(const Histogra
  * scatter calculation should be performed
  * @return An average weight across all of the paths
  */
-double CalculateMonteCarloMultipleScattering::simulatePaths(const int nPaths, const int nScatters, const Sample &sample,
-                                                            const Geometry::Instrument &instrument,
-                                                            Kernel::PseudoRandomNumberGenerator &rng,
-                                                            const MatrixWorkspace_sptr sigmaSSWS,
-                                                            const HistogramData::Histogram &SOfQ, const double kinc,
-                                                            Kernel::V3D detPos, bool specialSingleScatterCalc) {
+double DiscusMultipleScatteringCorrection::simulatePaths(const int nPaths, const int nScatters, const Sample &sample,
+                                                         const Geometry::Instrument &instrument,
+                                                         Kernel::PseudoRandomNumberGenerator &rng,
+                                                         const MatrixWorkspace_sptr sigmaSSWS,
+                                                         const HistogramData::Histogram &SOfQ, const double kinc,
+                                                         Kernel::V3D detPos, bool specialSingleScatterCalc) {
   double sumOfWeights = 0, sumOfQSS = 0.;
   auto sourcePos = instrument.getSource()->getPos();
 
@@ -527,7 +527,7 @@ double CalculateMonteCarloMultipleScattering::simulatePaths(const int nPaths, co
  * @return A tuple containing a success/fail boolean, the calculated weight and
  * a sum of the QSS values across the n-1 multiple scatters
  */
-std::tuple<bool, double, double> CalculateMonteCarloMultipleScattering::scatter(
+std::tuple<bool, double, double> DiscusMultipleScatteringCorrection::scatter(
     const int nScatters, const Sample &sample, const Geometry::Instrument &instrument, const V3D sourcePos,
     Kernel::PseudoRandomNumberGenerator &rng, const double sigma_total, double scatteringXSection,
     const HistogramData::Histogram &SOfQ, const double kinc, Kernel::V3D detPos, bool specialSingleScatterCalc) {
@@ -573,10 +573,9 @@ std::tuple<bool, double, double> CalculateMonteCarloMultipleScattering::scatter(
 }
 
 // update track direction, QSS and weight
-void CalculateMonteCarloMultipleScattering::q_dir(Geometry::Track &track, const HistogramData::Histogram &SOfQ,
-                                                  const double kinc, const double scatteringXSection,
-                                                  Kernel::PseudoRandomNumberGenerator &rng, double &QSS,
-                                                  double &weight) {
+void DiscusMultipleScatteringCorrection::q_dir(Geometry::Track &track, const HistogramData::Histogram &SOfQ,
+                                               const double kinc, const double scatteringXSection,
+                                               Kernel::PseudoRandomNumberGenerator &rng, double &QSS, double &weight) {
   const double kf = kinc; // elastic only so far
   const double qmin = abs(kf - kinc);
   const double qrange = 2 * kinc;
@@ -597,8 +596,8 @@ void CalculateMonteCarloMultipleScattering::q_dir(Geometry::Track &track, const 
  * @param cosT Cos two theta. two theta is scattering angle
  * @param phi Phi (radians) of after track. Measured in plane perpendicular to initial trajectory
  */
-void CalculateMonteCarloMultipleScattering::updateTrackDirection(Geometry::Track &track, const double cosT,
-                                                                 const double phi) {
+void DiscusMultipleScatteringCorrection::updateTrackDirection(Geometry::Track &track, const double cosT,
+                                                              const double phi) {
   const auto B3 = sqrt(1 - cosT * cosT);
   const auto B2 = cosT;
   // possible to do this using the Quat class instead??
@@ -645,10 +644,10 @@ void CalculateMonteCarloMultipleScattering::updateTrackDirection(Geometry::Track
  * @param rng Random number generator
  * @return a track intercepting the sample
  */
-Geometry::Track
-CalculateMonteCarloMultipleScattering::start_point(const Geometry::IObject &shape,
-                                                   std::shared_ptr<const Geometry::ReferenceFrame> frame,
-                                                   const V3D sourcePos, Kernel::PseudoRandomNumberGenerator &rng) {
+Geometry::Track DiscusMultipleScatteringCorrection::start_point(const Geometry::IObject &shape,
+                                                                std::shared_ptr<const Geometry::ReferenceFrame> frame,
+                                                                const V3D sourcePos,
+                                                                Kernel::PseudoRandomNumberGenerator &rng) {
   const int MAX_ATTEMPTS = 100;
   for (int i = 0; i < MAX_ATTEMPTS; i++) {
     auto t = generateInitialTrack(shape, frame, sourcePos, rng);
@@ -663,14 +662,14 @@ CalculateMonteCarloMultipleScattering::start_point(const Geometry::IObject &shap
       return t;
     }
   }
-  throw std::runtime_error("CalculateMultipleScattering::start_point() - Unable to "
+  throw std::runtime_error("DiscusMultipleScatteringCorrection::start_point() - Unable to "
                            "generate entry point into sample");
 }
 
 // update track start point and weight
-void CalculateMonteCarloMultipleScattering::updateWeightAndPosition(Geometry::Track &track, double &weight,
-                                                                    const double vmu, const double sigma_total,
-                                                                    Kernel::PseudoRandomNumberGenerator &rng) {
+void DiscusMultipleScatteringCorrection::updateWeightAndPosition(Geometry::Track &track, double &weight,
+                                                                 const double vmu, const double sigma_total,
+                                                                 Kernel::PseudoRandomNumberGenerator &rng) {
   const double dl = track.front().distInsideObject;
   const double b4 = (1.0 - exp(-dl * vmu));
   const double vmfp = 1.0 / vmu;
@@ -688,7 +687,7 @@ void CalculateMonteCarloMultipleScattering::updateWeightAndPosition(Geometry::Tr
  * @param rng Random number generator
  * @return a track
  */
-Geometry::Track CalculateMonteCarloMultipleScattering::generateInitialTrack(
+Geometry::Track DiscusMultipleScatteringCorrection::generateInitialTrack(
     const Geometry::IObject &shape, std::shared_ptr<const Geometry::ReferenceFrame> frame, const V3D &sourcePos,
     Kernel::PseudoRandomNumberGenerator &rng) {
   auto sampleBox = shape.getBoundingBox();
@@ -716,7 +715,7 @@ Geometry::Track CalculateMonteCarloMultipleScattering::generateInitialTrack(
  * @param track A track defining the current trajectory
  * @param vl A distance to move along the current trajectory
  */
-void CalculateMonteCarloMultipleScattering::inc_xyz(Geometry::Track &track, double vl) {
+void DiscusMultipleScatteringCorrection::inc_xyz(Geometry::Track &track, double vl) {
   Kernel::V3D position = track.front().entryPoint;
   Kernel::V3D direction = track.direction();
   auto x = position[0] + vl * direction[0];
@@ -737,14 +736,13 @@ void CalculateMonteCarloMultipleScattering::inc_xyz(Geometry::Track &track, doub
  * @param columns The number of columns of detectors to create
  * @return a pointer to an SparseInstrument object
  */
-std::shared_ptr<SparseWorkspace> CalculateMonteCarloMultipleScattering::createSparseWorkspace(
+std::shared_ptr<SparseWorkspace> DiscusMultipleScatteringCorrection::createSparseWorkspace(
     const API::MatrixWorkspace &modelWS, const size_t wavelengthPoints, const size_t rows, const size_t columns) {
   auto sparseWS = std::make_shared<SparseWorkspace>(modelWS, wavelengthPoints, rows, columns);
   return sparseWS;
 }
 
-MatrixWorkspace_sptr
-CalculateMonteCarloMultipleScattering::createOutputWorkspace(const MatrixWorkspace &inputWS) const {
+MatrixWorkspace_sptr DiscusMultipleScatteringCorrection::createOutputWorkspace(const MatrixWorkspace &inputWS) const {
   MatrixWorkspace_uptr outputWS = DataObjects::create<Workspace2D>(inputWS);
   // The algorithm computes the signal values at bin centres so they should
   // be treated as a distribution
@@ -759,12 +757,12 @@ CalculateMonteCarloMultipleScattering::createOutputWorkspace(const MatrixWorkspa
  * class
  * @return a pointer to an InterpolationOption object
  */
-std::unique_ptr<InterpolationOption> CalculateMonteCarloMultipleScattering::createInterpolateOption() {
+std::unique_ptr<InterpolationOption> DiscusMultipleScatteringCorrection::createInterpolateOption() {
   auto interpolationOpt = std::make_unique<InterpolationOption>();
   return interpolationOpt;
 }
 
-void CalculateMonteCarloMultipleScattering::interpolateFromSparse(
+void DiscusMultipleScatteringCorrection::interpolateFromSparse(
     MatrixWorkspace &targetWS, const SparseWorkspace &sparseWS,
     const Mantid::Algorithms::InterpolationOption &interpOpt) {
   const auto &spectrumInfo = targetWS.spectrumInfo();
@@ -789,7 +787,7 @@ void CalculateMonteCarloMultipleScattering::interpolateFromSparse(
   PARALLEL_CHECK_INTERUPT_REGION
 }
 
-void CalculateMonteCarloMultipleScattering::correctForWorkspaceNameClash(std::string &wsName) {
+void DiscusMultipleScatteringCorrection::correctForWorkspaceNameClash(std::string &wsName) {
   bool noClash(false);
 
   for (int i = 0; !noClash; ++i) {
@@ -813,7 +811,7 @@ void CalculateMonteCarloMultipleScattering::correctForWorkspaceNameClash(std::st
  * @param ws The ws to set the name on
  * @param wsName The name to set on the workspace
  */
-void CalculateMonteCarloMultipleScattering::setWorkspaceName(const API::MatrixWorkspace_sptr &ws, std::string wsName) {
+void DiscusMultipleScatteringCorrection::setWorkspaceName(const API::MatrixWorkspace_sptr &ws, std::string wsName) {
   correctForWorkspaceNameClash(wsName);
   API::AnalysisDataService::Instance().addOrReplace(wsName, ws);
 }
