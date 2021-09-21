@@ -63,7 +63,7 @@ Improvements
 - The plotting has been updated for better stability.
 - The plotting now has autoscale active by default.
 - It is now possible to load nexusV2 files in the GUI.
-- Added a table to store phasequads in the phase tab. Also, phasequads no longer delete themselves automatically.
+- Added a table to store :ref:`PhaseQuads <algm-PhaseQuad>` in the phase tab. Also, phasequads no longer delete themselves automatically.
 - The labels on the tabs in the GUIs will now show in full
 - When running the :ref:`DynamicKobuToyabe <func-DynamicKuboToyabe>` fitting function you should now be able to see the BinWidth to 3 decimal places.
 - It is now possible to select the normalisation (``analysis_asymmetry_norm``) and group (``analysis_group``) in the :ref:`Results Tab <muon_results_tab-ref>`.
@@ -80,6 +80,8 @@ Bugfixes
 - The autoscale option when ``All`` is selected will now show the largest and smallest y value for all of the plots.
 - The global parameters in a results table will no longer be given a zero error arbitrarily if one with an error exists.
 - The attribute values in a Chebyshev function will no longer get reset after performing a simultaneous fit.
+- Fixed a crash caused by fitting to rebinned :ref:`PhaseQuad <algm-PhaseQuad>` data.
+- When :ref:`PhaseQuad <algm-PhaseQuad>` data is rebinned it now divides by the fractional change in the bin size (to keep the asymmetry to about 0.3).
 
 ALC
 ---
