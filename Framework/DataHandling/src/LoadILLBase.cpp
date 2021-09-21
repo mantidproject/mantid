@@ -50,7 +50,7 @@ void LoadILLBase::bootstrap() {
   PropertyManager_sptr pmp = getProperty("PatchNexusMetadataEntries");
   m_nxroot = std::make_unique<NXRoot>(filename);
   m_nep = std::make_unique<NexusEntryProvider>(filename, *pmp);
-  m_helper = std::make_unique<LoadHelper>();
+  m_helper = std::make_shared<LoadHelper>();
   m_mode = resolveAcqMode();
   m_instrument = resolveInstrument();
   validateMetadata();

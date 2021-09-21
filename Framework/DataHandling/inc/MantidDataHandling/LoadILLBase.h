@@ -21,8 +21,8 @@ namespace Mantid::DataHandling {
 class DLLExport LoadILLBase : public API::IFileLoader<Kernel::NexusDescriptor> {
 protected:
   // protected getters
-  std::shared_ptr<NeXus::NXRoot> getNXRoot() { return m_nxroot; }
-  std::shared_ptr<NexusEntryProvider> getNep() { return m_nep; }
+  std::unique_ptr<NeXus::NXRoot> &getNXRoot() { return m_nxroot; }
+  std::unique_ptr<NexusEntryProvider> &getNep() { return m_nep; }
   std::shared_ptr<LoadHelper> getHelper() { return m_helper; }
   std::shared_ptr<API::Workspace> getOutput() { return m_workspace; }
   std::string getAcqMode() { return m_mode; }
@@ -55,8 +55,8 @@ private:
   void setOutputWorkspace();
 
   // member variables
-  std::shared_ptr<NeXus::NXRoot> m_nxroot;
-  std::shared_ptr<NexusEntryProvider> m_nep;
+  std::unique_ptr<NeXus::NXRoot> m_nxroot;
+  std::unique_ptr<NexusEntryProvider> m_nep;
   std::shared_ptr<LoadHelper> m_helper;
   std::shared_ptr<API::Workspace> m_workspace;
   std::string m_mode;
