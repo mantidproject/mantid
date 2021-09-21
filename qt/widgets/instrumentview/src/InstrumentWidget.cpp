@@ -157,6 +157,7 @@ InstrumentWidget::InstrumentWidget(QString wsName, QWidget *parent, bool resetGe
   QMetaObject::invokeMethod(m_instrumentActor.get(), "initialize", Qt::QueuedConnection);
 
   m_xIntegration = new XIntegrationControl(this);
+  m_xIntegration->setEnabled(false);
   m_mainLayout->addWidget(m_xIntegration);
   m_qtConnect->connect(m_xIntegration, SIGNAL(changed(double, double)), this,
                        SLOT(setIntegrationRange(double, double)));
@@ -318,6 +319,7 @@ void InstrumentWidget::init(bool resetGeometry, bool autoscaling, double scaleMi
 void InstrumentWidget::initWidget() {
   // re-enable side panels now that the instrument is loaded
   m_controlPanelLayout->setEnabled(true);
+  m_xIntegration->setEnabled(true);
   init(m_resetGeometry, m_autoscaling, m_scaleMin, m_scaleMax, m_setDefaultView, false);
 }
 
