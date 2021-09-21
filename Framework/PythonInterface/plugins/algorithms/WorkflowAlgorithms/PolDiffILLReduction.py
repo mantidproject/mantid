@@ -1064,9 +1064,10 @@ class PolDiffILLReduction(PythonAlgorithm):
         L1 = instrument.getNumberParameter('sample_distance_chopper')[0]  # in m
         L2_odd = instrument.getNumberParameter('sample_distance_odd')[0]  # in m
         L2_even = instrument.getNumberParameter('sample_distance_even')[0]  # in m
-        neutron_velocity = np.sqrt(2.0 * Ei / neutron_mass) * light_speed  # in m / s, light_speed to go back to SI
-        tof_deltaE_0_odd = 1e6 * (L1 + L2_odd) / neutron_velocity  # in us
-        tof_deltaE_0_even = 1e6 * (L1 + L2_even) / neutron_velocity # in us
+        neutron_speed = np.sqrt(2.0 * Ei / neutron_mass) * light_speed  # in m / s, light_speed to go back to SI
+        self._sampleAndEnvironmentProperties['NeutronSpeed'] = float(neutron_speed)
+        tof_deltaE_0_odd = 1e6 * (L1 + L2_odd) / neutron_speed  # in us
+        tof_deltaE_0_even = 1e6 * (L1 + L2_even) / neutron_speed  # in us
         peak_positions = mtd[self._elastic_channels_ws].column('PeakCentre')
         for entry in mtd[ws]:
             for pixel_no in range(entry.getNumberHistograms()):
