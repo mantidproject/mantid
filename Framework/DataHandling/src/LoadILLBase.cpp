@@ -10,6 +10,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidDataHandling/LoadHelper.h"
 #include "MantidDataHandling/NexusEntryProvider.h"
 #include "MantidKernel/PropertyManagerProperty.h"
 

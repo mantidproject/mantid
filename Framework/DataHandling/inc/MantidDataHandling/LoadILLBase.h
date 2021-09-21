@@ -7,9 +7,9 @@
 #pragma once
 
 #include "MantidAPI/IFileLoader.h"
-#include "MantidAPI/Workspace.h"
+#include "MantidAPI/Workspace_fwd.h"
 #include "MantidDataHandling/DllConfig.h"
-#include "MantidDataHandling/LoadHelper.h"
+#include "MantidDataHandling/LoadHelper_fwd.h"
 #include "MantidDataHandling/NexusEntryProvider.h"
 #include "MantidNexus/NexusClasses.h"
 

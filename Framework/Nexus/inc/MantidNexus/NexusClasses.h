@@ -585,15 +585,29 @@ public:
   int getInt(const std::string &name) const;
 
   /**
-   * Returns a typed value (int, float, double or string)
+   * Returns a typed scalar value templated on the return variable
    * @param name :: The name of the entry
    * @return the typed value
    */
-  template <typename T> T getTyped(const std::string &name) const { return reinterpret_cast<T>(getString(name)); }
-  template <> int getTyped(const std::string &name) const { return getInt(name); }
-  template <> float getTyped(const std::string &name) const { return getFloat(name); }
-  template <> double getTyped(const std::string &name) const { return getDouble(name); }
-  template <> std::string getTyped(const std::string &name) const { return getString(name); }
+  template <typename T> T getTypedScalar(const std::string &name) const {
+    auto number = openNXDataSet<T>(name);
+    number.load();
+    return *number();
+  }
+
+  /**
+   * Returns a typed 1D vector value templated on the return variable
+   * @param name :: The name of the entry
+   * @return the typed value
+   */
+  template <typename T> std::vector<T> getTypedVector(const std::string &name) const {
+    auto contents = openNXDataSet<T>(name);
+    contents.load();
+    T *address = &contents();
+    std::vector<T> retval;
+    retval.assign(address, address + contents.dim0());
+    return retval;
+  }
 
   /// Returns a list of all classes (or groups) in this NXClass
   std::vector<NXClassInfo> &groups() const { return *m_groups; }

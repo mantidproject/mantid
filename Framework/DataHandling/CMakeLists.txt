@@ -277,6 +277,7 @@ set(INC_FILES
     inc/MantidDataHandling/LoadGeometry.h
     inc/MantidDataHandling/LoadHFIRSANS.h
     inc/MantidDataHandling/LoadHelper.h
+    inc/MantidDataHandling/LoadHelper_fwd.h
     inc/MantidDataHandling/LoadIDFFromNexus.h
     inc/MantidDataHandling/LoadILLBase.h
     inc/MantidDataHandling/LoadILLDiffraction.h

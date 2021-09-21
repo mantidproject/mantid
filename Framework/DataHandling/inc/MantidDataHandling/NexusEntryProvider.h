@@ -21,17 +21,30 @@ public:
   NexusEntryProvider(const std::string &filename, const Kernel::PropertyManager &entriesToPatch)
       : m_nxroot(filename), m_entriesToPatch(entriesToPatch) {}
 
-  template <typename T> T getNexusEntryValue(const std::string &entryName) {
+  template <typename T> T getScalarMetadata(const std::string &entryName) {
     if (m_entriesToPatch.existsProperty(entryName)) {
       return m_entriesToPatch.getProperty(entryName);
     } else {
       try {
-        return m_nxroot.getTyped<T>(entryName);
+        return m_nxroot.getTypedScalar<T>(entryName);
       } catch (std::runtime_error &) {
         throwMissingKeyError(entryName);
       }
     }
   }
+
+  template <typename T> std::vector<T> getVectorMetadata(const std::string &entryName) {
+    if (m_entriesToPatch.existsProperty(entryName)) {
+      return m_entriesToPatch.getProperty(entryName);
+    } else {
+      try {
+        return m_nxroot.getTypedVector<T>(entryName);
+      } catch (std::runtime_error &) {
+        throwMissingKeyError(entryName);
+      }
+    }
+  }
+
   bool isValid(const std::vector<std::string> &mandatoryKeys) {
     for (const auto &key : mandatoryKeys) {
       if (!keyExists(key)) {
