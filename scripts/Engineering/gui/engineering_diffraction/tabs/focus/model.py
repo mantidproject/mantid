@@ -16,14 +16,11 @@ from mantid.simpleapi import logger, AnalysisDataService as Ads, SaveNexus, Save
     Load, NormaliseByCurrent, Divide, DiffractionFocussing, RebinToWorkspace, DeleteWorkspace, ApplyDiffCal, \
     ConvertUnits, ReplaceSpecialValues, EnggEstimateFocussedBackground, AddSampleLog, ExtractSingleSpectrum
 
-SAMPLE_RUN_WORKSPACE_NAME = "engggui_focusing_input_ws"
 FOCUSED_OUTPUT_WORKSPACE_NAME = "engggui_focusing_output_ws_"
 CALIB_PARAMS_WORKSPACE_NAME = "engggui_calibration_banks_parameters"
-REGION_CALIB_WS_PREFIX = "engggui_calibration_"
 CURVES_PREFIX = "engggui_curves_"
 
-NORTH_BANK_CAL = "EnginX_NorthBank.cal"
-SOUTH_BANK_CAL = "EnginX_SouthBank.cal"
+XUNIT_SUFFIXES = {'d-Spacing': '_dSpacing', 'Time-of-flight': '_TOF'}  # to put in saved focused data filename
 
 
 class FocusModel(object):
@@ -82,6 +79,9 @@ class FocusModel(object):
             ws_sample = self._load_run_and_convert_to_dSpacing(sample_path, calibration.get_instrument(), full_calib)
             ws_foc = self._focus_run_and_apply_roi_calibration(ws_sample, calibration, applyCal=True)
             ws_foc = self._apply_vanadium_norm(ws_foc, ws_van_foc)
+            self._save_output_files(ws_foc, calibration, van_run, rb_num)
+            # convert units to TOF and save again
+            ws_foc = ConvertUnits(InputWorkspace=ws_foc, OutputWorkspace=ws_foc.name(), Target='TOF')
             self._save_output_files(ws_foc, calibration, van_run, rb_num)
             output_workspaces.append(ws_foc.name())
 
@@ -142,13 +142,13 @@ class FocusModel(object):
                                              NaNValue=0, NaNError=0.0, InfinityValue=0, InfinityError=0.0)
         return sample_ws_foc
 
-    def _save_output_files(self, sample_ws_foc, calibration, van_run, rb_num = None):
+    def _save_output_files(self, sample_ws_foc, calibration, van_run, rb_num=None):
         focus_dir = path.join(output_settings.get_output_path(), "Focus")
         if not path.exists(focus_dir):
             makedirs(focus_dir)
         # set bankid for use in fit tab
         foc_suffix = calibration.get_foc_ws_suffix()
-        # if nspec = 1 - just use suffix
+        xunit_suffix = XUNIT_SUFFIXES[sample_ws_foc.getDimension(0).getName()]
         for ispec in range(sample_ws_foc.getNumberHistograms()):
             ws_spec = ExtractSingleSpectrum(InputWorkspace=sample_ws_foc, WorkspaceIndex=ispec)
             # add a bankid and vanadium to log that is read by fitting model
@@ -157,7 +157,7 @@ class FocusModel(object):
             AddSampleLog(Workspace=ws_spec, LogName="Vanadium Run", LogText=van_run)
             ws_spec.getRun().addProperty("bankid", bankid, True) # overwrites previous if exists
             # save spectrum as nexus, gss and XYE
-            filename = self._generate_output_file_name(calibration, van_run, bankid, ext="")
+            filename = self._generate_output_file_name(calibration, van_run, bankid, xunit_suffix)
             SaveNexus(InputWorkspace=ws_spec, Filename=path.join(focus_dir, filename + ".nxs"))
             SaveGSS(InputWorkspace=ws_spec, Filename=path.join(focus_dir, filename + ".gss"))
             SaveFocusedXYE(InputWorkspace=ws_spec, Filename=path.join(focus_dir, filename + ".abc"),
