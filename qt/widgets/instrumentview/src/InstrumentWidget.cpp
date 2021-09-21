@@ -131,22 +131,24 @@ InstrumentWidget::InstrumentWidget(QString wsName, QWidget *parent, bool resetGe
 
   setFocusPolicy(Qt::StrongFocus);
   m_mainLayout = new QVBoxLayout(this);
-  auto *controlPanelLayout = new QSplitter(Qt::Horizontal);
+  m_controlPanelLayout = new QSplitter(Qt::Horizontal);
 
   // Add Tab control panel
   mControlsTab = new QTabWidget(this);
-  controlPanelLayout->addWidget(mControlsTab);
-  controlPanelLayout->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+  m_controlPanelLayout->addWidget(mControlsTab);
+  m_controlPanelLayout->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
   m_instrumentDisplay->installEventFilter(this);
   m_instrumentDisplay->getGLDisplay()->setMinimumWidth(600);
   m_qtConnect->connect(this, SIGNAL(enableLighting(bool)), m_instrumentDisplay->getGLDisplay(),
                        SLOT(enableLighting(bool)));
 
-  controlPanelLayout->addWidget(aWidget);
+  m_controlPanelLayout->addWidget(aWidget);
 
-  m_mainLayout->addWidget(controlPanelLayout);
+  m_mainLayout->addWidget(m_controlPanelLayout);
 
+  // disable all controls until background thread has finished
+  m_controlPanelLayout->setEnabled(false);
   m_instrumentActor = std::make_unique<InstrumentActor>(m_workspaceName.toStdString(), *m_messageHandler, autoscaling,
                                                         scaleMin, scaleMax);
   m_instrumentActor->moveToThread(&m_thread);
@@ -203,13 +205,14 @@ InstrumentWidget::InstrumentWidget(QString wsName, QWidget *parent, bool resetGe
   const int tabsSize = windowWidth / 4;
   QList<int> sizes;
   sizes << tabsSize << windowWidth - tabsSize;
-  controlPanelLayout->setSizes(sizes);
-  controlPanelLayout->setStretchFactor(0, 0);
-  controlPanelLayout->setStretchFactor(1, 1);
+  m_controlPanelLayout->setSizes(sizes);
+  m_controlPanelLayout->setStretchFactor(0, 0);
+  m_controlPanelLayout->setStretchFactor(1, 1);
 
   resize(windowWidth, 650);
 
   tabChanged(0);
+  updateInfoText("Loading instrument...");
 
   m_qtConnect->connect(this, SIGNAL(needSetIntegrationRange(double, double)), this,
                        SLOT(setIntegrationRange(double, double)), Qt::QueuedConnection);
@@ -308,7 +311,13 @@ void InstrumentWidget::init(bool resetGeometry, bool autoscaling, double scaleMi
   updateIntegrationWidget(resetGeometry);
 }
 
+/**
+ * Wrapper around the init function that is called
+ * when thread creating the InstrumentActor is finished
+ */
 void InstrumentWidget::initWidget() {
+  // re-enable side panels now that the instrument is loaded
+  m_controlPanelLayout->setEnabled(true);
   init(m_resetGeometry, m_autoscaling, m_scaleMin, m_scaleMax, m_setDefaultView, false);
 }
 

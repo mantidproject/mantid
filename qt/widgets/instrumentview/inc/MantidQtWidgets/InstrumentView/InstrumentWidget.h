@@ -49,6 +49,7 @@ class QDragEnterEvent;
 class QDropEvent;
 class QStackedLayout;
 class QSettings;
+class QSplitter;
 class QVBoxLayout;
 
 namespace MantidQt {
@@ -372,6 +373,8 @@ private:
   double m_scaleMax;
   bool m_setDefaultView;
   bool m_resetGeometry;
+
+  QSplitter *m_controlPanelLayout;
 };
 
 } // namespace MantidWidgets
