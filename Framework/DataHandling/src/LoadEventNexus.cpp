@@ -351,26 +351,28 @@ void LoadEventNexus::filterDuringPause<EventWorkspaceCollection_sptr>(EventWorks
  * Filter the events by pulse time - no in place version so have to return workspace
  *
  */
-template <typename T> T LoadEventNexus::filterByTime(T workspace) {
+template <typename T>
+T LoadEventNexus::filterEventsByTime(T workspace, Mantid::Types::Core::DateAndTime &startTime,
+                                     Mantid::Types::Core::DateAndTime &stopTime) {
 
   auto filterByTime = createChildAlgorithm("FilterByTime");
   g_log.information("Filtering events by time...");
   filterByTime->setProperty("InputWorkspace", workspace);
-  filterByTime->setProperty("OutputWorkspace", workspace);
   // sample log already filtered by time so use absolute times to be safe
-  filterByTime->setProperty("AbsoluteStartTime", filter_time_start.toISO8601String());
-  filterByTime->setProperty("AbsoluteStopTime", filter_time_stop.toISO8601String());
+  filterByTime->setProperty("AbsoluteStartTime", startTime.toISO8601String());
+  filterByTime->setProperty("AbsoluteStopTime", stopTime.toISO8601String());
   filterByTime->execute();
-  T resultWorkspace = filterByTime->getProperty("OutputWorkspace");
-  return resultWorkspace;
+  return filterByTime->getProperty("OutputWorkspace");
 }
 
 template <>
 EventWorkspaceCollection_sptr
-LoadEventNexus::filterByTime<EventWorkspaceCollection_sptr>(EventWorkspaceCollection_sptr workspace) {
+LoadEventNexus::filterEventsByTime<EventWorkspaceCollection_sptr>(EventWorkspaceCollection_sptr workspace,
+                                                                  Mantid::Types::Core::DateAndTime &startTime,
+                                                                  Mantid::Types::Core::DateAndTime &stopTime) {
   // We provide a function pointer to the filter method of the object
   using std::placeholders::_1;
-  auto func = std::bind(&LoadEventNexus::filterByTime<EventWorkspace_sptr>, this, _1);
+  auto func = std::bind(&LoadEventNexus::filterEventsByTime<EventWorkspace_sptr>, this, _1, startTime, stopTime);
   workspace->applyFilter(func);
   return workspace;
 }
@@ -1014,11 +1016,6 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
     }
   }
 
-  if (is_time_filtered) {
-    // Now filter out the run, using the DateAndTime type.
-    m_ws->mutableRun().filterByTime(filter_time_start, filter_time_stop);
-  }
-
   if (metaDataOnly) {
     // Now, create a default X-vector for histogramming, with just 2 bins.
     auto axis = HistogramData::BinEdges{1, static_cast<double>(std::numeric_limits<uint32_t>::max()) * 0.1 - 1};
@@ -1188,7 +1185,10 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
   adjustTimeOfFlightISISLegacy(*m_file, m_ws, m_top_entry_name, classType, descriptor.get());
 
   if (is_time_filtered) {
-    filterByTime(m_ws);
+    // Now filter out the run and events, using the DateAndTime type.
+    // This will sort both by pulse time
+    m_ws->mutableRun().filterByTime(filter_time_start, filter_time_stop);
+    filterEventsByTime(m_ws, filter_time_start, filter_time_stop);
   }
 }
 
