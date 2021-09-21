@@ -20,19 +20,31 @@ PreviewPresenter::PreviewPresenter(Dependencies dependencies)
   m_jobManager->subscribe(this);
 }
 
+/** Notification received when the user has requested to load a workspace. If it already exists in the ADS
+ * then we use that and continue to plot it; otherwise we start an async load.
+ */
 void PreviewPresenter::notifyLoadWorkspaceRequested() {
   auto const name = m_view->getWorkspaceName();
-  m_model->loadWorkspace(name, *m_jobManager);
+  if (m_model->loadWorkspaceFromAds(name)) {
+    notifyLoadWorkspaceCompleted();
+  } else {
+    m_model->loadAndPreprocessWorkspaceAsync(name, *m_jobManager);
+  }
 }
 
+/** Notification received from the job manager when loading has completed.
+ */
 void PreviewPresenter::notifyLoadWorkspaceCompleted() {
+  // The model has already been updated by another callback to contain the loaded workspace. If loading fails
+  // then it should bail out early and this method should never be called, so the workspace should
+  // always be valid at this point.
   auto ws = m_model->getLoadedWs();
-  assert(ws); // This method should never be called for the failure path
-  m_instViewModel->notifyWorkspaceUpdated(ws);
+  assert(ws);
 
+  // Notify the instrument view model that the workspace has changed before we get the surface
+  m_instViewModel->notifyWorkspaceUpdated(ws);
   auto surface = m_instViewModel->getInstrumentViewSurface();
   m_view->plotInstView(surface);
   g_log.notice("Loaded ws pointer");
 }
-
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

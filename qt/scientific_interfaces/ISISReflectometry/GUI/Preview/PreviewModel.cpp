@@ -23,27 +23,36 @@ Mantid::Kernel::Logger g_log("Reflectometry Preview Model");
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
-void PreviewModel::loadWorkspace(std::string const &workspaceName, IJobManager &jobManager) {
-  createRunDetails(workspaceName);
-  auto ws = loadFromAds(workspaceName);
-  if (!ws) {
-    // Row is automatically updated (as we pass by-ref) on completion
-    jobManager.startPreprocessing(*m_runDetails);
-  } else {
-    m_runDetails->setLoadedWs(ws);
+/** Set the loaded workspace from the ADS if it exists
+ *
+ * @param workspaceName : the workspace name to look for
+ * @returns : true if the loaded workspace was set, false if it was not found in the ADS
+ */
+bool PreviewModel::loadWorkspaceFromAds(std::string const &workspaceName) {
+  auto &adsInstance = AnalysisDataService::Instance();
+  if (!adsInstance.doesExist(workspaceName)) {
+    return false;
   }
+  auto ws = adsInstance.retrieveWS<MatrixWorkspace>(workspaceName);
+  createRunDetails(workspaceName);
+  m_runDetails->setLoadedWs(ws);
+  return true;
+}
+
+/** Load a workspace and perform standard ISIS reflectometry preprocessing on it.
+ * This is done asynchronously. The caller should subscribe to the job manager to
+ * get a callback when loading is finished.
+ *
+ * @param workspaceName : the workspace name to load
+ * @param jobManager : the job manager that will perform the loading
+ */
+void PreviewModel::loadAndPreprocessWorkspaceAsync(std::string const &workspaceName, IJobManager &jobManager) {
+  createRunDetails(workspaceName);
+  // Note that the run details are automatically updated with the resulting workspace (as we pass by-ref) on completion
+  jobManager.startPreprocessing(*m_runDetails);
 }
 
 MatrixWorkspace_sptr PreviewModel::getLoadedWs() const { return m_runDetails->getLoadedWs(); }
-
-MatrixWorkspace_sptr PreviewModel::loadFromAds(std::string const &workspaceName) const {
-  auto &adsInstance = AnalysisDataService::Instance();
-  if (adsInstance.doesExist(workspaceName)) {
-    g_log.information("Loaded from ADS" + workspaceName);
-    return adsInstance.retrieveWS<MatrixWorkspace>(workspaceName);
-  }
-  return nullptr;
-}
 
 void PreviewModel::createRunDetails(const std::string &workspaceName) {
   m_runDetails = std::make_unique<PreviewRow>(std::vector<std::string>{workspaceName});

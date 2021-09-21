@@ -14,7 +14,6 @@
 #include "MockPreviewModel.h"
 #include "MockPreviewView.h"
 #include "PreviewPresenter.h"
-#include "Reduction/PreviewRow.h"
 #include "TestHelpers/ModelCreationHelper.h"
 
 #include <cxxtest/TestSuite.h>
@@ -27,6 +26,7 @@ using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 using namespace MantidQt::CustomInterfaces::ISISReflectometry::ModelCreationHelper;
 using namespace MantidQt::API;
 
+using ::testing::_;
 using ::testing::ByRef;
 using ::testing::Eq;
 using ::testing::NiceMock;
@@ -42,16 +42,34 @@ class PreviewPresenterTest : public CxxTest::TestSuite {
   using MockViewT = std::unique_ptr<MockPreviewView>;
 
 public:
-  void test_notify_load_workspace_requested() {
+  void test_notify_load_workspace_requested_loads_from_file_if_not_in_ads() {
     auto mockModel = makeModel();
     auto mockView = makeView();
     auto mockJobManager = makeJobManager();
     auto const workspaceName = std::string("test workspace");
 
     EXPECT_CALL(*mockView, getWorkspaceName()).Times(1).WillOnce(Return(workspaceName));
-    EXPECT_CALL(*mockModel, loadWorkspace(Eq(workspaceName), Ref(*mockJobManager))).Times(1);
+    EXPECT_CALL(*mockModel, loadWorkspaceFromAds(workspaceName)).Times(1).WillOnce(Return(false));
+    EXPECT_CALL(*mockModel, loadAndPreprocessWorkspaceAsync(Eq(workspaceName), Ref(*mockJobManager))).Times(1);
 
     auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager)));
+    presenter.notifyLoadWorkspaceRequested();
+  }
+
+  void test_notify_load_workspace_requested_does_not_load_from_file_if_in_ads() {
+    auto mockModel = makeModel();
+    auto mockView = makeView();
+    auto mockInstViewModel = makeInstViewModel();
+    auto mockJobManager = makeJobManager();
+    auto const workspaceName = std::string("test workspace");
+
+    EXPECT_CALL(*mockView, getWorkspaceName()).Times(1).WillOnce(Return(workspaceName));
+    EXPECT_CALL(*mockModel, loadWorkspaceFromAds(workspaceName)).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(*mockModel, loadAndPreprocessWorkspaceAsync(_, _)).Times(0);
+    expectLoadWorkspaceCompleted(*mockView, *mockModel, *mockInstViewModel);
+
+    auto presenter = PreviewPresenter(
+        packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager), std::move(mockInstViewModel)));
     presenter.notifyLoadWorkspaceRequested();
   }
 
@@ -61,13 +79,7 @@ public:
     auto mockJobManager = makeJobManager();
     auto mockInstViewModel = makeInstViewModel();
 
-    auto row = PreviewRow({"12345"});
-    auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
-
-    EXPECT_CALL(*mockModel, getLoadedWs).Times(1).WillOnce(Return(ws));
-    EXPECT_CALL(*mockInstViewModel, notifyWorkspaceUpdated(Eq(ws))).Times(1);
-    EXPECT_CALL(*mockInstViewModel, getInstrumentViewSurface()).Times(1).WillOnce(Return(nullptr));
-    EXPECT_CALL(*mockView, plotInstView(Eq(nullptr)));
+    expectLoadWorkspaceCompleted(*mockView, *mockModel, *mockInstViewModel);
 
     auto deps = packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager), std::move(mockInstViewModel));
     auto presenter = PreviewPresenter(std::move(deps));
@@ -96,5 +108,14 @@ private:
                                           MockJobManagerT jobManager = std::make_unique<NiceMock<MockJobManager>>(),
                                           MockInstViewModelT instView = std::make_unique<MockInstViewModel>()) {
     return PreviewPresenter::Dependencies{view, std::move(model), std::move(jobManager), std::move(instView)};
+  }
+
+  void expectLoadWorkspaceCompleted(MockPreviewView &mockView, MockPreviewModel &mockModel,
+                                    MockInstViewModel &mockInstViewModel) {
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
+    EXPECT_CALL(mockModel, getLoadedWs).Times(1).WillOnce(Return(ws));
+    EXPECT_CALL(mockInstViewModel, notifyWorkspaceUpdated(Eq(ws))).Times(1);
+    EXPECT_CALL(mockInstViewModel, getInstrumentViewSurface()).Times(1).WillOnce(Return(nullptr));
+    EXPECT_CALL(mockView, plotInstView(Eq(nullptr)));
   }
 };
