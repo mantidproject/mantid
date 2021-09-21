@@ -100,7 +100,6 @@ public:
 protected:
   std::string createOutputName(const std::string &fitMode, const std::string &workspaceName,
                                const std::string &spectra) const;
-  Mantid::API::IAlgorithm_sptr createSequentialFit(Mantid::API::IFunction_sptr function) const;
   Mantid::API::IAlgorithm_sptr createSimultaneousFit(const Mantid::API::MultiDomainFunction_sptr &function) const;
   virtual Mantid::API::MultiDomainFunction_sptr getMultiDomainFunction() const;
   virtual std::unordered_map<std::string, std::string> mapDefaultParameterNames() const;
@@ -112,7 +111,8 @@ protected:
 private:
   void removeWorkspaceFromFittingData(WorkspaceID const &workspaceIndex);
 
-  Mantid::API::IAlgorithm_sptr createSequentialFit(const Mantid::API::IFunction_sptr &function,
+  Mantid::API::IAlgorithm_sptr createSequentialFit(Mantid::API::IFunction_sptr function) const;
+  Mantid::API::IAlgorithm_sptr createSequentialFit(const Mantid::API::IFunction_sptr function,
                                                    const std::string &input) const;
   virtual Mantid::API::IAlgorithm_sptr sequentialFitAlgorithm() const;
   virtual Mantid::API::IAlgorithm_sptr simultaneousFitAlgorithm() const;
