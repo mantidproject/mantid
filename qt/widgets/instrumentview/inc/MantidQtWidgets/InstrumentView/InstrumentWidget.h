@@ -334,12 +334,6 @@ protected:
   /// dict of selected tabs
   std::vector<std::pair<std::string, bool>> m_stateOfTabs;
 
-  bool m_autoscaling;
-  double m_scaleMin;
-  double m_scaleMax;
-  bool m_setDefaultView;
-  bool m_resetGeometry;
-
 private:
   /// ADS notification handlers
   void preDeleteHandle(const std::string &ws_name,
@@ -373,6 +367,11 @@ private:
   std::unique_ptr<IMessageHandler> m_messageHandler;
 
   QThread m_thread;
+  bool m_autoscaling;
+  double m_scaleMin;
+  double m_scaleMax;
+  bool m_setDefaultView;
+  bool m_resetGeometry;
 };
 
 } // namespace MantidWidgets

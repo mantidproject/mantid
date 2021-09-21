@@ -116,8 +116,9 @@ InstrumentWidget::InstrumentWidget(QString wsName, QWidget *parent, bool resetGe
           QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"))),
       mViewChanged(false), m_blocked(false), m_instrumentDisplayContextMenuOn(false),
       m_stateOfTabs(std::vector<std::pair<std::string, bool>>{}), m_wsReplace(false), m_help(nullptr),
-      m_qtConnect(std::move(deps.qtConnect)), m_messageHandler(std::move(deps.messageHandler)) {
-
+      m_qtConnect(std::move(deps.qtConnect)), m_messageHandler(std::move(deps.messageHandler)),
+      m_autoscaling(autoscaling), m_scaleMin(scaleMin), m_scaleMax(scaleMax), m_setDefaultView(setDefaultView),
+      m_resetGeometry(resetGeometry) {
   QWidget *aWidget = new QWidget(this);
   if (!m_instrumentDisplay) {
     m_instrumentDisplay =
@@ -150,6 +151,8 @@ InstrumentWidget::InstrumentWidget(QString wsName, QWidget *parent, bool resetGe
                                                         scaleMin, scaleMax);
   m_instrumentActor->moveToThread(&m_thread);
   connect(m_instrumentActor.get(), SIGNAL(initWidget()), this, SLOT(initWidget()));
+  m_thread.start();
+  QMetaObject::invokeMethod(m_instrumentActor.get(), "initialize", Qt::QueuedConnection);
 
   m_xIntegration = new XIntegrationControl(this);
   m_mainLayout->addWidget(m_xIntegration);
@@ -214,15 +217,6 @@ InstrumentWidget::InstrumentWidget(QString wsName, QWidget *parent, bool resetGe
 
   setWindowTitle(QString("Instrument - ") + m_workspaceName);
 
-  m_thread.start();
-  QMetaObject::invokeMethod(m_instrumentActor.get(), "initialize", Qt::QueuedConnection);
-
-  const bool resetActor(false);
-  m_autoscaling = autoscaling;
-  m_scaleMin = scaleMin;
-  m_scaleMax = scaleMax;
-  m_setDefaultView = setDefaultView;
-  m_resetGeometry = resetGeometry;
 }
 
 /**
