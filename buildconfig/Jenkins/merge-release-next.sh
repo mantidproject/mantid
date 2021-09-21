@@ -1,4 +1,9 @@
 #!/bin/sh
+
+# Fetch and merge release-next into master
+
+set -ex
+
 git fetch origin --prune
 git checkout master
 git reset --hard origin/master
