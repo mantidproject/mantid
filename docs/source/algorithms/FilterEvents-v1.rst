@@ -294,4 +294,4 @@ Output:
 
 .. categories::
 
-.. sourcelink::
+.. sourcelink:: /qt/python/mantidqtinterfaces/mantidqtinterfaces/FilterEvents.py
