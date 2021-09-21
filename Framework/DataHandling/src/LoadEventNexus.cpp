@@ -1187,7 +1187,6 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
   if (is_time_filtered) {
     // Now filter out the run and events, using the DateAndTime type.
     // This will sort both by pulse time
-    m_ws->mutableRun().filterByTime(filter_time_start, filter_time_stop);
     filterEventsByTime(m_ws, filter_time_start, filter_time_stop);
   }
 }
