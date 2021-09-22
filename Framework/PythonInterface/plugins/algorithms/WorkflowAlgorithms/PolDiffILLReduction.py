@@ -258,6 +258,8 @@ class PolDiffILLReduction(PythonAlgorithm):
                              direction=Direction.Input,
                              doc="What type of measurement technique has been used to collect the data.")
 
+        tofMeasurement = EnabledWhenProperty('MeasurementTechnique', PropertyCriterion.IsEqualTo, 'TOF')
+
         self.declareProperty(FileProperty('InstrumentCalibration', '',
                                           action=FileAction.OptionalLoad,
                                           extensions=['.xml']),
@@ -282,6 +284,16 @@ class PolDiffILLReduction(PythonAlgorithm):
                              doc='Manual energy exchange binning parameters.')
 
         self.setPropertySettings('EnergyBinning', tofMeasurement)
+
+        self.declareProperty('FrameOverlapCorrection', True,
+                             doc='Whether or not to perform frame overlap correction for TOF data.')
+
+        self.setPropertySettings('FrameOverlapCorrection', tofMeasurement)
+
+        self.declareProperty('DetectorEnergyEfficiencyCorrection', True,
+                             doc='Whether or not to perform detector energy efficiency correction for TOF data.')
+
+        self.setPropertySettings('DetectorEnergyEfficiencyCorrection', tofMeasurement)
 
     @staticmethod
     def _calculate_transmission(ws, beam_ws):
@@ -1239,7 +1251,7 @@ class PolDiffILLReduction(PythonAlgorithm):
                 self._calculate_polarising_efficiencies(ws)
 
             if process in ['Vanadium', 'Sample']:
-                if measurement_technique == 'TOF':
+                if measurement_technique == 'TOF' and self.getProperty('FrameOverlapCorrection').value:
                     self._correct_frame_overlap(ws)
                 pol_eff_ws = self.getPropertyValue('QuartzWorkspace')
                 if pol_eff_ws:
@@ -1251,8 +1263,9 @@ class PolDiffILLReduction(PythonAlgorithm):
                     self._apply_self_attenuation_correction(ws, empty_ws)
                 if measurement_technique == 'TOF':
                     self._calibrate_elastic_peak_position(ws)
-                    progress.report('Correcting detector-analyser efficiency')
-                    self._detector_analyser_energy_efficiency(ws)
+                    if self.getProperty('DetectorEnergyEfficiencyCorrection').value:
+                        progress.report('Correcting detector-analyser efficiency')
+                        self._detector_analyser_energy_efficiency(ws)
                 if process == 'Vanadium':
                     progress.report('Normalising vanadium output')
                     self._normalise_vanadium(ws)
