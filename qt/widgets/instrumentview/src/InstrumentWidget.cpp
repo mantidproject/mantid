@@ -135,7 +135,6 @@ InstrumentWidget::InstrumentWidget(QString wsName, QWidget *parent, bool resetGe
   controlPanelLayout->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
   m_instrumentDisplay->installEventFilter(this);
-
   m_instrumentDisplay->getGLDisplay()->setMinimumWidth(600);
   m_qtConnect->connect(this, SIGNAL(enableLighting(bool)), m_instrumentDisplay->getGLDisplay(),
                        SLOT(enableLighting(bool)));
@@ -275,7 +274,7 @@ void InstrumentWidget::init(bool resetGeometry, bool autoscaling, double scaleMi
     m_instrumentActor.reset(new InstrumentActor(m_workspaceName, autoscaling, scaleMin, scaleMax));
   }
 
-  updateIntegrationWidget(true);
+  updateIntegrationWidget(resetGeometry);
 
   auto surface = getSurface();
   if (resetGeometry || !surface) {
@@ -618,7 +617,7 @@ void InstrumentWidget::replaceWorkspace(const std::string &newWs, const std::str
  * initialized
  */
 void InstrumentWidget::updateIntegrationWidget(bool init) {
-  m_xIntegration->setTotalRange(m_instrumentActor->minBinValue(), m_instrumentActor->maxBinValue());
+  m_xIntegration->setTotalRange(m_instrumentActor->minWkspBinValue(), m_instrumentActor->maxWkspBinValue());
 
   if (!init) {
     m_xIntegration->setRange(m_instrumentActor->minBinValue(), m_instrumentActor->maxBinValue());
@@ -857,8 +856,10 @@ void InstrumentWidget::setInfoText(const QString &text) { mInteractionInfo->setT
 void InstrumentWidget::saveSettings() {
   QSettings settings;
   settings.beginGroup(InstrumentWidgetSettingsGroup);
+
   if (m_instrumentDisplay->getGLDisplay())
     settings.setValue("BackgroundColor", m_instrumentDisplay->getGLDisplay()->currentBackgroundColor());
+
   auto surface = getSurface();
   if (surface) {
     // if surface is null istrument view wasn't created and there is nothing to
@@ -1218,6 +1219,7 @@ void InstrumentWidget::updateInstrumentView(bool picking) { m_instrumentDisplay-
 /// Recalculate the colours and redraw the instrument view
 void InstrumentWidget::updateInstrumentDetectors() {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
   if (m_instrumentDisplay->getGLDisplay() &&
       m_instrumentDisplay->currentWidget() == dynamic_cast<QWidget *>(m_instrumentDisplay->getGLDisplay())) {
     m_instrumentDisplay->getGLDisplay()->updateDetectors();
@@ -1392,6 +1394,7 @@ void InstrumentWidget::handleWorkspaceReplacement(const std::string &wsName,
   // hasn't, but theoretically possible)
   bool resetGeometry = matrixWS->detectorInfo().size() != m_instrumentActor->ndetectors();
   resetInstrument(resetGeometry);
+  updateIntegrationWidget();
 }
 
 /**
