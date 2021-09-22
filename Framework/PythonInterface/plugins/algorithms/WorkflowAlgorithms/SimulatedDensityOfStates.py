@@ -136,8 +136,9 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
         if euphonic_filename and not euphonic_available():
             issues['ForceConstantsFile'] = ('Cannot import the Euphonic library for force constants import. '
-                                            'This can be installed using users/AdamJackson/install_euphonic.py '
-                                            'from the ScriptRepository.')
+                                            'This will be included in a future version of Mantid. '
+                                            'Until then, it can be installed using users/AdamJackson/install_euphonic.py '
+                                            'from the Script Repository.')
 
         if spec_type == 'IonTable' and not pdos_available:
             issues['SpectrumType'] = 'Cannot produce ion table when only .castep file is provided'
