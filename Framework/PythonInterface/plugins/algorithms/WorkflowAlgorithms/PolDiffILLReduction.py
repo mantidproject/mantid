@@ -271,17 +271,6 @@ class PolDiffILLReduction(PythonAlgorithm):
                              direction=Direction.Input,
                              doc="What normalisation approach to use on data.")
 
-        self.declareProperty(name="TOFUnits",
-                             defaultValue="TimeChannels",
-                             validator=StringListValidator(["TimeChannels", "UncalibratedTime", "CalibratedTime",
-                                                            "Energy"]),
-                             direction=Direction.Input,
-                             doc="The choice to display the TOF data either as a function of the time channel,"
-                                 " (un)calibrated time, or energy.")
-
-        tofMeasurement = EnabledWhenProperty('MeasurementTechnique', PropertyCriterion.IsEqualTo, 'TOF')
-        self.setPropertySettings('TOFUnits', tofMeasurement)
-
         self.declareProperty(ITableWorkspaceProperty('ElasticChannelsWorkspace', '',
                                                      direction=Direction.Input,
                                                      optional=PropertyMode.Optional),
