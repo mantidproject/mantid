@@ -54,11 +54,12 @@ Different input properties can be specified depending on the value of **ProcessA
 |                  | * Transmission                  | * **SampleAndEnvironmentProperties**       |
 |                  | * QuartzWorkspace               | * OutputTreatment                          |
 +------------------+---------------------------------+--------------------------------------------+
-| Sample           | * CadmiumWorkspace              | * SampleGeometry                           |
-|                  | * EmptyContainerWorkspace       | * **SampleAndEnvironmentProperties**       |
-|                  | * Transmission                  | * OutputTreatment                          |
-|                  | * QuartzWorkspace               | * MeasurementTechnique                     |
-|                  | * ElasticChannelsWorkspace      | * FrameOverlapCorrection                   |
+| Sample           | * CadmiumWorkspace              | * NormaliseBy                              |
+|                  | * EmptyContainerWorkspace       | * SampleGeometry                           |
+|                  | * Transmission                  | * **SampleAndEnvironmentProperties**       |
+|                  | * QuartzWorkspace               | * OutputTreatment                          |
+|                  | * ElasticChannelsWorkspace      | * MeasurementTechnique                     |
+|                  |                                 | * FrameOverlapCorrection                   |
 |                  |                                 | * DetectorEnergyEfficiencyCorrection       |
 |                  |                                 | * EnergyBinning                            |
 +------------------+---------------------------------+--------------------------------------------+

@@ -26,7 +26,14 @@ Three ways of sample data normalisation are supported: `Vanadium`, `Paramagnetic
 or from the cross-section separation (magnetic and spin-incoherent respectively) is used. This step can also be skipped by setting `NormalisationMethod` parameter
 to `'None'`.
 
-This algorithm is indended to be invoked on sample data that is fully corrected and needs to be normalised to the absolute scale.
+`MeasurementTechnique` property allows to distinguish between data reduced as `Powder`, `SingleCrystal`, or `TOF` by :ref:`PolDiffILLReduction <algm-PolDiffILLReduction>`.
+`Paramagnetic` and `Incoherent` data normalisation approaches are not possible when the data reduced is in the `TOF` mode.
+
+The choice for the output units are set with `OutputUnits` property. The options are: `TwoTheta`, `Q`, `Qxy`, and `Qw`. The first two are relevant for `Powder` measurement
+technique. Single crystal data would be best shown on the `Qx` - `Qy` plane, which can be achieved by setting `OutputUnit` to `Qxy`. The `TOF`-mode specific output unit is
+`Qw`, which allows to obtain data on the momentum exchange (Q) - energy exchange plane (`w`, which stands for `#omega`).
+
+This algorithm is indended to be invoked on sample data that is fully corrected and needs to be normalised to an appropriate scale.
 
 SampleAndEnvironmentProperties
 ##############################
