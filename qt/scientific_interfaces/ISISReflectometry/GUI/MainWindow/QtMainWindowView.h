@@ -7,8 +7,8 @@
 #pragma once
 
 #include "GUI/Common/IFileHandler.h"
-#include "GUI/Common/IMessageHandler.h"
 #include "GUI/Common/IPythonRunner.h"
+#include "GUI/Common/IReflMessageHandler.h"
 #include "IMainWindowPresenter.h"
 #include "IMainWindowView.h"
 #include "MainWindowPresenter.h"
@@ -31,7 +31,7 @@ functionality defined by the interface IMainWindowView
 */
 class MANTIDQT_ISISREFLECTOMETRY_DLL QtMainWindowView : public MantidQt::API::UserSubWindow,
                                                         public IMainWindowView,
-                                                        public IMessageHandler,
+                                                        public IReflMessageHandler,
                                                         public IFileHandler,
                                                         public IPythonRunner {
   Q_OBJECT

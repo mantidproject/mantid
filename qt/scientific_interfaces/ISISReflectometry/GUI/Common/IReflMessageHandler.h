@@ -10,13 +10,13 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
-/** @class IMessageHandler
+/** @class IReflMessageHandler
 
-IMessageHandler is an interface for passing messages to the user
+IReflMessageHandler is an interface for passing messages to the user
 */
-class IMessageHandler {
+class IReflMessageHandler {
 public:
-  virtual ~IMessageHandler(){};
+  virtual ~IReflMessageHandler(){};
   virtual void giveUserCritical(const std::string &prompt, const std::string &title) = 0;
   virtual void giveUserInfo(const std::string &prompt, const std::string &title) = 0;
   virtual bool askUserOkCancel(const std::string &prompt, const std::string &title) = 0;

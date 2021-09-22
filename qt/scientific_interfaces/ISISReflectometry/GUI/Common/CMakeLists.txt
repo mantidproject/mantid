@@ -10,7 +10,7 @@ set(
   IFileHandler.h
   IJobRunner.h
   IJobManager.h
-  IMessageHandler.h
+  IReflMessageHandler.h
   IPythonRunner.h
   IPlotter.h
   Plotter.h

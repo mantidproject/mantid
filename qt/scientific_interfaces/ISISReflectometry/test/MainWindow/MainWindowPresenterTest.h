@@ -480,7 +480,7 @@ private:
     friend class MainWindowPresenterTest;
 
   public:
-    MainWindowPresenterFriend(IMainWindowView *view, IMessageHandler *messageHandler, IFileHandler *fileHandler,
+    MainWindowPresenterFriend(IMainWindowView *view, IReflMessageHandler *messageHandler, IFileHandler *fileHandler,
                               std::unique_ptr<IEncoder> encoder, std::unique_ptr<IDecoder> decoder,
                               std::unique_ptr<ISlitCalculator> slitCalculator,
                               std::unique_ptr<IOptionsDialogPresenter> optionsDialogPresenter,
