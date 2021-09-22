@@ -18,4 +18,6 @@ public:
   // This means the constructor isn't called when running other tests
   static NexusEntryProviderTest *createSuite() { return new NexusEntryProviderTest(); }
   static void destroySuite(NexusEntryProviderTest *suite) { delete suite; }
+
+  void test_dummy() { TS_ASSERT(true); }
 };
