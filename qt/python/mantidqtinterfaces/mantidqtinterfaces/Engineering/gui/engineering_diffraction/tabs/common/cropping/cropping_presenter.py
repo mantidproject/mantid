@@ -48,11 +48,16 @@ class CroppingPresenter(object):
             self.custom_calfile_enabled = False
             self.custom_spectra_enabled = False
             self.set_custom_widgets_visibility(False, False)
-        else:  # cropped
+        elif index == 3:  # cropped
             self.group = GROUP.CROPPED
             self.custom_calfile_enabled = False
             self.custom_spectra_enabled = True
             self.set_custom_widgets_visibility(False, True)
+        else:  # texture
+            self.group = GROUP.TEXTURE
+            self.custom_calfile_enabled = False
+            self.custom_spectra_enabled = False
+            self.set_custom_widgets_visibility(False, False)
 
     def on_calfile_changed(self):
         valid = self.view.finder_custom.isValid()

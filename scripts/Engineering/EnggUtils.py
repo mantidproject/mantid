@@ -45,7 +45,7 @@ class GroupingInfo:
         self.spectra_list = None
         # private dicts with enum keys to avoid hard-coding strings in multiple places and many if/elif branches
         # would like to reduce the number of these required by making naming more consistent but required for
-        # backwards compatibility
+        # backwards compatibility - probably don't need in class
         self._group_files = {GROUP.BOTH: "ENGINX_NorthAndSouth_grouping.xml", GROUP.NORTH: "ENGINX_North_grouping.xml",
                              GROUP.SOUTH: "ENGINX_South_grouping.xml", GROUP.TEXTURE: "ENGINX_Texture_grouping.xml"}
         self._group_bank_args = {GROUP.BOTH: "NorthBank,SouthBank", GROUP.NORTH: "NorthBank", GROUP.SOUTH: "SouthBank"}
@@ -54,16 +54,17 @@ class GroupingInfo:
                                     GROUP.CUSTOM: "Custom .cal file", GROUP.TEXTURE: "Texture"}
         self._group_ws_names = {GROUP.BOTH: "NorthAndSouthBank_grouping", GROUP.NORTH: "NorthBank_grouping",
                                     GROUP.SOUTH: "SouthBank_grouping", GROUP.CROPPED: "Cropped_spectra_grouping",
-                                    GROUP.CUSTOM: "Custom_calfile_grouping", GROUP.TEXTURE: "Texture"}
+                                    GROUP.CUSTOM: "Custom_calfile_grouping", GROUP.TEXTURE: "Texture_grouping"}
         self._group_suffix = {GROUP.BOTH: "all_banks", GROUP.NORTH: "bank_1", GROUP.SOUTH: "bank_2",
-                              GROUP.CROPPED: "Cropped", GROUP.CUSTOM: "Custom", GROUP.TEXTURE: "Texture"} # prm suffix
+                              GROUP.CROPPED: "Cropped", GROUP.CUSTOM: "Custom", GROUP.TEXTURE: "Texture"}  # prm suffix
         self._group_foc_ws_suffix = {GROUP.BOTH: "bank", GROUP.NORTH: "bank 1", GROUP.SOUTH: "bank 2",
                                      GROUP.CROPPED: "Cropped", GROUP.CUSTOM: "Custom", GROUP.TEXTURE: "grouping"}
         self._prm_templates = {GROUP.NORTH: "template_ENGINX_241391_North_bank.prm",
                                GROUP.SOUTH: "template_ENGINX_241391_South_bank.prm",
                                GROUP.BOTH: "template_ENGINX_241391_North_and_South_banks.prm",
                                GROUP.CROPPED: "template_ENGINX_241391_North_bank.prm",
-                               GROUP.CUSTOM:"template_ENGINX_241391_North_bank.prm"}
+                               GROUP.CUSTOM: "template_ENGINX_241391_North_bank.prm",
+                               GROUP.TEXTURE: "template_ENGINX_241391_Texture.prm"}
 
     def clear(self):
         self.group = None
