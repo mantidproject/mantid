@@ -354,6 +354,7 @@ class SuperplotPresenter:
         current_spectrum_index = self._view.get_spectrum_slider_position()
         plotted_data = self._model.get_plotted_data()
         mode = self._view.get_mode()
+        normalised = self._model.is_normalised()
 
         figure = self._canvas.figure
         axes = figure.gca()
@@ -386,6 +387,8 @@ class SuperplotPresenter:
                 if (ws_name, sp) not in plotted_data:
                     ws = mtd[ws_name]
                     kwargs = {}
+                    if normalised:
+                        kwargs["normalise_spectrum"] = True
                     if mode == self.SPECTRUM_MODE_TEXT:
                         kwargs["axis"] = MantidAxType.SPECTRUM
                         kwargs["specNum"] = ws.getSpectrumNumbers()[sp]
