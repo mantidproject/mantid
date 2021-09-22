@@ -87,11 +87,6 @@ InstrumentActor::InstrumentActor(MatrixWorkspace_sptr workspace, MantidWidgets::
 
   m_renderer.reset(new InstrumentRenderer(*this));
   m_renderer->changeScaleType(m_scaleType);
-
-  // set up the color map
-  if (!m_currentCMap.isEmpty()) {
-    loadColorMap(m_currentCMap, false);
-  }
 }
 
 void InstrumentActor::initialize() {
@@ -137,9 +132,8 @@ void InstrumentActor::initialize() {
   // enable drawing now that everything is ready
   m_initialized = true;
 
-  updateColors();
+  resetColors();
 
-  emit colorMapChanged();
   emit initWidget();
   emit refreshView();
 }

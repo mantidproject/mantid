@@ -247,6 +247,9 @@ void InstrumentWidgetRenderTab::setupUnwrappedControls(QHBoxLayout *parentLayout
 void InstrumentWidgetRenderTab::setupGridBankMenu(QVBoxLayout *parentLayout) {
   const auto &actor = m_instrWidget->getInstrumentActor();
 
+  if (!actor.isInitialized())
+    return;
+
   if (!actor.hasGridBank())
     return;
 
