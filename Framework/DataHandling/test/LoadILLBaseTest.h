@@ -18,6 +18,4 @@ public:
   // This means the constructor isn't called when running other tests
   static LoadILLBaseTest *createSuite() { return new LoadILLBaseTest(); }
   static void destroySuite(LoadILLBaseTest *suite) { delete suite; }
-
-  void test_Something() { TS_FAIL("You forgot to write a test!"); }
 };
