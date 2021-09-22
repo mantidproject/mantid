@@ -308,8 +308,15 @@ void XIntegrationControl::setTotalRange(double minimum, double maximum) {
   }
   m_totalMinimum = minimum;
   m_totalMaximum = maximum;
-  m_minimum = minimum;
-  m_maximum = maximum;
+
+  if (m_scrollBar->getMinimum() != 0 || m_scrollBar->getMaximum() != 1) {
+    m_minimum = std::min(std::max(m_minimum, minimum), m_totalMaximum);
+    m_maximum = std::max(std::min(m_maximum, maximum), m_totalMinimum);
+    setRange(m_minimum, m_maximum);
+  } else {
+    m_minimum = minimum;
+    m_maximum = maximum;
+  }
   updateTextBoxes();
 }
 

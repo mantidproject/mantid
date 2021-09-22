@@ -13,6 +13,7 @@ import numpy
 
 
 class SimpleAPITest(unittest.TestCase):
+    maxDiff = None
     def tearDown(self):
         mtd.clear()
 
@@ -55,7 +56,16 @@ class SimpleAPITest(unittest.TestCase):
 
     def test_alg_has_expected_doc_string(self):
         # Test auto generated string, Load is manually written
-        expected_doc = """Rebins data with new X bin boundaries. For EventWorkspaces, you can very quickly rebin in-place by keeping the same output name and PreserveEvents=true.\n\nProperty descriptions: \n\nInputWorkspace(Input:req) *MatrixWorkspace*       Workspace containing the input data\n\nOutputWorkspace(Output:req) *MatrixWorkspace*       The name to give the output workspace\n\nParams(Input:req) *dbl list*       A comma separated list of first bin boundary, width, last bin boundary. Optionally this can be followed by a comma and more widths and last boundary pairs. Optionally this can also be a single number, which is the bin width. In this case, the boundary of binning will be determined by minimum and maximum TOF values among all events, or previous binning boundary, in case of event Workspace, or non-event Workspace, respectively. Negative width values indicate logarithmic binning. \n\nPreserveEvents(Input) *boolean*       Keep the output workspace as an EventWorkspace, if the input has events. If the input and output EventWorkspace names are the same, only the X bins are set, which is very quick. If false, then the workspace gets converted to a Workspace2D histogram.\n\nFullBinsOnly(Input) *boolean*       Omit the final bin if it's width is smaller than the step size\n\nIgnoreBinErrors(Input) *boolean*       Ignore errors related to zero/negative bin widths in input/output workspaces. When ignored, the signal and errors are set to zero\n"""
+        expected_doc = "Rebins data with new X bin boundaries. For EventWorkspaces, you can very quickly rebin in-place by keeping the same output name and PreserveEvents=true.\n\n"\
+                        "Property descriptions: \n\n"\
+                        "InputWorkspace(Input:req) *MatrixWorkspace*       Workspace containing the input data\n\n"\
+                        "OutputWorkspace(Output:req) *MatrixWorkspace*       The name to give the output workspace\n\n"\
+                        "Params(Input:req) *dbl list*       A comma separated list of first bin boundary, width, last bin boundary. Optionally this can be followed by a comma and more widths and last boundary pairs. Optionally this can also be a single number, which is the bin width. In this case, the boundary of binning will be determined by minimum and maximum TOF values among all events, or previous binning boundary, in case of event Workspace, or non-event Workspace, respectively. Negative width values indicate logarithmic binning.\n\n"\
+                        "PreserveEvents(Input) *boolean*       Keep the output workspace as an EventWorkspace, if the input has events. If the input and output EventWorkspace names are the same, only the X bins are set, which is very quick. If false, then the workspace gets converted to a Workspace2D histogram.\n\n"\
+                        "FullBinsOnly(Input) *boolean*       Omit the final bin if its width is smaller than the step size\n\n"\
+                        "IgnoreBinErrors(Input) *boolean*       Ignore errors related to zero/negative bin widths in input/output workspaces. When ignored, the signal and errors are set to zero\n\n"\
+                        "UseReverseLogarithmic(Input) *boolean*       For logarithmic intervals, the splitting starts from the end and goes back to the start, ie the bins are bigger at the start getting exponentially smaller until they reach the end. For these bins, the FullBinsOnly flag is ignored.\n\n" \
+                        "Power(Input) *number*       Splits the interval in bins which actual width is equal to requested width / (i ^ power); default is linear. Power must be between 0 and 1.\n"
         doc = simpleapi.rebin.__doc__
         self.assertGreater(len(doc), 0)
         self.assertEqual(doc, expected_doc)

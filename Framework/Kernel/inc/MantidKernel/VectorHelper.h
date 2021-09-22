@@ -27,7 +27,8 @@ namespace VectorHelper {
 int MANTID_KERNEL_DLL createAxisFromRebinParams(const std::vector<double> &params, std::vector<double> &xnew,
                                                 const bool resize_xnew = true, const bool full_bins_only = false,
                                                 const double xMinHint = std::nan(""),
-                                                const double xMaxHint = std::nan(""));
+                                                const double xMaxHint = std::nan(""),
+                                                const bool useReverseLogarithmic = false, const double power = -1);
 
 void MANTID_KERNEL_DLL rebin(const std::vector<double> &xold, const std::vector<double> &yold,
                              const std::vector<double> &eold, const std::vector<double> &xnew,
