@@ -66,11 +66,11 @@ def euphonic_calculate_modes(filename: str, cutoff: float = 20.,
     return modes
 
 
-def get_data_with_euphonic(file_name: str, cutoff: float = 20.):
+def get_data_with_euphonic(filename: str, cutoff: float = 20.):
     """
     Read force constants file with Euphonic and sample frequencies/modes
 
-    :param file_name: Input data
+    :param filename: Input data
     :param cutoff:
         Sampling density of Brillouin-zone. Specified as real-space length
         cutoff.
@@ -79,7 +79,7 @@ def get_data_with_euphonic(file_name: str, cutoff: float = 20.):
                        dict of elements and isotopes)
 
     """
-    modes = euphonic_calculate_modes(file_name=file_name, cutoff=cutoff)
+    modes = euphonic_calculate_modes(filename=filename, cutoff=cutoff)
 
     file_data = {'num_ions': len(modes.crystal.atom_type),
                  'num_branches': modes.frequencies.magnitude.shape[1],
