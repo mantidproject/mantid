@@ -294,4 +294,7 @@ Output:
 
 .. categories::
 
-.. sourcelink:: /qt/python/mantidqtinterfaces/mantidqtinterfaces/FilterEvents.py
+.. sourcelink::
+    :h: Framework/Algorithms/inc/MantidAlgorithms/FilterEvents.h
+    :cpp: Framework/Algorithms/src/FilterEvents.cpp
+    :py: None
