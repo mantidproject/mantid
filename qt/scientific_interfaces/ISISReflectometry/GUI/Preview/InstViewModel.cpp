@@ -14,7 +14,6 @@
 #include <memory>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
-
 std::unique_ptr<MantidWidgets::InstrumentActor>
 InstViewModel::createInstrumentViewActor(Mantid::API::MatrixWorkspace_sptr &workspace) const {
   bool autoscaling = true;

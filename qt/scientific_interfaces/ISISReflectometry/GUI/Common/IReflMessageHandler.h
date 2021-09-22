@@ -6,6 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidQtWidgets/Common/IMessageHandler.h"
+
 #include <string>
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -14,12 +16,9 @@ namespace ISISReflectometry {
 
 IReflMessageHandler is an interface for passing messages to the user
 */
-class IReflMessageHandler {
+class IReflMessageHandler : public MantidWidgets::IMessageHandler {
 public:
   virtual ~IReflMessageHandler(){};
-  virtual void giveUserCritical(const std::string &prompt, const std::string &title) = 0;
-  virtual void giveUserInfo(const std::string &prompt, const std::string &title) = 0;
-  virtual bool askUserOkCancel(const std::string &prompt, const std::string &title) = 0;
   virtual std::string askUserForSaveFileName(std::string const &filter) = 0;
   virtual std::string askUserForLoadFileName(std::string const &filter) = 0;
 };

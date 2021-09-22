@@ -58,6 +58,7 @@ public:
   void removeBatch(int batchIndex) override;
 
   void giveUserCritical(const std::string &prompt, const std::string &title) override;
+  void giveUserWarning(const std::string &prompt, const std::string &title) override;
   void giveUserInfo(const std::string &prompt, const std::string &title) override;
   bool askUserOkCancel(const std::string &prompt, const std::string &title) override;
   std::string askUserForLoadFileName(std::string const &filter) override;
