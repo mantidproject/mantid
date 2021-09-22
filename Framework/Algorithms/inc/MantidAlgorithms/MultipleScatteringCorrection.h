@@ -62,19 +62,17 @@ private:
                      const IDetector &detector,                                             //
                      std::vector<double> &container_L2Ds, std::vector<double> &sample_L2Ds, //
                      const Geometry::IObject &shapeContainer, const Geometry::IObject &shapeSample) const;
-  void pairWiseSumSingleComponent(double &A1, double &A2, const double linearCoefAbs,
-                                  const MultipleScatteringCorrectionDistGraber &distGraber,
-                                  const std::vector<double> &L2Ds, const std::vector<double> &L12s,
-                                  const int64_t startIndex, const int64_t endIndex) const;
-  void pairWiseSumSampleAndContainer(double &A1, double &A2,                                                         //
-                                     const double linearCoefAbsContainer, const double linearCoefAbsSample,          //
-                                     const int64_t numVolumeElementsContainer, const int64_t numVolumeElementsTotal, //
-                                     const double totScatterCoefContainer, const double totScatterCoefSample,        //
-                                     const std::vector<double> &elementVolumes,
-                                     const std::vector<double> &LS1sContainer, const std::vector<double> &LS1sSample,
-                                     const std::vector<double> &L12sContainer, const std::vector<double> &L12sSample,
-                                     const std::vector<double> &L2DsContainer, const std::vector<double> &L2DsSample,
-                                     const int64_t startIndex, const int64_t endIndex) const;
+  void pairWiseSum(double &A1, double &A2, const double linearCoefAbs,
+                   const MultipleScatteringCorrectionDistGraber &distGraber, const std::vector<double> &L2Ds,
+                   const std::vector<double> &L12s, const int64_t startIndex, const int64_t endIndex) const;
+  void pairWiseSum(double &A1, double &A2,                                                         //
+                   const double linearCoefAbsContainer, const double linearCoefAbsSample,          //
+                   const int64_t numVolumeElementsContainer, const int64_t numVolumeElementsTotal, //
+                   const double totScatterCoefContainer, const double totScatterCoefSample,        //
+                   const std::vector<double> &elementVolumes, const std::vector<double> &LS1sContainer,
+                   const std::vector<double> &LS1sSample, const std::vector<double> &L12sContainer,
+                   const std::vector<double> &L12sSample, const std::vector<double> &L2DsContainer,
+                   const std::vector<double> &L2DsSample, const int64_t startIndex, const int64_t endIndex) const;
 
   int64_t m_xStep; ///< The step in bin number between adjacent points for linear interpolation
 };
