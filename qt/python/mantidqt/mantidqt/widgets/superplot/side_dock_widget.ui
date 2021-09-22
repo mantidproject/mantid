@@ -24,7 +24,7 @@
     <property name="topMargin">
      <number>0</number>
     </property>
-    <item row="1" column="0" colspan="3">
+    <item row="2" column="0" colspan="3">
      <widget class="QTreeWidget" name="workspacesList">
       <property name="selectionMode">
        <enum>QAbstractItemView::ExtendedSelection</enum>
@@ -47,6 +47,13 @@
       </column>
      </widget>
     </item>
+    <item row="0" column="0" colspan="2">
+     <widget class="WorkspaceSelector" name="workspaceSelector">
+      <property name="toolTip">
+       <string>Select a workspace</string>
+      </property>
+     </widget>
+    </item>
     <item row="0" column="2">
      <widget class="QToolButton" name="addButton">
       <property name="minimumSize">
@@ -63,10 +70,10 @@
       </property>
      </widget>
     </item>
-    <item row="0" column="0" colspan="2">
-     <widget class="WorkspaceSelector" name="workspaceSelector">
-      <property name="toolTip">
-       <string>Select a workspace</string>
+    <item row="1" column="0">
+     <widget class="QCheckBox" name="normaliseCheckbox">
+      <property name="text">
+       <string>Normalise plotted spectra</string>
       </property>
      </widget>
     </item>
