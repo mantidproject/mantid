@@ -74,5 +74,8 @@ Bugfixes
 - Fixed a bug that when transposing MDE workspaces multiple times it would cause the data to become all zeros.
 - Fixed out of range errors that sometimes occurred whilst hovering over transposed data.
 - Users can toggle between different scales again without any issue.
+- Fix bug where non-orthogonal view was enabled on an orthogonal workspace with no UB.
+- Fixed cursor tracking from getting stuck and displaying incorrect signals when viewing MDHistogram workspaces.
+- Fixed bug in resetting axes limits in non-orthogonal view when a plot is updated.
 
 :ref:`Release 6.2.0 <v6.2.0>`
