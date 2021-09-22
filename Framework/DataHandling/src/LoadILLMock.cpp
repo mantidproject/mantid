@@ -39,14 +39,14 @@ int LoadILLMock::confidence(Kernel::NexusDescriptor &descriptor) const {
   return 0;
 }
 
-std::vector<std::string> LoadILLMock::mandatoryKeys() { return std::vector<std::string>({"/entry0/monitor1/mode"}); }
+std::vector<std::string> LoadILLMock::mandatoryKeys() { return std::vector<std::string>({"/entry0/monitor7/mode"}); }
 
 Workspace_sptr LoadILLMock::buildWorkspace() {
   return std::dynamic_pointer_cast<Workspace>(WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1));
 }
 
 void LoadILLMock::loadAndFillData() {
-  std::string a = getNep()->getScalarMetadata<std::string>("/entry0/monitor1/mode");
+  std::string a = getNep()->getScalarMetadata<std::string>("/entry0/monitor7/mode");
   g_log.warning("Using provided value: " + a);
 };
 

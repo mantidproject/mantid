@@ -273,6 +273,15 @@ size_t NXClass::getSize(const std::string &name) const {
   return *number();
 }
 
+/// specialization for string, since string is read as char array
+template <> std::string NXClass::getTypedScalar(const std::string &name) const { return getString(name); }
+/// specialization for string arrays, as they are not allowed in nexus
+/// string is stored as char array, array of strings we can't easily split
+template <> std::vector<std::string> NXClass::getTypedVector(const std::string &name) const {
+  UNUSED_ARG(name);
+  throw std::runtime_error("String arrays are not supported currently.");
+}
+
 /** Returns whether an individual group (or group) is present
  *  @param query :: the class name to search for
  *  @return true if the name is found and false otherwise
