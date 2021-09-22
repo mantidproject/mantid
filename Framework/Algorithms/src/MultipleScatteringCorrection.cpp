@@ -418,19 +418,41 @@ void MultipleScatteringCorrection::calculateSampleAndContainer(API::MatrixWorksp
   const int64_t numVolumeElementsSample = distGraberSample.m_numVolumeElements;
   const int64_t numVolumeElementsContainer = distGraberContainer.m_numVolumeElements;
   const int64_t numVolumeElements = numVolumeElementsSample + numVolumeElementsContainer;
-  // NOTE: if we find a better way to store a sparse vector, we should update the following
-  //       section
-  // LS1 = [container_1, container_2, ..., sample_1, sample_2, ...]
-  // LS1_container = [container_1, container_2, ..., 0, 0, ...]
-  // LS1_sample = [0, 0, ..., sample_1, sample_2, ...]
+  // Total elements = [container_elements] + [sample_elements]
+  // Schematic for scattering element i (*)
+  //   |                       \                                        /                       |
+  //   |      container         \               sample                 /  container             |
+  //   |                         \                                    /                         |
+  //   | ---LS1_container[i] ---  \  LS1_sample[i] * L2D_sample[i]   / ---L2D_container[i]  --- |
+  //   |                           \                                /                           |
+  // LS1 can be cached here, but L2D must be calculated within the loop of spectra
   std::vector<double> LS1_container(numVolumeElements, 0.0);
-  for (int64_t i = 0; i < numVolumeElementsContainer; ++i) {
-    LS1_container[i] = distGraberContainer.m_LS1[i];
-  }
   std::vector<double> LS1_sample(numVolumeElements, 0.0);
-  for (int64_t i = 0; i < numVolumeElementsSample; ++i) {
-    LS1_sample[i + numVolumeElementsContainer] = distGraberSample.m_LS1[i];
+  // Use OpenMP to go through all elements
+  const auto sourcePos = m_inputWS->getInstrument()->getSource()->getPos();
+  Track trackerLS1(V3D{0, 0, 1}, V3D{0, 0, 1}); // reusable tracker for calculating LS1
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS))
+  for (int64_t idx = 0; idx < numVolumeElements; ++idx) {
+    PARALLEL_START_INTERUPT_REGION
+    const auto pos = idx < numVolumeElementsContainer
+                         ? distGraberContainer.m_elementPositions[idx]
+                         : distGraberSample.m_elementPositions[idx - numVolumeElementsContainer];
+    const auto vec = getDirection(sourcePos, pos);
+    //
+    trackerLS1.reset(sourcePos, vec);
+    trackerLS1.clearIntersectionResults();
+    const auto dist1_container = getDistanceInsideObject(containerShape, trackerLS1);
+    const auto dist1_sample = getDistanceInsideObject(sampleShape, trackerLS1);
+    trackerLS1.reset(pos, vec);
+    trackerLS1.clearIntersectionResults();
+    const auto dist2_container = getDistanceInsideObject(containerShape, trackerLS1);
+    const auto dist2_sample = getDistanceInsideObject(sampleShape, trackerLS1);
+    //
+    LS1_container[idx] = (dist1_container - dist2_container);
+    LS1_sample[idx] = (dist1_sample - dist2_sample);
+    PARALLEL_END_INTERUPT_REGION
   }
+  PARALLEL_CHECK_INTERUPT_REGION
 
   // cache L12 for both sample and container
   // L12 is a upper off-diagonal matrix from the hybrid of container and sample.
@@ -467,26 +489,6 @@ void MultipleScatteringCorrection::calculateSampleAndContainer(API::MatrixWorksp
                                : distGraberSample.m_elementPositions[indexFrom - numVolumeElementsContainer];
       const V3D unitVector = getDirection(posFrom, posTo);
 
-      /**
-      // 1. calc segments inside container
-      track.reset(posFrom, unitVector);
-      track.clearIntersectionResults();
-      const auto dist1_container = getDistanceInsideObject(containerShape, track);
-      track.reset(posTo, unitVector);
-      track.clearIntersectionResults();
-      const auto dist2_container = getDistanceInsideObject(containerShape, track);
-      L12_container[idx] = (dist1_container - dist2_container);
-
-      // 2. calc segments inside sample
-      track.reset(posFrom, unitVector);
-      track.clearIntersectionResults();
-      const auto dist1_sample = getDistanceInsideObject(sampleShape, track);
-      track.reset(posTo, unitVector);
-      track.clearIntersectionResults();
-      const auto dist2_sample = getDistanceInsideObject(sampleShape, track);
-      L12_sample[idx] = (dist1_sample - dist2_sample);
-      */
-
       // combined
       track.reset(posFrom, unitVector);
       track.clearIntersectionResults();
@@ -508,9 +510,6 @@ void MultipleScatteringCorrection::calculateSampleAndContainer(API::MatrixWorksp
   elementVolumes.insert(elementVolumes.end(), distGraberSample.m_elementVolumes.begin(),
                         distGraberSample.m_elementVolumes.end());
 
-  // compute prefactor rho*sigma_s/(4pi) for sample and container
-  // Delta = Delta_sample + Delta_container
-  //       = pf_sample * A2/A1 (sampleElements) + pf_container * A2/A1 (containerElements)
   // NOTE: Unit is important
   // rho in 1/A^3, and sigma_s in 1/barns (1e-8 A^(-2))
   // so rho * sigma_s = 1e-8 A^(-1) = 100 meters
@@ -540,16 +539,10 @@ void MultipleScatteringCorrection::calculateSampleAndContainer(API::MatrixWorksp
     const auto &det = spectrumInfo.detector(workspaceIndex);
 
     // calculate L2D (2_element -> detector)
-    // L2D_container = [container_1, container_2, ..., 0, 0, ...]
-    // L2D_sample = [0, 0, ..., sample_1, sample_2, ...]
     // 1. container
     std::vector<double> L2D_container(numVolumeElements, 0.0);
-    calculateL2Ds(distGraberContainer, det, L2D_container, containerShape);
-    // 2. sample
     std::vector<double> L2D_sample(numVolumeElements, 0.0);
-    std::vector<double> L2D_sample_temp(numVolumeElementsSample, 0.0);
-    calculateL2Ds(distGraberSample, det, L2D_sample_temp, sampleShape);
-    std::copy(L2D_sample_temp.begin(), L2D_sample_temp.end(), L2D_sample.begin() + numVolumeElementsContainer);
+    calculateL2Ds(distGraberContainer, distGraberSample, det, L2D_container, L2D_sample, containerShape, sampleShape);
 
     // prepare material wise linear coefficient
     const auto wavelengths = m_inputWS->points(workspaceIndex);
@@ -598,7 +591,8 @@ void MultipleScatteringCorrection::calculateSampleAndContainer(API::MatrixWorksp
  *
  * @param distGraber
  * @param detector
- * @param sample_L2Ds
+ * @param L2Ds
+ * @param shape
  */
 void MultipleScatteringCorrection::calculateL2Ds(const MultipleScatteringCorrectionDistGraber &distGraber,
                                                  const IDetector &detector, std::vector<double> &L2Ds,
@@ -619,6 +613,64 @@ void MultipleScatteringCorrection::calculateL2Ds(const MultipleScatteringCorrect
     TwoToDetector.clearIntersectionResults();
     // find distance in sample
     L2Ds[i] = getDistanceInsideObject(shape, TwoToDetector);
+  }
+}
+
+/**
+ * @brief Calculate the distance L2D within sample and container for each element
+ *
+ * @param distGraberContainer
+ * @param distGraberSample
+ * @param detector
+ * @param container_L2Ds
+ * @param sample_L2Ds
+ * @param shapeContainer
+ * @param shapeSample
+ */
+void MultipleScatteringCorrection::calculateL2Ds(const MultipleScatteringCorrectionDistGraber &distGraberContainer, //
+                                                 const MultipleScatteringCorrectionDistGraber &distGraberSample,    //
+                                                 const IDetector &detector,                                         //
+                                                 std::vector<double> &container_L2Ds,                               //
+                                                 std::vector<double> &sample_L2Ds,                                  //
+                                                 const Geometry::IObject &shapeContainer,                           //
+                                                 const Geometry::IObject &shapeSample) const {
+  V3D detectorPos(detector.getPos());
+  if (detector.nDets() > 1) {
+    // We need to make sure this is right for grouped detectors - should use
+    // average theta & phi
+    detectorPos.spherical(detectorPos.norm(), detector.getTwoTheta(V3D(), V3D(0, 0, 1)) * RAD2DEG,
+                          detector.getPhi() * RAD2DEG);
+  }
+
+  const int64_t numVolumeElementsSample = distGraberSample.m_numVolumeElements;
+  const int64_t numVolumeElementsContainer = distGraberContainer.m_numVolumeElements;
+  const int64_t numVolumeElements = numVolumeElementsSample + numVolumeElementsContainer;
+  // Total elements = [container_elements] + [sample_elements]
+  // Schematic for scattering element i (*)
+  //   |                       \                                        /                       |
+  //   |      container         \               sample                 /  container             |
+  //   |                         \                                    /                         |
+  //   | ---LS1_container[i] ---  \  LS1_sample[i] * L2D_sample[i]   / ---L2D_container[i]  --- |
+  //   |                           \                                /                           |
+  // L2D must be calculated within the loop of spectra, so we cannot use OpenMP here
+  Track trackerL2D(V3D{0, 0, 1}, V3D{0, 0, 1}); // reusable tracker for calculating L2D
+  for (int64_t idx = 0; idx < numVolumeElements; ++idx) {
+    const auto pos = idx < numVolumeElementsContainer
+                         ? distGraberContainer.m_elementPositions[idx]
+                         : distGraberSample.m_elementPositions[idx - numVolumeElementsContainer];
+    const auto vec = getDirection(pos, detectorPos);
+    //
+    trackerL2D.reset(pos, vec);
+    trackerL2D.clearIntersectionResults();
+    const auto dist1_container = getDistanceInsideObject(shapeContainer, trackerL2D);
+    const auto dist1_sample = getDistanceInsideObject(shapeSample, trackerL2D);
+    trackerL2D.reset(detectorPos, vec);
+    trackerL2D.clearIntersectionResults();
+    const auto dist2_container = getDistanceInsideObject(shapeContainer, trackerL2D);
+    const auto dist2_sample = getDistanceInsideObject(shapeSample, trackerL2D);
+    //
+    container_L2Ds[idx] = (dist1_container - dist2_container);
+    sample_L2Ds[idx] = (dist1_sample - dist2_sample);
   }
 }
 

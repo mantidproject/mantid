@@ -56,7 +56,12 @@ private:
   void calculateSingleComponent(API::MatrixWorkspace_sptr outws, const Geometry::IObject &shape);
   void calculateSampleAndContainer(API::MatrixWorkspace_sptr outws);
   void calculateL2Ds(const MultipleScatteringCorrectionDistGraber &distGraber, const IDetector &detector,
-                     std::vector<double> &sample_L2Ds, const Geometry::IObject &shape) const;
+                     std::vector<double> &L2Ds, const Geometry::IObject &shape) const;
+  void calculateL2Ds(const MultipleScatteringCorrectionDistGraber &distGraberContainer,     //
+                     const MultipleScatteringCorrectionDistGraber &distGraberSample,        //
+                     const IDetector &detector,                                             //
+                     std::vector<double> &container_L2Ds, std::vector<double> &sample_L2Ds, //
+                     const Geometry::IObject &shapeContainer, const Geometry::IObject &shapeSample) const;
   void pairWiseSumSingleComponent(double &A1, double &A2, const double linearCoefAbs,
                                   const MultipleScatteringCorrectionDistGraber &distGraber,
                                   const std::vector<double> &L2Ds, const std::vector<double> &L12s,
