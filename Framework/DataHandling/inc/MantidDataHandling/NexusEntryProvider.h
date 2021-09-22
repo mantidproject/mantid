@@ -30,14 +30,14 @@ public:
    * @return scalar value
    * @throws runtime_error if the key is missing
    */
-  template <typename T> T getScalarMetadata(const std::string &entryName) {
-    if (m_entriesToPatch.existsProperty(entryName)) {
-      return m_entriesToPatch.getProperty(entryName);
+  template <typename T> T getScalarMetadata(const std::string &key) {
+    if (m_entriesToPatch.existsProperty(key)) {
+      return m_entriesToPatch.getProperty(key);
     } else {
       try {
-        return m_nxroot.getTypedScalar<T>(entryName);
+        return m_nxroot.getTypedScalar<T>(key);
       } catch (std::runtime_error &) {
-        throwMissingKeyError(entryName);
+        throwMissingKeyError(key);
       }
     }
     // shouldn't reach here

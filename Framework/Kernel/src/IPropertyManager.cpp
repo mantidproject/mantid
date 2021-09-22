@@ -17,6 +17,7 @@ DEFINE_IPROPERTYMANAGER_GETVALUE(int64_t)
 DEFINE_IPROPERTYMANAGER_GETVALUE(uint64_t)
 DEFINE_IPROPERTYMANAGER_GETVALUE(bool)
 DEFINE_IPROPERTYMANAGER_GETVALUE(double)
+DEFINE_IPROPERTYMANAGER_GETVALUE(float)
 DEFINE_IPROPERTYMANAGER_GETVALUE(OptionalBool)
 DEFINE_IPROPERTYMANAGER_GETVALUE(std::vector<int16_t>)
 DEFINE_IPROPERTYMANAGER_GETVALUE(std::vector<uint16_t>)
@@ -113,6 +114,7 @@ IPropertyManager::TypedValue::operator int64_t() { return pm.getValue<int64_t>(p
 IPropertyManager::TypedValue::operator uint64_t() { return pm.getValue<uint64_t>(prop); }
 IPropertyManager::TypedValue::operator bool() { return pm.getValue<bool>(prop); }
 IPropertyManager::TypedValue::operator double() { return pm.getValue<double>(prop); }
+IPropertyManager::TypedValue::operator float() { return pm.getValue<float>(prop); }
 IPropertyManager::TypedValue::operator std::string() { return pm.getPropertyValue(prop); }
 IPropertyManager::TypedValue::operator OptionalBool() { return pm.getValue<OptionalBool>(prop); }
 IPropertyManager::TypedValue::operator Property *() { return pm.getPointerToProperty(prop); }

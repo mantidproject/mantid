@@ -382,6 +382,8 @@ protected:
     operator bool();
     /// explicit specialization for double()
     operator double();
+    /// explicit specialization for float()
+    operator float();
     /// explicit specialization for std::string()
     operator std::string();
     /// explicit specialization for Property*()
