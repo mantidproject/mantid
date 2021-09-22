@@ -257,6 +257,8 @@ class DrillExportModel:
                 if isinstance(mtd[wsName], WorkspaceGroup):
                     continue
 
+                if not wsName.startswith(workspaceName):
+                    continue
                 filename = os.path.join(
                         exportPath,
                         wsName + RundexSettings.EXPORT_ALGO_EXTENSION[algo])
