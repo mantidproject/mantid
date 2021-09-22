@@ -44,5 +44,7 @@ MatrixWorkspace_sptr PreviewModel::loadFromAds(std::string const &workspaceName)
   return nullptr;
 }
 
-void PreviewModel::createRunDetails(const std::string &workspaceName) { m_runDetails = PreviewRow({workspaceName}); }
+void PreviewModel::createRunDetails(const std::string &workspaceName) {
+  m_runDetails = std::make_optional<PreviewRow>({workspaceName});
+}
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
