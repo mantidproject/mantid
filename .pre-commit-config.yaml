@@ -4,7 +4,6 @@ default_language_version:
 exclude: ^$|instrument/
 
 repos:
-
   # Run fast code improvement/checks before running PR specific helpers.
   - repo: https://github.com/pre-commit/pre-commit-hooks.git
     rev: 2618198e9658cccb4a53f04af0f7d642109f3b54
@@ -13,21 +12,22 @@ repos:
         args: [--markdown-linebreak-ext=md]
         exclude: .patch$
       - id: check-added-large-files
-        args: ['--maxkb=4096']
+        args: ["--maxkb=4096"]
       - id: check-xml
       - id: check-yaml
         args: [--allow-multiple-documents]
 
-  - repo: https://github.com/mantidproject/pre-commit-hooks.git
-    rev: 8809bbab4c8b9609f559e2428e6255e9407c3efe
+  - repo: https://github.com/DavidFair/pre-commit-hooks.git
+    rev: 362ec8f6f25ad8f252d4c2ad236c9d6231f3d8a1
     hooks:
       - id: clang-format
         exclude: Testing/Tools/cxxtest|tools
+      - id: cmake-missing-pytest-files
 
   - repo: https://github.com/cheshirekow/cmake-format-precommit
     rev: v0.6.13
     hooks:
-    - id: cmake-format
+      - id: cmake-format
     #- id: cmake-lint <- not ready yet
 
   - repo: https://gitlab.com/pycqa/flake8.git
@@ -36,4 +36,4 @@ repos:
       - id: flake8
         # Have to manually copy this from the .flake8 as flake8 will just ignore the config if the file is passed
         exclude: Framework/PythonInterface/test|qt/applications/workbench/workbench/app/resources.py|qt/python/mantidqt/mantidqt/resources.py|qt/python/mantidqt/mantidqt/dialogs/errorreports/resources_qt4.py|qt/python/mantidqt/mantidqt/dialogs/errorreports/resources_qt5.py|Testing/PerformanceTests|Testing/SystemTests/lib|Testing/SystemTests/scripts|Testing/SystemTests/tests/framework/reference|scripts/ErrorReporter/ui_errorreport.py
-        args: ['--extend-ignore=E999,F821,E127']
+        args: ["--extend-ignore=E999,F821,E127"]
