@@ -94,6 +94,18 @@ def get_normalize_by_bin_width(workspace, axes, **kwargs):
     return normalization, kwargs
 
 
+def get_spectrum_normalisation(**kwargs):
+    """
+    Get the spectrum normalisation flag from the plot keyword arguments.
+
+    :param kwargs: plot kwargs
+    :return the normalisation flag and the new kwargs
+    """
+    norm = False
+    if "normalise_spectrum" in kwargs:
+        norm = kwargs.pop("normalise_spectrum")
+    return norm, kwargs
+
 def get_normalization(md_workspace, **kwargs):
     """
     Gets the normalization flag of an MDHistoWorkspace. For workspaces
