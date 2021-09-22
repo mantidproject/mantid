@@ -29,6 +29,7 @@ class D7AbsoluteCrossSectionsTest(unittest.TestCase):
         Load('396993_reduced.nxs', OutputWorkspace='396993_reduced.nxs')
         GroupWorkspaces('396993_reduced.nxs', OutputWorkspace='vanadium_data') # workaround for a single-entry workspace group
         Load('397004_reduced.nxs', OutputWorkspace='sample_data')
+        Load('395639_reduced.nxs', OutputWorkspace='sample_tof_data')
 
     def setUp(self):
         self._sampleProperties = {'SampleMass': 2.93, 'FormulaUnitMass': 182.56, 'SampleSpin':0.5,
@@ -87,6 +88,13 @@ class D7AbsoluteCrossSectionsTest(unittest.TestCase):
                                 CrossSectionSeparationMethod='XYZ', NormalisationMethod='Incoherent',
                                 SampleAndEnvironmentProperties=self._sampleProperties, AbsoluteUnitsNormalisation=False)
         self._check_output('normalised_sample_incoherent', 132, 1, 3, onlySeparation=False)
+
+    def test_tof_data_normalisation(self):
+        D7AbsoluteCrossSections(InputWorkspace='sample_tof_data', OutputWorkspace='normalised_tof',
+                                CrossSectionSeparationMethod='Uniaxial', NormalisationMethod='Vanadium',
+                                SampleAndEnvironmentProperties=self._sampleProperties, AbsoluteUnitsNormalisation=False,
+                                VanadiumInputWorkspace='vanadium_data', MeasurementTechnique='TOF')
+        self._check_output('normalised_tof', 132, 339, 3, onlySeparation=False)
 
     def _check_output(self, ws, blocksize, spectra, nEntries, onlySeparation):
         self.assertTrue(mtd[ws])
