@@ -24,11 +24,11 @@ def euphonic_available():
     return True
 
 
-def get_data_with_euphonic(file_name: str, cutoff: float = 20.):
+def get_data_with_euphonic(filename: str, cutoff: float = 20.):
     """
     Read force constants file with Euphonic and sample frequencies/modes
 
-    :param file_name: Input data
+    :param filename: Input data
     :param cutoff:
         Sampling density of Brillouin-zone. Specified as real-space length
         cutoff.
@@ -41,7 +41,7 @@ def get_data_with_euphonic(file_name: str, cutoff: float = 20.):
     from euphonic.cli.utils import force_constants_from_file
     from euphonic.util import mp_grid
 
-    fc = force_constants_from_file(file_name)
+    fc = force_constants_from_file(filename)
     recip_lattice_lengths = np.linalg.norm(
         fc.crystal.reciprocal_cell().to('1/angstrom').magnitude, axis=1)
     mp_sampling = [ceil(x)
