@@ -236,6 +236,8 @@ class SuperplotView(QWidget):
 
         side = self._side_view
         side.visibilityChanged.connect(self._presenter.on_visibility_changed)
+        side.normaliseCheckbox.clicked.connect(
+                self._presenter.on_normalise_checked)
         side.addButton.clicked.connect(self._presenter.on_add_button_clicked)
         side.workspacesList.itemSelectionChanged.connect(
                 self._presenter.on_workspace_selection_changed)

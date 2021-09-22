@@ -215,6 +215,12 @@ class SuperplotPresenter:
                 pass
             self._canvas.draw_idle()
 
+    def on_normalise_checked(self, checked):
+        """
+        Transmit the normalisation checkbox state to the model.
+        """
+        self._model.normalise(checked)
+
     def on_drop(self, name):
         """
         Triggered when a drop event is received in the list widget. Here, name

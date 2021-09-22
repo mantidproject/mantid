@@ -66,6 +66,11 @@ class SuperplotModel(QObject):
     """
     _ws_colors = None
 
+    """
+    Whether or not the plotted spectra are normalised.
+    """
+    _normalised = False
+
     def __init__(self):
         super().__init__()
         self._workspaces = list()
@@ -125,6 +130,24 @@ class SuperplotModel(QObject):
             list(str): list of workspace names
         """
         return self._workspaces.copy()
+
+    def normalise(self, normalise):
+        """
+        Set the spectra normalisation state.
+
+        Args:
+            normalise (bool): True if spectra have to be normalised
+        """
+        self._normalised = normalise
+
+    def is_normalised(self):
+        """
+        Get the spectra normalisation state.
+
+        Returns:
+            bool: True if spectra have to be normalised
+        """
+        return self._normalised
 
     def set_workspace_color(self, ws_name, color):
         """
