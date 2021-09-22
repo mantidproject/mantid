@@ -46,7 +46,7 @@ Workspace_sptr LoadILLMock::buildWorkspace() {
 }
 
 void LoadILLMock::loadAndFillData() {
-  std::string a = getNep()->getScalarMetadata<std::string>("/entry0/monitor7/mode");
+  std::string a = getScalarMetadata<std::string>("/entry0/monitor7/mode");
   g_log.warning("Using provided value: " + a);
 };
 

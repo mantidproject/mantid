@@ -27,6 +27,10 @@ protected:
   std::shared_ptr<API::Workspace> getOutput() { return m_workspace; }
   std::string getAcqMode() { return m_mode; }
   std::string getInstrument() { return m_instrument; }
+  template <typename T> T getScalarMetadata(const std::string &key) { return m_nep->getScalarMetadata<T>(key); }
+  template <typename T> std::vector<T> getVectorMetadata(const std::string &key) {
+    return m_nep->getVectorMetadata<T>(key);
+  }
 
   // pure virtual methods
   virtual API::Workspace_sptr buildWorkspace() = 0;
