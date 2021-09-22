@@ -100,19 +100,35 @@ public:
     msAlg.setPropertyValue("InputWorkspace", ws_name);
     msAlg.setPropertyValue("Method", "SampleOnly");
     msAlg.setPropertyValue("OutputWorkspace", "rst_ms");
-    // msAlg.setProperty("ElementSize", 0.4); // mm
+    // msAlg.setProperty("ElementSize", 4.0); // mm
     msAlg.execute();
     TS_ASSERT(msAlg.isExecuted());
-    Mantid::API::MatrixWorkspace_sptr rst_ms =
+    Mantid::API::MatrixWorkspace_sptr rst_ms_sampleOnly =
         AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>("rst_ms_sampleOnly");
 
     //
     msAlg.initialize();
     msAlg.setPropertyValue("InputWorkspace", ws_name);
     msAlg.setPropertyValue("Method", "SampleAndContainer");
+    // msAlg.setProperty("ElementSize", 4.0); // mm
     msAlg.setPropertyValue("OutputWorkspace", "rst_ms");
     msAlg.execute();
     TS_ASSERT(msAlg.isExecuted());
+    Mantid::API::MatrixWorkspace_sptr rst_ms_containerOnly =
+        AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>("rst_ms_containerOnly");
+    Mantid::API::MatrixWorkspace_sptr rst_ms_sampleAndContainer =
+        AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>("rst_ms_sampleAndContainer");
+
+    for (size_t i = 0; i < rst_ms_sampleOnly->getNumberHistograms(); ++i) {
+      for (size_t j = 0; j < rst_ms_sampleOnly->blocksize(); ++j) {
+        g_log.notice() << "rst_ms_sampleOnly: " << rst_ms_sampleOnly->readY(i)[j] << "\n"
+                       << "rst_ms_containerOnly: " << rst_ms_containerOnly->readY(i)[j] << "\n"
+                       << "rst_ms_sampleAndContainer: " << rst_ms_sampleAndContainer->readY(i)[j] << "\n";
+      }
+    }
+
+    // just to see the output
+    TS_ASSERT(false);
   }
 
 private:
