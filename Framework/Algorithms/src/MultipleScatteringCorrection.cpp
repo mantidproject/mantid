@@ -724,7 +724,7 @@ void MultipleScatteringCorrection::pairWiseSumSampleAndContainer(
       // compute A1
       double exponent = (LS1sContainer[i] + L2DsContainer[i]) * linearCoefAbsContainer +
                         (LS1sSample[i] + L2DsSample[i]) * linearCoefAbsSample;
-      A1 += exp(exponent) * factor_i;
+      A1 += exp(exponent) * factor_i * elementVolumes[i];
       // compute A2
       double a2 = 0.0;
       for (int64_t j = 0; j < numVolumeElementsTotal; ++j) {
@@ -739,9 +739,9 @@ void MultipleScatteringCorrection::pairWiseSumSampleAndContainer(
         const double l12 = L12sContainer[idx_l12] + L12sSample[idx_l12];
         exponent = (LS1sContainer[i] + L12sContainer[idx_l12] + L2DsContainer[j]) * linearCoefAbsContainer + //
                    (LS1sSample[i] + L12sSample[idx_l12] + L2DsSample[j]) * linearCoefAbsSample;
-        a2 += exp(exponent) * factor_j / (l12 * l12);
+        a2 += exp(exponent) * factor_j * elementVolumes[j] / (l12 * l12);
       }
-      A2 += a2 * factor_i;
+      A2 += a2 * factor_i * elementVolumes[i];
     }
   }
 }
