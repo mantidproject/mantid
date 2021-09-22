@@ -5,19 +5,16 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-#include "MantidQtWidgets/Common/TSVSerialiser.h"
-#endif
 #include "MantidQtWidgets/InstrumentView/InstrumentRenderer.h"
 #include "MantidQtWidgets/InstrumentView/OpenGLError.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IMaskWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidQtWidgets/Common/MessageHandler.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
 #include "MantidGeometry/Instrument.h"
@@ -36,7 +33,6 @@
 #include <QMessageBox>
 #include <QSettings>
 
-#include <numeric>
 #include <utility>
 
 using namespace Mantid::Kernel::Exception;
@@ -69,13 +65,19 @@ bool isPhysicalView() {
  * @param scaleMax :: Maximum value of the colormap scale. Used to assign
  * detector colours. Ignored if autoscaling == true.
  */
-InstrumentActor::InstrumentActor(const std::string &wsName, bool autoscaling, double scaleMin, double scaleMax)
+InstrumentActor::InstrumentActor(const std::string &wsName, bool autoscaling, double scaleMin, double scaleMax,
+                                 std::unique_ptr<MantidQt::MantidWidgets::IMessageHandler> messageHandler)
     : InstrumentActor(AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName), autoscaling, scaleMin,
-                      scaleMax) {}
+                      scaleMax, std::move(messageHandler)) {}
 
-InstrumentActor::InstrumentActor(MatrixWorkspace_sptr workspace, bool autoscaling, double scaleMin, double scaleMax)
-    : m_workspace(workspace), m_ragged(true), m_autoscaling(autoscaling), m_defaultPos(),
-      m_isPhysicalInstrument(false) {
+InstrumentActor::InstrumentActor(MatrixWorkspace_sptr workspace, bool autoscaling, double scaleMin, double scaleMax,
+                                 std::unique_ptr<MantidQt::MantidWidgets::IMessageHandler> messageHandler)
+    : m_workspace(workspace), m_ragged(true), m_autoscaling(autoscaling), m_defaultPos(), m_isPhysicalInstrument(false),
+      m_messageHandler(std::move(messageHandler)) {
+  if (!m_messageHandler) {
+    m_messageHandler = std::make_unique<MantidQt::MantidWidgets::MessageHandler>();
+  }
+
   // settings
   loadSettings();
 
@@ -113,7 +115,7 @@ InstrumentActor::InstrumentActor(MatrixWorkspace_sptr workspace, bool autoscalin
 
   // If the instrument is empty, maybe only having the sample and source
   if (detectorInfo().size() == 0) {
-    QMessageBox::warning(nullptr, "Mantid - Warning", "This instrument appears to contain no detectors", "OK");
+    m_messageHandler->giveUserWarning("This instrument appears to contain no detectors", "Mantid - Warning");
   }
 }
 
@@ -299,7 +301,7 @@ void InstrumentActor::applyMaskWorkspace() {
       // after-replace notification
       // and updates this instrument actor.
     } catch (...) {
-      QMessageBox::warning(nullptr, "Mantid - Warning", "An error accured when applying the mask.", "OK");
+      m_messageHandler->giveUserWarning("An error occurred when applying the mask.", "Mantid - Warning");
     }
   }
 
@@ -755,10 +757,8 @@ void InstrumentActor::initMaskHelper() const {
     m_maskWorkspace = extractCurrentMask();
   } catch (...) {
     // don't know what to do here yet ...
-    QMessageBox::warning(nullptr, "Mantid - Warning",
-                         "An error occurred when extracting the mask. "
-                         "Instrument Viewer is not supported yet for workspaces containing a detector scan.",
-                         "OK");
+    m_messageHandler->giveUserWarning(
+        "Instrument Viewer is not supported yet for workspaces containing a detector scan.", "Mantid - Warning");
   }
 }
 

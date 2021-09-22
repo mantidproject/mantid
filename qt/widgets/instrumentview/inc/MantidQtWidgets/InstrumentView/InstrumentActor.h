@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidQtWidgets/Common/IMessageHandler.h"
 #include "MantidQtWidgets/InstrumentView/ColorMap.h"
 #include "MantidQtWidgets/InstrumentView/DllOption.h"
 #include "MantidQtWidgets/InstrumentView/GLColor.h"
@@ -64,9 +65,11 @@ public:
   static constexpr double INVALID_VALUE = std::numeric_limits<double>::lowest();
 
   /// Constructor
-  InstrumentActor(const std::string &wsName, bool autoscaling = true, double scaleMin = 0.0, double scaleMax = 0.0);
+  InstrumentActor(const std::string &wsName, bool autoscaling = true, double scaleMin = 0.0, double scaleMax = 0.0,
+                  std::unique_ptr<MantidQt::MantidWidgets::IMessageHandler> messageHandler = nullptr);
   InstrumentActor(Mantid::API::MatrixWorkspace_sptr workspace, bool autoscaling = true, double scaleMin = 0.0,
-                  double scaleMax = 0.0);
+                  double scaleMax = 0.0,
+                  std::unique_ptr<MantidQt::MantidWidgets::IMessageHandler> messageHandler = nullptr);
   ///< Destructor
   ~InstrumentActor();
 
@@ -279,6 +282,7 @@ private:
   std::unique_ptr<Mantid::Geometry::ComponentInfo> m_physicalComponentInfo;
   std::unique_ptr<Mantid::Geometry::DetectorInfo> m_physicalDetectorInfo;
   std::unique_ptr<InstrumentRenderer> m_renderer;
+  std::unique_ptr<MantidQt::MantidWidgets::IMessageHandler> m_messageHandler;
 
   friend class InstrumentWidgetEncoder;
   friend class InstrumentWidgetDecoder;
