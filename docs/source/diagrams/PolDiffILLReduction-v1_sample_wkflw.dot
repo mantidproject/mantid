@@ -6,6 +6,8 @@ digraph Sample {
     AverageCounts
     SelfAttenuationMethod
     SingleCrystal
+    TimeOfFlight1 [label="Time-of-flight"]
+    TimeOfFlight2 [label="Time-of-flight"]
   }
 
   subgraph params {
@@ -18,6 +20,7 @@ digraph Sample {
     Transmission
     PaalmanPingsMonteCarloAbsorption
     SampleAndEnvironmentProperties
+    ElasticChannelsWorkspace
   }
 
   subgraph values {
@@ -31,6 +34,9 @@ digraph Sample {
     Divide [label="Normalize to monitor/time"]
     MergeOmegaScan
     Multiply [label="Correct polarising efficiency"]
+    FrameOverlapCorrection
+    EnergyEfficiencyCorrection
+    ElasticPeakCalibration
     Minus [label="Subtract background"]
     Plus [label="Average polarization/2theta"]
     PaalmanPingsMonteCarloAbsorption
@@ -50,7 +56,10 @@ digraph Sample {
   CadmiumWorkspace -> Minus
   EmptyContainerWorkspace -> Minus
   Transmission -> Minus
-  Minus -> Multiply
+  Minus -> TimeOfFlight1
+  TimeOfFlight1 -> FrameOverlapCorrection
+  FrameOverlapCorrection -> Multiply
+  TimeOfFlight1 -> Multiply
   QuartzWorkspace -> Multiply
   Multiply -> SelfAttenuationMethod
   SelfAttenuationMethod -> PaalmanPingsMonteCarloAbsorption
@@ -62,9 +71,14 @@ digraph Sample {
   PaalmanPingsAbsorptionCorrection -> ApplyPaalmanPingsCorrection
   SelfAttenuationMethod -> SampleSelfAttenuationFactors
   SampleSelfAttenuationFactors -> ApplyPaalmanPingsCorrection
-  ApplyPaalmanPingsCorrection -> AverageCounts
-  SelfAttenuationMethod -> AverageCounts
-  Divide2 -> AverageCounts
+  SelfAttenuationMethod -> TimeOfFlight2
+  ApplyPaalmanPingsCorrection -> TimeOfFlight2
+  Divide2 -> TimeOfFlight2
+  TimeOfFlight2 -> AverageCounts
+  TimeOfFlight2 -> EnergyEfficiencyCorrection
+  EnergyEfficiencyCorrection -> ElasticPeakCalibration
+  ElasticChannelsWorkspace -> ElasticPeakCalibration
+  ElasticPeakCalibration -> AverageCounts
   AverageCounts -> SumOverlappingTubes
   AverageCounts -> Plus
   AverageCounts -> OutputWorkspace
