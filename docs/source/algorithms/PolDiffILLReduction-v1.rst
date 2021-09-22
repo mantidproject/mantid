@@ -58,6 +58,9 @@ Different input properties can be specified depending on the value of **ProcessA
 |                  | * EmptyContainerWorkspace       | * **SampleAndEnvironmentProperties**       |
 |                  | * Transmission                  | * OutputTreatment                          |
 |                  | * QuartzWorkspace               | * MeasurementTechnique                     |
+|                  | * ElasticChannelsWorkspace      | * FrameOverlapCorrection                   |
+|                  |                                 | * DetectorEnergyEfficiencyCorrection       |
+|                  |                                 | * EnergyBinning                            |
 +------------------+---------------------------------+--------------------------------------------+
 
 All the input workspace properties above are optional, unless bolded.
@@ -74,9 +77,17 @@ This property allows to choose how the data is going to be normalised. The choic
 MeasurementTechnique
 --------------------
 
-This property allows to distinguish between reducing powder data from single crystal measurement. The options are: `Powder` and `SingleCrystal`. In the case of single crystal
-data, one bank position is processed at a time, and all input files are concatenated into a single workspace with vertical axis being 2theta positions of detectors,
+This property allows to distinguish between reducing powder data from single crystal measurement. The options are: `Powder`, `SingleCrystal`, and `TOF`. In the case of single crystal
+data, only one bank position can processed at a time, and all input files for that bank are concatenated into a single workspace with vertical axis being 2theta positions of detectors,
 and the horizontal axis containing omega scan steps.
+
+In the `TOF` case, the X-axis is binned according to uncalibrated time, with binning information (start of the range, time bin width, number of bins) coming from NeXus files. Setting
+the `MeasurementTechnique` property to `TOF` enables also elastic peak calibration of data, with peak information coming from :ref:`FindEPP <algm-FindEPP>` which is run on vanadium data
+during reducing data as `Vanadium`. The output of `Vanadium` reduction elastic peak calibration, or a mock TableWorkspace containing at least two columns: `PeakCentre` and `Sigmas`,
+is required to be provided through `ElasticChannelsWorkspace` property, when the `processAs` property is `Sample` and `MeasurementTechnique` is set to `TOF`. The output workspace
+processed in this mode will have its X-axis units set to calibrated energy exchange (`DeltaE`), where the energy exchange equal to 0 is set to fall at the position of the elastic peak
+for each detector.
+
 
 OutputTreatment
 ---------------
@@ -161,11 +172,16 @@ Then, depending on the chosen sample geometry, additional parameters need to be 
   - *ContainerInnerRadius*
   - *ContainerOuterRadius*
 
+Time-of-flight specific keys:
+
+- *EPWidth*
+
+The *EPWidth* key is the user-defined width (in the number of time channels) of elastic peaks to be used for integrating elastic peaks.
+
 Optional keys:
 
 - *InitialEnergy* - if not provided, the value will be calculated from the wavelength in the SampleLogs
 - *NMoles* - if not provided, the value will be calculated based on the *SampleMass* and *FormulaUnitMass*
-
 
 Workflows
 #########
@@ -456,6 +472,118 @@ Output:
            if polarisation in entry_name:
 	       break
        RenameWorkspace(InputWorkspace=entry, OutputWorkspace="{}_{}".format(appended_ws, polarisation))
+
+
+**Example - full treatment of a single crystal sample**
+
+.. code-block:: python
+
+   # based on logbook from exp_6-02-594, cycle 193
+
+   vanadium_mass = 6.11 * 4.0 * np.pi * (0.6**2 - 0.4**2)
+   formula_weight_H2O = 1.008 * 2 + 15.999 # NIST
+   formula_weight_D2O = 2.014 * 2 + 15.999 # NIST
+   sample_mass_H2O = 0.874
+   sample_mass_D2O = 1.9204
+   sample_formula_H2O = 'H2O'
+   sample_formula_D2O = 'D2O'
+   sample_thickness_H2O = 1.95
+   sample_thickness_D2O = 1.9
+   max_tof_channel = 511
+   vanadium_dictionary = {'SampleMass':vanadium_mass, 'FormulaUnitMass':50.942}
+   sample_dictionary_H2O = {'SampleMass':sample_mass_H2O, 'FormulaUnitMass':formula_weight_H2O, 'SampleChemicalFormula':sample_formula_H2O}
+   sample_dictionary_D2O = {'SampleMass':sample_mass_D2O, 'FormulaUnitMass':formula_weight_D2O, 'SampleChemicalFormula':sample_formula_D2O}
+   yig_calibration_file = "D7_YIG_calibration_TOF.xml"
+
+   # Beam measurement for transmission
+   PolDiffILLReduction(
+		Run='395557',
+		OutputWorkspace='beam_ws',
+		ProcessAs='EmptyBeam'
+   )
+   PolDiffILLReduction(
+		Run='395566',
+		OutputWorkspace='beam_ws_2',
+		ProcessAs='EmptyBeam'
+   )
+
+   # empty container
+   PolDiffILLReduction(
+		Run='396036:396155',
+		OutputTreatment='AveragePol',
+		OutputWorkspace='container_ws',
+		ProcessAs='Empty'
+   )
+
+   # Vanadium transmission
+   PolDiffILLReduction(
+		Run='395564',
+		OutputWorkspace='vanadium_tr',
+		EmptyBeamWorkspace='beam_ws',
+		ProcessAs='Transmission'
+   )
+
+   # Vanadium reduction
+   PolDiffILLReduction(
+		Run='396016:396034',
+		OutputWorkspace='vanadium_ws',
+		EmptyContainerWorkspace='container_ws',
+		Transmission='vanadium_tr',
+		OutputTreatment='Sum',
+		SelfAttenuationMethod='None',
+		SampleGeometry='None',
+		AbsoluteNormalisation=False,
+		SampleAndEnvironmentProperties=vanadium_dictionary,
+		MeasurementTechnique='TOF',
+		ProcessAs='Vanadium',
+		InstrumentCalibration=yig_calibration_file,
+		ClearCache=True
+   )
+
+   # D2O transmission
+   PolDiffILLReduction(
+		Run='395558,395559', # 0 and 90 degrees
+		OutputWorkspace='d2O_1cm_tr',
+		EmptyBeamWorkspace='beam_ws',
+		ProcessAs='Transmission'
+   )
+   # H2O transmissions
+   PolDiffILLReduction(
+		Run='395560,395561', # 0 and 90 degrees
+		OutputWorkspace='h2O_1cm_tr',
+		EmptyBeamWorkspace='beam_ws',
+		ProcessAs='Transmission'
+   )
+
+   # Sample reduction
+
+   # water reduction
+   PolDiffILLReduction(
+		Run="395639:395798",
+		OutputWorkspace='h2O_ws',
+		EmptyContainerWorkspace='container_ws',
+		Transmission='h2O_1cm_tr',
+		OutputTreatment='AveragePol',
+		SampleGeometry='None',
+		SampleAndEnvironmentProperties=sample_dictionary_H2O,
+		MeasurementTechnique='TOF',
+		InstrumentCalibration=yig_calibration_file,
+		ElasticChannelsWorkspace='vanadium_ws_elastic',
+		ProcessAs='Sample'
+   )
+
+   D7AbsoluteCrossSections(
+		InputWorkspace='h2O_ws',
+		OutputWorkspace='h2O_red',
+		CrossSectionSeparationMethod='Uniaxial',
+		NormalisationMethod='Vanadium',
+		VanadiumInputWorkspace='vanadium_ws',
+		OutputUnits='Qw',
+		SampleAndEnvironmentProperties=sample_dictionary_H2O,
+		AbsoluteUnitsNormalisation=False,
+		MeasurementTechnique='TOF',
+		ClearCache=True
+   )
 
 .. categories::
 
