@@ -10,8 +10,10 @@
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/PropertyManager.h"
 
 using namespace Mantid::API;
+using namespace Mantid::Kernel;
 
 namespace Mantid::DataHandling {
 
@@ -46,8 +48,10 @@ Workspace_sptr LoadILLMock::buildWorkspace() {
 }
 
 void LoadILLMock::loadAndFillData() {
-  float a = getNep()->getScalarMetadata<float>("/entry0/monitor1/monrate");
-  g_log.warning() << a << std::endl;
+  float monrate = getScalarMetadata<float>("/entry0/monitor1/monrate");
+  // PropertyManager_sptr pm = getProperty("PatchNexusMetadataEntries");
+  // float a = pm->getProperty("/entry0/monitor1/monrate");
+  g_log.warning() << monrate << std::endl;
 };
 
 void LoadILLMock::configureBeamline(){};
