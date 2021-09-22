@@ -143,7 +143,6 @@ set(SRC_FILES
     src/ModifyDetectorDotDatFile.cpp
     src/MoveInstrumentComponent.cpp
     src/MultiPeriodLoadMuonStrategy.cpp
-    src/NexusEntryProvider.cpp
     src/NexusTester.cpp
     src/ORNLDataArchive.cpp
     src/PDLoadCharacterizations.cpp

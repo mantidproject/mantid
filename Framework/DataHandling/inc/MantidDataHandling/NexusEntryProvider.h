@@ -14,13 +14,22 @@
 namespace Mantid::DataHandling {
 
 /** NexusEntryProvider : Wrapper around NXRoot providing metadata either from the tree or from the map of overridden
- * values.
+ * values. The overridden values are stored in a PropertyManager; that is, type agnostic JSON-like dictionaries.
+ * What is considered metadata are scalars (rank 0) or small 1D arrays (rank 1) of any standard type.
+ * Anything with higher dimensionality is considered data, hence it is not possible to override as it does not make
+ * sense.
  */
 class MANTID_DATAHANDLING_DLL NexusEntryProvider {
 public:
   NexusEntryProvider(const std::string &filename, const Kernel::PropertyManager &entriesToPatch)
       : m_nxroot(filename), m_entriesToPatch(entriesToPatch) {}
 
+  /**
+   * Retrieves scalar value of the given key from the map, if provided, or from the nexus otherwise
+   * @param key : the full path of the entry in nexus
+   * @return scalar value
+   * @throws runtime_error if the key is missing
+   */
   template <typename T> T getScalarMetadata(const std::string &entryName) {
     if (m_entriesToPatch.existsProperty(entryName)) {
       return m_entriesToPatch.getProperty(entryName);
@@ -35,20 +44,32 @@ public:
     return T();
   }
 
-  template <typename T> std::vector<T> getVectorMetadata(const std::string &entryName) {
-    if (m_entriesToPatch.existsProperty(entryName)) {
-      return m_entriesToPatch.getProperty(entryName);
+  /**
+   * Retrieves vector value of the given key from the map, if provided, or from the nexus otherwise
+   * @param key : the full path of the entry in nexus
+   * @return 1D vector value
+   * @throws runtime_error if the key is missing
+   */
+  template <typename T> std::vector<T> getVectorMetadata(const std::string &key) {
+    if (m_entriesToPatch.existsProperty(key)) {
+      return m_entriesToPatch.getProperty(key);
     } else {
       try {
-        return m_nxroot.getTypedVector<T>(entryName);
+        return m_nxroot.getTypedVector<T>(key);
       } catch (std::runtime_error &) {
-        throwMissingKeyError(entryName);
+        throwMissingKeyError(key);
       }
     }
     // shouldn't reach here
     return std::vector<T>();
   }
 
+  /**
+   * Checks if all the mandatory keys are present
+   * @param mandatoryKeys : vector of all the mandatory keys
+   * @return true if all provided
+   * @throws runtim_error if one is missing
+   */
   bool isValid(const std::vector<std::string> &mandatoryKeys) {
     for (const auto &key : mandatoryKeys) {
       if (!keyExists(key)) {
@@ -59,6 +80,12 @@ public:
   }
 
 private:
+  /**
+   * Throws an error if the mandatory key is not found.
+   * Gives hints what to do to work about it.
+   * @param key : the full path of the entry in nexus
+   * @throws runtime_error
+   */
   [[noreturn]] void throwMissingKeyError(const std::string &key) {
     std::ostringstream ss;
     ss << "Numor does not conform to the protocols.\n";
@@ -68,10 +95,15 @@ private:
     throw std::runtime_error(ss.str());
   }
 
-  bool keyExists(const std::string &key) { return m_nxroot.isValid(key) || m_entriesToPatch.existsProperty(key); }
+  /**
+   * Checks if the given key exists either in the map or in the tree
+   * @param key : the full path of the entry in nexus
+   * @return true if it exists
+   */
+  bool keyExists(const std::string &key) { return m_entriesToPatch.existsProperty(key) || m_nxroot.isValid(key); }
 
-  NeXus::NXRoot m_nxroot;
-  Kernel::PropertyManager m_entriesToPatch;
+  NeXus::NXRoot m_nxroot;                   // root of the tree
+  Kernel::PropertyManager m_entriesToPatch; // property manager
 };
 
 } // namespace Mantid::DataHandling
