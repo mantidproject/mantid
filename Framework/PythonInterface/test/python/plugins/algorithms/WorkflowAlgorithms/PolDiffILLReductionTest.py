@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from mantid.api import MatrixWorkspace, WorkspaceGroup, Run
-from mantid.simpleapi import config, mtd, PolDiffILLReduction
+from mantid.simpleapi import config, mtd, PolDiffILLReduction, CreateEmptyTableWorkspace
 from mantid.geometry import Instrument
 
 class PolDiffILLReductionTest(unittest.TestCase):
@@ -97,6 +97,20 @@ class PolDiffILLReductionTest(unittest.TestCase):
         self._check_output(mtd['vanadium'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['vanadium'], 'Vanadium')
 
+    def test_vanadium_tof(self):
+        sampleProperties = {'SampleMass': 8.54, 'FormulaUnitMass': 50.94, 'EPWidth': 15}
+        yig_calibration_file = "D7_YIG_calibration_TOF.xml"
+        PolDiffILLReduction(Run='396016', ProcessAs='Vanadium', OutputWorkspace='vanadium_tof',
+                            SampleAndEnvironmentProperties=sampleProperties,
+                            SampleGeometry='None',
+                            OutputTreatment='Individual',
+                            InstrumentCalibration=yig_calibration_file,
+                            MeasurementTechnique='TOF')
+        self.assertTrue('vanadium_tof' in mtd)
+        self.assertTrue('vanadium_tof_elastic' in mtd)
+        self._check_output(mtd['vanadium_tof'], 1, 132, 2, 'Energy transfer', 'DeltaE', 'Spectrum', 'Label')
+        self._check_process_flag(mtd['vanadium_tof'], 'Vanadium')
+
     def test_vanadium_annulus(self):
         PolDiffILLReduction(Run='396917', ProcessAs='Empty', OutputWorkspace='container_ws')
         sampleProperties = {'SampleChemicalFormula': 'V', 'SampleMass': 8.54, 'FormulaUnitMass': 50.94,
@@ -120,6 +134,26 @@ class PolDiffILLReductionTest(unittest.TestCase):
                             OutputTreatment='Individual')
         self._check_output(mtd['sample'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['sample'], 'Sample')
+
+    def test_sample_tof(self):
+        # creates table workspace with mock elastic peak positions and widths:
+        table_ws = CreateEmptyTableWorkspace()
+        table_ws.addColumn("float", "PeakCentre")
+        table_ws.addColumn("float", "Sigma")
+        for row in range(132):
+            table_ws.addRow([1645.2, 15.0])
+
+        sampleProperties = {'SampleMass': 2.93, 'FormulaUnitMass': 50.94, 'EPWidth': 15}
+        yig_calibration_file = "D7_YIG_calibration_TOF.xml"
+        PolDiffILLReduction(Run='395639', ProcessAs='Sample', OutputWorkspace='sample_tof',
+                            SampleAndEnvironmentProperties=sampleProperties,
+                            SampleGeometry='None',
+                            OutputTreatment='Individual',
+                            InstrumentCalibration=yig_calibration_file,
+                            ElasticChannelsWorkspace='table_ws',
+                            MeasurementTechnique='TOF')
+        self._check_output(mtd['sample_tof'], 339, 132, 2, 'Energy transfer', 'DeltaE', 'Spectrum', 'Label')
+        self._check_process_flag(mtd['sample_tof'], 'Vanadium')
 
     def _check_process_flag(self, ws, value):
         self.assertTrue(ws[0].getRun().getLogData('ProcessedAs').value, value)
