@@ -136,6 +136,10 @@ public:
   double minBinValue() const { return m_BinMinValue; }
   /// Get the upper bound of the integration range.
   double maxBinValue() const { return m_BinMaxValue; }
+  /// Get the workspace min bin
+  double minWkspBinValue() const { return m_WkspBinMinValue; }
+  /// Get the workspace max bin
+  double maxWkspBinValue() const { return m_WkspBinMaxValue; }
   /// Return true if the integration range covers the whole of the x-axis in the
   /// data workspace.
   bool wholeRange() const;

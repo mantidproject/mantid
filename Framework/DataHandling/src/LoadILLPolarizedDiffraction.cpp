@@ -36,14 +36,9 @@ using namespace NeXus;
 using Types::Core::DateAndTime;
 
 namespace {
-// This defines the number of detector banks in D7
-constexpr size_t D7_NUMBER_BANKS = 3;
 // This defines the number of physical pixels in D7
 constexpr size_t D7_NUMBER_PIXELS = 132;
-// This defines the number of pixels per bank in D7
-constexpr size_t D7_NUMBER_PIXELS_BANK = 44;
-// This defines the number of monitors in the instrument. If there are cases
-// where this is no longer one this decleration should be moved.
+// This defines the number of monitors in the instrument.
 constexpr size_t NUMBER_MONITORS = 2;
 // This defines Time Of Flight measurement mode switch value
 constexpr size_t TOF_MODE_ON = 1;
@@ -320,13 +315,14 @@ void LoadILLPolarizedDiffraction::loadInstrument(const API::MatrixWorkspace_sptr
 std::vector<double> LoadILLPolarizedDiffraction::loadTwoThetaDetectors(const API::MatrixWorkspace_sptr &workspace,
                                                                        const NXEntry &entry, const int bankId) {
 
-  std::vector<double> twoTheta(static_cast<int>(D7_NUMBER_PIXELS_BANK));
+  auto const nPixelsPerBank = workspace->getInstrument()->getIntParameter("number_pixels_per_bank")[0];
+  std::vector<double> twoTheta(static_cast<int>(nPixelsPerBank));
 
   if (getPropertyValue("PositionCalibration") == "Nexus") {
     NXFloat twoThetaPixels = entry.openNXFloat("D7/Detector/bank" + std::to_string(bankId) + "_offset");
     twoThetaPixels.load();
     float *twoThetaDataStart = twoThetaPixels();
-    float *twoThetaDataEnd = twoThetaDataStart + D7_NUMBER_PIXELS_BANK;
+    float *twoThetaDataEnd = twoThetaDataStart + nPixelsPerBank;
     twoTheta.assign(twoThetaDataStart, twoThetaDataEnd);
   } else {
     auto loadIpf = createChildAlgorithm("LoadParameterFile");
@@ -339,7 +335,7 @@ std::vector<double> LoadILLPolarizedDiffraction::loadTwoThetaDetectors(const API
 
     m_wavelength = currentBank->getNumberParameter("wavelength")[0];
 
-    for (auto pixel_no = 0; pixel_no < static_cast<int>(D7_NUMBER_PIXELS_BANK); pixel_no++) {
+    for (auto pixel_no = 0; pixel_no < static_cast<int>(nPixelsPerBank); pixel_no++) {
       twoTheta[pixel_no] = currentBank->getNumberParameter("twoTheta_pixel_" + std::to_string(pixel_no + 1))[0];
     }
   }
@@ -375,9 +371,11 @@ std::vector<double> LoadILLPolarizedDiffraction::loadBankParameters(const API::M
 void LoadILLPolarizedDiffraction::moveTwoTheta(const NXEntry &entry, const API::MatrixWorkspace_sptr &workspace) {
 
   Instrument_const_sptr instrument = workspace->getInstrument();
+  auto const nBanks = instrument->getIntParameter("number_banks")[0];
+  auto const nPixelsPerBank = instrument->getIntParameter("number_pixels_per_bank")[0];
 
   auto &componentInfo = workspace->mutableComponentInfo();
-  for (auto bank_no = 0; bank_no < static_cast<int>(D7_NUMBER_BANKS); ++bank_no) {
+  for (auto bank_no = 0; bank_no < static_cast<int>(nBanks); ++bank_no) {
     NXFloat twoThetaBank =
         entry.openNXFloat("D7/2theta/actual_bank" + std::to_string(bank_no + 2)); // detector bank IDs start at 2
     twoThetaBank.load();
@@ -393,8 +391,8 @@ void LoadILLPolarizedDiffraction::moveTwoTheta(const NXEntry &entry, const API::
       if (getPropertyValue("PositionCalibration") == "YIGFile") {
         bankParameters = loadBankParameters(workspace, bank_no + 2);
       }
-      for (auto pixel_no = 0; pixel_no < static_cast<int>(D7_NUMBER_PIXELS_BANK); ++pixel_no) {
-        auto const pixelIndex = bank_no * static_cast<int>(D7_NUMBER_PIXELS_BANK) + pixel_no;
+      for (auto pixel_no = 0; pixel_no < static_cast<int>(nPixelsPerBank); ++pixel_no) {
+        auto const pixelIndex = bank_no * static_cast<int>(nPixelsPerBank) + pixel_no;
         auto const pixel = componentInfo.componentID(pixelIndex);
         V3D position = pixel->getPos();
         double radius, theta, phi;

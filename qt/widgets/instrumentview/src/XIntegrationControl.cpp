@@ -509,16 +509,23 @@ void XIntegrationControl::setTotalRange(double minimum, double maximum) {
   }
   m_totalMinimum = minimum;
   m_totalMaximum = maximum;
-  m_minimum = minimum;
-  m_maximum = maximum;
 
   if (m_isDiscrete) {
+    // if the slider is discrete, we reset it to its usual starting position
     discretize();
     m_scrollBar->setStepsTotal(static_cast<int>(m_totalMaximum - m_totalMinimum + 1));
     setRange(0, 0);
   } else {
-    // we reset the slider to max range, since its size has been changed
-    setWholeRange();
+    // we keep as much of the previous slider as possible
+    if (m_scrollBar->getMinimum() != 0 || m_scrollBar->getMaximum() != 1) {
+      m_minimum = std::min(std::max(m_minimum, minimum), m_totalMaximum);
+      m_maximum = std::max(std::min(m_maximum, maximum), m_totalMinimum);
+      setRange(m_minimum, m_maximum);
+    } else {
+      m_minimum = minimum;
+      m_maximum = maximum;
+    }
+    updateTextBoxes();
   }
 }
 

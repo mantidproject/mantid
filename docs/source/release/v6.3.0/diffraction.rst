@@ -14,6 +14,10 @@ Powder Diffraction
 - `GetDetOffsetsMultiPeaks`, which is deprecate since v6.2.0, is removed.
 - `CalibrateRectangularDetectors`, which is deprecate since v6.2.0, is removed. And system test CalibrateRectangularDetectors_Test is removed.
 
+Bugfixes
+########
+- For processing vanadium run, we don't want to find environment automatically in :ref:`SetSampleFromLogs <algm-SetSampleFromLogs>`.
+
 Engineering Diffraction
 -----------------------
 

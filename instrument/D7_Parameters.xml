@@ -2,6 +2,13 @@
 <parameter-file instrument="D7" valid-from="1900-01-01T00:00:00">
 
   <component-link name="D7">
+    <parameter name="number_banks" type="int" visible="false">
+      <value val="3" />
+    </parameter>
+    <parameter name="number_pixels_per_bank" type="int" visible="false">
+      <value val="44" />
+    </parameter>
+
     <!-- formula for Detector efficiency calculation. Algorithm: DetectorEfficiencyCorUser
 	 See http://muparser.sourceforge.net/mup_features.html#idDef2 for available
 	 operators -->
@@ -39,4 +46,3 @@
 
   </component-link>
 </parameter-file>
-
