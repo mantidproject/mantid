@@ -266,6 +266,13 @@ int NXClass::getInt(const std::string &name) const {
   number.load();
   return *number();
 }
+
+size_t NXClass::getSize(const std::string &name) const {
+  NXSize number = openNXSize(name);
+  number.load();
+  return *number();
+}
+
 /** Returns whether an individual group (or group) is present
  *  @param query :: the class name to search for
  *  @return true if the name is found and false otherwise

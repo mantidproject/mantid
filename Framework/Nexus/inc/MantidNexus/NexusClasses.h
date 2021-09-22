@@ -583,6 +583,11 @@ public:
    *   @return The int
    */
   int getInt(const std::string &name) const;
+  /**  Returns a size_t
+   *   @param name :: The name of the NXSize dataset
+   *   @return The size_t
+   */
+  size_t getSize(const std::string &name) const;
 
   /**
    * Returns a typed scalar value templated on the return variable
@@ -594,9 +599,15 @@ public:
     number.load();
     return *number();
   }
+  /// specialization for string, since string is read as char array
+  template <> std::string getTypedScalar(const std::string &name) const { return getString(name); }
+  template <> int getTypedScalar(const std::string &name) const { return getInt(name); }
+  template <> float getTypedScalar(const std::string &name) const { return getFloat(name); }
+  template <> double getTypedScalar(const std::string &name) const { return getDouble(name); }
+  template <> size_t getTypedScalar(const std::string &name) const { return getSize(name); }
 
   /**
-   * Returns a typed 1D vector value templated on the return variable
+   * Returns a typed 1D numeric vector value templated on the return variable
    * @param name :: The name of the entry
    * @return the typed value
    */
@@ -607,6 +618,12 @@ public:
     std::vector<T> retval;
     retval.assign(address, address + contents.dim0());
     return retval;
+  }
+  /// specialization for string arrays, as they are not allowed in nexus
+  /// string is stored as char array, array of strings we can't easily split
+  template <> std::vector<std::string> getTypedVector(const std::string &name) const {
+    UNUSED_ARG(name);
+    throw std::runtime_error("String arrays are not supported currently.");
   }
 
   /// Returns a list of all classes (or groups) in this NXClass
