@@ -16,8 +16,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-namespace MantidQt {
-namespace API {
+namespace MantidQt::API {
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
@@ -93,5 +92,4 @@ void OptionsPropertyWidget::editingFinished() {
   }
 }
 
-} // namespace API
-} // namespace MantidQt
+} // namespace MantidQt::API

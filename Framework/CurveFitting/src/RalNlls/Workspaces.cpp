@@ -8,9 +8,7 @@
 // https://ccpforge.cse.rl.ac.uk/gf/project/ral_nlls June 2016
 #include "MantidCurveFitting/RalNlls/Workspaces.h"
 
-namespace Mantid {
-namespace CurveFitting {
-namespace NLLS {
+namespace Mantid::CurveFitting::NLLS {
 
 /// Constructor of the workspace.
 NLLS_workspace::NLLS_workspace()
@@ -59,6 +57,4 @@ void NLLS_workspace::initialize(int n, int m, const nlls_options &options) {
   }
 }
 
-} // namespace NLLS
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::NLLS

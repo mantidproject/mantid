@@ -16,8 +16,7 @@
 #include <memory>
 #include <utility>
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 //-----------------------------------------------------------------------------
 // Public member functions
@@ -101,5 +100,4 @@ std::string AlgorithmProperty::setBaseValue(const AlgorithmProperty::HeldType &a
     return message;
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

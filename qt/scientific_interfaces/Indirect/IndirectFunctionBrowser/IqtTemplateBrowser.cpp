@@ -28,9 +28,7 @@
 
 #include <limits>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 /**
  * Constructor
@@ -349,6 +347,4 @@ void IqtTemplateBrowser::updateState() {
   m_tieIntensities->setEnabled(on);
 }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

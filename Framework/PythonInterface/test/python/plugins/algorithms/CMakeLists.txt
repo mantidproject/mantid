@@ -110,8 +110,8 @@ set(TEST_PY_FILES
     SortDetectorsTest.py
     StatisticsOfTableWorkspaceTest.py
     StringToPngTest.py
-    SuggestTibCNCSTest.py
-    SuggestTibHYSPECTest.py
+    CNCSSuggestTIBTest.py
+    HYSPECSuggestTIBTest.py
     SymmetriseTest.py
     UpdatePeakParameterTableValueTest.py
     SANSSubtractTest.py

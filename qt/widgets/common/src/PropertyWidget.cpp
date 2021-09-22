@@ -153,8 +153,7 @@ std::string createFieldPlaceholderText(Mantid::Kernel::Property *prop) {
 }
 } // anonymous namespace
 
-namespace MantidQt {
-namespace API {
+namespace MantidQt::API {
 /**
  * Constructor.
  *
@@ -445,5 +444,4 @@ void PropertyWidget::setFieldPlaceholderText(Mantid::Kernel::Property *prop, QLi
   field->setPlaceholderText(QString::fromStdString(createFieldPlaceholderText(prop)));
 }
 
-} // namespace API
-} // namespace MantidQt
+} // namespace MantidQt::API

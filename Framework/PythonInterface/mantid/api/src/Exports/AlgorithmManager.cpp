@@ -45,8 +45,8 @@ AlgorithmManagerImpl &instance() {
  * @param self The calling object
  * @param id An algorithm ID
  */
-IAlgorithm_sptr getAlgorithm(AlgorithmManagerImpl &self, AlgorithmIDProxy idHolder) {
-  return self.getAlgorithm(idHolder.id);
+IAlgorithm_sptr getAlgorithm(AlgorithmManagerImpl const *const self, AlgorithmIDProxy idHolder) {
+  return self->getAlgorithm(idHolder.id);
 }
 
 /**
@@ -63,14 +63,11 @@ void removeById(AlgorithmManagerImpl &self, AlgorithmIDProxy idHolder) { return 
  * @param algName The name of the algorithm
  * @return A python list of managed algorithms that are currently running
  */
-boost::python::list runningInstancesOf(AlgorithmManagerImpl &self, const std::string &algName) {
+boost::python::list runningInstancesOf(AlgorithmManagerImpl const *const self, const std::string &algName) {
   boost::python::list algs;
-  auto mgrAlgs = self.runningInstancesOf(algName);
+  auto mgrAlgs = self->runningInstancesOf(algName);
   for (auto &mgrAlg : mgrAlgs) {
-    // boost 1.41 (RHEL6) can't handle registering IAlgorithm_const_sptr so we
-    // have to cast to IAlgorithm_sptr and then convert to Python
-    // The constness is pretty-irrelevant by this point anyway
-    algs.append(std::const_pointer_cast<IAlgorithm>(mgrAlg));
+    algs.append(mgrAlg);
   }
 
   return algs;

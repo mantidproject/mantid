@@ -13,8 +13,7 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidDataObjects/RebinnedOutput.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(Transpose)
@@ -146,5 +145,4 @@ API::Axis *Transpose::getVerticalAxis(const API::MatrixWorkspace_const_sptr &wor
   return yAxis;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

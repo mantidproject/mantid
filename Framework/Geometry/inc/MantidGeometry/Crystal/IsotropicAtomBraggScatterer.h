@@ -107,7 +107,7 @@ using IsotropicAtomBraggScatterer_sptr = std::shared_ptr<IsotropicAtomBraggScatt
 
 class MANTID_GEOMETRY_DLL IsotropicAtomBraggScattererParser {
 public:
-  IsotropicAtomBraggScattererParser(const std::string &scattererString);
+  IsotropicAtomBraggScattererParser(std::string scattererString);
 
   std::vector<BraggScatterer_sptr> operator()() const;
 

@@ -101,8 +101,8 @@ private:
   void doComparison();
 
   void doPeaksComparison(DataObjects::PeaksWorkspace_sptr tws1, DataObjects::PeaksWorkspace_sptr tws2);
-  void doLeanElasticPeaksComparison(DataObjects::LeanElasticPeaksWorkspace_sptr tws1,
-                                    DataObjects::LeanElasticPeaksWorkspace_sptr tws2);
+  void doLeanElasticPeaksComparison(const DataObjects::LeanElasticPeaksWorkspace_sptr &tws1,
+                                    const DataObjects::LeanElasticPeaksWorkspace_sptr &tws2);
   void doTableComparison(const API::ITableWorkspace_const_sptr &tws1, const API::ITableWorkspace_const_sptr &tws2);
   void doMDComparison(const API::Workspace_sptr &w1, const API::Workspace_sptr &w2);
   bool compareEventWorkspaces(const DataObjects::EventWorkspace &ews1, const DataObjects::EventWorkspace &ews2);

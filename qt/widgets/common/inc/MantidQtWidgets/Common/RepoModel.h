@@ -87,7 +87,7 @@ class EXPORT_OPT_MANTIDQT_COMMON RepoModel : public QAbstractItemModel {
   class RepoItem {
   public:
     // construct the RepoItem passing the script repository path
-    RepoItem(const QString &label, const QString &path = "/", RepoItem *parent = nullptr);
+    RepoItem(QString label, QString path = "/", RepoItem *parent = nullptr);
 
     ~RepoItem();
     // append child to build the directory tree

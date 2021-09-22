@@ -23,9 +23,7 @@ QStringList FqFitHeaders() {
 }
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 FqFitDataView::FqFitDataView(QWidget *parent) : FqFitDataView(FqFitHeaders(), parent) {}
 
@@ -52,6 +50,4 @@ void FqFitDataView::addTableEntry(size_t row, FitDataRow newRow) {
   setCell(std::move(cell), row, 1);
 }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

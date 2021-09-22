@@ -10,8 +10,7 @@
 #include <stdexcept>
 #include <utility>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 /** Constructor */
 MaxentTransformMultiFourier::MaxentTransformMultiFourier(const MaxentSpaceComplex_sptr &dataSpace,
@@ -120,5 +119,4 @@ void MaxentTransformMultiFourier::setAdjustments(const std::vector<double> &linA
   m_constAdjustments = constAdj;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

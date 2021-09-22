@@ -55,8 +55,7 @@ GNU_DIAG_ON("cast-qual")
 #endif
 #endif
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 using Kernel::Quat;
 using Kernel::V3D;
 
@@ -323,5 +322,4 @@ void renderShape(const detail::ShapeInfo &shapeInfo) {
   }
 }
 } // namespace RenderingHelpers
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

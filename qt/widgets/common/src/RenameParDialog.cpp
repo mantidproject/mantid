@@ -7,6 +7,7 @@
 #include "MantidQtWidgets/Common/RenameParDialog.h"
 
 #include <algorithm>
+#include <utility>
 
 using namespace MantidQt::MantidWidgets;
 
@@ -16,9 +17,9 @@ using namespace MantidQt::MantidWidgets;
  * @param new_params Renamed parameters
  * @param parent The parent widget for the dialog
  */
-RenameParDialog::RenameParDialog(const std::vector<std::string> &old_params, const std::vector<std::string> &new_params,
+RenameParDialog::RenameParDialog(std::vector<std::string> old_params, const std::vector<std::string> &new_params,
                                  QWidget *parent)
-    : QDialog(parent), m_old_params(old_params), m_new_params(new_params) {
+    : QDialog(parent), m_old_params(std::move(old_params)), m_new_params(new_params) {
   m_uiForm.setupUi(this);
   QAbstractItemModel *model = m_uiForm.tableWidget->model();
   int nparams(static_cast<int>(new_params.size()));

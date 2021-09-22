@@ -8,8 +8,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 std::string ICatalogInfo::transformArchivePath(const std::string &path) const {
   std::string ret;
@@ -59,5 +58,4 @@ std::string ICatalogInfo::replaceAllOccurences(const std::string &path, const st
   return boost::replace_all_copy(path, search, format);
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

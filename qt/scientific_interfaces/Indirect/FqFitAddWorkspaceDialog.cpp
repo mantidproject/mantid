@@ -10,9 +10,7 @@
 
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 FqFitAddWorkspaceDialog::FqFitAddWorkspaceDialog(QWidget *parent) : IAddWorkspaceDialog(parent) {
   m_uiForm.setupUi(this);
@@ -73,6 +71,4 @@ void FqFitAddWorkspaceDialog::emitParameterTypeChanged(const QString &type) {
   emit parameterTypeChanged(this, type.toStdString());
 }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

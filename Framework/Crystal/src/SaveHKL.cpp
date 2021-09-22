@@ -31,8 +31,7 @@ using namespace Mantid::Kernel::Strings;
 using namespace Mantid::API;
 using namespace Mantid::PhysicalConstants;
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveHKL)
@@ -680,5 +679,4 @@ void SaveHKL::sizeBanks(const std::string &bankName, int &nCols, int &nRows) {
   }
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

@@ -92,8 +92,7 @@ bool containsOneOf(std::string const &str, std::string const &delimiters) {
 const std::vector<QString> REQUIRESRECONSTRUCTIONATTRIBUTES = {QString("n")};
 } // namespace
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 /**
  * Constructor
@@ -102,9 +101,9 @@ namespace MantidWidgets {
  * @param categories :: Function categories to be included to the Add Function
  * dialog. An empty vector means include all available categories.
  */
-FunctionTreeView::FunctionTreeView(QWidget *parent, bool multi, const std::vector<std::string> &categories)
-    : IFunctionView(parent), m_multiDataset(multi), m_multiDomainFunctionPrefix(), m_allowedCategories(categories),
-      m_selectFunctionDialog(nullptr)
+FunctionTreeView::FunctionTreeView(QWidget *parent, bool multi, std::vector<std::string> categories)
+    : IFunctionView(parent), m_multiDataset(multi), m_multiDomainFunctionPrefix(),
+      m_allowedCategories(std::move(categories)), m_selectFunctionDialog(nullptr)
 
 {
   // create m_browser
@@ -429,7 +428,7 @@ void FunctionTreeView::setFunction(QtProperty *prop, const Mantid::API::IFunctio
   // m_localParameterValues.clear();
   if (!m_multiDomainFunctionPrefix.isEmpty())
     addMultiDomainIndexProperty(prop);
-  addAttributeAndParameterProperties(prop, std::move(fun));
+  addAttributeAndParameterProperties(prop, fun);
 }
 
 /**
@@ -471,7 +470,7 @@ class CreateAttributePropertyForFunctionTreeView
     : public Mantid::API::IFunction::ConstAttributeVisitor<FunctionTreeView::AProperty> {
 public:
   CreateAttributePropertyForFunctionTreeView(FunctionTreeView *browser, QtProperty *parent, const QString &attName)
-      : m_browser(browser), m_parent(parent), m_attName(std::move(attName)) {
+      : m_browser(browser), m_parent(parent), m_attName(attName) {
     // check that parent is a function property
     if (!m_parent ||
         dynamic_cast<QtAbstractPropertyManager *>(m_browser->m_functionManager) != m_parent->propertyManager()) {
@@ -619,7 +618,7 @@ private:
  */
 FunctionTreeView::AProperty FunctionTreeView::addAttributeProperty(QtProperty *parent, const QString &attName,
                                                                    const Mantid::API::IFunction::Attribute &att) {
-  CreateAttributePropertyForFunctionTreeView cap(this, parent, std::move(attName));
+  CreateAttributePropertyForFunctionTreeView cap(this, parent, attName);
   return att.apply(cap);
 }
 
@@ -1903,22 +1902,28 @@ void FunctionTreeView::attributeChanged(QtProperty *prop) {
   // Some attributes require the function to be fully reconstructed, in this
   // case we'd need to emit a function replaced signal. If its not one of these
   // attributes emit an attributeValueChanged signal.
-  if (std::find(REQUIRESRECONSTRUCTIONATTRIBUTES.begin(), REQUIRESRECONSTRUCTIONATTRIBUTES.end(),
-                removePrefix(attributeName)) != REQUIRESRECONSTRUCTIONATTRIBUTES.end()) {
-    auto funProp = m_properties[prop].parent;
-    if (!funProp)
-      return;
-    auto fun = getFunction(funProp, true);
+  try {
+    if (std::find(REQUIRESRECONSTRUCTIONATTRIBUTES.begin(), REQUIRESRECONSTRUCTIONATTRIBUTES.end(),
+                  removePrefix(attributeName)) != REQUIRESRECONSTRUCTIONATTRIBUTES.end()) {
+      auto funProp = m_properties[prop].parent;
+      if (!funProp)
+        return;
+      auto fun = getFunction(funProp, true);
 
-    // delete and recreate all function's properties (attributes, parameters,
-    // etc)
-    setFunction(funProp, fun);
-    updateFunctionIndices();
-    if (m_emitAttributeValueChange)
-      emit functionReplaced(QString::fromStdString(getFunction()->asString()));
-  } else {
-    if (m_emitAttributeValueChange)
-      emit attributePropertyChanged(attributeName);
+      // delete and recreate all function's properties (attributes, parameters,
+      // etc)
+      setFunction(funProp, fun);
+      updateFunctionIndices();
+      if (m_emitAttributeValueChange) {
+        emit functionReplaced(QString::fromStdString(getFunction()->asString()));
+      }
+    } else {
+      if (m_emitAttributeValueChange) {
+        emit attributePropertyChanged(attributeName);
+      }
+    }
+  } catch (std::exception &expt) {
+    QMessageBox::critical(this, "Mantid - Error", QString::fromStdString(expt.what()));
   }
 }
 
@@ -2173,5 +2178,4 @@ QtTreePropertyBrowser *FunctionTreeView::treeBrowser() { return m_browser; }
 
 DoubleDialogEditorFactory *FunctionTreeView::doubleEditorFactory() { return m_doubleEditorFactory; }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

@@ -17,9 +17,7 @@
 
 using std::size_t;
 
-namespace Mantid {
-namespace Kernel {
-namespace Strings {
+namespace Mantid::Kernel::Strings {
 
 //------------------------------------------------------------------------------------------------
 /** Loads the entire contents of a text file into a string
@@ -1217,8 +1215,4 @@ template MANTID_KERNEL_DLL int writeFile(const std::string &, const std::vector<
                                          const std::vector<float> &);
 /// \endcond TEMPLATE
 
-} // NAMESPACE Strings
-
-} // NAMESPACE Kernel
-
-} // NAMESPACE Mantid
+} // namespace Mantid::Kernel::Strings

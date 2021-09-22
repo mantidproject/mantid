@@ -25,8 +25,7 @@
 #include <limits>
 #include <nexus/NeXusFile.hpp>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(SaveNXSPE)
@@ -304,5 +303,4 @@ void SaveNXSPE::exec() {
   nxFile.closeGroup(); // Top level NXentry
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

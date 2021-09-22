@@ -111,8 +111,7 @@ WorkspaceGroup_sptr convertUnits(const WorkspaceGroup_sptr &workspaceGroup, std:
 }
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 AbsorptionCorrections::AbsorptionCorrections(QWidget *parent)
     : CorrectionsTab(parent), m_sampleDensities(std::make_shared<Densities>()),
       m_canDensities(std::make_shared<Densities>()) {
@@ -741,5 +740,4 @@ void AbsorptionCorrections::setRunIsRunning(bool running) {
   setButtonsEnabled(!running);
 }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

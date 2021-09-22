@@ -20,8 +20,7 @@
 
 #include "boost/lexical_cast.hpp"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(TOFSANSResolutionByPixel)
@@ -234,5 +233,4 @@ void TOFSANSResolutionByPixel::checkInput(const Mantid::API::MatrixWorkspace_spt
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

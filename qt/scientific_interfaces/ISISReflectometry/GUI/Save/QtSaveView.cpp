@@ -11,9 +11,7 @@
 #include <QMessageBox>
 #include <boost/algorithm/string.hpp>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 /** Constructor
  * @param parent :: The parent of this view
@@ -309,6 +307,4 @@ void QtSaveView::noWorkspacesSelected() {
 void QtSaveView::cannotSaveWorkspaces() { error("Error", "Unknown error while saving workspaces"); }
 
 void QtSaveView::cannotSaveWorkspaces(std::string const &fullError) { error("Error", fullError); }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

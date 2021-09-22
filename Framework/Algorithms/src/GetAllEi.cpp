@@ -28,8 +28,7 @@
 
 #include <string>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::HistogramData;
@@ -1157,5 +1156,4 @@ std::map<std::string, std::string> GetAllEi::validateInputs() {
   return result;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

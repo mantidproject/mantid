@@ -21,9 +21,7 @@
 #include <algorithm>
 #include <cfloat>
 
-namespace Mantid {
-
-namespace Algorithms {
+namespace Mantid::Algorithms {
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(DetectorDiagnostic)
 
@@ -661,5 +659,4 @@ void DetectorDiagnostic::failProgress(RunTime aborted) {
   advanceProgress(-aborted);
   m_TotalTime -= aborted;
 }
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

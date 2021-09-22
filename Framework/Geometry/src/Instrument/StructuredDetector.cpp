@@ -21,8 +21,7 @@
 #include <ostream>
 #include <stdexcept>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 using Kernel::V3D;
 
@@ -614,5 +613,4 @@ size_t StructuredDetector::registerContents(class ComponentVisitor &componentVis
   return componentVisitor.registerStructuredBank(*this);
 }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

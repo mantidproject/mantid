@@ -14,8 +14,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CylinderAbsorption)
@@ -176,5 +175,4 @@ void CylinderAbsorption::initialiseCachedDistances() {
   m_elementVolumes = std::move(raster.volume);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

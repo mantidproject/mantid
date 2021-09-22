@@ -17,8 +17,7 @@
 #include "MantidTypes/SpectrumDefinition.h"
 
 #include <H5Cpp.h>
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 using Mantid::API::WorkspaceProperty;
 using Mantid::Kernel::Direction;
 
@@ -227,5 +226,4 @@ int LoadNexusProcessed2::confidence(Kernel::NexusDescriptor &descriptor) const {
     return 0;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

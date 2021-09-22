@@ -11,8 +11,7 @@ namespace {
 using VecElements = std::vector<Mantid::Crystal::DisjointElement>;
 }
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 /**
  * Constructor
@@ -121,5 +120,4 @@ bool Cluster::operator==(const Cluster &other) const { return getLabel() == othe
  */
 bool Cluster::containsLabel(const size_t &label) const { return (label == this->getLabel()); }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

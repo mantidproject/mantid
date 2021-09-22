@@ -230,7 +230,7 @@ void LoadFlexiNexus::loadMD(NeXus::File *fin) {
   // assign the workspace
   setProperty("OutputWorkspace", ws);
 }
-int LoadFlexiNexus::calculateCAddress(int *pos, int *dim, int rank) {
+int LoadFlexiNexus::calculateCAddress(const int *pos, const int *dim, int rank) {
   int result = pos[rank - 1];
   for (int i = 0; i < rank - 1; i++) {
     int mult = 1;

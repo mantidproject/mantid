@@ -12,8 +12,7 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/NullValidator.h"
 
-namespace Mantid {
-namespace RemoteAlgorithms {
+namespace Mantid::RemoteAlgorithms {
 
 // Register the algorithm into the Algorithm Factory
 DECLARE_ALGORITHM(QueryRemoteJob2)
@@ -94,5 +93,4 @@ void QueryRemoteJob2::exec() {
   setProperty("CommandLine", info.cmdLine);
 }
 
-} // end namespace RemoteAlgorithms
-} // end namespace Mantid
+} // namespace Mantid::RemoteAlgorithms

@@ -26,8 +26,7 @@
 #include <numeric>
 #include <vector>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Kernel;
 using namespace DataObjects;
@@ -237,5 +236,4 @@ HistogramData::Histogram PaddingAndApodization::addPadding(const HistogramData::
   return result;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

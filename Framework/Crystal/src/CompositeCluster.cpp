@@ -24,8 +24,7 @@ public:
 };
 } // namespace
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 /**
  * Integrate the composite cluster.
@@ -170,5 +169,4 @@ bool CompositeCluster::containsLabel(const size_t &label) const {
   return m_ownedClusters.end() != std::find_if(m_ownedClusters.begin(), m_ownedClusters.end(), comparitor);
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

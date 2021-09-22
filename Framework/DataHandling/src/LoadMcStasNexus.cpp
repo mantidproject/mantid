@@ -19,8 +19,7 @@
 
 #include <boost/algorithm/string.hpp>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 using namespace Kernel;
 using namespace API;
 
@@ -160,7 +159,7 @@ void LoadMcStasNexus::exec() {
       ws->setYUnit(axis2Name);
       ws->replaceAxis(1, std::move(axis2));
 
-      ws->mutableX(0) = std::move(axis1Values);
+      ws->mutableX(0) = axis1Values;
 
       for (size_t wsIndex = 0; wsIndex < axis2Length; ++wsIndex) {
         auto &dataY = ws->mutableY(wsIndex);
@@ -189,5 +188,4 @@ void LoadMcStasNexus::exec() {
   setProperty("OutputWorkspace", outputGroup);
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

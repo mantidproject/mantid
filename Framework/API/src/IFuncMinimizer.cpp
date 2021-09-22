@@ -9,8 +9,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/IFuncMinimizer.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 /**
  * Do minimization of the set function.
@@ -44,5 +43,4 @@ bool IFuncMinimizer::minimize(size_t maxIterations) {
   return success;
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

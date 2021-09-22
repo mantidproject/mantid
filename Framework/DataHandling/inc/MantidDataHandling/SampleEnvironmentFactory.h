@@ -55,7 +55,7 @@ private:
  */
 class MANTID_DATAHANDLING_DLL SampleEnvironmentSpecFileFinder final : public ISampleEnvironmentSpecFinder {
 public:
-  SampleEnvironmentSpecFileFinder(const std::vector<std::string> &directories);
+  SampleEnvironmentSpecFileFinder(std::vector<std::string> directories);
 
   SampleEnvironmentSpec_uptr find(const std::string &facility, const std::string &instrument,
                                   const std::string &name) const override;

@@ -54,6 +54,13 @@ Bugfixes
 - Corrected the equation for pseudo-voigt FWHM and mixing parameter in peak profile function :ref:`Bk2BkExpConvPV <func-Bk2BkExpConvPV>`.
 - Fixed a bug when filtering events in :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder-v1>` based on time-of-flight. The code now allows setting the minimum time-of-flight to zero (inclusive).
 
+
+Deprecation
+###########
+- Existing `CalibrateRectangularDetectors` is deprecated.
+- Existing `GetDetOffsetsMultiPeaks` is deprecated.
+
+
 Engineering Diffraction
 -----------------------
 New features

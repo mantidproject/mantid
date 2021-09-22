@@ -10,8 +10,7 @@
 #include <algorithm>
 #include <stdexcept>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 using Mantid::Kernel::DblMatrix;
 using Mantid::Kernel::Matrix;
 using Mantid::Kernel::V3D;
@@ -293,5 +292,4 @@ bool NiggliCell::MakeNiggliUB(const DblMatrix &UB, DblMatrix &newUB) {
   return true;
 }
 
-} // Namespace Geometry
-} // Namespace Mantid
+} // namespace Mantid::Geometry

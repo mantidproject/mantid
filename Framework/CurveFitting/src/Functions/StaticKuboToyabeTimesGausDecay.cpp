@@ -8,9 +8,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include <cmath>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
 
@@ -44,6 +42,4 @@ void StaticKuboToyabeTimesGausDecay::function1D(double *out, const double *xValu
     out[i] = A * (exp(-(x2 * D2) / 2) * (1 - x2 * D2) * C1 + C2) * exp(-S2 * x2);
   }
 }
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

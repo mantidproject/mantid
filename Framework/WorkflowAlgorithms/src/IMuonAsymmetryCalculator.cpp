@@ -4,6 +4,8 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+#include <utility>
+
 #include "MantidWorkflowAlgorithms/IMuonAsymmetryCalculator.h"
 
 using Mantid::API::AlgorithmManager;
@@ -13,8 +15,7 @@ using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::API::Workspace_sptr;
 using Mantid::API::WorkspaceGroup_sptr;
 
-namespace Mantid {
-namespace WorkflowAlgorithms {
+namespace Mantid::WorkflowAlgorithms {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -24,10 +25,10 @@ namespace WorkflowAlgorithms {
  * @param subtractedPeriods :: [input] Vector of period indexes to be subtracted
  * from summed periods
  */
-IMuonAsymmetryCalculator::IMuonAsymmetryCalculator(const WorkspaceGroup_sptr &inputWS,
-                                                   const std::vector<int> &summedPeriods,
-                                                   const std::vector<int> &subtractedPeriods)
-    : m_inputWS(inputWS), m_summedPeriods(summedPeriods), m_subtractedPeriods(subtractedPeriods) {}
+IMuonAsymmetryCalculator::IMuonAsymmetryCalculator(WorkspaceGroup_sptr inputWS, std::vector<int> summedPeriods,
+                                                   std::vector<int> subtractedPeriods)
+    : m_inputWS(std::move(inputWS)), m_summedPeriods(std::move(summedPeriods)),
+      m_subtractedPeriods(std::move(subtractedPeriods)) {}
 
 /**
  * Sums the specified periods of the input workspace group
@@ -97,5 +98,4 @@ MatrixWorkspace_sptr IMuonAsymmetryCalculator::extractSpectrum(const Workspace_s
   return outWS;
 }
 
-} // namespace WorkflowAlgorithms
-} // namespace Mantid
+} // namespace Mantid::WorkflowAlgorithms

@@ -11,8 +11,7 @@
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeList.h>
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 std::shared_ptr<ImplicitFunctionParser> ImplicitFunctionParserFactoryImpl::create(const std::string &xmlString) const {
   UNUSED_ARG(xmlString);
@@ -70,5 +69,4 @@ ImplicitFunctionParserFactoryImpl::createImplicitFunctionParserFromXML(const std
 
   return createImplicitFunctionParserFromXML(pRootElem);
 }
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

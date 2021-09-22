@@ -19,8 +19,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ModeratorTzero)
@@ -391,5 +390,4 @@ double ModeratorTzero::CalculateT0elastic(const double &tof, const double &L12, 
 }
 double ModeratorTzero::gett1min() { return m_t1min; }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

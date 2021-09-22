@@ -8,8 +8,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/IPropertyManager.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 /// Returns a clone of the workspace
 /// @param colNames :: Names of the column to clone. If empty clone
@@ -96,12 +95,10 @@ void ITableWorkspace::sort(std::vector<std::pair<std::string, bool>> &criteria) 
                            "returns true. Please contact the developers.");
 }
 
-} // namespace API
-} // Namespace Mantid
+} // namespace Mantid::API
 
 ///\cond TEMPLATE
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 template <>
 MANTID_API_DLL API::ITableWorkspace_sptr
 IPropertyManager::getValue<API::ITableWorkspace_sptr>(const std::string &name) const {
@@ -128,7 +125,6 @@ IPropertyManager::getValue<API::ITableWorkspace_const_sptr>(const std::string &n
   }
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel
 
 ///\endcond TEMPLATE

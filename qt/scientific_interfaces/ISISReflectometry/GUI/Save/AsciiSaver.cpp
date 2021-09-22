@@ -14,9 +14,7 @@
 
 #include <utility>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 Mantid::API::IAlgorithm_sptr AsciiSaver::getSaveAlgorithm() {
   return Mantid::API::AlgorithmManager::Instance().create("SaveReflectometryAscii");
@@ -93,7 +91,7 @@ Mantid::API::IAlgorithm_sptr AsciiSaver::setUpSaveAlgorithm(std::string const &s
 
 void AsciiSaver::save(const Mantid::API::Workspace_sptr &workspace, std::string const &saveDirectory,
                       std::vector<std::string> const &logParameters, FileFormatOptions const &fileFormat) const {
-  auto alg = setUpSaveAlgorithm(saveDirectory, std::move(workspace), logParameters, fileFormat);
+  auto alg = setUpSaveAlgorithm(saveDirectory, workspace, logParameters, fileFormat);
   alg->execute();
 }
 
@@ -119,6 +117,4 @@ void AsciiSaver::save(std::string const &saveDirectory, std::vector<std::string>
     throw InvalidSavePath(saveDirectory);
   }
 }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

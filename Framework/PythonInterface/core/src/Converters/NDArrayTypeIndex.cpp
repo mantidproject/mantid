@@ -15,9 +15,7 @@
 #define NO_IMPORT_ARRAY
 #include <numpy/arrayobject.h>
 
-namespace Mantid {
-namespace PythonInterface {
-namespace Converters {
+namespace Mantid::PythonInterface::Converters {
 /// Macro to define mappings between the CType and Numpy enum
 #define DEFINE_TYPE_MAPPING(CType, NDTypeNum, NDTypeCode)                                                              \
   template <> int NDArrayTypeIndex<CType>::typenum = NDTypeNum;                                                        \
@@ -34,6 +32,4 @@ DEFINE_TYPE_MAPPING(unsigned long long, NPY_ULONGLONG, NPY_ULONGLONGLTR)
 DEFINE_TYPE_MAPPING(bool, NPY_BOOL, NPY_BOOLLTR)
 DEFINE_TYPE_MAPPING(double, NPY_DOUBLE, NPY_DOUBLELTR)
 DEFINE_TYPE_MAPPING(float, NPY_FLOAT, NPY_CFLOATLTR)
-} // namespace Converters
-} // namespace PythonInterface
-} // namespace Mantid
+} // namespace Mantid::PythonInterface::Converters

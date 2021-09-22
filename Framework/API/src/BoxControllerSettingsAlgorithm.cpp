@@ -15,8 +15,7 @@
 
 using namespace Mantid::Kernel;
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 //----------------------------------------------------------------------------------------------
 /** Add Box-controller-specific properties to this algorithm
@@ -111,7 +110,7 @@ void BoxControllerSettingsAlgorithm::setBoxController(const BoxController_sptr &
                                                       const Mantid::Geometry::Instrument_const_sptr &instrument) {
   size_t nd = bc->getNDims();
 
-  takeDefaultsFromInstrument(std::move(instrument), nd);
+  takeDefaultsFromInstrument(instrument, nd);
 
   setBoxController(bc);
 }
@@ -145,5 +144,4 @@ void BoxControllerSettingsAlgorithm::setBoxController(const BoxController_sptr &
   bc->resetNumBoxes();
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

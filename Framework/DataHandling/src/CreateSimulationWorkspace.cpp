@@ -71,8 +71,7 @@ StartAndEndTime getStartAndEndTimesFromNexusFile(const std::string &filename,
 }
 } // namespace
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CreateSimulationWorkspace)
@@ -294,7 +293,7 @@ void CreateSimulationWorkspace::loadMappingFromISISNXS(const std::string &filena
  * @param udetTable :: An array of detector IDs
  * @param ndets :: The size of the two arrays
  */
-void CreateSimulationWorkspace::createGroupingsFromTables(int *specTable, int *udetTable, int ndets) {
+void CreateSimulationWorkspace::createGroupingsFromTables(const int *specTable, const int *udetTable, int ndets) {
   m_detGroups.clear();
   for (int i = 0; i < ndets; ++i) {
     int specNo = specTable[i];
@@ -407,5 +406,4 @@ void CreateSimulationWorkspace::setStartDate(const API::MatrixWorkspace_sptr &wo
   run.setStartAndEndTime(startTime, endTime);
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

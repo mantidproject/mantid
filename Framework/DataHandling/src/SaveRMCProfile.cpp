@@ -16,8 +16,7 @@
 
 #include <fstream>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using Mantid::API::WorkspaceProperty;
 using Mantid::Kernel::Direction;
@@ -107,5 +106,4 @@ void SaveRMCProfile::writeWSData(std::ofstream &out, const API::MatrixWorkspace_
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

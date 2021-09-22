@@ -21,8 +21,7 @@ const std::string CURVES = "Curves";
 } // namespace
 
 using namespace Mantid::API;
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 
 ALFCustomInstrumentModel::ALFCustomInstrumentModel() : m_numberOfTubesInAverage(0) {
   m_base = new MantidWidgets::BaseCustomInstrumentModel("ALF_tmp", "ALF", "ALFData");
@@ -199,5 +198,4 @@ CompositeFunction_sptr ALFCustomInstrumentModel::getDefaultFunction() {
   return composite;
 }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

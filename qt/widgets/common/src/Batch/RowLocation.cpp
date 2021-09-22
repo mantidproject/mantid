@@ -15,9 +15,7 @@
 // or just #include <algorithm> in c++14
 // available in boost 1.54+ - required for RHEL7.
 
-namespace MantidQt {
-namespace MantidWidgets {
-namespace Batch {
+namespace MantidQt::MantidWidgets::Batch {
 
 RowLocation::RowLocation(RowPath path) : m_path(std::move(path)) {}
 RowPath const &RowLocation::path() const { return m_path; }
@@ -121,6 +119,4 @@ bool pathsSameUntilDepth(int depth, RowLocation const &locationA, RowLocation co
                 "equal to the depth of both locations");
   return boost::algorithm::equal(pathA.cbegin(), pathA.cbegin() + depth, pathB.cbegin(), pathB.cbegin() + depth);
 }
-} // namespace Batch
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets::Batch

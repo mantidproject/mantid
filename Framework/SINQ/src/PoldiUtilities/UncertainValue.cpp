@@ -9,8 +9,7 @@
 #include <cmath>
 #include <stdexcept>
 
-namespace Mantid {
-namespace Poldi {
+namespace Mantid::Poldi {
 
 UncertainValue::UncertainValue() : m_value(0.0), m_error(0.0) {}
 
@@ -80,5 +79,4 @@ UncertainValue operator/(double d, const UncertainValue &v) {
 UncertainValue operator+(double d, const UncertainValue &v) { return UncertainValue(d + v.value(), v.error()); }
 
 UncertainValue operator-(double d, const UncertainValue &v) { return UncertainValue(d - v.value(), v.error()); }
-} // namespace Poldi
-} // namespace Mantid
+} // namespace Mantid::Poldi

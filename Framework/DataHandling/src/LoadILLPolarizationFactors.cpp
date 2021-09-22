@@ -216,8 +216,7 @@ void setUnits(Mantid::API::MatrixWorkspace &ws) {
 }
 } // namespace
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using Mantid::API::WorkspaceProperty;
 using Mantid::Kernel::Direction;
@@ -323,5 +322,4 @@ std::map<std::string, std::string> LoadILLPolarizationFactors::validateInputs() 
   return issues;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

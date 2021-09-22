@@ -21,9 +21,7 @@ using namespace Mantid::Kernel;
 
 using namespace Mantid::API;
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
 using namespace CurveFitting::SpecialFunctionSupport;
@@ -232,6 +230,4 @@ double Bk2BkExpConvPV::expWidth() const {
   return M_LN2 * (a + b) / (a * b);
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

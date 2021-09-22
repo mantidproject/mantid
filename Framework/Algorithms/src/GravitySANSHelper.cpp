@@ -10,8 +10,7 @@
 
 #include <cmath>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 using Kernel::V3D;
 
 /** sets up the object with workspace data and calculates cached values ready to
@@ -112,5 +111,4 @@ double GravitySANSHelper::gravitationalDrop(const double l2, const double waveLe
 
   return waveLength * waveLength * L2;
 }
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

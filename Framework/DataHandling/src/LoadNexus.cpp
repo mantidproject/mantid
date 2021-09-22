@@ -24,8 +24,7 @@
 #include <cmath>
 #include <memory>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 const std::string LoadNexus::muonTD = "muonTD";
 const std::string LoadNexus::pulsedTD = "pulsedTD";
@@ -257,5 +256,4 @@ void LoadNexus::setOutputWorkspace(const API::IAlgorithm_sptr &loader) {
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

@@ -15,8 +15,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-namespace MantidQt {
-namespace API {
+namespace MantidQt::API {
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -85,5 +84,4 @@ void ListPropertyWidget::setValueImpl(const QString &value) {
     m_list->scrollToItem(item);
   }
 }
-} // namespace API
-} // namespace MantidQt
+} // namespace MantidQt::API

@@ -163,8 +163,7 @@ double getThetaFromLogs(const MatrixWorkspace_sptr &inputWs) {
 }
 } // namespace
 
-namespace Mantid {
-namespace Reflectometry {
+namespace Mantid::Reflectometry {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertToReflectometryQ)
@@ -422,5 +421,4 @@ MatrixWorkspace_sptr ConvertToReflectometryQ::correctDetectors(MatrixWorkspace_s
   return outWS;
 }
 
-} // namespace Reflectometry
-} // namespace Mantid
+} // namespace Mantid::Reflectometry

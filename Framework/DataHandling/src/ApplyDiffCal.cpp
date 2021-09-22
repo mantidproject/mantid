@@ -20,8 +20,7 @@
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using Mantid::Kernel::Direction;
 using Mantid::Kernel::PropertyWithValue;
@@ -161,7 +160,7 @@ void ApplyDiffCal::getCalibrationWS(const Workspace_sptr &inputWS) {
   const std::string calFileName = getPropertyValue("CalibrationFile");
   if (!calFileName.empty()) {
     progress(0.0, "Reading calibration file");
-    loadCalFile(std::move(inputWS), calFileName);
+    loadCalFile(inputWS, calFileName);
     return;
   }
 
@@ -214,5 +213,4 @@ void ApplyDiffCal::exec() {
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

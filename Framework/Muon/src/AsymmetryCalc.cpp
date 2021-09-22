@@ -15,8 +15,7 @@
 #include <cmath>
 #include <vector>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Kernel;
 using API::Progress;
@@ -164,5 +163,4 @@ void AsymmetryCalc::exec() {
   setProperty("OutputWorkspace", std::move(outputWS));
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

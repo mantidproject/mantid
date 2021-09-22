@@ -10,8 +10,7 @@
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressModel.h"
 #include "MantidQtWidgets/Common/AlgorithmProgress/IAlgorithmProgressDialogWidget.h"
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 AlgorithmProgressDialogPresenter::AlgorithmProgressDialogPresenter(QWidget *parent,
                                                                    IAlgorithmProgressDialogWidget *view,
@@ -94,5 +93,4 @@ void AlgorithmProgressDialogPresenter::algorithmEndedSlot(Mantid::API::Algorithm
 }
 size_t AlgorithmProgressDialogPresenter::getNumberTrackedAlgorithms() { return m_progressBars.size(); }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

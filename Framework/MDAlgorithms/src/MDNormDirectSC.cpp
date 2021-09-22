@@ -22,8 +22,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VectorHelper.h"
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 using Mantid::API::WorkspaceProperty;
 using Mantid::Kernel::Direction;
@@ -709,5 +708,4 @@ void MDNormDirectSC::calculateIntersections(std::vector<std::array<double, 4>> &
   std::stable_sort(intersections.begin(), intersections.end(), compareMomentum);
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

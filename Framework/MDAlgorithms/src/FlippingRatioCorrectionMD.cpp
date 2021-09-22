@@ -17,8 +17,7 @@
 
 #include <muParser.h>
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using Mantid::API::WorkspaceProperty;
@@ -192,5 +191,4 @@ void FlippingRatioCorrectionMD::executeTemplatedMDE(typename Mantid::DataObjects
   ws->setFileNeedsUpdating(true);
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

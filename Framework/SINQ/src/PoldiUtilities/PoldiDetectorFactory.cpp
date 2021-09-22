@@ -8,8 +8,7 @@
 
 #include "MantidSINQ/PoldiUtilities/PoldiHeliumDetector.h"
 
-namespace Mantid {
-namespace Poldi {
+namespace Mantid::Poldi {
 using namespace boost::gregorian;
 
 PoldiDetectorFactory::PoldiDetectorFactory() : m_newDetectorDate(from_string(std::string("2016/01/01"))) {}
@@ -28,5 +27,4 @@ PoldiAbstractDetector *PoldiDetectorFactory::createDetector(date experimentDate)
   return nullptr;
 }
 
-} // namespace Poldi
-} // namespace Mantid
+} // namespace Mantid::Poldi

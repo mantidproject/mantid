@@ -12,6 +12,7 @@
 #include <map>
 #include <sstream>
 #include <stack>
+#include <utility>
 #include <vector>
 
 #include "MantidGeometry/Surfaces/BaseVisit.h"
@@ -95,7 +96,7 @@ void SurfaceFactory::registerSurface()
 namespace {
 class KeyEquals {
 public:
-  explicit KeyEquals(const std::string &key) : m_key(key) {}
+  explicit KeyEquals(std::string key) : m_key(std::move(key)) {}
   bool operator()(const std::pair<std::string, std::unique_ptr<Surface>> &element) { return m_key == element.first; }
 
 private:

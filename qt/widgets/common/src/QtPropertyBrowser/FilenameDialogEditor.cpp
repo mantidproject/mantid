@@ -9,8 +9,7 @@
 #include <QFileDialog>
 #include <QSettings>
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 /**
  * Open a file dialog to choose a file. Update the property if a file was
@@ -25,5 +24,4 @@ void FilenameDialogEditor::runDialog() {
     updateProperty();
   }
 }
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

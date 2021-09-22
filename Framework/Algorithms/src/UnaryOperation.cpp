@@ -14,8 +14,7 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 /** Initialisation method.
  *  Defines input and output workspace properties
  */
@@ -156,5 +155,4 @@ template <class T> void UnaryOperation::unaryOperationEventHelper(std::vector<T>
     it->m_errorSquared = static_cast<float>(eout * eout);
   }
 }
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

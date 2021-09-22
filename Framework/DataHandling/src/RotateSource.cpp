@@ -11,8 +11,7 @@
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using Mantid::API::WorkspaceProperty;
 using Mantid::Kernel::Direction;
@@ -124,5 +123,4 @@ void RotateSource::exec() {
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

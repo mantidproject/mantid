@@ -9,8 +9,7 @@
 
 using boost::regex;
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 PeakTransformHKL::PeakTransformHKL()
     : PeakTransform("H", "K", regex("^(H.*)|(\\[H,0,0\\].*)$"), regex("^(K.*)|(\\[0,K,0\\].*)$"),
@@ -37,5 +36,4 @@ Mantid::Kernel::V3D PeakTransformHKL::transformPeak(const Mantid::Geometry::IPea
  * @return Special coordinate system associated with this type of transform.
  */
 Mantid::Kernel::SpecialCoordinateSystem PeakTransformHKL::getCoordinateSystem() const { return Mantid::Kernel::HKL; }
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

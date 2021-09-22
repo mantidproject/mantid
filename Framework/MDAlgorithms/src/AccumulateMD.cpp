@@ -28,8 +28,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 /*
  * Reduce the vector of input data to only data files and workspaces which can
@@ -469,5 +468,4 @@ std::map<std::string, std::string> AccumulateMD::validateInputs() {
   return validation_output;
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

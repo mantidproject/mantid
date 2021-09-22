@@ -24,8 +24,7 @@
 #include <memory>
 #include <utility>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 using Mantid::API::WorkspaceProperty;
 using Mantid::Kernel::Direction;
 
@@ -89,5 +88,4 @@ void SaveNexusGeometry::exec() {
   Mantid::NexusGeometry::NexusGeometrySave::saveInstrument(compInfo, detInfo, destinationFile, rootFileName, adapter);
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

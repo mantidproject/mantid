@@ -19,9 +19,7 @@ using Mantid::PythonInterface::Converters::VectorToNDArray;
 using Mantid::PythonInterface::Converters::WrapReadOnly;
 using namespace MantidQt::Widgets::Common;
 
-namespace MantidQt {
-namespace Widgets {
-namespace MplCpp {
+namespace MantidQt::Widgets::MplCpp {
 
 namespace {
 
@@ -149,6 +147,4 @@ std::vector<QRgb> ScalarMappable::toRGBA(const std::vector<double> &x, double al
   return rgbaVector;
 }
 
-} // namespace MplCpp
-} // namespace Widgets
-} // namespace MantidQt
+} // namespace MantidQt::Widgets::MplCpp

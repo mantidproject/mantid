@@ -12,9 +12,7 @@
 #include "MantidCurveFitting/GSLMatrix.h"
 #include "MantidCurveFitting/GSLVector.h"
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
 
@@ -246,6 +244,4 @@ void BSpline::getGSLBreakPoints(std::vector<double> &bp) const {
   }
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

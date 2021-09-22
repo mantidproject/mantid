@@ -10,9 +10,7 @@
 
 using namespace Mantid::API;
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 IndirectFitOutputOptionsPresenter::IndirectFitOutputOptionsPresenter(IIndirectFitOutputOptionsView *view)
     : QObject(nullptr), m_model(std::make_unique<IndirectFitOutputOptionsModel>()), m_view(view) {
@@ -190,6 +188,4 @@ void IndirectFitOutputOptionsPresenter::closeEditResultDialog() {
 
 void IndirectFitOutputOptionsPresenter::displayWarning(std::string const &message) { m_view->displayWarning(message); }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

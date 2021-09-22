@@ -11,8 +11,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/VectorHelper.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 DECLARE_ALGORITHM(ConvertToPointData)
 
@@ -51,7 +50,6 @@ size_t ConvertToPointData::getNewXSize(const std::size_t ySize) const { return y
  */
 Kernel::cow_ptr<HistogramData::HistogramX>
 ConvertToPointData::calculateXPoints(Kernel::cow_ptr<HistogramData::HistogramX> inputX) const {
-  return HistogramData::Points(HistogramData::BinEdges(std::move(inputX))).cowData();
+  return HistogramData::Points(HistogramData::BinEdges(inputX)).cowData();
 }
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

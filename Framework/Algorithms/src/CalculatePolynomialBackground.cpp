@@ -258,8 +258,7 @@ void evaluateInPlace(const std::string &name, const std::vector<double> &paramet
 }
 } // namespace
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CalculatePolynomialBackground)
@@ -340,5 +339,4 @@ void CalculatePolynomialBackground::exec() {
   setProperty(Prop::OUTPUT_WS, outWS);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

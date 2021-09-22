@@ -17,9 +17,9 @@
 #include <numeric>
 #include <sstream>
 #include <stdexcept>
+#include <utility>
 
-namespace Mantid {
-namespace CurveFitting {
+namespace Mantid::CurveFitting {
 
 /// Constructor
 GSLVector::GSLVector() : m_data(1), m_view(gsl_vector_view_array(m_data.data(), 1)) {}
@@ -30,8 +30,8 @@ GSLVector::GSLVector(const size_t n) : m_data(n), m_view(gsl_vector_view_array(m
 
 /// Construct from a std vector
 /// @param v :: A std vector.
-GSLVector::GSLVector(const std::vector<double> &v)
-    : m_data(v), m_view(gsl_vector_view_array(m_data.data(), m_data.size())) {}
+GSLVector::GSLVector(std::vector<double> v)
+    : m_data(std::move(v)), m_view(gsl_vector_view_array(m_data.data(), m_data.size())) {}
 
 /// Construct from an initialisation list
 /// @param ilist :: A list of doubles: {V0, V1, V2, ...}
@@ -56,9 +56,10 @@ GSLVector::GSLVector(const gsl_vector *v)
   }
 }
 
-/// Move constructor.
-GSLVector::GSLVector(std::vector<double> &&v)
-    : m_data(std::move(v)), m_view(gsl_vector_view_array(m_data.data(), m_data.size())) {}
+GSLVector::GSLVector(GSLVector &&v) noexcept : m_data(std::move(v.m_data)), m_view() {
+  // m_view is trivially copyable, but does not provide an operator()
+  m_view = v.m_view;
+}
 
 /// Copy assignment operator
 /// @param v :: The other vector
@@ -267,9 +268,6 @@ void GSLVector::sort(const std::vector<size_t> &indices) {
   m_view = gsl_vector_view_array(m_data.data(), m_data.size());
 }
 
-/// Create a new GSLVector and move all data to it. Destroys this vector.
-GSLVector GSLVector::move() { return GSLVector(std::move(m_data)); }
-
 /// Copy the values to an std vector of doubles
 std::vector<double> GSLVector::toStdVector() const { return m_data; }
 
@@ -284,5 +282,4 @@ std::ostream &operator<<(std::ostream &ostr, const GSLVector &v) {
   return ostr;
 }
 
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting

@@ -10,8 +10,7 @@
 #include "MantidCurveFitting/GSLMatrix.h"
 #include <gsl/gsl_eigen.h>
 
-namespace Mantid {
-namespace CurveFitting {
+namespace Mantid::CurveFitting {
 
 /// Constructor
 /// @param nx :: First dimension
@@ -352,5 +351,4 @@ GSLVector GSLMatrix::multiplyByVector(const GSLVector &v) const {
   return res;
 }
 
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting

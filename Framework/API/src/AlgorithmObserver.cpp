@@ -12,8 +12,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmObserver.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 /// Default constructor. Notification handlers are not connected to any
 /// algorithm
@@ -34,7 +33,7 @@ AlgorithmObserver::AlgorithmObserver(const IAlgorithm_const_sptr &alg)
       m_finishObserver(*this, &AlgorithmObserver::_finishHandle),
       m_errorObserver(*this, &AlgorithmObserver::_errorHandle),
       m_startingObserver(*this, &AlgorithmObserver::_startingHandle) {
-  observeAll(std::move(alg));
+  observeAll(alg);
 }
 
 /// Virtual destructor
@@ -180,5 +179,4 @@ void AlgorithmObserver::_startingHandle(const Poco::AutoPtr<AlgorithmStartingNot
   this->startingHandle(pNf->getAlgorithm());
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

@@ -12,8 +12,7 @@
 
 using namespace Mantid::Kernel;
 
-namespace MantidQt {
-namespace API {
+namespace MantidQt::API {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -143,5 +142,4 @@ QStringList FilePropertyWidget::openMultipleFileDialog(Mantid::Kernel::Property 
   return files;
 }
 
-} // namespace API
-} // namespace MantidQt
+} // namespace MantidQt::API

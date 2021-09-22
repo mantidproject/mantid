@@ -32,8 +32,7 @@ using namespace Mantid::DataObjects;
 using VecProperties = std::vector<Mantid::Kernel::Property *>;
 using ConstVecProperties = const VecProperties;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(SmoothNeighbours)
@@ -748,5 +747,4 @@ void SmoothNeighbours::execEvent(Mantid::DataObjects::EventWorkspace_sptr &ws) {
     spreadPixels(outWS);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

@@ -41,8 +41,7 @@
 #include <QVBoxLayout>
 #include <limits>
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 /**
  * Constructor
@@ -803,5 +802,4 @@ void FitOptionsBrowser::displaySequentialFitProperties() {
   emit changedToSequentialFitting();
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

@@ -35,8 +35,7 @@ Value getValueOr(const Map &map, const Key &key, const Value &defaultValue) {
 using namespace Mantid::API;
 using MantidQt::API::BatchAlgorithmRunner;
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
@@ -724,5 +723,4 @@ void ISISCalibration::updateRunButton(bool enabled, std::string const &enableOut
     setSaveEnabled(enableOutputButtons == "enable");
 }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

@@ -7,8 +7,7 @@
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 #include "MantidPythonInterface/core/VersionCompat.h"
 
-namespace Mantid {
-namespace PythonInterface {
+namespace Mantid::PythonInterface {
 
 //------------------------------------------------------------------------------
 // GlobalInterpreterLock Static helpers
@@ -55,5 +54,4 @@ GlobalInterpreterLock::GlobalInterpreterLock() : m_state(this->acquire()) {}
  */
 GlobalInterpreterLock::~GlobalInterpreterLock() { this->release(m_state); }
 
-} // namespace PythonInterface
-} // namespace Mantid
+} // namespace Mantid::PythonInterface

@@ -17,8 +17,7 @@
 
 #include <iomanip>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 using namespace Mantid::Kernel;
 
@@ -131,5 +130,4 @@ void CrystalStructure::initializeScatterers() {
   }
 }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

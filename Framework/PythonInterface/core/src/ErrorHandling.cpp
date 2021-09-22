@@ -19,8 +19,7 @@
 
 using boost::python::extract;
 
-namespace Mantid {
-namespace PythonInterface {
+namespace Mantid::PythonInterface {
 
 namespace {
 
@@ -95,5 +94,4 @@ std::string exceptionToString(bool withTrace) {
  */
 PythonException::PythonException(bool withTrace) : std::runtime_error(exceptionToString(withTrace)) {}
 
-} // namespace PythonInterface
-} // namespace Mantid
+} // namespace Mantid::PythonInterface

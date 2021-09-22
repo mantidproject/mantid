@@ -31,8 +31,7 @@
 #include <sstream>
 #include <string>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Kernel;
 using namespace API;
@@ -99,7 +98,7 @@ DataObjects::TableWorkspace_sptr CalibrationTableHandler::createCalibrationTable
  * @param errormsg: (output) error message
  * @return
  */
-bool CalibrationTableHandler::isValidCalibrationTableWorkspace(DataObjects::TableWorkspace_sptr calibws,
+bool CalibrationTableHandler::isValidCalibrationTableWorkspace(const DataObjects::TableWorkspace_sptr &calibws,
                                                                std::string &errormsg) {
   // Check columns of
   std::vector<std::string> colNames = calibws->getColumnNames();
@@ -140,8 +139,8 @@ bool CalibrationTableHandler::isValidCalibrationTableWorkspace(DataObjects::Tabl
  * @param datestamp: a day-stamp with format YYYYMMDD
  * @param pos: location and orientation of the component
  */
-void CalibrationTableHandler::appendCalibration(DataObjects::TableWorkspace_sptr tablews, const std::string &datestamp,
-                                                ComponentPosition &pos) {
+void CalibrationTableHandler::appendCalibration(const DataObjects::TableWorkspace_sptr &tablews,
+                                                const std::string &datestamp, ComponentPosition &pos) {
   // check
   if (tablews->columnCount() != calibrationTableColumnNames.size()) {
     throw std::runtime_error("Single component calibration table workspace is not correct.");
@@ -158,7 +157,7 @@ void CalibrationTableHandler::appendCalibration(DataObjects::TableWorkspace_sptr
  * table for history-of-component-positions, but a calibration table.
  * @param calibws
  */
-void CalibrationTableHandler::setCalibrationTable(DataObjects::TableWorkspace_sptr calibws) {
+void CalibrationTableHandler::setCalibrationTable(const DataObjects::TableWorkspace_sptr &calibws) {
 
   std::string errmsg{""};
 
@@ -330,7 +329,7 @@ void CalibrationTableHandler::saveCalibrationTable(const std::string &filename) 
 
 //-----------------------------------------------------------------------------
 ComponentPosition
-CalibrationTableHandler::getLatestCalibratedPosition(DataObjects::TableWorkspace_sptr componentcaltable) {
+CalibrationTableHandler::getLatestCalibratedPosition(const DataObjects::TableWorkspace_sptr &componentcaltable) {
 
   size_t num_rows = componentcaltable->rowCount();
   ComponentPosition pos = CalibrationTableHandler::getCalibratedPosition(componentcaltable, num_rows - 1);
@@ -339,8 +338,9 @@ CalibrationTableHandler::getLatestCalibratedPosition(DataObjects::TableWorkspace
 }
 
 //-----------------------------------------------------------------------------
-ComponentPosition CalibrationTableHandler::getCalibratedPosition(DataObjects::TableWorkspace_sptr componentcaltable,
-                                                                 size_t rownumber) {
+ComponentPosition
+CalibrationTableHandler::getCalibratedPosition(const DataObjects::TableWorkspace_sptr &componentcaltable,
+                                               size_t rownumber) {
   // Get the values
   ComponentPosition pos;
 
@@ -545,7 +545,7 @@ void CorelliCalibrationDatabase::loadNonCalibratedComponentDatabase(
 // Create summary calibration workspace: input: component_caibws_map output:
 // new calibration workspace
 void CorelliCalibrationDatabase::createOutputCalibrationTable(std::map<std::string, TableWorkspace_sptr> &calibwsmap,
-                                                              std::vector<std::string> orderedcomponents) {
+                                                              const std::vector<std::string> &orderedcomponents) {
   // Create an empty calibration table without setting to analysis data service
   mOutputWS = CorelliCalibration::CalibrationTableHandler::createCalibrationTableWorkspace("", false);
   CorelliCalibration::CalibrationTableHandler handler = CorelliCalibration::CalibrationTableHandler();
@@ -580,7 +580,7 @@ void CorelliCalibrationDatabase::saveCalibrationTable(const std::string &calibdb
  * @param run_start_time: str as run start time in format of YYYY-MM-DDTHH:MM:SS
  * @return
  */
-std::string CorelliCalibrationDatabase::convertTimeStamp(std::string run_start_time) {
+std::string CorelliCalibrationDatabase::convertTimeStamp(const std::string &run_start_time) {
   // Get the first sub string by
   std::string date_str = run_start_time.substr(0, run_start_time.find("T"));
 
@@ -656,7 +656,7 @@ bool CorelliCalibrationDatabase::isFileExist(const std::string &filepath) {
  * @param basename
  * @return
  */
-std::string CorelliCalibrationDatabase::joinPath(const std::string directory, const std::string basename) {
+std::string CorelliCalibrationDatabase::joinPath(const std::string &directory, const std::string &basename) {
   boost::filesystem::path dir(directory);
   boost::filesystem::path file(basename);
   boost::filesystem::path fullpath = dir / file;
@@ -672,7 +672,7 @@ std::string CorelliCalibrationDatabase::joinPath(const std::string directory, co
  * @param componentnames
  * @param compmap
  */
-void CorelliCalibrationDatabase::setComponentMap(std::vector<std::string> componentnames,
+void CorelliCalibrationDatabase::setComponentMap(const std::vector<std::string> &componentnames,
                                                  std::map<std::string, DataObjects::TableWorkspace_sptr> &compmap) {
   // Add entries
   for (auto compname : componentnames)
@@ -689,7 +689,7 @@ void CorelliCalibrationDatabase::setComponentMap(std::vector<std::string> compon
  * @return  : vector including of all the compoments in the order as
  * moderator, sample-position, bank1, bank2, ...
  */
-std::vector<std::string> CorelliCalibrationDatabase::retrieveInstrumentComponents(MatrixWorkspace_sptr ws) {
+std::vector<std::string> CorelliCalibrationDatabase::retrieveInstrumentComponents(const MatrixWorkspace_sptr &ws) {
   // Get access to instrument information
   const auto &component_info = ws->componentInfo();
 
@@ -709,5 +709,4 @@ std::vector<std::string> CorelliCalibrationDatabase::retrieveInstrumentComponent
   return componentnames;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

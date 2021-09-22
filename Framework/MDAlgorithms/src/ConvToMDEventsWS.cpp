@@ -8,8 +8,7 @@
 
 #include "MantidMDAlgorithms/UnitsConversionHelper.h"
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 /**function converts particular list of events of type T into MD workspace and
  * adds these events to the workspace itself  */
 template <class T> size_t ConvToMDEventsWS::convertEventList(size_t workspaceIndex) {
@@ -191,5 +190,4 @@ void ConvToMDEventsWS::appendEventsFromInputWS(API::Progress *pProgress, const A
   m_OutWSWrapper->pWorkspace()->refreshCache();
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

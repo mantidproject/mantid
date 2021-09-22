@@ -12,8 +12,7 @@
 #include "MantidMDAlgorithms/ConvToMDEventsWSIndexing.h"
 #include "MantidMDAlgorithms/ConvToMDHistoWS.h"
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 // workspaces which currently can be converted to md workspaces:
 enum wsType {
   Matrix2DWS, //< Workspace2D
@@ -88,5 +87,4 @@ std::shared_ptr<ConvToMDBase> ConvToMDSelector::convSelector(const API::MatrixWo
 
   return res;
 }
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

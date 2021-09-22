@@ -11,8 +11,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CreateDetectorTable)
 
@@ -356,5 +355,4 @@ std::string createTruncatedList(const std::set<int> &elements) {
   return truncated;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

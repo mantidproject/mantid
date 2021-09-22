@@ -16,8 +16,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SelectCellOfType)
 
@@ -152,5 +151,4 @@ void SelectCellOfType::exec() {
   }
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

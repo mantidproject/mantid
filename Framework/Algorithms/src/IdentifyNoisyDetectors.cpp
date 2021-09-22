@@ -14,8 +14,7 @@
 #include "MantidKernel/CompositeValidator.h"
 #include <numeric>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 using namespace Kernel;
 using namespace API;
 using namespace HistogramData;
@@ -179,5 +178,4 @@ void IdentifyNoisyDetectors::getStdDev(API::Progress &progress, const MatrixWork
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

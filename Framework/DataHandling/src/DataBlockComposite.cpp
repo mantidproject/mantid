@@ -189,8 +189,7 @@ std::vector<SpectrumPair> spectrumIDIntervals(const std::vector<Mantid::DataHand
 }
 } // namespace
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 specnum_t DataBlockComposite::getMinSpectrumID() const {
   specnum_t min = std::numeric_limits<specnum_t>::max();
@@ -419,5 +418,4 @@ std::vector<specnum_t> DataBlockComposite::getAllSpectrumNumbers() {
 }
 
 bool DataBlockComposite::isEmpty() { return m_dataBlocks.empty(); }
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

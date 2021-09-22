@@ -24,8 +24,7 @@
 #include <climits>
 #include <numeric>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CalculateFlatBackground)
@@ -442,5 +441,4 @@ void CalculateFlatBackground::MovingAverage(const HistogramData::Histogram &hist
   variance = currentVariance;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

@@ -14,8 +14,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/System.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CreatePeaksWorkspace)
@@ -109,5 +108,4 @@ void CreatePeaksWorkspace::exec() {
   // ALG END
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

@@ -15,8 +15,7 @@
 #include <boost/algorithm/string/detail/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(FFTSmooth2)
@@ -255,5 +254,4 @@ void FFTSmooth2::Butterworth(int n, int order, API::MatrixWorkspace_sptr &unfilt
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

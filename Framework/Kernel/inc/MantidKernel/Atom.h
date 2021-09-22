@@ -20,7 +20,7 @@ namespace PhysicalConstants {
 class MANTID_KERNEL_DLL Atom {
 public:
   /// Standard constructor
-  Atom(const std::string &symbol, const uint16_t z, const uint16_t a, const double abundance, const double mass,
+  Atom(std::string symbol, const uint16_t z, const uint16_t a, const double abundance, const double mass,
        const double density);
   /// Copy constructor
   Atom(const Atom &other);

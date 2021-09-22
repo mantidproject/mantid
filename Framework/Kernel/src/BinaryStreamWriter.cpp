@@ -14,8 +14,7 @@
 #include <fstream>
 #include <stdexcept>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 //------------------------------------------------------------------------------
 // Anonymous functions
@@ -215,5 +214,4 @@ BinaryStreamWriter &BinaryStreamWriter::write(const std::string &value, const si
   return *this;
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

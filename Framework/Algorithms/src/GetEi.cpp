@@ -20,8 +20,7 @@
 #include <cmath>
 #include <numeric>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(GetEi)
@@ -44,7 +43,7 @@ const double GetEi::CROP = 0.15;
 const double GetEi::GET_COUNT_RATE = 0.15;
 const double GetEi::FIT_PEAK = 0.2;
 
-/// Empty default constructor algorith() calls the constructor in the base class
+/// Empty default constructor algorithm() calls the constructor in the base class
 GetEi::GetEi() : Algorithm(), m_tempWS(), m_fracCompl(0.0) {}
 
 void GetEi::init() {
@@ -469,5 +468,4 @@ void GetEi::advanceProgress(double toAdd) {
   interruption_point();
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

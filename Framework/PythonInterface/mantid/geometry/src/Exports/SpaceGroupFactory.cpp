@@ -18,11 +18,11 @@ GET_POINTER_SPECIALIZATION(SpaceGroupFactoryImpl)
 namespace {
 using namespace Mantid::PythonInterface;
 
-std::vector<std::string> allSpaceGroupSymbols(SpaceGroupFactoryImpl &self) {
+std::vector<std::string> allSpaceGroupSymbols(const SpaceGroupFactoryImpl &self) {
   return self.subscribedSpaceGroupSymbols();
 }
 
-std::vector<std::string> spaceGroupSymbolsForNumber(SpaceGroupFactoryImpl &self, size_t number) {
+std::vector<std::string> spaceGroupSymbolsForNumber(const SpaceGroupFactoryImpl &self, size_t number) {
   return self.subscribedSpaceGroupSymbols(number);
 }
 
@@ -31,13 +31,14 @@ std::vector<std::string> spaceGroupSymbolsForPointGroup(SpaceGroupFactoryImpl &s
   return self.subscribedSpaceGroupSymbols(pointGroup);
 }
 
-bool isSubscribedSymbol(SpaceGroupFactoryImpl &self, const std::string &symbol) { return self.isSubscribed(symbol); }
+bool isSubscribedSymbol(const SpaceGroupFactoryImpl &self, const std::string &symbol) {
+  return self.isSubscribed(symbol);
+}
 
-bool isSubscribedNumber(SpaceGroupFactoryImpl &self, size_t number) { return self.isSubscribed(number); }
+bool isSubscribedNumber(const SpaceGroupFactoryImpl &self, size_t number) { return self.isSubscribed(number); }
 
 SpaceGroup_sptr createSpaceGroup(SpaceGroupFactoryImpl &self, const std::string &symbol) {
-  SpaceGroup_const_sptr spaceGroup = self.createSpaceGroup(symbol);
-  return std::const_pointer_cast<SpaceGroup>(spaceGroup);
+  return std::const_pointer_cast<SpaceGroup>(self.createSpaceGroup(symbol));
 }
 } // namespace
 

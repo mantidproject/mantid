@@ -7,8 +7,7 @@
 #include "MantidKernel/ProxyInfo.h"
 #include <stdexcept>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -62,5 +61,4 @@ bool ProxyInfo::isHttpProxy() const { return m_isHttpProxy; }
  */
 bool ProxyInfo::emptyProxy() const { return m_isEmptyProxy; }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

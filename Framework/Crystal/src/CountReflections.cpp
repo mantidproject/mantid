@@ -18,8 +18,7 @@
 
 #include "MantidKernel/ListValidator.h"
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 using Mantid::Kernel::Direction;
 
@@ -191,5 +190,4 @@ CountReflections::getPeaksWorkspace(const PeaksWorkspace_sptr &templateWorkspace
   return outputPeaksWorkspace;
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

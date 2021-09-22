@@ -24,9 +24,7 @@ namespace {
 Mantid::Kernel::Logger g_log("ElasticDiffRotDiscreteCircle");
 }
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 DECLARE_FUNCTION(ElasticDiffRotDiscreteCircle)
 
@@ -69,6 +67,4 @@ double ElasticDiffRotDiscreteCircle::HeightPrefactor() const {
   return aN / N;
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

@@ -11,8 +11,7 @@
 #include <list>
 #include <memory>
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 using Kernel::Strings::join;
 
 /**
@@ -57,5 +56,4 @@ std::string InstrumentValidator::checkValidity(const std::shared_ptr<ExperimentI
   }
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

@@ -8,8 +8,7 @@
 #include "MantidAPI/Sample.h"
 #include <memory>
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 /// @return A string identifier for the type of validator
 std::string SampleShapeValidator::getType() const { return "SampleShape"; }
@@ -31,5 +30,4 @@ std::string SampleShapeValidator::checkValidity(const std::shared_ptr<Experiment
   }
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

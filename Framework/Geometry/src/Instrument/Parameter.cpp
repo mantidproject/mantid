@@ -21,8 +21,7 @@
       ((Mantid::Geometry::ParameterFactory::subscribe<Mantid::Geometry::ParameterType<classtype>>(#classname)), 0));   \
   }
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 /** Return the value of the parameter as a string
  * @tparam T The type of the parameter
@@ -95,8 +94,7 @@ std::shared_ptr<Parameter> ParameterFactory::create(const std::string &className
   return p;
 }
 
-} // Namespace Geometry
-} // Namespace Mantid
+} // namespace Mantid::Geometry
 
 DECLARE_PARAMETER(int, int)
 DECLARE_PARAMETER(double, double)

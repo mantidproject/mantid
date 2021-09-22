@@ -9,8 +9,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/ListValidator.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 DECLARE_ALGORITHM(UnGroupWorkspace)
 
@@ -59,5 +58,4 @@ void UnGroupWorkspace::exec() {
   // Now remove the WorkspaceGroup from the ADS
   data_store.remove(inputws);
 }
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

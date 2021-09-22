@@ -10,8 +10,7 @@
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/Algorithm.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 namespace {
 void checkEnd(double end) {
@@ -90,5 +89,4 @@ bool Progress::hasCancellationBeenRequested() const {
     return false;
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

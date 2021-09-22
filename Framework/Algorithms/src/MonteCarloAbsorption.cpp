@@ -70,8 +70,7 @@ private:
 } // namespace
 /// @endcond
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 DECLARE_ALGORITHM(MonteCarloAbsorption)
 
@@ -468,5 +467,4 @@ void MonteCarloAbsorption::interpolateFromSparse(MatrixWorkspace &targetWS, cons
   }
   PARALLEL_CHECK_INTERUPT_REGION
 }
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

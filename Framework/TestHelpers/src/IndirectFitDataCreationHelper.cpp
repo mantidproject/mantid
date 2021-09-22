@@ -7,8 +7,7 @@
 #include "MantidTestHelpers/IndirectFitDataCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-namespace Mantid {
-namespace IndirectFitDataCreationHelper {
+namespace Mantid::IndirectFitDataCreationHelper {
 using namespace Mantid::API;
 
 MatrixWorkspace_sptr createWorkspace(int const &numberOfSpectra, int const &numberOfBins) {
@@ -110,5 +109,4 @@ MatrixWorkspace_sptr createWorkspaceWithInelasticInstrument(int const &yLength) 
   return inputWS;
 }
 
-} // namespace IndirectFitDataCreationHelper
-} // namespace Mantid
+} // namespace Mantid::IndirectFitDataCreationHelper

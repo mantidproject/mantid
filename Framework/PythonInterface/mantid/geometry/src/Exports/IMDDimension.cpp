@@ -28,7 +28,7 @@ namespace {
  * @param self A reference to the calling object
  * @return A plain-text string giving the units
  */
-std::string getUnitsAsStr(IMDDimension &self) { return self.getUnits().ascii(); }
+std::string getUnitsAsStr(const IMDDimension &self) { return self.getUnits().ascii(); }
 
 /**
  * @brief getMDFrame
@@ -47,7 +47,7 @@ std::shared_ptr<MDFrame> getMDFrame(const IMDDimension &self) {
  * @param self Reference to the calling object
  * @return name of the dimension.
  */
-std::string getName(IMDDimension &self) {
+std::string getName(const IMDDimension &self) {
   PyErr_Warn(PyExc_DeprecationWarning, ".getName() is deprecated. Use .name instead.");
   return self.getName();
 }

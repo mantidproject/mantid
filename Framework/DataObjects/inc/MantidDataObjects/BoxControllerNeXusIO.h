@@ -101,7 +101,7 @@ public:
    * file. Valid values are "READ" and "WRITE"
    */
   template <typename FloatOrDouble>
-  void adjustEventDataBlock(std::vector<FloatOrDouble> &Block, std::string accessMode) const;
+  void adjustEventDataBlock(std::vector<FloatOrDouble> &Block, const std::string &accessMode) const;
 
 private:
   /// Default size of the events block which can be written in the NeXus array

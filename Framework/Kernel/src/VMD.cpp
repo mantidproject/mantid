@@ -20,8 +20,7 @@
 
 using namespace Mantid::Kernel;
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 /** Default constructor, build with 1 dimension */
 template <typename TYPE> VMDBase<TYPE>::VMDBase() : nd(1) {
@@ -562,5 +561,4 @@ std::ostream &operator<<(std::ostream &os, const VMDBase<float> &v) {
   return os;
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

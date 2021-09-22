@@ -18,8 +18,7 @@
 
 #include <utility>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 namespace { // anonymous namespace
 
@@ -180,5 +179,4 @@ void CalculatePlaczekSelfScattering::exec() {
   setProperty("OutputWorkspace", outputWS);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

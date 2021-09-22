@@ -12,8 +12,7 @@
 
 using namespace Mantid::API;
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 
 ALCPeakFittingPresenter::ALCPeakFittingPresenter(IALCPeakFittingView *view, IALCPeakFittingModel *model)
     : m_view(view), m_model(model), m_guessPlotted(false) {}
@@ -154,5 +153,4 @@ void ALCPeakFittingPresenter::removePlot(std::string const &plotName) {
   m_guessPlotted = false;
 }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

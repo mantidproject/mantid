@@ -23,8 +23,7 @@ std::vector<WorkspaceIndex> workspaceIndexVectorFromString(const std::string &li
 
 } // namespace
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 FunctionModelSpectra::FunctionModelSpectra(const std::string &str)
     : m_vec(workspaceIndexVectorFromString(str)), m_isContinuous(true) {
@@ -44,7 +43,7 @@ FunctionModelSpectra::FunctionModelSpectra(const FunctionModelSpectra &vec)
     : m_vec(vec.m_vec), m_isContinuous(vec.m_isContinuous) {}
 
 FunctionModelSpectra::FunctionModelSpectra(FunctionModelSpectra &&vec)
-    : m_vec(std::move(vec.m_vec)), m_isContinuous(std::move(vec.m_isContinuous)) {}
+    : m_vec(std::move(vec.m_vec)), m_isContinuous(vec.m_isContinuous) {}
 
 FunctionModelSpectra &FunctionModelSpectra::operator=(const FunctionModelSpectra &vec) {
   m_vec = vec.m_vec;
@@ -54,7 +53,7 @@ FunctionModelSpectra &FunctionModelSpectra::operator=(const FunctionModelSpectra
 
 FunctionModelSpectra &FunctionModelSpectra::operator=(FunctionModelSpectra &&vec) {
   m_vec = std::move(vec.m_vec);
-  m_isContinuous = std::move(vec.m_isContinuous);
+  m_isContinuous = vec.m_isContinuous;
   return *this;
 }
 
@@ -124,5 +123,4 @@ void FunctionModelSpectra::erase(WorkspaceIndex workspaceIndex) {
   }
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

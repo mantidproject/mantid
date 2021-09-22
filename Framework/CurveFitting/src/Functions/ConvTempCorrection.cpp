@@ -14,9 +14,7 @@ namespace {
 constexpr double CONVERSIONFACTOR = 11.606;
 } // namespace
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 DECLARE_FUNCTION(ConvTempCorrection)
 
@@ -33,6 +31,4 @@ void ConvTempCorrection::function1D(double *out, const double *xValues, const si
     }
   }
 }
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

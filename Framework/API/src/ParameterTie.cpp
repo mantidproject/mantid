@@ -11,8 +11,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/regex.hpp>
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 /** Constructor
  * @param funct :: A pointer to the function which parameter will be tied
@@ -192,5 +191,4 @@ std::vector<ParameterReference> ParameterTie::getRHSParameters() const {
   return out;
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

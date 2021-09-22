@@ -22,6 +22,7 @@ Usage
 -----
 
 **Example - IndirectILLReductionDIFF**
+
 .. testsetup:: ExIndirectILLReductionDIFF
 
    config['default.facility'] = 'ILL'
@@ -43,3 +44,7 @@ Output:
 .. testcleanup:: ExIndirectILLReductionDIFF
 
    DeleteWorkspace('ws')
+
+.. categories::
+
+.. sourcelink::

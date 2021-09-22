@@ -23,8 +23,7 @@
 #include <sstream>
 #include <utility>
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 using Kernel::Property;
 using Kernel::PropertyHistories;
@@ -74,11 +73,10 @@ AlgorithmHistory::~AlgorithmHistory() = default;
    (optional).
    @param uexeccount ::  an  unsigned int for algorithm execution order
  */
-AlgorithmHistory::AlgorithmHistory(const std::string &name, int vers, std::string uuid,
-                                   const Types::Core::DateAndTime &start, const double &duration,
-                                   std::size_t uexeccount)
-    : m_name(name), m_version(vers), m_executionDate(start), m_executionDuration(duration), m_execCount(uexeccount),
-      m_childHistories(), m_uuid(std::move(uuid)) {}
+AlgorithmHistory::AlgorithmHistory(std::string name, int vers, std::string uuid, const Types::Core::DateAndTime &start,
+                                   const double &duration, std::size_t uexeccount)
+    : m_name(std::move(name)), m_version(vers), m_executionDate(start), m_executionDuration(duration),
+      m_execCount(uexeccount), m_childHistories(), m_uuid(std::move(uuid)) {}
 
 /**
  *  Set the history properties for an algorithm pointer
@@ -290,5 +288,4 @@ void AlgorithmHistory::saveNexus(::NeXus::File *file, int &algCount) const {
   }
   file->closeGroup();
 }
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

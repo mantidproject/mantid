@@ -8,8 +8,7 @@
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressDialogPresenter.h"
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressPresenter.h"
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 AlgorithmProgressModel::AlgorithmProgressModel(AlgorithmProgressPresenter *presenter)
     : AlgorithmObserver(), m_dialogPresenter{nullptr}, m_mainWindowPresenter{presenter} {
@@ -84,5 +83,4 @@ void AlgorithmProgressModel::removeFrom(const Mantid::API::IAlgorithm *alg) {
     m_dialogPresenter->algorithmEnded(alg->getAlgorithmID());
   }
 }
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

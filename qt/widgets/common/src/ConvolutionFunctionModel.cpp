@@ -21,8 +21,7 @@ namespace {
 Mantid::Kernel::Logger g_log("ConvolutionFunctionModel");
 }
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 using namespace Mantid::API;
 
@@ -256,5 +255,4 @@ void ConvolutionFunctionModel::setPrefix(IFunction *func, const QString &prefix)
   }
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

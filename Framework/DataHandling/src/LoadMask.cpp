@@ -250,8 +250,7 @@ void parseComponent(const std::string &valuetext, bool tomask, std::vector<std::
 }
 } // namespace
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 DECLARE_ALGORITHM(LoadMask)
 
@@ -779,5 +778,4 @@ void LoadMask::reset() {
   m_uMaskCompIdSingle.clear();
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling
