@@ -40,6 +40,7 @@ class InstrumentView(QWidget, ObservingView):
         super(InstrumentView, self).__init__(parent)
 
         self.widget = InstrumentWidget(name)
+        self.widget.resetInstrumentActor()
 
         # used by the observers view to delete the ADS observer
         self.presenter = presenter

@@ -103,6 +103,8 @@ public:
        an integer as the index of current tab
 %End
 
+  void resetInstrumentActor() /ReleaseGIL/;
+
 
   InstrumentWidgetTab * getTab(const QString & title) const;
 %Docstring

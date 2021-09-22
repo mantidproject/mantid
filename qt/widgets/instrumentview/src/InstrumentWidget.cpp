@@ -151,10 +151,6 @@ InstrumentWidget::InstrumentWidget(QString wsName, QWidget *parent, bool resetGe
   m_controlPanelLayout->setEnabled(false);
   m_instrumentActor = std::make_unique<InstrumentActor>(m_workspaceName.toStdString(), *m_messageHandler, autoscaling,
                                                         scaleMin, scaleMax);
-  m_instrumentActor->moveToThread(&m_thread);
-  connect(m_instrumentActor.get(), SIGNAL(initWidget()), this, SLOT(initWidget()));
-  m_thread.start();
-  QMetaObject::invokeMethod(m_instrumentActor.get(), "initialize", Qt::QueuedConnection);
 
   m_xIntegration = new XIntegrationControl(this);
   m_xIntegration->setEnabled(false);
@@ -336,6 +332,21 @@ void InstrumentWidget::resetSurface() {
   auto surface = getSurface();
   surface->updateDetectors();
   update();
+}
+
+/**
+ * Re-creates the instrument actor and initializes it
+ * in a background thread
+ */
+void InstrumentWidget::resetInstrumentActor() {
+  m_thread.quit();
+  m_thread.wait();
+  m_instrumentActor = std::make_unique<InstrumentActor>(m_workspaceName.toStdString(), *m_messageHandler, m_autoscaling,
+                                                        m_scaleMin, m_scaleMax);
+  m_instrumentActor->moveToThread(&m_thread);
+  connect(m_instrumentActor.get(), SIGNAL(initWidget()), this, SLOT(initWidget()));
+  m_thread.start();
+  QMetaObject::invokeMethod(m_instrumentActor.get(), "initialize", Qt::QueuedConnection);
 }
 
 /**
