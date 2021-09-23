@@ -23,7 +23,6 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Workspace.h"
-#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/Unit.h"
 #include "MantidQtWidgets/InstrumentView/PanelsSurface.h"
 #include "MantidQtWidgets/InstrumentView/Projection3D.h"
@@ -620,8 +619,7 @@ void InstrumentWidget::updateIntegrationWidget(bool init) {
   // convention
   auto ws = m_instrumentActor->getWorkspace();
 
-  // differentiating behaviour by subclass is not really recommended, but we have to chek if there are events.
-  bool isNotEventWs = dynamic_cast<const Mantid::DataObjects::EventWorkspace *>(ws.get()) == nullptr;
+  bool isNotEventWs = ws->id() != "EventWorkspace";
 
   bool isDiscrete = ws->isCommonBins() && ws->isIntegerBins() && isNotEventWs;
 
@@ -955,7 +953,7 @@ void InstrumentWidget::setWireframe(bool on) {
  */
 void InstrumentWidget::setIntegrationRange(double xmin, double xmax) {
   auto workspace = m_instrumentActor->getWorkspace();
-  bool isNotEventWorkspace = dynamic_cast<const Mantid::DataObjects::EventWorkspace *>(workspace.get()) == nullptr;
+  bool isNotEventWorkspace = workspace->id() != "EventWorkspace";
   bool isDiscrete = workspace->isCommonBins() && workspace->isIntegerBins() && isNotEventWorkspace;
 
   if (isDiscrete) {
