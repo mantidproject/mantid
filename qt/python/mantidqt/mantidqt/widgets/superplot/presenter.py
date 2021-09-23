@@ -418,6 +418,8 @@ class SuperplotPresenter:
             legend = axes.legend()
             if legend:
                 legend_set_draggable(legend, True)
+            axes.relim()
+            axes.autoscale()
         else:
             legend = axes.get_legend()
             if legend:
