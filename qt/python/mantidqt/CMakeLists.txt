@@ -19,7 +19,7 @@ add_python_package(mantidqt INSTALL_LIB_DIRS ${_install_lib_dirs})
 add_subdirectory(mantidqt)
 
 # Setup dependency chain
-if(MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
+if(BUILD_MANTIDFRAMEWORK)
   add_dependencies(mantidqt PythonInterface)
 endif()
 
