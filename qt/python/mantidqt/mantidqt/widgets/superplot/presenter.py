@@ -344,11 +344,15 @@ class SuperplotPresenter:
                     spectra.append(data[1])
             self._view.set_spectra_list(name, spectra)
 
-    def _update_plot(self):
+    def _update_plot(self, replot=False):
         """
         Update the plot. This function overplots the memorized data with the
         currently selected workspace and spectrum index. It keeps a memory of
-        the last plot and removes it if is not part of the memorised data.
+        the last plot and removes it if is not part of the memorised data. It
+        can also replot all cuves if needed.
+
+        Args:
+            replot (bool): if True, all curves are removed and replotted
         """
         selection = self._view.get_selection()
         current_spectrum_index = self._view.get_spectrum_slider_position()
@@ -375,6 +379,19 @@ class SuperplotPresenter:
                 if color == self._model.get_workspace_color(ws_name):
                     self._model.set_workspace_color(ws_name, None)
                 self._view.modify_spectrum_label(ws_name, sp, label, color)
+                if replot:
+                    axes.remove_artists_if(lambda a: a==artist)
+                    kwargs = dict()
+                    kwargs["color"] = color
+                    if normalised:
+                        kwargs["normalise_spectrum"] = True
+                    if mode == self.SPECTRUM_MODE_TEXT:
+                        kwargs["axis"] = MantidAxType.SPECTRUM
+                        kwargs["specNum"] = ws.getSpectrumNumbers()[sp]
+                    else:
+                        kwargs["axis"] = MantidAxType.BIN
+                        kwargs["wkspIndex"] = sp
+                    line = axes.plot(ws, **kwargs)
 
         # add selection to plot
         for ws_name, spectra in selection.items():
