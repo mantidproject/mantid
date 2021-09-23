@@ -4,9 +4,9 @@
 Mantid 6.2.0 Release Notes
 ===========================
 
-.. figure:: ../../images/ImageNotFound.png
+.. figure:: ../../images/ReleaseNotesIndex_v6_2.png
    :class: screenshot
-   :width: 385px
+   :width: 500px
    :align: right
 
 .. contents:: Table of Contents
