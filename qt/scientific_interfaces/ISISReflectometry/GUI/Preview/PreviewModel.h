@@ -24,7 +24,10 @@ public:
   Mantid::API::MatrixWorkspace_sptr getLoadedWs() const override;
 
 private:
-  boost::optional<PreviewRow> m_runDetails;
+  // This should be an optional instead of a point, but we have issues reassigning it because boost::optional doesn't
+  // play well with non-copyables. This should be fixable when we can use std::make_optional, but that is disabled on
+  // Mac right now.
+  std::unique_ptr<PreviewRow> m_runDetails{nullptr};
 
   void createRunDetails(std::string const &workspaceName);
   Mantid::API::MatrixWorkspace_sptr loadFromAds(std::string const &workspaceName) const;

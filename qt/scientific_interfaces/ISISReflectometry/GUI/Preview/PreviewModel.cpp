@@ -29,7 +29,7 @@ void PreviewModel::loadWorkspace(std::string const &workspaceName, IJobManager &
   auto ws = loadFromAds(workspaceName);
   if (!ws) {
     // Row is automatically updated (as we pass by-ref) on completion
-    jobManager.startPreprocessing(m_runDetails.value());
+    jobManager.startPreprocessing(*m_runDetails);
   } else {
     m_runDetails->setLoadedWs(ws);
   }
@@ -47,6 +47,6 @@ MatrixWorkspace_sptr PreviewModel::loadFromAds(std::string const &workspaceName)
 }
 
 void PreviewModel::createRunDetails(const std::string &workspaceName) {
-  m_runDetails = boost::in_place(std::vector<std::string>{workspaceName});
+  m_runDetails = std::make_unique<PreviewRow>(std::vector<std::string>{workspaceName});
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
