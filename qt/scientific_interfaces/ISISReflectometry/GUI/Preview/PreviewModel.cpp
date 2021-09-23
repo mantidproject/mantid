@@ -11,6 +11,8 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Logger.h"
 
+#include <boost/utility/in_place_factory.hpp>
+
 #include <memory>
 #include <string>
 
@@ -45,6 +47,6 @@ MatrixWorkspace_sptr PreviewModel::loadFromAds(std::string const &workspaceName)
 }
 
 void PreviewModel::createRunDetails(const std::string &workspaceName) {
-  m_runDetails = std::make_optional<PreviewRow>({workspaceName});
+  m_runDetails = boost::in_place(std::vector<std::string>{workspaceName});
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

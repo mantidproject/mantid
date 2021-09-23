@@ -24,7 +24,7 @@ public:
   Mantid::API::MatrixWorkspace_sptr getLoadedWs() const override;
 
 private:
-  std::optional<PreviewRow> m_runDetails;
+  boost::optional<PreviewRow> m_runDetails;
 
   void createRunDetails(std::string const &workspaceName);
   Mantid::API::MatrixWorkspace_sptr loadFromAds(std::string const &workspaceName) const;
