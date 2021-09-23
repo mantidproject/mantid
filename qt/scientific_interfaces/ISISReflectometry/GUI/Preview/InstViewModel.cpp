@@ -7,6 +7,7 @@
 
 #include "InstViewModel.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidQtWidgets/Common/IMessageHandler.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
 #include "MantidQtWidgets/InstrumentView/RotationSurface.h"
 #include "MantidQtWidgets/InstrumentView/UnwrappedCylinder.h"
@@ -14,6 +15,10 @@
 #include <memory>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
+
+InstViewModel::InstViewModel(std::unique_ptr<MantidWidgets::IMessageHandler> messageHandler)
+    : m_messageHandler(std::move(messageHandler)) {}
+
 std::unique_ptr<MantidWidgets::InstrumentActor>
 InstViewModel::createInstrumentViewActor(Mantid::API::MatrixWorkspace_sptr &workspace) const {
   bool autoscaling = true;
