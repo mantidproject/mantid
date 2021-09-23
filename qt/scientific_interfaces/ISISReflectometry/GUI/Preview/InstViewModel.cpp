@@ -7,7 +7,7 @@
 
 #include "InstViewModel.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
-#include "MantidQtWidgets/Common/IMessageHandler.h"
+#include "MantidQtWidgets/Common/MessageHandler.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
 #include "MantidQtWidgets/InstrumentView/RotationSurface.h"
 #include "MantidQtWidgets/InstrumentView/UnwrappedCylinder.h"
@@ -17,7 +17,10 @@
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 InstViewModel::InstViewModel(std::unique_ptr<MantidWidgets::IMessageHandler> messageHandler)
-    : m_messageHandler(std::move(messageHandler)) {}
+    : m_messageHandler(std::move(messageHandler)) {
+  if (!m_messageHandler)
+    m_messageHandler = std::make_unique<MantidWidgets::MessageHandler>();
+}
 
 std::unique_ptr<MantidWidgets::InstrumentActor>
 InstViewModel::createInstrumentViewActor(Mantid::API::MatrixWorkspace_sptr &workspace) const {
@@ -26,7 +29,8 @@ InstViewModel::createInstrumentViewActor(Mantid::API::MatrixWorkspace_sptr &work
   auto scaleMin = 0.0;
   auto scaleMax = 1.0;
 
-  return std::make_unique<MantidWidgets::InstrumentActor>(workspace, autoscaling, scaleMin, scaleMax);
+  return std::make_unique<MantidWidgets::InstrumentActor>(workspace, *m_messageHandler, autoscaling, scaleMin,
+                                                          scaleMax);
 }
 
 void InstViewModel::notifyWorkspaceUpdated(Mantid::API::MatrixWorkspace_sptr &workspace) {

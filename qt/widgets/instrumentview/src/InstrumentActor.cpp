@@ -65,19 +65,15 @@ bool isPhysicalView() {
  * @param scaleMax :: Maximum value of the colormap scale. Used to assign
  * detector colours. Ignored if autoscaling == true.
  */
-InstrumentActor::InstrumentActor(const std::string &wsName, bool autoscaling, double scaleMin, double scaleMax,
-                                 std::unique_ptr<MantidQt::MantidWidgets::IMessageHandler> messageHandler)
-    : InstrumentActor(AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName), autoscaling, scaleMin,
-                      scaleMax, std::move(messageHandler)) {}
+InstrumentActor::InstrumentActor(const std::string &wsName, MantidWidgets::IMessageHandler &messageHandler,
+                                 bool autoscaling, double scaleMin, double scaleMax)
+    : InstrumentActor(AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName), messageHandler, autoscaling,
+                      scaleMin, scaleMax) {}
 
-InstrumentActor::InstrumentActor(MatrixWorkspace_sptr workspace, bool autoscaling, double scaleMin, double scaleMax,
-                                 std::unique_ptr<MantidQt::MantidWidgets::IMessageHandler> messageHandler)
+InstrumentActor::InstrumentActor(MatrixWorkspace_sptr workspace, MantidWidgets::IMessageHandler &messageHandler,
+                                 bool autoscaling, double scaleMin, double scaleMax)
     : m_workspace(workspace), m_ragged(true), m_autoscaling(autoscaling), m_defaultPos(), m_isPhysicalInstrument(false),
-      m_messageHandler(std::move(messageHandler)) {
-  if (!m_messageHandler) {
-    m_messageHandler = std::make_unique<MantidQt::MantidWidgets::MessageHandler>();
-  }
-
+      m_messageHandler(messageHandler) {
   // settings
   loadSettings();
 
@@ -115,7 +111,7 @@ InstrumentActor::InstrumentActor(MatrixWorkspace_sptr workspace, bool autoscalin
 
   // If the instrument is empty, maybe only having the sample and source
   if (detectorInfo().size() == 0) {
-    m_messageHandler->giveUserWarning("This instrument appears to contain no detectors", "Mantid - Warning");
+    m_messageHandler.giveUserWarning("This instrument appears to contain no detectors", "Mantid - Warning");
   }
 }
 
@@ -301,7 +297,7 @@ void InstrumentActor::applyMaskWorkspace() {
       // after-replace notification
       // and updates this instrument actor.
     } catch (...) {
-      m_messageHandler->giveUserWarning("An error occurred when applying the mask.", "Mantid - Warning");
+      m_messageHandler.giveUserWarning("An error occurred when applying the mask.", "Mantid - Warning");
     }
   }
 
@@ -757,7 +753,7 @@ void InstrumentActor::initMaskHelper() const {
     m_maskWorkspace = extractCurrentMask();
   } catch (...) {
     // don't know what to do here yet ...
-    m_messageHandler->giveUserWarning(
+    m_messageHandler.giveUserWarning(
         "Instrument Viewer is not supported yet for workspaces containing a detector scan.", "Mantid - Warning");
   }
 }

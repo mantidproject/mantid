@@ -11,6 +11,7 @@
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
 #endif
+#include "MantidQtWidgets/Common/MessageHandler.h"
 #include "MantidQtWidgets/InstrumentView/DetXMLFile.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetMaskTab.h"
@@ -117,12 +118,16 @@ InstrumentWidget::InstrumentWidget(QString wsName, QWidget *parent, bool resetGe
           QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"))),
       mViewChanged(false), m_blocked(false), m_instrumentDisplayContextMenuOn(false),
       m_stateOfTabs(std::vector<std::pair<std::string, bool>>{}), m_wsReplace(false), m_help(nullptr),
-      m_qtConnect(std::move(deps.qtConnect)) {
+      m_qtConnect(std::move(deps.qtConnect)), m_messageHandler(std::move(deps.messageHandler)) {
 
   QWidget *aWidget = new QWidget(this);
   if (!m_instrumentDisplay) {
     m_instrumentDisplay =
         std::make_unique<InstrumentDisplay>(aWidget, std::move(deps.glDisplay), std::move(deps.qtDisplay));
+  }
+
+  if (!m_messageHandler) {
+    m_messageHandler = std::make_unique<MessageHandler>();
   }
 
   setFocusPolicy(Qt::StrongFocus);
@@ -143,7 +148,8 @@ InstrumentWidget::InstrumentWidget(QString wsName, QWidget *parent, bool resetGe
 
   m_mainLayout->addWidget(controlPanelLayout);
 
-  m_instrumentActor = std::make_unique<InstrumentActor>(m_workspaceName.toStdString(), autoscaling, scaleMin, scaleMax);
+  m_instrumentActor = std::make_unique<InstrumentActor>(m_workspaceName.toStdString(), *m_messageHandler, autoscaling,
+                                                        scaleMin, scaleMax);
 
   m_xIntegration = new XIntegrationControl(this);
   m_mainLayout->addWidget(m_xIntegration);
@@ -271,8 +277,8 @@ Mantid::Kernel::V3D InstrumentWidget::getSurfaceAxis(const int surfaceType) cons
 void InstrumentWidget::init(bool resetGeometry, bool autoscaling, double scaleMin, double scaleMax, bool setDefaultView,
                             bool resetActor) {
   if (resetActor) {
-    m_instrumentActor =
-        std::make_unique<InstrumentActor>(m_workspaceName.toStdString(), autoscaling, scaleMin, scaleMax);
+    m_instrumentActor = std::make_unique<InstrumentActor>(m_workspaceName.toStdString(), *m_messageHandler, autoscaling,
+                                                          scaleMin, scaleMax);
   }
 
   auto surface = getSurface();
@@ -579,7 +585,7 @@ void InstrumentWidget::setSurfaceType(const QString &typeStr) {
 void InstrumentWidget::replaceWorkspace(const std::string &newWs, const std::string &newInstrumentWindowName) {
   // change inside objects
   renameWorkspace(newWs);
-  m_instrumentActor = std::make_unique<InstrumentActor>(newWs);
+  m_instrumentActor = std::make_unique<InstrumentActor>(newWs, *m_messageHandler);
 
   // update the view and colormap
   auto surface = getSurface();

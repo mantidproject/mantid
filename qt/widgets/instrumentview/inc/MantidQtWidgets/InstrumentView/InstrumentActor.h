@@ -65,11 +65,10 @@ public:
   static constexpr double INVALID_VALUE = std::numeric_limits<double>::lowest();
 
   /// Constructor
-  InstrumentActor(const std::string &wsName, bool autoscaling = true, double scaleMin = 0.0, double scaleMax = 0.0,
-                  std::unique_ptr<MantidQt::MantidWidgets::IMessageHandler> messageHandler = nullptr);
-  InstrumentActor(Mantid::API::MatrixWorkspace_sptr workspace, bool autoscaling = true, double scaleMin = 0.0,
-                  double scaleMax = 0.0,
-                  std::unique_ptr<MantidQt::MantidWidgets::IMessageHandler> messageHandler = nullptr);
+  InstrumentActor(const std::string &wsName, MantidWidgets::IMessageHandler &messageHandler, bool autoscaling = true,
+                  double scaleMin = 0.0, double scaleMax = 0.0);
+  InstrumentActor(Mantid::API::MatrixWorkspace_sptr workspace, MantidWidgets::IMessageHandler &messageHandler,
+                  bool autoscaling = true, double scaleMin = 0.0, double scaleMax = 0.0);
   ///< Destructor
   ~InstrumentActor();
 
@@ -282,7 +281,7 @@ private:
   std::unique_ptr<Mantid::Geometry::ComponentInfo> m_physicalComponentInfo;
   std::unique_ptr<Mantid::Geometry::DetectorInfo> m_physicalDetectorInfo;
   std::unique_ptr<InstrumentRenderer> m_renderer;
-  std::unique_ptr<MantidQt::MantidWidgets::IMessageHandler> m_messageHandler;
+  MantidWidgets::IMessageHandler &m_messageHandler;
 
   friend class InstrumentWidgetEncoder;
   friend class InstrumentWidgetDecoder;
