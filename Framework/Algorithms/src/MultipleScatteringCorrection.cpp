@@ -247,71 +247,22 @@ void MultipleScatteringCorrection::calculateSingleComponent(API::MatrixWorkspace
   //       the shared pointer upon returning.
   MultipleScatteringCorrectionDistGraber distGraber(shape, m_elementSize);
   distGraber.cacheLS1(m_beamDirection);
-  // NOTE: the following data is now cached in the distGraber object
-  // std::vector<double> distGraber.m_LS1 : Cached L1 distances
-  // std::vector<double> distGraber.m_elementVolumes : Cached element volumes
-  // std::vector<Kernel::V3D> distGraber.m_elementPositions : Cached element positions
-  // size_t distGraber.m_numVolumeElements : The number of volume elements
+
   const int64_t numVolumeElements = distGraber.m_numVolumeElements;
 
-  // L2D needs to be calculated w.r.t the detector
+  // calculate distance within material from source to scattering point
+  std::vector<double> LS1s(numVolumeElements, 0.0);
+  calculateLS1s(distGraber, LS1s, shape);
+
   // L12 is independent from the detector, therefore can be cached outside
   // - L12 is a upper off-diagonal matrix
   // NOTE: if the sample size/volume is too large, we might need to use openMP
   //       to parallelize the calculation
   const int64_t len_l12 = numVolumeElements * (numVolumeElements - 1) / 2;
   std::vector<double> L12s(len_l12, 0.0);
-  PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS))
-  for (int64_t indexTo = 0; indexTo < numVolumeElements; ++indexTo) {
-    PARALLEL_START_INTERUPT_REGION
-    const auto posTo = distGraber.m_elementPositions[indexTo];
-    Track track(posTo, V3D{0, 0, 1}); // take object creation out of the loop
-    for (int64_t indexFrom = indexTo + 1; indexFrom < numVolumeElements; ++indexFrom) {
-      // where in the final result to update, e.g.
-      // x 1 2 3
-      // x x 4 5
-      // x x x 6
-      // x x x x
-      const int64_t idx = calcLinearIdxFromUpperTriangular(numVolumeElements, indexTo, indexFrom);
+  calculateL12s(distGraber, L12s, shape);
 
-      const auto posFrom = distGraber.m_elementPositions[indexFrom];
-      const V3D unitVector = getDirection(posFrom, posTo);
-
-      // reset information in the Track and calculate distance
-      track.reset(posFrom, unitVector);
-      track.clearIntersectionResults();
-      const auto distance1 = getDistanceInsideObject(shape, track);
-
-      track.reset(posTo, unitVector);
-      track.clearIntersectionResults();
-      const auto distance2 = getDistanceInsideObject(shape, track);
-
-      L12s[idx] = (distance1 - distance2);
-    }
-    PARALLEL_END_INTERUPT_REGION
-  }
-  PARALLEL_CHECK_INTERUPT_REGION
-
-  // debug L12 matrix
-  // NOTE: this will come in handy when we start considering container and sample interaction,
-  //       do not remove it.
-#ifndef NDEBUG
-  std::ostringstream msg;
-  msg << "\n";
-  for (int64_t i = 0; i < numVolumeElements; ++i) {
-    for (int64_t j = 0; j < numVolumeElements; ++j) {
-      if (i < j) {
-        int64_t idx = numVolumeElements * (numVolumeElements - 1) / 2 -
-                      (numVolumeElements - i) * (numVolumeElements - i - 1) / 2 + j - i - 1;
-        msg << L12s[idx] << " ";
-      } else {
-        msg << "x ";
-      }
-    }
-    msg << '\n';
-  }
-  g_log.notice(msg.str());
-#endif
+  // L2D needs to be calculated w.r.t the detector
 
   // compute the prefactor for multiple scattering correction factor Delta
   // Delta = totScatterCoeff * A2/A1
@@ -355,7 +306,7 @@ void MultipleScatteringCorrection::calculateSingleComponent(API::MatrixWorkspace
       double A1 = 0.0;
       double A2 = 0.0;
 
-      pairWiseSum(A1, A2, -LinearCoefAbs[wvBinsIndex], distGraber, L2Ds, L12s, 0, numVolumeElements);
+      pairWiseSum(A1, A2, -LinearCoefAbs[wvBinsIndex], distGraber, LS1s, L12s, L2Ds, 0, numVolumeElements);
 
       // compute the correction factor
       // NOTE: prefactor, totScatterCoeff, is pre-calculated outside the loop (see above)
@@ -415,16 +366,13 @@ void MultipleScatteringCorrection::calculateSampleAndContainer(API::MatrixWorksp
   MultipleScatteringCorrectionDistGraber distGraberContainer(containerShape, m_elementSize);
   distGraberContainer.cacheLS1(m_beamDirection);
 
-  // cache LS1 (Source -> 1_element)
+  // useful info to have
   const int64_t numVolumeElementsSample = distGraberSample.m_numVolumeElements;
   const int64_t numVolumeElementsContainer = distGraberContainer.m_numVolumeElements;
   const int64_t numVolumeElements = numVolumeElementsSample + numVolumeElementsContainer;
-
-  // Debug
-#ifndef NDEBUG
   g_log.notice() << "numVolumeElementsSample=" << numVolumeElementsSample
                  << ", numVolumeElementsContainer=" << numVolumeElementsContainer << "\n";
-#endif
+
   // Total elements = [container_elements] + [sample_elements]
   // Schematic for scattering element i (*)
   //   |                       \                                        /                       |
@@ -432,42 +380,11 @@ void MultipleScatteringCorrection::calculateSampleAndContainer(API::MatrixWorksp
   //   |                         \                                    /                         |
   //   | ---LS1_container[i] ---  \  LS1_sample[i] * L2D_sample[i]   / ---L2D_container[i]  --- |
   //   |                           \                                /                           |
+
   // LS1 can be cached here, but L2D must be calculated within the loop of spectra
   std::vector<double> LS1_container(numVolumeElements, 0.0);
   std::vector<double> LS1_sample(numVolumeElements, 0.0);
-  // Use OpenMP to go through all elements
-  const auto sourcePos = m_inputWS->getInstrument()->getSource()->getPos();
-  Track trackerLS1(V3D{0, 0, 1}, V3D{0, 0, 1}); // reusable tracker for calculating LS1
-  for (int64_t idx = 0; idx < numVolumeElements; ++idx) {
-    const auto pos = idx < numVolumeElementsContainer
-                         ? distGraberContainer.m_elementPositions[idx]
-                         : distGraberSample.m_elementPositions[idx - numVolumeElementsContainer];
-    const auto vec = getDirection(sourcePos, pos);
-    //
-    trackerLS1.reset(sourcePos, vec);
-    trackerLS1.clearIntersectionResults();
-    const auto dist1_container = getDistanceInsideObject(containerShape, trackerLS1);
-    const auto dist1_sample = getDistanceInsideObject(sampleShape, trackerLS1);
-    trackerLS1.reset(pos, vec);
-    trackerLS1.clearIntersectionResults();
-    const auto dist2_container = getDistanceInsideObject(containerShape, trackerLS1);
-    const auto dist2_sample = getDistanceInsideObject(sampleShape, trackerLS1);
-    //
-    LS1_container[idx] = (dist1_container - dist2_container);
-    LS1_sample[idx] = (dist1_sample - dist2_sample);
-#ifndef NDEBUG
-    // debug
-    std::ostringstream msg_debug;
-    msg_debug << "idx=" << idx << ", pos=" << pos << ", vec=" << vec << "\n";
-    if (idx < numVolumeElementsContainer) {
-      msg_debug << "Container element " << idx << "\n";
-    } else {
-      msg_debug << "Sample element " << idx - numVolumeElementsContainer << "\n";
-    }
-    msg_debug << "LS1_container=" << LS1_container[idx] << ", LS1_sample=" << LS1_sample[idx] << "\n";
-    g_log.notice(msg_debug.str());
-#endif
-  }
+  calculateLS1s(distGraberContainer, distGraberSample, LS1_container, LS1_sample, containerShape, sampleShape);
 
   // cache L12 for both sample and container
   // L12 is a upper off-diagonal matrix from the hybrid of container and sample.
@@ -486,39 +403,7 @@ void MultipleScatteringCorrection::calculateSampleAndContainer(API::MatrixWorksp
   const int64_t len_l12 = numVolumeElements * (numVolumeElements - 1) / 2;
   std::vector<double> L12_container(len_l12, 0.0);
   std::vector<double> L12_sample(len_l12, 0.0);
-  //
-  PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS))
-  for (int64_t indexTo = 0; indexTo < numVolumeElements; ++indexTo) {
-    PARALLEL_START_INTERUPT_REGION
-    // find the position of first scattering element (container or sample)
-    const auto posTo = indexTo < numVolumeElementsContainer
-                           ? distGraberContainer.m_elementPositions[indexTo]
-                           : distGraberSample.m_elementPositions[indexTo - numVolumeElementsContainer];
-    // NOTE:
-    // We are using Track to ensure that the distance calculated are within the material
-    Track track(posTo, V3D{0, 0, 1}); // reusable track, eco-friendly
-    for (int64_t indexFrom = indexTo + 1; indexFrom < numVolumeElements; ++indexFrom) {
-      const int64_t idx = calcLinearIdxFromUpperTriangular(numVolumeElements, indexTo, indexFrom);
-      const auto posFrom = indexFrom < numVolumeElementsContainer
-                               ? distGraberContainer.m_elementPositions[indexFrom]
-                               : distGraberSample.m_elementPositions[indexFrom - numVolumeElementsContainer];
-      const V3D unitVector = getDirection(posFrom, posTo);
-
-      // combined
-      track.reset(posFrom, unitVector);
-      track.clearIntersectionResults();
-      const auto dist1_container = getDistanceInsideObject(containerShape, track);
-      const auto dist1_sample = getDistanceInsideObject(sampleShape, track);
-      track.reset(posTo, unitVector);
-      track.clearIntersectionResults();
-      const auto dist2_container = getDistanceInsideObject(containerShape, track);
-      const auto dist2_sample = getDistanceInsideObject(sampleShape, track);
-      L12_container[idx] = (dist1_container - dist2_container);
-      L12_sample[idx] = (dist1_sample - dist2_sample);
-    }
-    PARALLEL_END_INTERUPT_REGION
-  }
-  PARALLEL_CHECK_INTERUPT_REGION
+  calculateL12s(distGraberContainer, distGraberSample, L12_container, L12_sample, containerShape, sampleShape);
 
   // cache the elementsVolumes
   std::vector<double> elementVolumes = distGraberContainer.m_elementVolumes;
@@ -602,7 +487,234 @@ void MultipleScatteringCorrection::calculateSampleAndContainer(API::MatrixWorksp
 }
 
 /**
- * @brief Calculate distance between exiting element to the detector
+ * @brief compute LS1s within given shape for single component case
+ *
+ * @param distGraber
+ * @param LS1s
+ * @param shape
+ */
+void MultipleScatteringCorrection::calculateLS1s(const MultipleScatteringCorrectionDistGraber &distGraber, //
+                                                 std::vector<double> &LS1s,                                //
+                                                 const Geometry::IObject &shape) const {
+  const auto sourcePos = m_inputWS->getInstrument()->getSource()->getPos();
+  const int64_t numVolumeElements = distGraber.m_numVolumeElements;
+  Track trackerLS1(V3D{0, 0, 1}, V3D{0, 0, 1});
+
+  for (int64_t idx = 0; idx < numVolumeElements; ++idx) {
+    const auto pos = distGraber.m_elementPositions[idx];
+    const auto vec = getDirection(sourcePos, pos);
+    //
+    trackerLS1.reset(sourcePos, vec);
+    trackerLS1.clearIntersectionResults();
+    const auto dist1 = getDistanceInsideObject(shape, trackerLS1);
+    trackerLS1.reset(pos, vec);
+    trackerLS1.clearIntersectionResults();
+    const auto dist2 = getDistanceInsideObject(shape, trackerLS1);
+    //
+    LS1s[idx] = (dist1 - dist2);
+  }
+}
+
+/**
+ * @brief compute LS1s within given shape for sample and container case
+ *
+ * @param distGraberContainer
+ * @param distGraberSample
+ * @param LS1sContainer
+ * @param LS1sSample
+ * @param shapeContainer
+ * @param shapeSample
+ */
+void MultipleScatteringCorrection::calculateLS1s(const MultipleScatteringCorrectionDistGraber &distGraberContainer, //
+                                                 const MultipleScatteringCorrectionDistGraber &distGraberSample,    //
+                                                 std::vector<double> &LS1sContainer,                                //
+                                                 std::vector<double> &LS1sSample,                                   //
+                                                 const Geometry::IObject &shapeContainer,                           //
+                                                 const Geometry::IObject &shapeSample) const {
+  // Total elements = [container_elements] + [sample_elements]
+  // Schematic for scattering element i (*)
+  //   |                       \                                        /                       |
+  //   |      container         \               sample                 /  container             |
+  //   |                         \                                    /                         |
+  //   | ---LS1_container[i] ---  \  LS1_sample[i] * L2D_sample[i]   / ---L2D_container[i]  --- |
+  //   |                           \                                /                           |
+  const int64_t numVolumeElementsSample = distGraberSample.m_numVolumeElements;
+  const int64_t numVolumeElementsContainer = distGraberContainer.m_numVolumeElements;
+  const int64_t numVolumeElements = numVolumeElementsSample + numVolumeElementsContainer;
+  const auto sourcePos = m_inputWS->getInstrument()->getSource()->getPos();
+  Track trackerLS1(V3D{0, 0, 1}, V3D{0, 0, 1}); // reusable tracker for calculating LS1
+  for (int64_t idx = 0; idx < numVolumeElements; ++idx) {
+    const auto pos = idx < numVolumeElementsContainer
+                         ? distGraberContainer.m_elementPositions[idx]
+                         : distGraberSample.m_elementPositions[idx - numVolumeElementsContainer];
+    const auto vec = getDirection(sourcePos, pos);
+    //
+    trackerLS1.reset(sourcePos, vec);
+    trackerLS1.clearIntersectionResults();
+    const auto dist1_container = getDistanceInsideObject(shapeContainer, trackerLS1);
+    const auto dist1_sample = getDistanceInsideObject(shapeSample, trackerLS1);
+    trackerLS1.reset(pos, vec);
+    trackerLS1.clearIntersectionResults();
+    const auto dist2_container = getDistanceInsideObject(shapeContainer, trackerLS1);
+    const auto dist2_sample = getDistanceInsideObject(shapeSample, trackerLS1);
+    //
+    LS1sContainer[idx] = (dist1_container - dist2_container);
+    LS1sSample[idx] = (dist1_sample - dist2_sample);
+#ifndef NDEBUG
+    // debug
+    std::ostringstream msg_debug;
+    msg_debug << "idx=" << idx << ", pos=" << pos << ", vec=" << vec << "\n";
+    if (idx < numVolumeElementsContainer) {
+      msg_debug << "Container element " << idx << "\n";
+    } else {
+      msg_debug << "Sample element " << idx - numVolumeElementsContainer << "\n";
+    }
+    msg_debug << "LS1_container=" << LS1sContainer[idx] << ", LS1_sample=" << LS1sSample[idx] << "\n";
+    g_log.notice(msg_debug.str());
+#endif
+  }
+}
+
+/**
+ * @brief calculate L12 for single component case
+ *
+ * @param distGraber
+ * @param L12s
+ * @param shape
+ */
+void MultipleScatteringCorrection::calculateL12s(const MultipleScatteringCorrectionDistGraber &distGraber, //
+                                                 std::vector<double> &L12s,                                //
+                                                 const Geometry::IObject &shape) {
+  const int64_t numVolumeElements = distGraber.m_numVolumeElements;
+  // L12 is independent from the detector, therefore can be cached outside
+  // - L12 is a upper off-diagonal matrix
+  // NOTE: if the sample size/volume is too large, we might need to use openMP
+  //       to parallelize the calculation
+
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS))
+  for (int64_t indexTo = 0; indexTo < numVolumeElements; ++indexTo) {
+    PARALLEL_START_INTERUPT_REGION
+
+    const auto posTo = distGraber.m_elementPositions[indexTo];
+    Track track(posTo, V3D{0, 0, 1}); // take object creation out of the loop
+    for (int64_t indexFrom = indexTo + 1; indexFrom < numVolumeElements; ++indexFrom) {
+      // where in the final result to update, e.g.
+      // x 1 2 3
+      // x x 4 5
+      // x x x 6
+      // x x x x
+      const int64_t idx = calcLinearIdxFromUpperTriangular(numVolumeElements, indexTo, indexFrom);
+
+      const auto posFrom = distGraber.m_elementPositions[indexFrom];
+      const V3D unitVector = getDirection(posFrom, posTo);
+
+      // reset information in the Track and calculate distance
+      track.reset(posFrom, unitVector);
+      track.clearIntersectionResults();
+      const auto distance1 = getDistanceInsideObject(shape, track);
+
+      track.reset(posTo, unitVector);
+      track.clearIntersectionResults();
+      const auto distance2 = getDistanceInsideObject(shape, track);
+
+      L12s[idx] = (distance1 - distance2);
+    }
+
+    PARALLEL_END_INTERUPT_REGION
+  }
+  PARALLEL_CHECK_INTERUPT_REGION
+
+  // debug L12 matrix
+  // NOTE: this will come in handy when we start considering container and sample interaction,
+  //       do not remove it.
+#ifndef NDEBUG
+  std::ostringstream msg;
+  msg << "\n";
+  for (int64_t i = 0; i < numVolumeElements; ++i) {
+    for (int64_t j = 0; j < numVolumeElements; ++j) {
+      if (i < j) {
+        int64_t idx = numVolumeElements * (numVolumeElements - 1) / 2 -
+                      (numVolumeElements - i) * (numVolumeElements - i - 1) / 2 + j - i - 1;
+        msg << L12s[idx] << " ";
+      } else {
+        msg << "x ";
+      }
+    }
+    msg << '\n';
+  }
+  g_log.notice(msg.str());
+#endif
+}
+
+/**
+ * @brief calculate L12s for sample and container case
+ *
+ * @param distGraberContainer
+ * @param distGraberSample
+ * @param L12sContainer
+ * @param L12sSample
+ * @param shapeContainer
+ * @param shapeSample
+ */
+void MultipleScatteringCorrection::calculateL12s(const MultipleScatteringCorrectionDistGraber &distGraberContainer, //
+                                                 const MultipleScatteringCorrectionDistGraber &distGraberSample,    //
+                                                 std::vector<double> &L12sContainer,                                //
+                                                 std::vector<double> &L12sSample,                                   //
+                                                 const Geometry::IObject &shapeContainer,                           //
+                                                 const Geometry::IObject &shapeSample) {
+  const int64_t numVolumeElementsSample = distGraberSample.m_numVolumeElements;
+  const int64_t numVolumeElementsContainer = distGraberContainer.m_numVolumeElements;
+  const int64_t numVolumeElements = numVolumeElementsSample + numVolumeElementsContainer;
+  // L12 is a upper off-diagonal matrix from the hybrid of container and sample.
+  // e.g. container: a, b, c
+  //      sample: alpha, beta, gamma
+  //      hybrid: a, b, c, alpha, beta, gamma
+  //      L12:
+  //               a    b      c     alpha   beta    gamma
+  //      -------------------------------------------------
+  //      a     |  x   L12[0] L12[1] L12[2]  L12[3]  L12[4]
+  //      b     |  x    x     L12[5] L12[6]  L12[7]  L12[8]
+  //      c     |  x    x      x     L12[9]  L12[10] L12[11]
+  //      alpha |  x    x      x      x      L12[12] L12[13]
+  //      beta  |  x    x      x      x       x      L12[14]
+  //      gamma |  x    x      x      x       x       x
+
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS))
+  for (int64_t indexTo = 0; indexTo < numVolumeElements; ++indexTo) {
+    PARALLEL_START_INTERUPT_REGION
+    // find the position of first scattering element (container or sample)
+    const auto posTo = indexTo < numVolumeElementsContainer
+                           ? distGraberContainer.m_elementPositions[indexTo]
+                           : distGraberSample.m_elementPositions[indexTo - numVolumeElementsContainer];
+    // NOTE:
+    // We are using Track to ensure that the distance calculated are within the material
+    Track track(posTo, V3D{0, 0, 1}); // reusable track, eco-friendly
+    for (int64_t indexFrom = indexTo + 1; indexFrom < numVolumeElements; ++indexFrom) {
+      const int64_t idx = calcLinearIdxFromUpperTriangular(numVolumeElements, indexTo, indexFrom);
+      const auto posFrom = indexFrom < numVolumeElementsContainer
+                               ? distGraberContainer.m_elementPositions[indexFrom]
+                               : distGraberSample.m_elementPositions[indexFrom - numVolumeElementsContainer];
+      const V3D unitVector = getDirection(posFrom, posTo);
+
+      // combined
+      track.reset(posFrom, unitVector);
+      track.clearIntersectionResults();
+      const auto dist1_container = getDistanceInsideObject(shapeContainer, track);
+      const auto dist1_sample = getDistanceInsideObject(shapeSample, track);
+      track.reset(posTo, unitVector);
+      track.clearIntersectionResults();
+      const auto dist2_container = getDistanceInsideObject(shapeContainer, track);
+      const auto dist2_sample = getDistanceInsideObject(shapeSample, track);
+      L12sContainer[idx] = (dist1_container - dist2_container);
+      L12sSample[idx] = (dist1_sample - dist2_sample);
+    }
+    PARALLEL_END_INTERUPT_REGION
+  }
+  PARALLEL_CHECK_INTERUPT_REGION
+}
+
+/**
+ * @brief Calculate distance between exiting element to the detector for single component case
  *
  * @param distGraber
  * @param detector
@@ -697,29 +809,32 @@ void MultipleScatteringCorrection::calculateL2Ds(const MultipleScatteringCorrect
  * @param A2
  * @param linearCoefAbs
  * @param distGraber
- * @param L2Ds
+ * @param LS1s
  * @param L12s
+ * @param L2Ds
  * @param startIndex
  * @param endIndex
  */
-void MultipleScatteringCorrection::pairWiseSum(double &A1, double &A2, const double linearCoefAbs,
-                                               const MultipleScatteringCorrectionDistGraber &distGraber,
-                                               const std::vector<double> &L2Ds, const std::vector<double> &L12s,
+void MultipleScatteringCorrection::pairWiseSum(double &A1, double &A2,                                   //
+                                               const double linearCoefAbs,                               //
+                                               const MultipleScatteringCorrectionDistGraber &distGraber, //
+                                               const std::vector<double> &LS1s,                          //
+                                               const std::vector<double> &L12s,                          //
+                                               const std::vector<double> &L2Ds,                          //
                                                const int64_t startIndex, const int64_t endIndex) const {
   if (endIndex - startIndex > MAX_INTEGRATION_LENGTH) {
     int64_t middle = findMiddle(startIndex, endIndex);
 
     // recursive to process upper and lower part
-    pairWiseSum(A1, A2, linearCoefAbs, distGraber, L2Ds, L12s, startIndex, middle);
-    pairWiseSum(A1, A2, linearCoefAbs, distGraber, L2Ds, L12s, middle, endIndex);
+    pairWiseSum(A1, A2, linearCoefAbs, distGraber, LS1s, L12s, L2Ds, startIndex, middle);
+    pairWiseSum(A1, A2, linearCoefAbs, distGraber, LS1s, L12s, L2Ds, middle, endIndex);
   } else {
     // perform the integration
-    const auto &Ls1s = distGraber.m_LS1;
     const auto &elementVolumes = distGraber.m_elementVolumes;
     const auto nElements = distGraber.m_numVolumeElements;
     for (int64_t i = startIndex; i < endIndex; ++i) {
       // compute A1
-      double exponent = (Ls1s[i] + L2Ds[i]) * linearCoefAbs;
+      double exponent = (LS1s[i] + L2Ds[i]) * linearCoefAbs;
       A1 += exp(exponent) * elementVolumes[i];
       // compute A2
       double a2 = 0.0;
@@ -732,7 +847,7 @@ void MultipleScatteringCorrection::pairWiseSum(double &A1, double &A2, const dou
         size_t idx_l12 = i < j ? calcLinearIdxFromUpperTriangular(nElements, i, j)
                                : calcLinearIdxFromUpperTriangular(nElements, j, i);
         // compute a2 component
-        exponent = (Ls1s[i] + L12s[idx_l12] + L2Ds[j]) * linearCoefAbs;
+        exponent = (LS1s[i] + L12s[idx_l12] + L2Ds[j]) * linearCoefAbs;
         a2 += exp(exponent) * elementVolumes[j] / (L12s[idx_l12] * L12s[idx_l12]);
       }
       A2 += a2 * elementVolumes[i];

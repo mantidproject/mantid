@@ -55,16 +55,43 @@ private:
   void parseInputs();
   void calculateSingleComponent(API::MatrixWorkspace_sptr outws, const Geometry::IObject &shape);
   void calculateSampleAndContainer(API::MatrixWorkspace_sptr outws);
-  void calculateL2Ds(const MultipleScatteringCorrectionDistGraber &distGraber, const IDetector &detector,
-                     std::vector<double> &L2Ds, const Geometry::IObject &shape) const;
+  // For single component case
+  void calculateLS1s(const MultipleScatteringCorrectionDistGraber &distGraber, //
+                     std::vector<double> &LS1s,                                //
+                     const Geometry::IObject &shape) const;
+  void calculateL12s(const MultipleScatteringCorrectionDistGraber &distGraber, //
+                     std::vector<double> &L12s,                                //
+                     const Geometry::IObject &shape);
+  void calculateL2Ds(const MultipleScatteringCorrectionDistGraber &distGraber, //
+                     const IDetector &detector,                                //
+                     std::vector<double> &L2Ds,                                //
+                     const Geometry::IObject &shape) const;
+  void pairWiseSum(double &A1, double &A2,                                   //
+                   const double linearCoefAbs,                               //
+                   const MultipleScatteringCorrectionDistGraber &distGraber, //
+                   const std::vector<double> &LS1s,                          //
+                   const std::vector<double> &L12s,                          //
+                   const std::vector<double> &L2Ds,                          //
+                   const int64_t startIndex, const int64_t endIndex) const;
+  // For sample and container case
+  void calculateLS1s(const MultipleScatteringCorrectionDistGraber &distGraberContainer, //
+                     const MultipleScatteringCorrectionDistGraber &distGraberSample,    //
+                     std::vector<double> &LS1sContainer,                                //
+                     std::vector<double> &LS1sSample,                                   //
+                     const Geometry::IObject &shapeContainer,                           //
+                     const Geometry::IObject &shapeSample) const;
+  void calculateL12s(const MultipleScatteringCorrectionDistGraber &distGraberContainer, //
+                     const MultipleScatteringCorrectionDistGraber &distGraberSample,    //
+                     std::vector<double> &L12sContainer,                                //
+                     std::vector<double> &L12sSample,                                   //
+                     const Geometry::IObject &shapeContainer,                           //
+                     const Geometry::IObject &shapeSample);
   void calculateL2Ds(const MultipleScatteringCorrectionDistGraber &distGraberContainer,     //
                      const MultipleScatteringCorrectionDistGraber &distGraberSample,        //
                      const IDetector &detector,                                             //
                      std::vector<double> &container_L2Ds, std::vector<double> &sample_L2Ds, //
                      const Geometry::IObject &shapeContainer, const Geometry::IObject &shapeSample) const;
-  void pairWiseSum(double &A1, double &A2, const double linearCoefAbs,
-                   const MultipleScatteringCorrectionDistGraber &distGraber, const std::vector<double> &L2Ds,
-                   const std::vector<double> &L12s, const int64_t startIndex, const int64_t endIndex) const;
+
   void pairWiseSum(double &A1, double &A2,                                                         //
                    const double linearCoefAbsContainer, const double linearCoefAbsSample,          //
                    const int64_t numVolumeElementsContainer, const int64_t numVolumeElementsTotal, //
