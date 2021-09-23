@@ -156,15 +156,13 @@ void DensityOfStates::dosAlgoComplete(bool error) {
 void DensityOfStates::handleFileChange() {
   QString filename = m_uiForm.mwInputFile->getFirstFilename();
   InputFormat fileFormat = filenameToFormat(filename);
-
-  std::string filePropName = formatToFilePropName(fileFormat);
   bool pdosAvailable = isPdosFile(fileFormat);
 
   if (pdosAvailable) {
     // Load the ion table to populate the list of ions
     IAlgorithm_sptr ionTableAlgo = AlgorithmManager::Instance().create("SimulatedDensityOfStates");
     ionTableAlgo->initialize();
-    ionTableAlgo->setProperty(filePropName, filename.toStdString());
+    ionTableAlgo->setProperty(formatToFilePropName(fileFormat), filename.toStdString());
     ionTableAlgo->setProperty("SpectrumType", "IonTable");
     ionTableAlgo->setProperty("OutputWorkspace", "__dos_ions");
 
