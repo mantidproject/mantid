@@ -36,6 +36,11 @@ namespace DataObjects {
 class DLLExport CoordTransformAffine : public Mantid::API::CoordTransform {
 public:
   CoordTransformAffine(const size_t inD, const size_t outD);
+
+  CoordTransformAffine(const CoordTransformAffine &);
+  friend void swap(CoordTransformAffine &, CoordTransformAffine &);
+  CoordTransformAffine &operator=(CoordTransformAffine);
+
   CoordTransform *clone() const override;
   ~CoordTransformAffine() override;
   std::string toXMLString() const override;

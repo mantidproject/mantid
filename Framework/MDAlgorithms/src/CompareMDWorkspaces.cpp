@@ -297,7 +297,6 @@ void CompareMDWorkspaces::compareMDEventWorkspaces(typename MDEventWorkspace<MDE
   // segmentation fault is generated on Mac build
   bool filebacked = ws1->isFileBacked() || ws2->isFileBacked();
 
-  // cppcheck-suppress syntaxError
   PRAGMA_OMP( parallel for if (!filebacked))
   for (int ibox = 0; ibox < num_boxes; ibox++) {
     PARALLEL_START_INTERUPT_REGION

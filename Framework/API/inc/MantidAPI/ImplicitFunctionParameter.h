@@ -48,7 +48,7 @@ public:
   virtual ~ImplicitFunctionParameter() = default;
 
 protected:
-  bool m_isValid;
+  bool m_isValid{false};
 
   std::string parameterXMLTemplate(const std::string &valueXMLtext) const {
     using namespace Poco::XML;

@@ -55,7 +55,7 @@ void LoadBankFromDiskTask::loadPulseTimes(::NeXus::File &file) {
     return;
   }
   std::string thisStartTime;
-  size_t thisNumPulses = 0;
+  size_t thispulseTimes = 0;
   // If the offset is not present, use Unix epoch
   if (!file.hasAttr("offset")) {
     thisStartTime = "1970-01-01T00:00:00Z";
@@ -66,13 +66,13 @@ void LoadBankFromDiskTask::loadPulseTimes(::NeXus::File &file) {
   }
 
   if (!file.getInfo().dims.empty())
-    thisNumPulses = file.getInfo().dims[0];
+    thispulseTimes = file.getInfo().dims[0];
   file.closeData();
 
   // Now, we look through existing ones to see if it is already loaded
   // thisBankPulseTimes = NULL;
   for (auto &bankPulseTime : m_loader.m_bankPulseTimes) {
-    if (bankPulseTime->equals(thisNumPulses, thisStartTime)) {
+    if (bankPulseTime->equals(thispulseTimes, thisStartTime)) {
       thisBankPulseTimes = bankPulseTime;
       return;
     }
@@ -131,7 +131,7 @@ void LoadBankFromDiskTask::prepareEventId(::NeXus::File &file, int64_t &start_ev
   stop_event = dim0;
 
   // Handle the time filtering by changing the start/end offsets.
-  for (size_t i = 0; i < thisBankPulseTimes->numPulses; i++) {
+  for (size_t i = 0; i < thisBankPulseTimes->pulseTimes.size(); i++) {
     if (thisBankPulseTimes->pulseTimes[i] >= m_loader.alg->filter_time_start) {
       start_event = static_cast<int64_t>(event_index[i]);
       break; // stop looking
@@ -150,7 +150,7 @@ void LoadBankFromDiskTask::prepareEventId(::NeXus::File &file, int64_t &start_ev
     start_event = 0;
     stop_event = dim0;
   } else {
-    for (size_t i = 0; i < thisBankPulseTimes->numPulses; i++) {
+    for (size_t i = 0; i < thisBankPulseTimes->pulseTimes.size(); i++) {
       if (thisBankPulseTimes->pulseTimes[i] > m_loader.alg->filter_time_stop) {
         stop_event = event_index[i];
         break;
@@ -353,7 +353,7 @@ void LoadBankFromDiskTask::run() {
 
       // The event_index should be the same length as the pulse times from DAS
       // logs.
-      if (event_index.size() != thisBankPulseTimes->numPulses)
+      if (event_index.size() != thisBankPulseTimes->pulseTimes.size())
         m_loader.alg->getLogger().warning() << "Bank " << entry_name
                                             << " has a mismatch between the number of event_index entries "
                                                "and the number of pulse times in event_time_zero.\n";

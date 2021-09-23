@@ -462,7 +462,7 @@ void MDNormDirectSC::calculateNormalization(const std::vector<coord_t> &otherVal
   double progStep = 0.7 / m_numExptInfos;
   auto prog =
       std::make_unique<API::Progress>(this, 0.3 + progStep * expInfoIndex, 0.3 + progStep * (expInfoIndex + 1.), ndets);
-  // cppcheck-suppress syntaxError
+
 PRAGMA_OMP(parallel for private(intersections, pos, posNew))
 for (int64_t i = 0; i < ndets; i++) {
   PARALLEL_START_INTERUPT_REGION
