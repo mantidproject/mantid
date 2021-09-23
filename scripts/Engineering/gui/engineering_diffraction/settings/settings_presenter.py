@@ -126,7 +126,8 @@ class SettingsPresenter(object):
         for key in list(self.settings):
             if key not in DEFAULT_SETTINGS.keys():
                 del self.settings[key]
-        if "default_peak" not in self.settings or not self.settings["default_peak"] in ALL_PEAKS:
+        self.check_and_populate_with_default("default_peak")
+        if not self.settings["default_peak"] in ALL_PEAKS:
             self.settings["default_peak"] = DEFAULT_SETTINGS["default_peak"]
         self.check_and_populate_with_default("save_location")
         self.check_and_populate_with_default("logs")
