@@ -8,6 +8,8 @@ import systemtesting
 import numpy as np
 from mantid.simpleapi import *
 
+from mantid import config
+
 
 class ConvertWANDSCDtoQTest(systemtesting.MantidSystemTest):
     def requiredMemoryMB(self):
@@ -116,3 +118,50 @@ class ConvertWANDSCDtoQ_HB3A_Test(systemtesting.MantidSystemTest):
         signal = ConvertWANDSCDtoQTest_HKL.getSignalArray()
         # peak should be roughly the center of the volume
         np.testing.assert_array_equal(np.unravel_index(np.nanargmax(signal), signal.shape), (50, 51, 53))
+
+
+class ConvertWANDSCDtoQ_Rotate_Test(systemtesting.MantidSystemTest):
+    def requiredMemoryMB(self):
+        return 8000
+
+    def runTest(self):
+        config['Q.convention'] = "Inelastic"
+
+        # wavelength (angstrom) --------------------------------------------------------
+        wavelength = 1.486
+
+        # minimum and maximum values for Q sample --------------------------------------
+        min_values = [-7.5,-0.65,-4.4]
+        max_values = [6.8,0.65,7.5]
+
+        # obliquity parallax coefficient
+        cop = 1.022
+
+        # ---
+
+        LoadMD(Filename='HB2C_WANDSCD_data.nxs', OutputWorkspace="data")
+
+        LoadIsawUB(InputWorkspace='data',
+                        Filename='HB2C_WANDSCD_data.nxs', OutputWorkspace="UB")
+
+        ConvertHFIRSCDtoMDE(data,
+                                Wavelength=wavelength,
+                                ObliquityParallaxCoefficient=cop,
+                                MinValues='{},{},{}'.format(*min_values),
+                                MaxValues='{},{},{}'.format(*max_values))
+
+        ConvertWANDSCDtoQ(InputWorkspace='data',
+                            S1Offset='0',
+                            BinningDim1='-1,1,1', OutputWorkspace="Q")
+
+        ConvertWANDSCDtoQ(InputWorkspace='data',
+                                S1Offset='45',
+                                BinningDim1='-1,1,1', OutputWorkspace="Qrot")
+
+    def validate(self):
+        # rotationResults = 'Qrot'
+        # reference = 'Q'
+
+        # Manually check to see if the results are rotated 45 degrees?
+
+        return True
