@@ -28,16 +28,4 @@ std::string QtPreviewView::getWorkspaceName() const { return m_ui.workspace_line
 void QtPreviewView::plotInstView(std::shared_ptr<MantidWidgets::RotationSurface> &surface) {
   m_instDisplay->setSurface(surface);
 }
-
-// void QtRoiView::plot3D(MatrixWorkspace_sptr ws) {
-
-//  const auto &componentInfo = m_instActor->componentInfo();
-//  auto sample_pos = componentInfo.samplePosition();
-//  auto axis = Mantid::Kernel::V3D(0, 1, 0); // CYLINDRICAL_Y
-//
-// m_instDisplay->setSurface(std::make_shared<UnwrappedCylinder>(m_instActor.get(), sample_pos, axis));
-
-//  connect(m_instDisplay->getSurface().get(), SIGNAL(shapeChangeFinished()), this, SLOT(onShapeChanged()));
-//}
-
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

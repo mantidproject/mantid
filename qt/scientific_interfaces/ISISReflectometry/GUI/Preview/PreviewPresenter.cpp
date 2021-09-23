@@ -45,6 +45,5 @@ void PreviewPresenter::notifyLoadWorkspaceCompleted() {
   m_instViewModel->notifyWorkspaceUpdated(ws);
   auto surface = m_instViewModel->getInstrumentViewSurface();
   m_view->plotInstView(surface);
-  g_log.notice("Loaded ws pointer");
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
