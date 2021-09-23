@@ -447,10 +447,10 @@ XIntegrationControl::XIntegrationControl(InstrumentWidget *instrWindow)
 
   m_minSpin = new QSpinBox(this);
   m_minSpin->setMaximumWidth(100);
-  m_minSpin->setToolTip("Minimum channel index");
+  m_minSpin->setToolTip("Minimum channel index. Click outside to refresh.");
   m_maxSpin = new QSpinBox(this);
   m_maxSpin->setMaximumWidth(100);
-  m_maxSpin->setToolTip("Maximum channel index");
+  m_maxSpin->setToolTip("Maximum channel index. Click outside to refresh.");
 
   m_units = new QLabel("TOF", this);
   m_setWholeRange = new QPushButton("Reset");
