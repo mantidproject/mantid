@@ -44,6 +44,8 @@ class InstrumentView(QWidget, ObservingView):
         # used by the observers view to delete the ADS observer
         self.presenter = presenter
 
+        self.name = name
+
         self.setWindowTitle(name)
         self.setAttribute(Qt.WA_DeleteOnClose, True)
         self.setWindowFlags(window_flags)
@@ -88,6 +90,10 @@ class InstrumentView(QWidget, ObservingView):
         if new_window_name is None:
             new_window_name = new_ws_name
         self.widget.replaceWorkspace(new_ws_name, new_window_name)
+
+    def closeEvent(self, event):
+        self.presenter.close(self.name)
+        super(InstrumentView, self).closeEvent(event)
 
     @Slot()
     def _run_close(self):
