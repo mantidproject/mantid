@@ -220,6 +220,7 @@ class SuperplotPresenter:
         Transmit the normalisation checkbox state to the model.
         """
         self._model.normalise(checked)
+        self._update_plot(True)
 
     def on_drop(self, name):
         """
