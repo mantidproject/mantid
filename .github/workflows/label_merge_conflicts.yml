@@ -1,9 +1,7 @@
 name: 'Check for merge conflicts'
 on:
   push:
-    branches:
-      - master
-      - release-next
+
 jobs:
   label-conflicts:
     runs-on: ubuntu-latest
