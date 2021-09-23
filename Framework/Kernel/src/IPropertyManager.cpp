@@ -17,7 +17,6 @@ DEFINE_IPROPERTYMANAGER_GETVALUE(int64_t)
 DEFINE_IPROPERTYMANAGER_GETVALUE(uint64_t)
 DEFINE_IPROPERTYMANAGER_GETVALUE(bool)
 DEFINE_IPROPERTYMANAGER_GETVALUE(double)
-DEFINE_IPROPERTYMANAGER_GETVALUE(float)
 DEFINE_IPROPERTYMANAGER_GETVALUE(OptionalBool)
 DEFINE_IPROPERTYMANAGER_GETVALUE(std::vector<int16_t>)
 DEFINE_IPROPERTYMANAGER_GETVALUE(std::vector<uint16_t>)
@@ -36,6 +35,13 @@ namespace Mantid::Kernel {
 // e.g.: std::string s = getProperty("myProperty")
 template <> DLLExport std::string IPropertyManager::getValue<std::string>(const std::string &name) const {
   return getPropertyValue(name);
+}
+
+// For an unknown reason, float is not working as other primitive types.
+// Hence we specialize it further, which will get to double then cast to float.
+template <> DLLExport float IPropertyManager::getValue<float>(const std::string &name) const {
+  const double retval = getProperty(name);
+  return float(retval);
 }
 
 template <> DLLExport Property *IPropertyManager::getValue<Property *>(const std::string &name) const {
