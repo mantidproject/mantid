@@ -16,7 +16,14 @@ Mantid 6.2.0 Release Notes
 
 We are proud to announce version 6.2.0 of Mantid.
 
-**TODO: Add paragraph summarizing big changes**
+This release sees many new algorithms added or improved to extend the functionality of Mantid for users. In addition to this there are some significant new features
+including:-
+
+- Superplot, a new detector widget for the plot window that facilitates over-plotting and the manipulation of overplotted data.
+- The ablity to plot CSGObjects as Sample shapes and merge shapes for greater complexity.
+- In MSlice you can now enable powder (Bragg) peaks on cut plots.
+- Maxent Dual Plotting for Frequency Domain Analysis allowing raw and reconstructed data to be plotted together along with the frequency domain data.
+- A new widget and workspace plugin, the Workspace Calculator. This allows users to quickly perform binary operations on selected workspace pairs, optionally with scaling.
 
 These are just some of the many improvements in this release, so please take a
 look at the release notes, which are filled with details of the
