@@ -402,11 +402,30 @@ void MultipleScatteringCorrection::calculateSampleAndContainer(API::MatrixWorksp
   std::vector<double> L12_container(len_l12, 0.0);
   std::vector<double> L12_sample(len_l12, 0.0);
   calculateL12s(distGraberContainer, distGraberSample, L12_container, L12_sample, containerShape, sampleShape);
+#ifndef NDEBUG
+  for (size_t i = 0; i < size_t(numVolumeElements); ++i) {
+    for (size_t j = i + 1; j < size_t(numVolumeElements); ++j) {
+      const auto idx = calcLinearIdxFromUpperTriangular(numVolumeElements, i, j);
+      const auto l12 = L12_container[idx] + L12_sample[idx];
+      if (l12 < 1e-9) {
+        g_log.notice() << "L12_container(" << i << "," << j << ")=" << L12_container[idx] << "\n"
+                       << "L12_sample(" << i << "," << j << ")=" << L12_sample[idx] << "\n";
+      }
+    }
+  }
+#endif
 
   // cache the elementsVolumes
   std::vector<double> elementVolumes = distGraberContainer.m_elementVolumes;
   elementVolumes.insert(elementVolumes.end(), distGraberSample.m_elementVolumes.begin(),
                         distGraberSample.m_elementVolumes.end());
+#ifndef NDEBUG
+  for (size_t i = 0; i < elementVolumes.size(); ++i) {
+    if (elementVolumes[i] < 1e-16) {
+      g_log.notice() << "Element_" << i << " has near zero volume: " << elementVolumes[i] << "\n";
+    }
+  }
+#endif
 
   // NOTE: Unit is important
   // rho in 1/A^3, and sigma_s in 1/barns (1e-8 A^(-2))
@@ -464,6 +483,22 @@ void MultipleScatteringCorrection::calculateSampleAndContainer(API::MatrixWorksp
                   0, numVolumeElements);
 
       output[wvBinsIndex] = (A2 / A1) / (4.0 * M_PI);
+
+      // debug output
+#ifndef NDEBUG
+      std::ostringstream msg_debug;
+      msg_debug << "Det_" << workspaceIndex << "@spectrum_" << wvBinsIndex << ":\n"
+                << "-containerLinearCoefAbs[wvBinsIndex] = " << -containerLinearCoefAbs[wvBinsIndex] << "\n"
+                << "-sampleLinearCoefAbs[wvBinsIndex] = " << -sampleLinearCoefAbs[wvBinsIndex] << "\n"
+                << "numVolumeElementsContainer = " << numVolumeElementsContainer << "\n"
+                << "numVolumeElements = " << numVolumeElements << "\n"
+                << "totScatterCoef_container = " << totScatterCoef_container << "\n"
+                << "totScatterCoef_sample = " << totScatterCoef_sample << "\n"
+                << "\tA1 = " << A1 << "\n"
+                << "\tA2 = " << A2 << "\n"
+                << "\tms_factor = " << output[wvBinsIndex] << "\n";
+      g_log.notice(msg_debug.str());
+#endif
 
       // Make certain that last point is calculated
       if (m_xStep > 1 && wvBinsIndex + m_xStep >= specSize && wvBinsIndex + 1 != specSize) {
@@ -703,8 +738,9 @@ void MultipleScatteringCorrection::calculateL12s(const MultipleScatteringCorrect
       track.clearIntersectionResults();
       const auto dist2_container = getDistanceInsideObject(shapeContainer, track);
       const auto dist2_sample = getDistanceInsideObject(shapeSample, track);
-      L12sContainer[idx] = (dist1_container - dist2_container);
-      L12sSample[idx] = (dist1_sample - dist2_sample);
+      //
+      L12sContainer[idx] = dist1_container - dist2_container;
+      L12sSample[idx] = dist1_sample - dist2_sample;
     }
     PARALLEL_END_INTERUPT_REGION
   }
@@ -914,6 +950,9 @@ void MultipleScatteringCorrection::pairWiseSum(
         size_t idx_l12 = i < j ? calcLinearIdxFromUpperTriangular(numVolumeElementsTotal, i, j)
                                : calcLinearIdxFromUpperTriangular(numVolumeElementsTotal, j, i);
         const double l12 = L12sContainer[idx_l12] + L12sSample[idx_l12];
+        if (l12 == 0) {
+          continue;
+        }
         exponent = (LS1sContainer[i] + L12sContainer[idx_l12] + L2DsContainer[j]) * linearCoefAbsContainer + //
                    (LS1sSample[i] + L12sSample[idx_l12] + L2DsSample[j]) * linearCoefAbsSample;
         a2 += exp(exponent) * factor_j * elementVolumes[j] / (l12 * l12);
