@@ -243,7 +243,7 @@ bool XIntegrationScrollBar::manageEventContinuous(QEvent *e) {
     }
     m_changed = true;
     updateMinMax();
-    return false;
+    return true;
   }
   default:
     return false;
