@@ -149,8 +149,7 @@ InstrumentWidget::InstrumentWidget(QString wsName, QWidget *parent, bool resetGe
 
   // disable all controls until background thread has finished
   m_controlPanelLayout->setEnabled(false);
-  m_instrumentActor = std::make_unique<InstrumentActor>(m_workspaceName.toStdString(), *m_messageHandler, autoscaling,
-                                                        scaleMin, scaleMax);
+  resetInstrumentActor();
 
   m_xIntegration = new XIntegrationControl(this);
   m_xIntegration->setEnabled(false);
@@ -614,7 +613,7 @@ void InstrumentWidget::setSurfaceType(const QString &typeStr) {
 void InstrumentWidget::replaceWorkspace(const std::string &newWs, const std::string &newInstrumentWindowName) {
   // change inside objects
   renameWorkspace(newWs);
-  m_instrumentActor = std::make_unique<InstrumentActor>(newWs, *m_messageHandler);
+  resetInstrumentActor();
 
   // update the view and colormap
   auto surface = getSurface();
@@ -1459,8 +1458,8 @@ void InstrumentWidget::handleWorkspaceReplacement(const std::string &wsName,
   }
   // try to detect if the instrument changes (unlikely if the workspace
   // hasn't, but theoretically possible)
-  bool resetGeometry = matrixWS->detectorInfo().size() != m_instrumentActor->ndetectors();
-  resetInstrument(resetGeometry);
+  m_resetGeometry = matrixWS->detectorInfo().size() != m_instrumentActor->ndetectors();
+  resetInstrumentActor();
   updateIntegrationWidget();
 }
 
