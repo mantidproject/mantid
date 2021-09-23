@@ -382,17 +382,13 @@ class SuperplotPresenter:
                 self._view.modify_spectrum_label(ws_name, sp, label, color)
                 if replot:
                     axes.remove_artists_if(lambda a: a==artist)
-                    kwargs = dict()
-                    kwargs["color"] = color
-                    if normalised:
-                        kwargs["normalise_spectrum"] = True
-                    if mode == self.SPECTRUM_MODE_TEXT:
-                        kwargs["axis"] = MantidAxType.SPECTRUM
-                        kwargs["specNum"] = ws.getSpectrumNumbers()[sp]
+                    kwargs = self._fill_plot_kwargs(ws_name, sp, normalised,
+                                                    mode, color)
+                    ws = mtd[ws_name]
+                    if self._error_bars:
+                        axes.errorbar(ws, **kwargs)
                     else:
-                        kwargs["axis"] = MantidAxType.BIN
-                        kwargs["wkspIndex"] = sp
-                    line = axes.plot(ws, **kwargs)
+                        axes.plot(ws, **kwargs)
 
         # add selection to plot
         for ws_name, spectra in selection.items():
@@ -403,20 +399,10 @@ class SuperplotPresenter:
                 if sp == -1:
                     continue
                 if (ws_name, sp) not in plotted_data:
-                    ws = mtd[ws_name]
-                    kwargs = {}
-                    if normalised:
-                        kwargs["normalise_spectrum"] = True
-                    if mode == self.SPECTRUM_MODE_TEXT:
-                        kwargs["axis"] = MantidAxType.SPECTRUM
-                        kwargs["specNum"] = ws.getSpectrumNumbers()[sp]
-                    else:
-                        kwargs["axis"] = MantidAxType.BIN
-                        kwargs["wkspIndex"] = sp
-
                     color = self._model.get_workspace_color(ws_name)
-                    if color:
-                        kwargs["color"] = color
+                    kwargs = self._fill_plot_kwargs(ws_name, sp, normalised,
+                                                    mode, color)
+                    ws = mtd[ws_name]
                     if self._error_bars:
                         lines = axes.errorbar(ws, **kwargs)
                         label = lines.get_label()
@@ -445,6 +431,35 @@ class SuperplotPresenter:
             axes.set_axis_off()
             axes.set_title("")
         self._canvas.draw_idle()
+
+    def _fill_plot_kwargs(self, ws_name, spectrum, normalise, mode, color):
+        """
+        Fill the keywork arguments dictionnary needed by the mantid plot
+        function.
+
+        Args:
+            ws_name (str): name of the workspace
+            spectrum (int): index of the spectrum
+            normalise (bool): True if the plot has to be normalised
+            mode (self.SPECTRUM_MODE_TEXT or self.BIN_MODE_TEXT): spectrum or
+                bin mode plot
+            color (str): color of the curve
+
+        Returns:
+            dict(str: str): plot keywork arguments
+        """
+        kwargs = dict()
+        ws = mtd[ws_name]
+        if normalise is True:
+            kwargs["normalise_spectrum"] = True
+        if mode == self.SPECTRUM_MODE_TEXT:
+            kwargs["axis"] = MantidAxType.SPECTRUM
+            kwargs["specNum"] = ws.getSpectrumNumbers()[spectrum]
+        elif mode == self.BIN_MODE_TEXT:
+            kwargs["axis"] = MantidAxType.BIN
+            kwargs["wkspIndex"] = spectrum
+        kwargs["color"] = color
+        return kwargs
 
     def on_workspace_selection_changed(self):
         """
