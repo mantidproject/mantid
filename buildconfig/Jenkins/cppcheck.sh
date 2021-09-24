@@ -32,7 +32,7 @@ if [ $(command -v scl) ]; then
     SCL_ENABLE="scl enable devtoolset-7"
 else
     CMAKE_EXE=cmake
-    SCL_ENABLE=""
+    SCL_ENABLE="eval"
 fi
 $SCL_ENABLE "$CMAKE_EXE --version"
 
