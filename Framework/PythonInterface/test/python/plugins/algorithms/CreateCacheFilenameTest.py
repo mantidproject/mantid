@@ -6,6 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,too-many-public-methods,too-many-arguments
 import unittest
+from pathlib import Path
+
 from mantid.kernel import *
 from mantid.api import *
 from testhelpers import run_algorithm
@@ -36,7 +38,7 @@ class CreateCacheFilename(unittest.TestCase):
         # Verify ....
         expected = os.path.join(
             ConfigService.getUserPropertiesDir(), "cache",
-            "%s.nxs" % hashlib.sha1("a=3").hexdigest()
+            "%s.nxs" % hashlib.sha1("a=3".encode('utf-8')).hexdigest()
             )
         self.assertEqual(
             alg_test.getPropertyValue("OutputFilename"),
@@ -52,7 +54,7 @@ class CreateCacheFilename(unittest.TestCase):
         # Verify ....
         expected = os.path.join(
             ConfigService.getUserPropertiesDir(), "cache",
-            "%s.nxs" % hashlib.sha1("a=3").hexdigest()
+            "%s.nxs" % hashlib.sha1("a=3".encode('utf-8')).hexdigest()
             )
         self.assertEqual(
             alg_test.getPropertyValue("OutputFilename"),
@@ -63,12 +65,8 @@ class CreateCacheFilename(unittest.TestCase):
         """CreateCacheFilename: wrong input
         """
         # Execute
-        alg_test = run_algorithm(
-            "CreateCacheFilename",
-            )
-        # executed?
-        self.assertFalse(alg_test.isExecuted())
-        return
+        with self.assertRaises(RuntimeError):
+            run_algorithm("CreateCacheFilename",)
 
     def test_glob(self):
         """CreateCacheFilename: globbing
@@ -95,7 +93,7 @@ class CreateCacheFilename(unittest.TestCase):
         s = ','.join(sorted( ['%s=3' % p for p in aprops] ))
         expected = os.path.join(
             ConfigService.getUserPropertiesDir(), "cache",
-            "%s.nxs" % hashlib.sha1(s).hexdigest()
+            "%s.nxs" % hashlib.sha1(s.encode('utf-8')).hexdigest()
             )
         self.assertEqual(
             alg_test.getPropertyValue("OutputFilename"),
@@ -115,7 +113,7 @@ class CreateCacheFilename(unittest.TestCase):
         # Verify ....
         expected = os.path.join(
             ConfigService.getUserPropertiesDir(), "cache",
-            "%s.nxs" % hashlib.sha1("a=1,b=2").hexdigest()
+            "%s.nxs" % hashlib.sha1("a=1,b=2".encode('utf-8')).hexdigest()
             )
         self.assertEqual(
             alg_test.getPropertyValue("OutputFilename"),
@@ -147,7 +145,7 @@ class CreateCacheFilename(unittest.TestCase):
         s = ','.join(sorted( ['%s=fish' % p for p in aprops] + other_props ))
         expected = os.path.join(
             ConfigService.getUserPropertiesDir(), "cache",
-            "%s.nxs" % hashlib.sha1(s).hexdigest()
+            "%s.nxs" % hashlib.sha1(s.encode('utf-8')).hexdigest()
             )
         self.assertEqual(
             alg_test.getPropertyValue("OutputFilename"),
@@ -168,7 +166,7 @@ class CreateCacheFilename(unittest.TestCase):
         # Verify ....
         expected = os.path.join(
             ConfigService.getUserPropertiesDir(), "cache",
-            "vanadium_%s.nxs" % hashlib.sha1("a=1,b=2").hexdigest()
+            "vanadium_%s.nxs" % hashlib.sha1("a=1,b=2".encode('utf-8')).hexdigest()
             )
         self.assertEqual(
             alg_test.getPropertyValue("OutputFilename"),
@@ -187,12 +185,9 @@ class CreateCacheFilename(unittest.TestCase):
         # executed?
         self.assertTrue(alg_test.isExecuted())
         # Verify ....
-        expected = os.path.join(
-            "my_cache",
-            "%s.nxs" % hashlib.sha1("a=1,b=2").hexdigest()
-            )
+        expected = f"{hashlib.sha1('a=1,b=2'.encode('utf-8')).hexdigest()}.nxs"
         self.assertEqual(
-            alg_test.getPropertyValue("OutputFilename"),
+            Path(alg_test.getPropertyValue("OutputFilename")).name,
             expected)
         return
 
