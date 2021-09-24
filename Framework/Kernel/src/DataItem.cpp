@@ -14,14 +14,12 @@ namespace Mantid::Kernel {
 
 /** Default constructor
  */
-DataItem::DataItem() { m_lock = std::make_unique<Poco::RWLock>(); }
+DataItem::DataItem() : m_lock(std::make_unique<Poco::RWLock>()) {}
 
 /** Copy constructor
+ * Always makes a unique lock
  */
-DataItem::DataItem(const DataItem & /*other*/) {
-  // Always make a unique lock!
-  m_lock = std::make_unique<Poco::RWLock>();
-}
+DataItem::DataItem(const DataItem & /*other*/) : m_lock(std::make_unique<Poco::RWLock>()) {}
 
 /**
  * Destructor. Required in cpp do avoid linker errors when other projects try to

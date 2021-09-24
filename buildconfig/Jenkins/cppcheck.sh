@@ -4,7 +4,7 @@ SCRIPT_DIR=$(dirname "$0")
 # If errors slip through to master this can be used to set a non-zero
 # allowed count while those errors are dealt with. This avoids breaking all
 # builds for all developers
-ALLOWED_ERRORS_COUNT=1069
+ALLOWED_ERRORS_COUNT=1067
 
 if [[ ${JOB_NAME} == *pull_requests* ]]; then
     # This relies on the fact pull requests use pull/$PR-NAME
@@ -32,7 +32,7 @@ if [ $(command -v scl) ]; then
     SCL_ENABLE="scl enable devtoolset-7"
 else
     CMAKE_EXE=cmake
-    SCL_ENABLE=""
+    SCL_ENABLE="eval"
 fi
 $SCL_ENABLE "$CMAKE_EXE --version"
 
