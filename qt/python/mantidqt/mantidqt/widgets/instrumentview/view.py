@@ -92,13 +92,18 @@ class InstrumentView(QWidget, ObservingView):
         self.widget.replaceWorkspace(new_ws_name, new_window_name)
 
     def closeEvent(self, event):
-        # pass close event through to the underlying C++ widget
-        children = self.findChildren(InstrumentWidget)
-        for child in children:
-            child.close()
-        self.presenter.close(self.name)
+        # ordering of close events is different depending on
+        # whether workspace is deleted or window is closed
+        if self.presenter is not None:
+            # pass close event through to the underlying C++ widget
+            children = self.findChildren(InstrumentWidget)
+            for child in children:
+                child.close()
+            self.presenter.close(self.name)
         super(InstrumentView, self).closeEvent(event)
 
     @Slot()
     def _run_close(self):
+        # clear presenter to act as flag for processing in closeEvent
+        self.presenter = None
         self.close()

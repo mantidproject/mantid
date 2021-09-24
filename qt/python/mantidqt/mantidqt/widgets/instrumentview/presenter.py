@@ -87,8 +87,8 @@ class InstrumentViewPresenter(ObservingPresenter):
             InstrumentViewManager.last_view = None
 
         if workspace_name == self.ws_name:
-            InstrumentViewManager.remove(self.ws_name)
             super(InstrumentViewPresenter, self).close(self.ws_name)
+            InstrumentViewManager.remove(self.ws_name)
 
 
 class InstrumentViewManager:

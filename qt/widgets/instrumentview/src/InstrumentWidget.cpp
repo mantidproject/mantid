@@ -343,7 +343,6 @@ void InstrumentWidget::resetInstrumentActor() {
   m_instrumentActor = std::make_unique<InstrumentActor>(m_workspaceName.toStdString(), *m_messageHandler, m_autoscaling,
                                                         m_scaleMin, m_scaleMax);
   m_instrumentActor->moveToThread(&m_thread);
-  connect(&m_thread, &QThread::finished, m_instrumentActor.get(), &QObject::deleteLater);
   connect(m_instrumentActor.get(), SIGNAL(initWidget()), this, SLOT(initWidget()));
   m_thread.start();
   QMetaObject::invokeMethod(m_instrumentActor.get(), "initialize", Qt::QueuedConnection);
