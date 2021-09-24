@@ -1989,4 +1989,3 @@ def get_failed_spectra_list_from_masks(masked_wksp,prop_man):
 #-----------------------------------------------------------------
 if __name__ == "__main__":
     pass
-    #unittest.main()

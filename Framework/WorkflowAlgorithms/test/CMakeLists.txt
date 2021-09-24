@@ -1,3 +1,17 @@
+set(TEST_FILES
+    AlignAndFocusPowderTest.h
+    ExtractQENSMembersTest.h
+    IMuonAsymmetryCalculatorTest.h
+    LoadEventAndCompressTest.h
+    MuonProcessTest.h
+    ProcessIndirectFitParametersTest.h
+    SANSSolidAngleCorrectionTest.h
+    SofTwoThetaTOFTest.h
+    StepScanTest.h
+)
+
+set(TEST_PY_FILES EQSANSQ2DTest.py SANSBeamFluxCorrectionTest.py)
+
 if(CXXTEST_FOUND)
   include_directories(SYSTEM ${CXXTEST_INCLUDE_DIR})
 
