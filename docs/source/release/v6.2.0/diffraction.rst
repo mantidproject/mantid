@@ -89,7 +89,7 @@ Improvements
 - The region of interest for Calibration/Focusing can now be selected with a user-supplied custom calibration file.
 - The Focused Run Files input box defaults to the last runs focused on the :ref:`Focus tab <ui engineering focus>`, even if multiple runs were focussed.
 - The full calibration setting now has a default value consisting of the path to the ``ENGINX_full_instrument_calibration_193749.nxs file``.
-
+- StartX and EndX for fitting region in :ref:`Fitting tab <ui engineering fitting>` can be manually entered in the fit browser.
 
 
 Bugfixes
