@@ -36,6 +36,7 @@ from mantidqtinterfaces.Muon.GUI.Common.plotting_dock_widget.plotting_dock_widge
 from mantidqt.utils.observer_pattern import GenericObserver, GenericObservable
 from mantidqtinterfaces.Muon.GUI.Common.features.model_analysis import addModelAnalysis
 from mantidqtinterfaces.Muon.GUI.Common.features.raw_plots import addRawPlots
+from mantidqtinterfaces.Muon.GUI.Common.features.load_features import load_features
 
 
 SUPPORTED_FACILITIES = ["ISIS", "SmuS"]
@@ -78,6 +79,8 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
             check_facility()
         except AttributeError as error:
             self.warning_popup(error.args[0])
+        # load the feature flags
+        feature_dict = load_features()
 
         # initialise the data storing classes of the interface
         self.loaded_data = MuonLoadData()
@@ -124,8 +127,6 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.phase_tab = PhaseTabWidget(self.context, self)
         self.seq_fitting_tab = SeqFittingTabWidget(self.context, self.fitting_tab.fitting_tab_model, self)
         self.results_tab = ResultsTabWidget(self.context.fitting_context, self.context, self)
-
-        feature_dict ={"bob": True, "cake": False, "model analysis": 0, "raw plots":1}
 
         self.add_model_analysis = addModelAnalysis(self, feature_dict)
         self.add_raw_plots = addRawPlots(self, feature_dict)

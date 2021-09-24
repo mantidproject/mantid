@@ -7,7 +7,7 @@
 from mantidqtinterfaces.Muon.GUI.Common.features.add_feature import addFeature
 
 
-RAWPLOTS = "raw plots"
+RAWPLOTS = "raw_plots"
 ADD = 1
 
 

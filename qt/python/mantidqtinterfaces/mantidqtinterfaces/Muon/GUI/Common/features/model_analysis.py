@@ -8,7 +8,7 @@ from mantidqtinterfaces.Muon.GUI.Common.features.add_feature import addFeature
 from mantidqtinterfaces.Muon.GUI.Common.model_fitting_tab_widget.model_fitting_tab_widget import ModelFittingTabWidget
 
 
-MODELANALYSIS = "model analysis"
+MODELANALYSIS = "model_analysis"
 TABONLY = 1
 TABANDPLOT = 2
 
