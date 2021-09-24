@@ -1013,6 +1013,8 @@ set(QT5_TEST_FILES
     test/WorkspacePresenter/WorkspacePresenterTest.h
 )
 
+set(TEST_PY_FILES FileFinderWidgetTest.py)
+
 if(NOT APPLE)
   list(APPEND QT5_TEST_FILES test/Python/SipTest.h)
 endif()
@@ -1034,3 +1036,4 @@ mtd_add_qt_tests(
 )
 
 add_framework_test_helpers(MantidQtWidgetsCommonTestQt5)
+pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} MantidQtWidgetsCommonPyTest ${TEST_PY_FILES})

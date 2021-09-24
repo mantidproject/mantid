@@ -16,6 +16,7 @@ set(TEST_PY_FILES
     slice_event_test.py
     save_test.py
     state_test.py
+    StateBuilderTest.py
     wavelength_test.py
     wavelength_and_pixel_adjustment_test.py
 )
