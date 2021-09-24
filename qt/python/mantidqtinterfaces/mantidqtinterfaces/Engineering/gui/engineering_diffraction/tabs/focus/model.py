@@ -80,10 +80,10 @@ class FocusModel(object):
             ws_foc = self._focus_run_and_apply_roi_calibration(ws_sample, calibration)
             ws_foc = self._apply_vanadium_norm(ws_foc, ws_van_foc)
             self._save_output_files(ws_foc, calibration, van_run, rb_num)
+            output_workspaces.append(ws_foc.name())
             # convert units to TOF and save again
             ws_foc = ConvertUnits(InputWorkspace=ws_foc, OutputWorkspace=ws_foc.name(), Target='TOF')
             self._save_output_files(ws_foc, calibration, van_run, rb_num)
-            output_workspaces.append(ws_foc.name())
 
         # Plot the output
         if plot_output:
@@ -159,7 +159,7 @@ class FocusModel(object):
             bankid = foc_suffix if sample_ws_foc.getNumberHistograms() == 1 else foc_suffix + ' ' + str(ispec+1)
             AddSampleLog(Workspace=ws_spec, LogName="bankid", LogText=bankid)
             AddSampleLog(Workspace=ws_spec, LogName="Vanadium Run", LogText=van_run)
-            ws_spec.getRun().addProperty("bankid", bankid, True) # overwrites previous if exists
+            ws_spec.getRun().addProperty("bankid", bankid, True)  # overwrites previous if exists
             # save spectrum as nexus
             filename = self._generate_output_file_name(calibration.get_instrument(), sample_run_no, van_run, bankid,
                                                        xunit_suffix)
