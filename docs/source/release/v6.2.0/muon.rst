@@ -32,7 +32,7 @@ Bugfixes
 ########
 
 - In :ref:`Frequency Domain Analysis <Frequency_Domain_Analysis-ref>` the phasetables calculated from :ref:`MuonMaxent <algm-MuonMaxent>` can be used for
-  :ref:`PhaseQuad <algm-PhaseQuad>` calculations on the phase tab.
+  :ref:`PhaseQuad <algm-PhaseQuad>` calculations on the :ref:`Phase Table tab <muon_phase_table_tab-ref>`.
 - Can now fit to negative frequencies in the fitting tab.
 
 Muon Analysis

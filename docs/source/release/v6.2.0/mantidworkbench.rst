@@ -62,7 +62,7 @@ Sliceviewer
 Improvements
 ############
 
-- Peaks can now be added or removed from a PeaksWorkspace using the :ref:`peaks overlay <sliceviewer_peaks_overlay>`.
+- Peaks can now be added or removed from a PeaksWorkspace using the :ref:`PeaksWorkspace overlay <sliceviewer_peaks_overlay>`.
 - Added tooltips to all the widgets. Please contact the developers if any are missing.
 - Added a help button.
 - There is now a more visible divider between the main data view and the peaks table view.
