@@ -939,4 +939,4 @@ Or these parameters may be specified using keyword arguments, with the keywords:
 physical properties). The default values (`Hdir=[0,0,1]`, `Hmag=1`, `Inverse=False`, `Unit='cgs'` and
 `Temperature=1` are used if nothing is specified for a particular attribute.
 
-.. categories:: Interfaces Indirect
+.. categories:: Interfaces Direct
