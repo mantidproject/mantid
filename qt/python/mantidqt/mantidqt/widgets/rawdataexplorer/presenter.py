@@ -15,7 +15,7 @@ from qtpy.QtCore import *
 import os.path
 
 from mantid.simpleapi import config, mtd
-from mantid.api import IPreview, PreviewManager, PreviewType
+from mantid.api import PreviewManager, PreviewType # IPreview
 
 
 class PreviewPresenter:
@@ -177,7 +177,7 @@ class RawDataExplorerPresenter(QObject):
         Triggered when the selection changed in the file system widget.
         """
         selection = self.view.get_selection()
-        target_type = self.view.get_current_target()
+        # target_type = self.view.get_current_target()
         instrument = self.view.get_current_instrument()
         acquision_mode = self.view.get_current_acquisition()
         preview_name = self.view.get_current_preview()

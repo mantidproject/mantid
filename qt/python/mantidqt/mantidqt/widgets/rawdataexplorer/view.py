@@ -239,8 +239,7 @@ class RawDataExplorerView(QWidget):
         file_tree_path = QFileDialog().getExistingDirectory(parent=self,
                                                             caption="Select a directory",
                                                             directory="/home",
-                                                            options=QFileDialog.DontUseNativeDialog |
-                                                                    QFileDialog.ShowDirsOnly)
+                                                            options=QFileDialog.DontUseNativeDialog | QFileDialog.ShowDirsOnly)
         self.file_tree_path_changed.emit(file_tree_path)
 
     # Views openers and managers
