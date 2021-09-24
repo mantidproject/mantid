@@ -42,5 +42,6 @@ private:
 
 private slots:
   void onLoadWorkspaceRequested() const;
+  void loadToolbarIcons();
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
