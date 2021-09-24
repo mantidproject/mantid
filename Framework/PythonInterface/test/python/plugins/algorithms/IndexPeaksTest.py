@@ -19,7 +19,7 @@ class IndexPeaksTest(unittest.TestCase):
     def test_exec_with_different_args(self):
         # load data
         Load(
-            Filename="test_index_satellite_peaks.integrate", OutputWorkspace="test",
+            Filename="test_index_peaks.integrate", OutputWorkspace="test",
         )
         FindUBUsingIndexedPeaks(PeaksWorkspace="test")
 
