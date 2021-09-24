@@ -45,28 +45,6 @@ public:
   }
 
   /**
-   * Explicit specialization for float
-   * PropertyManager is unable to operate with floats
-   * While when reading from file we must read as the exact type,
-   * overridden value is very unlikely to not fit in float.
-   * So we read to double and cast to float to bypass the issue.
-   */
-  template <> float getScalarMetadata(const std::string &key) {
-    if (m_entriesToPatch.existsProperty(key)) {
-      double val = m_entriesToPatch.getProperty(key);
-      return float(val);
-    } else {
-      try {
-        return m_nxroot.getTypedScalar<float>(key);
-      } catch (std::runtime_error &) {
-        throwMissingKeyError(key);
-      }
-    }
-    // shouldn't reach here
-    return 0.;
-  }
-
-  /**
    * Retrieves vector value of the given key from the map, if provided, or from the nexus otherwise
    * @param key : the full path of the entry in nexus
    * @return 1D vector value
