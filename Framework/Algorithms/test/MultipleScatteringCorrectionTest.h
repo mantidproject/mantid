@@ -100,7 +100,7 @@ public:
     msAlg.setPropertyValue("InputWorkspace", ws_name);
     msAlg.setPropertyValue("Method", "SampleOnly");
     msAlg.setPropertyValue("OutputWorkspace", "rst_ms");
-    // msAlg.setProperty("ElementSize", 4.0); // mm
+    msAlg.setProperty("ElementSize", 0.5); // mm
     msAlg.execute();
     TS_ASSERT(msAlg.isExecuted());
     Mantid::API::MatrixWorkspace_sptr rst_ms_sampleOnly =
@@ -110,7 +110,7 @@ public:
     msAlg.initialize();
     msAlg.setPropertyValue("InputWorkspace", ws_name);
     msAlg.setPropertyValue("Method", "SampleAndContainer");
-    // msAlg.setProperty("ElementSize", 4.0); // mm
+    msAlg.setProperty("ElementSize", 0.5); // mm
     msAlg.setPropertyValue("OutputWorkspace", "rst_ms");
     msAlg.execute();
     TS_ASSERT(msAlg.isExecuted());
@@ -119,16 +119,29 @@ public:
     Mantid::API::MatrixWorkspace_sptr rst_ms_sampleAndContainer =
         AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>("rst_ms_sampleAndContainer");
 
-    for (size_t i = 0; i < rst_ms_sampleOnly->getNumberHistograms(); ++i) {
-      for (size_t j = 0; j < rst_ms_sampleOnly->blocksize(); ++j) {
-        g_log.notice() << "rst_ms_sampleOnly: " << rst_ms_sampleOnly->readY(i)[j] << "\n"
-                       << "rst_ms_containerOnly: " << rst_ms_containerOnly->readY(i)[j] << "\n"
-                       << "rst_ms_sampleAndContainer: " << rst_ms_sampleAndContainer->readY(i)[j] << "\n";
-      }
-    }
-
-    // just to see the output
-    TS_ASSERT(false);
+    /*
+    NOTE: regression test results as there is no analytical solution as reference
+    --------------------------------------------------------------------------
+    DetID	SpectrumID	Method	           A1	       A2	      A2/A1	    Delta
+    ==========================================================================
+    0	        0	    SampleOnly	      8.41E-08	1.55E-09	1.84E-02	0.0923619
+    0	        0	    ContainerOnly	    1.51E-07	1.16E-08	7.64E-02	0.223564
+    0	        0	    Sample&Container	7.18E-06	9.42E-06	1.31E+00	0.10445
+    1	        0	    SampleOnly	      8.13E-08	1.48E-09	1.82E-02	0.0911247
+    1	        0	    ContainerOnly	    1.51E-07	1.15E-08	7.64E-02	0.223515
+    1	        0	    Sample&Container	7.06E-06	8.90E-06	1.26E+00	0.100374
+    0	        1	    SampleOnly	      7.82E-08	1.39E-09	1.78E-02	0.0891449
+    0	        1	    ContainerOnly	    1.50E-07	1.15E-08	7.62E-02	0.222937
+    0	        1	    Sample&Container	6.39E-06	8.05E-06	1.26E+00	0.100243
+    1	        1	    SampleOnly	      7.55E-08	1.32E-09	1.75E-02	0.0876116
+    1	        1	    ContainerOnly	    1.50E-07	1.14E-08	7.62E-02	0.222875
+    1	        1	    Sample&Container	6.32E-06	7.56E-06	1.20E+00	0.0952532
+    --------------------------------------------------------------------------
+    - Delta refers to the final multiple scattering correction factor where Im = I_total * Delta
+    */
+    TS_ASSERT_DELTA(rst_ms_sampleOnly->readY(0)[0], 0.0923619, 1e-3);
+    TS_ASSERT_DELTA(rst_ms_containerOnly->readY(0)[0], 0.223564, 1e-3);
+    TS_ASSERT_DELTA(rst_ms_sampleAndContainer->readY(0)[0], 0.10445, 1e-3);
   }
 
 private:
@@ -218,11 +231,11 @@ private:
     setSampleAlg->setPropertyValue("Material",
                                    R"({"ChemicalFormula": "La-(B11)5.94-(B10)0.06", "SampleNumberDensity": 0.1})");
     setSampleAlg->setPropertyValue("Geometry",
-                                   R"({"Shape": "Cylinder", "Height": 5.68, "Radius": 0.295, "Center": [0., 0., 0.]})");
+                                   R"({"Shape": "Cylinder", "Height": 1.0, "Radius": 0.2, "Center": [0., 0., 0.]})");
     setSampleAlg->setPropertyValue("ContainerMaterial", R"({"ChemicalFormula":"V", "SampleNumberDensity": 0.0721})");
     setSampleAlg->setPropertyValue(
         "ContainerGeometry",
-        R"({"Shape": "HollowCylinder", "Height": 5.68, "InnerRadius": 0.295, "OuterRadius": 0.315, "Center": [0., 0., 0.]})");
+        R"({"Shape": "HollowCylinder", "Height": 1.0, "InnerRadius": 0.2, "OuterRadius": 0.3, "Center": [0., 0., 0.]})");
     TS_ASSERT_THROWS_NOTHING(setSampleAlg->execute());
   }
 };

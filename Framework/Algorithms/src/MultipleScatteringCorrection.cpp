@@ -425,6 +425,14 @@ void MultipleScatteringCorrection::calculateSampleAndContainer(API::MatrixWorksp
       g_log.notice() << "Element_" << i << " has near zero volume: " << elementVolumes[i] << "\n";
     }
   }
+  g_log.notice() << "V_container = "
+                 << std::accumulate(distGraberContainer.m_elementVolumes.begin(),
+                                    distGraberContainer.m_elementVolumes.end(), 0.0)
+                 << "\n"
+                 << "V_sample = "
+                 << std::accumulate(distGraberSample.m_elementVolumes.begin(), distGraberSample.m_elementVolumes.end(),
+                                    0.0)
+                 << "\n";
 #endif
 
   // NOTE: Unit is important
@@ -656,27 +664,6 @@ void MultipleScatteringCorrection::calculateL12s(const MultipleScatteringCorrect
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
-
-  // debug L12 matrix
-  // NOTE: this will come in handy when we start considering container and sample interaction,
-  //       do not remove it.
-#ifndef NDEBUG
-  std::ostringstream msg;
-  msg << "\n";
-  for (int64_t i = 0; i < numVolumeElements; ++i) {
-    for (int64_t j = 0; j < numVolumeElements; ++j) {
-      if (i < j) {
-        int64_t idx = numVolumeElements * (numVolumeElements - 1) / 2 -
-                      (numVolumeElements - i) * (numVolumeElements - i - 1) / 2 + j - i - 1;
-        msg << L12s[idx] << " ";
-      } else {
-        msg << "x ";
-      }
-    }
-    msg << '\n';
-  }
-  g_log.notice(msg.str());
-#endif
 }
 
 /**
@@ -825,13 +812,17 @@ void MultipleScatteringCorrection::calculateL2Ds(const MultipleScatteringCorrect
     trackerL2D.clearIntersectionResults();
     const auto dist1_container = getDistanceInsideObject(shapeContainer, trackerL2D);
     const auto dist1_sample = getDistanceInsideObject(shapeSample, trackerL2D);
-    trackerL2D.reset(detectorPos, vec);
-    trackerL2D.clearIntersectionResults();
-    const auto dist2_container = getDistanceInsideObject(shapeContainer, trackerL2D);
-    const auto dist2_sample = getDistanceInsideObject(shapeSample, trackerL2D);
+    // Since the detector will never intercept with material, dist2_x are always 0,
+    // therefore we can skip the calculation below to save some time.
+    // trackerL2D.reset(detectorPos, vec);
+    // trackerL2D.clearIntersectionResults();
+    // const auto dist2_container = getDistanceInsideObject(shapeContainer, trackerL2D);
+    // const auto dist2_sample = getDistanceInsideObject(shapeSample, trackerL2D);
     //
-    container_L2Ds[idx] = (dist1_container - dist2_container);
-    sample_L2Ds[idx] = (dist1_sample - dist2_sample);
+    // container_L2Ds[idx] = (dist1_container - dist2_container);
+    // sample_L2Ds[idx] = (dist1_sample - dist2_sample);
+    container_L2Ds[idx] = dist1_container;
+    sample_L2Ds[idx] = dist1_sample;
   }
 }
 
@@ -880,6 +871,9 @@ void MultipleScatteringCorrection::pairWiseSum(double &A1, double &A2,          
         // L12 is a pre-computed vector, therefore we can use the index directly
         size_t idx_l12 = i < j ? calcLinearIdxFromUpperTriangular(nElements, i, j)
                                : calcLinearIdxFromUpperTriangular(nElements, j, i);
+        if (L12s[idx_l12] == 0) {
+          continue;
+        }
         // compute a2 component
         exponent = (LS1s[i] + L12s[idx_l12] + L2Ds[j]) * linearCoefAbs;
         a2 += exp(exponent) * elementVolumes[j] / (L12s[idx_l12] * L12s[idx_l12]);
