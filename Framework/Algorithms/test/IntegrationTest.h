@@ -146,7 +146,7 @@ public:
     Workspace2D_sptr input;
     TS_ASSERT_THROWS_NOTHING(
         input = std::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve("testSpace")))
-    assertRangeWithPartialBins(input);
+    assertRangeWithPartialBins(input, 0.1, 4.5, {52., 74., 96.}, {6.899, 8.240, 9.391});
   }
 
   void testRangeWithPartialBinsAndDistributionData() {
@@ -154,7 +154,23 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         input = std::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve("testSpace")))
     input->setDistribution(true);
-    assertRangeWithPartialBins(input);
+    assertRangeWithPartialBins(input, 0.1, 4.5, {52., 74., 96.}, {6.899, 8.240, 9.391});
+  }
+
+  void testRangeWithPartialBinsAndLimitsInSameBin() {
+    Workspace2D_sptr input;
+    TS_ASSERT_THROWS_NOTHING(
+        input = std::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve("testSpace")))
+    input->setDistribution(true);
+    assertRangeWithPartialBins(input, 0.1, 0.5, {4., 6., 8.}, {1.265, 1.549, 1.788});
+  }
+
+  void testRangeWithPartialBinsAndEqualLimits() {
+    Workspace2D_sptr input;
+    TS_ASSERT_THROWS_NOTHING(
+        input = std::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve("testSpace")))
+    input->setDistribution(true);
+    assertRangeWithPartialBins(input, 0.1, 0.1, {0., 0., 0.}, {0., 0., 0.});
   }
 
   void doTestEvent(const std::string &inName, const std::string &outName, int StartWorkspaceIndex,
@@ -706,7 +722,8 @@ public:
   }
 
 private:
-  void assertRangeWithPartialBins(const Workspace_sptr &input) {
+  void assertRangeWithPartialBins(const Workspace_sptr &input, const double rangeLower, const double rangeUpper,
+                                  const std::array<double, 3> yy, const std::array<double, 3> ee) {
     Integration alg;
     alg.setRethrows(false);
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -715,8 +732,8 @@ private:
     // Set the properties
     alg.setProperty("InputWorkspace", input);
     alg.setPropertyValue("OutputWorkspace", "out");
-    alg.setPropertyValue("RangeLower", "0.1");
-    alg.setPropertyValue("RangeUpper", "4.5");
+    alg.setProperty("RangeLower", rangeLower);
+    alg.setProperty("RangeUpper", rangeUpper);
     alg.setPropertyValue("StartWorkspaceIndex", "2");
     alg.setPropertyValue("EndWorkspaceIndex", "4");
     alg.setPropertyValue("IncludePartialBins", "1");
@@ -730,8 +747,7 @@ private:
     Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
     size_t max = 0;
     TS_ASSERT_EQUALS(max = output2D->getNumberHistograms(), 3);
-    const double yy[3] = {52., 74., 96.};
-    const double ee[3] = {6.899, 8.240, 9.391};
+
     for (size_t i = 0; i < max; ++i) {
       Mantid::MantidVec &x = output2D->dataX(i);
       Mantid::MantidVec &y = output2D->dataY(i);
@@ -741,8 +757,8 @@ private:
       TS_ASSERT_EQUALS(y.size(), 1);
       TS_ASSERT_EQUALS(e.size(), 1);
 
-      TS_ASSERT_EQUALS(x[0], 0.1);
-      TS_ASSERT_EQUALS(x[1], 4.5);
+      TS_ASSERT_EQUALS(x[0], rangeLower);
+      TS_ASSERT_EQUALS(x[1], rangeUpper);
       TS_ASSERT_EQUALS(y[0], yy[i]);
       TS_ASSERT_DELTA(e[0], ee[i], 0.001);
     }

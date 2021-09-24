@@ -264,10 +264,11 @@ void Integration::exec() {
     // If partial bins are included, set integration range to exact range
     // given and add on contributions from partial bins either side of range.
     if (incPartBins) {
-      if (distmin > 0) {
+      if ((distmax <= distmin) && (distmin > 0) && (highit < X.end() - 1)) {
+        // handle special case where lower and upper limit are in the same bin
         const double lower_bin = *lowit;
         const double prev_bin = *(lowit - 1);
-        double fraction = (lower_bin - lowerLimit);
+        double fraction = (upperLimit - lowerLimit);
         if (!is_distrib) {
           fraction /= (lower_bin - prev_bin);
         }
@@ -278,19 +279,35 @@ void Integration::exec() {
         if (rebinned_input) {
           sumF += Fmin * fraction;
         }
-      }
-      if (highit < X.end() - 1) {
-        const double upper_bin = *highit;
-        const double next_bin = *(highit + 1);
-        double fraction = (upperLimit - upper_bin);
-        if (!is_distrib) {
-          fraction /= (next_bin - upper_bin);
+      } else {
+        if (distmin > 0) {
+          const double lower_bin = *lowit;
+          const double prev_bin = *(lowit - 1);
+          double fraction = (lower_bin - lowerLimit);
+          if (!is_distrib) {
+            fraction /= (lower_bin - prev_bin);
+          }
+          const MantidVec::size_type val_index = distmin - 1;
+          sumY += Y[val_index] * fraction;
+          const double eval = E[val_index];
+          sumE += eval * eval * fraction * fraction;
+          if (rebinned_input) {
+            sumF += Fmin * fraction;
+          }
         }
-        sumY += Y[distmax] * fraction;
-        const double eval = E[distmax];
-        sumE += eval * eval * fraction * fraction;
-        if (rebinned_input) {
-          sumF += Fmax * fraction;
+        if (highit < X.end() - 1) {
+          const double upper_bin = *highit;
+          const double next_bin = *(highit + 1);
+          double fraction = (upperLimit - upper_bin);
+          if (!is_distrib) {
+            fraction /= (next_bin - upper_bin);
+          }
+          sumY += Y[distmax] * fraction;
+          const double eval = E[distmax];
+          sumE += eval * eval * fraction * fraction;
+          if (rebinned_input) {
+            sumF += Fmax * fraction;
+          }
         }
       }
     } else {
