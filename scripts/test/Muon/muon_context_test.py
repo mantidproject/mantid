@@ -15,6 +15,7 @@ from mantid import ConfigService
 from collections import Counter
 from Muon.GUI.Common.utilities.load_utils import load_workspace_from_filename
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
+from Muon.GUI.Common.muon_base_pair import MuonBasePair
 from Muon.GUI.Common.muon_diff import MuonDiff
 from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.muon_pair import MuonPair
@@ -34,6 +35,18 @@ def return_list(name):
 
 
 def crop_side_effect(name, xmin, xmax):
+    return name
+
+
+def average_side_effect(name, dt):
+    return name
+
+
+def convert_side_effect(name):
+    return name
+
+
+def divide_side_effect(LHS, RHS, name):
     return name
 
 
@@ -379,6 +392,14 @@ class MuonContextTest(unittest.TestCase):
 
         self.assertEqual(len(diffs), 0)
 
+    def test_that_find_pairs_containing_groups_does_not_raise_if_one_of_the_pairs_is_a_MuonBasePair(self):
+        self.group_pair_context.add_pair(MuonBasePair("PhaseQuad_Re_"))
+        groups = ["bwd"]
+        pairs = self.context.find_pairs_containing_groups(groups)
+
+        self.assertEqual(len(pairs), 1)
+        self.assertEqual(pairs[0].name, "long")
+
     def test_that_find_diffs_containing_groups_or_pairs_will_return_diffs_containing_the_provided_pair(self):
         pair_diff = self.add_pair_diff()
 
@@ -480,6 +501,10 @@ class MuonContextTest(unittest.TestCase):
         # 2 + 1
         self.assertEqual(3, self.context._calculate_phasequads.call_count)
 
+    def set_up_phasequad_rebin_mock(self):
+        self.context._get_bin_width = mock.Mock(return_value = 0.1)
+        self.context._average_by_bin_widths = mock.Mock(side_effect=average_side_effect)
+
     @mock.patch('Muon.GUI.Common.contexts.muon_context.run_PhaseQuad')
     @mock.patch('Muon.GUI.Common.contexts.muon_context.split_phasequad')
     @mock.patch('Muon.GUI.Common.contexts.muon_context.run_crop_workspace')
@@ -493,14 +518,17 @@ class MuonContextTest(unittest.TestCase):
         self.context._run_rebin = mock.Mock(side_effect=rebin_side_effect)
         split_mock.side_effect = return_list
         crop_mock.side_effect = crop_side_effect
+        self.set_up_phasequad_rebin_mock()
 
         result = self.context.calculate_phasequad(phasequad, 5234, False)
         # names are wrong due to split mock
         self.assertEqual(result, [name+"1", name+"2"])
-        self.context._run_rebin.assert_called_with(name, False)
+        self.context._run_rebin.assert_not_called()
         run_mock.assert_called_with({"PhaseTable": table, 'InputWorkspace': name}, name)
         split_mock.assert_called_with(name)
         crop_mock.assert_called_with(name, 0.0, 0.0)
+        self.context._get_bin_width.assert_not_called()
+        self.context._average_by_bin_widths.assert_not_called()
 
     @mock.patch('Muon.GUI.Common.contexts.muon_context.run_PhaseQuad')
     @mock.patch('Muon.GUI.Common.contexts.muon_context.split_phasequad')
@@ -515,6 +543,7 @@ class MuonContextTest(unittest.TestCase):
         self.context._run_rebin = mock.Mock(side_effect=rebin_side_effect)
         split_mock.side_effect = return_list
         crop_mock.side_effect = crop_side_effect
+        self.set_up_phasequad_rebin_mock()
 
         result = self.context.calculate_phasequad(phasequad, 5234, True)
         # names are wrong due to split mock
@@ -523,6 +552,8 @@ class MuonContextTest(unittest.TestCase):
         run_mock.assert_called_with({"PhaseTable": table, 'InputWorkspace': name}, name)
         split_mock.assert_called_with(name)
         crop_mock.assert_called_with(name, 0.0, 0.0)
+        self.context._get_bin_width.assert_called_once_with(name)
+        self.context._average_by_bin_widths.assert_called_once_with(name,0.1)
 
     @mock.patch('Muon.GUI.Common.contexts.muon_context.run_PhaseQuad')
     @mock.patch('Muon.GUI.Common.contexts.muon_context.split_phasequad')
@@ -536,15 +567,18 @@ class MuonContextTest(unittest.TestCase):
         self.context._run_rebin = mock.Mock(side_effect=rebin_side_effect)
         split_mock.side_effect = return_list
         crop_mock.side_effect = crop_side_effect
+        self.set_up_phasequad_rebin_mock()
 
         result = self.context.calculate_phasequad(phasequad, 5234, False)
         # names are wrong due to split mock
         name = "EMU5234; PhaseQuad; test_Re__Im_; MA"
         self.assertEqual(result, [name+"1", name+"2"])
-        self.context._run_rebin.assert_called_with(name, False)
+        self.context._run_rebin.assert_not_called()
         run_mock.assert_called_with({"PhaseTable": table, 'InputWorkspace': name}, name)
         split_mock.assert_called_with(name)
         crop_mock.asser_called_with(name, 0.0, 0.0)
+        self.context._get_bin_width.assert_not_called()
+        self.context._average_by_bin_widths.assert_not_called()
 
     @mock.patch('Muon.GUI.Common.contexts.muon_context.run_PhaseQuad')
     @mock.patch('Muon.GUI.Common.contexts.muon_context.split_phasequad')
@@ -558,6 +592,7 @@ class MuonContextTest(unittest.TestCase):
         self.context._run_rebin = mock.Mock(side_effect=rebin_side_effect)
         split_mock.side_effect = return_list
         crop_mock.side_effect = crop_side_effect
+        self.set_up_phasequad_rebin_mock()
 
         result = self.context.calculate_phasequad(phasequad, 5234, True)
         # names are wrong due to split mock
@@ -567,6 +602,31 @@ class MuonContextTest(unittest.TestCase):
         run_mock.assert_called_with({"PhaseTable": table, 'InputWorkspace': name}, name)
         split_mock.assert_called_with(name)
         crop_mock.assert_called_with(name, 0.0, 0.0)
+        self.context._get_bin_width.assert_called_once_with(name)
+        self.context._average_by_bin_widths.assert_called_once_with(name,0.1)
+
+    @mock.patch('Muon.GUI.Common.contexts.muon_context.run_convert_to_histogram')
+    @mock.patch('Muon.GUI.Common.contexts.muon_context.run_convert_to_points')
+    @mock.patch('Muon.GUI.Common.contexts.muon_context.run_create_workspace')
+    @mock.patch('Muon.GUI.Common.contexts.muon_context.run_divide')
+    @mock.patch('Muon.GUI.Common.contexts.muon_context.delete_ws')
+    def test_average_by_bin_widths(self, delete, divide, create, points, histo):
+        self.context._get_x_data = mock.Mock(return_value = [0,1,3,4,6])
+        divide.side_effect = divide_side_effect
+        name = "test"
+        tmp = "tmp"
+        create.return_value = tmp
+        points.side_effect = convert_side_effect
+        histo.side_effect = convert_side_effect
+
+        self.context._average_by_bin_widths(name, .5)
+        histo.assert_called_once_with(name)
+        create.assert_called_once_with([0,1,3,4,6], [2, 4, 2, 4], tmp)
+        self.assertEqual(points.call_count, 2)
+        points.assert_any_call(name)
+        points.assert_any_call(tmp)
+        divide.assert_called_once_with(name, tmp, name)
+        delete.assert_called_once_with(tmp)
 
     @mock.patch('Muon.GUI.Common.contexts.muon_context.get_raw_data_workspace_name')
     @mock.patch('Muon.GUI.Common.contexts.muon_context.apply_deadtime')

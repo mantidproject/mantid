@@ -100,10 +100,10 @@ class MaxEntView(QtWidgets.QWidget):
         table_utils.setTableHeaders(self.tableA)
 
         table_utils.setRowName(self.tableA, 0, "Maximum entropy constant (A)")
-        self.AConst, _ = table_utils.addDoubleToTable(self.tableA, 0.1, 0)
+        self.AConst, _ = table_utils.addDoubleToTable(self.tableA, 0.1, 0, minimum=0.0)
 
         table_utils.setRowName(self.tableA, 1, "Lagrange multiplier for chi^2")
-        self.factor, _ = table_utils.addDoubleToTable(self.tableA, 1.04, 1)
+        self.factor, _ = table_utils.addDoubleToTable(self.tableA, 1.04, 1, minimum=0.0)
 
         table_utils.setRowName(self.tableA, 2, "Inner Iterations")
         self.inner_loop = table_utils.addSpinBoxToTable(self.tableA, 10, 2)
@@ -119,7 +119,7 @@ class MaxEntView(QtWidgets.QWidget):
         self.N_points = table_utils.addComboToTable(self.tableA, 5, options)
 
         table_utils.setRowName(self.tableA, 6, "Maximum Field ")
-        self.max_field, _ = table_utils.addDoubleToTable(self.tableA, 1000.0, 6)
+        self.max_field, _ = table_utils.addDoubleToTable(self.tableA, 1000.0, 6, minimum=0.0)
 
         # layout
         # this is if complex data is unhidden

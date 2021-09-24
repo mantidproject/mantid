@@ -60,7 +60,7 @@ BOOST_PYTHON_MODULE(_WorkspaceCreationHelper) {
   def("create2DWorkspaceWithFullInstrument", reinterpret_cast<Signature1_2D>(&create2DWorkspaceWithFullInstrument),
       create2DWorkspaceWithFullInstrument_overloads()[return_value_policy<AsType<Workspace_sptr>>()]);
   def("create2DWorkspaceWithRectangularInstrument", (Signature2_2D)&create2DWorkspaceWithRectangularInstrument,
-      create2DWorkspaceWithRectangularInstrument_overloads());
+      create2DWorkspaceWithRectangularInstrument_overloads()[return_value_policy<AsType<Workspace_sptr>>()]);
 
   def("create2DWorkspace123WithMaskedBin", reinterpret_cast<Signature3_2D>(&create2DWorkspace123WithMaskedBin));
 

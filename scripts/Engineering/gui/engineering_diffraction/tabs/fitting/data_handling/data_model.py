@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from os import path
 
-from mantid.simpleapi import Load, logger, EnggEstimateFocussedBackground, Minus, AverageLogData, \
+from mantid.simpleapi import Load, logger, EnggEstimateFocussedBackground, Minus, AverageLogData, SetUncertainties, \
     CreateEmptyTableWorkspace, GroupWorkspaces, DeleteWorkspace, DeleteTableRows, RenameWorkspace, CreateWorkspace
 from Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 from Engineering.gui.engineering_diffraction.tabs.common import output_settings
@@ -321,8 +321,14 @@ class FittingDataModel(object):
             self._bg_params[ws_name][0] = status
 
     def estimate_background(self, ws_name, niter, xwindow, doSGfilter):
-        ws_bg = EnggEstimateFocussedBackground(InputWorkspace=ws_name, OutputWorkspace=ws_name + "_bg",
-                                               NIterations=niter, XWindow=xwindow, ApplyFilterSG=doSGfilter)
+        try:
+            ws_bg = EnggEstimateFocussedBackground(InputWorkspace=ws_name, OutputWorkspace=ws_name + "_bg",
+                                                   NIterations=niter, XWindow=xwindow, ApplyFilterSG=doSGfilter)
+        except (ValueError, RuntimeError) as e:
+            # ValueError when Niter not positive integer, RuntimeError when Window too small
+            logger.error("Error on arguments supplied to EnggEstimateFocusedBackground: " + str(e))
+            ws_bg = SetUncertainties(InputWorkspace=ws_name)  # copy data and zero errors
+            ws_bg = Minus(LHSWorkspace=ws_bg, RHSWorkspace=ws_bg)  # workspace of zeros with same num spectra
         return ws_bg
 
     def plot_background_figure(self, ws_name):

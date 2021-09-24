@@ -15,9 +15,9 @@ from Muon.GUI.Common.calculate_pair_and_group import calculate_group_data, calcu
     estimate_group_asymmetry_data, run_pre_processing
 from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string, run_string_to_list
 from Muon.GUI.Common.utilities.algorithm_utils import run_PhaseQuad, split_phasequad, rebin_ws, apply_deadtime, \
-    run_minus, run_crop_workspace
+    run_minus, run_crop_workspace, run_create_workspace, run_convert_to_points, run_convert_to_histogram, run_divide
 import Muon.GUI.Common.ADSHandler.workspace_naming as wsName
-from Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws
+from Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws, delete_ws
 from Muon.GUI.Common.contexts.muon_group_pair_context import get_default_grouping
 from Muon.GUI.Common.contexts.muon_context_ADS_observer import MuonContextADSObserver
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper, WorkspaceGroupDefinition
@@ -229,7 +229,7 @@ class MuonContext(object):
         """Returns a list of MuonPair's that are formed from one or more groups contained in the provided list."""
         pairs = []
         for pair in self._group_pair_context.pairs:
-            if pair.forward_group in groups or pair.backward_group in groups:
+            if isinstance(pair, MuonPair) and (pair.forward_group in groups or pair.backward_group in groups):
                 pairs.append(pair)
         return pairs
 
@@ -272,15 +272,42 @@ class MuonContext(object):
 
         parameters['InputWorkspace'] = self._run_deadtime(run_string, ws_name)
         runs = self._data_context.current_runs
+
         if runs:
             parameters['InputWorkspace'] = run_crop_workspace(parameters['InputWorkspace'], self.first_good_data(runs[0]),
                                                               self.last_good_data(runs[0]))
 
         phase_quad = run_PhaseQuad(parameters, ws_name)
-        phase_quad = self._run_rebin(phase_quad, rebin)
+        if rebin:
+            dt = self._get_bin_width(phase_quad)
+            phase_quad = self._run_rebin(phase_quad, True)
+            phase_quad = self._average_by_bin_widths(phase_quad, dt)
 
         workspaces = split_phasequad(phase_quad)
         return workspaces
+
+    def _get_bin_width(self, name):
+        tmp = self._get_x_data(name)
+        return tmp[1]-tmp[0]
+
+    def _get_x_data(self, name):
+        tmp = retrieve_ws(name)
+        return tmp.readX(0)
+
+    def _average_by_bin_widths(self, ws_name, dt):
+        #convert to Histogram to get bin widths and divide by how much bin widths have changed
+        ws_name= run_convert_to_histogram(ws_name)
+        ws_x = self._get_x_data(ws_name)
+
+        # assume constant binning in raw data
+        dx = [ (ws_x[j+1]-ws_x[j])/(dt) for j in range(len(ws_x)-1)]
+        tmp = run_create_workspace(ws_x, dx, "tmp")
+
+        tmp = run_convert_to_points(tmp)
+        ws_name = run_convert_to_points(ws_name)
+        output = run_divide(ws_name, tmp, ws_name)
+        delete_ws(tmp)
+        return output
 
     def _calculate_phasequads(self, phasequad_obj, rebin):
         for run in self._data_context.current_runs:
@@ -477,9 +504,6 @@ class MuonContext(object):
         equivalent_list = []
 
         for item in input_list:
-            if 'PhaseQuad' in item:
-                equivalent_list.append(item)
-
             equivalent_group_pair = self.group_pair_context.get_equivalent_group_pair(
                 item)
             if equivalent_group_pair:

@@ -98,11 +98,12 @@ private:
   void newPreviewFileSelected(const QString workspaceName, const QString filename);
   void newPreviewWorkspaceSelected(const QString workspaceName);
   size_t findWorkspaceID();
+  void newInputFiles();
+  void plotInput();
+  void updateIntegrationRange();
 
 private slots:
-  void newInputFiles();
   void checkNewPreviewSelected(int index);
-  void plotInput();
   void handlePreviewSpectrumChanged();
   void twoRanges(QtProperty *prop, bool enabled);
   void minChanged(double val);
@@ -111,8 +112,8 @@ private slots:
   void unGroupInput(bool error);
   void runClicked();
   void saveClicked();
-  void updateIntegrationRange();
   void addData();
+  void checkLoadedFiles();
 
   /// Slot called when the current view is changed
   void handleViewChanged(int index);

@@ -54,6 +54,7 @@ class BasicFittingPresenterTest(unittest.TestCase, MockBasicFitting):
         self.assertEqual(self.view.set_slot_for_covariance_matrix_clicked.call_count, 1)
         self.assertEqual(self.view.set_slot_for_function_structure_changed.call_count, 1)
         self.assertEqual(self.view.set_slot_for_function_parameter_changed.call_count, 1)
+        self.assertEqual(self.view.set_slot_for_function_attribute_changed.call_count, 1)
         self.assertEqual(self.view.set_slot_for_start_x_updated.call_count, 1)
         self.assertEqual(self.view.set_slot_for_end_x_updated.call_count, 1)
         self.assertEqual(self.view.set_slot_for_exclude_range_state_changed.call_count, 1)
@@ -300,6 +301,17 @@ class BasicFittingPresenterTest(unittest.TestCase, MockBasicFitting):
 
         self.model.update_plot_guess.assert_called_once_with()
         self.presenter.fit_parameter_changed_notifier.notify_subscribers.assert_called_once_with()
+
+    def test_that_handle_function_attribute_changed_will_update_the_attribute_values_in_the_model(self):
+        attribute_value = True
+        full_attribute = "NumDeriv"
+        self.view.attribute_value = mock.Mock(return_value=attribute_value)
+        self.model.update_attribute_value = mock.Mock()
+
+        self.presenter.handle_function_attribute_changed(full_attribute)
+
+        self.view.attribute_value.assert_called_once_with(full_attribute)
+        self.model.update_attribute_value.assert_called_once_with(full_attribute, attribute_value)
 
     def test_that_handle_start_x_updated_will_attempt_to_update_the_start_x_in_the_model(self):
         self.presenter.handle_start_x_updated()
