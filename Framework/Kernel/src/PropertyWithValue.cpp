@@ -83,16 +83,14 @@ template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<std::vector<long 
 // since this produces a warning on "gcc: warning: type attributes ignored after
 // type is already define". We can remove the issue, by removing the visibility
 // attribute
-template class PropertyWithValue<float>;
-template class PropertyWithValue<double>;
-template class PropertyWithValue<int32_t>;
-template class PropertyWithValue<uint32_t>;
-template class PropertyWithValue<int64_t>;
-template class PropertyWithValue<uint64_t>;
-
-template class PropertyWithValue<std::vector<double>>;
-template class PropertyWithValue<std::vector<int32_t>>;
-
-template class PropertyWithValue<std::string>;
+template class MANTID_KERNEL_DLL PropertyWithValue<float>;
+template class MANTID_KERNEL_DLL PropertyWithValue<double>;
+template class MANTID_KERNEL_DLL PropertyWithValue<int32_t>;
+template class MANTID_KERNEL_DLL PropertyWithValue<uint32_t>;
+template class MANTID_KERNEL_DLL PropertyWithValue<int64_t>;
+template class MANTID_KERNEL_DLL PropertyWithValue<uint64_t>;
+template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<double>>;
+template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<int32_t>>;
+template class MANTID_KERNEL_DLL PropertyWithValue<std::string>;
 
 } // namespace Mantid::Kernel
