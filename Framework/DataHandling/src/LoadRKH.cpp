@@ -518,7 +518,6 @@ const std::string LoadRKH::readUnit(const std::string &line) {
     // however to use is safely other checks would be required that would impair
     // readability, therefore in this case the unlikely performance hit is
     // accepted.
-    // cppcheck-suppress stlIfStrFind
     if (unit.find('(') != 0 || unit.find(')') != unit.size()) {
       std::string qCode = std::to_string(SaveRKH::Q_CODE);
       if (symbol == qCode && theQuantity == "q" &&

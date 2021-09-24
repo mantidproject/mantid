@@ -11,9 +11,7 @@ namespace MantidQt::CustomInterfaces {
 IndirectBayesTab::IndirectBayesTab(QWidget *parent) : IndirectTab(parent), m_propTree(new QtTreePropertyBrowser()) {
   m_propTree->setFactoryForManager(m_dblManager, m_dblEdFac);
 
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-          // cppcheck-suppress pureVirtualCall
-          SLOT(updateProperties(QtProperty *, double)));
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SLOT(updateProperties(QtProperty *, double)));
 }
 
 IndirectBayesTab::~IndirectBayesTab() { m_propTree->unsetFactoryForManager(m_dblManager); }

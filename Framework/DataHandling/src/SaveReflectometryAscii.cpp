@@ -136,7 +136,7 @@ bool SaveReflectometryAscii::includeQResolution() const {
  *  @param firstColumn :: true if the value is the first column in the output
  */
 template <typename T> void SaveReflectometryAscii::outputval(const T &val, bool firstColumn) {
-  // cppcheck-suppress syntaxError
+
   if constexpr (std::is_floating_point<T>::value) {
     if (std::isinf(val))
       return outputval("inf", firstColumn);

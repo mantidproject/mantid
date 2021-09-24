@@ -212,7 +212,7 @@ template <typename MDE, size_t nd> void MergeMD::doPlus(typename MDEventWorkspac
 
   // Add the boxes in parallel. They should be spread out enough on each
   // core to avoid stepping on each other.
-  // cppcheck-suppress syntaxError
+
     PRAGMA_OMP( parallel for if (!ws2->isFileBacked()) )
     for (int i = 0; i < numBoxes; i++) {
       PARALLEL_START_INTERUPT_REGION

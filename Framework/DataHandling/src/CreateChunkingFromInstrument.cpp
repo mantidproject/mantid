@@ -377,7 +377,7 @@ void CreateChunkingFromInstrument::exec() {
   // search the instrument for the bank names
   int maxRecurseDepth = this->getProperty(PARAM_MAX_RECURSE);
   map<string, vector<string>> grouping;
-  // cppcheck-suppress syntaxError
+
     PRAGMA_OMP(parallel for schedule(dynamic, 1) )
     for (int num = 0; num < maxBankNum; ++num) {
       PARALLEL_START_INTERUPT_REGION

@@ -1523,7 +1523,6 @@ void MDNorm::calculateNormalization(const std::vector<coord_t> &otherValues, con
     safe = Kernel::threadSafe(*integrFlux);
   }
 
-  // cppcheck-suppress syntaxError
 PRAGMA_OMP(parallel for private(intersections, xValues, yValues, pos, posNew) if (safe))
 for (int64_t i = 0; i < ndets; i++) {
   PARALLEL_START_INTERUPT_REGION
