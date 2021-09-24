@@ -10,7 +10,6 @@ from mantid.api import AlgorithmFactory, PythonAlgorithm, ITableWorkspacePropert
 from mantid.simpleapi import CreateEmptyTableWorkspace
 from mantid.kernel import Direction
 from mantid import mtd
-from Muon.GUI import ElementalAnalysis
 
 LABELS = {"Primary": "Primary energy", "Secondary": "Secondary energy"}
 
@@ -80,6 +79,8 @@ class PeakMatching(PythonAlgorithm):
             doc='Name of the table containing the weighted count of elements in all matches')
 
     def get_default_peak_data(self):
+        # import locally dynamically so we don't introduce a qt dependency into the framework
+        from mantidqtinterfaces.Muon.GUI import ElementalAnalysis
         path = os.path.join(os.path.dirname(ElementalAnalysis.__file__), "peak_data.json")
         with open(path, 'r') as file_to_read:
             peak_data = json.load(file_to_read)

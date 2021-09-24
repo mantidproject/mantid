@@ -23,8 +23,7 @@
 #include <cmath>
 #include <numeric>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(Integration)
@@ -346,7 +345,7 @@ MatrixWorkspace_sptr Integration::getInputWorkspace() {
   if (temp->id() == "RebinnedOutput") {
     // Clean the input workspace in the RebinnedOutput case for nan's and
     // inf's in order to treat the data correctly later.
-    IAlgorithm_sptr alg = this->createChildAlgorithm("ReplaceSpecialValues");
+    auto alg = createChildAlgorithm("ReplaceSpecialValues");
     alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", temp);
     std::string outName = "_" + temp->getName() + "_clean";
     alg->setProperty("OutputWorkspace", outName);
@@ -403,5 +402,4 @@ std::map<std::string, std::string> Integration::validateInputs() {
   return issues;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

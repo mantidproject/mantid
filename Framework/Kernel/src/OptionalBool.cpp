@@ -5,15 +5,13 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/OptionalBool.h"
-#include "MantidKernel/Exception.h"
 
 #include <json/value.h>
 
 #include <ostream>
 #include <utility>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 const std::string OptionalBool::StrUnset = "Unset";
 const std::string OptionalBool::StrFalse = "False";
@@ -59,9 +57,21 @@ std::map<OptionalBool::Value, std::string> OptionalBool::enumToStrMap() {
  * serialize this type.
  * @return A new Json::Value
  */
-Json::Value encodeAsJson(const OptionalBool & /*unused*/) {
-  throw Exception::NotImplementedError("encodeAsJson not implemented for OptionalBool type");
+Json::Value encodeAsJson(const OptionalBool &value) {
+  const auto enumValue = value.getValue();
+  if (enumValue == OptionalBool::True)
+    return Json::Value(true);
+  else if (enumValue == OptionalBool::False)
+    return Json::Value(false);
+  else
+    return Json::Value();
 }
 
-} // namespace Kernel
-} // namespace Mantid
+// Specialization of ToCpp for OptionalBool
+namespace pwvjdetail {
+
+bool ToCpp<OptionalBool>::operator()(const Json::Value &value) { return value.asBool(); }
+
+} // namespace pwvjdetail
+
+} // namespace Mantid::Kernel

@@ -6,18 +6,18 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/Batch/Cell.h"
 #include <ostream>
-namespace MantidQt {
-namespace MantidWidgets {
-namespace Batch {
+#include <utility>
 
-Cell::Cell(std::string const &contentText, std::string const &backgroundColor, int borderThickness,
-           std::string const &borderColor, int borderOpacity, bool isEditable)
-    : m_contentText(contentText), m_backgroundColor(backgroundColor), m_borderThickness(borderThickness),
-      m_borderOpacity(borderOpacity), m_borderColor(borderColor), m_iconFilePath(), m_isEditable(isEditable),
-      m_toolTip(""), m_direction(Direction::INPUT) {}
+namespace MantidQt::MantidWidgets::Batch {
 
-Cell::Cell(std::string const &contentText)
-    : m_contentText(contentText), m_backgroundColor("white"), m_borderThickness(1), m_borderOpacity(255),
+Cell::Cell(std::string contentText, std::string backgroundColor, int borderThickness, std::string borderColor,
+           int borderOpacity, bool isEditable)
+    : m_contentText(std::move(contentText)), m_backgroundColor(std::move(backgroundColor)),
+      m_borderThickness(borderThickness), m_borderOpacity(borderOpacity), m_borderColor(std::move(borderColor)),
+      m_iconFilePath(), m_isEditable(isEditable), m_toolTip(""), m_direction(Direction::INPUT) {}
+
+Cell::Cell(std::string contentText)
+    : m_contentText(std::move(contentText)), m_backgroundColor("white"), m_borderThickness(1), m_borderOpacity(255),
       m_borderColor("darkGrey"), m_iconFilePath(), m_isEditable(true), m_toolTip(""), m_direction(Direction::INPUT) {}
 
 std::string const &Cell::contentText() const { return m_contentText; }
@@ -98,6 +98,4 @@ std::vector<Cell> paddedCellsToWidth(std::vector<Cell> const &cells, Cell const 
     paddedCells.emplace_back(paddingCell);
   return paddedCells;
 }
-} // namespace Batch
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets::Batch

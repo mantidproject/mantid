@@ -31,8 +31,7 @@
 #include <sstream>
 #include <utility>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(LoadIsawDetCal)
@@ -211,7 +210,7 @@ void LoadIsawDetCal::exec() {
         if (inputW) {
           API::Run &run = inputW->mutableRun();
           // Check to see if LoadEventNexus had T0 from TOPAZ Parameter file
-          IAlgorithm_sptr alg1 = createChildAlgorithm("ChangeBinOffset");
+          auto alg1 = createChildAlgorithm("ChangeBinOffset");
           alg1->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputW);
           alg1->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", inputW);
           if (run.hasProperty("T0")) {
@@ -342,7 +341,7 @@ void LoadIsawDetCal::exec() {
 void LoadIsawDetCal::center(const double x, const double y, const double z, const std::string &detname,
                             const API::Workspace_sptr &ws, Geometry::ComponentInfo &componentInfo) {
 
-  Instrument_sptr inst = getCheckInst(std::move(ws));
+  Instrument_sptr inst = getCheckInst(ws);
 
   IComponent_const_sptr comp = inst->getComponentByName(detname);
   if (comp == nullptr) {
@@ -468,7 +467,7 @@ void LoadIsawDetCal::applyScalings(Workspace_sptr &ws,
                                    const std::vector<ComponentScaling> &rectangularDetectorScalings) {
 
   for (const auto &scaling : rectangularDetectorScalings) {
-    IAlgorithm_sptr alg1 = createChildAlgorithm("ResizeRectangularDetector");
+    auto alg1 = createChildAlgorithm("ResizeRectangularDetector");
     alg1->setProperty<Workspace_sptr>("Workspace", ws);
     alg1->setProperty("ComponentName", scaling.componentName);
     alg1->setProperty("ScaleX", scaling.scaleX);
@@ -477,5 +476,4 @@ void LoadIsawDetCal::applyScalings(Workspace_sptr &ws,
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

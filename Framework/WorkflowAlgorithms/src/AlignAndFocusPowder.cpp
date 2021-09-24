@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidWorkflowAlgorithms/AlignAndFocusPowder.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -22,6 +23,7 @@
 #include "MantidKernel/DateTimeValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/InstrumentInfo.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidKernel/System.h"
@@ -31,8 +33,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
-namespace Mantid {
-namespace WorkflowAlgorithms {
+namespace Mantid::WorkflowAlgorithms {
 using namespace Kernel;
 using API::FileProperty;
 using API::MatrixWorkspace;
@@ -63,6 +64,9 @@ const std::string WL_MIN("CropWavelengthMin");
 const std::string WL_MAX("CropWavelengthMax");
 const std::string PRESERVE_EVENTS("PreserveEvents");
 const std::string REMOVE_PROMPT_PULSE("RemovePromptPulseWidth");
+const std::string RESONANCE_UNITS("ResonanceFilterUnits");
+const std::string RESONANCE_LOWER_LIMITS("ResonanceFilterLowerLimits");
+const std::string RESONANCE_UPPER_LIMITS("ResonanceFilterUpperLimits");
 const std::string COMPRESS_TOF_TOL("CompressTolerance");
 const std::string COMPRESS_WALL_TOL("CompressWallClockTolerance");
 const std::string COMPRESS_WALL_START("CompressStartTime");
@@ -161,6 +165,19 @@ void AlignAndFocusPowder::init() {
                   "pulse to remove. 0 disables");
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
+
+  std::vector<std::string> allowedResonanceUnits({"Energy", "Wavelength"});
+  declareProperty(PropertyNames::RESONANCE_UNITS, allowedResonanceUnits.back(),
+                  std::make_shared<StringListValidator>(allowedResonanceUnits),
+                  "Units for resonances to be filtered in. "
+                  "The data will be converted to these units temporarily to filter.");
+  declareProperty(std::make_unique<ArrayProperty<double>>(PropertyNames::RESONANCE_LOWER_LIMITS),
+                  "Minimum values to filter absorption resonance. This must have same number of values as "
+                  "ResonanceFilterUpperLimits. Default behavior is to not filter.");
+  declareProperty(std::make_unique<ArrayProperty<double>>(PropertyNames::RESONANCE_UPPER_LIMITS),
+                  "Maximum values to filter absorption resonance. This must have same number of values as "
+                  "ResonanceFilterLowerLimits. Default behavior is to not filter.");
+
   declareProperty(std::make_unique<PropertyWithValue<double>>(PropertyNames::COMPRESS_TOF_TOL, 1e-5, mustBePositive,
                                                               Direction::Input),
                   "Compress events (in "
@@ -238,6 +255,29 @@ std::map<std::string, std::string> AlignAndFocusPowder::validateInputs() {
     result[PropertyNames::INPUT_WKSP] = "Empty workspace encounter, possibly due to beam down."
                                         "Please plot the pCharge-time to identify suitable range for "
                                         "re-time-slicing";
+
+  m_resonanceLower = getProperty(PropertyNames::RESONANCE_LOWER_LIMITS);
+  m_resonanceUpper = getProperty(PropertyNames::RESONANCE_UPPER_LIMITS);
+  // verify that they are the same length
+  if (m_resonanceLower.size() == m_resonanceUpper.size()) {
+    // verify that the lowers are less than the uppers
+    const size_t NUM_WINDOWS = m_resonanceLower.size();
+    bool ok = true;
+    for (size_t i = 0; i < NUM_WINDOWS; ++i) {
+      if (m_resonanceLower[i] >= m_resonanceUpper[i])
+        ok = false;
+    }
+    if (!ok) {
+      const std::string msg = "Lower limits must be less than upper limits";
+      result[PropertyNames::RESONANCE_LOWER_LIMITS] = msg;
+      result[PropertyNames::RESONANCE_UPPER_LIMITS] = msg;
+    }
+  } else {
+    result[PropertyNames::RESONANCE_LOWER_LIMITS] =
+        "Must have same number of values as " + PropertyNames::RESONANCE_UPPER_LIMITS;
+    result[PropertyNames::RESONANCE_UPPER_LIMITS] =
+        "Must have same number of values as " + PropertyNames::RESONANCE_LOWER_LIMITS;
+  }
 
   return result;
 }
@@ -434,7 +474,7 @@ void AlignAndFocusPowder::exec() {
   }
 
   // set up a progress bar with the "correct" number of steps
-  m_progress = std::make_unique<Progress>(this, 0., 1., 21);
+  m_progress = std::make_unique<Progress>(this, 0., 1., 22);
 
   if (m_inputEW) {
     if (compressEventsTolerance > 0.) {
@@ -461,7 +501,8 @@ void AlignAndFocusPowder::exec() {
   }
   m_progress->report();
 
-  if (xmin > 0. || xmax > 0.) {
+  // crop the workspace in time-of-flight
+  if (xmin >= 0. || xmax > 0.) {
     double tempmin;
     double tempmax;
     m_outputW->getXMinMax(tempmin, tempmax);
@@ -471,7 +512,7 @@ void AlignAndFocusPowder::exec() {
     API::IAlgorithm_sptr cropAlg = createChildAlgorithm("CropWorkspace");
     cropAlg->setProperty("InputWorkspace", m_outputW);
     cropAlg->setProperty("OutputWorkspace", m_outputW);
-    if ((xmin > 0.) && (xmin > tempmin))
+    if ((xmin >= 0.) && (xmin > tempmin))
       cropAlg->setProperty("Xmin", xmin);
     if ((xmax > 0.) && (xmax < tempmax))
       cropAlg->setProperty("Xmax", xmax);
@@ -571,6 +612,12 @@ void AlignAndFocusPowder::exec() {
     outputw = applyDiffCalAlg->getProperty("InstrumentWorkspace");
     m_outputW = std::dynamic_pointer_cast<MatrixWorkspace>(outputw);
   }
+
+  // filter out absorption resonances
+  if (!m_resonanceLower.empty()) {
+    m_outputW = filterResonances(m_outputW);
+  }
+  m_progress->report(); // the step wil be really fast if the option isn't selected
 
   // ----------------- WACKY LORENTZ THING HERE
   // TODO should call LorentzCorrection as a sub-algorithm
@@ -866,6 +913,35 @@ API::MatrixWorkspace_sptr AlignAndFocusPowder::convertUnits(API::MatrixWorkspace
   return matrixws;
 }
 
+API::MatrixWorkspace_sptr AlignAndFocusPowder::filterResonances(API::MatrixWorkspace_sptr matrixws) {
+  // determine the previous units
+  const std::string PREVIOUS_UNITS(matrixws->getAxis(0)->unit()->unitID());
+  // number of resonance windows to be removed
+  const size_t NUM_WINDOWS = m_resonanceLower.size();
+
+  // convert to the units requested
+  matrixws = convertUnits(matrixws, getPropertyValue(PropertyNames::RESONANCE_UNITS));
+
+  // filter out the requested area
+  API::IAlgorithm_sptr maskBinsAlg = createChildAlgorithm("MaskBins");
+  for (size_t i = 0; i < NUM_WINDOWS; ++i) {
+    g_log.information() << "running MaskBins(XMin=" << m_resonanceLower[i] << ", XMax=" << m_resonanceUpper[i]
+                        << ") started at " << Types::Core::DateAndTime::getCurrentTime() << "\n";
+    maskBinsAlg->setProperty("InputWorkspace", matrixws);
+    maskBinsAlg->setProperty("OutputWorkspace", matrixws); // operate in-place
+    maskBinsAlg->setProperty("XMin", m_resonanceLower[i]);
+    maskBinsAlg->setProperty("XMax", m_resonanceUpper[i]);
+    maskBinsAlg->executeAsChildAlg();
+
+    matrixws = maskBinsAlg->getProperty("OutputWorkspace"); // update workspace pointer
+  }
+
+  // convert back to the original units
+  matrixws = convertUnits(matrixws, PREVIOUS_UNITS);
+
+  return matrixws;
+}
+
 //----------------------------------------------------------------------------------------------
 /** Rebin
  */
@@ -1075,49 +1151,63 @@ void AlignAndFocusPowder::loadCalFile(const std::string &calFilename, const std:
   if (calFilename.empty() && groupFilename.empty())
     return;
 
-  g_log.information() << "Loading Calibration file \"" << calFilename << "\"";
-  if (!groupFilename.empty())
-    g_log.information() << "with grouping from \"" << groupFilename << "\"";
-  g_log.information("");
-
   // bunch of booleans to keep track of things
   const bool loadMask = !m_maskWS;
   const bool loadGrouping = !m_groupWS;
   const bool loadCalibration = !m_calibrationWS;
 
-  IAlgorithm_sptr alg = createChildAlgorithm("LoadDiffCal");
-  alg->setProperty("InputWorkspace", m_inputW);
-  alg->setPropertyValue("Filename", calFilename);
-  alg->setPropertyValue("GroupFilename", groupFilename);
-  alg->setProperty<bool>("MakeCalWorkspace", loadCalibration);
-  alg->setProperty<bool>("MakeGroupingWorkspace", loadGrouping);
-  alg->setProperty<bool>("MakeMaskWorkspace", loadMask);
-  alg->setProperty<double>("TofMin", getProperty("TMin"));
-  alg->setProperty<double>("TofMax", getProperty("TMax"));
-  alg->setPropertyValue("WorkspaceName", m_instName);
-  alg->executeAsChildAlg();
+  if (calFilename.empty()) { // only load the grouping file
+    g_log.information() << "Loading Grouping file \"" << groupFilename << "\"\n";
 
-  // replace workspaces as appropriate
-  if (loadGrouping) {
-    m_groupWS = alg->getProperty("OutputGroupingWorkspace");
+    IAlgorithm_sptr alg = createChildAlgorithm("LoadDetectorsGroupingFile");
+    alg->setProperty("InputFile", groupFilename);
+    alg->setProperty("InputWorkspace", m_inputW);
+    alg->executeAsChildAlg();
 
+    m_groupWS = alg->getProperty("OutputWorkspace");
     const std::string name = m_instName + "_group";
     AnalysisDataService::Instance().addOrReplace(name, m_groupWS);
     this->setPropertyValue(PropertyNames::GROUP_WKSP, name);
-  }
-  if (loadCalibration) {
-    m_calibrationWS = alg->getProperty("OutputCalWorkspace");
+  } else { // let LoadDiffCal sort out everything
+    g_log.information() << "Loading Calibration file \"" << calFilename << "\"";
+    if (!groupFilename.empty())
+      g_log.information() << "with grouping from \"" << groupFilename << "\"";
+    g_log.information("");
 
-    const std::string name = m_instName + "_cal";
-    AnalysisDataService::Instance().addOrReplace(name, m_calibrationWS);
-    this->setPropertyValue(PropertyNames::CAL_WKSP, name);
-  }
-  if (loadMask) {
-    m_maskWS = alg->getProperty("OutputMaskWorkspace");
+    IAlgorithm_sptr alg = createChildAlgorithm("LoadDiffCal");
+    alg->setProperty("InputWorkspace", m_inputW);
+    alg->setPropertyValue("Filename", calFilename);
+    alg->setPropertyValue("GroupFilename", groupFilename);
+    alg->setProperty<bool>("MakeCalWorkspace", loadCalibration);
+    alg->setProperty<bool>("MakeGroupingWorkspace", loadGrouping);
+    alg->setProperty<bool>("MakeMaskWorkspace", loadMask);
+    alg->setProperty<double>("TofMin", getProperty("TMin"));
+    alg->setProperty<double>("TofMax", getProperty("TMax"));
+    alg->setPropertyValue("WorkspaceName", m_instName);
+    alg->executeAsChildAlg();
 
-    const std::string name = m_instName + "_mask";
-    AnalysisDataService::Instance().addOrReplace(name, m_maskWS);
-    this->setPropertyValue(PropertyNames::MASK_WKSP, name);
+    // replace workspaces as appropriate
+    if (loadGrouping) {
+      m_groupWS = alg->getProperty("OutputGroupingWorkspace");
+
+      const std::string name = m_instName + "_group";
+      AnalysisDataService::Instance().addOrReplace(name, m_groupWS);
+      this->setPropertyValue(PropertyNames::GROUP_WKSP, name);
+    }
+    if (loadCalibration) {
+      m_calibrationWS = alg->getProperty("OutputCalWorkspace");
+
+      const std::string name = m_instName + "_cal";
+      AnalysisDataService::Instance().addOrReplace(name, m_calibrationWS);
+      this->setPropertyValue(PropertyNames::CAL_WKSP, name);
+    }
+    if (loadMask) {
+      m_maskWS = alg->getProperty("OutputMaskWorkspace");
+
+      const std::string name = m_instName + "_mask";
+      AnalysisDataService::Instance().addOrReplace(name, m_maskWS);
+      this->setPropertyValue(PropertyNames::MASK_WKSP, name);
+    }
   }
 }
 
@@ -1137,5 +1227,4 @@ void AlignAndFocusPowder::doSortEvents(const Mantid::API::Workspace_sptr &ws) {
   alg->executeAsChildAlg();
 }
 
-} // namespace WorkflowAlgorithms
-} // namespace Mantid
+} // namespace Mantid::WorkflowAlgorithms

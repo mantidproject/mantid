@@ -23,8 +23,7 @@ using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 
 //----------------------------------------------------------------------------------------------
 /** Default constructor */
@@ -113,6 +112,16 @@ double LeanElasticPeak::getWavelength() const { return m_wavelength; }
  * using the geometry of the detector  */
 double LeanElasticPeak::getTOF() const {
   throw Exception::NotImplementedError("LeanElasticPeak::getTOF(): no detector infomation in LeanElasticPeak");
+}
+
+/// returns the row (y) of the pixel of the detector, throws NotImplementedError for LeanElasticPeak
+int LeanElasticPeak::getRow() const {
+  throw Exception::NotImplementedError("LeanElasticPeak::getRow(): no detector infomation in LeanElasticPeak");
+}
+
+/// returns the column (x) of the pixel of the detector, throws NotImplementedError for LeanElasticPeak
+int LeanElasticPeak::getCol() const {
+  throw Exception::NotImplementedError("LeanElasticPeak::getCol(): no detector infomation in LeanElasticPeak");
 }
 
 // -------------------------------------------------------------------------------------
@@ -246,5 +255,4 @@ LeanElasticPeak &LeanElasticPeak::operator=(const LeanElasticPeak &other) {
 
 Mantid::Kernel::Logger LeanElasticPeak::g_log("PeakLogger");
 
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects

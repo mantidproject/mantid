@@ -41,7 +41,7 @@ public:
   /// Type of domain to create.
   enum DomainType { Simple = 0, Sequential, Parallel };
   /// Constrcutor
-  IDomainCreator(Kernel::IPropertyManager *manager, const std::vector<std::string> &workspacePropertyNames,
+  IDomainCreator(Kernel::IPropertyManager *manager, std::vector<std::string> workspacePropertyNames,
                  DomainType domainType = Simple);
   /// Virtual destructor
   virtual ~IDomainCreator() = default;

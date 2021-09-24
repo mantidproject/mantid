@@ -41,8 +41,7 @@
 
 #include <Poco/File.h>
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 
 using namespace Mantid::API;
 using Mantid::DataObjects::EventWorkspace;
@@ -71,7 +70,7 @@ EventWorkspace_sptr createDiffractionEventWorkspace(int numEvents, int numPixels
   double binDelta = 10.0;
 
   auto retVal = std::make_shared<EventWorkspace>();
-  retVal->initialize(numPixels, 1, 1);
+  retVal->initialize(numPixels + 2, 1, 1);
 
   // --------- Load the instrument -----------
   const std::string filename = FileFinder::Instance().getFullPath("unit_testing/MINITOPAZ_Definition.xml");
@@ -82,11 +81,15 @@ EventWorkspace_sptr createDiffractionEventWorkspace(int numEvents, int numPixels
 
   DateAndTime run_start("2010-01-01T00:00:00");
 
+  // create spectra for monitors
+  retVal->getSpectrum(0).addDetectorID(-1);
+  retVal->getSpectrum(1).addDetectorID(-2);
+
   for (int pix = 0; pix < numPixels; pix++) {
     for (int i = 0; i < numEvents; i++) {
-      retVal->getSpectrum(pix) += Types::Event::TofEvent((i + 0.5) * binDelta, run_start + double(i));
+      retVal->getSpectrum(pix + 2) += Types::Event::TofEvent((i + 0.5) * binDelta, run_start + double(i));
     }
-    retVal->getSpectrum(pix).addDetectorID(pix);
+    retVal->getSpectrum(pix + 2).addDetectorID(pix);
   }
 
   // Create the x-axis for histogramming.
@@ -112,7 +115,7 @@ EventWorkspace_sptr createDiffractionEventWorkspace(int numEvents, int numPixels
                              "instrument loaded.");
   Mantid::detid2det_map dets;
   retVal->getInstrument()->getDetectors(dets);
-  if (dets.size() != 100 * 100)
+  if (dets.size() != 100 * 100 + 2)
     throw std::runtime_error("MDEventsTestHelper::"
                              "createDiffractionEventWorkspace(): Wrong "
                              "instrument size.");
@@ -346,5 +349,4 @@ void checkAndDeleteFile(const std::string &filename) {
 }
 
 } // namespace MDEventsTestHelper
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects

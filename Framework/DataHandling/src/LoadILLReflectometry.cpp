@@ -138,8 +138,7 @@ Mantid::Kernel::Quat detectorFaceRotation(const RotationPlane plane, const doubl
 }
 } // anonymous namespace
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using namespace Kernel;
 using namespace API;
@@ -222,7 +221,7 @@ void LoadILLReflectometry::exec() {
 
 /// Run the Child Algorithm LoadInstrument.
 void LoadILLReflectometry::loadInstrument() {
-  IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
+  auto loadInst = createChildAlgorithm("LoadInstrument");
   const std::string instrumentName = m_instrument == Supported::D17 ? "D17" : "FIGARO";
   loadInst->setPropertyValue("InstrumentName", instrumentName);
   loadInst->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
@@ -503,7 +502,7 @@ void LoadILLReflectometry::loadData(NeXus::NXEntry &entry, const std::vector<std
     for (int j = 0; j < static_cast<int>(m_numberOfHistograms); ++j) {
       const int *data_p = &data(0, static_cast<int>(j), 0);
       const HistogramData::Counts counts(data_p, data_p + m_numberOfChannels);
-      m_localWorkspace->setHistogram(j, binEdges, std::move(counts));
+      m_localWorkspace->setHistogram(j, binEdges, counts);
       m_localWorkspace->getSpectrum(j).setSpectrumNo(j);
       progress.report();
     }
@@ -511,7 +510,7 @@ void LoadILLReflectometry::loadData(NeXus::NXEntry &entry, const std::vector<std
       const int *monitor_p = monitorsData[im].data();
       const HistogramData::Counts monitorCounts(monitor_p, monitor_p + m_numberOfChannels);
       const size_t spectrum = im + m_numberOfHistograms;
-      m_localWorkspace->setHistogram(spectrum, binEdges, std::move(monitorCounts));
+      m_localWorkspace->setHistogram(spectrum, binEdges, monitorCounts);
       m_localWorkspace->getSpectrum(spectrum).setSpectrumNo(static_cast<specnum_t>(spectrum));
       progress.report();
     }
@@ -551,7 +550,7 @@ double LoadILLReflectometry::reflectometryPeak() {
   if (!isDefault("FitEndWorkspaceIndex")) {
     endIndex = getProperty("FitEndWorkspaceIndex");
   }
-  IAlgorithm_sptr integration = createChildAlgorithm("Integration");
+  auto integration = createChildAlgorithm("Integration");
   integration->initialize();
   integration->setProperty("InputWorkspace", m_localWorkspace);
   integration->setProperty("OutputWorkspace", "__unused_for_child");
@@ -567,7 +566,7 @@ double LoadILLReflectometry::reflectometryPeak() {
   }
   integration->execute();
   MatrixWorkspace_sptr integralWS = integration->getProperty("OutputWorkspace");
-  IAlgorithm_sptr transpose = createChildAlgorithm("Transpose");
+  auto transpose = createChildAlgorithm("Transpose");
   transpose->initialize();
   transpose->setProperty("InputWorkspace", integralWS);
   transpose->setProperty("OutputWorkspace", "__unused_for_child");
@@ -605,7 +604,7 @@ double LoadILLReflectometry::reflectometryPeak() {
   func->setParameter("A1", 0.);
   sum->addFunction(func);
   // call Fit child algorithm
-  API::IAlgorithm_sptr fit = createChildAlgorithm("Fit");
+  auto fit = createChildAlgorithm("Fit");
   fit->initialize();
   fit->setProperty("Function", std::dynamic_pointer_cast<API::IFunction>(sum));
   fit->setProperty("InputWorkspace", integralWS);
@@ -869,5 +868,4 @@ double LoadILLReflectometry::sourceSampleDistance() const {
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

@@ -11,8 +11,7 @@
 
 using namespace MantidQt::CustomInterfaces;
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 DECLARE_SUBWINDOW(IndirectBayes)
 
 IndirectBayes::IndirectBayes(QWidget *parent)
@@ -100,5 +99,4 @@ std::string IndirectBayes::documentationPage() const { return "Indirect Bayes"; 
 
 IndirectBayes::~IndirectBayes() {}
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

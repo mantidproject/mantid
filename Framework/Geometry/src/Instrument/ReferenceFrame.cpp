@@ -9,8 +9,7 @@
 
 using namespace Mantid::Kernel;
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 namespace {
 /**
@@ -183,5 +182,4 @@ bool ReferenceFrame::isVectorPointingAlongBeam(const V3D &v) const {
   return m_vecPointingAlongBeam.scalar_prod(normalize(v)) == 1;
 }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

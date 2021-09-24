@@ -28,7 +28,7 @@ namespace {
  * @param chemicalFormula the chemical formula of the material (compound)
  * @return a tuple consisting of a list of the elements and their proportions
  */
-tuple chemicalFormula(Material &self) {
+tuple chemicalFormula(const Material &self) {
   list atoms, numberAtoms;
   for (const auto &formulaUnit : self.chemicalFormula()) {
     atoms.append(formulaUnit.atom);
@@ -37,7 +37,7 @@ tuple chemicalFormula(Material &self) {
   return make_tuple(atoms, numberAtoms);
 }
 
-bool toBool(Material &self) {
+bool toBool(const Material &self) {
   return (self.cohScatterXSection() != 0.) || (self.incohScatterXSection() != 0.) ||
          (self.totalScatterXSection() != 0.) || (self.absorbXSection() != 0.) || (self.cohScatterLength() != 0.) ||
          (self.incohScatterLength() != 0.) || (self.totalScatterLength() != 0.) ||
@@ -52,7 +52,7 @@ bool toBool(Material &self) {
  * @param rmm the relative molecular (formula) mass of this material
  * @return the relative molecular mass
  */
-double relativeMolecularMass(Material &self) {
+double relativeMolecularMass(const Material &self) {
   const auto &formula = self.chemicalFormula();
   return std::accumulate(formula.cbegin(), formula.cend(), 0., [](double sum, const auto &formulaUnit) {
     return sum + formulaUnit.atom->mass * formulaUnit.multiplicity;
@@ -73,6 +73,7 @@ void export_Material() {
                     "Packing fraction as a number, ideally, 0 to 1")
       .add_property("temperature", make_function(&Material::temperature), "Temperature")
       .add_property("pressure", make_function(&Material::pressure), "Pressure")
+      .add_property("totalAtoms", make_function(&Material::totalAtoms), "Total number of atoms")
 #if PY_MAJOR_VERSION >= 3
       .def("__bool__", &toBool, "Returns True if any of the scattering values are non-zero")
 #else

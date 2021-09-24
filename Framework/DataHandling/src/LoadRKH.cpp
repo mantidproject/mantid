@@ -47,8 +47,7 @@ bool isUnit(const Mantid::Kernel::StringTokenizer &codes) {
 }
 } // namespace
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
@@ -519,7 +518,6 @@ const std::string LoadRKH::readUnit(const std::string &line) {
     // however to use is safely other checks would be required that would impair
     // readability, therefore in this case the unlikely performance hit is
     // accepted.
-    // cppcheck-suppress stlIfStrFind
     if (unit.find('(') != 0 || unit.find(')') != unit.size()) {
       std::string qCode = std::to_string(SaveRKH::Q_CODE);
       if (symbol == qCode && theQuantity == "q" &&
@@ -578,5 +576,4 @@ bool LoadRKH::hasXerror(std::ifstream &stream) {
   stream.seekg(currentPutLocation, stream.beg);
   return containsXerror;
 }
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

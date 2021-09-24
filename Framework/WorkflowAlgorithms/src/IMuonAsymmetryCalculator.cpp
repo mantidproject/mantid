@@ -4,6 +4,8 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+#include <utility>
+
 #include "MantidWorkflowAlgorithms/IMuonAsymmetryCalculator.h"
 
 using Mantid::API::AlgorithmManager;
@@ -13,8 +15,7 @@ using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::API::Workspace_sptr;
 using Mantid::API::WorkspaceGroup_sptr;
 
-namespace Mantid {
-namespace WorkflowAlgorithms {
+namespace Mantid::WorkflowAlgorithms {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -24,10 +25,10 @@ namespace WorkflowAlgorithms {
  * @param subtractedPeriods :: [input] Vector of period indexes to be subtracted
  * from summed periods
  */
-IMuonAsymmetryCalculator::IMuonAsymmetryCalculator(const WorkspaceGroup_sptr &inputWS,
-                                                   const std::vector<int> &summedPeriods,
-                                                   const std::vector<int> &subtractedPeriods)
-    : m_inputWS(inputWS), m_summedPeriods(summedPeriods), m_subtractedPeriods(subtractedPeriods) {}
+IMuonAsymmetryCalculator::IMuonAsymmetryCalculator(WorkspaceGroup_sptr inputWS, std::vector<int> summedPeriods,
+                                                   std::vector<int> subtractedPeriods)
+    : m_inputWS(std::move(inputWS)), m_summedPeriods(std::move(summedPeriods)),
+      m_subtractedPeriods(std::move(subtractedPeriods)) {}
 
 /**
  * Sums the specified periods of the input workspace group
@@ -43,7 +44,7 @@ MatrixWorkspace_sptr IMuonAsymmetryCalculator::sumPeriods(const std::vector<int>
       auto numPeriods = static_cast<int>(periodsToSum.size());
       for (int i = 1; i < numPeriods; i++) {
         auto RHSWorkspace = m_inputWS->getItem(periodsToSum[i] - 1);
-        IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Plus");
+        auto alg = AlgorithmManager::Instance().create("Plus");
         alg->setChild(true);
         alg->setProperty("LHSWorkspace", outWS);
         alg->setProperty("RHSWorkspace", RHSWorkspace);
@@ -66,7 +67,7 @@ MatrixWorkspace_sptr IMuonAsymmetryCalculator::subtractWorkspaces(const MatrixWo
                                                                   const MatrixWorkspace_sptr &rhs) const {
   MatrixWorkspace_sptr outWS;
   if (lhs && rhs) {
-    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Minus");
+    auto alg = AlgorithmManager::Instance().create("Minus");
     alg->setChild(true);
     alg->setProperty("LHSWorkspace", lhs);
     alg->setProperty("RHSWorkspace", rhs);
@@ -86,7 +87,7 @@ MatrixWorkspace_sptr IMuonAsymmetryCalculator::subtractWorkspaces(const MatrixWo
 MatrixWorkspace_sptr IMuonAsymmetryCalculator::extractSpectrum(const Workspace_sptr &inputWS, const int index) const {
   MatrixWorkspace_sptr outWS;
   if (inputWS) {
-    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("ExtractSingleSpectrum");
+    auto alg = AlgorithmManager::Instance().create("ExtractSingleSpectrum");
     alg->setChild(true);
     alg->setProperty("InputWorkspace", inputWS);
     alg->setProperty("WorkspaceIndex", index);
@@ -97,5 +98,4 @@ MatrixWorkspace_sptr IMuonAsymmetryCalculator::extractSpectrum(const Workspace_s
   return outWS;
 }
 
-} // namespace WorkflowAlgorithms
-} // namespace Mantid
+} // namespace Mantid::WorkflowAlgorithms

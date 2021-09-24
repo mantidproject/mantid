@@ -26,8 +26,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Crystal::ConnectedComponentMappingTypes;
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(IntegratePeaksUsingClusters)
@@ -178,5 +177,4 @@ void IntegratePeaksUsingClusters::exec() {
   setProperty("OutputWorkspaceMD", outHistoWS);
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

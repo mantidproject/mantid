@@ -15,8 +15,7 @@
 #include <gsl/gsl_statistics.h>
 #include <unordered_map>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(IntegrateByComponent)
@@ -60,7 +59,7 @@ void IntegrateByComponent::exec() {
   MatrixWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
   int parents = getProperty("LevelsUp");
   // Make sure it's integrated
-  IAlgorithm_sptr childAlg = createChildAlgorithm("Integration", 0, 0.2);
+  auto childAlg = createChildAlgorithm("Integration", 0, 0.2);
   childAlg->setProperty("InputWorkspace", inputWS);
   childAlg->setProperty("StartWorkspaceIndex", 0);
   childAlg->setProperty("EndWorkspaceIndex", EMPTY_INT());
@@ -215,5 +214,4 @@ std::vector<std::vector<size_t>> IntegrateByComponent::makeMap(const API::Matrix
   return speclist;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

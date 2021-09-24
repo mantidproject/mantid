@@ -21,9 +21,7 @@
 #include <memory>
 #include <utility>
 
-namespace Mantid {
-namespace WorkflowAlgorithms {
-namespace HFIRInstrument {
+namespace Mantid::WorkflowAlgorithms::HFIRInstrument {
 /**
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
@@ -84,7 +82,7 @@ void getPixelFromCoordinate(const double &x, const double &y, const API::MatrixW
  * of real-space coordinates (0,0).
  */
 void getDefaultBeamCenter(const API::MatrixWorkspace_sptr &dataWS, double &pixel_x, double &pixel_y) {
-  getPixelFromCoordinate(0.0, 0.0, std::move(dataWS), pixel_x, pixel_y);
+  getPixelFromCoordinate(0.0, 0.0, dataWS, pixel_x, pixel_y);
 }
 
 /*
@@ -122,6 +120,4 @@ double getSourceToSampleDistance(const API::MatrixWorkspace_sptr &dataWS) {
   return sourceToSampleDistance;
 }
 
-} // namespace HFIRInstrument
-} // namespace WorkflowAlgorithms
-} // namespace Mantid
+} // namespace Mantid::WorkflowAlgorithms::HFIRInstrument

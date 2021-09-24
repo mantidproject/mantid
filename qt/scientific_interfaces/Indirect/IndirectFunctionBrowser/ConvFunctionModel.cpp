@@ -11,9 +11,7 @@
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidQtWidgets/Common/FunctionBrowser/FunctionBrowserUtils.h"
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 using namespace MantidWidgets;
 using namespace Mantid::API;
@@ -250,12 +248,6 @@ bool ConvFunctionModel::hasBackground() const { return m_backgroundType != Backg
 
 void ConvFunctionModel::updateParameterEstimationData(DataForParameterEstimationCollection &&data) {
   m_estimationData = std::move(data);
-}
-
-void ConvFunctionModel::setResolution(std::string const &name, TableDatasetIndex const &index) {
-  m_resolutionName = name;
-  m_resolutionIndex = index;
-  setModel();
 }
 
 void ConvFunctionModel::setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) {
@@ -568,25 +560,9 @@ std::string ConvFunctionModel::buildStretchExpFTFunctionString() const {
          "constraints=(Height>0, Tau>0)";
 }
 
-std::string ConvFunctionModel::buildIsoRotDiffFunctionString() const {
-  return "name=IsoRotDiff, f1.Height=0.1, f1.Radius=2, f1.Tau=100, f1.Centre=0";
-}
-
-std::string ConvFunctionModel::buildElasticDiffSphereFunctionString() const {
-  return "name=ElasticDiffSphere, Height=1, Centre=0, Radius=2, "
-         "constraints=(Height>0, Radius>0)";
-}
-
-std::string ConvFunctionModel::buildInelasticDiffSphereFunctionString() const {
-  return "name=InelasticDiffSphere, Intensity=1, Radius=2, Diffusion=0.05, "
-         "Shift=0, constraints=(Intensity>0, Radius>0, Diffusion>0)";
-}
-
-std::string ConvFunctionModel::buildDiffSphereFunctionString() const {
-  return "name=DiffSphere, Q=1, f0.Q=1, "
-         "f0.WorkspaceIndex=2147483647, f1.Q = 1, f1.WorkspaceIndex = "
-         "2147483647, f0.Height = 1, f0.Centre = 0, f0.Radius = 2, "
-         "f1.Intensity = 1, f1.Radius = 2, f1.Diffusion = 0.05, f1.Shift = 0";
+std::string ConvFunctionModel::buildDiffRotDiscreteCircleFunctionString() const {
+  return "name=DiffRotDiscreteCircle, f1.Intensity=1, f1.Radius=1, f1.Decay=1, "
+         "f1.Shift=0, constraints=(f1.Intensity>0, f1.Radius>0)";
 }
 
 std::string ConvFunctionModel::buildInelasticDiffRotDiscreteCircleFunctionString() const {
@@ -599,9 +575,33 @@ std::string ConvFunctionModel::buildElasticDiffRotDiscreteCircleFunctionString()
          "constraints=(Height>0, Radius>0)";
 }
 
-std::string ConvFunctionModel::buildDiffRotDiscreteCircleFunctionString() const {
-  return "name=DiffRotDiscreteCircle, f1.Intensity=1, f1.Radius=1, f1.Decay=1, "
-         "f1.Shift=0, constraints=(f1.Intensity>0, f1.Radius>0)";
+std::string ConvFunctionModel::buildDiffSphereFunctionString() const {
+  return "name=DiffSphere, Q=1, f0.Q=1, "
+         "f0.WorkspaceIndex=2147483647, f1.Q = 1, f1.WorkspaceIndex = "
+         "2147483647, f0.Height = 1, f0.Centre = 0, f0.Radius = 2, "
+         "f1.Intensity = 1, f1.Radius = 2, f1.Diffusion = 0.05, f1.Shift = 0";
+}
+
+std::string ConvFunctionModel::buildElasticDiffSphereFunctionString() const {
+  return "name=ElasticDiffSphere, Height=1, Centre=0, Radius=2, "
+         "constraints=(Height>0, Radius>0)";
+}
+
+std::string ConvFunctionModel::buildInelasticDiffSphereFunctionString() const {
+  return "name=InelasticDiffSphere, Intensity=1, Radius=2, Diffusion=0.05, "
+         "Shift=0, constraints=(Intensity>0, Radius>0, Diffusion>0)";
+}
+
+std::string ConvFunctionModel::buildIsoRotDiffFunctionString() const {
+  return "name=IsoRotDiff, f1.Height=0.1, f1.Radius=2, f1.Tau=100, f1.Centre=0";
+}
+
+std::string ConvFunctionModel::buildElasticIsoRotDiffFunctionString() const {
+  return "name=ElasticIsoRotDiff, Height=0.1, Radius=2";
+}
+
+std::string ConvFunctionModel::buildInelasticIsoRotDiffFunctionString() const {
+  return "name=InelasticIsoRotDiff, Height=0.1, Radius=2, Tau=100, Centre=0";
 }
 
 std::string ConvFunctionModel::buildPeaksFunctionString() const {
@@ -618,8 +618,6 @@ std::string ConvFunctionModel::buildPeaksFunctionString() const {
     functions.append(buildTeixeiraFunctionString());
   } else if (m_fitType == FitType::StretchedExpFT) {
     functions.append(buildStretchExpFTFunctionString());
-  } else if (m_fitType == FitType::IsoRotDiff) {
-    functions.append(buildIsoRotDiffFunctionString());
   } else if (m_fitType == FitType::DiffSphere) {
     functions.append(buildDiffSphereFunctionString());
   } else if (m_fitType == FitType::ElasticDiffSphere) {
@@ -632,6 +630,12 @@ std::string ConvFunctionModel::buildPeaksFunctionString() const {
     functions.append(buildInelasticDiffRotDiscreteCircleFunctionString());
   } else if (m_fitType == FitType::ElasticDiffRotDiscreteCircle) {
     functions.append(buildElasticDiffRotDiscreteCircleFunctionString());
+  } else if (m_fitType == FitType::IsoRotDiff) {
+    functions.append(buildIsoRotDiffFunctionString());
+  } else if (m_fitType == FitType::ElasticIsoRotDiff) {
+    functions.append(buildElasticIsoRotDiffFunctionString());
+  } else if (m_fitType == FitType::InelasticIsoRotDiff) {
+    functions.append(buildInelasticIsoRotDiffFunctionString());
   }
   return functions;
 }
@@ -655,8 +659,6 @@ std::string ConvFunctionModel::buildFitTypeString() const {
     functions.append(buildTeixeiraFunctionString());
   } else if (m_fitType == FitType::StretchedExpFT) {
     functions.append(buildStretchExpFTFunctionString());
-  } else if (m_fitType == FitType::IsoRotDiff) {
-    functions.append(buildIsoRotDiffFunctionString());
   } else if (m_fitType == FitType::DiffSphere) {
     functions.append(buildDiffSphereFunctionString());
   } else if (m_fitType == FitType::ElasticDiffSphere) {
@@ -669,6 +671,12 @@ std::string ConvFunctionModel::buildFitTypeString() const {
     functions.append(buildInelasticDiffRotDiscreteCircleFunctionString());
   } else if (m_fitType == FitType::ElasticDiffRotDiscreteCircle) {
     functions.append(buildElasticDiffRotDiscreteCircleFunctionString());
+  } else if (m_fitType == FitType::IsoRotDiff) {
+    functions.append(buildIsoRotDiffFunctionString());
+  } else if (m_fitType == FitType::ElasticIsoRotDiff) {
+    functions.append(buildElasticIsoRotDiffFunctionString());
+  } else if (m_fitType == FitType::InelasticIsoRotDiff) {
+    functions.append(buildInelasticIsoRotDiffFunctionString());
   }
   return functions;
 }
@@ -689,6 +697,4 @@ boost::optional<QString> ConvFunctionModel::getDeltaPrefix() const { return m_mo
 
 boost::optional<QString> ConvFunctionModel::getBackgroundPrefix() const { return m_model.backgroundPrefix(); }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

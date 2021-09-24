@@ -28,15 +28,15 @@
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
 #include "MantidKernel/normal_distribution.h"
 
+#include <boost/math/special_functions/fpclassify.hpp>
+
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <ctime>
 #include <random>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace FuncMinimisers {
+namespace Mantid::CurveFitting::FuncMinimisers {
 using namespace Mantid::API;
 
 namespace {
@@ -1096,6 +1096,4 @@ void FABADAMinimizer::initSimulatedAnnealing() {
   }
 }
 
-} // namespace FuncMinimisers
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::FuncMinimisers

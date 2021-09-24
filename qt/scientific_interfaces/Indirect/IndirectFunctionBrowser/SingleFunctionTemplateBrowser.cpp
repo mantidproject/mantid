@@ -29,9 +29,7 @@
 
 #include <limits>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 /**
  * Constructor
@@ -198,10 +196,7 @@ void SingleFunctionTemplateBrowser::setGlobalParametersQuiet(const QStringList &
 }
 
 void SingleFunctionTemplateBrowser::setBackgroundA0(double) {}
-void SingleFunctionTemplateBrowser::setResolution(std::string const &, TableDatasetIndex const &) {}
 void SingleFunctionTemplateBrowser::setResolution(const std::vector<std::pair<std::string, size_t>> &) {}
 void SingleFunctionTemplateBrowser::setQValues(const std::vector<double> &) {}
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

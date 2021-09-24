@@ -7,8 +7,7 @@
 #include "MantidAPI/RefAxis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 /** Constructor
  *  @param parentWorkspace :: A pointer to the workspace that holds this axis
@@ -114,5 +113,4 @@ double RefAxis::getMax() const {
                            "on the workspace instead");
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

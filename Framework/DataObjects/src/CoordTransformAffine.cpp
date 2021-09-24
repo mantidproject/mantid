@@ -20,8 +20,7 @@ using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 using Mantid::API::CoordTransform;
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor.
@@ -45,6 +44,22 @@ CoordTransformAffine::CoordTransformAffine(const size_t inD, const size_t outD)
     m_rawMatrix[i] = m_rawMemory + (i * ny);
   // Copy into the raw matrix (for speed)
   copyRawMatrix();
+}
+
+CoordTransformAffine::CoordTransformAffine(const CoordTransformAffine &other) : CoordTransform(other.inD, other.outD) {
+  this->setMatrix(other.getMatrix());
+}
+
+void swap(CoordTransformAffine &obj1, CoordTransformAffine &obj2) {
+  using std::swap;
+  swap(obj1.m_affineMatrix, obj2.m_affineMatrix);
+  swap(obj1.m_rawMatrix, obj2.m_rawMatrix);
+  swap(obj1.m_rawMemory, obj2.m_rawMemory);
+}
+
+CoordTransformAffine &CoordTransformAffine::operator=(CoordTransformAffine other) {
+  swap(*this, other);
+  return *this;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -372,5 +387,4 @@ CoordTransformAffine *CoordTransformAffine::combineTransformations(CoordTransfor
   return out;
 }
 
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects

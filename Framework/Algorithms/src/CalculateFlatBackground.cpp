@@ -24,8 +24,7 @@
 #include <climits>
 #include <numeric>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CalculateFlatBackground)
@@ -362,7 +361,7 @@ void CalculateFlatBackground::LinearFit(const HistogramData::Histogram &histogra
                                         const double startX, const double endX) {
   MatrixWorkspace_sptr WS = create<Workspace2D>(1, histogram);
   WS->setHistogram(0, histogram);
-  IAlgorithm_sptr childAlg = createChildAlgorithm("Fit");
+  auto childAlg = createChildAlgorithm("Fit");
 
   IFunction_sptr func = API::FunctionFactory::Instance().createFunction("LinearBackground");
   childAlg->setProperty<IFunction_sptr>("Function", func);
@@ -442,5 +441,4 @@ void CalculateFlatBackground::MovingAverage(const HistogramData::Histogram &hist
   variance = currentVariance;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

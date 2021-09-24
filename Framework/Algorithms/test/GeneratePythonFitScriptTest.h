@@ -28,6 +28,20 @@ std::vector<std::string> splitStringBy(std::string const &str, std::string const
   return subStrings;
 }
 
+std::string getFileContents(std::string const &filename) {
+  auto const directory = ConfigService::Instance().getString("python.templates.directory") + "/reference";
+
+  std::ifstream filestream(directory + "/" + filename);
+  if (!filestream) {
+    filestream.close();
+    throw std::runtime_error("Error occured when attempting to load file: " + filename);
+  }
+
+  std::string fileText((std::istreambuf_iterator<char>(filestream)), std::istreambuf_iterator<char>());
+  filestream.close();
+  return fileText;
+}
+
 } // namespace
 
 class GeneratePythonFitScriptTest : public CxxTest::TestSuite {
@@ -43,12 +57,16 @@ public:
     m_workspaceIndices = std::vector<std::size_t>{0u, 1u};
     m_startXs = std::vector<double>{0.5, 0.6};
     m_endXs = std::vector<double>{1.5, 1.6};
-    m_function = "name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0";
+    m_sequentialFunction = "name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0";
+    m_simultaneousFunction = "composite=MultiDomainFunction,NumDeriv=true;name=GausOsc,A=0.2,Sigma=0.2,Frequency=1,Phi="
+                             "0,$domains=i;name=GausOsc,A=0.2,Sigma=0.2,Frequency=1,Phi=0,$domains=i";
 
     m_maxIterations = 500;
     m_minimizer = "Levenberg-Marquardt";
     m_costFunction = "Least squares";
     m_evaluationType = "CentrePoint";
+    m_outputBaseName = "Output_Fit";
+    m_plotOutput = true;
 
     m_filepath = ConfigService::Instance().getString("defaultsave.directory") + "TestPythonScript.py";
 
@@ -62,36 +80,67 @@ public:
     m_algorithm->setProperty("StartXs", m_startXs);
     m_algorithm->setProperty("EndXs", m_endXs);
 
-    m_algorithm->setProperty("Function", m_function);
-
     m_algorithm->setProperty("MaxIterations", std::to_string(m_maxIterations));
     m_algorithm->setProperty("Minimizer", m_minimizer);
     m_algorithm->setProperty("CostFunction", m_costFunction);
     m_algorithm->setProperty("EvaluationType", m_evaluationType);
+    m_algorithm->setProperty("OutputBaseName", m_outputBaseName);
+    m_algorithm->setProperty("PlotOutput", m_plotOutput);
   }
 
   void tearDown() override { AnalysisDataService::Instance().clear(); }
 
-  void test_that_the_expected_python_script_is_generated_when_a_filepath_is_set() {
+  void test_that_the_expected_python_script_is_generated_when_a_filepath_is_set_in_sequential_mode() {
+    m_algorithm->setProperty("FittingType", "Sequential");
+    m_algorithm->setProperty("Function", m_sequentialFunction);
     m_algorithm->setProperty("Filepath", m_filepath);
     m_algorithm->execute();
 
-    auto const expectedText = createExpectedSequentialScriptText();
+    auto const expectedText = getFileContents("generate_sequential_fit_script_reference_file.py");
     auto const expectedLines = splitStringBy(expectedText, "\n");
 
-    std::string const text = m_algorithm->getPropertyValue("ScriptText");
+    std::string const text = m_algorithm->getPropertyValue("ScriptText") + "\n";
     TS_ASSERT_EQUALS(text, expectedText);
 
     assertExpectedScriptExists(expectedLines);
   }
 
-  void test_that_the_expected_script_text_is_returned_using_an_output_property_when_a_filepath_is_not_set() {
+  void
+  test_that_the_expected_script_text_is_returned_using_an_output_property_when_a_filepath_is_not_set_in_sequential_mode() {
+    m_algorithm->setProperty("FittingType", "Sequential");
+    m_algorithm->setProperty("Function", m_sequentialFunction);
     m_algorithm->execute();
 
-    auto const expectedText = createExpectedSequentialScriptText();
+    auto const expectedText = getFileContents("generate_sequential_fit_script_reference_file.py");
+
+    std::string const text = m_algorithm->getPropertyValue("ScriptText") + "\n";
+    TS_ASSERT_EQUALS(text, expectedText);
+  }
+
+  void test_that_the_expected_python_script_is_generated_when_a_filepath_is_set_in_simultaneous_mode() {
+    m_algorithm->setProperty("FittingType", "Simultaneous");
+    m_algorithm->setProperty("Function", m_simultaneousFunction);
+    m_algorithm->setProperty("Filepath", m_filepath);
+    m_algorithm->execute();
+
+    auto const expectedText = getFileContents("generate_simultaneous_fit_script_reference_file.py");
     auto const expectedLines = splitStringBy(expectedText, "\n");
 
-    std::string const text = m_algorithm->getPropertyValue("ScriptText");
+    std::string const text = m_algorithm->getPropertyValue("ScriptText") + "\n";
+    TS_ASSERT_EQUALS(text, expectedText);
+
+    assertExpectedScriptExists(expectedLines);
+  }
+
+  void
+  test_that_the_expected_script_text_is_returned_using_an_output_property_when_a_filepath_is_not_set_in_simultaneous_mode() {
+    m_algorithm->setProperty("FittingType", "Simultaneous");
+    m_algorithm->setProperty("Function", m_simultaneousFunction);
+    m_algorithm->execute();
+
+    auto const expectedText = getFileContents("generate_simultaneous_fit_script_reference_file.py");
+
+    std::string const text = m_algorithm->getPropertyValue("ScriptText") + "\n";
     TS_ASSERT_EQUALS(text, expectedText);
   }
 
@@ -112,89 +161,21 @@ private:
     Poco::File(m_filepath).remove();
   }
 
-  std::string createExpectedSequentialScriptText() const {
-    std::string expectedScript;
-
-    expectedScript += "# A python script generated to perform a sequential fit\n";
-    expectedScript += "from mantid.simpleapi import *\n";
-    expectedScript += "import matplotlib.pyplot as plt\n";
-    expectedScript += "\n";
-    expectedScript += "# Dictionary { workspace_name: (workspace_index, start_x, end_x) }\n";
-    expectedScript += "input_data = {\n";
-    expectedScript += "    \"" + m_inputWorkspaces[0] + "\": (" + std::to_string(m_workspaceIndices[0]) + ", " +
-                      std::to_string(m_startXs[0]) + ", " + std::to_string(m_endXs[0]) + "),\n";
-    expectedScript += "    \"" + m_inputWorkspaces[1] + "\": (" + std::to_string(m_workspaceIndices[1]) + ", " +
-                      std::to_string(m_startXs[1]) + ", " + std::to_string(m_endXs[1]) + ")\n";
-    expectedScript += "}\n";
-    expectedScript += "\n";
-    expectedScript += "# Fit function as a string\n";
-    expectedScript += "function = \"" + m_function + "\"\n";
-    expectedScript += "\n";
-    expectedScript += "# Fitting options\n";
-    expectedScript += "max_iterations = " + std::to_string(m_maxIterations) + "\n";
-    expectedScript += "minimizer = \"" + m_minimizer + "\"\n";
-    expectedScript += "cost_function = \"" + m_costFunction + "\"\n";
-    expectedScript += "evaluation_type = \"" + m_evaluationType + "\"\n";
-    expectedScript += "\n";
-
-    expectedScript +=
-        "# Perform a sequential fit\n"
-        "output_workspaces, parameter_tables, normalised_matrices = [], [], []\n"
-        "for input_workspace, domain_data in input_data.items():\n"
-        "    fit_output = Fit(Function=function, InputWorkspace=input_workspace, WorkspaceIndex=domain_data[0],\n"
-        "                     StartX=domain_data[1], EndX=domain_data[2], MaxIterations=max_iterations,\n"
-        "                     Minimizer=minimizer, CostFunction=cost_function, EvaluationType=evaluation_type,\n"
-        "                     CreateOutput=True)\n"
-        "\n"
-        "    output_workspaces.append(fit_output.OutputWorkspace)\n"
-        "    parameter_tables.append(fit_output.OutputParameters)\n"
-        "    normalised_matrices.append(fit_output.OutputNormalisedCovarianceMatrix)\n"
-        "\n"
-        "    # Use the parameters in the previous function as the start parameters of the next fit\n"
-        "    function = fit_output.Function\n"
-        "\n"
-        "# Group the output workspaces from the sequential fit\n"
-        "GroupWorkspaces(InputWorkspaces=output_workspaces, OutputWorkspace=\"Sequential_Fit_Workspaces\")\n"
-        "GroupWorkspaces(InputWorkspaces=parameter_tables, OutputWorkspace=\"Sequential_Fit_Parameters\")\n"
-        "GroupWorkspaces(InputWorkspaces=normalised_matrices, "
-        "OutputWorkspace=\"Sequential_Fit_NormalisedCovarianceMatrices\")\n"
-        "\n"
-        "# Plot the results of the sequential fit\n"
-        "fig, axes = plt.subplots(nrows=2,\n"
-        "                         ncols=len(output_workspaces),\n"
-        "                         sharex=True,\n"
-        "                         gridspec_kw={\"height_ratios\": [2, 1]},\n"
-        "                         subplot_kw={\"projection\": \"mantid\"})\n"
-        "\n"
-        "for i, workspace in enumerate(output_workspaces):\n"
-        "    axes[0, i].errorbar(workspace, \"rs\", wkspIndex=0, label=\"Data\", markersize=2)\n"
-        "    axes[0, i].errorbar(workspace, \"b-\", wkspIndex=1, label=\"Fit\")\n"
-        "    axes[0, i].set_title(workspace.name())\n"
-        "    axes[0, i].set_xlabel(\"\")\n"
-        "    axes[0, i].tick_params(axis=\"both\", direction=\"in\")\n"
-        "    axes[0, i].legend()\n"
-        "\n"
-        "    axes[1, i].errorbar(workspace, \"ko\", wkspIndex=2, markersize=2)\n"
-        "    axes[1, i].set_ylabel(\"Difference\")\n"
-        "    axes[1, i].tick_params(axis=\"both\", direction=\"in\")\n"
-        "\n"
-        "fig.subplots_adjust(hspace=0)\n"
-        "fig.show()";
-    return expectedScript;
-  }
-
   Mantid::API::IAlgorithm_sptr m_algorithm;
 
   std::vector<std::string> m_inputWorkspaces;
   std::vector<std::size_t> m_workspaceIndices;
   std::vector<double> m_startXs;
   std::vector<double> m_endXs;
-  std::string m_function;
+  std::string m_sequentialFunction;
+  std::string m_simultaneousFunction;
 
   std::size_t m_maxIterations;
   std::string m_minimizer;
   std::string m_costFunction;
   std::string m_evaluationType;
+  std::string m_outputBaseName;
+  bool m_plotOutput;
 
   std::string m_filepath;
 };

@@ -11,8 +11,7 @@
 #include <cmath>
 #include <sstream>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -128,7 +127,7 @@ void FindEPP::fitGaussian(int64_t index) {
 
       g_log.debug() << "Fitting spectrum #" << spectrum << " with: " << function.str() << "\n";
 
-      IAlgorithm_sptr fitAlg = createChildAlgorithm("Fit", 0., 0., false);
+      auto fitAlg = createChildAlgorithm("Fit", 0., 0., false);
       fitAlg->setProperty("Function", function.str());
       fitAlg->setProperty("InputWorkspace", m_inWS);
       fitAlg->setProperty("WorkspaceIndex", static_cast<int>(spectrum));
@@ -198,5 +197,4 @@ void FindEPP::initWorkspace() {
   m_outWS->setRowCount(numberSpectra);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

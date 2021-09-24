@@ -15,8 +15,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SetMDUsingMask)
@@ -87,7 +86,7 @@ void SetMDUsingMask::exec() {
 
   if (outIWS != inIWS) {
     // Not in-place. So clone the input to the output
-    IAlgorithm_sptr clone = this->createChildAlgorithm("CloneMDWorkspace", 0.0, 0.5, true);
+    auto clone = createChildAlgorithm("CloneMDWorkspace", 0.0, 0.5, true);
     clone->setProperty("InputWorkspace", std::dynamic_pointer_cast<IMDWorkspace>(inIWS));
     clone->executeAsChildAlg();
     IMDWorkspace_sptr temp = clone->getProperty("OutputWorkspace");
@@ -111,5 +110,4 @@ void SetMDUsingMask::exec() {
   setProperty("OutputWorkspace", outIWS);
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

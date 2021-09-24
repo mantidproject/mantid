@@ -29,8 +29,7 @@
 #include <cstring>
 #include <ctime>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(SaveToSNSHistogramNexus)
@@ -698,5 +697,4 @@ void SaveToSNSHistogramNexus::exec() {
     throw std::runtime_error("Nexus error while copying the file.");
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

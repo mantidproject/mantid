@@ -22,8 +22,7 @@
 #include <boost/math/special_functions/round.hpp>
 #include <cmath>
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(PeakIntegration)
@@ -295,7 +294,7 @@ int PeakIntegration::fitneighbours(int ipeak, const std::string &det_name, int x
   // Number of slices
   int TOFmax = 0;
 
-  IAlgorithm_sptr slice_alg = createChildAlgorithm("IntegratePeakTimeSlices");
+  auto slice_alg = createChildAlgorithm("IntegratePeakTimeSlices");
   slice_alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputW);
   std::ostringstream tab_str;
   tab_str << "LogTable" << ipeak;
@@ -346,5 +345,4 @@ int PeakIntegration::fitneighbours(int ipeak, const std::string &det_name, int x
   return TOFmax - 1;
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

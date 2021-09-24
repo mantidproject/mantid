@@ -25,8 +25,7 @@
 
 #include <Poco/TemporaryFile.h>
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -295,7 +294,7 @@ MatrixWorkspace_sptr ConvertSpiceDataToRealSpace::loadRunToMatrixWS(
   tempws->mutableRun().addProperty(new PropertyWithValue<int>("run_number", pt));
 
   // Load instrument
-  IAlgorithm_sptr instloader = this->createChildAlgorithm("LoadInstrument");
+  auto instloader = createChildAlgorithm("LoadInstrument");
   instloader->initialize();
   instloader->setProperty("InstrumentName", m_instrumentName);
   instloader->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
@@ -694,5 +693,4 @@ void ConvertSpiceDataToRealSpace::correctByDetectorEfficiency(std::vector<Matrix
   }
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

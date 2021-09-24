@@ -19,8 +19,7 @@
 // Public member functions
 //---------------------------------------
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 /// Constructor
 /// @param fitBrowser
@@ -70,5 +69,4 @@ void MultifitSetupDialog::cellChanged(int row, int col) {
     }
   }
 }
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

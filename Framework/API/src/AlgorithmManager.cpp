@@ -12,8 +12,7 @@
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidKernel/ConfigService.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 namespace {
 /// static logger
 Kernel::Logger g_log("AlgorithmManager");
@@ -131,7 +130,7 @@ void AlgorithmManagerImpl::removeById(AlgorithmID id) {
  * @param id :: ID of the algorithm being started
  */
 void AlgorithmManagerImpl::notifyAlgorithmStarting(AlgorithmID id) {
-  IAlgorithm_sptr alg = this->getAlgorithm(id);
+  auto alg = this->getAlgorithm(id);
   if (!alg)
     return;
   notificationCenter.postNotification(new AlgorithmStartingNotification(alg));
@@ -187,5 +186,4 @@ size_t AlgorithmManagerImpl::removeFinishedAlgorithms() {
 }
 
 void AlgorithmManagerImpl::shutdown() { clear(); }
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

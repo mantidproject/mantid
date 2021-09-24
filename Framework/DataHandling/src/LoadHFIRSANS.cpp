@@ -47,8 +47,7 @@
 #include <utility>
 #include <vector>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using Mantid::API::WorkspaceProperty;
 using Mantid::Kernel::Direction;
@@ -507,7 +506,7 @@ void LoadHFIRSANS::runLoadInstrument() {
 
   const std::string &instrumentName = m_metadata["Header/Instrument"];
 
-  API::IAlgorithm_sptr loadInstrumentAlgorithm = createChildAlgorithm("LoadInstrument");
+  auto loadInstrumentAlgorithm = createChildAlgorithm("LoadInstrument");
 
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   try {
@@ -666,5 +665,4 @@ void LoadHFIRSANS::setBeamDiameter() {
   addRunProperty<double>("beam-diameter", beamDiameter, "mm");
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

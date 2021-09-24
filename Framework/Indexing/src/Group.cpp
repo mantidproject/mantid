@@ -8,8 +8,7 @@
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
-namespace Mantid {
-namespace Indexing {
+namespace Mantid::Indexing {
 
 /** Return IndexInfo with grouped spectra as specified in the arguments.
  *
@@ -40,5 +39,4 @@ IndexInfo group(const IndexInfo &source, std::vector<SpectrumNumber> &&specNums,
   return result;
 }
 
-} // namespace Indexing
-} // namespace Mantid
+} // namespace Mantid::Indexing

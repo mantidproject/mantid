@@ -452,7 +452,7 @@ public:
       const auto &yValues = outWS->histogram(i).y();
       for (size_t j = 0; j < yValues.size(); ++j) {
         if (specOutInfo.isMonitor(i))
-          // cppcheck-suppress syntaxError
+
           TS_ASSERT_DELTA(yValues[j], double(j + 1) / 15.0, 1e-12)
         else
           TS_ASSERT_DELTA(yValues[j], 2.0 / 15.0, 1e-12)

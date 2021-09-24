@@ -22,9 +22,7 @@
 
 #include <limits>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 namespace {
 
@@ -331,10 +329,6 @@ void ConvTemplateBrowser::estimateFunctionParameters() {}
 
 void ConvTemplateBrowser::setBackgroundA0(double value) { m_presenter.setBackgroundA0(value); }
 
-void ConvTemplateBrowser::setResolution(std::string const &name, TableDatasetIndex const &index) {
-  m_presenter.setResolution(name, index);
-}
-
 void ConvTemplateBrowser::setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) {
   m_presenter.setResolution(fitResolutions);
 }
@@ -344,6 +338,4 @@ void ConvTemplateBrowser::intChanged(QtProperty *prop) {
     m_presenter.setSubType(SubTypeIndex::Lorentzian, m_intManager->value(prop));
   }
 }
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

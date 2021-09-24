@@ -17,8 +17,7 @@
 // WorkspaceProperty implementation
 #include "MantidAPI/WorkspaceProperty.tcc"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 ///@cond TEMPLATE
 template class MANTID_API_DLL Mantid::API::WorkspaceProperty<Mantid::API::Workspace>;
 template class MANTID_API_DLL Mantid::API::WorkspaceProperty<Mantid::API::IEventWorkspace>;
@@ -30,5 +29,4 @@ template class MANTID_API_DLL Mantid::API::WorkspaceProperty<Mantid::API::IPeaks
 template class MANTID_API_DLL Mantid::API::WorkspaceProperty<Mantid::API::ITableWorkspace>;
 template class MANTID_API_DLL Mantid::API::WorkspaceProperty<Mantid::API::WorkspaceGroup>;
 ///@endcond TEMPLATE
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

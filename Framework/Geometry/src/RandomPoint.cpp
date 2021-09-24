@@ -9,9 +9,7 @@
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
 #include <boost/math/special_functions/pow.hpp>
 
-namespace Mantid {
-namespace Geometry {
-namespace RandomPoint {
+namespace Mantid::Geometry::RandomPoint {
 
 /**
  * Return a local point in a cylinder shape
@@ -162,6 +160,4 @@ boost::optional<Kernel::V3D> bounded(const IObject &object, Kernel::PseudoRandom
   };
   return point;
 }
-} // namespace RandomPoint
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry::RandomPoint

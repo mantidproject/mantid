@@ -16,8 +16,7 @@
 #include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidWorkflowAlgorithms/EQSANSInstrument.h"
 
-namespace Mantid {
-namespace WorkflowAlgorithms {
+namespace Mantid::WorkflowAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ComputeSensitivity)
@@ -66,7 +65,7 @@ void ComputeSensitivity::exec() {
   // patch the sensitivity workspace
   const std::string patchWSName = getPropertyValue("PatchWorkspace");
   if (!patchWSName.empty()) {
-    IAlgorithm_sptr patchAlg = createChildAlgorithm("EQSANSPatchSensitivity");
+    auto patchAlg = createChildAlgorithm("EQSANSPatchSensitivity");
     patchAlg->setPropertyValue("PatchWorkspace", patchWSName);
     if (!reductionManager->existsProperty("SensitivityPatchAlgorithm")) {
       reductionManager->declareProperty(std::make_unique<AlgorithmProperty>("SensitivityPatchAlgorithm"));
@@ -91,5 +90,4 @@ void ComputeSensitivity::exec() {
   }
 }
 
-} // namespace WorkflowAlgorithms
-} // namespace Mantid
+} // namespace Mantid::WorkflowAlgorithms

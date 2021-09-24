@@ -13,35 +13,33 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/Atom.h"
 #include "MantidKernel/Material.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Unit.h"
 
 #include <utility>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
-std::map<std::string, std::map<std::string, double>> getSampleSpeciesInfo(const API::MatrixWorkspace_const_sptr &ws) {
-  // get sample information : mass, total scattering length, and concentration
-  // of each species
-  double totalStoich = 0.0;
-  std::map<std::string, std::map<std::string, double>> atomSpecies;
-  const Kernel::Material::ChemicalFormula formula = ws->sample().getMaterial().chemicalFormula();
-  const double xSection = ws->sample().getMaterial().totalScatterXSection();
-  const double bSqrdBar = xSection / (4.0 * M_PI);
+namespace { // anonymous namespace
 
-  for (const auto &element : formula) {
-    const std::map<std::string, double> atomMap{
-        {"mass", element.atom->mass}, {"stoich", element.multiplicity}, {"bSqrdBar", bSqrdBar}};
-    atomSpecies[element.atom->symbol] = atomMap;
-    totalStoich += element.multiplicity;
-  }
-  std::map<std::string, std::map<std::string, double>>::iterator atom = atomSpecies.begin();
-  while (atom != atomSpecies.end()) {
-    atom->second["concentration"] = atom->second["stoich"] / totalStoich;
-    ++atom;
-  }
-  return atomSpecies;
+// calculate summation term w/ neutron mass over molecular mass ratio
+double calculateSummationTerm(const Kernel::Material &material) {
+  // add together the weighted sum
+  const auto &formula = material.chemicalFormula();
+  auto sumLambda = [](double sum, auto &formula_unit) {
+    return sum + formula_unit.multiplicity * formula_unit.atom->neutron.tot_scatt_xs / formula_unit.atom->mass;
+  };
+  const double unnormalizedTerm = std::accumulate(formula.begin(), formula.end(), 0.0, sumLambda);
+
+  // neutron mass converted to atomic mass comes out of the sum
+  constexpr double neutronMass = PhysicalConstants::NeutronMass / PhysicalConstants::AtomicMassUnit;
+  // normalizing by totalStoich (number of atoms) comes out of the sum
+  const double totalStoich = material.totalAtoms();
+  // converting scattering cross section to scattering length square comes out of the sum
+  return neutronMass * unnormalizedTerm / (4. * M_PI * totalStoich);
 }
+
+} // anonymous namespace
 
 DECLARE_ALGORITHM(CalculatePlaczekSelfScattering)
 
@@ -49,7 +47,7 @@ void CalculatePlaczekSelfScattering::init() {
   declareProperty(
       std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>("InputWorkspace", "", Kernel::Direction::Input),
       "Raw diffraction data workspace for associated correction to be "
-      "calculated for. Workspace must have instument and sample data.");
+      "calculated for. Workspace must have instrument and sample data.");
   declareProperty(
       std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>("IncidentSpecta", "", Kernel::Direction::Input),
       "Workspace of fitted incident spectrum with it's first derivative.");
@@ -76,34 +74,39 @@ std::map<std::string, std::string> CalculatePlaczekSelfScattering::validateInput
 }
 
 //----------------------------------------------------------------------------------------------
+double CalculatePlaczekSelfScattering::getPackingFraction(const API::MatrixWorkspace_const_sptr &ws) {
+  // get a handle to the material
+  const auto &material = ws->sample().getMaterial();
+
+  // default value is packing fraction
+  double packingFraction = material.packingFraction();
+
+  // see if the user thinks the material wasn't setup right
+  const double crystalDensity = getProperty("CrystalDensity");
+  if (crystalDensity > 0.) {
+    // assume that the number density set in the Material is the effective number density
+    packingFraction = material.numberDensity() / crystalDensity;
+  }
+
+  return packingFraction;
+}
+
+//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void CalculatePlaczekSelfScattering::exec() {
   const API::MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
   const API::MatrixWorkspace_sptr incidentWS = getProperty("IncidentSpecta");
-  constexpr double factor = 1.0 / 1.66053906660e-27;       // atomic mass unit-kilogram relationship
-  constexpr double neutronMass = factor * 1.674927471e-27; // neutron mass
-  // get sample information : mass, total scattering length, and concentration
-  // of each species
-  auto atomSpecies = getSampleSpeciesInfo(inWS);
+
   // calculate summation term w/ neutron mass over molecular mass ratio
+  const double summationTerm = calculateSummationTerm(inWS->sample().getMaterial());
+  const double packingFraction = getPackingFraction(inWS);
 
-  auto sumLambda = [&neutronMass](double sum, auto &atom) {
-    return sum + atom.second["concentration"] * atom.second["bSqrdBar"] * neutronMass / atom.second["mass"];
-  };
-  double summationTerm = std::accumulate(atomSpecies.begin(), atomSpecies.end(), 0.0, sumLambda);
-
-  double numberDensity = inWS->sample().getMaterial().numberDensity();
-  double crystalDensity = getProperty("CrystalDensity");
-  double densityRatio = 1.0;
-  if (crystalDensity > 0) {
-    densityRatio = numberDensity / crystalDensity;
-  }
   // get incident spectrum and 1st derivative
   const MantidVec xLambda = incidentWS->readX(0);
   const MantidVec incident = incidentWS->readY(0);
   const MantidVec incidentPrime = incidentWS->readY(1);
-  double dx = (xLambda[1] - xLambda[0]) / 2.0;
+  const double dx = (xLambda[1] - xLambda[0]) / 2.0; // assume constant bin width
   std::vector<double> phi1;
   for (size_t i = 0; i < xLambda.size() - 1; i++) {
     phi1.emplace_back((xLambda[i] + dx) * incidentPrime[i] / incident[i]);
@@ -112,7 +115,7 @@ void CalculatePlaczekSelfScattering::exec() {
   std::vector<double> eps1;
   constexpr auto LambdaD = 1.44;
   for (size_t i = 0; i < xLambda.size() - 1; i++) {
-    auto xTerm = -(xLambda[i] + dx) / LambdaD;
+    const auto xTerm = -(xLambda[i] + dx) / LambdaD;
     eps1.emplace_back(xTerm * exp(xTerm) / (1.0 - exp(xTerm)));
   }
   /* Placzek
@@ -126,17 +129,7 @@ void CalculatePlaczekSelfScattering::exec() {
      Howe's Equation for P(theta) by adding the elastic self-scattering
   */
 
-  MantidVec xLambdas;
-  MantidVec placzekCorrection;
-  size_t nReserve = 0;
-  const API::SpectrumInfo specInfo = inWS->spectrumInfo();
-  for (size_t detIndex = 0; detIndex < specInfo.size(); detIndex++) {
-    if (!(specInfo.isMonitor(detIndex)) && !(specInfo.l2(detIndex) == 0.0)) {
-      nReserve += 1;
-    }
-  }
-  xLambdas.reserve(nReserve);
-  placzekCorrection.reserve(nReserve);
+  const auto &specInfo = inWS->spectrumInfo();
   API::MatrixWorkspace_sptr outputWS = DataObjects::create<API::HistoWorkspace>(*inWS);
   // The algorithm computes the signal values at bin centres so they should
   // be treated as a distribution
@@ -169,7 +162,7 @@ void CalculatePlaczekSelfScattering::exec() {
         const double inelasticPlaczekSelfCorrection =
             2.0 * (term1 + term2 - 3) * sinThetaBy2 * sinThetaBy2 * summationTerm;
         x[xIndex] = wavelength.singleToTOF(xLambda[xIndex]);
-        y[xIndex] = (1 + inelasticPlaczekSelfCorrection) * densityRatio;
+        y[xIndex] = (1 + inelasticPlaczekSelfCorrection) * packingFraction;
       }
       x.back() = wavelength.singleToTOF(xLambda.back());
     } else {
@@ -186,5 +179,4 @@ void CalculatePlaczekSelfScattering::exec() {
   setProperty("OutputWorkspace", outputWS);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

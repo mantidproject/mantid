@@ -7,6 +7,7 @@
 #include "MantidQtWidgets/Common/RepoModel.h"
 
 #include "MantidAPI/ScriptRepositoryFactory.h"
+#include <utility>
 #include <vector>
 
 #include "MantidKernel/ConfigService.h"
@@ -96,8 +97,8 @@ static QString delete_thread(Mantid::API::ScriptRepository_sptr &pt, const std::
   user nicer way.
 
 */
-RepoModel::RepoItem::RepoItem(const QString &label, const QString &path, RepoItem *parent)
-    : m_label(label), keypath(path), parentItem(parent) {}
+RepoModel::RepoItem::RepoItem(QString label, QString path, RepoItem *parent)
+    : m_label(std::move(label)), keypath(std::move(path)), parentItem(parent) {}
 /// destruct all the childItems.
 RepoModel::RepoItem::~RepoItem() { qDeleteAll(childItems); }
 /** This method is the very responsible to allow the reconstruction of the

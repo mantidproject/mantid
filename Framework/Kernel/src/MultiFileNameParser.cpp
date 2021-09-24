@@ -18,10 +18,9 @@
 
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
+#include <utility>
 
-namespace Mantid {
-namespace Kernel {
-namespace MultiFileNameParsing {
+namespace Mantid::Kernel::MultiFileNameParsing {
 /////////////////////////////////////////////////////////////////////////////
 // Static constants.
 /////////////////////////////////////////////////////////////////////////////
@@ -340,8 +339,8 @@ void Parser::split() {
  * @param suffix      :: a string that suffixes the generated file names.
  * @param instString :: the instrument name
  */
-GenerateFileName::GenerateFileName(const std::string &prefix, const std::string &suffix, const std::string &instString)
-    : m_prefix(prefix), m_suffix(suffix), m_instString(instString) {}
+GenerateFileName::GenerateFileName(std::string prefix, std::string suffix, std::string instString)
+    : m_prefix(std::move(prefix)), m_suffix(std::move(suffix)), m_instString(std::move(instString)) {}
 
 /**
  * Overloaded function operator that takes in a vector of runs, and returns a
@@ -763,7 +762,4 @@ std::string toString(const RunRangeList &runRangeList) {
 
 } // anonymous namespace
 
-} // namespace MultiFileNameParsing
-
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel::MultiFileNameParsing

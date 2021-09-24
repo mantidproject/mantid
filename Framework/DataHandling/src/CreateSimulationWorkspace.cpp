@@ -71,8 +71,7 @@ StartAndEndTime getStartAndEndTimesFromNexusFile(const std::string &filename,
 }
 } // namespace
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CreateSimulationWorkspace)
@@ -139,7 +138,7 @@ void CreateSimulationWorkspace::exec() {
  */
 void CreateSimulationWorkspace::createInstrument() {
   const bool enableLogging(false);
-  IAlgorithm_sptr loadInstrument = createChildAlgorithm("LoadInstrument", 0.0, 0.5, enableLogging);
+  auto loadInstrument = createChildAlgorithm("LoadInstrument", 0.0, 0.5, enableLogging);
   MatrixWorkspace_sptr tempWS = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
 
   // We need to set the correct start date for this workspace
@@ -294,7 +293,7 @@ void CreateSimulationWorkspace::loadMappingFromISISNXS(const std::string &filena
  * @param udetTable :: An array of detector IDs
  * @param ndets :: The size of the two arrays
  */
-void CreateSimulationWorkspace::createGroupingsFromTables(int *specTable, int *udetTable, int ndets) {
+void CreateSimulationWorkspace::createGroupingsFromTables(const int *specTable, const int *udetTable, int ndets) {
   m_detGroups.clear();
   for (int i = 0; i < ndets; ++i) {
     int specNo = specTable[i];
@@ -355,7 +354,7 @@ void CreateSimulationWorkspace::adjustInstrument(const std::string &filename) {
 
   std::string value = updateDets->value<std::string>();
   if (value.substr(0, 8) == "datafile") {
-    IAlgorithm_sptr updateInst = createChildAlgorithm("UpdateInstrumentFromFile", 0.75, 1.0);
+    auto updateInst = createChildAlgorithm("UpdateInstrumentFromFile", 0.75, 1.0);
     updateInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_outputWS);
     updateInst->setPropertyValue("Filename", filename);
     if (value == "datafile-ignore-phi") {
@@ -407,5 +406,4 @@ void CreateSimulationWorkspace::setStartDate(const API::MatrixWorkspace_sptr &wo
   run.setStartAndEndTime(startTime, endTime);
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

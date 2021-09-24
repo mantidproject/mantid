@@ -20,8 +20,7 @@ void toLower(std::string &name) {
 }
 } // namespace
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(LoadMuonLog)
@@ -114,6 +113,7 @@ void LoadMuonLog::addLogValueFromIndex(MuonNexusReader &nxload, const int &index
     for (int j = 0; j < nxload.getLogLength(index); j++) {
       nxload.getLogStringValues(index, j, logTime, logValue);
       l_PropertyString->addValue(logTime, logValue);
+      l_PropertyString->setUnits(nxload.logUnits(index));
     }
   } else {
     double logValue;
@@ -121,6 +121,7 @@ void LoadMuonLog::addLogValueFromIndex(MuonNexusReader &nxload, const int &index
     for (int j = 0; j < nxload.getLogLength(index); j++) {
       nxload.getLogValues(index, j, logTime, logValue);
       l_PropertyDouble->addValue(logTime, logValue);
+      l_PropertyDouble->setUnits(nxload.logUnits(index));
     }
   }
 
@@ -155,5 +156,4 @@ bool LoadMuonLog::isDateTimeString(const std::string &str) {
   return false;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

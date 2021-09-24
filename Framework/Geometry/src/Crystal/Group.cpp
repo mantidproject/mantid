@@ -7,8 +7,7 @@
 #include "MantidGeometry/Crystal/Group.h"
 #include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 /// Default constructor. Creates a group with one symmetry operation (identity).
 Group::Group() : m_allOperations(), m_operationSet(), m_axisSystem() {
@@ -272,5 +271,4 @@ bool operator==(const Group_const_sptr &lhs, const Group_const_sptr &rhs) {
 /// Inequality operator for shared pointers.
 bool operator!=(const Group_const_sptr &lhs, const Group_const_sptr &rhs) { return !(operator==(lhs, rhs)); }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

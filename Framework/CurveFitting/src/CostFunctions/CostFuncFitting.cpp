@@ -17,9 +17,7 @@
 #include <limits>
 #include <utility>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace CostFunctions {
+namespace Mantid::CurveFitting::CostFunctions {
 
 /**
  * Constructor.
@@ -505,6 +503,4 @@ void CostFuncFitting::drop() {
   setDirty();
 }
 
-} // namespace CostFunctions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::CostFunctions

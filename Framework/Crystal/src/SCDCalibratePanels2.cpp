@@ -32,9 +32,9 @@
 #include <cmath>
 #include <fstream>
 #include <iostream>
+#include <utility>
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -58,25 +58,25 @@ void SCDCalibratePanels2::init() {
                   "Workspace of Indexed Peaks");
 
   // Lattice constant group
-  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
-  mustBePositive->setLower(0.0);
+  auto mustBeNonNegative = std::make_shared<BoundedValidator<double>>();
+  mustBeNonNegative->setLower(0.0);
   declareProperty("RecalculateUB", true, "Recalculate UB matrix using given lattice constants");
-  declareProperty("a", EMPTY_DBL(), mustBePositive,
+  declareProperty("a", EMPTY_DBL(), mustBeNonNegative,
                   "Lattice Parameter a (Leave empty to use lattice constants "
                   "in peaks workspace)");
-  declareProperty("b", EMPTY_DBL(), mustBePositive,
+  declareProperty("b", EMPTY_DBL(), mustBeNonNegative,
                   "Lattice Parameter b (Leave empty to use lattice constants "
                   "in peaks workspace)");
-  declareProperty("c", EMPTY_DBL(), mustBePositive,
+  declareProperty("c", EMPTY_DBL(), mustBeNonNegative,
                   "Lattice Parameter c (Leave empty to use lattice constants "
                   "in peaks workspace)");
-  declareProperty("alpha", EMPTY_DBL(), mustBePositive,
+  declareProperty("alpha", EMPTY_DBL(), mustBeNonNegative,
                   "Lattice Parameter alpha in degrees (Leave empty to use "
                   "lattice constants in peaks workspace)");
-  declareProperty("beta", EMPTY_DBL(), mustBePositive,
+  declareProperty("beta", EMPTY_DBL(), mustBeNonNegative,
                   "Lattice Parameter beta in degrees (Leave empty to use "
                   "lattice constants in peaks workspace)");
-  declareProperty("gamma", EMPTY_DBL(), mustBePositive,
+  declareProperty("gamma", EMPTY_DBL(), mustBeNonNegative,
                   "Lattice Parameter gamma in degrees (Leave empty to use "
                   "lattice constants in peaks workspace)");
   const std::string LATTICE("Lattice Constants");
@@ -107,75 +107,68 @@ void SCDCalibratePanels2::init() {
   // ----- L1 -----
   // --------------
   declareProperty("CalibrateL1", true, "Change the L1(source to sample) distance");
-  declareProperty("ToleranceL1", 5e-4, mustBePositive, "Delta L1 below this value (in meter) is treated as 0.0");
-  declareProperty("SearchRadiusL1", 0.1, mustBePositive,
+  declareProperty("SearchRadiusL1", 0.1, mustBeNonNegative,
                   "Search radius of delta L1 in meters, which is used to constrain optimization search space"
                   "when calibrating L1");
   // editability
-  setPropertySettings("ToleranceL1", std::make_unique<EnabledWhenProperty>("CalibrateL1", IS_EQUAL_TO, "1"));
   setPropertySettings("SearchRadiusL1", std::make_unique<EnabledWhenProperty>("CalibrateL1", IS_EQUAL_TO, "1"));
   // grouping
   setPropertyGroup("CalibrateL1", CALIBRATION);
-  setPropertyGroup("ToleranceL1", CALIBRATION);
   setPropertyGroup("SearchRadiusL1", CALIBRATION);
   // ----------------
   // ----- bank -----
   // ----------------
   declareProperty("CalibrateBanks", false, "Calibrate position and orientation of each bank.");
-  declareProperty("ToleranceTransBank", 1e-6, mustBePositive,
-                  "Delta translation of bank (in meter) below this value is treated as 0.0");
   declareProperty(
-      "SearchRadiusTransBank", 5e-2, mustBePositive,
+      "SearchRadiusTransBank", 5e-2, mustBeNonNegative,
       "This is the search radius (in meter) when calibrating component translations, used to constrain optimization"
       "search space when calibration translation of banks");
-  declareProperty("ToleranceRotBank", 1e-3, mustBePositive,
-                  "Misorientation of bank (in deg) below this value is treated as 0.0");
-  declareProperty("SearchradiusRotBank", 1.0, mustBePositive,
+  declareProperty("SearchradiusRotXBank", 1.0, mustBeNonNegative,
+                  "This is the search radius (in deg) when calibrating component reorientation, used to constrain "
+                  "optimization search space");
+  declareProperty("SearchradiusRotYBank", 1.0, mustBeNonNegative,
+                  "This is the search radius (in deg) when calibrating component reorientation, used to constrain "
+                  "optimization search space");
+  declareProperty("SearchradiusRotZBank", 1.0, mustBeNonNegative,
                   "This is the search radius (in deg) when calibrating component reorientation, used to constrain "
                   "optimization search space");
   // editability
-  setPropertySettings("ToleranceTransBank", std::make_unique<EnabledWhenProperty>("CalibrateBanks", IS_EQUAL_TO, "1"));
   setPropertySettings("SearchRadiusTransBank",
                       std::make_unique<EnabledWhenProperty>("CalibrateBanks", IS_EQUAL_TO, "1"));
-  setPropertySettings("ToleranceRotBank", std::make_unique<EnabledWhenProperty>("CalibrateBanks", IS_EQUAL_TO, "1"));
-  setPropertySettings("SearchradiusRotBank", std::make_unique<EnabledWhenProperty>("CalibrateBanks", IS_EQUAL_TO, "1"));
+  setPropertySettings("SearchradiusRotXBank",
+                      std::make_unique<EnabledWhenProperty>("CalibrateBanks", IS_EQUAL_TO, "1"));
+  setPropertySettings("SearchradiusRotYBank",
+                      std::make_unique<EnabledWhenProperty>("CalibrateBanks", IS_EQUAL_TO, "1"));
+  setPropertySettings("SearchradiusRotZBank",
+                      std::make_unique<EnabledWhenProperty>("CalibrateBanks", IS_EQUAL_TO, "1"));
   // grouping
   setPropertyGroup("CalibrateBanks", CALIBRATION);
-  setPropertyGroup("ToleranceTransBank", CALIBRATION);
   setPropertyGroup("SearchRadiusTransBank", CALIBRATION);
-  setPropertyGroup("ToleranceRotBank", CALIBRATION);
-  setPropertyGroup("SearchradiusRotBank", CALIBRATION);
+  setPropertyGroup("SearchradiusRotXBank", CALIBRATION);
+  setPropertyGroup("SearchradiusRotYBank", CALIBRATION);
+  setPropertyGroup("SearchradiusRotZBank", CALIBRATION);
   // --------------
   // ----- T0 -----
   // --------------
   declareProperty("CalibrateT0", false, "Calibrate the T0 (initial TOF)");
-  declareProperty("ToleranceT0", 1e-3, mustBePositive,
-                  "Shift of initial TOF (in ms) below this value is treated as 0.0");
-  declareProperty("SearchRadiusT0", 10.0, mustBePositive,
+  declareProperty("SearchRadiusT0", 10.0, mustBeNonNegative,
                   "Search radius of T0 (in ms), used to constrain optimization search space");
   // editability
-  setPropertySettings("ToleranceT0", std::make_unique<EnabledWhenProperty>("CalibrateT0", IS_EQUAL_TO, "1"));
   setPropertySettings("SearchRadiusT0", std::make_unique<EnabledWhenProperty>("CalibrateT0", IS_EQUAL_TO, "1"));
   // grouping
   setPropertyGroup("CalibrateT0", CALIBRATION);
-  setPropertyGroup("ToleranceT0", CALIBRATION);
   setPropertyGroup("SearchRadiusT0", CALIBRATION);
   // ---------------------
   // ----- samplePos -----
   // ---------------------
   declareProperty("TuneSamplePosition", false, "Fine tunning sample position");
-  declareProperty("ToleranceSamplePos", 1e-6, mustBePositive,
-                  "Sample position change (in meter) below this value is treated as 0.0");
-  declareProperty("SearchRadiusSamplePos", 0.1, mustBePositive,
+  declareProperty("SearchRadiusSamplePos", 0.1, mustBeNonNegative,
                   "Search radius of sample position change (in meters), used to constrain optimization search space");
   // editability
-  setPropertySettings("ToleranceSamplePos",
-                      std::make_unique<EnabledWhenProperty>("TuneSamplePosition", IS_EQUAL_TO, "1"));
   setPropertySettings("SearchRadiusSamplePos",
                       std::make_unique<EnabledWhenProperty>("TuneSamplePosition", IS_EQUAL_TO, "1"));
   // grouping
   setPropertyGroup("TuneSamplePosition", CALIBRATION);
-  setPropertyGroup("ToleranceSamplePos", CALIBRATION);
   setPropertyGroup("SearchRadiusSamplePos", CALIBRATION);
 
   // Output options group
@@ -404,7 +397,7 @@ void SCDCalibratePanels2::optimizeL1(IPeaksWorkspace_sptr pws, IPeaksWorkspace_s
   MatrixWorkspace_sptr l1ws = getIdealQSampleAsHistogram1D(pws);
 
   // fit algorithm for the optimization of L1
-  IAlgorithm_sptr fitL1_alg = createChildAlgorithm("Fit", -1, -1, false);
+  auto fitL1_alg = createChildAlgorithm("Fit", -1, -1, false);
   auto objf = std::make_shared<SCDCalibratePanels2ObjFunc>();
   // NOTE: always use the original pws to get the tofs
   std::vector<double> tofs = captureTOF(pws_original);
@@ -414,7 +407,7 @@ void SCDCalibratePanels2::optimizeL1(IPeaksWorkspace_sptr pws, IPeaksWorkspace_s
   //-- bounds&constraints def
   std::ostringstream tie_str;
   tie_str << "DeltaX=0.0,DeltaY=0.0,"
-          << "Theta=1.0,Phi=0.0,DeltaRotationAngle=0.0";
+          << "RotX=0.0,RotY=0.0,RotZ=0.0";
   if (!tuneSamplepos) {
     tie_str << ",DeltaSampleX=0.0,DeltaSampleY=0.0,DeltaSampleZ=0.0";
   }
@@ -452,20 +445,10 @@ void SCDCalibratePanels2::optimizeL1(IPeaksWorkspace_sptr pws, IPeaksWorkspace_s
   ITableWorkspace_sptr rst = fitL1_alg->getProperty("OutputParameters");
   // get results for L1
   double dL1_optimized = rst->getRef<double>("Value", 2);
-  double tor_dL1 = getProperty("ToleranceL1");
-  if (std::abs(dL1_optimized) < std::abs(tor_dL1)) {
-    calilog << "-- Fit L1 results below tolerance, zero it\n";
-    dL1_optimized = 0.0;
-  }
+
   // get results for T0 (optional)
   double dT0_optimized = rst->getRef<double>("Value", 6);
-  double tor_dT0 = getProperty("ToleranceT0");
-  if (caliT0) {
-    if (std::abs(dT0_optimized) < std::abs(tor_dT0)) {
-      calilog << "-- Fit dT0 = " << dT0_optimized << " is below tolerance(" << tor_dT0 << "), zero it\n";
-      dT0_optimized = 0.0;
-    }
-  }
+
   // get results for sample pos
   // NOTE:
   //    if samplePos is not part of calibration, we will get zeros here, which means zero
@@ -473,23 +456,11 @@ void SCDCalibratePanels2::optimizeL1(IPeaksWorkspace_sptr pws, IPeaksWorkspace_s
   double dsx_optimized = rst->getRef<double>("Value", 7);
   double dsy_optimized = rst->getRef<double>("Value", 8);
   double dsz_optimized = rst->getRef<double>("Value", 9);
-  double tor_dsp = getProperty("ToleranceSamplePos");
-  tor_dsp = std::abs(tor_dsp);
-  if (tuneSamplepos) {
-    if ((std::abs(dsx_optimized) < tor_dsp) && (std::abs(dsy_optimized) < tor_dsp) &&
-        (std::abs(dsz_optimized) < tor_dsp)) {
-      calilog << "-- Tune SamplePos = (" << dsx_optimized << "," << dsy_optimized << "," << dsz_optimized
-              << ") is below tolerance (" << tor_dsp << "), zero it\n";
-      dsx_optimized = 0.0;
-      dsy_optimized = 0.0;
-      dsz_optimized = 0.0;
-    }
-  }
 
   // apply the cali results (for output cali table and file)
-  adjustComponent(0.0, 0.0, dL1_optimized, 1.0, 0.0, 0.0, 0.0, pws->getInstrument()->getSource()->getName(), pws);
+  adjustComponent(0.0, 0.0, dL1_optimized, 0.0, 0.0, 0.0, pws->getInstrument()->getSource()->getName(), pws);
   m_T0 = dT0_optimized;
-  adjustComponent(dsx_optimized, dsy_optimized, dsz_optimized, 1.0, 0.0, 0.0, 0.0, "sample-position", pws);
+  adjustComponent(dsx_optimized, dsy_optimized, dsz_optimized, 0.0, 0.0, 0.0, "sample-position", pws);
   // logging
   int npks = pws->getNumberPeaks();
   calilog << "-- Fit L1 results using " << npks << " peaks:\n"
@@ -507,7 +478,7 @@ void SCDCalibratePanels2::optimizeL1(IPeaksWorkspace_sptr pws, IPeaksWorkspace_s
  * @param pws
  * @param pws_original
  */
-void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws, IPeaksWorkspace_sptr pws_original) {
+void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws, const IPeaksWorkspace_sptr &pws_original) {
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*pws))
   for (int i = 0; i < static_cast<int>(m_BankNames.size()); ++i) {
@@ -538,23 +509,54 @@ void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws, IPeaksWorkspac
     MatrixWorkspace_sptr wsBankCali = getIdealQSampleAsHistogram1D(pwsBanki);
 
     //-- step 2&3: invoke fit to find both traslation and rotation
-    IAlgorithm_sptr fitBank_alg = createChildAlgorithm("Fit", -1, -1, false);
+    auto fitBank_alg = createChildAlgorithm("Fit", -1, -1, false);
     //---- setup obj fun def
     auto objf = std::make_shared<SCDCalibratePanels2ObjFunc>();
     objf->setPeakWorkspace(pwsBanki, bankname, tofs);
     fitBank_alg->setProperty("Function", std::dynamic_pointer_cast<IFunction>(objf));
 
     //---- bounds&constraints def
+    //
+    double searchRadiusRotX = getProperty("SearchradiusRotXBank");
+    searchRadiusRotX = std::abs(searchRadiusRotX);
+    double searchRadiusRotY = getProperty("SearchradiusRotYBank");
+    searchRadiusRotY = std::abs(searchRadiusRotY);
+    double searchRadiusRotZ = getProperty("SearchradiusRotZBank");
+    searchRadiusRotZ = std::abs(searchRadiusRotZ);
+    //
+    double searchRadiusTran = getProperty("SearchRadiusTransBank");
+    searchRadiusTran = std::abs(searchRadiusTran);
+    //
     std::ostringstream tie_str;
     tie_str << "DeltaSampleX=0.0,DeltaSampleY=0.0,DeltaSampleZ=0.0,"
             << "DeltaT0=" << m_T0;
     std::ostringstream constraint_str;
-    double brb = getProperty("SearchradiusRotBank");
-    brb = std::abs(brb);
-    constraint_str << "0.0<Theta<3.1415926,0<Phi<6.28318530718," << -brb << "<DeltaRotationAngle<" << brb << ",";
-    double btb = getProperty("SearchRadiusTransBank");
-    btb = std::abs(btb);
-    constraint_str << -btb << "<DeltaX<" << btb << "," << -btb << "<DeltaY<" << btb << "," << -btb << "<DeltaZ<" << btb;
+    // rot x
+    if (searchRadiusRotX < Tolerance) {
+      tie_str << ",RotX=0.0";
+    } else {
+      constraint_str << -searchRadiusRotX << "<RotX<" << searchRadiusRotX << ",";
+    }
+    // rot y
+    if (searchRadiusRotY < Tolerance) {
+      tie_str << ",RotY=0.0";
+    } else {
+      constraint_str << -searchRadiusRotY << "<RotY<" << searchRadiusRotY << ",";
+    }
+    // rot z
+    if (searchRadiusRotZ < Tolerance) {
+      tie_str << ",RotZ=0.0";
+    } else {
+      constraint_str << -searchRadiusRotZ << "<RotZ<" << searchRadiusRotZ << ","; // constrain rotation around Z-axis
+    }
+    // translation
+    if (searchRadiusTran < Tolerance) {
+      tie_str << ",DeltaX=0.0,DeltaY=0.0,DeltaZ=0.0";
+    } else {
+      constraint_str << -searchRadiusTran << "<DeltaX<" << searchRadiusTran << "," // restrict tranlastion along X
+                     << -searchRadiusTran << "<DeltaY<" << searchRadiusTran << "," // restrict tranlastion along Y
+                     << -searchRadiusTran << "<DeltaZ<" << searchRadiusTran;       // restrict tranlastion along Z
+    }
 
     //---- set&go
     fitBank_alg->setProperty("Ties", tie_str.str());
@@ -570,36 +572,24 @@ void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws, IPeaksWorkspac
     double dx = rstFitBank->getRef<double>("Value", 0);
     double dy = rstFitBank->getRef<double>("Value", 1);
     double dz = rstFitBank->getRef<double>("Value", 2);
-    double theta = rstFitBank->getRef<double>("Value", 3);
-    double phi = rstFitBank->getRef<double>("Value", 4);
-    double rotang = rstFitBank->getRef<double>("Value", 5);
+    double drx = rstFitBank->getRef<double>("Value", 3);
+    double dry = rstFitBank->getRef<double>("Value", 4);
+    double drz = rstFitBank->getRef<double>("Value", 5);
 
     //-- step 4: update the instrument with optimization results
-    //           if the fit results are above the tolerance/threshold
     std::string bn = bankname;
     std::ostringstream calilog;
-    if (pws->getInstrument()->getName().compare("CORELLI") == 0)
+    if (pws->getInstrument()->getName().compare("CORELLI") == 0) {
       bn.append("/sixteenpack");
-    double tolerance_translation = getProperty("ToleranceTransBank");
-    tolerance_translation = std::abs(tolerance_translation);
-    double tolerance_rotation = getProperty("ToleranceRotBank");
-    tolerance_rotation = std::abs(tolerance_rotation);
-    if ((std::abs(dx) < tolerance_translation) && (std::abs(dy) < tolerance_translation) &&
-        (std::abs(dz) < tolerance_translation) && (std::abs(rotang) < tolerance_rotation)) {
-      calilog << "-- Fit " << bn << " results below tolerance, zero all\n";
-      dx = 0.0;
-      dy = 0.0;
-      dz = 0.0;
-      rotang = 0.0;
     }
-    double rvx = sin(theta) * cos(phi);
-    double rvy = sin(theta) * sin(phi);
-    double rvz = cos(theta);
-    adjustComponent(dx, dy, dz, rvx, rvy, rvz, rotang, bn, pws);
+    // update instrument for output
+    adjustComponent(dx, dy, dz, drx, dry, drz, bn, pws);
     // logging
-    calilog << "-- Fit " << bn << " results using " << nBankPeaks << " peaks:\n "
-            << "    d(x,y,z) = (" << dx << "," << dy << "," << dz << ")\n"
-            << "    rotang(rx,ry,rz) =" << rotang << "(" << rvx << "," << rvy << "," << rvz << ")\n"
+    V3D dtrans(dx, dy, dz);
+    V3D drots(drx, dry, drz);
+    calilog << "-- Fit " << bn << " results using " << nBankPeaks << " peaks:\n"
+            << "    d(x,y,z) = " << dtrans << "\n"
+            << "    r(x,y,z) = " << drots << "\n"
             << "    chi2/DOF = " << chi2OverDOF << "\n";
     g_log.notice() << calilog.str();
 
@@ -621,7 +611,7 @@ void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws, IPeaksWorkspac
  */
 void SCDCalibratePanels2::optimizeT0(IPeaksWorkspace_sptr pws, IPeaksWorkspace_sptr pws_original) {
   // create child Fit alg to optimize T0
-  IAlgorithm_sptr fitT0_alg = createChildAlgorithm("Fit", -1, -1, false);
+  auto fitT0_alg = createChildAlgorithm("Fit", -1, -1, false);
   //-- obj func def
   //  dl;dr;
   //    Fit algorithm requires a IFunction1D to fit
@@ -644,7 +634,7 @@ void SCDCalibratePanels2::optimizeT0(IPeaksWorkspace_sptr pws, IPeaksWorkspace_s
   //-- bounds&constraints def
   std::ostringstream tie_str;
   tie_str << "DeltaX=0.0,DeltaY=0.0,DeltaZ=0.0,"
-          << "Theta=0.0,Phi=0.0,DeltaRotationAngle=0.0,"
+          << "RotX=0.0,RotY=0.0,RotZ=0.0,"
           << "DeltaSampleX=0.0,DeltaSampleY=0.0,DeltaSampleZ=0.0";
   std::ostringstream constraint_str;
   double r_dT0 = getProperty("SearchRadiusT0");
@@ -660,15 +650,10 @@ void SCDCalibratePanels2::optimizeT0(IPeaksWorkspace_sptr pws, IPeaksWorkspace_s
   fitT0_alg->executeAsChildAlg();
 
   //-- parse output
+  std::ostringstream calilog;
   double chi2OverDOF = fitT0_alg->getProperty("OutputChi2overDoF");
   ITableWorkspace_sptr rst = fitT0_alg->getProperty("OutputParameters");
   double dT0_optimized = rst->getRef<double>("Value", 6);
-  double tor_dT0 = getProperty("ToleranceT0");
-  std::ostringstream calilog;
-  if (std::abs(dT0_optimized) < std::abs(tor_dT0)) {
-    calilog << "-- Fit dT0 = " << dT0_optimized << " is below tolerance(" << tor_dT0 << "), zero it\n";
-    dT0_optimized = 0.0;
-  }
 
   // apply calibration results (for output file and caliTable)
   m_T0 = dT0_optimized;
@@ -688,7 +673,7 @@ void SCDCalibratePanels2::optimizeT0(IPeaksWorkspace_sptr pws, IPeaksWorkspace_s
  */
 void SCDCalibratePanels2::optimizeSamplePos(IPeaksWorkspace_sptr pws, IPeaksWorkspace_sptr pws_original) {
   // create child Fit alg to optimize T0
-  IAlgorithm_sptr fitSamplePos_alg = createChildAlgorithm("Fit", -1, -1, false);
+  auto fitSamplePos_alg = createChildAlgorithm("Fit", -1, -1, false);
 
   // creat input 1DHist from qSample
   MatrixWorkspace_sptr samplePosws = getIdealQSampleAsHistogram1D(pws);
@@ -702,7 +687,7 @@ void SCDCalibratePanels2::optimizeSamplePos(IPeaksWorkspace_sptr pws, IPeaksWork
   //-- bounds&constraints def
   std::ostringstream tie_str;
   tie_str << "DeltaX=0.0,DeltaY=0.0,DeltaZ=0.0,"
-          << "Theta=0.0,Phi=0.0,DeltaRotationAngle=0.0,"
+          << "RotX=0.0,RotY=0.0,RotZ=0.0,"
           << "DeltaT0=" << m_T0;
   std::ostringstream constraint_str;
   double r_dsp = getProperty("SearchRadiusSamplePos");
@@ -719,25 +704,15 @@ void SCDCalibratePanels2::optimizeSamplePos(IPeaksWorkspace_sptr pws, IPeaksWork
   fitSamplePos_alg->executeAsChildAlg();
 
   //-- parse output
+  std::ostringstream calilog;
   double chi2OverDOF = fitSamplePos_alg->getProperty("OutputChi2overDoF");
   ITableWorkspace_sptr rst = fitSamplePos_alg->getProperty("OutputParameters");
   double dsx_optimized = rst->getRef<double>("Value", 7);
   double dsy_optimized = rst->getRef<double>("Value", 8);
   double dsz_optimized = rst->getRef<double>("Value", 9);
-  double tor_dsp = getProperty("ToleranceSamplePos");
-  tor_dsp = std::abs(tor_dsp);
-  std::ostringstream calilog;
-  if ((std::abs(dsx_optimized) < tor_dsp) && (std::abs(dsy_optimized) < tor_dsp) &&
-      (std::abs(dsz_optimized) < tor_dsp)) {
-    calilog << "-- Tune SamplePos = (" << dsx_optimized << "," << dsy_optimized << "," << dsz_optimized
-            << ") is below tolerance (" << tor_dsp << "), zero it\n";
-    dsx_optimized = 0.0;
-    dsy_optimized = 0.0;
-    dsz_optimized = 0.0;
-  }
 
   // apply the calibration results to pws for ouptut file
-  adjustComponent(dsx_optimized, dsy_optimized, dsz_optimized, 1.0, 0.0, 0.0, 0.0, "sample-position", pws);
+  adjustComponent(dsx_optimized, dsy_optimized, dsz_optimized, 0.0, 0.0, 0.0, "sample-position", pws);
   int npks = pws->getNumberPeaks();
   // logging
   calilog << "-- Tune SamplePos results using " << npks << " peaks:\n"
@@ -755,7 +730,7 @@ void SCDCalibratePanels2::optimizeSamplePos(IPeaksWorkspace_sptr pws, IPeaksWork
  *        input peak workspace
  *
  */
-void SCDCalibratePanels2::parseLatticeConstant(IPeaksWorkspace_sptr pws) {
+void SCDCalibratePanels2::parseLatticeConstant(const IPeaksWorkspace_sptr &pws) {
   m_a = getProperty("a");
   m_b = getProperty("b");
   m_c = getProperty("c");
@@ -783,8 +758,8 @@ void SCDCalibratePanels2::parseLatticeConstant(IPeaksWorkspace_sptr pws) {
  *
  * @param pws
  */
-void SCDCalibratePanels2::updateUBMatrix(IPeaksWorkspace_sptr pws) {
-  IAlgorithm_sptr calcUB_alg = createChildAlgorithm("CalculateUMatrix", -1, -1, false);
+void SCDCalibratePanels2::updateUBMatrix(const IPeaksWorkspace_sptr &pws) {
+  auto calcUB_alg = createChildAlgorithm("CalculateUMatrix", -1, -1, false);
   calcUB_alg->setLogging(LOGCHILDALG);
   calcUB_alg->setProperty("PeaksWorkspace", pws);
   calcUB_alg->setProperty("a", m_a);
@@ -796,7 +771,7 @@ void SCDCalibratePanels2::updateUBMatrix(IPeaksWorkspace_sptr pws) {
   calcUB_alg->executeAsChildAlg();
 
   // Since UB is updated, we need to redo the indexation
-  IAlgorithm_sptr idxpks_alg = createChildAlgorithm("IndexPeaks", -1, -1, false);
+  auto idxpks_alg = createChildAlgorithm("IndexPeaks", -1, -1, false);
   idxpks_alg->setLogging(LOGCHILDALG);
   idxpks_alg->setProperty("PeaksWorkspace", pws);
   idxpks_alg->setProperty("RoundHKLs", true); // both are using default
@@ -810,8 +785,8 @@ void SCDCalibratePanels2::updateUBMatrix(IPeaksWorkspace_sptr pws) {
  * @param pws
  * @return IPeaksWorkspace_sptr
  */
-IPeaksWorkspace_sptr SCDCalibratePanels2::removeUnindexedPeaks(Mantid::API::IPeaksWorkspace_sptr pws) {
-  IAlgorithm_sptr fltpk_alg = createChildAlgorithm("FilterPeaks");
+IPeaksWorkspace_sptr SCDCalibratePanels2::removeUnindexedPeaks(const Mantid::API::IPeaksWorkspace_sptr &pws) {
+  auto fltpk_alg = createChildAlgorithm("FilterPeaks");
   fltpk_alg->setLogging(LOGCHILDALG);
   fltpk_alg->setProperty("InputWorkspace", pws);
   fltpk_alg->setProperty("FilterVariable", "h^2+k^2+l^2");
@@ -831,7 +806,7 @@ IPeaksWorkspace_sptr SCDCalibratePanels2::removeUnindexedPeaks(Mantid::API::IPea
  *
  * @param pws
  */
-std::vector<double> SCDCalibratePanels2::captureTOF(Mantid::API::IPeaksWorkspace_sptr pws) {
+std::vector<double> SCDCalibratePanels2::captureTOF(const Mantid::API::IPeaksWorkspace_sptr &pws) {
   std::vector<double> tofs;
 
   for (int i = 0; i < pws->getNumberPeaks(); ++i) {
@@ -846,7 +821,7 @@ std::vector<double> SCDCalibratePanels2::captureTOF(Mantid::API::IPeaksWorkspace
  *
  * @param pws
  */
-void SCDCalibratePanels2::getBankNames(IPeaksWorkspace_sptr pws) {
+void SCDCalibratePanels2::getBankNames(const IPeaksWorkspace_sptr &pws) {
   auto peaksWorkspace = std::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(pws);
   if (!peaksWorkspace)
     throw std::invalid_argument("a PeaksWorkspace is required to retrieve bank names");
@@ -866,9 +841,10 @@ void SCDCalibratePanels2::getBankNames(IPeaksWorkspace_sptr pws) {
  * @param outputwsn
  * @return DataObjects::PeaksWorkspace_sptr
  */
-IPeaksWorkspace_sptr SCDCalibratePanels2::selectPeaksByBankName(IPeaksWorkspace_sptr pws, const std::string bankname,
-                                                                const std::string outputwsn) {
-  IAlgorithm_sptr fltpk_alg = createChildAlgorithm("FilterPeaks");
+IPeaksWorkspace_sptr SCDCalibratePanels2::selectPeaksByBankName(const IPeaksWorkspace_sptr &pws,
+                                                                const std::string &bankname,
+                                                                const std::string &outputwsn) {
+  auto fltpk_alg = createChildAlgorithm("FilterPeaks");
   fltpk_alg->setLogging(LOGCHILDALG);
   fltpk_alg->setProperty("InputWorkspace", pws);
   fltpk_alg->setProperty("BankName", bankname);
@@ -888,7 +864,7 @@ IPeaksWorkspace_sptr SCDCalibratePanels2::selectPeaksByBankName(IPeaksWorkspace_
  * @param pws
  * @return MatrixWorkspace_sptr
  */
-MatrixWorkspace_sptr SCDCalibratePanels2::getIdealQSampleAsHistogram1D(IPeaksWorkspace_sptr pws) {
+MatrixWorkspace_sptr SCDCalibratePanels2::getIdealQSampleAsHistogram1D(const IPeaksWorkspace_sptr &pws) {
   int npeaks = pws->getNumberPeaks();
 
   // prepare workspace to store qSample as Histogram1D
@@ -902,6 +878,20 @@ MatrixWorkspace_sptr SCDCalibratePanels2::getIdealQSampleAsHistogram1D(IPeaksWor
   auto &yvector = spectrum.mutableY();
   auto &evector = spectrum.mutableE();
 
+  // quick check to see what kind of weighting we can use
+  double totalSigmaInt = 0.0;
+  for (int i = 0; i < npeaks; ++i) {
+    totalSigmaInt += pws->getPeak(i).getSigmaIntensity();
+  }
+  double totalInt = 0.0;
+  for (int i = 0; i < npeaks; ++i) {
+    totalInt += pws->getPeak(i).getIntensity();
+  }
+  double totalCnt = 0.0;
+  for (int i = 0; i < npeaks; ++i) {
+    totalCnt += pws->getPeak(i).getBinCount();
+  }
+
   // directly compute qsample from UBmatrix and HKL
   auto ubmatrix = pws->sample().getOrientedLattice().getUB();
   for (int i = 0; i < npeaks; ++i) {
@@ -909,10 +899,19 @@ MatrixWorkspace_sptr SCDCalibratePanels2::getIdealQSampleAsHistogram1D(IPeaksWor
     V3D qv = ubmatrix * pws->getPeak(i).getIntHKL();
     qv *= 2 * PI;
     // qv = qv / qv.norm();
+    double wgt = 1.0;
+    if (totalSigmaInt > 0.0) {
+      wgt = 1.0 / pws->getPeak(i).getSigmaIntensity();
+    } else if (totalInt > 0.0) {
+      wgt = 1.0 / pws->getPeak(i).getIntensity();
+    } else if (totalCnt > 0.0) {
+      wgt = 1.0 / pws->getPeak(i).getBinCount();
+    }
+    // make 1dhist
     for (int j = 0; j < 3; ++j) {
       xvector[i * 3 + j] = i * 3 + j;
       yvector[i * 3 + j] = qv[j];
-      evector[i * 3 + j] = 1;
+      evector[i * 3 + j] = wgt;
     }
   }
 
@@ -925,30 +924,16 @@ MatrixWorkspace_sptr SCDCalibratePanels2::getIdealQSampleAsHistogram1D(IPeaksWor
  * @param dx
  * @param dy
  * @param dz
- * @param rvx
- * @param rvy
- * @param rvz
- * @param rang
+ * @param drx
+ * @param dry
+ * @param drz
  * @param cmptName
  * @param pws
  */
-void SCDCalibratePanels2::adjustComponent(double dx, double dy, double dz, double rvx, double rvy, double rvz,
-                                          double rang, std::string cmptName, IPeaksWorkspace_sptr &pws) {
-
-  // orientation
-  IAlgorithm_sptr rot_alg = createChildAlgorithm("RotateInstrumentComponent", -1, -1, false);
-  rot_alg->setLogging(LOGCHILDALG);
-  rot_alg->setProperty<Workspace_sptr>("Workspace", pws);
-  rot_alg->setProperty("ComponentName", cmptName);
-  rot_alg->setProperty("X", rvx);
-  rot_alg->setProperty("Y", rvy);
-  rot_alg->setProperty("Z", rvz);
-  rot_alg->setProperty("Angle", rang);
-  rot_alg->setProperty("RelativeRotation", true);
-  rot_alg->executeAsChildAlg();
-
+void SCDCalibratePanels2::adjustComponent(double dx, double dy, double dz, double drx, double dry, double drz,
+                                          const std::string &cmptName, IPeaksWorkspace_sptr &pws) {
   // translation
-  IAlgorithm_sptr mv_alg = createChildAlgorithm("MoveInstrumentComponent", -1, -1, false);
+  auto mv_alg = createChildAlgorithm("MoveInstrumentComponent", -1, -1, false);
   mv_alg->setLogging(LOGCHILDALG);
   mv_alg->setProperty<Workspace_sptr>("Workspace", pws);
   mv_alg->setProperty("ComponentName", cmptName);
@@ -957,6 +942,37 @@ void SCDCalibratePanels2::adjustComponent(double dx, double dy, double dz, doubl
   mv_alg->setProperty("Z", dz);
   mv_alg->setProperty("RelativePosition", true);
   mv_alg->executeAsChildAlg();
+
+  // rotation
+  auto rot_alg = createChildAlgorithm("RotateInstrumentComponent", -1, -1, false);
+  rot_alg->setLogging(LOGCHILDALG);
+  // - x-axis
+  rot_alg->setProperty<Workspace_sptr>("Workspace", pws);
+  rot_alg->setProperty("ComponentName", cmptName);
+  rot_alg->setProperty("X", 1.0);
+  rot_alg->setProperty("Y", 0.0);
+  rot_alg->setProperty("Z", 0.0);
+  rot_alg->setProperty("Angle", drx);
+  rot_alg->setProperty("RelativeRotation", true);
+  rot_alg->executeAsChildAlg();
+  // - y-axis
+  rot_alg->setProperty<Workspace_sptr>("Workspace", pws);
+  rot_alg->setProperty("ComponentName", cmptName);
+  rot_alg->setProperty("X", 0.0);
+  rot_alg->setProperty("Y", 1.0);
+  rot_alg->setProperty("Z", 0.0);
+  rot_alg->setProperty("Angle", dry);
+  rot_alg->setProperty("RelativeRotation", true);
+  rot_alg->executeAsChildAlg();
+  // - z-axis
+  rot_alg->setProperty<Workspace_sptr>("Workspace", pws);
+  rot_alg->setProperty("ComponentName", cmptName);
+  rot_alg->setProperty("X", 0.0);
+  rot_alg->setProperty("Y", 0.0);
+  rot_alg->setProperty("Z", 1.0);
+  rot_alg->setProperty("Angle", drz);
+  rot_alg->setProperty("RelativeRotation", true);
+  rot_alg->executeAsChildAlg();
 }
 
 /**
@@ -1025,9 +1041,6 @@ ITableWorkspace_sptr SCDCalibratePanels2::generateCalibrationTable(std::shared_p
  *
  * @param instrument   The instrument with the new values for the banks
  * in Groups
- *
- * TODO:
- *  - Need to find a way to add the information regarding calibrated T0
  */
 void SCDCalibratePanels2::saveXmlFile(const std::string &FileName,
                                       boost::container::flat_set<std::string> &AllBankNames,
@@ -1216,7 +1229,7 @@ void SCDCalibratePanels2::saveIsawDetCal(const std::string &filename,
   std::vector<std::string> banknames(AllBankName.begin(), AllBankName.end());
 
   // call SaveIsawDetCal
-  API::IAlgorithm_sptr alg = createChildAlgorithm("SaveIsawDetCal");
+  auto alg = createChildAlgorithm("SaveIsawDetCal");
   alg->setProperty("InputWorkspace", wksp);
   alg->setProperty("Filename", filename);
   alg->setProperty("TimeOffset", T0);
@@ -1230,8 +1243,8 @@ void SCDCalibratePanels2::saveIsawDetCal(const std::string &filename,
  * @param FileName
  * @param tws
  */
-void SCDCalibratePanels2::saveCalibrationTable(const std::string &FileName, ITableWorkspace_sptr &tws) {
-  API::IAlgorithm_sptr alg = createChildAlgorithm("SaveAscii");
+void SCDCalibratePanels2::saveCalibrationTable(const std::string &FileName, Mantid::API::ITableWorkspace_sptr &tws) {
+  auto alg = createChildAlgorithm("SaveAscii");
   alg->setProperty("InputWorkspace", tws);
   alg->setProperty("Filename", FileName);
   alg->setPropertyValue("CommentIndicator", "#");
@@ -1330,7 +1343,7 @@ void SCDCalibratePanels2::profileL1(Mantid::API::IPeaksWorkspace_sptr &pws,
  * @param pws_original
  */
 void SCDCalibratePanels2::profileBanks(Mantid::API::IPeaksWorkspace_sptr &pws,
-                                       Mantid::API::IPeaksWorkspace_sptr pws_original) {
+                                       const Mantid::API::IPeaksWorkspace_sptr &pws_original) {
   g_log.notice() << "START of profiling all banks along six degree of freedom\n";
 
   // control option
@@ -1609,5 +1622,4 @@ void SCDCalibratePanels2::profileL1T0(Mantid::API::IPeaksWorkspace_sptr &pws,
                  << "END of profiling objective func along L1 and T0\n";
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

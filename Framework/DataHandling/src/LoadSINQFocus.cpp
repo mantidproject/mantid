@@ -21,8 +21,7 @@
 #include <limits>
 #include <vector>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using namespace Kernel;
 using namespace API;
@@ -229,7 +228,7 @@ void LoadSINQFocus::loadExperimentDetails(NXEntry &entry) {
  */
 void LoadSINQFocus::runLoadInstrument() {
 
-  IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
+  auto loadInst = createChildAlgorithm("LoadInstrument");
 
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   try {
@@ -246,5 +245,4 @@ void LoadSINQFocus::runLoadInstrument() {
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

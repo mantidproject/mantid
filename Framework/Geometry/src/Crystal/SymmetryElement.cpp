@@ -9,12 +9,12 @@
 
 #include <memory>
 #include <stdexcept>
+#include <utility>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 /// Constructor with symbol argument.
-SymmetryElement::SymmetryElement(const std::string &symbol) : m_hmSymbol(symbol) {}
+SymmetryElement::SymmetryElement(std::string symbol) : m_hmSymbol(std::move(symbol)) {}
 
 SymmetryElementIdentity::SymmetryElementIdentity() : SymmetryElement("1") {}
 
@@ -73,5 +73,4 @@ SymmetryElement_sptr SymmetryElementTranslation::clone() const {
   return std::make_shared<SymmetryElementTranslation>(m_translation);
 }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

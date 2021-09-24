@@ -18,8 +18,7 @@
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/UnitFactory.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(SassenaFFT)
@@ -80,7 +79,7 @@ void SassenaFFT::exec() {
   // F(q,-t) = F*(q,t)
   int part = 3; // extract the real part of the transform, assuming I(Q,t) is real
   const std::string sqwName = gwsName + "_sqw";
-  API::IAlgorithm_sptr fft = this->createChildAlgorithm("ExtractFFTSpectrum");
+  auto fft = createChildAlgorithm("ExtractFFTSpectrum");
   fft->setProperty<DataObjects::Workspace2D_sptr>("InputWorkspace", fqtRe);
   if (!this->getProperty("FFTonlyRealPart")) {
     part = 0; // extract the real part of the transform, assuming I(Q,t) is complex
@@ -97,7 +96,7 @@ void SassenaFFT::exec() {
   // We assume the units of the intermediate scattering function are in
   // picoseconds
   // The resulting frequency unit is in mili-eV, thus use m_ps2meV
-  API::IAlgorithm_sptr scaleX = this->createChildAlgorithm("ScaleX");
+  auto scaleX = createChildAlgorithm("ScaleX");
   scaleX->setProperty<DataObjects::Workspace2D_sptr>("InputWorkspace", sqw);
   scaleX->setProperty<double>("Factor", m_ps2meV);
   scaleX->setProperty<DataObjects::Workspace2D_sptr>("OutputWorkspace", sqw);
@@ -108,7 +107,7 @@ void SassenaFFT::exec() {
     double T = this->getProperty("Temp");
     // The ExponentialCorrection algorithm assumes the form C0*exp(-C1*x). Note
     // the explicit minus in the exponent
-    API::IAlgorithm_sptr ec = this->createChildAlgorithm("ExponentialCorrection");
+    auto ec = createChildAlgorithm("ExponentialCorrection");
     ec->setProperty<DataObjects::Workspace2D_sptr>("InputWorkspace", sqw);
     ec->setProperty<DataObjects::Workspace2D_sptr>("OutputWorkspace", sqw);
     ec->setProperty<double>("C0", 1.0);
@@ -130,5 +129,4 @@ void SassenaFFT::exec() {
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

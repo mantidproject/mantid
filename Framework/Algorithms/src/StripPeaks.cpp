@@ -15,8 +15,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(StripPeaks)
@@ -118,7 +117,7 @@ API::ITableWorkspace_sptr StripPeaks::findPeaks(const API::MatrixWorkspace_sptr 
 
   // Set up and execute algorithm
   bool showlog = true;
-  API::IAlgorithm_sptr findpeaks = createChildAlgorithm("FindPeaks", 0.0, 0.2, showlog);
+  auto findpeaks = createChildAlgorithm("FindPeaks", 0.0, 0.2, showlog);
   findpeaks->setProperty("InputWorkspace", WS);
   findpeaks->setProperty<int>("FWHM", fwhm);
   findpeaks->setProperty<int>("Tolerance", tolerance);
@@ -266,5 +265,4 @@ API::MatrixWorkspace_sptr StripPeaks::removePeaks(const API::MatrixWorkspace_con
   return outputWS;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

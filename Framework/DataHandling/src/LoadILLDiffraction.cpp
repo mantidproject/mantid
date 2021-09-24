@@ -28,8 +28,7 @@
 #include <nexus/napi.h>
 #include <numeric>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using namespace API;
 using namespace Geometry;
@@ -258,6 +257,7 @@ void LoadILLDiffraction::loadMetaData() {
     m_loadHelper.addNexusFieldsToWsRun(nxHandle, m_outWorkspace->mutableRun());
     NXclose(&nxHandle);
   }
+  mutableRun.addProperty("run_list", mutableRun.getPropertyValueAsType<int>("run_number"));
 
   if (mutableRun.hasProperty("Detector.calibration_file")) {
     if (getPropertyValue("DataType") == "Raw")
@@ -756,7 +756,7 @@ void LoadILLDiffraction::resolveInstrument() {
  * Runs LoadInstrument as child to link the non-moving instrument to workspace
  */
 void LoadILLDiffraction::loadStaticInstrument() {
-  IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
+  auto loadInst = createChildAlgorithm("LoadInstrument");
   loadInst->setPropertyValue("Filename", getInstrumentFilePath(m_instName));
   loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_outWorkspace);
   loadInst->setProperty("RewriteSpectraMap", OptionalBool(true));
@@ -770,7 +770,7 @@ void LoadILLDiffraction::loadStaticInstrument() {
  * @return A MatrixWorkspace containing the correct instrument
  */
 MatrixWorkspace_sptr LoadILLDiffraction::loadEmptyInstrument(const std::string &start_time) {
-  IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
+  auto loadInst = createChildAlgorithm("LoadInstrument");
   loadInst->setPropertyValue("InstrumentName", m_instName);
   auto ws = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
   auto &run = ws->mutableRun();
@@ -896,5 +896,4 @@ void LoadILLDiffraction::convertAxisAndTranspose() {
   m_outWorkspace = transposed;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

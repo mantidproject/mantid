@@ -19,8 +19,7 @@
 
 #include <boost/algorithm/string.hpp>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(SumNeighbours)
@@ -83,7 +82,7 @@ void SumNeighbours::exec() {
 
   progress.report("Smoothing Neighbours...");
 
-  IAlgorithm_sptr smooth = createChildAlgorithm("SmoothNeighbours");
+  auto smooth = createChildAlgorithm("SmoothNeighbours");
   smooth->setProperty("InputWorkspace", inWS);
   if (rect) {
     smooth->setProperty("SumPixelsX", SumX);
@@ -103,5 +102,4 @@ void SumNeighbours::exec() {
   this->setProperty("OutputWorkspace", outWS);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

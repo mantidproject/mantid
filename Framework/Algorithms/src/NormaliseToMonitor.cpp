@@ -33,10 +33,7 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::HistogramData;
 using Mantid::Kernel::IPropertyManager;
 
-namespace Mantid {
-
-//
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Method of complex validator class
 // method checks if the property is enabled
@@ -287,7 +284,7 @@ void NormaliseToMonitor::exec() {
  */
 MatrixWorkspace_sptr NormaliseToMonitor::extractMonitorSpectra(const MatrixWorkspace_sptr &ws,
                                                                const std::vector<std::size_t> &workspaceIndexes) {
-  IAlgorithm_sptr childAlg = createChildAlgorithm("ExtractSpectra");
+  auto childAlg = createChildAlgorithm("ExtractSpectra");
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", ws);
   childAlg->setProperty("WorkspaceIndexList", workspaceIndexes);
   childAlg->executeAsChildAlg();
@@ -532,7 +529,7 @@ void NormaliseToMonitor::normaliseByIntegratedCount(const MatrixWorkspace_sptr &
   if (!isSingleCountWorkspace) {
     // Add up all the bins so it's just effectively a series of values with
     // errors
-    IAlgorithm_sptr integrate = createChildAlgorithm("Integration");
+    auto integrate = createChildAlgorithm("Integration");
     integrate->setProperty<MatrixWorkspace_sptr>("InputWorkspace", m_monitor);
     integrate->setProperty("RangeLower", m_integrationMin);
     integrate->setProperty("RangeUpper", m_integrationMax);
@@ -545,7 +542,7 @@ void NormaliseToMonitor::normaliseByIntegratedCount(const MatrixWorkspace_sptr &
 
   if (inputEvent) {
     // Run the divide algorithm explicitly to enable progress reporting
-    IAlgorithm_sptr divide = createChildAlgorithm("Divide", 0.0, 1.0);
+    auto divide = createChildAlgorithm("Divide", 0.0, 1.0);
     divide->setProperty<MatrixWorkspace_sptr>("LHSWorkspace", inputWorkspace);
     divide->setProperty<MatrixWorkspace_sptr>("RHSWorkspace", m_monitor);
     divide->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", outputWorkspace);
@@ -758,5 +755,4 @@ void NormaliseToMonitor::normalisationFactor(const BinEdges &X, Counts &Y, Count
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

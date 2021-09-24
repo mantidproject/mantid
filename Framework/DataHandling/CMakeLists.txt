@@ -1,5 +1,4 @@
 set(SRC_FILES
-    src/AppendGeometryToSNSNexus.cpp
     src/ApplyDiffCal.cpp
     src/BankPulseTimes.cpp
     src/CheckMantidVersion.cpp
@@ -206,13 +205,13 @@ set(SRC_FILES
     src/SetSample.cpp
     src/SetSampleMaterial.cpp
     src/SetScalingPSD.cpp
+    src/SNSAppendGeometryToNexus.cpp
     src/SortTableWorkspace.cpp
     src/StartAndEndTimeFromNexusFileExtractor.cpp
     src/UpdateInstrumentFromFile.cpp
     src/XmlHandler.cpp)
 
 set(INC_FILES
-    inc/MantidDataHandling/AppendGeometryToSNSNexus.h
     inc/MantidDataHandling/ApplyDiffCal.h
     inc/MantidDataHandling/BankPulseTimes.h
     inc/MantidDataHandling/CheckMantidVersion.h
@@ -417,6 +416,7 @@ set(INC_FILES
     inc/MantidDataHandling/SetSample.h
     inc/MantidDataHandling/SetSampleMaterial.h
     inc/MantidDataHandling/SetScalingPSD.h
+    inc/MantidDataHandling/SNSAppendGeometryToNexus.h
     inc/MantidDataHandling/SortTableWorkspace.h
     inc/MantidDataHandling/StartAndEndTimeFromNexusFileExtractor.h
     inc/MantidDataHandling/UpdateInstrumentFromFile.h
@@ -428,7 +428,6 @@ set(INC_FILES
     src/LoadRaw/vms_convert.h)
 
 set(TEST_FILES
-    AppendGeometryToSNSNexusTest.h
     ApplyDiffCalTest.h
     CheckMantidVersionTest.h
     CompressEventsTest.h
@@ -610,12 +609,13 @@ set(TEST_FILES
     SetSampleMaterialTest.h
     SetSampleTest.h
     SetScalingPSDTest.h
+    SNSAppendGeometryToNexusTest.h
     SortTableWorkspaceTest.h
     StartAndEndTimeFromNexusFileExtractorTest.h
     UpdateInstrumentFromFileTest.h
     XMLInstrumentParameterTest.h)
 
-if(COVERALLS)
+if(COVERAGE)
   foreach(loop_var ${SRC_FILES} ${INC_FILES})
     set_property(GLOBAL APPEND
                  PROPERTY COVERAGE_SRCS
@@ -650,6 +650,12 @@ endif()
 enable_precompiled_headers(inc/MantidDataHandling/PrecompiledHeader.h SRC_FILES)
 # Add the target for this directory
 add_library(DataHandling ${SRC_FILES} ${INC_FILES})
+add_library(Mantid::DataHandling ALIAS DataHandling)
+
+target_include_directories(DataHandling PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+		$<INSTALL_INTERFACE:include/Mantid>
+)
 # Set the name of the generated library
 set_target_properties(DataHandling
                       PROPERTIES OUTPUT_NAME
@@ -671,33 +677,45 @@ endif()
 # Add to the 'Framework' group in VS
 set_property(TARGET DataHandling PROPERTY FOLDER "MantidFramework")
 
-target_include_directories(DataHandling PUBLIC inc ../Nexus/inc)
-target_include_directories(DataHandling SYSTEM PRIVATE ${HDF5_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
-
 target_link_libraries(DataHandling
-                      LINK_PRIVATE
-                      ${MANTIDLIBS}
-                      Nexus
-                      HistogramData
-                      DataObjects
-                      ${NEXUS_LIBRARIES}
-                      ${HDF5_LIBRARIES}
-                      ${HDF5_HL_LIBRARIES}
-                      ${JSONCPP_LIBRARIES}
-                      Catalog)
+                        PUBLIC
+                        Mantid::Nexus
+                        Mantid::API
+                        Mantid::HistogramData
+                        Mantid::Catalog
+                        Mantid::DataObjects
+                        Mantid::Geometry
+                        Mantid::Kernel
+                        Mantid::Indexing
+                        Mantid::Parallel
+                        PRIVATE
+                        Mantid::Json
+                        Boost::filesystem
+                        Mantid::NexusGeometry)
 
+
+# Lib3mf is technically a public dependency as it is in our public headers.
+# We are assuming here that it won't be used.
 if(ENABLE_LIB3MF)
-  target_link_libraries(DataHandling LINK_PRIVATE
+  target_link_libraries(DataHandling PRIVATE
                         ${LIB3MF_LIBRARIES})
+  if (CONDA_BUILD)
+    target_include_directories(DataHandling PRIVATE ${LIB3MF_INCLUDE_DIR})
+  else()
+    target_include_directories(DataHandling PRIVATE ${LIB3MF_INCLUDE_DIR}/lib3mf)
+  endif()
 endif()
 
 # Add the unit tests directory
 add_subdirectory(test)
 
 # Installation settings
-
+if (CONDA_BUILD)
+mtd_install_framework_lib(TARGETS DataHandling PLUGIN_LIB)
+else()
 mtd_install_targets(TARGETS
                     DataHandling
                     INSTALL_DIRS
                     ${PLUGINS_DIR}
                     ${WORKBENCH_PLUGINS_DIR})
+endif()

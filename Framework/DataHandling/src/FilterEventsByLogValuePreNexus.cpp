@@ -34,7 +34,11 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 
+#if BOOST_VERSION < 107100
 #include <boost/timer.hpp>
+#else
+#include <boost/timer/timer.hpp>
+#endif
 
 #include <Poco/File.h>
 #include <Poco/Path.h>
@@ -48,8 +52,7 @@
 
 // #define DBOUT
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 DECLARE_FILELOADER_ALGORITHM(FilterEventsByLogValuePreNexus)
 
@@ -735,7 +738,7 @@ void FilterEventsByLogValuePreNexus::runLoadInstrument(const std::string &eventf
   instrument = instrument.substr(0, pos);
 
   // do the actual work
-  IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
+  auto loadInst = createChildAlgorithm("LoadInstrument");
 
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   loadInst->setPropertyValue("InstrumentName", instrument);
@@ -868,7 +871,7 @@ void FilterEventsByLogValuePreNexus::procEvents(DataObjects::EventWorkspace_sptr
   g_log.information() << "Processing input event preNexus by " << numThreads << " threads"
                       << " in " << numBlocks << " blocks. "
                       << "\n";
-  // cppcheck-suppress syntaxError
+
     PRAGMA_OMP( parallel for schedule(dynamic, 1) if (m_parallelProcessing) )
     for (int i = 0; i < int(numThreads); i++) {
       // This is the partial workspace we are about to create (if in parallel)
@@ -2233,5 +2236,4 @@ void FilterEventsByLogValuePreNexus::readPulseidFile(const std::string &filename
   this->m_protonChargeTot = this->m_protonChargeTot * CURRENT_CONVERSION;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

@@ -46,8 +46,7 @@ using Poco::XML::Document;
 using Poco::XML::DOMParser;
 using Poco::XML::Element;
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using Mantid::API::WorkspaceProperty;
 using Mantid::Kernel::Direction;
@@ -592,7 +591,7 @@ void LoadSpice2D::detectorTranslation(std::map<std::string, std::string> &metada
  */
 void LoadSpice2D::runLoadInstrument(const std::string &inst_name, const DataObjects::Workspace2D_sptr &localWorkspace) {
 
-  API::IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
+  auto loadInst = createChildAlgorithm("LoadInstrument");
 
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   try {
@@ -651,5 +650,4 @@ void LoadSpice2D::setSansSpiceXmlFormatVersion(std::map<std::string, std::string
   }
   g_log.debug() << "Sans_spice_xml_format_version == " << m_sansSpiceXmlFormatVersion << "\n";
 }
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

@@ -14,8 +14,7 @@
 #include "MantidKernel/CompositeValidator.h"
 #include <numeric>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 using namespace Kernel;
 using namespace API;
 using namespace HistogramData;
@@ -62,7 +61,7 @@ void IdentifyNoisyDetectors::exec() {
 
   progress.report("Integrating...");
 
-  IAlgorithm_sptr integ = createChildAlgorithm("Integration");
+  auto integ = createChildAlgorithm("Integration");
   integ->initialize();
   integ->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWs);
   integ->setProperty<double>("RangeLower", rangeLower);
@@ -73,7 +72,7 @@ void IdentifyNoisyDetectors::exec() {
 
   progress.report("Power...");
 
-  IAlgorithm_sptr power = createChildAlgorithm("Power");
+  auto power = createChildAlgorithm("Power");
   power->initialize();
   power->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWs);
   power->setProperty<double>("Exponent", 2.0);
@@ -94,7 +93,7 @@ void IdentifyNoisyDetectors::exec() {
   MatrixWorkspace_sptr int2 = integ->getProperty("OutputWorkspace");
 
   progress.report("Dividing...");
-  IAlgorithm_sptr algScale = createChildAlgorithm("Scale");
+  auto algScale = createChildAlgorithm("Scale");
   algScale->initialize();
   algScale->setProperty("InputWorkspace", int1);
   algScale->setProperty("OutputWorkspace", int1);
@@ -179,5 +178,4 @@ void IdentifyNoisyDetectors::getStdDev(API::Progress &progress, const MatrixWork
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

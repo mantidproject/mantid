@@ -16,8 +16,7 @@
 #include <fstream>
 #include <map>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -102,7 +101,7 @@ void LoadSwans::exec() {
  */
 void LoadSwans::loadInstrument() {
 
-  IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
+  auto loadInst = createChildAlgorithm("LoadInstrument");
 
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   try {
@@ -271,5 +270,4 @@ unsigned int LoadSwans::getDetectorSize() {
   return x_size * y_size;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

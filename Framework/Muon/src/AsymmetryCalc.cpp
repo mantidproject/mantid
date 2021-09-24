@@ -15,8 +15,7 @@
 #include <cmath>
 #include <vector>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Kernel;
 using API::Progress;
@@ -85,7 +84,7 @@ void AsymmetryCalc::exec() {
     // grouped
 
     // First group spectra from the backward list leaving the rest ungrouped
-    API::IAlgorithm_sptr group = createChildAlgorithm("GroupDetectors");
+    auto group = createChildAlgorithm("GroupDetectors");
     group->setProperty("InputWorkspace", inputWS);
     group->setProperty("SpectraList", backward_list);
     group->setProperty("KeepUngroupedSpectra", true);
@@ -164,5 +163,4 @@ void AsymmetryCalc::exec() {
   setProperty("OutputWorkspace", std::move(outputWS));
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

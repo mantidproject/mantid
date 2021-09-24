@@ -32,8 +32,7 @@
 
 #include <boost/math/distributions/students_t.hpp>
 
-namespace Mantid {
-namespace CurveFitting {
+namespace Mantid::CurveFitting {
 
 namespace {
 
@@ -783,5 +782,4 @@ void TableWorkspaceDomainCreator::setAndValidateWorkspace(const API::Workspace_s
     throw std::invalid_argument("X or Y Columns not found");
   }
 }
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting

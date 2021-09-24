@@ -6,12 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/PeakShapeSphericalFactory.h"
 #include "MantidDataObjects/PeakShapeSpherical.h"
+#include "MantidJson/Json.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidKernel/VMD.h"
 #include <json/json.h>
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 
 using namespace Mantid::Kernel;
 
@@ -21,10 +21,9 @@ using namespace Mantid::Kernel;
  * @return PeakShape object
  */
 Mantid::Geometry::PeakShape *PeakShapeSphericalFactory::create(const std::string &source) const {
-  Json::Reader reader;
   Json::Value root;
   Mantid::Geometry::PeakShape *product = nullptr;
-  if (reader.parse(source, root)) {
+  if (Mantid::JsonHelpers::parse(source, &root)) {
     const std::string shape = root["shape"].asString();
     if (shape == PeakShapeSpherical::sphereShapeName()) {
 
@@ -70,5 +69,4 @@ void PeakShapeSphericalFactory::setSuccessor(PeakShapeFactory_const_sptr success
   m_successor = successorFactory;
 }
 
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects

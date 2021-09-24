@@ -84,8 +84,7 @@ int getWorkspaceNumberOfHistograms(const MatrixWorkspace_sptr &workspace) {
 
 } // namespace
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 DECLARE_ALGORITHM(CalculateIqt)
 
@@ -190,7 +189,7 @@ std::map<std::string, std::string> CalculateIqt::validateInputs() {
 }
 
 MatrixWorkspace_sptr CalculateIqt::rebin(const MatrixWorkspace_sptr &workspace, const std::string &params) {
-  IAlgorithm_sptr rebinAlgorithm = this->createChildAlgorithm("Rebin");
+  auto rebinAlgorithm = createChildAlgorithm("Rebin");
   rebinAlgorithm->initialize();
   rebinAlgorithm->setProperty("InputWorkspace", workspace);
   rebinAlgorithm->setProperty("OutputWorkspace", "_");
@@ -200,7 +199,7 @@ MatrixWorkspace_sptr CalculateIqt::rebin(const MatrixWorkspace_sptr &workspace, 
 }
 
 MatrixWorkspace_sptr CalculateIqt::integration(const MatrixWorkspace_sptr &workspace) {
-  IAlgorithm_sptr integrationAlgorithm = this->createChildAlgorithm("Integration");
+  auto integrationAlgorithm = createChildAlgorithm("Integration");
   integrationAlgorithm->initialize();
   integrationAlgorithm->setProperty("InputWorkspace", workspace);
   integrationAlgorithm->setProperty("OutputWorkspace", "_");
@@ -209,7 +208,7 @@ MatrixWorkspace_sptr CalculateIqt::integration(const MatrixWorkspace_sptr &works
 }
 
 MatrixWorkspace_sptr CalculateIqt::convertToPointData(const MatrixWorkspace_sptr &workspace) {
-  IAlgorithm_sptr pointDataAlgorithm = this->createChildAlgorithm("ConvertToPointData");
+  auto pointDataAlgorithm = createChildAlgorithm("ConvertToPointData");
   pointDataAlgorithm->initialize();
   pointDataAlgorithm->setProperty("InputWorkspace", workspace);
   pointDataAlgorithm->setProperty("OutputWorkspace", "_");
@@ -218,7 +217,7 @@ MatrixWorkspace_sptr CalculateIqt::convertToPointData(const MatrixWorkspace_sptr
 }
 
 MatrixWorkspace_sptr CalculateIqt::extractFFTSpectrum(const MatrixWorkspace_sptr &workspace) {
-  IAlgorithm_sptr FFTAlgorithm = this->createChildAlgorithm("ExtractFFTSpectrum");
+  auto FFTAlgorithm = createChildAlgorithm("ExtractFFTSpectrum");
   FFTAlgorithm->initialize();
   FFTAlgorithm->setProperty("InputWorkspace", workspace);
   FFTAlgorithm->setProperty("OutputWorkspace", "_");
@@ -229,7 +228,7 @@ MatrixWorkspace_sptr CalculateIqt::extractFFTSpectrum(const MatrixWorkspace_sptr
 
 MatrixWorkspace_sptr CalculateIqt::divide(const MatrixWorkspace_sptr &lhsWorkspace,
                                           const MatrixWorkspace_sptr &rhsWorkspace) {
-  IAlgorithm_sptr divideAlgorithm = this->createChildAlgorithm("Divide");
+  auto divideAlgorithm = createChildAlgorithm("Divide");
   divideAlgorithm->initialize();
   divideAlgorithm->setProperty("LHSWorkspace", lhsWorkspace);
   divideAlgorithm->setProperty("RHSWorkspace", rhsWorkspace);
@@ -239,7 +238,7 @@ MatrixWorkspace_sptr CalculateIqt::divide(const MatrixWorkspace_sptr &lhsWorkspa
 }
 
 MatrixWorkspace_sptr CalculateIqt::cropWorkspace(const MatrixWorkspace_sptr &workspace, const double xMax) {
-  IAlgorithm_sptr cropAlgorithm = this->createChildAlgorithm("CropWorkspace");
+  auto cropAlgorithm = createChildAlgorithm("CropWorkspace");
   cropAlgorithm->initialize();
   cropAlgorithm->setProperty("InputWorkspace", workspace);
   cropAlgorithm->setProperty("OutputWorkspace", "_");
@@ -249,7 +248,7 @@ MatrixWorkspace_sptr CalculateIqt::cropWorkspace(const MatrixWorkspace_sptr &wor
 }
 
 MatrixWorkspace_sptr CalculateIqt::replaceSpecialValues(const MatrixWorkspace_sptr &workspace) {
-  IAlgorithm_sptr specialValuesAlgorithm = this->createChildAlgorithm("ReplaceSpecialValues");
+  auto specialValuesAlgorithm = createChildAlgorithm("ReplaceSpecialValues");
   specialValuesAlgorithm->initialize();
   specialValuesAlgorithm->setProperty("InputWorkspace", workspace);
   specialValuesAlgorithm->setProperty("OutputWorkspace", "_");
@@ -273,13 +272,13 @@ MatrixWorkspace_sptr CalculateIqt::calculateIqt(MatrixWorkspace_sptr workspace,
                                                 const MatrixWorkspace_sptr &resolutionWorkspace,
                                                 const std::string &rebinParams) {
   workspace = normalizedFourierTransform(workspace, rebinParams);
-  return divide(workspace, std::move(resolutionWorkspace));
+  return divide(workspace, resolutionWorkspace);
 }
 
-MatrixWorkspace_sptr CalculateIqt::doSimulation(MatrixWorkspace_sptr sample, MatrixWorkspace_sptr resolution,
+MatrixWorkspace_sptr CalculateIqt::doSimulation(MatrixWorkspace_sptr sample, const MatrixWorkspace_sptr &resolution,
                                                 const std::string &rebinParams, MersenneTwister &mTwister) {
   auto simulatedWorkspace = randomizeWorkspaceWithinError(std::move(sample), mTwister);
-  return calculateIqt(simulatedWorkspace, std::move(resolution), rebinParams);
+  return calculateIqt(simulatedWorkspace, resolution, rebinParams);
 }
 
 MatrixWorkspace_sptr
@@ -307,5 +306,4 @@ MatrixWorkspace_sptr CalculateIqt::setErrorsToZero(const std::vector<MatrixWorks
   return outputWorkspace;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

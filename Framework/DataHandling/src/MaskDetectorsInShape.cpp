@@ -12,8 +12,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(MaskDetectorsInShape)
 
@@ -50,7 +49,7 @@ void MaskDetectorsInShape::exec() {
 std::vector<int> MaskDetectorsInShape::runFindDetectorsInShape(const API::MatrixWorkspace_sptr &workspace,
                                                                const std::string &shapeXML,
                                                                const bool includeMonitors) {
-  IAlgorithm_sptr alg = createChildAlgorithm("FindDetectorsInShape");
+  auto alg = createChildAlgorithm("FindDetectorsInShape");
   alg->setPropertyValue("IncludeMonitors", includeMonitors ? "1" : "0");
   alg->setPropertyValue("ShapeXML", shapeXML);
   alg->setProperty<MatrixWorkspace_sptr>("Workspace", workspace);
@@ -81,5 +80,4 @@ void MaskDetectorsInShape::runMaskDetectors(const API::MatrixWorkspace_sptr &wor
   progress(1);
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

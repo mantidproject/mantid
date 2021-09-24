@@ -12,7 +12,7 @@
 namespace Mantid {
 namespace API {
 
-enum IndexType { SpectrumNum = 1, WorkspaceIndex = 2 };
+enum class IndexType { SpectrumNum = 1, WorkspaceIndex = 2 };
 
 /** IndexTypeProperty : Implementation of a property which stores the type of
 input indices users require for accessing workspace data. This works in harmony
@@ -23,7 +23,7 @@ with IndexProperty and is not intended for isolated use.
 */
 class MANTID_API_DLL IndexTypeProperty : public Kernel::PropertyWithValue<std::string> {
 public:
-  IndexTypeProperty(const std::string &name = "IndexType", int indexType = IndexType::WorkspaceIndex);
+  IndexTypeProperty(const std::string &name = "IndexType", int indexType = static_cast<int>(IndexType::WorkspaceIndex));
 
   IndexType selectedType() const;
 

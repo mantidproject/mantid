@@ -9,8 +9,7 @@
 #include "MantidAPI/IDomainCreator.h"
 #include "MantidKernel/IPropertyManager.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 /**
  * Creates an initialized domain creator
@@ -28,5 +27,4 @@ IDomainCreator *DomainCreatorFactoryImpl::createDomainCreator(const std::string 
   return creator;
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

@@ -26,8 +26,7 @@ int PHASE_ROW = 2;
 double ASYMM_ERROR = 999.0;
 } // namespace
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Kernel;
 using namespace DataObjects;
@@ -276,7 +275,7 @@ std::string CalMuonDetectorPhases::createFittingFunction(double freq, bool fixFr
  */
 API::MatrixWorkspace_sptr CalMuonDetectorPhases::extractDataFromWorkspace(double startTime, double endTime) {
   // Extract counts from startTime to endTime
-  API::IAlgorithm_sptr crop = createChildAlgorithm("CropWorkspace");
+  auto crop = createChildAlgorithm("CropWorkspace");
   crop->setProperty("InputWorkspace", m_inputWS);
   crop->setProperty("XMin", startTime);
   crop->setProperty("XMax", endTime);
@@ -291,7 +290,7 @@ API::MatrixWorkspace_sptr CalMuonDetectorPhases::extractDataFromWorkspace(double
  * @return :: Workspace with decay removed
  */
 API::MatrixWorkspace_sptr CalMuonDetectorPhases::removeExpDecay(const API::MatrixWorkspace_sptr &wsInput) {
-  API::IAlgorithm_sptr remove = createChildAlgorithm("RemoveExpDecay");
+  auto remove = createChildAlgorithm("RemoveExpDecay");
   remove->setProperty("InputWorkspace", wsInput);
   remove->executeAsChildAlg();
   API::MatrixWorkspace_sptr wsRem = remove->getProperty("OutputWorkspace");
@@ -552,5 +551,4 @@ void CalMuonDetectorPhases::reportProgress(const int thisSpectrum, const int tot
   this->progress(proportionDone, progMessage.str());
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

@@ -36,9 +36,7 @@
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 struct ScopedSignalBlocker {
   // block signals on construction
@@ -85,7 +83,7 @@ void IndirectFitPropertyBrowser::initFitOptionsBrowser() {
   m_fitOptionsBrowser->setCurrentFittingType(FittingMode::SEQUENTIAL);
 }
 
-void IndirectFitPropertyBrowser::setHiddenProperties(std::vector<std::string> hiddenProperties) {
+void IndirectFitPropertyBrowser::setHiddenProperties(const std::vector<std::string> &hiddenProperties) {
   for (const auto &propertyName : hiddenProperties) {
     m_fitOptionsBrowser->addPropertyToBlacklist(QString::fromStdString(propertyName));
   }
@@ -384,13 +382,6 @@ void IndirectFitPropertyBrowser::fit() { emit fitScheduled(); }
  */
 void IndirectFitPropertyBrowser::sequentialFit() { emit sequentialFitScheduled(); }
 
-void IndirectFitPropertyBrowser::setModelResolution(std::string const &name, TableDatasetIndex const &index) {
-  if (isFullFunctionBrowserActive()) {
-    showFullFunctionBrowser(false);
-  }
-  m_templateBrowser->setResolution(name, index);
-}
-
 void IndirectFitPropertyBrowser::setModelResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) {
   if (isFullFunctionBrowserActive()) {
     showFullFunctionBrowser(false);
@@ -436,6 +427,4 @@ void IndirectFitPropertyBrowser::showFullFunctionBrowser(bool on) {
   m_functionWidget->setCurrentIndex(index);
 }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

@@ -24,8 +24,7 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/UnitFactory.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Kernel;
 using namespace API;
@@ -288,5 +287,4 @@ CreateWorkspace::getParallelExecutionMode(const std::map<std::string, Parallel::
   return Parallel::getCorrespondingExecutionMode(storageMode);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

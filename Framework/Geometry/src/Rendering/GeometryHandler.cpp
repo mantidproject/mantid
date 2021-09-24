@@ -14,8 +14,7 @@
 #include "MantidGeometry/Rendering/RenderingMesh.h"
 #include <memory>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 GeometryHandler::GeometryHandler(IObjComponent *comp) : m_objComp(comp) {}
 
@@ -105,7 +104,6 @@ void GeometryHandler::GetObjectGeom(detail::ShapeInfo::GeometryShape &type, std:
 
 void GeometryHandler::setShapeInfo(detail::ShapeInfo &&shapeInfo) {
   m_triangulator.reset(nullptr);
-  m_shapeInfo.reset(new detail::ShapeInfo(std::move(shapeInfo)));
+  m_shapeInfo.reset(new detail::ShapeInfo(shapeInfo));
 }
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

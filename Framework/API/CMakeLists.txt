@@ -30,6 +30,7 @@ set(SRC_FILES
     src/CostFunctionFactory.cpp
     src/DataProcessorAlgorithm.cpp
     src/DeprecatedAlgorithm.cpp
+    src/DeprecatedAlias.cpp
     src/DetectorSearcher.cpp
     src/DistributedAlgorithm.cpp
     src/DomainCreatorFactory.cpp
@@ -202,6 +203,7 @@ set(INC_FILES
     inc/MantidAPI/DataProcessorAlgorithm.h
     inc/MantidAPI/DeclareUserAlg.h
     inc/MantidAPI/DeprecatedAlgorithm.h
+    inc/MantidAPI/DeprecatedAlias.h
     inc/MantidAPI/DetectorSearcher.h
     inc/MantidAPI/DistributedAlgorithm.h
     inc/MantidAPI/DomainCreatorFactory.h
@@ -499,7 +501,7 @@ set(GMOCK_TEST_FILES
     MatrixWorkspaceTest.h
 )
 
-if(COVERALLS)
+if(COVERAGE)
   foreach(loop_var ${SRC_FILES} ${INC_FILES})
     set_property(
       GLOBAL APPEND PROPERTY COVERAGE_SRCS
@@ -523,6 +525,12 @@ endif()
 enable_precompiled_headers(inc/MantidAPI/PrecompiledHeader.h SRC_FILES)
 # Add the target for this directory
 add_library(API ${SRC_FILES} ${INC_FILES})
+add_library(Mantid::API ALIAS API)
+
+target_include_directories(API PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+		$<INSTALL_INTERFACE:include/Mantid>
+)
 # Set the name of the generated library
 set_target_properties(
   API PROPERTIES OUTPUT_NAME MantidAPI COMPILE_DEFINITIONS IN_MANTID_API
@@ -540,27 +548,37 @@ endif()
 # Add to the 'Framework' group in VS
 set_property(TARGET API PROPERTY FOLDER "MantidFramework")
 
-target_include_directories(
-  API SYSTEM PUBLIC ${NEXUS_INCLUDE_DIR} ${Boost_INCLUDE_DIRS}
-)
 target_link_libraries(
   API
-  LINK_PRIVATE
-  ${JSONCPP_LIBRARIES}
-  ${MANTIDLIBS}
-  ${GSL_LIBRARIES}
-  ${NEXUS_LIBRARIES}
+  PUBLIC
+  Mantid::HistogramData
+  Mantid::Types
+  Mantid::Kernel
+  Mantid::Geometry
+  Mantid::Indexing
+  Mantid::Parallel
+  Nexus::nexus
+  PRIVATE
   ${WINSOCK}
   ${BCRYPT}
+  Mantid::Beamline
+  Mantid::Json
 )
 
 # Add the unit tests directory
 add_subdirectory(test)
 
 # Auto-generate exports header
-target_include_directories(API PUBLIC ${CMAKE_BINARY_DIR}/Framework/API)
+target_include_directories(API PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/API>
+  $<INSTALL_INTERFACE:include/Mantid>
+)
 generate_mantid_export_header(API TRUE)
 
 # Installation settings
-
+if (CONDA_BUILD)
+set(TARGET_EXPORT_NAME "MantidAPITargets")
+mtd_install_framework_lib(TARGETS API INSTALL_EXPORT_FILE EXPORT_NAME ${TARGET_EXPORT_NAME})
+else()
 mtd_install_targets(TARGETS API INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
+endif()

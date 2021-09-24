@@ -188,8 +188,7 @@ std::vector<std::string> labelProjection(const DblMatrix &projection) {
 
 } // anonymous namespace
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 /**
 Determine the original q units. Assumes first 3 dimensions by index are r,l,d
@@ -381,7 +380,7 @@ void CutMD::exec() {
 
     // Either run RebinMD or SliceMD
     const std::string cutAlgName = noPix ? "BinMD" : "SliceMD";
-    IAlgorithm_sptr cutAlg = createChildAlgorithm(cutAlgName, 0.0, 1.0);
+    auto cutAlg = createChildAlgorithm(cutAlgName, 0.0, 1.0);
     cutAlg->initialize();
     cutAlg->setProperty("InputWorkspace", inWS);
     cutAlg->setProperty("OutputWorkspace", "sliced");
@@ -457,5 +456,4 @@ void CutMD::exec() {
   setProperty("OutputWorkspace", sliceWS);
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

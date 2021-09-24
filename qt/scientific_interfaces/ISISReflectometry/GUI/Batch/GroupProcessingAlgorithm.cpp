@@ -16,9 +16,7 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 using API::IConfiguredAlgorithm_sptr;
 using Mantid::API::IAlgorithm_sptr;
@@ -59,7 +57,7 @@ void updateWorkspaceProperties(AlgorithmRuntimeProps &properties, Group const &g
 }
 
 void updateGroupFromOutputProperties(const IAlgorithm_sptr &algorithm, Item &group) {
-  auto const stitched = AlgorithmProperties::getOutputWorkspace(std::move(algorithm), "OutputWorkspace");
+  auto const stitched = AlgorithmProperties::getOutputWorkspace(algorithm, "OutputWorkspace");
   group.setOutputNames(std::vector<std::string>{stitched});
 }
 
@@ -71,11 +69,11 @@ void updateParamsFromResolution(AlgorithmRuntimeProps &properties, boost::option
   AlgorithmProperties::update("Params", -(resolution.get()), properties);
 }
 
-void updatePerThetaDefaultProperties(AlgorithmRuntimeProps &properties, PerThetaDefaults const *perThetaDefaults) {
-  if (!perThetaDefaults)
+void updateLookupRowProperties(AlgorithmRuntimeProps &properties, LookupRow const *lookupRow) {
+  if (!lookupRow)
     return;
 
-  updateParamsFromResolution(properties, perThetaDefaults->qRange().step());
+  updateParamsFromResolution(properties, lookupRow->qRange().step());
 }
 
 void updateGroupProperties(AlgorithmRuntimeProps &properties, Group const &group) {
@@ -128,15 +126,13 @@ IConfiguredAlgorithm_sptr createConfiguredAlgorithm(Batch const &model, Group &g
 AlgorithmRuntimeProps createAlgorithmRuntimeProps(Batch const &model, Group const &group) {
   auto properties = AlgorithmRuntimeProps();
   updateWorkspaceProperties(properties, group);
-  // Set the rebin Params from the per theta defaults resolution, if given
-  updatePerThetaDefaultProperties(properties, model.wildcardDefaults());
-  // Override the per theta defaults params with the group's rows' resolution,
+  // Set the rebin Params from the lookup row resolution, if given
+  updateLookupRowProperties(properties, model.findLookupRow());
+  // Override the lookup row with the group's rows' resolution,
   // if given
   updateGroupProperties(properties, group);
   // Override the rebin Params from the user-specified stitch params, if given
   updateStitchProperties(properties, model.experiment().stitchParameters());
   return properties;
 }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

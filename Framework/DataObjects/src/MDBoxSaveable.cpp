@@ -7,8 +7,7 @@
 #include "MantidDataObjects/MDBoxSaveable.h"
 #include "MantidDataObjects/MDBox.h"
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 
 MDBoxSaveable::MDBoxSaveable(API::IMDNode *const Host) : m_MDNode(Host) {}
 
@@ -43,5 +42,4 @@ void MDBoxSaveable::load() {
     this->setLoaded(true);
   }
 }
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects

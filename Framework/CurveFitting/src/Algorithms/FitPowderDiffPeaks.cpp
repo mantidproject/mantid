@@ -60,9 +60,7 @@ using namespace Mantid::CurveFitting::Constraints;
 
 using namespace std;
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Algorithms {
+namespace Mantid::CurveFitting::Algorithms {
 
 DECLARE_ALGORITHM(FitPowderDiffPeaks)
 
@@ -782,7 +780,7 @@ bool FitPowderDiffPeaks::doFit1PeakBackground(const Workspace2D_sptr &dataws, si
                  << cominfoa << "Fit range = " << startx << ", " << endx << '\n';
 
   // 3. Set
-  IAlgorithm_sptr fitalg = createChildAlgorithm("Fit", -1, -1, true);
+  auto fitalg = createChildAlgorithm("Fit", -1, -1, true);
   fitalg->initialize();
 
   fitalg->setProperty("Function", std::dynamic_pointer_cast<API::IFunction>(compfunc));
@@ -1685,7 +1683,7 @@ bool FitPowderDiffPeaks::doFitGaussianPeak(const DataObjects::Workspace2D_sptr &
   gaussianpeak->addConstraint(std::move(centerbound));
 
   // 3. Fit
-  API::IAlgorithm_sptr fitalg = createChildAlgorithm("Fit", -1, -1, true);
+  auto fitalg = createChildAlgorithm("Fit", -1, -1, true);
   fitalg->initialize();
 
   fitalg->setProperty("Function", std::dynamic_pointer_cast<API::IFunction>(gaussianpeak));
@@ -2256,10 +2254,10 @@ Workspace2D_sptr FitPowderDiffPeaks::genPeakParameterDataWorkspace() {
     paramws->mutableX(j) = vecdh;
     paramws->mutableE(j) = vecchi2;
   }
-  paramws->mutableY(0) = std::move(vectofh);
-  paramws->mutableY(1) = std::move(vecalpha);
-  paramws->mutableY(2) = std::move(vecbeta);
-  paramws->mutableY(3) = std::move(vecsigma);
+  paramws->mutableY(0) = vectofh;
+  paramws->mutableY(1) = vecalpha;
+  paramws->mutableY(2) = vecbeta;
+  paramws->mutableY(3) = vecsigma;
 
   // 4. Set Axis label
   paramws->getAxis(0)->setUnit("dSpacing");
@@ -2776,7 +2774,7 @@ bool FitPowderDiffPeaks::getHKLFromMap(map<string, int> intmap, vector<int> &hkl
  * @param tofmax:  maximum value for cropping
  */
 void FitPowderDiffPeaks::cropWorkspace(double tofmin, double tofmax) {
-  API::IAlgorithm_sptr cropalg = this->createChildAlgorithm("CropWorkspace", -1, -1, true);
+  auto cropalg = createChildAlgorithm("CropWorkspace", -1, -1, true);
   cropalg->initialize();
 
   cropalg->setProperty("InputWorkspace", m_dataWS);
@@ -3115,6 +3113,4 @@ size_t findMaxValue(const MatrixWorkspace_sptr &dataws, size_t wsindex, double l
   return imax;
 }
 
-} // namespace Algorithms
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Algorithms

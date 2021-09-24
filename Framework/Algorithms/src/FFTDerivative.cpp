@@ -17,8 +17,7 @@
 using Mantid::HistogramData::HistogramX;
 using Mantid::HistogramData::HistogramY;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(FFTDerivative)
@@ -66,7 +65,7 @@ void FFTDerivative::execComplexFFT() {
 
     // Transform symmetrized spectrum
     const bool isHisto = copyWS->isHistogramData();
-    IAlgorithm_sptr fft = createChildAlgorithm("FFT");
+    auto fft = createChildAlgorithm("FFT");
     fft->setProperty("InputWorkspace", copyWS);
     fft->setProperty("Real", 0);
     fft->setProperty("Transform", "Forward");
@@ -88,7 +87,7 @@ void FFTDerivative::execComplexFFT() {
 
     // If the input was histogram data, convert the output to histogram data too
     if (isHisto) {
-      IAlgorithm_sptr toHisto = createChildAlgorithm("ConvertToHistogram");
+      auto toHisto = createChildAlgorithm("ConvertToHistogram");
       toHisto->setProperty("InputWorkspace", transWS);
       toHisto->execute();
       transWS = toHisto->getProperty("OutputWorkspace");
@@ -186,5 +185,4 @@ void FFTDerivative::multiplyTransform(HistogramX &nu, HistogramY &re, HistogramY
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

@@ -25,8 +25,7 @@
 #include <sstream>
 #include <utility>
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 using namespace CurveFitting;
 
@@ -83,7 +82,7 @@ void SCDPanelErrors::moveDetector(double x, double y, double z, double rotx, dou
     detname.append("/sixteenpack");
 
   if (x != 0.0 || y != 0.0 || z != 0.0) {
-    IAlgorithm_sptr alg1 = Mantid::API::AlgorithmFactory::Instance().create("MoveInstrumentComponent", -1);
+    auto alg1 = Mantid::API::AlgorithmFactory::Instance().create("MoveInstrumentComponent", -1);
     alg1->initialize();
     alg1->setChild(true);
     alg1->setLogging(false);
@@ -98,7 +97,7 @@ void SCDPanelErrors::moveDetector(double x, double y, double z, double rotx, dou
   }
 
   if (rotx != 0.0) {
-    IAlgorithm_sptr algx = Mantid::API::AlgorithmFactory::Instance().create("RotateInstrumentComponent", -1);
+    auto algx = Mantid::API::AlgorithmFactory::Instance().create("RotateInstrumentComponent", -1);
     algx->initialize();
     algx->setChild(true);
     algx->setLogging(false);
@@ -113,7 +112,7 @@ void SCDPanelErrors::moveDetector(double x, double y, double z, double rotx, dou
   }
 
   if (roty != 0.0) {
-    IAlgorithm_sptr algy = Mantid::API::AlgorithmFactory::Instance().create("RotateInstrumentComponent", -1);
+    auto algy = Mantid::API::AlgorithmFactory::Instance().create("RotateInstrumentComponent", -1);
     algy->initialize();
     algy->setChild(true);
     algy->setLogging(false);
@@ -128,7 +127,7 @@ void SCDPanelErrors::moveDetector(double x, double y, double z, double rotx, dou
   }
 
   if (rotz != 0.0) {
-    IAlgorithm_sptr algz = Mantid::API::AlgorithmFactory::Instance().create("RotateInstrumentComponent", -1);
+    auto algz = Mantid::API::AlgorithmFactory::Instance().create("RotateInstrumentComponent", -1);
     algz->initialize();
     algz->setChild(true);
     algz->setLogging(false);
@@ -285,7 +284,7 @@ void SCDPanelErrors::setAttribute(const std::string &attName, const IFunction::A
  * @param fname :: The file name
  */
 void SCDPanelErrors::load(const std::string &fname) {
-  IAlgorithm_sptr loadAlg = Mantid::API::AlgorithmFactory::Instance().create("Load", -1);
+  auto loadAlg = Mantid::API::AlgorithmFactory::Instance().create("Load", -1);
   loadAlg->initialize();
   loadAlg->setChild(true);
   loadAlg->setLogging(false);
@@ -344,5 +343,4 @@ void SCDPanelErrors::setupData() const {
   m_setupFinished = true;
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

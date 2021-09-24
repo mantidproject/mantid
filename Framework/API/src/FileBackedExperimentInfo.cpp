@@ -12,10 +12,10 @@
 // clang-format off
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
+#include <utility>
 // clang-format on
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 namespace {
 /// static logger object
@@ -27,8 +27,8 @@ Kernel::Logger g_log("FileBackedExperimentInfo");
  * @param filename The full path to the file
  * @param nxpath Path to the location of the experiment information
  */
-FileBackedExperimentInfo::FileBackedExperimentInfo(const std::string &filename, const std::string &nxpath)
-    : ExperimentInfo(), m_loaded(false), m_filename(filename), m_nxpath(nxpath) {}
+FileBackedExperimentInfo::FileBackedExperimentInfo(std::string filename, std::string nxpath)
+    : ExperimentInfo(), m_loaded(false), m_filename(std::move(filename)), m_nxpath(std::move(nxpath)) {}
 
 /**
  * This clones the FileBackedExperimentInfo and will not cause a load
@@ -69,5 +69,4 @@ void FileBackedExperimentInfo::populateFromFile() const {
   }
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

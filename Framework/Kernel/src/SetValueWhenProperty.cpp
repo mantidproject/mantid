@@ -18,8 +18,7 @@
 
 using namespace Mantid::Kernel;
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 /**
  * Checks the algorithm given is in a valid state and the property
@@ -75,5 +74,4 @@ void SetValueWhenProperty::modify_allowed_values(Property *const /*unused*/) {}
 
 IPropertySettings *SetValueWhenProperty::clone() const { return new SetValueWhenProperty(*this); }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

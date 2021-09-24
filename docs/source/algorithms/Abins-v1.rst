@@ -30,6 +30,13 @@ Abins uses a semi-empirical powder averaging model to account for q- and energy-
 The user-input temperature value is included in a Debye-Waller term, recreating the intensity fall-off with increasing
 wavelength.
 
+The input file should contain frequency and displacement data
+(i.e. phonon eigenvalues and eigenvectors) for the vibrations of a
+system; these may be phonons at multiple q-points.
+For VASP XML inputs, it is also permitted to use a "selective dynamics" in which some atoms are frozen.
+These would typically form a rigid substrate (e.g. a noble metal surface) for
+an adsorbed molecule of lightweight atoms, and are omitted from the calculated spectrum.
+
 After successfully-performed analysis a user obtains a Mantid Workspace Group which stores theoretical spectra (and,
 optionally, experimental data).
 Currently a user can produce theoretical spectra for given atoms (e.g. 'atom_1', the first atom listed in the input

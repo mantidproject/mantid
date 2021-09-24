@@ -18,8 +18,7 @@
 #include <memory>
 #include <utility>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 namespace {
 constexpr const char *SAMPLEGEOMETRY_TAG = "samplegeometry";
@@ -65,7 +64,7 @@ Container::Container(const Container &container)
  * Construct a container providing an XML definition shape
  * @param xml Definition of the shape in xml
  */
-Container::Container(std::string xml) : m_shape(std::make_shared<CSGObject>(xml)) {}
+Container::Container(const std::string &xml) : m_shape(std::make_shared<CSGObject>(xml)) {}
 
 /**
  * @return True if the can contains a definition of the sample shape
@@ -145,5 +144,4 @@ void Container::setID(const std::string &id) {
   }
 }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

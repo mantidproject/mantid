@@ -222,7 +222,7 @@ auto getTextAxisValueReader(std::size_t axisIndex) {
 
 template <typename T, typename GetValue>
 void addValuesToColumn(Column &column, const std::vector<MatrixWorkspace_sptr> &workspaces,
-                       const Mantid::Kernel::PropertyManagerOwner &indexProperties, const GetValue &getValue) {
+                       const Mantid::API::Algorithm &indexProperties, const GetValue &getValue) {
   const std::string prefix = "WorkspaceIndex";
 
   int index = indexProperties.getProperty(prefix);
@@ -236,7 +236,7 @@ void addValuesToColumn(Column &column, const std::vector<MatrixWorkspace_sptr> &
 }
 
 void addValuesToTableColumn(ITableWorkspace &table, const std::vector<MatrixWorkspace_sptr> &workspaces,
-                            const Mantid::Kernel::PropertyManagerOwner &indexProperties, std::size_t columnIndex) {
+                            const Mantid::API::Algorithm &indexProperties, std::size_t columnIndex) {
   if (workspaces.empty())
     return;
 
@@ -280,9 +280,7 @@ WorkspaceGroup_sptr runParameterProcessingWithGrouping(IAlgorithm &processingAlg
 }
 } // namespace
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Algorithms {
+namespace Mantid::CurveFitting::Algorithms {
 
 using namespace API;
 using namespace Kernel;
@@ -511,7 +509,7 @@ void QENSFitSimultaneous::extractMembers(const WorkspaceGroup_sptr &resultGroupW
     workspaceNames.emplace_back(name);
   }
 
-  auto extractAlgorithm = extractMembersAlgorithm(std::move(resultGroupWs), outputWsName);
+  auto extractAlgorithm = extractMembersAlgorithm(resultGroupWs, outputWsName);
   extractAlgorithm->setProperty("InputWorkspaces", workspaceNames);
   extractAlgorithm->execute();
 
@@ -667,6 +665,4 @@ void QENSFitSimultaneous::renameWorkspaces(const API::WorkspaceGroup_sptr &outpu
   return renameWorkspacesInQENSFit(this, rename, outputGroup, outputBaseName, endOfSuffix + "s", getNameSuffix);
 }
 
-} // namespace Algorithms
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Algorithms

@@ -25,8 +25,7 @@
 
 using namespace Mantid::API;
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using namespace Kernel;
 using namespace API;
@@ -636,5 +635,4 @@ void SaveNexusProcessed::saveSpectrumNumbersNexus(const API::MatrixWorkspace &ws
   file->writeCompData("spectra", spectra, dims, compression, dims);
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

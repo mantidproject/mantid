@@ -16,8 +16,7 @@
 
 #include <limits>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -94,7 +93,7 @@ void ConvertAxesToRealSpace::exec() {
       WorkspaceFactory::Instance().create(inputWs, axisVector[1].bins, axisVector[0].bins, axisVector[0].bins);
 
   // first integrate the data
-  IAlgorithm_sptr alg = this->createChildAlgorithm("Integration", 0, 0.4);
+  auto alg = createChildAlgorithm("Integration", 0, 0.4);
   alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWs);
   std::string outName = "_" + inputWs->getName() + "_integrated";
   alg->setProperty("OutputWorkspace", outName);
@@ -288,5 +287,4 @@ void ConvertAxesToRealSpace::fillUnitMap(std::vector<std::string> &orderedVector
   orderedVector.emplace_back(caption);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

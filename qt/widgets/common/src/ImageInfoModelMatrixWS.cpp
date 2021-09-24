@@ -39,8 +39,7 @@ static const std::array<std::tuple<Unit_sptr, bool>, 6> &displayUnits() {
 Logger g_log("ImageInfoModelMatrixWS");
 } // namespace
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 /**
  * Constructor
@@ -223,5 +222,4 @@ void ImageInfoModelMatrixWS::createItemNames() {
   }
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

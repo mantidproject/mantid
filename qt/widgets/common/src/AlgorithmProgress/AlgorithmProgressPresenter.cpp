@@ -7,8 +7,7 @@
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressPresenter.h"
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressWidget.h"
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 AlgorithmProgressPresenter::AlgorithmProgressPresenter(QWidget *parent, IAlgorithmProgressWidget *view)
     : AlgorithmProgressPresenterBase(parent), m_model{AlgorithmProgressModel(this)}, m_algorithm(nullptr), m_view(view),
       m_timer() {}
@@ -56,5 +55,4 @@ void AlgorithmProgressPresenter::updateProgressBarSlot(Mantid::API::AlgorithmID 
   }
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

@@ -10,20 +10,21 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidCurveFitting/Functions/Bk2BkExpConvPV.h"
+#include "MantidCurveFitting/SpecialFunctionSupport.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <gsl/gsl_sf_erf.h>
+#include <gsl/gsl_sf_lambert.h>
 
 using namespace Mantid::Kernel;
 
 using namespace Mantid::API;
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
+using namespace CurveFitting::SpecialFunctionSupport;
 namespace {
 /// static logger
 Kernel::Logger g_log("Bk2BkExpConvPV");
@@ -31,18 +32,13 @@ Kernel::Logger g_log("Bk2BkExpConvPV");
 
 DECLARE_FUNCTION(Bk2BkExpConvPV)
 
-// ----------------------------
-/** Constructor and Desctructor
- */
-Bk2BkExpConvPV::Bk2BkExpConvPV() : mFWHM(0.0) {}
-
 /** Initialize:  declare paraemters
  */
 void Bk2BkExpConvPV::init() {
   declareParameter("X0", -0.0, "Location of the peak");
   declareParameter("Intensity", 0.0, "Integrated intensity");
-  declareParameter("Alpha", 1.0, "Exponential rise");
-  declareParameter("Beta", 1.0, "Exponential decay");
+  declareParameter("Alpha", 0.04, "Exponential rise");
+  declareParameter("Beta", 0.02, "Exponential decay");
   declareParameter("Sigma2", 1.0, "Sigma squared");
   declareParameter("Gamma", 0.0);
 }
@@ -63,7 +59,8 @@ void Bk2BkExpConvPV::setHeight(const double h) {
   setParameter("Intensity", h / h0);
 }
 
-/** Get peak height
+/**
+ * Get approximate height (maximum value) of the peak (not at X0)
  */
 double Bk2BkExpConvPV::height() const {
   double height[1];
@@ -73,25 +70,45 @@ double Bk2BkExpConvPV::height() const {
   return height[0];
 }
 
-/** Get peak's FWHM
+/**
+ * Get approximate peak width.
  */
 double Bk2BkExpConvPV::fwhm() const {
-  double sigma2 = this->getParameter("Sigma2");
-  double gamma = this->getParameter("Gamma");
+  // get sigma of Gauss with same FWHM as voigt (H)
   double H, eta;
-  calHandEta(sigma2, gamma, H, eta);
-
-  return mFWHM;
+  calHandEta(getParameter("Sigma2"), getParameter("Gamma"), H, eta);
+  const auto s = H / (2 * sqrt(2 * M_LN2)); // FWHM = 2*sqrt(2*ln(2))*sigma
+  const auto w0 = expWidth();
+  // Gaussian and B2B exp widths don't add in quadrature. The following
+  // tends to gaussian at large S and at S=0 is equal to the intrinsic width of
+  // the B2B exp (good to <3% for typical params)
+  // (same Eq. used in BackToBackExponential)
+  return w0 * exp(-0.5 * M_LN2 * s / w0) + 2 * sqrt(2 * M_LN2) * s;
 }
 
-/** Set FWHM
- * This cannot be set directly so we assume Gamma is 0 and set Sigma by doing
- * the reverse of calHandEta
+/**
+ * Set new peak width approximately using same mapping in BackToBackExponential
+ * assuming fwhm_gaus = fwhm_lorz (i.e. fwhm_pv = 1.6363*fwhm_gauss from calHandEta)
+ * @param w :: New value for the width.
  */
 void Bk2BkExpConvPV::setFwhm(const double w) {
-  this->setParameter("Gamma", 0);
-  auto sigma2 = std::pow(w, 2) / (8.0 * M_LN2);
-  this->setParameter("Sigma2", sigma2);
+  const auto h0 = height();
+  const auto w0 = expWidth();
+  if (w > w0) {
+    const auto a = 0.5 * M_LN2;
+    const auto b = 2 * sqrt(2 * M_LN2);
+    // Can calculate FWHM of voigt (from FWHM of Gauss componeont from Eq. in BackToBackExponential)
+    // From Eq. in calHandEta assuming FWHM of Gauss and Lorz are equal fwhm_pv = 1.6364*fwhm_gauss
+    const auto fwhm_gauss =
+        b * w0 * (gsl_sf_lambert_W0(-(a / b) * exp(-(a / b) * (w / w0))) / a + (w / w0) / b) / 1.6364;
+    setParameter("Sigma2", std::pow(fwhm_gauss / b, 2));
+    setParameter("Gamma", fwhm_gauss / 2);
+  } else {
+    // set to some small number relative to w0
+    setParameter("Sigma2", 1e-6);
+    setParameter("Gamma", 1e-6);
+  }
+  setHeight(h0);
 }
 
 /** Set peak center
@@ -104,18 +121,6 @@ double Bk2BkExpConvPV::centre() const { return getParameter("X0"); }
 
 void Bk2BkExpConvPV::setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> workspace, size_t wi, double startX,
                                         double endX) {
-  if (workspace) {
-    // convert alpha and beta to correct units so inital guess is resonable
-    auto tof = Mantid::Kernel::UnitFactory::Instance().create("TOF");
-    const auto centre = getParameter("X0");
-    const auto scaleFactor = centre / convertValue(centre, tof, workspace, wi);
-    if (scaleFactor != 0) {
-      if (isActive(parameterIndex("Alpha")))
-        setParameter("Alpha", getParameter("Alpha") / scaleFactor);
-      if (isActive(parameterIndex("Beta")))
-        setParameter("Beta", getParameter("Beta") / scaleFactor);
-    }
-  }
   IFunctionMW::setMatrixWorkspace(workspace, wi, startX, endX);
 }
 
@@ -140,11 +145,16 @@ void Bk2BkExpConvPV::functionLocal(double *out, const double *xValues, const siz
                 << " X0 = " << x0 << " Intensity = " << intensity << " alpha = " << alpha << " beta = " << beta
                 << " H = " << H << " eta = " << eta << '\n';
 
-  // 2. Do calculation for each data point
+  // 2. Do calculation for each data point within extent of peak (avoid NaNs)
+  double extent = 10 * fwhm();
   for (size_t id = 0; id < nData; ++id) {
     double dT = xValues[id] - x0;
-    double omega = calOmega(dT, eta, N, alpha, beta, H, sigma2, invert_sqrt2sigma);
-    out[id] = intensity * omega;
+    if (fabs(dT) < extent) {
+      double omega = calOmega(dT, eta, N, alpha, beta, H, sigma2, invert_sqrt2sigma);
+      out[id] = intensity * omega;
+    } else {
+      out[id] = 0.0;
+    }
   }
 }
 
@@ -181,58 +191,11 @@ double Bk2BkExpConvPV::calOmega(double x, double eta, double N, double alpha, do
   if (eta < 1.0E-8) {
     omega2 = 0.0;
   } else {
-    omega2 = 2 * N * eta / M_PI * (imag(exp(p) * E1(p)) + imag(exp(q) * E1(q)));
+    omega2 = 2 * N * eta / M_PI * (imag(exponentialIntegral(p)) + imag(exponentialIntegral(q)));
   }
   double omega = omega1 - omega2;
 
   return omega;
-}
-
-/** Implementation of complex integral E_1
- */
-std::complex<double> Bk2BkExpConvPV::E1(std::complex<double> z) const {
-  std::complex<double> e1;
-
-  double rz = real(z);
-  double az = abs(z);
-
-  if (fabs(az) < 1.0E-8) {
-    // If z = 0, then the result is infinity... diverge!
-    std::complex<double> r(1.0E300, 0.0);
-    e1 = r;
-  } else if (az <= 10.0 || (rz < 0.0 && az < 20.0)) {
-    // Some interesting region, equal to integrate to infinity, converged
-    std::complex<double> r(1.0, 0.0);
-    e1 = r;
-    std::complex<double> cr = r;
-
-    for (size_t k = 0; k < 150; ++k) {
-      auto dk = double(k);
-      cr = -cr * dk * z / ((dk + 2.0) * (dk + 2.0));
-      e1 += cr;
-      if (abs(cr) < abs(e1) * 1.0E-15) {
-        // cr is converged to zero
-        break;
-      }
-    } // ENDFOR k
-
-    e1 = -e1 - log(z) + (z * e1);
-  } else {
-    std::complex<double> ct0(0.0, 0.0);
-    for (int k = 120; k > 0; --k) {
-      std::complex<double> dk(double(k), 0.0);
-      ct0 = dk / (10.0 + dk / (z + ct0));
-    } // ENDFOR k
-
-    e1 = 1.0 / (z + ct0);
-    e1 = e1 * exp(-z);
-    if (rz < 0.0 && fabs(imag(z)) < 1.0E-10) {
-      std::complex<double> u(0.0, 1.0);
-      e1 = e1 - (M_PI * u);
-    }
-  }
-
-  return e1;
 }
 
 void Bk2BkExpConvPV::geneatePeak(double *out, const double *xValues, const size_t nData) {
@@ -241,15 +204,13 @@ void Bk2BkExpConvPV::geneatePeak(double *out, const double *xValues, const size_
 
 void Bk2BkExpConvPV::calHandEta(double sigma2, double gamma, double &H, double &eta) const {
   // 1. Calculate H
-  double H_G = sqrt(8.0 * sigma2 * M_LN2);
-  double H_L = gamma;
+  double H_G = sqrt(8.0 * sigma2 * M_LN2); // FWHM Gauss
+  double H_L = 2 * gamma;                  // FWHM lorz
 
   double temp1 = std::pow(H_L, 5) + 0.07842 * H_G * std::pow(H_L, 4) + 4.47163 * std::pow(H_G, 2) * std::pow(H_L, 3) +
                  2.42843 * std::pow(H_G, 3) * std::pow(H_L, 2) + 2.69269 * std::pow(H_G, 4) * H_L + std::pow(H_G, 5);
 
-  H = std::pow(temp1, 0.2);
-
-  mFWHM = H;
+  H = std::pow(temp1, 0.2); // FWHM of PV
 
   // 2. Calculate eta
   double gam_pv = H_L / H;
@@ -260,6 +221,13 @@ void Bk2BkExpConvPV::calHandEta(double sigma2, double gamma, double &H, double &
   }
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+/**
+ * Calculate contribution to the width by the exponentials.
+ */
+double Bk2BkExpConvPV::expWidth() const {
+  const double a = getParameter("Alpha");
+  const double b = getParameter("Beta");
+  return M_LN2 * (a + b) / (a * b);
+}
+
+} // namespace Mantid::CurveFitting::Functions

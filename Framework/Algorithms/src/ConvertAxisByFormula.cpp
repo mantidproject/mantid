@@ -17,8 +17,7 @@
 #include <memory>
 #include <sstream>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Kernel;
 using namespace API;
@@ -70,7 +69,7 @@ void ConvertAxisByFormula::exec() {
   // Just overwrite if the change is in place
   MatrixWorkspace_sptr outputWs = getProperty("OutputWorkspace");
   if (outputWs != inputWs) {
-    IAlgorithm_sptr duplicate = createChildAlgorithm("CloneWorkspace", 0.0, 0.6);
+    auto duplicate = createChildAlgorithm("CloneWorkspace", 0.0, 0.6);
     duplicate->initialize();
     duplicate->setProperty<Workspace_sptr>("InputWorkspace", std::dynamic_pointer_cast<Workspace>(inputWs));
     duplicate->execute();
@@ -282,5 +281,4 @@ double ConvertAxisByFormula::evaluateResult(mu::Parser &p) {
   return result;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

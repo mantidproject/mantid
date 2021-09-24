@@ -14,6 +14,8 @@ GNU_DIAG_OFF("format-truncation")
 GNU_DIAG_OFF("implicit-fallthrough")
 GNU_DIAG_OFF("cast-align")
 GNU_DIAG_OFF("deprecated-copy")
+GNU_DIAG_OFF("stringop-truncation")
+GNU_DIAG_OFF("restrict")
 
 /*
   stdsoap2.c[pp] 2.8.15

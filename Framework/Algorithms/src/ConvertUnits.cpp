@@ -24,8 +24,7 @@
 
 #include <numeric>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register with the algorithm factory
 DECLARE_ALGORITHM(ConvertUnits)
@@ -108,7 +107,7 @@ void ConvertUnits::exec() {
       return;
     } else {
       // Clone the workspace.
-      IAlgorithm_sptr duplicate = createChildAlgorithm("CloneWorkspace", 0.0, 0.6);
+      auto duplicate = createChildAlgorithm("CloneWorkspace", 0.0, 0.6);
       duplicate->initialize();
       duplicate->setProperty("InputWorkspace", inputWS);
       duplicate->execute();
@@ -128,7 +127,7 @@ void ConvertUnits::exec() {
       g_log.information("ConvertFromPointData is checked. Running ConvertToHistogram\n");
       // not histogram data
       // ConvertToHistogram
-      IAlgorithm_sptr convToHist = createChildAlgorithm("ConvertToHistogram");
+      auto convToHist = createChildAlgorithm("ConvertToHistogram");
       convToHist->setProperty("InputWorkspace", inputWS);
       convToHist->execute();
       MatrixWorkspace_sptr temp = convToHist->getProperty("OutputWorkspace");
@@ -151,7 +150,7 @@ void ConvertUnits::exec() {
   // If InputWorkspace contained point data, convert back
   if (workspaceWasConverted) {
     g_log.information("ConvertUnits is completed. Running ConvertToPointData.\n");
-    IAlgorithm_sptr convtoPoints = createChildAlgorithm("ConvertToPointData");
+    auto convtoPoints = createChildAlgorithm("ConvertToPointData");
     convtoPoints->setProperty("InputWorkspace", outputWS);
     convtoPoints->execute();
     MatrixWorkspace_sptr temp = convtoPoints->getProperty("OutputWorkspace");
@@ -504,7 +503,7 @@ API::MatrixWorkspace_sptr ConvertUnits::alignBins(const API::MatrixWorkspace_spt
   if (communicator().size() != 1)
     throw std::runtime_error("ConvertUnits: Parallel support for aligning bins not implemented.");
   // Create a Rebin child algorithm
-  IAlgorithm_sptr childAlg = createChildAlgorithm("Rebin");
+  auto childAlg = createChildAlgorithm("Rebin");
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", workspace);
   // Next line for EventWorkspaces - needed for as long as in/out set same
   // keeps
@@ -687,5 +686,4 @@ void ConvertUnits::putBackBinWidth(const API::MatrixWorkspace_sptr &outputWS) {
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

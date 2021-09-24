@@ -21,7 +21,7 @@ Performance
 - Applying ParameterMaps to Detectors now about 30% faster. Algorithms that involve applying ParameterMaps will see performance improvements.
 - This release saw the introduction of the StructuredDetector. This change has reduced load times via LoadInstrument from ~10minutes down to ~0.5seconds for the prospective ESS LOKI instrument.
   For more information on how to generate a StructuredDetector based instrument follow
-  this `link <http://docs.mantidproject.org/nightly/concepts/InstrumentDefinitionFile.html#creating-structured-irregular-geometry-detectors>`_
+  this :ref:`link <Creating Structured Detectors>`
 - The destructors for ConvexPolygon and Quadrilateral objects are now faster, especially on Linux.
 
 CurveFitting
@@ -51,7 +51,7 @@ New
 
 -  :ref:`AlignComponents <algm-AlignComponents>`
    This algorithm will take the calibration from the output of
-   :ref:`GetDetOffsetsMultiPeaks <algm-GetDetOffsetsMultiPeaks>`, :ref:`CalibrateRectangularDetectors <algm-CalibrateRectangularDetectors>`, *et al* and
+   `GetDetOffsetsMultiPeaks`, `CalibrateRectangularDetectors`, *et al* and
    minimizes the difference between the *DIFC* of the instrument and
    calibration by moving and rotating instrument components.
 - :ref:`CorrectTOF <algm-CorrectTOF>` applies to the time-of-flight correction which considers the specified elastic peak position.
@@ -59,7 +59,7 @@ New
   parameters (DIFA, DIFC, TZERO) from peaks fitted using
   :ref:`EnggFitPeaks <algm-EnggFitPeaks>`.
 - :ref:`FindEPP <algm-FindEPP>` This algorithm performs Gaussian fit to find the elastic peak position.
-  As a result, `TableWorkspace <http://www.mantidproject.org/TableWorkspace>`_ with parameters of the fitted peaks is created.
+  As a result, :ref:`TableWorkspace <Table Workspaces>` with parameters of the fitted peaks is created.
 - :ref:`GetIPTS <algm-GetIPTS>` Returns the IPTS directory of the specified ORNL run.
 - :ref:`GSASIIRefineFitPeaks <algm-GSASIIRefineFitPeaks>` uses the GSAS-II
   software to refine lattice parameters (whole pattern refinement) and fit

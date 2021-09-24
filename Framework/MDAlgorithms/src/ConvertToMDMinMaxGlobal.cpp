@@ -27,8 +27,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertToMDMinMaxGlobal)
@@ -128,7 +127,7 @@ void ConvertToMDMinMaxGlobal::exec() {
   } else // need to calculate the appropriate q values
   {
     double qmax, deltaEmax, deltaEmin;
-    IAlgorithm_sptr conv = createChildAlgorithm("ConvertUnits", 0.0, 0.9);
+    auto conv = createChildAlgorithm("ConvertUnits", 0.0, 0.9);
     conv->setProperty<MatrixWorkspace_sptr>("InputWorkspace", ws);
     conv->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", wstemp);
     // Calculate maxumum momentum transfer Q
@@ -255,5 +254,4 @@ void ConvertToMDMinMaxGlobal::exec() {
   setProperty("MaxValues", MaxValues);
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

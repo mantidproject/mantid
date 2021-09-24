@@ -6,15 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectBayesTab.h"
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 
 IndirectBayesTab::IndirectBayesTab(QWidget *parent) : IndirectTab(parent), m_propTree(new QtTreePropertyBrowser()) {
   m_propTree->setFactoryForManager(m_dblManager, m_dblEdFac);
 
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-          // cppcheck-suppress pureVirtualCall
-          SLOT(updateProperties(QtProperty *, double)));
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SLOT(updateProperties(QtProperty *, double)));
 }
 
 IndirectBayesTab::~IndirectBayesTab() { m_propTree->unsetFactoryForManager(m_dblManager); }
@@ -40,5 +37,4 @@ void IndirectBayesTab::formatTreeWidget(QtTreePropertyBrowser *treeWidget,
     treeWidget->setBackgroundColor(treeWidget->topLevelItem(item), QColor(246, 246, 246));
 }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

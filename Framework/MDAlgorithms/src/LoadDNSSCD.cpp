@@ -92,8 +92,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 DECLARE_FILELOADER_ALGORITHM(LoadDNSSCD)
 
@@ -410,7 +409,7 @@ void LoadDNSSCD::fillOutputWorkspace(double wavelength) {
   std::vector<double> v = getProperty("HKL2");
 
   // load empty DNS instrument to access L1 and L2
-  IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
+  auto loadAlg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
   loadAlg->setChild(true);
   loadAlg->setLogging(false);
   loadAlg->initialize();
@@ -585,7 +584,7 @@ void LoadDNSSCD::fillOutputWorkspaceRaw(double wavelength) {
   Mantid::Kernel::SpecialCoordinateSystem coordinateSystem = Mantid::Kernel::None;
 
   // load empty DNS instrument to access L1 and L2
-  IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
+  auto loadAlg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
   loadAlg->setChild(true);
   loadAlg->setLogging(false);
   loadAlg->initialize();
@@ -814,5 +813,4 @@ void LoadDNSSCD::read_data(const std::string &fname, std::map<std::string, std::
   m_data.emplace_back(ds);
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

@@ -33,8 +33,7 @@ const double EXP_SCALAR_CONST = 2175.486863864;
 // Tolerance for diameter/thickness comparison
 const double TOL = 1.0e-8;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace DataObjects;
 using namespace HistogramData;
@@ -458,5 +457,4 @@ template <class T> void He3TubeEfficiency::eventHelper(std::vector<T> &events, d
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

@@ -30,8 +30,7 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::HistogramData;
 using std::size_t;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 /** Initialisation method.
  *  Defines input and output workspaces
  *
@@ -76,7 +75,7 @@ bool BinaryOperation::handleSpecialDivideMinus() {
     if (this->name() == "Divide" && !bool(rhs_singleVal)) {
       // x / workspace = Power(workspace, -1) * x
       // workspace ^ -1
-      IAlgorithm_sptr pow = this->createChildAlgorithm("Power", 0.0, 0.5, true);
+      auto pow = createChildAlgorithm("Power", 0.0, 0.5, true);
       pow->setProperty("InputWorkspace", std::const_pointer_cast<MatrixWorkspace>(m_rhs));
       pow->setProperty("Exponent", -1.0);
       pow->setProperty("OutputWorkspace", out);
@@ -84,7 +83,7 @@ bool BinaryOperation::handleSpecialDivideMinus() {
       out = pow->getProperty("OutputWorkspace");
 
       // Multiply by x
-      IAlgorithm_sptr mult = this->createChildAlgorithm("Multiply", 0.5, 1.0, true);
+      auto mult = createChildAlgorithm("Multiply", 0.5, 1.0, true);
       mult->setProperty(inputPropName1(), out); //(workspace^-1)
       mult->setProperty(inputPropName2(),
                         std::const_pointer_cast<MatrixWorkspace>(m_lhs)); // (1.0) or other number
@@ -100,7 +99,7 @@ bool BinaryOperation::handleSpecialDivideMinus() {
       minusOne->dataE(0)[0] = 0.0;
 
       // workspace * -1
-      IAlgorithm_sptr mult = this->createChildAlgorithm("Multiply", 0.0, 0.5, true);
+      auto mult = createChildAlgorithm("Multiply", 0.0, 0.5, true);
       mult->setProperty(inputPropName1(), std::const_pointer_cast<MatrixWorkspace>(m_rhs));
       mult->setProperty(inputPropName2(), minusOne);
       mult->setProperty("OutputWorkspace", out);
@@ -108,7 +107,7 @@ bool BinaryOperation::handleSpecialDivideMinus() {
       out = mult->getProperty("OutputWorkspace");
 
       // Multiply by x
-      IAlgorithm_sptr plus = this->createChildAlgorithm("Plus", 0.5, 1.0, true);
+      auto plus = createChildAlgorithm("Plus", 0.5, 1.0, true);
       plus->setProperty(inputPropName1(), out); //(workspace^-1)
       plus->setProperty(inputPropName2(),
                         std::const_pointer_cast<MatrixWorkspace>(m_lhs)); // (1.0) or other number
@@ -159,10 +158,6 @@ void BinaryOperation::exec() {
     }
   }
 
-  // Get the output workspace
-  m_out = getProperty(outputPropName());
-  m_eout = std::dynamic_pointer_cast<EventWorkspace>(m_out);
-
   // Make a check of what will be needed to setup the workspaces, based on the
   // input types.
   this->checkRequirements();
@@ -180,6 +175,12 @@ void BinaryOperation::exec() {
     ostr << "The two workspaces are not compatible for algorithm " << this->name();
     g_log.error() << ostr.str() << '\n';
     throw std::invalid_argument(ostr.str());
+  }
+
+  // Get the output workspace
+  m_out = getProperty(outputPropName());
+  if (m_elhs) {
+    m_eout = std::dynamic_pointer_cast<EventWorkspace>(m_out);
   }
 
   // Is the output going to be an EventWorkspace?
@@ -999,5 +1000,4 @@ BinaryOperation::getParallelExecutionMode(const std::map<std::string, Parallel::
   return Parallel::ExecutionMode::Invalid;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

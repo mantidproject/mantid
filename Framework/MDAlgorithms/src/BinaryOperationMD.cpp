@@ -22,8 +22,7 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::DataObjects;
 using Mantid::Geometry::IMDDimension_const_sptr;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string BinaryOperationMD::name() const { return "BinaryOperationMD"; }
@@ -115,7 +114,7 @@ void BinaryOperationMD::exec() {
     // A = A * B. -> we will do A *= B
   } else {
     // C = A + B. -> So first we clone A (lhs) into C
-    IAlgorithm_sptr clone = this->createChildAlgorithm("CloneMDWorkspace", 0.0, 0.5, true);
+    auto clone = createChildAlgorithm("CloneMDWorkspace", 0.0, 0.5, true);
     clone->setProperty("InputWorkspace", m_lhs);
     clone->executeAsChildAlg();
     m_out = clone->getProperty("OutputWorkspace");
@@ -187,5 +186,4 @@ void BinaryOperationMD::exec() {
   setProperty("OutputWorkspace", m_out);
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

@@ -6,8 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/StructureFactorCalculator.h"
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 /**
  * Sets the crystal structure for which to calculate structure factors
@@ -76,5 +75,4 @@ void StructureFactorCalculator::crystalStructureSetHook(const CrystalStructure &
   UNUSED_ARG(crystalStructure)
 }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

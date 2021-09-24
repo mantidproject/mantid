@@ -25,8 +25,7 @@
 #include "MantidKernel/Unit.h"
 #include "MantidParallel/Communicator.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -174,7 +173,7 @@ void CompareWorkspaces::exec() {
 
   if (!m_result) {
     std::string message = m_messages->cell<std::string>(0, 0);
-    g_log.notice() << "The workspaces did not match: " << message << '\n';
+    g_log.warning() << "The workspaces did not match: " << message << '\n';
   } else {
     std::string ws1 = Workspace_const_sptr(getProperty("Workspace1"))->getName();
     std::string ws2 = Workspace_const_sptr(getProperty("Workspace2"))->getName();
@@ -1082,8 +1081,8 @@ void CompareWorkspaces::doPeaksComparison(PeaksWorkspace_sptr tws1, PeaksWorkspa
 }
 
 //------------------------------------------------------------------------------------------------
-void CompareWorkspaces::doLeanElasticPeaksComparison(LeanElasticPeaksWorkspace_sptr tws1,
-                                                     LeanElasticPeaksWorkspace_sptr tws2) {
+void CompareWorkspaces::doLeanElasticPeaksComparison(const LeanElasticPeaksWorkspace_sptr &tws1,
+                                                     const LeanElasticPeaksWorkspace_sptr &tws2) {
   // Check some table-based stuff
   if (tws1->getNumberPeaks() != tws2->getNumberPeaks()) {
     recordMismatch("Mismatched number of rows.");
@@ -1244,7 +1243,7 @@ void CompareWorkspaces::doMDComparison(const Workspace_sptr &w1, const Workspace
   mdws1 = std::dynamic_pointer_cast<IMDWorkspace>(w1);
   mdws2 = std::dynamic_pointer_cast<IMDWorkspace>(w2);
 
-  IAlgorithm_sptr alg = this->createChildAlgorithm("CompareMDWorkspaces");
+  auto alg = createChildAlgorithm("CompareMDWorkspaces");
   alg->setProperty<IMDWorkspace_sptr>("Workspace1", mdws1);
   alg->setProperty<IMDWorkspace_sptr>("Workspace2", mdws2);
   const double tolerance = getProperty("Tolerance");
@@ -1330,5 +1329,4 @@ void CompareWorkspaces::execMasterOnly() {
     setProperty("Result", true);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

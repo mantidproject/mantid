@@ -14,8 +14,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using std::size_t;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ResetNegatives)
@@ -48,7 +47,7 @@ void ResetNegatives::exec() {
   MatrixWorkspace_sptr outputWS = this->getProperty("OutputWorkspace");
 
   // get the minimum for each spectrum
-  IAlgorithm_sptr alg = this->createChildAlgorithm("Min", 0., .1);
+  auto alg = createChildAlgorithm("Min", 0., .1);
   alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWS);
   alg->executeAsChildAlg();
   MatrixWorkspace_const_sptr minWS = alg->getProperty("OutputWorkspace");
@@ -68,7 +67,7 @@ void ResetNegatives::exec() {
     g_log.information() << "No values are negative. Copying InputWorkspace to "
                            "OutputWorkspace\n";
     if (inputWS != outputWS) {
-      IAlgorithm_sptr clone = this->createChildAlgorithm("CloneWorkspace", .1, 1.);
+      auto clone = createChildAlgorithm("CloneWorkspace", .1, 1.);
       clone->setProperty<Workspace_sptr>("InputWorkspace", inputWS);
       clone->executeAsChildAlg();
 
@@ -179,5 +178,4 @@ void ResetNegatives::changeNegatives(const MatrixWorkspace_const_sptr &minWS, co
   PARALLEL_CHECK_INTERUPT_REGION
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

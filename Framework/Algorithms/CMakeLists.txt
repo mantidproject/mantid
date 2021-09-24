@@ -29,7 +29,9 @@ set(SRC_FILES
     src/CalculateFlatBackground.cpp
     src/CalculateIqt.cpp
     src/CalculateMultipleScattering.cpp
+    src/CalculatePlaczek.cpp
     src/CalculatePlaczekSelfScattering.cpp
+    src/CalculatePlaczekSelfScattering2.cpp
     src/CalculatePolynomialBackground.cpp
     src/CalculateTransmission.cpp
     src/CalculateTransmissionBeamSpreader.cpp
@@ -46,6 +48,7 @@ set(SRC_FILES
     src/ClearInstrumentParameters.cpp
     src/ClearMaskFlag.cpp
     src/CloneWorkspace.cpp
+    src/CombineDiffCal.cpp
     src/Comment.cpp
     src/CommutativeBinaryOperation.cpp
     src/CompareWorkspaces.cpp
@@ -158,7 +161,6 @@ set(SRC_FILES
     src/GeneratePythonFitScript.cpp
     src/GeneratePythonScript.cpp
     src/GetAllEi.cpp
-    src/GetDetOffsetsMultiPeaks.cpp
     src/GetDetectorOffsets.cpp
     src/GetEi.cpp
     src/GetEi2.cpp
@@ -211,6 +213,8 @@ set(SRC_FILES
     src/MonitorEfficiencyCorUser.cpp
     src/MonteCarloAbsorption.cpp
     src/MostLikelyMean.cpp
+    src/MultipleScatteringCorrection.cpp
+    src/MultipleScatteringCorrectionDistGraber.cpp
     src/Multiply.cpp
     src/MultiplyRange.cpp
     src/NormaliseByCurrent.cpp
@@ -226,6 +230,7 @@ set(SRC_FILES
     src/PaddingAndApodization.cpp
     src/ParallaxCorrection.cpp
     src/Pause.cpp
+    src/PeakParameterHelper.cpp
     src/PerformIndexOperations.cpp
     src/Plus.cpp
     src/PointByPointVCorrection.cpp
@@ -300,6 +305,7 @@ set(SRC_FILES
     src/SpatialGrouping.cpp
     src/SpectrumAlgorithm.cpp
     src/SphericalAbsorption.cpp
+    src/Stitch.cpp
     src/Stitch1D.cpp
     src/Stitch1DMany.cpp
     src/StripPeaks.cpp
@@ -329,6 +335,7 @@ set(SRC_FILES
     src/WeightingStrategy.cpp
     src/WienerSmooth.cpp
     src/WorkflowAlgorithmRunner.cpp
+    src/WorkspaceBoundingBox.cpp
     src/WorkspaceJoiners.cpp
     src/XDataConverter.cpp
     src/XrayAbsorptionCorrection.cpp)
@@ -364,7 +371,9 @@ set(INC_FILES
     inc/MantidAlgorithms/CalculateFlatBackground.h
     inc/MantidAlgorithms/CalculateIqt.h
     inc/MantidAlgorithms/CalculateMultipleScattering.h
+    inc/MantidAlgorithms/CalculatePlaczek.h
     inc/MantidAlgorithms/CalculatePlaczekSelfScattering.h
+    inc/MantidAlgorithms/CalculatePlaczekSelfScattering2.h
     inc/MantidAlgorithms/CalculatePolynomialBackground.h
     inc/MantidAlgorithms/CalculateTransmission.h
     inc/MantidAlgorithms/CalculateTransmissionBeamSpreader.h
@@ -381,6 +390,7 @@ set(INC_FILES
     inc/MantidAlgorithms/ClearInstrumentParameters.h
     inc/MantidAlgorithms/ClearMaskFlag.h
     inc/MantidAlgorithms/CloneWorkspace.h
+    inc/MantidAlgorithms/CombineDiffCal.h
     inc/MantidAlgorithms/Comment.h
     inc/MantidAlgorithms/CommutativeBinaryOperation.h
     inc/MantidAlgorithms/CompareWorkspaces.h
@@ -494,7 +504,6 @@ set(INC_FILES
     inc/MantidAlgorithms/GeneratePythonFitScript.h
     inc/MantidAlgorithms/GeneratePythonScript.h
     inc/MantidAlgorithms/GetAllEi.h
-    inc/MantidAlgorithms/GetDetOffsetsMultiPeaks.h
     inc/MantidAlgorithms/GetDetectorOffsets.h
     inc/MantidAlgorithms/GetEi.h
     inc/MantidAlgorithms/GetEi2.h
@@ -550,6 +559,8 @@ set(INC_FILES
     inc/MantidAlgorithms/MonitorEfficiencyCorUser.h
     inc/MantidAlgorithms/MonteCarloAbsorption.h
     inc/MantidAlgorithms/MostLikelyMean.h
+    inc/MantidAlgorithms/MultipleScatteringCorrection.h
+    inc/MantidAlgorithms/MultipleScatteringCorrectionDistGraber.h
     inc/MantidAlgorithms/Multiply.h
     inc/MantidAlgorithms/MultiplyRange.h
     inc/MantidAlgorithms/NormaliseByCurrent.h
@@ -565,6 +576,7 @@ set(INC_FILES
     inc/MantidAlgorithms/PaddingAndApodization.h
     inc/MantidAlgorithms/ParallaxCorrection.h
     inc/MantidAlgorithms/Pause.h
+    inc/MantidAlgorithms/PeakParameterHelper.h
     inc/MantidAlgorithms/PerformIndexOperations.h
     inc/MantidAlgorithms/Plus.h
     inc/MantidAlgorithms/PointByPointVCorrection.h
@@ -642,6 +654,7 @@ set(INC_FILES
     inc/MantidAlgorithms/SpatialGrouping.h
     inc/MantidAlgorithms/SpectrumAlgorithm.h
     inc/MantidAlgorithms/SphericalAbsorption.h
+    inc/MantidAlgorithms/Stitch.h
     inc/MantidAlgorithms/Stitch1D.h
     inc/MantidAlgorithms/Stitch1DMany.h
     inc/MantidAlgorithms/StripPeaks.h
@@ -672,6 +685,7 @@ set(INC_FILES
     inc/MantidAlgorithms/WeightingStrategy.h
     inc/MantidAlgorithms/WienerSmooth.h
     inc/MantidAlgorithms/WorkflowAlgorithmRunner.h
+    inc/MantidAlgorithms/WorkspaceBoundingBox.h
     inc/MantidAlgorithms/WorkspaceJoiners.h
     inc/MantidAlgorithms/XDataConverter.h
     inc/MantidAlgorithms/XrayAbsorptionCorrection.h)
@@ -717,7 +731,9 @@ set(TEST_FILES
     CalculateFlatBackgroundTest.h
     CalculateIqtTest.h
     CalculateMultipleScatteringTest.h
+    CalculatePlaczekSelfScattering2Test.h
     CalculatePlaczekSelfScatteringTest.h
+    CalculatePlaczekTest.h
     CalculatePolynomialBackgroundTest.h
     CalculateTransmissionBeamSpreaderTest.h
     CalculateTransmissionTest.h
@@ -736,6 +752,7 @@ set(TEST_FILES
     ClearInstrumentParametersTest.h
     ClearMaskFlagTest.h
     CloneWorkspaceTest.h
+    CombineDiffCalTest.h
     CommentTest.h
     CommutativeBinaryOperationTest.h
     CompareWorkspacesTest.h
@@ -786,6 +803,7 @@ set(TEST_FILES
     CropWorkspaceRaggedTest.h
     CropWorkspaceTest.h
     CrossCorrelateTest.h
+    CrossCorrelateTestData.h
     CuboidGaugeVolumeAbsorptionTest.h
     CylinderAbsorptionTest.h
     DeadTimeCorrectionTest.h
@@ -843,7 +861,6 @@ set(TEST_FILES
     GeneratePythonFitScriptTest.h
     GeneratePythonScriptTest.h
     GetAllEiTest.h
-    GetDetOffsetsMultiPeaksTest.h
     GetDetectorOffsetsTest.h
     GetEiMonDet3Test.h
     GetEiTest.h
@@ -897,6 +914,7 @@ set(TEST_FILES
     MonitorEfficiencyCorUserTest.h
     MonteCarloAbsorptionTest.h
     MostLikelyMeanTest.h
+    MultipleScatteringCorrectionTest.h
     MultiplyRangeTest.h
     MultiplyTest.h
     MuonWorkspaceCreationHelperTest.h
@@ -977,6 +995,7 @@ set(TEST_FILES
     SphericalAbsorptionTest.h
     Stitch1DManyTest.h
     Stitch1DTest.h
+    StitchTest.h
     StripPeaksTest.h
     StripVanadiumPeaks2Test.h
     StripVanadiumPeaksTest.h
@@ -1011,7 +1030,7 @@ set(TEST_PY_FILES
 
   pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} python ${TEST_PY_FILES})
 
-if(COVERALLS)
+if(COVERAGE)
   foreach(loop_var ${SRC_FILES} ${C_SRC_FILES} ${INC_FILES})
     set_property(GLOBAL APPEND
                  PROPERTY COVERAGE_SRCS
@@ -1023,6 +1042,12 @@ endif()
 enable_precompiled_headers(inc/MantidAlgorithms/PrecompiledHeader.h SRC_FILES)
 # Add the target for this directory
 add_library(Algorithms ${SRC_FILES} ${C_SRC_FILES} ${INC_FILES})
+add_library(Mantid::Algorithms ALIAS Algorithms)
+
+target_include_directories(Algorithms PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+		$<INSTALL_INTERFACE:include/Mantid>
+)
 # Set the name of the generated library
 set_target_properties(Algorithms
                       PROPERTIES OUTPUT_NAME
@@ -1042,26 +1067,25 @@ endif()
 # Add to the 'Framework' group in VS
 set_property(TARGET Algorithms PROPERTY FOLDER "MantidFramework")
 
-include_directories(inc)
-
-target_include_directories(Algorithms SYSTEM PUBLIC ${Boost_INCLUDE_DIRS})
-target_link_libraries(Algorithms
-                      LINK_PRIVATE
-                      ${MANTIDLIBS}
-                      ${GSL_LIBRARIES})
+target_link_libraries(Algorithms PUBLIC Mantid::API Mantid::HistogramData Mantid::Kernel Mantid::Geometry Mantid::Indexing PRIVATE Mantid::DataObjects Mantid::Parallel Mantid::Types Boost::filesystem)
 
 # Add the unit tests directory
 add_subdirectory(test)
 
 # Auto-generate exports header
-target_include_directories(Algorithms PUBLIC ${CMAKE_BINARY_DIR}/Framework/Algorithms)
-target_include_directories(Algorithms PUBLIC ${CMAKE_BINARY_DIR}/Framework/Types)
+target_include_directories(Algorithms PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/Algorithms>
+  $<INSTALL_INTERFACE:include/Mantid>
+)
 generate_mantid_export_header(Algorithms FALSE)
 
 # Installation settings
-
+if (CONDA_BUILD)
+mtd_install_framework_lib(TARGETS Algorithms PLUGIN_LIB)
+else()
 mtd_install_targets(TARGETS
                     Algorithms
                     INSTALL_DIRS
                     ${PLUGINS_DIR}
                     ${WORKBENCH_PLUGINS_DIR})
+endif()

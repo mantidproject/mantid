@@ -107,8 +107,7 @@ Powder Diffraction
 - `Pearl Powder Diffraction Script <http://docs.mantidproject.org/v3.8.0/api/python/techniques/PearlPowderDiffractionISIS-v1.html>`_:
   A workflow diagram for ``pearl_run_focus`` function has been created.
 
-- :ref:`CalibrateRectangularDetectors
-  <algm-CalibrateRectangularDetectors>` has been modified to output
+- `CalibrateRectangularDetectors` has been modified to output
   ``.h5`` formatted calibration files as well as the other versions it
   already supported.
 

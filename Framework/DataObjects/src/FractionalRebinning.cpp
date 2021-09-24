@@ -40,9 +40,7 @@ using namespace API;
 using namespace Geometry;
 using namespace Kernel;
 
-namespace DataObjects {
-
-namespace FractionalRebinning {
+namespace DataObjects::FractionalRebinning {
 
 const double POS_TOLERANCE = 1.e-10;
 
@@ -658,7 +656,5 @@ void finalizeFractionalRebin(RebinnedOutput &outputWS) {
   outputWS.setSqrdErrors(true);
 }
 
-} // namespace FractionalRebinning
-
-} // namespace DataObjects
+} // namespace DataObjects::FractionalRebinning
 } // namespace Mantid

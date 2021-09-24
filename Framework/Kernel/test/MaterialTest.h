@@ -63,6 +63,7 @@ public:
     TS_ASSERT_EQUALS(material.numberDensity(), numberDensity);
     TS_ASSERT_EQUALS(material.numberDensityEffective(), numberDensity);
     TS_ASSERT_EQUALS(material.packingFraction(), 1.);
+    TS_ASSERT_EQUALS(material.totalAtoms(), 1.)
     TS_ASSERT_EQUALS(material.temperature(), 300);
     TS_ASSERT_EQUALS(material.pressure(), Mantid::PhysicalConstants::StandardAtmosphere);
 
@@ -86,6 +87,7 @@ public:
     TS_ASSERT_EQUALS(material.numberDensity(), numberDensity);
     TS_ASSERT_EQUALS(material.numberDensityEffective(), numberDensity);
     TS_ASSERT_EQUALS(material.packingFraction(), 1.);
+    TS_ASSERT_EQUALS(material.totalAtoms(), 1.)
 
     // check everything with (default) reference wavelength
     checkMatching(material, atom);
@@ -104,6 +106,7 @@ public:
     TS_ASSERT_EQUALS(TiZr.numberDensity(), numberDensity);
     TS_ASSERT_EQUALS(TiZr.numberDensityEffective(), numberDensity * packingFraction);
     TS_ASSERT_EQUALS(TiZr.packingFraction(), packingFraction);
+    TS_ASSERT_DELTA(TiZr.totalAtoms(), 3.082605, 1.e-5); // string to double changes value
 
     TS_ASSERT_EQUALS(TiZr.cohScatterLengthImg(), 0.);
     TS_ASSERT_DELTA(TiZr.cohScatterLengthReal(), 0., 1.e-5);

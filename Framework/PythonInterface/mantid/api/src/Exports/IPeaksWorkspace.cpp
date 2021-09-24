@@ -32,39 +32,49 @@ GET_POINTER_SPECIALIZATION(IPeaksWorkspace)
 namespace {
 
 /// Create a peak via it's HKL value from a list or numpy array
-IPeak *createPeakHKL(IPeaksWorkspace &self, const object &data) {
+IPeak *createPeakHKL(const IPeaksWorkspace &self, const object &data) {
   auto peak = self.createPeakHKL(Mantid::PythonInterface::Converters::PyObjectToV3D(data)());
   // Python will manage it
   return peak.release();
 }
 
 /// Create a peak via it's QLab value from a list or numpy array
-IPeak *createPeakQLab(IPeaksWorkspace &self, const object &data) {
+IPeak *createPeakQLab(const IPeaksWorkspace &self, const object &data) {
   auto peak = self.createPeak(Mantid::PythonInterface::Converters::PyObjectToV3D(data)(), boost::none);
   // Python will manage it
   return peak.release();
 }
 
 /// Create a peak via it's QLab value from a list or numpy array
-IPeak *createPeakQLabWithDistance(IPeaksWorkspace &self, const object &data, double detectorDistance) {
+IPeak *createPeakQLabWithDistance(const IPeaksWorkspace &self, const object &data, double detectorDistance) {
   auto peak = self.createPeak(Mantid::PythonInterface::Converters::PyObjectToV3D(data)(), detectorDistance);
   // Python will manage the object
   return peak.release();
 }
 
 /// Create a peak via it's QSample value from a list or numpy array
-IPeak *createPeakQSample(IPeaksWorkspace &self, const object &data) {
+IPeak *createPeakQSample(const IPeaksWorkspace &self, const object &data) {
   auto peak = self.createPeakQSample(Mantid::PythonInterface::Converters::PyObjectToV3D(data)());
   // Python will manage it
   return peak.release();
 }
 
 /// Create a peak via it's QLab value from a list or numpy array
-void addPeak(IPeaksWorkspace &self, const IPeak &peak) { self.addPeak(peak); }
+void addPeak(IPeaksWorkspace &self, const IPeak &peak) {
+  self.addPeak(peak);
+  self.modified();
+}
 
 /// Add a peak with its Q-vector (using a list of numpy array) and the coordinate frm (Qlab, Qsmaple, HKL)
 void addPeak2(IPeaksWorkspace &self, const object &data, const SpecialCoordinateSystem &frame) {
   self.addPeak(PyObjectToV3D(data)(), frame);
+  self.modified();
+}
+
+/// Remove a peak and send an AfterReplaceNotification for subscribed viewers, such as sliceviewer's
+void removePeak(IPeaksWorkspace &self, int peak_num) {
+  self.removePeak(peak_num);
+  self.modified();
 }
 
 /**
@@ -246,8 +256,7 @@ void export_IPeaksWorkspace() {
            "Returns the number of peaks within the workspace")
       .def("addPeak", addPeak, (arg("self"), arg("peak")), "Add a peak to the workspace")
       .def("addPeak", addPeak2, (arg("self"), arg("data"), arg("coord_system")), "Add a peak to the workspace")
-      .def("removePeak", &IPeaksWorkspace::removePeak, (arg("self"), arg("peak_num")),
-           "Remove a peak from the workspace")
+      .def("removePeak", removePeak, (arg("self"), arg("peak_num")), "Remove a peak from the workspace")
       .def("getPeak", &IPeaksWorkspace::getPeakPtr, (arg("self"), arg("peak_num")), return_internal_reference<>(),
            "Returns a peak at the given index")
       .def("createPeak", createPeakQLab, (arg("self"), arg("data")), return_value_policy<manage_new_object>(),

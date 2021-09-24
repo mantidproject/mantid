@@ -71,8 +71,7 @@ bool setLogFromElementIfNameIs(std::string const &searchName, Element *elem, Run
 }
 } // namespace
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 DECLARE_FILELOADER_ALGORITHM(LoadCanSAS1D)
 
@@ -327,7 +326,7 @@ void LoadCanSAS1D::appendDataToOutput(const API::MatrixWorkspace_sptr &newWork, 
  */
 void LoadCanSAS1D::runLoadInstrument(const std::string &inst_name, const API::MatrixWorkspace_sptr &localWorkspace) {
 
-  API::IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
+  auto loadInst = createChildAlgorithm("LoadInstrument");
 
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   try {
@@ -449,5 +448,4 @@ void LoadCanSAS1D::createSampleInformation(const Poco::XML::Element *const sasEn
     }
   }
 }
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

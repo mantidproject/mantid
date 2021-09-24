@@ -17,8 +17,7 @@
 #include "Poco/Path.h"
 #include "Poco/String.h"
 
-namespace Mantid {
-namespace WorkflowAlgorithms {
+namespace Mantid::WorkflowAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(EQSANSDarkCurrentSubtraction)
@@ -146,7 +145,7 @@ void EQSANSDarkCurrentSubtraction::exec() {
   progress.report("Scaling dark current");
 
   // Scale the stored dark current by the counting time
-  IAlgorithm_sptr rebinAlg = createChildAlgorithm("RebinToWorkspace", 0.4, 0.5);
+  auto rebinAlg = createChildAlgorithm("RebinToWorkspace", 0.4, 0.5);
   rebinAlg->setProperty("WorkspaceToRebin", darkWS);
   rebinAlg->setProperty("WorkspaceToMatch", inputWS);
   rebinAlg->setProperty("OutputWorkspace", darkWS);
@@ -154,7 +153,7 @@ void EQSANSDarkCurrentSubtraction::exec() {
   MatrixWorkspace_sptr scaledDarkWS = rebinAlg->getProperty("OutputWorkspace");
 
   // Perform subtraction
-  IAlgorithm_sptr scaleAlg = createChildAlgorithm("Scale", 0.5, 0.6);
+  auto scaleAlg = createChildAlgorithm("Scale", 0.5, 0.6);
   scaleAlg->setProperty("InputWorkspace", scaledDarkWS);
   scaleAlg->setProperty("Factor", scaling_factor);
   scaleAlg->setProperty("OutputWorkspace", scaledDarkWS);
@@ -162,7 +161,7 @@ void EQSANSDarkCurrentSubtraction::exec() {
   scaleAlg->executeAsChildAlg();
   scaledDarkWS = rebinAlg->getProperty("OutputWorkspace");
 
-  IAlgorithm_sptr minusAlg = createChildAlgorithm("Minus", 0.6, 0.7);
+  auto minusAlg = createChildAlgorithm("Minus", 0.6, 0.7);
   minusAlg->setProperty("LHSWorkspace", inputWS);
   minusAlg->setProperty("RHSWorkspace", scaledDarkWS);
   const std::string outputWSname = getPropertyValue("OutputWorkspace");
@@ -176,5 +175,4 @@ void EQSANSDarkCurrentSubtraction::exec() {
   progress.report("Subtracted dark current");
 }
 
-} // namespace WorkflowAlgorithms
-} // namespace Mantid
+} // namespace Mantid::WorkflowAlgorithms

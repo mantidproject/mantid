@@ -21,8 +21,7 @@
 #include <cstdio> //Required for gcc 4.4
 #include <memory>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(LoadRawBin0)
 
@@ -173,5 +172,4 @@ void LoadRawBin0::setOptionalProperties() {
   m_spec_min = getProperty("SpectrumMin");
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

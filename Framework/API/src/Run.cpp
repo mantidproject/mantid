@@ -20,8 +20,7 @@
 #include <algorithm>
 #include <numeric>
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 using namespace Kernel;
 
@@ -180,6 +179,12 @@ void Run::setProtonCharge(const double charge) {
  */
 double Run::getProtonCharge() const {
   double charge = 0.0;
+
+  if (!m_manager->existsProperty(PROTON_CHARGE_LOG_NAME) && !this->hasProperty("proton_charge")) {
+    g_log.notice() << "There is no proton charge associated with this workspace" << std::endl;
+    return charge;
+  }
+
   if (!m_manager->existsProperty(PROTON_CHARGE_LOG_NAME)) {
     integrateProtonCharge();
   }
@@ -598,7 +603,7 @@ void Run::calculateAverageGoniometerMatrix() {
  * Calculate the goniometer matrixes from logs
  * @param goniometer goniometer with axes names to use
  */
-void Run::calculateGoniometerMatrices(Geometry::Goniometer goniometer) {
+void Run::calculateGoniometerMatrices(const Geometry::Goniometer &goniometer) {
   if (goniometer.getNumberAxes() == 0)
     throw std::runtime_error("Run::calculateGoniometerMatrices must include axes for goniometer");
 
@@ -657,5 +662,4 @@ void Run::copyGoniometers(const Run &other) {
     m_goniometers.emplace_back(std::move(new_goniometer));
   }
 }
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

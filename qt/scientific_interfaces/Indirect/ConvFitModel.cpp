@@ -207,16 +207,9 @@ void setResolutionAttribute(const CompositeFunction_sptr &convolutionModel, cons
 }
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 ConvFitModel::ConvFitModel() { m_fitType = CONVFIT_STRING; }
-
-ConvFitModel::~ConvFitModel() {
-  for (const auto &resolution : m_extendedResolution)
-    AnalysisDataService::Instance().remove(resolution);
-}
 
 IAlgorithm_sptr ConvFitModel::sequentialFitAlgorithm() const {
   return AlgorithmManager::Instance().create("ConvolutionFitSequential");
@@ -226,18 +219,10 @@ IAlgorithm_sptr ConvFitModel::simultaneousFitAlgorithm() const {
   return AlgorithmManager::Instance().create("ConvolutionFitSimultaneous");
 }
 
-Mantid::API::MultiDomainFunction_sptr ConvFitModel::getFitFunction() const {
-  return IndirectFittingModel::getFitFunction();
-}
-
-boost::optional<double> ConvFitModel::getInstrumentResolution(TableDatasetIndex dataIndex) const {
-  if (dataIndex < getNumberOfWorkspaces())
-    return instrumentResolution(getWorkspace(dataIndex));
+boost::optional<double> ConvFitModel::getInstrumentResolution(WorkspaceID workspaceID) const {
+  if (workspaceID < getNumberOfWorkspaces())
+    return instrumentResolution(getWorkspace(workspaceID));
   return boost::none;
-}
-
-std::size_t ConvFitModel::getNumberHistograms(TableDatasetIndex index) const {
-  return getWorkspace(index)->getNumberHistograms();
 }
 
 MultiDomainFunction_sptr ConvFitModel::getMultiDomainFunction() const {
@@ -249,28 +234,9 @@ MultiDomainFunction_sptr ConvFitModel::getMultiDomainFunction() const {
   return function;
 }
 
-void ConvFitModel::setFitFunction(MultiDomainFunction_sptr function) { IndirectFittingModel::setFitFunction(function); }
-
 void ConvFitModel::setTemperature(const boost::optional<double> &temperature) { m_temperature = temperature; }
 
-void ConvFitModel::removeWorkspace(TableDatasetIndex index) {
-  IndirectFittingModel::removeWorkspace(index);
-
-  const auto newSize = getNumberOfWorkspaces();
-  while (m_resolution.size() > newSize)
-    m_resolution.remove(index);
-
-  while (m_extendedResolution.size() > newSize) {
-    AnalysisDataService::Instance().remove(m_extendedResolution[index]);
-    m_extendedResolution.remove(index);
-  }
-}
-
-void ConvFitModel::setResolution(const std::string &name, TableDatasetIndex index) {
-  m_fitDataModel->setResolution(name, index);
-}
-
-std::unordered_map<std::string, ParameterValue> ConvFitModel::createDefaultParameters(TableDatasetIndex index) const {
+std::unordered_map<std::string, ParameterValue> ConvFitModel::createDefaultParameters(WorkspaceID workspaceID) const {
   std::unordered_map<std::string, ParameterValue> defaultValues;
   defaultValues["PeakCentre"] = ParameterValue(0.0);
   defaultValues["Centre"] = ParameterValue(0.0);
@@ -284,7 +250,7 @@ std::unordered_map<std::string, ParameterValue> ConvFitModel::createDefaultParam
   defaultValues["Radius"] = ParameterValue(1.0);
   defaultValues["Tau"] = ParameterValue(1.0);
 
-  auto resolution = getInstrumentResolution(index);
+  auto resolution = getInstrumentResolution(workspaceID);
   if (resolution)
     defaultValues["FWHM"] = ParameterValue(*resolution);
   return defaultValues;
@@ -327,6 +293,4 @@ std::vector<std::pair<std::string, size_t>> ConvFitModel::getResolutionsForFit()
   return m_fitDataModel->getResolutionsForFit();
 }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

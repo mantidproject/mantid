@@ -19,8 +19,11 @@
 #include <QWidget>
 #include <utility>
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace {
+Mantid::Kernel::Logger g_log("FunctionMultiDomain");
+}
+
+namespace MantidQt::MantidWidgets {
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -291,8 +294,14 @@ void FunctionMultiDomainPresenter::viewChangedParameter(const QString &paramName
 }
 
 void FunctionMultiDomainPresenter::viewChangedAttribute(const QString &attrName) {
-  auto value = m_view->getAttribute(attrName);
-  m_model->setAttribute(attrName, value);
+  try {
+    auto value = m_view->getAttribute(attrName);
+    m_model->setAttribute(attrName, value);
+    emit attributeChanged(attrName);
+  } catch (const std::invalid_argument &e) {
+    updateViewAttributesFromModel();
+    g_log.error(e.what());
+  }
 }
 
 /**
@@ -388,5 +397,4 @@ void FunctionMultiDomainPresenter::showGlobals() {
   }
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

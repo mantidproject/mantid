@@ -29,8 +29,7 @@ namespace {
 bool singleValued(const MatrixWorkspace &ws) { return (ws.getNumberHistograms() == 1 && ws.blocksize() == 1); }
 } // namespace
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(bool viewOnly, QWidget *parent)
     : WorkspaceTreeWidget(new MantidTreeModel(), viewOnly, parent), m_plotSpectrum(new QAction("Spectrum...", this)),
@@ -46,7 +45,10 @@ WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(bool viewOnly, QWidget *par
       m_overplotMDHisto1D(new QAction("Overplot 1D MDHistogram...", this)),
       m_plotMDHisto1DWithErrs(new QAction("Plot 1D MDHistogram with errors...", this)),
       m_overplotMDHisto1DWithErrs(new QAction("Overplot 1D MDHistogram with errors...", this)),
-      m_sampleMaterial(new QAction("Show Sample Material", this)) {
+      m_sampleMaterial(new QAction("Show Sample Material", this)), m_superplot(new QAction("Superplot...", this)),
+      m_superplotWithErrs(new QAction("Superplot with errors...", this)),
+      m_superplotBins(new QAction("Superplot bins...", this)),
+      m_superplotBinsWithErrs(new QAction("Superplot bins with errors...", this)) {
 
   // Replace the double click action on the MantidTreeWidget
   m_tree->m_doubleClickAction = [&](const QString &wsName) { emit workspaceDoubleClicked(wsName); };
@@ -75,6 +77,10 @@ WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(bool viewOnly, QWidget *par
   connect(m_plotWireframe, SIGNAL(triggered()), this, SLOT(onPlotWireframeClicked()));
   connect(m_plotContour, SIGNAL(triggered()), this, SLOT(onPlotContourClicked()));
   connect(m_sampleMaterial, SIGNAL(triggered()), this, SLOT(onSampleMaterialClicked()));
+  connect(m_superplot, SIGNAL(triggered()), this, SLOT(onSuperplotClicked()));
+  connect(m_superplotWithErrs, SIGNAL(triggered()), this, SLOT(onSuperplotWithErrsClicked()));
+  connect(m_superplotBins, SIGNAL(triggered()), this, SLOT(onSuperplotBinsClicked()));
+  connect(m_superplotBinsWithErrs, SIGNAL(triggered()), this, SLOT(onSuperplotBinsWithErrsClicked()));
 }
 
 WorkspaceTreeWidgetSimple::~WorkspaceTreeWidgetSimple() {}
@@ -131,8 +137,12 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
         plotSubMenu->addAction(m_plotSpectrumWithErrs);
         plotSubMenu->addAction(m_overplotSpectrumWithErrs);
         plotSubMenu->addAction(m_plotAdvanced);
+        plotSubMenu->addAction(m_superplot);
+        plotSubMenu->addAction(m_superplotWithErrs);
       } else {
         plotSubMenu->addAction(m_plotBin);
+        plotSubMenu->addAction(m_superplotBins);
+        plotSubMenu->addAction(m_superplotBinsWithErrs);
       }
       plotSubMenu->addSeparator();
       plotSubMenu->addAction(m_plotColorfill);
@@ -227,6 +237,8 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
         plotSubMenu->addAction(m_plotSpectrumWithErrs);
         plotSubMenu->addAction(m_overplotSpectrumWithErrs);
         plotSubMenu->addAction(m_plotAdvanced);
+        plotSubMenu->addAction(m_superplot);
+        plotSubMenu->addAction(m_superplotWithErrs);
 
         plotSubMenu->addSeparator();
         plotSubMenu->addAction(m_plotColorfill);
@@ -336,5 +348,18 @@ void WorkspaceTreeWidgetSimple::onSampleMaterialClicked() {
   emit sampleMaterialClicked(getSelectedWorkspaceNamesAsQList());
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+void WorkspaceTreeWidgetSimple::onSuperplotClicked() { emit superplotClicked(getSelectedWorkspaceNamesAsQList()); }
+
+void WorkspaceTreeWidgetSimple::onSuperplotWithErrsClicked() {
+  emit superplotWithErrsClicked(getSelectedWorkspaceNamesAsQList());
+}
+
+void WorkspaceTreeWidgetSimple::onSuperplotBinsClicked() {
+  emit superplotBinsClicked(getSelectedWorkspaceNamesAsQList());
+}
+
+void WorkspaceTreeWidgetSimple::onSuperplotBinsWithErrsClicked() {
+  emit superplotBinsWithErrsClicked(getSelectedWorkspaceNamesAsQList());
+}
+
+} // namespace MantidQt::MantidWidgets

@@ -17,8 +17,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ThresholdMD)
@@ -86,7 +85,7 @@ void ThresholdMD::exec() {
   IMDHistoWorkspace_sptr outWS = getProperty("OutputWorkspace");
   if (outWS != inputWS) {
     g_log.debug("Deep copy input workspace as output workspace.");
-    IAlgorithm_sptr alg = createChildAlgorithm("CloneMDWorkspace");
+    auto alg = createChildAlgorithm("CloneMDWorkspace");
     alg->setProperty("InputWorkspace", inputWS);
     alg->executeAsChildAlg();
     IMDWorkspace_sptr temp = alg->getProperty("OutputWorkspace");
@@ -124,5 +123,4 @@ void ThresholdMD::exec() {
   setProperty("OutputWorkspace", outWS);
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

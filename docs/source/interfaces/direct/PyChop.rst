@@ -77,7 +77,7 @@ Mantid, to do a single point calculation of the flux and resolution
 
 .. code:: python
 
-    from PyChop import PyChop2
+    from mantidqtinterfaces.PyChop import PyChop2
     resolution, flux = PyChop2.calculate(inst='maps', chtyp='a', freq=500, ei=600, etrans=range(0,550,50))
 
 The parameters are in order, so ``PyChop2.calculate('maps','a',500,600,range(0,550,50))``

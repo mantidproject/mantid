@@ -12,6 +12,7 @@
 
 #include <QMessageBox>
 #include <QTimer>
+#include <limits>
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 #include "MantidQtIcons/Icon.h"
@@ -50,7 +51,6 @@ IndirectFitPlotView::IndirectFitPlotView(QWidget *parent)
   // Create a Splitter and place two plots within the splitter layout
   createSplitterWithPlots();
 
-  m_plotForm->cbDataSelection->hide();
   addFitRangeSelector();
   addBackgroundRangeSelector();
   addHWHMRangeSelector();
@@ -133,26 +133,15 @@ WorkspaceIndex IndirectFitPlotView::getSelectedSpectrum() const {
   return WorkspaceIndex{0};
 }
 
-FitDomainIndex IndirectFitPlotView::getSelectedSpectrumIndex() const {
-  if (m_plotForm->swPlotSpectrum->currentIndex() == 0)
-    return FitDomainIndex{
-        static_cast<size_t>(m_plotForm->spPlotSpectrum->value() - m_plotForm->spPlotSpectrum->minimum())};
-  return FitDomainIndex{static_cast<size_t>(m_plotForm->cbPlotSpectrum->currentIndex())};
+WorkspaceID IndirectFitPlotView::getSelectedDataIndex() const {
+  return WorkspaceID{static_cast<size_t>(m_plotForm->cbDataSelection->currentIndex())};
 }
 
-TableDatasetIndex IndirectFitPlotView::getSelectedDataIndex() const {
-  return TableDatasetIndex{static_cast<size_t>(m_plotForm->cbDataSelection->currentIndex())};
-}
-
-TableDatasetIndex IndirectFitPlotView::dataSelectionSize() const {
-  return TableDatasetIndex{static_cast<size_t>(m_plotForm->cbDataSelection->count())};
+WorkspaceID IndirectFitPlotView::dataSelectionSize() const {
+  return WorkspaceID{static_cast<size_t>(m_plotForm->cbDataSelection->count())};
 }
 
 bool IndirectFitPlotView::isPlotGuessChecked() const { return m_plotForm->ckPlotGuess->isChecked(); }
-
-void IndirectFitPlotView::hideMultipleDataSelection() { m_plotForm->cbDataSelection->hide(); }
-
-void IndirectFitPlotView::showMultipleDataSelection() { m_plotForm->cbDataSelection->show(); }
 
 void IndirectFitPlotView::setAvailableSpectra(WorkspaceIndex minimum, WorkspaceIndex maximum) {
   m_plotForm->swPlotSpectrum->setCurrentIndex(0);
@@ -220,8 +209,8 @@ void IndirectFitPlotView::appendToDataSelection(const std::string &dataName) {
   m_plotForm->cbDataSelection->addItem(QString::fromStdString(dataName));
 }
 
-void IndirectFitPlotView::setNameInDataSelection(const std::string &dataName, TableDatasetIndex index) {
-  m_plotForm->cbDataSelection->setItemText(static_cast<int>(index.value), QString::fromStdString(dataName));
+void IndirectFitPlotView::setNameInDataSelection(const std::string &dataName, WorkspaceID workspaceID) {
+  m_plotForm->cbDataSelection->setItemText(static_cast<int>(workspaceID.value), QString::fromStdString(dataName));
 }
 
 void IndirectFitPlotView::clearDataSelection() { m_plotForm->cbDataSelection->clear(); }
@@ -289,7 +278,7 @@ void IndirectFitPlotView::setHWHMMinimum(double maximum) {
 
 void IndirectFitPlotView::addFitRangeSelector() {
   auto fitRangeSelector = m_topPlot->addRangeSelector("FitRange");
-  fitRangeSelector->setBounds(-1.0, 1.0);
+  fitRangeSelector->setBounds(-DBL_MAX, DBL_MAX);
 
   connect(fitRangeSelector, SIGNAL(minValueChanged(double)), this, SIGNAL(startXChanged(double)));
   connect(fitRangeSelector, SIGNAL(maxValueChanged(double)), this, SIGNAL(endXChanged(double)));
@@ -316,7 +305,7 @@ void IndirectFitPlotView::setBackgroundBounds() {
 
 void IndirectFitPlotView::addHWHMRangeSelector() {
   auto hwhmRangeSelector = m_topPlot->addRangeSelector("HWHM");
-  hwhmRangeSelector->setBounds(-1.0, 1.0);
+  hwhmRangeSelector->setBounds(-DBL_MAX, DBL_MAX);
   hwhmRangeSelector->setColour(Qt::red);
   hwhmRangeSelector->setRange(0.0, 0.0);
   hwhmRangeSelector->setVisible(false);
@@ -350,7 +339,7 @@ void IndirectFitPlotView::displayMessage(const std::string &message) const {
 
 void IndirectFitPlotView::emitSelectedFitDataChanged(int index) {
   if (index >= 0)
-    emit selectedFitDataChanged(TableDatasetIndex{static_cast<size_t>(index)});
+    emit selectedFitDataChanged(WorkspaceID{static_cast<size_t>(index)});
 }
 
 // Required due to a bug in qt causing the valueChanged signal to be emitted

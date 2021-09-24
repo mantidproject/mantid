@@ -11,16 +11,13 @@
 #include <cmath>
 #include <numeric>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
-Group::Group( // cppcheck-suppress passedByValue
-    std::string name, std::vector<boost::optional<Row>> rows)
+Group::Group(std::string name, std::vector<boost::optional<Row>> rows)
     : m_name(std::move(name)), m_postprocessedWorkspaceName(), m_rows(std::move(rows)) {}
 
 Group::Group(
-    // cppcheck-suppress passedByValue
+
     std::string name)
     : m_name(std::move(name)), m_rows() {}
 
@@ -90,11 +87,6 @@ void Group::resetSkipped() {
   for (auto &row : m_rows)
     if (row)
       row->setSkipped(false);
-}
-
-bool Group::allRowsAreValid() const {
-  return std::all_of(m_rows.cbegin(), m_rows.cend(),
-                     [](boost::optional<Row> const &row) -> bool { return row.is_initialized(); });
 }
 
 std::vector<boost::optional<Row>> const &Group::rows() const { return m_rows; }
@@ -214,6 +206,4 @@ bool operator==(Group const &lhs, Group const &rhs) {
   return lhs.name() == rhs.name() && lhs.postprocessedWorkspaceName() == rhs.postprocessedWorkspaceName() &&
          lhs.rows() == rhs.rows();
 }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

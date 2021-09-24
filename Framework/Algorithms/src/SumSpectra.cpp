@@ -20,8 +20,7 @@
 
 #include <functional>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(SumSpectra)
@@ -325,7 +324,7 @@ API::MatrixWorkspace_sptr SumSpectra::replaceSpecialValues() {
     return wksp;
   }
 
-  IAlgorithm_sptr alg = createChildAlgorithm("ReplaceSpecialValues");
+  auto alg = createChildAlgorithm("ReplaceSpecialValues");
   alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", wksp);
   std::string outName = "_" + wksp->getName() + "_clean";
   alg->setProperty("OutputWorkspace", outName);
@@ -594,5 +593,4 @@ void SumSpectra::execEvent(const MatrixWorkspace_sptr &outputWorkspace, Progress
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

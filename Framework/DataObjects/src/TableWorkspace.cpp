@@ -11,8 +11,7 @@
 
 #include <queue>
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 namespace {
 /// static logger
 Kernel::Logger g_log("TableWorkspace");
@@ -297,12 +296,10 @@ TableWorkspace *TableWorkspace::doCloneColumns(const std::vector<std::string> &c
 //    names,size_t i)
 //    {return boost::tuples::null_type();}
 
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects
 
 ///\cond TEMPLATE
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 template <>
 DLLExport DataObjects::TableWorkspace_sptr
 IPropertyManager::getValue<DataObjects::TableWorkspace_sptr>(const std::string &name) const {
@@ -329,7 +326,6 @@ IPropertyManager::getValue<DataObjects::TableWorkspace_const_sptr>(const std::st
   }
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel
 
 ///\endcond TEMPLATE

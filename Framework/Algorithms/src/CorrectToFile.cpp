@@ -14,8 +14,7 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 using namespace API;
 using namespace DataObjects;
 
@@ -153,7 +152,7 @@ void CorrectToFile::exec() {
 MatrixWorkspace_sptr CorrectToFile::loadInFile(const std::string &corrFile) {
   g_log.information() << "Loading file " << corrFile << '\n';
   progress(0, "Loading file");
-  IAlgorithm_sptr loadRKH = createChildAlgorithm("LoadRKH", 0, 1.0 /*LOAD_TIME*/);
+  auto loadRKH = createChildAlgorithm("LoadRKH", 0, 1.0 /*LOAD_TIME*/);
   std::string rkhfile = getProperty("Filename");
   loadRKH->setPropertyValue("Filename", rkhfile);
   loadRKH->setPropertyValue("OutputWorkspace", "rkhout");
@@ -176,7 +175,7 @@ void CorrectToFile::doWkspAlgebra(const API::MatrixWorkspace_sptr &lhs, const AP
                                   const std::string &algName, API::MatrixWorkspace_sptr &result) {
   g_log.information() << "Initalising the algorithm " << algName << '\n';
   progress(LOAD_TIME, "Applying correction");
-  IAlgorithm_sptr algebra = createChildAlgorithm(algName, LOAD_TIME, 1.0);
+  auto algebra = createChildAlgorithm(algName, LOAD_TIME, 1.0);
   algebra->setProperty("LHSWorkspace", lhs);
   algebra->setProperty("RHSWorkspace", rhs);
   algebra->setProperty("OutputWorkspace", result);
@@ -194,5 +193,4 @@ void CorrectToFile::doWkspAlgebra(const API::MatrixWorkspace_sptr &lhs, const AP
   result = algebra->getProperty("OutputWorkspace");
   g_log.debug() << algName << " complete\n";
 }
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

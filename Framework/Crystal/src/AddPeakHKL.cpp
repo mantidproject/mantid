@@ -12,8 +12,7 @@
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -57,5 +56,4 @@ void AddPeakHKL::exec() {
   peakWS->addPeak(*peak);
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

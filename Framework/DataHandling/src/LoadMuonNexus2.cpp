@@ -36,8 +36,7 @@
 
 using Mantid::Types::Core::DateAndTime;
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 // Register the algorithm into the algorithm factory
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMuonNexus2)
 
@@ -93,7 +92,7 @@ void LoadMuonNexus2::exec() {
     doExec();
   } else {
     // Version 1 or V2
-    IAlgorithm_sptr childAlg = createChildAlgorithm(getLoadAlgName(confidence1, confidenceV2), 0, 1, true, 1);
+    auto childAlg = createChildAlgorithm(getLoadAlgName(confidence1, confidenceV2), 0, 1, true, 1);
     auto loader = std::dynamic_pointer_cast<API::Algorithm>(childAlg);
     loader->copyPropertiesFrom(*this);
     loader->executeAsChildAlg();
@@ -233,6 +232,11 @@ void LoadMuonNexus2::doExec() {
     if (detector.containsDataSet("first_good_time")) {
       double dum = detector.getFloat("first_good_time");
       setProperty("FirstGoodData", dum);
+    }
+
+    if (detector.containsDataSet("last_good_time")) {
+      double dum = detector.getFloat("last_good_time");
+      setProperty("LastGoodData", dum);
     }
   }
 
@@ -526,5 +530,4 @@ std::map<int, std::set<int>> LoadMuonNexus2::loadDetectorMapping(const Mantid::N
   return mapping;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

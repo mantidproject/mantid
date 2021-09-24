@@ -6,8 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/Algorithm.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 //---------------------------------------------------------------------------------------------
 /** The actions to be performed by the algorithm on a dataset. This method is
  *  invoked for top level algorithms by the application manager.
@@ -20,5 +19,4 @@ namespace API {
  *  @return true if executed successfully.
  */
 bool Algorithm::execute() { return executeInternal(); }
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

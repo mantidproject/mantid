@@ -24,8 +24,7 @@
 #include <numeric> // std::accumulate
 #include <utility> // std::pair
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Kernel;
 using namespace API;
@@ -325,7 +324,7 @@ bool ConvertEmptyToTof::doFitGaussianPeak(int workspaceindex, double &center, do
 
   g_log.debug("Calling createChildAlgorithm : Fit...");
   // 4. Fit
-  API::IAlgorithm_sptr fitalg = createChildAlgorithm("Fit", -1, -1, true);
+  auto fitalg = createChildAlgorithm("Fit", -1, -1, true);
   fitalg->initialize();
 
   fitalg->setProperty("Function", std::dynamic_pointer_cast<API::IFunction>(gaussianpeak));
@@ -455,5 +454,4 @@ void ConvertEmptyToTof::setTofInWS(const std::vector<double> &tofAxis, const API
   outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

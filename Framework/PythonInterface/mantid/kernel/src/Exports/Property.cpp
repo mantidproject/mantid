@@ -11,6 +11,7 @@
 #include "MantidPythonInterface/core/GetPointer.h"
 #include "MantidPythonInterface/core/PythonObjectInstantiator.h"
 #include "MantidPythonInterface/core/StlExportDefinitions.h"
+#include <array>
 
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>

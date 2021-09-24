@@ -41,8 +41,7 @@ using namespace Mantid::Geometry;
 using Mantid::HistogramData::Counts;
 using Mantid::Kernel::ConfigService;
 
-namespace Mantid {
-namespace LiveData {
+namespace Mantid::LiveData {
 DECLARE_LISTENER(ISISHistoDataListener)
 
 namespace {
@@ -597,5 +596,4 @@ bool ISISHistoDataListener::isPeriodIgnored(int period) const {
   return std::find(m_periodList.begin(), m_periodList.end(), period + 1) == m_periodList.end();
 }
 
-} // namespace LiveData
-} // namespace Mantid
+} // namespace Mantid::LiveData

@@ -63,15 +63,13 @@ public:
   static constexpr double INVALID_VALUE = std::numeric_limits<double>::lowest();
 
   /// Constructor
-  InstrumentActor(const QString &wsName, bool autoscaling = true,
-                  double scaleMin = 0.0, double scaleMax = 0.0);
+  InstrumentActor(const QString &wsName, bool autoscaling = true, double scaleMin = 0.0, double scaleMax = 0.0);
   ///< Destructor
   ~InstrumentActor();
   /// Draw the instrument in 3D
   void draw(bool picking = false) const;
   /// Return the bounding box in 3D
-  void getBoundingBox(Mantid::Kernel::V3D &minBound,
-                      Mantid::Kernel::V3D &maxBound) const;
+  void getBoundingBox(Mantid::Kernel::V3D &minBound, Mantid::Kernel::V3D &maxBound, const bool excludeMonitors) const;
   /// Set a component (and all its children) visible.
   void setComponentVisible(size_t componentIndex);
   /// Set visibilit of all components.
@@ -138,6 +136,10 @@ public:
   double minBinValue() const { return m_BinMinValue; }
   /// Get the upper bound of the integration range.
   double maxBinValue() const { return m_BinMaxValue; }
+  /// Get the workspace min bin
+  double minWkspBinValue() const { return m_WkspBinMinValue; }
+  /// Get the workspace max bin
+  double maxWkspBinValue() const { return m_WkspBinMaxValue; }
   /// Return true if the integration range covers the whole of the x-axis in the
   /// data workspace.
   bool wholeRange() const;
@@ -163,11 +165,9 @@ public:
   /// Get the integrated counts of a detector by its detector Index.
   double getIntegratedCounts(size_t index) const;
   /// Sum the counts in detectors
-  void sumDetectors(const std::vector<size_t> &dets, std::vector<double> &x,
-                    std::vector<double> &y, size_t size) const;
+  void sumDetectors(const std::vector<size_t> &dets, std::vector<double> &x, std::vector<double> &y, size_t size) const;
   /// Sum the counts in detectors.
-  void sumDetectors(const std::vector<size_t> &dets, std::vector<double> &x,
-                    std::vector<double> &y) const;
+  void sumDetectors(const std::vector<size_t> &dets, std::vector<double> &x, std::vector<double> &y) const;
   /// Calc indexes for min and max bin values
   void getBinMinMaxIndex(size_t wi, size_t &imin, size_t &imax) const;
 
@@ -179,17 +179,12 @@ public:
   /// Get the guide visibility status
   bool areGuidesShown() const { return m_showGuides; }
 
-  static void BasisRotation(const Mantid::Kernel::V3D &Xfrom,
-                            const Mantid::Kernel::V3D &Yfrom,
-                            const Mantid::Kernel::V3D &Zfrom,
-                            const Mantid::Kernel::V3D &Xto,
-                            const Mantid::Kernel::V3D &Yto,
-                            const Mantid::Kernel::V3D &Zto,
-                            Mantid::Kernel::Quat &R, bool out = false);
+  static void BasisRotation(const Mantid::Kernel::V3D &Xfrom, const Mantid::Kernel::V3D &Yfrom,
+                            const Mantid::Kernel::V3D &Zfrom, const Mantid::Kernel::V3D &Xto,
+                            const Mantid::Kernel::V3D &Yto, const Mantid::Kernel::V3D &Zto, Mantid::Kernel::Quat &R,
+                            bool out = false);
 
-  static void rotateToLookAt(const Mantid::Kernel::V3D &eye,
-                             const Mantid::Kernel::V3D &up,
-                             Mantid::Kernel::Quat &R);
+  static void rotateToLookAt(const Mantid::Kernel::V3D &eye, const Mantid::Kernel::V3D &up, Mantid::Kernel::Quat &R);
 
   /* Masking */
 
@@ -200,8 +195,7 @@ public:
   std::string getDefaultAxis() const;
   std::string getDefaultView() const;
   std::string getInstrumentName() const;
-  std::vector<std::string> getStringParameter(const std::string &name,
-                                              bool recursive = true) const;
+  std::vector<std::string> getStringParameter(const std::string &name, bool recursive = true) const;
   /// Load the state of the actor from a Mantid project file.
   void loadFromProject(const std::string &lines);
   /// Save the state of the actor to a Mantid project file.
@@ -220,25 +214,20 @@ signals:
 private:
   static constexpr double TOLERANCE = 0.00001;
 
-  void setUpWorkspace(const std::shared_ptr<const Mantid::API::MatrixWorkspace>
-                          &sharedWorkspace,
-                      double scaleMin, double scaleMax);
+  void setUpWorkspace(const std::shared_ptr<const Mantid::API::MatrixWorkspace> &sharedWorkspace, double scaleMin,
+                      double scaleMax);
   void setupPhysicalInstrumentIfExists();
   void resetColors();
   void loadSettings();
   void saveSettings();
   void setDataMinMaxRange(double vmin, double vmax);
   void setDataIntegrationRange(const double &xmin, const double &xmax);
-  void
-  calculateIntegratedSpectra(const Mantid::API::MatrixWorkspace &workspace);
+  void calculateIntegratedSpectra(const Mantid::API::MatrixWorkspace &workspace);
   /// Sum the counts in detectors if the workspace has equal bins for all
   /// spectra
-  void sumDetectorsUniform(const std::vector<size_t> &dets,
-                           std::vector<double> &x,
-                           std::vector<double> &y) const;
+  void sumDetectorsUniform(const std::vector<size_t> &dets, std::vector<double> &x, std::vector<double> &y) const;
   /// Sum the counts in detectors if the workspace is ragged
-  void sumDetectorsRagged(const std::vector<size_t> &dets,
-                          std::vector<double> &x, std::vector<double> &y,
+  void sumDetectorsRagged(const std::vector<size_t> &dets, std::vector<double> &x, std::vector<double> &y,
                           size_t size) const;
 
   /// The workspace whose data are shown

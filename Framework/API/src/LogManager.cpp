@@ -12,8 +12,7 @@
 
 #include <nexus/NeXusFile.hpp>
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 using namespace Kernel;
 using namespace Types::Core;
@@ -565,5 +564,4 @@ template MANTID_API_DLL std::vector<int> LogManager::getPropertyValueAsType(cons
 template MANTID_API_DLL std::vector<long> LogManager::getPropertyValueAsType(const std::string &) const;
 /** @endcond */
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

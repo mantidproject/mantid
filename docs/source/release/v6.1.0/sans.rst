@@ -32,7 +32,7 @@ Improvements
 Bugfixes
 --------
 
-- Fix a bug that made it impossible to process flux in SANSILLAutoprocess.
+- Fix a bug that made it impossible to process flux in :ref:`SANSILLAutoProcess <algm-SANSILLAutoProcess>`.
 - On D16 using :ref:`SANSILLAutoProcess <algm-SANSILLAutoProcess>`, now uses the correct monitor for normalization, fix a bug where processing transmission would yield undefined values at 90 degrees when using ThetaDependent correction, and improve the q binning used.
 - Fixed the ISIS SANS interface crashing if a new row is created using the enter key, then the user immediately uses process or load without clicking away.
 - ISIS SANS beam finder no longer attempts to scale LAB (and HAB) values from m into mm for LARMOR. This resolves an issue where the angle was

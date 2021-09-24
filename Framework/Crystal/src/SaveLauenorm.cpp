@@ -30,8 +30,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::PhysicalConstants;
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveLauenorm)
@@ -137,7 +136,7 @@ void SaveLauenorm::exec() {
     if (!ws->sample().hasOrientedLattice()) {
 
       const std::string fft("FindUBUsingIndexedPeaks");
-      API::IAlgorithm_sptr findUB = this->createChildAlgorithm(fft);
+      auto findUB = createChildAlgorithm(fft);
       findUB->initialize();
       findUB->setProperty<PeaksWorkspace_sptr>("PeaksWorkspace", ws);
       findUB->executeAsChildAlg();
@@ -483,5 +482,4 @@ void SaveLauenorm::sizeBanks(const std::string &bankName, int &nCols, int &nRows
   }
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

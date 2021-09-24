@@ -25,8 +25,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 DECLARE_ALGORITHM(ConvertCWSDExpToMomentum)
 
@@ -320,7 +319,7 @@ void ConvertCWSDExpToMomentum::setupTransferMatrix(const API::MatrixWorkspace_sp
                              "Unable to set goniometer and calcualte roation matrix R.");
 
   // Call algorithm SetGoniometer
-  IAlgorithm_sptr setalg = createChildAlgorithm("SetGoniometer");
+  auto setalg = createChildAlgorithm("SetGoniometer");
   setalg->initialize();
   setalg->setProperty("Workspace", dataws);
   setalg->setProperty("Axis0", "_omega,0,1,0,-1");
@@ -558,7 +557,7 @@ API::MatrixWorkspace_sptr ConvertCWSDExpToMomentum::loadSpiceData(const std::str
 
   // Load SPICE file
   try {
-    IAlgorithm_sptr loader = createChildAlgorithm("LoadSpiceXML2DDet");
+    auto loader = createChildAlgorithm("LoadSpiceXML2DDet");
     loader->initialize();
     loader->setProperty("Filename", filename);
     // std::vector<size_t> sizelist(2);
@@ -656,5 +655,4 @@ void ConvertCWSDExpToMomentum::removeBackground(const API::MatrixWorkspace_sptr 
   }
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

@@ -8,9 +8,7 @@
 #include "EventPresenter.h"
 #include "MantidKernel/UsageService.h"
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 /** Constructor
  * @param parent :: [input] The parent of this widget
@@ -194,6 +192,4 @@ void QtEventView::onToggleDisabledSlicing(bool isChecked) {
   }
 }
 
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

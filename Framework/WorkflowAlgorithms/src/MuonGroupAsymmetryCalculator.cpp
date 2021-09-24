@@ -18,8 +18,7 @@ using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::API::Workspace_sptr;
 using Mantid::API::WorkspaceFactory;
 
-namespace Mantid {
-namespace WorkflowAlgorithms {
+namespace Mantid::WorkflowAlgorithms {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -95,7 +94,7 @@ MatrixWorkspace_sptr MuonGroupAsymmetryCalculator::removeExpDecay(const Workspac
   MatrixWorkspace_sptr outWS;
   // Remove decay
   if (inputWS) {
-    IAlgorithm_sptr asym = AlgorithmManager::Instance().create("RemoveExpDecay");
+    auto asym = AlgorithmManager::Instance().create("RemoveExpDecay");
     asym->setChild(true);
     asym->setProperty("InputWorkspace", inputWS);
     if (index > 0) {
@@ -133,7 +132,7 @@ MatrixWorkspace_sptr MuonGroupAsymmetryCalculator::estimateAsymmetry(const Works
   MatrixWorkspace_sptr outWS;
   // calculate asymmetry
   if (inputWS) {
-    IAlgorithm_sptr asym = AlgorithmManager::Instance().create("EstimateMuonAsymmetryFromCounts");
+    auto asym = AlgorithmManager::Instance().create("EstimateMuonAsymmetryFromCounts");
     asym->setChild(true);
 
     asym->setProperty("InputWorkspace", inputWS);
@@ -175,5 +174,4 @@ double getStoredNorm() {
   }
 }
 
-} // namespace WorkflowAlgorithms
-} // namespace Mantid
+} // namespace Mantid::WorkflowAlgorithms

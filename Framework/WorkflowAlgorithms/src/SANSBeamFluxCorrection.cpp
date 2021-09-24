@@ -12,8 +12,7 @@
 #include "MantidKernel/PropertyManager.h"
 #include "Poco/Path.h"
 
-namespace Mantid {
-namespace WorkflowAlgorithms {
+namespace Mantid::WorkflowAlgorithms {
 
 using namespace Kernel;
 using namespace API;
@@ -61,12 +60,12 @@ void SANSBeamFluxCorrection::exec() {
 
   // Rebin the reference and monitor data to the sample data workspace
   progress.report("Rebinning reference data");
-  IAlgorithm_sptr convAlg = createChildAlgorithm("ConvertToHistogram");
+  auto convAlg = createChildAlgorithm("ConvertToHistogram");
   convAlg->setProperty("InputWorkspace", fluxRefWS);
   convAlg->executeAsChildAlg();
   fluxRefWS = convAlg->getProperty("OutputWorkspace");
 
-  IAlgorithm_sptr rebinAlg = createChildAlgorithm("RebinToWorkspace");
+  auto rebinAlg = createChildAlgorithm("RebinToWorkspace");
   rebinAlg->setProperty("WorkspaceToRebin", fluxRefWS);
   rebinAlg->setProperty("WorkspaceToMatch", inputWS);
   rebinAlg->executeAsChildAlg();
@@ -83,7 +82,7 @@ void SANSBeamFluxCorrection::exec() {
   // I = I_0 / Phi_sample
   // Phi_sample = M_sample * [Phi_ref/M_ref]
   // where [Phi_ref/M_ref] is the fluxRefWS workspace
-  IAlgorithm_sptr divideAlg = createChildAlgorithm("Divide");
+  auto divideAlg = createChildAlgorithm("Divide");
   divideAlg->setProperty("LHSWorkspace", inputWS);
   divideAlg->setProperty("RHSWorkspace", monitorWS);
   divideAlg->executeAsChildAlg();
@@ -115,7 +114,7 @@ MatrixWorkspace_sptr SANSBeamFluxCorrection::loadReference() {
     fluxRefWS = m_reductionManager->getProperty(entryName);
     m_output_message += "   | Using flux reference " + referenceFluxFile + "\n";
   } else {
-    IAlgorithm_sptr loadAlg = createChildAlgorithm("Load");
+    auto loadAlg = createChildAlgorithm("Load");
     loadAlg->setProperty("Filename", referenceFluxFile);
     loadAlg->executeAsChildAlg();
     Workspace_sptr tmpWS = loadAlg->getProperty("OutputWorkspace");
@@ -133,5 +132,4 @@ MatrixWorkspace_sptr SANSBeamFluxCorrection::loadReference() {
   return fluxRefWS;
 }
 
-} // namespace WorkflowAlgorithms
-} // namespace Mantid
+} // namespace Mantid::WorkflowAlgorithms

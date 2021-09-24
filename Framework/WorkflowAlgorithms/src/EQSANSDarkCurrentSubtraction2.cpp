@@ -20,8 +20,7 @@
 #include "Poco/Path.h"
 #include "Poco/String.h"
 
-namespace Mantid {
-namespace WorkflowAlgorithms {
+namespace Mantid::WorkflowAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(EQSANSDarkCurrentSubtraction2)
@@ -170,14 +169,14 @@ void EQSANSDarkCurrentSubtraction2::exec() {
   progress.report("Scaling dark current");
 
   // Get the dark current counts per pixel
-  IAlgorithm_sptr rebinAlg = createChildAlgorithm("Integration", 0.4, 0.5);
+  auto rebinAlg = createChildAlgorithm("Integration", 0.4, 0.5);
   rebinAlg->setProperty("InputWorkspace", darkWS);
   rebinAlg->setProperty("OutputWorkspace", darkWS);
   rebinAlg->executeAsChildAlg();
   MatrixWorkspace_sptr scaledDarkWS = rebinAlg->getProperty("OutputWorkspace");
 
   // Scale the dark current
-  IAlgorithm_sptr scaleAlg = createChildAlgorithm("Scale", 0.5, 0.6);
+  auto scaleAlg = createChildAlgorithm("Scale", 0.5, 0.6);
   scaleAlg->setProperty("InputWorkspace", scaledDarkWS);
   scaleAlg->setProperty("Factor", scaling_factor);
   scaleAlg->setProperty("OutputWorkspace", scaledDarkWS);
@@ -223,5 +222,4 @@ void EQSANSDarkCurrentSubtraction2::exec() {
   progress.report("Subtracted dark current");
 }
 
-} // namespace WorkflowAlgorithms
-} // namespace Mantid
+} // namespace Mantid::WorkflowAlgorithms

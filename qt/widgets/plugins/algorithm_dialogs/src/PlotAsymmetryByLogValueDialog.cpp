@@ -28,11 +28,9 @@
 #include <QVBoxLayout>
 
 // Add this class to the list of specialised dialogs in this namespace
-namespace MantidQt {
-namespace CustomDialogs {
+namespace MantidQt::CustomDialogs {
 DECLARE_DIALOG(PlotAsymmetryByLogValueDialog)
-}
-} // namespace MantidQt
+} // namespace MantidQt::CustomDialogs
 
 using namespace MantidQt::CustomDialogs;
 using namespace MantidQt::API;

@@ -17,8 +17,7 @@
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Unit.h"
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 /** Construct DetectorInfo based on an Instrument.
  *
  * The Instrument reference `instrument` must be the parameterized instrument
@@ -454,5 +453,4 @@ DetectorInfoIt DetectorInfo::begin() { return DetectorInfoIt(*this, 0, size()); 
 // End method for iterator
 DetectorInfoIt DetectorInfo::end() { return DetectorInfoIt(*this, size(), size()); }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

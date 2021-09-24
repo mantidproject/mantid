@@ -13,8 +13,7 @@
 
 #include <numeric>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 namespace {
 // static logger
 Kernel::Logger g_log("DetectorGroup");
@@ -292,6 +291,19 @@ std::string DetectorGroup::getParameterAsString(const std::string &pname, bool r
 }
 
 /**
+ *  Get a visibility attribute of a parameter
+ * @param pname :: The name of the parameter
+ * @param recursive :: If true the search will walk up through the parent
+ * components
+ * @return A boolean containing the visibility attribute of the parameter, false if does not exist
+ */
+bool DetectorGroup::getParameterVisible(const std::string &pname, bool recursive) const {
+  (void)pname;     // Avoid compiler warning
+  (void)recursive; // Avoid compiler warning
+  return false;
+}
+
+/**
  * Get the bounding box for this group of detectors. It is simply the sum of the
  * bounding boxes of its constituents.
  * @param boundingBox :: [Out] The resulting bounding box is stored here.
@@ -447,5 +459,4 @@ size_t DetectorGroup::registerContents(class ComponentVisitor & /*component*/) c
                            "instrument. On-the-fly only.");
 }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

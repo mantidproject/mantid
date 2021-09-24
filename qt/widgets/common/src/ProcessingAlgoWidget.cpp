@@ -18,8 +18,7 @@
 using Mantid::API::Algorithm_sptr;
 using Mantid::API::AlgorithmManager;
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 //----------------------
 // Public member functions
@@ -134,6 +133,7 @@ void ProcessingAlgoWidget::changeAlgorithm() {
   QStringList disabled;
   disabled.push_back("OutputWorkspace");
   disabled.push_back("InputWorkspace");
+  disabled.push_back("Workspace");
   ui.algoProperties->addEnabledAndDisableLists(QStringList(), disabled);
   // Sets the m_algorithm and also the properties from the InputHistory
   ui.algoProperties->setAlgorithm(m_alg);
@@ -159,5 +159,4 @@ QString ProcessingAlgoWidget::getScriptText() { return ui.editor->text(); }
 /// Set the script editor text
 void ProcessingAlgoWidget::setScriptText(const QString &text) { ui.editor->setText(text); }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

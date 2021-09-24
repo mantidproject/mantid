@@ -22,8 +22,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ApplyDetailedBalance)
@@ -75,7 +74,7 @@ void ApplyDetailedBalance::exec() {
   double oneOverT = PhysicalConstants::meVtoKelvin / Temp;
   // Run the exponential correction algorithm explicitly to enable progress
   // reporting
-  IAlgorithm_sptr expcor = createChildAlgorithm("OneMinusExponentialCor", 0.0, 1.0);
+  auto expcor = createChildAlgorithm("OneMinusExponentialCor", 0.0, 1.0);
   expcor->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWS);
   expcor->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", outputWS);
   expcor->setProperty<double>("C1", M_PI);
@@ -88,7 +87,7 @@ void ApplyDetailedBalance::exec() {
   // Select the unit, transform if different than energy
   std::string unit = getProperty("OutputUnits");
   if (unit == "Frequency") {
-    IAlgorithm_sptr convert = createChildAlgorithm("ConvertUnits");
+    auto convert = createChildAlgorithm("ConvertUnits");
     convert->setProperty<MatrixWorkspace_sptr>("InputWorkspace", outputWS);
     convert->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", outputWS);
     convert->setProperty<std::string>("Target", "DeltaE_inFrequency");
@@ -97,5 +96,4 @@ void ApplyDetailedBalance::exec() {
   setProperty("OutputWorkspace", outputWS);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

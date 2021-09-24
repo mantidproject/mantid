@@ -13,8 +13,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(NormaliseToUnity)
@@ -72,7 +71,7 @@ void NormaliseToUnity::exec() {
   MatrixWorkspace_sptr localworkspace = getProperty("InputWorkspace");
 
   // Sum up all the wavelength bins
-  IAlgorithm_sptr integrateAlg = createChildAlgorithm("Integration");
+  auto integrateAlg = createChildAlgorithm("Integration");
   integrateAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", localworkspace);
   integrateAlg->setProperty<double>("RangeLower", m_MinRange);
   integrateAlg->setProperty<double>("RangeUpper", m_MaxRange);
@@ -85,7 +84,7 @@ void NormaliseToUnity::exec() {
   MatrixWorkspace_sptr integrated = integrateAlg->getProperty("OutputWorkspace");
 
   // Sum all the spectra of the integrated workspace
-  IAlgorithm_sptr sumAlg = createChildAlgorithm("SumSpectra");
+  auto sumAlg = createChildAlgorithm("SumSpectra");
   sumAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", integrated);
   sumAlg->setProperty<bool>("IncludeMonitors", keepMonitors);
   sumAlg->executeAsChildAlg();
@@ -101,5 +100,4 @@ void NormaliseToUnity::exec() {
   setProperty("OutputWorkspace", result);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

@@ -16,8 +16,7 @@
 using std::ostream;
 using std::size_t;
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 using Types::Event::TofEvent;
 
 //==========================================================================
@@ -224,5 +223,4 @@ bool WeightedEventNoTime::equals(const WeightedEventNoTime &rhs, const double to
   return true;
 }
 
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects

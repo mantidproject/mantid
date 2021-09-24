@@ -17,8 +17,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-namespace MantidQt {
-namespace API {
+namespace MantidQt::API {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -66,5 +65,4 @@ PropertyWidget *PropertyWidgetFactory::createWidget(Mantid::Kernel::Property *pr
   }
 }
 
-} // namespace API
-} // namespace MantidQt
+} // namespace MantidQt::API

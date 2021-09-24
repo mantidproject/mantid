@@ -9,7 +9,6 @@ set(
   src/AlgorithmSelectorWidget.cpp
   src/AlternateCSPythonLexer.cpp
   src/ConvolutionFunctionModel.cpp
-  src/BasicFitOptionsBrowser.cpp
   src/BatchAlgorithmRunner.cpp
   src/BoolPropertyWidget.cpp
   src/DataSelector.cpp
@@ -28,6 +27,7 @@ set(
   src/FitScriptGeneratorModel.cpp
   src/FitScriptGeneratorPresenter.cpp
   src/FitScriptGeneratorView.cpp
+  src/FitScriptOptionsBrowser.cpp
   src/FittingGlobals.cpp
   src/FlowLayout.cpp
   src/FunctionBrowser/FunctionBrowserUtils.cpp
@@ -49,7 +49,6 @@ set(
   src/ImageInfoModelMD.cpp
   src/ImageInfoPresenter.cpp
   src/ImageInfoWidget.cpp
-  src/IndexTypes.cpp
   src/InputController.cpp
   src/InstrumentSelector.cpp
   src/InterfaceManager.cpp
@@ -72,6 +71,7 @@ set(
   src/Message.cpp
   src/MessageDisplay.cpp
   src/MultifitSetupDialog.cpp
+  src/MuonPeriodInfo.cpp
   src/NotificationService.cpp
   src/OptionsPropertyWidget.cpp
   src/ParseKeyValueString.cpp
@@ -159,7 +159,6 @@ set(
   inc/MantidQtWidgets/Common/AlgorithmPropertiesWidget.h
   inc/MantidQtWidgets/Common/AlgorithmRunner.h
   inc/MantidQtWidgets/Common/AlgorithmSelectorWidget.h
-  inc/MantidQtWidgets/Common/BasicFitOptionsBrowser.h
   inc/MantidQtWidgets/Common/BatchAlgorithmRunner.h
   inc/MantidQtWidgets/Common/BoolPropertyWidget.h
   inc/MantidQtWidgets/Common/DataSelector.h
@@ -173,6 +172,7 @@ set(
   inc/MantidQtWidgets/Common/FitPropertyBrowser.h
   inc/MantidQtWidgets/Common/FitScriptGeneratorDataTable.h
   inc/MantidQtWidgets/Common/FitScriptGeneratorView.h
+  inc/MantidQtWidgets/Common/FitScriptOptionsBrowser.h
   inc/MantidQtWidgets/Common/FunctionBrowser.h
   inc/MantidQtWidgets/Common/FunctionMultiDomainPresenter.h
   inc/MantidQtWidgets/Common/FunctionTreeView.h
@@ -199,6 +199,7 @@ set(
   inc/MantidQtWidgets/Common/MantidWSIndexDialog.h
   inc/MantidQtWidgets/Common/MessageDisplay.h
   inc/MantidQtWidgets/Common/MultifitSetupDialog.h
+  inc/MantidQtWidgets/Common/MuonPeriodInfo.h
   inc/MantidQtWidgets/Common/FileFinderWidget.h
   inc/MantidQtWidgets/Common/NotificationService.h
   inc/MantidQtWidgets/Common/OptionsPropertyWidget.h
@@ -285,6 +286,7 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/MantidDesktopServices.h
     inc/MantidQtWidgets/Common/MantidTreeWidgetItem.h
     inc/MantidQtWidgets/Common/MultifitSetupDialog.h
+    inc/MantidQtWidgets/Common/MuonPeriodInfo.h
     inc/MantidQtWidgets/Common/ParseKeyValueString.h
     inc/MantidQtWidgets/Common/pixmaps.h
     inc/MantidQtWidgets/Common/ProgressableView.h
@@ -330,6 +332,7 @@ set(QT5_UI_FILES
     inc/MantidQtWidgets/Common/LogValueSelector.ui
     inc/MantidQtWidgets/Common/ManageUserDirectories.ui
     inc/MantidQtWidgets/Common/MultifitSetupDialog.ui
+    inc/MantidQtWidgets/Common/MuonPeriodInfo.ui
     inc/MantidQtWidgets/Common/FileFinderWidget.ui
     inc/MantidQtWidgets/Common/FitScriptGenerator.ui
     inc/MantidQtWidgets/Common/pqHelpWindow.ui
@@ -376,6 +379,7 @@ set(
   src/MantidHelpInterface.cpp
   src/MantidWidget.cpp
   src/Message.cpp
+  src/MuonPeriodInfo.cpp
   src/NonOrthogonal.cpp
   src/FileFinderWidget.cpp
   src/OptionsPropertyWidget.cpp
@@ -473,7 +477,6 @@ set(
   src/FunctionTreeView.cpp
   src/HintingLineEdit.cpp
   src/IFunctionModel.cpp
-  src/IndexTypes.cpp
   src/InputController.cpp
   src/InstrumentSelector.cpp
   src/LineEditWithClear.cpp
@@ -604,6 +607,7 @@ set(
   inc/MantidQtWidgets/Common/MuonFitDataSelector.h
   inc/MantidQtWidgets/Common/MuonFitPropertyBrowser.h
   inc/MantidQtWidgets/Common/MuonFunctionBrowser.h
+  inc/MantidQtWidgets/Common/MuonPeriodInfo.h
   inc/MantidQtWidgets/Common/pqHelpWindow.h
   inc/MantidQtWidgets/Common/PropertyHandler.h
   inc/MantidQtWidgets/Common/ProcessingAlgoWidget.h
@@ -768,6 +772,7 @@ set(
   inc/MantidQtWidgets/Common/MantidTreeWidgetItem.h
   inc/MantidQtWidgets/Common/MuonFitDataSelector.h
   inc/MantidQtWidgets/Common/MuonFunctionBrowser.h
+  inc/MantidQtWidgets/Common/MuonPeriodInfo.h
   inc/MantidQtWidgets/Common/ProgressableView.h
   inc/MantidQtWidgets/Common/MockProgressableView.h
   inc/MantidQtWidgets/Common/ProgressPresenter.h
@@ -830,6 +835,7 @@ set(UI_FILES
     inc/MantidQtWidgets/Common/ManageUserDirectories.ui
     inc/MantidQtWidgets/Common/MultifitSetupDialog.ui
     inc/MantidQtWidgets/Common/MuonFitDataSelector.ui
+    inc/MantidQtWidgets/Common/MuonPeriodInfo.ui
     inc/MantidQtWidgets/Common/FileFinderWidget.ui
     inc/MantidQtWidgets/Common/FitScriptGenerator.ui
     inc/MantidQtWidgets/Common/ProcessingAlgoWidget.ui
@@ -978,6 +984,7 @@ set(
   test/ImageInfoModelMDTest.h
   test/ImageInfoPresenterTest.h
   test/InterfaceManagerTest.h
+  test/MuonPeriodInfoTest.h
   test/NonOrthogonalTest.h
   test/ParseKeyValueStringTest.h
   test/PlotAxisTest.h
@@ -1015,34 +1022,9 @@ set(
   ${CMAKE_CURRENT_LIST_DIR}/test/WidgetsCommonTestInitialization.h
 )
 
-mtd_add_qt_tests(
-  TARGET_NAME MantidQtWidgetsCommonTest
-  QT_VERSION 4
-  SRC ${TEST_FILES}
-  INCLUDE_DIRS
-    ../../../Framework/TestHelpers/inc
-    ../../../Framework/DataObjects/inc
-    ../../../Framework/Crystal/inc
-
-  TEST_HELPER_SRCS
-    ../../../Framework/TestHelpers/src/TearDownWorld.cpp
-    ../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
-    ../../../Framework/TestHelpers/src/DataProcessorTestHelper.cpp
-    ../../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
-    ../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
-    ../../../Framework/TestHelpers/src/MDEventsTestHelper.cpp
-  LINK_LIBS
-    ${TARGET_LIBRARIES}
-    DataObjects
-    gmock
-  MTD_QT_LINK_LIBS MantidQtWidgetsCommon
-  PARENT_DEPENDENCIES GUITests
-)
-
 set(
   QT5_TEST_FILES
   test/AddWorkspaceDialogTest.h
-  test/BasicFitOptionsBrowserTest.h
   test/BatchAlgorithmRunnerTest.h
   test/FileDialogHandlerTest.h
   test/FindFilesThreadPoolManagerTest.h
@@ -1054,12 +1036,14 @@ set(
   test/FitScriptGeneratorModelTest.h
   test/FitScriptGeneratorPresenterTest.h
   test/FitScriptGeneratorViewTest.h
+  test/FitScriptOptionsBrowserTest.h
   test/FunctionTreeViewTest.h
   test/ImageInfoModelMatrixWSTest.h
   test/ImageInfoModelMDTest.h
   test/ImageInfoPresenterTest.h
   test/InterfaceManagerTest.h
   test/ManageUserDirectoriesTest.h
+  test/MuonPeriodInfoTest.h
   test/QtJSONUtilsTest.h
   test/RepoModelTest.h
   test/Batch/BuildSubtreeItemsTest.h
@@ -1102,6 +1086,7 @@ mtd_add_qt_tests(
     DataObjects
     gmock
     Qt5::Test
+    Python::Python
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon
   PARENT_DEPENDENCIES GUITests
 )

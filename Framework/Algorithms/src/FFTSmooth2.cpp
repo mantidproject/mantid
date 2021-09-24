@@ -15,8 +15,7 @@
 #include <boost/algorithm/string/detail/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(FFTSmooth2)
@@ -105,7 +104,7 @@ void FFTSmooth2::exec() {
 
     progress.report("Calculating FFT");
     // Forward Fourier transform
-    IAlgorithm_sptr fft = createChildAlgorithm("RealFFT", 0, 0.5);
+    auto fft = createChildAlgorithm("RealFFT", 0, 0.5);
     fft->setProperty("InputWorkspace", symmWS);
     fft->setProperty("WorkspaceIndex", 0);
     fft->setProperty("IgnoreXBins", ignoreXBins);
@@ -255,5 +254,4 @@ void FFTSmooth2::Butterworth(int n, int order, API::MatrixWorkspace_sptr &unfilt
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

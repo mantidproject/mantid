@@ -8,8 +8,7 @@
 #include "MantidAPI/AlgorithmFactoryObserver.h"
 #include "MantidPythonInterface/core/CallMethod.h"
 
-namespace Mantid {
-namespace PythonInterface {
+namespace Mantid::PythonInterface {
 
 AlgorithmFactoryObserverAdapter::AlgorithmFactoryObserverAdapter(PyObject *self)
     : API::AlgorithmFactoryObserver(), m_self(self) {}
@@ -22,5 +21,4 @@ void AlgorithmFactoryObserverAdapter::updateHandle() {
   }
 }
 
-} // namespace PythonInterface
-} // namespace Mantid
+} // namespace Mantid::PythonInterface

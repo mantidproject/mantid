@@ -20,8 +20,7 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SliceMD)
@@ -143,7 +142,7 @@ void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
     // First save to the NXS file
     g_log.notice() << "Running SaveMD to create file back-end\n";
-    IAlgorithm_sptr alg = createChildAlgorithm("SaveMD");
+    auto alg = createChildAlgorithm("SaveMD");
     alg->setPropertyValue("Filename", filename);
     alg->setProperty("InputWorkspace", outWS);
     alg->setProperty("MakeFileBacked", true);
@@ -252,7 +251,7 @@ void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   if (outWS->isFileBacked()) {
     // Update the file-back-end
     g_log.notice() << "Running SaveMD\n";
-    IAlgorithm_sptr alg = createChildAlgorithm("SaveMD");
+    auto alg = createChildAlgorithm("SaveMD");
     alg->setProperty("UpdateFileBackEnd", true);
     alg->setProperty("InputWorkspace", outWS);
     alg->executeAsChildAlg();
@@ -322,5 +321,4 @@ void SliceMD::exec() {
   CALL_MDEVENT_FUNCTION(this->doExec, m_inWS);
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

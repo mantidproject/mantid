@@ -12,8 +12,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
-namespace Mantid {
-namespace WorkflowAlgorithms {
+namespace Mantid::WorkflowAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(DgsRemap)
@@ -71,7 +70,7 @@ void DgsRemap::exec() {
 void DgsRemap::execMasking(const MatrixWorkspace_sptr &iWS) {
   MatrixWorkspace_sptr maskWS = this->getProperty("MaskWorkspace");
   if (maskWS) {
-    IAlgorithm_sptr mask = this->createChildAlgorithm("MaskDetectors");
+    auto mask = createChildAlgorithm("MaskDetectors");
     mask->setProperty("Workspace", iWS);
     mask->setProperty("MaskedWorkspace", maskWS);
     mask->executeAsChildAlg();
@@ -86,7 +85,7 @@ void DgsRemap::execGrouping(const MatrixWorkspace_sptr &iWS, MatrixWorkspace_spt
   }
 
   if (groupWS || !oldGroupingFile.empty()) {
-    IAlgorithm_sptr group = this->createChildAlgorithm("GroupDetectors");
+    auto group = createChildAlgorithm("GroupDetectors");
     group->setProperty("InputWorkspace", iWS);
     group->setProperty("OutputWorkspace", iWS);
     if (groupWS) {
@@ -105,5 +104,4 @@ void DgsRemap::execGrouping(const MatrixWorkspace_sptr &iWS, MatrixWorkspace_spt
   }
 }
 
-} // namespace WorkflowAlgorithms
-} // namespace Mantid
+} // namespace Mantid::WorkflowAlgorithms

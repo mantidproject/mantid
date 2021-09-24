@@ -5,12 +5,12 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/PeakShapeSpherical.h"
+#include "MantidJson/Json.h"
 #include <json/json.h>
 #include <stdexcept>
 #include <utility>
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 
 /**
  * @brief Constructor
@@ -56,8 +56,7 @@ std::string PeakShapeSpherical::toJSON() const {
     root["background_inner_radius"] = Json::Value(m_backgroundInnerRadius.get());
   }
 
-  Json::StyledWriter writer;
-  return writer.write(root);
+  return Mantid::JsonHelpers::jsonToString(root);
 }
 
 /**
@@ -116,5 +115,4 @@ boost::optional<double> PeakShapeSpherical::backgroundInnerRadius() const { retu
  */
 const std::string PeakShapeSpherical::sphereShapeName() { return "spherical"; }
 
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects

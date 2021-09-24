@@ -16,8 +16,7 @@
 #include <boost/utility.hpp>
 #include <utility>
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 using Mantid::Kernel::PropertyHistory_const_sptr;
 using Mantid::Kernel::PropertyHistory_sptr;
@@ -185,5 +184,4 @@ const std::string NotebookBuilder::buildPropertyString(const PropertyHistory_con
   return prop;
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

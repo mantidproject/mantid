@@ -8,8 +8,7 @@
 
 #include <algorithm>
 
-namespace Mantid {
-namespace CurveFitting {
+namespace Mantid::CurveFitting {
 
 /// Constructor.
 /// @param exclude :: The value of the "Exclude" property.
@@ -69,7 +68,7 @@ void ExcludeRangeFinder::findNextExcludedRange(double p) {
   // the previous point. Keep index m_exclIndex pointing to the start.
   for (auto it = m_exclude.begin() + m_exclIndex; it != m_exclude.end(); ++it) {
     if (*it >= p) {
-      m_exclIndex = static_cast<size_t>(std::distance(m_exclude.begin(), it));
+      m_exclIndex = static_cast<std::size_t>(std::distance(m_exclude.begin(), it));
       if (m_exclIndex % 2 == 0) {
         // A number at an even position in m_exclude starts an exclude
         // range
@@ -88,6 +87,4 @@ void ExcludeRangeFinder::findNextExcludedRange(double p) {
   // and m_exclude[m_exclIndex] < p due to conditions at the calls
   // so the break statement will always be reached.
 }
-} // namespace CurveFitting
-
-} // namespace Mantid
+} // namespace Mantid::CurveFitting

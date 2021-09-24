@@ -5,8 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/V3R.h"
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 /// Default constructor, all elements 0
 V3R::V3R() : m_x(0), m_y(0), m_z(0) {}
@@ -303,5 +302,4 @@ V3R::operator std::vector<double>() const {
   return vector;
 }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

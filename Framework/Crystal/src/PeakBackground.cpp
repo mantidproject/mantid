@@ -14,8 +14,7 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using Mantid::Geometry::IPeak;
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -60,5 +59,4 @@ bool PeakBackground::isBackground(Mantid::API::IMDIterator *iterator) const {
 
 void PeakBackground::configureIterator(Mantid::API::IMDIterator *const /*iterator*/) const {}
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

@@ -18,8 +18,7 @@
 #include "MantidKernel/UnitFactory.h"
 /************************/
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using namespace Kernel;
 using namespace API;
@@ -374,7 +373,7 @@ LoadCSNSNexus::getEventData(const std::vector<std::string> &inputList, const std
  * @param[in] evtData :: event data
  */
 void LoadCSNSNexus::loadEventData(EventWorkspace_sptr &workspace, const std::vector<uint32_t> &timeOfFlight,
-                                  size_t pidNums, const std::multimap<uint32_t, std::pair<float, int64_t>> evtData) {
+                                  size_t pidNums, const std::multimap<uint32_t, std::pair<float, int64_t>> &evtData) {
   workspace->initialize(pidNums, 1, 1);
   float m_tof;
   uint64_t m_pulseTime;
@@ -462,5 +461,4 @@ void LoadCSNSNexus::exec() {
     setProperty("OutputWorkspace", ws_hist);
   }
 }
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

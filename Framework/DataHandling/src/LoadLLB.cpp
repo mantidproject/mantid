@@ -21,8 +21,7 @@
 #include <limits>
 #include <vector>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using namespace Kernel;
 using namespace API;
@@ -294,7 +293,7 @@ void LoadLLB::loadExperimentDetails(NXEntry &entry) {
  */
 void LoadLLB::runLoadInstrument() {
 
-  IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
+  auto loadInst = createChildAlgorithm("LoadInstrument");
 
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   try {
@@ -311,5 +310,4 @@ void LoadLLB::runLoadInstrument() {
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

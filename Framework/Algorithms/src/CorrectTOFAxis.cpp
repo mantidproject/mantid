@@ -21,8 +21,7 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitConversion.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using Mantid::API::WorkspaceProperty;
 using Mantid::Kernel::Direction;
@@ -388,7 +387,7 @@ void CorrectTOFAxis::averageL2AndEPP(const API::SpectrumInfo &spectrumInfo, doub
   double eppSum = 0;
   size_t n = 0;
   const auto indexCount = static_cast<int64_t>(m_workspaceIndices.size());
-  // cppcheck-suppress syntaxError
+
   PRAGMA_OMP(parallel for if (m_eppTable->threadSafe())
              reduction(+: n, l2Sum, eppSum))
   for (int64_t i = 0; i < indexCount; ++i) {
@@ -460,5 +459,4 @@ std::vector<size_t> CorrectTOFAxis::referenceWorkspaceIndices() const {
   return workspaceIndices;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

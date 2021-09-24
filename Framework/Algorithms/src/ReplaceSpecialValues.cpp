@@ -15,8 +15,7 @@
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(ReplaceSpecialValues)
@@ -112,5 +111,4 @@ bool ReplaceSpecialValues::checkifPropertyEmpty(const double value) const {
   return (std::abs(value - Mantid::EMPTY_DBL()) < 1e-08);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

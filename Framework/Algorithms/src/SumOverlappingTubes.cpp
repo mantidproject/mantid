@@ -31,8 +31,7 @@
 
 #include <boost/math/special_functions/round.hpp>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 DECLARE_ALGORITHM(SumOverlappingTubes)
 
@@ -344,5 +343,4 @@ double SumOverlappingTubes::distanceFromAngle(const int angleIndex, const double
   return fabs(m_startScatteringAngle + double(angleIndex) * m_stepScatteringAngle - angle);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

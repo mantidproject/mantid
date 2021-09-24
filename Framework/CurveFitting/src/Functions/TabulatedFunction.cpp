@@ -20,9 +20,7 @@
 #include <sstream>
 #include <utility>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
 
@@ -253,7 +251,7 @@ IFunction::Attribute TabulatedFunction::getAttribute(const std::string &attName)
  * @param fname :: The file name
  */
 void TabulatedFunction::load(const std::string &fname) {
-  IAlgorithm_sptr loadAlg = Mantid::API::AlgorithmFactory::Instance().create("Load", -1);
+  auto loadAlg = Mantid::API::AlgorithmFactory::Instance().create("Load", -1);
   loadAlg->initialize();
   loadAlg->setChild(true);
   loadAlg->setLogging(false);
@@ -321,6 +319,4 @@ void TabulatedFunction::setupData() const {
   m_setupFinished = true;
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

@@ -15,8 +15,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Unit.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SumRowColumn)
@@ -111,7 +110,7 @@ void SumRowColumn::exec() {
 MatrixWorkspace_sptr SumRowColumn::integrateWorkspace() {
   g_log.debug() << "Integrating input workspace\n";
 
-  IAlgorithm_sptr childAlg = createChildAlgorithm("Integration");
+  auto childAlg = createChildAlgorithm("Integration");
   // pass inputed values straight to this Child Algorithm, checking must be done
   // there
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", getProperty("InputWorkspace"));
@@ -121,5 +120,4 @@ MatrixWorkspace_sptr SumRowColumn::integrateWorkspace() {
   return childAlg->getProperty("OutputWorkspace");
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

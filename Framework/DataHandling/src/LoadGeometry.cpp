@@ -8,8 +8,7 @@
 #include "MantidKernel/FileDescriptor.h"
 #include "MantidKernel/NexusDescriptor.h"
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 /// Determine if the Geometry file type is IDF
 bool LoadGeometry::isIDF(const std::string &filename) {
@@ -45,5 +44,4 @@ bool LoadGeometry::isNexus(const std::string &filename,
 /// List allowed file extensions for geometry
 const std::vector<std::string> LoadGeometry::validExtensions() { return {".xml", ".nxs", ".hdf5"}; }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

@@ -34,13 +34,12 @@ public:
 
   std::shared_ptr<Mantid::API::IMDHistoWorkspace>
   hatSmooth(const std::shared_ptr<const Mantid::API::IMDHistoWorkspace> &toSmooth,
-            const std::vector<double> &widthVector,
-            boost::optional<std::shared_ptr<const Mantid::API::IMDHistoWorkspace>> weightingWS);
+            const std::vector<double> &widthVector, const std::shared_ptr<Mantid::API::IMDHistoWorkspace> &weightingWS);
 
   std::shared_ptr<Mantid::API::IMDHistoWorkspace>
   gaussianSmooth(const std::shared_ptr<const Mantid::API::IMDHistoWorkspace> &toSmooth,
                  const std::vector<double> &widthVector,
-                 boost::optional<std::shared_ptr<const Mantid::API::IMDHistoWorkspace>> weightingWS);
+                 const std::shared_ptr<Mantid::API::IMDHistoWorkspace> &weightingWS);
 
 private:
   void init() override;

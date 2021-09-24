@@ -25,8 +25,7 @@ std::string const OUTPUT_WS{"OutputWorkspace"};
 constexpr double FWHM_GAUSSIAN_EQUIVALENT{0.68};
 } // namespace
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(GroupToXResolution)
 
@@ -136,5 +135,4 @@ void GroupToXResolution::exec() {
   setProperty(Prop::OUTPUT_WS, outWS);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

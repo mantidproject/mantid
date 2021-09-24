@@ -9,8 +9,7 @@
 
 using namespace Mantid::Kernel;
 
-namespace MantidQt {
-namespace API {
+namespace MantidQt::API {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -57,5 +56,4 @@ void BoolPropertyWidget::setValueImpl(const QString &value) {
   else
     m_checkBox->setCheckState(Qt::Checked);
 }
-} // namespace API
-} // namespace MantidQt
+} // namespace MantidQt::API

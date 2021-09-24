@@ -45,7 +45,7 @@ std::shared_ptr<UnitLabel> createLabel(const object &ascii, const object &utf8, 
  * @param self A reference to the calling object
  * @return A new Python unicode string with the contents of the utf8 label
  */
-PyObject *utf8ToUnicode(UnitLabel &self) {
+PyObject *utf8ToUnicode(const UnitLabel &self) {
   const auto &label = self.utf8();
   return PyUnicode_FromWideChar(label.c_str(), label.size());
 }

@@ -19,8 +19,7 @@
 #include <Poco/File.h>
 #include <Poco/Path.h>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 const size_t SaveFITS::g_maxLenHdr = 80;
 
@@ -235,5 +234,4 @@ void SaveFITS::writePaddingFITSHeaders(size_t count, std::ofstream &file) {
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

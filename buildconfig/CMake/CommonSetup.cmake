@@ -34,6 +34,11 @@ include(GoogleTest)
 include(PyUnitTest)
 enable_testing()
 
+# build f2py fortran routines
+if (ENABLE_F2PY_ROUTINES)
+include(f2pylibraries)
+endif()
+
 # We want shared libraries everywhere
 set(BUILD_SHARED_LIBS On)
 
@@ -69,7 +74,7 @@ find_package(
   Boost ${BOOST_VERSION_REQUIRED} REQUIRED
   COMPONENTS date_time regex serialization filesystem system
 )
-add_definitions(-DBOOST_ALL_DYN_LINK -DBOOST_ALL_NO_LIB)
+add_definitions(-DBOOST_ALL_DYN_LINK -DBOOST_ALL_NO_LIB -DBOOST_BIND_GLOBAL_PLACEHOLDERS)
 # Need this defined globally for our log time values
 add_definitions(-DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG)
 # Silence issues with deprecated allocator methods in boost regex
@@ -94,20 +99,32 @@ endif()
 
 find_package(Doxygen) # optional
 
-if(CMAKE_HOST_WIN32)
+if(CMAKE_HOST_WIN32 AND NOT CONDA_BUILD)
   find_package(ZLIB REQUIRED CONFIGS zlib-config.cmake)
   set(HDF5_DIR "${THIRD_PARTY_DIR}/cmake/hdf5")
   find_package(
     HDF5
-    COMPONENTS CXX HL
+    COMPONENTS C CXX HL
     REQUIRED CONFIGS hdf5-config.cmake
   )
   set(HDF5_LIBRARIES hdf5::hdf5_cpp-shared hdf5::hdf5_hl-shared)
-else()
+elseif(CONDA_BUILD)
+  # We'll use the cmake finder
   find_package(ZLIB REQUIRED)
   find_package(
     HDF5
-    COMPONENTS CXX HL
+    MODULE
+    COMPONENTS C CXX HL
+    REQUIRED
+  )
+  set(HDF5_LIBRARIES hdf5::hdf5_cpp hdf5::hdf5)
+  set(HDF5_HL_LIBRARIES hdf5::hdf5_hl)
+  else()
+  find_package(ZLIB REQUIRED)
+  find_package(
+    HDF5
+    MODULE
+    COMPONENTS C CXX HL
     REQUIRED
   )
 endif()
@@ -304,64 +321,7 @@ endif()
 # ##############################################################################
 # Configure clang-tidy if the tool is found
 # ##############################################################################
-
-if(CMAKE_VERSION VERSION_GREATER "3.5")
-  set(DEFAULT_CLANG_TIDY_CHECKS
-      "-*,performance-for-range-copy,performance-unnecessary-copy-initialization,modernize-use-override,modernize-use-nullptr,modernize-loop-convert,modernize-use-bool-literals,modernize-deprecated-headers,misc-*,-misc-unused-parameters"
-  )
-  option(ENABLE_CLANG_TIDY "Add clang-tidy automatically to builds")
-  if(ENABLE_CLANG_TIDY)
-    find_program(
-      CLANG_TIDY_EXE
-      NAMES "clang-tidy"
-      PATHS /usr/local/opt/llvm/bin
-    )
-    if(CLANG_TIDY_EXE)
-      message(STATUS "clang-tidy found: ${CLANG_TIDY_EXE}")
-      set(CLANG_TIDY_CHECKS
-          "${DEFAULT_CLANG_TIDY_CHECKS}"
-          CACHE STR "Select checks to perform"
-      )
-      option(APPLY_CLANG_TIDY_FIX "Apply fixes found through clang-tidy checks"
-             OFF
-      )
-      if(CLANG_TIDY_CHECKS STREQUAL "")
-        # use default checks if empty to avoid errors
-        set(CLANG_TIDY_CHECKS
-            "${DEFAULT_CLANG_TIDY_CHECKS}"
-            CACHE STR "Select checks to perform" FORCE
-        )
-      endif()
-      if(APPLY_CLANG_TIDY_FIX)
-        set(CMAKE_CXX_CLANG_TIDY
-            "${CLANG_TIDY_EXE};-checks=${CLANG_TIDY_CHECKS};-header-filter='${CMAKE_SOURCE_DIR}/*';-fix"
-            CACHE STRING "" FORCE
-        )
-      else()
-        set(CMAKE_CXX_CLANG_TIDY
-            "${CLANG_TIDY_EXE};-checks=${CLANG_TIDY_CHECKS};-header-filter='${CMAKE_SOURCE_DIR}/*'"
-            CACHE STRING "" FORCE
-        )
-      endif()
-    else()
-      message(AUTHOR_WARNING "clang-tidy not found!")
-      set(CMAKE_CXX_CLANG_TIDY
-          ""
-          CACHE STRING "" FORCE
-      ) # delete it
-    endif()
-  else()
-    set(CMAKE_CXX_CLANG_TIDY
-        ""
-        CACHE STRING "" FORCE
-    ) # delete it
-  endif()
-else()
-  message(
-    AUTHOR_WARNING
-      "Using cmake version 3.5 or below. Clang-tidy is not supported!"
-  )
-endif()
+include(ClangTidy)
 
 # ##############################################################################
 # Setup cppcheck
@@ -420,14 +380,24 @@ if (ENABLE_PRECOMMIT)
     message ( FATAL_ERROR "Failed to find pre-commit see https://developer.mantidproject.org/GettingStarted.html" )
   endif ()
 
-  if (MSVC)
+  if (WIN32)
+    if(CONDA_BUILD)
+    execute_process(COMMAND "${PRE_COMMIT_EXE}" install --overwrite WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} RESULT_VARIABLE PRE_COMMIT_RESULT)
+    else()
     execute_process(COMMAND "${PRE_COMMIT_EXE}.cmd" install --overwrite WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} RESULT_VARIABLE PRE_COMMIT_RESULT)
+    endif()
     if(NOT PRE_COMMIT_RESULT EQUAL "0")
         message(FATAL_ERROR "Pre-commit install failed with ${PRE_COMMIT_RESULT}")
     endif()
     # Create pre-commit script wrapper to use mantid third party python for pre-commit
+    if (NOT CONDA_BUILD)
     file(RENAME "${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit" "${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit-script.py")
     file(WRITE "${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit" "#!/usr/bin/env sh\n${MSVC_PYTHON_EXECUTABLE_DIR}/python.exe ${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit-script.py")
+    else()
+    file(TO_CMAKE_PATH $ENV{CONDA_PREFIX} CONDA_SHELL_PATH)
+    file(RENAME "${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit" "${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit-script.py")
+    file(WRITE "${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit" "#!/usr/bin/env sh\n${CONDA_SHELL_PATH}/Scripts/wrappers/conda/python.bat ${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit-script.py")
+    endif()
   else()  # linux as osx
     execute_process(COMMAND bash -c "${PRE_COMMIT_EXE} install" WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} RESULT_VARIABLE STATUS)
     if (STATUS AND NOT STATUS EQUAL 0)

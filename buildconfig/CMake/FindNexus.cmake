@@ -15,9 +15,15 @@ find_path ( NEXUS_INCLUDE_DIR napi.h
         PATH_SUFFIXES nexus)
 
 # Find the C libraries
+if(WIN32 AND CONDA_BUILD)
+find_library ( NEXUS_C_LIBRARIES NAMES NeXus NeXus )
+# Find the C++ libraries
+find_library ( NEXUS_CPP_LIBRARIES NAMES NeXusCPP NeXusCPP)
+else()
 find_library ( NEXUS_C_LIBRARIES NAMES NeXus libNeXus-0 )
 # Find the C++ libraries
 find_library ( NEXUS_CPP_LIBRARIES NAMES NeXusCPP libNeXusCPP-0)
+endif()
 
 # Debug variants
 # C
@@ -60,3 +66,85 @@ else (NEXUS_VERSION)
   message (WARNING "Failed to determine version: Ignoring version requirement")
   find_package_handle_standard_args( Nexus DEFAULT_MSG NEXUS_LIBRARIES NEXUS_INCLUDE_DIR )
 endif (NEXUS_VERSION)
+
+
+if(WIN32)
+  # c library
+  string( REPLACE ".lib" ".dll" NEXUS_C_LIBRARIES_DLL       "${NEXUS_C_LIBRARIES}" )
+  string( REPLACE ".lib" ".dll" NEXUS_C_LIBRARIES_DEBUG_DLL "${NEXUS_C_LIBRARIES_DEBUG}" )
+  get_filename_component(NEXUS_C_LIBRARIES_DLL ${NEXUS_C_LIBRARIES_DLL} NAME)
+  get_filename_component(NEXUS_C_LIBRARIES_DEBUG_DLL ${NEXUS_C_LIBRARIES_DEBUG_DLL} NAME)
+  find_file(NEXUS_C_LIBRARIES_DLL PATH_SUFFIXES bin/)
+  find_file(NEXUS_C_LIBRARIES_DEBUG_DLL PATH_SUFFIXES bin/)
+
+  # cpp library
+  string( REPLACE ".lib" ".dll" NEXUS_CPP_LIBRARIES_DLL       "${NEXUS_CPP_LIBRARIES}" )
+  string( REPLACE ".lib" ".dll" NEXUS_CPP_LIBRARIES_DEBUG_DLL "${NEXUS_CPP_LIBRARIES_DEBUG}" )
+  get_filename_component(NEXUS_CPP_LIBRARIES_DLL ${NEXUS_CPP_LIBRARIES_DLL} NAME)
+  get_filename_component(NEXUS_CPP_LIBRARIES_DEBUG_DLL ${NEXUS_CPP_LIBRARIES_DEBUG_DLL} NAME)
+  find_file(NEXUS_CPP_LIBRARIES_DLL PATH_SUFFIXES bin/)
+  find_file(NEXUS_CPP_LIBRARIES_DEBUG_DLL PATH_SUFFIXES bin/)
+
+
+endif()
+
+if( NEXUS_FOUND AND NOT TARGET Nexus::nexus AND NOT TARGET Nexus::nexuscpp)
+if( NEXUS_C_LIBRARIES_DLL AND NEXUS_CPP_LIBRARIES_DLL)
+
+    # Nexus c library
+    # Windows systems with dll libraries.
+    add_library( Nexus::nexus SHARED IMPORTED )
+
+    # Windows with dlls, but only Release libraries.
+    set_target_properties(Nexus::nexus PROPERTIES
+      IMPORTED_LOCATION_RELEASE         "${NEXUS_C_LIBRARIES_DLL}"
+      IMPORTED_IMPLIB                   "${NEXUS_C_LIBRARIES}"
+      INTERFACE_INCLUDE_DIRECTORIES     "${NEXUS_INCLUDE_DIR}"
+      IMPORTED_CONFIGURATIONS           Release
+      IMPORTED_LINK_INTERFACE_LANGUAGES "C" )
+
+    # If we have both Debug and Release libraries
+    if(NEXUS_C_LIBRARIES_DEBUG_DLL)
+      set_property( TARGET Nexus::nexus APPEND PROPERTY IMPORTED_CONFIGURATIONS Debug )
+      set_target_properties( Nexus::nexus PROPERTIES
+        IMPORTED_LOCATION_DEBUG           "${NEXUS_C_LIBRARIES_DEBUG_DLL}"
+        IMPORTED_IMPLIB_DEBUG             "${NEXUS_C_LIBRARIES_DEBUG}"
+        )
+    endif()
+
+    # Nexus cpp library
+    # Windows systems with dll libraries.
+    add_library( Nexus::nexuscpp SHARED IMPORTED )
+
+    # Windows with dlls, but only Release libraries.
+    set_target_properties(Nexus::nexuscpp PROPERTIES
+      IMPORTED_LOCATION_RELEASE         "${NEXUS_CPP_LIBRARIES_DLL}"
+      IMPORTED_IMPLIB                   "${NEXUS_CPP_LIBRARIES}"
+      INTERFACE_INCLUDE_DIRECTORIES     "${NEXUS_INCLUDE_DIR}"
+      IMPORTED_CONFIGURATIONS           Release
+      IMPORTED_LINK_INTERFACE_LANGUAGES "CXX" )
+
+    # If we have both Debug and Release libraries
+    if(NEXUS_CPP_LIBRARIES_DEBUG_DLL)
+      set_property( TARGET Nexus::nexuscpp APPEND PROPERTY IMPORTED_CONFIGURATIONS Debug )
+      set_target_properties( Nexus::nexuscpp PROPERTIES
+        IMPORTED_LOCATION_DEBUG           "${NEXUS_CPP_LIBRARIES_DEBUG_DLL}"
+        IMPORTED_IMPLIB_DEBUG             "${NEXUS_CPP_LIBRARIES_DEBUG}"
+        )
+    endif()
+else()
+  add_library(Nexus::nexus UNKNOWN IMPORTED)
+  set_target_properties(Nexus::nexus PROPERTIES
+  IMPORTED_LOCATION                 "${NEXUS_C_LIBRARIES}"
+  INTERFACE_INCLUDE_DIRECTORIES     "${NEXUS_INCLUDE_DIR}"
+  IMPORTED_LINK_INTERFACE_LANGUAGES "C"
+  )
+
+  add_library(Nexus::nexuscpp UNKNOWN IMPORTED)
+  set_target_properties(Nexus::nexuscpp PROPERTIES
+  IMPORTED_LOCATION                 "${NEXUS_CPP_LIBRARIES}"
+  INTERFACE_INCLUDE_DIRECTORIES     "${NEXUS_INCLUDE_DIR}"
+  IMPORTED_LINK_INTERFACE_LANGUAGES "CXX"
+  )
+endif()
+endif()

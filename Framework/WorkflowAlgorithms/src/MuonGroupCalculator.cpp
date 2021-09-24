@@ -6,8 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidWorkflowAlgorithms/MuonGroupCalculator.h"
 
-namespace Mantid {
-namespace WorkflowAlgorithms {
+namespace Mantid::WorkflowAlgorithms {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -27,5 +26,4 @@ void MuonGroupCalculator::setStartEnd(const double start, const double end) {
   m_endX = end;
 }
 void MuonGroupCalculator::setWSName(const std::string &wsName) { m_wsName = wsName; }
-} // namespace WorkflowAlgorithms
-} // namespace Mantid
+} // namespace Mantid::WorkflowAlgorithms

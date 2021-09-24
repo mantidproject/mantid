@@ -18,8 +18,7 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using boost::regex;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 /*
  * The list of dimension names often looks like "[H,0,0],[0,K,0]" with "[H,0,0]"
@@ -244,5 +243,4 @@ std::map<std::string, std::string> MaskMD::validateInputs() {
   return validation_output;
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

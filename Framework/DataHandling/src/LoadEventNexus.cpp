@@ -13,6 +13,7 @@
 #include "MantidDataHandling/DefaultEventLoader.h"
 #include "MantidDataHandling/EventWorkspaceCollection.h"
 #include "MantidDataHandling/LoadEventNexusIndexSetup.h"
+#include "MantidDataHandling/LoadHelper.h"
 #include "MantidDataHandling/ParallelEventLoader.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
@@ -40,8 +41,7 @@ using std::string;
 using std::vector;
 using namespace ::NeXus;
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadEventNexus)
 
@@ -246,7 +246,12 @@ void LoadEventNexus::init() {
                   "If true, only the meta data and sample logs will be loaded.");
 
   declareProperty(std::make_unique<PropertyWithValue<bool>>("LoadLogs", true, Direction::Input),
-                  "Load the Sample/DAS logs from the file (default True).");
+                  "Load only the Sample/DAS logs from the file (default True).");
+
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("LoadAllLogs", false, Direction::Input),
+                  "Load all the logs from the nxs, without checking or processing them; if checked, LoadLogs will be "
+                  "ignored; use with caution");
+
   std::vector<std::string> loadType{"Default"};
 
 #ifndef _WIN32
@@ -511,7 +516,7 @@ LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilename, T localWorksp
   // The pulse times will be empty if not specified in the DAS logs.
   // BankPulseTimes * out = NULL;
   std::shared_ptr<BankPulseTimes> out;
-  API::IAlgorithm_sptr loadLogs = alg.createChildAlgorithm("LoadNexusLogs");
+  auto loadLogs = alg.createChildAlgorithm("LoadNexusLogs");
 
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   try {
@@ -562,6 +567,8 @@ LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilename, T localWorksp
       // (this is used in LoadInstrument to find the right instrument file to
       // use).
       localWorkspace->mutableRun().addProperty("run_start", run_start.toISO8601String(), true);
+    } else if (run.hasProperty("start_time")) {
+      localWorkspace->mutableRun().addProperty("run_start", run.getProperty("start_time")->value(), true);
     } else {
       alg.getLogger().warning() << "Empty proton_charge sample log. You will "
                                    "not be able to filter by time.\n";
@@ -610,7 +617,7 @@ std::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
   // The pulse times will be empty if not specified in the DAS logs.
   // BankPulseTimes * out = NULL;
   std::shared_ptr<BankPulseTimes> out;
-  API::IAlgorithm_sptr loadLogs = alg.createChildAlgorithm("LoadNexusLogs");
+  auto loadLogs = alg.createChildAlgorithm("LoadNexusLogs");
 
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   try {
@@ -812,27 +819,43 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
   bad_tofs = 0;
   int nPeriods = 1;
   auto periodLog = std::make_unique<const TimeSeriesProperty<int>>("period_log");
+
+  bool loadAllLogs = getProperty("LoadAllLogs");
+
   if (loadlogs) {
-    prog->doReport("Loading DAS logs");
+    if (!loadAllLogs) {
+      prog->doReport("Loading DAS logs");
 
-    if (allow_list.empty() && block_list.empty()) {
-      m_allBanksPulseTimes =
-          runLoadNexusLogs<EventWorkspaceCollection_sptr>(m_filename, m_ws, *this, true, nPeriods, periodLog);
+      if (allow_list.empty() && block_list.empty()) {
+        m_allBanksPulseTimes =
+            runLoadNexusLogs<EventWorkspaceCollection_sptr>(m_filename, m_ws, *this, true, nPeriods, periodLog);
+      } else {
+        m_allBanksPulseTimes = runLoadNexusLogs<EventWorkspaceCollection_sptr>(m_filename, m_ws, *this, true, nPeriods,
+                                                                               periodLog, allow_list, block_list);
+      }
+
+      try {
+        run_start = m_ws->getFirstPulseTime();
+      } catch (Kernel::Exception::NotFoundError &) {
+        /*
+          This is added to (a) support legacy behaviour of continuing to take
+          times from the proto_charge log, but (b) allowing a fall back of
+          getting run start and end from actual pulse times within the
+          NXevent_data group. Note that the latter is better Nexus compliant.
+        */
+        takeTimesFromEvents = true;
+      }
     } else {
-      m_allBanksPulseTimes = runLoadNexusLogs<EventWorkspaceCollection_sptr>(m_filename, m_ws, *this, true, nPeriods,
-                                                                             periodLog, allow_list, block_list);
-    }
+      prog->doReport("Loading all logs");
+      // Open NeXus file
+      NXhandle nxHandle;
+      NXstatus nxStat = NXopen(m_filename.c_str(), NXACC_READ, &nxHandle);
 
-    try {
-      run_start = m_ws->getFirstPulseTime();
-    } catch (Kernel::Exception::NotFoundError &) {
-      /*
-        This is added to (a) support legacy behaviour of continuing to take
-        times from the proto_charge log, but (b) allowing a fall back of
-        getting run start and end from actual pulse times within the
-        NXevent_data group. Note that the latter is better Nexus compliant.
-      */
-      takeTimesFromEvents = true;
+      if (nxStat != NX_ERROR) {
+        LoadHelper loadHelper;
+        loadHelper.addNexusFieldsToWsRun(nxHandle, m_ws->mutableRun());
+        NXclose(&nxHandle);
+      }
     }
   } else {
     g_log.information() << "Skipping the loading of sample logs!\n"
@@ -962,7 +985,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
   filter_time_start = Types::Core::DateAndTime::minimum();
   filter_time_stop = Types::Core::DateAndTime::maximum();
 
-  if (m_allBanksPulseTimes->numPulses > 0) {
+  if (m_allBanksPulseTimes->pulseTimes.size() > 0) {
     // If not specified, use the limits of doubles. Otherwise, convert from
     // seconds to absolute PulseTime
     if (filter_time_start_sec != EMPTY_DBL()) {
@@ -1358,7 +1381,7 @@ void LoadEventNexus::runLoadMonitors() {
   std::string mon_wsname = this->getProperty("OutputWorkspace");
   mon_wsname.append("_monitors");
 
-  IAlgorithm_sptr loadMonitors = this->createChildAlgorithm("LoadNexusMonitors");
+  auto loadMonitors = createChildAlgorithm("LoadNexusMonitors");
   g_log.information("Loading monitors from NeXus file...");
   loadMonitors->setPropertyValue("Filename", m_filename);
   g_log.information() << "New workspace name for monitors: " << mon_wsname << '\n';
@@ -1592,5 +1615,4 @@ LoadEventNexus::getParallelExecutionMode(const std::map<std::string, Parallel::S
   static_cast<void>(storageModes);
   return Parallel::ExecutionMode::Distributed;
 }
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

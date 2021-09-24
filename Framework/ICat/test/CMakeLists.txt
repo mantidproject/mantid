@@ -13,9 +13,11 @@ if(CXXTEST_FOUND)
   # The actual test suite
   cxxtest_add_test(ICatTest ${TEST_FILES})
   target_link_libraries(ICatTest
-                        LINK_PRIVATE
-                        ${MANTIDLIBS}
-                        ICat)
+                        PRIVATE
+                        Mantid::ICat
+                        Mantid::API
+                        Mantid::DataObjects
+                        gmock)
   add_dependencies(FrameworkTests ICatTest)
 
   # Add to the 'FrameworkTests' group in VS

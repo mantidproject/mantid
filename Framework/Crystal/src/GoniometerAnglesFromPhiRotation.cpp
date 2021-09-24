@@ -17,8 +17,7 @@
 
 using Mantid::Kernel::Direction;
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(GoniometerAnglesFromPhiRotation)
@@ -142,7 +141,7 @@ void GoniometerAnglesFromPhiRotation::exec() {
     Run1HasOrientedLattice = false;
 
     const std::string fft("FindUBUsingFFT");
-    API::IAlgorithm_sptr findUB = this->createChildAlgorithm(fft);
+    auto findUB = createChildAlgorithm(fft);
     findUB->initialize();
     findUB->setProperty<PeaksWorkspace_sptr>("PeaksWorkspace", getProperty("PeaksWorkspace1"));
     findUB->setProperty("MIND", static_cast<double>(getProperty("MIND")));
@@ -381,5 +380,4 @@ Kernel::Matrix<double> GoniometerAnglesFromPhiRotation::getUBRaw(const Kernel::M
   return GoniometerMatrix * UB;
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

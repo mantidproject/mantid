@@ -33,8 +33,7 @@
 #include <fstream>
 #include <gsl/gsl_integration.h>
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(IntegratePeaksMD)
@@ -428,7 +427,7 @@ template <typename MDE, size_t nd> void IntegratePeaksMD::integrate(typename MDE
         background_total += y.sum(peakMax);
         errorSquared = std::abs(signal);
       } else {
-        API::IAlgorithm_sptr findpeaks = createChildAlgorithm("FindPeaks", -1, -1, false);
+        auto findpeaks = createChildAlgorithm("FindPeaks", -1, -1, false);
         findpeaks->setProperty("InputWorkspace", wsProfile2D);
         findpeaks->setProperty<int>("FWHM", 7);
         findpeaks->setProperty<int>("Tolerance", 4);
@@ -500,7 +499,7 @@ template <typename MDE, size_t nd> void IntegratePeaksMD::integrate(typename MDE
         fun->function(domain, yy);
         auto funcValues = yy.toVector();
 
-        wsFit2D->mutableY(i) = std::move(funcValues);
+        wsFit2D->mutableY(i) = funcValues;
         wsDiff2D->setSharedY(i, wsProfile2D->sharedY(i));
         wsDiff2D->mutableY(i) -= wsFit2D->y(i);
 
@@ -622,5 +621,4 @@ double f_eval(double x, void *params) {
   return yval[0];
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

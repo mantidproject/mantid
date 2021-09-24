@@ -18,8 +18,7 @@
 #include <stdexcept>
 #include <string>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using Mantid::API::FileProperty;
 using Mantid::Kernel::Direction;
@@ -81,5 +80,4 @@ void DownloadFile::exec() {
   setProperty("Address", address);
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

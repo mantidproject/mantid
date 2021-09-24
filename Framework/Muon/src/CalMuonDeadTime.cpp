@@ -18,8 +18,7 @@
 #include <cmath>
 #include <vector>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Kernel;
 using namespace DataObjects;
@@ -101,8 +100,7 @@ void CalMuonDeadTime::exec() {
   // and lastgooddata
 
   std::string wsName = "TempForMuonCalDeadTime";
-  API::IAlgorithm_sptr cropWS;
-  cropWS = createChildAlgorithm("CropWorkspace", -1, -1);
+  auto cropWS = createChildAlgorithm("CropWorkspace", -1, -1);
   cropWS->setProperty("InputWorkspace", inputWS);
   cropWS->setPropertyValue("OutputWorkspace", "croppedWS");
   cropWS->setProperty("XMin", firstgooddata);
@@ -119,8 +117,7 @@ void CalMuonDeadTime::exec() {
   // x-axis with measured counts
   // y-axis with measured counts * exp(t/t_mu)
 
-  API::IAlgorithm_sptr convertToPW;
-  convertToPW = createChildAlgorithm("ConvertToPointData", -1, -1);
+  auto convertToPW = createChildAlgorithm("ConvertToPointData", -1, -1);
   convertToPW->setProperty("InputWorkspace", wsCrop);
   convertToPW->setPropertyValue("OutputWorkspace", wsName);
   convertToPW->executeAsChildAlg();
@@ -172,8 +169,7 @@ void CalMuonDeadTime::exec() {
     const double in_bg0 = inputWS->y(i)[0];
     const double in_bg1 = 0.0;
 
-    API::IAlgorithm_sptr fit;
-    fit = createChildAlgorithm("Fit", -1, -1, true);
+    auto fit = createChildAlgorithm("Fit", -1, -1, true);
 
     std::stringstream ss;
     ss << "name=LinearBackground,A0=" << in_bg0 << ",A1=" << in_bg1;
@@ -222,5 +218,4 @@ void CalMuonDeadTime::exec() {
   setProperty("DeadTimeTable", outTable);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

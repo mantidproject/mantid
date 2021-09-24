@@ -17,8 +17,7 @@
 #include "MantidWorkflowAlgorithms/HFIRLoad.h"
 #include "Poco/NumberFormatter.h"
 
-namespace Mantid {
-namespace WorkflowAlgorithms {
+namespace Mantid::WorkflowAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(HFIRLoad)
@@ -80,7 +79,7 @@ void HFIRLoad::moveToBeamCenter(API::MatrixWorkspace_sptr &dataWS, double &cente
   double beam_ctr_y = 0.0;
   HFIRInstrument::getCoordinateFromPixel(center_x, center_y, dataWS, beam_ctr_x, beam_ctr_y);
 
-  IAlgorithm_sptr mvAlg = createChildAlgorithm("MoveInstrumentComponent", 0.5, 0.50);
+  auto mvAlg = createChildAlgorithm("MoveInstrumentComponent", 0.5, 0.50);
   mvAlg->setProperty<MatrixWorkspace_sptr>("Workspace", dataWS);
   mvAlg->setProperty("ComponentName", "detector1");
   mvAlg->setProperty("X", default_ctr_x - beam_ctr_x);
@@ -127,7 +126,7 @@ void HFIRLoad::exec() {
 
   progress.report("LoadSpice2D...");
 
-  IAlgorithm_sptr loadAlg = createChildAlgorithm("LoadSpice2D", 0, 0.2);
+  auto loadAlg = createChildAlgorithm("LoadSpice2D", 0, 0.2);
   loadAlg->setProperty("Filename", fileName);
   loadAlg->setPropertyValue("OutputWorkspace", getPropertyValue("OutputWorkspace"));
   if (!isEmpty(wavelength_input)) {
@@ -194,7 +193,7 @@ void HFIRLoad::exec() {
   progress.report("MoveInstrumentComponent...");
 
   // Move the detector to its correct position
-  IAlgorithm_sptr mvAlg = createChildAlgorithm("MoveInstrumentComponent", 0.2, 0.4);
+  auto mvAlg = createChildAlgorithm("MoveInstrumentComponent", 0.2, 0.4);
   mvAlg->setProperty<MatrixWorkspace_sptr>("Workspace", dataWS);
   mvAlg->setProperty("ComponentName", "detector1");
   mvAlg->setProperty("Z", sdd / 1000.0);
@@ -291,5 +290,4 @@ void HFIRLoad::exec() {
   setPropertyValue("OutputMessage", output_message);
 }
 
-} // namespace WorkflowAlgorithms
-} // namespace Mantid
+} // namespace Mantid::WorkflowAlgorithms

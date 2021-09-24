@@ -35,9 +35,8 @@ namespace Impl {
 /// equivalent to macro PyArray_IterNew
 MANTID_PYTHONINTERFACE_CORE_DLL PyObject *func_PyArray_IterNew(PyArrayObject *arr);
 /// equivalent to macro PyArray_NewFromDescr
-MANTID_PYTHONINTERFACE_CORE_DLL PyArrayObject *func_PyArray_NewFromDescr(int datatype, const int ndims,
-                                                                         Py_intptr_t *dims);
-MANTID_PYTHONINTERFACE_CORE_DLL PyArrayObject *func_PyArray_NewFromDescr(const char *datadescr, const int ndims,
+MANTID_PYTHONINTERFACE_CORE_DLL PyArrayObject *func_PyArray_NewFromDescr(int datatype, int ndims, Py_intptr_t *dims);
+MANTID_PYTHONINTERFACE_CORE_DLL PyArrayObject *func_PyArray_NewFromDescr(const char *datadescr, int ndims,
                                                                          Py_intptr_t *dims);
 MANTID_PYTHONINTERFACE_CORE_DLL PyArray_Descr *func_PyArray_Descr(const char *datadescr);
 } // namespace Impl

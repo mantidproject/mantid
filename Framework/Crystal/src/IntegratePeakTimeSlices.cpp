@@ -34,8 +34,7 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::HistogramData;
 using namespace std;
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 DECLARE_ALGORITHM(IntegratePeakTimeSlices)
 
@@ -1377,7 +1376,7 @@ void IntegratePeakTimeSlices::SetUpData(MatrixWorkspace_sptr &Data, MatrixWorksp
     m_NeighborIDs[1] = 2;
     neighborRadius = NeighborhoodRadiusDivPeakRadius * NewRadius;
     CentNghbr = CentPos;
-    getNeighborPixIDs(std::move(comp), CentPos, neighborRadius, m_NeighborIDs);
+    getNeighborPixIDs(comp, CentPos, neighborRadius, m_NeighborIDs);
 
   } else // big enough neighborhood so
     neighborRadius -= DD;
@@ -1842,8 +1841,7 @@ void IntegratePeakTimeSlices::Fit(MatrixWorkspace_sptr &Data, double &chisqOverD
   bool CalcVars = m_AttributeValues->CalcVariances();
   std::vector<std::pair<double, double>> Bounds;
   std::string Constraints = m_AttributeValues->CalcConstraints(Bounds, CalcVars);
-  IAlgorithm_sptr fit_alg;
-  fit_alg = createChildAlgorithm("Fit");
+  auto fit_alg = createChildAlgorithm("Fit");
   std::string fun_str = CalculateFunctionProperty_Fit();
 
   std::string SSS("   Fit string ");
@@ -2512,6 +2510,5 @@ double DataModeHandler::CalcSampleIntensityMultiplier(const double *params) cons
   return r;
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal
 // Attr indicies

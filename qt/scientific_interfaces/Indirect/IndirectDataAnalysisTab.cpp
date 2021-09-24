@@ -20,9 +20,7 @@
 
 using namespace Mantid::API;
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 /**
  * Constructor.
  *
@@ -55,7 +53,7 @@ void IndirectDataAnalysisTab::clearOutputPlotOptionsWorkspaces() { m_plotOptions
  *
  * @param settings :: the QSettings object from which to load
  */
-void IndirectDataAnalysisTab::loadTabSettings(const QSettings &settings) { loadSettings(settings); }
+void IndirectDataAnalysisTab::loadTabSettings(const QSettings &settings) { UNUSED_ARG(settings) }
 
 /**
  * Prevents the loading of data with incorrect naming if passed true
@@ -319,6 +317,4 @@ void IndirectDataAnalysisTab::updatePlot(const MatrixWorkspace_sptr &outputWS,
     clearAndPlotInput(fitPreviewPlot, diffPreviewPlot);
 }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

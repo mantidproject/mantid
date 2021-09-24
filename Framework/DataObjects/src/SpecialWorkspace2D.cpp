@@ -15,8 +15,7 @@
 using std::set;
 using std::size_t;
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 
 namespace {
 Kernel::Logger g_log("SpecialWorkspace2D");
@@ -394,13 +393,11 @@ void SpecialWorkspace2D::copyFrom(std::shared_ptr<const SpecialWorkspace2D> sour
   this->detID_to_WI = sourcews->detID_to_WI;
 }
 
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects
 
 /// @cond TEMPLATE
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 template <>
 DLLExport Mantid::DataObjects::SpecialWorkspace2D_sptr
@@ -430,7 +427,6 @@ IPropertyManager::getValue<Mantid::DataObjects::SpecialWorkspace2D_const_sptr>(c
   }
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel
 
 /// @endcond TEMPLATE

@@ -11,9 +11,7 @@
 #include "IEventView.h"
 #include <boost/algorithm/string.hpp>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 /** Constructor
  * @param view :: The view we are handling
@@ -140,6 +138,4 @@ void EventPresenter::setSlicingFromView() {
 bool EventPresenter::isProcessing() const { return m_mainPresenter->isProcessing(); }
 
 bool EventPresenter::isAutoreducing() const { return m_mainPresenter->isAutoreducing(); }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

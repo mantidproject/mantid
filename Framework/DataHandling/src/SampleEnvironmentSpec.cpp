@@ -6,8 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SampleEnvironmentSpec.h"
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 /**
  * Constructor
@@ -70,5 +69,4 @@ void SampleEnvironmentSpec::addComponent(const Geometry::IObject_const_sptr &com
   m_components.emplace_back(component);
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

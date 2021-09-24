@@ -28,8 +28,7 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveIsawPeaks)
@@ -511,5 +510,4 @@ void SaveIsawPeaks::writeOffsets(std::ofstream &out, double qSign, std::vector<d
     out << std::setw(12) << std::fixed << std::setprecision(6) << qSign * offset[i] << " ";
   }
 }
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

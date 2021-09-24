@@ -38,8 +38,7 @@
 #include <string>
 #include <vector>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadNXSPE)
 
@@ -323,7 +322,7 @@ void LoadNXSPE::exec() {
     std::string instrument_parfile = IDF_filename.substr(0, IDF_filename.find("_Definition")) + "_Parameters.xml";
     if (Poco::File(instrument_parfile).exists()) {
       try {
-        IAlgorithm_sptr loadParamAlg = createChildAlgorithm("LoadParameterFile");
+        auto loadParamAlg = createChildAlgorithm("LoadParameterFile");
         loadParamAlg->setProperty("Filename", instrument_parfile);
         loadParamAlg->setProperty("Workspace", outputWS);
         loadParamAlg->execute();
@@ -408,5 +407,4 @@ std::shared_ptr<Geometry::CSGObject> LoadNXSPE::createCuboid(double dx, double d
   return retVal;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

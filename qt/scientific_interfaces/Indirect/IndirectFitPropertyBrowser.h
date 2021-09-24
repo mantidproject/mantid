@@ -81,12 +81,11 @@ public:
   void updateParameterEstimationData(DataForParameterEstimationCollection &&data);
   void estimateFunctionParameters();
   void setBackgroundA0(double value);
-  void setHiddenProperties(std::vector<std::string>);
+  void setHiddenProperties(const std::vector<std::string> &);
 
 public slots:
   void fit();
   void sequentialFit();
-  void setModelResolution(std::string const &name, TableDatasetIndex const &index);
   void setModelResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions);
 
 protected slots:

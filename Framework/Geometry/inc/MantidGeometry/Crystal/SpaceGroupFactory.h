@@ -38,7 +38,7 @@ std::vector<std::string> MANTID_GEOMETRY_DLL operator*(const SymmetryOperation &
  */
 class MANTID_GEOMETRY_DLL AbstractSpaceGroupGenerator {
 public:
-  AbstractSpaceGroupGenerator(size_t number, const std::string &hmSymbol, const std::string &generatorInformation);
+  AbstractSpaceGroupGenerator(size_t number, std::string hmSymbol, std::string generatorInformation);
   virtual ~AbstractSpaceGroupGenerator() = default;
 
   inline size_t getNumber() const { return m_number; }
@@ -194,7 +194,7 @@ public:
       std::string transformedSymbol = getTransformedSymbolOrthorhombic(hmSymbol, transformation);
 
       bool symbolExists = std::find(transformedSpaceGroupSymbols.cbegin(), transformedSpaceGroupSymbols.cend(),
-                                    transformedSymbol) != transformedSpaceGroupSymbols.end();
+                                    transformedSymbol) != transformedSpaceGroupSymbols.cend();
 
       if (transformedSymbol != hmSymbol && !symbolExists) {
         subscribeUsingGenerator<TransformationSpaceGroupGenerator>(

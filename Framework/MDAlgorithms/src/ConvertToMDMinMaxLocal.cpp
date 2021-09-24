@@ -17,8 +17,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertToMDMinMaxLocal)
@@ -134,22 +133,23 @@ void ConvertToMDMinMaxLocal::findMinMaxValues(MDWSDescription &WSDescription, MD
   pQtransf->initialize(WSDescription);
 
   //
-  auto nHist = static_cast<long>(inWS->getNumberHistograms());
+  auto nSpectra = WSDescription.m_PreprDetTable->getLogs()->getPropertyValueAsType<uint32_t>("ActualDetectorsNum");
   auto detIDMap = WSDescription.m_PreprDetTable->getColVector<size_t>("detIDMap");
+  auto sp2detMap = WSDescription.m_PreprDetTable->getColVector<size_t>("spec2detMap");
 
   // vector to place transformed coordinates;
   std::vector<coord_t> locCoord(nDims);
 
   pQtransf->calcGenericVariables(locCoord, nDims);
   // PRAGMA_OMP(parallel for reduction(||:rangeChanged))
-  for (long i = 0; i < nHist; i++) {
+  for (size_t i = 0; i < nSpectra; i++) {
     // get valid spectrum number
     size_t iSpctr = detIDMap[i];
 
     // update unit conversion according to current spectra
-    unitsConverter.updateConversion(iSpctr);
+    unitsConverter.updateConversion(i);
     // update coordinate transformation according to the spectra
-    pQtransf->calcYDepCoordinates(locCoord, iSpctr);
+    pQtransf->calcYDepCoordinates(locCoord, i);
 
     // get the range of the input data in the spectra
     auto source_range = inWS->getSpectrum(iSpctr).getXDataRange();
@@ -160,7 +160,7 @@ void ConvertToMDMinMaxLocal::findMinMaxValues(MDWSDescription &WSDescription, MD
     double x1 = unitsConverter.convertUnits(source_range.first);
     double x2 = unitsConverter.convertUnits(source_range.second);
 
-    std::vector<double> range = pQtransf->getExtremumPoints(x1, x2, iSpctr);
+    std::vector<double> range = pQtransf->getExtremumPoints(x1, x2, i);
     // transform coordinates
     for (double &k : range) {
 
@@ -175,5 +175,4 @@ void ConvertToMDMinMaxLocal::findMinMaxValues(MDWSDescription &WSDescription, MD
     }
   }
 }
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

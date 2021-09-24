@@ -7,8 +7,7 @@
 #include "MantidReflectometry/ReflectometryTransformP.h"
 using namespace Mantid::DataObjects;
 
-namespace Mantid {
-namespace Reflectometry {
+namespace Mantid::Reflectometry {
 /*
 Constructor
 @param pSumMin: p sum min value (extent)
@@ -20,14 +19,14 @@ Constructor
 @param numberOfBinsQz : Number of bins along the qz axis
 */
 ReflectometryTransformP::ReflectometryTransformP(double pSumMin, double pSumMax, double pDiffMin, double pDiffMax,
-                                                 double incidentTheta, int numberOfBinsQx, int numberOfBinsQz)
+                                                 double incidentTheta, int version, int numberOfBinsQx,
+                                                 int numberOfBinsQz)
     : ReflectometryTransform("Pz_i + Pz_f", "sum_pz", pSumMin, pSumMax, "Pz_i - Pz_f", "diff_pz", pDiffMin, pDiffMax,
-                             numberOfBinsQx, numberOfBinsQz, new CalculateReflectometryP()) {
+                             numberOfBinsQx, numberOfBinsQz, new CalculateReflectometryP(version)) {
   if (incidentTheta < 0 || incidentTheta > 90) {
     throw std::out_of_range("incident theta angle must be > 0 and < 90");
   }
   m_calculator->setThetaIncident(incidentTheta);
 }
 
-} // namespace Reflectometry
-} // namespace Mantid
+} // namespace Mantid::Reflectometry

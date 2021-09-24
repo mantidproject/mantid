@@ -15,9 +15,7 @@
 #include <sstream>
 #include <vector>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace API;
 using namespace CurveFitting;
@@ -68,7 +66,7 @@ double midpnt(double func(const double, const double, const double), const doubl
 }
 
 // Polynomial interpolation
-void polint(double xa[], double ya[], int n, double x, double &y, double &dy) {
+void polint(double xa[], const double ya[], int n, double x, double &y, double &dy) {
   int i, m, ns = 1;
   double dif;
 
@@ -345,6 +343,4 @@ void DynamicKuboToyabe::setAttribute(const std::string &attName, const API::IFun
   }
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

@@ -160,9 +160,9 @@ Mantid::Reflectometry::ReflectometrySumInQ::MinMax twoThetaWidth(const size_t ws
 }
 } // namespace
 
-namespace Mantid {
-namespace Reflectometry {
+namespace Mantid::Reflectometry {
 
+using namespace API;
 /**
  * Construct a new MinMax object.
  * The minimum of the arguments is assigned to the `min` field and
@@ -234,7 +234,8 @@ void ReflectometrySumInQ::init() {
   auto nonnegative = std::make_shared<Kernel::BoundedValidator<double>>();
   nonnegative->setLower(0.);
   mandatoryNonnegative->add(nonnegative);
-  declareWorkspaceInputProperties<API::MatrixWorkspace, API::IndexType::SpectrumNum | API::IndexType::WorkspaceIndex>(
+  declareWorkspaceInputProperties<API::MatrixWorkspace, static_cast<int>(IndexType::SpectrumNum) |
+                                                            static_cast<int>(IndexType::WorkspaceIndex)>(
       Prop::INPUT_WS, "A workspace in X units of wavelength to be summed.", inputWSValidator);
   declareProperty(
       std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(Prop::OUTPUT_WS, "", Kernel::Direction::Output),
@@ -326,10 +327,9 @@ API::MatrixWorkspace_sptr ReflectometrySumInQ::constructIvsLamWS(const API::Matr
   // Construct the histogram with these X values. Y and E values are zero.
   const HistogramData::BinEdges bins(numBins + 1, HistogramData::LinearGenerator(wavelengthRange.min, binWidth));
   const HistogramData::Counts counts(numBins, 0.);
-  const HistogramData::Histogram modelHistogram(std::move(bins), std::move(counts));
+  const HistogramData::Histogram modelHistogram(bins, counts);
   // Create the output workspace
-  API::MatrixWorkspace_sptr outputWS =
-      DataObjects::create<DataObjects::Workspace2D>(detectorWS, 1, std::move(modelHistogram));
+  API::MatrixWorkspace_sptr outputWS = DataObjects::create<DataObjects::Workspace2D>(detectorWS, 1, modelHistogram);
 
   // Set the detector IDs and specturm number from the twoThetaR detector.
   const auto &thetaSpec = detectorWS.getSpectrum(refAngles.referenceWSIndex);
@@ -529,5 +529,4 @@ API::MatrixWorkspace_sptr ReflectometrySumInQ::sumInQ(const API::MatrixWorkspace
   return IvsLam;
 }
 
-} // namespace Reflectometry
-} // namespace Mantid
+} // namespace Mantid::Reflectometry

@@ -38,8 +38,7 @@ using namespace std;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 DECLARE_ALGORITHM(SCDCalibratePanels)
 
@@ -83,7 +82,7 @@ void SCDCalibratePanels::exec() {
     MyPanels.insert("East");
     MyPanels.insert("West");
     int maxRecurseDepth = 4;
-    // cppcheck-suppress syntaxError
+
     PRAGMA_OMP(parallel for schedule(dynamic, 1) )
     for (int num = 1; num < 64; ++num) {
       PARALLEL_START_INTERUPT_REGION
@@ -154,7 +153,7 @@ void SCDCalibratePanels::exec() {
   std::sort(fit_workspaces.begin(), fit_workspaces.end());
 
   // collect output of fit for each spectrum into workspace groups
-  API::IAlgorithm_sptr groupAlg = AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
+  auto groupAlg = AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
   groupAlg->initialize();
   groupAlg->setProperty("InputWorkspaces", parameter_workspaces);
   groupAlg->setProperty("OutputWorkspace", "Fit_Parameters");
@@ -259,7 +258,7 @@ void SCDCalibratePanels::exec() {
 }
 
 void SCDCalibratePanels::saveNexus(const std::string &outputFile, const MatrixWorkspace_sptr &outputWS) {
-  IAlgorithm_sptr save = this->createChildAlgorithm("SaveNexus");
+  auto save = createChildAlgorithm("SaveNexus");
   save->setProperty("InputWorkspace", outputWS);
   save->setProperty("FileName", outputFile);
   save->execute();
@@ -386,7 +385,7 @@ void SCDCalibratePanels::findU(const DataObjects::PeaksWorkspace_sptr &peaksWs) 
   ub_alg->executeAsChildAlg();
 
   // Reindex peaks with new UB
-  Mantid::API::IAlgorithm_sptr alg = createChildAlgorithm("IndexPeaks");
+  auto alg = createChildAlgorithm("IndexPeaks");
   alg->setPropertyValue("PeaksWorkspace", peaksWs->getName());
   alg->setProperty("Tolerance", 0.15);
   alg->executeAsChildAlg();
@@ -425,7 +424,7 @@ void SCDCalibratePanels::saveIsawDetCal(std::shared_ptr<Instrument> &instrument,
   std::vector<string> banknames(AllBankName.begin(), AllBankName.end());
 
   // call SaveIsawDetCal
-  API::IAlgorithm_sptr alg = createChildAlgorithm("SaveIsawDetCal");
+  auto alg = createChildAlgorithm("SaveIsawDetCal");
   alg->setProperty("InputWorkspace", wksp);
   alg->setProperty("Filename", filename);
   alg->setProperty("TimeOffset", T0);
@@ -707,5 +706,4 @@ void SCDCalibratePanels::findL2(boost::container::flat_set<string> MyBankNames,
   }
   PARALLEL_CHECK_INTERUPT_REGION
 }
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

@@ -6,8 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/IFunctionGeneral.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 Kernel::Logger IFunctionGeneral::g_log("IFunctionGeneral");
 
@@ -38,5 +37,4 @@ size_t IFunctionGeneral::getValuesSize(const FunctionDomain &domain) const {
 
 size_t IFunctionGeneral::getDefaultDomainSize() const { return 0; }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

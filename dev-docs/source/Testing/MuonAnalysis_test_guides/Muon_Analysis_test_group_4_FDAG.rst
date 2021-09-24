@@ -69,6 +69,8 @@ Test 4: MaxEnt
 - The plot should update to a mostly flat line with a peak
 - Make sure everything in the top table is ticked
 - Click calculate MaxEnt
+- In the plotting window change the plot to ``Maxent Dual Plot``
+- You will now see 5 plots (1 frequency and 4 time domain)
 - In the ADS expand the `MUSR62260 MaxEnt FD` group
 - It will contain several workspaces
 - The phase convergence will show a plot that tends to a single y value as x gets larger (just check a spectrum or two)

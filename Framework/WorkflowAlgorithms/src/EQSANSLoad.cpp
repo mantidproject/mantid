@@ -26,8 +26,7 @@
 
 #include <fstream>
 
-namespace Mantid {
-namespace WorkflowAlgorithms {
+namespace Mantid::WorkflowAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(EQSANSLoad)
@@ -364,7 +363,7 @@ void EQSANSLoad::moveToBeamCenter() {
   double beam_ctr_y = 0.0;
   EQSANSInstrument::getCoordinateFromPixel(m_center_x, m_center_y, dataWS, beam_ctr_x, beam_ctr_y);
 
-  IAlgorithm_sptr mvAlg = createChildAlgorithm("MoveInstrumentComponent", 0.5, 0.50);
+  auto mvAlg = createChildAlgorithm("MoveInstrumentComponent", 0.5, 0.50);
   mvAlg->setProperty<MatrixWorkspace_sptr>("Workspace", dataWS);
   mvAlg->setProperty("ComponentName", "detector1");
   mvAlg->setProperty("X", -x_offset - beam_ctr_x);
@@ -489,7 +488,7 @@ void EQSANSLoad::exec() {
   if (!inputEventWS) {
     const bool loadMonitors = getProperty("LoadMonitors");
     const bool loadNexusInstrumentXML = getProperty("LoadNexusInstrumentXML");
-    IAlgorithm_sptr loadAlg = createChildAlgorithm("LoadEventNexus", 0, 0.2);
+    auto loadAlg = createChildAlgorithm("LoadEventNexus", 0, 0.2);
     loadAlg->setProperty("LoadMonitors", loadMonitors);
     loadAlg->setProperty("Filename", fileName);
     loadAlg->setProperty("LoadNexusInstrumentXML", loadNexusInstrumentXML);
@@ -522,7 +521,7 @@ void EQSANSLoad::exec() {
     MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
     EventWorkspace_sptr outputEventWS = std::dynamic_pointer_cast<EventWorkspace>(outputWS);
     if (inputEventWS != outputEventWS) {
-      IAlgorithm_sptr copyAlg = createChildAlgorithm("CloneWorkspace", 0, 0.2);
+      auto copyAlg = createChildAlgorithm("CloneWorkspace", 0, 0.2);
       copyAlg->setProperty("InputWorkspace", inputEventWS);
       copyAlg->executeAsChildAlg();
       Workspace_sptr dataWS_asWks = copyAlg->getProperty("OutputWorkspace");
@@ -577,7 +576,7 @@ void EQSANSLoad::exec() {
       s2d -= sampleflange_sample_offset;
 
       // Move the sample to its correct position
-      IAlgorithm_sptr mvAlg = createChildAlgorithm("MoveInstrumentComponent", 0.2, 0.4);
+      auto mvAlg = createChildAlgorithm("MoveInstrumentComponent", 0.2, 0.4);
       mvAlg->setProperty<MatrixWorkspace_sptr>("Workspace", dataWS);
       mvAlg->setProperty("ComponentName", "sample-position");
       mvAlg->setProperty("Z", sampleflange_sample_offset / 1000.0);
@@ -592,7 +591,7 @@ void EQSANSLoad::exec() {
   dataWS->mutableRun().addProperty("sample_detector_distance", s2d, "mm", true);
 
   // Move the detector to its correct position
-  IAlgorithm_sptr mvAlg = createChildAlgorithm("MoveInstrumentComponent", 0.2, 0.4);
+  auto mvAlg = createChildAlgorithm("MoveInstrumentComponent", 0.2, 0.4);
   mvAlg->setProperty<MatrixWorkspace_sptr>("Workspace", dataWS);
   mvAlg->setProperty("ComponentName", "detector1");
   mvAlg->setProperty("Z", sfdd / 1000.0);
@@ -691,7 +690,7 @@ void EQSANSLoad::exec() {
       m_output_message += "NOT ";
     m_output_message += "applied\n";
     DataObjects::EventWorkspace_sptr dataWS_evt = std::dynamic_pointer_cast<EventWorkspace>(dataWS);
-    IAlgorithm_sptr tofAlg = createChildAlgorithm("EQSANSTofStructure", 0.5, 0.7);
+    auto tofAlg = createChildAlgorithm("EQSANSTofStructure", 0.5, 0.7);
     tofAlg->setProperty<EventWorkspace_sptr>("InputWorkspace", dataWS_evt);
     tofAlg->setProperty("LowTOFCut", m_low_TOF_cut);
     tofAlg->setProperty("HighTOFCut", m_high_TOF_cut);
@@ -743,7 +742,7 @@ void EQSANSLoad::exec() {
     dataWS->mutableRun().addProperty("wavelength_max", wl_max, "Angstrom", true);
   }
 
-  IAlgorithm_sptr scAlg = createChildAlgorithm("ScaleX", 0.7, 0.71);
+  auto scAlg = createChildAlgorithm("ScaleX", 0.7, 0.71);
   scAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", dataWS);
   scAlg->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", dataWS);
   scAlg->setProperty("Factor", conversion_factor);
@@ -759,7 +758,7 @@ void EQSANSLoad::exec() {
   std::string params = Poco::NumberFormatter::format(wl_min_rounded, 2) + "," + Poco::NumberFormatter::format(wl_step) +
                        "," + Poco::NumberFormatter::format(wl_max_rounded, 2);
   g_log.information() << "Rebin parameters: " << params << '\n';
-  IAlgorithm_sptr rebinAlg = createChildAlgorithm("Rebin", 0.71, 0.72);
+  auto rebinAlg = createChildAlgorithm("Rebin", 0.71, 0.72);
   rebinAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", dataWS);
   if (preserveEvents)
     rebinAlg->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", dataWS);
@@ -775,5 +774,4 @@ void EQSANSLoad::exec() {
   setPropertyValue("OutputMessage", m_output_message);
 }
 
-} // namespace WorkflowAlgorithms
-} // namespace Mantid
+} // namespace Mantid::WorkflowAlgorithms

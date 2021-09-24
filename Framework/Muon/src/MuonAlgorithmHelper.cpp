@@ -19,8 +19,7 @@
 
 #include <vector>
 
-namespace Mantid {
-namespace MuonAlgorithmHelper {
+namespace Mantid::MuonAlgorithmHelper {
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -213,7 +212,7 @@ void groupWorkspaces(const std::string &groupName, const std::vector<std::string
     }
   } else {
     // Doesn't exist or isn't a group -> create/overwrite
-    IAlgorithm_sptr groupingAlg = AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
+    auto groupingAlg = AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
     groupingAlg->initialize();
     groupingAlg->setProperty("InputWorkspaces", inputWorkspaces);
     groupingAlg->setPropertyValue("OutputWorkspace", groupName);
@@ -336,7 +335,7 @@ std::vector<int> getAllDetectorIDsFromGroup(const Grouping &grouping) {
 // Checks if all the detectors in the groups in a Grouping are in the workspace.
 // Workspace can be matrix or group type.
 bool checkGroupDetectorsInWorkspace(const Grouping &grouping, const Workspace_sptr &ws) {
-  std::set<int> detectorIDs = getAllDetectorIDsFromWorkspace(std::move(ws));
+  std::set<int> detectorIDs = getAllDetectorIDsFromWorkspace(ws);
   std::vector<int> groupDetectorIDs = getAllDetectorIDsFromGroup(grouping);
   return checkItemsInSet(groupDetectorIDs, detectorIDs);
 }
@@ -511,7 +510,7 @@ MatrixWorkspace_sptr sumPeriods(const WorkspaceGroup_sptr &inputWS, const std::v
       auto numPeriods = static_cast<int>(periodsToSum.size());
       for (int i = 1; i < numPeriods; i++) {
         auto RHSWorkspace = inputWS->getItem(periodsToSum[i] - 1);
-        IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("Plus");
+        auto alg = AlgorithmManager::Instance().createUnmanaged("Plus");
         alg->initialize();
         alg->setChild(true);
         alg->setRethrows(true);
@@ -535,7 +534,7 @@ MatrixWorkspace_sptr sumPeriods(const WorkspaceGroup_sptr &inputWS, const std::v
 MatrixWorkspace_sptr subtractWorkspaces(const MatrixWorkspace_sptr &lhs, const MatrixWorkspace_sptr &rhs) {
   MatrixWorkspace_sptr outWS;
   if (lhs && rhs) {
-    IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("Minus");
+    auto alg = AlgorithmManager::Instance().createUnmanaged("Minus");
     alg->initialize();
     alg->setChild(true);
     alg->setRethrows(true);
@@ -557,7 +556,7 @@ MatrixWorkspace_sptr subtractWorkspaces(const MatrixWorkspace_sptr &lhs, const M
 MatrixWorkspace_sptr extractSpectrum(const Workspace_sptr &inputWS, const int index) {
   MatrixWorkspace_sptr outWS;
   if (inputWS) {
-    IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("ExtractSingleSpectrum");
+    auto alg = AlgorithmManager::Instance().createUnmanaged("ExtractSingleSpectrum");
     alg->initialize();
     alg->setChild(true);
     alg->setRethrows(true);
@@ -571,7 +570,7 @@ MatrixWorkspace_sptr extractSpectrum(const Workspace_sptr &inputWS, const int in
 }
 
 void addSampleLog(const MatrixWorkspace_sptr &workspace, const std::string &logName, const std::string &logValue) {
-  IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("AddSampleLog");
+  auto alg = AlgorithmManager::Instance().createUnmanaged("AddSampleLog");
   alg->initialize();
   alg->setChild(true);
   alg->setRethrows(true);
@@ -585,5 +584,4 @@ bool isAlphanumericOrUnderscore(char character) {
   return (isalpha(character) || isdigit(character) || (character == '_'));
 }
 
-} // namespace MuonAlgorithmHelper
-} // namespace Mantid
+} // namespace Mantid::MuonAlgorithmHelper

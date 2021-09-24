@@ -10,8 +10,7 @@
 #include <json/value.h>
 #include <set>
 
-namespace Mantid {
-namespace ICat {
+namespace Mantid::ICat {
 
 using Poco::Net::HTTPResponse;
 
@@ -32,11 +31,11 @@ const std::string CatalogAlgorithmHelper::getIDSError(HTTPResponse::HTTPStatus &
   if (successHTTPStatus.find(HTTPStatus) == successHTTPStatus.end()) {
     // Attempt to parse response as json stream
     Json::Value json;
-    Json::Reader json_reader;
-    auto json_valid = json_reader.parse(responseStream, json);
+    ::Json::CharReaderBuilder readerBuilder;
+    std::string errors;
 
     // Error messages from IDS are returned as json
-    if (json_valid) {
+    if (Json::parseFromStream(readerBuilder, responseStream, &json, &errors)) {
       return json.get("code", "UNKNOWN").asString() + ": " + json.get("message", "Unknown Error").asString();
     } else {
       // Sometimes the HTTP server can throw an error (which is plain HTML)
@@ -48,5 +47,4 @@ const std::string CatalogAlgorithmHelper::getIDSError(HTTPResponse::HTTPStatus &
   return "";
 }
 
-} // namespace ICat
-} // namespace Mantid
+} // namespace Mantid::ICat

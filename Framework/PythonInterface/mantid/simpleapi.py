@@ -29,14 +29,17 @@ Importing this module starts the FrameworkManager instance.
 # std libs
 from collections import OrderedDict, namedtuple
 from contextlib import contextmanager
-import inspect
+import datetime
+from dateutil.parser import parse as parse_date
 import os
 import sys
 
 import mantid
 # This is a simple API so give access to the aliases by default as well
-from mantid import __gui__, api as _api, kernel as _kernel, apiVersion
+from mantid import api as _api, kernel as _kernel
+from mantid import apiVersion  # noqa: F401
 from mantid.kernel import plugins as _plugin_helper
+from mantid.kernel import ConfigService, logger
 from mantid.kernel.funcinspect import customise_func as _customise_func, lhs_info as _lhs_info, \
     replace_signature as _replace_signature, LazyFunctionSignature
 
@@ -407,7 +410,7 @@ def IqtFitSimultaneous(*args, **kwargs):
 # --------------------------------------------------- --------------------------
 
 
-def CutMD(*args, **kwargs):
+def CutMD(*args, **kwargs):  # noqa: C901
     """
     Slices multidimensional workspaces using input projection information and binning limits.
     """
@@ -517,13 +520,8 @@ def CutMD(*args, **kwargs):
         return out_names[0]
 
 
-# enddef
-
-
 _replace_signature(CutMD, ("\bInputWorkspace", "**kwargs"))
 
-
-# --------------------- RenameWorkspace ------------- --------------------------
 
 def RenameWorkspace(*args, **kwargs):
     """ Rename workspace with option to renaming monitors
@@ -555,7 +553,7 @@ def RenameWorkspace(*args, **kwargs):
     _set_logging_option(algm, arguments)
     algm.setAlwaysStoreInADS(True)
     # does not make sense otherwise, this overwrites even the __STORE_ADS_DEFAULT__
-    if __STORE_KEYWORD__ in arguments and not (arguments[__STORE_KEYWORD__] == True):
+    if __STORE_KEYWORD__ in arguments and not (arguments[__STORE_KEYWORD__] is True):
         raise KeyError("RenameWorkspace operates only on named workspaces in ADS.")
 
     for key, val in arguments.items():
@@ -566,13 +564,7 @@ def RenameWorkspace(*args, **kwargs):
     return _gather_returns("RenameWorkspace", lhs, algm)
 
 
-# enddef
-
-
 _replace_signature(RenameWorkspace, ("\bInputWorkspace,[OutputWorkspace],[True||False]", "**kwargs"))
-
-
-# --------------------------------------------------- --------------------------
 
 
 def _get_function_spec(func):
@@ -633,9 +625,6 @@ def _get_function_spec(func):
                 calltip = args[index] + "," + calltip
         calltip = '(' + calltip.rstrip(',') + ')'
     return calltip
-
-
-# --------------------------------------------------- --------------------------
 
 
 def _get_mandatory_args(func_name, required_args, *args, **kwargs):
@@ -712,8 +701,6 @@ def _check_mandatory_args(algorithm, _algm_object, error, *args, **kwargs):
 
 
 # ------------------------ General simple function calls ----------------------
-
-
 def _is_workspace_property(prop):
     """
         Returns true if the property is a workspace property.
@@ -801,7 +788,7 @@ def _merge_keywords_with_lhs(keywords, lhs_args):
     return final_keywords
 
 
-def _gather_returns(func_name, lhs, algm_obj, ignore_regex=None, inout=False):
+def _gather_returns(func_name, lhs, algm_obj, ignore_regex=None, inout=False):  # noqa: C901
     """Gather the return values and ensure they are in the
        correct order as defined by the output properties and
        return them as a tuple. If their is a single return
@@ -963,7 +950,7 @@ def set_properties(alg_object, *args, **kwargs):
         do_set_property(key, value)
 
 
-def _create_algorithm_function(name, version, algm_object):
+def _create_algorithm_function(name, version, algm_object):  # noqa: C901
     """
         Create a function that will set up and execute an algorithm.
         The help that will be displayed is that of the most recent version.
@@ -972,12 +959,34 @@ def _create_algorithm_function(name, version, algm_object):
         :param algm_object: the created algorithm object.
     """
 
-    def algorithm_wrapper():
-        """
-        Creates a wrapper object around the algorithm functions.
+    def algorithm_wrapper(alias=None):
+        r"""
+        @brief Creates a wrapper object around the algorithm functions.
+        @param str alias: Non-empty when the algorithm is to be invoked with this alias instead of its name.
+                          Default `None` indicates an alias is not being used.
         """
         class Wrapper:
-            __slots__ = ["__name__", "__signature__"]
+
+            __slots__ = ["__name__", "__signature__", "_alias"]
+
+            @staticmethod
+            def _init_alias(algm_alias):
+                r"""
+                @brief Encapsulate alias features on a namedtuple
+                @param str algm_alias
+                """
+                deprecated = algm_object.aliasDeprecated()  # non-empty string when alias set to be deprecated
+                if deprecated:
+                    try:
+                        parse_date(deprecated)
+                    except ValueError:
+                        deprecated = ''
+                        logger.error(f'Alias deprecation date {deprecated} must be in ISO8601 format')
+                AlgorithmAlias = namedtuple('AlgorithmAlias', 'name, deprecated')
+                return AlgorithmAlias(algm_alias, deprecated)
+
+            def __init__(self, algm_alias=None):
+                self._alias = self._init_alias(algm_alias) if algm_alias else None
 
             def __getattribute__(self, item):
                 obj = object.__getattribute__(self, item)
@@ -999,6 +1008,14 @@ def _create_algorithm_function(name, version, algm_object):
                 If both startProgress and endProgress are supplied they will
                 be used.
                 """
+
+                # Check at runtime whether to throw upon alias deprecation.
+                if self._alias and self._alias.deprecated:
+                    deprecated = parse_date(self._alias.deprecated) < datetime.datetime.today()
+                    deprecated_action = ConfigService.Instance().get('algorithms.alias.deprecated', 'Log').lower()
+                    if deprecated and deprecated_action == 'raise':
+                        raise RuntimeError(f'Use of algorithm alias {self._alias.name} not allowed. Use {name} instead')
+
                 _version = version
                 if "Version" in kwargs:
                     _version = kwargs["Version"]
@@ -1047,21 +1064,23 @@ def _create_algorithm_function(name, version, algm_object):
                         msg = '{}-v{}: {}'.format(algm.name(), algm.version(), str(e))
                         raise RuntimeError(msg) from e
 
+                if self._alias and self._alias.deprecated:
+                    logger.error(f'Algorithm alias {self._alias.name} is deprecated. Use {name} instead')
+
                 return _gather_returns(name, lhs, algm)
         # Set the signature of the callable to be one that is only generated on request.
         Wrapper.__call__.__signature__ = LazyFunctionSignature(alg_name=name)
-        return Wrapper()
 
-    # enddef
-    # Insert definition in to global dict
-    algm_wrapper = algorithm_wrapper()
-    algm_wrapper.__name__ = name
+        wrapper = Wrapper(algm_alias=alias)
+        wrapper.__name__ = name
+        return wrapper
 
-    globals()[name] = algm_wrapper
     # Register aliases - split on whitespace
     for alias in algm_object.alias().strip().split():
-        globals()[alias] = algm_wrapper
-    # endfor
+        globals()[alias] = algorithm_wrapper(alias=alias)
+
+    algm_wrapper = algorithm_wrapper()
+    globals()[name] = algorithm_wrapper()  # Insert definition in to global dict
     return algm_wrapper
 
 

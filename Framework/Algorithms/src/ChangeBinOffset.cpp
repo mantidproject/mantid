@@ -11,8 +11,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Kernel;
 using namespace API;
@@ -27,8 +26,7 @@ void ChangeBinOffset::init() {
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace");
   auto isDouble = std::make_shared<BoundedValidator<double>>();
-  declareProperty("Offset", 0.0, isDouble, "The amount to change each time bin by");
-
+  declareProperty("Offset", 0.0, isDouble, "The amount to adjust the time bins. Usually in microseconds");
   declareWorkspaceIndexSetProperties();
 }
 
@@ -53,5 +51,4 @@ void ChangeBinOffset::exec() {
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

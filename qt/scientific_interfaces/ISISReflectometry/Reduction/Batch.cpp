@@ -5,9 +5,10 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "Batch.h"
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+
+#include <utility>
+
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 Batch::Batch(Experiment const &experiment, Instrument const &instrument, RunsTable &runsTable, Slicing const &slicing)
     : m_experiment(experiment), m_instrument(instrument), m_runsTable(runsTable), m_slicing(slicing) {}
@@ -28,11 +29,9 @@ std::vector<MantidWidgets::Batch::RowLocation> Batch::selectedRowLocations() con
 
 std::vector<Group> Batch::selectedGroups() const { return m_runsTable.selectedGroups(); }
 
-PerThetaDefaults const *Batch::defaultsForTheta(double thetaAngle) const {
-  return experiment().defaultsForTheta(thetaAngle, runsTable().thetaTolerance());
+LookupRow const *Batch::findLookupRow(boost::optional<double> thetaAngle) const {
+  return experiment().findLookupRow(thetaAngle, runsTable().thetaTolerance());
 }
-
-PerThetaDefaults const *Batch::wildcardDefaults() const { return experiment().wildcardDefaults(); }
 
 void Batch::resetState() { m_runsTable.resetState(); }
 
@@ -41,6 +40,4 @@ void Batch::resetSkippedItems() { m_runsTable.resetSkippedItems(); }
 boost::optional<Item &> Batch::getItemWithOutputWorkspaceOrNone(std::string const &wsName) {
   return m_runsTable.getItemWithOutputWorkspaceOrNone(wsName);
 }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

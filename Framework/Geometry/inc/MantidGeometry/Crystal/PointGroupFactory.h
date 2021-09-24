@@ -19,8 +19,7 @@ namespace Geometry {
 
 class MANTID_GEOMETRY_DLL PointGroupGenerator {
 public:
-  PointGroupGenerator(const std::string &hmSymbol, const std::string &generatorInformation,
-                      const std::string &description);
+  PointGroupGenerator(std::string hmSymbol, std::string generatorInformation, std::string description);
 
   inline std::string getHMSymbol() const { return m_hmSymbol; }
   inline std::string getGeneratorString() const { return m_generatorString; }

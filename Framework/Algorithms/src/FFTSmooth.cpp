@@ -18,8 +18,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ListValidator.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(FFTSmooth)
@@ -81,7 +80,7 @@ void FFTSmooth::exec() {
     symmWS->mutableX(0).back() = m_inWS->x(spec).back();
 
   // Forward Fourier transform
-  IAlgorithm_sptr fft = createChildAlgorithm("RealFFT", 0, 0.5);
+  auto fft = createChildAlgorithm("RealFFT", 0, 0.5);
   fft->setProperty("InputWorkspace", symmWS);
   fft->setProperty("WorkspaceIndex", 0);
   try {
@@ -196,5 +195,4 @@ void FFTSmooth::zero(int n) {
   std::copy(m_unfilteredWS->y(1).cbegin(), m_unfilteredWS->y(1).begin() + ny, m_filteredWS->mutableY(1).begin());
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

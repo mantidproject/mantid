@@ -11,9 +11,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include <cmath>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
 
@@ -76,6 +74,4 @@ void ExpDecayOsc::setActiveParameter(size_t i, double value) {
     setParameter(j, value, false);
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

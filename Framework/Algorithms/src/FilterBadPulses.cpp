@@ -14,8 +14,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/V3D.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(FilterBadPulses)
 
@@ -99,7 +98,7 @@ void FilterBadPulses::exec() {
 
   // Child Algorithme does all of the actual work - do not set the output
   // workspace
-  IAlgorithm_sptr filterAlgo = createChildAlgorithm("FilterByLogValue", 0., 1.);
+  auto filterAlgo = createChildAlgorithm("FilterByLogValue", 0., 1.);
   filterAlgo->setProperty("InputWorkspace", inputWS);
   filterAlgo->setProperty("LogName", "proton_charge");
   filterAlgo->setProperty("MinimumValue", min_pcharge);
@@ -125,5 +124,4 @@ void FilterBadPulses::exec() {
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

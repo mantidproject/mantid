@@ -34,8 +34,7 @@ using std::runtime_error;
 using std::size_t;
 using std::vector;
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 using Types::Core::DateAndTime;
 using Types::Event::TofEvent;
 using namespace Mantid::API;
@@ -307,7 +306,8 @@ void EventList::createFromHistogram(const ISpectrum *inSpec, bool GenerateZeros,
  * @return reference to this
  * */
 EventList &EventList::operator=(const EventList &rhs) {
-  // Note that we are NOT copying the MRU pointer.
+  // Note that we are NOT copying the MRU pointer
+  // the EventWorkspace that posseses the EventList has already configured the mru
   IEventList::operator=(rhs);
   m_histogram = rhs.m_histogram;
   events = rhs.events;
@@ -945,8 +945,9 @@ void EventList::setSortOrder(const EventSortType order) const { this->order = or
 // --------------------------------------------------------------------------
 /** Sort events by TOF in one thread */
 void EventList::sortTof() const {
+  // nothing to do
   if (this->order == TOF_SORT)
-    return; // nothing to do
+    return;
 
   // Avoid sorting from multiple threads
   std::lock_guard<std::mutex> _lock(m_sortMutex);
@@ -1042,7 +1043,7 @@ void EventList::sortPulseTime() const {
  */
 void EventList::sortPulseTimeTOF() const {
   if (this->order == PULSETIMETOF_SORT)
-    return; // already ordered.
+    return; // already ordered
 
   // Avoid sorting from multiple threads
   std::lock_guard<std::mutex> _lock(m_sortMutex);
@@ -4711,5 +4712,4 @@ void EventList::checkIsYAndEWritable() const {
                            "generated automatically based on the events");
 }
 
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects

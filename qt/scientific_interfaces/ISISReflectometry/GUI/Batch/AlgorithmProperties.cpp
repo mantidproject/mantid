@@ -9,10 +9,7 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
-namespace AlgorithmProperties {
+namespace MantidQt::CustomInterfaces::ISISReflectometry::AlgorithmProperties {
 
 using API::IConfiguredAlgorithm_sptr;
 using Mantid::API::IAlgorithm_sptr;
@@ -60,7 +57,4 @@ std::string getOutputWorkspace(const IAlgorithm_sptr &algorithm, std::string con
   auto const workspaceName = algorithm->getPropertyValue(property);
   return workspaceName;
 }
-} // namespace AlgorithmProperties
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry::AlgorithmProperties

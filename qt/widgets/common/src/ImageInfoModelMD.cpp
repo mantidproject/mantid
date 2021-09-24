@@ -8,8 +8,7 @@
 #include "MantidQtWidgets/Common/ImageInfoModelMD.h"
 #include <climits>
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 /// @copydoc MantidQt::MantidWidgets::ImageInfoModel::info
 ImageInfoModel::ImageInfo ImageInfoModelMD::info(const double x, const double y, const double signal) const {
@@ -23,5 +22,4 @@ ImageInfoModel::ImageInfo ImageInfoModelMD::info(const double x, const double y,
   return info;
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

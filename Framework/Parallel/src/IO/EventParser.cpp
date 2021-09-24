@@ -6,10 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidParallel/IO/EventParser.h"
 
-namespace Mantid {
-namespace Parallel {
-namespace IO {
-namespace detail {
+namespace Mantid::Parallel::IO::detail {
 
 /** Transform event IDs to global spectrum numbers using the bankOffsets stored
  * at object creation.
@@ -26,7 +23,4 @@ void eventIdToGlobalSpectrumIndex(int32_t *event_id_start, size_t count, const i
     event_id_start[i] -= bankOffset;
 }
 
-} // namespace detail
-} // namespace IO
-} // namespace Parallel
-} // namespace Mantid
+} // namespace Mantid::Parallel::IO::detail

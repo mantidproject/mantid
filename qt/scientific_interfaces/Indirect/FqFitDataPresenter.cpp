@@ -5,221 +5,339 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "FqFitDataPresenter.h"
-#include "FqFitDataTablePresenter.h"
 #include "IDAFunctionParameterEstimation.h"
+#include "MantidAPI/TextAxis.h"
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace {
+using namespace MantidQt::CustomInterfaces::IDA;
 
-FqFitDataPresenter::FqFitDataPresenter(FqFitModel *model, IIndirectFitDataView *view, QComboBox *cbParameterType,
-                                       QComboBox *cbParameter, QLabel *lbParameterType, QLabel *lbParameter,
+Mantid::Kernel::Logger logger("FqFitDataPresenter");
+
+struct ContainsOneOrMore {
+  explicit ContainsOneOrMore(std::vector<std::string> &&substrings) : m_substrings(std::move(substrings)) {}
+
+  bool operator()(const std::string &str) const {
+    for (const auto &substring : m_substrings) {
+      if (str.rfind(substring) != std::string::npos)
+        return true;
+    }
+    return false;
+  }
+
+private:
+  std::vector<std::string> m_substrings;
+};
+
+template <typename Predicate>
+std::pair<std::vector<std::string>, std::vector<std::size_t>> findAxisLabels(TextAxis *axis,
+                                                                             Predicate const &predicate) {
+  std::vector<std::string> labels;
+  std::vector<std::size_t> spectra;
+
+  for (auto i = 0u; i < axis->length(); ++i) {
+    auto label = axis->label(i);
+    if (predicate(label)) {
+      labels.emplace_back(label);
+      spectra.emplace_back(i);
+    }
+  }
+  return std::make_pair(labels, spectra);
+}
+
+template <typename Predicate>
+std::pair<std::vector<std::string>, std::vector<std::size_t>> findAxisLabels(MatrixWorkspace_sptr const &workspace,
+                                                                             Predicate const &predicate) {
+  auto axis = dynamic_cast<TextAxis *>(workspace->getAxis(1));
+  if (axis)
+    return findAxisLabels(axis, predicate);
+  return std::make_pair(std::vector<std::string>(), std::vector<std::size_t>());
+}
+
+FqFitParameters createFqFitParameters(const MatrixWorkspace_sptr &workspace) {
+  auto foundWidths = findAxisLabels(workspace, ContainsOneOrMore({".Width", ".FWHM"}));
+  auto foundEISF = findAxisLabels(workspace, ContainsOneOrMore({".EISF"}));
+
+  FqFitParameters parameters;
+  parameters.widths = foundWidths.first;
+  parameters.widthSpectra = foundWidths.second;
+  parameters.eisf = foundEISF.first;
+  parameters.eisfSpectra = foundEISF.second;
+  return parameters;
+}
+
+std::string createSpectra(const std::vector<std::size_t> &spectrum) {
+  std::string spectra = "";
+  for (auto spec : spectrum) {
+    spectra.append(std::to_string(spec) + ",");
+  }
+  return spectra;
+}
+
+std::string getHWHMName(const std::string &resultName) {
+  auto position = resultName.rfind("_FWHM");
+  if (position != std::string::npos)
+    return resultName.substr(0, position) + "_HWHM" + resultName.substr(position + 5, resultName.size());
+  return resultName + "_HWHM";
+}
+
+void deleteTemporaryWorkspaces(std::vector<std::string> const &workspaceNames) {
+  auto deleter = AlgorithmManager::Instance().create("DeleteWorkspace");
+  deleter->setLogging(false);
+  for (auto const &name : workspaceNames) {
+    deleter->setProperty("Workspace", name);
+    deleter->execute();
+  }
+}
+
+std::string scaleWorkspace(std::string const &inputName, std::string const &outputName, double factor) {
+  auto scaleAlg = AlgorithmManager::Instance().create("Scale");
+  scaleAlg->initialize();
+  scaleAlg->setLogging(false);
+  scaleAlg->setProperty("InputWorkspace", inputName);
+  scaleAlg->setProperty("OutputWorkspace", outputName);
+  scaleAlg->setProperty("Factor", factor);
+  scaleAlg->execute();
+  return outputName;
+}
+
+std::string extractSpectra(std::string const &inputName, int startIndex, int endIndex, std::string const &outputName) {
+  auto extractAlg = AlgorithmManager::Instance().create("ExtractSpectra");
+  extractAlg->initialize();
+  extractAlg->setLogging(false);
+  extractAlg->setProperty("InputWorkspace", inputName);
+  extractAlg->setProperty("StartWorkspaceIndex", startIndex);
+  extractAlg->setProperty("EndWorkspaceIndex", endIndex);
+  extractAlg->setProperty("OutputWorkspace", outputName);
+  extractAlg->execute();
+  return outputName;
+}
+
+std::string extractSpectrum(const MatrixWorkspace_sptr &workspace, int index, std::string const &outputName) {
+  return extractSpectra(workspace->getName(), index, index, outputName);
+}
+
+std::string extractHWHMSpectrum(const MatrixWorkspace_sptr &workspace, int index) {
+  auto const scaledName = "__scaled_" + std::to_string(index);
+  auto const extractedName = "__extracted_" + std::to_string(index);
+  auto const outputName = scaleWorkspace(extractSpectrum(workspace, index, extractedName), scaledName, 0.5);
+  deleteTemporaryWorkspaces({extractedName});
+  return outputName;
+}
+
+std::string appendWorkspace(std::string const &lhsName, std::string const &rhsName, std::string const &outputName) {
+  auto appendAlg = AlgorithmManager::Instance().create("AppendSpectra");
+  appendAlg->initialize();
+  appendAlg->setLogging(false);
+  appendAlg->setProperty("InputWorkspace1", lhsName);
+  appendAlg->setProperty("InputWorkspace2", rhsName);
+  appendAlg->setProperty("OutputWorkspace", outputName);
+  appendAlg->execute();
+  return outputName;
+}
+
+MatrixWorkspace_sptr appendAll(std::vector<std::string> const &workspaces, std::string const &outputName) {
+  auto appended = workspaces[0];
+  for (auto i = 1u; i < workspaces.size(); ++i)
+    appended = appendWorkspace(appended, workspaces[i], outputName);
+  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(appended);
+}
+
+std::vector<std::string> subdivideWidthWorkspace(const MatrixWorkspace_sptr &workspace,
+                                                 const std::vector<std::size_t> &widthSpectra) {
+  std::vector<std::string> subworkspaces;
+  subworkspaces.reserve(1 + 2 * widthSpectra.size());
+
+  int start = 0;
+  for (auto spectrum_number : widthSpectra) {
+    const auto spectrum = static_cast<int>(spectrum_number);
+    if (spectrum > start) {
+      auto const outputName = "__extracted_" + std::to_string(start) + "_to_" + std::to_string(spectrum);
+      subworkspaces.emplace_back(extractSpectra(workspace->getName(), start, spectrum - 1, outputName));
+    }
+    subworkspaces.emplace_back(extractHWHMSpectrum(workspace, spectrum));
+    start = spectrum + 1;
+  }
+
+  const int end = static_cast<int>(workspace->getNumberHistograms());
+  if (start < end) {
+    auto const outputName = "__extracted_" + std::to_string(start) + "_to_" + std::to_string(end);
+    subworkspaces.emplace_back(extractSpectra(workspace->getName(), start, end - 1, outputName));
+  }
+  return subworkspaces;
+}
+
+MatrixWorkspace_sptr createHWHMWorkspace(MatrixWorkspace_sptr workspace, const std::string &hwhmName,
+                                         const std::vector<std::size_t> &widthSpectra) {
+  if (widthSpectra.empty())
+    return workspace;
+  if (AnalysisDataService::Instance().doesExist(hwhmName))
+    return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(hwhmName);
+
+  const auto subworkspaces = subdivideWidthWorkspace(workspace, widthSpectra);
+  const auto hwhmWorkspace = appendAll(subworkspaces, hwhmName);
+  auto axis = dynamic_cast<TextAxis *>(workspace->getAxis(1)->clone(hwhmWorkspace.get()));
+  hwhmWorkspace->replaceAxis(1, std::unique_ptr<TextAxis>(axis));
+
+  deleteTemporaryWorkspaces(subworkspaces);
+
+  return hwhmWorkspace;
+}
+
+boost::optional<std::vector<std::size_t>> getParameterSpectrum(const FqFitParameters &parameters) {
+  if (!parameters.widthSpectra.empty())
+    return parameters.widthSpectra;
+  else if (!parameters.eisfSpectra.empty())
+    return parameters.eisfSpectra;
+  return boost::none;
+}
+
+} // namespace
+
+namespace MantidQt::CustomInterfaces::IDA {
+
+FqFitDataPresenter::FqFitDataPresenter(IIndirectFitDataModel *model, IIndirectFitDataView *view,
                                        IFQFitObserver *SingleFunctionTemplateBrowser)
-    : IndirectFitDataPresenter(model, view, std::make_unique<FqFitDataTablePresenter>(model, view->getDataTable())),
-      m_activeParameterType("Width"), m_dataIndex(TableDatasetIndex{0}), m_cbParameterType(cbParameterType),
-      m_cbParameter(cbParameter), m_lbParameterType(lbParameterType), m_lbParameter(lbParameter), m_fqFitModel(model) {
-  connect(view, SIGNAL(singleDataViewSelected()), this, SLOT(handleSingleInputSelected()));
-  connect(view, SIGNAL(multipleDataViewSelected()), this, SLOT(handleMultipleInputSelected()));
+    : IndirectFitDataPresenter(model, view), m_activeParameterType("Width"), m_activeWorkspaceID(WorkspaceID{0}),
+      m_adsInstance(Mantid::API::AnalysisDataService::Instance()) {
+  connect(this, SIGNAL(requestedAddWorkspaceDialog()), this, SLOT(updateActiveWorkspaceID()));
 
-  connect(this, SIGNAL(requestedAddWorkspaceDialog()), this, SLOT(updateActiveDataIndex()));
-
-  connect(cbParameterType, SIGNAL(currentIndexChanged(const QString &)), this,
-          SLOT(handleParameterTypeChanged(const QString &)));
-  connect(cbParameter, SIGNAL(currentIndexChanged(int)), this, SLOT(handleSpectrumSelectionChanged(int)));
-
-  updateParameterSelectionEnabled();
   m_notifier = Notifier<IFQFitObserver>();
   m_notifier.subscribe(SingleFunctionTemplateBrowser);
-  showParameterComboBoxes();
 }
 
-void FqFitDataPresenter::handleSampleLoaded(const QString &workspaceName) {
-  setModelWorkspace(workspaceName);
-  updateAvailableParameterTypes();
-  updateAvailableParameters();
-  updateParameterSelectionEnabled();
-  setModelSpectrum(0);
-  emit dataChanged();
-  updateRanges();
-  emit dataChanged();
-  emit updateAvailableFitTypes();
-}
+void FqFitDataPresenter::addWorkspace(const std::string &workspaceName, const std::string &paramType,
+                                      const int &spectrum_index) {
+  auto workspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
+  const auto name = getHWHMName(workspace->getName());
+  const auto parameters = createFqFitParameters(workspace);
+  const auto spectrum = getParameterSpectrum(parameters);
+  if (!spectrum)
+    throw std::invalid_argument("Workspace contains no Width or EISF spectra.");
 
-void FqFitDataPresenter::handleMultipleInputSelected() {
-  m_notifier.notify([](IFQFitObserver &obs) { obs.updateAvailableFunctions(availableFits.at(DataType::ALL)); });
-}
+  if (workspace->y(0).size() == 1)
+    throw std::invalid_argument("Workspace contains only one data point.");
+  const auto hwhmWorkspace = createHWHMWorkspace(workspace, name, parameters.widthSpectra);
 
-void FqFitDataPresenter::handleSingleInputSelected() {
-  m_dataIndex = TableDatasetIndex{0};
-  std::string currentText = m_cbParameterType->currentText().toStdString();
-  auto dataType = m_cbParameterType->currentText() == QString("Width") ? DataType::WIDTH : DataType::EISF;
-  m_notifier.notify([&dataType](IFQFitObserver &obs) { obs.updateAvailableFunctions(availableFits.at(dataType)); });
-}
-
-void FqFitDataPresenter::hideParameterComboBoxes() {
-  m_cbParameter->hide();
-  m_cbParameterType->hide();
-  m_lbParameter->hide();
-  m_lbParameterType->hide();
-}
-
-void FqFitDataPresenter::showParameterComboBoxes() {
-  m_cbParameter->show();
-  m_cbParameterType->show();
-  m_lbParameter->show();
-  m_lbParameterType->show();
+  if (paramType == "Width") {
+    const auto single_spectra = FunctionModelSpectra(std::to_string(parameters.widthSpectra[spectrum_index]));
+    m_model->addWorkspace(hwhmWorkspace->getName(), single_spectra);
+  } else if (paramType == "EISF") {
+    const auto single_spectra = FunctionModelSpectra(std::to_string(parameters.eisfSpectra[spectrum_index]));
+    m_model->addWorkspace(hwhmWorkspace->getName(), single_spectra);
+  } else {
+    throw std::invalid_argument("Invalid Parameter Type");
+  }
 }
 
 void FqFitDataPresenter::setActiveParameterType(const std::string &type) { m_activeParameterType = type; }
 
-void FqFitDataPresenter::updateActiveDataIndex() { m_dataIndex = m_fqFitModel->getNumberOfWorkspaces(); }
+void FqFitDataPresenter::updateActiveWorkspaceID() { m_activeWorkspaceID = m_model->getNumberOfWorkspaces(); }
 
-void FqFitDataPresenter::updateActiveDataIndex(int index) { m_dataIndex = index; }
+void FqFitDataPresenter::updateActiveWorkspaceID(WorkspaceID index) { m_activeWorkspaceID = index; }
 
-void FqFitDataPresenter::updateAvailableParameters() { updateAvailableParameters(m_cbParameterType->currentText()); }
-
-void FqFitDataPresenter::updateAvailableParameters(const QString &type) {
-  if (type == "Width")
-    setAvailableParameters(m_fqFitModel->getWidths(TableDatasetIndex{0}));
-  else if (type == "EISF")
-    setAvailableParameters(m_fqFitModel->getEISF(TableDatasetIndex{0}));
-  else
-    setAvailableParameters({});
-
-  if (!type.isEmpty())
-    setSingleModelSpectrum(m_cbParameter->currentIndex());
-}
-
-void FqFitDataPresenter::updateAvailableParameterTypes() {
-  MantidQt::API::SignalBlocker blocker(m_cbParameterType);
-  m_cbParameterType->clear();
-  for (const auto &type : getParameterTypes(m_dataIndex))
-    m_cbParameterType->addItem(QString::fromStdString(type));
-}
-
-void FqFitDataPresenter::updateParameterSelectionEnabled() {
-  const auto enabled = m_fqFitModel->getNumberOfWorkspaces() > TableDatasetIndex{0};
-  m_cbParameter->setEnabled(enabled);
-  m_cbParameterType->setEnabled(enabled);
-  m_lbParameter->setEnabled(enabled);
-}
-
-void FqFitDataPresenter::setAvailableParameters(const std::vector<std::string> &parameters) {
-  MantidQt::API::SignalBlocker blocker(m_cbParameter);
-  m_cbParameter->clear();
-  for (const auto &parameter : parameters)
-    m_cbParameter->addItem(QString::fromStdString(parameter));
-}
-
-void FqFitDataPresenter::setParameterLabel(const QString &parameter) { m_lbParameter->setText(parameter + ":"); }
-
-void FqFitDataPresenter::handleParameterTypeChanged(const QString &parameter) {
-  m_lbParameter->setText(parameter + ":");
-  updateAvailableParameters(parameter);
-  emit dataChanged();
-  auto dataType = parameter == QString("Width") ? DataType::WIDTH : DataType::EISF;
-  m_notifier.notify([&dataType](IFQFitObserver &obs) { obs.updateAvailableFunctions(availableFits.at(dataType)); });
-}
-
-void FqFitDataPresenter::setDialogParameterNames(FqFitAddWorkspaceDialog *dialog, const std::string &workspace) {
+void FqFitDataPresenter::setDialogParameterNames(FqFitAddWorkspaceDialog *dialog, const std::string &workspaceName) {
+  FqFitParameters parameters;
   try {
-    addWorkspace(m_fqFitModel, workspace);
+    auto workspace = m_adsInstance.retrieveWS<MatrixWorkspace>(workspaceName);
+    parameters = createFqFitParameters(workspace);
     dialog->enableParameterSelection();
   } catch (const std::invalid_argument &) {
     dialog->disableParameterSelection();
   }
-  updateParameterTypes(dialog);
-  updateParameterOptions(dialog);
+  updateParameterTypes(dialog, parameters);
+  updateParameterOptions(dialog, parameters);
 }
 
 void FqFitDataPresenter::dialogParameterTypeUpdated(FqFitAddWorkspaceDialog *dialog, const std::string &type) {
+  const auto workspaceName = dialog->workspaceName();
+  auto workspace = m_adsInstance.retrieveWS<MatrixWorkspace>(workspaceName);
+  const FqFitParameters parameter = createFqFitParameters(workspace);
   setActiveParameterType(type);
-  updateParameterOptions(dialog);
+  updateParameterOptions(dialog, parameter);
 }
 
-void FqFitDataPresenter::updateParameterOptions(FqFitAddWorkspaceDialog *dialog) {
-  setDataIndexToCurrentWorkspace(dialog);
+void FqFitDataPresenter::updateParameterOptions(FqFitAddWorkspaceDialog *dialog, const FqFitParameters &parameter) {
+  setActiveWorkspaceIDToCurrentWorkspace(dialog);
   setActiveParameterType(dialog->parameterType());
   if (m_activeParameterType == "Width")
-    dialog->setParameterNames(m_fqFitModel->getWidths(m_dataIndex));
+    dialog->setParameterNames(parameter.widths);
   else if (m_activeParameterType == "EISF")
-    dialog->setParameterNames(m_fqFitModel->getEISF(m_dataIndex));
+    dialog->setParameterNames(parameter.eisf);
   else
     dialog->setParameterNames({});
 }
 
-void FqFitDataPresenter::updateParameterTypes(FqFitAddWorkspaceDialog *dialog) {
-  setDataIndexToCurrentWorkspace(dialog);
-  dialog->setParameterTypes(getParameterTypes(m_dataIndex));
+void FqFitDataPresenter::updateParameterTypes(FqFitAddWorkspaceDialog *dialog, FqFitParameters &parameters) {
+  setActiveWorkspaceIDToCurrentWorkspace(dialog);
+  dialog->setParameterTypes(getParameterTypes(parameters));
 }
 
-std::vector<std::string> FqFitDataPresenter::getParameterTypes(TableDatasetIndex dataIndex) const {
+std::vector<std::string> FqFitDataPresenter::getParameterTypes(FqFitParameters &parameters) const {
   std::vector<std::string> types;
-  if (!m_fqFitModel->zeroWidths(dataIndex))
+  if (!parameters.widths.empty())
     types.emplace_back("Width");
-  if (!m_fqFitModel->zeroEISF(dataIndex))
+  if (!parameters.eisf.empty())
     types.emplace_back("EISF");
   return types;
 }
 
-void FqFitDataPresenter::addWorkspace(IndirectFittingModel *model, const std::string &name) {
-  if (model->getNumberOfWorkspaces() > m_dataIndex)
-    model->removeWorkspace(m_dataIndex);
-  model->addWorkspace(name);
-}
-
-void FqFitDataPresenter::addDataToModel(IAddWorkspaceDialog const *dialog) {
-  if (const auto fqFitDialog = dynamic_cast<FqFitAddWorkspaceDialog const *>(dialog)) {
-    setDataIndexToCurrentWorkspace(fqFitDialog);
-    // here we can say that we are in multiple mode so we can append the spectra
-    // to the current one and then setspectra
-    setModelSpectrum(fqFitDialog->parameterNameIndex());
-    updateActiveDataIndex();
-  }
-}
-
-void FqFitDataPresenter::setSingleModelSpectrum(int parameterIndex) {
-  auto index = static_cast<std::size_t>(parameterIndex);
-  if (m_cbParameterType->currentIndex() == 0)
-    m_fqFitModel->setActiveWidth(index, TableDatasetIndex{0});
-  else
-    m_fqFitModel->setActiveEISF(index, TableDatasetIndex{0});
-}
-
-void FqFitDataPresenter::handleSpectrumSelectionChanged(int parameterIndex) {
-  setSingleModelSpectrum(parameterIndex);
-  emit dataChanged();
-}
-
-void FqFitDataPresenter::setModelSpectrum(int index) {
-  if (index < 0)
-    throw std::runtime_error("No valid parameter was selected.");
-  else if (m_activeParameterType == "Width")
-    m_fqFitModel->setActiveWidth(static_cast<std::size_t>(index), m_dataIndex, false);
-  else
-    m_fqFitModel->setActiveEISF(static_cast<std::size_t>(index), m_dataIndex, false);
-}
-
-void FqFitDataPresenter::setDataIndexToCurrentWorkspace(IAddWorkspaceDialog const *dialog) {
+void FqFitDataPresenter::setActiveWorkspaceIDToCurrentWorkspace(IAddWorkspaceDialog const *dialog) {
   //  update active data index with correct index based on the workspace name
   //  and the vector in m_fitDataModel which is in the base class
   //  indirectFittingModel get table workspace index
   const auto wsName = dialog->workspaceName().append("_HWHM");
   // This a vector of workspace names currently loaded
-  auto wsVector = m_fqFitModel->getFitDataModel()->getWorkspaceNames();
+  auto wsVector = m_model->getWorkspaceNames();
   // this is an iterator pointing to the current wsName in wsVector
   auto wsIt = std::find(wsVector.begin(), wsVector.end(), wsName);
   // this is the index of the workspace.
-  int index = int(std::distance(wsVector.begin(), wsIt));
-  updateActiveDataIndex(index);
+  const auto index = WorkspaceID(std::distance(wsVector.begin(), wsIt));
+  updateActiveWorkspaceID(index);
 }
 
-void FqFitDataPresenter::closeDialog() {
-  if (m_fqFitModel->getNumberOfWorkspaces() > m_dataIndex)
-    m_fqFitModel->removeWorkspace(m_dataIndex);
-  IndirectFitDataPresenter::closeDialog();
+void FqFitDataPresenter::setActiveWidth(std::size_t widthIndex, WorkspaceID workspaceID, bool single) {
+  const auto parameters = createFqFitParameters(m_model->getWorkspace(workspaceID));
+  if (parameters.widthSpectra.size() > widthIndex) {
+    const auto &widthSpectra = parameters.widthSpectra;
+    if (single == true) {
+      m_model->setSpectra(createSpectra(std::vector<std::size_t>({widthSpectra[widthIndex]})), workspaceID);
+    } else { // In multiple mode the spectra needs to be appending on the
+             // existing spectra list.
+      auto spectra_vec = std::vector<std::size_t>({widthSpectra[widthIndex]});
+      auto spectra = m_model->getSpectra(workspaceID);
+      for (auto i : spectra) {
+        if ((std::find(spectra_vec.begin(), spectra_vec.end(), i.value) == spectra_vec.end())) {
+          spectra_vec.push_back(i.value);
+        }
+      }
+      m_model->setSpectra(createSpectra(spectra_vec), workspaceID);
+    }
+  } else
+    logger.warning("Invalid width index specified.");
+}
+
+void FqFitDataPresenter::setActiveEISF(std::size_t eisfIndex, WorkspaceID workspaceID, bool single) {
+  const auto parameters = createFqFitParameters(m_model->getWorkspace(workspaceID));
+  if (parameters.eisfSpectra.size() > eisfIndex) {
+    const auto &eisfSpectra = parameters.eisfSpectra;
+    if (single == true) {
+      m_model->setSpectra(createSpectra(std::vector<std::size_t>({eisfSpectra[eisfIndex]})), workspaceID);
+    } else { // In multiple mode the spectra needs to be appending on the
+             // existing spectra list.
+      auto spectra_vec = std::vector<std::size_t>({eisfSpectra[eisfIndex]});
+      auto spectra = m_model->getSpectra(workspaceID);
+      for (auto i : spectra) {
+        if ((std::find(spectra_vec.begin(), spectra_vec.end(), i.value) == spectra_vec.end())) {
+          spectra_vec.push_back(i.value);
+        }
+      }
+      m_model->setSpectra(createSpectra(spectra_vec), workspaceID);
+    }
+  } else
+    logger.warning("Invalid EISF index specified.");
 }
 
 std::unique_ptr<IAddWorkspaceDialog> FqFitDataPresenter::getAddWorkspaceDialog(QWidget *parent) const {
@@ -231,10 +349,26 @@ std::unique_ptr<IAddWorkspaceDialog> FqFitDataPresenter::getAddWorkspaceDialog(Q
   return dialog;
 }
 
-void FqFitDataPresenter::setMultiInputResolutionFBSuffixes(IAddWorkspaceDialog *dialog) { UNUSED_ARG(dialog); }
+void FqFitDataPresenter::addTableEntry(FitDomainIndex row) {
+  const auto &name = m_model->getWorkspace(row)->getName();
 
-void FqFitDataPresenter::setMultiInputResolutionWSSuffixes(IAddWorkspaceDialog *dialog) { UNUSED_ARG(dialog); }
+  auto subIndices = m_model->getSubIndices(row);
+  const auto workspace = m_model->getWorkspace(subIndices.first);
+  const auto axis = dynamic_cast<Mantid::API::TextAxis *>(workspace->getAxis(1));
+  const auto parameter = axis->label(subIndices.second.value);
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+  const auto workspaceIndex = m_model->getSpectrum(row);
+  const auto range = m_model->getFittingRange(row);
+  const auto exclude = m_model->getExcludeRegion(row);
+
+  FitDataRow newRow;
+  newRow.name = name;
+  newRow.workspaceIndex = workspaceIndex;
+  newRow.parameter = parameter;
+  newRow.startX = range.first;
+  newRow.endX = range.second;
+  newRow.exclude = exclude;
+
+  m_view->addTableEntry(row.value, newRow);
+}
+} // namespace MantidQt::CustomInterfaces::IDA

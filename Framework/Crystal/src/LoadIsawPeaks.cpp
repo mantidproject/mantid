@@ -27,8 +27,7 @@ using Mantid::Kernel::Strings::getWord;
 using Mantid::Kernel::Strings::readToEndOfLine;
 using Mantid::Kernel::Units::Wavelength;
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 DECLARE_FILELOADER_ALGORITHM(LoadIsawPeaks)
 
@@ -161,7 +160,7 @@ std::string LoadIsawPeaks::readHeader(const PeaksWorkspace_sptr &outWS, std::ifs
   MatrixWorkspace_sptr tempWS = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
   tempWS->mutableRun().addProperty<std::string>("run_start", date);
 
-  IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
+  auto loadInst = createChildAlgorithm("LoadInstrument");
   loadInst->setPropertyValue("InstrumentName", C_Instrument);
   loadInst->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
   loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", tempWS);
@@ -173,7 +172,7 @@ std::string LoadIsawPeaks::readHeader(const PeaksWorkspace_sptr &outWS, std::ifs
   Geometry::Instrument_const_sptr instr = tempWS->getInstrument();
   outWS->setInstrument(instr);
 
-  IAlgorithm_sptr applyCal = createChildAlgorithm("LoadIsawDetCal");
+  auto applyCal = createChildAlgorithm("LoadIsawDetCal");
   applyCal->initialize();
   applyCal->setProperty("InputWorkspace", outWS);
   applyCal->setProperty("Filename", getPropertyValue("Filename"));
@@ -253,7 +252,7 @@ std::string LoadIsawPeaks::readHeader(const PeaksWorkspace_sptr &outWS, std::ifs
  * @return the Peak the Peak object created
  */
 DataObjects::Peak LoadIsawPeaks::readPeak(const PeaksWorkspace_sptr &outWS, std::string &lastStr, std::ifstream &in,
-                                          int &seqNum, std::string bankName, double qSign) {
+                                          int &seqNum, const std::string &bankName, double qSign) {
   double h;
   double k;
   double l;
@@ -328,7 +327,7 @@ DataObjects::Peak LoadIsawPeaks::readPeak(const PeaksWorkspace_sptr &outWS, std:
   if (!inst)
     throw std::runtime_error("No instrument in PeaksWorkspace!");
 
-  int pixelID = findPixelID(inst, std::move(bankName), static_cast<int>(col), static_cast<int>(row));
+  int pixelID = findPixelID(inst, bankName, static_cast<int>(col), static_cast<int>(row));
 
   // Create the peak object
   Peak peak(outWS->getInstrument(), pixelID, wl);
@@ -345,7 +344,7 @@ DataObjects::Peak LoadIsawPeaks::readPeak(const PeaksWorkspace_sptr &outWS, std:
 
 //----------------------------------------------------------------------------------------------
 int LoadIsawPeaks::findPixelID(const Instrument_const_sptr &inst, const std::string &bankName, int col, int row) {
-  std::shared_ptr<const IComponent> parent = getCachedBankByName(std::move(bankName), inst);
+  std::shared_ptr<const IComponent> parent = getCachedBankByName(bankName, inst);
 
   if (!parent)
     return -1; // peak not in any detector.
@@ -515,7 +514,7 @@ void LoadIsawPeaks::appendFile(const PeaksWorkspace_sptr &outWS, const std::stri
     prog.report(in.tellg());
   }
   if (m_isModulatedStructure) {
-    IAlgorithm_sptr findUB = createChildAlgorithm("FindUBUsingIndexedPeaks");
+    auto findUB = createChildAlgorithm("FindUBUsingIndexedPeaks");
     findUB->setPropertyValue("ToleranceForSatellite", "0.05");
     findUB->setProperty<PeaksWorkspace_sptr>("PeaksWorkspace", outWS);
     findUB->executeAsChildAlg();
@@ -583,5 +582,4 @@ LoadIsawPeaks::getCachedBankByName(const std::string &bankname,
   return m_banks[bankname];
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

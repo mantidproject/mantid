@@ -20,8 +20,7 @@
 
 #include <limits>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 DECLARE_ALGORITHM(UnwrapSNS)
 
@@ -291,12 +290,11 @@ void UnwrapSNS::getTofRangeData(const bool isEvent) {
 }
 
 void UnwrapSNS::runMaskDetectors() {
-  IAlgorithm_sptr alg = createChildAlgorithm("MaskDetectors");
+  auto alg = createChildAlgorithm("MaskDetectors");
   alg->setProperty<MatrixWorkspace_sptr>("Workspace", this->getProperty("OutputWorkspace"));
   alg->setProperty<MatrixWorkspace_sptr>("MaskedWorkspace", this->getProperty("InputWorkspace"));
   if (!alg->execute())
     throw std::runtime_error("MaskDetectors Child Algorithm has not executed successfully");
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

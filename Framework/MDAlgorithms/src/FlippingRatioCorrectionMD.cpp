@@ -17,8 +17,7 @@
 
 #include <muParser.h>
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using Mantid::API::WorkspaceProperty;
@@ -118,7 +117,7 @@ void FlippingRatioCorrectionMD::exec() {
   }
   // Create workspaces by cloning
   API::IMDWorkspace_sptr outputWS1, outputWS2;
-  API::IAlgorithm_sptr cloneMD = createChildAlgorithm("CloneMDWorkspace", 0, 0.25, true);
+  auto cloneMD = createChildAlgorithm("CloneMDWorkspace", 0, 0.25, true);
   cloneMD->setRethrows(true);
   cloneMD->setProperty("InputWorkspace", inWS);
   cloneMD->setProperty("OutputWorkspace", getPropertyValue("OutputWorkspace1"));
@@ -192,5 +191,4 @@ void FlippingRatioCorrectionMD::executeTemplatedMDE(typename Mantid::DataObjects
   ws->setFileNeedsUpdating(true);
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

@@ -16,6 +16,7 @@
 #include <cstdlib>   // malloc, calloc
 #include <cstring>   // strcpy
 #include <stdexcept> // std::invalid_argument
+#include <utility>
 
 using boost::multi_index::detail::index_matcher::entry;
 
@@ -96,20 +97,16 @@ herr_t readStringAttribute(hid_t attr, char **data) {
 /**
  * Reads a string attribute of N-dimensions
  * @param attr input HDF5 attribute handler
- * @param data output attribute data
- * @param maxlen
  * @return
  */
-herr_t readStringAttributeN(hid_t attr, char *data, int maxlen) {
-  herr_t iRet;
+std::pair<std::string, herr_t> readStringAttributeN(hid_t attr) {
   char *vdat = NULL;
-  iRet = readStringAttribute(attr, &vdat);
+  const auto iRet = readStringAttribute(attr, &vdat);
+  std::string attrData;
   if (iRet >= 0) {
-    strncpy(data, vdat, maxlen);
-    free(vdat);
+    attrData = vdat;
   }
-  data[maxlen - 1] = '\0';
-  return iRet;
+  return std::make_pair(attrData, iRet);
 }
 
 void getGroup(hid_t groupID, std::map<std::string, std::set<std::string>> &allEntries) {
@@ -125,14 +122,9 @@ void getGroup(hid_t groupID, std::map<std::string, std::set<std::string>> &allEn
       return attribute;
     }
 
-    hid_t type = H5T_C_S1;
-    hid_t atype = H5Tcopy(type);
-    char data[128];
-    H5Tset_size(atype, sizeof(data));
-    readStringAttributeN(attributeID, data, sizeof(data));
+    auto pairData = readStringAttributeN(attributeID);
     // already null terminated in readStringAttributeN
-    attribute = std::string(data);
-    H5Tclose(atype);
+    attribute = pairData.first;
     H5Aclose(attributeID);
 
     return attribute;
@@ -179,8 +171,8 @@ bool NexusHDF5Descriptor::isReadable(const std::string &filename) {
   return NexusDescriptor::isReadable(filename, NexusDescriptor::Version::Version5);
 }
 
-NexusHDF5Descriptor::NexusHDF5Descriptor(const std::string &filename)
-    : m_filename(filename), m_allEntries(initAllEntries()) {}
+NexusHDF5Descriptor::NexusHDF5Descriptor(std::string filename)
+    : m_filename(std::move(filename)), m_allEntries(initAllEntries()) {}
 
 // PUBLIC
 std::string NexusHDF5Descriptor::getFilename() const noexcept { return m_filename; }

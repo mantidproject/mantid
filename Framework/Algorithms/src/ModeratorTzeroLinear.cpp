@@ -17,8 +17,7 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ModeratorTzeroLinear)
@@ -253,5 +252,4 @@ void ModeratorTzeroLinear::calculateTfLi(const SpectrumInfo &spectrumInfo, size_
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

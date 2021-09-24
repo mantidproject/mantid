@@ -30,8 +30,7 @@
 #include <algorithm>
 #include <boost/math/distributions/students_t.hpp>
 
-namespace Mantid {
-namespace CurveFitting {
+namespace Mantid::CurveFitting {
 
 namespace {
 bool greaterIsLess(double x1, double x2) { return x1 > x2; }
@@ -385,9 +384,8 @@ void IMWDomainCreator::addFunctionValuesToWS(const API::IFunction_sptr &function
   resultValues->zeroCalculated();
   // Confidence bands are calculated based on the example in
   // www.astro.rug.nl/software/kapteyn/kmpfittutorial.html#confidence-and-prediction-intervals,
-  // which references J.Wolberg, Data Analysis Using the Method of Least
-  // Squares, 2006, Springer.
-  // Here we asusme a confidence band of 1 sigma
+  // which references J.Wolberg, Data Analysis Using the Method of Least Squares, 2006, Springer.
+  // Here we assume a confidence band of 1 sigma
   double sigma = 1;
   double prob = std::erf(sigma / sqrt(2));
   // critical value for t distribution
@@ -475,5 +473,4 @@ void IMWDomainCreator::addFunctionValuesToWS(const API::IFunction_sptr &function
   }
 }
 
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting

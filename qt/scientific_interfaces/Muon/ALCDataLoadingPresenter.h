@@ -11,6 +11,7 @@
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/System.h"
+#include "MantidQtWidgets/Common/MuonPeriodInfo.h"
 #include <QFileSystemWatcher>
 #include <QObject>
 #include <atomic>
@@ -57,7 +58,7 @@ private slots:
   void handleRunsEditingFinished();
 
   /// Handle for when instrument changed
-  void handleInstrumentChanged(std::string instrument);
+  void handleInstrumentChanged(const std::string &instrument);
 
   /// Handle for when manage user directories clicked
   void handleManageDirectories();
@@ -70,6 +71,9 @@ private slots:
 
   /// Begin/Stop watching path
   void startWatching(bool watch);
+
+  /// Handle a user requests to see the period info widget
+  void handlePeriodInfoClicked();
 
 signals:
   /// Signal emitted when data get changed
@@ -95,8 +99,14 @@ private:
   /// Get path from files
   std::string getPathFromFiles() const;
 
+  /// Update info on MuonPeriodInfo widget using sample logs from ws
+  void updateAvailablePeriodInfo(const Mantid::API::MatrixWorkspace_sptr &ws);
+
   /// View which the object works with
   IALCDataLoadingView *const m_view;
+
+  /// Period Info Widget displayed from the view
+  std::unique_ptr<MantidQt::MantidWidgets::MuonPeriodInfo> m_periodInfo;
 
   /// Last loaded data workspace
   Mantid::API::MatrixWorkspace_sptr m_loadedData;

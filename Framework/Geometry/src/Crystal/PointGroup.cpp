@@ -15,8 +15,7 @@
 #include "MantidGeometry/Crystal/SymmetryElementFactory.h"
 #include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 using Kernel::IntMatrix;
 using Kernel::V3D;
 
@@ -320,5 +319,4 @@ std::ostream &operator<<(std::ostream &stream, const PointGroup &self) {
   return stream;
 }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

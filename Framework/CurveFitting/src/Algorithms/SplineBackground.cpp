@@ -17,9 +17,7 @@
 #include <gsl/gsl_multifit.h>
 #include <gsl/gsl_statistics.h>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Algorithms {
+namespace Mantid::CurveFitting::Algorithms {
 
 DECLARE_ALGORITHM(SplineBackground)
 
@@ -287,6 +285,4 @@ void SplineBackground::setupSpline(double xMin, double xMax, int numBins, int nc
   }
 }
 
-} // namespace Algorithms
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Algorithms

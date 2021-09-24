@@ -1,0 +1,25 @@
+@echo off
+::
+:: Defines the environment variables required to build Mantid
+:: It is designed to be used similarly to Visual Studio's vcvarsall.bat
+:: so that it can be sourced either by a cmd prompt or used by another
+:: script.
+:: It is assumed that tools such as CMake & Git are already on the PATH
+
+:: Third Party
+set CONDA_BASE=@CONDA_BASE_DIR@
+
+:: Qt5 - exes are in bin & dlls are in lib
+set QT5_BIN=%CONDA_BASE%\Library\bin;%CONDA_BASE%\Library\lib
+
+:: Set path to windows plugins for QApplication
+set QT_QPA_PLATFORM_PLUGIN_PATH=%CONDA_BASE%\Library\plugins
+
+:: Python -
+set PYTHONHOME=%CONDA_BASE%
+
+:: Misc bin -
+set MISC_BIN=%CONDA_BASE%\bin
+
+:: Update PATH
+set PATH=%MISC_BIN%;%PYTHONHOME%;%PYTHONHOME%\Scripts;%QT5_BIN%;%PATH%

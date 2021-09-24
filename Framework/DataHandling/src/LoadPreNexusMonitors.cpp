@@ -35,8 +35,7 @@
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::Counts;
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(LoadPreNexusMonitors)
@@ -214,7 +213,7 @@ void LoadPreNexusMonitors::exec() {
 void LoadPreNexusMonitors::runLoadInstrument(const std::string &instrument,
                                              const MatrixWorkspace_sptr &localWorkspace) {
 
-  IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
+  auto loadInst = createChildAlgorithm("LoadInstrument");
 
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   bool executionSuccessful(true);
@@ -244,5 +243,4 @@ void LoadPreNexusMonitors::runLoadInstrument(const std::string &instrument,
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

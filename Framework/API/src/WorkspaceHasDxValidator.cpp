@@ -6,8 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/WorkspaceHasDxValidator.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 /// Return a deep clone of this validator.
 Kernel::IValidator_sptr WorkspaceHasDxValidator::clone() const {
@@ -25,5 +24,4 @@ std::string WorkspaceHasDxValidator::checkValidity(MatrixWorkspace_sptr const &w
   return "";
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

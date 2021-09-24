@@ -11,8 +11,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidMDAlgorithms/DisplayNormalizationSetter.h"
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 /**
  * Sets the display normalization
@@ -66,7 +65,7 @@ void DisplayNormalizationSetter::setNormalizationMDEvent(const Mantid::API::IMDW
     displayNormalizationHisto = Mantid::API::MDNormalization::NumEventsNormalization;
   }
 
-  applyNormalizationMDEvent(std::move(mdWorkspace), displayNormalization, displayNormalizationHisto);
+  applyNormalizationMDEvent(mdWorkspace, displayNormalization, displayNormalizationHisto);
 }
 
 /**
@@ -84,5 +83,4 @@ void DisplayNormalizationSetter::applyNormalizationMDEvent(const Mantid::API::IM
   ws->setDisplayNormalization(displayNormalization);
   ws->setDisplayNormalizationHisto(displayNormalizationHisto);
 }
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

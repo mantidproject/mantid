@@ -236,8 +236,7 @@ std::map<detid_t, int> makeGroupingByCustomString(const Instrument_const_sptr &i
 
 } // namespace
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CreateGroupingWorkspace)
@@ -617,7 +616,7 @@ void CreateGroupingWorkspace::exec() {
       sortnames = true;
       GroupNames = "";
       int maxRecurseDepth = this->getProperty("MaxRecursionDepth");
-      // cppcheck-suppress syntaxError
+
           PRAGMA_OMP(parallel for schedule(dynamic, 1) )
           for (int num = 0; num < 300; ++num) {
             PARALLEL_START_INTERUPT_REGION
@@ -720,5 +719,4 @@ Instrument_const_sptr CreateGroupingWorkspace::getInstrument() {
   return instrument;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

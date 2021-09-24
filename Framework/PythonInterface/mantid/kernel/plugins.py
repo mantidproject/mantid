@@ -13,27 +13,10 @@ algorithms, fit functions etc.
 
 
 import os as _os
-import sys as _sys
 from traceback import format_exc
-try:
-    from importlib.machinery import SourceFileLoader
-except ImportError:
-    # imp is deprecated in Python 3 but importlib doesn't exist
-    # in Python 2.
-    # We only use a single function so implement a handwritten compatability
-    # class
-    import imp as _imp
-    class SourceFileLoader(object):
-
-        def __init__(self, name, pathname):
-            self._name = name
-            self._pathname = pathname
-
-        def load_module(self):
-            return _imp.load_source(self._name, self._pathname)
-    #endclass
-
+from importlib.machinery import SourceFileLoader
 from . import logger, Logger, config
+
 
 # String that separates paths (should be in the ConfigService)
 PATH_SEPARATOR=";"

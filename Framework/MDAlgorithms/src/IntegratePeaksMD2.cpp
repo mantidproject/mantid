@@ -46,8 +46,7 @@
 #include <fstream>
 #include <gsl/gsl_integration.h>
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(IntegratePeaksMD2)
@@ -222,24 +221,24 @@ void IntegratePeaksMD2::init() {
   setPropertyGroup("MaskEdgeTubes", general_grp);
 
   // SetValue when another property value changes
-  setPropertySettings(
-      "Ellipsoid", std::make_unique<SetValueWhenProperty>("Cylinder", [](std::string ellipsoid, std::string cylinder) {
-        // Set Ellipsoid to 0, if user has set Cylinder to 1
-        if (ellipsoid == "1" && cylinder == "1") {
-          return std::string{"0"};
-        } else {
-          return ellipsoid;
-        };
-      }));
-  setPropertySettings(
-      "Cylinder", std::make_unique<SetValueWhenProperty>("Ellipsoid", [](std::string cylinder, std::string ellipsoid) {
-        // Set Cylinder to 0, if user has set Ellipsoid to 1
-        if (cylinder == "1" && ellipsoid == "1") {
-          return std::string{"0"};
-        } else {
-          return cylinder;
-        };
-      }));
+  setPropertySettings("Ellipsoid", std::make_unique<SetValueWhenProperty>(
+                                       "Cylinder", [](std::string ellipsoid, const std::string &cylinder) {
+                                         // Set Ellipsoid to 0, if user has set Cylinder to 1
+                                         if (ellipsoid == "1" && cylinder == "1") {
+                                           return std::string{"0"};
+                                         } else {
+                                           return ellipsoid;
+                                         };
+                                       }));
+  setPropertySettings("Cylinder", std::make_unique<SetValueWhenProperty>(
+                                      "Ellipsoid", [](std::string cylinder, const std::string &ellipsoid) {
+                                        // Set Cylinder to 0, if user has set Ellipsoid to 1
+                                        if (cylinder == "1" && ellipsoid == "1") {
+                                          return std::string{"0"};
+                                        } else {
+                                          return cylinder;
+                                        };
+                                      }));
 
   // Set these Properties as visible only when Cylinder = 1
   setPropertySettings("CylinderLength", std::make_unique<VisibleWhenProperty>("Cylinder", IS_EQUAL_TO, "1"));
@@ -775,7 +774,7 @@ template <typename MDE, size_t nd> void IntegratePeaksMD2::integrate(typename MD
         errorSquared = std::fabs(signal);
       } else {
 
-        IAlgorithm_sptr fitAlgorithm = createChildAlgorithm("Fit", -1, -1, false);
+        auto fitAlgorithm = createChildAlgorithm("Fit", -1, -1, false);
         // fitAlgorithm->setProperty("CreateOutput", true);
         // fitAlgorithm->setProperty("Output", "FitPeaks1D");
         std::string myFunc = std::string("name=LinearBackground;name=") + profileFunction;
@@ -830,7 +829,7 @@ template <typename MDE, size_t nd> void IntegratePeaksMD2::integrate(typename MD
         fun->function(domain, yy);
         auto funcValues = yy.toVector();
 
-        wsFit2D->mutableY(i) = std::move(funcValues);
+        wsFit2D->mutableY(i) = funcValues;
         wsDiff2D->setSharedY(i, wsProfile2D->sharedY(i));
         wsDiff2D->mutableY(i) -= wsFit2D->y(i);
 
@@ -1240,20 +1239,20 @@ void IntegratePeaksMD2::runMaskDetectors(const Mantid::DataObjects::PeaksWorkspa
                                          const std::string &property, const std::string &values) {
   // For CORELLI do not count as edge if next to another detector bank
   if (property == "Tube" && peakWS->getInstrument()->getName() == "CORELLI") {
-    IAlgorithm_sptr alg = createChildAlgorithm("MaskBTP");
+    auto alg = createChildAlgorithm("MaskBTP");
     alg->setProperty<Workspace_sptr>("Workspace", peakWS);
     alg->setProperty("Bank", "1,7,12,17,22,27,30,59,63,69,74,79,84,89");
     alg->setProperty(property, "1");
     if (!alg->execute())
       throw std::runtime_error("MaskDetectors Child Algorithm has not executed successfully");
-    IAlgorithm_sptr alg2 = createChildAlgorithm("MaskBTP");
+    auto alg2 = createChildAlgorithm("MaskBTP");
     alg2->setProperty<Workspace_sptr>("Workspace", peakWS);
     alg2->setProperty("Bank", "6,11,16,21,26,29,58,62,68,73,78,83,88,91");
     alg2->setProperty(property, "16");
     if (!alg2->execute())
       throw std::runtime_error("MaskDetectors Child Algorithm has not executed successfully");
   } else {
-    IAlgorithm_sptr alg = createChildAlgorithm("MaskBTP");
+    auto alg = createChildAlgorithm("MaskBTP");
     alg->setProperty<Workspace_sptr>("Workspace", peakWS);
     alg->setProperty(property, values);
     if (!alg->execute())
@@ -1307,5 +1306,4 @@ double f_eval2(double x, void *params) {
   return yval[0];
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

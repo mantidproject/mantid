@@ -8,7 +8,7 @@ import numpy as np
 from typing import Dict, Tuple
 
 import abins
-from abins.constants import ACOUSTIC_PHONON_THRESHOLD, CONSTANT, GAMMA_POINT, NUM_ZERO
+from abins.constants import ACOUSTIC_PHONON_THRESHOLD, CONSTANT, NUM_ZERO
 
 
 # noinspection PyMethodMayBeStatic
@@ -139,9 +139,7 @@ class PowderCalculator:
         :returns: object of type PowderData with mean square displacements.
         """
         data = self._clerk.load(list_of_datasets=["powder_data"])
-        powder_data = abins.PowderData(**data["datasets"]["powder_data"],
-                                       num_atoms=data["datasets"]["powder_data"]["b_tensors"][str(GAMMA_POINT)].shape[0])
-
+        powder_data = abins.PowderData.from_extracted(data["datasets"]["powder_data"])
         return powder_data
 
     def _report_progress(self, msg: str) -> None:

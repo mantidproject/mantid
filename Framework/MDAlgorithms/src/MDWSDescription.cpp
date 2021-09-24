@@ -22,8 +22,7 @@
 #include <boost/lexical_cast.hpp>
 #include <utility>
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 /** set specific (non-default) dimension name
  * @param nDim   -- number of dimension;
@@ -122,7 +121,7 @@ void MDWSDescription::buildFromMatrixWS(const API::MatrixWorkspace_sptr &pWS, co
 void MDWSDescription::setWS(API::MatrixWorkspace_sptr otherMatrixWS) { m_InWS = std::move(otherMatrixWS); }
 /// Method checks if input workspace has defined goniometer
 bool MDWSDescription::hasGoniometer() const {
-  if (m_InWS)
+  if ((m_InWS != nullptr) && (m_InWS->run().getNumGoniometers() > 0))
     return m_InWS->run().getGoniometer().isDefined();
   else
     return false;
@@ -412,5 +411,4 @@ bool MDWSDescription::isQ3DMode() const { return this->AlgID == "Q3D"; }
 
 bool MDWSDescription::hasLattice() const { return m_InWS->sample().hasOrientedLattice(); }
 
-} // end namespace MDAlgorithms
-} // end namespace Mantid
+} // namespace Mantid::MDAlgorithms

@@ -19,8 +19,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/regex.hpp>
 
-namespace Mantid {
-namespace Reflectometry {
+namespace Mantid::Reflectometry {
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -352,7 +351,7 @@ void ReflectometryReductionOneAuto2::exec() {
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   auto instrument = inputWS->getInstrument();
 
-  IAlgorithm_sptr alg = createChildAlgorithm("ReflectometryReductionOne");
+  auto alg = createChildAlgorithm("ReflectometryReductionOne");
   alg->initialize();
   // Mandatory properties
   alg->setProperty("SummationType", getPropertyValue("SummationType"));
@@ -499,7 +498,7 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto2::correctDetectorPositions(Ma
   MatrixWorkspace_sptr corrected = inputWS;
 
   for (const auto &detector : detectorSet) {
-    IAlgorithm_sptr alg = createChildAlgorithm("SpecularReflectionPositionCorrect");
+    auto alg = createChildAlgorithm("SpecularReflectionPositionCorrect");
     alg->setProperty("InputWorkspace", corrected);
     alg->setProperty("TwoTheta", twoTheta);
     alg->setProperty("DetectorCorrectionType", correctionType);
@@ -527,7 +526,7 @@ double ReflectometryReductionOneAuto2::calculateTheta(const MatrixWorkspace_sptr
   if (detectorsOfInterest.empty())
     return 0.0;
 
-  IAlgorithm_sptr alg = createChildAlgorithm("SpecularReflectionCalculateTheta");
+  auto alg = createChildAlgorithm("SpecularReflectionCalculateTheta");
   alg->setProperty("InputWorkspace", inputWS);
   alg->setProperty("DetectorComponentName", detectorsOfInterest[0]);
   alg->execute();
@@ -631,7 +630,7 @@ boost::optional<double> ReflectometryReductionOneAuto2::getQStep(const MatrixWor
                                "this algorithm.");
     }
 
-    IAlgorithm_sptr calcRes = createChildAlgorithm("NRCalculateSlitResolution");
+    auto calcRes = createChildAlgorithm("NRCalculateSlitResolution");
     calcRes->setProperty("Workspace", inputWS);
     calcRes->setProperty("TwoTheta", 2 * theta);
     calcRes->execute();
@@ -655,7 +654,7 @@ boost::optional<double> ReflectometryReductionOneAuto2::getQStep(const MatrixWor
 MatrixWorkspace_sptr ReflectometryReductionOneAuto2::rebinAndScale(const MatrixWorkspace_sptr &inputWS,
                                                                    RebinParams const &params) {
   // Rebin
-  IAlgorithm_sptr algRebin = createChildAlgorithm("Rebin");
+  auto algRebin = createChildAlgorithm("Rebin");
   algRebin->initialize();
   algRebin->setProperty("InputWorkspace", inputWS);
   algRebin->setProperty("OutputWorkspace", inputWS);
@@ -667,7 +666,7 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto2::rebinAndScale(const MatrixW
   Property *scaleProp = getProperty("ScaleFactor");
   if (!scaleProp->isDefault()) {
     double scaleFactor = getProperty("ScaleFactor");
-    IAlgorithm_sptr algScale = createChildAlgorithm("Scale");
+    auto algScale = createChildAlgorithm("Scale");
     algScale->initialize();
     algScale->setProperty("InputWorkspace", IvsQ);
     algScale->setProperty("OutputWorkspace", IvsQ);
@@ -681,7 +680,7 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto2::rebinAndScale(const MatrixW
 
 MatrixWorkspace_sptr ReflectometryReductionOneAuto2::cropQ(const MatrixWorkspace_sptr &inputWS,
                                                            RebinParams const &params) {
-  IAlgorithm_sptr algCrop = createChildAlgorithm("CropWorkspace");
+  auto algCrop = createChildAlgorithm("CropWorkspace");
   algCrop->initialize();
   algCrop->setProperty("InputWorkspace", inputWS);
   algCrop->setProperty("OutputWorkspace", inputWS);
@@ -1121,5 +1120,4 @@ void ReflectometryReductionOneAuto2::applyFloodCorrections() {
   }
 }
 
-} // namespace Reflectometry
-} // namespace Mantid
+} // namespace Mantid::Reflectometry

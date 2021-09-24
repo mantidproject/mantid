@@ -15,8 +15,7 @@
 #include <QMessageBox>
 #include <limits>
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 using namespace Mantid::API;
 
@@ -40,6 +39,8 @@ AddWorkspaceDialog::AddWorkspaceDialog(QWidget *parent) : QDialog(parent), m_max
   m_uiForm.cbWorkspaceName->addItems(workspaceNames);
 
   connect(m_uiForm.cbAllSpectra, SIGNAL(stateChanged(int)), this, SLOT(selectAllSpectra(int)));
+  connect(m_uiForm.pbCancel, SIGNAL(clicked()), this, SLOT(handleCancelClicked()));
+  connect(m_uiForm.pbOK, SIGNAL(clicked()), this, SLOT(handleOKClicked()));
 }
 
 std::vector<MatrixWorkspace_const_sptr> AddWorkspaceDialog::getWorkspaces() const {
@@ -139,8 +140,13 @@ void AddWorkspaceDialog::findCommonMaxIndex(const QString &wsName) {
   }
 }
 
-/// Called on close if selection accepted.
-void AddWorkspaceDialog::accept() {
+void AddWorkspaceDialog::handleCancelClicked() {
+  m_workspaceName.clear();
+  m_wsIndices.clear();
+  emit closeDialog();
+}
+
+void AddWorkspaceDialog::handleOKClicked() {
   m_workspaceName = m_uiForm.cbWorkspaceName->currentText();
   m_wsIndices.clear();
   QString indexInput = m_uiForm.leWSIndices->text();
@@ -159,15 +165,8 @@ void AddWorkspaceDialog::accept() {
     QMessageBox::warning(this, "Mantid - Warning", QString("No indices have been selected."));
     return;
   }
-  QDialog::accept();
+
+  emit okClicked(!m_uiForm.ckKeepOpen->isChecked());
 }
 
-/// Called on close if selection rejected.
-void AddWorkspaceDialog::reject() {
-  m_workspaceName.clear();
-  m_wsIndices.clear();
-  QDialog::reject();
-}
-
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

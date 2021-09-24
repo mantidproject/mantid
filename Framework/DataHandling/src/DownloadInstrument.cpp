@@ -39,8 +39,7 @@
 // std
 #include <fstream>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 using namespace Kernel;
 using namespace Poco::Net;
 
@@ -205,10 +204,13 @@ DownloadInstrument::StringToStringMap DownloadInstrument::processRepository() {
   }
 
   // Parse the server JSON response
-  Json::Reader reader;
+  ::Json::CharReaderBuilder readerBuilder;
   Json::Value serverContents;
   Poco::FileStream fileStream(gitHubJson.toString(), std::ios::in);
-  if (!reader.parse(fileStream, serverContents)) {
+
+  std::string errors;
+  Json::parseFromStream(readerBuilder, fileStream, &serverContents, &errors);
+  if (errors.size() != 0) {
     throw std::runtime_error("Unable to parse server JSON file \"" + gitHubJson.toString() + "\"");
   }
   fileStream.close();
@@ -385,5 +387,4 @@ int DownloadInstrument::doDownloadFile(const std::string &urlFile, const std::st
   return retStatus;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

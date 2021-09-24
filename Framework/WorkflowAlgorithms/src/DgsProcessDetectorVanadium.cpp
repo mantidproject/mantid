@@ -18,8 +18,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace WorkflowAlgorithmHelpers;
 
-namespace Mantid {
-namespace WorkflowAlgorithms {
+namespace Mantid::WorkflowAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(DgsProcessDetectorVanadium)
@@ -75,7 +74,7 @@ void DgsProcessDetectorVanadium::exec() {
   MatrixWorkspace_sptr monWS = this->getProperty("InputMonitorWorkspace");
 
   // Normalise result workspace to incident beam parameter
-  IAlgorithm_sptr norm = this->createChildAlgorithm("DgsPreprocessData");
+  auto norm = createChildAlgorithm("DgsPreprocessData");
   norm->setProperty("InputWorkspace", inputWS);
   norm->setProperty("OutputWorkspace", inputWS);
   norm->setProperty("InputMonitorWorkspace", monWS);
@@ -91,7 +90,7 @@ void DgsProcessDetectorVanadium::exec() {
 
   if ("TOF" != detVanIntRangeUnits) {
     // Convert the data to the appropriate units
-    IAlgorithm_sptr cnvun = this->createChildAlgorithm("ConvertUnits");
+    auto cnvun = createChildAlgorithm("ConvertUnits");
     cnvun->setProperty("InputWorkspace", inputWS);
     cnvun->setProperty("OutputWorkspace", inputWS);
     cnvun->setProperty("Target", detVanIntRangeUnits);
@@ -103,7 +102,7 @@ void DgsProcessDetectorVanadium::exec() {
   // Rebin the data (not Integration !?!?!?)
   std::vector<double> binning{detVanIntRangeLow, detVanIntRangeHigh - detVanIntRangeLow, detVanIntRangeHigh};
 
-  IAlgorithm_sptr rebin = this->createChildAlgorithm("Rebin");
+  auto rebin = createChildAlgorithm("Rebin");
   rebin->setProperty("InputWorkspace", inputWS);
   rebin->setProperty("OutputWorkspace", outputWS);
   rebin->setProperty("PreserveEvents", false);
@@ -115,7 +114,7 @@ void DgsProcessDetectorVanadium::exec() {
   MatrixWorkspace_sptr maskWS = this->getProperty("MaskWorkspace");
   //!!! I see masks here but where is the map workspace used for vanadium
   // grouping (In ISIS)?
-  IAlgorithm_sptr remap = this->createChildAlgorithm("DgsRemap");
+  auto remap = createChildAlgorithm("DgsRemap");
   remap->setProperty("InputWorkspace", outputWS);
   remap->setProperty("OutputWorkspace", outputWS);
   remap->setProperty("MaskWorkspace", maskWS);
@@ -144,7 +143,7 @@ void DgsProcessDetectorVanadium::exec() {
       // Don't save private calculation workspaces
       if (!outputFile.empty() && !boost::starts_with(outputFile, "ChildAlgOutput") &&
           !boost::starts_with(outputFile, "__")) {
-        IAlgorithm_sptr save = this->createChildAlgorithm("SaveNexus");
+        auto save = createChildAlgorithm("SaveNexus");
         save->setProperty("InputWorkspace", outputWS);
         save->setProperty("FileName", outputFile);
         save->execute();
@@ -155,5 +154,4 @@ void DgsProcessDetectorVanadium::exec() {
   this->setProperty("OutputWorkspace", outputWS);
 }
 
-} // namespace WorkflowAlgorithms
-} // namespace Mantid
+} // namespace Mantid::WorkflowAlgorithms

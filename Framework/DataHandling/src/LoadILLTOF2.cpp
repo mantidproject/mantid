@@ -22,8 +22,7 @@ namespace {
 const std::array<std::string, 5> SUPPORTED_INSTRUMENTS = {{"IN4", "IN5", "IN6", "PANTHER", "SHARP"}};
 } // namespace
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using namespace Kernel;
 using namespace API;
@@ -273,6 +272,7 @@ void LoadILLTOF2::addAllNexusFieldsAsProperties(const std::string &filename) {
   }
   m_loader.addNexusFieldsToWsRun(nxfileID, runDetails);
   NXclose(&nxfileID);
+  runDetails.addProperty("run_list", runDetails.getPropertyValueAsType<int>("run_number"));
   g_log.debug() << "End parsing properties from : " << filename << '\n';
 }
 
@@ -435,7 +435,7 @@ void LoadILLTOF2::loadSpectra(size_t &spec, const size_t numberOfTubes, const st
  */
 void LoadILLTOF2::runLoadInstrument() {
 
-  IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
+  auto loadInst = createChildAlgorithm("LoadInstrument");
 
   loadInst->setPropertyValue("InstrumentName", m_instrumentName);
   loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
@@ -443,5 +443,4 @@ void LoadILLTOF2::runLoadInstrument() {
   loadInst->execute();
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

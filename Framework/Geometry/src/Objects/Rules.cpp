@@ -26,9 +26,7 @@
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
 
-namespace Mantid {
-
-namespace Geometry {
+namespace Mantid::Geometry {
 
 namespace {
 Kernel::Logger logger("Rules");
@@ -674,6 +672,4 @@ int Rule::Eliminate()
   return static_cast<int>(deadKeys.size());
 }
 
-} // NAMESPACE Geometry
-
-} // NAMESPACE Mantid
+} // namespace Mantid::Geometry

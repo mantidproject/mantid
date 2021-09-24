@@ -37,8 +37,8 @@ public:
   static std::shared_ptr<IDetector> createDetector(const IDetector *base, const ParameterMap *map);
 
   /// Create a parameterized instrument from the given base and ParameterMap
-  static std::shared_ptr<Instrument> createInstrument(std::shared_ptr<const Instrument> base,
-                                                      std::shared_ptr<ParameterMap> map);
+  static std::shared_ptr<Instrument> createInstrument(const std::shared_ptr<const Instrument> &base,
+                                                      const std::shared_ptr<ParameterMap> &map);
   /// Create a parameterized component from the given base component and
   /// ParameterMap
   static std::shared_ptr<IComponent> create(const std::shared_ptr<const IComponent> &base, const ParameterMap *map);

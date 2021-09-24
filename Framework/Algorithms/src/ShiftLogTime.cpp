@@ -19,8 +19,7 @@ using std::string;
 using std::stringstream;
 using std::vector;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ShiftLogTime)
@@ -98,7 +97,7 @@ void ShiftLogTime::exec() {
   // Just overwrite if the change is in place
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
   if (outputWS != inputWS) {
-    IAlgorithm_sptr duplicate = createChildAlgorithm("CloneWorkspace");
+    auto duplicate = createChildAlgorithm("CloneWorkspace");
     duplicate->initialize();
     duplicate->setProperty<Workspace_sptr>("InputWorkspace", std::dynamic_pointer_cast<Workspace>(inputWS));
     duplicate->execute();
@@ -111,5 +110,4 @@ void ShiftLogTime::exec() {
   outputWS->mutableRun().addProperty(newlog, true);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

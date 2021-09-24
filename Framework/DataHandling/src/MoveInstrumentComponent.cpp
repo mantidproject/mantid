@@ -12,8 +12,7 @@
 #include "MantidGeometry/Instrument/GridDetectorPixel.h"
 #include "MantidKernel/Exception.h"
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(MoveInstrumentComponent)
@@ -129,5 +128,4 @@ void MoveInstrumentComponent::exec() {
   componentInfo.setPosition(componentInfo.indexOf(componentId), position);
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

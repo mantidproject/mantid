@@ -22,9 +22,7 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using namespace std;
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Algorithms {
+namespace Mantid::CurveFitting::Algorithms {
 
 DECLARE_ALGORITHM(RefinePowderInstrumentParameters3)
 
@@ -801,7 +799,7 @@ double RefinePowderInstrumentParameters3::calculateFunctionError(const IFunction
   double chi2;
   string fitstatus;
   const std::string minimizer = "Levenberg-MarquardtMD";
-  bool fitOK = doFitFunction(function, std::move(dataws), wsindex, minimizer, 0, chi2, fitstatus);
+  bool fitOK = doFitFunction(function, dataws, wsindex, minimizer, 0, chi2, fitstatus);
 
   if (!fitOK) {
     g_log.warning() << "Fit by " << minimizer << " with 0 iterations failed, with reason: " << fitstatus << "\n";
@@ -927,7 +925,7 @@ bool RefinePowderInstrumentParameters3::doFitFunction(const IFunction_sptr &func
   g_log.information() << outss.str();
 
   // 1. Create and setup fit algorithm
-  API::IAlgorithm_sptr fitalg = createChildAlgorithm("Fit", 0.0, 0.2, true);
+  auto fitalg = createChildAlgorithm("Fit", 0.0, 0.2, true);
   fitalg->initialize();
 
   fitalg->setProperty("Function", function);
@@ -1314,6 +1312,4 @@ void restoreFunctionParameterValue(map<string, pair<double, double>> parvaluemap
   }
 }
 
-} // namespace Algorithms
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Algorithms

@@ -31,8 +31,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveMD2)
@@ -200,7 +199,7 @@ void SaveMD2::exec() {
 
   if (eventWS) {
     // If event workspace use SaveMD version 1.
-    IAlgorithm_sptr saveMDv1 = createChildAlgorithm("SaveMD", -1, -1, true, 1);
+    auto saveMDv1 = createChildAlgorithm("SaveMD", -1, -1, true, 1);
     saveMDv1->setProperty<IMDWorkspace_sptr>("InputWorkspace", ws);
     saveMDv1->setProperty<std::string>("Filename", getProperty("Filename"));
     saveMDv1->setProperty<bool>("UpdateFileBackEnd", getProperty("UpdateFileBackEnd"));
@@ -215,5 +214,4 @@ void SaveMD2::exec() {
                              "type.");
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

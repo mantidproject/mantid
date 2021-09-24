@@ -22,8 +22,7 @@
 #include <memory>
 #include <utility>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ChangeTimeZero)
@@ -108,7 +107,7 @@ API::MatrixWorkspace_sptr ChangeTimeZero::createOutputWS(const API::MatrixWorksp
   MatrixWorkspace_sptr output = getProperty("OutputWorkspace");
   // Check whether input == output to see whether a new workspace is required.
   if (input != output) {
-    IAlgorithm_sptr duplicate = createChildAlgorithm("CloneWorkspace", startProgress, stopProgress);
+    auto duplicate = createChildAlgorithm("CloneWorkspace", startProgress, stopProgress);
     duplicate->initialize();
     duplicate->setProperty<API::Workspace_sptr>("InputWorkspace", std::dynamic_pointer_cast<API::Workspace>(input));
     duplicate->execute();
@@ -130,7 +129,7 @@ double ChangeTimeZero::getTimeShift(const API::MatrixWorkspace_sptr &ws) const {
   std::string timeOffset = getProperty("AbsoluteTimeOffset");
   if (isAbsoluteTimeShift(timeOffset)) {
     DateAndTime desiredTime(timeOffset);
-    DateAndTime originalTime(getStartTimeFromWorkspace(std::move(ws)));
+    DateAndTime originalTime(getStartTimeFromWorkspace(ws));
     timeShift = DateAndTime::secondsFromDuration(desiredTime - originalTime);
   } else {
     timeShift = getProperty("RelativeTimeOffset");
@@ -333,5 +332,4 @@ bool ChangeTimeZero::isAbsoluteTimeShift(const std::string &offset) const {
   return offset != m_defaultAbsoluteTimeShift && checkForDateTime(offset);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

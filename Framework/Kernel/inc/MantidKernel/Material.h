@@ -53,7 +53,7 @@ public:
   struct FormulaUnit final {
     std::shared_ptr<PhysicalConstants::Atom> atom;
     double multiplicity;
-    FormulaUnit(const std::shared_ptr<PhysicalConstants::Atom> &atom, const double multiplicity);
+    FormulaUnit(std::shared_ptr<PhysicalConstants::Atom> atom, const double multiplicity);
     FormulaUnit(const PhysicalConstants::Atom &atom, const double multiplicity);
   };
 
@@ -67,10 +67,10 @@ public:
 
   /// Construct a material from a known element, with optional
   /// temperature and pressure
-  explicit Material(const std::string &name, const ChemicalFormula &formula, const double numberDensity,
+  explicit Material(std::string name, const ChemicalFormula &formula, const double numberDensity,
                     const double packingFraction = 1, const double temperature = 300,
                     const double pressure = PhysicalConstants::StandardAtmosphere);
-  explicit Material(const std::string &name, const PhysicalConstants::NeutronAtom &atom, const double numberDensity,
+  explicit Material(std::string name, const PhysicalConstants::NeutronAtom &atom, const double numberDensity,
                     const double packingFraction = 1, const double temperature = 300,
                     const double pressure = PhysicalConstants::StandardAtmosphere);
   /// Virtual destructor.
@@ -93,6 +93,8 @@ public:
   double numberDensityEffective() const;
   /// Get the packing fraction
   double packingFraction() const;
+  /// The total number of atoms in the formula
+  double totalAtoms() const;
   /// Get the temperature
   double temperature() const;
   /// Get the pressure

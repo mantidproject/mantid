@@ -20,8 +20,7 @@ using Mantid::HistogramData::HistogramE;
 using Mantid::HistogramData::HistogramX;
 using Mantid::HistogramData::HistogramY;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Kernel;
 using namespace API;
@@ -224,7 +223,7 @@ void RemoveBins::exec() {
 /// Calls CropWorkspace as a Child Algorithm to remove bins from the start or
 /// end of a square workspace
 void RemoveBins::crop(const double &start, const double &end) {
-  IAlgorithm_sptr childAlg = createChildAlgorithm("CropWorkspace");
+  auto childAlg = createChildAlgorithm("CropWorkspace");
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace",
                                               std::const_pointer_cast<MatrixWorkspace>(m_inputWorkspace));
   childAlg->setProperty<double>("XMin", start);
@@ -367,5 +366,4 @@ void RemoveBins::RemoveFromMiddle(const int &start, const int &end, const double
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

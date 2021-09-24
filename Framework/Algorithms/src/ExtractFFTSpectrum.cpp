@@ -17,8 +17,7 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ExtractFFTSpectrum)
@@ -67,7 +66,7 @@ void ExtractFFTSpectrum::exec() {
   for (int i = 0; i < numHists; i++) {
     PARALLEL_START_INTERUPT_REGION
 
-    IAlgorithm_sptr childFFT = createChildAlgorithm("FFT");
+    auto childFFT = createChildAlgorithm("FFT");
     childFFT->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWS);
     childFFT->setProperty<int>("Real", i);
     if (inputImagWS) {
@@ -94,7 +93,7 @@ void ExtractFFTSpectrum::exec() {
     // In this case, trim half of the workspace, as these are just zeros.
     const double xMax = outputWS->x(0)[(outputWS->x(0).size() / 2) - 1];
 
-    IAlgorithm_sptr extractSpectra = createChildAlgorithm("ExtractSpectra");
+    auto extractSpectra = createChildAlgorithm("ExtractSpectra");
     extractSpectra->setProperty<MatrixWorkspace_sptr>("InputWorkspace", outputWS);
     extractSpectra->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", outputWS);
     extractSpectra->setProperty("XMax", xMax);
@@ -103,5 +102,4 @@ void ExtractFFTSpectrum::exec() {
 
   setProperty("OutputWorkspace", outputWS);
 }
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

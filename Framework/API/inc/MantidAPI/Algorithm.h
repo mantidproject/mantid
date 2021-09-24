@@ -53,6 +53,9 @@ namespace API {
 class AlgorithmHistory;
 class WorkspaceHistory;
 
+/// Typedef for a shared pointer to an Algorithm
+using Algorithm_sptr = std::shared_ptr<Algorithm>;
+
 /**
 Base class from which all concrete algorithm classes should be derived.
 In order for a concrete algorithm class to do anything
@@ -75,7 +78,7 @@ Gaudi user guide).
 http://proj-gaudi.web.cern.ch/proj-gaudi/)
 @date 12/09/2007
 */
-class MANTID_API_DLL Algorithm : public IAlgorithm, public Kernel::PropertyManagerOwner {
+class MANTID_API_DLL Algorithm : public IAlgorithm {
 public:
   /// Base class for algorithm notifications
   class MANTID_API_DLL AlgorithmNotification : public Poco::Notification {
@@ -108,7 +111,7 @@ public:
   class MANTID_API_DLL ProgressNotification : public AlgorithmNotification {
   public:
     /// Constructor
-    ProgressNotification(const Algorithm *const alg, double p, const std::string &msg, double estimatedTime,
+    ProgressNotification(const Algorithm *const alg, double p, std::string msg, double estimatedTime,
                          int progressPrecision);
     std::string name() const override;
     double progress;       ///< Current progress. Value must be between 0 and 1.
@@ -123,7 +126,7 @@ public:
   class MANTID_API_DLL ErrorNotification : public AlgorithmNotification {
   public:
     /// Constructor
-    ErrorNotification(const Algorithm *const alg, const std::string &str);
+    ErrorNotification(const Algorithm *const alg, std::string str);
     std::string name() const override;
     std::string what; ///< message string
   };
@@ -168,9 +171,13 @@ public:
   /// Function to return all of the seeAlso (these are not validated) algorithms
   /// related to this algorithm.A default implementation is provided.
   const std::vector<std::string> seeAlso() const override { return {}; };
-  /// function to return any aliases to the algorithm;  A default implementation
-  /// is provided
+  /// function to return any aliases to the algorithm;  A default implementation is provided
   const std::string alias() const override { return ""; }
+  /// Flag to indicate if the algorithm is called by its alias.
+  bool calledByAlias = false;
+
+  /// Expiration date (in ISO8601 format) for the algorithm aliases; default implementation for no expiration date
+  const std::string aliasDeprecated() const override { return ""; }
 
   /// function to return URL for algorithm documentation; A default
   /// implementation is provided.
@@ -215,8 +222,6 @@ public:
   bool isExecuted() const override;
   bool isRunning() const override;
   bool isReadyForGarbageCollection() const override;
-
-  using Kernel::PropertyManagerOwner::getProperty;
 
   bool isChild() const override;
   void setChild(const bool isChild) override;
@@ -271,7 +276,7 @@ public:
   virtual std::shared_ptr<Algorithm> createChildAlgorithm(const std::string &name, const double startProgress = -1.,
                                                           const double endProgress = -1.,
                                                           const bool enableLogging = true, const int &version = -1);
-  void setupAsChildAlgorithm(const std::shared_ptr<Algorithm> &algorithm, const double startProgress = -1.,
+  void setupAsChildAlgorithm(const Algorithm_sptr &algorithm, const double startProgress = -1.,
                              const double endProgress = -1., const bool enableLogging = true);
 
   /// set whether we wish to track the child algorithm's history and pass it the
@@ -291,6 +296,80 @@ public:
 
   const Parallel::Communicator &communicator() const;
   void setCommunicator(const Parallel::Communicator &communicator);
+
+  // Function to declare properties (i.e. store them)
+  void declareProperty(std::unique_ptr<Kernel::Property> p, const std::string &doc = "") override;
+
+  // Function to declare properties (i.e. store them)
+  void declareOrReplaceProperty(std::unique_ptr<Kernel::Property> p, const std::string &doc = "") override;
+  void resetProperties() override;
+  using IPropertyManager::declareProperty;
+  // Sets all the declared properties from
+  void setProperties(const std::string &propertiesJson,
+                     const std::unordered_set<std::string> &ignoreProperties = std::unordered_set<std::string>(),
+                     bool createMissing = false) override;
+
+  // Sets all the declared properties from a json object
+  void setProperties(const ::Json::Value &jsonValue,
+                     const std::unordered_set<std::string> &ignoreProperties = std::unordered_set<std::string>(),
+                     bool createMissing = false) override;
+
+  // sets all the declared properties using a simple string format
+  void setPropertiesWithString(
+      const std::string &propertiesString,
+      const std::unordered_set<std::string> &ignoreProperties = std::unordered_set<std::string>()) override;
+
+  void setPropertyValue(const std::string &name, const std::string &value) override;
+  void setPropertyValueFromJson(const std::string &name, const Json::Value &value) override;
+  void setPropertyOrdinal(const int &index, const std::string &value) override;
+
+  /// Make m_properties point to the same PropertyManager as alg.m_properties.
+  virtual void copyPropertiesFrom(const Algorithm &alg) { m_properties.copyPropertiesFrom(alg.m_properties); }
+
+  bool existsProperty(const std::string &name) const override;
+  bool validateProperties() const override;
+  size_t propertyCount() const override;
+
+  std::string getPropertyValue(const std::string &name) const override;
+  const std::vector<Kernel::Property *> &getProperties() const override;
+
+  /// Get the value of a property
+  TypedValue getProperty(const std::string &name) const override;
+
+  /// Return the property manager serialized as a string.
+  std::string asString(bool withDefaultValues = false) const override;
+
+  /// Return the property manager serialized as a json object.
+  ::Json::Value asJson(bool withDefaultValues = false) const override;
+
+  bool isDefault(const std::string &name) const;
+
+  /// Removes the property from management
+  void removeProperty(const std::string &name, const bool delproperty = true) override;
+  /// Removes the property from management and returns a pointer to it
+  std::unique_ptr<Kernel::Property> takeProperty(const size_t index) override;
+
+  /// Clears all properties under management
+  void clear() override;
+  /// Override this method to perform a custom action right after a property was
+  /// set.
+  /// The argument is the property name. Default - do nothing.
+  void afterPropertySet(const std::string &) override;
+
+  void filterByTime(const Types::Core::DateAndTime & /*start*/, const Types::Core::DateAndTime & /*stop*/) override {
+    throw(std::runtime_error("Not yet implmented"));
+  }
+  void splitByTime(std::vector<Kernel::SplittingInterval> & /*splitter*/,
+                   std::vector<Kernel::PropertyManager *> /* outputs*/) const override {
+    throw(std::runtime_error("Not yet implmented"));
+  }
+
+  void filterByProperty(const Kernel::TimeSeriesProperty<bool> & /*filter*/, const std::vector<std::string> &
+                        /* excludedFromFiltering */) override {
+    throw(std::runtime_error("Not yet implmented"));
+  }
+  Kernel::Property *getPointerToProperty(const std::string &name) const override;
+  Kernel::Property *getPointerToPropertyOrdinal(const int &index) const override;
 
 protected:
   /// Virtual method - must be overridden by concrete algorithm
@@ -377,7 +456,8 @@ protected:
   /// versions
   bool m_usingBaseProcessGroups = false;
 
-  template <typename T, const int AllowedIndexTypes = IndexType::WorkspaceIndex, typename... WSPropArgs,
+  template <typename T, const int AllowedIndexTypes = static_cast<int>(IndexType::WorkspaceIndex),
+            typename... WSPropArgs,
             typename = typename std::enable_if<std::is_convertible<T *, MatrixWorkspace *>::value>::type>
   void declareWorkspaceInputProperties(const std::string &propertyName, const std::string &doc,
                                        WSPropArgs &&...wsPropArgs);
@@ -475,10 +555,9 @@ private:
 
   /// The earliest this class should be considered for garbage collection
   Mantid::Types::Core::DateAndTime m_gcTime;
-};
 
-/// Typedef for a shared pointer to an Algorithm
-using Algorithm_sptr = std::shared_ptr<Algorithm>;
+  Mantid::Kernel::PropertyManagerOwner m_properties;
+};
 
 } // namespace API
 } // namespace Mantid

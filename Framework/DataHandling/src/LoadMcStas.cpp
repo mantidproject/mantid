@@ -25,8 +25,7 @@
 #include <nexus/NeXusException.hpp>
 // clang-format on
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
@@ -156,7 +155,7 @@ void LoadMcStas::exec() {
  * @return Workspace group
  */
 API::WorkspaceGroup_sptr LoadMcStas::groupWorkspaces(const std::vector<std::string> &workspaces) const {
-  API::IAlgorithm_sptr groupAlgorithm = API::AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
+  auto groupAlgorithm = API::AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
   groupAlgorithm->setChild(true);
   groupAlgorithm->setLogging(false);
   groupAlgorithm->initialize();
@@ -591,5 +590,4 @@ int LoadMcStas::confidence(Kernel::NexusDescriptor &descriptor) const {
   return confidence;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

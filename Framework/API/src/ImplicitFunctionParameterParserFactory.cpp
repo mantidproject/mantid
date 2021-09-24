@@ -9,8 +9,7 @@
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeList.h>
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 std::shared_ptr<ImplicitFunctionParameterParser>
 ImplicitFunctionParameterParserFactoryImpl::create(const std::string &xmlString) const {
@@ -42,5 +41,4 @@ ImplicitFunctionParameterParserFactoryImpl::createImplicitFunctionParameterParse
   }
   return paramParser;
 }
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

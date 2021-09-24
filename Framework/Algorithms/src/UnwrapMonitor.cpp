@@ -19,8 +19,7 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 DECLARE_ALGORITHM(UnwrapMonitor)
 
@@ -339,7 +338,7 @@ API::MatrixWorkspace_sptr UnwrapMonitor::rebin(const API::MatrixWorkspace_sptr &
   const double step = (max - min) / static_cast<double>(numBins);
 
   // Create a Rebin child algorithm
-  IAlgorithm_sptr childAlg = createChildAlgorithm("Rebin");
+  auto childAlg = createChildAlgorithm("Rebin");
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", workspace);
   childAlg->setPropertyValue("OutputWorkspace", "Anonymous");
 
@@ -353,5 +352,4 @@ API::MatrixWorkspace_sptr UnwrapMonitor::rebin(const API::MatrixWorkspace_sptr &
   return childAlg->getProperty("OutputWorkspace");
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

@@ -12,9 +12,7 @@
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/UnitFactory.h"
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
 
@@ -157,6 +155,4 @@ void UserFunction1D::functionDeriv(const double *in, Jacobian *out, const double
   }
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

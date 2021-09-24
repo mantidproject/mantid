@@ -39,9 +39,7 @@ namespace {
 Mantid::Kernel::Logger g_log("PlotPeakByLogValue");
 }
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Algorithms {
+namespace Mantid::CurveFitting::Algorithms {
 
 using namespace Kernel;
 using namespace API;
@@ -361,7 +359,7 @@ void PlotPeakByLogValue::finaliseOutputWorkspaces(bool createFitOutput,
 }
 
 void PlotPeakByLogValue::appendTableRow(
-    bool isDataName, ITableWorkspace_sptr &result, const IFunction_sptr ifun, const InputSpectraToFit &data,
+    bool isDataName, ITableWorkspace_sptr &result, const IFunction_sptr &ifun, const InputSpectraToFit &data,
     double logValue, double chi2) const { // Extract the fitted parameters and put them into the result table
   TableRow row = result->appendRow();
   if (isDataName) {
@@ -378,11 +376,10 @@ void PlotPeakByLogValue::appendTableRow(
         row << p->getParameter(i, j) << p->getError(i, j);
       }
 
-      if (f->hasParameter("Intensity") == false) {
-        auto intensity_handle = std::dynamic_pointer_cast<API::IPeakFunction>(f);
-        if (intensity_handle) {
-          row << intensity_handle->intensity();
-        }
+      /* Output integrated intensity */
+      auto intensity_handle = std::dynamic_pointer_cast<API::IPeakFunction>(f);
+      if (intensity_handle) {
+        row << intensity_handle->intensity() << intensity_handle->intensityError();
       }
     }
   }
@@ -392,19 +389,18 @@ void PlotPeakByLogValue::appendTableRow(
       row << ifun->getParameter(iPar) << ifun->getError(iPar);
     }
 
-    if (ifun->hasParameter("Intensity") == false) {
-      auto intensity_handle = std::dynamic_pointer_cast<API::IPeakFunction>(ifun);
-      if (intensity_handle) {
-        row << intensity_handle->intensity();
-      }
+    /* Output integrated intensity */
+    auto intensity_handle = std::dynamic_pointer_cast<API::IPeakFunction>(ifun);
+    if (intensity_handle) {
+      row << intensity_handle->intensity() << intensity_handle->intensityError();
     }
   }
 
   row << chi2;
 }
 
-ITableWorkspace_sptr PlotPeakByLogValue::createResultsTable(const std::string &logName, const IFunction_sptr ifunSingle,
-                                                            bool &isDataName) {
+ITableWorkspace_sptr PlotPeakByLogValue::createResultsTable(const std::string &logName,
+                                                            const IFunction_sptr &ifunSingle, bool &isDataName) {
   ITableWorkspace_sptr result = WorkspaceFactory::Instance().createTable("TableWorkspace");
   if (logName == "SourceName") {
     result->addColumn("str", "SourceName");
@@ -426,11 +422,10 @@ ITableWorkspace_sptr PlotPeakByLogValue::createResultsTable(const std::string &l
         result->addColumn("double", p->parameterName(i, j) + "_Err");
       }
 
-      if (f->hasParameter("Intensity") == false) {
-        auto intensity_handle = std::dynamic_pointer_cast<API::IPeakFunction>(f);
-        if (intensity_handle) {
-          result->addColumn("double", "f" + std::to_string(i) + ".Intensity");
-        }
+      auto intensity_handle = std::dynamic_pointer_cast<API::IPeakFunction>(f);
+      if (intensity_handle) {
+        result->addColumn("double", "f" + std::to_string(i) + ".Integrated Intensity");
+        result->addColumn("double", "f" + std::to_string(i) + ".Integrated Intensity_Err");
       }
     }
   }
@@ -441,11 +436,10 @@ ITableWorkspace_sptr PlotPeakByLogValue::createResultsTable(const std::string &l
       result->addColumn("double", ifunSingle->parameterName(iPar) + "_Err");
     }
 
-    if (ifunSingle->hasParameter("Intensity") == false) {
-      auto intensity_handle = std::dynamic_pointer_cast<API::IPeakFunction>(ifunSingle);
-      if (intensity_handle) {
-        result->addColumn("double", "Intensity");
-      }
+    auto intensity_handle = std::dynamic_pointer_cast<API::IPeakFunction>(ifunSingle);
+    if (intensity_handle) {
+      result->addColumn("double", "Integrated Intensity");
+      result->addColumn("double", "Integrated Intensity_Err");
     }
   }
 
@@ -574,6 +568,4 @@ std::vector<std::string> PlotPeakByLogValue::getExclude(const size_t numSpectra)
   }
 }
 
-} // namespace Algorithms
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Algorithms

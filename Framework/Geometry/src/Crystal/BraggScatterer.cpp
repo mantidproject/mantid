@@ -6,8 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/BraggScatterer.h"
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 using namespace Kernel;
 
@@ -72,5 +71,4 @@ void BraggScatterer::unexposePropertyFromComposite(const std::string &propertyNa
 /// Returns the group name that is used to mark properties that are propagated.
 const std::string &BraggScatterer::getPropagatingGroupName() const { return m_propagatingGroupName; }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

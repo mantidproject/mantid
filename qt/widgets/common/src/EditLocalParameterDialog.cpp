@@ -21,8 +21,7 @@ const int valueColumn = 0;
 const int roleColumn = 1;
 } // namespace
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 /**
  * Constructor used inside and outside of MultiDatasetFit interface
@@ -368,5 +367,4 @@ void EditLocalParameterDialog::setAllValuesToLog() {
 /// @returns True if log options are enabled
 bool EditLocalParameterDialog::isLogCheckboxTicked() const { return m_uiForm.logValueSelector->isCheckboxTicked(); }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

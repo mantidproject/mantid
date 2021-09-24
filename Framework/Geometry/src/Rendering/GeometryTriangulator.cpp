@@ -54,9 +54,7 @@ GNU_DIAG_ON("cast-qual")
 
 #endif // ENABLE_OPENCASCADE
 
-namespace Mantid {
-namespace Geometry {
-namespace detail {
+namespace Mantid::Geometry::detail {
 namespace {
 /// static logger
 Kernel::Logger g_log("GeometryTriangulator");
@@ -245,6 +243,4 @@ void GeometryTriangulator::setGeometryCache(size_t nPoints, size_t nFaces, std::
   m_faces = std::move(faces);
   m_isTriangulated = true;
 }
-} // namespace detail
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry::detail

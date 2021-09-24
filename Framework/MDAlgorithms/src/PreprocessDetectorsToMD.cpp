@@ -19,8 +19,7 @@ using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(PreprocessDetectorsToMD)
 
@@ -239,6 +238,7 @@ void PreprocessDetectorsToMD::processDetectorsPositions(const API::MatrixWorkspa
     detId[i] = std::numeric_limits<int32_t>::quiet_NaN();
     detIDMap[i] = std::numeric_limits<uint64_t>::quiet_NaN();
     L2[i] = std::numeric_limits<double>::quiet_NaN();
+    DIFC[i] = std::numeric_limits<double>::quiet_NaN();
     TwoTheta[i] = std::numeric_limits<double>::quiet_NaN();
     Azimuthal[i] = std::numeric_limits<double>::quiet_NaN();
     //     detMask[i]  = true;
@@ -435,5 +435,4 @@ double PreprocessDetectorsToMD::getEi(const API::MatrixWorkspace_const_sptr &inp
 
   return Efi;
 }
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

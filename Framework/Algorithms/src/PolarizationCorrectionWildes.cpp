@@ -300,8 +300,7 @@ Mantid::API::MatrixWorkspace_sptr createWorkspaceWithHistory(const Mantid::API::
 }
 } // namespace
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(PolarizationCorrectionWildes)
@@ -927,5 +926,4 @@ void PolarizationCorrectionWildes::twoInputsSolve01And10(WorkspaceMap &fullInput
     }
   }
 }
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

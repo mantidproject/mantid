@@ -13,6 +13,9 @@ cmake_install.cmake
 install_manifest.txt
 compile_commands.json
 
+# Ignore CMakeUserPresets
+CMakeUserPresets.json
+
 
 # Compiled Object files
 *.slo
@@ -77,6 +80,9 @@ local.properties
 #Test results
 *.log
 
+#Coverage results
+*.gcov
+
 # Build results
 build/
 /[Rr]elease/
@@ -100,10 +106,8 @@ build/
 .builds
 *.egg-info/
 Framework/Kernel/inc/MantidKernel/GitHubApiHelper.h
-qt/python/mantidqt/resources.py
+qt/python/mantidqt/mantidqt/resources.py
 qt/applications/workbench/workbench/app/resources.py
-qt/applications/workbench/setup.py
-qt/python/setup.py
 
 # Visual C++ cache files
 ipch/
@@ -164,11 +168,13 @@ Thumbs.db
 # Folder config file
 Desktop.ini
 
-# PyCharm IDE
+# CLion and PyCharm IDE
 .idea/
+cmake-build-*/
 
 # VSCode
 .vscode/
+.cache/
 .clangd/
 XDG_CACHE_HOME/
 # The file that contains metadata for VSCode Workspace
@@ -190,3 +196,7 @@ rel/
 
 # NFS files
 *.nfs*
+
+# in source installed conda
+mambaforge/
+miniconda3/

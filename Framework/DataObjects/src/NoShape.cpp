@@ -5,11 +5,11 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/NoShape.h"
+#include "MantidJson/Json.h"
 #include <json/json.h>
 #include <stdexcept>
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 
 /**
  * @brief Serialize to JSON object
@@ -21,8 +21,7 @@ std::string NoShape::toJSON() const {
   Json::Value shape(this->shapeName());
   root["shape"] = shape;
 
-  Json::StyledWriter writer;
-  return writer.write(root);
+  return Mantid::JsonHelpers::jsonToString(root);
 }
 
 /**
@@ -45,5 +44,4 @@ Kernel::SpecialCoordinateSystem NoShape::frame() const { return Kernel::None; }
 
 const std::string NoShape::noShapeName() { return "none"; }
 
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects

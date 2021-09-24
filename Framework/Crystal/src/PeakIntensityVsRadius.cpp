@@ -20,8 +20,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(PeakIntensityVsRadius)
@@ -162,8 +161,7 @@ void PeakIntensityVsRadius::exec() {
       InnerRadius = BackgroundInnerFactor * radius;
 
     // Run the integrate algo with this background
-    IAlgorithm_sptr alg =
-        this->createChildAlgorithm("IntegratePeaksMD", progStep * double(step), progStep *double(step + 1), false);
+    auto alg = createChildAlgorithm("IntegratePeaksMD", progStep * double(step), progStep *double(step + 1), false);
     alg->setProperty("InputWorkspace", inWS);
     alg->setProperty("PeaksWorkspace", peaksWS);
     alg->setProperty<std::vector<double>>("PeakRadius", {radius});
@@ -223,5 +221,4 @@ void PeakIntensityVsRadius::exec() {
   setProperty("OutputWorkspace2", outWS2);
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

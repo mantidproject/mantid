@@ -8,6 +8,7 @@
 #include "MantidKernel/Atom.h"
 #include <stdexcept>
 
+#include "MantidJson/Json.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/StringTokenizer.h"
@@ -15,11 +16,11 @@
 #include "MantidGeometry/Crystal/BraggScattererFactory.h"
 
 #include <boost/algorithm/string.hpp>
+#include <utility>
 
 #include <json/json.h>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 using namespace Kernel;
 
@@ -135,8 +136,8 @@ DECLARE_BRAGGSCATTERER(IsotropicAtomBraggScatterer)
  *
  * @param scattererString :: String in the format specified above
  */
-IsotropicAtomBraggScattererParser::IsotropicAtomBraggScattererParser(const std::string &scattererString)
-    : m_scattererString(scattererString) {}
+IsotropicAtomBraggScattererParser::IsotropicAtomBraggScattererParser(std::string scattererString)
+    : m_scattererString(std::move(scattererString)) {}
 
 /// Operator that returns vector of IsotropicAtomBraggScatterers.
 std::vector<BraggScatterer_sptr> IsotropicAtomBraggScattererParser::operator()() const {
@@ -167,8 +168,7 @@ BraggScatterer_sptr IsotropicAtomBraggScattererParser::getScatterer(const std::s
     root[properties[i]] = cleanScattererTokens[i];
   }
 
-  ::Json::FastWriter writer;
-  std::string initString = writer.write(root);
+  std::string initString = Mantid::JsonHelpers::jsonToString(root);
 
   return BraggScattererFactory::Instance().createScatterer("IsotropicAtomBraggScatterer", initString);
 }
@@ -208,5 +208,4 @@ std::string getIsotropicAtomBraggScattererString(const BraggScatterer_sptr &scat
   return outStream.str();
 }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

@@ -7,8 +7,7 @@
 #include "MantidHistogramData/Points.h"
 #include "MantidHistogramData/BinEdges.h"
 
-namespace Mantid {
-namespace HistogramData {
+namespace Mantid::HistogramData {
 
 /// Constructs Points from BinEdges, where each point is a bin center.
 Points::Points(const BinEdges &edges) {
@@ -28,5 +27,4 @@ Points::Points(const BinEdges &edges) {
   m_data = Kernel::make_cow<HistogramX>(std::move(data));
 }
 
-} // namespace HistogramData
-} // namespace Mantid
+} // namespace Mantid::HistogramData

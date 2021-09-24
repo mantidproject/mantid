@@ -10,8 +10,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/cow_ptr.h"
 
-namespace Mantid {
-namespace WorkflowAlgorithms {
+namespace Mantid::WorkflowAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(EQSANSPatchSensitivity)
@@ -123,7 +122,7 @@ void EQSANSPatchSensitivity::exec() {
 
   // Call Calculate efficiency to renormalize
   progress(0.91, "Renormalizing");
-  IAlgorithm_sptr effAlg = createChildAlgorithm("CalculateEfficiency", 0.91, 1, true, 1);
+  auto effAlg = createChildAlgorithm("CalculateEfficiency", 0.91, 1, true, 1);
   effAlg->setProperty("InputWorkspace", inputWS);
   effAlg->setProperty("OutputWorkspace", inputWS);
   effAlg->execute();
@@ -133,5 +132,4 @@ void EQSANSPatchSensitivity::exec() {
   setProperty("OutputMessage", "Applied wavelength-dependent sensitivity correction");
 }
 
-} // namespace WorkflowAlgorithms
-} // namespace Mantid
+} // namespace Mantid::WorkflowAlgorithms

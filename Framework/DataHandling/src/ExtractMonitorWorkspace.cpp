@@ -7,8 +7,7 @@
 #include "MantidDataHandling/ExtractMonitorWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ExtractMonitorWorkspace)
 
@@ -62,5 +61,4 @@ void ExtractMonitorWorkspace::exec() {
     inputWS->setMonitorWorkspace(MatrixWorkspace_sptr());
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

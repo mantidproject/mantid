@@ -17,8 +17,7 @@
 #include <limits>
 #include <map>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(DiffractionFocussing)
@@ -96,7 +95,7 @@ void DiffractionFocussing::exec() {
     for (auto d = from; d != to; ++d)
       detectorList.emplace_back(static_cast<detid_t>(d->second));
     // Want version 1 of GroupDetectors here
-    API::IAlgorithm_sptr childAlg = createChildAlgorithm("GroupDetectors", -1.0, -1.0, true, 1);
+    auto childAlg = createChildAlgorithm("GroupDetectors", -1.0, -1.0, true, 1);
     childAlg->setProperty("Workspace", tmpW);
     childAlg->setProperty<std::vector<detid_t>>("DetectorList", detectorList);
     childAlg->executeAsChildAlg();
@@ -156,7 +155,7 @@ MatrixWorkspace_sptr DiffractionFocussing::convertUnitsToDSpacing(const API::Mat
 
   g_log.information() << "Converting units from " << xUnit->label().ascii() << " to " << CONVERSION_UNIT << ".\n";
 
-  API::IAlgorithm_sptr childAlg = createChildAlgorithm("ConvertUnits", 0.34, 0.66);
+  auto childAlg = createChildAlgorithm("ConvertUnits", 0.34, 0.66);
   childAlg->setProperty("InputWorkspace", workspace);
   childAlg->setPropertyValue("Target", CONVERSION_UNIT);
   childAlg->executeAsChildAlg();
@@ -176,7 +175,7 @@ void DiffractionFocussing::RebinWorkspace(API::MatrixWorkspace_sptr &workspace) 
 
   g_log.information() << "Rebinning from " << min << " to " << max << " in " << step << " logaritmic steps.\n";
 
-  API::IAlgorithm_sptr childAlg = createChildAlgorithm("Rebin");
+  auto childAlg = createChildAlgorithm("Rebin");
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", workspace);
   childAlg->setProperty<std::vector<double>>("Params", paramArray);
   childAlg->executeAsChildAlg();
@@ -248,5 +247,4 @@ std::multimap<int64_t, int64_t> DiffractionFocussing::readGroupingFile(const std
   return detectorGroups;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

@@ -19,8 +19,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using Mantid::DataObjects::MDHistoWorkspace_sptr;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(TransformMD)
@@ -116,7 +115,7 @@ void TransformMD::exec() {
 
   if (outWS != inWS) {
     // NOT in-place. So first we clone inWS into outWS
-    IAlgorithm_sptr clone = this->createChildAlgorithm("CloneMDWorkspace", 0.0, 0.5, true);
+    auto clone = createChildAlgorithm("CloneMDWorkspace", 0.0, 0.5, true);
     clone->setProperty("InputWorkspace", inWS);
     clone->executeAsChildAlg();
     outWS = clone->getProperty("OutputWorkspace");
@@ -256,5 +255,4 @@ MDHistoWorkspace_sptr TransformMD::transposeMD(MDHistoWorkspace_sptr &toTranspos
   return std::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

@@ -30,9 +30,7 @@ namespace {
 const double tolerance{0.02};
 }
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
 using namespace Kernel;
@@ -507,6 +505,4 @@ void Convolution::refreshResolution() const {
   m_resolution.clear();
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

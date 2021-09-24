@@ -85,9 +85,7 @@ double computeHeightApproximation(IFunction_sptr function) {
 }
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 IqtFitModel::IqtFitModel() : IndirectFittingModel(), m_constrainIntensities(false) { m_fitType = IQTFIT_STRING; }
 
@@ -109,11 +107,11 @@ void IqtFitModel::setFitFunction(Mantid::API::MultiDomainFunction_sptr function)
     constrainIntensities(function);
 }
 
-std::unordered_map<std::string, ParameterValue> IqtFitModel::createDefaultParameters(TableDatasetIndex index) const {
+std::unordered_map<std::string, ParameterValue> IqtFitModel::createDefaultParameters(WorkspaceID workspaceID) const {
   std::unordered_map<std::string, ParameterValue> parameters;
   parameters["Height"] = ParameterValue(computeHeightApproximation(getFitFunction()));
 
-  const auto inputWs = getWorkspace(index);
+  const auto inputWs = getWorkspace(workspaceID);
   const auto tau = inputWs ? computeTauApproximation(inputWs) : 0.0;
 
   parameters["Lifetime"] = ParameterValue(tau);
@@ -122,6 +120,4 @@ std::unordered_map<std::string, ParameterValue> IqtFitModel::createDefaultParame
   return parameters;
 }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

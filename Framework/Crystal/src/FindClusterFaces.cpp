@@ -234,8 +234,7 @@ void executeFiltered(IMDIterator *mdIterator, ClusterFaces &localClusterFaces, P
 }
 } // namespace
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(FindClusterFaces)
@@ -364,5 +363,4 @@ void FindClusterFaces::exec() {
   setProperty("TruncatedOutput", truncatedOutput);
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

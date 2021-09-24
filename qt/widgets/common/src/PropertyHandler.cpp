@@ -36,8 +36,7 @@ const std::regex PREFIX_REGEX("(^[f][0-9](.*))");
 inline bool variableIsPrefixed(const std::string &name) { return std::regex_match(name, PREFIX_REGEX); }
 } // namespace
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 // Constructor
 PropertyHandler::PropertyHandler(const Mantid::API::IFunction_sptr &fun, Mantid::API::CompositeFunction_sptr parent,
@@ -119,6 +118,7 @@ void PropertyHandler::init() {
       auto h = std::make_unique<PropertyHandler>(f, m_cf, m_browser);
       f->setHandler(std::move(h));
     }
+    initTies(); // populate ties after all child functions handlers have been inititiated (post setHandler)
   }
 
   m_browser->m_changeSlotsEnabled = true;
@@ -130,8 +130,8 @@ void PropertyHandler::init() {
  */
 class CreateAttributeProperty : public Mantid::API::IFunction::ConstAttributeVisitor<QtProperty *> {
 public:
-  CreateAttributeProperty(FitPropertyBrowser *browser, PropertyHandler *handler, const QString &name)
-      : m_browser(browser), m_handler(handler), m_name(name) {}
+  CreateAttributeProperty(FitPropertyBrowser *browser, PropertyHandler *handler, QString name)
+      : m_browser(browser), m_handler(handler), m_name(std::move(name)) {}
 
 protected:
   /// Create string property
@@ -188,6 +188,23 @@ private:
 };
 
 /**
+ * Populate ties on parameter properties of child functions
+ */
+void PropertyHandler::initTies() {
+  for (size_t iparam = 0; iparam < m_cf->nParams(); iparam++) {
+    Mantid::API::ParameterTie *tie = m_cf->getTie(iparam);
+    if (tie) {
+      // get function index from prefix (second element of pair below)
+      const auto nameIndex_pair = m_cf->parseName(m_cf->parameterName(iparam));
+      Mantid::API::IFunction_sptr f =
+          std::dynamic_pointer_cast<Mantid::API::IFunction>(m_cf->getFunction(nameIndex_pair.second));
+      auto *h = findHandler(f);
+      h->addTie(QString::fromStdString(tie->asString()));
+    }
+  }
+}
+
+/**
  * Create and attach QtProperties for function attributes.
  */
 void PropertyHandler::initAttributes() {
@@ -225,17 +242,7 @@ void PropertyHandler::initParameters() {
 
     m_item->property()->addSubProperty(prop);
     m_parameters << prop;
-    // add tie property if this parameter has a tie
-    Mantid::API::ParameterTie *tie = m_fun->getTie(i);
-    if (tie) {
-      QStringList qtie = QString::fromStdString(tie->asString(m_browser->theFunction().get())).split("=");
-      if (qtie.size() > 1) {
-        QtProperty *tieProp = m_browser->m_stringManager->addProperty("Tie");
-        m_browser->m_stringManager->setValue(tieProp, qtie[1]);
-        prop->addSubProperty(tieProp);
-        m_ties[parName] = tieProp;
-      }
-    } else if (m_fun->isFixed(i)) {
+    if (m_fun->isFixed(i)) {
       QtProperty *tieProp = m_browser->m_stringManager->addProperty("Tie");
       m_browser->m_stringManager->setValue(tieProp, QString::number(m_fun->getParameter(i)));
       prop->addSubProperty(tieProp);
@@ -1553,5 +1560,4 @@ void PropertyHandler::setFunctionWorkspace() {
   }
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

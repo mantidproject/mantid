@@ -17,20 +17,15 @@
 #include <QVBoxLayout>
 #include <utility>
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
-PlotFitAnalysisPaneView::PlotFitAnalysisPaneView(const double &start,
-                                                 const double &end,
-                                                 QWidget *parent)
-    : QWidget(parent), m_plot(nullptr), m_fitBrowser(nullptr), m_start(nullptr),
-      m_end(nullptr), m_fitButton(nullptr), m_fitObservable(nullptr),
-      m_updateEstimateObservable(nullptr) {
+PlotFitAnalysisPaneView::PlotFitAnalysisPaneView(const double &start, const double &end, QWidget *parent)
+    : QWidget(parent), m_plot(nullptr), m_fitBrowser(nullptr), m_start(nullptr), m_end(nullptr), m_fitButton(nullptr),
+      m_fitObservable(nullptr), m_updateEstimateObservable(nullptr) {
   setupPlotFitSplitter(start, end);
 }
 
-void PlotFitAnalysisPaneView::setupPlotFitSplitter(const double &start,
-                                                   const double &end) {
+void PlotFitAnalysisPaneView::setupPlotFitSplitter(const double &start, const double &end) {
   auto layout = new QHBoxLayout(this);
   auto splitter = new QSplitter(Qt::Vertical);
 
@@ -43,8 +38,7 @@ void PlotFitAnalysisPaneView::setupPlotFitSplitter(const double &start,
   layout->addWidget(splitter);
 }
 
-QWidget *PlotFitAnalysisPaneView::createFitPane(const double &start,
-                                                const double &end) {
+QWidget *PlotFitAnalysisPaneView::createFitPane(const double &start, const double &end) {
   auto fitPane = new QWidget();
   auto fitPaneLayout = new QVBoxLayout(fitPane);
 
@@ -55,12 +49,10 @@ QWidget *PlotFitAnalysisPaneView::createFitPane(const double &start,
   m_fitObservable = new Observable();
   m_updateEstimateObservable = new Observable();
   connect(m_fitButton, SIGNAL(clicked()), this, SLOT(doFit()));
-  connect(m_updateEstimateButton, SIGNAL(clicked()), this,
-          SLOT(updateEstimate()));
+  connect(m_updateEstimateButton, SIGNAL(clicked()), this, SLOT(updateEstimate()));
 
   layout->addWidget(m_fitButton);
-  layout->addItem(
-      new QSpacerItem(80, 0, QSizePolicy::Expanding, QSizePolicy::Fixed));
+  layout->addItem(new QSpacerItem(80, 0, QSizePolicy::Expanding, QSizePolicy::Fixed));
   layout->addWidget(m_updateEstimateButton);
 
   fitPaneLayout->addWidget(fitButtons);
@@ -94,9 +86,7 @@ void PlotFitAnalysisPaneView::doFit() {
   }
 }
 
-void PlotFitAnalysisPaneView::updateEstimate() {
-  m_updateEstimateObservable->notify();
-}
+void PlotFitAnalysisPaneView::updateEstimate() { m_updateEstimateObservable->notify(); }
 
 void PlotFitAnalysisPaneView::addSpectrum(const std::string &wsName) {
   m_plot->addSpectrum("Extracted Data", wsName.c_str(), 0, Qt::black);
@@ -111,12 +101,9 @@ std::pair<double, double> PlotFitAnalysisPaneView::getRange() {
   return std::make_pair(start, end);
 }
 
-Mantid::API::IFunction_sptr PlotFitAnalysisPaneView::getFunction() {
-  return m_fitBrowser->getFunction();
-}
+Mantid::API::IFunction_sptr PlotFitAnalysisPaneView::getFunction() { return m_fitBrowser->getFunction(); }
 
-void PlotFitAnalysisPaneView::updateFunction(
-    const Mantid::API::IFunction_sptr func) {
+void PlotFitAnalysisPaneView::updateFunction(const Mantid::API::IFunction_sptr func) {
   m_fitBrowser->updateMultiDatasetParameters(*func);
 }
 
@@ -128,5 +115,4 @@ void PlotFitAnalysisPaneView::displayWarning(const std::string &message) {
   QMessageBox::warning(this, "Warning!", message.c_str());
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

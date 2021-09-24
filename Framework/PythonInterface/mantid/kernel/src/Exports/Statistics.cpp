@@ -144,11 +144,12 @@ std::vector<double> getZscoreNumpyDeprecated(const NDArray &data, const bool sor
  * arrays,
  */
 std::vector<double> getModifiedZscoreNumpy(const NDArray &data, const bool sorted = false) {
+  UNUSED_ARG(sorted) // We explicitly check in the kernel now
   using Converters::NDArrayToVector;
   using Mantid::Kernel::getModifiedZscore;
 
   if (isFloatArray(data.ptr())) {
-    return getModifiedZscore(NDArrayToVector<double>(data)(), sorted);
+    return getModifiedZscore(NDArrayToVector<double>(data)());
   } else {
     throw UnknownDataType();
   }
@@ -254,7 +255,7 @@ void export_Statistics() {
           .def("getZscore", &getZscoreNumpy, arg("data"), "Determine the Z score for an array of data")
           .def("getZscore", &getZscoreNumpyDeprecated, (arg("data"), arg("sorted")),
                "Determine the Z score for an array of "
-               "data (deprecated sorted argument)")
+               "data (deprecated + ignored sorted argument)")
           .staticmethod("getZscore")
 
           .def("getModifiedZscore", &getModifiedZscoreNumpy,

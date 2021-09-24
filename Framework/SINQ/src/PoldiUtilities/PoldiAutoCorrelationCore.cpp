@@ -20,8 +20,7 @@
 
 #include "MantidSINQ/PoldiUtilities/UncertainValueIO.h"
 
-namespace Mantid {
-namespace Poldi {
+namespace Mantid::Poldi {
 
 using namespace API;
 using namespace std::placeholders;
@@ -636,5 +635,4 @@ double PoldiAutoCorrelationCore::getSumOfCounts(int timeBinCount, const std::vec
   return sum;
 }
 
-} // namespace Poldi
-} // namespace Mantid
+} // namespace Mantid::Poldi

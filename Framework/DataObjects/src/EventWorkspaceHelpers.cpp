@@ -13,8 +13,7 @@
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 
 /** Converts an EventWorkspace to an equivalent Workspace2D
  * @param inputMatrixW :: input event workspace
@@ -52,5 +51,4 @@ MatrixWorkspace_sptr EventWorkspaceHelpers::convertEventTo2D(const MatrixWorkspa
   return outputW;
 }
 
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects

@@ -16,8 +16,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -58,7 +57,7 @@ void UnaryOperationMD::exec() {
     // Pass-through to the same function without "MD"
     std::string matrixAlg = this->name();
     matrixAlg = matrixAlg.substr(0, matrixAlg.size() - 2);
-    IAlgorithm_sptr alg = this->createChildAlgorithm(matrixAlg);
+    auto alg = createChildAlgorithm(matrixAlg);
     // Copy all properties from THIS to the non-MD version
     std::vector<Property *> props = this->getProperties();
     for (auto prop : props) {
@@ -79,7 +78,7 @@ void UnaryOperationMD::exec() {
 
   if (m_out != m_in) {
     // B = f(A) -> So first we clone A (lhs) into B
-    IAlgorithm_sptr clone = this->createChildAlgorithm("CloneMDWorkspace", 0.0, 0.5, true);
+    auto clone = createChildAlgorithm("CloneMDWorkspace", 0.0, 0.5, true);
     clone->setProperty("InputWorkspace", m_in);
     clone->executeAsChildAlg();
     m_out = clone->getProperty("OutputWorkspace");
@@ -108,5 +107,4 @@ void UnaryOperationMD::exec() {
   setProperty("OutputWorkspace", m_out);
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

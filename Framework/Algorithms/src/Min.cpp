@@ -11,8 +11,7 @@
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidKernel/BoundedValidator.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(Min)
@@ -54,7 +53,7 @@ void Min::exec() {
 
   // Child Algorithme does all of the actual work - do not set the output
   // workspace
-  IAlgorithm_sptr minAlgo = createChildAlgorithm("MaxMin", 0., 1.);
+  auto minAlgo = createChildAlgorithm("MaxMin", 0., 1.);
   minAlgo->setProperty("InputWorkspace", inworkspace);
   minAlgo->setProperty("RangeLower", m_MinRange);
   minAlgo->setProperty("RangeUpper", m_MaxRange);
@@ -68,5 +67,4 @@ void Min::exec() {
   this->setProperty("OutputWorkspace", outputWS);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

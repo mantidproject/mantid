@@ -24,8 +24,7 @@
 
 using namespace Mantid::PhysicalConstants;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SphericalAbsorption)
@@ -86,7 +85,7 @@ void SphericalAbsorption::exec() {
 
   progress.report("AnvredCorrection");
 
-  IAlgorithm_sptr anvred = createChildAlgorithm("AnvredCorrection");
+  auto anvred = createChildAlgorithm("AnvredCorrection");
   anvred->setProperty<MatrixWorkspace_sptr>("InputWorkspace", m_inputWS);
   anvred->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", correctionFactors);
   anvred->setProperty("PreserveEvents", true);
@@ -128,5 +127,4 @@ void SphericalAbsorption::retrieveBaseProperties() {
   m_scattering = sigma_s * rho;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

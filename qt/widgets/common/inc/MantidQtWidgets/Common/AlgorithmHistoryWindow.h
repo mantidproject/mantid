@@ -182,7 +182,7 @@ class AlgHistoryProperties : public QObject {
   Q_OBJECT
 
 public:
-  AlgHistoryProperties(QWidget *w, const std::vector<Mantid::Kernel::PropertyHistory_sptr> &propHist);
+  AlgHistoryProperties(QWidget *w, std::vector<Mantid::Kernel::PropertyHistory_sptr> propHist);
 
   void displayAlgHistoryProperties();
   void clearData();

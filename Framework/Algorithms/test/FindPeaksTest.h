@@ -33,6 +33,32 @@ using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::Points;
 
+namespace {
+/// Load focussed data file
+void loadNexusProcessed(const std::string &filename, const std::string &wsname) {
+  Mantid::DataHandling::LoadNexusProcessed loader;
+  loader.initialize();
+  loader.setProperty("Filename", filename);
+  loader.setProperty("OutputWorkspace", wsname);
+  loader.execute();
+  TS_ASSERT(loader.isExecuted());
+}
+
+const std::vector<double> VANADIUM_CENTRES{0.5044, 0.5191, 0.5350, 0.5526, 0.5936, 0.6178, 0.6453, 0.6768, 0.7134,
+                                           0.7566, 0.8089, 0.8737, 0.9571, 1.0701, 1.2356, 1.5133, 2.1401};
+
+// columns in the effective peak table
+const int COL_SPECTRUM{0};
+const int COL_CENTRE{1};
+const int COL_WIDTH{2};
+const int COL_HEIGHT{3};
+const int COL_A0{4};
+const int COL_A1{5};
+const int COL_A2{6};
+const int COL_CHISQ{7};
+
+} // anonymous namespace
+
 class FindPeaksTest : public CxxTest::TestSuite {
 public:
   static FindPeaksTest *createSuite() { return new FindPeaksTest(); }
@@ -115,59 +141,161 @@ public:
   /** Test find peaks automaticallyclear
    */
   void test_findMultiPeaksAuto() {
+    const std::string WKSP_NAME_INPUT("FindPeaksTest_peaksWS");
+    const std::string WKSP_NAME_OUTPUT("FindPeaksTest_foundpeaks");
+
     // Load data file
-    Mantid::DataHandling::LoadNexusProcessed loader;
-    loader.initialize();
-    loader.setProperty("Filename", "focussed.nxs");
-    loader.setProperty("OutputWorkspace", "FindPeaksTest_peaksWS");
-    loader.execute();
+    loadNexusProcessed("focussed.nxs", WKSP_NAME_INPUT);
 
     // Find peaks (Test)
     FindPeaks finder;
     if (!finder.isInitialized())
       finder.initialize();
 
-    TS_ASSERT_THROWS_NOTHING(finder.setPropertyValue("InputWorkspace", "FindPeaksTest_peaksWS"));
+    TS_ASSERT_THROWS_NOTHING(finder.setPropertyValue("InputWorkspace", WKSP_NAME_INPUT));
     TS_ASSERT_THROWS_NOTHING(finder.setPropertyValue("WorkspaceIndex", "4"));
     // TS_ASSERT_THROWS_NOTHING(
     // finder.setPropertyValue("SmoothedData","smoothed") );
-    TS_ASSERT_THROWS_NOTHING(finder.setPropertyValue("PeaksList", "FindPeaksTest_foundpeaks"));
+    TS_ASSERT_THROWS_NOTHING(finder.setPropertyValue("PeaksList", WKSP_NAME_OUTPUT));
 
     TS_ASSERT_THROWS_NOTHING(finder.execute());
     TS_ASSERT(finder.isExecuted());
 
     Mantid::API::ITableWorkspace_sptr peaklist = std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
-        Mantid::API::AnalysisDataService::Instance().retrieve("FindPeaksTest_foundpeaks"));
+        Mantid::API::AnalysisDataService::Instance().retrieve(WKSP_NAME_OUTPUT));
 
     TS_ASSERT(peaklist);
     TS_ASSERT_EQUALS(peaklist->rowCount(), 9);
-    TS_ASSERT_DELTA(peaklist->Double(1, 1), 0.59, 0.01);
-    TS_ASSERT_DELTA(peaklist->Double(2, 1), 0.71, 0.01);
-    TS_ASSERT_DELTA(peaklist->Double(3, 1), 0.81, 0.01);
+    // check peak positions
+    TS_ASSERT_DELTA(peaklist->Double(1, COL_CENTRE), 0.59, 0.01);
+    TS_ASSERT_DELTA(peaklist->Double(2, COL_CENTRE), 0.71, 0.01);
+    TS_ASSERT_DELTA(peaklist->Double(3, COL_CENTRE), 0.81, 0.01);
     // This is a dodgy value, that comes out different on different platforms
-    // TS_ASSERT_DELTA( peaklist->Double(3,1), 1.03, 0.01 );
-    TS_ASSERT_DELTA(peaklist->Double(5, 1), 0.96, 0.01);
-    TS_ASSERT_DELTA(peaklist->Double(6, 1), 1.24, 0.01);
-    TS_ASSERT_DELTA(peaklist->Double(7, 1), 1.52, 0.01);
-    TS_ASSERT_DELTA(peaklist->Double(8, 1), 2.14, 0.01);
+    // TS_ASSERT_DELTA( peaklist->Double(3,COL_CENTRE), 1.03, 0.01 );
+    TS_ASSERT_DELTA(peaklist->Double(5, COL_CENTRE), 0.96, 0.01);
+    TS_ASSERT_DELTA(peaklist->Double(6, COL_CENTRE), 1.24, 0.01);
+    TS_ASSERT_DELTA(peaklist->Double(7, COL_CENTRE), 1.52, 0.01);
+    TS_ASSERT_DELTA(peaklist->Double(8, COL_CENTRE), 2.14, 0.01);
+
+    // cleanup
+    AnalysisDataService::Instance().remove(WKSP_NAME_INPUT);
+    AnalysisDataService::Instance().remove(WKSP_NAME_OUTPUT);
   }
 
-  void NtestFindMultiPeaksGivenPeaksList() {
-    this->LoadPG3_733();
+  void testFindMultiPeaksGivenPeaksList() {
+    const std::string WKSP_NAME_INPUT("FindPeaksTest_vanadium");
+    const std::string WKSP_NAME_OUTPUT("FindPeaksTest_foundpeaks2");
+
+    loadNexusProcessed("PG3_733_focussed.nxs", WKSP_NAME_INPUT);
 
     FindPeaks finder;
     if (!finder.isInitialized())
       finder.initialize();
-    TS_ASSERT_THROWS_NOTHING(finder.setPropertyValue("InputWorkspace", "FindPeaksTest_vanadium"));
-    TS_ASSERT_THROWS_NOTHING(finder.setPropertyValue("WorkspaceIndex", "0"));
-    TS_ASSERT_THROWS_NOTHING(finder.setPropertyValue("PeakPositions",
-                                                     "0.5044,0.5191,0.5350,0.5526,0.5936,0.6178,0.6453,0."
-                                                     "6768,0.7134,0.7566,0.8089,0.8737,0.9571,1.0701,1."
-                                                     "2356,1.5133,2.1401"));
-    TS_ASSERT_THROWS_NOTHING(finder.setPropertyValue("PeaksList", "FindPeaksTest_foundpeaks2"));
+    TS_ASSERT_THROWS_NOTHING(finder.setPropertyValue("InputWorkspace", WKSP_NAME_INPUT));
+    TS_ASSERT_THROWS_NOTHING(finder.setProperty("WorkspaceIndex", 0)); // only fit first spectrum
+    TS_ASSERT_THROWS_NOTHING(finder.setProperty("PeakPositions", VANADIUM_CENTRES));
+    TS_ASSERT_THROWS_NOTHING(finder.setPropertyValue("PeaksList", WKSP_NAME_OUTPUT));
 
     TS_ASSERT_THROWS_NOTHING(finder.execute());
     TS_ASSERT(finder.isExecuted());
+
+    Mantid::API::ITableWorkspace_sptr peaklist = std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
+        Mantid::API::AnalysisDataService::Instance().retrieve(WKSP_NAME_OUTPUT));
+    // TODO validate the results
+
+    // cleanup
+    AnalysisDataService::Instance().remove(WKSP_NAME_INPUT);
+    AnalysisDataService::Instance().remove(WKSP_NAME_OUTPUT);
+  }
+
+  // this test is meant to mimic part of the innards the SNSPowderRedux.PG3StripPeaks system test
+  // StripVanadiumPeaks calls StripPeaks (with specific positions) which calls FindPeaks
+  void testPG3Vanadium() {
+    const std::string WKSP_NAME_INPUT("FindPeaksTest_PG3_4866");
+    const std::string WKSP_NAME_OUTPUT("FindPeaksTest_PG3_4866_table");
+
+    // copied from running the tests on ubuntu 20.04
+    const std::vector<double> HEIGHTS{657., 739., 435., 636., 1167., 554., 627., 244., 829.,
+                                      310., 773., 260., 306., 182.,  586., 292., 31.};
+    const std::vector<double> WIDTHS{0.0007, 0.0009, 0.0001, 0.0012, 0.0013, 0.0012, 0.0013, 0.0011, 0.0015,
+                                     0.0030, 0.0023, 0.0038, 0.0021, 0.0034, 0.0042, 0.0062, 0.0099};
+    // peaks that have different values on differnt operating systems
+    const std::vector<int> BAD{4, 5, 6, 9, 10, 11, 12, 13, 15, 16};
+
+    loadNexusProcessed("PG3_4866_focussed_vanadium.nxs", WKSP_NAME_INPUT);
+
+    FindPeaks finder;
+    if (!finder.isInitialized())
+      finder.initialize();
+    TS_ASSERT_THROWS_NOTHING(finder.setPropertyValue("InputWorkspace", WKSP_NAME_INPUT));
+    TS_ASSERT_THROWS_NOTHING(finder.setPropertyValue("PeaksList", WKSP_NAME_OUTPUT));
+    // values set from system test
+    TS_ASSERT_THROWS_NOTHING(finder.setProperty("PeakPositionTolerance", 0.05));
+    TS_ASSERT_THROWS_NOTHING(finder.setProperty("FWHM", 8));
+    TS_ASSERT_THROWS_NOTHING(finder.setProperty("BackgroundType", "Quadratic"));
+    // default values in StripVandiumPeaks/StripPeaks
+    TS_ASSERT_THROWS_NOTHING(finder.setProperty("PeakPositions", VANADIUM_CENTRES));
+    TS_ASSERT_THROWS_NOTHING(finder.setProperty("Tolerance", 4));
+    TS_ASSERT_THROWS_NOTHING(finder.setProperty("HighBackground", true));
+    // get the effective even though StripPeaks sets it to true
+    TS_ASSERT_THROWS_NOTHING(finder.setProperty("RawPeakParameters", false));
+
+    // run the code
+    TS_ASSERT_THROWS_NOTHING(finder.execute());
+    TS_ASSERT(finder.isExecuted());
+
+    // validate the results
+    Mantid::API::ITableWorkspace_sptr peaklist = std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
+        Mantid::API::AnalysisDataService::Instance().retrieve(WKSP_NAME_OUTPUT));
+    TS_ASSERT(peaklist);
+    const auto NUM_PEAKS = static_cast<int>(VANADIUM_CENTRES.size());
+    TS_ASSERT_EQUALS(peaklist->rowCount(), VANADIUM_CENTRES.size()); // everything requested should be present
+    // TODO
+    for (int i = 0; i < NUM_PEAKS; ++i) {
+      // only one spectrum supplied
+      TS_ASSERT_EQUALS(peaklist->Int(i, COL_SPECTRUM), 0);
+      std::cout << i << " center=" << peaklist->Double(i, COL_CENTRE) << " width=" << peaklist->Double(i, COL_WIDTH)
+                << " height=" << peaklist->Double(i, COL_HEIGHT) << " chisq=" << peaklist->Double(i, COL_CHISQ)
+                << std::endl;
+      // positions guessed were "close"
+      TS_ASSERT_DELTA(peaklist->Double(i, COL_CENTRE), VANADIUM_CENTRES[i], 0.01);
+      TS_ASSERT(peaklist->Double(i, COL_CHISQ) > 0.);
+      // other peak shape parameters show of instability
+      double tol_height = 1.;
+      double tol_width = 0.0001;
+      if (std::find(BAD.begin(), BAD.end(), i) != BAD.end()) {
+        // "light" checks have larger tolerances
+        tol_height = 10.;
+        tol_width = 0.001;
+      }
+      // super-special peaks
+      if (i == 4) {
+        tol_height = 19.;
+      } else if (i == 5) {
+        tol_height = 55.;
+        tol_width = 0.003;
+      } else if (i == 8) {
+        tol_height = 17.;
+      } else if (i == 9) {
+        tol_height = 36.;
+        tol_width = 0.0014;
+      } else if (i == 10) {
+        tol_height = 11.;
+      } else if (i == 13) {
+        tol_height = 18.;
+      } else if (i == 15) {
+        tol_height = 15.;
+      } else if (i == 16) {
+        tol_width = 0.015;
+        tol_height = 15.;
+      }
+      TS_ASSERT_DELTA(peaklist->Double(i, COL_HEIGHT), HEIGHTS[i], tol_height);
+      TS_ASSERT_DELTA(peaklist->Double(i, COL_WIDTH), WIDTHS[i], tol_width);
+    }
+
+    // cleanup
+    AnalysisDataService::Instance().remove(WKSP_NAME_INPUT);
+    AnalysisDataService::Instance().remove(WKSP_NAME_OUTPUT);
   }
 
   //----------------------------------------------------------------------------------------------
@@ -196,15 +324,6 @@ public:
     }
 
     return;
-  }
-
-  /// Load PG3_733 focussed data from AutoTest
-  void LoadPG3_733() {
-    Mantid::DataHandling::LoadNexusProcessed loader;
-    loader.initialize();
-    loader.setProperty("Filename", "PG3_733_focussed.nxs");
-    loader.setProperty("OutputWorkspace", "FindPeaksTest_vanadium");
-    loader.execute();
   }
 
   //----------------------------------------------------------------------------------------------

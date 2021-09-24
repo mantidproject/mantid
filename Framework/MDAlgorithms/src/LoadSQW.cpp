@@ -31,8 +31,7 @@ using namespace Mantid::API;
 using Mantid::Geometry::OrientedLattice;
 using namespace Mantid::DataObjects;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 namespace {
 /** Helper function allowing to typecast sequence of bytes into proper expected
@@ -144,7 +143,7 @@ void LoadSQW::exec() {
                      << " points into memory; this would be "
                         "faster than using a file back-end.\n";
 
-    IAlgorithm_sptr saver = this->createChildAlgorithm("SaveMD", 0.01, 0.05, true);
+    auto saver = createChildAlgorithm("SaveMD", 0.01, 0.05, true);
     saver->setProperty("InputWorkspace", ws);
     saver->setPropertyValue("Filename", m_outputFile);
     // should think about it.
@@ -190,7 +189,7 @@ void LoadSQW::exec() {
 
   if (!m_outputFile.empty()) {
     g_log.notice() << "Starting SaveMD to update the file back-end.\n";
-    IAlgorithm_sptr saver = this->createChildAlgorithm("SaveMD", 0.76, 1.00);
+    auto saver = createChildAlgorithm("SaveMD", 0.76, 1.00);
     saver->setProperty("InputWorkspace", ws);
     saver->setProperty("UpdateFileBackEnd", true);
     saver->executeAsChildAlg();
@@ -922,5 +921,4 @@ void dataPositions::parse_data_locations(std::ifstream &dataStream, std::streamo
 EndRegion:
 ==================================================================================*/
 } // namespace LoadSQWHelper
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

@@ -11,8 +11,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CloneWorkspace)
@@ -47,7 +46,7 @@ void CloneWorkspace::exec() {
     setProperty("OutputWorkspace", outputWS);
   } else if (inputMD) {
     // Call the CloneMDWorkspace algo to handle MDEventWorkspace
-    IAlgorithm_sptr alg = this->createChildAlgorithm("CloneMDWorkspace", 0.0, 1.0, true);
+    auto alg = createChildAlgorithm("CloneMDWorkspace", 0.0, 1.0, true);
     alg->setProperty("InputWorkspace", inputMD);
     alg->setPropertyValue("OutputWorkspace", getPropertyValue("OutputWorkspace"));
     alg->executeAsChildAlg();
@@ -59,5 +58,4 @@ void CloneWorkspace::exec() {
                              "clone this type of workspace.");
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

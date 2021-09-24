@@ -196,7 +196,7 @@ LogParser::LogParser(const Kernel::Property *log) : m_nOfPeriods(1) {
   if (!icpLog || icpLog->size() == 0) {
     periods->addValue(Types::Core::DateAndTime(), 1);
     status->addValue(Types::Core::DateAndTime(), true);
-    g_log.warning() << "Cannot process ICPevent log. Period 1 assumed for all data.\n";
+    g_log.information() << "Cannot process ICPevent log. Period 1 assumed for all data.\n";
     return;
   }
 

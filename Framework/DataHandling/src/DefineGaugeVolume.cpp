@@ -11,8 +11,7 @@
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/MandatoryValidator.h"
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using namespace Mantid::API;
 
@@ -57,5 +56,4 @@ void DefineGaugeVolume::exec() {
   progress(1);
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

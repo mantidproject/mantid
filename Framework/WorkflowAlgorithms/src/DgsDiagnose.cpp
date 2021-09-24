@@ -18,8 +18,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace WorkflowAlgorithmHelpers;
 
-namespace Mantid {
-namespace WorkflowAlgorithms {
+namespace Mantid::WorkflowAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(DgsDiagnose)
@@ -125,7 +124,7 @@ void DgsDiagnose::exec() {
   bool isStandAlone = !reductionManager->existsProperty("IncidentEnergyGuess");
 
   // Process the detector vanadium
-  IAlgorithm_sptr detVan = this->createChildAlgorithm("DgsProcessDetectorVanadium");
+  auto detVan = createChildAlgorithm("DgsProcessDetectorVanadium");
   detVan->setProperty("InputWorkspace", detVanWS);
   detVan->setProperty("OutputWorkspace", dvInternal);
   detVan->setProperty("InputMonitorWorkspace", detVanMonWS);
@@ -153,7 +152,7 @@ void DgsDiagnose::exec() {
 
     Workspace_sptr tmp;
     if (!isStandAlone) {
-      IAlgorithm_sptr cloneWs = this->createChildAlgorithm("CloneWorkspace");
+      auto cloneWs = createChildAlgorithm("CloneWorkspace");
       cloneWs->setProperty("InputWorkspace", sampleWS);
       cloneWs->setProperty("OutputWorkspace", sampleInternal);
       cloneWs->executeAsChildAlg();
@@ -161,7 +160,7 @@ void DgsDiagnose::exec() {
       sampleWS = std::static_pointer_cast<MatrixWorkspace>(tmp);
     }
 
-    IAlgorithm_sptr norm = this->createChildAlgorithm("DgsPreprocessData");
+    auto norm = createChildAlgorithm("DgsPreprocessData");
     norm->setProperty("InputWorkspace", sampleWS);
     norm->setProperty("OutputWorkspace", sampleWS);
     norm->setProperty("InputMonitorWorkspace", sampleMonWS);
@@ -173,7 +172,7 @@ void DgsDiagnose::exec() {
   // Create the total counts workspace if necessary
   MatrixWorkspace_sptr totalCountsWS;
   if (rejectZeroBkg) {
-    IAlgorithm_sptr integrate = this->createChildAlgorithm("Integration");
+    auto integrate = createChildAlgorithm("Integration");
     integrate->setProperty("InputWorkspace", sampleWS);
     integrate->setProperty("OutputWorkspace", countsInternal);
     integrate->setProperty("IncludePartialBins", true);
@@ -190,7 +189,7 @@ void DgsDiagnose::exec() {
 
     double rangeEnd = getDblPropOrParam("BackgroundTofEnd", reductionManager, "bkgd-range-max", sampleWS);
 
-    IAlgorithm_sptr integrate = this->createChildAlgorithm("Integration");
+    auto integrate = createChildAlgorithm("Integration");
     integrate->setProperty("InputWorkspace", sampleWS);
     integrate->setProperty("OutputWorkspace", bkgInternal);
     integrate->setProperty("RangeLower", rangeStart);
@@ -201,7 +200,7 @@ void DgsDiagnose::exec() {
 
     // Need to match the units between background and detector vanadium
     const std::string detVanIntRangeUnits = reductionManager->getProperty("DetVanIntRangeUnits");
-    IAlgorithm_sptr cvu = this->createChildAlgorithm("ConvertUnits");
+    auto cvu = createChildAlgorithm("ConvertUnits");
     cvu->setProperty("InputWorkspace", backgroundIntWS);
     cvu->setProperty("OutputWorkspace", backgroundIntWS);
     cvu->setProperty("Target", detVanIntRangeUnits);
@@ -226,7 +225,7 @@ void DgsDiagnose::exec() {
     sampleWS = std::shared_ptr<MatrixWorkspace>();
   }
 
-  IAlgorithm_sptr diag = this->createChildAlgorithm("DetectorDiagnostic");
+  auto diag = createChildAlgorithm("DetectorDiagnostic");
   diag->setProperty("InputWorkspace", dvWS);
   diag->setProperty("DetVanCompare", dvCompWS);
   diag->setProperty("SampleWorkspace", sampleWS);
@@ -269,7 +268,7 @@ void DgsDiagnose::exec() {
       diag->execute();
       if (maskWS) {
         MatrixWorkspace_sptr tmp = diag->getProperty("OutputWorkspace");
-        IAlgorithm_sptr comb = createChildAlgorithm("BinaryOperateMasks");
+        auto comb = createChildAlgorithm("BinaryOperateMasks");
         comb->setProperty("InputWorkspace1", maskWS);
         comb->setProperty("InputWorkspace2", tmp);
         comb->setProperty("OutputWorkspace", maskWS);
@@ -293,7 +292,7 @@ void DgsDiagnose::exec() {
   if (reductionManager->existsProperty("OutputMaskFile")) {
     std::string maskFilename = reductionManager->getPropertyValue("OutputMaskFile");
     if (!maskFilename.empty()) {
-      IAlgorithm_sptr saveNxs = this->createChildAlgorithm("SaveMask");
+      auto saveNxs = createChildAlgorithm("SaveMask");
       saveNxs->setProperty("InputWorkspace", maskWS);
       saveNxs->setProperty("OutputFile", maskFilename);
       saveNxs->execute();
@@ -306,5 +305,4 @@ void DgsDiagnose::exec() {
   this->setProperty("OutputWorkspace", maskWS);
 }
 
-} // namespace WorkflowAlgorithms
-} // namespace Mantid
+} // namespace Mantid::WorkflowAlgorithms

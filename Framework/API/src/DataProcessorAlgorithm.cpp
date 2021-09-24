@@ -28,8 +28,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -212,7 +211,7 @@ template <class Base> MatrixWorkspace_sptr GenericDataProcessorAlgorithm<Base>::
 template <class Base> Workspace_sptr GenericDataProcessorAlgorithm<Base>::assemble(Workspace_sptr partialWS) {
   Workspace_sptr outputWS = std::move(partialWS);
 #ifdef MPI_BUILD
-  IAlgorithm_sptr gatherAlg = createChildAlgorithm("GatherWorkspaces");
+  auto gatherAlg = createChildAlgorithm("GatherWorkspaces");
   gatherAlg->setLogging(true);
   gatherAlg->setAlwaysStoreInADS(true);
   gatherAlg->setProperty("InputWorkspace", partialWS);
@@ -240,7 +239,7 @@ Workspace_sptr GenericDataProcessorAlgorithm<Base>::assemble(const std::string &
 #ifdef MPI_BUILD
   std::string threadOutput = partialWSName;
   Workspace_sptr partialWS = AnalysisDataService::Instance().retrieve(partialWSName);
-  IAlgorithm_sptr gatherAlg = createChildAlgorithm("GatherWorkspaces");
+  auto gatherAlg = createChildAlgorithm("GatherWorkspaces");
   gatherAlg->setLogging(true);
   gatherAlg->setAlwaysStoreInADS(true);
   gatherAlg->setProperty("InputWorkspace", partialWS);
@@ -271,7 +270,7 @@ void GenericDataProcessorAlgorithm<Base>::saveNexus(const std::string &outputWSN
 #else
   if (!outputFile.empty()) {
 #endif
-    IAlgorithm_sptr saveAlg = createChildAlgorithm("SaveNexus");
+    auto saveAlg = createChildAlgorithm("SaveNexus");
     saveAlg->setPropertyValue("Filename", outputFile);
     saveAlg->setPropertyValue("InputWorkspace", outputWSName);
     saveAlg->execute();
@@ -323,7 +322,7 @@ Workspace_sptr GenericDataProcessorAlgorithm<Base>::load(const std::string &inpu
       Poco::Path p(foundFile);
       const std::string outputWSName = p.getBaseName();
 
-      IAlgorithm_sptr loadAlg = createChildAlgorithm(m_loadAlg);
+      auto loadAlg = createChildAlgorithm(m_loadAlg);
       loadAlg->setProperty(m_loadAlgFileProp, foundFile);
       if (!loadQuiet) {
         loadAlg->setAlwaysStoreInADS(true);
@@ -531,5 +530,4 @@ template class MANTID_API_DLL GenericDataProcessorAlgorithm<DistributedAlgorithm
 
 template <> MANTID_API_DLL void GenericDataProcessorAlgorithm<Algorithm>::visualStudioC4661Workaround() {}
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

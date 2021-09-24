@@ -174,7 +174,7 @@ private:
                                                                const size_t nWorkspaceEntries, const size_t p);
 
   /// applies log filtering of the loaded logs if required
-  void applyLogFiltering(Mantid::API::Workspace_sptr local_workspace);
+  void applyLogFiltering(const Mantid::API::Workspace_sptr &local_workspace);
 
   /// Does the current workspace have uniform binning
   bool m_shared_bins;

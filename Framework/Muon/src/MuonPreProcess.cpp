@@ -30,8 +30,7 @@ using namespace Mantid::Kernel;
 
 namespace {} // namespace
 
-namespace Mantid {
-namespace Muon {
+namespace Mantid::Muon {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(MuonPreProcess)
@@ -202,7 +201,7 @@ MatrixWorkspace_sptr MuonPreProcess::correctWorkspace(MatrixWorkspace_sptr ws) {
 
 MatrixWorkspace_sptr MuonPreProcess::applyDTC(MatrixWorkspace_sptr ws, const TableWorkspace_sptr &dt) {
   if (dt != nullptr) {
-    IAlgorithm_sptr dtc = this->createChildAlgorithm("ApplyDeadTimeCorr");
+    auto dtc = createChildAlgorithm("ApplyDeadTimeCorr");
     dtc->setProperty("InputWorkspace", ws);
     dtc->setProperty("DeadTimeTable", dt);
     dtc->execute();
@@ -214,7 +213,7 @@ MatrixWorkspace_sptr MuonPreProcess::applyDTC(MatrixWorkspace_sptr ws, const Tab
 
 MatrixWorkspace_sptr MuonPreProcess::applyTimeOffset(MatrixWorkspace_sptr ws, const double &offset) {
   if (offset != EMPTY_DBL()) {
-    IAlgorithm_sptr changeOffset = createChildAlgorithm("ChangeBinOffset");
+    auto changeOffset = createChildAlgorithm("ChangeBinOffset");
     changeOffset->setProperty("InputWorkspace", ws);
     changeOffset->setProperty("Offset", offset);
     changeOffset->execute();
@@ -224,7 +223,7 @@ MatrixWorkspace_sptr MuonPreProcess::applyTimeOffset(MatrixWorkspace_sptr ws, co
   }
 }
 
-MatrixWorkspace_sptr MuonPreProcess::applyTimeZeroTable(MatrixWorkspace_sptr ws,
+MatrixWorkspace_sptr MuonPreProcess::applyTimeZeroTable(const MatrixWorkspace_sptr &ws,
                                                         const TableWorkspace_sptr &timeZeroTable) {
   auto cloneWs = cloneWorkspace(ws);
   if (!timeZeroTable) {
@@ -251,9 +250,9 @@ MatrixWorkspace_sptr MuonPreProcess::applyCropping(MatrixWorkspace_sptr ws, cons
     return cropWithVectors(ws, xMin, xMax);
 }
 
-MatrixWorkspace_sptr MuonPreProcess::cropWithSingleValues(MatrixWorkspace_sptr ws, const double xMin,
+MatrixWorkspace_sptr MuonPreProcess::cropWithSingleValues(const MatrixWorkspace_sptr &ws, const double xMin,
                                                           const double xMax) {
-  IAlgorithm_sptr crop = createChildAlgorithm("CropWorkspace");
+  auto crop = createChildAlgorithm("CropWorkspace");
   crop->setProperty("InputWorkspace", ws);
   if (xMin != EMPTY_DBL())
     crop->setProperty("Xmin", xMin);
@@ -263,7 +262,8 @@ MatrixWorkspace_sptr MuonPreProcess::cropWithSingleValues(MatrixWorkspace_sptr w
   return crop->getProperty("OutputWorkspace");
 }
 
-MatrixWorkspace_sptr MuonPreProcess::cropWithVectors(MatrixWorkspace_sptr ws, const double xMin, const double xMax) {
+MatrixWorkspace_sptr MuonPreProcess::cropWithVectors(const MatrixWorkspace_sptr &ws, const double xMin,
+                                                     const double xMax) {
   std::vector<double> xMinVec;
   std::vector<double> xMaxVec;
 
@@ -285,7 +285,7 @@ MatrixWorkspace_sptr MuonPreProcess::cropWithVectors(MatrixWorkspace_sptr ws, co
     }
   }
 
-  IAlgorithm_sptr cropRagged = createChildAlgorithm("CropWorkspaceRagged");
+  auto cropRagged = createChildAlgorithm("CropWorkspaceRagged");
   cropRagged->setProperty("InputWorkspace", ws);
   cropRagged->setProperty("XMin", xMinVec);
   cropRagged->setProperty("XMax", xMaxVec);
@@ -295,7 +295,7 @@ MatrixWorkspace_sptr MuonPreProcess::cropWithVectors(MatrixWorkspace_sptr ws, co
 
 MatrixWorkspace_sptr MuonPreProcess::applyRebinning(MatrixWorkspace_sptr ws, const std::vector<double> &rebinArgs) {
   if (!rebinArgs.empty()) {
-    IAlgorithm_sptr rebin = createChildAlgorithm("Rebin");
+    auto rebin = createChildAlgorithm("Rebin");
     rebin->setProperty("InputWorkspace", ws);
     rebin->setProperty("Params", rebinArgs);
     rebin->setProperty("FullBinsOnly", false);
@@ -307,7 +307,7 @@ MatrixWorkspace_sptr MuonPreProcess::applyRebinning(MatrixWorkspace_sptr ws, con
 }
 
 MatrixWorkspace_sptr MuonPreProcess::cloneWorkspace(const MatrixWorkspace_sptr &ws) {
-  IAlgorithm_sptr cloneWorkspace = this->createChildAlgorithm("CloneWorkspace");
+  auto cloneWorkspace = createChildAlgorithm("CloneWorkspace");
   cloneWorkspace->setProperty("InputWorkspace", ws);
   cloneWorkspace->execute();
   Workspace_sptr wsClone = cloneWorkspace->getProperty("OutputWorkspace");
@@ -363,5 +363,4 @@ void MuonPreProcess::addPreProcessSampleLogs(const WorkspaceGroup_sptr &group) {
 // Allow WorkspaceGroup property to function correctly.
 bool MuonPreProcess::checkGroups() { return false; }
 
-} // namespace Muon
-} // namespace Mantid
+} // namespace Mantid::Muon

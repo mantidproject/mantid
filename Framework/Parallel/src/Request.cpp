@@ -10,8 +10,7 @@
 #include <boost/mpi/status.hpp>
 #endif
 
-namespace Mantid {
-namespace Parallel {
+namespace Mantid::Parallel {
 
 #ifdef MPI_EXPERIMENTAL
 Request::Request(const boost::mpi::request &request) : m_request(request) {}
@@ -28,5 +27,4 @@ void Request::wait() {
 #endif
 }
 
-} // namespace Parallel
-} // namespace Mantid
+} // namespace Mantid::Parallel

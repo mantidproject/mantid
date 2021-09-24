@@ -22,8 +22,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::PhysicalConstants;
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(StatisticsOfPeaksWorkspace)
@@ -190,7 +189,7 @@ void StatisticsOfPeaksWorkspace::doSortHKL(const Mantid::API::Workspace_sptr &ws
   std::string equivalentIntensities = getPropertyValue("EquivalentIntensities");
   double sigmaCritical = getProperty("SigmaCritical");
   bool weightedZ = getProperty("WeightedZScore");
-  API::IAlgorithm_sptr statsAlg = createChildAlgorithm("SortHKL");
+  auto statsAlg = createChildAlgorithm("SortHKL");
   statsAlg->setProperty("InputWorkspace", ws);
   statsAlg->setPropertyValue("OutputWorkspace", wkspName);
   statsAlg->setPropertyValue("StatisticsTable", tableName);
@@ -212,5 +211,4 @@ void StatisticsOfPeaksWorkspace::doSortHKL(const Mantid::API::Workspace_sptr &ws
   setProperty("EquivalentsWorkspace", equivws);
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

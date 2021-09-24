@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "QtBatchView.h"
 #include "GUI/Event/QtEventView.h"
+#include "GUI/Preview/QtPreviewView.h"
 #include "GUI/Runs/QtRunsView.h"
 #include "GUI/Save/QtSaveView.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -16,9 +17,7 @@
 #include <QMetaType>
 #include <utility>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 using API::BatchAlgorithmRunner;
 using Mantid::API::IAlgorithm_sptr;
@@ -47,6 +46,13 @@ void QtBatchView::initLayout() {
   m_instrument = std::make_unique<QtInstrumentView>(createReductionAlg(), this);
   m_ui.batchTabs->addTab(m_instrument.get(), "Instrument Settings");
 
+  m_preview = std::make_unique<QtPreviewView>(this);
+  m_ui.batchTabs->addTab(m_preview.get(), "Reduction Preview");
+#ifdef NDEBUG
+  // Preview disabled in Release mode to prevent users "finding" it in the nightly
+  m_ui.batchTabs->removeTab(m_ui.batchTabs->indexOf(m_preview.get()));
+#endif // NDEBUG
+
   m_save = createSaveTab();
   m_ui.batchTabs->addTab(m_save.get(), "Save ASCII");
 }
@@ -54,6 +60,8 @@ void QtBatchView::initLayout() {
 IExperimentView *QtBatchView::experiment() const { return m_experiment.get(); }
 
 IInstrumentView *QtBatchView::instrument() const { return m_instrument.get(); }
+
+IPreviewView *QtBatchView::preview() const { return m_preview.get(); }
 
 IRunsView *QtBatchView::runs() const { return m_runs.get(); }
 
@@ -110,6 +118,4 @@ IAlgorithm_sptr QtBatchView::createReductionAlg() {
 }
 
 std::unique_ptr<QtSaveView> QtBatchView::createSaveTab() { return std::make_unique<QtSaveView>(this); }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

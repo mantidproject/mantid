@@ -71,8 +71,7 @@ bool convertLogToDouble(const Mantid::Kernel::Property *property, double &value,
 
 } // namespace
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Kernel;
 using namespace API;
@@ -196,14 +195,32 @@ void PlotAsymmetryByLogValue::exec() {
   MatrixWorkspace_sptr outWS = create<Workspace2D>(nplots,         //  the number of plots
                                                    Points(npoints) //  the number of data points on a plot
   );
+  const auto units = getLogUnits(m_fileNames[0]);
   // Populate output workspace with data
-  populateOutputWorkspace(outWS, nplots);
+  populateOutputWorkspace(outWS, nplots, units);
+
   // Assign the result to the output workspace property
   setProperty("OutputWorkspace", outWS);
 
   outWS = create<Workspace2D>(nplots + 1, Points(npoints));
   // Populate ws holding current results
   saveResultsToADS(outWS, nplots + 1);
+}
+
+const std::string PlotAsymmetryByLogValue::getLogUnits(const std::string &fileName) {
+  Workspace_sptr loadedWs = doLoad(fileName);
+  MatrixWorkspace_sptr ws;
+  // Check if workspace is a workspace group
+  WorkspaceGroup_sptr group = std::dynamic_pointer_cast<WorkspaceGroup>(loadedWs);
+  // If it is not, we only have 'red' data
+  if (!group) {
+    ws = std::dynamic_pointer_cast<MatrixWorkspace>(loadedWs);
+  } else {
+    ws = std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(m_red - 1));
+  }
+  const Run &run = ws->run();
+  auto property = run.getLogData(m_logName);
+  return property->units();
 }
 
 /**  Finds path to a file and removes file name to return it's directory
@@ -370,7 +387,7 @@ void PlotAsymmetryByLogValue::checkProperties(size_t &firstRunNumber, size_t &la
 Workspace_sptr PlotAsymmetryByLogValue::doLoad(const std::string &fileName) {
 
   // Load run
-  IAlgorithm_sptr load = createChildAlgorithm("LoadMuonNexus");
+  auto load = createChildAlgorithm("LoadMuonNexus");
   load->setPropertyValue("Filename", fileName);
   load->setPropertyValue("DetectorGroupingTable", "detGroupTable");
   load->setPropertyValue("DeadTimeTable", "deadTimeTable");
@@ -419,7 +436,7 @@ Workspace_sptr PlotAsymmetryByLogValue::doLoad(const std::string &fileName) {
  */
 Workspace_sptr PlotAsymmetryByLogValue::loadCorrectionsFromFile(const std::string &deadTimeFile) {
 
-  IAlgorithm_sptr alg = createChildAlgorithm("LoadNexusProcessed");
+  auto alg = createChildAlgorithm("LoadNexusProcessed");
   alg->setPropertyValue("Filename", deadTimeFile);
   alg->setLogging(false);
   alg->execute();
@@ -431,7 +448,8 @@ Workspace_sptr PlotAsymmetryByLogValue::loadCorrectionsFromFile(const std::strin
  *   @param outWS :: [input/output] Output workspace to populate
  *   @param nplots :: [input] Number of histograms
  */
-void PlotAsymmetryByLogValue::populateOutputWorkspace(MatrixWorkspace_sptr &outWS, int nplots) {
+void PlotAsymmetryByLogValue::populateOutputWorkspace(MatrixWorkspace_sptr &outWS, int nplots,
+                                                      const std::string &units) {
 
   auto tAxis = std::make_unique<TextAxis>(nplots);
   if (nplots == 1) {
@@ -468,6 +486,8 @@ void PlotAsymmetryByLogValue::populateOutputWorkspace(MatrixWorkspace_sptr &outW
   }
   outWS->replaceAxis(1, std::move(tAxis));
   outWS->getAxis(0)->title() = m_logName;
+  outWS->getAxis(0)->setUnit("Label");
+  std::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(outWS->getAxis(0)->unit())->setLabel(m_logName, units);
   outWS->setYUnitLabel("Asymmetry");
 }
 
@@ -612,11 +632,11 @@ int PlotAsymmetryByLogValue::extractRunNumberFromRunName(std::string runName) {
  *   @param loadedWs :: [input/output] Workspace to apply corrections to
  *   @param deadTimes :: [input] Corrections to apply
  */
-void PlotAsymmetryByLogValue::applyDeadtimeCorr(Workspace_sptr &loadedWs, Workspace_sptr deadTimes) {
+void PlotAsymmetryByLogValue::applyDeadtimeCorr(Workspace_sptr &loadedWs, const Workspace_sptr &deadTimes) {
   ScopedWorkspace ws(loadedWs);
-  ScopedWorkspace dt(std::move(deadTimes));
+  ScopedWorkspace dt(deadTimes);
 
-  IAlgorithm_sptr applyCorr = AlgorithmManager::Instance().createUnmanaged("ApplyDeadTimeCorr");
+  auto applyCorr = AlgorithmManager::Instance().createUnmanaged("ApplyDeadTimeCorr");
   applyCorr->initialize();
   applyCorr->setLogging(false);
   applyCorr->setRethrows(true);
@@ -651,14 +671,14 @@ Workspace_sptr PlotAsymmetryByLogValue::createCustomGrouping(const std::vector<i
  *   @param loadedWs :: [input/output] Workspace to apply grouping to
  *   @param grouping :: [input] Workspace containing grouping to apply
  */
-void PlotAsymmetryByLogValue::groupDetectors(Workspace_sptr &loadedWs, Workspace_sptr grouping) {
+void PlotAsymmetryByLogValue::groupDetectors(Workspace_sptr &loadedWs, const Workspace_sptr &grouping) {
 
   // Could be groups of workspaces, so need to work with ADS
   ScopedWorkspace inWS(loadedWs);
-  ScopedWorkspace grWS(std::move(grouping));
+  ScopedWorkspace grWS(grouping);
   ScopedWorkspace outWS;
 
-  IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("MuonGroupDetectors");
+  auto alg = AlgorithmManager::Instance().createUnmanaged("MuonGroupDetectors");
   alg->initialize();
   alg->setLogging(false);
   alg->setPropertyValue("InputWorkspace", inWS.name());
@@ -743,13 +763,13 @@ void PlotAsymmetryByLogValue::calcIntAsymmetry(const MatrixWorkspace_sptr &ws, d
   MatrixWorkspace_sptr out;
 
   if (!m_int) { //  "Differential asymmetry"
-    IAlgorithm_sptr asym = createChildAlgorithm("AsymmetryCalc");
+    auto asym = createChildAlgorithm("AsymmetryCalc");
     asym->setLogging(false);
     asym->setProperty("InputWorkspace", ws);
     asym->execute();
     MatrixWorkspace_sptr asymWS = asym->getProperty("OutputWorkspace");
 
-    IAlgorithm_sptr integr = createChildAlgorithm("Integration");
+    auto integr = createChildAlgorithm("Integration");
     integr->setLogging(false);
     integr->setProperty("InputWorkspace", asymWS);
     integr->setProperty("RangeLower", m_minTime);
@@ -759,7 +779,7 @@ void PlotAsymmetryByLogValue::calcIntAsymmetry(const MatrixWorkspace_sptr &ws, d
 
   } else {
     //  "Integral asymmetry"
-    IAlgorithm_sptr integr = createChildAlgorithm("Integration");
+    auto integr = createChildAlgorithm("Integration");
     integr->setLogging(false);
     integr->setProperty("InputWorkspace", ws);
     integr->setProperty("RangeLower", m_minTime);
@@ -767,7 +787,7 @@ void PlotAsymmetryByLogValue::calcIntAsymmetry(const MatrixWorkspace_sptr &ws, d
     integr->execute();
     MatrixWorkspace_sptr intWS = integr->getProperty("OutputWorkspace");
 
-    IAlgorithm_sptr asym = createChildAlgorithm("AsymmetryCalc");
+    auto asym = createChildAlgorithm("AsymmetryCalc");
     asym->setLogging(false);
     asym->setProperty("InputWorkspace", intWS);
     asym->setProperty("Alpha", m_alpha);
@@ -804,7 +824,7 @@ void PlotAsymmetryByLogValue::calcIntAsymmetry(const MatrixWorkspace_sptr &ws_re
       tmpWS->mutableE(0)[i] = (1.0 + ZF * ZF) * FNORM + (1.0 + ZB * ZB) * BNORM;
     }
 
-    IAlgorithm_sptr integr = createChildAlgorithm("Integration");
+    auto integr = createChildAlgorithm("Integration");
     integr->setProperty("InputWorkspace", tmpWS);
     integr->setProperty("RangeLower", m_minTime);
     integr->setProperty("RangeUpper", m_maxTime);
@@ -815,7 +835,7 @@ void PlotAsymmetryByLogValue::calcIntAsymmetry(const MatrixWorkspace_sptr &ws_re
     E = out->e(0)[0] / static_cast<double>(tmpWS->y(0).size());
   } else {
     //  "Integral asymmetry"
-    IAlgorithm_sptr integr = createChildAlgorithm("Integration");
+    auto integr = createChildAlgorithm("Integration");
     integr->setProperty("InputWorkspace", ws_red);
     integr->setProperty("RangeLower", m_minTime);
     integr->setProperty("RangeUpper", m_maxTime);
@@ -909,5 +929,4 @@ double PlotAsymmetryByLogValue::getLogValue(MatrixWorkspace &ws) {
   throw std::invalid_argument("Log " + m_logName + " cannot be converted to a double type.");
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

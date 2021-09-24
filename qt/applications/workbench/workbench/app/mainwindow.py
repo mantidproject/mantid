@@ -66,10 +66,19 @@ def _get_splash_image():
                                                                 Qt.SmoothTransformation)
 
 
+def _get_interface_dir():
+    """
+    Returns the path to the directory containing the mantidqt interfaces launch scripts
+    This is the path to the mantidqtinterfaces package
+    """
+    import mantidqtinterfaces
+    return os.path.dirname(mantidqtinterfaces.__file__)
+
+
 SPLASH = QSplashScreen(_get_splash_image(), Qt.WindowStaysOnTopHint)
 SPLASH.show()
-SPLASH.showMessage("Starting...", Qt.AlignBottom | Qt.AlignLeft
-                   | Qt.AlignAbsolute, QColor(Qt.black))
+SPLASH.showMessage("Starting...", int(Qt.AlignBottom | Qt.AlignLeft
+                   | Qt.AlignAbsolute), QColor(Qt.black))
 # The event loop has not started - force event processing
 QApplication.processEvents(QEventLoop.AllEvents)
 
@@ -93,6 +102,7 @@ class MainWindow(QMainWindow):
         self.messagedisplay = None
         self.ipythonconsole = None
         self.workspacewidget = None
+        self.workspacecalculator = None
         self.editor = None
         self.algorithm_selector = None
         self.plot_selector = None
@@ -191,6 +201,11 @@ class MainWindow(QMainWindow):
         self.algorithm_selector.algorithm_selector.set_get_selected_workspace_fn(
             self.workspacewidget.workspacewidget.getSelectedWorkspaceNames)
 
+        from workbench.plugins.workspacecalculatorwidget import WorkspaceCalculatorWidget
+        self.workspacecalculator = WorkspaceCalculatorWidget(self)
+        self.workspacecalculator.register_plugin()
+        self.widgets.append(self.workspacecalculator)
+
         # Set up the project, recovery and interface manager objects
         self.project = Project(GlobalFigureManager, find_all_windows_that_are_savable)
         self.project_recovery = ProjectRecovery(globalfiguremanager=GlobalFigureManager,
@@ -226,7 +241,7 @@ class MainWindow(QMainWindow):
         if not self.splash:
             return
         if msg:
-            self.splash.showMessage(msg, Qt.AlignBottom | Qt.AlignLeft | Qt.AlignAbsolute,
+            self.splash.showMessage(msg, int(Qt.AlignBottom | Qt.AlignLeft | Qt.AlignAbsolute),
                                     QColor(Qt.black))
         QApplication.processEvents(QEventLoop.AllEvents)
 
@@ -363,7 +378,8 @@ class MainWindow(QMainWindow):
     def populate_interfaces_menu(self):
         """Populate then Interfaces menu with all Python and C++ interfaces"""
         self.interfaces_menu.clear()
-        interface_dir = ConfigService['mantidqt.python_interfaces_directory']
+        interface_dir = _get_interface_dir()
+
         self.interface_list, registers_to_run = self._discover_python_interfaces(interface_dir)
         self._discover_cpp_interfaces(self.interface_list)
         hidden_interfaces = ConfigService['interfaces.categories.hidden'].split(';')
@@ -391,7 +407,8 @@ class MainWindow(QMainWindow):
         for reg_list in registers_to_run.values():
             for register in reg_list:
                 file_path = os.path.join(interface_dir, register)
-                self.interface_executor.execute(open(file_path).read(), file_path)
+                with open(file_path) as handle:
+                    self.interface_executor.execute(handle.read(), file_path)
 
     def redirect_python_warnings(self):
         """By default the warnings module writes warnings to sys.stderr. stderr is assumed to be
@@ -492,7 +509,7 @@ class MainWindow(QMainWindow):
         editor = self.editor
         algorithm_selector = self.algorithm_selector
         plot_selector = self.plot_selector
-
+        workspacecalculator = self.workspacecalculator
         # If more than two rows are needed in a column,
         # arrange_layout function needs to be revisited.
         # In the first column, there are three widgets in two rows
@@ -502,7 +519,7 @@ class MainWindow(QMainWindow):
                 # column 0
                 [[workspacewidget], [algorithm_selector, plot_selector]],
                 # column 1
-                [[editor, ipython]],
+                [[editor, ipython], [workspacecalculator]],
                 # column 2
                 [[memorywidget], [logmessages]]
             ],
@@ -588,6 +605,9 @@ class MainWindow(QMainWindow):
 
             if self.interface_manager is not None:
                 self.interface_manager.closeHelpWindow()
+
+            if self.workspacecalculator is not None:
+                self.workspacecalculator.view.closeEvent(event)
 
             event.accept()
         else:

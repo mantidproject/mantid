@@ -13,8 +13,7 @@
 
 #include <cfloat>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 using Kernel::V3D;
 
 //---------------------------------------------------------
@@ -270,5 +269,4 @@ std::ostream &operator<<(std::ostream &os, const BoundingBox &box) {
      << "; Z from " << box.zMin() << " to " << box.zMax();
   return os;
 }
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

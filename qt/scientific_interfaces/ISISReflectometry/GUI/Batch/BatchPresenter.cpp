@@ -14,10 +14,9 @@
 #include "GUI/Save/ISavePresenter.h"
 #include "IBatchView.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
+#include <memory>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 using API::IConfiguredAlgorithm_sptr;
 
@@ -37,11 +36,13 @@ BatchPresenter::BatchPresenter(IBatchView *view, Batch model, std::unique_ptr<IR
                                std::unique_ptr<IEventPresenter> eventPresenter,
                                std::unique_ptr<IExperimentPresenter> experimentPresenter,
                                std::unique_ptr<IInstrumentPresenter> instrumentPresenter,
-                               std::unique_ptr<ISavePresenter> savePresenter)
+                               std::unique_ptr<ISavePresenter> savePresenter,
+                               std::unique_ptr<IPreviewPresenter> previewPresenter)
     : m_view(view), m_mainPresenter(), m_runsPresenter(std::move(runsPresenter)),
       m_eventPresenter(std::move(eventPresenter)), m_experimentPresenter(std::move(experimentPresenter)),
       m_instrumentPresenter(std::move(instrumentPresenter)), m_savePresenter(std::move(savePresenter)),
-      m_unsavedBatchFlag(false), m_jobRunner(new BatchJobRunner(std::move(model))) {
+      m_previewPresenter(std::move(previewPresenter)), m_unsavedBatchFlag(false),
+      m_jobRunner(new BatchJobRunner(model)) {
 
   m_view->subscribe(this);
 
@@ -324,6 +325,4 @@ void BatchPresenter::clearADSHandle() {
   m_runsPresenter->notifyRowOutputsChanged();
   m_runsPresenter->notifyRowStateChanged();
 }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

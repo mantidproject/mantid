@@ -17,8 +17,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CloneMDWorkspace)
@@ -57,7 +56,7 @@ template <typename MDE, size_t nd> void CloneMDWorkspace::doClone(const typename
     if (ws->fileNeedsUpdating()) {
       // Data was modified! You need to save first.
       g_log.notice() << "InputWorkspace's file-backend being updated. \n";
-      IAlgorithm_sptr alg = createChildAlgorithm("SaveMD", 0.0, 0.4, false);
+      auto alg = createChildAlgorithm("SaveMD", 0.0, 0.4, false);
       alg->setProperty("InputWorkspace", ws);
       alg->setPropertyValue("UpdateFileBackEnd", "1");
       alg->executeAsChildAlg();
@@ -80,7 +79,7 @@ template <typename MDE, size_t nd> void CloneMDWorkspace::doClone(const typename
     g_log.information() << "File copied successfully.\n";
 
     // Now load it back
-    IAlgorithm_sptr alg = createChildAlgorithm("LoadMD", 0.5, 1.0, false);
+    auto alg = createChildAlgorithm("LoadMD", 0.5, 1.0, false);
     alg->setPropertyValue("Filename", outFilename);
     alg->setPropertyValue("FileBackEnd", "1");
     alg->setPropertyValue("Memory", "0"); // TODO: How much memory?
@@ -119,5 +118,4 @@ void CloneMDWorkspace::exec() {
   }
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

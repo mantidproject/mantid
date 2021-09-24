@@ -11,8 +11,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 
 using std::string;
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(RemovePromptPulse)
@@ -124,7 +123,7 @@ void RemovePromptPulse::exec() {
     g_log.notice() << "Filtering tmin=" << pulseTime << ", tmax=" << right << " microseconds\n";
 
     // run maskbins to do the work on the first prompt pulse
-    IAlgorithm_sptr algo = this->createChildAlgorithm("MaskBins");
+    auto algo = createChildAlgorithm("MaskBins");
     if (outputWS) {
       algo->setProperty<MatrixWorkspace_sptr>("InputWorkspace", std::const_pointer_cast<MatrixWorkspace>(outputWS));
     } else { // should only be first time
@@ -187,5 +186,4 @@ std::vector<double> RemovePromptPulse::calculatePulseTimes(const double tmin, co
 
   return times;
 }
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

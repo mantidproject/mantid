@@ -135,7 +135,6 @@ ConfigServiceImpl::ConfigServiceImpl()
 
   setBaseDirectory();
 
-  m_configPaths.insert("mantidqt.python_interfaces_directory");
   m_configPaths.insert("framework.plugins.directory");
   m_configPaths.insert("mantidqt.plugins.directory");
   m_configPaths.insert("instrumentDefinition.directory");
@@ -1238,7 +1237,6 @@ std::string ConfigServiceImpl::getDirectoryOfExecutable() const {
 std::string ConfigServiceImpl::getPathToExecutable() const {
   std::string execpath;
   const size_t LEN(1024);
-  // cppcheck-suppress variableScope
   char pBuf[LEN];
 
 #ifdef _WIN32

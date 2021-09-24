@@ -13,9 +13,7 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 using API::IConfiguredAlgorithm_sptr;
 using Mantid::API::IAlgorithm_sptr;
@@ -103,17 +101,17 @@ void updateExperimentProperties(AlgorithmRuntimeProps &properties, Experiment co
   updateFloodCorrectionProperties(properties, experiment.floodCorrections());
 }
 
-void updatePerThetaDefaultProperties(AlgorithmRuntimeProps &properties, PerThetaDefaults const *perThetaDefaults) {
-  if (!perThetaDefaults)
+void updateLookupRowProperties(AlgorithmRuntimeProps &properties, LookupRow const *lookupRow) {
+  if (!lookupRow)
     return;
 
-  updateTransmissionWorkspaceProperties(properties, perThetaDefaults->transmissionWorkspaceNames());
-  AlgorithmProperties::update("TransmissionProcessingInstructions",
-                              perThetaDefaults->transmissionProcessingInstructions(), properties);
-  updateMomentumTransferProperties(properties, perThetaDefaults->qRange());
-  AlgorithmProperties::update("ScaleFactor", perThetaDefaults->scaleFactor(), properties);
-  AlgorithmProperties::update("ProcessingInstructions", perThetaDefaults->processingInstructions(), properties);
-  AlgorithmProperties::update("BackgroundProcessingInstructions", perThetaDefaults->backgroundProcessingInstructions(),
+  updateTransmissionWorkspaceProperties(properties, lookupRow->transmissionWorkspaceNames());
+  AlgorithmProperties::update("TransmissionProcessingInstructions", lookupRow->transmissionProcessingInstructions(),
+                              properties);
+  updateMomentumTransferProperties(properties, lookupRow->qRange());
+  AlgorithmProperties::update("ScaleFactor", lookupRow->scaleFactor(), properties);
+  AlgorithmProperties::update("ProcessingInstructions", lookupRow->processingInstructions(), properties);
+  AlgorithmProperties::update("BackgroundProcessingInstructions", lookupRow->backgroundProcessingInstructions(),
                               properties);
 }
 
@@ -237,7 +235,7 @@ AlgorithmRuntimeProps createAlgorithmRuntimeProps(Batch const &model, Row const 
   auto properties = createAlgorithmRuntimeProps(model);
   // Update properties specific to this row - the per-angle options based on
   // the known angle, and the values in the table cells in the row
-  updatePerThetaDefaultProperties(properties, model.defaultsForTheta(row.theta()));
+  updateLookupRowProperties(properties, model.findLookupRow(row.theta()));
   updateRowProperties(properties, row);
   return properties;
 }
@@ -249,10 +247,8 @@ AlgorithmRuntimeProps createAlgorithmRuntimeProps(Batch const &model) {
   updateEventProperties(properties, model.slicing());
   updateExperimentProperties(properties, model.experiment());
   updateInstrumentProperties(properties, model.instrument());
-  // Update properties from the wildcard row in the per-theta defaults table
-  updatePerThetaDefaultProperties(properties, model.wildcardDefaults());
+  // Update properties from the wildcard row in the lookup table
+  updateLookupRowProperties(properties, model.findLookupRow());
   return properties;
 }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

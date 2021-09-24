@@ -6,8 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidParallel/StorageMode.h"
 
-namespace Mantid {
-namespace Parallel {
+namespace Mantid::Parallel {
 
 /// Returns a human-readable string representation of a StorageMode.
 std::string toString(StorageMode mode) {
@@ -43,5 +42,4 @@ StorageMode fromString(const std::string &mode) {
                               "Parallel::StorageMode.");
 }
 
-} // namespace Parallel
-} // namespace Mantid
+} // namespace Mantid::Parallel

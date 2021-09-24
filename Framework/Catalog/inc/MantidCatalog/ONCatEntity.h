@@ -88,7 +88,7 @@ public:
   static std::vector<ONCatEntity> vectorFromJSONStream(std::istream &streamContent);
 
 private:
-  ONCatEntity(const std::string &id, const std::string &type, Content_uptr content);
+  ONCatEntity(std::string id, std::string type, Content_uptr content);
 
   template <typename T> T getNestedContentValueAsType(const Content &content, const std::string &path) const;
 

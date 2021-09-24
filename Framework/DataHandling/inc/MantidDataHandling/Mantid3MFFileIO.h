@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "Bindings/Cpp/lib3mf_implicit.hpp"
 #include "MantidDataHandling/MeshFileIO.h"
-#include "lib3mf/Bindings/Cpp/lib3mf_implicit.hpp"
 #include <memory>
 
 namespace Mantid {
@@ -46,6 +46,7 @@ public:
 
 private:
   Lib3MF::PModel model;
+  std::string m_filename;
   MeshObject_sptr loadMeshObject(Lib3MF::PMeshObject meshObject, sLib3MFTransform buildTransform);
   void readMeshObject(std::vector<MeshObject_sptr> &meshObjects, MeshObject_sptr &sample, uint32_t objectResourceID,
                       sLib3MFTransform transform);

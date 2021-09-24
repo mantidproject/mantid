@@ -23,8 +23,7 @@
 #include "MantidKernel/Utils.h"
 #include <boost/algorithm/string.hpp>
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(BinMD)
@@ -271,7 +270,7 @@ template <typename MDE, size_t nd> void BinMD::binByIterating(typename MDEventWo
 
   // Run the chunks in parallel. There is no overlap in the output workspace so
   // it is thread safe to write to it..
-  // cppcheck-suppress syntaxError
+
     PRAGMA_OMP( parallel for schedule(dynamic,1) if (doParallel) )
     for (int chunk = 0; chunk < int(m_binDimensions[chunkDimension]->getNBins()); chunk += chunkNumBins) {
       PARALLEL_START_INTERUPT_REGION
@@ -427,5 +426,4 @@ void BinMD::exec() {
   setProperty("OutputWorkspace", std::dynamic_pointer_cast<Workspace>(outWS));
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

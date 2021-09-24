@@ -10,8 +10,7 @@
 
 #include <fstream>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(FindDeadDetectors)
@@ -124,7 +123,7 @@ void FindDeadDetectors::exec() {
 MatrixWorkspace_sptr FindDeadDetectors::integrateWorkspace() {
   g_log.information() << "Integrating input workspace\n";
 
-  API::IAlgorithm_sptr childAlg = createChildAlgorithm("Integration");
+  auto childAlg = createChildAlgorithm("Integration");
   // Now execute integration.
   // pass inputed values straight to Integration, checking must be done there
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", getProperty("InputWorkspace"));
@@ -136,5 +135,4 @@ MatrixWorkspace_sptr FindDeadDetectors::integrateWorkspace() {
   return childAlg->getProperty("OutputWorkspace");
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

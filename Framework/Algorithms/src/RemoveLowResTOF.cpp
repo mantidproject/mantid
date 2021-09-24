@@ -21,8 +21,7 @@
 #include <limits>
 #include <map>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Kernel;
 using namespace API;
@@ -270,5 +269,4 @@ void RemoveLowResTOF::getTminData(const bool isEvent) {
     throw std::runtime_error("Cannot have minimum time less than zero");
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

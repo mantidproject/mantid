@@ -30,8 +30,7 @@ template <typename T = MatrixWorkspace> std::shared_ptr<T> getADSWorkspace(std::
 
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 ApplyAbsorptionCorrections::ApplyAbsorptionCorrections(QWidget *parent) : CorrectionsTab(parent) {
   m_spectra = 0;
   m_uiForm.setupUi(parent);
@@ -519,7 +518,8 @@ void ApplyAbsorptionCorrections::plotCurrentPreview() {
     indices.emplace_back(index);
   }
 
-  m_plotter->plotCorrespondingSpectra(workspaces, indices, IndirectSettingsHelper::externalPlotErrorBars());
+  m_plotter->plotCorrespondingSpectra(
+      workspaces, indices, std::vector<bool>(workspaces.size(), IndirectSettingsHelper::externalPlotErrorBars()));
 }
 
 /*
@@ -568,5 +568,4 @@ void ApplyAbsorptionCorrections::setRunIsRunning(bool running) {
   setButtonsEnabled(!running);
 }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

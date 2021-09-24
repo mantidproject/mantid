@@ -20,7 +20,6 @@ set(PYTHON_PLUGINS
     algorithms/CalculateEfficiencyCorrection.py
     algorithms/CalculateFlux.py
     algorithms/CalculateSampleTransmission.py
-    algorithms/CalibrateRectangularDetectors.py
     algorithms/CheckForSampleLogs.py
     algorithms/CleanFileCache.py
     algorithms/ClipPeaks.py
@@ -68,6 +67,7 @@ set(PYTHON_PLUGINS
     algorithms/ExtractMonitors.py
     algorithms/FilterLogByTime.py
     algorithms/FindGoniometerFromUB.py
+    algorithms/FindGlobalBMatrix.py
     algorithms/FindSatellitePeaks.py
     algorithms/FitGaussian.py
     algorithms/FitIncidentSpectrum.py
@@ -135,6 +135,7 @@ set(PYTHON_PLUGINS
     algorithms/MuonMaxent.py
     algorithms/MuscatSofQW.py
     algorithms/NMoldyn4Interpolation.py
+    algorithms/NOMADMedianDetectorTest.py
     algorithms/NormaliseSpectra.py
     algorithms/OptimizeCrystalPlacementByRun.py
     algorithms/OrderWorkspaceHistory.py
@@ -149,6 +150,7 @@ set(PYTHON_PLUGINS
     algorithms/PoldiCreatePeaksFromFile.py
     algorithms/PoldiLoadRuns.py
     algorithms/PoldiMerge.py
+    algorithms/PowderReduceP2D.py
     algorithms/RebinRagged.py
     algorithms/RefinePowderDiffProfileSeq.py
     algorithms/ReflectometryReductionOneLiveData.py
@@ -169,12 +171,13 @@ set(PYTHON_PLUGINS
     algorithms/SaveYDA.py
     algorithms/SelectNexusFilesByMetadata.py
     algorithms/SetDetScale.py
+    algorithms/SetSampleFromLogs.py
     algorithms/SortByQVectors.py
     algorithms/SortDetectors.py
     algorithms/StatisticsOfTableWorkspace.py
     algorithms/StringToPng.py
-    algorithms/SuggestTibCNCS.py
-    algorithms/SuggestTibHYSPEC.py
+    algorithms/CNCSSuggestTIB.py
+    algorithms/HYSPECSuggestTIB.py
     algorithms/Symmetrise.py
     algorithms/TOFTOFCropWorkspace.py
     algorithms/TOFTOFMergeRuns.py
@@ -268,6 +271,7 @@ set(PYTHON_PLUGINS
     algorithms/WorkflowAlgorithms/ReflectometryILLPreprocess.py
     algorithms/WorkflowAlgorithms/ReflectometryILLSumForeground.py
     algorithms/WorkflowAlgorithms/ReflectometryILL_common.py
+    algorithms/WorkflowAlgorithms/ReflectometryISISPreprocess.py
     algorithms/WorkflowAlgorithms/ReflectometryISISLoadAndProcess.py
     algorithms/WorkflowAlgorithms/ResNorm2.py
     algorithms/WorkflowAlgorithms/SANS/SANSBeamCentreFinder.py

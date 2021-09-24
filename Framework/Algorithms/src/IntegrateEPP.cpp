@@ -12,8 +12,7 @@
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using Mantid::API::WorkspaceProperty;
 using Mantid::Kernel::Direction;
@@ -117,11 +116,11 @@ std::map<std::string, std::string> IntegrateEPP::validateInputs() {
   std::map<std::string, std::string> issues;
   API::MatrixWorkspace_const_sptr inWS = getProperty(PropertyNames::INPUT_WORKSPACE);
   API::ITableWorkspace_const_sptr eppWS = getProperty(PropertyNames::EPP_WORKSPACE);
-  if (eppWS->rowCount() > inWS->getNumberHistograms()) {
+
+  if (inWS && eppWS && eppWS->rowCount() > inWS->getNumberHistograms()) {
     issues[PropertyNames::EPP_WORKSPACE] = "The EPP workspace contains too many rows.";
   }
   return issues;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

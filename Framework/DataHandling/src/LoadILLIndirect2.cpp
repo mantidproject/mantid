@@ -24,8 +24,7 @@
 #include <cmath>
 #include <nexus/napi.h>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using namespace Kernel;
 using namespace API;
@@ -33,6 +32,13 @@ using namespace NeXus;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLIndirect2)
+
+//----------------------------------------------------------------------------------------------
+/** Constructor
+ */
+LoadILLIndirect2::LoadILLIndirect2()
+    : m_numberOfTubes{16}, m_numberOfChannels{1024}, m_numberOfSimpleDetectors{8}, m_numberOfMonitors{1}, m_bats{false},
+      m_firstTubeAngleRounded{251}, m_supportedInstruments{"IN16B"} {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -218,7 +224,8 @@ void LoadILLIndirect2::loadDataDetails(NeXus::NXEntry &entry) {
       firstTubeAngle.load();
       m_firstTubeAngleRounded = static_cast<size_t>(std::round(10 * firstTubeAngle[0]));
     } catch (...) {
-      g_log.information() << "Unable to read first tube anlge, assuming 25.1";
+      m_firstTubeAngleRounded = 251;
+      g_log.information() << "Unable to read first tube angle, assuming 251";
     }
   } else {
     m_numberOfSimpleDetectors = 0;
@@ -371,7 +378,7 @@ void LoadILLIndirect2::loadNexusEntriesIntoProperties(const std::string &nexusfi
  * Run the Child Algorithm LoadInstrument.
  */
 void LoadILLIndirect2::runLoadInstrument() {
-  IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
+  auto loadInst = createChildAlgorithm("LoadInstrument");
   loadInst->setPropertyValue("Filename", getInstrumentFilePath());
   loadInst->setPropertyValue("InstrumentName", m_instrumentName);
   loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
@@ -457,5 +464,4 @@ void LoadILLIndirect2::rotateTubes() {
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

@@ -15,8 +15,7 @@
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/MultiThreaded.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
@@ -76,7 +75,7 @@ void ChopData::exec() {
 
     // Get ranges
     for (int i = 0; i < chops; i++) {
-      Mantid::API::IAlgorithm_sptr integ = Mantid::API::Algorithm::createChildAlgorithm("Integration");
+      auto integ = createChildAlgorithm("Integration");
       integ->initialize();
       integ->setProperty<MatrixWorkspace_sptr>("InputWorkspace", monitorWS);
       integ->setProperty<double>("RangeLower", i * step + rLower);
@@ -172,5 +171,4 @@ void ChopData::exec() {
   // set the output property
   setProperty("OutputWorkspace", wsgroup);
 }
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

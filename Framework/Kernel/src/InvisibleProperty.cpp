@@ -6,8 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/InvisibleProperty.h"
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 /// Is the property to be shown in the GUI? Always false.
 bool InvisibleProperty::isVisible(const IPropertyManager * /*algo*/) const { return false; }
@@ -15,5 +14,4 @@ bool InvisibleProperty::isVisible(const IPropertyManager * /*algo*/) const { ret
 /// Make a copy of the present type of IPropertySettings
 IPropertySettings *InvisibleProperty::clone() const { return new InvisibleProperty(*this); }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

@@ -29,8 +29,7 @@
 
 using Mantid::HistogramData::HistogramX;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register with the algorithm factory
 DECLARE_ALGORITHM(MergeRuns)
@@ -640,7 +639,7 @@ void MergeRuns::inclusionParams(const HistogramX &X1, size_t &i, const Histogram
 API::MatrixWorkspace_sptr MergeRuns::rebinInput(const API::MatrixWorkspace_sptr &workspace,
                                                 const std::vector<double> &params) {
   // Create a Rebin child algorithm
-  IAlgorithm_sptr rebin = createChildAlgorithm("Rebin");
+  auto rebin = createChildAlgorithm("Rebin");
   rebin->setProperty("InputWorkspace", workspace);
   rebin->setProperty("Params", params);
   rebin->executeAsChildAlg();
@@ -691,5 +690,4 @@ std::vector<SpectrumDefinition> MergeRuns::buildScanIntervals(const std::vector<
   return newAddeeSpecDefs;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

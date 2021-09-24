@@ -18,8 +18,7 @@
 #include <cstdio>
 #include <fstream>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SavePAR)
@@ -58,7 +57,7 @@ void SavePAR::exec() {
   }
 
   // execute the ChildAlgorithm to calculate the detector's parameters;
-  IAlgorithm_sptr spCalcDetPar = this->createChildAlgorithm("FindDetectorsPar", 0, 1, true, 1);
+  auto spCalcDetPar = createChildAlgorithm("FindDetectorsPar", 0, 1, true, 1);
   spCalcDetPar->initialize();
   spCalcDetPar->setPropertyValue("InputWorkspace", inputWorkspace->getName());
   // calculate linear rather then angular detector's sizes;
@@ -118,5 +117,4 @@ void SavePAR::exec() {
   outPAR_file.close();
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

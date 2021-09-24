@@ -17,8 +17,7 @@
 
 #include <numeric>
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 namespace OperatorOverloads {
 
 /** Performs a binary operation on two workspaces
@@ -36,7 +35,7 @@ namespace OperatorOverloads {
 template <typename LHSType, typename RHSType, typename ResultType>
 ResultType executeBinaryOperation(const std::string &algorithmName, const LHSType lhs, const RHSType rhs,
                                   bool lhsAsOutput, bool child, const std::string &name, bool rethrow) {
-  IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged(algorithmName);
+  auto alg = AlgorithmManager::Instance().createUnmanaged(algorithmName);
   alg->setChild(child);
   alg->setRethrows(rethrow);
   alg->initialize();
@@ -137,7 +136,7 @@ template MANTID_API_DLL IMDHistoWorkspace_sptr executeBinaryOperation(const std:
  *  @return bool, true if workspaces match
  */
 bool equals(const MatrixWorkspace_sptr &lhs, const MatrixWorkspace_sptr &rhs, double tolerance) {
-  IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("CompareWorkspaces");
+  auto alg = AlgorithmManager::Instance().createUnmanaged("CompareWorkspaces");
   alg->setChild(true);
   alg->setRethrows(false);
   alg->initialize();
@@ -459,5 +458,4 @@ void WorkspaceHelpers::makeDistribution(const MatrixWorkspace_sptr &workspace, c
   }
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

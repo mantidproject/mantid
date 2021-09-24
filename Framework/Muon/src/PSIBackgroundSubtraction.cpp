@@ -20,8 +20,7 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 
-namespace Mantid {
-namespace Muon {
+namespace Mantid::Muon {
 
 namespace {
 constexpr char *MINIMISER = "Levenberg-Marquardt";
@@ -135,7 +134,7 @@ void PSIBackgroundSubtraction::exec() {
  * @param inputWorkspace ::  Input PSI workspace which is modified inplace
  */
 void PSIBackgroundSubtraction::calculateBackgroundUsingFit(MatrixWorkspace_sptr &inputWorkspace) {
-  IAlgorithm_sptr fit = setupFitAlgorithm(inputWorkspace->getName());
+  auto fit = setupFitAlgorithm(inputWorkspace->getName());
   auto numberOfHistograms = inputWorkspace->getNumberHistograms();
   std::vector<double> backgroundValues(numberOfHistograms);
   for (size_t index = 0; index < numberOfHistograms; ++index) {
@@ -151,9 +150,9 @@ void PSIBackgroundSubtraction::calculateBackgroundUsingFit(MatrixWorkspace_sptr 
     }
   }
   // Create background workspace
-  IAlgorithm_sptr wsAlg = createChildAlgorithm("CreateWorkspace", 0.7, 1.0);
+  auto wsAlg = createChildAlgorithm("CreateWorkspace", 0.7, 1.0);
   wsAlg->setProperty<std::vector<double>>("DataX", std::vector<double>(2, 0.0));
-  wsAlg->setProperty<std::vector<double>>("DataY", std::move(backgroundValues));
+  wsAlg->setProperty<std::vector<double>>("DataY", backgroundValues);
   wsAlg->setProperty<int>("NSpec", static_cast<int>(numberOfHistograms));
   wsAlg->execute();
   MatrixWorkspace_sptr backgroundWS = wsAlg->getProperty("OutputWorkspace");
@@ -173,7 +172,7 @@ void PSIBackgroundSubtraction::calculateBackgroundUsingFit(MatrixWorkspace_sptr 
  * @return Initalised fitting algorithm
  */
 IAlgorithm_sptr PSIBackgroundSubtraction::setupFitAlgorithm(const std::string &wsName) {
-  IAlgorithm_sptr fit = createChildAlgorithm("Fit");
+  auto fit = createChildAlgorithm("Fit");
   int maxIterations = getProperty("MaxIterations");
   fit->initialize();
   fit->setProperty("Function", getFunction());
@@ -240,5 +239,4 @@ std::pair<double, double> PSIBackgroundSubtraction::getRange(MatrixWorkspace con
   return std::make_pair(startX, endX);
 }
 
-} // namespace Muon
-} // namespace Mantid
+} // namespace Mantid::Muon

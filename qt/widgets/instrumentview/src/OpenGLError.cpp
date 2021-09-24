@@ -14,8 +14,7 @@ namespace {
 Mantid::Kernel::Logger g_log("OpenGL");
 } // namespace
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 /**
  * Check for a GL error and throw OpenGLError if found
  * @param funName :: Name of the function where checkGLError is called.
@@ -26,8 +25,7 @@ bool OpenGLError::check(const std::string &funName) {
   GLuint err = glGetError();
   if (err) {
     std::ostringstream ostr;
-    ostr << "OpenGL error detected in " << funName << ": "
-         << gluErrorString(err);
+    ostr << "OpenGL error detected in " << funName << ": " << gluErrorString(err);
     g_log.error() << ostr.str() << '\n';
     // throw OpenGLError(ostr.str());
     return true;
@@ -39,5 +37,4 @@ std::ostream &OpenGLError::log() { return g_log.error(); }
 
 std::ostream &OpenGLError::logDebug() { return g_log.debug(); }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

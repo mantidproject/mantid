@@ -21,16 +21,13 @@ if(CXXTEST_FOUND)
 
   cxxtest_add_test(MDAlgorithmsTest ${TEST_FILES} ${GMOCK_TEST_FILES})
   target_link_libraries(MDAlgorithmsTest
-                        LINK_PRIVATE
-                        ${MANTIDLIBS}
-                        DataHandling
-                        CurveFitting
-                        MDAlgorithms
-                        Nexus
-                        ${MUPARSER_LIBRARIES}
-                        gmock
-                        ${NEXUS_LIBRARIES}
-                        ${HDF5_LIBRARIES})
+                        PRIVATE
+                        Mantid::DataHandling
+                        Mantid::CurveFitting
+                        Mantid::MDAlgorithms
+                        Mantid::Nexus
+                        Mantid::Kernel
+                        gmock)
 
   add_dependencies(MDAlgorithmsTest DataHandling Algorithms CurveFitting)
   add_dependencies(FrameworkTests MDAlgorithmsTest)

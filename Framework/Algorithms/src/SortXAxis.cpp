@@ -19,8 +19,7 @@ using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using namespace Mantid::HistogramData;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 DECLARE_ALGORITHM(SortXAxis)
 
@@ -231,5 +230,4 @@ bool SortXAxis::determineIfHistogramIsValid(const Mantid::API::MatrixWorkspace &
   return false;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

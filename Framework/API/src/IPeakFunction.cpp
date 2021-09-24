@@ -14,13 +14,13 @@
 #include "MantidAPI/Jacobian.h"
 #include "MantidAPI/PeakFunctionIntegrator.h"
 #include "MantidKernel/Exception.h"
+#include "boost/make_shared.hpp"
 
 #include <cmath>
 #include <limits>
 #include <memory>
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 namespace {
 
@@ -53,32 +53,6 @@ public:
   void zero() override {
     throw Kernel::Exception::NotImplementedError("zero() is not implemented for PartialJacobian1");
   }
-};
-
-class TempJacobian : public Jacobian {
-public:
-  TempJacobian(size_t y, size_t p) : m_y(y), m_p(p), m_J(y * p) {}
-  void set(size_t iY, size_t iP, double value) override { m_J[iY * m_p + iP] = value; }
-  double get(size_t iY, size_t iP) override { return m_J[iY * m_p + iP]; }
-  size_t maxParam(size_t iY) {
-    double max = -DBL_MAX;
-    size_t maxIndex = 0;
-    for (size_t i = 0; i < m_p; ++i) {
-      double current = get(iY, i);
-      if (current > max) {
-        maxIndex = i;
-        max = current;
-      }
-    }
-
-    return maxIndex;
-  }
-  void zero() override { m_J.assign(m_J.size(), 0.0); }
-
-protected:
-  size_t m_y;
-  size_t m_p;
-  std::vector<double> m_J;
 };
 
 /// Tolerance for determining the smallest significant value on the peak
@@ -169,19 +143,45 @@ void IPeakFunction::setPeakRadius(int r) const {
   }
 }
 
-/// Returns the integral intensity of the peak function, using the peak radius
-/// to determine integration borders.
-double IPeakFunction::intensity() const {
-  auto interval = getDomainInterval();
+void IPeakFunction::setParameter(size_t i, const double &value, bool explicitlySet) {
+  m_parameterContextDirty = true;
+  ParamFunction::setParameter(i, value, explicitlySet);
+}
 
-  PeakFunctionIntegrator integrator;
-  IntegrationResult result = integrator.integrate(*this, interval.first, interval.second);
+void IPeakFunction::setParameter(const std::string &name, const double &value, bool explicitlySet) {
+  m_parameterContextDirty = true;
+  ParamFunction::setParameter(name, value, explicitlySet);
+}
 
-  if (!result.success) {
-    return 0.0;
+/*
+ * @brief Integrate based on dirty parameters then cache the result
+ * @details Returns the integrated intensity of the peak function, using the peak radius
+ * to determine integration borders.
+ */
+IntegrationResultCache IPeakFunction::integrate() const {
+  if (!integrationResult || m_parameterContextDirty) {
+    auto const interval = getDomainInterval();
+
+    PeakFunctionIntegrator integrator;
+
+    auto const result = integrator.integrate(*this, interval.first, interval.second);
+    if (result.success)
+      integrationResult = boost::make_shared<IntegrationResultCache>(result.result, result.error);
+    else
+      integrationResult = boost::make_shared<IntegrationResultCache>(std::nan(""), std::nan(""));
+    m_parameterContextDirty = false;
   }
+  return *integrationResult;
+}
 
-  return result.result;
+/// Returns the integrated intensity of the peak function, using the peak radius
+/// to determine integration borders.
+double IPeakFunction::intensity() const { return integrate().first; }
+
+double IPeakFunction::intensityError() const {
+  auto const interval = getDomainInterval();
+  PeakFunctionIntegrator integrator;
+  return integrator.integrateError(*this, interval.first, interval.second);
 }
 
 /// Sets the integral intensity of the peak by adjusting the height.
@@ -235,6 +235,7 @@ std::pair<double, double> IPeakFunction::getDomainInterval(double level) const {
   double right = 0.0;
   auto h = height();
   auto w = fwhm();
+
   auto c = centre();
   if (h == 0.0 || w == 0.0 || level >= 1.0) {
     return std::make_pair(c, c);
@@ -271,5 +272,4 @@ void IPeakFunction::functionDerivLocal(Jacobian *jacobian, const double *xValues
   this->calcNumericalDerivative1D(jacobian, std::move(evalMethod), xValues, nData);
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

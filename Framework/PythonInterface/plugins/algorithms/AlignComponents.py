@@ -52,7 +52,7 @@ class AlignComponents(PythonAlgorithm):
         return "Diffraction"
 
     def seeAlso(self):
-        return ["GetDetOffsetsMultiPeaks", "CalibrateRectangularDetectors"]
+        return []
 
     def name(self):
         """
@@ -273,7 +273,7 @@ class AlignComponents(PythonAlgorithm):
             return round(the_number, precision - len(str(int(the_number))))
 
         for column_name, peak_position in zip(column_names, sorted(peak_positions)):
-            if (float(column_name[1:]) - with_precision(peak_position, 5)) > 1.e-5:
+            if (float(column_name[1:]) - with_precision(peak_position, 5)) > 1.e-3:
                 issues['PeakCentersTofTable'] = f'{column_name} and {peak_position} differ up to precision 5'
 
         maskWS: MaskWorkspace = self.getProperty("MaskWorkspace").value

@@ -64,9 +64,7 @@ std::vector<std::string> getKeysFromTable(const Mantid::API::ITableWorkspace_spt
 }
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace MuonAnalysisHelper {
+namespace MantidQt::CustomInterfaces::MuonAnalysisHelper {
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -1059,7 +1057,7 @@ std::string generateWorkspaceName(const Muon::DatasetParams &params) {
 
 /**
  * Get the colors corresponding to their position in the workspace list.
- * Used in fittings table on results table tab.
+ * Used in fittings table on results tab.
  *
  * New color if:
  * - different model used for fit
@@ -1131,6 +1129,4 @@ QMap<int, QColor> getWorkspaceColors(const std::vector<Workspace_sptr> &workspac
 
   return colors;
 }
-} // namespace MuonAnalysisHelper
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::MuonAnalysisHelper

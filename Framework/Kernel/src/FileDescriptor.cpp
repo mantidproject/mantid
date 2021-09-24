@@ -12,8 +12,7 @@
 
 #include <stdexcept>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 //----------------------------------------------------------------------------------------------
 // Public static methods
 //----------------------------------------------------------------------------------------------
@@ -104,6 +103,21 @@ bool FileDescriptor::isAscii(FILE *file, const size_t nbytes) {
   return result;
 }
 
+/**
+ * Check whether a file is empty.
+ * @param filename
+ * @return true if the file is empty.
+ */
+bool FileDescriptor::isEmpty(const std::string &filename) {
+  std::ifstream file(filename.c_str());
+
+  if (!file) {
+    throw std::invalid_argument("FileDescriptor::isEmpty() - Unable to open file '" + filename + "'");
+  }
+
+  return file.peek() == std::ifstream::traits_type::eof();
+}
+
 //----------------------------------------------------------------------------------------------
 // Public methods
 //----------------------------------------------------------------------------------------------
@@ -172,5 +186,4 @@ void FileDescriptor::initialize(const std::string &filename) {
   m_ascii = FileDescriptor::isAscii(m_file);
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

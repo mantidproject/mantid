@@ -190,13 +190,13 @@ std::string replaceWorkspaces(const std::string &input, const std::vector<Matrix
   return newInput.str();
 }
 
-void renameWorkspace(const IAlgorithm_sptr &renamer, const Workspace_sptr &workspace, const std::string &newName) {
+void renameWorkspace(const Algorithm_sptr &renamer, const Workspace_sptr &workspace, const std::string &newName) {
   renamer->setProperty("InputWorkspace", workspace);
   renamer->setProperty("OutputWorkspace", newName);
   renamer->executeAsChildAlg();
 }
 
-void deleteTemporaries(const IAlgorithm_sptr &deleter, const std::string &base) {
+void deleteTemporaries(const Algorithm_sptr &deleter, const std::string &base) {
   auto name = base + std::to_string(1);
   std::size_t i = 2;
 
@@ -233,7 +233,7 @@ void renameWorkspacesWith(const WorkspaceGroup_sptr &groupWorkspace, F const &ge
 }
 
 template <typename F>
-void renameWorkspacesInQENSFit(Algorithm *qensFit, const IAlgorithm_sptr &renameAlgorithm,
+void renameWorkspacesInQENSFit(Algorithm *qensFit, const Algorithm_sptr &renameAlgorithm,
                                WorkspaceGroup_sptr outputGroup, std::string const &outputBaseName,
                                std::string const &groupSuffix, const F &getNameSuffix) {
   Progress renamerProg(qensFit, 0.98, 1.0, outputGroup->size() + 1);
@@ -242,7 +242,7 @@ void renameWorkspacesInQENSFit(Algorithm *qensFit, const IAlgorithm_sptr &rename
   auto getName = [&](std::size_t i) { return outputBaseName + "_" + getNameSuffix(i); };
 
   auto renamer = [&](const Workspace_sptr &workspace, const std::string &name) {
-    renameWorkspace(renameAlgorithm, std::move(workspace), name);
+    renameWorkspace(renameAlgorithm, workspace, name);
     renamerProg.report("Renamed workspace in group.");
   };
   renameWorkspacesWith(outputGroup, getName, renamer);
@@ -275,7 +275,7 @@ WorkspaceGroup_sptr createGroup(const std::vector<MatrixWorkspace_sptr> &workspa
   return group;
 }
 
-WorkspaceGroup_sptr runParameterProcessingWithGrouping(IAlgorithm &processingAlgorithm,
+WorkspaceGroup_sptr runParameterProcessingWithGrouping(Algorithm &processingAlgorithm,
                                                        const std::vector<std::size_t> &grouping) {
   std::vector<MatrixWorkspace_sptr> results;
   results.reserve(grouping.size() - 1);
@@ -291,9 +291,7 @@ WorkspaceGroup_sptr runParameterProcessingWithGrouping(IAlgorithm &processingAlg
 
 } // namespace
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Algorithms {
+namespace Mantid::CurveFitting::Algorithms {
 
 using namespace API;
 using namespace Kernel;
@@ -754,8 +752,8 @@ ITableWorkspace_sptr QENSFitSequential::performFit(const std::string &input, con
     declareProperty(std::make_unique<ArrayProperty<double>>("OutputChiSquared", Direction::Output));
     std::vector<std::string> outputStatus = plotPeaks->getProperty("OutputStatus");
     std::vector<double> outputChiSquared = plotPeaks->getProperty("OutputChiSquared");
-    setProperty("OutputStatus", std::move(outputStatus));
-    setProperty("OutputChiSquared", std::move(outputChiSquared));
+    setProperty("OutputStatus", outputStatus);
+    setProperty("OutputChiSquared", outputChiSquared);
   }
 
   return plotPeaks->getProperty("OutputWorkspace");
@@ -792,7 +790,7 @@ void QENSFitSequential::extractMembers(const WorkspaceGroup_sptr &resultGroupWs,
   std::transform(workspaces.begin(), workspaces.end(), std::back_inserter(workspaceNames),
                  [](const API::MatrixWorkspace_sptr &workspace) { return workspace->getName(); });
 
-  auto extractAlgorithm = extractMembersAlgorithm(std::move(resultGroupWs), outputWsName);
+  auto extractAlgorithm = extractMembersAlgorithm(resultGroupWs, outputWsName);
   extractAlgorithm->setProperty("InputWorkspaces", workspaceNames);
   extractAlgorithm->execute();
 }
@@ -844,6 +842,4 @@ IAlgorithm_sptr QENSFitSequential::extractMembersAlgorithm(const WorkspaceGroup_
 
 std::string QENSFitSequential::getTemporaryName() const { return "__" + name() + "_ws"; }
 
-} // namespace Algorithms
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Algorithms

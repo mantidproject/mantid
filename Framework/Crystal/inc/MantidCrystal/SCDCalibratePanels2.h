@@ -12,6 +12,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 
 #include <boost/container/flat_set.hpp>
+#include <limits>
 
 namespace Mantid {
 namespace Crystal {
@@ -64,19 +65,19 @@ private:
   std::map<std::string, std::string> validateInputs() override;
 
   /// Cache TOF equivalent to those measured from experiment
-  std::vector<double> captureTOF(Mantid::API::IPeaksWorkspace_sptr pws);
+  std::vector<double> captureTOF(const Mantid::API::IPeaksWorkspace_sptr &pws);
 
   /// Private function dedicated for parsing lattice constant
-  void parseLatticeConstant(Mantid::API::IPeaksWorkspace_sptr pws);
+  void parseLatticeConstant(const Mantid::API::IPeaksWorkspace_sptr &pws);
 
   /// Update the UB matrix
-  void updateUBMatrix(Mantid::API::IPeaksWorkspace_sptr pws);
+  void updateUBMatrix(const Mantid::API::IPeaksWorkspace_sptr &pws);
 
   /// Remove unindexed peaks from workspace
-  Mantid::API::IPeaksWorkspace_sptr removeUnindexedPeaks(Mantid::API::IPeaksWorkspace_sptr pws);
+  Mantid::API::IPeaksWorkspace_sptr removeUnindexedPeaks(const Mantid::API::IPeaksWorkspace_sptr &pws);
 
   /// Private function for getting names of banks to be calibrated
-  void getBankNames(Mantid::API::IPeaksWorkspace_sptr pws);
+  void getBankNames(const Mantid::API::IPeaksWorkspace_sptr &pws);
 
   /// Private function for calibrating T0
   void optimizeT0(Mantid::API::IPeaksWorkspace_sptr pws, Mantid::API::IPeaksWorkspace_sptr pws_original);
@@ -85,22 +86,22 @@ private:
   void optimizeL1(Mantid::API::IPeaksWorkspace_sptr pws, Mantid::API::IPeaksWorkspace_sptr pws_original);
 
   /// Private function for calibrating banks
-  void optimizeBanks(Mantid::API::IPeaksWorkspace_sptr pws, Mantid::API::IPeaksWorkspace_sptr pws_original);
+  void optimizeBanks(Mantid::API::IPeaksWorkspace_sptr pws, const Mantid::API::IPeaksWorkspace_sptr &pws_original);
 
   /// Private function for fine tunning sample position
   void optimizeSamplePos(Mantid::API::IPeaksWorkspace_sptr pws, Mantid::API::IPeaksWorkspace_sptr pws_original);
 
   /// Helper function for selecting peaks based on given bank name
-  Mantid::API::IPeaksWorkspace_sptr selectPeaksByBankName(Mantid::API::IPeaksWorkspace_sptr pws,
-                                                          const std::string bankname, const std::string outputwsn);
+  Mantid::API::IPeaksWorkspace_sptr selectPeaksByBankName(const Mantid::API::IPeaksWorkspace_sptr &pws,
+                                                          const std::string &bankname, const std::string &outputwsn);
 
   /// Helper function that calculates the ideal qSample based on
   /// integer HKL
-  Mantid::API::MatrixWorkspace_sptr getIdealQSampleAsHistogram1D(Mantid::API::IPeaksWorkspace_sptr pws);
+  Mantid::API::MatrixWorkspace_sptr getIdealQSampleAsHistogram1D(const Mantid::API::IPeaksWorkspace_sptr &pws);
 
   /// Helper functions for adjusting components
-  void adjustComponent(double dx, double dy, double dz, double rvx, double rvy, double rvz, double rang,
-                       std::string cmptName, Mantid::API::IPeaksWorkspace_sptr &pws);
+  void adjustComponent(double dx, double dy, double dz, double drx, double dry, double drz, const std::string &cmptName,
+                       Mantid::API::IPeaksWorkspace_sptr &pws);
 
   /// Generate a Table workspace to store the calibration results
   Mantid::API::ITableWorkspace_sptr generateCalibrationTable(std::shared_ptr<Geometry::Instrument> &instrument);
@@ -118,7 +119,7 @@ private:
 
   /// Profile related functions
   void profileL1(Mantid::API::IPeaksWorkspace_sptr &pws, Mantid::API::IPeaksWorkspace_sptr pws_original);
-  void profileBanks(Mantid::API::IPeaksWorkspace_sptr &pws, Mantid::API::IPeaksWorkspace_sptr pws_original);
+  void profileBanks(Mantid::API::IPeaksWorkspace_sptr &pws, const Mantid::API::IPeaksWorkspace_sptr &pws_original);
   void profileT0(Mantid::API::IPeaksWorkspace_sptr &pws, Mantid::API::IPeaksWorkspace_sptr pws_original);
   void profileL1T0(Mantid::API::IPeaksWorkspace_sptr &pws, Mantid::API::IPeaksWorkspace_sptr pws_original);
 
@@ -128,6 +129,7 @@ private:
   bool LOGCHILDALG{true};
   const int MINIMUM_PEAKS_PER_BANK{6};
   const double PI{3.1415926535897932384626433832795028841971693993751058209};
+  static constexpr double Tolerance = std::numeric_limits<double>::epsilon();
 
   // Column names and types
   const std::string calibrationTableColumnNames[8] = {"ComponentName",    "Xposition",        "Yposition",

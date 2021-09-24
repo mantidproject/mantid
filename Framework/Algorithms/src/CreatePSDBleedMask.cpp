@@ -18,8 +18,7 @@
 #include <list>
 #include <map>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the class
 DECLARE_ALGORITHM(CreatePSDBleedMask)
@@ -250,5 +249,4 @@ void CreatePSDBleedMask::maskTube(const std::vector<int> &tubeIndices, const API
     workspace->mutableY(tubeIndice)[0] = deadValue;
   }
 }
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

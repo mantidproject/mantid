@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "TestGroupDataListener.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
@@ -17,8 +16,7 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using Mantid::Kernel::ConfigService;
 
-namespace Mantid {
-namespace LiveData {
+namespace Mantid::LiveData {
 DECLARE_LISTENER(TestGroupDataListener)
 
 /// Constructor
@@ -68,5 +66,4 @@ void TestGroupDataListener::setAlgorithm(const IAlgorithm &callingAlgorithm) {
   this->updatePropertyValues(callingAlgorithm);
 }
 
-} // namespace LiveData
-} // namespace Mantid
+} // namespace Mantid::LiveData

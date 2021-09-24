@@ -20,8 +20,7 @@
 #include "MantidSINQ/PoldiUtilities/MillerIndicesIO.h"
 #include "MantidSINQ/PoldiUtilities/UncertainValueIO.h"
 
-namespace Mantid {
-namespace Poldi {
+namespace Mantid::Poldi {
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -283,5 +282,4 @@ UnitCell PoldiPeakCollection::unitCellFromString(const std::string &unitCellStri
 
   return cell;
 }
-} // namespace Poldi
-} // namespace Mantid
+} // namespace Mantid::Poldi

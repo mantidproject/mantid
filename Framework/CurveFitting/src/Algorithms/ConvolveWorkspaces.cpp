@@ -18,9 +18,7 @@
 
 #include <sstream>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Algorithms {
+namespace Mantid::CurveFitting::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvolveWorkspaces)
@@ -93,6 +91,4 @@ void ConvolveWorkspaces::exec() {
   setProperty("OutputWorkspace", outputWS);
 }
 
-} // namespace Algorithms
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Algorithms

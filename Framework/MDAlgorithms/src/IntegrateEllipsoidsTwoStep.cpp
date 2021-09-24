@@ -34,8 +34,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(IntegrateEllipsoidsTwoStep)
@@ -510,11 +509,10 @@ void IntegrateEllipsoidsTwoStep::calculateE1(const Geometry::DetectorInfo &detec
 
 void IntegrateEllipsoidsTwoStep::runMaskDetectors(const Mantid::DataObjects::PeaksWorkspace_sptr &peakWS,
                                                   const std::string &property, const std::string &values) {
-  IAlgorithm_sptr alg = createChildAlgorithm("MaskBTP");
+  auto alg = createChildAlgorithm("MaskBTP");
   alg->setProperty<Workspace_sptr>("Workspace", peakWS);
   alg->setProperty(property, values);
   if (!alg->execute())
     throw std::runtime_error("MaskDetectors Child Algorithm has not executed successfully");
 }
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

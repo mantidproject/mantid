@@ -29,8 +29,7 @@
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/regex.hpp>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(GroupDetectors2)
 
@@ -1053,7 +1052,7 @@ size_t GroupDetectors2::formGroupsEvent(const DataObjects::EventWorkspace_const_
 
   if (bhv == 1 && requireDivide) {
     g_log.debug() << "Running Divide algorithm to perform averaging.\n";
-    Mantid::API::IAlgorithm_sptr divide = createChildAlgorithm("Divide");
+    auto divide = createChildAlgorithm("Divide");
     divide->initialize();
     divide->setProperty<API::MatrixWorkspace_sptr>("LHSWorkspace", outputWS);
     divide->setProperty<API::MatrixWorkspace_sptr>("RHSWorkspace", beh);
@@ -1162,5 +1161,4 @@ std::map<std::string, std::string> GroupDetectors2::validateInputs() {
 
   return errors;
 }
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

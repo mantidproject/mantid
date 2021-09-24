@@ -9,8 +9,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
-namespace Mantid {
-namespace ICat {
+namespace Mantid::ICat {
 DECLARE_ALGORITHM(CatalogMyDataSearch)
 
 /// Initialisation method.
@@ -27,5 +26,4 @@ void CatalogMyDataSearch::exec() {
   API::CatalogManager::Instance().getCatalog(getPropertyValue("Session"))->myData(outputws);
   setProperty("OutputWorkspace", outputws);
 }
-} // namespace ICat
-} // namespace Mantid
+} // namespace Mantid::ICat

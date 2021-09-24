@@ -25,8 +25,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(LoadCalFile)
 
@@ -351,5 +350,4 @@ LoadCalFile::getParallelExecutionMode(const std::map<std::string, Parallel::Stor
   return Parallel::ExecutionMode::Identical;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

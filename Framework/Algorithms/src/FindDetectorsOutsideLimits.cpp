@@ -14,8 +14,7 @@
 #include <cmath>
 #include <fstream>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(FindDetectorsOutsideLimits)
 
@@ -156,5 +155,4 @@ void FindDetectorsOutsideLimits::exec() {
   // Assign it to the output workspace property
   setProperty("OutputWorkspace", outputWS);
 }
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

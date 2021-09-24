@@ -20,8 +20,7 @@
 #include "Poco/Path.h"
 #include "Poco/String.h"
 
-namespace Mantid {
-namespace WorkflowAlgorithms {
+namespace Mantid::WorkflowAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SANSBeamFinder)
@@ -67,7 +66,7 @@ MatrixWorkspace_sptr SANSBeamFinder::loadBeamFinderFile(const std::string &beamC
     std::string finderWSName = "__beam_finder_" + path.getBaseName();
 
     if (!m_reductionManager->existsProperty("LoadAlgorithm")) {
-      IAlgorithm_sptr loadAlg = createChildAlgorithm("EQSANSLoad", 0.1, 0.3);
+      auto loadAlg = createChildAlgorithm("EQSANSLoad", 0.1, 0.3);
       loadAlg->setProperty("Filename", beamCenterFile);
       loadAlg->setProperty("NoBeamCenter", true);
       loadAlg->setProperty("BeamCenterX", EMPTY_DBL());
@@ -83,7 +82,7 @@ MatrixWorkspace_sptr SANSBeamFinder::loadBeamFinderFile(const std::string &beamC
       // new proxy and ensure that we don't overwrite existing properties
       IAlgorithm_sptr loadAlg0 = m_reductionManager->getProperty("LoadAlgorithm");
       const std::string loadString = loadAlg0->toString();
-      IAlgorithm_sptr loadAlg = Algorithm::fromString(loadString);
+      auto loadAlg = Algorithm::fromString(loadString);
 
       loadAlg->setProperty("Filename", beamCenterFile);
       if (loadAlg->existsProperty("NoBeamCenter"))
@@ -164,7 +163,7 @@ void SANSBeamFinder::exec() {
       // int high, int low, int left, int right
       maskEdges(beamCenterWS, 1, 1, 1, 1);
 
-    IAlgorithm_sptr ctrAlg = createChildAlgorithm("FindCenterOfMassPosition");
+    auto ctrAlg = createChildAlgorithm("FindCenterOfMassPosition");
     ctrAlg->setProperty("InputWorkspace", beamCenterWS);
 
     const bool directBeam = getProperty("UseDirectBeamMethod");
@@ -276,7 +275,7 @@ void SANSBeamFinder::maskEdges(const MatrixWorkspace_sptr &beamCenterWS, int hig
   }
   g_log.debug() << std::endl;
 
-  IAlgorithm_sptr maskAlg = createChildAlgorithm("MaskDetectors");
+  auto maskAlg = createChildAlgorithm("MaskDetectors");
   maskAlg->setChild(true);
   maskAlg->setProperty("Workspace", beamCenterWS);
   maskAlg->setProperty("DetectorList", IDs);
@@ -292,5 +291,4 @@ void SANSBeamFinder::maskEdges(const MatrixWorkspace_sptr &beamCenterWS, int hig
   }
 }
 
-} // namespace WorkflowAlgorithms
-} // namespace Mantid
+} // namespace Mantid::WorkflowAlgorithms

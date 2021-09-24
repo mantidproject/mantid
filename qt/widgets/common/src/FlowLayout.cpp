@@ -41,8 +41,7 @@
 #include "MantidQtWidgets/Common/FlowLayout.h"
 #include <QWidget>
 
-namespace MantidQt {
-namespace API {
+namespace MantidQt::API {
 FlowLayout::FlowLayout(QWidget *parent, int margin, int hSpacing, int vSpacing)
     : QLayout(parent), m_hSpace(hSpacing), m_vSpace(vSpacing) {
   setContentsMargins(margin, margin, margin, margin);
@@ -155,5 +154,4 @@ int FlowLayout::smartSpacing(QStyle::PixelMetric pm) const {
     return static_cast<QLayout *>(parent)->spacing();
   }
 }
-} // namespace API
-} // namespace MantidQt
+} // namespace MantidQt::API

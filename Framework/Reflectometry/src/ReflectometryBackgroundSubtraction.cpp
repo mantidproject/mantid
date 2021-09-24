@@ -17,8 +17,7 @@
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
-namespace Mantid {
-namespace Reflectometry {
+namespace Mantid::Reflectometry {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ReflectometryBackgroundSubtraction)
@@ -159,7 +158,7 @@ void ReflectometryBackgroundSubtraction::calculatePixelBackground(const MatrixWo
   const std::vector<int> peakRange{static_cast<int>(peakRangeIndexSet[0]),
                                    static_cast<int>(peakRangeIndexSet[peakRangeIndexSet.size() - 1])};
 
-  IAlgorithm_sptr LRBgd = createChildAlgorithm("LRSubtractAverageBackground");
+  auto LRBgd = createChildAlgorithm("LRSubtractAverageBackground");
   LRBgd->initialize();
   LRBgd->setProperty("InputWorkspace", inputWS);
   LRBgd->setProperty("PeakRange", Strings::toString(peakRange));
@@ -169,6 +168,7 @@ void ReflectometryBackgroundSubtraction::calculatePixelBackground(const MatrixWo
   // will need to change if ISIS reflectometry get a 2D detector
   LRBgd->setProperty("LowResolutionRange", "0,0");
   LRBgd->setProperty("TypeOfDetector", "LinearDetector");
+  LRBgd->setProperty("ErrorWeighting", true);
   LRBgd->execute();
 
   Workspace_sptr outputWS = LRBgd->getProperty("OutputWorkspace");
@@ -186,8 +186,9 @@ void ReflectometryBackgroundSubtraction::init() {
   const auto &inputWSPropRef = *inputWSProp;
   declareProperty(std::move(inputWSProp), "An input workspace.");
 
-  auto inputIndexType = std::make_unique<IndexTypeProperty>("InputWorkspaceIndexType",
-                                                            IndexType::SpectrumNum | IndexType::WorkspaceIndex);
+  auto inputIndexType =
+      std::make_unique<IndexTypeProperty>("InputWorkspaceIndexType", static_cast<int>(IndexType::SpectrumNum) |
+                                                                         static_cast<int>(IndexType::WorkspaceIndex));
   const auto &inputIndexTypeRef = *inputIndexType;
   declareProperty(std::move(inputIndexType), "The type of indices in the optional index set; For optimal "
                                              "performance WorkspaceIndex should be preferred;");
@@ -315,5 +316,4 @@ std::map<std::string, std::string> ReflectometryBackgroundSubtraction::validateI
   }
   return errors;
 }
-} // namespace Reflectometry
-} // namespace Mantid
+} // namespace Mantid::Reflectometry

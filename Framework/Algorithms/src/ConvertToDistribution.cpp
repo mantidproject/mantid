@@ -12,8 +12,7 @@
 #include "MantidAPI/RawCountValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertToDistribution)
@@ -46,5 +45,4 @@ std::map<std::string, std::string> ConvertToDistribution::validateInputs() {
   return errors;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

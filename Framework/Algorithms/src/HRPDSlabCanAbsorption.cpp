@@ -13,8 +13,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Material.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(HRPDSlabCanAbsorption)
@@ -161,7 +160,7 @@ API::MatrixWorkspace_sptr HRPDSlabCanAbsorption::runFlatPlateAbsorption() {
   }
 
   // Call FlatPlateAbsorption as a Child Algorithm
-  IAlgorithm_sptr childAlg = createChildAlgorithm("FlatPlateAbsorption", 0.0, 0.9);
+  auto childAlg = createChildAlgorithm("FlatPlateAbsorption", 0.0, 0.9);
   // Pass through all the properties
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", m_inputWS);
   childAlg->setProperty<double>("AttenuationXSection", sigma_atten);
@@ -181,5 +180,4 @@ API::MatrixWorkspace_sptr HRPDSlabCanAbsorption::runFlatPlateAbsorption() {
   return childAlg->getProperty("OutputWorkspace");
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

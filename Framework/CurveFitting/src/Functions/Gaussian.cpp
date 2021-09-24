@@ -13,9 +13,7 @@
 #include <cmath>
 #include <numeric>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
 using namespace Kernel;
@@ -91,6 +89,12 @@ double Gaussian::intensity() const {
     m_intensityCache = getParameter("Height") * getParameter("Sigma") * sqrt(2.0 * M_PI);
   }
   return m_intensityCache;
+}
+double Gaussian::intensityError() const {
+  const double heightError = getError("Height");
+  const double sigmaError = getError("Sigma");
+
+  return intensity() * sqrt(pow(heightError / getParameter("Height"), 2) + pow(sigmaError / getParameter("Sigma"), 2));
 }
 
 void Gaussian::setCentre(const double c) { setParameter("PeakCentre", c); }
@@ -173,6 +177,4 @@ void Gaussian::histogramDerivative1D(Jacobian *jacobian, double left, const doub
   }
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

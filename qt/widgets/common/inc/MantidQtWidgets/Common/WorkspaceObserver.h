@@ -58,13 +58,13 @@ signals:
 
 private slots:
   /// Pre Delete slot
-  void handlePreDelete(const std::string &name, Mantid::API::Workspace_sptr workspace);
+  void handlePreDelete(const std::string &name, const Mantid::API::Workspace_sptr &workspace);
   /// Post Delete slot
   void handlePostDelete(const std::string &name);
   /// Add slot
-  void handleAdd(const std::string &name, Mantid::API::Workspace_sptr workspace);
+  void handleAdd(const std::string &name, const Mantid::API::Workspace_sptr &workspace);
   /// Replace slot
-  void handleAfterReplace(const std::string &name, Mantid::API::Workspace_sptr workspace);
+  void handleAfterReplace(const std::string &name, const Mantid::API::Workspace_sptr &workspace);
   /// Rename slot
   void handleRename(const std::string &oldName, const std::string &newName);
   /// Clear slot
@@ -213,7 +213,7 @@ protected:
 
 private:
   friend class ObserverCallback;
-  ObserverCallback *m_proxy;
+  std::unique_ptr<ObserverCallback> m_proxy;
 
   bool m_predel_observed, m_postdel_observed, m_add_observed, m_repl_observed, m_rename_observed, m_clr_observed;
 };

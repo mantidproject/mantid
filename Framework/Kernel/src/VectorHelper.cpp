@@ -15,9 +15,7 @@
 
 using std::size_t;
 
-namespace Mantid {
-namespace Kernel {
-namespace VectorHelper {
+namespace Mantid::Kernel::VectorHelper {
 
 /** Creates a new output X array given a 'standard' set of rebinning parameters.
  *  @param[in]  params Rebin parameters input [x_1, delta_1,x_2, ...
@@ -29,11 +27,13 @@ namespace VectorHelper {
  *step are not included. (Default=True)
  *  @param[in] xMinHint x_1 if params contains only delta_1.
  *  @param[in] xMaxHint x_2 if params contains only delta_1.
+ *  @param[in] useReverseLogarithmic wheter or not to use reverse logarithmic for bins
+ *  @param[in] power the power in case of inverse power sum. Must be between 0 and 1 or is ignored.
  *  @return The number of bin boundaries in the new axis
  **/
 int DLLExport createAxisFromRebinParams(const std::vector<double> &params, std::vector<double> &xnew,
                                         const bool resize_xnew, const bool full_bins_only, const double xMinHint,
-                                        const double xMaxHint) {
+                                        const double xMaxHint, const bool useReverseLogarithmic, const double power) {
   std::vector<double> tmp;
   const std::vector<double> &fullParams = [&params, &tmp, xMinHint, xMaxHint]() {
     if (params.size() == 1) {
@@ -53,14 +53,12 @@ int DLLExport createAxisFromRebinParams(const std::vector<double> &params, std::
   auto ibounds = static_cast<int>(fullParams.size());
   int isteps = ibounds - 1; // highest index in params array containing a step
 
-  // This coefficitent represents the maximum difference between the size of the
-  // last bin and all
+  // This coefficitent represents the maximum difference between the size of the last bin and all
   // the other bins.
   double lastBinCoef(0.25);
 
   if (full_bins_only) {
-    // For full_bin_only, we want it so that last bin couldn't be smaller then
-    // the pervious bin
+    // For full_bin_only, we want it so that last bin couldn't be smaller than the previous bin
     lastBinCoef = 1.0;
   }
 
@@ -71,44 +69,75 @@ int DLLExport createAxisFromRebinParams(const std::vector<double> &params, std::
   if (resize_xnew)
     xnew.emplace_back(xcurr);
 
+  int currDiv = 1;
+
+  bool isPower = power > 0 && power <= 1;
+
   while ((ibound <= ibounds) && (istep <= isteps)) {
     // if step is negative then it is logarithmic step
-    if (fullParams[istep] >= 0.0)
-      xs = fullParams[istep];
-    else
-      xs = xcurr * fabs(fullParams[istep]);
+    bool isLogBin = (fullParams[istep] < 0.0);
+    bool isReverseLogBin = isLogBin && useReverseLogarithmic;
+    double alpha = std::fabs(fullParams[istep]);
+
+    if (isReverseLogBin && xcurr == fullParams[ibound - 2]) {
+      // we are starting a new bin, but since it is a rev log, xcurr needs to be at its end
+      xcurr = fullParams[ibound];
+    }
+    if (!isPower) {
+      if (!isLogBin)
+        xs = fullParams[istep];
+      else {
+        if (useReverseLogarithmic) {
+          // we go through a reverse log bin by starting from its end, and working our way back to the beginning
+          // this way we can define the bins in a reccuring way, and with a more obvious closeness with the usual log.
+          double x0 = fullParams[ibound - 2];
+          double step = x0 + fullParams[ibound] - xcurr;
+
+          xs = -step * alpha;
+
+        } else
+          xs = xcurr * fabs(fullParams[istep]);
+      }
+    } else {
+      xs = fullParams[istep] * std::pow(currDiv, -power);
+      ++currDiv;
+    }
 
     if (fabs(xs) == 0.0) {
       // Someone gave a 0-sized step! What a dope.
-      throw std::runtime_error("Invalid binning step provided! Can't creating binning axis.");
+      throw std::runtime_error("Invalid binning step provided! Can't create binning axis.");
     } else if (!std::isfinite(xs)) {
       throw std::runtime_error("An infinite or NaN value was found in the binning parameters.");
     }
 
-    if ((xcurr + xs * (1.0 + lastBinCoef)) <= fullParams[ibound]) {
-      // If we can still fit current bin _plus_ specified portion of a last bin,
-      // continue
+    if ((!isReverseLogBin && xcurr + xs * (1.0 + lastBinCoef) <= fullParams[ibound]) ||
+        (isReverseLogBin && xcurr + 2 * xs >= fullParams[ibound - 2])) {
+      // If we can still fit current bin _plus_ specified portion of a last bin, continue
       xcurr += xs;
+
     } else {
       // If this is the start of the last bin, finish this range
-      if (full_bins_only)
-        // For full_bins_only, finish the range by adding one more full bin, so
-        // that last bin is not
-        // bigger than the previous one
-        xcurr += xs;
-      else
-        // For non full_bins_only, finish by adding as mush as is left from the
-        // range
+      if (!isReverseLogBin) {
+        if (full_bins_only)
+          // For full_bins_only, finish the range by adding one more full bin, so that last bin is not bigger than the
+          // previous one
+          xcurr += xs;
+        else
+          // For non full_bins_only, finish by adding as much as is left from the range
+          xcurr = fullParams[ibound];
+      } else {
+        // we have finished this range, because its starting time has already been added, so we jump back to the last
+        // value of the bin and resume normal behaviour
         xcurr = fullParams[ibound];
-
-      ibound += 2;
+      }
       istep += 2;
+      ibound += 2;
     }
     if (resize_xnew)
       xnew.emplace_back(xcurr);
     inew++;
   }
-
+  std::sort(xnew.begin(), xnew.end());
   return inew;
 }
 
@@ -735,6 +764,4 @@ template DLLExport std::vector<float> splitStringIntoVector<float>(std::string l
 template DLLExport std::vector<double> splitStringIntoVector<double>(std::string listString);
 template DLLExport std::vector<std::string> splitStringIntoVector<std::string>(std::string listString);
 
-} // End namespace VectorHelper
-} // End namespace Kernel
-} // End namespace Mantid
+} // namespace Mantid::Kernel::VectorHelper

@@ -13,8 +13,7 @@
 
 using namespace Mantid::Kernel;
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 void DefaultEventLoader::load(LoadEventNexus *alg, EventWorkspaceCollection &ws, bool haveWeights,
                               bool event_id_is_spec, std::vector<std::string> bankNames,
@@ -137,5 +136,4 @@ std::pair<size_t, size_t> DefaultEventLoader::setupChunking(std::vector<std::str
   return {bank0, bankn};
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

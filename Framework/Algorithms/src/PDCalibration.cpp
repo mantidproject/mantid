@@ -41,8 +41,7 @@
 #include <limits>
 #include <numeric>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::HistogramData;
@@ -201,7 +200,8 @@ void PDCalibration::init() {
                   "Previous calibration table. This overrides results from previous file.");
 
   // properties about peak positions to fit
-  std::vector<std::string> peaktypes{"BackToBackExponential", "Gaussian", "Lorentzian", "PseudoVoigt"};
+  std::vector<std::string> peaktypes{"BackToBackExponential", "Gaussian", "Lorentzian", "PseudoVoigt",
+                                     "IkedaCarpenterPV"};
   declareProperty("PeakFunction", "Gaussian", std::make_shared<StringListValidator>(peaktypes));
   vector<std::string> bkgdtypes{"Flat", "Linear", "Quadratic"};
   declareProperty("BackgroundType", "Linear", std::make_shared<StringListValidator>(bkgdtypes), "Type of Background.");
@@ -533,7 +533,7 @@ void PDCalibration::exec() {
   // Scan the table containing the fit parameters for every peak, retrieve the
   // parameters for peaks that were successfully fitting, then use this info
   // to obtain difc, difa, and tzero for each pixel
-  // cppcheck-suppress syntaxError
+
    PRAGMA_OMP(parallel for schedule(dynamic, 1))
    for (int wkspIndex = 0; wkspIndex < NUMHIST; ++wkspIndex) {
      PARALLEL_START_INTERUPT_REGION
@@ -664,7 +664,7 @@ void PDCalibration::exec() {
            chisq += (temp * temp);
            m_peakPositionTable->cell<double>(rowIndexOutputPeaks, i + 1) = dspacing;
            m_peakWidthTable->cell<double>(rowIndexOutputPeaks, i + 1) =
-               WIDTH_TO_FWHM * dSpacingUnit.singleFromTOF(width_vec_full[i]);
+               WIDTH_TO_FWHM * (width_vec_full[i] / (2 * difa * dspacing + difc));
            m_peakHeightTable->cell<double>(rowIndexOutputPeaks, i + 1) = height_vec_full[i];
          }
          m_peakPositionTable->cell<double>(rowIndexOutputPeaks, m_peaksInDspacing.size() + 1) = chisq;
@@ -934,9 +934,9 @@ void PDCalibration::fitDIFCtZeroDIFA_LM(const std::vector<double> &d, const std:
     }
   }
 
+  difc = best_difc;
   // check that something actually fit and set to the best result
   if (best_difc > 0. && best_errsum < std::numeric_limits<double>::max()) {
-    difc = best_difc;
     t0 = best_t0;
     difa = best_difa;
   }
@@ -1369,5 +1369,4 @@ PDCalibration::createTOFPeakCenterFitWindowWorkspaces(const API::MatrixWorkspace
   return std::make_pair(peak_pos_ws, peak_window_ws);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

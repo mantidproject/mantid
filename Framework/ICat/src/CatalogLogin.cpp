@@ -16,15 +16,14 @@
 
 #include <Poco/ActiveResult.h>
 
-namespace Mantid {
-namespace ICat {
+namespace Mantid::ICat {
 DECLARE_ALGORITHM(CatalogLogin)
 
 namespace {
 std::vector<std::string> namesOfFacilitiesWithICAT() {
   const auto &config = Kernel::ConfigService::Instance();
 
-  const auto facilityDoesNotHaveICAT = [&](std::string name) {
+  const auto facilityDoesNotHaveICAT = [&](const std::string &name) {
     return config.getFacility(name).catalogInfo().soapEndPoint().empty();
   };
 
@@ -97,5 +96,4 @@ void CatalogLogin::exec() {
     setProperty("KeepAlive", keepAliveAlgorithm);
   }
 }
-} // namespace ICat
-} // namespace Mantid
+} // namespace Mantid::ICat

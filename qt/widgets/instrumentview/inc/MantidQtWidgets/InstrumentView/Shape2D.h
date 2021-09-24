@@ -84,10 +84,13 @@ public:
   virtual RectF getBoundingRect() const { return m_boundingRect; }
   /// move the left, top, right and bottom sides of the bounding rect
   /// by dx1, dy1, dx2, and dy2 correspondingly
-  virtual void adjustBoundingRect(double dx1, double dy1, double dx2,
-                                  double dy2);
+  virtual void adjustBoundingRect(double dx1, double dy1, double dx2, double dy2);
   /// Set new bounding rect.
   virtual void setBoundingRect(const RectF &rect);
+  /// Return the bounding rotation of the shape.
+  virtual double getBoundingRotation() const { return m_boundingRotation; }
+  /// Set new bounding rotation
+  virtual void setBoundingRotation(const double rotation) { m_boundingRotation = rotation; };
   /// will the shape be selected if clicked at a point? By default return false.
   virtual bool selectAt(const QPointF & /*unused*/) const { return false; }
   /// is a point inside the shape (closed line)? By default return false.
@@ -164,13 +167,10 @@ protected:
   virtual size_t getShapeNControlPoints() const { return 0; }
   // returns position of a shape specific control point, 0 < i <
   // getShapeNControlPoints()
-  virtual QPointF getShapeControlPoint(size_t /*unused*/) const {
-    return QPointF();
-  }
+  virtual QPointF getShapeControlPoint(size_t /*unused*/) const { return QPointF(); }
   // sets position of a shape specific control point, 0 < i <
   // getShapeNControlPoints()
-  virtual void setShapeControlPoint(size_t /*unused*/,
-                                    const QPointF & /*unused*/) {}
+  virtual void setShapeControlPoint(size_t /*unused*/, const QPointF & /*unused*/) {}
   // make sure the bounding box is correct
   virtual void resetBoundingRect() {}
 
@@ -179,6 +179,7 @@ protected:
   static const size_t NCommonCP;
   static const qreal sizeCP;
   RectF m_boundingRect;
+  double m_boundingRotation = 0.0;
   QColor m_color;
   QColor m_fill_color;
   bool m_scalable; ///< shape can be scaled when zoomed
@@ -188,8 +189,7 @@ protected:
 
 private:
   /// Instantiate specifc shapes from a type string
-  static Shape2D *loadShape2DFromType(const std::string &type,
-                                      const std::string &lines);
+  static Shape2D *loadShape2DFromType(const std::string &type, const std::string &lines);
 
   friend class InstrumentWidgetEncoder;
   friend class InstrumentWidgetDecoder;
@@ -240,9 +240,7 @@ public:
   Shape2DRectangle(const QPointF &p0, const QSizeF &size);
   Shape2D *clone() const override { return new Shape2DRectangle(*this); }
   bool selectAt(const QPointF &p) const override;
-  bool contains(const QPointF &p) const override {
-    return m_boundingRect.contains(p);
-  }
+  bool contains(const QPointF &p) const override { return m_boundingRect.contains(p); }
   void addToPath(QPainterPath &path) const override;
   /// Load state for the shape from a project file
   static Shape2D *loadFromProject(const std::string &lines);
@@ -264,8 +262,7 @@ protected:
  */
 class Shape2DRing : public Shape2D {
 public:
-  Shape2DRing(Shape2D *shape, double xWidth = 0.000001,
-              double yWidth = 0.000001);
+  Shape2DRing(Shape2D *shape, double xWidth = 0.000001, double yWidth = 0.000001);
   Shape2DRing(const Shape2DRing &ring);
   Shape2D *clone() const override { return new Shape2DRing(*this); }
   bool selectAt(const QPointF &p) const override;
@@ -315,8 +312,7 @@ protected:
  */
 class Shape2DSector : public Shape2D {
 public:
-  Shape2DSector(double innerRadius, double outerRadius, double startAngle,
-                double endAngle, const QPointF &center);
+  Shape2DSector(double innerRadius, double outerRadius, double startAngle, double endAngle, const QPointF &center);
   Shape2DSector(const Shape2DSector &sector);
   Shape2D *clone() const override { return new Shape2DSector(*this); }
   bool selectAt(const QPointF &p) const override;
@@ -355,9 +351,8 @@ protected:
   QPointF m_center;
 
 private:
-  void computeScaling(const QPointF &BBoxCorner,
-                      const QPointF &BBoxOpposedCorner,
-                      const QPointF &bRectCorner, int vertexIndex);
+  void computeScaling(const QPointF &BBoxCorner, const QPointF &BBoxOpposedCorner, const QPointF &bRectCorner,
+                      int vertexIndex);
   QRectF findSectorBoundingBox();
   double distanceBetween(const QPointF &, const QPointF &) const;
 };
@@ -371,7 +366,7 @@ private:
 class Shape2DFree : public Shape2D {
 public:
   explicit Shape2DFree(const QPointF &p);
-  explicit Shape2DFree(const QPolygonF &polygon);
+  explicit Shape2DFree(QPolygonF polygon);
   Shape2D *clone() const override { return new Shape2DFree(*this); }
   bool selectAt(const QPointF &p) const override;
   bool contains(const QPointF &p) const override;

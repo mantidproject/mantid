@@ -23,8 +23,7 @@ void conjoinSpectra(std::string const &inputWorkspaces, std::string const &outpu
 
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -157,5 +156,4 @@ void IndirectTransmission::updateRunButton(bool enabled, std::string const &enab
     setSaveEnabled(enableOutputButtons == "enable");
 }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

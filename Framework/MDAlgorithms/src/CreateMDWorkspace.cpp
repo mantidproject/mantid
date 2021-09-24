@@ -25,8 +25,7 @@
 #include <boost/regex.hpp>
 #include <cmath>
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -201,7 +200,7 @@ void CreateMDWorkspace::exec() {
   if (!filename.empty()) {
     // First save to the NXS file
     g_log.notice() << "Running SaveMD\n";
-    IAlgorithm_sptr alg = createChildAlgorithm("SaveMD");
+    auto alg = createChildAlgorithm("SaveMD");
     alg->setPropertyValue("Filename", filename);
     alg->setProperty("InputWorkspace", std::dynamic_pointer_cast<IMDWorkspace>(out));
     alg->executeAsChildAlg();
@@ -272,5 +271,4 @@ bool CreateMDWorkspace::checkIfFrameValid(const std::string &frame, const std::v
                      [&frame](const auto &targetFrame) { return targetFrame == frame; });
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

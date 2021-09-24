@@ -6,8 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/ILatticeFunction.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 using namespace Geometry;
 
@@ -62,5 +61,4 @@ void ILatticeFunction::functionDerivLattice(const LatticeDomain &latticeDomain, 
   throw Kernel::Exception::NotImplementedError("FunctionLatticeDeriv is not implemented for this function.");
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API
