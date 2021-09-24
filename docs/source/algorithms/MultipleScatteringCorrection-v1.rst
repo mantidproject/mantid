@@ -67,7 +67,7 @@ Consequently, the term :math:`A_{1}` now becomes
 where :math:`\mu^\text{s}` denotes the sample absorption coefficient and :math:`\mu^\text{c}` denotes the container absorption coefficient.
 Notice that the number density :math:`\rho` as well as the scattering cross section :math:`\sigma` are inside the integral now.
 This is because the material of the sample is often different from the material of the container, therefore we need to consider the material
-whiling performing the integration, which is different from when working with a single material component.
+while performing the integration, which is different from when working with a single material component.
 
 Similarly, the term :math:`A_{2}` is now
 
