@@ -33,8 +33,21 @@ information about the environment components
 XML Definition File - Explicit Definition
 -----------------------------------------
 
-An environment definition is contained within a file using XML syntax. A minimal
-structure with a single container defined using CSG geometry would have the following form:
+An environment definition is contained within a file using XML syntax.
+
+Multiple containers can be specified in the definition. The correct container for a run
+must be chosen by the user at the time the environment is attached to a
+workspace with the ``Environment`` option on the
+:ref:`SetSample <algm-SetSample>` algorithm.
+
+One Sample Environment can contain components defined in different ways - some components
+defined by a CSG geometry and some components
+defined in a separate STL mesh file.
+
+CSG geometry
+############
+
+A minimal structure with a single container defined using CSG geometry would have the following form:
 
 .. code-block:: xml
 
@@ -60,11 +73,10 @@ structure with a single container defined using CSG geometry would have the foll
 The CSG geometry of both the sample and container are defined using the same syntax
 used in the instrument definition files to define detector shapes. See
 :ref:`here <HowToDefineGeometricShape>` for detail on defining shapes in XML.
+CSG shapes can be plotted in Mantid, see :ref:`Mesh_Plots`.
 
-Multiple containers can be specified in the definition. The correct container for a run
-must be chosen by the user at the time the environment is attached to a
-workspace with the ``Environment`` option on the
-:ref:`SetSample <algm-SetSample>` algorithm.
+Mesh files - STL
+################
 
 The container and sample geometry can alternatively be defined using a mesh description by
 specifying an .stl file as follows.
@@ -94,9 +106,10 @@ Mantid will try the following approaches to find the path to the stl file (in or
 - Mantid will then check in the data search directories
 
 The stl file format doesn't natively support a scale so this should be specified
-in the scale attribute of the stilfile tag. Possible values are mm, cm or m.
+in the scale attribute of the stlfile tag. Possible values are mm, cm or m.
 
-Mantid does not provide tools to view meshes loaded from .stl files. There are however various free software tools available that can view .stl files:
+Stl mesh shapes can be plotted in Mantid, see :ref:`Mesh_Plots`.
+There are also various free software tools available that can view and edit .stl files:
 
 - FreeCAD (Windows, Linux, Mac). https://www.freecadweb.org/ This viewer also provides coordinate readout of the cursor position
 - Microsoft 3D Viewer (Windows only)
@@ -203,7 +216,7 @@ The shape defined in the stl file can be transformed and\or rotated in order to 
 the other environment components. This is achieved by specifying a translation or rotation tag in the xml.
 The translation tag has an attribute vector which is a comma separated list of x, y, z coordinates.
 The rotation tag has available attributes xdegrees, ydegrees, zdegrees which all take a rotation specified
-in degrees
+in degrees.
 
 XML Definition File - 3MF Definition
 -----------------------------------------
