@@ -70,15 +70,14 @@ class FocusModel(object):
                 ws_van = Ads.retrieve(van_run) # will exist if have only changed the ROI
             else:
                 ws_van = self._load_run_and_convert_to_dSpacing(vanadium_path, calibration.get_instrument(), full_calib)
-            ws_van_foc = self._focus_run_and_apply_roi_calibration(ws_van, calibration, ws_foc_name=van_foc_name,
-                                                                   applyCal=False)
+            ws_van_foc = self._focus_run_and_apply_roi_calibration(ws_van, calibration, ws_foc_name=van_foc_name)
             ws_van_foc = self._smooth_vanadium(ws_van_foc)
 
         # 2) Loop over runs
         output_workspaces = []  # List of collated workspaces to plot.
         for sample_path in sample_paths:
             ws_sample = self._load_run_and_convert_to_dSpacing(sample_path, calibration.get_instrument(), full_calib)
-            ws_foc = self._focus_run_and_apply_roi_calibration(ws_sample, calibration, applyCal=True)
+            ws_foc = self._focus_run_and_apply_roi_calibration(ws_sample, calibration)
             ws_foc = self._apply_vanadium_norm(ws_foc, ws_van_foc)
             self._save_output_files(ws_foc, calibration, van_run, rb_num)
             # convert units to TOF and save again
@@ -118,13 +117,15 @@ class FocusModel(object):
         return ws
 
     @staticmethod
-    def _focus_run_and_apply_roi_calibration(ws, calibration, ws_foc_name=None, applyCal=True):
+    def _focus_run_and_apply_roi_calibration(ws, calibration, ws_foc_name=None):
         if not ws_foc_name:
             ws_foc_name = ws.name() + "_" + FOCUSED_OUTPUT_WORKSPACE_NAME + calibration.get_foc_ws_suffix()
         ws_foc = DiffractionFocussing(InputWorkspace=ws, OutputWorkspace=ws_foc_name,
                                       GroupingWorkspace=calibration.get_group_ws())
-        if applyCal:
-            ApplyDiffCal(InstrumentWorkspace=ws_foc, CalibrationWorkspace=calibration.get_calibration_table())
+        ApplyDiffCal(InstrumentWorkspace=ws_foc, ClearCalibration=True)
+        ws_foc = ConvertUnits(InputWorkspace=ws_foc, OutputWorkspace=ws_foc.name(), Target='TOF')
+        ApplyDiffCal(InstrumentWorkspace=ws_foc, CalibrationWorkspace=calibration.get_calibration_table())
+        ws_foc = ConvertUnits(InputWorkspace=ws_foc, OutputWorkspace=ws_foc.name(), Target='dSpacing')
         return ws_foc
 
     @staticmethod
