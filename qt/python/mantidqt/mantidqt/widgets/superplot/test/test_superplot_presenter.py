@@ -11,6 +11,7 @@ from unittest import mock
 from mantidqt.widgets.superplot.presenter import SuperplotPresenter
 
 from mantid.plots import MantidAxes
+from mantid.plots.utility import MantidAxType
 
 
 class SuperplotPresenterTest(unittest.TestCase):
@@ -229,6 +230,8 @@ class SuperplotPresenterTest(unittest.TestCase):
         line.get_color.return_value = "color"
         self.m_axes.plot.return_value = [line]
         self.m_model.get_workspace_color.return_value = "memorized_color"
+        self.presenter._fill_plot_kwargs = mock.Mock()
+        self.presenter._fill_plot_kwargs.return_value = dict()
         self.presenter._update_plot()
         self.m_axes.remove_artists_if.assert_called_once()
         calls = [mock.call("ws5", 5, "label", "color"),
@@ -236,6 +239,36 @@ class SuperplotPresenterTest(unittest.TestCase):
         self.m_view.modify_spectrum_label.assert_has_calls(calls)
         self.m_model.set_workspace_color.assert_called_once_with("ws1", "color")
         self.m_axes.plot.assert_called_once()
+
+    def test_fill_plot_kwargs(self):
+        ws_name = "ws_name"
+        spectrum = 0
+        normalise = False
+        mode = self.presenter.SPECTRUM_MODE_TEXT
+        color = "color"
+        ws = mock.Mock()
+        ws.getSpectrumNumbers.return_value = [99]
+        self.m_mtd.__getitem__.return_value = ws
+        kwargs = self.presenter._fill_plot_kwargs(ws_name, spectrum, normalise,
+                                                  mode, color)
+        ws.getSpectrumNumbers.assert_called_once()
+        self.assertDictEqual(kwargs, {"axis": MantidAxType.SPECTRUM,
+                                      "specNum": 99,
+                                      "color": "color"})
+        normalise = True
+        kwargs = self.presenter._fill_plot_kwargs(ws_name, spectrum, normalise,
+                                                  mode, color)
+        self.assertDictEqual(kwargs, {"axis": MantidAxType.SPECTRUM,
+                                      "specNum": 99,
+                                      "color": "color",
+                                      "normalise_spectrum": True})
+        mode = self.presenter.BIN_MODE_TEXT
+        kwargs = self.presenter._fill_plot_kwargs(ws_name, spectrum, normalise,
+                                                  mode, color)
+        self.assertDictEqual(kwargs, {"axis": MantidAxType.BIN,
+                                      "wkspIndex": 0,
+                                      "color": "color",
+                                      "normalise_spectrum": True})
 
     def test_on_workspace_selection_changed(self):
         self.presenter._update_plot = mock.Mock()
