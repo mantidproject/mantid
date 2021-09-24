@@ -116,11 +116,13 @@ std::map<std::string, std::string> MultipleScatteringCorrection::validateInputs(
   }
 
   // check 1: input workspace must have a valid sample environment
-  // TODO: this check should be implemented once we start considering the multiple
-  // scattering correction between container and sample (heterogenous scattering media)
-  // NOTE: use PaalmanPingAbsorptionCorrection.cpp check as starting point
-
-  // others?
+  std::string method = getProperty("Method");
+  if (method == "SampleAndContainer") {
+    const auto &containerShape = m_inputWS->sample().getEnvironment().getContainer();
+    if (!containerShape.hasValidShape()) {
+      result["Method"] = "SampleAndContainer requires a valid container shape.";
+    }
+  }
 
   return result;
 }
