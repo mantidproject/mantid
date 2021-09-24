@@ -11,8 +11,6 @@ Description
 
 This algorithm uses numerical integration to approximate the sample correction factor for multiple scattering events
 using the formula detailed in the concept page of Absorption and Multiple Scattering Corrections.
-Currently, the multiple scattering correction is only implemented for the sample, and the interaction terms between samples
-and containers will be implemented at a later time.
 
 Here is a quick recap of the physical model used in the numerical integration.
 The scattered neutron can bounce into another atom before leaving the sample when the sample is sufficiently thick, leading to
@@ -56,6 +54,41 @@ memory when the selected element size is below the standard 1 mm.
 Some operating system will stop Mantid from claiming/reserving the memory, leading to a memory allocation error at the starting
 stage.
 This is a known limitation and we are actively searching for a solution.
+
+By default, the algorithm uses the ``SampleOnly`` method where it ignores container's contribution as well as its interaction with sample.
+When ``SampleAndContainer`` is selected, the algorithm will compute the distance within sample and container separately.
+Consequently, the term :math:`A_{1}` now becomes
+
+.. math::
+    :label: A1_final_sampleAndContainer
+
+    A_{1}(\lambda) = \int \rho \sigma \exp[ -\mu^\text{s} (l_\text{S1}^\text{s} + l_\text{1D}^\text{s}) -\mu^\text{c} (l_\text{S1}^\text{c} + l_\text{1D}^\text{c})] dV
+
+where :math:`\mu^\text{s}` denotes the sample absorption coefficient and :math:`\mu^\text{c}` denotes the container absorption coefficient.
+Notice that the number density :math:`\rho` as well as the scattering cross section :math:`\sigma` are inside the integral now.
+This is because the material of the sample is often different from the material of the container, therefore we need to consider the material
+whiling performing the integration, which is different from when working with a single material component.
+
+Similarly, the term :math:`A_{2}` is now
+
+.. math::
+    :label: A2_final_sampleAndContainer
+
+    A_2(\lambda) = \int \rho_1 \sigma_1
+            \int \rho_2 \sigma_2
+                 \dfrac{ \exp\left[
+                          -\mu^\text{s}( l_\text{S1}^\text{s}
+                                       + l_\text{12}^\text{s}
+                                       + l_\text{2D}^\text{s})
+                          -\mu^\text{c}( l_\text{S1}^\text{c}
+                                       + l_\text{12}^\text{c}
+                                       + l_\text{2D}^\text{c})
+                         \right]
+                      }{l_\text{12}^2}
+            dV_2
+        dV_1
+
+where the distance within different material (sample and container) are summed independently.
 
 Example
 -------
