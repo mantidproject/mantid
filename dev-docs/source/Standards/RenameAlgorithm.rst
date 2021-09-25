@@ -141,4 +141,4 @@ Coming to our previous example, a ``RuntimeError`` is printed:
         raise RuntimeError(f'Use of algorithm alias {self._alias.name} not allowed. Use {name} instead')
 
 To prevent the ``RuntimeError`` and instead print a log error message, the property can be left unset or set to
-"``Log``"
+"``Log``".

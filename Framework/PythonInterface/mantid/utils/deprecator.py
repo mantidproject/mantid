@@ -43,7 +43,8 @@ def deprecated_algorithm(new_name, deprecation_date):  # decorator factory
     r"""
     :brief: Class decorator marking the algorithm as deprecated
 
-    :param str new_name: Algorithm's name that should be used in place of this algorithm
+    :param str new_name: Algorithm's name replacing the deprecated algorithm. If there's no replacement, pass
+        and empty string or ``None``.
     :param str deprecation_date:  date of deprecation for this algorithm, in ISO8601 format
     """
     try:
@@ -52,7 +53,9 @@ def deprecated_algorithm(new_name, deprecation_date):  # decorator factory
         logger.error(f'Algorithm deprecation date {deprecation_date} must be in ISO8601 format')
 
     def decorator_instance(cls):
-        depr_msg = f'Algorithm "{cls.__name__}" is deprecated since {deprecation_date}. Use "{new_name}" instead'
+        depr_msg = f'Algorithm "{cls.__name__}" is deprecated since {deprecation_date}.'
+        if new_name:
+            depr_msg += ' Use "{new_name}" instead'
         raise_msg = f'Configuration "algorithms.deprecated" set to raise upon use of any deprecated algorithm'
 
         cls_category = cls.category
