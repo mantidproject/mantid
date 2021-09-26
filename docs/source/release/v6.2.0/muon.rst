@@ -55,6 +55,7 @@ New Features
    :align: center
    :height: 800px
 
+- Changing runs with autoscale on will update the fitting plots correctly.
 - It is now possible to exclude a single range from a fit range when doing a fit on the :ref:`Fitting Tab <muon_fitting_tab-ref>`.
 - Added a ``Covariance Matrix`` button to the :ref:`Fitting Tab <muon_fitting_tab-ref>` that can be used to open and inspect the normalised covariance parameters of a fit.
 
