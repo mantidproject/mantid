@@ -30,6 +30,11 @@
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidGeometry/Instrument/Detector.h"
 
+#include <gmock/gmock.h>
+
+#include <string>
+#include <vector>
+
 namespace Mantid {
 namespace DataObjects {
 class PeaksWorkspace;
@@ -55,10 +60,10 @@ public:
     return out;
   }
 };
-/** mock algorithm for doing logging/progress reporting*/
-class MockAlgorithm : public Mantid::API::Algorithm {
+/** Stub algorithm for doing logging/progress reporting*/
+class StubAlgorithm : public Mantid::API::Algorithm {
 public:
-  MockAlgorithm(size_t nSteps = 100);
+  StubAlgorithm(size_t nSteps = 100);
   /// Algorithm's name for identification
   const std::string name() const override { return "MockAlgorithm"; }
   /// Algorithm's version for identification

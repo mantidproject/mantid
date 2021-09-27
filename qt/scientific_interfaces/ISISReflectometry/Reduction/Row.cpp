@@ -25,6 +25,8 @@ Row::Row(std::vector<std::string> runNumbers, double theta,
 
 bool Row::isGroup() const { return false; }
 
+bool Row::isPreview() const { return false; }
+
 std::vector<std::string> const &Row::runNumbers() const { return m_runNumbers; }
 
 TransmissionRunPair const &Row::transmissionWorkspaceNames() const { return m_transmissionRuns; }

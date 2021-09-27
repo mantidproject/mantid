@@ -6,17 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidAPI/MatrixWorkspace_fwd.h"
-#include <string>
+#include "../../../ISISReflectometry/Reduction/IBatch.h"
+#include <gmock/gmock.h>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
-class IJobManager;
-
-class IPreviewModel {
+class MockBatch : public IBatch {
 public:
-  IPreviewModel() = default;
-  virtual ~IPreviewModel() = default;
-  virtual void loadWorkspace(std::string const &workspaceName, IJobManager &jobManager) = 0;
-  virtual Mantid::API::MatrixWorkspace_sptr getLoadedWs() const = 0;
+  virtual ~MockBatch() = default;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

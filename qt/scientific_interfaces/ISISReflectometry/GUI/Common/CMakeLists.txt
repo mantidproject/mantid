@@ -8,6 +8,8 @@ set(COMMON_SRC_FILES
 set(
   COMMON_INC_FILES
   IFileHandler.h
+  IJobRunner.h
+  IJobManager.h
   IMessageHandler.h
   IPythonRunner.h
   IPlotter.h
