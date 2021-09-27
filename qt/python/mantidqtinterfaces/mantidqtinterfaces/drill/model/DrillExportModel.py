@@ -267,7 +267,8 @@ class DrillExportModel:
                 kwargs = {}
                 if 'Ascii' in algo:
                     log_list = (mtd[wsName].getInstrument().getStringParameter('log_list_to_save')[0]).split(',')
-                    kwargs['LogList'] = [log.strip() for log in log_list] # removes white spaces
+                    if len(log_list) > 0:
+                        kwargs['LogList'] = [log.strip() for log in log_list] # removes white spaces
                     if 'Reflectometry' in algo:
                         kwargs['WriteHeader'] = True
                         kwargs['FileExtension'] = 'custom'
