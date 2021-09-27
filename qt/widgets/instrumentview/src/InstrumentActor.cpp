@@ -143,6 +143,16 @@ void InstrumentActor::initialize() {
  */
 InstrumentActor::~InstrumentActor() { saveSettings(); }
 
+void InstrumentActor::deleteLater() {
+  blockSignals(true);
+
+  // cancel any running mantid algorithms to help free the thread
+  auto alg = AlgorithmManager::Instance().getAlgorithm(m_algID);
+  if (alg) {
+    alg->cancel();
+  }
+}
+
 /**
  * Set up the workspace: calculate the value ranges, set the colours.
  * @param sharedWorkspace :: A shared pointer to the workspace.
@@ -759,6 +769,8 @@ Mantid::API::MatrixWorkspace_sptr InstrumentActor::extractCurrentMask() const {
   alg->getPointerToProperty("OutputWorkspace")->createTemporaryValue();
   alg->setLogging(false);
   alg->setAlwaysStoreInADS(false);
+  // grab the algorithm ID to use for cancelling execution on quit events
+  m_algID = alg->getAlgorithmID();
   alg->execute();
   return alg->getProperty("OutputWorkspace");
 }

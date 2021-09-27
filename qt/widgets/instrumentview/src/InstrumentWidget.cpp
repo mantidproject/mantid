@@ -222,11 +222,15 @@ InstrumentWidget::InstrumentWidget(QString wsName, QWidget *parent, bool resetGe
  * Destructor
  */
 InstrumentWidget::~InstrumentWidget() {
-  m_thread.quit();
-  m_thread.wait();
   if (m_instrumentActor) {
     saveSettings();
   }
+  m_instrumentActor->blockSignals(true);
+  QMetaObject::invokeMethod(m_instrumentActor.get(), "deleteLater", Qt::DirectConnection);
+
+  m_thread.requestInterruption();
+  m_thread.quit();
+  m_thread.wait();
 }
 
 void InstrumentWidget::hideHelp() { m_help->setVisible(false); }

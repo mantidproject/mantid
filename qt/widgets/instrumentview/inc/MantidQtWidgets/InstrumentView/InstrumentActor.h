@@ -11,6 +11,7 @@
 #include "MantidQtWidgets/InstrumentView/DllOption.h"
 #include "MantidQtWidgets/InstrumentView/GLColor.h"
 
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
 #include "MantidGeometry/IComponent.h"
@@ -223,6 +224,7 @@ signals:
 
 public slots:
   void initialize();
+  void deleteLater();
 
 private:
   static constexpr double TOLERANCE = 0.00001;
@@ -293,6 +295,8 @@ private:
   std::unique_ptr<Mantid::Geometry::DetectorInfo> m_physicalDetectorInfo;
   std::unique_ptr<InstrumentRenderer> m_renderer;
   MantidWidgets::IMessageHandler &m_messageHandler;
+
+  mutable Mantid::API::AlgorithmID m_algID;
 
   friend class InstrumentWidgetEncoder;
   friend class InstrumentWidgetDecoder;
