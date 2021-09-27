@@ -33,7 +33,7 @@ InstViewModel::createInstrumentViewActor(Mantid::API::MatrixWorkspace_sptr &work
                                                           scaleMax);
 }
 
-void InstViewModel::notifyWorkspaceUpdated(Mantid::API::MatrixWorkspace_sptr &workspace) {
+void InstViewModel::updateWorkspace(Mantid::API::MatrixWorkspace_sptr &workspace) {
   // TODO refactor the component info stuff into the surface constructor so we don't need to get it here
   m_actor = createInstrumentViewActor(workspace);
   const auto &componentInfo = m_actor->componentInfo();

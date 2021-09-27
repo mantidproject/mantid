@@ -19,7 +19,7 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 class MANTIDQT_ISISREFLECTOMETRY_DLL InstViewModel : public IInstViewModel {
 public:
   InstViewModel(std::unique_ptr<MantidWidgets::IMessageHandler> messageHandler = nullptr);
-  void notifyWorkspaceUpdated(Mantid::API::MatrixWorkspace_sptr &workspace) override;
+  void updateWorkspace(Mantid::API::MatrixWorkspace_sptr &workspace) override;
   std::shared_ptr<MantidWidgets::RotationSurface> getInstrumentViewSurface() const override;
 
 private:

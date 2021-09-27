@@ -22,7 +22,7 @@ public:
     auto model = InstViewModel(makeMessageHandler());
     auto previousSurface = model.getInstrumentViewSurface();
     auto ws = createWorkspace();
-    model.notifyWorkspaceUpdated(ws);
+    model.updateWorkspace(ws);
     const auto result = model.getInstrumentViewSurface();
     TS_ASSERT(result);
     TS_ASSERT_DIFFERS(previousSurface, result)

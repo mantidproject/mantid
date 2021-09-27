@@ -42,14 +42,20 @@ void PreviewPresenter::notifyLoadWorkspaceCompleted() {
   assert(ws);
 
   // Notify the instrument view model that the workspace has changed before we get the surface
-  m_instViewModel->notifyWorkspaceUpdated(ws);
+  m_instViewModel->updateWorkspace(ws);
   auto surface = m_instViewModel->getInstrumentViewSurface();
   m_view->plotInstView(surface);
 }
 
 /** Notification received when the user has requested the sele
  */
-void PreviewPresenter::notifyInstViewSelectRectRequested() { assert(false); }
+void PreviewPresenter::notifyInstViewSelectRectRequested() {
+  // Wire up models
+  // Call back out to the view to toggle button "on"
+  // Conquer inst viewer, m_view->setMode(ENUM)
+  // Fix unknown bugs
+  assert(false);
+}
 
 void PreviewPresenter::notifyInstViewPanRequested() { assert(false); }
 

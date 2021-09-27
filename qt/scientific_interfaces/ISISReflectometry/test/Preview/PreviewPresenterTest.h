@@ -114,7 +114,7 @@ private:
                                     MockInstViewModel &mockInstViewModel) {
     auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
     EXPECT_CALL(mockModel, getLoadedWs).Times(1).WillOnce(Return(ws));
-    EXPECT_CALL(mockInstViewModel, notifyWorkspaceUpdated(Eq(ws))).Times(1);
+    EXPECT_CALL(mockInstViewModel, updateWorkspace(Eq(ws))).Times(1);
     EXPECT_CALL(mockInstViewModel, getInstrumentViewSurface()).Times(1).WillOnce(Return(nullptr));
     EXPECT_CALL(mockView, plotInstView(Eq(nullptr)));
   }

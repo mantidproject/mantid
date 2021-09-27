@@ -16,7 +16,7 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 class IInstViewModel {
 public:
   virtual ~IInstViewModel() = default;
-  virtual void notifyWorkspaceUpdated(Mantid::API::MatrixWorkspace_sptr &workspace) = 0;
+  virtual void updateWorkspace(Mantid::API::MatrixWorkspace_sptr &workspace) = 0;
   virtual std::shared_ptr<MantidWidgets::RotationSurface> getInstrumentViewSurface() const = 0;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
