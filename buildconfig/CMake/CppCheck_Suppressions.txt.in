@@ -847,7 +847,6 @@ passedByValue:${CMAKE_SOURCE_DIR}/Framework/TestHelpers/inc/MantidTestHelpers/MD
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/TestHelpers/inc/MantidTestHelpers/MDEventsTestHelper.h:266
 useInitializationList:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FindFilesThreadPoolManager.cpp:52
 constVariable:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FindFilesWorker.cpp:65
-nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitOptionsBrowser.cpp:404
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitScriptGeneratorDataTable.cpp:200
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitDomain.cpp:97
 unreadVariable:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitDomain.cpp:125
@@ -1032,4 +1031,3 @@ unreadVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/Stretch.cpp
 ctunullpointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/IPropertyManager.h:139
 ctunullpointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/IPropertyManager.h:163
 ctunullpointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/IPropertyManager.h:281
-ctunullpointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitOptionsBrowser.cpp:404
