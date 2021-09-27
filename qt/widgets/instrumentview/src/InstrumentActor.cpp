@@ -211,13 +211,10 @@ bool InstrumentActor::hasChildVisible() const {
  *  !!!! USE InstrumentActor::getInstrument() BELOW !!!!
  */
 MatrixWorkspace_const_sptr InstrumentActor::getWorkspace() const {
-  auto sharedWorkspace = m_workspace.lock();
-
-  if (!sharedWorkspace) {
+  if (m_workspace.expired())
     throw std::runtime_error("Instrument view: workspace doesn't exist");
-  }
 
-  return sharedWorkspace;
+  return m_workspace.lock();
 }
 
 void InstrumentActor::getBoundingBox(Mantid::Kernel::V3D &minBound, Mantid::Kernel::V3D &maxBound,
