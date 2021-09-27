@@ -18,6 +18,7 @@ using namespace Mantid::Kernel;
 namespace Mantid::DataHandling {
 
 // For manual testing, uncomment this to register the algorithm as a loader
+// Never commit to master uncommented!
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLMock)
 
 //----------------------------------------------------------------------------------------------
@@ -29,7 +30,7 @@ const std::string LoadILLMock::name() const { return "LoadILLMock"; }
 int LoadILLMock::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string LoadILLMock::category() const { return "Test"; }
+const std::string LoadILLMock::category() const { return "Utility\\Development"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string LoadILLMock::summary() const { return "This is a fake algorithm for testing purposes ONLY."; }
@@ -52,8 +53,8 @@ void LoadILLMock::loadAndFillData() {
   // PropertyManager_sptr pm = getProperty("PatchNexusMetadataEntries");
   // float a = pm->getProperty("/entry0/monitor1/monrate");
   g_log.warning() << monrate << std::endl;
-};
+}
 
-void LoadILLMock::configureBeamline(){};
+void LoadILLMock::configureBeamline() {}
 
 } // namespace Mantid::DataHandling
