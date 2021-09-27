@@ -13,6 +13,7 @@ New and Improved
 .. figure:: ../../images/iview_insitu_rebin.png
     :width: 500px
     :align: center
+- The integration slider in the instrument viewer now support discrete steps when the axis has discrete values.
 
 Bugfixes
 --------

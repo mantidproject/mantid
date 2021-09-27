@@ -295,7 +295,7 @@ void InstrumentWidget::init(bool resetGeometry, bool autoscaling, double scaleMi
     surface->resetInstrumentActor(m_instrumentActor.get());
     updateInfoText();
   }
-  updateIntegrationWidget(true);
+  updateIntegrationWidget(resetGeometry);
 }
 
 /**
@@ -615,14 +615,17 @@ void InstrumentWidget::replaceWorkspace(const std::string &newWs, const std::str
  * @param init : boolean set to true if the integration widget is still being initialized
  */
 void InstrumentWidget::updateIntegrationWidget(bool init) {
-  // discrete integration range is only used if all the bins are common and integers, as a convention
-  bool isDiscrete =
-      m_instrumentActor->getWorkspace()->isCommonBins() && m_instrumentActor->getWorkspace()->isIntegerBins();
+  // discrete integration range is only used if all the bins are common and integers and not an event workspace, as a
+  // convention
+  auto ws = m_instrumentActor->getWorkspace();
+
+  bool isNotEventWs = ws->id() != "EventWorkspace";
+
+  bool isDiscrete = ws->isCommonBins() && ws->isIntegerBins() && isNotEventWs;
 
   m_xIntegration->setDiscrete(isDiscrete);
-  double minRange = isDiscrete ? 0 : m_instrumentActor->minBinValue();
-  double maxRange = isDiscrete ? static_cast<int>(m_instrumentActor->getWorkspace()->blocksize()) - 1
-                               : m_instrumentActor->maxBinValue();
+  double minRange = isDiscrete ? 0 : m_instrumentActor->minWkspBinValue();
+  double maxRange = isDiscrete ? static_cast<int>(ws->blocksize()) - 1 : m_instrumentActor->maxWkspBinValue();
 
   m_xIntegration->setTotalRange(minRange, maxRange);
 
@@ -636,7 +639,7 @@ void InstrumentWidget::updateIntegrationWidget(bool init) {
     }
   }
 
-  m_xIntegration->setUnits(QString::fromStdString(m_instrumentActor->getWorkspace()->getAxis(0)->unit()->caption()));
+  m_xIntegration->setUnits(QString::fromStdString(ws->getAxis(0)->unit()->caption()));
 
   bool integrable = isIntegrable();
 
@@ -950,7 +953,8 @@ void InstrumentWidget::setWireframe(bool on) {
  */
 void InstrumentWidget::setIntegrationRange(double xmin, double xmax) {
   auto workspace = m_instrumentActor->getWorkspace();
-  bool isDiscrete = workspace->isCommonBins() && workspace->isIntegerBins();
+  bool isNotEventWorkspace = workspace->id() != "EventWorkspace";
+  bool isDiscrete = workspace->isCommonBins() && workspace->isIntegerBins() && isNotEventWorkspace;
 
   if (isDiscrete) {
     xmin = workspace->binEdges(0)[static_cast<int>(xmin)];

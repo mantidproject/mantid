@@ -243,7 +243,7 @@ bool XIntegrationScrollBar::manageEventContinuous(QEvent *e) {
     }
     m_changed = true;
     updateMinMax();
-    return false;
+    return true;
   }
   default:
     return false;
@@ -434,7 +434,6 @@ void XIntegrationScrollBar::updateMinMax() {
 }
 
 //---------------------------------------------------------------------------------//
-
 XIntegrationControl::XIntegrationControl(InstrumentWidget *instrWindow)
     : QFrame(instrWindow), m_instrWindow(instrWindow), m_totalMinimum(0), m_totalMaximum(1), m_minimum(0),
       m_maximum(1) {
@@ -448,10 +447,10 @@ XIntegrationControl::XIntegrationControl(InstrumentWidget *instrWindow)
 
   m_minSpin = new QSpinBox(this);
   m_minSpin->setMaximumWidth(100);
-  m_minSpin->setToolTip("Minimum channel index");
+  m_minSpin->setToolTip("Minimum channel index. Click outside to refresh.");
   m_maxSpin = new QSpinBox(this);
   m_maxSpin->setMaximumWidth(100);
-  m_maxSpin->setToolTip("Maximum channel index");
+  m_maxSpin->setToolTip("Maximum channel index. Click outside to refresh.");
 
   m_units = new QLabel("TOF", this);
   m_setWholeRange = new QPushButton("Reset");
@@ -513,21 +512,22 @@ void XIntegrationControl::setTotalRange(double minimum, double maximum) {
   m_minimum = minimum;
   m_maximum = maximum;
 
-  if (m_scrollBar->getMinimum() != 0 || m_scrollBar->getMaximum() != 1) {
-    m_minimum = std::min(std::max(m_minimum, minimum), m_totalMaximum);
-    m_maximum = std::max(std::min(m_maximum, maximum), m_totalMinimum);
-  } else {
-    m_minimum = minimum;
-    m_maximum = maximum;
-  }
-
   if (m_isDiscrete) {
+    // if the slider is discrete, we reset it to its usual starting position
     discretize();
     m_scrollBar->setStepsTotal(static_cast<int>(m_totalMaximum - m_totalMinimum + 1));
     setRange(0, 0);
   } else {
-    // we reset the slider to max range, since its size has been changed
-    setWholeRange();
+    // we keep as much of the previous slider as possible
+    if (m_scrollBar->getMinimum() != 0 || m_scrollBar->getMaximum() != 1) {
+      m_minimum = std::min(std::max(m_minimum, minimum), m_totalMaximum);
+      m_maximum = std::max(std::min(m_maximum, maximum), m_totalMinimum);
+      setRange(m_minimum, m_maximum);
+    } else {
+      m_minimum = minimum;
+      m_maximum = maximum;
+    }
+    updateTextBoxes();
   }
 }
 
