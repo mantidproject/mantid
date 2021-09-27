@@ -408,7 +408,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
 
         self.copyProperties('SANSILLIntegration', ['ShapeTable'])
 
-        self.copyProperties('SANSILLReduction', 'Wavelength')
+        self.copyProperties('SANSILLReduction', 'Wavelength', 1)
 
     def PyExec(self):
         self.setUp()
