@@ -111,7 +111,7 @@ template <class W> void LoadILLBase<W>::patchSampleLogs(std::shared_ptr<W> ws) {
   const auto properties = logsToPatch->getProperties();
   ExperimentInfo_sptr einfo = std::dynamic_pointer_cast<MatrixWorkspace>(ws);
   for (const auto &prop : properties) {
-    ws->mutableRun().addProperty(prop, true);
+    einfo->mutableRun().addProperty(prop, true);
   }
 }
 
@@ -125,7 +125,7 @@ template <class W> void LoadILLBase<W>::patchLogsForPatchedEntries(std::shared_p
   for (const auto &prop : properties) {
     std::string logName = prop->name();
     // TODO: build the sample log name just as load helper would do
-    ws->mutableRun().addProperty(logName, prop->value(), true);
+    einfo->mutableRun().addProperty(logName, prop->value(), true);
   }
 }
 

@@ -7,7 +7,9 @@
 #pragma once
 
 #include "MantidAPI/IFileLoader.h"
-#include "MantidAPI/Workspace_fwd.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Workspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidDataHandling/LoadHelper.h"
 #include "MantidDataHandling/NexusEntryProvider.h"
@@ -20,14 +22,14 @@ namespace Mantid::DataHandling {
 /** LoadILLBase : A common base class for ILL raw data nexus (numor) loaders.
  */
 
-template <class W> class DLLExport LoadILLBase : public API::IFileLoader<Kernel::NexusDescriptor> {
+template <class W> class MANTID_DATAHANDLING_DLL LoadILLBase : public API::IFileLoader<Kernel::NexusDescriptor> {
   static_assert(std::is_base_of<API::Workspace, W>::value, "W must be a workspace type.");
 
 protected:
   // protected getters
-  std::unique_ptr<NeXus::NXRoot> &getNXRoot() const { return m_nxroot; }
-  std::unique_ptr<NexusEntryProvider> &getNep() const { return m_nep; }
-  std::unique_ptr<LoadHelper> &getHelper() const { return m_helper; }
+  std::unique_ptr<NeXus::NXRoot> &getNXRoot() { return m_nxroot; }
+  std::unique_ptr<NexusEntryProvider> &getNep() { return m_nep; }
+  std::unique_ptr<LoadHelper> &getHelper() { return m_helper; }
   template <typename T> T getScalarMetadata(const std::string &key) { return m_nep->getScalarMetadata<T>(key); }
   template <typename T> std::vector<T> getVectorMetadata(const std::string &key) {
     return m_nep->getVectorMetadata<T>(key);
@@ -69,4 +71,8 @@ private:
   std::unique_ptr<NexusEntryProvider> m_nep; // pointer to nexus entry provider
   std::unique_ptr<LoadHelper> m_helper;      // pointer to load helper
 };
+
+template class MANTID_DATAHANDLING_DLL LoadILLBase<API::MatrixWorkspace>;
+template class MANTID_DATAHANDLING_DLL LoadILLBase<API::WorkspaceGroup>;
+
 } // namespace Mantid::DataHandling
