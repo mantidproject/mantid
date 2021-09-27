@@ -575,7 +575,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 SANSILLReduction(Run=absorber,
                                  ProcessAs='Absorber',
                                  NormaliseBy=self.normalise,
-                                 OutputWorkspace=transmission_absorber_name)
+                                 OutputWorkspace=transmission_absorber_name,
+                                 Wavelength=self.getProperty("Wavelength").value)
         for beam_no, beam in enumerate(self.btransmission.split(',')):
             [process_transmission_beam, transmission_beam_name] = \
                 needs_processing(beam, 'Beam')
@@ -594,7 +595,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                                  BeamRadius=self.tr_radius,
                                  FluxOutputWorkspace=flux_name,
                                  AbsorberInputWorkspace=
-                                 transmission_absorber_name)
+                                 transmission_absorber_name,
+                                 Wavelength=self.getProperty("Wavelength").value)
         for transmission_no, transmission in enumerate(self.ctransmission.split(',')):
             [process_container_transmission, container_transmission_name] = \
                 needs_processing(transmission, 'Transmission')
@@ -616,7 +618,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                                  transmission_absorber_name,
                                  BeamInputWorkspace=transmission_beam_name,
                                  NormaliseBy=self.normalise,
-                                 BeamRadius=self.tr_radius)
+                                 BeamRadius=self.tr_radius,
+                                 Wavelength=self.getProperty("Wavelength").value)
         for transmission_no, transmission in enumerate(self.stransmission.split(',')):
             [process_sample_transmission, sample_transmission_name] = \
                 needs_processing(transmission, 'Transmission')
@@ -638,7 +641,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                                  transmission_absorber_name,
                                  BeamInputWorkspace=transmission_beam_name,
                                  NormaliseBy=self.normalise,
-                                 BeamRadius=self.tr_radius)
+                                 BeamRadius=self.tr_radius,
+                                 Wavelength=self.getProperty("Wavelength").value)
         return container_transmission_names, sample_transmission_names
 
     def processAbsorber(self, i):
@@ -652,7 +656,9 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
             SANSILLReduction(Run=absorber,
                              ProcessAs='Absorber',
                              NormaliseBy=self.normalise,
-                             OutputWorkspace=absorber_name)
+                             OutputWorkspace=absorber_name,
+                             Wavelength=self.getProperty("Wavelength").value
+                             )
         return absorber_name
 
     def processBeam(self, i, absorber_name):
@@ -672,7 +678,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                              NormaliseBy=self.normalise,
                              BeamRadius=radius,
                              AbsorberInputWorkspace=absorber_name,
-                             FluxOutputWorkspace=flux_name)
+                             FluxOutputWorkspace=flux_name,
+                             Wavelength=self.getProperty("Wavelength").value)
         return beam_name, flux_name
 
     def processFlux(self, i, absorber_name):
@@ -693,7 +700,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                                  NormaliseBy=self.normalise,
                                  BeamRadius=radius,
                                  AbsorberInputWorkspace=absorber_name,
-                                 FluxOutputWorkspace=flux_name)
+                                 FluxOutputWorkspace=flux_name,
+                                 Wavelength=self.getProperty("Wavelength").value)
             return flux_name
         else:
             return None
@@ -720,7 +728,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                              TransmissionInputWorkspace=
                              container_transmission_name,
                              ThetaDependent=self.theta_dependent,
-                             NormaliseBy=self.normalise)
+                             NormaliseBy=self.normalise,
+                             Wavelength=self.getProperty("Wavelength").value)
         return container_name
 
     def getWavelength(self, logs):
