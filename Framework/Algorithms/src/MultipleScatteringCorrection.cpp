@@ -24,9 +24,7 @@
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
 
-namespace Mantid {
-
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace API;
 using namespace Geometry;
@@ -887,10 +885,6 @@ void MultipleScatteringCorrection::pairWiseSum(double &A1, double &A2,          
   }
 }
 
-<<<<<<< HEAD
-} // namespace Algorithms
-} // namespace Mantid
-=======
 /**
  * @brief Integrate for A1 and A2 using pair-wise summation for multi component case
  *
@@ -965,4 +959,3 @@ void MultipleScatteringCorrection::pairWiseSum(
 }
 
 } // namespace Mantid::Algorithms
->>>>>>> 5512e2e7919 (first draft of SC case)
