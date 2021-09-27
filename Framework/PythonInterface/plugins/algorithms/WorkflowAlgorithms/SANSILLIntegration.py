@@ -398,8 +398,10 @@ class SANSILLIntegration(PythonAlgorithm):
         wavelength = run.getLogData('wavelength').value
         if 'selector.wavelength_res' in run:
             delta_wavelength = run.getLogData('selector.wavelength_res').value * 0.01
+        elif 'selector.wavelenght_res' in run: # typo in some nexus files
+            delta_wavelength = run.getLogData('selector.wavelenght_res').value * 0.01
         elif 'selector.wave_lenght_res' in run:
-            delta_wavelength = run.getLogData('selector.wave_lenght_res').value * 0.01 # sic! log name for at least some D22 data
+            delta_wavelength = run.getLogData('selector.wave_lenght_res').value * 0.01 # typo in some nexus files
         else:
             raise RuntimeError("Wavelength resolution log not available.")
         if 'BeamWidthX' in run:
