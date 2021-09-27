@@ -131,7 +131,9 @@ void GenerateEventsFilter::init() {
   auto logvalidator = std::make_shared<StringListValidator>(logboundoptions);
   declareProperty("LogBoundary", "Centre", logvalidator,
                   "How to treat log values as being measured in the centre of time. "
-                  "There are three options, 'Centre', 'Left' and 'Other'. ");
+                  "There are three options, 'Centre', 'Left' and 'Other'. "
+                  "This value must be set to Left if the sample log is recorded upon changing,"
+                  "which applies to most of the sample environment devices in SNS.");
   setPropertySettings("LogBoundary", std::make_unique<VisibleWhenProperty>("LogName", IS_NOT_EQUAL_TO, ""));
 
   declareProperty("LogValueTolerance", EMPTY_DBL(),
