@@ -588,6 +588,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                                  ProcessAs='Absorber',
                                  NormaliseBy=self.normalise,
                                  OutputWorkspace=transmission_absorber_name,
+                                 Wavelength=self.getProperty("Wavelength").value,
                                  Version=1)
         for beam_no, beam in enumerate(self.btransmission.split(',')):
             [process_transmission_beam, transmission_beam_name] = \
@@ -608,6 +609,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                                  FluxOutputWorkspace=flux_name,
                                  AbsorberInputWorkspace=
                                  transmission_absorber_name,
+                                 Wavelength=self.getProperty("Wavelength").value,
                                  Version=1)
         for transmission_no, transmission in enumerate(self.ctransmission.split(',')):
             [process_container_transmission, container_transmission_name] = \
@@ -631,6 +633,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                                  BeamInputWorkspace=transmission_beam_name,
                                  NormaliseBy=self.normalise,
                                  BeamRadius=self.tr_radius,
+                                 Wavelength=self.getProperty("Wavelength").value,
                                  Version=1)
         for transmission_no, transmission in enumerate(self.stransmission.split(',')):
             [process_sample_transmission, sample_transmission_name] = \
@@ -654,6 +657,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                                  BeamInputWorkspace=transmission_beam_name,
                                  NormaliseBy=self.normalise,
                                  BeamRadius=self.tr_radius,
+                                 Wavelength=self.getProperty("Wavelength").value,
                                  Version=1)
         return container_transmission_names, sample_transmission_names
 
@@ -669,6 +673,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                              ProcessAs='Absorber',
                              NormaliseBy=self.normalise,
                              OutputWorkspace=absorber_name,
+                             Wavelength=self.getProperty("Wavelength").value,
                              Version=1)
         return absorber_name
 
@@ -690,6 +695,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                              BeamRadius=radius,
                              AbsorberInputWorkspace=absorber_name,
                              FluxOutputWorkspace=flux_name,
+                             Wavelength=self.getProperty("Wavelength").value,
                              Version=1)
         return beam_name, flux_name
 
@@ -712,6 +718,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                                  BeamRadius=radius,
                                  AbsorberInputWorkspace=absorber_name,
                                  FluxOutputWorkspace=flux_name,
+                                 Wavelength=self.getProperty("Wavelength").value,
                                  Version=1)
             return flux_name
         else:
@@ -740,6 +747,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                              container_transmission_name,
                              ThetaDependent=self.theta_dependent,
                              NormaliseBy=self.normalise,
+                             Wavelength=self.getProperty("Wavelength").value,
                              Version=1)
         return container_name
 
