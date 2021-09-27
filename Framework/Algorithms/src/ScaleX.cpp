@@ -18,8 +18,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Kernel;
 using namespace API;
@@ -247,5 +246,4 @@ double ScaleX::getScaleFactor(const API::MatrixWorkspace_const_sptr &inputWS, co
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

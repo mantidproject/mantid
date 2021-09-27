@@ -10,9 +10,7 @@
 #include "MantidCurveFitting/Functions/Resolution.h"
 #include "MantidAPI/FunctionFactory.h"
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
 
@@ -46,6 +44,4 @@ bool Resolution::hasAttribute(const std::string &attName) const { return m_fun.h
 
 std::string Resolution::attributeName(size_t index) const { return m_fun.attributeName(index); }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

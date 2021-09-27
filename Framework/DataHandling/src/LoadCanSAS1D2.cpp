@@ -28,8 +28,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 DECLARE_FILELOADER_ALGORITHM(LoadCanSAS1D2)
 
@@ -210,5 +209,4 @@ MatrixWorkspace_sptr LoadCanSAS1D2::loadEntry(Poco::XML::Node *const workspaceDa
   }
   return main_out;
 }
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

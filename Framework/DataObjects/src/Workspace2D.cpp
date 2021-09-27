@@ -19,8 +19,7 @@
 
 using Mantid::API::MantidImage;
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 using std::size_t;
 
 DECLARE_WORKSPACE(Workspace2D)
@@ -352,11 +351,9 @@ void Workspace2D::generateHistogram(const std::size_t index, const MantidVec &X,
 
 Workspace2D *Workspace2D::doClone() const { return new Workspace2D(*this); }
 Workspace2D *Workspace2D::doCloneEmpty() const { return new Workspace2D(storageMode()); }
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 template <>
 DLLExport Mantid::DataObjects::Workspace2D_sptr
 IPropertyManager::getValue<Mantid::DataObjects::Workspace2D_sptr>(const std::string &name) const {
@@ -382,7 +379,6 @@ IPropertyManager::getValue<Mantid::DataObjects::Workspace2D_const_sptr>(const st
     throw std::runtime_error(message);
   }
 }
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel
 
 ///\endcond TEMPLATE

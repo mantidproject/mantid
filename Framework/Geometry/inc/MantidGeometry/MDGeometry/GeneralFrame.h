@@ -23,8 +23,8 @@ public:
   static const std::string GeneralFrameDistance;
   static const std::string GeneralFrameTOF;
   static const std::string GeneralFrameName;
-  GeneralFrame(const std::string &frameName, const Kernel::UnitLabel &unit);
-  GeneralFrame(const std::string &frameName, std::unique_ptr<Mantid::Kernel::MDUnit> unit);
+  GeneralFrame(std::string frameName, const Kernel::UnitLabel &unit);
+  GeneralFrame(std::string frameName, std::unique_ptr<Mantid::Kernel::MDUnit> unit);
   Kernel::UnitLabel getUnitLabel() const override;
   const Kernel::MDUnit &getMDUnit() const override;
   bool setMDUnit(const Mantid::Kernel::MDUnit &newUnit) override;

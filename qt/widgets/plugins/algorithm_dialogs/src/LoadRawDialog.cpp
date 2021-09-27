@@ -23,11 +23,9 @@
 #include <QVBoxLayout>
 
 // Add this class to the list of specialized dialogs in this namespace
-namespace MantidQt {
-namespace CustomDialogs {
+namespace MantidQt::CustomDialogs {
 DECLARE_DIALOG(LoadRawDialog)
-}
-} // namespace MantidQt
+} // namespace MantidQt::CustomDialogs
 
 // Just to save writing this everywhere
 using namespace MantidQt::CustomDialogs;

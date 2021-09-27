@@ -10,8 +10,7 @@
 #include "MantidKernel/SobolSequence.h"
 #include <stdexcept>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 /**
  * Constructor taking the number of dimensions for the sequence
  */
@@ -77,5 +76,4 @@ void SobolSequence::deleteCurrentGenerator() {
     gsl_qrng_free(m_savedGenerator);
   }
 }
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

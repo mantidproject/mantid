@@ -14,8 +14,7 @@
 
 using namespace Mantid::Kernel;
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 
 /**
  * @brief Create the PeakShape
@@ -78,5 +77,4 @@ void PeakShapeEllipsoidFactory::setSuccessor(std::shared_ptr<const PeakShapeFact
   this->m_successor = successorFactory;
 }
 
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects

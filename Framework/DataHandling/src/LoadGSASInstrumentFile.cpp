@@ -39,8 +39,7 @@ using namespace Poco::XML;
 using Geometry::Instrument_const_sptr;
 using Geometry::Instrument_sptr;
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 DECLARE_ALGORITHM(LoadGSASInstrumentFile)
 
@@ -453,5 +452,4 @@ TableWorkspace_sptr LoadGSASInstrumentFile::genTableWorkspace(map<size_t, map<st
   return tablews;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

@@ -64,8 +64,8 @@ class SimpleAPITest(unittest.TestCase):
                         "PreserveEvents(Input) *boolean*       Keep the output workspace as an EventWorkspace, if the input has events. If the input and output EventWorkspace names are the same, only the X bins are set, which is very quick. If false, then the workspace gets converted to a Workspace2D histogram.\n\n"\
                         "FullBinsOnly(Input) *boolean*       Omit the final bin if its width is smaller than the step size\n\n"\
                         "IgnoreBinErrors(Input) *boolean*       Ignore errors related to zero/negative bin widths in input/output workspaces. When ignored, the signal and errors are set to zero\n\n"\
-                        "UseReverseLogarithmic(Input) *boolean*       For logarithmic intervals, the splitting starts from the end and go back to the start, ie the bins are bigger at the start and exponentially reduces until they reach the end. For these bins, the FullBinsOnly flag is ignored.\n\n" \
-                        "Power(Input) *number*       Splits the interval in bins whose width is width / (i ^ power). Power must be between 0 and 1.\n"
+                        "UseReverseLogarithmic(Input) *boolean*       For logarithmic intervals, the splitting starts from the end and goes back to the start, ie the bins are bigger at the start getting exponentially smaller until they reach the end. For these bins, the FullBinsOnly flag is ignored.\n\n" \
+                        "Power(Input) *number*       Splits the interval in bins which actual width is equal to requested width / (i ^ power); default is linear. Power must be between 0 and 1.\n"
         doc = simpleapi.rebin.__doc__
         self.assertGreater(len(doc), 0)
         self.assertEqual(doc, expected_doc)

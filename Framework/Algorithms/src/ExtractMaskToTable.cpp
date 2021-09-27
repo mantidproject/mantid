@@ -12,8 +12,7 @@
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/ArrayProperty.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -385,5 +384,4 @@ std::vector<detid_t> ExtractMaskToTable::subtractVector(std::vector<detid_t> min
   return diff;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

@@ -123,8 +123,7 @@ void writeData(const QString &filename, const QByteArray &data) {
 }
 
 } // namespace
-namespace MantidQt {
-namespace API {
+namespace MantidQt::API {
 void saveJSONToFile(QString &filename, const QMap<QString, QVariant> &map) {
   auto filenameString = filename.toStdString();
   if (filenameString.find_last_of(".") == std::string::npos ||
@@ -196,5 +195,4 @@ QMap<QString, QVariant> loadJSONFromString(const QString &jsonString) {
 #endif
 }
 
-} // namespace API
-} // namespace MantidQt
+} // namespace MantidQt::API

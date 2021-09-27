@@ -41,7 +41,7 @@ boost::python::list getChildrenAsList(const std::shared_ptr<AlgorithmHistory> &s
  * @param self :: A reference to the AlgorithmHistory that called this method
  * @returns A python list created from the set of property histories
  */
-boost::python::list getPropertiesAsList(AlgorithmHistory &self) {
+boost::python::list getPropertiesAsList(const AlgorithmHistory &self) {
   boost::python::list names;
   const auto &histories = self.getProperties();
   for (const auto &history : histories) {

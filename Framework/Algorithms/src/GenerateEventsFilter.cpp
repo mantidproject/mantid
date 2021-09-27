@@ -30,8 +30,7 @@ using Types::Core::time_duration;
 
 using namespace std;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 DECLARE_ALGORITHM(GenerateEventsFilter)
 
 /** Constructor
@@ -1072,7 +1071,7 @@ void GenerateEventsFilter::makeMultipleFiltersByValuesParallel(const map<size_t,
   }
 
   // Create event filters/splitters in parallel
-  // cppcheck-suppress syntaxError
+
     PRAGMA_OMP(parallel for schedule(dynamic, 1) )
     for (int i = 0; i < numThreads; ++i) {
       PARALLEL_START_INTERUPT_REGION
@@ -1875,5 +1874,4 @@ DateAndTime GenerateEventsFilter::findRunEnd() {
   return runendtime;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

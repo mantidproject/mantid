@@ -30,7 +30,7 @@ namespace {
  *calculation
  * @return The distance between self & the other component in metres
  */
-double getDistance(IComponent &self, IComponent &other) { return self.getDistance(other); }
+double getDistance(const IComponent &self, const IComponent &other) { return self.getDistance(other); }
 } // namespace
 
 void export_IComponent() {

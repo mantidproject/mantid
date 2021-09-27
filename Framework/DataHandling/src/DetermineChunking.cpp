@@ -37,8 +37,7 @@ using std::size_t;
 using std::string;
 using std::vector;
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 const int NUM_EXT_PRENEXUS(1); ///< Number of prenexus extensions
 /// Valid extensions for prenexus files
 const std::string PRENEXUS_EXT[NUM_EXT_PRENEXUS] = {"_runinfo.xml"};
@@ -348,5 +347,4 @@ FileType DetermineChunking::getFileType(const string &filename) {
 
   throw std::invalid_argument("Unsupported file type");
 }
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

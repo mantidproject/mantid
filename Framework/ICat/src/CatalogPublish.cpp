@@ -29,8 +29,7 @@
 #include <boost/regex.hpp>
 #include <fstream>
 
-namespace Mantid {
-namespace ICat {
+namespace Mantid::ICat {
 DECLARE_ALGORITHM(CatalogPublish)
 
 /// Init method to declare algorithm properties
@@ -237,5 +236,4 @@ const std::string CatalogPublish::generateWorkspaceHistory(Mantid::API::Workspac
   wsHistory->execute();
   return wsHistory->getPropertyValue("ScriptText");
 }
-} // namespace ICat
-} // namespace Mantid
+} // namespace Mantid::ICat

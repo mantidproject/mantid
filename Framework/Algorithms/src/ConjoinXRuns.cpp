@@ -32,8 +32,7 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace API;
 using namespace Kernel;
@@ -324,6 +323,9 @@ void ConjoinXRuns::joinSpectrum(int64_t wsIndex) {
   m_outWS->setCountStandardDeviations(index, std::move(errors));
   if (!xerrors.empty())
     m_outWS->setPointStandardDeviations(index, std::move(xerrors));
+  m_outWS->mutableY(index) = spectrum;
+  m_outWS->mutableE(index) = errors;
+  m_outWS->mutableX(index) = axis;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -440,5 +442,4 @@ void ConjoinXRuns::exec() {
   m_inputWS.clear();
   m_axisCache.clear();
 }
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

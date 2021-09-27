@@ -20,8 +20,7 @@
 // String utilities
 #include <boost/algorithm/string.hpp>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 DECLARE_FILELOADER_ALGORITHM(LoadTBL)
 
 using namespace Kernel;
@@ -416,5 +415,4 @@ void LoadTBL::exec() {
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

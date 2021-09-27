@@ -18,8 +18,7 @@
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/Text.h>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 std::string MDHistoDimension::toXMLString() const {
   using namespace Poco::XML;
@@ -101,5 +100,4 @@ std::string MDHistoDimension::toXMLString() const {
 
   return xmlstream.str();
 }
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

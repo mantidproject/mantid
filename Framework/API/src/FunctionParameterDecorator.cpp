@@ -11,8 +11,7 @@
 #include "MantidAPI/ParameterReference.h"
 #include "MantidAPI/ParameterTie.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 void FunctionParameterDecorator::setDecoratedFunction(const std::string &wrappedFunctionName) {
   IFunction_sptr fn = FunctionFactory::Instance().createFunction(wrappedFunctionName);
@@ -312,5 +311,4 @@ void FunctionParameterDecorator::beforeDecoratedFunctionSet(const IFunction_sptr
 
 void FunctionParameterDecorator::setDecoratedFunctionPrivate(const IFunction_sptr &fn) { m_wrappedFunction = fn; }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

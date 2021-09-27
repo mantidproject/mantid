@@ -7,8 +7,7 @@
 #include "MantidAPI/Projection.h"
 #include "MantidAPI/ITableWorkspace.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 using Mantid::Kernel::V3D;
 
@@ -137,5 +136,4 @@ void Projection::setUnit(size_t nd, ProjectionUnit unit) {
     m_units[nd] = unit;
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

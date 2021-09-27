@@ -17,8 +17,7 @@
 #include "MantidCurveFitting/Algorithms/PawleyFit.h"
 #include "MantidDataObjects/Peak.h"
 
-namespace Mantid {
-namespace CurveFitting {
+namespace Mantid::CurveFitting {
 
 using namespace API;
 using namespace Kernel;
@@ -263,5 +262,4 @@ void LatticeDomainCreator::createDomainFromPeakTable(const ITableWorkspace_sptr 
   }
 }
 
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting

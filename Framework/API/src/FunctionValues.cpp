@@ -11,8 +11,7 @@
 #include <algorithm>
 #include <functional>
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 /// Constructor.
 /// @param n :: A number of values to store.
@@ -221,5 +220,4 @@ void FunctionValues::setFitDataFromCalculated(const FunctionValues &values) {
   m_data.assign(values.m_calculated.begin(), values.m_calculated.end());
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

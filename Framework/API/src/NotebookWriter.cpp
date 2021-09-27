@@ -11,8 +11,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MantidVersion.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 namespace {
 Mantid::Kernel::Logger g_log("NotebookWriter");
@@ -176,5 +175,4 @@ std::string NotebookWriter::writeNotebook() {
 
   return Mantid::JsonHelpers::jsonToString(root, " ");
 }
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

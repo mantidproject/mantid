@@ -22,8 +22,7 @@
 #include <type_traits>
 #include <unordered_map>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 // -----------------------------------------------------------------------------
 // Anonymous methods
@@ -214,5 +213,4 @@ Material MaterialXMLParser::parse(Poco::XML::Element *element, const std::string
   return builder.build();
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

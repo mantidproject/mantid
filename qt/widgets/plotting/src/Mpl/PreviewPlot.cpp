@@ -45,9 +45,7 @@ constexpr auto SHOWALLERRORS = "Show all errors";
 constexpr auto HIDEALLERRORS = "Hide all errors";
 } // namespace
 
-namespace MantidQt {
-
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 /**
  * Construct a plot object
@@ -356,7 +354,7 @@ void PreviewPlot::resetView() {
  * Set the face colour for the canvas
  * @param colour A new colour for the figure facecolor
  */
-void PreviewPlot::setCanvasColour(const QColor &colour) { m_canvas->gcf().setFaceColor(std::move(colour)); }
+void PreviewPlot::setCanvasColour(const QColor &colour) { m_canvas->gcf().setFaceColor(colour); }
 
 /**
  * @brief PreviewPlot::setLinesWithErrors
@@ -759,5 +757,4 @@ void PreviewPlot::tickLabelFormat(char *axis, char *style, bool useOffset) {
   }
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

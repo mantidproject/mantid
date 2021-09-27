@@ -11,8 +11,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-namespace MantidQt {
-namespace API {
+namespace MantidQt::API {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -118,5 +117,4 @@ void AlgorithmRunner::handleAlgorithmErrorNotification(const Poco::AutoPtr<Algor
   emit algorithmComplete(true);
 }
 
-} // namespace API
-} // namespace MantidQt
+} // namespace MantidQt::API

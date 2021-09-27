@@ -32,8 +32,7 @@ std::string const WORKSPACE_INDICES = "(" + NATURAL_OR_RANGE + "(" + COMMA + NAT
 } // namespace Regexes
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 
 IndirectPlotOptionsPresenter::IndirectPlotOptionsPresenter(
     IndirectPlotOptionsView *view, PlotWidget const &plotType, std::string const &fixedIndices,
@@ -49,8 +48,7 @@ IndirectPlotOptionsPresenter::IndirectPlotOptionsPresenter(IndirectPlotOptionsVi
                                                            IndirectPlotOptionsModel *model, PlotWidget const &plotType,
                                                            std::string const &fixedIndices)
     : QObject(nullptr), m_wsRemovedObserver(*this, &IndirectPlotOptionsPresenter::onWorkspaceRemoved),
-      m_wsReplacedObserver(*this, &IndirectPlotOptionsPresenter::onWorkspaceReplaced), m_view(view),
-      m_model(std::move(model)) {
+      m_wsReplacedObserver(*this, &IndirectPlotOptionsPresenter::onWorkspaceReplaced), m_view(view), m_model(model) {
   setupPresenter(plotType, fixedIndices);
 }
 
@@ -206,5 +204,4 @@ bool IndirectPlotOptionsPresenter::validateWorkspaceSize(MantidAxis const &axisT
   return true;
 }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

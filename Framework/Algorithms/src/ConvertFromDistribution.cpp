@@ -13,8 +13,7 @@
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidKernel/CompositeValidator.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertFromDistribution)
@@ -35,5 +34,4 @@ void ConvertFromDistribution::exec() {
   WorkspaceHelpers::makeDistribution(workspace, false);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

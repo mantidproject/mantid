@@ -34,8 +34,7 @@
 #include <numeric>
 #include <vector>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Kernel;
 using std::size_t;
@@ -405,5 +404,4 @@ void CalculateMuonAsymmetry::normalizeWorkspace(const API::MatrixWorkspace_sptr 
   normalizedWorkspace->mutableY(0) -= 1.0;
   normalizedWorkspace->mutableE(0) = unnormalizedWorkspace->e(workspaceIndex) / N0;
 }
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

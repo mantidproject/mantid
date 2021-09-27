@@ -13,8 +13,7 @@
 constexpr auto SETTINGS_ICON = "mdi.settings";
 #endif
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 DECLARE_SUBWINDOW(IndirectSettings)
 
 IndirectSettings::IndirectSettings(QWidget *parent) : MantidQt::API::UserSubWindow(parent) { m_uiForm.setupUi(this); }
@@ -80,5 +79,4 @@ QWidget *IndirectSettings::getDockedOrFloatingWindow() {
 }
 #endif
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

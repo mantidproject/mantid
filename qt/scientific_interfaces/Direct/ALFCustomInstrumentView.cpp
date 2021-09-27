@@ -13,8 +13,7 @@
 #include <QVBoxLayout>
 #include <utility>
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 
 ALFCustomInstrumentView::ALFCustomInstrumentView(const std::string &instrument, QWidget *parent)
     : MantidWidgets::BaseCustomInstrumentView(instrument, parent), m_extractSingleTubeObservable(nullptr),
@@ -79,7 +78,6 @@ void ALFCustomInstrumentView::setupAnalysisPane(MantidWidgets::IPlotFitAnalysisP
   BaseCustomInstrumentView::setupInstrumentAnalysisSplitters(analysis->getQWidget());
 }
 
-void ALFCustomInstrumentView::addSpectrum(const std::string &wsName) { m_analysisPane->addSpectrum(std::move(wsName)); }
+void ALFCustomInstrumentView::addSpectrum(const std::string &wsName) { m_analysisPane->addSpectrum(wsName); }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

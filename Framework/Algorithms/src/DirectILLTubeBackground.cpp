@@ -181,8 +181,7 @@ void writeComponentBackgroundToOutput(Mantid::API::MatrixWorkspace const &compon
 
 } // namespace
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(DirectILLTubeBackground)
@@ -416,5 +415,4 @@ API::MatrixWorkspace_sptr DirectILLTubeBackground::peakExcludingAverage(API::Mat
   return averageWS;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

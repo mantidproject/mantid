@@ -17,8 +17,7 @@
 #include <cmath>
 #include <sstream>
 
-namespace Mantid {
-namespace CurveFitting {
+namespace Mantid::CurveFitting {
 using Kernel::DblMatrix;
 using std::fabs;
 using std::max;
@@ -378,5 +377,4 @@ void AugmentedLagrangianOptimizer::checkConstraints(const DblMatrix &equality, c
   }
 }
 
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting

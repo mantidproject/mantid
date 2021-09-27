@@ -24,8 +24,7 @@
 #include "Eigen/Dense"
 #include "boost/math/constants/constants.hpp"
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 using Mantid::API::WorkspaceProperty;
 using Mantid::Kernel::Direction;
@@ -262,5 +261,4 @@ void ConvertHFIRSCDtoMDE::exec() {
   setProperty("OutputWorkspace", outputWS);
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

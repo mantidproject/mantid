@@ -4,17 +4,18 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidAlgorithms/RunCombinationHelpers/SampleLogsBehaviour.h"
+#include <utility>
+
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidAlgorithms/RunCombinationHelpers/SampleLogsBehaviour.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Kernel;
 using namespace API;
@@ -77,8 +78,8 @@ const std::string SampleLogsBehaviour::SUM_DOC = "A comma separated list of the 
  * merge given be the IPF
  */
 SampleLogsBehaviour::SampleLogsBehaviour(const MatrixWorkspace_sptr &ws, Logger &logger,
-                                         const SampleLogNames &logEntries, const ParameterName &parName)
-    : parameterNames(parName), m_logger(logger) {
+                                         const SampleLogNames &logEntries, ParameterName parName)
+    : parameterNames(std::move(parName)), m_logger(logger) {
   setSampleMap(m_logMap, MergeLogType::Sum, logEntries.sampleLogsSum, *ws);
   setSampleMap(m_logMap, MergeLogType::TimeSeries, logEntries.sampleLogsTimeSeries, *ws);
   setSampleMap(m_logMap, MergeLogType::List, logEntries.sampleLogsList, *ws);
@@ -614,5 +615,4 @@ void SampleLogsBehaviour::resetSampleLogs(const MatrixWorkspace_sptr &ws) {
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

@@ -13,8 +13,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/PropertyWithValue.h"
 
-namespace Mantid {
-namespace CurveFitting {
+namespace Mantid::CurveFitting {
 
 using namespace API;
 
@@ -262,5 +261,4 @@ size_t GeneralDomainCreator::getDomainSize() const {
   return domainSize;
 }
 
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting

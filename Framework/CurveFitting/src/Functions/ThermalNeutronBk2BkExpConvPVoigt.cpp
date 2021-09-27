@@ -25,9 +25,7 @@ using namespace Mantid;
 
 using namespace Mantid::API;
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
 namespace {
@@ -708,6 +706,4 @@ void ThermalNeutronBk2BkExpConvPVoigt::setPeakRadius(const int& r)
 }
   */
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

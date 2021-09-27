@@ -9,8 +9,7 @@
 #include "MantidAPI/CatalogFactory.h"
 #include "MantidAPI/Progress.h"
 
-namespace Mantid {
-namespace ICat {
+namespace Mantid::ICat {
 
 DECLARE_CATALOG(ICat3Catalog)
 
@@ -137,5 +136,4 @@ void ICat3Catalog::keepAlive() {}
 API::ITableWorkspace_sptr ICat3Catalog::getPublishInvestigations() {
   throw std::runtime_error("Publishing is not supported in ICat3Catalog.");
 }
-} // namespace ICat
-} // namespace Mantid
+} // namespace Mantid::ICat

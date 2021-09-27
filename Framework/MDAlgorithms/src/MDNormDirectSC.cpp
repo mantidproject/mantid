@@ -22,8 +22,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VectorHelper.h"
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 using Mantid::API::WorkspaceProperty;
 using Mantid::Kernel::Direction;
@@ -463,7 +462,7 @@ void MDNormDirectSC::calculateNormalization(const std::vector<coord_t> &otherVal
   double progStep = 0.7 / m_numExptInfos;
   auto prog =
       std::make_unique<API::Progress>(this, 0.3 + progStep * expInfoIndex, 0.3 + progStep * (expInfoIndex + 1.), ndets);
-  // cppcheck-suppress syntaxError
+
 PRAGMA_OMP(parallel for private(intersections, pos, posNew))
 for (int64_t i = 0; i < ndets; i++) {
   PARALLEL_START_INTERUPT_REGION
@@ -709,5 +708,4 @@ void MDNormDirectSC::calculateIntersections(std::vector<std::array<double, 4>> &
   std::stable_sort(intersections.begin(), intersections.end(), compareMomentum);
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

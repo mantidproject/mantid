@@ -15,8 +15,7 @@
 
 using namespace Mantid::Kernel;
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 namespace {
 
@@ -198,5 +197,4 @@ bool MANTID_GEOMETRY_DLL intersection(const ConvexPolygon &P, const ConvexPolygo
   return false;
 }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

@@ -19,8 +19,7 @@ namespace {
 Mantid::Kernel::Logger g_log("ConvolutionFitSequential");
 }
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace API;
 using namespace Kernel;
@@ -131,5 +130,4 @@ MantidVec GetQsInQENSData::extractQValues(const Mantid::API::MatrixWorkspace_spt
 
   return qValues;
 }
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

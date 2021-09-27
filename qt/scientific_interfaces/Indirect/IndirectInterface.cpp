@@ -11,8 +11,7 @@
 
 using namespace MantidQt::API;
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 
 IndirectInterface::IndirectInterface(QWidget *parent)
     : UserSubWindow(parent),
@@ -41,5 +40,4 @@ void IndirectInterface::manageUserDirectories() { ManageUserDirectories::openMan
 
 void IndirectInterface::showMessageBox(QString const &message) { showInformationBox(message); }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

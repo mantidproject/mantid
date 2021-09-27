@@ -51,8 +51,8 @@ protected:
 
   Kernel::V3D calculateDetectorPos(double const detectorAngle, double detectorDistance);
 
-  std::vector<Kernel::V3D> calculateMuonPos(API::MatrixWorkspace_sptr &muonProfile, API::MatrixWorkspace_sptr inputWS,
-                                            double detectorDistance);
+  std::vector<Kernel::V3D> calculateMuonPos(API::MatrixWorkspace_sptr &muonProfile,
+                                            const API::MatrixWorkspace_sptr &inputWS, double detectorDistance);
 
   std::vector<double> normaliseMuonIntensity(MantidVec muonIntensity);
 

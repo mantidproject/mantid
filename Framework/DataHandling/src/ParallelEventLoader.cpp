@@ -12,8 +12,7 @@
 #include "MantidTypes/Event/TofEvent.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 /// Return offset between global spectrum index and detector ID for given banks.
 std::vector<int32_t> bankOffsets(const API::ExperimentInfo &ws, const std::string &filename,
@@ -99,8 +98,7 @@ void ParallelEventLoader::loadMPI(DataObjects::EventWorkspace &ws, const std::st
                                   const bool eventIDIsSpectrumNumber) {
   std::vector<std::vector<Types::Event::TofEvent> *> eventLists = getResultVector(ws);
   std::vector<int32_t> offsets = getOffsets(ws, filename, groupName, bankNames, eventIDIsSpectrumNumber);
-  Parallel::IO::EventLoader::load(ws.indexInfo().communicator(), filename, groupName, bankNames, offsets,
-                                  std::move(eventLists));
+  Parallel::IO::EventLoader::load(ws.indexInfo().communicator(), filename, groupName, bankNames, offsets, eventLists);
 }
 
 /// Load events from given banks into given EventWorkspace using
@@ -110,8 +108,7 @@ void ParallelEventLoader::loadMultiProcess(DataObjects::EventWorkspace &ws, cons
                                            const bool eventIDIsSpectrumNumber, const bool precalcEvents) {
   auto eventLists = getResultVector(ws);
   std::vector<int32_t> offsets = getOffsets(ws, filename, groupName, bankNames, eventIDIsSpectrumNumber);
-  Parallel::IO::EventLoader::load(filename, groupName, bankNames, offsets, std::move(eventLists), precalcEvents);
+  Parallel::IO::EventLoader::load(filename, groupName, bankNames, offsets, eventLists, precalcEvents);
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

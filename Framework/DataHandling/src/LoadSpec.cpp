@@ -19,8 +19,7 @@
 #include <cstring>
 #include <fstream>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(LoadSpec)
 
@@ -183,5 +182,4 @@ void LoadSpec::readHistogram(const std::vector<double> &input, HistogramData::Hi
   histogram.setCountStandardDeviations(e);
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

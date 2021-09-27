@@ -20,9 +20,7 @@
 
 using namespace Mantid::API;
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 /**
  * Constructor.
  *
@@ -319,6 +317,4 @@ void IndirectDataAnalysisTab::updatePlot(const MatrixWorkspace_sptr &outputWS,
     clearAndPlotInput(fitPreviewPlot, diffPreviewPlot);
 }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

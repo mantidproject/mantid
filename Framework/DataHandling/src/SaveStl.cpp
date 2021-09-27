@@ -11,8 +11,7 @@
 #include <Poco/File.h>
 #include <fstream>
 #include <vector>
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 namespace {
 
@@ -117,5 +116,4 @@ void SaveStl::writeTriangle(Kernel::BinaryStreamWriter streamWriter, uint32_t tr
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

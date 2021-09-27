@@ -11,8 +11,7 @@
 
 using namespace boost::python;
 
-namespace Mantid {
-namespace PythonInterface {
+namespace Mantid::PythonInterface {
 
 /** Checks whether the given object's type dictionary contains the named
  *attribute.
@@ -46,5 +45,4 @@ bool typeHasAttribute(const boost::python::detail::wrapper_base &wrapper, const 
   return typeHasAttribute(wrapper_base_::get_owner(wrapper), attr);
 }
 
-} // namespace PythonInterface
-} // namespace Mantid
+} // namespace Mantid::PythonInterface

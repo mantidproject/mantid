@@ -7,8 +7,7 @@
 #include "MantidGeometry/Crystal/CenteringGroup.h"
 #include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 /// String-based constructor which accepts centering symbols such as P, I or F.
 CenteringGroup::CenteringGroup(const std::string &centeringSymbol) : Group(), m_type(), m_symbol() {
@@ -115,5 +114,4 @@ CenteringGroupCreatorImpl::CenteringGroupCreatorImpl()
                             {"Robv", CenteringGroup::Robv},
                             {"Rrev", CenteringGroup::Rrev}}) {}
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

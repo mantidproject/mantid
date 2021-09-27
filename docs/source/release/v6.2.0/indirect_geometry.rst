@@ -19,12 +19,14 @@ Improvements
 ------------
 - Single input has been removed from the :ref:`Inelastic Data Analysis <interface-inelastic-data-analysis>` Fit tabs. All data input is now done via the multiple input dialog.
 - The data input widgets in the :ref:`Inelastic Data Analysis <interface-inelastic-data-analysis>` Fit tabs has been made dockable and can be resized once undocked.
+- Updated :ref:`Inelastic Data Analysis <interface-inelastic-data-analysis>` and :ref:`Elwin and I(Q,t) <Elwin-iqt-ref>` documentation with up to date screenshots.
 
 Bugfixes
 --------
 - A bug has been fixed in :ref:`Inelastic Data Analysis <interface-inelastic-data-analysis>` on the :ref:`F(Q)Fit <fqfit>` tab, Multiple Input tab that allowed duplicate spectra to be added.
 - A bug has been fixed that stopped additional spectra being added to :ref:`Inelastic Data Analysis <interface-inelastic-data-analysis>` if spectra from that workspace had already been added.
 - A bug has been fixed in :ref:`Inelastic Data Analysis <interface-inelastic-data-analysis>` that limited the integration range on the tabs to between -1 and 1.
+- A bug has been fixed in :ref:`Elwin <Elwin-iqt-ref>` tab that caused Mantid to crash if a file of the wrong format was loaded.
 
 Algorithms
 ----------
@@ -46,7 +48,7 @@ Improvements
 
 Bugfixes
 ########
-- :ref:`IndirectILLEnertyTransfer <algm-IndirectILLEnertyTransfer>` will now perform the monitor normalisation correctly; that is, in wavelength instead of energy. It will also provide the monitor workspace as a diagnostic output, if requested.
+- :ref:`IndirectILLEnergyTransfer <algm-IndirectILLEnergyTransfer>` will now perform the monitor normalisation correctly; that is, in wavelength instead of energy. It will also provide the monitor workspace as a diagnostic output, if requested.
 
 
 :ref:`Release 6.2.0 <v6.2.0>`

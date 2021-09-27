@@ -24,8 +24,7 @@
 #pragma warning(pop)
 #endif
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 using namespace Kernel;
 
@@ -131,5 +130,4 @@ std::vector<std::string> getTokenizedPositionString(const std::string &position)
   return numberParts;
 }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

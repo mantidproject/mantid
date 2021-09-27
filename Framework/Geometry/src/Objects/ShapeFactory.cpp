@@ -40,8 +40,7 @@ using Poco::XML::Element;
 using Poco::XML::Node;
 using Poco::XML::NodeList;
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 using namespace Kernel;
 
@@ -1530,7 +1529,7 @@ std::shared_ptr<CSGObject> ShapeFactory::createHexahedralShape(double xlb, doubl
 }
 
 /// create a special geometry handler for the known finite primitives
-void ShapeFactory::createGeometryHandler(Poco::XML::Element *pElem, std::shared_ptr<CSGObject> Obj) {
+void ShapeFactory::createGeometryHandler(Poco::XML::Element *pElem, const std::shared_ptr<CSGObject> &Obj) {
 
   auto geomHandler = std::make_shared<GeometryHandler>(Obj);
   detail::ShapeInfo shapeInfo;
@@ -1673,5 +1672,4 @@ std::string ShapeFactory::addGoniometerTag(const Kernel::Matrix<double> &rotateM
 
   return xml;
 }
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

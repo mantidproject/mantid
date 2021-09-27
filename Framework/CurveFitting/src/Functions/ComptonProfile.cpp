@@ -14,9 +14,7 @@
 
 #include <gsl/gsl_poly.h>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
 using namespace CurveFitting::Algorithms;
@@ -217,6 +215,4 @@ void ComptonProfile::voigtApproxDiff(std::vector<double> &voigtDiff, const std::
                  std::bind(std::divides<double>(), _1, 2.0 * std::pow(epsilon, 3)));
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

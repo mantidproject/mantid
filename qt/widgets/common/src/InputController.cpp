@@ -14,8 +14,7 @@
 
 #include <cmath>
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 //--------------------------------------------------------------------------------
 
@@ -453,5 +452,4 @@ void InputControllerDrawAndErase::startCreatingShape2D(const QColor &borderColor
   m_fillColor = fillColor;
   m_creating = true;
 }
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

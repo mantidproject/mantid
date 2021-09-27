@@ -23,8 +23,7 @@
 #include <cfloat>
 #include <numeric>
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 XIntegrationScrollBar::XIntegrationScrollBar(QWidget *parent)
     : QFrame(parent), m_resizeMargin(5), m_init(false), m_resizingLeft(false), m_resizingRight(false), m_moving(false),
@@ -613,5 +612,4 @@ void XIntegrationControl::setMaximum() {
 }
 
 void XIntegrationControl::setUnits(const QString &units) { m_units->setText(units); }
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

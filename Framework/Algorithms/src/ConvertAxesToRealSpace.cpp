@@ -16,8 +16,7 @@
 
 #include <limits>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -288,5 +287,4 @@ void ConvertAxesToRealSpace::fillUnitMap(std::vector<std::string> &orderedVector
   orderedVector.emplace_back(caption);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

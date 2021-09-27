@@ -24,8 +24,7 @@
 
 using namespace Mantid::PhysicalConstants;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SphericalAbsorption)
@@ -128,5 +127,4 @@ void SphericalAbsorption::retrieveBaseProperties() {
   m_scattering = sigma_s * rho;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

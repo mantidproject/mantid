@@ -16,8 +16,7 @@ void checkUnitCompatibility(Mantid::Kernel::MDUnit const *const unit) {
 }
 } // namespace
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 const std::string HKL::HKLName = "HKL";
 
@@ -83,5 +82,4 @@ bool HKL::isSameType(const MDFrame &frame) const {
   }
   return isSameType;
 }
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

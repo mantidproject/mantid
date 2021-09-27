@@ -12,8 +12,7 @@
 #include <Poco/Path.h>
 #include <fstream>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 /**
  * Construct an attenuation profile object
@@ -103,5 +102,4 @@ double AttenuationProfile::getAttenuationCoefficient(const double x) const { ret
 void AttenuationProfile::setAttenuationCoefficient(const double x, const double atten) {
   m_Interpolator.addPoint(x, atten);
 }
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

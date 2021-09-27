@@ -23,9 +23,7 @@ namespace {
 const npy_datetime UNIX_EPOCH_NS = DateAndTime("1970-01-01T00:00").totalNanoseconds();
 } // namespace
 
-namespace Mantid {
-namespace PythonInterface {
-namespace Converters {
+namespace Mantid::PythonInterface::Converters {
 
 npy_datetime to_npy_datetime(const DateAndTime &dateandtime) {
   return static_cast<npy_datetime>(dateandtime.totalNanoseconds()) - UNIX_EPOCH_NS;
@@ -110,6 +108,4 @@ std::shared_ptr<Types::Core::DateAndTime> to_dateandtime(const boost::python::ap
   return to_dateandtime(value.ptr());
 }
 
-} // namespace Converters
-} // namespace PythonInterface
-} // namespace Mantid
+} // namespace Mantid::PythonInterface::Converters

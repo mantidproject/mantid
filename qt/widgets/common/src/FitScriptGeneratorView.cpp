@@ -86,8 +86,7 @@ QString getDefaultScriptDirectory() {
 
 } // namespace
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 using ColumnIndex = FitScriptGeneratorDataTable::ColumnIndex;
 using ViewEvent = IFitScriptGeneratorView::Event;
@@ -488,5 +487,4 @@ void FitScriptGeneratorView::closeEvent(QCloseEvent *event) {
   QWidget::closeEvent(event);
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

@@ -11,8 +11,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Property.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CopyLogs)
@@ -124,5 +123,4 @@ void CopyLogs::wipeExisting(const std::vector<Kernel::Property *> &inputLogs, Ru
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

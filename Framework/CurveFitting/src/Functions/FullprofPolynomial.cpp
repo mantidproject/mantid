@@ -7,9 +7,7 @@
 #include "MantidCurveFitting/Functions/FullprofPolynomial.h"
 #include "MantidAPI/FunctionFactory.h"
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
 
@@ -145,6 +143,4 @@ bool FullprofPolynomial::hasAttribute(const std::string &attName) const {
   return has;
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

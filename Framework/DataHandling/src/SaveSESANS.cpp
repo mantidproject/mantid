@@ -21,8 +21,7 @@
 #include <set>
 #include <string>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 // Register the algorithm with the AlgorithmFactory
 DECLARE_ALGORITHM(SaveSESANS)
@@ -214,5 +213,4 @@ Mantid::MantidVec SaveSESANS::calculateError(const HistogramData::HistogramE &eV
   return error;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

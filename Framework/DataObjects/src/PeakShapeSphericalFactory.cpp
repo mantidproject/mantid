@@ -11,8 +11,7 @@
 #include "MantidKernel/VMD.h"
 #include <json/json.h>
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 
 using namespace Mantid::Kernel;
 
@@ -70,5 +69,4 @@ void PeakShapeSphericalFactory::setSuccessor(PeakShapeFactory_const_sptr success
   m_successor = successorFactory;
 }
 
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects

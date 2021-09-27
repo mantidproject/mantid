@@ -59,6 +59,7 @@ set(TEST_PY_FILES
     ReflectometryILLPreprocessTest.py
     ReflectometryILLSumForegroundTest.py
     ReflectometryISISLoadAndProcessTest.py
+    ReflectometryISISPreprocessTest.py
     ResNorm2Test.py
     SANSDarkRunBackgroundCorrectionTest.py
     SANSFitShiftScaleTest.py

@@ -12,8 +12,7 @@
 #include <ostream>
 #include <sstream>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 /** Constructor.
  *  Instantiating the object starts the timer.
@@ -61,5 +60,4 @@ std::ostream &operator<<(std::ostream &out, const Timer &obj) {
   return out;
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

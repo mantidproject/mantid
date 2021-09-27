@@ -16,7 +16,7 @@ namespace DataHandling {
 
 class SpiceXMLNode {
 public:
-  SpiceXMLNode(const std::string &nodename);
+  SpiceXMLNode(std::string nodename);
   void setParameters(const std::string &nodetype, const std::string &nodeunit, const std::string &nodedescription);
   void setValue(const std::string &strvalue);
 
@@ -98,7 +98,7 @@ private:
   bool setupSampleLogs(const API::MatrixWorkspace_sptr &outws);
 
   /// Load instrument
-  void loadInstrument(API::MatrixWorkspace_sptr matrixws, const std::string &idffilename);
+  void loadInstrument(const API::MatrixWorkspace_sptr &matrixws, const std::string &idffilename);
 
   /// Get wavelength from workspace
   bool getHB3AWavelength(const API::MatrixWorkspace_sptr &dataws, double &wavelength);

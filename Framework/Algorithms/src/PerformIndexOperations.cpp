@@ -67,7 +67,7 @@ private:
   std::vector<int> m_indexes;
 
 public:
-  explicit AdditionCommand(const std::vector<int> &indexes) : m_indexes(indexes) {}
+  explicit AdditionCommand(std::vector<int> indexes) : m_indexes(std::move(indexes)) {}
 
   MatrixWorkspace_sptr execute(MatrixWorkspace_sptr inputWS) const override {
     MatrixWorkspace_sptr outWS;
@@ -94,7 +94,7 @@ private:
   std::vector<int> m_indexes;
 
 public:
-  explicit CropCommand(const std::vector<int> &indexes) : m_indexes(indexes) {}
+  explicit CropCommand(std::vector<int> indexes) : m_indexes(std::move(indexes)) {}
 
   MatrixWorkspace_sptr execute(MatrixWorkspace_sptr inputWS) const override {
 
@@ -234,8 +234,7 @@ public:
 };
 } // namespace
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(PerformIndexOperations)
@@ -333,5 +332,4 @@ void PerformIndexOperations::exec() {
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

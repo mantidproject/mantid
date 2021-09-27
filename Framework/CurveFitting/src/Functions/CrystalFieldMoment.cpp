@@ -19,9 +19,7 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <cmath>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 namespace {
 
@@ -155,6 +153,4 @@ void CrystalFieldMomentCalculation::setHamiltonian(const ComplexFortranMatrix &h
   m_nre = nre;
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

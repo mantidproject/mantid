@@ -22,7 +22,7 @@ namespace {
  * The neutron cross-sections for this atom
  * @return a dict of the neutron cross-sections
  */
-dict neutron(Atom &self) {
+dict neutron(const Atom &self) {
   dict retval;
   retval["coh_scatt_xs"] = self.neutron.coh_scatt_xs;
   retval["inc_scatt_xs"] = self.neutron.inc_scatt_xs;

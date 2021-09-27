@@ -17,8 +17,7 @@ using namespace Mantid::Geometry;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CalculatePeaksHKL)
@@ -76,5 +75,4 @@ void CalculatePeaksHKL::exec() {
   setProperty("NumIndexed", peaksIndexed);
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

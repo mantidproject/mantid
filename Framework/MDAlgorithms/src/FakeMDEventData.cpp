@@ -12,8 +12,7 @@
 #include "MantidDataObjects/FakeMD.h"
 #include "MantidKernel/ArrayProperty.h"
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 using namespace API;
 using namespace DataObjects;
@@ -77,5 +76,4 @@ void FakeMDEventData::exec() {
   faker.fill(getProperty("InputWorkspace"));
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

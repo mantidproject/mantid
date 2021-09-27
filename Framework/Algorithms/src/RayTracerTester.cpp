@@ -20,8 +20,7 @@ using namespace Mantid::DataObjects;
 using Mantid::Geometry::IDetector_const_sptr;
 using Mantid::Geometry::InstrumentRayTracer;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(RayTracerTester)
@@ -82,5 +81,4 @@ void RayTracerTester::exec() {
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

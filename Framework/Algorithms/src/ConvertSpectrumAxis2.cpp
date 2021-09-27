@@ -29,8 +29,7 @@
 
 constexpr double rad2deg = 180.0 / M_PI;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertSpectrumAxis2)
 using namespace Kernel;
@@ -374,5 +373,4 @@ void ConvertSpectrumAxis2::emplaceIndexMap(double value, size_t wsIndex) {
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

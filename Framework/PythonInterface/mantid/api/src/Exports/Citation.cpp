@@ -8,29 +8,29 @@
 #include "MantidKernel/WarningSuppressions.h"
 
 #include <boost/python/class.hpp>
+#include <boost/python/copy_const_reference.hpp>
 #include <boost/python/operators.hpp>
 #include <boost/python/overloads.hpp>
 
 using namespace Mantid::API;
 using namespace boost::python;
 
-std::string description(Citation &self) { return self.description(); }
-std::string url(Citation &self) { return self.url(); }
-std::string doi(Citation &self) { return self.doi(); }
-std::string bibtex(Citation &self) { return self.bibtex(); }
-std::string endnote(Citation &self) { return self.endnote(); }
-
 void export_Citation() {
+  using return_copy = return_value_policy<copy_const_reference>;
+
   class_<Citation, boost::noncopyable>("Citation",
                                        init<optional<const std::string &, const std::string &, const std::string &,
                                                      const std::string &, const std::string &>>())
       .def(init<NeXus::File *, const std::string &>())
-      .def("description", &description, arg("self"), "Returns the description on the citation object")
-      .def("url", &url, arg("self"), "Returns the url on the citation object")
-      .def("doi", &doi, arg("self"), "Returns the doi on the citation object")
-      .def("bibtex", &bibtex, arg("self"), "Returns the bibtex formatted citation from the citation object")
-      .def("endnote", &endnote, arg("self"), "Returns the endnote formatted citation from the citation object")
-      .def("saveNexus", &Citation::saveNexus, (arg("self"), arg("file"), arg("group")),
+      .def("description", &Citation::description, arg("self"), return_copy(),
+           "Returns the description on the citation object")
+      .def("url", &Citation::url, arg("self"), return_copy(), "Returns the url on the citation object")
+      .def("doi", &Citation::doi, arg("self"), return_copy(), "Returns the doi on the citation object")
+      .def("bibtex", &Citation::bibtex, arg("self"), return_copy(),
+           "Returns the bibtex formatted citation from the citation object")
+      .def("endnote", &Citation::endnote, arg("self"), return_copy(),
+           "Returns the endnote formatted citation from the citation object")
+      .def("saveNexus", &Citation::saveNexus, (arg("self"), arg("file"), arg("group")), return_copy(),
            "Save data from this object to a NeXus file")
       .def("__eq__", &Citation::operator==);
 }

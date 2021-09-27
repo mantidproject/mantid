@@ -16,8 +16,7 @@
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(FindDetectorsInShape)
 
@@ -76,5 +75,4 @@ void FindDetectorsInShape::exec() {
   setProperty("DetectorList", foundDets);
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

@@ -24,8 +24,7 @@
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(PDLoadCharacterizations)
@@ -603,5 +602,4 @@ void PDLoadCharacterizations::readExpIni(const std::string &filename, API::ITabl
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

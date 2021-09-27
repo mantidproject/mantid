@@ -9,8 +9,7 @@
 #include "MantidLiveData/Kafka/KafkaBroker.h"
 #include "MantidLiveData/Kafka/KafkaTopicSubscriber.h"
 
-namespace Mantid {
-namespace LiveData {
+namespace Mantid::LiveData {
 
 /**
  * Constructor accepting the address of a broker.
@@ -37,5 +36,4 @@ std::unique_ptr<IKafkaStreamSubscriber> KafkaBroker::subscribe(std::vector<std::
   return subscriber;
 }
 
-} // namespace LiveData
-} // namespace Mantid
+} // namespace Mantid::LiveData

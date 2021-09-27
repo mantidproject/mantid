@@ -2449,8 +2449,7 @@ INSTANTIATE(bool)
 } // namespace Kernel
 } // namespace Mantid
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 //================================================================================================
 /** Function filtering double TimeSeriesProperties according to the requested
  * statistics.
@@ -2487,5 +2486,4 @@ double filterByStatistic(TimeSeriesProperty<double> const *const propertyToFilte
   };
   return singleValue;
 }
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

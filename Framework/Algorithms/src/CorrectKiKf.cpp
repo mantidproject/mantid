@@ -17,8 +17,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register with the algorithm factory
 DECLARE_ALGORITHM(CorrectKiKf)
@@ -303,5 +302,4 @@ void CorrectKiKf::getEfixedFromParameterMap(double &Efi, int64_t i, const Spectr
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

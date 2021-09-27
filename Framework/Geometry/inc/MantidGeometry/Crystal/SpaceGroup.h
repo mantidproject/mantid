@@ -45,7 +45,7 @@ namespace Geometry {
   */
 class MANTID_GEOMETRY_DLL SpaceGroup : public Group {
 public:
-  SpaceGroup(size_t itNumber, const std::string &hmSymbol, const Group &group);
+  SpaceGroup(size_t itNumber, std::string hmSymbol, const Group &group);
 
   size_t number() const;
   std::string hmSymbol() const;

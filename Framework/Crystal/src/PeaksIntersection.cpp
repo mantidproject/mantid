@@ -20,8 +20,7 @@ using Mantid::DataObjects::Peak;
 using Mantid::DataObjects::PeaksWorkspace;
 using Mantid::DataObjects::PeaksWorkspace_sptr;
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 std::string PeaksIntersection::detectorSpaceFrame() { return "Detector space"; }
 
 std::string PeaksIntersection::qLabFrame() { return "Q (lab frame)"; }
@@ -172,5 +171,4 @@ void PeaksIntersection::executePeaksIntersection(const bool checkPeakExtents) {
   setProperty("OutputWorkspace", outputWorkspace);
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

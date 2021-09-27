@@ -39,8 +39,7 @@
 // std
 #include <fstream>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 using namespace Kernel;
 using namespace Poco::Net;
 
@@ -388,5 +387,4 @@ int DownloadInstrument::doDownloadFile(const std::string &urlFile, const std::st
   return retStatus;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

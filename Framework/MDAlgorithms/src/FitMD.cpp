@@ -23,8 +23,7 @@
 
 #include <algorithm>
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 DECLARE_DOMAINCREATOR(FitMD)
 
 using namespace API;
@@ -328,5 +327,4 @@ size_t FitMD::getDomainSize() const {
   return n;
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

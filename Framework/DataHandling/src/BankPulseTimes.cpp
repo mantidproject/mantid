@@ -39,32 +39,28 @@ BankPulseTimes::BankPulseTimes(::NeXus::File &file, const std::vector<int> &pNum
     file.getData(seconds);
     file.closeData();
     // Now create the pulseTimes
-    numPulses = seconds.size();
-    if (numPulses == 0)
+    if (seconds.size() == 0)
       throw std::runtime_error("event_time_zero field has no data!");
 
-    pulseTimes = new Mantid::Types::Core::DateAndTime[numPulses];
-    for (size_t i = 0; i < numPulses; i++)
-      pulseTimes[i] = start + seconds[i];
+    std::transform(seconds.cbegin(), seconds.cend(), std::back_inserter(pulseTimes),
+                   [start](double seconds) { return start + seconds; });
   } else if (heldTimeZeroType == ::NeXus::UINT64) {
     std::vector<uint64_t> nanoseconds;
     file.getData(nanoseconds);
     file.closeData();
     // Now create the pulseTimes
-    numPulses = nanoseconds.size();
-    if (numPulses == 0)
+    if (nanoseconds.size() == 0)
       throw std::runtime_error("event_time_zero field has no data!");
 
-    pulseTimes = new Mantid::Types::Core::DateAndTime[numPulses];
-    for (size_t i = 0; i < numPulses; i++)
-      pulseTimes[i] = start + int64_t(nanoseconds[i]);
+    std::transform(nanoseconds.cbegin(), nanoseconds.cend(), std::back_inserter(pulseTimes),
+                   [start](int64_t nanoseconds) { return start + nanoseconds; });
   } else {
     throw std::invalid_argument("Unsupported type for event_time_zero");
   }
   // Ensure that we always have a consistency between nPulses and
   // periodNumbers containers
-  if (numPulses != pNumbers.size()) {
-    periodNumbers = std::vector<int>(numPulses, FirstPeriod);
+  if (pulseTimes.size() != pNumbers.size()) {
+    periodNumbers = std::vector<int>(pulseTimes.size(), FirstPeriod);
     ;
   }
 }
@@ -75,19 +71,12 @@ BankPulseTimes::BankPulseTimes(::NeXus::File &file, const std::vector<int> &pNum
  *  @param times
  */
 BankPulseTimes::BankPulseTimes(const std::vector<Mantid::Types::Core::DateAndTime> &times) {
-  numPulses = times.size();
-  pulseTimes = nullptr;
-  if (numPulses == 0)
+  if (times.size() == 0)
     return;
-  pulseTimes = new Mantid::Types::Core::DateAndTime[numPulses];
-  periodNumbers = std::vector<int>(numPulses, FirstPeriod); // TODO we are fixing this at 1 period for all
-  for (size_t i = 0; i < numPulses; i++)
-    pulseTimes[i] = times[i];
-}
 
-//----------------------------------------------------------------------------------------------
-/** Destructor */
-BankPulseTimes::~BankPulseTimes() { delete[] this->pulseTimes; }
+  pulseTimes = times;
+  periodNumbers = std::vector<int>(pulseTimes.size(), FirstPeriod); // TODO we are fixing this at 1 period for all
+}
 
 //----------------------------------------------------------------------------------------------
 /** Comparison. Is this bank's pulse times array the same as another one.
@@ -99,5 +88,5 @@ BankPulseTimes::~BankPulseTimes() { delete[] this->pulseTimes; }
  * reloaded.
  */
 bool BankPulseTimes::equals(size_t otherNumPulse, const std::string &otherStartTime) {
-  return ((this->startTime == otherStartTime) && (this->numPulses == otherNumPulse));
+  return ((this->startTime == otherStartTime) && (this->pulseTimes.size() == otherNumPulse));
 }

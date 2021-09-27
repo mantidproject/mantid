@@ -187,7 +187,7 @@ class EXPORT_OPT_MANTIDQT_COMMON IntervalListValidator : public QValidator {
 public:
   /// Constructor - This object must know its parent QObject, as well as the
   /// IntervalList it is validating against.
-  IntervalListValidator(QObject *parent, const IntervalList &intervals);
+  IntervalListValidator(QObject *parent, IntervalList intervals);
 
   /// Overriden method to validate a given QString, at a particular position
   State validate(QString & /*unused*/, int & /*unused*/) const override;

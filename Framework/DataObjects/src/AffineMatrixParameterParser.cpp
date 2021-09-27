@@ -7,8 +7,7 @@
 #include "MantidDataObjects/AffineMatrixParameterParser.h"
 #include <boost/algorithm/string.hpp>
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 
 AffineMatrixParameterParser::AffineMatrixParameterParser() {}
 
@@ -74,5 +73,4 @@ AffineMatrixParameter *AffineMatrixParameterParser::createParameter(Poco::XML::E
 void AffineMatrixParameterParser::setSuccessorParser(Mantid::API::ImplicitFunctionParameterParser * /*paramParser*/) {
   throw std::runtime_error("Cannot set a successor parser on a AffineMatrixParameterParser");
 }
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects

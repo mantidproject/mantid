@@ -16,8 +16,7 @@
 
 #include <cfloat>
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 namespace {
 // logger for the algorithm workspaces
 Kernel::Logger g_Log("MDWSTransform");
@@ -488,5 +487,4 @@ MDWSTransform::MDWSTransform() : m_isUVdefault(true), m_QScalingID(NCoordScaling
   m_TargFramesID[SampleFrame] = "Q_sample";
   m_TargFramesID[HKLFrame] = "HKL";
 }
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

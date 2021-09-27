@@ -7,9 +7,12 @@ Mantid Workbench Changes
 
 New and Improved
 ----------------
-
-- In the pick tab of the instrument viewer, integration is now by default over the entire detector until something is selected.
+- Add ability to rotate Ellipse and Rectangle shapes in :ref:`InstrumentViewer`.
+- In the pick tab of the instrument viewer, integration is now by default over the entire detector unless some other curve is requested (such as by drawing a shape or picking a detector).
 - In the pick tab of the instrument viewer, a new panel allowing for direct rebinning of the workspace now exists.
+.. figure:: ../../images/iview_insitu_rebin.png
+    :width: 500px
+    :align: center
 
 Bugfixes
 --------

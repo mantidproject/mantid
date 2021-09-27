@@ -19,7 +19,7 @@ enum class NamedFormat { Custom, ThreeColumn, ANSTO, ILLCosmos };
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL FileFormatOptions {
 public:
-  FileFormatOptions(NamedFormat format, std::string const &prefix, bool includeHeader, std::string const &separator,
+  FileFormatOptions(NamedFormat format, std::string prefix, bool includeHeader, std::string separator,
                     bool includeQResolution);
   bool shouldIncludeHeader() const;
   bool shouldIncludeQResolution() const;

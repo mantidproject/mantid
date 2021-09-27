@@ -95,8 +95,7 @@ void sortIntermediateEventBuffer(
 }
 } // namespace
 
-namespace Mantid {
-namespace LiveData {
+namespace Mantid::LiveData {
 using Types::Core::DateAndTime;
 using Types::Event::TofEvent;
 
@@ -637,6 +636,4 @@ computeGroupBoundaries(const std::vector<Mantid::LiveData::KafkaEventStreamDecod
   return groupBoundaries;
 }
 
-} // namespace LiveData
-
-} // namespace Mantid
+} // namespace Mantid::LiveData

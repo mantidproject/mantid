@@ -10,8 +10,7 @@
 
 #include <QPainter>
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 /// Constructor.
 LocalParameterItemDelegate::LocalParameterItemDelegate(EditLocalParameterDialog *parent)
@@ -117,5 +116,4 @@ void LocalParameterItemDelegate::prepareForPastedData() {
   }
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

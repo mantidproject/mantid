@@ -13,9 +13,7 @@ namespace {
 constexpr double TWOPI = 2.0 * M_PI;
 }
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 DECLARE_FUNCTION(Keren)
 
@@ -128,6 +126,4 @@ double Keren::relaxation(const double delta, const double larmor, const double f
   return prefactor * (term1 + term2 * term3 - term4);
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

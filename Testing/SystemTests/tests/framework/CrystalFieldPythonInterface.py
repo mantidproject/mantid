@@ -8,7 +8,7 @@
 from systemtesting import MantidSystemTest
 from mantid.simpleapi import CreateWorkspace, LinearBackground, FlatBackground, Gaussian, CalculateChiSquared, mtd
 from CrystalField.fitting import makeWorkspace
-from PyChop import PyChop2
+from mantidqtinterfaces.PyChop import PyChop2
 import numpy as np
 
 
@@ -123,7 +123,7 @@ class CrystalFieldPythonInterface(MantidSystemTest):
         # ---------------------------
 
         cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
-                          Temperature=[44.0, 50], FWHM=[1.1, 0.9])
+                          Temperature=[44.0, 50.], FWHM=[1.1, 0.9])
         cf.PeakShape = 'Lorentzian'
         cf.peaks[0].param[0]['FWHM'] = 1.11
         cf.peaks[1].param[1]['FWHM'] = 1.12
@@ -176,7 +176,7 @@ class CrystalFieldPythonInterface(MantidSystemTest):
         fit.fit()
 
         params = {'B20': 0.377, 'B22': 3.9, 'B40': -0.03, 'B42': -0.116, 'B44': -0.125,
-                  'Temperature': [44.0, 50], 'FWHM': [1.1, 0.9]}
+                  'Temperature': [44.0, 50.], 'FWHM': [1.1, 0.9]}
         cf1 = CrystalField('Ce', 'C2v', **params)
         cf2 = CrystalField('Pr', 'C2v', **params)
         cfms = cf1 + cf2
@@ -392,6 +392,6 @@ class CrystalFieldPythonInterface(MantidSystemTest):
         PPchi = PhysicalProperties('susc', 'powder', Unit='cgs')
         PPMag = PhysicalProperties('M(H)', [1, 1, 1], 5, 'bohr')
         cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
-                          Temperature=[44.0, 50], FWHM=[1.1, 0.9], PhysicalProperty=[PPCv, PPchi, PPMag] )
+                          Temperature=[44.0, 50.], FWHM=[1.1, 0.9], PhysicalProperty=[PPCv, PPchi, PPMag] )
         fit = CrystalFieldFit(Model=cf, InputWorkspace=[ws_ins_44K, ws_ins_50K, ws_cp, ws_chi, ws_mag])
         fit.fit()

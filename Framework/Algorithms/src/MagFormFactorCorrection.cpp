@@ -19,8 +19,7 @@
 #include "MantidKernel/UnitFactory.h"
 using namespace Mantid::PhysicalConstants;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(MagFormFactorCorrection)
@@ -130,5 +129,4 @@ void MagFormFactorCorrection::exec() {
   setProperty("OutputWorkspace", outputWS);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

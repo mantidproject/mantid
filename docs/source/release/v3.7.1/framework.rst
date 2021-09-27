@@ -51,7 +51,7 @@ New
 
 -  :ref:`AlignComponents <algm-AlignComponents>`
    This algorithm will take the calibration from the output of
-   :ref:`GetDetOffsetsMultiPeaks <algm-GetDetOffsetsMultiPeaks>`, :ref:`CalibrateRectangularDetectors <algm-CalibrateRectangularDetectors>`, *et al* and
+   `GetDetOffsetsMultiPeaks`, `CalibrateRectangularDetectors`, *et al* and
    minimizes the difference between the *DIFC* of the instrument and
    calibration by moving and rotating instrument components.
 - :ref:`CorrectTOF <algm-CorrectTOF>` applies to the time-of-flight correction which considers the specified elastic peak position.

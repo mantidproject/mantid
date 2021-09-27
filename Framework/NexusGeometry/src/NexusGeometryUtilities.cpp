@@ -8,9 +8,7 @@
 #include "MantidNexusGeometry/H5ForwardCompatibility.h"
 #include "MantidNexusGeometry/NexusGeometryDefinitions.h"
 #include <regex>
-namespace Mantid {
-namespace NexusGeometry {
-namespace utilities {
+namespace Mantid::NexusGeometry::utilities {
 using namespace H5;
 
 /// Find a single dataset inside parent group (returns first match). Optional
@@ -113,6 +111,4 @@ H5::Group findGroupOrThrow(const H5::Group &parentGroup, const H5std_string &cla
     return *found;
 }
 
-} // namespace utilities
-} // namespace NexusGeometry
-} // namespace Mantid
+} // namespace Mantid::NexusGeometry::utilities

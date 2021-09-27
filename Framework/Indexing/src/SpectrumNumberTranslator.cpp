@@ -4,10 +4,11 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+#include <utility>
+
 #include "MantidIndexing/SpectrumNumberTranslator.h"
 
-namespace Mantid {
-namespace Indexing {
+namespace Mantid::Indexing {
 
 namespace {
 // Helpers for accessing vectors of tuples used as a map. Lookup is by first
@@ -42,9 +43,9 @@ template <class MapT, class KeyT> void checkPartitionContainsValue(const MapT &m
 }
 } // namespace
 
-SpectrumNumberTranslator::SpectrumNumberTranslator(const std::vector<SpectrumNumber> &spectrumNumbers,
+SpectrumNumberTranslator::SpectrumNumberTranslator(std::vector<SpectrumNumber> spectrumNumbers,
                                                    const Partitioner &partitioner, const PartitionIndex &partition)
-    : m_partition(partition), m_globalSpectrumNumbers(spectrumNumbers) {
+    : m_partition(partition), m_globalSpectrumNumbers(std::move(spectrumNumbers)) {
   partitioner.checkValid(m_partition);
 
   size_t currentIndex = 0;
@@ -183,5 +184,4 @@ SpectrumNumberTranslator::spectrumNumbers(const std::vector<GlobalSpectrumIndex>
   return spectrumNumbers;
 }
 
-} // namespace Indexing
-} // namespace Mantid
+} // namespace Mantid::Indexing

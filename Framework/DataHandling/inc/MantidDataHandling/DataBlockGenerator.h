@@ -20,7 +20,7 @@ class DataBlock;
 */
 class DLLExport DataBlockGenerator {
 public:
-  DataBlockGenerator(const std::vector<SpectrumPair> &intervals);
+  DataBlockGenerator(std::vector<SpectrumPair> intervals);
   class DataBlock;
   DataBlockGenerator &operator++();
   DataBlockGenerator operator++(int);

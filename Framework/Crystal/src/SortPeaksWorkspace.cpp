@@ -11,8 +11,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SortPeaksWorkspace)
@@ -66,5 +65,4 @@ void SortPeaksWorkspace::exec() {
   setProperty("OutputWorkspace", outputWS);
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

@@ -33,9 +33,7 @@ Python::Object newMarker(FigureCanvasQt *canvas, QString const &colour, double p
 
 } // namespace
 
-namespace MantidQt {
-namespace Widgets {
-namespace MplCpp {
+namespace MantidQt::Widgets::MplCpp {
 
 /**
  * @brief Create a SingleMarker instance
@@ -153,6 +151,4 @@ bool SingleMarker::isMoving() {
   return PyLong_AsLong(movedPy.ptr()) > 0;
 }
 
-} // namespace MplCpp
-} // namespace Widgets
-} // namespace MantidQt
+} // namespace MantidQt::Widgets::MplCpp

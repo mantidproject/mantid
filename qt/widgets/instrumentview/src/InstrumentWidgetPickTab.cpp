@@ -56,8 +56,7 @@
 
 using Mantid::API::AlgorithmManager;
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 using namespace boost::math;
 
@@ -103,7 +102,7 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   m_rebinParams = new QLineEdit(m_rebin);
   m_rebinParams->setToolTip("The parameters to use for the new binning, a comma separated list of first bin boundary, "
                             "width, last bin boundary. See Rebin doc for details.");
-  m_rebinUseReverseLog = new QCheckBox("UseReverseLogarithmic", m_rebin);
+  m_rebinUseReverseLog = new QCheckBox("Use reverse logarithmic", m_rebin);
   m_rebinUseReverseLog->setToolTip("Use a reverse logarithmic binning, the bins getting exponentially smaller as they "
                                    "approach the upper limit. See Rebin for details.");
   m_rebinSaveToHisto = new QCheckBox("Convert to histogram", m_rebin);
@@ -1871,5 +1870,4 @@ void DetectorPlotController::zoomOutOnPlot() {
   m_plot->zoomOutOnPlot();
 #endif
 }
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

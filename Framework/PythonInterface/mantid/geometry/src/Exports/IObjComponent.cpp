@@ -23,7 +23,7 @@ namespace {
  * @param self A reference to the calling object to emulate method on Python
  * object
  */
-std::shared_ptr<Mantid::Geometry::IObject> getShape(IObjComponent &self) {
+std::shared_ptr<Mantid::Geometry::IObject> getShape(const IObjComponent &self) {
   return std::const_pointer_cast<Mantid::Geometry::IObject>(self.shape());
 }
 } // namespace

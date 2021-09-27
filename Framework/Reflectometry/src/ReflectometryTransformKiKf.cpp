@@ -8,8 +8,7 @@
 
 using namespace Mantid::DataObjects;
 
-namespace Mantid {
-namespace Reflectometry {
+namespace Mantid::Reflectometry {
 
 /*
   Constructor
@@ -32,5 +31,4 @@ ReflectometryTransformKiKf::ReflectometryTransformKiKf(double kiMin, double kiMa
   m_calculator->setThetaIncident(incidentTheta);
 }
 
-} // namespace Reflectometry
-} // namespace Mantid
+} // namespace Mantid::Reflectometry

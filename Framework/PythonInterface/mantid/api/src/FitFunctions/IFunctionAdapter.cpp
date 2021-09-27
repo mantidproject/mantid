@@ -6,18 +6,19 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidPythonInterface/api/FitFunctions/IFunctionAdapter.h"
 #include "MantidPythonInterface/core/CallMethod.h"
+#include "MantidPythonInterface/core/Converters/PyNativeTypeExtractor.h"
 #include "MantidPythonInterface/core/Converters/WrapWithNDArray.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/list.hpp>
+#include <boost/variant/apply_visitor.hpp>
 #include <utility>
 
 #define PY_ARRAY_UNIQUE_SYMBOL API_ARRAY_API
 #define NO_IMPORT_ARRAY
 #include <numpy/arrayobject.h>
 
-namespace Mantid {
-namespace PythonInterface {
+namespace Mantid::PythonInterface {
 using API::IFunction;
 using PythonInterface::callMethod;
 using PythonInterface::callMethodNoCheck;
@@ -25,6 +26,34 @@ using PythonInterface::UndefinedAttributeError;
 using namespace boost::python;
 
 namespace {
+
+class AttrVisitor : Mantid::PythonInterface::IPyTypeVisitor {
+public:
+  AttrVisitor(IFunction::Attribute &attrToUpdate) : m_attr(attrToUpdate) {}
+
+  void operator()(bool value) const override { m_attr.setValue(value); }
+  void operator()(long value) const override { m_attr.setValue(static_cast<int>(value)); }
+  void operator()(double value) const override { m_attr.setValue(value); }
+  void operator()(std::string value) const override { m_attr.setValue(std::move(value)); }
+  void operator()(Mantid::API::Workspace_sptr) const override { throw std::invalid_argument(m_errorMsg); }
+
+  void operator()(std::vector<bool>) const override { throw std::invalid_argument(m_errorMsg); }
+  void operator()(std::vector<long> value) const override {
+    // Previous existing code blindly converted any list type into a list of doubles.
+    // We now have to preserve this behaviour to maintain API compatibility as
+    // setValue only takes std::vector<double>.
+    std::vector<double> doubleVals(value.cbegin(), value.cend());
+    m_attr.setValue(std::move(doubleVals));
+  }
+  void operator()(std::vector<double> value) const override { m_attr.setValue(std::move(value)); }
+  void operator()(std::vector<std::string>) const override { throw std::invalid_argument(m_errorMsg); }
+
+  using Mantid::PythonInterface::IPyTypeVisitor::operator();
+
+private:
+  IFunction::Attribute &m_attr;
+  const std::string m_errorMsg = "Invalid attribute. Allowed types=float,int,str,bool,list(float),list(int)";
+};
 
 /**
  * Create an Attribute from a python value.
@@ -34,38 +63,10 @@ namespace {
  */
 IFunction::Attribute createAttributeFromPythonValue(IFunction::Attribute attrToUpdate, const object &value) {
 
-  PyObject *rawptr = value.ptr();
+  using Mantid::PythonInterface::PyNativeTypeExtractor;
+  auto variantObj = PyNativeTypeExtractor::convert(value);
 
-  if (PyBool_Check(rawptr) == 1) {
-    attrToUpdate.setValue(extract<bool>(rawptr)());
-  }
-#if PY_MAJOR_VERSION >= 3
-  else if (PyLong_Check(rawptr) == 1) {
-#else
-  else if (PyInt_Check(rawptr) == 1) {
-#endif
-    attrToUpdate.setValue(extract<int>(rawptr)());
-  } else if (PyFloat_Check(rawptr) == 1) {
-    attrToUpdate.setValue(extract<double>(rawptr)());
-  }
-#if PY_MAJOR_VERSION >= 3
-  else if (PyUnicode_Check(rawptr) == 1) {
-#else
-  else if (PyBytes_Check(rawptr) == 1) {
-#endif
-    attrToUpdate.setValue(extract<std::string>(rawptr)());
-  } else if (PyList_Check(rawptr) == 1) {
-    auto n = PyList_Size(rawptr);
-    std::vector<double> vec;
-    for (Py_ssize_t i = 0; i < n; ++i) {
-      auto v = extract<double>(PyList_GetItem(rawptr, i))();
-      vec.emplace_back(v);
-    }
-    attrToUpdate.setValue(vec);
-  } else {
-    throw std::invalid_argument("Invalid attribute type. Allowed "
-                                "types=float,int,str,bool,list(float)");
-  }
+  boost::apply_visitor(AttrVisitor(attrToUpdate), variantObj);
   return attrToUpdate;
 }
 
@@ -126,7 +127,7 @@ void IFunctionAdapter::declareAttribute(const std::string &name, const object &d
  * @param name :: The name of the new attribute.
  * @returns The value of the attribute
  */
-PyObject *IFunctionAdapter::getAttributeValue(IFunction &self, const std::string &name) {
+PyObject *IFunctionAdapter::getAttributeValue(const IFunction &self, const std::string &name) {
   auto attr = self.getAttribute(name);
   return getAttributeValue(self, attr);
 }
@@ -137,7 +138,7 @@ PyObject *IFunctionAdapter::getAttributeValue(IFunction &self, const std::string
  * @param attr An attribute object
  * @returns The value of the attribute
  */
-PyObject *IFunctionAdapter::getAttributeValue(IFunction &self, const API::IFunction::Attribute &attr) {
+PyObject *IFunctionAdapter::getAttributeValue(const IFunction &self, const API::IFunction::Attribute &attr) {
   UNUSED_ARG(self);
   std::string type = attr.type();
   PyObject *result(nullptr);
@@ -190,7 +191,7 @@ void IFunctionAdapter::setAttribute(const std::string &attName, const Attribute 
  *    For a single domain function it should have a single element (self).
  * @return A python list of IFunction_sprs.
  */
-boost::python::list IFunctionAdapter::createPythonEquivalentFunctions(IFunction &self) {
+boost::python::list IFunctionAdapter::createPythonEquivalentFunctions(const IFunction &self) {
   auto functions = self.createEquivalentFunctions();
   boost::python::list list;
   for (const auto &fun : functions) {
@@ -306,5 +307,4 @@ void IFunctionAdapter::evaluateDerivative(API::Jacobian *out, const double *xVal
   if (PyErr_Occurred())
     throw PythonException();
 }
-} // namespace PythonInterface
-} // namespace Mantid
+} // namespace Mantid::PythonInterface

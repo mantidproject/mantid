@@ -295,3 +295,6 @@ Output:
 .. categories::
 
 .. sourcelink::
+    :h: Framework/Algorithms/inc/MantidAlgorithms/FilterEvents.h
+    :cpp: Framework/Algorithms/src/FilterEvents.cpp
+    :py: None

@@ -23,8 +23,7 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::HistogramData;
 using namespace std;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 DECLARE_ALGORITHM(CalculateZscore)
 
@@ -112,5 +111,4 @@ void CalculateZscore::exec() {
   setProperty("OutputWorkspace", outWS);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

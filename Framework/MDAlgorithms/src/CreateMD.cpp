@@ -21,8 +21,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 using Mantid::API::WorkspaceProperty;
 using Mantid::Kernel::Direction;
@@ -454,7 +453,7 @@ CreateMD::single_run(const Mantid::API::MatrixWorkspace_sptr &input_workspace, c
     addSampleLog(input_workspace, "psi", psi);
     setGoniometer(input_workspace);
 
-    return convertToMD(input_workspace, emode, in_place, filebackend_filename, filebackend, std::move(out_mdws));
+    return convertToMD(input_workspace, emode, in_place, filebackend_filename, filebackend, out_mdws);
   }
 }
 
@@ -529,5 +528,4 @@ std::map<std::string, std::string> CreateMD::validateInputs() {
   return validation_output;
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

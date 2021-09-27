@@ -9,8 +9,7 @@
 #include <iomanip>
 #include <sstream>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -89,5 +88,4 @@ std::ostream &operator<<(std::ostream &out, CPUTimer &obj) {
   return out;
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

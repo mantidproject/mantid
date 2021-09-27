@@ -17,8 +17,7 @@ template <typename Observer> void modifyObserver(const bool turnOn, bool &isObse
 }
 } // namespace
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 AnalysisDataServiceObserver::AnalysisDataServiceObserver()
     : m_addObserver(*this, &AnalysisDataServiceObserver::_addHandle),
@@ -291,5 +290,4 @@ void AnalysisDataServiceObserver::_groupUpdateHandle(
   this->groupUpdateHandle(pNf->objectName(), pNf->object());
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

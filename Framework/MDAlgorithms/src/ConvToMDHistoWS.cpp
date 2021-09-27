@@ -6,8 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/ConvToMDHistoWS.h"
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 // service variable used for efficient filling of the MD event WS  -> should be
 // moved to configuration?
 #define DATA_BUFFER_SIZE 8192
@@ -276,5 +275,4 @@ void ConvToMDHistoWS::estimateThreadWork(size_t nThreads, size_t specSize, size_
   m_spectraChunk = std::max(nSpectras / nThreads, static_cast<size_t>(1));
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

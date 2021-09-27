@@ -20,8 +20,7 @@ using namespace Mantid::Geometry;
 using Mantid::Kernel::ConfigService;
 using Mantid::Types::Event::TofEvent;
 
-namespace Mantid {
-namespace LiveData {
+namespace Mantid::LiveData {
 DECLARE_LISTENER(TestDataListener)
 
 /// Constructor
@@ -136,5 +135,4 @@ std::shared_ptr<Workspace> TestDataListener::extractData() {
   return extracted;
 }
 
-} // namespace LiveData
-} // namespace Mantid
+} // namespace Mantid::LiveData

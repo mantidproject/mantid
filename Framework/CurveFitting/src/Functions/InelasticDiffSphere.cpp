@@ -25,9 +25,7 @@ namespace {
 Mantid::Kernel::Logger g_log("InelasticDiffSphere");
 }
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 DECLARE_FUNCTION(InelasticDiffSphere)
 
@@ -262,6 +260,4 @@ void InelasticDiffSphere::setWorkspace(std::shared_ptr<const API::Workspace> ws)
   }
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

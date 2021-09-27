@@ -51,7 +51,7 @@ Fitting with resolution function
 .. code-block:: python
 
    from CrystalField import CrystalField, CrystalFieldFit, Background, Function, ResolutionModel
-   from PyChop import PyChop2
+   from mantidqtinterfaces.PyChop import PyChop2
 
    # load the data
    data_ws1 = Load('MER38435_10p22meV.txt')

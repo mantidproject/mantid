@@ -26,9 +26,7 @@
 
 #include <algorithm>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Algorithms {
+namespace Mantid::CurveFitting::Algorithms {
 
 using namespace API;
 using namespace Kernel;
@@ -390,6 +388,4 @@ V3D V3DFromHKLColumnExtractor::getHKLFromString(const std::string &hklString) co
   return hkl;
 }
 
-} // namespace Algorithms
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Algorithms

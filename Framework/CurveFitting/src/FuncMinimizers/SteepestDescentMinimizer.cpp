@@ -14,9 +14,7 @@
 
 #include "MantidKernel/Logger.h"
 
-namespace Mantid {
-namespace CurveFitting {
-namespace FuncMinimisers {
+namespace Mantid::CurveFitting::FuncMinimisers {
 
 namespace {
 // Get a reference to the logger
@@ -31,6 +29,4 @@ const gsl_multimin_fdfminimizer_type *SteepestDescentMinimizer::getGSLMinimizerT
   return gsl_multimin_fdfminimizer_steepest_descent;
 }
 
-} // namespace FuncMinimisers
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::FuncMinimisers

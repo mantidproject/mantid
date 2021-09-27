@@ -15,8 +15,7 @@
 using std::acos;
 using std::cos;
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 //-----------------------------------------------------------------------------
 // Public members
@@ -34,5 +33,4 @@ double ChebyshevPolynomial::operator()(const size_t n, const double x) {
   return cos(static_cast<double>(n) * acos(x));
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

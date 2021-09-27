@@ -20,8 +20,7 @@
 #include <fstream>
 //#include <iterator>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 XmlHandler::XmlHandler(const std::string &filename) {
   std::ifstream in(filename);
@@ -103,5 +102,4 @@ std::vector<std::string> XmlHandler::get_subnodes(const std::string &xpath) {
   return subnodes;
 }
 
-} /* namespace DataHandling */
-} /* namespace Mantid */
+} // namespace Mantid::DataHandling

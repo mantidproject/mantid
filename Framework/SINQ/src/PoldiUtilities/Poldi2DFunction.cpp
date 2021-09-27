@@ -7,8 +7,7 @@
 #include "MantidSINQ/PoldiUtilities/Poldi2DFunction.h"
 #include <cmath>
 
-namespace Mantid {
-namespace Poldi {
+namespace Mantid::Poldi {
 using namespace API;
 
 Poldi2DFunction::Poldi2DFunction() : IFunction1DSpectrum(), CompositeFunction(), m_iteration(0) {}
@@ -84,5 +83,4 @@ void Poldi2DFunction::poldiFunction1D(const std::vector<int> &indices, const Fun
 
 void Poldi2DFunction::iterationFinished() { ++m_iteration; }
 
-} // namespace Poldi
-} // namespace Mantid
+} // namespace Mantid::Poldi

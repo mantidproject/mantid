@@ -43,8 +43,7 @@ std::vector<std::string> createPBinStringVector(std::vector<Mantid::coord_t> min
 }
 } // namespace
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 DECLARE_ALGORITHM(CompactMD)
 
@@ -149,5 +148,4 @@ void CompactMD::exec() {
   // set output workspace of CompactMD to output of IntegrateMDHistoWorkspace
   this->setProperty("OutputWorkspace", out_ws);
 }
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

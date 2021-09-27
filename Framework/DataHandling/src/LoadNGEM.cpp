@@ -20,8 +20,7 @@
 #include <boost/algorithm/string.hpp>
 #include <fstream>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 DECLARE_FILELOADER_ALGORITHM(LoadNGEM)
 
@@ -420,5 +419,4 @@ std::map<std::string, std::string> LoadNGEM::validateInputs() {
   return results;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

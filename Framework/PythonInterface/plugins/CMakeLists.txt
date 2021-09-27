@@ -20,7 +20,6 @@ set(PYTHON_PLUGINS
     algorithms/CalculateEfficiencyCorrection.py
     algorithms/CalculateFlux.py
     algorithms/CalculateSampleTransmission.py
-    algorithms/CalibrateRectangularDetectors.py
     algorithms/CheckForSampleLogs.py
     algorithms/CleanFileCache.py
     algorithms/ClipPeaks.py
@@ -177,8 +176,8 @@ set(PYTHON_PLUGINS
     algorithms/SortDetectors.py
     algorithms/StatisticsOfTableWorkspace.py
     algorithms/StringToPng.py
-    algorithms/SuggestTibCNCS.py
-    algorithms/SuggestTibHYSPEC.py
+    algorithms/CNCSSuggestTIB.py
+    algorithms/HYSPECSuggestTIB.py
     algorithms/Symmetrise.py
     algorithms/TOFTOFCropWorkspace.py
     algorithms/TOFTOFMergeRuns.py
@@ -271,6 +270,7 @@ set(PYTHON_PLUGINS
     algorithms/WorkflowAlgorithms/ReflectometryILLPreprocess.py
     algorithms/WorkflowAlgorithms/ReflectometryILLSumForeground.py
     algorithms/WorkflowAlgorithms/ReflectometryILL_common.py
+    algorithms/WorkflowAlgorithms/ReflectometryISISPreprocess.py
     algorithms/WorkflowAlgorithms/ReflectometryISISLoadAndProcess.py
     algorithms/WorkflowAlgorithms/ResNorm2.py
     algorithms/WorkflowAlgorithms/SANS/SANSBeamCentreFinder.py

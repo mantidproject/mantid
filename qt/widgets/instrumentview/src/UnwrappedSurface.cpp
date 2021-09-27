@@ -32,8 +32,7 @@
 
 using namespace Mantid::Geometry;
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 namespace {
 
 QRectF getArea(const UnwrappedDetector &udet, double maxWidth, double maxHeight) {
@@ -709,5 +708,4 @@ std::string UnwrappedSurface::saveToProject() const {
 #endif
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

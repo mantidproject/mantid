@@ -60,15 +60,15 @@ boost::optional<double> firstParameterValue(const IFunction_sptr &function, cons
 }
 
 boost::optional<double> findFirstPeakCentre(const IFunction_sptr &function) {
-  return firstParameterValue(std::move(function), "Peak", "PeakCentre");
+  return firstParameterValue(function, "Peak", "PeakCentre");
 }
 
 boost::optional<double> findFirstFWHM(const IFunction_sptr &function) {
-  return firstParameterValue(std::move(function), "Peak", "FWHM");
+  return firstParameterValue(function, "Peak", "FWHM");
 }
 
 boost::optional<double> findFirstBackgroundLevel(const IFunction_sptr &function) {
-  return firstParameterValue(std::move(function), "Background", "A0");
+  return firstParameterValue(function, "Background", "A0");
 }
 
 void setFunctionParameters(const IFunction_sptr &function, const std::string &category,
@@ -111,9 +111,7 @@ inline void adjustRange(std::pair<double, double> &range) {
 }
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 using namespace Mantid::API;
 
@@ -286,8 +284,8 @@ MatrixWorkspace_sptr IndirectFitPlotModel::getGuessWorkspace() const {
 
 MatrixWorkspace_sptr IndirectFitPlotModel::appendGuessToInput(const MatrixWorkspace_sptr &guessWorkspace) const {
   const auto range = getGuessRange();
-  return createInputAndGuessWorkspace(getWorkspace(), std::move(guessWorkspace),
-                                      static_cast<int>(m_activeWorkspaceIndex.value), range.first, range.second);
+  return createInputAndGuessWorkspace(getWorkspace(), guessWorkspace, static_cast<int>(m_activeWorkspaceIndex.value),
+                                      range.first, range.second);
 }
 
 std::pair<double, double> IndirectFitPlotModel::getGuessRange() const {
@@ -418,6 +416,4 @@ void IndirectFitPlotModel::deleteWorkspace(const std::string &name) const {
   deleteWorkspaceAlg->execute();
 }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

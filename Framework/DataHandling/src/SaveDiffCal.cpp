@@ -15,8 +15,7 @@
 #include <Poco/File.h>
 #include <Poco/Path.h>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using Mantid::API::FileProperty;
 using Mantid::API::ITableWorkspace;
@@ -101,7 +100,6 @@ std::map<std::string, std::string> SaveDiffCal::validateInputs() {
  */
 void SaveDiffCal::writeDoubleFieldFromTable(H5::Group &group, const std::string &name) {
   auto column = m_calibrationWS->getColumn(name);
-  // cppcheck-suppress compareBoolExpressionWithInt
   // Retrieve only the first m_numValues, not necessarily the whole column
   auto data = column->numeric_fill<>(m_numValues);
   H5Util::writeArray1D(group, name, data);
@@ -258,5 +256,4 @@ void SaveDiffCal::exec() {
   file.close();
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

@@ -10,8 +10,7 @@
 
 #include <Poco/Thread.h>
 
-namespace Mantid {
-namespace ICat {
+namespace Mantid::ICat {
 DECLARE_ALGORITHM(CatalogKeepAlive)
 
 void CatalogKeepAlive::init() {
@@ -43,5 +42,4 @@ void CatalogKeepAlive::exec() {
     }
   }
 }
-} // namespace ICat
-} // namespace Mantid
+} // namespace Mantid::ICat

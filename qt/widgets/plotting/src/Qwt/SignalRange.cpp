@@ -68,7 +68,7 @@ void SignalRange::findFullRange(const Mantid::API::IMDWorkspace &workspace,
  */
 QwtDoubleInterval SignalRange::getRange(const std::vector<std::unique_ptr<Mantid::API::IMDIterator>> &iterators) {
   std::vector<QwtDoubleInterval> intervals(iterators.size());
-  // cppcheck-suppress syntaxError
+
       PRAGMA_OMP( parallel for schedule(dynamic, 1))
       for (int i = 0; i < int(iterators.size()); i++) {
         auto it = iterators[i].get();

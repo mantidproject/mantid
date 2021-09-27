@@ -25,8 +25,7 @@ using namespace Mantid::DataObjects;
 
 using namespace std;
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 DECLARE_ALGORITHM(SaveGSASInstrumentFile)
 
@@ -1034,5 +1033,4 @@ double SaveGSASInstrumentFile::erfc(double xx) {
   return y;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

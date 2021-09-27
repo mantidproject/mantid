@@ -708,8 +708,7 @@ void addTransmission(H5::Group &group, const Mantid::API::MatrixWorkspace_const_
 }
 } // namespace
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveNXcanSAS)
 
@@ -886,5 +885,4 @@ std::string makeCanSASRelaxedName(const std::string &input) {
   return makeCompliantName(input, isStrict, emptyCapitalizationStrategy);
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

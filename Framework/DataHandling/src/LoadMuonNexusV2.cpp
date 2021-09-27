@@ -25,8 +25,7 @@
 
 #include <vector>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadMuonNexusV2)
 
@@ -324,5 +323,4 @@ void LoadMuonNexusV2::loadPeriodInfo(Workspace &workspace) {
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

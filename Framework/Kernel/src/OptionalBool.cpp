@@ -11,8 +11,7 @@
 #include <ostream>
 #include <utility>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 const std::string OptionalBool::StrUnset = "Unset";
 const std::string OptionalBool::StrFalse = "False";
@@ -75,5 +74,4 @@ bool ToCpp<OptionalBool>::operator()(const Json::Value &value) { return value.as
 
 } // namespace pwvjdetail
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

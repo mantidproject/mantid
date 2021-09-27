@@ -60,9 +60,7 @@ using namespace Mantid::CurveFitting::Constraints;
 
 using namespace std;
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Algorithms {
+namespace Mantid::CurveFitting::Algorithms {
 
 DECLARE_ALGORITHM(FitPowderDiffPeaks)
 
@@ -2256,10 +2254,10 @@ Workspace2D_sptr FitPowderDiffPeaks::genPeakParameterDataWorkspace() {
     paramws->mutableX(j) = vecdh;
     paramws->mutableE(j) = vecchi2;
   }
-  paramws->mutableY(0) = std::move(vectofh);
-  paramws->mutableY(1) = std::move(vecalpha);
-  paramws->mutableY(2) = std::move(vecbeta);
-  paramws->mutableY(3) = std::move(vecsigma);
+  paramws->mutableY(0) = vectofh;
+  paramws->mutableY(1) = vecalpha;
+  paramws->mutableY(2) = vecbeta;
+  paramws->mutableY(3) = vecsigma;
 
   // 4. Set Axis label
   paramws->getAxis(0)->setUnit("dSpacing");
@@ -3115,6 +3113,4 @@ size_t findMaxValue(const MatrixWorkspace_sptr &dataws, size_t wsindex, double l
   return imax;
 }
 
-} // namespace Algorithms
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Algorithms

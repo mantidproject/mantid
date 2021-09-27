@@ -14,8 +14,7 @@
 #include <cmath>
 #include <vector>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Kernel;
 
@@ -139,5 +138,4 @@ void AlphaCalc::exec() {
   setProperty("Alpha", sumForward / sumBackward);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

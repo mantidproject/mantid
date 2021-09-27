@@ -151,6 +151,10 @@ public:
   FastReadOnlyFile(const char *filename);
   ~FastReadOnlyFile();
 
+  // Prevent copying of a file handle
+  FastReadOnlyFile(const FastReadOnlyFile &) = delete;
+  FastReadOnlyFile &operator=(FastReadOnlyFile) = delete;
+
   // properties
   void *handle() const;
 

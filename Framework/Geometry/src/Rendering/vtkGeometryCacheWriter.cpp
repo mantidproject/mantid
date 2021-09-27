@@ -31,8 +31,7 @@ using Poco::XML::Element;
 using Poco::XML::Text;
 using Poco::XML::XMLWriter;
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 namespace {
 /// static object
 Kernel::Logger g_log("vtkGeometryCacheWriter");
@@ -179,5 +178,4 @@ void vtkGeometryCacheWriter::write() {
     g_log.error("Geometry Cache file writing exception");
   }
 }
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

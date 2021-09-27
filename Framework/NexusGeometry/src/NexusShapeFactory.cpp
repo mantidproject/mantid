@@ -22,9 +22,7 @@
 #include <iterator>
 #include <memory>
 
-namespace Mantid {
-namespace NexusGeometry {
-namespace NexusShapeFactory {
+namespace Mantid::NexusGeometry::NexusShapeFactory {
 using namespace Eigen;
 
 namespace {
@@ -198,6 +196,4 @@ std::unique_ptr<const Geometry::IObject> createMesh(std::vector<uint32_t> &&tria
   else
     return std::make_unique<Geometry::MeshObject>(std::move(triangularFaces), std::move(vertices), Kernel::Material{});
 }
-} // namespace NexusShapeFactory
-} // namespace NexusGeometry
-} // namespace Mantid
+} // namespace Mantid::NexusGeometry::NexusShapeFactory
