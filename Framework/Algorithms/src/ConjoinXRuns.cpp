@@ -301,6 +301,7 @@ void ConjoinXRuns::joinSpectrum(int64_t wsIndex) {
   spectrum.reserve(ySize);
   errors.reserve(ySize);
   axis.reserve(ySize);
+  xerrors.reserve(ySize);
   for (const auto &input : m_inputWS) {
     const auto &y = input->y(index);
     spectrum.insert(spectrum.end(), y.begin(), y.end());
@@ -323,9 +324,6 @@ void ConjoinXRuns::joinSpectrum(int64_t wsIndex) {
   m_outWS->setCountStandardDeviations(index, std::move(errors));
   if (!xerrors.empty())
     m_outWS->setPointStandardDeviations(index, std::move(xerrors));
-  m_outWS->mutableY(index) = spectrum;
-  m_outWS->mutableE(index) = errors;
-  m_outWS->mutableX(index) = axis;
 }
 
 //----------------------------------------------------------------------------------------------
