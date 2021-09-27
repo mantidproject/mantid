@@ -46,20 +46,27 @@ void FilterByLogValue::init() {
   auto min = std::make_shared<BoundedValidator<double>>();
   min->setLower(0.0);
   declareProperty("TimeTolerance", 0.0, min,
-                  "Tolerance, in seconds, for the event times to keep. A good "
-                  "value is 1/2 your measurement interval. \n"
-                  "For a single log value at time T, all events between "
-                  "T+-Tolerance are kept.\n"
+                  "Tolerance, in seconds, for the event times to keep. \n"
+                  "(1) If PulseFilter is true, a notch of width 2*TimeTolerance is centered at each log "
+                  "time. Neutron events in this notch will not be used.\n"
+                  "(2) If PulseFilter is false and LogBoundary is 'Left', TimeTolerance is ignored.\n"
+                  "(3) If PulseFilter is false and LogBoundary is 'Centre', "
+                  "for a single log value at time T when LogBoundary is set to Center"
+                  ", all events between "
+                  "(T-TimeTolerance) and (T+TimeTolerance) are kept."
                   "If there are several consecutive log values matching the "
-                  "filter, events between T1-Tolerance and T2+Tolerance are "
-                  "kept.");
+                  "filter, events between (T0-TimeTolerance) and (Tf+TimTolerance) are "
+                  "kept."
+                  "A good value is 1/2 your measurement interval if the intervals are constant.");
 
   std::vector<std::string> types(2);
   types[0] = CENTRE;
   types[1] = LEFT;
   declareProperty("LogBoundary", types[0], std::make_shared<StringListValidator>(types),
                   "How to treat log values as being measured in the centre of "
-                  "the time, or beginning (left) boundary");
+                  "the time, or left (beginning) of boundary. "
+                  "This value must be set to Left if the sample log is recorded upon changing,"
+                  "which applies to most of the sample environment devices in SNS.");
 
   declareProperty("PulseFilter", false,
                   "Optional. Filter out a notch of time for each entry in the "
