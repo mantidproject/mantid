@@ -16,6 +16,7 @@ class PreviewViewSubscriber {
 public:
   virtual ~PreviewViewSubscriber() = default;
   virtual void notifyLoadWorkspaceRequested() = 0;
+
   virtual void notifyInstViewSelectRectRequested() = 0;
   virtual void notifyInstViewPanRequested() = 0;
   virtual void notifyInstViewZoomRequested() = 0;
@@ -27,5 +28,9 @@ public:
   virtual void subscribe(PreviewViewSubscriber *notifyee) noexcept = 0;
   virtual std::string getWorkspaceName() const = 0;
   virtual void plotInstView(std::shared_ptr<MantidWidgets::RotationSurface> &) = 0;
+
+  virtual void setInstViewSelectRectState(bool on) = 0;
+  virtual void setInstViewPanState(bool on) = 0;
+  virtual void setInstViewZoomState(bool on) = 0;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

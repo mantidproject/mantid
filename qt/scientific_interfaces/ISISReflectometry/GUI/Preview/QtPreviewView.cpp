@@ -41,4 +41,8 @@ std::string QtPreviewView::getWorkspaceName() const { return m_ui.workspace_line
 void QtPreviewView::plotInstView(std::shared_ptr<MantidWidgets::RotationSurface> &surface) {
   m_instDisplay->setSurface(surface);
 }
+
+void QtPreviewView::setInstViewSelectRectState(bool) {}
+void QtPreviewView::setInstViewPanState(bool) {}
+void QtPreviewView::setInstViewZoomState(bool) {}
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
