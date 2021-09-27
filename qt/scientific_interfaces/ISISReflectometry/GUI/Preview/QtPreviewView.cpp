@@ -21,13 +21,16 @@ void QtPreviewView::loadToolbarIcons() {
   m_ui.iv_pan_button->setIcon(MantidQt::Icons::getIcon("mdi.arrow-all", "black", 1.3));
   m_ui.iv_rect_select_toggle->setIcon(MantidQt::Icons::getIcon("mdi.selection", "black", 1.3));
   m_ui.iv_zoom_button->setIcon(MantidQt::Icons::getIcon("mdi.magnify", "black", 1.3));
-  // TODO set text?
 }
 
 void QtPreviewView::subscribe(PreviewViewSubscriber *notifyee) noexcept { m_notifyee = notifyee; }
 
 void QtPreviewView::connectSignals() const {
   connect(m_ui.load_button, SIGNAL(clicked()), this, SLOT(onLoadWorkspaceRequested()));
+
+  connect(m_ui.iv_rect_select_toggle, SIGNAL(clicked()), this, SLOT(onInstViewSelectRectClicked()));
+  connect(m_ui.iv_pan_button, SIGNAL(clicked()), this, SLOT(onInstViewPanClicked()));
+  connect(m_ui.iv_zoom_button, SIGNAL(clicked()), this, SLOT(onInstViewZoomClicked()));
 }
 
 void QtPreviewView::onLoadWorkspaceRequested() const { m_notifyee->notifyLoadWorkspaceRequested(); }

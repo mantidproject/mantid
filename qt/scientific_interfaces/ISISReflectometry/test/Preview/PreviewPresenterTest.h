@@ -86,6 +86,33 @@ public:
     presenter.notifyLoadWorkspaceCompleted();
   }
 
+  void test_notify_inst_view_select_rect_requested() {
+    auto mockView = makeView();
+    EXPECT_CALL(*mockView, setInstViewPanState(Eq(false))).Times(1);
+    EXPECT_CALL(*mockView, setInstViewZoomState(Eq(false))).Times(1);
+    EXPECT_CALL(*mockView, setInstViewSelectRectState(Eq(true))).Times(1);
+    auto presenter = PreviewPresenter(packDeps(mockView.get()));
+    presenter.notifyInstViewSelectRectRequested();
+  }
+
+  void test_notify_inst_view_pan_requested() {
+    auto mockView = makeView();
+    EXPECT_CALL(*mockView, setInstViewSelectRectState(Eq(false))).Times(1);
+    EXPECT_CALL(*mockView, setInstViewZoomState(Eq(false))).Times(1);
+    EXPECT_CALL(*mockView, setInstViewPanState(Eq(true))).Times(1);
+    auto presenter = PreviewPresenter(packDeps(mockView.get()));
+    presenter.notifyInstViewPanRequested();
+  }
+
+  void test_notify_inst_view_zoom_requested() {
+    auto mockView = makeView();
+    EXPECT_CALL(*mockView, setInstViewSelectRectState(Eq(false))).Times(1);
+    EXPECT_CALL(*mockView, setInstViewPanState(Eq(false))).Times(1);
+    EXPECT_CALL(*mockView, setInstViewZoomState(Eq(true))).Times(1);
+    auto presenter = PreviewPresenter(packDeps(mockView.get()));
+    presenter.notifyInstViewZoomRequested();
+  }
+
 private:
   MockViewT makeView() {
     auto mockView = std::make_unique<MockPreviewView>();

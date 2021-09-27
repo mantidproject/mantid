@@ -50,15 +50,21 @@ void PreviewPresenter::notifyLoadWorkspaceCompleted() {
 /** Notification received when the user has requested the sele
  */
 void PreviewPresenter::notifyInstViewSelectRectRequested() {
-  // Wire up models
-  // Call back out to the view to toggle button "on"
-  // Conquer inst viewer, m_view->setMode(ENUM)
-  // Fix unknown bugs
-  assert(false);
+  m_view->setInstViewPanState(false);
+  m_view->setInstViewZoomState(false);
+  m_view->setInstViewSelectRectState(true);
 }
 
-void PreviewPresenter::notifyInstViewPanRequested() { assert(false); }
+void PreviewPresenter::notifyInstViewPanRequested() {
+  m_view->setInstViewSelectRectState(false);
+  m_view->setInstViewZoomState(false);
+  m_view->setInstViewPanState(true);
+}
 
-void PreviewPresenter::notifyInstViewZoomRequested() { assert(false); }
+void PreviewPresenter::notifyInstViewZoomRequested() {
+  m_view->setInstViewSelectRectState(false);
+  m_view->setInstViewPanState(false);
+  m_view->setInstViewZoomState(true);
+}
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
