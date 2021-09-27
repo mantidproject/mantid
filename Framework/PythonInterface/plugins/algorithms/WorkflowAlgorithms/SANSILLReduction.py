@@ -758,8 +758,6 @@ class SANSILLReduction(PythonAlgorithm):
                 self._mode = 'TOF'
             elif mtd[ws].getInstrument().getName() != 'D16':
                 self._mode = 'Kinetic'
-        else:
-            self.log().warning('SANSILLReduction v1 is deprecated, use v2 instead.')
 
     def PyExec(self):
         process = self.getPropertyValue('ProcessAs')

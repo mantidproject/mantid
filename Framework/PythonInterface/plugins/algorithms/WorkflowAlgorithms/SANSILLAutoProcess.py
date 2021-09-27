@@ -412,7 +412,6 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
 
     def PyExec(self):
         self.setUp()
-        self.log().warning('SANSILLAutoProcess is deprecated, use SANSILLMultiProcess instead.')
         outputSamples = []
         outputWedges = []
         outputPanels = []
