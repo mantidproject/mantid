@@ -165,12 +165,10 @@ std::map<std::string, std::string> ConjoinXRuns::validateInputs() {
     }
   }
   if (getProperty("LinearizeAxis")) {
-    for (const auto &ws : m_inputWS) {
-      if (!ws->isCommonBins()) {
-        issues[INPUT_WORKSPACE_PROPERTY] +=
-            "Workspace " + ws->getName() + " is ragged, which is not allowed if linearize axis is requested.\n";
-        break;
-      }
+    auto notCommon = std::find_if(m_inputWS.cbegin(), m_inputWS.cend(), [](auto ws) { return !ws->isCommonBins(); });
+    if (notCommon != m_inputWS.cend()) {
+      issues[INPUT_WORKSPACE_PROPERTY] +=
+          "Workspace " + (*notCommon)->getName() + " is ragged, which is not allowed if linearize axis is requested.\n";
     }
   }
   m_inputWS.clear();
