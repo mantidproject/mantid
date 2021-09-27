@@ -16,6 +16,9 @@ class PreviewViewSubscriber {
 public:
   virtual ~PreviewViewSubscriber() = default;
   virtual void notifyLoadWorkspaceRequested() = 0;
+  virtual void notifyInstViewSelectRectRequested() = 0;
+  virtual void notifyInstViewPanRequested() = 0;
+  virtual void notifyInstViewZoomRequested() = 0;
 };
 
 class IPreviewView {

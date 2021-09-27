@@ -38,6 +38,10 @@ public:
   // JobManagerSubscriber overrides
   void notifyLoadWorkspaceCompleted() override;
 
+  void notifyInstViewSelectRectRequested() override;
+  void notifyInstViewPanRequested() override;
+  void notifyInstViewZoomRequested() override;
+
 private:
   IPreviewView *m_view{nullptr};
   std::unique_ptr<IPreviewModel> m_model;

@@ -46,4 +46,13 @@ void PreviewPresenter::notifyLoadWorkspaceCompleted() {
   auto surface = m_instViewModel->getInstrumentViewSurface();
   m_view->plotInstView(surface);
 }
+
+/** Notification received when the user has requested the sele
+ */
+void PreviewPresenter::notifyInstViewSelectRectRequested() { assert(false); }
+
+void PreviewPresenter::notifyInstViewPanRequested() { assert(false); }
+
+void PreviewPresenter::notifyInstViewZoomRequested() { assert(false); }
+
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
