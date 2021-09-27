@@ -7,6 +7,7 @@
 
 #include "MantidDataHandling/LoadILLBase.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -29,33 +30,16 @@ namespace Mantid::DataHandling {
  * This method is final and cannot be overridden.
  * If there are extra properties to declare, override declareExtraProperties
  */
-void LoadILLBase::init() {
+template <class W> void LoadILLBase<W>::init() {
   declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Load, ".nxs"),
                   "The run number of the path of the data file to load.");
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<W>>("OutputWorkspace", "", Direction::Output),
                   "The output workspace.");
   declareProperty(std::make_unique<PropertyManagerProperty>("PatchNexusMetadataEntries", Direction::Input),
                   "JSON formatted key-value pairs to add/override nexus entries.");
   declareProperty(std::make_unique<PropertyManagerProperty>("PatchWorkspaceSampleLogs", Direction::Input),
                   "JSON formatted key-value pairs to add/override sample logs.");
   declareExtraProperties();
-}
-
-/**
- * @brief LoadILLBase::setOutputWorkspace sets the output workspace
- */
-void LoadILLBase::setOutputWorkspace() { setProperty<API::Workspace_sptr>("OutputWorkspace", m_workspace); }
-
-/**
- * @brief LoadILLBase::getInstrumentDefinitionFilePath returns the fully resolved IDF file path.
- * The instrument is loaded via file and not name, as the variants should not be declared in the facilities xml.
- * @return the fully resolved path of the IDF file
- */
-std::string LoadILLBase::getInstrumentDefinitionFilePath() {
-  Poco::Path directory(ConfigService::Instance().getInstrumentDirectory());
-  Poco::Path file(m_instrument + "_Definition.xml");
-  Poco::Path fullPath(directory, file);
-  return fullPath.toString();
 }
 
 /**
@@ -67,40 +51,52 @@ std::string LoadILLBase::getInstrumentDefinitionFilePath() {
  * method. There again, the type, size and the shape of the workspace depends on the mode and the instrument.
  * Once the workspace is instantiated, it resolves the start time and loads the instrument.
  */
-void LoadILLBase::bootstrap() {
+template <class W> void LoadILLBase<W>::setup() {
   const std::string filename = getPropertyValue("Filename");
   PropertyManager_sptr pmp = getProperty("PatchNexusMetadataEntries");
   m_nxroot = std::make_unique<NXRoot>(filename);
   m_nep = std::make_unique<NexusEntryProvider>(filename, *pmp);
-  m_helper = std::make_shared<LoadHelper>();
-  m_mode = resolveAcqMode();
-  m_instrument = resolveInstrument();
+  m_helper = std::make_unique<LoadHelper>();
   validateMetadata();
-  m_workspace = buildWorkspace();
-  resolveStartTime();
-  loadInstrument();
+}
+
+template <class W> void LoadILLBase<W>::wrapup(std::shared_ptr<W> ws) {
+  addSampleLogs(ws);
+  patchLogsForPatchedEntries(ws);
+  patchSampleLogs(ws);
+  setOutputWorkspace(ws);
+}
+
+/**
+ * @brief LoadILLBase::setOutputWorkspace sets the output workspace
+ */
+template <class W> void LoadILLBase<W>::setOutputWorkspace(std::shared_ptr<W> ws) {
+  setProperty<std::shared_ptr<W>>("OutputWorkspace", ws);
+}
+
+/**
+ * @brief LoadILLBase::getInstrumentDefinitionFilePath returns the fully resolved IDF file path.
+ * The instrument is loaded via file and not name, as the variants should not be declared in the facilities xml.
+ * @return the fully resolved path of the IDF file
+ */
+template <class W> std::string LoadILLBase<W>::getInstrumentDefinitionFilePath(const std::string &iname) {
+  Poco::Path directory(ConfigService::Instance().getInstrumentDirectory());
+  Poco::Path file(iname + "_Definition.xml");
+  Poco::Path fullPath(directory, file);
+  return fullPath.toString();
 }
 
 /**
  * @brief LoadILLBase::addSampleLogs adds all the metadata from nexus to the output workspace
  */
-void LoadILLBase::addSampleLogs() {
+template <class W> void LoadILLBase<W>::addSampleLogs(std::shared_ptr<W> ws) {
   NXhandle nxHandle;
   NXstatus nxStat = NXopen(getPropertyValue("Filename").c_str(), NXACC_READ, &nxHandle);
   if (nxStat != NX_ERROR) {
-    if (isOutputGroup()) {
-      WorkspaceGroup_sptr wsg = std::dynamic_pointer_cast<WorkspaceGroup>(m_workspace);
-      for (int i = 0; i < wsg->getNumberOfEntries(); ++i) {
-        MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(wsg->getItem(i));
-        auto const entryName = std::string("entry" + std::to_string(i));
-        m_helper->addNexusFieldsToWsRun(nxHandle, ws->mutableRun(), entryName);
-      }
-    } else {
-      MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(m_workspace);
-      m_helper->addNexusFieldsToWsRun(nxHandle, ws->mutableRun());
-    }
-    NXclose(&nxHandle);
+    ExperimentInfo_sptr einfo = std::dynamic_pointer_cast<ExperimentInfo>(ws);
+    m_helper->addNexusFieldsToWsRun(nxHandle, einfo->mutableRun());
   }
+  NXclose(&nxHandle);
 }
 
 /**
@@ -110,33 +106,45 @@ void LoadILLBase::addSampleLogs() {
  * reduction. This way there is more flexibility. When overriding the sample logs, the keys are the names of the logs,
  * not to be confused with nexus entries.
  */
-void LoadILLBase::patchSampleLogs() {
+template <class W> void LoadILLBase<W>::patchSampleLogs(std::shared_ptr<W> ws) {
   const PropertyManager_sptr logsToPatch = getProperty("PatchWorkspaceSampleLogs");
   const auto properties = logsToPatch->getProperties();
-  if (isOutputGroup()) {
-    WorkspaceGroup_sptr wsg = std::dynamic_pointer_cast<WorkspaceGroup>(m_workspace);
-    for (int i = 0; i < wsg->getNumberOfEntries(); ++i) {
-      MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(wsg->getItem(i));
-      for (const auto &prop : properties) {
-        ws->mutableRun().addProperty(prop, true);
-      }
-    }
-  } else {
-    MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(m_workspace);
-    for (const auto &prop : properties) {
-      ws->mutableRun().addProperty(prop, true);
-    }
+  ExperimentInfo_sptr einfo = std::dynamic_pointer_cast<MatrixWorkspace>(ws);
+  for (const auto &prop : properties) {
+    ws->mutableRun().addProperty(prop, true);
   }
+}
+
+/**
+ * @brief LoadILLBase::patchLogsForPatchedEntries
+ */
+template <class W> void LoadILLBase<W>::patchLogsForPatchedEntries(std::shared_ptr<W> ws) {
+  const PropertyManager_sptr entiresToPatch = getProperty("PatchNexusMetadataEntries");
+  const auto properties = entiresToPatch->getProperties();
+  ExperimentInfo_sptr einfo = std::dynamic_pointer_cast<MatrixWorkspace>(ws);
+  for (const auto &prop : properties) {
+    std::string logName = prop->name();
+    // TODO: build the sample log name just as load helper would do
+    ws->mutableRun().addProperty(logName, prop->value(), true);
+  }
+}
+
+/**
+ * @brief LoadILLBase::addStartTime adds the start time in ISO format to enable time-resolved instrument parameters
+ */
+template <class W> void LoadILLBase<W>::addStartTime(std::shared_ptr<W> ws) {
+  ExperimentInfo_sptr einfo = std::dynamic_pointer_cast<ExperimentInfo>(ws);
+  einfo->mutableRun().addProperty("start_time", getStartTime(), true);
 }
 
 /**
  * @brief LoadILLBase::loadInstrument loads the instrument to the workspace
  */
-void LoadILLBase::loadInstrument() {
-  const std::string idf = getInstrumentDefinitionFilePath();
+template <class W> void LoadILLBase<W>::loadInstrument(std::shared_ptr<W> ws) {
+  addStartTime(ws);
   auto loadInst = createChildAlgorithm("LoadInstrument");
-  loadInst->setPropertyValue("Filename", idf);
-  loadInst->setProperty("Workspace", m_workspace);
+  loadInst->setPropertyValue("Filename", getInstrumentDefinitionFilePath());
+  loadInst->setProperty("Workspace", ws);
   loadInst->setProperty("RewriteSpectraMap", OptionalBool(true));
   loadInst->execute();
 }
@@ -146,19 +154,8 @@ void LoadILLBase::loadInstrument() {
  * It is necessary to add it in the right format to the logs prior to loading the instrument.
  * This way one can benefit from time-resolved values of instrument parameters.
  */
-void LoadILLBase::resolveStartTime() {
-  const std::string startTime = "start_time";
-  m_timestamp = m_helper->dateTimeInIsoFormat(m_nxroot->openFirstEntry().getString(startTime));
-  if (isOutputGroup()) {
-    WorkspaceGroup_sptr wsg = std::dynamic_pointer_cast<WorkspaceGroup>(m_workspace);
-    for (int i = 0; i < wsg->getNumberOfEntries(); ++i) {
-      MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(wsg->getItem(i));
-      ws->mutableRun().addProperty(startTime, m_timestamp, true);
-    }
-  } else {
-    MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(m_workspace);
-    ws->mutableRun().addProperty(startTime, m_timestamp, true);
-  }
+template <class W> std::string LoadILLBase<W>::getStartTime() {
+  return m_helper->dateTimeInIsoFormat(m_nxroot->openFirstEntry().getString("start_time"));
 }
 
 /**
@@ -166,26 +163,20 @@ void LoadILLBase::resolveStartTime() {
  * Optionally, appends the variant, if overridden.
  * @return the name of fully resolved instrument as mantid knows it
  */
-std::string LoadILLBase::resolveInstrument() {
+template <class W> std::string LoadILLBase<W>::resolveInstrument() {
   NXEntry firstEntry = m_nxroot->openFirstEntry();
   const std::string instrumentPath = m_helper->findInstrumentNexusPath(firstEntry);
   std::string instrumentName = m_helper->getStringFromNexusPath(firstEntry, instrumentPath + "/name");
   boost::to_upper(instrumentName);
-  return instrumentName + resolveVariant();
+  return instrumentName;
 }
 
 /**
- * @brief LoadILLBase::exec executes the core logic.
- * This method is final and cannot be overridden.
- * The sequence of what it does is not commutative.
+ * @brief LoadILLBase::exec Entry point, final.
  */
-void LoadILLBase::exec() {
-  bootstrap();
-  loadAndFillData();
-  configureBeamline();
-  addSampleLogs();
-  patchSampleLogs();
-  setOutputWorkspace();
+template <class W> void LoadILLBase<W>::exec() {
+  setup();
+  wrapup(load());
 }
 
 } // namespace Mantid::DataHandling

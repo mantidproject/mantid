@@ -44,17 +44,13 @@ int LoadILLMock::confidence(Kernel::NexusDescriptor &descriptor) const {
 
 std::vector<std::string> LoadILLMock::mandatoryKeys() { return std::vector<std::string>({"/entry0/monitor1/monrate"}); }
 
-Workspace_sptr LoadILLMock::buildWorkspace() {
-  return std::dynamic_pointer_cast<Workspace>(WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1));
-}
-
-void LoadILLMock::loadAndFillData() {
+MatrixWorkspace_sptr LoadILLMock::load() {
+  MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
   float monrate = getScalarMetadata<float>("/entry0/monitor1/monrate");
   // PropertyManager_sptr pm = getProperty("PatchNexusMetadataEntries");
   // float a = pm->getProperty("/entry0/monitor1/monrate");
   g_log.warning() << monrate << std::endl;
+  return ws;
 }
-
-void LoadILLMock::configureBeamline() {}
 
 } // namespace Mantid::DataHandling
