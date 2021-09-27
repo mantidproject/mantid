@@ -220,7 +220,6 @@ invalidFunctionArgBool:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Surfaces/Gener
 constParameter:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/ShapeFactory.cpp:939
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/ShapeFactory.cpp:59
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Surfaces/Sphere.cpp:45
-passedByValue:${CMAKE_SOURCE_DIR}/Framework/TestHelpers/src/NexusTestHelper.cpp:49
 useInitializationList:${CMAKE_SOURCE_DIR}/Framework/API/src/AlgorithmHistory.cpp:59
 useInitializationList:${CMAKE_SOURCE_DIR}/Framework/API/src/AlgorithmHistory.cpp:124
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/API/src/AlgorithmHistory.cpp:93
