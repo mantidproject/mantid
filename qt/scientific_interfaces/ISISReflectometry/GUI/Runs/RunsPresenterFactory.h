@@ -19,9 +19,8 @@ namespace ISISReflectometry {
 
 class RunsPresenterFactory {
 public:
-  RunsPresenterFactory(
-      RunsTablePresenterFactory runsTablePresenterFactory, double thetaTolerance, std::vector<std::string> instruments,
-      IReflMessageHandler *messageHandler)
+  RunsPresenterFactory(RunsTablePresenterFactory runsTablePresenterFactory, double thetaTolerance,
+                       std::vector<std::string> instruments, IReflMessageHandler *messageHandler)
       : m_runsTablePresenterFactory(std::move(runsTablePresenterFactory)), m_thetaTolerance(std::move(thetaTolerance)),
         m_instruments(std::move(instruments)), m_messageHandler(messageHandler) {}
 
