@@ -10,21 +10,21 @@ from mantidqt.utils.qt.testing import start_qapplication
 
 from unittest import mock
 
-from Muon.GUI.MuonAnalysis.plot_widget.plot_time_fit_pane_model import PlotTimeFitPaneModel
+from mantidqtinterfaces.Muon.GUI.MuonAnalysis.plot_widget.plot_time_fit_pane_model import PlotTimeFitPaneModel
 
 
-from Muon.GUI.MuonAnalysis.plot_widget.muon_analysis_plot_widget import MuonAnalysisPlotWidget
-from Muon.GUI.Common.test_helpers.context_setup import setup_context
-from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_widget import PlottingCanvasWidget
-from Muon.GUI.Common.plot_widget.data_pane.plot_data_pane_model import PlotDataPaneModel
-from Muon.GUI.Common.plot_widget.main_plot_widget_view import MainPlotWidgetView
-from Muon.GUI.Common.plot_widget.main_plot_widget_presenter import MainPlotWidgetPresenter
+from mantidqtinterfaces.Muon.GUI.MuonAnalysis.plot_widget.muon_analysis_plot_widget import MuonAnalysisPlotWidget
+from mantidqtinterfaces.Muon.GUI.Common.test_helpers.context_setup import setup_context
+from mantidqtinterfaces.Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_widget import PlottingCanvasWidget
+from mantidqtinterfaces.Muon.GUI.Common.plot_widget.data_pane.plot_data_pane_model import PlotDataPaneModel
+from mantidqtinterfaces.Muon.GUI.Common.plot_widget.main_plot_widget_view import MainPlotWidgetView
+from mantidqtinterfaces.Muon.GUI.Common.plot_widget.main_plot_widget_presenter import MainPlotWidgetPresenter
 
 
 @start_qapplication
 class PlotWidgetTest(unittest.TestCase):
 
-    @mock.patch('Muon.GUI.Common.plot_widget.base_pane.base_pane_view.BasePaneView')
+    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.plot_widget.base_pane.base_pane_view.BasePaneView')
     def setUp(self, basepane_mock):
         self.context = setup_context()
         self.count = 0
