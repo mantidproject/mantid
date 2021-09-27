@@ -857,19 +857,22 @@ class SANSILLReduction(PythonAlgorithm):
     def place_detector(self, ws):
         '''
         Places the detector just as the LoadILLSANS would do.
-        This is because rebinned events are loaded by LoadNexusProcesses, so there is no detector placement at all.
-        TODO: this is not good to repeat that logic, investigate how to avoid this
+        This is because event nexus are loaded by LoadEventNexus, and rebinned events are loaded by LoadNexusProcessed.
+        None of those performs instrument specific placement, so we have to do it here.
+        TODO: It is not good to repeat the logic of the LoadILLSANS, the only way to avoid this would be to create a small separate C++
+        algorithm that does the placement, and it can be called both from within the loader, and here if needed; that is, for events.
         '''
         instr = mtd[ws].getInstrument()
         run = mtd[ws].getRun()
         if instr.getName() == 'D22B':
             back_pos = instr.getComponentByName('detector_back').getPos()
+            distance = run['Detector 1.det1_calc'].value
             MoveInstrumentComponent(Workspace=ws,
                                     ComponentName='detector_back',
                                     RelativePosition=False,
                                     X=-run['Detector 1.dtr1_actual'].value/1000.,
                                     Y=back_pos[1],
-                                    Z=run['Detector 1.det1_calc'].value)
+                                    Z=distance)
             front_pos = instr.getComponentByName('detector_front').getPos()
             MoveInstrumentComponent(Workspace=ws,
                                     ComponentName='detector_front',
@@ -882,6 +885,18 @@ class SANSILLReduction(PythonAlgorithm):
                                       RelativeRotation=False,
                                       Angle=-run['Detector 2.dan2_actual'].value,
                                       X=0, Y=1, Z=0)
+            AddSampleLog(Workspace=ws, LogName="L2", LogText=str(distance), LogType="Number")
+        if instr.getName() == 'D11B':
+            back_pos = instr.getComponentByName('detector_center').getPos()
+            det_pos = instr.getComponentByName('detector').getPos()
+            distance = run['Detector 1.det_calc'].value - back_pos[2]
+            MoveInstrumentComponent(Workspace=ws,
+                                    ComponentName='detector',
+                                    RelativePosition=False,
+                                    X=det_pos[0],
+                                    Y=det_pos[1],
+                                    Z=distance)
+            AddSampleLog(Workspace=ws, LogName="L2", LogText=str(distance), LogType="Number")
 
     def reduce(self):
         '''
