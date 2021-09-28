@@ -299,7 +299,7 @@ class DirectILLAutoProcess(PythonAlgorithm):
                              doc='Sample material definitions.')
 
         self.declareProperty(name='SampleShape',
-                             defaultValue='None',
+                             defaultValue='FlatPlate',
                              validator=StringListValidator(['FlatPlate', 'Cylinder', 'Annulus']),
                              doc='Sample material.')
 
