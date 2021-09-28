@@ -378,6 +378,11 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.context.data_context.instrumentNotifier.add_subscriber(
             self.home_tab.home_tab_widget.instrumentObserver)
 
+        self.clear_observer =  GenericObserver(self.clear)
+
+        self.context.data_context.instrumentNotifier.add_subscriber(
+            self.clear_observer)
+
         self.context.data_context.instrumentNotifier.add_subscriber(
             self.load_widget.load_widget.instrumentObserver)
 
@@ -395,6 +400,9 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
 
         for observer in self.plot_widget.clear_plot_observers:
             self.context.data_context.instrumentNotifier.add_subscriber(observer)
+
+    def clear(self):
+        self.context.clear_context()
 
     def setup_group_calculation_enable_notifier(self):
 

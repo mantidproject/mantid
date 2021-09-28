@@ -85,6 +85,7 @@ Bugfixes
 - The attribute values in a :ref:`Chebyshev <func-Chebyshev>` fitting function will no longer reset after performing a simultaneous fit.
 - Fixed a crash caused by fitting to rebinned :ref:`PhaseQuad <algm-PhaseQuad>` data.
 - When :ref:`PhaseQuad <algm-PhaseQuad>` data is rebinned it now divides by the fractional change in the bin size (to keep the asymmetry to about 0.3).
+- Fixed a bug that is caused by changing instrument and loading a run, after creating a phasequad.
 
 ALC
 ---
