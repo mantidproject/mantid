@@ -69,6 +69,7 @@ class DirectILLAutoProcess(PythonAlgorithm):
     flat_bkg_scaling = None
     flat_background = None
     to_clean = None
+    absorption_corr = None
 
     def category(self):
         return "{};{}".format(common.CATEGORIES, "ILL\\Auto")
@@ -465,7 +466,8 @@ class DirectILLAutoProcess(PythonAlgorithm):
                            OutputWorkspace=sofq_output,
                            OutputSofThetaEnergyWorkspace=softw_output,
                            IntegratedVanadiumWorkspace=vanadium_integral,
-                           DiagnosticsWorkspace=vanadium_diagnostics)
+                           DiagnosticsWorkspace=vanadium_diagnostics
+                           )
 
         if self.getProperty('ClearCache').value:
             DeleteWorkspaces(WorkspaceList=to_remove)
@@ -485,17 +487,59 @@ class DirectILLAutoProcess(PythonAlgorithm):
                 vanadium_no = 0
             elif sample_no > nintegrals:
                 vanadium_no = sample_no % nintegrals
-            Divide(LHSWorkspace=sample_ws,
-                   RHSWorkspace=self.vanadium_integral[vanadium_no],
-                   OutputWorkspace=normalised_ws)
+            Divide(
+                LHSWorkspace=sample_ws,
+                RHSWorkspace=self.vanadium_integral[vanadium_no],
+                OutputWorkspace=normalised_ws
+            )
         else:
             normalised_ws = sample_ws
             self.log().warning("Vanadium integral workspace not found.")
 
         return normalised_ws
 
+    def _prepare_self_attenuation_ws(self, ws):
+        """Creates a self-attenuation workspace using either a MonteCarlo approach or numerical integration."""
+        sample_geometry = self.getProperty('SampleGeometry').value
+        sample_material = self.getProperty('SampleMaterial').value
+        container_geometry = self.getProperty('ContainerGeometry').value \
+            if not self.getProperty('SampleGeometry').isDefault else ""
+        container_material = self.getProperty('ContainerMaterial').value \
+            if not self.getProperty('ContainerMaterial').isDefault else ""
+        self.absorption_corr = "{}_abs_corr".format(ws)
+        self.to_clean.append(self.absorption_corr)
+        SetSample(
+            InputWorkspace=ws,
+            Geometry=sample_geometry,
+            Material=sample_material,
+            ContainerGeometry=container_geometry,
+            ContainerMaterial=container_material
+        )
+        if self.getProperty('SelfAttenuationMethod').value == 'MonteCarlo':
+            PaalmanPingsMonteCarloAbsorption(
+                InputWorkspace=ws,
+                CorrectionsWorkspace=self.absorption_corr,
+                SparseInstrument=True,
+                NumberOfDetectorRows=5,
+                NumberOfDetectorColumns=10
+            )
+        else:
+            PaalmanPingsAbsorptionCorrection(
+                InputWorkspace=ws,
+                OutputWorkspace=self.absorption_corr
+            )
+
     def _correct_self_attenuation(self, ws, sample_no):
-        pass
+        """Creates, if necessary, a self-attenuation workspace and uses it to correct the provided sample workspace."""
+        if sample_no == 0:
+            self._prepare_self_attenuation_ws(ws)
+
+        if self.absorption_corr:
+            ApplyPaalmanPingsCorrection(
+                    SampleWorkspace=ws,
+                    OutputWorkspace=ws,
+                    CorrectionsWorkspace=self.absorption_corr
+            )
 
     def _process_sample(self, ws, sample_no):
         """Does the sample data reduction for single crystal."""
