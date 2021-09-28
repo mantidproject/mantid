@@ -113,8 +113,6 @@ class DirectILLAutoProcess(PythonAlgorithm):
         if self.getPropertyValue('AbsorptionCorrection') != 'None':
             if self.getProperty('SampleMaterial').isDefault:
                 issues['SampleMaterial'] = 'Please define sample material.'
-            if self.getProperty('SampleShape').isDefault:
-                issues['SampleShape'] = 'Please define sample shape.'
             if self.getProperty('SampleGeometry').isDefault:
                 issues['SampleGeometry'] = 'Please define sample geometry.'
             if self.getProperty('ContainerMaterial').isDefault:
@@ -297,11 +295,6 @@ class DirectILLAutoProcess(PythonAlgorithm):
         self.declareProperty(PropertyManagerProperty('SampleMaterial', dict()),
                              doc='Sample material definitions.')
 
-        self.declareProperty(name='SampleShape',
-                             defaultValue='FlatPlate',
-                             validator=StringListValidator(['FlatPlate', 'Cylinder', 'Annulus']),
-                             doc='Sample material.')
-
         self.declareProperty(PropertyManagerProperty('SampleGeometry', dict()),
                              doc="Dictionary for the sample geometry.")
 
@@ -315,7 +308,6 @@ class DirectILLAutoProcess(PythonAlgorithm):
         self.setPropertyGroup('AbsorptionCorrection', attenuation_group)
         self.setPropertyGroup('SelfAttenuationMethod', attenuation_group)
         self.setPropertyGroup('SampleMaterial', attenuation_group)
-        self.setPropertyGroup('SampleShape', attenuation_group)
         self.setPropertyGroup('SampleGeometry', attenuation_group)
         self.setPropertyGroup('ContainerMaterial', attenuation_group)
         self.setPropertyGroup('ContainerGeometry', attenuation_group)
