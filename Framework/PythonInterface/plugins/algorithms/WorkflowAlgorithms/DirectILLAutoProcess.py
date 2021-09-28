@@ -122,9 +122,6 @@ class DirectILLAutoProcess(PythonAlgorithm):
             if self.getProperty('ContainerGeometry').isDefault:
                 issues['ContainerGeometry'] = 'Please define container geometry.'
 
-        if self.getPropertyValue('ProcessAs') == 'Sample' and self.getProperty('VanadiumWorkspace').isDefault:
-            issues['VanadiumWorkspace'] = 'Vanadium input is required to reduce sample.'
-
         return issues
 
     def setUp(self):
@@ -552,12 +549,14 @@ class DirectILLAutoProcess(PythonAlgorithm):
             processed_sample_tw = 'SofTW_{}'.format(ws[:ws.rfind('_')])  # name should contain only SofTW and numor
             if self.getPropertyValue('AbsorptionCorrection') != 'None':
                 self._correct_self_attenuation(ws, sample_no)
+            vanadium_integral = self.vanadium_integral[0] if self.vanadium_integral else ""
+            vanadium_diagnostics = self.vanadium_diagnostics[0] if self.vanadium_diagnostics else ""
             DirectILLReduction(
                 InputWorkspace=ws,
                 OutputWorkspace=processed_sample,
                 OutputSofThetaEnergyWorkspace=processed_sample_tw,
-                IntegratedVanadiumWorkspace=self.vanadium_integral[0],
-                DiagnosticsWorkspace=self.vanadium_diagnostics[0]
+                IntegratedVanadiumWorkspace=vanadium_integral,
+                DiagnosticsWorkspace=vanadium_diagnostics
             )
         if len(to_remove) > 0 and self.getProperty('ClearCache').value:
             DeleteWorkspaces(WorkspaceList=to_remove)
