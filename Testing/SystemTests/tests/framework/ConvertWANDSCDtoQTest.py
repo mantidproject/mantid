@@ -127,6 +127,8 @@ class ConvertWANDSCDtoQ_Rotate_Test(systemtesting.MantidSystemTest):
     def runTest(self):
         config['Q.convention'] = "Inelastic"
 
+        angleOffset = 45
+
         # wavelength (angstrom) --------------------------------------------------------
         wavelength = 1.486
 
@@ -139,29 +141,60 @@ class ConvertWANDSCDtoQ_Rotate_Test(systemtesting.MantidSystemTest):
 
         # ---
 
-        LoadMD(Filename='HB2C_WANDSCD_data.nxs', OutputWorkspace="data")
+        data = LoadMD(Filename='/HFIR/HB2C/shared/WANDscripts/test_data/data.nxs')
 
         LoadIsawUB(InputWorkspace='data',
-                        Filename='HB2C_WANDSCD_data.nxs', OutputWorkspace="UB")
+                    Filename='/HFIR/HB2C/shared/WANDscripts/test_data/data.mat')
 
         ConvertHFIRSCDtoMDE(data,
-                                Wavelength=wavelength,
-                                ObliquityParallaxCoefficient=cop,
-                                MinValues='{},{},{}'.format(*min_values),
-                                MaxValues='{},{},{}'.format(*max_values))
+                            Wavelength=wavelength,
+                            ObliquityParallaxCoefficient=cop,
+                            MinValues='{},{},{}'.format(*min_values),
+                            MaxValues='{},{},{}'.format(*max_values))
 
-        ConvertWANDSCDtoQ(InputWorkspace='data',
-                            S1Offset='0',
-                            BinningDim1='-1,1,1', OutputWorkspace="Q")
+        Q = ConvertWANDSCDtoQ(InputWorkspace='data',
+                                S1Offset='0',
+                                BinningDim1='-1,1,1')
 
-        ConvertWANDSCDtoQ(InputWorkspace='data',
-                                S1Offset='45',
-                                BinningDim1='-1,1,1', OutputWorkspace="Qrot")
+        Qrot = ConvertWANDSCDtoQ(InputWorkspace='data',
+                                    S1Offset=45,
+                                    BinningDim1='-1,1,1')
 
-    def validate(self):
-        # rotationResults = 'Qrot'
-        # reference = 'Q'
+        tableQ = FindPeaksMD(InputWorkspace=Q,
+                                PeakDistanceThreshold=0.2,
+                                MaxPeaks=20,
+                                DensityThresholdFactor=10000,
+                                OutputType='LeanElasticPeak')
 
-        # Manually check to see if the results are rotated 45 degrees?
+        tableQrot = FindPeaksMD(InputWorkspace=Qrot,
+                                PeakDistanceThreshold=0.2,
+                                MaxPeaks=20,
+                                DensityThresholdFactor=10000,
+                                OutputType='LeanElasticPeak')
 
-        return True
+        self.assertEqual(tableQrot.getNumberPeaks(),tableQ.getNumberPeaks())
+
+        peak = tableQ.getPeak(0)
+        # determine angle from origin (x,y) plane only
+        angle = np.degrees(np.arctan2(peak.getQSampleFrame().Z(),peak.getQSampleFrame().X()))
+        hypotenuse =  np.hypot(peak.getQSampleFrame().Z(), peak.getQSampleFrame().X())
+
+        print("Angle {} :: Hypotenuse :: {}".format(angle, hypotenuse))
+        # add offset degrees to determine new possible location, recalc coords
+        newX = np.cos(np.radians(angle + angleOffset)) * hypotenuse
+        newZ = np.sin(np.radians(angle + angleOffset)) * hypotenuse
+
+        print("X: {} :: New X {}".format(peak.getQSampleFrame().X(), newX))
+        print("Z: {} :: New Z {}".format(peak.getQSampleFrame().Z(), newZ))
+
+        # look for coords in rotated table
+        peakStillExists = False
+        for i in range(tableQrot.getNumberPeaks()):
+            rotatedPeak = tableQrot.getPeak(i)
+            print("X: {} vs {}".format(rotatedPeak.getQSampleFrame().X(), newX))
+            print("Z: {} vs {}".format(rotatedPeak.getQSampleFrame().Z(), newZ))
+            if(np.isclose(rotatedPeak.getQSampleFrame().X(), newX, rtol=1e-2)
+               and np.isclose(rotatedPeak.getQSampleFrame().Z(), newZ, rtol=1e-2)):
+                peakStillExists = True
+
+        self.assertTrue(peakStillExists)
