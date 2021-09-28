@@ -652,6 +652,10 @@
 <facility name="ILL" zeropadding="6" FileExtensions=".nxs,.hdf,.inx,.asc" nofileprefix="True" multifilelimit="1000">
   <timezone>Europe/Paris</timezone>
 
+  <instrument name="IN1">
+      <technique>Neutron Spectroscopy</technique>
+  </instrument>
+
   <instrument name="IN4">
     <technique>Neutron Spectroscopy</technique>
     <technique>Reactor Direct Geometry Spectroscopy</technique>

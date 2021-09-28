@@ -20,11 +20,13 @@ class RundexSettings(object):
     D2B =    "D2B"
     D20 =    "D20"
     D1B =    "D1B"
+    IN1 =    "IN1"
 
     # techniques (see instrument/Facilities.xml)
     SANS =   "SANS"
     REFL =   "Reflectometry"
     POWDER = "Powder diffraction"
+    SPECTRO= "Neutron Spectroscopy"
 
     # acquisition modes
     SANS_ACQ =     "SANS"
@@ -33,6 +35,7 @@ class RundexSettings(object):
     REFL_NPOL =    "Unpolarized"
     POWDER_DSCAN = "Detector scan"
     POWDER_PSCAN = "Sample scan"
+    SPECTRO_PSCAN = "Sample scan"
 
     # correspondance between instrument and technique
     TECHNIQUE = {
@@ -46,7 +49,8 @@ class RundexSettings(object):
             FIGARO: REFL,
             D2B:    POWDER,
             D20:    POWDER,
-            D1B:    POWDER
+            D1B:    POWDER,
+            IN1:    SPECTRO
             }
 
     # correspondance between instrument and acquisition mode
@@ -61,7 +65,8 @@ class RundexSettings(object):
             FIGARO: [REFL_NPOL],
             D2B:    [POWDER_DSCAN],
             D20:    [POWDER_DSCAN, POWDER_PSCAN],
-            D1B:    [POWDER_PSCAN]
+            D1B:    [POWDER_PSCAN],
+            IN1:    [SPECTRO_PSCAN]
             }
 
     # parameters for each acquisition mode
@@ -128,6 +133,12 @@ class RundexSettings(object):
                 "OutputWorkspace",
                 "CustomOptions"
                 ],
+            SPECTRO_PSCAN: [
+                "SampleRuns",
+                "OutputWorkspace",
+                "ContainerRuns",
+                "CorrectionFile"
+            ]
             }
 
     VISUAL_SETTINGS = {
@@ -147,6 +158,7 @@ class RundexSettings(object):
             REFL_NPOL:    "ReflectometryILLAutoProcess",
             POWDER_DSCAN: "PowderILLDetectorScan",
             POWDER_PSCAN: "PowderILLParameterScan",
+            SPECTRO_PSCAN:"LagrangeTMP"
             }
 
     # export algos for each acquisition mode. Each algo has a boolean to set
