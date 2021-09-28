@@ -72,7 +72,4 @@ private:
   std::unique_ptr<LoadHelper> m_helper;      // pointer to load helper
 };
 
-template class MANTID_DATAHANDLING_DLL LoadILLBase<API::MatrixWorkspace>;
-template class MANTID_DATAHANDLING_DLL LoadILLBase<API::WorkspaceGroup>;
-
 } // namespace Mantid::DataHandling

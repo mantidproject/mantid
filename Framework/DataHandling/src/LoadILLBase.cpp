@@ -143,7 +143,7 @@ template <class W> void LoadILLBase<W>::addStartTime(std::shared_ptr<W> ws) {
 template <class W> void LoadILLBase<W>::loadInstrument(std::shared_ptr<W> ws) {
   addStartTime(ws);
   auto loadInst = createChildAlgorithm("LoadInstrument");
-  loadInst->setPropertyValue("Filename", getInstrumentDefinitionFilePath());
+  loadInst->setPropertyValue("Filename", getInstrumentDefinitionFilePath(resolveInstrument()));
   loadInst->setProperty("Workspace", ws);
   loadInst->setProperty("RewriteSpectraMap", OptionalBool(true));
   loadInst->execute();
@@ -178,5 +178,8 @@ template <class W> void LoadILLBase<W>::exec() {
   setup();
   wrapup(load());
 }
+
+template class MANTID_DATAHANDLING_DLL LoadILLBase<API::MatrixWorkspace>;
+template class MANTID_DATAHANDLING_DLL LoadILLBase<API::WorkspaceGroup>;
 
 } // namespace Mantid::DataHandling
