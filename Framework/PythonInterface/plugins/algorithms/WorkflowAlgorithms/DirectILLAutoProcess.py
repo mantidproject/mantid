@@ -155,7 +155,7 @@ class DirectILLAutoProcess(PythonAlgorithm):
         self.empty = self.getPropertyValue('EmptyContainerWorkspace')
         self.vanadium = self.getPropertyValue('VanadiumWorkspace')
         if self.vanadium:
-            self.vanadium_integral, self.vanadium_diagnostics = get_vanadium_corrections(self.vanadium)
+            self.vanadium_diagnostics, self.vanadium_integral = get_vanadium_corrections(self.vanadium)
 
     def PyInit(self):
 
