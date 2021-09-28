@@ -45,7 +45,7 @@ void QtPreviewView::plotInstView(std::shared_ptr<MantidWidgets::RotationSurface>
   m_instDisplay->setSurface(surface);
 }
 
-void QtPreviewView::setInstViewSelectRectState(bool) {}
-void QtPreviewView::setInstViewPanState(bool) {}
-void QtPreviewView::setInstViewZoomState(bool) {}
+void QtPreviewView::setInstViewSelectRectState(bool isChecked) { m_ui.iv_rect_select_toggle->setDown(isChecked); }
+void QtPreviewView::setInstViewPanState(bool isChecked) { m_ui.iv_pan_button->setDown(isChecked); }
+void QtPreviewView::setInstViewZoomState(bool isChecked) { m_ui.iv_zoom_button->setDown(isChecked); }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

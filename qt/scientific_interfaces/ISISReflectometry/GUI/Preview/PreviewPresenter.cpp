@@ -18,6 +18,7 @@ PreviewPresenter::PreviewPresenter(Dependencies dependencies)
       m_jobManager(std::move(dependencies.jobManager)), m_instViewModel(std::move(dependencies.instViewModel)) {
   m_view->subscribe(this);
   m_jobManager->subscribe(this);
+  notifyInstViewZoomRequested();
 }
 
 /** Notification received when the user has requested to load a workspace. If it already exists in the ADS

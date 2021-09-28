@@ -33,9 +33,9 @@ public:
   std::string getWorkspaceName() const override;
   void plotInstView(std::shared_ptr<MantidWidgets::RotationSurface> &surface) override;
 
-  void setInstViewSelectRectState(bool on) override;
-  void setInstViewPanState(bool on) override;
-  void setInstViewZoomState(bool on) override;
+  void setInstViewSelectRectState(bool isChecked) override;
+  void setInstViewPanState(bool isChecked) override;
+  void setInstViewZoomState(bool isChecked) override;
 
 private:
   Ui::PreviewWidget m_ui;
