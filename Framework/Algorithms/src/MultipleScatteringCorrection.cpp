@@ -547,16 +547,11 @@ void MultipleScatteringCorrection::calculateLS1s(const MultipleScatteringCorrect
 
   for (int64_t idx = 0; idx < numVolumeElements; ++idx) {
     const auto pos = distGraber.m_elementPositions[idx];
-    const auto vec = getDirection(sourcePos, pos);
+    const auto vec = getDirection(pos, sourcePos);
     //
-    trackerLS1.reset(sourcePos, vec);
-    trackerLS1.clearIntersectionResults();
-    const auto dist1 = getDistanceInsideObject(shape, trackerLS1);
     trackerLS1.reset(pos, vec);
     trackerLS1.clearIntersectionResults();
-    const auto dist2 = getDistanceInsideObject(shape, trackerLS1);
-    //
-    LS1s[idx] = (dist1 - dist2);
+    LS1s[idx] = getDistanceInsideObject(shape, trackerLS1);
   }
 }
 
@@ -592,7 +587,7 @@ void MultipleScatteringCorrection::calculateLS1s(const MultipleScatteringCorrect
     const auto pos = idx < numVolumeElementsContainer
                          ? distGraberContainer.m_elementPositions[idx]
                          : distGraberSample.m_elementPositions[idx - numVolumeElementsContainer];
-    const auto vec = getDirection(sourcePos, pos);
+    const auto vec = getDirection(pos, sourcePos);
     //
     trackerLS1.reset(pos, vec);
     trackerLS1.clearIntersectionResults();
@@ -795,6 +790,8 @@ void MultipleScatteringCorrection::calculateL2Ds(const MultipleScatteringCorrect
     trackerL2D.reset(pos, vec);
     trackerL2D.clearIntersectionResults();
     container_L2Ds[idx] = getDistanceInsideObject(shapeContainer, trackerL2D);
+    trackerL2D.reset(pos, vec);
+    trackerL2D.clearIntersectionResults();
     sample_L2Ds[idx] = getDistanceInsideObject(shapeSample, trackerL2D);
   }
 }
