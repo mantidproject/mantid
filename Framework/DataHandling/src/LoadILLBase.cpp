@@ -179,7 +179,8 @@ template <class W> void LoadILLBase<W>::exec() {
   wrapup(load());
 }
 
+/// @cond
 template class MANTID_DATAHANDLING_DLL LoadILLBase<API::MatrixWorkspace>;
 template class MANTID_DATAHANDLING_DLL LoadILLBase<API::WorkspaceGroup>;
-
+/// @endcond
 } // namespace Mantid::DataHandling
