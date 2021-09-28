@@ -115,10 +115,6 @@ class DirectILLAutoProcess(PythonAlgorithm):
                 issues['SampleMaterial'] = 'Please define sample material.'
             if self.getProperty('SampleGeometry').isDefault:
                 issues['SampleGeometry'] = 'Please define sample geometry.'
-            if self.getProperty('ContainerMaterial').isDefault:
-                issues['ContainerMaterial'] = 'Please define container material.'
-            if self.getProperty('ContainerGeometry').isDefault:
-                issues['ContainerGeometry'] = 'Please define container geometry.'
 
         return issues
 
