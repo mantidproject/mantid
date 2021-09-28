@@ -509,8 +509,6 @@ void XIntegrationControl::setTotalRange(double minimum, double maximum) {
   }
   m_totalMinimum = minimum;
   m_totalMaximum = maximum;
-  m_minimum = minimum;
-  m_maximum = maximum;
 
   if (m_isDiscrete) {
     // if the slider is discrete, we reset it to its usual starting position
