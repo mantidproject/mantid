@@ -63,7 +63,7 @@ class DrillPresenterTest(unittest.TestCase):
         # multiple columns
         self.view.increment.value.return_value = 7
         self.mTable.getSelectedCells.return_value = [(0, 0), (1, 0),
-                                                         (0, 1), (1, 1)]
+                                                     (0, 1), (1, 1)]
         self.mTable.getRowsFromSelectedCells.return_value = [0, 1]
         self.mTable.getCellContents.return_value = "10+15,100:200,1:10:2"
         self.presenter.onAutomaticFilling()
