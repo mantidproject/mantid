@@ -158,7 +158,8 @@ class DrillExportModelTest(unittest.TestCase):
         mGroup.getNames.return_value = ["workspace"]
         self.mMtd.__getitem__.return_value = mGroup
         self.mMtd.getObjectNames.return_value = ["workspace_1",
-                                                 "workspace_2"]
+                                                 "workspace_2",
+                                                 "_workspace_3"]
         self.exportModel._validCriteria = mock.Mock()
         self.exportModel._validCriteria.return_value = True
         self.exportModel.run(mSample)
