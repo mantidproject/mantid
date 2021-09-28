@@ -150,14 +150,15 @@ class ConvertWANDSCDtoQ_Rotate_Test(systemtesting.MantidSystemTest):
                             Wavelength=wavelength,
                             ObliquityParallaxCoefficient=cop,
                             MinValues='{},{},{}'.format(*min_values),
-                            MaxValues='{},{},{}'.format(*max_values))
+                            MaxValues='{},{},{}'.format(*max_values),
+                            OutputWorkspace='qb')
 
         Q = ConvertWANDSCDtoQ(InputWorkspace='data',
                                 S1Offset='0',
                                 BinningDim1='-1,1,1')
 
         Qrot = ConvertWANDSCDtoQ(InputWorkspace='data',
-                                    S1Offset=45,
+                                    S1Offset=angleOffset,
                                     BinningDim1='-1,1,1')
 
         tableQ = FindPeaksMD(InputWorkspace=Q,
