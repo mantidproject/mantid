@@ -20,6 +20,7 @@ public:
   virtual void notifyInstViewSelectRectRequested() = 0;
   virtual void notifyInstViewPanRequested() = 0;
   virtual void notifyInstViewZoomRequested() = 0;
+  virtual void notifyInstViewShapeChanged() = 0;
 };
 
 class IPreviewView {
@@ -33,5 +34,8 @@ public:
   virtual void setInstViewSelectRectState(bool on) = 0;
   virtual void setInstViewPanState(bool on) = 0;
   virtual void setInstViewZoomState(bool on) = 0;
+  virtual void setInstViewSelectRectMode() = 0;
+  virtual void setInstViewPanMode() = 0;
+  virtual void setInstViewZoomMode() = 0;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

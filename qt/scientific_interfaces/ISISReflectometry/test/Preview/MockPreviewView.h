@@ -25,5 +25,8 @@ public:
   MOCK_METHOD(void, setInstViewSelectRectState, (bool), (override));
   MOCK_METHOD(void, setInstViewPanState, (bool), (override));
   MOCK_METHOD(void, setInstViewZoomState, (bool), (override));
+  MOCK_METHOD(void, setInstViewSelectRectMode, (), (override));
+  MOCK_METHOD(void, setInstViewPanMode, (), (override));
+  MOCK_METHOD(void, setInstViewZoomMode, (), (override));
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

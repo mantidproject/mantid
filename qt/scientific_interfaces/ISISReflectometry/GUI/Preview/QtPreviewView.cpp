@@ -7,12 +7,14 @@
 #include "QtPreviewView.h"
 #include "MantidQtIcons/Icon.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
+#include "MantidQtWidgets/InstrumentView/ProjectionSurface.h"
 #include "MantidQtWidgets/InstrumentView/RotationSurface.h"
 #include "MantidQtWidgets/InstrumentView/UnwrappedCylinder.h"
 
 #include <string>
 
 using namespace Mantid::Kernel;
+using MantidQt::MantidWidgets::ProjectionSurface;
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 QtPreviewView::QtPreviewView(QWidget *parent) : QWidget(parent) {
@@ -49,10 +51,27 @@ std::string QtPreviewView::getWorkspaceName() const { return m_ui.workspace_line
 void QtPreviewView::plotInstView(MantidWidgets::InstrumentActor *instActor, V3D const &samplePos, V3D const &axis) {
   auto surface = std::make_shared<MantidWidgets::UnwrappedCylinder>(instActor, samplePos, axis);
   m_instDisplay->setSurface(surface);
-  // connect(m_instDisplay->getSurface().get(), SIGNAL(shapeChangeFinished()), this, SLOT(onShapeChanged()));
 }
 
 void QtPreviewView::setInstViewSelectRectState(bool isChecked) { m_ui.iv_rect_select_toggle->setDown(isChecked); }
 void QtPreviewView::setInstViewPanState(bool isChecked) { m_ui.iv_pan_button->setDown(isChecked); }
 void QtPreviewView::setInstViewZoomState(bool isChecked) { m_ui.iv_zoom_button->setDown(isChecked); }
+
+void QtPreviewView::setInstViewSelectRectMode() {
+  m_instDisplay->getSurface()->setInteractionMode(ProjectionSurface::EditShapeMode);
+  connect(m_instDisplay->getSurface().get(), SIGNAL(shapeChangeFinished()), this, SLOT(onInstViewShapeChanged()));
+  m_instDisplay->getSurface()->startCreatingShape2D("rectangle", Qt::green, QColor(255, 255, 255, 80));
+}
+
+void QtPreviewView::setInstViewPanMode() {
+  m_instDisplay->getSurface()->setInteractionMode(ProjectionSurface::MoveMode);
+}
+
+void QtPreviewView::setInstViewZoomMode() {
+  m_instDisplay->getSurface()->setInteractionMode(ProjectionSurface::MoveMode);
+}
+
+void QtPreviewView::onInstViewShapeChanged() const {
+  // m_notifyee->notifyInstViewShapeChanged();
+}
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

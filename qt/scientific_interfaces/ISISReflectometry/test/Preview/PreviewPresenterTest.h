@@ -92,6 +92,7 @@ public:
     EXPECT_CALL(*mockView, setInstViewPanState(Eq(false))).Times(1);
     EXPECT_CALL(*mockView, setInstViewZoomState(Eq(false))).Times(1);
     EXPECT_CALL(*mockView, setInstViewSelectRectState(Eq(true))).Times(1);
+    EXPECT_CALL(*mockView, setInstViewSelectRectMode()).Times(1);
     auto presenter = PreviewPresenter(packDeps(mockView.get()));
     presenter.notifyInstViewSelectRectRequested();
   }
@@ -101,6 +102,7 @@ public:
     EXPECT_CALL(*mockView, setInstViewSelectRectState(Eq(false))).Times(1);
     EXPECT_CALL(*mockView, setInstViewZoomState(Eq(false))).Times(1);
     EXPECT_CALL(*mockView, setInstViewPanState(Eq(true))).Times(1);
+    EXPECT_CALL(*mockView, setInstViewPanMode()).Times(1);
     auto presenter = PreviewPresenter(packDeps(mockView.get()));
     presenter.notifyInstViewPanRequested();
   }
@@ -110,8 +112,16 @@ public:
     EXPECT_CALL(*mockView, setInstViewSelectRectState(Eq(false))).Times(1);
     EXPECT_CALL(*mockView, setInstViewPanState(Eq(false))).Times(1);
     EXPECT_CALL(*mockView, setInstViewZoomState(Eq(true))).Times(1);
+    EXPECT_CALL(*mockView, setInstViewZoomMode()).Times(1);
     auto presenter = PreviewPresenter(packDeps(mockView.get()));
     presenter.notifyInstViewZoomRequested();
+  }
+
+  void test_notify_inst_view_shape_changed() {
+    auto mockView = makeView();
+    // TODO check that the model is called to sum banks
+    auto presenter = PreviewPresenter(packDeps(mockView.get()));
+    presenter.notifyInstViewShapeChanged();
   }
 
 private:

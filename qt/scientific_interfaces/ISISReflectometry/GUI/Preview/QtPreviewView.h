@@ -37,6 +37,9 @@ public:
   void setInstViewSelectRectState(bool isChecked) override;
   void setInstViewPanState(bool isChecked) override;
   void setInstViewZoomState(bool isChecked) override;
+  void setInstViewSelectRectMode() override;
+  void setInstViewPanMode() override;
+  void setInstViewZoomMode() override;
 
 private:
   Ui::PreviewWidget m_ui;
@@ -44,12 +47,13 @@ private:
   std::unique_ptr<MantidQt::MantidWidgets::InstrumentDisplay> m_instDisplay{nullptr};
 
   void connectSignals() const;
+  void loadToolbarIcons();
 
 private slots:
   void onLoadWorkspaceRequested() const;
   void onInstViewSelectRectClicked() const;
   void onInstViewPanClicked() const;
   void onInstViewZoomClicked() const;
-  void loadToolbarIcons();
+  void onInstViewShapeChanged() const;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

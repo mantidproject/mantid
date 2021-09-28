@@ -44,6 +44,8 @@ void PreviewPresenter::notifyLoadWorkspaceCompleted() {
 
   // Notify the instrument view model that the workspace has changed before we get the surface
   m_instViewModel->updateWorkspace(ws);
+  // TODO add calls to the view to make sure we disconnect signals, clear any drawn shapes and reset back to default
+  // state (i.e. zoom)
   m_view->plotInstView(m_instViewModel->getInstrumentViewActor(), m_instViewModel->getSamplePos(),
                        m_instViewModel->getAxis());
 }
@@ -52,18 +54,25 @@ void PreviewPresenter::notifyInstViewSelectRectRequested() {
   m_view->setInstViewPanState(false);
   m_view->setInstViewZoomState(false);
   m_view->setInstViewSelectRectState(true);
+  m_view->setInstViewSelectRectMode();
 }
 
 void PreviewPresenter::notifyInstViewPanRequested() {
   m_view->setInstViewSelectRectState(false);
   m_view->setInstViewZoomState(false);
   m_view->setInstViewPanState(true);
+  m_view->setInstViewPanMode();
 }
 
 void PreviewPresenter::notifyInstViewZoomRequested() {
   m_view->setInstViewSelectRectState(false);
   m_view->setInstViewPanState(false);
   m_view->setInstViewZoomState(true);
+  m_view->setInstViewZoomMode();
 }
 
+void PreviewPresenter::notifyInstViewShapeChanged() {
+  // TODO start the algorithm that will sum banks horizontally
+  // m_model->sumBanksAsync(*m_jobManager);
+}
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
