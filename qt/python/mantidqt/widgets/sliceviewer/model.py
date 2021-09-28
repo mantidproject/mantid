@@ -126,6 +126,9 @@ class SliceViewerModel:
         return ws_type == WS_TYPE.MDE or (ws_type == WS_TYPE.MDH and self._get_ws().hasOriginalWorkspace(
             0) and self._get_ws().getOriginalWorkspace(0).getNumDims() == self._get_ws().getNumDims())
 
+    def set_ws_name(self, new_name):
+        self._ws_name = new_name
+
     def get_ws_name(self) -> str:
         """Return the name of the workspace being viewed"""
         return self._ws_name

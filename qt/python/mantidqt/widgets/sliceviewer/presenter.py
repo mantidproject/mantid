@@ -439,7 +439,8 @@ class SliceViewer(ObservingPresenter):
             ws.unlock()
 
     def rename_workspace(self, old_name, new_name):
-        if str(self.model._get_ws()) == old_name:
+        if self.model.get_ws_name() == old_name:
+            self.model.set_ws_name(new_name)
             self.view.emit_rename(self.model.get_title(new_name))
 
     def delete_workspace(self, ws_name):
