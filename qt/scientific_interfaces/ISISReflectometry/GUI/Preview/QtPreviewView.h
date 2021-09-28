@@ -31,7 +31,8 @@ public:
   void subscribe(PreviewViewSubscriber *notifyee) noexcept override;
 
   std::string getWorkspaceName() const override;
-  void plotInstView(std::shared_ptr<MantidWidgets::RotationSurface> &surface) override;
+  void plotInstView(MantidWidgets::InstrumentActor *instActor, Mantid::Kernel::V3D const &samplePos,
+                    Mantid::Kernel::V3D const &axis) override;
 
   void setInstViewSelectRectState(bool isChecked) override;
   void setInstViewPanState(bool isChecked) override;

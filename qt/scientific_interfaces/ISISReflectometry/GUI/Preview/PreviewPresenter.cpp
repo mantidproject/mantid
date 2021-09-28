@@ -18,7 +18,7 @@ PreviewPresenter::PreviewPresenter(Dependencies dependencies)
       m_jobManager(std::move(dependencies.jobManager)), m_instViewModel(std::move(dependencies.instViewModel)) {
   m_view->subscribe(this);
   m_jobManager->subscribe(this);
-  notifyInstViewZoomRequested();
+  // TODO disable buttons when the workspace is not loaded initially
 }
 
 /** Notification received when the user has requested to load a workspace. If it already exists in the ADS
@@ -44,12 +44,10 @@ void PreviewPresenter::notifyLoadWorkspaceCompleted() {
 
   // Notify the instrument view model that the workspace has changed before we get the surface
   m_instViewModel->updateWorkspace(ws);
-  auto surface = m_instViewModel->getInstrumentViewSurface();
-  m_view->plotInstView(surface);
+  m_view->plotInstView(m_instViewModel->getInstrumentViewActor(), m_instViewModel->getSamplePos(),
+                       m_instViewModel->getAxis());
 }
 
-/** Notification received when the user has requested the sele
- */
 void PreviewPresenter::notifyInstViewSelectRectRequested() {
   m_view->setInstViewPanState(false);
   m_view->setInstViewZoomState(false);

@@ -25,6 +25,7 @@
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 using namespace MantidQt::CustomInterfaces::ISISReflectometry::ModelCreationHelper;
 using namespace MantidQt::API;
+using namespace Mantid::Kernel;
 
 using ::testing::_;
 using ::testing::ByRef;
@@ -140,9 +141,14 @@ private:
   void expectLoadWorkspaceCompleted(MockPreviewView &mockView, MockPreviewModel &mockModel,
                                     MockInstViewModel &mockInstViewModel) {
     auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
+    auto samplePos = V3D(1, 2, 3);
+    auto axis = V3D(4, 5, 6);
+
     EXPECT_CALL(mockModel, getLoadedWs).Times(1).WillOnce(Return(ws));
     EXPECT_CALL(mockInstViewModel, updateWorkspace(Eq(ws))).Times(1);
-    EXPECT_CALL(mockInstViewModel, getInstrumentViewSurface()).Times(1).WillOnce(Return(nullptr));
-    EXPECT_CALL(mockView, plotInstView(Eq(nullptr)));
+    EXPECT_CALL(mockInstViewModel, getInstrumentViewActor()).Times(1).WillOnce(Return(nullptr));
+    EXPECT_CALL(mockInstViewModel, getSamplePos()).Times(1).WillOnce(Return(samplePos));
+    EXPECT_CALL(mockInstViewModel, getAxis()).Times(1).WillOnce(Return(axis));
+    EXPECT_CALL(mockView, plotInstView(Eq(nullptr), Eq(samplePos), Eq(axis)));
   }
 };

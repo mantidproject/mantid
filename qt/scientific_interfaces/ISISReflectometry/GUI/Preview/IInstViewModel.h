@@ -17,6 +17,8 @@ class IInstViewModel {
 public:
   virtual ~IInstViewModel() = default;
   virtual void updateWorkspace(Mantid::API::MatrixWorkspace_sptr &workspace) = 0;
-  virtual std::shared_ptr<MantidWidgets::RotationSurface> getInstrumentViewSurface() const = 0;
+  virtual MantidWidgets::InstrumentActor *getInstrumentViewActor() const = 0;
+  virtual Mantid::Kernel::V3D getSamplePos() const = 0;
+  virtual Mantid::Kernel::V3D getAxis() const = 0;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

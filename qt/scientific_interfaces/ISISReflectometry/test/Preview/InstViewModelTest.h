@@ -18,14 +18,15 @@ using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 
 class InstViewModelTest : public CxxTest::TestSuite {
 public:
-  void test_notify_workspace_updated_updates_surface() {
+  void test_notify_workspace_updated_updates_actor() {
     auto model = InstViewModel(makeMessageHandler());
-    auto previousSurface = model.getInstrumentViewSurface();
+    auto previousActor = model.getInstrumentViewActor();
     auto ws = createWorkspace();
     model.updateWorkspace(ws);
-    const auto result = model.getInstrumentViewSurface();
+    const auto result = model.getInstrumentViewActor();
     TS_ASSERT(result);
-    TS_ASSERT_DIFFERS(previousSurface, result)
+    TS_ASSERT_DIFFERS(previousActor, result)
+    TS_ASSERT_EQUALS(result->getWorkspace(), ws)
   }
 
 private:

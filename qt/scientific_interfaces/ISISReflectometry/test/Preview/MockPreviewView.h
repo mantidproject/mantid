@@ -7,6 +7,7 @@
 #pragma once
 
 #include "IPreviewView.h"
+#include "MantidKernel/V3D.h"
 #include "MantidQtWidgets/InstrumentView/RotationSurface.h"
 
 #include <gmock/gmock.h>
@@ -19,7 +20,8 @@ class MockPreviewView : public IPreviewView {
 public:
   MOCK_METHOD(void, subscribe, (PreviewViewSubscriber *), (noexcept, override));
   MOCK_METHOD(std::string, getWorkspaceName, (), (const, override));
-  MOCK_METHOD(void, plotInstView, (std::shared_ptr<MantidWidgets::RotationSurface> &), (override));
+  MOCK_METHOD(void, plotInstView,
+              (MantidWidgets::InstrumentActor *, Mantid::Kernel::V3D const &, Mantid::Kernel::V3D const &), (override));
   MOCK_METHOD(void, setInstViewSelectRectState, (bool), (override));
   MOCK_METHOD(void, setInstViewPanState, (bool), (override));
   MOCK_METHOD(void, setInstViewZoomState, (bool), (override));

@@ -20,6 +20,8 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 class MockInstViewModel : public IInstViewModel {
 public:
   MOCK_METHOD(void, updateWorkspace, (Mantid::API::MatrixWorkspace_sptr &), (override));
-  MOCK_METHOD(std::shared_ptr<MantidWidgets::RotationSurface>, getInstrumentViewSurface, (), (const, override));
+  MOCK_METHOD(MantidWidgets::InstrumentActor *, getInstrumentViewActor, (), (const, override));
+  MOCK_METHOD(Mantid::Kernel::V3D, getSamplePos, (), (const, override));
+  MOCK_METHOD(Mantid::Kernel::V3D, getAxis, (), (const, override));
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
