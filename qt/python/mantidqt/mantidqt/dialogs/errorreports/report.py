@@ -11,8 +11,10 @@ from qtpy.QtWidgets import QMessageBox
 
 from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.utils.qt import load_ui
+from mantid.kernel import ConfigService
 
 from .details import MoreDetailsDialog
+import os
 
 DEFAULT_PLAIN_TEXT = (
     """Please enter any additional information about your problems. (Max 3200 characters)
@@ -79,6 +81,21 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
         # Set default focus to the editing box, rather then letting qt try and guess
         self.input_free_text.setFocus()
 
+        self.contact_info_file_path = os.path.join(ConfigService.getAppDataDirectory(),
+                                                   'workbench_contact_info.txt')
+        self.contact_info_file_exists = bool(os.path.isfile(self.contact_info_file_path))
+        self.saved_name, self.saved_email = None, None
+        if self.contact_info_file_exists:
+            with open(self.contact_info_file_path, 'r') as file:
+                lines = file.readlines()
+            if lines:
+                saved_name, saved_email = [line.strip().split('\n')[0] for line in lines]
+                if saved_name[7:] or saved_email[8:]:
+                    self.input_name_line_edit.setText(saved_name[7:])
+                    self.input_email_line_edit.setText(saved_email[8:])
+                    self.nonIDShareButton.setEnabled(True)
+                    self.saveContactInfoCheckbox.setChecked(True)
+
     def quit(self):
         self.quit_signal.emit()
 
@@ -122,6 +139,8 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
 
     def set_button_status(self):
         if self.input_text == '' and not self.input_name and not self.input_email:
+            self.nonIDShareButton.setEnabled(True)
+        elif self.input_name == self.saved_name and self.input_email == self.saved_email:
             self.nonIDShareButton.setEnabled(True)
         else:
             self.nonIDShareButton.setEnabled(False)
