@@ -16,6 +16,8 @@ from mantid.simpleapi import *
 
 from os import path
 
+import numpy as np
+
 
 def get_run_number(value):
     """
@@ -352,15 +354,14 @@ class DirectILLAutoProcess(PythonAlgorithm):
 
         for sample_no, sample in enumerate(sample_runs):
             ws = self._collect_data(sample, vanadium=self.process == 'Vanadium')
-            if self.process in ['Empty', 'Cadmium']:
-                pass
-            elif self.process == 'Vanadium':
+            if self.process == 'Vanadium':
                 ws_sofq, ws_softw, ws_diag, ws_integral = self._process_vanadium(ws)
                 output_samples.extend([ws_sofq, ws_softw, ws_diag, ws_integral])
             elif self.process == 'Sample':
-                ws = self._process_sample(ws, sample_no)
-                output_samples.append(ws)
-        GroupWorkspaces(InputWorkspaces=output_samples,
+                sample_sofq, sample_softw = self._process_sample(ws, sample_no)
+                output_samples.extend([sample_sofq, sample_softw])
+        output_samples = np.array(output_samples)
+        GroupWorkspaces(InputWorkspaces=output_samples[output_samples is not None],
                         OutputWorkspace=self.output)
         if self.getProperty('ClearCache').value:
             self._final_cleanup()
@@ -506,6 +507,9 @@ class DirectILLAutoProcess(PythonAlgorithm):
             normalised_ws = ws
         return normalised_ws
 
+    def _correct_self_attenuation(self, ws, sample_no):
+        pass
+
     def _process_sample(self, ws, sample_no):
         """Does the sample data reduction for single crystal."""
         to_remove = [ws]
@@ -514,6 +518,7 @@ class DirectILLAutoProcess(PythonAlgorithm):
         if self.empty:
             self._subtract_background(ws)
         numor = ws[:ws.rfind('_')]
+        processed_sample_tw = None
         if self.reduction_type == 'SingleCrystal':
             # normalises to vanadium integral
             normalised_ws = self._normalise_sample(ws, sample_no, numor)
@@ -539,14 +544,23 @@ class DirectILLAutoProcess(PythonAlgorithm):
             else:
                 RenameWorkspace(InputWorkspace=corrected_ws, OutputWorkspace=processed_sample)
                 to_remove.pop()
-            # saving of the output is omitted at this point: it is handled by Drill
-        else:  # not implemented yet
-            processed_sample = ws
-
+            # saving of the output is omitted at this point: it is handled by Drill interface
+        else:
+            processed_sample = 'SofQW_{}'.format(ws[:ws.rfind('_')])  # name should contain only SofQW and numor
+            processed_sample_tw = 'SofTW_{}'.format(ws[:ws.rfind('_')])  # name should contain only SofTW and numor
+            if self.getPropertyValue('AbsorptionCorrection') != 'None':
+                self._correct_self_attenuation(ws, sample_no)
+            DirectILLReduction(
+                InputWorkspace=ws,
+                OutputWorkspace=processed_sample,
+                OutputSofThetaEnergyWorkspace=processed_sample_tw,
+                IntegratedVanadiumWorkspace=self.vanadium_integral[0],
+                DiagnosticsWorkspace=self.vanadium_diagnostics[0]
+            )
         if len(to_remove) > 0 and self.getProperty('ClearCache').value:
             DeleteWorkspaces(WorkspaceList=to_remove)
 
-        return processed_sample
+        return processed_sample, processed_sample_tw
 
 
 AlgorithmFactory.subscribe(DirectILLAutoProcess)
