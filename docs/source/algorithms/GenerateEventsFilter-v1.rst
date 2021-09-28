@@ -172,16 +172,34 @@ Algorithm Parameters and Examples
 Here are the introductions to some important parameters (i.e., algorithm's properties).
 
 
-Parameter: ``Centre``
-#####################
+Parameter: ``LogBoundary``
+##########################
 
-The input Boolean parameter ``centre`` is for filtering by log value(s).
+The input string parameter ``LogBoundary`` is for filtering by log value(s).
+
 If option ``centre`` is taken, then for each interval,
 
 -  starting time = log\_time - tolerance\_time;
 -  stopping time = log\_time - tolerance\_time;
 
 It is a shift to left.
+
+**For SNS Users**
+
+In SNS, most of the sample environment devices record values upon changing.
+Therefore, the **LogBoundary** value shall set to **Left** but not **Centre**.
+And in this case, **TimeTolerance** is ignored.
+
+Please check with the instrument scientist to confirm how the sample log values are recorded.
+
+Here is an example how the time splitter works with the a motor's position.
+
+.. figure:: /images/SNAP_motor_filter.png
+
+        For this SNAP run, the user wants to filter events with motor (BL3:Mot:Hexa:MotZ) position
+        at value equal to 6.65 with tolerance as 0.1.
+        The red curve shows the boundary of the time splitters (i.e., event filters).
+
 
 Parameter: ``FastLog``
 ######################
