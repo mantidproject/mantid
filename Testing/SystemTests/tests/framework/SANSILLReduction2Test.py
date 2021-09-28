@@ -25,7 +25,7 @@ class ILL_SANS_D11_MONO_TEST(systemtesting.MantidSystemTest):
         config['default.instrument'] = 'D11'
         config.appendDataSearchSubDir('ILL/D11/')
 
-    def tearDown(self):
+    def cleanup(self):
         mtd.clear()
         config['default.facility'] = self.facility
         config['default.instrument'] = self.instrument
@@ -160,7 +160,7 @@ class ILL_SANS_D22_MONO_TEST(systemtesting.MantidSystemTest):
         config['default.instrument'] = 'D22'
         config.appendDataSearchSubDir('ILL/D22/')
 
-    def tearDown(self):
+    def cleanup(self):
         mtd.clear()
         config['default.facility'] = self.facility
         config['default.instrument'] = self.instrument
@@ -237,7 +237,7 @@ class ILL_SANS_D22_MULTISENS(systemtesting.MantidSystemTest):
         config['default.instrument'] = 'D22'
         config.appendDataSearchSubDir('ILL/D22/')
 
-    def tearDown(self):
+    def cleanup(self):
         mtd.clear()
         config['default.facility'] = self.facility
         config['default.instrument'] = self.instrument
