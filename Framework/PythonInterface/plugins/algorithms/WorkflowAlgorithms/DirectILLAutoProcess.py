@@ -504,7 +504,9 @@ class DirectILLAutoProcess(PythonAlgorithm):
                    RHSWorkspace=self.vanadium_integral[vanadium_no],
                    OutputWorkspace=normalised_ws)
         else:
-            normalised_ws = ws
+            normalised_ws = sample_ws
+            self.log().warning("Vanadium integral workspace not found.")
+
         return normalised_ws
 
     def _correct_self_attenuation(self, ws, sample_no):
