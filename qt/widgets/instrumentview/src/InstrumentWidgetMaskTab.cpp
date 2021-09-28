@@ -422,32 +422,32 @@ void InstrumentWidgetMaskTab::setActivity() {
     m_activeTool->setText("Tool: Navigation");
   } else if (m_pointer->isChecked()) {
     m_activity = Select;
-    m_instrWidget->getSurface()->setInteractionMode(ProjectionSurface::DrawRegularMode);
+    m_instrWidget->getSurface()->setInteractionMode(ProjectionSurface::EditShapeMode);
     m_activeTool->setText("Tool: Shape editing. " + whatIsBeingSelected);
   } else if (m_ellipse->isChecked()) {
     m_activity = DrawEllipse;
     m_instrWidget->getSurface()->startCreatingShape2D("ellipse", borderColor, fillColor);
-    m_instrWidget->getSurface()->setInteractionMode(ProjectionSurface::DrawRegularMode);
+    m_instrWidget->getSurface()->setInteractionMode(ProjectionSurface::EditShapeMode);
     m_activeTool->setText("Tool: Ellipse. " + whatIsBeingSelected);
   } else if (m_rectangle->isChecked()) {
     m_activity = DrawRectangle;
     m_instrWidget->getSurface()->startCreatingShape2D("rectangle", borderColor, fillColor);
-    m_instrWidget->getSurface()->setInteractionMode(ProjectionSurface::DrawRegularMode);
+    m_instrWidget->getSurface()->setInteractionMode(ProjectionSurface::EditShapeMode);
     m_activeTool->setText("Tool: Rectangle. " + whatIsBeingSelected);
   } else if (m_ring_ellipse->isChecked()) {
     m_activity = DrawEllipticalRing;
     m_instrWidget->getSurface()->startCreatingShape2D("ring ellipse", borderColor, fillColor);
-    m_instrWidget->getSurface()->setInteractionMode(ProjectionSurface::DrawRegularMode);
+    m_instrWidget->getSurface()->setInteractionMode(ProjectionSurface::EditShapeMode);
     m_activeTool->setText("Tool: Elliptical ring. " + whatIsBeingSelected);
   } else if (m_ring_rectangle->isChecked()) {
     m_activity = DrawRectangularRing;
     m_instrWidget->getSurface()->startCreatingShape2D("ring rectangle", borderColor, fillColor);
-    m_instrWidget->getSurface()->setInteractionMode(ProjectionSurface::DrawRegularMode);
+    m_instrWidget->getSurface()->setInteractionMode(ProjectionSurface::EditShapeMode);
     m_activeTool->setText("Tool: Rectangular ring. " + whatIsBeingSelected);
   } else if (m_sector->isChecked()) {
     m_activity = DrawSector;
     m_instrWidget->getSurface()->startCreatingShape2D("sector", borderColor, fillColor);
-    m_instrWidget->getSurface()->setInteractionMode(ProjectionSurface::DrawRegularMode);
+    m_instrWidget->getSurface()->setInteractionMode(ProjectionSurface::EditShapeMode);
     m_activeTool->setText("Tool: Sector. " + whatIsBeingSelected);
 
   } else if (m_free_draw->isChecked()) {
