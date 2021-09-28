@@ -17,13 +17,16 @@ def load_features():
     return feature_list
 
 
+def get_muon_GUI_config():
+    return config["muon.GUI"]
+
+
 def attempt_load():
     feature_list = {}
-    string = config["muon.GUI"]
+    string = get_muon_GUI_config()
     if string:
         item_list = string.split(",")
         for item in item_list:
-            item.replace(" ","")
             key, value = item.split(":")
-            feature_list[key] = int(value)
+            feature_list[key.replace(" ","")] = int(value)
     return feature_list
