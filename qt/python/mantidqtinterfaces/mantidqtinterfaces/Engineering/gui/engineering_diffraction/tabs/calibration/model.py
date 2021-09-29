@@ -154,7 +154,7 @@ class CalibrationModel(object):
                                                  UseChiSq=True)
         ApplyDiffCal(InstrumentWorkspace=foc_name, CalibrationWorkspace=cal_table)
         # store cal_table in calibration
-        calibration.set_calibration_table(cal_table)
+        calibration.set_calibration_table(cal_table_name)
         return Ads.retrieve(foc_name), cal_table, diag_ws, mask
 
     def load_full_instrument_calibration(self):

@@ -13,6 +13,7 @@ class CalibrationInfo(EnggUtils.GroupingInfo):
     """
     Keeps track of the parameters that went into a calibration created by the engineering diffraction GUI.
     """
+
     def __init__(self, group=None):
         super().__init__(group)
         self.sample_path = None
@@ -44,7 +45,7 @@ class CalibrationInfo(EnggUtils.GroupingInfo):
         super().save_grouping_workspace(directory, filename)
 
     def load_relevant_calibration_files(self, output_prefix="engggui"):
-        self.calibration_table = super().load_relevant_calibration_files(output_prefix)
+        self.calibration_table = super().load_relevant_calibration_files(output_prefix).name()
 
     # getters
     def get_group_ws(self):
@@ -70,5 +71,5 @@ class CalibrationInfo(EnggUtils.GroupingInfo):
         self.calibration_table = None
 
     def is_valid(self):
-        return self.sample_path and self.instrument and self.calibration_table and \
-               ADS.doesExist(self.calibration_table.name()) and self.group_ws and ADS.doesExist(self.group_ws.name())
+        return self.sample_path is not None and self.instrument is not None and self.calibration_table is not None \
+               and self.group_ws is not None and self.calibration_table in ADS and self.group_ws in ADS
