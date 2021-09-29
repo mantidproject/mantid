@@ -73,7 +73,7 @@
     <item row="1" column="0">
      <widget class="QCheckBox" name="normaliseCheckbox">
       <property name="text">
-       <string>Normalise plotted spectra</string>
+       <string>Normalise to 1</string>
       </property>
      </widget>
     </item>
