@@ -115,9 +115,9 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
         in the UI.
         """
         ax = self.get_axes()[0]
-        y0_lab = ax.xaxis.get_label().get_tightbbox(renderer=self.figure.canvas.get_renderer()).transformed(
+        y0_lab = ax.xaxis.get_tightbbox(renderer=self.figure.canvas.get_renderer()).transformed(
             self.figure.transFigure.inverted()).y0  # vertical coord of bottom left corner of xlabel in fig ref. frame
-        x0_lab = ax.yaxis.get_label().get_tightbbox(renderer=self.figure.canvas.get_renderer()).transformed(
+        x0_lab = ax.yaxis.get_tightbbox(renderer=self.figure.canvas.get_renderer()).transformed(
             self.figure.transFigure.inverted()).x0  # horizontal coord of bottom left corner ylabel in fig ref. frame
         pos = ax.get_position()
         x0_ax = pos.x0 + 0.05 - x0_lab  # move so that ylabel left bottom corner at horizontal coord 0.05
