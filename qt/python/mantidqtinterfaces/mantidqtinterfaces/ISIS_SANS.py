@@ -10,9 +10,9 @@
 """
 import sys
 from sans.common.enums import SANSFacility
-from sans.gui_logic.models.run_tab_model import RunTabModel
-from sans.gui_logic.presenter.run_tab_presenter import RunTabPresenter
-from ui.sans_isis import sans_data_processor_gui
+from mantidqtinterfaces.sans.gui_logic.models.run_tab_model import RunTabModel
+from mantidqtinterfaces.sans.gui_logic.presenter.run_tab_presenter import RunTabPresenter
+from mantidqtinterfaces.ui.sans_isis import sans_data_processor_gui
 
 if 'workbench' in sys.modules:
     from workbench.config import get_window_config

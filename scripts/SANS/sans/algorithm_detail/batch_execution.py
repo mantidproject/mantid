@@ -21,7 +21,6 @@ from sans.common.constants import (TRANS_SUFFIX, SANS_SUFFIX, ALL_PERIODS,
                                    CAN_COUNT_AND_NORM_FOR_OPTIMIZATION,
                                    CAN_AND_SAMPLE_WORKSPACE)
 from sans.common.file_information import (get_extension_for_file_type, SANSFileInformationFactory)
-from sans.gui_logic.plotting import get_plotting_module
 from sans.state.Serializer import Serializer
 from sans.state.StateObjects.StateData import StateData
 
@@ -237,8 +236,15 @@ def plot_workspace(reduction_package, output_graph):
     :param reduction_package: An object containing the reduced workspaces
     :param output_graph: Name to the plot window
     """
-    plotting_module = get_plotting_module()
-    plot_workspace_mantidqt(reduction_package, output_graph, plotting_module)
+    plotting_module = None
+    try:
+        from mantidqtinterfaces.sans.gui_logic.plotting import get_plotting_module
+        plotting_module = get_plotting_module()
+    except ImportError as exc:
+        from mantid.kernel import logger
+        logger.debug("Unable to import plotting module {}".format(str(exc)))
+    if plotting_module:
+        plot_workspace_mantidqt(reduction_package, output_graph, plotting_module)
 
 
 def plot_workspace_mantidqt(reduction_package, output_graph, plotting_module):

@@ -1,0 +1,2 @@
+add_subdirectory(command_interface)
+add_subdirectory(gui_logic)
