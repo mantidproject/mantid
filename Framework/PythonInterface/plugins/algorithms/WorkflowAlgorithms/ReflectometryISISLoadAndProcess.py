@@ -46,7 +46,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
 
     def category(self):
         """Return the categories of the algorithm."""
-        return 'ISIS\\Reflectometry;Workflow\\Reflectometry'
+        return 'Reflectometry\\ISIS;Workflow\\Reflectometry'
 
     def name(self):
         """Return the name of the algorithm."""
