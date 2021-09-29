@@ -104,6 +104,4 @@ class InstrumentView(QWidget, ObservingView):
 
     @Slot()
     def _run_close(self):
-        # clear presenter to act as flag for processing in closeEvent
-        self.presenter = None
         self.close()

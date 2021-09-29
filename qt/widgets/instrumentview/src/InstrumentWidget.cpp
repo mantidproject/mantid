@@ -215,7 +215,6 @@ InstrumentWidget::InstrumentWidget(QString wsName, QWidget *parent, bool resetGe
   setAcceptDrops(true);
 
   setWindowTitle(QString("Instrument - ") + m_workspaceName);
-
 }
 
 /**
@@ -225,12 +224,8 @@ InstrumentWidget::~InstrumentWidget() {
   if (m_instrumentActor) {
     saveSettings();
   }
-  m_instrumentActor->blockSignals(true);
-  QMetaObject::invokeMethod(m_instrumentActor.get(), "deleteLater", Qt::DirectConnection);
-
-  m_thread.requestInterruption();
-  m_thread.quit();
-  m_thread.wait();
+  cancelThread();
+  m_instrumentActor.reset();
 }
 
 void InstrumentWidget::hideHelp() { m_help->setVisible(false); }
@@ -342,8 +337,9 @@ void InstrumentWidget::resetSurface() {
  * in a background thread
  */
 void InstrumentWidget::resetInstrumentActor() {
-  m_thread.quit();
-  m_thread.wait();
+  if (m_thread.isRunning()) {
+    cancelThread();
+  }
 
   // disable main GUI elements while thread is running - these are re-enabled afterwards in initWidget
   m_controlPanelLayout->setEnabled(false);
@@ -353,9 +349,25 @@ void InstrumentWidget::resetInstrumentActor() {
   m_instrumentActor = std::make_unique<InstrumentActor>(m_workspaceName.toStdString(), *m_messageHandler, m_autoscaling,
                                                         m_scaleMin, m_scaleMax);
   m_instrumentActor->moveToThread(&m_thread);
-  connect(m_instrumentActor.get(), SIGNAL(initWidget()), this, SLOT(initWidget()));
+  m_qtConnect->connect(m_instrumentActor.get(), SIGNAL(initWidget()), this, SLOT(initWidget()));
   m_thread.start();
   QMetaObject::invokeMethod(m_instrumentActor.get(), "initialize", Qt::QueuedConnection);
+}
+
+void InstrumentWidget::cancelThread() {
+  if (m_instrumentActor) {
+    m_instrumentActor->blockSignals(true);
+    QMetaObject::invokeMethod(m_instrumentActor.get(), "deleteLater", Qt::DirectConnection);
+  }
+
+  m_thread.requestInterruption();
+  m_thread.quit();
+  if (!m_thread.wait(10000)) {
+    // terminate after waiting a delay to catch edge case where workbench is closed while
+    // this background thread is running
+    m_thread.terminate();
+    m_thread.wait();
+  }
 }
 
 /**
@@ -1133,6 +1145,9 @@ bool InstrumentWidget::eventFilter(QObject *obj, QEvent *ev) {
 void InstrumentWidget::closeEvent(QCloseEvent *e) {
   // stop the background thread if it is running
   if (m_thread.isRunning()) {
+    if (m_instrumentActor) {
+      QMetaObject::invokeMethod(m_instrumentActor.get(), "deleteLater");
+    }
     m_thread.quit();
   }
   e->accept();

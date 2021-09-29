@@ -359,6 +359,8 @@ private:
   /// Save tabs on the widget to a string
   std::string saveTabs() const;
 
+  void cancelThread();
+
   bool m_wsReplace;
   QPushButton *m_help;
   QVBoxLayout *m_mainLayout;

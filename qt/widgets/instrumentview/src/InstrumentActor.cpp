@@ -148,7 +148,7 @@ void InstrumentActor::deleteLater() {
 
   // cancel any running mantid algorithms to help free the thread
   auto alg = AlgorithmManager::Instance().getAlgorithm(m_algID);
-  if (alg) {
+  if (alg && alg->isRunning()) {
     alg->cancel();
   }
 }
