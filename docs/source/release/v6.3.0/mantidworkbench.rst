@@ -14,6 +14,8 @@ New and Improved
     :width: 500px
     :align: center
 
+- A users name and email can now be saved locally and prefilled in the Error Reporter
+
 Bugfixes
 --------
 - Fixed arbitrary values not being accepted as the "Start Time" in StartLiveDataDialog.
