@@ -25,7 +25,7 @@ QtPreviewView::QtPreviewView(QWidget *parent) : QWidget(parent) {
 
 void QtPreviewView::loadToolbarIcons() {
   m_ui.iv_pan_button->setIcon(MantidQt::Icons::getIcon("mdi.arrow-all", "black", 1.3));
-  m_ui.iv_rect_select_toggle->setIcon(MantidQt::Icons::getIcon("mdi.selection", "black", 1.3));
+  m_ui.iv_rect_select_button->setIcon(MantidQt::Icons::getIcon("mdi.selection", "black", 1.3));
   m_ui.iv_zoom_button->setIcon(MantidQt::Icons::getIcon("mdi.magnify", "black", 1.3));
 }
 
@@ -34,7 +34,7 @@ void QtPreviewView::subscribe(PreviewViewSubscriber *notifyee) noexcept { m_noti
 void QtPreviewView::connectSignals() const {
   connect(m_ui.load_button, SIGNAL(clicked()), this, SLOT(onLoadWorkspaceRequested()));
 
-  connect(m_ui.iv_rect_select_toggle, SIGNAL(clicked()), this, SLOT(onInstViewSelectRectClicked()));
+  connect(m_ui.iv_rect_select_button, SIGNAL(clicked()), this, SLOT(onInstViewSelectRectClicked()));
   connect(m_ui.iv_pan_button, SIGNAL(clicked()), this, SLOT(onInstViewPanClicked()));
   connect(m_ui.iv_zoom_button, SIGNAL(clicked()), this, SLOT(onInstViewZoomClicked()));
 }
@@ -52,7 +52,7 @@ void QtPreviewView::plotInstView(MantidWidgets::InstrumentActor *instActor, V3D 
   m_instDisplay->setSurface(surface);
 }
 
-void QtPreviewView::setInstViewSelectRectState(bool isChecked) { m_ui.iv_rect_select_toggle->setDown(isChecked); }
+void QtPreviewView::setInstViewSelectRectState(bool isChecked) { m_ui.iv_rect_select_button->setDown(isChecked); }
 void QtPreviewView::setInstViewPanState(bool isChecked) { m_ui.iv_pan_button->setDown(isChecked); }
 void QtPreviewView::setInstViewZoomState(bool isChecked) { m_ui.iv_zoom_button->setDown(isChecked); }
 
@@ -75,7 +75,7 @@ void QtPreviewView::onInstViewShapeChanged() const {
 }
 
 void QtPreviewView::setInstViewToolbarEnabled(bool enable) {
-  m_ui.iv_rect_select_toggle->setEnabled(enable);
+  m_ui.iv_rect_select_button->setEnabled(enable);
   m_ui.iv_zoom_button->setEnabled(enable);
   m_ui.iv_pan_button->setEnabled(enable);
 }

@@ -113,14 +113,14 @@
           </widget>
          </item>
          <item>
-          <widget class="QToolButton" name="iv_rect_select_toggle">
+          <widget class="QToolButton" name="iv_rect_select_button">
            <property name="text">
             <string>Rect. Select</string>
            </property>
           </widget>
          </item>
          <item>
-          <spacer name="horizontalSpacer">
+          <spacer name="iv_toolbar_spacer">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
