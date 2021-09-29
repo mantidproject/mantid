@@ -19,6 +19,7 @@ PreviewPresenter::PreviewPresenter(Dependencies dependencies)
   m_view->subscribe(this);
   m_jobManager->subscribe(this);
   // TODO disable buttons when the workspace is not loaded initially
+  notifyInstViewZoomRequested();
 }
 
 /** Notification received when the user has requested to load a workspace. If it already exists in the ADS
