@@ -55,7 +55,7 @@ inline bool hasAlternateDataStream([[maybe_unused]] const Poco::Path &pathToFile
  * file and returns the filenames of the log files that exist in the same
  * directory as the given file
  * @param pathToRawFile The path and name of the raw file.
- * @return list of logfile names.
+ * @return set of logfile names.
  */
 std::set<std::string> logFilesFromAlternateDataStream(const Poco::Path &pathToRawFile) {
   std::set<std::string> logfilesList;
@@ -79,7 +79,8 @@ std::set<std::string> logFilesFromAlternateDataStream(const Poco::Path &pathToRa
       const size_t asteriskPos = line.find('*');
       if (asteriskPos == std::string::npos)
         continue;
-      Poco::Path logFilePath(dirOfFile.append(line.substr(asteriskPos + 1)));
+      Poco::Path logFilePath(dirOfFile);
+      logFilePath.append(line.substr(asteriskPos + 1));
       if (Poco::File(logFilePath).exists()) {
         logfilesList.insert(logFilePath.toString());
       }
@@ -546,7 +547,7 @@ void LoadRawHelper::runLoadInstrument(const std::string &fileName, const DataObj
   if (i != std::string::npos)
     instrumentID.erase(i);
 
-  IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
+  auto loadInst = createChildAlgorithm("LoadInstrument");
   // Enable progress reporting by Child Algorithm -
   loadInst->addObserver(this->progressObserver());
   setChildStartProgress(progStart);
@@ -581,7 +582,7 @@ void LoadRawHelper::runLoadInstrument(const std::string &fileName, const DataObj
           pmap.get(localWorkspace->getInstrument()->getComponentID(), "det-pos-source");
       std::string value = updateDets->value<std::string>();
       if (value.substr(0, 8) == "datafile") {
-        IAlgorithm_sptr updateInst = createChildAlgorithm("UpdateInstrumentFromFile");
+        auto updateInst = createChildAlgorithm("UpdateInstrumentFromFile");
         updateInst->setProperty<MatrixWorkspace_sptr>("Workspace", localWorkspace);
         updateInst->setPropertyValue("Filename", fileName);
         updateInst->addObserver(this->progressObserver()); // Enable progress
@@ -617,7 +618,7 @@ void LoadRawHelper::runLoadInstrument(const std::string &fileName, const DataObj
 /// @param localWorkspace :: The workspace to load the instrument for
 void LoadRawHelper::runLoadInstrumentFromRaw(const std::string &fileName,
                                              const DataObjects::Workspace2D_sptr &localWorkspace) {
-  IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrumentFromRaw");
+  auto loadInst = createChildAlgorithm("LoadInstrumentFromRaw");
   loadInst->setPropertyValue("Filename", fileName);
   // Set the workspace property to be the same one filled above
   loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", localWorkspace);
@@ -648,7 +649,7 @@ void LoadRawHelper::runLoadMappingTable(const std::string &fileName,
   // Now determine the spectra to detector map calling Child Algorithm
   // LoadMappingTable
   // There is a small penalty in re-opening the raw file but nothing major.
-  IAlgorithm_sptr loadmap = createChildAlgorithm("LoadMappingTable");
+  auto loadmap = createChildAlgorithm("LoadMappingTable");
   loadmap->setPropertyValue("Filename", fileName);
   loadmap->setProperty<MatrixWorkspace_sptr>("Workspace", localWorkspace);
   try {
@@ -669,7 +670,7 @@ void LoadRawHelper::runLoadMappingTable(const std::string &fileName,
 /// @param progEnd :: ending progress fraction
 void LoadRawHelper::runLoadLog(const std::string &fileName, const DataObjects::Workspace2D_sptr &localWorkspace,
                                double progStart, double progEnd) {
-  // search for the log file to load, and save their names in a set.
+  // search for the log file to load, and save their names in a list.
   std::list<std::string> logFiles = searchForLogFiles(Poco::Path(fileName));
 
   g_log.debug("Loading the log files...");
@@ -683,20 +684,28 @@ void LoadRawHelper::runLoadLog(const std::string &fileName, const DataObjects::W
   std::list<std::string>::const_iterator logPath;
   for (logPath = logFiles.begin(); logPath != logFiles.end(); ++logPath) {
     // check for log files we should just ignore
-    std::string ignoreSuffix = "ICPstatus.txt";
-    if (boost::algorithm::ends_with(*logPath, ignoreSuffix)) {
+    std::string statusSuffix = "ICPstatus.txt";
+    if (boost::algorithm::iends_with(*logPath, statusSuffix)) {
       g_log.information("Skipping log file: " + *logPath);
       continue;
     }
 
-    ignoreSuffix = "ICPdebug.txt";
-    if (boost::algorithm::ends_with(*logPath, ignoreSuffix)) {
+    std::string debugSuffix = "ICPdebug.txt";
+    if (boost::algorithm::iends_with(*logPath, debugSuffix)) {
       g_log.information("Skipping log file: " + *logPath);
       continue;
+    }
+
+    std::string alarmSuffix = "ICPalarm.txt";
+    if (boost::algorithm::iends_with(*logPath, alarmSuffix)) {
+      if (Mantid::Kernel::FileDescriptor::isEmpty(*logPath)) {
+        g_log.information("Skipping empty log file: " + *logPath);
+        continue;
+      }
     }
 
     // Create a new object for each log file.
-    IAlgorithm_sptr loadLog = createChildAlgorithm("LoadLog");
+    auto loadLog = createChildAlgorithm("LoadLog");
 
     // Pass through the same input filename
     loadLog->setPropertyValue("Filename", *logPath);
@@ -1086,7 +1095,7 @@ void LoadRawHelper::loadSpectra(FILE *file, const int &period, const int &total_
 }
 
 /**
- * Return the confidence with with this algorithm can load the file
+ * Return the confidence with which this algorithm can load the file
  * @param descriptor A descriptor for the file
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
@@ -1152,16 +1161,16 @@ std::list<std::string> LoadRawHelper::searchForLogFiles(const Poco::Path &pathTo
         Kernel::Glob::glob(pattern, potentialLogFiles);
       } catch (std::exception &) {
       }
+      // Check for .log
+      const Poco::File combinedLogPath(Poco::Path(pathToRawFile).setExtension("log"));
+      if (combinedLogPath.exists()) {
+        // Push three column filename to end of list.
+        potentialLogFilesList.insert(potentialLogFilesList.end(), combinedLogPath.path());
+      }
     }
 
     // push potential log files from set to list.
     potentialLogFilesList.insert(potentialLogFilesList.begin(), potentialLogFiles.begin(), potentialLogFiles.end());
-    // Check for .log
-    const Poco::File combinedLogPath(Poco::Path(pathToRawFile).setExtension("log"));
-    if (combinedLogPath.exists()) {
-      // Push three column filename to end of list.
-      potentialLogFilesList.insert(potentialLogFilesList.end(), combinedLogPath.path());
-    }
   }
   return potentialLogFilesList;
 }

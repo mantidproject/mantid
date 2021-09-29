@@ -43,17 +43,15 @@ class TestFittingDataModel(unittest.TestCase):
         mock_unit.caption.return_value = 'Time-of-flight'
 
     @patch(data_model_path + ".FittingDataModel.update_log_workspace_group")
-    @patch(data_model_path + '.ConvertUnits')
     @patch(data_model_path + ".Load")
-    def test_loading_single_file_stores_workspace(self, mock_load, mock_convunits, mock_update_logws_group):
+    def test_loading_single_file_stores_workspace(self, mock_load, mock_update_logws_group):
         mock_load.return_value = self.mock_ws
 
-        self.model.load_files("/ar/a_filename.whatever", "dSpacing")
+        self.model.load_files("/ar/a_filename.whatever")
 
-        mock_convunits.assert_called_once()
         self.assertEqual(1, len(self.model._loaded_workspaces))
-        self.assertEqual(self.mock_ws, self.model._loaded_workspaces["a_filename_dSpacing"])
-        mock_load.assert_called_with("/ar/a_filename.whatever", OutputWorkspace="a_filename_dSpacing")
+        self.assertEqual(self.mock_ws, self.model._loaded_workspaces["a_filename"])
+        mock_load.assert_called_with("/ar/a_filename.whatever", OutputWorkspace="a_filename")
         mock_update_logws_group.assert_called_once()
 
     @patch(data_model_path + ".FittingDataModel.update_log_workspace_group")
@@ -63,7 +61,7 @@ class TestFittingDataModel(unittest.TestCase):
         mock_ads.doesExist.return_value = True
         mock_ads.retrieve.return_value = self.mock_ws
 
-        self.model.load_files("/ar/a_filename.whatever", "TOF")
+        self.model.load_files("/ar/a_filename.whatever")
 
         self.assertEqual(1, len(self.model._loaded_workspaces))
         mock_load.assert_not_called()
@@ -73,10 +71,9 @@ class TestFittingDataModel(unittest.TestCase):
     @patch(data_model_path + ".Load")
     def test_loading_single_file_already_loaded_tracked(self, mock_load, mock_update_logws_group):
         fpath = "/ar/a_filename.whatever"
-        xunit = "TOF"
-        self.model._loaded_workspaces = {self.model._generate_workspace_name(fpath, xunit): self.mock_ws}
+        self.model._loaded_workspaces = {self.model._generate_workspace_name(fpath): self.mock_ws}
 
-        self.model.load_files(fpath, xunit)
+        self.model.load_files(fpath)
 
         self.assertEqual(1, len(self.model._loaded_workspaces))
         mock_load.assert_not_called()
@@ -91,26 +88,24 @@ class TestFittingDataModel(unittest.TestCase):
         mock_getsetting.return_value = ','.join(log_names)
         mock_avglogs.return_value = (1.0, 1.0)  # avg, stdev
 
-        self.model.load_files("/ar/a_filename.whatever", "TOF")
+        self.model.load_files("/ar/a_filename.whatever")
 
         self.assertEqual(1, len(self.model._loaded_workspaces))
-        self.assertEqual(self.mock_ws, self.model._loaded_workspaces["a_filename_TOF"])
-        mock_load.assert_called_with("/ar/a_filename.whatever", OutputWorkspace="a_filename_TOF")
+        self.assertEqual(self.mock_ws, self.model._loaded_workspaces["a_filename"])
+        mock_load.assert_called_with("/ar/a_filename.whatever", OutputWorkspace="a_filename")
         self.assertEqual(1 + len(log_names), len(self.model._log_workspaces))
         for ilog in range(0, len(log_names)):
             self.assertEqual(log_names[ilog], self.model._log_workspaces[ilog + 1].name())
             self.assertEqual(1, self.model._log_workspaces[ilog + 1].rowCount())
 
-    @patch(data_model_path + '.ConvertUnits')
     @patch(data_model_path + ".logger")
     @patch(data_model_path + ".Load")
-    def test_loading_single_file_invalid(self, mock_load, mock_logger, mock_convunits):
+    def test_loading_single_file_invalid(self, mock_load, mock_logger):
         mock_load.side_effect = RuntimeError("Invalid Path")
 
-        self.model.load_files("/ar/a_filename.whatever", "TOF")
-        mock_convunits.assert_not_called()
+        self.model.load_files("/ar/a_filename.whatever")
         self.assertEqual(0, len(self.model._loaded_workspaces))
-        mock_load.assert_called_with("/ar/a_filename.whatever", OutputWorkspace="a_filename_TOF")
+        mock_load.assert_called_with("/ar/a_filename.whatever", OutputWorkspace="a_filename")
         self.assertEqual(1, mock_logger.error.call_count)
 
     @patch(data_model_path + ".FittingDataModel.update_log_workspace_group")
@@ -118,13 +113,13 @@ class TestFittingDataModel(unittest.TestCase):
     def test_loading_multiple_files(self, mock_load, mock_update_logws_group):
         mock_load.return_value = self.mock_ws
 
-        self.model.load_files("/dir/file1.txt, /dir/file2.nxs", "TOF")
+        self.model.load_files("/dir/file1.txt, /dir/file2.nxs")
 
         self.assertEqual(2, len(self.model._loaded_workspaces))
-        self.assertEqual(self.mock_ws, self.model._loaded_workspaces["file1_TOF"])
-        self.assertEqual(self.mock_ws, self.model._loaded_workspaces["file2_TOF"])
-        mock_load.assert_any_call("/dir/file1.txt", OutputWorkspace="file1_TOF")
-        mock_load.assert_any_call("/dir/file2.nxs", OutputWorkspace="file2_TOF")
+        self.assertEqual(self.mock_ws, self.model._loaded_workspaces["file1"])
+        self.assertEqual(self.mock_ws, self.model._loaded_workspaces["file2"])
+        mock_load.assert_any_call("/dir/file1.txt", OutputWorkspace="file1")
+        mock_load.assert_any_call("/dir/file2.nxs", OutputWorkspace="file2")
         mock_update_logws_group.assert_called_once()
 
     @patch(data_model_path + ".logger")
@@ -133,11 +128,11 @@ class TestFittingDataModel(unittest.TestCase):
         self.mock_ws.getNumberHistograms.return_value = 2
         mock_load.return_value = self.mock_ws
 
-        self.model.load_files("/dir/file1.txt, /dir/file2.nxs", "TOF")
+        self.model.load_files("/dir/file1.txt, /dir/file2.nxs")
 
         self.assertEqual(0, len(self.model._loaded_workspaces))
-        mock_load.assert_any_call("/dir/file1.txt", OutputWorkspace="file1_TOF")
-        mock_load.assert_any_call("/dir/file2.nxs", OutputWorkspace="file2_TOF")
+        mock_load.assert_any_call("/dir/file1.txt", OutputWorkspace="file1")
+        mock_load.assert_any_call("/dir/file2.nxs", OutputWorkspace="file2")
         self.assertEqual(2, mock_logger.warning.call_count)
 
     @patch(data_model_path + ".logger")
@@ -145,11 +140,11 @@ class TestFittingDataModel(unittest.TestCase):
     def test_loading_multiple_files_invalid(self, mock_load, mock_logger):
         mock_load.side_effect = RuntimeError("Invalid Path")
 
-        self.model.load_files("/dir/file1.txt, /dir/file2.nxs", "TOF")
+        self.model.load_files("/dir/file1.txt, /dir/file2.nxs")
 
         self.assertEqual(0, len(self.model._loaded_workspaces))
-        mock_load.assert_any_call("/dir/file1.txt", OutputWorkspace="file1_TOF")
-        mock_load.assert_any_call("/dir/file2.nxs", OutputWorkspace="file2_TOF")
+        mock_load.assert_any_call("/dir/file1.txt", OutputWorkspace="file1")
+        mock_load.assert_any_call("/dir/file2.nxs", OutputWorkspace="file2")
         self.assertEqual(2, mock_logger.error.call_count)
 
     @patch(data_model_path + ".DeleteWorkspace")
@@ -381,7 +376,7 @@ class TestFittingDataModel(unittest.TestCase):
                                                  'Function': func_str,
                                                  'InputWorkspace': "name1", 'Output': "name1",
                                                  'OutputCompositeMembers': True, 'StartX': 50000},
-                   'peak_centre_params': ['Gaussian_PeakCentre'], 'version': 1}
+                   'status': 'success', 'peak_centre_params': ['Gaussian_PeakCentre'], 'version': 1}
         self.model.update_fit([fitprop])
 
         self.assertEqual(self.model._fit_results['name1']['model'], func_str)
@@ -407,7 +402,7 @@ class TestFittingDataModel(unittest.TestCase):
         self.model._log_workspaces.name.return_value = 'some_log'
         func_str = 'name=Gaussian,Height=11,PeakCentre=40000,Sigma=54;name=Gaussian,Height=10,PeakCentre=30000,Sigma=51'
         self.model._fit_results = dict()
-        self.model._fit_results['name1'] = {'model': func_str,
+        self.model._fit_results['name1'] = {'model': func_str, 'status': 'success',
                                             'results': {'Gaussian_Height': [[11.0, 1.0], [10.0, 1.0]],
                                                         'Gaussian_PeakCentre': [[40000.0, 10.0],
                                                                                 [30000.0, 10.0]],
@@ -428,11 +423,12 @@ class TestFittingDataModel(unittest.TestCase):
                                                                                             mock_groupws)
         self.model.create_fit_tables()
 
-        # test the workspaces were created and added to fit_workspaces (and the mdoel table workspace)
+        # test the workspaces were created and added to fit_workspaces (and the model table workspace)
         self.assertEqual(self.model._fit_workspaces, (mock_ws_list + [mock_create_table.return_value]))
         # test the table stores the correct function strings (empty string if no function present)
         mock_writerow.assert_any_call(mock_create_table.return_value,
                                       ['name1', self.model._fit_results['name1']['costFunction'],
+                                       self.model._fit_results['name1']['status'],
                                        self.model._fit_results['name1']['model']], 0)
         mock_writerow.assert_any_call(mock_create_table.return_value, ['', nan, ''], 1)  # name2 has no entry
         # check the matrix workspaces corresponding to the fit parameters
@@ -464,7 +460,7 @@ class TestFittingDataModel(unittest.TestCase):
                                                                                             mock_groupws)
         mock_ws_list.append(mock.MagicMock())  # adding an additional parameter into model for name2
         func_str2 = self.model._fit_results['name1']['model'] + ';name=FlatBackground,A0=1'
-        self.model._fit_results['name2'] = {'model': func_str2,
+        self.model._fit_results['name2'] = {'model': func_str2, 'status': 'success',
                                             'results': dict(self.model._fit_results['name1']['results'],
                                                             FlatBackground_A0=[[1.0, 0.1]]),
                                             'costFunction': 2.0}
@@ -475,9 +471,11 @@ class TestFittingDataModel(unittest.TestCase):
         # test the table stores the correct function strings (empty string if no function present)
         mock_writerow.assert_any_call(mock_create_table.return_value,
                                       ['name1', self.model._fit_results['name1']['costFunction'],
+                                       self.model._fit_results['name1']['status'],
                                        self.model._fit_results['name1']['model']], 0)
         mock_writerow.assert_any_call(mock_create_table.return_value,
                                       ['name2', self.model._fit_results['name2']['costFunction'],
+                                       self.model._fit_results['name1']['status'],
                                        self.model._fit_results['name2']['model']], 1)
         # check the matrix workspaces corresponding to the fit parameters
         # 4 unique params plus the peak centre converted to dSpacing

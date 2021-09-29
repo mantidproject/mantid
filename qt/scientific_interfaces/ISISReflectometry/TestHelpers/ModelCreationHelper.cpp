@@ -344,22 +344,21 @@ ReductionJobs oneGroupWithTwoRowsWithOutputNamesModel() {
 
 /* Experiment */
 
-std::vector<PerThetaDefaults> makePerThetaDefaults() {
-  auto perThetaDefaults =
-      PerThetaDefaults(boost::none, TransmissionRunPair(), boost::none, RangeInQ(boost::none, boost::none, boost::none),
-                       boost::none, boost::none, boost::none);
-  return std::vector<PerThetaDefaults>{std::move(perThetaDefaults)};
+LookupTable makeLookupTable() {
+  auto lookupRow = LookupRow(boost::none, TransmissionRunPair(), boost::none,
+                             RangeInQ(boost::none, boost::none, boost::none), boost::none, boost::none, boost::none);
+  return LookupTable{std::move(lookupRow)};
 }
 
-std::vector<PerThetaDefaults> makePerThetaDefaultsWithTwoAnglesAndWildcard() {
-  return std::vector<PerThetaDefaults>{
+LookupTable makeLookupTableWithTwoAnglesAndWildcard() {
+  return LookupTable{
       // wildcard row with no angle
-      PerThetaDefaults(boost::none, TransmissionRunPair("22345", "22346"), ProcessingInstructions("5-6"),
-                       RangeInQ(0.007, 0.01, 1.1), 0.7, ProcessingInstructions("1"), ProcessingInstructions("3,7")),
+      LookupRow(boost::none, TransmissionRunPair("22345", "22346"), ProcessingInstructions("5-6"),
+                RangeInQ(0.007, 0.01, 1.1), 0.7, ProcessingInstructions("1"), ProcessingInstructions("3,7")),
       // two angle rows
-      PerThetaDefaults(0.5, TransmissionRunPair("22347", ""), boost::none, RangeInQ(0.008, 0.02, 1.2), 0.8,
-                       ProcessingInstructions("2-3"), boost::none),
-      PerThetaDefaults(
+      LookupRow(0.5, TransmissionRunPair("22347", ""), boost::none, RangeInQ(0.008, 0.02, 1.2), 0.8,
+                ProcessingInstructions("2-3"), boost::none),
+      LookupRow(
           2.3,
           TransmissionRunPair(std::vector<std::string>{"22348", "22349"}, std::vector<std::string>{"22358", "22359"}),
           ProcessingInstructions("4"), RangeInQ(0.009, 0.03, 1.3), 0.9, ProcessingInstructions("4-6"),
@@ -402,15 +401,14 @@ TransmissionStitchOptions makeEmptyTransmissionStitchOptions() {
 Experiment makeExperiment() {
   return Experiment(AnalysisMode::MultiDetector, ReductionType::NonFlatSample, SummationType::SumInQ, true, true,
                     makeBackgroundSubtraction(), makePolarizationCorrections(), makeFloodCorrections(),
-                    makeTransmissionStitchOptions(), makeStitchOptions(),
-                    makePerThetaDefaultsWithTwoAnglesAndWildcard());
+                    makeTransmissionStitchOptions(), makeStitchOptions(), makeLookupTableWithTwoAnglesAndWildcard());
 }
 
 Experiment makeEmptyExperiment() {
   return Experiment(AnalysisMode::PointDetector, ReductionType::Normal, SummationType::SumInLambda, false, false,
                     makeEmptyBackgroundSubtraction(), PolarizationCorrections(PolarizationCorrectionType::None),
                     FloodCorrections(FloodCorrectionType::Workspace), TransmissionStitchOptions(),
-                    std::map<std::string, std::string>(), std::vector<PerThetaDefaults>());
+                    std::map<std::string, std::string>(), LookupTable());
 }
 
 /* Instrument */

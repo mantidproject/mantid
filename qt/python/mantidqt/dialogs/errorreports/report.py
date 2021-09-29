@@ -76,6 +76,9 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
         # Dialog window to show more details of the crash to the user.
         self.details_dialog = MoreDetailsDialog(self)
 
+        # Set default focus to the editing box, rather then letting qt try and guess
+        self.input_free_text.setFocus()
+
     def quit(self):
         self.quit_signal.emit()
 

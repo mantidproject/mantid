@@ -8,6 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidJson/Json.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
@@ -405,6 +406,17 @@ public:
     TS_ASSERT_EQUALS(mgr.getProperties().size(), 0);
   }
 
+  void testTakeProperty() {
+    PropertyManagerHelper mgr;
+    const std::string name("TestProperty");
+    TS_ASSERT_THROWS_NOTHING(mgr.declareProperty(name, 10.0));
+    std::unique_ptr<Property> propertyPointer;
+    TS_ASSERT_THROWS_NOTHING(propertyPointer = mgr.takeProperty(0));
+    TS_ASSERT(propertyPointer);
+    TS_ASSERT_EQUALS(name, propertyPointer->name());
+    TS_ASSERT_EQUALS(mgr.getProperties().size(), 0);
+  }
+
   void testClear() {
     PropertyManagerHelper mgr;
     const std::string name("TestProperty");
@@ -452,9 +464,9 @@ public:
     mgr.setPropertySettings(
         "Crossing", std::make_unique<EnabledWhenProperty>("Semaphor", Mantid::Kernel::ePropertyCriterion::IS_DEFAULT));
 
-    TSM_ASSERT_EQUALS("Show the default", mgr.asString(true), "{\"Crossing\":42,\"Semaphor\":true}\n");
+    TSM_ASSERT_EQUALS("Show the default", mgr.asString(true), "{\"Crossing\":42,\"Semaphor\":true}");
     mgr.setProperty("Semaphor", false);
-    TSM_ASSERT_EQUALS("Hide not enabled", mgr.asString(true), "{\"Semaphor\":false}\n");
+    TSM_ASSERT_EQUALS("Hide not enabled", mgr.asString(true), "{\"Semaphor\":false}");
   }
 
   void test_asString() {
@@ -462,23 +474,22 @@ public:
     TS_ASSERT_THROWS_NOTHING(mgr.declareProperty("Prop1", 10));
     TS_ASSERT_THROWS_NOTHING(mgr.declareProperty("Prop2", 15));
 
-    ::Json::Reader reader;
     ::Json::Value value;
 
-    TSM_ASSERT("value was not valid JSON", reader.parse(mgr.asString(), value));
+    TSM_ASSERT("value was not valid JSON", Mantid::JsonHelpers::parse(mgr.asString(), &value));
 
     TSM_ASSERT_EQUALS("value was not empty", value.size(), 0);
 
-    TSM_ASSERT_EQUALS("Show the default", mgr.asString(true), "{\"Prop1\":10,\"Prop2\":15}\n");
+    TSM_ASSERT_EQUALS("Show the default", mgr.asString(true), "{\"Prop1\":10,\"Prop2\":15}");
 
-    TSM_ASSERT("value was not valid JSON", reader.parse(mgr.asString(true), value));
+    TSM_ASSERT("value was not valid JSON", Mantid::JsonHelpers::parse(mgr.asString(true), &value));
     TS_ASSERT_EQUALS(boost::lexical_cast<int>(value["Prop1"].asString()), 10);
     TS_ASSERT_EQUALS(boost::lexical_cast<int>(value["Prop2"].asString()), 15);
     mgr.setProperty("Prop1", 123);
     mgr.setProperty("Prop2", 456);
-    TSM_ASSERT_EQUALS("Change the values", mgr.asString(false), "{\"Prop1\":123,\"Prop2\":456}\n");
+    TSM_ASSERT_EQUALS("Change the values", mgr.asString(false), "{\"Prop1\":123,\"Prop2\":456}");
 
-    TSM_ASSERT("value was not valid JSON", reader.parse(mgr.asString(false), value));
+    TSM_ASSERT("value was not valid JSON", Mantid::JsonHelpers::parse(mgr.asString(false), &value));
     TS_ASSERT_EQUALS(boost::lexical_cast<int>(value["Prop1"].asString()), 123);
     TS_ASSERT_EQUALS(boost::lexical_cast<int>(value["Prop2"].asString()), 456);
   }
@@ -487,34 +498,33 @@ public:
     PropertyManagerHelper mgr;
     TS_ASSERT_THROWS_NOTHING(mgr.declareProperty(std::make_unique<ArrayProperty<double>>("ArrayProp")));
 
-    ::Json::Reader reader;
     ::Json::Value value;
 
-    TSM_ASSERT("value was not valid JSON", reader.parse(mgr.asString(), value));
+    TSM_ASSERT("value was not valid JSON", Mantid::JsonHelpers::parse(mgr.asString(), &value));
 
     TSM_ASSERT_EQUALS("value was not empty", value.size(), 0);
 
-    TSM_ASSERT_EQUALS("Show the default", mgr.asString(true), "{\"ArrayProp\":[]}\n");
+    TSM_ASSERT_EQUALS("Show the default", mgr.asString(true), "{\"ArrayProp\":[]}");
 
-    TSM_ASSERT("value was not valid JSON", reader.parse(mgr.asString(true), value));
+    TSM_ASSERT("value was not valid JSON", Mantid::JsonHelpers::parse(mgr.asString(true), &value));
 
     mgr.setProperty("ArrayProp", "10.1,12.5,23.5");
 
-    TSM_ASSERT_EQUALS("Change the values", mgr.asString(false), "{\"ArrayProp\":[10.1,12.5,23.5]}\n");
+    TSM_ASSERT_EQUALS("Change the values", mgr.asString(false), "{\"ArrayProp\":[10.1,12.5,23.5]}");
 
-    TSM_ASSERT("value was not valid JSON", reader.parse(mgr.asString(false), value));
+    TSM_ASSERT("value was not valid JSON", Mantid::JsonHelpers::parse(mgr.asString(false), &value));
   }
 
   void test_asStringWithNonSerializableProperty() {
     using namespace Mantid::Kernel;
     PropertyManagerHelper mgr;
     TS_ASSERT_THROWS_NOTHING(mgr.declareProperty(std::make_unique<MockNonSerializableProperty>("PropertyName", 0)));
-    TS_ASSERT_EQUALS(mgr.asString(true), "null\n")
-    TS_ASSERT_EQUALS(mgr.asString(false), "null\n")
+    TS_ASSERT_EQUALS(mgr.asString(true), "null")
+    TS_ASSERT_EQUALS(mgr.asString(false), "null")
     // Set to non-default value.
     mgr.setProperty("PropertyName", 1);
-    TS_ASSERT_EQUALS(mgr.asString(true), "null\n")
-    TS_ASSERT_EQUALS(mgr.asString(false), "null\n")
+    TS_ASSERT_EQUALS(mgr.asString(true), "null")
+    TS_ASSERT_EQUALS(mgr.asString(false), "null")
   }
 
   //-----------------------------------------------------------------------------------------------------------

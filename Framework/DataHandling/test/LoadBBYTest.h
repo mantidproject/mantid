@@ -8,6 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include <fstream>
+#include <iostream>
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -23,6 +24,27 @@ using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Types::Core;
+
+namespace {
+
+void copyFile(std::string &srcPath, std::string &dstPath) {
+  std::ifstream source(srcPath, std::ios::binary);
+  std::ofstream dest(dstPath, std::ios::binary);
+
+  dest << source.rdbuf();
+
+  source.close();
+  dest.close();
+}
+
+void replaceValue(std::string &tarPath, int offset, char invalid) {
+
+  std::fstream destn(tarPath, std::ios::binary | std::ios::in | std::ios::out);
+  destn.seekp(offset);
+  destn.write(&invalid, 1);
+  destn.close();
+}
+} // namespace
 
 class LoadBBYTest : public CxxTest::TestSuite {
 public:
@@ -143,5 +165,67 @@ public:
 
     TS_ASSERT_LESS_THAN(maxTime, 0.0600001);
     TS_ASSERT_LESS_THAN(0.0399999, minTime);
+  }
+
+  void test_default_parameters_logged() {
+    LoadBBY algToBeTested;
+
+    if (!algToBeTested.isInitialized())
+      algToBeTested.initialize();
+
+    std::string outputSpace = "LoadBBYTestB";
+    algToBeTested.setPropertyValue("OutputWorkspace", outputSpace);
+    std::string inputFile = "BBY0000014.tar";
+    algToBeTested.setPropertyValue("Filename", inputFile);
+
+    // execute and get workspace generated
+    TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
+    TS_ASSERT(algToBeTested.isExecuted());
+    EventWorkspace_sptr output = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outputSpace);
+    auto run = output->run();
+
+    // confirm that the sample_aperture which is not included in the hdf file
+    // is present in the log and set to the default value
+    TS_ASSERT_DELTA(dynamic_cast<TimeSeriesProperty<double> *>(run.getProperty("sample_aperture"))->firstValue(), 0.0,
+                    1.0e-3);
+    TS_ASSERT_DELTA(dynamic_cast<TimeSeriesProperty<double> *>(run.getProperty("source_aperture"))->firstValue(), 0.0,
+                    1.0e-3);
+
+    // confirm that the dummy test parameter in the xml without a default is not added to the log
+    TS_ASSERT(!run.hasProperty("sample_xxx"))
+  }
+
+  void test_invalid_event_logged() {
+    LoadBBY algToBeTested;
+
+    if (!algToBeTested.isInitialized())
+      algToBeTested.initialize();
+
+    std::string outputSpace = "LoadBBYTestA";
+    algToBeTested.setPropertyValue("OutputWorkspace", outputSpace);
+    std::string inputFile = "BBY0000014.tar";
+    algToBeTested.setPropertyValue("Filename", inputFile);
+
+    TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
+    TS_ASSERT(algToBeTested.isExecuted());
+    EventWorkspace_sptr eventWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outputSpace);
+    auto goodEvents = eventWS->getNumberEvents();
+
+    // corrupt the value at the offset in the tar file to be out of bounds
+    // and confirm the file is loaded but with one less event. The offset
+    // was manually determined from the good file.
+    std::string filename = algToBeTested.getPropertyValue("Filename");
+    Poco::TemporaryFile tempFile;
+    std::string tempPath = tempFile.path();
+    copyFile(filename, tempPath);
+    replaceValue(tempPath, 595456 + 136, (char)0xff);
+
+    outputSpace = "LoadBBYTestB";
+    algToBeTested.setPropertyValue("OutputWorkspace", outputSpace);
+    algToBeTested.setPropertyValue("Filename", tempPath);
+    TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
+    TS_ASSERT(algToBeTested.isExecuted());
+    eventWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outputSpace);
+    TS_ASSERT_EQUALS(eventWS->getNumberEvents(), goodEvents - 1);
   }
 };

@@ -91,7 +91,7 @@ For a full list of all issues addressed during this release please see the `GitH
 
 .. _forum: https://forum.mantidproject.org
 
-.. _GitHub milestone: https://github.com/mantidproject/mantid/pulls?utf8=%E2%9C%93&q=is%3Apr+milestone%3A"Release {milestone}"+is%3Amerged
+.. _GitHub milestone: {milestone_link}
 
 .. _GitHub release page: https://github.com/mantidproject/mantid/releases/tag/v{version}
 ''',
@@ -256,7 +256,7 @@ def fixReleaseName(name):
 
 def toMilestoneName(version):
     version = version[1:].split('.')
-    version = '"Release+{major}.{minor}"'.format(major=version[0], minor=version[1])
+    version = 'Release+{major}.{minor}'.format(major=version[0], minor=version[1])
     return version
 
 
@@ -295,7 +295,8 @@ if __name__ == '__main__':
     print('milestone:', args.milestone)
     release_root = getReleaseRoot()
     print('     root:', release_root)
-
+    milestone_link='https://github.com/mantidproject/mantid/pulls?utf8=%E2%9C%93&q=is%3Apr+' \
+        + f'milestone%3A%22{sanitized_milestone}%22+is%3Amerged'
     # add the new sub-site to the index
     addToReleaseList(release_root, args.release)
 
@@ -306,10 +307,13 @@ if __name__ == '__main__':
         os.makedirs(release_root)
 
     release_link = '\n:ref:`Release {0} <{1}>`'.format(args.release[1:], args.release)
+    # Encode the milestone to remove spaces for the GitHub filter URL
+    sanitized_milestone = args.milestone.replace(' ', '+')
 
     for filename in DOCS.keys():
         version_maj_min=args.release[1:-2]
-        contents = DOCS[filename].format(milestone=args.milestone, version=args.release[1:], version_maj_min=version_maj_min ,
+        contents = DOCS[filename].format(sanitized_milestone=sanitized_milestone, version=args.release[1:],
+                                         version_maj_min=version_maj_min,
                                          mantid_doi=MANTID_DOI.format(version_maj_min=version_maj_min))
         filename = os.path.join(release_root, filename)
         print('making', filename)
@@ -320,7 +324,7 @@ if __name__ == '__main__':
 
     for filename in TECH_DOCS.keys():
         name, contents = TECH_DOCS[filename]
-        contents = contents.format(milestone=args.milestone, version=args.release[1:])
+        contents = contents.format(sanitized_milestone=sanitized_milestone, version=args.release[1:])
         filename = os.path.join(release_root, filename)
         print('making', filename)
         with open(filename, 'w') as handle:

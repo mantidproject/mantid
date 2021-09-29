@@ -1,0 +1,63 @@
+#!/bin/bash -ex
+
+# This script expects a setup environment with all dependencies availiable in
+# the environment
+#
+# Expected args:
+#   1. WORKSPACE: path to the workspace/source code that this should run inside
+#   2. CMAKE_PRESET: the CMake preset that should be ran to generate the cmake files for this CI job
+#   3. ENABLE_DOCS: build the user docs
+#   4. ENABLE_DEV_DOCS: build the user docs
+#   5. ENABLE_BUILD_CODE: whether or not to build the main code target
+#   6. ENABLE_UNIT_TESTS: whether or not to build the unit tests target
+#   7. ENABLE_SYSTEM_TESTS: whether or not to build the system test data
+#   8. EXTRA_CMAKE_FLAGS: Extra flags to pass directly to cmake, enclose in "".
+#   9. BUILD_THREADS: Pass the number of threads that can be used to build with
+
+WORKSPACE=$1
+CMAKE_PRESET=$2
+ENABLE_DOCS=$3
+ENABLE_DEV_DOCS=$4
+ENABLE_BUILD_CODE=$5
+ENABLE_UNIT_TESTS=$6
+ENABLE_SYSTEM_TESTS=$7
+EXTRA_CMAKE_FLAGS=$8
+BUILD_THREADS=$9
+
+# Only pass MANTID_DATA_STORE to CMake if present in the environment otherwise rely on CMake default
+if [[ -n "${MANTID_DATA_STORE}" ]]; then
+    MANTID_DATA_STORE_CMAKE="-DMANTID_DATA_STORE=${MANTID_DATA_STORE}"
+fi
+
+# Run CMake using preset and variables
+cmake --preset=${CMAKE_PRESET} ${MANTID_DATA_STORE_CMAKE} ${EXTRA_CMAKE_FLAGS} $WORKSPACE
+
+# Run the actual builds for the code, unit tests, and system tests.
+cd $WORKSPACE/build
+if [[ $ENABLE_BUILD_CODE == true ]]; then
+    cmake --build . -j$BUILD_THREADS
+fi
+
+if [[ $ENABLE_UNIT_TESTS == true ]]; then
+    cmake --build . --target AllTests -j$BUILD_THREADS
+fi
+
+if [[ $ENABLE_SYSTEM_TESTS == true ]]; then
+    cmake --build . --target StandardTestData -j$BUILD_THREADS
+    cmake --build . --target SystemTestData -j$BUILD_THREADS
+fi
+
+# Build docs
+if [[ $ENABLE_DOCS == true ]]; then
+    # Remove doctrees directory so it forces a full reparse. It seems that
+    # without this newly added doctests are not executed
+    if [ -d $BUILD_DIR/docs/doctrees ]; then
+        rm -fr $BUILD_DIR/docs/doctrees/*
+    fi
+    cmake --build . --target docs-html -j$BUILD_THREADS
+fi
+
+# Build dev-docs turned off until dev docs run without error
+# if [[ $ENABLE_DEV_DOCS == true ]]; then
+#     cmake --build . --target dev-docs-html
+# fi

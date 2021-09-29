@@ -206,14 +206,22 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         for subplot in self.plotting.get_subplots():
             self.plotting.rm_vline_and_annotate(subplot, name)
 
+    def _create_peak_selector(self, element):
+        data = self.ptable.element_data(element)
+        widget = PeakSelectorPresenter(PeakSelectorView(data, element))
+        widget.on_finished(self._update_peak_data)
+        return widget
+
     # setup element pop up
     def _generate_element_widgets(self):
         self.element_widgets = {}
-        for element in self.ptable.peak_data:
-            data = self.ptable.element_data(element)
-            widget = PeakSelectorPresenter(PeakSelectorView(data, element))
-            widget.on_finished(self._update_peak_data)
-            self.element_widgets[element] = widget
+        any_data_loaded = False
+        for element in self.ptable.peak_data.keys():
+            if element in self.ptable.elements_list():
+                any_data_loaded = True
+                widget = self._create_peak_selector(element)
+                self.element_widgets[element] = widget
+        return any_data_loaded
 
     # interact with periodic table
     def table_right_clicked(self, item):
@@ -388,21 +396,25 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
             self.ptable.set_peak_datafile(filename)
 
         try:
-            self._generate_element_widgets()
+            any_data_loaded = self._generate_element_widgets()
+            if not any_data_loaded:
+                self._reset_data_file_warning_and_action()
         except ValueError:
-            message_box.warning(
-                'The file does not contain correctly formatted data, resetting to default data file.'
-                'See "https://docs.mantidproject.org/nightly/interfaces/'
-                'Muon%20Elemental%20Analysis.html" for more information.')
-            self.ptable.set_peak_datafile(None)
-            self._generate_element_widgets()
-
+            self._reset_data_file_warning_and_action()
         for element in old_lines:
             if element in self.element_widgets.keys():
                 self.ptable.select_element(element)
             else:
                 self._remove_element_lines(element)
         self._update_checked_data()
+
+    def _reset_data_file_warning_and_action(self):
+        message_box.warning(
+            'The file does not contain correctly formatted data, resetting to default data file.'
+            'See "https://docs.mantidproject.org/nightly/interfaces/muon/'
+            'Muon%20Elemental%20Analysis.html" for more information.')
+        self.ptable.set_peak_datafile(None)
+        self._generate_element_widgets()
 
     def _update_checked_data(self):
         self.major_peaks_changed(self.peaks.major)

@@ -403,7 +403,7 @@ void LoadNexusMonitors2::runLoadLogs(const std::string &filename, const API::Mat
   const std::vector<std::string> block_list = getProperty(PropertyNames::LOGS_BLOCK);
 
   // do the actual work
-  API::IAlgorithm_sptr loadLogs = createChildAlgorithm("LoadNexusLogs");
+  auto loadLogs = createChildAlgorithm("LoadNexusLogs");
 
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   try {

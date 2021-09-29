@@ -658,7 +658,6 @@ QLayout *AlgorithmDialog::createDefaultButtonLayout(const QString &helpText, con
  */
 QPushButton *AlgorithmDialog::createHelpButton(const QString &helpText) const {
   auto *help = new QPushButton(helpText);
-  help->setMaximumWidth(25);
   connect(help, SIGNAL(clicked()), this, SLOT(helpClicked()));
   return help;
 }

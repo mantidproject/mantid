@@ -1,0 +1,51 @@
+name: mantid-developer
+
+channels:
+  - conda-forge
+  - DLR-SC # Required for OpenCascade
+
+dependencies:
+  - boost=1.75.* # Also pulls in boost-cpp
+  - cmake>=3.20.*
+  - conda-wrappers
+  - doxygen>=1.9.*
+  - eigen=3.3.*
+  - graphviz>=2.47.0
+  - gsl=2.6 # Keep gsl a specific version to reduce changes in our fitting
+  - h5py>=2.10.0,<3 # Pinned back due to api differences
+  - hdf5=1.10.*
+  - jsoncpp>=1.9.4,<2
+  - librdkafka>=1.6.0
+  - lib3mf # windows only
+  - muparser>=2.3.2
+  - nexus=4.4.*
+  - ninja>=1.10.2
+  - numpy>=1.20.2
+  - opencascade>=7.4.0
+  - conda-wrappers
+  - pip>=21.0.1
+  - poco=1.10.*
+  - psutil>=5.8.0
+  - pycifrw>=4.4.1
+  - pyqt>=5.12.3,<6
+  - python-dateutil>=2.8.1
+  - python=3.8.*
+  - pyyaml>=5.4.1
+  - qscintilla2>=2.11.2
+  - qt>=5.12.9,<6
+  - qtconsole>=5.0.3,<6
+  - qtpy>=1.9.0
+  - requests>=2.25.1
+  - scipy>=1.6.2
+  - setuptools=48.0.0 # Pinned purposefully due to incompatibility with later versions
+  - sphinx>=3.5.4
+  - tbb-devel=2020.2.*
+  - tbb=2020.2.*
+  - toml>=0.10.2
+  - zlib>=1.2.11
+  # Needed only for development
+  - cppcheck>=2.4.1
+  - pre-commit>=2.12.0
+  - pip:
+      - matplotlib==3.1.3 # Pip used for package compatibility (Conda seems to have a broken dependancy list), otherwise a high version number is needed (for use on conda) which doesn't work right now for workbench. Pinned at 3.1.3 as is highest/currently used and compatible with Workbench.
+      - sphinx-bootstrap-theme>=0.7.1

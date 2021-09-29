@@ -65,6 +65,10 @@ set(EXPORT_FILES
     src/Exports/SpectrumInfo.cpp
     src/Exports/Run.cpp
     src/Exports/WorkspaceFactory.cpp
+    src/Exports/FunctionDomain.cpp
+    src/Exports/FunctionDomain1D.cpp
+    src/Exports/FunctionDomain1DHistogram.cpp
+    src/Exports/FunctionDomain1DVector.cpp
     src/Exports/IFunction.cpp
     src/Exports/IFunction1D.cpp
     src/Exports/IPeakFunction.cpp
@@ -125,30 +129,33 @@ list (APPEND ALL_FILES ${EXPORT_FILES} ${SRC_FILES})
 enable_precompiled_headers(inc/MantidPythonInterface/api/PrecompiledHeader.h ALL_FILES)
 
 # Create the target for this directory
+set(FRAMEWORK_DIR ../../..)
+include_directories(${FRAMEWORK_DIR}/CurveFitting/inc)
 
 add_library(
   PythonAPIModule ${ALL_FILES} ${MODULE_DEFINITION}
                   ${INC_FILES} ${PYTHON_INSTALL_FILES}
 )
+add_library(Mantid::PythonAPIModule ALIAS PythonAPIModule)
+
+target_include_directories(PythonAPIModule PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+		$<INSTALL_INTERFACE:include/Mantid>
+)
+
 set_python_properties(PythonAPIModule _api)
 
-target_include_directories(PythonAPIModule PUBLIC inc)
 
 # Add the required dependencies
-target_link_libraries(
-  PythonAPIModule
-  PRIVATE
-          PythonInterfaceCore
-          PythonGeometryModule
-          PythonKernelModule
-          API
-          Geometry
-          HistogramData
-          Indexing
-          Kernel
-          Types
-          ${POCO_LIBRARIES}
-          ${Boost_LIBRARIES}
+target_link_libraries(PythonAPIModule
+          PUBLIC Mantid::API
+          PRIVATE
+          Mantid::PythonInterfaceCore
+          Mantid::PythonGeometryModule
+          Mantid::PythonKernelModule
+          Mantid::HistogramData
+          Mantid::Indexing
+          Mantid::Types
 )
 
 # Installation settings

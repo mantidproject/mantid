@@ -21,23 +21,26 @@ if(CXXTEST_FOUND)
 	  ../../TestHelpers/src/FileResource.cpp)
 
   cxxtest_add_test(DataHandlingTest ${TEST_FILES})
-  target_include_directories(DataHandlingTest SYSTEM
-                             PRIVATE ${HDF5_INCLUDE_DIRS})
+
   target_link_libraries(DataHandlingTest
-                        LINK_PRIVATE
-                        ${MANTIDLIBS}
-                        Catalog
-                        DataHandling
-                        Nexus
-                        HistogramData
-                        ${NEXUS_LIBRARIES}
-                        ${HDF5_LIBRARIES}
-                        ${HDF5_HL_LIBRARIES}
+                        PRIVATE
+                        Mantid::Kernel
+                        Mantid::Catalog
+                        Mantid::DataHandling
+                        Mantid::Nexus
+                        Mantid::NexusGeometry
+                        Mantid::HistogramData
+                        Boost::filesystem
                         gmock)
 
   if(ENABLE_LIB3MF)
     target_link_libraries(DataHandlingTest LINK_PRIVATE
                           ${LIB3MF_LIBRARIES})
+    if (CONDA_BUILD)
+      target_include_directories(DataHandlingTest PRIVATE ${LIB3MF_INCLUDE_DIR})
+    else()
+      target_include_directories(DataHandlingTest PRIVATE ${LIB3MF_INCLUDE_DIR}/lib3mf)
+    endif()
   endif()
 
   add_dependencies(DataHandlingTest Algorithms MDAlgorithms)

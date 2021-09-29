@@ -55,7 +55,6 @@ endfunction()
 # keyword: OUTPUT_NAME An optional filename for the library
 # keyword: QT_VERSION The major version of Qt to build against
 # keyword: SRC .cpp files to include in the target build
-# keyword: QT4_SRC .cpp files to include in a Qt4 build
 # keyword: QT5_SRC .cpp files to include in a Qt5 build
 # keyword: MOC Header files that are to be parsed by moc
 # keyword: UI Qt designer ui files that are to be parsed by the UI compiler
@@ -69,8 +68,6 @@ endfunction()
 # keyword: PRECOMPILED A name of the precompiled header
 # keyword: LINK_LIBS A list of additional libraries to link to the
 #          target that are not dependent on Qt
-# keyword: QT4_LINK_LIBS A list of additional Qt libraries to link to.
-#          QtGui islinked to by default
 # keyword: QT5_LINK_LIBS A list of additional Qt libraries to link to.
 #          QtWidgets islinked to by default
 # keyword: MTD_QT_LINK_LIBS A list of additional libraries to link to the
@@ -85,8 +82,8 @@ function (mtd_add_qt_target)
   set (oneValueArgs
     TARGET_NAME OUTPUT_NAME QT_VERSION OUTPUT_DIR_BASE OUTPUT_SUBDIR PRECOMPILED)
   set (multiValueArgs SRC UI MOC
-    NOMOC RES DEFS QT4_DEFS QT5_DEFS INCLUDE_DIRS SYSTEM_INCLUDE_DIRS LINK_LIBS
-    QT4_LINK_LIBS QT5_LINK_LIBS MTD_QT_LINK_LIBS OSX_INSTALL_RPATH LINUX_INSTALL_RPATH INSTALL_DIR INSTALL_DIR_BASE)
+    NOMOC RES DEFS QT5_DEFS INCLUDE_DIRS SYSTEM_INCLUDE_DIRS LINK_LIBS
+    QT5_LINK_LIBS MTD_QT_LINK_LIBS OSX_INSTALL_RPATH LINUX_INSTALL_RPATH INSTALL_DIR INSTALL_DIR_BASE)
   cmake_parse_arguments (PARSED "${options}" "${oneValueArgs}"
                          "${multiValueArgs}" ${ARGN})
   if (PARSED_UNPARSED_ARGUMENTS)
@@ -104,17 +101,7 @@ function (mtd_add_qt_target)
                      ${CMAKE_CURRENT_BINARY_DIR})
   set (CMAKE_CURRENT_BINARY_DIR ${_ui_dir})
   set ( _all_defines ${PARSED_DEFS};${PARSED_QT${PARSED_QT_VERSION}_DEFS} )
-  if (PARSED_QT_VERSION EQUAL 4)
-    # Workaround Qt compiler detection
-    # https://forum.qt.io/topic/43778/error-when-initializing-qstringlist-using-initializer-list/3
-    # https://bugreports.qt.io/browse/QTBUG-39142
-    list ( APPEND _all_defines Q_COMPILER_INITIALIZER_LISTS )
-    qt4_wrap_ui (UI_HEADERS ${PARSED_UI})
-    _internal_qt_wrap_cpp ( 4 MOC_GENERATED DEFS ${_all_defines} INFILES ${PARSED_MOC})
-    set (ALL_SRC ${PARSED_SRC} ${PARSED_QT4_SRC} ${MOC_GENERATED})
-    qt4_add_resources (RES_FILES ${PARSED_RES})
-    set (_qt_link_libraries Qt4::QtGui ${PARSED_QT4_LINK_LIBS})
-  elseif (PARSED_QT_VERSION EQUAL 5)
+  if (PARSED_QT_VERSION EQUAL 5)
     qt5_wrap_ui (UI_HEADERS ${PARSED_UI})
     _internal_qt_wrap_cpp ( 5 MOC_GENERATED DEFS ${_all_defines} INFILES ${PARSED_MOC} )
     set (ALL_SRC ${PARSED_SRC} ${PARSED_QT5_SRC} ${MOC_GENERATED})
@@ -254,7 +241,7 @@ endfunction()
 #  - install_target_type The type of target that should be installed. See https://cmake.org/cmake/help/latest/command/install.html?highlight=install
 #  - install_dir A relative directory to install_prefix
 function (mtd_install_qt_library qt_version target install_target_type install_dir )
-    if ( qt_version EQUAL 4 OR (qt_version EQUAL 5 AND ${ENABLE_WORKBENCH}) )
+    if ( qt_version EQUAL 5 AND ${ENABLE_WORKBENCH} )
       install ( TARGETS ${target} ${install_target_type} DESTINATION ${install_dir} )
     endif ()
 endfunction ()
@@ -278,8 +265,6 @@ endfunction()
 # keyword: TEST_HELPER_SRCS A list of test helper files to compile in with the target
 # keyword: LINK_LIBS A list of additional libraries to link to the
 #          target that are not dependent on Qt
-# keyword: QT4_LINK_LIBS A list of additional Qt libraries to link to.
-#          QtGui islinked to by default
 # keyword: QT5_LINK_LIBS A list of additional Qt libraries to link to.
 #          QtWidgets islinked to by default
 # keyword: MTD_QT_LINK_LIBS A list of additional libraries to link to the
@@ -290,8 +275,8 @@ endfunction()
 function (mtd_add_qt_test_executable)
   set (options)
   set (oneValueArgs TARGET_NAME QT_VERSION)
-  set (multiValueArgs SRC QT4_SRC INCLUDE_DIRS TEST_HELPER_SRCS LINK_LIBS
-       QT4_LINK_LIBS QT5_LINK_LIBS MTD_QT_LINK_LIBS PARENT_DEPENDENCIES)
+  set (multiValueArgs SRC INCLUDE_DIRS TEST_HELPER_SRCS LINK_LIBS
+       QT5_LINK_LIBS MTD_QT_LINK_LIBS PARENT_DEPENDENCIES)
   cmake_parse_arguments (PARSED "${options}" "${oneValueArgs}"
                          "${multiValueArgs}" ${ARGN})
   if (PARSED_UNPARSED_ARGUMENTS)
@@ -311,15 +296,7 @@ function (mtd_add_qt_test_executable)
 
   # libraries
   set (_link_libs ${PARSED_LINK_LIBS} ${_mtd_qt_libs} )
-  if (PARSED_QT_VERSION EQUAL 4)
-    set (_link_libs Qt4::QtGui ${PARSED_QT4_LINK_LIBS} ${_link_libs})
-    # Workaround Qt compiler detection
-    # https://forum.qt.io/topic/43778/error-when-initializing-qstringlist-using-initializer-list/3
-    # https://bugreports.qt.io/browse/QTBUG-39142
-    set_target_properties ( ${_target_name} PROPERTIES
-      COMPILE_DEFINITIONS Q_COMPILER_INITIALIZER_LISTS
-    )
-  elseif (PARSED_QT_VERSION EQUAL 5)
+  if (PARSED_QT_VERSION EQUAL 5)
     set (_link_libs Qt5::Widgets ${PARSED_QT5_LINK_LIBS} ${_link_libs})
   else ()
     message (FATAL_ERROR "Unknown Qt version. Please specify only the major version.")
@@ -353,13 +330,12 @@ function (_qt_versions output_list)
   list (FIND ARGN "QT_VERSION" _ver_idx)
   if (_ver_idx EQUAL -1)
     # default versions
-    set (_qt_vers 4 5)
+    set (_qt_vers 5)
   else()
     math (EXPR _ver_value_idx "${_ver_idx}+1")
     list (GET ARGN ${_ver_value_idx} _ver_value)
     list (APPEND _qt_vers ${_ver_value})
   endif()
-  list (REMOVE_ITEM _qt_vers 4)
   if(NOT ENABLE_WORKBENCH)
     list (REMOVE_ITEM _qt_vers 5)
   endif()
@@ -394,7 +370,7 @@ function (_append_qt_suffix)
 endfunction ()
 
 # Wrap generation of moc files
-# We call the qt{4|5}_wrap_cpp individually for each file and force the include
+# We call the qt{5}_wrap_cpp individually for each file and force the include
 # path to be absolute to avoid relative paths whose length exceed the maximum
 # allowed limit on Windows (260 chars). It is assumed that the input paths
 # can be made absolute by prefixing them with ${CMAKE_CURRENT_LIST_DIR}
@@ -409,10 +385,7 @@ function (_internal_qt_wrap_cpp qtversion moc_generated )
     list ( APPEND _moc_defs "-D${_def}")
   endforeach ()
   foreach (_infile ${PARSED_INFILES})
-    if(qtversion EQUAL 4)
-      qt4_wrap_cpp (moc_generated ${_infile}
-        OPTIONS -i -f${CMAKE_CURRENT_LIST_DIR}/${_infile} ${_moc_defs} )
-    elseif (qtversion EQUAL 5)
+    if (qtversion EQUAL 5)
       qt5_wrap_cpp (moc_generated ${_infile}
         OPTIONS -i -f${CMAKE_CURRENT_LIST_DIR}/${_infile} ${_moc_defs} )
     else()

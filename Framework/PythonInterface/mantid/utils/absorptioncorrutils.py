@@ -418,7 +418,7 @@ def calc_absorption_corr_using_wksp(
         raise ValueError("Unrecognized absorption correction method '{}'".format(abs_method))
 
 
-def create_absorption_input(
+def create_absorption_input(   # noqa: C901
     filename,
     props=None,
     num_wl_bins=1000,

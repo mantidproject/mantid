@@ -10,16 +10,16 @@ Introduction
 ############
 
 This information is intended for a developer who needs to write a customized
-`ConvertToMD class <http://docs.mantidproject.org/nightly/algorithms/ConvertToMD.html>`__ (plugin). The
+:ref:`ConvertToMD class <algm-ConvertToMD-v1>` (plugin). The
 plugin then becomes automatically available to use in the
-`ConvertToMD <http://docs.mantidproject.org/nightly/algorithms/ConvertToMD.html>`__ algorithm and via the
+:ref:`ConvertToMD <algm-ConvertToMD-v1>` algorithm and via the
 `Create MD workspaces <http://www.mantidproject.org/Create_MD_Workspace_GUI>`__
 interface to produce multidimensional workspace for further visualization and analysis.
 
-As the MD transformation factory is similar to the `Dynamic Factory <http://www.mantidproject.org/Dynamic_Factory>`__
-used for `converting units <http://docs.mantidproject.org/nightly/concepts/UnitFactory.html>`__, the
+As the MD transformation factory is similar to the :ref:`Dynamic Factory <Dynamic Factory>`
+used for converting :ref:`units <Unit Factory>`, the
 procedure of writing a custom ``ConvertToMD`` transformation is very similar to adding a new unit to use
-with `ConvertUnits <http://docs.mantidproject.org/nightly/algorithms/ConvertUnits.html>`__ algorithm
+with :ref:`ConvertUnits <algm-ConvertUnits-v1>` algorithm
 or writing a new algorithm to use with Mantid.
 
 The plugin interface deals with the task of converting a generic n-dimensional point of a ``MatrixWorkspace``
@@ -150,16 +150,16 @@ PreprocessDetectorsToMD with custom plugins
 
 Unit conversion uses the angular positions and sample-detector distances.
 This information is usually expensive to calculate so it is calculated separately by the
-`PreprocessDetectorsToMD <http://docs.mantidproject.org/nightly/algorithms/PreprocessDetectorsToMD-v1.html>`__ algorithm.
+:ref:`PreprocessDetectorsToMD <algm-PreprocessDetectorsToMD-v1>` algorithm.
 The detector information can be extracted directly from the input workspace, but consider checking the table workspace
-returned by `PreprocessDetectorsToMD <http://docs.mantidproject.org/nightly/algorithms/PreprocessDetectorsToMD-v1.html>`__
+returned by :ref:`PreprocessDetectorsToMD <algm-PreprocessDetectorsToMD-v1>`
 and check if the information is already provided there.
 
-`PreprocessDetectorsToMD <http://docs.mantidproject.org/nightly/algorithms/PreprocessDetectorsToMD-v1.html>`__ can also
+:ref:`PreprocessDetectorsToMD <algm-PreprocessDetectorsToMD-v1>` can also
 be modified to add some additional detector information. This information can then be added to the resulting table workspace
 and used in the custom plugin.
 All currently existing plugins use the information about the detector's positions calculated by
-`PreprocessDetectorsToMD <http://docs.mantidproject.org/nightly/algorithms/PreprocessDetectorsToMD-v1.html>`__.
+:ref:`PreprocessDetectorsToMD <algm-PreprocessDetectorsToMD-v1>`.
 
 Complex Transformations
 #######################

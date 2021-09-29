@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantidqt.utils.observer_pattern import Observer, Observable, GenericObservable,GenericObserver
+from mantidqt.widgets.muonperiodinfo import MuonPeriodInfo
 import Muon.GUI.Common.utilities.muon_file_utils as file_utils
 import Muon.GUI.Common.utilities.xml_utils as xml_utils
 import Muon.GUI.Common.utilities.algorithm_utils as algorithm_utils
@@ -12,14 +13,6 @@ from Muon.GUI.Common import thread_model
 from Muon.GUI.Common.run_selection_dialog import RunSelectionDialog
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
 from Muon.GUI.Common.utilities.run_string_utils import run_string_to_list
-from Muon.GUI.Common.muon_period_info_widget import MuonPeriodInfoWidget, PERIOD_INFO_NOT_FOUND
-
-CONTEXT_MAP = {"Name": 6,
-               "Type": 1,
-               "Frames": 2,
-               "Total Good Frames": 3,
-               "Counts": 5,
-               "Tag": 4}
 
 
 class GroupingTabPresenter(object):
@@ -43,7 +36,7 @@ class GroupingTabPresenter(object):
         self.grouping_table_widget = grouping_table_widget
         self.pairing_table_widget = pairing_table_widget
         self.diff_table = diff_table
-        self.period_info_widget = MuonPeriodInfoWidget(parent=parent)
+        self.period_info_widget = MuonPeriodInfo()
 
         self._view.set_description_text('')
         self._view.on_add_pair_requested(self.add_pair_from_grouping_table)
@@ -64,7 +57,7 @@ class GroupingTabPresenter(object):
         self.pairing_table_widget.on_data_changed(self.pair_table_changed)
         self.enable_editing_notifier = GroupingTabPresenter.EnableEditingNotifier(self)
         self.disable_editing_notifier = GroupingTabPresenter.DisableEditingNotifier(self)
-        self.calculation_finished_notifier = GenericObservable()
+        self.counts_calculation_finished_notifier = GenericObservable()
 
         self.guessAlphaObserver = GroupingTabPresenter.GuessAlphaObserver(self)
         self.pairing_table_widget.guessAlphaNotifier.add_subscriber(self.guessAlphaObserver)
@@ -221,7 +214,7 @@ class GroupingTabPresenter(object):
         self.pairing_table_widget.enable_editing()
 
     def calculate_all_data(self):
-        self._model.show_all_groups_and_pairs()
+        self._model.calculate_all_data()
 
     def handle_update_all_clicked(self):
         self.update_thread = self.create_update_thread()
@@ -237,7 +230,7 @@ class GroupingTabPresenter(object):
     def handle_update_finished(self):
         self.enable_editing()
         self.groupingNotifier.notify_subscribers()
-        self.calculation_finished_notifier.notify_subscribers()
+        self.counts_calculation_finished_notifier.notify_subscribers()
 
     def handle_default_grouping_button_clicked(self):
         status = self._model.reset_groups_and_pairs_to_default()
@@ -259,6 +252,7 @@ class GroupingTabPresenter(object):
         self.diff_table.update_view_from_model()
         self.pairing_table_widget.update_view_from_model()
         self.update_description_text_to_empty()
+        self.groupingNotifier.notify_subscribers()
 
     def handle_new_data_loaded(self):
         self.period_info_widget.clear()
@@ -292,56 +286,27 @@ class GroupingTabPresenter(object):
                 self.grouping_table_widget.plot_default_case()
 
     def handle_period_information_button_clicked(self):
-        if self._model.is_data_loaded() and self.period_info_widget.is_empty():
+        if self._model.is_data_loaded() and self.period_info_widget.isEmpty():
             self._add_period_info_to_widget()
         self.period_info_widget.show()
         self.period_info_widget.raise_()
 
-    def _add_period_info_to_widget(self):
-
-        def _parse_logs(log_name):
-            sample_log = self._model._data.get_sample_log(log_name)
-            return sample_log.value.split(";") if sample_log else []
-
-        runs = self._model._data.current_runs
-        runs_string = ""
-        for run_list in runs:
-            for run in run_list:
-                if runs_string:
-                    runs_string += ", "
-                runs_string += str(run)
-        self.period_info_widget.set_title_runs(self._model.instrument + runs_string)
-
-        period_sequences_log = self._model._data.get_sample_log("period_sequences")
-        self.period_info_widget.number_of_sequences = str(period_sequences_log.value) if period_sequences_log else None
-        names = _parse_logs("period_labels")
-        types = _parse_logs("period_type")
-        frames = _parse_logs("frames_period_requested")
-        total_frames = _parse_logs("frames_period_Raw")
-        counts = _parse_logs("total_counts_period")
-        tags = _parse_logs("period_output")
-
-        names, types, frames, total_frames, counts, tags, count = self._fix_up_period_info_lists([names, types, frames,
-                                                                                                  total_frames, counts,
-                                                                                                  tags])
-        for i in range(count):
-            self.period_info_widget.add_period_to_table(names[i], types[i], frames[i], total_frames[i],
-                                                        counts[self.period_info_widget.daq_count], tags[i])
-
     def closePeriodInfoWidget(self):
         self.period_info_widget.close()
 
-    def _fix_up_period_info_lists(self, info_list):
-        # First find number of periods
-        lengths_list = [len(i) for i in info_list]
-        count = max(lengths_list)
-        # Then make sure lists are correct size
-        for i, info in enumerate(info_list):
-            if info:
-                info_list[i] += [PERIOD_INFO_NOT_FOUND] * (count - len(info))
-            else:
-                info_list[i] = [PERIOD_INFO_NOT_FOUND] * count
-        return (*info_list, count)
+    def _add_period_info_to_widget(self):
+        try:
+            self.period_info_widget.addInfo(self._model._data.current_workspace)
+            runs = self._model._data.current_runs
+            runs_string = ""
+            for run_list in runs:
+                for run in run_list:
+                    if runs_string:
+                        runs_string += ", "
+                    runs_string += str(run)
+            self.period_info_widget.setWidgetTitleRuns(self._model.instrument + runs_string)
+        except RuntimeError:
+            self._view.display_warning_box("Could not read period info from the current workspace")
 
     # ------------------------------------------------------------------------------------------------------------------
     # Observer / Observable

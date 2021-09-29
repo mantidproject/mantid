@@ -9,7 +9,7 @@ if(CXXTEST_FOUND)
       ../../TestHelpers/src/WorkspaceCreationHelper.cpp)
 
   cxxtest_add_test(MPIAlgorithmsTest ${TEST_FILES})
-  target_link_libraries(MPIAlgorithmsTest MPIAlgorithms)
+  target_link_libraries(MPIAlgorithmsTest Mantid::MPIAlgorithms)
   add_dependencies(FrameworkTests MPIAlgorithmsTest)
   # Add to the 'FrameworkTests' group in VS
   set_property(TARGET MPIAlgorithmsTest PROPERTY FOLDER "UnitTests")

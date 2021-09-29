@@ -1,0 +1,132 @@
+#!/bin/bash -ex
+
+# This script expects to be in a POSIX environment, it will run our CI workflow on a POSIX environment depending
+# on the flags and args passed. This script will always compile the code, and run the unit tests if a change was
+# made to something other than a .rst file.
+#
+# Script usage:
+# buildscript <path-to-workspace> <cmake-preset-name> [options]
+#
+# Example command to run a PR build on ubuntu:
+# buildscript /jenkins/workspace_dir/ linux-ci --enable-systemtests --enable-coverage --enable-docs
+#
+# Expected args:
+#   1. WORKSPACE: path to the workspace/source code that this should run inside
+#   2. CMAKE_PRESET: the CMake preset that should be ran to generate the cmake files for this CI job
+#
+# Possible flags:
+#   --enable-systemtests: Runs the system tests from being compiled or ran
+#   --enable-package: Runs a package being produced
+#   --enable-docs: Runs the docs from being built
+#   --enable-dev-docs: Runs the developer docs from being built
+#   --enable-doctests: Runs the documentation tests
+#   --clean-build: Clears the build folder and builds from scratch
+#   --clean-external-projects: Clear the external projects from the build folder
+#   --use-core-dumps: Activate core dumps (Linux only)
+#
+# Possible parameters:
+#   --extra-cmake-flags: Extra flags to pass directly to cmake, enclose in "", defaults to nothing
+#   --build-threads: pass the number of threads that can be used to build with, default is 1 thread per logical core
+
+# Check arguements passed are 2 or higher, and aren't optional flags.
+if [[ $# < 2 || $1 == "--"* || $2 == "--"* ]]; then
+    echo "Pass 2 arguements followed by optional flags usage: buildscript <path-to-workspace> <cmake-preset-name> [options]"
+    exit 1
+fi
+
+# SCRIPT_DIR discovery from https://stackoverflow.com/a/9107028 by https://stackoverflow.com/users/1184238/andrew-norrie
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+WORKSPACE=$1
+shift
+CMAKE_PRESET=$1
+shift
+EXPECTED_MAMBAFORGE_PATH=$WORKSPACE/mambaforge # Install into the WORKSPACE_DIR
+EXPECTED_CONDA_PATH=$EXPECTED_MAMBAFORGE_PATH/bin/conda
+CONDA_ENV_NAME="mantid-developer"
+BUILD_THREADS="$(grep -c ^processor /proc/cpuinfo)" # Not physical but logical cores, includes hyper threaded.
+XVFB_SERVER_NUM=101
+BUILD_DIR=$WORKSPACE/build
+
+ENABLE_BUILD_CODE=true
+ENABLE_UNIT_TESTS=true
+ENABLE_SYSTEM_TESTS=false
+ENABLE_PACKAGE=false
+ENABLE_DOCS=false
+ENABLE_DOC_TESTS=false
+ENABLE_DEV_DOCS=false
+CLEAN_BUILD=false
+CLEAN_EXTERNAL_PROJECTS=false
+USE_CORE_DUMPS=false
+EXTRA_CMAKE_FLAGS=""
+
+# Handle flag inputs
+while [ ! $# -eq 0 ]
+do
+    case "$1" in
+        --enable-systemtests) ENABLE_SYSTEM_TESTS=true ;;
+        --enable-package) ENABLE_PACKAGE=true ;;
+        --enable-docs) ENABLE_DOCS=true ;;
+        --enable-doctests) ENABLE_DOC_TESTS=true ;;
+        --enable-dev-docs) ENABLE_DEV_DOCS=true ;;
+        --clean-build) CLEAN_BUILD=true ;;
+        --clean-external-projects) CLEAN_EXTERNAL_PROJECTS=true ;;
+        --use-core-dumps) USE_CORE_DUMPS=true ;;
+        --extra-cmake-flags)
+            EXTRA_CMAKE_FLAGS="$2"
+            shift
+            ;;
+        --build-threads)
+            BUILD_THREADS="$2"
+            shift
+            ;;
+        *)
+            echo "Argument not accepted: $1"
+            exit 1
+            ;;
+  esac
+  shift
+done
+
+# Setup Mambaforge
+$SCRIPT_DIR/download-and-install-mambaforge $EXPECTED_MAMBAFORGE_PATH $EXPECTED_CONDA_PATH $CLEAN_BUILD
+
+# Setup Conda environment
+$SCRIPT_DIR/setup-conda-env $WORKSPACE $EXPECTED_CONDA_PATH $CONDA_ENV_NAME
+
+# Activate Conda environment
+. $WORKSPACE/mambaforge/etc/profile.d/conda.sh
+conda activate $CONDA_ENV_NAME
+
+# Clean the source tree to remove stale configured files ignoring the build directory
+git clean -d -x --force --exclude=build --exclude=mambaforge --exclude=".Xauthority-*"
+
+# Clean up build folder
+if [[ $CLEAN_BUILD  == true ]]; then
+    rm -rf $BUILD_DIR
+fi
+
+mkdir -p $BUILD_DIR
+
+rm -rf ${BUILD_DIR}/bin ${BUILD_DIR}/ExternalData ${BUILD_DIR}/Testing
+find $WORKSPACE \( -iname 'TEST-*.xml' -o -name 'Test.xml' \) -delete
+
+if [[ ${CLEAN_EXTERNAL_PROJECTS} == true ]]; then
+    rm -rf $BUILD_DIR/eigen-*
+    rm -rf $BUILD_DIR/googletest-*
+fi
+
+# Clean up artifacts from previous builds
+rm -f -- *.dmg *.rpm *.deb *.tar.gz *.tar.xz
+
+# Should we even build the code?
+if ${SCRIPT_DIR}/../check_for_changes dev-docs-only || ${SCRIPT_DIR}/../check_for_changes user-docs-only; then
+    ENABLE_BUILD_CODE=false
+    ENABLE_UNIT_TESTS=false
+    ENABLE_SYSTEM_TESTS=false
+fi
+
+# Run the script that handles the actual building
+$SCRIPT_DIR/build $WORKSPACE $CMAKE_PRESET $ENABLE_DOCS $ENABLE_DEV_DOCS $ENABLE_BUILD_CODE $ENABLE_UNIT_TESTS $ENABLE_SYSTEM_TESTS $EXTRA_CMAKE_FLAGS
+
+# Run unit and system tests
+$SCRIPT_DIR/run-tests $WORKSPACE $ENABLE_SYSTEM_TESTS $ENABLE_UNIT_TESTS $ENABLE_DOCS $ENABLE_DOC_TESTS $BUILD_THREADS $USE_CORE_DUMPS

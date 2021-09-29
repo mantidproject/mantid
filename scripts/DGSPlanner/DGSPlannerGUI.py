@@ -16,6 +16,7 @@ from .ValidateOL import ValidateOL
 import matplotlib
 from mantidqt.gui_helper import show_interface_help
 from mantidqt.MPLwidgets import *
+from mantidqt.plotting.mantid_navigation_toolbar import MantidNavigationToolbar
 from matplotlib.figure import Figure
 from mpl_toolkits.axisartist.grid_helper_curvelinear import GridHelperCurveLinear
 from mpl_toolkits.axisartist import Subplot
@@ -33,10 +34,6 @@ def float2Input(x):
 
 
 # pylint: disable=too-many-instance-attributes
-
-
-class CustomNavigationToolbar(NavigationToolbar2QT):
-    toolitems = [t for t in NavigationToolbar2QT.toolitems if t[0] in ('Home', 'Pan', 'Zoom')]
 
 
 class DGSPlannerGUI(QtWidgets.QWidget):
@@ -108,7 +105,7 @@ class DGSPlannerGUI(QtWidgets.QWidget):
         if matplotlib.compare_versions('2.1.0', matplotlib.__version__):
             self.trajfig.hold(True)  # hold is deprecated since 2.1.0, true by default
         self.figure.add_subplot(self.trajfig)
-        self.toolbar = CustomNavigationToolbar(self.canvas, self)
+        self.toolbar = MantidNavigationToolbar(self.canvas, self)
         figureLayout = QtWidgets.QVBoxLayout()
         figureLayout.addWidget(self.toolbar, 0)
         figureLayout.addWidget(self.canvas, 1)

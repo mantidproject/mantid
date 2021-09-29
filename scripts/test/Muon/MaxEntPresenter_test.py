@@ -9,9 +9,8 @@ import unittest
 from unittest import mock
 from Muon.GUI.Common import thread_model
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
-from Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_presenter_new
-from Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_view_new
-from Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_model
+from Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_presenter
+from Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_view
 
 
 class MaxEntPresenterTest(unittest.TestCase):
@@ -20,18 +19,18 @@ class MaxEntPresenterTest(unittest.TestCase):
         self.context.data_context.instrument = 'MUSR'
         self.context.gui_context.update({'RebinType': 'None'})
 
-        # Model
-        self.model = mock.create_autospec(maxent_model.MaxEntWrapper, spec_set=True)
-
         # View
-        self.view = mock.create_autospec(maxent_view_new.MaxEntView, spec_set=True)
+        self.view = mock.create_autospec(maxent_view.MaxEntView, spec_set=True)
         # signals
         # needed for connect in presenter
         self.view.maxEntButtonSignal = mock.Mock()
         self.view.cancelSignal = mock.Mock()
 
         # Default Values
-        self.view.input_workspace = "TEST00000001"
+        type(self.view).get_run = mock.PropertyMock(return_value="2435")
+        type(self.view).num_periods = mock.PropertyMock(return_value=1)
+        type(self.view).get_period = mock.PropertyMock(return_value="1")
+
         self.view.phase_table = "Construct"
         self.view.num_points = 2048
         self.view.inner_iterations = 10
@@ -42,8 +41,10 @@ class MaxEntPresenterTest(unittest.TestCase):
         self.view.maximum_entropy_constant = 0.1
         self.view.fit_dead_times = False
 
+        self.context.data_context.num_periods = mock.Mock(return_value=1)
+
         # Presenter
-        self.presenter = maxent_presenter_new.MaxEntPresenter(self.view, self.context)
+        self.presenter = maxent_presenter.MaxEntPresenter(self.view, self.context)
 
         # make thread
         self.thread = mock.create_autospec(thread_model.ThreadModel)
@@ -66,16 +67,9 @@ class MaxEntPresenterTest(unittest.TestCase):
     def test_clear(self):
         self.presenter.clear()
 
-        self.assertEqual(2,self.view.addItems.call_count)
+        self.assertEqual(2,self.view.addRuns.call_count)
         self.assertEqual(2,self.view.update_phase_table_combo.call_count)
         self.assertRaises(KeyError,lambda: self.presenter.get_parameters_for_maxent_calculation()['InputPhaseTable'])
-
-    def test_cancel(self):
-        self.presenter.maxent_alg = self.model
-
-        self.presenter.cancel()
-
-        self.assertEqual(1,self.model.cancel.call_count)
 
     def test_maxent_button(self):
         self.presenter.createThread = lambda *args:self.thread

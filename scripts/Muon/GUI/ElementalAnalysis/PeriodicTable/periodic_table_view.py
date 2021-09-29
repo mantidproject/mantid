@@ -18,6 +18,9 @@ class PeriodicTableView(QtWidgets.QWidget):
         self.grid.addWidget(self.ptable)
         self.setLayout(self.grid)
 
+    def elements_list(self):
+        return self.ptable.elements_list()
+
     def on_table_lclicked(self, slot):
         self.ptable.sigElementLeftClicked.connect(slot)
 

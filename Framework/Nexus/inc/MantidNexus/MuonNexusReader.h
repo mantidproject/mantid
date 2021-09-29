@@ -36,6 +36,8 @@ private:
   int m_nexusLogCount = 0;             ///< number of NXlog sections read from file
   std::vector<bool> m_logType;         ///< true if i'th log is numeric
   std::vector<std::string> m_logNames; ///< stores name read from file
+  std::vector<std::string> m_logUnits;
+
   void openFirstNXentry(NeXus::File &handle);
   bool readMuonLogData(NeXus::File &handle);               ///< method to read the fields of open NXlog section
   std::vector<std::vector<float>> m_logValues,             ///< array of values for i'th NXlog section
@@ -81,6 +83,7 @@ public:
   void getLogStringValues(const int &logNumber, const int &logSequence, std::time_t &logTime,
                           std::string &value); ///< get logSequence pair of logNumber string log
   bool logTypeNumeric(const int i) const;      ///< true if i'th log is of numeric type
+  std::string logUnits(const int i) const;
   // following ISISRAW.h
   int t_nsp1 = 0; ///< number of spectra in time regime 1
   int t_ntc1 = 0; ///< number of time channels in time regime 1

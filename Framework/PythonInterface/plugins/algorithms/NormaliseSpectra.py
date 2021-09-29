@@ -44,7 +44,7 @@ class NormaliseSpectra(DataProcessorAlgorithm):
         for idx in range(num_hists):
             single_spectrum = ExtractSpectra(InputWorkspace=self._input_ws, WorkspaceIndexList=idx)
             y_data = single_spectrum.readY(0)
-            ymax = np.amax(y_data)
+            ymax = np.nanmax(y_data)
             # raises a RuntimeError if the ymax is <= 0
             if ymax <= 0:
                 spectrum_no = single_spectrum.getSpectrum(0).getSpectrumNo()

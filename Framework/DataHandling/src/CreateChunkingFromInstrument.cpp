@@ -312,7 +312,7 @@ Instrument_const_sptr CreateChunkingFromInstrument::getInstrument() {
       // Test if IDF exists in file, move on quickly if not
       nxsfile.openPath("instrument/instrument_xml");
       nxsfile.close();
-      IAlgorithm_sptr loadInst = createChildAlgorithm("LoadIDFFromNexus", 0.0, 0.2);
+      auto loadInst = createChildAlgorithm("LoadIDFFromNexus", 0.0, 0.2);
       // Now execute the Child Algorithm. Catch and log any error, but don't
       // stop.
       try {

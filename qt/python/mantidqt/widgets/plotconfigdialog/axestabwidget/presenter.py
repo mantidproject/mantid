@@ -16,12 +16,14 @@ from mantidqt.widgets.plotconfigdialog.axestabwidget.view import AxesTabWidgetVi
 
 class AxesTabWidgetPresenter:
 
-    def __init__(self, fig, view=None, parent=None):
+    def __init__(self, fig, view=None, parent=None, success_callback=None, error_callback=None):
         self.fig = fig
         if not view:
             self.view = AxesTabWidgetView(parent)
         else:
             self.view = view
+        self.success_callback = success_callback
+        self.error_callback = error_callback
 
         # Store a copy of the current view props.
         self.current_view_props = {}
@@ -40,10 +42,13 @@ class AxesTabWidgetPresenter:
             self.update_view)
         self.view.axis_tab_bar.currentChanged.connect(
             self.axis_changed)
-        self.view.apply_all_button.clicked.connect(self.apply_all_properties)
         self.view.show_minor_ticks_check_box.toggled.connect(
             self.show_minor_ticks_checked)
         self.view.autoscale.toggled.connect(self.autoscale_changed)
+        if self.success_callback and self.error_callback:
+            self.view.apply_all_button.clicked.connect(self._apply_all_properties_with_errors)
+        else:
+            self.view.apply_all_button.clicked.connect(self.apply_all_properties)
 
     def apply_properties(self):
         """Update the axes with the user inputted properties"""
@@ -293,3 +298,12 @@ class AxesTabWidgetPresenter:
 
         if not checked:
             self.view.set_show_minor_gridlines(False)
+
+    def _apply_all_properties_with_errors(self):
+        """Call apply_all_properties, notifying the parent presenter of whether there were any errors"""
+        try:
+            self.apply_all_properties()
+        except (AssertionError, IndexError, KeyError, TypeError, ValueError) as exception:
+            self.error_callback(str(exception))
+            return
+        self.success_callback()

@@ -9,6 +9,7 @@
 #include "GUI/Event/QtEventView.h"
 #include "GUI/Experiment/QtExperimentView.h"
 #include "GUI/Instrument/QtInstrumentView.h"
+#include "GUI/Preview/QtPreviewView.h"
 #include "GUI/Runs/QtRunsView.h"
 #include "GUI/Save/QtSaveView.h"
 #include "IBatchView.h"
@@ -34,6 +35,7 @@ public:
   ISaveView *save() const override;
   IExperimentView *experiment() const override;
   IInstrumentView *instrument() const override;
+  IPreviewView *preview() const override;
   void clearAlgorithmQueue() override;
   void setAlgorithmQueue(std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> algorithms) override;
   void executeAlgorithmQueue() override;
@@ -62,6 +64,7 @@ private:
   std::unique_ptr<QtSaveView> m_save;
   std::unique_ptr<QtExperimentView> m_experiment;
   std::unique_ptr<QtInstrumentView> m_instrument;
+  std::unique_ptr<QtPreviewView> m_preview;
   API::BatchAlgorithmRunner m_batchAlgoRunner;
 
   friend class Encoder;

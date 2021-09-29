@@ -481,6 +481,13 @@
              </widget>
             </item>
             <item>
+             <widget class="QPushButton" name="periodInfo">
+              <property name="text">
+               <string>Period Info</string>
+              </property>
+             </widget>
+            </item>
+            <item>
              <spacer name="hSpacerPeriods">
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
@@ -864,8 +871,8 @@
   </connection>
  </connections>
  <buttongroups>
-  <buttongroup name="detectorGroupingType"/>
   <buttongroup name="deadTimeCorrType"/>
+  <buttongroup name="detectorGroupingType"/>
   <buttongroup name="calculationType"/>
  </buttongroups>
 </ui>

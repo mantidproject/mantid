@@ -4,8 +4,10 @@ from mantid.simpleapi import *
 import matplotlib.pyplot as plt
 
 LINE_COLORS = ('blue', 'orange', 'green', 'red', 'purple')
-LINE_LABELS = ('Uncorrected', 'Mayers', 'Carpenter',
-               'Numerical Integration', 'Monte Carlo')
+ABS_LINE_LABELS = ('Uncorrected', 'Mayers', 'Carpenter',
+                   'Numerical Integration', 'Monte Carlo')
+MS_LINE_LABELS = ('Uncorrected', 'Mayers', 'Carpenter',
+                  'Numerical Integration', 'Discus')
 
 
 def make_sample_workspace(material, num_density, radius, height):
@@ -34,14 +36,14 @@ def get_mayers_results(sample_ws):
     return mayers_abs, mayers_ms, mayers_abs_corr, mayers_ms_corr
 
 
-def get_carpenter_results(sample_ws):
+def get_carpenter_results(sample_ws, radius):
     ConvertUnits(InputWorkspace=sample_ws, OutputWorkspace=sample_ws, Target="Wavelength")
-    corrections = CalculateCarpenterSampleCorrection(InputWorkspace=sample_ws,CylinderSampleRadius=0.2)
+    corrections = CalculateCarpenterSampleCorrection(InputWorkspace=sample_ws,CylinderSampleRadius=radius)
     absCorr = corrections.getItem(0)
     msCorr = corrections.getItem(1)
     carpenter_abs = Divide(sample_ws, absCorr)
     absCorr = 1. / absCorr # plots are of 1/correction
-    carpenter_ms  = CarpenterSampleCorrection(sample_ws)
+    carpenter_ms  = CarpenterSampleCorrection(sample_ws,CylinderSampleRadius=radius)
     msCorr = carpenter_ms / carpenter_abs # makes things look like Mayers' function
     return carpenter_abs, carpenter_ms, absCorr, msCorr
 
@@ -72,7 +74,7 @@ def get_montecarlo_results(sample_ws):
     X=[0,10,20,30,40]
     Y=[1,1,1,1,1]
     SQ=CreateWorkspace(DataX=X,DataY=Y,UnitX="MomentumTransfer")
-    mc_corrections = CalculateMultipleScattering(sample_ws, SofqWorkspace=SQ, NumberScatterings=2)
+    mc_corrections = DiscusMultipleScatteringCorrection(sample_ws, SofqWorkspace=SQ, NumberScatterings=2)
     # apply ms correction using ratio method
     multi_scatt_ratio = mc_corrections[1]/(mc_corrections[1] + mc_corrections[2])
     mc_ms = sample_ws * multi_scatt_ratio
@@ -85,8 +87,8 @@ def get_montecarlo_results(sample_ws):
     return mc_abs, mc_ms, mc_abs_factor, multi_scatt_ratio
 
 
-def plot_stuff(axis, workspaces, wkspIndex=0):
-    labels = LINE_LABELS[len(LINE_LABELS) - len(workspaces):]
+def plot_stuff(axis, workspaces, line_labels, wkspIndex=0):
+    labels = line_labels[len(line_labels) - len(workspaces):]
     colors = LINE_COLORS[len(LINE_COLORS) - len(workspaces):]
     for wksp, label, color in zip(workspaces, labels, colors):
         axis.plot(wksp, wkspIndex=wkspIndex, label=label, color=color, normalize_by_bin_width=False)
@@ -104,7 +106,7 @@ sample_ws = make_sample_workspace(material, num_density, cyl_radius_cm, cyl_heig
 
 # Calculate corrections
 mayers_abs, mayers_ms, mayers_abs_corr, mayers_ms_corr = get_mayers_results(sample_ws)
-carpenter_abs, carpenter_ms, carpenter_abs_corr, carpenter_ms_corr = get_carpenter_results(sample_ws)
+carpenter_abs, carpenter_ms, carpenter_abs_corr, carpenter_ms_corr = get_carpenter_results(sample_ws, cyl_radius_cm)
 numerical_abs, numerical_ms, numerical_abs_corr, numerical_ms_corr = get_numerical_results(sample_ws)
 mc_abs, mc_ms, mc_abs_corr, mc_ms_corr = get_montecarlo_results(sample_ws)
 
@@ -120,17 +122,17 @@ for name in [sample_ws, mayers_abs, mayers_ms, mayers_abs_corr, mayers_ms_corr,
 def plot_abs():
     # Plot
     fig, ax = plt.subplots(2, subplot_kw={'projection':'mantid'}, sharex=True, gridspec_kw = {'wspace':0, 'hspace':0})
-    plot_stuff(ax[0], (sample_ws, mayers_ms, carpenter_ms, numerical_ms, mc_ms))
+    plot_stuff(ax[0], (sample_ws, mayers_abs, carpenter_abs, numerical_abs, mc_abs), ABS_LINE_LABELS)
     ax[0].legend()
-    plot_stuff(ax[1], (mayers_ms_corr, carpenter_ms_corr, numerical_ms_corr, mc_ms_corr))
-    ax[1].set_ylabel(r'1-$\Delta$')
+    plot_stuff(ax[1], (mayers_abs_corr, carpenter_abs_corr, numerical_abs_corr, mc_abs_corr), ABS_LINE_LABELS)
+    ax[1].set_ylabel('1/A')
     #plt.show()
 
 
 def plot_ms():
     fig, ax = plt.subplots(2, subplot_kw={'projection':'mantid'}, sharex=True, gridspec_kw = {'wspace':0, 'hspace':0})
-    plot_stuff(ax[0], (sample_ws, mayers_ms, carpenter_ms, numerical_ms, mc_ms))
+    plot_stuff(ax[0], (sample_ws, mayers_ms, carpenter_ms, numerical_ms, mc_ms), MS_LINE_LABELS)
     ax[0].legend()
-    plot_stuff(ax[1], (mayers_abs_corr, carpenter_abs_corr, numerical_abs_corr, mc_abs_corr))
-    ax[1].set_ylabel('1/A')
+    plot_stuff(ax[1], (mayers_ms_corr, carpenter_ms_corr, numerical_ms_corr, mc_ms_corr), MS_LINE_LABELS)
+    ax[1].set_ylabel(r'1-$\Delta$')
     #plt.show()

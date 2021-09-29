@@ -109,6 +109,8 @@ public:
   QStringList getParameterNames() const;
   // Get parameters used to run the Fit algorithm
   std::string getFitAlgorithmParameters() const;
+  // Get the status string returned from Fit
+  std::string getFitAlgorithmOutputStatus() const;
 
   /// Load function
   void loadFunction(const QString &funcString);
@@ -469,7 +471,7 @@ protected:
   /// Adds the workspace index property to the browser.
   virtual void addWorkspaceIndexToBrowser();
   /// Set the parameters to the fit outcome
-  void getFitResults();
+  void updateBrowserFromFitResults(const Mantid::API::IFunction_sptr &finalFunction);
   /// Create a double property and set some settings
   QtProperty *addDoubleProperty(const QString &name, QtDoublePropertyManager *manager = nullptr) const;
   /// Called when the minimizer changes. Creates minimizes's properties.
@@ -683,6 +685,7 @@ private:
 
   // Keep a history of the parameters used to run the Fit algorithm
   std::string m_fitAlgParameters;
+  std::string m_fitAlgOutputStatus;
 
   /// If non-empty it contains references to the spectra
   /// allowed to be fitted in this browser:

@@ -62,7 +62,10 @@ public:
     m_fitDomain = std::make_unique<FitDomain>(m_wsName, m_wsIndex, m_startX, m_endX);
   }
 
-  void tearDown() override { Mantid::API::AnalysisDataService::Instance().clear(); }
+  void tearDown() override {
+    Mantid::API::AnalysisDataService::Instance().clear();
+    m_fitDomain.reset();
+  }
 
   void test_that_the_FitDomain_has_been_instantiated_with_the_correct_data() {
     TS_ASSERT_EQUALS(m_fitDomain->domainName(), m_wsName + " (" + std::to_string(m_wsIndex.value) + ")");
@@ -71,6 +74,13 @@ public:
     TS_ASSERT_EQUALS(m_fitDomain->startX(), m_startX);
     TS_ASSERT_EQUALS(m_fitDomain->endX(), m_endX);
     TS_ASSERT_EQUALS(m_fitDomain->getFunctionCopy(), nullptr);
+  }
+
+  void test_that_setWorkspaceName_will_change_the_name_of_the_workspace_within_a_fit_domain() {
+    std::string const newName("New Workspace Name");
+    m_fitDomain->setWorkspaceName(newName);
+
+    TS_ASSERT_EQUALS(m_fitDomain->workspaceName(), newName);
   }
 
   void test_that_setStartX_will_not_set_the_startX_if_the_value_is_out_of_range() {

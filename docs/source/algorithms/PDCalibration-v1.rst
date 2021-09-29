@@ -93,6 +93,38 @@ Output:
 
   The calibrated difc at detid 40896 is 5523.060327692842
 
+**Example - PDCalibration with BackToBackExponential fit function**
+
+The following example shows how to use PDCalibration with the BackToBackExponential fit function. The fit works best if sensible initial values for the parameters are specified in an instrument definition or parameter file (for more details, see the :ref:`fitting parameters <Using fitting parameter>` documentation):
+
+.. code-block:: python
+
+   Load(Filename=r'ENGINX00193749.nxs', OutputWorkspace='193749')
+   dpks = (1.913220892, 1.631600313,
+           1.562138267, 1.352851554, 1.104598643)
+
+   # initial values for GSAS parameters A, B, S are in ENGINX parameters .xml
+   # use log binning
+   PDCalibration(InputWorkspace='193749',
+                 TofBinning=[10000,-0.0005,46000],
+                 PeakPositions=dpks,
+                 PeakWindow = 0.03,
+                 MinimumPeakHeight = 0.5,
+                 PeakFunction = 'BackToBackExponential',
+                 CalibrationParameters = 'DIFC',
+                 OutputCalibrationTable='cal_B2B_DIFC_chisqTrue',
+                 DiagnosticWorkspaces = 'diag_B2B_DIFC_chisqTrue',
+                 UseChiSq = True)
+
+   # Print the result
+   print("The calibrated difc at detid {detid} is {difc}".format(**mtd['cal_B2B_DIFC_chisqTrue'].row(1000)))
+
+Output:
+
+.. code-block:: none
+
+  The calibrated difc at detid 108041 is 16834.952770921267
+
 .. categories::
 
 .. sourcelink::

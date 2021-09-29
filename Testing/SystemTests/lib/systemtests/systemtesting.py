@@ -13,6 +13,8 @@ import functools
 import os
 import pathlib
 from typing import List
+from io import StringIO
+from contextlib import redirect_stdout
 
 if os.environ.get('MANTID_FRAMEWORK_CONDA_SYSTEMTEST'):
     # conda build of mantid-framework sometimes require importing matplotlib before mantid
@@ -102,6 +104,9 @@ class MantidSystemTest(unittest.TestCase):
         self.stripWhitespace = True
         # Tolerance
         self.tolerance = 0.00000001
+        # Whether or not to check the instrument/parameter map in CompareWorkspaces
+        self.checkInstrument = True
+
         # Store the resident memory of the system (in MB) before starting the test
         FrameworkManager.clear()
         self.memory = MemoryStats().residentMem() / 1024
@@ -346,6 +351,7 @@ class MantidSystemTest(unittest.TestCase):
         checker.setPropertyValue("Workspace1", valNames[0])
         checker.setPropertyValue("Workspace2", valNames[1])
         checker.setProperty("Tolerance", float(self.tolerance))
+        checker.setProperty("CheckInstrument", self.checkInstrument)
         if hasattr(self, 'tolerance_is_rel_err') and self.tolerance_is_rel_err:
             checker.setProperty("ToleranceRelErr", True)
         for d in self.disableChecking:
@@ -543,7 +549,14 @@ class ResultReporter(object):
         '''Initialize a class instance, e.g. connect to a database'''
         self._total_number_of_tests = total_number_of_tests
         self._maximum_name_length = maximum_name_length
-        pass
+
+    @property
+    def total_number_of_tests(self):
+        return self._total_number_of_tests
+
+    @total_number_of_tests.setter
+    def total_number_of_tests(self, ntests):
+        self._total_number_of_tests = ntests
 
     def dispatchResults(self, result, number_of_completed_tests):
         raise NotImplementedError(
@@ -607,7 +620,6 @@ class TextResultReporter(ResultReporter):
         The default text reporter prints to standard out
         '''
         self.printResultsToConsole(result, number_of_completed_tests)
-        return
 
 
 # A class to report results as junit xml
@@ -630,7 +642,7 @@ class TestRunner(object):
     NOT_A_TEST = 98
     SKIP_TEST = 97
 
-    def __init__(self, executable, exec_args=None, escape_quotes=False, clean=False):
+    def __init__(self, executable=None, exec_args=None, escape_quotes=False, clean=False):
         self._executable = executable
         self._exec_args = exec_args
         self._test_dir = ''
@@ -655,6 +667,8 @@ class TestRunner(object):
 
     def start(self, script):
         '''Run the given test code in a new subprocess'''
+        if self._executable is None:
+            return self.start_in_current_process(script)
         exec_call = self._executable
         if self._exec_args:
             exec_call += ' ' + self._exec_args
@@ -667,6 +681,46 @@ class TestRunner(object):
         os.remove(tmp_file.name)
         return results
 
+    def start_in_current_process(self, script):
+        """Run the given test code within the current Python process
+        Error handling adapted from: https://stackoverflow.com/questions/28836078/how-to-get-the-line-number-of-an-error-from-exec-or-execfile-in-python
+        Do not use in multithreading environment due to stdout context manager"""
+        exec_globals = dict()
+        exec_locals = dict()
+        exitcode = None
+        dual_stdout = DualStdOut()
+        try:
+            write_to_dual_stdout = redirect_stdout(dual_stdout)
+            with write_to_dual_stdout:
+                exec(script.asString(self._clean, call_exit=False), exec_globals, exec_locals)
+            exitcode = exec_locals['exitcode']
+            dump = dual_stdout.dump.getvalue()
+            return exitcode, dump
+        except SyntaxError as e:
+            error_class = e.__class__.__name__
+            detail = e.args[0]
+            line_number = e.lineno
+        except Exception as ex:
+            import traceback
+            error_class = ex.__class__.__name__
+            detail = ex.args[0]
+            cl, exc, tb = sys.exc_info()
+            line_number = traceback.extract_tb(tb)[-1][1]
+        print(f"{error_class} at line {line_number} of SystemTest for {script._modname}.{script._test_cls_name}: "
+              f"{detail}")
+        if exitcode is None:
+            if "exitcode" in exec_locals:
+                exitcode = exec_locals['exitcode']
+            else:
+                # assign to generic fail code
+                exitcode = 1
+        if dual_stdout.dump.getvalue():
+            dump = dual_stdout.dump.getvalue()
+        else:
+            # Need to give some string output or caller function will fail when trying to parse results
+            dump = "SystemTest runner script produced no output to StdOut"
+        return exitcode, dump
+
 
 #########################################################################
 # Encapsulate the script for running a single test
@@ -678,7 +732,7 @@ class TestScript(object):
         self._test_cls_name = test_cls_name
         self._exclude_in_pr_builds = not exclude_in_pr_builds
 
-    def asString(self, clean=False):
+    def asString(self, clean=False, call_exit=True):
         code = f"""
 import sys
 for p in ('{TESTING_FRAMEWORK_DIR}', '{FRAMEWORK_PYTHONINTERFACE_TEST_DIR}', '{self._test_dir}'):
@@ -697,7 +751,9 @@ if {self._exclude_in_pr_builds}:
                     "exitcode = systest.returnValidationCode({})\n".format(TestRunner.VALIDATION_FAIL_CODE)
         else:
             code += "exitcode = 0\n"
-        code += "systest.cleanup()\nsys.exit(exitcode)\n"
+        code += "systest.cleanup()\n"
+        if call_exit:
+            code += "sys.exit(exitcode)\n"
         return code
 
 
@@ -739,6 +795,9 @@ class TestSuite(object):
     def markAsSkipped(self, reason):
         self.setOutputMsg(reason)
         self._result.status = 'skipped'
+
+    def getMapResultNameToStatus(self):
+        return {self._result.name: self._result.status}
 
     def execute(self, runner, exclude_in_pr_builds):
         if self._test_cls_name is not None:
@@ -801,7 +860,7 @@ class TestManager(object):
     def __init__(self,
                  mantid_config,
                  runner=None,
-                 output=[TextResultReporter()],
+                 output=None,
                  quiet=False,
                  testsInclude=None,
                  testsExclude=None,
@@ -815,7 +874,7 @@ class TestManager(object):
 
         # Runners and reporters
         self._runner = runner
-        self._reporters = output
+        self._reporters = output if output is not None else [TextResultReporter()]
         for r in self._reporters:
             r._quiet = quiet
             r._output_on_failure = output_on_failure
@@ -868,6 +927,9 @@ class TestManager(object):
             print('No tests were found in the test directory {0}. Please ensure all test classes sub class '
                   'systemtesting.MantidSystemTest.'.format(self._config.testDir))
             exit(2)
+
+        for reporter in self._reporters:
+            reporter.total_number_of_tests = test_stats[0]
 
         return mod_counts, mod_tests, mod_sub_directories, test_stats, mod_required_files, data_file_lock_status
 
@@ -1025,6 +1087,7 @@ class TestManager(object):
 
     def executeTests(self, tests_done=None):
         # Get the defined tests
+        status_dict = dict()
         for suite in self._tests:
             if self.__shouldTest(suite):
                 suite.execute(self._runner, self._exclude_in_pr_builds)
@@ -1034,11 +1097,33 @@ class TestManager(object):
                 self._skippedTests += 1
             else:
                 self._failedTests += 1
-            with tests_done.get_lock():
-                tests_done.value += 1
-            if not self._clean:
-                suite.reportResults(self._reporters, tests_done.value)
+            if tests_done:
+                with tests_done.get_lock():
+                    tests_done.value += 1
+                if not self._clean:
+                    suite.reportResults(self._reporters, tests_done.value)
+            else:
+                # tests_done=None indicates running tests on parent thread, no need to worry about the Lock
+                if not self._clean:
+                    sum_tests = self._passedTests + self._skippedTests + self._failedTests
+                    suite.reportResults(self._reporters, sum_tests)
+                status_dict.update(suite.getMapResultNameToStatus())
             self._lastTestRun += 1
+        return status_dict
+
+    def replaceRunner(self, new_runner):
+        self._runner = new_runner
+
+    def executeTestsListUnderCurrentProcess(self, tests_to_run):
+        """This is used when running the tests under the current process, removing the test executable so that the
+         provided test list is run under the current python process"""
+        self._tests = tests_to_run
+        status_dict = self.executeTests()
+        return status_dict
+
+    def getTestResultStats(self):
+        """Return the numbers of skipped, failed, and total tests to be used for result and output collation"""
+        return self._skippedTests, self._failedTests, self._lastTestRun
 
     def markSkipped(self, reason=None, tests_done_value=0):
         for suite in self._tests[self._lastTestRun:]:
@@ -1418,3 +1503,22 @@ def testThreadsLoopImpl(mtdconf, options, tests_dict, tests_lock, tests_left, re
 
     for key in local_dict.keys():
         stat_dict[key] = local_dict[key]
+
+
+class DualStdOut:
+    """This helper class is used when running SystemTests under the current Python process, allowing the output of the
+    test to be printed both to for display and a StringIO object to collate the test results from.
+    """
+    def __init__(self):
+        self.stdout = sys.stdout
+        self.dump = StringIO()
+
+    def __del__(self):
+        self.dump.close()
+
+    def write(self, message):
+        self.stdout.write(message)
+        self.dump.write(message)
+
+    def flush(self):
+        self.stdout.flush()

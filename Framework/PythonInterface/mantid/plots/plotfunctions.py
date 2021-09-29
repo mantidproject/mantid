@@ -22,6 +22,7 @@ from mantid.api import AnalysisDataService, MatrixWorkspace, WorkspaceGroup
 from mantid.api import IMDHistoWorkspace
 from mantid.kernel import ConfigService
 from mantid.plots import datafunctions, MantidAxes
+from mantid.plots.utility import MantidAxType
 
 # -----------------------------------------------------------------------------
 # Constants
@@ -114,7 +115,8 @@ def plot_md_histo_ws(workspaces, errors=False, overplot=False, fig=None, ax_prop
 @manage_workspace_names
 def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
          overplot=False, fig=None, plot_kwargs=None, ax_properties=None,
-         window_title=None, tiled=False, waterfall=False, log_name=None, log_values=None):
+         window_title=None, tiled=False, waterfall=False, log_name=None,
+         log_values=None, superplot=False):
     """
     Create a figure with a single subplot and for each workspace/index add a
     line plot to the new axes. show() is called before returning the figure instance. A legend
@@ -212,6 +214,14 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
                     datafunctions.waterfall_update_fill(ax)
 
                 ax.lines += errorbar_cap_lines
+
+    if superplot and not waterfall and not tiled:
+        fig.canvas.manager.superplot_toggle()
+        if not spectrum_nums and not wksp_indices:
+            workspace_names = [ws.name() for ws in workspaces]
+            fig.canvas.manager.superplot.set_workspaces(workspace_names)
+            fig.canvas.manager.superplot.set_bin_mode(plot_kwargs and "axis" in plot_kwargs and plot_kwargs["axis"] == MantidAxType.BIN)
+        fig.canvas.manager.superplot.enable_error_bars(errors)
 
     # update and show figure
     return _update_show_figure(fig)
