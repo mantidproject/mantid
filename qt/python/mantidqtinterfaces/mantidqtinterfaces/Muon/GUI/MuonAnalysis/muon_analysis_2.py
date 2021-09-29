@@ -474,10 +474,6 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.fitting_tab.fitting_tab_presenter.update_plot_guess_notifier.add_subscriber(
             self.plot_widget.fit_mode.update_plot_guess_observer)
 
-    def setup_results_notifier(self):
-        """Connect results tab to the model fitting tab."""
-        return
-
     def closeEvent(self, event):
         self.removeDockWidget(self.dockable_plot_widget_window)
         self.tabs.closeEvent(event)
