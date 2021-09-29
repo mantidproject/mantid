@@ -534,6 +534,7 @@ class AlignComponents(PythonAlgorithm):
                 displacements_table.addRow([component] + component_displacements)
 
             # Need to grab the component object again, as things have changed
+            comp = api.mtd[wks_name].getInstrument().getComponentByName(component)  # adjusted component
             logger.notice("Finished " + comp.getFullName() + " Final position is " + str(comp.getPos())
                           + " Final rotation is " + str(comp.getRotation().getEulerAngles(self._eulerConvention)))
 
