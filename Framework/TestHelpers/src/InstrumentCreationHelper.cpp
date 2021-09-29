@@ -84,11 +84,12 @@ void addFullInstrumentToWorkspace(MatrixWorkspace &workspace, bool includeMonito
 }
 
 void addInstrumentWithGeographicalDetectorsToWorkspace(Mantid::API::MatrixWorkspace &workspace, const int nlat,
-                                                       const int nlong, const double anginc) {
+                                                       const int nlong, const double anginc,
+                                                       const std::string &instrumentName) {
   V3D samplePosition(0., 0., 0.);
   V3D sourcePosition(0., 0., -14.);
 
-  Instrument_sptr instrument = std::make_shared<Instrument>();
+  Instrument_sptr instrument = std::make_shared<Instrument>(instrumentName);
   instrument->setReferenceFrame(
       std::make_shared<ReferenceFrame>(Mantid::Geometry::Y, Mantid::Geometry::Z, Right, "0,0,0"));
 

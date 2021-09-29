@@ -401,17 +401,18 @@ MatrixWorkspace_sptr create2DDetectorScanWorkspaceWithFullInstrument(int nhist, 
 }
 
 //================================================================================================================
-/** Create an Workspace2D with an instrument that contains detectors arranged at even latitude\longitude
+/** Create an Workspace2D with an instrument that contains detectors arranged at even latitude/longitude
  * values. For use in testing absorption and multiple scattering corrections. The sparse instrument functionality
- * in these algorithms uses geographical angles (lat\long) to specify the detector positions
- * Latitude corresponds to two theta if longitude equals zero
+ * in these algorithms uses geographical angles (lat/long) to specify the detector positions
+ * Latitude/longitude corresponds to two theta if longitude/latitude equals zero
  */
 Workspace2D_sptr create2DWorkspaceWithGeographicalDetectors(const int nlat, const int nlong, const double anginc,
                                                             const int nbins, const std::string &instrumentName) {
   auto inputWorkspace = WorkspaceCreationHelper::create2DWorkspaceBinned(nlat * nlong, nbins, 0.5 /*x0*/);
   inputWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
 
-  InstrumentCreationHelper::addInstrumentWithGeographicalDetectorsToWorkspace(*inputWorkspace, nlat, nlong, anginc);
+  InstrumentCreationHelper::addInstrumentWithGeographicalDetectorsToWorkspace(*inputWorkspace, nlat, nlong, anginc,
+                                                                              instrumentName);
 
   return inputWorkspace;
 }
