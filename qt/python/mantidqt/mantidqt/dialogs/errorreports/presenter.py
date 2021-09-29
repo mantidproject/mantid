@@ -54,9 +54,9 @@ class ErrorReporterPresenter(object):
             self.empty_contact_info_file()
         return -1
 
-    def share_non_identifiable_information(self, continue_working):
+    def share_non_identifiable_information(self, continue_working, text_box):
         uptime = UsageService.getUpTime()
-        status = self._send_report_to_server(share_identifiable=False, uptime=uptime)
+        status = self._send_report_to_server(share_identifiable=False, uptime=uptime, text_box=text_box)
         self.error_log.notice("Sent non-identifiable information")
         self._handle_exit(continue_working)
         if not self._view.saveContactInfoCheckbox.checkState():
@@ -85,7 +85,7 @@ class ErrorReporterPresenter(object):
         if share == 0:
             status = self.share_all_information(continue_working, name, email, text_box)
         elif share == 1:
-            status = self.share_non_identifiable_information(continue_working)
+            status = self.share_non_identifiable_information(continue_working, text_box)
         elif share == 2:
             status = self.do_not_share(continue_working)
         else:

@@ -138,7 +138,7 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
         self.interface_manager.showWebPage(link)
 
     def set_button_status(self):
-        if self.input_text == '' and not self.input_name and not self.input_email:
+        if not self.input_name and not self.input_email:
             self.nonIDShareButton.setEnabled(True)
         elif self.input_name == self.saved_name and self.input_email == self.saved_email:
             self.nonIDShareButton.setEnabled(True)
