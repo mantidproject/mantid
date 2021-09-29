@@ -147,13 +147,13 @@
   <customwidget>
    <class>RunSelectorWidget</class>
    <extends>QWidget</extends>
-   <header>ui.sans_isis.run_selector_widget</header>
+   <header>mantidqtinterfaces.ui.sans_isis.run_selector_widget</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>SummationSettingsWidget</class>
    <extends>QWidget</extends>
-   <header>ui.sans_isis.summation_settings_widget</header>
+   <header>mantidqtinterfaces.ui.sans_isis.summation_settings_widget</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

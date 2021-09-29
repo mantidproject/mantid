@@ -9,11 +9,11 @@ import json
 import os
 
 from mantidqtinterfaces.ui.sans_isis.settings_diagnostic_tab import SettingsDiagnosticTab
+from mantidqtinterfaces.sans.gui_logic.gui_common import JSON_SUFFIX
 
 from mantid.kernel import Logger
 from mantid import UsageService
 from mantid.kernel import FeatureType
-from mantidqtinterfaces.sans.gui_logic.gui_common import JSON_SUFFIX
 from sans.state.AllStates import AllStates
 from sans.state.Serializer import Serializer
 

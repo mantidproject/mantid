@@ -2305,31 +2305,31 @@ QGroupBox::title {
   <customwidget>
    <class>SettingsDiagnosticTab</class>
    <extends>QWidget</extends>
-   <header>ui.sans_isis.settings_diagnostic_tab</header>
+   <header>mantidqtinterfaces.ui.sans_isis.settings_diagnostic_tab</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>MaskingTable</class>
    <extends>QWidget</extends>
-   <header>ui.sans_isis.masking_table</header>
+   <header>mantidqtinterfaces.ui.sans_isis.masking_table</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>AddRunsPage</class>
    <extends>QWidget</extends>
-   <header>ui.sans_isis.add_runs_page</header>
+   <header>mantidqtinterfaces.ui.sans_isis.add_runs_page</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>BeamCentre</class>
    <extends>QWidget</extends>
-   <header>ui.sans_isis.beam_centre</header>
+   <header>mantidqtinterfaces.ui.sans_isis.beam_centre</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>DiagnosticsPage</class>
    <extends>QWidget</extends>
-   <header>ui.sans_isis.diagnostics_page.h</header>
+   <header>mantidqtinterfaces.ui.sans_isis.diagnostics_page.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
