@@ -657,22 +657,6 @@ DetectorBankSetsPkt::DetectorBankSetsPkt(const uint8_t *data, uint32_t len)
   }
 }
 
-DetectorBankSetsPkt::DetectorBankSetsPkt(const DetectorBankSetsPkt &pkt)
-    : Packet(pkt), m_fields(reinterpret_cast<const uint32_t *>(payload())), m_sectionOffsets(nullptr),
-      m_after_banks_offset(nullptr) {
-  uint32_t numSets = detBankSetCount();
-
-  // Don't Allocate Anything if there are No Detector Bank Sets...
-  if (numSets < 1)
-    return;
-
-  m_sectionOffsets = new uint32_t[numSets];
-  memcpy(const_cast<uint32_t *>(m_sectionOffsets), pkt.m_sectionOffsets, numSets * sizeof(uint32_t));
-
-  m_after_banks_offset = new uint32_t[numSets];
-  memcpy(const_cast<uint32_t *>(m_after_banks_offset), pkt.m_after_banks_offset, numSets * sizeof(uint32_t));
-}
-
 DetectorBankSetsPkt::~DetectorBankSetsPkt() {
   delete[] m_sectionOffsets;
   delete[] m_after_banks_offset;

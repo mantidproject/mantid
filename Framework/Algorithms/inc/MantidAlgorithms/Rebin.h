@@ -56,6 +56,7 @@ public:
   const std::vector<std::string> seeAlso() const override {
     return {"RebinToWorkspace", "Rebin2D", "Rebunch", "Regroup", "RebinByPulseTimes", "RebinByTimeAtSample"};
   }
+  std::map<std::string, std::string> validateInputs() override;
 
   static std::vector<double> rebinParamsFromInput(const std::vector<double> &inParams,
                                                   const API::MatrixWorkspace &inputWS, Kernel::Logger &logger);

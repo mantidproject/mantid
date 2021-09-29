@@ -48,45 +48,30 @@ Statistics getNanStatistics() {
  * There are enough special cases in determining the median where it useful to
  * put it in a single function.
  */
-template <typename TYPE> double getMedian(const vector<TYPE> &data, const size_t num_data, const bool sorted) {
-  if (num_data == 1)
-    return static_cast<double>(*(data.begin()));
+template <typename TYPE> double getMedian(const vector<TYPE> &data) {
+  const size_t size = data.size();
+  if (size == 1)
+    return static_cast<double>(data[0]);
 
-  bool is_even = ((num_data & 1) == 0);
-  if (is_even) {
-    double left = 0.0;
-    double right = 0.0;
-
-    if (sorted) {
-      // Just get the centre two elements.
-      left = static_cast<double>(*(data.begin() + num_data / 2 - 1));
-      right = static_cast<double>(*(data.begin() + num_data / 2));
-    } else {
-      // If the data is not sorted, make a copy we can mess with
-      vector<TYPE> temp(data.begin(), data.end());
-      // Get what the centre two elements should be...
-      std::nth_element(temp.begin(), temp.begin() + num_data / 2 - 1, temp.end());
-      left = static_cast<double>(*(temp.begin() + num_data / 2 - 1));
-      std::nth_element(temp.begin(), temp.begin() + num_data / 2, temp.end());
-      right = static_cast<double>(*(temp.begin() + num_data / 2));
-    }
-    // return the average
-    return (left + right) / 2.;
-  } else
-  // Odd number
-  {
-    if (sorted) {
-      // If sorted and odd, just return the centre value
-      return static_cast<double>(*(data.begin() + num_data / 2));
-    } else {
-      // If the data is not sorted, make a copy we can mess with
-      vector<TYPE> temp(data.begin(), data.end());
-      // Make sure the centre value is in the correct position
-      std::nth_element(temp.begin(), temp.begin() + num_data / 2, temp.end());
-      // Now return the centre value
-      return static_cast<double>(*(temp.begin() + num_data / 2));
-    }
+  const bool isSorted = std::is_sorted(data.cbegin(), data.cend());
+  std::vector<TYPE> tmpSortedData;
+  auto sortedDataRef = std::ref(data);
+  if (!isSorted) {
+    tmpSortedData = data;
+    std::sort(tmpSortedData.begin(), tmpSortedData.end());
+    sortedDataRef = std::ref(std::as_const(tmpSortedData));
   }
+
+  const bool is_even = (size % 2 == 0);
+  double retVal = 0;
+  if (is_even) {
+    const auto left = static_cast<double>(sortedDataRef.get()[size / 2 - 1]);
+    const auto right = static_cast<double>(sortedDataRef.get()[size / 2]);
+    retVal = (left + right) / 2;
+  } else {
+    retVal = static_cast<double>(sortedDataRef.get()[size / 2]);
+  }
+  return retVal;
 }
 
 /**
@@ -147,20 +132,19 @@ template <typename TYPE> std::vector<double> getWeightedZscore(const vector<TYPE
  * useful to
  * put it in a single function.
  */
-template <typename TYPE> std::vector<double> getModifiedZscore(const vector<TYPE> &data, const bool sorted) {
+template <typename TYPE> std::vector<double> getModifiedZscore(const vector<TYPE> &data) {
   if (data.size() < 3) {
     std::vector<double> Zscore(data.size(), 0.);
     return Zscore;
   }
   std::vector<double> MADvec;
   double tmp;
-  size_t num_data = data.size(); // cache since it is frequently used
-  double median = getMedian(data, num_data, sorted);
+  double median = getMedian(data);
   for (auto it = data.cbegin(); it != data.cend(); ++it) {
     tmp = static_cast<double>(*it);
     MADvec.emplace_back(fabs(tmp - median));
   }
-  double MAD = getMedian(MADvec, num_data, sorted);
+  double MAD = getMedian(MADvec);
   if (MAD == 0.) {
     std::vector<double> Zscore(data.size(), 0.);
     return Zscore;
@@ -182,8 +166,7 @@ template <typename TYPE> std::vector<double> getModifiedZscore(const vector<TYPE
  */
 template <typename TYPE> Statistics getStatistics(const vector<TYPE> &data, const unsigned int flags) {
   Statistics statistics = getNanStatistics();
-  size_t num_data = data.size(); // cache since it is frequently used
-  if (num_data == 0) {           // don't do anything
+  if (data.empty()) { // don't do anything
     return statistics;
   }
   // calculate the mean if this or the stddev is requested
@@ -216,7 +199,7 @@ template <typename TYPE> Statistics getStatistics(const vector<TYPE> &data, cons
 
   // calculate the median if requested
   if (flags & StatOptions::Median) {
-    statistics.median = getMedian(data, num_data, flags & StatOptions::SortedData);
+    statistics.median = getMedian(data);
   }
 
   return statistics;
@@ -421,7 +404,7 @@ std::vector<double> getMomentsAboutMean(const std::vector<TYPE> &x, const std::v
   template MANTID_KERNEL_DLL Statistics getStatistics<TYPE>(const vector<TYPE> &, const unsigned int);                 \
   template MANTID_KERNEL_DLL std::vector<double> getZscore<TYPE>(const vector<TYPE> &);                                \
   template MANTID_KERNEL_DLL std::vector<double> getWeightedZscore<TYPE>(const vector<TYPE> &, const vector<TYPE> &);  \
-  template MANTID_KERNEL_DLL std::vector<double> getModifiedZscore<TYPE>(const vector<TYPE> &, const bool);            \
+  template MANTID_KERNEL_DLL std::vector<double> getModifiedZscore<TYPE>(const vector<TYPE> &);                        \
   template MANTID_KERNEL_DLL std::vector<double> getMomentsAboutOrigin<TYPE>(                                          \
       const std::vector<TYPE> &x, const std::vector<TYPE> &y, const int maxMoment);                                    \
   template MANTID_KERNEL_DLL std::vector<double> getMomentsAboutMean<TYPE>(                                            \

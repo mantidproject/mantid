@@ -1416,6 +1416,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
                                                                             'Height': 7.,
                                                                             'Radius': self._vanRadius,
                                                                             'Center': [0., 0., 0.]},
+                                                                  find_environment=False,
                                                                   opt_wl_min=self._wavelengthMin,
                                                                   opt_wl_max=self._wavelengthMax)
 

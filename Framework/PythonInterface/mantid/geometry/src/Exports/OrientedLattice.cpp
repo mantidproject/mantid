@@ -40,11 +40,11 @@ void setUFromVectors(OrientedLattice &self, const object &vec1, const object &ve
   self.setUFromVectors(Converters::PyObjectToV3D(vec1)(), Converters::PyObjectToV3D(vec2)());
 }
 
-Mantid::Kernel::V3D qFromHKL(OrientedLattice &self, const object &vec) {
+Mantid::Kernel::V3D qFromHKL(const OrientedLattice &self, const object &vec) {
   return self.qFromHKL(Converters::PyObjectToV3D(vec)());
 }
 
-Mantid::Kernel::V3D hklFromQ(OrientedLattice &self, const object &vec) {
+Mantid::Kernel::V3D hklFromQ(const OrientedLattice &self, const object &vec) {
   return self.hklFromQ(Converters::PyObjectToV3D(vec)());
 }
 } // namespace

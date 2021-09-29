@@ -24,9 +24,9 @@ Experiment::Experiment(AnalysisMode analysisMode, ReductionType reductionType, S
                        bool includePartialBins, bool debug, BackgroundSubtraction backgroundSubtraction,
                        PolarizationCorrections polarizationCorrections, FloodCorrections floodCorrections,
                        TransmissionStitchOptions transmissionStitchOptions,
-                       // cppcheck-suppress passedByValue
+
                        std::map<std::string, std::string> stitchParameters,
-                       // cppcheck-suppress passedByValue
+
                        LookupTable lookupTable)
     : m_analysisMode(analysisMode), m_reductionType(reductionType), m_summationType(summationType),
       m_includePartialBins(includePartialBins), m_debug(debug), m_backgroundSubtraction(backgroundSubtraction),

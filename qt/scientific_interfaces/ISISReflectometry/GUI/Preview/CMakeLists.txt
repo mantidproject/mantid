@@ -1,4 +1,5 @@
 set(PREVIEW_SRC_FILES
+        PreviewJobManager.cpp
         PreviewPresenter.cpp
         QtPreviewView.cpp
         PreviewModel.cpp)
@@ -9,6 +10,7 @@ set(PREVIEW_SRC_FILES
 set(PREVIEW_INC_FILES
         IPreviewModel.h
         PreviewModel.h
+        PreviewJobManager.h
 
         IPreviewPresenter.h
         PreviewPresenterFactory.h

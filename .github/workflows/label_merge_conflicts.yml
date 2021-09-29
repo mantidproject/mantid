@@ -1,0 +1,17 @@
+name: 'Check for merge conflicts'
+on:
+  push:
+
+jobs:
+  label-conflicts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: prince-chrismc/label-merge-conflicts-action@v1
+        with:
+          conflict_label_name: "Has Conflicts"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          # These are optional incase you need to adjust for the limitations described below
+          max_retries: 5
+          wait_ms: 15000
+          detect_merge_changes: false
+          conflict_comment: ":wave: Hi, @${author},\n\nConflicts have been detected against the base branch. Please rebase your branch against the base branch."

@@ -16,6 +16,7 @@
 #include "IBatchPresenter.h"
 #include "IBatchPresenterFactory.h"
 #include "IBatchView.h"
+#include "ReflAlgorithmFactory.h"
 #include <memory>
 
 namespace MantidQt {
@@ -25,7 +26,7 @@ namespace ISISReflectometry {
 class BatchPresenterFactory : public IBatchPresenterFactory {
 public:
   BatchPresenterFactory(
-      // cppcheck-suppress passedByValue
+
       RunsPresenterFactory runsPresenterFactory, EventPresenterFactory eventPresenterFactory,
       ExperimentPresenterFactory experimentPresenterFactory, InstrumentPresenterFactory instrumentPresenterFactory,
       PreviewPresenterFactory previewPresenterFactory, SavePresenterFactory savePresenterFactory)
@@ -38,18 +39,20 @@ public:
 
   std::unique_ptr<IBatchPresenter> make(IBatchView *view) override {
     auto runsPresenter = m_runsPresenterFactory.make(view->runs());
-    auto eventPresenter = m_eventPresenterFactory.make(view->eventHandling());
     auto experimentPresenter = m_experimentPresenterFactory.make(view->experiment());
     auto instrumentPresenter = m_instrumentPresenterFactory.make(view->instrument());
-    auto previewPresenter = m_previewPresenterFactory.make(view->preview());
+    auto eventPresenter = m_eventPresenterFactory.make(view->eventHandling());
     auto savePresenter = m_savePresenterFactory.make(view->save());
 
-    auto model = Batch(experimentPresenter->experiment(), instrumentPresenter->instrument(),
-                       runsPresenter->mutableRunsTable(), eventPresenter->slicing());
+    auto batchModel = std::make_unique<Batch>(experimentPresenter->experiment(), instrumentPresenter->instrument(),
+                                              runsPresenter->mutableRunsTable(), eventPresenter->slicing());
+    auto algFactory = std::make_unique<ReflAlgorithmFactory>(*batchModel);
+    auto previewPresenter = m_previewPresenterFactory.make(view->preview(), view, std::move(algFactory));
 
-    return std::make_unique<BatchPresenter>(view, std::move(model), std::move(runsPresenter), std::move(eventPresenter),
-                                            std::move(experimentPresenter), std::move(instrumentPresenter),
-                                            std::move(savePresenter), std::move(previewPresenter));
+    return std::make_unique<BatchPresenter>(view, std::move(batchModel), view, std::move(runsPresenter),
+                                            std::move(eventPresenter), std::move(experimentPresenter),
+                                            std::move(instrumentPresenter), std::move(savePresenter),
+                                            std::move(previewPresenter));
   }
 
 private:

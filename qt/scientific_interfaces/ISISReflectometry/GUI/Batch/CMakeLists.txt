@@ -2,9 +2,11 @@ set(BATCH_SRC_FILES
     BatchPresenter.cpp
     QtBatchView.cpp
     BatchJobAlgorithm.cpp
-    BatchJobRunner.cpp
+    BatchJobManager.cpp
     AlgorithmProperties.cpp
     GroupProcessingAlgorithm.cpp
+    ReflAlgorithmFactory.cpp
+    RowPreprocessingAlgorithm.cpp
     RowProcessingAlgorithm.cpp)
 
 # Include files aren't required, but this makes them appear in Visual Studio
@@ -14,15 +16,18 @@ set(BATCH_INC_FILES
     IBatchPresenter.h
     IBatchView.h
     IBatchJobAlgorithm.h
-    IBatchJobRunner.h
+    IBatchJobManager.h
     IBatchPresenterFactory.h
+    IReflAlgorithmFactory.h
     BatchPresenter.h
     BatchPresenterFactory.h
     QtBatchView.h
     BatchJobAlgorithm.h
-    BatchJobRunner.h
+    BatchJobManager.h
     AlgorithmProperties.h
     GroupProcessingAlgorithm.h
+    ReflAlgorithmFactory.h
+    RowPreprocessingAlgorithm.h
     RowProcessingAlgorithm.h)
 
 set(BATCH_MOC_FILES QtBatchView.h)

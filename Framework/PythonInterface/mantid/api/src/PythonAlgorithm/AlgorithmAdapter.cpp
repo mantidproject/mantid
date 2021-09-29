@@ -118,6 +118,18 @@ template <typename BaseAlgorithm> const std::string AlgorithmAdapter<BaseAlgorit
 }
 
 /**
+ * Returns the expiration date (in ISO8601 format) of algorithm aliases. If not overridden, returns the
+ * base algorithm implementation
+ */
+template <typename BaseAlgorithm> const std::string AlgorithmAdapter<BaseAlgorithm>::aliasDeprecated() const {
+  try {
+    return callMethod<std::string>(getSelf(), "aliasDeprecated");
+  } catch (UndefinedAttributeError &) {
+    return BaseAlgorithm::aliasDeprecated();
+  }
+}
+
+/**
  * Returns the summary of the algorithm. If not overridden
  * it returns defaultSummary
  */

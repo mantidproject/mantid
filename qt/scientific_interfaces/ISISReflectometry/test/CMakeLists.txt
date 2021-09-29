@@ -3,11 +3,14 @@ set(TEST_FILES
   Instrument/InstrumentOptionDefaultsTest.h
   Instrument/InstrumentPresenterTest.h
   Batch/BatchPresenterTest.h
-  Batch/BatchJobRunnerProgressBarTest.h
-  Batch/BatchJobRunnerWorkspacesTest.h
+  Batch/BatchJobManagerProgressBarTest.h
+  Batch/BatchJobManagerWorkspacesTest.h
   Batch/GroupProcessingAlgorithmTest.h
-  Batch/BatchJobRunnerProcessingTest.h
+  Batch/BatchJobManagerProcessingTest.h
   Batch/RowProcessingAlgorithmTest.h
+  Batch/RowPreprocessingAlgorithmTest.h
+
+
   Event/EventPresenterTest.h
   MainWindow/MainWindowPresenterTest.h
   RunsTable/RunsTablePresenterRowDeletionTest.h
@@ -36,6 +39,7 @@ set(TEST_FILES
   Reduction/GroupTest.h
   Reduction/ValidateRowTest.h
 
+  Preview/PreviewJobManagerTest.h
   Preview/PreviewModelTest.h
   Preview/PreviewPresenterTest.h
 )
@@ -53,6 +57,7 @@ mtd_add_qt_tests(
     ../../../../Framework/TestHelpers/inc
     ../GUI/Preview
     Preview
+    Reduction
   TEST_HELPER_SRCS
     ../../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
     ../../../../Framework/TestHelpers/src/IndirectFitDataCreationHelper.cpp

@@ -97,10 +97,11 @@ private:
   void newPreviewWorkspaceSelected(const QString &workspaceName);
   size_t findWorkspaceID();
   void newInputFiles();
-  void checkNewPreviewSelected(int index);
   void plotInput();
+  void updateIntegrationRange();
 
 private slots:
+  void checkNewPreviewSelected(int index);
   void handlePreviewSpectrumChanged();
   void twoRanges(QtProperty *prop, bool enabled);
   void minChanged(double val);
@@ -109,7 +110,6 @@ private slots:
   void unGroupInput(bool error);
   void runClicked();
   void saveClicked();
-  void updateIntegrationRange();
   void addData();
   void checkLoadedFiles();
 

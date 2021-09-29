@@ -469,7 +469,7 @@ std::string RunsPresenter::liveDataReductionAlgorithm() { return "ReflectometryR
 
 std::string RunsPresenter::liveDataReductionOptions(const std::string &inputWorkspace, const std::string &instrument) {
   // Get the properties for the reduction algorithm from the settings tabs
-  AlgorithmRuntimeProps options = m_mainPresenter->rowProcessingProperties();
+  API::IConfiguredAlgorithm::AlgorithmRuntimeProps options = m_mainPresenter->rowProcessingProperties();
   // Add other required input properties to the live data reduction algorithnm
   options["InputWorkspace"] = inputWorkspace;
   options["Instrument"] = instrument;

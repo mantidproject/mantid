@@ -604,6 +604,8 @@ else()
 endif()
 
 set(CONSOLECHANNELCLASS "ConsoleChannel")
+set(ALIASDEPRECATED "Raise")
+set(ALGORITHMDEPRECATED "Raise")
 configure_file(../Properties/Mantid.properties.template
                ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.config)
 
@@ -654,6 +656,8 @@ else()
 endif()
 
 set(CONSOLECHANNELCLASS "StdoutChannel")
+set(ALIASDEPRECATED "Log")
+set(ALGORITHMDEPRECATED "Log")
 configure_file(../Properties/Mantid.properties.template
                ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.install)
 

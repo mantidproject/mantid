@@ -62,7 +62,7 @@ using Mantid::MantidVecPtr;
 using Mantid::Types::Core::DateAndTime;
 using Mantid::Types::Event::TofEvent;
 
-MockAlgorithm::MockAlgorithm(size_t nSteps) : m_Progress(std::make_unique<API::Progress>(this, 0.0, 1.0, nSteps)) {}
+StubAlgorithm::StubAlgorithm(size_t nSteps) : m_Progress(std::make_unique<API::Progress>(this, 0.0, 1.0, nSteps)) {}
 
 EPPTableRow::EPPTableRow(const double peakCentre_, const double sigma_, const double height_,
                          const FitStatus fitStatus_)

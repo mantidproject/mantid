@@ -23,7 +23,8 @@ set(REDUCTION_SRC_FILES
     RangeInLambda.cpp
     RunsTable.cpp
     LookupRow.cpp
-    ValidateLookupRow.cpp)
+    ValidateLookupRow.cpp
+    PreviewRow.cpp)
 
 # Include files aren't required, but this makes them appear in Visual Studio
 # IMPORTANT: Include files are required in the MOC_FILES set. Scroll down to
@@ -57,7 +58,9 @@ set(REDUCTION_INC_FILES
     ReductionType.h
     RunsTable.h
     LookupRow.h
-    SummationType.h)
+    SummationType.h
+    IBatch.h
+    PreviewRow.h)
 
 prepend(REDUCTION_SRC_FILES Reduction ${REDUCTION_SRC_FILES})
 prepend(REDUCTION_INC_FILES Reduction ${REDUCTION_INC_FILES})

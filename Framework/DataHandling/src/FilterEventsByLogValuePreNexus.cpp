@@ -871,7 +871,7 @@ void FilterEventsByLogValuePreNexus::procEvents(DataObjects::EventWorkspace_sptr
   g_log.information() << "Processing input event preNexus by " << numThreads << " threads"
                       << " in " << numBlocks << " blocks. "
                       << "\n";
-  // cppcheck-suppress syntaxError
+
     PRAGMA_OMP( parallel for schedule(dynamic, 1) if (m_parallelProcessing) )
     for (int i = 0; i < int(numThreads); i++) {
       // This is the partial workspace we are about to create (if in parallel)

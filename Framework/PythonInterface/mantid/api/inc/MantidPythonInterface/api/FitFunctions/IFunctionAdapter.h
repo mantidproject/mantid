@@ -41,15 +41,15 @@ public:
   /// Declare an attribute with an initial value
   void declareAttribute(const std::string &name, const boost::python::object &defaultValue);
   /// Get a named attribute value
-  static PyObject *getAttributeValue(IFunction &self, const std::string &name);
+  static PyObject *getAttributeValue(const IFunction &self, const std::string &name);
   /// Returns the attribute's value as a Python object
-  static PyObject *getAttributeValue(IFunction &self, const API::IFunction::Attribute &attr);
+  static PyObject *getAttributeValue(const IFunction &self, const API::IFunction::Attribute &attr);
   /// Set the attribute's value
   static void setAttributePythonValue(IFunction &self, const std::string &name, const boost::python::object &value);
   /// Called by the framework when an attribute has been set
   void setAttribute(const std::string &attName, const API::IFunction::Attribute &attr) override;
   /// Split this function (if needed) into a list of independent functions
-  static boost::python::list createPythonEquivalentFunctions(IFunction &self);
+  static boost::python::list createPythonEquivalentFunctions(const IFunction &self);
 
   // Each overload of declareParameter requires a different name as we
   // can't use a function pointer with a virtual base class

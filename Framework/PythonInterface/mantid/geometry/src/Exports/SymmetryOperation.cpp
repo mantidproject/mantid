@@ -24,11 +24,11 @@ namespace //<unnamed>
 {
 using namespace Mantid::PythonInterface;
 
-Mantid::Kernel::V3D applyToVector(SymmetryOperation &self, const object &hkl) {
+Mantid::Kernel::V3D applyToVector(const SymmetryOperation &self, const object &hkl) {
   return self.transformHKL(Converters::PyObjectToV3D(hkl)());
 }
 
-Mantid::Kernel::V3D applyToCoordinates(SymmetryOperation &self, const object &coordinates) {
+Mantid::Kernel::V3D applyToCoordinates(const SymmetryOperation &self, const object &coordinates) {
   return self.operator*<Mantid::Kernel::V3D>(Converters::PyObjectToV3D(coordinates)());
 }
 } // namespace

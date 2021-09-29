@@ -9,18 +9,27 @@
 #include "Common/DllConfig.h"
 #include "IPreviewModel.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "Reduction/PreviewRow.h"
 
 #include <memory>
 #include <string>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
+class IJobManager;
+
 class MANTIDQT_ISISREFLECTOMETRY_DLL PreviewModel : public IPreviewModel {
 public:
   virtual ~PreviewModel() = default;
-  void loadWorkspace(std::string const &workspaceName) override;
-  Mantid::API::MatrixWorkspace_sptr getInstViewWorkspace() const override;
+  void loadWorkspace(std::string const &workspaceName, IJobManager &jobManager) override;
+  Mantid::API::MatrixWorkspace_sptr getLoadedWs() const override;
 
 private:
-  Mantid::API::MatrixWorkspace_sptr m_instViewWorkspace;
+  // This should be an optional instead of a point, but we have issues reassigning it because boost::optional doesn't
+  // play well with non-copyables. This should be fixable when we can use std::make_optional, but that is disabled on
+  // Mac right now.
+  std::unique_ptr<PreviewRow> m_runDetails{nullptr};
+
+  void createRunDetails(std::string const &workspaceName);
+  Mantid::API::MatrixWorkspace_sptr loadFromAds(std::string const &workspaceName) const;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
