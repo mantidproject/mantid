@@ -139,7 +139,7 @@ def _get_data_for_plot(axes, workspace, kwargs, with_dy=False, with_dx=False):
             max_val = numpy.nanmax(y)
             if (min_val != max_val):
                 y = (y - min_val) / (max_val - min_val)
-                if dy:
+                if dy is not None:
                     dy = dy / (max_val - min_val)
     return x, y, dy, dx, indices, axis, kwargs
 
