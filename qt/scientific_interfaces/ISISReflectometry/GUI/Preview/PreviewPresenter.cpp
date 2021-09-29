@@ -20,9 +20,6 @@ PreviewPresenter::PreviewPresenter(Dependencies dependencies)
   m_jobManager->subscribe(this);
 
   m_view->setInstViewToolbarEnabled(false);
-  m_view->setInstViewPanState(false);
-  m_view->setInstViewZoomState(false);
-  m_view->setInstViewSelectRectState(false);
 }
 
 /** Notification received when the user has requested to load a workspace. If it already exists in the ADS

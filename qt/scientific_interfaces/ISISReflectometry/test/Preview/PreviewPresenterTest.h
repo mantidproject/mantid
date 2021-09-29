@@ -87,23 +87,10 @@ public:
     presenter.notifyLoadWorkspaceCompleted();
   }
 
-  void test_constructor_disables_inst_view_buttons() {
-    auto mockView = makeView();
-    EXPECT_CALL(*mockView, setInstViewSelectRectState(Eq(false))).Times(1);
-    EXPECT_CALL(*mockView, setInstViewPanState(Eq(false))).Times(1);
-    EXPECT_CALL(*mockView, setInstViewZoomState(Eq(false))).Times(1);
-
-    auto presenter = PreviewPresenter(packDeps(mockView.get()));
-  }
-
   void test_notify_inst_view_select_rect_requested() {
     auto mockView = makeView();
-    // Constructor
-    EXPECT_CALL(*mockView, setInstViewSelectRectState(Eq(false))).Times(1);
-    EXPECT_CALL(*mockView, setInstViewPanState(Eq(false))).Times(2);
-    EXPECT_CALL(*mockView, setInstViewZoomState(Eq(false))).Times(2);
-
-    // Method
+    EXPECT_CALL(*mockView, setInstViewPanState(Eq(false))).Times(1);
+    EXPECT_CALL(*mockView, setInstViewZoomState(Eq(false))).Times(1);
     EXPECT_CALL(*mockView, setInstViewSelectRectState(Eq(true))).Times(1);
     EXPECT_CALL(*mockView, setInstViewSelectRectMode()).Times(1);
 
@@ -113,12 +100,8 @@ public:
 
   void test_notify_inst_view_pan_requested() {
     auto mockView = makeView();
-    // Constructor
-    EXPECT_CALL(*mockView, setInstViewZoomState(Eq(false))).Times(2);
-    EXPECT_CALL(*mockView, setInstViewSelectRectState(Eq(false))).Times(2);
-    EXPECT_CALL(*mockView, setInstViewPanState(Eq(false))).Times(1);
-
-    // Method
+    EXPECT_CALL(*mockView, setInstViewZoomState(Eq(false))).Times(1);
+    EXPECT_CALL(*mockView, setInstViewSelectRectState(Eq(false))).Times(1);
     EXPECT_CALL(*mockView, setInstViewPanState(Eq(true))).Times(1);
     EXPECT_CALL(*mockView, setInstViewPanMode()).Times(1);
     auto presenter = PreviewPresenter(packDeps(mockView.get()));
@@ -127,10 +110,8 @@ public:
 
   void test_notify_inst_view_zoom_requested() {
     auto mockView = makeView();
-    EXPECT_CALL(*mockView, setInstViewSelectRectState(Eq(false))).Times(2);
-    EXPECT_CALL(*mockView, setInstViewPanState(Eq(false))).Times(2);
-    EXPECT_CALL(*mockView, setInstViewZoomState(Eq(false))).Times(1);
-
+    EXPECT_CALL(*mockView, setInstViewSelectRectState(Eq(false))).Times(1);
+    EXPECT_CALL(*mockView, setInstViewPanState(Eq(false))).Times(1);
     EXPECT_CALL(*mockView, setInstViewZoomState(Eq(true))).Times(1);
     EXPECT_CALL(*mockView, setInstViewZoomMode()).Times(1);
     auto presenter = PreviewPresenter(packDeps(mockView.get()));
