@@ -19,6 +19,7 @@ PreviewPresenter::PreviewPresenter(Dependencies dependencies)
   m_view->subscribe(this);
   m_jobManager->subscribe(this);
 
+  m_view->setInstViewToolbarEnabled(false);
   m_view->setInstViewPanState(false);
   m_view->setInstViewZoomState(false);
   m_view->setInstViewSelectRectState(false);
@@ -47,10 +48,10 @@ void PreviewPresenter::notifyLoadWorkspaceCompleted() {
 
   // Notify the instrument view model that the workspace has changed before we get the surface
   m_instViewModel->updateWorkspace(ws);
-  // TODO add calls to the view to make sure we disconnect signals, clear any drawn shapes and reset back to default
-  // state (i.e. zoom)
+  // TODO add calls to the view to make sure we clear any drawn shapes and reset back to default state (i.e. zoom)
   m_view->plotInstView(m_instViewModel->getInstrumentViewActor(), m_instViewModel->getSamplePos(),
                        m_instViewModel->getAxis());
+  m_view->setInstViewToolbarEnabled(true);
 }
 
 void PreviewPresenter::notifyInstViewSelectRectRequested() {

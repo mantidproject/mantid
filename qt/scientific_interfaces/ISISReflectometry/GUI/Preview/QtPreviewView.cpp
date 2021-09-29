@@ -8,7 +8,6 @@
 #include "MantidQtIcons/Icon.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
 #include "MantidQtWidgets/InstrumentView/ProjectionSurface.h"
-#include "MantidQtWidgets/InstrumentView/RotationSurface.h"
 #include "MantidQtWidgets/InstrumentView/UnwrappedCylinder.h"
 
 #include <string>
@@ -74,4 +73,11 @@ void QtPreviewView::setInstViewZoomMode() {
 void QtPreviewView::onInstViewShapeChanged() const {
   // m_notifyee->notifyInstViewShapeChanged();
 }
+
+void QtPreviewView::setInstViewToolbarEnabled(bool enable) {
+  m_ui.iv_rect_select_toggle->setEnabled(enable);
+  m_ui.iv_zoom_button->setEnabled(enable);
+  m_ui.iv_pan_button->setEnabled(enable);
+}
+
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

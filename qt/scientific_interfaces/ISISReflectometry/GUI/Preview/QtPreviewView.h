@@ -40,6 +40,7 @@ public:
   void setInstViewSelectRectMode() override;
   void setInstViewPanMode() override;
   void setInstViewZoomMode() override;
+  void setInstViewToolbarEnabled(bool enable) override;
 
 private:
   Ui::PreviewWidget m_ui;

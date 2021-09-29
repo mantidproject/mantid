@@ -89,7 +89,6 @@ public:
 
   void test_constructor_disables_inst_view_buttons() {
     auto mockView = makeView();
-
     EXPECT_CALL(*mockView, setInstViewSelectRectState(Eq(false))).Times(1);
     EXPECT_CALL(*mockView, setInstViewPanState(Eq(false))).Times(1);
     EXPECT_CALL(*mockView, setInstViewZoomState(Eq(false))).Times(1);
@@ -149,6 +148,7 @@ private:
   MockViewT makeView() {
     auto mockView = std::make_unique<MockPreviewView>();
     EXPECT_CALL(*mockView, subscribe(NotNull())).Times(1);
+    EXPECT_CALL(*mockView, setInstViewToolbarEnabled(Eq(false))).Times(1);
     return mockView;
   }
 
@@ -173,13 +173,14 @@ private:
                                     MockInstViewModel &mockInstViewModel) {
     auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
     auto samplePos = V3D(1, 2, 3);
-    auto axis = V3D(4, 5, 6);
+    auto axes = V3D(4, 5, 6);
 
     EXPECT_CALL(mockModel, getLoadedWs).Times(1).WillOnce(Return(ws));
     EXPECT_CALL(mockInstViewModel, updateWorkspace(Eq(ws))).Times(1);
     EXPECT_CALL(mockInstViewModel, getInstrumentViewActor()).Times(1).WillOnce(Return(nullptr));
     EXPECT_CALL(mockInstViewModel, getSamplePos()).Times(1).WillOnce(Return(samplePos));
-    EXPECT_CALL(mockInstViewModel, getAxis()).Times(1).WillOnce(Return(axis));
-    EXPECT_CALL(mockView, plotInstView(Eq(nullptr), Eq(samplePos), Eq(axis)));
+    EXPECT_CALL(mockInstViewModel, getAxis()).Times(1).WillOnce(Return(axes));
+    EXPECT_CALL(mockView, plotInstView(Eq(nullptr), Eq(samplePos), Eq(axes)));
+    EXPECT_CALL(mockView, setInstViewToolbarEnabled(Eq(true))).Times(1);
   }
 };

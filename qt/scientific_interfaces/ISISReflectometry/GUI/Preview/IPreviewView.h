@@ -37,5 +37,6 @@ public:
   virtual void setInstViewSelectRectMode() = 0;
   virtual void setInstViewPanMode() = 0;
   virtual void setInstViewZoomMode() = 0;
+  virtual void setInstViewToolbarEnabled(bool enable) = 0;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
