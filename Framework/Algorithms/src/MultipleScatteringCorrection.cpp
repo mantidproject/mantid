@@ -827,9 +827,6 @@ void MultipleScatteringCorrection::pairWiseSum(double &A1, double &A2,          
         // L12 is a pre-computed vector, therefore we can use the index directly
         size_t idx_l12 = i < j ? calcLinearIdxFromUpperTriangular(nElements, i, j)
                                : calcLinearIdxFromUpperTriangular(nElements, j, i);
-        if (L12s[idx_l12] == 0) {
-          continue;
-        }
         // compute a2 component
         exponent = (LS1s[i] + L12s[idx_l12] + L2Ds[j]) * linearCoefAbs;
         a2 += exp(exponent) * elementVolumes[j] / (L12s[idx_l12] * L12s[idx_l12]);
@@ -879,9 +876,6 @@ void MultipleScatteringCorrection::pairWiseSum(
         size_t idx_l12 = i < j ? calcLinearIdxFromUpperTriangular(numVolumeElementsTotal, i, j)
                                : calcLinearIdxFromUpperTriangular(numVolumeElementsTotal, j, i);
         const double l12 = L12sContainer[idx_l12] + L12sSample[idx_l12];
-        if (l12 == 0) {
-          continue;
-        }
         exponent = (LS1sContainer[i] + L12sContainer[idx_l12] + L2DsContainer[j]) * linearCoefAbsContainer + //
                    (LS1sSample[i] + L12sSample[idx_l12] + L2DsSample[j]) * linearCoefAbsSample;
         a2 += exp(exponent) * factor_j * elementVolumes[j] / (l12 * l12);
