@@ -147,10 +147,6 @@ InstrumentWidget::InstrumentWidget(QString wsName, QWidget *parent, bool resetGe
 
   m_mainLayout->addWidget(m_controlPanelLayout);
 
-  // disable all controls until background thread has finished
-  m_controlPanelLayout->setEnabled(false);
-  resetInstrumentActor();
-
   m_xIntegration = new XIntegrationControl(this);
   m_xIntegration->setEnabled(false);
   m_mainLayout->addWidget(m_xIntegration);
@@ -170,6 +166,10 @@ InstrumentWidget::InstrumentWidget(QString wsName, QWidget *parent, bool resetGe
   m_mainLayout->addLayout(infoLayout);
   QSettings settings;
   settings.beginGroup(InstrumentWidgetSettingsGroup);
+
+  // disable all controls until background thread has finished
+  m_controlPanelLayout->setEnabled(false);
+  resetInstrumentActor();
 
   // Background colour
   setBackgroundColor(settings.value("BackgroundColor", QColor(0, 0, 0, 1.0)).value<QColor>());
@@ -344,6 +344,12 @@ void InstrumentWidget::resetSurface() {
 void InstrumentWidget::resetInstrumentActor() {
   m_thread.quit();
   m_thread.wait();
+
+  // disable main GUI elements while thread is running - these are re-enabled afterwards in initWidget
+  m_controlPanelLayout->setEnabled(false);
+  m_xIntegration->setEnabled(false);
+  updateInfoText("Loading instrument...");
+
   m_instrumentActor = std::make_unique<InstrumentActor>(m_workspaceName.toStdString(), *m_messageHandler, m_autoscaling,
                                                         m_scaleMin, m_scaleMax);
   m_instrumentActor->moveToThread(&m_thread);
@@ -656,6 +662,10 @@ void InstrumentWidget::replaceWorkspace(const std::string &newWs, const std::str
 void InstrumentWidget::updateIntegrationWidget(bool init) {
   // discrete integration range is only used if all the bins are common and integers and not an event workspace, as a
   // convention
+  if (!m_instrumentActor->isInitialized()) {
+    // skip if background thread is still running, this will get called when it finishes as part of init
+    return;
+  }
   auto ws = m_instrumentActor->getWorkspace();
 
   bool isNotEventWs = ws->id() != "EventWorkspace";
