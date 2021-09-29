@@ -382,7 +382,7 @@ class AlignComponents(PythonAlgorithm):
             api.LoadEmptyInstrument(Filename=self.getProperty("InstrumentFilename").value, OutputWorkspace=wks_name)
 
         # mapping from component-info index (or detector-info index) to detector-ID
-        self.component_info = api.mtd[wks_name].component_info
+        self.component_info = api.mtd[wks_name].componentInfo()
         self.ci2id = api.mtd[wks_name].detectorInfo().detectorIDs()
 
         # Make a dictionary of what options are being refined for sample/source. No rotation.
