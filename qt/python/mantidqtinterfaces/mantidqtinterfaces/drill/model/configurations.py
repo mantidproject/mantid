@@ -65,6 +65,17 @@ class RundexSettings(object):
             D1B:    [POWDER_PSCAN]
             }
 
+    #group by group processing mode
+    COLUMN_BY_COLUMN = "ColumnByColumn"
+    GROUP_BY_GROUP = "GroupByGroup"
+    PROCESSING_MODE = {
+            SANS_MULTI: GROUP_BY_GROUP
+            }
+    GROUPED_COLUMNS = {
+            SANS_MULTI: [
+                ]
+            }
+
     # parameters for each acquisition mode
     COLUMNS = {
             SANS_ACQ: [
@@ -91,6 +102,28 @@ class RundexSettings(object):
                 "OutputWorkspace",
                 "OutputJoinedWorkspace",
                 "CustomOptions"
+                ],
+            SANS_MULTI: [
+                "SampleRunsD1",
+                "SampleRunsD2",
+                "SampleRunsD3",
+                "SampleRunsD4",
+                "SampleRunsD5",
+                "DarkCurrentRuns",
+                "EmptyBeamRuns",
+                "FluxRuns",
+                "EmptyContainerRuns",
+                "SampleTrRunsW1",
+                "SampleTrRunsW2",
+                "TrDarkCurrentRuns",
+                "ContainerTrRuns",
+                "TrEmptyBeamRuns",
+                "BeamStopMasks",
+                "FlatFields",
+                "Solvents",
+                "SampleThickness",
+                "SampleNames",
+                "OutputWorkspace"
                 ],
             REFL_POL: [
                 "Run00",
@@ -159,6 +192,8 @@ class RundexSettings(object):
                 "SaveAscii": False,
                 "SaveCanSAS1D": True,
                 "SaveNISTDAT": True
+                },
+            SANS_MULTI: {
                 },
             REFL_POL: {
                 "SaveNexusProcessed": False,
@@ -257,6 +292,37 @@ class RundexSettings(object):
                 "PixelYMin",
                 "PixelYMax",
                 "Wavelength"
+                ],
+            SANS_MULTI : [
+                "SensitivityMap",
+                "DefaultMask",
+                "TransmissionThetaDependent",
+                "NormaliseBy",
+                "TrBeamRadius",
+                "BeamRadius",
+                "SampleThicknessFrom",
+                "SampleNamesFrom",
+                "ProduceSensitivity",
+                "SensitivityWithOffset",
+                "OutputType",
+                "DistanceAtWavelength2",
+                "SubAlgorithmOffset",
+                "OutputBinning",
+                "CalculateResolution",
+                "DefaultQBinning",
+                "BinningFactor",
+                "NumberOfWedges",
+                "WedgeAngle",
+                "WedgeOffset",
+                "AsymmetricWedges",
+                "WavelengthRange",
+                "ShapeTable",
+                "OutputPanels",
+                "PerformStitching",
+                "ManualScaleFactors",
+                "TieScaleFactor",
+                "ScaleFactorCalculation",
+                "StitchReferenceIndex",
                 ],
             REFL_POL : [
                 "PolarizationEfficiencyFile",
