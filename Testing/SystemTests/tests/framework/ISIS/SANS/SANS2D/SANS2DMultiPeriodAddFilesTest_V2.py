@@ -11,9 +11,9 @@ import os
 
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 from mantid.kernel import config
-from sans.command_interface.ISISCommandInterface import (SANS2D, Set1D, Detector, MaskFile, Gravity, AssignSample,
-                                                         WavRangeReduction, DefaultTrans, UseCompatibilityMode,
-                                                         AddRuns)
+from mantidqtinterfaces.sans.command_interface.ISISCommandInterface import (SANS2D, Set1D, Detector, MaskFile, Gravity, AssignSample,
+                                                                            WavRangeReduction, DefaultTrans, UseCompatibilityMode,
+                                                                            AddRuns)
 from sans.common.enums import SANSInstrument
 
 

@@ -10,8 +10,8 @@ import systemtesting
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 
 from mantid.api import AnalysisDataService
-from sans.command_interface.ISISCommandInterface import (Set1D, Detector, MaskFile, AssignSample, WavRangeReduction,
-                                                         LARMOR)
+from mantidqtinterfaces.sans.command_interface.ISISCommandInterface import (Set1D, Detector, MaskFile, AssignSample, WavRangeReduction,
+                                                                            LARMOR)
 
 # test batch mode with sans2d and selecting a period in batch mode
 from sans.common.enums import SANSInstrument

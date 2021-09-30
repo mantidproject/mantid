@@ -14,9 +14,9 @@ import systemtesting
 from isis_sans_system_test import ISISSansSystemTest
 from mantid.kernel import (config)
 from mantid.simpleapi import RenameWorkspace
-from sans.command_interface.ISISCommandInterface import (BatchReduce, SANS2D, MaskFile, AssignSample, AssignCan,
-                                                         TransmissionSample, TransmissionCan, WavRangeReduction,
-                                                         UseCompatibilityMode, FindBeamCentre)
+from mantidqtinterfaces.sans.command_interface.ISISCommandInterface import (BatchReduce, SANS2D, MaskFile, AssignSample, AssignCan,
+                                                                            TransmissionSample, TransmissionCan, WavRangeReduction,
+                                                                            UseCompatibilityMode, FindBeamCentre)
 from sans.common.enums import SANSInstrument
 
 

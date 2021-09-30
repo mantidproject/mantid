@@ -9,7 +9,7 @@ from mantid import FileFinder
 from sans.common.enums import SANSInstrument
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 
-from sans.command_interface.ISISCommandInterface import (LOQ, UseCompatibilityMode, BatchReduce)
+from mantidqtinterfaces.sans.command_interface.ISISCommandInterface import (LOQ, UseCompatibilityMode, BatchReduce)
 from mantid.simpleapi import GroupWorkspaces
 
 

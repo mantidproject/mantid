@@ -7,7 +7,7 @@
 from isis_sans_system_test import ISISSansSystemTest
 
 from mantid.simpleapi import GroupWorkspaces
-from sans.command_interface.ISISCommandInterface import UseCompatibilityMode, ZOOM, MaskFile, BatchReduce
+from mantidqtinterfaces.sans.command_interface.ISISCommandInterface import UseCompatibilityMode, ZOOM, MaskFile, BatchReduce
 from sans.common.enums import SANSInstrument
 from systemtesting import MantidSystemTest
 

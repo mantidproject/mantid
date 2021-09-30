@@ -9,9 +9,9 @@
 import systemtesting
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 from mantid.api import (AnalysisDataService, FileFinder)
-from sans.command_interface.ISISCommandInterface import (SANS2D, MaskFile, BatchReduce, SetEventSlices,
-                                                         UseCompatibilityMode, AssignSample, AssignCan,
-                                                         TransmissionSample, TransmissionCan, WavRangeReduction)
+from mantidqtinterfaces.sans.command_interface.ISISCommandInterface import (SANS2D, MaskFile, BatchReduce, SetEventSlices,
+                                                                            UseCompatibilityMode, AssignSample, AssignCan,
+                                                                            TransmissionSample, TransmissionCan, WavRangeReduction)
 from mantid.simpleapi import RenameWorkspace
 from sans.common.enums import SANSInstrument
 

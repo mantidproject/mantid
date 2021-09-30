@@ -9,10 +9,10 @@
 import systemtesting
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 from mantid.simpleapi import DeleteWorkspace, mtd
-from sans.command_interface.ISISCommandInterface import (SANS2DTUBES, MaskFile, SetDetectorOffsets, Gravity, Set1D,
-                                                         SetFrontDetRescaleShift, WavRangeReduction, AssignSample,
-                                                         AssignCan, TransmissionSample, TransmissionCan,
-                                                         UseCompatibilityMode)
+from mantidqtinterfaces.sans.command_interface.ISISCommandInterface import (SANS2DTUBES, MaskFile, SetDetectorOffsets, Gravity, Set1D,
+                                                                            SetFrontDetRescaleShift, WavRangeReduction, AssignSample,
+                                                                            AssignCan, TransmissionSample, TransmissionCan,
+                                                                            UseCompatibilityMode)
 from sans.common.enums import SANSInstrument
 
 

@@ -19,9 +19,9 @@ from mantid.api import AnalysisDataService
 from mantid.kernel import config
 from mantid.simpleapi import DeleteWorkspace
 import SANSadd2
-from sans.command_interface.ISISCommandInterface import (SANS2DTUBES, MaskFile, SetDetectorOffsets, Gravity, Set1D,
-                                                         AddRuns, AssignSample, AssignCan, TransmissionSample,
-                                                         TransmissionCan, WavRangeReduction, UseCompatibilityMode)
+from mantidqtinterfaces.sans.command_interface.ISISCommandInterface import (SANS2DTUBES, MaskFile, SetDetectorOffsets, Gravity, Set1D,
+                                                                            AddRuns, AssignSample, AssignCan, TransmissionSample,
+                                                                            TransmissionCan, WavRangeReduction, UseCompatibilityMode)
 from sans.common.enums import SANSInstrument
 
 

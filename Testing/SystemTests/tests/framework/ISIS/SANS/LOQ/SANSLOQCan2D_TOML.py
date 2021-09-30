@@ -7,9 +7,9 @@
 import systemtesting
 import mantid  # noqa
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
-from sans.command_interface.ISISCommandInterface import (LOQ, Set2D, Detector, MaskFile, SetDetectorOffsets, Gravity,
-                                                         AssignSample, AssignCan, WavRangeReduction,
-                                                         UseCompatibilityMode)
+from mantidqtinterfaces.sans.command_interface.ISISCommandInterface import (LOQ, Set2D, Detector, MaskFile, SetDetectorOffsets, Gravity,
+                                                                            AssignSample, AssignCan, WavRangeReduction,
+                                                                            UseCompatibilityMode)
 from sans.common.enums import SANSInstrument
 
 

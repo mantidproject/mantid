@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from isis_sans_system_test import ISISSansSystemTest
-from sans.command_interface.ISISCommandInterface import UseCompatibilityMode, ZOOM, MaskFile, Set1D, AssignSample, \
+from mantidqtinterfaces.sans.command_interface.ISISCommandInterface import UseCompatibilityMode, ZOOM, MaskFile, Set1D, AssignSample, \
     WavRangeReduction
 from sans.common.enums import SANSInstrument
 from systemtesting import MantidSystemTest

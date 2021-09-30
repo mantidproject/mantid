@@ -8,10 +8,10 @@
 import systemtesting
 import mantid  # noqa
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
-from sans.command_interface.ISISCommandInterface import (LOQ, Set1D, Detector, MaskFile, Gravity, AssignSample,
-                                                         TransmissionSample, AssignCan, TransmissionCan,
-                                                         WavRangeReduction, DefaultTrans, SetCentre,
-                                                         UseCompatibilityMode, FindBeamCentre)
+from mantidqtinterfaces.sans.command_interface.ISISCommandInterface import (LOQ, Set1D, Detector, MaskFile, Gravity, AssignSample,
+                                                                            TransmissionSample, AssignCan, TransmissionCan,
+                                                                            WavRangeReduction, DefaultTrans, SetCentre,
+                                                                            UseCompatibilityMode, FindBeamCentre)
 from sans.common.enums import SANSInstrument
 
 

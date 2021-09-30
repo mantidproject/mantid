@@ -12,8 +12,8 @@ from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 from mantid import config
 from mantid.api import (FileFinder)
 from mantid.simpleapi import (Load, DeleteWorkspace, mtd)
-from sans.command_interface.ISISCommandInterface import (SANS2DTUBES, SANS2D, Set1D, Detector,
-                                                         MaskFile, Gravity, BatchReduce, UseCompatibilityMode)
+from mantidqtinterfaces.sans.command_interface.ISISCommandInterface import (SANS2DTUBES, SANS2D, Set1D, Detector,
+                                                                            MaskFile, Gravity, BatchReduce, UseCompatibilityMode)
 import os.path
 
 from sans.common.enums import SANSInstrument
