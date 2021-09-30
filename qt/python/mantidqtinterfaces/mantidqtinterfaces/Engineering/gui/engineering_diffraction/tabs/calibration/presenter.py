@@ -52,7 +52,7 @@ class CalibrationPresenter(object):
         else:
             # make a new calibration
             sample_file = self.view.get_sample_filename()
-            self.current_calibration.set_calibration_paths(sample_file, self.instrument)
+            self.current_calibration.set_calibration_paths(self.instrument, sample_file)
             # set group and any additional parameters needed
             if self.view.get_crop_checked():
                 self.current_calibration.set_group(self.cropping_widget.get_group())

@@ -12,6 +12,7 @@ from mantid.simpleapi import PDCalibration, DeleteWorkspace, DiffractionFocussin
     CreateEmptyTableWorkspace, NormaliseByCurrent, ConvertUnits, Load, SaveNexus, ApplyDiffCal
 import Engineering.EnggUtils as EnggUtils
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting, set_setting
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.calibration_info import CalibrationInfo
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
 from Engineering.common import path_handling
 
@@ -28,10 +29,9 @@ class CalibrationModel(object):
         :param ceria_path: Path to ceria (CeO2) data file
         :param rb_num: The RB number for file creation.
         """
-        ceria_path = calibration.get_sample_path()
 
         # load ceria data
-        ceria_workspace = path_handling.load_workspace(ceria_path)
+        ceria_workspace = path_handling.load_workspace(calibration.get_ceria_path())
 
         # load whole instrument calibration
         full_calib = self.load_full_instrument_calibration()
@@ -68,7 +68,6 @@ class CalibrationModel(object):
 
     @staticmethod
     def extract_b2b_params(workspace):
-
         ws_inst = workspace.getInstrument()
         NorthBank = ws_inst.getComponentByName("NorthBank")
         SouthBank = ws_inst.getComponentByName("SouthBank")
@@ -191,8 +190,6 @@ class CalibrationModel(object):
         :param bk2bk_params: BackToBackExponential parameters from Parameters.xml file.
         :param CalibrationInfo object with details of calibration and grouping
         """
-        ceria_run = calibration.get_sample_runno()
-
         # create calibration dir of not exiust
         if not path.exists(calibration_dir):
             makedirs(calibration_dir)
@@ -202,6 +199,7 @@ class CalibrationModel(object):
             calibration.save_grouping_workspace(calibration_dir)
 
         # save prm file(s)
+        ceria_run = calibration.get_ceria_runno()
         prm_filepath = calibration_dir + calibration.generate_output_file_name()
         set_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX,
                     "last_calibration_path", prm_filepath)
@@ -217,9 +215,10 @@ class CalibrationModel(object):
         if calibration.group == EnggUtils.GROUP.BOTH:
             # output a separate prm for North and South when both banks included
             for ibank, bank in enumerate(calibration.group.banks):
-                bank_group = EnggUtils.GroupingInfo(EnggUtils.GROUP(str(ibank + 1)))  # to get prm template for the bank
-                prm_filepath_bank = calibration_dir + bank_group.generate_output_file_name(
-                    calibration.get_sample_path(), calibration.get_instrument())
+                # create temp group to get prm template for the bank
+                bank_group = CalibrationInfo(EnggUtils.GROUP(str(ibank + 1)),
+                                             calibration.get_instrument(), calibration.get_ceria_path())
+                prm_filepath_bank = calibration_dir + bank_group.generate_output_file_name()
                 EnggUtils.write_ENGINX_GSAS_iparam_file(prm_filepath_bank,
                                                         [difa[ibank]], [difc[ibank]], [tzero[ibank]],
                                                         bk2bk_params, bank_names=bank_group.group.banks,

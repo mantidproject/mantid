@@ -92,8 +92,8 @@ class EngineeringDiffractionPresenter(object):
 
     def update_calibration(self, calibration):
         instrument = calibration.get_instrument()
-        sample_no = calibration.get_sample_runno()
-        self.statusbar_observable.notify_subscribers(f"CeO2: {sample_no}, Instrument: {instrument}")
+        ceria_no = calibration.get_ceria_runno()
+        self.statusbar_observable.notify_subscribers(f"CeO2: {ceria_no}, Instrument: {instrument}")
 
     @staticmethod
     def get_saved_rb_number() -> str:
