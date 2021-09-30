@@ -9,7 +9,7 @@
 #include "DllConfig.h"
 
 #include "IndirectFitPlotModel.h"
-#include "MantidAPI/IFunction_fwd.h"
+//#include "MantidAPI/IFunction_fwd.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
 #include "MantidQtWidgets/Plotting/Mpl/ExternalPlotter.h"
 
@@ -89,9 +89,6 @@ private:
   void plotFit(const Mantid::API::MatrixWorkspace_sptr &workspace);
   void plotFit(Mantid::API::MatrixWorkspace_sptr workspace, WorkspaceIndex spectrum);
   void plotDifference(Mantid::API::MatrixWorkspace_sptr workspace, WorkspaceIndex spectrum);
-  void clearInput();
-  void clearFit();
-  void clearDifference();
   void plotGuess(Mantid::API::MatrixWorkspace_sptr workspace);
   void plotGuessInSeparateWindow(const Mantid::API::MatrixWorkspace_sptr &workspace);
   void plotLines();
