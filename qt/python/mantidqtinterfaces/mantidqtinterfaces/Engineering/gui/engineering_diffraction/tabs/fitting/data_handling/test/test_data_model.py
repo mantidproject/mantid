@@ -197,6 +197,19 @@ class TestFittingDataModel(unittest.TestCase):
         mock_minus.assert_not_called()
         mock_estimate_bg.assert_not_called()
 
+    @patch(data_model_path + ".SetUncertainties")
+    @patch(data_model_path + ".DeleteWorkspace")
+    @patch(data_model_path + ".EnggEstimateFocussedBackground")
+    @patch(data_model_path + ".Minus")
+    def test_invalid_bg_inputs_dont_throw(self, mock_minus, mock_estimate_bg, mock_delete_ws, mock_set_uncertainties):
+        self.model._loaded_workspaces = {"name1": self.mock_ws}
+        self.model._bg_sub_workspaces = {"name1": None}
+        self.model._bg_params = dict()
+        mock_estimate_bg.side_effect = ValueError("Some problem")
+
+        bg_params = [True, -1, 800, False]
+        assertRaisesNothing(self, self.model.create_or_update_bgsub_ws, "name1", bg_params)
+
     @patch(data_model_path + '.RenameWorkspace')
     @patch(data_model_path + ".ADS")
     @patch(data_model_path + ".DeleteTableRows")
