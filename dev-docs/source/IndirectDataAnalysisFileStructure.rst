@@ -6,7 +6,7 @@ IndirectDataAnalysis File Structure
 The many levels of inheritance in the indirect data analysis codebase can be confusing. it is not always clear how they
 all interact.
 
-The Ewlin and I(Q,t) are the most different as their components are all contained within a single UI file. This is
+The Elwin and I(Q,t) are the most different as their components are all contained within a single UI file. This is
 something that should be fixed to be more modular but it could be left till the fit tabs are separated out entirely.
 
 Fit Tab structure
