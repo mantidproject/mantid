@@ -182,8 +182,8 @@ Output:
 
 .. testcode:: ExLoadEventNexusWithFiltering
 
-   # Load SNS CNCS event dataset between 10 and 20 minutes
-   ws = LoadEventNexus('CNCS_7860_event.nxs', FilterByTimeStart=600, FilterByTimeStop=1200)
+   # Load SNS CNCS event dataset between 1 and 2 minutes
+   ws = LoadEventNexus('CNCS_7860_event.nxs', FilterByTimeStart=60, FilterByTimeStop=120)
 
    print("The number of events: {}".format(ws.getNumberEvents()))
 
@@ -191,7 +191,7 @@ Output:
 
 .. testoutput:: ExLoadEventNexusWithFiltering
 
-   The number of events: 112266
+   The number of events: 29753
 
 
 .. categories::

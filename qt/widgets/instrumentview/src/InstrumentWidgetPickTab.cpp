@@ -33,8 +33,10 @@
 #include <QAction>
 #include <QActionGroup>
 #include <QApplication>
+#include <QCheckBox>
 #include <QGridLayout>
 #include <QLabel>
+#include <QLineEdit>
 #include <QMenu>
 #include <QMessageBox>
 #include <QPixmap>
@@ -81,7 +83,7 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
 
   // connect to InstrumentWindow signals
   connect(m_instrWidget, SIGNAL(integrationRangeChanged(double, double)), this,
-          SLOT(changedIntegrationRange(double, double)));
+          SLOT(changedIntegrationRange(double, double)), Qt::QueuedConnection);
 
   m_plotSum = true;
 
@@ -93,6 +95,33 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   // set up the plot widget
   m_plot = new MiniPlot(this);
   connect(m_plot, SIGNAL(showContextMenu()), this, SLOT(plotContextMenu()));
+
+  // set up the rebin tab
+  m_rebin = new QWidget(this);
+  QGridLayout *rebinLayout = new QGridLayout(m_rebin);
+  m_rebinParams = new QLineEdit(m_rebin);
+  m_rebinParams->setToolTip("The parameters to use for the new binning, a comma separated list of first bin boundary, "
+                            "width, last bin boundary. See Rebin doc for details.");
+  m_rebinUseReverseLog = new QCheckBox("Use reverse logarithmic", m_rebin);
+  m_rebinUseReverseLog->setToolTip("Use a reverse logarithmic binning, the bins getting exponentially smaller as they "
+                                   "approach the upper limit. See Rebin for details.");
+  m_rebinSaveToHisto = new QCheckBox("Convert to histogram", m_rebin);
+  m_rebinSaveToHisto->setToolTip("Convert the data to histogram, and thus removes the events. CANNOT BE UNDONE.");
+
+  m_runRebin = new QPushButton("Run", m_rebin);
+  connect(m_rebinParams, SIGNAL(textChanged(QString)), this, SLOT(onRebinParamsWritten(QString)));
+  m_runRebin->setEnabled(false);
+
+  rebinLayout->addWidget(m_rebinParams, 0, 0);
+
+  QGridLayout *rebinCheckBoxesLayout = new QGridLayout();
+  rebinCheckBoxesLayout->addWidget(m_rebinUseReverseLog, 0, 0);
+  rebinCheckBoxesLayout->addWidget(m_rebinSaveToHisto, 0, 1);
+  rebinLayout->addLayout(rebinCheckBoxesLayout, 1, 0);
+
+  rebinLayout->addWidget(m_runRebin, 2, 0);
+  connect(m_rebinParams, SIGNAL(returnPressed()), this, SLOT(onRunRebin()));
+  connect(m_runRebin, SIGNAL(clicked(bool)), this, SLOT(onRunRebin()));
 
   // Plot context menu actions
   m_sumDetectors = new QAction("Sum", this);
@@ -154,6 +183,8 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   CollapsibleStack *panelStack = new CollapsibleStack(this);
   m_infoPanel = panelStack->addPanel("Selection", m_selectionInfoDisplay);
   m_plotPanel = panelStack->addPanel("Name", m_plot);
+  m_rebinPanel = panelStack->addPanel("Rebin", m_rebin);
+  m_rebinPanel->collapseCaption();
   collapsePlotPanel();
 
   m_selectionType = Single;
@@ -288,14 +319,29 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
 }
 
 /**
- * If the workspace is monochromatic, the plot panel is useless and should be
- * collapsed
+ * If the workspace is monochromatic, the plot panel is useless and should be collapsed
  */
 void InstrumentWidgetPickTab::collapsePlotPanel() {
   if (!m_instrWidget->isIntegrable()) {
     m_plotPanel->collapseCaption();
-  } else
+  } else {
     m_plotPanel->expandCaption();
+  }
+}
+
+/**
+ * @brief InstrumentWidgetPickTab::onRebinParamsWritten
+ * Forbid running rebin if no parameters are provided
+ * @param text the text in the params field
+ */
+void InstrumentWidgetPickTab::onRebinParamsWritten(const QString &text) {
+  m_runRebin->setEnabled(!text.isEmpty());
+  if (text.isEmpty()) {
+    disconnect(m_rebinParams, SIGNAL(returnPressed()), this, SLOT(onRunRebin()));
+  } else {
+    // set up the connection, unique so that they are not added over and over
+    connect(m_rebinParams, SIGNAL(returnPressed()), this, SLOT(onRunRebin()), Qt::UniqueConnection);
+  }
 }
 
 /**
@@ -487,13 +533,16 @@ void InstrumentWidgetPickTab::setSelectionType() {
   m_plotController->setPlotType(plotType);
   auto surface = m_instrWidget->getSurface();
   if (surface) {
+    auto previousInteractionMode = surface->getInteractionMode();
     surface->setInteractionMode(surfaceMode);
     auto interactionMode = surface->getInteractionMode();
-    if (interactionMode == ProjectionSurface::DrawRegularMode || interactionMode == ProjectionSurface::MoveMode) {
-      updatePlotMultipleDetectors();
-    } else {
-      m_plot->clearAll();
-      m_plot->replot();
+    if (interactionMode != previousInteractionMode) {
+      if (interactionMode == ProjectionSurface::DrawRegularMode || interactionMode == ProjectionSurface::MoveMode) {
+        updatePlotMultipleDetectors();
+      } else {
+        m_plot->clearAll();
+        m_plot->replot();
+      }
     }
     setPlotCaption();
   }
@@ -746,9 +795,37 @@ void InstrumentWidgetPickTab::updatePlotMultipleDetectors() {
     surface.getMaskedDetectors(dets);
     m_plotController->setPlotData(dets);
   } else {
-    m_plotController->clear();
+    std::vector<Mantid::detid_t> dets;
+    const auto &actor = m_instrWidget->getInstrumentActor();
+    const auto &detInfo = actor.detectorInfo();
+    dets = detInfo.detectorIDs();
+
+    std::vector<size_t> detsIds;
+    detsIds.reserve(dets.size());
+
+    for (auto id : dets) {
+      auto detector = actor.getDetectorByDetID(id);
+      if (!detInfo.isMonitor(detector))
+        detsIds.push_back(detector);
+    }
+
+    m_plotController->setPlotData(detsIds);
   }
   m_plot->replot();
+}
+
+void InstrumentWidgetPickTab::onRunRebin() {
+  try {
+    auto alg = AlgorithmManager::Instance().create("Rebin");
+    alg->setProperty("InputWorkspace", m_instrWidget->getWorkspaceNameStdString());
+    alg->setProperty("OutputWorkspace", m_instrWidget->getWorkspaceNameStdString());
+    alg->setProperty("Params", m_rebinParams->text().toStdString());
+    alg->setProperty("PreserveEvents", !m_rebinSaveToHisto->isChecked());
+    alg->setProperty("UseReverseLogarithmic", m_rebinUseReverseLog->isChecked());
+    alg->execute();
+  } catch (std::exception &e) {
+    QMessageBox::information(this, "Rebin Error", e.what(), "OK");
+  }
 }
 
 /**

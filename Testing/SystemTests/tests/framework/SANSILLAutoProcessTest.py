@@ -650,6 +650,58 @@ class D16_AutoProcess_Test(systemtesting.MantidSystemTest):
                            )
 
 
+class D16_AutoProcess_Test_cycle213(systemtesting.MantidSystemTest):
+    """
+    Tests autoprocess with D16 data from cycle 213.
+    """
+    def __init__(self):
+        super(D16_AutoProcess_Test_cycle213, self).__init__()
+        self.setUp()
+
+    def setUp(self):
+        config['default.facility'] = 'ILL'
+        config['default.instrument'] = 'D16'
+        config['logging.loggers.root.level'] = 'Warning'
+        config.appendDataSearchSubDir('ILL/D16/')
+        config['algorithms.retained'] = '0'
+
+    def cleanup(self):
+        mtd.clear()
+
+    def validate(self):
+        self.tolerance = 1e-3
+        self.tolerance_is_rel_err = True
+        self.disableChecking.append("Instrument")
+        return ['iq', 'D16_213_iq.nxs']
+
+    def runTest(self):
+        sample = "23389:23390"
+        transmission_sample = '23388'
+        beam = '23376'
+        transmission_beam = '23376'
+        absorber = '23380'
+        cell_background = '23359'
+        transmission_empty_cell = '23358'
+
+        # process the sample where wavelength is incorrectly defined in nexus
+        SANSILLAutoProcess(
+            SampleRuns=sample,
+            BeamRuns=beam,
+            DefaultMaskFile="side_mask",
+            MaskFiles="beam_mask, side_mask",
+            TransmissionBeamRuns=transmission_beam,
+            OutputWorkspace='iq',
+            ContainerTransmissionRuns=transmission_empty_cell,
+            SampleTransmissionRuns=transmission_sample,
+            ContainerRuns=cell_background,
+            AbsorberRuns=absorber,
+            ThetaDependent=False,
+            SampleThickness=0.6,
+            StitchReferenceIndex=0,
+            Wavelength=4.54
+        )
+
+
 class D22_AutoProcess_Single_Sensitivity(systemtesting.MantidSystemTest):
     """
     Tests auto process with D22 data with one sensitivity measurement.

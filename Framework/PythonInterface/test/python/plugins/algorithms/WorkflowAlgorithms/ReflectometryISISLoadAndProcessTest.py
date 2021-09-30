@@ -78,7 +78,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args['InputRunList'] = '13460'
         outputs = ['IvsQ_13460', 'IvsQ_binned_13460', 'TOF_13460', 'TOF']
         self._assert_run_algorithm_succeeds(args, outputs)
-        history = ['LoadNexus', 'ReflectometryReductionOneAuto', 'GroupWorkspaces']
+        history = ['ReflectometryISISPreprocess', 'ReflectometryReductionOneAuto', 'GroupWorkspaces']
         self._check_history(AnalysisDataService.retrieve('IvsQ_binned_13460'), history)
 
     def test_input_run_that_is_in_ADS_with_prefixed_name_is_not_reloaded(self):
@@ -105,7 +105,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args['InputRunList'] = '13460'
         outputs = ['IvsQ_13460', 'IvsQ_binned_13460', 'TEST_13460', 'TOF_13460', 'TOF']
         self._assert_run_algorithm_succeeds(args, outputs)
-        history = ['LoadNexus', 'ReflectometryReductionOneAuto', 'GroupWorkspaces']
+        history = ['ReflectometryISISPreprocess', 'ReflectometryReductionOneAuto', 'GroupWorkspaces']
         self._check_history(AnalysisDataService.retrieve('IvsQ_binned_13460'), history)
 
     def test_existing_workspace_is_used_when_name_passed_in_input_list(self):
@@ -122,7 +122,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args['InputRunList'] = 'INTER13460'
         outputs = ['IvsQ_13460', 'IvsQ_binned_13460', 'TOF_13460', 'TOF']
         self._assert_run_algorithm_succeeds(args, outputs)
-        history = ['LoadNexus', 'RenameWorkspace', 'ReflectometryReductionOneAuto', 'GroupWorkspaces']
+        history = ['ReflectometryISISPreprocess', 'ReflectometryReductionOneAuto', 'GroupWorkspaces']
         self._check_history(AnalysisDataService.retrieve('IvsQ_binned_13460'), history)
 
     def test_overriding_output_names(self):
@@ -202,7 +202,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         outputs = ['IvsQ_13460', 'IvsQ_binned_13460', 'TOF_13460', 'TRANS_13463', 'TRANS_13464',
                    'TRANS_LAM_13463_13464', 'TOF']
         self._assert_run_algorithm_succeeds(args, outputs)
-        history = ['LoadNexus', 'LoadNexus', 'ReflectometryReductionOneAuto', 'GroupWorkspaces']
+        history = ['ReflectometryISISPreprocess', 'ReflectometryISISPreprocess', 'ReflectometryReductionOneAuto', 'GroupWorkspaces']
         self._check_history(AnalysisDataService.retrieve('IvsQ_binned_13460'), history)
 
     def test_trans_runs_are_not_loaded_if_in_ADS_without_prefix(self):
@@ -234,7 +234,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         outputs = ['IvsQ_13460', 'IvsQ_binned_13460', 'TOF_13460', 'TRANS_13463', 'TRANS_13464',
                    'TEST_13463', 'TEST_13464', 'TRANS_LAM_13463_13464', 'TOF']
         self._assert_run_algorithm_succeeds(args, outputs)
-        history = ['LoadNexus', 'LoadNexus', 'ReflectometryReductionOneAuto', 'GroupWorkspaces']
+        history = ['ReflectometryISISPreprocess', 'ReflectometryISISPreprocess', 'ReflectometryReductionOneAuto', 'GroupWorkspaces']
         self._check_history(AnalysisDataService.retrieve('IvsQ_binned_13460'), history)
 
     def test_existing_workspace_is_used_for_trans_runs_when_name_passed_in_input_list(self):
@@ -507,6 +507,8 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args['GroupTOFWorkspaces'] = True
         outputs = ['no_TOF_group', 'TOF_12345+67890', '12345', '67890']
         self._assert_run_algorithm_succeeds(args, outputs)
+
+    # TODO test if no runNumber is on the WS
 
     def _create_workspace(self, run_number, prefix='', suffix=''):
         name = prefix + str(run_number) + suffix

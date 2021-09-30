@@ -500,7 +500,8 @@ private:
 
 class DLLExport DetectorBankSetsPkt : public Packet {
 public:
-  DetectorBankSetsPkt(const DetectorBankSetsPkt &pkt);
+  DetectorBankSetsPkt(const DetectorBankSetsPkt &pkt) = delete;
+  DetectorBankSetsPkt &operator=(DetectorBankSetsPkt) = delete;
 
   ~DetectorBankSetsPkt() override;
 

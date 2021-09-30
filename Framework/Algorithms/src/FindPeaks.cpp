@@ -990,9 +990,6 @@ int FindPeaks::findPeakBackground(const MatrixWorkspace_sptr &input, int spectru
 
   // Local check whether FindPeakBackground gives a reasonable value
   vecpeakrange.resize(2);
-
-  /// @todo Remove this cppcheck suppression when #13950 is fixed
-  // cppcheck-suppress knownConditionTrueFalse
   if (fitresult > 0) {
     // Use FitPeakBackgroud's result
     size_t i_peakmin, i_peakmax;

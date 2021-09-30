@@ -135,7 +135,6 @@ InstrumentWidget::InstrumentWidget(QString wsName, QWidget *parent, bool resetGe
   controlPanelLayout->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
   m_instrumentDisplay->installEventFilter(this);
-
   m_instrumentDisplay->getGLDisplay()->setMinimumWidth(600);
   m_qtConnect->connect(this, SIGNAL(enableLighting(bool)), m_instrumentDisplay->getGLDisplay(),
                        SLOT(enableLighting(bool)));
@@ -275,8 +274,6 @@ void InstrumentWidget::init(bool resetGeometry, bool autoscaling, double scaleMi
     m_instrumentActor.reset(new InstrumentActor(m_workspaceName, autoscaling, scaleMin, scaleMax));
   }
 
-  updateIntegrationWidget(true);
-
   auto surface = getSurface();
   if (resetGeometry || !surface) {
     if (setDefaultView) {
@@ -298,6 +295,7 @@ void InstrumentWidget::init(bool resetGeometry, bool autoscaling, double scaleMi
     surface->resetInstrumentActor(m_instrumentActor.get());
     updateInfoText();
   }
+  updateIntegrationWidget(resetGeometry);
 }
 
 /**
@@ -613,18 +611,35 @@ void InstrumentWidget::replaceWorkspace(const std::string &newWs, const std::str
 
 /**
  * @brief InstrumentWidget::updateIntegrationWidget
- * Update the range of the integration widget, and show or hide it is needed
- * @param init : boolean set to true if the integration widget is still being
- * initialized
+ * Update the range of the integration widget, and show or hide it if needed
+ * @param init : boolean set to true if the integration widget is still being initialized
  */
 void InstrumentWidget::updateIntegrationWidget(bool init) {
-  m_xIntegration->setTotalRange(m_instrumentActor->minBinValue(), m_instrumentActor->maxBinValue());
+  // discrete integration range is only used if all the bins are common and integers and not an event workspace, as a
+  // convention
+  auto ws = m_instrumentActor->getWorkspace();
+
+  bool isNotEventWs = ws->id() != "EventWorkspace";
+
+  bool isDiscrete = ws->isCommonBins() && ws->isIntegerBins() && isNotEventWs;
+
+  m_xIntegration->setDiscrete(isDiscrete);
+  double minRange = isDiscrete ? 0 : m_instrumentActor->minWkspBinValue();
+  double maxRange = isDiscrete ? static_cast<int>(ws->blocksize()) - 1 : m_instrumentActor->maxWkspBinValue();
+
+  m_xIntegration->setTotalRange(minRange, maxRange);
 
   if (!init) {
-    m_xIntegration->setRange(m_instrumentActor->minBinValue(), m_instrumentActor->maxBinValue());
+    // setRange needs the initialization of the instrument viewer to run, but is only needed when replacing a workspace,
+    // hence the check
+    if (!isDiscrete) {
+      m_xIntegration->setRange(minRange, maxRange);
+    } else {
+      m_xIntegration->setRange(0, 0);
+    }
   }
 
-  m_xIntegration->setUnits(QString::fromStdString(m_instrumentActor->getWorkspace()->getAxis(0)->unit()->caption()));
+  m_xIntegration->setUnits(QString::fromStdString(ws->getAxis(0)->unit()->caption()));
 
   bool integrable = isIntegrable();
 
@@ -857,8 +872,10 @@ void InstrumentWidget::setInfoText(const QString &text) { mInteractionInfo->setT
 void InstrumentWidget::saveSettings() {
   QSettings settings;
   settings.beginGroup(InstrumentWidgetSettingsGroup);
+
   if (m_instrumentDisplay->getGLDisplay())
     settings.setValue("BackgroundColor", m_instrumentDisplay->getGLDisplay()->currentBackgroundColor());
+
   auto surface = getSurface();
   if (surface) {
     // if surface is null istrument view wasn't created and there is nothing to
@@ -935,6 +952,15 @@ void InstrumentWidget::setWireframe(bool on) {
  * control calls this slot)
  */
 void InstrumentWidget::setIntegrationRange(double xmin, double xmax) {
+  auto workspace = m_instrumentActor->getWorkspace();
+  bool isNotEventWorkspace = workspace->id() != "EventWorkspace";
+  bool isDiscrete = workspace->isCommonBins() && workspace->isIntegerBins() && isNotEventWorkspace;
+
+  if (isDiscrete) {
+    xmin = workspace->binEdges(0)[static_cast<int>(xmin)];
+    xmax = workspace->binEdges(0)[static_cast<int>(xmax) + 1];
+  }
+
   m_instrumentActor->setIntegrationRange(xmin, xmax);
   setupColorMap();
   updateInstrumentDetectors();
@@ -1218,6 +1244,7 @@ void InstrumentWidget::updateInstrumentView(bool picking) { m_instrumentDisplay-
 /// Recalculate the colours and redraw the instrument view
 void InstrumentWidget::updateInstrumentDetectors() {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
   if (m_instrumentDisplay->getGLDisplay() &&
       m_instrumentDisplay->currentWidget() == dynamic_cast<QWidget *>(m_instrumentDisplay->getGLDisplay())) {
     m_instrumentDisplay->getGLDisplay()->updateDetectors();
@@ -1392,6 +1419,7 @@ void InstrumentWidget::handleWorkspaceReplacement(const std::string &wsName,
   // hasn't, but theoretically possible)
   bool resetGeometry = matrixWS->detectorInfo().size() != m_instrumentActor->ndetectors();
   resetInstrument(resetGeometry);
+  updateIntegrationWidget();
 }
 
 /**

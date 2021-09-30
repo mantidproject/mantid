@@ -19,9 +19,8 @@ namespace ISISReflectometry {
 
 class RunsPresenterFactory {
 public:
-  RunsPresenterFactory( // cppcheck-suppress passedByValue
-      RunsTablePresenterFactory runsTablePresenterFactory, double thetaTolerance, std::vector<std::string> instruments,
-      IMessageHandler *messageHandler)
+  RunsPresenterFactory(RunsTablePresenterFactory runsTablePresenterFactory, double thetaTolerance,
+                       std::vector<std::string> instruments, IMessageHandler *messageHandler)
       : m_runsTablePresenterFactory(std::move(runsTablePresenterFactory)), m_thetaTolerance(std::move(thetaTolerance)),
         m_instruments(std::move(instruments)), m_messageHandler(messageHandler) {}
 

@@ -11,13 +11,17 @@
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "Reduction/Batch.h"
 
+#include <boost/optional.hpp>
+
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
-class MANTIDQT_ISISREFLECTOMETRY_DLL IBatchJobRunner {
+class PreviewRow;
+
+class MANTIDQT_ISISREFLECTOMETRY_DLL IBatchJobManager {
 public:
-  virtual ~IBatchJobRunner() = default;
+  virtual ~IBatchJobManager() = default;
 
   virtual bool isProcessing() const = 0;
   virtual bool isAutoreducing() const = 0;
@@ -27,10 +31,10 @@ public:
   virtual void notifyAutoreductionResumed() = 0;
   virtual void notifyAutoreductionPaused() = 0;
   virtual void setReprocessFailedItems(bool reprocessFailed) = 0;
-  virtual Item const &algorithmStarted(MantidQt::API::IConfiguredAlgorithm_sptr algorithm) = 0;
-  virtual Item const &algorithmComplete(MantidQt::API::IConfiguredAlgorithm_sptr algorithm) = 0;
-  virtual Item const &algorithmError(MantidQt::API::IConfiguredAlgorithm_sptr algorithm,
-                                     std::string const &message) = 0;
+  virtual boost::optional<Item &> getRunsTableItem(API::IConfiguredAlgorithm_sptr const &algorithm) = 0;
+  virtual void algorithmStarted(MantidQt::API::IConfiguredAlgorithm_sptr algorithm) = 0;
+  virtual void algorithmComplete(MantidQt::API::IConfiguredAlgorithm_sptr algorithm) = 0;
+  virtual void algorithmError(MantidQt::API::IConfiguredAlgorithm_sptr algorithm, std::string const &message) = 0;
   virtual std::vector<std::string>
   algorithmOutputWorkspacesToSave(MantidQt::API::IConfiguredAlgorithm_sptr algorithm) const = 0;
   virtual boost::optional<Item const &> notifyWorkspaceDeleted(std::string const &wsName) = 0;
@@ -38,7 +42,7 @@ public:
                                                                std::string const &newName) = 0;
   virtual void notifyAllWorkspacesDeleted() = 0;
   virtual std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> getAlgorithms() = 0;
-  virtual AlgorithmRuntimeProps rowProcessingProperties() const = 0;
+  virtual API::IConfiguredAlgorithm::AlgorithmRuntimeProps rowProcessingProperties() const = 0;
   virtual bool getProcessPartial() const = 0;
   virtual bool getProcessAll() const = 0;
 };

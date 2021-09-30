@@ -15,7 +15,8 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common impo
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 from mantid.simpleapi import logger, AnalysisDataService as Ads, SaveNexus, SaveGSS, SaveFocusedXYE, \
     Load, NormaliseByCurrent, Divide, DiffractionFocussing, RebinToWorkspace, DeleteWorkspace, ApplyDiffCal, \
-    ConvertUnits, ReplaceSpecialValues, EnggEstimateFocussedBackground, AddSampleLog, ExtractSingleSpectrum
+    ConvertUnits, ReplaceSpecialValues, EnggEstimateFocussedBackground, AddSampleLog, ExtractSingleSpectrum, \
+    CropWorkspace
 
 FOCUSED_OUTPUT_WORKSPACE_NAME = "engggui_focusing_output_ws_"
 CALIB_PARAMS_WORKSPACE_NAME = "engggui_calibration_banks_parameters"
@@ -136,6 +137,7 @@ class FocusModel(object):
     @staticmethod
     def _apply_vanadium_norm(sample_ws_foc, van_ws_foc):
         # divide by curves - automatically corrects for solid angle, det efficiency and lambda dep. flux
+        sample_ws_foc = CropWorkspace(InputWorkspace=sample_ws_foc, OutputWorkspace=sample_ws_foc.name(), XMin=0.45)
         van_ws_foc_rb = RebinToWorkspace(WorkspaceToRebin=van_ws_foc,
                                          WorkspaceToMatch=sample_ws_foc)  # copy so as not to lose data at end
         sample_ws_foc = Divide(LHSWorkspace=sample_ws_foc, RHSWorkspace=van_ws_foc_rb,

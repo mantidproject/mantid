@@ -22,7 +22,7 @@ namespace ISISReflectometry {
 class ExperimentValidationErrors {
 public:
   explicit ExperimentValidationErrors(
-      // cppcheck-suppress passedByValue
+
       LookupTableValidationError lookupTableErrors)
       : m_lookupTableErrors(std::move(lookupTableErrors)) {}
 

@@ -60,7 +60,7 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
         qmenu = self.fit_browser.getFitMenu()
         qmenu.removeAction([qact for qact in qmenu.actions() if qact.text() == "Sequential Fit"][0])
         # hide unnecessary properties of browser
-        hide_props = ['StartX', 'EndX', 'Minimizer', 'Cost function', 'Max Iterations', 'Output',
+        hide_props = ['Minimizer', 'Cost function', 'Max Iterations', 'Output',
                       'Ignore invalid data', 'Peak Radius', 'Plot Composite Members',
                       'Convolve Composite Members', 'Show Parameter Errors', 'Evaluate Function As']
         self.fit_browser.removePropertiesFromSettingsBrowser(hide_props)

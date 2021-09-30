@@ -116,6 +116,56 @@ public:
     TS_ASSERT_EQUALS(axis, expectedAxis);
   }
 
+  void test_createAxisFromRebinParams_reverseLog() {
+    std::vector<double> rbParams = {1, -1, 37};
+
+    std::vector<double> axis;
+    VectorHelper::createAxisFromRebinParams(rbParams, axis, true, false, 1, 37, true);
+
+    std::vector<double> expectedAxis = {1, 22, 30, 34, 36, 37};
+    TS_ASSERT_EQUALS(axis, expectedAxis);
+  }
+
+  void test_createAxisFromRebinParams_reverseLogFullBins() {
+    std::vector<double> rbParams = {1, -1, 37};
+
+    std::vector<double> axis;
+    VectorHelper::createAxisFromRebinParams(rbParams, axis, true, false, 1, 37, true);
+
+    std::vector<double> expectedAxis = {1, 22, 30, 34, 36, 37};
+    TS_ASSERT_EQUALS(axis, expectedAxis);
+  }
+
+  void test_createAxisFromRebinParams_reverseLogWithDiffStep() {
+    std::vector<double> rbParams = {1, -2, 42};
+
+    std::vector<double> axis;
+    VectorHelper::createAxisFromRebinParams(rbParams, axis, true, false, 1, 42, true);
+
+    std::vector<double> expectedAxis = {1, 34, 40, 42};
+    TS_ASSERT_EQUALS(axis, expectedAxis);
+  }
+
+  void test_createAxisFromRebinParams_inverseSquareRoot() {
+    std::vector<double> rbParams = {1, 1, 3.5};
+
+    std::vector<double> axis;
+    VectorHelper::createAxisFromRebinParams(rbParams, axis, true, false, 1, 3.5, true, 0.5);
+
+    std::vector<double> expectedAxis = {1, 2, 2.707106781, 3.28445705, 3.5};
+    TS_ASSERT_DELTA(axis, expectedAxis, 1e-5);
+  }
+
+  void test_createAxisFromRebinParams_harmonicSeries() {
+    std::vector<double> rbParams = {1, 1, 3};
+
+    std::vector<double> axis;
+    VectorHelper::createAxisFromRebinParams(rbParams, axis, true, false, 1, 3, true, 1);
+
+    std::vector<double> expectedAxis = {1, 2, 2.5, 2.833333, 3};
+    TS_ASSERT_DELTA(axis, expectedAxis, 1e-5);
+  }
+
   void test_CreateAxisFromRebinParams_MultipleSteps() {
     std::vector<double> rbParams = {0, 2, 5, 3, 10, 1, 12};
 

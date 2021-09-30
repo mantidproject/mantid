@@ -348,7 +348,38 @@ void LoadEventNexus::filterDuringPause<EventWorkspaceCollection_sptr>(EventWorks
   // We provide a function pointer to the filter method of the object
   using std::placeholders::_1;
   auto func = std::bind(&LoadEventNexus::filterDuringPause<MatrixWorkspace_sptr>, this, _1);
+  workspace->applyFilterInPlace(func);
+}
+
+//-----------------------------------------------------------------------------
+/**
+ * Filter the events by pulse time - no in place version so have to return workspace
+ *
+ */
+template <typename T>
+T LoadEventNexus::filterEventsByTime(T workspace, Mantid::Types::Core::DateAndTime &startTime,
+                                     Mantid::Types::Core::DateAndTime &stopTime) {
+
+  auto filterByTime = createChildAlgorithm("FilterByTime");
+  g_log.information("Filtering events by time...");
+  filterByTime->setProperty("InputWorkspace", workspace);
+  // sample log already filtered by time so use absolute times to be safe
+  filterByTime->setProperty("AbsoluteStartTime", startTime.toISO8601String());
+  filterByTime->setProperty("AbsoluteStopTime", stopTime.toISO8601String());
+  filterByTime->execute();
+  return filterByTime->getProperty("OutputWorkspace");
+}
+
+template <>
+EventWorkspaceCollection_sptr
+LoadEventNexus::filterEventsByTime<EventWorkspaceCollection_sptr>(EventWorkspaceCollection_sptr workspace,
+                                                                  Mantid::Types::Core::DateAndTime &startTime,
+                                                                  Mantid::Types::Core::DateAndTime &stopTime) {
+  // We provide a function pointer to the filter method of the object
+  using std::placeholders::_1;
+  auto func = std::bind(&LoadEventNexus::filterEventsByTime<EventWorkspace_sptr>, this, _1, startTime, stopTime);
   workspace->applyFilter(func);
+  return workspace;
 }
 
 //------------------------------------------------------------------------------------------------
@@ -985,7 +1016,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
   filter_time_start = Types::Core::DateAndTime::minimum();
   filter_time_stop = Types::Core::DateAndTime::maximum();
 
-  if (m_allBanksPulseTimes->numPulses > 0) {
+  if (m_allBanksPulseTimes->pulseTimes.size() > 0) {
     // If not specified, use the limits of doubles. Otherwise, convert from
     // seconds to absolute PulseTime
     if (filter_time_start_sec != EMPTY_DBL()) {
@@ -1006,11 +1037,6 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
       msg += "filter for time's Stop value is smaller than the Start value.";
       throw std::invalid_argument(msg);
     }
-  }
-
-  if (is_time_filtered) {
-    // Now filter out the run, using the DateAndTime type.
-    m_ws->mutableRun().filterByTime(filter_time_start, filter_time_stop);
   }
 
   if (metaDataOnly) {
@@ -1180,6 +1206,12 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
 
   // if there is time_of_flight load it
   adjustTimeOfFlightISISLegacy(*m_file, m_ws, m_top_entry_name, classType, descriptor.get());
+
+  if (is_time_filtered) {
+    // Now filter out the run and events, using the DateAndTime type.
+    // This will sort both by pulse time
+    filterEventsByTime(m_ws, filter_time_start, filter_time_stop);
+  }
 }
 
 //-----------------------------------------------------------------------------

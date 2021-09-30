@@ -224,6 +224,9 @@ private:
   void runLoadMonitors();
   /// Set the filters on TOF.
   void setTimeFilters(const bool monitors);
+  template <typename T>
+  T filterEventsByTime(T workspace, Mantid::Types::Core::DateAndTime &startTime,
+                       Mantid::Types::Core::DateAndTime &stopTime);
 
   /// Load a spectra mapping from the given file
   std::unique_ptr<std::pair<std::vector<int32_t>, std::vector<int32_t>>>

@@ -244,8 +244,9 @@ class RundexSettings(object):
                 "WavelengthRange",
                 "StitchReferenceIndex",
                 "ClearCorrected2DWorkspace",
-                "ShapeTable"
-                ],
+                "ShapeTable",
+                "Wavelength"
+            ],
             SANS_PSCAN : [
                 "SensitivityMap",
                 "DefaultMaskFile",

@@ -7,23 +7,29 @@
 #pragma once
 
 #include "Common/DllConfig.h"
-#include "IBatchJobRunner.h"
+#include "IBatchJobManager.h"
+#include "IReflAlgorithmFactory.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "Reduction/Batch.h"
 
+#include <boost/optional.hpp>
+#include <memory>
+
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
+class PreviewRow;
+
 /**
- * The BatchJobRunner class sets up algorithms to run based on the reduction
+ * The BatchJobManager class sets up algorithms to run based on the reduction
  * configuration, and handles updating state when algorithms complete
  */
-class MANTIDQT_ISISREFLECTOMETRY_DLL BatchJobRunner : public IBatchJobRunner {
+class MANTIDQT_ISISREFLECTOMETRY_DLL BatchJobManager : public IBatchJobManager {
 public:
-  explicit BatchJobRunner(Batch batch);
+  BatchJobManager(Batch &batch, std::unique_ptr<IReflAlgorithmFactory> algFactory = nullptr);
 
   bool isProcessing() const override;
   bool isAutoreducing() const override;
@@ -36,9 +42,11 @@ public:
 
   void setReprocessFailedItems(bool reprocessFailed) override;
 
-  Item const &algorithmStarted(MantidQt::API::IConfiguredAlgorithm_sptr algorithm) override;
-  Item const &algorithmComplete(MantidQt::API::IConfiguredAlgorithm_sptr algorithm) override;
-  Item const &algorithmError(MantidQt::API::IConfiguredAlgorithm_sptr algorithm, std::string const &message) override;
+  boost::optional<Item &> getRunsTableItem(API::IConfiguredAlgorithm_sptr const &algorithm) override;
+
+  void algorithmStarted(MantidQt::API::IConfiguredAlgorithm_sptr algorithm) override;
+  void algorithmComplete(MantidQt::API::IConfiguredAlgorithm_sptr algorithm) override;
+  void algorithmError(MantidQt::API::IConfiguredAlgorithm_sptr algorithm, std::string const &message) override;
 
   std::vector<std::string>
   algorithmOutputWorkspacesToSave(MantidQt::API::IConfiguredAlgorithm_sptr algorithm) const override;
@@ -48,13 +56,15 @@ public:
   void notifyAllWorkspacesDeleted() override;
 
   std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> getAlgorithms() override;
-  AlgorithmRuntimeProps rowProcessingProperties() const override;
+  API::IConfiguredAlgorithm::AlgorithmRuntimeProps rowProcessingProperties() const override;
 
   bool getProcessPartial() const override;
   bool getProcessAll() const override;
 
 protected:
-  Batch m_batch;
+  Batch &m_batch;
+  // TODO use algFactory to wrap and test calls to createConfiguredAlgorithm
+  std::unique_ptr<IReflAlgorithmFactory> m_algFactory;
   bool m_isProcessing;
   bool m_isAutoreducing;
   bool m_reprocessFailed;

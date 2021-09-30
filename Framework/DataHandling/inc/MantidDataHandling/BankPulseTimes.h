@@ -28,20 +28,14 @@ public:
   /// Constructor with vector of DateAndTime
   BankPulseTimes(const std::vector<Mantid::Types::Core::DateAndTime> &times);
 
-  /// Destructor
-  ~BankPulseTimes();
-
   /// Equals
   bool equals(size_t otherNumPulse, const std::string &otherStartTime);
 
   /// String describing the start time
   std::string startTime;
 
-  /// Size of the array of pulse times
-  size_t numPulses;
-
   /// Array of the pulse times
-  Mantid::Types::Core::DateAndTime *pulseTimes;
+  std::vector<Mantid::Types::Core::DateAndTime> pulseTimes;
 
   /// Vector of period numbers corresponding to each pulse
   std::vector<int> periodNumbers;

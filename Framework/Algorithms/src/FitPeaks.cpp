@@ -850,7 +850,6 @@ std::vector<std::shared_ptr<FitPeaksAlgorithm::PeakFitResult>> FitPeaks::fitPeak
   const int nThreads = FrameworkManager::Instance().getNumOMPThreads();
   size_t chunkSize = num_fit_result / nThreads;
 
-  // cppcheck-suppress syntaxError
   PRAGMA_OMP(parallel for schedule(dynamic, 1) )
   for (int ithread = 0; ithread < nThreads; ithread++) {
     PARALLEL_START_INTERUPT_REGION

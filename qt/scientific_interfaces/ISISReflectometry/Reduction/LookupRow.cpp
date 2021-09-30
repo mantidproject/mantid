@@ -9,7 +9,7 @@
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 LookupRow::LookupRow(boost::optional<double> theta,
-                     // cppcheck-suppress passedByValue
+
                      TransmissionRunPair transmissionRuns,
                      boost::optional<ProcessingInstructions> transmissionProcessingInstructions, RangeInQ qRange,
                      boost::optional<double> scaleFactor,

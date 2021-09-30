@@ -26,6 +26,7 @@ class QLabel;
 class QActionGroup;
 class QSignalMapper;
 class QMenu;
+class QLineEdit;
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -111,6 +112,8 @@ private slots:
   void updateSelectionInfoDisplay();
   void shapeCreated();
   void updatePlotMultipleDetectors();
+  void onRunRebin();
+  void onRebinParamsWritten(const QString &text);
 
 private:
   void showEvent(QShowEvent * /*unused*/) override;
@@ -118,31 +121,28 @@ private:
   void collapsePlotPanel();
 
   /* Pick tab controls */
-  MiniPlot *m_plot;           ///< Miniplot to display data in the detectors
-  QLabel *m_activeTool;       ///< Displays a tip on which tool is currently selected
-  QPushButton *m_zoom;        ///< Button switching on navigation mode
-  QPushButton *m_one;         ///< Button switching on single detector selection mode
-  QPushButton *m_tube;        ///< Button switching on detector's parent selection mode
-  QPushButton *m_peakAdd;     ///< Button switching on peak creation mode
-  QPushButton *m_peakErase;   ///< Button switching on peak erase mode
-  QPushButton *m_peakCompare; ///< Button switching on peak comparison mode
-  QPushButton *m_peakAlign;   ///< Button switching on peak alignment mode
-  QPushButton *m_rectangle;   ///< Button switching on drawing a rectangular
-  /// selection region
-  QPushButton *m_ellipse;      ///< Button switching on drawing a elliptical selection region
-  QPushButton *m_ring_ellipse; ///< Button switching on drawing a elliptical
-  /// ring selection region
-  QPushButton *m_ring_rectangle; ///< Button switching on drawing a rectangular
-  /// ring selection region
-  QPushButton *m_sector;    ///< Button switching on drawing a circular sector
-  QPushButton *m_free_draw; ///< Button switching on drawing a region of arbitrary shape
-  QPushButton *m_edit;      ///< Button switching on edditing the selection region
+  MiniPlot *m_plot;              ///< Miniplot to display data in the detectors
+  QLabel *m_activeTool;          ///< Displays a tip on which tool is currently selected
+  QPushButton *m_zoom;           ///< Button switching on navigation mode
+  QPushButton *m_one;            ///< Button switching on single detector selection mode
+  QPushButton *m_tube;           ///< Button switching on detector's parent selection mode
+  QPushButton *m_peakAdd;        ///< Button switching on peak creation mode
+  QPushButton *m_peakErase;      ///< Button switching on peak erase mode
+  QPushButton *m_peakCompare;    ///< Button switching on peak comparison mode
+  QPushButton *m_peakAlign;      ///< Button switching on peak alignment mode
+  QPushButton *m_rectangle;      ///< Button switching on drawing a rectangular selection region
+  QPushButton *m_ellipse;        ///< Button switching on drawing a elliptical selection region
+  QPushButton *m_ring_ellipse;   ///< Button switching on drawing a elliptical ring selection region
+  QPushButton *m_ring_rectangle; ///< Button switching on drawing a rectangular ring selection region
+  QPushButton *m_sector;         ///< Button switching on drawing a circular sector
+  QPushButton *m_free_draw;      ///< Button switching on drawing a region of arbitrary shape
+  QPushButton *m_edit;           ///< Button switching on editing the selection region
   bool m_plotSum;
 
   // Actions to set integration option for the detector's parent selection mode
   QAction *m_sumDetectors;      ///< Sets summation over detectors (m_plotSum = true)
-  QAction *m_integrateTimeBins; ///< Sets integration over time bins (m_plotSum
-                                ///= false)
+  QAction *m_integrateTimeBins; ///< Sets integration over time bins (m_plotSum = false)
+
   QActionGroup *m_summationType;
   QAction *m_logY;
   QAction *m_linearY;
@@ -154,13 +154,12 @@ private:
   // Instrument display context menu actions
   QAction *m_storeCurve; ///< add the current curve to the list of permanently
   /// displayed curves
-  QAction *m_savePlotToWorkspace; ///< Save data plotted on the miniplot into a
-  /// MatrixWorkspace
+  QAction *m_savePlotToWorkspace; ///< Save data plotted on the miniplot into a MatrixWorkspace
 
   CollapsiblePanel *m_plotPanel;
-  QTextEdit *m_selectionInfoDisplay; ///< Text control for displaying selection
-  /// information
+  QTextEdit *m_selectionInfoDisplay; ///< Text control for displaying selection information
   CollapsiblePanel *m_infoPanel;
+  CollapsiblePanel *m_rebinPanel;
   SelectionType m_selectionType;
   mutable bool m_freezePlot;
 
@@ -168,6 +167,12 @@ private:
   ComponentInfoController *m_infoController;
   /// Controller responsible for the plot.
   DetectorPlotController *m_plotController;
+
+  QWidget *m_rebin;
+  QLineEdit *m_rebinParams;
+  QCheckBox *m_rebinUseReverseLog;
+  QCheckBox *m_rebinSaveToHisto;
+  QPushButton *m_runRebin;
 
   // Temporary caches for values from settings
   int m_tubeXUnitsCache;

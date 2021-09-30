@@ -23,9 +23,9 @@ const std::string CURVES = "Curves";
 using namespace Mantid::API;
 namespace MantidQt::CustomInterfaces {
 
-ALFCustomInstrumentModel::ALFCustomInstrumentModel() : m_numberOfTubesInAverage(0) {
-  m_base = new MantidWidgets::BaseCustomInstrumentModel("ALF_tmp", "ALF", "ALFData");
-}
+ALFCustomInstrumentModel::ALFCustomInstrumentModel()
+    : m_numberOfTubesInAverage(0),
+      m_base(std::make_unique<MantidWidgets::BaseCustomInstrumentModel>("ALF_tmp", "ALF", "ALFData")) {}
 
 /*
  * Runs load data alg

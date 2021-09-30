@@ -12,6 +12,7 @@
 #include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentModel.h"
 
 #include <map>
+#include <memory>
 #include <string>
 
 namespace MantidQt {
@@ -40,7 +41,7 @@ class DLLExport ALFCustomInstrumentModel : public IALFCustomInstrumentModel {
 
 public:
   ALFCustomInstrumentModel();
-  virtual ~ALFCustomInstrumentModel(){};
+  virtual ~ALFCustomInstrumentModel() = default;
   // virtual so we can patch them later
   virtual void loadAlg(const std::string &name) override;
   virtual void transformData() override;
@@ -69,7 +70,7 @@ public:
 
 private:
   int m_numberOfTubesInAverage;
-  MantidWidgets::BaseCustomInstrumentModel *m_base;
+  std::unique_ptr<MantidWidgets::BaseCustomInstrumentModel> m_base;
 };
 
 } // namespace CustomInterfaces

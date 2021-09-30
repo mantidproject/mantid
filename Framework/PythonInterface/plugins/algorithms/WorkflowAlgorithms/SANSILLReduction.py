@@ -268,6 +268,10 @@ class SANSILLReduction(PythonAlgorithm):
 
         self.setPropertySettings('SolventInputWorkspace', sample)
 
+        self.declareProperty('Wavelength', 0.0,
+                             validator=FloatBoundedValidator(lower=0.),
+                             doc='Wavelength set for the data, will override nexus, intended for D16 reduction.')
+
     def _normalise(self, ws, monID=None):
         """
             Normalizes the workspace by time (SampleLog Timer) or Monitor
@@ -761,7 +765,11 @@ class SANSILLReduction(PythonAlgorithm):
         progress = Progress(self, start=0.0, end=1.0, nreports=processes.index(process) + 1)
         ws = '__' + self.getPropertyValue('OutputWorkspace')
         if self.getPropertyValue('Run'):
-            LoadAndMerge(Filename=self.getPropertyValue('Run').replace('+', ','), LoaderName='LoadILLSANS', OutputWorkspace=ws)
+            loader_options = {}
+            if not self.getProperty('Wavelength').isDefault:
+                loader_options['Wavelength'] = self.getProperty('Wavelength').value
+            LoadAndMerge(Filename=self.getPropertyValue('Run').replace('+', ','), LoaderName='LoadILLSANS',
+                         OutputWorkspace=ws, LoaderOptions=loader_options)
             if isinstance(mtd[ws], WorkspaceGroup):
                 # we do not want the summing done by LoadAndMerge since it will be pair-wise and slow
                 # instead we load and list, and merge once with merge runs
