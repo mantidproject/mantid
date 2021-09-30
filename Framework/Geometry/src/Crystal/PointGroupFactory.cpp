@@ -10,6 +10,7 @@
 #include "MantidGeometry/Crystal/ProductOfCyclicGroups.h"
 #include "MantidKernel/LibraryManager.h"
 #include <boost/algorithm/string.hpp>
+#include <utility>
 
 namespace Mantid {
 namespace Geometry {
@@ -150,9 +151,10 @@ PointGroupFactoryImpl::PointGroupFactoryImpl()
   Kernel::LibraryManager::Instance();
 }
 
-PointGroupGenerator::PointGroupGenerator(const std::string &hmSymbol, const std::string &generatorInformation,
-                                         const std::string &description)
-    : m_hmSymbol(hmSymbol), m_generatorString(generatorInformation), m_description(description) {}
+PointGroupGenerator::PointGroupGenerator(std::string hmSymbol, std::string generatorInformation,
+                                         std::string description)
+    : m_hmSymbol(std::move(hmSymbol)), m_generatorString(std::move(generatorInformation)),
+      m_description(std::move(description)) {}
 
 PointGroup_sptr PointGroupGenerator::getPrototype() {
   if (!hasValidPrototype()) {

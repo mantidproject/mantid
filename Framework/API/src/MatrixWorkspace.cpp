@@ -38,6 +38,7 @@
 #include <cmath>
 #include <functional>
 #include <numeric>
+#include <utility>
 
 using Mantid::Kernel::TimeSeriesProperty;
 using Mantid::Types::Core::DateAndTime;
@@ -1402,8 +1403,9 @@ std::string MatrixWorkspace::getDimensionIdFromAxis(const int &axisIndex) const 
 //===============================================================================
 class MWDimension : public Mantid::Geometry::IMDDimension {
 public:
-  MWDimension(const Axis *axis, const std::string &dimensionId)
-      : m_axis(*axis), m_dimensionId(dimensionId), m_haveEdges(dynamic_cast<const BinEdgeAxis *>(&m_axis) != nullptr),
+  MWDimension(const Axis *axis, std::string dimensionId)
+      : m_axis(*axis), m_dimensionId(std::move(dimensionId)),
+        m_haveEdges(dynamic_cast<const BinEdgeAxis *>(&m_axis) != nullptr),
         m_frame(std::make_unique<Geometry::GeneralFrame>(m_axis.unit()->label(), m_axis.unit()->label())) {}
 
   /// the name of the dimennlsion as can be displayed along the axis
@@ -1481,8 +1483,8 @@ private:
  */
 class MWXDimension : public Mantid::Geometry::IMDDimension {
 public:
-  MWXDimension(const MatrixWorkspace *ws, const std::string &dimensionId)
-      : m_ws(ws), m_X(ws->readX(0)), m_dimensionId(dimensionId),
+  MWXDimension(const MatrixWorkspace *ws, std::string dimensionId)
+      : m_ws(ws), m_X(ws->readX(0)), m_dimensionId(std::move(dimensionId)),
         m_frame(std::make_unique<Geometry::GeneralFrame>(m_ws->getAxis(0)->unit()->label(),
                                                          m_ws->getAxis(0)->unit()->label())) {}
 

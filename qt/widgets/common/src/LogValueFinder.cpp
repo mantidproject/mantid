@@ -9,6 +9,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include <ostream>
+#include <utility>
 
 using Mantid::API::AnalysisDataService;
 using Mantid::API::MatrixWorkspace;
@@ -19,7 +20,7 @@ namespace MantidWidgets {
  * Constructor
  * @param wsNames :: [input] Workspace names
  */
-LogValueFinder::LogValueFinder(const QStringList &wsNames) : m_wsNames(wsNames) {}
+LogValueFinder::LogValueFinder(QStringList wsNames) : m_wsNames(std::move(wsNames)) {}
 
 /**
  * Get names of all logs from the first workspace

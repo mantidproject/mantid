@@ -24,6 +24,7 @@
 
 #include <boost/math/distributions/normal.hpp>
 #include <functional>
+#include <utility>
 
 namespace Mantid {
 namespace Poldi {
@@ -49,7 +50,7 @@ RefinedRange::RefinedRange(const PoldiPeak_sptr &peak, double fwhmMultiples) : m
   setRangeBorders(peak->q() - extent, peak->q() + extent);
 }
 
-RefinedRange::RefinedRange(double xStart, double xEnd, const std::vector<PoldiPeak_sptr> &peaks) : m_peaks(peaks) {
+RefinedRange::RefinedRange(double xStart, double xEnd, std::vector<PoldiPeak_sptr> peaks) : m_peaks(std::move(peaks)) {
 
   setRangeBorders(xStart, xEnd);
 }

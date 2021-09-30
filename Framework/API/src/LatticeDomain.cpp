@@ -4,12 +4,14 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+#include <utility>
+
 #include "MantidAPI/LatticeDomain.h"
 #include "MantidKernel/Exception.h"
 namespace Mantid {
 namespace API {
 
-LatticeDomain::LatticeDomain(const std::vector<Kernel::V3D> &hkls) : m_hkls(hkls) {}
+LatticeDomain::LatticeDomain(std::vector<Kernel::V3D> hkls) : m_hkls(std::move(hkls)) {}
 
 size_t LatticeDomain::size() const { return m_hkls.size(); }
 

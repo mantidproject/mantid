@@ -4,9 +4,11 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidAPI/WorkspaceUnitValidator.h"
+#include <utility>
+
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/Unit.h"
 
 namespace Mantid {
@@ -18,8 +20,8 @@ namespace API {
  * left empty, the validator will simply check that the workspace is not
  * unitless.
  */
-WorkspaceUnitValidator::WorkspaceUnitValidator(const std::string &unitID)
-    : MatrixWorkspaceValidator(), m_unitID(unitID) {}
+WorkspaceUnitValidator::WorkspaceUnitValidator(std::string unitID)
+    : MatrixWorkspaceValidator(), m_unitID(std::move(unitID)) {}
 
 /**
  * Clone the current state

@@ -33,8 +33,8 @@ GroupingLoader::GroupingLoader(Geometry::Instrument_const_sptr instrument) : m_i
  * @param instrument :: [input] Instrument
  * @param mainFieldDirection :: [input] Direction of main field (for MUSR)
  */
-GroupingLoader::GroupingLoader(Geometry::Instrument_const_sptr instrument, const std::string &mainFieldDirection)
-    : m_instrument(std::move(instrument)), m_mainFieldDirection(mainFieldDirection) {}
+GroupingLoader::GroupingLoader(Geometry::Instrument_const_sptr instrument, std::string mainFieldDirection)
+    : m_instrument(std::move(instrument)), m_mainFieldDirection(std::move(mainFieldDirection)) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor

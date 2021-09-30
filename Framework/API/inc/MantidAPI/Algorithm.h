@@ -111,7 +111,7 @@ public:
   class MANTID_API_DLL ProgressNotification : public AlgorithmNotification {
   public:
     /// Constructor
-    ProgressNotification(const Algorithm *const alg, double p, const std::string &msg, double estimatedTime,
+    ProgressNotification(const Algorithm *const alg, double p, std::string msg, double estimatedTime,
                          int progressPrecision);
     std::string name() const override;
     double progress;       ///< Current progress. Value must be between 0 and 1.
@@ -126,7 +126,7 @@ public:
   class MANTID_API_DLL ErrorNotification : public AlgorithmNotification {
   public:
     /// Constructor
-    ErrorNotification(const Algorithm *const alg, const std::string &str);
+    ErrorNotification(const Algorithm *const alg, std::string str);
     std::string name() const override;
     std::string what; ///< message string
   };

@@ -19,6 +19,7 @@
 #include <cmath>
 #include <iostream>
 #include <stdexcept>
+#include <utility>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -33,8 +34,8 @@ const double Shape2D::sizeCP = 3;
  * (==QColor()).
  */
 Shape2D::Shape2D()
-    : m_color(Qt::red), m_fill_color(QColor()), m_scalable(true),
-      m_editing(false), m_selected(false), m_visible(true) {}
+    : m_color(Qt::red), m_fill_color(QColor()), m_scalable(true), m_editing(false), m_selected(false), m_visible(true) {
+}
 
 /**
  * Calls virtual drawShape() method to draw the actial shape.
@@ -81,9 +82,7 @@ void Shape2D::draw(QPainter &painter) const {
 /**
  * Return total number of control points for this shape.
  */
-size_t Shape2D::getNControlPoints() const {
-  return NCommonCP + this->getShapeNControlPoints();
-}
+size_t Shape2D::getNControlPoints() const { return NCommonCP + this->getShapeNControlPoints(); }
 
 /**
  * Return coordinates of i-th control point.
@@ -133,8 +132,7 @@ void Shape2D::moveBy(const QPointF &dp) {
  * Adjust the bound of the bounding rect. Calls virtual method refit()
  * to resize the shape in order to fit into the new bounds.
  */
-void Shape2D::adjustBoundingRect(double dx1, double dy1, double dx2,
-                                 double dy2) {
+void Shape2D::adjustBoundingRect(double dx1, double dy1, double dx2, double dy2) {
   double dwidth = dx2 - dx1;
   if (dwidth <= -m_boundingRect.xSpan()) {
     double mu = m_boundingRect.xSpan() / fabs(dwidth);
@@ -219,8 +217,7 @@ Shape2D *Shape2D::loadFromProject(const std::string &lines) {
  * @param lines :: Mantid project lines to parse state from
  * @return a new instance of a Shape2D
  */
-Shape2D *Shape2D::loadShape2DFromType(const std::string &type,
-                                      const std::string &lines) {
+Shape2D *Shape2D::loadShape2DFromType(const std::string &type, const std::string &lines) {
   Shape2D *shape = nullptr;
 
   if (type == "ellipse") {
@@ -259,9 +256,7 @@ std::string Shape2D::saveToProject() const {
 
 // --- Shape2DEllipse --- //
 
-Shape2DEllipse::Shape2DEllipse(const QPointF &center, double radius1,
-                               double radius2)
-    : Shape2D() {
+Shape2DEllipse::Shape2DEllipse(const QPointF &center, double radius1, double radius2) : Shape2D() {
   if (radius2 == 0) {
     radius2 = radius1;
   }
@@ -283,9 +278,7 @@ void Shape2DEllipse::drawShape(QPainter &painter) const {
   painter.restore();
 }
 
-void Shape2DEllipse::addToPath(QPainterPath &path) const {
-  path.addEllipse(m_boundingRect.toQRectF());
-}
+void Shape2DEllipse::addToPath(QPainterPath &path) const { path.addEllipse(m_boundingRect.toQRectF()); }
 
 bool Shape2DEllipse::selectAt(const QPointF &p) const {
   if (m_fill_color != QColor()) { // filled ellipse
@@ -398,13 +391,9 @@ std::string Shape2DEllipse::saveToProject() const {
 
 Shape2DRectangle::Shape2DRectangle() { m_boundingRect = RectF(); }
 
-Shape2DRectangle::Shape2DRectangle(const QPointF &p0, const QPointF &p1) {
-  m_boundingRect = RectF(p0, p1);
-}
+Shape2DRectangle::Shape2DRectangle(const QPointF &p0, const QPointF &p1) { m_boundingRect = RectF(p0, p1); }
 
-Shape2DRectangle::Shape2DRectangle(const QPointF &p0, const QSizeF &size) {
-  m_boundingRect = RectF(p0, size);
-}
+Shape2DRectangle::Shape2DRectangle(const QPointF &p0, const QSizeF &size) { m_boundingRect = RectF(p0, size); }
 
 bool Shape2DRectangle::selectAt(const QPointF &p) const {
   if (m_fill_color != QColor()) { // filled rectangle
@@ -433,9 +422,7 @@ void Shape2DRectangle::drawShape(QPainter &painter) const {
   painter.restore();
 }
 
-void Shape2DRectangle::addToPath(QPainterPath &path) const {
-  path.addRect(m_boundingRect.toQRectF());
-}
+void Shape2DRectangle::addToPath(QPainterPath &path) const { path.addRect(m_boundingRect.toQRectF()); }
 
 /** Load shape 2D state from a Mantid project file
  * @param lines :: lines from the project file to load state from
@@ -480,17 +467,14 @@ Shape2DRing::Shape2DRing(Shape2D *shape, double xWidth, double yWidth)
 }
 
 Shape2DRing::Shape2DRing(const Shape2DRing &ring)
-    : Shape2D(), m_outer_shape(ring.m_outer_shape->clone()),
-      m_inner_shape(ring.m_inner_shape->clone()), m_xWidth(ring.m_xWidth),
-      m_yWidth(ring.m_yWidth) {
+    : Shape2D(), m_outer_shape(ring.m_outer_shape->clone()), m_inner_shape(ring.m_inner_shape->clone()),
+      m_xWidth(ring.m_xWidth), m_yWidth(ring.m_yWidth) {
   resetBoundingRect();
 }
 
 bool Shape2DRing::selectAt(const QPointF &p) const { return contains(p); }
 
-bool Shape2DRing::contains(const QPointF &p) const {
-  return m_outer_shape->contains(p) && !m_inner_shape->contains(p);
-}
+bool Shape2DRing::contains(const QPointF &p) const { return m_outer_shape->contains(p) && !m_inner_shape->contains(p); }
 
 void Shape2DRing::drawShape(QPainter &painter) const {
   m_outer_shape->draw(painter);
@@ -521,9 +505,7 @@ void Shape2DRing::refit() {
   m_inner_shape->adjustBoundingRect(xWidth, yWidth, -xWidth, -yWidth);
 }
 
-void Shape2DRing::resetBoundingRect() {
-  m_boundingRect = m_outer_shape->getBoundingRect();
-}
+void Shape2DRing::resetBoundingRect() { m_boundingRect = m_outer_shape->getBoundingRect(); }
 
 QPointF Shape2DRing::getShapeControlPoint(size_t i) const {
   RectF rect = m_inner_shape->getBoundingRect();
@@ -642,8 +624,7 @@ std::string Shape2DRing::saveToProject() const {
 
 // --- Shape2DSector --- //
 
-Shape2DSector::Shape2DSector(double innerRadius, double outerRadius,
-                             double startAngle, double endAngle,
+Shape2DSector::Shape2DSector(double innerRadius, double outerRadius, double startAngle, double endAngle,
                              const QPointF &center) {
   m_innerRadius = std::min(innerRadius, outerRadius);
   m_outerRadius = std::max(innerRadius, outerRadius);
@@ -655,9 +636,8 @@ Shape2DSector::Shape2DSector(double innerRadius, double outerRadius,
 }
 
 Shape2DSector::Shape2DSector(const Shape2DSector &sector)
-    : Shape2D(), m_innerRadius(sector.m_innerRadius),
-      m_outerRadius(sector.m_outerRadius), m_startAngle(sector.m_startAngle),
-      m_endAngle(sector.m_endAngle), m_center(sector.m_center) {
+    : Shape2D(), m_innerRadius(sector.m_innerRadius), m_outerRadius(sector.m_outerRadius),
+      m_startAngle(sector.m_startAngle), m_endAngle(sector.m_endAngle), m_center(sector.m_center) {
   setColor(sector.getColor());
   resetBoundingRect();
 }
@@ -690,8 +670,7 @@ bool Shape2DSector::contains(const QPointF &p) const {
   }
 
   return ((m_startAngle <= angle && angle <= m_endAngle) ||
-          (m_startAngle > m_endAngle &&
-           (angle <= m_endAngle || angle >= m_startAngle)));
+          (m_startAngle > m_endAngle && (angle <= m_endAngle || angle >= m_startAngle)));
 }
 
 /**
@@ -716,13 +695,13 @@ void Shape2DSector::drawShape(QPainter &painter) const {
   path.moveTo(x_origin, y_origin);
   QRectF absoluteBBox(QPointF(-1, 1), QPointF(1, -1));
 
-  path.arcTo(QRectF(absoluteBBox.topLeft() * m_innerRadius + m_center,
-                    absoluteBBox.bottomRight() * m_innerRadius + m_center),
-             m_startAngle * to_degrees, sweepLength);
+  path.arcTo(
+      QRectF(absoluteBBox.topLeft() * m_innerRadius + m_center, absoluteBBox.bottomRight() * m_innerRadius + m_center),
+      m_startAngle * to_degrees, sweepLength);
   path.lineTo(x_arcEnd, y_arcEnd);
-  path.arcTo(QRectF(absoluteBBox.topLeft() * m_outerRadius + m_center,
-                    absoluteBBox.bottomRight() * m_outerRadius + m_center),
-             m_endAngle * to_degrees, -sweepLength);
+  path.arcTo(
+      QRectF(absoluteBBox.topLeft() * m_outerRadius + m_center, absoluteBBox.bottomRight() * m_outerRadius + m_center),
+      m_endAngle * to_degrees, -sweepLength);
   path.closeSubpath();
 
   painter.drawPath(path);
@@ -743,8 +722,7 @@ QRectF Shape2DSector::findSectorBoundingBox() {
 
   // the yMax value is the outerRaius if the sector reaches pi/2
   if ((m_startAngle <= M_PI / 2 && m_endAngle >= M_PI / 2) ||
-      (m_startAngle > m_endAngle &&
-       !(m_startAngle >= M_PI / 2 && m_endAngle <= M_PI / 2))) {
+      (m_startAngle > m_endAngle && !(m_startAngle >= M_PI / 2 && m_endAngle <= M_PI / 2))) {
     yMax = m_outerRadius;
     // else it has to be computed
   } else {
@@ -754,8 +732,7 @@ QRectF Shape2DSector::findSectorBoundingBox() {
 
   // xMin is -outerRadius if the sector reaches pi
   if ((m_startAngle <= M_PI && m_endAngle >= M_PI) ||
-      (m_startAngle > m_endAngle &&
-       !(m_startAngle >= M_PI && m_endAngle <= M_PI))) {
+      (m_startAngle > m_endAngle && !(m_startAngle >= M_PI && m_endAngle <= M_PI))) {
     xMin = -m_outerRadius;
   } else {
     xMin = std::min(std::cos(m_startAngle), std::cos(m_endAngle));
@@ -764,8 +741,7 @@ QRectF Shape2DSector::findSectorBoundingBox() {
 
   // yMin is -outerRadius if the sector reaches 3pi/2
   if ((m_startAngle <= 3 * M_PI / 2 && m_endAngle >= 3 * M_PI / 2) ||
-      (m_startAngle > m_endAngle &&
-       !(m_startAngle >= 3 * M_PI / 2 && m_endAngle <= 3 * M_PI / 2))) {
+      (m_startAngle > m_endAngle && !(m_startAngle >= 3 * M_PI / 2 && m_endAngle <= 3 * M_PI / 2))) {
     yMin = -m_outerRadius;
   } else {
     yMin = std::min(std::sin(m_startAngle), std::sin(m_endAngle));
@@ -799,64 +775,50 @@ void Shape2DSector::refit() {
   QRectF BBox = findSectorBoundingBox();
 
   // corners of the user-modified bounding box
-  QPointF bRectTopLeft(
-      std::min(m_boundingRect.p0().x(), m_boundingRect.p1().x()),
-      std::max(m_boundingRect.p0().y(), m_boundingRect.p1().y()));
-  QPointF bRectBottomRight(
-      std::max(m_boundingRect.p0().x(), m_boundingRect.p1().x()),
-      std::min(m_boundingRect.p0().y(), m_boundingRect.p1().y()));
+  QPointF bRectTopLeft(std::min(m_boundingRect.p0().x(), m_boundingRect.p1().x()),
+                       std::max(m_boundingRect.p0().y(), m_boundingRect.p1().y()));
+  QPointF bRectBottomRight(std::max(m_boundingRect.p0().x(), m_boundingRect.p1().x()),
+                           std::min(m_boundingRect.p0().y(), m_boundingRect.p1().y()));
 
   // check if the bounding box has been modified
 
   // since the calculus are made on relatively small numbers, some errors can
   // progressively appear and stack, so we have to take a range rather than a
   // strict equality
-  if (BBox.topLeft().x() != bRectTopLeft.x() &&
-      BBox.topLeft().y() != bRectTopLeft.y() &&
+  if (BBox.topLeft().x() != bRectTopLeft.x() && BBox.topLeft().y() != bRectTopLeft.y() &&
       std::abs(BBox.bottomRight().x() - bRectBottomRight.x()) < epsilon &&
       std::abs(BBox.bottomRight().y() - bRectBottomRight.y()) < epsilon) {
 
     // top left corner is moving
     computeScaling(BBox.topLeft(), BBox.bottomRight(), bRectTopLeft, 0);
 
-  } else if (BBox.topLeft().x() != bRectTopLeft.x() &&
-             BBox.bottomRight().y() != bRectBottomRight.y() &&
-             std::abs(BBox.bottomRight().x() - bRectBottomRight.x()) <
-                 epsilon &&
+  } else if (BBox.topLeft().x() != bRectTopLeft.x() && BBox.bottomRight().y() != bRectBottomRight.y() &&
+             std::abs(BBox.bottomRight().x() - bRectBottomRight.x()) < epsilon &&
              std::abs(BBox.topLeft().y() - bRectTopLeft.y()) < epsilon) {
 
     // bottom left corner is moving
-    computeScaling(BBox.bottomLeft(), BBox.topRight(),
-                   QPointF(bRectTopLeft.x(), bRectBottomRight.y()), 1);
+    computeScaling(BBox.bottomLeft(), BBox.topRight(), QPointF(bRectTopLeft.x(), bRectBottomRight.y()), 1);
 
-  } else if (BBox.bottomRight().x() != bRectBottomRight.x() &&
-             BBox.bottomRight().y() != bRectBottomRight.y() &&
+  } else if (BBox.bottomRight().x() != bRectBottomRight.x() && BBox.bottomRight().y() != bRectBottomRight.y() &&
              std::abs(BBox.topLeft().x() - bRectTopLeft.x()) < epsilon &&
              std::abs(BBox.topLeft().y() - bRectTopLeft.y()) < epsilon) {
 
     // bottom right corner is moving
     computeScaling(BBox.bottomRight(), BBox.topLeft(), bRectBottomRight, 2);
 
-  } else if (BBox.bottomRight().x() != bRectBottomRight.x() &&
-             BBox.topLeft().y() != bRectTopLeft.y() &&
+  } else if (BBox.bottomRight().x() != bRectBottomRight.x() && BBox.topLeft().y() != bRectTopLeft.y() &&
              std::abs(BBox.topLeft().x() - bRectTopLeft.x()) < epsilon &&
-             std::abs(BBox.bottomRight().y() - bRectBottomRight.y()) <
-                 epsilon) {
+             std::abs(BBox.bottomRight().y() - bRectBottomRight.y()) < epsilon) {
 
     // top right corner is moving
-    computeScaling(BBox.topRight(), BBox.bottomLeft(),
-                   QPointF(bRectBottomRight.x(), bRectTopLeft.y()), 3);
+    computeScaling(BBox.topRight(), BBox.bottomLeft(), QPointF(bRectBottomRight.x(), bRectTopLeft.y()), 3);
   }
 
   // check if the shape has moved
-  if ((BBox.bottomRight().x() != bRectBottomRight.x() &&
-       BBox.topLeft().x() != bRectTopLeft.x() &&
-       std::abs((BBox.bottomRight().x() - bRectBottomRight.x()) -
-                (BBox.topLeft().x() - bRectTopLeft.x())) < epsilon) ||
-      (BBox.bottomRight().y() != bRectBottomRight.y() &&
-       BBox.topLeft().y() != bRectTopLeft.y() &&
-       std::abs((BBox.bottomRight().y() - bRectBottomRight.y()) -
-                (BBox.topLeft().y() - bRectTopLeft.y())) < epsilon)) {
+  if ((BBox.bottomRight().x() != bRectBottomRight.x() && BBox.topLeft().x() != bRectTopLeft.x() &&
+       std::abs((BBox.bottomRight().x() - bRectBottomRight.x()) - (BBox.topLeft().x() - bRectTopLeft.x())) < epsilon) ||
+      (BBox.bottomRight().y() != bRectBottomRight.y() && BBox.topLeft().y() != bRectTopLeft.y() &&
+       std::abs((BBox.bottomRight().y() - bRectBottomRight.y()) - (BBox.topLeft().y() - bRectTopLeft.y())) < epsilon)) {
     // every corner has moved by the same distance -> the shape is being moved
     qreal xDiff = bRectBottomRight.x() - BBox.bottomRight().x();
     qreal yDiff = bRectBottomRight.y() - BBox.bottomRight().y();
@@ -885,10 +847,8 @@ void Shape2DSector::refit() {
  * @param vertexIndex :: the index of the vertex corresponding to the one
  * modified by the user in m_boundingRect
  */
-void Shape2DSector::computeScaling(const QPointF &BBoxCorner,
-                                   const QPointF &BBoxOpposedCorner,
-                                   const QPointF &bRectCorner,
-                                   int vertexIndex) {
+void Shape2DSector::computeScaling(const QPointF &BBoxCorner, const QPointF &BBoxOpposedCorner,
+                                   const QPointF &bRectCorner, int vertexIndex) {
 
   // first we need to find the best projection of the new corner on the
   // diagonal line of the rectangle, so its shape won't be modified, only
@@ -910,8 +870,7 @@ void Shape2DSector::computeScaling(const QPointF &BBoxCorner,
   yProj.setY(yPos);
 
   if (slope.x() != 0 && slope.y() != 0) {
-    if (distanceBetween(xProj, QPointF(0, 0)) <
-        distanceBetween(yProj, QPointF(0, 0))) {
+    if (distanceBetween(xProj, QPointF(0, 0)) < distanceBetween(yProj, QPointF(0, 0))) {
       proj = xProj;
     } else {
       proj = yProj;
@@ -928,17 +887,14 @@ void Shape2DSector::computeScaling(const QPointF &BBoxCorner,
   proj += BBoxCorner;
 
   // then we need to adapt the shape to the new size
-  qreal ratio = distanceBetween(proj, BBoxOpposedCorner) /
-                distanceBetween(slope.toPointF(), QPointF(0, 0));
+  qreal ratio = distanceBetween(proj, BBoxOpposedCorner) / distanceBetween(slope.toPointF(), QPointF(0, 0));
 
   m_boundingRect.setVertex(vertexIndex, proj);
 
   m_innerRadius *= ratio;
   m_outerRadius = ratio != 0 ? m_outerRadius * ratio : 1e-4;
-  m_center.setX((m_center.x() - BBoxOpposedCorner.x()) * ratio +
-                BBoxOpposedCorner.x());
-  m_center.setY((m_center.y() - BBoxOpposedCorner.y()) * ratio +
-                BBoxOpposedCorner.y());
+  m_center.setX((m_center.x() - BBoxOpposedCorner.x()) * ratio + BBoxOpposedCorner.x());
+  m_center.setY((m_center.y() - BBoxOpposedCorner.y()) * ratio + BBoxOpposedCorner.y());
 }
 
 /**
@@ -948,8 +904,7 @@ void Shape2DSector::computeScaling(const QPointF &BBoxCorner,
  * @param p1 :: the second point
  * @return  the distance
  */
-double Shape2DSector::distanceBetween(const QPointF &p0,
-                                      const QPointF &p1) const {
+double Shape2DSector::distanceBetween(const QPointF &p0, const QPointF &p1) const {
   return sqrt(pow(p0.x() - p1.x(), 2) + pow(p0.y() - p1.y(), 2));
 }
 
@@ -974,10 +929,8 @@ void Shape2DSector::resetBoundingRect() {
  * @param i :: Index of a control point. 0 <= i < getNControlPoints().
  */
 QPointF Shape2DSector::getShapeControlPoint(size_t i) const {
-  double halfAngle =
-      m_startAngle < m_endAngle
-          ? std::fmod((m_startAngle + m_endAngle) / 2., 2 * M_PI)
-          : std::fmod((m_startAngle + m_endAngle + 2 * M_PI) / 2, 2 * M_PI);
+  double halfAngle = m_startAngle < m_endAngle ? std::fmod((m_startAngle + m_endAngle) / 2., 2 * M_PI)
+                                               : std::fmod((m_startAngle + m_endAngle + 2 * M_PI) / 2, 2 * M_PI);
   double halfLength = (m_outerRadius + m_innerRadius) / 2;
 
   switch (i) {
@@ -991,8 +944,7 @@ QPointF Shape2DSector::getShapeControlPoint(size_t i) const {
     return QPointF(m_center.x() + std::cos(m_startAngle) * halfLength,
                    m_center.y() + std::sin(m_startAngle) * halfLength);
   case 3:
-    return QPointF(m_center.x() + std::cos(m_endAngle) * halfLength,
-                   m_center.y() + std::sin(m_endAngle) * halfLength);
+    return QPointF(m_center.x() + std::cos(m_endAngle) * halfLength, m_center.y() + std::sin(m_endAngle) * halfLength);
   default:
     return QPointF();
   }
@@ -1032,12 +984,11 @@ void Shape2DSector::setShapeControlPoint(size_t i, const QPointF &pos) {
 
     // conditions to prevent the startAngle from going over the endAngle
     // this one is in case of trigonometrical rotation
-    if ((m_startAngle < m_endAngle && newAngle >= m_endAngle &&
-         std::abs(newAngle - m_startAngle) < M_PI) ||
-        (newAngle < m_endAngle && m_startAngle < m_endAngle &&
-         std::abs(newAngle - m_startAngle) > M_PI && newAngle < m_startAngle) ||
-        (newAngle > m_endAngle && m_startAngle > m_endAngle &&
-         std::abs(newAngle - m_startAngle) > M_PI && newAngle < m_startAngle)) {
+    if ((m_startAngle < m_endAngle && newAngle >= m_endAngle && std::abs(newAngle - m_startAngle) < M_PI) ||
+        (newAngle < m_endAngle && m_startAngle < m_endAngle && std::abs(newAngle - m_startAngle) > M_PI &&
+         newAngle < m_startAngle) ||
+        (newAngle > m_endAngle && m_startAngle > m_endAngle && std::abs(newAngle - m_startAngle) > M_PI &&
+         newAngle < m_startAngle)) {
 
       newAngle = m_endAngle - epsilon;
 
@@ -1046,13 +997,10 @@ void Shape2DSector::setShapeControlPoint(size_t i, const QPointF &pos) {
       }
 
       // and this one is in case of clockwise rotation
-    } else if ((m_startAngle > m_endAngle && newAngle <= m_endAngle &&
-                std::abs(newAngle - m_startAngle) < M_PI) ||
-               (newAngle > m_endAngle && m_startAngle > m_endAngle &&
-                std::abs(newAngle - m_startAngle) > M_PI &&
+    } else if ((m_startAngle > m_endAngle && newAngle <= m_endAngle && std::abs(newAngle - m_startAngle) < M_PI) ||
+               (newAngle > m_endAngle && m_startAngle > m_endAngle && std::abs(newAngle - m_startAngle) > M_PI &&
                 newAngle > m_startAngle) ||
-               (newAngle < m_endAngle && m_startAngle < m_endAngle &&
-                std::abs(newAngle - m_startAngle) > M_PI &&
+               (newAngle < m_endAngle && m_startAngle < m_endAngle && std::abs(newAngle - m_startAngle) > M_PI &&
                 newAngle > m_startAngle)) {
 
       newAngle = m_endAngle + epsilon;
@@ -1072,12 +1020,11 @@ void Shape2DSector::setShapeControlPoint(size_t i, const QPointF &pos) {
 
     // and conditions to prevent the endAngle from going over the startAngle
     // trigonometrical rotation
-    if ((m_endAngle < m_startAngle && newAngle >= m_startAngle &&
-         std::abs(newAngle - m_endAngle) < M_PI) ||
-        (newAngle < m_startAngle && m_endAngle < m_startAngle &&
-         std::abs(newAngle - m_endAngle) > M_PI && newAngle < m_endAngle) ||
-        (newAngle > m_startAngle && m_endAngle > m_startAngle &&
-         std::abs(newAngle - m_endAngle) > M_PI && newAngle < m_endAngle)) {
+    if ((m_endAngle < m_startAngle && newAngle >= m_startAngle && std::abs(newAngle - m_endAngle) < M_PI) ||
+        (newAngle < m_startAngle && m_endAngle < m_startAngle && std::abs(newAngle - m_endAngle) > M_PI &&
+         newAngle < m_endAngle) ||
+        (newAngle > m_startAngle && m_endAngle > m_startAngle && std::abs(newAngle - m_endAngle) > M_PI &&
+         newAngle < m_endAngle)) {
 
       newAngle = m_startAngle - epsilon;
 
@@ -1085,13 +1032,10 @@ void Shape2DSector::setShapeControlPoint(size_t i, const QPointF &pos) {
         newAngle += 2 * M_PI;
       }
       // clockwise rotation
-    } else if ((m_endAngle >= m_startAngle && newAngle <= m_startAngle &&
-                std::abs(newAngle - m_endAngle) < M_PI) ||
-               (newAngle >= m_startAngle && m_endAngle >= m_startAngle &&
-                std::abs(newAngle - m_endAngle) > M_PI &&
+    } else if ((m_endAngle >= m_startAngle && newAngle <= m_startAngle && std::abs(newAngle - m_endAngle) < M_PI) ||
+               (newAngle >= m_startAngle && m_endAngle >= m_startAngle && std::abs(newAngle - m_endAngle) > M_PI &&
                 newAngle > m_endAngle) ||
-               (newAngle < m_startAngle && m_endAngle < m_startAngle &&
-                std::abs(newAngle - m_endAngle) > M_PI &&
+               (newAngle < m_startAngle && m_endAngle < m_startAngle && std::abs(newAngle - m_endAngle) > M_PI &&
                 newAngle > m_endAngle)) {
 
       newAngle = m_startAngle + epsilon;
@@ -1207,11 +1151,9 @@ Shape2D *Shape2DSector::loadFromProject(const std::string &lines) {
   API::TSVSerialiser tsv(lines);
   tsv.selectLine("Parameters");
   double innerRadius, outerRadius, startAngle, endAngle, xCenter, yCenter;
-  tsv >> innerRadius >> outerRadius >> startAngle >> endAngle >> xCenter >>
-      yCenter;
+  tsv >> innerRadius >> outerRadius >> startAngle >> endAngle >> xCenter >> yCenter;
 
-  return new Shape2DSector(innerRadius, outerRadius, startAngle, endAngle,
-                           QPointF(xCenter, yCenter));
+  return new Shape2DSector(innerRadius, outerRadius, startAngle, endAngle, QPointF(xCenter, yCenter));
 }
 
 /** Save the state of the sector to a Mantid project file
@@ -1224,30 +1166,24 @@ std::string Shape2DSector::saveToProject() const {
   API::TSVSerialiser tsv;
 
   tsv.writeLine("Type") << "sector";
-  tsv.writeLine("Parameters") << m_innerRadius << m_outerRadius << m_startAngle
-                              << m_endAngle << m_center.x() << m_center.y();
+  tsv.writeLine("Parameters") << m_innerRadius << m_outerRadius << m_startAngle << m_endAngle << m_center.x()
+                              << m_center.y();
   tsv.writeRaw(Shape2D::saveToProject());
   return tsv.outputLines();
 }
 //------------------------------------------------------------------------------
 
 /// Construct a zero-sized shape.
-Shape2DFree::Shape2DFree(const QPointF &p) : m_polygon(QRectF(p, p)) {
-  resetBoundingRect();
-}
+Shape2DFree::Shape2DFree(const QPointF &p) : m_polygon(QRectF(p, p)) { resetBoundingRect(); }
 
 /// The shape can be selected if it contains the point.
 bool Shape2DFree::selectAt(const QPointF &p) const { return contains(p); }
 
 /// Check if a point is inside the shape.
-bool Shape2DFree::contains(const QPointF &p) const {
-  return m_polygon.containsPoint(p, Qt::OddEvenFill);
-}
+bool Shape2DFree::contains(const QPointF &p) const { return m_polygon.containsPoint(p, Qt::OddEvenFill); }
 
 /// Add to a larger shape.
-void Shape2DFree::addToPath(QPainterPath &path) const {
-  path.addPolygon(m_polygon);
-}
+void Shape2DFree::addToPath(QPainterPath &path) const { path.addPolygon(m_polygon); }
 
 /// Draw.
 void Shape2DFree::drawShape(QPainter &painter) const {
@@ -1397,9 +1333,7 @@ std::string Shape2DFree::saveToProject() const {
   return tsv.outputLines();
 }
 
-Shape2DFree::Shape2DFree(const QPolygonF &polygon) : m_polygon(polygon) {
-  resetBoundingRect();
-}
+Shape2DFree::Shape2DFree(QPolygonF polygon) : m_polygon(std::move(polygon)) { resetBoundingRect(); }
 
 } // namespace MantidWidgets
 } // namespace MantidQt

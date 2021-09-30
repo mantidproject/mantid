@@ -19,6 +19,7 @@
 #include "MantidKernel/UnitFactory.h"
 
 #include <boost/algorithm/string/predicate.hpp>
+#include <utility>
 
 namespace {
 using namespace Mantid::API;
@@ -113,9 +114,9 @@ std::vector<Column_const_sptr> extractColumns(ITableWorkspace const *table, Colu
 
 struct TableToMatrixWorkspaceConverter {
   template <typename YFilter, typename EFilter>
-  TableToMatrixWorkspaceConverter(ITableWorkspace const *table, std::vector<double> const &x, YFilter const &yFilter,
+  TableToMatrixWorkspaceConverter(ITableWorkspace const *table, std::vector<double> x, YFilter const &yFilter,
                                   EFilter const &eFilter)
-      : m_x(x), m_yColumns(extractColumns(table, yFilter)), m_eColumns(extractColumns(table, eFilter)),
+      : m_x(std::move(x)), m_yColumns(extractColumns(table, yFilter)), m_eColumns(extractColumns(table, eFilter)),
         m_yAxis(extractColumnNames(m_yColumns)) {}
 
   MatrixWorkspace_sptr operator()(std::size_t startRow, std::size_t endRow, std::string const &unitX,

@@ -21,7 +21,7 @@ namespace API {
 */
 class MANTID_API_DLL CatalogSession {
 public:
-  CatalogSession(const std::string &sessionID, const std::string &facility, const std::string &endpoint);
+  CatalogSession(std::string sessionID, std::string facility, std::string endpoint);
   std::string getSessionId() const;
   void setSessionId(const std::string &sessionID);
   const std::string &getSoapEndpoint() const;

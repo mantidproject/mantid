@@ -34,7 +34,7 @@ public:
   /// Constructor
   MultiPeriodGroupWorker() = default;
   /// Constructor
-  MultiPeriodGroupWorker(const std::string &workspacePropertyName);
+  MultiPeriodGroupWorker(std::string workspacePropertyName);
   virtual ~MultiPeriodGroupWorker() = default;
   /// Flag to indicate use of a custom workspace property
   bool useCustomWorkspaceProperty() const;

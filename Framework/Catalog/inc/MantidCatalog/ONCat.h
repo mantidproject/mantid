@@ -119,8 +119,8 @@ public:
   // Exposed publicly for testing purposes only.
   //////////////////////////////////////////////////////////////////////
   ONCat(const std::string &url);
-  ONCat(const std::string &url, IOAuthTokenStore_uptr tokenStore, OAuthFlow flow,
-        const boost::optional<std::string> &clientId, const boost::optional<std::string> &clientSecret = boost::none);
+  ONCat(std::string url, IOAuthTokenStore_uptr tokenStore, OAuthFlow flow, boost::optional<std::string> clientId,
+        boost::optional<std::string> clientSecret = boost::none);
   void refreshTokenIfNeeded();
   void refreshTokenIfNeeded(const DateAndTime &currentTime);
   void setInternetHelper(const std::shared_ptr<Mantid::Kernel::InternetHelper> &internetHelper);

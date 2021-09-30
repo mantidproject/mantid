@@ -4,18 +4,20 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidQtWidgets/Common/Batch/QtStandardItemTreeAdapter.h"
+#include <utility>
+
 #include "MantidQtWidgets/Common/Batch/AssertOrThrow.h"
 #include "MantidQtWidgets/Common/Batch/CellStandardItem.h"
 #include "MantidQtWidgets/Common/Batch/QtBasicNavigation.h"
+#include "MantidQtWidgets/Common/Batch/QtStandardItemTreeAdapter.h"
 #include "MantidQtWidgets/Common/Batch/StrictQModelIndices.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
 namespace Batch {
 
-QtStandardItemTreeModelAdapter::QtStandardItemTreeModelAdapter(QStandardItemModel &model, Cell const &emptyCellStyle)
-    : m_model(model), m_emptyCellStyle(emptyCellStyle) {}
+QtStandardItemTreeModelAdapter::QtStandardItemTreeModelAdapter(QStandardItemModel &model, Cell emptyCellStyle)
+    : m_model(model), m_emptyCellStyle(std::move(emptyCellStyle)) {}
 
 QModelIndexForMainModel QtStandardItemTreeModelAdapter::rootIndex() const { return QModelIndexForMainModel(); }
 

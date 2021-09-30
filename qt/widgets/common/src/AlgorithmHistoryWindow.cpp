@@ -31,6 +31,7 @@
 #include <cstdio>
 #include <fstream>
 #include <numeric>
+#include <utility>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -500,8 +501,8 @@ void AlgorithmHistoryWindow::unrollAll(int state) {
 // AlgHistoryProperties Definitions
 //--------------------------------------------------------------------------------------------------
 
-AlgHistoryProperties::AlgHistoryProperties(QWidget *w, const std::vector<PropertyHistory_sptr> &propHist)
-    : m_Histprop(propHist) {
+AlgHistoryProperties::AlgHistoryProperties(QWidget *w, std::vector<PropertyHistory_sptr> propHist)
+    : m_Histprop(std::move(propHist)) {
   QStringList hList;
   hList << "Name"
         << "Value"

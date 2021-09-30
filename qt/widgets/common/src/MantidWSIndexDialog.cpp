@@ -1222,8 +1222,8 @@ IntervalList IntervalList::intersect(const IntervalList &a, const IntervalList &
 //----------------------------------
 // IntervalListValidator public methods
 //----------------------------------
-IntervalListValidator::IntervalListValidator(QObject *parent, const IntervalList &intervalList)
-    : QValidator(parent), m_intervalList(intervalList) {}
+IntervalListValidator::IntervalListValidator(QObject *parent, IntervalList intervalList)
+    : QValidator(parent), m_intervalList(std::move(intervalList)) {}
 
 QValidator::State IntervalListValidator::validate(QString &input, int &pos) const {
   UNUSED_ARG(pos)

@@ -60,7 +60,7 @@ class EXPORT_OPT_MANTIDQT_COMMON FindFilesWorker : public QObject, public QRunna
 
 public:
   /// Constructor.
-  FindFilesWorker(const FindFilesSearchParameters &parameters);
+  FindFilesWorker(FindFilesSearchParameters parameters);
 
 signals:
   /// Signal emitted after the search is finished, regardless of whether

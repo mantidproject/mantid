@@ -7,6 +7,7 @@
 #include "MantidGeometry/Crystal/HKLFilterWavelength.h"
 #include <sstream>
 #include <stdexcept>
+#include <utility>
 
 namespace Mantid {
 namespace Geometry {
@@ -14,8 +15,8 @@ namespace Geometry {
 using namespace Kernel;
 
 /// Constructor, takes an orientation matrix and lambda min/max.
-HKLFilterWavelength::HKLFilterWavelength(const Kernel::DblMatrix &ub, double lambdaMin, double lambdaMax)
-    : m_ub(ub), m_lambdaMin(lambdaMin), m_lambdaMax(lambdaMax) {
+HKLFilterWavelength::HKLFilterWavelength(Kernel::DblMatrix ub, double lambdaMin, double lambdaMax)
+    : m_ub(std::move(ub)), m_lambdaMin(lambdaMin), m_lambdaMax(lambdaMax) {
   checkProperLambdaRangeValues();
 }
 

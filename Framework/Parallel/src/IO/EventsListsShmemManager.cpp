@@ -7,6 +7,7 @@
 #include "MantidParallel/IO/EventsListsShmemManager.h"
 #include <random>
 #include <sstream>
+#include <utility>
 
 #include "MantidParallel/IO/EventsListsShmemManager.h"
 #include "MantidTypes/Event/TofEvent.h"
@@ -15,8 +16,8 @@ namespace Mantid {
 namespace Parallel {
 namespace IO {
 
-EventsListsShmemManager::EventsListsShmemManager(const std::string &segmentName, const std::string &elName)
-    : m_segmentName(segmentName), m_chunksName(elName), m_chunks(nullptr) {
+EventsListsShmemManager::EventsListsShmemManager(std::string segmentName, std::string elName)
+    : m_segmentName(std::move(segmentName)), m_chunksName(std::move(elName)), m_chunks(nullptr) {
   m_segment = std::make_unique<ip::managed_shared_memory>(ip::open_only, m_segmentName.c_str());
   m_allocatorInstance = std::make_unique<VoidAllocator>(m_segment->get_segment_manager());
   m_chunks = m_segment->find<Chunks>(m_chunksName.c_str()).first;
@@ -24,9 +25,8 @@ EventsListsShmemManager::EventsListsShmemManager(const std::string &segmentName,
     throw std::invalid_argument("No event lists found.");
 }
 
-EventsListsShmemManager::EventsListsShmemManager(const std::string &segmentName, const std::string &elName,
-                                                 int /*unused*/)
-    : m_segmentName(segmentName), m_chunksName(elName), m_chunks(nullptr) {}
+EventsListsShmemManager::EventsListsShmemManager(std::string segmentName, std::string elName, int /*unused*/)
+    : m_segmentName(std::move(segmentName)), m_chunksName(std::move(elName)), m_chunks(nullptr) {}
 
 /// Appends ToF event to given pixel in given chunk of shared storage
 void EventsListsShmemManager::appendEvent(std::size_t chunkN, std::size_t listN, const Types::Event::TofEvent &event) {

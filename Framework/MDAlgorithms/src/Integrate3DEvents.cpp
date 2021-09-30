@@ -47,9 +47,9 @@ using Mantid::Kernel::V3D;
  *                       correction should be used.
  */
 Integrate3DEvents::Integrate3DEvents(
-    const std::vector<std::pair<std::pair<double, double>, Mantid::Kernel::V3D>> &peak_q_list,
-    Kernel::DblMatrix const &UBinv, double radius, const bool useOnePercentBackgroundCorrection)
-    : m_UBinv(UBinv), m_radius(radius), maxOrder(0), crossterm(0),
+    const std::vector<std::pair<std::pair<double, double>, Mantid::Kernel::V3D>> &peak_q_list, Kernel::DblMatrix UBinv,
+    double radius, const bool useOnePercentBackgroundCorrection)
+    : m_UBinv(std::move(UBinv)), m_radius(radius), maxOrder(0), crossterm(0),
       m_useOnePercentBackgroundCorrection(useOnePercentBackgroundCorrection) {
   for (size_t it = 0; it != peak_q_list.size(); ++it) {
     int64_t hkl_key = getHklKey(peak_q_list[it].second);
@@ -82,11 +82,11 @@ Integrate3DEvents::Integrate3DEvents(
  */
 Integrate3DEvents::Integrate3DEvents(
     const std::vector<std::pair<std::pair<double, double>, Mantid::Kernel::V3D>> &peak_q_list,
-    std::vector<V3D> const &hkl_list, std::vector<V3D> const &mnp_list, Kernel::DblMatrix const &UBinv,
-    Kernel::DblMatrix const &ModHKL, double radius_m, double radius_s, int MaxO, const bool CrossT,
+    std::vector<V3D> const &hkl_list, std::vector<V3D> const &mnp_list, Kernel::DblMatrix UBinv,
+    Kernel::DblMatrix ModHKL, double radius_m, double radius_s, int MaxO, const bool CrossT,
     const bool useOnePercentBackgroundCorrection)
-    : m_UBinv(UBinv), m_ModHKL(ModHKL), m_radius(radius_m), s_radius(radius_s), maxOrder(MaxO), crossterm(CrossT),
-      m_useOnePercentBackgroundCorrection(useOnePercentBackgroundCorrection) {
+    : m_UBinv(std::move(UBinv)), m_ModHKL(std::move(ModHKL)), m_radius(radius_m), s_radius(radius_s), maxOrder(MaxO),
+      crossterm(CrossT), m_useOnePercentBackgroundCorrection(useOnePercentBackgroundCorrection) {
   for (size_t it = 0; it != peak_q_list.size(); ++it) {
     int64_t hklmnp_key =
         getHklMnpKey(boost::math::iround<double>(hkl_list[it][0]), boost::math::iround<double>(hkl_list[it][1]),

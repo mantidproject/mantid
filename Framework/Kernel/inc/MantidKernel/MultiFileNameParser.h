@@ -115,7 +115,7 @@ private:
 class MANTID_KERNEL_DLL GenerateFileName {
 public:
   /// Constructor.
-  GenerateFileName(const std::string &prefix, const std::string &suffix, const std::string &instString);
+  GenerateFileName(std::string prefix, std::string suffix, std::string instString);
 
   /// Overloaded function operator that generates a vector of file names from a
   /// vector of runs.

@@ -8,12 +8,13 @@
 #include "MantidAPI/IAlgorithm.h"
 
 #include <memory>
+#include <utility>
 
 namespace Mantid {
 namespace API {
 
 /// Constructor
-AlgorithmHasProperty::AlgorithmHasProperty(const std::string &propName) : m_propName(propName) {}
+AlgorithmHasProperty::AlgorithmHasProperty(std::string propName) : m_propName(std::move(propName)) {}
 
 /**
  * Get a string representation of the type

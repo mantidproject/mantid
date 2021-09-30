@@ -17,7 +17,7 @@ namespace API {
 */
 class MANTID_API_DLL WorkspaceUnitValidator : public MatrixWorkspaceValidator {
 public:
-  explicit WorkspaceUnitValidator(const std::string &unitID = "");
+  explicit WorkspaceUnitValidator(std::string unitID = "");
   /// Gets the type of the validator
   std::string getType() const { return "workspaceunit"; }
   /// Clone the current state

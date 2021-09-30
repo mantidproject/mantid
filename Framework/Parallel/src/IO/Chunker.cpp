@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include <numeric>
+#include <utility>
 
 #include "MantidParallel/Communicator.h"
 #include "MantidParallel/IO/Chunker.h"
@@ -77,8 +78,8 @@ size_t taskSize(const std::pair<int, std::vector<size_t>> &partition, const std:
  * This is done using the given `chunkSize`, i.e., each bank size is cut into
  * pieces of size `chunkSize` and all pieces are assigned to the requested
  * number of workers. */
-Chunker::Chunker(const int numWorkers, const int worker, const std::vector<size_t> &bankSizes, const size_t chunkSize)
-    : m_worker(worker), m_chunkSize(chunkSize), m_bankSizes(bankSizes) {
+Chunker::Chunker(const int numWorkers, const int worker, std::vector<size_t> bankSizes, const size_t chunkSize)
+    : m_worker(worker), m_chunkSize(chunkSize), m_bankSizes(std::move(bankSizes)) {
   // Create partitions based on chunk counts.
   m_chunkCounts = m_bankSizes;
   const auto sizeToChunkCount = [&](size_t &value) { value = (value + m_chunkSize - 1) / m_chunkSize; };

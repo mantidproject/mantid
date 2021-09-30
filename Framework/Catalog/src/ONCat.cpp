@@ -16,6 +16,7 @@
 #include <sstream>
 
 #include <boost/algorithm/string/join.hpp>
+#include <utility>
 
 #include <Poco/Net/HTMLForm.h>
 #include <Poco/Net/HTTPResponse.h>
@@ -110,10 +111,10 @@ ONCat_uptr ONCat::fromMantidSettings(bool authenticate) {
       hasClientCredentials ? client_id : DEFAULT_CLIENT_ID, boost::make_optional(hasClientCredentials, client_secret));
 }
 
-ONCat::ONCat(const std::string &url, IOAuthTokenStore_uptr tokenStore, OAuthFlow flow,
-             const boost::optional<std::string> &clientId, const boost::optional<std::string> &clientSecret)
-    : m_url(url), m_tokenStore(std::move(tokenStore)), m_clientId(clientId), m_clientSecret(clientSecret), m_flow(flow),
-      m_internetHelper(new Mantid::Kernel::InternetHelper()) {}
+ONCat::ONCat(std::string url, IOAuthTokenStore_uptr tokenStore, OAuthFlow flow, boost::optional<std::string> clientId,
+             boost::optional<std::string> clientSecret)
+    : m_url(std::move(url)), m_tokenStore(std::move(tokenStore)), m_clientId(std::move(clientId)),
+      m_clientSecret(std::move(clientSecret)), m_flow(flow), m_internetHelper(new Mantid::Kernel::InternetHelper()) {}
 
 ONCat::ONCat(const ONCat &other)
     : m_url(other.m_url), m_tokenStore(other.m_tokenStore), m_clientId(other.m_clientId),

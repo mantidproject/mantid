@@ -15,13 +15,14 @@
 #include "MantidKernel/Material.h"
 
 #include <memory>
+#include <utility>
 
 namespace Mantid {
 namespace Geometry {
 
-MeshObject::MeshObject(const std::vector<uint32_t> &faces, const std::vector<Kernel::V3D> &vertices,
-                       const Kernel::Material &material)
-    : m_boundingBox(), m_id("MeshObject"), m_triangles(faces), m_vertices(vertices), m_material(material) {
+MeshObject::MeshObject(std::vector<uint32_t> faces, std::vector<Kernel::V3D> vertices, const Kernel::Material &material)
+    : m_boundingBox(), m_id("MeshObject"), m_triangles(std::move(faces)), m_vertices(std::move(vertices)),
+      m_material(material) {
 
   initialize();
 }

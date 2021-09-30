@@ -24,9 +24,9 @@ public:
   static constexpr const char *INPUT_FOREGROUND_COLOR = "#000000";
   static constexpr const char *OUTPUT_FOREGROUND_COLOR = "#808080";
 
-  Cell(std::string const &contentText);
-  Cell(std::string const &contentText, std::string const &backgroundColor, int borderThickness,
-       std::string const &color, int borderOpacity, bool isEditable);
+  Cell(std::string contentText);
+  Cell(std::string contentText, std::string backgroundColor, int borderThickness, std::string color, int borderOpacity,
+       bool isEditable);
 
   void setContentText(std::string const &contentText);
   std::string const &contentText() const;

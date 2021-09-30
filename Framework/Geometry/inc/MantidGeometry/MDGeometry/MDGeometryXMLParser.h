@@ -48,7 +48,7 @@ protected:
   MDGeometryXMLParser();
 
 public:
-  explicit MDGeometryXMLParser(const std::string &xmlToProcess);
+  explicit MDGeometryXMLParser(std::string xmlToProcess);
 
   virtual ~MDGeometryXMLParser() = default;
 

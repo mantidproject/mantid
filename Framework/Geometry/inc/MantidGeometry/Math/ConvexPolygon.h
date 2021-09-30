@@ -69,7 +69,7 @@ public:
   /// Default constructor
   ConvexPolygon();
   /// Construct a polygon from a collection of points
-  ConvexPolygon(const Vertices &vertices);
+  ConvexPolygon(Vertices vertices);
   /// Destructor
   virtual ~ConvexPolygon() = default;
   ConvexPolygon(ConvexPolygon &&) = default;

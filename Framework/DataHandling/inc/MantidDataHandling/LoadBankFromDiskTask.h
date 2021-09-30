@@ -25,10 +25,10 @@ class DefaultEventLoader;
 class MANTID_DATAHANDLING_DLL LoadBankFromDiskTask : public Kernel::Task {
 
 public:
-  LoadBankFromDiskTask(DefaultEventLoader &loader, const std::string &entry_name, const std::string &entry_type,
+  LoadBankFromDiskTask(DefaultEventLoader &loader, std::string entry_name, std::string entry_type,
                        const std::size_t numEvents, const bool oldNeXusFileNames, API::Progress *prog,
                        std::shared_ptr<std::mutex> ioMutex, Kernel::ThreadScheduler &scheduler,
-                       const std::vector<int> &framePeriodNumbers);
+                       std::vector<int> framePeriodNumbers);
 
   void run() override;
 

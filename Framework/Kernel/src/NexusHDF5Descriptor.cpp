@@ -16,6 +16,7 @@
 #include <cstdlib>   // malloc, calloc
 #include <cstring>   // strcpy
 #include <stdexcept> // std::invalid_argument
+#include <utility>
 
 using boost::multi_index::detail::index_matcher::entry;
 
@@ -170,8 +171,8 @@ bool NexusHDF5Descriptor::isReadable(const std::string &filename) {
   return NexusDescriptor::isReadable(filename, NexusDescriptor::Version::Version5);
 }
 
-NexusHDF5Descriptor::NexusHDF5Descriptor(const std::string &filename)
-    : m_filename(filename), m_allEntries(initAllEntries()) {}
+NexusHDF5Descriptor::NexusHDF5Descriptor(std::string filename)
+    : m_filename(std::move(filename)), m_allEntries(initAllEntries()) {}
 
 // PUBLIC
 std::string NexusHDF5Descriptor::getFilename() const noexcept { return m_filename; }

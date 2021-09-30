@@ -29,7 +29,7 @@ public:
   using Utf8String = std::wstring;
 
   /// Constructor giving labels as ascii, unicode, and latex respectively
-  UnitLabel(const AsciiString &ascii, const Utf8String &unicode, const AsciiString &latex);
+  UnitLabel(AsciiString ascii, Utf8String unicode, AsciiString latex);
   /// Constructor creating all labels from the ascii string
   UnitLabel(const AsciiString &ascii);
   /// Constructor creating all labels using a C-style string

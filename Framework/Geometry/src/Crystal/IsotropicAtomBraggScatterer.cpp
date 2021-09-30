@@ -16,6 +16,7 @@
 #include "MantidGeometry/Crystal/BraggScattererFactory.h"
 
 #include <boost/algorithm/string.hpp>
+#include <utility>
 
 #include <json/json.h>
 
@@ -136,8 +137,8 @@ DECLARE_BRAGGSCATTERER(IsotropicAtomBraggScatterer)
  *
  * @param scattererString :: String in the format specified above
  */
-IsotropicAtomBraggScattererParser::IsotropicAtomBraggScattererParser(const std::string &scattererString)
-    : m_scattererString(scattererString) {}
+IsotropicAtomBraggScattererParser::IsotropicAtomBraggScattererParser(std::string scattererString)
+    : m_scattererString(std::move(scattererString)) {}
 
 /// Operator that returns vector of IsotropicAtomBraggScatterers.
 std::vector<BraggScatterer_sptr> IsotropicAtomBraggScattererParser::operator()() const {
