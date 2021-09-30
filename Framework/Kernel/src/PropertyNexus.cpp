@@ -201,15 +201,7 @@ std::unique_ptr<Property> loadPropertyCommon(::NeXus::File *file, const std::str
 
 } // namespace
 //----------------------------------------------------------------------------------------------
-/** Opens a NXlog group in a nexus file and
- * creates the correct Property object from it. Overlead that
- *
- * @param file :: NXS file handle
- * @param group :: name of NXlog group to open
- * @param fileDescriptor :: HDF5 Nexus file descriptor (metadata)
- * @param prefix :: current absolute target prefix
- * @return Property pointer
- */
+
 std::unique_ptr<Property> loadProperty(::NeXus::File *file, const std::string &group,
                                        const Mantid::Kernel::NexusHDF5Descriptor &fileInfo, const std::string &prefix) {
   file->openGroup(group, "NXlog");
