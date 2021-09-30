@@ -456,7 +456,6 @@ class AlignComponents(PythonAlgorithm):
         prog = Progress(self, start=0, end=1, nreports=len(components))
         for component in components:
             firstDetID, lastDetID = self._firstAndLastDetID(component, api.mtd[wks_name].componentInfo())
-            logger.debug(f'{component}, firstDetID = {firstDetID}, lastDetID = {lastDetID}')
 
             firstIndex = detID.index(firstDetID)  # a row index in the input TOFS table
             lastIndex = detID.index(lastDetID)  # a row index in the input TOFS table
