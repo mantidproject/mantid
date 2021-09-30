@@ -27,15 +27,24 @@ cd $WORKSPACE/build
 find -name cppcheck.xml -delete
 
 # configure cmake
+if [ $(command -v scl) ]; then
+    CMAKE_EXE=cmake3
+    SCL_ENABLE="scl enable devtoolset-7"
+else
+    CMAKE_EXE=cmake
+    SCL_ENABLE="eval"
+fi
+$SCL_ENABLE "$CMAKE_EXE --version"
+
 if [ "$(command -v ninja)" ]; then
   CMAKE_GENERATOR="-G Ninja"
 elif [ "$(command -v ninja-build)" ]; then
   CMAKE_GENERATOR="-G Ninja"
 fi
-cmake ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=Debug -DCPPCHECK_GENERATE_XML=TRUE -DCPPCHECK_NUM_THREADS=$BUILD_THREADS ..
+$SCL_ENABLE "$CMAKE_EXE ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=Debug -DCPPCHECK_GENERATE_XML=TRUE -DCPPCHECK_NUM_THREADS=$BUILD_THREADS .."
 
 # run cppcheck
-cmake --build . --target cppcheck
+$SCL_ENABLE "$CMAKE_EXE --build . --target cppcheck"
 
 # Generate HTML report
 cppcheck-htmlreport --file=cppcheck.xml --title=Embedded --report-dir=cppcheck-report
